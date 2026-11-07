@@ -518,7 +518,15 @@ void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
     TransformRotationBetweenFrames(other, 0, &self->rot, &self->rot);
 }
 
-INCLUDE_ASM(func_001F3B48);
+// The world point p in the object's own frame: into its parent's frame, less the position,
+// through the transpose of the rotation.
+void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
+{
+    Vec02 t;
+    TransformPointBetweenFrames(0, self->parent, p, &t);
+    Vu0::Q(t) = Vu0::Sub(Vu0::Q(t), Vu0::Q(self->pos));
+    Vu0::Q(*out) = Vu0::RotateTransposed(self->rot, Vu0::Q(t));
+}
 
 s32 GetObjectWorldPosition(BaseObject* self, s32 arg)
 {

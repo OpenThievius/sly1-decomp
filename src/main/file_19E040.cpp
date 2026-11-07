@@ -1550,7 +1550,45 @@ void SplitTrailSegment(Effect* self)
     }
 }
 
-INCLUDE_ASM(func_001A05D8);
+// One step of a trail segment: its velocity damped by fB0 and pulled by vC0 over dt, its two
+// ends moved by it. Then the anchor's (kind 1: another segment's, kind 2: a placed object's)
+// speed and distance decide whether it lets go or splits.
+void MoveTrailSegment(Effect* self, f32 dt)
+{
+    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Q(self->qA0), Vu0::Scalar(self->fB0 * dt + 1.0f), Vu0::Q(self->qC0), Vu0::Scalar(dt));
+    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+    Vec02* vel;
+    Vec02* pos;
+    switch (self->i120) {
+    case 0:
+        Vu0::Q(self->q90) = Vu0::MulAddX(Vu0::Q(self->q90), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+        return;
+    case 1:
+        pos = (Vec02*)&self->p124->q80;
+        vel = (Vec02*)&self->p124->qA0;
+        break;
+    case 2: {
+        PlacedObject* o = (PlacedObject*)self->p128;
+        if (o->flags & ((u64)0x8000 << 20)) {
+            SetTrailSegmentAnchor(self, 0, 0);
+            return;
+        }
+        pos = &o->v140;
+        vel = &o->v150;
+        break;
+    }
+    default:
+        return;
+    }
+    if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(*vel), Vu0::Q(*vel))) < 40000.0f) {
+        SetTrailSegmentAnchor(self, 0, 0);
+        return;
+    }
+    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(*pos));
+    if (625.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+        SplitTrailSegment(self);
+    }
+}
 
 INCLUDE_ASM(func_001A0758);
 
@@ -1948,7 +1986,36 @@ void InitDelayedEffect(Effect* self, f32 x)
     *(s32*)&self->m30[2] = 0;
 }
 
-INCLUDE_ASM(func_001A35F0);
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+
+// Takes the source object's pose (+0x134) and lets it go: the effect starts there and moves
+// over its life to where its target object (+0x20) will be then, turning by the rotation
+// between the two frames.
+void TakeDelayedEffectSourcePose(Effect* self)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Mat02 turn;
+    PlacedObject* src = (PlacedObject*)self->p134;
+    *(Vec02*)&self->q80 = src->v140;
+    self->rot50[0] = src->m110.r[0];
+    self->rot50[1] = src->m110.r[1];
+    self->rot50[2] = src->m110.r[2];
+    ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, self->life);
+    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80)), Vu0::Scalar(1.0f / self->life),
+                                     Vu0::Q(self->qC0), Vu0::Scalar(self->life * -0.5f));
+    MultiplyMatrices3x3(&rot, (Mat02*)self->rot50, &turn);
+    MatrixToAxisAngle(&turn, &self->f130, &self->f120);
+    if (0.0f < self->f130) {
+        self->f130 = self->f130 + 6.28318548f;
+    } else {
+        self->f130 = self->f130 - 6.28318548f;
+    }
+    ((BaseObject*)self->p134)->desc->m03((BaseObject*)self->p134);
+    self->p134 = 0;
+}
 
 INCLUDE_ASM(func_001A3730);
 

@@ -139,13 +139,50 @@ What retail shows, and what the compiler does:
   float comparison that retail sets with `li 1; bc1fl ...; move 0` is a
   variable assigned the comparison (func_001BC670, func_0013B778).
 
+- **Weights are Scalars.** A float that scales a vector (a blend's 1 - t and t, a
+  spring's k, damping and dt, Transform's w) is stored to a stack slot nothing reads,
+  but not to a local of the function: two weights of one MulXSum share one slot (a
+  third, of a MulAddX after it, too), the first stored first, and later locals reuse
+  the slot. They are locals of calls that have ended: `Vu0::Scalar(f)` holds the
+  store in a 16-byte local of its own. The same float twice is one qmtc2 and two
+  stores (func_00143180). Transform takes w as a float and makes it a Scalar inside:
+  retail allocates w's register after v's. FromFloat stays `"r"(f)`: reading the
+  float's bits instead gives the `lw` retail has for a global but breaks
+  func_001A35F0, whose weights are computed.
+- **Rows as values when a product stores between rows.** MultiplyMatrices
+  (func_00188668) and the three-row product store each result row between the
+  sequences; rows read in place would be read again after each store, so retail's
+  C had them in values first (Transform4, RotateRows, and MulTransposed loads b's
+  rows, then a's, before its three sequences). Rotate and RotateTransposed read the
+  matrix where it is (one address formed, rows loaded by the compiler).
+- **Rotate or RotateRows.** Rotate's result is tied to the vector ("0"), as its six
+  users show; RotateRows takes the rows as values and does not tie, so the result
+  takes the first of r0, r1, r2, v that dies there (v's while the rows live on, row
+  0's at the last row of a product: func_00116840 and the others the wave-2 workers
+  found, func_001EBDD0, func_00128150, func_00128E88, func_00125138, func_001CCF98,
+  func_001CDD98, func_001EA918, func_00144AA0).
+- **The three-row product is three sequences.** `vmulaz/vmaddaz/vmaddz`, then x,
+  then y (func_00189150, func_00128FD0) is one sequence per row of a's transpose
+  times b; retail's z, x, y is the scheduler's order, and only y (the last) shares a
+  register with an input, which three separate `__asm__` give and one does not.
+- **The ten-instruction form is the inverse rotation.** `vmul.xyzw` of each row by
+  v, `vmaxw.xyzw` of vf0 by its w (1.0 everywhere), then `vadday.x/vmaddz.x`,
+  `vaddax.y/vmaddz.y`, `vaddax.z/vmaddy.z`: the dot of v with each row, that is v
+  through the transpose (RotateTransposed). Its result is never tied ("=&j").
+- **Return by value shows.** A function whose code returns its first argument in v0
+  (`daddu v0, a0`) returns a struct by value: func_00188520
+  (MultiplyByTransposedMatrix3x3) returns a 3x3 matrix, and its callers copy the
+  returned temporary.
+
 The sequences still without a helper, by how often retail has them (runs of
-VU0 instructions in the `inline` functions): vmulax.xyzw/vmaddx.xyzw (75),
-the cross product vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31),
-the 4x4 forms with vmaddw, vmove, vmax/vmini, and a vector built from three
-floats in GPRs (pextlw, pcpyld, qmtc2) and rotated with a result not tied to
-it (func_00144AA0). The assembler takes `vsqrt` (the disassembler prints it
-as a `.word`).
+VU0 instructions in the `inline` functions): the cross product
+vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31), vmove, vmax/vmini,
+vadda/vmaddax/vmaddx (14), vmulax/vmaddax/vmaddx (13), the vmsubax + four vnop
+form (13), and a vector built from three floats in GPRs (pextlw, pcpyld,
+qmtc2) (func_00144AA0, func_001BFBF8). The Q-register forms have helpers
+(Sqrt, DivX, Length, NormalizeOr) and so do the matrix forms (Transform,
+Transform4, RotateRows, RotateTransposed, MulTransposed, MulXSum). The
+assembler takes `vsqrt` (the disassembler prints it as a `.word`).
 
 ## Getting the compiler
 

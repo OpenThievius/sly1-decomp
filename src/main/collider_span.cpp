@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "collider.h"
 #include "shapes.h"
 
 s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
 s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
 s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, s32 e, f32 x);
+s32 CollectBoundsSpans(void* a, void* b, void* c, f32 x, s32 d, s32 e);
 s32 TestTreeSegmentHit(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
 s32 TestBoundsSegmentHit(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
 
@@ -66,7 +67,7 @@ s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
         return CollectTreeNodeSpans((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((u8*)self + 0x140, a1, a2, a3, a4, self->radius3CC);
+        return CollectBoundsSpans((u8*)self + 0x140, a1, a2, self->radius3CC, a3, a4);
     }
     return 0;
 }
@@ -77,7 +78,7 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
         return CollectTreeNodeSpans(a1, a2, a3, 0, a4, a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->radius3CC);
+        return CollectBoundsSpans((u8*)self + 0x140, a2, a3, self->radius3CC, a4, (s32)a5);
     }
     return 0;
 }
@@ -97,7 +98,27 @@ INCLUDE_ASM(func_00141D88);
 
 INCLUDE_ASM(func_00141F48);
 
-INCLUDE_ASM(func_00142170);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
+
+// Whether the segment a-b, moved toward p's bounds by the offset from its nearest point to p
+// (at most fb long), hits them (CollectBoundsSpans).
+s32 TestBoundsSegmentHit(void* p, void* a, void* b, void* d, s32 e, f32 fa, f32 fb)
+{
+    Vec02 nearest;
+    Vec02 off;
+    Vec02 a2;
+    Vec02 b2;
+    f32 t;
+    f32 dist;
+    MeasurePointToSegment((Vec02*)p, (Vec02*)a, (Vec02*)b, &t, &dist);
+    Vu0::Q(nearest) = Vu0::MulXSum(Vu0::Q(*(Vec02*)a), Vu0::Scalar(1.0f - t), Vu0::Q(*(Vec02*)b), Vu0::Scalar(t));
+    Vu0::Q(off) = Vu0::Sub(Vu0::Q(*(Vec02*)p), Vu0::Q(nearest));
+    ClampVectorLength(&off, &off, fb);
+    Vu0::Q(a2) = Vu0::Add(Vu0::Q(*(Vec02*)a), Vu0::Q(off));
+    Vu0::Q(b2) = Vu0::Add(Vu0::Q(*(Vec02*)b), Vu0::Q(off));
+    return CollectBoundsSpans(p, &a2, &b2, fa, (s32)d, e);
+}
 
 INCLUDE_ASM(func_00142278);
 

@@ -1363,7 +1363,23 @@ void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
 }
 
-INCLUDE_ASM(func_0019CEC0);
+// What func_0019CEC0 reads of its first argument: the object whose frame it measures in.
+struct FrameOwner_0019CEC0 {
+    u8 pad0[0x3C];
+    void* object;           // 0x3C
+};
+
+// The point func_0019CE50 places at time t, in the frame of self's object at that time.
+void func_0019CEC0(void* self, void* p, void* out, f32 t)
+{
+    Vec02 pos;
+    Vec02 point;
+    Mat02 rot;
+    func_0019CE50(self, (FramePoint_0019CE50*)p, &point, t);
+    ComputeObjectFrameAtTime(((FrameOwner_0019CEC0*)self)->object, 0, &pos, &rot, 0, 0, t);
+    Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
+    Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
+}
 
 INCLUDE_ASM(func_0019CF68);
 

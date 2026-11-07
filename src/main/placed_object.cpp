@@ -2032,9 +2032,46 @@ INCLUDE_ASM(func_00127B20);
 
 INCLUDE_ASM(func_00127E60);
 
-INCLUDE_ASM(func_00128018);
+// The point in from's frame (the world's for none) in to's frame: through from's rotation and
+// position, then less to's position and through the transpose of to's rotation.
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out)
+{
+    Vec02 world;
+    Vec02 local;
+    if (from != to) {
+        if (from != 0) {
+            Vu0::Q(world) = Vu0::Rotate(from->m110, Vu0::Q(*in));
+            Vu0::Q(world) = Vu0::Add(Vu0::Q(from->v140), Vu0::Q(world));
+            in = &world;
+        }
+        if (to != 0) {
+            Vu0::Q(local) = Vu0::Sub(Vu0::Q(*in), Vu0::Q(to->v140));
+            Vu0::Q(*out) = Vu0::RotateTransposed(to->m110, Vu0::Q(local));
+            return;
+        }
+    }
+    *out = *in;
+}
 
-INCLUDE_ASM(func_001280C0);
+// The direction in from's frame (the world's for none) in to's frame: through from's rotation,
+// then through the transpose of to's.
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out)
+{
+    Vec02 world;
+    Vec02 local;
+    if (from != to) {
+        if (from != 0) {
+            Vu0::Q(world) = Vu0::Rotate(from->m110, Vu0::Q(*in));
+            in = &world;
+        }
+        if (to != 0) {
+            Vu0::Q(local) = Vu0::RotateTransposed(to->m110, Vu0::Q(*in));
+            *out = local;
+            return;
+        }
+    }
+    *out = *in;
+}
 
 INCLUDE_ASM(func_00128150);
 
@@ -2223,7 +2260,28 @@ void ResolveFollowRecordObjects(PlacedObject* self)
 
 INCLUDE_ASM(func_00128E88);
 
-INCLUDE_ASM(func_00128FD0);
+Mat02 MultiplyByTransposedMatrix3x3(void* m, Mat02* in);
+
+// Applies the record's matrices (+0x224) to m: with its flag 1, the first one's transpose
+// times m; with flag 2, the second one (MultiplyByTransposedMatrix3x3, which returns a 3x3
+// matrix by value: retail's `daddu v0, a0`).
+void func_00128FD0(PlacedObject* self, Mat02* m)
+{
+    Mat02 t;
+    Rec2195_224* p = self->f224;
+    if (p != 0) {
+        if (p->fB0 & 1) {
+            Mat02 u;
+            Vu0::MulTransposed(u, *(Mat02*)p, *m);
+            t = u;
+            *m = t;
+        }
+        if (p->fB0 & 2) {
+            t = MultiplyByTransposedMatrix3x3(p->pad00 + 0x30, m);
+            *m = t;
+        }
+    }
+}
 
 ASM_FUNC(func_001290B8);
 
