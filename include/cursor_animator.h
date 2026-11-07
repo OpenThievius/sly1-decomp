@@ -117,6 +117,15 @@ struct CursorAnimatorMethods {
     void* m07;                                         // 0x1C
 };
 
+// The types of the table's slots, to define a table with.
+typedef void (*AnimLoad)(CursorAnimator* self, const AnimatorParams* src);
+typedef void (*AnimBind)(CursorAnimator* self);
+typedef void (*AnimStep)(CursorAnimator* self, f32 dt);
+typedef f32 (*AnimProgress)(CursorAnimator* self);
+typedef void (*AnimFollow)(CursorAnimator* self, void* unused, void* other);
+typedef AnimCursor* (*AnimFind)(CursorAnimator* self, const AnimRecord* rec);
+typedef void (*AnimOutputs)(CursorAnimator* self, void** out);
+
 // The base (0x2C bytes).
 struct CursorAnimator {
     const CursorAnimatorMethods* methods;   // 0x00

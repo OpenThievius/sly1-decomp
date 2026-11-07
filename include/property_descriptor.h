@@ -25,4 +25,17 @@ struct PropertyDescriptor {
 
 typedef char check_PropertyDescriptor[sizeof(PropertyDescriptor) == 0x20 ? 1 : -1];
 
+// One property of a class in the registry (g_classPropertyLists, D_00244950): its id and its
+// descriptor. A class's list is sorted by id; FindPropertyDescriptor binary-searches it.
+struct PropertyEntry {
+    s32 id;                         // 0x00
+    PropertyDescriptor* prop;       // 0x04: in D_002505D8
+};
+
+// A class's properties in the registry: how many, and the list.
+struct PropertyList {
+    s32 count;                      // 0x00
+    const PropertyEntry* entries;   // 0x04
+};
+
 #endif

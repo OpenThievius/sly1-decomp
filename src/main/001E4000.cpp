@@ -1,24 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "base_object.h"
-#include "placed_object.h"
-#include "switched_collider.h"
 #include "world.h"
-#include "font.h"
-#include "shapes.h"
 #include "level_entry.h"
 #include "threshold_range.h"
 #include "scatter_controller.h"
 #include "render_frame.h"
-#include "background_job.h"
-#include "group_marker.h"
 #include "game_progress.h"
-#include "bump_allocator.h"
+#include "key_record.h"
+#include "base_object.h"
+#include "attachment.h"
+#include "screen_element.h"
+#include "cursor_animator.h"
 
 // Class descriptors (parent, class id, flags, object size, then the class's methods) and the
 // method tables of .rodata from 0x217380, defined here until their own files are found.
 typedef void (*Fn_Table)();
-template <int N> struct ClassDesc_217418 { const void* parent; s32 id; s32 f8; s32 size; Fn_Table methods[N]; };
+template <int N> struct ClassDescriptor { const void* parent; s32 id; s32 flags; s32 size; Fn_Table methods[N]; };
 void func_0011EDA8();
 void func_001212D8();
 void func_00121338();
@@ -620,20 +617,6 @@ void func_001A99F8();
 void func_001A9A40();
 void func_001A9A98();
 void func_001A9AE8();
-void func_001AA1F0();
-void func_001AA268();
-void func_001AA298();
-void func_001AA4F0();
-void func_001AA790();
-f32 func_001AA898();
-f32 func_001AA8A0();
-f32 func_001AA8A8();
-void func_001AA8C8();
-void func_001AA8F0();
-void func_001AA958();
-void func_001AA998();
-s32 func_001AAAC8();
-void func_001AAF58();
 void func_001AAF88();
 void func_001AB058();
 void func_001AB198();
@@ -835,7 +818,6 @@ void func_001DAE18();
 void func_001DAE48();
 void func_001DAE68();
 void func_001DAF08();
-void func_001DB4C8();
 void func_001DCEA0();
 void func_001DDCE0();
 void func_001DDD18();
@@ -888,7 +870,6 @@ void func_001E8EF8();
 void func_001E8FA8();
 void func_001E8FE8();
 s32 func_001E9038();
-void func_001EA118();
 void func_001EB460();
 void func_001EB518();
 void func_001EB598();
@@ -955,167 +936,12 @@ void func_001F51C8();
 int func_001F51E8();
 void func_001F5218();
 void func_001F5268();
-extern const ClassDesc_217418<2> D_00217380;
-extern const Fn_Table D_00217410[2];
-extern const ClassDesc_217418<28> D_00217418;
-extern const ClassDesc_217418<48> D_00217498;
-extern const ClassDesc_217418<86> D_00217568;
-extern const ClassDesc_217418<28> D_00217740;
-extern const ClassDesc_217418<28> D_002177C0;
-extern const ClassDesc_217418<28> D_00217840;
-extern const ClassDesc_217418<28> D_002178C0;
-extern const ClassDesc_217418<28> D_00217940;
-extern const ClassDesc_217418<48> D_002179C0;
-extern const ClassDesc_217418<48> D_00217A90;
-extern const ClassDesc_217418<48> D_00217B60;
-extern const ClassDesc_217418<124> D_00217C30;
-extern const Fn_Table D_00218330[20];
-extern const ClassDesc_217418<28> D_00218650;
-extern const ClassDesc_217418<72> D_00218770;
-extern const ClassDesc_217418<48> D_002188A0;
-extern const ClassDesc_217418<74> D_00218970;
-extern const ClassDesc_217418<72> D_00218AA8;
-extern const ClassDesc_217418<74> D_00218BD8;
-extern const ClassDesc_217418<74> D_00218D10;
-extern const ClassDesc_217418<74> D_00218E48;
-extern const ClassDesc_217418<72> D_00218F80;
-extern const ClassDesc_217418<72> D_002190B0;
-extern const ClassDesc_217418<28> D_002191E0;
-extern const ClassDesc_217418<48> D_00219260;
-extern const ClassDesc_217418<72> D_00219330;
-extern const ClassDesc_217418<28> D_00219460;
-extern const ClassDesc_217418<28> D_002194E0;
-extern const Fn_Table D_00219560[10];
-extern const Fn_Table D_00219588[10];
-extern const ClassDesc_217418<28> D_00219738;
-extern const ClassDesc_217418<28> D_002197E8;
-extern const ClassDesc_217418<28> D_00219868;
-extern const ClassDesc_217418<72> D_002198F0;
-extern const ClassDesc_217418<48> D_00219A20;
-extern const ClassDesc_217418<72> D_00219AF0;
-extern const Fn_Table D_00219DE0[8];
-extern const ClassDesc_217418<48> D_00219F80;
-extern const ClassDesc_217418<48> D_0021A050;
-extern const ClassDesc_217418<28> D_0021A120;
-extern const ClassDesc_217418<28> D_0021A1A0;
-extern const ClassDesc_217418<28> D_0021A220;
-extern const ClassDesc_217418<28> D_0021A2A0;
-extern const ClassDesc_217418<48> D_0021A320;
-extern const ClassDesc_217418<48> D_0021A490;
-extern const ClassDesc_217418<28> D_0021A560;
-extern const ClassDesc_217418<28> D_0021A5E0;
-extern const ClassDesc_217418<72> D_0021A660;
-extern const Fn_Table D_0021A790[10];
-extern const ClassDesc_217418<28> D_0021A7B8;
-extern const ClassDesc_217418<88> D_0021A838;
-extern const Fn_Table D_0021A9A8[10];
-extern const ClassDesc_217418<74> D_0021A9D0;
-extern const ClassDesc_217418<72> D_0021AB08;
-extern const ClassDesc_217418<78> D_0021AC38;
-extern const ClassDesc_217418<78> D_0021AD80;
-extern const ClassDesc_217418<78> D_0021AEC8;
-extern const ClassDesc_217418<78> D_0021B010;
-extern const ClassDesc_217418<28> D_0021B158;
-extern const ClassDesc_217418<28> D_0021B1D8;
-extern const ClassDesc_217418<28> D_0021B258;
-extern const ClassDesc_217418<72> D_0021B2D8;
-extern const ClassDesc_217418<48> D_0021B408;
-extern const ClassDesc_217418<72> D_0021B4D8;
-extern const ClassDesc_217418<28> D_0021B608;
-extern const ClassDesc_217418<88> D_0021B688;
-extern const ClassDesc_217418<28> D_0021B7F8;
-extern const ClassDesc_217418<72> D_0021B878;
-extern const ClassDesc_217418<72> D_0021B9A8;
-extern const ClassDesc_217418<28> D_0021BAD8;
-extern const ClassDesc_217418<100> D_0021BB58;
-extern const ClassDesc_217418<100> D_0021BCF8;
-extern const ClassDesc_217418<100> D_0021BE98;
-extern const ClassDesc_217418<72> D_0021C038;
-extern const ClassDesc_217418<72> D_0021C168;
-extern const ClassDesc_217418<28> D_0021C298;
-extern const ClassDesc_217418<72> D_0021C318;
-extern const ClassDesc_217418<28> D_0021C448;
-extern const ClassDesc_217418<48> D_0021C4C8;
-extern const ClassDesc_217418<72> D_0021C598;
-extern const ClassDesc_217418<48> D_0021C6C8;
-extern const ClassDesc_217418<48> D_0021C798;
-extern const ClassDesc_217418<48> D_0021C868;
-extern const ClassDesc_217418<48> D_0021C938;
-extern const ClassDesc_217418<48> D_0021CA08;
-extern const ClassDesc_217418<48> D_0021CAD8;
-extern const ClassDesc_217418<48> D_0021CBA8;
-extern const ClassDesc_217418<76> D_0021CC78;
-extern const ClassDesc_217418<76> D_0021CDB8;
-extern const ClassDesc_217418<76> D_0021CEF8;
-extern const ClassDesc_217418<48> D_0021D038;
-extern const ClassDesc_217418<48> D_0021D108;
-extern const ClassDesc_217418<84> D_0021D1D8;
-extern const ClassDesc_217418<28> D_0021D338;
-extern const ClassDesc_217418<72> D_0021D3B8;
-extern const ClassDesc_217418<48> D_0021D4E8;
-extern const ClassDesc_217418<84> D_0021D5B8;
-extern const ClassDesc_217418<72> D_0021D718;
-extern const ClassDesc_217418<72> D_0021D848;
-extern const ClassDesc_217418<72> D_0021D978;
-extern const ClassDesc_217418<72> D_0021DAA8;
-extern const ClassDesc_217418<72> D_0021DBD8;
-extern const ClassDesc_217418<74> D_0021DD08;
-extern const ClassDesc_217418<48> D_0021DE40;
-extern const ClassDesc_217418<74> D_0021DF10;
-extern const ClassDesc_217418<74> D_0021E048;
-extern const ClassDesc_217418<74> D_0021E180;
-extern const ClassDesc_217418<36> D_0021E2B8;
-extern const Fn_Table D_0021E438[8];
-extern const ClassDesc_217418<72> D_0021E458;
-extern const ClassDesc_217418<48> D_0021E588;
-extern const ClassDesc_217418<48> D_0021E658;
-extern const ClassDesc_217418<100> D_0021E728;
-extern const ClassDesc_217418<100> D_0021E8C8;
-extern const ClassDesc_217418<100> D_0021EA68;
-extern const ClassDesc_217418<84> D_0021EC08;
-extern const ClassDesc_217418<100> D_0021ED68;
-extern const ClassDesc_217418<28> D_0021EF08;
-extern const ClassDesc_217418<48> D_0021EF88;
-extern const ClassDesc_217418<72> D_0021F058;
-extern const ClassDesc_217418<72> D_0021F188;
-extern const ClassDesc_217418<28> D_0021F2B8;
-extern const ClassDesc_217418<28> D_0021F338;
-extern const ClassDesc_217418<28> D_0021F3B8;
-extern const ClassDesc_217418<28> D_0021F438;
-extern const ClassDesc_217418<88> D_0021F4B8;
-extern const ClassDesc_217418<84> D_0021F628;
-extern const ClassDesc_217418<100> D_0021F788;
-extern const ClassDesc_217418<84> D_0021F928;
-extern const ClassDesc_217418<100> D_0021FA88;
-extern const ClassDesc_217418<72> D_0021FC28;
-extern const ClassDesc_217418<72> D_0021FD58;
-extern const ClassDesc_217418<100> D_0021FE88;
-extern const ClassDesc_217418<100> D_00220028;
-extern const ClassDesc_217418<100> D_002201C8;
-extern const ClassDesc_217418<48> D_00220368;
-extern const ClassDesc_217418<84> D_00220438;
-extern const ClassDesc_217418<84> D_00220598;
-extern const ClassDesc_217418<72> D_002206F8;
-extern const ClassDesc_217418<72> D_00220828;
-extern const ClassDesc_217418<74> D_00220958;
-extern const ClassDesc_217418<84> D_00220A90;
-extern const ClassDesc_217418<28> D_00220C40;
-extern const ClassDesc_217418<84> D_00220CC0;
-extern const ClassDesc_217418<72> D_00220E20;
-extern const ClassDesc_217418<48> D_00220F50;
-extern const ClassDesc_217418<48> D_00221020;
-extern const ClassDesc_217418<48> D_00221140;
-extern const ClassDesc_217418<48> D_00221210;
-extern const ClassDesc_217418<48> D_002213D0;
-extern const ClassDesc_217418<28> D_002214A0;
-extern const ClassDesc_217418<28> D_00221520;
-extern const ClassDesc_217418<2> D_00217380 = { 0x0, 0x0, 0x0, 0x0, {
+extern const ClassDescriptor<2> D_00217380 = { 0x0, 0x0, 0x0, 0x0, {
     0, 0,
 } };
-extern const Fn_Table D_00217410[2] = {
-    0, 0,
-};
-extern const ClassDesc_217418<28> D_00217418 = { (const void*)(const u8*)&D_00217410, 0x1, 0x0, 0x34, {
+// The root every chain of parents ends at (tools/classes.py's `root`).
+extern const ClassHead D_00217410 = { 0, 0 };
+extern const ClassDescriptor<28> D_00217418 = { &D_00217410, 0x1, 0x0, 0x34, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -1124,7 +950,7 @@ extern const ClassDesc_217418<28> D_00217418 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<48> D_00217498 = { (const void*)(const u8*)&D_00217418, 0x2, 0x1, 0x2D0, {
+extern const ClassDescriptor<48> D_00217498 = { &D_00217418, 0x2, 0x1, 0x2D0, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1138,7 +964,7 @@ extern const ClassDesc_217418<48> D_00217498 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<86> D_00217568 = { (const void*)(const u8*)&D_00217498, 0x3, 0x3, 0x550, {
+extern const ClassDescriptor<86> D_00217568 = { &D_00217498, 0x3, 0x3, 0x550, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1162,7 +988,7 @@ extern const ClassDesc_217418<86> D_00217568 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_0014DB58, 0, 0, 0,
     0, 0,
 } };
-extern const ClassDesc_217418<28> D_00217740 = { (const void*)(const u8*)&D_00217418, 0x6E, 0x0, 0x38, {
+extern const ClassDescriptor<28> D_00217740 = { &D_00217418, 0x6E, 0x0, 0x38, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001B2840, 0,
@@ -1171,7 +997,7 @@ extern const ClassDesc_217418<28> D_00217740 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_002177C0 = { (const void*)(const u8*)&D_00217418, 0x7E, 0x0, 0x50, {
+extern const ClassDescriptor<28> D_002177C0 = { &D_00217418, 0x7E, 0x0, 0x50, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00192068, 0,
@@ -1180,7 +1006,7 @@ extern const ClassDesc_217418<28> D_002177C0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_00217840 = { (const void*)(const u8*)&D_002177C0, 0x82, 0x0, 0x60, {
+extern const ClassDescriptor<28> D_00217840 = { &D_002177C0, 0x82, 0x0, 0x60, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00192150, 0,
@@ -1189,7 +1015,7 @@ extern const ClassDesc_217418<28> D_00217840 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_002178C0 = { (const void*)(const u8*)&D_00217418, 0x73, 0x0, 0x80, {
+extern const ClassDescriptor<28> D_002178C0 = { &D_00217418, 0x73, 0x0, 0x80, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001F3A40, 0,
@@ -1198,7 +1024,7 @@ extern const ClassDesc_217418<28> D_002178C0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_00217940 = { (const void*)(const u8*)&D_002178C0, 0x74, 0x0, 0x100, {
+extern const ClassDescriptor<28> D_00217940 = { &D_002178C0, 0x74, 0x0, 0x100, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001F3EE0, (Fn_Table)func_001F3D80, 0,
@@ -1207,7 +1033,7 @@ extern const ClassDesc_217418<28> D_00217940 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<48> D_002179C0 = { (const void*)(const u8*)&D_00217498, 0x7D, 0x1, 0x330, {
+extern const ClassDescriptor<48> D_002179C0 = { &D_00217498, 0x7D, 0x1, 0x330, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001F4500, 0,
@@ -1221,7 +1047,7 @@ extern const ClassDesc_217418<48> D_002179C0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_00217A90 = { (const void*)(const u8*)&D_00217498, 0x4E, 0x1, 0x320, {
+extern const ClassDescriptor<48> D_00217A90 = { &D_00217498, 0x4E, 0x1, 0x320, {
     (Fn_Table)func_001F4E18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1235,7 +1061,7 @@ extern const ClassDesc_217418<48> D_00217A90 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_00217B60 = { (const void*)(const u8*)&D_00217498, 0x51, 0x1, 0x620, {
+extern const ClassDescriptor<48> D_00217B60 = { &D_00217498, 0x51, 0x1, 0x620, {
     (Fn_Table)func_00183CC8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00183E40, (Fn_Table)func_00183E70,
     (Fn_Table)func_00126F78, (Fn_Table)func_00183EA0, (Fn_Table)func_001289C0, 0,
@@ -1249,7 +1075,7 @@ extern const ClassDesc_217418<48> D_00217B60 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<124> D_00217C30 = { (const void*)(const u8*)&D_00217568, 0x5, 0xB, 0x610, {
+extern const ClassDescriptor<124> D_00217C30 = { &D_00217568, 0x5, 0xB, 0x610, {
     (Fn_Table)func_001921A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -1282,14 +1108,14 @@ extern const ClassDesc_217418<124> D_00217C30 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001AB5D8, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958,
     (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0,
 } };
-extern const Fn_Table D_00218330[20] = {
-    (Fn_Table)func_001AA1F0, (Fn_Table)func_001AC5C0, (Fn_Table)func_001AA298, 0,
-    0, (Fn_Table)func_001AA8C8, 0, 0,
-    (Fn_Table)func_001AC638, (Fn_Table)func_001AC700, 0, (Fn_Table)func_001AA898,
-    (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958,
-    (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0,
+extern const T217D_Vt D_00218330 = {
+    (ElementIntFn)func_001AA1F0, (ElementFn)func_001AC5C0, (ElementFn)func_001AA298, 0,
+    0, (ElementFn)func_001AA8C8, 0, 0,
+    (ElementTextFn)func_001AC638, (ElementFn)func_001AC700, 0, (ElementTimeFn)func_001AA898,
+    (ElementTimeFn)func_001AA8A0, (ElementTimeFn)func_001AA8A8, (ElementFn)func_001AA8F0, (ElementFn)func_001AA958,
+    (ElementIntFn)func_001AA998, (ElementClockFn)func_001AAF58, (ElementPairFn)func_001AAAC8, 0,
 };
-extern const ClassDesc_217418<28> D_00218650 = { (const void*)(const u8*)&D_00217418, 0x8E, 0x0, 0xA0, {
+extern const ClassDescriptor<28> D_00218650 = { &D_00217418, 0x8E, 0x0, 0xA0, {
     (Fn_Table)func_0017FE90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_0017FEC0, 0,
@@ -1298,7 +1124,7 @@ extern const ClassDesc_217418<28> D_00218650 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_00218770 = { (const void*)(const u8*)&D_00217568, 0x1F, 0x83, 0x6B0, {
+extern const ClassDescriptor<72> D_00218770 = { &D_00217568, 0x1F, 0x83, 0x6B0, {
     (Fn_Table)func_001EEC60, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1318,7 +1144,7 @@ extern const ClassDesc_217418<72> D_00218770 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001EF808,
 } };
-extern const ClassDesc_217418<48> D_002188A0 = { (const void*)(const u8*)&D_00217498, 0x63, 0x1, 0x470, {
+extern const ClassDescriptor<48> D_002188A0 = { &D_00217498, 0x63, 0x1, 0x470, {
     (Fn_Table)func_001E2520, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001E25F8,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001E2648, 0,
@@ -1332,7 +1158,7 @@ extern const ClassDesc_217418<48> D_002188A0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<74> D_00218970 = { (const void*)(const u8*)&D_00217568, 0x20, 0x3, 0x6C0, {
+extern const ClassDescriptor<74> D_00218970 = { &D_00217568, 0x20, 0x3, 0x6C0, {
     (Fn_Table)func_0013CCF8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -1353,7 +1179,7 @@ extern const ClassDesc_217418<74> D_00218970 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0013D278, 0,
 } };
-extern const ClassDesc_217418<72> D_00218AA8 = { (const void*)(const u8*)&D_00217568, 0x27, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_00218AA8 = { &D_00217568, 0x27, 0x3, 0x570, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1373,7 +1199,7 @@ extern const ClassDesc_217418<72> D_00218AA8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<74> D_00218BD8 = { (const void*)(const u8*)&D_00218970, 0x21, 0x13, 0x6C0, {
+extern const ClassDescriptor<74> D_00218BD8 = { &D_00218970, 0x21, 0x13, 0x6C0, {
     (Fn_Table)func_0013DDB8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -1394,7 +1220,7 @@ extern const ClassDesc_217418<74> D_00218BD8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0013D278, 0,
 } };
-extern const ClassDesc_217418<74> D_00218D10 = { (const void*)(const u8*)&D_00218970, 0x25, 0x3, 0x6D0, {
+extern const ClassDescriptor<74> D_00218D10 = { &D_00218970, 0x25, 0x3, 0x6D0, {
     (Fn_Table)func_0013DDF0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -1415,7 +1241,7 @@ extern const ClassDesc_217418<74> D_00218D10 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0013D278, 0,
 } };
-extern const ClassDesc_217418<74> D_00218E48 = { (const void*)(const u8*)&D_00218D10, 0x26, 0x3, 0x6E0, {
+extern const ClassDescriptor<74> D_00218E48 = { &D_00218D10, 0x26, 0x3, 0x6E0, {
     (Fn_Table)func_0013DDF0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -1436,7 +1262,7 @@ extern const ClassDesc_217418<74> D_00218E48 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0013D278, 0,
 } };
-extern const ClassDesc_217418<72> D_00218F80 = { (const void*)(const u8*)&D_00217568, 0x29, 0x3, 0x7A0, {
+extern const ClassDescriptor<72> D_00218F80 = { &D_00217568, 0x29, 0x3, 0x7A0, {
     (Fn_Table)func_001400A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_00140200, (Fn_Table)func_00140100, 0,
@@ -1456,7 +1282,7 @@ extern const ClassDesc_217418<72> D_00218F80 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_002190B0 = { (const void*)(const u8*)&D_00217568, 0x28, 0x3, 0x890, {
+extern const ClassDescriptor<72> D_002190B0 = { &D_00217568, 0x28, 0x3, 0x890, {
     (Fn_Table)func_0013F0E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013F6C0, (Fn_Table)func_0013F110, 0,
@@ -1476,7 +1302,7 @@ extern const ClassDesc_217418<72> D_002190B0 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_0013FAE8, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_002191E0 = { (const void*)(const u8*)&D_00217418, 0x87, 0x0, 0x68, {
+extern const ClassDescriptor<28> D_002191E0 = { &D_00217418, 0x87, 0x0, 0x68, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -1485,7 +1311,7 @@ extern const ClassDesc_217418<28> D_002191E0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<48> D_00219260 = { (const void*)(const u8*)&D_00217498, 0x4F, 0x1, 0x2D0, {
+extern const ClassDescriptor<48> D_00219260 = { &D_00217498, 0x4F, 0x1, 0x2D0, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1499,7 +1325,7 @@ extern const ClassDesc_217418<48> D_00219260 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<72> D_00219330 = { (const void*)(const u8*)&D_00217568, 0x2B, 0x3, 0x550, {
+extern const ClassDescriptor<72> D_00219330 = { &D_00217568, 0x2B, 0x3, 0x550, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1519,7 +1345,7 @@ extern const ClassDesc_217418<72> D_00219330 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_00219460 = { (const void*)(const u8*)&D_00217418, 0x86, 0x0, 0x44, {
+extern const ClassDescriptor<28> D_00219460 = { &D_00217418, 0x86, 0x0, 0x44, {
     (Fn_Table)func_001EE900, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001EE930, 0,
@@ -1528,7 +1354,7 @@ extern const ClassDesc_217418<28> D_00219460 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_002194E0 = { (const void*)(const u8*)&D_00217418, 0x85, 0x0, 0x34, {
+extern const ClassDescriptor<28> D_002194E0 = { &D_00217418, 0x85, 0x0, 0x34, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -1537,17 +1363,17 @@ extern const ClassDesc_217418<28> D_002194E0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const Fn_Table D_00219560[10] = {
-    (Fn_Table)func_00121338, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
-    (Fn_Table)func_001214B8, (Fn_Table)func_00121508, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
-    (Fn_Table)func_001215A8, 0,
+extern const T2195_Vt D_00219560 = {
+    (AttachInit)func_00121338, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, 0,
+    (AttachGetPos)func_001214B8, (AttachGetRot)func_00121508, (AttachGetValue)func_00121568, (AttachGetMatrix)func_00121580,
+    (AttachGetIndexed)func_001215A8, 0,
 };
-extern const Fn_Table D_00219588[10] = {
-    (Fn_Table)func_00122708, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
-    (Fn_Table)func_001227B0, (Fn_Table)func_001227F0, (Fn_Table)func_00122840, (Fn_Table)func_00122858,
-    (Fn_Table)func_00122878, 0,
+extern const T2195_Vt D_00219588 = {
+    (AttachInit)func_00122708, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, 0,
+    (AttachGetPos)func_001227B0, (AttachGetRot)func_001227F0, (AttachGetValue)func_00122840, (AttachGetMatrix)func_00122858,
+    (AttachGetIndexed)func_00122878, 0,
 };
-extern const ClassDesc_217418<28> D_00219738 = { (const void*)(const u8*)&D_00217418, 0x83, 0x40, 0xB0, {
+extern const ClassDescriptor<28> D_00219738 = { &D_00217418, 0x83, 0x40, 0xB0, {
     (Fn_Table)func_0012B870, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_0012C140, (Fn_Table)func_0012B8C8, 0,
@@ -1556,7 +1382,7 @@ extern const ClassDesc_217418<28> D_00219738 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_002197E8 = { (const void*)(const u8*)&D_00219738, 0x84, 0x40, 0xD0, {
+extern const ClassDescriptor<28> D_002197E8 = { &D_00219738, 0x84, 0x40, 0xD0, {
     (Fn_Table)func_0012B870, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_0012D3F0, (Fn_Table)func_0012D3E0, 0,
@@ -1565,7 +1391,7 @@ extern const ClassDesc_217418<28> D_002197E8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_00219868 = { (const void*)(const u8*)&D_00217418, 0x88, 0x0, 0x54, {
+extern const ClassDescriptor<28> D_00219868 = { &D_00217418, 0x88, 0x0, 0x54, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001B5F50, 0,
@@ -1574,7 +1400,7 @@ extern const ClassDesc_217418<28> D_00219868 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_002198F0 = { (const void*)(const u8*)&D_00217568, 0x35, 0x3, 0x550, {
+extern const ClassDescriptor<72> D_002198F0 = { &D_00217568, 0x35, 0x3, 0x550, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1594,7 +1420,7 @@ extern const ClassDesc_217418<72> D_002198F0 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_00219A20 = { (const void*)(const u8*)&D_00217498, 0x52, 0x1, 0x2D0, {
+extern const ClassDescriptor<48> D_00219A20 = { &D_00217498, 0x52, 0x1, 0x2D0, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1608,7 +1434,7 @@ extern const ClassDesc_217418<48> D_00219A20 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<72> D_00219AF0 = { (const void*)(const u8*)&D_00217568, 0x1E, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_00219AF0 = { &D_00217568, 0x1E, 0x3, 0x570, {
     (Fn_Table)func_0019E0B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0019E168,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1632,7 +1458,7 @@ extern const Fn_Table D_00219DE0[8] = {
     (Fn_Table)func_001A0FE8, 0, 0, (Fn_Table)func_001A1030,
     (Fn_Table)func_001A11C0, (Fn_Table)func_001A1398, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58,
 };
-extern const ClassDesc_217418<48> D_00219F80 = { (const void*)(const u8*)&D_00217498, 0x4D, 0x1, 0x640, {
+extern const ClassDescriptor<48> D_00219F80 = { &D_00217498, 0x4D, 0x1, 0x640, {
     (Fn_Table)func_00139DE8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00139E80, (Fn_Table)func_00139EC8,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1646,7 +1472,7 @@ extern const ClassDesc_217418<48> D_00219F80 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021A050 = { (const void*)(const u8*)&D_00217498, 0x50, 0x1, 0x350, {
+extern const ClassDescriptor<48> D_0021A050 = { &D_00217498, 0x50, 0x1, 0x350, {
     (Fn_Table)func_00154C10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00155080, (Fn_Table)func_00154F98, 0,
@@ -1660,7 +1486,7 @@ extern const ClassDesc_217418<48> D_0021A050 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021A120 = { (const void*)(const u8*)&D_002178C0, 0x77, 0x0, 0x90, {
+extern const ClassDescriptor<28> D_0021A120 = { &D_002178C0, 0x77, 0x0, 0x90, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001F3A40, 0,
@@ -1669,7 +1495,7 @@ extern const ClassDesc_217418<28> D_0021A120 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001587C0,
 } };
-extern const ClassDesc_217418<28> D_0021A1A0 = { (const void*)(const u8*)&D_0021A120, 0x78, 0x0, 0xC0, {
+extern const ClassDescriptor<28> D_0021A1A0 = { &D_0021A120, 0x78, 0x0, 0xC0, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_00158980, (Fn_Table)func_001587C8, 0,
@@ -1678,7 +1504,7 @@ extern const ClassDesc_217418<28> D_0021A1A0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158A80,
 } };
-extern const ClassDesc_217418<28> D_0021A220 = { (const void*)(const u8*)&D_0021A120, 0x79, 0x0, 0xA0, {
+extern const ClassDescriptor<28> D_0021A220 = { &D_0021A120, 0x79, 0x0, 0xA0, {
     (Fn_Table)func_00158B00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_00158C28, (Fn_Table)func_00158B30, 0,
@@ -1687,7 +1513,7 @@ extern const ClassDesc_217418<28> D_0021A220 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158D38,
 } };
-extern const ClassDesc_217418<28> D_0021A2A0 = { (const void*)(const u8*)&D_0021A220, 0x7A, 0x0, 0xD0, {
+extern const ClassDescriptor<28> D_0021A2A0 = { &D_0021A220, 0x7A, 0x0, 0xD0, {
     (Fn_Table)func_00158E10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_00158C28, (Fn_Table)func_00158B30, 0,
@@ -1696,7 +1522,7 @@ extern const ClassDesc_217418<28> D_0021A2A0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158F80,
 } };
-extern const ClassDesc_217418<48> D_0021A320 = { (const void*)(const u8*)&D_00217498, 0x53, 0x101, 0x2F0, {
+extern const ClassDescriptor<48> D_0021A320 = { &D_00217498, 0x53, 0x101, 0x2F0, {
     (Fn_Table)func_001963D8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00196810, (Fn_Table)func_00196410, 0,
@@ -1710,7 +1536,7 @@ extern const ClassDesc_217418<48> D_0021A320 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021A490 = { (const void*)(const u8*)&D_00217498, 0x65, 0x1, 0x340, {
+extern const ClassDescriptor<48> D_0021A490 = { &D_00217498, 0x65, 0x1, 0x340, {
     (Fn_Table)func_001504E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_00150528, 0,
@@ -1724,7 +1550,7 @@ extern const ClassDesc_217418<48> D_0021A490 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021A560 = { (const void*)(const u8*)&D_00217740, 0x6F, 0x0, 0x60, {
+extern const ClassDescriptor<28> D_0021A560 = { &D_00217740, 0x6F, 0x0, 0x60, {
     (Fn_Table)func_00169CD8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00169D20, (Fn_Table)func_00169D58,
     (Fn_Table)func_001830B0, (Fn_Table)func_00169DD8, (Fn_Table)func_001B2840, 0,
@@ -1733,7 +1559,7 @@ extern const ClassDesc_217418<28> D_0021A560 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021A5E0 = { (const void*)(const u8*)&D_002177C0, 0x7F, 0x0, 0x80, {
+extern const ClassDescriptor<28> D_0021A5E0 = { &D_002177C0, 0x7F, 0x0, 0x80, {
     (Fn_Table)func_0016A100, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0016A140, (Fn_Table)func_0016A178,
     (Fn_Table)func_001830B0, (Fn_Table)func_0016A1F8, (Fn_Table)func_00192068, 0,
@@ -1742,7 +1568,7 @@ extern const ClassDesc_217418<28> D_0021A5E0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021A660 = { (const void*)(const u8*)&D_00217568, 0x3A, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_0021A660 = { &D_00217568, 0x3A, 0x3, 0x570, {
     (Fn_Table)func_0016A3A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0016A490, (Fn_Table)func_0016A4C8,
     (Fn_Table)func_00126F78, (Fn_Table)func_0016A500, (Fn_Table)func_0016A420, 0,
@@ -1762,12 +1588,12 @@ extern const ClassDesc_217418<72> D_0021A660 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const Fn_Table D_0021A790[10] = {
-    (Fn_Table)func_00185358, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, (Fn_Table)func_00185498,
-    (Fn_Table)func_001214B8, (Fn_Table)func_00185538, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
-    (Fn_Table)func_001215A8, 0,
+extern const T2195_Vt D_0021A790 = {
+    (AttachInit)func_00185358, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, (void*)func_00185498,
+    (AttachGetPos)func_001214B8, (AttachGetRot)func_00185538, (AttachGetValue)func_00121568, (AttachGetMatrix)func_00121580,
+    (AttachGetIndexed)func_001215A8, 0,
 };
-extern const ClassDesc_217418<28> D_0021A7B8 = { (const void*)(const u8*)&D_00217418, 0x8B, 0x0, 0x3F0, {
+extern const ClassDescriptor<28> D_0021A7B8 = { &D_00217418, 0x8B, 0x0, 0x3F0, {
     (Fn_Table)func_0019C440, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_0019C470, 0,
@@ -1776,7 +1602,7 @@ extern const ClassDesc_217418<28> D_0021A7B8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<88> D_0021A838 = { (const void*)(const u8*)&D_00217C30, 0x6, 0xB, 0x720, {
+extern const ClassDescriptor<88> D_0021A838 = { &D_00217C30, 0x6, 0xB, 0x720, {
     (Fn_Table)func_001C4458, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -1800,12 +1626,12 @@ extern const ClassDesc_217418<88> D_0021A838 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
     (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, 0,
 } };
-extern const Fn_Table D_0021A9A8[10] = {
-    (Fn_Table)func_00121338, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
-    (Fn_Table)func_001C5F18, (Fn_Table)func_001C6028, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
-    (Fn_Table)func_001215A8, 0,
+extern const T2195_Vt D_0021A9A8 = {
+    (AttachInit)func_00121338, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, 0,
+    (AttachGetPos)func_001C5F18, (AttachGetRot)func_001C6028, (AttachGetValue)func_00121568, (AttachGetMatrix)func_00121580,
+    (AttachGetIndexed)func_001215A8, 0,
 };
-extern const ClassDesc_217418<74> D_0021A9D0 = { (const void*)(const u8*)&D_00218BD8, 0x22, 0x13, 0x6D0, {
+extern const ClassDescriptor<74> D_0021A9D0 = { &D_00218BD8, 0x22, 0x13, 0x6D0, {
     (Fn_Table)func_0013DDB8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -1826,7 +1652,7 @@ extern const ClassDesc_217418<74> D_0021A9D0 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_001233C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021AB08 = { (const void*)(const u8*)&D_00217568, 0x2F, 0x3, 0x6C0, {
+extern const ClassDescriptor<72> D_0021AB08 = { &D_00217568, 0x2F, 0x3, 0x6C0, {
     (Fn_Table)func_00123408, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_00123540, (Fn_Table)func_001BAC30, 0,
@@ -1846,7 +1672,7 @@ extern const ClassDesc_217418<72> D_0021AB08 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<78> D_0021AC38 = { (const void*)(const u8*)&D_00217568, 0x30, 0x3, 0x5D0, {
+extern const ClassDescriptor<78> D_0021AC38 = { &D_00217568, 0x30, 0x3, 0x5D0, {
     (Fn_Table)func_001AECB0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1868,7 +1694,7 @@ extern const ClassDesc_217418<78> D_0021AC38 = { (const void*)(const u8*)&D_0021
     0, 0, 0, 0,
     (Fn_Table)func_001AECE0, (Fn_Table)func_001AECE8,
 } };
-extern const ClassDesc_217418<78> D_0021AD80 = { (const void*)(const u8*)&D_0021AC38, 0x31, 0x3, 0xB10, {
+extern const ClassDescriptor<78> D_0021AD80 = { &D_0021AC38, 0x31, 0x3, 0xB10, {
     (Fn_Table)func_001AF0A0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001AF0D0, 0,
@@ -1890,7 +1716,7 @@ extern const ClassDesc_217418<78> D_0021AD80 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001AFBB0, (Fn_Table)func_001B00E8, (Fn_Table)func_001B0120, (Fn_Table)func_001B0160,
     (Fn_Table)func_001AECE0, (Fn_Table)func_001B01B0,
 } };
-extern const ClassDesc_217418<78> D_0021AEC8 = { (const void*)(const u8*)&D_0021AC38, 0x32, 0x3, 0x5F0, {
+extern const ClassDescriptor<78> D_0021AEC8 = { &D_0021AC38, 0x32, 0x3, 0x5F0, {
     (Fn_Table)func_001B04A0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1912,7 +1738,7 @@ extern const ClassDesc_217418<78> D_0021AEC8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B0C68, (Fn_Table)func_001B0EA8, (Fn_Table)func_001B0EE0, (Fn_Table)func_001B0F70,
     (Fn_Table)func_001AECE0, (Fn_Table)func_001B0FC0,
 } };
-extern const ClassDesc_217418<78> D_0021B010 = { (const void*)(const u8*)&D_0021AC38, 0x33, 0x3, 0x620, {
+extern const ClassDescriptor<78> D_0021B010 = { &D_0021AC38, 0x33, 0x3, 0x620, {
     (Fn_Table)func_001B1158, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -1934,7 +1760,7 @@ extern const ClassDesc_217418<78> D_0021B010 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B1438, (Fn_Table)func_001B15D0, (Fn_Table)func_001B1608, (Fn_Table)func_001B1698,
     (Fn_Table)func_001AECE0, (Fn_Table)func_001B1710,
 } };
-extern const ClassDesc_217418<28> D_0021B158 = { (const void*)(const u8*)&D_002178C0, 0x75, 0x0, 0xA0, {
+extern const ClassDescriptor<28> D_0021B158 = { &D_002178C0, 0x75, 0x0, 0xA0, {
     (Fn_Table)func_001DFD90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001DFDC8, (Fn_Table)func_001DFE00,
     (Fn_Table)func_001830B0, (Fn_Table)func_001DFE38, (Fn_Table)func_001F3A40, 0,
@@ -1943,7 +1769,7 @@ extern const ClassDesc_217418<28> D_0021B158 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021B1D8 = { (const void*)(const u8*)&D_0021B158, 0x76, 0x0, 0xC0, {
+extern const ClassDescriptor<28> D_0021B1D8 = { &D_0021B158, 0x76, 0x0, 0xC0, {
     (Fn_Table)func_0016C470, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001DFDC8, (Fn_Table)func_001DFE00,
     (Fn_Table)func_001830B0, (Fn_Table)func_001DFE38, (Fn_Table)func_0016C4B8, 0,
@@ -1952,7 +1778,7 @@ extern const ClassDesc_217418<28> D_0021B1D8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021B258 = { (const void*)(const u8*)&D_00217740, 0x70, 0x0, 0x70, {
+extern const ClassDescriptor<28> D_0021B258 = { &D_00217740, 0x70, 0x0, 0x70, {
     (Fn_Table)func_00191F08, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00191F68, (Fn_Table)func_00191FA0,
     (Fn_Table)func_001830B0, (Fn_Table)func_00192020, (Fn_Table)func_001B2840, 0,
@@ -1961,7 +1787,7 @@ extern const ClassDesc_217418<28> D_0021B258 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021B2D8 = { (const void*)(const u8*)&D_00217568, 0x34, 0x3, 0x5B0, {
+extern const ClassDescriptor<72> D_0021B2D8 = { &D_00217568, 0x34, 0x3, 0x5B0, {
     (Fn_Table)func_0012F840, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0012F888, (Fn_Table)func_001BAC30, 0,
@@ -1981,7 +1807,7 @@ extern const ClassDesc_217418<72> D_0021B2D8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_0012FB68, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_0021B408 = { (const void*)(const u8*)&D_00217498, 0x5E, 0x1, 0x340, {
+extern const ClassDescriptor<48> D_0021B408 = { &D_00217498, 0x5E, 0x1, 0x340, {
     (Fn_Table)func_001DDCE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -1995,7 +1821,7 @@ extern const ClassDesc_217418<48> D_0021B408 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001DDE90, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021B4D8 = { (const void*)(const u8*)&D_00217568, 0x3B, 0x23, 0x690, {
+extern const ClassDescriptor<72> D_0021B4D8 = { &D_00217568, 0x3B, 0x23, 0x690, {
     (Fn_Table)func_0013B4C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0013B598, 0,
@@ -2015,7 +1841,7 @@ extern const ClassDesc_217418<72> D_0021B4D8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_0021B608 = { (const void*)(const u8*)&D_00217418, 0x8F, 0x0, 0x6C, {
+extern const ClassDescriptor<28> D_0021B608 = { &D_00217418, 0x8F, 0x0, 0x6C, {
     (Fn_Table)func_0017B998, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -2024,7 +1850,7 @@ extern const ClassDesc_217418<28> D_0021B608 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<88> D_0021B688 = { (const void*)(const u8*)&D_0021A838, 0x7, 0xB, 0x2BF0, {
+extern const ClassDescriptor<88> D_0021B688 = { &D_0021A838, 0x7, 0xB, 0x2BF0, {
     (Fn_Table)func_0016F608, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00178038, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_0016F7B0, 0,
@@ -2048,7 +1874,7 @@ extern const ClassDesc_217418<88> D_0021B688 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001D6608, (Fn_Table)func_00177EE0, (Fn_Table)func_00177F98, (Fn_Table)func_001930B0,
     (Fn_Table)func_001C53B0, (Fn_Table)func_00172EB8, (Fn_Table)func_00170790, 0,
 } };
-extern const ClassDesc_217418<28> D_0021B7F8 = { (const void*)(const u8*)&D_002177C0, 0x80, 0x0, 0x70, {
+extern const ClassDescriptor<28> D_0021B7F8 = { &D_002177C0, 0x80, 0x0, 0x70, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0017FD90, (Fn_Table)func_0017FDC8,
     (Fn_Table)func_001830B0, (Fn_Table)func_0017FE00, (Fn_Table)func_00192068, 0,
@@ -2057,7 +1883,7 @@ extern const ClassDesc_217418<28> D_0021B7F8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021B878 = { (const void*)(const u8*)&D_0021B4D8, 0x3F, 0x23, 0x6A0, {
+extern const ClassDescriptor<72> D_0021B878 = { &D_0021B4D8, 0x3F, 0x23, 0x6A0, {
     (Fn_Table)func_0013B4C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0013B598, 0,
@@ -2077,7 +1903,7 @@ extern const ClassDesc_217418<72> D_0021B878 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021B9A8 = { (const void*)(const u8*)&D_00217568, 0x4C, 0x3, 0x560, {
+extern const ClassDescriptor<72> D_0021B9A8 = { &D_00217568, 0x4C, 0x3, 0x560, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -2097,7 +1923,7 @@ extern const ClassDesc_217418<72> D_0021B9A8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_0021BAD8 = { (const void*)(const u8*)&D_00217418, 0x89, 0x0, 0x190, {
+extern const ClassDescriptor<28> D_0021BAD8 = { &D_00217418, 0x89, 0x0, 0x190, {
     (Fn_Table)func_001CB618, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -2106,7 +1932,7 @@ extern const ClassDesc_217418<28> D_0021BAD8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<100> D_0021BB58 = { (const void*)(const u8*)&D_0021A838, 0x8, 0xB, 0xC10, {
+extern const ClassDescriptor<100> D_0021BB58 = { &D_0021A838, 0x8, 0xB, 0xC10, {
     (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -2133,7 +1959,7 @@ extern const ClassDesc_217418<100> D_0021BB58 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_0021BCF8 = { (const void*)(const u8*)&D_0021BB58, 0xA, 0xB, 0xC50, {
+extern const ClassDescriptor<100> D_0021BCF8 = { &D_0021BB58, 0xA, 0xB, 0xC50, {
     (Fn_Table)func_00167D68, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -2160,7 +1986,7 @@ extern const ClassDesc_217418<100> D_0021BCF8 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_0021BE98 = { (const void*)(const u8*)&D_0021BB58, 0x9, 0xB, 0xD00, {
+extern const ClassDescriptor<100> D_0021BE98 = { &D_0021BB58, 0x9, 0xB, 0xD00, {
     (Fn_Table)func_001B6EC8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -2187,7 +2013,7 @@ extern const ClassDesc_217418<100> D_0021BE98 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001B7790, (Fn_Table)func_001B7818, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<72> D_0021C038 = { (const void*)(const u8*)&D_00217568, 0x36, 0x3, 0x860, {
+extern const ClassDescriptor<72> D_0021C038 = { &D_00217568, 0x36, 0x3, 0x860, {
     (Fn_Table)func_001F4F70, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001F51A0, (Fn_Table)func_001BAC30, 0,
@@ -2207,7 +2033,7 @@ extern const ClassDesc_217418<72> D_0021C038 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001F51E8,
 } };
-extern const ClassDesc_217418<72> D_0021C168 = { (const void*)(const u8*)&D_0021C038, 0x37, 0x3, 0x860, {
+extern const ClassDescriptor<72> D_0021C168 = { &D_0021C038, 0x37, 0x3, 0x860, {
     (Fn_Table)func_001F5218, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001F51A0, (Fn_Table)func_001BAC30, 0,
@@ -2227,7 +2053,7 @@ extern const ClassDesc_217418<72> D_0021C168 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001F51E8,
 } };
-extern const ClassDesc_217418<28> D_0021C298 = { (const void*)(const u8*)&D_002178C0, 0x7B, 0x0, 0x90, {
+extern const ClassDescriptor<28> D_0021C298 = { &D_002178C0, 0x7B, 0x0, 0x90, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00141108, 0,
@@ -2236,7 +2062,7 @@ extern const ClassDesc_217418<28> D_0021C298 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021C318 = { (const void*)(const u8*)&D_00217568, 0x38, 0x3, 0x5C0, {
+extern const ClassDescriptor<72> D_0021C318 = { &D_00217568, 0x38, 0x3, 0x5C0, {
     (Fn_Table)func_001411A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001415D0, (Fn_Table)func_00141210, 0,
@@ -2256,7 +2082,7 @@ extern const ClassDesc_217418<72> D_0021C318 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_0021C448 = { (const void*)(const u8*)&D_00217418, 0x8A, 0x0, 0x58, {
+extern const ClassDescriptor<28> D_0021C448 = { &D_00217418, 0x8A, 0x0, 0x58, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001916D0, 0,
@@ -2265,7 +2091,7 @@ extern const ClassDesc_217418<28> D_0021C448 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021C4C8 = { (const void*)(const u8*)&D_00217498, 0x54, 0x1, 0x2E0, {
+extern const ClassDescriptor<48> D_0021C4C8 = { &D_00217498, 0x54, 0x1, 0x2E0, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -2279,7 +2105,7 @@ extern const ClassDesc_217418<48> D_0021C4C8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021C598 = { (const void*)(const u8*)&D_00217568, 0x40, 0x3, 0x6A0, {
+extern const ClassDescriptor<72> D_0021C598 = { &D_00217568, 0x40, 0x3, 0x6A0, {
     (Fn_Table)func_0015AAE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0015AD80, (Fn_Table)func_0015AC08, 0,
@@ -2299,7 +2125,7 @@ extern const ClassDesc_217418<72> D_0021C598 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_0021C6C8 = { (const void*)(const u8*)&D_00217498, 0x55, 0x1, 0x390, {
+extern const ClassDescriptor<48> D_0021C6C8 = { &D_00217498, 0x55, 0x1, 0x390, {
     (Fn_Table)func_00146340, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2313,7 +2139,7 @@ extern const ClassDesc_217418<48> D_0021C6C8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00147AB0,
 } };
-extern const ClassDesc_217418<48> D_0021C798 = { (const void*)(const u8*)&D_0021C6C8, 0x58, 0x1, 0x3A0, {
+extern const ClassDescriptor<48> D_0021C798 = { &D_0021C6C8, 0x58, 0x1, 0x3A0, {
     (Fn_Table)func_00147E40, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2327,7 +2153,7 @@ extern const ClassDesc_217418<48> D_0021C798 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148298,
 } };
-extern const ClassDesc_217418<48> D_0021C868 = { (const void*)(const u8*)&D_0021C6C8, 0x56, 0x1, 0x390, {
+extern const ClassDescriptor<48> D_0021C868 = { &D_0021C6C8, 0x56, 0x1, 0x390, {
     (Fn_Table)func_00148400, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2341,7 +2167,7 @@ extern const ClassDesc_217418<48> D_0021C868 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148470,
 } };
-extern const ClassDesc_217418<48> D_0021C938 = { (const void*)(const u8*)&D_0021C6C8, 0x59, 0x1, 0x390, {
+extern const ClassDescriptor<48> D_0021C938 = { &D_0021C6C8, 0x59, 0x1, 0x390, {
     (Fn_Table)func_00148510, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2355,7 +2181,7 @@ extern const ClassDesc_217418<48> D_0021C938 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148598,
 } };
-extern const ClassDesc_217418<48> D_0021CA08 = { (const void*)(const u8*)&D_0021C6C8, 0x5A, 0x1, 0x390, {
+extern const ClassDescriptor<48> D_0021CA08 = { &D_0021C6C8, 0x5A, 0x1, 0x390, {
     (Fn_Table)func_00148698, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2369,7 +2195,7 @@ extern const ClassDesc_217418<48> D_0021CA08 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148888,
 } };
-extern const ClassDesc_217418<48> D_0021CAD8 = { (const void*)(const u8*)&D_0021C6C8, 0x57, 0x1, 0x3A0, {
+extern const ClassDescriptor<48> D_0021CAD8 = { &D_0021C6C8, 0x57, 0x1, 0x3A0, {
     (Fn_Table)func_00148D90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2383,7 +2209,7 @@ extern const ClassDesc_217418<48> D_0021CAD8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148FF0,
 } };
-extern const ClassDesc_217418<48> D_0021CBA8 = { (const void*)(const u8*)&D_0021C6C8, 0x5B, 0x1, 0x390, {
+extern const ClassDescriptor<48> D_0021CBA8 = { &D_0021C6C8, 0x5B, 0x1, 0x390, {
     (Fn_Table)func_00149168, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
@@ -2397,7 +2223,7 @@ extern const ClassDesc_217418<48> D_0021CBA8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00147AB0,
 } };
-extern const ClassDesc_217418<76> D_0021CC78 = { (const void*)(const u8*)&D_00217568, 0x2C, 0x3, 0x5A0, {
+extern const ClassDescriptor<76> D_0021CC78 = { &D_00217568, 0x2C, 0x3, 0x5A0, {
     (Fn_Table)func_00198980, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001989B0, 0,
@@ -2418,7 +2244,7 @@ extern const ClassDesc_217418<76> D_0021CC78 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_00198E98, (Fn_Table)func_00198DA8, (Fn_Table)func_00198E58, 0,
 } };
-extern const ClassDesc_217418<76> D_0021CDB8 = { (const void*)(const u8*)&D_0021CC78, 0x2D, 0x3, 0x5B0, {
+extern const ClassDescriptor<76> D_0021CDB8 = { &D_0021CC78, 0x2D, 0x3, 0x5B0, {
     (Fn_Table)func_00199070, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001990A8, (Fn_Table)func_001989B0, 0,
@@ -2439,7 +2265,7 @@ extern const ClassDesc_217418<76> D_0021CDB8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_001990E0, (Fn_Table)func_00199138, (Fn_Table)func_00198E58, 0,
 } };
-extern const ClassDesc_217418<76> D_0021CEF8 = { (const void*)(const u8*)&D_0021CC78, 0x2E, 0x3, 0x5C0, {
+extern const ClassDescriptor<76> D_0021CEF8 = { &D_0021CC78, 0x2E, 0x3, 0x5C0, {
     (Fn_Table)func_001993F0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001994C8, (Fn_Table)func_00199428, 0,
@@ -2460,7 +2286,7 @@ extern const ClassDesc_217418<76> D_0021CEF8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_00198E98, (Fn_Table)func_001999D0, (Fn_Table)func_00198E58, 0,
 } };
-extern const ClassDesc_217418<48> D_0021D038 = { (const void*)(const u8*)&D_00217498, 0x5C, 0x1, 0x2E0, {
+extern const ClassDescriptor<48> D_0021D038 = { &D_00217498, 0x5C, 0x1, 0x2E0, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_00199170, 0,
@@ -2474,7 +2300,7 @@ extern const ClassDesc_217418<48> D_0021D038 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021D108 = { (const void*)(const u8*)&D_00217498, 0x5D, 0x1, 0x330, {
+extern const ClassDescriptor<48> D_0021D108 = { &D_00217498, 0x5D, 0x1, 0x330, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001991E0, 0,
@@ -2488,7 +2314,7 @@ extern const ClassDesc_217418<48> D_0021D108 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<84> D_0021D1D8 = { (const void*)(const u8*)&D_00217C30, 0x17, 0xB, 0x800, {
+extern const ClassDescriptor<84> D_0021D1D8 = { &D_00217C30, 0x17, 0xB, 0x800, {
     (Fn_Table)func_0019A148, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -2511,7 +2337,7 @@ extern const ClassDesc_217418<84> D_0021D1D8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<28> D_0021D338 = { (const void*)(const u8*)&D_0021C298, 0x7C, 0x0, 0xA0, {
+extern const ClassDescriptor<28> D_0021D338 = { &D_0021C298, 0x7C, 0x0, 0xA0, {
     (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0019C3D0, (Fn_Table)func_0019C408,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00141108, 0,
@@ -2520,7 +2346,7 @@ extern const ClassDesc_217418<28> D_0021D338 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021D3B8 = { (const void*)(const u8*)&D_00217568, 0x41, 0x3, 0x670, {
+extern const ClassDescriptor<72> D_0021D3B8 = { &D_00217568, 0x41, 0x3, 0x670, {
     (Fn_Table)func_0019B038, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0019B1E0, (Fn_Table)func_0019B218,
     (Fn_Table)func_00126F78, (Fn_Table)func_0019B250, (Fn_Table)func_0019B0A0, 0,
@@ -2540,7 +2366,7 @@ extern const ClassDesc_217418<72> D_0021D3B8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_0021D4E8 = { (const void*)(const u8*)&D_00217498, 0x5F, 0x1, 0x660, {
+extern const ClassDescriptor<48> D_0021D4E8 = { &D_00217498, 0x5F, 0x1, 0x660, {
     (Fn_Table)func_001A4718, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -2554,7 +2380,7 @@ extern const ClassDesc_217418<48> D_0021D4E8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, (Fn_Table)func_001A4D60, 0,
 } };
-extern const ClassDesc_217418<84> D_0021D5B8 = { (const void*)(const u8*)&D_00217C30, 0x15, 0xB, 0x690, {
+extern const ClassDescriptor<84> D_0021D5B8 = { &D_00217C30, 0x15, 0xB, 0x690, {
     (Fn_Table)func_001A3AE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001A3B20, 0,
@@ -2577,7 +2403,7 @@ extern const ClassDesc_217418<84> D_0021D5B8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<72> D_0021D718 = { (const void*)(const u8*)&D_00217568, 0x42, 0x3, 0x5C0, {
+extern const ClassDescriptor<72> D_0021D718 = { &D_00217568, 0x42, 0x3, 0x5C0, {
     (Fn_Table)func_001A6498, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001A6540, (Fn_Table)func_001A64F8, 0,
@@ -2597,7 +2423,7 @@ extern const ClassDesc_217418<72> D_0021D718 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021D848 = { (const void*)(const u8*)&D_00217568, 0x43, 0x3, 0x5B0, {
+extern const ClassDescriptor<72> D_0021D848 = { &D_00217568, 0x43, 0x3, 0x5B0, {
     (Fn_Table)func_001A6F88, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001A7050, (Fn_Table)func_001A7008, 0,
@@ -2617,7 +2443,7 @@ extern const ClassDesc_217418<72> D_0021D848 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021D978 = { (const void*)(const u8*)&D_00217568, 0x44, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_0021D978 = { &D_00217568, 0x44, 0x3, 0x570, {
     (Fn_Table)func_001A7520, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001A7588, (Fn_Table)func_001A7550, 0,
@@ -2637,7 +2463,7 @@ extern const ClassDesc_217418<72> D_0021D978 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021DAA8 = { (const void*)(const u8*)&D_00217568, 0x45, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_0021DAA8 = { &D_00217568, 0x45, 0x3, 0x570, {
     (Fn_Table)func_001A7708, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001A7750, 0,
@@ -2657,7 +2483,7 @@ extern const ClassDesc_217418<72> D_0021DAA8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021DBD8 = { (const void*)(const u8*)&D_00217568, 0x46, 0x3, 0x590, {
+extern const ClassDescriptor<72> D_0021DBD8 = { &D_00217568, 0x46, 0x3, 0x590, {
     (Fn_Table)func_0014EE40, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_0014EF00,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014EE70, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0014EF40, (Fn_Table)func_0014EF88, 0,
@@ -2677,7 +2503,7 @@ extern const ClassDesc_217418<72> D_0021DBD8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<74> D_0021DD08 = { (const void*)(const u8*)&D_00218BD8, 0x23, 0x13, 0x7C0, {
+extern const ClassDescriptor<74> D_0021DD08 = { &D_00218BD8, 0x23, 0x13, 0x7C0, {
     (Fn_Table)func_0014F740, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -2698,7 +2524,7 @@ extern const ClassDesc_217418<74> D_0021DD08 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0014FC38, 0,
 } };
-extern const ClassDesc_217418<48> D_0021DE40 = { (const void*)(const u8*)&D_00217498, 0x60, 0x1, 0x300, {
+extern const ClassDescriptor<48> D_0021DE40 = { &D_00217498, 0x60, 0x1, 0x300, {
     (Fn_Table)func_0015A8B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_0015A918, 0,
@@ -2712,7 +2538,7 @@ extern const ClassDesc_217418<48> D_0021DE40 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<74> D_0021DF10 = { (const void*)(const u8*)&D_0021B4D8, 0x3C, 0x23, 0x6F0, {
+extern const ClassDescriptor<74> D_0021DF10 = { &D_0021B4D8, 0x3C, 0x23, 0x6F0, {
     (Fn_Table)func_0018D8E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
@@ -2733,7 +2559,7 @@ extern const ClassDesc_217418<74> D_0021DF10 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0018DA40, 0,
 } };
-extern const ClassDesc_217418<74> D_0021E048 = { (const void*)(const u8*)&D_0021DF10, 0x3D, 0x23, 0x710, {
+extern const ClassDescriptor<74> D_0021E048 = { &D_0021DF10, 0x3D, 0x23, 0x710, {
     (Fn_Table)func_0018DDA0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
@@ -2754,7 +2580,7 @@ extern const ClassDesc_217418<74> D_0021E048 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0018DDD8, 0,
 } };
-extern const ClassDesc_217418<74> D_0021E180 = { (const void*)(const u8*)&D_0021DF10, 0x3E, 0x23, 0x710, {
+extern const ClassDescriptor<74> D_0021E180 = { &D_0021DF10, 0x3E, 0x23, 0x710, {
     (Fn_Table)func_0018D8E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
@@ -2775,7 +2601,7 @@ extern const ClassDesc_217418<74> D_0021E180 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0018DEE8, 0,
 } };
-extern const ClassDesc_217418<36> D_0021E2B8 = { (const void*)(const u8*)&D_00217418, 0x8C, 0x0, 0x170, {
+extern const ClassDescriptor<36> D_0021E2B8 = { &D_00217418, 0x8C, 0x0, 0x170, {
     (Fn_Table)func_001A7FE8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_001A80E0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001A84C8, (Fn_Table)func_001833D0, 0,
@@ -2786,11 +2612,11 @@ extern const ClassDesc_217418<36> D_0021E2B8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B4AA0, (Fn_Table)func_001B4AD0, 0, (Fn_Table)func_001B4B38,
     0, (Fn_Table)func_001B4B48, 0, 0,
 } };
-extern const Fn_Table D_0021E438[8] = {
-    (Fn_Table)func_00159680, (Fn_Table)func_001596E0, (Fn_Table)func_00159890, (Fn_Table)func_001B4B38,
-    0, (Fn_Table)func_00159A80, 0, 0,
+extern const CursorAnimatorMethods D_0021E438 = {
+    (AnimLoad)func_00159680, (AnimBind)func_001596E0, (AnimStep)func_00159890, (AnimProgress)func_001B4B38,
+    0, (AnimFind)func_00159A80, 0, 0,
 };
-extern const ClassDesc_217418<72> D_0021E458 = { (const void*)(const u8*)&D_00217568, 0x39, 0x3, 0x560, {
+extern const ClassDescriptor<72> D_0021E458 = { &D_00217568, 0x39, 0x3, 0x560, {
     (Fn_Table)func_00146100, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_00146130, 0,
@@ -2810,7 +2636,7 @@ extern const ClassDesc_217418<72> D_0021E458 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_0021E588 = { (const void*)(const u8*)&D_00217498, 0x61, 0x1, 0x2F0, {
+extern const ClassDescriptor<48> D_0021E588 = { &D_00217498, 0x61, 0x1, 0x2F0, {
     (Fn_Table)func_00152E28, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -2824,7 +2650,7 @@ extern const ClassDesc_217418<48> D_0021E588 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021E658 = { (const void*)(const u8*)&D_00217498, 0x62, 0x1, 0x330, {
+extern const ClassDescriptor<48> D_0021E658 = { &D_00217498, 0x62, 0x1, 0x330, {
     (Fn_Table)func_001EF838, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -2838,7 +2664,7 @@ extern const ClassDesc_217418<48> D_0021E658 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<100> D_0021E728 = { (const void*)(const u8*)&D_0021BCF8, 0xB, 0xB, 0xCA0, {
+extern const ClassDescriptor<100> D_0021E728 = { &D_0021BCF8, 0xB, 0xB, 0xCA0, {
     (Fn_Table)func_001E88D0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -2865,7 +2691,7 @@ extern const ClassDesc_217418<100> D_0021E728 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001E8A50, (Fn_Table)func_001E8DD0, (Fn_Table)func_001E8EF8, (Fn_Table)func_001C8590,
     (Fn_Table)func_001E8E48, (Fn_Table)func_001E8E08, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_0021E8C8 = { (const void*)(const u8*)&D_0021BB58, 0xC, 0xB, 0xE50, {
+extern const ClassDescriptor<100> D_0021E8C8 = { &D_0021BB58, 0xC, 0xB, 0xE50, {
     (Fn_Table)func_0018A388, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_0018A3B8, 0,
@@ -2892,7 +2718,7 @@ extern const ClassDesc_217418<100> D_0021E8C8 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_0018AB88, (Fn_Table)func_0018A9A8, (Fn_Table)func_0018AD88, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_0021EA68 = { (const void*)(const u8*)&D_0021BB58, 0xD, 0xB, 0xC30, {
+extern const ClassDescriptor<100> D_0021EA68 = { &D_0021BB58, 0xD, 0xB, 0xC30, {
     (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -2919,7 +2745,7 @@ extern const ClassDesc_217418<100> D_0021EA68 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001A99F8, (Fn_Table)func_001CA468, (Fn_Table)func_001A9960, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<84> D_0021EC08 = { (const void*)(const u8*)&D_00217C30, 0x1C, 0xB, 0x690, {
+extern const ClassDescriptor<84> D_0021EC08 = { &D_00217C30, 0x1C, 0xB, 0x690, {
     (Fn_Table)func_001EB460, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001EB518, 0,
@@ -2942,7 +2768,7 @@ extern const ClassDesc_217418<84> D_0021EC08 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001EBD08, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<100> D_0021ED68 = { (const void*)(const u8*)&D_0021BB58, 0x13, 0xB, 0xCA0, {
+extern const ClassDescriptor<100> D_0021ED68 = { &D_0021BB58, 0x13, 0xB, 0xCA0, {
     (Fn_Table)func_001EBEB0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001EC0B8, (Fn_Table)func_001EC098,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001EBF40, 0,
@@ -2969,7 +2795,7 @@ extern const ClassDesc_217418<100> D_0021ED68 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001EC570, (Fn_Table)func_001EC0D8, (Fn_Table)func_001ECE98, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<28> D_0021EF08 = { (const void*)(const u8*)&D_00217418, 0x90, 0x0, 0x48, {
+extern const ClassDescriptor<28> D_0021EF08 = { &D_00217418, 0x90, 0x0, 0x48, {
     (Fn_Table)func_001ED168, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -2978,7 +2804,7 @@ extern const ClassDesc_217418<28> D_0021EF08 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<48> D_0021EF88 = { (const void*)(const u8*)&D_00217498, 0x64, 0x1, 0x340, {
+extern const ClassDescriptor<48> D_0021EF88 = { &D_00217498, 0x64, 0x1, 0x340, {
     (Fn_Table)func_0016DD10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_0016DD90, 0,
@@ -2992,7 +2818,7 @@ extern const ClassDesc_217418<48> D_0021EF88 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<72> D_0021F058 = { (const void*)(const u8*)&D_00218F80, 0x2A, 0x3, 0x7C0, {
+extern const ClassDescriptor<72> D_0021F058 = { &D_00218F80, 0x2A, 0x3, 0x7C0, {
     (Fn_Table)func_0016DF30, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_00140200, (Fn_Table)func_00140100, 0,
@@ -3012,7 +2838,7 @@ extern const ClassDesc_217418<72> D_0021F058 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021F188 = { (const void*)(const u8*)&D_00217568, 0x47, 0x3, 0x5E0, {
+extern const ClassDescriptor<72> D_0021F188 = { &D_00217568, 0x47, 0x3, 0x5E0, {
     (Fn_Table)func_0016CE00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_0016CE80, 0,
@@ -3032,7 +2858,7 @@ extern const ClassDesc_217418<72> D_0021F188 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<28> D_0021F2B8 = { (const void*)(const u8*)&D_002177C0, 0x81, 0x0, 0x60, {
+extern const ClassDescriptor<28> D_0021F2B8 = { &D_002177C0, 0x81, 0x0, 0x60, {
     (Fn_Table)func_001C10A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001C10D8, (Fn_Table)func_001C1110,
     (Fn_Table)func_001830B0, (Fn_Table)func_001C1148, (Fn_Table)func_00192068, 0,
@@ -3041,7 +2867,7 @@ extern const ClassDesc_217418<28> D_0021F2B8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021F338 = { (const void*)(const u8*)&D_00217740, 0x71, 0x0, 0x5C, {
+extern const ClassDescriptor<28> D_0021F338 = { &D_00217740, 0x71, 0x0, 0x5C, {
     (Fn_Table)func_0019AF00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0019AF38, (Fn_Table)func_0019AF70,
     (Fn_Table)func_001830B0, (Fn_Table)func_0019AFF0, (Fn_Table)func_001B2840, 0,
@@ -3050,7 +2876,7 @@ extern const ClassDesc_217418<28> D_0021F338 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021F3B8 = { (const void*)(const u8*)&D_00217740, 0x72, 0x0, 0x40, {
+extern const ClassDescriptor<28> D_0021F3B8 = { &D_00217740, 0x72, 0x0, 0x40, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00180EB0, (Fn_Table)func_00180EE8,
     (Fn_Table)func_001830B0, (Fn_Table)func_00180F20, (Fn_Table)func_001B2840, 0,
@@ -3059,7 +2885,7 @@ extern const ClassDesc_217418<28> D_0021F3B8 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_0021F438 = { (const void*)(const u8*)&D_00217418, 0x8D, 0x0, 0x8F0, {
+extern const ClassDescriptor<28> D_0021F438 = { &D_00217418, 0x8D, 0x0, 0x8F0, {
     (Fn_Table)func_001F2758, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -3068,7 +2894,7 @@ extern const ClassDesc_217418<28> D_0021F438 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<88> D_0021F4B8 = { (const void*)(const u8*)&D_0021A838, 0x14, 0xB, 0x760, {
+extern const ClassDescriptor<88> D_0021F4B8 = { &D_0021A838, 0x14, 0xB, 0x760, {
     (Fn_Table)func_001DE798, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3092,7 +2918,7 @@ extern const ClassDesc_217418<88> D_0021F4B8 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001DEBB8, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
     (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, 0,
 } };
-extern const ClassDesc_217418<84> D_0021F628 = { (const void*)(const u8*)&D_00217C30, 0x16, 0xB, 0x660, {
+extern const ClassDescriptor<84> D_0021F628 = { &D_00217C30, 0x16, 0xB, 0x660, {
     (Fn_Table)func_001E5378, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3115,7 +2941,7 @@ extern const ClassDesc_217418<84> D_0021F628 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001E5E08, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_001E5E50, (Fn_Table)func_00192A38, (Fn_Table)func_001E5E60,
 } };
-extern const ClassDesc_217418<100> D_0021F788 = { (const void*)(const u8*)&D_0021BB58, 0xE, 0xB, 0xC50, {
+extern const ClassDescriptor<100> D_0021F788 = { &D_0021BB58, 0xE, 0xB, 0xC50, {
     (Fn_Table)func_0018FEF8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -3142,7 +2968,7 @@ extern const ClassDesc_217418<100> D_0021F788 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_0018FFB0, (Fn_Table)func_00190658, (Fn_Table)func_00190128, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<84> D_0021F928 = { (const void*)(const u8*)&D_00217C30, 0x18, 0xB, 0x6C0, {
+extern const ClassDescriptor<84> D_0021F928 = { &D_00217C30, 0x18, 0xB, 0x6C0, {
     (Fn_Table)func_00196938, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001969C0, 0,
@@ -3165,7 +2991,7 @@ extern const ClassDesc_217418<84> D_0021F928 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<100> D_0021FA88 = { (const void*)(const u8*)&D_0021BB58, 0xF, 0xB, 0xC20, {
+extern const ClassDescriptor<100> D_0021FA88 = { &D_0021BB58, 0xF, 0xB, 0xC20, {
     (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
     (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
@@ -3192,7 +3018,7 @@ extern const ClassDesc_217418<100> D_0021FA88 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_00198530, (Fn_Table)func_00198858, (Fn_Table)func_00198318, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<72> D_0021FC28 = { (const void*)(const u8*)&D_00217568, 0x48, 0x3, 0x560, {
+extern const ClassDescriptor<72> D_0021FC28 = { &D_00217568, 0x48, 0x3, 0x560, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -3212,7 +3038,7 @@ extern const ClassDesc_217418<72> D_0021FC28 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_0021FD58 = { (const void*)(const u8*)&D_00217568, 0x49, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_0021FD58 = { &D_00217568, 0x49, 0x3, 0x570, {
     (Fn_Table)func_0018F988, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -3232,7 +3058,7 @@ extern const ClassDesc_217418<72> D_0021FD58 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<100> D_0021FE88 = { (const void*)(const u8*)&D_0021BB58, 0x10, 0xB, 0xC20, {
+extern const ClassDescriptor<100> D_0021FE88 = { &D_0021BB58, 0x10, 0xB, 0xC20, {
     (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
     (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
@@ -3259,7 +3085,7 @@ extern const ClassDesc_217418<100> D_0021FE88 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_00220028 = { (const void*)(const u8*)&D_0021FE88, 0x11, 0xB, 0xC30, {
+extern const ClassDescriptor<100> D_00220028 = { &D_0021FE88, 0x11, 0xB, 0xC30, {
     (Fn_Table)func_0014B608, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
     (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
@@ -3286,7 +3112,7 @@ extern const ClassDesc_217418<100> D_00220028 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_0014BD38, (Fn_Table)func_001CA468, (Fn_Table)func_0014B6A8, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<100> D_002201C8 = { (const void*)(const u8*)&D_0021FE88, 0x12, 0xB, 0xC30, {
+extern const ClassDescriptor<100> D_002201C8 = { &D_0021FE88, 0x12, 0xB, 0xC30, {
     (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
     (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
@@ -3313,7 +3139,7 @@ extern const ClassDesc_217418<100> D_002201C8 = { (const void*)(const u8*)&D_002
     (Fn_Table)func_0014BF88, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
     (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
 } };
-extern const ClassDesc_217418<48> D_00220368 = { (const void*)(const u8*)&D_00217498, 0x68, 0x1, 0x6A0, {
+extern const ClassDescriptor<48> D_00220368 = { &D_00217498, 0x68, 0x1, 0x6A0, {
     (Fn_Table)func_0014C018, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3327,7 +3153,7 @@ extern const ClassDesc_217418<48> D_00220368 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, (Fn_Table)func_0014C788, 0,
 } };
-extern const ClassDesc_217418<84> D_00220438 = { (const void*)(const u8*)&D_00217C30, 0x19, 0xB, 0xBB0, {
+extern const ClassDescriptor<84> D_00220438 = { &D_00217C30, 0x19, 0xB, 0xBB0, {
     (Fn_Table)func_001D73A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3350,7 +3176,7 @@ extern const ClassDesc_217418<84> D_00220438 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001DACB0, (Fn_Table)func_001925C0,
     (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<84> D_00220598 = { (const void*)(const u8*)&D_00217C30, 0x1B, 0xB, 0x710, {
+extern const ClassDescriptor<84> D_00220598 = { &D_00217C30, 0x1B, 0xB, 0x710, {
     (Fn_Table)func_001793C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3373,7 +3199,7 @@ extern const ClassDesc_217418<84> D_00220598 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_0017AA40, (Fn_Table)func_0017ABD8, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_0017A6D0, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<72> D_002206F8 = { (const void*)(const u8*)&D_00217568, 0x4A, 0x3, 0x620, {
+extern const ClassDescriptor<72> D_002206F8 = { &D_00217568, 0x4A, 0x3, 0x620, {
     (Fn_Table)func_0017ADD0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -3393,7 +3219,7 @@ extern const ClassDesc_217418<72> D_002206F8 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<72> D_00220828 = { (const void*)(const u8*)&D_00217568, 0x4B, 0x3, 0x570, {
+extern const ClassDescriptor<72> D_00220828 = { &D_00217568, 0x4B, 0x3, 0x570, {
     (Fn_Table)func_0017B5D0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -3413,7 +3239,7 @@ extern const ClassDesc_217418<72> D_00220828 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<74> D_00220958 = { (const void*)(const u8*)&D_00218BD8, 0x24, 0x13, 0x6F0, {
+extern const ClassDescriptor<74> D_00220958 = { &D_00218BD8, 0x24, 0x13, 0x6F0, {
     (Fn_Table)func_00182470, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
@@ -3434,7 +3260,7 @@ extern const ClassDesc_217418<74> D_00220958 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
     (Fn_Table)func_0013D278, 0,
 } };
-extern const ClassDesc_217418<84> D_00220A90 = { (const void*)(const u8*)&D_00220438, 0x1A, 0xB, 0xC10, {
+extern const ClassDescriptor<84> D_00220A90 = { &D_00220438, 0x1A, 0xB, 0xC10, {
     (Fn_Table)func_00180F68, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3457,7 +3283,7 @@ extern const ClassDesc_217418<84> D_00220A90 = { (const void*)(const u8*)&D_0022
     (Fn_Table)func_00181BC8, (Fn_Table)func_00181AE0, (Fn_Table)func_001DACB0, (Fn_Table)func_001925C0,
     (Fn_Table)func_00181AF0, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<28> D_00220C40 = { (const void*)(const u8*)&D_00217418, 0x91, 0x0, 0x60, {
+extern const ClassDescriptor<28> D_00220C40 = { &D_00217418, 0x91, 0x0, 0x60, {
     (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -3466,7 +3292,7 @@ extern const ClassDesc_217418<28> D_00220C40 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<84> D_00220CC0 = { (const void*)(const u8*)&D_00217C30, 0x1D, 0xB, 0x760, {
+extern const ClassDescriptor<84> D_00220CC0 = { &D_00217C30, 0x1D, 0xB, 0x760, {
     (Fn_Table)func_001C3390, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
     (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
@@ -3489,7 +3315,7 @@ extern const ClassDesc_217418<84> D_00220CC0 = { (const void*)(const u8*)&D_0021
     (Fn_Table)func_001C3D60, (Fn_Table)func_001C3E50, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
     (Fn_Table)func_001C3E80, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
 } };
-extern const ClassDesc_217418<72> D_00220E20 = { (const void*)(const u8*)&D_00217568, 0x4, 0x3, 0x550, {
+extern const ClassDescriptor<72> D_00220E20 = { &D_00217568, 0x4, 0x3, 0x550, {
     (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
     (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
@@ -3509,7 +3335,7 @@ extern const ClassDesc_217418<72> D_00220E20 = { (const void*)(const u8*)&D_0021
     0, 0, 0, (Fn_Table)func_001B8A48,
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
-extern const ClassDesc_217418<48> D_00220F50 = { (const void*)(const u8*)&D_00217498, 0x66, 0x1, 0x340, {
+extern const ClassDescriptor<48> D_00220F50 = { &D_00217498, 0x66, 0x1, 0x340, {
     (Fn_Table)func_001C0F30, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3523,7 +3349,7 @@ extern const ClassDesc_217418<48> D_00220F50 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_00221020 = { (const void*)(const u8*)&D_00217498, 0x67, 0x1, 0x570, {
+extern const ClassDescriptor<48> D_00221020 = { &D_00217498, 0x67, 0x1, 0x570, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3537,7 +3363,7 @@ extern const ClassDesc_217418<48> D_00221020 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_00221140 = { (const void*)(const u8*)&D_00217498, 0x6A, 0x1, 0x300, {
+extern const ClassDescriptor<48> D_00221140 = { &D_00217498, 0x6A, 0x1, 0x300, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3551,7 +3377,7 @@ extern const ClassDesc_217418<48> D_00221140 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_00221210 = { (const void*)(const u8*)&D_00217498, 0x69, 0x1, 0x350, {
+extern const ClassDescriptor<48> D_00221210 = { &D_00217498, 0x69, 0x1, 0x350, {
     (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3565,7 +3391,7 @@ extern const ClassDesc_217418<48> D_00221210 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<48> D_002213D0 = { (const void*)(const u8*)&D_00217498, 0x6B, 0x1, 0x6E0, {
+extern const ClassDescriptor<48> D_002213D0 = { &D_00217498, 0x6B, 0x1, 0x6E0, {
     (Fn_Table)func_0012B6B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
     (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
@@ -3579,7 +3405,7 @@ extern const ClassDesc_217418<48> D_002213D0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
     (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
 } };
-extern const ClassDesc_217418<28> D_002214A0 = { (const void*)(const u8*)&D_00217418, 0x6C, 0x0, 0x2360, {
+extern const ClassDescriptor<28> D_002214A0 = { &D_00217418, 0x6C, 0x0, 0x2360, {
     (Fn_Table)func_001DB4C8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001DCEA0, 0,
@@ -3588,7 +3414,7 @@ extern const ClassDesc_217418<28> D_002214A0 = { (const void*)(const u8*)&D_0021
     0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
     (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
 } };
-extern const ClassDesc_217418<28> D_00221520 = { (const void*)(const u8*)&D_00217418, 0x6D, 0x0, 0x590, {
+extern const ClassDescriptor<28> D_00221520 = { &D_00217418, 0x6D, 0x0, 0x590, {
     (Fn_Table)func_00143648, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
     (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
     (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
@@ -3600,8 +3426,9 @@ extern const ClassDesc_217418<28> D_00221520 = { (const void*)(const u8*)&D_0021
 
 // The table of (a, b) pairs func_001BE4A8 (001BC000.cpp) and func_001C0070 (001C0000.cpp) index by id;
 // the latter reads it from its second word (D_00245024).
-struct Ent_1BFAF8 { s32 a; s32 b; };
-extern const Ent_1BFAF8 D_00245020[771] = {
+// g_soundEntries: each sound's bank and its index in the bank (func_001BE4A8 reads them).
+struct SoundEntry { s32 bank; s32 index; };
+extern const SoundEntry D_00245020[771] = {
     { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 }, { 0, 5 }, { 0, 6 }, { 0, 7 },
     { 0, 8 }, { 0, 9 }, { 0, 10 }, { 0, 11 }, { 0, 12 }, { 0, 13 }, { 0, 14 }, { 0, 15 },
     { 0, 16 }, { 0, 17 }, { 0, 18 }, { 0, 19 }, { 0, 20 }, { 0, 21 }, { 0, 22 }, { 0, 23 },
@@ -3701,25 +3528,6 @@ extern const Ent_1BFAF8 D_00245020[771] = {
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 
-// Globals typed by worker dv02, from retail's bytes and their readers.
-
-// Globals typed by worker dv06, from retail's bytes and their readers.
-struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
-struct VEnt_0024A220 { s32 delta; void (*fn)(); };
-struct Vec2_24A210 { f32 x; f32 y; };
-void func_00152E18();
-void func_0015C2E8();
-void func_0015C3C0();
-void func_0015C930();
-void func_0015CA38();
-void func_0015CA60();
-void func_0015CB88();
-void func_0015CC80();
-void func_0015CD18();
-void func_0015CF70();
-void func_0015D4E0();
-void func_001FBDF8();
-
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const char D_0024A2D0[8] = "Splash";
 extern const char D_0024A2D8[16] = "Paris, France";
@@ -3768,31 +3576,10 @@ extern const char D_0024A660[24] = "A Temporary Truce";
 extern const char D_0024A678[16] = "Sinking Peril";
 extern const char D_0024A688[24] = "A Strange Reunion";
 
-// Globals typed by worker dv07, from retail's bytes and their readers.
-
-// Globals typed by worker dv08, from retail's bytes and their readers.
-struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
-void func_001FEF00();
-void func_001FEFC0();
-void func_001FF008();
-void func_002005A0();
-void func_002005E8();
-void func_00200638();
-void func_00200680();
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
 extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
-
-// Globals typed by worker dv03, from retail's bytes and their readers.
-extern const u8 D_0026A0E0[];
-extern const u8 D_0026A0E8[];
-extern const u8 D_0026A0F0[];
-extern const u8 D_0026A0F8[];
-extern const u8 D_0026A100[];
-extern const u8 D_0026A108[];
-extern const u8 D_0026A110[];
-
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
 extern const u8 D_002197B8[];
@@ -3829,7 +3616,6 @@ extern const char D_0024E0A8[];
 extern const char D_0024E0C8[];
 extern const char D_0024E0F8[];
 extern const char D_0024E118[];
-extern const u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
 extern const void* const D_00247448[149] = {
     &D_00217410,
     &D_00217418,
@@ -4018,8 +3804,7 @@ extern const u32 D_002476A0[256] = {
 extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
 extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
 // Moved from 0016C000.cpp when the player's file (player.cpp) took its functions.
-struct Slot_2482D8 { u32 w[8]; };
-extern const Slot_2482D8 D_002482D8[7] = {
+extern const KeyRecord D_002482D8[7] = {
     {0x239C1F4B, 0x4F1B6BCE, 0x332880C9, 0xDC1FC810, 0xB3EF7189, 0x239FB500, 0x332882F6, 0x4F1B486E},
     {0x674A1AEF, 0xEAAAB4AD, 0xCE2EF724, 0xB0B61237, 0x30E7A079, 0x67448204, 0xCE2EF564, 0xEAAA8C7D},
     {0x9FFD39A4, 0x92C0B086, 0x1904453E, 0x13763226, 0x52A098D3, 0x9FFD0941, 0x1904477F, 0x92C08E66},
@@ -4039,9 +3824,6 @@ extern const Vec02 D_00248D20 = { 0.0f, 0.0f, 1.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 
-// Globals typed by worker dv01, from retail's bytes and their readers.
-struct Rec_263558 { s32 f0; s32 f4; s32 f8; };
-
 f32 D_00261CD4 = 500.0f;
 f32 D_00261CD8 = 800.0f;
 ThresholdRange D_00261D40[4] = {
@@ -4057,34 +3839,6 @@ GameProgress* D_002623C0 = &D_0027C220;
 G27C230* D_002623C4 = D_0027C230;
 G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
-
-// Globals typed by worker dz06, from retail's bytes and their readers.
-// word
-// word flag
-// word
-// word
-// word flag
-// word flag
-// word
-
-// Globals typed by worker dz07, from retail's bytes and their readers.
-
-// size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
-// size: s32 compared with 1/2 in 00148000 and 00194000
-// size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
-// size: s32 state compared/assigned in 001EC000
-
-// Globals typed by worker dz05, from retail's bytes and their readers.
-// size: lw at offset 0 only, a 4-byte scalar of its own label
-extern s32 D_00270454;
-// size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
-extern void* D_002704F4;
-// size: lw at offset 0 compared with 1, 4-byte label
-extern s32 D_00270518;
-// size: lw at offset 0 compared with a count, 4-byte label
-extern s32 D_002726AC;
-// size: lw at offset 0 compared with a count, 4-byte label
-extern s32 D_0027292C;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
@@ -4127,70 +3881,6 @@ RenderFrame D_00262320[2] = {};
 // size: pointer (lw/sw), 4-byte label
 void* D_002623B4 = 0;
 
-// Globals typed by worker dz04, from retail's bytes and their readers.
-// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
-// size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
-extern s32 D_0026EC58;
-// size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
-extern s32 D_0026EC60;
-// size: one pointer (lw, passed to func_00150790), label 8 bytes with 4 of padding before the 8-aligned D_0026F808
-extern u8* D_0026F800;
-// size: one s32 (lw, bnez), label is 4 bytes
-extern s32 D_0026FA64;
-
-// Globals typed by worker dz01, from retail's bytes and their readers.
-
-// The span func_00130F48 fills: head, then len/halfw/lo/mid/hi/p/q, padded to 16 by the quad's alignment.
-
-// size: sizeof(Span_261280) == 0x30; func_00130F48 fills it (n = 0x18) and func_00131000 reads it
-// size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
-// size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
-// size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
-
-// Globals typed by worker dz03, from retail's bytes and their readers.
-// A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
-// Three words set by func_00168D68.
-// Record func_0016C360 clears (0x1C bytes) and fills.
-struct Pair_262C70 { f32 lo; f32 hi; };
-// The input stream func_0016E1A0 clears (0xC4 bytes).
-struct Obj_262C70 {
-    u8 pad00[4];
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    f32 f1C;
-    s32 f20;
-    u8 pad24[0x2C];
-    s32 f50;
-    Pair_262C70 a54[4];
-    u8 pad74[0x10];
-    s32 f84;
-    Pair_262C70 a88[4];
-    s16 fA8;
-    u8 padAA[0x12];
-    void* fBC;
-    s32 fC0;
-};
-struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
-
-// size: pointer, word accesses only
-// size: s32, word load/store only
-// size: pointer, word store of D_002622CC
-// size: s32, word accesses only
-// size: func_00184DE8 fills it while index < 0x100 (sltiu 0x100, step 4)
-// size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
-// size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
-// size: s32 flag, word load/store only
-// size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
-// size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
-extern BackgroundJob D_00269990;
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 extern const LevelEntry D_00248748[33] = {
@@ -4229,142 +3919,5 @@ extern const LevelEntry D_00248748[33] = {
     { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, D_0024E118 },
 };
 
-// Globals typed by worker dz08, from retail's bytes and their readers.
-struct Obj_26EC70 {
-    const void* vt;
-    u8 pad04[0x25C];
-};
-
-// size: func_0014ABD0 builds 4 embedded objects with this vtable (D_00218330) at stride 0x260
-extern Obj_26EC70 D_0026EC70;
-
-// Globals typed by worker dz201, from retail's bytes and their readers.
-struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
-
-// 16 bytes, a pointer word read whole, rest padding
-// 16 bytes, address passed (byte array in readers)
-// 208 bytes, address only
-// 16 bytes, byte array in readers
-// 208 bytes, address only
-// 8 bytes, one word read whole
-// 24 bytes, byte array in readers
-// 24 bytes, byte array in readers
-
-// Globals typed by worker dz202, from retail's bytes and their readers.
-
-// only address/offsets used by readers; size to next label
-extern u8 D_0026C6C8[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026C948[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026CBC8[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026CE48[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026D0C8[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026D348[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026D5C8[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026D848[612];
-// only address/offsets used by readers; size to next label
-// only address/offsets used by readers; size to next label
-extern u8 D_0026DAC8[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026DD48[640];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026DFC8[608];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026E248[664];
-// only address/offsets used by readers; size to next label
-extern u8 D_0026E4E0[612];
-
-// Globals typed by worker dz203, from retail's bytes and their readers.
-struct Obj_26EED0 { u8* head; u8 pad[612]; };
-struct Obj_26F388 { s32 head; u8 pad[532]; };
-struct Obj_26FA68 { void* head; u8 pad[36]; };
-struct Obj_2701B8 { s32 head; u8 pad[8]; };
-
-// object passed by address; size to next label
-extern u8 D_0026E760[664];
-
-// object read at offsets by several readers; size to next label
-extern u8 D_0026E9F8[608];
-
-// pointer stored at +0; size to next label
-extern Obj_26EED0 D_0026EED0;
-
-// object with vtable, size to next label
-extern u8 D_0026F138[592];
-
-// word read at +0; size to next label
-extern Obj_26F388 D_0026F388;
-
-// object; size to next label
-extern u8 D_0026F5A0[608];
-
-// object; size to next label
-extern u8 D_0026F808[604];
-
-// pointer read at +0; size to next label
-extern Obj_26FA68 D_0026FA68;
-
-// object with vtable; size to next label
-extern u8 D_0026FA90[608];
-
-// size: s32, the current placed object (g_currentPlacedObject), 4 bytes before the 16-aligned next label
-extern s32 D_0026FCF0;
-
-// object; size to next label
-extern u8 D_0026FD00[616];
-
-// object; size to next label
-extern u8 D_0026FF68[592];
-
-// word read at +0; size to next label
-extern Obj_2701B8 D_002701B8;
-
-// object; size to next label
-extern u8 D_002701F8[592];
-
-// Globals typed by worker dz204, from retail's bytes and their readers.
-extern s32 D_00270448[3]; // 12 bytes to next label; word read whole at 0, rest padding
-extern s32 D_00270458[39]; // 156 bytes; state word read whole at 0, word array to next label
-extern u8 D_00270650[624]; // 624 bytes; accessed by offsets (0x284,0x288), byte buffer
-extern u8 D_002708C0[32]; // 32 bytes; only address used
-extern u8 D_002708E0[592]; // 592 bytes; object passed by address
-extern s32 D_00270B30[9]; // 36 bytes; word read whole at 0
-extern u8 D_00271558[592]; // 592 bytes; object passed by address
-extern s32 D_002717A8[9]; // 36 bytes; word read whole at 0
-extern u8 D_002721D0[572]; // 572 bytes; engine object used by address
-extern s32 D_00272420[4]; // 16 bytes; word read whole at 0
-extern u8 D_00272430[636]; // 636 bytes; block cast to structs by address
-extern u8 D_002726B0[636]; // 636 bytes; block cast to structs by address
-extern u8 D_00272930[572]; // 572 bytes; object with vt at 0, used by address
-
-// Globals typed by worker dz205, from retail's bytes and their readers.
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_00272B98[624];
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_00272E08[3048];
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_002739F0[608];
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_00273C50[608];
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_00273EB0[616];
-// readers pass only its address; byte buffer, size to next label
-extern u8 D_00274118[648];
-// word read whole / address only, 4 bytes to next label
-// readers pass only its address; byte buffer, size to next label
-// word read whole / address only, 4 bytes to next label
-// word read whole / address only, 4 bytes to next label
-
-
 // Defined in the old 001EC000.cpp; outside file_1E88D0.cpp's data.
 void* D_002505C0[6];
-
-
-// Outside src/main/state_notifier.cpp's and src/main/file_149398.cpp's data; read by func_00148718.
-extern void* D_0026EC68;
