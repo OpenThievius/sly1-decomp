@@ -456,7 +456,9 @@
 #define FindScriptTrackPlayer                      func_001014C8
 #define CopyScriptPlacedObjectFrame                func_00101568
 #define SetScriptFollowObjects                     func_00101620
+#define SetScriptColliderFlagNibble36              func_001016F0
 #define TestScriptPointInsideCollider              func_001017A0
+#define SetScriptTransformObjectKeyedValue         func_00101860
 #define PlaceScriptAtArrivalPoint                  func_00101950
 #define StartScriptObjectSubGroupFinish            func_001019F0
 #define CreateScriptAnimationPlayer                func_00101A90
@@ -521,12 +523,14 @@
 #define PushScriptCameraStackValue                 func_00104710
 #define PopScriptCameraStackValue                  func_001047C0
 #define PeekScriptCameraStackValue                 func_00104860
+#define SetScriptCameraTargetControllerTuning      func_00104900
 #define RecordScriptCameraTimestamp                func_001049D8
 #define RequestScriptPlainCameraSnap               func_00104A78
 #define TestScriptSphereInCameraView               func_00104B18
 #define PushScriptObjectCameraController           func_00104C00
 #define RemoveScriptObjectCameraController         func_00104CA0
 #define ClearScriptTrackedNodes                    func_00104D40
+#define CollectScriptNumberedItem                  func_00104DE0
 #define SetScriptAgentStateClipId                  func_00104E80
 #define SetScriptAgentStateClip                    func_00104F50
 #define GetScriptAgentStateClip                    func_00105020
@@ -539,9 +543,12 @@
 #define SetScriptAgentMainClip                     func_001055A8
 #define SetScriptCompanionAgentLookId              func_00105658
 #define StartScriptChildGroupDelay                 func_00105728
+#define StepScriptChildGroupObject                 func_001057D8
 #define PlaceScriptPlayerOnGround                  func_00105878
 #define ReleaseScriptPlayerToState2                func_00105960
+#define IgnoreScriptPlayerFlag                     func_00105A00
 #define SetScriptPlayerPath                        func_00105AB0
+#define SwitchScriptPlayerState11                  func_00105B60
 #define SeekScriptObjects105Animations             func_00105C10
 #define SwapInScriptPlayerStandIn                  func_00105CC0
 #define QueueScriptPlayerWalkerActivation          func_00105D60
@@ -561,7 +568,10 @@
 #define DisableScriptObjectPoolEntry               func_001067A0
 #define SetScriptObjectPoolEntryCount              func_00106850
 #define ChooseScriptObjectPoolItem                 func_00106920
+#define ReleaseScriptObjectPoolItem                func_001069C0
 #define ResetScriptPlacementRecord                 func_00106A70
+#define ResetScriptObjectPoolReleaseRecord         func_00106B10
+#define ClearScriptObjectPoolHeadingRecord         func_00106BB0
 #define SetScriptStepSequenceModeOne               func_00106C50
 #define SetScriptStepSequenceCameraMode            func_00106CF0
 #define AddScriptSequenceExtraTarget               func_00106D90
@@ -578,7 +588,9 @@
 #define AddScriptPathFollowerActiveEntry           func_00107570
 #define ResetScriptPathFollower                    func_00107678
 #define TestScriptPointAgainstObjectShape          func_00107718
+#define TestScriptPointInsideFaceTreeObject        func_001077D8
 #define AddScriptSeekingAgentObject                func_00107898
+#define StartScriptC24ObjectPath                   func_00107948
 #define ResetScriptEntryQueue                      func_00107A10
 #define BindScriptEntryQueueToObject               func_00107AB0
 #define UnbindScriptEntryQueue                     func_00107B60
@@ -611,7 +623,9 @@
 #define AppendScriptTimelineKind4Entry             func_00108F38
 #define AppendScriptTimelineKind5Entry             func_00109000
 #define SetScriptGaugeBarAgentValues               func_001090C8
+#define SendScriptHitCountColliderRequest          func_001091A8
 #define AddScriptHitCountColliderId                func_00109258
+#define AddScriptHitCountColliderItem              func_00109308
 #define TakeScriptCountedColliderTouch             func_001093B8
 #define FillObjectPropertyTable                    func_00109488
 #define AddScriptValues                            func_00112698
@@ -833,6 +847,9 @@
 #define NewKeyedList                               func_0011BF30
 #define InitScriptValuePools                       func_0011BF70
 #define ShutDownScriptValuePools                   func_0011C040
+#define ConstructValuePools                        func_0011C0A8
+#define CallValuePoolsConstructor                  func_0011C0E8
+#define CallValuePoolsDestructor                   func_0011C108
 #define InitEntryPool                              func_0011C128
 #define ShutDownEntryPool                          func_0011C1D0
 #define PopPoolFreeEntry                           func_0011C1D8
@@ -3401,7 +3418,12 @@
 #define GetAnchorPreset                            func_001BB028
 #define SetColliderTurnAnchorPreset                func_001BB058
 #define SetColliderMoveAnchorPreset                func_001BB0C8
+#define SetColliderFlagNibble32                    func_001BB138
+#define SetColliderFlagBit47                       func_001BB168
+#define SetColliderFlagBit48                       func_001BB1A0
+#define SetColliderFlagNibble36                    func_001BB1E0
 #define SendColliderNotification                   func_001BB210
+#define FindColliderFloorContact                   func_001BB290
 #define SetColliderGravityDisabled                 func_001BB378
 #define SetColliderTreeContactsDropped             func_001BB3B0
 #define SetColliderContactsDropped                 func_001BB400
@@ -3420,6 +3442,8 @@
 #define CopyColliderMeshesInFrame                  func_001BC368
 #define ExtractContactsByPartMode                  func_001BC4D8
 #define IsPointInsideCollider                      func_001BC670
+#define SetColliderFlagBit52                       func_001BC710
+#define GetColliderFlagBit52                       func_001BC748
 #define NumberColliderParts                        func_001BC760
 #define ComputeColliderPointVelocity               func_001BC7F8
 #define ComputeColliderImpulseResponse             func_001BC828
@@ -3465,6 +3489,7 @@
 #define ReleaseSoundLevel                          func_001BF048
 #define RemoveSoundLevelAndRecompute               func_001BF0D8
 #define InitSoundSystem                            func_001BF130
+#define IsSoundEmitterUpdateDisabled               func_001BF1F0
 #define ComputeSoundVolumeAndPan                   func_001BF200
 #define MeasureCameraWeightedDistance              func_001BF2E0
 #define MeasureListenerDistance                    func_001BF398
@@ -3532,6 +3557,8 @@
 #define StoreScriptArgumentsVa                     func_001C23B0
 #define StartToSprChain                            func_001C2430
 #define StartFromSprChain                          func_001C25B0
+#define ConstructScratchpadTransfers               func_001C27B0
+#define CallScratchpadTransfersConstructor         func_001C29C8
 #define ResetTrailRing                             func_001C29E8
 #define AddTrailPoint                              func_001C29F8
 #define QueueTrailRibbonDraw                       func_001C3028
