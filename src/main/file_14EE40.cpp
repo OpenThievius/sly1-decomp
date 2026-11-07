@@ -2547,3 +2547,34 @@ void func_00154880(s32 count, u8* data, f32* values, f32* out)
         out[i] = *(f32*)(loc.items + i * 0x60 + 0x34);
     PopBackMemoryMark();
 }
+
+// The file's .data, 0x261CC8 to 0x261F70, in retail's order: the globals its functions read
+// (D_00261EF0 and the DMA channel words are read by many files, which keep them extern).
+ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
+f32 D_00261CD4 = 500.0f;
+f32 D_00261CD8 = 800.0f;
+ObjectLink D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
+u16 D_00261D08[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
+u8 D_00261D28[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
+// size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
+s32 D_00261D38 = 0;
+ThresholdRange D_00261D40[4] = {
+    { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
+};
+ScatterTable D_00261D70[2] = {
+    { 0, 1.0f, 0.0f, 0.6f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, D_00261D40, 0 },
+    { 0, 0.5f, 0.0f, 0.2f, 0.1f, -0.4f, -0.4f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, D_00261D40, 0 },
+};
+ScatterTable D_00261E30 = { 0, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f, 0.0f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, D_00261D40, 0 };
+ScatterTable D_00261E90 = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, D_00261D40, 0 };
+// size: func_00151A68 clears 0x24 bytes of it
+ScatterController D_00261EF0 = {};
+// size: semaphore id from func_002027A0 (lw/sw), 4-byte label
+u32 D_00261F14 = 0;
+u32 D_00261F18 = 0;
+u32 D_00261F1C = 0;
+u32 D_00261F20 = 0;
+// The fifth channel word's label runs 12 bytes to D_00261F30, more than the word its readers use
+// and more than the file's 8-byte alignment pads: included from the disassembly.
+INCLUDE_DATA(D_00261F24);
+f32 D_00261F30[16] = {2.0f,0,0,0,0,2.0f,0,0,0,0,0,0,-1.0f,-1.0f,0,1.0f};

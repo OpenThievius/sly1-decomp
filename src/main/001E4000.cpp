@@ -3824,11 +3824,6 @@ extern const Vec02 D_00248D20 = { 0.0f, 0.0f, 1.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 
-f32 D_00261CD4 = 500.0f;
-f32 D_00261CD8 = 800.0f;
-ThresholdRange D_00261D40[4] = {
-    { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
-};
 f32 D_00262178[2] = { 0.5f, 2.0f };
 f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
 f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
@@ -3841,15 +3836,6 @@ G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
-// size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
-s32 D_00261D38 = 0;
-// size: func_00151A68 clears 0x24 bytes of it
-ScatterController D_00261EF0 = {};
-// size: semaphore id from func_002027A0 (lw/sw), 4-byte label
-s32 D_00261F14 = 0;
-s32 D_00261F18 = 0;
-s32 D_00261F1C = 0;
-s32 D_00261F20 = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 D_00261F70 = 0;
 // size: s32 (lw/sw), 4-byte label

@@ -3,10 +3,6 @@
 #include "object_link.h"
 #include "path_curve.h"
 
-ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
-
-ObjectLink D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
-
 // The types of PathCurveVt's slots, for the tables at the end of this file.
 typedef void (*PathLoad)(PathCurve* self, void* stream);
 typedef void (*PathM01)(PathCurve* self, s32 a1, s32 a2);
