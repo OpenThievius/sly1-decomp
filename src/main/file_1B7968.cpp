@@ -5,7 +5,7 @@
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "collider.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c54.h"
 #include "world.h"
 #include "attachment.h"
@@ -28,7 +28,7 @@ f32 func_00205778(f32 a, f32 b);
 extern f32 D_0026185C[];
 s32 func_00182F40(Collider* e, void* b);
 void func_001BF048(void* p);
-void func_001837E0(C88* host, s32 a, s32 b, void** args);
+void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
 s32 func_00137BE0(void* a);
 void* func_0018D5C0(s32 size);
 struct Node_1B5EC0 { Node_1B5EC0* next; };
@@ -67,7 +67,7 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_00124FC0(void* self);
 void* func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
 void func_00152470(List01* list, StateWalker* item);
-void func_001837E0(C88* self, s32 a, s32 b, void* c);
+void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
 void func_0018D608(void);
 void func_0018D6F0(void);
 void* func_0018D658(u32 bytes);

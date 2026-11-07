@@ -2762,3 +2762,11 @@ D_00274518	g_activeImageMask	the image mask SwitchActiveImageMask last sent; it 
 D_00274520	g_maskImageUploads	six results of UploadImagesByMask, one per mask bit 0 to 5 with 0x40000000, kept by LoadScreenResources
 D_00274538	g_maskedImagesPacket	what BuildMaskedImagesPacket returns for mask 0x20000000 at the end of LoadScreenResources
 D_00274544	g_lastPendingCursor	the first cursor SetCursorFrame or SetCursorCoords put in the pending list, so the list's last; a cursor is pushed only when its next link is empty and it is not this one
+func_001B5CD8	StartCameraPositionedObject	slot 16 (start) of class 0x54: StartPlacedObject, then clears flag bits 40 and 41 and sets bit 40
+func_001B5D28	MoveObjectToCamera	slot 17 (update) of class 0x54: UpdatePlacedObject, then sets its position (slot 29) to the camera's vector at +0x40, keeping its own height unless +0x2D0 is set
+func_001B5F50	LoadStateGraph	slot 10 (load) of class 0x88: reads the graph's state table (keys, FindStateEntryIndexOrZero) and its edges with their vectors from the stream onto front memory
+func_001B61A8	StartStateGraph	slot 16 (start) of class 0x88: StartObject, and when the graph is armed (+0x44) queues SpawnInitialStateWalker on the world
+func_001B6568	GetStateWalkerTargetKey	stores the key of the walker's target state (+0x30) in the graph's state table, or -1 for none
+func_001B6598	GetStateWalkerCurrentKey	stores the key of the walker's current state (+0x28) in the graph's state table, or -1 for none
+func_001B65C8	GetStateWalkerNextKey	stores the key of the state the walker is moving to (+0x2C) in the graph's state table, or -1 for none
+func_001B65F8	SetStateWalkerSpeed	stores the walker's speed at +0x38 and tells the animation player at +0x24 when there is one (SetAnimationPlayerSpeed)

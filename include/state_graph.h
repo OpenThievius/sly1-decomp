@@ -3,21 +3,27 @@
 // no class under it: a graph of states (docs/DISC.md). Written for this project from what
 // retail's code does (config/us/classes.tsv). Its own methods are func_001B5F50 (slot 10, not
 // defined in C yet) and func_001B61A8 (slot 16).
-#ifndef C88_H
-#define C88_H
+#ifndef STATE_GRAPH_H
+#define STATE_GRAPH_H
 
 #include "base_object.h"
 
-struct C88 : BaseObject {
-    s32 f34;                // 0x34
-    void* f38;              // 0x38
+// An entry of the graph's state table: its key (func_001B63C0 looks one up) and a second word.
+struct StateEntry {
+    s32 key;                // 0x00
+    s32 extra;              // 0x04
+};
+
+struct StateGraph : BaseObject {
+    s32 f34;                // 0x34: the entries at 0x38
+    StateEntry* f38;        // 0x38: the state table
     u8 pad3C[0x44 - 0x3C];
     s32 armed;              // 0x44: nonzero once the graph has something to run
     u8 pad48[0x54 - 0x48];
 };
 
-typedef char check_C88[sizeof(C88) == 0x54 ? 1 : -1];
+typedef char check_StateGraph[sizeof(StateGraph) == 0x54 ? 1 : -1];
 
-void func_001B61A8(C88* self);                  // slot 16
+void func_001B61A8(StateGraph* self);                  // slot 16
 
 #endif

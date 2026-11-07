@@ -2199,12 +2199,16 @@
 #define CopyVec3                                   func_001B5588
 #define CopyVec2                                   func_001B55A8
 #define ConvertStringToCharCodes                   func_001B5C40
+#define StartCameraPositionedObject                func_001B5CD8
+#define MoveObjectToCamera                         func_001B5D28
 #define BuildFreeList                              func_001B5D80
 #define InitSlotPool                               func_001B5DD0
 #define InitAlignedSlotPool                        func_001B5E30
 #define PopFreeSlot                                func_001B5EA0
 #define PopZeroedFreeSlot                          func_001B5EE0
 #define PushFreeSlot                               func_001B5F28
+#define LoadStateGraph                             func_001B5F50
+#define StartStateGraph                            func_001B61A8
 #define SpawnInitialStateWalker                    func_001B61F0
 #define CreateStateWalker                          func_001B6290
 #define FindListNodeByKey                          func_001B6388
@@ -2213,6 +2217,10 @@
 #define GetStateEntryKey                           func_001B6420
 #define DestroyStateWalker                         func_001B6438
 #define SetStateWalkerTarget                       func_001B64D8
+#define GetStateWalkerTargetKey                    func_001B6568
+#define GetStateWalkerCurrentKey                   func_001B6598
+#define GetStateWalkerNextKey                      func_001B65C8
+#define SetStateWalkerSpeed                        func_001B65F8
 #define TeleportStateWalker                        func_001B6628
 #define StartNextStateWalkerEdge                   func_001B66A0
 #define CommitStateWalkerArrival                   func_001B6C68

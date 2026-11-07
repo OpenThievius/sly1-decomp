@@ -19,7 +19,7 @@
 #include "script_value.h"
 #include "switched_collider.h"
 #include "collider.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c54.h"
 #include "attachment.h"
 #include "state_walker.h"

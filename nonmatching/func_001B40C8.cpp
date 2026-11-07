@@ -8,7 +8,7 @@
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "collider.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c54.h"
 #include "world.h"
 #include "attachment.h"
@@ -194,7 +194,7 @@ void func_001B5F28(Pool6C* list, Attachment* item)
     }
 }
 
-u32 func_001B6420(C88* a0, s32 a1)
+u32 func_001B6420(StateGraph* a0, s32 a1)
 {
     a1 = (a1 << 3) + (u32)a0->f38;
     return *(u32*)a1;
@@ -344,9 +344,9 @@ void func_001B6D78(Node_1B6D78* self, s32 a, s32 b)
 }
 
 struct Entry_1B6E28 { s32 value; s32 extra; };
-struct Node_1B6E28 { u8 pad[0x18]; C88* host; };
+struct Node_1B6E28 { u8 pad[0x18]; StateGraph* host; };
 
-void func_001837E0(C88* host, s32 a, s32 b, void** args);
+void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
 
 void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
 {
@@ -604,7 +604,7 @@ void func_00182C58(void* self);
 void func_001B61F0(void* self);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001B61A8(C88* self)
+void func_001B61A8(StateGraph* self)
 {
     func_00182C58(self);
     if (self->armed != 0) {
@@ -617,7 +617,7 @@ struct Pair_1B63C0 {
     s32 value_04;
 };
 
-s32 func_001B63C0(C88* self, s32 key)
+s32 func_001B63C0(StateGraph* self, s32 key)
 {
     s32 count = self->f34;
     if (count > 0) {
@@ -1322,7 +1322,7 @@ struct Node_1B64D8 {
     Flags_1B64D8* f34;
 };
 
-s32 func_001B63F8(C88* self, s32 key);
+s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6C68(Node_1B64D8* self);
 void func_0012E760(AnimationPlayer* obj);
 void func_001B66A0(Node_1B64D8* self);
@@ -1331,7 +1331,7 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
 {
     s32 v;
     if (key != -1) {
-        v = func_001B63F8((C88*)self->f18, key);
+        v = func_001B63F8((StateGraph*)self->f18, key);
     } else {
         v = -1;
     }
@@ -1355,12 +1355,12 @@ extern const u8 D_00217410[];
 
 void* func_001B5EE0(Pool6C* pool);
 void func_00152470(List01* list, StateWalker* item);
-s32 func_001B63F8(C88* self, s32 key);
+s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6E28(StateWalker* self, s32 a, s32 b);
 void func_001B66A0(StateWalker* self);
-void func_001837E0(C88* self, s32 a, s32 b, void* c);
+void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
 
-StateWalker* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
+StateWalker* func_001B6290(StateGraph* self, s32 a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)func_001B5EE0(&self->world->pool1B88);
     obj->f1C = a1;

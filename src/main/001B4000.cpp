@@ -5,7 +5,7 @@
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "collider.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c54.h"
 #include "world.h"
 #include "attachment.h"
