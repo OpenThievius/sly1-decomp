@@ -1453,9 +1453,105 @@ void SetOnOffObjectFrozen(OnOffObject* self, void* p)
 
 void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
 
-INCLUDE_ASM(func_001E2A00);
+typedef void (*OnOffShapeFn)(f32 angle, Arr63* obj, Vec02* out, Vec02* dir);
+void ComputePolarOffset(Vec02* out, f32 a, f32 b, f32 c);
+void BuildBasisFromXAndZHint(Vec02* dir, const Vec02* hint, Mat02* out);
 
-INCLUDE_ASM(func_001E2BF0);
+void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir)
+{
+    Vec02 a;
+    Vec02 b;
+    Mat02 m;
+    TransformPointBetweenFrames(0, self, eye, (FacePoint*)&a);
+    if (self->obj != 0) {
+        OnOffShapeFn fn = *(OnOffShapeFn*)(*(u8**)self->obj + 8);
+        if (fn != 0) {
+            fn(self->angle3A0, self->obj, &b, dir);
+        }
+        BuildBasisFromXAndZHint(dir, &g_unitZVector, &m);
+        Vu0::Q(*out) = Vu0::RotateTransposed(m, Vu0::Sub(Vu0::Q(a), Vu0::Q(b)));
+    } else if (self->f38C != 0) {
+        Vec02 p;
+        ComputePolarOffset(&p, self->angle3A0 / self->f410, self->f410, 0.0f);
+        Vu0::Q(b) = Vu0::Add(Vu0::Q(self->v400), Vu0::Q(p));
+        u128 side = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(p));
+        Vu0::Q(*dir) = Vu0::DivX(side, Vu0::Length(side));
+        BuildBasisFromXAndZHint(dir, &g_unitZVector, &m);
+        Vu0::Q(*out) = Vu0::RotateTransposed(m, Vu0::Sub(Vu0::Q(a), Vu0::Q(b)));
+    } else {
+        *dir = g_unitXVector;
+        Vu0::Q(*out) = Vu0::RotateTransposed(*(Mat02*)((u8*)self + 0x3B0), Vu0::Sub(Vu0::Q(a), Vu0::Q(*(Vec02*)((u8*)self + 0x3E0))));
+    }
+}
+
+f32 FloatRemainder(f32 x, f32 y);
+void TransformPointBetweenFrames(OnOffObject* from, void* to, void* in, FacePoint* out);
+
+void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out)
+{
+    Vec02 v;
+    Vec02 dir;
+    Vec02 t;
+    Mat02 m;
+    Vec02 r;
+    s32 i = 2;
+    f32* o = &v.x;
+    do {
+        f32 p = poly[0] + x[0] * (poly[1] + x[0] * poly[2]);
+        f32 lo = range[0];
+        f32 hi = range[1];
+        if (p < lo) {
+            p = lo;
+        } else if (hi < p) {
+            p = hi;
+        }
+        *o++ = p;
+        x++;
+        range += 2;
+        poly += 4;
+    } while (--i >= 0);
+    if (mode == 2) {
+        v.x = -v.x;
+    }
+    if (self->f380 != 0) {
+        ComputePolarOffset(&v, v.x, v.y, v.z);
+    }
+    if (self->obj != 0) {
+        f32 a;
+        if (mode != 1) {
+            a = angle - offset;
+        } else {
+            a = angle + offset;
+        }
+        OnOffShapeFn fn = *(OnOffShapeFn*)(*(u8**)self->obj + 8);
+        if (fn != 0) {
+            fn(a, self->obj, &t, &dir);
+        }
+        BuildBasisFromXAndZHint(&dir, &g_unitZVector, &m);
+        Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(v));
+    } else if (self->f38C != 0) {
+        f32 period = self->f410 * 6.2831855f;
+        f32 a;
+        if (mode != 1) {
+            a = angle - offset;
+        } else {
+            a = angle + offset;
+        }
+        f32 wrapped = FloatRemainder(a, period);
+        ComputePolarOffset(&t, wrapped / self->f410, self->f410, 0.0f);
+        u128 side = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(t));
+        Vu0::Q(t) = Vu0::Add(Vu0::Q(t), Vu0::Q(self->v400));
+        Vu0::Q(dir) = Vu0::DivX(side, Vu0::Length(side));
+        BuildBasisFromXAndZHint(&dir, &g_unitZVector, &m);
+        Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(v));
+    } else {
+        v.x += offset;
+        t = *(Vec02*)((u8*)self + 0x3E0);
+        Vu0::Q(r) = Vu0::Rotate(*(Mat02*)((u8*)self + 0x3B0), Vu0::Q(v));
+    }
+    Vu0::Q(t) = Vu0::Add(Vu0::Q(t), Vu0::Q(r));
+    TransformPointBetweenFrames(self, 0, &t, (FacePoint*)out);
+}
 
 // The five quadwords func_00143418 gives for a camera and its target: the placement.
 struct CameraPlacement { Vec02 q[5]; };
