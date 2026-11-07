@@ -6,6 +6,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -2294,40 +2295,6 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02
 }
 
 Mat02 MultiplyByTransposedMatrix3x3(void* m, Mat02* in);
-
-static inline void MulRotationRows(Mat02* out, const Mat02& a, const Mat02& b)
-{
-    const u128* p = (const u128*)&a;
-    u128 a0 = p[0];
-    u128 a1 = p[1];
-    u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
-    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
-    r.r[0] = x;
-    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
-    r.r[1] = y;
-    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
-    *out = r;
-}
-
-static inline void MulRotationRowsX(Mat02* out, const Mat02& a, const Mat02& b)
-{
-    const u128* p = (const u128*)&a;
-    u128 a0 = p[0];
-    u128 a1 = p[1];
-    u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
-    Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
-    Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
-    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
-    *out = r;
-}
 
 // The rotation in from's frame (the world's for none) in to's frame: through from's rotation,
 // then the product with the transpose of to's.

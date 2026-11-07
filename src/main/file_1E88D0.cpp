@@ -2976,7 +2976,47 @@ void RebuildAttachedSet(AttachedSet* self)
     }
 }
 
-INCLUDE_ASM(func_001EF5B8);
+s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+
+f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
+{
+    Vec02 from;
+    Vec02 to;
+    ColliderSpan spans[16];
+    if (self->f278 != 0) {
+        ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), &o->v140, 0, &from, 0, 0);
+        Vu0::Q(from) = Vu0::Q(to) = Vu0::MulXSum(Vu0::Q(o->v140), Vu0::Scalar(2.0f), Vu0::Q(from), Vu0::Scalar(-1.0f));
+    } else {
+        from = to = o->v140;
+    }
+    if (o == g_player) {
+        from.z = from.z + -75.0f;
+        if (o->f690 != 0) {
+            from.z = o->v6A0.z >? from.z;
+        }
+    } else {
+        from.z = from.z + (*(f32*)((u8*)o + 0x428) - o->v140.z);
+    }
+    to.z = to.z + (*(f32*)((u8*)o + 0x438) - o->v140.z);
+    s32 n = CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans);
+    if (n == 0) {
+        if (hitOut != 0) {
+            *hitOut = g_unitZVector;
+        }
+        return 0.0f;
+    }
+    if (nOut != 0) {
+        *nOut = *(Vec02*)&spans[0].q[1];
+    }
+    if (hitOut != 0) {
+        if (*(Vec02**)((u8*)&spans[0] + 0x54) != 0) {
+            *hitOut = **(Vec02**)((u8*)&spans[0] + 0x54);
+        } else {
+            *hitOut = g_unitZVector;
+        }
+    }
+    return spans[0].time[1] - spans[0].time[0];
+}
 
 INCLUDE_ASM(func_001EF768);
 

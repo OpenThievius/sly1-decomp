@@ -29,7 +29,7 @@ struct PathCurveObject : BaseObject {
 // 0x398 it clears.
 struct TargetCurve : PathCurveObject {
     PathCurveKeptBits keep; // 0x38
-    u8 pad40[0x44 - 0x40];
+    s32 mode40;             // 0x40: 0 or 1: how far the placement stands off (func_00169E20)
     s32 targetId;           // 0x44: -1 for none
     void* target;           // 0x48: the object targetId names
     s32 f4C;                // 0x4C: 1 at setup

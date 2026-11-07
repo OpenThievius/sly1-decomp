@@ -201,7 +201,6 @@ func_001626A0	001626A0	4	remnant	stripped-function leftover
 func_00167F10	00167F10	544	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001682C0	001682C0	244	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_00168698	00168698	80	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
-func_00169E20	00169E20	416	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0016A910	0016A910	260	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0016C440	0016C440	12	remnant	stripped-function leftover
 func_0016C4D8	0016C4D8	12	remnant	stripped-function leftover
@@ -564,7 +563,6 @@ func_001EE360	001EE360	4	remnant	stripped-function leftover
 func_001EEA40	001EEA40	284	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EEBB0	001EEBB0	172	handwritten	VU0 macro instruction
 func_001EEF90	001EEF90	1044	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001EF5B8	001EF5B8	428	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EF768	001EF768	156	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
 func_001F0218	001F0218	4	remnant	stripped-function leftover

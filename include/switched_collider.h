@@ -59,7 +59,8 @@ struct Part07 {
     u8 pad54[0x60 - 0x54];
     Vec02 v60;              // 0x60: the two points func_001C4790 queries a collider's spans between
     Vec02 v70;              // 0x70
-    u8 pad80[0x90 - 0x80];
+    f32 f80;                // 0x80: the distance func_001C4618 measures between the two points
+    u8 pad84[0x90 - 0x84];
     ColliderSpan span;      // 0x90: the nearest span found (func_001C4790)
 };
 
