@@ -34,7 +34,7 @@ struct EntryQueue : BaseObject {
     void* f48;              // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
     s32 f4C;                // 0x4C
     void* f50;              // 0x50
-    u8 pad54[0x58 - 0x54];
+    void* f54;              // 0x54: the object func_0017BB78 aims the player at
     OnOffObject* f58;       // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)
     s32 f5C;                // 0x5C: f58 was not attached, so it was put in its parent's list
     u8 pad60[0x68 - 0x60];

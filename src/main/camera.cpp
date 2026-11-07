@@ -8,6 +8,8 @@
 #include "fpu.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "ramp_profile.h"
+#include "placed_object.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
 extern void SetCameraFogStrength(void*);
@@ -342,9 +344,9 @@ INCLUDE_DATA(D_00261910);
 INCLUDE_DATA(D_00261920);
 INCLUDE_DATA(D_00261924);
 INCLUDE_DATA(D_00261928);
-INCLUDE_DATA(D_0026194C);
+f32 D_0026194C = 250.0f;
 INCLUDE_DATA(D_00261950);
-INCLUDE_DATA(D_00261958);
+RampProfile D_00261958 = { 2500.0f, 0.0f, 0.25f, 0.0f };
 INCLUDE_DATA(D_00261970);
 INCLUDE_DATA(D_00261980);
 void* g_camera = 0;
@@ -657,7 +659,31 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
 
 ASM_FUNC(func_00144008);
 
-INCLUDE_ASM(func_00144128);
+// The camera's frame as func_00144128 reads it: rows at 0x80, a position at 0x40, two scales.
+struct Frame_00144128 {
+    u8 pad0[0x40];
+    Vec02 pos;              // 0x40
+    u8 pad50[0x80 - 0x50];
+    Mat02 rot;              // 0x80
+    u8 padB0[0x1F0 - 0xB0];
+    f32 scaleY;             // 0x1F0
+    f32 scaleZ;             // 0x1F4
+};
+
+void func_00144128(Frame_00144128* self, f32* a, Vec02* out)
+{
+    Vec02 v;
+    v.x = a[2];
+    v.y = -a[0];
+    v.z = a[1];
+    if (1e-4f < a[2]) {
+        v.y = -a[0] * a[2];
+        v.z = a[1] * a[2];
+    }
+    v.y = v.y * self->scaleY;
+    v.z = v.z * self->scaleZ;
+    Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(self->rot, Vu0::Q(v)), Vu0::Q(self->pos));
+}
 
 INCLUDE_ASM(func_001441C0);
 
@@ -908,7 +934,22 @@ s32 HasColliderSecondTree(void* unused, Collider* other)
     return other->tree2.nodes != 0;
 }
 
-INCLUDE_ASM(func_00145DE8);
+// The vectors func_00145DE8 reads: a direction at +0x10 and a distance at +0x20.
+struct Heading_00145DE8 {
+    u8 pad0[0x10];
+    Quad16 dir;             // 0x10
+    f32 dist;               // 0x20
+};
+
+extern f32 g_frameStep;
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+
+f32 func_00145DE8(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
+{
+    f32 out;
+    ApproachValueWithRamp(h->dist, *(f32*)((u8*)self + 0x1EC) - D_0026194C, g_frameStep, &D_00261958, &out);
+    return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
+}
 
 INCLUDE_ASM(func_00145E68);
 
