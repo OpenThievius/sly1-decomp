@@ -90,7 +90,8 @@ class Scorer:
     def score(self, text, tag):
         """Bytes that differ from retail (0 = EXACT), or None if it does not compile."""
         import elf
-        src = WORK / ("%s_%s.cpp" % (self.func, tag))
+        # A C file (Sony's libraries) is compiled as C: compile.py goes by the suffix.
+        src = WORK / ("%s_%s%s" % (self.func, tag, ".c" if self.source.suffix == ".c" else ".cpp"))
         obj = WORK / ("%s_%s.o" % (self.func, tag))
         if self.unit:
             import version_src

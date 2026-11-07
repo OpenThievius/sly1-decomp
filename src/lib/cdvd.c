@@ -91,7 +91,7 @@ s32 func_001F6B50(s32 sema);
 s32 func_001F6B60(s32 sema);
 s32 func_001F6B70(s32 sema);
 s32 func_001F7B88(const char* format, ...);
-s32 func_001F7BE8(s32 mode);
+void func_001F7BE8(s32 mode);
 s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
 s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void (*end)(void*), void* end_arg);
@@ -228,18 +228,55 @@ s32 func_00203050(void)
 }
 
 LINKER_REMNANT(func_002030B8);
-INCLUDE_ASM(func_002030C0);
-
-/* The messages of functions the linker stripped, which no code reads, and of func_002030C0,
- * defined here while it is assembly. */
+/* The messages of functions the linker stripped, which no code reads. */
 const char D_0024F560[] = "sceCdCbfunc= %d sceCdCbfunc_num= %d\n";
 const char D_0024F588[] = "Libcdvd bind err CdSearchFile\n";
 const char D_0024F5A8[] = "ee call cmd search %s\n";
 const char D_0024F5C0[] = "search name %s\n";
 const char D_0024F5D0[] = "search size %d\n";
 const char D_0024F5E0[] = "search loc lbn %d\n";
-const char D_0024F5F8[] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
-const char D_0024F620[] = "Libcdvd bind err N CMD\n";
+
+/* Takes the semaphore of the first client's commands for `command` and binds the client once,
+ * retrying after a busy wait (cc1 pads the one-instruction wait loop with four nops, for the
+ * R5900's short-loop erratum). The semaphore word is read as volatile, as the end callback
+ * releases it. */
+s32 func_002030C0(s32 command)
+{
+    s32 i;
+
+    func_00202EF0();
+    if (*(volatile s32*)&D_00279428 != func_001F6B70(*(volatile s32*)&D_00279428)) {
+        if (D_00279410 > 0) {
+            func_001F7B88("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0027941C);
+        }
+        return 0;
+    }
+    D_0027941C = command;
+    func_001F6AA0(D_0062A7D0, D_0062A7D8);
+    if (func_002032C8(1)) {
+        func_001F6B40(*(volatile s32*)&D_00279428);
+        return 0;
+    }
+    func_001F7BE8(0);
+    if (D_00279438 < 0) {
+        while (1) {
+            if (func_001F80C0(&D_0027A5D0, 0x80000595, 0) < 0) {
+                if (D_00279410 > 0) {
+                    func_001F7B88("Libcdvd bind err N CMD\n");
+                }
+                for (i = 0x100000; i != -1; i--) {
+                }
+                continue;
+            }
+            if (D_0027A5D0.server != 0)
+                break;
+            for (i = 0x100000; i != -1; i--) {
+            }
+        }
+        D_00279438 = 0;
+    }
+    return 1;
+}
 
 s32 func_00203230(void)
 {
@@ -289,15 +326,51 @@ s32 func_00203368(s32 mode)
     return func_001F8480(&D_0027AE48);
 }
 
-INCLUDE_ASM(func_002033D8);
+/* The same for the second client's commands. */
+s32 func_002033D8(s32 command)
+{
+    s32 i;
+
+    func_00202EF0();
+    if (*(volatile s32*)&D_0027942C != func_001F6B70(*(volatile s32*)&D_0027942C)) {
+        if (D_00279410 > 0) {
+            func_001F7B88("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_00279418);
+        }
+        return 0;
+    }
+    D_00279418 = command;
+    func_001F6AA0(D_0062A7D0, D_0062A7D8);
+    if (func_00203368(1)) {
+        func_001F6B40(*(volatile s32*)&D_0027942C);
+        return 0;
+    }
+    func_001F7BE8(0);
+    if (D_00279448 < 0) {
+        while (1) {
+            if (func_001F80C0(&D_0027AE48, 0x80000593, 0) < 0) {
+                if (D_00279410 > 0) {
+                    func_001F7B88("Libcdvd bind err S cmd\n");
+                }
+                for (i = 0x100000; i != -1; i--) {
+                }
+                continue;
+            }
+            if (D_0027AE48.server != 0)
+                break;
+            for (i = 0x100000; i != -1; i--) {
+            }
+        }
+        D_00279448 = 0;
+    }
+    return 1;
+}
+
 INCLUDE_ASM(func_00203548);
 INCLUDE_ASM(func_00203828);
 
-/* The messages of func_002033D8, func_00203548 and func_00203828, defined here while they are
- * assembly (after the last of them: a definition before an included function would leave the
- * compiler in .rodata for the next one's). */
-const char D_0024F658[] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";
-const char D_0024F680[] = "Libcdvd bind err S cmd\n";
+/* The messages of func_00203548 and func_00203828, defined here while they are assembly (after
+ * the last of them: a definition before an included function would leave the compiler in .rodata
+ * for the next one's). */
 const char D_0024F698[] = "Libcdvd bind err %d CD_Init %d\n";
 const char D_0024F6B8[] = "Libcdvd Exit\n";
 const char D_0024F6C8[] = "DiskReady 0\n";

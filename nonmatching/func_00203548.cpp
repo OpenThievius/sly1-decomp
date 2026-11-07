@@ -3,6 +3,11 @@
 // NEAR: D_0027943C's store comes last before the loop, as the Ryzen PC's permuter run found
 //       (26 lines to 7). Left: the hoisted lui of D_00279444's and D_00279434's high halves
 //       take t2/t3 the other way round, and one lui/sw pair near the end is swapped.
+// NEAR (C, 2026-11-06): the same 723/736 as C in src/lib/cdvd.c's unit, as the file builds it
+//       (cc1 of 2.9-ee-991111), with func_001F7BE8 void (retail's callers never read its $v0)
+//       and only D_00279424 (read by the interrupt callback func_00203010), D_0062A7D0 and the
+//       mode-5 stores volatile. The delay loops' four nops are not a difference: cc1 and
+//       ee/bin/as.exe pad them as retail (docs/TOOLCHAIN.md). Left as below.
 #include "common.h"
 // NEAR (r60f): 26 lines, same as m59e but with D_0062A7D0 stored from a local after
 // D_00279424 = 1 (retail stores 424 before 62A7D0; the C++ front end otherwise computes

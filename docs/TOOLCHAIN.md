@@ -33,7 +33,17 @@ What else was measured:
   - no `nop` after `mtc1` before the register is used (`li.s`, `cvt.s.w`), as
     in retail. `bin/ee-as.exe`, the same release (`2.9-ee-991111b`) in
     another build, puts one there: measured on `func_00158108` and
-    `func_001A7290`, EXACT with `ee/bin/as.exe` only.
+    `func_001A7290`, EXACT with `ee/bin/as.exe` only;
+  - a short loop gets nops before its backward branch, for the R5900's
+    short-loop erratum, until five instructions precede the branch, even
+    under `.set noreorder` (`bin/ee-as.exe` adds none). cc1 of both
+    compilers already writes the four nops of a one-instruction delay loop
+    (`for (i = 0x100000; i != -1; i--) {}`) itself. Retail's short loops,
+    in Sony's libraries and in the game, show the same padding: the CD
+    library's waits (func_002030C0, func_002033D8) match with nothing
+    added. tools/check.py prints every zero word (`objdump
+    -z`): without it a run of nops collapsed into `...` and the padding
+    seemed missing from both columns.
 
   Then GNU objcopy rewrites the object's symbol table in the order modern ld
   wants, without touching code.
