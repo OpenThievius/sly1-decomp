@@ -858,7 +858,7 @@ void RestoreVolumeChannel2(void);
 void SilenceVolumeChannel2(void);
 void ChooseStepSequenceState(Collider* t);
 s32 FadeInPlacedObject(Collider* t, f32 v);
-s32 FadeOutPlacedObject(Collider* t, f32 v);
+void FadeOutPlacedObject(Collider* t, f32 v);
 void SetColliderAnchors(Collider* t, s32 a, s32 b, s32 c, s32 d);
 void PushObjectCameraController(Collider* t);
 void RemoveObjectCameraController(Collider* t);
@@ -1738,7 +1738,20 @@ void EnsureObjectWorldNode(PlacedObject* self)
 
 INCLUDE_ASM(func_00126CB8);
 
-INCLUDE_ASM(func_00126D60);
+void func_00126D60(Collider* self, f32 time)
+{
+    if (IsObjectAttached(self)) {
+        EnsureObjectWorldNode(self);
+        f32 rate;
+        if (time == 0.0f) {
+            f32 zero = 0.0f;
+            rate = zero <? -self->f298->level - 0.0001f;
+        } else {
+            rate = -1.0f / time;
+        }
+        self->f298->rate = rate;
+    }
+}
 
 INCLUDE_ASM(func_00126DE8);
 

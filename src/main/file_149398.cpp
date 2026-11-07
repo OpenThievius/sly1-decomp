@@ -547,7 +547,33 @@ void ClearItemColumn(T217D_720* self)
     self->vt->m16(self, 0);
 }
 
-INCLUDE_ASM(func_0014AF38);
+void func_0014AF38(T217D_720* self, s32 index, char* text, f32 hold)
+{
+    T217D_330* item = &self->items[index];
+    for (char* p = text; *p != 0; p++) {
+        if (*p == '_') {
+            *p = ' ';
+        }
+    }
+    item->vt->m08(item, text);
+    f32 width = 0.0f;
+    for (s32 i = 0; i < self->count; i++) {
+        width = self->items[i].w >? width;
+    }
+    Font* q = self->font;
+    SetScreenElementSize(self, width, (f32)q->height * q->sy * (f32)self->count);
+    if (hold != 0.0f) {
+        item = &self->items[index];
+        f32 span = item->vt->m11(item);
+        span += item->vt->m13(item);
+        hold -= span;
+        if (hold <= 0.0f) {
+            hold = 0.016666668f;
+        }
+        SetScreenElementHoldTime(item, hold);
+        item->vt->m14(item);
+    }
+}
 
 void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
 {
