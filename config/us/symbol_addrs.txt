@@ -51,7 +51,7 @@ func_001B5F50 = 0x001B5F50; // type:func
 func_001B9940 = 0x001B9940; // type:func
 
 // Data labels no instruction names: the start of a proved file's .rodata, reached only through a
-// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; file_193210's
+// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; pause_menu's
 // menu strings, pointed to by its menu table D_00269D50).
 D_00249CA0 = 0x00249CA0;
 D_0024B660 = 0x0024B660;

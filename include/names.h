@@ -1749,6 +1749,8 @@
 #define InitPauseMenu                              func_00193E58
 #define ChangePauseMenuPage                        func_00193EE8
 #define SetPauseMenuOpen                           func_001940E8
+#define ExitLevelFromPauseMenu                     func_00194278
+#define UpdatePauseMenu                            func_001943E8
 #define SetPauseMenuLayerPage                      func_00194D30
 #define SetPauseMenuMode                           func_00194E60
 #define ShowPauseMenu                              func_00194F00

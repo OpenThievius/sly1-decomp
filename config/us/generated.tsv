@@ -29,8 +29,8 @@ src/main/movie_player.cpp	Put__11IopRingSinkiPUc	func_0018E6C0
 src/main/movie_player.cpp	Idle__11IopRingSink	func_0018E8C0
 src/main/movie_player.cpp	Put__10IpuDmaSinkiPUc	func_0018E8C8
 src/main/movie_player.cpp	Idle__10IpuDmaSink	func_0018E938
-src/main/file_193210.cpp	__static_initialization_and_destruction_0	func_00196330
-src/main/file_193210.cpp	_GLOBAL_$I$*	func_001963B8
+src/main/pause_menu.cpp	__static_initialization_and_destruction_0	func_00196330
+src/main/pause_menu.cpp	_GLOBAL_$I$*	func_001963B8
 src/lib/new_handler.cpp	what__C9bad_alloc	func_001FFFF0
 src/lib/new_handler.cpp	__tf9bad_alloc	func_00200000
 src/lib/new_handler.cpp	_$_9bad_alloc	func_00200050

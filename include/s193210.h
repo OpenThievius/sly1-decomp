@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The record func_00193210(rec, a, b, c, d) fills and returns (file_193210.cpp): five words, then
+// The record func_00193210(rec, a, b, c, d) fills and returns (pause_menu.cpp): five words, then
 // four words it stores one by one with swl/swr (its arguments 1 to 4 are such words too).
 // func_001E4EA8 keeps one in a 0x28-byte local. Written for this project from what retail's code
 // does (build/swarm/st3/groups.tsv, g4869 and g4870).

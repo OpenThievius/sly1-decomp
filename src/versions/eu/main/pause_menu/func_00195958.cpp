@@ -68,7 +68,7 @@ void func_00195958(Menu_195958_eu* self)
         }
         case 19:
         case 20:
-            func_00194278(self, 1, 1);
+            ExitLevelFromPauseMenu(self, 1, 1);
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -149,14 +149,14 @@ void func_00195958(Menu_195958_eu* self)
             func_00160578(8);
             return;
         }
-        func_00194278(self, 0, 2);
+        ExitLevelFromPauseMenu(self, 0, 2);
         return;
     case 1:
     case 26:
     case 28:
     case 29:
     case 30:
-        func_00194278(self, (u32)sel < 1, 1);
+        ExitLevelFromPauseMenu(self, (u32)sel < 1, 1);
         return;
     case 25: {
         s32 a = self->f280;

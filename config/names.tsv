@@ -2198,7 +2198,7 @@ D_0025C3C4	g_iopBankLoadResult	reply word of the single pending request: PollIop
 D_00260E00	g_iopChannel2Result	reply word of the RPC channel D_0027B4F0: set to 0xFFFFFFFF while a command is pending, polled by PollIopCommands, cleared when its callback ran
 D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at 0011C000.cpp:1665 sends as command 3 over channel D_0027B4F0
 D_00260E60	g_valueRampProfile	three-float profile (3.0, 1.0, 0.1) passed to ApproachValueWithRamp for the pose-source indexed value in ApplyPoseSourceIndexedValue
-D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in file_193210.cpp:1129
+D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in pause_menu.cpp:1129
 D_00261420	g_flagTable	the table TakeFlagTableIndex hands bit indices out of (counter at +4) and TestFlagTableBit / func_00141040 read and set (bitmap at +0xC); class set-up code takes its indices from it
 D_00261850	g_timeScale	set by func_00142ED0 (which also turns the clock's running flag on when it is positive) and multiplied into the step in func_00142F10
 D_00261854	g_stepScale	second factor of the step in func_00142F10; reset to 1.0 on level reset and set from a clamped quadratic of a ratio in 001C0000.cpp
@@ -2517,3 +2517,5 @@ func_00192128	ConvertPointObjectPosition	slot 22 of class 0x7E: converts the pos
 func_001924C8	StartSwitchedColliderEffect	slot 78 of class 0x05: for mode 0 creates effect 0x1A at the other object's position, keeps it at 0x5AC, sets its range from clip 0x13F and its gravity, then calls slot 0x4F with 1; for mode 1 calls slot 0x4F with 2
 func_001929F8	GetActiveSwitchedColliderData	returns the block at +0x580 of GetActiveSwitchedCollider's object, or the default block D_00604700 when none is active
 func_00192A70	HandleStepSequenceSkipButtons	unless the camera controller is on top, skips the remaining steps of the running step sequence D_0027051C or sets D_0026F800 to state 1 on buttons 0xC, then clears those buttons with ClearPadPressedBits
+func_001943E8	UpdatePauseMenu	shows or hides the four pause-menu layers by the level key 0x19D8/0x19DC and the page, moves the selection with the pad's vertical or horizontal step, and on buttons 0x810, 0x80 and 0x40 runs CancelPauseMenuPage, SetPauseMenuLayerPage or ActivatePauseMenuSelection
+func_00194278	ExitLevelFromPauseMenu	ActivatePauseMenuSelection calls it: clears the menu's layer page, then starts a screen fade (D_00275B04) or, without the flag, sets the pair controller 0x5F to state 6 (level key 0x106) or calls func_001F4408
