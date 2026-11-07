@@ -60,4 +60,4 @@ func_00146018	SetCameraControllerSettings	stores a word and two floats at 0x50, 
 func_00146028	RecordCameraTimestamp	stores g_gameTime at 0x218 (ResetCamera sets it to -10; UpdateCameraMatrices reads it)
 func_00146038	IsSphereInCameraView	tests a point with a radius against the three planes at 0x50..0x70 around the position at 0x40 and, when inside, returns whether ComputeCameraDistanceFade accepts it
 func_001460B8	ConstructCameraStaticColor	the file's static initialiser: on the construction pass sets the colour D_002618B0 to 0x80303030
-func_001460E0	RunCameraStaticInitializer	the file's _GLOBAL_$I$: calls ConstructCameraStaticColor(1, 0xFFFF); an entry of the startup init list D_0027B130
+func_001460E0	ConstructCameraStaticColorAtStartup	the file's _GLOBAL_$I$: calls ConstructCameraStaticColor(1, 0xFFFF); an entry of the startup init list D_0027B130

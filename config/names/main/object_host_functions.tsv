@@ -96,7 +96,7 @@ func_00104660	SetScriptWorldFlagBit	builtin: one argument forwarded to SetWorldF
 func_00104710	PushScriptCameraStackValue	builtin: one argument forwarded to PushCameraStackValue, empty result
 func_001047C0	PopScriptCameraStackValue	builtin without arguments: PopCameraStackValue returned as a script int
 func_00104860	PeekScriptCameraStackValue	builtin without arguments: PeekCameraStackValue returned as a script int
-func_00104900	SetScriptCameraTargetControllerTuning	builtin: an int and two floats forwarded to func_00146018, which stores them at +0x50, +0x54 and +0x58 of the target controller at +0x460 (the numbers InitTargetCameraController sets to 0.5 and -1), empty result
+func_00104900	SetScriptCameraControllerSettings	builtin: an int and two floats forwarded to func_00146018, which stores them at +0x50, +0x54 and +0x58 of the target controller at +0x460 (the numbers InitTargetCameraController sets to 0.5 and -1), empty result
 func_001049D8	RecordScriptCameraTimestamp	builtin without arguments: calls RecordCameraTimestamp on the camera, empty result
 func_00104A78	RequestScriptPlainCameraSnap	builtin without arguments: calls RequestPlainCameraSnap on the camera, empty result
 func_00104B18	TestScriptSphereInCameraView	builtin: a vector and two floats to IsSphereInCameraView, returned as a script bool
@@ -119,7 +119,7 @@ func_00105728	StartScriptChildGroupDelay	builtin wrapper: unpacks one value and 
 func_001057D8	StepScriptChildGroupObject	builtin without arguments: calls func_0013BF68, the large step UpdateChildGroupObject also calls, which records the pose (RecordChildGroupPose) and then moves the group, empty result
 func_00105878	PlaceScriptPlayerOnGround	builtin: three arguments forwarded to PlacePlayerOnGround, empty result
 func_00105960	ReleaseScriptPlayerToState2	builtin: no arguments, calls ReleasePlayerToState2 on the object, empty result
-func_00105A00	IgnoreScriptPlayerFlag	builtin: one int argument passed to func_001777F8, an empty function, empty result; its sibling SwitchScriptPlayerState11 uses the real func_00177800 the same way
+func_00105A00	IgnoreScriptPlayerArgument	builtin: one int argument passed to func_001777F8, an empty function, empty result; its sibling SwitchScriptPlayerState11 uses the real func_00177800 the same way
 func_00105AB0	SetScriptPlayerPath	builtin: one argument forwarded to SetPlayerPath, empty result
 func_00105B60	SwitchScriptPlayerState11	builtin: one int argument forwarded to SwitchPlayerState11 (func_00177800), empty result
 func_00105C10	SeekScriptObjects105Animations	builtin: one argument forwarded to SeekObjects105Animations, empty result

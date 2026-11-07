@@ -176,6 +176,6 @@ func_0011A7D8	PopMarkRecord	pops from the stack at 0x1310, returning 0 when empt
 func_0011A800	MarkPoolLiveEnds	calls func_0011C2A0 (MarkPoolLiveEnd) on each of the five pools D_0025C250..D_0025C2D0
 func_0011A850	DrainMarkStacks	pops the three stacks until empty, marking (func_0011C3C8 / func_0011C3F0) what each entry holds and pushing newly found entries back on their stacks
 func_0011AB58	CollectScriptPools	clears the pools' live states (func_0011C2B0), marks everything reachable from the root lists and the object table at D_00275710+0x1EC8, drains the stacks, then releases the unmarked entries (func_0011C2E8)
-func_0011ADF8	ConstructOrDestroyScriptMachineStatics	the compiler's static initialisation and destruction for this file: when its second argument is 0xFFFF runs ConstructMarkStacks on D_00259F38 for a nonzero first argument and DestructMarkStacks (flag 2) for zero
-func_0011AE38	ConstructScriptMachineStatics	the file's entry in the initialiser list D_0027B130: calls ConstructOrDestroyScriptMachineStatics(1, 0xFFFF)
-func_0011AE58	DestroyScriptMachineStatics	the file's destructor entry: calls ConstructOrDestroyScriptMachineStatics(0, 0xFFFF)
+func_0011ADF8	ConstructScriptMachineStatics	the compiler's static initialisation and destruction for this file: when its second argument is 0xFFFF runs ConstructMarkStacks on D_00259F38 for a nonzero first argument and DestructMarkStacks (flag 2) for zero
+func_0011AE38	ConstructScriptMachineStaticsAtStartup	the file's entry in the initialiser list D_0027B130: calls ConstructOrDestroyScriptMachineStatics(1, 0xFFFF)
+func_0011AE58	DestroyScriptMachineStaticsAtExit	the file's destructor entry: calls ConstructOrDestroyScriptMachineStatics(0, 0xFFFF)

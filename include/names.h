@@ -523,7 +523,7 @@
 #define PushScriptCameraStackValue                 func_00104710
 #define PopScriptCameraStackValue                  func_001047C0
 #define PeekScriptCameraStackValue                 func_00104860
-#define SetScriptCameraTargetControllerTuning      func_00104900
+#define SetScriptCameraControllerSettings          func_00104900
 #define RecordScriptCameraTimestamp                func_001049D8
 #define RequestScriptPlainCameraSnap               func_00104A78
 #define TestScriptSphereInCameraView               func_00104B18
@@ -546,7 +546,7 @@
 #define StepScriptChildGroupObject                 func_001057D8
 #define PlaceScriptPlayerOnGround                  func_00105878
 #define ReleaseScriptPlayerToState2                func_00105960
-#define IgnoreScriptPlayerFlag                     func_00105A00
+#define IgnoreScriptPlayerArgument                 func_00105A00
 #define SetScriptPlayerPath                        func_00105AB0
 #define SwitchScriptPlayerState11                  func_00105B60
 #define SeekScriptObjects105Animations             func_00105C10
@@ -805,9 +805,9 @@
 #define MarkPoolLiveEnds                           func_0011A800
 #define DrainMarkStacks                            func_0011A850
 #define CollectScriptPools                         func_0011AB58
-#define ConstructOrDestroyScriptMachineStatics     func_0011ADF8
-#define ConstructScriptMachineStatics              func_0011AE38
-#define DestroyScriptMachineStatics                func_0011AE58
+#define ConstructScriptMachineStatics              func_0011ADF8
+#define ConstructScriptMachineStaticsAtStartup     func_0011AE38
+#define DestroyScriptMachineStaticsAtExit          func_0011AE58
 #define TakeZeroedPoolEntry                        func_0011AE78
 #define CopyScriptValueChain                       func_0011AEB8
 #define NewScriptValueNode                         func_0011AF28
@@ -848,8 +848,8 @@
 #define InitScriptValuePools                       func_0011BF70
 #define ShutDownScriptValuePools                   func_0011C040
 #define ConstructValuePools                        func_0011C0A8
-#define CallValuePoolsConstructor                  func_0011C0E8
-#define CallValuePoolsDestructor                   func_0011C108
+#define ConstructValuePoolsAtStartup               func_0011C0E8
+#define DestroyValuePoolsAtExit                    func_0011C108
 #define InitEntryPool                              func_0011C128
 #define ShutDownEntryPool                          func_0011C1D0
 #define PopPoolFreeEntry                           func_0011C1D8
@@ -1358,7 +1358,7 @@
 #define SetTextLayoutColor                         func_00137248
 #define SetTextLayoutHorizontalAlign               func_00137260
 #define SetTextLayoutVerticalAlign                 func_00137268
-#define RunTextPanelStaticInit                     func_00137270
+#define ConstructTextPanelStaticsAtStartup         func_00137270
 #define InitBufferedStream                         func_00137290
 #define DestroyBufferedStream                      func_001372E0
 #define OpenBufferedSectorStream                   func_00137328
@@ -1633,7 +1633,7 @@
 #define RecordCameraTimestamp                      func_00146028
 #define IsSphereInCameraView                       func_00146038
 #define ConstructCameraStaticColor                 func_001460B8
-#define RunCameraStaticInitializer                 func_001460E0
+#define ConstructCameraStaticColorAtStartup        func_001460E0
 #define InitScaledOffsetObject                     func_00146100
 #define LoadScaledOffsetObject                     func_00146130
 #define StartScaledOffsetObject                    func_00146178
@@ -2695,7 +2695,7 @@
 #define FinishMovie                                func_0018F7D0
 #define FeedMovieDecoder                           func_0018F890
 #define ConstructMovieRingSink                     func_0018F940
-#define RunMovieRingSinkInitializer                func_0018F968
+#define ConstructMovieRingSinkAtStartup            func_0018F968
 #define InitBoxCollider                            func_0018F988
 #define InitSeekingAgent                           func_0018FEF8
 #define StartSeekingAgent                          func_0018FF28
@@ -2776,7 +2776,7 @@
 #define FinishSwitchedCollider                     func_00192C58
 #define GetSwitchedColliderTarget                  func_001930B0
 #define ConstructSwitchedColliderDefaults          func_001930B8
-#define RunSwitchedColliderDefaultsInitializer     func_001931F0
+#define ConstructSwitchedColliderDefaultsAtStartup func_001931F0
 #define InitLoadProgress                           func_00193210
 #define BeginLoadProgress                          func_00193270
 #define UpdateLoadProgress                         func_00193288
@@ -3126,8 +3126,8 @@
 #define HasObjectPoolChoice                        func_001A8C50
 #define ClearObjectPoolChoice                      func_001A93C8
 #define ResetPlacementRecord                       func_001A93E8
-#define ResetObjectPoolSecondRecord                func_001A9438
-#define ClearObjectPoolThirdRecord                 func_001A9498
+#define ResetObjectPoolReleaseRecord               func_001A9438
+#define ClearObjectPoolHeadingRecord               func_001A9498
 #define GetPlacementRecordTransform                func_001A94C0
 #define GetPlacementRecordAngle                    func_001A97C8
 #define StartGaugeBarAgent                         func_001A98F8
@@ -3596,7 +3596,7 @@
 #define StartToSprChain                            func_001C2430
 #define StartFromSprChain                          func_001C25B0
 #define ConstructScratchpadTransfers               func_001C27B0
-#define CallScratchpadTransfersConstructor         func_001C29C8
+#define ConstructScratchpadTransfersAtStartup      func_001C29C8
 #define ResetTrailRing                             func_001C29E8
 #define AddTrailPoint                              func_001C29F8
 #define QueueTrailRibbonDraw                       func_001C3028
@@ -4033,7 +4033,7 @@
 #define RunPendingWorldLoad                        func_001E4EA8
 #define RequestWorldLoadByMode                     func_001E5278
 #define ConstructWorldLoadRequestGlobal            func_001E5328
-#define RunWorldLoadRequestInitializer             func_001E5358
+#define ConstructWorldLoadRequestGlobalAtStartup   func_001E5358
 #define InitPlayerLinkedCollider                   func_001E5378
 #define AddPlayerLinkedColliderId                  func_001E53F8
 #define StartPlayerLinkedCollider                  func_001E5428
@@ -4268,7 +4268,7 @@
 #define DrawColoredCircle                          func_001F1E38
 #define DrawWarpMenu                               func_001F20A8
 #define ConstructWarpTextStyleGlobals              func_001F2688
-#define RunWarpTextStyleInitializer                func_001F2738
+#define ConstructWarpTextStyleGlobalsAtStartup     func_001F2738
 #define InitOscillator                             func_001F2758
 #define AttachNodeToOwner                          func_001F2798
 #define RefreshOscillatorFrames                    func_001F2840

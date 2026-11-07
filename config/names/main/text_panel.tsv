@@ -37,4 +37,4 @@ func_00137238	SetTextLayoutSize	the text layout's setter of width and height at 
 func_00137248	SetTextLayoutColor	the text layout's setter of the 32-bit colour at 0x10 (Layout_137228::Color)
 func_00137260	SetTextLayoutHorizontalAlign	stores its argument at +0x14 of the text layout (Layout_137228::SetF14); DrawFontString aligns each line left when it is 0, right when it is 2 and centred otherwise from it
 func_00137268	SetTextLayoutVerticalAlign	stores its argument at +0x18 of the text layout (Layout_137228::SetF18); DrawFontString places the text at the top of the rectangle when it is 0, at the bottom when 2 and centred otherwise
-func_00137270	RunTextPanelStaticInit	the file's entry in the initialiser list D_0027B130: calls ConstructTextPanelStatics(1, 0xFFFF)
+func_00137270	ConstructTextPanelStaticsAtStartup	the file's entry in the initialiser list D_0027B130: calls ConstructTextPanelStatics(1, 0xFFFF)

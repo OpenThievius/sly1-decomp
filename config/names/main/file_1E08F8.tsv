@@ -59,4 +59,4 @@ func_001E4E80	QueueWorldLoad	when its state word is 0 sets it to 1 and stores it
 func_001E4EA8	RunPendingWorldLoad	handles the request QueueWorldLoad stored: when it holds a blob it opens a stream on it, frees the old record D_00275710, makes a new one with CreateTypedRecord and loads it from the stream, then updates the tracker and clears the request state to 0
 func_001E5278	RequestWorldLoadByMode	calls func_001C05D0(0.0); mode 1 starts StartScreenFadeFromFlagTable, modes 0, 2 and 3 queue QueueWorldLoad on D_00275AF0 with 0, 2 or 4 as the last value
 func_001E5328	ConstructWorldLoadRequestGlobal	the file's static initialiser: on the construction pass runs ConstructWorldLoadRequest on D_00275AF0
-func_001E5358	RunWorldLoadRequestInitializer	the file's _GLOBAL_$I$: calls ConstructWorldLoadRequestGlobal(1, 0xFFFF); entry of the startup init list D_0027B130
+func_001E5358	ConstructWorldLoadRequestGlobalAtStartup	the file's _GLOBAL_$I$: calls ConstructWorldLoadRequestGlobal(1, 0xFFFF); entry of the startup init list D_0027B130

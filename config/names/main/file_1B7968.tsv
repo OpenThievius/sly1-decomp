@@ -191,4 +191,4 @@ func_001C23B0	StoreScriptArgumentsVa	collects the variadic destination pointers 
 func_001C2430	StartToSprChain	variadic (size,data) pairs become 16-byte-aligned entries and DMA tags of the current ring slot, then it kicks the to-scratchpad channel (g_toSprChannel) at the slot's tag list
 func_001C25B0	StartFromSprChain	variadic values are written into the tags of the current ring slot, the last marked as end, then it kicks the from-scratchpad channel (g_fromSprChannel)
 func_001C27B0	ConstructScratchpadTransfers	the file's static initialiser: on the construction pass (first argument set, second 0xFFFF) builds the two 0x50-byte scratchpad transfer records D_002748F0[0] and [1] from constant templates
-func_001C29C8	CallScratchpadTransfersConstructor	the file's _GLOBAL_$I: calls ConstructScratchpadTransfers(1, 0xFFFF); it is in the constructor list D_0027B130 (+0x34)
+func_001C29C8	ConstructScratchpadTransfersAtStartup	the file's _GLOBAL_$I: calls ConstructScratchpadTransfers(1, 0xFFFF); it is in the constructor list D_0027B130 (+0x34)
