@@ -11,6 +11,7 @@
 #define WORLD_H
 
 #include "placed_object.h"
+#include "shapes.h"      // U64P
 
 struct C17;
 struct EffectOwner;
@@ -48,6 +49,20 @@ struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
 struct Pool6C { s32 size; void* base; void* head; };
 
 // A setting of an IOP channel: the index into its table and the value (func_001C08B0).
+// A sound of the level (20 bytes; func_001C0A50 appends one, func_001C0B38 starts them all):
+// the sound and two pairs of floats handed to func_001BFCD8 as blocks.
+struct WorldSoundEntry {
+    s32 sound;              // 0x00: its g_soundEntries row
+    U64P repeat;            // 0x04: the repeat interval and a second float (4.0, 6.0 at first)
+    union {
+        U64P range;         // 0x0C: (3000.0, 8000.0) at first
+        struct {
+            f32 range0;     // 0x0C: func_001C0AB8 sets 8000 - 50 y
+            f32 range1;     // 0x10: func_001C0AB8 sets 8000 - 50 x
+        };
+    };
+};
+
 struct IopChannelSetting { s32 index; s32 value; };   // base: the records' block (func_001B5DD0)
 
 struct World : BaseObject {
@@ -139,8 +154,8 @@ struct World : BaseObject {
     s32 f1D74;              // 0x1D74
     u8 pad1D78[0x1D7C - 0x1D78];
     f32 f1D7C;              // 0x1D7C
-    s32 f1D80;              // 0x1D80
-    u8 f1D84[0x140];        // 0x1D84
+    s32 soundCount;         // 0x1D80: the number of soundEntries (func_001C0A50)
+    WorldSoundEntry soundEntries[16];  // 0x1D84: the level's sounds, started by func_001C0B38
     void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
     QueuedCall* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
     QueuedCall* f1ECC;         // 0x1ECC: its last
