@@ -281,6 +281,9 @@
 #define g_pairPayloadPool                          D_0062C588
 #define g_triplePayloadPool                        D_0062C598
 #define g_imageEnd                                 D_0064C70F
+#define EnterProgram                               func_00100008
+#define ExitProgram                                func_001000B8
+#define EndMainThread                              func_001000C0
 #define TestScriptObjectOfKind                     func_001000C8
 #define AddScriptObjectKeyToOwner                  func_00100178
 #define CreateScriptObjectCopy                     func_00100368

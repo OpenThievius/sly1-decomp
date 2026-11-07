@@ -7,7 +7,7 @@
 // with 0) and func_001000C0, the thread's return address set up by the entry, which ends it
 // with a system call. All of it is original assembly (config/us/original_asm.tsv), with the
 // two words of padding before the entry (func_00100000). No .rodata or .data of its own.
-// Named after its first address.
+// Named after what it holds: the program's entry.
 #include "asm_func.h"
 
 LINKER_REMNANT(func_00100000);
