@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "t2196.h"
+#include "anim_curve.h"
 #include "world.h"
 #include "entry_pool.h"
 #include "buffered_stream.h"

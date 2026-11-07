@@ -94,7 +94,7 @@ void func_001B1BF8(RangeRecord* o);
 typedef void (*VFn_1B0EA8)(void* self, s32 arg);
 
 s32 func_00137B90(void* src);
-T2176* func_0014D9A8(s32 kind);
+PathCurve* func_0014D9A8(s32 kind);
 void func_0011EC40(void* self, void* obj);
 
 void func_00124A48(void* self);

@@ -21,7 +21,7 @@ void func_001B1DA8(RangeRecord* self, f32 v);
 AnimRecord* func_001B4688(s32 key);
 void func_001B1BF8(RangeRecord* o);
 s32 func_00137B90(void* src);
-T2176* func_0014D9A8(s32 kind);
+PathCurve* func_0014D9A8(s32 kind);
 void func_0011EC40(void* self, void* obj);
 void func_001B2358(void* o);
 s32 func_001B26F8(RangeRecord* node, void* a1, f32 f);
@@ -221,9 +221,9 @@ void func_001B2790(World* self, void* a1, s32 max, s32* outCount, RangeRecord** 
 
 void func_001B2840(C6E* self, void* obj)
 {
-    T2176* p = CreatePathCurve(ReadBufferedU8(obj));
+    PathCurve* p = CreatePathCurve(ReadBufferedU8(obj));
     self->curve = p;
-    void (*fn)(T2176* self, void* stream) = p->vt->m00;
+    void (*fn)(PathCurve* self, void* stream) = p->vt->m00;
     if (fn != 0) {
         fn(p, obj);
     }
@@ -234,7 +234,7 @@ void func_001B28A8(C6E* self, BaseObject* other)
 {
     Mat4A a;
     Mat4A b;
-    T2176* h;
+    PathCurve* h;
     if (self->parent) {
         BuildMatrixFromRotationAndTranslation((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
     } else {

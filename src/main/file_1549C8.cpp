@@ -93,7 +93,7 @@ void* func_0018D500(s32 size);
 void func_001549C8(void* mem);
 void func_001289C0(void* self, s32 count);
 s32 func_00137CC0(s32 count);
-T2176* func_0014D9A8(s32 kind);
+PathCurve* func_0014D9A8(s32 kind);
 void func_00154C80(void* self, s32 count);
 s32 func_00137BE0(s32 count);
 void* func_00155778(void* self, s32 flag);
@@ -318,7 +318,7 @@ void func_001B46E0(AnimCursor* cur, s32 idx);
 void* func_0018D5C0(s32 size);
 void func_001549C8(void* p);
 s32 func_00137CC0(void* other);
-T2176* func_0014D9A8(s32 kind);
+PathCurve* func_0014D9A8(s32 kind);
 void* func_00137BE0(void* other);
 void func_00154C80(void* p, void* other);
 void func_00154EE0(void* a, void* b, void* c, void* d);
@@ -929,9 +929,9 @@ void func_00154F98(EffectSpawner* self, s32 count)
     LoadPlacedObject(self, count);
     s32 index = ReadBufferedS8(count);
     if (index != -1) {
-        T2176* obj = CreatePathCurve(index);
+        PathCurve* obj = CreatePathCurve(index);
         self->rec->curve20 = obj;
-        void (*fn)(T2176* self, void* stream) = obj->vt->m00;
+        void (*fn)(PathCurve* self, void* stream) = obj->vt->m00;
         if (fn != 0) {
             fn(obj, (void*)count);
         }

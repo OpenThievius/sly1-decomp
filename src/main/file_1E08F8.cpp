@@ -3,7 +3,7 @@
 #include "asm_func.h"
 #include "on_off_object.h"
 #include "world.h"
-#include "t2173.h"
+#include "camera_controller.h"
 #include "globals.h"
 #include "buffered_stream.h"
 #include "key_id.h"
@@ -1504,7 +1504,7 @@ ASM_FUNC(func_001E2BF0);
 
 ASM_FUNC(func_001E2E68);
 
-void func_001E30A0(T2173_3F8* self)
+void func_001E30A0(OnOffCameraController* self)
 {
     Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
     if (s != 0) {
@@ -1516,11 +1516,11 @@ void func_001E30A0(T2173_3F8* self)
     self->ptr = 0;
 }
 
-void func_001E30D8(T2173_3F8* self, s32 arg)
+void func_001E30D8(OnOffCameraController* self, s32 arg)
 {
 }
 
-void func_001E30E0(T2173_3F8* self, s32 arg) {}
+void func_001E30E0(OnOffCameraController* self, s32 arg) {}
 
 ASM_FUNC(func_001E30E8);
 

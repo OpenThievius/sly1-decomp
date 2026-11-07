@@ -11,7 +11,7 @@
 #define TRANSFORM_OBJECT_H
 
 #include "base_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 struct __attribute__((aligned(16))) Vec4_73 { f32 x, y, z, w; };
 struct __attribute__((aligned(16))) Mat3_73 { Vec4_73 row[3]; };
@@ -48,7 +48,7 @@ struct Rec79 {
     s32 kind;               // 0x10: 3, 4 seen
     u8 pad14[0x20 - 0x14];
     union {
-        T2176* curve20;     // 0x20: the key-frame curve found by index (func_00158B30)
+        PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00158B30)
         s32 value20;        // 0x20: a value taken from another object (func_00158C60)
     };
     u8 pad24[0x7C - 0x24];

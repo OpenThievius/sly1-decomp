@@ -65,14 +65,14 @@ struct Scratch_0014BEF8 {
 
 s32 func_001C96D8(C12* self, Node_0014BEF8** slot);
 void func_001D7098(void* out, s32 mode, C12* owner);
-void func_00149398(T2173* self, Camera* owner);
+void func_00149398(CameraController* self, Camera* owner);
 
 struct Tmp_1496C0 {
     s32 w[4];
 };
 
 void func_00189230(void* a, void* b, void* c);
-s32 func_001493C8(void* out, T2173_3B0* self);
+s32 func_001493C8(void* out, TargetCameraController* self);
 void func_00144B70(void* eng, void* tmp);
 void func_00143968(void* eng, f32 x);
 extern void* D_0026EC68;
@@ -97,7 +97,7 @@ struct Quad_14A7B8 {
     s32 w[4];
 };
 
-s32 func_001493C8(void* out, T2173_3B0* self);
+s32 func_001493C8(void* out, TargetCameraController* self);
 void func_00149458(void* out, void* self);
 void func_001BF788(void* self, s32 n);
 void func_00144938(void* self, void* a, void* b);
@@ -359,28 +359,28 @@ f32 D_00261C94 = 900.0f;
 f32 D_00261C98 = 1200.0f;
 ObjectLink D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
-void func_00149398(T2173* self, Camera* owner)
+void func_00149398(CameraController* self, Camera* owner)
 {
     self->owner = owner;
 }
 
-s32 func_001493A0(T2173* self)
+s32 func_001493A0(CameraController* self)
 {
     return self->owner->stack[0].ctl == self;
 }
 
-void func_001493B8(T2173* self, s32 value)
+void func_001493B8(CameraController* self, s32 value)
 {
     self->value = value;
 }
 
-void func_001493C0(T2173* self, u8* eye, u8* tail, f32 dt)
+void func_001493C0(CameraController* self, u8* eye, u8* tail, f32 dt)
 {
 }
 
 struct __attribute__((aligned(16))) Quad_1493C8 { s32 a, b, c, d; };
 
-Quad_1493C8 func_001493C8(T2173_3B0* self)
+Quad_1493C8 func_001493C8(TargetCameraController* self)
 {
     Quad_1493C8 r;
     if (self->f5C != 0) {
@@ -408,7 +408,7 @@ void func_00149508(Obj_149508* self)
     self->f44 = 1;
 }
 
-void func_001495E8(T2173_3B0* s, s32 value)
+void func_001495E8(TargetCameraController* s, s32 value)
 {
     s32 n = s->count;
     if ((u32)n < 4) {
@@ -417,7 +417,7 @@ void func_001495E8(T2173_3B0* s, s32 value)
     }
 }
 
-s32 func_00149610(T2173_3B0* s)
+s32 func_00149610(TargetCameraController* s)
 {
     s32 n = s->count;
     if (n <= 0) {
@@ -428,7 +428,7 @@ s32 func_00149610(T2173_3B0* s)
     return s->items[n];
 }
 
-s32 func_00149638(T2173_3B0* s)
+s32 func_00149638(TargetCameraController* s)
 {
     s32 n = s->count;
     if (n <= 0) {
@@ -437,7 +437,7 @@ s32 func_00149638(T2173_3B0* s)
     return s->items[n - 1];
 }
 
-void func_00149660(T2173_3B0* self, Camera* owner)
+void func_00149660(TargetCameraController* self, Camera* owner)
 {
     SetCameraControllerOwner(self, owner);
     self->count = 0;
@@ -448,7 +448,7 @@ void func_00149660(T2173_3B0* self, Camera* owner)
     self->f50 = 0;
 }
 
-void func_001496C0(T2173_3B0* self)
+void func_001496C0(TargetCameraController* self)
 {
     Tmp_1496C0 tmp;
     Camera* eng = (Camera*)self->owner;
@@ -474,7 +474,7 @@ INCLUDE_RODATA(jtbl_00249ED0);
 
 ASM_FUNC(func_00149760);
 
-void func_0014A7B8(T2173_3B0* self)
+void func_0014A7B8(TargetCameraController* self)
 {
     Quad_14A7B8 a;
     Quad_14A7B8 b;
@@ -495,14 +495,14 @@ void func_0014A7B8(T2173_3B0* self)
     }
 }
 
-void func_0014A888(T2173_3C8* self, Camera* a1)
+void func_0014A888(FrameCameraController* self, Camera* a1)
 {
     SetCameraControllerOwner(self, a1);
-    Blk2173* dst = &self->frame20;
-    *dst = *(Blk2173*)g_identityMatrix;
+    CameraFrameBlock* dst = &self->frame20;
+    *dst = *(CameraFrameBlock*)g_identityMatrix;
 }
 
-void func_0014A8D0(T2173_3C8* self)
+void func_0014A8D0(FrameCameraController* self)
 {
     Camera* parent = self->owner;
     func_00144B70(parent, (u8*)parent->stack[0].target + 0x370);
@@ -510,9 +510,9 @@ void func_0014A8D0(T2173_3C8* self)
 
 ASM_FUNC(func_0014A8F8);
 
-void func_0014AA90(T2173_3E0* obj, s32 value) { obj->value = value; }
+void func_0014AA90(ValueCameraController* obj, s32 value) { obj->value = value; }
 
-void func_0014AA98(T2173_3E0* obj) { obj->value = 0; }
+void func_0014AA98(ValueCameraController* obj) { obj->value = 0; }
 
 ASM_FUNC(func_0014AAA0);
 

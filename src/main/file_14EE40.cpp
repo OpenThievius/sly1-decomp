@@ -621,7 +621,7 @@ s32 func_001BE5E8(void);
 void func_00150790(StepSequence* self, s32 mode);
 void func_001F5C0C(s32* p, s32 v, s32 n);
 Ent65* func_001925F0(void);
-s32 func_001493A0(T2173* p);
+s32 func_001493A0(CameraController* p);
 void func_001518B8(StepSequence* self);
 void func_00151860(StepSequence* value, Ent65* object);
 void func_001516C0(StepSequence* self);

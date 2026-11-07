@@ -11,17 +11,17 @@
 #define C6E_H
 
 #include "base_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 // Eight bytes that each subclass keeps through a copy (slot 9: saved, the parent's copy,
 // restored); retail moves them as one unaligned doubleword.
 struct __attribute__((packed)) Keep6E { u64 bits; };
 
-// 0x6E: a key-frame curve (include/t2176.h) found by the index the stream names; slot 0 of
+// 0x6E: a key-frame curve (include/path_curve.h) found by the index the stream names; slot 0 of
 // its table reads it (func_001B2840), slot 4 is told the frames of the object's parent and of
 // another object (func_001B28A8).
 struct C6E : BaseObject {
-    T2176* curve;           // 0x34
+    PathCurve* curve;           // 0x34
 };
 
 // 0x6F: an object id (-1 for none) resolved after loading (slot 15) into an object whose
