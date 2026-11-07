@@ -99,3 +99,4 @@ src/lib/sort.cpp	001F5CD0	001F66F8	-	-	-	-
 src/lib/random.cpp	001F66F8	001F6738	-	-	-	-
 src/lib/string_compare.cpp	001F6738	001F6880	-	-	-	-
 src/lib/substring.cpp	001F6880	001F6900	-	-	-	-
+src/lib/tlb.cpp	001FA9B0	001FAC00	0024EC30	00277D70	-	-

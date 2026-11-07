@@ -525,18 +525,6 @@ void func_001FA4D0(s32 index)
     *(s32*)off = 0;
 }
 
-s32 func_001F6D20(void);
-s32 func_001F6D30(void);
-s32 func_001FAA00(void);
-
-s32 func_001FA9C0(void)
-{
-    if (func_001F6D20() == 0x2000000) {
-        return func_001FAA00();
-    }
-    return func_001F6D30();
-}
-
 struct Obj_1F8480 {
     u8 pad0[0x10];
     s32 flags;
@@ -1435,8 +1423,6 @@ void func_001C29C8();
 void func_001E5358();
 void func_001E88B0();
 void func_00211DE0();
-extern u8 D_00277D70[], D_00277E40[], D_00277F60[], D_0027B184[];
-void* D_00277FE0[8] = { (void*)0xD, (void*)0x12, (void*)8, 0, D_00277D70, D_00277E40, D_00277F60, D_0027B184 };
 void* D_0027B130[21] = {
     (void*)0x12, func_0011AE38, func_0011C0E8, func_00137270,
     func_001460E0, func_0015F658, func_00167D48, func_0016C450,
@@ -1454,7 +1440,3 @@ extern const Msgs_24EBA0 D_0024EBA0 = {
     "TTY: send err %d\n",
     "TTY: err ti->wlen=%08x\n",
 };
-extern const char D_0024EC30[56] = "# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n";
-extern const char D_0024EC68[24] = "# TLB over flow (1)";
-extern const char D_0024EC80[24] = "# TLB over flow (2)";
-extern const char D_0024EC98[24] = "# TLB over flow (3)";
