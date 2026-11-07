@@ -195,7 +195,7 @@ extern void func_00121580(Attachment* self, Mat02* a1);
 
 typedef void (*VFn_1236C8)(void* self, void* arg);
 struct Obj_1236C8 { VFn_1236C8* vt; };
-void func_00123400(C22* node, StateTrigger* value);
+void func_00123400(CountedObject* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
@@ -1571,14 +1571,14 @@ struct Out_130B48 { u8 pad0[16]; };
 
 void func_00130540(f32 f12, Self_130B48* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
-void func_001233C0(C22* object)
+void func_001233C0(CountedObject* object)
 {
 	if (!object->hold)
 		CountStateTriggerDone(object->counter);
 	func_0013D278(object);
 }
 
-void func_00123400(C22* state, StateTrigger* value)
+void func_00123400(CountedObject* state, StateTrigger* value)
 {
     state->counter = value;
 }
@@ -1672,7 +1672,7 @@ void func_001236C8(StateTrigger* self)
     for (i = 0; i < self->count1; i++) {
         void* node = FindFirstObjectById(self->world, 0x104, self->items1[i], self);
         if (node && IsObjectOfKind(node, 0x22)) {
-            SetCountedObjectCounter((C22*)node, self);
+            SetCountedObjectCounter((CountedObject*)node, self);
             kept++;
         }
     }

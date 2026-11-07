@@ -238,7 +238,7 @@ struct Msg_158778 {
 };
 
 void func_001830D8(void* self);
-C77* func_00183058(void* a, void* b, void* c);
+MemberObject* func_00183058(void* a, void* b, void* c);
 
 void func_001B4AD0(CursorAnimator* self);
 AnimRecord* func_001B4688(s32 key);
@@ -305,7 +305,7 @@ struct Rec_158C60 {
 };
 
 Rec_158C60* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
-void func_00158288(Rec79* rec, C79* self);
+void func_00158288(Rec79* rec, RecordMember* self);
 
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
@@ -1391,7 +1391,7 @@ ASM_FUNC(func_001583E8);
 
 INCLUDE_ASM(func_00158480);
 
-void func_001585F8(C77* self)
+void func_001585F8(MemberObject* self)
 {
     StartObject(self);
     self->desc->m03(self);
@@ -1399,14 +1399,14 @@ void func_001585F8(C77* self)
 
 ASM_FUNC(func_00158630);
 
-void func_00158730(C77* a0)
+void func_00158730(MemberObject* a0)
 {
     Blob_158730 b;
     FillMemory(&b, 0, 0x50);
     a0->desc->m1B(a0, &b);
 }
 
-void func_00158778(C77* a0, s32 a1, s32 a2, Quad_158778* a3, Quad_158778* a4, f32 x, f32 y)
+void func_00158778(MemberObject* a0, s32 a1, s32 a2, Quad_158778* a3, Quad_158778* a4, f32 x, f32 y)
 {
     Msg_158778 m;
     m.a = a1;
@@ -1422,7 +1422,7 @@ void func_001587C0()
 {
 }
 
-void func_001587C8(C78* self, void* src)
+void func_001587C8(MemberGroup* self, void* src)
 {
     void* arr[8];
     s32 total;
@@ -1455,7 +1455,7 @@ void func_001587C8(C78* self, void* src)
             void** s = arr;
             s32 j;
             for (j = n; j != 0; j--, s++) {
-                C77* o = (C77*)*s;
+                MemberObject* o = (MemberObject*)*s;
                 if (IsObjectOfKind(o, 0x78) != 0 || IsObjectOfKind(o, 0x7A) != 0) {
                     o->desc->m03(o);
                     u32 c = self->count;
@@ -1470,21 +1470,21 @@ void func_001587C8(C78* self, void* src)
     }
 }
 
-void func_00158980(C78* self)
+void func_00158980(MemberGroup* self)
 {
     CopyObjectData(self);
     for (s32 i = 0; i < self->count; i++) {
-        C77* o = CreateObjectCopy(self->members[i], self->world, self->parent);
+        MemberObject* o = CreateObjectCopy(self->members[i], self->world, self->parent);
         o->desc->m03(o);
         self->members[i] = o;
         o->group = self;
     }
 }
 
-void func_00158A10(C78* self)
+void func_00158A10(MemberGroup* self)
 {
     for (s32 i = 0; i < self->count; i++) {
-        C77* it = self->members[i];
+        MemberObject* it = self->members[i];
         void (*fn)(BaseObject*) = it->desc->m0F;
         if (fn != 0) {
             fn(it);
@@ -1492,22 +1492,22 @@ void func_00158A10(C78* self)
     }
 }
 
-void func_00158A80(C78* self, void* message)
+void func_00158A80(MemberGroup* self, void* message)
 {
     for (s32 i = 0; i < self->count; i++) {
-        C77* it = self->members[i];
+        MemberObject* it = self->members[i];
         it->desc->m1B(it, message);
     }
 }
 
-void func_00158B00(C79* self)
+void func_00158B00(RecordMember* self)
 {
     InitTransformObject(self);
     self->id94 = -1;
     self->id98 = -1;
 }
 
-void func_00158B30(C79* self, void* stream)
+void func_00158B30(RecordMember* self, void* stream)
 {
     Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
     self->rec = p;
@@ -1532,13 +1532,13 @@ void func_00158B30(C79* self, void* stream)
     }
 }
 
-void func_00158C28(C79* self)
+void func_00158C28(RecordMember* self)
 {
     CopyObjectData(self);
     self->rec->uses += 1;
 }
 
-void func_00158C60(C79* self)
+void func_00158C60(RecordMember* self)
 {
     Rec79* r;
     Rec79* c;
@@ -1575,13 +1575,13 @@ void func_00158D38(void)
 {
 }
 
-void func_00158D40(C79* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
+void func_00158D40(RecordMember* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
     AddRangeEntry(p+16,a,b,x,y,z,w,self);
 }
 
-Rec79* func_00158DD8(C79* self, s32 own)
+Rec79* func_00158DD8(RecordMember* self, s32 own)
 {
     if (own == 1) {
         self->rec = (Rec79*)CloneSharedSpawnRecord(self->rec);
@@ -1589,7 +1589,7 @@ Rec79* func_00158DD8(C79* self, s32 own)
     return self->rec;
 }
 
-void func_00158E10(C7A* self)
+void func_00158E10(HoldingMember* self)
 {
     InitRecordMember(self);
     self->idAC = -1;
@@ -1597,7 +1597,7 @@ void func_00158E10(C7A* self)
     self->idB4 = -1;
 }
 
-void func_00158E48(C7A* self)
+void func_00158E48(HoldingMember* self)
 {
     Rec79* s;
     void* p;
@@ -1621,7 +1621,7 @@ void func_00158E48(C7A* self)
     }
 }
 
-void func_00158F10(C7A* self, s32 kind, BaseObject* other)
+void func_00158F10(HoldingMember* self, s32 kind, BaseObject* other)
 {
     if (kind == 2) {
         if (other == self->heldC0) {
@@ -1634,7 +1634,7 @@ void func_00158F10(C7A* self, s32 kind, BaseObject* other)
     }
 }
 
-void func_00158F80(C7A* self, void* message)
+void func_00158F80(HoldingMember* self, void* message)
 {
     Rec_158F80* r;
     f32* k;
@@ -1659,7 +1659,7 @@ void func_00158F80(C7A* self, void* message)
 
 s32 func_00159068(void* self)
 {
-    C7A* o = (C7A*)self;
+    HoldingMember* o = (HoldingMember*)self;
     if (o->fA0 == 0) {
         InitSoundParams(&o->fA0);
     }

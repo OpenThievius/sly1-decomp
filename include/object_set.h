@@ -30,14 +30,14 @@ struct ObjectSet : Collider {
 
 typedef char check_ObjectSet[sizeof(ObjectSet) == 0x5A0 ? 1 : -1];
 
-struct C2D : ObjectSet {
+struct FlaggedObjectSet : ObjectSet {
     s32 f5A0;               // 0x5A0: slot 0 (func_00199070) stores a table entry; the others pass it as an index
     u8 pad5A4[0x5B0 - 0x5A4];
 };
 
-typedef char check_C2D[sizeof(C2D) == 0x5B0 ? 1 : -1];
+typedef char check_FlaggedObjectSet[sizeof(FlaggedObjectSet) == 0x5B0 ? 1 : -1];
 
-struct C2E : ObjectSet {
+struct NumberedItem : ObjectSet {
     s32 f5A0;               // 0x5A0: an index into the world's bit table (func_00199C10, func_00199500, func_00199850)
     f32 f5A4;               // 0x5A4: func_00199500 (slot 16)
     f32 f5A8;               // 0x5A8
@@ -48,7 +48,7 @@ struct C2E : ObjectSet {
     u8* f5BC;               // 0x5BC: the object func_001999D0 (slot 73) was made for
 };
 
-typedef char check_C2E[sizeof(C2E) == 0x5C0 ? 1 : -1];
+typedef char check_NumberedItem[sizeof(NumberedItem) == 0x5C0 ? 1 : -1];
 
 #endif
 

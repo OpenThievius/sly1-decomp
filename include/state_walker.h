@@ -2,7 +2,7 @@
 // The handle func_001B6290(owner, a, key, b) makes for an object: taken from the world's pool
 // at World+0x1B88 (func_001B5EE0; func_001DB4C8 makes it of 0x100 entries of 0x40 bytes), its table
 // D_002198E8 stored at +0, and put in the world's list at +0x1B94 and the owner's at +0x48.
-// StateTrigger::f55C holds one, and so do C14+0x75C, C17+0x614, C1A+0xBBC and C24+0x6C8. func_001B6568,
+// StateTrigger::f55C holds one, and so do TintBlendCollider+0x75C, C17+0x614, ModeWalker+0xBBC and C24+0x6C8. func_001B6568,
 // func_001B6628, func_001B66A0 and func_001B6E28 (001B4000.cpp) read it. Written for this project
 // from what retail's code does (build/swarm/st3/groups.tsv, g1937).
 #ifndef STATE_WALKER_H

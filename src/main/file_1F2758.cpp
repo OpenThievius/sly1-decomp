@@ -146,8 +146,8 @@ struct Node_1F0758;
 
 void func_00182ED8(Node_1F0758* node);
 
-C7A* func_0015A418(World* host, s32 kind, s32 id, C7A* ctx);
-s32 func_0015A4F0(World* host, s32 kind, s32 a2, s32 a3, s32 max, C7A** out);
+HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
+s32 func_0015A4F0(World* host, s32 kind, s32 a2, s32 a3, s32 max, HoldingMember** out);
 
 struct Min_1F3C38 {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
@@ -587,12 +587,12 @@ s32 func_001F3C08(BaseObject* self, s32 arg)
     return func_00128150(self->parent, 0, (u8*)self + 0x50, arg);
 }
 
-C7A* func_001F3C38(s32 id, s32 parent)
+HoldingMember* func_001F3C38(s32 id, s32 parent)
 {
-    C7A* found = 0;
-    C7A* buf[64];
-    C7A* other;
-    C7A* any;
+    HoldingMember* found = 0;
+    HoldingMember* buf[64];
+    HoldingMember* other;
+    HoldingMember* any;
     s32 n;
     s32 i;
 
@@ -605,7 +605,7 @@ C7A* func_001F3C38(s32 id, s32 parent)
         n = GatherObjectsById(g_currentWorld, 0x205, 0x74, 0, 0x100, buf);
         n = Min_1F3C38::Of(n, 0x40);
         for (i = 0; i < n; i++) {
-            C7A* e = buf[i];
+            HoldingMember* e = buf[i];
             if (id != -1 && id == e->idB0) {
                 found = e;
                 break;

@@ -30,7 +30,7 @@ struct Pending_0014BD38 { u8 pad0[0x10]; s32 f10; };
 
 
 
-void func_001C91C8(C11* self);
+void func_001C91C8(NumberedAgent* self);
 
 
 void func_0012F6B0(void* handle, f32 scale);
@@ -46,11 +46,11 @@ struct Scratch_0014BDC8 {
     s32 words[8];
 };
 
-s32 func_001C8010(C12* self);
+s32 func_001C8010(ContactAgent* self);
 
 
 s32 func_001B9FB0(void* a, void* b);
-void func_001D7098(void* out, s32 mode, C12* owner);
+void func_001D7098(void* out, s32 mode, ContactAgent* owner);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_001DDA80(void* p);
 typedef void (*VFn_0014BEF8)(void* self, void* arg);
@@ -63,8 +63,8 @@ struct Scratch_0014BEF8 {
     s32 words[4];
 };
 
-s32 func_001C96D8(C12* self, Node_0014BEF8** slot);
-void func_001D7098(void* out, s32 mode, C12* owner);
+s32 func_001C96D8(ContactAgent* self, Node_0014BEF8** slot);
+void func_001D7098(void* out, s32 mode, ContactAgent* owner);
 void func_00149398(CameraController* self, Camera* owner);
 
 struct Tmp_1496C0 {
@@ -130,7 +130,7 @@ struct Obj_149508 {
     s32 f4C;
 };
 
-s32 func_001C96D8(C11* self);
+s32 func_001C96D8(NumberedAgent* self);
 extern u8 D_00261990[];
 void func_001920B0(void* n, void* out);
 extern u8 D_002483D0[];
@@ -706,19 +706,19 @@ void func_0014B3E0(s32 n, f32* m, f32* b, f32* x)
     }
 }
 
-void func_0014B550(C10* self)
+void func_0014B550(WorldListedAgent* self)
 {
     RegisterAgent(self);
     AppendToList(&self->world->list1CCC, self);
 }
 
-void func_0014B588(C10* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
+void func_0014B588(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
 
-void func_0014B5C0(C10* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
+void func_0014B5C0(WorldListedAgent* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
 
-void func_0014B608(C11* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
+void func_0014B608(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
 
-void func_0014B640(C11* self) { StartAgent(self); self->fC2C=D_0027C008++; }
+void func_0014B640(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
 
 void func_0014B678(State_0014B678* self, f32 value)
 {
@@ -732,7 +732,7 @@ ASM_FUNC(func_0014B6A8);
 
 ASM_FUNC(func_0014BB08);
 
-s32 func_0014BCE8(C11* self)
+s32 func_0014BCE8(NumberedAgent* self)
 {
     if (self->f724 == 0x10) {
         return 1;
@@ -747,7 +747,7 @@ s32 func_0014BCE8(C11* self)
     return 1;
 }
 
-void func_0014BD38(C11* self)
+void func_0014BD38(NumberedAgent* self)
 {
     EnterAgentState(self);
     switch (self->f724) {
@@ -762,7 +762,7 @@ void func_0014BD38(C11* self)
     }
 }
 
-s32 func_0014BDC8(C12* self)
+s32 func_0014BDC8(ContactAgent* self)
 {
     s32 result = ChooseAgentState(self);
     if (result == 0xB) return result;
@@ -781,14 +781,14 @@ s32 func_0014BDC8(C12* self)
     return result;
 }
 
-s32 func_0014BEA8(C12* self)
+s32 func_0014BEA8(ContactAgent* self)
 {
     if (func_001DDA80(self->world) != 0) return 0;
     if (self->f724 == 0xB || self->f724 == 0x10) return 0;
     return 1;
 }
 
-s32 func_0014BEF8(C12* self, Node_0014BEF8** slot)
+s32 func_0014BEF8(ContactAgent* self, Node_0014BEF8** slot)
 {
     if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
     if (HandleAgentObjectEvent(self, slot) == 0) return 0;
@@ -802,7 +802,7 @@ s32 func_0014BEF8(C12* self, Node_0014BEF8** slot)
     return 1;
 }
 
-void func_0014BF88(C12* self)
+void func_0014BF88(ContactAgent* self)
 {
     EnterAgentState(self);
     switch (self->f724) {

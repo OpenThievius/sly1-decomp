@@ -24,19 +24,19 @@ struct TransformObject : BaseObject {
     Mat3_73 rot;            // 0x50
 };
 
-struct C78;
+struct MemberGroup;
 
 // 0x77: a member of a group (class 0x78, func_001587C8 and func_00159478 fill it).
-struct C77 : TransformObject {
-    C78* group;             // 0x80
+struct MemberObject : TransformObject {
+    MemberGroup* group;             // 0x80
     u8 pad84[0x90 - 0x84];
 };
 
 // 0x78: a group of up to eight members; copying it copies them (func_00158980), messages
 // go to every member (func_00158A80).
-struct C78 : C77 {
+struct MemberGroup : MemberObject {
     s32 count;              // 0x90
-    C77* members[8];        // 0x94
+    MemberObject* members[8];        // 0x94
     u8 padB4[0xC0 - 0xB4];
 };
 
@@ -63,7 +63,7 @@ struct Rec79 {
 };
 
 // 0x79: a member with a shared record and two object ids (-1 for none).
-struct C79 : C77 {
+struct RecordMember : MemberObject {
     Rec79* rec;             // 0x90
     s32 id94;               // 0x94
     s32 id98;               // 0x98
@@ -71,7 +71,7 @@ struct C79 : C77 {
 };
 
 // 0x7A: three more ids, a delay for messages, and two objects it holds.
-struct C7A : C79 {
+struct HoldingMember : RecordMember {
     s32 fA0;                // 0xA0
     u8 padA4[0xAC - 0xA4];
     s32 idAC;               // 0xAC
@@ -86,10 +86,10 @@ struct C7A : C79 {
 
 // Each class ends at its descriptor's size.
 typedef char check_TransformObject[sizeof(TransformObject) == 0x80 ? 1 : -1];
-typedef char check_C77[sizeof(C77) == 0x90 ? 1 : -1];
-typedef char check_C78[sizeof(C78) == 0xC0 ? 1 : -1];
-typedef char check_C79[sizeof(C79) == 0xA0 ? 1 : -1];
-typedef char check_C7A[sizeof(C7A) == 0xD0 ? 1 : -1];
+typedef char check_MemberObject[sizeof(MemberObject) == 0x90 ? 1 : -1];
+typedef char check_MemberGroup[sizeof(MemberGroup) == 0xC0 ? 1 : -1];
+typedef char check_RecordMember[sizeof(RecordMember) == 0xA0 ? 1 : -1];
+typedef char check_HoldingMember[sizeof(HoldingMember) == 0xD0 ? 1 : -1];
 typedef char check_Rec79[sizeof(Rec79) == 0x200 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
@@ -97,21 +97,21 @@ void func_001F39F8(TransformObject* self);                       // 0x73 slot 0
 void func_001F3A40(TransformObject* self, void* stream);         // 0x73 slot 10
 void func_001F3A90(TransformObject* self, BaseObject* other);          // 0x73 slot 21
 void func_001F3AF0(TransformObject* self, BaseObject* other);          // 0x73 slot 22
-void func_001585F8(C77* self);                       // 0x77 slot 16
+void func_001585F8(MemberObject* self);                       // 0x77 slot 16
 void func_001587C0();                                // 0x77 slot 27 (empty)
-void func_00158980(C78* self);                       // 0x78 slot 9
-void func_001587C8(C78* self, void* stream);         // 0x78 slot 10
-void func_00158A10(C78* self);                       // 0x78 slot 15
-void func_00158A80(C78* self, void* message);        // 0x78 slot 27
-void func_00158B00(C79* self);                       // 0x79 slot 0
-void func_00158C28(C79* self);                       // 0x79 slot 9
-void func_00158B30(C79* self, void* stream);         // 0x79 slot 10
-void func_00158C60(C79* self);                       // 0x79 slot 15
+void func_00158980(MemberGroup* self);                       // 0x78 slot 9
+void func_001587C8(MemberGroup* self, void* stream);         // 0x78 slot 10
+void func_00158A10(MemberGroup* self);                       // 0x78 slot 15
+void func_00158A80(MemberGroup* self, void* message);        // 0x78 slot 27
+void func_00158B00(RecordMember* self);                       // 0x79 slot 0
+void func_00158C28(RecordMember* self);                       // 0x79 slot 9
+void func_00158B30(RecordMember* self, void* stream);         // 0x79 slot 10
+void func_00158C60(RecordMember* self);                       // 0x79 slot 15
 void func_00158D38(void);                            // 0x79 slot 27 (empty)
-void func_00158E10(C7A* self);                       // 0x7A slot 0
-void func_00158F10(C7A* self, s32 kind, BaseObject* other); // 0x7A slot 13
-void func_00158E48(C7A* self);                       // 0x7A slot 15
-void func_00158F80(C7A* self, void* message);        // 0x7A slot 27
-Rec79* func_00158DD8(C79* self, s32 own);            // the record, made the object's own first
+void func_00158E10(HoldingMember* self);                       // 0x7A slot 0
+void func_00158F10(HoldingMember* self, s32 kind, BaseObject* other); // 0x7A slot 13
+void func_00158E48(HoldingMember* self);                       // 0x7A slot 15
+void func_00158F80(HoldingMember* self, void* message);        // 0x7A slot 27
+Rec79* func_00158DD8(RecordMember* self, s32 own);            // the record, made the object's own first
 
 #endif

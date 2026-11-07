@@ -169,7 +169,7 @@ void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
 void* func_00183058(void* item, void* x, void* self);
-void func_0014F900(C23* self);
+void func_0014F900(PooledHolder* self);
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
@@ -232,8 +232,8 @@ void* func_0018D5C0(u32 n);
 // NEAR: the calls and branches match; the store of 1 into the inner object comes before the
 // float load of D_0026185C in retail, ours schedules the float load first (5 instructions).
 
-s32 func_0014FEC0(C23* self);
-PooledObject* func_00150338(C23* self);
+s32 func_0014FEC0(PooledHolder* self);
+PooledObject* func_00150338(PooledHolder* self);
 s32 func_00182FC8(PooledObject* p);
 void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
@@ -241,7 +241,7 @@ void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
 
 s32 func_00152720(void* p);
-void func_00150298(C23* self);
+void func_00150298(PooledHolder* self);
 void func_001B9AE0(Collider* o, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
@@ -253,12 +253,12 @@ f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
 void func_001B93F8(Collider* self);
 void func_0014F270(PooledObject* self, f32 f);
 
-void func_0013D068(C23* self);
+void func_0013D068(PooledHolder* self);
 void func_001B6598(void* p, s32* out);
 void func_001B6568(void* p, s32* out);
-void func_0014FDA8(C23* self, s32* state);
-void func_00150008(C23* self);
-void func_0014FCE8(C23* self, s32 state);
+void func_0014FDA8(PooledHolder* self, s32* state);
+void func_00150008(PooledHolder* self);
+void func_0014FCE8(PooledHolder* self, s32 state);
 
 struct Slot_14CBA8 {
     void* p0;
@@ -920,13 +920,13 @@ ASM_FUNC(func_0014F168);
 
 ASM_FUNC(func_0014F270);
 
-void func_0014F740(C23* self)
+void func_0014F740(PooledHolder* self)
 {
     InitPlayerFlaggedCollider(self);
     self->f6C0 = -1;
 }
 
-void func_0014F770(C23* self, s32 kind, void* msg)
+void func_0014F770(PooledHolder* self, s32 kind, void* msg)
 {
     s32 result;
 
@@ -950,7 +950,7 @@ void func_0014F770(C23* self, s32 kind, void* msg)
     }
 }
 
-void func_0014F850(C23* self)
+void func_0014F850(PooledHolder* self)
 {
     s32 i = 0;
     PostLoadPlacedObject(self);
@@ -969,14 +969,14 @@ void func_0014F850(C23* self)
     }
 }
 
-void func_0014F900(C23* self)
+void func_0014F900(PooledHolder* self)
 {
     if (g_player != 0) {
         self->f6DC = (s32)g_player->f24F8;
     }
 }
 
-void func_0014F920(C23* self)
+void func_0014F920(PooledHolder* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
@@ -1005,7 +1005,7 @@ void func_0014F920(C23* self)
     self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
 }
 
-void func_0014FA88(C23* self)
+void func_0014FA88(PooledHolder* self)
 {
     s32 st[2];
     UpdateMaskedCollider(self);
@@ -1046,7 +1046,7 @@ void func_0014FA88(C23* self)
     }
 }
 
-s32 func_0014FBE0(C23* self, Collider* obj)
+s32 func_0014FBE0(PooledHolder* self, Collider* obj)
 {
     if (IsObjectOfKind(obj, 0x46) != 0) {
         if (((PooledObject*)obj)->taker == self) {
@@ -1056,7 +1056,7 @@ s32 func_0014FBE0(C23* self, Collider* obj)
     return TestCollidersMayContact(self, obj);
 }
 
-void func_0014FC38(C23* self)
+void func_0014FC38(PooledHolder* self)
 {
     s32 status;
 
@@ -1079,7 +1079,7 @@ void func_0014FC38(C23* self)
     func_0013D278(self);
 }
 
-void func_0014FCE8(C23* self, s32 code)
+void func_0014FCE8(PooledHolder* self, s32 code)
 {
     s32 r;
 
@@ -1104,7 +1104,7 @@ void func_0014FCE8(C23* self, s32 code)
     SetStateWalkerTarget(self->p740, code);
 }
 
-void func_0014FDA8(C23* self, s32* state)
+void func_0014FDA8(PooledHolder* self, s32* state)
 {
     if (*state == 0x2B8) {
         ((Held23*)self->p734->f200)->f1C = 0;
@@ -1130,7 +1130,7 @@ void func_0014FDA8(C23* self, s32* state)
     }
 }
 
-s32 func_0014FEC0(C23* self) {
+s32 func_0014FEC0(PooledHolder* self) {
     PooledObject* s0;
 
     if (self->p6C8 != 0) {
@@ -1162,7 +1162,7 @@ s32 func_0014FEC0(C23* self) {
 
 ASM_FUNC(func_00150008);
 
-void func_00150298(C23* self)
+void func_00150298(PooledHolder* self)
 {
 	ListFrame frame;
 	if (self->p6CC != 0) return;
@@ -1178,7 +1178,7 @@ void func_00150298(C23* self)
 	if (best != 0) { SetPooledObjectState(best, 5); self->p6CC = best; }
 }
 
-PooledObject* func_00150338(C23* state)
+PooledObject* func_00150338(PooledHolder* state)
 {
 	for (s32 i = 0; i < state->f78C; ++i) {
 		PooledObject* item = (PooledObject*)state->f790[i];
@@ -1190,7 +1190,7 @@ PooledObject* func_00150338(C23* state)
 	return 0;
 }
 
-void func_001503E0(C23* self, void* item)
+void func_001503E0(PooledHolder* self, void* item)
 {
     u32 n = (u32)self->count744;
     if (n < 8) {
@@ -1199,13 +1199,13 @@ void func_001503E0(C23* self, void* item)
     }
 }
 
-void func_00150408(C23* self)
+void func_00150408(PooledHolder* self)
 {
     self->f78C = 0;
     self->f7B0 = 0;
 }
 
-void func_00150418(C23* self, void* event)
+void func_00150418(PooledHolder* self, void* event)
 {
     if (IsObjectOfKind(event, 7)) {
         self->f7B0 = 1;

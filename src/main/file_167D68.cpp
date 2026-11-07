@@ -26,7 +26,7 @@ void* func_001EFA30(void);
 void func_001EFA60(void* a, void* b);
 
 void func_001C6F48(void* self);
-void func_00167D68(C0A* self);
+void func_00167D68(ConeAgent* self);
 
 void func_001B7B78(void* self);
 void func_00152600(void* data, void* self);
@@ -438,7 +438,7 @@ static s32 D_002BE46C;
 static s32 D_002BE470;
 static s32 D_002BE474;
 
-void func_00167D68(C0A* self)
+void func_00167D68(ConeAgent* self)
 {
     InitAgent(self);
     self->fC20 = 1000.0f;
@@ -454,7 +454,7 @@ void func_00167D68(C0A* self)
     self->f74C = 1.04719755f;
 }
 
-void func_00167E08(C0A* self)
+void func_00167E08(ConeAgent* self)
 {
     Out_167E08 out;
     s32 i;
@@ -1183,7 +1183,7 @@ void func_00169FC0(Self_169FC0* self, f32* out, void* a2, void* a3)
     *out = f.x;
 }
 
-void func_0016A100(C7F* self)
+void func_0016A100(TargetPoint* self)
 {
     InitObject(self);
     f32 k = 3.4028235e+38f;
@@ -1192,19 +1192,19 @@ void func_0016A100(C7F* self)
     self->f70 = k;
 }
 
-void func_0016A140(C7F* self)
+void func_0016A140(TargetPoint* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetPointList, self);
 }
 
-void func_0016A178(C7F* self)
+void func_0016A178(TargetPoint* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetPointList, self);
 }
 
-void func_0016A1B0(C7F* self)
+void func_0016A1B0(TargetPoint* self)
 {
     if (self->targetId != -1) {
         Res_0015A448* r = (Res_0015A448*)FindFirstObjectByIdMode4(self->world, self->targetId, self->parent);
@@ -1213,7 +1213,7 @@ void func_0016A1B0(C7F* self)
     }
 }
 
-void func_0016A1F8(C7F* self)
+void func_0016A1F8(TargetPoint* self)
 {
     KeptBits saved = self->keep;
     CopyObjectData(self);

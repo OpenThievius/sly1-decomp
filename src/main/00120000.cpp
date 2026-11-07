@@ -160,7 +160,7 @@ extern void func_00121580(Attachment* self, Mat02* a1);
 typedef void (*VFn_1236C8)(void* self, void* arg);
 struct Obj_1236C8 { VFn_1236C8* vt; };
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_00123400(C22* node, StateTrigger* value);
+void func_00123400(CountedObject* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 

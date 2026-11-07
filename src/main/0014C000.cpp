@@ -131,7 +131,7 @@ void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
 void* func_00183058(void* item, void* x, void* self);
-void func_0014F900(C23* self);
+void func_0014F900(PooledHolder* self);
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
@@ -171,8 +171,8 @@ extern const Fn_Table D_00217708[];
 // float load of D_0026185C in retail, ours schedules the float load first (5 instructions).
 extern u8 D_00248D30[];
 
-s32 func_0014FEC0(C23* self);
-PooledObject* func_00150338(C23* self);
+s32 func_0014FEC0(PooledHolder* self);
+PooledObject* func_00150338(PooledHolder* self);
 s32 func_00182FC8(PooledObject* p);
 void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
@@ -183,7 +183,7 @@ void func_001853F0(Held23* a, PooledObject* b, u8* c);
 extern u8 D_00248D30[];
 
 s32 func_00152720(void* p);
-void func_00150298(C23* self);
+void func_00150298(PooledHolder* self);
 void func_001B9AE0(Collider* o, s32 a, s32 b, s32 c, s32 d);
 
 
@@ -195,12 +195,12 @@ void func_0014F270(PooledObject* self, f32 f);
 
 
 
-void func_0013D068(C23* self);
+void func_0013D068(PooledHolder* self);
 void func_001B6598(void* p, s32* out);
 void func_001B6568(void* p, s32* out);
-void func_0014FDA8(C23* self, s32* state);
-void func_00150008(C23* self);
-void func_0014FCE8(C23* self, s32 state);
+void func_0014FDA8(PooledHolder* self, s32* state);
+void func_00150008(PooledHolder* self);
+void func_0014FCE8(PooledHolder* self, s32 state);
 
 
 

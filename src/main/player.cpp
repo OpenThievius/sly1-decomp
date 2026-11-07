@@ -1534,8 +1534,8 @@ extern f32 D_00275C60[];
 extern Rgba4 D_002623E0;
 
 f32 func_00205210(f32 x);
-void func_00126A48(C1B* o, u32 value);
-void func_00125C90(C1B* o, void* s, void* out);
+void func_00126A48(ModeCollider* o, u32 value);
+void func_00125C90(ModeCollider* o, void* s, void* out);
 
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
@@ -1545,11 +1545,11 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void func_001B9338(C1B* self, f32 t);
-void func_001794E0(C1B* self, Vec02* a, Vec02* b);
+void func_001B9338(ModeCollider* self, f32 t);
+void func_001794E0(ModeCollider* self, Vec02* a, Vec02* b);
 void func_00127E60(Sub_179590* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void func_001B9058(C1B* self, void* buf, f32 f, void* d1, void* d2, void* d3);
-void func_001B9D10(C1B* self, f32 scale, void* out, void* data);
+void func_001B9058(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
+void func_001B9D10(ModeCollider* self, f32 scale, void* out, void* data);
 
 
 struct Q_178D98 {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the two slots written in D_0026D348 on code 0x3F3 are at 0x574 and 0x578 (not 0x264 and 0x268).
-void func_00197F10(C18* self, s32 kind, void* rec)
+void func_00197F10(GaugeCollider* self, s32 kind, void* rec)
 {
     s32 code;
     HandleSwitchedColliderNotification(self, kind, rec);

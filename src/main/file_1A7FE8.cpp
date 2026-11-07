@@ -59,25 +59,25 @@ void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
-void func_001C72A0(C0D* self);
-void func_001DDC38(void* sub, C0D* self);
+void func_001C72A0(GaugeBarAgent* self);
+void func_001DDC38(void* sub, GaugeBarAgent* self);
 
 
 s32 func_001DDA80(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void func_001C8C08(C0D* self);
-void func_001C8418(C0D* self, void* p);
+void func_001C8C08(GaugeBarAgent* self);
+void func_001C8418(GaugeBarAgent* self, void* p);
 
 
-void func_001C8E28(C0D* self);
-void func_001C8BC0(C0D* self);
+void func_001C8E28(GaugeBarAgent* self);
+void func_001C8BC0(GaugeBarAgent* self);
 
 
 extern u8 D_00264A40[];
 
-void func_001C91C8(C0D* self);
+void func_001C91C8(GaugeBarAgent* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(u8* p);
 
@@ -984,20 +984,20 @@ void func_001A97C8(u8* self, f32* out, int x)
 
 ASM_FUNC(func_001A9868);
 
-void func_001A98F8(C0D* self)
+void func_001A98F8(GaugeBarAgent* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
 }
 
-s32 func_001A9928(C0D* self)
+s32 func_001A9928(GaugeBarAgent* self)
 {
     if (func_001DDA80(self->world) != 0)
         return 0;
     return self->fC24;
 }
 
-void func_001A9960(C0D* self)
+void func_001A9960(GaugeBarAgent* self)
 {
     UpdateAgentGoal(self);
     if (self->f724 == 0x10) {
@@ -1007,14 +1007,14 @@ void func_001A9960(C0D* self)
     }
 }
 
-void func_001A99B8(C0D* self)
+void func_001A99B8(GaugeBarAgent* self)
 {
     UpdateAgentState(self);
     if (self->f724 == 0x10)
         func_001C8BC0(self);
 }
 
-void func_001A99F8(C0D* self)
+void func_001A99F8(GaugeBarAgent* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0xB) {
@@ -1023,7 +1023,7 @@ void func_001A99F8(C0D* self)
     }
 }
 
-void func_001A9A40(C0D* self)
+void func_001A9A40(GaugeBarAgent* self)
 {
     u8* s = (u8*)self;
     UpdateAgent(self);
@@ -1047,7 +1047,7 @@ void func_001A9A98(void)
 
 ASM_FUNC(func_001A9AE8);
 
-void func_001A9C58(C0D* self, s32 a, s32 b, s32 c)
+void func_001A9C58(GaugeBarAgent* self, s32 a, s32 b, s32 c)
 {
     self->fC14 = a;
     self->fC18 = b;

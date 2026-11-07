@@ -156,7 +156,7 @@ struct __attribute__((aligned(16))) Quad_1999D0 { s32 a, b, c, d; };
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00128018(void* a0, s32 a1, void* a2, void* a3);
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_00199850(C2E* self);
+void func_00199850(NumberedItem* self);
 void func_001518B8(s32 x);
 struct VObj_19A1E0 { s32 (**vtbl)(VObj_19A1E0*, C17*); };
 struct Pad_19A1E0 { u32 flags; u8 pad[0x74]; };
@@ -454,20 +454,20 @@ void func_00199000(ObjectSet* self, Elem_199000* elems, s32 idx)
     }
 }
 
-void func_00199070(C2D* self)
+void func_00199070(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
     self->f5A0 = (s32)TakeFlagTableIndex(g_flagTable);
 }
 
-void func_001990A8(C2D* obj)
+void func_001990A8(FlaggedObjectSet* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-s32 func_001990E0(C2D* self)
+s32 func_001990E0(FlaggedObjectSet* self)
 {
     s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
@@ -476,7 +476,7 @@ s32 func_001990E0(C2D* self)
     return r;
 }
 
-void func_00199138(C2D* self)
+void func_00199138(FlaggedObjectSet* self)
 {
     SetFlagTableBit(g_flagTable, self->f5A0);
     CollectObjectSet(self);
@@ -546,13 +546,13 @@ void func_001993C0(s32 a0) {
     }
 }
 
-void func_001993F0(C2E* obj)
+void func_001993F0(NumberedItem* obj)
 {
     InitObjectSet(obj);
     obj->f5A0 = obj->world->count2300++;
 }
 
-void func_00199428(C2E* self)
+void func_00199428(NumberedItem* self)
 {
     LoadObjectSet(self);
     s32 i = 0x318;
@@ -571,14 +571,14 @@ void func_00199428(C2E* self)
     }
 }
 
-void func_001994C8(C2E* obj)
+void func_001994C8(NumberedItem* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-void func_00199500(C2E* self)
+void func_00199500(NumberedItem* self)
 {
     s32 neg;
     s32 one;
@@ -620,7 +620,7 @@ void func_00199500(C2E* self)
 
 ASM_FUNC(func_00199698);
 
-void func_00199850(C2E* self)
+void func_00199850(NumberedItem* self)
 {
     f32 zf;
     G27C230* ctx = g_currentEntry;
@@ -662,7 +662,7 @@ L980:
     }
 }
 
-void func_001999D0(C2E* self)
+void func_001999D0(NumberedItem* self)
 {
     Quad_1999D0 loc;
     Obj_1999D0* g = (Obj_1999D0*)D_0026C948;
@@ -684,7 +684,7 @@ void func_001999D0(C2E* self)
     CollectObjectSet(self);
 }
 
-void func_00199AF0(C2E* p)
+void func_00199AF0(NumberedItem* p)
 {
     ((VFn_199AF0*)p->desc)[77](p);
 }
@@ -710,7 +710,7 @@ void func_00199B18(Actor_199B18* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void func_00199C10(C2E* self, s32* out)
+void func_00199C10(NumberedItem* self, s32* out)
 {
     s32 n = self->f5A0;
     s32 byte = n / 8;
@@ -726,7 +726,7 @@ void func_00199C58(void)
     ApplyColliderPendingImpulse();
 }
 
-s32 func_00199C78(C2E* self, ObjectEvent* a1)
+s32 func_00199C78(NumberedItem* self, ObjectEvent* a1)
 {
     if (a1->eventFlags & 0x8) {
         ((VFnA_199C78)((void**)self->desc)[25])(self, 0);

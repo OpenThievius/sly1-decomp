@@ -50,25 +50,25 @@ void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
-void func_001C72A0(C0D* self);
-void func_001DDC38(void* sub, C0D* self);
+void func_001C72A0(GaugeBarAgent* self);
+void func_001DDC38(void* sub, GaugeBarAgent* self);
 
 
 s32 func_001DDA80(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void func_001C8C08(C0D* self);
-void func_001C8418(C0D* self, void* p);
+void func_001C8C08(GaugeBarAgent* self);
+void func_001C8418(GaugeBarAgent* self, void* p);
 
 
-void func_001C8E28(C0D* self);
-void func_001C8BC0(C0D* self);
+void func_001C8E28(GaugeBarAgent* self);
+void func_001C8BC0(GaugeBarAgent* self);
 
 
 extern u8 D_00264A40[];
 
-void func_001C91C8(C0D* self);
+void func_001C91C8(GaugeBarAgent* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(u8* p);
 
