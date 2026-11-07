@@ -546,7 +546,10 @@ struct ConeAgent : Agent {
     f32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
     s32 fC34;               // 0xC34
-    u8 padC38[0xC40 - 0xC38];
+    union {
+        s32 fC38;           // 0xC38: set when the target was found free (func_00167F10)
+        s64 fC38q;          // 0xC38: the same, tested as a doubleword
+    };
     s32 fC40;               // 0xC40
     u8 padC44[0xC50 - 0xC44];
 };
