@@ -13,6 +13,7 @@
 #include "pad_record.h"
 #include "game_progress.h"
 #include "world.h"
+#include "vu0.h"
 
 struct SpanHead {
     f32 c0, c1, c2, c3;
@@ -43,6 +44,7 @@ struct PanelColor
 };
 
 f32 Cosine(f32 x);
+void ConvertPositionToWorld(void* obj, Vec02* out);
 void BeginGifTag(PacketWriter* gs, s32 a, s32 b, u64 c);
 void AddGifRgbaEntry(PacketWriter* gs, u32 c);
 void AddGifXyzfNoDrawEntry(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
@@ -75,7 +77,7 @@ struct BorderColorMix
 };
 
 
-struct CameraHeading { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
+struct CameraHeading { u8 pad0[0x40]; s32 f40[4]; u8 pad[0x468 - 0x50]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
 
 extern s32 g_padRouting;
 extern f32 g_frameDt;
@@ -832,7 +834,18 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     AddGifXyzfEntry(gs, 0x9400, 0x80C0, 0, 0);
 }
 
-INCLUDE_ASM(func_00134AA0);
+s32 func_00134AA0(void** a, void** b)
+{
+    Vec02 pa;
+    Vec02 pb;
+    ConvertPositionToWorld(*a, &pa);
+    ConvertPositionToWorld(*b, &pb);
+    u128 cam = Vu0::Q(g_camera->f40);
+    u128 da = Vu0::Sub(cam, Vu0::Q(pa));
+    u128 db = Vu0::Sub(cam, Vu0::Q(pb));
+    s32 c = Vu0::ToFloat(Vu0::Dot(da, da)) < Vu0::ToFloat(Vu0::Dot(db, db));
+    return c == 0 ? -1 : 1;
+}
 
 INCLUDE_RODATA(D_00249CF8);
 INCLUDE_ASM(func_00134B48);
