@@ -19,13 +19,7 @@
 s32 D_00261314 = 0;
 s32 D_00261318 = 0;
 
-typedef u64 Quad_136040 __attribute__((mode(TI)));
-
 f32 func_001EAFE0(f32 x, f32 y);
-
-struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
-
-void func_001A1F40(Vec_135E48* v, s32 mode);
 
 BufferedStream* func_00137290(BufferedStream* self, s32 a1, s32 a2, s32 a3)
 {
@@ -110,9 +104,7 @@ void func_00137398(BufferedStream* self, s32 a1, s32 a2) { self->remaining = a1;
 void func_001AA8C8(void* self);
 void func_00150790(void* obj, s32 mode);
 
-struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
 
-void func_00150790(Child_136EF8* obj, s32 mode);
 
 s32 func_00137328(void* a, void* b, s32 c);
 
@@ -201,7 +193,7 @@ void func_00160D30(u32* out);
 f32 func_00205210(f32 x);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
 
-struct Strm_137490 {
+struct SectorStreamState {
     s32 flags;      // 0x00
     s32 f04;
     s32 base;       // 0x08
@@ -221,7 +213,7 @@ struct Strm_137490 {
     s32 writeIdx;   // 0x58
 };
 
-struct Min_137490 {
+struct MinOf {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
 };
 
@@ -233,15 +225,15 @@ s32 func_0011E2E8(void);
 void func_00140CC8(s32 a, s32 b, s32 c);
 void func_00140C28(s32 a, s32 b, s32 c);
 
-struct Io_137490 {
-    static void Read(Strm_137490* self, s32 sector, s32 len, s32 dst)
+struct SectorReadIssue {
+    static void Read(SectorStreamState* self, s32 sector, s32 len, s32 dst)
     {
         if (self->flags & 2) StartLowLevelDiscReadUntilAccepted(sector, len, dst);
         else StartDiscReadUntilAccepted(sector, len, dst);
     }
 };
 
-void func_00137490(Strm_137490* self)
+void func_00137490(SectorStreamState* self)
 {
     self->pos += self->rem;
     self->rem = 0;
@@ -260,7 +252,7 @@ void func_00137490(Strm_137490* self)
             s32 got;
             if (self->flags & 2) got = GetDiscReadPosition();
             else got = 0;
-            got = Min_137490::Of(got + self->start, self->size);
+            got = MinOf::Of(got + self->start, self->size);
             if (self->done < got) {
                 self->done = got;
             } else {
@@ -284,14 +276,14 @@ void func_00137490(Strm_137490* self)
                         s32 len = ((self->size - done + 0x7FF) & -0x800) / 0x800;
                         self->start = done;
                         s32 sector = self->sector + done / 0x800;
-                        Io_137490::Read(self, sector, len, dst);
+                        SectorReadIssue::Read(self, sector, len, dst);
                     }
                 }
             }
         }
         s32 cur = self->cur;
         if (cur < self->count && self->size == 0 && self->left > 0) {
-            s32 size = Min_137490::Of(self->left, chunk);
+            s32 size = MinOf::Of(self->left, chunk);
             self->done = 0;
             self->size = size;
             s32 n = (self->writeIdx + 1) % self->count;
@@ -300,7 +292,7 @@ void func_00137490(Strm_137490* self)
             s32 dst = self->base + n * chunk;
             s32 sector = self->sector;
             self->writeIdx = n;
-            Io_137490::Read(self, sector, len, dst);
+            SectorReadIssue::Read(self, sector, len, dst);
         }
         if (self->cur == 0) {
             self->rem = 0;
@@ -309,32 +301,23 @@ void func_00137490(Strm_137490* self)
             s32 lim = chunk;
             if (self->cur == singleBuffer) lim = self->done;
             s32 avail = lim - (self->pos - (self->base + self->readIdx * chunk));
-            self->rem = Min_137490::Of(avail, 0x8000);
+            self->rem = MinOf::Of(avail, 0x8000);
         }
     } while (self->rem == 0 && self->left > 0);
 }
 
 extern s32 func_001F8DB8(void*, s32, s32);
-struct Obj_1377C0 { u8 pad0[8]; s32 f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; s32 f20; s32 f24; u8 pad28[0xC]; void* f34; };
-struct Min_1377C0 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
-void func_001377C0(Obj_1377C0* self)
+struct FileStreamState { u8 pad0[8]; s32 f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; s32 f20; s32 f24; u8 pad28[0xC]; void* f34; };
+void func_001377C0(FileStreamState* self)
 {
     s32 size = self->fC;
     s32 limit = self->f14;
     self->f20 = self->f8;
-    size = (size > 0x8000) ? Min_1377C0::Of(0x8000, limit) : Min_1377C0::Of(size, limit);
+    size = (size > 0x8000) ? MinOf::Of(0x8000, limit) : MinOf::Of(size, limit);
     self->f24 = ReadFile(self->f34, self->f20, size);
 }
 
-struct State_001365A8 { u8 pad[0x300]; f32 value;
-    void set(f32 x, f32 lo, f32 hi) {
-        if (x < lo) x = lo;
-        else if (hi < x) x = hi;
-        value = x;
-    }
-};
-
-struct Max_137820 { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
+struct MaxOf { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
 void func_001377C0(void* self);
 void func_00137490(void* self);
 void func_00193288(void* self, s32 value);
@@ -345,60 +328,15 @@ void func_00137820(BufferedStream* self)
     case 1: RefillBufferedStreamFromSectors(self); break;
     }
     s32 value = self->f14 - self->nextCount;
-    value = Max_137820::Of(0, value);
+    value = MaxOf::Of(0, value);
     self->f14 = value;
     if (self->f30) UpdateLoadProgress((void*)self->f30, value);
 }
 
-struct Item_135550;
-struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
-struct Host_135550;
 
-struct Next_135550 {
-    static Item_135550* Of(Iter_135550* it)
-    {
-        Item_135550* obj = *(Item_135550**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-struct Begin_135550 {
-    static void Of(Iter_135550* it, List_135550* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_135550*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
-
-void func_0012F6B0(Item_135550* item, f32 x);
-
-struct Obj_136238;
-struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
-struct Obj_136238 {
-    VT_136238* vt;
-    u8 pad4[0x25C - 4];
-    s32 f25C;
-    u8 pad260[0x320 - 0x260];
-    s32 f320;
-    struct Sub_136238* f324;
-    s32 f328;
-    s32 f32C;
-};
-
-
-void func_001BEA50(void);
-void func_001BEA28(void);
-s32 func_00160D10(void);
-void func_00135E78(Obj_136238* self, s32 state, s32 flag);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void func_00192190(void* p);
 
-struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void func_00137820(BufferedStream* d);
 void func_001F5A58(void* dst, void* src, s32 n);
@@ -463,7 +401,6 @@ void func_001378A0(BufferedStream* d)
     d->f28 = flags;
 }
 
-typedef void (*VFn_1356C0)(void* self);
 
 extern f32 D_0026185C;
 
@@ -526,17 +463,15 @@ void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
     } while (remaining > 0);
 }
 
-struct Ring_137B60 { u8 pad0[0x18]; s32 head; s32 size; };
-
-void func_00137B60(Ring_137B60* self, s32 n)
+void func_00137B60(BufferedStream* self, s32 n)
 {
-    s32 head = self->head;
+    s32 head = self->ptr;
     s32 t = head - 1;
     t = t + n;
     s32 aligned = t & -n;
     s32 delta = aligned - head;
-    self->head = aligned;
-    self->size -= delta;
+    self->ptr = aligned;
+    self->remaining -= delta;
 }
 
 s32 func_00137B90(BufferedStream* self)
@@ -601,7 +536,6 @@ s32 func_00137CC0(BufferedStream* self)
     return value;
 }
 
-struct SlotEntry_135E78 { void* handle; s32 extra; };
 
 void func_0019EBE8(void* handle);
 void func_001A1DF0(void* handle, s32 mode);
@@ -796,7 +730,7 @@ void func_00138518(void* self)
     ReadBufferedStreamBytes(self, n, 0);
 }
 
-struct Range_138550 {
+struct OptionalBlock {
     s32 w[8];
 };
 
@@ -805,7 +739,7 @@ u32 func_0018D568(s32 size, void* src);
 
 void func_00138550(void* self, u32* out)
 {
-    Range_138550 r;
+    OptionalBlock r;
     ReadBufferedStreamBytes(self, 0x20, &r);
     if (r.w[1] != r.w[7]) {
         *out = CopyToFrontMemory(0x20, &r);
@@ -817,17 +751,17 @@ void func_00138550(void* self, u32* out)
 void func_001B7968(Collider* self);
 
 
-struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; Collider* fC; };
+struct ContactPairLink { s32 f0; s32 f4; ContactPairLink* f8; Collider* fC; };
 
-Link_1385A0* func_00138738(World* w, s32 a, s32 b);
-Link_1385A0* func_00138788(World* w, s32 a, s32 b);
+ContactPairLink* func_00138738(World* w, s32 a, s32 b);
+ContactPairLink* func_00138788(World* w, s32 a, s32 b);
 void func_001861E8(World* w, s32 a);
 void func_00129DF8(Collider* e);
-void func_001B5F28(u8* w, Link_1385A0* l);
+void func_001B5F28(u8* w, ContactPairLink* l);
 
 void func_001385A0(World* w, s32 a, s32 b, u8 set, u8 clr) {
-    Link_1385A0* n1;
-    Link_1385A0* n2;
+    ContactPairLink* n1;
+    ContactPairLink* n2;
     s32 ia = (a - (s32)w->tables) >> 4;
     s32 ib = (b - (s32)w->tables) >> 4;
     u8* p = (u8*)w->buf1ADC + (ia << 8) + ib;
@@ -861,15 +795,15 @@ void func_001385A0(World* w, s32 a, s32 b, u8 set, u8 clr) {
     }
 }
 
-struct Node_138738 { s32 a0; Node_138738* next; void* a8; s32 value; };
-struct List_138738 { Node_138738* head; };
-struct Src_138738 { u8 pad0[4]; s32 value4; };
+struct ContactRowNode { s32 a0; ContactRowNode* next; void* a8; s32 value; };
+struct ContactRowList { ContactRowNode* head; };
+struct ContactRowSource { u8 pad0[4]; s32 value4; };
 
 void* func_001B5EC0(void* pool);
 
-Node_138738* func_00138738(World* self, List_138738* list, Src_138738* src)
+ContactRowNode* func_00138738(World* self, ContactRowList* list, ContactRowSource* src)
 {
-    Node_138738* n = (Node_138738*)func_001B5EC0((u8*)self + 0x1AF0);
+    ContactRowNode* n = (ContactRowNode*)func_001B5EC0((u8*)self + 0x1AF0);
     n->a0 = 0;
     n->value = src->value4;
     n->next = list->head;
@@ -920,7 +854,7 @@ s32 func_001387F8(void* self, void* other)
     return r;
 }
 
-struct Slot_138828 {
+struct SweepAxisSlot {
     s32 flag;
     void* owner;
     void* link;
@@ -939,7 +873,7 @@ void func_00138828(World* self, void* arg)
     s32 n = 2;
     do {
         n--;
-        Slot_138828* e = (Slot_138828*)((u8*)t->buf1AD8 + off + t->count38 * stride);
+        SweepAxisSlot* e = (SweepAxisSlot*)((u8*)t->buf1AD8 + off + t->count38 * stride);
         off += 0x1800;
         e->link = a2;
         e->flag = 0;
@@ -984,57 +918,57 @@ void func_00138BE0(void* a0, Collider* owner, u32 mask)
     }
 }
 
-struct Obj_138C00;
-struct Child_138C00;
+struct ContactBody;
+struct ContactPart;
 
-struct Vtbl_138C00
+struct ContactPartVt
 {
     u8 pad0[0x10C];
-    void (*f10C)(Child_138C00* c);
-    void (*f110)(Child_138C00* c);
+    void (*f10C)(ContactPart* c);
+    void (*f110)(ContactPart* c);
 };
 
-struct Child_138C00
+struct ContactPart
 {
-    Vtbl_138C00* vt;
+    ContactPartVt* vt;
     u8 pad[0x2E4 - 4];
-    Child_138C00* next;
+    ContactPart* next;
 };
 
-struct Pair_138C00
+struct ContactCursor
 {
     Contact03* prev;
     Contact03* it;
 };
 
-struct Slot_138C00
+struct ContactSlot
 {
     Contact03* f0;
 };
 
-struct Node_138C00
+struct ContactNode
 {
     Contact03* f0;
-    Node_138C00* f4;
-    Slot_138C00* f8;
-    Obj_138C00* fC;
+    ContactNode* f4;
+    ContactSlot* f8;
+    ContactBody* fC;
 };
 
-struct List_138C00
+struct ContactNodeList
 {
-    Node_138C00* head;
+    ContactNode* head;
 };
 
-struct Obj_138C00
+struct ContactBody
 {
     u8 pad0[0x2C8];
     u64 bits2C8;
     u8 pad1[0x2D8 - 0x2D0];
-    Child_138C00* children;
+    ContactPart* children;
     u8 pad2[0x414 - 0x2DC];
-    Obj_138C00* next;
+    ContactBody* next;
     u8 pad3[0x480 - 0x418];
-    List_138C00* list;
+    ContactNodeList* list;
     u8 pad4[0x4B8 - 0x484];
     s32 kind;
     u8 pad5[0x538 - 0x4BC];
@@ -1043,17 +977,17 @@ struct Obj_138C00
 
 void func_001389D0(World* w);
 void func_001861E8(World* w, Contact03* item);
-Contact03* func_00188270(World* w, Obj_138C00** pair, s32 arg);
+Contact03* func_00188270(World* w, ContactBody** pair, s32 arg);
 void func_001860A8(World* w, s32 one, Contact03** item);
-void func_00129DF8(Obj_138C00* o);
+void func_00129DF8(ContactBody* o);
 
 void func_00138C00(World* w, s32 arg)
 {
-    Obj_138C00* pair[2];
-    Obj_138C00* o;
-    Child_138C00* ch;
+    ContactBody* pair[2];
+    ContactBody* o;
+    ContactPart* ch;
     SortSweepAxes(w);
-    for (o = (Obj_138C00*)w->list6C.head; o; o = o->next)
+    for (o = (ContactBody*)w->list6C.head; o; o = o->next)
     {
         pair[0] = o;
         if (o->kind == 7)
@@ -1065,7 +999,7 @@ void func_00138C00(World* w, s32 arg)
             continue;
         }
         o->bits538 |= 0x8000ull << 46;
-        Node_138C00* node = pair[0]->list->head;
+        ContactNode* node = pair[0]->list->head;
         for (; node; node = node->f4)
         {
             s32 dead = 7;
@@ -1106,7 +1040,7 @@ void func_00138C00(World* w, s32 arg)
             }
             else
             {
-                Pair_138C00 p;
+                ContactCursor p;
                 for (p.it = node->f0; p.it; p.it = p.it->next)
                 {
                     func_001860A8(w, 1, &p.it);
@@ -1114,7 +1048,7 @@ void func_00138C00(World* w, s32 arg)
             }
         }
     }
-    for (o = (Obj_138C00*)w->list6C.head; o; o = o->next)
+    for (o = (ContactBody*)w->list6C.head; o; o = o->next)
     {
         if (o->kind & 4)
         {
@@ -1129,7 +1063,7 @@ void func_00138C00(World* w, s32 arg)
         }
         o->bits538 |= 0x8000ull << 46;
     }
-    for (o = (Obj_138C00*)w->list6C.head; o; o = o->next)
+    for (o = (ContactBody*)w->list6C.head; o; o = o->next)
     {
         if (o->bits538 & (0x8000ull << 46))
         {
