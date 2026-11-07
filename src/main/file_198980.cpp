@@ -228,10 +228,11 @@ f32 D_0026A960[2] = { 0.9f, 1.1f };
 f32 D_0026A968 = 300.0f;
 T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))func_00199850 };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
-ObjectLink D_0026AA50[26] = {
-    { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } };
-// Eight zero bytes no code reads, inside retail's label D_0026AA50 after its 26 entries.
-s32 D_0026AB88[2] = { 0, 0 };
+// The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
+// holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
+struct C17LinkTable { ObjectLink e[26]; s32 end[2]; };
+C17LinkTable D_0026AA50 = { {
+    { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
 ObjectLink D_0026AB90[1] = { { 0x0, 0x268, 0x5EC } };
 ObjectLink D_0026ABA0[1] = { { 0x4, 0x267, 0x5FC } };
 f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
@@ -747,7 +748,7 @@ void func_0019A1E0(C17* o)
 {
     u32 i;
     StartPlacedObject(o);
-    ResolveObjectLinks(o, 0x1A, (u8*)D_0026AA50);
+    ResolveObjectLinks(o, 0x1A, (u8*)D_0026AA50.e);
     for (i = 0; i < 3; i++)
         StartC17Marker(o->f61C + i * 12, 0x390);
     s32 h = CreateStateWalker(o->f610, o, 0x384, 1);
