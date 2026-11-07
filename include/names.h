@@ -745,6 +745,7 @@
 #define StopScriptEffect                           func_001187E8
 #define StartScriptPadRecordPattern                func_00118850
 #define SendScriptPointEventToWorldListener        func_001188F0
+#define SampleScriptAnimation                      func_00118988
 #define StoreFloatAsQuadword                       func_00118CF0
 #define CopyQuadword                               func_00118D10
 #define StoreQuadword                              func_00118D20
@@ -775,6 +776,8 @@
 #define CopyScriptScope                            func_0011A5B0
 #define NewScriptScope                             func_0011A630
 #define ReleaseScriptScope                         func_0011A670
+#define ConstructMarkStacks                        func_0011A678
+#define DestructMarkStacks                         func_0011A680
 #define ResetMarkRoots                             func_0011A6A8
 #define ShutDownMarkRoots                          func_0011A6B8
 #define AddUniqueMarkRoot                          func_0011A6C0
@@ -788,6 +791,9 @@
 #define MarkPoolLiveEnds                           func_0011A800
 #define DrainMarkStacks                            func_0011A850
 #define CollectScriptPools                         func_0011AB58
+#define ConstructOrDestroyScriptMachineStatics     func_0011ADF8
+#define ConstructScriptMachineStatics              func_0011AE38
+#define DestroyScriptMachineStatics                func_0011AE58
 #define TakeZeroedPoolEntry                        func_0011AE78
 #define CopyScriptValueChain                       func_0011AEB8
 #define NewScriptValueNode                         func_0011AF28
@@ -1093,6 +1099,10 @@
 #define StorePlacedObjectLocalVelocity             func_001290B8
 #define StorePlacedObjectLocalSpin                 func_001290E0
 #define EnsureTimerRecord                          func_00129108
+#define SetPlacedObjectScaleXY                     func_00129170
+#define GetPlacedObjectScaleXY                     func_00129188
+#define SetPlacedObjectScaleZ                      func_001291A0
+#define GetPlacedObjectScaleZ                      func_001291B8
 #define EnsureRangeRecord                          func_001291D0
 #define SetRangeRecordPresent                      func_00129228
 #define SetRangeRecordKey                          func_00129288
@@ -1195,6 +1205,10 @@
 #define EnsureColorRecord                          func_0012B040
 #define SetColorPreset                             func_0012B0B0
 #define GetColorPreset                             func_0012B128
+#define SetColorRecordFirstColor                   func_0012B140
+#define GetColorRecordFirstColor                   func_0012B180
+#define SetColorRecordSecondColor                  func_0012B1A0
+#define GetColorRecordSecondColor                  func_0012B1E0
 #define SetColorRecordFactor                       func_0012B200
 #define GetColorRecordFactor                       func_0012B238
 #define SetTintRgb                                 func_0012B250
@@ -1207,10 +1221,14 @@
 #define GetTintByte2                               func_0012B2A8
 #define SetTintByte3                               func_0012B2B8
 #define GetTintByte3                               func_0012B2C0
+#define SetTintByte4                               func_0012B2D0
+#define GetTintByte4                               func_0012B2D8
 #define TestOtherFlagged                           func_0012B2E8
 #define SelectValueEntryByKey                      func_0012B2F8
 #define SetObjectCameraTracked                     func_0012B420
 #define SetPlacedObjectFrameStepClock              func_0012B4C8
+#define SetPlacedObjectSpecialFlag                 func_0012B550
+#define GetPlacedObjectSpecialFlag                 func_0012B590
 #define SetFollowObjects                           func_0012B5B8
 #define InitCodeChecksum                           func_0012B6B8
 #define UpdateCodeChecksum                         func_0012B760
@@ -1291,6 +1309,7 @@
 #define ClearTextPanel                             func_00131140
 #define SetupTextPanel                             func_00131198
 #define DrawCompassStrip                           func_001316E8
+#define DrawTextPanelControlLabels                 func_00131F60
 #define DrawTextPanelCenterFrame                   func_00132500
 #define DrawTextPanelBorders                       func_00133B58
 #define DrawTextPanelBlocks                        func_00135228
@@ -1316,9 +1335,13 @@
 #define GetTextPanelCenter                         func_00136EC8
 #define ChooseTextPanelState                       func_00136EF8
 #define EndTextPanelState                          func_00136FA8
+#define ConstructTextPanelStatics                  func_00136FE8
 #define SetTextLayoutPosition                      func_00137228
 #define SetTextLayoutSize                          func_00137238
 #define SetTextLayoutColor                         func_00137248
+#define SetTextLayoutHorizontalAlign               func_00137260
+#define SetTextLayoutVerticalAlign                 func_00137268
+#define RunTextPanelStaticInit                     func_00137270
 #define InitBufferedStream                         func_00137290
 #define DestroyBufferedStream                      func_001372E0
 #define OpenBufferedSectorStream                   func_00137328

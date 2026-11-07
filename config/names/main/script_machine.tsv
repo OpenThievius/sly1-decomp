@@ -130,6 +130,7 @@ func_00118720	StartScriptEffect	builtin: calls func_001BFCD8 (the effect start S
 func_001187E8	StopScriptEffect	builtin: calls func_001BF788(args[0].p, 0), the effect stop SetObjectCyclerHandle uses, and returns the empty result
 func_00118850	StartScriptPadRecordPattern	builtin: calls StartPadRecordPattern on the pad record with an int and a float argument and returns an empty value
 func_001188F0	SendScriptPointEventToWorldListener	built-in: an object and a float argument forwarded to SendPointEventToWorldListener, empty result
+func_00118988	SampleScriptAnimation	builtin (slot 0x1D of D_00259DE8, after SendScriptPointEventToWorldListener): reads an animation, two objects, two floats, a count and a flag mask from its arguments, allocates temporary arrays of count entries for each mask bit (1 vectors, 2 matrices of 0x30 bytes, 4 and 8 vectors) and fills them with func_0012CD78 (the call CreatePlayerTwoEntryBlend uses to measure an animation between two times), then returns one list per requested bit (tag 0x16 vectors, tag 0x17 matrices through CopyRotationMatrix)
 func_00118CF0	StoreFloatAsQuadword	original assembly: stores the float argument (f12) as a 128-bit value at out and returns out, as StoreQuadword does for a quadword; MultiplyScriptValues, DivideScriptValues and func_00129E10, func_00129EE0 and others in placed_object.cpp call it
 func_00118D10	CopyQuadword	copies one 128-bit value from src into out and returns out
 func_00118D20	StoreQuadword	stores a 128-bit value passed by value into out and returns out
@@ -160,6 +161,8 @@ func_0011A4D8	FindScriptVariable	searches the scope's own list for the key, then
 func_0011A5B0	CopyScriptScope	copies the parent count and list and duplicates the keyed-value list with func_0011C418
 func_0011A630	NewScriptScope	takes an entry from the scope pool D_0025C270 and clears its 0x1C bytes
 func_0011A670	ReleaseScriptScope	the empty removeCallback of the scope pool D_0025C270
+func_0011A678	ConstructMarkStacks	the compiler's constructor of MarkStacks (D_00259F38): an empty body that returns this
+func_0011A680	DestructMarkStacks	the compiler's destructor of MarkStacks: an empty body that frees the object with FreeObjectMemory when bit 0 of its second argument is set
 func_0011A6A8	ResetMarkRoots	sets both root counts of the collector state D_00259F38 (offsets 0x0 and 0x504) to 0; value.cpp calls it
 func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
 func_0011A6C0	AddUniqueMarkRoot	appends a value to the root list at 0 of D_00259F38 unless already in it; the scope creator passes the new scope to it
@@ -173,3 +176,6 @@ func_0011A7D8	PopMarkRecord	pops from the stack at 0x1310, returning 0 when empt
 func_0011A800	MarkPoolLiveEnds	calls func_0011C2A0 (MarkPoolLiveEnd) on each of the five pools D_0025C250..D_0025C2D0
 func_0011A850	DrainMarkStacks	pops the three stacks until empty, marking (func_0011C3C8 / func_0011C3F0) what each entry holds and pushing newly found entries back on their stacks
 func_0011AB58	CollectScriptPools	clears the pools' live states (func_0011C2B0), marks everything reachable from the root lists and the object table at D_00275710+0x1EC8, drains the stacks, then releases the unmarked entries (func_0011C2E8)
+func_0011ADF8	ConstructOrDestroyScriptMachineStatics	the compiler's static initialisation and destruction for this file: when its second argument is 0xFFFF runs ConstructMarkStacks on D_00259F38 for a nonzero first argument and DestructMarkStacks (flag 2) for zero
+func_0011AE38	ConstructScriptMachineStatics	the file's entry in the initialiser list D_0027B130: calls ConstructOrDestroyScriptMachineStatics(1, 0xFFFF)
+func_0011AE58	DestroyScriptMachineStatics	the file's destructor entry: calls ConstructOrDestroyScriptMachineStatics(0, 0xFFFF)
