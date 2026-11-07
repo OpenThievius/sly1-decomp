@@ -3782,43 +3782,6 @@ void func_00200680();
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
-extern const char D_0024EB78[3][8] = {"....", "....", "all"};
-extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
-extern const char D_0024F5F8[40] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
-extern const char D_0024F620[24] = "Libcdvd bind err N CMD\n";
-extern const char D_0024F658[40] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";
-extern const char D_0024F680[24] = "Libcdvd bind err S cmd\n";
-extern const char D_0024F698[32] = "Libcdvd bind err %d CD_Init %d\n";
-extern const char D_0024F6B8[16] = "Libcdvd Exit\n";
-extern const char D_0024F6C8[16] = "DiskReady 0\n";
-extern const char D_0024F6D8[32] = "Libcdvd bind err CdDiskReady\n";
-extern const char D_0024F6F8[24] = "DiskReady ended\n";
-extern const char D_0024F710[24] = "call cdread cmd\n";
-extern const char D_0024F728[16] = "cdread end\n";
-extern const char D_0024F738[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
-extern const char D_0024F7D0[48] = "libpad: buffer addr is not 64 byte align. %08x\n";
-extern const char D_0024F800[144] = "libpad: pad port is already open [%d][%d]\n\000\000\000\000\000\000ERROR\000\000\000STABLE\000\000EXECCMD\000FINDCTP1\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000DISCONNECT\000\000\000\000\000\000BUSY\000\000\000\000FAILED\000\000COMPLETE";
-extern const f32 D_0024F89C = 1.57079625f;
-extern const f32 D_0024F8AC = 7.54978942e-08f;
-extern const char D_0024F8F0[8] = "acosf";
-extern const char D_0024F8F8[8] = "asinf";
-extern const char D_0024F900[8] = "atan2f";
-extern const char D_0024F908[8] = "fmodf";
-extern const double D_0024F910 = (0.0/0.0);
-extern const char D_0024F918[8] = "logf";
-extern const double D_0024F920 = -3.4028234663852886e+38;
-extern const char D_0024F928[8] = "log10f";
-extern const double D_0024F930 = -3.4028234663852886e+38;
-extern const char D_0024F938[8] = "powf";
-extern const double D_0024F940 = (0.0/0.0);
-extern const double D_0024F948 = 3.4028234663852886e+38;
-extern const double D_0024F950 = -3.4028234663852886e+38;
-extern const char D_0024F958[8] = "sqrtf";
-extern const f32 D_0024FA4C = -(1.0f/0.0f);
-extern const f32 D_0024FAD4 = (1.0f/0.0f);
-extern const double D_0024FF70 = (1.0/0.0);
-extern const s32 D_0024FF78 = 1;
-extern const char D_002502E8[24] = "intra && skip MB";
 extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
 
 // Globals typed by worker dv03, from retail's bytes and their readers.
@@ -3832,22 +3795,6 @@ extern const u8 D_0026A110[];
 
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
-void func_0020D138();
-void func_0020D248();
-void func_0020D3D0();
-void func_0020D538();
-void func_0020D730();
-void func_0020D880();
-void func_0020DA48();
-void func_0020DBF0();
-void func_0020D1B0();
-void func_0020D300();
-void func_0020D480();
-void func_0020D630();
-void func_0020D7D0();
-void func_0020D960();
-void func_0020DB20();
-void func_0020DD10();
 extern const u8 D_002197B8[];
 extern const u8 D_002198E8[];
 extern const u8 D_002505B8[];
@@ -3883,19 +3830,6 @@ extern const char D_0024E0C8[];
 extern const char D_0024E0F8[];
 extern const char D_0024E118[];
 extern const u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
-volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-s32 D_002771CC = -1;
-s32 D_00279420 = -1;
-s32 D_00279428 = -1;
-s32 D_0027942C = -1;
-s32 D_00279438 = -1;
-s32 D_0027943C = -1;
-s32 D_00279440 = -1;
-s32 D_00279444 = -1;
-s32 D_00279448 = -1;
-s32 D_0027944C = -1;
-void (*D_0027B000[8])() = { func_0020D138, func_0020D248, func_0020D3D0, func_0020D538, func_0020D730, func_0020D880, func_0020DA48, func_0020DBF0 };
-void (*D_0027B020[8])() = { func_0020D1B0, func_0020D300, func_0020D480, func_0020D630, func_0020D7D0, func_0020D960, func_0020DB20, func_0020DD10 };
 extern const void* const D_00247448[149] = {
     &D_00217410,
     &D_00217418,
@@ -4139,20 +4073,6 @@ s32 D_002623CC = -1;
 // size: s32 compared with 1/2 in 00148000 and 00194000
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 // size: s32 state compared/assigned in 001EC000
-// size: u32 cleared by func_001F7D88
-u32 D_00277134 = 0;
-// size: s32 flag set/cleared in 001F8000
-s32 D_002771B8 = 0;
-// size: s32 read as one word (> 0 test) in 00200000
-s32 D_00279410 = 0;
-// size: s32 flag tested in 00200000
-s32 D_00279414 = 0;
-// size: s32 flag set/cleared in 00200000
-s32 D_00279424 = 0;
-// size: s32 read as one word in 00200000
-s32 D_00279430 = 0;
-// size: s32 state word, written 8/0/-1 in 00200000
-s32 D_00279454 = 0;
 
 // Globals typed by worker dz05, from retail's bytes and their readers.
 // size: lw at offset 0 only, a 4-byte scalar of its own label
@@ -4441,24 +4361,6 @@ extern u8 D_00274118[648];
 // word read whole / address only, 4 bytes to next label
 // word read whole / address only, 4 bytes to next label
 
-// Globals typed by worker dz206, from retail's bytes and their readers.
-// scalar words read whole (lw/sw in func_00203xxx)
-u32 D_00279418 = 0;
-u32 D_0027941C = 0;
-u32 D_00279434 = 0;
-u32 D_00279450 = 0;
-// 40 bytes to the next label, word store; no indexing seen
-u32 D_00279458[10] = {0};
-// 4096-byte buffer, address passed only
-u8 D_00279500[4096] = {0};
-// 192 bytes to next label, address passed only
-u8 D_0027A500[192] = {0};
-// 16 bytes, read as words through the uncached alias (func_00203AE8)
-u32 D_0027A5C0[4] = {0};
-// 48-byte request/result block, address passed only
-u8 D_0027A5D0[48] = {0};
-// 1088-byte buffer, address passed only
-u8 D_0027A600[1088] = {0};
 
 // Defined in the old 001EC000.cpp; outside file_1E88D0.cpp's data.
 void* D_002505C0[6];

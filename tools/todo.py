@@ -101,7 +101,7 @@ MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu
 # seeing it proves nothing. Add an instruction here only with such a function; a function in
 # config/us/original_asm.tsv that src/ defines is an error (tests/test_tools.py). mult1 is the
 # second of two multiplies the compiler issues together, to the EE's second pipeline (the 64-bit
-# product, src/lib/multiply.c, and the pad library's slot readers, src/lib/00204000.cpp).
+# product, src/lib/multiply.c, and the pad library's slot readers, src/lib/pad.c).
 COMPILER_EMITS = {"por", "pref", "mult1"}
 
 

@@ -186,7 +186,6 @@ void func_001BA130(void*);
 
 s32 func_0013EC00(void*, int, void*, void*, void*, void*, void*);
 
-extern u32 D_00277134;
 void func_00124A48(void*);
 void func_001F55A8(Rec36*);
 

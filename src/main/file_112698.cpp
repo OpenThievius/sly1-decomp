@@ -1373,33 +1373,33 @@ ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     InitScriptValue(&q);
-    R11B008Node* ix = args[1].node;
+    R11B008Node* indexNode = args[1].node;
     switch (args[0].tag) {
     case 0x16:
-        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
+        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[indexNode->i]);
         break;
     case 0x17: {
-        s32 i = ix->i;
+        s32 i = indexNode->i;
         Arr_1159B8* v;
         if (count == 2) {
             v = (Arr_1159B8*)AcquireVectorAPayload();
             *v = ((Arr_1159B8*)args[0].v)[i];
             SetScriptValueVectorA(&q, (f32*)v);
         } else {
-            ix = ix->next;
+            indexNode = indexNode->next;
             v = &((Mat_1159B8*)args[0].v)->row[i];
-            SetScriptValueFloat(&q, v->v[ix->i]);
+            SetScriptValueFloat(&q, v->v[indexNode->i]);
         }
         break;
     }
     case 0x18:
-        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
+        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[indexNode->i]);
         break;
     case 0x19:
-        SetScriptValueFloat(&q, ix->i == 0 ? args[0].v[0] : args[0].v[1]);
+        SetScriptValueFloat(&q, indexNode->i == 0 ? args[0].v[0] : args[0].v[1]);
         break;
     case 0x1A:
-        switch (ix->i) {
+        switch (indexNode->i) {
         case 0:
             SetScriptValueFloat(&q, args[0].v[0]);
             break;

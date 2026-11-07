@@ -64,6 +64,29 @@ D_0024F220 = 0x0024F220;
 // The end of src/lib/type_info.cpp's .rodata (its type name "9type_info"), where the next
 // object's string begins.
 D_0024F330 = 0x0024F330;
+// The start of the kernel library's identification string "PsIIlibkernl2430" (16 bytes, the
+// .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
+// D_0027696C; func_001F9790 reads its last four bytes.
+D_00276970 = 0x00276970;
+// The end of the 32 words D_006294C0 of src/lib/file_1FA068.cpp (func_001FA1E8 clears 32, and
+// func_001FA1C0 reads them), inside splat's 0x1080-byte label: the 0x1000 bytes after them, which
+// no code reads, belong to that object or the next.
+D_00629540 = 0x00629540;
+// The starts of the math library's files' .rodata (src/libm/file_*.c), each object's literals
+// and tables in one piece, where a coarse label or one an instruction names spans two of them.
+D_0024F8E4 = 0x0024F8E4;
+D_0024F8E8 = 0x0024F8E8;
+D_0024F968 = 0x0024F968;
+D_0024F9A0 = 0x0024F9A0;
+D_0024F9DC = 0x0024F9DC;
+D_0024F9F8 = 0x0024F9F8;
+D_0024FA08 = 0x0024FA08;
+D_0024FA38 = 0x0024FA38;
+D_0024FE98 = 0x0024FE98;
+D_0024FEA0 = 0x0024FEA0;
+D_0024FF0C = 0x0024FF0C;
+D_0024FF28 = 0x0024FF28;
+D_0024FF90 = 0x0024FF90;
 // The end of soft_float.c's .bss inside a coarse label: the double routines' NaN result
 // (D_0062A770, 0x18 bytes, the unpacked double type) is followed by 0x10 bytes no code reads.
 D_0062A788 = 0x0062A788;
@@ -102,3 +125,57 @@ D_00249D80 = 0x00249D80;
 // 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
 // Named so that file_13CCF8 can hold them (LINKER_REMNANT).
 func_0013E650 = 0x0013E650; // type:func
+// The start of the memory card library's .data inside a coarse label (D_0027AE84): its
+// identification string, which no code reads, after the previous object's table.
+D_0027AEB8 = 0x0027AEB8;
+// The end of the memory card library's .rodata: a message no code reads (that of a function the
+// linker stripped), after the binding's message at D_0024FFE0.
+D_00250008 = 0x00250008;
+// The MPEG library's identification string, which no code reads, inside a coarse label
+// (D_0027AED0): the end of the demultiplexer's stream table and of its file's .data.
+D_0027AF70 = 0x0027AF70;
+// The pad library's file (src/lib/pad.c): its .data starts with its identification string
+// inside the label of the CD library's last buffer (D_0027AE48), holds two tables of state
+// names and a word no code reads, and ends where the memory card library's string begins; its
+// .rodata ends with those tables' strings, which no code reads, before the math library's. Its
+// second message (0x24F758) has no reader either: a stripped function's.
+D_0024F758 = 0x0024F758;
+D_0024F830 = 0x0024F830;
+D_0027AE70 = 0x0027AE70;
+D_0027AE88 = 0x0027AE88;
+D_0027AEA8 = 0x0027AEA8;
+D_0027AEB4 = 0x0027AEB4;
+// The graphics library's identification string (src/lib/graph.c's .data), inside the label of
+// the VIF1 words before it, which no code reads.
+D_00279320 = 0x00279320;
+// The end of the DMA library's .data (src/lib/dma.c): its last settings (D_002793D8, 0x14
+// bytes) end at 0x2793EC; the CD library's .data (src/lib/cdvd.c) starts on 64 bytes, with its
+// identification string at 0x279400. The DMA library's .rodata (one message) is followed by the
+// CD library's: first six messages of functions the linker stripped, which no code reads.
+D_00279400 = 0x00279400;
+D_0024F560 = 0x0024F560;
+D_0024F588 = 0x0024F588;
+D_0024F5A8 = 0x0024F5A8;
+D_0024F5C0 = 0x0024F5C0;
+D_0024F5D0 = 0x0024F5D0;
+D_0024F5E0 = 0x0024F5E0;
+// bytes) end at 0x2793EC; after the padding to 16, 16 zero bytes no code reads, then the CD
+// library's identification string; its .rodata (one message) is followed by the CD library's
+// messages, which no code reads.
+D_002793F0 = 0x002793F0;
+// The end of the MPEG library's .data inside a coarse label (D_0027B068): its last table (16
+// words) ends at 0x27B0A8, then 8 zero bytes of padding to the IPU library's .data, which starts
+// on 16 with its identification string (src/lib/file_211B40.cpp), which no code reads.
+D_0027B0A8 = 0x0027B0A8;
+D_0027B0B0 = 0x0027B0B0;
+// The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
+// zeros after it, to 0x250580, are the padding before .data.
+D_00250540 = 0x00250540;
+// The kernel library's objects from 0x1F84D8 (src/lib/file_1F84D8.cpp, src/lib/file_1F9690.cpp,
+// src/lib/file_1F9AD8.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
+// second object, and the string "all" (0x24EB88), which no code reads, inside splat's label
+// D_0024EB78; and the first object's last word, the pointer to its "...." (0x2771C8), inside
+// D_002771C4.
+D_0024EB80 = 0x0024EB80;
+D_0024EB88 = 0x0024EB88;
+D_002771C8 = 0x002771C8;

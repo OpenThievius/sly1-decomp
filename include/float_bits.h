@@ -9,10 +9,10 @@
 
 #include "common.h"
 
-union FloatBits {
+typedef union FloatBits {
     f32 f;
     s32 i;
-};
+} FloatBits;
 
 #define FLOAT_TO_BITS(bits, value) \
     do {                           \
@@ -28,13 +28,13 @@ union FloatBits {
         (value) = fb_.f;           \
     } while (0)
 
-union DoubleWords {
+typedef union DoubleWords {
     double d;
     struct {
         s32 lo;
         s32 hi;
     } w;
-};
+} DoubleWords;
 
 #define DOUBLE_TO_WORDS(high, low, value) \
     do {                                  \

@@ -251,12 +251,13 @@ def literal_width(insn, section, start):
     """How many bytes of a .rodata literal the instruction at its %lo reaches.
 
     A load or store says: 1, 2, 4, 8 or 16. An address (addiu) is a string, which is read up to
-    and including its terminating NUL.
+    and including its terminating NUL, or an array with no NUL in it (a static table of floats in
+    a section of its own), which is read to the section's end.
     """
     op = insn >> 26
     if op == 0x09:
         end = section.find(b"\0", start)
-        return (end + 1 - start) if end >= 0 else len(section) - start + 1
+        return (end + 1 - start) if end >= 0 else len(section) - start
     return LOAD_WIDTH.get(op, 4)
 
 

@@ -197,6 +197,23 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    needs; AGENTS.md allows `do { } while (0)` there and nowhere else. With
    them all 33 functions of the library match.
 
+   **Its files** (2026-11-06). The library is 35 objects, proved whole in
+   config/us/files.tsv as src/libm/file_*.c: one function each, and two
+   with no code, only a constant in .rodata (the double infinity at
+   0x24FF70 and the error mode at 0x24FF78). They are C, built by the
+   Linux `cc1` with `-O2 -G0`. Each file's .rodata is its own in one
+   piece, 0x24F890-0x24FFA0 in the order of the code: the file's
+   `static const` floats and tables in definition order, then the
+   literals its code needs (a checked function's name, a folded
+   `0.0 / 0.0` or `-two25 / zero`). GCC folds a `static const` into the code
+   as an immediate and still writes it out, unused or not, which is why
+   retail has a 1.0 after the cosine's code and a 1.0 and 1e-30 after the
+   square root's. Double arithmetic in plain C (`(double)x`, `-inf`,
+   `y *= 0.5`, `x < 0.0`) gives the software routine calls retail makes.
+   The word-for-word comparison with the toolchain's `libm.a` confirmed
+   each object's range and that every one was compiled from C; nothing
+   else was taken from it.
+
 Record every result here: the function, the compiler, the flags, and whether
 it matched.
 

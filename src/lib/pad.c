@@ -1,0 +1,320 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* The pad library, one object in retail from 0x203FD0 to the math library: the remote calls to
+ * the IOP's pad module (bind, version, setup, opening a port's slot and the commands on it), the
+ * readers of the two frames each open slot's buffer holds, and their data cache write-back
+ * (assembly). Its .data begins with the library's identification string and ends with the two
+ * tables of state names; its .bss holds the two clients, the slots' state, each slot's DMA
+ * words and the request buffer. C, built by the cc1 of 2.9-ee-991111 (config/cflags.tsv,
+ * docs/TOOLCHAIN.md). Written for this project from retail's code. */
+#include "common.h"
+#include "asm_func.h"
+
+/* A remote call client: the server it is bound to at +0x24. */
+typedef struct RpcClient {
+    u8 pad00[0x24];
+    void* server;
+} RpcClient;
+
+/* A port's slot: the buffer of its two frames, its DMA words, whether it is open. */
+typedef struct PadSlot {
+    u8* buffer;
+    u32* dma;
+    s32 f08;
+    s32 f0C;
+    s32 open;
+    s32 f14;
+    s32 f18;
+} PadSlot;
+
+/* One of the two frames of a slot's buffer, 0x80 bytes. */
+typedef struct PadFrame {
+    u8 head[0x58];
+    s32 count;
+    u8 pad5C[4];
+    s32 size;
+    u8 pad64[3];
+    u8 f67;
+    u8 pad68[8];
+    u8 state;
+    u8 mode;
+    u8 pad72[0x0E];
+} PadFrame;
+
+/* The requests sent to the pad module, each a view of the request buffer. */
+typedef struct PadRequest {
+    s32 command;
+    s32 port;
+    s32 slot;
+    s32 result;
+    s32 arg10;
+    s32 arg14;
+} PadRequest;
+
+typedef struct PadActRequest {
+    s32 command;
+    s32 port;
+    s32 slot;
+    u8 bytes[6];
+    u8 pad12[2];
+    s32 result;
+} PadActRequest;
+
+typedef struct PadModeRequest {
+    s32 command;
+    s32 port;
+    s32 slot;
+    s32 arg0C;
+    s32 arg10;
+    s32 result;
+} PadModeRequest;
+
+typedef struct PadInfoRequest {
+    s32 command;
+    s32 port;
+    s32 slot;
+    s32 data;
+    s32 result;
+} PadInfoRequest;
+
+char D_0027AE70[16] = "PsIIlibpad  2410";
+s32 D_0027AE80 = 0;
+s32 D_0027AE84 = 1;
+
+static RpcClient D_0062AA80[2] __attribute__((aligned(64)));
+static PadSlot D_0062AAD0[2][4];
+static u32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
+static u8 D_0062ACC0[0x80] __attribute__((aligned(64)));
+
+s32 func_001E1F10(const char* format, ...);
+void* func_001F5A58(void* dst, const void* src, s32 size);
+void* func_001F5C0C(void* dst, s32 value, s32 size);
+s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
+s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+                  s32 receive_size, void* end, void* end_arg);
+s32 func_00203FD0(s32 port, s32 slot);
+s32 func_00204228(s32 mode);
+s32 func_00204610(s32 port, s32 slot, s32 mode);
+s32 func_00204B80(s32 port, s32 slot);
+s32 func_00204C38(s32 port, s32 slot, s32 data);
+s32 func_00204DB8(void);
+void func_00204EC8(void* start, void* end);
+
+INCLUDE_ASM(func_00203FD0);
+
+/* The message of func_00203FD0, defined here while it is assembly (after it: an included
+ * function leaves the assembler in .text), and one of a function the linker stripped. */
+const char D_0024F738[] = "libpad: sceSifSetDma faild\n";
+const char D_0024F758[] = "libpad: tPadDma Structure Invalid\n";
+
+s32 func_002040E8(s32 mode)
+{
+    s32 i;
+    s32 version;
+    s32 major;
+
+    D_0027AE80 = 1;
+    while (func_001F80C0(&D_0062AA80[0], 0x80000100, 0), D_0062AA80[0].server == 0) {
+        for (i = 0x10000; i != -1; i--) {
+        }
+    }
+    for (;;) {
+        func_001F80C0(&D_0062AA80[1], 0x80000101, 0);
+        if (D_0062AA80[1].server != 0)
+            break;
+        for (i = 0x10000; i != -1; i--) {
+        }
+    }
+    version = func_00204DB8();
+    major = version >> 8;
+    if (major != 4) {
+        if (D_0027AE84 != 0) {
+            func_001E1F10("libpad: Module version mismatch ");
+            func_001E1F10("[libpad.a = %d.%d, padman.irx = %d.%d]\n", 4, 0, major, version & 0xFF);
+        }
+        return 0;
+    }
+    return func_00204228(mode);
+}
+
+s32 func_00204228(s32 mode)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        D_0062AAD0[0][i].open = 0;
+        D_0062AAD0[0][i].f18 = 0;
+        D_0062AAD0[0][i].f14 = 0;
+        D_0062AAD0[1][i].open = 0;
+        D_0062AAD0[1][i].f18 = 0;
+        D_0062AAD0[1][i].f14 = 0;
+    }
+    ((PadRequest*)D_0062ACC0)->command = 0x10;
+    ((PadRequest*)D_0062ACC0)->arg10 = 0;
+    if (func_001F8290(D_0062AA80, 1, 0, D_0062ACC0, 0x80, D_0062ACC0, 0x80, 0, 0) < 0)
+        return 0;
+    return ((PadRequest*)D_0062ACC0)->result;
+}
+
+INCLUDE_ASM(func_002042C8);
+
+/* The messages of func_002042C8, defined here while it is assembly. */
+const char D_0024F7D0[] = "libpad: buffer addr is not 64 byte align. %08x\n";
+const char D_0024F800[] = "libpad: pad port is already open [%d][%d]\n";
+
+PadFrame* func_002044B0(s32 port, s32 slot)
+{
+    PadFrame* frames = (PadFrame*)D_0062AAD0[port][slot].buffer;
+    s32 newer;
+
+    func_00204EC8(frames, frames + 2);
+    newer = frames[0].count < frames[1].count;
+    return &frames[newer];
+}
+
+s32 func_00204510(s32 port, s32 slot, u8* data)
+{
+    PadFrame* frame;
+
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    frame = func_002044B0(port, slot);
+    func_001F5A58(data, frame, frame->size);
+    return frame->size;
+}
+
+s32 func_00204590(s32 port, s32 slot)
+{
+    PadFrame* frame;
+
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0x63;
+    frame = func_002044B0(port, slot);
+    if (frame->state == 6) {
+        if (frame->mode == 2)
+            return 5;
+    }
+    return frame->state;
+}
+
+LINKER_REMNANT(func_00204608);
+
+s32 func_00204610(s32 port, s32 slot, s32 mode)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    func_002044B0(port, slot)->mode = mode;
+    return 1;
+}
+
+u32 func_00204678(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_002044B0(port, slot)->mode;
+}
+
+LINKER_REMNANT(func_002046C8);
+INCLUDE_ASM(func_002046D0);
+LINKER_REMNANT(func_002047F0);
+INCLUDE_ASM(func_002047F8);
+
+s32 func_00204930(s32 port, s32 slot, s32 a2, s32 a3)
+{
+    PadModeRequest* request = (PadModeRequest*)D_0062ACC0;
+    s32 result;
+
+    request->arg0C = a2;
+    request->arg10 = a3;
+    request->command = 6;
+    request->port = port;
+    request->slot = slot;
+    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+        return 0;
+    result = request->result;
+    if (result == 1) {
+        func_00204610(port, slot, 2);
+        result = request->result;
+    }
+    return result;
+}
+
+INCLUDE_ASM(func_002049E8);
+
+s32 func_00204AA8(s32 port, s32 slot, u8* src)
+{
+    PadActRequest* request = (PadActRequest*)D_0062ACC0;
+    s32 i;
+
+    request->command = 8;
+    request->port = port;
+    request->slot = slot;
+    i = 0;
+    do {
+        request->bytes[i] = src[i];
+        i++;
+    } while (i < 6);
+    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+        return 0;
+    if (request->result == 1)
+        func_00204610(port, slot, 2);
+    return request->result;
+}
+
+INCLUDE_ASM(func_00204B80);
+
+s32 func_00204C38(s32 port, s32 slot, s32 data)
+{
+    PadInfoRequest* request = (PadInfoRequest*)D_0062ACC0;
+    s32 status;
+    s32 result;
+
+    request->data = data;
+    request->command = 10;
+    request->port = port;
+    request->slot = slot;
+    status = func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0);
+    if (status < 0)
+        return 0;
+    result = request->result;
+    if (result == 1) {
+        func_00204610(port, slot, 2);
+        result = request->result;
+    }
+    return result;
+}
+
+s32 func_00204CE8(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_00204B80(port, slot) == 0x3FFFF;
+}
+
+s32 func_00204D48(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_00204C38(port, slot, 0xFFF);
+}
+
+LINKER_REMNANT(func_00204DA0);
+
+s32 func_00204DB8(void)
+{
+    PadRequest* request = (PadRequest*)D_0062ACC0;
+
+    request->command = 0x12;
+    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+        return 0;
+    return request->result;
+}
+
+ASM_FUNC(func_00204E20);
+ASM_FUNC(func_00204EC8);
+LINKER_REMNANT(func_00204F48);
+
+/* The names of a slot's states and of a command's results, which no function left in retail
+ * reads. */
+const char* D_0027AE88[8] = { "DISCONNECT", "", "FINDCTP1", "", "", "EXECCMD", "STABLE", "ERROR" };
+const char* D_0027AEA8[3] = { "COMPLETE", "FAILED", "BUSY" };
+s32 D_0027AEB4 = 0;
