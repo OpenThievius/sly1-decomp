@@ -3093,7 +3093,7 @@ func_001F9EA8	InitKernelLibrary	runs the kernel library's set-ups: its semaphore
 func_001F9F50	IsSecondKernelPatchNeeded	writes the system configuration word back with bits 13 to 15 set to 1 (WriteSystemConfig), reads it again (ReadSystemConfig), restores the original and returns whether the field came back 0 (InstallSecondKernelPatch's test)
 func_001F9FB8	InstallSecondKernelPatch	when IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls D_00277998 lists (InitKernelLibrary calls it)
 func_001FA068	SetUpTlb	runs the TLB set-up func_001FA9C0 (ExitProgram calls it)
-func_001FA078	ExitProgram	runs SetUpTlb, then ExitProgramSyscall with the status (the program's entry, SignalProcess and the TLB set-up call it)
+func_001FA078	TerminateProgram	runs SetUpTlb, then ExitProgramSyscall with the status (the program's entry, SignalProcess and the TLB set-up call it)
 func_001FA0D8	GetProcessId	returns 1, the only process (GetProcessIdFor calls it)
 func_001FA0E0	SignalProcess	exits the program with the signal as status when the process is 1, else does nothing and returns 0 (SendSignalFor calls it)
 func_001FA140	PrintToDebugConsole	hands a line to CallDebugService with request 0x10 (BufferOutputChar calls it)

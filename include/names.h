@@ -3119,7 +3119,7 @@
 #define IsSecondKernelPatchNeeded                  func_001F9F50
 #define InstallSecondKernelPatch                   func_001F9FB8
 #define SetUpTlb                                   func_001FA068
-#define ExitProgram                                func_001FA078
+#define TerminateProgram                           func_001FA078
 #define GetProcessId                               func_001FA0D8
 #define SignalProcess                              func_001FA0E0
 #define PrintToDebugConsole                        func_001FA140

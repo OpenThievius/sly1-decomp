@@ -112,7 +112,7 @@ s32 func_001FA0D8(void)
 s32 func_001FA0E0(s32 mode, s32 status)
 {
     if (mode == 1) {
-        ExitProgram(status);
+        TerminateProgram(status);
     }
     return 0;
 }
