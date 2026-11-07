@@ -3960,16 +3960,7 @@ extern const u8 D_0026A0F8[];
 extern const u8 D_0026A100[];
 extern const u8 D_0026A108[];
 extern const u8 D_0026A110[];
-void func_00199850();
-struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 
-f32 D_0026A910 = 100.0f;
-f32 D_0026A968 = 300.0f;
-Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
-f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
-f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
-f32 D_0026ABF0[4] = { 33218888.0f, 33218888.0f, 4.2520177e+09f, 0.0f };
-f32 D_0026AC00[4] = { 8.623489e+09f, 8.623489e+09f, 1.2884902e+10f, 0.0f };
 f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
 f32 D_0026B540 = 0.5f;
 f32 D_0026B544 = 0.5f;
@@ -4369,15 +4360,15 @@ s32 D_00279454 = 0;
 
 // Globals typed by worker dz05, from retail's bytes and their readers.
 // size: lw at offset 0 only, a 4-byte scalar of its own label
-s32 D_00270454 = 0;
+extern s32 D_00270454;
 // size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
-void* D_002704F4 = 0;
+extern void* D_002704F4;
 // size: lw at offset 0 compared with 1, 4-byte label
-s32 D_00270518 = 0;
+extern s32 D_00270518;
 // size: lw at offset 0 compared with a count, 4-byte label
-s32 D_002726AC = 0;
+extern s32 D_002726AC;
 // size: lw at offset 0 compared with a count, 4-byte label
-s32 D_0027292C = 0;
+extern s32 D_0027292C;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
@@ -4425,18 +4416,15 @@ void* D_002623B4 = 0;
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
-s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
-GroupMarker D_0026AC30[18] = {};
 // size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
-s32 D_0026EC58 = 0;
+extern s32 D_0026EC58;
 // size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
-s32 D_0026EC60 = 0;
+extern s32 D_0026EC60;
 // size: one pointer (lw, passed to func_00150790), label 8 bytes with 4 of padding before the 8-aligned D_0026F808
-u8* D_0026F800 = 0;
+extern u8* D_0026F800;
 // size: one s32 (lw, bnez), label is 4 bytes
-s32 D_0026FA64 = 0;
+extern s32 D_0026FA64;
 
 // Globals typed by worker dz01, from retail's bytes and their readers.
 
@@ -4547,7 +4535,7 @@ struct Obj_26EC70 {
 };
 
 // size: func_0014ABD0 builds 4 embedded objects with this vtable (D_00218330) at stride 0x260
-Obj_26EC70 D_0026EC70 = {0};
+extern Obj_26EC70 D_0026EC70;
 
 // Globals typed by worker dz201, from retail's bytes and their readers.
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
@@ -4563,37 +4551,34 @@ Obj_2639B8 D_002639B8 = {0};
 // 24 bytes, byte array in readers
 
 // Globals typed by worker dz202, from retail's bytes and their readers.
-struct Obj_26AC10 { s32 p0; u8 pad04[12]; };
 
-// word at 0 is the next free entry pointer; 16 bytes to next label
-Obj_26AC10 D_0026AC10 = {};
 // only address/offsets used by readers; size to next label
-u8 D_0026C6C8[640] = {0};
+extern u8 D_0026C6C8[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026C948[640] = {0};
+extern u8 D_0026C948[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026CBC8[640] = {0};
+extern u8 D_0026CBC8[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026CE48[640] = {0};
+extern u8 D_0026CE48[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026D0C8[640] = {0};
+extern u8 D_0026D0C8[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026D348[640] = {0};
+extern u8 D_0026D348[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026D5C8[640] = {0};
+extern u8 D_0026D5C8[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026D848[612] = {0};
+extern u8 D_0026D848[612];
 // only address/offsets used by readers; size to next label
 // only address/offsets used by readers; size to next label
-u8 D_0026DAC8[640] = {0};
+extern u8 D_0026DAC8[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026DD48[640] = {0};
+extern u8 D_0026DD48[640];
 // only address/offsets used by readers; size to next label
-u8 D_0026DFC8[608] = {0};
+extern u8 D_0026DFC8[608];
 // only address/offsets used by readers; size to next label
-u8 D_0026E248[664] = {0};
+extern u8 D_0026E248[664];
 // only address/offsets used by readers; size to next label
-u8 D_0026E4E0[612] = {0};
+extern u8 D_0026E4E0[612];
 
 // Globals typed by worker dz203, from retail's bytes and their readers.
 struct Obj_26EED0 { u8* head; u8 pad[612]; };
@@ -4602,75 +4587,75 @@ struct Obj_26FA68 { void* head; u8 pad[36]; };
 struct Obj_2701B8 { s32 head; u8 pad[8]; };
 
 // object passed by address; size to next label
-u8 D_0026E760[664] = {0};
+extern u8 D_0026E760[664];
 
 // object read at offsets by several readers; size to next label
-u8 D_0026E9F8[608] = {0};
+extern u8 D_0026E9F8[608];
 
 // pointer stored at +0; size to next label
-Obj_26EED0 D_0026EED0 = {};
+extern Obj_26EED0 D_0026EED0;
 
 // object with vtable, size to next label
-u8 D_0026F138[592] = {0};
+extern u8 D_0026F138[592];
 
 // word read at +0; size to next label
-Obj_26F388 D_0026F388 = {};
+extern Obj_26F388 D_0026F388;
 
 // object; size to next label
-u8 D_0026F5A0[608] = {0};
+extern u8 D_0026F5A0[608];
 
 // object; size to next label
-u8 D_0026F808[604] = {0};
+extern u8 D_0026F808[604];
 
 // pointer read at +0; size to next label
-Obj_26FA68 D_0026FA68 = {};
+extern Obj_26FA68 D_0026FA68;
 
 // object with vtable; size to next label
-u8 D_0026FA90[608] = {0};
+extern u8 D_0026FA90[608];
 
 // size: s32, the current placed object (g_currentPlacedObject), 4 bytes before the 16-aligned next label
-s32 D_0026FCF0 = 0;
+extern s32 D_0026FCF0;
 
 // object; size to next label
-u8 D_0026FD00[616] = {0};
+extern u8 D_0026FD00[616];
 
 // object; size to next label
-u8 D_0026FF68[592] = {0};
+extern u8 D_0026FF68[592];
 
 // word read at +0; size to next label
-Obj_2701B8 D_002701B8 = {};
+extern Obj_2701B8 D_002701B8;
 
 // object; size to next label
-u8 D_002701F8[592] = {0};
+extern u8 D_002701F8[592];
 
 // Globals typed by worker dz204, from retail's bytes and their readers.
-s32 D_00270448[3] = {0}; // 12 bytes to next label; word read whole at 0, rest padding
-s32 D_00270458[39] = {0}; // 156 bytes; state word read whole at 0, word array to next label
-u8 D_00270650[624] = {0}; // 624 bytes; accessed by offsets (0x284,0x288), byte buffer
-u8 D_002708C0[32] = {0}; // 32 bytes; only address used
-u8 D_002708E0[592] = {0}; // 592 bytes; object passed by address
-s32 D_00270B30[9] = {0}; // 36 bytes; word read whole at 0
-u8 D_00271558[592] = {0}; // 592 bytes; object passed by address
-s32 D_002717A8[9] = {0}; // 36 bytes; word read whole at 0
-u8 D_002721D0[572] = {0}; // 572 bytes; engine object used by address
-s32 D_00272420[4] = {0}; // 16 bytes; word read whole at 0
-u8 D_00272430[636] = {0}; // 636 bytes; block cast to structs by address
-u8 D_002726B0[636] = {0}; // 636 bytes; block cast to structs by address
-u8 D_00272930[572] = {0}; // 572 bytes; object with vt at 0, used by address
+extern s32 D_00270448[3]; // 12 bytes to next label; word read whole at 0, rest padding
+extern s32 D_00270458[39]; // 156 bytes; state word read whole at 0, word array to next label
+extern u8 D_00270650[624]; // 624 bytes; accessed by offsets (0x284,0x288), byte buffer
+extern u8 D_002708C0[32]; // 32 bytes; only address used
+extern u8 D_002708E0[592]; // 592 bytes; object passed by address
+extern s32 D_00270B30[9]; // 36 bytes; word read whole at 0
+extern u8 D_00271558[592]; // 592 bytes; object passed by address
+extern s32 D_002717A8[9]; // 36 bytes; word read whole at 0
+extern u8 D_002721D0[572]; // 572 bytes; engine object used by address
+extern s32 D_00272420[4]; // 16 bytes; word read whole at 0
+extern u8 D_00272430[636]; // 636 bytes; block cast to structs by address
+extern u8 D_002726B0[636]; // 636 bytes; block cast to structs by address
+extern u8 D_00272930[572]; // 572 bytes; object with vt at 0, used by address
 
 // Globals typed by worker dz205, from retail's bytes and their readers.
 // readers pass only its address; byte buffer, size to next label
-u8 D_00272B98[624] = {0};
+extern u8 D_00272B98[624];
 // readers pass only its address; byte buffer, size to next label
-u8 D_00272E08[3048] = {0};
+extern u8 D_00272E08[3048];
 // readers pass only its address; byte buffer, size to next label
-u8 D_002739F0[608] = {0};
+extern u8 D_002739F0[608];
 // readers pass only its address; byte buffer, size to next label
-u8 D_00273C50[608] = {0};
+extern u8 D_00273C50[608];
 // readers pass only its address; byte buffer, size to next label
-u8 D_00273EB0[616] = {0};
+extern u8 D_00273EB0[616];
 // readers pass only its address; byte buffer, size to next label
-u8 D_00274118[648] = {0};
+extern u8 D_00274118[648];
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
 // word read whole / address only, 4 bytes to next label
