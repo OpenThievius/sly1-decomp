@@ -598,7 +598,7 @@ void func_001999D0(NumberedItem* self)
         }
         n->p134 = self;
         n->params = &D_0026A970;
-        func_00128018(self, 0, self->f5BC + 0x100, &loc);
+        TransformPointBetweenFrames(self, 0, self->f5BC + 0x100, &loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
     } else {
@@ -1122,9 +1122,9 @@ void func_0019C068(ObjectGatherer *self, s32 a1) {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
         ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
-        func_00128018(*(void **)((u8 *)self->f660 + 0x18), 0,
+        TransformPointBetweenFrames(*(void **)((u8 *)self->f660 + 0x18), 0,
                       (u8 *)self->f660 + 0x40, &buf);
-        func_001B9860(self, &buf, (void*)&g_unitZVector);
+        PlaceColliderClearOfContacts(self, &buf, (void*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
     ListWalker it(&self->parts);
@@ -1180,7 +1180,7 @@ void func_0019C470(C8B* o, LoadStream* in)
         f32 z;
         Rec8B* r = &o->fC4[i];
         o->fC4[i].id = ReadBufferedS8(in);
-        func_0019CD90(o, i, &x, &y, &z);
+        DecodeC8BGridIndex(o, i, &x, &y, &z);
         func_0019CC10(x, y, z, o, r->pos);
     }
     o->fC8 = ReadBufferedS16(in);
@@ -1239,7 +1239,7 @@ void func_0019C728(C8B* self)
         if (n != 0) n->vtbl[7](n);
     }
     ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
-    func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
+    BuildCombinedBlendAnimation(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
     void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
     if (nd != 0) func_00139B38(self->f3E4, nd);
@@ -1328,12 +1328,12 @@ void func_0019D338(void* self, void* dst, PathCurveObject* src, f32* k)
     Quad16 q3;
     s32 w40;
     s32 w44;
-    func_00128018(0, (s32)src->parent, (u8*)self + 0x140, &q0);
+    TransformPointBetweenFrames(0, (s32)src->parent, (u8*)self + 0x140, &q0);
     PathCurve* o = src->curve;
     if (o->vt->m12 != 0) {
         o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
-    func_00128018((void*)src->parent, (s32)self, &q1, &q2);
+    TransformPointBetweenFrames((void*)src->parent, (s32)self, &q1, &q2);
     func_0019D0E0(dst, &q2, &q3, &w40, &w44);
     func_0019C9C8(dst, w40, &q3);
 }

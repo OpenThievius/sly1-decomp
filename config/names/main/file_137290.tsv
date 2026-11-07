@@ -5,6 +5,7 @@ func_00137328	OpenBufferedSectorStream	sets mode 1, stores the start sector at 0
 func_00137398	OpenBufferedMemoryStream	sets remaining and the read pointer from its two arguments and mode 2 (read straight from memory)
 func_001373B0	OpenBufferedSectorStreamRange	passes a KeyId's two words (sector and byte count) to OpenBufferedSectorStream; func_001E4EA8 calls it on the stream it loads from
 func_001373D0	CloseBufferedStream	by mode closes the file handle (func_001F8C38, mode 0) or finishes the pending sector read (mode 1), then sets mode -1 and zeroes the pointers and counts
+func_00137480	ReduceBufferedStreamBytesLeft	subtracts its count from the bytes left of a sector stream at +0x40 (set by OpenBufferedSectorStream) and returns the rest; ReadBufferedBlockHeader calls it
 func_00137490	RefillBufferedStreamFromSectors	keeps the ring of chunk buffers filled: completes or restarts the sector reads (func_00140C28 or func_00140CC8 by flags bit 2) and sets rem to at most 0x8000 available bytes
 func_001377C0	RefillBufferedStreamFromFile	reads min(0x8000, remaining) bytes at the file offset with func_001F8DB8 and stores the result in the pending count
 func_00137820	RefillBufferedStream	by mode refills from the file (func_001377C0) or the sector ring (func_00137490), reduces f14 by nextCount (floored at 0) and passes it to func_00193288 when f30 is set
@@ -39,6 +40,7 @@ func_001389D0	SortSweepAxes	when 0x1AEC is clear, insertion-sorts each of the th
 func_00138BE0	ClearRootObjectStateBits	clears the given bits of the root object's word at +0x4B8
 func_00138C00	UpdateWorldContacts	sorts the axes (SortSweepAxes), then for each pair of objects on the world's list at 0x6C rebuilds their contact chain (FreePooledContactChain, func_00188270) and calls the objects' children's slots 0x110 and 0x10C; LoadWorld, RunPendingWorldLoad and UpdateWorld call it
 func_00138F28	InitContactPairFlags	clears the object's +0x4B8 then, for each contact table in use but its own, calls func_001385A0 with a set or clear value of 8 chosen by slot 14 of either object
+func_00139038	BuildCombinedBlendAnimation	creates a class 0x84 record (CreateTypedRecord) whose items and keys it allocates, merges the tracks of every item's source animation by key into shared position, rotation and weight curves (CreatePositionCurve, CreateRotationCurve, CreateWeightCurve) and copies the first source's timing fields; StartPlayer calls it four times
 func_00139600	ComputeWrappedDeltas	for each element with an object at +4 fills a table of values from func_0012CCC0 and stores the difference to the previous one, adding the object's period at +0x34 when it is negative
 func_00139970	FindCyclicRangeIndex	returns the index of the first (start, length) pair with a nonzero length that contains x modulo period, writing the offset into the range through out
 func_00139B70	BuildAlphaStatePacket	builds a GIF packet that writes GS register 0x47 (TEST_1) with 0x7180B and register 0x42 (ALPHA_1) from its index, detached into the word it is given

@@ -762,7 +762,7 @@ void* func_001B5EC0(void* pool);
 
 ContactRowNode* func_00138738(World* self, ContactRowList* list, ContactRowSource* src)
 {
-    ContactRowNode* n = (ContactRowNode*)func_001B5EC0((u8*)self + 0x1AF0);
+    ContactRowNode* n = (ContactRowNode*)TakePoolSlot((u8*)self + 0x1AF0);
     n->a0 = 0;
     n->value = src->value4;
     n->next = list->head;
@@ -1002,7 +1002,7 @@ void func_00138C00(World* w, s32 arg)
                 ContactCursor p;
                 for (p.it = node->f0; p.it; p.it = p.it->next)
                 {
-                    func_001860A8(w, 1, &p.it);
+                    NotifyContactEnds(w, 1, &p.it);
                 }
             }
         }

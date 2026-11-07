@@ -35,6 +35,9 @@ func_001AB938	StartTimerCounting	sets the timer state to 2
 func_001AB958	StopTimer	sets the f290 flag and the timer state to 0
 func_001AB980	StepTimer	reads the time, plays the tick sounds, advances it by dt times the rate while counting, fires the warning and end callbacks, and rebuilds the minutes:seconds or tenths text
 func_001ABE20	SetTimerState	stores the timer state and the clock time of the change when it differs
+func_001ABE40	GetPairCaptionHoldTime	slot 12 (the hold time) of D_00217F70, the table of the caption D_0026D0C8 that ShowPairControllerElement shows: returns 0, where GetScreenElementHoldTime returns +0x244
+func_001ABE50	GetGaugeAmountCaptionHoldTime	slot 12 (the hold time) of D_00217FC0, the table of g_gaugeAmountCaption: returns 0, where GetScreenElementHoldTime returns +0x244
+func_001ABE60	GetGaugeColliderCaptionHoldTime	slot 12 (the hold time) of D_002181A0, the table of the caption D_0026E4E0 that UpdateGaugeColliderVisibility and HandleGaugeColliderNotification show and hide: returns 0, where GetScreenElementHoldTime returns +0x244
 func_001ABE70	InitGauge	slot 1 of the gauge element's table D_002182E0 (whose slot 9 is DrawGauge): SetupScreenElementText, font 4, and the gauge's segment layout chosen by the save's value (g_saveData)
 func_001AC060	DecrementGaugeCount	counts the gauge's 0x270 down by one, rolling it over to 0x264 and decrementing 0x26C, then sets fillTarget from (rows - 1) times 0x264 plus 0x270 over 0x268 and stamps changedAt
 func_001AC0E8	DrawGauge	slot 9 of the gauge element: eases fill toward fillTarget (func_001EA4B8), draws the dark bar and the lit part with a colour interpolated by the time since changedAt (func_0019DDA0) and the letter glyph, shaking it for 0.75 seconds after a change

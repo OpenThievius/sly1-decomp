@@ -45,6 +45,7 @@ func_0019A1E0	StartC17Collider	slot 16 (+0x50) of class 0x17: resolves its links
 func_0019A520	HandleC17ColliderActivation	slot 0x130 of class 0x17, the slot HandleSwitchedColliderActivation fills for 0x05: on activation moves its walker to 0x385 and lists the objects 0x39A or 0x39B and +0x648 at +0x7DC; on release moves it to 0x384, empties the list and, with completion bit 2, queues movie 4 (FadeOutAndQueueMovie)
 func_0019AB78	HandleC17ColliderNotification	slot 13 (+0x44) of class 0x17: after HandleSwitchedColliderNotification, on message 12 from its object +0x650 either sends the player to state 6/16 or picks a reaction by the share of items collected in the level (CompletesWorldBits for all of them) and runs its next object (ChooseStepSequenceState)
 func_0019AD30	AddEntryRecordKey	appends item to keys of the 0x2C-byte record at index in the table at 0x658 of the 0x17 class, only while its count is below 4
+func_0019AD68	RecordC17ColliderCompletion	HandleC17ColliderNotification calls it: when the collider's completion bits at 0x760 are set, counts the level record's +0x43C, ORs them into the save data's +0x19F0, sets the save's progress bits 8 then 0x10, applies completion flag 4 when ComputeCompletionMask has it, saves to the memory card (StartMemoryCardSave) unless the bits are 1, and calls slot 2 of the object 0x37E or 0x37F it finds
 func_0019AF00	InitC71Object	slot 0 (+0x10) of class 0x71: InitObject, then sets the target id to -1 and +0x4C to the largest float
 func_0019AF38	RegisterC71Object	slot 6 (+0x28) of class 0x71: RegisterObject, then appends itself to the world's list at +0x1C90
 func_0019AF70	UnregisterC71Object	slot 7 (+0x2C) of class 0x71: UnregisterObject, then removes itself from the world's list at +0x1C90
@@ -67,5 +68,8 @@ func_0019C408	UnregisterC7CObject	slot 7 (+0x2C) of class 0x7C: UnregisterObject
 func_0019C440	InitC8BObject	slot 0 (+0x10) of class 0x8B: InitObject, then sets its two ids at +0x34 and +0x38 to -1
 func_0019C470	LoadC8BObject	slot 10 (+0x38) of class 0x8B: reads its counts, values and records from the level stream (ReadBufferedS16, ReadBufferedS8, ReadBufferedFloat) into front memory, then its property records (ReadPropertyRecords)
 func_0019C728	StartC8BObject	slot 16 (+0x50) of class 0x8B: StartObject, then finds its objects by id (FindFirstObjectByIdMode4, FindFirstObjectByIdMode1) and sets up their links and blend records
+func_0019CD90	DecodeC8BGridIndex	splits an index into three grid coordinates of a (2n+1) by (n+1) by (3n+1) grid with n at +0x48, each divided by n (the first centred on n); StartC8BObject calls it
 func_0019CE28	SetC8BObjectVector	stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00105F70 calls it
 func_0019CE38	SetC8BObjectVectorFlagged	sets +0x80 to 1 and stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00106048 calls it
+func_0019D2A8	TrackAimTargetObject	UpdatePlayerAimTarget's aim at its target object: predicts its position (func_0019CEC0) over the time left until +0x2424 (at least g_gameClock[2]), then aims with func_0019D0E0 and func_0019C9C8
+func_0019D338	TrackAimTargetPoint	UpdatePlayerAimTarget's aim at its target point: carries the point between frames (TransformPointBetweenFrames) along the path curve's slot 12 when it has one, then aims with func_0019D0E0 and func_0019C9C8
