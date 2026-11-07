@@ -5,7 +5,7 @@
 // or .bss. Named after its first address until what it was is known.
 #include "transform_object.h"
 #include "c67.h"
-#include "c8d.h"
+#include "oscillator.h"
 #include "camera.h"
 #include "list_iter.h"
 #include "screen_element.h"
@@ -361,12 +361,12 @@ s32 func_0012C7B0(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
 s32 func_0012C9A8(Animation* node);
 void func_001837E0(ObjectSubGroup* self, s32 a, s32 b, s32 c);
 
-void func_001F2758(C8D* self)
+void func_001F2758(Oscillator* self)
 {
     InitObject(self);
-    self->index40 = -1;
-    self->scale34 = -1.0f;
-    self->index6D0 = -1;
+    self->pendingId = -1;
+    self->lastTime = -1.0f;
+    self->currentEntry = -1;
 }
 
 void func_001F2798(Owner_1F2798* self, s32 unused, Ctx_1F2798* ctx)
@@ -443,59 +443,59 @@ f32 func_001F3358(Blob_1F3358* obj)
 
 ASM_FUNC(func_001F3408);
 
-void func_001F36E8(C8D* o)
+void func_001F36E8(Oscillator* o)
 {
-    s32 n = o->f38;
+    s32 n = o->entryCount;
     s32 off;
     Node_1F36E8* node;
 
-    o->f38 = n + 1;
-    o->index6D0 = o->index6D0 + 1;
+    o->entryCount = n + 1;
+    o->currentEntry = o->currentEntry + 1;
     off = n * 0xD0;
     off += 0x50;
     node = (Node_1F36E8*)((u8*)o + off);
     node->f0 = 0;
     node->q10 = *(Quad16*)&g_unitXVector;
-    if (o->index40 >= 0) {
-        node->f4 = o->index40;
-        o->index40 = -1;
+    if (o->pendingId >= 0) {
+        node->f4 = o->pendingId;
+        o->pendingId = -1;
         node->f60 = 2;
     } else {
-        s32 v = o->f3C;
+        s32 v = o->nextId;
         node->f4 = v;
         v++;
-        o->f3C = v;
-        o->index40 = node->f4;
+        o->nextId = v;
+        o->pendingId = node->f4;
         node->f60 = 0;
     }
 }
 
-void func_001F3768(C8D* self)
+void func_001F3768(Oscillator* self)
 {
-    s32 n6 = self->index6D0;
-    s32 idx = self->f38;
+    s32 n6 = self->currentEntry;
+    s32 idx = self->entryCount;
     Entry_001F3768* e = (Entry_001F3768*)((u8*)self + 0x50 + 0xD0 * idx);
     n6 = n6 + 1;
     idx = idx + 1;
-    self->f38 = idx;
-    self->index6D0 = n6;
+    self->entryCount = idx;
+    self->currentEntry = n6;
     e->a = 1;
     e->q10 = *(Quad16*)&g_unitYVector;
     e->q20 = *(Quad16*)&g_unitZVector;
     e->f38 = 0.5f;
     e->f88 = 0.5f;
-    self->f3C = self->f3C + 1;
+    self->nextId = self->nextId + 1;
 }
 
-void* func_001F37D8(C8D* obj, s32 value)
+void* func_001F37D8(Oscillator* obj, s32 value)
 {
-    if (obj->f38 == 0) {
+    if (obj->entryCount == 0) {
         return 0;
     }
     if (value == 1) {
-        obj->f8E4 = value;
+        obj->framesDirty = value;
     }
-    return (u8*)obj + (obj->index6D0 * 0xD0 + 0x50);
+    return (u8*)obj + (obj->currentEntry * 0xD0 + 0x50);
 }
 
 void* func_001F3810(Obj_1F3810* self, s32 mode)

@@ -24,7 +24,7 @@
 #include "v24a0.h"
 #include "screen_fade.h"
 #include "transform_object.h"
-#include "c8d.h"
+#include "oscillator.h"
 #include "camera.h"
 #include "game_progress.h"
 #include "asm_func.h"
