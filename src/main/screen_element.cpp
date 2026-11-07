@@ -1384,8 +1384,8 @@ void func_001AC0E8(T217D_2E0* self)
     f32 dx = 0.0f;
     f32 dy = dx;
     if (flag) {
-        dx = func_00205400(g_gameClock.elapsed * 40.0f) * 8.0f;
-        dy = func_00205210(g_gameClock.elapsed * 15.0f) * 4.0f;
+        dx = Sine(g_gameClock.elapsed * 40.0f) * 8.0f;
+        dy = Cosine(g_gameClock.elapsed * 15.0f) * 4.0f;
     }
     out.x = self->x + self->letterX + dx;
     out.y = self->y + self->letterY + dy;
@@ -1495,7 +1495,7 @@ void func_001AC910(T217D_380* self, const char* v)
     if (k >= 4) {
         goto done;
     }
-    if (func_001F6738(self->text, v) != 0) {
+    if (CompareStrings(self->text, v) != 0) {
         self->pendingText = v;
         self->pending = 1;
         self->vt->m16(self, 3);
@@ -1629,7 +1629,7 @@ void func_001ACE38(T217D_3D0* self, const char* v)
         return;
     }
     if (self->pending == 0) {
-        if (func_001F6738(self->text, v) == 0) {
+        if (CompareStrings(self->text, v) == 0) {
             return;
         }
     }
@@ -1856,7 +1856,7 @@ void func_001AD7B0(T217D_420* self)
     s32 mask = (s32)0xFF808080;
     DrawScreenElementText(self);
     f32 half = 0.5f;
-    f32 sc = func_00205210(WrapAngle(g_elapsedTime * 8.0f)) * half + half;
+    f32 sc = Cosine(WrapAngle(g_elapsedTime * 8.0f)) * half + half;
     V24A2* h = GetFontById(1);
     f32 s2 = sc * 0.1f + half;
     PushFontScale(h, s2, s2);

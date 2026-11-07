@@ -555,19 +555,19 @@ void func_001A7FE8(ObjectPool* self)
     self->id50 = -1;
     self->id54 = -1;
     self->id58 = -1;
-    (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
+    (void)FillMemory((Buf_1A7FE8*)s1, 0, 0x80);
     const Quad16* src = (const Quad16*)&g_identityMatrix;
     *(Quad16*)(s1 + 0x20) = src[0];
     *(Quad16*)(s1 + 0x30) = src[1];
     *(Quad16*)(s1 + 0x40) = src[2];
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
+    (void)FillMemory((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
     V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
+    (void)FillMemory((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
     self->f168 = 0;
@@ -884,7 +884,7 @@ void func_001A8AF8(ObjectPool* self)
                         } else {
                             rec->count = rec->count - 1;
                             s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->objects);
-                            func_001F5B08(p, p + 1, (rec->count - i) * 4);
+                            MoveMemory(p, p + 1, (rec->count - i) * 4);
                         }
                         break;
                     }
@@ -915,13 +915,13 @@ void func_001A93C8(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 !=
 void func_001A93E8(u8* self)
 {
     u8* p = self + 0x60;
-    func_001F5C0C((Obj_1A93E8*)p, 0, 0x80);
+    FillMemory((Obj_1A93E8*)p, 0, 0x80);
     *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
 void func_001A9438(ObjectPool* self)
 {
-    func_001F5C0C((u8*)self + 0xE0, 0, 0x70);
+    FillMemory((u8*)self + 0xE0, 0, 0x70);
     V8C* t = &self->v110;
     t->a = 0;
     t->b = 1.0f;
@@ -932,7 +932,7 @@ void func_001A9438(ObjectPool* self)
 
 void func_001A9498(u8* self)
 {
-    func_001F5C0C(self + 0x150, 0, 0x18);
+    FillMemory(self + 0x150, 0, 0x18);
 }
 
 void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
@@ -973,10 +973,10 @@ void func_001A97C8(u8* self, f32* out, int x)
     if (*(void**)(self + 0x10) != 0) {
         GetObjectWorldRotation(*(void**)(self + 0x10), v);
         func_00128150(0, x, v, v);
-        *out = func_00205778(v[1], v[0]);
+        *out = ArctangentOfRatio(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
         func_00128150(0, x, *(u8**)(self + 0x14) + 0x110, v);
-        *out = func_00205778(v[1], v[0]);
+        *out = ArctangentOfRatio(v[1], v[0]);
     } else {
         *out = *(f32*)(self + 0x8);
     }
@@ -1180,7 +1180,7 @@ void func_001AA178(void)
         }
     }
     DrawScreenFade(g_screenFade);
-    func_001AE820((u8*)&D_00273EB0);
+    DrawCyclingGlyphElement((u8*)&D_00273EB0);
 }
 
 void func_001AA1F0(ScreenElement* self, s32 index)
