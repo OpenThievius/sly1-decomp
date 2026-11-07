@@ -25,6 +25,7 @@
 #include "texture_table.h"
 #include "cursor_animator.h"
 #include "warp_page.h"
+#include "ramp_profile.h"
 #include "asm_func.h"
 
 extern void* const D_002486B0[];
@@ -182,9 +183,6 @@ extern TextStyle D_002743F0;
 
 s32 func_001F6738(const char* a, const char* b);
 
-// The element stack (g_elementStack) as func_001AD718 reads it: a state word, and at 0x2C how
-// many elements it holds (file_1E88D0's PushStackElement keeps them at 0x0C).
-struct ElementStackView { u8 pad0[4]; s32 f4; u8 pad1[0x2C - 8]; s32 count; };
 
 extern u8 D_00275BC0[];
 
@@ -362,7 +360,6 @@ struct ClampFloat {
 
 struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
-struct RampProfile { f32 f0; f32 f4; f32 f8; f32 fC; };
 extern RampProfile D_002743C0;
 
 f32 func_001EA4B8(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
@@ -1739,14 +1736,14 @@ void func_001AD6A8(T217D_420* self)
 void func_001AD718(T217D_420* self)
 {
     Player* g;
-    ElementStackView* m;
+    ElementStack* m;
 
     UpdateScreenElementSlide(self);
     if (self->flag == 0) goto tail;
     g = g_player;
     if (g != 0 && g->f2220 == 6) goto tail;
-    m = (ElementStackView*)g_elementStack;
-    if (m->f4 == 3 && m->count < 2) {
+    m = (ElementStack*)g_elementStack;
+    if (m->state == 3 && m->count < 2) {
         self->vt->m14(self);
         return;
     }
