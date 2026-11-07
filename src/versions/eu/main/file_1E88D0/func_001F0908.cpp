@@ -14,7 +14,7 @@ struct Eng_eu_1F0908 {
     s32 i974;
 };
 
-void func_001F0908(Obj_1F0908* self)
+void func_001F0908(WarpPage* self)
 {
     if (D_00276250 == -1) return;
     SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
@@ -26,17 +26,17 @@ void func_001F0908(Obj_1F0908* self)
     e->i974 = 1;
     SetScreenElementHoldTime((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
-    Slot_1F0908* sl = self->slots[D_00276250].s;
+    Animation* sl = self->entries[D_00276250].f00;
     if (sl != 0) {
         f32 f = 0.0f;
-        if (D_00276654 == 0) f = sl->f34;
-        ReplaceAnimationPlayer(sl, self, 0, self->f2F0, f, 0.0f);
+        if (D_00276654 == 0) f = sl->length;
+        ReplaceAnimationPlayer(sl, self, 0, &self->f2F0, f, 0.0f);
     }
-    if (self->tbl != 0) {
-        for (s32 i = 0; i < self->tbl->count; i++) {
-            Ent_1F0908* en = &self->tbl->ents[i];
-            if (en->type == 10) {
-                BaseObject* n = FindFirstObjectById(self->f14, 0x104, en->id, self);
+    if (self->f2E8 != 0) {
+        for (s32 i = 0; i < self->f2E8->startCount; i++) {
+            AnimEvent* en = &self->f2E8->startList[i];
+            if (en->kind == 10) {
+                BaseObject* n = FindFirstObjectById(self->world, 0x104, en->a8.i, self);
                 if (n != 0) n->desc->m02(n);
             }
         }

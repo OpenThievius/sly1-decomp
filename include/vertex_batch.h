@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x1850-byte builder func_001C30E8 (file_1C29E8.cpp) keeps on its stack and hands to
+// The 0x1850-byte builder func_001C30E8 (trail_ribbon.cpp) keeps on its stack and hands to
 // func_001619C0, func_00161A88, func_00161AB0, func_00161B10, func_00161BB0, func_00162508,
 // func_00162680, func_001626A8, func_001626C0 and func_001626D8 (file_15F678.cpp). Written for this
 // project from what retail's code does (build/swarm/st3/groups.tsv, g4664). Only a few of its

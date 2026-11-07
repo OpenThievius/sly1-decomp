@@ -4,7 +4,7 @@
 // state), and the three classes under it: 0x31 (D_0021AD80, 0xB10 bytes: a group of child
 // objects), 0x32 (D_0021AEC8, 0x5F0 bytes) and 0x33 (D_0021B010, 0x620 bytes: three frame
 // ranges and a blink). Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/file_1AECB0.cpp).
+// (config/us/classes.tsv; src/main/timed_object.cpp).
 //
 // Their fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
@@ -14,10 +14,11 @@
 #include "collider.h"
 
 struct TimedObject;
+struct StateTrigger;
 
-// The record func_00129CA8 hands out (func_001AEF68 takes one): 0x18 holds a value that is given
+// The track player func_00129CA8 returns (func_001AEF68 takes one): 0x18 holds a value that is given
 // back as the record is cleared (a float read, then zeroed as an integer).
-struct Node30 {
+struct TrackPlayer {
     u8 pad00[0x18];
     union {
         s32 w;
@@ -32,12 +33,12 @@ struct Desc30 : Desc03 {
     void (*m49)(TimedObject* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
     void (*m4A)(TimedObject* self);                 // 0x138: func_001B0120, func_001B0EE0
     void (*m4B)(TimedObject* self);                 // 0x13C: func_001B0160, func_001B0F70
-    void (*m4C)(TimedObject* self, s32 value);      // 0x140: func_001AECE0
+    void (*m4C)(TimedObject* self, StateTrigger* trigger); // 0x140: slot 76, keep the trigger (func_001AECE0; func_001236C8)
     void (*m4D)(TimedObject* self, s32 state);      // 0x144: enter a state (func_001AECE8)
 };
 
 struct TimedObject : Collider {
-    void* f550;             // 0x550: set by slot 76; slot 77 tells it when the state goes from 1 to 2
+    StateTrigger* trigger;  // 0x550: set by slot 76; slot 77 tells it when the state goes from 1 to 2
     s32 f554;               // 0x554: 0 at set-up
     s32 state;              // 0x558: -1 at set-up
     f32 f55C;               // 0x55C: the time the state was entered
@@ -51,35 +52,37 @@ struct TimedObject : Collider {
     f32 f5BC;               // 0x5BC
     s32 f5C0;               // 0x5C0
     void* f5C4;             // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
-    Node30* f5C8;           // 0x5C8
+    TrackPlayer* f5C8;           // 0x5C8
     f32 f5CC;               // 0x5CC: the value kept out of f5C8's record
 
     const Desc30* desc30() const { return (const Desc30*)desc; }
 };
 
 // A group of 0x31: a child object and the objects it was cloned from the first group for.
-struct Entry31 {
+struct TimedGroupEntry {
     BaseObject* obj;               // 0x00
     s32 value;              // 0x04
 };
 
-struct Group31 {
+struct TimedGroupChild {
     BaseObject* child;             // 0x00
-    u8 pad04[0x24 - 0x04];
+    f32 riseScale;          // 0x04: the scale of the group's ramp (func_001B0360)
+    f32 fallScale;          // 0x08: the same in the falling states 3 and 7
+    u8 pad0C[0x24 - 0x0C];
     s32 count;              // 0x24
-    Entry31 items[5];       // 0x28
+    TimedGroupEntry items[5];       // 0x28
 };
 
 // 0x31: slot 9 (func_001AF3B8) clones the first group's entries into every other group; the
 // objects are kept in the world's list at +0x1CA8 (link at 0xAF0).
-struct C31 : TimedObject {
+struct TimedGroup : TimedObject {
     u8 pad5D0[0x5D4 - 0x5D0];
     s32 groupCount;         // 0x5D4
     u8 pad5D8[0x5E0 - 0x5D8];
-    Group31 groups[16];     // 0x5E0
+    TimedGroupChild groups[16];     // 0x5E0
     u8 padAE0[0xAEC - 0xAE0];
     f32 fAEC;               // 0xAEC
-    C31* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
+    TimedGroup* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
     u8 padAF4[0xAF8 - 0xAF4];
     s32 flagAF8;            // 0xAF8: 1 while it is in the list
     f32 fAFC;               // 0xAFC
@@ -91,7 +94,7 @@ struct C31 : TimedObject {
 
 // 0x32: two object ids it resolves at load (D_002744D8: +0x5D0 and +0x5D4), a state of its own
 // at +0x5D8 (func_001B1070) and three times.
-struct C32 : TimedObject {
+struct SequencedObject : TimedObject {
     Collider* f5D0;              // 0x5D0
     s32 f5D4;               // 0x5D4
     s32 state5D8;           // 0x5D8: -1 at set-up
@@ -104,17 +107,17 @@ struct C32 : TimedObject {
 
 // A range of frames (func_001B1898): the first and the last, the time it takes, and how it
 // loops (0 around, 1 back and forth).
-struct Anim33 {
+struct FrameRange {
     s32 first;              // 0x00: -1 at set-up
     s32 last;               // 0x04: -1 at set-up
     f32 duration;           // 0x08
     s32 mode;               // 0x0C
 };
 
-struct C33 : TimedObject {
-    Anim33 animB;           // 0x5D0
-    Anim33 animC;           // 0x5E0
-    Anim33 animA;           // 0x5F0
+struct BlinkObject : TimedObject {
+    FrameRange animB;           // 0x5D0
+    FrameRange animC;           // 0x5E0
+    FrameRange animA;           // 0x5F0
     s32 blinkFrame;         // 0x600: -1 at set-up
     f32 blinkRate;          // 0x604
     f32 f608;               // 0x608
@@ -127,40 +130,40 @@ struct C33 : TimedObject {
 
 typedef char check_Desc30[sizeof(Desc30) == 0x148 ? 1 : -1];
 typedef char check_TimedObject[sizeof(TimedObject) == 0x5D0 ? 1 : -1];
-typedef char check_Group31[sizeof(Group31) == 0x50 ? 1 : -1];
-typedef char check_C31[sizeof(C31) == 0xB10 ? 1 : -1];
-typedef char check_C32[sizeof(C32) == 0x5F0 ? 1 : -1];
-typedef char check_Anim33[sizeof(Anim33) == 0x10 ? 1 : -1];
-typedef char check_C33[sizeof(C33) == 0x620 ? 1 : -1];
+typedef char check_TimedGroupChild[sizeof(TimedGroupChild) == 0x50 ? 1 : -1];
+typedef char check_TimedGroup[sizeof(TimedGroup) == 0xB10 ? 1 : -1];
+typedef char check_SequencedObject[sizeof(SequencedObject) == 0x5F0 ? 1 : -1];
+typedef char check_FrameRange[sizeof(FrameRange) == 0x10 ? 1 : -1];
+typedef char check_BlinkObject[sizeof(BlinkObject) == 0x620 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_001AECB0(TimedObject* self);                      // 0x30 slot 0
 void func_001AEFA0(TimedObject* self);                      // 0x30 slot 17
 void func_001AECE0(TimedObject* self, s32 value);           // 0x30 slot 76
 void func_001AECE8(TimedObject* self, s32 state);           // 0x30 slot 77
-void func_001AF0A0(C31* self);                      // 0x31 slot 0
-void func_001AF0D0(C31* self);                      // 0x31 slot 10
-void func_001AF3B8(C31* self);                      // 0x31 slot 16
-void func_001AF5C8(C31* self, f32 dt);              // 0x31 slot 17
-void func_001AF7A8(C31* self, void* p);             // 0x31 slot 20
-void func_001B00E8(C31* self, s32 flag);            // 0x31 slot 73
-void func_001B0120(C31* self);                      // 0x31 slot 74
-void func_001B0160(C31* self);                      // 0x31 slot 75
-void func_001B01B0(C31* self, s32 state);           // 0x31 slot 77
-void func_001B04A0(C32* self);                      // 0x32 slot 0
-void func_001B04D0(C32* self);                      // 0x32 slot 16
-void func_001B0578(C32* self);                      // 0x32 slot 17
+void func_001AF0A0(TimedGroup* self);                      // 0x31 slot 0
+void func_001AF0D0(TimedGroup* self);                      // 0x31 slot 10
+void func_001AF3B8(TimedGroup* self);                      // 0x31 slot 16
+void func_001AF5C8(TimedGroup* self, f32 dt);              // 0x31 slot 17
+void func_001AF7A8(TimedGroup* self, void* p);             // 0x31 slot 20
+void func_001B00E8(TimedGroup* self, s32 flag);            // 0x31 slot 73
+void func_001B0120(TimedGroup* self);                      // 0x31 slot 74
+void func_001B0160(TimedGroup* self);                      // 0x31 slot 75
+void func_001B01B0(TimedGroup* self, s32 state);           // 0x31 slot 77
+void func_001B04A0(SequencedObject* self);                      // 0x32 slot 0
+void func_001B04D0(SequencedObject* self);                      // 0x32 slot 16
+void func_001B0578(SequencedObject* self);                      // 0x32 slot 17
 s32 func_001B0BD8();                                // 0x32 slot 56
-void func_001B0EA8(C32* self, s32 flag);            // 0x32 slot 73
-void func_001B0EE0(C32* self);                      // 0x32 slot 74
-void func_001B0F70(C32* self);                      // 0x32 slot 75
-void func_001B0FC0(C32* self, s32 state);           // 0x32 slot 77
-void func_001B1158(C33* self);                      // 0x33 slot 0
-void func_001B11A0(C33* self);                      // 0x33 slot 16
-void func_001B1238(C33* self);                      // 0x33 slot 17
-void func_001B15D0(C33* self, s32 flag);            // 0x33 slot 73
-void func_001B1608(C33* self);                      // 0x33 slot 74
-void func_001B1698(C33* self);                      // 0x33 slot 75
-void func_001B1710(C33* self, s32 state);           // 0x33 slot 77
+void func_001B0EA8(SequencedObject* self, s32 flag);            // 0x32 slot 73
+void func_001B0EE0(SequencedObject* self);                      // 0x32 slot 74
+void func_001B0F70(SequencedObject* self);                      // 0x32 slot 75
+void func_001B0FC0(SequencedObject* self, s32 state);           // 0x32 slot 77
+void func_001B1158(BlinkObject* self);                      // 0x33 slot 0
+void func_001B11A0(BlinkObject* self);                      // 0x33 slot 16
+void func_001B1238(BlinkObject* self);                      // 0x33 slot 17
+void func_001B15D0(BlinkObject* self, s32 flag);            // 0x33 slot 73
+void func_001B1608(BlinkObject* self);                      // 0x33 slot 74
+void func_001B1698(BlinkObject* self);                      // 0x33 slot 75
+void func_001B1710(BlinkObject* self, s32 state);           // 0x33 slot 77
 
 #endif

@@ -1,0 +1,7 @@
+symbol	name	evidence
+func_001DFD48	InitClass75List	sets up the list g_class75List with func_00152438 (link offset 0x80)
+func_001DFD70	ClearClass75List	empties the list g_class75List with ClearList
+func_001DFD90	InitClass75Object	slot 0 of class 0x75: runs InitTransformObject, then sets the count at +0x88 to 30 and the scale at +0x8C to 25.0
+func_001DFDC8	RegisterClass75Object	slot 6 of class 0x75: registers the object (RegisterObject) and appends it to g_class75List
+func_001DFE00	UnregisterClass75Object	slot 7 of class 0x75: unregisters the object (UnregisterObject) and removes it from g_class75List
+func_001DFE38	CopyClass75ObjectData	slot 9 of class 0x75: runs CopyObjectData but keeps the list link at +0x80 as it was

@@ -1,0 +1,155 @@
+symbol	name	evidence
+func_001549C8	InitSpawnRecord	fills a 0x200-byte spawn record from a default template it builds once (D_00261F70 set, the template at D_0027C010 and D_0027C0A0 cleared to 0x90 and 0xC8 bytes with unit vectors); LoadEffectSpawner, SpawnEffectsAt and LoadRecordMember call it
+func_00154C10	InitEffectSpawner	slot 0 of class 0x50: runs InitPlacedObject, sets the ids at 0x2F8..0x30C and 0x310 and the states at 0x2D4 and 0x2D8 to -1, the floats at 0x2DC and 0x2E0 to 10.0 and the deadline at 0x340 to -1.0
+func_00154EE0	ReadCappedWordList	caps the count at 32, allocates cap*4 bytes, reads a byte and then count words from the stream and stores the first cap of them
+func_00154F98	LoadEffectSpawner	slot 10 of class 0x50: allocates its 0x200-byte spawn record, runs LoadPlacedObject, reads a curve index and creates the curve (CreatePathCurve) and then reads a word list into the record
+func_00155080	CopyEffectSpawner	slot 9 of class 0x50: runs CopyPlacedObject and counts one more user of the shared spawn record
+func_001550B8	ReparentEffectSpawnerToSource	calls the spawner's slot 25 (0x64, reparent) with the word at +0x7C of the object at +0x2D0 (ResolveEffectSpawnerLinks calls it)
+func_001550E8	ResolveEffectSpawnerLinks	slot 15 of class 0x50: runs PostLoadPlacedObject, then finds the objects named by the ids at 0x2F8..0x30C with FindFirstObjectById and stores them in the spawn record's target and found slots
+func_00155270	StartEffectSpawner	original assembly: slot 0x50 of class 0x50
+func_00155678	ReleaseEffectSpawnerHeld	slot 13 of class 0x50: in mode 2 calls slot 6 of the held object at 0x344 or 0x348 when it is the one passed, and clears that field
+func_001556E8	CloneSharedSpawnRecord	returns the spawn record unchanged when only one object uses it, otherwise makes a 0x200-byte copy (and a copy of its 0x28-byte entries), lowers the user count and returns the copy
+func_00155778	GetOwnSpawnRecord	with mode 1 marks the spawner changed (0x34C) and replaces its shared spawn record by CloneSharedSpawnRecord before returning it
+func_001557B8	MarkEffectSpawnerChanged	sets the changed word at 0x34C when the value is 1 and returns the object
+func_001557D0	AddSpawnRangeEntry	passes the spawner's own record (+16) to AddRangeEntry together with four floats and itself
+func_00155AB0	UpdateEffectSpawner	original assembly: slot 0x54 of class 0x50
+func_00155F28	InheritFlaggedAncestorValue	unless it has the 0x0C000000 flag pattern 0x08000000 itself, walks up the parent chain to the first node that has it and copies that node's float at 0x88
+func_00155F78	SetEffectSpawnerActiveFor	stores the game clock D_0026185C plus the argument as the deadline at 0x340
+func_00155F90	SetEffectSpawnerActiveForever	stores the largest float as the deadline at 0x340
+func_00155FA0	SetEffectSpawnerInactive	stores -1 as the deadline at 0x340, so IsEffectSpawnerActive fails on the clock (script built-ins and five other functions call it)
+func_00155FB0	IsEffectSpawnerActive	1 while the clock D_0026185C is below the deadline at 0x340, or when state 0x2D4 is 0 or 1 and 0x2D8 is 0
+func_00156000	SetEffectSpawnerDisabled	with a nonzero argument makes the spawner inactive (SetEffectSpawnerInactive), else active forever (SetEffectSpawnerActiveForever); a script built-in of func_00109488
+func_00156030	GetEffectSpawnerInactive	writes the negation of IsEffectSpawnerActive through its out pointer (a script built-in of func_00109488)
+func_00156060	GetEffectSpawnerActive	writes IsEffectSpawnerActive through its out pointer
+func_00156088	RandomizeEffectSpawnerDelay	clears the dirty flag and stores a random value in [f2DC, f2E0], times 60 when mode f2D4 is 3, into f328
+func_00156108	SetEffectSpawnerLimit	stores its argument at 0x2D8 while the state 0x2D4 is -1; in state 0 maps 0 to active forever, -1 to inactive and stores other values; marks the spawner changed (+0x34C)
+func_00156178	SetEffectSpawnerContinuous	stores its argument at +0x308 and marks the spawner changed (+0x34C); with +0x308 set StartEffectSpawner and UpdateEffectSpawner make the spawner active forever (SetEffectSpawnerActiveForever) instead of drawing a random delay; a script built-in of func_00109488
+func_00156188	SetSpawnRecordKind	stores the kind at 0x1B0 of the record, clears 12 bytes at 0x1F0 and sets defaults (-1 and 10.0 for kind 27, 25.0 and 0.8 twice for kind 24)
+func_00156218	SetEffectSpawnerKind	gets the spawner's own record (GetOwnSpawnRecord) and passes it to SetSpawnRecordKind
+func_00156250	SetOwnedSpawnRecordKind	gets the spawner's owned record (GetOwnedSpawnRecord) and passes it to SetSpawnRecordKind
+func_001566C8	SendPointEventToWorldListener	sends message kind 12 with a point and a float to the world's object at +0x1D0C through its slot 31, when there is one
+func_00156F08	ConvertSpawnToAnchorSpace	when the spawn setup has an anchor object (+0x6C), converts a position (func_00128018) and, unless the mode +0x70 is 3, a velocity (func_001280C0) into its space, adding the anchor's own motion (func_001278A8) in modes 0 and 1
+func_00156FC8	InitSpawnRing	sets count = min(n, k), rate 2 pi / count, a step from the span's width over the number of passes, a start phase half a step in, and a random start angle in 0..2 pi
+func_00157320	SpawnRecordEffects	acquires or reuses an effect owner, then CreateEffect for each of n positions, runs the kind's slot 0 and sets velocity, life, start and colour fields from the spawn record, registers the entry with func_001583E8 and finally flushes the owner
+func_00157E00	SpawnEffectsFromRecord	under a front-memory scope, derives the setup with func_001579B0 and spawns the effects with SpawnRecordEffects when the record's 0x120 word is 1, else through func_001575D8 (with a pair from func_00157B88 when 0x130 is 2)
+func_00157EF8	SpawnEffectsAt	builds a spawn record on the stack from its position and block arguments (set word 0x120 to 1) and passes it to SpawnEffectsFromRecord
+func_00157FF8	BroadcastPointEvent	sends each object of the world's list a message with the point: kind 4, or 0x14 with a float or 0x24 with an object as its +0x90 record asks (func_001EEF90 calls it)
+func_00158108	SpawnBriefEffectAt	creates an effect of kind 4 (CreateEffect) at a point, gives it 0.75 of life and the owner's +0x278 record's +0x0C (func_0019ED58 calls it)
+func_00158198	AddRangeEntry	sets kind 3, allocates 0x500 bytes of 0x28-byte entries once, and appends up to 0x20 entries of two ints and two start/end float pairs (a negative end defaults to the start)
+func_00158288	ResolveSpawnRecordTargets	looks up the spawn record's ids (from 0x120 and 0x188, storing the object at 0x18C, then its entries') with FindFirstObjectById; ResolveEffectSpawnerLinks and ResolveRecordMemberTargets call it
+func_001585F8	StartMemberObject	slot 0x50 of class 0x77: runs StartObject, then the object's slot 3
+func_00158630	ComputeChainedWorldFrame	writes a frame's world position and rotation by composing its local position (+0x40) and rotation (+0x50..+0x70) with each parent's along the chain at +0x80; func_00157B88 and func_001590A0 call it
+func_00158730	SendEmptyMessage	builds a zeroed 0x50-byte block and passes it to the object's message slot 27
+func_00158778	SendTwoVectorMessage	fills a 0x50-byte block with two words, two 16-byte vectors and two floats and passes it to message slot 27
+func_001587C0	SendMemberObjectMessage	slot 0x7C of class 0x77: does nothing (0x78 and 0x7A override it)
+func_001587C8	LoadGroupMembers	slot 10 of class 0x78: for each entry in the stream creates an object with func_0011E580, loads it and keeps it (or its members) as a group member when it is of class 0x78 or 0x7A, up to 8
+func_00158980	CopyGroupMembers	slot 9 of class 0x78: replaces each member by a copy made with func_00183058, starts it through slot 3 and points its group back at itself
+func_00158A10	ResolveGroupMembers	slot 0x4C of class 0x78: calls the resolve slot (15) of each of its members
+func_00158A80	BroadcastMessageToMembers	slot 27 of class 0x78: passes the message to slot 27 of every member
+func_00158B00	InitRecordMember	slot 0 of class 0x79: runs the base set-up and sets both object ids (0x94, 0x98) to -1
+func_00158B30	LoadRecordMember	slot 10 of class 0x79: allocates the 0x200-byte shared record, reads a path-curve kind index and builds the curve with CreatePathCurve and its slot 0, and reads more for record kind 4
+func_00158C28	CopyRecordMember	slot 9 of class 0x79: runs CopyObjectData and counts one more user of the shared record
+func_00158C60	ResolveRecordMemberTargets	slot 15 of class 0x79: finds the objects for the ids at 0x94 and 0x98 (func_0015A418) into the record's target and value, then runs func_00158288
+func_00158D38	SendRecordMemberMessage	slot 0x7C of class 0x79: does nothing
+func_00158D40	AddRecordMemberRangeEntry	makes the object's own record and adds a range entry to it with AddRangeEntry
+func_00158DD8	GetOwnedSpawnRecord	with own set, replaces the shared record by a copy (func_001556E8) before returning it
+func_00158E10	InitHoldingMember	slot 0 of class 0x7A: runs InitRecordMember and sets the three ids at 0xAC, 0xB0, 0xB4 to -1
+func_00158E48	ResolveHoldingMemberTargets	slot 15 of class 0x7A: runs ResolveRecordMemberTargets, then looks up the objects for its three ids into the record's found array (the third only if of kind 3)
+func_00158F10	ReleaseHeldObject	slot 13 of class 0x7A: on message kind 2 calls slot 18 of the object it holds (0xC0 or 0xC4) and clears that field
+func_00158F80	SendMessageAfterDelay	slot 27 of class 0x7A: with a positive delay copies the message into a pooled record due at now plus the delay and appends it to the world list at 0x1BDC, else sends it at once
+func_00159068	GetOrCreateSoundParams	returns the record at 0xA0, first making it with InitSoundParams when it is 0
+func_00159478	FindOrBuildMemberGroup	gathers the class 0x77 objects under the object with func_0015A4F0; none gives 0, one is returned, more are collected (up to 8) into a new class 0x78 object that becomes their owner
+func_00159588	DispatchDelayedMessages	walks the world's list at 0x1BDC and for each record whose due time has passed sends its message with func_001590A0, unlinks it and returns it to the pool
+func_00159680	LoadCrossfadeAnimator	slot 0 of D_0021E438: LoadAnimatorBase, copies the flags to the second cursor, reads the second record's key and the fade parameters from the block
+func_001596E0	BindCrossfadeAnimator	slot 1 of D_0021E438: binds both records, takes ownership of the second, sets count to the larger frameCount and mode to 0
+func_00159770	SetCrossfadeMode	switches the animator's mode (0 to 3), initialising pos, step and level for the new mode and stamping the time
+func_00159890	StepCrossfadeAnimator	slot 2 of D_0021E438: advances pos by mode and sets the frames of both cursors
+func_00159A00	SetCrossfadeRatio	stores the ratio, selects mode 2 when it is at least 1 else mode 0, and sets both cursors' frames from pos
+func_00159A80	FindCrossfadeCursor	slot 5 of D_0021E438: the first cursor by FindAnimatorCursor, else the second cursor when the key matches recordKey2
+func_00159AD0	StepObjectLevelRamp	moves a level (0x4) by its rate (0x8) times dt; reaching 0 calls the object's slot 7, and reaching 0 or 1 (or the object not being live) removes the node with RemoveObjectNodeFromWorld
+func_00159BB0	AddObjectNodeToWorld	takes a node from the world pool at 0x1C18, stores the object in it and appends it to the list at 0x1C30 or 0x1C24 by the flag at 0x294
+func_00159C28	RemoveObjectNodeFromWorld	removes the node from the list at 0x1C30 or 0x1C24 by the owner's flag at 0x294, clears the flag at 0x298 and returns it to the pool at 0x1C18
+func_00159CA0	DrawScreenFill	callback of the colour-fade object: fills a packet with the colour at +0x60 through FillScreenColor and writes it as VIF direct inside a DMA tag
+func_00159D00	UpdateColorFade	blends the fade record's start, hold and end colours by the time since its start time and sends the colour request, or clears the running flag and unlinks it when the fade is over
+func_00159ED0	StartColorFade	if the fade record is not running, sets its running flag, stores the clock as its start time and links it into the list at D_00275710 + 0x1CD8
+func_00159F20	GetHashedSlot	returns base plus 0x84 plus 12 times ((n * 0x95675) and 0x1FF)
+func_00159F48	CollectObjectByMode	switch on a collection mode (parent chain, level bits, alias ids) that appends self to a bounded array and counts it when it passes and is attached
+func_0015A198	GatherObjectsByMode	unmatched yet: collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
+func_0015A418	FindFirstObjectById	runs func_0015A198 with flags or 0x200, one result wanted, and returns that object
+func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and some thirty others call it)
+func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object
+func_0015A4B8	IsClassOfKind	walks the list kept at D_00247448[index] and returns 1 when it holds the value
+func_0015A4F0	GatherObjectsById	by the low byte of the flags (modes 1 to 5) collects up to max objects of the id's classes (IsClassOfKind) from the world, from the root's children or from the root's parent chain, returning the count
+func_0015A838	FindFirstObjectByIdGathered	runs GatherObjectsById with flags or 0x200 and one result wanted, and returns it
+func_0015A868	FindCommonAncestor	returns the first object on the first parent chain that also appears on the second
+func_0015A8B8	InitC60Object	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
+func_0015A918	LoadC60Object	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
+func_0015A960	UpdateC60Object	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
+func_0015A9A8	DrawC60Object	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
+func_0015AAE0	InitObjectCycler	slot 0 of the 0x40 class: runs the base set-up, sets state -1, loads its ranges from the doubleword tables D_00262180..D_002621C0 and appends itself to the world list at +0x1C48
+func_0015AC08	LoadObjectCycler	slot 10 of the 0x40 class: runs the base load, finds the objects of kinds 0x23C..0x24B (and 0x24D..0x254 in mode 1) into its object arrays and appends itself to the world list in mode 1
+func_0015AD80	CopyObjectCycler	slot 9 of the 0x40 class: keeps the doubleword at 0x5DC across the base copy func_001BA130, then in mode 0 starts the effect handle and otherwise leaves the world list
+func_0015AE38	SetObjectCyclerHandle	slot 20 of the 0x40 class: in mode 0 stops its effect handle (func_001BF788) when flag is set and starts it again (func_001BFCD8) when not
+func_0015AEB0	StartObjectCycler	slot 16 of the 0x40 class: registers its table, draws the first check and step times in mode 1, enters its start state and sets 0x64C to twice its radius
+func_0015AF50	StepObjectCycler	original assembly: slot 0x80 of class 0x40
+func_0015B128	UpdateObjectCycler	slot 17 of the 0x40 class: moves the state on when its end time passes, steps the shown index (cycling in mode 0, back and forth in mode 1) and advances state 6
+func_0015B4D0	DrawObjectCycler	slot 37 of the 0x40 class: builds a parameter block with func_00125B70, scales it by a clamped curve of the state time and passes it to the shown object's method slot 24
+func_0015B720	HandleObjectCyclerObjectEvent	slot 45 of the 0x40 class: if not already in state 1 it enters state 1 and forwards the message's values to its group object's method 0x1B
+func_0015B7B8	SetObjectCyclerState	returns at once when the state at 0x554 is already the one given; otherwise runs the leaving case of the old state and the entering case of the new one (jump tables jtbl_0024A1D0/jtbl_0024A1F0) and stores it; StartObjectCycler passes the start state, UpdateObjectCycler and HandleObjectCyclerObjectEvent pass 0, 1, 5 or -1
+func_0015C058	IsCyclerGroundCandidate	the filter IsObjectCyclerUnsupported passes: rejects an object with flag bit 43 or the cycler's own +0x50, else accepts it when bit 0 of its +0x2CC is clear
+func_0015C0A0	IsObjectCyclerUnsupported	at most every 0.05 s: looks for a span object under the cycler, between its position and that point lowered by +0x64C (FindNearestSpanObject), and returns 1 when there is none (UpdateObjectCycler calls it)
+func_0015C178	ClearDefaultFont	sets the default font D_0026227C to 0
+func_0015C188	IsFontLoaded	returns 1 when the id is not -1 and D_00262268 holds a font for it
+func_0015C1C0	GetFontById	returns the font registered under the id in D_00262268, the default font D_0026227C when none, 0 for -1
+func_0015C200	FindFontByKeyChar	looks the character up in the 5-entry key table D_00262250 and returns the font at the same index of D_00262268 (the & code of the text reader), else 0
+func_0015C260	CopyFontMetrics	copies the first fields, sizes, scale stack and the three words at 0x30..0x40 from one font to another
+func_0015C2E8	SetFontClipRect	slot 4 of the abstract font base: writes the clip register (0x40) from a rectangle as x, y and the last pixel at the corner, with y scaled by 0.4545
+func_0015C3C0	ResetFontClipRect	slot 7 of the font tables: when the flag is set writes the clip register (0x40) with the full-screen rectangle constant
+func_0015C418	MeasureFontString	adds the width of each character of the string through slot 3, 0 for a null string
+func_0015C4A8	MeasureFontStringHeight	the font's height times its scale times the number of lines WrapFontString counts
+func_0015C4E8	WrapFontString	counts the lines of the string, starting a new one at a newline and, when the line passes the width limit, overwriting the last space or tab (or the current character) with a newline
+func_0015C638	DrawFontString	draws a string with the font into a rectangle: vertical position by the mode (top, centre or bottom), each line aligned left, centre or right by its measured width, drawing through slot 6 between slot 4 and slot 7
+func_0015C8B8	PushFontScale	saves the scale on the font's stack and sets the scale to the first entry times the two factors
+func_0015C900	PopFontScale	takes the top of the scale stack back into the font's scale
+func_0015C930	CloneFont	slot 1 of the font table D_0024A220: allocates 0x88 bytes, installs the table, copies the source with CopyFont and multiplies its scales by x and y
+func_0015C9B0	CopyFont	copies the metrics with CopyFontMetrics plus the id, the two images, the register words, the glyph table and the mask
+func_0015CA38	HasFontGlyph	slot 2 of the font table: returns whether FindFontGlyph finds the key
+func_0015CA60	GetFontCharWidth	slot 3 of the font table: the glyph width plus 1 times the scale, or the default advance times the scale when the key has no glyph
+func_0015CAB8	AddFontImagesToFrame	if the font's mask bit is not yet set in the build frame's flags, writes its two images' transfers into the packet and sets the bit, returning whether it did
+func_0015CB88	BeginFontDraw	slot 4 of the font table: sets the clip through the base, adds the font images to the frame with AddFontImagesToFrame and writes the texture and alpha registers for drawing glyphs
+func_0015CC80	BeginFontGlyphPacket	a slot of the font's GCC vtable D_0024A220: adds the font's images (AddFontImagesToFrame) and opens a GIF tag with its register writes
+func_0015CD18	DrawFontGlyph	slot 6 of the font table: draws one glyph as a textured sprite at x, y when it lies inside 640 by 492.8 and returns the advance
+func_0015CF70	DrawFontGlyphTurned	slot 8 of the font table: like DrawFontGlyph with the sprite's width and height swapped, as four vertices, then calls slot 7
+func_0015D338	DrawFontQuad	writes a colour (alpha scaled) and two corner texture-and-screen points of a sprite into the packet
+func_0015D4E0	DrawFontFrame	slot 9 of the font table: draws a rectangle frame as nine DrawFontQuad pieces (four corners, four edges and a centre) from one glyph of the font
+func_0015D8A8	LoadFont	reads a 16-byte header from the data, registers the font under its id in D_00262268, links the two images from the tables D_00274504 and D_0027450C and copies the glyph table
+func_0015D998	UploadFontImages	sends the font's image (and second image) to video memory with a GS packet, recording the register word and the packet words in 0x60..0x74
+func_0015DAB8	FindFontGlyph	binary search of the font's glyph table (8-byte entries sorted by key) for the key
+func_0015DB28	InitTextReader	stores the text and default font in the reader, sets its four colours to 0xFF808080, points the inline font at the font vtable and rewinds it
+func_0015DB80	RewindTextReader	puts the cursor back at the text's start, the font back to the default one and the colours back to the default colour
+func_0015DBB8	SetTextDefaultColor	stores a colour word at +0xA4 of the reader, the colour the codes in the text go back to
+func_0015DBE0	ReadTextChar	returns the next character of the reader's text, applying the ~ colour, & font and ^ scale codes it passes
+func_0015DF58	CountTextChars	rewinds the reader and counts the characters ReadTextChar returns
+func_0015DFA0	SeekTextReader	rewinds the reader, skips n characters (stopping at the end) and clears the changed-font flag
+func_0015DFF8	SumTextWidth	rewinds the reader and adds the font's width of every character ReadTextChar returns
+func_0015E068	WrapTextLines	counts the lines of the reader's text, starting a new line at a newline and, when the width passes the limit, overwriting the last space or tab (or the current character) with a newline
+func_0015E1B0	MeasureTextHeight	multiplies the default font's height times its scale by the number of lines func_0015E068 counts
+func_0015E1F0	MeasureTextWidth	rewinds the text reader (RewindTextReader) and sums each character's advance from the font's glyph-width callback until a newline (0xA), returning the widest line; MeasureText and RebuildPromptText call it
+func_0015E290	MeasureText	counts the lines, asks func_0015E1F0 for the width and writes the width and the lines times the default font's line height through its two out pointers
+func_0015E318	DrawAlignedText	measures each line of the reader's text then draws every character with the font inside a layout rectangle, aligning each line left, centre or right and the block top, centre or bottom
+func_0015E5F0	UploadAllFontImages	for each of the D_00262260 fonts at D_00262264 (0x88 bytes apart) calls UploadFontImages
+func_0015E810	InitRenderFrames	gives each of the two render frames its buffers and three lists, creates the empty global lists, starts the render thread and its two semaphores and fills the CRC-32 table D_002C3B00
+func_0015E9F0	BeginRenderFrame	calls func_001F6B60 on the semaphore D_002623B4, takes the next of the two RenderFrame records in turn into D_002622D8, empties it (func_0015EFE8), clears its flags and points the buffer writers D_00262280 and D_002622A8 at its two buffers
+func_0015EAE0	AddDmaRefTagIfChanged	adds a DMA ref tag of (end-value+15)/16 quadwords only when value differs from the last one remembered in D_0026230C
+func_0015EB20	WriteGsFinishPacket	builds a GIF packet with one register write to GS register 0x61 (FINISH), writes it through VIF direct, adds a DMA end tag and detaches the buffer
+func_0015EBF0	CloseDrawBuffer	finishes a GS buffer: sets its header registers (0x61), closes it with func_00161200 and func_00152D30 and submits it with func_001529E0
+func_0015EC68	SubmitRenderFrame	copies the global lists D_002622E0, D_002622F0 and D_00262300 into the current record, clears D_002622D8 and signals the semaphore D_002623B0 that func_0015EE80 waits on
+func_0015ED50	ActivateRenderFrame	sets g_drawFrameData and the image mask of a render frame, and when it has a pending list sends D_00274538 on the GIF channel (RunRenderThread and SendRenderFrameToDma call it)
+func_0015EDB8	VerifyCodeChecksum	folds the words from 0x100000 for D_00148D74 bytes through the CRC-32 table and sets D_00262310 to 1 when the result is nonzero; RunRenderThread calls it first
+func_0015EE80	RunRenderThread	loops forever: waits on D_002623B0, takes the next RenderFrame in turn, sends its two buffers to the DMA channels D_00261F18 and D_00261F1C, then signals D_002623B4
+func_0015EF88	SendRenderFrameToDma	sets up the frame with func_0015ED50, sends its buffer to the DMA channel D_00261F18 and, when the flag is set, also the second buffer to D_00261F1C
+func_0015EFE8	ReleaseFrameNodes	for each of the record's three lists, takes every node out and returns it to the pool it came from, then empties the list
+func_0015F210	DrainRenderFrames	waits on the semaphore D_002623B4 until the render thread is idle, optionally sends the last frame again a few times, then releases the nodes of both frames with ReleaseFrameNodes
+func_0015F320	BlitFrameToDisplay	after each frame's GIF packet (RunRenderThread, DrainRenderFrames) builds a GIF packet on the stack with register writes chosen by g_displayFrameCounter's parity and two UV/XYZF pairs (a textured sprite) and sends it
+func_0015F618	ConstructPacketWriters	the file's static initialiser: on the construction pass sets up g_gsPacketWriter and g_vifPacketWriter (ResetPacketWriters calls it)
+func_0015F658	ResetPacketWriters	calls func_0015F618(1, 0xFFFF), which re-initialises the GS packet writer and the VIF packet writer

@@ -5,7 +5,7 @@ struct Obj_1F1C90_eu {
     VFn_1F1C90* vtbl;
     u8 pad0[0x56C - 4];
     s32 f56C;
-    C67* f570;
+    WarpPage* f570;
     u8 pad1[0x58C - 0x574];
     f32 f58C;
     f32 f590;
@@ -37,9 +37,9 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
         SetWarpCursor(self->f570, r, 2);
         self->f590 = 1.0f;
         self->f58C = 1.0f;
-        Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E4;
+        Animation* an = self->f570->f2E4;
         if (an != 0) {
-            SetScreenElementSlideInTime(self, an->f34);
+            SetScreenElementSlideInTime(self, an->length);
         }
         GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
@@ -53,9 +53,9 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
         self->vtbl[15](self);
         if (self->f570->f560 == 0) {
             BeginWarpPageClose(self->f570);
-            Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E8;
+            Animation* an = self->f570->f2E8;
             if (an != 0) {
-                SetScreenElementSlideOutTime(self, an->f34);
+                SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
             SetElementStackState(g_elementStack, 3);

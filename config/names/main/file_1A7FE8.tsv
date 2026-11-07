@@ -1,0 +1,39 @@
+symbol	name	evidence
+func_001A7FE8	InitObjectPool	slot 0 of the 0x8C class: after InitObject sets four ids to -1, zeroes its blocks, sets defaults (5.0, 20000.0) and schedules func_001A8208 (SpawnObjectPoolCopies) with func_001DBCC8
+func_001A80E0	UnregisterObjectPool	slot 7 of the 0x8C class: runs the base func_00182ED0, then clears the chosen item through func_001A93C8
+func_001A8110	GetObjectPoolShare	creates the 0x20-byte shared record at 0x3C on first use, points its first word back at the pool, and returns it
+func_001A8150	AddObjectPoolEntry	allocates the 0x50-byte entry array on first use and appends a 0x14-byte entry with an id, a count and two flag bits
+func_001A8208	SpawnObjectPoolCopies	for each entry looks its object up in the world (list 4), makes copies up to the entry's count, runs their set-up slots and stores them in the entry's list
+func_001A84C8	CopyObjectPool	slot 9 of the 0x8C class: runs func_001830D8, then either shares the source's record (marking it lent and linking itself in its list) or duplicates the source's entry array
+func_001A8590	StartObjectPool	slot 16 of the 0x8C class: runs func_00182C58 and once looks up the ids at 0x4C, 0x50, 0x54 and 0x58, filing each object found by its kind (0x7E, 0x73, 2, 0x75) in the pool's fields
+func_001A86F8	ClearObjectPoolChoiceIfFlag	slot 20 of the 0x8C class: when the flag argument is set, clears the chosen item through func_001A93C8
+func_001A8718	FindObjectPoolEntry	returns the 0x14-byte entry whose key equals the argument, or 0
+func_001A8778	EnableObjectPoolEntry	sets bit 2 of the flags of the entry found by key
+func_001A87A8	DisableObjectPoolEntry	clears bit 2 of the flags of the entry found by key
+func_001A87E0	SetObjectPoolEntryCount	stores a value, limited to the entry's stored-copy count, in the count word of the entry found by key
+func_001A8820	IsObjectInPool	finds the pool row whose first object has the query's id (+8) and returns 1 when the query is one of that row's objects; the agents' and the player-linked collider's contact and target tests call it
+func_001A88A0	IsObjectPoolItemFree	returns 0 when another pool of the shared group holds the item as its chosen one, or the item is registered, a kind 0x3B object with word 0x678 clear, or a kind 0x20 object with word 0x680 set
+func_001A89E8	AdvanceObjectPoolEntry	starting after the current entry index at 0x44, moves it to the next enabled entry with at least one free item
+func_001A8AF8	ChooseObjectPoolItem	in the current enabled entry picks the first free item, stores it at 0x48 and removes it from the entry unless flag bit 1 is set
+func_001A8C50	HasObjectPoolChoice	returns 1 if an item is chosen at 0x48, else runs ChooseObjectPoolItem and returns whether it chose one
+func_001A93C8	ClearObjectPoolChoice	zeroes the chosen item at 0x48 and, if the shared record is lent, its word at 0x10
+func_001A93E8	ResetPlacementRecord	zeroes the 0x80-byte placement record at +0x60 of an object (an object pool, the object object_host_functions sets up) and sets its rotation (+0x20) to the identity matrix
+func_001A94C0	GetPlacementRecordTransform	gives the position and rotation a placement record names: through its frame object (+0x0, ConvertPositionToWorld), its object (+0x4, world position and rotation), its collider (+0x8, +0x140 and +0x110) or its own values (+0x10, +0x20)
+func_001A97C8	GetPlacementRecordAngle	gives the heading a placement record names: the angle of its object's world rotation (+0x10) or its collider's (+0x14), else its own angle at +0x8
+func_001A98F8	StartGaugeBarAgent	slot 16 of class 0x0D: runs StartAgent, then registers itself with its world through func_001DDC38
+func_001A9928	IsGaugeBarAgentFree	slot 0x16C of class 0x0D (as IsGaugeAgentFree): returns 0 when func_001DDA80 holds for its world, else its flag at +0xC24
+func_001A9960	UpdateGaugeBarAgentGoal	slot 94 of class 0x0D: runs UpdateAgentGoal and in state 0x10 heads for the position (+0x140) of the object its slot 102 returns
+func_001A99B8	UpdateGaugeBarAgentState	slot 90 of class 0x0D: runs UpdateAgentState, then func_001C8BC0 in state 0x10
+func_001A99F8	EnterGaugeBarAgentState	slot 92 of class 0x0D: runs EnterAgentState and on state 0xB marks level part 4 done (MarkLevelDone) and starts a memory card save
+func_001A9A40	UpdateGaugeBarAgent	slot 17 of class 0x0D: runs UpdateAgent, then stops and clears the animation player at 0xC20 once its value at +0x18 is 0
+func_001A9A98	UpdateGaugeBarAgentVisibility	slot 46 of class 0x0D: shows g_gaugeBarElement while AreMenusAndFadeClear, else hides it
+func_001A9AE8	HandleGaugeBarAgentObjectEvent	slot 0xC4 (object event) of class 0x0D: counts at 0xC10 and lowers the gauge (DecrementGaugeCount), sends its member group 0xB00 a message (slot 27) and plays a clip (ReplaceAnimationPlayer) on the events it handles, then runs HandleAgentObjectEvent
+func_001A9C58	SetGaugeBarAgentValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent
+func_001A9C68	InstallScreenElements	stores each of the 37 element tables in its global element, calls slot 0 on every element of D_002486B0 and resets D_00275F80
+func_001A9F78	InitScreenElements	calls slot 1 on each of the 37 elements of D_002486B0 from the last to the first
+func_001A9FD0	UpdateScreenElements	calls slot 2 on each of the 37 elements from the last to the first, then advances the screen fade g_screenFade
+func_001AA060	HideScreenElements	calls slot 16 with mode 0 on each of the 37 elements
+func_001AA0C0	ResetScreenElements	calls slot 5 on each of the 37 elements
+func_001AA110	QueueEachScreenElementDraw	runs slot 10 (+0x28) of each of the 37 screen elements of g_screenElements whose mode is set, when it has one; QueueScreenElementDraws calls it
+func_001AA178	DrawScreenElements	calls slot 9 on each element of D_002486B0 whose mode is not 0, then draws g_screenFade and D_00273EB0
+func_001AA1F0	InitScreenElement	slot 0 of the element tables: picks its 20-byte placement record from D_0026C3E0 by index, sets the slide times to 0.25, installs the default clock, places it and starts it hidden

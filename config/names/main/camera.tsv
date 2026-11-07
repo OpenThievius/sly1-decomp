@@ -1,0 +1,60 @@
+symbol	name	evidence
+func_00143140	InitCameraModule	the camera file's entry in g_startupInitializers (D_002647C0[13]); its body is empty
+func_00143148	ComputeOffsetBehindTarget	calls ComputePolarOffset with the target's heading at 0x30 plus pi and its pitch at 0x34, writing the offset behind it (func_00143208, func_001433E0 and func_00143418 call it)
+func_00143180	SpringCameraVector	moves a 16-byte position toward a goal through a velocity with the three spring factors it is given, or copies the goal and zeroes the velocity when the snap flag at 0x224 is set (func_00143208 and func_00145718 call it)
+func_00143208	UpdateCameraTargetTracking	the step UpdateCamera runs for the target in action: ComputeOffsetBehindTarget, then SpringCameraVector on the offset at 0x250 (velocity 0x260) and the vector at 0x270 (velocity 0x280), with factors chosen by the mode at 0x268C when the target is D_00262E10
+func_001433E0	ResetCameraTargetTracking	UpdateCamera calls it when the target changes: ComputeOffsetBehindTarget into 0x250 and zeroes the velocities at 0x260, 0x270 and 0x280
+func_001434C8	ComputeCameraFogTerms	fits a reciprocal through (1, 4080) and (far/near, (1 - strength) * 4080) from the fog settings at 0x1F8/0x1FC/0x200 and writes the four terms (with the 2^23 bias) UpdateCameraProjection stores at 0x208
+func_00143560	UpdateCameraProjection	derives from the zoom at 0x1C4, the settings at 0x1E0 and the near and far distances at 0x1E4/0x1E8 the values at 0x1F0..0x1EC, builds the matrix at 0xC0 with func_00189F58 and calls func_001434C8 and func_00144540; every setter below calls it
+func_00143648	InitCamera	slot 0 of the 0x6D class: runs the base set-up, stores the zoom, near/far and projection settings at 0x1C0..0x208, copies the frame at 0x80, installs the five controller tables and calls ResetCamera
+func_001437C0	SnapCurrentCameraZoom	calls SnapCameraZoom on g_camera with the float it is given
+func_001437E8	SetCurrentCameraNearDistance	calls SetCameraNearDistance on g_camera with the float it is given
+func_00143810	SetCurrentCameraFarDistance	calls SetCameraFarDistance on g_camera with the float it is given
+func_00143838	SetCurrentCameraFogNear	calls SetCameraFogNear on g_camera with the float it is given
+func_00143860	SetCurrentCameraFogFar	calls SetCameraFogFar on g_camera with the float it is given
+func_00143888	SetCurrentCameraFogStrength	calls SetCameraFogStrength on g_camera with the float it is given
+func_001438B0	SetCurrentCameraFogColor	calls SetCameraFogColor on g_camera with the colour it is given
+func_001438D8	SetCurrentCameraDistanceScale	calls SetCameraDistanceScale on g_camera with the float it is given
+func_00143900	SetCameraPosition	calls SetCameraPlacement with only the position argument (the 16 bytes copied to 0x40)
+func_00143920	SetCameraOrientation	calls SetCameraPlacement with only the second argument (the three 16-byte rows copied to 0x80, 0x90, 0xA0)
+func_00143940	SnapCameraZoom	stores its argument as both the zoom at 0x1C4 and the target zoom at 0x1C8, zeroes the rate at 0x1CC and calls UpdateCameraProjection (UpdateCamera calls it to jump to the target)
+func_00143968	SetCameraNearDistance	stores the value at 0x1E4 (default 100, passed to the projection builder before the 20000 at 0x1E8) and updates the projection
+func_00143988	SetCameraFarDistance	stores the value at 0x1E8 (default 20000, the last argument of the projection builder in UpdateCameraProjection) and updates the projection
+func_001439A8	SetCameraFogNear	stores the value at 0x1F8 (default 500, the near term of ComputeCameraFogTerms) and updates the projection
+func_001439C8	SetCameraFogFar	stores the value at 0x1FC (default 20000, the far term of ComputeCameraFogTerms) and updates the projection
+func_001439E8	SetCameraFogStrength	stores the value at 0x200 (default 0.5, how far ComputeCameraFogTerms lowers the far value) and updates the projection
+func_00143A08	SetCameraFogColor	copies the 32-bit colour at 0x204 (default 0x80303030) and updates the projection
+func_00143A38	SetCameraDistanceScale	stores the value at 0x1C0, which UpdateCameraProjection divides by the zoom into the scale at 0xB0 that ComputeCameraDistanceFade multiplies distances by, then updates g_camera's projection
+func_00143A60	ResetCamera	optionally places the camera from D_00261880/D_00261890, then empties the controller stack (count 0x3D0 = 0), pushes controller ctl454 with func_00145088, clears the pending snap and sets 0x218/0x21C
+func_00143AF0	ClearCameraObjectList	sets the count at 0x340 of the object pointer list at 0x344 to 0
+func_00143AF8	AddCameraObject	appends the item to the pointer list at 0x344 when the count at 0x340 is below 8
+func_00143B20	RemoveCameraObject	finds the value in the list at 0x344, shifts the later entries down with func_0018D800 and decrements the count at 0x340
+func_00143BA8	IsCameraObstacle	the filter func_00143BE0 passes to func_001DC238 around the camera: accepts an object whose bits 32..35 of the 64-bit flags at 0x538 are 1 or whose 0x404 is set
+func_00143E40	UpdateCamera	runs the top controller on the frame time (calls the target's slot 0x124/4, the controller's slot 4) and eases the zoom at 0x1C4 toward 0x1C8 with func_001EA620, updating the projection
+func_00144128	UnprojectCameraPoint	turns a point given in the camera's screen terms (x and y scaled by the depth and by the factors at 0x1F0/0x1F4) into a world point through the rows at 0x80 and the position at 0x40
+func_001441C0	ProjectPointToCamera	the inverse of UnprojectCameraPoint: brings a world point into the frame at 0x40/0x80 and divides x and y by the factors at 0x1F0/0x1F4 and by the depth
+func_00144270	UpdateCameraLocation	recomputes the camera's derived rows (func_00144008), then finds the leaf of the world's tree at 0x1EC4 holding the position at 0x40 (func_001EEBB0) and keeps it at 0x21C; RunMainLoop and LoadWorld call it
+func_001442C8	BuildViewProjectionMatrix	builds a 4x4 matrix from a 3x3 frame (columns reordered and negated) and a position, inverts it and multiplies the projection it is given by the inverse; UpdateCameraMatrices, RefreshConeVolumeShape and BuildRangeRecordPacket call it
+func_00144540	UpdateCameraMatrices	rebuilds the camera's matrices from its frame, near/far at 0x1E4/0x1E8 and factors at 0x1F0/0x1F4 (BuildViewProjectionMatrix, func_00189F58, func_001443C8); every placement and projection change calls it
+func_00144848	WriteCameraMatricesPacket	writes the 4 quadwords at 0x100 and the 8 at 0x140 into a DMA tag of g_vifPacketWriter; UploadCameraOncePerFrame and PrepareUnzoomedGroup call it
+func_001448C8	SetCameraPlacement	copies a 16-byte position to 0x40 and three 16-byte rows to 0x80/0x90/0xA0 when given, calls func_00144540 and zeroes the five floats at 0x2B0..0x2C0
+func_00144938	PlaceCameraLookingAt	calls func_00144BE8 with a position and a point to look at and no offsets; ResetCamera places the camera at (0, -2000, 500) looking at the origin with it
+func_00144978	ComputeLookFrameCoordinates	builds the frame from one point toward another (func_00189350) and writes a third point's coordinates in it, divided by the distance (at least 100), through three float pointers; the inverse of ApplyLookFrameCoordinates
+func_00144AA0	ApplyLookFrameCoordinates	builds the frame from one point toward another (func_00189350) and writes the point given by three coordinates in it, scaled by the distance
+func_00144B70	SetCameraLookAnchor	turns the coordinates at 0x2B0..0x2B8 back into a point from the old anchor at 0x2D0, re-expresses it from the new anchor and stores the new anchor at 0x2D0
+func_00144FF8	ComputeCameraRelativeStickHeading	returns, wrapped, the heading of a pad record's left (0x40/0x44, mode 0) or right (0x74/0x78, mode 1) stick plus the camera's heading from its frame at 0x80; the collider and walker input code calls it
+func_00145088	PushCameraController	pushes a controller onto the camera's stack at 0x3D4 (count 0x3D0), ordered by key; the stack is walked by UpdateCamera and cleaned by RemoveCameraControllers
+func_001451F0	RemoveCameraControllers	drops the stack entries matching the key, controller, target and argument selected by the flag bits, calls their slot 3, then slot 1 on the old top and slot 0 on the new top
+func_001453B0	ComputeCameraDistanceFade	compares an offset's length with a radius plus a distance scaled by the camera's 0xB0 and writes a fade from 1 down over the last 400 units; returns 0 beyond it (DrawEffectAt, DrawTrailSegment, IsSphereInCameraView call it)
+func_00145438	ConvertOffsetToCylindrical	from a vector (or the difference of two) writes its heading (func_00205778, wrapped by func_001EA408), its horizontal length and its height, each when its pointer is given
+func_001454E0	ConvertOffsetToSpherical	from a vector (or the difference of two) writes its heading, its pitch above the horizontal and its length, each when its pointer is given
+func_001455C0	RequestCameraSnap	sets the snap flag at 0x224 (UpdateCamera then jumps the zoom) and, given a value, the flag at 0x228 and the value at 0x22C
+func_001455E0	QueueCameraSnap	sets the flag at 0x220, which UpdateCamera turns into the snap flag at 0x224 at its next run
+func_001455F0	RequestPlainCameraSnap	calls RequestCameraSnap with no value
+func_00145810	FindFirstFreeSpan	collects spans of every object with func_0013DFD8, merges them with MergeOverlappingSpans, and returns the first gap in [0,1] wider than thresh through lo/hi
+func_00145DD8	HasColliderSecondTree	the filter func_00145E68 and FindFreeOnOffCameraScreenSpan pass to the object gathering: accepts an object whose second mesh's tree (0x530) has nodes
+func_00145FB8	PushCameraStackValue	calls PushStackValue on the camera's controller at 0x460
+func_00145FD8	PopCameraStackValue	returns PopStackValue of the camera's controller at 0x460
+func_00145FF8	PeekCameraStackValue	returns PeekStackValue of the camera's controller at 0x460
+func_00146028	RecordCameraTimestamp	stores g_gameTime at 0x218 (ResetCamera sets it to -10; UpdateCameraMatrices reads it)
+func_00146038	IsSphereInCameraView	tests a point with a radius against the three planes at 0x50..0x70 around the position at 0x40 and, when inside, returns whether ComputeCameraDistanceFade accepts it

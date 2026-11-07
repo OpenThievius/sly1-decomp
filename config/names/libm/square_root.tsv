@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00206180	SquareRoot	the checked square root: SquareRootKernel's result, or a domain error below zero (square_root.c)

@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FB6B0	ConvertS64ToFloat	converts a signed 64-bit integer to a float, rounded once (s64_to_float.c; AdvanceGameClock calls it)

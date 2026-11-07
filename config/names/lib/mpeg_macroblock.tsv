@@ -1,0 +1,5 @@
+symbol	name	evidence
+func_0020C1A0	PrepareMacroblockPrediction	for macroblock n, checks its motion type (reporting "Invalid modion type -- ignored" outside 1 to 3), computes its motion vectors and prediction and waits for the IPU's output DMA channel before marking the buffer
+func_0020C3F0	ComputeMotionVectors	works out a macroblock's motion vectors from its position and flags and fetches its prediction through PredictMacroblock (PrepareMacroblockPrediction calls it)
+func_0020CAF8	PredictMacroblock	runs the hand-written prediction routines of mpeg_motion_compensation.cpp through the two tables D_0027B000 and D_0027B020, by kind of motion, whole or half pixel
+func_0020CF18	AddMacroblockResiduals	adds the prediction to the decoded residual through the hand-written routines func_0020DE28 and func_0020DE88 (DecodeAllMacroblocks calls it)

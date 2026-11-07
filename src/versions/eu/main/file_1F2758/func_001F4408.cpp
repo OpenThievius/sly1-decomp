@@ -3,10 +3,10 @@
 extern s32 D_eu_00263710;
 void func_001F4408(s32 flag, s32 n)
 {
-    Ctx_1F4408* ctx = (Ctx_1F4408*)g_saveData;
-    Obj_1F4408* o;
+    GameProgress* ctx = g_saveData;
+    LevelRecordWord78* o;
     ObjectSubGroup* v;
-    Val_1F4408* k;
+    LevelFadeEntry* k;
     FadeRequest args;
     if (ctx->f19D8 == 5) {
         goto lm1;
@@ -14,15 +14,15 @@ void func_001F4408(s32 flag, s32 n)
     if (ctx->f19DC != 0) {
         goto l4490;
     }
-    o = (Obj_1F4408*)g_currentLevelRecord;
+    o = (LevelRecordWord78*)g_currentLevelRecord;
     if ((o->f78 & 1) != 0) {
         goto l4470;
     }
 lm1:
-    StartObjectFade((Val_1F4408*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
+    StartObjectFade((LevelFadeEntry*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
-    k = func_00160180((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
+    k = LookupEntryById((ctx->f19D8 << 8) | 1);
     StartObjectFade(k, 0x1BD, n);
     return;
 l4490:
@@ -33,7 +33,7 @@ l4490:
     if (flag != 0) {
         v->count = 0;
     }
-    func_001F4808(v);
+    StartObjectSubGroupFinish(v);
     return;
 larg:
     args.kind = 1;

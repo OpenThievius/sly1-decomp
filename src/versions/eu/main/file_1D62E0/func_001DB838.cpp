@@ -6,10 +6,10 @@ void func_001DB838(s32 a0)
         ActivateSwitchedColliderIndex(-1);
         g_switchedColliderCount = 0;
         g_player = 0;
-        D_00262C6C = 0;
-        func_0016E148();
+        g_padSelectFlags = 0;
+        UpdatePadRouting();
         ClearCameraObjectList(g_camera);
-        func_001DFD70();
+        ClearClass75List();
         ClearPointObjectList();
         ClearTargetVectorList();
         ClearObjectLists();
@@ -23,8 +23,8 @@ void func_001DB838(s32 a0)
         g_camera = 0;
         g_coloredTriangleSet = 0;
         g_stepScale = 1.0f;
-        ((Word_1DB838*)(c + 0x584))->v = 0;
-        ((Word_1DB838*)(e + 0x590))->v = 0;
+        ((PackedWord*)(c + 0x584))->v = 0;
+        ((PackedWord*)(e + 0x590))->v = 0;
         D_00261D38 = 0;
         *(s32*)(c + 0x588) = 0;
         *(s32*)(e + 0x59C) = 0;

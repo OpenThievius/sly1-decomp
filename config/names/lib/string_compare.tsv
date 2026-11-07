@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F6738	CompareStrings	compares two NUL-terminated strings byte by byte and returns their difference or 0 (string_compare.cpp; type_info's comparison and SetElementTextAfterSlideOut call it)

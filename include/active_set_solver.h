@@ -10,6 +10,26 @@
 
 #include "base_object.h"
 
+// An item (0x60 bytes) of the solver: an unknown x in [0, limit] (no upper bound unless
+// `bounded`), its residual and the rate that changes it, its row of the matrix, and the link
+// (+0x4C) of the list it is in. func_00153A50 moves items between the lists.
+struct ActiveSetItem {
+    u8 pad00[0x28];
+    s32 kind;               // 0x28: 2 enters the active list at once (func_00153EC0)
+    s32 bounded;            // 0x2C: nonzero, x stops at `limit` (func_00153A50)
+    f32 limit;              // 0x30
+    f32 x;                  // 0x34: the unknown (func_00154880 returns it)
+    f32 val;                // 0x38: the residual; a pending item below -0.01 is pivoted in
+    f32 rate;               // 0x3C: how fast val changes with the active items' step
+    u8 pad40[4];
+    f32* row;               // 0x44: the item's row of the matrix; 0 until func_00153780 builds it
+    u8 pad48[4];
+    ActiveSetItem* next;    // 0x4C: the list link (func_00153608 clears it and the word after)
+    u8 pad50[0x60 - 0x50];
+};
+
+typedef char check_ActiveSetItem[sizeof(ActiveSetItem) == 0x60 ? 1 : -1];
+
 struct ActiveSetSolver {
     union {
         s32 slots;          // 0x00: 2n, the number of items allocated (func_00153528)

@@ -1,0 +1,128 @@
+symbol	name	evidence
+func_001D62E0	QueuePlayerMarkerRingDraw	original assembly: by the player's sub-state (+0x2228) picks DrawPlayerMarkerRing1, 2 or 3, queues it in a cleared request (QueueDeferredRequest), and pulses a value from the times at 0x26C8 to 0x26D0 (Cosine) into the object tree (SetObjectTreeRecordValue); DrawPlayer calls it
+func_001D65D8	GetPlayerRequestPhase	slot 77 of class 0x07: returns 0 or 1 from the pending flag 0x26C4 outside state 4, and in state 4 returns 1 below sub-state 45 and 2 from there
+func_001D6608	FinishPlayerRequest	slot 80 of class 0x07: clears the flag 0x2730, runs the stored callback at 0x26C0 or else moves itself up by the minimum height and enters state 2 sub-state 6, then clears 0x226C
+func_001D6A18	ProbeColliderBelowPoint	original assembly: tests a vertical segment through the player's position (+0x140, from D_00275168 above to D_00275164 below) against a collider's tree (+0x3F8, func_0013DFD8), shifted by the displacement of the collider's oscillator (+0x278, ComputeOscillatorDisplacement), and writes the hit point; func_001D66A8 and the player's func_001D6B18 call it
+func_001D6CB0	SwapInPlayerStandIn	the script built-in func_00105CC0 calls it: when the player has a class 0x3F object at +0x1518, adds it to its parent's list (slot 2), clears its parent (ReparentCollider), copies the frame of the first attached object of the four at +0x1508 (else of +0x1504) with CopyPlacedObjectFrame, stamps the clock at +0x690, sets +0x694 to 1 and removes that object from its parent's list (slot 3)
+func_001D6DA0	TestStandInMayContact	slot 56 of class 0x3F, the stand-in SwapInPlayerStandIn places: returns 1 for the player (g_player) and otherwise asks TestCollidersMayContact
+func_001D6DD8	StepStandIn	slot 28 of class 0x3F (the stand-in SwapInPlayerStandIn places), its override of StepCollider
+func_001D7018	StopStandIn	slot 60 of class 0x3F: runs the base func_0013BA70 and clears the running flag at +0x694 that SwapInPlayerStandIn sets
+func_001D7040	HandleStandInNotification	slot 13 of class 0x3F: runs HandleChildGroupNotification and, for a kind 10 message about itself, clears the running flag at +0x694 that SwapInPlayerStandIn sets
+func_001D7098	InitOwnerMessage	clears 0x10 bytes then stores a mode (0 or 2 from callers) at 0 and the owner object at 4 and 8; callers pass it to a virtual slot of another object
+func_001D7100	InitOutputBuffer	sets an output buffer's handle (+0x0C) and zeroes its target, capacity, used, count and pending words; PrintFormattedVa sets one up with handle -1 for the console
+func_001D7120	InitStringOutputBuffer	sets an output buffer up to write into memory: target and capacity from its arguments, used, count and pending 0 and handle -1 (FormatToStringVa, FormatToStringBoundedVa)
+func_001D7148	DestroyOutputBuffer	flushes the buffer with func_001D72C8 and, when flag bit 0 is set, frees it with func_0018D778
+func_001D7190	AppendToOutputBuffer	copies n bytes into target at used when a target is set, else into the 0x18 buffer, flushing at 0x400, and adds the count written to count
+func_001D72C8	FlushOutputBuffer	writes the pending bytes of buf to the handle with func_001F9028 (or to func_001F7B88 in 0x80-byte pieces when handle is negative) and zeroes pending
+func_001D73A8	InitPathFollower	slot 0 of class 0x19: runs InitSwitchedCollider, sets its distances (50.0, 50.0, 3000.0, 1300.0), its rate 2.0 and mode 3, copies its default vectors from D_00275290 and D_00275250 and resets it with ResetPathFollower
+func_001D7440	StartPathFollower	slot 16 of class 0x19: starts the placed object, resolves its links (D_002752A0), stores its heading, creates its state walker, starts the three engine sounds of worlds 3, 5 and 6, finds its class 0x104 partner, and for kind 1 points the 0x426 objects at it
+func_001D7778	StepPathFollower	slot 28 of class 0x19, its override of StepCollider
+func_001D8470	FindNearestValueOutsideSpans	returns x when func_001EB080 says no span of the array contains it, else the span end (lo or hi) nearest to x that no span contains
+func_001D8578	UpdatePathFollowerPace	moves the value at +0x85C toward the target at +0x860 and, once the time at +0x864 has passed, picks a new target from a clamped polynomial of lap and entry index plus a random offset and a random next time
+func_001D86F8	GetWrappedDifference	returns lim - base, then subtracts or adds the period x when that difference lies beyond half of it in either direction
+func_001D8740	IsPathFollowerAhead	returns 1 when the first object's lap count at +0xB00 is greater than the other's, then compares the index of its current entry (+0xAF8, word at +0xC), then the wrapped difference of their positions along the path
+func_001D87C8	AdvancePathFollowerAlongPath	original assembly: gathers the other followers (GatherObjectsById), compares their progress (IsPathFollowerAhead), finds the nearest time on its path curve (FindPathCurveNearestTime), keeps it out of the blocked spans (FindNearestValueOutsideSpans, IsInsideRange) and eases toward it (ApproachValueWithRamp, WrapModulo); UpdatePathFollower calls it
+func_001D8BD0	ComputePathFollowerHeadingTarget	original assembly: from the path (+0x830) at the follower's position (+0x83C) and pace (+0x85C) computes the heading to aim at (ArctangentOfRatio, func_001ED908) and stores it and its turn at 0x694 and 0x698; UpdatePathFollower calls it
+func_001D8D90	SteerPathFollower	UpdatePathFollower's helper: eases the turn rate at +0x69C toward the clamped wrapped difference between the target heading at +0x694 and the heading of its first matrix row, and sets the value at +0x50 of each of the four slots at +0x6B0 to the speed at +0x698 over the radius at +0x610 (first two) or +0x614
+func_001D92F0	CountDownPathFollowerLap	stores the game time at +0x854, counts the laps at +0x858 down by one and calls slot 6 of the object at +0xB14 when there is one
+func_001D9338	RecordPathFollowerProgress	passes a 0..1 fraction from the lap index at +0xB00 to func_00151E20 on D_00261EF0, then sets every bit from 0 up to the index +0xB0C minus +0xB08 in the current entry's bit set at +0x74, counting each newly set bit at +0x70
+func_001D9488	AdvancePathFollowerEntry	original assembly: moves the current entry (+0xAF8) along the entry list (first at +0xAF4, count at +0x870), counts the lap at +0xB00 from +0xB04, sets the state walker's target (GetStateWalkerTargetKey, SetStateWalkerTarget), resets the scatter levels and records the progress (RecordPathFollowerProgress); UpdatePathFollower calls it
+func_001D9678	UpdatePathFollowerSound	original assembly: eases the value at 0xBA0 toward the turn at 0x698 (ApproachValueWithRamp) and from it and the speed (+0x150) sets the pitch and volume of the follower's sound record (SetSoundRecordPitch, SetSoundRecordVolume); UpdatePathFollower calls it
+func_001D9AC8	ProcessPathFollowerContacts	original assembly: for each object the follower touched (the contact chain at +0xB74), once per object (the list at +0xB54, counted at +0xB50), sets a value at +0x86C of another path follower (IsObjectOfKind 0x19) from the relative velocity (+0x150, func_001280C0) and moves an agent (kind 8) to state 0x10 (ChangeAgentState), then frees the chain (FreePooledContactChain) and clears +0xB74; UpdatePathFollower calls it
+func_001D9C98	UpdatePathFollower	slot of class 0x19: runs the base update func_00192B58, then per mode (+0xB34) UpdateFollowerPace and the rest of the per-frame follower functions, and records the time at +0x850 when the third row's z exceeds 0.5
+func_001D9D78	ControlPathFollower	original assembly: slot 0x134 of class 0x19, the slot ControlPlayer fills for the player: reads the stick through the camera (func_00144FF8), counts down laps (CountDownPathFollowerLap), handles the skip buttons (HandleStepSequenceSkipButtons) and the state walker's target, plays sounds; ControlModeWalker calls it
+func_001DA170	UpdatePathFollowerScreenElements	slot of class 0x19: by the mode at +0xB30 shows or hides (slots 14 and 15) the three screen elements D_0026D848, D_0026D5C8 and D_0026DAC8 or the two D_00272430 and D_002726B0 when AreMenusAndFadeClear allows
+func_001DA310	ReleasePathFollowerContacts	slot 0x110 of class 0x19, the slot ReleasePlayerContacts fills for the player: only increments the count at +0x6A0
+func_001DA320	CollidePathFollowerWithObject	original assembly: slot 0xF8 of class 0x19, the slot CollidePlayerWithObject and CollideAgentWithObject fill: tests the other object (IsObjectOfKind, IsObjectAccepted, IsObjectAttached), collects spans and adds mesh contacts with it (CollectColliderSpansInTree, AddMeshContacts)
+func_001DA6E0	ComputePathFollowerContactValue	original assembly: slot 0x100 of class 0x19, the slot of ComputeGaugeColliderContactValue and ComputeWalkerColliderContactValue: from the other object's flags (+0x538) and velocity (+0x150) and the constants D_00275600 to D_00275618
+func_001DA7E0	UpdatePathFollowerAttachmentFrames	slot 39 of class 0x19, its override of UpdateAttachmentFrames
+func_001DAA18	DrawPathFollower	original assembly: slot 0xA4 of class 0x19, the draw slot (DrawCollider for class 0x03): builds the follower's transform (BuildPlacedObjectTransform, BuildMatrixFromRotationAndTranslation) and draws it with DrawCollider
+func_001DAC20	UpdatePathFollowerBounds	slot of class 0x19: updates the collider's bounds, then widens them with the position at +0x190 of each of the four slots' objects, by the radius at +0x610 (first two) or +0x614
+func_001DACB0	StartPathFollowerEffect	slot 78 of class 0x19: with a target at +0xB78 clears its main clip (SetAgentMainClip) and forwards the call to the target's slot 78, else runs StartSwitchedColliderEffect
+func_001DAD28	FindPathFollowerPathPosition	original assembly: samples the path at +0x830 at the length +0x838 through its slots and stores the position at 0x83C and the word at 0x840; RecomputePathFollowerFrame and SetPathFollowerPath call it
+func_001DAE18	RecomputePathFollowerFrame	slot of class 0x19: recomputes the collider frame and runs func_001DAD28
+func_001DAE48	CapturePathFollowerPose	slot 69 of class 0x19: runs CaptureColliderPose (CaptureModeWalkerTarget calls it too)
+func_001DAE68	HandlePathFollowerActivation	slot of class 0x19: runs HandleSwitchedColliderActivation, then on activation points the global element targets at its +0xB00..+0xB0C fields, and on deactivation in mode 2 resets the mode to 0
+func_001DAF08	HandlePathFollowerNotification	slot of class 0x19: handles the switched collider's notification and on code 0xE of kind 0x426 adds one to the count of D_00272430 when the link's owner is itself or of D_002726B0 when not, while both are below D_002751D4
+func_001DAFB8	SetPathFollowerPath	stores the path object at +0x830, queries its slot 10 for the start location, copies +0x840 to +0x844, reads the path's length from its slot 8 into +0x834 and queries the path for each entry of the array at +0x874
+func_001DB0C8	SetPathFollowerSecondPath	as SetPathFollowerPath for a second path: stores the path object at +0x848 and asks its slot 10 for the location of the position at +0x100 into +0x84C (the script built-in func_00109488 calls it)
+func_001DB110	AddPathFollowerEntry	appends an item to the 16-entry array at +0x874 (count at +0x870), links it into the circular entry list at +0xAF4 and, when a path is set (+0x830), queries it with the item's world position
+func_001DB1E8	AddPathFollowerActiveEntry	appends an entry (object, two words and two floats, marked active) to the at most 16 at +0x874 counted at +0x870, like AddPathFollowerEntry
+func_001DB238	SetPathFollowerMode	stores the mode at +0xB34 and its time at +0xB38 and, in mode 2 when the object is not the current switched collider, activates it with ActivateSwitchedCollider
+func_001DB290	ResetPathFollower	sets the lap at +0xB00 to 1, the current entry (+0xAF8) to the first (+0xAF4) and its timers to -10.0, then blends two stored vectors by a clamped polynomial of the frame time and stores the clamped result in +0x85C and +0x860
+func_001DB460	AddWeightedVectors	returns a1 times a0.x plus a3 times a2.x as one quad (the VU0 multiply-add); ResetPathFollower calls it to blend two vectors
+func_001DB480	InitWorldHashLists	CreateTypedRecord calls it for a world (type 0x6C): sets the link offset 0xC on each of the 0x200 lists at +0x84 that GetHashedSlot picks from
+func_001DB4C8	InitWorldPools	slot of the world (class 0x6C): allocates its front-memory buffers, sets up the sixteen slot pools (InitSlotPool) at +0x1AF0..+0x1C18 and the lists at +0x3C..+0x1CD8, and sets the world's default fields
+func_001DB838	ResetWorldSubsystems	when its argument is nonzero, runs a series of subsystem reset functions and zeroes the globals D_00269C90, D_00262E10, D_00262C6C, D_00261990 and D_002640A4
+func_001DB928	ReadBufferedBlockHeader	reads two signed words from the stream, allocates front memory of the first one's size into D_00275718 and stores the words and a flag in D_00275720..D_00275728
+func_001DBA38	ReadBufferedBlockBody	when D_0027571C is set, aligns the stream (AlignBufferedStreamPosition 0x10) and reads D_00275720 bytes into the buffer D_00275718 (ReadBufferedStreamBytes)
+func_001DBA90	SetWorldGravityZ	stores the vector (0, 0, z) as the world's gravity at +0x1EE0; InitWorldPools calls it
+func_001DBAC0	SetCachedVoiceParamBuiltin	the script built-in func_00104220 calls: passes its two arguments to SetCachedVoiceParam
+func_001DBAE0	GetCachedVoiceParamBuiltin	returns GetCachedVoiceParam of the index, for the script built-ins
+func_001DBB00	RefreshCachedVoiceParamBuiltin	returns RefreshCachedVoiceParam of its two arguments, for the script built-ins
+func_001DBB20	IsWorldBodyLimitReached	returns 1 when the object's class has flag bit 2, the world already counts 0xF7 or more bodies (+0x38) and the value is 0; func_0013D278 asks it
+func_001DBB50	TakeAttachRecord	takes a 0x10-byte entry from the world's pool at +0x1B08 and clears 16 bytes; its callers store it as an Attach03 link
+func_001DBB90	ReleaseAttachRecords	walks an Attach03 chain by nextOwn and pushes each node back on the world's pool at +0x1B08
+func_001DBBD8	TakeCallRecord	takes a 0x14-byte entry from the world's pool at +0x1B14 (PopZeroedFreeSlot) and clears 0x14 bytes
+func_001DBC18	ReleaseCallRecords	walks the chain linked through the next word at +0x10 and pushes each 0x14-byte record back on the world's pool at +0x1B14 (PushFreeSlot)
+func_001DBC60	AppendQueuedCallOnce	walks the list at +0x1EC8 and returns if a record with the same four words exists, otherwise calls AppendQueuedCall
+func_001DBCC8	AppendQueuedCall	takes a call record, stores its four words, and appends it to the world's list at +0x1EC8 (tail at +0x1ECC)
+func_001DBD40	RemoveQueuedCalls	unlinks every record of the list at +0x1EC8 whose words match the ones selected by the bit mask (bits 1, 2, 4, 8 for words 0..3) and releases them
+func_001DBE48	RunQueuedCalls	slot of the world: pops each record of the list at +0x1EC8, calls its function with the next three words, and releases it with ReleaseCallRecords
+func_001DBEC8	RunDueDelayedScriptCalls	UpdateWorld calls it with the time step: takes it off the delay of each (delay, expression) entry of the world's script variable +0x1EF8 (the list func_00117668 appends to), evaluates the expressions that fall due and drops their entries from the list
+func_001DC0C8	AllocateTouchNode	takes a record from the pool at world + 0x1C0C (func_001B5EC0) and clears its 8 bytes
+func_001DC108	FreeTouchNodes	walks a Touch03 chain by next and gives each node back to the pool at owner + 0x1C0C with func_001B5F28
+func_001DC150	PushCloneBatch	makes n - 1 copies of src with func_00183058 into a new buffer and pushes the (count, buffer) pair on the stack at 0x1F00 indexed by 0x1EFC
+func_001DC208	PopSpawnedClone	decrements the count of the stack entry at index in the array at 0x1F00 and returns the value it then points to
+func_001DC238	GatherCollidersInBox	original assembly: allocates an array of the world's body count (+0x34) in back memory and fills it with the bodies of the world's list (+0x6C) and their parts whose bounds (+0x420 to +0x434) overlap the box of two points, skipping the given object, flagged bodies (+0x538 bits) and those the optional filter refuses; writes the array and its count; eighteen functions call it, among them ScoreTargetCandidate, BuildAgentPath and AddTargetObstructionCost
+func_001DC4D0	GatherCollidersInSphere	original assembly: as GatherCollidersInBox but keeps the bodies whose bounding sphere (centre +0x140, radius +0x3D0) comes within the given radius of a point, testing each pair with the bodies' slot at +0xF0 and the optional filter; IsObjectCyclerUnsupported, ChooseTimedGroupState and UpdateRangeRecord call it
+func_001DC710	UnlinkContactTable	removes node from the doubly linked list whose head is *head, fixing prev/next and the head
+func_001DC740	InitContactTables	allocates 0x1000 bytes, makes them 0x100 16-byte Contacts03 records chained through next/prev, sets tables and freeTables to the block
+func_001DC7B0	PushContactTable	pushes node on the front of the doubly linked list *head (next, prev)
+func_001DC7D0	TakeContactTable	unlinks the first of freeTables, pushes it onto usedTables and sets its owner
+func_001DC828	ReleaseContactTable	gives back every contact row of the table to pool1AF0, clears its byte pair entries in buf1ADC, unlinks it from usedTables and pushes it onto freeTables
+func_001DC9A0	CreateConeVolumes	for each of bits 1, 2, 4, 8 of D_00275630[0] creates a ConeVolume with func_0011E580 (mode 0..3) and sets the same distances and the per-mode ranges from the D_002756xx floats
+func_001DCCC0	SkipBufferedBlocks	reads a u32 count n from the buffered stream and, when D_00275714 is set, skips n-1 blocks with SkipBufferedBlock
+func_001DCD28	SpawnListedObjectCopies	for two (key, count) pairs finds the first object of list1C54 with that descriptor key and flag334 clear and makes count copies of it with func_00183058, setting 0x2D8 to 2 and calling slots 19 and 20
+func_001DCEA0	LoadWorld	slot 10 of class 0x6C (the world), its override of LoadObjectProperties: reads the world's strings, property records and slot objects, its script entry table and blocks, creates its records (CreateTypedRecord) and cone volumes, loads its screen resources and sound banks, fills the screen colour, spawns the listed copies (SpawnListedObjectCopies) and runs the queued calls
+func_001DD218	ClipSegmentToPlanes	clips a segment of two homogeneous points against the six planes D_002756B0, moving the outside end onto each plane it crosses; returns 0 when both ends lie outside one plane (DrawProjectedLine calls it)
+func_001DD3E0	DrawProjectedLine	transforms two points by the matrix at obj + 0x100, and when func_001DD218 accepts them divides by w, applies the scale D_0026ABF0 and bias D_0026AC00 and draws the segment with func_001AE3B8
+func_001DD548	DrawProjectedCurve	fills ten points with func_00130B48 and draws each consecutive pair with DrawProjectedLine
+func_001DD5F8	SetWorldLightingParamA	stores the world's lighting value at +0x1D6C and records the frame (g_lightingChangeFrame from g_frameCount); the script built-ins (func_00109488) call it
+func_001DD610	SetWorldLightingParamB	stores the world's lighting value at +0x1D68 and records the frame (g_lightingChangeFrame from g_frameCount); the script built-ins (func_00109488) call it
+func_001DD628	SetWorldSoundLevel	stores the level at +0x2318, resets g_previousSoundLevel to -100, sets volume channel 7's factor to 1.0 (SetVolumeChannelFactor) and sends the rounded level to the IOP (func_0011D928); the script built-ins (func_00109488) call it
+func_001DD690	TestLevelEntryFlag1	the script built-in func_00103590 calls it: returns bit 0x1 of the level entry's word (GetLevelEntryWord)
+func_001DD6B0	TestLevelEntryFlag2	the script built-in func_00103640 calls it: returns bit 0x2 of the level entry's word (GetLevelEntryWord)
+func_001DD6D0	TestLevelEntryFlag4	the script built-in func_001036F0 calls it: returns bit 0x4 of the level entry's word (GetLevelEntryWord)
+func_001DD6F0	TestLevelEntryFlag8	the script built-in func_001037A0 calls it: returns bit 0x8 of the level entry's word (GetLevelEntryWord)
+func_001DD710	CheckEntryOneBitRequirement	as CheckEntryTwoBitRequirement with one bit: when bit 2 of the entry's flags (GetEntryFlags) is set returns whether bit 0 of g_currentEntry's flags is set, else 0
+func_001DD758	CheckEntryTwoBitRequirement	takes the flags of an entry (func_001601D8); when bit 4 is set returns whether the low two bits are all set in the flags word of D_002623C8, else 0
+func_001DD7A0	CheckEntryThreeBitRequirement	as CheckEntryTwoBitRequirement but with the low three bits and enabling bit 8
+func_001DD7E8	SetEntrySlotValue	in the four key/value slots after offset 0x44 of the record func_00160810 returns, finds the slot with the key (or the first empty one) and stores key and value
+func_001DD888	GetEntrySlotValue	searches the four key/value slots at offset 0x44 of the record func_00160810 returns and returns the value of the one with the key, else 0
+func_001DD8E8	IsLevelRecordComplete	the script built-in func_00103C10 calls it: returns bit 0 of word +0x448 of the save data's level record n, which MarkLevelRecordComplete sets
+func_001DD908	IsLevelDone	the script built-in func_00103CC0 calls it: returns bit 0x20 of word +0x448 of the save data's level record n, which MarkLevelDone sets
+func_001DD928	RecomputeSaveCompletion	the script built-in func_00103D70 calls: runs ComputeCompletionPercent on the save data g_saveData
+func_001DD950	ScatterRandomObjects	picks a count with RandomIntInRange(a, b) and, if nonzero, calls ScatterObjectsAroundCircle on the current world with that count
+func_001DD9A0	SetScatterLevelBuiltin	passes its value to SetScatterLevel on g_scatterController, for the script built-ins (func_00109488)
+func_001DD9C0	GetGameStateDeltaTime	writes the dt field of D_002623C8 through its out pointer
+func_001DD9D8	SetCurrentScatterLevel	clamps its value to g_unitRange (ClampToRange) and stores it as g_currentEntry's scatter level (+0x10), for the script built-ins
+func_001DDA08	GetCurrentScatterLevel	writes g_currentEntry's scatter level (+0x10) through its out pointer, for the script built-ins
+func_001DDA20	AcquirePadSelectFlag	increments a use count at +0x231C and on the 0 to 1 transition calls SetPadSelectFlags(2); its pair func_001DDA50 releases it
+func_001DDA50	ReleasePadSelectFlag	decrements the use count at +0x231C and on reaching 0 calls ClearPadSelectFlags(2)
+func_001DDA80	IsPadSelectFlagHeld	returns whether the world's use count at +0x231C, which AcquirePadSelectFlag raises and ReleasePadSelectFlag lowers, is above 0 (AreMenusAndFadeClear and the request-blocked tests call it)
+func_001DDA90	GetHasStreamVoice	the script built-in func_00109488 calls: stores HasStreamVoice's result in the out word
+func_001DDAB8	SetWorldValueAndTarget	stores a value both as the world's value at +0x234C and as its target at +0x2350, so StepWorldValueTowardTarget has nothing to do (RunAnimationEvent and the script built-ins)
+func_001DDAC8	SetWorldValueTarget	stores the target at +0x2350 that StepWorldValueTowardTarget moves the world's value at +0x234C towards (RunAnimationEvent and the script built-ins)
+func_001DDAD0	PopActiveSequenceElement	when the sequence D_0027051C exists, is not in state 4 (+0x2D4) and its mode at +0x2D0 is 1 or 2, pops the top of the element stack g_elementStack; the player's state changes and func_00160DA0 call it
+func_001DDB20	ShowPauseMenuPageWith	the script built-in func_00103EB0 calls: stores the value at +0x280 of the pause menu element and sets its layer page with SetPauseMenuLayerPage
+func_001DDB58	ShowCountedScreenElement	increments the counter at 0x2320 and, on reaching 1, sets the hold time of the screen element D_002721D0 to 0 and calls its slot 14
+func_001DDBB8	HideCountedScreenElement	decrements the counter at 0x2320 and, on reaching 0, calls slot 15 of the screen element D_002721D0
+func_001DDBF8	PushSoundLevelBuiltin	passes the record to PushSoundLevel, for the script built-ins
+func_001DDC18	RemoveSoundLevelBuiltin	returns RemoveSoundLevelAndRecompute of the record, for the script built-ins
+func_001DDC38	SetWorldActiveFollower	stores the object at +0x2324 of the world; HandlePathFollowerActivation passes the activated class 0x19 follower
+func_001DDC40	NotifyWorldActiveFollower	calls the slot at word 50 of the table of the object at +0x2324 of the world, when it has one (func_001EA118 calls it)
+func_001DDC78	SetWorldFlagBit	sets bit n in the word at 0x235C
+func_001DDC90	ClearWorldFlagBit	clears bit n in the word at 0x235C
+func_001DDCB0	GetSaveSpareCount	writes g_saveData's count at +0x19E4 (the one PlaceSpareSoundNotifier raises) through its out pointer, for the script built-ins
+func_001DDCC8	GetReserveUnitCount	writes g_saveData's count at +0x19E0 (the one AddReserveUnitNow raises) through its out pointer, for the script built-ins

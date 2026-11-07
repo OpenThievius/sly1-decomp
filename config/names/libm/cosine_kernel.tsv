@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002081A0	CosineKernel	cos(x + y) for a reduced argument in two parts (cosine_kernel.c)

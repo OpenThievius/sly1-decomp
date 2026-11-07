@@ -1,0 +1,9 @@
+symbol	name	evidence
+func_001FC910	PackDouble	packs a double taken apart (kind, sign, exponent, fraction) back into its 64 bits, rounding and handling NaN, zero, infinity and denormals (soft_float.c)
+func_001FCA40	UnpackDouble	takes a double's 64 bits apart into kind, sign, unbiased exponent and fraction (every operation of soft_float.c starts with it)
+func_001FCAE0	AddUnpackedDoubles	adds two unpacked doubles, aligning their exponents and handling the special kinds (the double add and subtract call it)
+func_001FD088	DivideDoubles	unpacks two doubles, divides them and packs the result (FormatExponent calls it)
+func_001FD1F0	CompareUnpackedDoubles	compares two unpacked doubles by kind, sign, exponent and fraction (the double comparison calls it)
+func_001FD410	ConvertDoubleToS32	converts a double to a signed 32-bit integer, 0 for NaN and zero, saturating at the limits
+func_001FD4A8	ConvertDoubleToU32	converts a double to an unsigned 32-bit integer, 0 for negative values and NaN, 0xFFFFFFFF above the range
+func_001FD548	PackDoubleFromParts	packs a double from a kind, sign, exponent and fraction passed as loose arguments (fptodp, func_001FD868, calls it)

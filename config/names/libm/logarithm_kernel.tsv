@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00206FA0	LogarithmKernel	the unchecked natural logarithm of a float (logarithm_kernel.c)

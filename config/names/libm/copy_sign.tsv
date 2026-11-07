@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002093C0	CopySign	a float with the magnitude of x and the sign of y (copy_sign.c)

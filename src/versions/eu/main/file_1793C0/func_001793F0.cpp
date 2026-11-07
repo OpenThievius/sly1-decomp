@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the D_00270650 words at 0x594 and 0x598 (US 0x284 and 0x288).
 
-void func_001793F0(C1B* self)
+void func_001793F0(ModeCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
@@ -13,7 +13,7 @@ void func_001793F0(C1B* self)
     func_001399F8(self->f6C0, 0xC, 5, &self->f684);
     func_0017ABE8(self, 2);
     u8* base = (u8*)&D_00270650;
-    ((Packed_1793F0*)(base + 0x598))->v = 0.0f;
+    ((T217D_Float*)(base + 0x598))->v = 0.0f;
     *(s32*)(base + 0x594) = FindAnimRecord(0x36A);
 }
 

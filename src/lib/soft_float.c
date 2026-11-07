@@ -208,9 +208,9 @@ u64 func_001FCD20(u64 pa, u64 pb)
     Unpacked b;
     Unpacked c;
 
-    func_001FCA40(&pa, &a);
-    func_001FCA40(&pb, &b);
-    return func_001FC910(func_001FCAE0(&a, &b, &c));
+    UnpackDouble(&pa, &a);
+    UnpackDouble(&pb, &b);
+    return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
 u64 func_001FCD78(u64 pa, u64 pb)
@@ -219,10 +219,10 @@ u64 func_001FCD78(u64 pa, u64 pb)
     Unpacked b;
     Unpacked c;
 
-    func_001FCA40(&pa, &a);
-    func_001FCA40(&pb, &b);
+    UnpackDouble(&pa, &a);
+    UnpackDouble(&pb, &b);
     b.sign ^= 1;
-    return func_001FC910(func_001FCAE0(&a, &b, &c));
+    return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
 u64 func_001FE890(u64 a, u64 b);
@@ -325,9 +325,9 @@ u64 func_001FCDE0(u64 x, u64 y)
 
     xa = x;
     xb = y;
-    func_001FCA40(&xa, &a);
-    func_001FCA40(&xb, &b);
-    return func_001FC910((Unpacked*)Multiply(&a, &b, &tmp));
+    UnpackDouble(&xa, &a);
+    UnpackDouble(&xb, &b);
+    return PackDouble((Unpacked*)Multiply(&a, &b, &tmp));
 }
 
 
@@ -393,9 +393,9 @@ u64 func_001FD088(u64 x, u64 y)
     Unpacked pa;
     Unpacked pb;
 
-    func_001FCA40(&x, &pa);
-    func_001FCA40(&y, &pb);
-    return func_001FC910((Unpacked*)Divide(&pa, &pb));
+    UnpackDouble(&x, &pa);
+    UnpackDouble(&y, &pb);
+    return PackDouble((Unpacked*)Divide(&pa, &pb));
 }
 
 s32 func_001FD1F0(Unpacked* a, Unpacked* b)
@@ -447,9 +447,9 @@ s32 func_001FD308(u64 pa, u64 pb)
     Unpacked a;
     Unpacked b;
 
-    func_001FCA40(&pa, &a);
-    func_001FCA40(&pb, &b);
-    return func_001FD1F0(&a, &b);
+    UnpackDouble(&pa, &a);
+    UnpackDouble(&pb, &b);
+    return CompareUnpackedDoubles(&a, &b);
 }
 
 u64 func_001FD358(s32 value)
@@ -485,7 +485,7 @@ u64 func_001FD358(s32 value)
             parts.fraction.ll = m;
         }
     }
-    return func_001FC910(&parts);
+    return PackDouble(&parts);
 }
 
 s32 func_001FD410(u64 value)
@@ -494,7 +494,7 @@ s32 func_001FD410(u64 value)
     Unpacked out;
     s32 v;
 
-    func_001FCA40(&in, &out);
+    UnpackDouble(&in, &out);
     if ((out.kind ^ 2) == 0) {
         return 0;
     }
@@ -527,7 +527,7 @@ u32 func_001FD4A8(u64 value)
     s32 e;
 
     b = value;
-    func_001FCA40(&b, &d);
+    UnpackDouble(&b, &d);
     if ((d.kind ^ 2) == 0) {
         return 0;
     }
@@ -561,7 +561,7 @@ u64 func_001FD548(s32 a0, s32 a1, s32 a2, u64 a3)
     args.sign = a1;
     args.exponent = a2;
     args.fraction.ll = a3;
-    return func_001FC910(&args);
+    return PackDouble(&args);
 }
 
 f32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3);
@@ -571,8 +571,8 @@ f32 func_001FD578(u64 bits)
     Unpacked u;
     s32 fraction;
 
-    func_001FCA40(&bits, &u);
+    UnpackDouble(&bits, &u);
     fraction = (s32)(u.fraction.ll >> 30) | 1;
     if ((u.fraction.ll & 0x3FFFFFFFULL) == 0) fraction = (s32)(u.fraction.ll >> 30);
-    return func_001FD838(u.kind, u.sign, u.exponent, fraction);
+    return PackFloatFromParts(u.kind, u.sign, u.exponent, fraction);
 }

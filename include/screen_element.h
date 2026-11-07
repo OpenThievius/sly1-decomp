@@ -19,11 +19,14 @@
 
 #include "common.h"
 
-struct V24A2;
-struct C67;     // an object of class 0x67 (include/c67.h)   // the font (include/v24a2.h): a game object with a GCC vtable at +0x4C
+struct Font;       // the font (include/font.h): a game object with a GCC vtable at +0x4C
+struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
+struct PadRecord;   // the pad's state (include/pad_record.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
+// A float that may sit at any address: storing one is a pair of unaligned stores (swl, swr).
+struct __attribute__((packed)) T217D_Float { f32 v; };
 // A colour as four bytes (red, green, blue, alpha), copied as a whole.
 struct T217D_Rgba { u8 c[4]; };
 
@@ -39,7 +42,14 @@ struct T217D_Place {
 
 typedef char check_T217D_Place[sizeof(T217D_Place) == 20 ? 1 : -1];   // func_001AA1F0 steps 20 bytes
 
+// D_0026C3E0: the 37 elements' places and a word after them.
+struct ElementPlaceTable {
+    T217D_Place e[37];
+    s32 end;
+};
+
 struct ScreenElement;
+struct StepSequence;    // include/step_sequence.h
 
 // The 20 slots. Those the base fills are the generic ones; the derived tables replace
 // slots 0, 1, 2, 8, 9, 14, 15, 16 and so on with their own.
@@ -48,7 +58,7 @@ struct T217D_Vt {
     void (*m01)(ScreenElement* self);                   // 0x04: set up (func_001AA268 in the base)
     void (*m02)(ScreenElement* self);                   // 0x08: update the slide (func_001AA298)
     void (*m03)(ScreenElement* self, s32 top);          // 0x0C: told it is (1) or is no longer (0) the top of a stack (func_001E9498)
-    void (*m04)(ScreenElement* self);                   // 0x10: not used by these files
+    void (*m04)(ScreenElement* self, PadRecord* pad);   // 0x10: handle the pad as the top of the stack (func_001E9108)
     void (*m05)(ScreenElement* self);                   // 0x14: reset, m16(self, 0) (func_001AA8C8)
     void (*m06)(ScreenElement* self);                   // 0x18: not used by these files
     void (*m07)(ScreenElement* self);                   // 0x1C: not used by these files
@@ -66,10 +76,19 @@ struct T217D_Vt {
     void (*m19)(ScreenElement* self);                   // 0x4C: unused, 0 in every table
 };
 
+// The types of the table's slots, to define a table with.
+typedef void (*ElementFn)(ScreenElement* self);
+typedef void (*ElementIntFn)(ScreenElement* self, s32 value);
+typedef void (*ElementPadFn)(ScreenElement* self, PadRecord* pad);
+typedef void (*ElementTextFn)(ScreenElement* self, const char* text);
+typedef f32 (*ElementTimeFn)(ScreenElement* self);
+typedef void (*ElementClockFn)(ScreenElement* self, f32* clock);
+typedef s32 (*ElementPairFn)(ScreenElement* self, ScreenElement* other);
+
 // The base element, 0x260 bytes (the four sub-elements of D_00218720's object are this big).
 struct ScreenElement {
     const T217D_Vt* vt;         // 0x00
-    V24A2* font;                // 0x04: the font object (func_0015C1C0) the text is drawn with
+    Font* font;                // 0x04: the font object (func_0015C1C0) the text is drawn with
     char text[0x200];           // 0x08: the text; its first byte is the element's visible flag
     union {
         u32 color;              // 0x208: 0xFF808080 is "no tint"; the alpha is the top byte
@@ -77,7 +96,7 @@ struct ScreenElement {
         T217D_Rgba rgba;        // 0x208
     };
     f32 scale;                  // 0x20C: text size
-    V24A2** frame;              // 0x210: a cell holding the object drawn behind the text, or 0
+    Font** frame;              // 0x210: a cell holding the object drawn behind the text, or 0
     s32 index;                  // 0x214: position in D_002486B0
     T217D_Place* place;         // 0x218: its record of D_0026C3E0
     f32 x;                      // 0x21C: where it is now
@@ -136,8 +155,8 @@ void func_001ABE20(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
-    u8 pad260[0x264 - 0x260];
-    s32 f264;               // 0x264
+    s32 f260;               // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
+    s32 f264;               // 0x264: copied into f270 then
     s32 f268;               // 0x268
     union {
         u8 letter;          // 0x26C: the glyph to show, from 'r'
@@ -175,7 +194,10 @@ struct T217D_3D0 : ScreenElement {
 
 // D_00218420.
 struct T217D_420 : ScreenElement {
-    s32 flag;                   // 0x260
+    union {
+        s32 flag;               // 0x260: nonzero, the element shows (func_001AD718)
+        StepSequence* owner;    // 0x260: the step sequence in state 5 that shows it (func_00150790)
+    };
 };
 
 // D_00218470: an element with an icon table.
@@ -298,8 +320,8 @@ struct T217D_6D0 : ScreenElement {
 
 // The map screen's list (D_002210F0, D_0026F808): it holds the objects of kind 0x67 by slot.
 struct T217D_0F0 : ScreenElement {
-    C67* current;               // 0x260: the object it shows
-    C67* nodes[6];              // 0x264: the objects of kind 0x67, by their slot (func_001F0660 enters them)
+    WarpPage* current;          // 0x260: the object it shows
+    WarpPage* nodes[6];         // 0x264: the warp pages, by their slot (StartWarpPage enters them)
     f32 scale;                  // 0x27C: eased toward `scaleTarget` (func_001F1A08)
     f32 scaleTarget;            // 0x280
 };
@@ -329,7 +351,7 @@ struct T217D_1380 : ScreenElement {
 struct T217D_BF0 : ScreenElement {
     u8 pad260[0x284 - 0x260];
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
-    f32 f288;                   // 0x288: 0.0 at the start
+    f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.
@@ -405,5 +427,17 @@ extern T217D_E30 D_00274118;    // D_002181F0
 // The base is the stride of D_00218720's four sub-elements (func_0014ABD0 steps 0x260 bytes).
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
 typedef char check_T217D_330[sizeof(T217D_330) == 0x260 ? 1 : -1];
+
+// The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
+// (SetElementStackState), and the elements, whose top gets the pad each frame
+// (UpdateElementStack, file_1E88D0.cpp).
+struct ElementStack {
+    u8 pad00[4];
+    s32 state;              // 0x04: 0 .. 8 (SetElementStackState)
+    f32 stateTime;          // 0x08: the clock when the state was set
+    ScreenElement* items[8]; // 0x0C: items[count - 1] is the top
+    s32 count;              // 0x2C: 1 for the base element alone
+    s32 resumeState;        // 0x30: the state that state 3 stands for, -1 for 3 itself
+};
 
 #endif

@@ -1,0 +1,86 @@
+symbol	name	evidence
+func_001C6F48	InitAgent	slot 0 of class 0x08: runs func_001C4458, sets the state 0x724 and the word 0x924 to -1, the tuning floats at 0x73C..0x74C, marks the 17-entry tables at 0x758 and 0x870 with -1 and draws a record from D_00261420 into 0xB10
+func_001C7140	LoadAgent	slot 10 of class 0x08: runs LoadCollider, installs the table D_00274C20 with func_00124DF8 and parses the two tables with func_001CA7C0 and func_001CA8E8
+func_001C7188	CopyAgent	slot 9 of class 0x08: keeps the record 0xB10 and the roster 0x720 across the base copy func_001921E8 and stores the copy source in 0xB74
+func_001C71E0	PostLoadAgent	slot 15 of class 0x08: runs func_001249A8, looks up the id at 0x924 (func_0015A448) into 0x928, resolves 0xB4C (func_001CAB10) and the id at 0xAFC into 0xB00 (func_0015A418)
+func_001C7278	RemoveAgentFromParent	calls the agent's slot 3 (+0x1C, RemoveObjectFromParentList's slot); StartAgent queues it (AppendQueuedCall) when the agent's flag-table bit (+0xB10) is set
+func_001C72A0	StartAgent	slot 16 of class 0x08: runs func_001C44F0, installs D_00274C30, creates the shared roster (func_001CB5B8) if 0x720 is empty and joins it, binds the 17 item slots and resolves the entries at 0xA7C
+func_001C7468	TestAgentMayContact	slot 56 of class 0x08: returns 1 when the base func_001B8A08 says so, when the target 0xB0C rejects the object (func_001A8820), or in state 0xB when the object lacks flag bit 55
+func_001C74E8	RegisterAgent	slot 6 of class 0x08: runs func_00192820 and adds itself to the roster at 0x720 (func_001CB648, a list of up to 16 entries)
+func_001C7520	UnregisterAgent	slot 7 of class 0x08: runs func_00192850, ends the animation players at 0x7E0 and 0x754, removes itself from the roster at 0x720 (func_001CB6F8) and clears the state words
+func_001C75B0	StepAgent	slot 28 of class 0x08: moves it by the animation player 0x7E0 and the state 0x724 (func_001B91A8, func_001B9D10) after the base step
+func_001C7A60	ComputeAgentTargetBearing	the wrapped angle (WrapAngle) between the agent's facing (the matrix row at 0x110) and the direction to its target (slot 98, its position 0x140), or 0 without a target; IsAgentTargetInRange and IsConeAgentFree call it
+func_001C7AE0	SetAgentFacingAngles	unless func_001CB578 says so, stores the two angles at +0x638 and +0xB24 and builds the matrix at +0x660 from them (func_001892A0, or func_00188850 about D_00248D20 when +0xB1C is 0)
+func_001C7B60	SettleAgentState	unless the world's flag or two fields block it, calls slot 93 for the wanted state and changes to it with func_001C8F20 until slot 93 returns the current state (+0x724)
+func_001C7CB8	UpdateAgent	slot 17 of class 0x08: runs func_001C4ED0, then the per-frame helpers func_001CAB10, func_001C9A58 and func_001C7B60 and several calls through its descriptor on the state 0x724 and the players 0x754 and 0x7E0
+func_001C8010	ChooseAgentState	slot 89 of class 0x08: from the current state 0x724 and func_001C96B8 returns the next state, going to 0xA while the entry 0x758[10] exists and the timer 0xBFC has run out
+func_001C84C0	HasAgentReachedPathEnd	returns whether the path index at 0x930 equals the path point count at 0x92C once the path flag 0xA60 is set; ChooseAgentState tests it before leaving states 4, 5 and 12
+func_001C84E8	IsAgentPathBlocker	the filter BuildAgentPath passes to its query: refuses an object with bit 43 of +0x538 (unless its type has flag 0x80 and +0x360 is nonzero) and one whose +0x50 is of kind 5, 0x40 or 0x41, accepts the rest
+func_001C8590	BuildAgentPath	slot 95 of class 0x08: asks the path object 0x928 (func_00191A88) for points from the goal at 0xA50 to the current position, filling the 16-byte entries at 0x940 and the count 0x92C
+func_001C8BC0	FaceAgentTowardGoalPoint	works out the two angles from the agent's position (+0x140) to the point at +0xA40 with func_001454E0 and sets them with SetAgentFacingAngles
+func_001C8C08	UpdateAgentGoal	slot 94 of class 0x08: per state takes the goal from the target of slot 98 (+0x140) or from the animation's end position (func_0012C9E8) and passes it to func_001C8418
+func_001C8D40	IsAgentNearPathEnd	writes 1 through out when the path flag 0xA60 is set and the path index 0x930 is within 2 of the count 0x92C, else 0
+func_001C8D78	CreateAgentAnimationPlayer	when the agent's sub-object (+0xA74) has an id at +0x2DC, creates the animation player at +0x754 from it (CreateAnimationPlayer), binds it to the sub-object (func_0012F810) and sets mode 5 on the attachments +0x1EC and +0x1F0 it finds; EnterAgentState and HandleAgentNotification call it
+func_001C8E28	UpdateAgentState	slot 90 of class 0x08: runs slot 102, then switches on the state 0x724: steps the animation player 0x754 or the path following (func_001C8920, func_001C8BC0)
+func_001C8F20	ChangeAgentState	clears bit 0 of 0x72C, then when the state differs calls LeaveAgentState and EnterAgentState through descriptor slots 0x5B and 0x5C around storing the new state in 0x724 and its clock time in 0x728, and posts message 15 with the old/new pair
+func_001C8FD0	ForceAgentState	clears the forced flag at +0xB88 for mode -1; otherwise sets it and runs ChangeAgentState with the mode and value (func_00105360 calls it)
+func_001C9008	LeaveAgentState	slot 91 of class 0x08: ends the animation players 0x754 and 0x7E0 and clears the path state, then per old state saves the animation time, frees the object 0xA74 or sets the timers 0x748 and 0xC00
+func_001C91C8	EnterAgentState	slot 92 of class 0x08: picks the animation for the new state from 0x758 and 0x870, starts it on the players 0x754 and 0x7E0 (func_0012C7B0, func_0012C288) and does the per-state set-up (cases 1, 2, 3, 6, 7, 10, 11, 16)
+func_001C96B8	GetAgentRosterState	the state (+0x50) of the agent's roster at 0x720, or 3 without one; ChooseAgentState, SetAgentMainClip and the gauge agents' state choices read it
+func_001C96D8	HandleAgentObjectEvent	slot 45 of class 0x08: returns 1 at once when 0xBD8 is set or the target 0xB0C rejects the event's object (func_001A8820), otherwise runs func_001BC320 and, for an event with bit 0x20, matches its mask against the pending entries at 0xAC8
+func_001C9990	AcceptAgentRequest	slot 76 of class 0x08: returns 0 when slot 75 refuses, otherwise fills a 0x40-byte request frame (kind, reference, position) and passes it to func_00177838 to find an accepting node
+func_001C9A48	IsAgentRequestBlocked	slot 75 of class 0x08: returns whether the word 0xBD8 is nonzero; func_001C9990 asks it before taking a request
+func_001C9A58	ApplyPendingAgentChanges	acts on the request bits of 0x72C: bit 1 ends the animation player 0x7E0 (or parks it at its end time in state 0xB) and clears the bit, bit 0 calls ChangeAgentState with the state in 0x730
+func_001C9AF8	SteerAgentAlongPath	slot 97 of class 0x08: aims at the path entry 0x940[0x930] (distance via func_001EB0F8), turns with func_001C7AE0 and stores the velocity in 0x640 and the arrival time in 0xBA4
+func_001C9CF8	RestartAgentClip	slot 96 of class 0x08: clears 0xB8C, 0xA60 and 0xBA4 and restarts the player 0x7E0 on its clip 0x1B1 (func_0012CCC0, func_0012F0A0)
+func_001C9D50	TestAgentTargetContact	returns 0 unless the key equals the current target 0xB54; then by state 0xA, 0xB, 0x10 gives 0 and 0xC..0xE gives 1, else 1 for an object under the same root and otherwise asks 0xB0C (func_001A8820)
+func_001C9DE0	HandleAgentNotification	slot 13 of class 0x08: runs func_00192230 then switches on the message kind, setting the state fields 0x72C..0x730, 0xA74 and the animation player fields 0xB78..0xB90 (func_0012CBE8, func_0012F0A0)
+func_001CA460	AnswerAgentRosterPoll	slot 0x170 of class 0x08: always 2, the answer PollItemKeeperMembers takes as an immediate yes (func_001B7860 overrides it for class 0x09)
+func_001CA468	IsAgentTargetInRange	slot 93 of class 0x08: gets the target from slot 98 and returns 1 only when its distance passes the range at 0x738 (func_001EB050), the angle limit 0x74C and the clock 0x748 and the target 0xB0C allow it
+func_001CA5E0	DrawAgent	slot 37 of class 0x08: a tail call to func_001C49C8 with the same arguments, the draw the class 0x07 version also ends with
+func_001CA600	IsAgentSlotIndex	returns whether the index is below 17, the size of the 0x758 and 0x870 tables; the slot setters test it
+func_001CA608	SetAgentStateClipId	stores a value into the id word of entry index of the 17-entry table at 0x758 when the index passes IsAgentSlotIndex
+func_001CA658	SetAgentStateClip	stores the id into entry index of the table at 0x758 and resolves its object with ResolveAgentClip (0 for id -1), when the index passes IsAgentSlotIndex
+func_001CA6D0	GetAgentStateClip	returns the resolved object of entry index of the table at 0x758, 0 for an index not below 17
+func_001CA720	AddAgentExtraClip	appends an (f00, id) pair to the list at 0xAC8 while its count at 0xAC4 is below 4; ResolveAgentClips resolves their ids
+func_001CA758	ResolveAgentClip	looks the id up with func_0015A418 in the world (kind 0x101), and for a hit zeroes its state at +0x48, links it to the agent with func_0012D398 and passes it to func_00182ED8
+func_001CA7C0	ResolveAgentClips	resolves every id of the 17-entry table at 0x758 and of the extra list at 0xAC8 with ResolveAgentClip and sets each id to -1
+func_001CA878	SetAgentMemberGroupId	script built-in: stores the id at 0xAFC and sets 0xAF8; PostLoadAgent looks the id up into the member group at 0xB00
+func_001CA888	SetAgentTargetSetId	script built-in: stores the id at 0xB08 and sets 0xB04; StartAgent looks the id up into 0xB0C, the set IsAgentTargetInRange requires the target to be in (func_001A8820)
+func_001CA898	SetAgentSecondaryClipId	stores a value into the id word of entry index of the table at 0x870 when the index passes IsAgentSlotIndex
+func_001CA8E8	ResolveAgentSecondaryClips	for each of the 17 entries of the table at 0x870 with an id other than -1, looks the object up with func_0015A418 (kind 0x101) into the entry and passes it to func_00182ED8
+func_001CA960	AddAgentMeshKey	appends a (key, f08) pair to the list at 0xA7C while its count at 0xA78 is below 4; CollideAgentWithObject tests each entry
+func_001CA998	SetAgentPathObjectId	stores the index at 0x924 and its object from func_0015A448 at 0x928 (0 for -1), clearing the path flag 0xA60 when the object changes; BuildAgentPath asks that object for points
+func_001CAA08	SelectAgentTarget	slot 98 of class 0x08: chooses the target from 0xB50, 0xB48 or the controlled object (func_001925F0), calls slot 28 of the old and slot 27 of the new one and stores it in 0xB54
+func_001CAAD0	StoreAgentTarget	writes the result of slot 98 (SelectAgentTarget) through out
+func_001CAB00	SetAgentSecondaryTarget	stores the object at 0xB48 and sets 0xB40; SelectAgentTarget uses it when 0xB50 is empty and 0xB40 is set
+func_001CAB10	PickAgentSecondaryTarget	gathers up to 32 objects of the key at 0xB4C (GatherObjectsByMode, mode 5) and stores the nearest to a point ahead of the agent at 0xB48, favouring the current one by halving its distance, and sets 0xB40; PostLoadAgent and UpdateAgent call it
+func_001CAC28	SetAgentPrimaryTarget	stores the object at 0xB50, the first choice of SelectAgentTarget
+func_001CAC30	ComputeAgentContactValue	slot 0x100 of class 0x08 (ComputeWalkerColliderContactValue's slot): the constants D_00274CF4/D_00274CF8 when 0xC04 is set, else 0xBE8 when its slot 90 accepts the contact, else zeros
+func_001CACB0	ClampAgentContactLimit	slot 62 of class 0x08: runs func_001C5388 and, when 0xC04 is set with flags 0x12, clears out+0x30 if the surface value out->p0+0x88 is above 0.7
+func_001CAD28	SetAgentAngleLimitDegrees	stores the value times 0.017453294 (degrees to radians) at 0x74C, the angle limit IsAgentTargetInRange compares
+func_001CAD40	AddAgentStateTrigger	adds the value to the trigger list of the agent's roster (0x720) with AddItemKeeperStateTrigger; ResolveStateTriggerObjects calls it
+func_001CAD60	AddAgentClipGroup	appends four ids to the group table at 0x7E8 while its count at 0x7E4 is below 8; EnterAgentState looks for the old and new clip ids in one group to carry the blend over
+func_001CAD98	CollideAgentWithObject	slot 58 of class 0x08: runs func_001C5C10 unless 0xC04 is set, then tests the object against each mesh in the list at 0xA7C (func_001879C0 or func_00186BA8) into the block at 0xAAC
+func_001CAEE0	LaunchObjectWithAgentVelocity	sets the other object's velocity to the agent's vector at +0xAB0 (its slot 32, SetPlacedObjectVelocity's) and, when it is the player (kind 7), moves it to state 4, sub-state 0x2B; func_001CAF38 calls it four times
+func_001CB328	SetAgentMainClip	replaces the clip at 0x750: ends the player 0x754, and when the roster state is 3 clears 0x730 and sets bit 0 of 0x72C, then starts the new clip on the agent with func_0012C9E8
+func_001CB3C0	RequestAgentLaunch	slot 71 of class 0x08, its override of RequestColliderLaunch: accepts with 1 and offers nothing
+func_001CB3C8	IsAgentFree	slot 0x16C of class 0x08, the slot IsConeAgentFree and IsGaugeAgentFree override: always 0
+func_001CB578	IsAgentFacingBlocked	returns 1 when 0xB7C or 0xB80 is set, or the global object D_00262E10 points at has a nonzero word at +0x275C; SetAgentFacingAngles tests it
+func_001CB5B8	CreateItemKeeper	creates a class 0x89 record (CreateTypedRecord, id 0x436) and queues GroupAnimationEventObjects on it in the world; StartAgent calls it
+func_001CB618	InitItemKeeper	slot 0 of the 0x89 class: after the base set-up it stores -1 in the field at 0x180
+func_001CB648	AddItemKeeperMember	appends an object to the 0x89 record's member list (at most 16), first setting the state to 0 (SetItemKeeperState) when the list was empty; StartAgent and RegisterAgent call it
+func_001CB6A8	AddOwnedWantedId	appends a value to the wanted list of the 0x89 object's first group (0x58 block) while it has fewer than 16
+func_001CB6D0	AddListedWantedId	appends a value to the wanted list of the 0x89 object's second group (0xE0 block) while it has fewer than 16
+func_001CB6F8	RemoveItemKeeperMember	removes an object from the 0x89 record's member list, closing the gap with CopyMemory, and sets the state to 3 (SetItemKeeperState) when it is empty; UnregisterAgent and EnterSeekingAgentState call it
+func_001CB7A0	FindWantedItems	slot 15 of the 0x89 class: looks each wanted id of both groups up with func_0015A448 and appends what it finds to the group (setting the owner for the first group)
+func_001CB8B8	GroupAnimationEventObjects	gathers each listed node's animation event objects and gives the objects that have no group (f328) a new small list, sharing it with later objects of equal f2E0
+func_001CBAA0	QueueItemKeeperUpdate	unless the 0x89 record is in state 3 or already queued (+0x17C), marks it and queues UpdateItemKeeper on the world; UpdateAgent calls it
+func_001CBAF8	GetItemKeeperTarget	the target (slot 98) of the 0x89 record's first member
+func_001CBB20	UpdateItemKeeper	the queued update of a 0x89 record: clears the queued mark, stores IsAnyItemKeeperMemberFree at +0x188 and changes state (SetItemKeeperState) until ChooseItemKeeperState keeps the current one
+func_001CBB88	ChooseItemKeeperState	the next state of a 0x89 record from +0x188: 0 and 1 go to 2 when it is set (0 plays sound 0x3F unless every member is of kind 9), 2 to 1 when it clears, 1 to 0 when PollItemKeeperMembers agrees
+func_001CBCB8	IsAnyItemKeeperMemberFree	1 when a member's slot 0x16C (IsAgentFree's slot) answers nonzero, keeping the first member's target position (GetItemKeeperTarget, +0x140) at +0x40; else 0
+func_001CBD58	PollItemKeeperMembers	asks each member's slot 0x170 (AnswerAgentRosterPoll): an answer of 2 returns 1 at once, one of 0 makes the result 0, otherwise 1
+func_001CBE20	AddItemKeeperStateTrigger	adds a value to the 0x89 record's trigger list (count +0x168, at most 4) unless it is already there; AddAgentStateTrigger calls it
+func_001CBE70	SetItemKeeperTriggerStates	passes a mode to each object of the trigger list (+0x168) with SetStateTriggerStateFromMessage; SetItemKeeperState sends 1, 0 and 2 on entering states 0, 2 and 3
+func_001CBEE8	SetItemKeeperState	changes the 0x89 record's state (+0x50, its clock time +0x54): leaving 2 drops its sound level and gives each member a random time at +0xC00, leaving 1 one at +0xBF4; entering 2 pushes sound level 0x6B and stamps +0xBF8, 1 runs func_001CC120, 0 and 3 set the triggers (SetItemKeeperTriggerStates)

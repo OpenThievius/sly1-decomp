@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 215/232 (92.7%), checked 2026-11-06
+// BYTES 215/232 (92.7%), checked 2026-11-07
 // NEAR: registers only: every instruction lines up once the last test is `if (base == 0)` and the
 //       table is read through a pointer local; temporaries differ in the two table paths. The
-//       tables are Sjis_274588 in 001E4000.cpp.
+//       tables are SjisCharEntry in 001E4000.cpp.
 #include "common.h"
 #include "script_value.h"
 #include "cursor_animator.h"
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "collider.h"
-#include "c88.h"
-#include "c54.h"
+#include "state_graph.h"
+#include "camera_positioned_object.h"
 #include "world.h"
 #include "attachment.h"
 #include "state_walker.h"
@@ -87,17 +87,17 @@ void func_001B5108(AngleFrameAnimator* p)
     }
 }
 
-struct Vec2_1B5160 { f32 x; f32 y; };
-struct Inner_1B5160 { u8 pad0[0x34]; s32 i34; };
-struct Other_1B5160 {
-    void* vt; u8 pad0[0xC]; Vec2_1B5160 vec; u8 pad1[0x60]; Inner_1B5160* p78;
+struct FacingXY { f32 x; f32 y; };
+struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
+struct DrawnPart {
+    void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
 
 extern u8 func_00166690[];
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EAFE0(f32 a, f32 b);
 
-void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
+void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q)
 {
     if (p->cursor.record == 0) {
         return;
@@ -108,11 +108,11 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
     if (*(void**)q != (void*)func_00166690) {
         return;
     }
-    Vec2_1B5160* vv;
+    FacingXY* vv;
     if (q->p78->i34 != 0) {
         vv = &q->vec;
     } else {
-        vv = (Vec2_1B5160*)D_00261990->g80;
+        vv = (FacingXY*)D_00261990->g80;
     }
     f32 t = func_00205778(vv->y, vv->x);
     f32 r = func_001EAFE0(p->phase - t, p->sector);
@@ -195,7 +195,7 @@ void func_001B5F28(Pool6C* list, Attachment* item)
     }
 }
 
-u32 func_001B6420(C88* a0, s32 a1)
+u32 func_001B6420(StateGraph* a0, s32 a1)
 {
     a1 = (a1 << 3) + (u32)a0->f38;
     return *(u32*)a1;
@@ -252,10 +252,10 @@ s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
     return 1;
 }
 
-void func_0015FCD8(C09* self, void* p);
+void func_0015FCD8(CompanionAgent* self, void* p);
 void func_001BF048(void* p);
 
-void func_001B7920(C09* self, void* p)
+void func_001B7920(CompanionAgent* self, void* p)
 {
     func_0015FCD8(self, p);
     if (p != 0) {
@@ -345,9 +345,9 @@ void func_001B6D78(Node_1B6D78* self, s32 a, s32 b)
 }
 
 struct Entry_1B6E28 { s32 value; s32 extra; };
-struct Node_1B6E28 { u8 pad[0x18]; C88* host; };
+struct Node_1B6E28 { u8 pad[0x18]; StateGraph* host; };
 
-void func_001837E0(C88* host, s32 a, s32 b, void** args);
+void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
 
 void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
 {
@@ -605,7 +605,7 @@ void func_00182C58(void* self);
 void func_001B61F0(void* self);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001B61A8(C88* self)
+void func_001B61A8(StateGraph* self)
 {
     func_00182C58(self);
     if (self->armed != 0) {
@@ -618,7 +618,7 @@ struct Pair_1B63C0 {
     s32 value_04;
 };
 
-s32 func_001B63C0(C88* self, s32 key)
+s32 func_001B63C0(StateGraph* self, s32 key)
 {
     s32 count = self->f34;
     if (count > 0) {
@@ -783,7 +783,7 @@ void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
 }
 
 
-void func_001B7100(C09* self, s32 value)
+void func_001B7100(CompanionAgent* self, s32 value)
 {
     s32 n = self->fCD4;
     if ((u32)n < 4) {
@@ -799,7 +799,7 @@ void func_001B5568(TriangleAnimator* self, void** out) { out[0] = &self->out44; 
 
 void func_00124A48(void* self);
 
-void func_001B5CD8(C54* self)
+void func_001B5CD8(CameraPositionedObject* self)
 {
     func_00124A48(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
@@ -883,7 +883,7 @@ void func_001B6F50(void* self);
 s32 func_0015A448(void* host, s32 id, void* ctx);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001B7128(C09* self)
+void func_001B7128(CompanionAgent* self)
 {
     func_001C72A0(self);
     func_001B6F50(self);
@@ -904,7 +904,7 @@ void func_001B7128(C09* self)
 void func_001C7CB8(void* self);
 void func_001B7638(void* self);
 
-void func_001B7608(C09* self)
+void func_001B7608(CompanionAgent* self)
 {
     func_001C7CB8(self);
     func_001B7638(self);
@@ -915,7 +915,7 @@ struct Sub_1B7790 { VFn_1B7790* vtbl; };
 void func_001C91C8(void* self);
 void func_001BF048(void* p);
 
-void func_001B7790(C09* self)
+void func_001B7790(CompanionAgent* self)
 {
     func_001C91C8(self);
     switch (self->f724) {
@@ -939,7 +939,7 @@ typedef s32 (*VFn_1B7818)(void* self);
 
 s32 func_001CA468(void* self);
 
-s32 func_001B7818(C09* self)
+s32 func_001B7818(CompanionAgent* self)
 {
     if (func_001CA468(self) == 0) {
         return 0;
@@ -949,7 +949,7 @@ s32 func_001B7818(C09* self)
 
 void func_001C9DE0(void* self, s32 code, void* req);
 
-void func_001B78C0(C09* self, s32 code, void* req)
+void func_001B78C0(CompanionAgent* self, s32 code, void* req)
 {
     func_001C9DE0(self, code, req);
     if (code == 7) {
@@ -1045,12 +1045,12 @@ void func_001B54D0(TriangleAnimator* self, AnimatorParams* src)
 void func_00124FC0(void* self);
 
 
-void func_001B5D28(C54* self)
+void func_001B5D28(CameraPositionedObject* self)
 {
     func_00124FC0(self);
     Vec02* src = (Vec02*)D_00261990->f40;
     Vec02 q = *src;
-    if (self->f2D0 == 0) {
+    if (self->followHeight == 0) {
         q.z = self->v140.z;
     }
     self->desc02()->m1D(self, &q);
@@ -1059,7 +1059,7 @@ void func_001B5D28(C54* self)
 void func_001C6F48(void* self);
 
 struct Ent_1B6EC8 { s32 v; s32 pad; };
-void func_001B6EC8(C09* self)
+void func_001B6EC8(CompanionAgent* self)
 {
     func_001C6F48(self);
     self->fC20 = 2000.0f;
@@ -1087,7 +1087,7 @@ void func_001B5398(CircleAnimator* p, AnimatorParams* s)
 
 extern f32 D_0026185C;
 
-s32 func_001B7860(C09* self)
+s32 func_001B7860(CompanionAgent* self)
 {
     s32 r;
     if (self->f724 == 11) {
@@ -1187,9 +1187,9 @@ void func_001B5200(ScrollAnimator* p, AnimatorParams* s)
     p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
-struct Sjis_274588 { u16 sjis; u16 ascii; };
-extern Sjis_274588 D_00274588[];
-extern Sjis_274588 D_00274610[];
+struct SjisCharEntry { u16 sjis; u16 ascii; };
+extern SjisCharEntry D_00274588[];
+extern SjisCharEntry D_00274610[];
 
 u16 func_001B5B58(u8 ch)
 {
@@ -1215,7 +1215,7 @@ u16 func_001B5B58(u8 ch)
     if (base == 0) {
         return D_00274610[idx].sjis + ch - D_00274610[idx].ascii;
     }
-    Sjis_274588* e = &D_00274588[ch - (base + 0x1F)];
+    SjisCharEntry* e = &D_00274588[ch - (base + 0x1F)];
     return e->sjis;
 }
 s32 func_001E2100(void* p);
@@ -1353,7 +1353,7 @@ struct Node_1B64D8 {
     Flags_1B64D8* f34;
 };
 
-s32 func_001B63F8(C88* self, s32 key);
+s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6C68(Node_1B64D8* self);
 void func_0012E760(AnimationPlayer* obj);
 void func_001B66A0(Node_1B64D8* self);
@@ -1362,7 +1362,7 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
 {
     s32 v;
     if (key != -1) {
-        v = func_001B63F8((C88*)self->f18, key);
+        v = func_001B63F8((StateGraph*)self->f18, key);
     } else {
         v = -1;
     }
@@ -1380,18 +1380,17 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
     }
 }
 
-struct Entry_2198E8 { const u8* f0; s32 f4; };
-extern const Entry_2198E8 D_002198E8;
+extern const ClassHead D_002198E8;
 extern const u8 D_00217410[];
 
 void* func_001B5EE0(Pool6C* pool);
 void func_00152470(List01* list, StateWalker* item);
-s32 func_001B63F8(C88* self, s32 key);
+s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6E28(StateWalker* self, s32 a, s32 b);
 void func_001B66A0(StateWalker* self);
-void func_001837E0(C88* self, s32 a, s32 b, void* c);
+void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
 
-StateWalker* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
+StateWalker* func_001B6290(StateGraph* self, s32 a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)func_001B5EE0(&self->world->pool1B88);
     obj->f1C = a1;
@@ -1469,8 +1468,8 @@ typedef void (*VFn_1B6F50)(void* self);
 struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
 struct Ent_1B6F50 { s32 key; void* val; };
 extern u8 D_0021A790[];
-void* func_0015A448(Hdr_1B6F50* obj, s32 id, C09* flags);
-s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, C09* a3, s32 a4, void* a5);
+void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
+s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
 s32 func_001833F0(Elem_1B6F50* a, s32 b);
 void func_0018D608(void);
 void func_0018D6F0(void);
@@ -1478,7 +1477,7 @@ void* func_0018D658(u32 bytes);
 void* func_00121228(Hdr_1B6F50* root, s32 value, void* table);
 void func_001299E0(Hdr_1B6F50* self, void* src);
 
-void func_001B6F50(C09* self)
+void func_001B6F50(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
@@ -1544,10 +1543,10 @@ struct Target_1B7638 {
 };
 
 
-s32 func_001C96B8(C09 *self);
-s32 func_001CB578(C09 *self);
+s32 func_001C96B8(CompanionAgent *self);
+s32 func_001CB578(CompanionAgent *self);
 
-void func_001B7638(C09 *self) {
+void func_001B7638(CompanionAgent *self) {
     struct Target_1B7638 *t;
     s32 r;
     s32 res;
@@ -1601,8 +1600,8 @@ void func_001B7638(C09 *self) {
     ((struct Sub_1B7638 *)self->fC14)->f2F0 = f;
 }
 
-struct Lo_1B4FC0 { s32 v; };
-s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
+struct RandomRangeLow { s32 v; };
+s32 func_001EAA70(RandomRangeLow lo, s32 hi);
 f32 func_001EAAE0(f32 a, f32 b);
 
 void func_001B4FC0(RandomJumpAnimator* self, f32 x)
@@ -1617,7 +1616,7 @@ void func_001B4FC0(RandomJumpAnimator* self, f32 x)
         self->wait = self->wait - x;
         return;
     }
-    Lo_1B4FC0 lo;
+    RandomRangeLow lo;
     lo.v = 1;
     s32 v = func_001EAA70(lo, count - 1);
     s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
@@ -1882,5 +1881,5 @@ done:
     func_001B6D78(self, 0x14, self);
 }
 
-extern const Entry_2198E8 D_002198E8 = { D_00217410, 0x93 };
+extern const ClassHead D_002198E8 = { D_00217410, 0x93 };
 f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };

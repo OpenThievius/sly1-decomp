@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00205400	Sine	the sine of a float, reduced by ReduceByHalfPi to SineKernel or CosineKernel (sine.c)

@@ -1,0 +1,43 @@
+symbol	name	evidence
+func_0014D0A8	AccumulateSegmentLengths	asm; FillPathCurveLengths calls it with (count, points, lengths) and SampleSplineSegment with (20, pts30, len170), each time to fill a running length array from a point array
+func_0014D138	WrapCurveTime	returns x unchanged when wrap is 0, else adds or subtracts the span (last key minus first key) until x lies between the first and last key times
+func_0014D1A0	FindPathCurveSegment	wraps x with WrapCurveTime, scans the key array for the first key above it, and returns the segment index with the offset into the segment and the segment length through lo and hi
+func_0014D280	InterpolatePathCurvePoint	finds the segment of a parameter in a key array (FindPathCurveSegment) and writes the point blended between the segment's two points and, when asked, the segment's unit direction (the unit x vector for a zero-length one); SamplePathCurveAtTime and SamplePathCurveAtLength call it
+func_0014D3A8	FindNearestPathCurveSegment	measures a point against every segment of the curve's points (func_001BA430) and returns the nearest segment and the fraction along it; FindPathCurveNearestPoint calls it
+func_0014D680	WalkToNearestPathCurveSegment	from a start segment steps forwards or backwards (wrapping when the curve wraps) while the next segment is nearer to the point (func_001BA430), and returns the nearest segment and fraction; ProjectOntoPathCurveNearTime and ProjectOntoPathCurveNearLength call it
+func_0014D938	TransformPointArray	gets a matrix from func_001891C0 and replaces each of count 16-byte points with func_00188700 of the matrix and the point
+func_0014D9A8	CreatePathCurve	allocates 0x1C or 0x1D0 bytes for kind 0 or 1, stores the table D_002176D0 or D_00217708 and the kind, returns 0 for other kinds
+func_0014DA18	GetBaseCurveLengthAtTime	slot 5 of the abstract curve table D_00217568: returns 0
+func_0014DA28	GetBaseCurveTimeAtLength	slot 6 of the abstract curve table D_00217568: returns 0
+func_0014DA38	FindPathCurveSegmentByTime	FindPathCurveSegment over the curve's times array
+func_0014DA68	FindPathCurveSegmentByLength	FindPathCurveSegment over the curve's arc-length array
+func_0014DA98	MeasureSplinePathDistance	original assembly: the function FindSplinePathNearestTime minimises over time (func_001EB168), as MeasurePathCurveDistance is for the path curve
+func_0014DB40	GetPathCurveEndTime	table slot 7: returns the last entry of the times array
+func_0014DB58	GetPathCurveEndLength	table slot 8: returns the last entry of the arc-length array
+func_0014DB78	MeasurePathCurveDistance	samples the curve at the time through its slot 1, then measures that point against the context's two points with func_00186320 and returns the second result; FindPathCurveNearestTime minimises it
+func_0014DBD0	FindPathCurveNearestTime	minimises MeasurePathCurveDistance over the curve's times from a start time (func_001EB168, a tenth of the first segment as step, unbounded when it wraps), samples the curve there through slot 1 and returns the time and its length (slot 5); func_001D87C8 calls it
+func_0014DD00	GetPathCurveSearchStep	returns a tenth of the first time interval (times[1]-times[0]); func_0014DBD0 passes it as the step of its parameter search
+func_0014DD28	ReadPathCurve	table slot 0: reads wrap, count, then a time and a 16-byte point per key from the stream into freshly allocated arrays, then calls table slot 9
+func_0014DE08	SamplePathCurveAtTime	slot 1 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its times
+func_0014DE40	SamplePathCurveAtLength	slot 2 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its lengths
+func_0014DE78	DrawPathCurveSegment	transforms the segment's two end points (the last wraps to the first) with func_00188700 and draws the line between them with DrawProjectedLine
+func_0014DF68	TransformPathCurvePoints	table slot 4: passes the curve's count and points to TransformPointArray
+func_0014DF98	GetPathCurveLengthAtTime	table slot 5: finds the segment of a time and linearly blends the arc lengths of its two keys
+func_0014E000	GetPathCurveTimeAtLength	table slot 6: finds the segment of an arc length and linearly blends the times of its two keys
+func_0014E068	FillPathCurveLengths	table slot 9: fills the arc-length array from the points with AccumulateSegmentLengths
+func_0014E090	FindPathCurveNearestPoint	slot 10 of the path curve table D_002176D0: finds the nearest segment and fraction (func_0014D3A8) and returns the time and length there
+func_0014E170	ProjectOntoPathCurveNearTime	slot 11 of the path curve table D_002176D0: from the segment at the given time (FindPathCurveSegment), finds the nearest point (func_0014D680) and returns its time and length
+func_0014E2A0	ProjectOntoPathCurveNearLength	slot 12 of the path curve table D_002176D0: as ProjectOntoPathCurveNearTime, from the segment at the given length
+func_0014E3D0	ReadSplinePathCurve	table slot 0 of the kind 1 curve: reads wrap, count, then a time, a point and two tangent vectors per key, calls slot 9 and resets the sample cache
+func_0014E500	ResetSplineSegmentCache	stores -1 in the cached segment index at 0x1C0
+func_0014E510	SampleSplineSegment	when a segment is not the cached one, fills 20 samples of it with func_00130B48 and their running lengths with AccumulateSegmentLengths, then caches its index
+func_0014E5B8	SampleSplinePathAtTime	original assembly: slot 1 of the spline curve table D_00217708, the counterpart of SamplePathCurveAtTime
+func_0014E6A8	SampleSplinePathAtLength	slot 2 of the spline curve table D_00217708: turns the length into a time (slot 6) and samples there through slot 1
+func_0014E710	DrawSplinePathSegment	original assembly: slot 3 of the spline curve table D_00217708, the counterpart of DrawPathCurveSegment
+func_0014E828	TransformSplinePathPoints	original assembly: slot 4 of the spline curve table D_00217708, the counterpart of TransformPathCurvePoints
+func_0014E910	GetSplineLengthAtTime	table slot 5 of kind 1: finds the segment of a time, adds the Hermite length of the part (func_00130C20) to the length at the segment start
+func_0014E990	GetSplineTimeAtLength	table slot 6 of kind 1: samples the segment of an arc length, locates the length among the 20 sample lengths and blends the segment's key times by the fraction (1/19 steps)
+func_0014EA48	FillSplinePathLengths	table slot 9 of kind 1: sets the first length to 0 and adds the Hermite length of each segment (func_00130C20) to the running total
+func_0014EB10	FindSplinePathNearestPoint	original assembly: slot 10 of the spline curve table D_00217708, the counterpart of FindPathCurveNearestPoint
+func_0014EC70	FindSplinePathNearestTime	slot 11 of the spline curve table D_00217708: minimises MeasureSplinePathDistance over the curve's times from a start time, samples there through slot 1 and returns the time and its length (slot 5)
+func_0014ED98	ProjectOntoSplinePathNearLength	slot 12 of the spline curve table D_00217708: turns the length into a time (slot 6) and calls slot 11 with it

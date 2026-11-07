@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FBDF8	HandleAbstractCall	jumps to RunTerminateHook; retail's method table D_0024A220 holds it in the slots a class leaves unimplemented (abstract_call.c)

@@ -1,0 +1,14 @@
+symbol	name	evidence
+func_002093F0	InitMemoryCardClient	binds the memory card client to the IOP's server and checks the server's version, printing its messages (InitMemoryCardSystem calls it)
+func_002095B0	OpenCardFile	sends the card server a request (operation 2) with a port, slot, path and flags and records it in flight (OpenMemoryCardFile calls it)
+func_002096E8	MakeCardDirectory	OpenCardFile with the directory flag (CreateMemoryCardDirectory calls it)
+func_00209720	CloseCardFile	sends the card server the close request (operation 3) for a handle (CloseMemoryCardFile calls it)
+func_002097E0	CopyCardDirectoryReply	the completion handler that copies the server's results out of uncached memory into the caller's buffers
+func_00209870	ReadCardFile	sends the card server a read request (operation 5) of a size into a buffer for a handle (ReadMemoryCardFile calls it)
+func_00209990	WriteCardFile	sends the card server a write request (operation 6) of data for a handle (WriteMemoryCardFile calls it)
+func_00209B10	WakeCardWaiter	original assembly: the alarm handler of WaitCardTicks, which wakes the waiting thread through QueueThreadRequest
+func_00209B38	WaitCardTicks	arms an alarm of a number of ticks that wakes the current thread and sleeps until it does
+func_00209B80	SyncCardRequest	waits for the request in flight to end (or tests it), returns its operation and result and releases the request semaphore (SyncMemoryCardResult calls it)
+func_00209C60	CopyCardInfoReply	the completion handler that copies the card information's words out of uncached memory to where GetCardInfo was asked to put them
+func_00209CB8	GetCardInfo	sends the card server the information request (operation 1) for a port and slot with three pointers for its results (PollMemoryCard and GetMemoryCardFreeBytes call it)
+func_00209E48	ReadCardDirectory	sends the card server the directory request (operation 0xD) for a path into a table of entries (ListMemoryCardDirectory and LoadMemoryCardSaveSlots call it)

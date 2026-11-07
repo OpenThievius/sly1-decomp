@@ -1,0 +1,13 @@
+symbol	name	evidence
+func_001D29C8	ShowModeLabel	when the mode differs from the one stored at +0x19FC of D_002623C0 and is below 7, shows the string D_00274F58[mode] on the label object D_0026EC70 (slots 8/14) and stores the mode; it also eases the player's state and sets D_00274F74
+func_001D2BB8	UpdateModeSelection	called from the player's update func_00173888: reads the pad record, steps the selected mode with FindNextTableIndexMatchingMask over the mask table D_00274F38 and shows it with ShowModeLabel, easing g_stepScale per mode
+func_001D3100	FindNextTableIndexMatchingMask	steps an index through count entries (direction from bit 0 of the flags, wrapping both ways) and returns the first whose table word shares a bit with the mask func_00160D10 returns, or start when none does
+func_001D31D0	SeekObjects105Animations	gathers every object of id 0x105 in the player's world and seeks the animation player at +0x7E0 of each to its start or end by the value, then stores the value at +0x275C and the clock at +0x2758 of the player
+func_001D3290	StartCountedCollider	slot 16 of class 0x4C: starts the placed object, resolves its links from the id list D_00274F90 and calls its slot 3
+func_001D32D8	TakeCountedColliderTouch	when the flag is 0 sends message 0x17 with the toucher and counts the touches at +0x550 down, returning while some are left; at zero or with the flag sends the empty message to +0x558, plays sound 0x67 at its position, raises script event 2 and calls slot 3
+func_001D3398	UpdateCountedCollider	slot 17 of class 0x4C: updates the collider, ends it with TakeCountedColliderTouch when the player is more than 2000 away, and otherwise counts down a touch from the first contact of its chain at +0x554 and frees the chain
+func_001D3470	StepCountedCollider	slot 28 of class 0x4C: steps the collider and, while it has no parent, converts its placement matrix at +0xD0 and passes it to func_001B91A8
+func_001D34E0	CollectCountedColliderContacts	slot 63 of class 0x4C: extracts its contacts by part mode into the chain at +0x554
+func_001D3500	HandleCountedColliderEvent	slot 45 of class 0x4C: handles the object event and, when it is a contact (flag 0x20), counts down a touch from the other object (ending it at once when that is the player) and frees the chain at +0x554
+func_001D35A8	ComputeCountedColliderWorldFrame	slot 19 of class 0x4C, its override of ComputeColliderWorldFrame
+func_001D3678	HandleCountedColliderNotification	slot 13 of class 0x4C: handles the placed object's notification and on kind 10 records a contact with the message's object into the chain at +0x554

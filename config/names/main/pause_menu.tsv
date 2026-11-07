@@ -1,0 +1,24 @@
+symbol	name	evidence
+func_00193210	InitLoadProgress	zeroes five fields and copies four colour words into 0x14..0x20
+func_00193270	BeginLoadProgress	zeroes the five counters of a load progress record; the startup loading calls it after InitLoadProgress, before running the initialisers
+func_00193288	UpdateLoadProgress	on the first call stores the total, then counts repeats of the same value and redraws the bar with DrawLoadProgressBar
+func_00193300	EndLoadProgress	zeroes the five counters of a load progress record again; the startup loading calls it after the last UpdateLoadProgress
+func_00193318	DrawLoadProgressBar	scales the width and fill to the bar and draws two rectangles in the colours chosen by the count
+func_00193598	GetMenuChoiceLabel	returns the string D_0026A068 (g_menuChoiceLabels) holds at index
+func_001935B0	FormatGameSummary	formats "%d%% - %s - %d:%02d" from a percentage, a name and the clock in minutes and seconds
+func_00193660	FindObject42CStateWalker	finds the first object with id 0x42C (kind 5) in g_currentWorld and returns its word +0x48, else 0; ActivatePauseMenuSelection reads its state walker's current key (GetStateWalkerCurrentKey) and BuildPauseMenuPage calls it too
+func_001936A0	BuildPauseMenuPage	fills the pause menu's current page (g_pauseMenuPages): its title and choice labels (g_menuChoiceLabels, CopyString, FormatToString), the game summary (FormatGameSummary) and the memory card's state; SetPauseMenuMode, SetPauseMenuPage and ActivatePauseMenuSelection call it
+func_00193E58	InitPauseMenu	slot 0 of the pause menu: runs the base initialiser, sets page and stage to -1, the three wanted pages to -1 and fade to 1.0
+func_00193EE8	ChangePauseMenuPage	when the page changes, stops the sound, hides the displays of the old page and sets up those of the new one by the page number
+func_001940E8	SetPauseMenuOpen	opens or closes the pause menu: plays the menu change on D_00275BC0, changes page, calls slot 14 or 15 and sets open
+func_00194278	ExitLevelFromPauseMenu	ActivatePauseMenuSelection calls it: clears the menu's layer page, then starts a screen fade (D_00275B04) or, without the flag, sets the pair controller 0x5F to state 6 (level key 0x106) or calls func_001F4408
+func_00194398	StartPauseMenuExitFade	starts the screen fade (StartScreenFade, kind 1) to the entry D_00247AB0 that ResetGameSessionAndFade also fades to; the pause menu calls it when a save of stage 2 ends well and on leaving
+func_001943E8	UpdatePauseMenu	shows or hides the four pause-menu layers by the level key 0x19D8/0x19DC and the page, moves the selection with the pad's vertical or horizontal step, and on buttons 0x810, 0x80 and 0x40 runs CancelPauseMenuPage, SetPauseMenuLayerPage or ActivatePauseMenuSelection
+func_00194D30	SetPauseMenuLayerPage	stores the page layer idx asks for, takes the last set of the three, and changes to it at once or queues it while sliding
+func_00194E60	SetPauseMenuMode	slot 16 of the pause menu: moves to a queued page when the mode reaches 0, then calls the base mode setter func_001AA998
+func_00194F00	ShowPauseMenu	slot 14 of the pause menu: calls the base show unless it is in mode 3 with a page queued
+func_00194F38	HidePauseMenu	slot 15 of the pause menu: in mode 3 with a page queued drops the queue, else calls the base hide
+func_00194F80	DrawPauseMenu	slot 9 of the pause menu: draws the page's title and rows from the table at D_00269D50 with a pulse and the fade colour
+func_00195928	SetPauseMenuPage	stores the page and, unless it is -1, calls func_001936A0
+func_00195958	ActivatePauseMenuSelection	reads the chosen row of the page's table and acts on it by page and item
+func_001961C0	CancelPauseMenuPage	goes back from the page: sets the layer's page to -1, 0 or 0x17 by the current page number

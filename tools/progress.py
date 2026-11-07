@@ -23,7 +23,7 @@ matches are counted apart (exact_c() and the README table), as OpenRAC does. A P
 is original assembly when its US counterpart (config/eu/map.tsv) is.
 
 Units follow that layout. Code units are the source files: each proved file of
-config/us/files.tsv (game/file_16F608, lib/cdvd...), and a 16 KiB window
+config/us/files.tsv (game/player, lib/cdvd...), and a 16 KiB window
 (game/<window>, lib/<window>) for code no proved file holds yet; PAL's functions
 take their US counterpart's file. A unit is complete when every function in it is.
 Data units are the sections with bytes (data/<section>): they measure data,

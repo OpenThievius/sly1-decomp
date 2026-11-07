@@ -10,23 +10,9 @@
  * 2.9-ee-991111 (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
  * code. */
 #include "common.h"
+#include "remote_call_client.h"
+#include "semaphore_params.h"
 #include "asm_func.h"
-
-/* A remote call client: the server it is bound to at +0x24. */
-typedef struct RpcClient {
-    u8 pad00[0x24];
-    void* server;
-} RpcClient;
-
-/* The parameters of a new semaphore. */
-typedef struct SemaParam {
-    s32 count;
-    s32 max;
-    s32 init;
-    s32 waiting;
-    u32 attr;
-    u32 option;
-} SemaParam;
 
 /* What the read's end callback receives, in uncached memory: two byte counts, where each
  * goes and the bytes. */
@@ -65,10 +51,10 @@ u8 D_00279480[128] __attribute__((aligned(64))) = { 0 };
 u8 D_00279500[0x1000] __attribute__((aligned(64))) = { 0 };
 u8 D_0027A500[192] __attribute__((aligned(64))) = { 0 };
 u32 D_0027A5C0[4] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027A5D0 = { { 0 } };
+RemoteCallClient D_0027A5D0 = { 0 };
 u8 D_0027A600[1088] __attribute__((aligned(64))) = { 0 };
 u32 D_0027AA40[0x102] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027AE48 = { { 0 } };
+RemoteCallClient D_0027AE48 = { 0 };
 
 static s32 D_0062A7C0;
 static void (*D_0062A7C4)(s32);
@@ -76,15 +62,15 @@ static void (*D_0062A7C4)(s32);
 static s32 D_0062A7C8[2];
 static s32 D_0062A7D0;
 static u8 D_0062A7D8[0x210];
-static RpcClient D_0062A9E8;
-static RpcClient D_0062AA10;
+static RemoteCallClient D_0062A9E8;
+static RemoteCallClient D_0062AA10;
 static s32 D_0062AA40[4] __attribute__((aligned(64)));
-static RpcClient D_0062AA50;
+static RemoteCallClient D_0062AA50;
 
 s32 func_001F69E0(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
 s32 func_001F6A90(void);
 s32 func_001F6AA0(s32 thread, void* status);
-s32 func_001F6B20(SemaParam* param);
+s32 func_001F6B20(SemaphoreParams* param);
 s32 func_001F6B30(s32 sema);
 s32 func_001F6B40(s32 sema);
 s32 func_001F6B50(s32 sema);
@@ -92,10 +78,10 @@ s32 func_001F6B60(s32 sema);
 s32 func_001F6B70(s32 sema);
 s32 func_001F7B88(const char* format, ...);
 void func_001F7BE8(s32 mode);
-s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
-s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 func_001F80C0(RemoteCallClient* client, u32 server, s32 mode);
+s32 func_001F8290(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void (*end)(void*), void* end_arg);
-s32 func_001F8480(RpcClient* client);
+s32 func_001F8480(RemoteCallClient* client);
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
 s32 func_001FA4A0(s32 cause, void (*handler)(void), s32 next);
@@ -116,16 +102,16 @@ ASM_FUNC(func_00202D08);
 
 void func_00202D30(u16 ticks)
 {
-    SemaParam param;
+    SemaphoreParams param;
     s32 sema;
 
-    param.max = 1;
-    param.init = 0;
+    param.maxCount = 1;
+    param.initCount = 0;
     param.option = 0;
-    sema = func_001F6B20(&param);
-    func_001F69E0(ticks, func_00202D08, sema);
-    func_001F6B60(sema);
-    func_001F6B30(sema);
+    sema = NewSemaphore(&param);
+    ScheduleAlarm(ticks, WakeDiscWaiter, sema);
+    AwaitSemaphore(sema);
+    FreeSemaphore(sema);
 }
 
 LINKER_REMNANT(func_00202D98);
@@ -141,9 +127,9 @@ void func_00202DA0(s32* code)
         D_00279454 = 0;
         D_00279430 = 0;
     } else {
-        func_001F6B50(*(volatile s32*)&D_00279428);
+        PostSemaphoreFromInterrupt(*(volatile s32*)&g_discNSemaphore);
         if (D_00279414 && D_0062A7C0) {
-            func_001F6B50(*(volatile s32*)&D_00279420);
+            PostSemaphoreFromInterrupt(*(volatile s32*)&D_00279420);
         } else {
             D_00279430 = 0;
         }
@@ -170,21 +156,21 @@ void func_00202E50(ReadTail* tail)
             d[i] = q->src1[i];
         }
     }
-    func_00202DA0((s32*)&D_00279454);
+    EndDiscCommand((s32*)&D_00279454);
 }
 
 /* Creates the semaphores of the two clients' commands and of the callback, once. */
 void func_00202EF0(void)
 {
-    SemaParam param;
+    SemaphoreParams param;
 
-    if (*(volatile s32*)&D_00279428 == -1 || *(volatile s32*)&D_0027942C == -1) {
+    if (*(volatile s32*)&g_discNSemaphore == -1 || *(volatile s32*)&g_discSSemaphore == -1) {
         param.option = 0;
-        param.init = 1;
-        param.max = 1;
+        param.initCount = 1;
+        param.maxCount = 1;
         *(volatile s32*)&D_00279428 = func_001F6B20(&param);
         *(volatile s32*)&D_0027942C = func_001F6B20(&param);
-        param.init = 0;
+        param.initCount = 0;
         *(volatile s32*)&D_00279420 = func_001F6B20(&param);
         D_00279430 = 0;
     }
@@ -197,14 +183,14 @@ void func_00202F88(void)
          * stores -1 here before loading D_00279420, and only this keeps the compiler from moving
          * the load first. */
         do { D_00279454 = -1; } while (0);
-        func_001F6B40(D_00279420);
+        PostSemaphore(D_00279420);
     }
-    func_001F6B30(D_00279428);
-    func_001F6B30(D_0027942C);
-    func_001F6B30(D_00279420);
-    func_001F9D60();
-    func_001FA4D0(0x80000012);
-    func_001F9DA8();
+    FreeSemaphore(g_discNSemaphore);
+    FreeSemaphore(g_discSSemaphore);
+    FreeSemaphore(D_00279420);
+    DisableInterrupts();
+    ClearCommandHandler(0x80000012);
+    EnableInterrupts();
 }
 
 LINKER_REMNANT(func_00203008);
@@ -219,9 +205,9 @@ void func_00203010(void)
 s32 func_00203050(void)
 {
     D_00279424 = 1;
-    func_001F9D60();
-    func_001FA4A0(0x80000012, func_00203010, 0);
-    func_001F9DA8();
+    DisableInterrupts();
+    SetCommandHandler(0x80000012, RunDiscCallback, 0);
+    EnableInterrupts();
     D_00279424 = 0;
     D_0027943C = 1;
     return 1;
@@ -244,31 +230,31 @@ s32 func_002030C0(s32 command)
 {
     s32 i;
 
-    func_00202EF0();
-    if (*(volatile s32*)&D_00279428 != func_001F6B70(*(volatile s32*)&D_00279428)) {
+    CreateDiscSemaphores();
+    if (*(volatile s32*)&g_discNSemaphore != TrySemaphore(*(volatile s32*)&g_discNSemaphore)) {
         if (D_00279410 > 0) {
-            func_001F7B88("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0027941C);
+            PrintBuffered("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0027941C);
         }
         return 0;
     }
     D_0027941C = command;
-    func_001F6AA0(D_0062A7D0, D_0062A7D8);
-    if (func_002032C8(1)) {
-        func_001F6B40(*(volatile s32*)&D_00279428);
+    QueryThreadStatus(D_0062A7D0, D_0062A7D8);
+    if (SyncDiscNCommand(1)) {
+        PostSemaphore(*(volatile s32*)&g_discNSemaphore);
         return 0;
     }
-    func_001F7BE8(0);
+    InitRemoteCalls(0);
     if (D_00279438 < 0) {
         while (1) {
-            if (func_001F80C0(&D_0027A5D0, 0x80000595, 0) < 0) {
+            if (BindRemoteService(&g_discNClient, 0x80000595, 0) < 0) {
                 if (D_00279410 > 0) {
-                    func_001F7B88("Libcdvd bind err N CMD\n");
+                    PrintBuffered("Libcdvd bind err N CMD\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
                 }
                 continue;
             }
-            if (D_0027A5D0.server != 0)
+            if (g_discNClient.server != 0)
                 break;
             for (i = 0x100000; i != -1; i--) {
             }
@@ -282,16 +268,16 @@ s32 func_00203230(void)
 {
     u32 recv;
 
-    if (func_002030C0(2) == 0) {
+    if (BeginDiscNCommand(2) == 0) {
         return 0;
     }
     recv = (u32)D_00279480;
-    if (func_001F8290(&D_0027A5D0, 0xE, 0, 0, 0, (void*)recv, 4, 0, 0) < 0) {
-        func_001F6B40(D_00279428);
+    if (CallRemoteService(&g_discNClient, 0xE, 0, 0, 0, (void*)recv, 4, 0, 0) < 0) {
+        PostSemaphore(g_discNSemaphore);
         return 0;
     }
     recv = *(u32*)(recv | 0x20000000);
-    func_001F6B40(D_00279428);
+    PostSemaphore(g_discNSemaphore);
     return recv;
 }
 
@@ -299,14 +285,14 @@ s32 func_002032C8(s32 mode)
 {
     if (mode == 0) {
         if (D_00279410 > 0) {
-            func_001F7B88("N cmd wait\n");
+            PrintBuffered("N cmd wait\n");
         }
-        while (D_00279430 != 0 || func_001F8480(&D_0027A5D0) != 0) {
-            func_00202D30(60);
+        while (D_00279430 != 0 || IsRemoteCallPending(&g_discNClient) != 0) {
+            WaitDiscTicks(60);
         }
         return 0;
     }
-    if (D_00279430 != 0 || func_001F8480(&D_0027A5D0)) {
+    if (D_00279430 != 0 || IsRemoteCallPending(&g_discNClient)) {
         return 1;
     }
     return 0;
@@ -316,14 +302,14 @@ s32 func_00203368(s32 mode)
 {
     if (mode == 0) {
         if (D_00279410 > 0) {
-            func_001F7B88("S cmd wait\n");
+            PrintBuffered("S cmd wait\n");
         }
-        while (func_001F8480(&D_0027AE48) != 0) {
-            func_00202D30(60);
+        while (IsRemoteCallPending(&g_discSClient) != 0) {
+            WaitDiscTicks(60);
         }
         return 0;
     }
-    return func_001F8480(&D_0027AE48);
+    return IsRemoteCallPending(&g_discSClient);
 }
 
 /* The same for the second client's commands. */
@@ -331,31 +317,31 @@ s32 func_002033D8(s32 command)
 {
     s32 i;
 
-    func_00202EF0();
-    if (*(volatile s32*)&D_0027942C != func_001F6B70(*(volatile s32*)&D_0027942C)) {
+    CreateDiscSemaphores();
+    if (*(volatile s32*)&g_discSSemaphore != TrySemaphore(*(volatile s32*)&g_discSSemaphore)) {
         if (D_00279410 > 0) {
-            func_001F7B88("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_00279418);
+            PrintBuffered("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_00279418);
         }
         return 0;
     }
     D_00279418 = command;
-    func_001F6AA0(D_0062A7D0, D_0062A7D8);
-    if (func_00203368(1)) {
-        func_001F6B40(*(volatile s32*)&D_0027942C);
+    QueryThreadStatus(D_0062A7D0, D_0062A7D8);
+    if (SyncDiscSCommand(1)) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return 0;
     }
-    func_001F7BE8(0);
+    InitRemoteCalls(0);
     if (D_00279448 < 0) {
         while (1) {
-            if (func_001F80C0(&D_0027AE48, 0x80000593, 0) < 0) {
+            if (BindRemoteService(&g_discSClient, 0x80000593, 0) < 0) {
                 if (D_00279410 > 0) {
-                    func_001F7B88("Libcdvd bind err S cmd\n");
+                    PrintBuffered("Libcdvd bind err S cmd\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
                 }
                 continue;
             }
-            if (D_0027AE48.server != 0)
+            if (g_discSClient.server != 0)
                 break;
             for (i = 0x100000; i != -1; i--) {
             }
@@ -383,20 +369,20 @@ u32 func_00203A20(u32 value)
     u32 recv;
     s32 r;
 
-    if (func_002033D8(0x22) != 0) {
+    if (BeginDiscSCommand(0x22) != 0) {
         D_0027AA40[0] = value;
     } else {
         return 0;
     }
-    func_001FA7D8(send, 4);
+    WriteBackDataCacheRange(send, 4);
     recv = (u32)D_0027A600;
-    r = func_001F8290(&D_0027AE48, 0x22, 0, send, 4, D_0027A600, 4, 0, 0);
+    r = CallRemoteService(&g_discSClient, 0x22, 0, send, 4, D_0027A600, 4, 0, 0);
     if (r < 0) {
-        func_001F6B40(D_0027942C);
+        PostSemaphore(g_discSSemaphore);
         return 0;
     }
     recv = *(u32*)(recv | 0x20000000);
-    func_001F6B40(D_0027942C);
+    PostSemaphore(g_discSSemaphore);
     return recv;
 }
 
@@ -418,15 +404,15 @@ s32 func_00203CF8(void)
     u32 base;
     s32 v;
 
-    if (!func_002033D8(1))
+    if (!BeginDiscSCommand(1))
         return 0;
     base = (u32)D_0027A600;
-    if (func_001F8290(&D_0027AE48, 3, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
-        func_001F6B40(D_0027942C);
+    if (CallRemoteService(&g_discSClient, 3, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
+        PostSemaphore(g_discSSemaphore);
         return 0;
     }
     v = *(s32*)(base | 0x20000000);
-    func_001F6B40(D_0027942C);
+    PostSemaphore(g_discSSemaphore);
     return v;
 }
 
@@ -435,15 +421,15 @@ s32 func_00203D90(void)
     u32 base;
     s32 v;
 
-    if (!func_002033D8(3))
+    if (!BeginDiscSCommand(3))
         return -1;
     base = (u32)D_0027A600;
-    if (func_001F8290(&D_0027AE48, 4, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
-        func_001F6B40(D_0027942C);
+    if (CallRemoteService(&g_discSClient, 4, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
+        PostSemaphore(g_discSSemaphore);
         return -1;
     }
     v = *(s32*)(base | 0x20000000);
-    func_001F6B40(D_0027942C);
+    PostSemaphore(g_discSSemaphore);
     return v;
 }
 
@@ -451,18 +437,18 @@ s32 func_00203E28(void)
 {
     s32 r;
 
-    if (func_002033D8(0x1E) == 0) {
+    if (BeginDiscSCommand(0x1E) == 0) {
         return 0;
     }
     *(volatile s32*)&D_00279454 = 8;
-    if (func_001F8290(&D_0027AE48, 0x16, 0, 0, 0, D_0027A600, 4, 0, 0) < 0) {
-        func_001F6B40(*(volatile s32*)&D_0027942C);
+    if (CallRemoteService(&g_discSClient, 0x16, 0, 0, 0, D_0027A600, 4, 0, 0) < 0) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         *(volatile s32*)&D_00279454 = 0;
         return 0;
     }
     *(volatile s32*)&D_00279454 = 0;
     r = *(s32*)((u32)D_0027A600 | 0x20000000);
-    func_001F6B40(*(volatile s32*)&D_0027942C);
+    PostSemaphore(*(volatile s32*)&g_discSSemaphore);
     return r;
 }
 
@@ -472,22 +458,22 @@ s32 func_00203EE0(s32 value, s32* out)
     s32 r;
     u32* send = D_0027AA40;
 
-    if (func_002033D8(0x1A) != 0) {
+    if (BeginDiscSCommand(0x1A) != 0) {
         D_0027AA40[0] = value;
     } else {
         return -1;
     }
-    func_001FA7D8(send, 4);
+    WriteBackDataCacheRange(send, 4);
     base = (s32)D_0027A600;
-    r = func_001F8290(&D_0027AE48, 5, 0, send, 4, (void*)base, 8, 0, 0);
+    r = CallRemoteService(&g_discSClient, 5, 0, send, 4, (void*)base, 8, 0, 0);
     if (r < 0) {
-        func_001F6B40(*(volatile s32*)&D_0027942C);
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return -1;
     }
     if (out != 0) {
         *out = *(s32*)((u32)(base + 4) | 0x20000000);
     }
     base = *(s32*)((u32)base | 0x20000000);
-    func_001F6B40(*(volatile s32*)&D_0027942C);
+    PostSemaphore(*(volatile s32*)&g_discSSemaphore);
     return base;
 }

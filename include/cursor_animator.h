@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Kind 0x21E3: cursor animators, objects that move a cursor (a frame index or a pair of
-// coordinates) over a record (src/main/001B4000.cpp and 00158000.cpp). Each is read from the
+// coordinates) over a record (src/main/anim_record.cpp and 00158000.cpp). Each is read from the
 // level stream by func_001B4A10: a type (1 to 8), an
 // object of func_001B4920(type) bytes on the heap whose table func_001B4980(type) is stored at
 // +0 and the type at +8, then slot 0 with the 0x1C-byte block the stream holds. func_001B3040
-// (001B0000.cpp) keeps the objects in D_00274540 and each owns a record (AnimRecord) it binds
+// (anim_record.cpp) keeps the objects in D_00274540 and each owns a record (AnimRecord) it binds
 // with slot 1; func_001B4878 calls slot 2 on them every frame.
 //
 // The 0x2C-byte base is the same for all eight tables: a frame stamp, the type, the id of the
@@ -18,6 +18,7 @@
 
 struct CursorAnimator;
 struct AnimRecord;
+struct TextureTable;
 
 // The 0x1C bytes slot 0 reads from the stream (func_00137A60(stream, 0x1C, block)).
 struct AnimatorParams {
@@ -43,9 +44,16 @@ struct FrameSource {
     s32 stride;             // 0x00
     s32 base;               // 0x04
 };
+// An entry of the mesh queue (D_0027DC20, 0x4000 of them; file_167D68.cpp): func_001694A0
+// copies count quadwords from value to dst and, with a flag, marks the copy's GIF tags.
 struct FrameTarget {
-    u8 pad00[4];
-    s32 value;              // 0x04
+    s32 count;              // 0x00: the quadwords to copy
+    s32 value;              // 0x04: where they come from
+    union {
+        struct QueuedGifTags* dst;  // 0x08: where they go (func_001694A0)
+        u32 dstAddr;        // 0x08: func_001696B8 moves the ones inside a range
+    };
+    s32 flag;               // 0x0C: or-ed into the first tag (func_001694A0)
 };
 struct FrameLink {
     FrameSource* src;      // 0x00
@@ -67,17 +75,33 @@ struct AnimCursor {
     AnimCursor* next;     // 0x18: in the list to flush
 };
 
+struct Quad4;           // a quadword (shapes.h)
+
+// An entry of an AnimRecord's list (func_001B3040 allocates them): a count of quadwords per
+// frame and the buffer of them that func_001B3510 sends to the GIF.
+struct AnimRecordEntry {
+    s32 type;               // 0x00
+    union {
+        s32 addr;           // 0x04: func_001B3040 stores the allocation
+        Quad4* data;        // 0x04: func_001B3510 reads it
+    };
+};
+
 // A record of D_002744FC (0x28 bytes each, func_001B3040 reads them): func_001B4688 finds one
 // by its key. Its owner is the object that binds it.
 struct AnimRecord {
     u8 kind;                // 0x00
     u8 flags;               // 0x01
     s16 key;                // 0x02
-    u8 pad04[0x13 - 0x04];
+    u8 pad04[0x08 - 0x04];
+    u8 color[4];            // 0x08: halved into the GIF packet of a kind 4 record (func_001B3510)
+    u32 maskC;              // 0x0C: a range record that links it is drawn when it has 0x10000000 or every bit of the camera's mask (func_001B2090)
+    s16 linkKey;            // 0x10: the key of the record a kind 0 record takes its third pass's textures from (func_001B3510)
+    u8 pad12[0x13 - 0x12];
     u8 nelem;               // 0x13: the elements at 0x14
-    void* elems;           // 0x14: nelem elements of 0x14 bytes
+    TextureTable* elems;    // 0x14: nelem texture tables of 0x14 bytes (func_001B2F00 reads them)
     s32 entCount;           // 0x18: the number of entries at 0x1C
-    void* ents;             // 0x1C: entCount entries of 8 bytes
+    AnimRecordEntry* ents;  // 0x1C: entCount entries
     s32 count;              // 0x20: frames (the first element's second word)
     CursorAnimator* owner;  // 0x24
 };
@@ -92,6 +116,15 @@ struct CursorAnimatorMethods {
     void (*getOutputs)(CursorAnimator* self, void** out);              // 0x18: type 8: pointers to its outputs
     void* m07;                                         // 0x1C
 };
+
+// The types of the table's slots, to define a table with.
+typedef void (*AnimLoad)(CursorAnimator* self, const AnimatorParams* src);
+typedef void (*AnimBind)(CursorAnimator* self);
+typedef void (*AnimStep)(CursorAnimator* self, f32 dt);
+typedef f32 (*AnimProgress)(CursorAnimator* self);
+typedef void (*AnimFollow)(CursorAnimator* self, void* unused, void* other);
+typedef AnimCursor* (*AnimFind)(CursorAnimator* self, const AnimRecord* rec);
+typedef void (*AnimOutputs)(CursorAnimator* self, void** out);
 
 // The base (0x2C bytes).
 struct CursorAnimator {

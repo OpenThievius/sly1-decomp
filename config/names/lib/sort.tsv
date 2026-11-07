@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F5CD0	SortElements	sorts n elements of a given size in place with a three-way-partition quicksort and the caller's comparison (sort.cpp; GatherAxisCurveTimes and MergeOverlappingSpans sort with it)

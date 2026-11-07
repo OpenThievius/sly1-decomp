@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FD8A8	AllocateOrThrow	the C++ runtime's allocation: takes memory from the game's allocator func_0018D758 and throws bad_alloc when there is none (allocate.cpp; LoadFonts calls it)

@@ -1,0 +1,14 @@
+symbol	name	evidence
+func_001F7BE8	InitRemoteCalls	once (g_remoteCallsReady), sets up the remote call state g_remoteCallState with its three pools of 0x40-byte packets and installs the handlers of the commands 0x80000008 to 0x8000000C (InitIopCommandChannels, LoadIopModules and the IOP clients call it)
+func_001F7D88	ShutDownRemoteCalls	shuts the command channel down (ShutDownCommandChannel) and clears g_remoteCallsReady (ResetIop calls it)
+func_001F7DB0	TakeRequestPacket	with interrupts disabled, marks the first free packet of the pool in use, gives it the next id and returns it, or 0 when none is free
+func_001F7E58	FreeRequestPacket	clears a packet's id and its in-use bit
+func_001F7E78	NextReplyPacket	returns the next packet of the reply ring, wrapping at its count
+func_001F7EA8	HandleRemoteCallReply	the handler of the IOP's replies: runs the client's callback for 0x8000000A, copies the found service for 0x80000009, signals the waiting client's semaphore and frees its packet
+func_001F7F60	AnswerIopCall	answers an IOP call with a 0x8000000C packet from the reply ring through SendCommandFromInterrupt
+func_001F7FC0	FindRemoteService	walks the groups of services in g_remoteCallState and returns the entry whose first word is the key, or 0
+func_001F8010	AnswerServiceLookup	answers a 0x80000009 lookup with the entry FindRemoteService finds (or zeros) through SendCommandFromInterrupt
+func_001F80C0	BindRemoteService	takes a request packet for the client, sends the bind command 0x80000009 for a service id and, unless asked not to wait, waits for the reply on a semaphore of its own (InitIopCommandChannels and every IOP client bind with it)
+func_001F8200	QueueServerRequest	appends an incoming request to its server's list and, when the server's thread is idle, wakes it with QueueThreadRequest
+func_001F8290	CallRemoteService	sends a bound client's request (command, send buffer, receive buffer, callback) and, unless asked not to, waits for the reply (SendIopCommandAndWait, the sound bank loads and every IOP client call it)
+func_001F8480	IsRemoteCallPending	returns 1 while the client's packet still has its id and its in-use bit (IsIopReplyReady and the sound bank loads poll it)

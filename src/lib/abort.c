@@ -10,7 +10,7 @@ void func_001000B8(s32 status);
 void func_002014D0(void)
 {
     for (;;) {
-        func_00201668(6);
+        RaiseSignal(6);
         func_001000B8(1);
     }
 }

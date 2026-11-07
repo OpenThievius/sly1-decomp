@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002059E0	Logarithm	the checked natural logarithm: LogarithmKernel's result, or a singularity at zero or a domain error below it (logarithm.c)

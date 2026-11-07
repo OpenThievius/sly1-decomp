@@ -1,0 +1,7 @@
+symbol	name	evidence
+func_001DFE80	FindLevelEntry	walks the 33 LevelEntry records of D_00248748 and returns the one whose first word equals its argument, or 0
+func_001DFEB8	InitCommentaryPromptElement	after SetupScreenElementText looks up the current level's entry (FindLevelEntry) to set world fields, then on bit 8 of D_002623C8 shows the string "Press &2L&. for Bonus Commentary" with a 5-second hold
+func_001E00B0	UpdateBestTimeState	per-frame update of the same object: in states 0/1 hides its text after a button request or 5 seconds, in state 2 keeps the timer display and best-time marker in step, ending with SetBestTimeState(3) when the timer stops
+func_001E02C8	SetBestTimeState	state 0..3 setter: on 2 starts the timer display and shows 'Best time' text or a begin text, on 3 compares the timer with the stored best time (D_002623C8), updates it and the memory card and plays a result sound; stores the state and the clock
+func_001E0678	DrawFramedText	when the text is non-empty sets the font scale, scales the colour alpha by blend, draws the optional frame box (self->frame) and then the text with the same placement
+func_001E0828	FinishBestTimeRun	calls SetBestTimeState with state 3, which compares the timer with the stored best time; func_001F4808 calls it

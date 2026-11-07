@@ -2,13 +2,13 @@
 // PAL: case 3 calls func_eu_001387C8 (a 16-bit string reader) instead of func_001384A0.
 void func_eu_001387C8(BufferedStream* r, void* out);
 
-void func_00150570(void* unused, BufferedStream* rd, s32* outCount, Ent_150570** outArr)
+void func_00150570(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
 {
     s32 i = 0;
     *outCount = ReadBufferedS8(rd);
-    *outArr = (Ent_150570*)AllocateZeroedFrontMemory(*outCount * 0x28);
+    *outArr = (SequenceStep*)AllocateZeroedFrontMemory(*outCount * 0x28);
     for (i = 0; i < *outCount; i++) {
-        Ent_150570* e = (Ent_150570*)((u8*)*outArr + i * 0x28);
+        SequenceStep* e = (SequenceStep*)((u8*)*outArr + i * 0x28);
         e->type = ReadBufferedS8(rd);
         switch (e->type) {
         case 0:

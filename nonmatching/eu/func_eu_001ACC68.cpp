@@ -1,7 +1,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 488/492, checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACC68.cpp func_eu_001ACC68 --unit src/main/file_1AA268.cpp
+// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACC68.cpp func_eu_001ACC68 --unit src/main/screen_element.cpp
 // Still differs: Menu object init; only the multiply differs (retail mult v0,v1 + mflo a0 with the store later, ours 3-operand mult a0,v0,v1; moving the statement or s64/u32 casts did not help).
+// Mechanism (from -dr/-dc/-dl/-dg dumps of this file and of func_0012D2A8): mulsi3 expands to
+// mulsi3_mult3_r5900, whose hi/lo/accum clobbers are explicit pseudos; its alternatives are
+// "=d,l,d,v" for the product, so it prints the two-operand form only if the product ends up in
+// LO, which regclass never prefers when the only use is a store. Every two-operand mult in
+// matched C comes from combine instead: when combine rebuilds the mult from its bare SET (a
+// three-insn combine whose result is split again, or a PARALLEL of two SETs split in two), the
+// explicit clobbers are lost, recog_for_combine adds scratch ones, and the insn becomes
+// mulsi3_internal ("=l" only): mult rs,rt with the result in LO, and reload's output copy
+// mflo rd, which sched2 then delays past the mult's latency. In func_0012D2A8 the product's
+// use is a copy into a2 (a call argument, a hard register CSE cannot propagate away). Here the
+// product is only stored: (set mem (mult ..)) is never valid, so combine needs a register copy of
+// the product that survives CSE (a pseudo live outside CSE's block, or a hard register), or a
+// second use of the product. Not reproduced: a local, chained assignment, inline getter/setter
+// (CSE deletes their copies), a reused switch variable (expand multiplies straight into it),
+// s64/u64 locals and casts. 0x1AC01C (US twin func_001ABE70) is the only stored product of the
+// ten mult $zero sites in US; the other nine feed call arguments.
 // Initialises a menu object: sets up its font, grid size from the mode and the label sizes.
 struct Game_eu_1AE6D0;
 extern Game_eu_1AE6D0* D_eu_002636F0;

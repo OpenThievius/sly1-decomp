@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FA8F8	InstallThirdKernelPatch	copies D_002779C0 to 0x80075000 and sets the system calls D_00277D30 lists (InitKernelLibrary calls it)

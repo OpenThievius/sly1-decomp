@@ -9,7 +9,8 @@
 
 void func_001DFD90(void* self);
 
-struct Obj_16C470 {
+// An object of class 0x76 (0xC0 bytes, under 0x75): the fields its set-up writes.
+struct C76 {
     u8 pad0[0x88];
     s32 f88;
     u8 pad8C[0xA8 - 0x8C];
@@ -21,8 +22,8 @@ struct Obj_16C470 {
 
 void func_0016C470(void* a0)
 {
-    Obj_16C470* self = (Obj_16C470*)a0;
-    func_001DFD90(a0);
+    C76* self = (C76*)a0;
+    InitClass75Object(a0);
     self->f88 = 1;
     self->fA8 = 8;
     self->fAC = 9;
@@ -31,7 +32,7 @@ void func_0016C470(void* a0)
 
 // Two words no code reads, after func_0016C470's literal: those of functions the linker stripped
 // (func_0016C4D8 is what it left of one). The zeros after them are the linker's padding before
-// file_16CE00's 16-aligned .rodata.
+// target_follower's 16-aligned .rodata.
 extern const f32 D_0024A7E0 = -3.40282347e+38f;
 extern const f32 D_0024A7E4 = -3.40282347e+38f;
 
@@ -48,7 +49,7 @@ void func_001B93D8(void);
 
 void func_0016C4E8(void)
 {
-    func_001B93D8();
+    DrawCollider();
 }
 
 void func_001261C0(void);

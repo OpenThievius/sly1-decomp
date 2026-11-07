@@ -11,7 +11,7 @@
 #include "switched_collider.h"
 #include "object_set.h"
 #include "object_gatherer.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "c5c.h"
 #include "c5d.h"
 #include "effect_owner.h"
@@ -24,28 +24,24 @@
 #include "game_progress.h"
 #include "object_message.h"
 #include "object_event.h"
+#include "object_link.h"
 #include "camera.h"
-#include "v24a0.h"
+#include "packet_writer.h"
+#include "screen_element.h"
+#include "step_sequence.h"
 #include "asm_func.h"
 void func_001B7968(void* self);
 void func_001249A8(void* self);
 void* func_0015A448(void* a, void* b, void* c);
-typedef s32 (*VFn_198B28)(void* self);
+// A descriptor slot called by its index (the slots past class 0x01's, whose types the
+// descriptors give differently).
+typedef s32 (*SlotTest)(void* self);
 void func_00124A48(void* self);
 s32 func_0012C9A8(void* node);
 void func_00182ED8(void* node);
-typedef void (*VFn_198DA8)(void* self);
+typedef void (*SlotFn)(void* self);
 void* func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-typedef void (*VFn_198E58)(void* self, void* msg);
-struct Msg_198E58 {
-    s32 kind;
-    void* owner;
-    u8 pad_08[0x50 - 8];
-};
-struct Target_198E58 {
-    VFn_198E58* vtbl;
-};
 s32 func_00182FC8(void* self);
 void func_001BA130(void*);
 void func_00198980(ObjectSet*);
@@ -59,32 +55,26 @@ void* func_0015A418(void*, s32, s32, void*);
 void func_001B7A98(void*);
 void func_001B7B78(void*);
 void func_00182C18(void*);
-typedef void (*VFn_198EF8)(void* self, void* other);
-struct Ctx_198EF8 {
-    VFn_198EF8* vtbl;
-    u8 pad_04[0x2230 - 4];
-    ObjectMessage* watched_2230;
-};
 void func_00127378(ObjectSet* self, s32 msg, ObjectMessage* m);
 s32 func_001300E8(void* obj, s32 kind);
 void* func_001929F8();
 s32 func_00182F40(void* e, void* b);
-struct Rec_199000 {
+// The active switched collider's data block (SwitchedCollider + 0x580): at 0x18 the collider.
+struct ActiveColliderData {
     u8 pad0[0x18];
     void* f18;
 };
-struct Elem_199000 {
-    u8 pad0[0x4];
-    void* f4;
-    u8 pad1[0x40 - 0x8];
-};
-struct Rec_19A088 { s32 flags; u8 rest[0x74]; };
-struct Obj_19A0F0 { u8 pad0[0x30]; s32 f30; };
-extern Obj_19A0F0 D_00275BC0;
+// One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
+struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
+// The element stack (g_elementStack), as file_15F678.cpp and file_16AA18.cpp view it.
+struct ElementStackState { u8 pad0[0x30]; s32 f30; };
+extern ElementStackState D_00275BC0;
 void func_0019A088(s32 index);
 void func_001E5278(s32 mode);
 void func_001921A8(C17* self);
-struct Obj_19A178 { s32 f0; s32 f4; s32 f8; };
+// One of C17's three markers at 0x61C (StartC17Marker): its owner, the object found for it and
+// that object's state walker.
+struct C17Marker { s32 owner; s32 object; s32 walker; };
 s32 func_0015A418(s32 a, s32 b, s32 c, s32 d);
 void func_00182ED8(s32 a);
 s32 func_001B6290(s32 a, s32 b, s32 c, s32 d);
@@ -97,8 +87,6 @@ void func_00160578(s32 value);
 void* func_0015A448(void* a, s32 code, void* c);
 extern u8 D_00262C70[];
 void func_001830D8(void* self);
-struct Obj_0019C3D0 { u8 pad[0x14]; u8* owner; };
-struct Obj_0019C408 { u8 pad[0x14]; u8* owner; };
 void func_00124DF8(void* self, s32 n, void* table);
 extern u8 D_00261420[];
 void func_00198980(ObjectSet* self);
@@ -106,32 +94,18 @@ void* func_00140FF8(void* p);
 void func_001989B0(ObjectSet* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
 void* func_0018D500(s32 size);
-struct Vec4_19BE08 { s32 a, b, c, d; } __attribute__((aligned(16)));
-struct Src_19BE08 { u8 pad[0x20]; Vec4_19BE08 q20; Vec4_19BE08 q30; };
-struct Local_19BE08 { s32 mode; u8 pad[0xC]; Vec4_19BE08 qa; Vec4_19BE08 qb; u8 pad2[0x20]; };
-typedef void (*VFn_19BE08)(void* self, void* arg);
-struct Obj_19BE08 { VFn_19BE08* vtbl; };
+// What func_0019BE08 is given: two quadwords at 0x20 and 0x30.
+struct GatherTrigger { u8 pad[0x20]; Quad16 q20; Quad16 q30; };
 void func_0019C1C0(void* self, s32 mode);
 s32 func_00198E98(ObjectSet* self);
 s32 func_00141008(void* table, s32 index);
 void func_00141040(void* table, s32 index);
 void func_00198DA8(ObjectSet* self);
-typedef void (*VFn_199AF0)(void* self);
-typedef void (*VFnA_199C78)(void* self, s32 a);
-typedef void (*VFnB_199C78)(void* self);
+typedef void (*SlotFnInt)(void* self, s32 a);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 s32 func_001BC320(void* self, ObjectEvent* ev);
 void func_001BA130(void* self);
 void func_001289C0(void* self);
-typedef void (*VFn_199F38)(void* self);
-struct Obj_199F38 {
-    VFn_199F38* vtbl;
-};
-struct Holder_199F38 {
-    u8 pad0[0x18];
-    Obj_199F38* sub;
-};
-extern u8 D_0026C948[];
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void func_00199B18(void* obj);
 s32 func_001300E8(void* node, s32 kind);
@@ -147,125 +121,77 @@ void func_001E9570(void* q);
 void func_001604B8(s32 mode);
 void func_0018C7F8(void* p);
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-typedef void (*VFn_199500)(void* self);
 extern s32 D_00275C34;
 void func_00198B28(ObjectSet* self);
 f32 func_001EAAE0(f32 a, f32 b);
 s32 func_001EAA70(s32 a, s32 b);
-typedef void (*VFn_1999D0)(void* self);
-struct Obj_1999D0 { VFn_1999D0* vtbl; };
-struct __attribute__((aligned(16))) Quad_1999D0 { s32 a, b, c, d; };
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00128018(void* a0, s32 a1, void* a2, void* a3);
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_00199850(C2E* self);
+void func_00199850(NumberedItem* self);
 void func_001518B8(s32 x);
-struct VObj_19A1E0 { s32 (**vtbl)(VObj_19A1E0*, C17*); };
-struct Pad_19A1E0 { u32 flags; u8 pad[0x74]; };
 void func_00124A48(C17* o);
 void func_00124DF8(C17* o, s32 n, u8* t);
 void func_0019A178(void* p, s32 x);
 s32 func_001B6290(s32 a, C17* b, s32 c, s32 d);
 void func_001B64D8(s32 a, s32 b);
-VObj_19A1E0* func_0015A448(World* a, s32 b, C17* c);
+BaseObject* func_0015A448(World* a, s32 b, C17* c);
 void func_00160D30(s32* p);
-struct Elem_199218 {
-    u8 pad0[0x2D0];
-    void* f2D0;
-    void* f2D4;
-};
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_001B64D8(void* p, s32 n);
-typedef void (*VFn_199B18)(void* self);
-struct Actor_199B18 {
-    VFn_199B18* vtbl;
-    u8 pad0[0x570 - 4];
-    s32 n570;
-    void* arr574[1];
-    u8 pad1[0x5A0 - 0x578];
-    s32 n5A0;
-};
 void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb);
-struct Arg_001993C0;
-void func_001781E0(Arg_001993C0* a, s32 v);
-struct List_1989B0 { s32 head; s32 x; s32 link; };
-struct Frame_1989B0 {
+void func_001781E0(Player* a, s32 v);
+// A list walk's frame (as ListFrame), pushed by its constructor.
+struct ListWalkFrame {
     s32 list; s32 cursor; s32 link; s32 prev;
-    Frame_1989B0(List_1989B0* l) {
+    ListWalkFrame(List01* l) {
         cursor = (s32)l;
         list = (s32)l;
-        link = l->link;
-        prev = *(s32*)&D_0027B314;
-        *(s32*)&D_0027B314 = (s32)this;
+        link = l->offset;
+        prev = *(s32*)&g_activeListFrames;
+        *(s32*)&g_activeListFrames = (s32)this;
     }
 };
 void func_00182ED8(BaseObject* n);
 s32 func_001300E8(void* key, s32 kind);
 s32 func_00182FC8(void* p);
-struct Slot_19AB78 { u8 pad[0x304]; s32* f304; };
-struct Slot_19AB78;
-struct Ent_19AB78 { u8 pad[0x14]; s32 f14; Slot_19AB78* f18[4]; s32 f28; };
-struct Obj_19AB78 { void** vt; };
-typedef void (*VFn_19AB78)(Obj_19AB78*);
-struct Vi_19AB78 { u8 pad[0x239C]; s32 f239C; u8 p2[0x2C]; void* f23CC; };
 void func_00192230(void* self, s32 code, s32* rec);
 void func_00175170(void* self, s32 a, s32 b);
 s32 func_0019A000(s32 bits);
-void func_001518B8(Slot_19AB78* s);
+void func_001518B8(StepSequence* s);
 void func_001B7968(Collider* self);
 void func_00152470(void* list, void* item);
 void func_00152600(void* table, void* self);
 extern f32 D_00261858[];
-struct __attribute__((aligned(16))) Vec_19D2A8 { s32 a, b, c, d; };
-struct Frame_19D2A8 { Vec_19D2A8 q0; Vec_19D2A8 q1; s32 w20; s32 w24; };
 void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
-struct __attribute__((aligned(16))) Vec_19D338 { s32 a, b, c, d; };
-struct Frame_19D338 {
-    Vec_19D338 q0;
-    Vec_19D338 q1;
-    Vec_19D338 q2;
-    Vec_19D338 q3;
-    s32 w40;
-    s32 w44;
-    s32 w48;
-    s32 w4C;
-};
-typedef s32 (*Slot_19D338)(void* self, void* a1, s32 a2, void* a3, s32 a4, s32 a5, f32 f, void* a6);
-struct Obj_19D338 { Slot_19D338* vtbl; };
-struct Src_19D338 {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1[0x34 - 0x1C];
-    Obj_19D338* f34;
-};
 void func_001B7B78(Collider* self);
-struct Stream_19C470;
-s32 func_00137D10(Stream_19C470* in);
-void func_00137FB0(Stream_19C470* in, void* p);
+struct LoadStream;
+s32 func_00137D10(LoadStream* in);
+void func_00137FB0(LoadStream* in, void* p);
 void* func_0018D5C0(s32 n);
-s32 func_00137CC0(Stream_19C470* in);
+s32 func_00137CC0(LoadStream* in);
 void func_0019CD90(C8B* o, s32 i, f32* x, f32* y, f32* z);
 void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
-f32 func_00137DF8(Stream_19C470* in);
-void func_0011EC40(C8B* o, Stream_19C470* in);
-typedef void (*VFn_19C068)(void *self);
-struct Frame_19C068;
-struct Frame_19C068 {
+f32 func_00137DF8(LoadStream* in);
+void func_0011EC40(C8B* o, LoadStream* in);
+// A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
+struct ListWalker;
+struct ListWalker {
     List01 *list;
     s32 *cur;
     s32 step;
-    Frame_19C068 *prev;
-    Frame_19C068(List01 *l)
+    ListWalker *prev;
+    ListWalker(List01 *l)
     {
         list = l;
         cur = (s32 *)&l->head;
         step = l->offset;
-        prev = ((Frame_19C068*)D_0027B314);
-        D_0027B314 = (ListFrame*)this;
+        prev = ((ListWalker*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_19C068() { D_0027B314 = (ListFrame*)prev; }
+    ~ListWalker() { g_activeListFrames = (ListFrame*)prev; }
     s32 Next()
     {
         s32 n = *cur;
@@ -273,14 +199,10 @@ struct Frame_19C068 {
         return n;
     }
 };
-struct Ob_19C068 {
-    VFn_19C068 *vtbl;
-};
 void func_00152600(List01 *a, ObjectGatherer *b);
 void func_00152470(List01 *a, ObjectGatherer *b);
-struct Buf_19C068 { s32 w[4]; };
-void func_00128018(void *a, s32 b, void *c, struct Buf_19C068 *d);
-void func_001B9860(ObjectGatherer *a, struct Buf_19C068 *b, void *c);
+void func_00128018(void *a, s32 b, void *c, Quad4 *d);
+void func_001B9860(ObjectGatherer *a, Quad4 *b, void *c);
 void func_001B7C40(ObjectGatherer *self, s32 flag);
 void func_00182C58(void* self);
 void* func_0015A448(void* a, s32 b, void* c);
@@ -297,23 +219,22 @@ void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, 
 // func_0019B378.
 f32 D_0026A910 = 100.0f;
 s32 D_0026A914 = 0;
-s32 D_0026A918[4] = { 0x0, 0x22B, 0x2D0, 0x0 };
-s32 D_0026A928[4] = { 0x0, 0x22D, 0x2D8, 0x0 };
-s32 D_0026A938[4] = { 0x0, 0x22C, 0x2D4, 0x0 };
-s32 D_0026A948[4] = { 0x0, 0x339, 0x5BC, 0x0 };
+ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
+ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
+ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
+ObjectLink D_0026A948[1] = { { 0x0, 0x339, 0x5BC } };
 f32 D_0026A958[2] = { 0.8f, 1.2f };
 f32 D_0026A960[2] = { 0.9f, 1.1f };
 f32 D_0026A968 = 300.0f;
 T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))func_00199850 };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
-struct Ent_26AA50 { s32 a; s32 b; s32 c; };
-struct Tab_26AA50 { Ent_26AA50 e[26]; s32 end[2]; };
-Tab_26AA50 D_0026AA50 = {
-    { { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } },
-    { 0, 0 }
-};
-s32 D_0026AB90[4] = { 0x0, 0x268, 0x5EC, 0x0 };
-s32 D_0026ABA0[4] = { 0x4, 0x267, 0x5FC, 0x0 };
+// The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
+// holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
+struct C17LinkTable { ObjectLink e[26]; s32 end[2]; };
+C17LinkTable D_0026AA50 = { {
+    { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
+ObjectLink D_0026AB90[1] = { { 0x0, 0x268, 0x5EC } };
+ObjectLink D_0026ABA0[1] = { { 0x4, 0x267, 0x5FC } };
 f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
 f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 s32 D_0026ABD0[2] = { 0x130, 0x132 };
@@ -331,7 +252,7 @@ void func_001989B0(ObjectSet* self)
 {
     LoadCollider(self);
     FindOrBuildMemberGroup(&self->f584, self);
-    Frame_1989B0 fr((List_1989B0*)&self->children);
+    ListWalkFrame fr(&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
     BaseObject* p = (BaseObject*)self->children.head;
     while (p != 0) {
@@ -339,7 +260,7 @@ void func_001989B0(ObjectSet* self)
             s32 i = self->count570;
             self->found574[i] = p;
             self->count570 = i + 1;
-            func_00182ED8(p);
+            ResolveAndStartObject(p);
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
@@ -354,7 +275,7 @@ void func_00198A88(ObjectSet* self)
 
     PostLoadPlacedObject(self);
     for (i = 0; i < self->n55C; i++) {
-        void* r = func_0015A448(self->world, self->keys560[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->keys560[i], self);
         if (r != 0) {
             self->found574[self->count570++] = r;
         }
@@ -368,13 +289,13 @@ void func_00198B28(ObjectSet* self)
     StartPlacedObject(self);
     for (i = 0; i < self->count570; i++) {
         void* node = self->found574[i];
-        if (func_0012C9A8(node)) {
+        if (HasAnimationEventKind19(node)) {
             self->f558 = 1;
         }
-        func_00182ED8(node);
+        ResolveAndStartObject(node);
     }
-    if (((VFn_198B28*)self->desc)[76](self) == 0) {
-        ((VFn_198B28*)self->desc)[7](self);
+    if (((SlotTest*)self->desc)[76](self) == 0) {
+        self->desc->m03(self);
     }
 }
 
@@ -382,25 +303,25 @@ ASM_FUNC(func_00198BD8);
 
 void func_00198DA8(ObjectSet* self)
 {
-    VFn_198DA8 fn = ((VFn_198DA8*)self->desc)[7];
+    SlotFn fn = ((SlotFn*)self->desc)[7];
     fn(self);
     s32 i = self->count570;
     i--;
     for (; i >= 0; i--) {
-        (void)func_0012C8F8(self->found574[i], 0, 0.0f, 1, 1.0f, 0);
+        (void)FindOrCreateSeekedAnimationPlayer(self->found574[i], 0, 0.0f, 1, 1.0f, 0);
     }
-    ((VFn_198DA8*)self->desc)[78](self);
+    ((SlotFn*)self->desc)[78](self);
     (void)TriggerScriptEvent(self, 2, 0, 0);
 }
 
 void func_00198E58(ObjectSet* self)
 {
-    Target_198E58* t = (Target_198E58*)self->f584;
+    BaseObject* t = (BaseObject*)self->f584;
     if (t != 0) {
-        Msg_198E58 msg;
+        SlotMessage msg;
         msg.kind = 1;
         msg.owner = self;
-        t->vtbl[31](t, &msg);
+        t->desc->m1B(t, &msg);
     }
 }
 
@@ -426,10 +347,10 @@ void func_00198EF8(ObjectSet* self, s32 msg, ObjectMessage* m)
                 self->marks588[i] = 1;
             }
         }
-        Ctx_198EF8* g = (Ctx_198EF8*)g_player;
+        Player* g = g_player;
         if (g != 0) {
-            if (m == g->watched_2230) {
-                g->vtbl[28](g, self);
+            if (m == g->watched2230) {
+                g->desc->m18(g, self);
                 self->done598 = 1;
             }
         }
@@ -444,45 +365,45 @@ s32 func_00198FB0(ObjectSet* unused, void* obj)
     return 0;
 }
 
-void func_00199000(ObjectSet* self, Elem_199000* elems, s32 idx)
+void func_00199000(ObjectSet* self, Contact03* elems, s32 idx)
 {
-    Rec_199000* r = (Rec_199000*)func_001929F8();
+    ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
     if (r->f18 == 0) return;
     {
         s32 one = 1;
-        Elem_199000* e = (Elem_199000*)((u8*)elems + ((one - idx) << 6));
-        if (IsObjectDescendantOf(e->f4, r->f18) != 0) {
+        ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
+        if (IsObjectDescendantOf(e->part, r->f18) != 0) {
             self->f59C = one;
         }
     }
 }
 
-void func_00199070(C2D* self)
+void func_00199070(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
     self->f5A0 = (s32)TakeFlagTableIndex(g_flagTable);
 }
 
-void func_001990A8(C2D* obj)
+void func_001990A8(FlaggedObjectSet* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-s32 func_001990E0(C2D* self)
+s32 func_001990E0(FlaggedObjectSet* self)
 {
-    s32 r = func_00198E98(self);
+    s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
         r = TestFlagTableBit(g_flagTable, self->f5A0) ? 0 : r;
     }
     return r;
 }
 
-void func_00199138(C2D* self)
+void func_00199138(FlaggedObjectSet* self)
 {
     SetFlagTableBit(g_flagTable, self->f5A0);
-    func_00198DA8(self);
+    CollectObjectSet(self);
 }
 
 void func_00199170(C5C* self)
@@ -508,9 +429,9 @@ void func_00199218(C5D* self)
     StartPlacedObject(self);
     self->count300 = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objs304);
     s32 i;
-    Elem_199218* e;
+    C5C* e;
     for (i = 0; i < self->count2DC; i++) {
-        e = (Elem_199218*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
+        e = (C5C*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
         if (e != 0) {
             u32 k = self->count300;
             if (k < 8) {
@@ -521,7 +442,7 @@ void func_00199218(C5D* self)
     }
     s32 s4 = (g_currentLevelRecord->f448 & self->mask2D0) ? 0x22F : 0x22E;
     for (i = 0; i < self->count300; i++) {
-        e = (Elem_199218*)self->objs304[i];
+        e = (C5C*)self->objs304[i];
         e->f2D4 = CreateStateWalker(e->f2D0, e, -1, 0);
         SetStateWalkerTarget(e->f2D4, s4);
     }
@@ -545,17 +466,17 @@ void func_00199398(C5D* queue, void* item)
 
 void func_001993C0(s32 a0) {
     if (g_player != 0) {
-        (void)func_001781E0((Arg_001993C0*)g_player, a0);
+        (void)QueuePlayerWalkerActivation(g_player, a0);
     }
 }
 
-void func_001993F0(C2E* obj)
+void func_001993F0(NumberedItem* obj)
 {
     InitObjectSet(obj);
     obj->f5A0 = obj->world->count2300++;
 }
 
-void func_00199428(C2E* self)
+void func_00199428(NumberedItem* self)
 {
     LoadObjectSet(self);
     s32 i = 0x318;
@@ -570,18 +491,18 @@ void func_00199428(C2E* self)
         i++;
         ((s32*)self->f5B0)[count] = r;
         self->n5AC = count + 1;
-        func_00182ED8(r);
+        ResolveAndStartObject(r);
     }
 }
 
-void func_001994C8(C2E* obj)
+void func_001994C8(NumberedItem* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-void func_00199500(C2E* self)
+void func_00199500(NumberedItem* self)
 {
     s32 neg;
     s32 one;
@@ -603,7 +524,7 @@ void func_00199500(C2E* self)
         s32 bit = self->f5A0;
         s32 mask = one << (bit & 7);
         if (g_currentEntry->bits68[bit / 8] & mask) {
-            ((VFn_199500*)self->desc)[7](self);
+            self->desc->m03(self);
         }
     }
 
@@ -616,14 +537,14 @@ void func_00199500(C2E* self)
                 d->bits68[bit / 8] = d->bits68[bit / 8] & ~mask;
                 d->count64--;
             }
-            ((VFn_199500*)self->desc)[7](self);
+            self->desc->m03(self);
         }
     }
 }
 
 ASM_FUNC(func_00199698);
 
-void func_00199850(C2E* self)
+void func_00199850(NumberedItem* self)
 {
     f32 zf;
     G27C230* ctx = g_currentEntry;
@@ -665,11 +586,11 @@ L980:
     }
 }
 
-void func_001999D0(C2E* self)
+void func_001999D0(NumberedItem* self)
 {
-    Quad_1999D0 loc;
-    Obj_1999D0* g = (Obj_1999D0*)D_0026C948;
-    g->vtbl[14](g);
+    Quad16 loc;
+    T217D_E30* g = &D_0026C948;
+    g->vt->m14(g);
     Effect* n = CreateEffect(0x10, 0);
     if (n != 0) {
         if (g_currentEntry->count64 + 1 >= g_currentWorld->count2300) {
@@ -678,24 +599,24 @@ void func_001999D0(C2E* self)
         }
         n->p134 = self;
         n->params = &D_0026A970;
-        func_00128018(self, 0, self->f5BC + 0x100, &loc);
+        TransformPointBetweenFrames(self, 0, self->f5BC + 0x100, &loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
     } else {
         SetNumberedItemFlag(self);
     }
-    func_00198DA8(self);
+    CollectObjectSet(self);
 }
 
-void func_00199AF0(C2E* p)
+void func_00199AF0(NumberedItem* p)
 {
-    ((VFn_199AF0*)p->desc)[77](p);
+    ((SlotFn*)p->desc)[77](p);
 }
 
-void func_00199B18(Actor_199B18* self)
+void func_00199B18(NumberedItem* self)
 {
-    self->vtbl[7](self);
-    s32 n = self->n5A0;
+    self->desc->m03(self);
+    s32 n = self->f5A0;
     G27C230* m = g_currentEntry;
     s32 idx = n / 8;
     u8 cur = m->bits68[idx];
@@ -704,16 +625,16 @@ void func_00199B18(Actor_199B18* self)
         m->bits68[idx] = cur | mask;
         m->count64 = m->count64 + 1;
     }
-    s32 i = self->n570;
+    s32 i = self->count570;
     i--;
     while (i >= 0) {
-        func_0012C8F8(self->arr574[i], 0, 1, 0, 0.0f, 1.0f);
+        FindOrCreateSeekedAnimationPlayer(self->found574[i], 0, 1, 0, 0.0f, 1.0f);
         i--;
     }
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void func_00199C10(C2E* self, s32* out)
+void func_00199C10(NumberedItem* self, s32* out)
 {
     s32 n = self->f5A0;
     s32 byte = n / 8;
@@ -729,15 +650,15 @@ void func_00199C58(void)
     ApplyColliderPendingImpulse();
 }
 
-s32 func_00199C78(C2E* self, ObjectEvent* a1)
+s32 func_00199C78(NumberedItem* self, ObjectEvent* a1)
 {
     if (a1->eventFlags & 0x8) {
-        ((VFnA_199C78)((void**)self->desc)[25])(self, 0);
+        ((SlotFnInt)((void**)self->desc)[25])(self, 0);
         SetColliderAnchors(self, 0, 0, 3, 0);
     }
     HandleObjectEvent(self, a1);
     if (a1->eventFlags & 0x10) {
-        ((VFnB_199C78)((void**)self->desc)[77])(self);
+        ((SlotFn)((void**)self->desc)[77])(self);
     }
     return 1;
 }
@@ -752,18 +673,17 @@ void func_00199F38(void)
         void** p = (void**)(i * 4 + (s32)arr);
         do {
             FlagNumberedItem(*p);
-            if (((Holder_199F38*)*p)->sub != 0) {
-                if (IsObjectOfKind(((Holder_199F38*)*p)->sub, 0x20) != 0) {
-                    Obj_199F38* s = ((Holder_199F38*)*p)->sub;
-                    s->vtbl[7](s);
+            if (((BaseObject*)*p)->parent != 0) {
+                if (IsObjectOfKind(((BaseObject*)*p)->parent, 0x20) != 0) {
+                    BaseObject* s = ((BaseObject*)*p)->parent;
+                    s->desc->m03(s);
                 }
             }
             i--;
             p--;
         } while (i >= 0);
     }
-    VFn_199F38* vt = *(VFn_199F38**)D_0026C948;
-    vt[14](D_0026C948);
+    D_0026C948.vt->m14(&D_0026C948);
 }
 
 void func_00199FF0(u32 value)
@@ -779,7 +699,7 @@ s32 func_0019A000(s32 bits)
     if ((g_saveData->f19F0 & mask) == mask) {
         return 0;
     }
-    if (func_001602A0() & 2) {
+    if (ComputeCompletionMask() & 2) {
         return 0;
     }
     GameProgress* c = g_saveData;
@@ -795,8 +715,8 @@ void func_0019A088(s32 index)
 {
     if (index == -1) index = g_saveData->f19D8;
     u8* base = (u8*)g_saveData + (index * 0x44C + 0x10);
-    Rec_19A088* p = (Rec_19A088*)base;
-    Rec_19A088* end = (Rec_19A088*)(base + 0x438);
+    LevelTaskRecord* p = (LevelTaskRecord*)base;
+    LevelTaskRecord* end = (LevelTaskRecord*)(base + 0x438);
     do {
         p->flags |= 1;
         p++;
@@ -806,7 +726,7 @@ void func_0019A088(s32 index)
 
 void func_0019A0F0()
 {
-    for (s32 i = 0; i < 6; i++) func_0019A088(i);
+    for (s32 i = 0; i < 6; i++) MarkLevelRecordComplete(i);
     if (g_elementStack.f30 == 2) RequestWorldLoadByMode(0);
 }
 
@@ -817,20 +737,20 @@ void func_0019A148(C17* self)
     self->f644 = -1;
 }
 
-void func_0019A178(Obj_19A178* self, s32 x)
+void func_0019A178(C17Marker* self, s32 x)
 {
-    self->f4 = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->f0);
-    func_00182ED8(self->f4);
-    self->f8 = CreateStateWalker(self->f4, self->f0, x, 0);
+    self->object = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->owner);
+    ResolveAndStartObject(self->object);
+    self->walker = CreateStateWalker(self->object, self->owner, x, 0);
 }
 
 void func_0019A1E0(C17* o)
 {
     u32 i;
     StartPlacedObject(o);
-    ResolveObjectLinks(o, 0x1A, (u8*)&D_0026AA50);
+    ResolveObjectLinks(o, 0x1A, (u8*)D_0026AA50.e);
     for (i = 0; i < 3; i++)
-        func_0019A178(o->f61C + i * 12, 0x390);
+        StartC17Marker(o->f61C + i * 12, 0x390);
     s32 h = CreateStateWalker(o->f610, o, 0x384, 1);
     o->f764 = -1;
     o->f614 = (StateWalker*)h;
@@ -843,7 +763,7 @@ void func_0019A1E0(C17* o)
     for (s32 e = 0; e < 6; e++) {
         Ent17* en = &o->f658[e];
         for (s32 k = 0; k < en->count; k++) {
-            VObj_19A1E0* r = func_0015A448(o->world, en->keys[k], o);
+            BaseObject* r = FindFirstObjectByIdMode4(o->world, en->keys[k], o);
             if (r) {
                 en->list[en->n++] = r;
             }
@@ -851,18 +771,18 @@ void func_0019A1E0(C17* o)
         if (en->n > 0)
             en->pick = RandomIntInRange(0, en->n - 1);
     }
-    o->f648 = (void*)func_0015A448(o->world, o->f644, o);
-    o->f650 = func_0015A448(o->world, o->f64C, o);
-    if (((VObj_19A1E0*)o->f650))
-        ((VObj_19A1E0*)o->f650)->vtbl[0x6C / 4](((VObj_19A1E0*)o->f650), o);
+    o->f648 = (void*)FindFirstObjectByIdMode4(o->world, o->f644, o);
+    o->f650 = FindFirstObjectByIdMode4(o->world, o->f64C, o);
+    if (((BaseObject*)o->f650))
+        ((BaseObject*)o->f650)->desc->m17(((BaseObject*)o->f650), o);
     if (((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 3) {
         o->f760 = 1;
     } else {
         GetCurrentLevelBit(&o->f760);
         if (o->f760 & 0xF000FFFFl) {
             s32 cnt = 0;
-            Pad_19A1E0* p = (Pad_19A1E0*)g_currentLevelRecord;
-            Pad_19A1E0* end = p + 9;
+            LevelTaskRecord* p = (LevelTaskRecord*)g_currentLevelRecord;
+            LevelTaskRecord* end = p + 9;
             do {
                 if (p->flags & 4)
                     cnt++;
@@ -907,9 +827,9 @@ void func_0019A520(C17* self, s32 flag)
     void* a;
     s32 n;
 
-    func_001B6568(self->f614, &r);
+    GetStateWalkerTargetKey(self->f614, &r);
     if (r == -1) {
-        func_001B6598(self->f614, &r);
+        GetStateWalkerCurrentKey(self->f614, &r);
     }
     if (flag != 0) {
         if (r != 0x38F) {
@@ -918,12 +838,12 @@ void func_0019A520(C17* self, s32 flag)
         ResetPadStepRepeat(g_padRecord);
         flags = g_saveData->f19EC;
         if ((flags & 8) == 0) {
-            a = func_0015A448((void*)g_currentWorld, 0x39A, self);
+            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39A, self);
         } else {
             if ((flags & 0x10) != 0) {
                 goto tail;
             }
-            a = func_0015A448((void*)g_currentWorld, 0x39B, self);
+            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39B, self);
         }
         if (a != 0) {
             n = self->f7D8;
@@ -946,8 +866,8 @@ tail:
             SetStateWalkerTarget(self->f614, 0x384);
         }
         self->f7D8 = 0;
-        if ((func_001602A0() & 4) != 0) {
-            func_00160578(4);
+        if ((ComputeCompletionMask() & 4) != 0) {
+            FadeOutAndQueueMovie(4);
         }
     }
 }
@@ -961,19 +881,19 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
     HandleSwitchedColliderNotification(self, msg, rec);
     if (msg == 12 && rec[1] == (s32)self->f650) {
         if (self->f654 != 0 && g_player != 0) {
-            ((Vi_19AB78*)g_player)->f23CC = self;
-            ((Vi_19AB78*)g_player)->f239C = 7;
-            func_00175170((Vi_19AB78*)g_player, 6, 16);
+            g_player->f23CC = self;
+            g_player->f239C = 7;
+            SetPlayerState(g_player, 6, 16);
         } else {
             s32 k;
             s32 a;
             s32 b;
-            ((VFn_19AB78)(*(Obj_19AB78*)&D_0026C948).vt[0x38 / 4])(((Obj_19AB78*)&D_0026C948));
+            D_0026C948.vt->m14(&D_0026C948);
             a = g_currentEntry->count64;
             b = g_currentWorld->count2300;
             k = -1;
             if (a == b) {
-                k = func_0019A000(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
+                k = CompletesWorldBits(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
             } else if ((g_saveData->u19F0 & 0xF0000000) == 0) {
                 if (a == b - 1) {
                     k = 3;
@@ -989,10 +909,10 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
                 }
             }
             if (k != -1) {
-                Ent_19AB78* e = (Ent_19AB78*)((u8*)self + (k * 0x2C + 0x658));
-                e->f18[e->f28]->f304[0] = 0;
-                ChooseStepSequenceState(e->f18[e->f28]);
-                e->f28 = (e->f28 + 1) % e->f14;
+                Ent17* e = (Ent17*)((u8*)self + (k * 0x2C + 0x658));
+                *(s32*)((StepSequence*)e->list[e->pick])->target304 = 0;
+                ChooseStepSequenceState((StepSequence*)e->list[e->pick]);
+                e->pick = (e->pick + 1) % e->n;
             }
         }
     }
@@ -1046,8 +966,8 @@ void func_0019AD68(C17* self)
             g->f19EC = v | 0x10;
         }
 
-        if (func_001602A0() & 4) {
-            func_001604B8(4);
+        if (ComputeCompletionMask() & 4) {
+            ApplyCompletionFlags(4);
         }
 
         sel = 0x37E;
@@ -1076,7 +996,7 @@ void func_0019AD68(C17* self)
 void func_0019AF00(C71* self)
 {
     InitObject(self);
-    self->id54 = -1;
+    self->targetId = -1;
     self->f4C = 3.4028235e+38f;
 }
 
@@ -1095,13 +1015,13 @@ void func_0019AF70(C71* obj)
 void func_0019AFA8(C71* obj)
 {
     StartObject(obj);
-    if (obj->id54 != -1)
-        obj->found58 = (s32)FindFirstObjectById(obj->world, 4, obj->id54, obj);
+    if (obj->targetId != -1)
+        obj->target = (s32)FindFirstObjectById(obj->world, 4, obj->targetId, obj);
 }
 
 void func_0019AFF0(C71* self)
 {
-    Keep6E tmp;
+    PathCurveKeptBits tmp;
 
     tmp = self->keep;
     CopyObjectData(self);
@@ -1124,9 +1044,9 @@ void func_0019B0A0(ObjectGatherer* self)
     FindOrBuildMemberGroup(&self->group, self);
     ResolveObjectLinks(self, 1, (u8*)g_objectGathererLoadLinks);
     for (; k < 0x288; k++) {
-        void* node = func_0015A480(self->world, k, self);
+        void* node = FindFirstObjectByIdMode1(self->world, k, self);
         if (node != 0) {
-            func_00182ED8(node);
+            ResolveAndStartObject(node);
             if (k < 0x279) {
                 self->lowObjects[self->lowCount++] = node;
             } else {
@@ -1177,17 +1097,17 @@ ASM_FUNC(func_0019BB90);
 
 ASM_FUNC(func_0019BC40);
 
-s32 func_0019BE08(ObjectGatherer* self, Src_19BE08* src)
+s32 func_0019BE08(ObjectGatherer* self, GatherTrigger* src)
 {
-    Local_19BE08 loc;
+    SlotMessage loc;
     if (self->state != 3) {
         func_0019C1C0(self, 3);
-        Obj_19BE08* obj = (Obj_19BE08*)self->group;
+        BaseObject* obj = (BaseObject*)self->group;
         if (obj != 0) {
-            loc.mode = 6;
+            loc.kind = 6;
             loc.qb = src->q20;
             loc.qa = src->q30;
-            obj->vtbl[31](obj, &loc);
+            obj->desc->m1B(obj, &loc);
         }
     }
     return 1;
@@ -1198,17 +1118,17 @@ ASM_FUNC(func_0019BE80);
 void func_0019C068(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         RemoveFromList(&self->world->list1C60, self);
-        ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
+        ((BaseObject *)self->f5FC)->desc->m03((BaseObject *)self->f5FC);
     } else {
-        struct Buf_19C068 buf;
+        Quad4 buf;
         AppendToList(&self->world->list1C60, self);
-        ((struct Ob_19C068 *)self->f5FC)->vtbl[6](self->f5FC);
-        func_00128018(*(void **)((u8 *)self->f660 + 0x18), 0,
+        ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
+        TransformPointBetweenFrames(*(void **)((u8 *)self->f660 + 0x18), 0,
                       (u8 *)self->f660 + 0x40, &buf);
-        func_001B9860(self, &buf, (void*)&g_unitZVector);
+        PlaceColliderClearOfContacts(self, &buf, (void*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
-    Frame_19C068 it(&self->parts);
+    ListWalker it(&self->parts);
     s32 node = it.Next();
     while (node != 0) {
         SetColliderPartListed((ObjectGatherer *)node, a1 == 0);
@@ -1221,16 +1141,16 @@ void func_0019C068(ObjectGatherer *self, s32 a1) {
 INCLUDE_RODATA(jtbl_0024C910);
 ASM_FUNC(func_0019C1C0);
 
-void func_0019C3D0(Obj_0019C3D0* obj)
+void func_0019C3D0(BaseObject* obj)
 {
     RegisterObject(obj);
-    AppendToList(obj->owner + 0x1C6C, obj);
+    AppendToList(&obj->world->list1C6C, obj);
 }
 
-void func_0019C408(Obj_0019C408* obj)
+void func_0019C408(BaseObject* obj)
 {
     UnregisterObject(obj);
-    RemoveFromList(obj->owner + 0x1C6C, obj);
+    RemoveFromList(&obj->world->list1C6C, obj);
 }
 
 void func_0019C440(C8B* obj)
@@ -1240,7 +1160,7 @@ void func_0019C440(C8B* obj)
     obj->first34 = -1;
 }
 
-void func_0019C470(C8B* o, Stream_19C470* in)
+void func_0019C470(C8B* o, LoadStream* in)
 {
     {
         s32 i = 0x17;
@@ -1261,7 +1181,7 @@ void func_0019C470(C8B* o, Stream_19C470* in)
         f32 z;
         Rec8B* r = &o->fC4[i];
         o->fC4[i].id = ReadBufferedS8(in);
-        func_0019CD90(o, i, &x, &y, &z);
+        DecodeC8BGridIndex(o, i, &x, &y, &z);
         func_0019CC10(x, y, z, o, r->pos);
     }
     o->fC8 = ReadBufferedS16(in);
@@ -1309,20 +1229,20 @@ void func_0019C728(C8B* self)
     Slot8B* s;
     s32 i;
     StartObject(self);
-    self->f3C = func_0015A448(self->world, self->first34, self);
+    self->f3C = FindFirstObjectByIdMode4(self->world, self->first34, self);
     if (self->f3C == 0) return;
-    self->f40 = func_0015A480(self->world, self->second38, self->f3C);
+    self->f40 = FindFirstObjectByIdMode1(self->world, self->second38, self->f3C);
     if (self->f40 == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        Node8B* n = (Node8B*)func_0015A480(self->world, s->fC, self->f3C);
+        Node8B* n = (Node8B*)FindFirstObjectByIdMode1(self->world, s->fC, self->f3C);
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
     ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
-    func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
+    BuildCombinedBlendAnimation(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
-    void* nd = func_0015A480(self->world, 0x36, self->f3C);
+    void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
     if (nd != 0) func_00139B38(self->f3E4, nd);
     f32 buf[24];
     func_0019CC10(self, buf, self->f54, self->f58, self->f5C);
@@ -1386,27 +1306,35 @@ ASM_FUNC(func_0019D0E0);
 
 void func_0019D2A8(Player* self, void* x, void* y)
 {
-    Frame_19D2A8 f;
+    Quad16 q0;
+    Quad16 q1;
+    s32 w20;
+    s32 w24;
     if (y != 0) {
         f32 d = self->f2424 - g_gameClock[1];
         if (d < g_gameClock[2]) {
             d = g_gameClock[2];
         }
-        func_0019CEC0(x, y, &f.q0, d);
-        func_0019D0E0(x, &f.q0, &f.q1, &f.w20, &f.w24);
-        func_0019C9C8(x, f.w20, &f.q1);
+        func_0019CEC0(x, y, &q0, d);
+        func_0019D0E0(x, &q0, &q1, &w20, &w24);
+        func_0019C9C8(x, w20, &q1);
     }
 }
 
-void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
+void func_0019D338(void* self, void* dst, PathCurveObject* src, f32* k)
 {
-    Frame_19D338 f;
-    func_00128018(0, src->f18, (u8*)self + 0x140, &f.q0);
-    Obj_19D338* o = src->f34;
-    if (o->vtbl[12] != 0) {
-        o->vtbl[12](o, &f.q0, 0, &f.q1, 0, 0, *k, k);
+    Quad16 q0;
+    Quad16 q1;
+    Quad16 q2;
+    Quad16 q3;
+    s32 w40;
+    s32 w44;
+    TransformPointBetweenFrames(0, (s32)src->parent, (u8*)self + 0x140, &q0);
+    PathCurve* o = src->curve;
+    if (o->vt->m12 != 0) {
+        o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
-    func_00128018((void*)src->f18, (s32)self, &f.q1, &f.q2);
-    func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
-    func_0019C9C8(dst, f.w40, &f.q3);
+    TransformPointBetweenFrames((void*)src->parent, (s32)self, &q1, &q2);
+    func_0019D0E0(dst, &q2, &q3, &w40, &w44);
+    func_0019C9C8(dst, w40, &q3);
 }

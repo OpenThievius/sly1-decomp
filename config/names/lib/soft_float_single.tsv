@@ -1,0 +1,5 @@
+symbol	name	evidence
+func_001FD5D0	PackFloat	packs a float taken apart (kind, sign, exponent, fraction) back into its 32 bits (soft_float_single.c)
+func_001FD6E0	UnpackFloat	takes a float's 32 bits apart into kind, sign, unbiased exponent and fraction (soft_float_single.c)
+func_001FD7A0	ConvertFloatToU32	converts a float to an unsigned 32-bit integer (CancelPauseMenuPage calls it)
+func_001FD838	PackFloatFromParts	packs a float from a kind, sign, exponent and fraction passed as loose arguments (the double to float conversion calls it)

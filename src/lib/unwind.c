@@ -266,23 +266,23 @@ u8* func_001FF740(FrameDesc* f, CommonInfo* info)
     u32 len;
 
     info->augmentation = (char*)common + 9;
-    if (func_001F6738(info->augmentation, "") != 0 &&
-        func_001F6738(info->augmentation, "eh") != 0 &&
+    if (CompareStrings(info->augmentation, "") != 0 &&
+        CompareStrings(info->augmentation, "eh") != 0 &&
         info->augmentation[0] != 'z') {
         return 0;
     }
     p = (u8*)info->augmentation + func_001E2100(info->augmentation) + 1;
-    if (func_001F6738(info->augmentation, "eh") == 0) {
+    if (CompareStrings(info->augmentation, "eh") == 0) {
         info->handlerData = (void*)((Unaligned32*)p)->v;
         p += 4;
     } else {
         info->handlerData = 0;
     }
-    p = func_001FF048(p, (u32*)&info->codeAlign);
-    p = func_001FF090(p, &info->dataAlign);
+    p = ReadUnsignedLeb128(p, (u32*)&info->codeAlign);
+    p = ReadSignedLeb128(p, &info->dataAlign);
     *(s32*)&info->returnColumn = *p++;
     if (info->augmentation[0] == 'z') {
-        p = func_001FF048(p, &len);
+        p = ReadUnsignedLeb128(p, &len);
         p += len;
     }
     return p;
@@ -299,7 +299,7 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
         *pc += (op & 0x3F) * cie->codeAlign;
     } else if (op & 0x80) {
         reg = op & 0x3F;
-        p = func_001FF048(p, (u32*)&offset);
+        p = ReadUnsignedLeb128(p, (u32*)&offset);
         offset *= cie->dataAlign;
         rs->s.how[reg] = 1;
         rs->s.value[reg] = offset;
@@ -327,37 +327,37 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
             p += 4;
             break;
         case 5:
-            p = func_001FF048(p, &reg);
-            p = func_001FF048(p, (u32*)&offset);
+            p = ReadUnsignedLeb128(p, &reg);
+            p = ReadUnsignedLeb128(p, (u32*)&offset);
             offset *= cie->dataAlign;
             rs->s.how[reg] = 1;
             rs->s.value[reg] = offset;
             break;
         case 6:
-            p = func_001FF048(p, &reg);
+            p = ReadUnsignedLeb128(p, &reg);
             rs->s.how[reg] = 0;
             break;
         case 7:
         case 8:
             break;
         case 9:
-            p = func_001FF048(p, &reg);
-            p = func_001FF048(p, &reg2);
+            p = ReadUnsignedLeb128(p, &reg);
+            p = ReadUnsignedLeb128(p, &reg2);
             rs->s.how[reg] = 2;
             rs->s.value[reg] = reg2;
             break;
         case 12:
-            p = func_001FF048(p, &reg);
-            p = func_001FF048(p, (u32*)&offset);
+            p = ReadUnsignedLeb128(p, &reg);
+            p = ReadUnsignedLeb128(p, (u32*)&offset);
             rs->s.cfaColumn = reg;
             rs->s.cfaOffset = offset;
             break;
         case 13:
-            p = func_001FF048(p, &reg);
+            p = ReadUnsignedLeb128(p, &reg);
             rs->s.cfaColumn = reg;
             break;
         case 14:
-            p = func_001FF048(p, (u32*)&offset);
+            p = ReadUnsignedLeb128(p, (u32*)&offset);
             rs->s.cfaOffset = offset;
             break;
         case 10: {
@@ -379,11 +379,11 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
             }
             break;
         case 46:
-            p = func_001FF048(p, (u32*)&offset);
+            p = ReadUnsignedLeb128(p, (u32*)&offset);
             rs->s.cfaReg = offset;
             break;
         default:
-            func_002014D0();
+            AbortProgram();
             break;
         }
     }
@@ -409,7 +409,7 @@ FrameTable* func_001FFC08(void* value)
             slot = &t->next;
         } while (t->next != 0);
     }
-    func_002014D0();
+    AbortProgram();
 }
 
 UnwindState* func_001FFC80(void* target, UnwindState* out)
@@ -428,7 +428,7 @@ UnwindState* func_001FFC80(void* target, UnwindState* out)
     if (insn == 0)
         return 0;
 
-    func_001F5C0C(&work, 0, sizeof(work));
+    FillMemory(&work, 0, sizeof(work));
     work.s.returnColumn = info.returnColumn;
     work.s.handlerData = info.handlerData;
 
@@ -442,7 +442,7 @@ UnwindState* func_001FFC80(void* target, UnwindState* out)
     insn = (u8*)(f + 1);
     if (info.augmentation[0] == 'z') {
         u32 skip;
-        insn = func_001FF048(insn, &skip);
+        insn = ReadUnsignedLeb128(insn, &skip);
         insn += skip;
     }
 

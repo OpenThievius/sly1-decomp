@@ -11,11 +11,12 @@
 #define WORLD_H
 
 #include "placed_object.h"
+#include "shapes.h"      // U64P
 
 struct C17;
 struct EffectOwner;
 struct Contacts03;
-struct S1DBBD8;     // an entry of the callback list at 0x1EC8 (s1dbbd8.h)
+struct QueuedCall;     // an entry of the callback list at 0x1EC8 (queued_call.h)
 
 struct Actor6C;
 
@@ -45,7 +46,24 @@ struct Actor6C {
 struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
 
 // A pool of free records of one size (func_001B5EA0 takes the first, func_001B5EE0 clears it).
-struct Pool6C { s32 size; u8 pad4[4]; void* head; };
+struct Pool6C { s32 size; void* base; void* head; };
+
+// A setting of an IOP channel: the index into its table and the value (func_001C08B0).
+// A sound of the level (20 bytes; func_001C0A50 appends one, func_001C0B38 starts them all):
+// the sound and two pairs of floats handed to func_001BFCD8 as blocks.
+struct WorldSoundEntry {
+    s32 sound;              // 0x00: its g_soundEntries row
+    U64P repeat;            // 0x04: the repeat interval and a second float (4.0, 6.0 at first)
+    union {
+        U64P range;         // 0x0C: (3000.0, 8000.0) at first
+        struct {
+            f32 range0;     // 0x0C: func_001C0AB8 sets 8000 - 50 y
+            f32 range1;     // 0x10: func_001C0AB8 sets 8000 - 50 x
+        };
+    };
+};
+
+struct IopChannelSetting { s32 index; s32 value; };   // base: the records' block (func_001B5DD0)
 
 struct World : BaseObject {
     s32 count34;            // 0x34: the 0x03 objects in the world (func_001B7A98, func_001B7B78)
@@ -67,7 +85,7 @@ struct World : BaseObject {
     Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
     Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
-    Pool6C pool1B14;        // 0x1B14: the 0x14-byte S1DBBD8 entries (func_001DBBD8, func_001DBC18)
+    Pool6C pool1B14;        // 0x1B14: the 0x14-byte QueuedCall entries (func_001DBBD8, func_001DBC18)
     Pool6C pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
     Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
     EffectOwner* f1B38;             // 0x1B38
@@ -85,10 +103,9 @@ struct World : BaseObject {
     Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
     List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
     u8 pad1BA0[0x1BAC - 0x1BA0];
-    u8* f1BAC;              // 0x1BAC
-    s32 f1BB0;              // 0x1BB0
-    s32 f1BB4;              // 0x1BB4
-    u8 pad1BB8[0x1BD0 - 0x1BB8];
+    List01 list1BAC;        // 0x1BAC: the sound records (func_001C0808 walks them)
+    Pool6C pool1BB8;        // 0x1BB8: the sound level entries (func_001BEDF8 gives one back)
+    List01 list1BC4;        // 0x1BC4: the sound level entries in use (func_001BEE48 walks them)
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
     List01 list1BDC;        // 0x1BDC
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
@@ -105,7 +122,7 @@ struct World : BaseObject {
     List01 list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
     List01 list1C54;        // 0x1C54: the 0x55 family's objects
     List01 list1C60;        // 0x1C60: class 0x41's objects (offset 0x600)
-    u8 pad1C6C[0x1C78 - 0x1C6C];
+    List01 list1C6C;        // 0x1C6C: class 0x7C's objects (func_0019C3D0, func_0019C408)
     List01 list1C78;        // 0x1C78: class 0x46's objects (offset 0x56C)
     List01 list1C84;        // 0x1C84: class 0x81's objects
     List01 list1C90;        // 0x1C90: class 0x71's objects
@@ -137,13 +154,16 @@ struct World : BaseObject {
     s32 f1D74;              // 0x1D74
     u8 pad1D78[0x1D7C - 0x1D78];
     f32 f1D7C;              // 0x1D7C
-    s32 f1D80;              // 0x1D80
-    u8 f1D84[0x140];        // 0x1D84
+    s32 soundCount;         // 0x1D80: the number of soundEntries (func_001C0A50)
+    WorldSoundEntry soundEntries[16];  // 0x1D84: the level's sounds, started by func_001C0B38
     void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
-    S1DBBD8* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
-    S1DBBD8* f1ECC;         // 0x1ECC: its last
-    u8 pad1ED0[0x1ED4 - 0x1ED0];
-    void* buf1ED4;          // 0x1ED4: 0x1000 bytes
+    QueuedCall* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
+    QueuedCall* f1ECC;         // 0x1ECC: its last
+    s32 regroupCount;       // 0x1ED0: objects queued for regrouping (func_0015F678; func_0015FA58 clears it)
+    union {
+        void* buf1ED4;      // 0x1ED4: 0x1000 bytes
+        PlacedObject** regroupObjects; // the queue func_0015F678 appends to
+    };
     u8 pad1ED8[0x1EE0 - 0x1ED8];
     Vec02 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
     s32 f1EF0;              // 0x1EF0: the number of f1EF4 entries
@@ -162,8 +182,8 @@ struct World : BaseObject {
     s32 f231C;              // 0x231C
     s32 f2320;              // 0x2320
     void* f2324;            // 0x2324
-    u8 f2328[0x20];         // 0x2328
-    s32 f2348;              // 0x2348
+    IopChannelSetting channel2[4]; // 0x2328: the stack of IOP channel 2 settings (func_001C08B0 pushes, func_001C0950 pops)
+    s32 channel2Count;      // 0x2348
     f32 f234C;              // 0x234C
     f32 f2350;              // 0x2350
     s32 f2354;              // 0x2354

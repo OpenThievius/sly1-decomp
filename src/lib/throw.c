@@ -41,7 +41,7 @@ EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))func_001FDA38;
 
 void func_001FD920(void)
 {
-    func_002014D0();
+    AbortProgram();
 }
 
 void func_001FD930(void)
@@ -54,7 +54,7 @@ typedef struct Obj_1FD958 Obj_1FD958;
 s32 func_001FD958(Obj_1FD958* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
-    if (func_001F6738(self, v) != 0) {
+    if (CompareStrings(self, v) != 0) {
         result = 0;
     }
     return result;
@@ -75,9 +75,9 @@ Node_001FD990* func_001FD990(void)
 {
     Node_001FD990* p = (Node_001FD990*)func_0018D740(0x18);
     if (p == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
-    (void)func_001F5C0C(p, 0, 0x18);
+    (void)FillMemory(p, 0, 0x18);
     p->f4 = (u8*)p + 0x10;
     return p;
 }
@@ -113,7 +113,7 @@ EhContext* func_001FDA60(void)
 {
     if (D_0062A7A8 == 0) {
         D_0062A7A8 = 1;
-        (void)func_001F5C0C(&D_0062A798, 0, 0x10);
+        (void)FillMemory(&D_0062A798, 0, 0x10);
         D_0062A798.b = D_0062A7B0;
     }
     return (EhContext*)&D_0062A798;
@@ -156,12 +156,12 @@ void func_001FDAF0(void)
             }
             *chain = (void**)frame[0];
         } else {
-            func_001FD930();
+            RunTerminateHook();
         }
     }
 
     if (ctx->active == 0 || (*chain)[0] == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
 
     buf = &(*chain)[2];
@@ -191,12 +191,12 @@ void func_001FDC68(void)
             }
             *chain = (void**)frame[0];
         } else {
-            func_001FD930();
+            RunTerminateHook();
         }
     }
 
     *chain = (void**)(*chain)[0];
-    func_001FDAF0();
+    ThrowToTopHandler();
 }
 
 /* The active exception, asked whether it matches a runtime type through its matcher. */
@@ -329,7 +329,7 @@ u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
     if (self->st[idx] == 1) {
         return self->f0 + self->tbl[idx];
     }
-    func_002014D0();
+    AbortProgram();
 }
 
 s32 func_001FE080(s32 a0, u32 a1, u32 a2)
@@ -345,7 +345,7 @@ s32 func_001FE080(s32 a0, u32 a1, u32 a2)
     } else {
         n = 16;
     }
-    return func_001F5A58(r2, r1, n);
+    return CopyBytes(r2, r1, n);
 }
 
 /* A frame being unwound: the unwind table entry at 4, the register slots from 0x10. */
@@ -368,7 +368,7 @@ typedef struct Pc_1FE198 Pc_1FE198;
 
 Frame_1FE198* func_001FE100(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
 {
-    Frame_1FE198* s0 = (Frame_1FE198*)func_001FFC80(a0, (UnwindFrame*)a2);
+    Frame_1FE198* s0 = (Frame_1FE198*)FindFrameUnwindState(a0, (UnwindFrame*)a2);
     u16 idx;
     if (s0 == 0) {
         return 0;
@@ -475,7 +475,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         }
     }
     if (res == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
     obj->f0 = res;
     if (pc == startPc) {
@@ -517,13 +517,13 @@ void func_001FE4C8(void)
     s32 offset;
 
     if (ctx->f8 == 0)
-        func_001FD930();
+        RunTerminateHook();
 
     __builtin_unwind_init();
 here:
-    cur = func_001FFC80(&&here, cur);
+    cur = FindFrameUnwindState(&&here, cur);
     if (cur == 0)
-        func_001FD930();
+        RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
     handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
@@ -542,14 +542,14 @@ void func_001FE6A8(void* index)
     s32 offset;
 
     if (ctx->f8 == 0)
-        func_001FD930();
+        RunTerminateHook();
     ctx->fC = (s32)index;
 
     __builtin_unwind_init();
 here:
-    cur = func_001FFC80(&&here, cur);
+    cur = FindFrameUnwindState(&&here, cur);
     if (cur == 0)
-        func_001FD930();
+        RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
     handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);

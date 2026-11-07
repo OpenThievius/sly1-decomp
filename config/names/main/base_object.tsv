@@ -1,0 +1,73 @@
+symbol	name	evidence
+func_00182C18	InitObject	slot 0 of the root class 0x01: runs its slot 1 (class defaults) then slot 2 (link into the parent's list); class 0x02's set-up func_00123ED0 calls it
+func_00182C58	StartObject	slot 16: calls func_001837E0 with index 0, which looks up the event record 0 in the table at +0x2C and queues it with the world; class 0x02's override calls it first and then starts the children
+func_00182C80	AddObjectToParentList	slot 2: appends itself to its parent's children list (or the world's list at +0x48 when it has no parent) unless already linked, then runs slot 4 if the whole chain to the world is linked
+func_00182D00	AttachObject	slot 4: runs the hook slot 6, then slot 14 with kind 1 (class 0x02's override also attaches every child)
+func_00182D48	RegisterObject	slot 6: empty in the base; class 0x02's override (func_001240F8) is what puts the object into the world's lists and AttachObject calls it first
+func_00182D50	RemoveObjectFromParentList	slot 3: unlinks itself from its parent's children list (or the world's list at +0x48) if present, running slot 5 first when the chain to the world was linked
+func_00182DD8	AddObjectKeyToOwner	pushes a node with its own id on the key list at +0x2CC of itself (descriptor flag 1) or of its parent
+func_00182E40	AddObjectKeyIfLevelInRange	runs AddObjectKeyToOwner when the target's range holds g_currentEntry's level (IsInsideRange); a script built-in of func_00109488
+func_00182E88	DetachObject	slot 5: runs the hook slot 7, then slot 14 with kind 2 (RemoveObjectFromParentList calls it)
+func_00182ED0	UnregisterObject	slot 7: empty in the base; class 0x02's override (func_001243E0) takes the object out of the world's lists and DetachObject calls it first
+func_00182ED8	ResolveAndStartObject	when the object is attached (IsObjectAttached), calls its resolve slot (15) if any, its start slot (16) and its slot 3 (a dozen loaders call it)
+func_00182F40	IsObjectDescendantOf	walks up the parent chain from node looking for target; returns 1 on a hit, and 1 for a null target
+func_00182F78	ReparentObject	slot 21: runs slot 3 (leave the old parent's list), stores the new parent at +0x18, runs slot 2 (join its list)
+func_00182FC8	IsObjectAttached	walks up the parent chain checking each node is in its parent's children list (or the world's list at +0x48); 1 only when all are
+func_00183028	GetObjectAttached	writes IsObjectAttached through its out pointer (a script built-in of func_00109488)
+func_00183058	CreateObjectCopy	creates an object of the same class id with CreateTypedRecord for the given world and parent, then calls its slot 12 with the original
+func_001830B0	CloneObject	slot 8: only calls slot 9 with the source; class 0x02's override also clones the children
+func_001830D8	CopyObjectData	slot 9: copies the source's bytes after the 0x34-byte header and its two property blocks (+0x04, +0x2C), re-registers the id in the world's id lists and takes the alias
+func_001831E8	AddCallbackNode	takes a node from the pool func_001DBBD8, stores fn and ctx in it and pushes it on the list head (func_00183290 and func_001832F0 call it)
+func_00183238	RemoveCallbackNode	walks the list for the node whose two keys match, unlinks it and returns it to the pool with func_001DBC18
+func_00183290	AddObjectCallback	slot 25: adds a function and context to the callback list at +0x28 through func_001831E8
+func_001832C0	RemoveObjectCallback	slot 26: removes a function and context from the callback list at +0x28 through func_00183238
+func_001832F0	AddObjectListener	slot 23: adds to the callback list at +0x28 the listener's slot 13 with the listener as context (func_001831E8)
+func_00183320	RemoveObjectListener	slot 24: removes from the callback list at +0x28 the entry of the listener's slot 13 with the listener as context (func_00183238)
+func_00183350	SendObjectNotification	slot 14: calls slot 13 (kind, arg) when it is set, then calls each callback of the list at +0x28 with the same kind and arg
+func_001833D0	LoadObjectProperties	slot 10: calls func_0011EC40, which reads (index, value) records from the level stream until the stream ends and applies each with func_0011E680 using the table D_002505D8
+func_001833F0	MatchesObjectId	0 for id -1, else 1 when the id equals the object's own id or its alias's id
+func_00183438	GetAliasId	returns the alias's id, or -1 when the object has no alias
+func_00183458	GetEffectiveObjectId	returns the alias's id when the object has an alias, otherwise its own id
+func_00183478	GetObjectAliasId	writes GetAliasId through its out pointer (a script built-in of func_00109488)
+func_001834A0	RunScriptEventHandler	looks key up in the object's script scope, makes a child scope and evaluates the handler body and each argument item in it
+func_00183668	SuppressScriptEvent	decides by the event index (thirty, jtbl_0024B170) whether TriggerScriptEvent should drop an event: a timer at +0x29C not yet run out, a matching argument, or the same handler already queued for the object in the world's list at +0x1EC8 (which it updates); nonzero drops it
+func_001837E0	TriggerScriptEvent	when the object's scope has handler idx and func_00183668 declines, queues RunScriptEventHandler for the world (func_001DBCC8) with the argument list from BuildScriptListFromPairs
+func_00183910	SetExtraObjectPropertyBool	wraps a bool in a script value and passes it to SetExtraObjectProperty
+func_00183990	SetExtraObjectPropertyInt	wraps an integer in a script value and passes it to SetExtraObjectProperty (func_00100720 calls it)
+func_00183A10	SetExtraObjectPropertyFloat	wraps a float in a script value and passes it to SetExtraObjectProperty
+func_00183A90	SetExtraObjectPropertyVectorB	copies a vector into a payload of the second vector kind (AcquireVectorBPayload), wraps it and passes it to SetExtraObjectProperty
+func_00183B20	SetExtraObjectPropertyPair	copies an 8-byte pair into a pair payload, wraps it with SetScriptValuePair and passes it to SetExtraObjectProperty
+func_00183BB8	SetExtraObjectPropertyWord	the same body as SetExtraObjectPropertyInt: wraps an integer in a script value for SetExtraObjectProperty (func_00100A78 calls it)
+func_00183C38	SetExtraObjectPropertyVectorA	copies a vector into a payload of the first vector kind (AcquireVectorAPayload), wraps it and passes it to SetExtraObjectProperty
+func_00183CC8	InitConeVolume	slot 0 of the 0x51 class: sets the mode to 0, the range to 200 and 2000, the angles to 60, copies two vectors, calls UpdateConeVolumeTangents then the base set-up func_00123ED0
+func_00183D88	RefreshConeVolume	slot 19 of class 0x51: base func_00125138, then func_001841D0 and func_00184B58
+func_00183DC0	RemoveConeVolumeFromWorldList	removes itself from the world's list at +0x1BE8, then func_001841B0
+func_00183DF8	AddConeVolumeToWorldList	adds itself to the world's list at +0x1BE8 and calls slot 18 when it has one
+func_00183E40	RegisterConeVolume	slot 6 of class 0x51: base register func_001240F8, then AddConeVolumeToWorldList
+func_00183E70	UnregisterConeVolume	slot 7 of class 0x51: base unregister func_001243E0, then RemoveConeVolumeFromWorldList
+func_00183EA0	CopyConeVolume	slot 9 of the 0x51 class: calls the parent copy func_00127048 while keeping the saved pair at 0x410, with a re-register around it when value differs
+func_00183F40	FitLineThroughPoints	returns the intercept and slope of the line through (a,b) and (c,d); a vertical pair gives slope 0 and intercept b
+func_00183FE0	FitReciprocalThroughPoints	solves out + t/x through (x,y) and (z,w): t = x*z*(w-y)/(x-z), out = y - t/x, with a zero fallback
+func_001840B8	FitUnitRampBetweenPair	calls FitLineThroughPoints for the line that is 1 at the pair's x and 0 at its y
+func_001840F0	FitLineThroughAngleSamples	turns two angles (halved, to radians, t + t^3) and two bytes (scaled by 1/255) into two points and calls FitLineThroughPoints
+func_001841B0	NoteConeVolumeLightingChange	when the cone volume's value at +0x304 is 0, stamps g_lightingChangeFrame with the frame count D_002622CC; RefreshConeVolumeShape and RemoveConeVolumeFromWorldList call it
+func_001841D0	RefreshConeVolumeShape	original assembly: recomputes a cone volume after any of its settings changes (SetConeVolumeMode, SetConeVolumeRange and every setter after them call it)
+func_00184768	SetConeVolumeMode	stores its flag in the mode field at 0x2D0, sets or clears two flag bits by whether it is 0, then calls the refresh functions func_001841D0 and func_00184B58
+func_001847F0	SetConeVolumeColor	copies a hue, saturation, value quad into +0x2E0 (RefreshConeVolumeShape turns it to red, green, blue with func_001B4580) and refreshes the shape; CreateConeVolumes and CreateArcSprite call it
+func_00184818	SetConeVolumeSecondLevel	stores the level at +0x2F0, which RefreshConeVolumeShape pairs with the angle at +0x2FC (FitLineThroughAngleSamples), and refreshes the shape
+func_00184838	SetConeVolumeThirdLevel	stores the level at +0x2F4, which RefreshConeVolumeShape pairs with 360 less the angle at +0x300 (FitLineThroughAngleSamples), and refreshes the shape
+func_00184858	SetConeVolumeFirstAngle	stores the angle at +0x2F8 (180 at set-up), which RefreshConeVolumeShape pairs with the color's value at +0x2E8, and refreshes the shape
+func_00184878	SetConeVolumeSecondAngle	stores the angle at +0x2FC (240 at set-up), which RefreshConeVolumeShape pairs with the level at +0x2F0, and refreshes the shape
+func_00184898	SetConeVolumeThirdAngle	stores the angle at +0x300 (180 at set-up), which RefreshConeVolumeShape pairs with the level at +0x2F4, and refreshes the shape
+func_001848B8	SetConeVolumeDirection	stores a vector at +0x310 and its negated unit vector at +0x320 (the unit z vector when it is shorter than 1e-4), then refreshes the shape and the bounds (UpdateConeVolumeBounds)
+func_00184968	SetConeVolumeValue	when the value at 0x304 changes stores it and runs func_001841D0
+func_00184990	SetConeVolumeRange	copies one eight-byte pair into the adjacent rangeMin and rangeMax fields (default 200 and 2000) then calls the refresh functions
+func_001849D0	SetConeVolumeOuterAngle	stores its float in outerAngle (60 at set-up), then calls UpdateConeVolumeTangents and the refresh functions
+func_00184A08	SetConeVolumeInnerAngle	stores its float in innerAngle, then calls UpdateConeVolumeTangents and func_001841D0
+func_00184A38	SetConeVolumeVector340	copies a quad into +0x340 (D_00248D10 at set-up) and refreshes the shape and the bounds (UpdateConeVolumeBounds); a script built-in of func_00109488
+func_00184A70	UpdateConeVolumeTangents	clamps outerAngle to 0..175 and innerAngle to 0..outerAngle, and stores func_002054F0 of each angle times pi/360 and their ratios in the 0x350..0x36C fields
+func_00184B58	UpdateConeVolumeBounds	when the value at +0x304 is set, computes the bounding sphere at +0x3D0 by mode: unbounded (0xFFFFFFF) in mode 0, rangeMax around the position in mode 1, around the cone's reach from outerAngle and rangeMax in modes 2 and 3 (func_001EEB60)
+func_00184CD0	SetConeVolumeOuterLevels	stores one level in both +0x2F0 and +0x2F4 (SetConeVolumeSecondLevel, SetConeVolumeThirdLevel)
+func_00184D10	GetConeVolumeSecondLevel	writes the level at +0x2F0 through its out pointer (a script built-in of func_00109488)
+func_00184D20	SetConeVolumeColorRgb	converts a red, green, blue quad to hue, saturation, value with func_001B4600 and sets it with SetConeVolumeColor
+func_00184D58	GetConeVolumeColorRgb	converts the hue, saturation, value quad at +0x2E0 to red, green, blue with func_001B4580 into the caller's buffer

@@ -36,7 +36,7 @@ void func_001A4EF0(PairController* self, s32 state)
     case 2: {
         ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = &self->f3C4;
         ((Tab_1A4EF0_eu*)&D_0026D0C8)->f578 = &self->limit3B8;
-        func_001DDC38(self->world, self);
+        SetWorldActiveFollower(self->world, self);
         break;
     }
     case 5:
@@ -47,7 +47,7 @@ void func_001A4EF0(PairController* self, s32 state)
             PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) SetPairedState(o, 8);
-        func_00151FC8(D_00261EF0);
+        ResetScatterLevels(g_scatterController);
         break;
     case 3:
         v = FindFirstObjectById(self->world, 0x105, 0x33E, 0);
@@ -57,17 +57,17 @@ void func_001A4EF0(PairController* self, s32 state)
             PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
-            Link_1A4EF0* l = (Link_1A4EF0*)P(o, 0x55C);
-            if (l == 0 || l->f18 != o) SetPairedState(o, 7);
+            BaseObject* l = (BaseObject*)P(o, 0x55C);
+            if (l == 0 || l->parent != o) SetPairedState(o, 7);
         }
-        func_00151E20(D_00261EF0, 1.0f);
+        RaiseScatterLevels(g_scatterController, 1.0f);
         break;
     case 4:
         SetPauseMenuLayerPage((u8*)&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
         func_001A4070(P(self, 0x354), 3);
-        D_0026EC70.vt->m15(&D_0026EC70);
+        g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }
 }

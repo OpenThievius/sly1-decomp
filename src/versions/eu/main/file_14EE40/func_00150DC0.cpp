@@ -12,10 +12,10 @@ u32 func_eu_001E3018(u16* a);
 void func_001365A8(Hud_150DC0_eu* a, f32 b);
 void func_001365A0(Hud_150DC0_eu* a, s32 b);
 
-void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
+void func_00150DC0(StepSequence* self, SequenceMessage* msg)
 {
-    Slot_150DC0* s2;
-    Slot_150DC0* s4;
+    CaptionSpeaker* s2;
+    CaptionSpeaker* s4;
     s32 a2;
     s32 a0;
     f32 f20;
@@ -28,12 +28,12 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
     case 1:
     case 2:
         if (msg->f4.i != -1) {
-            s2 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
+            s2 = (CaptionSpeaker*)FindFirstObjectById(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
         } else {
             s2 = 0;
         }
         if (msg->f8.i != -1) {
-            s4 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
+            s4 = (CaptionSpeaker*)FindFirstObjectById(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
         } else {
             s4 = 0;
         }
@@ -62,12 +62,12 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
         }
         break;
     case 3:
-        if (self->p2F0 && MatchesObjectId((Slot_150DC0*)self->p2F0, msg->f18)) {
-            s2 = (Slot_150DC0*)self->p2F0;
+        if (self->p2F0 && MatchesObjectId((CaptionSpeaker*)self->p2F0, msg->f18)) {
+            s2 = (CaptionSpeaker*)self->p2F0;
             SetArcFade(&D_002708E0, 1);
             SetArcFade(&D_00271558, 0);
-        } else if (self->p2F4 && MatchesObjectId((Slot_150DC0*)self->p2F4, msg->f18)) {
-            s2 = (Slot_150DC0*)self->p2F4;
+        } else if (self->p2F4 && MatchesObjectId((CaptionSpeaker*)self->p2F4, msg->f18)) {
+            s2 = (CaptionSpeaker*)self->p2F4;
             SetArcFade(&D_00271558, 1);
             SetArcFade(&D_002708E0, 0);
         } else {
@@ -84,14 +84,14 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->player2F8);
+            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (CaptionSpeaker*)a0, (s32)s2, 1, &self->player2F8);
             func_0012F810(self->player2F8, self);
         }
         nm = (u16*)msg->f14;
         if (nm && *nm) {
             (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).vt->f20(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), nm);
             if (s2) {
-                *(Raw4_150DC0*)&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = s2->f2D0;
+                *(Rgba4*)&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = s2->f2D0;
             } else {
                 (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = 0x80808080;
             }
@@ -125,9 +125,9 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             func_001365A0(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
             g_camera->ctl460.f5C = 0;
         }

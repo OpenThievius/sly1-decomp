@@ -18,7 +18,7 @@ s32 func_001FAA00(void);
 
 s32 func_001FA9C0(void)
 {
-    if (func_001F6D20() == 0x2000000) {
+    if (QueryMemorySize() == 0x2000000) {
         return func_001FAA00();
     }
     return func_001F6D30();

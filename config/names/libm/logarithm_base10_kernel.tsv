@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002072C8	LogarithmBase10Kernel	the unchecked base-10 logarithm of a float (logarithm_base10_kernel.c)

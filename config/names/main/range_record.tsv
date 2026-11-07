@@ -1,0 +1,24 @@
+symbol	name	evidence
+func_001B1AC8	InitRangeRecord	sets a RangeRecord up: both ranges at +0x04 and +0x08 to -1, the vectors at +0x20 and +0x30 from the unit Z and Y vectors, 100 and 400 at +0x40 and +0x44, -1 at +0xB0 (EnsureRangeRecord and GetRangeRecord's default)
+func_001B1B38	PrepareRangeRecord	links the record to key 0x2C when it has no link, gives it ranges 100 and 400 when HasRangeRecordRanges says it has none, and takes a 16-byte mesh-queue slot (g_meshQueueCount) for +0x2D0 unless its link has bit 0x10000000; StartPlacedObject calls it
+func_001B1BF0	InvalidateRangeRecordPacket	clears +0xC0, the packet QueueRangeRecordPacket builds again when it is 0; every setter of the record calls it after a change
+func_001B1BF8	UpdateRangeRecordBounds	works out the sphere at +0x50 (centre) and +0x60 (radius) from the position, the direction, the ranges at +0x04, +0x08 and the values at +0x40, +0x44; the setters call it after a change
+func_001B1CF8	LinkRangeRecord	links the record to the AnimRecord FindAnimRecord finds for a key (0x2C for -1) and drops its packet when there is one (SetRangeRecordKey)
+func_001B1D38	HasRangeRecordRanges	1 when both ranges at +0x04 and +0x08 are non-negative
+func_001B1D70	StoreRangeRecordNear	stores the near range at +0x04, copies it to +0x08 while that is negative and drops the packet (SetRangeRecordNear)
+func_001B1DA8	StoreRangeRecordFar	stores the far range at +0x08, copies it to +0x04 while that is negative and drops the packet (SetRangeRecordFar)
+func_001B1DE0	SetRangeRecordPosition	copies a vector to +0x10 when it differs from it beyond func_001EAC68's tolerance, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket; ComputePlacedObjectWorldFrame calls it
+func_001B1EC8	SetRangeRecordDirection	copies a vector to +0x20 when it differs from it beyond func_001EAC68's tolerance, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket; ComputePlacedObjectWorldFrame calls it
+func_001B1FB0	StoreRangeRecordInner	stores +0x40, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket (SetRangeRecordInner)
+func_001B1FE0	StoreRangeRecordOuter	stores +0x44, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket (SetRangeRecordOuter)
+func_001B2010	ScaleRangeRecordByAngle	sets the ranges +0x04 and +0x08 to +0x40 and +0x44 times the tangent (func_002054F0) of half the angle given in degrees (SetRangeRecordInnerAndOuter)
+func_001B2068	StoreRangeRecordVector	copies a 16-byte vector to +0x30 and drops the packet (SetRangeRecordVector)
+func_001B2090	RangeRecordMatchesKinds	1 when the record's link is shown under the camera's mask at 0x21C (or has bit 0x10000000) and is of kind 2 with bit 1 asked or kind 3 with bit 2 asked
+func_001B2118	IsRangeRecordBodyCandidate	the filter UpdateRangeRecord passes when it gathers bodies: accepts a collider with face starts (+0x410) whose bit 43 of +0x538 is clear
+func_001B2140	UpdateRangeRecord	UpdatePlacedObject's per-frame call for the record: gathers bodies from the world on back memory (func_001DC4D0) through func_001B2118 and RangeRecordMatchesKinds and builds the packet with BuildRangeRecordPacket
+func_001B2358	BuildRangeRecordPacket	writes the record's VIF packet with the camera's packet writer (InitPacketWriter, SubmitMeshQueueEntry, WriteVifMscal, WriteVifFlushE) and keeps it in +0xC0
+func_001B2640	QueueRangeRecordPacket	when the link is shown under the camera's mask, builds the packet if +0xC0 is empty and writes a reference to it into g_vifPacketWriter
+func_001B26F8	RangeRecordReachesSphere	tests the record's bounding sphere (+0x50, +0x60) against a point and radius under the camera's mask; the part drawer func_00166690 and CollectRangeRecordsInReach call it
+func_001B2790	CollectRangeRecordsInReach	walks the world's list at +0x1C00 and stores up to max records that RangeRecordReachesSphere accepts, with their count
+func_001B2840	LoadPathCurveObject	creates a path curve from a stream byte, lets the curve read its data through vt slot 0, then reads the property records
+func_001B28A8	ReparentPathCurveObject	builds the old parent's and the new parent's matrices, passes both to the curve's vt slot 1, then calls ReparentObject

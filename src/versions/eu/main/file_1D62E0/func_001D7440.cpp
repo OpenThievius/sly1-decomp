@@ -8,17 +8,17 @@ struct Blk_eu_1D7440 {
 };
 struct __attribute__((packed)) BlkP_eu_1D7440 { u8 pad[0x58C]; s32 v; };
 
-void func_001D7440(C19* self)
+void func_001D7440(PathFollower* self)
 {
-    Ent_1D7440* buf[16];
+    BaseObject* buf[16];
     s32 id0;
     s32 id1;
     s32 id2;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x14, D_002752A0);
-    self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    if (((Snd_1D7440*)self->fB44) != 0) {
-        StateTrigger* v = CreateStateWalker(((Snd_1D7440*)self->fB44), self, -1, 0);
+    self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    if (self->fB44 != 0) {
+        StateTrigger* v = CreateStateWalker(self->fB44, self, -1, 0);
         self->fB48 = v;
         SetStateWalkerTarget(v, self->fB30 == 1 ? 0x484 : 0x384);
     }
@@ -58,9 +58,9 @@ void func_001D7440(C19* self)
         }
     }
     if (self->fB30 == 1) {
-        s32 n = func_0015A198((self->world), 0x105, 0x426, 0, 0x10, buf);
+        s32 n = GatherObjectsByMode((self->world), 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
-            buf[i]->vt->fn6C(buf[i], self);
+            buf[i]->desc->m17(buf[i], self);
         }
         ((BlkP_eu_1D7440*)&D_00272430)->v = 0;
         ((BlkP_eu_1D7440*)&D_002726B0)->v = 0;
@@ -68,8 +68,8 @@ void func_001D7440(C19* self)
         ((Blk_eu_1D7440*)&D_002726B0)->p574 = &((Blk_eu_1D7440*)&D_002726B0)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot_1D7440* s = (Slot_1D7440*)&self->f6B0[k];
-        s->q = s->p->q;
+        Slot19* s = &self->f6B0[k];
+        s->v10 = s->obj->pos;
     }
     ResetPathFollower(self);
 }

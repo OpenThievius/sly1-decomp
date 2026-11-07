@@ -20,7 +20,7 @@ type_info::~type_info()
 
 bool type_info::operator==(const type_info& other) const
 {
-    return &other == this || func_001F6738(name_, other.name_) == 0;
+    return &other == this || CompareStrings(name_, other.name_) == 0;
 }
 
 extern "C" void __rtti_class(void* at, const char* name, const __class_type_info::Base* bases, size_t count)

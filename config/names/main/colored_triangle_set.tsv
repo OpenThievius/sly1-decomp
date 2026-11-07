@@ -1,0 +1,7 @@
+symbol	name	evidence
+func_0017FE00	CopyPointObject	slot 0x34 of class 0x80: runs CopyObjectData, keeping its own kept bits
+func_0017FE48	StartPointObject	slot 0x50 of class 0x80: runs StartObject and, when its target id is set, finds the object of kind 0x104 with that id (FindFirstObjectById)
+func_0017FE90	InitColoredTriangles	slot 0 of class 0x8E: runs the base init func_00182C18 and stores itself in the global D_002640A4
+func_0017FEC0	LoadColoredTriangles	reads the point list, two corner pairs and five lists of index triples from the stream, giving each list a colour from func_001B4688; slot 10
+func_00180108	DrawTriangleGroups	for each of four groups, emits a GIF colour entry (alpha scaled by d) and the projected XYZF of every triangle's three vertices
+func_00180398	DrawColoredTriangles	transforms the points by a matrix built from width and t and emits each list as coloured triangles to the packet buffer D_00262280, then a box over minX..maxX

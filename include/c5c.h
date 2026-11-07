@@ -12,7 +12,9 @@
 #include "placed_object.h"
 
 struct C5C : PlacedObject {
-    u8 pad2D0[0x2E0 - 0x2D0];
+    void* f2D0;             // 0x2D0: what its state walker is made from (func_00199218)
+    void* f2D4;             // 0x2D4: its state walker (func_00199218)
+    u8 pad2D8[0x2E0 - 0x2D8];
 };
 
 typedef char check_C5C[sizeof(C5C) == 0x2E0 ? 1 : -1];

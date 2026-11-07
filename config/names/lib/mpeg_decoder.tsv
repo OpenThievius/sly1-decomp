@@ -1,0 +1,24 @@
+symbol	name	evidence
+func_0020ADA0	InitMpegLibrary	the MPEG library's initialisation: resets the IPU (ResetIpu) (InitMoviePlayback calls it)
+func_0020AE40	CreateMpegDecoder	sets up a decoder in a work area, reporting "The size of work area is too small" when it is, with its ring buffer and DMA hooks (InitMoviePlayback calls it)
+func_0020B048	DeleteMpegDecoder	returns 1 (FinishMovie calls it)
+func_0020B058	DecodeMpegPicture	sets the output address and size of a decoder and runs its picture loop (StepMovieFrame calls it)
+func_0020B0B0	GetMpegDecoderStatus	returns the first word of a decoder's state (PlayMovie reads it)
+func_0020B0C0	ResetMpegDecoder	clears a decoder's state words and its pictures' bookkeeping (FinishMovie and CreateMpegDecoder call it)
+func_0020B110	ReleaseMpegPictures	clears the word at +0x28 of each of the decoder's six picture pointers that is set
+func_0020B168	SetMpegCallback	stores a callback and its argument in a decoder's table at an index and returns the old one (InitMoviePlayback calls it)
+func_0020B190	RunMpegCallback	runs the decoder's callback for the kind a message names, with its argument
+func_0020B1E0	RunMpegStallCallback	runs the decoder's callback of kind 1; the IPU waits call it each time the IPU stays busy too long
+func_0020B240	InitMpegRing	sets a ring buffer's start, size, read and write positions
+func_0020B278	AllocateFromMpegRing	takes an aligned block of a size from a decoder's ring buffer, reporting an error when it does not fit
+func_0020B2E8	RunMpegPictureLoop	the decoder's picture loop: parses headers and decodes pictures until a picture is out or the stream ends (DecodeMpegPicture calls it)
+func_0020B930	PrintMpegError	prints a message after "[MPEG ERROR]"
+func_0020B940	ReportMpegErrorFormat	formats a message into a buffer and reports it with ReportMpegError
+func_0020B978	ReportMpegError	hands a message to the decoder's callback of kind 0, or prints it with PrintMpegError when there is none
+func_0020B9F0	ReadSequenceHeader	reads a sequence header and its extensions (ParseMpegHeaders calls it on the start code 0x1B3)
+func_0020C138	RejectSequenceScalableExtension	reports "_sequenceScalableExtension() is not implemented"
+func_0020C148	RejectUnknownExtension	reports "Unknown Extension"
+func_0020C158	RejectSpatialScalableExtension	reports "_pictureSpatialScalableExtension is not supported"
+func_0020C168	RejectTemporalScalableExtension	reports "_pictureTemporalScalableExtension is not supported"
+func_0020C178	SaveMpegDmaState	saves the IPU's two DMA channels before a picture (SaveIpuDmaChannels); a decoder's hook
+func_0020C188	RestoreMpegDmaState	restores the IPU's two DMA channels after a picture (RestoreIpuDmaChannels); a decoder's hook

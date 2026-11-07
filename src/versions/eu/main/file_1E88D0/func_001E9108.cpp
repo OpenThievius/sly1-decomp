@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: calls func_0018C178(g, 1) before func_0018C568 and handles a third button (0x10) when D_eu_002636EC >= 2
 extern s32 D_eu_002636EC;
-struct G2_1E9108_eu { u8 pad[0x570]; C67* f570; };
-extern void func_001E9498(Obj_1E9108* o, G2_1E9108_eu* g);
+struct G2_1E9108_eu { u8 pad[0x570]; WarpPage* f570; };
+extern void func_001E9498(ElementStack* o, G2_1E9108_eu* g);
 extern void func_0018C178(MemoryCard* g, s32 a);
 
-void func_001E9108(Obj_1E9108* obj)
+void func_001E9108(ElementStack* obj)
 {
-    f32 d = g_gameClock.elapsed - obj->f8;
+    f32 d = g_gameClock.elapsed - obj->stateTime;
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
-    if (D_00262C68 & 4) {
+    if (g_padRouting & 4) {
         s2 = &g_padRecord;
     } else {
         s2 = &g_blankPadRecord;
     }
     s5 = 0;
-    if (D_00262C6C & 0x80) {
+    if (g_padSelectFlags & 0x80) {
         if (0.1f < g_gameClock.time) {
             ClearPadSelectFlags(0x80);
         }
@@ -32,7 +32,7 @@ void func_001E9108(Obj_1E9108* obj)
             }
         }
         if (a2) {
-            func_001F4808(FindActiveObjectSubGroup());
+            StartObjectSubGroupFinish(FindActiveObjectSubGroup());
         }
         break;
     }
@@ -49,7 +49,7 @@ void func_001E9108(Obj_1E9108* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);
@@ -63,7 +63,7 @@ void func_001E9108(Obj_1E9108* obj)
         break;
     }
     case 3: {
-        if (D_00262C6C & 2) break;
+        if (g_padSelectFlags & 2) break;
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
@@ -73,7 +73,7 @@ void func_001E9108(Obj_1E9108* obj)
                 ClearPadPressedBits(s2, 0x800);
             } else if ((v = s2->flags) & 0x100) {
                 G2_1E9108_eu* g2 = (G2_1E9108_eu*)&g_mapScreenList;
-                C67* x = g2->f570;
+                WarpPage* x = g2->f570;
                 if (x == 0) break;
                 if (x->mode) break;
                 PushStackElement(obj, g2);
@@ -108,10 +108,10 @@ void func_001E9108(Obj_1E9108* obj)
     }
     SetElementStackState(obj, s1);
     {
-        Elem_1E9108* e = obj->stack[obj->count - 1];
+        ScreenElement* e = obj->items[obj->count - 1];
         if (e) {
-            if (e->vt->fn) {
-                e->vt->fn(e, s2);
+            if (e->vt->m04) {
+                e->vt->m04(e, s2);
             }
         } else if (s5) {
             SetElementStackState(obj, 3);

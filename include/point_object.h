@@ -27,7 +27,7 @@ struct PointObject : BaseObject {
 
 // 0x7F: registers itself in the table D_002626F8 (slots 6, 7); an object id (-1 for none)
 // resolved after loading (slot 15) into an object whose 0x398 it clears.
-struct C7F : PointObject {
+struct TargetPoint : PointObject {
     KeptBits keep;          // 0x50
     u8 pad58[0x60 - 0x58];
     s32 targetId;           // 0x60: -1 for none (-1 at setup)
@@ -49,7 +49,7 @@ struct C80 : PointObject {
 };
 
 // 0x81: registers itself in a table inside its level (World::list1C84, slots 6, 7).
-struct C81 : PointObject {
+struct ListedPointObject : PointObject {
     KeptBits keep;          // 0x50
     f32 f58;                // 0x58: the largest float at setup
     u8 pad5C[0x60 - 0x5C];
@@ -59,33 +59,35 @@ struct C81 : PointObject {
 // func_001384A0, which allocates it).
 struct TextPointObject : PointObject {
     u8* text;               // 0x50
-    u8 pad54[0x60 - 0x54];
+    f32 f54;                // 0x54: 0.5 each, set by func_00192190 for every 0x82 object the
+    f32 f58;                // 0x58  text panel gathers when it opens (func_00136238)
+    u8 pad5C[0x60 - 0x5C];
 };
 
 // Each class ends at its descriptor's size.
 typedef char check_PointObject[sizeof(PointObject) == 0x50 ? 1 : -1];
-typedef char check_C7F[sizeof(C7F) == 0x80 ? 1 : -1];
+typedef char check_TargetPoint[sizeof(TargetPoint) == 0x80 ? 1 : -1];
 typedef char check_C80[sizeof(C80) == 0x70 ? 1 : -1];
-typedef char check_C81[sizeof(C81) == 0x60 ? 1 : -1];
+typedef char check_ListedPointObject[sizeof(ListedPointObject) == 0x60 ? 1 : -1];
 typedef char check_TextPointObject[sizeof(TextPointObject) == 0x60 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_00192068(PointObject* self, void* stream);         // 0x7E slot 10
 void func_001920E0(PointObject* self, s32 value);            // 0x7E slot 21
 s32 func_00192128(PointObject* self, void* other);           // 0x7E slot 22
-void func_0016A100(C7F* self);                       // 0x7F slot 0
-void func_0016A140(C7F* self);                       // 0x7F slot 6
-void func_0016A178(C7F* self);                       // 0x7F slot 7
-void func_0016A1F8(C7F* self);                       // 0x7F slot 9
-void func_0016A1B0(C7F* self);                       // 0x7F slot 15
+void func_0016A100(TargetPoint* self);                       // 0x7F slot 0
+void func_0016A140(TargetPoint* self);                       // 0x7F slot 6
+void func_0016A178(TargetPoint* self);                       // 0x7F slot 7
+void func_0016A1F8(TargetPoint* self);                       // 0x7F slot 9
+void func_0016A1B0(TargetPoint* self);                       // 0x7F slot 15
 void func_0017FD90(C80* self);                       // 0x80 slot 6
 void func_0017FDC8(C80* self);                       // 0x80 slot 7
 void func_0017FE00(C80* self);                       // 0x80 slot 9
 void func_0017FE48(C80* self);                       // 0x80 slot 16
-void func_001C10A8(C81* self);                       // 0x81 slot 0
-void func_001C10D8(C81* self);                       // 0x81 slot 6
-void func_001C1110(C81* self);                       // 0x81 slot 7
-void func_001C1148(C81* self);                       // 0x81 slot 9
+void func_001C10A8(ListedPointObject* self);                       // 0x81 slot 0
+void func_001C10D8(ListedPointObject* self);                       // 0x81 slot 6
+void func_001C1110(ListedPointObject* self);                       // 0x81 slot 7
+void func_001C1148(ListedPointObject* self);                       // 0x81 slot 9
 void func_00192150(TextPointObject* self, void* stream);         // 0x82 slot 10
 
 #endif

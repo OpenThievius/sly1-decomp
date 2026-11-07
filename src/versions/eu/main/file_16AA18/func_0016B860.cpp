@@ -29,8 +29,8 @@ void func_0015C900(s32 handle);
 
 void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 z);
 void func_eu_0015E7E0(void* a, void* b, s32 c, void* d);
-void func_eu_001374E0(Out_16B860* out, s32 v);
-struct Out_eu_16B860 : Out_16B860 {
+void func_eu_001374E0(CaptionLayout* out, s32 v);
+struct Out_eu_16B860 : CaptionLayout {
     void Mode(s32 v) { func_eu_001374E0(this, v); }
     void Draw(void* loc, s32 z, void* tbl) { func_eu_0015E7E0(loc, this, z, tbl); }
 };
@@ -60,7 +60,7 @@ void func_0016B860(Obj_16B860_eu* self)
         if (h != 0) {
             slot = *(Pk4_16B860*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_16B860::Draw((V24A2**)self->f520, &out, &g_gsPacketWriter);
+            CaptionDrawer::Draw((Font**)self->f520, &out, &g_gsPacketWriter);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
         f32 r = func_00205400(g_elapsedTime * 10.0f);

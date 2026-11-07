@@ -10,22 +10,22 @@
 #define ANIMATION_H
 
 #include "base_object.h"
-#include "t2196.h"
+#include "anim_curve.h"
 
 struct Stream83;  // the level stream an animation is read from (func_00137D10 and friends)
 
 // A track (28 bytes, func_0012B8C8): the target and one curve for each property the flags
 // select (position 0x1, rotation 0x2, scale 0x4, weight 0x8), and the morph channels (0x10).
-// The curves are kind t2196 (t2196.h); slot 1 (slot 2 of the rotation curves) reads each from
+// The curves are kind t2196 (anim_curve.h); slot 1 (slot 2 of the rotation curves) reads each from
 // the stream.
 struct Track83 {
     s32 target;             // 0x00
-    T2196_Pos* pos;         // 0x04
-    T2196_Rot* rot;         // 0x08
-    T2196_Scale* scale;     // 0x0C
-    T2196_Weight* weight;   // 0x10
+    PositionCurve* pos;         // 0x04
+    RotationCurve* rot;         // 0x08
+    ScaleCurve* scale;     // 0x0C
+    WeightCurve* weight;   // 0x10
     s32 morphCount;         // 0x14
-    T2196_Weight** morph;   // 0x18
+    WeightCurve** morph;   // 0x18
 };
 
 // A value that moves with a speed and an acceleration (func_0012C160 steps it by the frame time).
@@ -33,6 +33,33 @@ struct Kin83 {
     f32 pos;                // 0x00
     f32 vel;                // 0x04
     f32 acc;                // 0x08
+};
+
+// An event of an animation's three lists (func_0012BC38 reads them): its time, its kind, and two
+// words whose meaning the kind gives (func_0012D5D0 runs it).
+struct AnimEvent {
+    union {
+        f32 f;              // 0x00: the time, in seconds
+        s32 i;
+    } a0;
+    s32 kind;               // 0x04
+    union {
+        s32 i;
+        f32 f;
+        void* p;
+        struct {
+            s16 lo;
+            s16 hi;
+        } h;
+    } a8;                   // 0x08
+    union {
+        s32 i;
+        f32 f;
+        struct {
+            s16 lo;
+            s16 hi;
+        } h;
+    } aC;                   // 0x0C
 };
 
 // 0x83: an animation. func_0012B8C8 reads it: the object id, the length in seconds, the target
@@ -47,11 +74,11 @@ struct Animation : BaseObject {
     s32 f4C;                // 0x4C
     s32 f50;                // 0x50
     s32 startCount;         // 0x54: the list that runs when it starts
-    s32 startList;          // 0x58
+    AnimEvent* startList;   // 0x58
     s32 timedCount;         // 0x5C: the timed list
-    s32 timedList;          // 0x60
+    AnimEvent* timedList;   // 0x60
     s32 endCount;           // 0x64: the list that runs when it ends
-    s32 endList;            // 0x68
+    AnimEvent* endList;     // 0x68
     u8 props6C[0x80 - 0x6C]; // 0x6C: the property list (func_00152438 sets its element size 0x3C)
     Kin83 kin;              // 0x80
     u8 pad8C[0x90 - 0x8C];
@@ -69,6 +96,7 @@ struct C84 : Animation {
     u8 padB0[0xD0 - 0xB0];
 };
 
+typedef char check_AnimEvent[sizeof(AnimEvent) == 0x10 ? 1 : -1];
 typedef char check_Animation[sizeof(Animation) == 0xB0 ? 1 : -1];
 typedef char check_C84[sizeof(C84) == 0xD0 ? 1 : -1];
 typedef char check_Track83[sizeof(Track83) == 0x1C ? 1 : -1];

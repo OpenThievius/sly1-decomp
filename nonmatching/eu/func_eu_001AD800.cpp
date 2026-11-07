@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 760/780, checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AD800.cpp func_eu_001AD800 --unit src/main/file_1AA268.cpp
+// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AD800.cpp func_eu_001AD800 --unit src/main/screen_element.cpp
 // Still differs: Per-character fade-in text draw; now matches through the first division (lenF as (f32)n twice) but the clamp shape (retail: f0 result then mov f1,f0) and float/saved register allocation still differ (145 lines).
 // Draws a string character by character with a per-character fade: positions interpolate between two corners by the fade phase.
 struct Vt_eu_1AD800 {
@@ -78,10 +78,10 @@ void func_eu_001AD800(Label_eu_1AD800* self)
         func_00137260(&L, 0);
         func_00137268(&L, 0);
         func_eu_001374E0(&L, 0);
-        SubObj_001AB710* sub = *(SubObj_001AB710**)self->f520;
+        Font* sub = *(Font**)self->f520;
         if (sub != 0) {
-            VDesc_001AB710* d = sub->desc4C;
-            d->fn4C((u8*)sub + d->off48, self->f520, &L, D_eu_00263590);
+            const FontVt* d = sub->vt;
+            d->drawBox((Font*)((u8*)sub + d->adj9), self->f520, &L, D_eu_00263590);
         }
     }
     {

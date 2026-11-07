@@ -1,0 +1,6 @@
+symbol	name	evidence
+func_001F9690	BindModuleLoader	binds g_moduleLoaderClient to the IOP's service 0x80000006 once, retrying until it is bound, and keeps the service's version word in g_moduleLoaderVersion
+func_001F9790	IsModuleLoaderMismatched	tells whether g_moduleLoaderVersion, the library's own version (the end of its identification string D_00276970) and the string D_002771D0 points to all differ
+func_001F9820	ForgetModuleLoader	sets g_moduleLoaderBound back to -1 and clears the version word (LoadIopModules calls it)
+func_001F9868	SendModuleLoadRequest	sends the module loader a file name of up to 0xFB characters and up to 0xFC bytes of arguments with a command, and returns the reply's size and word
+func_001F9A90	LoadIopModuleFile	sends a module load request (command 0) for a file name and its arguments; LoadIopModules loads each name of g_iopModuleNames with it

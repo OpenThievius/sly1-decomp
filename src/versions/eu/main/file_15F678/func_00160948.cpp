@@ -4,12 +4,12 @@ extern s32 D_eu_00263710;
 
 void func_00160948(void)
 {
-    Key_160948* k = func_00160180((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    SessionKey* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
-        k = (Key_160948*)((u8*)&D_00247AB0 + D_eu_00263710 * 0x20);
+        k = (SessionKey*)((u8*)&D_00247AB0 + D_eu_00263710 * 0x20);
     }
-    func_00160CC8(D_002623D8);
-    if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((Key_160948*)&D_00275B04)) {
+    ClearTwoWords(D_002623D8);
+    if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
         if (D_00275F84 == 0) {
@@ -17,7 +17,7 @@ void func_00160948(void)
             func_001C0790(g_saveData->f19EC & 0x40);
             Animation* r = FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
             if (r != 0) {
-                Frame_160948 frame((Lst_160948*)r->props6C);
+                PlayerListWalk frame((AnimationPlayerList*)r->props6C);
                 void* head = *(void**)r->props6C;
                 frame.cursor = (u8*)head + frame.next_off;
                 void* node = head;

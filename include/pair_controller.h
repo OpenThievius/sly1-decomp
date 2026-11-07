@@ -43,9 +43,11 @@ struct PairController : PlacedObject {
     ObjectCreator* target;  // 0x358
     u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
     u8 list368[0x374 - 0x368];
-    u8 list374[0x384 - 0x374];
+    u8 list374[0x380 - 0x374];
+    s32 count380;  // 0x380: paired objects out; at limit624 a removal schedules the next start (f62C to f630 later, at f634)
     u8 list384[0x390 - 0x384];
-    u8 list390[0x3A0 - 0x390];
+    u8 list390[0x39C - 0x390];
+    s32 count39C;  // 0x39C: attachments out; at f628 a removal schedules the next (f638 to f63C later, at f640)
     u8 list3A0[0x3AC - 0x3A0];
     u8 list3AC[0x3B8 - 0x3AC];
     s32 limit3B8;  // 0x3B8: 0x28 after setup
@@ -61,9 +63,10 @@ struct PairController : PlacedObject {
     f32 poseB[48];  // 0x4A0
     f32 poseOut[48];  // 0x560
     s32 poseIndex;  // 0x620
-    u8 pad624[0x628 - 0x624];
+    s32 limit624;  // 0x624: the most paired objects out at once
     s32 f628;  // 0x628
-    u8 pad62C[0x634 - 0x62C];
+    f32 f62C;  // 0x62C: the shortest wait before the next start
+    f32 f630;  // 0x630: the longest
     f32 f634;  // 0x634
     f32 f638;  // 0x638
     f32 f63C;  // 0x63C

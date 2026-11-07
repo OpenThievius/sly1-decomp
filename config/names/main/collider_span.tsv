@@ -1,0 +1,11 @@
+symbol	name	evidence
+func_001419E8	FindNearestSpanObject	asks each listed object for up to two spans (func_00141C28) and returns the object whose first usable span has the smallest key at +0x40 (skipping a zero key unless flag bit 1), copying that record to out
+func_00141B48	CollectSpansFromList	for each object of the list whose flags538 lack the bits 0xC000<<28, gets its spans with func_00141C28 into the output at a 0x70 stride and merges them with MergeOverlappingSpans
+func_00141C28	CollectColliderSpans	if the object has BSP tree nodes it queries them with func_0013DFD8, else when flags538 has 0x8000<<28 it queries the box at +0x140 with func_00141F48; returns the number of 0x70-byte records written
+func_00141C90	CollectColliderSpansInTree	the same two-way query as func_00141C28 but takes the tree nodes as an argument instead of reading them from the object
+func_00141D00	TestColliderSegmentHit	the segment test FindNearestHitObject runs on each candidate: the tree at 0x3A4/0x3F0 with TestTreeSegmentHit when the collider has nodes, else the bounds at 0x140 with the radius at 0x3CC (TestBoundsSegmentHit) when flags538 has 0x8000<<25
+func_00141F48	CollectBoundsSpans	queries the bounds at +0x140 for spans, the call CollectColliderSpans and CollectColliderSpansInTree make when an object has no tree nodes; TestBoundsSegmentHit calls it too
+func_00142170	TestBoundsSegmentHit	TestColliderSegmentHit's test of the bounds at +0x140 with a radius, through CollectBoundsSpans
+func_00142998	CompareSpanEndpoints	qsort comparator on (float time, int tag): -1 or 1 when the times differ by more than 0.0001, otherwise the difference of the tags
+func_001429F8	MergeOverlappingSpans	splits every 0x70-byte span into a start and an end record, sorts them with func_001F5CD0 and CompareSpanEndpoints and rebuilds the list keeping only the outermost start and end of each overlapping run; returns the new count
+func_00142B78	TestTreeSegmentHit	TestColliderSegmentHit's test of a collider's tree (0x3F0, 0x3A4) against a segment, through func_0013E430 and func_00142278

@@ -1,0 +1,3 @@
+symbol	name	evidence
+func_001F9F50	IsSecondKernelPatchNeeded	writes the system configuration word back with bits 13 to 15 set to 1 (WriteSystemConfig), reads it again (ReadSystemConfig), restores the original and returns whether the field came back 0 (InstallSecondKernelPatch's test)
+func_001F9FB8	InstallSecondKernelPatch	when IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls D_00277998 lists (InitKernelLibrary calls it)

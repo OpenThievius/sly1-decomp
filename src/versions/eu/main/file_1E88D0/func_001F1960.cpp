@@ -7,7 +7,7 @@ struct Obj_1F1960_eu {
     u32 f518;
     u8 pad51C[0x54];
     u32 f570;
-    Clr_1F1960 f574;
+    WarpPage* f574[6];
 };
 
 void func_001AA268(Obj_1F1960_eu* self);
@@ -20,5 +20,5 @@ void func_001F1960(Obj_1F1960_eu* self) {
     SetScreenElementScale(self, 0.6f);
     self->f518 = 0xDF7F7F7F;
     self->f570 = 0;
-    func_001F5C0C(&self->f574, 0, 0x18);
+    FillMemory(&self->f574, 0, 0x18);
 }

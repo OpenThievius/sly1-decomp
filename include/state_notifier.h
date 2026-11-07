@@ -32,7 +32,8 @@ struct StateNotifier : PlacedObject {
     u8 pad2D4[0x2D8 - 0x2D4];
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
-    u8 pad2E0[0x2E8 - 0x2E0];
+    f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
+    u8 pad2E4[0x2E8 - 0x2E4];
     void* f2E8;             // 0x2E8: the object whose message ends it (func_00147EF8)
     void* f2EC;             // 0x2EC
     u8 pad2F0[0x320 - 0x2F0];
@@ -40,7 +41,8 @@ struct StateNotifier : PlacedObject {
         f32 f320;           // 0x320
         s32 i320;
     };
-    u8 pad324[0x338 - 0x324];
+    u8 pad324[0x334 - 0x324];
+    s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
     s32 f33C;               // 0x33C (unused here)
     s32 armed;               // 0x340
@@ -54,7 +56,10 @@ struct StateNotifier : PlacedObject {
     f32 f354;               // 0x354
     f32 f358;               // 0x358
     u8 pad35C[0x374 - 0x35C];
-    u8 tail374[8];          // 0x374: copied unaligned by func_00146418
+    union {
+        u8 tail374[8];      // 0x374: copied unaligned by func_00146418
+        StateNotifier* next374; // 0x374: the link in the world's list1C54 (func_001DCD28)
+    };
     s32 f37C;               // 0x37C
     StateListener* listener;         // 0x380
     u8 pad384[0x388 - 0x384];
@@ -62,19 +67,19 @@ struct StateNotifier : PlacedObject {
     u8 pad38C[0x390 - 0x38C];
 };
 
-struct C56 : StateNotifier {};
-struct C59 : StateNotifier {};
-struct C5A : StateNotifier {};
-struct C5B : StateNotifier {};
+struct SoundNotifier : StateNotifier {};
+struct SaveNotifier : StateNotifier {};
+struct DeadlineNotifier : StateNotifier {};
+struct ArmedStateNotifier : StateNotifier {};
 
 // 0x57 and 0x58: a timer (timeLeft) that counts down from a value chosen between two limits.
-struct C57 : StateNotifier {
+struct CountdownNotifier : StateNotifier {
     f32 timeMin;               // 0x390
     f32 timeMax;               // 0x394
     f32 timeLeft;               // 0x398
     u8 pad39C[0x3A0 - 0x39C];
 };
-struct C58 : StateNotifier {
+struct TimeRangeNotifier : StateNotifier {
     f32 timeMin;               // 0x390
     f32 timeMax;               // 0x394
     f32 timeLeft;               // 0x398
@@ -82,12 +87,12 @@ struct C58 : StateNotifier {
 };
 
 typedef char check_StateNotifier[sizeof(StateNotifier) == 0x390 ? 1 : -1];
-typedef char check_C56[sizeof(C56) == 0x390 ? 1 : -1];
-typedef char check_C57[sizeof(C57) == 0x3A0 ? 1 : -1];
-typedef char check_C58[sizeof(C58) == 0x3A0 ? 1 : -1];
-typedef char check_C59[sizeof(C59) == 0x390 ? 1 : -1];
-typedef char check_C5A[sizeof(C5A) == 0x390 ? 1 : -1];
-typedef char check_C5B[sizeof(C5B) == 0x390 ? 1 : -1];
+typedef char check_SoundNotifier[sizeof(SoundNotifier) == 0x390 ? 1 : -1];
+typedef char check_CountdownNotifier[sizeof(CountdownNotifier) == 0x3A0 ? 1 : -1];
+typedef char check_TimeRangeNotifier[sizeof(TimeRangeNotifier) == 0x3A0 ? 1 : -1];
+typedef char check_SaveNotifier[sizeof(SaveNotifier) == 0x390 ? 1 : -1];
+typedef char check_DeadlineNotifier[sizeof(DeadlineNotifier) == 0x390 ? 1 : -1];
+typedef char check_ArmedStateNotifier[sizeof(ArmedStateNotifier) == 0x390 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_00146340(StateNotifier* self);                       // 0x55 slot 0
@@ -97,23 +102,23 @@ void func_00146470(StateNotifier* self);                       // 0x55 slot 16
 s32 func_001473E0(StateNotifier* self, ContactObject* other);           // 0x55 slot 45
 void func_00147428(StateNotifier* self);                       // 0x55 slot 17 (original assembly)
 void func_00147AB0(StateNotifier* self, s32 mode);             // 0x55 slot 47
-void func_00147E40(C58* self);                       // 0x58 slot 0
-void func_00147EF8(C58* self, s32 kind, void* target);
-void func_00147FB0(C58* self);
-void func_00148298(C58* self, s32 mode);
-void func_00148400(C56* self);
-void func_00148470(C56* self, s32 mode);
-void func_00148510(C59* self);
-void func_00148598(C59* self, s32 mode);
-void func_00148698(C5A* self);
-void func_00148718(C5A* self);
-void func_00148770(C5A* self, s32 kind, void* msg);
-void func_00148828(C5A* self);
-void func_00148888(C5A* self, s32 mode);
-void func_00148D90(C57* self);
-void func_00148E40(C57* self, s32 kind, void* msg);
-void func_00148EF8(C57* self);
-void func_00148FF0(C57* self, s32 mode);
-void func_00149168(C5B* self);
+void func_00147E40(TimeRangeNotifier* self);                       // 0x58 slot 0
+void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target);
+void func_00147FB0(TimeRangeNotifier* self);
+void func_00148298(TimeRangeNotifier* self, s32 mode);
+void func_00148400(SoundNotifier* self);
+void func_00148470(SoundNotifier* self, s32 mode);
+void func_00148510(SaveNotifier* self);
+void func_00148598(SaveNotifier* self, s32 mode);
+void func_00148698(DeadlineNotifier* self);
+void func_00148718(DeadlineNotifier* self);
+void func_00148770(DeadlineNotifier* self, s32 kind, void* msg);
+void func_00148828(DeadlineNotifier* self);
+void func_00148888(DeadlineNotifier* self, s32 mode);
+void func_00148D90(CountdownNotifier* self);
+void func_00148E40(CountdownNotifier* self, s32 kind, void* msg);
+void func_00148EF8(CountdownNotifier* self);
+void func_00148FF0(CountdownNotifier* self, s32 mode);
+void func_00149168(ArmedStateNotifier* self);
 
 #endif

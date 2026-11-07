@@ -2,13 +2,20 @@
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"
+#include "collider.h"
 #include "world.h"
-#include "t2173.h"
+#include "camera_controller.h"
 #include "globals.h"
 #include "buffered_stream.h"
 #include "key_id.h"
-#include "s193210.h"
+#include "load_progress.h"
 #include "output_buffer.h"
+#include "game_progress.h"
+#include "flag_table.h"
+#include "semaphore_params.h"
+#include "thread_params.h"
+#include "memory_card.h"
+#include "screen_element.h"
 
 
 void* func_001D7120(u8* buf, char* dst, s32 cap);
@@ -20,12 +27,7 @@ void func_001D7148(u8* buf, s32 n);
 void func_001F5C0C(void* p, s32 v, s32 n);
 s32 func_001F6B20(void* self);
 
-struct Ctor_1E2268 {
-    u8 pad0[4];
-    void* b;
-    void* a;
-    u8 pad1[0x14];
-};
+
 
 
 
@@ -35,7 +37,9 @@ s32 func_001E1EB0(void* self, void* ap);
 
 
 
-struct Stream_001E1F58 { u8 bytes[0x420]; };
+// The stack room of an output buffer as the format functions declare one: its header and the
+// 0x400 bytes AppendToOutputBuffer fills before it flushes.
+struct OutputBufferStorage { u8 bytes[0x420]; };
 
 void* func_001D7120(void* stream, char* dst, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -51,7 +55,6 @@ s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
 
 
 
-struct Stream_1E1EB0 { u8 bytes[0x420]; };
 
 void* func_001D7100(void* stream, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -73,7 +76,9 @@ void func_0018D800(void* dst, void* src, s32 count);
 
 s32 func_001E2268(s32 a, s32 b);
 
-struct IntPair_1E22C0 { u8 pad0[4]; s32 a; s32 b; };
+// A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
+// how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
+struct RecursiveLock { s32 count; s32 last; void* sema; };
 
 
 
@@ -90,7 +95,6 @@ void func_001E2870(void* self, s32 a, s32 b);
 
 
 
-struct Tally_1E2358 { s32 count; s32 last; void* ptr; };
 extern void func_001F6B40(void* a);
 
 
@@ -140,8 +144,8 @@ void func_0011EC40(void* a, void* b);
 
 
 
-struct Sub_1E30A0 { u8 pad[0x438]; f32 f438; f32 f43C; };
-struct Glob_1E30A0 { u8 pad[0x1C8]; f32 f1C8; };
+// What an on-off camera controller points to: while f438 is set, its f43C is the camera's f1C8.
+struct CameraFovSource { u8 pad[0x438]; f32 f438; f32 f43C; };
 
 
 
@@ -164,60 +168,63 @@ void func_00123ED0(void* self);
 
 
 
-struct Tally_1E22F8 { s32 count; s32 last; void* ptr; };
 extern s32 func_001F6A90(void);
 extern s32 func_001F6B60(void* a);
 
 
 
-struct Field_001E0E18 {
-    u8 pad0[0x20];
-    s32 kind;
-    u8 pad1[0x8];
-    u8 mode;
+// A conversion of the formatter (func_001E1DB8): func_001E0978 parses it from a '%' on, and
+// func_001E1A08 hands it to the writer of its kind (func_001E0CD0 strings, func_001E1028
+// integers, func_001E17A8 floats).
+struct FormatSpec {
+    s32 left;       // 0x00: '-'
+    s32 plus;       // 0x04: '+'
+    s32 space;      // 0x08: ' '
+    s32 alt;        // 0x0C: '#'
+    s32 zero;       // 0x10: '0'
+    s32 noprec;     // 0x14: the precision given as zero
+    s32 width;      // 0x18
+    s32 prec;       // 0x1C
+    s32 length;     // 0x20: 1 'h', 2 'l' or 'L'
+    s32 f24;        // 0x24: a vector's count (3, or 4 for an upper-case letter)
+    s32 f28;        // 0x28: a matrix's rows ('v' for one)
+    u8 conv;        // 0x2C: the conversion letter, in lower case
+    s8 pad2D[3];
+    s32 upper;      // 0x30: the letter was upper case
 };
 
 
 
 
 
-struct Sub_1E2870;
-struct Mgr_1E2870;
-struct Loc_1E2870 {
+// A point as func_00128018 writes it and func_001E4DC0 tests it.
+struct FacePoint {
     s32 v[4];
-};
-struct Pq_1E2870 {
-    u8 pad0[0x2220];
-    s32 f2220;
-};
-struct Glob_1E2870 {
-    u8 pad0[0x224];
-    s32 f224;
 };
 
 
 void* func_001925F0(void);
-void func_00128018(Mgr_1E2870* a0, OnOffObject* a1, void* a2, Loc_1E2870* a3);
-s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
+void func_00128018(void* a0, OnOffObject* a1, void* a2, FacePoint* a3);
+s32 func_001E4DC0(TreeNode03* self, FacePoint* value);
 void func_001E2778(OnOffObject* self, s32 state);
 
 
 
 
-struct Locals_1E1DB8 {
-    u8 spec[0x40];      // the conversion spec, at sp + 0
+// func_001E1DB8's frame: the conversion it parses, then the argument pointer.
+struct FormatFrame {
+    FormatSpec spec;    // the conversion spec, at sp + 0
+    u8 pad34[0x40 - 0x34];
     void* va;           // the argument pointer, at sp + 0x40
     u8 pad44[0xC];
 };
 
-struct Str_1E1DB8;
-
 void func_001D72C8(OutputBuffer* ctx);
 s32 func_001D7190(OutputBuffer* ctx, const char* p, s32 n);
-char* func_001E21D8(Str_1E1DB8* s, s32 c);
-s32 func_001E2100(Str_1E1DB8* s);
-s32 func_001E0978(const char* at, u8* spec, void* va);
-void func_001E1A08(u8* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
+char* func_001E21D8(const char* s, s32 c);
+s32 func_001E2100(const char* s);
+s32 func_001E0978(const char* at, FormatSpec* spec, void* va);
+void func_001E1A08(FormatSpec* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
 
 
 
@@ -227,21 +234,7 @@ extern u8 D_0024E879[];
 
 
 
-struct Fmt_1E1028 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    u8 pad20[0xC];
-    s8 mode;
-    u8 pad2D[3];
-    s32 f30;
-};
-struct Val_1E1028 {
+struct IntegerArg {
     u64 v;
 };
 
@@ -252,7 +245,7 @@ struct Val_1E1028 {
 
 
 
-s32 func_001E0E18(Fmt_1E1028* self, Val_1E1028* v);
+s32 func_001E0E18(FormatSpec* self, IntegerArg* v);
 s32 func_001E2100(char* p);
 s32 func_001E0EF8(s8 c);
 s32 func_001E0F58(char* buf, s32 len, u64 value, u32 radix);
@@ -261,99 +254,61 @@ void func_001E2218(char* p);
 
 
 
-struct Spec_1E0978 {
-    s32 left;       // 0x00
-    s32 plus;       // 0x04
-    s32 space;      // 0x08
-    s32 alt;        // 0x0C
-    s32 zero;       // 0x10
-    s32 noprec;     // 0x14
-    s32 width;      // 0x18
-    s32 prec;       // 0x1C
-    s32 length;     // 0x20
-    s32 f24;        // 0x24
-    s32 f28;        // 0x28
-    s8 conv;        // 0x2C
-    s8 pad2D[3];
-    s32 upper;      // 0x30
-};
 
-void func_001F5C0C(Spec_1E0978* dst, s32 value, s32 size);
+void func_001F5C0C(FormatSpec* dst, s32 value, s32 size);
 s32 func_001E08F8(s8* s, s32* out);
 extern u8 D_0024E879[];
 
 
 
-struct Spec_001E1A08 {
-    s32 f00; s32 f04; s32 f08; u8 pad0C[4]; s32 f10; s32 f14; s32 f18;
-    s32 i1C; s32 i20; s32 i24; s32 i28; u8 ch; u8 pad2D[3]; s32 f30;
-};
 
 
 
 s32 func_001E2100(const char* s);
 s32 func_001D7190(OutputBuffer* c, const char* s, s32 n);
-void func_001E0CD0(Spec_001E1A08* sp, OutputBuffer* c, const char* s);
-void func_001E1028(Spec_001E1A08* sp, OutputBuffer* c, u64 v);
-void func_001E17A8(Spec_001E1A08* sp, OutputBuffer* c, s64 s);
-void func_001E17A8(Spec_001E1A08* sp, OutputBuffer* c, double value);
-s32 func_001E1498(char* buf, s32 n, Spec_001E1A08* sp, double value);
+void func_001E0CD0(FormatSpec* sp, OutputBuffer* c, const char* s);
+void func_001E1028(FormatSpec* sp, OutputBuffer* c, u64 v);
+void func_001E17A8(FormatSpec* sp, OutputBuffer* c, s64 s);
+void func_001E17A8(FormatSpec* sp, OutputBuffer* c, double value);
+s32 func_001E1498(char* buf, s32 n, FormatSpec* sp, double value);
 void func_001E2218(char* p);
 double func_001FD868(f32 f);
 
 
 
-struct Ctx_1E0CD0 : OutputBuffer {
+struct PaddedOutput : OutputBuffer {
     void Pad(u8 ch, s32 count)
     {
         u8 buf = ch;
         while (count-- > 0) {
-            if (func_001D7190(this, (const char*)&buf, 1) != 1) {
+            if (AppendToOutputBuffer(this, (const char*)&buf, 1) != 1) {
                 break;
             }
         }
     }
 };
-struct Str_1E0CD0;
-
-struct Obj_1E0CD0 {
-    s32 f00;
-    u8 p04[0x10 - 0x04];
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-};
-
-
-
-s32 func_001E2100(Str_1E0CD0* p);
 
 
 
 
 
 
-struct Obj_1E13D0 { u8 pad; };
+
+
+
+
+struct RegDouble { u8 pad; };
 
 
 f32 func_00205C78(f32 a, f32 b);
-Obj_1E13D0* func_001FCDE0(Obj_1E13D0* self, u64 v);
-Obj_1E13D0* func_001FCDE0(Obj_1E13D0* self, double v); // soft-float double in a1
-Obj_1E13D0* func_001EAE78(Obj_1E13D0* self);
-Obj_1E13D0* func_001FCD78(Obj_1E13D0* self, Obj_1E13D0* v);
-s32 func_001FD410(Obj_1E13D0* self);
+RegDouble* func_001FCDE0(RegDouble* self, u64 v);
+RegDouble* func_001FCDE0(RegDouble* self, double v); // soft-float double in a1
+RegDouble* func_001EAE78(RegDouble* self);
+RegDouble* func_001FCD78(RegDouble* self, RegDouble* v);
+s32 func_001FD410(RegDouble* self);
 
 
 
-struct Spec_1E1498 {
-    u8 pad0[0x14];
-    s32 noPoint;
-    u8 pad1[4];
-    s32 prec;
-    u8 pad2[0xC];
-    u8 conv;
-};
 
 extern u8 D_00275940[];
 
@@ -368,25 +323,25 @@ double func_001FD868(f32 f);
 double func_001FCDE0(double a, double b);
 double func_001FCD20(double a, double b);
 
-union Bits_001E1498 {
+union DoubleBits {
     double d;
     u64 u;
 };
 
 
 
-struct Init_1E2398 { s32 f00; void (*f04)(void); s32 f08; s32 f0C; s32 f10; s32 f14; u8 pad[0x18]; };
 
 extern u8 D_006056D0[];
 extern u8 D_002832F0[];
-struct Pair_1E2398 { s32 f0; s32 f4; };
-extern Pair_1E2398 D_00275958;
+// The ids of the main thread and of the render thread func_001E2398 starts.
+struct ThreadIds { s32 main; s32 render; };
+extern ThreadIds D_00275958;
 
 void func_0015EE80(void);
 s32 func_001F6A90(void);
 void func_001F6A50(s32 a, s32 b);
-s32 func_001F5C0C(Init_1E2398* p, s32 zero, s32 size);
-s32 func_001F6A10(Init_1E2398* p);
+s32 func_001F5C0C(ThreadParams* p, s32 zero, s32 size);
+s32 func_001F6A10(ThreadParams* p);
 
 
 
@@ -400,22 +355,32 @@ double func_001FD358(s32 a);
 extern f32 D_00261858[];
 
 
-struct Ret_1E4880 { u8 pad[0x20]; f32 value; };
+struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
 void func_001F5C0C(void* p, s32 v, s32 n);
 
-// Built at startup: its constructor is func_001E4E38; the compiler's initialiser and constructor
-// for this file are func_001E5328 and func_001E5358 (config/us/generated.tsv).
-struct Ctor_1E4E38 {
-    s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 body[0x20];
-    Ctor_1E4E38();
+// The eight scrambled words that locate a level's data on the disc: the key of the sector
+// range is w[0] ^ w[5] and w[1] ^ w[7]; two blocks are the same level when w[2] ^ w[6] agree.
+struct WorldKeyBlock { u32 w[8]; };
+
+// The world load QueueWorldLoad (func_001E4E80) asks for and RunPendingWorldLoad
+// (func_001E4EA8) carries out. Built at startup: its constructor is func_001E4E38; the
+// compiler's initialiser and constructor for this file are func_001E5328 and func_001E5358
+// (config/us/generated.tsv).
+struct WorldLoadRequest {
+    s32 state;              // 0x00: 1 while a load is queued
+    WorldKeyBlock* key;     // 0x04: the level to load, or 0 to stay
+    s32 f8;                 // 0x08: the ids FindOrActivateSwitchedCollider starts from
+    s32 fC;                 // 0x0C
+    s32 flags;              // 0x10: handed to SetCurrentLevelEntry; 0x10 shows D_0026C6C8
+    WorldKeyBlock current;  // 0x14: the level loaded last
+    WorldLoadRequest();
 };
 
 
 
-struct Blk_1E4E80 { s32 state; s32 a; s32 b; s32 c; s32 d; };
 
 
 
@@ -426,48 +391,36 @@ struct Blk_1E4E80 { s32 state; s32 a; s32 b; s32 c; s32 d; };
 
 
 
-struct Blk_1E5278 { u8 pad[0x14]; };
-struct Ring_1E5278 { s32 w; };
 
-extern u8 D_00261420[];
+extern FlagTable D_00261420;
 
 void func_001C05D0(f32 x);
-void func_00140ED0(Ring_1E5278* r);
-void func_001E4E80(Blk_1E5278* self, u8* p, s32 a, s32 b, s32 c);
+void func_00140ED0(FlagTable* r);
+void func_001E4E80(WorldLoadRequest* self, WorldKeyBlock* key, s32 a, s32 b, s32 flags);
 
 
 
-struct Blob_1E4EA8 { u32 w[8]; };
-struct Eq_1E4EA8 {
-    static s32 Of(Blob_1E4EA8* a, Blob_1E4EA8* b)
+struct SameWorldKey {
+    static s32 Of(WorldKeyBlock* a, WorldKeyBlock* b)
     {
         if (a == b) return 1;
         if (b == 0) return 0;
         return ((a->w[2] ^ a->w[6]) ^ (b->w[2] ^ b->w[6])) == 0;
     }
 };
-struct VT1_1E4EA8 { u8 pad[0x38]; void (*m38)(void*); };
-struct Self_1E4EA8 { s32 f0; Blob_1E4EA8* f4; s32 f8; s32 fC; s32 f10; Blob_1E4EA8 f14; };
-struct Sub_1E4EA8 : BufferedStream {
+struct OwnedStream : BufferedStream {
     void SetOwner(void* o) { owner = o; }
 };
-struct Cur_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 f19E0; };
-struct Cur2_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 pad19E0[3]; u32 f19EC; };
-struct Pl_1E4EA8 { u8 pad[0x4F44]; Cur_1E4EA8* f4F44; };
-struct Vo_1E4EA8 { void* vt; };
 
 extern u8 D_002C3B00[];
 extern u8 D_00261EF0[];
 extern u8 D_002623D8[];
-extern u8 D_0026FA90[];
+
 extern f32 D_0026186C;
-extern Vo_1E4EA8 D_0026C6C8;
-extern Cur2_1E4EA8* D_002623C0;
-extern Pl_1E4EA8 D_00264A40;
 
 void func_00191E70(s32 a);
 void func_0018D410(KeyId* q);
-S193210* func_00193210(S193210* q, U32P* a, U32P* b, U32P* c, U32P* d);
+LoadProgress* func_00193210(LoadProgress* q, U32P* a, U32P* b, U32P* c, U32P* d);
 void* func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
 void func_00193270(void* q);
 s32 func_001373B0(BufferedStream* q, KeyId* k);
@@ -476,18 +429,18 @@ void func_001DB838(World* q);
 void func_001DB928(s32 a, BufferedStream* q);
 void func_001430B8(u8* q, f32 v);
 s32 func_0016E0F0(s32 n);
-void func_00160690(Blob_1E4EA8* q, s32 n);
+void func_00160690(WorldKeyBlock* q, s32 n);
 World* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_001C06A0(s32 a, s32 b, f32 x);
 void func_001373D0(BufferedStream* q);
 void func_00193300(void* q);
-void func_0018C7F8(Pl_1E4EA8* q);
+void func_0018C7F8(MemoryCard* q);
 void func_00143A60(s32 q, s32 f);
 void func_001C0070(void);
 s32 func_001F4318(World* q, s32 a, s32 b);
 void func_00151E18(u8* q);
 void func_00160CE8(u8* q);
-void func_0016B520(u8* q);
+void func_0016B520(T217D_12E0* q);
 void func_00138C00(World* q, s32 n);
 void func_00143E40(s32 q, s32 n, f32 v);
 void func_00142ED0(f32 x);
@@ -496,7 +449,7 @@ void func_00191EB0(s32 a);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
 u8 D_00275940[0x18] = "0123456789abcdef";
-Pair_1E2398 D_00275958 = { 0, 0 };
+ThreadIds D_00275958 = { 0, 0 };
 u8 D_00275960[4] = { 0 };
 s32 D_00275964 = 0;
 INCLUDE_DATA(D_00275970);
@@ -545,13 +498,13 @@ s32 func_001E08F8(s8* s, s32* out)
     return count;
 }
 
-s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
+s32 func_001E0978(s8* at, FormatSpec* spec, s32** va)
 {
     s32 state = 0;
     s8* p = at;
     s32 next;
 
-    func_001F5C0C(spec, 0, 0x34);
+    FillMemory(spec, 0, 0x34);
     if (*at != 0) {
         for (;;) {
             s32 adv = 0;
@@ -711,7 +664,7 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
 }
 
 
-void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
+void func_001E0CD0(FormatSpec* self, PaddedOutput* ctx, const char* str) {
     s32 n;
     s32 right;
     s32 left;
@@ -721,17 +674,17 @@ void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
         str = "(null)";
     }
     right = 0;
-    n = GetStringLength((Str_1E0CD0*)str);
+    n = GetStringLength(str);
     left = 0;
-    if (self->f1C != 0 && self->f1C < n) {
-        n = self->f1C;
-    } else if (self->f14 != 0) {
+    if (self->prec != 0 && self->prec < n) {
+        n = self->prec;
+    } else if (self->noprec != 0) {
         n = 0;
     }
-    if (n < self->f18) {
-        pad = (self->f10 != 0) ? 0x30 : 0x20;
-        s32 d = self->f18 - n;
-        if (self->f00 != 0) {
+    if (n < self->width) {
+        pad = (self->zero != 0) ? 0x30 : 0x20;
+        s32 d = self->width - n;
+        if (self->left != 0) {
             right = d;
         } else {
             left = d;
@@ -743,20 +696,20 @@ void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
 }
 
 
-s32 func_001E0E18(Field_001E0E18* self, void* dst)
+s32 func_001E0E18(FormatSpec* self, void* dst)
 {
     s32 ret = 0;
-    if (self->kind != 1) {
-        if (self->kind < 2) {
-            if (self->kind == 0) {
+    if (self->length != 1) {
+        if (self->length < 2) {
+            if (self->length == 0) {
                 *(u32*)((u8*)dst + 4) = 0;
             }
         }
     } else {
         *(u64*)dst = *(u16*)dst;
     }
-    if (self->mode == 'd' || self->mode == 'i') {
-        switch (self->kind) {
+    if (self->conv == 'd' || self->conv == 'i') {
+        switch (self->length) {
         case 0:
             if (*(s32*)dst < 0) {
                 *(s32*)dst = -*(s32*)dst;
@@ -818,12 +771,12 @@ s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
 }
 
 
-void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
+void func_001E1028(FormatSpec* self, OutputBuffer* sink, u64 value)
 {
     char buf[0x50];
     char pfx[0x10];
     char padc[0x10];
-    Val_1E1028 val;
+    IntegerArg val;
     s32 total;
     s32 lead;
     s32 trail;
@@ -833,63 +786,63 @@ void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
     s32 n;
 
     val.v = value;
-    if (self->f14 != 0 || self->f1C != 0) {
-        self->f10 = 0;
+    if (self->noprec != 0 || self->prec != 0) {
+        self->zero = 0;
     }
-    if (self->f14 != 0 && val.v == 0) {
+    if (self->noprec != 0 && val.v == 0) {
         plen = 0;
         zeros = 0;
         ndig = 0;
     } else {
         s32 neg = ExtractIntegerSign(self, &val);
-        zeros = self->f1C;
+        zeros = self->prec;
         pfx[0] = 0;
-        switch ((u8)self->mode) {
+        switch ((u8)self->conv) {
         case 'd':
         case 'i':
             if (neg) {
                 __builtin_strcpy(pfx, "-");
-            } else if (self->f4) {
+            } else if (self->plus) {
                 __builtin_strcpy(pfx, "+");
-            } else if (self->f8) {
+            } else if (self->space) {
                 __builtin_strcpy(pfx, " ");
             }
             zeros -= GetStringLength(pfx);
             break;
         case 'b':
-            if (self->fC) {
+            if (self->alt) {
                 __builtin_strcpy(pfx, "0b");
             }
             break;
         case 'o':
-            if (self->fC) {
+            if (self->alt) {
                 __builtin_strcpy(pfx, "0");
             }
             break;
         case 'x':
-            if (self->fC) {
+            if (self->alt) {
                 __builtin_strcpy(pfx, "0x");
             }
             break;
         }
         plen = GetStringLength(pfx);
-        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->mode));
+        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->conv));
         zeros -= ndig;
         zeros = zeros >= 0 ? zeros : 0;
     }
     buf[ndig] = 0;
-    if (self->f30) {
+    if (self->upper) {
         UppercaseString(pfx);
         UppercaseString(buf);
     }
     total = plen + zeros + ndig;
     lead = 0;
     trail = 0;
-    if (total < self->f18) {
-        s32 rem = self->f18 - total;
-        if (self->f0) {
+    if (total < self->width) {
+        s32 rem = self->width - total;
+        if (self->left) {
             trail = rem;
-        } else if (self->f10 == 0) {
+        } else if (self->zero == 0) {
             lead = rem;
         } else if (ndig != 0) {
             zeros += rem;
@@ -927,8 +880,8 @@ s32 func_001E1330(double v)
 {
     s32 i;
     if (func_001FD308(v, 0.0) > 0) {
-        double l = func_001FD868(func_00205B28(func_001FD578(v)));
-        i = func_001FD410(l);
+        double l = func_001FD868(LogarithmBase10(func_001FD578(v)));
+        i = ConvertDoubleToS32(l);
         if (func_001FD308(l, 0.0) < 0 && func_001FD308(l, func_001FD358(i)) != 0)
             i--;
     } else {
@@ -937,27 +890,27 @@ s32 func_001E1330(double v)
     return i;
 }
 
-s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
+s8 func_001E13D0(RegDouble* self0, s32 a, s32 b)
 {
-    Obj_1E13D0* self = self0;
+    RegDouble* self = self0;
     s32 idx;
     if (a < b || a - 15 >= b) {
         idx = 0;
     } else {
-        f32 t = func_00205C78(10.0f, (f32)(-b));
-        Obj_1E13D0* p = func_001FCDE0(self, func_001FD868(t));
+        f32 t = Power(10.0f, (f32)(-b));
+        RegDouble* p = func_001FCDE0(self, func_001FD868(t));
         self = TruncateDouble(p);
         p = TruncateDouble(func_001FCDE0(self, 0.1));
         p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
-        idx = func_001FD410(func_001FCD78(self, p));
+        idx = ConvertDoubleToS32(func_001FCD78(self, p));
     }
     return ((s8*)&D_00275940)[idx];
 }
 
 
-s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
+s32 func_001E1498(char* buf, s32 unused, FormatSpec* sp, double v)
 {
-    Bits_001E1498 bits;
+    DoubleBits bits;
     bits.d = v;
     if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
         const char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? "(nan)" : "(inf)";
@@ -976,7 +929,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     s32 base = 0;
     if (isE) base = e;
     s32 prec = sp->prec;
-    f32 p = func_00205C78(10.0f, (f32)(base - prec));
+    f32 p = Power(10.0f, (f32)(base - prec));
     double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
     s32 e2 = GetDecimalExponent(r);
     if (e < GetDecimalExponent(r)) e = e2;
@@ -994,7 +947,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     while (n-- > 0) {
         *out++ = GetDecimalDigit(r, e, i--);
     }
-    if (sp->noPoint == 0) {
+    if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
@@ -1013,7 +966,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
         } else {
             *out++ = '+';
         }
-        s32 d = (s32)func_00205C78(10.0f, 2.0f);
+        s32 d = (s32)Power(10.0f, 2.0f);
         for (s32 k = 2; k >= 0; k--) {
             *out++ = D_00275940[e / d];
             e = (e % d) * 10;
@@ -1023,7 +976,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
 }
 
 
-void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
+void func_001E17A8(FormatSpec* spec, OutputBuffer* ctx, double value)
 {
     char buf[0x1C0];
     char sign[16];
@@ -1037,29 +990,29 @@ void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
     s32 width;
     s32 total;
     s32 neg;
-    if (spec->i1C == 0 && spec->f14 == 0) {
-        spec->i1C = 6;
-    } else if (spec->f14 != 0 && spec->ch == 0x67) {
-        spec->i1C = 1;
+    if (spec->prec == 0 && spec->noprec == 0) {
+        spec->prec = 6;
+    } else if (spec->noprec != 0 && spec->conv == 0x67) {
+        spec->prec = 1;
     }
     neg = value < 0.0;
     if (neg) value = 0.0 - value;
     sign[0] = 0;
     if (neg) __builtin_strcpy(sign, "-");
-    else if (spec->f04) __builtin_strcpy(sign, "+");
-    else if (spec->f08) __builtin_strcpy(sign, " ");
+    else if (spec->plus) __builtin_strcpy(sign, "+");
+    else if (spec->space) __builtin_strcpy(sign, " ");
     slen = GetStringLength(sign);
     len = FormatFloatDigits(buf, 0x1B5, spec, value);
     buf[len] = 0;
-    if (spec->f30) UppercaseString(buf);
-    width = spec->f18;
+    if (spec->upper) UppercaseString(buf);
+    width = spec->width;
     total = slen + len;
     lead = 0;
     left = 0;
     if (total < width) {
         s32 pad = width - total;
-        if (spec->f00) left = pad;
-        else if (spec->f10 && len != 0) zeros = pad;
+        if (spec->left) left = pad;
+        else if (spec->zero && len != 0) zeros = pad;
         else lead = pad;
     }
     padc[0] = ' ';
@@ -1082,11 +1035,11 @@ void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
 }
 
 
-void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
+void func_001E1A08(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
-    switch (sp->ch) {
+    switch (sp->conv) {
     case '%':
-        AppendToOutputBuffer(c, (const char*)sp + 0x2C, 1);
+        AppendToOutputBuffer(c, (const char*)&sp->conv, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -1104,18 +1057,18 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         return;
     }
     case 'p':
-        sp->i1C = 8;
-        sp->ch = 'x';
-        sp->i20 = 0;
+        sp->prec = 8;
+        sp->conv = 'x';
+        sp->length = 0;
     case 'b': case 'd': case 'i': case 'o': case 'u': case 'x':
-        switch (sp->i20) {
+        switch (sp->length) {
         case 0: case 1: { u8* p = *va; *va = p + 8; v = *(u32*)p; break; }
         case 2: { u8* p = *va; *va = p + 8; v = *(u64*)p; break; }
         }
         FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
-        if (sp->i24 != 0) {
+        if (sp->f24 != 0) {
             const char* s4 = "
 ";
             u8* a = *va;
@@ -1126,17 +1079,17 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
             const char* s5 = ", ";
             const char* s6 = " }";
             f32* fp = *(f32**)a;
-            if (sp->i28 >= 2) {
+            if (sp->f28 >= 2) {
                 AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
-            for (s32 i = 0; i < sp->i28; ) {
+            for (s32 i = 0; i < sp->f28; ) {
                 s32 next;
                 if (i != 0) {
                     AppendToOutputBuffer(c, s8, GetStringLength(s8));
                 }
                 next = i + 1;
                 AppendToOutputBuffer(c, s7, GetStringLength(s7));
-                for (s32 j = 0; j < sp->i24; j++) {
+                for (s32 j = 0; j < sp->f24; j++) {
                     if (j != 0) {
                         AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
@@ -1145,7 +1098,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
                 AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;
             }
-            if (sp->i28 >= 2) {
+            if (sp->f28 >= 2) {
                 AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
         } else {
@@ -1155,7 +1108,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         }
         return;
     case 'n':
-        switch (sp->i20) {
+        switch (sp->length) {
         case 0: { u8* p = *va; *va = p + 8; **(s32**)p = c->count; break; }
         case 1: { u8* p = *va; *va = p + 8; s16* q = *(s16**)p; s32 n = c->count; *q = n; break; }
         case 2: { u8* p = *va; *va = p + 8; **(s64**)p = c->count; break; }
@@ -1170,16 +1123,16 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
 
 s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 {
-    Locals_1E1DB8 loc;
+    FormatFrame loc;
     const char* s1 = fmt;
 
     loc.va = a2;
     if (*s1 != 0) {
         do {
-            char* s2 = FindCharInString((Str_1E1DB8*)s1, '%');
+            char* s2 = FindCharInString(s1, '%');
             s32 n = (s32)s2 - (s32)s1;
             if (s2 == 0) {
-                n = GetStringLength((Str_1E1DB8*)s1);
+                n = GetStringLength(s1);
                 s2 = (char*)((s32)s1 + n);
             }
             if (n != 0) {
@@ -1189,8 +1142,8 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
                 s1 = s2;
             }
             if (*s1 == '%') {
-                s32 n2 = ParseFormatSpec(s1, loc.spec, (void*)&loc.va);
-                FormatConversionArg(loc.spec, ctx, (void*)&loc.va, s1, n2);
+                s32 n2 = ParseFormatSpec(s1, &loc.spec, (void*)&loc.va);
+                FormatConversionArg(&loc.spec, ctx, (void*)&loc.va, s1, n2);
                 s1 = s1 + n2;
             }
         } while (*s1 != 0);
@@ -1201,8 +1154,8 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 
 s32 func_001E1EB0(const char* fmt, void* ap)
 {
-    Stream_1E1EB0 buf;
-    func_001D7100(&buf, -1);
+    OutputBufferStorage buf;
+    InitOutputBuffer(&buf, -1);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     DestroyOutputBuffer(&buf, 2);
     return n;
@@ -1216,8 +1169,8 @@ s32 func_001E1F10(void* self, ...)
 
 s32 func_001E1F58(char* dst, const char* fmt, void* ap)
 {
-    Stream_001E1F58 buf;
-    func_001D7120(&buf, dst, 0);
+    OutputBufferStorage buf;
+    InitStringOutputBuffer(&buf, dst, 0);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     dst += n;
     *dst = 0;
@@ -1236,7 +1189,7 @@ s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
     u8 buf[0x420];
     s32 n;
 
-    func_001D7120(buf, dst, cap);
+    InitStringOutputBuffer(buf, dst, cap);
     n = FormatToOutputBuffer(buf, a, b);
     if (n >= cap) {
         n = -1;
@@ -1303,27 +1256,27 @@ void func_001E2218(s8* p)
 
 void func_001E2268(void* a, void* b)
 {
-    Ctor_1E2268 tmp;
+    SemaphoreParams tmp;
 
-    func_001F5C0C(&tmp, 0, 0x18);
-    tmp.a = a;
-    tmp.b = b;
-    func_001F6B20(&tmp);
+    FillMemory(&tmp, 0, 0x18);
+    tmp.initCount = (s32)a;
+    tmp.maxCount = (s32)b;
+    NewSemaphore(&tmp);
 }
 
 LINKER_REMNANT(func_001E22B8);
 
-void func_001E22C0(IntPair_1E22C0* self)
+void func_001E22C0(RecursiveLock* self)
 {
-    self->a = -1;
-    self->b = CreateLockSemaphore(1, 1);
+    self->last = -1;
+    self->sema = (void*)CreateLockSemaphore(1, 1);
 }
 
-void func_001E22F8(Tally_1E22F8* self)
+void func_001E22F8(RecursiveLock* self)
 {
-    s32 key = func_001F6A90();
+    s32 key = GetCurrentThreadId();
     if (key != self->last) {
-        (void)func_001F6B60(self->ptr);
+        (void)AwaitSemaphore(self->sema);
         self->last = key;
         self->count = 1;
     } else {
@@ -1331,11 +1284,11 @@ void func_001E22F8(Tally_1E22F8* self)
     }
 }
 
-void func_001E2358(Tally_1E2358* self)
+void func_001E2358(RecursiveLock* self)
 {
     if (--self->count == 0) {
         self->last = -1;
-        func_001F6B40(self->ptr);
+        PostSemaphore(self->sema);
     }
 }
 
@@ -1343,17 +1296,17 @@ LINKER_REMNANT(func_001E2390);
 
 void func_001E2398(void)
 {
-    Init_1E2398 l;
+    ThreadParams l;
 
-    g_mainAndRenderThreads.f0 = func_001F6A90();
-    func_001F6A50(g_mainAndRenderThreads.f0, 4);
-    (void)func_001F5C0C(&l, 0, sizeof(l));
-    l.f0C = 0x20000;
-    l.f08 = (s32)g_renderThreadStack;
-    l.f14 = 2;
-    l.f10 = (s32)D_002832F0;
-    l.f04 = RunRenderThread;
-    g_mainAndRenderThreads.f4 = func_001F6A10(&l);
+    g_mainAndRenderThreads.main = GetCurrentThreadId();
+    SetThreadPriority(g_mainAndRenderThreads.main, 4);
+    (void)FillMemory(&l, 0, sizeof(l));
+    l.stackSize = 0x20000;
+    l.stack = g_renderThreadStack;
+    l.priority = 2;
+    l.gp = D_002832F0;
+    l.entry = RunRenderThread;
+    g_mainAndRenderThreads.render = MakeThread(&l);
 }
 
 void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
@@ -1449,7 +1402,7 @@ void func_001E2840(void* selfv, s32 value)
 }
 
 void func_001E2870(OnOffObject* self) {
-    Loc_1E2870 loc;
+    FacePoint loc;
     void* p = GetActiveSwitchedCollider();
     if (p == 0) {
         return;
@@ -1460,14 +1413,14 @@ void func_001E2870(OnOffObject* self) {
     }
     s32 st;
     if (self->f398 == -1) {
-        func_00128018(0, self, (u8*)p + 0x140, &loc);
-        s32 r = func_001E4DC0((Sub_1E2870*)self->f2E0, &loc);
+        TransformPointBetweenFrames(0, self, (u8*)p + 0x140, &loc);
+        s32 r = IsPointInsideFaceTree((TreeNode03*)self->f2E0, &loc);
         st = (0u < (u32)r);
     } else {
         st = self->f398;
     }
-    if (self->f384 == 0 && p == (u8*)g_player && ((Pq_1E2870*)p)->f2220 == 2 &&
-        ((Glob_1E2870*)g_camera)->f224 == 0) {
+    if (self->f384 == 0 && p == (u8*)g_player && ((Player*)p)->f2220 == 2 &&
+        g_camera->f224 == 0) {
         if (self->f398 == -1) {
             return;
         }
@@ -1504,23 +1457,23 @@ ASM_FUNC(func_001E2BF0);
 
 ASM_FUNC(func_001E2E68);
 
-void func_001E30A0(T2173_3F8* self)
+void func_001E30A0(OnOffCameraController* self)
 {
-    Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
+    CameraFovSource* s = (CameraFovSource*)self->ptr;
     if (s != 0) {
         if (s->f438 != 0.0f) {
-            Glob_1E30A0* g = (Glob_1E30A0*)g_camera;
+            Camera* g = g_camera;
             g->f1C8 = s->f43C;
         }
     }
     self->ptr = 0;
 }
 
-void func_001E30D8(T2173_3F8* self, s32 arg)
+void func_001E30D8(OnOffCameraController* self, s32 arg)
 {
 }
 
-void func_001E30E0(T2173_3F8* self, s32 arg) {}
+void func_001E30E0(OnOffCameraController* self, s32 arg) {}
 
 ASM_FUNC(func_001E30E8);
 
@@ -1528,7 +1481,7 @@ ASM_FUNC(func_001E31F0);
 
 ASM_FUNC(func_001E4578);
 
-f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
+f32 func_001E4880(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
     return a3->value;
 }
@@ -1540,45 +1493,45 @@ INCLUDE_ASM(func_001E4C48);
 
 ASM_FUNC(func_001E4DC0);
 
-Ctor_1E4E38::Ctor_1E4E38()
+WorldLoadRequest::WorldLoadRequest()
 {
-    f4 = 0;
-    f10 = 0;
+    key = 0;
+    flags = 0;
     fC = f8 = -1;
-    func_001F5C0C(body, 0, 0x20);
+    FillMemory(&current, 0, 0x20);
 }
 
-Ctor_1E4E38 D_00275AF0;
+WorldLoadRequest D_00275AF0;
 
-void func_001E4E80(Blk_1E4E80* self, s32 a1, s32 a2, s32 a3, s32 a4)
+void func_001E4E80(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s32 flags)
 {
     if (self->state == 0) {
         self->state = 1;
-        self->a = a1;
-        self->b = a2;
-        self->c = a3;
-        self->d = a4;
+        self->key = key;
+        self->f8 = a2;
+        self->fC = a3;
+        self->flags = flags;
     }
 }
 
-void func_001E4EA8(Self_1E4EA8* self)
+void func_001E4EA8(WorldLoadRequest* self)
 {
     KeyId key;
-    Blob_1E4EA8 blob;
-    S193210 o30;
+    WorldKeyBlock blob;
+    LoadProgress o30;
     U32P w60, w70, w80, w90;
-    Sub_1E4EA8 sub;
-    func_00191E70(2);
-    if (self->f4 != 0) {
+    OwnedStream sub;
+    SetScreenOwner(2);
+    if (self->key != 0) {
         ClearKeyId(&key);
-        blob = *self->f4;
-        self->f4 = 0;
+        blob = *self->key;
+        self->key = 0;
         key.second = blob.w[1] ^ blob.w[7];
         key.first = blob.w[0] ^ blob.w[5];
         if (key.second == 0) goto end;
         {
-            Blob_1E4EA8* s2 = &self->f14;
-            s32 ne = !Eq_1E4EA8::Of(&blob, s2);
+            WorldKeyBlock* s2 = &self->current;
+            s32 ne = !SameWorldKey::Of(&blob, s2);
             w60.v = 0x3F00;
             w70.v = 0x3F3F3F;
             w80.v = 0x3F3F;
@@ -1586,7 +1539,7 @@ void func_001E4EA8(Self_1E4EA8* self)
             InitLoadProgress(&o30, &w60, &w70, &w80, &w90);
             InitBufferedStream(&sub, 0x340C00, D_002C3B00, 6);
             sub.SetOwner(&o30);
-            if (sub.owner != 0) func_00193270(sub.owner);
+            if (sub.owner != 0) BeginLoadProgress(sub.owner);
             if (OpenBufferedSectorStreamRange(&sub, &key) == 0) {
                 DestroyBufferedStream(&sub, 2);
                 goto end;
@@ -1596,15 +1549,15 @@ void func_001E4EA8(Self_1E4EA8* self)
             ReadBufferedBlockHeader(ne, &sub);
             SetGameClockTime(((u8*)&g_gameClock), 0.0f);
             SetPadSelectFlags(0x80);
-            self->f14 = blob;
-            SetCurrentLevelEntry(s2, self->f10);
+            self->current = blob;
+            SetCurrentLevelEntry(s2, self->flags);
             g_currentWorld = CreateTypedRecord(0x6C, 0, 0, 3, -1);
             SetVolumeChannelFactor(0xA, 0, 0.0f);
             g_currentWorld->desc->m0A(g_currentWorld, &sub);
             CloseBufferedStream(&sub);
-            if (sub.owner != 0) func_00193300(sub.owner);
+            if (sub.owner != 0) EndLoadProgress(sub.owner);
             if (g_saveData->f19EC & 0x100) {
-                Cur_1E4EA8* c = g_memoryCard.f4F44;
+                GameProgress* c = g_memoryCard.image;
                 if (c != 0 && (c->f19D8 != g_saveData->f19D8 || c->f19DC != g_saveData->f19DC))
                     StartMemoryCardSave(&g_memoryCard);
             }
@@ -1614,31 +1567,31 @@ void func_001E4EA8(Self_1E4EA8* self)
     ResetCamera((*(s32*)&g_camera), 1);
     UpdateSoundEmitters();
     SetVolumeChannelFactor(0xA, 0, 1.0f);
-    func_001F4318(g_currentWorld, self->f8, self->fC);
-    func_00151E18(D_00261EF0);
-    func_00160CE8(D_002623D8);
-    func_0016B520(D_0026FA90);
-    func_00138C00(g_currentWorld, 0);
+    FindOrActivateSwitchedCollider(g_currentWorld, self->f8, self->fC);
+    NotifyScatterControllerLoaded(g_scatterController);
+    ResetCounter(D_002623D8);
+    RestoreSelectionCaptionCamera(&D_0026FA90);
+    UpdateWorldContacts(g_currentWorld, 0);
     UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);
-    if (self->f10 & 0x10) ((VT1_1E4EA8*)D_0026C6C8.vt)->m38(&D_0026C6C8);
+    if (self->flags & 0x10) D_0026C6C8.vt->m14(&D_0026C6C8);
     SetGameClockScale(1.0f);
 end:
     ResetVolumeChannelFactors();
     SetVolumeChannelFactor(1, 1, g_currentWorld->f1D7C);
-    func_00191EB0(2);
-    self->f0 = 0;
+    ClearScreenOwner(2);
+    self->state = 0;
 }
 
 void func_001E5278(s32 mode)
 {
     s32 n;
-    func_001C05D0(0.0f);
+    SetIopVolumeChannel8(0.0f);
     switch (mode) {
     case 0:
         n = 0;
         break;
     case 1:
-        StartScreenFadeFromFlagTable((Ring_1E5278*)g_flagTable);
+        StartScreenFadeFromFlagTable(&g_flagTable);
         return;
     case 2:
         n = 2;
@@ -1647,7 +1600,7 @@ void func_001E5278(s32 mode)
         n = 4;
         break;
     }
-    QueueWorldLoad((Blk_1E5278*)&g_worldLoadRequest, g_worldLoadRequest.body, -1, -1, n);
+    QueueWorldLoad(&g_worldLoadRequest, &g_worldLoadRequest.current, -1, -1, n);
 }
 
 

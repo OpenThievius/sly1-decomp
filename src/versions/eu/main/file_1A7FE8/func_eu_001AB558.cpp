@@ -3,7 +3,7 @@
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB558.cpp func_eu_001AB558 --unit src/main/001A8000.cpp
 // Still differs: Rect record from owner fields, virtual call, font scale, buffer builders; matches except self/record-pointer s1/s2 swap (retail self in s2) and load order of f544/f548 vs lui.
 // Builds a rect record from the owner's fields, lets the +0x520 object fill it through a virtual call, scales the font and draws via the buffer builders.
-struct Actor_eu_001AB558 { u8 pad0[4]; V24A2* p4; u16 f08; u8 pad1[0x518 - 0xA]; s32 f518; f32 f51C; void* f520; u8 pad2[8]; f32 f52C; f32 f530; u8 pad3[0x10]; f32 f544; f32 f548; };
+struct Actor_eu_001AB558 { u8 pad0[4]; Font* p4; u16 f08; u8 pad1[0x518 - 0xA]; s32 f518; f32 f51C; void* f520; u8 pad2[8]; f32 f52C; f32 f530; u8 pad3[0x10]; f32 f544; f32 f548; };
 
 void func_eu_001374E0(void* out, s32 v);
 void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
@@ -29,10 +29,10 @@ void func_eu_001AB558(Actor_eu_001AB558* self)
         func_eu_001374E0(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {
-            SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
+            Font* sub = *(Font**)obj;
             if (sub != 0) {
-                VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, D_eu_00263590);
+                const FontVt* d = sub->vt;
+                d->drawBox((Font*)((u8*)sub + d->adj9), obj, &L, D_eu_00263590);
             }
         }
         f32 v = self->f51C;

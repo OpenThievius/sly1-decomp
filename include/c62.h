@@ -21,15 +21,32 @@ struct Msg62 {
 struct C62 : PlacedObject {
     s32 id2D0;              // 0x2D0: -1 for none
     f32 f2D4;               // 0x2D4
-    u8 pad2D8[0x2DC - 0x2D8];
+    f32 f2D8;               // 0x2D8: how long state 2 lasts (UpdateItemTimeouts)
     s32 id2DC;              // 0x2DC
     s32 id2E0;              // 0x2E0: -1 for none
     s32 f2E4;               // 0x2E4
     u8 f2E8[1];             // 0x2E8
-    u8 pad2E9[0x330 - 0x2E9];
+    u8 pad2E9[0x328 - 0x2E9];
+    void* group;            // 0x328: the record of the ones sharing id2E0 (func_001CB8B8), whose timeouts an agent schedules
+    u8 pad32C[0x330 - 0x32C];
 };
 
 typedef char check_C62[sizeof(C62) == 0x330 ? 1 : -1];
+
+struct ItemKeeper;          // include/item_keeper.h
+
+// The 48-byte record of the class 0x62 objects that share an id (C62::group): CreateRecord2505C0
+// makes it, AppendToSmallList and RemoveFromSmallList keep its objects, ScheduleItemTimeouts
+// queues UpdateItemTimeouts on it.
+struct C62Group {
+    void* vtbl;             // 0x00: D_002505C0
+    s32 count;              // 0x04
+    C62* items[8];          // 0x08
+    s32 scheduled;          // 0x28: UpdateItemTimeouts is queued
+    ItemKeeper* owner;      // 0x2C: the keeper that made it (func_001CB8B8)
+};
+
+typedef char check_C62Group[sizeof(C62Group) == 0x30 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_001EF838(C62* self);                       // 0x62 slot 0

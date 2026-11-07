@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00209010	RoundToInteger	a double rounded to an integer in the current rounding direction, with the software double arithmetic (round_to_integer.c)

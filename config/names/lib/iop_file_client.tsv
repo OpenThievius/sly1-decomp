@@ -1,0 +1,13 @@
+symbol	name	evidence
+func_001F84D8	CreateFileTableLock	creates the two semaphores that guard the file client's handle table and its replies (OpenFileClient and FindFileHandle call it)
+func_001F8538	FindFileHandle	returns the entry of the file client's table of 32 open handles for a handle, or 0
+func_001F85A8	HandleFileReply	the file client's reply handler: copies the reply out of the reply buffer's uncached address and frees the waiter's slot in g_semaphoreSlots
+func_001F8968	CreateFileRequestLock	creates the semaphore that keeps one file request at a time (LockFileRequests calls it first)
+func_001F89B8	LockFileRequests	waits on the file client's request semaphore, creating it first when needed
+func_001F89E8	UnlockFileRequests	signals the file client's request semaphore
+func_001F8A28	OpenFileClient	once, installs HandleFileReply and func_001F89F8 for the commands 0x80000011 and 0x80000013, binds the client to the IOP's file service, clears the handle table and hands the reply buffer over
+func_001F8BF8	ForgetFileClient	clears the file client's opened flag and its binding (LoadIopModules calls it before it resets the IOP)
+func_001F8C38	CloseFile	sends the close request for a handle and waits for its reply (CloseStreamReader and CloseBufferedStream call it)
+func_001F8DB8	ReadFile	sends a read request for a handle into a buffer and waits for its reply (StartChunkRead and RefillBufferedStreamFromFile call it)
+func_001F9028	WriteFile	sends a write request of a buffer to a handle and waits for its reply (FlushOutputBuffer calls it)
+func_001F92E8	ControlFile	sends request 5 with a mode and a block of data for a handle, answering modes 1 to 3 from the client's own state (PollChunkRead asks whether a read finished with it)

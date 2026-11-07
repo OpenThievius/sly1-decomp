@@ -1,0 +1,17 @@
+symbol	name	evidence
+func_0019D410	QueueDeferredRequest	copies a 0x80-byte request to the next free entry of D_005E4700 (1024 of them, uncached alias) and advances D_0026AC10
+func_0019D468	CompareEntriesByValueDescending	comparator on two pointers to records: the larger value at +4 sorts first, ties broken by the address difference shifted right by 7
+func_0019D4B0	BucketDeferredRequests	counts the requests of each of the 18 groups, lays out one group marker row per used group followed by that group's requests in out, sorts groups 4, 8, 13 and 1 with CompareEntriesByValueDescending, and returns the total of group 17
+func_0019D6C0	RunWorldFrameLists	resets the deferred-request cursor D_0026AC10 to D_005E4700, calls slot 40 on every object of the lists at +0x60 and +0x78, then UpdateColorFade on each fade of the list at +0x1CD8
+func_0019D860	UploadProjectionConstants	once per frame (flag D_0060478C), opens a DMA tag on the VIF packet writer and copies the projection scale, projection offset, a 0xC-word block and the world's f1D68 into it, then closes the tag
+func_0019D930	UploadCameraOncePerFrame	unless D_00604788 is set, sets it and runs func_00144848 on g_camera; the group set-ups call it, and func_0019DAD8 clears the flag
+func_0019D968	UploadGroupConstants	the first time in a frame (D_00604780 clear) uploads the 0x2C quadwords of D_002BDC20 through the VIF packet writer (func_001EE7D0); later, when D_00604784 is clear, flushes and uploads D_002BDEE0 instead; sets both flags
+func_0019DA30	PrepareBasicGroup	the handler of group-marker row 0 (InitGroupMarkers): only adds the DMA ref tag of the block D_00212160 to D_00215C50 (AddDmaRefTagIfChanged)
+func_0019DA60	PrepareFlushedGroup	the handler of group-marker row 1: UploadProjectionConstants, UploadCameraOncePerFrame, the ref tag of D_00212160, marks the base constants sent, sets the build frame's +0x1C and writes a VIF flush
+func_0019DAD8	PrepareGroupWithoutCamera	the handler of group-marker row 2: UploadProjectionConstants, UploadGroupConstants and the ref tag of D_00212160, then clears g_cameraUploadedThisFrame
+func_0019DB20	PrepareStandardGroup	the handler of 11 group-marker rows (3, 4, 6 to 8, 10 to 13, 16): UploadProjectionConstants, UploadCameraOncePerFrame, UploadGroupConstants and the ref tag of D_00212160
+func_0019DB68	PrepareAlternateBlockGroup	the handler of group-marker rows 5, 9, 14 and 15: as PrepareStandardGroup, with the block D_00215C60 to D_00217348 in place of D_00212160
+func_0019DBB0	PrepareUnzoomedGroup	the handler of group-marker row 17: the ref tag of D_00212160, the projection and camera uploads, the world object's VIF word from D_00274520, and the camera uploaded again with its zoom snapped to 1.0 (SnapCameraZoom) and put back
+func_0019DC98	SubmitDeferredRequests	once a frame (main loop, with the world and camera): sorts the deferred requests, clears the frame's upload flags, buckets them (BucketDeferredRequests) and for each group runs its row's handler and sends its requests, then resets g_nextDeferredRequest
+func_0019DDA0	WriteColoredSpritePacket	writes a GS sprite primitive (PRIM 6, alpha-blend flag chosen by alpha) with a packed colour and two vertices converted by (x+1728)*16 and (y*0.4545+1936)*16
+func_0019DF48	InitGroupMarkers	assigns a handler function to each of the 18 rows of D_0026AC30 and sets word 2 of every row to -1 (it also sets up a local object first)

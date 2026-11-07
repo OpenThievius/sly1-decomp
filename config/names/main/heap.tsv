@@ -1,0 +1,20 @@
+symbol	name	evidence
+func_0018D410	ClearKeyId	clears the two words of a KeyId (an 8-byte memset through func_001F5C0C); callers call it before filling words 0 ^ 5 and 1 ^ 7 of a key
+func_0018D430	InitHeap	sets the heap start to the image end rounded to 16, the end to 0x2000000, resets the permanent, front and back cursors and the back mark index, and inits the heap lock; sits in the start-up function table D_002647C0
+func_0018D4B0	ReservePermanentMemory	takes size rounded up to 16 from the heap base D_002C2A14, advances it, and sets both the reset mark D_002C2A18 and the front pointer D_002C2A1C to the new base
+func_0018D4F8	CheckAllocationSize	takes a size and does nothing; AllocateFrontMemory and AllocateBackMemory call it before they move their cursors
+func_0018D500	AllocateFrontMemory	returns D_002C2A1C and advances it by size rounded up to 16 (0 for size 0)
+func_0018D550	ResetFrontMemory	sets the front pointer D_002C2A1C back to the mark D_002C2A18
+func_0018D568	CopyToFrontMemory	allocates size bytes with func_0018D500 and copies size bytes from src into them with func_0018D800
+func_0018D5C0	AllocateZeroedFrontMemory	allocates n bytes with func_0018D500 and clears them with func_001F5C0C
+func_0018D608	PushBackMemoryMark	increments the index D_002C2A34 and stores the current back pointer D_002C2A20 in the array D_002C2A38 (func_0018D6F0 undoes it)
+func_0018D658	AllocateBackMemory	lowers the back pointer D_002C2A20 by size rounded up to 16 and returns it
+func_0018D6A8	AllocateZeroedBackMemory	allocates size bytes with func_0018D658 and clears them with func_001F5C0C
+func_0018D6F0	PopBackMemoryMark	restores the back pointer D_002C2A20 from D_002C2A38[D_002C2A34] and decrements the index
+func_0018D740	EnterRuntimeLock	returns 0; the frame-info registry functions of the C++ runtime (func_001FD990, func_001FF518, func_001FF848) call it before touching their lists, and LeaveRuntimeLock after
+func_0018D748	AllocateSignalTable	returns 0: MakeSignalTable calls it with 0x80 for its table of signal handlers and gives up when it returns 0
+func_0018D750	LeaveRuntimeLock	does nothing; the frame-info registry functions (func_001FE9F8, func_001FF1E0, DeregisterFrameInfo) call it after the work they open with EnterRuntimeLock
+func_0018D758	AllocateObjectMemory	returns AllocateZeroedFrontMemory of its size: the allocation the libraries and CloneFont call for a new object
+func_0018D778	FreeObjectMemory	does nothing: the release a deleting destructor calls (some dozen callers, as func_00137290's flag-1 path), since front memory is only freed by a reset
+func_0018D780	CopyQuadwords	copies n 128-bit values, the remainder n & 3 first and then four per iteration
+func_0018D800	CopyMemory	byte copy when dst, src or size is not word aligned, word copy when not 16-byte aligned, otherwise 16-byte block copy through func_0018D780

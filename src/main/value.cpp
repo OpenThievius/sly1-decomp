@@ -16,8 +16,8 @@ EntryPool D_0025C2D0;
 
 // The payloads of tags 0x19 and 0x1A as func_0011B258 copies them (ldl/ldr for the first two
 // words: the pool does not align them).
-struct Pair_11B258 { U64P xy; };
-struct Triple_11B258 { U64P xy; s32 z; };
+struct PairPayload { U64P xy; };
+struct TriplePayload { U64P xy; s32 z; };
 
 void func_0018D778(void* p);
 void* func_0018D5C0(s32 size);
@@ -36,7 +36,7 @@ void func_0011A6A8(void* p);
 void func_0011A6B8(void* p);
 void func_0011A670(void);
 
-// The pooled payloads (0011C000.cpp): each tag's allocator, reference and release.
+// The pooled payloads (value_pools.cpp): each tag's allocator, reference and release.
 void* func_0011C508(void);
 void* func_0011C618(void);
 void* func_0011C748(void);
@@ -53,7 +53,7 @@ void func_0011C7F0(void* p);
 void func_0011C900(void* p);
 void func_0011CA20(void* p);
 
-// The stream reader (00134000.cpp).
+// The stream reader (file_137290.cpp).
 s32 func_00137B90(BufferedStream* r);
 s32 func_00137BE0(BufferedStream* r);
 s32 func_00137D78(BufferedStream* r);
@@ -64,8 +64,8 @@ extern s32 D_00275714;
 
 void* func_0011AE78(void)
 {
-    void* p = TakePoolEntry(&D_0025C2D0);
-    func_001F5C0C(p, 0, 12);
+    void* p = TakePoolEntry(&g_propertyRefPool);
+    FillMemory(p, 0, 12);
     return p;
 }
 
@@ -82,7 +82,7 @@ void func_0011AEB8(R11B008Node* src, R11B008Node* dst, s32 first)
 R11B008Node* func_0011AF28(void)
 {
     R11B008Node* node = (R11B008Node*)TakePoolEntry(&g_valueNodePool);
-    func_001F5C0C(node, 0, 12);
+    FillMemory(node, 0, 12);
     InitScriptValue(node);
     node->tag = -1;
     return node;
@@ -108,7 +108,7 @@ void func_0011AF98(R11AFC8* src, R11AFC8* dst, s32 first)
 R11AFC8* func_0011AFC8(void)
 {
     R11AFC8* p = (R11AFC8*)TakePoolEntry(&g_payloadPool);
-    func_001F5C0C(p, 0, 0x14);
+    FillMemory(p, 0, 0x14);
     return p;
 }
 
@@ -130,7 +130,7 @@ void func_0011B060(ScriptValue* self, s32 flags)
 {
     ReleaseScriptValuePayload(self);
     if (flags & 1) {
-        func_0018D778(self);
+        FreeObjectMemory(self);
     }
 }
 
@@ -165,7 +165,7 @@ s32 func_0011B0F8(const ScriptValue* a, const ScriptValue* b)
         return r;
     }
     case 0x17:
-        return func_001F59C4(a->p, b->p, 0x40) == 0;
+        return CompareMemory(a->p, b->p, 0x40) == 0;
     case 0x19: {
         f32* pa = a->v;
         f32* pb = b->v;
@@ -228,15 +228,15 @@ void func_0011B258(const ScriptValue* src, ScriptValue* dst, s32 first)
         break;
     }
     case 0x19: {
-        Pair_11B258* p = (Pair_11B258*)AcquirePairPayload();
-        *p = *(Pair_11B258*)src->p;
+        PairPayload* p = (PairPayload*)AcquirePairPayload();
+        *p = *(PairPayload*)src->p;
         (void)AddRefPairPayload(p);
         dst->p = p;
         break;
     }
     case 0x1A: {
-        Triple_11B258* p = (Triple_11B258*)AcquireTriplePayload();
-        *p = *(Triple_11B258*)src->p;
+        TriplePayload* p = (TriplePayload*)AcquireTriplePayload();
+        *p = *(TriplePayload*)src->p;
         (void)AddRefTriplePayload(p);
         dst->p = p;
         break;
@@ -601,13 +601,13 @@ void func_0011BEE0(R11B008List* self, R11B008List* out)
 R11B008List* func_0011BF30(void)
 {
     R11B008List* p = (R11B008List*)AllocateZeroedFrontMemory(4);
-    func_001F5C0C(p, 0, 4);
+    FillMemory(p, 0, 4);
     return p;
 }
 
 void func_0011BF70(void)
 {
-    ResetMarkRoots(D_00259F38);
+    ResetMarkRoots(g_markStacks);
     InitEntryPool(&g_valueNodePool, 0xC, 0x2000);
     g_valueNodePool.removeCallback = (void*)DestroyScriptValueNode;
     InitEntryPool(&g_scopePool, 0x1C, 0x190);
@@ -616,16 +616,16 @@ void func_0011BF70(void)
     g_keyedValuePool.removeCallback = (void*)DestroyKeyedValue;
     InitEntryPool(&g_payloadPool, 0x14, 0x800);
     InitPayloadPools();
-    InitEntryPool(&D_0025C2D0, 0xC, 0x80);
+    InitEntryPool(&g_propertyRefPool, 0xC, 0x80);
 }
 
 void func_0011C040(void)
 {
-    func_0011C1D0(&g_valueNodePool);
-    func_0011C1D0(&g_scopePool);
-    func_0011C1D0(&g_keyedValuePool);
-    func_0011C1D0(&g_payloadPool);
-    func_0011CBB0();
-    func_0011C1D0(&D_0025C2D0);
-    func_0011A6B8(D_00259F38);
+    ShutDownEntryPool(&g_valueNodePool);
+    ShutDownEntryPool(&g_scopePool);
+    ShutDownEntryPool(&g_keyedValuePool);
+    ShutDownEntryPool(&g_payloadPool);
+    ShutDownPayloadPools();
+    ShutDownEntryPool(&g_propertyRefPool);
+    ShutDownMarkRoots(g_markStacks);
 }

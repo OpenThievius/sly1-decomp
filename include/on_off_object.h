@@ -9,7 +9,7 @@
 #define ON_OFF_OBJECT_H
 
 #include "placed_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 // The 0x90 bytes at 0x2F0, copied from the table at D_00275980 at construction.
 struct __attribute__((aligned(16))) Block63 {
@@ -25,8 +25,8 @@ struct __attribute__((packed)) Pack63 {
 };
 
 // A list of floats the loader finds by index (func_0014D9A8): its count and its values. It is
-// the key-frame curve T2176 (include/t2176.h): count is T2176::count and data is
-// T2176::lengths; func_001E2648 (file_1E08F8.cpp) can read it as a T2176 through `curve`.
+// the key-frame curve PathCurve (include/path_curve.h): count is PathCurve::count and data is
+// PathCurve::lengths; func_001E2648 (file_1E08F8.cpp) can read it as a PathCurve through `curve`.
 struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
 struct OnOffObject : PlacedObject {
@@ -37,7 +37,7 @@ struct OnOffObject : PlacedObject {
     void* f2E0;             // 0x2E0
     union {
         Arr63* obj;         // 0x2E4: the list the stream names, or 0
-        T2176* curve;       // 0x2E4: the same, as the key-frame curve it is
+        PathCurve* curve;       // 0x2E4: the same, as the key-frame curve it is
     };
     u8 f2E8[0x2F0 - 0x2E8]; // 0x2E8
     Block63 block2F0;       // 0x2F0

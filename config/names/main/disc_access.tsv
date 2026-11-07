@@ -1,0 +1,11 @@
+symbol	name	evidence
+func_00140790	ResetDiscSectorCheck	stores 3 in D_002613EC, the state StepDiscSectorCheck starts from; it sits in the method table D_002647C0
+func_001407A0	GetKeyIdSecond	returns a key pair's second word; GetKeyedDataSize calls it
+func_001407A8	NormalizeDiscPath	uppercases the path, appends ";1" unless it ends in a separator, then rewrites it in place as NUL-separated components of at most 8 name and 3 extension characters with non-alphanumerics replaced by '_', returning the component count
+func_00140968	RefreshDiscStatus	stores GetDiscStatus's result in g_discStatus when it changed and returns whether it is 0x14; StepDiscSectorCheck and LoadIopModules call it
+func_001409D8	InitDiscAccessModule	the disc file's entry in g_startupInitializers (D_002647C0[6]); its body is empty
+func_001409E0	StepDiscSectorCheck	state machine on D_002613EC: reads sector data into D_0027B800 with StartDiscRead and, once TestDiscReadDone reports the read finished, runs a CRC-32 over 0x800 bytes with the table D_002476A0 and compares it with the constant D_00247AA8, going back to state 1 on a mismatch
+func_00140B60	FormatDiscPath	copies the name behind a backslash, runs func_001407A8 on it, turns the NULs between its components back into backslashes and writes it with "%s\%s" after "cdrom0:" (or an empty prefix when flag is 0)
+func_00140C28	StartDiscReadUntilAccepted	calls StartDiscRead (func_0011E138) with the descriptor D_00247AA0 until it returns 1, and after each refusal runs SyncDiscRead(0) and stores GetDiscReadError in D_002613F8[0]; the sector-stream refill func_00137490 calls it
+func_00140CC8	StartLowLevelDiscReadUntilAccepted	the same retry loop as func_00140C28 but calling the low-level pair func_00203B18, func_002032C8 and func_00203D90 that StartDiscRead, SyncDiscRead and GetDiscReadError forward to; func_00137490 picks it when flags bit 2 is set
+func_00140D68	TestDiscReadDone	calls SyncDiscRead with (value < 1), which only polls when value is 0, and returns whether it answered 0; func_001409E0 and the disc set-up in main_loop call it

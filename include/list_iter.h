@@ -17,4 +17,12 @@ struct ListFrame {
 
 extern ListFrame* D_0027B314;
 
+// The same frame as some walks keep it: four words, each pointer handled as an int.
+struct WordListFrame {
+    s32 list;
+    s32 link;
+    s32 offset;
+    s32 prev;
+};
+
 #endif

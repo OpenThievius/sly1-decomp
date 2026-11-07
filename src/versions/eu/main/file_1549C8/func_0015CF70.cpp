@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: key is an unsigned 16-bit glyph, 576-line screen (468.6 limit, 0.5463 scale, 1920 offset)
-V24A2_Glyph* func_0015DAB8(V24A2* self, u16 key);
+FontGlyph* func_0015DAB8(Font* self, u16 key);
 extern s32 D_eu_00263564;
 extern s32 D_eu_00263568;
 
-void func_0015CF70(V24A2* self, u16 key, u32 color, V24A0* s, f32 x, f32 y)
+void func_0015CF70(Font* self, u16 key, u32 color, PacketWriter* s, f32 x, f32 y)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, key);
+    FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -37,19 +37,19 @@ void func_0015CF70(V24A2* self, u16 key, u32 color, V24A0* s, f32 x, f32 y)
             BeginGifRegListTag(s, 9, 0x434343431ULL);
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
             AddGifRegListFloat(s, tag, 0.0f);
-            func_00161860(s, u0, v0);
+            AddGifUvRegListEntry(s, u0, v0);
             s32 sx = (s32)((x + 1728.0f) * 16.0f);
             s32 sy = (s32)((py * 0.5462963f + 1920.0f) * 16.0f);
-            func_001618C0(s, sx, sy, self->f40, 0);
-            func_00161860(s, u1, v0);
+            AddGifXyzfRegListEntry(s, sx, sy, self->f40, 0);
+            AddGifUvRegListEntry(s, u1, v0);
             s32 sy2 = (s32)((y * 0.5462963f + 1920.0f) * 16.0f);
-            func_001618C0(s, sx, sy2, self->f40, 0);
-            func_00161860(s, u0, v1);
+            AddGifXyzfRegListEntry(s, sx, sy2, self->f40, 0);
+            AddGifUvRegListEntry(s, u0, v1);
             s32 sx2 = (s32)((px + 1728.0f) * 16.0f);
-            func_001618C0(s, sx2, sy, self->f40, 0);
-            func_00161860(s, u1, v1);
-            func_001618C0(s, sx2, sy2, self->f40, 0);
-            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
+            AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
+            AddGifUvRegListEntry(s, u1, v1);
+            AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
+            self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
         }
     }
 }

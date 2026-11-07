@@ -22,6 +22,20 @@ struct Tri8B { u8* a; u8* b; u8* c; };
 struct Edge8B { u8* a; u8* b; };
 struct Rec8B { s32 id; u8 pos[96]; };
 
+// An entry of a Gr8B's table at +0x3C (0x1C bytes each, f38 of them), found by object id
+// (FindEntryByObjectId, func_0012CCE8): the id, an object whose first method moves a body
+// (func_001C8C08), and a record whose flag at 0x18 func_00139B38 sets.
+struct Mover8B;
+typedef void (*MoveFn8B)(Mover8B* m, void* body, f32 x, f32 y, s32 z, void* out, s32 w);
+struct Mover8B { MoveFn8B* vtbl; };
+struct Flagged8B { u8 pad[0x18]; s32 flag; };
+struct Entry8B {
+    s32 key;                // 0x00: the object id func_0012CCE8 matches
+    Mover8B* mover;         // 0x04
+    Flagged8B* sub;         // 0x08
+    u8 pad0C[0x1C - 0x0C];
+};
+
 struct Fl8B { u8 pad[8]; f32 f8; };
 struct In8B { u8 pad[8]; Fl8B* p8; };
 struct Gr8B {

@@ -4,8 +4,8 @@
 void func_001685B8(void)
 {
     D_002BE470 = 1;
-    func_00168AF8();
-    func_001683B8();
+    SendDisplayResetPacket();
+    SignalDisplaySync();
     D_002BE470 = 0;
     func_00201A18(0, 1, 3, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;

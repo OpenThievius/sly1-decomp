@@ -1,0 +1,3 @@
+symbol	name	evidence
+func_00211DE0	RegisterProgramFrameInfo	registers the program's frame information D_0027B198 with the runtime (RegisterFrameInfo); the last entry of the constructor list D_0027B130
+func_00211DF8	ReleaseProgramFrameInfo	takes the program's frame information D_0027B198 back from the runtime (DeregisterFrameInfo); the last entry of the destructor list D_0027B180

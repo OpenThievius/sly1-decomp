@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FB528	ConvertDoubleToU64	converts a double to an unsigned 64-bit integer with the software double arithmetic (double_to_u64.c; FormatExponent calls it)

@@ -6,7 +6,7 @@ struct Obj_16B580_eu {
     s32 f2D4;
     f32 f2D8;
     u8 pad2DC[4];
-    Sub_16B580* f2E0;
+    StateWalker* f2E0;
     u8 pad2E4[0x308 - 0x2E4];
     void* f308;
     u8 pad30C[0x33C - 0x30C];
@@ -43,7 +43,7 @@ void func_0016B580(Obj_16B580_eu* self, PadRecord* arg)
         return;
     }
     self = self->p260;
-    Sub_16B580* p = self->f2E0;
+    StateWalker* p = self->f2E0;
     if (self->f308 != 0) {
         if (self->f308 == self->f33C) {
             StartMemoryCardSave(g_memoryCard);
@@ -53,7 +53,7 @@ void func_0016B580(Obj_16B580_eu* self, PadRecord* arg)
     }
     ShowCurrentObjectCaptions(self);
     f32 delay = 0.3f;
-    if (self->f2D4 == 1 && (p->f28 == p->f30 || delay <= g_gameTime[0] - self->f2D8)) {
+    if (self->f2D4 == 1 && (p->f28 == p->index || delay <= g_gameTime[0] - self->f2D8)) {
         s32 idx = self->f2D0;
         if (idx == 0) {
             Obj_16B580_eu* g = (Obj_16B580_eu*)&D_0026FD00;
@@ -71,7 +71,7 @@ void func_0016B580(Obj_16B580_eu* self, PadRecord* arg)
         PushStackElement(g_elementStack, &g_mapScreenList);
         return;
     }
-    if (p->f28 != p->f30) {
+    if (p->f28 != p->index) {
         return;
     }
     if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= g_gameTime[0])) {

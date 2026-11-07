@@ -10,7 +10,7 @@
 #define EFFECT_SPAWNER_H
 
 #include "placed_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
 // own before a change, func_001550E8 fills it from the ids).
@@ -20,7 +20,7 @@ struct Rec50 {
     s32 kind;               // 0x10: 3, 4 seen
     u8 pad14[0x20 - 0x14];
     union {
-        T2176* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
+        PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
         s32 value20;        // 0x20: a value taken from another object (func_001550E8)
     };
     void* f24;              // 0x24
@@ -36,7 +36,13 @@ struct Rec50 {
     void* found[3];         // 0x1D8: objects named by the ids
     u8 pad1E4[0x1E8 - 0x1E4];
     f32 f1E8;               // 0x1E8
-    u8 pad1EC[0x200 - 0x1EC];
+    u8 pad1EC[0x1F0 - 0x1EC];
+    s32 f1F0;               // 0x1F0: an effect's i124 takes it (func_001A22C8, func_001A2D30), an object id (func_001A39C8)
+    union {
+        s32 i1F4;           // 0x1F4: an effect's i120 (func_001A2D30)
+        f32 f1F4;           // 0x1F4: an effect's rate (func_001A39C8)
+    };
+    u8 pad1F8[0x200 - 0x1F8];
 };
 
 struct EffectSpawner : PlacedObject {
@@ -52,7 +58,7 @@ struct EffectSpawner : PlacedObject {
     };
     s32 id300;              // 0x300
     s32 id304;              // 0x304
-    s32 f308;               // 0x308
+    s32 continuous;         // 0x308: set, the spawner stays active forever
     s32 id30C;              // 0x30C
     s32 f310;               // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438

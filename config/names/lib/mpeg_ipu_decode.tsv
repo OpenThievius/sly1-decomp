@@ -1,0 +1,18 @@
+symbol	name	evidence
+func_0020DEE8	SetIpuMpeg1Mode	sets or clears bit 23 of the IPU's control register 0x10002010, the MPEG-1 mode, as the sequence header says
+func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the decoder's callback of kind 1 while its input runs dry, refreshes the bit window and reports "Error code detected(BDEC)" and resets the IPU on an error
+func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
+func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
+func_0020F0C0	SendIpuCommand	writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the bit window (D_0027B040)
+func_0020F0F0	WaitIpuCommandDone	waits while the IPU is busy, running the stall callback every 5000 polls
+func_0020F248	DecodeIpuVariableLength	waits for the IPU, then sends it a variable-length decode command of a table and reads the decoded value
+func_0020F3C0	PeekIpuBits	returns the next n bits of the IPU's bit stream without consuming them
+func_0020F4C8	SkipIpuBits	sends the IPU a command that consumes n bits and refreshes the bit window
+func_0020F5B8	ReadIpuBits	returns the next n bits of the IPU's bit stream and consumes them
+func_0020F708	FindNextStartCode	aligns the IPU's bit stream to a byte and skips to the next start code prefix 0x000001
+func_0020F7F0	ParseMpegHeaders	reads start codes and their headers: a sequence header (0x1B3), a group of pictures (0x1B8), a picture (0x100), until the sequence's end (0x1B7)
+func_0020F900	ReadPictureHeader	reads a picture header: its temporal reference, coding type, delay and the forward and backward codes of P and B pictures
+func_0020F9C8	ReadExtensionsAndUserData	reads the extensions and user data after a header, dispatching each extension through the table D_00250430
+func_0020FDA0	ReadGroupOfPicturesHeader	reads a group of pictures header: its time code, closed and broken flags
+func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks
+func_00211348	ConvertPictureColours	converts a decoded picture's colours with the IPU by DMA, through interrupt handlers for large pictures

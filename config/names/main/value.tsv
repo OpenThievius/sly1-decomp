@@ -1,0 +1,40 @@
+symbol	name	evidence
+func_0011AE78	TakeZeroedPoolEntry	takes an entry from pool D_0025C2D0 with TakePoolEntry and clears its 12 bytes
+func_0011AEB8	CopyScriptValueChain	deep-copies a value with CloneValue, then recurses over the next pointer, making a new node for each
+func_0011AF28	NewScriptValueNode	takes a 0xC-byte node from the pool D_0025C250, clears it and sets its value to unset (tag -1)
+func_0011AF78	DestroyScriptValueNode	the node pool's removeCallback: destroys the node's value with DestroyValue (flags 2)
+func_0011AF98	CopyScriptValueRecord	copies the five words of a tag 0x1F record, using a given first word unless it is 0
+func_0011AFC8	NewScriptValueRecord	takes a 0x14-byte record from the pool D_0025C2B0 and clears it
+func_0011B008	InitScriptValue	constructor: sets the tag to -1 and returns the value
+func_0011B018	CopyConstructScriptValue	copy constructor: takes a reference on the source's payload, then copies tag and word
+func_0011B060	DestroyScriptValue	destructor: releases the payload and, when bit 0 of the flags is set, deletes the value with func_0018D778
+func_0011B0A8	AssignScriptValue	assignment: references the source's payload, releases the old one and copies tag and word
+func_0011B0F8	AreScriptValuesEqual	0 when the tags differ; then compares by tag: float equality (0x15), bytes (0x17), 2 or 3 floats (0x19, 0x16/0x18/0x1A), booleans (0x1B), words for the integer and pointer tags
+func_0011B258	CloneScriptValue	copies the tag and, per tag, makes a fresh node chain (0x1E), a fresh pooled payload (0x16..0x1A) or a fresh record (0x1F), else copies the word
+func_0011B418	ReleaseScriptValuePayload	for tags 0x16..0x1A calls the matching Release...Payload on the word
+func_0011B4A8	AddRefScriptValuePayload	for tags 0x16..0x1A calls the matching AddRef...Payload on the word
+func_0011B538	SetScriptValueTag	releases the payload and sets only the tag (BD28 uses it to make the empty result, 0x22)
+func_0011B570	SetScriptValueInt	releases the payload, stores the integer and sets tag 0x14
+func_0011B5B0	SetScriptValueFloat	releases the payload, stores the float and sets tag 0x15
+func_0011B5F0	SetScriptValueBool	releases the payload, stores 1 or 0 from the flag and sets tag 0x1B
+func_0011B640	SetScriptValuePointer	releases the payload, stores the pointer and sets tag 0x1C
+func_0011B680	SetScriptValueIntB	releases the payload, stores the integer and sets tag 0x1D (the stream reader's case 29)
+func_0011B6C0	SetScriptValueChain	releases the payload, stores the first node and sets tag 0x1E
+func_0011B700	SetScriptValueRecord	releases the payload, stores a tag 0x1F record and sets tag 0x1F
+func_0011B740	SetScriptValueVectorA	references the pooled block, releases the old payload, stores it and sets tag 0x16
+func_0011B788	SetScriptValueMatrix	references the pooled block, releases the old payload, stores it and sets tag 0x17
+func_0011B7D0	SetScriptValueVectorB	references the pooled block, releases the old payload, stores it and sets tag 0x18
+func_0011B818	SetScriptValuePair	references the pooled block, releases the old payload, stores it and sets tag 0x19
+func_0011B860	SetScriptValueTriple	references the pooled block, releases the old payload, stores it and sets tag 0x1A
+func_0011B8A8	SetScriptValuePointerB	releases the payload, stores the pointer and sets tag 0x20 (the stream reader's case 32)
+func_0011B8E8	SetScriptValueIntC	releases the payload, stores the integer and sets tag 0x21
+func_0011B928	ConvertScriptValueToInt	gives back a copy when the tag is already 0x14, otherwise a tag 0x14 value holding the float truncated to an integer
+func_0011B9A8	ConvertScriptValueToFloat	gives back a copy when the tag is already 0x15, otherwise a tag 0x15 value holding the integer converted to float
+func_0011BA28	ReadScriptValueChain	reads a tag byte from the stream (0xFF ends, bit 7 means another node follows), reads the payload that tag needs into a new node (integers, floats, pooled vectors, a nested chain) and links the next node
+func_0011BD28	AddKeyedValue	makes a keyed node holding a copy of the value and pushes it at the head of the list without looking for the key; gives back an empty (0x22) value
+func_0011BDD0	UpdateKeyedValue	walks the list for the key and assigns the value to the node found; gives back an empty (0x22) value either way
+func_0011BE90	FindKeyedValue	walks the list for the key and, when found, copies its value to the out value (if given) and returns 1, else 0
+func_0011BEE0	CopyKeyedList	makes a keyed node, copies the list into it with CopyKeyedValueChain and stores it as the head of the out list
+func_0011BF30	NewKeyedList	allocates the 4-byte list head with func_0018D5C0 and clears it
+func_0011BF70	InitScriptValuePools	sets up the five pools D_0025C250..D_0025C2D0 with InitEntryPool and installs the removeCallbacks of the node, scope and keyed pools
+func_0011C040	ShutDownScriptValuePools	calls the pools' teardown func_0011C1D0 for each, func_0011CBB0 and func_0011A6B8 (mirror of InitValuePools)

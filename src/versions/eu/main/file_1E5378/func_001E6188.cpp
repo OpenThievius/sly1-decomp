@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the instrument pointer is at 0x58C (US 0x27C).
 void func_001AA268(void* self);
-struct Obj_1E6188_eu { u8 pad[0x58C]; Inst_1E6188* p58C; };
+struct Obj_1E6188_eu { u8 pad[0x58C]; ConeSprite* p58C; };
 
 void func_001E6188(Obj_1E6188_eu* self)
 {
     SetupScreenElementText(self);
-    self->p58C = (Inst_1E6188*)CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
+    self->p58C = (ConeSprite*)CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode(self->p58C, 1);
     func_001847F0(self->p58C, D_00275640);
     func_00184858(self->p58C, D_00275650);

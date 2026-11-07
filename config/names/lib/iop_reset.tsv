@@ -1,0 +1,10 @@
+symbol	name	evidence
+func_001F9AD8	SendIopReset	sends the IOP the reset command 0x80000003 with its argument in a packet by DMA and waits for the IOP to come back
+func_001F9C18	IsIopResetDone	tells whether the IOP has come back from a reset, from a register shared with it (LoadIopModules polls it)
+func_001F9C50	ResetIop	resets the IOP with "rom0:UDNL " followed by an argument of up to 69 characters after shutting the remote calls down (LoadIopModules resets it with the IOP image)
+func_001F9D60	DisableInterrupts	original assembly: clears the status register's interrupt enable and returns whether it was set (the wrappers and the IOP clients bracket their critical sections with it)
+func_001F9DA8	EnableInterrupts	original assembly: sets the status register's interrupt enable again
+func_001F9DC0	CreateLibrarySemaphores	creates the two semaphores D_002771E4 and D_002771E8 (InitKernelLibrary calls it first)
+func_001F9E08	FindKernelWord	returns the address of the first word equal to a value from 0x80000000 on
+func_001F9E50	InstallKernelWordSearch	installs FindKernelWord as the system call D_002771D8 names (0x83)
+func_001F9EA8	InitKernelLibrary	runs the kernel library's set-ups: its semaphores, InstallKernelWordSearch, the three kernel patch installers and StartRequestThread (the program's entry func_00100008 calls it)

@@ -1,0 +1,44 @@
+symbol	name	evidence
+func_0018D8E0	InitContactListObject	slot 0 of class 0x3C: runs InitChildGroupObject, then sets the flag at 0x6B8 that its slot 27 tests
+func_0018D910	LoadContactListObject	slot 10 of class 0x3C: runs LoadChildGroupObject, resolves its one object link (D_002699B0, id 0x317 into +0x6B0) and clears flag bits 32, 40 and 41 and sets bit 40
+func_0018D978	UnregisterContactListObject	slot 7 of class 0x3C: runs UnregisterCollider, then stops the animation player at +0x6B4 with StopAnimationPlayer and clears the field
+func_0018D9B8	MoveContactListObject	slot 0x7C (motion) of class 0x3C: when ready turns its placement by its velocity (func_00189350), then runs the base motion func_001BC088 with its two attachments (+0x1EC, +0x1F0) cleared and puts them back
+func_0018DA40	LaunchContactListObject	slot 0x130 of class 0x3C: stores its argument at +0x694 and the vector at +0x6A0, starts the animation of +0x6B0 into +0x6B4 and, when +0x6B8 is set and it moves, turns it to face its velocity (slot 0x88)
+func_0018DB20	ApplyContactListAttachments	slot 0xA0 of class 0x3C: with attachments at +0x1EC/+0x1F0, multiplies the transform by their position and rotation before the base slot 0xA0 (func_00125C90); without them, the base slot alone
+func_0018DC88	TestContactListMayContact	slot 56 of class 0x3C: returns 1 for the object at +0x6E4, one whose id matches an id of the list at +0x6C0, or one of a kind of the list at +0x6D4, otherwise what TestCollidersMayContact returns
+func_0018DD50	AddContactListId	appends an object id to the list at +0x6C0 (count at +0x6BC, at most four) that TestContactListMayContact matches
+func_0018DD78	AddContactListKind	appends a kind to the list at +0x6D4 (count at +0x6D0, at most four) that TestContactListMayContact tests with IsObjectOfKind
+func_0018DDA0	InitContactListObjectWithoutGravity	slot 0 of class 0x3D: runs InitContactListObject, then sets the gravity vector to the zero vector D_00248D30
+func_0018DDD8	LaunchContactListObjectWithoutGravity	slot 0x130 of class 0x3D: LaunchContactListObject, then stores the direction of its velocity times the speed at +0x6F0 as the velocity it keeps (+0x700)
+func_0018DE70	StepContactListObjectWithoutGravity	slot 0x80 (step) of class 0x3D: StepCollider, then accelerates towards the velocity at +0x700 at the rate +0x6F4 (func_001EE2B0, func_001B9AB0)
+func_0018DEE8	LaunchTimedContactListObject	slot 0x130 of class 0x3E: LaunchContactListObject, then sets its arrival time: the game time plus +0x6F0 when that is positive, else from the time func_00141D88 finds to reach the target (+0x694) at the speed +0x6F4
+func_0018E410	FindKeyIndex	walks the 16 keys at D_002484B0 comparing words 2 ^ 6 with the argument's and returns the index of the match, or -1
+func_0018E480	GetMovieTitle	index below 16 returns the string in D_002699C0, -1 returns "Nil", else "(unknown)"
+func_0018E4C0	QueueMovieByIndex	queues the movie key at D_002484B0 + index * 32 with func_0018F0E8
+func_0018E4F0	QueueMovieWithSuccessor	queues a movie by index, stores the key of a second index as the player's following movie (+8) and sets its bit in u19F4
+func_0018E558	RunMovieDecodeThread	thread body: forever waits on a semaphore, then submits two buffers per round with func_001686E8/func_001684E8/func_001683E8
+func_0018E5E8	CreateMovieDecodeThread	creates the semaphore at +0x130 and a thread whose entry is func_0018E558, then starts it; listed in the init function table D_002647C0
+func_0018E678	InitIopRingSink	stores the ring's IOP address and size (from OpenIopRing's result) and resets it with func_0018E6A0
+func_0018E6A0	ResetIopRingSink	free space = size and read, write and fill counters set to 0
+func_0018E7C0	WriteIopRingBlock	describes one transfer (source, ring address + write position, size) and runs it through the DMA calls func_001F6CA0/func_001F6C90, waiting until it finishes
+func_0018E838	UpdateIopRingSink	reads the ring position with GetIopRingPosition and recomputes the free space, filled amount and read position modulo the size
+func_0018E940	StartMovieStream	prepares the sound volume channels and the IOP ring (OpenIopRing 0x6000), sets up two stream buffers and the ring sink; f00 is 1 when the ring opens
+func_0018EA48	ResetMovieStream	if the stream is open, resets its two buffers and the ring sink
+func_0018EAA0	StopMovieStream	clears the open flag and restores both volume channels and the previous state saved by func_0018E940
+func_0018EAF8	FeedMovieStream	skips the 4-byte header, fills the first buffer (mode 1) and then the second (mode 2) from a chunk; returns 0 until enough data is available
+func_0018EB98	UpdateMovieStream	state 2 drains the buffer then starts the ring (state 3); state 3 refreshes the ring and keeps draining
+func_0018EC40	AcceptMovieDataIntoRing	the decoder's callback 0 (InitMoviePlayback installs it through func_0020A538): when the ring at +0x60 has room (+0x70) for the request's size, copies the request's bytes in with FillRingBufferFromMemory and returns 1, else 0
+func_0018EC80	PassMovieDataToStream	the decoder's callback 2 (InitMoviePlayback installs it through func_0020A538): hands the request's size and buffer to FeedMovieStream on the stream at +0x80
+func_0018ECA8	FlushMovieToIpu	tops up the stream until 0x1000 bytes, pads with zeroes to a 32-byte multiple and drains the buffer into an IpuDmaSink
+func_0018ED78	FeedMovieDecoderWithoutWaiting	the decoder's callback 4 (InitMoviePlayback installs it through func_0020B168): runs FeedMovieDecoder with wait 0 and returns 1
+func_0018EDA0	AcceptMovieDecoderEvent	the decoder's callback 0 of func_0020B168 (InitMoviePlayback installs it): does nothing and returns 1
+func_0018EDA8	UploadMovieFrame	builds a GIF packet that uploads the decoded frame in 16 by 16 blocks (0x400 bytes each)
+func_0018EF78	DrawMovieFrame	builds a GIF packet that sets up registers and draws the frame's sprite at the given x, y
+func_0018F0E8	QueueMovie	if the player's pending key (+4) is empty stores the key and sets its bit in the device flags word u19F4
+func_0018F148	PlayQueuedMovies	takes the pending keys (+4, +8), clears them and plays the first with func_0018F198, then the second if set
+func_0018F198	PlayMovie	opens the movie stream for a key, starts playback and loops on func_0018F6E8 until the movie ends or a button is pressed, then finishes with func_0018F7D0; a failure plays a sound effect
+func_0018F448	InitMoviePlayback	sets up buffers, the stream and decoder callbacks, sets the checksum cursor and fills the 256-entry CRC table (0xEDB88320)
+func_0018F610	AdvanceCodeChecksum	updates a CRC-32 over four bytes at the cursor from the table; sets D_00269B48 when the end is reached with a nonzero result
+func_0018F6E8	StepMovieFrame	waits for the decoder, decodes a frame with func_0020B058, uploads and draws it and advances the checksum while the decoder runs
+func_0018F7D0	FinishMovie	stops the stream and decoder, waits for the thread, sets D_002626CC to 3 and sets the movie's bit in the device flags word f19F8
+func_0018F890	FeedMovieDecoder	while the stream window is empty refills it; passes the unread bytes to func_0020A518 and consumes the returned count; returns 0 when empty and not waiting

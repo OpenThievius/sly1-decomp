@@ -93,32 +93,32 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
 
     switch (mode) {
     case 0:
-        p = func_00201BA8();
+        p = GetGsParams();
         *(volatile u64*)0x12001000 = 0x200;
         p->interlace = x;
         ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
         p->mode = y;
         p->version = ext;
-        func_001F6C70(0xFF00);
+        WriteGsInterruptMask(0xFF00);
         p->field = (flag != 0);
         if (p->handler != 0) {
-            func_001F6D40(2);
-            func_001F6960(2, p->handler_id);
+            DisableInterruptCause(2);
+            RemoveInterruptHandler(2, p->handler_id);
             p->handler = 0;
             p->handler_id = 0;
         }
-        func_001F6910(x & 1, (u8)y, flag & 1);
+        SetVideoModeSyscall(x & 1, (u8)y, flag & 1);
         return;
     case 1:
         *(volatile u64*)0x12001000 = 0x100;
         return;
     case 5:
-        p = func_00201BA8();
+        p = GetGsParams();
         p->field = (flag != 0);
         p->interlace = x;
         p->mode = y;
         p->version = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
-        func_001F6910(x & 1, (u8)y, flag & 1);
+        SetVideoModeSyscall(x & 1, (u8)y, flag & 1);
         return;
     default:
         return;
@@ -127,12 +127,12 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
 
 GsParam* func_00201BA8(void)
 {
-    return &D_00279330;
+    return &g_gsParams;
 }
 
 void func_00201BB8(void* self)
 {
-    s16 kind = func_00201BA8()->version;
+    s16 kind = GetGsParams()->version;
     if (kind == 1) {
         *(volatile u64*)0x12000000 = *(u64*)self;
         *(volatile u64*)0x12000070 = *(u64*)((u8*)self + 0x10);
@@ -171,18 +171,18 @@ s32 func_00201C78(void* self)
 void func_00201D60(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
 {
     u8* base = (u8*)self;
-    u64* mode = (u64*)func_00201BA8();
+    u64* mode = (u64*)GetGsParams();
     s32 r;
 
-    func_00202140(self, a1, w, h, 0, 0);
-    func_00202140(base + 0x28, a1, w, h, 0, 0);
-    func_00202478(base + 0x60, a1, w, h, a4, a5);
-    func_00202478(base + 0x150, a1, w, h, a4, a5);
+    DefineDisplayEnvironment(self, a1, w, h, 0, 0);
+    DefineDisplayEnvironment(base + 0x28, a1, w, h, 0, 0);
+    DefineDrawEnvironment(base + 0x60, a1, w, h, a4, a5);
+    DefineDrawEnvironment(base + 0x150, a1, w, h, a4, a5);
     if (flag) {
         s32 y = 0x800 - (w >> 1);
         s32 z = 0x800 - (h >> 1);
-        func_00202660(base + 0xE0, a4, y, z, w, h, 0, 0, 0, 0, 0);
-        func_00202660(base + 0x1D0, a4, y, z, w, h, 0, 0, 0, 0, 0);
+        DefineClearPacket(base + 0xE0, a4, y, z, w, h, 0, 0, 0, 0, 0);
+        DefineClearPacket(base + 0x1D0, a4, y, z, w, h, 0, 0, 0, 0, 0);
     }
     *(V128*)&self->tag50 = 0;
     *(V128*)&self->tag140 = 0;
@@ -194,7 +194,7 @@ void func_00201D60(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag
     self->tag140.last = 1;
     self->tag140.words = 1;
     self->tag140.kind = 14;
-    r = func_002023B0(a1, w, h);
+    r = CountFrameBufferPages(a1, w, h);
     if ((*mode & 0xFFFF0000FFFFULL) == 0x100000001ULL || *(s16*)mode == 0) {
         s16 half = r >> 1;
         self->f38.value = half;
@@ -208,19 +208,19 @@ s32 func_00201FF8(void* self, s32 flag)
     s32 idx = flag & 1;
     s32 r;
 
-    func_00201BB8(base + idx * 0x28);
+    WriteDisplayRegisters(base + idx * 0x28);
     if (idx != 0) {
-        r = func_00201C78(base + 0x140);
+        r = SendDrawEnvironment(base + 0x140);
     } else {
-        r = func_00201C78(base + 0x50);
+        r = SendDrawEnvironment(base + 0x50);
     }
     return r;
 }
 
 s32 func_00202058(s32 mask)
 {
-    s32 r = func_001F6C60(mask);
-    func_001F6C70(mask);
+    s32 r = ReadGsInterruptMask(mask);
+    WriteGsInterruptMask(mask);
     return r;
 }
 
@@ -249,7 +249,7 @@ void func_00202098(GsOffset* self, s16 a1, s16 a2, s16 a3)
 
 s32 func_00202120(s32 mask)
 {
-    return func_001F6C60(mask);
+    return ReadGsInterruptMask(mask);
 }
 
 INCLUDE_ASM(func_00202140);
@@ -259,7 +259,7 @@ const char D_0024F510[] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
 
 s32 func_002023B0(s16 px, s16 py, s16 pz)
 {
-    u64* bits = (u64*)func_00201BA8();
+    u64* bits = (u64*)GetGsParams();
     s32 yS = (py + 63) / 64;
     s32 c;
     if (px & 2) {

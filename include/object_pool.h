@@ -11,13 +11,19 @@
 #define OBJECT_POOL_H
 
 #include "base_object.h"
+#include "shapes.h"   // Quad16
+
+struct Quad16;
 
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
 struct Sub8C {
     s32 f0;                 // 0x0
     s32 f4;                 // 0x04: nonzero while the record is lent out
     s32 f8;                 // 0x08
-    s32 fC;                 // 0xC
+    union {
+        s32 fC;             // 0xC
+        Quad16* qC;         // 0x0C: two quadwords per entry, allocated by func_001A8208
+    };
     s32 f10;                // 0x10
     void* f14;              // 0x14: the object it was lent to
 };
@@ -29,9 +35,20 @@ struct V8C {
     s32 c;
 };
 
+// One entry of an object pool: an object found by id and the copies of it func_001A8208 makes.
+struct ObjectPoolEntry {
+    s32 id;                 // 0x00: the id of the object (func_001A8150, func_001A8208)
+    s32 count;              // 0x04: the objects in use; func_001A87E0 caps it at total
+    void** objects;         // 0x08: the object and its copies
+    s32 total;              // 0x0C: the objects func_001A8208 made
+    s32 flags;              // 0x10: 1 keeps a chosen object in the list (func_001A8AF8), 2 enables the entry
+};
+
+typedef char check_ObjectPoolEntry[sizeof(ObjectPoolEntry) == 0x14 ? 1 : -1];
+
 struct ObjectPool : BaseObject {
-    s32 count;              // 0x34: number of 0x14-byte items (func_001A84C8)
-    void* items;            // 0x38
+    s32 count;              // 0x34: the entries of items (func_001A84C8)
+    ObjectPoolEntry* items; // 0x38
     Sub8C* sub;             // 0x3C
     s32 f40;                // 0x40
     s32 f44;                // 0x44
@@ -49,7 +66,12 @@ struct ObjectPool : BaseObject {
     u8 padDC[0xE0 - 0xDC];
     void* fE0;              // 0xE0
     void* fE4;              // 0xE4
-    u8 padE8[0x110 - 0xE8];
+    u8 padE8[0xF0 - 0xE8];
+    union {
+        Quad16 fF0;         // 0xF0: a place func_0018B340 copies in whole before releasing it
+        f32 posF0[4];       // (its z, 0xF8, set or raised after the copy)
+    };
+    u8 pad100[0x110 - 0x100];
     V8C v110;               // 0x110
     u8 pad11C[0x120 - 0x11C];
     s32 f120;               // 0x120

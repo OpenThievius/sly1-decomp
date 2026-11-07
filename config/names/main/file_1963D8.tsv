@@ -1,0 +1,32 @@
+symbol	name	evidence
+func_001963D8	InitObjectGroup	slot 0 of the 0x53 class: runs the base set-up func_00123ED0 and adds itself to its world's list at +0x1C3C
+func_00196410	LoadObjectGroup	slot 10 of the 0x53 class: reads the member count from the level stream, creates or looks up each member object, records it in a cell of the list at 0x2D0, then reads per-member settings and hands each member the group as parent
+func_00196810	CopyObjectGroup	slot 9 of the 0x53 class: runs the common copy keeping the words at 0x2DC, then rebuilds the cell list at 0x2D0 with new cells that point at the copy's own matching members
+func_00196900	StartObjectGroup	slot 16 of the 0x53 class: runs the base func_00124A48 and then its own slot 3
+func_00196938	InitGaugeCollider	slot 0 of class 0x18: runs InitSwitchedCollider, sets its defaults (-10, the unit Z vector, a 120-second time, two values from D_0026A718), sets up its two lists and stores itself in D_0026A904
+func_001969C0	LoadGaugeCollider	slot 10 of class 0x18: runs LoadCollider and resolves its one object link g_gaugeColliderLoadLinks
+func_001969F8	StartGaugeCollider	slot 16 of class 0x18: resolves g_gaugeColliderStartLinks, creates its state walkers and its pose source, and gathers the objects of ids 0x305, 0x105 and class 0x44 into its lists
+func_00196B78	StepGaugeCollider	slot 0x80 (step) of class 0x18: StepCollider, then turns it with BuildAxisAngleMatrix and passes the turn to func_001B9D10
+func_00196E48	AcceptColliderOfOtherRoot	a filter UpdateGaugeCollider passes by address: rejects a collider whose root (+0x50) is the given one, and a collider with flag bit 43 of +0x538 that is not of kind 0x1F
+func_00196EB0	UpdateGaugeCollider	slot 0x54 (update) of class 0x18: UpdateSwitchedCollider, then its own per-frame work (func_001BB290, ConvertPositionToWorld)
+func_001973D8	ApplyGaugeColliderRatioToEffect	clamps the count at 0x680 over the limit at 0x684 to 0..1 and passes 1 - ratio * 0.8 to func_00151E20 on D_00261EF0, as ApplyGaugeRatioToEffect does for the gauge manager
+func_00197458	EndGaugeColliderTimer	the timer's limit callback that HandleGaugeColliderNotification installs: on flag 1, unless the gauge collider's walker at 0x6B8 is at 0x3F4, sets its target to 0x3F5 and runs ApplyGaugeColliderRatioToEffect
+func_001974D8	HandleGaugeColliderActivation	slot 72 of class 0x18: only runs HandleSwitchedColliderActivation
+func_001974F8	ControlGaugeCollider	slot 0x134 of class 0x18 (the control slot, as ControlWalkerCollider): reads the input against the camera (func_00144FF8), moves its state walkers between 0x3DB/0x3DC and 0x3F3 to 0x3F5, stops the timer element and places objects (PlaceObjectAtRandomNode)
+func_00197788	UpdateGaugeColliderVisibility	slot 46 of class 0x18: shows g_gaugeAmountCaption, D_0026E4E0 and g_timerElement while its walker is at 0x3F3 and AreMenusAndFadeClear, else hides them
+func_00197848	PlaceObjectAtRandomNode	once the time at 0x698 has passed, takes the first array object func_00182FC8 rejects, moves a random node (func_001EAA70) from the free list 0x69C to the used list 0x6A8, places the object at the node's position and matrix, enters state 0x10 and sets the next time
+func_00197A08	ReleaseObjectNode	moves the node the object holds at 0xC14 from the used list 0x6A8 back to the free list 0x69C, resets its state with func_001A76A0 and clears 0xC14
+func_00197A68	ComputeGaugeColliderContactValue	slot 0x100 of class 0x18: sets the contact's values at +0x98 and +0x94 from D_0026A83C and D_0026A840
+func_00197F10	HandleGaugeColliderNotification	slot 13 of class 0x18: after HandleSwitchedColliderNotification keeps the kind-10 value at 0x644, and when its walker reaches 0x3F3 points g_gaugeAmountCaption at its count and limit and starts g_timerElement, stopping and hiding them on 0x3F4 and 0x3F5
+func_00198090	StartGaugeColliderAgent	slot 16 of class 0x0F: only runs StartAgent
+func_001980B0	StepGaugeColliderAgent	slot 0x80 (step) of class 0x0F: the agent step func_001C5148, then turns it towards its heading (ArctangentOfRatio, WrapAngle)
+func_001982A0	ChooseGaugeColliderAgentState	slot 93 of class 0x0F: in state 2 picks 4 when func_001C96B8 fails, in state 0x10 stays until its value 0xC10 is set, else ChooseAgentState
+func_00198318	UpdateGaugeColliderAgentGoal	slot 0x188 of class 0x0F (UpdateAgentGoal's slot): per state heads for the active switched collider or a point of its path, else UpdateAgentGoal
+func_001984B8	LeaveGaugeColliderAgentState	slot 91 of class 0x0F: leaving state 0x10 releases its node of the active switched collider and sets its height to 0, then runs LeaveAgentState
+func_00198530	EnterGaugeColliderAgentState	slot 92 of class 0x0F: runs EnterAgentState, then func_001C8920 in state 0x10
+func_00198570	UpdateGaugeColliderAgentState	slot 0x178 of class 0x0F (UpdateAgentState's slot): UpdateAgentState, then in state 0xC sets its animation speed from the entry's curves D_0026A8A0 to D_0026A8D0
+func_001986E8	HandleGaugeColliderAgentNotification	slot 13 of class 0x0F: after HandleAgentNotification stores the value of a kind-10 notification about itself at 0xC10 and clears it on kind 11
+func_00198760	UpdateGaugeColliderAgent	slot 17 of class 0x0F: when the active switched collider is a class 0x18 gauge whose object at 0x640 reaches it and a node is found, adds one to its count at 0x67C (up to D_0026A720) and starts its clock 0x698, then runs UpdateAgent
+func_00198858	IsGaugeColliderAgentTargetInRange	slot 0x184 of class 0x0F (IsAgentTargetInRange's slot): always 0
+func_00198860	IsGaugeColliderAgentNear	slot 0x16C of class 0x0F: while the active switched collider is a gauge collider (class 0x18), latches +0xC18 on when their horizontal distance drops below D_0026A8DC and off above D_0026A8D8, and returns it
+func_00198920	StartGaugeCountedObject	slot 16 of class 0x48: resolves g_gaugeCountedObjectLinks, runs StartPlacedObject and adds one to the limit at 0x684 of the first class 0x18 object

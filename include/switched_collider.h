@@ -12,10 +12,17 @@
 struct SwitchedCollider;
 struct TurningCollider;
 struct Player;
+struct ObjectMessage;    // object_message.h
+struct BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
+struct PathCurveObject;   // path_curve_object.h
+struct StateTrigger;      // state_trigger.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
+struct EntryQueue;       // class 0x8F (entry_queue.h)
+struct Timeline;         // class 0x90 (timeline.h)
+struct PadRecord;        // pad_record.h
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
 struct Blk05 {
@@ -48,8 +55,12 @@ struct Ent1C {
 // A 0x100-byte record class 0x07 keeps twice (0x1190, 0x1290), one per object it holds.
 struct Part07 {
     u8 pad00[0x50];
-    s32 f50;                // 0x50: cleared by func_00172530 when the object is missing
-    u8 pad54[0x100 - 0x54];
+    s32 f50;                // 0x50: cleared by func_00172530 when the object is missing; func_001C4790 needs it set
+    u8 pad54[0x60 - 0x54];
+    Vec02 v60;              // 0x60: the two points func_001C4790 queries a collider's spans between
+    Vec02 v70;              // 0x70
+    u8 pad80[0x90 - 0x80];
+    ColliderSpan span;      // 0x90: the nearest span found (func_001C4790)
 };
 
 // One of class 0x17's six groups at 0x658: count keys, the n objects they resolve to (slot 16),
@@ -73,12 +84,29 @@ struct Ev07 {
 
 // One of class 0x19's four slots at 0x6B0: an object and a position.
 struct Slot19 {
-    void* obj;              // 0x00
+    PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
     u8 pad04[0x10 - 0x04];
     Vec02 v10;              // 0x10
     u8 pad20[0x50 - 0x20];
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
     u8 pad54[0x60 - 0x54];
+};
+
+// A marker on class 0x19's path (sixteen at 0x874): an object (kind 0, func_001DB110) or a
+// point (kind 1, func_001DB1E8). The object markers form a ring through next, numbered in
+// order from the first (0xAF4); their place on the path is the arc length the path's curve
+// gives (PathCurveVt::m10).
+struct PathMarker {
+    s32 kind;               // 0x00: 0 an object, 1 a point
+    void* item;             // 0x04: the object (the point's id for kind 1)
+    u8 pad08[0x0C - 0x08];
+    s32 index;              // 0x0C: one more than the marker before it in the ring
+    f32 pathLength;         // 0x10: the arc length of its place on the path
+    PathMarker* next;       // 0x14
+    f32 x;                  // 0x18: a point's two values
+    f32 y;                  // 0x1C
+    s32 b;                  // 0x20
+    s32 c;                  // 0x24
 };
 
 // An entry of class 0x08's second queue at 0xAC8 (func_001CA720 adds one, func_001CA7C0
@@ -98,7 +126,7 @@ struct __attribute__((packed)) Pack10 {
 // Class 0x05's descriptor: 0x03's slots, then twelve more (slot n at 0x10 + 4n).
 struct Desc05 : Desc03 {
     void (*m48)(SwitchedCollider* self, s32 mode);               // 0x130: slot 72 (func_001922E8)
-    void* m49;                                      // 0x134: slot 73
+    void (*m49)(SwitchedCollider* self, f32 dt, PadRecord* pad);   // 0x134: slot 73: the pad each frame while it is the active one (func_001E9C78)
     s32 (*m4A)(SwitchedCollider* self);                          // 0x138: slot 74 (func_00192410)
     s32 (*m4B)(SwitchedCollider* self, s32 a);                   // 0x13C: slot 75 (func_00192450, class 0x08: func_001C9A48)
     s32 (*m4C)(SwitchedCollider* self, void* arg);               // 0x140: slot 76 (func_00192488, class 0x08: func_001C9990)
@@ -108,24 +136,24 @@ struct Desc05 : Desc03 {
     void (*m50)(SwitchedCollider* self);                         // 0x150: slot 80 (func_00192C58)
     void* m51;                                      // 0x154: slot 81 (func_00192A28)
     void* m52;                                      // 0x158: slot 82 (func_00192A38)
-    void* m53;                                      // 0x15C: slot 83 (func_001930B0)
+    SwitchedCollider* (*m53)(SwitchedCollider* self);           // 0x15C: slot 83 (func_001930B0): the collider it stands for, or 0
 };
 
 // Class 0x06's descriptor (also 0x07's and 0x14's): four more slots.
 struct Desc06 : Desc05 {
-    void* m54;                                      // 0x160: slot 84 (class 0x06: func_001C53B0)
+    void (*m54)(TurningCollider* self);             // 0x160: slot 84, the matrix from the heading (class 0x06: func_001C53B0)
     s32 (*m55)(TurningCollider* self);                          // 0x164: slot 85 (class 0x06: func_001C4F00)
     void* m56;                                      // 0x168: slot 86 (class 0x06: func_001C5248)
-    void* m57;                                      // 0x16C: slot 87 (class 0x08: func_001CB3C8)
+    s32 (*m57)(Agent* self);                          // 0x16C: slot 87 (class 0x08: func_001CB3C8)
 };
 
 // Class 0x08's descriptor (and its subclasses'): twelve more slots.
 struct Desc08 : Desc06 {
-    void* m58;                                      // 0x170: slot 88 (class 0x08: func_001CA460)
-    void* m59;                                      // 0x174: slot 89 (class 0x08: func_001C8010)
+    s32 (*m58)(Agent* self);                          // 0x170: slot 88 (class 0x08: func_001CA460)
+    s32 (*m59)(Agent* self);                          // 0x174: slot 89 (class 0x08: func_001C8010)
     void* m5A;                                      // 0x178: slot 90 (class 0x08: func_001C8E28)
-    void* m5B;                                      // 0x17C: slot 91 (class 0x08: func_001C9008)
-    void* m5C;                                      // 0x180: slot 92 (class 0x08: func_001C91C8)
+    void (*m5B)(Agent* self, s32 state, void* context);   // 0x17C: slot 91 (class 0x08: func_001C9008)
+    void (*m5C)(Agent* self, s32 old, void* context);     // 0x180: slot 92 (class 0x08: func_001C91C8)
     s32 (*m5D)(Agent* self);                          // 0x184: slot 93 (class 0x08: func_001CA468)
     void (*m5E)(Agent* self, s32 on);                 // 0x188: slot 94 (class 0x08: func_001C8C08)
     void* m5F;                                      // 0x18C: slot 95 (class 0x08: func_001C8590)
@@ -227,7 +255,11 @@ struct Player : TurningCollider {
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
     Part07 f1290;           // 0x1290: the same with f614
-    u8 pad1390[0x1504 - 0x1390];
+    void* f1390[0x11];      // 0x1390: the animation node of each state (func_00174F50)
+    void* f13D4[0x11];      // 0x13D4: those of state 6, by +0x239C
+    void* f1418[0x15];      // 0x1418: those of state 4, by sub-state
+    void* f146C;            // 0x146C: the node of state 6's special cases
+    u8 pad1470[0x1504 - 0x1470];
     void* f1504;            // 0x1504
     void* f1508[4];         // 0x1508
     void* f1518;            // 0x1518
@@ -246,7 +278,7 @@ struct Player : TurningCollider {
     s32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
     f32 f222C;              // 0x222C
-    u8 pad2230[0x2234 - 0x2230];
+    ObjectMessage* watched2230; // 0x2230: the message whose object set it lets go of (func_00198EF8)
     void* f2234;            // 0x2234
     u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C
@@ -268,10 +300,12 @@ struct Player : TurningCollider {
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
     u8 pad23A0[0x23B0 - 0x23A0];
-    void* f23B0;            // 0x23B0
+    void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
-    u8 pad23C0[0x23D4 - 0x23C0];
+    u8 pad23C0[0x23CC - 0x23C0];
+    void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
+    u8 pad23D0[0x23D4 - 0x23D0];
     void* f23D4;            // 0x23D4
     u8 pad23D8[0x23E0 - 0x23D8];
     f32 f23E0;              // 0x23E0
@@ -292,9 +326,14 @@ struct Player : TurningCollider {
     void* f24A0;            // 0x24A0
     u8 pad24A4[0x24B0 - 0x24A4];
     u8 f24B0[0x10];         // 0x24B0: filled by func_00128018 (func_00172898)
-    u8 pad24C0[0x250C - 0x24C0];
-    s32 f250C;              // 0x250C
-    s32 f2510;              // 0x2510
+    u8 pad24C0[0x24F8 - 0x24C0];
+    PlacedObject* f24F8;    // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
+    u8 pad24FC[0x2500 - 0x24FC];
+    void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
+    void* f2504;            // 0x2504
+    void* f2508;            // 0x2508
+    void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
+    void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
     u8 pad2518[0x2590 - 0x2518];
     s32 f2590;              // 0x2590
@@ -322,10 +361,12 @@ struct Player : TurningCollider {
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
     u8 pad26CC[0x2718 - 0x26CC];
-    s32 f2718;              // 0x2718
+    s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
-    u8 pad2734[0x2750 - 0x2734];
+    u8 pad2734[0x2740 - 0x2734];
+    EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
+    u8 pad2744[0x2750 - 0x2744];
     void* f2750;            // 0x2750
     u8 pad2754[0x2758 - 0x2754];
     f32 f2758;              // 0x2758
@@ -354,9 +395,10 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BE4 - 0x2BDC];
-    void* f2BE4;            // 0x2BE4
-    void* f2BE8;            // 0x2BE8
+    s32 penalizedTargetId;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to the candidate with this id
+    void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
+    void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
+    void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation
     u8 pad2BEC[0x2BF0 - 0x2BEC];
 };
 
@@ -455,7 +497,7 @@ struct Agent : TurningCollider {
     const Desc08* desc08() const { return (const Desc08*)desc; }
 };
 
-struct C09 : Agent {
+struct CompanionAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
     f32 fC18;               // 0xC18
@@ -466,7 +508,7 @@ struct C09 : Agent {
     s32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
     void* fC34;             // 0xC34
-    u8 fC38[0x88];          // 0xC38
+    Slot08 fC38[17];        // 0xC38: ids -1 at set-up (func_001B6EC8), resolved by func_001B6F50
     void* fCC0;             // 0xCC0
     s32 fCC4;               // 0xCC4
     u8 padCC8[0xCD4 - 0xCC8];
@@ -474,7 +516,7 @@ struct C09 : Agent {
     Slot08 fCD8[5];         // 0xCD8: fCD4 of them, resolved by slot 16 (func_001B7128)
 };
 
-struct C0A : Agent {
+struct ConeAgent : Agent {
     f32 fC10;               // 0xC10
     f32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
@@ -490,20 +532,22 @@ struct C0A : Agent {
     u8 padC44[0xC50 - 0xC44];
 };
 
-struct C0B : C0A {
+// 0x0B, the keyed cone agent: a cone agent that counts down (+0xC5C) as it moves between its six
+// key objects (FindNearestAgentKey).
+struct KeyedConeAgent : ConeAgent {
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
-    s32 fC58;               // 0xC58
-    s32 fC5C;               // 0xC5C
+    s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
+    s32 fC5C;               // 0xC5C: the count it lowers (ChooseKeyedConeAgentState stops at 0)
     void* fC60;             // 0xC60
-    s32 fC64[6];            // 0xC64: keys slot 56 answers for itself (func_001E9038)
+    PlacedObject* fC64[6];  // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
     s32 fC7C;               // 0xC7C
     void* fC80[4];          // 0xC80
     s32 fC90;               // 0xC90
     u8 padC94[0xCA0 - 0xC94];
 };
 
-struct C0C : Agent {
+struct GaugeAgent : Agent {
     s32 fC10;               // 0xC10
     u8 padC14[0xE00 - 0xC14];
     s32 fE00;               // 0xE00
@@ -522,7 +566,7 @@ struct C0C : Agent {
     Vec02 vE40;             // 0xE40
 };
 
-struct C0D : Agent {
+struct GaugeBarAgent : Agent {
     u8 padC10[0xC14 - 0xC10];
     s32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
@@ -532,7 +576,7 @@ struct C0D : Agent {
     u8 padC28[0xC30 - 0xC28];
 };
 
-struct C0E : Agent {
+struct SeekingAgent : Agent {
     s32 fC10;               // 0xC10: the number of fC14
     void* fC14[4];          // 0xC14: objects
     void* fC24;             // 0xC24: an object whose position slot 89 takes (func_001F3BD8)
@@ -547,62 +591,72 @@ struct C0E : Agent {
     u8 padC48[0xC50 - 0xC48];
 };
 
-struct C0F : Agent {
+struct GaugeColliderAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
     u8 padC18[0xC20 - 0xC18];
 };
 
-struct C10 : Agent {
+struct WorldListedAgent : Agent {
     Pack10 fC10;            // 0xC10
     u8 padC18[0xC20 - 0xC18];
 };
 
-struct C11 : C10 {
+struct NumberedAgent : WorldListedAgent {
     s32 fC20;               // 0xC20
     s32 fC24;               // 0xC24
     void* fC28;             // 0xC28
     s32 fC2C;               // 0xC2C
 };
 
-struct C12 : C10 {
+struct ContactAgent : WorldListedAgent {
     void* fC20;             // 0xC20
     f32 fC24;               // 0xC24
     u8 padC28[0xC30 - 0xC28];
 };
 
-struct C13 : Agent {
-    u8 padC10[0xC20 - 0xC10];
+// An entry of the tempo agent's table at 0xC6C (func_001ED090 adds one): an animation player
+// and the number of beats its animation spans, whose speed SyncTempoAgentEntries sets.
+struct TempoPlayerEntry {
+    AnimationPlayer* player; // 0x00
+    s32 beats;              // 0x04
+};
+
+// 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
+// beat-press colliders to judge presses against (JudgeBeatPressInput).
+struct TempoAgent : Agent {
+    s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
     u8 padC24[0xC34 - 0xC24];
-    void* fC34;             // 0xC34
-    void* fC38;             // 0xC38
-    u8 padC3C[0xC48 - 0xC3C];
+    Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
+    Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldTimeline)
+    BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
+    u8 padC40[0xC48 - 0xC40];
     void* fC48;             // 0xC48
-    u8 padC4C[0xC50 - 0xC4C];
+    s32 fC4C;               // 0xC4C: set and cleared by timeline entries of kinds 4 and 5 (func_001ED318)
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     u8 padC58[0xC5C - 0xC58];
-    s32 fC5C;               // 0xC5C
-    s32 fC60;               // 0xC60
-    f32 fC64;               // 0xC64
+    s32 fC5C;               // 0xC5C: the tempo in beats a minute (SetTempoAgentTempo)
+    s32 fC60;               // 0xC60: a span in beats (SetTempoAgentSpanBeats)
+    f32 fC64;               // 0xC64: that span in seconds
     s32 fC68;               // 0xC68: the number of fC6C entries (func_001ED090)
-    void* fC6C;             // 0xC6C: a 0x400-byte table (slot 0)
-    s32 fC70;               // 0xC70
-    s32 fC74;               // 0xC74
-    s32 fC78;               // 0xC78
-    f32 fC7C;               // 0xC7C
-    f32 fC80;               // 0xC80
-    f32 fC84;               // 0xC84
-    f32 fC88;               // 0xC88
-    f32 fC8C;               // 0xC8C
+    TempoPlayerEntry* fC6C; // 0xC6C: a 0x400-byte table (slot 0)
+    s32 fC70;               // 0xC70: the bars counted (four beats each)
+    s32 fC74;               // 0xC74: the beats counted
+    s32 fC78;               // 0xC78: the beat in the bar, 0 to 3
+    f32 fC7C;               // 0xC7C: the position in the bar, in beats
+    f32 fC80;               // 0xC80: the time of the last beat
+    f32 fC84;               // 0xC84: the time of the next beat
+    f32 fC88;               // 0xC88: the beat length in use, in seconds
+    f32 fC8C;               // 0xC8C: the beat length set, 60 over the tempo (taken at the bar)
     u8 padC90[0xC94 - 0xC90];
     s32 fC94;               // 0xC94
     s32 fC98;               // 0xC98
     void* fC9C;             // 0xC9C
 };
 
-struct C14 : TurningCollider {
+struct TintBlendCollider : TurningCollider {
     s32 f720;               // 0x720: the mode func_001DFBE0 sets
     f32 f724;               // 0x724: the clock when it last changed (func_001DFBE0)
     s32 f728;               // 0x728
@@ -621,7 +675,7 @@ struct C14 : TurningCollider {
     StateWalker* f75C;          // 0x75C: a handle (func_001B64D8, func_001B6628 take it)
 };
 
-struct C15 : SwitchedCollider {
+struct WalkerCollider : SwitchedCollider {
     s32 f610;               // 0x610
     s32 f614;               // 0x614
     f32 f618;               // 0x618
@@ -629,7 +683,8 @@ struct C15 : SwitchedCollider {
     f32 f620;               // 0x620
     f32 f624;               // 0x624
     f32 f628;               // 0x628
-    u8 pad62C[0x640 - 0x62C];
+    u8 pad62C[0x630 - 0x62C];
+    Vec02 v630;             // 0x630: the offset func_001A3C40 computes from the heading (ComputePolarOffset)
     void* f640;             // 0x640
     void* f644;             // 0x644
     s32* f648;              // 0x648
@@ -650,10 +705,12 @@ struct C15 : SwitchedCollider {
     u8 pad68C[0x690 - 0x68C];
 };
 
-struct C16 : SwitchedCollider {
+struct ObjectPool;      // object_pool.h
+
+struct PlayerLinkedCollider : SwitchedCollider {
     void* f610;             // 0x610
-    void* f614;             // 0x614
-    void* f618;             // 0x618
+    StateWalker* f614;      // 0x614: the walker on f610 (func_001E5428)
+    ObjectPool* f618;       // 0x618: the pool it chooses from (func_001E5888, func_001E5C78)
     s32 f61C;               // 0x61C
     void* f620;             // 0x620
     void* f624;             // 0x624
@@ -691,7 +748,7 @@ struct C17 : SwitchedCollider {
     u8 pad7E0[0x800 - 0x7E0];
 };
 
-struct C18 : SwitchedCollider {
+struct GaugeCollider : SwitchedCollider {
     void* f610;             // 0x610
     StateWalker* f614;          // 0x614: a handle (func_001B6290)
     f32 f618;               // 0x618
@@ -709,7 +766,8 @@ struct C18 : SwitchedCollider {
     void* f664;             // 0x664
     u8 pad668[0x67C - 0x668];
     s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720
-    u8 pad680[0x688 - 0x680];
+    s32 f680;               // 0x680: the count g_gaugeAmountCaption shows (func_00197F10)
+    s32 f684;               // 0x684: its limit, one per class 0x48 object (func_00198920)
     f32 f688;               // 0x688
     u8 pad68C[0x690 - 0x68C];
     s32 f690;               // 0x690
@@ -722,18 +780,35 @@ struct C18 : SwitchedCollider {
     u8 pad6BC[0x6C0 - 0x6BC];
 };
 
-struct C19 : SwitchedCollider {
+struct PathFollower : SwitchedCollider {
     f32 f610;               // 0x610
     f32 f614;               // 0x614
     f32 f618;               // 0x618
     f32 f61C;               // 0x61C
-    Vec02 v620;             // 0x620
-    u8 f630[0x40];          // 0x630: 0x40 bytes slot 0 copies from D_00275250
-    f32 f670;               // 0x670
-    f32 f674;               // 0x674
-    f32 f678;               // 0x678
-    u8 pad67C[0x680 - 0x67C];
-    f32 f680;               // 0x680
+    Vec02 v620;             // 0x620: x, y, z the blend's curve over the entry's clock (func_001DB290)
+    union {
+        u8 f630[0x40];      // 0x630: 0x40 bytes slot 0 copies from D_00275250
+        struct {
+            u8 v630[0x10];  // 0x630: the blend's first end (func_001DB290)
+            f32 f640;       // 0x640: its range
+            f32 f644;       // 0x644
+            u8 pad648[0x650 - 0x648];
+            u8 v650[0x10];  // 0x650: the second end
+            f32 f660;       // 0x660: its range
+            f32 f664;       // 0x664
+            u8 pad668[0x670 - 0x668];
+        };
+    };
+    union {
+        struct {
+            f32 f670;       // 0x670
+            f32 f674;       // 0x674
+            f32 f678;       // 0x678
+            u8 pad67C[0x680 - 0x67C];
+        };
+        u8 v670[0x10];      // 0x670: the blend of the two ends
+    };
+    f32 f680;               // 0x680: the blend of the two ranges
     f32 f684;               // 0x684
     u8 pad688[0x694 - 0x688];
     f32 f694;               // 0x694
@@ -742,8 +817,8 @@ struct C19 : SwitchedCollider {
     s32 f6A0;               // 0x6A0
     u8 pad6A4[0x6B0 - 0x6A4];
     Slot19 f6B0[4];         // 0x6B0
-    void* f830;             // 0x830
-    f32 f834;               // 0x834
+    PathCurveObject* f830;  // 0x830: the path it follows (func_001DAFB8)
+    f32 f834;               // 0x834: the path's length
     u8 pad838[0x83C - 0x838];
     f32 f83C;               // 0x83C
     f32 f840;               // 0x840
@@ -756,24 +831,24 @@ struct C19 : SwitchedCollider {
     f32 f860;               // 0x860
     f32 f864;               // 0x864
     f32 f868;               // 0x868
-    u8 pad86C[0x870 - 0x86C];
+    f32 f86C;               // 0x86C: -10.0 at reset (func_001DB290)
     s32 f870;               // 0x870
-    u8 f874[0x280];         // 0x874
-    void* fAF4;             // 0xAF4
-    void* fAF8;             // 0xAF8
+    PathMarker f874[16];    // 0x874: f870 of them
+    PathMarker* fAF4;       // 0xAF4: the first object marker
+    PathMarker* fAF8;       // 0xAF8: the current one
     u8 padAFC[0xB00 - 0xAFC];
     s32 fB00;               // 0xB00
     s32 fB04;               // 0xB04
     s32 fB08;               // 0xB08
     s32 fB0C;               // 0xB0C
-    u8 padB10[0xB14 - 0xB10];
-    void* fB14;             // 0xB14
+    f32 fB10;               // 0xB10: -10.0 at reset (func_001DB290)
+    BaseObject* fB14;       // 0xB14
     u8 padB18[0xB30 - 0xB18];
     s32 fB30;               // 0xB30
     s32 fB34;               // 0xB34
     f32 fB38;               // 0xB38
     u8 padB3C[0xB44 - 0xB3C];
-    void* fB44;             // 0xB44
+    StateTrigger* fB44;     // 0xB44: the graph its walker (fB48) is made on
     void* fB48;             // 0xB48
     u8 padB4C[0xB78 - 0xB4C];
     void* fB78;             // 0xB78
@@ -788,7 +863,7 @@ struct C19 : SwitchedCollider {
     u8 padB9C[0xBB0 - 0xB9C];
 };
 
-struct C1A : C19 {
+struct ModeWalker : PathFollower {
     s32 fBB0;               // 0xBB0
     f32 fBB4;               // 0xBB4
     void* fBB8;             // 0xBB8
@@ -808,7 +883,7 @@ struct C1A : C19 {
     u8 padC08[0xC10 - 0xC08];
 };
 
-struct C1B : SwitchedCollider {
+struct ModeCollider : SwitchedCollider {
     s32 f610;               // 0x610
     u8 pad614[0x618 - 0x614];
     s32 f618;               // 0x618
@@ -839,7 +914,7 @@ struct C1B : SwitchedCollider {
     s32 f70C;               // 0x70C
 };
 
-struct C1C : SwitchedCollider {
+struct BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
     u8 pad618[0x628 - 0x618];
@@ -856,7 +931,7 @@ struct C1C : SwitchedCollider {
     void* f68C;             // 0x68C
 };
 
-struct C1D : SwitchedCollider {
+struct HitCountCollider : SwitchedCollider {
     s32 f610;               // 0x610
     f32 f614;               // 0x614
     u8 pad618[0x62C - 0x618];
@@ -869,17 +944,17 @@ struct C1D : SwitchedCollider {
     f32 f644;               // 0x644
     f32 f648;               // 0x648
     u8 pad64C[0x660 - 0x64C];
-    void* f660;             // 0x660
+    PlacedObject* f660;     // 0x660: an object it turns with itself (func_001C34C8 sets its matrix)
     void* f664;             // 0x664
     void* f668;             // 0x668
     u8 pad66C[0x670 - 0x66C];
     f32 f670;               // 0x670
     u8 pad674[0x678 - 0x674];
     void* f678;             // 0x678
-    void* f67C;             // 0x67C
+    AnimationPlayer* f67C;  // 0x67C: the player func_001C34C8 starts from f678 and stops at speed 0
     s32 f680;               // 0x680
     s32 f684;               // 0x684
-    void* f688;             // 0x688
+    BaseObject* f688;       // 0x688: an object id 0x52F that hit it (func_001C3C00); slot 3 takes it out
     f32 f68C;               // 0x68C
     s32 f690;               // 0x690
     s32 f694;               // 0x694
@@ -890,33 +965,35 @@ struct C1D : SwitchedCollider {
     void* f720[16];         // 0x720
 };
 
+typedef char check_Part07[sizeof(Part07) == 0x100 ? 1 : -1];
 typedef char check_Ent17[sizeof(Ent17) == 0x2C ? 1 : -1];
+typedef char check_PathMarker[sizeof(PathMarker) == 0x28 ? 1 : -1];
 typedef char check_Slot19[sizeof(Slot19) == 0x60 ? 1 : -1];
 typedef char check_SwitchedCollider[sizeof(SwitchedCollider) == 0x610 ? 1 : -1];
 typedef char check_TurningCollider[sizeof(TurningCollider) == 0x720 ? 1 : -1];
 typedef char check_Player[sizeof(Player) == 0x2BF0 ? 1 : -1];
 typedef char check_Agent[sizeof(Agent) == 0xC10 ? 1 : -1];
-typedef char check_C09[sizeof(C09) == 0xD00 ? 1 : -1];
-typedef char check_C0A[sizeof(C0A) == 0xC50 ? 1 : -1];
-typedef char check_C0B[sizeof(C0B) == 0xCA0 ? 1 : -1];
-typedef char check_C0C[sizeof(C0C) == 0xE50 ? 1 : -1];
-typedef char check_C0D[sizeof(C0D) == 0xC30 ? 1 : -1];
-typedef char check_C0E[sizeof(C0E) == 0xC50 ? 1 : -1];
-typedef char check_C0F[sizeof(C0F) == 0xC20 ? 1 : -1];
-typedef char check_C10[sizeof(C10) == 0xC20 ? 1 : -1];
-typedef char check_C11[sizeof(C11) == 0xC30 ? 1 : -1];
-typedef char check_C12[sizeof(C12) == 0xC30 ? 1 : -1];
-typedef char check_C13[sizeof(C13) == 0xCA0 ? 1 : -1];
-typedef char check_C14[sizeof(C14) == 0x760 ? 1 : -1];
-typedef char check_C15[sizeof(C15) == 0x690 ? 1 : -1];
-typedef char check_C16[sizeof(C16) == 0x660 ? 1 : -1];
+typedef char check_C09[sizeof(CompanionAgent) == 0xD00 ? 1 : -1];
+typedef char check_ConeAgent[sizeof(ConeAgent) == 0xC50 ? 1 : -1];
+typedef char check_KeyedConeAgent[sizeof(KeyedConeAgent) == 0xCA0 ? 1 : -1];
+typedef char check_GaugeAgent[sizeof(GaugeAgent) == 0xE50 ? 1 : -1];
+typedef char check_GaugeBarAgent[sizeof(GaugeBarAgent) == 0xC30 ? 1 : -1];
+typedef char check_SeekingAgent[sizeof(SeekingAgent) == 0xC50 ? 1 : -1];
+typedef char check_GaugeColliderAgent[sizeof(GaugeColliderAgent) == 0xC20 ? 1 : -1];
+typedef char check_WorldListedAgent[sizeof(WorldListedAgent) == 0xC20 ? 1 : -1];
+typedef char check_NumberedAgent[sizeof(NumberedAgent) == 0xC30 ? 1 : -1];
+typedef char check_ContactAgent[sizeof(ContactAgent) == 0xC30 ? 1 : -1];
+typedef char check_TempoAgent[sizeof(TempoAgent) == 0xCA0 ? 1 : -1];
+typedef char check_TintBlendCollider[sizeof(TintBlendCollider) == 0x760 ? 1 : -1];
+typedef char check_WalkerCollider[sizeof(WalkerCollider) == 0x690 ? 1 : -1];
+typedef char check_PlayerLinkedCollider[sizeof(PlayerLinkedCollider) == 0x660 ? 1 : -1];
 typedef char check_C17[sizeof(C17) == 0x800 ? 1 : -1];
-typedef char check_C18[sizeof(C18) == 0x6C0 ? 1 : -1];
-typedef char check_C19[sizeof(C19) == 0xBB0 ? 1 : -1];
-typedef char check_C1A[sizeof(C1A) == 0xC10 ? 1 : -1];
-typedef char check_C1B[sizeof(C1B) == 0x710 ? 1 : -1];
-typedef char check_C1C[sizeof(C1C) == 0x690 ? 1 : -1];
-typedef char check_C1D[sizeof(C1D) == 0x760 ? 1 : -1];
+typedef char check_GaugeCollider[sizeof(GaugeCollider) == 0x6C0 ? 1 : -1];
+typedef char check_PathFollower[sizeof(PathFollower) == 0xBB0 ? 1 : -1];
+typedef char check_ModeWalker[sizeof(ModeWalker) == 0xC10 ? 1 : -1];
+typedef char check_ModeCollider[sizeof(ModeCollider) == 0x710 ? 1 : -1];
+typedef char check_BeatPressCollider[sizeof(BeatPressCollider) == 0x690 ? 1 : -1];
+typedef char check_C1D[sizeof(HitCountCollider) == 0x760 ? 1 : -1];
 typedef char check_Desc05[sizeof(Desc05) == 0x160 ? 1 : -1];
 typedef char check_Desc06[sizeof(Desc06) == 0x170 ? 1 : -1];
 typedef char check_Desc08[sizeof(Desc08) == 0x1A0 ? 1 : -1];

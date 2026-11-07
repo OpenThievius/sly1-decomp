@@ -29,21 +29,21 @@ extern const char D_0024E988[40] = "## internel error in libkernl.a!\n";
 void func_001F7020(Queue_1F7020* q)
 {
     for (;;) {
-        func_001F6B60(D_00625B70);
+        AwaitSemaphore(g_requestSemaphore);
         u32 i = q->head & 0x1FF;
         q->head = i + 1;
         switch (q->e[i].kind) {
         case 0:
-            func_001F6AC0(q->e[i].arg);
+            WakeThread(q->e[i].arg);
             break;
         case 1:
-            func_001F6A70(q->e[i].arg);
+            RotateReadyThreads(q->e[i].arg);
             break;
         case 2:
-            func_001F6AF0(q->e[i].arg);
+            PauseThread(q->e[i].arg);
             break;
         default:
-            func_001F7B50(D_0024E988);
+            PrintToOutputHook(D_0024E988);
             break;
         }
     }
@@ -66,30 +66,30 @@ void func_001F6A50(s32 h, s32 v);
 s32 func_001F70F8(void)
 {
     Frame_1F70F8 f;
-    if (D_00277128 > 0) {
+    if (g_requestThreadId > 0) {
         return -1;
     }
     f.init.c = 0;
     f.init.b = 0xFF;
-    D_00625B70 = func_001F6B20(&f.init);
-    if (D_00625B70 < 0) {
+    g_requestSemaphore = NewSemaphore(&f.init);
+    if (g_requestSemaphore < 0) {
         return -1;
     }
-    f.ctx.f4 = (void*)func_001F7020;
+    f.ctx.f4 = (void*)RunRequestThread;
     f.ctx.f8 = D_00625770;
     f.ctx.fC = 0x400;
     f.ctx.f10 = D_002832F0;
     f.ctx.f14 = 0;
-    D_00277128 = func_001F6A10(&f.ctx);
-    if (D_00277128 < 0) {
-        func_001F6B30(D_00625B70);
+    g_requestThreadId = MakeThread(&f.ctx);
+    if (g_requestThreadId < 0) {
+        FreeSemaphore(g_requestSemaphore);
         return -1;
     }
-    D_00625B78.head = 0;
-    D_00625B78.tail = 0;
-    func_001F6A20(D_00277128, &D_00625B78);
-    func_001F6A50(func_001F6A90(), 1);
-    return D_00277128;
+    g_requestRing.head = 0;
+    g_requestRing.tail = 0;
+    RunThread(g_requestThreadId, &g_requestRing);
+    SetThreadPriority(GetCurrentThreadId(), 1);
+    return g_requestThreadId;
 }
 
 ASM_FUNC(func_001F71D0);

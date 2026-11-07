@@ -1,0 +1,108 @@
+symbol	name	evidence
+func_0011E560	InitObjectBuiltinTable	entry 12 of the startup table D_002647C0: calls func_00109488, which fills the table D_002505D8 with the object built-ins (TestScriptObjectOfKind, func_00100218, ...)
+func_0011E580	CreateTypedRecord	allocates a record of the size in D_00247448[type], links it into the type's list at +0x1884 + type * 4 of its context and runs the type's initialiser
+func_0011E680	ApplyPropertyRecord	reads one value from the stream per the record's type and flags and stores it to a field at an offset, passes it to a setter at a table slot or a given function, or calls a multi-value setter with an array of script values
+func_0011EC40	ReadPropertyRecords	reads indices from the stream while they are not negative and applies each to the record D_002505D8 + (index << 5) with ApplyPropertyRecord
+func_0011ECA0	MapKeyToSlotIndex	subtracts 12 from the key and gives -1 unless the result is 0..30
+func_0011ECB8	ReadSlotObjects	reads a count of (type, key, flag) entries, makes each object with CreateTypedRecord, runs its slot 14 on the stream and files it in slot1CE8 at MapKeyToSlotIndex(key) when that is valid
+func_0011EDA8	ApplyObjectClassDefaults	slot 1: walks the entries of D_00244950 for the object's class id and, for each whose flags have 0x800, parses its body into a buffer and hands it to func_0011E680 with the object
+func_0011EE70	FindCurveSegment	binary-searches the key times (a float at the start of each stride-byte record) for the segment holding the key, steps back one when exactly on a key if bit 0 of flags is set, and gives the offset in the segment, the segment length and the record pointer
+func_0011EF40	EvaluateNoPositionCurve	empty; slot 10 of D_00219600, the position-curve slot whose times slot (12) is GetNoPositionCurveTimes
+func_0011EF48	GetNoPositionCurveTimes	slot 2 of the empty position curve: sets the count to 0 and the times pointer to 0
+func_0011EF60	EvaluateNoRotationCurve	empty; slot 14 of D_00219600, before GetNoRotationCurve, the rotation-curve slots whose times slot (17) is GetNoRotationCurveTimes
+func_0011EF68	GetNoRotationCurve	empty; slot 15 of D_00219600 and slot 1 of D_00219708, where the keyed rotation curves have GetAxisRotationCurve and GetKeyedRotationCurve
+func_0011EF70	GetNoRotationCurveTimes	sets the count to 0 and the times pointer to 0 for the empty rotation curve
+func_0011EF88	EvaluateNoScaleCurve	empty; slot 18 of D_00219600, the scale-curve slot whose times slot (20) is GetNoScaleCurveTimes
+func_0011EF90	GetNoScaleCurveTimes	sets the count to 0 and the times pointer to 0 for the empty scale curve
+func_0011EFA8	EvaluateNoWeightCurve	empty; slot 22 of D_00219600, the weight-curve slot whose times slot (24) is GetNoWeightCurveTimes
+func_0011EFB0	GetNoWeightCurveTimes	sets the count to 0 and the times pointer to 0 for a blended weight curve
+func_0011EFC8	ReadTangentWeightCurve	reads count and keys (time, value, two kind words and two tangent floats) from the stream into 0x18-byte keys
+func_0011F0C8	EvaluateTangentWeightCurve	finds the segment of the kind 0 keys and returns the key's constant value when its kind is 5, else interpolates with func_001303F0 from the two values and tangents
+func_0011F180	GetTangentWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F210	ReadControlPointWeightCurve	reads count and keys from the stream, turning two of the read values into control points value-t and value+u around the key value
+func_0011F320	EvaluateControlPointWeightCurve	finds the segment of the kind 1 keys and returns the constant value for kind 5, else interpolates with func_00130168 from values and control points
+func_0011F3E8	GetControlPointWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F478	EvaluateLinearWeightCurve	finds the segment of the kind 2 keys and returns the linear blend of the two values with its slope (zero for a segment shorter than 0.0001)
+func_0011F568	ReadLinearWeightCurve	reads count and (time, value) keys of 8 bytes from the stream, scaling the times by 1/60
+func_0011F620	GetLinearWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F6B0	EvaluateAxisCurves	original assembly: copies the base vector into the output and clears the slope, then for each of the three axis weight curves present calls its evaluate slot into that component; EvaluateAxisPositionCurve, EvaluateAxisRotationCurve, GetAxisRotationCurve and EvaluateAxisScaleCurve call it
+func_0011F798	ReadAxisCurves	reads a presence mask and a base vector, then for each set bit makes a weight curve with func_00121160 and reads it from the stream into the axis slot
+func_0011F850	GatherAxisCurveTimes	asks each of three weight curves for its key times, joins them, sorts with func_001F5CD0 and drops repeated times
+func_0011F9F8	EvaluateVectorKeyCurve	finds the segment among 0x40-byte vector keys with FindCurveSegment and interpolates their vectors with func_00130540
+func_0011FA88	ReadVectorKeys	reads a count and, per key, a time (scaled by 1/60) and three vectors into 0x40-byte keys
+func_0011FB98	GetVectorKeyTimes	gives the count and, if asked, a new array of the keys' times (stride 0x40)
+func_0011FC20	EvaluateAxisPositionCurve	evaluates the three axis curves around the base vector with func_0011F6B0, then tells the owner's slot 44
+func_0011FC90	ReadAxisPositionCurve	original assembly; slot 1 of D_002196B8 between EvaluateAxisPositionCurve and GetAxisPositionCurveTimes, the read slot of the other curve tables
+func_0011FDB8	GetAxisPositionCurveTimes	passes the axis curves to GatherAxisCurveTimes
+func_0011FDD8	EvaluateVectorKeyPositionCurve	evaluates the key list with EvaluateVectorKeyCurve, then tells the owner's slot 44
+func_0011FE40	ReadVectorKeyPositionCurve	original assembly; slot 1 of D_002196C8 between EvaluateVectorKeyPositionCurve and GetVectorKeyPositionCurveTimes, the read slot of the other curve tables
+func_0011FED8	GetVectorKeyPositionCurveTimes	passes the key count and keys to GetVectorKeyTimes
+func_0011FF08	EvaluateAxisRotationCurve	evaluates the three axis curves with func_0011F6B0 into temporaries, converts them with func_00188A20 and func_001EDE38, then tells the owner's slot 45
+func_0011FFA8	GetAxisRotationCurve	returns func_0011F6B0 of the axis curves and base vector with four given words
+func_0011FFD8	ReadAxisRotationCurve	reads the axis curves, evaluates the curve at its first and last key times and sets closed to 1 when the two results differ by less than 0.01 (or there are no keys)
+func_00120110	GetAxisRotationCurveKeyTimes	rotation curve kind 0 (table D_002196E8) slot 3: forwards its three per-axis weight curves to func_0011F850, which gathers their key times into the count and array out-parameters
+func_00120130	EvaluateKeyedRotationCurve	rotation curve kind 1 (table D_002196F8) slot 0: evaluates its keys with func_0011F9F8 into a local buffer, converts the result into the output and state records, then calls the parent's slot 29 on them
+func_001201D0	GetKeyedRotationCurve	slot 1 of the keyed rotation curve table D_002196F8: returns func_0011F9F8 (EvaluateVectorKeyCurve) of its count and keys, as GetAxisRotationCurve does for the axis kind
+func_001201F0	ReadKeyedRotationCurve	rotation curve kind 1 slot 2: reads the keys from the stream with func_0011FA88, then sets closed to 1 when there are fewer than 2 keys or the first and last orientations differ by under 0.01
+func_001202C0	GetKeyedRotationCurveKeyTimes	rotation curve kind 1 slot 3: passes its count and keys to func_0011FB98 to fill the key-time count and array
+func_001202F0	EvaluateAxisScaleCurve	scale curve kind 0 (table D_00219718) slot 0: evaluates the three per-axis weight curves with func_0011F6B0 and writes the three results into a cleared 0x30-byte output
+func_00120360	ReadAxisScaleCurve	scale curve kind 0 slot 1: reads the base vector and the three per-axis weight curves from the stream with func_0011F798
+func_00120388	GetAxisScaleCurveKeyTimes	scale curve kind 0 slot 2: forwards its axis weight curves to func_0011F850 to gather their key times
+func_001203A8	EvaluateKeyedScaleCurve	scale curve kind 1 (table D_00219728) slot 0: evaluates its keys with func_0011F9F8 and writes the three results into a cleared 0x30-byte output
+func_00120418	ReadKeyedScaleCurve	scale curve kind 1 slot 1: reads count and keys from the stream with func_0011FA88
+func_00120440	GetKeyedScaleCurveKeyTimes	scale curve kind 1 slot 2: passes its count and keys to func_0011FB98 to fill the key-time count and array
+func_00120470	EvaluateBlendedPositionCurve	original assembly; slot 0 of the position curve kind 2 table D_002196D8: evaluates each target's position curve at its scaled time (FindCyclicRangeIndex for a cyclic range) and sums the results by their weights, as EvaluateValueBlendCurve does for values
+func_00120700	EvaluateBlendedRotationCurve	original assembly; slot 0 of the rotation curve kind 2 table D_00219708: evaluates each target's rotation at its scaled time and mixes them by their weights through BuildEulerRotationMatrix, MultiplyMatrices3x3, MatrixToAxisAngle and BuildAxisAngleMatrix
+func_00120AA8	EvaluateAngleBlendCurve	weight curve kind 3 (table D_00219698) slot 0: evaluates each target curve at its scaled time, mixes the values by their weights as angles (func_001EA408 wraps) and sums the slopes
+func_00120D58	EvaluateValueBlendCurve	weight curve kind 4 (table D_002196A8) slot 0: evaluates each target curve at its scaled time and returns the weight-summed value and slope, using the owner's value at index for missing targets
+func_00120FB0	CreatePositionCurve	allocates 0x30, 0x14 or 0x18 bytes for kind 0, 1 or 2, sets the table D_002196B8, D_002196C8 or D_002196D8 and stores the kind
+func_00121050	CreateRotationCurve	allocates 0x30, 0x14 or 0x1C bytes for kind 0, 1 or 2, sets the table D_002196E8, D_002196F8 or D_00219708 and stores the kind
+func_001210F0	CreateScaleCurve	allocates 0x30 or 0x10 bytes for kind 0 or 1, sets the table D_00219718 or D_00219728 and stores the kind
+func_00121160	CreateWeightCurve	allocates 0x10, 0x14 or 0x18 bytes for kinds 0..4, sets the tables D_00219668 ... D_002196A8 and stores the kind
+func_00121228	CreatePoseSource	takes a record from the world's pool at +0x1B20, stores the given table at +0 and calls its slot 0 with the owner
+func_00121280	ClonePoseSource	creates a record with the table D_00219560 for the new owner and copies the given record into it through slot 1
+func_001212D8	CopyPoseSource	slot 1: copies the source record's bytes (the pool's record size) over itself, then restores its own link and owner
+func_00121338	InitPoseSource	slot 0 of the base: stores the owner and sets the four mode bytes at 0x10..0x13 to -1
+func_00121358	ReleasePoseSource	slot 2: takes the record out of the owner's list at +0x1E0, tells the owner (slot 43), and if it was the position or orientation source gives the owner a default one, then returns the record to the pool
+func_001214B8	GetOwnerPosition	slot 4 of the base: returns the owner's vector at +0x190 and a zero vector, then tells the owner through its slot 40
+func_00121508	GetOwnerRotation	slot 5 of the base: returns the owner's matrix at +0x1A0 and a zero vector, then tells the owner through its slot 41
+func_00121568	GetOwnerValue	slot 6 of the base: returns the value at +0x8C of the owner's record at +0x224 and a slope of 0
+func_00121580	GetIdentityMatrix	slot 7 of the base: copies the identity matrix D_002483D0 into the output
+func_001215A8	GetOwnerIndexedValue	slot 8 of the base: returns the owner's value array (+0x274) entry at the index
+func_001215C0	ChoosePoseSourceModes	sets the position and orientation modes from the owner's bytes at 0x2C9 and 0x2CA, or to 2 or 3 by the owner's mode words when those are -1
+func_00121648	ApplyPoseSource	when it is the owner's position or orientation source and the flag or mode 2 asks, gets the position or orientation (slots 4, 5) and gives it to the owner through slots 29, 30, 32, 33
+func_00121760	ComputePositionSpringAcceleration	original assembly: from a placed object's distance to a target position (+0x100) and to a target velocity (+0x150), each scaled by a + b + c (the three floats of the profiles at +0x20C and +0x210, divided by and multiplied by the distance), the second capped by 1/dt; ApplyPoseSourcePosition and func_001CC818 call it
+func_001218C0	ApplyPoseSourcePosition	original assembly: asks the pose source for its position (slot 4) and, by its position mode (byte 0x10), sets the owner's position at +0x100, pulls it with ComputePositionSpringAcceleration or eases it with ApproachValueWithRamp; func_00125440 calls it
+func_00121C48	ComputeRotationSpringAcceleration	original assembly: the rotation twin of ComputePositionSpringAcceleration: the angle between the owner's matrix at +0xD0 and the target (MultiplyMatrices3x3, MatrixToAxisAngle) scaled by the profile at +0x214; ApplyPoseSourceRotation and func_001CC818 call it
+func_00121DE0	ApplyPoseSourceRotation	original assembly: asks the pose source for its rotation (slot 5) and, by its orientation mode (byte 0x11), sets the owner's matrix, pulls it with ComputeRotationSpringAcceleration or eases it, orthonormalising with OrthonormalizeMatrix; func_00125440 calls it
+func_00122488	ApplyPoseSourceIndexedValue	reads the indexed value (slot 8) and, by mode3, stores it in the owner's value array or eases the stored one towards it with func_001EA4B8
+func_00122550	GetPlacedObjectPositionAt	slot 34 of class 0x02: at time 0 returns the position at +0x100 and rate at +0x150, otherwise asks the path object at +0x1EC or returns position + rate * time
+func_001225D0	GetPlacedObjectRotationAt	slot 35 of class 0x02: at time 0 returns the matrix at +0xD0 and rate at +0x160, otherwise asks the path object at +0x1F0 or integrates the rate
+func_001226D8	SettlePoseSourceModes	turns a mode 7 of the position or the orientation into 3
+func_00122708	InitSnapshotPoseSource	slot 0 of D_00219588: runs the base set-up and copies the owner's position, matrix, value, identity matrix and value array pointer into its own record
+func_001227B0	GetSnapshotPosition	slot 4 of D_00219588: returns its copied position and vector, then tells the owner through its slot 40
+func_001227F0	GetSnapshotRotation	slot 5 of D_00219588: returns its copied matrix and vector, then tells the owner through its slot 41
+func_00122840	GetSnapshotValue	slot 6 of D_00219588: returns its copied value and slope from +0x80 and +0x84
+func_00122858	GetSnapshotMatrix	slot 7 of D_00219588: copies the three rows of its matrix at +0x90 into the output
+func_00122878	GetSnapshotIndexedValue	slot 8 of D_00219588: returns the entry of its copied value array at the index
+func_00122890	InitLinkedPoseSource	slot 0 of D_002195B0: runs the base set-up and stores pointers to the owner's position, matrix, count, value array and (when its flag is set) value
+func_00122920	GetLinkedPosition	slot 4 of D_002195B0: copies the vectors its pointers refer to into the outputs, then tells the owner through its slot 40
+func_00122968	GetLinkedRotation	slot 5 of D_002195B0: copies the matrix and vector its pointers refer to into the outputs and calls the owner's slot 41
+func_001229C0	GetLinkedValue	slot 6 of D_002195B0: returns the floats its two pointers refer to
+func_001229E0	GetLinkedMatrix	slot 7 of D_002195B0: copies the three rows of the matrix its pointer refers to into the output
+func_00122A00	GetLinkedIndexedValue	slot 8 of D_002195B0: returns the entry of the array its pointer holds at the index
+func_00122A18	InitIdentityPoseSource	slot 0 of D_002195D8: runs the base set-up and sets its two matrices at +0x40 and +0x90 to the identity matrix D_002483D0
+func_00122A80	GetIdentityPosePosition	original assembly; slot 4 of InitIdentityPoseSource's table D_002195D8: the position of the source at +0x8 (its slot 4) or GetOwnerPosition, plus its own offset (vadd)
+func_00122B30	GetIdentityPoseRotation	original assembly; slot 5 of D_002195D8: the rotation of the source at +0x8 or GetOwnerRotation, combined with its own matrix
+func_00122C48	GetNextPoseSourceValue	walks the owner's list from this record to the first one whose orientation mode is not -1 (0 ends the walk) and asks it for the value (slot 6), else uses the owner's value
+func_00122CB0	GetIdentityPoseMatrix	original assembly; slot 7 of D_002195D8: the matrix of the source at +0x8 or GetIdentityMatrix, combined with its own
+func_00122D90	GetIdentityPoseIndexedValue	returns 0.0; slot 8 of D_002195D8, the indexed-value slot (GetOwnerIndexedValue, GetSnapshotIndexedValue)
+func_00122DA0	InitAimPoseSource	slot 0 of D_00219600: InitPoseSource, then 1.0 at +0x1C and 0.25 at +0x20
+func_00122DE0	GetAimPoseRotation	original assembly; slot 5 of D_00219600: builds its rotation with func_00189C28 (as MakeScriptDirectionMatrix does) from a difference of two points scaled by a reciprocal (vdiv)
+func_00122F28	ReleaseTrackPoseSource	slot 2 of D_002197C0: takes itself out of the player's list at +0x44, clears the player's driven pointer if it was this record, then runs the base release
+func_00122F88	CopyTrackPoseSource	slot 1 of D_002197C0: runs the common copy and restores its own player pointer and the pair at +0x20
+func_00122FE0	GetTrackPosition	slot 4 of D_002197C0: evaluates the track's position curve at the player's time (advanced by the given fraction of its speed), or falls back to the owner's position when the track has none
+func_00123120	GetTrackRotation	slot 5 of D_002197C0: evaluates the track's rotation curve at the player's time, or falls back to the owner's orientation when the track has none
+func_00123270	GetTrackValue	slot 6 of D_002197C0: evaluates the track's weight curve at the player's time, or falls back to the owner's value when the track has none
+func_001232E8	GetTrackScaleMatrix	slot 7 of D_002197C0: evaluates the track's scale curve at the player's time, or returns the identity matrix when the track has none
+func_00123358	GetTrackIndexedValue	slot 8 of D_002197C0: evaluates the indexed weight curve of the track at the player's time and returns the value

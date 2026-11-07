@@ -1,0 +1,8 @@
+symbol	name	evidence
+func_00202768	ClearBytes	sets n bytes to 0 (ResetDmaController clears its settings with it)
+func_002027A0	GetDmaChannel	returns the register block of one of the ten DMA channels from g_dmaChannels, or 0 past the tenth
+func_002027C8	ResetDmaController	clears the channels g_dmaChannelsToReset marks, masks and clears the controller's interrupts, sets its settings to zero and enables it when asked; returns whether it was enabled (InitDmaChannels calls it)
+func_002028A8	SetDmaSettings	writes the controller's release, FIFO, stall and drain settings and its ring and hold words, and keeps them in g_dmaSettings
+func_00202A80	StartDmaChain	waits for a channel to finish, then starts it in chain mode from a tag address (SubmitPacketBuffer calls it)
+func_00202B68	StartDmaChainToMemory	waits for a channel to finish, then starts it in chain mode towards memory (StartFromSprChain calls it)
+func_00202C38	WaitDmaChannel	waits until a channel's transfer ends, or tests it, with a timeout (RunRenderThread calls it)

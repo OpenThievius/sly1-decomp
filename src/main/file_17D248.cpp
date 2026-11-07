@@ -7,7 +7,7 @@
 #include "placed_object.h"
 #include "asm_func.h"
 
-// From 0x17D248 to file_17FE00: player helpers in VU0 code, the probe test func_0017DE88, and the
+// From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
 // VU0 functions read, vectors, the probe segments and the list head g_pointObjects); its
 // .rodata from 0x24B060 to 0x24B164 is the jump tables of its VU0 functions.
@@ -81,31 +81,26 @@ ASM_FUNC(func_0017D5D8);
 
 ASM_FUNC(func_0017DCE0);
 
-struct Node_17DE88 { Collider* f0; Node_17DE88* f4; u8 pad[4]; Collider* fC; };
-struct List_17DE88 { Node_17DE88* head; };
-struct Obj_17DE88 { u8 pad[0x480]; List_17DE88* f480; };
-struct Ctx_17DE88 { u8 pad[1]; };
-struct Mat_17DE88 { f32 m[16]; };
 
 void func_001ED780(Quad16* q, void* out, const Vec02* a, const Vec02* b);
-void func_00188B08(Ctx_17DE88* a, Quad16* b, void* out);
-void func_00188700(Mat_17DE88* a, f32 w, void* b, void* c);
+void func_00188B08(void* a, Quad16* b, void* out);
+void func_00188700(void* a, f32 w, const void* b, void* c);
 s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, void* a4);
 
-s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
+s32 func_0017DE88(Collider* self, void* ctx, Quad16* src)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
     Quad16& q = *(Quad16*)buf;
     q = *src;
     s32 hits = 0;
-    func_001ED780(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
+    BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
-        Node_17DE88* n = self->f480->head;
+        TransformByMatrixWithW(buf + 0x30, 1.0f, &D_00263EC0[i], buf + 0x70);
+        TransformByMatrixWithW(buf + 0x30, 1.0f, &D_00263EC0[i + 1], buf + 0x80);
+        ContactRow03* n = self->contacts->head;
         while (n) {
-            Collider* a = n->fC;
+            Collider* a = n->other;
             if (!(a->flags538 & 0x40000000000ULL)) {
                 Collider* c = (Collider*)a->parts.head;
                 while (c) {
@@ -119,7 +114,7 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
                     c = (Collider*)c->link2E4.next;
                 }
             }
-            n = n->f4;
+            n = n->next;
         }
     }
     return hits >= 2;
@@ -163,7 +158,7 @@ void func_00152438(void* self, s32 value);
 
 void func_0017FD48(void)
 {
-    func_00152438(&g_pointObjects, 0x50);
+    SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
 void func_00152440(void* p);

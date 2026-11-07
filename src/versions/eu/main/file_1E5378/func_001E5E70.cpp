@@ -44,8 +44,8 @@ void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
     s32 i = 0;
     u32 dim = 0x30000000;
     s32 special = 0x1A;
-    Elem_1E5E70* p;
-    for (p = (Elem_1E5E70*)self->elems; i < 69; i++) {
+    ArcPointStep* p;
+    for (p = (ArcPointStep*)self->elems; i < 69; i++) {
         f32 t = (f32)i * step;
         f32 y = t + t - 1.0f;
         p->f34 = y;
@@ -65,7 +65,7 @@ void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
             p->fC = p->f34;
             p->f4 = p->f2C;
         }
-        p = (Elem_1E5E70*)((u8*)p + 0x2C);
+        p = (ArcPointStep*)((u8*)p + 0x2C);
     }
     self->f114C = 1.0f;
     self->f1144 = 0;

@@ -1,0 +1,6 @@
+symbol	name	evidence
+func_001FF048	ReadUnsignedLeb128	reads an unsigned number of 7-bit groups (the top bit marks a continuation) from the unwind tables and returns the position after it
+func_001FF090	ReadSignedLeb128	reads a signed number of 7-bit groups, extending the sign from bit 6 of the last byte, and returns the position after it
+func_001FFBE0	RegisterFrameInfo	original assembly: adds an object's frame information to the runtime's list D_0062A7B8 (RegisterProgramFrameInfo calls it at startup)
+func_001FFC08	DeregisterFrameInfo	removes an object's frame information from the runtime's list D_0062A7B8, freeing its sorted table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit)
+func_001FFC80	FindFrameUnwindState	finds the frame description of a code address and runs its unwind instructions into a state record (the throw and rethrow entries call it)

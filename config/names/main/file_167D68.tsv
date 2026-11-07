@@ -1,0 +1,65 @@
+symbol	name	evidence
+func_00167D68	InitConeAgent	slot 0x10 of class 0x0A: runs InitAgent and sets its two ranges (1000, 1500), two angles (pi/4, pi), the distances 2000 and 300, the angle pi/3 at +0x74C and the ids +0xC18 and +0xC30 to -1
+func_00167E08	StartConeAgent	slot 0x50 of class 0x0A: runs StartAgent, finds the objects of its ids +0xC18 and +0xC30 (FindFirstObjectByIdMode4) and gives each object its animation events gather a small list of its own
+func_00167EF0	DrawConeAgent	slot 0xA4 of class 0x0A: runs DrawAgent
+func_00167F10	IsConeAgentFree	slot 0x16C of class 0x0A, the slot IsGaugeAgentFree and IsContactAgentFree fill: tests func_001DDA80 for the world, the agent's state at +0x724 (0xB, 0x10) and its records at +0xC10..+0xC40
+func_00168130	ApplyFieldDisplayOffset	reads the GS CSR field bit (0x12001000 side, bit 13), and when it differs from the saved field copies the frame's display and dispfb records to DISPLAY2/DISPFB2 with the height one less and the start line (or framebuffer y) one further down, then writes PMODE
+func_001682C0	HandleVblankStart	the interrupt handler InitDisplay installs for cause 2 (the start of the vertical blank): posts D_002BE460 when D_002BE46C asks for it, then by the display mode D_002626CC applies the field's display offset (ApplyFieldDisplayOffset, modes 1 and 2) or advances g_displayFrameCounter and writes the next frame's display registers (WriteDisplayRegisters, mode 3)
+func_001683B8	SignalDisplaySync	sets D_002BE46C and signals D_002BE460 (func_001F6B60); FlipDisplayFrame, ResetDisplayBuffers and FadeScreenToBlack call it
+func_001683E8	FlipDisplayFrame	per-frame: picks one of two display records by the parity of the frame counter D_002626C0, sends it with func_00202098, increments the counter, then calls ApplyFieldDisplayOffset when D_002626CC is 1 or 2
+func_001684E8	ApplyPendingDisplayFlip	when a flip is pending (D_002BE474) clears it, reads the field bit of the GS CSR and sets the display and draw buffers for the frame counter's parity (RunRenderThread calls it)
+func_001685B8	ResetDisplayBuffers	sends the display reset packet, sets the GS mode, zeroes the flip state, sets the buffers by the field bit and advances g_displayFrameCounter (InitDisplay calls it)
+func_00168698	HandleGsFinish	the interrupt handler InitDisplay installs for cause 0 (the GS): when SendGsPacketAndWait has armed D_002BE468 and the GS CSR's FINISH bit (0x12001000 bit 1) is set, clears the flag and posts the semaphore D_002BE464 it waits on
+func_001686E8	SendGsPacketAndWait	sets D_002BE468, sets the GS CSR's FINISH bit, sends a packet on a DMA channel and waits on D_002BE464 (SendMaskedImagesToGif and the render thread call it)
+func_00168770	FillScreenColor	builds a GS packet that sets the colour register from its four bytes and draws sprites in 32-pixel steps across 0x280 pixels, two strips per step, with the flag choosing between two prim values
+func_001688B8	InitDisplay	clears the display records, fills three images with a colour (func_00168770), creates two semaphores, installs the two interrupt handlers func_001682C0 and func_00168698, then runs InitMeshQueue and func_001685B8
+func_00168A48	SendPacketToBothBuffers	sends a packet on the GIF channel once for each of the two draw buffers and waits for the channel
+func_00168AF8	SendDisplayResetPacket	builds a packet that refers to the 0x2C quadwords at D_002BE1A0 and sends it to both draw buffers (SendPacketToBothBuffers)
+func_00168B68	FadeScreenToBlack	for t*60 frames draws a full-screen 640-wide quad of colour (0,0,0,alpha) with alpha = (i/n)^2*255 into a packet and calls FlipDisplayFrame, so the screen goes to black
+func_00168D00	InitMeshQueue	calls InitBumpAllocator(&g_bumpAllocator, 0x1E00, 0x4000) and zeroes D_002626D0, the count of entries QueueMeshStrip and QueueNodeLink append to D_0027DC20
+func_00168D30	CeilLog2	returns the smallest count (at most 31) such that 1<<count is not below n, by doubling a value from 1 (BuildImageTexRegister uses it for the texture width and height exponents)
+func_00168D68	InitBumpAllocator	stores its first argument as the start and the cursor and its second as the limit
+func_00168D78	ResetBumpAllocator	copies the start back into the cursor
+func_00168D88	AllocateBump	returns the cursor and moves it on by the size
+func_00168D98	BeginImageTransfer	writes GS registers 0x50 to 0x53 (BITBLTBUF with dbp, dbw and dpsm, TRXPOS 0, TRXREG with width and height, TRXDIR 0) into a packet, then sends the data with func_00161958
+func_00168E78	BuildPaletteTexRegister	stores the VRAM address in the bit field at +0x10 that sits where TEX0 keeps its palette base, picks psm 0x14 or 0x13 by whether the colour count is at most 16, and sets the load-palette field to 1
+func_00168F48	StartPaletteUpload	calls BeginImageTransfer for a palette record with a width of 16 or 8 chosen by its colour count, height rounded up from it, and its VRAM address v
+func_00168FB0	BuildImageTexRegister	fills the TEX0-shaped bit field at +0x18 of an image record: base address, width in 64-pixel units, psm, CeilLog2 of the width and of the height, and the colour-component bit set
+func_00169088	StartImageUpload	calls BeginImageTransfer with an image record's psm, buffer width, width and height
+func_001690C0	PlaceMaskedImages	for each palette record and each image record whose flags contain the mask, takes its size from the bump allocator (aligned to 0x80 and 0x20), sets its register bits, and when given a packet starts the upload; returns whether the packet's write pointer moved
+func_001692B0	SendMaskedImagesToGif	places the masked images, appends TEXFLUSH and FINISH register writes, ends the packet and sends it down the GIF channel
+func_001693A8	BuildMaskedImagesPacket	places the masked images into a bump-allocated temporary packet, appends TEXFLUSH and copies the finished packet out to the caller
+func_001694A0	SubmitMeshQueueEntry	copies the entry's source block to its destination with func_0018D800 and, when its flag word is set, ORs 0x8000 and the flag into two words of the destination
+func_001694F8	QueueMeshStrip	fills a 16-byte record from a mesh strip (count, base, node index) in the pool D_0027DC20 or on the stack and, for a linked node, links it into the node's list
+func_00169608	QueueNodeLink	fills a 16-byte record for the node in the pool D_0027DC20 or on the stack and links it into the node's list
+func_001696B8	RemapMeshQueueValues	for entries from idx on, a value in [take, take+lo) is moved to give plus its offset from take
+func_00169718	FlushMeshQueue	runs SubmitMeshQueueEntry over each of the D_002626D0 entries of D_0027DC20
+func_00169780	UploadImagesByMask	for every image and palette record whose flag word contains the mask, builds the texture register and upload packet and writes it through VIF direct
+func_00169B18	SetupTextureRenderTarget	writes GS registers 0x4D (FRAME_2), 0x4F (ZBUF_2), 0x19 (XYOFFSET_2), 0x41 (SCISSOR_2), 0x48 (TEST_2) and 0x43 into a packet from a texture header's TEX0 base and size, so drawing lands in that texture
+func_00169C58	SetObjectListLinkOffsets	gives the three lists D_002626E8, D_002626F8 and D_00262708 their link offsets 0x38, 0x50 and 0x558 with func_00152438
+func_00169CA0	ClearObjectLists	zeroes the head and tail of the three lists D_002626E8, D_002626F8 and D_00262708 with func_00152440
+func_00169CD8	InitTargetCurve	class 0x6F slot 0: InitObject, then targetId = -1, f4C = 1, f50 = 3 and the largest float (the class carries an object id it resolves later)
+func_00169D20	RegisterTargetCurve	class 0x6F slot 6: RegisterObject, then appends the object to the list D_002626E8
+func_00169D58	UnregisterTargetCurve	class 0x6F slot 7: UnregisterObject, then removes it from the list D_002626E8
+func_00169D90	PostLoadTargetCurve	class 0x6F at table offset 0x4C: when targetId is not -1 finds that object with func_0015A448, stores it in target and clears its 0x398 word
+func_00169DD8	CopyTargetCurve	class 0x6F slot 9: saves the 8 bytes at +0x38, calls CopyObjectData and restores them
+func_00169E20	PlaceOnTargetCurve	samples the target curve's track (+0x34, through its slot 1) at a length and converts the point and direction to world space through the curve's owner (+0x18, func_00128018, func_001280C0), with the heading from ArctangentOfRatio; CopyTargetCurve's neighbour FindTargetCurveLengthNearCollider and ComputeTargetArc call it
+func_00169FC0	FindTargetCurveLengthNearCollider	projects the active switched collider's position onto the target curve's track through its slot 10, keeps the result 30 inside the track's ends unless it wraps, places the target there (func_00169E20) and returns it (func_001CFFD0 calls it)
+func_0016A100	InitTargetPoint	class 0x7F slot 0: InitObject, then targetId = -1, f68 = 1 and f70 = the largest float
+func_0016A140	RegisterTargetPoint	class 0x7F slot 6: RegisterObject, then appends the object to the list D_002626F8
+func_0016A178	UnregisterTargetPoint	class 0x7F slot 7: UnregisterObject, then removes it from the list D_002626F8
+func_0016A1B0	PostLoadTargetPoint	class 0x7F at table offset 0x4C: when targetId is not -1 finds that object with func_0015A448, stores it in target and clears its 0x398 word
+func_0016A1F8	CopyTargetPoint	class 0x7F slot 9: saves the keep word, calls CopyObjectData and restores it
+func_0016A240	PlaceOnTargetPoint	the target point's (class 0x7F) counterpart of PlaceOnTargetCurve: turns a length into an angle around the point over its radius (+0x5C), places a point on the circle 20 (kind 0) or 70 (kind 1) wider (ComputePolarOffset, ConvertPositionToWorld) and writes the heading, turned by pi for kind 1
+func_0016A320	PlaceTargetPointNearCollider	takes the angle of the active switched collider around the target point (ArctangentOfRatio), times the radius +0x5C, and places at that length with PlaceOnTargetPoint; the target point's FindTargetCurveLengthNearCollider
+func_0016A3A8	InitListedCollisionPart	class 0x3A slot 0: InitCollider, calls func_00129FB0, func_0012A080 and func_0012A150 with 3.0 and func_0012A270 with 2.0, and sets f568 to 300.0
+func_0016A420	LoadListedCollisionPart	class 0x3A at table offset 0x38 (LoadAgent in class 8): LoadCollider, then allocates a 0xC0-byte block if the object has none, sets bit 0 of a flag byte in it and copies 48 bytes of constants from D_002483D0
+func_0016A490	AddToPartList	Slot 6: runs the base step, then appends the object to the list at D_00262708 with func_00152470.
+func_0016A4C8	RemoveFromPartList	Slot 7: runs the base step, then removes the object from the list at D_00262708 with func_00152600.
+func_0016A500	CopyKeepingListLink	Slot 9: saves the list link at +0x558, runs the base copy, and writes the link back.
+func_0016A548	TestListedCollisionPartMayContact	class 0x3A at table offset 0xF0 (TestAgentMayContact in class 8): returns 1 for the pair (D_00262E10's object, its held object at +0x23B0), else TestCollidersMayContact
+func_0016A580	StepListedCollisionPart	class 0x3A at table offset 0x80 (StepAgent in class 8): StepCollider, then, while f550 is 0, computes a matrix from the sub-object at +0xD0 and passes it to func_001B91A8
+func_0016A5F0	SetPooledObjectPlayerHold	sets a pooled object's hold state +0x550: leaving 1 reparents it to nothing and sends script event 3; entering 1 reparents it to g_player, anchors it and sends script event 2; stamps the game time at +0x554 (func_00175170 calls it)
+func_0016A758	CountHeldPooledChildren	counts the objects of kind 0x46 in a list at +0x34 whose state +0x550 is 3 or 4 (func_0014F270 calls it)
+func_0016A820	FindEarliestPooledChild	walks the child list at +0x34 for kind 0x46 (PooledObject) objects in state 4 and returns the one with the smallest stateTime; func_00150298 calls it for each listed part to pick the earliest and put it in state 5
+func_0016A910	FindRingPointTowardCollider	original assembly: the point at the target point's radius (+0x560) plus 70 from its position in the direction of the active switched collider, and the heading back towards the target point (ArctangentOfRatio plus pi, WrapAngle); func_001CFFD0 calls it

@@ -2,13 +2,13 @@
 // PAL runs at 50 Hz (50.0f) and uses a 468.61017f screen height.
 void func_00168B68(f32 t)
 {
-    Frame_168B68 f;
+    FadePacket f;
     s32 i = 0;
     s32 n;
 
     InitGifPacket(&f);
     n = (s32)(t * 50.0f);
-    func_001683B8();
+    SignalDisplaySync();
     D_002626CC = 0;
     if (n > 0) {
         do {
@@ -24,7 +24,7 @@ void func_00168B68(f32 t)
             EndGifPacket(&f);
             AddDmaEndTag(&f);
             DetachPacketBuffer(&f, 0, 0);
-            func_001686E8(g_gifChannel, &f.value);
+            SendGsPacketAndWait(g_gifChannel, &f.value);
             FlipDisplayFrame();
         } while (i < n);
     }

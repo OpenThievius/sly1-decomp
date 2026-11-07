@@ -13,7 +13,7 @@
 #include "world.h"
 #include "object_pool.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "game_clock.h"
 #include "game_progress.h"
@@ -22,12 +22,12 @@
 #include "asm_func.h"
 
 // The font object's calls.
-V24A2* func_0015C1C0(s32 k);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
-f32 func_0015C418(V24A2* font, void* text);
-void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(V24A2* font);
-void* func_0015DB28(void* out, void* text, V24A2* font);
+Font* func_0015C1C0(s32 k);
+void func_0015C8B8(Font* font, f32 x, f32 y);
+f32 func_0015C418(Font* font, void* text);
+void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
+void func_0015C900(Font* font);
+void* func_0015DB28(void* out, void* text, Font* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 void func_00182ED0(void* self);
@@ -59,25 +59,25 @@ void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
-void func_001C72A0(C0D* self);
-void func_001DDC38(void* sub, C0D* self);
+void func_001C72A0(GaugeBarAgent* self);
+void func_001DDC38(void* sub, GaugeBarAgent* self);
 
 
 s32 func_001DDA80(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void func_001C8C08(C0D* self);
-void func_001C8418(C0D* self, void* p);
+void func_001C8C08(GaugeBarAgent* self);
+void func_001C8418(GaugeBarAgent* self, void* p);
 
 
-void func_001C8E28(C0D* self);
-void func_001C8BC0(C0D* self);
+void func_001C8E28(GaugeBarAgent* self);
+void func_001C8BC0(GaugeBarAgent* self);
 
 
 extern u8 D_00264A40[];
 
-void func_001C91C8(C0D* self);
+void func_001C91C8(GaugeBarAgent* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(u8* p);
 
@@ -88,8 +88,7 @@ s32 func_001E9970(void);
 
 
 
-struct Tab_26C3E0 { T217D_Place e[37]; s32 end; };
-extern Tab_26C3E0 D_0026C3E0;
+extern ElementPlaceTable D_0026C3E0;
 extern u8 D_00261868[];
 
 
@@ -101,45 +100,33 @@ void* func_0015A448(void* obj, s32 id, void* owner);
 s32 func_001300E8(void* node, s32 kind);
 
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+s32 func_001F5C0C(void* p, s32 value, s32 size);
 
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+s32 func_001F5C0C(void* p, s32 value, s32 size);
 
 
 void func_001A93C8(void* self);
 
 
-struct Entry_1A8718 { s32 key; s32 pad[3]; s32 flags; };
 
-Entry_1A8718* func_001A8718(ObjectPool* table, s32 key);
-
-
-struct Row_1A8820 { s32 unk0; s32 itemCount; void** items; u8 pad[8]; };
+ObjectPoolEntry* func_001A8718(ObjectPool* table, s32 key);
 
 
-struct Entry_1A87E0 { s32 pad0; s32 f4; s32 pad1; s32 fC; };
-
-Entry_1A87E0* func_001A8718(void* table, s32 key);
 
 
-struct __attribute__((aligned(16))) Quad_1A94C0 { s32 a, b, c, d; };
-struct Inner_1A94C0 {
-    u8 pad0[0x110];
-    Quad_1A94C0 q110;
-    Quad_1A94C0 q120;
-    Quad_1A94C0 q130;
-    Quad_1A94C0 q140;
-};
-struct Obj_1A94C0 {
+
+
+
+// Where func_001A94C0 takes a position and a matrix from: an object's world frame (f0 or f4), a
+// placed object's m110 and v140 (f8), or its own copy of both.
+struct FrameSource {
     void* f0;
     void* f4;
-    Inner_1A94C0* f8;
+    PlacedObject* f8;
     u8 pad0[4];
-    Quad_1A94C0 q10;
-    Quad_1A94C0 q20;
-    Quad_1A94C0 q30;
-    Quad_1A94C0 q40;
+    Vec02 pos;
+    Vec02 rot[3];
 };
 
 void func_001920B0(void* self, void* arg);
@@ -167,9 +154,7 @@ void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
 
-struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; T217D_Word w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; T217D_Word w30; };
-struct VDesc_001AB710 { u8 pad0[0x48]; s16 off48; u8 pad1[2]; void (*fn4C)(void* self, void* obj, void* out, void* d); };
-struct SubObj_001AB710 { u8 pad0[0x4C]; VDesc_001AB710* desc4C; };
+
 
 void func_00137228(void* out, f32 x, f32 y);
 void func_00137238(void* out, f32 x, f32 y);
@@ -191,7 +176,7 @@ extern void* const D_002486B0[];
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-// The screen elements' methods, in src/main/file_1AA268.cpp.
+// The screen elements' methods, in src/main/screen_element.cpp.
 void func_001AA268(ScreenElement* self);
 void func_001AA298(ScreenElement* self);
 void func_001AAF88(T217D_E30* self);
@@ -249,34 +234,21 @@ extern u8 D_0024E879[];
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 void* func_001E2138(void* dst, void* src);
 
-struct Hdr_1A8208 { u8 pad0[4]; s32 f4; s32 f8; Quad16* fC; };
-struct Ent_1A8208 { s32 f0; s32 f4; void** f8; s32 fC; s32 f10; };
-struct Self_1A8208 {
-    u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
-    s32 f34; Ent_1A8208* f38; Hdr_1A8208* f3C;
-};
 
 void* func_0018D500(s32 size);
-PlacedObject* func_0015A418(void* a, s32 b, s32 c, Self_1A8208* d);
+PlacedObject* func_0015A418(void* a, s32 b, s32 c, ObjectPool* d);
 void func_00152438(void* p, s32 a);
 s32 func_001527D8(void* p);
 PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
 
 
-struct Tab_1A87A8;
-struct Ent_1A87A8 { s32 pad[4]; s32 flags; };
 
-Ent_1A87A8* func_001A8718(Tab_1A87A8* table, s32 key);
 
 
 void func_001A8AF8(ObjectPool* self);
 
 
-struct Obj_1A93E8;
-void func_001F5C0C(Obj_1A93E8* p, s32 zero, s32 size);
 
-
-extern void* const D_002486B0[];
 
 
 extern void* const D_002486B0[];
@@ -284,7 +256,10 @@ extern void* const D_002486B0[];
 
 extern void* const D_002486B0[];
 
-extern Tab_26C3E0 D_0026C3E0;
+
+extern void* const D_002486B0[];
+
+extern ElementPlaceTable D_0026C3E0;
 
 
 
@@ -296,7 +271,6 @@ void func_001AE820(u8* a);
 
 
 
-struct Entry_1A8150 { s32 f0; s32 f4; u8 pad[8]; s32 f10; };
 
 void* func_0018D5C0(u32 n);
 
@@ -306,19 +280,11 @@ extern s32 D_002751D4;
 
 // EXACT: dst built as i*4 + (u32)items
 
-struct Rec_1A8AF8 { s32 f0; s32 count; s32* items; s32 f0C; s32 flags; };
 void func_001A89E8(ObjectPool* self);
 s32 func_001A88A0(ObjectPool* self, s32 item);
 void func_001F5B08(s32* dst, s32* src, s32 size);
 
 
-struct Rec_001A89E8 {
-    s32 f00;
-    s32 f04;
-    s32* f08;
-    s32 f0C;
-    s32 f10;
-};
 
 s32 func_001A88A0(ObjectPool* self, s32 item);
 
@@ -435,26 +401,27 @@ void func_001AB2B8(T217D_E30* self);
 f32 func_0015DFF8(TextReader* loc);
 
 
-struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
-struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
+// An object func_001A88A0 may add to a pool: a class 0x3B with 0x678 clear or a class 0x20
+// with 0x680 set is refused.
+struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 
-s32 func_00182FC8(Key_1A88A0* p);
-s32 func_001300E8(Key_1A88A0* p, s32 kind);
+s32 func_00182FC8(PoolCandidate* p);
+s32 func_001300E8(PoolCandidate* p, s32 kind);
 
-struct Begin_1A88A0 {
-    static void Of(Iter_1A88A0* it, List_1A88A0* list)
+// The list walk (list_iter.h): push a frame, step through the elements, pop it.
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_1A88A0*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 
-struct Next_1A88A0 {
-    static u8* Of(Iter_1A88A0* it)
+struct ListWalkNext {
+    static u8* Of(ListFrame* it)
     {
         u8* obj = *(u8**)it->link;
         it->link = obj + it->offset;
@@ -462,16 +429,16 @@ struct Next_1A88A0 {
     }
 };
 
-struct End_1A88A0 {
-    static void Of(Iter_1A88A0* it)
+struct ListWalkEnd {
+    static void Of(ListFrame* it)
     {
-        D_0027B314 = (ListFrame*)it->prev;
+        g_activeListFrames = it->prev;
     }
 };
 
 
 // Data defined by this file.
-Tab_26C3E0 D_0026C3E0 = {
+ElementPlaceTable D_0026C3E0 = {
     {
         { 0.0f, 0.0f, -1, -1, -1 },
         { 0.0f, 0.0f, -1, -1, -1 },
@@ -558,10 +525,10 @@ T217D_E30 D_00274118;
 
 
 void func_00182C18(ObjectPool* self);
-struct Buf_1A7FE8 { u8 b[1]; };
-s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
+
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(ObjectPool* self);
+
 
 
 void func_001A7FE8(ObjectPool* self)
@@ -572,19 +539,19 @@ void func_001A7FE8(ObjectPool* self)
     self->id50 = -1;
     self->id54 = -1;
     self->id58 = -1;
-    (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
+    (void)FillMemory(s1, 0, 0x80);
     const Quad16* src = (const Quad16*)&g_identityMatrix;
     *(Quad16*)(s1 + 0x20) = src[0];
     *(Quad16*)(s1 + 0x30) = src[1];
     *(Quad16*)(s1 + 0x40) = src[2];
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
+    (void)FillMemory(((u8*)self + 0xE0), 0, 0x70);
     V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
+    (void)FillMemory(((u8*)self + 0x150), 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
     self->f168 = 0;
@@ -611,33 +578,33 @@ void* func_001A8110(ObjectPool* self)
 void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
-        self->items = AllocateZeroedFrontMemory(0x50);
+        self->items = (ObjectPoolEntry*)AllocateZeroedFrontMemory(0x50);
     }
-    Entry_1A8150* e = &((Entry_1A8150*)self->items)[self->count++];
-    e->f0 = a1;
-    e->f4 = a2;
-    e->f10 = ((((e->f10 & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
+    ObjectPoolEntry* e = &self->items[self->count++];
+    e->id = a1;
+    e->count = a2;
+    e->flags = ((((e->flags & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
 }
 
-void func_001A8208(Self_1A8208* self)
+void func_001A8208(ObjectPool* self)
 {
     s32 i;
-    if (self->f3C != 0) {
-        if (self->f3C->f4 != 0) {
-            self->f3C->fC = (Quad16*)AllocateFrontMemory(self->f34 << 5);
+    if (self->sub != 0) {
+        if (self->sub->f4 != 0) {
+            self->sub->qC = (Quad16*)AllocateFrontMemory(self->count << 5);
         }
     }
-    for (i = 0; i < self->f34; i++) {
-        Ent_1A8208* e = &self->f38[i];
-        PlacedObject* obj = FindFirstObjectById(self->f14, 4, e->f0, self);
+    for (i = 0; i < self->count; i++) {
+        ObjectPoolEntry* e = &self->items[i];
+        PlacedObject* obj = FindFirstObjectById(self->world, 4, e->id, self);
         s32 n;
         s32 cnt;
         if (obj == 0) {
-            e->f4 = 0;
+            e->count = 0;
             continue;
         }
-        if (self->f3C != 0 && self->f3C->f4 != 0) {
-            s32 x = self->f3C->f8;
+        if (self->sub != 0 && self->sub->f4 != 0) {
+            s32 x = self->sub->f8;
             if (x == 1) goto c1;
             if (x < 2) {
                 if (x == 0) goto c0;
@@ -647,29 +614,29 @@ void func_001A8208(Self_1A8208* self)
             }
             goto done;
         c0:
-            self->f3C->f8 = 1;
-            func_00152438((u8*)self->f3C + 0x14, 0x18);
+            self->sub->f8 = 1;
+            SetListLinkOffset((u8*)self->sub + 0x14, 0x18);
         c1: {
-                s32 r = CountListItems((u8*)self->f3C + 0x14);
+                s32 r = CountListItems((u8*)self->sub + 0x14);
                 s32 lim = r + 1;
-                s32 m = e->f4;
+                s32 m = e->count;
                 s32 q = lim;
                 if (q < m) q = m;
                 n = q;
                 cnt = n - r - 1;
             }
         } else {
-            n = e->f4;
+            n = e->count;
             cnt = n - 1;
         }
     done:
-        if (n != 0) e->f8 = (void**)AllocateFrontMemory(n << 2);
-        e->f8[e->fC++] = obj;
+        if (n != 0) e->objects = (void**)AllocateFrontMemory(n << 2);
+        e->objects[e->total++] = obj;
         if (cnt > 0) {
             s32 k = cnt;
             do {
                 PlacedObject* o2 = CreateObjectCopy(obj, obj->world, obj->parent);
-                e->f8[e->fC++] = o2;
+                e->objects[e->total++] = o2;
                 if (o2->desc->m0F != 0) o2->desc->m0F(o2);
                 o2->desc->m10(o2);
                 o2->desc->m15(o2, 0);
@@ -680,8 +647,8 @@ void func_001A8208(Self_1A8208* self)
         obj->desc->m10(obj);
         obj->desc->m15(obj, 0);
         obj->desc->m03(obj);
-        if (self->f3C != 0 && self->f3C->f4 != 0) {
-            Quad16* d = self->f3C->fC + (i << 1);
+        if (self->sub != 0 && self->sub->f4 != 0) {
+            Quad16* d = self->sub->qC + (i << 1);
             d[0] = *(Quad16*)&obj->v190;
             d[1] = *(Quad16*)&obj->v1D0;
         }
@@ -696,7 +663,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         } else {
             other->sub->f8 = 1;
-            func_00152438((u8*)other->sub + 0x14, 0x18);
+            SetListLinkOffset((u8*)other->sub + 0x14, 0x18);
             self->sub = 0;
         }
         GetObjectPoolShare(self);
@@ -705,7 +672,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
         self->sub->f14 = other;
         AppendToList((u8*)other->sub + 0x14, self->sub);
     } else {
-        self->items = CopyToFrontMemory(other->count * 0x14, other->items);
+        self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
     }
 }
 
@@ -717,7 +684,7 @@ void func_001A8590(ObjectPool* self)
     }
     self->f168 = 1;
     if (self->id4C != -1) {
-        void* p = func_0015A448(self->world, self->id4C, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id4C, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 0x7E) != 0) {
                 self->f60 = p;
@@ -729,7 +696,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id50 != -1) {
-        void* p = func_0015A448(self->world, self->id50, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id50, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 2) != 0) {
                 self->fE0 = p;
@@ -739,7 +706,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id54 != -1) {
-        void* p = func_0015A448(self->world, self->id54, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id54, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 0x73) != 0) {
                 self->f160 = p;
@@ -749,7 +716,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id58 != -1) {
-        self->f5C = func_0015A448(self->world, self->id58, self);
+        self->f5C = FindFirstObjectByIdMode4(self->world, self->id58, self);
     }
 }
 
@@ -760,58 +727,58 @@ void func_001A86F8(ObjectPool* self, s32 flag)
     }
 }
 
-Entry_1A8718* func_001A8718(ObjectPool* self, s32 key)
+ObjectPoolEntry* func_001A8718(ObjectPool* self, s32 key)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
-        if (((Entry_1A8718*)self->items)[i].key == key) break;
+        if (self->items[i].id == key) break;
     }
-    if (i < self->count) return &((Entry_1A8718*)self->items)[i];
+    if (i < self->count) return &self->items[i];
     return 0;
 }
 
 void func_001A8778(ObjectPool* table, s32 key)
 {
-    Entry_1A8718* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e) {
         e->flags |= 2;
     }
 }
 
-void func_001A87A8(Tab_1A87A8* table, s32 key)
+void func_001A87A8(ObjectPool* table, s32 key)
 {
-    Ent_1A87A8* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
         e->flags &= ~2;
     }
 }
 
-void func_001A87E0(void* table, s32 key, s32 value)
+void func_001A87E0(ObjectPool* table, s32 key, s32 value)
 {
-    Entry_1A87E0* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
-        if (value >= e->fC) {
-            value = e->fC;
+        if (value >= e->total) {
+            value = e->total;
         }
-        e->f4 = value;
+        e->count = value;
     }
 }
 
-s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->items+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
+s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
-s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
+s32 func_001A88A0(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
 
     if (group != 0 && group->f4 != 0) {
-        List_1A88A0* list;
+        List01* list;
         ObjectPool* skip;
-        Iter_1A88A0 it;
+        ListFrame it;
         u8* obj;
 
         switch (group->f8) {
         case 1:
-            list = (List_1A88A0*)&group->f14;
+            list = (List01*)&group->f14;
             skip = 0;
             break;
         case 2: {
@@ -820,19 +787,19 @@ s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
             if (e->f48 == (s32)key) {
                 return 0;
             }
-            list = (List_1A88A0*)&e->sub->f14;
+            list = (List01*)&e->sub->f14;
             break;
         }
         }
-        Begin_1A88A0::Of(&it, list);
-        for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
+        ListWalkBegin::Of(&it, list);
+        for (obj = ListWalkNext::Of(&it); obj != 0; obj = ListWalkNext::Of(&it)) {
             ObjectPool* e = *(ObjectPool**)obj;
             if (e != skip && e->f48 == (s32)key) {
-                End_1A88A0::Of(&it);
+                ListWalkEnd::Of(&it);
                 return 0;
             }
         }
-        End_1A88A0::Of(&it);
+        ListWalkEnd::Of(&it);
     }
     if (IsObjectAttached(key) != 0) {
         return 0;
@@ -861,10 +828,10 @@ void func_001A89E8(ObjectPool* self)
         return;
     }
     do {
-        Rec_001A89E8* rec = &((Rec_001A89E8*)self->items)[pos];
-        if ((rec->f10 & 2) != 0) {
-            for (k = 0; k < rec->f04; k++) {
-                if (IsObjectPoolItemFree(self, rec->f08[k]) != 0) {
+        ObjectPoolEntry* rec = &self->items[pos];
+        if ((rec->flags & 2) != 0) {
+            for (k = 0; k < rec->count; k++) {
+                if (IsObjectPoolItemFree(self, (s32)rec->objects[k]) != 0) {
                     goto found;
                 }
             }
@@ -886,22 +853,22 @@ void func_001A8AF8(ObjectPool* self)
         if (self->f40 == 0) {
             AdvanceObjectPoolEntry(self);
         }
-        Rec_1A8AF8* rec = &((Rec_1A8AF8*)self->items)[self->f44];
+        ObjectPoolEntry* rec = &self->items[self->f44];
 
         if (rec->flags & 2) {
             s32 i = 0;
             if (rec->count > 0) {
                 do {
-                    if (IsObjectPoolItemFree(self, rec->items[i]) != 0) {
-                        s4 = rec->items[i];
+                    if (IsObjectPoolItemFree(self, (s32)rec->objects[i]) != 0) {
+                        s4 = (s32)rec->objects[i];
                         if (self->sub != 0 && self->sub->f4 != 0) {
                             s5 = self->sub->fC + (self->f44 << 5);
                         }
                         if (rec->flags & 1) {
                         } else {
                             rec->count = rec->count - 1;
-                            s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->items);
-                            func_001F5B08(p, p + 1, (rec->count - i) * 4);
+                            s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->objects);
+                            MoveMemory(p, p + 1, (rec->count - i) * 4);
                         }
                         break;
                     }
@@ -932,13 +899,13 @@ void func_001A93C8(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 !=
 void func_001A93E8(u8* self)
 {
     u8* p = self + 0x60;
-    func_001F5C0C((Obj_1A93E8*)p, 0, 0x80);
+    FillMemory(p, 0, 0x80);
     *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
 void func_001A9438(ObjectPool* self)
 {
-    func_001F5C0C((u8*)self + 0xE0, 0, 0x70);
+    FillMemory((u8*)self + 0xE0, 0, 0x70);
     V8C* t = &self->v110;
     t->a = 0;
     t->b = 1.0f;
@@ -949,36 +916,36 @@ void func_001A9438(ObjectPool* self)
 
 void func_001A9498(u8* self)
 {
-    func_001F5C0C(self + 0x150, 0, 0x18);
+    FillMemory(self + 0x150, 0, 0x18);
 }
 
-void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
+void func_001A94C0(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
     if (self->f0 != 0) {
-        func_001920B0(self->f0, a1);
-        a2[0] = self->q20;
-        a2[1] = self->q30;
-        a2[2] = self->q40;
+        ConvertPositionToWorld(self->f0, a1);
+        a2[0] = self->rot[0];
+        a2[1] = self->rot[1];
+        a2[2] = self->rot[2];
     } else if (self->f4 != 0) {
         GetObjectWorldPosition(self->f4, a1);
         GetObjectWorldRotation(self->f4, a2);
     } else {
         if (self->f8 != 0) {
-            a1[0] = self->f8->q140;
-            Inner_1A94C0* in = self->f8;
-            a2[0] = in->q110;
-            a2[1] = in->q120;
-            a2[2] = in->q130;
+            a1[0] = self->f8->v140;
+            PlacedObject* in = self->f8;
+            a2[0] = in->m110.r[0];
+            a2[1] = in->m110.r[1];
+            a2[2] = in->m110.r[2];
         } else {
-            a1[0] = self->q10;
-            a2[0] = self->q20;
-            a2[1] = self->q30;
-            a2[2] = self->q40;
+            a1[0] = self->pos;
+            a2[0] = self->rot[0];
+            a2[1] = self->rot[1];
+            a2[2] = self->rot[2];
         }
     }
     if (a3 != 0) {
-        func_00128018(0, a3, a1, a1);
-        func_00128150(0, a3, a2, a2);
+        TransformPointBetweenFrames(0, a3, a1, a1);
+        TransformRotationBetweenFrames(0, a3, a2, a2);
     }
 }
 
@@ -989,11 +956,11 @@ void func_001A97C8(u8* self, f32* out, int x)
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
         GetObjectWorldRotation(*(void**)(self + 0x10), v);
-        func_00128150(0, x, v, v);
-        *out = func_00205778(v[1], v[0]);
+        TransformRotationBetweenFrames(0, x, v, v);
+        *out = ArctangentOfRatio(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
-        func_00128150(0, x, *(u8**)(self + 0x14) + 0x110, v);
-        *out = func_00205778(v[1], v[0]);
+        TransformRotationBetweenFrames(0, x, *(u8**)(self + 0x14) + 0x110, v);
+        *out = ArctangentOfRatio(v[1], v[0]);
     } else {
         *out = *(f32*)(self + 0x8);
     }
@@ -1001,20 +968,20 @@ void func_001A97C8(u8* self, f32* out, int x)
 
 ASM_FUNC(func_001A9868);
 
-void func_001A98F8(C0D* self)
+void func_001A98F8(GaugeBarAgent* self)
 {
     StartAgent(self);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
 }
 
-s32 func_001A9928(C0D* self)
+s32 func_001A9928(GaugeBarAgent* self)
 {
-    if (func_001DDA80(self->world) != 0)
+    if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
     return self->fC24;
 }
 
-void func_001A9960(C0D* self)
+void func_001A9960(GaugeBarAgent* self)
 {
     UpdateAgentGoal(self);
     if (self->f724 == 0x10) {
@@ -1024,14 +991,14 @@ void func_001A9960(C0D* self)
     }
 }
 
-void func_001A99B8(C0D* self)
+void func_001A99B8(GaugeBarAgent* self)
 {
     UpdateAgentState(self);
     if (self->f724 == 0x10)
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
 }
 
-void func_001A99F8(C0D* self)
+void func_001A99F8(GaugeBarAgent* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0xB) {
@@ -1040,7 +1007,7 @@ void func_001A99F8(C0D* self)
     }
 }
 
-void func_001A9A40(C0D* self)
+void func_001A9A40(GaugeBarAgent* self)
 {
     u8* s = (u8*)self;
     UpdateAgent(self);
@@ -1064,7 +1031,7 @@ void func_001A9A98(void)
 
 ASM_FUNC(func_001A9AE8);
 
-void func_001A9C58(C0D* self, s32 a, s32 b, s32 c)
+void func_001A9C58(GaugeBarAgent* self, s32 a, s32 b, s32 c)
 {
     self->fC14 = a;
     self->fC18 = b;
@@ -1088,7 +1055,7 @@ void func_001A9C68()
     D_0026E4E0.vt = (const T217D_Vt*)D_002181A0;
     g_timerElement.vt = (const T217D_Vt*)D_00218510;
     g_timerCaption.vt = (const T217D_Vt*)D_00221380;
-    D_0026EC70.vt = (const T217D_Vt*)D_00218330;
+    g_buttonHintElement.vt = (const T217D_Vt*)D_00218330;
     D_0026EED0.vt = (const T217D_Vt*)D_00218380;
     D_0026F138.vt = (const T217D_Vt*)D_002183D0;
     D_0026F5A0.vt = (const T217D_Vt*)D_00218420;
@@ -1137,7 +1104,7 @@ void func_001A9FD0(void)
     }
     u8* g = g_screenFade;
     void* b;
-    if (*(s32*)D_00262C68 & 4) {
+    if (*(s32*)g_padRouting & 4) {
         b = g_padRecord;
     } else {
         b = g_blankPadRecord;
@@ -1197,7 +1164,7 @@ void func_001AA178(void)
         }
     }
     DrawScreenFade(g_screenFade);
-    func_001AE820((u8*)&D_00273EB0);
+    DrawCyclingGlyphElement((u8*)&D_00273EB0);
 }
 
 void func_001AA1F0(ScreenElement* self, s32 index)

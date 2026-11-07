@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002082F8	ReduceLargeByHalfPi	reduces a large float argument by pi / 2 on the table of the digits of 2 / pi (reduce_large_by_half_pi.c)

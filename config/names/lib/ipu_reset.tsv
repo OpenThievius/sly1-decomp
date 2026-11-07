@@ -1,0 +1,3 @@
+symbol	name	evidence
+func_00211B40	StartIpuInputForReset	the IPU initialisation's own copy of StartIpuInputTransfer, for channel 4
+func_00211BA8	ResetIpu	resets the IPU and loads its default quantiser matrices and colour table (InitMpegLibrary calls it)

@@ -1,0 +1,16 @@
+symbol	name	evidence
+func_002018E8	ResetGsPaths	original assembly: resets the paths to the GS, driving VU0 and VIF1 with macro instructions (InitDmaChannels calls it)
+func_00201988	WaitGsPaths	original assembly: waits until the paths to the GS are idle (FlipDisplayFrame calls it)
+func_00201A18	ResetGs	in mode 0 resets the GS, records the interlacing, video mode, field mode and GS version in g_gsParams, removes its handler and sets the video mode; mode 1 only resets, mode 5 only records and sets (InitDisplay calls it)
+func_00201BA8	GetGsParams	returns g_gsParams
+func_00201BB8	WriteDisplayRegisters	writes a display environment's words to the GS's privileged registers (0x12000000 on), by the layout of the GS version in g_gsParams
+func_00201C78	SendDrawEnvironment	waits for DMA channel 2 to finish and sends a drawing environment's packet through it
+func_00201D60	SetUpDoubleBuffer	defines the two display and drawing environments of a double buffer for a pixel format, width and height, with an optional clear (InitDisplay calls it)
+func_00201FF8	SwapDoubleBuffer	writes the display registers of one half of a double buffer and sends the other half's drawing environment (FlipDisplayFrame calls it)
+func_00202058	SwapGsInterruptMask	reads the GS interrupt mask, writes a new one and returns the old
+func_00202098	SetFieldDrawOffset	sets a drawing environment's offset from its centre, half a line lower on the odd field (FlipDisplayFrame calls it)
+func_00202120	GetGsInterruptMask	returns the GS interrupt mask (ReadGsInterruptMask)
+func_00202140	DefineDisplayEnvironment	fills a display environment for a pixel format and size, printing its message for an unsupported display mode (SetUpDoubleBuffer calls it)
+func_002023B0	CountFrameBufferPages	returns the GS pages a frame buffer of a pixel format and size takes, doubled when g_gsParams says interlaced frame mode
+func_00202478	DefineDrawEnvironment	original assembly: fills a drawing environment for a pixel format, size and offset (SetUpDoubleBuffer calls it)
+func_00202660	DefineClearPacket	original assembly: fills the packet that clears a rectangle (SetUpDoubleBuffer calls it when asked to clear)

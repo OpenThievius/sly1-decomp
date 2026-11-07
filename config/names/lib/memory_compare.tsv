@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F59C4	CompareMemory	compares n bytes at a and b and returns their difference or 0 (memory_compare.cpp; AreScriptValuesEqual and func_001F9790 compare words with it)

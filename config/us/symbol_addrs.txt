@@ -51,7 +51,7 @@ func_001B5F50 = 0x001B5F50; // type:func
 func_001B9940 = 0x001B9940; // type:func
 
 // Data labels no instruction names: the start of a proved file's .rodata, reached only through a
-// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; file_193210's
+// pointer table in its .data (text_panel.cpp's compass strings, pointed to by D_00261128; pause_menu's
 // menu strings, pointed to by its menu table D_00269D50).
 D_00249CA0 = 0x00249CA0;
 D_0024B660 = 0x0024B660;
@@ -65,10 +65,10 @@ D_0024F220 = 0x0024F220;
 // object's string begins.
 D_0024F330 = 0x0024F330;
 // The start of the kernel library's identification string "PsIIlibkernl2430" (16 bytes, the
-// .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
+// .data of the system call stubs' object src/lib/system_calls.cpp), inside the coarse label
 // D_0027696C; func_001F9790 reads its last four bytes.
 D_00276970 = 0x00276970;
-// The end of the 32 words D_006294C0 of src/lib/file_1FA068.cpp (func_001FA1E8 clears 32, and
+// The end of the 32 words D_006294C0 of src/lib/command_channel.cpp (func_001FA1E8 clears 32, and
 // func_001FA1C0 reads them), inside splat's 0x1080-byte label: the 0x1000 bytes after them, which
 // no code reads, belong to that object or the next.
 D_00629540 = 0x00629540;
@@ -95,7 +95,7 @@ D_0062A788 = 0x0062A788;
 // each a 4-byte global of its own (an object of 8 bytes or more would sit on 8).
 D_00274B78 = 0x00274B78;
 D_00274B7C = 0x00274B7C;
-// The same in the player's file (file_16F608): after the float at 0x263704 (238689) that
+// The same in the player's file (player): after the float at 0x263704 (238689) that
 // func_0016F810 loads, two zero floats no code reads before the vector at 0x263710.
 D_00263708 = 0x00263708;
 D_0026370C = 0x0026370C;
@@ -113,17 +113,17 @@ func_001F2738 = 0x001F2738; // type:func
 // ("jojo", a date and time) that no code reads.
 D_00276658 = 0x00276658;
 // Two ranges at D_00275C60 (0 to 1, then -1 to 1): every reader takes the first (g_unitRange,
-// S1EB050); the second has no reader, so the disassembly has no label for it.
+// ValueRange); the second has no reader, so the disassembly has no label for it.
 D_00275C68 = 0x00275C68;
 // A second FLT_MAX after func_001419E8's (D_00249E44) that no code loads: the constant of a
-// function the linker stripped, ending file_1419E8's .rodata.
+// function the linker stripped, ending collider_span.cpp's .rodata.
 D_00249E48 = 0x00249E48;
-// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): ring_buffer.cpp's
 // .rodata starts with it, after class 0x3B's FLT_MAX at D_00249D78.
 D_00249D80 = 0x00249D80;
 // Two nops after func_0013E430's return, 8 bytes that no alignment explains (functions are
 // 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
-// Named so that file_13CCF8 can hold them (LINKER_REMNANT).
+// Named so that zone_collider.cpp can hold them (LINKER_REMNANT).
 func_0013E650 = 0x0013E650; // type:func
 // The start of the memory card library's .data inside a coarse label (D_0027AE84): its
 // identification string, which no code reads, after the previous object's table.
@@ -165,17 +165,21 @@ D_0024F5E0 = 0x0024F5E0;
 D_002793F0 = 0x002793F0;
 // The end of the MPEG library's .data inside a coarse label (D_0027B068): its last table (16
 // words) ends at 0x27B0A8, then 8 zero bytes of padding to the IPU library's .data, which starts
-// on 16 with its identification string (src/lib/file_211B40.cpp), which no code reads.
+// on 16 with its identification string (src/lib/ipu_reset.cpp), which no code reads.
 D_0027B0A8 = 0x0027B0A8;
 D_0027B0B0 = 0x0027B0B0;
 // The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
 // zeros after it, to 0x250580, are the padding before .data.
 D_00250540 = 0x00250540;
-// The kernel library's objects from 0x1F84D8 (src/lib/file_1F84D8.cpp, src/lib/file_1F9690.cpp,
-// src/lib/file_1F9AD8.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
+// The kernel library's objects from 0x1F84D8 (src/lib/iop_file_client.cpp, src/lib/iop_module_loader.cpp,
+// src/lib/iop_reset.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
 // second object, and the string "all" (0x24EB88), which no code reads, inside splat's label
 // D_0024EB78; and the first object's last word, the pointer to its "...." (0x2771C8), inside
 // D_002771C4.
 D_0024EB80 = 0x0024EB80;
 D_0024EB88 = 0x0024EB88;
 D_002771C8 = 0x002771C8;
+// pointer table in its .data (text_panel's compass strings, pointed to by D_00261128; pause_menu's
+// function the linker stripped, ending collider_span's .rodata.
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): ring_buffer's
+// Named so that zone_collider can hold them (LINKER_REMNANT).
