@@ -232,7 +232,7 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
     return 1;
 }
 
-ASM_FUNC(func_001E5938);
+INCLUDE_ASM(func_001E5938);
 
 void GetStateWalkerCurrentKey(void* dev, s32* out);
 void GetStateWalkerTargetKey(void* dev, s32* out);
@@ -487,7 +487,7 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
     }
 }
 
-ASM_FUNC(func_001E6600);
+INCLUDE_ASM(func_001E6600);
 
 
 extern f32 g_elapsedTime;
@@ -828,11 +828,11 @@ void UpdateArc(T217D_3F0* self)
     SetArcPhase(self, sub);
 }
 
-ASM_FUNC(func_001E7C60);
+INCLUDE_ASM(func_001E7C60);
 
-ASM_FUNC(func_001E80D8);
+INCLUDE_ASM(func_001E80D8);
 
-ASM_FUNC(func_001E83E0);
+INCLUDE_ASM(func_001E83E0);
 
 void SetArcSpecialObject(T217D_3F0* self, void* a1);
 

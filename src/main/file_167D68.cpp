@@ -391,7 +391,7 @@ void DrawConeAgent(void)
     DrawAgent();
 }
 
-ASM_FUNC(func_00167F10);
+INCLUDE_ASM(func_00167F10);
 
 void ApplyFieldDisplayOffset(void)
 {
@@ -415,7 +415,7 @@ void ApplyFieldDisplayOffset(void)
     ((GsPrivRegs*)0x12000000)->pmode = pm;
 }
 
-ASM_FUNC(func_001682C0);
+INCLUDE_ASM(func_001682C0);
 
 void SignalDisplaySync(void) {
     D_002BE46C = 1;
@@ -509,7 +509,7 @@ void ResetDisplayBuffers(void)
     SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
 }
 
-ASM_FUNC(func_00168698);
+INCLUDE_ASM(func_00168698);
 
 void SendGsPacketAndWait(s32 channel, void* b)
 {
@@ -1060,7 +1060,7 @@ void CopyTargetCurve(TargetCurve* self)
     self->keep = saved;
 }
 
-ASM_FUNC(func_00169E20);
+INCLUDE_ASM(func_00169E20);
 
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {
@@ -1125,9 +1125,9 @@ void CopyTargetPoint(TargetPoint* self)
     self->keep = saved;
 }
 
-ASM_FUNC(func_0016A240);
+INCLUDE_ASM(func_0016A240);
 
-ASM_FUNC(func_0016A320);
+INCLUDE_ASM(func_0016A320);
 
 void InitListedCollisionPart(ListedCollisionPart* self)
 {
@@ -1263,4 +1263,4 @@ void* FindEarliestPooledChild(PlacedObject* self)
     return best;
 }
 
-ASM_FUNC(func_0016A910);
+INCLUDE_ASM(func_0016A910);

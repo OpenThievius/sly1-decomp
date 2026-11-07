@@ -27,9 +27,10 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 What stops a function from being matched, the blocker column:
 
 - asm: original assembly, tracked in config/us/original_asm.tsv (tools/classify_asm.py): the
-  function holds an instruction the compiler cannot emit, or is a run of words the linker
-  left of a stripped function. It is not C waiting to be matched, and tools/progress.py
-  counts it as finished, apart from the exact C matches.
+  function was written as assembly, or is a run of words the linker left of a stripped
+  function. It is not C waiting to be matched, and tools/progress.py counts it as finished,
+  apart from the exact C matches. A function of kind inline there is C with inline assembly:
+  tagged inline, it is C to match.
 
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
   assembler left after a return; no C function can produce it. A listing that ends in a tail
@@ -37,9 +38,13 @@ What stops a function from being matched, the blocker column:
   that never returns is a whole function, not a fragment
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C. por and pref are not
   counted: the compiler emits them (COMPILER_EMITS)
-- nonc: max.s, min.s: no plain C form with the files' flags. A bare sqrt.s is not one: it is
-  written with include/fpu.h's Fpu::Sqrt (AGENTS.md); `break 0, 7` after a division is the
+- nonc: max.s, min.s: no plain C form with the files' flags. Every function that holds one is C
+  with inline assembly (inline, below): it is written with include/fpu.h's Fpu::Max and
+  Fpu::Min, as a bare sqrt.s is with Fpu::Sqrt (AGENTS.md); `break 0, 7` after a division is the
   compiler's divide-by-zero trap, plain C, not system code
+- helper: C with inline assembly (config/us/original_asm.tsv, kind inline) that needs a shared
+  helper header for its VU0, MMI or system instructions (AGENTS.md); a function of that kind
+  without them (max.s, min.s) has the blocker of plain C
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
@@ -305,8 +310,15 @@ def tags_of(lines, kind):
 PERMANENT = ("asm", "fragment", "vu", "system", "handwritten", "mmi", "nonc")
 
 
+HELPER = ("vu", "mmi", "system", "handwritten")  # what an inline function needs a helper header for
+
+
 def blocker(tags):
     """The first thing that stops a function from being matched (see the module doc)."""
+    if "inline" in tags:
+        if any(tag in tags for tag in HELPER):
+            return "helper"
+        return next((tag for tag in ("jtbl", "rodata") if tag in tags), "none")
     for tag in PERMANENT + ("jtbl", "rodata"):
         if tag in tags:
             return tag
@@ -328,7 +340,9 @@ def todo():
         if name in done:
             continue
         tags = tags_of(body.get(name, []), kind)
-        if name in asm:
+        if asm.get(name) == "inline":
+            tags.add("inline")  # C with inline assembly: C to match with the shared helpers
+        elif name in asm:
             tags.add("asm")
         out.append((name, addr, size, source_of(addr), sorted(tags)))
     return out
@@ -357,7 +371,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "asm", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
+        for key in ("none", "rodata", "jtbl", "helper", "asm", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0

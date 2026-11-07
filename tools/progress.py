@@ -94,7 +94,7 @@ def finished(key):
     if both:
         raise SystemExit("error: %s is in config/us/original_asm.tsv and defined in src/; "
                          "a function is one or the other" % ", ".join(sorted(both)))
-    return exact_c(key) | original_asm(key)
+    return exact_c(key) | (original_asm(key) - inline_asm(key))
 
 
 def fuzzy(key):
@@ -296,17 +296,18 @@ def readme_table(reports):
         m = r["measures"]
         asm = original_asm(key)
         inline = asm & inline_asm(key)
-        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code (%s exact C, %s C with inline assembly, %s original assembly) |" % (
+        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code (%s exact C, %s original assembly; %s C with inline assembly to match) |" % (
             v["region"], v["serial"],
             badge(v["serial"], "Code", "matched_code_percent"), badge(v["serial"], "Functions", "matched_functions"),
             format(m["matched_functions"], ","), format(m["total_functions"], ","), m["matched_code_percent"],
-            format(len(exact_c(key)), ","), format(len(inline), ","), format(len(asm - inline), ",")))
+            format(len(exact_c(key)), ","), format(len(asm - inline), ","), format(len(inline), ",")))
     lines.append("")
     lines.append("A US function counts when the build links its C and still prints `MATCH`; a PAL function "
                  "when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`). "
-                 "Original assembly (hand-written code and the linker's leftovers) and C with inline assembly "
-                 "(compiled C around a few instructions the compiler cannot emit, `docs/ASM_CLASSIFICATION.md`) "
-                 "count as finished too and are shown apart from the exact C.")
+                 "Original assembly (hand-written code and the linker's leftovers, `docs/ASM_CLASSIFICATION.md`) "
+                 "counts as finished too and is shown apart from the exact C. C with inline assembly "
+                 "(compiled C around a few instructions the compiler cannot emit) is C still to match, "
+                 "with shared helpers (AGENTS.md).")
     lines.append(END)
     return "\n".join(lines)
 

@@ -87,6 +87,6 @@ void SetGameClockRunning(GameClock* clock, s32 running)
     clock->running = running;
 }
 
-ASM_FUNC(func_001430C8);
+INCLUDE_ASM(func_001430C8);
 
 ASM_FUNC(func_001430F8);

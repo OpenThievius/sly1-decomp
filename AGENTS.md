@@ -81,9 +81,16 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   own, not a masked comparison, not a model's claim. Report exactly what you ran and what it
   printed.
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
-  The one exception is the square root of include/fpu.h (`Fpu::Sqrt`): retail's bare `sqrt.s`
-  behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
-  function computes a bare square root through it. The other is `MUL_WIDE` (include/mul_wide.h),
+  The exception is the inline-assembly helpers the original developers' C called, for the
+  instructions the compiler cannot emit. Retail's bare `sqrt.s`, `max.s` and `min.s` behave as
+  such helpers, which no C form reproduces (docs/TOOLCHAIN.md): include/fpu.h's `Fpu::Sqrt`,
+  `Fpu::Max` and `Fpu::Min`. The functions config/us/original_asm.tsv classifies `inline`
+  (docs/ASM_CLASSIFICATION.md: compiled C around VU0, MMI or system instructions) are matched
+  with helpers of the same kind. A helper is one instruction, or one short sequence, that the
+  compiler cannot emit and that recurs across retail's functions; it lives in a shared header
+  in `include/`, written once for every function that needs it, and is named for what it does.
+  A function never holds inline assembly of its own, and a helper never reproduces one
+  function's code: that would be assembly written as C. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a

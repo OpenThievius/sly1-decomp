@@ -661,7 +661,7 @@ LINKER_REMNANT(func_001B4180);
 ASM_FUNC(func_001B4188);
 
 INCLUDE_RODATA(jtbl_0024D200);
-ASM_FUNC(func_001B4330);
+INCLUDE_ASM(func_001B4330);
 
 void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
 {
@@ -674,7 +674,7 @@ void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
     dst[2] = dst[2] * 255.0f;
 }
 
-ASM_FUNC(func_001B4600);
+INCLUDE_ASM(func_001B4600);
 
 LINKER_REMNANT(func_001B4670);
 

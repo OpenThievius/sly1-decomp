@@ -110,7 +110,7 @@ void StartGaugeAgent(GaugeAgent* self)
 
 INCLUDE_ASM(func_0018A510);
 
-ASM_FUNC(func_0018A628);
+INCLUDE_ASM(func_0018A628);
 
 // A 0x70-byte hit func_00141D00 gives (collider_contact.cpp's MeshHit): its score at 0x40.
 struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
@@ -336,7 +336,7 @@ void ShowGaugeAgentBar(GaugeAgent* self)
 
 INCLUDE_ASM(func_0018AD88);
 
-ASM_FUNC(func_0018AE38);
+INCLUDE_ASM(func_0018AE38);
 
 void LeaveGaugeAgentState(GaugeAgent* self)
 {

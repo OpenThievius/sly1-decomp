@@ -227,7 +227,7 @@ s32 LockFileRequests(s32 unused)
 
 void UnlockFileRequests() { PostSemaphore(D_002771BC); }
 
-ASM_FUNC(func_001F89F8);
+INCLUDE_ASM(func_001F89F8);
 
 s32 OpenFileClient(void)
 {

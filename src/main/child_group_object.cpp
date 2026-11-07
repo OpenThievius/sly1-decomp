@@ -117,9 +117,9 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
     }
 }
 
-ASM_FUNC(func_0013B778);
+INCLUDE_ASM(func_0013B778);
 
-ASM_FUNC(func_0013B828);
+INCLUDE_ASM(func_0013B828);
 
 s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
@@ -137,11 +137,11 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s3
     }
 }
 
-ASM_FUNC(func_0013BA70);
+INCLUDE_ASM(func_0013BA70);
 
-ASM_FUNC(func_0013BBA0);
+INCLUDE_ASM(func_0013BBA0);
 
-ASM_FUNC(func_0013BC80);
+INCLUDE_ASM(func_0013BC80);
 
 extern f32 g_gameTime;
 
@@ -150,12 +150,12 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
     self->f554 = g_gameTime + delta;
 }
 
-ASM_FUNC(func_0013BE18);
+INCLUDE_ASM(func_0013BE18);
 
 // The FLT_MAX func_0013BF68 loads, the last of the file's .rodata.
 extern const f32 D_00249D78 = 3.4028235e+38f;
 
-ASM_FUNC(func_0013BF68);
+INCLUDE_ASM(func_0013BF68);
 
 void InitSoundParams(void* p);
 

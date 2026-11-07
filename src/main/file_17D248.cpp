@@ -74,12 +74,12 @@ f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 List01 g_pointObjects = {0};
 
 INCLUDE_RODATA(jtbl_0024B060);
-ASM_FUNC(func_0017D248);
+INCLUDE_ASM(func_0017D248);
 
 INCLUDE_RODATA(jtbl_0024B090);
-ASM_FUNC(func_0017D5D8);
+INCLUDE_ASM(func_0017D5D8);
 
-ASM_FUNC(func_0017DCE0);
+INCLUDE_ASM(func_0017DCE0);
 
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
@@ -120,9 +120,9 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     return hits >= 2;
 }
 
-ASM_FUNC(func_0017E088);
+INCLUDE_ASM(func_0017E088);
 
-ASM_FUNC(func_0017E3C8);
+INCLUDE_ASM(func_0017E3C8);
 
 s32 ChoosePlayerNextState(Player* self)
 {
@@ -137,22 +137,22 @@ s32 ChoosePlayerNextState(Player* self)
     return r;
 }
 
-ASM_FUNC(func_0017E710);
+INCLUDE_ASM(func_0017E710);
 
-ASM_FUNC(func_0017ECE8);
+INCLUDE_ASM(func_0017ECE8);
 
 INCLUDE_RODATA(jtbl_0024B0D0);
 INCLUDE_RODATA(jtbl_0024B110);
-ASM_FUNC(func_0017F018);
+INCLUDE_ASM(func_0017F018);
 
-ASM_FUNC(func_0017FAC0);
+INCLUDE_ASM(func_0017FAC0);
 
 INCLUDE_RODATA(jtbl_0024B150);
-ASM_FUNC(func_0017FB78);
+INCLUDE_ASM(func_0017FB78);
 
-ASM_FUNC(func_0017FC48);
+INCLUDE_ASM(func_0017FC48);
 
-ASM_FUNC(func_0017FCC8);
+INCLUDE_ASM(func_0017FCC8);
 
 void SetListLinkOffset(void* self, s32 value);
 

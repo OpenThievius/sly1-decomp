@@ -285,9 +285,9 @@ void UnregisterAgent(Agent* self)
     self->fC00 = 3.4028235e+38f;
 }
 
-ASM_FUNC(func_001C75B0);
+INCLUDE_ASM(func_001C75B0);
 
-ASM_FUNC(func_001C7A60);
+INCLUDE_ASM(func_001C7A60);
 
 s32 IsAgentFacingBlocked(void* self);
 void BuildYawPitchMatrix(f32 a, f32 b, void* out);
@@ -320,9 +320,9 @@ void SettleAgentState(Agent* self)
     }
 }
 
-ASM_FUNC(func_001C7BE8);
+INCLUDE_ASM(func_001C7BE8);
 
-ASM_FUNC(func_001C7CB8);
+INCLUDE_ASM(func_001C7CB8);
 
 extern f32 g_gameClock[];
 s32 GetAgentRosterState(Agent* self);
@@ -562,7 +562,7 @@ done:
     return s;
 }
 
-ASM_FUNC(func_001C8418);
+INCLUDE_ASM(func_001C8418);
 
 s32 HasAgentReachedPathEnd(Agent* self)
 {
@@ -589,11 +589,11 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
     return 1;
 }
 
-ASM_FUNC(func_001C8590);
+INCLUDE_ASM(func_001C8590);
 
 INCLUDE_RODATA(jtbl_0024D6B0);
 
-ASM_FUNC(func_001C8920);
+INCLUDE_ASM(func_001C8920);
 
 void ConvertOffsetToSpherical(void* a, void* b, f32* x, f32* y, s32 flag);
 void SetAgentFacingAngles(void* self, f32 x, f32 y);
@@ -999,7 +999,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
 
 s32 GetAgentRosterState(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)self->f720 + 0x50); }
 
-ASM_FUNC(func_001C96D8);
+INCLUDE_ASM(func_001C96D8);
 
 // What slot 76 is asked about: a kind and the object concerned.
 struct AgentRequest { s32 kind00; BaseObject* ref04; };
@@ -1058,7 +1058,7 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
 }
 
-ASM_FUNC(func_001C9AF8);
+INCLUDE_ASM(func_001C9AF8);
 
 f32 GetAnimationMarkerTime(void* obj, s32 id);
 void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
@@ -1106,14 +1106,14 @@ INCLUDE_RODATA(jtbl_0024D850);
 
 INCLUDE_RODATA(jtbl_0024D8A0);
 
-ASM_FUNC(func_001C9DE0);
+INCLUDE_ASM(func_001C9DE0);
 
 s32 AnswerAgentRosterPoll(void)
 {
     return 2;
 }
 
-ASM_FUNC(func_001CA468);
+INCLUDE_ASM(func_001CA468);
 
 void DrawTurningCollider(void);
 
@@ -1325,7 +1325,7 @@ void SetAgentSecondaryTarget(Agent* self, s32 value)
 
 extern const f32 D_0024DA90 = 3.40282347e+38f;
 
-ASM_FUNC(func_001CAB10);
+INCLUDE_ASM(func_001CAB10);
 
 void SetAgentPrimaryTarget(Agent* self, s32 value)
 {
@@ -1414,7 +1414,7 @@ void LaunchObjectWithAgentVelocity(u8* self, PlacedObject* other)
     }
 }
 
-ASM_FUNC(func_001CAF38);
+INCLUDE_ASM(func_001CAF38);
 
 void StopAnimationPlayer(void* p);
 s32 GetAgentRosterState(void* self);
@@ -1453,7 +1453,7 @@ s32 IsAgentFree(void)
     return 0;
 }
 
-ASM_FUNC(func_001CB3D0);
+INCLUDE_ASM(func_001CB3D0);
 
 
 s32 IsAgentFacingBlocked(Agent* self)
@@ -1850,7 +1850,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
 
 INCLUDE_RODATA(D_0024DA94);
 
-ASM_FUNC(func_001CC120);
+INCLUDE_ASM(func_001CC120);
 
 ASM_FUNC(func_001CC3F8);
 

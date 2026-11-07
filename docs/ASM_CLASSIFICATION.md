@@ -11,7 +11,8 @@ from the evidence in this game's bytes.
 
 ## What is counted
 
-The progress report's `matched_functions` and `matched_code` now include the listed functions.
+The progress report's `matched_functions` and `matched_code` include the listed functions of
+kinds `handwritten` and `remnant`; the kind `inline` is C still to match (below).
 The README table and `tools/progress.py` show the two apart:
 
     3,183 exact C, 670 original assembly, of 4,770 functions
@@ -102,8 +103,12 @@ written in C, as retail's bare `sqrt.s` is (include/fpu.h's `Fpu::Sqrt`, AGENTS.
   hand-written.
 
 On 2026-11-07: 579 functions in US (565 of game code, 14 of the libraries, 366,176 bytes), and
-three of PAL's own functions. They are counted as finished, shown apart from the exact C and the
-original assembly, until their helpers exist and their C is matched (docs/ROADMAP.md).
+three of PAL's own functions. They are C to match, not finished: `tools/progress.py` leaves them
+out of the count, their files include them with `INCLUDE_ASM` (not `ASM_FUNC`), and
+`tools/todo.py` lists them with the tag `inline`. They are written with shared inline-assembly
+helpers, as AGENTS.md allows: include/fpu.h's `Fpu::Max` and `Fpu::Min` for `max.s` and `min.s`
+(their blocker is that of plain C), and headers still to write for the VU0, MMI and system
+sequences (blocker `helper`). `tools/version_src.py todo` lists PAL's own three.
 
 ### remnant
 

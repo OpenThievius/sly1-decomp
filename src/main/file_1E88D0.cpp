@@ -746,7 +746,7 @@ ASM_FUNC(func_001E89F0);
 
 INCLUDE_RODATA(jtbl_0024E610);
 INCLUDE_RODATA(jtbl_0024E650);
-ASM_FUNC(func_001E8A50);
+INCLUDE_ASM(func_001E8A50);
 
 s32 ChooseKeyedConeAgentState(KeyedConeAgent* self)
 {
@@ -1464,9 +1464,9 @@ f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self
     return WrapAngle(f12 + r);
 }
 
-ASM_FUNC(func_001EA818);
+INCLUDE_ASM(func_001EA818);
 
-ASM_FUNC(func_001EA918);
+INCLUDE_ASM(func_001EA918);
 
 s32 RandomIntInRange(s32 a, s32 b)
 {
@@ -1515,7 +1515,11 @@ f32 RandomGaussian(f32 mean, f32 deviation, f32 limit)
     return v;
 }
 
-ASM_FUNC(func_001EAC68);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
+{
+    f32 diff = __builtin_fabsf(a - b);
+    return diff / Fpu::Max(1.0f, __builtin_fabsf(a)) < tolerance;
+}
 
 s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)
 {
@@ -1683,7 +1687,7 @@ void IgnoreStackLocal(void)
 {
 }
 
-ASM_FUNC(func_001EB168);
+INCLUDE_ASM(func_001EB168);
 
 LINKER_REMNANT(func_001EB458);
 
@@ -1739,7 +1743,7 @@ void HandleBeatPressColliderActivation(BeatPressCollider* self, void* p)
     }
 }
 
-ASM_FUNC(func_001EB698);
+INCLUDE_ASM(func_001EB698);
 
 void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
 {
@@ -1873,9 +1877,9 @@ s32 AcceptBeatPressColliderRequest(void)
     return 0;
 }
 
-ASM_FUNC(func_001EBD10);
+INCLUDE_ASM(func_001EBD10);
 
-ASM_FUNC(func_001EBDD0);
+INCLUDE_ASM(func_001EBDD0);
 
 void InitTempoAgent(TempoAgent* self)
 {
@@ -1978,7 +1982,7 @@ void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
     func_00125C90(self, s, out);
 }
 
-ASM_FUNC(func_001EC3D8);
+INCLUDE_ASM(func_001EC3D8);
 
 void LeaveTempoAgentState(TempoAgent* self, void* arg)
 {
@@ -2086,7 +2090,7 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
 INCLUDE_ASM(func_001EC7A8);
 
 INCLUDE_RODATA(jtbl_0024E740);
-ASM_FUNC(func_001EC828);
+INCLUDE_ASM(func_001EC828);
 
 void SyncTempoAgentEntries(TempoAgent* self)
 {
@@ -2190,7 +2194,7 @@ tail:
 }
 
 INCLUDE_RODATA(jtbl_0024E780);
-ASM_FUNC(func_001ECF10);
+INCLUDE_ASM(func_001ECF10);
 
 void SetTempoAgentPendingTimeline(TempoAgent* self, s32 value)
 {
@@ -2385,15 +2389,15 @@ ASM_FUNC(func_001ED738);
 
 ASM_FUNC(func_001ED780);
 
-ASM_FUNC(func_001ED840);
+INCLUDE_ASM(func_001ED840);
 
 LINKER_REMNANT(func_001ED900);
 
-ASM_FUNC(func_001ED908);
+INCLUDE_ASM(func_001ED908);
 
-ASM_FUNC(func_001EDA80);
+INCLUDE_ASM(func_001EDA80);
 
-ASM_FUNC(func_001EDC08);
+INCLUDE_ASM(func_001EDC08);
 
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 {
@@ -2415,16 +2419,16 @@ void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
     out->z = -t[0] * b->x + b->z;
 }
 
-ASM_FUNC(func_001EDEF0);
+INCLUDE_ASM(func_001EDEF0);
 
-ASM_FUNC(func_001EE090);
+INCLUDE_ASM(func_001EE090);
 
 void ForwardBallisticLaunchVelocity(void* self)
 {
     ComputeBallisticLaunchVelocity(self);
 }
 
-ASM_FUNC(func_001EE2B0);
+INCLUDE_ASM(func_001EE2B0);
 
 PacketWriter* InitPacketWriter(PacketWriter* self)
 {
@@ -2668,7 +2672,7 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
     return acc | bits;
 }
 
-ASM_FUNC(func_001EEA40);
+INCLUDE_ASM(func_001EEA40);
 
 s32 QueryValueListMask(ValueListObject* self, Bits128* vec, s32* out)
 {
@@ -2718,7 +2722,7 @@ void StartAttachedSet(AttachedSet* self)
     }
 }
 
-ASM_FUNC(func_001EED68);
+INCLUDE_ASM(func_001EED68);
 
 void ReconcileColliderAttachments(void* owner, Attach03** head)
 {
@@ -2751,7 +2755,7 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
     ReleaseAttachRecords(owner, removed);
 }
 
-ASM_FUNC(func_001EEF90);
+INCLUDE_ASM(func_001EEF90);
 
 void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
 {
@@ -2830,9 +2834,9 @@ void RebuildAttachedSet(AttachedSet* self)
     }
 }
 
-ASM_FUNC(func_001EF5B8);
+INCLUDE_ASM(func_001EF5B8);
 
-ASM_FUNC(func_001EF768);
+INCLUDE_ASM(func_001EF768);
 
 s32 RequestAttachedSetLaunch(AttachedSet* self)
 {
@@ -3667,7 +3671,7 @@ void MoveWarpCursor(WarpPage* self, s32 idx)
     }
 }
 
-ASM_FUNC(func_001F17A0);
+INCLUDE_ASM(func_001F17A0);
 
 void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     u8* base = (u8*)self;
@@ -3833,7 +3837,7 @@ void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s3
 
 INCLUDE_RODATA(D_0024E830);
 INCLUDE_RODATA(D_0024E838);
-ASM_FUNC(func_001F20A8);
+INCLUDE_ASM(func_001F20A8);
 
 // The style above (D_00276620) and D_00276650 are built by the static initialiser GCC writes
 // here (func_001F2688), and its _GLOBAL_$I$ (func_001F2738) follows the 12 bytes the linker left

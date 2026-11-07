@@ -20,7 +20,8 @@ Three kinds, over game code and Sony's libraries; a function matched in C is C a
 - inline: C with inline assembly. The instruction that would make it hand-written sits in code
   the compiler shaped (GCC's own stack frame around it), or is max.s or min.s, which only such
   C holds in this game: the original developers wrote C that called small inline-assembly
-  helpers, the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt.
+  helpers, the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. It is C to
+  match with shared helpers (AGENTS.md), not finished: tools/progress.py does not count it.
 - remnant: a run of words the linker left of a stripped function. It starts on an
   8-byte boundary, has no jump or branch in it, nothing refers to it (no instruction
   or data names it), and the code before it is finished: going back over earlier

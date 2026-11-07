@@ -334,20 +334,20 @@ INCLUDE_DATA(D_00259958);
 INCLUDE_DATA(D_00259DE8);
 MarkStacks g_markStacks;
 
-ASM_FUNC(func_00112698);
+INCLUDE_ASM(func_00112698);
 
-ASM_FUNC(func_00112968);
+INCLUDE_ASM(func_00112968);
 
 INCLUDE_RODATA(jtbl_00248FE0);
 INCLUDE_RODATA(jtbl_00249000);
 INCLUDE_RODATA(jtbl_00249020);
 INCLUDE_RODATA(jtbl_00249040);
-ASM_FUNC(func_00112C38);
+INCLUDE_ASM(func_00112C38);
 
 INCLUDE_RODATA(jtbl_00249060);
 INCLUDE_RODATA(jtbl_00249080);
 INCLUDE_RODATA(jtbl_002490A0);
-ASM_FUNC(func_00113240);
+INCLUDE_ASM(func_00113240);
 
 ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -1477,21 +1477,21 @@ ScriptValue* GetScriptAtan2(ScriptValue* ret, s32 count, ScriptValue* args, Scri
     return ret;
 }
 
-ASM_FUNC(func_00115F70);
+INCLUDE_ASM(func_00115F70);
 
-ASM_FUNC(func_00115FF8);
+INCLUDE_ASM(func_00115FF8);
 
-ASM_FUNC(func_00116080);
+INCLUDE_ASM(func_00116080);
 
-ASM_FUNC(func_00116108);
+INCLUDE_ASM(func_00116108);
 
-ASM_FUNC(func_001161F8);
+INCLUDE_ASM(func_001161F8);
 
-ASM_FUNC(func_001162D0);
+INCLUDE_ASM(func_001162D0);
 
-ASM_FUNC(func_00116400);
+INCLUDE_ASM(func_00116400);
 
-ASM_FUNC(func_00116490);
+INCLUDE_ASM(func_00116490);
 
 ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -1569,7 +1569,7 @@ ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptVa
     return ret;
 }
 
-ASM_FUNC(func_00116840);
+INCLUDE_ASM(func_00116840);
 
 ScriptValue* GetScriptMatrixTranslation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -1627,7 +1627,7 @@ ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* 
     return ret;
 }
 
-ASM_FUNC(func_00116BC8);
+INCLUDE_ASM(func_00116BC8);
 
 // What func_00189378 fills in for func_00188B08: 0x30 bytes.
 struct UprightBasis {
@@ -2177,7 +2177,7 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
     return ret;
 }
 
-ASM_FUNC(func_00117FE0);
+INCLUDE_ASM(func_00117FE0);
 
 ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -2339,7 +2339,7 @@ ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, S
     return ret;
 }
 
-ASM_FUNC(func_00118698);
+INCLUDE_ASM(func_00118698);
 
 ScriptValue* StartScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

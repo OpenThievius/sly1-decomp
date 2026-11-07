@@ -144,12 +144,12 @@ ASM_FUNC(func_001F6D20);
 
 ASM_FUNC(func_001F6D30);
 
-ASM_FUNC(func_001F6D40);
+INCLUDE_ASM(func_001F6D40);
 
-ASM_FUNC(func_001F6DA8);
+INCLUDE_ASM(func_001F6DA8);
 
-ASM_FUNC(func_001F6E10);
+INCLUDE_ASM(func_001F6E10);
 
-ASM_FUNC(func_001F6E78);
+INCLUDE_ASM(func_001F6E78);
 
 char D_00276970[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'k', 'e', 'r', 'n', 'l', '2', '4', '3', '0' };

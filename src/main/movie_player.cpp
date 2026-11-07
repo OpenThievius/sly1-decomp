@@ -311,7 +311,7 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     self->f1F0 = (Attachment*)s0;
 }
 
-ASM_FUNC(func_0018DA40);
+INCLUDE_ASM(func_0018DA40);
 
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 {
@@ -383,13 +383,13 @@ void InitContactListObjectWithoutGravity(ContactListObject* self)
     self->gravity = D_00248D30;
 }
 
-ASM_FUNC(func_0018DDD8);
+INCLUDE_ASM(func_0018DDD8);
 
-ASM_FUNC(func_0018DE70);
+INCLUDE_ASM(func_0018DE70);
 
-ASM_FUNC(func_0018DEE8);
+INCLUDE_ASM(func_0018DEE8);
 
-ASM_FUNC(func_0018E040);
+INCLUDE_ASM(func_0018E040);
 
 s32 FindKeyIndex(IdentityKey* key)
 {

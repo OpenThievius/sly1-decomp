@@ -92,7 +92,7 @@ void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
     }
 }
 
-ASM_FUNC(func_001C4618);
+INCLUDE_ASM(func_001C4618);
 
 s32 CollectColliderSpansInTree(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
 
@@ -113,7 +113,7 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
     }
 }
 
-ASM_FUNC(func_001C4848);
+INCLUDE_ASM(func_001C4848);
 
 void DrawCollider(void);
 
@@ -122,7 +122,7 @@ void DrawTurningCollider(void)
     DrawCollider();
 }
 
-ASM_FUNC(func_001C49E8);
+INCLUDE_ASM(func_001C49E8);
 
 extern f32 g_gameTime[];
 extern s32 D_00605548;
@@ -153,9 +153,9 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     PlaySoundWithWanderingPitch();
 }
 
-ASM_FUNC(func_001C4C20);
+INCLUDE_ASM(func_001C4C20);
 
-ASM_FUNC(func_001C4D60);
+INCLUDE_ASM(func_001C4D60);
 
 
 void UpdateSwitchedCollider(void* self);
@@ -191,7 +191,7 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
     self->desc06()->m54(self);
 }
 
-ASM_FUNC(func_001C4FF8);
+INCLUDE_ASM(func_001C4FF8);
 
 void StepCollider(void* self);
 void ApplyTurningColliderDrive(void* self);
@@ -202,7 +202,7 @@ void StepTurningCollider(TurningCollider* self)
     ApplyTurningColliderDrive(self);
 }
 
-ASM_FUNC(func_001C5148);
+INCLUDE_ASM(func_001C5148);
 
 s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
@@ -305,9 +305,9 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     self->f63C = v;
 }
 
-ASM_FUNC(func_001C54D0);
+INCLUDE_ASM(func_001C54D0);
 
-ASM_FUNC(func_001C57C8);
+INCLUDE_ASM(func_001C57C8);
 
 void AddTurningColliderProbeContact(void* a, s32 b, s32 c, s32 d);
 
@@ -316,7 +316,7 @@ void CollideTurningColliderWithObject(TurningCollider* a0, s32 a1, s32 unused2, 
     AddTurningColliderProbeContact(a0, a1, a4, a5);
 }
 
-ASM_FUNC(func_001C5C10);
+INCLUDE_ASM(func_001C5C10);
 
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
@@ -329,7 +329,7 @@ void TurnColliderTowardHeading(TurningCollider* self)
     self->desc02()->m21(self, &q);
 }
 
-ASM_FUNC(func_001C5DB8);
+INCLUDE_ASM(func_001C5DB8);
 
 
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
@@ -340,4 +340,4 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
 
-ASM_FUNC(func_001C5EA8);
+INCLUDE_ASM(func_001C5EA8);

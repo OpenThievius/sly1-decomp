@@ -544,7 +544,7 @@ s32 D_00275720 = 0;
 s32 D_00275724 = 0;
 s32 D_00275728 = 0;
 
-ASM_FUNC(func_001D62E0);
+INCLUDE_ASM(func_001D62E0);
 
 s32 GetPlayerRequestPhase(Player* self)
 {
@@ -557,13 +557,13 @@ s32 GetPlayerRequestPhase(Player* self)
     return 2;
 }
 
-ASM_FUNC(func_001D6608);
+INCLUDE_ASM(func_001D6608);
 
-ASM_FUNC(func_001D66A8);
+INCLUDE_ASM(func_001D66A8);
 
-ASM_FUNC(func_001D6A18);
+INCLUDE_ASM(func_001D6A18);
 
-ASM_FUNC(func_001D6B18);
+INCLUDE_ASM(func_001D6B18);
 
 void SwapInPlayerStandIn(Player* self)
 {
@@ -600,7 +600,7 @@ s32 TestStandInMayContact(StandIn* self, s32 value)
     return TestCollidersMayContact(self, value);
 }
 
-ASM_FUNC(func_001D6DD8);
+INCLUDE_ASM(func_001D6DD8);
 
 void StopStandIn(StandIn* self)
 {
@@ -791,7 +791,7 @@ void StartPathFollower(PathFollower* self)
     ResetPathFollower(self);
 }
 
-ASM_FUNC(func_001D7778);
+INCLUDE_ASM(func_001D7778);
 
 f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
 {
@@ -880,9 +880,9 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
     return 0.0f < r;
 }
 
-ASM_FUNC(func_001D87C8);
+INCLUDE_ASM(func_001D87C8);
 
-ASM_FUNC(func_001D8BD0);
+INCLUDE_ASM(func_001D8BD0);
 
 void SteerPathFollower(PathFollower* self)
 {
@@ -901,7 +901,7 @@ void SteerPathFollower(PathFollower* self)
     }
 }
 
-ASM_FUNC(func_001D8E40);
+INCLUDE_ASM(func_001D8E40);
 
 void CountDownPathFollowerLap(PathFollower* self)
 {
@@ -950,9 +950,9 @@ void RecordPathFollowerProgress(PathFollower* self)
 
 INCLUDE_ASM(func_001D9488);
 
-ASM_FUNC(func_001D9678);
+INCLUDE_ASM(func_001D9678);
 
-ASM_FUNC(func_001D9AC8);
+INCLUDE_ASM(func_001D9AC8);
 
 void UpdatePathFollower(PathFollower* self, f32 t)
 {
@@ -982,7 +982,7 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     }
 }
 
-ASM_FUNC(func_001D9D78);
+INCLUDE_ASM(func_001D9D78);
 
 void UpdatePathFollowerScreenElements(PathFollower* self)
 {
@@ -1030,13 +1030,13 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
 
 void ReleasePathFollowerContacts(PathFollower* self) { self->f6A0++; }
 
-ASM_FUNC(func_001DA320);
+INCLUDE_ASM(func_001DA320);
 
 ASM_FUNC(func_001DA6E0);
 
-ASM_FUNC(func_001DA7E0);
+INCLUDE_ASM(func_001DA7E0);
 
-ASM_FUNC(func_001DAA18);
+INCLUDE_ASM(func_001DAA18);
 
 void UpdatePathFollowerBounds(PathFollower* self)
 {
@@ -1066,7 +1066,7 @@ void StartPathFollowerEffect(PathFollower* self, void* a, void* b)
     }
 }
 
-ASM_FUNC(func_001DAD28);
+INCLUDE_ASM(func_001DAD28);
 
 void RecomputePathFollowerFrame(PathFollower* self)
 {
@@ -1390,7 +1390,7 @@ void ReadBufferedBlockBody(BufferedStream* self)
     }
 }
 
-ASM_FUNC(func_001DBA90);
+INCLUDE_ASM(func_001DBA90);
 
 void SetCachedVoiceParamBuiltin(void* self, void* a, void* b)
 {
@@ -1636,9 +1636,9 @@ void PushCloneBatch(World* self, void* src, s32 n)
 
 s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
 
-ASM_FUNC(func_001DC238);
+INCLUDE_ASM(func_001DC238);
 
-ASM_FUNC(func_001DC4D0);
+INCLUDE_ASM(func_001DC4D0);
 
 void UnlinkContactTable(Contacts03* a0, Contacts03** a1) {
     Contacts03* next;

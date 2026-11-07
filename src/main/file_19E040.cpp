@@ -1013,7 +1013,7 @@ INCLUDE_RODATA(D_0024C930);
 
 INCLUDE_RODATA(D_0024C934);
 
-ASM_FUNC(func_0019E220);
+INCLUDE_ASM(func_0019E220);
 
 void KeepEffectOwnerBounds(void) {}
 
@@ -1229,9 +1229,9 @@ void ShortenEffectLife(Effect* self, f32 x)
 
 INCLUDE_RODATA(D_0024C9B0);
 
-ASM_FUNC(func_0019ED58);
+INCLUDE_ASM(func_0019ED58);
 
-ASM_FUNC(func_0019F390);
+INCLUDE_ASM(func_0019F390);
 
 void UpdateEffect(Effect* self)
 {
@@ -1260,7 +1260,7 @@ void UpdateEffect(Effect* self)
     self->vt->m06(self, flag);
 }
 
-ASM_FUNC(func_0019F620);
+INCLUDE_ASM(func_0019F620);
 
 void DrawEffect(Effect* self, void* a1)
 {
@@ -1328,16 +1328,16 @@ void EndEffectWithImpact(Effect* self, s32 flag)
     }
 }
 
-ASM_FUNC(func_0019FA98);
+INCLUDE_ASM(func_0019FA98);
 
-ASM_FUNC(func_0019FB08);
+INCLUDE_ASM(func_0019FB08);
 
 void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 {
     EndEffectWithImpact(value, enabled < 1);
 }
 
-ASM_FUNC(func_0019FD08);
+INCLUDE_ASM(func_0019FD08);
 
 void InitGrowingEffect(Effect* self)
 {
@@ -1367,9 +1367,9 @@ void InitDroppingEffect(Effect* self)
     self->i20 = v;
 }
 
-ASM_FUNC(func_0019FE50);
+INCLUDE_ASM(func_0019FE50);
 
-ASM_FUNC(func_0019FF20);
+INCLUDE_ASM(func_0019FF20);
 
 void EndDroppingEffect(Effect* self, void* other)
 {
@@ -1388,7 +1388,7 @@ void InitStreakEffect(Effect* self)
     self->f120 = 0.05f;
 }
 
-ASM_FUNC(func_001A00A0);
+INCLUDE_ASM(func_001A00A0);
 
 void InitScaledEffect(Effect* self, f32 f)
 {
@@ -1429,7 +1429,7 @@ void DetachTrailSegment(Effect* self)
     SetTrailSegmentAnchor(self, 0, 0);
 }
 
-ASM_FUNC(func_001A0338);
+INCLUDE_ASM(func_001A0338);
 
 void SplitTrailSegment(Effect* self)
 {
@@ -1462,9 +1462,9 @@ void SplitTrailSegment(Effect* self)
     }
 }
 
-ASM_FUNC(func_001A05D8);
+INCLUDE_ASM(func_001A05D8);
 
-ASM_FUNC(func_001A0758);
+INCLUDE_ASM(func_001A0758);
 
 void OnTrailAnchorEnded(void* self, s32 kind, s32 extra)
 {
@@ -1561,11 +1561,11 @@ void InitShortFallingEffect(Effect* self)
     self->qC0 = *(Quad219C*)&g->gravity;
 }
 
-ASM_FUNC(func_001A0C98);
+INCLUDE_ASM(func_001A0C98);
 
-ASM_FUNC(func_001A0D60);
+INCLUDE_ASM(func_001A0D60);
 
-ASM_FUNC(func_001A0DF0);
+INCLUDE_ASM(func_001A0DF0);
 
 void RunEffectEndCallback(Effect* self)
 {
@@ -1584,11 +1584,11 @@ void InitEmitterEffect(Effect* self)
 
 LINKER_REMNANT(func_001A1028);
 
-ASM_FUNC(func_001A1030);
+INCLUDE_ASM(func_001A1030);
 
-ASM_FUNC(func_001A11C0);
+INCLUDE_ASM(func_001A11C0);
 
-ASM_FUNC(func_001A1398);
+INCLUDE_ASM(func_001A1398);
 
 void InitLongStreakEffect(Effect* self)
 {
@@ -1635,7 +1635,7 @@ void AdvanceEffectPhases(Effect* c, f32 dt)
 
 INCLUDE_RODATA(D_0024C9B4);
 
-ASM_FUNC(func_001A15D8);
+INCLUDE_ASM(func_001A15D8);
 
 void SetEffectPhase(Effect* self, s32 mode)
 {
@@ -1683,11 +1683,11 @@ s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
     return 1;
 }
 
-ASM_FUNC(func_001A1F40);
+INCLUDE_ASM(func_001A1F40);
 
 INCLUDE_RODATA(D_0024C9BC);
 
-ASM_FUNC(func_001A2070);
+INCLUDE_ASM(func_001A2070);
 
 void CopyEffectSourceIds(Effect* self, Rec50* src)
 {
@@ -1695,9 +1695,9 @@ void CopyEffectSourceIds(Effect* self, Rec50* src)
     self->i124 = src->f1F0;
 }
 
-ASM_FUNC(func_001A22E0);
+INCLUDE_ASM(func_001A22E0);
 
-ASM_FUNC(func_001A2380);
+INCLUDE_ASM(func_001A2380);
 
 s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
@@ -1734,9 +1734,9 @@ void DrawHitMarkEffect(Effect* self, void* a1)
     DrawEffectAt(self, a1, scratch, scratch + 0x10);
 }
 
-ASM_FUNC(func_001A2770);
+INCLUDE_ASM(func_001A2770);
 
-ASM_FUNC(func_001A2830);
+INCLUDE_ASM(func_001A2830);
 
 s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
 {
@@ -1770,7 +1770,7 @@ s32 IsEffectAimCandidate(Rec50* self, Collider* other)
     return other != self->target;
 }
 
-ASM_FUNC(func_001A2B48);
+INCLUDE_ASM(func_001A2B48);
 
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
@@ -1782,11 +1782,11 @@ void PlaceEffectAtSource(Effect* dst, void* a1)
     dst->i124 = src->f1F0;
 }
 
-ASM_FUNC(func_001A2D88);
+INCLUDE_ASM(func_001A2D88);
 
-ASM_FUNC(func_001A2E68);
+INCLUDE_ASM(func_001A2E68);
 
-ASM_FUNC(func_001A3008);
+INCLUDE_ASM(func_001A3008);
 
 s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 {
@@ -1796,7 +1796,7 @@ s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void*
     return HandleEffectContact(a0, a1, a2, a3);
 }
 
-ASM_FUNC(func_001A31A0);
+INCLUDE_ASM(func_001A31A0);
 
 void InitFacingEffect(Effect* self)
 {
@@ -1809,7 +1809,7 @@ void InitFacingEffect(Effect* self)
     self->q30 = *(Quad219C*)D_0026B720;
 }
 
-ASM_FUNC(func_001A3250);
+INCLUDE_ASM(func_001A3250);
 
 void InitDelayedEffect(Effect* self, f32 x)
 {
@@ -1820,9 +1820,9 @@ void InitDelayedEffect(Effect* self, f32 x)
     *(s32*)&self->m30[2] = 0;
 }
 
-ASM_FUNC(func_001A35F0);
+INCLUDE_ASM(func_001A35F0);
 
-ASM_FUNC(func_001A3730);
+INCLUDE_ASM(func_001A3730);
 
 void UpdateDelayedEffect(Effect* self)
 {
@@ -1931,7 +1931,7 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
-ASM_FUNC(func_001A3D40);
+INCLUDE_ASM(func_001A3D40);
 
 void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
@@ -2116,7 +2116,7 @@ void StepWalkerCollider(WalkerCollider* self)
     TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 
-ASM_FUNC(func_001A4538);
+INCLUDE_ASM(func_001A4538);
 
 void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 {
@@ -2237,7 +2237,7 @@ s32 GetCurrentEntryVariant(void)
     return 2;
 }
 
-ASM_FUNC(func_001A48C0);
+INCLUDE_ASM(func_001A48C0);
 
 void BlendPairControllerPose(PairController* self)
 {
@@ -2434,7 +2434,7 @@ void SetPairControllerState(PairController* self, s32 state)
 
 INCLUDE_RODATA(D_0024CAEC);
 
-ASM_FUNC(func_001A5120);
+INCLUDE_ASM(func_001A5120);
 
 void StartPairedObjects(PairController* self)
 {
@@ -2650,7 +2650,7 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
 
 INCLUDE_RODATA(D_0024CAF4);
 
-ASM_FUNC(func_001A6090);
+INCLUDE_ASM(func_001A6090);
 
 void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 {
@@ -2682,11 +2682,11 @@ void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 
 INCLUDE_RODATA(D_0024CAF8);
 
-ASM_FUNC(func_001A6238);
+INCLUDE_ASM(func_001A6238);
 
 INCLUDE_RODATA(D_0024CAFC);
 
-ASM_FUNC(func_001A6328);
+INCLUDE_ASM(func_001A6328);
 
 void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {
@@ -2734,13 +2734,13 @@ void StartPairedObject(PairedObject* self)
 
 INCLUDE_RODATA(jtbl_0024CB00);
 
-ASM_FUNC(func_001A65C8);
+INCLUDE_ASM(func_001A65C8);
 
-ASM_FUNC(func_001A6788);
+INCLUDE_ASM(func_001A6788);
 
 INCLUDE_RODATA(jtbl_0024CB30);
 
-ASM_FUNC(func_001A69F8);
+INCLUDE_ASM(func_001A69F8);
 
 void SetPairedState(PairedObject* self, s32 mode)
 {
@@ -3114,7 +3114,7 @@ void StartObjectCreator(ObjectCreator* self)
     SetObjectCreatorState(self, 0);
 }
 
-ASM_FUNC(func_001A7800);
+INCLUDE_ASM(func_001A7800);
 
 void SetObjectCreatorState(ObjectCreator* self, s32 idx)
 {

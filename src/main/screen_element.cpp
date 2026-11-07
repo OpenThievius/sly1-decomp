@@ -1972,7 +1972,7 @@ void UpdatePromptElement(T217D_4C0* self)
     UpdateScreenElementSlide(self);
 }
 
-ASM_FUNC(func_001AE220);
+INCLUDE_ASM(func_001AE220);
 
 void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
 {
@@ -2005,7 +2005,7 @@ void InitLetterGlyphElement(T217D_5B0* self)
     PopFontScale(self->font);
 }
 
-ASM_FUNC(func_001AE5E0);
+INCLUDE_ASM(func_001AE5E0);
 
 f32 D_002744AC = 0.7f;
 

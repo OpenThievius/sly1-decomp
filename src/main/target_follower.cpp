@@ -145,10 +145,10 @@ void StepTargetFollower(TargetFollower* self, f32 t)
 }
 
 INCLUDE_RODATA(jtbl_0024A7F0);
-ASM_FUNC(func_0016D128);
+INCLUDE_ASM(func_0016D128);
 
 INCLUDE_RODATA(jtbl_0024A810);
-ASM_FUNC(func_0016D1E0);
+INCLUDE_ASM(func_0016D1E0);
 
 extern s32 g_padSelectFlags;
 
@@ -191,7 +191,7 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
     }
 }
 
-ASM_FUNC(func_0016D490);
+INCLUDE_ASM(func_0016D490);
 
 typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 
@@ -208,7 +208,7 @@ void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     ((VFn_16D788*)self->desc)[33](self, &v);
 }
 
-ASM_FUNC(func_0016D828);
+INCLUDE_ASM(func_0016D828);
 
 extern const KeyRecord g_streamVoiceKeys[7];
 
@@ -289,7 +289,7 @@ call928:
 
 INCLUDE_RODATA(D_0024A824);
 INCLUDE_RODATA(jtbl_0024A830);
-ASM_FUNC(func_0016DAC0);
+INCLUDE_ASM(func_0016DAC0);
 
 extern s32 g_currentTargetFollower;
 
@@ -341,7 +341,7 @@ void StartEntryTableObject(EntryTableObject* self)
 }
 
 INCLUDE_RODATA(D_0024A844);
-ASM_FUNC(func_0016DE20);
+INCLUDE_ASM(func_0016DE20);
 
 void InitFollowableObject(FollowableObject* self)
 {

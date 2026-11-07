@@ -1092,9 +1092,9 @@ void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
     }
 }
 
-ASM_FUNC(func_0015FCD8);
+INCLUDE_ASM(func_0015FCD8);
 
-ASM_FUNC(func_0015FD78);
+INCLUDE_ASM(func_0015FD78);
 
 void UpdateWorldObjectLists(void* self)
 {
@@ -1575,7 +1575,7 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
-ASM_FUNC(func_00160EA0);
+INCLUDE_ASM(func_00160EA0);
 
 s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {
@@ -2135,7 +2135,7 @@ void CollectNonNullRefs(RefOwner* owner)
 }
 
 INCLUDE_RODATA(D_0024A710);
-ASM_FUNC(func_00162890);
+INCLUDE_ASM(func_00162890);
 
 void WriteStripMeshMscal(s32 mode, void* obj)
 {

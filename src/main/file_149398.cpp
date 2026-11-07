@@ -340,7 +340,7 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
     return r;
 }
 
-ASM_FUNC(func_00149458);
+INCLUDE_ASM(func_00149458);
 
 void StartCameraSounds(CameraSoundOwner* self)
 {
@@ -416,7 +416,7 @@ INCLUDE_RODATA(D_00249EA0);
 INCLUDE_RODATA(jtbl_00249EB0);
 INCLUDE_RODATA(jtbl_00249ED0);
 
-ASM_FUNC(func_00149760);
+INCLUDE_ASM(func_00149760);
 
 void DeactivateTargetCameraController(TargetCameraController* self)
 {
@@ -452,13 +452,13 @@ void ActivateFrameCameraController(FrameCameraController* self)
     SetCameraLookAnchor(parent, (u8*)parent->stack[0].target + 0x370);
 }
 
-ASM_FUNC(func_0014A8F8);
+INCLUDE_ASM(func_0014A8F8);
 
 void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj->value = value; }
 
 void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 
-ASM_FUNC(func_0014AAA0);
+INCLUDE_ASM(func_0014AAA0);
 
 void InitItemColumn(T217D_720* self)
 {
@@ -547,7 +547,7 @@ void ClearItemColumn(T217D_720* self)
     self->vt->m16(self, 0);
 }
 
-ASM_FUNC(func_0014AF38);
+INCLUDE_ASM(func_0014AF38);
 
 void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
 {
@@ -672,9 +672,9 @@ void SetSinCosPair(SinCosPair* self, f32 value)
 
 INCLUDE_RODATA(D_00249EF0);
 
-ASM_FUNC(func_0014B6A8);
+INCLUDE_ASM(func_0014B6A8);
 
-ASM_FUNC(func_0014BB08);
+INCLUDE_ASM(func_0014BB08);
 
 s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
 {
@@ -932,7 +932,7 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
 
 INCLUDE_RODATA(D_00249FB4);
 
-ASM_FUNC(func_0014C858);
+INCLUDE_ASM(func_0014C858);
 
 void ActivateRandomGaugeSlot(GaugeManager* self)
 {

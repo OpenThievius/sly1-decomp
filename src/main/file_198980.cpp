@@ -299,7 +299,7 @@ void StartObjectSet(ObjectSet* self)
     }
 }
 
-ASM_FUNC(func_00198BD8);
+INCLUDE_ASM(func_00198BD8);
 
 void CollectObjectSet(ObjectSet* self)
 {
@@ -542,7 +542,7 @@ void StartNumberedItem(NumberedItem* self)
     }
 }
 
-ASM_FUNC(func_00199698);
+INCLUDE_ASM(func_00199698);
 
 void SetNumberedItemFlag(NumberedItem* self)
 {
@@ -663,7 +663,7 @@ s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
     return 1;
 }
 
-ASM_FUNC(func_00199D08);
+INCLUDE_ASM(func_00199D08);
 
 void FlagAllNumberedItems(void)
 {
@@ -1085,17 +1085,17 @@ void CopyObjectGatherer(ObjectGatherer* self)
     self->q600 = tmp;
 }
 
-ASM_FUNC(func_0019B298);
+INCLUDE_ASM(func_0019B298);
 
 INCLUDE_RODATA(jtbl_0024C8D0);
 INCLUDE_RODATA(jtbl_0024C8F0);
-ASM_FUNC(func_0019B378);
+INCLUDE_ASM(func_0019B378);
 
 ASM_FUNC(func_0019BB10);
 
 ASM_FUNC(func_0019BB90);
 
-ASM_FUNC(func_0019BC40);
+INCLUDE_ASM(func_0019BC40);
 
 s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
@@ -1113,7 +1113,7 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
     return 1;
 }
 
-ASM_FUNC(func_0019BE80);
+INCLUDE_ASM(func_0019BE80);
 
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
@@ -1139,7 +1139,7 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
 }
 
 INCLUDE_RODATA(jtbl_0024C910);
-ASM_FUNC(func_0019C1C0);
+INCLUDE_ASM(func_0019C1C0);
 
 void RegisterC7CObject(BaseObject* obj)
 {
@@ -1265,7 +1265,7 @@ void StartC8BObject(C8B* self)
     self->f50 = 1;
 }
 
-ASM_FUNC(func_0019C9C8);
+INCLUDE_ASM(func_0019C9C8);
 
 INCLUDE_ASM(func_0019CC10);
 
@@ -1296,13 +1296,13 @@ void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z)
     self->f5C = z;
 }
 
-ASM_FUNC(func_0019CE50);
+INCLUDE_ASM(func_0019CE50);
 
-ASM_FUNC(func_0019CEC0);
+INCLUDE_ASM(func_0019CEC0);
 
-ASM_FUNC(func_0019CF68);
+INCLUDE_ASM(func_0019CF68);
 
-ASM_FUNC(func_0019D0E0);
+INCLUDE_ASM(func_0019D0E0);
 
 void TrackAimTargetObject(Player* self, void* x, void* y)
 {

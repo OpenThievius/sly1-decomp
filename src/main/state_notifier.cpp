@@ -226,7 +226,7 @@ void StartScaledOffsetObject(ScaledOffsetObject* self)
     ApplyScaledOffset(self);
 }
 
-ASM_FUNC(func_001461A8);
+INCLUDE_ASM(func_001461A8);
 
 void SetOffsetScale(ScaledOffsetObject* self, f32 v)
 {
@@ -300,7 +300,7 @@ void StartStateNotifier(StateNotifier* self)
     self->desc02()->m2F(self, self->initialMode);
 }
 
-ASM_FUNC(func_00146518);
+INCLUDE_ASM(func_00146518);
 
 s32 IsEligibleNotifierTarget(void* unused, Collider* self)
 {
@@ -317,9 +317,9 @@ s32 IsEligibleNotifierTarget(void* unused, Collider* self)
     return 1;
 }
 
-ASM_FUNC(func_00146DB0);
+INCLUDE_ASM(func_00146DB0);
 
-ASM_FUNC(func_001471B0);
+INCLUDE_ASM(func_001471B0);
 
 s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 {
@@ -333,13 +333,13 @@ s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 
 INCLUDE_RODATA(jtbl_00249E50);
 
-ASM_FUNC(func_00147428);
+INCLUDE_ASM(func_00147428);
 
-ASM_FUNC(func_001478F0);
+INCLUDE_ASM(func_001478F0);
 
 INCLUDE_RODATA(jtbl_00249E70);
 
-ASM_FUNC(func_00147AB0);
+INCLUDE_ASM(func_00147AB0);
 
 void InitTimeRangeNotifier(TimeRangeNotifier* self)
 {
@@ -644,7 +644,7 @@ s32 CompareFloatsDescending(const f32* first, const f32* second)
 
 INCLUDE_RODATA(D_00249E90);
 
-ASM_FUNC(func_00148938);
+INCLUDE_ASM(func_00148938);
 
 s32 ScatterObjectsAroundCircle(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
 {
@@ -819,5 +819,5 @@ void InitArmedStateNotifier(ArmedStateNotifier* self)
     self->armed = 0;
 }
 
-ASM_FUNC(func_00149190);
+INCLUDE_ASM(func_00149190);
 

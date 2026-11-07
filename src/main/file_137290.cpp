@@ -591,7 +591,7 @@ void ReadBufferedMatrix4(void* self, u8* p)
     *(f32*)(c + 0xC) = 1.0f;
 }
 
-ASM_FUNC(func_00137FB0);
+INCLUDE_ASM(func_00137FB0);
 
 
 s32 ReadBufferedU16(void* self);
@@ -1557,7 +1557,7 @@ void RebuildAnimRecordEntries(WorldListedObject* self)
     }
 }
 
-ASM_FUNC(func_0013A128);
+INCLUDE_ASM(func_0013A128);
 
 void UpdatePlacedObject(void* self);
 void ClearRootTries(void* self);
@@ -1596,7 +1596,7 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
     }
 }
 
-ASM_FUNC(func_0013A498);
+INCLUDE_ASM(func_0013A498);
 
 // The bounds the assembly func_0013A618 and func_0013A940 start from: the file's .rodata.
 extern const f32 D_00249D64 = 3.4028235e+38f;
@@ -1604,9 +1604,9 @@ extern const f32 D_00249D68 = -3.4028235e+38f;
 extern const f32 D_00249D6C = 3.4028235e+38f;
 extern const f32 D_00249D70 = -3.4028235e+38f;
 
-ASM_FUNC(func_0013A618);
+INCLUDE_ASM(func_0013A618);
 
-ASM_FUNC(func_0013A940);
+INCLUDE_ASM(func_0013A940);
 
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
@@ -1631,7 +1631,7 @@ void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD
     QueueDeferredRequest(&blk);
 }
 
-ASM_FUNC(func_0013AD80);
+INCLUDE_ASM(func_0013AD80);
 
 // NEAR: frame and loop shape right; retail tests the call condition as a 0/1 value (li a0,1 / beqzl) and orders registers differently
 

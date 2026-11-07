@@ -309,7 +309,7 @@ s32 WriteCardFile(s32 self, u32 src, s32 n)
     return r;
 }
 
-ASM_FUNC(func_00209B10);
+INCLUDE_ASM(func_00209B10);
 
 void WakeCardWaiter(void);
 s32 GetCurrentThreadId(void);

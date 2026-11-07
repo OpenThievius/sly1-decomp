@@ -183,9 +183,9 @@ void UpdateMaskedCollider(MaskedCollider* self)
     }
 }
 
-ASM_FUNC(func_0013D0B0);
+INCLUDE_ASM(func_0013D0B0);
 
-ASM_FUNC(func_0013D278);
+INCLUDE_ASM(func_0013D278);
 
 extern u8 g_flagTable[];
 
@@ -461,9 +461,9 @@ void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self)
     }
 }
 
-ASM_FUNC(func_0013DFD8);
+INCLUDE_ASM(func_0013DFD8);
 
-ASM_FUNC(func_0013E430);
+INCLUDE_ASM(func_0013E430);
 
 LINKER_REMNANT(func_0013E650);
 
@@ -885,7 +885,7 @@ void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 
 INCLUDE_ASM(func_0013F1D8);
 
-ASM_FUNC(func_0013F290);
+INCLUDE_ASM(func_0013F290);
 
 void CopyCollider(Collider* self);
 
@@ -1018,7 +1018,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
     }
 }
 
-ASM_FUNC(func_0013FAE8);
+INCLUDE_ASM(func_0013FAE8);
 
 extern u8* g_player;
 extern f32 g_gameTime;
@@ -1202,7 +1202,7 @@ void SetZoneColliderMode(ZoneCollider* self, s32 flag)
     SetZoneMode(&self->zone);
 }
 
-ASM_FUNC(func_00140258);
+INCLUDE_ASM(func_00140258);
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"

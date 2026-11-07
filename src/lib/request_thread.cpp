@@ -92,6 +92,6 @@ s32 StartRequestThread(void)
     return g_requestThreadId;
 }
 
-ASM_FUNC(func_001F71D0);
+INCLUDE_ASM(func_001F71D0);
 
 LINKER_REMNANT(func_001F7268);

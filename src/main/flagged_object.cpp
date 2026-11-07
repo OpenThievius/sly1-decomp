@@ -19,7 +19,7 @@ u32 g_flaggedObjectLinks[4] = { 2, 0x545, 0x5A8, 0 };
 u8 g_flagTable[528] = {0};
 u8 g_flagTableSaved[544] = {0};
 
-ASM_FUNC(func_00140D90);
+INCLUDE_ASM(func_00140D90);
 
 void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
 {
@@ -298,7 +298,7 @@ void CopyFlaggedObject(FlaggedObject* self)
     }
 }
 
-ASM_FUNC(func_00141690);
+INCLUDE_ASM(func_00141690);
 
 extern u8 g_padRecord[];
 

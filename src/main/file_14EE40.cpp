@@ -692,9 +692,9 @@ void SetPooledObjectState(PooledObject* self, s32 state)
     }
 }
 
-ASM_FUNC(func_0014F168);
+INCLUDE_ASM(func_0014F168);
 
-ASM_FUNC(func_0014F270);
+INCLUDE_ASM(func_0014F270);
 
 void InitPooledHolder(PooledHolder* self)
 {
@@ -936,7 +936,7 @@ s32 AcquirePooledObject(PooledHolder* self) {
     return 1;
 }
 
-ASM_FUNC(func_00150008);
+INCLUDE_ASM(func_00150008);
 
 void SelectEarliestPooledObject(PooledHolder* self)
 {
@@ -2339,9 +2339,9 @@ void ResetActiveSetSolver(ActiveSetSolver* self)
     }
 }
 
-ASM_FUNC(func_001536C8);
+INCLUDE_ASM(func_001536C8);
 
-ASM_FUNC(func_00153780);
+INCLUDE_ASM(func_00153780);
 
 void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x)
 {
@@ -2523,9 +2523,9 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
     }
 }
 
-ASM_FUNC(func_00154088);
+INCLUDE_ASM(func_00154088);
 
-ASM_FUNC(func_00154370);
+INCLUDE_ASM(func_00154370);
 
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out)
 {

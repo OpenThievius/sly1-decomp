@@ -69,9 +69,9 @@ void InitRedirectObject(RedirectObject* self)
     self->q320 = D_00275730;
 }
 
-ASM_FUNC(func_001DDD18);
+INCLUDE_ASM(func_001DDD18);
 
-ASM_FUNC(func_001DDE90);
+INCLUDE_ASM(func_001DDE90);
 
 void CopyPlacedObjectFrame(RedirectObject* self);
 
@@ -218,7 +218,7 @@ void UpdateTintBlendCollider(TintBlendCollider* self)
     }
 }
 
-ASM_FUNC(func_001DEB30);
+INCLUDE_ASM(func_001DEB30);
 
 void FinishSwitchedCollider(void* self);
 void SetTintBlendColliderState(void* self, s32 flag);
@@ -229,7 +229,7 @@ void FinishTintBlendColliderRequest(TintBlendCollider* self)
     SetTintBlendColliderState(self, 1);
 }
 
-ASM_FUNC(func_001DEBE8);
+INCLUDE_ASM(func_001DEBE8);
 
 void HandleSwitchedColliderActivation(void* self, void* p);
 
@@ -287,7 +287,7 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
     }
 }
 
-ASM_FUNC(func_001DF520);
+INCLUDE_ASM(func_001DF520);
 
 s32 IsPadSelectFlagHeld(void* p);
 
@@ -297,9 +297,9 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
     return 0;
 }
 
-ASM_FUNC(func_001DF600);
+INCLUDE_ASM(func_001DF600);
 
-ASM_FUNC(func_001DF700);
+INCLUDE_ASM(func_001DF700);
 
 void ExtractContactsByPartMode(void* self, void* sub);
 void CollectTurningColliderContacts(void* self);

@@ -192,9 +192,9 @@ void ShowHitCountColliderCounters()
     }
 }
 
-ASM_FUNC(func_001C39A0);
+INCLUDE_ASM(func_001C39A0);
 
-ASM_FUNC(func_001C3B40);
+INCLUDE_ASM(func_001C3B40);
 
 s32 IsObjectOfKind(s32 a, s32 b);
 s32 MatchesObjectId(s32 a, s32 b);
@@ -213,7 +213,7 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
     if (MatchesObjectId((s32)e->body, 0x52F)) self->f688 = e->body;
 }
 
-ASM_FUNC(func_001C3C98);
+INCLUDE_ASM(func_001C3C98);
 
 extern s32 g_buttonCodeFlags;
 s32 IsPadSelectFlagHeld(void* p);
@@ -263,7 +263,7 @@ void FinishHitCountCollider(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-ASM_FUNC(func_001C3EB0);
+INCLUDE_ASM(func_001C3EB0);
 
 void InitOwnerMessage(void* self, s32 a, s32 b);
 void func_001C3EB0(s32 c, void* receiver);
@@ -345,4 +345,4 @@ void AddHitCountColliderId(HitCountCollider* self, s32 value)
 // jump table of func_001C3FC8.
 extern const f32 D_0024D584 = 3.40282347e+38f;
 
-ASM_FUNC(func_001C41A0);
+INCLUDE_ASM(func_001C41A0);

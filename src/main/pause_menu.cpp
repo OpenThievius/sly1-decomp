@@ -574,7 +574,7 @@ s32 FindObject42CStateWalker(void)
 INCLUDE_RODATA(jtbl_0024C430);
 INCLUDE_RODATA(jtbl_0024C480);
 INCLUDE_RODATA(jtbl_0024C4D0);
-ASM_FUNC(func_001936A0);
+INCLUDE_ASM(func_001936A0);
 
 void InitPauseMenu(T217D_6D0* self)
 {
