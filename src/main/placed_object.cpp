@@ -8,6 +8,7 @@
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
+#include "timed_object.h"
 #include "masked_collider.h"
 #include "world.h"
 #include "animation.h"
@@ -50,8 +51,6 @@ void func_0012FDE8(StreamReader* a0);
 
 void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
 
-struct Buffer_00120130 { u8 bytes[0x20]; };
-typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
 extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
@@ -59,25 +58,11 @@ extern void func_001EDE38(void*, void*, void*);
 extern void func_0011F9F8(s32, VectorKey*);
 extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
 
-struct Result_001202F0 { f32 x; f32 y; f32 z; };
-struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
 extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
 void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
 
-struct Result_001203A8 {
-    f32 first;
-    f32 second;
-    f32 third;
-};
-struct Output_001203A8 {
-    f32 first;
-    u8 pad4[0x10];
-    f32 second;
-    u8 pad18[0x10];
-    f32 third;
-};
 extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
 extern void func_0011FA88(s32*, VectorKey**, Stream83*);
@@ -87,20 +72,6 @@ extern void* func_001B5EE0(void*);
 extern World* D_00275710;
 
 void func_0018D800(Attachment* self, Attachment* src, s32 size);
-
-// Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
-struct Locals_121648 {
-    Vec02 pos;
-    Vec02 vec;
-    Mat02 rot;
-};
-
-// The owner's slot 44 (Desc02::m28) and 45 (m29) are told what was asked.
-typedef void (*Told_1227B0)(PlacedObject* self, Vec02* a, Vec02* b);
-
-typedef void (*Told_1227F0)(PlacedObject* self, Mat02* b, Vec02* q);
-
-typedef void (*Told_122920)(PlacedObject* self);
 
 void func_00121338(Attachment* self, PlacedObject* a1);
 
@@ -121,26 +92,9 @@ s32 func_00140FF8(void* p);
 
 extern void func_001BA130(Collider*);
 
-typedef void (*VFn_123578)(void* self);
-struct Obj_123578 { VFn_123578* vtbl; };
-struct Ctx_123578 { u8 pad[0x2220]; s32 f2220; };
-
 
 void func_001B93F8(Collider* self);
 s32 func_001300E8(void* node, s32 kind);
-
-typedef void (*VFn_123B28)(void* self, s32 arg);
-
-struct Vtbl_123B28 {
-    u8 pad0[0x134];
-    VFn_123B28 f134;
-};
-
-struct Elem_123B28 {
-    Vtbl_123B28* vt;
-    u8 pad1[0x560 - 4];
-    s32 f560;
-};
 
 extern s32 func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
 
@@ -160,19 +114,6 @@ struct Object_00126BC0 {
 };
 struct Record_00126BC0 { u8 pad0[0x14]; s32 type; u8 pad1[0x54]; s32 value; };
 
-struct Child_00123BB0 { void** vt; };
-
-typedef void (*VFn_123C20)(void* self);
-struct Item_123C20 { VFn_123C20* vtbl; };
-
-struct Locals_001201F0 {
-    u8 a[0x30];
-    u8 b[0x30];
-    u8 c[0x30];
-    u8 d[0x10];
-    f32 first;
-};
-
 extern void func_00189150(void*, void*, void*);
 extern void func_00188D28(void*, void*, void*);
 
@@ -186,16 +127,12 @@ void func_00124A48(void* self);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_00182ED8(void* a);
 
-struct Frame_123448 { s32 f00; s32 f04; s32 f08; s32 f0C; };
-
 void func_00121568(Attachment* self, f32* value, f32* slope);
 
 extern void func_00121568(Attachment* self, f32* a1, f32* a2);
 
 extern void func_00121580(Attachment* self, Mat02* a1);
 
-typedef void (*VFn_1236C8)(void* self, void* arg);
-struct Obj_1236C8 { VFn_1236C8* vt; };
 void func_00123400(CountedObject* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
@@ -241,8 +178,6 @@ void* func_0018D5C0(u32 n);
 
 extern u8 D_00219560[];
 
-typedef void (*Told_1214B8)(PlacedObject* self, Vec02* out);
-
 void func_00121338(Attachment* self);
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
@@ -276,8 +211,6 @@ extern const WeightCurveVt D_00219688;
 extern const WeightCurveVt D_00219698;
 extern const WeightCurveVt D_002196A8;
 void* func_0018D5C0(WeightCurve* n);
-
-typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
 void func_00152438(void* list, s32 n);
 void func_00182C18(BaseObject* self);
@@ -328,35 +261,6 @@ void func_00129DF8(void* self);
 s32 func_00123E00(void* a);
 
 
-typedef void (*VFn0_124EE8)(void* self);
-
-struct Info_124EE8 {
-    u8 pad0[8];
-    s32 flags;
-};
-
-struct Node_124EE8 {
-    Info_124EE8* info;
-};
-
-struct List_124EE8 {
-    s32 head;
-    u8 pad4[0x4];
-    s32 link;
-};
-
-struct Obj_124EE8 {
-    void** vt;
-    u8 pad4[0x30];
-    List_124EE8 list;
-};
-
-struct Frame_124EE8 {
-    s32 list;
-    s32 cursor;
-    s32 link;
-    s32 prev;
-};
 
 void func_00124EE8(void* self, f32 f);
 
@@ -366,11 +270,6 @@ void func_00124540(void* self);
 void func_0012A860(void* self, void* v);
 void func_00165828(void* a, void* b);
 
-struct Sub_1249A8 {
-    u8 pad0[0x20];
-    s32 f20;
-};
-
 
 void func_001BFCD8(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
@@ -379,16 +278,6 @@ void func_00152470(void* list, void* item);
 void func_0015F7D8(World* world, PlacedObject* item);
 void func_00143AF8(PlacedObject* a, PlacedObject* self);
 
-struct Pair_124A48 {
-    s32 a;
-    s32 b;
-};
-struct Frame_124A48 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-};
 
 void func_00182C58(BaseObject* self);
 void func_00124CC0(PlacedObject* self);
@@ -478,12 +367,11 @@ void func_001B2140(void* p, f32 f);
 void func_00126AC8(PlacedObject* self, f32 f);
 void func_001837E0(PlacedObject* self, s32 a, s32 b, void** args);
 
-struct Ctx_124CC0 { Animation* node; void* key; s32 mode; f32 value; f32 f10; };
-
 void func_0012C9E8(Animation* a, PlacedObject* b, f32 c, void* d, f32* e, s32 f, s32 g);
 void func_0012C288(Animation* a, PlacedObject* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
 
-struct Clamp_124CC0 {
+// A value kept within [lo, hi].
+struct ClampRange {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
         if (x < lo) {
@@ -497,24 +385,16 @@ struct Clamp_124CC0 {
 };
 
 struct Find_124CC0 {
-    static Animation* Of(PlacedObject* self, Ctx_124CC0* ctx)
+    static Animation* Of(PlacedObject* self, AnimationStart* ctx)
     {
-        if (ctx->node != 0) {
-            return ctx->node;
+        if (ctx->anim != 0) {
+            return ctx->anim;
         }
-        return (Animation*)FindFirstObjectById(self->world, 0x104, (s32)ctx->key, self);
+        return (Animation*)FindFirstObjectById(self->world, 0x104, ctx->key, self);
     }
 };
 
 struct Frame_124CC0 : TargetBinding { u8 pad0[8]; f32 tmp; };
-
-struct Fl_1276C0 {
-    u8 pad0[0x90];
-    f32 f90;
-    f32 f94;
-    u8 pad98[0xB0 - 0x98];
-    s32 fB0;
-};
 
 struct Locals_1276C0 {
     u8 a20[16];
@@ -574,7 +454,6 @@ struct Obj_12B2E8 { u8 pad[0xC]; u32 value; };
 
 void* func_0015A868(void* a0, s32 a1);
 
-struct Timer_129108 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; f32 f10; };
 
 void* func_0018D5C0(s32 size);
 
@@ -1202,19 +1081,6 @@ void func_001DDAB8(World_12D5D0* w, f32 v);
 void func_001DDAC8(World_12D5D0* w, f32 v);
 void func_0017CE20(Collider* t, Player* g);
 
-struct Clamp_12D5D0 {
-    static f32 Of(f32 x, f32 lo, f32 hi)
-    {
-        if (x < lo) {
-            return lo;
-        }
-        if (hi < x) {
-            return hi;
-        }
-        return x;
-    }
-};
-
 struct Range_12E968 { u32 field0; f32 minimum; f32 maximum; };
 struct Obj_12E968 { u8 pad0[8]; Range_12E968* range; };
 
@@ -1280,12 +1146,6 @@ void func_001837E0(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 void func_00130B48(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
 void func_0014D0A8(s32 n, void* buf, s32 zero);
 
-struct Quad_130F48 {
-    f32 c0, c1, c2, c3;
-} __attribute__((aligned(16)));
-
-typedef void (*VFn_131140)(void* self, s32 arg);
-
 void func_001365A0(void* self, s32 arg);
 
 void func_0012FE70(void* self);
@@ -1297,56 +1157,6 @@ void func_0011A708(void* dst, void* value);
 
 struct Inner_130158 { s32 pad0; s32 value; };
 struct Holder_130158 { Inner_130158* inner; };
-
-struct Rgba_133B58
-{
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a;
-    Rgba_133B58() {}
-    Rgba_133B58(const Rgba_133B58& o) { *this = o; }
-};
-struct Gs_133B58;
-struct Span_133B58;
-
-extern Rgba_133B58 D_002610E0;
-extern Rgba_133B58 D_002610D8;
-extern Span_133B58 D_00261280;
-extern Span_133B58 D_002612B0;
-
-f32 func_00205210(f32 x);
-f32 func_00131000(Span_133B58* s, s32 x);
-void func_001613C0(Gs_133B58* gs, s32 a, s32 b, s32 c);
-void func_00161458(Gs_133B58* gs, u32 c);
-void func_00161670(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
-void func_001615F0(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
-
-struct Lerp_133B58
-{
-    static s32 Channel(s32 a, s32 b, f32 t)
-    {
-        if (a == b)
-        {
-            return b;
-        }
-        if (a < b)
-        {
-            return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
-        }
-        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
-    }
-
-    static Rgba_133B58 Mix(Rgba_133B58 a, Rgba_133B58 b, f32 t)
-    {
-        Rgba_133B58 c;
-        c.r = Channel(a.r, b.r, t);
-        c.g = Channel(a.g, b.g, t);
-        c.b = Channel(a.b, b.b, t);
-        c.a = Channel(a.a, b.a, t);
-        return c;
-    }
-};
 
 struct Self_130B48;
 struct Out_130B48 { u8 pad0[16]; };
@@ -1372,22 +1182,31 @@ void func_00123408(StateTrigger* self)
     self->id6B0 = TakeFlagTableIndex(g_flagTable);
 }
 
+// A list frame (list_iter.h's ListFrame) as three walks of this file keep it: four words, each
+// pointer handled as an int.
+struct WordListFrame {
+    s32 list;
+    s32 link;
+    s32 offset;
+    s32 prev;
+};
+
 void func_00123448(StateTrigger* self)
 {
-    Frame_123448 fr;
+    WordListFrame fr;
     s32 s0;
     AppendQueuedCall(self->world, (void*)ResolveStateTriggerObjects, self, 0, 0);
     StartPlacedObject(self);
     s32 e = (s32)&self->children;
-    fr.f04 = e;
-    fr.f00 = e;
+    fr.link = e;
+    fr.list = e;
     s32 link = *(s32*)(e + 8);
     s32 old = (s32)g_activeListFrames;
-    fr.f0C = old;
-    fr.f08 = link;
+    fr.prev = old;
+    fr.offset = link;
     g_activeListFrames = (ListFrame*)&fr;
     s32 head = *(s32*)e;
-    fr.f04 = head + fr.f08;
+    fr.link = head + fr.offset;
     s0 = head;
     if (s0 != 0) {
         do {
@@ -1396,8 +1215,8 @@ void func_00123448(StateTrigger* self)
                     self->found558 = (void*)s0;
                 }
             }
-            s32 nx = *(s32*)fr.f04;
-            fr.f04 = nx + fr.f08;
+            s32 nx = *(s32*)fr.link;
+            fr.link = nx + fr.offset;
             s0 = nx;
         } while (s0 != 0);
     }
@@ -1405,7 +1224,7 @@ void func_00123448(StateTrigger* self)
         self->f55C = (StateWalker*)CreateStateWalker(self->found558, self, -1, 1);
         ResolveAndStartObject(self->found558);
     }
-    g_activeListFrames = (ListFrame*)fr.f0C;
+    g_activeListFrames = (ListFrame*)fr.prev;
 }
 
 void func_00123540(StateTrigger* object)
@@ -1439,8 +1258,8 @@ void func_00123578(StateTrigger* self)
     for (s32 i = 0; i < self->count1; i++) {
         void* p = FindFirstObjectById(self->world, 0x104, self->items1[i], self);
         if (p != 0 && IsObjectOfKind(p, 0x22) != 0) {
-            Obj_123578* o = (Obj_123578*)p;
-            o->vtbl[0x130 / 4](p);
+            CountedObject* o = (CountedObject*)p;
+            o->desc20()->m48(o);
         }
     }
 done:
@@ -1463,9 +1282,9 @@ void func_001236C8(StateTrigger* self)
         void* node = FindFirstObjectById(self->world, 0x104, self->items2[i], self);
         if (node && IsObjectOfKind(node, 0x30)) {
             s32 idx = self->outCount;
-            self->outItems[idx] = (Collider*)node;
+            self->outItems[idx] = (TimedObject*)node;
             self->outCount = idx + 1;
-            ((Obj_1236C8*)node)->vt[0x140 / 4](node, self);
+            ((TimedObject*)node)->desc30()->m4C((TimedObject*)node, self);
         }
     }
     for (i = 0; i < self->count3; i++) {
@@ -1570,9 +1389,9 @@ void func_00123B18(StateTrigger* counter)
 void func_00123B28(StateTrigger* self)
 {
     for (s32 i = 0; i < self->outCount; i++) {
-        Elem_123B28* e = (Elem_123B28*)self->outItems[i];
-        if (e->f560 == -1 && e->vt->f134 != 0) {
-            e->vt->f134(e, 0);
+        TimedObject* e = self->outItems[i];
+        if (e->f560 == -1 && e->desc30()->m49 != 0) {
+            e->desc30()->m49(e, 0);
         }
     }
 }
@@ -1581,10 +1400,10 @@ void func_00123BB0(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
-        Child_00123BB0* c = (Child_00123BB0*)self->outItems[i];
-        void* fn = c->vt[0x138 / 4];
+        TimedObject* c = self->outItems[i];
+        void (*fn)(TimedObject*) = c->desc30()->m4A;
         if (fn != 0) {
-            ((void (*)(void*))fn)(c);
+            fn(c);
         }
     }
 }
@@ -1593,8 +1412,8 @@ void func_00123C20(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
-        Item_123C20* it = (Item_123C20*)self->outItems[i];
-        VFn_123C20 fn = it->vtbl[79];
+        TimedObject* it = self->outItems[i];
+        void (*fn)(TimedObject*) = it->desc30()->m4B;
         if (fn != 0) {
             fn(it);
         }
@@ -1813,7 +1632,7 @@ void func_001249A8(PlacedObject* self)
     ListFrame frame;
     ResolveFollowRecordObjects(self);
     SavePlacedObjectInitialFrame(self);
-    Sub_1249A8* sub = (Sub_1249A8*)self->f200;
+    T2195_790* sub = self->f200;
     if (sub != 0 && sub->f20 != -1) {
         void* v = FindFirstObjectByIdMode4(self->world, sub->f20, self);
         if (v != 0) {
@@ -1831,19 +1650,19 @@ void func_001249A8(PlacedObject* self)
 
 void func_00124A48(PlacedObject* self)
 {
-    Frame_124A48 fr;
+    WordListFrame fr;
     Key02* k;
     BaseObject* s0;
     s32 old = (s32)g_activeListFrames;
     s32 e = (s32)&self->children;
-    fr.f00 = e;
-    fr.f04 = e;
-    fr.f08 = *(s32*)(e + 8);
-    fr.f0C = old;
+    fr.list = e;
+    fr.link = e;
+    fr.offset = *(s32*)(e + 8);
+    fr.prev = old;
     g_activeListFrames = (ListFrame*)&fr;
     StartObject(self);
     if (self->f2A0 != 0) {
-        if (((Pair_124A48*)self->f2A0)->a != 0 || ((Pair_124A48*)self->f2A0)->b != -1) {
+        if (self->f2A0->anim != 0 || self->f2A0->key != -1) {
             AppendQueuedCall(self->world, (void*)StartAnimationFromContext, self, 0, 0);
         }
     }
@@ -1889,23 +1708,23 @@ void func_00124A48(PlacedObject* self)
     }
     self->keys = 0;
     {
-        s32 head = *(s32*)fr.f04;
+        s32 head = *(s32*)fr.link;
         s32 p;
-        fr.f04 = head + fr.f08;
+        fr.link = head + fr.offset;
         p = head;
         while (p != 0) {
             ((BaseObject*)p)->desc->m10((BaseObject*)p);
-            s32 nx = *(s32*)fr.f04;
-            fr.f04 = nx + fr.f08;
+            s32 nx = *(s32*)fr.link;
+            fr.link = nx + fr.offset;
             p = nx;
         }
     }
-    g_activeListFrames = (ListFrame*)fr.f0C;
+    g_activeListFrames = (ListFrame*)fr.prev;
 }
 
 void func_00124CC0(PlacedObject* self)
 {
-    Ctx_124CC0* ctx = (Ctx_124CC0*)self->f2A0;
+    AnimationStart* ctx = self->f2A0;
     Animation* node = Find_124CC0::Of(self, ctx);
     if (node == 0) {
         return;
@@ -1916,7 +1735,7 @@ void func_00124CC0(PlacedObject* self)
         fr.tmp = ctx->value;
         break;
     case 1:
-        fr.tmp = Clamp_124CC0::Of(ctx->value, 0.0f, 1.0f) * node->length;
+        fr.tmp = ClampRange::Of(ctx->value, 0.0f, 1.0f) * node->length;
         break;
     case 2:
         func_0012C9E8(node, self, 0.0f, (u8*)self + 0x100, &fr.tmp, 0, 0);
@@ -1926,7 +1745,7 @@ void func_00124CC0(PlacedObject* self)
     }
     fr.key = node->id;
     fr.object = self;
-    CreateAnimationPlayer(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
+    CreateAnimationPlayer(node, self, 1, &fr, fr.tmp, ctx->speedScale, 0, 0);
 }
 
 void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
@@ -1962,34 +1781,34 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
 
 void func_00124EE8(void* self, f32 f)
 {
-    Obj_124EE8* obj = (Obj_124EE8*)self;
-    Frame_124EE8 fr;
+    PlacedObject* obj = (PlacedObject*)self;
+    WordListFrame fr;
     f32 saved = f;
-    VFn0_124EE8 pre = (VFn0_124EE8)obj->vt[21];
+    void (*pre)(BaseObject* self, f32 dt) = obj->desc->m11;
     if (pre != 0) {
-        pre(self);
+        pre(obj, f);
     }
     if (IsObjectAttached(self) == 0) {
         return;
     }
-    s32 e = (s32)&obj->list;
+    s32 e = (s32)&obj->children;
     fr.list = e;
-    fr.cursor = e;
+    fr.link = e;
     s32 old = *(s32*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
-    fr.link = link;
+    fr.offset = link;
     *(s32*)&g_activeListFrames = (s32)&fr;
-    s32 head = obj->list.head;
-    fr.cursor = head + fr.link;
-    Node_124EE8* node = (Node_124EE8*)head;
+    s32 head = (s32)obj->children.head;
+    fr.link = head + fr.offset;
+    BaseObject* node = (BaseObject*)head;
     while (node != 0) {
-        if ((node->info->flags & 1) != 0) {
+        if ((node->desc->flags & 1) != 0) {
             UpdateObjectTree(node, saved);
         }
-        s32 nx = *(s32*)fr.cursor;
-        fr.cursor = nx + fr.link;
-        node = (Node_124EE8*)nx;
+        s32 nx = *(s32*)fr.link;
+        fr.link = nx + fr.offset;
+        node = (BaseObject*)nx;
     }
     *(s32*)&g_activeListFrames = fr.prev;
 }
@@ -2319,12 +2138,12 @@ void func_001276C0(PlacedObject* self, PlacedObject* other)
     self->desc02()->m1E(self, (Mat02*)L.a50);
     self->desc02()->m20(self, (Vec02*)L.a30);
     self->desc02()->m21(self, (Vec02*)L.a40);
-    Fl_1276C0* a = (Fl_1276C0*)self->f224;
+    Rec2195_224* a = self->f224;
     if (a != 0 && (a->fB0 & 0x20)) {
-        Fl_1276C0* b = (Fl_1276C0*)other->f224;
+        Rec2195_224* b = other->f224;
         if (b != 0 && (b->fB0 & 0x20)) {
             a->f90 = b->f90;
-            ((Fl_1276C0*)self->f224)->f94 = ((Fl_1276C0*)other->f224)->f94;
+            self->f224->f94 = other->f224->f94;
         }
     }
     PlacedObject* n = (PlacedObject*)self->children.head;
@@ -2337,7 +2156,7 @@ void func_001276C0(PlacedObject* self, PlacedObject* other)
                 continue;
             if ((h->desc->flags ^ 1) & 1)
                 continue;
-            if (n->f224 != 0 && (((Fl_1276C0*)n->f224)->fB0 & 0xC))
+            if (n->f224 != 0 && (n->f224->fB0 & 0xC))
                 continue;
             n->desc02()->m1F(n, h);
         } while ((n = (PlacedObject*)n->next) != 0);
@@ -2488,17 +2307,17 @@ ASM_FUNC(func_001290B8);
 
 ASM_FUNC(func_001290E0);
 
-Timer_129108* func_00129108(PlacedObject* self)
+AnimationStart* func_00129108(PlacedObject* self)
 {
     if (self->f2A0 == 0) {
-        Timer_129108* t = (Timer_129108*)AllocateZeroedFrontMemory(0x14);
+        AnimationStart* t = (AnimationStart*)AllocateZeroedFrontMemory(0x14);
         self->f2A0 = t;
-        t->f4 = -1;
-        ((Timer_129108*)self->f2A0)->f8 = 0;
-        ((Timer_129108*)self->f2A0)->fC = 0;
-        ((Timer_129108*)self->f2A0)->f10 = 1.0f;
+        t->key = -1;
+        self->f2A0->mode = 0;
+        self->f2A0->value = 0;
+        self->f2A0->speedScale = 1.0f;
     }
-    return (Timer_129108*)self->f2A0;
+    return self->f2A0;
 }
 
 void func_00129170(PlacedObject* self, f32 x)
@@ -4330,7 +4149,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
     switch (msg->kind) {
     case 42:
         if (CheckStreamVoicePending() != 0) {
-            self->time = Clamp_12D5D0::Of(msg->a0.f, 0.0f, owner->f34);
+            self->time = ClampRange::Of(msg->a0.f, 0.0f, owner->f34);
             self->f20--;
             *out = 1;
         }
@@ -4391,7 +4210,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         SilenceVolumeChannel2();
         break;
     case 11:
-        self->time = Clamp_12D5D0::Of(msg->a0.f, 0.0f, owner->f34);
+        self->time = ClampRange::Of(msg->a0.f, 0.0f, owner->f34);
         self->speed = 0.0f;
         break;
     case 4:

@@ -69,6 +69,8 @@ struct Rec2195_224 {
             void* p88;          // 0x88: the ancestor the owner shares with f80
             f32 f8C;            // 0x8C
             f32 f90;            // 0x90: func_00120AA8
+            f32 f94;            // 0x94: copied with f90 (func_001276C0)
+            s32 f98;            // 0x98: 0 with flag 0x20 (func_00128C10)
         };
     };
     u8 padA0[0xA4 - 0xA0];  // 0xA0

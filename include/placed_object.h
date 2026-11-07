@@ -18,6 +18,7 @@ struct T2195_790;       // the aim attachment at +0x200 (attachment.h)
 struct T2195_600;       // the own-value attachment at +0x204 (attachment.h)
 struct RangeRecord;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
 struct SoundRecord;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
+struct Animation;           // class 0x83 (animation.h)
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
 struct __attribute__((aligned(16))) Vec02 {
@@ -51,6 +52,16 @@ struct Elem02 {
     u8 pad18[0x2C - 0x18];
     f32 x;                  // 0x2C: func_00146298 (kind 6)
     f32 y;                  // 0x30
+};
+
+// The 0x14-byte record at +0x2A0 (func_00129108 makes it): the animation the object starts when
+// it starts (func_00124A48 queues func_00124CC0 while anim or key is set), and from where.
+struct AnimationStart {
+    Animation* anim;        // 0x00: the animation, or 0 to find it by key
+    s32 key;                // 0x04: -1 at set-up; the animation's id
+    s32 mode;               // 0x08: 0: value is a time, 1: a fraction of the length, 2: the time at the position
+    f32 value;              // 0x0C
+    f32 speedScale;         // 0x10: 1.0 at set-up; the player's scale of its speed (func_0012C288)
 };
 
 // Class 0x02's descriptor: the root's slots, then twenty more (slot n at 0x10 + 4n).
@@ -140,7 +151,7 @@ struct PlacedObject : BaseObject {
     s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
     void* f298;             // 0x298
     s32 f29C;               // 0x29C
-    void* f2A0;             // 0x2A0
+    AnimationStart* f2A0;   // 0x2A0
     u8 pad2A4[0x2A8 - 0x2A4];
     f32 f2A8;               // 0x2A8
     SoundRecord* f2AC;          // 0x2AC: a 0x24-byte record

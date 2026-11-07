@@ -8,6 +8,7 @@
 
 #include "collider.h"
 
+struct TimedObject;     // class 0x30 (timed_object.h)
 struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
 struct StateTrigger : Collider {
@@ -21,7 +22,7 @@ struct StateTrigger : Collider {
     s32 count2;             // 0x578
     s32 items2[16];         // 0x57C: func_00123CB8 appends; objects of kind 0x30 are put in outItems
     s32 outCount;           // 0x5BC
-    Collider* outItems[16];      // 0x5C0: the objects found (kind 0x30); the state changes tell them
+    TimedObject* outItems[16];   // 0x5C0: the objects found (kind 0x30); the state changes tell them
     s32 count3;             // 0x600
     s32 items3[6];          // 0x604: func_00123CE0 appends; objects of kind 8 are told func_001CAD40
     s32 done;               // 0x61C: counted up by func_00123B18; state 1 follows when it equals count1
