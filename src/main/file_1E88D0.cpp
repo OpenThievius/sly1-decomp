@@ -27,6 +27,7 @@
 #include "oscillator.h"
 #include "camera.h"
 #include "game_progress.h"
+#include "item_keeper.h"
 #include "asm_func.h"
 
 void func_001C9AF8(void);
@@ -49,39 +50,11 @@ struct Probe_001E9038 {
     s32 key;
 };
 s32 func_001C7468(void* self, void* probe);
-struct Ctor_001E90A8 {
-    u8 pad0[4];
-    s32 a04;
-    u8 pad1[4];
-    s32 a0C;
-    u8 pad2[0x1C];
-    s32 a2C;
-    s32 a30;
-};
 void func_001E96F8(void* self, s32 mode);
-struct Set_001E9498 {
-    u8 pad0[0xC];
-    ScreenElement* items[8];
-    s32 count;
-};
 s32 func_001BE5E8(void);
 void func_001BEA28(void);
 f32 func_002058A0(f32 v);
 s32 func_001EB050(ValueRange* span, f32 x);
-typedef void (*VFn3_1E9570)(void* self, int arg);
-typedef void (*VFn7_1E9570)(void* self);
-struct VTable_1E9570 {
-    u8 pad0[0xC];
-    VFn3_1E9570 slot3;
-    u8 pad1[0xC];
-    VFn7_1E9570 slot7;
-};
-struct Item_1E9570 { VTable_1E9570* vt; };
-struct Group_1E9570 {
-    u8 pad0[0xC];
-    Item_1E9570* items[8];
-    s32 count;
-};
 void func_001BEA50(void);
 void func_001AA178(void);
 extern float D_0026185C[];
@@ -111,13 +84,6 @@ extern s32 D_00275DBC;
 void func_001C6F48(void* self);
 void* func_0018D500(s32 size);
 void func_001BEA78(void);
-struct Obj_1E9688 {
-    u8 pad0[0xC];
-    s32 f_0C;
-    u8 pad1[0x2C - 0x10];
-    s32 f_2C;
-    s32 f_30;
-};
 void func_001E9570(void* g);
 void func_001A7D98(void* self, s32 mode);
 void func_001AA0C0(void);
@@ -138,31 +104,14 @@ s32 func_0015A418(void* a, s32 b, s32 c, void* self);
 struct Entry_275D48 { s32 id; f32 v; s32 z; };
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
 s32 func_001C8010(KeyedConeAgent* self);
-struct Obj_1E96F8 { u8 pad0[4]; s32 f4; f32 f8; u8 pad1[0x24]; s32 f30; };
 extern s32 D_00274738;
 extern f32 D_00261868[];
-void func_001E98E8(Obj_1E96F8* a, f32 f);
+void func_001E98E8(ElementStack* a, f32 f);
 void func_0018C178(MemoryCard* a, s32 v);
 void func_001F0220(u8* a, s32 v);
 void func_001DDA50(void* a);
 void func_001DDA20(void* a);
 void func_001A7E70();
-struct Elem_1E9108;
-struct Vt_1E9108 {
-    u8 pad[0x10];
-    void (*fn)(Elem_1E9108* self, void* arg);
-};
-struct Elem_1E9108 {
-    Vt_1E9108* vt;
-};
-struct Obj_1E9108 {
-    u8 pad0[4];
-    s32 state;
-    f32 f8;
-    Elem_1E9108* stack[1];
-    u8 pad10[0x2C - 0x10];
-    s32 count;
-};
 extern u32 D_00262C68;
 extern u32 D_00262C6C;
 extern s32 D_002701B8;
@@ -174,9 +123,9 @@ extern s32 func_0018C568(MemoryCard* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
-extern void func_001E9498(Obj_1E9108* o, ScreenElement* g);
-extern void func_001E98E8(Obj_1E9108* o, f32 v);
-extern void func_001E96F8(Obj_1E9108* o, s32 mode);
+extern void func_001E9498(ElementStack* o, ScreenElement* g);
+extern void func_001E98E8(ElementStack* o, f32 v);
+extern void func_001E96F8(ElementStack* o, s32 mode);
 extern void func_001409E0(void);
 extern void func_001A9FD0(void);
 struct Item_1EB748 { s32 type; s32 a; f32 b; s32 c; };
@@ -344,7 +293,6 @@ void func_001EF900(void* self, s32 b);
 s32 func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
 struct Cursor_1EE368 { u8 pad[0xC]; u32* cursor; };
 void* func_001DBCC8(s32 a, void* b, void* c, s32 d, s32 e);
-struct Node_1EFC98 { u8 pad[0x28]; s32 flag; };
 void func_00192850(void);
 struct Packer_1EE528 {
     u8 pad0[0xC]; u32* cursor; u8 pad1[0xC]; s32 last;
@@ -362,7 +310,6 @@ void func_001EAD88(f32 angle, f32* a, f32* b);
 typedef u64 Quad_1EEB60 __attribute__((mode(TI)));
 s32 func_001EEA40(void* self, void* node, Quad_1EEB60 q, s32* out);
 typedef void (*VFn_1EF3A8)(void* self, void* arg);
-struct Obj_001EFA60 { u32 pad; u32 count; s32 items[8]; };
 void func_00125B70(void* obj, void* c, void* out);
 void func_00125C90(void* obj, void* s, void* out);
 void func_001C8418(void* self, void* p);
@@ -400,7 +347,6 @@ void* func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, TempoAgent* self, s32 a3, s32
 void func_001ECB18(void);
 void func_001C9008(void* self, void* arg);
 void func_00152CE0(void* self, s32 index, s32 count);
-struct Obj_1EFA30 { void* vtbl; };
 extern void* D_002505C0[6];
 void* func_0018D5C0(u32 n);
 void func_001EE5C8(void* s, void* a1, s32 size, void* a3, s32* outSize, u8** outCursor);
@@ -408,9 +354,6 @@ struct Mask_1EE9D0 { u8 pad[0x3C]; s32 count; s32* table; };
 extern s32 D_002640A4;
 void func_00180398(s32 a, f32 v);
 void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, void* e, f32 f, f32 g, f32 h, f32 i);
-struct Item_1EFB20 { u8 pad[0x2D0]; s32 kind; f32 lo; f32 hi; s32 sub; s32 tag; };
-struct Owner_1EFB20 { u8 pad[0x180]; s32 link; };
-struct Set_1EFB20 { s32 pad0; s32 count; Item_1EFB20* items[8]; s32 flag; Owner_1EFB20* owner; };
 void func_001AC060(void* p);
 void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 D_0024A0E0[];
@@ -468,12 +411,11 @@ f32 func_00205778(f32 a, f32 b);
 struct Entry_1ED0D8 { s32 key; s32 val; };
 void func_0018D800(Entry_1ED0D8* dst, Entry_1ED0D8* src, s32 bytes);
 void func_001ED318(Timeline* self, Entry90* e);
-struct List_1EFA88 { s32 pad0; s32 count; s32 items[1]; };
 void* func_001F5B08(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct Shift_1EFA88 {
-    static void Of(s32* dst, s32* src, s32 n)
+    static void Of(C62** dst, C62** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
@@ -521,7 +463,6 @@ void func_00182C58(void* self);
 void func_00182ED8(void* a);
 // The pad (include/c73.h's neighbours): its buttons at +0xAA, its direction timers at +0x30 .. 0x3C.
 struct Pool_1F1A08;
-struct Q_1F1A08;
 struct Q3_1F1A08;
 struct Val_1F1A08;
 typedef s32 Key_1F1A08;
@@ -532,7 +473,7 @@ s32 func_0016EED0(PadRecord* t);
 void func_001F1648(WarpPage* o, s32 n);
 void func_0016EC20(Pool_1F1A08* p, s32 n);
 s32 func_001F0468(void);
-void func_001E9570(Q_1F1A08* q);
+void func_001E9570(ElementStack* q);
 Val_1F1A08* func_00160180(Key_1F1A08 k);
 void func_001F0428(Val_1F1A08* v, s32 m, s32 n);
 void func_001BFCD8(Id_1F1A08 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -675,9 +616,9 @@ void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
 void func_00161708(PacketWriter* f, u64 a, u64 b);
 void func_00161458(PacketWriter* self, u32 value);
 void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void func_001E90A8(Ctor_001E90A8* self);
-void func_001E9498(Set_001E9498* self, ScreenElement* node);
-void func_001E96F8(Obj_1E96F8* self, s32 state);
+void func_001E90A8(ElementStack* self);
+void func_001E9498(ElementStack* self, ScreenElement* node);
+void func_001E96F8(ElementStack* self, s32 state);
 void func_001E98E8(float x);
 f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z);
 void func_001ED090(TempoAgent* self, void* a, s32 b);
@@ -1042,13 +983,13 @@ void func_001E9088(void)
     InitElementStack(g_elementStack);
 }
 
-void func_001E90A8(Ctor_001E90A8* self)
+void func_001E90A8(ElementStack* self)
 {
-    self->a30 = -1;
-    self->a04 = -1;
+    self->resumeState = -1;
+    self->state = -1;
     SetElementStackState(self, 3);
-    self->a0C = 0;
-    self->a2C = 1;
+    self->items[0] = 0;
+    self->count = 1;
 }
 
 void func_001E90E8(void* self)
@@ -1056,9 +997,9 @@ void func_001E90E8(void* self)
     SetElementStackState(self, 3);
 }
 
-void func_001E9108(Obj_1E9108* obj)
+void func_001E9108(ElementStack* obj)
 {
-    f32 d = g_gameClock.elapsed - obj->f8;
+    f32 d = g_gameClock.elapsed - obj->stateTime;
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
@@ -1154,10 +1095,10 @@ void func_001E9108(Obj_1E9108* obj)
     }
     SetElementStackState(obj, s1);
     {
-        Elem_1E9108* e = obj->stack[obj->count - 1];
+        ScreenElement* e = obj->items[obj->count - 1];
         if (e) {
-            if (e->vt->fn) {
-                e->vt->fn(e, s2);
+            if (e->vt->m04) {
+                e->vt->m04(e, s2);
             }
         } else if (s5) {
             SetElementStackState(obj, 3);
@@ -1167,7 +1108,7 @@ void func_001E9108(Obj_1E9108* obj)
     UpdateScreenElements();
 }
 
-void func_001E9498(Set_001E9498* self, ScreenElement* node)
+void func_001E9498(ElementStack* self, ScreenElement* node)
 {
     if (IsStreamVoiceLocked() && self->count == 1) {
         func_001BEA28();
@@ -1189,14 +1130,14 @@ void func_001E9498(Set_001E9498* self, ScreenElement* node)
     }
 }
 
-void func_001E9570(Group_1E9570* g)
+void func_001E9570(ElementStack* g)
 {
-    Item_1E9570* item = g->items[--g->count];
-    if (item->vt->slot3) item->vt->slot3(item, 0);
-    if (item->vt->slot7) item->vt->slot7(item);
+    ScreenElement* item = g->items[--g->count];
+    if (item->vt->m03) item->vt->m03(item, 0);
+    if (item->vt->m07) item->vt->m07(item);
     if (g->count >= 2) {
-        Item_1E9570* other = g->items[g->count - 1];
-        if (other->vt->slot3) other->vt->slot3(other, 1);
+        ScreenElement* other = g->items[g->count - 1];
+        if (other->vt->m03) other->vt->m03(other, 1);
     }
     if (IsStreamVoiceLocked()) {
         if (g->count == 1) func_001BEA50();
@@ -1213,36 +1154,36 @@ void func_001E9668(void)
     func_001AA110();
 }
 
-void func_001E9688(Obj_1E9688* self)
+void func_001E9688(ElementStack* self)
 {
-    while (self->f_2C >= 2) {
+    while (self->count >= 2) {
         PopStackElement(self);
     }
     s32 one = 1;
-    self->f_30 = -1;
+    self->resumeState = -1;
     u8* base = (u8*)&g_padRecord;
-    self->f_2C = one;
-    self->f_0C = 0;
+    self->count = one;
+    self->items[0] = 0;
     SetPadPatternState(*(void**)(base + 0xBC), 3);
     ResetScreenElements();
 }
 
-void func_001E96F8(Obj_1E96F8* self, s32 state)
+void func_001E96F8(ElementStack* self, s32 state)
 {
     if (state == 3) {
-        s32 t = self->f30;
+        s32 t = self->resumeState;
         if (t != -1) state = t;
     }
-    if (self->f4 != state) {
-        if (self->f4 != 0) {
-            if (self->f4 == 1) {
+    if (self->state != state) {
+        if (self->state != 0) {
+            if (self->state == 1) {
                 D_00272930.vt->m15(&D_00272930);
                 D_00272B98.vt->m15(&D_00272B98);
                 ReleasePadSelectFlag(g_currentWorld);
             }
         }
-        self->f4 = state;
-    self->f8 = g_elapsedTime[0];
+        self->state = state;
+    self->stateTime = g_elapsedTime[0];
     switch (state) {
     case 0:
         if (g_memoryCard.displayMode == 0) SetMemoryCardDisplayMode(&g_memoryCard, 1);
@@ -3072,14 +3013,14 @@ void func_001EF9C8(C62* self, s32 kind, Msg62* msg)
 
 void* func_001EFA30(void)
 {
-    Obj_1EFA30* p = (Obj_1EFA30*)AllocateZeroedFrontMemory(48);
+    C62Group* p = (C62Group*)AllocateZeroedFrontMemory(48);
     p->vtbl = D_002505C0;
     return p;
 }
 
-void func_001EFA60(Obj_001EFA60* self, s32 value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
+void func_001EFA60(C62Group* self, C62* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
 
-void func_001EFA88(List_1EFA88* self, s32 value)
+void func_001EFA88(C62Group* self, C62* value)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
@@ -3091,37 +3032,37 @@ void func_001EFA88(List_1EFA88* self, s32 value)
     }
 }
 
-void func_001EFB20(Set_1EFB20* s)
+void func_001EFB20(C62Group* s)
 {
-    s->flag = 0;
-    if (s->owner != 0 && s->owner->link != -1 && s->items[0]->tag == s->owner->link) {
+    s->scheduled = 0;
+    if (s->owner != 0 && s->owner->f180 != -1 && s->items[0]->id2E0 == s->owner->f180) {
         s32 i;
         for (i = 0; i < s->count; i++) {
-            if (s->items[i]->kind != 1) break;
+            if (s->items[i]->id2D0 != 1) break;
         }
         if (i >= s->count) {
             for (i = 0; i < s->count; i++) {
                 SetStateAndNotify(s->items[i], 2);
             }
-            s->owner->link = -1;
+            s->owner->f180 = -1;
         }
         return;
     }
     for (s32 i = 0; i < s->count; i++) {
-        Item_1EFB20* it = s->items[i];
-        if (it->kind != 2) continue;
-        if (it->sub != 0) continue;
-        f32 d = g_gameClock.time - it->lo;
-        if (it->hi < d) {
+        C62* it = s->items[i];
+        if (it->id2D0 != 2) continue;
+        if (it->id2DC != 0) continue;
+        f32 d = g_gameClock.time - it->f2D4;
+        if (it->f2D8 < d) {
             SetStateAndNotify(it, 0);
         }
     }
 }
 
-void func_001EFC98(Node_1EFC98* self)
+void func_001EFC98(C62Group* self)
 {
-    if (self->flag == 0) {
-        self->flag = 1;
+    if (self->scheduled == 0) {
+        self->scheduled = 1;
         AppendQueuedCall((s32)g_currentWorld, (void*)UpdateItemTimeouts, self, -1, 0);
     }
 }
@@ -3884,7 +3825,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     if (self->current->mode != 2) return;
     if (self->current->f560 != 0) return;
     if ((t->flags & 0x910) != 0 || t->f14 == 1) {
-        PopStackElement((Q_1F1A08*)g_elementStack);
+        PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x910);
         return;
     }
@@ -3910,13 +3851,13 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
             if (s3 != 0) {
                 Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
-                PopStackElement((Q_1F1A08*)g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((Q_1F1A08*)g_elementStack);
+            PopStackElement((ElementStack*)g_elementStack);
         }
     }
 

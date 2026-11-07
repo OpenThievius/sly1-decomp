@@ -21,6 +21,7 @@
 
 struct Font;       // the font (include/font.h): a game object with a GCC vtable at +0x4C
 struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
+struct PadRecord;   // the pad's state (include/pad_record.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
@@ -57,7 +58,7 @@ struct T217D_Vt {
     void (*m01)(ScreenElement* self);                   // 0x04: set up (func_001AA268 in the base)
     void (*m02)(ScreenElement* self);                   // 0x08: update the slide (func_001AA298)
     void (*m03)(ScreenElement* self, s32 top);          // 0x0C: told it is (1) or is no longer (0) the top of a stack (func_001E9498)
-    void (*m04)(ScreenElement* self);                   // 0x10: not used by these files
+    void (*m04)(ScreenElement* self, PadRecord* pad);   // 0x10: handle the pad as the top of the stack (func_001E9108)
     void (*m05)(ScreenElement* self);                   // 0x14: reset, m16(self, 0) (func_001AA8C8)
     void (*m06)(ScreenElement* self);                   // 0x18: not used by these files
     void (*m07)(ScreenElement* self);                   // 0x1C: not used by these files
@@ -78,6 +79,7 @@ struct T217D_Vt {
 // The types of the table's slots, to define a table with.
 typedef void (*ElementFn)(ScreenElement* self);
 typedef void (*ElementIntFn)(ScreenElement* self, s32 value);
+typedef void (*ElementPadFn)(ScreenElement* self, PadRecord* pad);
 typedef void (*ElementTextFn)(ScreenElement* self, const char* text);
 typedef f32 (*ElementTimeFn)(ScreenElement* self);
 typedef void (*ElementClockFn)(ScreenElement* self, f32* clock);
@@ -425,5 +427,17 @@ extern T217D_E30 D_00274118;    // D_002181F0
 // The base is the stride of D_00218720's four sub-elements (func_0014ABD0 steps 0x260 bytes).
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
 typedef char check_T217D_330[sizeof(T217D_330) == 0x260 ? 1 : -1];
+
+// The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
+// (SetElementStackState), and the elements, whose top gets the pad each frame
+// (UpdateElementStack, file_1E88D0.cpp).
+struct ElementStack {
+    u8 pad00[4];
+    s32 state;              // 0x04: 0 .. 8 (SetElementStackState)
+    f32 stateTime;          // 0x08: the clock when the state was set
+    ScreenElement* items[8]; // 0x0C: items[count - 1] is the top
+    s32 count;              // 0x2C: 1 for the base element alone
+    s32 resumeState;        // 0x30: the state that state 3 stands for, -1 for 3 itself
+};
 
 #endif

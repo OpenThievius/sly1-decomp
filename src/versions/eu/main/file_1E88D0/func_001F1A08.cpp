@@ -21,7 +21,7 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     if (self->f570->mode != 2) return;
     if (self->f570->f560 != 0) return;
     if ((t->flags & 0x910) != 0 || t->f14 == 1) {
-        PopStackElement((Q_1F1A08*)g_elementStack);
+        PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x910);
         return;
     }
@@ -47,13 +47,13 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
             if (s3 != 0) {
                 Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->f570->f560 = 1;
-                PopStackElement((Q_1F1A08*)g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((Q_1F1A08*)g_elementStack);
+            PopStackElement((ElementStack*)g_elementStack);
         }
     }
 
