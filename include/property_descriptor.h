@@ -16,8 +16,12 @@ struct PropertyDescriptor {
     s32 type;               // 0x00: the kind of value (func_0011E680 switches on it)
     u32 flags;              // 0x04: 0x800 a class default, read from value (func_0011EDA8)
     u8 value[4];            // 0x08: the default value
-    void (*setter)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args); // 0x0C: given the values read
-    u8 pad10[4];
+    union {
+        void (*setter)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args); // 0x0C: given the values read
+        s32 getter;         // 0x0C: when read (func_001C15D8): the field's offset (flags 2), the
+                            // getter's offset in the object's table, or (flags 4) the getter
+    };
+    s32 f10;                // 0x10: func_001C15D8 (flags 1) keeps it in a property reference
     s32 argCount;           // 0x14: how many values the setter takes
     s32 offset;             // 0x18: of the field (or of the method slot) in the target
     void* (*target)(void* obj, s32 one); // 0x1C: the object holding the field, when set

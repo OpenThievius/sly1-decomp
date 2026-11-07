@@ -22,7 +22,8 @@
 #include "id_linked_object.h"
 #include "game_progress.h"
 #include "shapes.h"
-#define VA_ARG_1C2430(ap, T) (*(T*)((ap += 8) - 8))
+#include "property_descriptor.h"
+#define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 func_001EAAE0(f32 a, f32 b);
 f32 func_00205778(f32 a, f32 b);
@@ -55,7 +56,6 @@ void func_00123ED0(void* self);
 void func_00160E80(Mesh03* mesh);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
-struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 void func_00124A48(void* self);
 void* func_0018D500(s32 size);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
@@ -77,22 +77,22 @@ void func_001B94F0(Collider* self, s32 value);
 void func_00138F28(void* a, void* b);
 s32 func_001C1AD8(s32 value, void* out);
 s32 func_001C1A28(s32 value, void* out);
-struct Vec_1B9338 { s32 v[4]; };
 void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
 void func_001B9AB0(void* a, void* b);
 void func_001261C0(Collider* self, void* a, void* m);
 void func_001BA430(void* a, void* b, void* c, s32 d);
 void func_00129DF8(void* self);
-typedef u64 Quad_1B8960 __attribute__((mode(TI)));
+// A quadword passed by value in one register (func_001B8820's position).
+typedef u64 Qword128 __attribute__((mode(TI)));
 void func_00125138(void* self);
-void func_001B8820(Mesh03* a, Mesh03* b, Quad_1B8960 q, Mat02* c);
-struct __attribute__((aligned(16))) Quad_1B9B50 { s32 a, b, c, d; };
+void func_001B8820(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 void func_001280C0(void* a, void* b, void* c, void* d);
 void func_001245A8(void* self, void* p);
 s32 func_00182F40(void* e, void* b);
 void func_00183350(void* self, s32 kind, void* arg);
-struct Entry_1BB028 { const Vec02* quad; s32 value; };
-extern Entry_1BB028 D_002746E0[8];
+// An anchor preset (func_001BB028): a direction and a mode.
+struct AnchorPreset { const Vec02* quad; s32 value; };
+extern AnchorPreset D_002746E0[8];
 void* func_0018D658(s32 n);
 s32 func_001387F8(void* self, void* other);
 // Matched by indexing the end as (u32)e + (i << 6).
@@ -118,15 +118,16 @@ s32 func_00137D10(BufferedStream* in);
 s32 func_00137C40(BufferedStream* in);
 void func_001289C0(Collider* self, BufferedStream* in);
 void func_00138F28(void* a, Collider* b);
-struct Out_1B9F30 {
-    s32 f00;
+// What class 0x03's slot 69 (func_001B9F30) writes of a collider.
+struct ColliderPose {
+    s32 f00;                // 0x00: 0
     u8 pad04[0x0C];
-    Vec02 q10;
-    Vec02 q20;
-    f32 f30;
-    f32 f34;
-    f32 f38;
-    s32 f3C;
+    Vec02 position;         // 0x10: v140
+    Vec02 v150;             // 0x20
+    f32 heading;            // 0x30: from the first row of the matrix
+    f32 f34;                // 0x34: 100.0
+    f32 time;               // 0x38: g_gameTime
+    s32 f3C;                // 0x3C: 0
 };
 void func_00189378(Mat02* m, s32 zero, Vec02* out);
 void func_001861E8(void* pool, Contact03* head);
@@ -238,7 +239,8 @@ f32 func_001BF398(void* listener, void* position);
 f32 func_001BF2E0(void* listener, void* position);
 void* func_0018D5C0(s32 bytes);
 extern s32 D_00274730;
-typedef s32 (*Cmp_1BE0A8)(void* a, void* b);
+// The comparison func_001BE0A8's heap sort orders its records by.
+typedef s32 (*SortCompareFn)(void* a, void* b);
 void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA);
 s32 func_001BE980(void);
 void func_0018D410(void* p);
@@ -262,13 +264,14 @@ s32 func_00152720(void* a);
 void* func_001BED98(void);
 s32 func_0011D708(s32 handle);
 extern f32 D_00261858[];
-struct Cnt_1BDD00 { s32 pad; s32 n1; s32 n2; };
+// The counts func_001BD678 fills for func_001BDD00 (its two lists of connected colliders).
+struct ConnectedCounts { s32 pad; s32 n1; s32 n2; };
 // What the update pass calls through slot 27 of a collider's class (func_001BDD00).
 typedef void (*ColliderStepFn)(Collider* self, s32 a, f32 dt);
 // The next object of World::list6C, at Collider::link414 read as one aligned word.
-struct Item_1BDD00 {
+struct ListedCollider {
     u8 pad0[0x414];
-    Item_1BDD00* next;
+    ListedCollider* next;
 };
 void func_0018D608();
 void func_0018D6F0();
@@ -377,56 +380,49 @@ s32 func_0011E1F8(s32 flag);
 void func_001C0808(s32 a0);
 void func_001BEE48(void);
 void func_001C0CB0(void);
-struct Rec_1C1530 { s32 a; R11B008Node* head; s32 cnt; };
-typedef void (*Cb_1C1530)(void* a, void* b);
-void* func_001C14C0(void* a, s32 b);
+// A property's getter (PropertyDescriptor::getter with flags 4, or the method at that offset of
+// the object's table): fills `out` with the value of `obj`.
+typedef void (*PropertyGetter)(void* obj, void* out);
 void func_001C1F20(ScriptValue* self, void* a, void* b, ScriptValue* c);
-struct Ring_1C25B0 {
-    s32 f0;
-    s32 f4;
-    s32 f8[8];
-    s32 f28[0x20 / 4];
-    s32 f48;
-    s32 f4C;
+// A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
+struct DmaTag { u64 lo; u64 hi; };
+// One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
+// func_001C2430 sends up to 8 blocks into the scratchpad by a DMA chain, func_001C25B0 sends
+// them back to memory.
+struct SprTransfer {
+    DmaTag* tags;           // 0x00: the chain's tags
+    s32 base;               // 0x04: the scratchpad address of the first block's tag
+    u32 addrs[8];           // 0x08: each block's address, after its 16-byte tag
+    s32 sizes[8];           // 0x28: each block's size, rounded up to 16
+    s32 count;              // 0x48: the number of blocks
+    s32 state;              // 0x4C: 1 sent in, 3 sending back (func_001C25B0), 0 done
 };
-struct Dma_1C25B0 {
-    s32 f0;
+// The registers of the scratchpad DMA channels (g_fromSprChannel, g_toSprChannel) the code sets.
+struct SprDmaChannel {
+    s32 chcr;               // 0x00: its control register (bit 6 cleared or set)
     u8 pad4[0x7C];
-    s32 f80;
+    s32 sadr;               // 0x80: the scratchpad address
 };
-extern Dma_1C25B0* D_00261F20;
-s32 func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
-void func_00202B68(Dma_1C25B0* d);
+extern SprDmaChannel* D_00261F20;
+s32 func_00202C38(SprDmaChannel* d, s32 b, s32 c);
+void func_00202B68(SprDmaChannel* d);
 extern f32 D_00274758[11][4];
 extern s32 D_00274808[];
 void func_0011E328(s32 channel, s32 value);
 void func_0011E360(s32 channel, s32 value, s32 value2);
-struct List_1C1A28 { s32 type; R11B008Node* head; R11B008Node* tail; };
-struct Desc_1C15D8;
-typedef void (*Get_1C15D8)(void* obj, void* out);
-typedef void* (*Base_1C15D8)(void* obj, s32 z);
-struct Desc_1C15D8 {
-    s32 kind;
-    u32 flags;
-    s32 pad8;
-    s32 off;
-    s32 imm;
-    s32 imm2;
-    s32 pad18;
-    Base_1C15D8 base;
-};
+// A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
+// of `type` to it).
+struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
 void func_001F5C0C(void* p, s32 v, s32 n);
-void func_001C15D8(ScriptValue* t, s32 value, Desc_1C15D8* d);
+void func_001C15D8(ScriptValue* t, s32 value, PropertyDescriptor* d);
 s32 func_001C0CF0(void);
-struct KeyPair_1C14C0 { s32 key; s32 value; };
-struct KeyTable_1C14C0 { s32 count; KeyPair_1C14C0* items; };
-struct KeyRef_1C14C0 { s32 pad0; s32 index; };
-struct KeyHolder_1C14C0 { KeyRef_1C14C0* ref; };
-extern KeyTable_1C14C0 D_00244950[];
-struct TabA_24D2A8 { s32 v[42]; };
-struct TabB_24D350 { s32 v[25]; };
-extern const TabA_24D2A8 D_0024D2A8;
-extern const TabB_24D350 D_0024D350;
+extern PropertyList D_00244950[];
+// func_001C0CF0's random walk: six steps for each of seven rows, and the row for each position
+// from -12 to 12, copied to the stack.
+struct RandomWalkSteps { s32 v[42]; };
+struct RandomWalkRows { s32 v[25]; };
+extern const RandomWalkSteps D_0024D2A8;
+extern const RandomWalkRows D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
 void func_001C15D8(ScriptValue* self, void* a, s32 r);
@@ -442,12 +438,11 @@ extern s32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
 void func_0011A080(ScriptValue* t, R11B008Node* node, s32 b);
-struct Cmd_1C1AD8 { u32 kind; R11B008Node* list; };
-struct __attribute__((aligned(16))) Blob_1C1BF8 { Quad16 q[3]; };
-struct W8_1C1BF8 { s32 a, b; };
-struct W12_1C1BF8 { s32 a, b, c; };
-struct Rec3_1C15D8 { s32 a, b, c; };
-struct D8_1C15D8 { s32 a, b; };
+// A type and a list of script values: func_001C1AD8 tells whether a value is among them.
+struct ScriptValueFilter { u32 type; R11B008Node* list; };
+// The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
+struct ScriptPair { s32 w[2]; };
+struct ScriptTriple { s32 w[3]; };
 extern void* func_0011C508(void);
 extern void* func_0011C618(void);
 extern void* func_001884E0(void* d, void* s);
@@ -456,24 +451,9 @@ extern void* func_0011C748(void);
 extern void* func_0011C858(void);
 extern void* func_0011C968(void);
 void func_001BF788(u8* obj, void* item);
-struct Tag_1C2430 { u64 lo; u64 hi; };
-struct Slot_1C2430 {
-    Tag_1C2430* tags;
-    u32 base;
-    u32 addrs[8];
-    s32 sizes[8];
-    s32 count;
-    s32 state;
-};
-struct Chan_1C2430 {
-    u32 f0;
-    u8 pad4[0x7C];
-    u32 f80;
-};
-extern Chan_1C2430* D_00261F24;
-typedef char* VaList_1C2430;
+extern SprDmaChannel* D_00261F24;
 s32 func_00202C38(void* p, s32 a, s32 b);
-void func_00202A80(Chan_1C2430* c, u32 addr);
+void func_00202A80(SprDmaChannel* c, u32 addr);
 void func_001C05D0(f32 x);
 void func_001C06A0(s32 row, s32 column, f32 value);
 void func_001C0760(s32 flag);
@@ -495,11 +475,11 @@ void func_001C0EC0(void);
 void func_001C1190(World* self, BufferedStream* arg);
 void* func_001C1390(s32 index, World* self);
 ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx);
-s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key);
-ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, Cb_1C1530 cb);
-ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d);
-s32 func_001C1A28(List_1C1A28* self, s32 value);
-s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val);
+PropertyDescriptor* func_001C14C0(BaseObject* self, s32 key);
+ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
+ScriptValue* func_001C15D8(ScriptValue* out, void* base, PropertyDescriptor* d);
+s32 func_001C1A28(ScriptListBuilder* self, s32 value);
+s32 func_001C1AD8(ScriptValueFilter* filter, s32* val);
 ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
 ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals);
 ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n);
@@ -517,7 +497,7 @@ extern const s32 D_00246838[772];
 // The file's .data, in retail's order.
 f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
 f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-Entry_1BB028 D_002746E0[8] = {
+AnchorPreset D_002746E0[8] = {
     { &D_00248D30, 0 },
     { &D_00248D30, 3 },
     { &g_unitXVector, 2 },
@@ -549,7 +529,7 @@ s32 D_00274830 = 0;
 f32 D_00274838[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
 s32 D_002748EC = 0;
-Ring_1C25B0 D_002748F0[2] = { { 0 } };
+SprTransfer D_002748F0[2] = { { 0 } };
 s32 D_00274990 = 0;
 
 void func_001B7968(Collider* self)
@@ -652,8 +632,8 @@ ASM_FUNC(func_001B8820);
 void func_001B8960(Collider* self)
 {
     ComputePlacedObjectWorldFrame(self);
-    TransformMeshToWorld(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
-    TransformMeshToWorld(&self->mesh2, &self->mesh2Copy, *(Quad_1B8960*)&self->v140, &self->m110);
+    TransformMeshToWorld(&self->mesh, &self->meshCopy, *(Qword128*)&self->v140, &self->m110);
+    TransformMeshToWorld(&self->mesh2, &self->mesh2Copy, *(Qword128*)&self->v140, &self->m110);
 }
 
 void func_001B89B8(Collider* self)
@@ -722,7 +702,7 @@ ASM_FUNC(func_001B91A8);
 
 void func_001B9338(Collider* self, f32 t)
 {
-    Vec_1B9338 local;
+    Vec4U local;
     Attach03* node;
     u64 m = 0x8000;
     m <<= 36;
@@ -871,8 +851,8 @@ void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 
 void func_001B9B50(Collider* self, BaseObject* p)
 {
-    Quad_1B9B50 local0;
-    Quad_1B9B50 local1;
+    Vec02 local0;
+    Vec02 local1;
     if (self->parent == p) {
         return;
     }
@@ -904,16 +884,16 @@ ASM_FUNC(func_001B9D10);
 
 LINKER_REMNANT(func_001B9F28);
 
-void func_001B9F30(Collider* self, Out_1B9F30* out)
+void func_001B9F30(Collider* self, ColliderPose* out)
 {
     Vec02 tmp[3];
-    out->q10 = self->v140;
-    out->q20 = self->v150;
+    out->position = self->v140;
+    out->v150 = self->v150;
     func_00189378(&self->m110, 0, &tmp[0]);
-    out->f30 = ArctangentOfRatio(-tmp[0].y, -tmp[0].x);
+    out->heading = ArctangentOfRatio(-tmp[0].y, -tmp[0].x);
     out->f34 = 100.0f;
     out->f00 = 0;
-    out->f38 = g_gameTime[0];
+    out->time = g_gameTime[0];
     out->f3C = 0;
 }
 
@@ -1678,7 +1658,7 @@ void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
 void func_001BDD00(World* self, s32 flags, f32 f)
 {
     ListFrame fr;
-    Cnt_1BDD00 c;
+    ConnectedCounts c;
     Collider** arr1;
     Collider** arr2;
     s32 j;
@@ -1715,7 +1695,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
         }
         g_activeListFrames = fr.prev;
     }
-    for (s = (Collider*)self->list6C.head; s != 0; s = (Collider*)((Item_1BDD00*)s)->next) {
+    for (s = (Collider*)self->list6C.head; s != 0; s = (Collider*)((ListedCollider*)s)->next) {
         if (s->flags538 & (1ULL << 57)) continue;
         if (s->flags538 & (1ULL << 55)) continue;
         CollectConnectedColliders(s, &c.n1, arr1, &c.n2, arr2);
@@ -1760,7 +1740,7 @@ void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA)
     }
 }
 
-void func_001BE0A8(u8* base, s32 n, s32 size, Cmp_1BE0A8 cmp)
+void func_001BE0A8(u8* base, s32 n, s32 size, SortCompareFn cmp)
 {
     if (n < 2) return;
     s32 end = n - 1;
@@ -2839,12 +2819,12 @@ void func_001C0CB0(void)
     }
 }
 
-extern const TabA_24D2A8 D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-extern const TabB_24D350 D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
+extern const RandomWalkSteps D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+extern const RandomWalkRows D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
 
 s32 func_001C0CF0() {
-    TabA_24D2A8 a = D_0024D2A8;
-    TabB_24D350 b = D_0024D350;
+    RandomWalkSteps a = D_0024D2A8;
+    RandomWalkRows b = D_0024D350;
     s32 r = RandomIntInRange(0, 5);
     D_00274830 += *(s32*)((u8*)&a + (b.v[D_00274830 + 12] * 24 + r * 4));
     return D_00274830;
@@ -2986,18 +2966,18 @@ ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx)
     return self;
 }
 
-s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key)
+PropertyDescriptor* func_001C14C0(BaseObject* self, s32 key)
 {
-    KeyTable_1C14C0* entry = &g_classPropertyLists[self->ref->index];
+    PropertyList* entry = &g_classPropertyLists[self->desc->id];
     s32 lo = 0;
     s32 hi = entry->count - 1;
-    KeyPair_1C14C0* items = entry->items;
+    const PropertyEntry* items = entry->entries;
 
     while (lo <= hi) {
         s32 mid = (lo + hi) >> 1;
-        s32 k = items[mid].key;
+        s32 k = items[mid].id;
         if (k == key) {
-            return items[mid].value;
+            return items[mid].prop;
         }
         if (key < k) {
             hi = mid - 1;
@@ -3008,14 +2988,14 @@ s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key)
     return 0;
 }
 
-ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, Cb_1C1530 cb)
+ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb)
 {
     ScriptValue q;
-    Rec_1C1530 r;
+    ScriptListBuilder r;
     InitScriptValue(&q);
-    r.a = v;
+    r.type = v;
     r.head = 0;
-    r.cnt = 0;
+    r.tail = 0;
     cb(ctx, &r);
     if (r.head != 0) {
         SetScriptValueChain(&q, r.head);
@@ -3027,28 +3007,28 @@ ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, Cb_1C1530 cb)
     return self;
 }
 
-ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
+ScriptValue* func_001C15D8(ScriptValue* out, void* base, PropertyDescriptor* d)
 {
     ScriptValue q;
     ScriptValue q2;
     s32 t20, t28, t2c, t30;
     f32 t24;
     char* p;
-    Get_1C15D8 fn;
+    PropertyGetter fn;
     InitScriptValue(&q);
     if (d->flags & 1) {
         s32* r = (s32*)TakeZeroedPoolEntry();
         r[0] = (s32)base;
-        r[1] = d->imm;
-        r[2] = d->imm2;
+        r[1] = d->f10;
+        r[2] = d->argCount;
         SetScriptValueIntC(&q, (s32)r);
     } else if (d->flags & 2) {
         if (d->flags & 0x1000) {
-            p = (char*)d->base(base, 0) + d->off;
+            p = (char*)d->target(base, 0) + d->getter;
         } else {
-            p = (char*)base + d->off;
+            p = (char*)base + d->getter;
         }
-        switch (d->kind) {
+        switch (d->type) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
             SetScriptValueInt(&q, *(s32*)p);
@@ -3078,39 +3058,39 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
             break;
         }
         case 10: {
-            D8_1C15D8* r = (D8_1C15D8*)AcquirePairPayload();
-            *r = *(D8_1C15D8*)p;
+            ScriptPair* r = (ScriptPair*)AcquirePairPayload();
+            *r = *(ScriptPair*)p;
             SetScriptValuePair(&q, (f32*)r);
             break;
         }
         case 11: {
-            Rec3_1C15D8* r = (Rec3_1C15D8*)AcquireTriplePayload();
-            *r = *(Rec3_1C15D8*)p;
+            ScriptTriple* r = (ScriptTriple*)AcquireTriplePayload();
+            *r = *(ScriptTriple*)p;
             SetScriptValueTriple(&q, (f32*)r);
             break;
         }
         case 13:
             break;
         default:
-            if (d->kind & 0x1000) {
+            if (d->type & 0x1000) {
                 SetScriptValueInt(&q, *(s32*)p);
-            } else if (d->kind & 0x2000) {
+            } else if (d->type & 0x2000) {
                 SetScriptValuePointerB(&q, (void*)*(s32*)p);
             }
             break;
         }
     } else {
         if (d->flags & 0x1000) {
-            p = (char*)d->base(base, 0);
+            p = (char*)d->target(base, 0);
         } else {
             p = (char*)base;
         }
         if (d->flags & 4) {
-            fn = (Get_1C15D8)d->off;
+            fn = (PropertyGetter)d->getter;
         } else {
-            fn = *(Get_1C15D8*)(*(char**)base + d->off);
+            fn = *(PropertyGetter*)(*(char**)base + d->getter);
         }
-        switch (d->kind) {
+        switch (d->type) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
             fn(p, &t20);
@@ -3158,14 +3138,14 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         case 13:
             break;
         default:
-            if (d->kind < 0) {
-                BuildScriptListFromCallback(&q2, base, d->kind & 0x7fffffff, fn);
+            if (d->type < 0) {
+                BuildScriptListFromCallback(&q2, base, d->type & 0x7fffffff, fn);
                 AssignScriptValue(&q, &q2);
                 DestroyScriptValue(&q2, 2);
-            } else if (d->kind & 0x1000) {
+            } else if (d->type & 0x1000) {
                 fn(p, &t2c);
                 SetScriptValueInt(&q, t2c);
-            } else if (d->kind & 0x2000) {
+            } else if (d->type & 0x2000) {
                 fn(p, &t30);
                 SetScriptValuePointerB(&q, (void*)t30);
             }
@@ -3177,14 +3157,14 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
     return out;
 }
 
-s32 func_001C1A28(List_1C1A28* self, s32 value)
+s32 func_001C1A28(ScriptListBuilder* self, s32 value)
 {
-    Desc_1C15D8 d;
+    PropertyDescriptor d;
     ScriptValue t;
     FillMemory(&d, 0, 0x20);
     d.flags = 2;
-    d.kind = self->type;
-    d.off = 0;
+    d.type = self->type;
+    d.getter = 0;
     R11B008Node* n = NewScriptValueNode();
     ReadPropertyValue(&t, value, &d);
     AssignScriptValue(n, &t);
@@ -3198,13 +3178,13 @@ s32 func_001C1A28(List_1C1A28* self, s32 value)
     return 1;
 }
 
-s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
+s32 func_001C1AD8(ScriptValueFilter* filter, s32* val) {
     ScriptValue q;
     R11B008Node* l;
     InitScriptValue(&q);
-    l = cmd->list;
+    l = filter->list;
     if (l) {
-        switch (cmd->kind) {
+        switch (filter->type) {
         case 1:
             SetScriptValueFloat(&q, *(f32*)val);
             break;
@@ -3214,11 +3194,11 @@ s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
         case 2: case 4: case 9: case 10: case 11: case 13:
             break;
         default:
-            if (cmd->kind & 0x1000) {
+            if (filter->type & 0x1000) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
                 SetScriptValueInt(&q, *val);
-            } else if (cmd->kind & 0x2000) {
+            } else if (filter->type & 0x2000) {
                 SetScriptValuePointerB(&q, (void*)*val);
             }
             break;
@@ -3274,17 +3254,17 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
             }
             break;
         case 4:
-            *(Blob_1C1BF8*)d = *(Blob_1C1BF8*)q.p;
+            *(Mat02*)d = *(Mat02*)q.p;
             break;
         case 2:
         case 9:
             *(Quad16*)d = *(Quad16*)q.p;
             break;
         case 10:
-            *(W8_1C1BF8*)d = *(W8_1C1BF8*)q.p;
+            *(ScriptPair*)d = *(ScriptPair*)q.p;
             break;
         case 11:
-            *(W12_1C1BF8*)d = *(W12_1C1BF8*)q.p;
+            *(ScriptTriple*)d = *(ScriptTriple*)q.p;
             break;
         default:
             if (t & 0x1000) {
@@ -3311,7 +3291,7 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
 ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals)
 {
     ScriptValue q;
-    List_1C1A28 list;
+    ScriptListBuilder list;
     InitScriptValue(&q);
     list.head = 0;
     list.tail = 0;
@@ -3393,25 +3373,25 @@ ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const
 
 void func_001C2430(s32 size, ...)
 {
-    VaList_1C2430 ap;
-    Slot_1C2430* e = &((Slot_1C2430*)D_002748F0)[1 - D_00274990];
+    char* ap;
+    SprTransfer* e = &D_002748F0[1 - D_00274990];
     s32 n = 0;
-    ap = (VaList_1C2430)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
+    ap = (char*)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
     u32 addr = e->base;
     if (e->state == 3) {
         WaitDmaChannel((*(void**)&g_fromSprChannel), 0, 0);
     }
     e->state = 1;
-    s32 data = VA_ARG_1C2430(ap, s32);
+    s32 data = VA_ARG_WORD(ap, s32);
     if (size != 0) {
         do {
-            s32 nsize = VA_ARG_1C2430(ap, s32);
+            s32 nsize = VA_ARG_WORD(ap, s32);
             size = (size + 15) & ~15;
             addr += 16;
             e->sizes[n] = size;
             e->addrs[n] = addr;
             addr += size;
-            s32 ndata = VA_ARG_1C2430(ap, s32);
+            s32 ndata = VA_ARG_WORD(ap, s32);
             if (data != 0) {
                 e->tags[n].lo = (u64)(size >> 4) | ((u64)(ndata != 0 ? 3 : 0) << 28) | ((u64)data << 32);
             }
@@ -3421,18 +3401,18 @@ void func_001C2430(s32 size, ...)
         } while (size != 0);
     }
     e->count = n;
-    Chan_1C2430* c = g_toSprChannel;
-    c->f0 |= 0x40;
-    c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
+    SprDmaChannel* c = g_toSprChannel;
+    c->chcr |= 0x40;
+    c->sadr = (e->base & 0x0FFFFFFF) | 0x80000000;
     StartDmaChain(c, (u32)e->tags & 0x0FFFFFFF);
 }
 
 void func_001C25B0(s32 first, ...) {
     s32 buf[8];
-    Ring_1C25B0* r = &D_002748F0[D_00274990];
+    SprTransfer* r = &D_002748F0[D_00274990];
     s32 n = 0;
     s32 x = first;
-    r->f4C = 3;
+    r->state = 3;
     WaitDmaChannel(g_fromSprChannel, 0, 0);
     void* ap = (char*)__builtin_next_arg(first) - 56;
     while (x) {
@@ -3442,19 +3422,19 @@ void func_001C25B0(s32 first, ...) {
         n++;
     }
     s32 i = 0;
-    n = r->f48 - n;
-    while (n < r->f48 - 1) {
-        *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x10000000) | ((u64)buf[i] << 32);
+    n = r->count - n;
+    while (n < r->count - 1) {
+        *(u64*)(r->addrs[n] - 0x10) = ((r->sizes[n] >> 4) | 0x10000000) | ((u64)buf[i] << 32);
         n++;
         i++;
     }
-    Dma_1C25B0* d = g_fromSprChannel;
-    *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
-    d->f0 &= ~0x40;
-    d->f80 = (r->f4 & 0xFFFFFFF) + 0x80000000;
+    SprDmaChannel* d = g_fromSprChannel;
+    *(u64*)(r->addrs[n] - 0x10) = ((r->sizes[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
+    d->chcr &= ~0x40;
+    d->sadr = (r->base & 0xFFFFFFF) + 0x80000000;
     StartDmaChainToMemory(d);
     r = &D_002748F0[1 - D_00274990];
-    if (r->f4C == 3) r->f4C = 0;
+    if (r->state == 3) r->state = 0;
 }
 
 LINKER_REMNANT(func_001C27A8);
