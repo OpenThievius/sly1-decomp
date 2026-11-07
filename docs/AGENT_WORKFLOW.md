@@ -241,6 +241,29 @@ Measured on this compiler; add to this list when you learn something.
   - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (file_15F678), one word)
     and the 0x1C-byte style object (zeroed, then 0x2D, 0xFF7D4B00, two sizes given as integers,
     0.3 twice) recur in many files' static initialisers.
+  - The compiler has one read-only section. A test unit with a `const` table of function
+    pointers, a `const` aggregate with relocations, a `static const`, a vtable, a string literal,
+    a float and a jump table, built whole, gives one `.rodata` (cc1plus writes `.rdata` for all
+    of them); only `-fdata-sections` splits it. So read-only data that lies apart from the
+    `.rodata` of the files whose code reads it, in no order of those files, is the `.rodata` of
+    a file with no code. Such a file gets an empty code range at its place in the link
+    (`text` = `end` in config/us/files.tsv, as src/libm/infinity.c), and is linked whole like
+    any other.
+  - The first stretch of `.rodata` (0x217380 to 0x248D80) is three such files, linked between
+    entry.cpp and object_host_functions.cpp (an empty range at 0x1000C8): class_descriptors.cpp
+    (the class descriptors and method tables, grouped by the file of their methods but in no
+    order of those files: file_1F2758's classes at 0x2178C0, zone_collider's at 0x218970,
+    file_1F2758's again at 0x21C038), property_registry.cpp (the property lists by class id),
+    and global_tables.cpp (tables read all over: the sound table, the classes by id, the disc
+    check's checksum table, keys, the level table whose names are in commentary_best_time.cpp's
+    own `.rodata`). The last also holds the first 0x58 bytes of `.data`, just before
+    object_host_functions.cpp's: a file with no code comes first in both. The game's GCC
+    vtables, by contrast, are in their files' `.rodata`. Where one of these files ends and the
+    next starts the build cannot tell (each cut is on 16, the most any of them aligns to); the
+    cuts follow what the data is, and keep each file under the repository's size limit.
+  - An aggregate is aligned to 8 by itself (16 for a type that asks for it), so a word-aligned
+    array is the tail of the object before it: D_00244DFC is the last member of the property
+    registry D_00244950.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

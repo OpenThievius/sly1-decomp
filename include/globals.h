@@ -35,7 +35,7 @@ extern Player* D_00262E10;
 // An object of class 0x65 (c65.h) or none: func_001516C0 and func_00192A70 read its fields.
 extern StepSequence* D_0027051C;
 
-// The axes and the identity, in .rodata (001E4000.cpp defines all but D_00248D30): read as
+// The axes and the identity, in .rodata (global_tables.cpp defines them): read as
 // whole vectors (lq) and as a matrix (three lq).
 extern const Mat02 D_002483D0;  // the identity (rows 1 0 0 0, 0 1 0 0, 0 0 1 0)
 extern const Vec02 D_00248D00;  // 1 0 0 0
