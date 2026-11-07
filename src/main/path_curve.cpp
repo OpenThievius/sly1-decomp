@@ -7,6 +7,7 @@
 #include "path_curve.h"
 #include "shapes.h"
 #include "placed_object.h"
+#include "vu0.h"
 
 // What the nearest-time search (func_001EB168) passes its measure: the curve and the two points
 // of the segment MeasurePathCurveDistance measures against (FindPathCurveNearestTime,
@@ -417,7 +418,20 @@ void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
 
 INCLUDE_ASM(func_0014E710);
 
-INCLUDE_ASM(func_0014E828);
+void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
+{
+    Vec02 m[4];
+    s32 i;
+    TransformMatrixByObject(b, a, (Quad16*)m);
+    Mat02* rot = (Mat02*)m;
+    for (i = 0; i < self->count; i++) {
+        u8* p = (u8*)self->points + (i << 4);
+        TransformByMatrixWithW(m, p, p, 1.0f);
+        Vu0::Q(((Vec02*)self->inTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->inTan)[i]));
+        Vu0::Q(((Vec02*)self->outTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->outTan)[i]));
+    }
+    ResetSplineSegmentCache(self);
+}
 
 f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
 {

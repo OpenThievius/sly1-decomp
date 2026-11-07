@@ -73,8 +73,8 @@ s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
 void* AllocateBackMemory(s32 size);
 void RecomputePlacedObjectFrame(Collider* self);
 void ClearRootObjectStateBits(void* a, void* b, s32 c);
+void UpdateWorldContacts(World* w, s32 arg);
 void MarkSweepAxesUnsorted(void* a);
-void ComputeColliderInverseInertia(Collider* self);
 void DropColliderContacts(Collider* self, s32 value);
 void InitContactPairFlags(void* a, void* b);
 s32 ScriptListContainsValue(s32 value, void* out);
@@ -82,7 +82,13 @@ s32 AppendPropertyToScriptList(s32 value, void* out);
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void AddColliderForce(void* a, void* b);
 void DrawPlacedObject(Collider* self, void* a, void* m);
-void ConstrainVectorByAnchor(void* a, void* b, void* c, s32 d);
+// What a vector is constrained by: an axis, and how (0 none, 1 the part along the axis removed,
+// 2 only the part along it kept, 3 zero).
+struct VectorConstraint {
+    Vec02 axis;             // 0x00
+    s32 kind;               // 0x10
+};
+void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 void ClearRootTries(void* self);
 // A quadword passed by value in one register (func_001B8820's position).
 typedef u64 Qword128 __attribute__((mode(TI)));
@@ -115,6 +121,10 @@ f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
 void ReadBufferedVector3(BufferedStream* in, Vec02* p);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
+void CopyBytes(void* dst, void* src, s32 n);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+void func_001BBC38(Collider* self);
+s32 InvertMatrix3x3(Mat02* in, Mat02* out);
 s32 ReadBufferedU16(BufferedStream* in);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
@@ -739,10 +749,24 @@ void SetColliderMass(Collider* self, f32 v)
     f32 a = self->mass;
     f32 q = v / a;
     self->mass = a * q;
-    ComputeColliderInverseInertia(self);
+    ComputeColliderInverseInertia(self, q);
 }
 
-INCLUDE_ASM(func_001B9448);
+void ComputeColliderInverseInertia(Collider* self, f32 scale)
+{
+    Mat02 m;
+    Vec02 k;
+    Mat02 s;
+    Vu0::Q(k) = Vu0::FromFloat(scale);
+    Vu0::Q(s.r[0]) = Vu0::MulX(Vu0::Q(self->inertia.r[0]), Vu0::Q(k));
+    Vu0::Q(s.r[1]) = Vu0::MulX(Vu0::Q(self->inertia.r[1]), Vu0::Q(k));
+    Vu0::Q(s.r[2]) = Vu0::MulX(Vu0::Q(self->inertia.r[2]), Vu0::Q(k));
+    CopyBytes(&m, &s, 0x30);
+    self->inertia = m;
+    if (!InvertMatrix3x3(&self->inertia, &self->invInertia)) {
+        FillMemory(&self->invInertia, 0, 0x30);
+    }
+}
 
 void DropColliderContacts(Collider* self, s32 mode)
 {
@@ -814,7 +838,25 @@ void SetColliderRotation(Collider* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
-INCLUDE_ASM(func_001B9860);
+void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
+{
+    Vec02 pos = *start;
+    s32 i = 9;
+    do {
+        self->desc02()->m1D(self, &pos);
+        UpdateWorldContacts(self->world, 0);
+        for (ContactRow03* node = self->contacts->head; node != 0; node = node->next) {
+            for (Contact03* c = node->head; c != 0; c = c->next) {
+                if (c->f90 < -2.0f) {
+                    goto moved;
+                }
+            }
+        }
+        return;
+    moved:
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(*step));
+    } while (--i >= 0);
+}
 
 LINKER_REMNANT(func_001B9938);
 
@@ -973,13 +1015,82 @@ void CopyCollider(Collider* self, Collider* other)
     self->flags538 |= 0x20000000000ULL;
 }
 
-INCLUDE_ASM(func_001BA2E8);
+void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
+{
+    Vec02 axis;
+    Vec02 tmp;
+    if (out == 0) {
+        out = &tmp;
+    }
+    switch (c->kind) {
+    case 0:
+        if (out != in) {
+            *out = *in;
+        }
+        break;
+    case 2: {
+        Vec02* a;
+        PlacedObject* parent = (PlacedObject*)self->parent;
+        if (parent != 0) {
+            Vu0::Q(axis) = Vu0::Rotate(parent->m110, Vu0::Q(c->axis));
+            a = &axis;
+        } else {
+            a = &c->axis;
+        }
+        Vu0::Q(*out) = Vu0::MulX(Vu0::Q(*a), Vu0::Dot(Vu0::Q(*in), Vu0::Q(*a)));
+        break;
+    }
+    case 1: {
+        Vec02* a;
+        PlacedObject* parent = (PlacedObject*)self->parent;
+        if (parent != 0) {
+            Vu0::Q(axis) = Vu0::Rotate(parent->m110, Vu0::Q(c->axis));
+            a = &axis;
+        } else {
+            a = &c->axis;
+        }
+        Vu0::Q(*out) = Vu0::Sub(Vu0::Q(*in), Vu0::MulX(Vu0::Q(*a), Vu0::Dot(Vu0::Q(*in), Vu0::Q(*a))));
+        break;
+    }
+    case 3:
+        Vu0::Q(*out) = Vu0::Zero();
+        break;
+    }
+    if (rem != 0) {
+        Vu0::Q(*rem) = Vu0::Sub(Vu0::Q(*in), Vu0::Q(*out));
+    }
+}
 
-INCLUDE_ASM(func_001BA430);
+void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
+{
+    Vec02 tmp;
+    if (out == 0) {
+        out = &tmp;
+    }
+    switch (c->kind) {
+    case 0:
+        if (out != in) {
+            *out = *in;
+        }
+        break;
+    case 2:
+        Vu0::Q(*out) = Vu0::MulX(Vu0::Q(c->axis), Vu0::Dot(Vu0::Q(*in), Vu0::Q(c->axis)));
+        break;
+    case 1:
+        Vu0::Q(*out) = Vu0::Sub(Vu0::Q(*in), Vu0::MulX(Vu0::Q(c->axis), Vu0::Dot(Vu0::Q(*in), Vu0::Q(c->axis))));
+        break;
+    case 3:
+        Vu0::Q(*out) = Vu0::Zero();
+        break;
+    }
+    if (rem != 0) {
+        Vu0::Q(*rem) = Vu0::Sub(Vu0::Q(*in), Vu0::Q(*out));
+    }
+}
 
 void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d)
 {
-    ConstrainVectorByAnchor(a, b, c, d);
+    ConstrainVectorByAnchor((VectorConstraint*)a, (Vec02*)b, (Vec02*)c, (Vec02*)(s32)d);
 }
 
 void AddColliderAttachment(Collider* self, Attach03* node)
@@ -1428,7 +1539,29 @@ s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
     return shape->eventFlags != 0;
 }
 
-INCLUDE_ASM(func_001BC368);
+void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
+{
+    Vec02 m[4];
+    Mesh03 tmp;
+    BuildMatrixFromRotationAndTranslation((u8*)src + 0x100, (u8*)src + 0xD0, m);
+    f32 maxDist = 0.0f;
+    for (s32 i = 0; i < src->mesh.vertCount; i++) {
+        f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(((Vec02*)src->mesh.verts)[i]), Vu0::Q(((Vec02*)src->mesh.verts)[i])));
+        if (maxDist < d) {
+            maxDist = d;
+        }
+    }
+    self->radius3CC = Fpu::Sqrt(maxDist);
+    tmp = src->mesh;
+    tmp.vertCount = tmp.vertCount + extra;
+    CopyMeshTransformed(&tmp, (s32)m, &self->mesh);
+    BuildMatrixFromRotationAndTranslation((u8*)self + 0x140, (u8*)self + 0x110, m);
+    CopyMeshTransformed(&self->mesh, (s32)m, &self->meshCopy);
+    self->f4B8 = 0;
+    CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);
+    CloneTreeNodes(&src->mesh2Copy, &src->tree2, &self->mesh2Copy, &self->tree2);
+    func_001BBC38(self);
+}
 
 void ExtractContactsByPartMode(Collider* self, Contact03** out)
 {

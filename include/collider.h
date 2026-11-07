@@ -77,7 +77,7 @@ struct ColliderSpan {
 struct Contact03 {
     ContactEnd03 end[2];    // 0x00
     Vec02 v80;              // 0x80: func_001F5008; its z, signed by the end, is how much end 0 faces up (func_001C5248)
-    u8 pad90[0x94 - 0x90];
+    f32 f90;                // 0x90: PlaceColliderClearOfContacts (func_001B9860) moves on while it is below -2
     f32 f94;                // 0x94: set by a body's slot 60 (func_001C5338: 1.5 or 0)
     f32 f98;                // 0x98: cleared with it (func_001CAC30 sets a float); class 0x43's slot 60
                             // scales it by 0.6 (func_001A7290)
