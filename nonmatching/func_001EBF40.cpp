@@ -532,7 +532,7 @@ ObjectLink D_00275B60[8] = {
 u8 D_00275BC0[4] = {0};
 INCLUDE_DATA(D_00275BC4);
 // size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
-// size: s32 compared with 1/2 in 00148000 and 00194000
+// size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };

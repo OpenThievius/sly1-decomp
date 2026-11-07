@@ -180,7 +180,7 @@ D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); f
 D_002621C8	g_objectCyclerLoadLinks	two-entry link table LoadObjectCycler installs through func_00124DF8
 D_002621E0	g_objectCyclerStartLinks	two-entry link table StartObjectCycler installs through func_00124DF8
 D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and 001A8000.cpp writes entries 3 and 4 into text escapes
-D_00262260	g_fontCount	number of font records: set from func_00137BE0 in 001B0000.cpp, which allocates g_fontRecords with it; looped over in 0015C000.cpp
+D_00262260	g_fontCount	number of font records: set by func_001B2DF8 (anim_record.cpp) from ReadBufferedU16, which then allocates g_fontRecords with it; looped over in func_0015E5F0 (file_1549C8.cpp)
 D_00262264	g_fontRecords	array allocated with new for g_fontCount entries; func_0015D8A8 initialises each and registers it by id in g_fonts
 D_00262268	g_fonts	five font pointers by id, filled by func_0015D8A8 and read by GetFontById
 D_0026227C	g_defaultFont	font GetFontById returns when an id has none; set from func_0015C1C0(0) and read by 001A8000.cpp as the default font
