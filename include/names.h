@@ -69,6 +69,7 @@
 #define g_unitXVector                              D_00248D00
 #define g_unitYVector                              D_00248D10
 #define g_unitZVector                              D_00248D20
+#define g_baseReaderMethods                        D_00249D80
 #define g_memoryReaderMethods                      D_00249D98
 #define g_defaultGaugeParams                       D_00249F00
 #define g_fontMethods                              D_0024A220
@@ -908,8 +909,10 @@
 #define IsTextPanelTextTyped                       func_00136530
 #define SetTextPanelValuePercent                   func_001365A8
 #define GetTextPanelSlideInTime                    func_001365F0
+#define GetTextPanelSlideOutTime                   func_00136648
 #define GetTextPanelCenter                         func_00136EC8
 #define ChooseTextPanelState                       func_00136EF8
+#define EndTextPanelState                          func_00136FA8
 #define InitBufferedStream                         func_00137290
 #define DestroyBufferedStream                      func_001372E0
 #define OpenBufferedSectorStream                   func_00137328
@@ -964,6 +967,7 @@
 #define HandleChildGroupNotification               func_0013B708
 #define RunKeyedChildGroupEntry                    func_0013B9D8
 #define StartChildGroupDelay                       func_0013BE00
+#define GetChildGroupSoundParams                   func_0013C950
 #define InitRingBuffer                             func_0013C988
 #define ResetRingBuffer                            func_0013C9B0
 #define FillRingBuffer                             func_0013C9D0
@@ -971,6 +975,7 @@
 #define FillRingBufferFromMemory                   func_0013CC00
 #define ConsumeSpan                                func_0013CC48
 #define ReadMemoryReader                           func_0013CC80
+#define ReadNothing                                func_0013CCE8
 #define InitMaskedCollider                         func_0013CCF8
 #define LoadMaskedCollider                         func_0013CD80
 #define CopyMaskedCollider                         func_0013CDE8

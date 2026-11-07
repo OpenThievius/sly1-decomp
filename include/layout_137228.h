@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The text layout other files fill before drawing (position, size, colour, two words), with
 // setters they call and never inline. With `#pragma interface`, the one file that names this
-// header in `#pragma implementation` (src/main/file_130F48.cpp) writes them out, after its static
+// header in `#pragma implementation` (src/main/text_panel.cpp) writes them out, after its static
 // initialiser; every other file refers to them by name.
 #pragma interface
 

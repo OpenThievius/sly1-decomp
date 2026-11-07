@@ -5625,7 +5625,7 @@ void func_00130110(BaseObject* self)
     if (self->f04 == 0) {
         void* v = NewKeyedList();
         self->f04 = v;
-        AddMarkRootList(D_00259F38, v);
+        AddMarkRootList(g_markStacks, v);
 
     }
 }

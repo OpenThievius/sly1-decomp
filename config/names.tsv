@@ -2523,3 +2523,8 @@ D_0025C370	g_iopCallbackTables	the two callback tables, one 16-byte entry (funct
 D_0025C378	g_iopReplyTables	the two reply word tables (D_00260540, D_00260980) PollIopCommands hands to each queued command's callback
 D_0027B4C8	g_iopCommandRpc	the first RPC channel InitIopCommandChannels binds (id 0x123456); SendIopCommandAndWait and FlushIopCommandBuffer call over it
 D_0027B4F0	g_iopBankLoadRpc	the second RPC channel InitIopCommandChannels binds (id 0x123457); LoadSoundBankAtLocation and StartSoundBankLoad send command 3 over it
+func_00136648	GetTextPanelSlideOutTime	the twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise GetScreenElementSlideOutTime
+func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanelState: with a child it sets the child's step sequence to state 4, without one it puts the panel back in state 0 (SetTextPanelState)
+func_0013C950	GetChildGroupSoundParams	returns the pointer at the object's sound slot, setting it up with InitSoundParams first when it is 0 (as GetMaskedColliderSoundParams does)
+func_0013CCE8	ReadNothing	the one virtual of the reader's base class (entry 1 of D_00249D80, where ReadMemoryReader is in the memory reader's table): returns 0, no bytes read
+D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods

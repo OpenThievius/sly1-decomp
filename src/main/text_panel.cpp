@@ -40,13 +40,12 @@ struct Rgba_130F48
     Rgba_130F48(const Rgba_130F48& o) { *this = o; }
     Rgba_130F48(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
-struct Gs_133B58;
 
 f32 func_00205210(f32 x);
-void func_001613C0(Gs_133B58* gs, s32 a, s32 b, s32 c);
-void func_00161458(Gs_133B58* gs, u32 c);
-void func_00161670(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
-void func_001615F0(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
+void func_001613C0(V24A0* gs, s32 a, s32 b, u64 c);
+void func_00161458(V24A0* gs, u32 c);
+void func_00161670(V24A0* gs, s32 x, s32 y, s32 a3, s32 a4);
+void func_001615F0(V24A0* gs, s32 x, s32 y, s32 a3, s32 a4);
 
 struct Lerp_133B58
 {
@@ -74,7 +73,6 @@ struct Lerp_133B58
     }
 };
 
-struct Gs_132500;
 
 struct Clock_132500 { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
 
@@ -82,11 +80,11 @@ extern s32 D_00262C68;
 extern f32 D_00261860;
 extern Clock_132500* D_00261990;
 
-void func_001613C0(Gs_132500* gs, s32 a, s32 b, u64 c);
-void func_00161708(Gs_132500* gs, s32 reg, u64 value);
-void func_00161458(Gs_132500* gs, u32 color);
-void func_00161670(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
-void func_001615F0(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
+void func_001613C0(V24A0* gs, s32 a, s32 b, u64 c);
+void func_00161708(V24A0* gs, s32 reg, u64 value);
+void func_00161458(V24A0* gs, u32 color);
+void func_00161670(V24A0* gs, s32 x, s32 y, s32 z, s32 f);
+void func_001615F0(V24A0* gs, s32 x, s32 y, s32 z, s32 f);
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
 void func_00136EC8(T217D_440* self, f32* x, f32* y);
@@ -379,8 +377,8 @@ void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y);
 f32 func_00131000(const Span_130F48* s, s32 x);
 void func_001310F0(T217D_440* self, s32 a1);
 void func_00131140(T217D_440* self);
-void func_00132500(T217D_440* self, Gs_132500* gs);
-void func_00133B58(T217D_440* self, Gs_133B58* gs);
+void func_00132500(T217D_440* self, V24A0* gs);
+void func_00133B58(T217D_440* self, V24A0* gs);
 void func_00135228(T217D_440* self, V24A0* q);
 void func_00135550(T217D_440* self, s32 value);
 void func_001356C0(T217D_440* self, s32 mode);
@@ -474,9 +472,9 @@ struct Font_1316E8 {
 };
 
 f32 func_0015C418(V24A2* font, const char* text);
-void func_0015C638(V24A2* font, const char* text, Layout_137228* layout, s32 zero, Gs_132500* gs);
+void func_0015C638(V24A2* font, const char* text, Layout_137228* layout, s32 zero, V24A0* gs);
 
-void func_001316E8(T217D_440* self, Gs_132500* gs)
+void func_001316E8(T217D_440* self, V24A0* gs)
 {
     Layout_137228 L;
     s32 i;
@@ -578,7 +576,7 @@ INCLUDE_RODATA(D_00249CE8);
 INCLUDE_RODATA(D_00249CF0);
 INCLUDE_ASM(func_00131F60);
 
-void func_00132500(T217D_440* self, Gs_132500* gs)
+void func_00132500(T217D_440* self, V24A0* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
@@ -752,7 +750,7 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
-void func_00133B58(T217D_440* self, Gs_133B58* gs)
+void func_00133B58(T217D_440* self, V24A0* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
