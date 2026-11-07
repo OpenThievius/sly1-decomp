@@ -34,6 +34,7 @@
 #include "object_link.h"
 #include "target_binding.h"
 #include "game_progress.h"
+#include "object_message.h"
 #include "asm_func.h"
 
 struct Obj_0019F8E8 { u8 pad[0x44]; s32 value; };
@@ -41,7 +42,6 @@ void func_001831E8(void* world, void* list, void* a, void* b);
 void func_00183238(void* world, void* list, void* a, void* b);
 
 
-typedef void (*Fn_19DF48)(void);
 
 void func_001B7968(Collider* self);
 
@@ -92,7 +92,6 @@ struct Frame_19E848 {
 
 struct ColorFade;
 
-typedef void (*VFn_19D6C0)(ColorFade* self, void* arg, s32 z);
 
 
 
@@ -107,7 +106,6 @@ extern Camera* D_00261990;
 
 
 
-typedef s32 (*Slot_19D338)(void* self, void* a1, s32 a2, void* a3, s32 a4, s32 a5, f32 f, void* a6);
 
 
 
@@ -206,9 +204,7 @@ extern const Fn_Table D_00219F60[];
 
 // The loop walks an intrusive list with an iterator that registers itself on a global stack
 // (D_0027B314) for its lifetime and unregisters in its destructor.
-typedef void (*VFn_19C068)(void *self);
 
-typedef void (*VFn2_19C068)(void *self, void *x);
 
 
 
@@ -339,10 +335,9 @@ void func_0019E558(EffectOwner* self);
 
 void func_00129DF8(PlacedObject* self);
 
-struct Iter_19E420 { List01* list; u8* link; s32 offset; Iter_19E420* saved; };
-
-struct Next_19E420 {
-    static Effect* Of(Iter_19E420* it)
+// The next object of a list walk, and the walk moved past it.
+struct NextEffect {
+    static Effect* Of(ListFrame* it)
     {
         Effect* obj = *(Effect**)it->link;
         it->link = (u8*)obj + it->offset;
@@ -350,34 +345,23 @@ struct Next_19E420 {
     }
 };
 
-struct Begin_19E420 {
-    static void Of(Iter_19E420* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = ((Iter_19E420*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 void func_0019CC10(C8B* self, f32* out, f32 a, f32 b, f32 c);
 
-struct Iter_19E558 { List01* list; u8* link; s32 offset; Iter_19E558* prev; };
-
-struct Begin_19E558 {
-    static void Of(Iter_19E558* it, List01* list)
+// A list walk's start: the frame takes the list and is pushed.
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_19E558*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 
-struct Next_19E558 {
-    static u8* Of(Iter_19E558* it)
+struct NextListItem {
+    static u8* Of(ListFrame* it)
     {
         u8* obj = *(u8**)it->link;
         it->link = obj + it->offset;
@@ -385,10 +369,10 @@ struct Next_19E558 {
     }
 };
 
-struct End_19E558 {
-    static void Of(Iter_19E558* it)
+struct EndListWalk {
+    static void Of(ListFrame* it)
     {
-        g_activeListFrames = (ListFrame*)it->prev;
+        g_activeListFrames = it->prev;
     }
 };
 
@@ -427,7 +411,6 @@ struct Item_1A1F18 { u8 pad0[0x20]; f32 key20; };
 
 struct Src_1A22C8 { u8 pad0[0x1DC]; s32 f1DC; u8 pad1[0x10]; s32 f1F0; };
 
-struct Obj_1A25F0 { u8 pad0[0x50]; void* f50; };
 
 extern s32 D_0026B6C0[4];
 
@@ -437,7 +420,6 @@ s32 func_001300E8(void* self, s32 kind);
 
 s32 func_0019ED58(Effect* a, void* b, void* c, void* d);
 
-struct Obj_1A3128 { u8 pad0[0x50]; void* p50; };
 
 typedef void (*VFn_1A38F0)(void* self);
 
@@ -451,7 +433,6 @@ void func_00128018(void* a0, void* a1, void* a2, void* a3);
 
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
 
-struct Other_1A2A68 { u8 pad0[0x50]; void* f50; };
 
 s32 func_001300E8(void* node, s32 kind);
 
@@ -459,7 +440,6 @@ void func_001A2380(Effect* self, s32 v, void* other, void* a2, void* a3, void* o
 
 struct Self_1A2B18 { u8 pad0[0x7C]; void* f7C; };
 
-struct Other_1A2B18 { u8 pad0[0x538]; u64 f538; };
 
 struct Src_1A2D30 { u8 pad0[0x7C]; void* link; u8 pad1[0x1F0 - 0x80]; s32 f1F0; s32 f1F4; };
 
@@ -503,11 +483,6 @@ extern f32 D_0026B720[4];
 
 void func_0019EB28(Effect* self, f32 x);
 
-struct Quad_1A3A18 { s32 a, b, c, d; } __attribute__((aligned(16)));
-
-struct Buf_1A3A18 { s32 n; u8 pad[0x1C]; Quad_1A3A18 q; u8 tail[0x20]; };
-
-typedef void (*Fn_1A3A18)(void* self, void* arg);
 
 void func_0019F560(Effect* self, f32 s);
 
@@ -605,11 +580,11 @@ void func_00124DF8(void* self, int idx, void* table);
 
 void func_00159478(void* sub, void* self);
 
-struct Blob8_1A6540 { u8 b[8]; };
+// Eight bytes kept across a copy, at any alignment.
+struct Bytes8 { u8 b[8]; };
 
 void func_001BA130(void* self);
 
-typedef void (*Fn_1A6588)(void* self);
 
 void func_001A6BE0(PairedObject* self, int flag);
 
@@ -617,11 +592,8 @@ struct Node_1A6F28 { void* flags; struct Node_1A6F28* next; s32 pad8; void* data
 
 s32 func_001300E8(void* self, int kind);
 
-struct Blob8_1A7050 { u8 b[8]; };
 
-struct Blob8_1A7098 { u8 b[8]; };
 
-typedef void (*Fn_1A7098)(void* self);
 
 void func_001A7480(void* self, int flag);
 
@@ -755,11 +727,6 @@ void func_001B6628(void* a, s32 b);
 
 void func_001B64D8(void* a, s32 b);
 
-struct Quad_1A7998 { s32 a, b, c, d; } __attribute__((aligned(16)));
-
-struct Buf_1A7998 { s32 n; u8 pad[0x1C]; Quad_1A7998 q; u8 tail[0x20]; };
-
-typedef void (*FnP_1A7998)(void* self, void* arg);
 
 typedef void (*FnI_1A7998)(void* self, s32 arg);
 
@@ -1194,10 +1161,10 @@ void func_0019E418(void) {}
 
 void func_0019E420(EffectOwner* self, f32 t)
 {
-    Iter_19E420 it;
-    Begin_19E420::Of(&it, &self->list558);
+    ListFrame it;
+    BeginListWalk::Of(&it, &self->list558);
     Effect* node;
-    while ((node = Next_19E420::Of(&it)) != 0) {
+    while ((node = NextEffect::Of(&it)) != 0) {
         if (node->start >= g_gameClock[1]) {
             continue;
         }
@@ -1213,7 +1180,7 @@ void func_0019E420(EffectOwner* self, f32 t)
         CollideEffects(self);
     }
     ClearRootTries(self);
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
 }
 
 void func_0019E558(EffectOwner* self)
@@ -1221,20 +1188,20 @@ void func_0019E558(EffectOwner* self)
     if (self->f550 != 1) return;
     ContactRow03* l;
     for (l = self->contacts->head; l != 0; l = l->next) {
-        Iter_19E558 it0;
-        Begin_19E558::Of(&it0, &l->other->parts);
+        ListFrame it0;
+        BeginListWalk::Of(&it0, &l->other->parts);
         if (l->other->flags538 & ((u64)0x8000 << 27)) {
-            End_19E558::Of(&it0);
+            EndListWalk::Of(&it0);
             continue;
         }
         Collider* s2;
-        for (s2 = (Collider*)Next_19E558::Of(&it0); s2 != 0; s2 = (Collider*)Next_19E558::Of(&it0)) {
-            Iter_19E558 it1;
+        for (s2 = (Collider*)NextListItem::Of(&it0); s2 != 0; s2 = (Collider*)NextListItem::Of(&it0)) {
+            ListFrame it1;
             void* buf;
             Hit_19E558 hits[4];
-            Begin_19E558::Of(&it1, &self->list558);
+            BeginListWalk::Of(&it1, &self->list558);
             if ((s2->flags538 & ((u64)0x8000 << 28)) && (s2->desc->flags & 0x80) == 0) {
-                End_19E558::Of(&it1);
+                EndListWalk::Of(&it1);
                 continue;
             }
             PushBackMemoryMark();
@@ -1247,7 +1214,7 @@ void func_0019E558(EffectOwner* self)
             }
             {
                 Effect* n;
-                for (n = (Effect*)Next_19E558::Of(&it1); n != 0; n = (Effect*)Next_19E558::Of(&it1)) {
+                for (n = (Effect*)NextListItem::Of(&it1); n != 0; n = (Effect*)NextListItem::Of(&it1)) {
                     if (n->start >= g_gameClock[1]) continue;
                     s32 cnt = CollectColliderSpansInTree(s2, buf, &n->q90, &n->q80, 4, hits);
                     s32 i;
@@ -1260,9 +1227,9 @@ void func_0019E558(EffectOwner* self)
             }
         skip:
             PopBackMemoryMark();
-            End_19E558::Of(&it1);
+            EndListWalk::Of(&it1);
         }
-        End_19E558::Of(&it0);
+        EndListWalk::Of(&it0);
     }
     if (IsListEmpty(&self->list558) != 0) {
         self->desc->m03(self);
@@ -1874,11 +1841,11 @@ ASM_FUNC(func_001A22E0);
 
 ASM_FUNC(func_001A2380);
 
-s32 func_001A25F0(Effect* self, Obj_1A25F0* other, void* a2, void* a3)
+s32 func_001A25F0(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
     u32 i;
     for (i = 0; i < 4; i++) {
-        if (IsObjectOfKind(other->f50, D_0026B6C0[i]) != 0) {
+        if (IsObjectOfKind(other->root, D_0026B6C0[i]) != 0) {
             return 0;
         }
     }
@@ -1915,14 +1882,14 @@ ASM_FUNC(func_001A2830);
 
 s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
 {
-    Other_1A2A68* other = (Other_1A2A68*)a1;
+    PlacedObject* other = (PlacedObject*)a1;
     u8 out[0x10];
     void* p;
 
-    if (IsObjectOfKind(other->f50, 0x40) != 0) {
+    if (IsObjectOfKind(other->root, 0x40) != 0) {
         return 0;
     }
-    if (IsObjectOfKind(other->f50, 6) != 0) {
+    if (IsObjectOfKind(other->root, 6) != 0) {
         return 0;
     }
     AttachHitMarkEffect(self, self->i20, other, a2, a3, out);
@@ -1934,12 +1901,12 @@ s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
     return 1;
 }
 
-s32 func_001A2B18(Self_1A2B18* self, Other_1A2B18* other)
+s32 func_001A2B18(Self_1A2B18* self, Collider* other)
 {
     u64 flag = 0x8000;
 
     flag <<= 28;
-    if ((other->f538 & flag) != 0) {
+    if ((other->flags538 & flag) != 0) {
         return 0;
     }
     return other != self->f7C;
@@ -1963,9 +1930,9 @@ ASM_FUNC(func_001A2E68);
 
 ASM_FUNC(func_001A3008);
 
-s32 func_001A3128(Effect* a0, Obj_1A3128* a1, void* a2, void* a3)
+s32 func_001A3128(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 {
-    if (IsObjectOfKind(a1->p50, 6) != 0) {
+    if (IsObjectOfKind(a1->root, 6) != 0) {
         return 0;
     }
     return HandleEffectContact(a0, a1, a2, a3);
@@ -2039,12 +2006,11 @@ void func_001A3A18(Effect* self, f32 scale)
     if (!(1.0f <= v)) return;
     f32 nv;
     do {
-        Buf_1A3A18 buf;
-        buf.n = 4;
-        buf.q = *(Quad_1A3A18*)&self->q80;
-        void* obj = self->p120;
-        Fn_1A3A18* vt = *(Fn_1A3A18**)obj;
-        vt[31](obj, &buf);
+        SlotMessage buf;
+        buf.kind = 4;
+        buf.qb = *(Quad16*)&self->q80;
+        BaseObject* obj = (BaseObject*)self->p120;
+        obj->desc->m1B(obj, &buf);
         nv = self->f128 - 1.0f;
         self->f128 = nv;
     } while (1.0f <= nv);
@@ -2896,17 +2862,16 @@ void func_001A64F8(PairedObject* self)
 
 void func_001A6540(PairedObject* self)
 {
-    Blob8_1A6540 tmp = *(Blob8_1A6540*)&self->blob5B0;
+    Bytes8 tmp = *(Bytes8*)&self->blob5B0;
     CopyCollider(self);
-    *(Blob8_1A6540*)&self->blob5B0 = tmp;
+    *(Bytes8*)&self->blob5B0 = tmp;
 }
 
 void func_001A6588(PairedObject* self)
 {
     StartPlacedObject(self);
     SetPairedState(self, 0);
-    Fn_1A6588* vt = *(Fn_1A6588**)self;
-    vt[7](self);
+    self->desc->m03(self);
 }
 
 INCLUDE_RODATA(jtbl_0024CB00);
@@ -3050,9 +3015,9 @@ void func_001A7008(HitTarget* self)
 
 void func_001A7050(HitTarget* self)
 {
-    Blob8_1A7050 tmp = *(Blob8_1A7050*)&self->blob5A0;
+    Bytes8 tmp = *(Bytes8*)&self->blob5A0;
     CopyCollider(self);
-    *(Blob8_1A7050*)&self->blob5A0 = tmp;
+    *(Bytes8*)&self->blob5A0 = tmp;
 }
 
 void func_001A7098(HitTarget* self)
@@ -3060,14 +3025,13 @@ void func_001A7098(HitTarget* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_hitTargetStartLinks);
     if (self->scaledObject != 0) {
-        *(Blob8_1A7098*)&self->f57C = *(Blob8_1A7098*)((u8*)self->scaledObject + 0x2DC);
+        *(Bytes8*)&self->f57C = *(Bytes8*)((u8*)self->scaledObject + 0x2DC);
     }
     if (self->soundId != 0) {
         self->soundHandle = (void*)CreateStateWalker(self->soundId, self, -1, 0);
     }
     SetHitTargetState(self, 0);
-    Fn_1A7098* vt = *(Fn_1A7098**)self;
-    vt[7](self);
+    self->desc->m03(self);
 }
 
 void func_001A7128(HitTarget* self)
@@ -3311,11 +3275,10 @@ void func_001A7998(ObjectCreator* self, s32 idx)
             void* a2 = self->notifyRecord;
             s2 = self->f560;
             if (a2 != 0) {
-                Buf_1A7998 buf;
-                buf.n = 4;
-                buf.q = *(Quad_1A7998*)&self->v140;
-                FnP_1A7998* vt = *(FnP_1A7998**)a2;
-                vt[31](a2, &buf);
+                SlotMessage buf;
+                buf.kind = 4;
+                buf.qb = *(Quad16*)&self->v140;
+                ((BaseObject*)a2)->desc->m1B((BaseObject*)a2, &buf);
             }
             break;
         }

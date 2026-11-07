@@ -22,10 +22,10 @@ void func_001961C0(Self_1961C0_eu* self)
         SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
-        Gs_1961C0* g = &D_00262490;
+        DisplayRegs* g = &D_00262490;
         s32 v = func_001FD7A0(D_eu_0026BB38);
-        Reg_1961C0 a = g->f40;
-        RegA_1961C0 b = g->f18;
+        DisplayReg64 a = g->f40;
+        DisplayReg32 b = g->f18;
         a.lo = v;
         b.lo = v;
         g->f40 = a;

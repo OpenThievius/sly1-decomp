@@ -29,7 +29,7 @@ void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
         }
         ChangePauseMenuPage(self, -1, self->f570);
         ((VFn_1940E8_eu)self->vtbl[14])(self);
-        SetPadSelectFlags((Bits_1940E8)1);
+        SetPadSelectFlags((PadSelectBits)1);
         ResetPadStepRepeat(&g_padRecord);
     } else {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
@@ -45,7 +45,7 @@ void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
         }
         ChangePauseMenuPage(self, self->f570, -1);
         ((VFn_1940E8_eu)self->vtbl[15])(self);
-        ClearPadSelectFlags((Bits_1940E8)1);
+        ClearPadSelectFlags((PadSelectBits)1);
     }
     self->f56C = mode;
 }

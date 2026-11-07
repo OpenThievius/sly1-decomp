@@ -22,6 +22,15 @@ struct GroupList {
     u32 third;              // 0x08
 };
 
+// A cell of ObjectGroup::cells (16 bytes from the front heap, linked at +8): the object it
+// stands for and the group's id; the object's alias (BaseObject::alias) points back at it.
+struct GroupCell {
+    void* node;             // 0x00
+    s32 id;                 // 0x04: the group's id
+    GroupCell* next;        // 0x08: the list's link
+    GroupCell* prev;        // 0x0C
+};
+
 // Two words func_00196810 keeps across the copy of the common fields.
 struct Pair53 {
     u32 first;

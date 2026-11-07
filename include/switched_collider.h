@@ -12,6 +12,7 @@
 struct SwitchedCollider;
 struct TurningCollider;
 struct Player;
+struct ObjectMessage;    // object_message.h
 struct BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
@@ -256,7 +257,7 @@ struct Player : TurningCollider {
     s32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
     f32 f222C;              // 0x222C
-    u8 pad2230[0x2234 - 0x2230];
+    ObjectMessage* watched2230; // 0x2230: the message whose object set it lets go of (func_00198EF8)
     void* f2234;            // 0x2234
     u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C

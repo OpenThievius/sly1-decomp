@@ -8,17 +8,17 @@ struct Obj_18F7D0_eu {
     s32 f148;
 };
 
-void func_0018F7D0(Obj_18F7D0* self_)
+void func_0018F7D0(MoviePlayer* self_)
 {
     Obj_18F7D0_eu* self = (Obj_18F7D0_eu*)self_;
     u8* base = (u8*)self;
     s32 mask;
 
     self->f0C = 0;
-    ResetMovieStream((Obj_18EA48*)(base + 0x80));
-    StopMovieStream((Obj_18EAA0*)(base + 0x80));
-    func_0020B0C0((Obj_18F7D0*)(base + 0x10));
-    (void)func_0020B048((Obj_18F7D0*)(base + 0x10));
+    ResetMovieStream((MovieStream*)(base + 0x80));
+    StopMovieStream((MovieStream*)(base + 0x80));
+    func_0020B0C0((void*)(base + 0x10));
+    (void)func_0020B048((void*)(base + 0x10));
     if (self->f148 != 0) {
         do {
         } while (*(volatile s32*)&self->f148 != 0);

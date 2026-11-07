@@ -3,7 +3,8 @@
 struct Self_18EB98_eu {
     s32 state;
     u8 pad4[0x50 - 4];
-    Blk_18EB98 f50;
+    RingBuffer f50;
+    u8 pad70[4];
     s32 f74;
     s32 f78;
     s32 f7C;
@@ -17,7 +18,7 @@ struct Self_18EB98_eu {
 struct Obj_eu_18F210;
 void func_eu_0018F210(Obj_eu_18F210* p);
 
-void func_0018EB98(Self_18EB98* self_)
+void func_0018EB98(MovieStream* self_)
 {
     Self_18EB98_eu* self = (Self_18EB98_eu*)self_;
     switch (self->state) {

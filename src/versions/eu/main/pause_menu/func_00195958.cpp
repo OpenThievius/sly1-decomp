@@ -17,7 +17,7 @@ struct Sub_195958_eu {
 extern u8 D_eu_00249050[][32];
 extern s32 D_eu_00263710;
 extern s32 D_eu_00263624;
-extern Ent_195958 D_eu_00255538[];
+extern CardSlot D_eu_00255538[];
 
 void func_001961C0(Menu_195958_eu* self);
 void func_00194D30(Menu_195958_eu* self, s32 a, s32 b);
@@ -274,8 +274,8 @@ void func_00195958(Menu_195958_eu* self)
         SetPauseMenuLayerPage(self, 0, 0x17);
         return;
     case 16: {
-        Ent_195958* e = &D_eu_00255538[sel];
-        if (e->fC == 0.0f) {
+        CardSlot* e = &D_eu_00255538[sel];
+        if (e->f0C == 0.0f) {
             SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
             ApplyMemoryCardImage(&g_memoryCard);
@@ -292,13 +292,13 @@ void func_00195958(Menu_195958_eu* self)
         ResumeAtSavedLevel();
         return;
     case 11: {
-        Ent_195958* e;
+        CardSlot* e;
         u32 p;
-        p = sel * sizeof(Ent_195958);
+        p = sel * sizeof(CardSlot);
         p += (u32)D_eu_00255538;
-        e = (Ent_195958*)p;
+        e = (CardSlot*)p;
         g_memoryCard.f4F4C = e;
-        if (e->fC == 0.0f) {
+        if (e->f0C == 0.0f) {
         c6030:
             MemoryCard* b;
             b = &g_memoryCard;

@@ -5,6 +5,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "memory_card.h"
+#include "thread_params.h"
 #include "background_job.h"
 #include "game_clock.h"
 #include "game_progress.h"
@@ -121,9 +122,6 @@ void func_0018B600()
     PostSemaphore(g_backgroundJob.semaphore);
     EndOwnThread();
 }
-
-// The parameters of the thread a job runs on (func_001F6A10 creates it from them).
-struct ThreadParams { s32 f00; void (*entry)(); void* stack; s32 stackSize; void* gp; s32 priority; u8 pad18[0x18]; };
 
 extern u8 D_002BEA10[];
 extern u8 D_002832F0[];

@@ -25,7 +25,7 @@ extern u8 D_eu_005C04C0[];
 extern u8 D_eu_005A4240[];
 extern u8 D_eu_005C05E0[];
 extern u8 D_eu_0014B588[];
-void func_0018F448(Obj_18F448* self_, void* v)
+void func_0018F448(MoviePlayer* self_, void* v)
 {
     Obj_eu_18F448* self = (Obj_eu_18F448*)self_;
     s32 i;
@@ -46,7 +46,7 @@ void func_0018F448(Obj_18F448* self_, void* v)
     func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
     func_0020B168((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
     func_0020B168((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
-    while (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
+    while (FeedMovieDecoder((MoviePlayer*)self, 1) == 0) {
     }
     self->f128 = D_eu_005A4240;
     self->f12C = D_eu_005C04C0;

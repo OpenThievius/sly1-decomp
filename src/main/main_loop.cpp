@@ -13,6 +13,7 @@
 #include "placed_object.h"
 #include "value_range.h"
 #include "screen_fade.h"
+#include "movie_player.h"
 
 
 // The objects func_00184D78 orders: by the words at 0x304 and 0x308, then flag bit 38, then
@@ -53,10 +54,6 @@ struct DmaChannelFlags {
 
 
 
-// The movie player (movie_player.cpp's MoviePlayer): its word at 4 is nonzero while movies wait.
-struct MovieOnFlag { s32 a; s32 on; };
-
-extern MovieOnFlag D_00269A00;
 extern s32 D_00275AF0;
 extern u8 D_00275BC0[];
 extern s32 D_002622CC;
@@ -64,7 +61,7 @@ extern s32 D_002622CC;
 void func_001FAE18(void);
 void func_00185B38(void);
 void func_0015F210(s32 flag);
-void func_0018F148(void* p);
+void func_0018F148(MoviePlayer* self);
 void func_001E4EA8(void* p);
 void func_0016E238(void* p);
 void func_0016F2E0(void);
@@ -247,7 +244,7 @@ void func_00185758(s32 a, s32 b)
     D_00264838 = b;
     RunStartupInitializers();
     while (1) {
-        if (g_moviePlayer.on != 0 && g_screenFade.mode != 1) {
+        if (g_moviePlayer.queued != 0 && g_screenFade.mode != 1) {
             DrainRenderFrames(1);
             PlayQueuedMovies(&g_moviePlayer);
         }
@@ -255,7 +252,7 @@ void func_00185758(s32 a, s32 b)
             DrainRenderFrames(1);
             RunPendingWorldLoad(&g_worldLoadRequest);
         }
-        if (g_moviePlayer.on != 0 && g_screenFade.mode != 1) {
+        if (g_moviePlayer.queued != 0 && g_screenFade.mode != 1) {
             DrainRenderFrames(1);
             PlayQueuedMovies(&g_moviePlayer);
         }

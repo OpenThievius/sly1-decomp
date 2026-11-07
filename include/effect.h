@@ -98,7 +98,10 @@ struct Effect {
         s32 iB0;            // 0xB0
     };
     u8 padB4[0xC0 - 0xB4];  // 0xB4
-    Quad219C qC0;           // 0xC0
+    union {
+        Quad219C qC0;       // 0xC0
+        Vec02 vC0;          // 0xC0: kind 26's direction (func_001924C8 gives it the world's gravity)
+    };
     u8 padD0[0x110 - 0xD0]; // 0xD0
     s32 i110;               // 0x110
     void* p114;             // 0x114: the frame func_0019F858 places the record by

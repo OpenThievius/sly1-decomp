@@ -12,9 +12,8 @@ extern f32 D_0026185C[];
 #include "shapes.h"
 #include "globals.h"
 #include "screen_element.h"
+#include "sound_state_object.h"
 
-// A four-float vector, aligned as the VU0 reads it.
-struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
 
 
 void func_00123ED0(ObjectGroup* self);
@@ -32,7 +31,6 @@ void func_00124DF8(void* self, s32 n, void* table);
 
 
 
-struct Obj_196E48 { u8 pad0[0x50]; s32 f50; u8 pad1[0x538 - 0x54]; u64 bits538; };
 
 s32 func_001300E8(void* self, s32 kind);
 
@@ -84,10 +82,6 @@ void func_00197458(s32 unused, s32 flag);
 
 
 
-struct Node_197848 {
-    u8 pad[0x568];
-    Node_197848* next;
-};
 
 extern f32 D_00261858[];
 extern GaugeColliderAgent* func_00182FC8(GaugeColliderAgent*);
@@ -109,26 +103,22 @@ void func_00152438(List01* p, s32 value);
 
 
 
-struct Item_001969F8 { u8 pad[0x24]; void* p24; };
-
-struct Any_001969F8;
 
 extern u8 D_0021A790[];
 
 void func_00124A48(GaugeCollider* self);
 void func_00124DF8(GaugeCollider* self, s32 n, void* table);
 f32 func_00205778(f32 a, f32 b);
-void* func_001B6290(Any_001969F8* a, void* b, s32 c, s32 d);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void* func_00121228(World* root, void* value, const T2195_Vt* table);
-void func_001299E0(Any_001969F8* a, void* b);
-s32 func_0015A4F0(Any_001969F8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void func_001299E0(void* a, void* b);
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void* func_0018D500(s32 size);
-void func_00152470(Any_001969F8* list, void* item);
-void func_001B6DF8(Any_001969F8* a, void* b);
+void func_00152470(void* list, void* item);
+void func_001B6DF8(void* a, void* b);
 
 
 
-struct Cell_196410 { PlacedObject* node; s32 link; };
 
 void func_00152438(u8* a, s32 v);
 void func_00137EB0(LoadStream* r, void* out);
@@ -138,8 +128,8 @@ s32 func_00137D10(LoadStream* r);
 PlacedObject* func_001DC208(void* host, s32 a);
 PlacedObject* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
 void func_001DC150(void* host, PlacedObject* n, s32 v);
-Cell_196410* func_0018D5C0(s32 n);
-void func_00152470(u8* list, Cell_196410* c);
+GroupCell* func_0018D5C0(s32 n);
+void func_00152470(u8* list, GroupCell* c);
 PlacedObject* func_0015A418(void* host, s32 kind, s32 id, PlacedObject* c);
 void* func_001C1390(s32 id, void* host);
 void func_0011A338(void* a, void* b);
@@ -151,19 +141,16 @@ void func_0011ECB8(void* host, ObjectGroup* self, LoadStream* r);
 s32 func_00152720(List01* list);
 
 // The id that names no object.
-struct Id_196410 {
+struct NoId {
     static s32 None() { return -1; }
 };
 
 
 
 
-struct Cell_196810 { void* node; s32 link; };
-struct Elem_196810 { s32 f0; u8 pad4[4]; Elem_196810* next; };
-struct Item_196810 { u8 pad0[0x1C]; Item_196810* next; u8 pad20[0x10]; void* f30; };
 void func_00127048(ObjectGroup* self, ObjectGroup* src);
 void func_00152440(GroupList* p);
-void func_00152470(GroupList* list, Cell_196810* c);
+void func_00152470(GroupList* list, GroupCell* c);
 
 
 
@@ -217,7 +204,8 @@ void func_001C8920(void* self);
 
 
 
-struct Req_1986E8 {
+// Notifications 10 and 11: a value and the agent they are for.
+struct AgentValueNotice {
     s32 a;
     s32 b;
 };
@@ -239,7 +227,8 @@ void* func_001925F0(GaugeColliderAgent* self, f32 f);
 s32 func_001300E8(void* key, s32 kind);
 s32 func_00182FC8(void* p);
 s32 func_00141170(void* self, void* value);
-struct Tmp_198760 {
+// The query FindNodeForQuery takes, in the 0x40-byte local retail keeps.
+struct NodeQueryFrame {
     void* f00;
     void* f04;
     s32 f08;
@@ -247,7 +236,7 @@ struct Tmp_198760 {
     s32 f10;
     u8 pad14[0x40 - 0x14];
 };
-s32 func_00177838(Tmp_198760* f, s32 a, s32 b);
+s32 func_00177838(NodeQueryFrame* f, s32 a, s32 b);
 void func_001C7CB8(GaugeColliderAgent* self, f32 f);
 
 // The file's .data, in retail's order.
@@ -273,9 +262,9 @@ ObjectLink D_0026A738[13] = {
     { 0x1, 0x3F1, 0x6B4 },
 };
 f32 D_0026A7D8[6] = { 7.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A7F0 = { 3.0f, -2.0f, -1.0f, 0.0f };
-Vec4_1963D8 D_0026A800 = { 0.25f, 0.0f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A810 = { 1.2f, -1.2f, 0.0f, 0.0f };
+Vec02 D_0026A7F0 = { 3.0f, -2.0f, -1.0f, 0.0f };
+Vec02 D_0026A800 = { 0.25f, 0.0f, 0.0f, 0.0f };
+Vec02 D_0026A810 = { 1.2f, -1.2f, 0.0f, 0.0f };
 f32 D_0026A820 = 60.0f;
 f32 D_0026A824 = -30.0f;
 f32 D_0026A828 = 0.25f;
@@ -286,14 +275,14 @@ f32 D_0026A838 = 0.5f;
 f32 D_0026A83C = 0.2f;
 f32 D_0026A840 = 0.1f;
 f32 D_0026A844 = 1.3f;
-Vec4_1963D8 D_0026A850 = { 0.0f, 3.0f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A860 = { 0.0f, 0.75f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A870 = { 5000.0f, 0.0f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A880 = { 3.0f, -2.0f, -1.0f, 0.0f };
-Vec4_1963D8 D_0026A890 = { 500.0f, 0.0f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A8A0 = { 1.8f, -0.00024999998f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A8B0 = { 1.1f, 1.6f, 0.0f, 0.0f };
-Vec4_1963D8 D_0026A8C0 = { 1.4f, -0.005f, 0.0f, 0.0f };
+Vec02 D_0026A850 = { 0.0f, 3.0f, 0.0f, 0.0f };
+Vec02 D_0026A860 = { 0.0f, 0.75f, 0.0f, 0.0f };
+Vec02 D_0026A870 = { 5000.0f, 0.0f, 0.0f, 0.0f };
+Vec02 D_0026A880 = { 3.0f, -2.0f, -1.0f, 0.0f };
+Vec02 D_0026A890 = { 500.0f, 0.0f, 0.0f, 0.0f };
+Vec02 D_0026A8A0 = { 1.8f, -0.00024999998f, 0.0f, 0.0f };
+Vec02 D_0026A8B0 = { 1.1f, 1.6f, 0.0f, 0.0f };
+Vec02 D_0026A8C0 = { 1.4f, -0.005f, 0.0f, 0.0f };
 f32 D_0026A8D0[2] = { 0.9f, 1.2f };
 f32 D_0026A8D8 = 2000.0f;
 f32 D_0026A8DC = 1100.0f;
@@ -308,7 +297,7 @@ void func_00196900(ObjectGroup* self);
 void func_00196938(GaugeCollider* self);
 void func_001969C0(GaugeCollider* self);
 void func_001969F8(GaugeCollider* self);
-s32 func_00196E48(s32 a0, Obj_196E48* self);
+s32 func_00196E48(s32 a0, Collider* self);
 void func_001973D8(GaugeCollider* self);
 void func_00197458(s32 unused, s32 flag);
 void func_001974D8(GaugeCollider* a, void* b);
@@ -321,7 +310,7 @@ void func_00198090(GaugeColliderAgent* self);
 s32 func_001982A0(GaugeColliderAgent* self);
 void func_001984B8(GaugeColliderAgent* self, void* arg);
 void func_00198530(GaugeColliderAgent* self);
-void func_001986E8(GaugeColliderAgent* self, s32 code, Req_1986E8* req);
+void func_001986E8(GaugeColliderAgent* self, s32 code, AgentValueNotice* req);
 void func_00198760(GaugeColliderAgent* s1, f32 f);
 u32 func_00198858(void);
 void func_00198920(GaugeCountedObject* self);
@@ -356,9 +345,9 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
     }
     for (i = 0; i < n; i++)
     {
-        Cell_196410* cell;
+        GroupCell* cell;
         id = ReadBufferedS16(rd);
-        if (id == Id_196410::None())
+        if (id == NoId::None())
         {
             c = PopSpawnedClone(self->world, ReadBufferedS16(rd));
         }
@@ -371,7 +360,7 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
         }
         cell = AllocateZeroedFrontMemory(16);
         cell->node = c;
-        cell->link = self->id;
+        cell->id = self->id;
         c->alias = (Alias01*)cell;
         AppendToList((u8*)&self->cells, cell);
         arr[i] = c;
@@ -399,7 +388,7 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
             }
         }
         s32 res = ReadBufferedS16(rd);
-        if (res != Id_196410::None())
+        if (res != NoId::None())
         {
             void* r = GetScriptEntryScope(res, self->world);
             if (t->f2C != 0)
@@ -470,19 +459,19 @@ void func_00196810(ObjectGroup* self, ObjectGroup* src)
     GroupList list = self->cells;
     ClearList(&self->cells);
     ListFrame frame;
-    Elem_196810* e = (Elem_196810*)list.first;
+    GroupCell* e = (GroupCell*)list.first;
     while (e != 0) {
-        Item_196810* it = (Item_196810*)((PlacedObject*)self->parent)->children.head;
-        for (; it != 0; it = it->next) {
-            if (it->f30 == e) break;
+        PlacedObject* it = (PlacedObject*)((PlacedObject*)self->parent)->children.head;
+        for (; it != 0; it = (PlacedObject*)it->next) {
+            if (it->alias == (Alias01*)e) break;
         }
-        Cell_196810* cell = (Cell_196810*)AllocateZeroedFrontMemory(16);
-        cell->link = self->id;
+        GroupCell* cell = (GroupCell*)AllocateZeroedFrontMemory(16);
+        cell->id = self->id;
         if (it != 0) {
             cell->node = it;
-            it->f30 = cell;
+            it->alias = (Alias01*)cell;
         } else {
-            cell->node = (void*)e->f0;
+            cell->node = e->node;
         }
         AppendToList(&self->cells, cell);
         e = e->next;
@@ -520,35 +509,35 @@ void func_001969F8(GaugeCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0xD, g_gaugeColliderStartLinks);
     self->f618 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    self->f614 = (StateWalker*)CreateStateWalker((Any_001969F8*)self->f610, self, -1, 1);
+    self->f614 = (StateWalker*)CreateStateWalker(self->f610, self, -1, 1);
 
     self->f664 = CreatePoseSource(self->world, self->f65C, (const T2195_Vt*)D_0021A790);
     ((Attachment*)self->f664)->mode1 = 2;
-    InsertAttachment((Any_001969F8*)self->f65C, self->f664);
-    ((s32*)self->f664)[7] = 1;
-    ((Item_001969F8*)self->f664)->p24 = self->f660;
+    InsertAttachment(self->f65C, self->f664);
+    ((T2195_790*)self->f664)->hasTarget = 1;
+    ((T2195_790*)self->f664)->target = self->f660;
     *(Quad16*)((u8*)self->f664 + 0x30) = *(Quad16*)&D_00248D30;
-    s32 n1 = GatherObjectsById((Any_001969F8*)self->world, 0x305, 0xF, 0, 0, 0);
+    s32 n1 = GatherObjectsById(self->world, 0x305, 0xF, 0, 0, 0);
     self->f690 = n1;
     void* buf = AllocateFrontMemory(n1 * 4);
     self->f694 = buf;
-    self->f690 = GatherObjectsById((Any_001969F8*)self->world, 0x105, 0xF, 0, self->f690, buf);
-    s32 cnt = GatherObjectsById((Any_001969F8*)self->world, 5, 0x44, 0, 0x20, arr);
+    self->f690 = GatherObjectsById(self->world, 0x105, 0xF, 0, self->f690, buf);
+    s32 cnt = GatherObjectsById(self->world, 5, 0x44, 0, 0x20, arr);
     for (s32 i = 0; i < cnt; i++) {
-        AppendToList((Any_001969F8*)&self->f69C, (void*)arr[i]);
+        AppendToList(&self->f69C, (void*)arr[i]);
     }
-    self->f6B8 = CreateStateWalker((Any_001969F8*)self->f6B4, 0, -1, 0);
-    func_001B6DF8((Any_001969F8*)self->f6B8, self);
+    self->f6B8 = CreateStateWalker(self->f6B4, 0, -1, 0);
+    func_001B6DF8(self->f6B8, self);
 }
 
 ASM_FUNC(func_00196B78);
 
-s32 func_00196E48(s32 a0, Obj_196E48* self)
+s32 func_00196E48(s32 a0, Collider* self)
 {
-    if (self->bits538 & 0x80000000000ULL) {
+    if (self->flags538 & 0x80000000000ULL) {
         if (IsObjectOfKind(self, 0x1F) == 0) return 0;
     }
-    return self->f50 != a0;
+    return (s32)self->root != a0;
 }
 
 ASM_FUNC(func_00196EB0);
@@ -623,10 +612,10 @@ void func_00197848(GaugeCollider* self)
     }
     GaugeColliderAgent* o = ((GaugeColliderAgent**)self->f694)[i];
     s32 n = RandomIntInRange(0, CountListItems(&self->f69C) - 1);
-    Node_197848* nd = (Node_197848*)self->f69C.head;
+    SoundStateObject* nd = (SoundStateObject*)self->f69C.head;
     if (n > 0) {
         do {
-            nd = nd->next;
+            nd = nd->listNext;
         } while (--n);
     }
     if (nd == 0) return;
@@ -758,7 +747,7 @@ void func_00198530(GaugeColliderAgent* self)
 
 ASM_FUNC(func_00198570);
 
-void func_001986E8(GaugeColliderAgent* self, s32 code, Req_1986E8* req)
+void func_001986E8(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
 {
     HandleAgentNotification(self, code, req);
     if (code != 10) {
@@ -782,7 +771,7 @@ void func_00198760(GaugeColliderAgent* s1, f32 f)
         if (s0->f640 != 0) {
             if (IsObjectAttached(s0->f640) != 0) {
                 if (func_00141170(s0->f640, (u8*)s1 + 0x140) != 0) {
-                    Tmp_198760 t;
+                    NodeQueryFrame t;
                     t.f00 = s1;
                     t.f10 = 2;
                     t.f04 = s1;

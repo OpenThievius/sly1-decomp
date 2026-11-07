@@ -15,13 +15,13 @@ struct Obj_18F6E8_eu {
     volatile s32 f148;
 };
 
-void func_0018F6E8(Obj_18F6E8* self_)
+void func_0018F6E8(MoviePlayer* self_)
 {
     Obj_18F6E8_eu* self = (Obj_18F6E8_eu*)self_;
     void* s1;
     if (self->f148 == 1) {
         do {
-            (void)FeedMovieDecoder((Object_18F890*)self, 0);
+            (void)FeedMovieDecoder((MoviePlayer*)self, 0);
         } while (self->f148 == 1);
     }
     if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
@@ -35,10 +35,10 @@ void func_0018F6E8(Obj_18F6E8* self_)
     s1 = (u8*)self + 0x80;
     if (self->f148 != 0) {
         do {
-            (void)FeedMovieDecoder((Object_18F890*)self, 0);
-            AdvanceCodeChecksum((Obj_18F610*)self);
+            (void)FeedMovieDecoder((MoviePlayer*)self, 0);
+            AdvanceCodeChecksum((MoviePlayer*)self);
         } while (self->f148 != 0);
     }
     func_001F6B40(self->f144);
-    UpdateMovieStream((Self_18EB98*)s1);
+    UpdateMovieStream((MovieStream*)s1);
 }

@@ -12,74 +12,9 @@
 #include "pad_record.h"
 #include "game_progress.h"
 #include "globals.h"
-
-// The movie player: its object (D_00269A00), the stream its data comes through, and the two
-// sinks a transfer goes to (a ring buffer, and the IPU's DMA channel).
-
-// Where a transfer's data goes: two virtual methods, which retail's vtables list in this order.
-class TransferSink {
-public:
-    virtual s32 Put(s32 size, u8* buf) = 0;
-    virtual s32 Idle() = 0;
-};
-
-// A ring buffer in the IOP's memory, read through the SIF.
-class IopRingSink : public TransferSink {
-public:
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    s32 Put(s32 size, u8* buf);
-    s32 Idle();
-};
-
-// The IPU's input DMA channel.
-class IpuDmaSink : public TransferSink {
-public:
-    s32 Put(s32 size, u8* buf);
-    s32 Idle();
-};
-
-// The stream the movie's data comes through (func_0018E940 opens it).
-struct MovieStream {
-    s32 f00;
-    s32 f04;
-#ifdef VERSION_EU
-    u8 pad08[0x28];     // a word longer in PAL: its StartMovieStream has sub-objects at 0x30 and 0x50
-#else
-    u8 pad08[0x24];
-#endif
-    u8 sub2C[0x20];
-    u8 sub4C[0x20];
-    IopRingSink sub6C;
-    s32 f8C;
-    s32 f90;
-};
-
-struct MoviePlayer {
-    s32 mode;
-    void* f04;
-    void* f08;
-    void* f0C;
-    u8 decoder[0x48];
-    void* f58;
-    void* f5C;
-    u8 queue60[0x20];
-    MovieStream stream;
-    void* f114;
-    void* f118;
-    u8 pad11C[0x14];
-    s32 f130;
-    volatile s32 f134;   // 0x134: the decode thread's step (0, 1, 2); FinishMovie waits for 0
-    u32 crc;
-    u8* cur;
-    s32 remain;
-    u8 pad144[4];  // to the label after it, g_movieChecksumFailed
-};
+#include "movie_player.h"
+#include "thread_params.h"
+#include "packet_writer.h"
 
 ObjectLink D_002699B0[1] = { { 2, 0x317, 0x6B0 } };
 f32 D_002699BC = 0.5f;
@@ -112,15 +47,16 @@ extern u8 D_00261858[];
 
 void func_00124DF8(void* self, s32 mode, void* data);
 
-struct Span_18E7C0 {
-    s32 a;
-    s32 b;
-    void* c;
-    s32 d;
+// A transfer to the IOP's memory, as StartIopDma takes it.
+struct IopDmaTransfer {
+    s32 src;    // the EE address
+    s32 dest;   // the IOP address
+    void* size;
+    s32 attr;
 };
 
 void func_001F6C20(s32 a);
-void* func_001F6CA0(Span_18E7C0* span, s32 n);
+void* func_001F6CA0(IopDmaTransfer* span, s32 n);
 s32 func_001F6C90(void* obj);
 
 
@@ -130,12 +66,8 @@ s32 func_001B8A08(void* self, void* key);
 
 
 
-struct Obj_18EA48 { s32 flag; u8 pad0[0x2C - 4]; };
-
 void func_0011E460(void);
 void func_0013C9B0(void* state);
-
-struct Obj_18F148 { u8 pad0[4]; s32 f04; s32 f08; };
 
 void func_001B7B78(void* self);
 void func_0012E760(void* obj);
@@ -154,46 +86,17 @@ s32 func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001C08B0(void* p, s32 a, s32 b);
 void func_0013C988(void* state, s32 size, void* buf);
 
-struct Obj_18EAA0 {
-    s32 f00;
-    u8 pad04[0x88];
-    s32 f8C;
-    s32 f90;
-};
-
 void func_0011E498(void);
 void func_001C0950(void* p);
 
 s32 func_0013CC00(void* queue, s32 size, void* data);
 
-struct Args_18EC80 { u8 pad0[8]; u8* f8; s32 fC; };
-
-struct Blk_18EB98 { u8 b[0x24]; };
-
-struct Self_18EB98 {
-    s32 state;
-    u8 pad4[0x4C - 4];
-    Blk_18EB98 f4C;
-    s32 f70;
-    s32 f74;
-    u8 pad78[8];
-    s32 f80;
-};
+// A block of data the decoder hands a stream callback.
+struct MovieDataBlock { u8 pad0[8]; u8* data; s32 size; };
 
 s32 func_0013CAD8(void* queue, s32 n, void* sink);
 void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 
-struct Stream_18EAF8 {
-    s32 mode;
-    u8 pad0[0x2C - 4];
-    u8 sub2C[0x10];
-    s32 v3C;
-    u8 pad1[0x4C - 0x40];
-    u8 sub4C[0x10];
-    s32 v5C;
-};
-
-struct Local_18EF78 { u8 bytes[0x30]; };
 
 void* func_001611B8(void* b);
 void func_001529C8(void* b, s32 a1, void* self);
@@ -208,7 +111,7 @@ void func_001529E0(void* b, s32 a1, s32 a2);
 void func_00161958(void* f, s32 a);
 void func_00152B80(void* f, s32 a, s32 b);
 
-struct Frame_18DB20 {
+struct AttachedTransformFrame {
     Vec02 q00;
     Vec02 q10;
     Vec02 q20;
@@ -236,22 +139,7 @@ void func_001686E8(s32 a, s32 b);
 void func_001684E8(void);
 void func_001683E8(void);
 
-struct Obj_18F610 {
-    u8 pad0[0x138];
-    u32 crc;
-    u8* cur;
-    s32 remain;
-};
-
 extern u8 D_005A2E60[];
-
-struct Obj_18F7D0 {
-    s32 f00;
-    u8 pad04[0x08];
-    s32 f0C;
-    u8 pad10[0x124];
-    s32 f134;
-};
 
 extern s32 D_002626CC;
 
@@ -263,13 +151,11 @@ void func_001B3450(void);
 
 extern const u32 D_002484B0[128];
 
-struct Obj_18ECA8 { u8 pad0[0x60]; u8 sub[0x14]; s32 f74; };
-
 void* func_001F5C0C(void* dst, s32 value, s32 size);
 void func_0013CC48(void* queue, s32 n);
 
 void func_0018D410(KeyId* p);
-struct Same_18F198 {
+struct SameMovieKey {
     static s32 Of(IdentityKey* a, IdentityKey* b)
     {
         if (a == b) return 1;
@@ -278,7 +164,7 @@ struct Same_18F198 {
         return ((a->words[2] ^ a->words[6]) ^ (b->words[2] ^ b->words[6])) == 0;
     }
 };
-struct Fill_18F198 {
+struct KeyIdOfMovie {
     static s32 Of(KeyId* p, IdentityKey* key)
     {
         ClearKeyId(p);
@@ -294,11 +180,6 @@ struct Fill_18F198 {
         return ok;
     }
 };
-struct Self_18F198 {
-    u32 mode;
-    u8 pad[0xC];
-    u8 list[1];
-};
 
 extern u8 D_002C3B00[];
 extern u8 D_00275F80[];
@@ -312,7 +193,7 @@ void func_00143030(u8* t);
 void func_0016E238(PadRecord* d);
 s32 func_001F00F0(u8* a, PadRecord* b, s32 c);
 void func_001409E0();
-s32 func_0020B0B0(u8* l);
+s32 func_0020B0B0(void* l);
 void func_0012FDE8(StreamReader* o);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00191EB0(s32 v);
@@ -322,56 +203,26 @@ extern u8 D_002C2B00[];
 extern u8 D_002832F0[];
 extern s32 D_00275964;
 
-struct Init_18E5E8 { s32 f00; void (*f04)(void); s32 f08; s32 f0C; s32 f10; s32 f14; u8 pad[0x18]; };
-struct Mgr_18E5E8 { s32 f00; };
-
-s32 func_001E2268(Init_18E5E8* a, void* b);
-s32 func_001F6A10(Init_18E5E8* p);
-void func_001F6A20(Mgr_18E5E8* m, s32 b);
+s32 func_001E2268(void* a, void* b);
+s32 func_001F6A10(ThreadParams* p);
+void func_001F6A20(s32 thread, s32 arg);
 
 s32 func_0011E4F8(void* self);
-
-struct Frame_18EDA8 { u8 buf[0x30]; };
 
 void func_00189350(void* a, void* b);
 void func_001BC088(Collider* self, f32 x, void* b);
 
-struct Object_18F890 { u8 pad00[0x0C]; StreamReaderWindow* buffer; u8 pad10[4]; };
-struct Empty_18F890 {
+struct ReaderEmpty {
     static bool Of(StreamReaderWindow* b) { return b->readyLength == b->usedLength; }
 };
 void func_00130070(StreamReaderWindow*);
 s32 func_0020A518(void*, s32, s32);
 void func_001300D8(StreamReaderWindow*, s32);
 
-struct Obj_18F6E8 {
-    u8 pad0[0x10];
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    u8 pad1[0x5C - 0x1C];
-    s32 f5C;
-    u8 pad2[0x114 - 0x60];
-    void* f114;
-    void* f118;
-    u8 pad3[0x130 - 0x11C];
-    s32 f130;
-    volatile s32 f134;  // state another thread changes: FinishMovie busy-waits on it
-};
 
 s32 func_0020B058(void* a, s32 b, s32 c);
 void func_001F6B40(s32 a);
 
-struct Obj_18F448 {
-    u8 pad0[0xC];
-    void* fC;
-    u8 pad1[0x48];
-    void* f58;
-    void* f5C;
-    u8 pad2[0xB4];
-    void* f114;
-    void* f118;
-};
 
 extern u8 D_002D7B40[];
 extern u8 D_0045AAC0[];
@@ -396,25 +247,25 @@ void func_0018E6A0(IopRingSink* c);
 s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf);
 void func_0018E838(IopRingSink* self);
 s32 func_0018E940(MovieStream* self);
-void func_0018EA48(Obj_18EA48* self);
-void func_0018EAA0(Obj_18EAA0* self);
-s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right);
-void func_0018EB98(Self_18EB98* self);
-s32 func_0018EC40(void* a0, void* a1, void* a2);
-void func_0018EC80(void* a0, Args_18EC80* a1, void* a2);
-s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self);
-s32 func_0018ED78(void* a0, s32 a1, void* a2);
+void func_0018EA48(MovieStream* self);
+void func_0018EAA0(MovieStream* self);
+s32 func_0018EAF8(MovieStream* self, s32 left, u8* right);
+void func_0018EB98(MovieStream* self);
+s32 func_0018EC40(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+void func_0018EC80(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+s32 func_0018ECA8(void* u0, void* u1, MoviePlayer* self);
+s32 func_0018ED78(void* a0, s32 a1, MoviePlayer* a2);
 s32 func_0018EDA0(void);
 void func_0018EDA8(void* p, s32 addr, s32 w, s32 h);
 void func_0018EF78(void* self, s32 a1, s32 a2);
-void func_0018F0E8(void* self, void* p);
-void func_0018F148(Obj_18F148* self);
-void func_0018F198(Self_18F198* self, IdentityKey* key);
-void func_0018F448(Obj_18F448* self, void* v);
-void func_0018F610(Obj_18F610* self);
-void func_0018F6E8(Obj_18F6E8* self);
-void func_0018F7D0(Obj_18F7D0* self);
-s32 func_0018F890(Object_18F890* self, s32 wait);
+void func_0018F0E8(MoviePlayer* self, void* p);
+void func_0018F148(MoviePlayer* self);
+void func_0018F198(MoviePlayer* self, IdentityKey* key);
+void func_0018F448(MoviePlayer* self, void* v);
+void func_0018F610(MoviePlayer* self);
+void func_0018F6E8(MoviePlayer* self);
+void func_0018F7D0(MoviePlayer* self);
+s32 func_0018F890(MoviePlayer* self, s32 wait);
 
 void func_0018D8E0(ContactListObject* self)
 {
@@ -464,7 +315,7 @@ ASM_FUNC(func_0018DA40);
 
 void func_0018DB20(ContactListObject* self, void* in1, void* in2)
 {
-    Frame_18DB20 f;
+    AttachedTransformFrame f;
 
     if ((self->flags & 0x100000000ULL) == 0) {
         if (self->f1EC == 0 && self->f1F0 == 0) {
@@ -586,7 +437,7 @@ void func_0018E4F0(s32 idx, u32 n)
     s32 m;
 
     QueueMovieByIndex(idx);
-    g_moviePlayer.f08 = (void*)((u8*)g_movieKeys + (n << 5));
+    g_moviePlayer.queuedNext = (IdentityKey*)((u8*)g_movieKeys + (n << 5));
     if (n >= 16) { m = 0; } else { m = 1 << n; }
     dev = g_saveData;
     dev->u19F4 |= m;
@@ -597,35 +448,35 @@ void func_0018E558(void)
     MoviePlayer* t = &g_moviePlayer;
 
     for (;;) {
-        t->f134 = 0;
-        AwaitSemaphore(t->f130);
-        t->f134 = 1;
-        SendGsPacketAndWait(g_gifChannel, (s32)t->f114);
-        t->f134 = 2;
+        t->threadStep = 0;
+        AwaitSemaphore(t->frameSemaphore);
+        t->threadStep = 1;
+        SendGsPacketAndWait(g_gifChannel, (s32)t->uploadPacket);
+        t->threadStep = 2;
         ApplyPendingDisplayFlip();
-        SendGsPacketAndWait(g_gifChannel, (s32)t->f118);
+        SendGsPacketAndWait(g_gifChannel, (s32)t->drawPacket);
         FlipDisplayFrame();
-        SendGsPacketAndWait(g_gifChannel, (s32)t->f118);
+        SendGsPacketAndWait(g_gifChannel, (s32)t->drawPacket);
         FlipDisplayFrame();
     }
 }
 
 void func_0018E5E8(void)
 {
-    Init_18E5E8 l;
+    ThreadParams l;
     s32 v;
 
-    g_moviePlayer.f130 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
-    g_moviePlayer.f0C = 0;
+    g_moviePlayer.frameSemaphore = CreateLockSemaphore(0, (void*)1);
+    g_moviePlayer.reader = 0;
     (void)FillMemory(&l, 0, sizeof(l));
-    l.f04 = RunMovieDecodeThread;
-    l.f08 = (s32)g_movieDecodeThreadStack;
-    l.f10 = (s32)D_002832F0;
-    l.f0C = 0x1000;
-    l.f14 = 2;
+    l.entry = RunMovieDecodeThread;
+    l.stack = g_movieDecodeThreadStack;
+    l.gp = D_002832F0;
+    l.stackSize = 0x1000;
+    l.priority = 2;
     v = MakeThread(&l);
     g_movieDecodeThread = v;
-    RunThread((Mgr_18E5E8*)v, 0);
+    RunThread(v, 0);
 }
 
 void func_0018E678(IopRingSink* self, s32 a1, s32 a2)
@@ -677,13 +528,13 @@ s32 IopRingSink::Put(s32 count, u8* dst)
 
 s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf)
 {
-    Span_18E7C0 span;
+    IopDmaTransfer span;
     void* obj;
 
-    span.a = (s32)buf;
-    span.b = p->f04 + p->f0C;
-    span.c = (void*)size;
-    span.d = 0;
+    span.src = (s32)buf;
+    span.dest = p->f04 + p->f0C;
+    span.size = (void*)size;
+    span.attr = 0;
     SyncDataCache(0);
     obj = StartIopDma(&span, 1);
     while (GetIopDmaStatus(obj) >= 0) {
@@ -729,128 +580,128 @@ s32 func_0018E940(MovieStream* self)
     }
     func_0011E110(1);
     SyncDiscRead(0);
-    self->f8C = GetIopVolumeChannel(2);
-    self->f90 = GetIopVolumeChannel(8);
+    self->savedVolume2 = GetIopVolumeChannel(2);
+    self->savedVolume8 = GetIopVolumeChannel(8);
     SetIopVolumeChannel(2, 0x400);
     SetIopVolumeChannel(8, 0x200);
     r = OpenIopRing(0x6000, 0x400, 0, 2, 2);
     if (r < 0) {
-        self->f00 = 0;
+        self->state = 0;
     } else {
-        self->f00 = 1;
-        InitRingBuffer(self->sub2C, 0x28, &self->f04);
-        InitRingBuffer(self->sub4C, 0xC000, D_002CBB40);
-        InitIopRingSink(&self->sub6C, 0x6000, r);
+        self->state = 1;
+        InitRingBuffer(&self->headerRing, 0x28, self->header);
+        InitRingBuffer(&self->dataRing, 0xC000, D_002CBB40);
+        InitIopRingSink(&self->sink, 0x6000, r);
     }
 }
 
-void func_0018EA48(Obj_18EA48* self)
+void func_0018EA48(MovieStream* self)
 {
-    if (self->flag != 0) {
+    if (self->state != 0) {
         ResetIopRing();
-        self->flag = 1;
-        ResetRingBuffer((u8*)self + 0x2C);
-        ResetRingBuffer((u8*)self + 0x4C);
-        ResetIopRingSink((IopRingSink*)((u8*)self + 0x6C));
+        self->state = 1;
+        ResetRingBuffer(&self->headerRing);
+        ResetRingBuffer(&self->dataRing);
+        ResetIopRingSink(&self->sink);
     }
 }
 
-void func_0018EAA0(Obj_18EAA0* self)
+void func_0018EAA0(MovieStream* self)
 {
-    self->f00 = 0;
+    self->state = 0;
     StopIopMovieStream();
-    SetIopVolumeChannel(2, self->f8C);
-    SetIopVolumeChannel(8, self->f90);
+    SetIopVolumeChannel(2, self->savedVolume2);
+    SetIopVolumeChannel(8, self->savedVolume8);
     PopIopChannel2Setting(g_currentWorld);
     ResumeIopVoices(0xFFFFFFFF);
 }
 
-s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right)
+s32 func_0018EAF8(MovieStream* self, s32 left, u8* right)
 {
     s32 n;
 
-    if (self->mode == 0) {
+    if (self->state == 0) {
         goto zero;
     }
     left -= 4;
     right += 4;
-    if (self->mode == 1) {
-        n = FillRingBufferFromMemory(self->sub2C, left, right);
+    if (self->state == 1) {
+        n = FillRingBufferFromMemory(&self->headerRing, left, right);
         left -= n;
         right += n;
-        if (self->v3C > 0) {
+        if (self->headerRing.space > 0) {
             goto one;
         }
-        self->mode = 2;
+        self->state = 2;
     }
-    if (self->v5C >= left) {
+    if (self->dataRing.space >= left) {
         goto call;
     }
 zero:
     return 0;
 call:
-    FillRingBufferFromMemory(self->sub4C, left, right);
+    FillRingBufferFromMemory(&self->dataRing, left, right);
 one:
     return 1;
 }
 
-void func_0018EB98(Self_18EB98* self)
+void func_0018EB98(MovieStream* self)
 {
     switch (self->state) {
     case 2:
-        DrainRingBuffer(&self->f4C, self->f80, (u8*)&self->f4C + 0x20);
-        if (self->f80 != 0) {
+        DrainRingBuffer(&self->dataRing, self->sink.f14, &self->sink);
+        if (self->sink.f14 != 0) {
             break;
         }
-        UpdateIopMovieStream(self->f70, self->f74, self->f70, 0, 0);
+        UpdateIopMovieStream(self->sink.f04, self->sink.f08, self->sink.f04, 0, 0);
         self->state = 3;
         break;
     case 3: {
-        void* s0 = (u8*)&self->f4C + 0x20;
-        UpdateIopRingSink((IopRingSink*)s0);
-        DrainRingBuffer(&self->f4C, self->f80, s0);
+        IopRingSink* s0 = &self->sink;
+        UpdateIopRingSink(s0);
+        DrainRingBuffer(&self->dataRing, self->sink.f14, s0);
         break;
     }
     }
 }
 
-s32 func_0018EC40(void* a0, void* a1, void* a2)
+s32 func_0018EC40(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
-    if (*(u32*)((u8*)a2 + 0x70) >= *(u32*)((u8*)a1 + 0xC)) {
-        FillRingBufferFromMemory((u8*)a2 + 0x60, *(u32*)((u8*)a1 + 0xC), *(void**)((u8*)a1 + 0x8));
+    if ((u32)a2->videoRing.space >= (u32)a1->size) {
+        FillRingBufferFromMemory(&a2->videoRing, a1->size, a1->data);
         return 1;
     }
     return 0;
 }
 
-void func_0018EC80(void* a0, Args_18EC80* a1, void* a2)
+void func_0018EC80(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
-    FeedMovieStream((Stream_18EAF8*)((u8*)a2 + 0x80), a1->fC, a1->f8);
+    FeedMovieStream(&a2->stream, a1->size, a1->data);
 }
 
-s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
+s32 func_0018ECA8(void* u0, void* u1, MoviePlayer* self)
 {
     s32 total = 0x40;
-    while (self->f74 < 0x1000) {
-        if (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
+    while (self->videoRing.filled < 0x1000) {
+        if (FeedMovieDecoder(self, 1) == 0) {
             u8 zero[0x40];
             FillMemory(zero, 0, 0x40);
-            s32 k = self->f74;
-            FillRingBufferFromMemory(&self->sub, total - (k % 32), zero);
+            s32 k = self->videoRing.filled;
+            FillRingBufferFromMemory(&self->videoRing, total - (k % 32), zero);
             break;
         }
     }
     {
         IpuDmaSink dma;
-        ConsumeSpan(&self->sub, 0);
-        DrainRingBuffer(&self->sub, 0, &dma);
+        ConsumeSpan(&self->videoRing, 0);
+        DrainRingBuffer(&self->videoRing, 0, &dma);
     }
     return 1;
 }
 
-s32 func_0018ED78(void* a0, s32 a1, void* a2)
+s32 func_0018ED78(void* a0, s32 a1, MoviePlayer* a2)
 {
-    FeedMovieDecoder((Object_18F890*)a2, 0);
+    FeedMovieDecoder(a2, 0);
     return 1;
 }
 
@@ -865,7 +716,7 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
     s32 nx = h / 16;
     s32 x;
     s32 y;
-    Frame_18EDA8 f;
+    PacketWriter f;
 
     InitGifPacket(&f);
     UsePacketBufferMemory(&f, 0x1C28, p);
@@ -893,7 +744,7 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
 
 void func_0018EF78(void* self, s32 a1, s32 a2)
 {
-    Local_18EF78 buf;
+    PacketWriter buf;
     InitGifPacket(&buf);
     UsePacketBufferMemory(&buf, 0x12, self);
     BeginDmaTag(&buf);
@@ -914,15 +765,15 @@ void func_0018EF78(void* self, s32 a1, s32 a2)
     DetachPacketBuffer(&buf, 0, 0);
 }
 
-void func_0018F0E8(void* self, void* p)
+void func_0018F0E8(MoviePlayer* self, void* p)
 {
     s32 m;
     s32 v;
 
-    if (*(void**)((u8*)self + 4) != 0) {
+    if (self->queued != 0) {
         return;
     }
-    *(void**)((u8*)self + 4) = p;
+    self->queued = (IdentityKey*)p;
     v = FindKeyIndex((IdentityKey*)p);
     if ((u32)v >= 16) {
         m = 0;
@@ -932,35 +783,35 @@ void func_0018F0E8(void* self, void* p)
     g_saveData->u19F4 |= m;
 }
 
-void func_0018F148(Obj_18F148* self)
+void func_0018F148(MoviePlayer* self)
 {
-    s32 pending = self->f08;
-    s32 first = self->f04;
-    self->f04 = 0;
-    self->f08 = 0;
-    PlayMovie((Self_18F198*)self, (IdentityKey*)first);
+    IdentityKey* pending = self->queuedNext;
+    IdentityKey* first = self->queued;
+    self->queued = 0;
+    self->queuedNext = 0;
+    PlayMovie(self, first);
     if (pending != 0) {
-        PlayMovie((Self_18F198*)self, (IdentityKey*)pending);
+        PlayMovie(self, pending);
     }
 }
 
-void func_0018F198(Self_18F198* self, IdentityKey* key)
+void func_0018F198(MoviePlayer* self, IdentityKey* key)
 {
     StreamReader loc;
     KeyId pr;
     SetScreenOwner(4);
-    self->mode = FindKeyIndex(key);
+    self->movieIndex = FindKeyIndex(key);
     InitStreamReader(&loc, D_002C3B00);
-    if (Fill_18F198::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
-        InitMoviePlayback((Obj_18F448*)self, &loc);
-        while (!GetMpegDecoderStatus(self->list)) {
+    if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
+        InitMoviePlayback(self, &loc);
+        while (!GetMpegDecoderStatus(&self->decoder)) {
             AdvanceGameClockElapsed(((u8*)g_gameClock));
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
-            if (Same_18F198::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
+            if (SameMovieKey::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
             u32 m;
-            if (self->mode >= 16) m = 0;
-            else m = 1u << self->mode;
+            if (self->movieIndex >= 16) m = 0;
+            else m = 1u << self->movieIndex;
             if (g_saveData->f19F8 & m) flag = 1;
             if (flag) {
                 if (RestoreFadeRequest(g_screenFade, &g_padRecord, 2)) break;
@@ -971,10 +822,10 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             }
             StepDiscSectorCheck();
             if (g_discSectorCheckState != 3) break;
-            StepMovieFrame((Obj_18F6E8*)self);
+            StepMovieFrame(self);
         }
-        if (Same_18F198::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
-        FinishMovie((Obj_18F7D0*)self);
+        if (SameMovieKey::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
+        FinishMovie(self);
         CloseStreamReader(&loc);
     } else {
         StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -983,26 +834,26 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
     DestroyStreamReader(&loc, 2);
 }
 
-void func_0018F448(Obj_18F448* self, void* v)
+void func_0018F448(MoviePlayer* self, void* v)
 {
     s32 i;
 
-    self->fC = v;
-    self->f58 = D_002D7B40;
-    self->f5C = D_0045AAC0;
-    InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
-    StartMovieStream((MovieStream*)((u8*)self + 0x80));
+    self->reader = (StreamReaderWindow*)v;
+    self->decoderWork = D_002D7B40;
+    self->picture = D_0045AAC0;
+    InitRingBuffer(&self->videoRing, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
+    StartMovieStream(&self->stream);
     InitMpegLibrary();
-    CreateMpegDecoder((u8*)self + 0x10, self->f58, 0x152F68);
-    SetStreamCallback((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
-    SetStreamCallback((u8*)self + 0x10, 2, 0, (void*)PassMovieDataToStream, self);
-    SetMpegCallback((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    SetMpegCallback((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
-    SetMpegCallback((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
-    while (FeedMovieDecoder((Object_18F890*)self, 1) != 0) {
+    CreateMpegDecoder(&self->decoder, self->decoderWork, 0x152F68);
+    SetStreamCallback(&self->decoder, 0, 0, (void*)AcceptMovieDataIntoRing, self);
+    SetStreamCallback(&self->decoder, 2, 0, (void*)PassMovieDataToStream, self);
+    SetMpegCallback(&self->decoder, 1, (void*)FlushMovieToIpu, self);
+    SetMpegCallback(&self->decoder, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    SetMpegCallback(&self->decoder, 0, (void*)AcceptMovieDecoderEvent, self);
+    while (FeedMovieDecoder(self, 1) != 0) {
     }
-    self->f114 = D_00586AC0;
-    self->f118 = D_005A2D40;
+    self->uploadPacket = D_00586AC0;
+    self->drawPacket = D_005A2D40;
     D_002626CC = 0;
     g_moviePlayer.cur = (u8*)0x100010;
     g_moviePlayer.remain = (s32)D_00148D68;
@@ -1023,7 +874,7 @@ void func_0018F448(Obj_18F448* self, void* v)
     } while (j < 256);
 }
 
-void func_0018F610(Obj_18F610* self)
+void func_0018F610(MoviePlayer* self)
 {
     if (self->remain > 0) {
         s32 n = self->remain - 4;
@@ -1050,68 +901,67 @@ void func_0018F610(Obj_18F610* self)
     }
 }
 
-void func_0018F6E8(Obj_18F6E8* self)
+void func_0018F6E8(MoviePlayer* self)
 {
-    void* s1;
-    if (self->f134 == 1) {
+    MovieStream* s1;
+    if (self->threadStep == 1) {
         do {
-            (void)FeedMovieDecoder((Object_18F890*)self, 0);
-        } while (self->f134 == 1);
+            (void)FeedMovieDecoder(self, 0);
+        } while (self->threadStep == 1);
     }
-    if (DecodeMpegPicture((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+    if (DecodeMpegPicture(&self->decoder, (s32)self->picture, 0x4B0) < 0) {
         return;
     }
-    if (self->f18 == 0) {
-        UploadMovieFrame(self->f114, self->f5C, self->f10, self->f14);
-        DrawMovieFrame(self->f118, self->f10, self->f14);
+    if (self->decoder.f08 == 0) {
+        UploadMovieFrame(self->uploadPacket, (s32)self->picture, self->decoder.width, self->decoder.height);
+        DrawMovieFrame(self->drawPacket, self->decoder.width, self->decoder.height);
         SyncDataCache(0);
     }
-    s1 = (u8*)self + 0x80;
-    if (self->f134 != 0) {
+    s1 = &self->stream;
+    if (self->threadStep != 0) {
         do {
-            (void)FeedMovieDecoder((Object_18F890*)self, 0);
-            AdvanceCodeChecksum((Obj_18F610*)self);
-        } while (self->f134 != 0);
+            (void)FeedMovieDecoder(self, 0);
+            AdvanceCodeChecksum(self);
+        } while (self->threadStep != 0);
     }
-    PostSemaphore(self->f130);
-    UpdateMovieStream((Self_18EB98*)s1);
+    PostSemaphore(self->frameSemaphore);
+    UpdateMovieStream(s1);
 }
 
-void func_0018F7D0(Obj_18F7D0* self)
+void func_0018F7D0(MoviePlayer* self)
 {
-    u8* base = (u8*)self;
     s32 mask;
 
-    self->f0C = 0;
-    ResetMovieStream((Obj_18EA48*)(base + 0x80));
-    StopMovieStream((Obj_18EAA0*)(base + 0x80));
-    ResetMpegDecoder(base + 0x10);
-    (void)DeleteMpegDecoder(base + 0x10);
-    if (self->f134 != 0) {
+    self->reader = 0;
+    ResetMovieStream(&self->stream);
+    StopMovieStream(&self->stream);
+    ResetMpegDecoder(&self->decoder);
+    (void)DeleteMpegDecoder(&self->decoder);
+    if (self->threadStep != 0) {
         do {
-        } while (*(volatile s32*)&self->f134 != 0);
+        } while (self->threadStep != 0);
     }
     D_002626CC = 3;
     SendResidentImages();
-    if ((u32)self->f00 >= 16) {
+    if (self->movieIndex >= 16) {
         mask = 0;
     } else {
-        mask = 1 << self->f00;
+        mask = 1 << self->movieIndex;
     }
     g_saveData->f19F8 |= mask;
 }
 
-s32 func_0018F890(Object_18F890* self, s32 wait)
+s32 func_0018F890(MoviePlayer* self, s32 wait)
 {
-    while (Empty_18F890::Of(self->buffer)) {
-        PumpStreamReader(self->buffer);
-        if (Empty_18F890::Of(self->buffer) && !wait) return 0;
+    while (ReaderEmpty::Of(self->reader)) {
+        PumpStreamReader(self->reader);
+        if (ReaderEmpty::Of(self->reader) && !wait) return 0;
     }
     SyncDataCache(0);
-    StreamReaderWindow* buffer = self->buffer;
+    StreamReaderWindow* buffer = self->reader;
     s32 count = buffer->readyLength - buffer->usedLength;
-    s32 result = DemultiplexBuffer(self->pad10, buffer->readyStart + buffer->usedLength, count);
-    ConsumeStreamBytes(self->buffer, result);
+    s32 result = DemultiplexBuffer(&self->decoder, buffer->readyStart + buffer->usedLength, count);
+    ConsumeStreamBytes(self->reader, result);
     return result;
 }
 

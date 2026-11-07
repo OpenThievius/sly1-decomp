@@ -3,11 +3,11 @@
 extern s32 D_eu_00263710;
 void func_00194398(void)
 {
-    Args_194398 args;
+    FadeRequest args;
     args.kind = 1;
     args.text = D_00247AB0 + D_eu_00263710 * 32;
-    args.x = -1;
-    args.y = -1;
-    args.z = 4;
-    StartScreenFade(g_screenFade, &args, 0);
+    args.f08 = -1;
+    args.f0C = -1;
+    args.flags = 4;
+    StartScreenFade(&g_screenFade, &args, 0);
 }

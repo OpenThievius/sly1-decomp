@@ -10,16 +10,36 @@
 
 #include "shapes.h"
 
+// A colour of the bar, read as four bytes at an unaligned place.
+struct __attribute__((packed)) BarColor { u8 r, g, b, a; };
+
+// UpdateLoadProgress (func_00193288) takes the first value it is given as the whole and counts
+// the updates that bring no change; DrawLoadProgressBar (func_00193318) draws the part done in
+// the bar colour and the rest in one of three colours chosen by that count.
 struct LoadProgress {
-    s32 f00;                // 0x00
-    s32 f04;                // 0x04
-    s32 f08;                // 0x08
-    s32 f0C;                // 0x0C
-    s32 f10;                // 0x10
-    U32P f14;               // 0x14
-    U32P f18;               // 0x18
-    U32P f1C;               // 0x1C
-    U32P f20;               // 0x20
+    s32 active;             // 0x00: nonzero while the bar is shown
+    s32 scale;              // 0x04: twice the first value
+    s32 total;              // 0x08: the first value
+    s32 current;            // 0x0C: the last value
+    s32 stalls;             // 0x10: the updates in a row that kept the value
+    union {
+        U32P f14;           // 0x14
+        BarColor barColor;  // 0x14: the part done
+    };
+    union {
+        U32P f18;           // 0x18
+        BarColor color0;    // 0x18: the rest, no stall
+    };
+    union {
+        U32P f1C;           // 0x1C
+        BarColor color1;    // 0x1C: the rest, one stall
+    };
+    union {
+        U32P f20;           // 0x20
+        BarColor color2;    // 0x20: the rest, more
+    };
 };
+
+typedef char check_LoadProgress[sizeof(LoadProgress) == 0x24 ? 1 : -1];
 
 #endif

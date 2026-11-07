@@ -415,7 +415,6 @@ void* func_0018D5C0(s32 bytes);
 
 
 // A cell of a group's list (ObjectGroup::cells): the object and the next cell.
-struct GroupCell { void* item; u8 pad0[4]; GroupCell* next; };
 
 s32 func_00137D10(void* src);
 s32 func_001300E8(void* node, s32 kind);
@@ -1379,7 +1378,7 @@ void func_001587C8(MemberGroup* self, void* src)
             n = 0;
             while (p != 0) {
                 if ((u32)n < 8) {
-                    arr[n] = p->item;
+                    arr[n] = p->node;
                     n++;
                 }
                 p = p->next;

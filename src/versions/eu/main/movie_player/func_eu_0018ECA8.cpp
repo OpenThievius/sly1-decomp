@@ -9,18 +9,18 @@ void func_eu_0018EBE8(void);
 
 void func_eu_0018ECA8(void)
 {
-    Init_18E5E8 l;
+    ThreadParams l;
     s32 v;
 
-    D_eu_0026AC60.f144 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
+    D_eu_0026AC60.f144 = CreateLockSemaphore(0, (void*)1);
     ((Head_eu_18ECA8*)&D_eu_0026AC60)->f0C = 0;
     (void)func_001F5C0C(&l, 0, sizeof(l));
-    l.f04 = func_eu_0018EBE8;
-    l.f08 = (s32)D_eu_002CC280;
-    l.f10 = (s32)D_eu_0028CA70;
-    l.f0C = 0x1000;
-    l.f14 = 2;
+    l.entry = func_eu_0018EBE8;
+    l.stack = D_eu_002CC280;
+    l.gp = D_eu_0028CA70;
+    l.stackSize = 0x1000;
+    l.priority = 2;
     v = func_001F6A10(&l);
     D_eu_0027F0DC = v;
-    func_001F6A20((Mgr_18E5E8*)v, 0);
+    func_001F6A20(v, 0);
 }
