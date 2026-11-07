@@ -3278,7 +3278,7 @@ ScriptValue* func_00107350(ScriptValue* ret, C0C* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0018AC58(obj);
+    AdvanceGaugeAgentPhase(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

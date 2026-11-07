@@ -177,8 +177,8 @@ s32 func_0018A910(C0C* self, void* a1, void* a2)
     s32 x;
     s32 y;
     PushBackMemoryMark(self, a1, a2);
-    func_001DC238(self->world, 0, a1, a2, func_0018A830, self, &x, &y);
-    s32 r = func_0018A6C0(0, a1, a2, x, y, buf, D_002649C4);
+    func_001DC238(self->world, 0, a1, a2, IsGaugeAgentBlocker, self, &x, &y);
+    s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, D_002649C4);
     PopBackMemoryMark();
     return r != 0;
 }
@@ -224,14 +224,14 @@ s32 func_0018A9A8(C0C* self)
             return 0;
         }
     }
-    if (func_0018A910((C0C*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
+    if (IsGaugeAgentLineBlocked((C0C*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
         goto second;
     }
 one:
     return 1;
 second:
     func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
-    if (func_0018A910((C0C*)obj, obj + 0x140, loc.buf) == 0) {
+    if (IsGaugeAgentLineBlocked((C0C*)obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
     return 0;

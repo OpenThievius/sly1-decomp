@@ -503,7 +503,7 @@ D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
 D_0024B1E8	0024B1E8	109	.rodata	src/main/main_loop.cpp
 D_0024B258	0024B258	4	.rodata	src/main/collider_contact.cpp
 D_0024B260	0024B260	16	.rodata	src/main/matrix.cpp
-D_0024B270	0024B270	4	.rodata	src/main/file_18A388.cpp
+D_0024B270	0024B270	4	.rodata	src/main/gauge_agent.cpp
 D_0024B280	0024B280	436	.rodata	src/main/file_18B580.cpp
 D_0024B438	0024B438	416	.rodata	src/main/file_18D8E0.cpp
 D_0024B5E0	0024B5E0	4	.rodata	src/main/file_18F988.cpp
@@ -681,7 +681,7 @@ D_00264098	00264098	16	.data	src/main/colored_triangle_set.cpp
 D_002640B0	002640B0	432	.data	src/main/file_180EB0.cpp
 D_00264260	00264260	1500	.data	src/main/main_loop.cpp
 D_00264840	00264840	208	.data	src/main/collider_contact.cpp
-D_00264910	00264910	300	.data	src/main/file_18A388.cpp
+D_00264910	00264910	300	.data	src/main/gauge_agent.cpp
 D_00264A40	00264A40	20324	.data	src/main/file_18B580.cpp
 D_002699A4	002699A4	8	.data	src/main/file_18D410.cpp
 D_002699B0	002699B0	416	.data	src/main/file_18D8E0.cpp

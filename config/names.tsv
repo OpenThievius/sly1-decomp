@@ -2721,3 +2721,20 @@ func_001884E0	CopyRotationMatrix	copies a matrix's first three rows and resets t
 func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawC60Object multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
 func_00188CE0	GetMatrixRotationCosine	returns half of the matrix's trace less one, clamped to -1..1 (ClampToMagnitude): the cosine of its rotation's angle
 func_001891C0	TransformMatrixByObject	builds a matrix from the object's rotation and translation at +0x30 (func_00188B48), multiplies it with the argument (MultiplyMatrices) and copies the four rows out (TransformPointArray calls it)
+func_0018A388	InitGaugeAgent	slot 0x10 of class 0x0C: runs InitAgent and sets +0xE3C to -1
+func_0018A3B8	LoadGaugeAgent	slot 0x38 of class 0x0C: runs LoadAgent and resolves its links (D_00264910)
+func_0018A3F0	StartGaugeAgent	slot 0x50 of class 0x0C: runs StartAgent, takes the world's gauge object (func_001DDC38), resolves its links, creates its state walker (0x438), its three clips and the six keyed objects of D_00264960
+func_0018A628	DrawGaugeAgent	original assembly: slot 0xA4 of class 0x0C
+func_0018A6C0	FindNearestHitObject	tests each candidate object against a segment (func_00141D00) and returns the one with the lowest score, copying its hit out, skipping a zero-score first hit when bit 0 of the mode is set
+func_0018A830	IsGaugeAgentBlocker	the filter of IsGaugeAgentLineBlocked: rejects the kinds of D_002649B0, class 3, objects of kind 0x34 whose slot 60 refuses, and the ids 0x449 and 0x44A
+func_0018A910	IsGaugeAgentLineBlocked	gathers the world's objects along a segment that pass IsGaugeAgentBlocker (func_001DC238) and returns whether one is hit (FindNearestHitObject)
+func_0018A9A8	HasGaugeAgentClearLine	slot 0x184 of class 0x0C: after its delay, with a target and its walker in state 0x43A, 0x43C or 0x43E, 1 when the line to the target or to a second point of it is not blocked (IsGaugeAgentLineBlocked)
+func_0018AAE0	IsGaugeAgentFree	slot 0x16C of class 0x0C: 1 when the world allows it, +0xC10 is clear, its state is not 0x10 or 0xB, its slot 0x66 agrees and its walker is in state 0x43A, 0x43C or 0x43E
+func_0018AB88	EnterGaugeAgentState	slot 0x180 of class 0x0C: runs EnterAgentState; state 0xB marks the level done (MarkLevelDone with 2) and starts a memory-card save, state 0x10 counts at +0xA68
+func_0018ABF0	ChooseGaugeAgentState	slot 0x174 of class 0x0C: state 2 when in state 4 with its walker in 0x438 and func_001C96B8 failing, else ChooseAgentState
+func_0018AC58	AdvanceGaugeAgentPhase	lowers the gauge count (DecrementGaugeCount), changes to the phase's state and clip (D_002649D8, +0xE30) and its walker target (D_002649E8), and moves to the next phase
+func_0018ACD0	UpdateGaugeAgent	slot 0x54 of class 0x0C: runs UpdateAgent
+func_0018ACF0	ShowGaugeAgentBar	slot 0xC8 of class 0x0C: with its walker in state 0x43A, 0x43C or 0x43E and AreMenusAndFadeClear, calls g_gaugeBarElement's slot 14, else its slot 15
+func_0018B2E8	LeaveGaugeAgentState	slot 0x17C of class 0x0C: runs LeaveAgentState; leaving state 0x10 sends its walker to the pending target +0xE3C and clears it
+func_0018B340	HandleGaugeAgentNotification	slot 0x44 of class 0x0C: on notification 0x13 from its +0x7E0 object, codes 0x442 and 0x443 place one of its two objects and start it, 0x444 and 0x445 set and clear +0xE2C; then HandleAgentNotification
+func_0018B460	GetGaugeAgentLevelFactor	writes a factor from g_currentEntry's level: 1.3 times it less 0.3, clamped to 0..1, with the walker in state 0x43A or 0x43C, else its square
