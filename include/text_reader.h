@@ -21,6 +21,7 @@ struct TextReader {
     union {
         s32 text;           // 0x00: the second argument (func_0015DB28), func_0015DB80
         u32 u00;            // 0x00
+        char* start;        // 0x00: the text's start, as func_0015E068 backs up to it
     };
     char* cur;              // 0x04: func_0015DBE0
     Font* font;            // 0x08: func_0015DBE0, func_0015DFF8, func_0015E318

@@ -5,34 +5,36 @@
 #include "asm_func.h"
 #include "path_curve.h"
 #include "shapes.h"
+#include "placed_object.h"
 
-struct __attribute__((aligned(16))) Vec_14DB78 { f32 v[4]; };
-struct Src_14DB78;
-struct VT_14DB78 {
-    void* slot0;
-    void (*f4)(Src_14DB78* self, Vec_14DB78* out, s32 flag);
-};
-struct Src_14DB78 { VT_14DB78* vt; };
-struct Obj_14DB78 {
-    Src_14DB78* src;
-    Vec_14DB78* a;
-    Vec_14DB78* b;
+// What the nearest-time search (func_001EB168) passes its measure: the curve and the two points
+// of the segment MeasurePathCurveDistance measures against (FindPathCurveNearestTime,
+// FindSplinePathNearestTime).
+struct NearestTimeQuery {
+    PathCurve* curve;       // 0x00
+    Vec02* a;               // 0x04
+    Vec02* b;               // 0x08
+    s32 pad;                // 0x0C
 };
 
-struct Ctx_14DBD0 { PathCurve* self; s32 a1; s32 a2; s32 pad; };
-struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
+// What the nearest-time search writes back: the time it found.
+struct NearestTimeResult {
+    f32 time;               // 0x00
+    s32 p1;                 // 0x04
+    s32 p2;                 // 0x08
+    s32 p3;                 // 0x0C
+};
 
-struct __attribute__((aligned(16))) Quad_0014DE78 { s32 v[4]; };
-struct __attribute__((packed)) Pack4_0014DE78 { s32 v; };
-struct Frac_14E090 { s32 idx; f32 t; };
-typedef f32 (*Fn_14E6A8)(void* self);
-typedef void (*Fn2_14E6A8)(void* self, f32 t, s32 a1, void* a2);
+// The point the curve's slot 1 samples into (MeasurePathCurveDistance's call, with the time
+// still in $f12), and the spline's slot 1 and slot 11 as func_0014E6A8 and func_0014ED98 call
+// them, with the time slot 6 returns.
+typedef void (*CurveSamplePointFn)(PathCurve* self, Vec02* out, s32 flag);
+typedef f32 (*CurveTimeFn)(void* self);
+typedef void (*CurveSampleAtFn)(void* self, f32 t, s32 a1, void* a2);
+typedef void (*SplineSlot11Fn)(void* self, s32 p1, f32 x, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
-struct Ctx_14EC70 { PathCurve* self; s32 a1; s32 a2; s32 pad; };
-struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
-
-typedef f32 (*Slot6_14ED98)(void* self);
-typedef void (*Slot11_14ED98)(void* self, s32 p1, f32 x, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
+// A segment index and the fraction along it (FindNearestPathCurveSegment's two outputs).
+struct SegmentFraction { s32 idx; f32 t; };
 
 // An entry of a table of functions.
 typedef void (*Fn_Table)();
@@ -44,7 +46,7 @@ void func_00130B48(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 
 s32 func_00137B90(void* src);
 f32 func_00137DF8(void* src);
 void func_00137E70(void* src, void* dst);
-void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2);
+void func_00186320(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
 void func_00188700(void* a, void* b, void* c, f32 w);
 void func_001891C0(void* self, void* arg, Quad16* out);
 void* func_0018D500(s32 size);
@@ -68,7 +70,7 @@ void func_0014DA98(void);
 f32 func_0014DB40(PathCurve* obj);
 f32 func_0014DB58(PathCurve* obj);
 void func_0014DB70(void);
-f32 func_0014DB78(Obj_14DB78* self);
+f32 func_0014DB78(NearestTimeQuery* self);
 void func_0014DBD0(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
 f32 func_0014DD00(PathCurve* self);
 void func_0014DD28(PathCurve* self, void* src);
@@ -200,42 +202,42 @@ f32 func_0014DB58(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->len
 
 LINKER_REMNANT(func_0014DB70);
 
-f32 func_0014DB78(Obj_14DB78* self)
+f32 func_0014DB78(NearestTimeQuery* self)
 {
-    Vec_14DB78 p;
+    Vec02 p;
     f32 o1;
     f32 o2;
-    if (self->src->vt->f4)
-        self->src->vt->f4(self->src, &p, 0);
+    if (self->curve->vt->m01)
+        ((CurveSamplePointFn)self->curve->vt->m01)(self->curve, &p, 0);
     MeasurePointToSegment(&p, self->a, self->b, &o1, &o2);
     return o2;
 }
 
 void func_0014DBD0(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
-    Ctx_14DBD0 ctx;
-    Out_14DBD0 out;
+    NearestTimeQuery ctx;
+    NearestTimeResult out;
     f32 f13;
     f32 f14;
     void* fn;
 
-    ctx.self = self;
-    ctx.a1 = a1;
-    ctx.a2 = a2;
+    ctx.curve = self;
+    ctx.a = (Vec02*)a1;
+    ctx.b = (Vec02*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
     func_001EB168((void*)MeasurePathCurveDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.f);
+            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.time);
         }
     }
     if (a5 != 0) {
-        *a5 = out.f;
+        *a5 = out.time;
     }
     if (a6 != 0) {
-        *a6 = self->vt->m05(self, out.f);
+        *a6 = self->vt->m05(self, out.time);
     }
 }
 
@@ -275,9 +277,9 @@ void func_0014DE40(PathCurve* self, s32 a1, s32 a2)
 
 void func_0014DE78(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
 {
-    Quad_0014DE78 A;
-    Quad_0014DE78 B;
-    Pack4_0014DE78 C;
+    Quad16 A;
+    Quad16 B;
+    U32P C;
     s32 next;
 
     if (idx == self->count - 1) {
@@ -290,7 +292,7 @@ void func_0014DE78(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     }
     TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
     TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), &B, 1.0f);
-    C = *(Pack4_0014DE78*)a4;
+    C = *(U32P*)a4;
     DrawProjectedLine(&A, &B, &C, a3, a5);
 }
 
@@ -319,7 +321,7 @@ f32 func_0014E068(PathCurve* self)
 
 void func_0014E090(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
 {
-    Frac_14E090 f;
+    SegmentFraction f;
     FindNearestPathCurveSegment(a1, a2, self->count, self->points, a3, a4, &f.idx, &f.t);
     if (out1) {
         *out1 = (1.0f - f.t) * self->lengths[f.idx] + f.t * self->lengths[f.idx + 1];
@@ -388,8 +390,8 @@ ASM_FUNC(func_0014E5B8);
 
 void func_0014E6A8(SplinePathCurve* self, s32 a1, void* a2)
 {
-    f32 t = ((Fn_14E6A8)self->vt->m06)(self);
-    Fn2_14E6A8 fn = (Fn2_14E6A8)self->vt->m01;
+    f32 t = ((CurveTimeFn)self->vt->m06)(self);
+    CurveSampleAtFn fn = (CurveSampleAtFn)self->vt->m01;
     if (fn) {
         fn(self, t, a1, a2);
     }
@@ -442,29 +444,29 @@ ASM_FUNC(func_0014EB10);
 
 void func_0014EC70(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
-    Ctx_14EC70 ctx;
-    Out_14EC70 out;
+    NearestTimeQuery ctx;
+    NearestTimeResult out;
     f32 f13;
     f32 f14;
     void* fn;
 
-    ctx.self = self;
-    ctx.a1 = a1;
-    ctx.a2 = a2;
+    ctx.curve = self;
+    ctx.a = (Vec02*)a1;
+    ctx.b = (Vec02*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
     func_001EB168((void*)MeasureSplinePathDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.f);
+            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.time);
         }
     }
     if (a5 != 0) {
-        *a5 = out.f;
+        *a5 = out.time;
     }
     if (a6 != 0) {
-        *a6 = self->vt->m05(self, out.f);
+        *a6 = self->vt->m05(self, out.time);
     }
 }
 
@@ -476,8 +478,8 @@ void func_0014ED98(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5
     s32 q1 = p1;
     s32 q6 = p6;
     s32 q5 = p5;
-    f32 r = ((Slot6_14ED98)self->vt->m06)(self);
-    Slot11_14ED98 fn = (Slot11_14ED98)self->vt->m11;
+    f32 r = ((CurveTimeFn)self->vt->m06)(self);
+    SplineSlot11Fn fn = (SplineSlot11Fn)self->vt->m11;
     if (fn != 0) {
         fn(self, q1, r, q2, q3, q4, q5, q6);
     }

@@ -27,10 +27,10 @@ extern s32 D_002623CC;
 extern u8 D_00264A40[];
 extern s32 D_0026FCF0;
 extern u8 D_00275BC0[];
-typedef void (*VFn_16A5F0)(void* self, void* a);
-struct Ent_262718 { s32 a; s32 b; s32 c; };
-struct Tab_262718 { Ent_262718 e[9]; s32 end; };
-extern Tab_262718 D_00262718;
+// An entry of the choice tables D_00262718 and D_00262788 (three words).
+struct ChoiceEntry { s32 a; s32 b; s32 c; };
+struct ChoiceTable { ChoiceEntry e[9]; s32 end; };
+extern ChoiceTable D_00262718;
 struct Cand_16AB38 {
     u8 pad[0x304];
     s32* flagp;
@@ -51,13 +51,8 @@ struct Self_16AB38 {
     u8 pad3[0x18];
     Cand_16AB38* cands[4];
 };
-struct SelEnt_16AB38 {
-    s32 id;
-    s32 pad;
-};
 struct Obj_16AED8Glob { u8 pad0[0x30]; s32 f30; };
-struct Ent_262788 { s32 a; s32 b; s32 c; };
-extern Ent_262788 D_00262788[18];
+extern ChoiceEntry D_00262788[18];
 struct Pair_16AF80 {
     u8 pad0[0x28];
     s32 f28;
@@ -89,12 +84,13 @@ struct Rec_16B190 {
     u8 pad[0x14];
     s32 f1C;
 };
-struct Tab_16B300 { s32 a; s32 b; };
-extern Tab_16B300 D_00262860[6];
-struct Slot_16B300 { u8 pad[0x20]; };
-struct Slot_262890 { u32 w[8]; };
-extern Slot_262890 D_00262890[6];
-extern Slot_262890 D_00262950;
+// The state-walker keys of each choice (D_00262860): the one walked to, the one targeted.
+struct ChoiceKeys { s32 walkerKey; s32 targetKey; };
+extern ChoiceKeys D_00262860[6];
+// A sound request of a choice (D_00262890 by choice, D_00262950), 0x20 bytes.
+struct ChoiceSound { u32 w[8]; };
+extern ChoiceSound D_00262890[6];
+extern ChoiceSound D_00262950;
 struct Self_16B300 {
     u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; f32 f2D8; u8 pad1[4]; void* f2E0;
     u8 pad2[0x300 - 0x2E4]; s32 f300;
@@ -102,8 +98,8 @@ struct Self_16B300 {
 extern f32 D_00261858[];
 extern f32 D_00262970;
 extern s32 D_0026FCF4;
-struct Style_16C360;
-extern Style_16C360 D_00262988;
+struct BoxStyle;
+extern BoxStyle D_00262988;
 struct Sub_16B580 { u8 pad0[0x28]; s32 f28; s32 f2C; s32 f30; };
 struct Obj_16B580 {
     u8 pad0[0x2D0];
@@ -122,13 +118,13 @@ struct Node_16B7A8 {
     u8 pad0[0x2D0];
     s32 f2D0;
 };
-struct Out_16B860;
-void func_00137228(Out_16B860* out, f32 x, f32 y);
-void func_00137238(Out_16B860* out, f32 x, f32 y);
-void func_00137248(Out_16B860* out, s32* value);
-void func_00137260(Out_16B860* out, s32 flag);
-void func_00137268(Out_16B860* out, s32 flag);
-struct Out_16B860 {
+struct CaptionLayout;
+void func_00137228(CaptionLayout* out, f32 x, f32 y);
+void func_00137238(CaptionLayout* out, f32 x, f32 y);
+void func_00137248(CaptionLayout* out, s32* value);
+void func_00137260(CaptionLayout* out, s32 flag);
+void func_00137268(CaptionLayout* out, s32 flag);
+struct CaptionLayout {
     u8 b[32];
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
@@ -136,8 +132,8 @@ struct Out_16B860 {
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
-struct Hd_16B860 {
-    static void Draw(Font** h, Out_16B860* out, void* tbl)
+struct CaptionDrawer {
+    static void Draw(Font** h, CaptionLayout* out, void* tbl)
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
@@ -145,7 +141,7 @@ struct Hd_16B860 {
         }
     }
 };
-extern Style_16C360 D_002629A8;
+extern BoxStyle D_002629A8;
 struct Tag_16BBA8;
 struct Bits_16BBA8;
 struct Group_16BBA8;
@@ -260,8 +256,8 @@ void func_0016AB38(Self_16AB38* self)
             else if (t->levels[5].f448 & 1) self->sel = 0;
             else self->sel = idx;
         }
-        if (self->p[2].dst) TeleportStateWalker(self->p[2].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
-        if (self->p[3].dst) TeleportStateWalker(self->p[3].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+        if (self->p[2].dst) TeleportStateWalker(self->p[2].dst, D_00262860[self->sel].walkerKey);
+        if (self->p[3].dst) TeleportStateWalker(self->p[3].dst, D_00262860[self->sel].walkerKey);
     }
     PushStackElement(g_elementStack, (u8*)&D_0026FA90);
 }
@@ -389,7 +385,7 @@ void func_0016B190(Obj_16B190* self)
             void* h = self->f2F8;
             callB = 0;
             if (h != 0) {
-                { SetStateWalkerTarget(h, D_00262860[idx].b); }
+                { SetStateWalkerTarget(h, D_00262860[idx].targetKey); }
             }
         }
         }
@@ -401,7 +397,7 @@ void func_0016B190(Obj_16B190* self)
 
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
 
-void func_001BE728(Slot_16B300* s);
+void func_001BE728(ChoiceSound* s);
 s32 func_001BE980(void);
 void func_001B6628(void* h, s32 arg);
 void func_001B64D8(void* h, s32 arg);
@@ -409,18 +405,18 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
 {
     if (a == self->f2D0 && b == self->f2D4) return;
     if (a != self->f300 && a > 0) {
-        Slot_16B300* slot = 0;
+        ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
             s32 fl = g_saveData->f19EC;
             if (!(fl & 2)) {
                 g_saveData->f19EC = fl | 2;
-                slot = (Slot_16B300*)&D_00262950;
+                slot = (ChoiceSound*)&D_00262950;
             }
         } else {
             f32 t = g_gameClock[1];
             if (D_00262970 <= t - D_0026FA90.lastAt) {
                 D_0026FA90.lastAt = t;
-                slot = (Slot_16B300*)((u8*)D_00262890 + (a << 5));
+                slot = (ChoiceSound*)((u8*)D_00262890 + (a << 5));
             }
         }
         if (slot) {
@@ -432,8 +428,8 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     if (h) {
         if (self->f2D0 == -1) {
             if (a != 0) {
-                TeleportStateWalker(h, D_00262860[a].b);
-                SetStateWalkerTarget(self->f2E0, D_00262860[a].a);
+                TeleportStateWalker(h, D_00262860[a].targetKey);
+                SetStateWalkerTarget(self->f2E0, D_00262860[a].walkerKey);
             }
         } else {
             SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
@@ -587,7 +583,7 @@ void func_0015C900(Font* font);
 void func_0016B860(T217D_12E0* self)
 {
     T217D_Word tmp;
-    Out_16B860 out;
+    CaptionLayout out;
     T217D_Word slot;
     u8 loc[0xB0];
 
@@ -608,7 +604,7 @@ void func_0016B860(T217D_12E0* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_16B860::Draw(self->frame, &out, &g_gsPacketWriter);
+            CaptionDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
         f32 r = Sine(g_elapsedTime * 10.0f);
@@ -751,7 +747,7 @@ INCLUDE_ASM(func_0016BEA0);
 // func_0016BEA0's "???", all literals.
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-struct Style_16C360 {
+struct BoxStyle {
     void* f0;
     u8 f4;
     f32 f8;
@@ -759,7 +755,7 @@ struct Style_16C360 {
     f32 f10;
     f32 f14;
     u32 f18;
-    Style_16C360(f32 w, f32 h)
+    BoxStyle(f32 w, f32 h)
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
@@ -771,24 +767,24 @@ struct Style_16C360 {
     }
 };
 
-Tab_262718 D_00262718 = {
+ChoiceTable D_00262718 = {
     { { 2, 0x51A, 0x2D0 }, { 2, 0x51B, 0x2D4 }, { 2, 0x51C, 0x2D8 }, { 2, 0x51D, 0x2DC },
       { 2, 0x51E, 0x2E0 }, { 2, 0x51F, 0x2E4 }, { 2, 0x520, 0x2E8 }, { 2, 0x521, 0x2EC },
       { 2, 0x522, 0x2F0 } },
     0
 };
-Ent_262788 D_00262788[18] = {
+ChoiceEntry D_00262788[18] = {
     { 0, 0x4F9, 0x2DC }, { 0, 0x4FA, 0x2E4 }, { 0, 0x4FB, 0x2EC }, { 1, 0x4FC, 0x2F4 },
     { 0, 0x50B, 0x328 }, { 0, 0x50C, 0x32C }, { 0, 0x50D, 0x330 }, { 0, 0x50E, 0x334 },
     { 0, 0x50F, 0x338 }, { 1, 0x510, 0x310 }, { 1, 0x511, 0x314 }, { 1, 0x512, 0x318 },
     { 1, 0x513, 0x31C }, { 1, 0x514, 0x320 }, { 7, 0x33B, 0x33C }, { 7, 0x33C, 0x340 },
     { 7, 0x33D, 0x344 }, { 7, 0x33E, 0x348 }
 };
-Tab_16B300 D_00262860[6] = {
+ChoiceKeys D_00262860[6] = {
     { 0x4FF, 0x505 }, { 0x500, 0x506 }, { 0x501, 0x507 }, { 0x502, 0x508 }, { 0x503, 0x509 },
     { 0x504, 0x50A }
 };
-Slot_262890 D_00262890[6] = {
+ChoiceSound D_00262890[6] = {
     { { 0, 0, 0, 0, 0, 0, 0, 0 } },
     { { 0x635DE216, 0x4EC49A4B, 0xE334472E, 0xCEF69512, 0x21FD26D6, 0x635CED13, 0xE33445A7, 0x4EC400FB } },
     { { 0x3FB4CB9D, 0xE4C59CDC, 0xB54DAA16, 0x74DAA291, 0x4E0ADF39, 0x3FB04A25, 0xB54DA89D, 0xE4C5FF1C } },
@@ -796,7 +792,7 @@ Slot_262890 D_00262890[6] = {
     { { 0xA46F3D2E, 0x368721CE, 0xF314B84E, 0x702E7249, 0x5011BB12, 0xA47BDDCC, 0xF314BAC4, 0x3687A2FE } },
     { { 0x4BEF3327, 0x61E51B24, 0x2E2955B0, 0xFEF61D5D, 0x4AC1B015, 0x4BE71C67, 0x2E29573C, 0x61E5EF04 } }
 };
-Slot_262890 D_00262950 = { { 0xAD5AA16C, 0xC4D11624, 0x183E0989, 0x9870DBBF, 0xC74A50B2, 0xAD59F526, 0x183E0BF2, 0xC4D06934 } };
+ChoiceSound D_00262950 = { { 0xAD5AA16C, 0xC4D11624, 0x183E0989, 0x9870DBBF, 0xC74A50B2, 0xAD59F526, 0x183E0BF2, 0xC4D06934 } };
 // Six words of floats; the code reads only the first (func_0016B300, func_0016B4A0).
 f32 D_00262970 = 20.0f;
 f32 D_00262974 = 0.5f;
@@ -804,9 +800,9 @@ f32 D_00262978 = 2.0f;
 f32 D_0026297C = 0.0f;
 f32 D_00262980 = 0.1f;
 f32 D_00262984 = 0.0f;
-Style_16C360 D_00262988(2.0f, 1.0f);
+BoxStyle D_00262988(2.0f, 1.0f);
 f32 D_002629A4 = 0.5f;
-Style_16C360 D_002629A8(2.0f, 1.0f);  // D_002629C0, which func_0016BEA0 reads, is its colour f18
+BoxStyle D_002629A8(2.0f, 1.0f);  // D_002629C0, which func_0016BEA0 reads, is its colour f18
 
 // The static initialiser above (func_0016C360) is followed in retail by 12 bytes the linker left
 // of a setter this file wrote out, then the file's _GLOBAL_$I$ (func_0016C450).

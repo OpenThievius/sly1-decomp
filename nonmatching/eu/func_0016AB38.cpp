@@ -62,8 +62,8 @@ void func_0016AB38(Self_16AB38* self)
     func_0016B300(self, idx, 0);
     if (self->p[2].dst || self->p[3].dst) {
         self->sel = 0;
-        if (self->p[2].dst) func_001B6628(self->p[2].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
-        if (self->p[3].dst) func_001B6628(self->p[3].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+        if (self->p[2].dst) func_001B6628(self->p[2].dst, D_00262860[self->sel].walkerKey);
+        if (self->p[3].dst) func_001B6628(self->p[3].dst, D_00262860[self->sel].walkerKey);
     }
     u8* cap = (u8*)&D_0026FA90;
     func_001E9498(D_00275BC0, cap);

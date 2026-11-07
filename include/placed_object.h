@@ -124,7 +124,14 @@ struct PlacedObject : BaseObject {
     u8* p220;               // 0x220: D_00260EC0
     Rec2195_224* f224;      // 0x224: a 0xC0-byte record (t2195.h)
     s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
-    u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
+    union {
+        u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
+        struct {
+            u8 pad22C[0x238 - 0x22C];
+            s32 drawPartCount;      // 0x238: the parts func_001533A8 draws
+            void* drawParts;        // 0x23C: drawPartCount parts of 0x70 bytes
+        };
+    };
     s32 f26C;               // 0x26C: the number of f1F8 entries
     f32* f270;              // 0x270
     u8 pad274[0x278 - 0x274];

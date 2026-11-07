@@ -42,13 +42,15 @@ struct Timer68 {
 };
 
 // The table at +0x2E0: an object, two things found from it, a key (func_0014CF30 clears the
-// key of a slot whose object goes away).
+// key of a slot whose object goes away; func_0014CBA8 starts an animation player into it).
+// func_0014CBA8 hands a free slot to the pool's chosen agent (NumberedAgent::fC28), which
+// clears `taken` when it is done with it (func_0014BD38, func_0014BF88 through ContactAgent::fC20).
 struct GaugeSlot {
     void* obj;              // 0x00
-    void* f4;               // 0x04
+    void* f4;               // 0x04: the object whose position and rotation the agent takes
     void* f8;               // 0x08
     void* key;              // 0x0C
-    u8 pad10[4];
+    s32 taken;              // 0x10: an agent holds the slot
 };
 
 struct GaugeManager : PlacedObject {
@@ -65,14 +67,17 @@ struct GaugeManager : PlacedObject {
         s32 tag430;         // 0x430: what func_001B6598 reads from the device
         u8 buf430[0x1C];
         struct {
-            u8 pad430[0x18];
+            u8 pad430[0xC];
+            f32 f43C;       // 0x43C: func_0014CD70 waits a random time between this
+            f32 f440;       // 0x440  and this
+            u8 pad444[0x448 - 0x444];
             f32 speed448;   // 0x448: the animation speed class 0x11 sets (func_0014BD38)
         };
     };
     s32 f44C;               // 0x44C
     s32 f450;               // 0x450: 2 at setup
     s32 f454;               // 0x454
-    u8 pad458[0x45C - 0x458];
+    s32 f458;               // 0x458: lowered by each contact (func_0014CD70)
     f32 f45C;               // 0x45C: the largest float at setup (D_00249FB0)
     f32 f460;               // 0x460
     s32 f464;               // 0x464: 0 at setup

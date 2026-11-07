@@ -7,15 +7,15 @@ s32 func_00151300(StepSequence* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
-        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
-        if (e != 0 && e->f0 == 2) {
+        SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
+        if (e != 0 && e->type == 2) {
             if (flags == 2) return 0;
         }
         if (((Hld_151300_eu*)&D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)&D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
-        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
-        if (e != 0 && e->f0 == 1 && flags == 4) return 0;
+        SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
+        if (e != 0 && e->type == 1 && flags == 4) return 0;
         if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
@@ -56,7 +56,7 @@ s32 func_00151300(StepSequence* self)
             if (0.8f < __builtin_fabsf(in->f44)) r = 1;
             break;
         case 13:
-            if (g_player != 0 && ((Ctx_151300*)g_player)->f2220 == 2) r = ((Ctx_151300*)g_player)->f2228 == 3;
+            if (g_player != 0 && g_player->f2220 == 2) r = g_player->f2228 == 3;
             break;
         case 14:
         {
