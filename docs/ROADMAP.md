@@ -24,8 +24,8 @@ Where each stands is in the README's table (`tools/progress.py`); in short, on 2
 matching is in its long tail, the data mostly from C, the original assembly classified, every byte
 of code in a proved source file, PAL close behind US, and names and types well under way.
 
-1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-06,
-   77 US functions are left (about 79 KB: 53 in game code, 24 in the libraries), 34 of them with
+1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-07,
+   79 US functions are left (78,688 bytes: 51 in game code, 28 in the libraries), 36 of them with
    a near miss in `nonmatching/`. The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB,
    47% of what is left), is close but differs in code as well as registers: 9,338 instructions
    against retail's 9,348, 2,990 of them exact. Its header records why: GCC keeps the value 4 in
@@ -54,11 +54,12 @@ of code in a proved source file, PAL close behind US, and names and types well u
    `src/main/` then give way to real files, with names that are ours. A file is proved by
    building it whole, as the original was, and linking each of its sections in one piece
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
-   On 2026-11-06 every byte of code, 0x100000 to 0x211E0C, is in one of 165 proved files (74 of
-   game code, 91 of the libraries, the math library and the toolchain's runtime). Many are one
+   On 2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
+   game code, 93 of the libraries, the math library and the toolchain's runtime). Many are one
    file between two exact edges that could be several; each commit says which. What is left is
-   refinement: splitting those when evidence appears, and placing the data the 16 KiB windows
-   still define (class method tables) in their files.
+   splitting those when evidence appears, and placing the data the 16 KiB windows still define
+   in their files: the 21 window files left (19 of game code, 2 of the libraries) hold no code,
+   but 538 of the 767 globals defined in C (205,348 bytes of 422,765) are still in them.
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
@@ -68,10 +69,13 @@ of code in a proved source file, PAL close behind US, and names and types well u
    (`D_0027B130`) gives the exact end of every file with a static initialiser.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
-   `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-06, 98 PAL functions
-   are left: one C function differs at its counterpart, 11 functions only PAL has are not
-   defined yet (`tools/version_src.py todo`), 10 have a near miss in `nonmatching/eu/`, and the
-   rest are the ones US has left too.
+   `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-07, 96 PAL functions
+   are left (62 in game code, 34 in the libraries): two C functions differ at their counterparts
+   (func_001316E8 and func_0016AB38), 11 game-code functions only PAL has are not defined yet
+   (`tools/version_src.py todo`, which lists game code only), and 6 library functions only PAL
+   has (964 bytes: 0x1F7738, 0x1F9538, 0x20A730, 0x20A7D0, 0x20A810, 0x20A870) are not defined
+   either. The other 77 are the counterparts of the functions US has left (two of US's 79,
+   func_001ABE70 and func_001DCEA0, have none). 11 have a near miss in `nonmatching/eu/`.
 6. **Names and types.** Ours, from what the code does, as the C is cleaned up. Types come
    first, one per object, so that each name is chosen once: a header per class family of
    retail's class descriptors (`include/cNN.h`, `config/us/classes.tsv`), per kind of the other
@@ -88,12 +92,15 @@ of code in a proved source file, PAL close behind US, and names and types well u
    367 game functions do not yet (255 of them original assembly, mostly VU0 routines and
    linker leftovers, and 112 in C whose role the code does not show yet). Eight class headers
    keep their ids, and of the views matched functions declared for themselves (`Obj_XXXXXX`,
-   `Sub_XXXXXX`, 2,018 of them that morning) 18 are left, each for a stated reason (a
-   declaration retail's code needs, data only assembly reads) or a role still unclear; the rest
-   are their shared types or local types named by role. Function bodies use the readable
-   names; declarations and definitions still use the address names.
-7. **The disc's data.** Its loader and index, then each format from the code that reads it
-   ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
+   `Sub_XXXXXX`, 2,018 of them in game code that morning) 18 are left in game code, each for a
+   stated reason (a declaration retail's code needs, data only assembly reads) or a role still
+   unclear; the rest are their shared types or local types named by role. The libraries' 221
+   views (in 23 files) are not named yet: Sony's library code was outside this pass. Function
+   bodies use the readable names; declarations and definitions still use the address names.
+7. **The disc's data**, each format from the code that reads it ([DISC.md](DISC.md)). How the
+   game finds its data is described, and a level's textures, objects, geometry, collision,
+   animations and events, and PAL's data. Next are the fields not yet named and the sound
+   banks' own format; OpenThievius's extractor is then written from these readers.
 
 ## Open decisions
 
