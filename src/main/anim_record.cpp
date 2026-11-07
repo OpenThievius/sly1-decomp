@@ -110,7 +110,7 @@ struct Ent_1B2DF8 {
     u8 pad84[0x04];
 
     Ent_1B2DF8() { p4c = g_fontMethods; }
-    void* operator new[](__SIZE_TYPE__ size) { return func_001FD8A8(size); }
+    void* operator new[](__SIZE_TYPE__ size) { return AllocateOrThrow(size); }
 };
 extern s32 D_00262260;
 extern Ent_1B2DF8* D_00262264;
@@ -199,11 +199,11 @@ void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
     s32 sel = flag ^ 5;
     u64 one = 1;
 
-    func_001F5C0C(&a, 0, 8);
-    func_001F5C0C(&b, 0, 8);
-    func_001F5C0C(&c, 0, 8);
-    func_001F5C0C(&d, 0, 8);
-    func_001F5C0C(&e, 0, 8);
+    FillMemory(&a, 0, 8);
+    FillMemory(&b, 0, 8);
+    FillMemory(&c, 0, 8);
+    FillMemory(&d, 0, 8);
+    FillMemory(&e, 0, 8);
 
     a.bits = GetTextureRegisterBits(obj, p1, p2);
     s32 kindA = 7;
@@ -1052,7 +1052,7 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
     if (p->cursor.record->count < 2) {
         return;
     }
-    if (*(void**)q != (void*)func_00166690) {
+    if (*(void**)q != (void*)DrawModelPart) {
         return;
     }
     Vec2_1B5160* vv;
@@ -1061,7 +1061,7 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
     } else {
         vv = (Vec2_1B5160*)g_camera->g80;
     }
-    f32 t = func_00205778(vv->y, vv->x);
+    f32 t = ArctangentOfRatio(vv->y, vv->x);
     f32 r = WrapModulo(p->phase - t, p->sector);
     s32 k = (s32)(r / p->step);
     SetCursorFrame(&p->cursor, k);
@@ -1082,8 +1082,8 @@ void func_001B5200(ScrollAnimator* p, AnimatorParams* s)
 void func_001B5278(ScrollAnimator* p, f32 t)
 {
     if (p->cursor.record != 0) {
-        f32 r1 = func_002058A0(p->cursor.u + p->velU * p->mulU * t, p->wrapU);
-        f32 r2 = func_002058A0(p->cursor.v + p->velV * p->mulV * t, p->wrapV);
+        f32 r1 = FloatRemainder(p->cursor.u + p->velU * p->mulU * t, p->wrapU);
+        f32 r2 = FloatRemainder(p->cursor.v + p->velV * p->mulV * t, p->wrapV);
         SetCursorCoords(&p->cursor, r1, r2);
     }
 }

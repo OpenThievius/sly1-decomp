@@ -1268,7 +1268,7 @@ void func_0019E420(EffectOwner* self, f32 t)
     } else {
         CollideEffects(self);
     }
-    func_00129DF8(self);
+    ClearRootTries(self);
     g_activeListFrames = (ListFrame*)it.saved;
 }
 
@@ -1634,7 +1634,7 @@ void func_001A01B8(Effect* self, f32 f)
     V128_1A01B8 tv = t;
     V128_1A01B8 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0258(Effect* self, f32 f)
@@ -1652,7 +1652,7 @@ void func_001A0258(Effect* self, f32 f)
     V128_1A0258 tv = t;
     V128_1A0258 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0318(Effect* self)
@@ -1734,7 +1734,7 @@ void func_001A09C0(Effect* self, f32 f)
     V128_1A09C0 tv = t;
     V128_1A09C0 u;
     CopyQuadword(&u, p);
-    (void)StoreQuadword(sub, func_00118D30(tv, u));
+    (void)StoreQuadword(sub, ScaleQuadword(tv, u));
     u8* q = (u8*)D_0026B5A0;
     self->q40 = *(Quad219C*)q;
 }
@@ -1779,7 +1779,7 @@ void func_001A0BA0(Effect* self, f32 f)
     V128_1A0258 tv = t;
     V128_1A0258 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0C50(Effect* self)
@@ -2158,7 +2158,7 @@ void func_001A3C40(C15* self, Src_1A3C40* src)
     f.tri = *(Tri_1A3C40*)D_0024C9C0;
     f32 r = ArctangentOfRatio(((Inner_1A3C40*)self->f64C)->f114, ((Inner_1A3C40*)self->f64C)->f110);
     r = ApproachAngleWithRamp((u8*)&f.tri, 0, r, self->f620, g_frameDt);
-    func_001892A0(f.buf, r, 0.0f);
+    BuildYawPitchMatrix(f.buf, r, 0.0f);
     func_00128150(0, self, f.buf, f.buf);
     ((Inner_1A3C40*)self->f64C)->vtbl[34](((Inner_1A3C40*)self->f64C), f.buf);
 }
@@ -2225,7 +2225,7 @@ void func_001A4070(C15* self, s32 n)
     case 3:
         snd = 0x290;
         h = self->f67C;
-        func_001F4408(0, 1);
+        BeginLevelExit(0, 1);
         break;
     }
     for (s32 i = 0; i < self->f668; i++) {
@@ -2344,8 +2344,8 @@ void func_001A44E8(C15* self)
 {
     f32 buf[12];
     StepCollider(self);
-    func_001892A0(buf, self->f618, 0.0f);
-    func_001B9D10(self, buf, D_0026B7D8, g_frameDt);
+    BuildYawPitchMatrix(buf, self->f618, 0.0f);
+    TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 
 ASM_FUNC(func_001A4538);
@@ -2373,7 +2373,7 @@ void func_001A4610(C15* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
             self->v440 = g_unitZVector;
         }
     }
-    func_001BC828(self, a1, a2, a3, a4, a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->v440 = s0;
     self->q450 = s1;
 }
@@ -3167,7 +3167,7 @@ void func_001A7230(HitTarget* self)
     if (self->parent == 0) {
         u8 buf[0x30];
         func_00189378(&self->m110, 0, buf);
-        func_001B9D10(self, buf, D_0026B850, g_frameDt);
+        TurnColliderTowardRotation(self, buf, D_0026B850, g_frameDt);
     }
 }
 

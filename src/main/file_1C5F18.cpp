@@ -179,8 +179,8 @@ void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
     s->f2200 = fr.n;
     s->f2208 = 0;
     if (fr.n != 0 && s->f2220 == 0) {
-        s->f638 = func_00205778(fr.y, fr.x);
-        func_001C5D58(s);
+        s->f638 = ArctangentOfRatio(fr.y, fr.x);
+        TurnColliderTowardHeading(s);
     }
 }
 
@@ -213,8 +213,8 @@ void func_001C6E58(Obj_1C6E58* self)
     self->f2200 = t.out;
     self->f2208 = 0;
     if (t.out != 0) {
-        self->f638 = func_00205778(t.pair[1], t.pair[0]);
-        func_001C5D58(self);
+        self->f638 = ArctangentOfRatio(t.pair[1], t.pair[0]);
+        TurnColliderTowardHeading(self);
     }
 }
 
@@ -247,7 +247,7 @@ void func_001C6ED0(Obj_1C6ED0* self)
     self->f2200 = t.out;
     self->f2208 = 0;
     if (t.out != 0) {
-        self->f638 = func_00205778(t.pair[1], t.pair[0]);
-        func_001C5D58(self);
+        self->f638 = ArctangentOfRatio(t.pair[1], t.pair[0]);
+        TurnColliderTowardHeading(self);
     }
 }

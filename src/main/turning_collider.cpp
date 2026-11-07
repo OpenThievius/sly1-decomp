@@ -178,7 +178,7 @@ void func_001C4F08(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5
 {
     s32 old = self->mode470;
     self->mode470 = self->desc06()->m55(self);
-    func_001BC828(self, a1, a2, a3, a4, a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->mode470 = old;
 }
 
@@ -190,7 +190,7 @@ f32 func_00205778(f32 a, f32 b);
 void func_001C4FA0(TurningCollider* self, Vec2_1C4FA0* v)
 {
     SetColliderRotation(self, v);
-    f32 r = func_00205778(v->y, v->x);
+    f32 r = ArctangentOfRatio(v->y, v->x);
     self->f638 = r;
     self->f630 = r;
     ((VFn_1C4FA0*)self->desc)[88](self);
@@ -298,7 +298,7 @@ f32 func_001EA408(f32 a);
 void func_001C5438(TurningCollider* self)
 {
     RecomputeColliderFrame(self);
-    f32 t = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    f32 t = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 ay = __builtin_fabsf(WrapAngle(self->f638 - t));
     f32* lim = g_unitRange;
     Vec02* p = &self->v6F0;
@@ -332,7 +332,7 @@ f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
 void func_001C5D58(TurningCollider* self)
 {
     Vec02 q = self->v160;
-    f32 r = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     ApproachAngleWithRamp((u8*)self + 0x6E0, &q.z, r, self->f638, 0.0f);
     self->desc02()->m21(self, &q);
 }

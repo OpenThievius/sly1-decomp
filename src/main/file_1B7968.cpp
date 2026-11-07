@@ -880,8 +880,8 @@ ASM_FUNC(func_001B8820);
 void func_001B8960(Collider* self)
 {
     ComputePlacedObjectWorldFrame(self);
-    func_001B8820(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
-    func_001B8820(&self->mesh2, &self->mesh2Copy, *(Quad_1B8960*)&self->v140, &self->m110);
+    TransformMeshToWorld(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
+    TransformMeshToWorld(&self->mesh2, &self->mesh2Copy, *(Quad_1B8960*)&self->v140, &self->m110);
 }
 
 void func_001B89B8(Collider* self)
@@ -956,8 +956,8 @@ void func_001B9338(Collider* self, f32 t)
     m <<= 36;
     if (self->parent == 0) {
         if ((self->flags538 & m) == 0) {
-            func_001BA500(self, &self->v440, &self->gravity, &local, 0);
-            func_001B9AB0(self, &local);
+            ConstrainColliderVector(self, &self->v440, &self->gravity, &local, 0);
+            AddColliderForce(self, &local);
         }
     }
     node = self->attached;
@@ -985,7 +985,7 @@ void func_001B9418(Collider* self, f32 v)
     f32 a = self->mass;
     f32 q = v / a;
     self->mass = a * q;
-    func_001B9448(self);
+    ComputeColliderInverseInertia(self);
 }
 
 ASM_FUNC(func_001B9448);
@@ -1138,7 +1138,7 @@ void func_001B9F30(Collider* self, Out_1B9F30* out)
     out->q10 = self->v140;
     out->q20 = self->v150;
     func_00189378(&self->m110, 0, &tmp[0]);
-    out->f30 = func_00205778(-tmp[0].y, -tmp[0].x);
+    out->f30 = ArctangentOfRatio(-tmp[0].y, -tmp[0].x);
     out->f34 = 100.0f;
     out->f00 = 0;
     out->f38 = g_gameTime[0];
@@ -1215,14 +1215,14 @@ ASM_FUNC(func_001BA430);
 
 void func_001BA500(void* self, void* a, void* b, void* c, s32 d)
 {
-    func_001BA430(a, b, c, d);
+    ConstrainVectorByAnchor(a, b, c, d);
 }
 
 void func_001BA528(Collider* self, Attach03* node)
 {
     node->next = self->attached;
     self->attached = node;
-    func_00129DF8(self);
+    ClearRootTries(self);
 }
 
 void func_001BA550(Collider* o, Attach03* node)
@@ -1250,7 +1250,7 @@ void func_001BA550(Collider* o, Attach03* node)
     }
     node->next = 0;
 tail:
-    func_00129DF8(o);
+    ClearRootTries(o);
 }
 
 ASM_FUNC(func_001BA5B0);
@@ -1280,7 +1280,7 @@ void func_001BAC30(Collider* self, BufferedStream* in)
     self->mass = ReadBufferedFloat(in);
     ReadBufferedRotation3(in, &self->inertia);
     ReadBufferedVector3(in, &self->offset);
-    func_001B9448(self, 1.0f);
+    ComputeColliderInverseInertia(self, 1.0f);
     self->groupCount = ReadBufferedU16(in);
     self->groups = (Pair03*)AllocateFrontMemory(self->groupCount << 3);
     if (self->groupCount > 0) {
@@ -1831,8 +1831,8 @@ void func_001BD888(s32 n, Collider** objs)
     PushBackMemoryMark();
     sorted = (Collider**)AllocateBackMemory(n * 4);
     counts = (s32*)AllocateBackMemory(n * 4);
-    func_001F5C0C(counts, 0, n * 4);
-    func_001F5C0C(local, 0, 20);
+    FillMemory(counts, 0, n * 4);
+    FillMemory(local, 0, 20);
     for (i = 0; i < n; i++) {
         Collider* o = objs[i];
         u32 cnt = 0;
@@ -1917,7 +1917,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
     c.n1 = 0;
     arr2 = (Node_1BDD00**)AllocateBackMemory(self->count38 * 4);
     c.n2 = 0;
-    func_001F6C20(0);
+    SyncDataCache(0);
     if (flags & 1) {
         s32 e = (s32)&self->list60;
         fr.cursor = e;
@@ -1964,7 +1964,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
         ProcessColliderGroup(self, c.n1, arr1, f, flags);
         for (i = 0; i < c.n1; i++) {
             if (!func_00129D70(arr1[i])) {
-                func_00129DF8(arr1[i]);
+                ClearRootTries(arr1[i]);
             }
         }
     }
@@ -2071,7 +2071,7 @@ s32 func_001BE268(s32 n)
         ok = l.second != 0;
     }
     if (ok) {
-        while (func_00203828(0) != 2) {
+        while (WaitDiscReady(0) != 2) {
         }
         SyncDiscRead(0);
         s32 r = LoadSoundBankAtLocation(l.first, 0);
@@ -2319,7 +2319,7 @@ void func_001BEB10(Rec_1BEB10* self)
         return;
     }
     while (PollIopCommands() != 0 && g_stagedBankState == 1) {
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     UnloadStagedBank();
     g_stagedBankRecord = (s32)self;
@@ -2344,7 +2344,7 @@ void func_001BEC58(void* self)
     RequestStagedBank(self);
     if (self == 0) return;
     while (PollIopCommands() != 0 && g_stagedBankState == 1) {
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     if (g_stagedBankState == 2) {
         s32 h = StartSoundVoice(g_stagedBankHandle, 0, 0x400, -1, 0, 0);
@@ -2378,7 +2378,7 @@ void* func_001BED98(void)
 {
     void* p = PopFreeSlot((u8*)g_currentWorld + 0x1BB8);
     if (p != 0) {
-        func_001F5C0C((u8*)p, 0, 12);
+        FillMemory((u8*)p, 0, 12);
         AppendToList((u8*)g_currentWorld + 0x1BC4, p);
     }
     return p;
@@ -2398,7 +2398,7 @@ void func_001BEE48(void)
     for (node = Next_1BEE48::Of(&it); node != 0; node = Next_1BEE48::Of(&it)) {
         RemoveSoundLevelEntry(node);
     }
-    func_0011D928(0x14);
+    SendIopSoundLevel(0x14);
     D_002748EC = 0;
     g_activeListFrames = (ListFrame*)it.saved;
     g_previousSoundLevel = 0;
@@ -2470,7 +2470,7 @@ void func_001BF048(Entry_1BF048* self)
                 D_002748EC = 0;
             }
             g_previousSoundLevel = cur;
-            func_0011D928(cur + 0x14);
+            SendIopSoundLevel(cur + 0x14);
             SetVolumeChannelFactor(7, 1, 1.0f);
             g_previousSoundLevel = -0x64;
         }
@@ -2492,11 +2492,11 @@ void func_001BF0D8(Obj_1BF0D8* self)
 
 void func_001BF130(void)
 {
-    func_001F5C0C(g_soundBankHandles, 0, 0x1C);
+    FillMemory(g_soundBankHandles, 0, 0x1C);
     InitIopCommandChannels();
     EnsureSoundBankLoaded(0);
     EnableIopDiscAccess(1, 0x2000, 1, 1);
-    func_0011D928(0x14);
+    SendIopSoundLevel(0x14);
     ResetVolumeChannelFactors();
     func_0011D520(0, 1);
     func_0011D558(0, 0, 0x2F);
@@ -2533,11 +2533,11 @@ ASM_FUNC(func_001BF428);
 Fn_001BF578 func_001BF578(void)
 {
     s32 n;
-    if (IsTopCameraController((u8*)g_camera + 0x460) == 0) return func_001BF398;
+    if (IsTopCameraController((u8*)g_camera + 0x460) == 0) return MeasureListenerDistance;
     n = PeekStackValue((u8*)g_camera + 0x460);
-    if (n >= 3) return func_001BF398;
-    if (n <= 0) return func_001BF398;
-    return func_001BF2E0;
+    if (n >= 3) return MeasureListenerDistance;
+    if (n <= 0) return MeasureListenerDistance;
+    return MeasureCameraWeightedDistance;
 }
 
 f32 func_001BF5E0(Arg_1BF5E0* arg)
@@ -2550,7 +2550,7 @@ void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
 {
     if (self != 0) {
         f32 r = ComputeSoundListenerFactor(self);
-        func_001BF200(r, self, out, flag, a, b, c);
+        ComputeSoundVolumeAndPan(r, self, out, flag, a, b, c);
     } else {
         *out = a;
         *flag = 0;
@@ -2561,7 +2561,7 @@ void* func_001BF6B8(void)
 {
     void* s = PopFreeSlot((u8*)g_currentWorld + 0x1BA0);
     if (s) {
-        func_001F5C0C(s, 0, 0x90);
+        FillMemory(s, 0, 0x90);
         AppendToList((u8*)g_currentWorld + 0x1BAC, s);
     }
     return s;
@@ -2635,7 +2635,7 @@ void func_001BF8E8(Obj_1BF8E8* self, f32 a)
 void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF920* q, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, B8_1BF920* p78, B8_1BF920* p80)
 {
     B8_1BF920 keep = self->f64;
-    func_001F5C0C(self, 0, 0x90);
+    FillMemory(self, 0, 0x90);
     self->f64 = keep;
     if (a3) q = (Q16_1BF920*)(a3 + 0x140);
     self->f0C = parent;
@@ -2659,7 +2659,7 @@ void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF
     if (q || self->f78.f >= 0.0f) fl = 1;
     self->f44 = fl;
     ComputeSoundAttenuation(q, &self->f50, &self->f54, f14, f12, f13);
-    func_001BF428(self);
+    ComputeSoundRecordDoppler(self);
 }
 
 void func_001BFAF8(Node_1BFAF8* self, s32 idx)
@@ -2683,7 +2683,7 @@ void func_001BFAF8(Node_1BFAF8* self, s32 idx)
         s32 r = StartSoundVoice((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
         self->f40 = 0;
         self->f18 = r;
-        func_001BF428(self);
+        ComputeSoundRecordDoppler(self);
         SetSoundRecordPitch(self, self->f58);
         ApplySoundRecordVolumePan(self);
     } else {
@@ -2728,7 +2728,7 @@ void func_001BFCD8(s32 id, Buf_1BFCD8** out, s32 p2, s32 p3,
         }
         if (s1) {
             if (0.0f <= s1->f78) {
-                func_001BFBF8(s1);
+                ScheduleAmbientSoundRecord(s1);
                 s1->f74 = (*(f32*)&g_gameTime) + RandomFloatInRange(0.0f, s1->f78);
             }
             StartSoundRecordVoice(s1, id);
@@ -2786,7 +2786,7 @@ void func_001C0070(void)
     if (g_previousSoundLevel != -100) {
         s32 up = g_previousSoundLevel < g_currentSoundLevel;
         if (g_currentSoundLevel > 0 && up) {
-            func_0011D928(g_currentSoundLevel + 0x14);
+            SendIopSoundLevel(g_currentSoundLevel + 0x14);
             g_previousSoundLevel = g_currentSoundLevel;
             SetVolumeChannelFactor(7, 1, 1.0f);
             D_002748EC = 0;
@@ -2797,7 +2797,7 @@ void func_001C0070(void)
                 s32 v = (g_currentSoundLevel < a) ? a - 1 : a + 1;
                 D_002748EC = (u32)v >> 31;
                 g_previousSoundLevel = v;
-                func_0011D928(v + 0x14);
+                SendIopSoundLevel(v + 0x14);
                 if (g_previousSoundLevel < 0) {
                     f32 cnv = (f32)g_previousSoundLevel;
                     f32 k = -0.05f;
@@ -2816,7 +2816,7 @@ void func_001C0070(void)
         }
         if (up ? !(g_previousSoundLevel < g_currentSoundLevel) : !(g_previousSoundLevel > g_currentSoundLevel)) {
             D_002748EC = (u32)g_previousSoundLevel >> 31;
-            func_0011D928(g_currentSoundLevel + 0x14);
+            SendIopSoundLevel(g_currentSoundLevel + 0x14);
             g_previousSoundLevel = -100;
         }
     }
@@ -2853,7 +2853,7 @@ void func_001C0070(void)
                 if (s1[1] < e->f74) {
                     if (e->f40 != 0) goto next;
                 } else {
-                    func_001BFBF8(e);
+                    ScheduleAmbientSoundRecord(e);
                     if (e->f40 != 0) {
                         if (s1[1] - D_00274750 < 1.0f) goto next;
                         D_00274750 = s1[1];
@@ -2878,13 +2878,13 @@ void func_001C0070(void)
                     StopSoundRecord(e, 0);
                     goto next;
                 }
-                func_001BF200(r, s1, &e->f50, &e->f54, e->f14, e->f34, e->f38);
+                ComputeSoundVolumeAndPan(r, s1, &e->f50, &e->f54, e->f14, e->f34, e->f38);
             }
             if (e->f40 != 0 && e->f0 != -2) {
                 e->f18 = StartSoundVoice(e->f8, D_00245024[e->f0].a, 0, 0, 0, 0);
                 e->f40 = 0;
             }
-            func_001BF428(e);
+            ComputeSoundRecordDoppler(e);
             SetSoundRecordPitch(e, e->f58);
             ApplySoundRecordVolumePan(e);
         next:;
@@ -2951,7 +2951,7 @@ s32 func_001C0790(s32 value)
 
 void func_001C07B0(void)
 {
-    func_0011E010();
+    StopAllIopSounds();
     StopWorldSoundRecords(0);
     ClearSoundLevels();
     ClearCachedVoiceParams();
@@ -3403,7 +3403,7 @@ s32 func_001C1A28(List_1C1A28* self, s32 value)
 {
     Desc_1C15D8 d;
     ScriptValue t;
-    func_001F5C0C(&d, 0, 0x20);
+    FillMemory(&d, 0, 0x20);
     d.flags = 2;
     d.kind = self->type;
     d.off = 0;
@@ -3621,7 +3621,7 @@ void func_001C2430(s32 size, ...)
     ap = (VaList_1C2430)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
     u32 addr = e->base;
     if (e->state == 3) {
-        func_00202C38((*(void**)&g_fromSprChannel), 0, 0);
+        WaitDmaChannel((*(void**)&g_fromSprChannel), 0, 0);
     }
     e->state = 1;
     s32 data = VA_ARG_1C2430(ap, s32);
@@ -3646,7 +3646,7 @@ void func_001C2430(s32 size, ...)
     Chan_1C2430* c = g_toSprChannel;
     c->f0 |= 0x40;
     c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
-    func_00202A80(c, (u32)e->tags & 0x0FFFFFFF);
+    StartDmaChain(c, (u32)e->tags & 0x0FFFFFFF);
 }
 
 void func_001C25B0(s32 first, ...) {
@@ -3655,7 +3655,7 @@ void func_001C25B0(s32 first, ...) {
     s32 n = 0;
     s32 x = first;
     r->f4C = 3;
-    func_00202C38(g_fromSprChannel, 0, 0);
+    WaitDmaChannel(g_fromSprChannel, 0, 0);
     void* ap = (char*)__builtin_next_arg(first) - 56;
     while (x) {
         buf[n] = x;
@@ -3674,7 +3674,7 @@ void func_001C25B0(s32 first, ...) {
     *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
     d->f0 &= ~0x40;
     d->f80 = (r->f4 & 0xFFFFFFF) + 0x80000000;
-    func_00202B68(d);
+    StartDmaChainToMemory(d);
     r = &D_002748F0[1 - D_00274990];
     if (r->f4C == 3) r->f4C = 0;
 }

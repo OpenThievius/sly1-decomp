@@ -6,28 +6,42 @@ func_001B7C40	SetColliderPartListed	stores flag in bit 50 of the flags at +0x538
 func_001B7D00	ApplyColliderPendingMove	slot 47 of class 0x03: adds the pending vector at 0x490 to the position at 0x100 and turns the matrix by the pending rotation at 0x4A0, clears them, then calls slot 47 of the parts and slot 18
 func_001B7F78	ApplyColliderPendingImpulse	slot 48 of class 0x03: adds the pending vectors at 0x490 and 0x4A0 into the vectors at 0x150 and 0x160, clears them and calls slot 48 of the parts
 func_001B8148	ApplyColliderPendingImpulseHalfStep	slot 49 of class 0x03: like slot 48 but also adds the pending vector times half the step D_00261860 to the position and turns the matrix by half the pending rotation, then calls slot 49 of the parts
+func_001B8420	ExpandColliderBoundsBySphere	widens the bounds box (0x420, 0x430) and the two radii about the position 0x140 (0x3D0) and the centre 0x3E0 (0x3D4) to take in a sphere of the given radius at a point; UpdatePlayerBounds and UpdatePathFollowerBounds call it for their extra points
 func_001B8540	UpdateColliderBounds	slot 50 of class 0x03: walks the body's parts and stores the minimum and maximum corner (0x420, 0x430), centre (0x3E0) and radii (0x3D0, 0x3D4) of their positions and mesh vertices
+func_001B8820	TransformMeshToWorld	copies a mesh's vertices (count +4, array +8) and its faces (count +0xC, array +0x10, 0x20 bytes each) through a matrix and an offset into a second mesh, recomputing each face's plane distance from its first vertex (+0x1E); ComputeColliderWorldFrame and ComputeCountedColliderWorldFrame call it
 func_001B8960	ComputeColliderWorldFrame	slot 19 of class 0x03: runs func_00125138, then transforms mesh and mesh2 into their copies at 0x3A4 and 0x50C with the world position (0x140) and matrix (0x110) through func_001B8820
 func_001B89B8	RecomputeColliderFrame	slot 18 of class 0x03: runs func_00125108, tells the body's slot 50 that its parts changed and queues the object in the world (func_00138BE0 with 7)
 func_001B8A08	TestCollidersMayContact	slot 56 of class 0x03: returns 1 when the first object has flag bit 47 or 55 and the second has bit 55, otherwise 0
 func_001B8A48	NotifyContactHandlers	slot 67 of class 0x03: for each contact in the body's table whose timer exceeds 0.0001 calls slot 65 of both ends' handler (func_001BB540) and zeroes the timer
+func_001B8B30	ComputeSegmentParameter	returns the parameter of a point's projection on the segment between two points: the dot product of (p - a) and (b - a) over the squared length of (b - a); func_001B8B90 calls it
+func_001B8FE8	ApplyColliderInverseInertia	turns a vector into the body's frame (the matrix at 0x110), multiplies it by the inverse inertia at 0x320 and turns it back; StepPathFollower and func_001BC828 use it
+func_001B9058	SteerColliderTowardPosition	adds to the force accumulator (AddColliderForce) a pull toward a target position (from 0x100) and toward a target velocity (from 0x150), each scaled by its three-gain table of the distance, the velocity term limited to one over the frame time; the step functions of the player, agents and stand-ins call it
+func_001B91A8	SteerColliderTowardRotation	the rotation counterpart of SteerColliderTowardPosition: turns the difference to a target matrix into an axis and angle (MatrixToAxisAngle) and the difference to a target spin (0x160) into a torque by their gain tables, added with AddColliderTorque
 func_001B9338	StepCollider	slot 28 of class 0x03: for a parentless body without flag bit 36 applies gravity (func_001BA500, func_001B9AB0), then calls slot 51 of each owner in the attachment list with the frame time
 func_001B93D8	DrawCollider	slot 37 of class 0x03 (the draw slot): only runs class 0x02's func_001261C0 with its two arguments; DrawTimedGroup and others call it as their base
 func_001B93F8	UpdateCollider	slot 17 of the 0x03 class: only runs UpdatePlacedObject (func_00124FC0)
 func_001B9418	SetColliderMass	rescales the mass (0x368) to the given value and recomputes with func_001B9448 (LoadCollider calls func_001B9448 with 1.0 after reading the mass)
+func_001B9448	ComputeColliderInverseInertia	scales the inertia rows at 0x2F0 by the mass and inverts them (InvertMatrix3x3) into 0x320, clearing it when singular; SetColliderMass and LoadCollider call it
 func_001B94F0	DropColliderContacts	removes from the contact rows of the root every contact whose end is a part under this object (mode 1), exactly this part (mode 2) or of kind 8..9 on end 0 (mode 3), and hands them to func_001861E8
 func_001B9680	SaveColliderPreviousPosition	slot 68 of class 0x03: copies the vector at 0x140 to 0x370 (SetColliderPosition calls it for every part)
 func_001B9690	SetColliderPosition	slot 29 of class 0x03: stores the vector at 0x100 (resetting the tracker D_00261990 if a flagged body jumps more than 10 units), recomputes, updates the contacts, calls slot 68 of the parts and slot 14 with kind 3
 func_001B97E0	SetColliderRotation	slot 30 of class 0x03: copies the three matrix rows to 0x0D0, runs slot 18 when it has a root, updates the contacts (func_001B94F0) and calls slot 14 with kind 4
+func_001B9860	PlaceColliderClearOfContacts	sets the position (slot 29) and refreshes the world (func_00138C00) up to ten times, moving the position on by the given offset while one of the body's contacts is deeper than 2 (+0x90 below -2); SetObjectGathererSuspended and PlaceAtArrivalPoint call it
 func_001B9940	SetColliderVelocity	slot 32 of class 0x03: calls func_001274F8 and, when the new vector at 0x150 differs from the old by 2.0 or more on an axis, queues the object in the world (func_00138BE0 with 2)
 func_001B99F0	SetColliderSpin	slot 33 of class 0x03: calls func_00127590 and, when the new vector at 0x160 differs from the old by 0.02 or more on an axis, queues the object in the world (func_00138BE0 with 2)
+func_001B9AB0	AddColliderForce	adds a vector to the force accumulator at 0x170; StepCollider adds gravity with it and the step functions their pulls
+func_001B9AC8	AddColliderTorque	adds a vector to the torque accumulator at 0x180; SteerColliderTowardRotation, func_001B9D10 and SyncPlayerTarget use it
 func_001B9AE0	SetColliderAnchors	stores the modes at 0x450 and 0x470 and (when given) the vectors at 0x440 and 0x460, and refreshes the flags with UpdateAnchorModeFlags when the both-3 test changed
 func_001B9B50	ReparentCollider	slot 21 of class 0x03: converts the anchor vectors at 0x440/0x460 out of the old parent's frame (func_001280C0), calls the base func_001245A8, converts them into the new parent's frame and recomputes the body flags
 func_001B9C80	ReframeColliderAnchors	slot 22 of class 0x03: calls func_00124868 with the other object, then rotates the anchor vectors at 0x440/0x460 by the other's matrix at 0xD0 and sets them with their modes through func_001B9AE0
+func_001B9D10	TurnColliderTowardRotation	turns the body toward a target matrix within a three-value table, limiting the spin and its change with ClampToMagnitude before adding the torque (AddColliderTorque); the step functions of walker colliders, hit targets, gatherers and agents call it
 func_001B9F30	CaptureColliderPose	fills a record with the position 0x140, the vector 0x150, a heading angle from the matrix at 0x110, 100.0 and the current time D_0026185C[0]
 func_001B9FB0	IsContactBetweenParts	walks the root's contact rows and returns 1 when one end's part lies under this object and the other end's part under the other object
 func_001BA068	FindContactingPart	walks the root's contact rows and returns the part at the other end of the first contact whose end lies under this object, else 0
 func_001BA130	CopyCollider	slot 9 of class 0x03: saves its links, parts list, contact table and handler, calls the placed-object copy func_00127048, restores them and copies the meshes and BSP trees with func_00160EA0 and func_0013E6C8
+func_001BA2E8	ConstrainVectorByParentAnchor	ConstrainVectorByAnchor with the anchor's axis first turned by the parent's (+0x18) matrix at 0x110: keeps the vector (mode 0 at +0x10), removes or keeps only its component along the axis (modes 1, 2) or clears it (3), and writes the removed rest when asked
+func_001BA430	ConstrainVectorByAnchor	by the anchor's mode at +0x10 keeps the vector (0), removes its component along the anchor's axis (1), keeps only that component (2) or clears it (3), and writes the removed rest when given an output; the path-curve searches use it
+func_001BA500	ConstrainColliderVector	ConstrainVectorByAnchor on one of the body's anchors (0x440, 0x460), the object argument unused; StepCollider and the gauge steps call it
 func_001BA528	AddColliderAttachment	pushes the attachment node onto the list at 0x4B0 (self->attached, walked by StepCollider) and runs ResetRootTries
 func_001BA550	RemoveColliderAttachment	unlinks the attachment node from the singly linked list self->attached and runs ResetRootTries
 func_001BAC28	IgnoreColliderAttachmentStep	slot 51 of class 0x03 (0xDC, called by what the object is attached to with the frame time): does nothing
@@ -35,7 +49,12 @@ func_001BAC30	LoadCollider	slot 10 of class 0x03: reads the collision prefix fro
 func_001BAFE0	SetColliderOverrideRadius	sets bit 40 of the flags at 0x538 and stores the radius at 0x3CC
 func_001BB000	ResetColliderAnchors	runs SetColliderAnchors(self, 3, 0, 3, 0), the anchors SetupSequencedObject also gives
 func_001BB028	GetAnchorPreset	copies the value and the vector at the index of the 8-entry table D_002746E0 into the two outputs
+func_001BB058	SetColliderTurnAnchorPreset	script built-in: sets the second anchor (0x460, its mode 0x470) to an entry of the preset table (GetAnchorPreset) with its axis turned into the body's frame (0xD0), keeping the first (SetColliderAnchors)
+func_001BB0C8	SetColliderMoveAnchorPreset	script built-in: sets the first anchor (0x440, its mode 0x450) to an entry of the preset table (GetAnchorPreset) with its axis turned into the body's frame (0xD0), keeping the second (SetColliderAnchors)
 func_001BB210	SendColliderNotification	slot 14 of class 0x03: calls the base func_00183350, then calls slot 13 (kind, arg) of each owner in its attachment list at 0x4B0
+func_001BB3B0	SetColliderTreeContactsDropped	script built-in: stores bit 42 of the flags at 0x538 and drops the contacts with the parts under the body (DropColliderContacts mode 1) when set; SetPlayerState calls it too
+func_001BB400	SetColliderContactsDropped	script built-in: stores bit 43 of the flags at 0x538 (the bit the notifier and range filters refuse) and drops the body's own contacts (DropColliderContacts mode 2) when set
+func_001BB450	SetColliderKindContactsDropped	script built-in: stores bit 44 of the flags at 0x538 and drops the contacts with kinds 8 and 9 (DropColliderContacts mode 3) when set
 func_001BB4A0	ResolveContactHandler	sets the handler at 0x4E4 to itself when its descriptor has slot 0x3C, 0x3D, 0x3E or 0x41, else to its parent's handler, and recurses into the children whose class flag bit 1 is set
 func_001BB540	FindHandlerForSlot	follows the handler links from the node upward and returns the first handler whose descriptor word at the given offset is nonzero (its caller func_001B8A48 passes 0x114)
 func_001BB580	UpdateAnchorModeFlags	sets flag bit 54 when both modes 0x450 and 0x470 are 3, bit 56 from the parent, bit 55 from all the children and calls func_00138F28 for a rootless parent when bit 55 changed
@@ -43,10 +62,16 @@ func_001BB710	CollectContactingPartsToScriptList	walks the root's contact rows, 
 func_001BB800	CollectContactingParts	counts, allocates (func_0018D658) and fills an array of the distinct parts at the other end of the root's contacts whose end lies under this object, returning the count
 func_001BB9A0	IsInTouchingList	walks the list of touch nodes and returns 1 when a node's object is the given one
 func_001BB9D0	UpdateTouchingParts	triggers script event 6 for parts that newly touch and 7 for ones that stopped, then rebuilds the list at self->touching from the root's contacts
+func_001BBC30	RequestColliderLaunch	slot 71 of class 0x03, the launch request RequestAttachedSetLaunch and RequestContactTrackerLaunch override: offers nothing and returns 0
+func_001BC088	MoveCollider	slot 0x7C (motion) of class 0x03: runs func_001BBEB8 when the body has a hook, then the base motion func_00125440; MoveModeCollider, MoveContactListObject and SetPlayerBoundsPoints call it
+func_001BC260	ComputeColliderJumpVelocity	the launch velocity that carries the body from its position (0x140) to a target over a peak the given height above the higher of the two, under its gravity (0x358), with the flight time from SolveQuadratic; LaunchPlayerFromModeWalker calls it
 func_001BC320	HandleObjectEvent	slot of class 3: when eventFlags has 8 it calls func_001BC0E0 with the event's radius, and returns whether eventFlags is non-zero; the overrides call it as their base
 func_001BC368	CopyColliderMeshesInFrame	slot 52 of class 0x03: takes another object's meshes, finds the largest vertex radius, copies them through the relative transform func_00188B08 into its own and copies the BSP trees
 func_001BC4D8	ExtractContactsByPartMode	for a root collider walks its contact rows: by the mode at +0x4E0 of the other end's part, mode 1 copies the contact to the output list, mode 3 drops it to a free list, mode 4 moves it to the output list; frees the dropped ones with func_001861E8
+func_001BC670	IsPointInsideCollider	with the override radius (bit 40 of 0x538, SetColliderOverrideRadius) tests the point's distance from 0x140 against 0x3CC, else tests the tree at 0x3F8 (func_0013E658); ChooseSequencedObjectState calls it
 func_001BC760	NumberColliderParts	slot 53 of class 0x03: stores the running index at 0x4C0, writes itself into the list at that index and recurses into the children whose descriptor has flag 2
+func_001BC7F8	ComputeColliderPointVelocity	the velocity of a point carried by the body: the linear part of a velocity pair plus its angular part crossed with the point's offset from 0x140; func_001BC978 and the contact solvers use it
+func_001BC828	ComputeColliderImpulseResponse	slot 57 of class 0x03: for one side of a contact, the change of motion a unit push along its normal gives the body: the push over the mass (0x368) and the turn from ApplyColliderInverseInertia, each held to its anchor (ConstrainVectorByParentAnchor), written to its row (0x4C0) for the parents in turn
 func_001BD558	CollectGroupItems	gathers up to cap items from each root's own item chain (+0x4B4) and from the item chains of its groups' children not already marked with bit 58 of flags538; clears the marks and returns the count
 func_001BD678	CollectConnectedColliders	breadth-first walk from a collider over its list at +0x480, marking visited ones with bit 57 of flags538; colliders with bit 55 go to the second output list, the rest to the queue; clears the marks of the second list at the end and returns both counts
 func_001BD790	SetColliderForcedState	with mode set: saves the two mode words (+0x450, +0x470) and flag bits 54 and 55 into +0x90, +0x94 and +0xC0, then forces both modes to 3 and sets both bits; with mode 0 restores them
@@ -70,12 +95,16 @@ func_001BE860	ApplySoundRecordVolumePan	passes the record's voice func_0011D798 
 func_001BE8F8	PlaySoundAndApplyVolumePan	starts a sound with StartSoundEffect, applies the record's volume/pan, and clears the handle again when the caller passed no handle slot
 func_001BE980	HasStreamVoice	returns whether D_0027472C is nonzero
 func_001BE998	StopStreamVoice	does nothing when locked or without a voice; otherwise stops D_0027472C with func_0011D600, spins while func_0011D708 says it is busy, then clears D_0027472C and D_00274730
+func_001BEA28	PauseStreamVoice	sends g_streamVoice IOP command 0x13 (func_0011D640) when there is one; PushStackElement and SetTextPanelOpen call it when a screen opens
+func_001BEA50	ResumeStreamVoice	sends g_streamVoice IOP command 0x14 (func_0011D670) when there is one; PopStackElement and SetTextPanelOpen call it when a screen closes
 func_001BEA78	StopStagedBankVoice	in state 3 stops the voice D_00274728 with func_0011D600, clears it and goes back to state 2
 func_001BEAC8	StoreStagedBankHandle	load callback: stores the bank handle in D_0027473C and sets state D_00274720 to 2 (loaded), or clears the record and state to 0 when the handle is 0
 func_001BEB10	RequestStagedBank	decodes the record's key and, unless it is the same record as D_00274724 and already staged, unloads the old bank (func_001BE1E8) and starts an asynchronous bank load with func_0011D2A8 whose callback is func_001BEAC8; state D_00274720 becomes 1
 func_001BEC58	PlayStagedBank	requests the record, waits for the load with func_0011CE30 and func_001F6C20, then in state 2 starts a voice on the bank with func_0011D598 into D_00274728 and sets state 3
 func_001BECF8	SilenceVolumeChannel2	SetVolumeChannelFactor(2, 1, 0.0); RestoreVolumeChannel2 sets it back to 1.0
 func_001BED20	RestoreVolumeChannel2	SetVolumeChannelFactor(2, 1, 1.0), undoing SilenceVolumeChannel2
+func_001BED48	PauseStagedBankVoice	sends g_stagedBankVoice IOP command 0x13 (func_0011D640); SetPauseMenuOpen and SetWarpMenuOpen call it as they open
+func_001BED70	ResumeStagedBankVoice	sends g_stagedBankVoice IOP command 0x14 (func_0011D670); SetPauseMenuOpen and SetWarpMenuOpen call it as they close
 func_001BED98	AllocateSoundLevelEntry	pops a 12-byte entry from the free list at world+0x1BB8, zeroes it and appends it to the list at world+0x1BC4
 func_001BEDF8	RemoveSoundLevelEntry	removes the entry from the list at world+0x1BC4 and returns it to the free list at world+0x1BB8
 func_001BEE48	ClearSoundLevels	walks the list at world+0x1BC4 removing every entry, then applies 0x14 with func_0011D928 and zeroes D_002748EC, D_00274738 and D_00274734
@@ -84,7 +113,11 @@ func_001BEF88	RecomputeSoundLevel	sets D_00274734 to 0 when the list at world+0x
 func_001BF048	ReleaseSoundLevel	removes the entry and, when its value was the current level D_00274734, recomputes the level, clears D_002748EC when non-negative, applies cur+0x14 with func_0011D928 and issues func_001C06A0(7,1,1.0)
 func_001BF0D8	RemoveSoundLevelAndRecompute	removes the entry and, when its value was the current level, stores it in D_00274738 and recomputes with func_001BEF88 (no apply, unlike func_001BF048)
 func_001BF130	InitSoundSystem	clears D_00604790 (0x1C bytes of bank handles), calls func_0011CBB8 (InitIopCommandChannels), loads bank 0 with func_001BE268, enables disc access with func_0011DF58 and issues the fixed func_0011D520, func_0011D558 and func_0011E3A0 set-up calls
+func_001BF200	ComputeSoundVolumeAndPan	from a position's distance to the camera (+0x40) between the inner and outer ranges gives the volume (full inside, none beyond) and the pan from its direction along the camera's side axis (+0x90); ComputeSoundAttenuation and UpdateSoundEmitters call it
+func_001BF2E0	MeasureCameraWeightedDistance	the listener function ChooseSoundListenerFunction picks for one or two camera controllers: the distance between two points with the part along the camera's axis (+0x80) shrunk by the factor at +0x478
+func_001BF398	MeasureListenerDistance	the listener function ChooseSoundListenerFunction picks by default: the plain distance between two points
 func_001BF3D0	GetSoundListenerPosition	returns the +0x140 position of the active switched collider (func_001925F0) when its slot 78 says so, else the vector at D_00261990+0x40
+func_001BF428	ComputeSoundRecordDoppler	for a record with a source object (+0x30) and a factor (+0x5C) stores at +0x60 a pitch offset (func_0011E538) from the two bodies' velocities (func_001278A8) along the line from the source to the active switched collider; clears it otherwise
 func_001BF578	ChooseSoundListenerFunction	returns func_001BF398 or func_001BF2E0 depending on a count read by func_00149638 from the structure at D_00261990+0x460 (1 or 2 picks func_001BF2E0)
 func_001BF5E0	ComputeSoundListenerFactor	fetches the listener position (func_001BF3D0) and calls through the function pointer func_001BF578 chooses with it and the argument, returning a float
 func_001BF620	ComputeSoundAttenuation	with a position computes a factor with func_001BF5E0 and hands it to func_001BF200 together with the output volume and flag; without a position writes the default volume and 0
@@ -96,6 +129,7 @@ func_001BF7F8	SetSoundRecordPitch	stores the float at +0x58, computes base + f58
 func_001BF8E8	SetSoundRecordVolume	stores the new base volume at +0x14, scales the attenuated volume at +0x50 by the same ratio and re-applies it with func_001BE860
 func_001BF920	InitSoundRecord	clears a 0x90-byte record keeping +0x64, links it to its parent handle, stores the unique id from D_0027474C, the ranges, volume, pitch and random byte (func_001EAA70), copies the position and calls func_001BF620 for the attenuated volume and pan
 func_001BFAF8	StartSoundRecordVoice	after a record is built: stores the entry index and bank handle, starts a voice with func_0011D598 (func_001BE4A8 handle, entry word b) when its volume is nonzero and its delay negative, then applies pitch (func_001BF7F8) and volume/pan (func_001BE860); id -2 uses the stream voice D_0027472C
+func_001BFBF8	ScheduleAmbientSoundRecord	sets the record's next start (+0x74) to the clock plus a random delay between +0x78 and +0x7C and, without a source object, places it at a random angle and a distance between +0x80 and +0x84 around the listener (GetSoundListenerPosition)
 func_001BFCD8	StartSoundEffect	starts a sound by entry index into D_00245020: skips it when the entry's bank is nonzero and differs from the world's +0x1D70, builds and links a tracked record (func_001BF6B8, func_001BF920) when a handle or position is given, otherwise starts an untracked voice with func_0011D598
 func_001BFFC8	MarkSoundRecordIfIdMatches	callback taking a record pointer and an id packed in a 64-bit key: when guard is 0 and the record's id (+4) still equals the id, sets the record's flag at +0x48 to 1
 func_001C0000	SetVolumeChannel6Factors	sets factors 0, 2 and 3 of volume channel 6 to the value, and factor 1 too when the flag is set
@@ -120,6 +154,7 @@ func_001C0C68	RefreshCachedVoiceParam	reloads D_006053E0[i] from GetVoiceParam
 func_001C0CB0	ClearCachedVoiceParams	calls SetCachedVoiceParam(i, 0) for i in 0..7 (StopAllSoundsAndWait calls it)
 func_001C0CF0	StepBiasedRandomWalk	adds a table entry (picked by the random value 0..5 and the current D_00274830) to D_00274830 and returns it
 func_001C0EC0	PlaySoundWithWanderingPitch	when D_002748EC is set, starts sound 0x77 with a pitch of StepBiasedRandomWalk's value over 12
+func_001C0F30	InitIdLinkedObject	slot 0 of class 0x66 (StartIdLinkedObject is its start): InitPlacedObject, then the link id -1 at 0x32C, the colour 0x80808080 at 0x2D0 and its default sizes
 func_001C0FF0	StartIdLinkedObject	slot 16 of class 0x66: StartPlacedObject, then SetObjectLinkId with its linkId, then slot 3
 func_001C1030	SetObjectLinkId	lets go of the old link (func_001B6438), looks the new id up with func_0015A418, links to what it finds with func_001B6290 and stores the id in linkId
 func_001C10A8	InitListedPointObject	slot 0 of class 0x81: InitObject, then sets the float at 0x58 to the largest float

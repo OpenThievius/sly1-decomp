@@ -405,7 +405,7 @@ void* func_001B5EC0(Pool_1B5EC0* pool)
 void* func_001B5EE0(Pool_1B5EE0* pool)
 {
     void* p = PopFreeSlot(pool);
-    func_001F5C0C(p, 0, pool->count);
+    FillMemory(p, 0, pool->count);
     return p;
 }
 

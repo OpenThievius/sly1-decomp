@@ -303,7 +303,7 @@ void func_001C7AE0(Agent* self, f32 x, f32 y)
     self->f638 = x;
     self->fB24 = y;
     if (t != 0) {
-        func_001892A0(x, y, (u8*)self + 0x660);
+        BuildYawPitchMatrix(x, y, (u8*)self + 0x660);
     } else {
         BuildAxisAngleMatrix((u8*)&g_unitZVector, x, (u8*)self + 0x660);
     }
@@ -808,7 +808,7 @@ void func_001C9008(Agent* self, s32 mode)
             self->f754 = 0;
         }
         ((C62*)self->fA74)->desc->m18(((C62*)self->fA74), self);
-        func_001EF900(((C62*)self->fA74), 0);
+        SetStateAndNotify(((C62*)self->fA74), 0);
         self->fA74 = 0;
         if (mode == 1) {
             self->f914 = self->f918;
@@ -1050,7 +1050,7 @@ s32 func_001C9990(Agent* self, Req_1C9990* req)
     Frame_1C9990 f;
 
     if (self->desc05()->m4B(self, req->kind00) != 0) return 0;
-    func_001F5C0C(&f, 0, 0x40);
+    FillMemory(&f, 0, 0x40);
     f.ref00 = req->ref04;
     f.self04 = self;
     if (req->kind00 == 4) {
@@ -1452,7 +1452,7 @@ void func_001CAD98(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
         Elem08* e = &a0->fA7C[i];
         if (IsObjectAttached((Collider*)e->obj) != 0) {
             if (a1->flags538 & 0x10000000000ULL) {
-                func_001879C0(a1->radius3CC, a1, (u8*)a1 + 0x140, (Collider*)e->obj,
+                AddMeshContacts(a1->radius3CC, a1, (u8*)a1 + 0x140, (Collider*)e->obj,
                               ((Collider*)e->obj)->tree.count,
                               (s32)((Collider*)e->obj)->tree.nodes, 0, (u8*)a0 + 0xAAC);
             } else if (a3 != 0) {

@@ -2036,7 +2036,7 @@ void func_001ADFF0(T217D_4C0 *self)
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader(&loc.obj, self->text, self->font);
     {
-        f32 x = func_0015E1F0(&loc.obj);
+        f32 x = MeasureTextWidth(&loc.obj);
         y = MeasureTextHeight(&loc.obj, 0.0f);
         SetScreenElementSize(self, x, y);
     }
