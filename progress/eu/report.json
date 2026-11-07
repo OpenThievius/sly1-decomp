@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 92.58516962346062,
+  "fuzzy_match_percent": 92.61272739636308,
   "total_code": "1117652",
-  "matched_code": "1029712",
-  "matched_code_percent": 92.13171899661076,
+  "matched_code": "1030020",
+  "matched_code_percent": 92.15927676951323,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4831,
-  "matched_functions": 4730,
-  "matched_functions_percent": 97.9093355412958,
+  "matched_functions": 4732,
+  "matched_functions_percent": 97.95073483750777,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -43197,16 +43197,16 @@
   {
    "name": "lib/00204000",
    "measures": {
-    "fuzzy_match_percent": 48.27427519558214,
+    "fuzzy_match_percent": 51.817763460653474,
     "total_code": "8692",
-    "matched_code": "4196",
-    "matched_code_percent": 48.27427519558214,
+    "matched_code": "4504",
+    "matched_code_percent": 51.817763460653474,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 53,
-    "matched_functions": 40,
-    "matched_functions_percent": 75.47169811320755,
+    "matched_functions": 42,
+    "matched_functions_percent": 79.24528301886792,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -43254,7 +43254,7 @@
     {
      "name": "func_002040E0",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "160",
      "metadata": {
       "virtual_address": "2113760"
@@ -43281,7 +43281,7 @@
     {
      "name": "func_00204230",
      "size": "148",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "496",
      "metadata": {
       "virtual_address": "2114096"
@@ -45721,16 +45721,16 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 88.53212594615145,
+    "fuzzy_match_percent": 88.79825804444752,
     "total_code": "115732",
-    "matched_code": "102460",
-    "matched_code_percent": 88.53212594615145,
+    "matched_code": "102768",
+    "matched_code_percent": 88.79825804444752,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 635,
-    "matched_functions": 596,
-    "matched_functions_percent": 93.85826771653544,
+    "matched_functions": 598,
+    "matched_functions_percent": 94.1732283464567,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",

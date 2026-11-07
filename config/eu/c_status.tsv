@@ -3656,13 +3656,15 @@ func_00202A80	func_00203DC0	match	rodata
 func_00202B68	func_00203EA8	match	rodata
 func_00202C38	func_00203F78	match	rodata
 func_00202D30	func_00204070	match	
+func_00202DA0	func_002040E0	match	
 func_00202E50	func_00204190	match	
+func_00202EF0	func_00204230	match	
 func_00202F88	func_002042C8	match	
 func_00203010	func_00204350	match	
 func_00203050	func_00204390	match	
 func_00203230	func_00204570	match	
-func_002032C8	func_00204608	match	
-func_00203368	func_002046A8	match	
+func_002032C8	func_00204608	match	rodata
+func_00203368	func_002046A8	match	rodata
 func_00203A20	func_00204D60	match	
 func_00203AE8	func_00204E28	match	
 func_00203CF8	func_00205038	match	

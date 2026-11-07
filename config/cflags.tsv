@@ -94,3 +94,4 @@ src/lib/strncpy.c	-O2 -G0	2.9-ee-991111-01
 src/lib/pad.c	-O2 -G0	2.9-ee-991111
 src/lib/graph.c	-O2 -G0	2.9-ee-991111
 src/lib/dma.c	-O2 -G0	2.9-ee-991111
+src/lib/cdvd.c	-O2 -G0	2.9-ee-991111
