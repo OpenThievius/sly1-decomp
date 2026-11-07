@@ -245,7 +245,8 @@ struct Player : TurningCollider {
     s32 f900;               // 0x900
     u8 pad904[0xA10 - 0x904];
     s32 fA10;               // 0xA10
-    u8 padA14[0x103C - 0xA14];
+    s32 fA14;               // 0xA14: -1, 0 or 1: which three of the blend slots take the weights (func_001D4348)
+    u8 padA18[0x103C - 0xA18];
     u8 f103C[0x20];         // 0x103C
     u8 f105C[4];            // 0x105C
     u8 pad1060[0x1064 - 0x1060];

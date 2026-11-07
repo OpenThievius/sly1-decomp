@@ -13,6 +13,7 @@
 #include "globals.h"
 #include "game_clock.h"
 #include "c8b.h"
+#include "vu0.h"
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
@@ -38,7 +39,21 @@ s32 D_00275134 = 0;
 s32 D_00275138 = 0;
 
 INCLUDE_ASM(func_001D36F0);
-INCLUDE_ASM(func_001D39E0);
+struct WeightedRow { f32 w; u8 pad0[0xC]; Vec02 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
+
+void func_001D39E0(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
+{
+    Vec02 k;
+    Vu0::Q(*out) = Vu0::Zero();
+    if (n > 0) {
+        do {
+            f32 t = rows->w * (rows->d / scale[1]);
+            Vu0::Q(k) = Vu0::FromFloat(t);
+            Vu0::Q(*out) = Vu0::MulAddX(Vu0::Q(*out), Vu0::Q(rows->v), Vu0::Q(k));
+            rows++;
+        } while (--n);
+    }
+}
 ASM_FUNC(func_001D3A38);
 INCLUDE_ASM(func_001D3B58);
 
@@ -121,8 +136,71 @@ void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, 
     SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
 }
 
-INCLUDE_RODATA(jtbl_0024DBD0);
-INCLUDE_ASM(func_001D4148);
+// The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
+struct BlendSlotObject;
+struct BlendSlot {
+    f32 weight;             // 0x00
+    BlendSlotObject* object; // 0x04
+    u8 pad08[0x10 - 0x08];
+    Vec02 v10;              // 0x10: where the object's mover puts it
+};
+
+typedef void (*SlotMoveFn)(Mover8B* m, void* body, f32 x, f32 y, s32 z, Vec02* out, Vec02* out2);
+struct SlotMover { SlotMoveFn* vtbl; };
+struct SlotMoverHolder { u8 pad00[4]; SlotMover* mover; };
+struct BlendSlotObject {
+    u8 pad00[0x34];
+    f32 f34;                // 0x34
+    u8 pad38[0x9C - 0x38];
+    SlotMoverHolder* holder; // 0x9C
+};
+
+Entry8B* FindEntryByObjectId(void* object, void* body);
+void BuildCombinedBlendAnimation(TurningCollider* self, s32 stride, s32 count, BlendSlot* slots, s32 a, s32 b, s32 c, Gr8B** gr);
+
+void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
+{
+    Vec02 here;
+    Vec02 there;
+    Vec02 delta;
+    Vec02 k;
+    s32 i;
+    slots[6].weight = 1.0f;
+    for (i = 0; i < 8; i++) {
+        BlendSlot* e = &slots[i];
+        BlendSlotObject* o = e->object;
+        if (o->holder && o->holder->mover) {
+            SlotMover* m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, 0.0f, 1.0f, 0, &here, 0);
+            m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, o->f34, 1.0f, 0, &there, 0);
+            Vu0::Q(delta) = Vu0::Sub(Vu0::Q(there), Vu0::Q(here));
+            Vu0::Q(k) = Vu0::FromFloat(-1.0f / o->f34);
+            Vu0::Q(e->v10) = Vu0::MulX(Vu0::Q(delta), Vu0::Q(k));
+        } else {
+            switch (i) {
+            case 0:
+            case 2:
+            case 4:
+            case 6: {
+                SlotMover* m = (SlotMover*)FindEntryByObjectId(e->object, self->f610)->mover;
+                (*m->vtbl)((Mover8B*)m, self->f610, 0.0f, 1.0f, 0, 0, &e->v10);
+                break;
+            }
+            case 1:
+            case 3:
+            case 5:
+            case 7: {
+                SlotMover* m = (SlotMover*)FindEntryByObjectId(e->object, self->f614)->mover;
+                (*m->vtbl)((Mover8B*)m, self->f614, 0.0f, 1.0f, 0, 0, &e->v10);
+                break;
+            }
+            }
+        }
+    }
+    BuildCombinedBlendAnimation(self, 0x20, 8, slots, 0, 0, 0, gr);
+    SetBlendItemWeights(*gr, 0x20, 8, slots);
+}
 INCLUDE_ASM(func_001D4348);
 INCLUDE_ASM(func_001D4698);
 
@@ -142,8 +220,49 @@ void ResolvePlayerTableObjects(Player* self)
 }
 
 
-INCLUDE_RODATA(jtbl_0024DBF0);
-INCLUDE_ASM(func_001D48E8);
+void AddColliderForce(Collider* self, Vec02* force);
+void SteerColliderTowardPosition(Collider* self, void* a, void* b, const Vec02* target, const f32* ramp, f32 dt);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* from, f32* to);
+
+void func_001D48E8(Player* self)
+{
+    Vec02 force;
+    switch (self->f2228) {
+    case 0x25:
+    case 0x26: {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
+        AddColliderForce(self, &force);
+        SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_00275020, g_gameClock.dt);
+        break;
+    }
+    case 0x29:
+    case 0x30: {
+        Vec02 aim;
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
+        AddColliderForce(self, &force);
+        f32 zero = 0.0f;
+        aim = D_00248D30;
+        if (self->v640.z != zero)
+            aim.z = self->v150.z;
+        SteerColliderTowardPosition(self, 0, 0, &aim, D_00275020, g_gameClock.dt);
+        if (self->v640.z != zero) {
+            force = D_00248D30;
+            force.z = (-self->v640.z - aim.z) / g_gameClock.dt;
+            AddColliderForce(self, &force);
+        }
+        break;
+    }
+    case 0x27: // the states that apply no force of their own
+        break;
+    case 0x2A:
+        break;
+    }
+    TurnColliderTowardRotation(self, g_gameClock.dt, &self->m660, &self->f6E0);
+}
 
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 ApproachAngleWithRamp(f32* p, s32 a, f32 b, f32 c, f32 d);
