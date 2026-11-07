@@ -27,10 +27,10 @@ struct Obj_1E77C0_eu
     f32 fC70;
 };
 
-void func_001AA298(Obj_1E77C0_eu* self);
-void func_001E7518(Obj_1E77C0_eu* self, s32 mode);
+void UpdateScreenElementSlide(Obj_1E77C0_eu* self);
+void SetArcPhase(Obj_1E77C0_eu* self, s32 mode);
 
-void func_001E77C0(Obj_1E77C0_eu* self)
+void UpdateArc(Obj_1E77C0_eu* self)
 {
     UpdateScreenElementSlide(self);
     s32 state = self->f250;
@@ -89,7 +89,7 @@ void func_001E77C0(Obj_1E77C0_eu* self)
         if (D_00270458 != 4)
         {
             self->fC5C = ApproachValueWithRamp(&self->fC64, 0, self->fC5C, self->fC60, g_gameClock[5]);
-            if (func_001EAC68(self->fC5C, self->fC60, 1e-4f) != 0)
+            if (AreFloatsNearlyEqual(self->fC5C, self->fC60, 1e-4f) != 0)
             {
                 self->fC5C = 1.0f;
                 if (self->f214 == 0x1A)
@@ -129,7 +129,7 @@ void func_001E77C0(Obj_1E77C0_eu* self)
             s32 i;
             for (q = &self->elems[0].f20, e = self->elems, i = 0; i < 69; q += 11, i++, e++)
             {
-                if (func_001EAC68(e->f18, e->f1C, 1e-4f) != 0)
+                if (AreFloatsNearlyEqual(e->f18, e->f1C, 1e-4f) != 0)
                 {
                     if (self->f214 == big)
                     {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the path's characters are read as unsigned bytes.
-s32 func_001407A8(s8* path)
+s32 NormalizeDiscPath(s8* path)
 {
     u8* p = (u8*)path;
     UppercaseString(path);

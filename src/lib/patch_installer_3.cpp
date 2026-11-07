@@ -65,9 +65,9 @@ u32 D_00277D30[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0
 u32 func_001FA8D8(Blk_1FA8F8* a);
 void func_001FA8E8(Blk_1FA8F8* a, u32 b);
 void func_001FA890(Blk_1FA8F8* a, void* b, s32 c);
-void func_001F6C20(s32 a);
+void SyncDataCache(s32 a);
 
-void func_001FA8F8() {
+void InstallThirdKernelPatch() {
     u32* s0 = D_00277D30;
     u32* s1;
     u32 k = 3;

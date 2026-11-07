@@ -102,12 +102,12 @@ typedef char check_C84[sizeof(C84) == 0xD0 ? 1 : -1];
 typedef char check_Track83[sizeof(Track83) == 0x1C ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0012B870(Animation* self);                      // 0x83 slot 0
-void func_0012C140(void);                           // 0x83 slot 9 (the base class's copy)
-void func_0012B8C8(Animation* self, Stream83* stream);    // 0x83 slot 10
-void func_0012C160(Animation* self);                      // 0x83 slot 16
-void func_0012D3F0();                               // 0x84 slot 9 (empty)
-void func_0012D3E0();                               // 0x84 slot 10 (empty)
-void func_0012D3E8();                               // 0x84 slot 16 (empty)
+void InitAnimation(Animation* self);                      // 0x83 slot 0
+void CopyAnimation(void);                           // 0x83 slot 9 (the base class's copy)
+void LoadAnimation(Animation* self, Stream83* stream);    // 0x83 slot 10
+void StartClampedKinematicValue(Animation* self);                      // 0x83 slot 16
+void SkipAnimationPlayerCopy();                               // 0x84 slot 9 (empty)
+void SkipAnimationPlayerLoad();                               // 0x84 slot 10 (empty)
+void SkipAnimationPlayerStart();                               // 0x84 slot 16 (empty)
 
 #endif

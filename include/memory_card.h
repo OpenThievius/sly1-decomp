@@ -60,6 +60,6 @@ struct MemoryCard {
 
 typedef char check_MemoryCard[sizeof(MemoryCard) == 0x4F50 ? 1 : -1];
 
-extern MemoryCard D_00264A40;      // memory_card.cpp
+extern MemoryCard g_memoryCard;      // memory_card.cpp
 
 #endif

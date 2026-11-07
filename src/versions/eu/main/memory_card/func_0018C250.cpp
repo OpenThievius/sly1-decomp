@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the memory-card directory names carry SCES-50917, the title is "Sly Raccoon", and the save count is 11.
-s32 func_0018C250(MemoryCard* self)
+s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];

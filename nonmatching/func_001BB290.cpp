@@ -5,7 +5,7 @@
 
 extern f32 D_0024D2A0;
 
-void* func_001BB290(void* self, s32 key, s32* out)
+void* FindColliderFloorContact(void* self, s32 key, s32* out)
 {
     u8* n = *(u8**)(*(u8**)((u8*)self + 0x480));
     u8* bestIt = 0;

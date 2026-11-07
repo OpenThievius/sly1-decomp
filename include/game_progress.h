@@ -71,8 +71,8 @@ typedef char check_GameProgress[sizeof(GameProgress) == 0x1A00 ? 1 : -1];
 
 extern GameProgress D_0027C220;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
 extern G27C230 D_0027C230[];    // .bss: D_0027C220.levels, the label the two record pointers name
-extern GameProgress* D_002623C0;     // file_15F678.cpp: = D_0027C220
-extern G27C230* D_002623C4;     // file_15F678.cpp: = D_0027C230
-extern G27C230* D_002623C8;     // file_15F678.cpp: = D_0027C230
+extern GameProgress* g_saveData;     // file_15F678.cpp: = D_0027C220
+extern G27C230* g_currentLevelRecord;     // file_15F678.cpp: = D_0027C230
+extern G27C230* g_currentEntry;     // file_15F678.cpp: = D_0027C230
 
 #endif

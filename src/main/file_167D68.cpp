@@ -13,93 +13,93 @@
 #include "texture_header.h"
 #include "shapes.h"
 
-void func_001CA5E0(void);
+void DrawAgent(void);
 
 struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
 struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
-void func_001C72A0(void* self);
-void* func_0015A448(void* a, s32 b, void* c);
-void func_0018D608(void);
-void func_0018D6F0(void);
-void func_0012D1B0(void* a, void* b, s32* c, void** d);
-void* func_001EFA30(void);
-void func_001EFA60(void* a, void* b);
+void StartAgent(void* self);
+void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherAnimationEventObjects(void* a, void* b, s32* c, void** d);
+void* CreateRecord2505C0(void);
+void AppendToSmallList(void* a, void* b);
 
-void func_001C6F48(void* self);
-void func_00167D68(ConeAgent* self);
+void InitAgent(void* self);
+void InitConeAgent(ConeAgent* self);
 
-void func_001B7B78(void* self);
-void func_00152600(void* data, void* self);
+void UnregisterCollider(void* self);
+void RemoveFromList(void* data, void* self);
 
-void func_001BA130(void* self);
+void CopyCollider(void* self);
 
-s32 func_001B8A08(Collider* a, Collider* b);
+s32 TestCollidersMayContact(Collider* a, Collider* b);
 
-void* func_0015A448(void* obj, s32 id, s32 flags);
+void* FindFirstObjectByIdMode4(void* obj, s32 id, s32 flags);
 
-void func_00168AF8(void);
-void func_001683B8(void);
-void func_00201A18(s32 a0, s32 a1, s32 a2, s32 a3);
-void func_00202098(void* p, s32 a1, s32 a2, s32 a3);
-void func_001F6C20(s32 a0);
-s32 func_00201FF8(void* p, s32 a1);
+void SendDisplayResetPacket(void);
+void SignalDisplaySync(void);
+void ResetGs(s32 a0, s32 a1, s32 a2, s32 a3);
+void SetFieldDrawOffset(void* p, s32 a1, s32 a2, s32 a3);
+void SyncDataCache(s32 a0);
+s32 SwapDoubleBuffer(void* p, s32 a1);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
 extern u8 D_002BE1A0[];
-void* func_00152888(DmaChainBlock* a);
-void func_001529C8(DmaChainBlock* a, s32 n, DmaChainBlock* b);
-void func_00152B80(DmaChainBlock* a, s32 n, void* table);
-void func_00152D30(DmaChainBlock* a);
-void func_001529E0(DmaChainBlock* a, s32 x, s32 y);
-void func_00168A48(DmaChainBlock* b);
+void* InitPacketBuffer(DmaChainBlock* a);
+void UsePacketBufferMemory(DmaChainBlock* a, s32 n, DmaChainBlock* b);
+void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
+void AddDmaEndTag(DmaChainBlock* a);
+void DetachPacketBuffer(DmaChainBlock* a, s32 x, s32 y);
+void SendPacketToBothBuffers(DmaChainBlock* b);
 
 struct TexturePacket : PacketWriter { s32 value; };
 
-extern s32 D_00274514;
-extern s32 D_00274510;
-extern s32 D_00261F1C;
+extern s32 g_imageSlotsB;
+extern s32 g_imageSlotsA;
+extern s32 g_gifChannel;
 
-void* func_001611B8(PacketWriter* f);
-void func_00152980(PacketWriter* f, s32 size);
-void func_00152B38(PacketWriter* f);
-s32 func_001690C0(void* self, void* arg, TexturePacket* f);
-void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
-void func_00161708(PacketWriter* f, s32 a, u64 b);
-void func_00161200(PacketWriter* f);
-void func_00152D30(PacketWriter* f);
-void func_001529E0(PacketWriter* f, s32 a, s32* out);
-void func_001686E8(s32 a, s32 b);
+void* InitGifPacket(PacketWriter* f);
+void AllocateTempPacketBuffer(PacketWriter* f, s32 size);
+void BeginDmaTag(PacketWriter* f);
+s32 PlaceMaskedImages(void* self, void* arg, TexturePacket* f);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
+void EndGifPacket(PacketWriter* f);
+void AddDmaEndTag(PacketWriter* f);
+void DetachPacketBuffer(PacketWriter* f, s32 a, s32* out);
+void SendGsPacketAndWait(s32 a, s32 b);
 
 extern FrameTarget D_0027DC20[];
 
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
+void RegisterObject(void* self);
+void AppendToList(void* table, void* self);
 
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
+void UnregisterObject(void* self);
+void RemoveFromList(void* table, void* self);
 
 struct TargetedObject {
     u8 pad_00[0x398];
     s32 f398;
 };
 
-void* func_0015A448(void* a, s32 b, s32 c);
+void* FindFirstObjectByIdMode4(void* a, s32 b, s32 c);
 
-void func_001830D8(void* self);
+void CopyObjectData(void* self);
 
-void func_001B7968(void* self);
-void func_00129FB0(void* self, f32 k);
-void func_0012A080(void* self, f32 k);
-void func_0012A150(void* self, f32 k);
-void func_0012A270(void* self, f32 k);
+void InitCollider(void* self);
+void SetScaledRotationSpring(void* self, f32 k);
+void SetScaledSpinSpring(void* self, f32 k);
+void SetScaledPositionRamp(void* self, f32 k);
+void SetScaledRotationRamp(void* self, f32 k);
 
-void func_001B7A98(void* self);
+void RegisterCollider(void* self);
 
-void func_001613C0(void* p, s32 a, s32 b, s32 c);
-void func_00161708(void* p, s32 a, u64 b);
-void func_00161958(void* p, s32 x);
+void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* p, s32 a, u64 b);
+void AddGifImageTag(void* p, s32 x);
 
 // The GS register TEX0 an image or palette record keeps (ImageRecord at 0x18, PaletteRecord
 // at 0x10), as func_00168E78 and func_00168FB0 fill it: the base, width and format, the size
@@ -119,75 +119,75 @@ struct GsTex0 {
     u64 cld : 3;
 };
 
-u32 func_00168D30(u32 n);
+u32 CeilLog2(u32 n);
 
-void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
+void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void func_00152438(void* self, s32 value);
+void SetListLinkOffset(void* self, s32 value);
 
-void func_00152440(void* self);
+void ClearList(void* self);
 
 
-void func_001694A0(void* p);
-void* func_0018D5C0(u32 n);
+void SubmitMeshQueueEntry(void* p);
+void* AllocateZeroedFrontMemory(u32 n);
 
 
 extern u8 D_002BDC20[];
 extern u8 D_002BE1A0[];
 extern u8 D_002BDEE0[];
 
-void func_00201D60(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-void func_00168770(void* ctx, Rgba4* v, s32 flag);
-s32 func_001E2268(void* a, void* b);
-void func_001F6950(s32 a0, void (*fn)(void), s32 a2);
-void func_001F6DA8(s32 a0);
-void func_00168D00(void);
-void func_001685B8(void);
-void func_001682C0(void);
-void func_00168698(void);
+void SetUpDoubleBuffer(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+void FillScreenColor(void* ctx, Rgba4* v, s32 flag);
+s32 CreateLockSemaphore(void* a, void* b);
+void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
+void EnableInterruptCause(s32 a0);
+void InitMeshQueue(void);
+void ResetDisplayBuffers(void);
+void HandleVblankStart(void);
+void HandleGsFinish(void);
 
-extern s32 D_00261F1C;
+extern s32 g_gifChannel;
 
-s32 func_00201C78(void* p);
-void func_00202A80(s32 a, void* b);
-s32 func_00202C38(s32 a, s32 b, s32 c);
+s32 SendDrawEnvironment(void* p);
+void StartDmaChain(s32 a, void* b);
+s32 WaitDmaChannel(s32 a, s32 b, s32 c);
 
-void func_00168D68(BumpAllocator*,s32,s32);
+void InitBumpAllocator(BumpAllocator*,s32,s32);
 
-void func_00168130(void);
-void func_00201988(s32 a0, s32 a1);
+void ApplyFieldDisplayOffset(void);
+void WaitGsPaths(s32 a0, s32 a1);
 
 struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
 
-extern s32 D_00274514;
-extern s32 D_00274510;
+extern s32 g_imageSlotsB;
+extern s32 g_imageSlotsA;
 
-void func_00168D68(void* p, s32 a, s32 b);
-s32 func_001690C0(void* self, void* arg, TextureUploadPacket* f);
-void func_00152A50(PacketWriter* f, s32 a1, s32 a2, s32* out, s32 a4);
-void func_001B3510(void* self);
+void InitBumpAllocator(void* p, s32 a, s32 b);
+s32 PlaceMaskedImages(void* self, void* arg, TextureUploadPacket* f);
+void DetachPacketBufferCopy(PacketWriter* f, s32 a1, s32 a2, s32* out, s32 a4);
+void BuildAnimRecordGifPackets(void* self);
 
 struct FadePacket : PacketWriter { s32 value; u8 pad[0x3F0]; };
 
-extern s32 D_00261F1C;
+extern s32 g_gifChannel;
 
-void func_001529C8(PacketWriter* f, s32 n, s32* p);
-void func_0019DDA0(f32 x, f32 y, f32 z, f32 w, s32 a, s32 b, s32 c, s32 d, FadePacket* e);
-void func_001529E0(PacketWriter* f, s32 a, s32 b);
-void func_001686E8(s32 a, s32* b);
-void func_001683E8(void);
+void UsePacketBufferMemory(PacketWriter* f, s32 n, s32* p);
+void WriteColoredSpritePacket(f32 x, f32 y, f32 z, f32 w, s32 a, s32 b, s32 c, s32 d, FadePacket* e);
+void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
+void SendGsPacketAndWait(s32 a, s32* b);
+void FlipDisplayFrame(void);
 
-extern s32 D_00274500;
-extern s32 D_00274508;
-s32 func_00168D88(void* self, s32 size);
-void func_00168E78(PaletteRecord* e, s32 v);
-void func_00168F48(PaletteRecord* e, s32 v, void* ctx);
-void func_00152B80(void* self, s32 lo, s32 hi);
-void func_00168FB0(ImageRecord* e, s32 v);
-void func_00169088(ImageRecord* e, s32 v, void* ctx);
+extern s32 g_imageRecordCountA;
+extern s32 g_imageRecordCountB;
+s32 AllocateBump(void* self, s32 size);
+void BuildPaletteTexRegister(PaletteRecord* e, s32 v);
+void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
+void AddDmaRefTag(void* self, s32 lo, s32 hi);
+void BuildImageTexRegister(ImageRecord* e, s32 v);
+void StartImageUpload(ImageRecord* e, s32 v, void* ctx);
 
 
-void* func_001300E8(void* node, s32 flags);
+void* IsObjectOfKind(void* node, s32 flags);
 
 struct ChildListWalk {
     List01* iter;
@@ -218,7 +218,7 @@ struct ChildListWalk {
     }
 };
 
-void func_00182C18(void* self);
+void InitObject(void* self);
 
 // What FindTargetCurveLengthNearCollider asks the curve (slot 10): a point and a direction in
 // the curve's parent's frame, and the arc length it answers.
@@ -230,10 +230,10 @@ struct CurveProbe {
     f32 x;
 };
 
-void* func_001925F0(void);
-s32 func_00128018(void* a, s32 b, void* c, void* d);
-void func_001280C0(void* a, s32 b, void* c, void* d);
-void func_00169E20(void* a0, void* a1, void* a2, f32 f);
+void* GetActiveSwitchedCollider(void);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
+void PlaceOnTargetCurve(void* a0, void* a1, void* a2, f32 f);
 
 struct HoldMatrices {
     u8 a[0x30];
@@ -243,13 +243,13 @@ struct HoldMatrices {
     u8 e[0x10];
 };
 
-extern f32 D_0026185C[];
+extern f32 g_gameTime[];
 
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-void func_001837E0(void* obj, s32 kind, s32 a, s32 b);
-void func_00189378(void* sub, void* a, void* out);
-void func_00188D28(void* a, void* b, void* c);
-void func_00189150(void* a, void* b, s32 c);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void TriggerScriptEvent(void* obj, s32 kind, s32 a, s32 b);
+void RotateMatrixUpright(void* sub, void* a, void* out);
+void MatrixToAxisAngle(void* a, void* b, void* c);
+void MultiplyMatrices3x3(void* a, void* b, s32 c);
 
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
@@ -260,26 +260,26 @@ struct QueuedGifTags {
     s32 f10;
 };
 
-void func_0018D800(QueuedGifTags* dst, void* src, s32 count);
+void CopyMemory(QueuedGifTags* dst, void* src, s32 count);
 
-s32 func_00202120(void);
-s32 func_00202058(s32 a);
-void func_001F6C20(s32 a);
-s32 func_001F6B60(s32 a);
+s32 GetGsInterruptMask(void);
+s32 SwapGsInterruptMask(s32 a);
+void SyncDataCache(s32 a);
+s32 AwaitSemaphore(s32 a);
 
-void func_001BAC30(Collider* self);
-void* func_0018D5C0(s32 bytes);
+void LoadCollider(Collider* self);
+void* AllocateZeroedFrontMemory(s32 bytes);
 
-void func_001B9338(Collider* self, f32 t);
-void func_00189378(Mat02* sub, s32 zero, Mat3U* out);
-void func_001B91A8(Collider* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
-extern f32 D_0026185C[];
+void StepCollider(Collider* self, f32 t);
+void RotateMatrixUpright(Mat02* sub, s32 zero, Mat3U* out);
+void SteerColliderTowardRotation(Collider* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
+extern f32 g_gameTime[];
 
 struct TransferBase { s32 v; };
 
-void func_00168D98(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
+void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void func_001529C8(PacketWriter* f, s32 n, PacketWriter* p);
+void UsePacketBufferMemory(PacketWriter* f, s32 n, PacketWriter* p);
 
 struct GsPmode { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
 struct GsDispFb { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
@@ -292,25 +292,25 @@ struct GsPrivRegs {
     u32 csr;
 };
 
-extern s32 D_00274508;
-extern s32 D_00274500;
-extern s32 D_00274514;
-extern s32 D_00274510;
+extern s32 g_imageRecordCountB;
+extern s32 g_imageRecordCountA;
+extern s32 g_imageSlotsB;
+extern s32 g_imageSlotsA;
 
-void func_00168D68(BumpAllocator* p, s32 a, s32 b);
-void* func_001EE318(PacketWriter* f);
-void func_001EE450(PacketWriter* f);
-void func_001528E0(PacketWriter* f);
-void func_001529C8(PacketWriter* f, s32 n, u8* buf);
-s32 func_00168D88(BumpAllocator* p, s32 size);
-void func_00168F48(PaletteRecord* e, s32 v, PacketWriter* f);
-void func_00169088(ImageRecord* e, s32 v, PacketWriter* f);
-void func_001529E0(PacketWriter* f, s32* o0, s32* o1);
-void func_001EE7D0(PacketWriter* f, s32 a, s32 b, s32 c);
-void func_001EE850(PacketWriter* f, s32 a, s32 b, s32 c);
-void func_00152D70(PacketWriter* f);
-void func_00152A50(PacketWriter* f, s32 a, s32 b, s32* out, s32 c);
-void func_001B3510(u32 mask);
+void InitBumpAllocator(BumpAllocator* p, s32 a, s32 b);
+void* InitPacketWriter(PacketWriter* f);
+void WriteVifFlush(PacketWriter* f);
+void RewindPacketBuffer(PacketWriter* f);
+void UsePacketBufferMemory(PacketWriter* f, s32 n, u8* buf);
+s32 AllocateBump(BumpAllocator* p, s32 size);
+void StartPaletteUpload(PaletteRecord* e, s32 v, PacketWriter* f);
+void StartImageUpload(ImageRecord* e, s32 v, PacketWriter* f);
+void DetachPacketBuffer(PacketWriter* f, s32* o0, s32* o1);
+void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
+void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
+void CloseDmaTag(PacketWriter* f);
+void DetachPacketBufferCopy(PacketWriter* f, s32 a, s32 b, s32* out, s32 c);
+void BuildAnimRecordGifPackets(u32 mask);
 
 // The file's .data, in retail's order (0x262480 to 0x262714): the word func_001682C0 reads,
 // the display's two records (0x28 bytes each, read by func_00168130; retail puts them on 16
@@ -326,15 +326,15 @@ u8 D_00262500[208] = { 0 };
 u8 D_002625D0[16] = { 0 };
 u8 D_002625E0[16] = { 0 };
 u8 D_002625F0[208] = { 0 };
-s32 D_002626C0 = 0;
+s32 g_displayFrameCounter = 0;
 s32 D_002626C4 = 0;
 s32 D_002626C8 = 0;
 s32 D_002626CC = 0;
-s32 D_002626D0 = 0;
-BumpAllocator D_002626D8 = { 0 };
-List01 D_002626E8 = { 0 };
-List01 D_002626F8 = { 0 };
-List01 D_00262708 = { 0 };
+s32 g_meshQueueCount = 0;
+BumpAllocator g_bumpAllocator = { 0 };
+List01 g_targetCurveList = { 0 };
+List01 g_targetPointList = { 0 };
+List01 g_partList = { 0 };
 
 static s32 D_002BE460;
 static s32 D_002BE464;
@@ -343,7 +343,7 @@ static s32 D_002BE46C;
 static s32 D_002BE470;
 static s32 D_002BE474;
 
-void func_00167D68(ConeAgent* self)
+void InitConeAgent(ConeAgent* self)
 {
     InitAgent(self);
     self->fC20 = 1000.0f;
@@ -359,7 +359,7 @@ void func_00167D68(ConeAgent* self)
     self->f74C = 1.04719755f;
 }
 
-void func_00167E08(ConeAgent* self)
+void StartConeAgent(ConeAgent* self)
 {
     GatheredObjects out;
     s32 i;
@@ -386,14 +386,14 @@ void func_00167E08(ConeAgent* self)
     }
 }
 
-void func_00167EF0(void)
+void DrawConeAgent(void)
 {
     DrawAgent();
 }
 
 ASM_FUNC(func_00167F10);
 
-void func_00168130(void)
+void ApplyFieldDisplayOffset(void)
 {
     s32 i = g_displayFrameCounter & 1;
     s32 field = D_002626C8;
@@ -417,12 +417,12 @@ void func_00168130(void)
 
 ASM_FUNC(func_001682C0);
 
-void func_001683B8(void) {
+void SignalDisplaySync(void) {
     D_002BE46C = 1;
     AwaitSemaphore(D_002BE460);
 }
 
-void func_001683E8(void)
+void FlipDisplayFrame(void)
 {
     D_002BE470 = 1;
     SignalDisplaySync();
@@ -454,7 +454,7 @@ void func_001683E8(void)
     WaitGsPaths(0, 0);
 }
 
-void func_001684E8(void)
+void ApplyPendingDisplayFlip(void)
 {
     if (D_002626CC == 3) {
         D_002626CC = 2;
@@ -483,7 +483,7 @@ void func_001684E8(void)
     }
 }
 
-void func_001685B8(void)
+void ResetDisplayBuffers(void)
 {
     D_002BE470 = 1;
     SendDisplayResetPacket();
@@ -511,7 +511,7 @@ void func_001685B8(void)
 
 ASM_FUNC(func_00168698);
 
-void func_001686E8(s32 channel, void* b)
+void SendGsPacketAndWait(s32 channel, void* b)
 {
     D_002BE468 = 1;
     *(volatile u64*)0x12001000 |= 2;
@@ -522,7 +522,7 @@ void func_001686E8(s32 channel, void* b)
     AwaitSemaphore(D_002BE464);
 }
 
-void func_00168770(PacketWriter* self, u8* color, s32 flag)
+void FillScreenColor(PacketWriter* self, u8* color, s32 flag)
 {
     PacketWriter f;
     s32 x;
@@ -540,7 +540,7 @@ void func_00168770(PacketWriter* self, u8* color, s32 flag)
     EndGifPacket(&f);
 }
 
-void func_001688B8(void)
+void InitDisplay(void)
 {
     Rgba4 k;
     Rgba4 t;
@@ -576,7 +576,7 @@ void func_001688B8(void)
     ResetDisplayBuffers();
 }
 
-void func_00168A48(DmaChainBlock* b)
+void SendPacketToBothBuffers(DmaChainBlock* b)
 {
     s32 i = 0;
     SyncDataCache(0);
@@ -594,7 +594,7 @@ void func_00168A48(DmaChainBlock* b)
     WaitDmaChannel(g_gifChannel, 0, 0);
 }
 
-void func_00168AF8(void)
+void SendDisplayResetPacket(void)
 {
     DmaChainBlock a;
     DmaChainBlock b;
@@ -607,7 +607,7 @@ void func_00168AF8(void)
     SendPacketToBothBuffers(&b);
 }
 
-void func_00168B68(f32 t)
+void FadeScreenToBlack(f32 t)
 {
     FadePacket f;
     s32 i = 0;
@@ -637,26 +637,26 @@ void func_00168B68(f32 t)
     }
 }
 
-void func_00168D00()
+void InitMeshQueue()
 {
     InitBumpAllocator(&g_bumpAllocator,0x1E00,0x4000);
     g_meshQueueCount=0;
 }
 
-u32 func_00168D30(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
+u32 CeilLog2(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
 
-void func_00168D68(BumpAllocator* p, s32 value, s32 other) { p->next = value; p->start = value; p->limit = other; }
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other) { p->next = value; p->start = value; p->limit = other; }
 
-void func_00168D78(BumpAllocator* p) { p->next = p->start; }
+void ResetBumpAllocator(BumpAllocator* p) { p->next = p->start; }
 
-s32 func_00168D88(s32* self,s32 size)
+s32 AllocateBump(s32* self,s32 size)
 {
     s32 old=self[1];
     self[1]=old+size;
     return old;
 }
 
-void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
+void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
 {
     BeginGifTag(ctx, 0, 1, 0xE);
     AddGifRegisterWrite(ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
@@ -666,13 +666,13 @@ void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ct
     AddGifImageTag(ctx, x);
 }
 
-void func_00168E78(PaletteRecord* self, u32 a1){
+void BuildPaletteTexRegister(PaletteRecord* self, u32 a1){
  GsTex0* bits = (GsTex0*)&self->f10;
  bits->cbp = a1;
  bits->psm = (self->f4 <= 0x10) ? 0x14 : 0x13;
  bits->cpsm=0; bits->csm=0; bits->csa=0; bits->cld=1;}
 
-void func_00168F48(PaletteRecord* e, s32 v, void* ctx)
+void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx)
 {
     s32 step = (e->f4 > 16) ? 16 : 8;
     s32 n = e->f4 - 1;
@@ -681,7 +681,7 @@ void func_00168F48(PaletteRecord* e, s32 v, void* ctx)
     BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
 }
 
-void func_00168FB0(ImageRecord* self, u32 a1)
+void BuildImageTexRegister(ImageRecord* self, u32 a1)
 {
     GsTex0* bits = (GsTex0*)&self->f18;
     bits->tbp = a1;
@@ -692,12 +692,12 @@ void func_00168FB0(ImageRecord* self, u32 a1)
     bits->tcc = 1;
 }
 
-void func_00169088(ImageRecord* d, u32 dbp, void* ctx)
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx)
 {
     BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->f14, ctx);
 }
 
-s32 func_001690C0(s32 mask, BumpAllocator* b, PacketWriter* c)
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
 {
     s32 saved;
 
@@ -741,7 +741,7 @@ s32 func_001690C0(s32 mask, BumpAllocator* b, PacketWriter* c)
     return (c->curS ^ saved) != 0;
 }
 
-void func_001692B0(void* self, void* arg)
+void SendMaskedImagesToGif(void* self, void* arg)
 {
     TexturePacket f;
 
@@ -764,7 +764,7 @@ void func_001692B0(void* self, void* arg)
     PopBackMemoryMark();
 }
 
-s32 func_001693A8(void* self)
+s32 BuildMaskedImagesPacket(void* self)
 {
     TextureUploadPacket f;
 
@@ -786,7 +786,7 @@ s32 func_001693A8(void* self)
     return f.out;
 }
 
-void func_001694A0(FrameTarget* self)
+void SubmitMeshQueueEntry(FrameTarget* self)
 {
     CopyMemory(self->dst, (void*)self->value, self->count);
     s32 flag = self->flag;
@@ -802,7 +802,7 @@ void func_001694A0(FrameTarget* self)
     }
 }
 
-void func_001694F8(StripMesh* a0, FrameSource* a1, s32 a2, s32 a3, s32 a4, AnimCursor* a5)
+void QueueMeshStrip(StripMesh* a0, FrameSource* a1, s32 a2, s32 a3, s32 a4, AnimCursor* a5)
 {
     FrameTarget local;
     FrameTarget* e;
@@ -864,7 +864,7 @@ store:
     }
 }
 
-void func_00169608(s32 a0, s32 a1, AnimCursor* a2)
+void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
 {
     FrameTarget local;
     FrameTarget* e;
@@ -890,7 +890,7 @@ void func_00169608(s32 a0, s32 a1, AnimCursor* a2)
     }
 }
 
-void func_001696B8(s32 idx, u32 lo, u32 take, u32 give)
+void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
 {
     u32 end = take + lo;
 
@@ -908,7 +908,7 @@ void func_001696B8(s32 idx, u32 lo, u32 take, u32 give)
     }
 }
 
-void func_00169718(void)
+void FlushMeshQueue(void)
 {
     s32 i;
 
@@ -917,7 +917,7 @@ void func_00169718(void)
     }
 }
 
-s32 func_00169780(u32 mask)
+s32 UploadImagesByMask(u32 mask)
 {
     BumpAllocator span;
     PacketWriter fa;
@@ -993,7 +993,7 @@ s32 func_00169780(u32 mask)
     return res;
 }
 
-void func_00169B18(TextureHeader* src, void* dst)
+void SetupTextureRenderTarget(TextureHeader* src, void* dst)
 {
     s32 w = 1 << (s32)((src->tex0 >> 26) & 0xF);
     s32 cap = 64;
@@ -1009,21 +1009,21 @@ void func_00169B18(TextureHeader* src, void* dst)
     AddGifRegisterWrite(dst, 0x43, 0x44);
 }
 
-void func_00169C58()
+void SetObjectListLinkOffsets()
 {
     SetListLinkOffset(&g_targetCurveList, 0x38);
     SetListLinkOffset(&g_targetPointList, 0x50);
     SetListLinkOffset(&g_partList, 0x558);
 }
 
-void func_00169CA0()
+void ClearObjectLists()
 {
     ClearList(&g_targetCurveList);
     ClearList(&g_targetPointList);
     ClearList(&g_partList);
 }
 
-void func_00169CD8(TargetCurve* self)
+void InitTargetCurve(TargetCurve* self)
 {
     InitObject(self);
     self->targetId = -1;
@@ -1032,19 +1032,19 @@ void func_00169CD8(TargetCurve* self)
     self->f58 = 3.4028235e+38f;
 }
 
-void func_00169D20(TargetCurve* self)
+void RegisterTargetCurve(TargetCurve* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetCurveList, self);
 }
 
-void func_00169D58(TargetCurve* self)
+void UnregisterTargetCurve(TargetCurve* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetCurveList, self);
 }
 
-void func_00169D90(TargetCurve* self)
+void PostLoadTargetCurve(TargetCurve* self)
 {
     if (self->targetId != -1) {
         TargetedObject* r = (TargetedObject*)FindFirstObjectByIdMode4(self->world, self->targetId, self->parent);
@@ -1053,7 +1053,7 @@ void func_00169D90(TargetCurve* self)
     }
 }
 
-void func_00169DD8(TargetCurve* self)
+void CopyTargetCurve(TargetCurve* self)
 {
     PathCurveKeptBits saved = self->keep;
     CopyObjectData(self);
@@ -1062,14 +1062,14 @@ void func_00169DD8(TargetCurve* self)
 
 ASM_FUNC(func_00169E20);
 
-void func_00169FC0(TargetCurve* self, f32* out, void* a2, void* a3)
+void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {
     CurveProbe f;
     u8* node = (u8*)GetActiveSwitchedCollider();
     PathCurve* o = self->curve;
     f.c = 1;
-    func_00128018(0, (s32)self->parent, node + 0x140, &f.a);
-    func_001280C0(0, (s32)self->parent, (void*)&g_unitZVector, &f.b);
+    TransformPointBetweenFrames(0, (s32)self->parent, node + 0x140, &f.a);
+    TransformDirectionBetweenFrames(0, (s32)self->parent, (void*)&g_unitZVector, &f.b);
     if (o->vt->m10 != 0) {
         o->vt->m10(o, &f.a, &f.b, 0, 0, 0, &f.x);
     }
@@ -1088,7 +1088,7 @@ void func_00169FC0(TargetCurve* self, f32* out, void* a2, void* a3)
     *out = f.x;
 }
 
-void func_0016A100(TargetPoint* self)
+void InitTargetPoint(TargetPoint* self)
 {
     InitObject(self);
     f32 k = 3.4028235e+38f;
@@ -1097,19 +1097,19 @@ void func_0016A100(TargetPoint* self)
     self->f70 = k;
 }
 
-void func_0016A140(TargetPoint* self)
+void RegisterTargetPoint(TargetPoint* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetPointList, self);
 }
 
-void func_0016A178(TargetPoint* self)
+void UnregisterTargetPoint(TargetPoint* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetPointList, self);
 }
 
-void func_0016A1B0(TargetPoint* self)
+void PostLoadTargetPoint(TargetPoint* self)
 {
     if (self->targetId != -1) {
         TargetedObject* r = (TargetedObject*)FindFirstObjectByIdMode4(self->world, self->targetId, self->parent);
@@ -1118,7 +1118,7 @@ void func_0016A1B0(TargetPoint* self)
     }
 }
 
-void func_0016A1F8(TargetPoint* self)
+void CopyTargetPoint(TargetPoint* self)
 {
     KeptBits saved = self->keep;
     CopyObjectData(self);
@@ -1129,18 +1129,18 @@ ASM_FUNC(func_0016A240);
 
 ASM_FUNC(func_0016A320);
 
-void func_0016A3A8(ListedCollisionPart* self)
+void InitListedCollisionPart(ListedCollisionPart* self)
 {
     f32 k = 3.0f;
     InitCollider(self);
-    func_00129FB0(self, k);
-    func_0012A080(self, k);
-    func_0012A150(self, k);
-    func_0012A270(self, 2.0f);
+    SetScaledRotationSpring(self, k);
+    SetScaledSpinSpring(self, k);
+    SetScaledPositionRamp(self, k);
+    SetScaledRotationRamp(self, 2.0f);
     self->f568 = 300.0f;
 }
 
-void func_0016A420(ListedCollisionPart* self)
+void LoadListedCollisionPart(ListedCollisionPart* self)
 {
     Rec2195_224* b;
     Quad16* dst;
@@ -1160,26 +1160,26 @@ void func_0016A420(ListedCollisionPart* self)
     dst[2] = src[2];
 }
 
-void func_0016A490(ListedCollisionPart* self)
+void AddToPartList(ListedCollisionPart* self)
 {
     RegisterCollider(self);
     AppendToList(&g_partList, self);
 }
 
-void func_0016A4C8(ListedCollisionPart* self)
+void RemoveFromPartList(ListedCollisionPart* self)
 {
     UnregisterCollider(self);
     RemoveFromList(&g_partList, self);
 }
 
-void func_0016A500(ListedCollisionPart* self)
+void CopyKeepingListLink(ListedCollisionPart* self)
 {
     Link02 tmp = self->listLink;
     CopyCollider(self);
     self->listLink = tmp;
 }
 
-s32 func_0016A548(Collider* a0, Collider* a1)
+s32 TestListedCollisionPartMayContact(Collider* a0, Collider* a1)
 {
     if ((void*)a1 == g_player && (void*)a0 == ((Player*)a1)->heldObject) {
         return 1;
@@ -1187,7 +1187,7 @@ s32 func_0016A548(Collider* a0, Collider* a1)
     return TestCollidersMayContact(a0, a1);
 }
 
-void func_0016A580(ListedCollisionPart* self, f32 t)
+void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
 {
     Mat3U buf;
 
@@ -1196,10 +1196,10 @@ void func_0016A580(ListedCollisionPart* self, f32 t)
         return;
     }
     RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, &buf);
-    func_001B91A8(self, &buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
+    SteerColliderTowardRotation(self, &buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
 }
 
-void func_0016A5F0(PooledObject* self, s32 v)
+void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
 {
     HoldMatrices f;
 
@@ -1226,7 +1226,7 @@ void func_0016A5F0(PooledObject* self, s32 v)
     self->stateTime = g_gameTime[0];
 }
 
-s32 func_0016A758(PlacedObject* self)
+s32 CountHeldPooledChildren(PlacedObject* self)
 {
     ChildListWalk w(&self->children);
     s32 count = 0;
@@ -1244,7 +1244,7 @@ s32 func_0016A758(PlacedObject* self)
     return count;
 }
 
-void* func_0016A820(PlacedObject* self)
+void* FindEarliestPooledChild(PlacedObject* self)
 {
     ChildListWalk w(&self->children);
     void* best = 0;

@@ -25,99 +25,99 @@
 #include "property_descriptor.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
-f32 func_001EAAE0(f32 a, f32 b);
-f32 func_00205778(f32 a, f32 b);
-extern f32 D_0026185C[];
-s32 func_00182F40(Collider* e, void* b);
-void func_001BF048(void* p);
-void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
-s32 func_00137BE0(void* a);
-void* func_0018D5C0(s32 size);
-void func_001F5C0C(void* p, int zero, s32 count);
-void func_00138828(void* owner, void* self);
-Contacts03* func_001DC7D0(void* owner, void* self);
-void func_00138F28(void* owner, void* self);
-void func_00152470(void* p, void* self);
-void func_001240F8(void* self);
-void func_001B7C40(Collider* self, s32 flag);
-void func_001BB580(void* p);
-void func_001BB4A0(void* self);
-void func_001243E0(void* self);
-void func_001388A0(void* owner, void* self);
-void func_001DC828(void* owner, Contacts03* contacts);
-void func_00152600(void* p, void* self);
-void func_001DC108(void* owner, Touch03* list);
-void func_00138BE0(void* owner, void* self, s32 n);
-void func_00152600(void* a, void* b);
-void func_001B5F28(void* a, void* b);
-void func_001837E0(void* a, s32 b, s32 c, s32 d);
-void func_00152438(void* self, s32 value);
-void func_00123ED0(void* self);
-void func_00160E80(Mesh03* mesh);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
-void func_00124A48(void* self);
-void* func_0018D500(s32 size);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_00124FC0(void* self);
-void* func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
-void func_00152470(List01* list, StateWalker* item);
-void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
-void func_0018D608(void);
-void func_0018D6F0(void);
-void* func_0018D658(u32 bytes);
+f32 RandomFloatInRange(f32 a, f32 b);
+f32 ArctangentOfRatio(f32 a, f32 b);
+extern f32 g_gameTime[];
+s32 IsObjectDescendantOf(Collider* e, void* b);
+void ReleaseSoundLevel(void* p);
+void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void** args);
+s32 ReadBufferedU16(void* a);
+void* AllocateZeroedFrontMemory(s32 size);
+void FillMemory(void* p, int zero, s32 count);
+void AddColliderToSweepAxes(void* owner, void* self);
+Contacts03* TakeContactTable(void* owner, void* self);
+void InitContactPairFlags(void* owner, void* self);
+void AppendToList(void* p, void* self);
+void RegisterPlacedObject(void* self);
+void SetColliderPartListed(Collider* self, s32 flag);
+void UpdateAnchorModeFlags(void* p);
+void ResolveContactHandler(void* self);
+void UnregisterPlacedObject(void* self);
+void RemoveColliderFromSweepAxes(void* owner, void* self);
+void ReleaseContactTable(void* owner, Contacts03* contacts);
+void RemoveFromList(void* p, void* self);
+void FreeTouchNodes(void* owner, Touch03* list);
+void ClearRootObjectStateBits(void* owner, void* self, s32 n);
+void RemoveFromList(void* a, void* b);
+void PushFreeSlot(void* a, void* b);
+void TriggerScriptEvent(void* a, s32 b, s32 c, s32 d);
+void SetListLinkOffset(void* self, s32 value);
+void InitPlacedObject(void* self);
+void ClearRecordBody(Mesh03* mesh);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+s32 LookupScriptVariable(void* a, s32 b, s32 c, ScriptValue* d);
+void StartPlacedObject(void* self);
+void* AllocateFrontMemory(s32 size);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+void UpdatePlacedObject(void* self);
+void* CreateStateWalker(void* bank, s32 r, s32 minus_one, s32 zero);
+void AppendToList(List01* list, StateWalker* item);
+void TriggerScriptEvent(StateGraph* self, s32 a, s32 b, void* c);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(u32 bytes);
 struct RandomRangeLow { s32 v; };
-s32 func_001EAA70(RandomRangeLow lo, s32 hi);
-void* func_0018D658(s32 size);
-void func_00125108(Collider* self);
-void func_00138BE0(void* a, void* b, s32 c);
-void func_001389C8(void* a);
-void func_001B9448(Collider* self);
-void func_001B94F0(Collider* self, s32 value);
-void func_00138F28(void* a, void* b);
-s32 func_001C1AD8(s32 value, void* out);
-s32 func_001C1A28(s32 value, void* out);
-void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
-void func_001B9AB0(void* a, void* b);
-void func_001261C0(Collider* self, void* a, void* m);
-void func_001BA430(void* a, void* b, void* c, s32 d);
-void func_00129DF8(void* self);
+s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
+void* AllocateBackMemory(s32 size);
+void RecomputePlacedObjectFrame(Collider* self);
+void ClearRootObjectStateBits(void* a, void* b, s32 c);
+void MarkSweepAxesUnsorted(void* a);
+void ComputeColliderInverseInertia(Collider* self);
+void DropColliderContacts(Collider* self, s32 value);
+void InitContactPairFlags(void* a, void* b);
+s32 ScriptListContainsValue(s32 value, void* out);
+s32 AppendPropertyToScriptList(s32 value, void* out);
+void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
+void AddColliderForce(void* a, void* b);
+void DrawPlacedObject(Collider* self, void* a, void* m);
+void ConstrainVectorByAnchor(void* a, void* b, void* c, s32 d);
+void ClearRootTries(void* self);
 // A quadword passed by value in one register (func_001B8820's position).
 typedef u64 Qword128 __attribute__((mode(TI)));
-void func_00125138(void* self);
-void func_001B8820(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
-void func_001280C0(void* a, void* b, void* c, void* d);
-void func_001245A8(void* self, void* p);
-s32 func_00182F40(void* e, void* b);
-void func_00183350(void* self, s32 kind, void* arg);
+void ComputePlacedObjectWorldFrame(void* self);
+void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
+void TransformDirectionBetweenFrames(void* a, void* b, void* c, void* d);
+void ReparentPlacedObject(void* self, void* p);
+s32 IsObjectDescendantOf(void* e, void* b);
+void SendObjectNotification(void* self, s32 kind, void* arg);
 // An anchor preset (func_001BB028): a direction and a mode.
 struct AnchorPreset { const Vec02* quad; s32 value; };
 extern AnchorPreset D_002746E0[8];
-void* func_0018D658(s32 n);
-s32 func_001387F8(void* self, void* other);
+void* AllocateBackMemory(s32 n);
+s32 GetContactRowHead(void* self, void* other);
 // Matched by indexing the end as (u32)e + (i << 6).
 
-void func_001837E0(void* self, s32 a, s32 b, void* c);
-void func_001DC108(void* pool, Touch03* m);
-Touch03* func_001DC0C8(void* pool);
-void func_00127048(Collider* self, Collider* other);
-void func_00160EA0(Mesh03* a, s32 b, Mesh03* c);
-void func_0013E6C8(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
+void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
+void FreeTouchNodes(void* pool, Touch03* m);
+Touch03* AllocateTouchNode(void* pool);
+void CopyPlacedObject(Collider* self, Collider* other);
+void CopyMeshTransformed(Mesh03* a, s32 b, Mesh03* c);
+void CloneTreeNodes(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
 
 
-s32 func_00137B90(BufferedStream* in);
+s32 ReadBufferedU8(BufferedStream* in);
 void func_00137FB0(BufferedStream* in, Mesh03* p);
-void func_00138278(BufferedStream* in, Mesh03* a, Tree03* out);
-f32 func_00137DF8(BufferedStream* in);
-void func_00137EB0(BufferedStream* in, Mat02* p);
-void func_00137E70(BufferedStream* in, Vec02* p);
-void func_001B9448(Collider* self, f32 x);
-s32 func_00137BE0(BufferedStream* in);
-s32 func_00137D10(BufferedStream* in);
-s32 func_00137C40(BufferedStream* in);
-void func_001289C0(Collider* self, BufferedStream* in);
-void func_00138F28(void* a, Collider* b);
+void ReadFaceTree(BufferedStream* in, Mesh03* a, Tree03* out);
+f32 ReadBufferedFloat(BufferedStream* in);
+void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
+void ReadBufferedVector3(BufferedStream* in, Vec02* p);
+void ComputeColliderInverseInertia(Collider* self, f32 x);
+s32 ReadBufferedU16(BufferedStream* in);
+s32 ReadBufferedS16(BufferedStream* in);
+s32 ReadBufferedU32(BufferedStream* in);
+void LoadPlacedObject(Collider* self, BufferedStream* in);
+void InitContactPairFlags(void* a, Collider* b);
 // What class 0x03's slot 69 (func_001B9F30) writes of a collider.
 struct ColliderPose {
     s32 f00;                // 0x00: 0
@@ -129,30 +129,30 @@ struct ColliderPose {
     f32 time;               // 0x38: g_gameTime
     s32 f3C;                // 0x3C: 0
 };
-void func_00189378(Mat02* m, s32 zero, Vec02* out);
-void func_001861E8(void* pool, Contact03* head);
-extern s32 D_00274744;
-void func_001BE998(void);
-extern s32 D_00274728;
-void func_001BEB10(void* self);
-s32 func_0011CE30(void);
-void func_001F6C20(s32 a);
-s32 func_0011D598(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-void func_00152600(u8* a, void* b);
-void func_001B5F28(u8* a, void* b);
-extern u8 D_00604790[];
-void func_001F5C0C(u8* p, s32 a, s32 b);
-void func_0011CBB8(void);
-s32 func_001BE268(s32 a);
-s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d);
-void func_0011D928(s32 a);
-void func_001C06D8(void);
+void RotateMatrixUpright(Mat02* m, s32 zero, Vec02* out);
+void FreePooledContactChain(void* pool, Contact03* head);
+extern s32 g_streamVoiceLocked;
+void StopStreamVoice(void);
+extern s32 g_stagedBankVoice;
+void RequestStagedBank(void* self);
+s32 PollIopCommands(void);
+void SyncDataCache(s32 a);
+s32 StartSoundVoice(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
+void RemoveFromList(u8* a, void* b);
+void PushFreeSlot(u8* a, void* b);
+extern u8 g_soundBankHandles[];
+void FillMemory(u8* p, s32 a, s32 b);
+void InitIopCommandChannels(void);
+s32 EnsureSoundBankLoaded(s32 a);
+s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d);
+void SendIopSoundLevel(s32 a);
+void ResetVolumeChannelFactors(void);
 void func_0011D520(s32 a, s32 b);
 void func_0011D558(s32 a, s32 b, s32 c);
 void func_0011E3A0(s32 a, s32 b);
-void* func_001B5EA0(void* p);
-void func_001F5C0C(void* p, s32 zero, s32 size);
-void func_00152470(void* list, void* item);
+void* PopFreeSlot(void* p);
+void FillMemory(void* p, s32 zero, s32 size);
+void AppendToList(void* list, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
 // voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
@@ -197,19 +197,19 @@ struct PlayingSound {
         return v;
     }
 };
-void func_00152600(u8* p, PlayingSound* self);
-void func_001B5F28(u8* p, PlayingSound* self);
-void func_001BF728(PlayingSound* self);
-void* func_001F5C0C(PlayingSound* p, s32 v, s32 n);
-void func_0011D860(s32 voice, s32 a, s32 b, s32 c);
-void func_001BE860(PlayingSound* self);
+void RemoveFromList(u8* p, PlayingSound* self);
+void PushFreeSlot(u8* p, PlayingSound* self);
+void FreeSoundRecord(PlayingSound* self);
+void* FillMemory(PlayingSound* p, s32 v, s32 n);
+void FadeOutSoundVoice(s32 voice, s32 a, s32 b, s32 c);
+void ApplySoundRecordVolumePan(PlayingSound* self);
 void func_001BBEB8(Collider* self);
-void func_00125440(Collider* self, f32 x, void* b);
+void MovePlacedObject(Collider* self, f32 x, void* b);
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
-void func_001C06A0(s32 a, s32 b, f32 x);
-void func_0011D640(s32 a);
-void func_0011D670(s32 a);
-void func_00152470(u8* a, void* b);
+void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
+void PauseIopVoice(s32 a);
+void ResumeIopVoice(s32 a);
+void AppendToList(u8* a, void* b);
 // A request for a sound level: a 12-byte record of the pool at World::pool1BB8, kept on
 // World::list1BC4 (func_001BEEF8 makes one). The highest level among them is the current one
 // (func_001BEF88); the IOP is sent the level plus 20.
@@ -218,52 +218,52 @@ struct SoundLevelEntry {
     u8 pad4[8];
 };
 extern s32 D_002748EC;
-extern s32 D_00274734;
-extern s32 D_00274738;
-void func_001BEDF8(void* self);
-void func_001BEF88(void* self);
+extern s32 g_currentSoundLevel;
+extern s32 g_previousSoundLevel;
+void RemoveSoundLevelEntry(void* self);
+void RecomputeSoundLevel(void* self);
 typedef signed int s32;
 typedef unsigned char u8;
-extern s32 D_00274720;
-extern s32 D_0027473C;
-void func_0011D450(s32 handle);
-void func_0011D600(s32 handle);
-void func_001BEDF8(SoundLevelEntry* self);
-void func_001BEF88(SoundLevelEntry* self);
-extern s32 D_0027472C;
+extern s32 g_stagedBankState;
+extern s32 g_stagedBankHandle;
+void UnloadSoundBank(s32 handle);
+void StopSoundVoice(s32 handle);
+void RemoveSoundLevelEntry(SoundLevelEntry* self);
+void RecomputeSoundLevel(SoundLevelEntry* self);
+extern s32 g_streamVoice;
 // How far the listener is from a position (func_001BF2E0 or func_001BF398, as func_001BF578 chooses).
 typedef f32 (*ListenerDistanceFn)(void* listener, void* position);
-s32 func_001493A0(u8* p);
-s32 func_00149638(u8* s);
-f32 func_001BF398(void* listener, void* position);
-f32 func_001BF2E0(void* listener, void* position);
-void* func_0018D5C0(s32 bytes);
-extern s32 D_00274730;
+s32 IsTopCameraController(u8* p);
+s32 PeekStackValue(u8* s);
+f32 MeasureListenerDistance(void* listener, void* position);
+f32 MeasureCameraWeightedDistance(void* listener, void* position);
+void* AllocateZeroedFrontMemory(s32 bytes);
+extern s32 g_streamVoicePending;
 // The comparison func_001BE0A8's heap sort orders its records by.
 typedef s32 (*SortCompareFn)(void* a, void* b);
-void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA);
-s32 func_001BE980(void);
-void func_0018D410(void* p);
-s32 func_0011E048(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
-void func_001BE5D8(void);
-void func_0011E0E0(s32 a0, void (*a1)(void), u64 a2);
-void func_0011D420(void);
-void* func_001925F0(void);
-f32 func_001BF5E0(void* self);
-void func_001BF200(f32 r, void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
-void func_0011D798(s32 voice, s32 volume, s32 pan);
-void func_001BFCD8(s32 a0, PlayingSound** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001BF718(PlayingSound** slot);
-void func_001BEA78(void);
-void func_001BE1E8(void);
-s32 func_0011E1F8(s32 a);
-void func_001BEAC8(s32 h);
-void func_0011D2A8(s32 a0, s32 a1, void* a2, s32 a3);
-void func_0018D800(void* dst, void* src, s32 count);
-s32 func_00152720(void* a);
-void* func_001BED98(void);
-s32 func_0011D708(s32 handle);
-extern f32 D_00261858[];
+void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA);
+s32 HasStreamVoice(void);
+void ClearKeyId(void* p);
+s32 StartStreamedVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+void ClearStreamVoicePending(void);
+void RequestStreamCallback(s32 a0, void (*a1)(void), u64 a2);
+void NotifyIopBanksChanged(void);
+void* GetActiveSwitchedCollider(void);
+f32 ComputeSoundListenerFactor(void* self);
+void ComputeSoundVolumeAndPan(f32 r, void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
+void SetVoiceVolumePan(s32 voice, s32 volume, s32 pan);
+void StartSoundEffect(s32 a0, PlayingSound** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void ClearSoundRecordHandle(PlayingSound** slot);
+void StopStagedBankVoice(void);
+void UnloadStagedBank(void);
+s32 SyncDiscRead(s32 a);
+void StoreStagedBankHandle(s32 h);
+void StartSoundBankLoad(s32 a0, s32 a1, void* a2, s32 a3);
+void CopyMemory(void* dst, void* src, s32 count);
+s32 IsListEmpty(void* a);
+void* AllocateSoundLevelEntry(void);
+s32 IsVoiceBusy(s32 handle);
+extern f32 g_gameClock[];
 // The counts func_001BD678 fills for func_001BDD00 (its two lists of connected colliders).
 struct ConnectedCounts { s32 pad; s32 n1; s32 n2; };
 // What the update pass calls through slot 27 of a collider's class (func_001BDD00).
@@ -273,40 +273,40 @@ struct ListedCollider {
     u8 pad0[0x414];
     ListedCollider* next;
 };
-void func_0018D608();
-void func_0018D6F0();
-void func_001BD678(Collider* n, s32* c1, Collider** a1, s32* c2, Collider** a2);
-void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
-s32 func_00129D70(Collider* n);
-void func_00129DF8(Collider* n);
-void func_0011E0B0(s32 a0);
+void PushBackMemoryMark();
+void PopBackMemoryMark();
+void CollectConnectedColliders(Collider* n, s32* c1, Collider** a1, s32* c2, Collider** a2);
+void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
+s32 IsObjectTreeAtRest(Collider* n);
+void ClearRootTries(Collider* n);
+void QueryIopStreamVoice(s32 a0);
 // A row of g_soundEntries (001E4000.cpp defines it): the bank a sound is in, -1 for none, and
 // its index in that bank.
 struct SoundEntry { s32 bank; s32 index; };
-extern SoundEntry D_00245020[];
-extern u8 D_006047B0[];
-extern u8 D_006047D0[];
-s32 func_001BE4A8(s32 idx);
+extern SoundEntry g_soundEntries[];
+extern u8 g_soundBankLoaded[];
+extern u8 g_soundEntryAvailable[];
+s32 EnsureSoundEntryBankLoaded(s32 idx);
 // NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
 
-void func_001BF428(PlayingSound* self);
-void func_001BF7F8(PlayingSound* self, f32 x);
+void ComputeSoundRecordDoppler(PlayingSound* self);
+void SetSoundRecordPitch(PlayingSound* self, f32 x);
 // NEAR: first load of the chain pointer lands in $v1 and the sum in $v0, retail has them in $v0/$v1; one instruction short so the final branch targets 0x1BF028 instead of 0x1BF02C
 
 // NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
 
-s32 func_0011D7D8(s32 a, s32 b);
-void func_0011D810(s32 x, s32 y);
-extern const KeyRecord D_00244F40[7];
-void func_0011D450(void);
-void func_0018D410(KeyId* p);
-s32 func_00203828(s32 a);
-s32 func_0011D140(s32 a, s32 b);
-s32 func_0011D760(s32 a, s32 b);
-s32 func_001BE568(s32 id);
-void func_001BF920(PlayingSound* self, PlayingSound** owner, s32 a2, s32 a3, s32 a4, f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* a5, s32 a6);
-void func_001BFBF8(PlayingSound* self);
-void func_001BFAF8(PlayingSound* self, s32 id);
+s32 GetSoundPitchBase(s32 a, s32 b);
+void SetVoicePitch(s32 x, s32 y);
+extern const KeyRecord g_soundBankKeys[7];
+void UnloadSoundBank(void);
+void ClearKeyId(KeyId* p);
+s32 WaitDiscReady(s32 a);
+s32 LoadSoundBankAtLocation(s32 a, s32 b);
+s32 TestSoundInBank(s32 a, s32 b);
+s32 IsSoundEntryAvailable(s32 id);
+void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 a2, s32 a3, s32 a4, f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* a5, s32 a6);
+void ScheduleAmbientSoundRecord(PlayingSound* self);
+void StartSoundRecordVoice(PlayingSound* self, s32 id);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
 struct ListWalk {
     static void Begin(ListFrame* it, List01* list)
@@ -325,65 +325,65 @@ struct ListWalk {
     }
     static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
-Contact03* func_001B5EC0(u8* p);
-void func_001861E8(u8* a, Contact03* b);
-s32 func_001EAA70(s32 a, s32 b);
-void func_001BF620(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
-void func_001BCD00(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
-void func_001BD790(u8* node, s32 flag);
+Contact03* TakePoolSlot(u8* p);
+void FreePooledContactChain(u8* a, Contact03* b);
+s32 RandomIntInRange(s32 a, s32 b);
+void ComputeSoundAttenuation(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
+void SetColliderForcedState(u8* node, s32 flag);
 // The list walk of World::list1BAC, element by element.
 struct PlayingSoundFrame : ListFrame {
     PlayingSound* Next() { PlayingSound* n = *(PlayingSound**)link; link = (u8*)n + offset; return n; }
 };
-s32 func_001BF1F0(void);
-void* func_001BF3D0(void);
-s32 func_0011D708(ListFrame* h);
-s32 func_00182FC8(BaseObject* o);
-void func_0011D600(s32 h);
-void func_0011D730(s32 h, void (*fn)(void), s64 arg);
-void func_001BFFC8(void);
-void func_001BF200(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
-void func_001BF788(PlayingSound* self, s32 n);
-void func_00130110(void* p);
-void func_001C27B0(s32 a, s32 b);
-s32 func_0011D4E0(s32 flag);
+s32 IsSoundEmitterUpdateDisabled(void);
+void* GetSoundListenerPosition(void);
+s32 IsVoiceBusy(ListFrame* h);
+s32 IsObjectAttached(BaseObject* o);
+void StopSoundVoice(s32 h);
+void RequestVoiceCallback(s32 h, void (*fn)(void), s64 arg);
+void MarkSoundRecordIfIdMatches(void);
+void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void StopSoundRecord(PlayingSound* self, s32 n);
+void EnsureKeyedList(void* p);
+void ConstructScratchpadTransfers(s32 a, s32 b);
+s32 SetIopSoundOptionFlag(s32 flag);
 extern U64P D_00274820;
 extern U64P D_00274828;
 extern s32 D_006053E0[];
-s32 func_0011D8F0(s32 a, s32 b);
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
-void func_001C0C08(s32 index, s32 value);
-void func_001B6438(s32 p);
-s32 func_001B6290(s32 p, void* ctx, s32 a2, s32 a3);
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
-void func_001830D8(void* self);
+s32 GetVoiceParam(s32 a, s32 b);
+void UnregisterObject(void* self);
+void RemoveFromList(void* table, void* self);
+void SetCachedVoiceParam(s32 index, s32 value);
+void DestroyStateWalker(s32 p);
+s32 CreateStateWalker(s32 p, void* ctx, s32 a2, s32 a3);
+void RegisterObject(void* self);
+void AppendToList(void* table, void* self);
+void CopyObjectData(void* self);
 // An entry of World::f1EF4: an expression read from the level and the scope it was evaluated in
 // (0 until func_001C13E8 evaluates it).
 struct WorldScriptEntry { R11B008Node* expr; s32 scope; };
-extern u8 D_00259F38[];
-void func_0011A6C0(void* a, void* b);
-void func_0011D480(s32 a, s32 b);
+extern u8 g_markStacks[];
+void AddUniqueMarkRoot(void* a, void* b);
+void SetIopVolumeChannel(s32 a, s32 b);
 extern s32 D_00274808[6];
-void func_0011E328(s32 a, s32 b);
-void func_0011E360(s32 a, s32 b, s32 c);
+void SetIopChannelValue(s32 a, s32 b);
+void SetIopChannelValuePair(s32 a, s32 b, s32 c);
 struct Point2 { f32 x; f32 y; };
-extern f32 D_00274838[11][4];
-void func_0011D480(s32 slot, s32 value);
-void func_001C0600(s32 column);
+extern f32 g_volumeChannelFactors[11][4];
+void SetIopVolumeChannel(s32 slot, s32 value);
+void ApplyVolumeChannelFactors(s32 column);
 extern u8 D_002748E8[4];
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_0011E010(void);
-void func_0011E110(s32 a0);
-s32 func_0011E1F8(s32 flag);
-void func_001C0808(s32 a0);
-void func_001BEE48(void);
-void func_001C0CB0(void);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void StopAllIopSounds(void);
+void WaitForIopSoundStop(s32 a0);
+s32 SyncDiscRead(s32 flag);
+void StopWorldSoundRecords(s32 a0);
+void ClearSoundLevels(void);
+void ClearCachedVoiceParams(void);
 // A property's getter (PropertyDescriptor::getter with flags 4, or the method at that offset of
 // the object's table): fills `out` with the value of `obj`.
 typedef void (*PropertyGetter)(void* obj, void* out);
-void func_001C1F20(ScriptValue* self, void* a, void* b, ScriptValue* c);
+void WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
 // One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
@@ -403,20 +403,20 @@ struct SprDmaChannel {
     u8 pad4[0x7C];
     s32 sadr;               // 0x80: the scratchpad address
 };
-extern SprDmaChannel* D_00261F20;
-s32 func_00202C38(SprDmaChannel* d, s32 b, s32 c);
-void func_00202B68(SprDmaChannel* d);
-extern f32 D_00274758[11][4];
+extern SprDmaChannel* g_fromSprChannel;
+s32 WaitDmaChannel(SprDmaChannel* d, s32 b, s32 c);
+void StartDmaChainToMemory(SprDmaChannel* d);
+extern f32 g_defaultVolumeChannelFactors[11][4];
 extern s32 D_00274808[];
-void func_0011E328(s32 channel, s32 value);
-void func_0011E360(s32 channel, s32 value, s32 value2);
+void SetIopChannelValue(s32 channel, s32 value);
+void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
-void func_001F5C0C(void* p, s32 v, s32 n);
-void func_001C15D8(ScriptValue* t, s32 value, PropertyDescriptor* d);
-s32 func_001C0CF0(void);
-extern PropertyList D_00244950[];
+void FillMemory(void* p, s32 v, s32 n);
+void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d);
+s32 StepBiasedRandomWalk(void);
+extern PropertyList g_classPropertyLists[];
 // func_001C0CF0's random walk: six steps for each of seven rows, and the row for each position
 // from -12 to 12, copied to the stack.
 struct RandomWalkSteps { s32 v[42]; };
@@ -425,74 +425,74 @@ extern const RandomWalkSteps D_0024D2A8;
 extern const RandomWalkRows D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
-void func_001C15D8(ScriptValue* self, void* a, s32 r);
-void func_0011D8B0(s32 voice, s32 a1, s32 a2);
-void func_00182C18(BaseObject* self);
-s32 func_00137C40(void* src);
-void* func_0018D500(u32 size);
-void func_00138518(void* self);
-s32 func_0011A630(void);
-void func_0011A6C0(u8* a, s32 b);
-void* func_0011A358(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
+void ReadPropertyValue(ScriptValue* self, void* a, s32 r);
+void SetVoiceParam(s32 voice, s32 a1, s32 a2);
+void InitObject(BaseObject* self);
+s32 ReadBufferedU32(void* src);
+void* AllocateFrontMemory(u32 size);
+void SkipBufferedBlock(void* self);
+s32 NewScriptScope(void);
+void AddUniqueMarkRoot(u8* a, s32 b);
+void* DefineScriptVariable(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
 extern s32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-void func_0011A080(ScriptValue* t, R11B008Node* node, s32 b);
+void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 struct ScriptValueFilter { u32 type; R11B008Node* list; };
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
 struct ScriptPair { s32 w[2]; };
 struct ScriptTriple { s32 w[3]; };
-extern void* func_0011C508(void);
-extern void* func_0011C618(void);
-extern void* func_001884E0(void* d, void* s);
-extern void func_001884C0(void* d);
-extern void* func_0011C748(void);
-extern void* func_0011C858(void);
-extern void* func_0011C968(void);
-void func_001BF788(u8* obj, void* item);
-extern SprDmaChannel* D_00261F24;
-s32 func_00202C38(void* p, s32 a, s32 b);
-void func_00202A80(SprDmaChannel* c, u32 addr);
-void func_001C05D0(f32 x);
-void func_001C06A0(s32 row, s32 column, f32 value);
-void func_001C0760(s32 flag);
-s32 func_001C0790(s32 value);
-void func_001C07B0(void);
-void func_001C0808(void* item);
-void func_001C08B0(World* self, s32 a, s32 b);
-void func_001C0950(World* self);
-void func_001C09D8(World* self, s32 index, s32 value);
-void func_001C0A50(World* self, s32 key);
-void func_001C0AB8(World* self, Point2* p);
-void func_001C0B08(World* self, U64P* item);
-void func_001C0B38(World* self);
-void func_001C0C08(s32 idx, s32 val);
-s32 func_001C0C50(s32 index);
-void func_001C0C68(s32 i);
-s32 func_001C0CF0();
-void func_001C0EC0(void);
-void func_001C1190(World* self, BufferedStream* arg);
-void* func_001C1390(s32 index, World* self);
-ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx);
-PropertyDescriptor* func_001C14C0(BaseObject* self, s32 key);
-ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
-ScriptValue* func_001C15D8(ScriptValue* out, void* base, PropertyDescriptor* d);
-s32 func_001C1A28(ScriptListBuilder* self, s32 value);
-s32 func_001C1AD8(ScriptValueFilter* filter, s32* val);
-ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
-ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals);
-ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n);
-ScriptValue* func_001C2238(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
-ScriptValue* func_001C22B8(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
-ScriptValue* func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
-ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
-void func_001C2430(s32 size, ...);
-void func_001C25B0(s32 first, ...);
-void func_001C29C8();
+extern void* AcquireVectorAPayload(void);
+extern void* AcquireMatrixPayload(void);
+extern void* CopyRotationMatrix(void* d, void* s);
+extern void ResetMatrixHomogeneous(void* d);
+extern void* AcquireVectorBPayload(void);
+extern void* AcquirePairPayload(void);
+extern void* AcquireTriplePayload(void);
+void StopSoundRecord(u8* obj, void* item);
+extern SprDmaChannel* g_toSprChannel;
+s32 WaitDmaChannel(void* p, s32 a, s32 b);
+void StartDmaChain(SprDmaChannel* c, u32 addr);
+void SetIopVolumeChannel8(f32 x);
+void SetVolumeChannelFactor(s32 row, s32 column, f32 value);
+void SilenceVolumeChannel3(s32 flag);
+s32 ApplySoundOptionFlag(s32 value);
+void StopAllSoundsAndWait(void);
+void StopWorldSoundRecords(void* item);
+void PushIopChannel2Setting(World* self, s32 a, s32 b);
+void PopIopChannel2Setting(World* self);
+void SetIopChannel2Setting(World* self, s32 index, s32 value);
+void AddWorldSoundEntry(World* self, s32 key);
+void SetLastWorldSoundEntryFromPoint(World* self, Point2* p);
+void SetLastWorldSoundEntryValues(World* self, U64P* item);
+void StartWorldSoundEntries(World* self);
+void SetCachedVoiceParam(s32 idx, s32 val);
+s32 GetCachedVoiceParam(s32 index);
+void RefreshCachedVoiceParam(s32 i);
+s32 StepBiasedRandomWalk();
+void PlaySoundWithWanderingPitch(void);
+void LoadScriptEntryTable(World* self, BufferedStream* arg);
+void* GetScriptEntryScope(s32 index, World* self);
+ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
+PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key);
+ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
+ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
+s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val);
+ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
+ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
+ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
+ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
+void StartToSprChain(s32 size, ...);
+void StartFromSprChain(s32 first, ...);
+void ConstructScratchpadTransfersAtStartup();
 
-Collider* func_001BB540(Collider* node, s32 offset);
-extern const s32 D_00246838[772];
+Collider* FindHandlerForSlot(Collider* node, s32 offset);
+extern const s32 g_soundEntryForcedAvailable[772];
 
 // The file's .data, in retail's order.
 f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
@@ -507,32 +507,32 @@ AnchorPreset D_002746E0[8] = {
     { &g_unitYVector, 1 },
     { &g_unitXVector, 1 },
 };
-s32 D_00274720 = 0;
-s32 D_00274724 = 0;
-s32 D_00274728 = 0;
-s32 D_0027472C = 0;
-s32 D_00274730 = 0;
-s32 D_00274734 = 0;
-s32 D_00274738 = 0;
-s32 D_0027473C = 0;
-s32 D_00274740 = -1;
-s32 D_00274744 = 0;
+s32 g_stagedBankState = 0;
+s32 g_stagedBankRecord = 0;
+s32 g_stagedBankVoice = 0;
+s32 g_streamVoice = 0;
+s32 g_streamVoicePending = 0;
+s32 g_currentSoundLevel = 0;
+s32 g_previousSoundLevel = 0;
+s32 g_stagedBankHandle = 0;
+s32 g_loadedSoundBank = -1;
+s32 g_streamVoiceLocked = 0;
 s32 D_00274748 = 0;
-s32 D_0027474C = 0;
+s32 g_nextSoundRecordId = 0;
 f32 D_00274750 = -2.0f;
 s32 D_00274754 = 3;
-f32 D_00274758[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+f32 g_defaultVolumeChannelFactors[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
 U64P D_00274820 = { 0x40C0000040800000ULL };
 U64P D_00274828 = { 0x45FA0000453B8000ULL };
 s32 D_00274830 = 0;
-f32 D_00274838[11][4] = { 0 };
+f32 g_volumeChannelFactors[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
 s32 D_002748EC = 0;
 SprTransfer D_002748F0[2] = { { 0 } };
 s32 D_00274990 = 0;
 
-void func_001B7968(Collider* self)
+void InitCollider(Collider* self)
 {
     ScriptValue local;
     s32 s0;
@@ -558,7 +558,7 @@ void func_001B7968(Collider* self)
     DestroyScriptValue(&local, 2);
 }
 
-void func_001B7A98(Collider* self)
+void RegisterCollider(Collider* self)
 {
     World* owner = self->world;
     owner->count34++;
@@ -580,7 +580,7 @@ void func_001B7A98(Collider* self)
     ResolveContactHandler(self);
 }
 
-void func_001B7B78(Collider* self)
+void UnregisterCollider(Collider* self)
 {
     Collider* old50 = self->root03();
     World* owner = self->world;
@@ -601,7 +601,7 @@ void func_001B7B78(Collider* self)
     }
 }
 
-void func_001B7C40(Collider* self, s32 flag)
+void SetColliderPartListed(Collider* self, s32 flag)
 {
     if (flag == ((self->flags538 >> 50) & 1)) {
         return;
@@ -629,14 +629,14 @@ ASM_FUNC(func_001B8540);
 
 ASM_FUNC(func_001B8820);
 
-void func_001B8960(Collider* self)
+void ComputeColliderWorldFrame(Collider* self)
 {
     ComputePlacedObjectWorldFrame(self);
     TransformMeshToWorld(&self->mesh, &self->meshCopy, *(Qword128*)&self->v140, &self->m110);
     TransformMeshToWorld(&self->mesh2, &self->mesh2Copy, *(Qword128*)&self->v140, &self->m110);
 }
 
-void func_001B89B8(Collider* self)
+void RecomputeColliderFrame(Collider* self)
 {
     RecomputePlacedObjectFrame(self);
     self->root03()->desc03()->m32(self->root03());
@@ -644,7 +644,7 @@ void func_001B89B8(Collider* self)
     MarkSweepAxesUnsorted(self->world);
 }
 
-s32 func_001B8A08(Collider* a, Collider* b)
+s32 TestCollidersMayContact(Collider* a, Collider* b)
 {
     u64 m1 = 0x8080;
     s32 r = 0;
@@ -660,7 +660,7 @@ s32 func_001B8A08(Collider* a, Collider* b)
     return r;
 }
 
-void func_001B8A48(Collider* self)
+void NotifyContactHandlers(Collider* self)
 {
     ContactRow03* node = self->contacts->head;
     while (node != 0) {
@@ -700,7 +700,7 @@ ASM_FUNC(func_001B9058);
 
 ASM_FUNC(func_001B91A8);
 
-void func_001B9338(Collider* self, f32 t)
+void StepCollider(Collider* self, f32 t)
 {
     Vec4U local;
     Attach03* node;
@@ -722,17 +722,17 @@ void func_001B9338(Collider* self, f32 t)
     }
 }
 
-void func_001B93D8(Collider* self, void* a, void* m)
+void DrawCollider(Collider* self, void* a, void* m)
 {
-    func_001261C0(self, a, m);
+    DrawPlacedObject(self, a, m);
 }
 
-void func_001B93F8(Collider* self)
+void UpdateCollider(Collider* self)
 {
     UpdatePlacedObject(self);
 }
 
-void func_001B9418(Collider* self, f32 v)
+void SetColliderMass(Collider* self, f32 v)
 {
     f32 a = self->mass;
     f32 q = v / a;
@@ -742,7 +742,7 @@ void func_001B9418(Collider* self, f32 v)
 
 ASM_FUNC(func_001B9448);
 
-void func_001B94F0(Collider* self, s32 mode)
+void DropColliderContacts(Collider* self, s32 mode)
 {
     Collider* ctx = self->root03();
     if (ctx == 0) {
@@ -791,14 +791,14 @@ void func_001B94F0(Collider* self, s32 mode)
     ctx->f4B8 = 0;
 }
 
-void func_001B9680(Collider* self)
+void SaveColliderPreviousPosition(Collider* self)
 {
     self->v370 = self->v140;
 }
 
 ASM_FUNC(func_001B9690);
 
-void func_001B97E0(Collider* self, Mat02* src)
+void SetColliderRotation(Collider* self, Mat02* src)
 {
     self->rot.r[0] = src->r[0];
     self->rot.r[1] = src->r[1];
@@ -826,7 +826,7 @@ ASM_FUNC(func_001B9AB0);
 
 ASM_FUNC(func_001B9AC8);
 
-void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 {
     self->mode450 = a1;
     u64 flag = (self->flags538 >> 54) & 1;
@@ -849,7 +849,7 @@ void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
     }
 }
 
-void func_001B9B50(Collider* self, BaseObject* p)
+void ReparentCollider(Collider* self, BaseObject* p)
 {
     Vec02 local0;
     Vec02 local1;
@@ -884,7 +884,7 @@ ASM_FUNC(func_001B9D10);
 
 LINKER_REMNANT(func_001B9F28);
 
-void func_001B9F30(Collider* self, ColliderPose* out)
+void CaptureColliderPose(Collider* self, ColliderPose* out)
 {
     Vec02 tmp[3];
     out->position = self->v140;
@@ -897,7 +897,7 @@ void func_001B9F30(Collider* self, ColliderPose* out)
     out->f3C = 0;
 }
 
-s32 func_001B9FB0(Collider* self, void* other)
+s32 IsContactBetweenParts(Collider* self, void* other)
 {
     s32 key;
     Contact03* n;
@@ -914,7 +914,7 @@ s32 func_001B9FB0(Collider* self, void* other)
     return 0;
 }
 
-void* func_001BA068(Collider* self)
+void* FindContactingPart(Collider* self)
 {
     Collider* s3 = self->root03();
     ContactRow03* s2 = s3->contacts->head;
@@ -931,7 +931,7 @@ void* func_001BA068(Collider* self)
     return 0;
 }
 
-void func_001BA130(Collider* self, Collider* other)
+void CopyCollider(Collider* self, Collider* other)
 {
     u64 bit = (self->flags538 >> 50) & 1;
     Link02 a, c, d;
@@ -965,19 +965,19 @@ ASM_FUNC(func_001BA2E8);
 
 ASM_FUNC(func_001BA430);
 
-void func_001BA500(void* self, void* a, void* b, void* c, s32 d)
+void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d)
 {
     ConstrainVectorByAnchor(a, b, c, d);
 }
 
-void func_001BA528(Collider* self, Attach03* node)
+void AddColliderAttachment(Collider* self, Attach03* node)
 {
     node->next = self->attached;
     self->attached = node;
     ClearRootTries(self);
 }
 
-void func_001BA550(Collider* o, Attach03* node)
+void RemoveColliderAttachment(Collider* o, Attach03* node)
 {
     Attach03** link = &o->attached;
     if (*link == 0) {
@@ -1007,11 +1007,11 @@ tail:
 
 ASM_FUNC(func_001BA5B0);
 
-void func_001BAC28(Collider* self, Attach03* node, f32 dt)
+void IgnoreColliderAttachmentStep(Collider* self, Attach03* node, f32 dt)
 {
 }
 
-void func_001BAC30(Collider* self, BufferedStream* in)
+void LoadCollider(Collider* self, BufferedStream* in)
 {
     s32 i;
     s32 j;
@@ -1089,18 +1089,18 @@ void func_001BAC30(Collider* self, BufferedStream* in)
     }
 }
 
-void func_001BAFE0(Collider* self, f32 v)
+void SetColliderOverrideRadius(Collider* self, f32 v)
 {
     self->flags538 |= (u64)0x8000 << 25;
     self->radius3CC = v;
 }
 
-void func_001BB000(void* self)
+void ResetColliderAnchors(void* self)
 {
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-void func_001BB028(s32 index, s32* out, Vec02* dst)
+void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
 {
     *out = D_002746E0[index].value;
     *dst = *D_002746E0[index].quad;
@@ -1110,20 +1110,20 @@ ASM_FUNC(func_001BB058);
 
 ASM_FUNC(func_001BB0C8);
 
-void func_001BB138(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
+void SetColliderFlagNibble32(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
 
-void func_001BB168(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
+void SetColliderFlagBit47(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
 
-void func_001BB1A0(Collider* self, s32 flag)
+void SetColliderFlagBit48(Collider* self, s32 flag)
 {
     self->flags538 = (self->flags538 & 0xFFFEFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 48);
 }
 
 void func_001BB1D8(Collider* self, u8 value) { self->b2C8 = value; }
 
-void func_001BB1E0(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
+void SetColliderFlagNibble36(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
 
-void func_001BB210(Collider* self, s32 kind, void* arg)
+void SendColliderNotification(Collider* self, s32 kind, void* arg)
 {
     SendObjectNotification(self, kind, arg);
     Attach03* n = self->attached;
@@ -1147,33 +1147,33 @@ extern const f32 D_0024D2A0 = 3.4028235e38f;
 
 INCLUDE_ASM(func_001BB290);
 
-void func_001BB378(Collider* self, s32 flag)
+void SetColliderGravityDisabled(Collider* self, s32 flag)
 {
     self->flags538 = (self->flags538 & ~(1ULL << 51)) | ((u64)(flag & 1) << 51);
 }
 
-void func_001BB3B0(Collider* self, s32 value)
+void SetColliderTreeContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 42;
     self->flags538 = (self->flags538 & ~(1ULL << 42)) | bit;
     DropColliderContacts(self, value != 0);
 }
 
-void func_001BB400(Collider* self, s32 value)
+void SetColliderContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 43;
     self->flags538 = (self->flags538 & ~(1ULL << 43)) | bit;
     DropColliderContacts(self, value != 0 ? 2 : 0);
 }
 
-void func_001BB450(Collider* self, s32 value)
+void SetColliderKindContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 44;
     self->flags538 = (self->flags538 & ~(1ULL << 44)) | bit;
     DropColliderContacts(self, value != 0 ? 3 : 0);
 }
 
-void func_001BB4A0(Collider* self)
+void ResolveContactHandler(Collider* self)
 {
     ListFrame frame;
     const Desc03* info = self->desc03();
@@ -1196,7 +1196,7 @@ void func_001BB4A0(Collider* self)
     }
 }
 
-Collider* func_001BB540(Collider* node, s32 offset)
+Collider* FindHandlerForSlot(Collider* node, s32 offset)
 {
     Collider* s;
     while (node != 0 && (s = node->handler) != 0) {
@@ -1206,7 +1206,7 @@ Collider* func_001BB540(Collider* node, s32 offset)
     return 0;
 }
 
-void func_001BB580(Collider* self)
+void UpdateAnchorModeFlags(Collider* self)
 {
     ListFrame frame;
     s32 flag = 0;
@@ -1237,7 +1237,7 @@ void func_001BB580(Collider* self)
     }
 }
 
-s32 func_001BB710(Collider* self, s32 value)
+s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
 {
     Collider* ctx = self->root03();
     ContactRow03* n = ctx->contacts->head;
@@ -1259,7 +1259,7 @@ s32 func_001BB710(Collider* self, s32 value)
     return 1;
 }
 
-s32 func_001BB800(Collider* obj, s32* outCount, void*** outArr)
+s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr)
 {
     Collider* own = obj->root03();
     ContactRow03* nd;
@@ -1295,7 +1295,7 @@ s32 func_001BB800(Collider* obj, s32* outCount, void*** outArr)
     return cnt;
 }
 
-s32 func_001BB9A0(Touch03* node, Collider* value)
+s32 IsInTouchingList(Touch03* node, Collider* value)
 {
     while (node != 0) {
         if (node->obj == value) return 1;
@@ -1304,7 +1304,7 @@ s32 func_001BB9A0(Touch03* node, Collider* value)
     return 0;
 }
 
-void func_001BB9D0(Collider* self)
+void UpdateTouchingParts(Collider* self)
 {
     Collider* core = self->root03();
     ContactRow03* o;
@@ -1357,7 +1357,7 @@ void func_001BB9D0(Collider* self)
     }
 }
 
-s32 func_001BBC30(Collider* self)
+s32 RequestColliderLaunch(Collider* self)
 {
     return 0;
 }
@@ -1366,7 +1366,7 @@ ASM_FUNC(func_001BBC38);
 
 ASM_FUNC(func_001BBEB8);
 
-void func_001BC088(Collider* self, void* b, f32 x)
+void MoveCollider(Collider* self, void* b, f32 x)
 {
     if (self->hook != 0) {
         func_001BBEB8(self);
@@ -1378,7 +1378,7 @@ ASM_FUNC(func_001BC0E0);
 
 ASM_FUNC(func_001BC260);
 
-s32 func_001BC320(Collider* self, ObjectEvent* shape)
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {
     if (shape->eventFlags & 0x8) {
         func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
@@ -1388,7 +1388,7 @@ s32 func_001BC320(Collider* self, ObjectEvent* shape)
 
 ASM_FUNC(func_001BC368);
 
-void func_001BC4D8(Collider* self, Contact03** out)
+void ExtractContactsByPartMode(Collider* self, Contact03** out)
 {
     Contact03* freed = 0;
     if (self->root == self) {
@@ -1434,18 +1434,18 @@ void func_001BC4D8(Collider* self, Contact03** out)
 
 ASM_FUNC(func_001BC670);
 
-void func_001BC710(Collider* self, u32 flag)
+void SetColliderFlagBit52(Collider* self, u32 flag)
 {
     self->flags538 = (self->flags538 & 0xFFEFFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 52);
 }
 
-void func_001BC748(Collider* self, u32* out)
+void GetColliderFlagBit52(Collider* self, u32* out)
 {
     u32 bit = (u32)(self->flags538 >> 52) & 1;
     *out = bit;
 }
 
-void func_001BC760(Collider* self, s32* index, Collider** list)
+void NumberColliderParts(Collider* self, s32* index, Collider** list)
 {
     ListFrame frame;
     self->index = *index;
@@ -1464,7 +1464,7 @@ ASM_FUNC(func_001BC978);
 
 ASM_FUNC(func_001BCD00);
 
-s32 func_001BD558(s32 count, Collider** roots, s32 cap, Contact03** out)
+s32 CollectGroupItems(s32 count, Collider** roots, s32 cap, Contact03** out)
 {
     s32 n = 0;
     s32 i;
@@ -1501,7 +1501,7 @@ done:
     return n;
 }
 
-void func_001BD678(Collider* self, s32* outQueued, Collider** queue, s32* outFlagged, Collider** list)
+void CollectConnectedColliders(Collider* self, s32* outQueued, Collider** queue, s32* outFlagged, Collider** list)
 {
     s32 nq = 1;
     s32 nl = 0;
@@ -1539,7 +1539,7 @@ void func_001BD678(Collider* self, s32* outQueued, Collider** queue, s32* outFla
     *outFlagged = nl;
 }
 
-void func_001BD790(Collider* obj, s32 mode)
+void SetColliderForcedState(Collider* obj, s32 mode)
 {
     if (mode) {
         u64 f = obj->flags538;
@@ -1570,7 +1570,7 @@ void func_001BD790(Collider* obj, s32 mode)
     }
 }
 
-void func_001BD888(s32 n, Collider** objs)
+void SortCollidersByContactCount(s32 n, Collider** objs)
 {
     s32 local[5];
     Collider** sorted;
@@ -1618,7 +1618,7 @@ void func_001BD888(s32 n, Collider** objs)
     PopBackMemoryMark();
 }
 
-void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
+void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
 {
     Contact03* buf[0x40];
     ListFrame it;
@@ -1655,7 +1655,7 @@ void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
     }
 }
 
-void func_001BDD00(World* self, s32 flags, f32 f)
+void ProcessColliderGroups(World* self, s32 flags, f32 f)
 {
     ListFrame fr;
     ConnectedCounts c;
@@ -1726,7 +1726,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
     PopBackMemoryMark();
 }
 
-void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA)
+void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA)
 {
     s32* b = (s32*)(base + rowB * stride);
     s32* a = (s32*)(base + rowA * stride);
@@ -1740,7 +1740,7 @@ void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA)
     }
 }
 
-void func_001BE0A8(u8* base, s32 n, s32 size, SortCompareFn cmp)
+void HeapSortRecords(u8* base, s32 n, s32 size, SortCompareFn cmp)
 {
     if (n < 2) return;
     s32 end = n - 1;
@@ -1774,7 +1774,7 @@ void func_001BE0A8(u8* base, s32 n, s32 size, SortCompareFn cmp)
     }
 }
 
-void func_001BE1E8(void)
+void UnloadStagedBank(void)
 {
     if (g_stagedBankHandle != 0) {
         if (g_stagedBankVoice != 0) {
@@ -1789,7 +1789,7 @@ void func_001BE1E8(void)
     g_stagedBankVoice = 0;
 }
 
-s32 func_001BE268(s32 n)
+s32 EnsureSoundBankLoaded(s32 n)
 {
     KeyId l;
     s32 h;
@@ -1843,12 +1843,12 @@ s32 func_001BE268(s32 n)
     return ((s32*)&g_soundBankHandles)[n];
 }
 
-s32 func_001BE4A8(s32 idx)
+s32 EnsureSoundEntryBankLoaded(s32 idx)
 {
     return EnsureSoundBankLoaded(g_soundEntries[idx].bank);
 }
 
-void func_001BE4D8(SoundRecord** self)
+void InitSoundParams(SoundRecord** self)
 {
     *self = (SoundRecord*)AllocateZeroedFrontMemory(0x24);
     (*self)->f00 = -1;
@@ -1861,7 +1861,7 @@ void func_001BE4D8(SoundRecord** self)
     (*self)->f20 = 0;
 }
 
-s32 func_001BE568(s32 idx)
+s32 IsSoundEntryAvailable(s32 idx)
 {
     const SoundEntry* p = g_soundEntries + idx;
 
@@ -1871,14 +1871,14 @@ s32 func_001BE568(s32 idx)
     return ((s32*)g_soundEntryAvailable)[idx];
 }
 
-void func_001BE5D8(void)
+void ClearStreamVoicePending(void)
 {
     g_streamVoicePending = 0;
 }
 
-s32 func_001BE5E8(void) { return g_streamVoiceLocked; }
+s32 IsStreamVoiceLocked(void) { return g_streamVoiceLocked; }
 
-void func_001BE5F8(KeyRecord* self)
+void StartLockedStreamVoice(KeyRecord* self)
 {
     if (g_streamVoiceLocked != 0) {
         return;
@@ -1911,13 +1911,13 @@ void func_001BE5F8(KeyRecord* self)
     SetVolumeChannelFactor(8, 3, 0.5f);
 }
 
-void func_001BE708(void)
+void StopLockedStreamVoice(void)
 {
     g_streamVoiceLocked = 0;
     StopStreamVoice();
 }
 
-void func_001BE728(KeyRecord* self)
+void OpenKeyRecord(KeyRecord* self)
 {
     if (g_streamVoiceLocked != 0) {
         return;
@@ -1948,7 +1948,7 @@ void func_001BE728(KeyRecord* self)
     RequestStreamCallback(h, ClearStreamVoicePending, (u32)h);
 }
 
-s32 func_001BE810(void)
+s32 CheckStreamVoicePending(void)
 {
     if (g_streamVoiceLocked != 0)
         return 0;
@@ -1960,7 +1960,7 @@ s32 func_001BE810(void)
     return 0;
 }
 
-void func_001BE860(PlayingSound* self)
+void ApplySoundRecordVolumePan(PlayingSound* self)
 {
     s32 a1 = (s32)(self->volume * 1024.0f);
     s32 a2;
@@ -1972,7 +1972,7 @@ void func_001BE860(PlayingSound* self)
     SetVoiceVolumePan(self->voice, a1, a2);
 }
 
-void func_001BE8F8(s32 a0, PlayingSound** a1, f32 f12, f32 f13)
+void PlaySoundAndApplyVolumePan(s32 a0, PlayingSound** a1, f32 f12, f32 f13)
 {
     s32 flag = 0;
     PlayingSound* local;
@@ -1990,14 +1990,14 @@ void func_001BE8F8(s32 a0, PlayingSound** a1, f32 f12, f32 f13)
     }
 }
 
-s32 func_001BE980(void)
+s32 HasStreamVoice(void)
 {
     return g_streamVoice != 0;
 }
 
 LINKER_REMNANT(func_001BE990);
 
-void func_001BE998(void)
+void StopStreamVoice(void)
 {
     s32 r;
     if (g_streamVoiceLocked != 0) return;
@@ -2012,21 +2012,21 @@ void func_001BE998(void)
     g_streamVoicePending = 0;
 }
 
-void func_001BEA28(void)
+void PauseStreamVoice(void)
 {
     if (g_streamVoice != 0) {
         PauseIopVoice(g_streamVoice);
     }
 }
 
-void func_001BEA50(void)
+void ResumeStreamVoice(void)
 {
     if (g_streamVoice != 0) {
         ResumeIopVoice(g_streamVoice);
     }
 }
 
-void func_001BEA78(void)
+void StopStagedBankVoice(void)
 {
     if (g_stagedBankState == 3) {
         StopSoundVoice(g_stagedBankVoice);
@@ -2035,7 +2035,7 @@ void func_001BEA78(void)
     }
 }
 
-void func_001BEAC8(s32 h)
+void StoreStagedBankHandle(s32 h)
 {
     g_stagedBankHandle = h;
     if (h != 0) {
@@ -2047,7 +2047,7 @@ void func_001BEAC8(s32 h)
     }
 }
 
-void func_001BEB10(KeyRecord* self)
+void RequestStagedBank(KeyRecord* self)
 {
     s32 local[2];
     s32 same;
@@ -2091,7 +2091,7 @@ void func_001BEB10(KeyRecord* self)
     }
 }
 
-void func_001BEC58(void* self)
+void PlayStagedBank(void* self)
 {
     RequestStagedBank(self);
     if (self == 0) return;
@@ -2106,27 +2106,27 @@ void func_001BEC58(void* self)
     }
 }
 
-void func_001BECF8(void)
+void SilenceVolumeChannel2(void)
 {
     SetVolumeChannelFactor(2, 1, 0.0f);
 }
 
-void func_001BED20(void)
+void RestoreVolumeChannel2(void)
 {
     SetVolumeChannelFactor(2, 1, 1.0f);
 }
 
-void func_001BED48(void)
+void PauseStagedBankVoice(void)
 {
     PauseIopVoice(g_stagedBankVoice);
 }
 
-void func_001BED70(void)
+void ResumeStagedBankVoice(void)
 {
     ResumeIopVoice(g_stagedBankVoice);
 }
 
-void* func_001BED98(void)
+void* AllocateSoundLevelEntry(void)
 {
     void* p = PopFreeSlot((u8*)g_currentWorld + 0x1BB8);
     if (p != 0) {
@@ -2136,13 +2136,13 @@ void* func_001BED98(void)
     return p;
 }
 
-void func_001BEDF8(void* self)
+void RemoveSoundLevelEntry(void* self)
 {
     RemoveFromList((u8*)g_currentWorld + 0x1BC4, self);
     PushFreeSlot((u8*)g_currentWorld + 0x1BB8, self);
 }
 
-void func_001BEE48(void)
+void ClearSoundLevels(void)
 {
     ListFrame it;
     ListWalk::Begin(&it, &g_currentWorld->list1BC4);
@@ -2158,7 +2158,7 @@ void func_001BEE48(void)
 
 }
 
-void* func_001BEEF8(s32 x)
+void* PushSoundLevel(s32 x)
 {
     s32 flag = IsListEmpty((u8*)g_currentWorld + 0x1BC4);
     SoundLevelEntry* p = (SoundLevelEntry*)AllocateSoundLevelEntry();
@@ -2178,7 +2178,7 @@ void* func_001BEEF8(s32 x)
     return p;
 }
 
-void func_001BEF88(void)
+void RecomputeSoundLevel(void)
 {
     ListFrame f;
     u8* P = (u8*)g_currentWorld + 0x1BC4;
@@ -2210,7 +2210,7 @@ void func_001BEF88(void)
     g_activeListFrames = f.prev;
 }
 
-void func_001BF048(SoundLevelEntry* self)
+void ReleaseSoundLevel(SoundLevelEntry* self)
 {
     if (self != 0) {
         s32 key = self->level;
@@ -2229,7 +2229,7 @@ void func_001BF048(SoundLevelEntry* self)
     }
 }
 
-void func_001BF0D8(SoundLevelEntry* self)
+void RemoveSoundLevelAndRecompute(SoundLevelEntry* self)
 {
     if (self == 0) {
         return;
@@ -2242,7 +2242,7 @@ void func_001BF0D8(SoundLevelEntry* self)
     }
 }
 
-void func_001BF130(void)
+void InitSoundSystem(void)
 {
     FillMemory(g_soundBankHandles, 0, 0x1C);
     InitIopCommandChannels();
@@ -2260,7 +2260,7 @@ void func_001BF130(void)
 
 LINKER_REMNANT(func_001BF1E8);
 
-s32 func_001BF1F0(void) { return D_00274748; }
+s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
 
 ASM_FUNC(func_001BF200);
 
@@ -2268,7 +2268,7 @@ ASM_FUNC(func_001BF2E0);
 
 ASM_FUNC(func_001BF398);
 
-void* func_001BF3D0(void)
+void* GetSoundListenerPosition(void)
 {
     SwitchedCollider* p = (SwitchedCollider*)GetActiveSwitchedCollider();
     u8* r;
@@ -2282,7 +2282,7 @@ void* func_001BF3D0(void)
 
 ASM_FUNC(func_001BF428);
 
-ListenerDistanceFn func_001BF578(void)
+ListenerDistanceFn ChooseSoundListenerFunction(void)
 {
     s32 n;
     if (IsTopCameraController((u8*)g_camera + 0x460) == 0) return MeasureListenerDistance;
@@ -2292,13 +2292,13 @@ ListenerDistanceFn func_001BF578(void)
     return MeasureCameraWeightedDistance;
 }
 
-f32 func_001BF5E0(void* position)
+f32 ComputeSoundListenerFactor(void* position)
 {
     void* listener = GetSoundListenerPosition();
     return ChooseSoundListenerFunction()(listener, position);
 }
 
-void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
+void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
 {
     if (self != 0) {
         f32 r = ComputeSoundListenerFactor(self);
@@ -2309,7 +2309,7 @@ void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
     }
 }
 
-void* func_001BF6B8(void)
+void* AllocateSoundRecord(void)
 {
     void* s = PopFreeSlot((u8*)g_currentWorld + 0x1BA0);
     if (s) {
@@ -2319,14 +2319,14 @@ void* func_001BF6B8(void)
     return s;
 }
 
-void func_001BF718(PlayingSound** slot)
+void ClearSoundRecordHandle(PlayingSound** slot)
 {
     PlayingSound* e = *slot;
     e->owner = 0;
     *slot = 0;
 }
 
-void func_001BF728(PlayingSound* self)
+void FreeSoundRecord(PlayingSound* self)
 {
     if (self->owner != 0) {
         *self->owner = 0;
@@ -2336,7 +2336,7 @@ void func_001BF728(PlayingSound* self)
     PushFreeSlot((u8*)g_currentWorld + 0x1BA0, self);
 }
 
-void func_001BF788(PlayingSound* self, s32 n)
+void StopSoundRecord(PlayingSound* self, s32 n)
 {
     if (self != 0) {
         if (n == 0) {
@@ -2350,7 +2350,7 @@ void func_001BF788(PlayingSound* self, s32 n)
     }
 }
 
-void func_001BF7F8(PlayingSound* p, f32 a)
+void SetSoundRecordPitch(PlayingSound* p, f32 a)
 {
     if (p == 0) {
         return;
@@ -2373,7 +2373,7 @@ void func_001BF7F8(PlayingSound* p, f32 a)
     SetVoicePitch(p->voice, p->Clamp(v, -0x8000, 0x7FFF));
 }
 
-void func_001BF8E8(PlayingSound* self, f32 a)
+void SetSoundRecordVolume(PlayingSound* self, f32 a)
 {
     if (self != 0) {
         f32 scale = a / self->baseVolume;
@@ -2384,7 +2384,7 @@ void func_001BF8E8(PlayingSound* self, f32 a)
     }
 }
 
-void func_001BF920(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80)
+void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80)
 {
     U64P keep = self->link;
     FillMemory(self, 0, 0x90);
@@ -2414,7 +2414,7 @@ void func_001BF920(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, Ba
     ComputeSoundRecordDoppler(self);
 }
 
-void func_001BFAF8(PlayingSound* self, s32 idx)
+void StartSoundRecordVoice(PlayingSound* self, s32 idx)
 {
     s32 link;
     s32 v3;
@@ -2446,7 +2446,7 @@ void func_001BFAF8(PlayingSound* self, s32 idx)
 
 ASM_FUNC(func_001BFBF8);
 
-void func_001BFCD8(s32 id, PlayingSound** out, s32 p2, s32 p3,
+void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, s32 p5) {
     PlayingSound* s1;
     s32 s0;
@@ -2491,7 +2491,7 @@ void func_001BFCD8(s32 id, PlayingSound** out, s32 p2, s32 p3,
     }
 }
 
-void func_001BFFC8(void* guard, s64 key)
+void MarkSoundRecordIfIdMatches(void* guard, s64 key)
 {
     if (guard == 0) {
         s32 tag = (s32)(key >> 32);
@@ -2502,7 +2502,7 @@ void func_001BFFC8(void* guard, s64 key)
     }
 }
 
-void func_001C0000(s32 flag, f32 x)
+void SetVolumeChannel6Factors(s32 flag, f32 x)
 {
     SetVolumeChannelFactor(6, 0, x);
     SetVolumeChannelFactor(6, 2, x);
@@ -2512,10 +2512,10 @@ void func_001C0000(s32 flag, f32 x)
     }
 }
 
-void func_001C0070(void)
+void UpdateSoundEmitters(void)
 {
     PlayingSoundFrame f;
-    if (func_001BF1F0() != 0) return;
+    if (IsSoundEmitterUpdateDisabled() != 0) return;
     void* v4 = GetSoundListenerPosition();
     ListenerDistanceFn v5 = ChooseSoundListenerFunction();
     u8* P = (u8*)g_currentWorld + 0x1BAC;
@@ -2646,12 +2646,12 @@ void func_001C0070(void)
     g_activeListFrames = f.prev;
 }
 
-void func_001C05D0(f32 x)
+void SetIopVolumeChannel8(f32 x)
 {
     SetIopVolumeChannel(8, (s32)(x * 1024.0f));
 }
 
-void func_001C0600(s32 column)
+void ApplyVolumeChannelFactors(s32 column)
 {
     f32* p = &g_volumeChannelFactors[0][column];
     f32 prod = 1.0f;
@@ -2674,13 +2674,13 @@ void func_001C0600(s32 column)
     SetIopVolumeChannel(column, (s32)(prod * 1024.0f));
 }
 
-void func_001C06A0(s32 row, s32 column, f32 value)
+void SetVolumeChannelFactor(s32 row, s32 column, f32 value)
 {
     g_volumeChannelFactors[row][column] = value;
     ApplyVolumeChannelFactors(column);
 }
 
-void func_001C06D8(void)
+void ResetVolumeChannelFactors(void)
 {
     CopyMemory(g_volumeChannelFactors, g_defaultVolumeChannelFactors, 0xB0);
     SetIopVolumeChannel8(1.0f);
@@ -2691,17 +2691,17 @@ void func_001C06D8(void)
     ApplySoundOptionFlag(g_saveData->f19EC & 0x40);
 }
 
-void func_001C0760(s32 flag)
+void SilenceVolumeChannel3(s32 flag)
 {
     SetVolumeChannelFactor(3, 1, flag ? 0.0f : 1.0f);
 }
 
-s32 func_001C0790(s32 value)
+s32 ApplySoundOptionFlag(s32 value)
 {
     return SetIopSoundOptionFlag(value != 0);
 }
 
-void func_001C07B0(void)
+void StopAllSoundsAndWait(void)
 {
     StopAllIopSounds();
     StopWorldSoundRecords(0);
@@ -2713,7 +2713,7 @@ void func_001C07B0(void)
     SyncDiscRead(0);
 }
 
-void func_001C0808(void* item)
+void StopWorldSoundRecords(void* item)
 {
     if (g_currentWorld) {
         ListFrame it;
@@ -2727,7 +2727,7 @@ void func_001C0808(void* item)
     PollIopCommands();
 }
 
-void func_001C08B0(World* self, s32 a, s32 b)
+void PushIopChannel2Setting(World* self, s32 a, s32 b)
 {
     if ((u32)self->channel2Count < 4) {
         SetIopChannelValue(2, D_00274808[a]);
@@ -2738,7 +2738,7 @@ void func_001C08B0(World* self, s32 a, s32 b)
     }
 }
 
-void func_001C0950(World* self)
+void PopIopChannel2Setting(World* self)
 {
     s32 n = self->channel2Count;
     if (n >= 2) {
@@ -2748,7 +2748,7 @@ void func_001C0950(World* self)
     }
 }
 
-void func_001C09D8(World* self, s32 index, s32 value)
+void SetIopChannel2Setting(World* self, s32 index, s32 value)
 {
     SetIopChannelValue(2, D_00274808[index]);
     SetIopChannelValuePair(2, value, value);
@@ -2757,7 +2757,7 @@ void func_001C09D8(World* self, s32 index, s32 value)
     self->channel2Count = 1;
 }
 
-void func_001C0A50(World* self, s32 key)
+void AddWorldSoundEntry(World* self, s32 key)
 {
     if (self->soundCount < 16) {
         WorldSoundEntry* e = &self->soundEntries[self->soundCount];
@@ -2768,7 +2768,7 @@ void func_001C0A50(World* self, s32 key)
     }
 }
 
-void func_001C0AB8(World* self, Point2* p)
+void SetLastWorldSoundEntryFromPoint(World* self, Point2* p)
 {
     s32 n = self->soundCount;
     if (n != 0) {
@@ -2778,7 +2778,7 @@ void func_001C0AB8(World* self, Point2* p)
     }
 }
 
-void func_001C0B08(World* self, U64P* item)
+void SetLastWorldSoundEntryValues(World* self, U64P* item)
 {
     if (!self->soundCount) return;
     // &soundEntries[soundCount - 1], written from 0x1D70 as retail computes it
@@ -2786,7 +2786,7 @@ void func_001C0B08(World* self, U64P* item)
     e->repeat = *item;
 }
 
-void func_001C0B38(World* self)
+void StartWorldSoundEntries(World* self)
 {
     for (s32 i = 0; i < self->soundCount; i++) {
         WorldSoundEntry* e = &self->soundEntries[i];
@@ -2794,7 +2794,7 @@ void func_001C0B38(World* self)
     }
 }
 
-void func_001C0C08(s32 idx, s32 val)
+void SetCachedVoiceParam(s32 idx, s32 val)
 {
     if (val != D_006053E0[idx]) {
         D_006053E0[idx] = val;
@@ -2802,17 +2802,17 @@ void func_001C0C08(s32 idx, s32 val)
     }
 }
 
-s32 func_001C0C50(s32 index)
+s32 GetCachedVoiceParam(s32 index)
 {
     return D_006053E0[index];
 }
 
-void func_001C0C68(s32 i)
+void RefreshCachedVoiceParam(s32 i)
 {
     D_006053E0[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
 
-void func_001C0CB0(void)
+void ClearCachedVoiceParams(void)
 {
     for (s32 i = 0; i < 8; i++) {
         SetCachedVoiceParam(i, 0);
@@ -2822,7 +2822,7 @@ void func_001C0CB0(void)
 extern const RandomWalkSteps D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 extern const RandomWalkRows D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
 
-s32 func_001C0CF0() {
+s32 StepBiasedRandomWalk() {
     RandomWalkSteps a = D_0024D2A8;
     RandomWalkRows b = D_0024D350;
     s32 r = RandomIntInRange(0, 5);
@@ -2830,7 +2830,7 @@ s32 func_001C0CF0() {
     return D_00274830;
 }
 
-void func_001C0EC0(void)
+void PlaySoundWithWanderingPitch(void)
 {
     if (D_002748EC != 0) {
         f32 scale = (f32)StepBiasedRandomWalk();
@@ -2840,14 +2840,14 @@ void func_001C0EC0(void)
 
 ASM_FUNC(func_001C0F30);
 
-void func_001C0FF0(IdLinkedObject* self)
+void StartIdLinkedObject(IdLinkedObject* self)
 {
     StartPlacedObject(self);
     SetObjectLinkId(self, self->linkId);
     self->desc->m03(self);
 }
 
-void func_001C1030(IdLinkedObject* self, s32 v)
+void SetObjectLinkId(IdLinkedObject* self, s32 v)
 {
     if (self->link != 0) {
         DestroyStateWalker(self->link);
@@ -2861,25 +2861,25 @@ void func_001C1030(IdLinkedObject* self, s32 v)
     self->linkId = v;
 }
 
-void func_001C10A8(ListedPointObject* self)
+void InitListedPointObject(ListedPointObject* self)
 {
     InitObject(self);
     self->f58 = 3.4028235e38f;
 }
 
-void func_001C10D8(ListedPointObject* self)
+void RegisterListedPointObject(ListedPointObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C84, self);
 }
 
-void func_001C1110(ListedPointObject* self)
+void UnregisterListedPointObject(ListedPointObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C84, self);
 }
 
-void func_001C1148(ListedPointObject* self)
+void CopyListedPointObject(ListedPointObject* self)
 {
     KeptBits saved;
     saved = self->keep;
@@ -2887,7 +2887,7 @@ void func_001C1148(ListedPointObject* self)
     self->keep = saved;
 }
 
-void func_001C1190(World* self, BufferedStream* arg) {
+void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     ScriptValue q0;
     ScriptValue q1;
     ScriptValue q2;
@@ -2934,7 +2934,7 @@ void func_001C1190(World* self, BufferedStream* arg) {
     DestroyScriptValue(&q0, 2);
 }
 
-void* func_001C1390(s32 index, World* self)
+void* GetScriptEntryScope(s32 index, World* self)
 {
     if (index == -1) {
         return 0;
@@ -2946,7 +2946,7 @@ void* func_001C1390(s32 index, World* self)
     }
 }
 
-ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx)
+ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx)
 {
     s32 off = index << 3;
     ScriptValue q;
@@ -2966,7 +2966,7 @@ ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx)
     return self;
 }
 
-PropertyDescriptor* func_001C14C0(BaseObject* self, s32 key)
+PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key)
 {
     PropertyList* entry = &g_classPropertyLists[self->desc->id];
     s32 lo = 0;
@@ -2988,7 +2988,7 @@ PropertyDescriptor* func_001C14C0(BaseObject* self, s32 key)
     return 0;
 }
 
-ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb)
+ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb)
 {
     ScriptValue q;
     ScriptListBuilder r;
@@ -3007,7 +3007,7 @@ ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, PropertyGetter c
     return self;
 }
 
-ScriptValue* func_001C15D8(ScriptValue* out, void* base, PropertyDescriptor* d)
+ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d)
 {
     ScriptValue q;
     ScriptValue q2;
@@ -3157,7 +3157,7 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, PropertyDescriptor* d)
     return out;
 }
 
-s32 func_001C1A28(ScriptListBuilder* self, s32 value)
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value)
 {
     PropertyDescriptor d;
     ScriptValue t;
@@ -3178,7 +3178,7 @@ s32 func_001C1A28(ScriptListBuilder* self, s32 value)
     return 1;
 }
 
-s32 func_001C1AD8(ScriptValueFilter* filter, s32* val) {
+s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val) {
     ScriptValue q;
     R11B008Node* l;
     InitScriptValue(&q);
@@ -3215,7 +3215,7 @@ s32 func_001C1AD8(ScriptValueFilter* filter, s32* val) {
     return 0;
 }
 
-ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts)
+ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts)
 {
     ScriptValue q;
     ScriptValue a;
@@ -3288,7 +3288,7 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
     return out;
 }
 
-ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals)
+ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals)
 {
     ScriptValue q;
     ScriptListBuilder list;
@@ -3312,7 +3312,7 @@ ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals)
 INCLUDE_RODATA(jtbl_0024D510);
 INCLUDE_ASM(func_001C1F20);
 
-ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n)
+ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
 {
     if (n < 0x495) {
         s32 r = (s32)FindPropertyDescriptor(p, n);
@@ -3327,7 +3327,7 @@ ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n)
     return self;
 }
 
-ScriptValue* func_001C2238(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
+ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     if (key < 0x495) {
         void* v = FindPropertyDescriptor(p, key);
@@ -3338,14 +3338,14 @@ ScriptValue* func_001C2238(ScriptValue* self, BaseObject* p, s32 key, ScriptValu
     return self;
 }
 
-ScriptValue* func_001C22B8(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
+ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
     AddKeyedValue(self, (R11B008List*)p->f04, key, value);
     return self;
 }
 
-ScriptValue* func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
+ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
     if (FindKeyedValue((R11B008List*)p->f04, key, 0)) UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
@@ -3353,7 +3353,7 @@ ScriptValue* func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValu
     return self;
 }
 
-ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...)
+ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...)
 {
     void* arr[32];
     void* ap = (char*)__builtin_next_arg(kinds) - 32;
@@ -3371,7 +3371,7 @@ ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const
     return ret;
 }
 
-void func_001C2430(s32 size, ...)
+void StartToSprChain(s32 size, ...)
 {
     char* ap;
     SprTransfer* e = &D_002748F0[1 - D_00274990];
@@ -3407,7 +3407,7 @@ void func_001C2430(s32 size, ...)
     StartDmaChain(c, (u32)e->tags & 0x0FFFFFFF);
 }
 
-void func_001C25B0(s32 first, ...) {
+void StartFromSprChain(s32 first, ...) {
     s32 buf[8];
     SprTransfer* r = &D_002748F0[D_00274990];
     s32 n = 0;
@@ -3441,7 +3441,7 @@ LINKER_REMNANT(func_001C27A8);
 
 INCLUDE_ASM(func_001C27B0);
 
-void func_001C29C8()
+void ConstructScratchpadTransfersAtStartup()
 {
-    func_001C27B0(1, 0xFFFF);
+    ConstructScratchpadTransfers(1, 0xFFFF);
 }

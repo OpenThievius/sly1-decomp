@@ -5,8 +5,8 @@
 // Packs four scaled, truncated box values from a float quad into one 64-bit key and passes it on.
 struct Quad_eu_15C5C0 { f32 a; f32 b; f32 c; f32 d; };
 
-void func_001613C0(void* p, s32 a, s32 b, s32 c);
-void func_00161708(void* p, s32 a, u64 key);
+void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* p, s32 a, u64 key);
 
 void func_eu_0015C5C0(void* unused, Quad_eu_15C5C0* q, void* ctx)
 {
@@ -16,8 +16,8 @@ void func_eu_0015C5C0(void* unused, Quad_eu_15C5C0* q, void* ctx)
         s32 s1 = (s32)((q->b + q->d) * k) - 1;
         s32 s3 = (s32)q->a;
         s32 s2 = (s32)(q->b * k);
-        func_001613C0(ctx, 0, 1, 0xE);
+        BeginGifTag(ctx, 0, 1, 0xE);
         u64 key = (u64)s3 | ((u64)s0 << 16) | ((u64)s2 << 32) | ((u64)s1 << 48);
-        func_00161708(ctx, 0x40, key);
+        AddGifRegisterWrite(ctx, 0x40, key);
     }
 }

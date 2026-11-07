@@ -73,33 +73,33 @@ struct Pools_1F7BE8 {
     s32 f3C;
 };
 
-s32 D_00277134 = 0;
+s32 g_remoteCallsReady = 0;
 
 static u8 D_00626000[0x800];
 static u8 D_00626800[0x800];
 static u8 D_00627000[0x800];
-static Pools_1F7BE8 D_00627800;
+static Pools_1F7BE8 g_remoteCallState;
 
-s32 func_001F9D60(void);
-void func_001F9DA8(void);
-void func_001FA468(void);
-s32 func_001F6B20(SemaphoreParams* params);
-void func_001F6B30(s32 sema);
-void func_001F6B50(s32 sema);
-s32 func_001F6B60(s32 sema);
-s32 func_001FA630(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
-s32 func_001FA670(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
-void func_001F71D0(void* thread);
+s32 DisableInterrupts(void);
+void EnableInterrupts(void);
+void ShutDownCommandChannel(void);
+s32 NewSemaphore(SemaphoreParams* params);
+void FreeSemaphore(s32 sema);
+void PostSemaphoreFromInterrupt(s32 sema);
+s32 AwaitSemaphore(s32 sema);
+s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
+s32 SendCommandFromInterrupt(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
+void QueueThreadRequest(void* thread);
 
 INCLUDE_ASM(func_001F7BE8);
 
-void func_001F7D88(void)
+void ShutDownRemoteCalls(void)
 {
     ShutDownCommandChannel();
     g_remoteCallsReady = 0;
 }
 
-RemoteCallPacket* func_001F7DB0(Pools_1F7BE8* self)
+RemoteCallPacket* TakeRequestPacket(Pools_1F7BE8* self)
 {
     DisableInterrupts();
     s32 count = self->packet_count;
@@ -129,13 +129,13 @@ RemoteCallPacket* func_001F7DB0(Pools_1F7BE8* self)
     return 0;
 }
 
-void func_001F7E58(RemoteCallPacket* packet)
+void FreeRequestPacket(RemoteCallPacket* packet)
 {
     packet->id = 0;
     packet->flags &= ~1u;
 }
 
-RemoteCallPacket* func_001F7E78(Pools_1F7BE8* r)
+RemoteCallPacket* NextReplyPacket(Pools_1F7BE8* r)
 {
     s32 index = r->cursor % r->reply_count;
     s32 off = index << 6;
@@ -143,7 +143,7 @@ RemoteCallPacket* func_001F7E78(Pools_1F7BE8* r)
     return (RemoteCallPacket*)((u8*)r->replies + off);
 }
 
-void func_001F7EA8(RemoteCallPacket* reply)
+void HandleRemoteCallReply(RemoteCallPacket* reply)
 {
     RemoteCallClient* s0;
     u32 cmd = reply->cmd;
@@ -174,7 +174,7 @@ after:
     s0->packet = 0;
 }
 
-void func_001F7F60(RemoteCallPacket* src, Pools_1F7BE8* pools)
+void AnswerIopCall(RemoteCallPacket* src, Pools_1F7BE8* pools)
 {
     RemoteCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
@@ -185,7 +185,7 @@ void func_001F7F60(RemoteCallPacket* src, Pools_1F7BE8* pools)
     SendCommandFromInterrupt(0x80000008, m, 0x40, src->cmd, src->f24, src->f28);
 }
 
-Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
+Entry_1F7FC0* FindRemoteService(u32 key, Pools_1F7BE8* pools)
 {
     Group_1F7FC0* group = pools->groups;
     while (group) {
@@ -199,7 +199,7 @@ Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
     return 0;
 }
 
-void func_001F8010(RemoteCallPacket* src, Pools_1F7BE8* pools)
+void AnswerServiceLookup(RemoteCallPacket* src, Pools_1F7BE8* pools)
 {
     RemoteCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
@@ -220,7 +220,7 @@ void func_001F8010(RemoteCallPacket* src, Pools_1F7BE8* pools)
     SendCommandFromInterrupt(0x80000008, m, 0x40, 0, 0, 0);
 }
 
-s32 func_001F80C0(RemoteCallClient* self, u32 cmd, s32 mode)
+s32 BindRemoteService(RemoteCallClient* self, u32 cmd, s32 mode)
 {
     SemaphoreParams params;
     RemoteCallPacket* packet;
@@ -300,7 +300,7 @@ struct Ctx_001F8200 {
 
 
 
-void func_001F8200(Ctx_001F8200* self)
+void QueueServerRequest(Ctx_001F8200* self)
 {
     Node_001F8200* n = self->f34;
     Node_001F8200* list = n->f40;
@@ -331,7 +331,7 @@ void func_001F8200(Ctx_001F8200* self)
 
 INCLUDE_ASM(func_001F8290);
 
-s32 func_001F8480(RemoteCallClient* self)
+s32 IsRemoteCallPending(RemoteCallClient* self)
 {
     RemoteCallPacket* p = self->packet;
     if (p != 0 && self->id == p->id) {

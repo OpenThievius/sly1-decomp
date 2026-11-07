@@ -6,4 +6,4 @@
  * Written for this project from retail's data. */
 #include "libm.h"
 
-const double D_0024FF70 = 1.0 / 0.0;
+const double g_mathInfinity = 1.0 / 0.0;

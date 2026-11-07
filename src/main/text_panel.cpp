@@ -29,7 +29,7 @@ struct CurveSpan {
     f32 q;
 };
 
-void func_001365A0(T217D_440* self, s32 arg);
+void SetTextPanelSubject(T217D_440* self, s32 arg);
 
 struct PanelColor
 {
@@ -42,11 +42,11 @@ struct PanelColor
     PanelColor(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-f32 func_00205210(f32 x);
-void func_001613C0(PacketWriter* gs, s32 a, s32 b, u64 c);
-void func_00161458(PacketWriter* gs, u32 c);
-void func_00161670(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
-void func_001615F0(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
+f32 Cosine(f32 x);
+void BeginGifTag(PacketWriter* gs, s32 a, s32 b, u64 c);
+void AddGifRgbaEntry(PacketWriter* gs, u32 c);
+void AddGifXyzfNoDrawEntry(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
+void AddGifXyzfEntry(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
 
 struct BorderColorMix
 {
@@ -77,18 +77,18 @@ struct BorderColorMix
 
 struct CameraHeading { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
 
-extern s32 D_00262C68;
-extern f32 D_00261860;
-extern CameraHeading* D_00261990;
+extern s32 g_padRouting;
+extern f32 g_frameDt;
+extern CameraHeading* g_camera;
 
-void func_001613C0(PacketWriter* gs, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* gs, s32 reg, u64 value);
-void func_00161458(PacketWriter* gs, u32 color);
-void func_00161670(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
-void func_001615F0(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
-f32 func_001EA408(f32 a);
-f32 func_00205210(f32 a);
-void func_00136EC8(T217D_440* self, f32* x, f32* y);
+void BeginGifTag(PacketWriter* gs, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* gs, s32 reg, u64 value);
+void AddGifRgbaEntry(PacketWriter* gs, u32 color);
+void AddGifXyzfNoDrawEntry(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
+void AddGifXyzfEntry(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
+f32 WrapAngle(f32 a);
+f32 Cosine(f32 a);
+void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
 
 struct CenterFrameMath {
     static s32 LerpU8(s32 a, s32 b, f32 t)
@@ -128,34 +128,34 @@ struct CenterFrameMath {
     }
 };
 
-void func_001AA8C8(void* self);
-s32 func_00150790(void* obj, s32 mode);
+void ResetScreenElement(void* self);
+s32 SetStepSequenceState(void* obj, s32 mode);
 
-void func_001356C0(T217D_440* self, s32 mode);
-void func_00150790(StepSequence* obj, s32 mode);
+void SetTextPanelState(T217D_440* self, s32 mode);
+void SetStepSequenceState(StepSequence* obj, s32 mode);
 
 struct SortEntry {
     void* obj;
     f32 key;
 };
 
-s32 func_00182FC8(void* obj);
+s32 IsObjectAttached(void* obj);
 
-void func_00199C10(void* obj, s32* out);
+void GetNumberedItemFlag(void* obj, s32* out);
 
-void func_0019EBE8(void* handle);
-void func_001A1DF0(void* handle, s32 mode);
-void* func_001F5C0C(void* block, s32 value, s32 size);
+void RemoveEffect(void* handle);
+void SetEffectPhase(void* handle, s32 mode);
+void* FillMemory(void* block, s32 value, s32 size);
 
 // func_00136FA8 keeps its own view: it uses the result of func_001356C0, which returns nothing.
 struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
 
-s32 func_001356C0(Owner_136FA8* self, s32 mode);
+s32 SetTextPanelState(Owner_136FA8* self, s32 mode);
 
 // Newly matched US functions from the small-function wave.
-extern void func_001373D0(void*);
-extern void func_0018D778(void*);
-extern void func_00137A60(void*, s32, void*);
+extern void CloseBufferedStream(void*);
+extern void FreeObjectMemory(void*);
+extern void ReadBufferedStreamBytes(void*, s32, void*);
 
 struct PercentClamp {
     static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
@@ -165,32 +165,32 @@ struct PercentClamp {
     }
 };
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-Font* func_0015DB28(void* out, void* p, Font* font);
-s32 func_0015DF58(void* self);
+Font* InitTextReader(void* out, void* p, Font* font);
+s32 CountTextChars(void* self);
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
 struct TextScratch {
     u8 bytes[0xB0];
 };
 
-s32 func_001E2100(const char* s);
-void* func_001E2138(void* dst, const char* src);
-void func_0015C8B8(Font* font, f32 x, f32 y);
-s32 func_0015E068(void* buf, f32 x);
-void func_0015C900(Font* font);
-void func_0015DB80(void* buf);
-s32 func_0015DBE0(void* buf);
+s32 GetStringLength(const char* s);
+void* CopyString(void* dst, const char* src);
+void PushFontScale(Font* font, f32 x, f32 y);
+s32 WrapTextLines(void* buf, f32 x);
+void PopFontScale(Font* font);
+void RewindTextReader(void* buf);
+s32 ReadTextChar(void* buf);
 
 struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_00131140(T217D_440* self);
-void func_001BFCD8(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
+void ClearTextPanel(T217D_440* self);
+void StartSoundEffect(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
 
-extern u8 D_00275710[];
+extern u8 g_currentWorld[];
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
 
@@ -198,9 +198,9 @@ extern u8 func_00135E40[];
 
 // The bit of the current level GetCurrentLevelBit (func_00160D30) gives back.
 struct LevelBit { s32 v; };
-void func_00160D30(LevelBit* p);
-s32 func_00160D10(void);
-void func_001358D0(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
+void GetCurrentLevelBit(LevelBit* p);
+s32 MaskWorldBitsBySave(void);
+void CollectPanelEntriesOfClass(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
 struct StickLimits { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
@@ -209,15 +209,15 @@ struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
 extern const StickLimits D_00249D00;
 extern const StickLimits D_00249D10;
 
-Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, StickLimits* c, s32 d, f32 f12);
-f32 func_001EAFE0(f32 x, f32 y);
-void func_00135F48(T217D_440* self, PadRecord* p);
+Quad_136040 ApproachPointWithRamp(Quad_136040 a, Quad_136040 b, StickLimits* c, s32 d, f32 f12);
+f32 WrapModulo(f32 x, f32 y);
+void RefreshPanelEntries(T217D_440* self, PadRecord* p);
 
 struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 
-void func_001A1F40(PanelEntryPosition* v, s32 mode);
+void ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
 
 struct PlayerListHolder { u8 pad0[0x6C]; List01 list; };
 
@@ -241,29 +241,29 @@ struct ListWalkBegin {
     }
 };
 
-PlayerListHolder* func_0015A418(World* host, s32 a1, s32 a2, void* ctx);
-void func_0012F6B0(AnimationPlayer* item, f32 x);
+PlayerListHolder* FindFirstObjectById(World* host, s32 a1, s32 a2, void* ctx);
+void SetAnimationPlayerSpeed(AnimationPlayer* item, f32 x);
 
 
-extern u8 D_00275710[];
+extern u8 g_currentWorld[];
 
-void func_001BEA50(void);
-void func_001BEA28(void);
-void func_00160D30(LevelBit* p);
-s32 func_00160D10(void);
-void func_00135E78(T217D_440* self, s32 state, s32 flag);
-s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
-void func_00192190(void* p);
+void ResumeStreamVoice(void);
+void PauseStreamVoice(void);
+void GetCurrentLevelBit(LevelBit* p);
+s32 MaskWorldBitsBySave(void);
+void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
+s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+void ResetTextPointToHalf(void* p);
 
 struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
-void func_00160D30(u32* out);
+void GetCurrentLevelBit(u32* out);
 void func_00134B48(T217D_440* self, PacketWriter* q);
-f32 func_00205210(f32 x);
-f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
-void func_001613C0(PacketWriter* q, s32 a, s32 b, u64 c);
-void func_00161458(PacketWriter* q, u32 v);
-void func_001615F0(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
+f32 Cosine(f32 x);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
+void BeginGifTag(PacketWriter* q, s32 a, s32 b, u64 c);
+void AddGifRgbaEntry(PacketWriter* q, u32 v);
+void AddGifXyzfEntry(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
 
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
@@ -346,35 +346,35 @@ CurveSpan D_002612B0;
 CurveSpan D_002612E0;
 f32 D_00261310;
 
-void func_00130F48(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y);
-f32 func_00131000(const CurveSpan* s, s32 x);
-void func_001310F0(T217D_440* self, s32 a1);
-void func_00131140(T217D_440* self);
-void func_00132500(T217D_440* self, PacketWriter* gs);
-void func_00133B58(T217D_440* self, PacketWriter* gs);
-void func_00135228(T217D_440* self, PacketWriter* q);
-void func_00135550(T217D_440* self, s32 value);
-void func_001356C0(T217D_440* self, s32 mode);
-s32 func_001357F0(SortEntry* a, SortEntry* b);
-s32 func_00135858(SortEntry* a, SortEntry* b);
-void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
-void func_00135E48(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
-void func_00135E78(T217D_440* self, s32 state, s32 flag);
-void func_00135F48(T217D_440* self);
-void func_00136040(T217D_440* self, PadRecord* p);
-void func_00136238(T217D_440* self, s32 on);
-void func_001363D0(T217D_440* self);
-void func_00136408(T217D_440* self, const char* name);
-s32 func_00136530(T217D_440* self);
-void func_001365A0(T217D_440* self, s32 value);
-void func_001365A8(T217D_440* self, f32 value);
-f32 func_001365F0(T217D_440* self);
-f32 func_00136648(T217D_440* s);
-void func_00136EC8(T217D_440* self, f32* x, f32* y);
-void func_00136EF8(T217D_440* self);
-s32 func_00136FA8(Owner_136FA8* self);
+void InitCurveSpan(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y);
+f32 EvalCurveSpan(const CurveSpan* s, s32 x);
+void InitTextPanel(T217D_440* self, s32 a1);
+void ClearTextPanel(T217D_440* self);
+void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs);
+void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs);
+void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q);
+void SetTextPanelMode(T217D_440* self, s32 value);
+void SetTextPanelState(T217D_440* self, s32 mode);
+s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b);
+s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b);
+void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
+void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
+void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
+void RefreshPanelEntries(T217D_440* self);
+void UpdatePanelStick(T217D_440* self, PadRecord* p);
+void SetTextPanelOpen(T217D_440* self, s32 on);
+void ResetTextPanel(T217D_440* self);
+void SetTextPanelText(T217D_440* self, const char* name);
+s32 IsTextPanelTextTyped(T217D_440* self);
+void SetTextPanelSubject(T217D_440* self, s32 value);
+void SetTextPanelValuePercent(T217D_440* self, f32 value);
+f32 GetTextPanelSlideInTime(T217D_440* self);
+f32 GetTextPanelSlideOutTime(T217D_440* s);
+void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
+void ChooseTextPanelState(T217D_440* self);
+s32 EndTextPanelState(Owner_136FA8* self);
 
-void func_00130F48(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y)
+void InitCurveSpan(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y)
 {
     f32 fn = (f32)n;
     f32 inv = 1.0f / fn;
@@ -396,7 +396,7 @@ void func_00130F48(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y)
     d->q = src->c0 + 0.5f * (src->c1 + 0.5f * src->c2) + y;
 }
 
-f32 func_00131000(const CurveSpan* s, s32 x)
+f32 EvalCurveSpan(const CurveSpan* s, s32 x)
 {
     if (x < s->lo || s->hi < x) {
         f32 u = (f32)x / s->len;
@@ -416,7 +416,7 @@ f32 func_00131000(const CurveSpan* s, s32 x)
     return s->q;
 }
 
-void func_001310F0(T217D_440* self, s32 a1)
+void InitTextPanel(T217D_440* self, s32 a1)
 {
     self->w = 640.0f;
     self->h = 492.800018f;
@@ -425,7 +425,7 @@ void func_001310F0(T217D_440* self, s32 a1)
     InitScreenElement(self, a1);
 }
 
-void func_00131140(T217D_440* self)
+void ClearTextPanel(T217D_440* self)
 {
     self->vt->m08(self, 0);
     SetTextPanelSubject(self, 0);
@@ -444,10 +444,10 @@ struct PanelFont {
     static Font* Of(T217D_440* self) { return *(Font**)((u8*)self + 0x310); }
 };
 
-f32 func_0015C418(Font* font, const char* text);
-void func_0015C638(Font* font, const char* text, Layout_137228* layout, s32 zero, PacketWriter* gs);
+f32 MeasureFontString(Font* font, const char* text);
+void DrawFontString(Font* font, const char* text, Layout_137228* layout, s32 zero, PacketWriter* gs);
 
-void func_001316E8(T217D_440* self, PacketWriter* gs)
+void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 {
     Layout_137228 L;
     s32 i;
@@ -549,7 +549,7 @@ INCLUDE_RODATA(D_00249CE8);
 INCLUDE_RODATA(D_00249CF0);
 INCLUDE_ASM(func_00131F60);
 
-void func_00132500(T217D_440* self, PacketWriter* gs)
+void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;
@@ -723,7 +723,7 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
-void func_00133B58(T217D_440* self, PacketWriter* gs)
+void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;
@@ -837,7 +837,7 @@ ASM_FUNC(func_00134AA0);
 INCLUDE_RODATA(D_00249CF8);
 ASM_FUNC(func_00134B48);
 
-void func_00135228(T217D_440* self, PacketWriter* q)
+void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
 {
     if (self->state == 1)
     {
@@ -879,7 +879,7 @@ void func_00135228(T217D_440* self, PacketWriter* q)
     }
 }
 
-void func_00135550(T217D_440* self, s32 value)
+void SetTextPanelMode(T217D_440* self, s32 value)
 {
     if (value == self->mode) {
         return;
@@ -911,7 +911,7 @@ void func_00135550(T217D_440* self, s32 value)
     SetScreenElementMode(self, value);
 }
 
-void func_001356C0(T217D_440* self, s32 mode)
+void SetTextPanelState(T217D_440* self, s32 mode)
 {
     if (mode != self->state) {
         if (self->state != 1) {
@@ -941,7 +941,7 @@ void func_001356C0(T217D_440* self, s32 mode)
     }
 }
 
-s32 func_001357F0(SortEntry* a, SortEntry* b)
+s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b)
 {
     if (IsObjectAttached(a->obj) == 0) {
         return 1;
@@ -955,7 +955,7 @@ s32 func_001357F0(SortEntry* a, SortEntry* b)
     return 1;
 }
 
-s32 func_00135858(SortEntry* a, SortEntry* b)
+s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b)
 {
     s32 flag;
 
@@ -977,7 +977,7 @@ ASM_FUNC(func_001358D0);
 
 LINKER_REMNANT(func_00135E20);
 
-void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag)
+void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32* flag)
 {
     *out = self->v;
     *flag = 0;
@@ -985,15 +985,15 @@ void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag)
 
 LINKER_REMNANT(func_00135E40);
 
-void func_00135E48(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
+void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
 {
     *out = self->v;
-    func_001A1F40(out, 1);
+    ComputeHullSeenFromCamera(out, 1);
 }
 
 LINKER_REMNANT(func_00135E70);
 
-void func_00135E78(T217D_440* self, s32 state, s32 flag)
+void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
 {
     if (state == self->bankState) return;
     s32 i = 0;
@@ -1017,7 +1017,7 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
     self->bankState = state;
 }
 
-void func_00135F48(T217D_440* self)
+void RefreshPanelEntries(T217D_440* self)
 {
     LevelBit flag;
     GetCurrentLevelBit(&flag);
@@ -1034,7 +1034,7 @@ void func_00135F48(T217D_440* self)
     }
 }
 
-void func_00136040(T217D_440* self, PadRecord* p)
+void UpdatePanelStick(T217D_440* self, PadRecord* p)
 {
     switch (self->state) {
     case 1: {
@@ -1063,7 +1063,7 @@ void func_00136040(T217D_440* self, PadRecord* p)
         vb.y = v * 50.0f;
         vb.z = 0;
         f32* g = ((f32*)g_gameClock);
-        *(Quad_136040*)&r = func_001EA818(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
+        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
         self->f314 += u * -0.08f;
         self->stickX = r.x;
         self->stickY = r.y;
@@ -1079,15 +1079,15 @@ void func_00136040(T217D_440* self, PadRecord* p)
 extern const StickLimits D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
 extern const StickLimits D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
-void func_00136238(T217D_440* self, s32 on)
+void SetTextPanelOpen(T217D_440* self, s32 on)
 {
     LevelBit in;
     void* arr[0x100];
     s32 n;
     if ((on != 0) != (self->open == 0)) return;
     if (self->child != 0 && ((StepSequence*)self->child)->state2D4 == 3) {
-        if (on != 0) func_001BEA50();
-        else func_001BEA28();
+        if (on != 0) ResumeStreamVoice();
+        else PauseStreamVoice();
     }
     self->open = on;
     self->palette = 0;
@@ -1103,7 +1103,7 @@ void func_00136238(T217D_440* self, s32 on)
             if (n > 0) {
                 void** p = arr;
                 s32 i = n;
-                do { i--; func_00192190(*p); p++; } while (i != 0);
+                do { i--; ResetTextPointToHalf(*p); p++; } while (i != 0);
             }
         }
     } else {
@@ -1113,7 +1113,7 @@ void func_00136238(T217D_440* self, s32 on)
     }
 }
 
-void func_001363D0(T217D_440* self)
+void ResetTextPanel(T217D_440* self)
 {
     ResetScreenElement(self);
     if (self->child != 0) {
@@ -1121,7 +1121,7 @@ void func_001363D0(T217D_440* self)
     }
 }
 
-void func_00136408(T217D_440* self, const char* name)
+void SetTextPanelText(T217D_440* self, const char* name)
 {
     TextScratch buf;
     s32 s1;
@@ -1162,7 +1162,7 @@ tail:
     self->textSince = tab[1];
 }
 
-s32 func_00136530(T217D_440* self)
+s32 IsTextPanelTextTyped(T217D_440* self)
 {
     u8 buf[0xB0];
 
@@ -1175,14 +1175,14 @@ s32 func_00136530(T217D_440* self)
     return v >= n;
 }
 
-void func_001365A0(T217D_440* self, s32 value) { self->f2FC = value; }
+void SetTextPanelSubject(T217D_440* self, s32 value) { self->f2FC = value; }
 
-void func_001365A8(T217D_440* self, f32 value)
+void SetTextPanelValuePercent(T217D_440* self, f32 value)
 {
     PercentClamp::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
-f32 func_001365F0(T217D_440* self)
+f32 GetTextPanelSlideInTime(T217D_440* self)
 {
     switch (self->state) {
     case 1:
@@ -1196,7 +1196,7 @@ f32 func_001365F0(T217D_440* self)
     }
 }
 
-f32 func_00136648(T217D_440* s) {
+f32 GetTextPanelSlideOutTime(T217D_440* s) {
     switch (s->state) {
     case 1:
     case 2:
@@ -1212,13 +1212,13 @@ f32 func_00136648(T217D_440* s) {
 INCLUDE_RODATA(D_00249D58);
 ASM_FUNC(func_001366A0);
 
-void func_00136EC8(T217D_440* self, f32* x, f32* y)
+void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
 {
     *x = self->stickX + 320.0f;
     *y = self->stickY + 180.4000091552734375f;
 }
 
-void func_00136EF8(T217D_440* self)
+void ChooseTextPanelState(T217D_440* self)
 {
     if (self->child != 0) {
         switch (((StepSequence*)self->child)->mode2D0) {
@@ -1238,7 +1238,7 @@ void func_00136EF8(T217D_440* self)
     }
 }
 
-s32 func_00136FA8(Owner_136FA8* self)
+s32 EndTextPanelState(Owner_136FA8* self)
 {
     s32 r;
     if (self->child != 0) {

@@ -64,206 +64,206 @@ typedef f32 (*MathFn_259938)(f32 x);
 
 // The pooled payloads (0011C000.cpp): the 16-byte vectors of tags 0x16 and 0x18, the 0x40-byte
 // block of tag 0x17, the two and three floats of tags 0x19 and 0x1A.
-f32* func_0011C508(void);
-f32* func_0011C618(void);
-f32* func_0011C748(void);
-f32* func_0011C858(void);
-f32* func_0011C968(void);
-R11B008Key* func_0011C498(void);
-void func_0011C418(R11B008Key* src, R11B008Key* dst, s32 first);
+f32* AcquireVectorAPayload(void);
+f32* AcquireMatrixPayload(void);
+f32* AcquireVectorBPayload(void);
+f32* AcquirePairPayload(void);
+f32* AcquireTriplePayload(void);
+R11B008Key* NewKeyedValue(void);
+void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 first);
 
 // The pools (value.cpp) and the collector's calls on them (0011C000.cpp).
-extern u8 D_0025C250[];
-extern u8 D_0025C270[];
-extern u8 D_0025C290[];
-extern u8 D_0025C2B0[];
-extern u8 D_0025C2D0[];
-void* func_0011C240(void* pool);
-void func_0011C2A0(void* pool);
-void func_0011C2B0(u8* pool);
-void func_0011C2E8(u8* pool);
+extern u8 g_valueNodePool[];
+extern u8 g_scopePool[];
+extern u8 g_keyedValuePool[];
+extern u8 g_payloadPool[];
+extern u8 g_propertyRefPool[];
+void* TakePoolEntry(void* pool);
+void MarkPoolLiveEnd(void* pool);
+void ClearPoolLiveStates(u8* pool);
+void ReleaseDeadPoolEntries(u8* pool);
 
-void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_0018D800(void* dst, void* src, s32 bytes);
+void* FillMemory(void* p, s32 value, s32 size);
+void CopyMemory(void* dst, void* src, s32 bytes);
 
 // Other files' functions the built-ins call.
-f32 func_00205778(f32 x, f32 y);
-f32 func_001EAAE0(f32 a, f32 b);
-s32 func_001EAC68(f32 a, f32 b, f32 c);
-f32 func_001ED908(s32 a, s32 b, f32* c);
-s32 func_001EDEF0(void* a0, void* a1, f32* a2, void* a3, f32 f);
-void func_001EB018(f32* a0, f32 x, f32 y, f32 z, f32 w);
-f32 func_001EB0F8(void* span, f32 x);
-s32 func_001EB050(void* target, f32 scale);
-void func_00188770(s32 a, f32* b);
-void* func_00189AF0(s32 a, f32* b);
-void func_001891C0(s32 a, s32 b, f32* c);
-void func_00188FD8(void* a, f32* b);
-void func_00188D28(void* a, f32* b, f32* c);
-void func_00189378(void* sub, s32 zero, void* out);
-void func_00188B08(void* a, void* b, f32* c);
-void func_001884C0(void* p);
-void func_001C0C08(s32 index, s32 value);
-void func_001F66F8(s32 v);
-void* func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
-s32 func_0015A198(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
-s32 func_0015A4F0(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
-void* func_001925F0(void);
-ScriptValue* func_001C2238(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* func_001C2320(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* func_001C22B8(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* func_001C21A0(ScriptValue* out, s32 a1, s32 a2);
-void func_0018D608(void);
-void func_0018D6F0(void);
-void func_001DC4D0(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, u8** o2);
-s32 func_00128018(void* a, s32 b, void* c, f32* d);
-s32 func_001280C0(void* a, s32 b, void* c, f32* d);
-void func_00128150(s32 a, s32 b, s32 c, f32* d);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_001BF718(void* slot);
-void func_001BF788(void* self, s32 n);
-void func_0016EC38(void* p, s32 n, f32 f);
-void func_001566C8(void* obj, f32 f);
-s32 func_001E1F10(const char* x);
-ScriptValue* func_001C13E8(ScriptValue* out, s32 id, u8* ctx);
-ScriptScope* func_001C1390(s32 id, u8* ctx);
-void func_001834A0(void* a);
+f32 ArctangentOfRatio(f32 x, f32 y);
+f32 RandomFloatInRange(f32 a, f32 b);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
+f32 ComputeAngleBetweenVectors(s32 a, s32 b, f32* c);
+s32 ComputeBallisticLaunchVelocity(void* a0, void* a1, f32* a2, void* a3, f32 f);
+void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w);
+f32 ClampToRange(void* span, f32 x);
+s32 IsInsideRange(void* target, f32 scale);
+void CopyTransposedMatrix(s32 a, f32* b);
+void* InvertMatrix4x4(s32 a, f32* b);
+void TransformMatrixByObject(s32 a, s32 b, f32* c);
+void MatrixToEulerAngles(void* a, f32* b);
+void MatrixToAxisAngle(void* a, f32* b, f32* c);
+void RotateMatrixUpright(void* sub, s32 zero, void* out);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, f32* c);
+void ResetMatrixHomogeneous(void* p);
+void SetCachedVoiceParam(s32 index, s32 value);
+void SeedRandom(s32 v);
+void* FindFirstObjectById(void* host, s32 a1, s32 a2, s32 ctx);
+s32 GatherObjectsByMode(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
+s32 GatherObjectsById(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
+void* GetActiveSwitchedCollider(void);
+ScriptValue* UpdateObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* SetExtraObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* AddObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* GetObjectProperty(ScriptValue* out, s32 a1, s32 a2);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInSphere(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, u8** o2);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, f32* d);
+s32 TransformDirectionBetweenFrames(void* a, s32 b, void* c, f32* d);
+void TransformRotationBetweenFrames(s32 a, s32 b, s32 c, f32* d);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void ClearSoundRecordHandle(void* slot);
+void StopSoundRecord(void* self, s32 n);
+void StartPadRecordPattern(void* p, s32 n, f32 f);
+void SendPointEventToWorldListener(void* obj, f32 f);
+s32 PrintFormatted(const char* x);
+ScriptValue* EvalScriptEntry(ScriptValue* out, s32 id, u8* ctx);
+ScriptScope* GetScriptEntryScope(s32 id, u8* ctx);
+void RunScriptEventHandler(void* a);
 
-extern f32 D_0026185C;
-extern u8 D_00262C70[];
+extern f32 g_gameTime;
+extern u8 g_padRecord[];
 
 // The table's records (script_builtin.h): D_00259DE8 is the count word of the last record of the first
 // label (func_00117668's, 0x259DE4), the one word func_00117668 reads.
-extern ScriptBuiltin D_00259958[];
+extern ScriptBuiltin g_scriptBuiltins[];
 extern s32 D_00259DE8;
 
 // The collector's calls on the pooled entries (value_pools.cpp).
-s32 func_0011C3C8(MarkEntry* e);
-void func_0011C3F0(MarkEntry* e);
+s32 IsPoolEntryUnmarked(MarkEntry* e);
+void MarkPoolEntryUsed(MarkEntry* e);
 
-s32 func_001419E8(Quad16* z, s32 a, s32 b, s32 c, void** d, ColliderSpan* e);
+s32 FindNearestSpanObject(Quad16* z, s32 a, s32 b, s32 c, void** d, ColliderSpan* e);
 
 // This file's functions. The built-ins (ScriptBuiltinFn) and their helpers:
-ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* args, s32 mode);
-ScriptValue* func_001139E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113A18(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113A48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113A78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b);
-ScriptValue* func_00113E48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 mode);
-ScriptValue* func_00114858(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114888(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115440(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index);
-ScriptValue* func_00115D48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115D78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115DA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115DD8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115E08(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115E38(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115E68(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115E98(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 kind);
-ScriptValue* func_00117A30(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117A60(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117A90(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117AC0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values);
+ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IgnoreScriptArguments(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* DiscardScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptWordsEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* CompareScriptNumbers(ScriptValue* ret, ScriptValue* args, s32 mode);
+ScriptValue* TestScriptLess(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptLessOrEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptGreater(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptGreaterOrEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptValuesIdentical(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* CompareScriptValues(ScriptValue* ret, ScriptValue* a, ScriptValue* b);
+ScriptValue* TestScriptEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptBool(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptNumber(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptInt(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptPointer(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptVector4(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptFloatPair(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptEmptyList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptRef(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptNullRef(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptHostFunction(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptFunction(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptNearlyEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* IsScriptFalse(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* PrependScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptListHead(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptListTail(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptListCell(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 mode);
+ScriptValue* SetScriptListHead(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptListTail(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptListLength(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptListContains(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ReturnScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MapScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FilterScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ForEachScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* EvalScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptVoiceParam(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptVector4FromThree(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptFloatPair(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptVectorElement(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptRandomSeed(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptRandomFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* CallScriptMathFunction(ScriptValue* ret, ScriptValue* arg, s32 index);
+ScriptValue* GetScriptSquareRoot(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptSine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptCosine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptTangent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptArcSine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptArcCosine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptArcTangent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* WrapScriptAngle(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptAtan2(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptAngleAndAxis(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TransposeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* InvertScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMatrixTranslation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMatrixRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMatrixEuler(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptUprightObjectMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* EvalScriptQuadratic(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* EvalScriptClampedQuadratic(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptVector4FromFour(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ClampScriptToRange(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TestScriptInsideRange(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ConvertScriptFloatToInt(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* RoundScriptFloatUp(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* RoundScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TruncateScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptAbsolute(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMaximum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptMinimum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptRemainder(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptClock(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ScheduleScriptCall(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptObjectEventTimer(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* DispatchScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 kind);
+ScriptValue* AddScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SetScriptExtraObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* UpdateScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values);
 // How its callers declare it (KEPT: see build/swarm/v2/NOTES.md): they call it as GCC calls a
 // function that gives a class back, a `call` with no value (expand_call has no value register when
 // the result goes through the hidden address), which schedules the argument moves differently
 // from a call of a function returning a pointer. The plain value cannot say that.
-void func_00117AF0(ScriptValue* ret, s32 count, u8* values);
-ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values);
+ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectListById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptControlledObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptWorld(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 // How its callers declare it; it is defined giving back a RetValue (KEPT, see there).
-ScriptValue* func_00118198(ScriptValue* ret, s32 id, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SearchScriptObjectHits(ScriptValue* ret, s32 id, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* CollectScriptObjectHits(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectHit(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TransformScriptPointBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TransformScriptDirectionBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* StartScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* StopScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* StartScriptPadRecordPattern(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 
 // A 128-bit value, copied as one quadword.
 typedef u64 Quad_118D10 __attribute__((mode(TI)));
@@ -271,68 +271,68 @@ typedef u64 Quad_118D10 __attribute__((mode(TI)));
 // A 128-bit value, stored as one quadword.
 typedef u64 Quad_118D20 __attribute__((mode(TI)));
 
-Quad_118D10* func_00118D10(Quad_118D10* out, void* src);
-Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v);
+Quad_118D10* CopyQuadword(Quad_118D10* out, void* src);
+Quad_118D20* StoreQuadword(Quad_118D20* out, Quad_118D20 v);
 
 // The evaluator (func_0011A080) and the handlers it dispatches to by the expression's kind.
-ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119128(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptVariable(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptAssign(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptDefine(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptIf(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptOr(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 // How func_0011A080 declares it; it is defined giving back a RetValue (KEPT, see there).
-ScriptValue* func_00119218(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, ScriptScope* scope);
-ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptAnd(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptCond(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptLet(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptWhile(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptLambda(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptBody(ScriptValue* ret, R11B008Node* list, ScriptScope* scope);
+ScriptValue* EvalScriptSequence(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptCall(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptImportScope(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 
 // The scopes.
-void func_0011A328(ScriptScope* scope, ScriptScope* parent);
-void func_0011A338(ScriptScope* scope, ScriptScope* parent);
-ScriptValue* func_0011A358(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
-ScriptValue* func_0011A400(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
-s32 func_0011A498(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
-ScriptValue* func_0011A4D8(ScriptScope* scope, s32 key, s32 flag);
-void func_0011A5B0(ScriptScope* src, ScriptScope* dst);
-ScriptScope* func_0011A630(void);
-void func_0011A670(void);
+void SetScriptScopeParent(ScriptScope* scope, ScriptScope* parent);
+void AddScriptScopeParent(ScriptScope* scope, ScriptScope* parent);
+ScriptValue* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
+ScriptValue* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
+s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
+ScriptValue* FindScriptVariable(ScriptScope* scope, s32 key, s32 flag);
+void CopyScriptScope(ScriptScope* src, ScriptScope* dst);
+ScriptScope* NewScriptScope(void);
+void ReleaseScriptScope(void);
 
 // The collector.
-void func_0011A6A8(MarkStacks* self);
-void func_0011A6B8();
-void func_0011A6C0(MarkStacks* self, MarkEntry* value);
-void func_0011A708(MarkStacks* self, R11B008List* list);
-void func_0011A728(MarkStacks* self, MarkEntry* value);
-MarkEntry* func_0011A748(MarkStacks* self);
-void func_0011A770(MarkStacks* self, MarkEntry* value);
-MarkEntry* func_0011A790(MarkStacks* self);
-void func_0011A7B8(MarkStacks* self, MarkRecord* value);
-MarkRecord* func_0011A7D8(MarkStacks* self);
-void func_0011A800(void);
-void func_0011A850(MarkStacks* self);
-void func_0011AB58(MarkStacks* self);
+void ResetMarkRoots(MarkStacks* self);
+void ShutDownMarkRoots();
+void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
+void AddMarkRootList(MarkStacks* self, R11B008List* list);
+void PushMarkObject(MarkStacks* self, MarkEntry* value);
+MarkEntry* PopMarkObject(MarkStacks* self);
+void PushMarkChain(MarkStacks* self, MarkEntry* value);
+MarkEntry* PopMarkChain(MarkStacks* self);
+void PushMarkRecord(MarkStacks* self, MarkRecord* value);
+MarkRecord* PopMarkRecord(MarkStacks* self);
+void MarkPoolLiveEnds(void);
+void DrainMarkStacks(MarkStacks* self);
+void CollectScriptPools(MarkStacks* self);
 
 // Tables of functions this file's code reads: the math functions of func_00115CA0.
-f32 func_001EA408(f32 x);
-f32 func_00204F68(f32 x);
-f32 func_00205210(f32 x);
-f32 func_00205400(f32 x);
-f32 func_002054F0(f32 x);
-f32 func_00205578(f32 x);
-f32 func_00205678(f32 x);
-f32 func_00206180(f32 x);
-MathFn_259938 D_00259938[8] = { func_00206180, func_00205400, func_00205210, func_002054F0, func_00205678, func_00205578, func_00204F68, func_001EA408 };
+f32 WrapAngle(f32 x);
+f32 Arctangent(f32 x);
+f32 Cosine(f32 x);
+f32 Sine(f32 x);
+f32 Tangent(f32 x);
+f32 Arccosine(f32 x);
+f32 Arcsine(f32 x);
+f32 SquareRoot(f32 x);
+MathFn_259938 g_scriptMathFunctions[8] = { SquareRoot, Sine, Cosine, Tangent, Arcsine, Arccosine, Arctangent, WrapAngle };
 INCLUDE_DATA(D_00259958);
 INCLUDE_DATA(D_00259DE8);
-MarkStacks D_00259F38;
+MarkStacks g_markStacks;
 
 ASM_FUNC(func_00112698);
 
@@ -349,7 +349,7 @@ INCLUDE_RODATA(jtbl_00249080);
 INCLUDE_RODATA(jtbl_002490A0);
 ASM_FUNC(func_00113240);
 
-ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -359,7 +359,7 @@ ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IgnoreScriptArguments(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -369,7 +369,7 @@ ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* DiscardScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -379,7 +379,7 @@ ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptWordsEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -389,7 +389,7 @@ ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* e, s32 mode)
+ScriptValue* CompareScriptNumbers(ScriptValue* ret, ScriptValue* e, s32 mode)
 {
     f32 xy[2];
     ScriptValue obj;
@@ -422,31 +422,31 @@ ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* e, s32 mode)
     return ret;
 }
 
-ScriptValue* func_001139E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptLess(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CompareScriptNumbers(ret, args, 0);
     return ret;
 }
 
-ScriptValue* func_00113A18(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptLessOrEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CompareScriptNumbers(ret, args, 1);
     return ret;
 }
 
-ScriptValue* func_00113A48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptGreater(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CompareScriptNumbers(ret, args, 2);
     return ret;
 }
 
-ScriptValue* func_00113A78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptGreaterOrEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CompareScriptNumbers(ret, args, 3);
     return ret;
 }
 
-ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptValuesIdentical(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     s32 r;
@@ -474,7 +474,7 @@ ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
+ScriptValue* CompareScriptValues(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
 {
     ScriptValue R;
     ScriptValue A;
@@ -573,13 +573,13 @@ ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
     return ret;
 }
 
-ScriptValue* func_00113E48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CompareScriptValues(ret, args, args + 1);
     return ret;
 }
 
-ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptBool(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue local;
     InitScriptValue(&local);
@@ -589,7 +589,7 @@ ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptNumber(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue local;
     InitScriptValue(&local);
@@ -599,7 +599,7 @@ ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue local;
     InitScriptValue(&local);
@@ -609,7 +609,7 @@ ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptInt(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue local;
     InitScriptValue(&local);
@@ -619,7 +619,7 @@ ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptPointer(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -629,7 +629,7 @@ ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -639,7 +639,7 @@ ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -649,7 +649,7 @@ ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptVector4(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -659,7 +659,7 @@ ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptFloatPair(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue a;
     InitScriptValue(&a);
@@ -669,7 +669,7 @@ ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue a;
     InitScriptValue(&a);
@@ -679,7 +679,7 @@ ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -690,7 +690,7 @@ ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptEmptyList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -700,7 +700,7 @@ ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptRef(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -710,7 +710,7 @@ ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptNullRef(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -724,7 +724,7 @@ ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptHostFunction(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -734,7 +734,7 @@ ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptFunction(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -746,7 +746,7 @@ ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptNearlyEqual(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     f32 out[3];
@@ -765,7 +765,7 @@ ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* IsScriptFalse(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -779,7 +779,7 @@ ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* PrependScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -798,7 +798,7 @@ ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptListHead(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -808,7 +808,7 @@ ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptListTail(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -824,7 +824,7 @@ ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 mode)
+ScriptValue* SetScriptListCell(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 mode)
 {
     ScriptValue q;
     R11B008Node* p;
@@ -845,19 +845,19 @@ ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114858(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptListHead(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     SetScriptListCell(ret, count, args, scope, 0x23);
     return ret;
 }
 
-ScriptValue* func_00114888(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptListTail(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     SetScriptListCell(ret, count, args, scope, 0x24);
     return ret;
 }
 
-ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptListLength(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -875,7 +875,7 @@ ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -898,7 +898,7 @@ ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptListContains(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue A;
     ScriptValue B;
@@ -947,7 +947,7 @@ ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* ReturnScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CopyConstructScriptValue(ret, args);
     return ret;
@@ -955,7 +955,7 @@ ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 
 INCLUDE_ASM(func_00114BB0);
 
-ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MapScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     R11B008Node arr[5];
@@ -1015,7 +1015,7 @@ ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FilterScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     R11B008Node arr[5];
@@ -1085,7 +1085,7 @@ ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* ForEachScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     R11B008Node arr[5];
@@ -1133,7 +1133,7 @@ ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* EvalScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -1148,7 +1148,7 @@ ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115440(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue a;
     ScriptValue b;
@@ -1177,7 +1177,7 @@ struct __attribute__((aligned(16))) Row_115510 {
     f32 f[4];               // 0x00
 };
 
-ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t, u;
     InitScriptValue(&t);
@@ -1215,7 +1215,7 @@ ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptVoiceParam(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     SetCachedVoiceParam(args[0].i, args[1].i);
@@ -1226,7 +1226,7 @@ ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptVector4FromThree(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue a;
     ScriptValue b;
@@ -1251,7 +1251,7 @@ ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptFloatPair(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue a;
     ScriptValue b;
@@ -1272,7 +1272,7 @@ ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -1305,7 +1305,7 @@ struct ScriptMatrixPayload {
     ScriptVectorRow row[4];      // 0x00
 };
 
-ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptVectorElement(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1353,7 +1353,7 @@ ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptRandomSeed(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1368,7 +1368,7 @@ ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptRandomFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue f;
     InitScriptValue(&f);
@@ -1391,7 +1391,7 @@ ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index)
+ScriptValue* CallScriptMathFunction(ScriptValue* ret, ScriptValue* arg, s32 index)
 {
     ScriptValue f;
     InitScriptValue(&f);
@@ -1408,55 +1408,55 @@ ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index)
     return ret;
 }
 
-ScriptValue* func_00115D48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptSquareRoot(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 0);
     return ret;
 }
 
-ScriptValue* func_00115D78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptSine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 1);
     return ret;
 }
 
-ScriptValue* func_00115DA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptCosine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 2);
     return ret;
 }
 
-ScriptValue* func_00115DD8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptTangent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 3);
     return ret;
 }
 
-ScriptValue* func_00115E08(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptArcSine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 4);
     return ret;
 }
 
-ScriptValue* func_00115E38(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptArcCosine(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 5);
     return ret;
 }
 
-ScriptValue* func_00115E68(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptArcTangent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 6);
     return ret;
 }
 
-ScriptValue* func_00115E98(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* WrapScriptAngle(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     CallScriptMathFunction(ret, args, 7);
     return ret;
 }
 
-ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptAtan2(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
     f32 xy[2];
@@ -1493,7 +1493,7 @@ ASM_FUNC(func_00116400);
 
 ASM_FUNC(func_00116490);
 
-ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue v;
@@ -1516,7 +1516,7 @@ ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptAngleAndAxis(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1533,7 +1533,7 @@ ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TransposeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1545,7 +1545,7 @@ ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* InvertScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1557,7 +1557,7 @@ ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1571,7 +1571,7 @@ ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 
 ASM_FUNC(func_00116840);
 
-ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMatrixTranslation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1583,7 +1583,7 @@ ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMatrixRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     f32* obj;
@@ -1597,7 +1597,7 @@ ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMatrixEuler(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1609,7 +1609,7 @@ ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     Vec4U vec;
@@ -1634,7 +1634,7 @@ struct UprightBasis {
     u8 bytes[0x30];         // 0x00
 };
 
-ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptUprightObjectMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     UprightBasis v;
@@ -1648,7 +1648,7 @@ ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* EvalScriptQuadratic(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue v;
@@ -1664,7 +1664,7 @@ ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* EvalScriptClampedQuadratic(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -1688,7 +1688,7 @@ ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* MakeScriptVector4FromFour(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q0;
     ScriptValue q1;
@@ -1716,7 +1716,7 @@ ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* ClampScriptToRange(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q0;
     ScriptValue q1;
@@ -1731,7 +1731,7 @@ ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TestScriptInsideRange(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue v;
@@ -1746,7 +1746,7 @@ ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* ConvertScriptFloatToInt(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1756,7 +1756,7 @@ ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* RoundScriptFloatUp(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1767,7 +1767,7 @@ ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* RoundScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1778,7 +1778,7 @@ ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TruncateScriptFloat(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1789,7 +1789,7 @@ ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptAbsolute(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1808,7 +1808,7 @@ ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMaximum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1851,7 +1851,7 @@ ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptMinimum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1894,7 +1894,7 @@ ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptRemainder(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -1905,7 +1905,7 @@ ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptClock(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -1915,7 +1915,7 @@ ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* ScheduleScriptCall(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue r;
@@ -1972,7 +1972,7 @@ ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptObjectEventTimer(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -1987,7 +1987,7 @@ ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 kind)
+ScriptValue* DispatchScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 kind)
 {
     ScriptValue q1;
     ScriptValue q2;
@@ -2022,31 +2022,31 @@ ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117A30(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* AddScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     DispatchScriptObjectProperty(ret, count, args, scope, 0x63);
     return ret;
 }
 
-ScriptValue* func_00117A60(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SetScriptExtraObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     DispatchScriptObjectProperty(ret, count, args, scope, 0x64);
     return ret;
 }
 
-ScriptValue* func_00117A90(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* UpdateScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     DispatchScriptObjectProperty(ret, count, args, scope, 0x65);
     return ret;
 }
 
-ScriptValue* func_00117AC0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     DispatchScriptObjectProperty(ret, count, args, scope, 0x66);
     return ret;
 }
 
-ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values)
+ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -2075,7 +2075,7 @@ ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values)
     return ret;
 }
 
-ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     void* r;
@@ -2090,7 +2090,7 @@ ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     u8 buf[0x100];
@@ -2105,7 +2105,7 @@ ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     void* r;
@@ -2117,7 +2117,7 @@ ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObjectListById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     u8 buf[0x100];
@@ -2132,7 +2132,7 @@ ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptControlledObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -2142,7 +2142,7 @@ ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptWorld(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -2152,7 +2152,7 @@ ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -2162,7 +2162,7 @@ ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     u8 buf[0x400];
@@ -2179,7 +2179,7 @@ ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 
 ASM_FUNC(func_00117FE0);
 
-ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2210,7 +2210,7 @@ struct RetValue : ScriptValue {
     ~RetValue() { DestroyScriptValue(this, 2); }
 };
 
-RetValue func_00118198(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
+RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     RetValue l0;
     ColliderSpan hit;
@@ -2275,7 +2275,7 @@ RetValue func_00118198(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
     return l0;
 }
 
-ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* CollectScriptObjectHits(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2288,7 +2288,7 @@ ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* FindScriptObjectHit(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2301,7 +2301,7 @@ ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TransformScriptPointBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -2313,7 +2313,7 @@ ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TransformScriptDirectionBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -2325,7 +2325,7 @@ ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     f32* obj;
@@ -2341,7 +2341,7 @@ ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 
 ASM_FUNC(func_00118698);
 
-ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* StartScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
     s32 n;
@@ -2355,7 +2355,7 @@ ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* StopScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -2366,7 +2366,7 @@ ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* StartScriptPadRecordPattern(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -2381,7 +2381,7 @@ ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -2400,14 +2400,14 @@ INCLUDE_ASM(func_00118988);
 
 INCLUDE_ASM(func_00118CF0);
 
-Quad_118D10* func_00118D10(Quad_118D10* out, void* src)
+Quad_118D10* CopyQuadword(Quad_118D10* out, void* src)
 {
     Quad_118D10 v = *(Quad_118D10*)src;
     *out = v;
     return out;
 }
 
-Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
+Quad_118D20* StoreQuadword(Quad_118D20* out, Quad_118D20 v)
 {
     *out = v;
     return out;
@@ -2415,7 +2415,7 @@ Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
 
 ASM_FUNC(func_00118D30);
 
-ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptVariable(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -2425,7 +2425,7 @@ ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptAssign(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2443,7 +2443,7 @@ ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptDefine(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2466,7 +2466,7 @@ ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
 extern const char D_00249200[];
 INCLUDE_RODATA(D_00249200);
 
-ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2490,7 +2490,7 @@ ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptIf(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2520,7 +2520,7 @@ ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119128(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptOr(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue L;
     ScriptValue M;
@@ -2548,7 +2548,7 @@ done:
     return ret;
 }
 
-RetValue func_00119218(R11B008Node* expr, ScriptScope* scope)
+RetValue EvalScriptAnd(R11B008Node* expr, ScriptScope* scope)
 {
     RetValue L;
     SetScriptValueBool(&L, 1);
@@ -2563,7 +2563,7 @@ RetValue func_00119218(R11B008Node* expr, ScriptScope* scope)
     return L;
 }
 
-ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptCond(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, r, t;
     InitScriptValue(&q);
@@ -2604,7 +2604,7 @@ ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue a;
     ScriptValue b[2];
@@ -2674,7 +2674,7 @@ ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptLet(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, r, u, t;
     InitScriptValue(&q);
@@ -2717,7 +2717,7 @@ ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptWhile(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, t;
     s32 a, b;
@@ -2746,7 +2746,7 @@ ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptLambda(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
     InitScriptValue(&q);
@@ -2779,7 +2779,7 @@ ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, ScriptScope* scope)
+ScriptValue* EvalScriptBody(ScriptValue* ret, R11B008Node* list, ScriptScope* scope)
 {
     ScriptValue q, t;
     InitScriptValue(&q);
@@ -2795,7 +2795,7 @@ ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptSequence(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, t;
     InitScriptValue(&q);
@@ -2812,7 +2812,7 @@ ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptCall(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     R11B008Node* node;
     ScriptValue a;
@@ -2933,7 +2933,7 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptImportScope(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue a;
     ScriptValue b;
@@ -2956,7 +2956,7 @@ ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
-ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
+ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
@@ -3015,18 +3015,18 @@ end:
     return ret;
 }
 
-void func_0011A328(ScriptScope* scope, ScriptScope* parent)
+void SetScriptScopeParent(ScriptScope* scope, ScriptScope* parent)
 {
     scope->parents[0] = parent;
     scope->count = 1;
 }
 
-void func_0011A338(ScriptScope* scope, ScriptScope* parent)
+void AddScriptScopeParent(ScriptScope* scope, ScriptScope* parent)
 {
     scope->parents[scope->count++] = parent;
 }
 
-ScriptValue* func_0011A358(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value)
+ScriptValue* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value)
 {
     ScriptValue a;
     R11B008Key* node;
@@ -3043,7 +3043,7 @@ ScriptValue* func_0011A358(ScriptValue* ret, ScriptScope* scope, s32 key, Script
     return ret;
 }
 
-ScriptValue* func_0011A400(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value)
+ScriptValue* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value)
 {
     ScriptValue a;
     ScriptValue* found;
@@ -3059,7 +3059,7 @@ ScriptValue* func_0011A400(ScriptValue* ret, ScriptScope* scope, s32 key, Script
     return ret;
 }
 
-s32 func_0011A498(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out)
+s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out)
 {
     ScriptValue* r = FindScriptVariable(scope, key, flag);
     if (r != 0) {
@@ -3070,7 +3070,7 @@ s32 func_0011A498(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out)
     return 0;
 }
 
-ScriptValue* func_0011A4D8(ScriptScope* scope, s32 key, s32 flag)
+ScriptValue* FindScriptVariable(ScriptScope* scope, s32 key, s32 flag)
 {
     ScriptValue* found = 0;
     R11B008Key* n;
@@ -3098,7 +3098,7 @@ done:
     return found;
 }
 
-void func_0011A5B0(ScriptScope* src, ScriptScope* dst)
+void CopyScriptScope(ScriptScope* src, ScriptScope* dst)
 {
     dst->count = src->count;
     CopyMemory(dst->parents, src->parents, src->count * 4);
@@ -3109,13 +3109,13 @@ void func_0011A5B0(ScriptScope* src, ScriptScope* dst)
     }
 }
 
-ScriptScope* func_0011A630(void)
+ScriptScope* NewScriptScope(void)
 {
     ScriptScope* p = (ScriptScope*)TakePoolEntry(g_scopePool);
     FillMemory(p, 0, 0x1C);
     return p;
 }
-void func_0011A670(void)
+void ReleaseScriptScope(void)
 {
 }
 
@@ -3127,15 +3127,15 @@ MarkStacks::~MarkStacks()
 {
 }
 
-void func_0011A6A8(MarkStacks* self)
+void ResetMarkRoots(MarkStacks* self)
 {
     self->rootCount = 0;
     self->listCount = 0;
 }
 
-void func_0011A6B8() {}
+void ShutDownMarkRoots() {}
 
-void func_0011A6C0(MarkStacks* self, MarkEntry* value)
+void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value)
 {
     for (int i = 0; i < self->rootCount; i++)
         if (self->roots[i] == value)
@@ -3143,20 +3143,20 @@ void func_0011A6C0(MarkStacks* self, MarkEntry* value)
     self->roots[self->rootCount++] = value;
 }
 
-void func_0011A708(MarkStacks* self, R11B008List* list) { self->lists[self->listCount++] = list; }
+void AddMarkRootList(MarkStacks* self, R11B008List* list) { self->lists[self->listCount++] = list; }
 
-void func_0011A728(MarkStacks* self, MarkEntry* value) { self->objects[self->objectCount++] = value; }
+void PushMarkObject(MarkStacks* self, MarkEntry* value) { self->objects[self->objectCount++] = value; }
 
-MarkEntry* func_0011A748(MarkStacks* self)
+MarkEntry* PopMarkObject(MarkStacks* self)
 {
     if (self->objectCount > 0)
         return self->objects[--self->objectCount];
     return 0;
 }
 
-void func_0011A770(MarkStacks* self, MarkEntry* value) { self->chains[self->chainCount++] = value; }
+void PushMarkChain(MarkStacks* self, MarkEntry* value) { self->chains[self->chainCount++] = value; }
 
-MarkEntry* func_0011A790(MarkStacks* self)
+MarkEntry* PopMarkChain(MarkStacks* self)
 {
     if (self->chainCount > 0) {
         s32 n = self->chainCount - 1;
@@ -3166,14 +3166,14 @@ MarkEntry* func_0011A790(MarkStacks* self)
     return 0;
 }
 
-void func_0011A7B8(MarkStacks* self, MarkRecord* value)
+void PushMarkRecord(MarkStacks* self, MarkRecord* value)
 {
     s32 n = self->recordCount;
     self->records[n] = value;
     self->recordCount = n + 1;
 }
 
-MarkRecord* func_0011A7D8(MarkStacks* self)
+MarkRecord* PopMarkRecord(MarkStacks* self)
 {
     s32 n = self->recordCount;
     if (n > 0) {
@@ -3184,7 +3184,7 @@ MarkRecord* func_0011A7D8(MarkStacks* self)
     return 0;
 }
 
-void func_0011A800(void)
+void MarkPoolLiveEnds(void)
 {
     MarkPoolLiveEnd(g_valueNodePool);
     MarkPoolLiveEnd(g_scopePool);
@@ -3193,7 +3193,7 @@ void func_0011A800(void)
     MarkPoolLiveEnd(g_propertyRefPool);
 }
 
-void func_0011A850(MarkStacks* self)
+void DrainMarkStacks(MarkStacks* self)
 {
     MarkEntry* obj;
     MarkEntry* other;
@@ -3296,7 +3296,7 @@ void func_0011A850(MarkStacks* self)
     }
 }
 
-void func_0011AB58(MarkStacks* w) {
+void CollectScriptPools(MarkStacks* w) {
     ClearPoolLiveStates(g_valueNodePool);
     ClearPoolLiveStates(g_scopePool);
     ClearPoolLiveStates(g_keyedValuePool);

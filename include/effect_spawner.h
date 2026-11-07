@@ -71,10 +71,10 @@ struct EffectSpawner : PlacedObject {
 
 typedef char check_EffectSpawner[sizeof(EffectSpawner) == 0x350 ? 1 : -1];
 
-void func_00154C10(EffectSpawner* self);                       // slot 0
-void func_00155080(EffectSpawner* self);                       // slot 9
-void func_00154F98(EffectSpawner* self, s32 count);            // slot 10
-void func_00155678(EffectSpawner* self, s32 mode, BaseObject* p);     // slot 13
-void func_001550E8(EffectSpawner* self);                       // slot 15
+void InitEffectSpawner(EffectSpawner* self);                       // slot 0
+void CopyEffectSpawner(EffectSpawner* self);                       // slot 9
+void LoadEffectSpawner(EffectSpawner* self, s32 count);            // slot 10
+void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p);     // slot 13
+void ResolveEffectSpawnerLinks(EffectSpawner* self);                       // slot 15
 
 #endif

@@ -5,13 +5,13 @@
 
 // The sector check's state, the word before this file's .data: GCC aligns the read errors
 // (24 bytes) to 8, so a .data that started at 0x2613EC would put them at 0x261400.
-extern s32 D_002613EC;
+extern s32 g_discSectorCheckState;
 
 // The file's .data, in retail's order: the drive's state, the last result of a read request
 // and the read errors.
-s32 D_002613F0 = -1;
-s32 D_002613F4 = 0;
-s32 D_002613F8[6] = { 0, 0, 0, 0, 0, 0 };
+s32 g_discStatus = -1;
+s32 g_lastDiscReadResult = 0;
+s32 g_discReadErrors[6] = { 0, 0, 0, 0, 0, 0 };
 
 // In another stretch of .rodata (00140000.cpp defines them): the read mode, the checked sector
 // and its CRC-32.
@@ -19,38 +19,38 @@ extern const u32 D_00247AA0;
 extern const u32 D_00247AA4;
 extern const u32 D_00247AA8[2];
 extern u8 D_002701B8[];
-extern u8 D_0027B800[];
-extern u32 D_002476A0[];
-extern u8 D_0026FF68[];
+extern u8 g_discCheckSectorBuffer[];
+extern u32 g_crc32Table[];
+extern u8 g_pauseMenuElement[];
 
-s32 func_0011E138(s32 a0, s32 a1, void* a2, void* a3);
-s32 func_0011E1F8(s32 mode);
-s32 func_0011E2E8(void);
-void func_001E2218(s8* p);
-s32 func_001E2100(const s8* s);
-void* func_001E2180(s8* dst, const char* src);
-s32 func_001E1FD0(void* dst, const char* fmt, ...);
-s32 func_00203EE0(s32 a0, s32* out);
+s32 StartDiscRead(s32 a0, s32 a1, void* a2, void* a3);
+s32 SyncDiscRead(s32 mode);
+s32 GetDiscReadError(void);
+void UppercaseString(s8* p);
+s32 GetStringLength(const s8* s);
+void* AppendString(s8* dst, const char* src);
+s32 FormatToString(void* dst, const char* fmt, ...);
+s32 CheckDiscChanged(s32 a0, s32* out);
 u32 func_00203A20(s32 arg);
-s32 func_00203B18(void*, void*, void*, void*);
-s32 func_002032C8(s32);
-s32 func_00203D90(void);
-s32 func_00140968(void);
-s32 func_00140D68(s32 value);
-void func_00194D30(void* self, s32 a, s32 b);
+s32 ReadDiscSectors(void*, void*, void*, void*);
+s32 SyncDiscNCommand(s32);
+s32 GetDiscError(void);
+s32 RefreshDiscStatus(void);
+s32 TestDiscReadDone(s32 value);
+void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
 
-void func_00140790(void)
+void ResetDiscSectorCheck(void)
 {
     g_discSectorCheckState = 3;
 }
 
 // The second word of a key (GetKeyedDataSize, func_0018C1E8, hands it one).
-s32 func_001407A0(KeyId* key)
+s32 GetKeyIdSecond(KeyId* key)
 {
     return key->second;
 }
 
-s32 func_001407A8(s8* path)
+s32 NormalizeDiscPath(s8* path)
 {
     UppercaseString(path);
     s32 len = GetStringLength(path);
@@ -114,16 +114,16 @@ s32 func_001407A8(s8* path)
 
 INCLUDE_ASM(func_00140968);
 
-void func_001409A8(void)
+void SendDiscCommand22WhenReady(void)
 {
     if (g_discStatus == 0x14) {
         func_00203A20(2);
     }
 }
 
-void func_001409D8(void) {}
+void InitDiscAccessModule(void) {}
 
-void func_001409E0(void)
+void StepDiscSectorCheck(void)
 {
     s32 tmp[1];
     s32 s1;
@@ -176,7 +176,7 @@ extern const char D_00249E28[8] = "%s\\%s";
 extern const char D_00249E30[8] = "cdrom0:";
 extern const char D_00249E38[4] = "";
 
-void func_00140B60(void* self, s8* a1, s32 flag)
+void FormatDiscPath(void* self, s8* a1, s32 flag)
 {
     char buf[256];
     *(u16*)buf = D_00249E20[0];
@@ -190,7 +190,7 @@ void func_00140B60(void* self, s8* a1, s32 flag)
                   flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
 }
 
-void func_00140C28(void* a, void* b, void* c)
+void StartDiscReadUntilAccepted(void* a, void* b, void* c)
 {
     s32 result;
     do {
@@ -200,7 +200,7 @@ void func_00140C28(void* a, void* b, void* c)
     } while (result != 1);
 }
 
-void func_00140CC8(void* a, void* b, void* c)
+void StartLowLevelDiscReadUntilAccepted(void* a, void* b, void* c)
 {
     s32 result;
     do {
@@ -210,6 +210,6 @@ void func_00140CC8(void* a, void* b, void* c)
     } while (result != 1);
 }
 
-s32 func_00140D68(s32 value) { s32 result = SyncDiscRead((u32)value < 1u); return result == 0; }
+s32 TestDiscReadDone(s32 value) { s32 result = SyncDiscRead((u32)value < 1u); return result == 0; }
 
 LINKER_REMNANT(func_00140D88);

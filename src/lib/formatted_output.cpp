@@ -16,14 +16,14 @@ typedef void (*PutChar_1F7588)(s32 c);
 
 struct Buf_1F72A8;
 
-static u8 D_00625F80[0x80];
-s32 D_0027712C = 0;
+static u8 g_outputLine[0x80];
+s32 g_outputLineLength = 0;
 
 INCLUDE_ASM(func_001F7270);
 
-void func_001FA140(Buf_1F72A8* b);
+void PrintToDebugConsole(Buf_1F72A8* b);
 
-void func_001F72A8(s32 c)
+void BufferOutputChar(s32 c)
 {
     s32 pos = g_outputLineLength;
     if (pos >= 0x7E) {
@@ -43,9 +43,9 @@ void func_001F72A8(s32 c)
     g_outputLine[pos] = (u8)c;
 }
 
-void func_001F7270(s32 c);
+void WriteSerialChar(s32 c);
 
-void func_001F7358(s32 c)
+void WriteConsoleChar(s32 c)
 {
     if (c == 10) {
         WriteSerialChar(13);
@@ -55,19 +55,19 @@ void func_001F7358(s32 c)
     }
 }
 
-PutChar_1F7588 D_00277130 = func_001F7358;  // where formatted output sends each character
+PutChar_1F7588 g_outputHook = WriteConsoleChar;  // where formatted output sends each character
 
 INCLUDE_ASM(func_001F7390);
 
 s32 func_001FD308(double a, double b);
 double func_001FCD78(double a, double b);
 double func_001FCDE0(double a, double b);
-double func_001FD088(double a, double b);
-double func_001FB528(double a);
+double DivideDoubles(double a, double b);
+double ConvertDoubleToU64(double a);
 s32 func_001F7390(double a);
-void func_001F7B50(const char* fmt, ...);
+void PrintToOutputHook(const char* fmt, ...);
 
-void func_001F7420(double value)
+void FormatExponent(double value)
 {
     s32 exp10 = 0;
     if (func_001FD308(value, 0.0) < 0) {
@@ -99,7 +99,7 @@ void func_001F7420(double value)
 
 #define NEXT_ARG_1F7588(ap, T) (ap += 8, *(T*)(ap - 8))
 
-void func_001F7588(const char* fmt, char* ap)
+void FormatOutput(const char* fmt, char* ap)
 {
     char buf[32];
     char* p;
@@ -357,15 +357,15 @@ void func_001F7588(const char* fmt, char* ap)
     }
 }
 
-void func_001F7B50(const char* fmt, ...)
+void PrintToOutputHook(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;
     FormatOutput(fmt, ap);
 }
 
-void func_001F72A8(s32 c);
+void BufferOutputChar(s32 c);
 
-void func_001F7B88(const char* fmt, ...)
+void PrintBuffered(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;
     PutChar_1F7588 saved = g_outputHook;

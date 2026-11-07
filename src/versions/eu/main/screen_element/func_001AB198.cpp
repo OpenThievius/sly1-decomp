@@ -23,14 +23,14 @@ struct Glob_1AB198_eu {
     f32 f594;
 };
 
-void func_00137260(void* out, void* p);
-void func_0015C8B8(s32 handle, f32 a, f32 b);
-void func_0015C900(s32 handle);
+void SetTextLayoutHorizontalAlign(void* out, void* p);
+void PushFontScale(s32 handle, f32 a, f32 b);
+void PopFontScale(s32 handle);
 void func_eu_001374E0(void* out, s32 flag);
 void func_eu_0015DCB8(void* buf, void* out, s32 handle, s32 zero);
 void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
 
-void func_001AB198(Obj_1AB198_eu* self)
+void DrawCounterCaption(Obj_1AB198_eu* self)
 {
     u8 out[0x20];
     T217D_Word packed;
@@ -56,12 +56,12 @@ void func_001AB198(Obj_1AB198_eu* self)
     held = packed.v;
     px = self->f544;
     py = self->f548;
-    func_00137228(out, self->f52c, self->f530);
-    func_00137238(out, px, py);
+    SetTextLayoutPosition(out, self->f52c, self->f530);
+    SetTextLayoutSize(out, px, py);
     tmp[0] = held;
-    func_00137248(out, &tmp[0]);
-    func_00137260(out, q);
-    func_00137268(out, 0);
+    SetTextLayoutColor(out, &tmp[0]);
+    SetTextLayoutHorizontalAlign(out, q);
+    SetTextLayoutVerticalAlign(out, 0);
     func_eu_001374E0(out, 0);
     PushFontScale(self->f4, self->f51c, self->f51c);
     func_eu_0015DCB8(buf, &self->f8, self->f4, 0);

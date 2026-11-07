@@ -2,7 +2,7 @@
 // PAL: case 3 calls func_eu_001387C8 (a 16-bit string reader) instead of func_001384A0.
 void func_eu_001387C8(BufferedStream* r, void* out);
 
-void func_00150570(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
+void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
 {
     s32 i = 0;
     *outCount = ReadBufferedS8(rd);

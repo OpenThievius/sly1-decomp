@@ -49,200 +49,200 @@ struct Kinds5 { s32 k[5]; };
 struct Kinds6 { s32 k[6]; };
 
 
-void func_00123AB0(void* object, s32 mode);
-s32 func_00123D08(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001250C8(void* p);
-s32 func_00126CB8(void* self, f32 value);
-s32 func_00126D60(void* self, f32 value);
-void* func_00129B98(void* self, s32 key);
-void* func_00129C20(void* self, s32 key);
-void* func_00129CA8(void* self);
-void func_0012A8B8(void* p);
-void func_0012A8C8(void* p);
-void func_0012A8D8(PlacedObject* self, s32 a, f32 x, f32 y);
-void func_0012AA50(void* self, f32 a, f32 b);
-void func_0012AAE8(void* self, f32 value);
-void func_0012AF38(PlacedObject* self, s32 value, Quad16* src, f32 x, f32 y, f32 z);
-void func_0012B010(void* p);
-void func_0012B5B8(PlacedObject* x, s32 a, s32 b);
-void* func_0012C7D8(Animation* self, s32 a1, f32 f1, f32 f2, s32 a2);
-void* func_0012C8F8(Animation* item, s32 a, f32 x, f32 y, s32 b, s32 c);
-f32 func_0012CCC0(void* obj, s32 id);
-void func_0012E760(void* obj);
-void func_0012E928(void* obj, s32 a, s32 b);
-void func_0012F0A0(AnimationPlayer* self, s32 a, f32 x, f32 y);
-void func_0012F190(void* obj, s32 v);
-s32 func_001300E8(void* list, s32 value);
-void func_0013BE00(void* p, f32 x);
+void SetStateTriggerStateFromMessage(void* object, s32 mode);
+s32 AddStateTriggerTableEntry(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void ClearObjectRecordValues(void* p);
+s32 FadeInPlacedObject(void* self, f32 value);
+s32 FadeOutPlacedObject(void* self, f32 value);
+void* FindObjectAnimationPlayer(void* self, s32 key);
+void* FindObjectHandle(void* self, s32 key);
+void* FindTrackPlayer(void* self);
+void ClearAimHold(void* p);
+void SetAimHold(void* p);
+void SetValueAttachment(PlacedObject* self, s32 a, f32 x, f32 y);
+void SetElementsScrollScale(void* self, f32 a, f32 b);
+void SetCrossfadeRatioDeep(void* self, f32 value);
+void StartSoundWithParams(PlacedObject* self, s32 value, Quad16* src, f32 x, f32 y, f32 z);
+void StopPlayingSound(void* p);
+void SetFollowObjects(PlacedObject* x, s32 a, s32 b);
+void* CreateAnimationPlayerReturned(Animation* self, s32 a1, f32 f1, f32 f2, s32 a2);
+void* FindOrCreateSeekedAnimationPlayer(Animation* item, s32 a, f32 x, f32 y, s32 b, s32 c);
+f32 GetAnimationMarkerTime(void* obj, s32 id);
+void StopAnimationPlayer(void* obj);
+void ReleasePlayerAttachment(void* obj, s32 a, s32 b);
+void SeekAnimationPlayer(AnimationPlayer* self, s32 a, f32 x, f32 y);
+void ApplyListedPoseSources(void* obj, s32 v);
+s32 IsObjectOfKind(void* list, s32 value);
+void StartChildGroupDelay(void* p, f32 x);
 void func_0013BF68(void*);
-s32 func_00140750(TriggerZone* self, s32 a1, s32 a2, s32 a3, s32 a4);
-s32 func_00140770(ZoneCollider* self, s32 a1, s32 a2, s32 a3, s32 a4);
-s32 func_00141170(void*,void*);
-void func_001455F0(void* p);
-void func_00145FB8(void*,s32);
-s32 func_00145FD8(void*);
-s32 func_00145FF8(void* x);
-void func_00146018(Camera* obj, s32 value, f32 first, f32 second);
-void func_00146028(void* x);
-s32 func_00146038(void* obj, void* p, f32 x, f32 y);
-void func_00150408(void*);
-void func_00150418(void*,s32);
-void func_00150750(void* x);
-void func_00150760(void* x);
-void func_001518B8(void* x);
-void func_001519A8(void* x);
-void func_001519E0(StepSequence* p, s32 a, s32 b);
-void func_001557D0(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
-void func_00155F78(void* p, f32 x);
-void func_00155F90(void* x);
-void func_00155FA0(void* x);
-void func_00158730(void* x);
-void func_00158778(MemberObject* self, s32 a, s32 b, Quad4* u, Quad4* v, f32 x, f32 y);
-void func_00158D40(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
-void func_00159ED0(void* x);
+s32 SetTriggerZoneEntry(TriggerZone* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 SetZoneColliderEntry(ZoneCollider* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 TestPointAgainstObjectShape(void*,void*);
+void RequestPlainCameraSnap(void* p);
+void PushCameraStackValue(void*,s32);
+s32 PopCameraStackValue(void*);
+s32 PeekCameraStackValue(void* x);
+void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second);
+void RecordCameraTimestamp(void* x);
+s32 IsSphereInCameraView(void* obj, void* p, f32 x, f32 y);
+void ResetCollectedItems(void*);
+void RecordCollectedItem(void*,s32);
+void SetStepSequenceModeOne(void* x);
+void SetStepSequenceCameraMode(void* x);
+void ChooseStepSequenceState(void* x);
+void ResetStepSequence(void* x);
+void AddSequenceExtraTarget(StepSequence* p, s32 a, s32 b);
+void AddSpawnRangeEntry(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
+void SetEffectSpawnerActiveFor(void* p, f32 x);
+void SetEffectSpawnerActiveForever(void* x);
+void SetEffectSpawnerInactive(void* x);
+void SendEmptyMessage(void* x);
+void SendTwoVectorMessage(MemberObject* self, s32 a, s32 b, Quad4* u, Quad4* v, f32 x, f32 y);
+void AddRecordMemberRangeEntry(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
+void StartColorFade(void* x);
 s32 func_0015AA50(void*,void*);
-void func_0016DCF0(void*);
-void func_0016DD00(void*);
-void func_00171F28(void* self, void* v, f32 x, f32 y);
-void func_00171FE0(void*);
-void func_001777F8(void*,s32);
-void func_00177800(void*,s32);
-void func_001781E0(void* obj, s32 v);
-void func_00178258(void* obj, s32 v);
-void func_00178280(void*,s32);
-void func_0017AD50(void* x);
-void func_0017B550(void* self, s32 index);
-void func_0017B598(void* x);
-void func_0017CDE0(void*);
-void func_0017CE20(void* x, s32 v);
-void func_0017CE80(void*);
-void* func_0017CFC8(void* x, s32 v);
-void* func_0017CFF0(void* x, s32 v);
-void* func_0017D018(void* x, s32 v);
-void func_0017D040(void* self, s32 value);
-void* func_0017D078(void* self, s32 value);
-void func_0017D0A0(void* self, s32 a, f32 value);
-void* func_0017D0D8(EntryQueue* p, s32 a, s32 b);
-void func_0017D100(EntryQueue* self, s32 b, s32 c, s32 d, s32 e);
-void func_0017D148(EntryQueue* self, s32 a, s32 b, f32 value);
-void func_0017D180(EntryQueue* self, s32 a, s32 b, f32 value);
-void func_0017D1B8(void* self, s32 b, s32 c, s32 d);
-void func_0017D1E8(void* x, f32 f);
-s32 func_0017D220(void* x);
+void SetCurrentTargetFollower(void*);
+void ClearCurrentTargetFollower(void*);
+void PlacePlayerOnGround(void* self, void* v, f32 x, f32 y);
+void ReleasePlayerToState2(void*);
+void IgnorePlayerArgument(void*,s32);
+void SwitchPlayerState11(void*,s32);
+void QueuePlayerWalkerActivation(void* obj, s32 v);
+void QueuePlayerFirstActivation(void* obj, s32 v);
+void QueuePlayerSecondActivation(void*,s32);
+void PlaceModeColliderAtAnchor(void* x);
+void SetGaugeModeObjectTarget(void* self, s32 index);
+void PlayGaugeModeObjectTarget(void* x);
+void ResetEntryQueue(void*);
+void BindEntryQueueToObject(void* x, s32 v);
+void UnbindEntryQueue(void*);
+void* AddQueueEntryKind0(void* x, s32 v);
+void* AddQueueEntryKind1(void* x, s32 v);
+void* AddQueueEntryKind10(void* x, s32 v);
+void AddQueueEntryKind2(void* self, s32 value);
+void* AddQueueEntryKind3(void* self, s32 value);
+void AddQueueEntryKind4(void* self, s32 a, f32 value);
+void* AddQueueEntryKind9(EntryQueue* p, s32 a, s32 b);
+void AddQueueEntryKind5(EntryQueue* self, s32 b, s32 c, s32 d, s32 e);
+void AddQueueEntryKind6(EntryQueue* self, s32 a, s32 b, f32 value);
+void AddQueueEntryKind7(EntryQueue* self, s32 a, s32 b, f32 value);
+void AddQueueEntryKind8(void* self, s32 b, s32 c, s32 d);
+void AddQueueEntryKind11(void* x, f32 f);
+s32 AddQueueEntryKind12(void* x);
 void func_00182948(void* a0, s32 a1, f32 x);
-void func_00182DD8(void* p);
-s32 func_00182F40(void* e, s32 v);
-void* func_00183058(BaseObject* x, s32 a, s32 b);
-s32 func_001833F0(void* key, s32 item);
-void func_00183910(BaseObject* x, s32 a, s32 b);
-void func_00183990(BaseObject* x, s32 a, s32 b);
-void func_00183A10(void* a0, s32 a1, f32 x);
-void func_00183A90(void* a0, s32 a1, Quad16* a2);
-void func_00183B20(void* a0, s32 a1, Quad16* a2);
-void func_00183BB8(BaseObject* x, s32 a, s32 b);
-void func_00183C38(void* a0, s32 a1, Quad16* a2);
-void func_0018AC58(GaugeAgent* st);
-void func_0018DD50(void*,s32);
-void func_0018DD78(void*,s32);
-s32 func_00190660(void* x, s32 v);
-void func_00192418(void* o);
-void func_001993C0(void* x);
+void AddObjectKeyToOwner(void* p);
+s32 IsObjectDescendantOf(void* e, s32 v);
+void* CreateObjectCopy(BaseObject* x, s32 a, s32 b);
+s32 MatchesObjectId(void* key, s32 item);
+void SetExtraObjectPropertyBool(BaseObject* x, s32 a, s32 b);
+void SetExtraObjectPropertyInt(BaseObject* x, s32 a, s32 b);
+void SetExtraObjectPropertyFloat(void* a0, s32 a1, f32 x);
+void SetExtraObjectPropertyVectorB(void* a0, s32 a1, Quad16* a2);
+void SetExtraObjectPropertyPair(void* a0, s32 a1, Quad16* a2);
+void SetExtraObjectPropertyWord(BaseObject* x, s32 a, s32 b);
+void SetExtraObjectPropertyVectorA(void* a0, s32 a1, Quad16* a2);
+void AdvanceGaugeAgentPhase(GaugeAgent* st);
+void AddContactListId(void*,s32);
+void AddContactListKind(void*,s32);
+s32 AddSeekingAgentObject(void* x, s32 v);
+void ActivateSwitchedColliderUnlessActive(void* o);
+void QueueWalkerActivationOnPlayer(void* x);
 void func_00199AF0(void* p);
-void func_0019AD30(C17* p, s32 a, s32 b);
-void func_0019CE28(C8B* value, f32 x, f32 y, f32 z);
-void func_0019CE38(C8B* self, f32 x, f32 y, f32 z);
-s32 func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001A8778(void*,s32);
-void func_001A87A8(void*,s32);
-void func_001A87E0(ObjectPool* p, s32 a, s32 b);
-void func_001A8AF8(void*);
+void AddEntryRecordKey(C17* p, s32 a, s32 b);
+void SetC8BObjectVector(C8B* value, f32 x, f32 y, f32 z);
+void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z);
+s32 AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void EnableObjectPoolEntry(void*,s32);
+void DisableObjectPoolEntry(void*,s32);
+void SetObjectPoolEntryCount(ObjectPool* p, s32 a, s32 b);
+void ChooseObjectPoolItem(void*);
 s32 func_001A8C90(void* obj, s32 v);
-void func_001A93E8(void* x);
-void func_001A9438(void* x);
-void func_001A9498(void*);
-void func_001A9C58(GaugeBarAgent* self, s32 a, s32 b, s32 c);
-void func_001B0470(void* p, f32 x);
-void func_001B0488(void* p, f32 x);
-void* func_001B6290(StateGraph* a, s32 b, s32 c, s32 d);
-void func_001B6438(void* x);
-void func_001B70B0(CompanionAgent* p, s32 a, s32 b);
-void func_001BB1E0(void* self, u32 value);
-s32 func_001BC670(void* x, void* out);
-void func_001C08B0(World* x, s32 a, s32 b);
-void func_001C0950(void* p);
-void func_001C09D8(World* x, s32 a, s32 b);
-void func_001C3F68(void* self, s32 value);
-void func_001C4180(void* self, s32 value);
+void ResetPlacementRecord(void* x);
+void ResetObjectPoolReleaseRecord(void* x);
+void ClearObjectPoolHeadingRecord(void*);
+void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c);
+void SetTimedGroupFadeOutTime(void* p, f32 x);
+void SetTimedGroupFadeInTime(void* p, f32 x);
+void* CreateStateWalker(StateGraph* a, s32 b, s32 c, s32 d);
+void DestroyStateWalker(void* x);
+void SetCompanionAgentLookId(CompanionAgent* p, s32 a, s32 b);
+void SetColliderFlagNibble36(void* self, u32 value);
+s32 IsPointInsideCollider(void* x, void* out);
+void PushIopChannel2Setting(World* x, s32 a, s32 b);
+void PopIopChannel2Setting(void* p);
+void SetIopChannel2Setting(World* x, s32 a, s32 b);
+void SendHitCountColliderRequest(void* self, s32 value);
+void AddHitCountColliderId(void* self, s32 value);
 void func_001C41A0(void* self, s32 value);
-void func_001C8FD0(Agent* p, s32 a, s32 b);
-void func_001CA608(Agent* self, s32 a, s32 b);
-void func_001CA658(Agent* self, s32 a, s32 b);
-void* func_001CA6D0(void* obj, s32 v);
-void func_001CA720(Agent* self, s32 a, s32 b);
-void func_001CA898(Agent* p, s32 a, s32 b);
-void func_001CA960(Agent* self, s32 a, s32 b);
-s32 func_001CAD60(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001CB328(void*, s32);
-void func_001D2830(void*,s32);
-void func_001D31D0(void*,s32);
-void func_001D32D8(CountedCollider* self, s32 a, s32 b);
-void func_001D6CB0(void* obj);
-void func_001DB110(void*,s32);
-void func_001DB1E8(PathFollower* item, s32 a, f32 x, f32 y, s32 b, s32 c);
-void func_001DB290(PathFollower* st);
-void func_001DBAC0(World* self, s32 a, s32 b);
-s32 func_001DBAE0(void*,s32);
-void* func_001DBB00(World* self, s32 a, s32 b);
-s32 func_001DD690(void* self, s32 obj);
-s32 func_001DD6B0(void* self, s32 obj);
-s32 func_001DD6D0(void* self, s32 obj);
-s32 func_001DD6F0(void* self, s32 obj);
-s32 func_001DD710(void* x, s32 v);
-s32 func_001DD758(void* x, s32 v);
-s32 func_001DD7A0(void* x, s32 v);
-void func_001DD7E8(World* self, void* obj, s32 key, s32 value);
-s32 func_001DD888(World* self, s32 a, s32 b);
-s32 func_001DD8E8(void* x, s32 v);
-s32 func_001DD908(void* self, s32 index);
-s32 func_001DD928(void* self);
-void func_001DD950(World* unused, s32 a, s32 b, void* c);
-void func_001DDA20(void* a);
-void func_001DDA50(void*);
-void func_001DDAD0(void* x);
-void func_001DDB20(World* self, s32 a, s32 b);
-void func_001DDB58(void* x);
-void func_001DDBB8(void* x);
-s32 func_001DDBF8(void*,s32);
-s32 func_001DDC18(void* unused, s32 p);
-void func_001DDC78(void*,s32);
-void func_001DDC90(void*,s32);
-void func_001EC528(void* x);
-void func_001ED018(void* self, s32 value);
-void func_001ED020(void* x);
-void func_001ED090(TempoAgent* p, s32 a, s32 b);
-void func_001ED0D8(void* self, s32 value);
-void func_001ED558(Timeline* self, s32 p, f32 f, s32 q);
-void func_001ED588(Timeline* self, s32 p, f32 f, s32 q);
-void func_001ED5B8(Timeline* self, s32 p, f32 v);
-void func_001ED5D8(Timeline* self, s32 p, f32 v);
-void func_001ED5F8(Timeline* self, s32 p, f32 v);
-void func_001ED618(Timeline* self, s32 p, f32 v);
-void func_001EF830(void* o);
-s32 func_001EF8C0(C62* self, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001F36E8(void*);
-void func_001F3768(void* x);
-void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d);
-void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d);
-void func_001F4008(void* x);
-s32 func_001F42D0(TransformObject* self, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001F4808(void* x);
-void func_001F4ED0(void*);
-void func_001F4F20(void* p);
-void func_001F5210(void* p);
+void ForceAgentState(Agent* p, s32 a, s32 b);
+void SetAgentStateClipId(Agent* self, s32 a, s32 b);
+void SetAgentStateClip(Agent* self, s32 a, s32 b);
+void* GetAgentStateClip(void* obj, s32 v);
+void AddAgentExtraClip(Agent* self, s32 a, s32 b);
+void SetAgentSecondaryClipId(Agent* p, s32 a, s32 b);
+void AddAgentMeshKey(Agent* self, s32 a, s32 b);
+s32 AddAgentClipGroup(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void SetAgentMainClip(void*, s32);
+void SetPlayerPath(void*,s32);
+void SeekObjects105Animations(void*,s32);
+void TakeCountedColliderTouch(CountedCollider* self, s32 a, s32 b);
+void SwapInPlayerStandIn(void* obj);
+void AddPathFollowerEntry(void*,s32);
+void AddPathFollowerActiveEntry(PathFollower* item, s32 a, f32 x, f32 y, s32 b, s32 c);
+void ResetPathFollower(PathFollower* st);
+void SetCachedVoiceParamBuiltin(World* self, s32 a, s32 b);
+s32 GetCachedVoiceParamBuiltin(void*,s32);
+void* RefreshCachedVoiceParamBuiltin(World* self, s32 a, s32 b);
+s32 TestLevelEntryFlag1(void* self, s32 obj);
+s32 TestLevelEntryFlag2(void* self, s32 obj);
+s32 TestLevelEntryFlag4(void* self, s32 obj);
+s32 TestLevelEntryFlag8(void* self, s32 obj);
+s32 CheckEntryOneBitRequirement(void* x, s32 v);
+s32 CheckEntryTwoBitRequirement(void* x, s32 v);
+s32 CheckEntryThreeBitRequirement(void* x, s32 v);
+void SetEntrySlotValue(World* self, void* obj, s32 key, s32 value);
+s32 GetEntrySlotValue(World* self, s32 a, s32 b);
+s32 IsLevelRecordComplete(void* x, s32 v);
+s32 IsLevelDone(void* self, s32 index);
+s32 RecomputeSaveCompletion(void* self);
+void ScatterRandomObjects(World* unused, s32 a, s32 b, void* c);
+void AcquirePadSelectFlag(void* a);
+void ReleasePadSelectFlag(void*);
+void PopActiveSequenceElement(void* x);
+void ShowPauseMenuPageWith(World* self, s32 a, s32 b);
+void ShowCountedScreenElement(void* x);
+void HideCountedScreenElement(void* x);
+s32 PushSoundLevelBuiltin(void*,s32);
+s32 RemoveSoundLevelBuiltin(void* unused, s32 p);
+void SetWorldFlagBit(void*,s32);
+void ClearWorldFlagBit(void*,s32);
+void DecrementTempoAgentGauge(void* x);
+void SetTempoAgentPendingTimeline(void* self, s32 value);
+void EndHeldTimeline(void* x);
+void AddTempoAgentEntry(TempoAgent* p, s32 a, s32 b);
+void RemoveTempoAgentEntry(void* self, s32 value);
+void AppendTimelineKind0Entry(Timeline* self, s32 p, f32 f, s32 q);
+void AppendTimelineKind1Entry(Timeline* self, s32 p, f32 f, s32 q);
+void AppendTimelineKind2Entry(Timeline* self, s32 p, f32 v);
+void AppendTimelineKind3Entry(Timeline* self, s32 p, f32 v);
+void AppendTimelineKind4Entry(Timeline* self, s32 p, f32 v);
+void AppendTimelineKind5Entry(Timeline* self, s32 p, f32 v);
+void ClearAttachedSetTrackedNodes(void* o);
+s32 AddStateResetEntry(C62* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void AddOscillatorXEntry(void*);
+void AddOscillatorYZEntry(void* x);
+void AddOscillatorEntryVectorA(void* self, f32 a, f32 b, f32 c, f32 d);
+void AddOscillatorEntryVectorB(void* self, f32 a, f32 b, f32 c, f32 d);
+void PlaceAtArrivalPoint(void* x);
+s32 SetTransformObjectKeyedValue(TransformObject* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void StartObjectSubGroupFinish(void* x);
+void PushObjectCameraController(void*);
+void RemoveObjectCameraController(void* p);
+void ClearTrackedNodes(void* p);
 
 // Reads a property call's arguments: count values of args, each as its kind in kinds, through
 // the pointers that follow (func_001C1BF8, src/main/file_1C05D0.cpp); gives back a value.
-ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
+ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 
 // The file's .rodata: the argument signatures its functions copy, in retail's order.
 extern const s32 D_00248D80[2] = { 0x2000, 0x2000 };
@@ -296,209 +296,209 @@ extern const s32 D_00248FD8[2] = { 0x2000, 0 };
 // The file's .data: the property descriptors, filled at startup by func_00109488.
 PropertyDescriptor D_002505D8[1179];
 
-ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100218(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001002C0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100368(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100438(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001004F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001005A0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100650(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001007F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100998(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100C28(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100CC8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100D68(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100E08(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101058(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101168(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101368(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101418(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001014C8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101568(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101620(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001016F0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101D38(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102358(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001023F8(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102B10(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102C28(ScriptValue* ret, RecordMember* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102D40(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102DE0(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102F10(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102FB0(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001030E0(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103420(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001034F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103900(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001039B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103A60(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103B40(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103D70(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103E10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103EB0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00103F80(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104020(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001040C0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104170(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104220(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001042F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001043A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104470(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104510(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001045B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104660(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104710(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001047C0(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104860(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104900(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104C00(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104CA0(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104D40(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104DE0(ScriptValue* ret, NumberedItem* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104E80(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00104F50(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105020(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001050D0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001051C0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105290(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105430(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105500(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001055A8(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105658(ScriptValue* ret, CompanionAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105728(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001057D8(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105A00(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105B60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105C10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106120(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001061C0(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106270(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106320(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001064C0(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106600(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001066F0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001067A0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106850(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106920(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001069C0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106B10(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106BB0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107040(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001070E0(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107350(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001074C0(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107570(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107678(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001077D8(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107898(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107948(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107A10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107AB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107B60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108688(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108728(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001087D8(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108878(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108928(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001089C8(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108A98(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108B48(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108BE8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108CC8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108DA8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108E70(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108F38(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00109000(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001090C8(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001091A8(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00109258(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00109308(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001093B8(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptObjectOfKind(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptObjectKeyToOwner(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* RemoveScriptObjectFromParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptObjectToParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* CreateScriptObjectCopy(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* ReparentScriptObject(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptObjectDescendantOf(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptObjectIdMatch(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyBool(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyInt(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyFloat(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyVectorB(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyPair(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyWord(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptExtraObjectPropertyVectorA(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptObjectRecordValues(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptValueAttachment(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptElementsScrollScale(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptCrossfadeRatioDeep(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* StartScriptSoundWithParams(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* StopScriptPlayingSound(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* FadeInScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* FadeOutScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* FindScriptObjectHandle(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* FindScriptObjectAnimationPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* FindScriptTrackPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* CopyScriptPlacedObjectFrame(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptFollowObjects(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptColliderFlagNibble36(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptPointInsideCollider(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTransformObjectKeyedValue(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlaceScriptAtArrivalPoint(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* StartScriptObjectSubGroupFinish(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* CreateScriptAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* FindOrCreateScriptSeekedAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* GetScriptAnimationMarkerTime(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* SeekScriptAnimationPlayer(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args);
+ScriptValue* StopScriptAnimationPlayer(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* ApplyScriptListedPoseSources(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* ReleaseScriptPlayerAttachment(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptAttachedSetTrackedNodes(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args);
+ScriptValue* HandleScriptMaskedColliderActivation(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTriggerZoneEntry(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptZoneColliderEntry(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* ActivateScriptSwitchedColliderUnlessActive(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptRequestBlocked(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptStateTriggerStateFromMessage(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptStateTriggerTableEntry(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTimedObjectMode(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* RequestScriptTimedObjectEnd(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTimedGroupFadeInTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTimedGroupFadeOutTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptEffectSpawnerActiveFor(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptEffectSpawnerActiveForever(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptEffectSpawnerInactive(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptSpawnRangeEntry(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptRecordMemberRangeEntry(ScriptValue* ret, RecordMember* obj, s32 unused, ScriptValue* args);
+ScriptValue* SendScriptEmptyMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args);
+ScriptValue* SendScriptTwoVectorMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args);
+ScriptValue* SendScriptEmptyMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* SendScriptTwoVectorMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* CreateScriptStateWalker(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args);
+ScriptValue* DestroyScriptStateWalker(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* ScatterScriptRandomObjects(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* PushScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* PopScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptLevelEntryFlag1(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptLevelEntryFlag2(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptLevelEntryFlag4(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptLevelEntryFlag8(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* CheckScriptEntryOneBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* CheckScriptEntryTwoBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* CheckScriptEntryThreeBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* GetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* IsScriptLevelRecordComplete(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* IsScriptLevelDone(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* RecomputeScriptSaveCompletion(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* PopScriptActiveSequenceElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* ShowScriptPauseMenuPageWith(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* ShowScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* HideScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* PushScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* RemoveScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* GetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* RefreshScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* AcquireScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* ReleaseScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* PushScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* PopScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* PeekScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptCameraControllerSettings(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* RecordScriptCameraTimestamp(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* RequestScriptPlainCameraSnap(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* PushScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* RemoveScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptTrackedNodes(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args);
+ScriptValue* CollectScriptNumberedItem(ScriptValue* ret, NumberedItem* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* GetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptAgentClipGroup(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptAgentMeshKey(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptAgentExtraClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* ForceScriptAgentState(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAgentSecondaryClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SteerScriptAgentAlongPath(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAgentMainClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptCompanionAgentLookId(ScriptValue* ret, CompanionAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* StartScriptChildGroupDelay(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* StepScriptChildGroupObject(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlaceScriptPlayerOnGround(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* ReleaseScriptPlayerToState2(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* IgnoreScriptPlayerArgument(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptPlayerPath(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* SwitchScriptPlayerState11(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* SeekScriptObjects105Animations(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* SwapInScriptPlayerStandIn(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* QueueScriptPlayerWalkerActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* QueueScriptPlayerFirstActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptC8BObjectVector(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptC8BObjectVectorFlagged(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptCollectedItems(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
+ScriptValue* CollectScriptItem(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptContactListId(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* EnableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* DisableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptObjectPoolEntryCount(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* ChooseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* ReleaseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptPlacementRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptObjectPoolReleaseRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* ClearScriptObjectPoolHeadingRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptStepSequenceModeOne(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptStepSequenceCameraMode(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* ChooseScriptStepSequenceState(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* AdvanceScriptGaugeAgentPhase(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptPathFollower(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args);
+ScriptValue* ResetScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* BindScriptEntryQueueToObject(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* UnbindScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind1(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind2(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind3(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind4(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind5(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind6(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind7(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind11(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptQueueEntryKind12(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlayScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlaceScriptModeColliderAtAnchor(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptTempoAgentPendingTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* EndScriptHeldTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptC13Entry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* RemoveScriptTempoAgentEntry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* DecrementScriptTempoAgentGauge(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind0Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind1Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind2Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind3Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind4Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptTimelineKind5Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptGaugeBarAgentValues(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* SendScriptHitCountColliderRequest(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptHitCountColliderId(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptHitCountColliderItem(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* TakeScriptCountedColliderTouch(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args);
 
-ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptObjectOfKind(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -515,7 +515,7 @@ ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptObjectKeyToOwner(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -530,7 +530,7 @@ ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100218(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* RemoveScriptObjectFromParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -545,7 +545,7 @@ ScriptValue* func_00100218(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001002C0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptObjectToParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -560,7 +560,7 @@ ScriptValue* func_001002C0(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100368(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* CreateScriptObjectCopy(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -578,7 +578,7 @@ ScriptValue* func_00100368(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100438(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* ReparentScriptObject(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -596,7 +596,7 @@ ScriptValue* func_00100438(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001004F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptObjectDescendantOf(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -614,7 +614,7 @@ ScriptValue* func_001004F0(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001005A0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptObjectIdMatch(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -632,7 +632,7 @@ ScriptValue* func_001005A0(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100650(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyBool(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -651,7 +651,7 @@ ScriptValue* func_00100650(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyInt(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -670,7 +670,7 @@ ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001007F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyFloat(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -689,7 +689,7 @@ ScriptValue* func_001007F0(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyVectorB(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -708,7 +708,7 @@ ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100998(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyPair(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -727,7 +727,7 @@ ScriptValue* func_00100998(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyWord(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -746,7 +746,7 @@ ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptExtraObjectPropertyVectorA(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -765,7 +765,7 @@ ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00100C28(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptObjectRecordValues(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -780,7 +780,7 @@ ScriptValue* func_00100C28(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00100CC8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -795,7 +795,7 @@ ScriptValue* func_00100CC8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00100D68(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -810,7 +810,7 @@ ScriptValue* func_00100D68(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00100E08(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptValueAttachment(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -838,7 +838,7 @@ ScriptValue* func_00100E08(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptElementsScrollScale(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -857,7 +857,7 @@ ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptCrossfadeRatioDeep(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -875,7 +875,7 @@ ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101058(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptSoundWithParams(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds5 kinds;
@@ -895,7 +895,7 @@ ScriptValue* func_00101058(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101168(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* StopScriptPlayingSound(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -910,7 +910,7 @@ ScriptValue* func_00101168(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* FadeInScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -928,7 +928,7 @@ ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* FadeOutScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -946,7 +946,7 @@ ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101368(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* FindScriptObjectHandle(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -963,7 +963,7 @@ ScriptValue* func_00101368(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101418(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* FindScriptObjectAnimationPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -982,7 +982,7 @@ ScriptValue* func_00101418(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_001014C8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* FindScriptTrackPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -996,7 +996,7 @@ ScriptValue* func_001014C8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101568(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* CopyScriptPlacedObjectFrame(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1016,7 +1016,7 @@ ScriptValue* func_00101568(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00101620(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptFollowObjects(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1035,7 +1035,7 @@ ScriptValue* func_00101620(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_001016F0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptColliderFlagNibble36(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1048,14 +1048,14 @@ ScriptValue* func_001016F0(ScriptValue* ret, Collider* obj, s32 unused, ScriptVa
     (void)StoreScriptArgumentsVa(&t, 1, args, px, py);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001BB1E0(obj, y);
+    SetColliderFlagNibble36(obj, y);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptPointInsideCollider(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Quad4 vec;
@@ -1073,7 +1073,7 @@ ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTransformObjectKeyedValue(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -1087,7 +1087,7 @@ ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, S
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = func_001F42D0(obj, o0, o1, o2, o3);
+    s32 r = SetTransformObjectKeyedValue(obj, o0, o1, o2, o3);
     (void)r;
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
@@ -1095,7 +1095,7 @@ ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlaceScriptAtArrivalPoint(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1110,7 +1110,7 @@ ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptObjectSubGroupFinish(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1125,7 +1125,7 @@ ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
+ScriptValue* CreateScriptAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -1146,7 +1146,7 @@ ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     return ret;
 }
 
-ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
+ScriptValue* FindOrCreateScriptSeekedAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds5 kinds;
@@ -1167,7 +1167,7 @@ ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     return ret;
 }
 
-ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
+ScriptValue* GetScriptAnimationMarkerTime(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1185,7 +1185,7 @@ ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     return ret;
 }
 
-ScriptValue* func_00101D38(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args)
+ScriptValue* SeekScriptAnimationPlayer(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -1205,7 +1205,7 @@ ScriptValue* func_00101D38(ScriptValue* ret, AnimationPlayer* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
+ScriptValue* StopScriptAnimationPlayer(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1220,7 +1220,7 @@ ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
+ScriptValue* ApplyScriptListedPoseSources(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1238,7 +1238,7 @@ ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
+ScriptValue* ReleaseScriptPlayerAttachment(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1257,7 +1257,7 @@ ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptAttachedSetTrackedNodes(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1272,7 +1272,7 @@ ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* HandleScriptMaskedColliderActivation(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1287,7 +1287,7 @@ ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTriggerZoneEntry(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -1309,7 +1309,7 @@ ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptZoneColliderEntry(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -1331,7 +1331,7 @@ ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00102358(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* ActivateScriptSwitchedColliderUnlessActive(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1346,7 +1346,7 @@ ScriptValue* func_00102358(ScriptValue* ret, SwitchedCollider* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_001023F8(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptRequestBlocked(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1364,7 +1364,7 @@ ScriptValue* func_001023F8(ScriptValue* ret, SwitchedCollider* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptStateTriggerStateFromMessage(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1382,7 +1382,7 @@ ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptStateTriggerTableEntry(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -1404,7 +1404,7 @@ ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTimedObjectMode(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1425,7 +1425,7 @@ ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* RequestScriptTimedObjectEnd(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1443,7 +1443,7 @@ ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTimedGroupFadeInTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1461,7 +1461,7 @@ ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTimedGroupFadeOutTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1479,7 +1479,7 @@ ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptEffectSpawnerActiveFor(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1497,7 +1497,7 @@ ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptEffectSpawnerActiveForever(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1512,7 +1512,7 @@ ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptEffectSpawnerInactive(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1527,7 +1527,7 @@ ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_00102B10(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptSpawnRangeEntry(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds6 kinds;
@@ -1546,7 +1546,7 @@ ScriptValue* func_00102B10(ScriptValue* ret, EffectSpawner* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_00102C28(ScriptValue* ret, RecordMember* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptRecordMemberRangeEntry(ScriptValue* ret, RecordMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds6 kinds;
@@ -1565,7 +1565,7 @@ ScriptValue* func_00102C28(ScriptValue* ret, RecordMember* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00102D40(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
+ScriptValue* SendScriptEmptyMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1580,7 +1580,7 @@ ScriptValue* func_00102D40(ScriptValue* ret, HoldingMember* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_00102DE0(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
+ScriptValue* SendScriptTwoVectorMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds6 kinds;
@@ -1606,7 +1606,7 @@ ScriptValue* func_00102DE0(ScriptValue* ret, HoldingMember* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_00102F10(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
+ScriptValue* SendScriptEmptyMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1621,7 +1621,7 @@ ScriptValue* func_00102F10(ScriptValue* ret, MemberGroup* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_00102FB0(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
+ScriptValue* SendScriptTwoVectorMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds6 kinds;
@@ -1645,7 +1645,7 @@ ScriptValue* func_00102FB0(ScriptValue* ret, MemberGroup* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_001030E0(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args)
+ScriptValue* CreateScriptStateWalker(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -1665,7 +1665,7 @@ ScriptValue* func_001030E0(ScriptValue* ret, StateGraph* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
+ScriptValue* DestroyScriptStateWalker(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1680,7 +1680,7 @@ ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* ScatterScriptRandomObjects(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -1700,7 +1700,7 @@ ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1719,7 +1719,7 @@ ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103420(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* PushScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1738,7 +1738,7 @@ ScriptValue* func_00103420(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001034F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* PopScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1753,7 +1753,7 @@ ScriptValue* func_001034F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptLevelEntryFlag1(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1770,7 +1770,7 @@ ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptLevelEntryFlag2(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1787,7 +1787,7 @@ ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptLevelEntryFlag4(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1804,7 +1804,7 @@ ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptLevelEntryFlag8(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1821,7 +1821,7 @@ ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* CheckScriptEntryOneBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1838,7 +1838,7 @@ ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103900(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* CheckScriptEntryTwoBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1855,7 +1855,7 @@ ScriptValue* func_00103900(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001039B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* CheckScriptEntryThreeBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1872,7 +1872,7 @@ ScriptValue* func_001039B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103A60(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -1892,7 +1892,7 @@ ScriptValue* func_00103A60(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103B40(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* GetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1911,7 +1911,7 @@ ScriptValue* func_00103B40(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* IsScriptLevelRecordComplete(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1928,7 +1928,7 @@ ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* IsScriptLevelDone(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1945,7 +1945,7 @@ ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103D70(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* RecomputeScriptSaveCompletion(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1959,7 +1959,7 @@ ScriptValue* func_00103D70(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103E10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* PopScriptActiveSequenceElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1974,7 +1974,7 @@ ScriptValue* func_00103E10(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103EB0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* ShowScriptPauseMenuPageWith(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -1993,7 +1993,7 @@ ScriptValue* func_00103EB0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00103F80(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* ShowScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2008,7 +2008,7 @@ ScriptValue* func_00103F80(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104020(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* HideScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2023,7 +2023,7 @@ ScriptValue* func_00104020(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001040C0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* PushScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2041,7 +2041,7 @@ ScriptValue* func_001040C0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104170(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* RemoveScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2059,7 +2059,7 @@ ScriptValue* func_00104170(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104220(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2078,7 +2078,7 @@ ScriptValue* func_00104220(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001042F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* GetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2096,7 +2096,7 @@ ScriptValue* func_001042F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001043A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* RefreshScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2121,7 +2121,7 @@ ScriptValue* func_001043A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104470(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* AcquireScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2136,7 +2136,7 @@ ScriptValue* func_00104470(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104510(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* ReleaseScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2151,7 +2151,7 @@ ScriptValue* func_00104510(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001045B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2169,7 +2169,7 @@ ScriptValue* func_001045B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104660(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2187,7 +2187,7 @@ ScriptValue* func_00104660(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104710(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* PushScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2205,7 +2205,7 @@ ScriptValue* func_00104710(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_001047C0(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* PopScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2219,7 +2219,7 @@ ScriptValue* func_001047C0(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00104860(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* PeekScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2234,7 +2234,7 @@ ScriptValue* func_00104860(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00104900(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptCameraControllerSettings(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2247,14 +2247,14 @@ ScriptValue* func_00104900(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00146018(obj, o0, o1, o2);
+    SetCameraControllerSettings(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* RecordScriptCameraTimestamp(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2269,7 +2269,7 @@ ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* RequestScriptPlainCameraSnap(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2284,7 +2284,7 @@ ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2303,7 +2303,7 @@ ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00104C00(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* PushScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2318,7 +2318,7 @@ ScriptValue* func_00104C00(ScriptValue* ret, LookupObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00104CA0(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* RemoveScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2333,7 +2333,7 @@ ScriptValue* func_00104CA0(ScriptValue* ret, LookupObject* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00104D40(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptTrackedNodes(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2348,7 +2348,7 @@ ScriptValue* func_00104D40(ScriptValue* ret, ContactTracker* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00104DE0(ScriptValue* ret, NumberedItem* obj, s32 unused, ScriptValue* args)
+ScriptValue* CollectScriptNumberedItem(ScriptValue* ret, NumberedItem* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2363,7 +2363,7 @@ ScriptValue* func_00104DE0(ScriptValue* ret, NumberedItem* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00104E80(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2382,7 +2382,7 @@ ScriptValue* func_00104E80(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00104F50(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2401,7 +2401,7 @@ ScriptValue* func_00104F50(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105020(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* GetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2418,7 +2418,7 @@ ScriptValue* func_00105020(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001050D0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptAgentClipGroup(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -2440,7 +2440,7 @@ ScriptValue* func_001050D0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001051C0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptAgentMeshKey(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2459,7 +2459,7 @@ ScriptValue* func_001051C0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105290(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptAgentExtraClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2478,7 +2478,7 @@ ScriptValue* func_00105290(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* ForceScriptAgentState(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2497,7 +2497,7 @@ ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105430(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAgentSecondaryClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2522,7 +2522,7 @@ ScriptValue* func_00105430(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105500(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SteerScriptAgentAlongPath(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2537,7 +2537,7 @@ ScriptValue* func_00105500(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_001055A8(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAgentMainClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2555,7 +2555,7 @@ ScriptValue* func_001055A8(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     return ret;
 }
 
-ScriptValue* func_00105658(ScriptValue* ret, CompanionAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptCompanionAgentLookId(ScriptValue* ret, CompanionAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -2574,7 +2574,7 @@ ScriptValue* func_00105658(ScriptValue* ret, CompanionAgent* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00105728(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptChildGroupDelay(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2592,7 +2592,7 @@ ScriptValue* func_00105728(ScriptValue* ret, ChildGroupObject* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_001057D8(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* StepScriptChildGroupObject(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2607,7 +2607,7 @@ ScriptValue* func_001057D8(ScriptValue* ret, ChildGroupObject* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlaceScriptPlayerOnGround(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2635,7 +2635,7 @@ ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* ReleaseScriptPlayerToState2(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2650,7 +2650,7 @@ ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105A00(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* IgnoreScriptPlayerArgument(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2661,14 +2661,14 @@ ScriptValue* func_00105A00(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001777F8(obj, out);
+    IgnorePlayerArgument(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptPlayerPath(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2686,7 +2686,7 @@ ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105B60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* SwitchScriptPlayerState11(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2697,14 +2697,14 @@ ScriptValue* func_00105B60(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00177800(obj, out);
+    SwitchPlayerState11(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_00105C10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* SeekScriptObjects105Animations(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2722,7 +2722,7 @@ ScriptValue* func_00105C10(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* SwapInScriptPlayerStandIn(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2737,7 +2737,7 @@ ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* QueueScriptPlayerWalkerActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2755,7 +2755,7 @@ ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* QueueScriptPlayerFirstActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2773,7 +2773,7 @@ ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
+ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2791,7 +2791,7 @@ ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     return ret;
 }
 
-ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptC8BObjectVector(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2811,7 +2811,7 @@ ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptC8BObjectVectorFlagged(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2831,7 +2831,7 @@ ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00106120(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptCollectedItems(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2846,7 +2846,7 @@ ScriptValue* func_00106120(ScriptValue* ret, PooledHolder* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_001061C0(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
+ScriptValue* CollectScriptItem(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2864,7 +2864,7 @@ ScriptValue* func_001061C0(ScriptValue* ret, PooledHolder* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106270(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptContactListId(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2882,7 +2882,7 @@ ScriptValue* func_00106270(ScriptValue* ret, ContactListObject* obj, s32 unused,
     return ret;
 }
 
-ScriptValue* func_00106320(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2900,7 +2900,7 @@ ScriptValue* func_00106320(ScriptValue* ret, ContactListObject* obj, s32 unused,
     return ret;
 }
 
-ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -2922,7 +2922,7 @@ ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_001064C0(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2937,7 +2937,7 @@ ScriptValue* func_001064C0(ScriptValue* ret, TargetFollower* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2952,7 +2952,7 @@ ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, Sc
     return ret;
 }
 
-ScriptValue* func_00106600(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -2974,7 +2974,7 @@ ScriptValue* func_00106600(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001066F0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* EnableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -2992,7 +2992,7 @@ ScriptValue* func_001066F0(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001067A0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* DisableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3010,7 +3010,7 @@ ScriptValue* func_001067A0(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00106850(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptObjectPoolEntryCount(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3029,7 +3029,7 @@ ScriptValue* func_00106850(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00106920(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* ChooseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3044,7 +3044,7 @@ ScriptValue* func_00106920(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001069C0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* ReleaseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3062,7 +3062,7 @@ ScriptValue* func_001069C0(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptPlacementRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3077,7 +3077,7 @@ ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00106B10(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptObjectPoolReleaseRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3085,14 +3085,14 @@ ScriptValue* func_00106B10(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001A9438(obj);
+    ResetObjectPoolReleaseRecord(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_00106BB0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
+ScriptValue* ClearScriptObjectPoolHeadingRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3100,14 +3100,14 @@ ScriptValue* func_00106BB0(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001A9498(obj);
+    ClearObjectPoolHeadingRecord(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptStepSequenceModeOne(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3122,7 +3122,7 @@ ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptStepSequenceCameraMode(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3137,7 +3137,7 @@ ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3156,7 +3156,7 @@ ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
+ScriptValue* ChooseScriptStepSequenceState(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3171,7 +3171,7 @@ ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3186,7 +3186,7 @@ ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args)
+ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3201,7 +3201,7 @@ ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107040(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3216,7 +3216,7 @@ ScriptValue* func_00107040(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001070E0(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3231,7 +3231,7 @@ ScriptValue* func_001070E0(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -3252,7 +3252,7 @@ ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -3273,7 +3273,7 @@ ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107350(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AdvanceScriptGaugeAgentPhase(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3288,7 +3288,7 @@ ScriptValue* func_00107350(ScriptValue* ret, GaugeAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3307,7 +3307,7 @@ ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_001074C0(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3325,7 +3325,7 @@ ScriptValue* func_001074C0(ScriptValue* ret, PathFollower* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00107570(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds5 kinds;
@@ -3347,7 +3347,7 @@ ScriptValue* func_00107570(ScriptValue* ret, PathFollower* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00107678(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptPathFollower(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3362,7 +3362,7 @@ ScriptValue* func_00107678(ScriptValue* ret, PathFollower* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Quad4 vec;
@@ -3379,7 +3379,7 @@ ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_001077D8(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Quad4 vec;
@@ -3396,7 +3396,7 @@ ScriptValue* func_001077D8(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107898(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3413,7 +3413,7 @@ ScriptValue* func_00107898(ScriptValue* ret, SeekingAgent* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00107948(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3432,7 +3432,7 @@ ScriptValue* func_00107948(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107A10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* ResetScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q, t;
     InitScriptValue(&q);
@@ -3446,7 +3446,7 @@ ScriptValue* func_00107A10(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107AB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* BindScriptEntryQueueToObject(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3464,7 +3464,7 @@ ScriptValue* func_00107AB0(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107B60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* UnbindScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q, t;
     InitScriptValue(&q);
@@ -3478,7 +3478,7 @@ ScriptValue* func_00107B60(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3496,7 +3496,7 @@ ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind1(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3514,7 +3514,7 @@ ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3532,7 +3532,7 @@ ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind2(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3550,7 +3550,7 @@ ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind3(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3568,7 +3568,7 @@ ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind4(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3587,7 +3587,7 @@ ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind5(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -3608,7 +3608,7 @@ ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind6(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3628,7 +3628,7 @@ ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind7(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3648,7 +3648,7 @@ ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3668,7 +3668,7 @@ ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3687,7 +3687,7 @@ ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind11(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3705,7 +3705,7 @@ ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptQueueEntryKind12(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3720,7 +3720,7 @@ ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3735,7 +3735,7 @@ ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108688(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlayScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3750,7 +3750,7 @@ ScriptValue* func_00108688(ScriptValue* ret, GaugeModeObject* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_00108728(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3768,7 +3768,7 @@ ScriptValue* func_00108728(ScriptValue* ret, GaugeModeObject* obj, s32 unused, S
     return ret;
 }
 
-ScriptValue* func_001087D8(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlaceScriptModeColliderAtAnchor(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3783,7 +3783,7 @@ ScriptValue* func_001087D8(ScriptValue* ret, ModeCollider* obj, s32 unused, Scri
     return ret;
 }
 
-ScriptValue* func_00108878(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptTempoAgentPendingTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3801,7 +3801,7 @@ ScriptValue* func_00108878(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108928(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* EndScriptHeldTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3816,7 +3816,7 @@ ScriptValue* func_00108928(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_001089C8(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptC13Entry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3835,7 +3835,7 @@ ScriptValue* func_001089C8(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108A98(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* RemoveScriptTempoAgentEntry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3853,7 +3853,7 @@ ScriptValue* func_00108A98(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108B48(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* DecrementScriptTempoAgentGauge(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3868,7 +3868,7 @@ ScriptValue* func_00108B48(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108BE8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind0Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3888,7 +3888,7 @@ ScriptValue* func_00108BE8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00108CC8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind1Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3908,7 +3908,7 @@ ScriptValue* func_00108CC8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00108DA8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind2Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3927,7 +3927,7 @@ ScriptValue* func_00108DA8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00108E70(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind3Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3946,7 +3946,7 @@ ScriptValue* func_00108E70(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00108F38(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind4Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3965,7 +3965,7 @@ ScriptValue* func_00108F38(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_00109000(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptTimelineKind5Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3984,7 +3984,7 @@ ScriptValue* func_00109000(ScriptValue* ret, Timeline* obj, s32 unused, ScriptVa
     return ret;
 }
 
-ScriptValue* func_001090C8(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptGaugeBarAgentValues(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -4004,7 +4004,7 @@ ScriptValue* func_001090C8(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, Scr
     return ret;
 }
 
-ScriptValue* func_001091A8(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* SendScriptHitCountColliderRequest(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -4015,14 +4015,14 @@ ScriptValue* func_001091A8(ScriptValue* ret, HitCountCollider* obj, s32 unused, 
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_001C3F68(obj, out);
+    (void)SendHitCountColliderRequest(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* func_00109258(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptHitCountColliderId(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -4040,7 +4040,7 @@ ScriptValue* func_00109258(ScriptValue* ret, HitCountCollider* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_00109308(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptHitCountColliderItem(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -4058,7 +4058,7 @@ ScriptValue* func_00109308(ScriptValue* ret, HitCountCollider* obj, s32 unused, 
     return ret;
 }
 
-ScriptValue* func_001093B8(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* TakeScriptCountedColliderTouch(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;

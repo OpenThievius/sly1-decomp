@@ -11,10 +11,10 @@
 // decide. Written for this project from retail's code.
 #include "common.h"
 
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
 
-void func_002117D0(u32 value)
+void StartIpuOutputTransfer(u32 value)
 {
     DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
@@ -23,7 +23,7 @@ void func_002117D0(u32 value)
     EnableInterrupts();
 }
 
-void func_00211838(u32 value)
+void StartIpuInputTransfer(u32 value)
 {
     DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
@@ -34,7 +34,7 @@ void func_00211838(u32 value)
 
 struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };
 
-void func_002118A0(Out_002118A0* out)
+void SaveIpuDmaChannels(Out_002118A0* out)
 {
     StartIpuInputTransfer(1);
     volatile u32* a = (volatile u32*)0x1000B410;
@@ -62,7 +62,7 @@ struct Ctx_211988 {
     s32 f18;
     s32 f1C;
 };
-void func_00211988(Ctx_211988* s0)
+void RestoreIpuDmaChannels(Ctx_211988* s0)
 {
     u32 v = (u32)s0->f1C;
     u32 s3 = v & 0x7Fu;
@@ -96,7 +96,7 @@ void func_00211988(Ctx_211988* s0)
     StartIpuInputTransfer(s0->fC | 0x100);
 }
 
-u32 func_00211AD8(s32 mode)
+u32 SyncIpu(s32 mode)
 {
     u32 result = 0;
     switch (mode) {

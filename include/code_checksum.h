@@ -28,7 +28,7 @@ struct CodeChecksum : PlacedObject {
 typedef char check_CodeChecksum[sizeof(CodeChecksum) == 0x6E0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0012B6B8(CodeChecksum* self);                       // 0x6B slot 0
-void func_0012B760(CodeChecksum* self);                       // 0x6B slot 17
+void InitCodeChecksum(CodeChecksum* self);                       // 0x6B slot 0
+void UpdateCodeChecksum(CodeChecksum* self);                       // 0x6B slot 17
 
 #endif

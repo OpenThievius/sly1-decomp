@@ -4,14 +4,14 @@
 #include "collider.h"
 #include "shapes.h"
 
-s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
-s32 func_001429F8(s32 count, ColliderSpan* spans);
-s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
-s32 func_00142B78(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
-s32 func_00142170(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
+s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
+s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
+s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, s32 e, f32 x);
+s32 TestTreeSegmentHit(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
+s32 TestBoundsSegmentHit(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
 
-Collider* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out)
+Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out)
 {
     f32 bestKey = 3.4028235e+38f;
     Collider* best = 0;
@@ -35,7 +35,7 @@ Collider* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Collider** lis
 }
 
 
-s32 func_00141B48(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5)
+s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5)
 {
     s32 result = 0;
     if (count > 0) {
@@ -60,7 +60,7 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5
     return result;
 }
 
-s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
+s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
 {
     if (self->tree.nodes != 0) {
         return CollectTreeNodeSpans((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
@@ -71,7 +71,7 @@ s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
     return 0;
 }
 
-s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
+s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
 {
     if (a1 != 0) {
         return CollectTreeNodeSpans(a1, a2, a3, 0, a4, a5);
@@ -82,7 +82,7 @@ s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5
     return 0;
 }
 
-s32 func_00141D00(Collider* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
+s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
 {
     if (self->tree.nodes != 0) {
         return TestTreeSegmentHit((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
@@ -111,7 +111,7 @@ struct SpanEvent {
     Quad16 q20;
 };
 
-s32 func_00142998(SpanEvent* a, SpanEvent* b)
+s32 CompareSpanEndpoints(SpanEvent* a, SpanEvent* b)
 {
     f32 d = a->time - b->time;
     if (d < -0.0001f)
@@ -121,12 +121,12 @@ s32 func_00142998(SpanEvent* a, SpanEvent* b)
     return a->end - b->end;
 }
 
-void func_0018D608(void);
-SpanEvent* func_0018D658(s32 size);
-void func_0018D6F0(void);
-void func_001F5CD0(SpanEvent* base, s32 n, s32 size, s32 (*cmp)(SpanEvent*, SpanEvent*));
+void PushBackMemoryMark(void);
+SpanEvent* AllocateBackMemory(s32 size);
+void PopBackMemoryMark(void);
+void SortElements(SpanEvent* base, s32 n, s32 size, s32 (*cmp)(SpanEvent*, SpanEvent*));
 
-s32 func_001429F8(s32 count, ColliderSpan* spans)
+s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
 {
     SpanEvent* mem;
     SpanEvent* rec;

@@ -22,10 +22,10 @@ struct Obj_001AB890_eu {
     s32 f290;
 };
 
-void func_001ABE20(Obj_001AB890_eu* self, s32 state);
-void func_001AB980(Obj_001AB890_eu* self, f32 value);
+void SetTimerState(Obj_001AB890_eu* self, s32 state);
+void StepTimer(Obj_001AB890_eu* self, f32 value);
 
-void func_001AB890(Obj_001AB890_eu* self, f32 x)
+void StartTimer(Obj_001AB890_eu* self, f32 x)
 {
     self->f280 = 0;
     self->f284 = 0;

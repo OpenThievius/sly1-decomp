@@ -3,12 +3,12 @@
 struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E00B0_eu { VT_1E00B0* vt; u8 pad04[0x56C]; s32 f570; u8 pad574[4]; f32 f578; s32 f57C; };
 void func_eu_001AB238(Obj_1E00B0_eu* q, void* p);
-void func_001AA298(Obj_1E00B0_eu* q);
-void func_001AA8B8(Obj_1E00B0_eu* q, f32 v);
-void func_001E02C8(Obj_1E00B0_eu* q, s32 n);
-void func_001AB920(Obj_1E00B0_eu* q, f32 v);
+void UpdateScreenElementSlide(Obj_1E00B0_eu* q);
+void SetScreenElementHoldTime(Obj_1E00B0_eu* q, f32 v);
+void SetBestTimeState(Obj_1E00B0_eu* q, s32 n);
+void SetTimerRate(Obj_1E00B0_eu* q, f32 v);
 
-void func_001E00B0(Obj_1E00B0_eu* self)
+void UpdateBestTimeState(Obj_1E00B0_eu* self)
 {
     UpdateScreenElementSlide(self);
     switch (self->f570) {
@@ -41,7 +41,7 @@ void func_001E00B0(Obj_1E00B0_eu* self)
             SetBestTimeState(self, 3);
             return;
         }
-        SetTimerRate(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));
         r = AreMenusAndFadeClear();
         if (r) o->vt->m38(o); else o->vt->m3C(o);
         if (g_currentEntry->flags & 8) {

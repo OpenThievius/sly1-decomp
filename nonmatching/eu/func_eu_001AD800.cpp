@@ -69,14 +69,14 @@ void func_eu_001AD800(Label_eu_1AD800* self)
         f32 qx = (x0 * self->f54C + x1 * (1.0f - self->f54C)) + self->f544;
         f32 qy = self->f548;
         s32 color = (s32)0xFF808080;
-        func_00137228(&L, px, y);
-        func_00137238(&L, qx, qy);
+        SetTextLayoutPosition(&L, px, y);
+        SetTextLayoutSize(&L, qx, qy);
         {
             s32 tag = color;
-            func_00137248(&L, &tag);
+            SetTextLayoutColor(&L, &tag);
         }
-        func_00137260(&L, 0);
-        func_00137268(&L, 0);
+        SetTextLayoutHorizontalAlign(&L, 0);
+        SetTextLayoutVerticalAlign(&L, 0);
         func_eu_001374E0(&L, 0);
         Font* sub = *(Font**)self->f520;
         if (sub != 0) {

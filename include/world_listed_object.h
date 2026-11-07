@@ -49,11 +49,11 @@ struct WorldListedObject : PlacedObject {
 
 typedef char check_WorldListedObject[sizeof(WorldListedObject) == 0x640 ? 1 : -1];
 
-void func_00139DE8(WorldListedObject* self);                       // slot 0
-void func_00139E80(WorldListedObject* self);                       // slot 6
-void func_00139EC8(WorldListedObject* self);                       // slot 7
-void func_0013A3A0(WorldListedObject* self);                       // slot 17
-void func_0013A418(WorldListedObject* self, BaseObject* src);             // slot 23
-void func_0013AD08(WorldListedObject* owner, s32 unused, void* src); // slot 37
+void InitWorldListedObject(WorldListedObject* self);                       // slot 0
+void LeaveWorldLists(WorldListedObject* self);                       // slot 6
+void ReleaseWorldListedObject(WorldListedObject* self);                       // slot 7
+void UpdateWorldListedObject(WorldListedObject* self);                       // slot 17
+void CopyWorldListedObject(WorldListedObject* self, BaseObject* src);             // slot 23
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, void* src); // slot 37
 
 #endif

@@ -3,7 +3,7 @@
 struct Glob_150790_eu { u8 pad0[0x570]; StepSequence* f260; };
 struct __attribute__((packed)) Blk_150790_eu { u8 pad0[0x5B0]; s32 f5B0; };
 
-void func_00150790(StepSequence* self, s32 next)
+void SetStepSequenceState(StepSequence* self, s32 next)
 {
     s32 cur = self->state2D4;
     if (next == cur) {
@@ -64,7 +64,7 @@ void func_00150790(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 4);
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
             AcquirePadSelectFlag(g_currentWorld);
-            func_001365A0(&g_typedTextCaptionBox, 0);
+            SetTextPanelSubject(&g_typedTextCaptionBox, 0);
             if (self->f330 != 0) {
                 f32 f = 0.6f;
                 SetVolumeChannelFactor(9, 0, f);

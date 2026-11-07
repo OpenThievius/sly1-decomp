@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the format string as unsigned bytes (lbu).
-s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
+s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
 {
     FormatFrame loc;
     const u8* s1 = (const u8*)fmt;

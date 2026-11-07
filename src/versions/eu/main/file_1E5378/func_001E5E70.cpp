@@ -22,9 +22,9 @@ struct Obj_1E5E70_eu {
     f32 f118C;
 };
 
-void func_001AA1F0(Obj_1E5E70_eu* self, s32 kind);
+void InitScreenElement(Obj_1E5E70_eu* self, s32 kind);
 
-void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
+void InitArcPoints(Obj_1E5E70_eu* self, s32 kind)
 {
     self->f544 = 160.0f;
     self->f548 = 126.305084f;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: draws the 620-wide HUD bar (two coloured segments) with PAL's own constants.
-void func_00193318(LoadProgress* o)
+void DrawLoadProgressBar(LoadProgress* o)
 {
     BarPacket buf;
     s32 n1;

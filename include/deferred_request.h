@@ -31,6 +31,6 @@ struct __attribute__((aligned(16))) DeferredRequest {
 
 typedef char check_DeferredRequest[sizeof(DeferredRequest) == 0x80 ? 1 : -1];
 
-extern DeferredRequest D_005E4700[];    // .bss
+extern DeferredRequest g_deferredRequests[];    // .bss
 
 #endif

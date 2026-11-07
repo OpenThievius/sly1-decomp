@@ -21,10 +21,10 @@ struct TwoEntryBlendEntry {
     f32 fC;
 };
 
-void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
 
-void func_001D14F0(Player* self)
+void CreatePlayerTwoEntryBlend(Player* self)
 {
     f32 out[4];
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
@@ -35,7 +35,7 @@ void func_001D14F0(Player* self)
         e++;
         i--;
     } while (i >= 0);
-    func_00139038(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
+    BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
     func_0012CD78(0.0f, 1.0f, self->f1064, self->f618, self, 1, &self->f23E0, 0, 0, 0);
     func_0012CD78(0.0f, 1.0f, self->f1064, self->f614, self, 1, &self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
@@ -53,12 +53,12 @@ ASM_FUNC(func_001D1BB0);
 
 ASM_FUNC(func_001D2518);
 
-void func_001DDA20(void* a);
-void func_001DDB58(void* a);
-void func_001DDA50(void* a);
-void func_001DDBB8(void* a);
+void AcquirePadSelectFlag(void* a);
+void ShowCountedScreenElement(void* a);
+void ReleasePadSelectFlag(void* a);
+void HideCountedScreenElement(void* a);
 
-void func_001D27C0(Player* a0, s32 a1)
+void SetPlayerPadSelectMode(Player* a0, s32 a1)
 {
     if (a0->f2718 != a1) {
         if (a0->f2718 == -1) {

@@ -24,50 +24,50 @@
 
 #include "script_value.h"
 
-void* func_0018D658(s32 size);
+void* AllocateBackMemory(s32 size);
 
-void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
+void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
-void func_00109488(void);
+void FillObjectPropertyTable(void);
 
 extern u8 D_002505D8[];
 
-void func_0011E680(void* self, void* slot, void* obj);
+void ApplyPropertyRecord(void* self, void* slot, void* obj);
 
-s32 func_00137D10(void* p);
+s32 ReadBufferedS16(void* p);
 
 // The owner's slot 44 (Desc02::m28) is told what was asked.
 typedef void (*VectorCurveToldFn)(PlacedObject* self, s32 a, s32 b);
 
-void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
+void EvaluateAxisCurves(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
 
-void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
+void EvaluateVectorKeyCurve(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
-void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr);
+void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
-s32 func_00137BE0(void* src);
+s32 ReadBufferedU16(void* src);
 
-s32 func_00137D10(void* src);
+s32 ReadBufferedS16(void* src);
 
-f32 func_00137DF8(void* src);
+f32 ReadBufferedFloat(void* src);
 
-s32 func_00137CC0(void* src);
+s32 ReadBufferedS8(void* src);
 
-void* func_0018D500(s32 size);
+void* AllocateFrontMemory(s32 size);
 
-s32 func_00137B90(void* src);
+s32 ReadBufferedU8(void* src);
 
-void func_00137E70(void* src, void* dst);
+void ReadBufferedVector3(void* src, void* dst);
 
-WeightCurve* func_00121160(s32 index);
+WeightCurve* CreateWeightCurve(s32 index);
 
 // What FindCurveSegment (func_0011EE70) gives back: the segment's length and the time into it,
 // and the segment's first key.
 struct CurveSegment { f32 diff; f32 delta; u8* ptr; };
 
-void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 
-void func_00130540(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+void EvaluateHermiteVectorSegment(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
 typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
@@ -75,13 +75,13 @@ typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
 // The angles and their rates EvaluateAxisCurves gives an axis rotation curve (func_0011FF08).
 struct AngleSample { s32 a[4]; s32 b[4]; };
 
-void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
+void EvaluateAxisCurves(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
 
-void func_00188A20(void* a, void* b);
+void BuildEulerRotationMatrix(void* a, void* b);
 
-void func_001EDE38(void* a, void* b, void* c);
+void RotateVectorByTwoAngles(void* a, void* b, void* c);
 
-extern void* func_0011F6B0(void*, u32, u32, void*, u32, u32);
+extern void* EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
 
 struct AxisCurveClosure {
     u8 a[0x30];
@@ -93,110 +93,110 @@ struct AxisCurveClosure {
     f32 first;
 };
 
-extern void func_0011F798(WeightCurve**, Vec02*, Stream83*);
+extern void ReadAxisCurves(WeightCurve**, Vec02*, Stream83*);
 
-extern void func_00189150(void*, void*, void*);
+extern void MultiplyMatrices3x3(void*, void*, void*);
 
-extern void func_00188D28(void*, void*, void*);
+extern void MatrixToAxisAngle(void*, void*, void*);
 
-extern void func_0018D608(void);
+extern void PushBackMemoryMark(void);
 
-extern void func_0018D6F0(void);
+extern void PopBackMemoryMark(void);
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
 
-void func_001303F0(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
+void EvaluateHermiteSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
-void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
+void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
-void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
+void* CreateTypedRecord(s32 slot, void* self, void* a1, s32 key, s32 flag);
 
-s32 func_0011ECA0(s32 value);
+s32 MapKeyToSlotIndex(s32 value);
 
-void func_00182ED8(void* obj);
+void ResolveAndStartObject(void* obj);
 
 // A class's property list (g_classPropertyLists) seen from its first descriptor pointer: the
 // descriptor, then the word before the next one.
 struct PropertyListSlot { void* node; s32 pad; };
 
-extern u8 D_00244950[];
+extern u8 g_classPropertyLists[];
 
-void* func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
+void* InitBufferedStream(BufferedStream* self, s32 a, s32 b, s32 c);
 
-void func_00137398(BufferedStream* self, s32 a1, u8* a2);
+void OpenBufferedMemoryStream(BufferedStream* self, s32 a1, u8* a2);
 
-void func_0011E680(BaseObject* self, PropertyDescriptor* slot, BufferedStream* obj);
+void ApplyPropertyRecord(BaseObject* self, PropertyDescriptor* slot, BufferedStream* obj);
 
-void func_001372E0(BufferedStream* self, s32 flags);
+void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
 // EXACT: reuse parameter a1 directly instead of a local copy
 
 extern u8 D_00247448[];
 
-void* func_0018D5C0(s32 bytes);
+void* AllocateZeroedFrontMemory(s32 bytes);
 
-void func_001DB480(void* self);
+void InitWorldHashLists(void* self);
 
-void* func_001C1390(s32 index, void* ctx);
+void* GetScriptEntryScope(s32 index, void* ctx);
 
-void* func_00159F20(void* base, s32 n);
+void* GetHashedSlot(void* base, s32 n);
 
-void func_00152470(void* list, void* item);
+void AppendToList(void* list, void* item);
 
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
-void* func_0011C508(void);
-void* func_0011C748(void);
-void* func_0011C858(void);
+void* AcquireVectorAPayload(void);
+void* AcquireVectorBPayload(void);
+void* AcquirePairPayload(void);
 
 typedef void (*PropertyMethodFn)(void);
 
 union PropertyValues { ScriptValue buf[32]; f32 f[8]; s32 i[2]; };
 
-s32 func_00137D10(BufferedStream* r);
+s32 ReadBufferedS16(BufferedStream* r);
 
-s32 func_00137B90(BufferedStream* r);
+s32 ReadBufferedU8(BufferedStream* r);
 
-s32 func_00137D78(BufferedStream* r);
+s32 ReadBufferedS32(BufferedStream* r);
 
-s32 func_00137C40(BufferedStream* r);
+s32 ReadBufferedU32(BufferedStream* r);
 
-f32 func_00137DF8(BufferedStream* r);
+f32 ReadBufferedFloat(BufferedStream* r);
 
-void func_00188978(f32* in, f32* out);
+void BuildRotationFromVector(f32* in, f32* out);
 
-void func_0018D800(f32* dst, f32* src, s32 n);
+void CopyMemory(f32* dst, f32* src, s32 n);
 
-void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
+void SortElements(f32* base, s32 n, s32 size, void* cmp);
 
-extern u8 func_001EB128[];
+extern u8 CompareFloats[];
 
 // The angles and their rates EvaluateVectorKeyCurve gives a keyed rotation curve (func_00120130).
 struct KeyedAngleSample { u8 bytes[0x20]; };
 typedef void (*KeyedRotationToldFn)(PlacedObject* self, void* output, void* state);
-extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
-extern void func_00188A20(void*, void*);
-extern void func_001EDE38(void*, void*, void*);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*, s32, void*, void*);
+extern void BuildEulerRotationMatrix(void*, void*);
+extern void RotateVectorByTwoAngles(void*, void*, void*);
 
-extern void func_0011F9F8(s32, VectorKey*);
-extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*);
+extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
-extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void func_001F5C0C(void*, s32, s32);
+extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
+extern void FillMemory(void*, s32, s32);
 
-void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
+void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
-extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
-extern void func_0011FA88(s32*, VectorKey**, Stream83*);
+extern void ReadVectorKeys(s32*, VectorKey**, Stream83*);
 
-extern void* func_001B5EE0(void*);
+extern void* PopZeroedFreeSlot(void*);
 
-extern World* D_00275710;
+extern World* g_currentWorld;
 
-void func_0018D800(Attachment* self, Attachment* src, s32 size);
+void CopyMemory(Attachment* self, Attachment* src, s32 size);
 
 // Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
 struct PoseLocals {
@@ -212,16 +212,16 @@ typedef void (*OrientationToldFn)(PlacedObject* self, Mat02* b, Vec02* q);
 
 typedef void (*OwnerToldFn)(PlacedObject* self);
 
-void func_00121338(Attachment* self, PlacedObject* a1);
+void InitPoseSource(Attachment* self, PlacedObject* a1);
 
-void func_00152600(void* list, void* item);
-void func_00121358(Attachment* self, s32 flags);
+void RemoveFromList(void* list, void* item);
+void ReleasePoseSource(Attachment* self, s32 flags);
 
-extern f32 D_0026185C[];
-void func_001214B8(Attachment* self, Vec02* a1, Vec02* a2);
-s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
+extern f32 g_gameTime[];
+void GetOwnerPosition(Attachment* self, Vec02* a1, Vec02* a2);
+s32 ApplyAnimationLoopMode(AnimationPlayer* t, f32* a, f32* b);
 
-void func_00121508(Attachment* self, Mat02* a, Vec02* b);
+void GetOwnerRotation(Attachment* self, Mat02* a, Vec02* b);
 
 struct KeyedCurveClosure {
     u8 a[0x30];
@@ -231,75 +231,75 @@ struct KeyedCurveClosure {
     f32 first;
 };
 
-f32 D_00260E60[4] = { 3.0f, 1.0f, 0.1f, 0.0f };
-extern f32 D_0026186C;
-extern f32 D_00261860;
-extern f32 func_001EA4B8(void*, s32, f32, f32, f32);
+f32 g_valueRampProfile[4] = { 3.0f, 1.0f, 0.1f, 0.0f };
+extern f32 g_frameStep;
+extern f32 g_frameDt;
+extern f32 ApproachValueWithRamp(void*, s32, f32, f32, f32);
 
-void func_00121568(Attachment* self, f32* value, f32* slope);
+void GetOwnerValue(Attachment* self, f32* value, f32* slope);
 
-extern void func_00121568(Attachment* self, f32* a1, f32* a2);
+extern void GetOwnerValue(Attachment* self, f32* a1, f32* a2);
 
-extern void func_00121580(Attachment* self, Mat02* a1);
+extern void GetIdentityMatrix(Attachment* self, Mat02* a1);
 
 // The position curves' tables, defined at the end of this file.
-extern const PositionCurveVt D_002196B8;
-extern const PositionCurveVt D_002196C8;
-extern const PositionCurveVt D_002196D8;
+extern const PositionCurveVt g_positionCurveKind0Methods;
+extern const PositionCurveVt g_positionCurveKind1Methods;
+extern const PositionCurveVt g_positionCurveKind2Methods;
 
 extern u8 D_00248D30[];
-void func_00152600(void* a, void* b);
-void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
-void func_001274F8(void* a, void* b);
-void func_00127590(void* a, void* b);
-void func_001B5F28(void* a, void* b);
+void RemoveFromList(void* a, void* b);
+void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
+void SetPlacedObjectVelocity(void* a, void* b);
+void SetPlacedObjectSpin(void* a, void* b);
+void PushFreeSlot(void* a, void* b);
 
-extern u8 D_002483D0[];
+extern u8 g_identityMatrix[];
 
-s32 func_00139970(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
-f32 func_001EA408(f32 a);
+s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
+f32 WrapAngle(f32 a);
 
-extern const RotationCurveVt D_002196E8;
-extern const RotationCurveVt D_002196F8;
-extern const RotationCurveVt D_00219708;
+extern const RotationCurveVt g_rotationCurveKind0Methods;
+extern const RotationCurveVt g_rotationCurveKind1Methods;
+extern const RotationCurveVt g_rotationCurveKind2Methods;
 
-extern const ScaleCurveVt D_00219718;
-extern const ScaleCurveVt D_00219728;
-void* func_0018D5C0(u32 n);
+extern const ScaleCurveVt g_scaleCurveKind0Methods;
+extern const ScaleCurveVt g_scaleCurveKind1Methods;
+void* AllocateZeroedFrontMemory(u32 n);
 
 extern u8 D_00219560[];
 
 typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
-void func_00121338(Attachment* self);
+void InitPoseSource(Attachment* self);
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
 // shared one, each table followed by a zero word.
-void func_0011F0C8();
-void func_0011EFC8();
-void func_0011F180();
-void func_0011F320();
-void func_0011F210();
-void func_0011F3E8();
-void func_0011F478();
-void func_0011F568();
-void func_0011F620();
-void func_0011EFB0();
-extern const WeightCurveVt D_00219668;
-extern const WeightCurveVt D_00219678;
-extern const WeightCurveVt D_00219688;
-extern const WeightCurveVt D_00219698;
-extern const WeightCurveVt D_002196A8;
-void* func_0018D5C0(WeightCurve* n);
+void EvaluateTangentWeightCurve();
+void ReadTangentWeightCurve();
+void GetTangentWeightCurveTimes();
+void EvaluateControlPointWeightCurve();
+void ReadControlPointWeightCurve();
+void GetControlPointWeightCurveTimes();
+void EvaluateLinearWeightCurve();
+void ReadLinearWeightCurve();
+void GetLinearWeightCurveTimes();
+void GetNoWeightCurveTimes();
+extern const WeightCurveVt g_weightCurveKind0Methods;
+extern const WeightCurveVt g_weightCurveKind1Methods;
+extern const WeightCurveVt g_weightCurveKind2Methods;
+extern const WeightCurveVt g_weightCurveKind3Methods;
+extern const WeightCurveVt g_weightCurveKind4Methods;
+void* AllocateZeroedFrontMemory(WeightCurve* n);
 
 typedef void (*FrameOutToldFn)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
-void func_0011E560(void)
+void InitObjectBuiltinTable(void)
 {
     FillObjectPropertyTable();
 }
 
-BaseObject* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
+BaseObject* CreateTypedRecord(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
     Desc01* owner = *(Desc01**)((u8*)D_00247448 + off);
@@ -322,7 +322,7 @@ BaseObject* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     return r;
 }
 
-void func_0011E680(void* obj, PropertyDescriptor* d, BufferedStream* r)
+void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
 {
     PropertyValues sc;
     ScriptValue ret;
@@ -545,7 +545,7 @@ void func_0011E680(void* obj, PropertyDescriptor* d, BufferedStream* r)
     }
 }
 
-void func_0011EC40(void* self, void* obj)
+void ReadPropertyRecords(void* self, void* obj)
 {
     s32 r;
     while ((r = ReadBufferedS16(obj)) >= 0) {
@@ -553,13 +553,13 @@ void func_0011EC40(void* self, void* obj)
     }
 }
 
-s32 func_0011ECA0(s32 value)
+s32 MapKeyToSlotIndex(s32 value)
 {
     s32 r = value - 12;
     return ((u32)30 < (u32)r) ? -1 : r;
 }
 
-void func_0011ECB8(World* self, void* a1, void* a2)
+void ReadSlotObjects(World* self, void* a1, void* a2)
 {
     s32 n = ReadBufferedS16(a2);
     if (n > 0) {
@@ -580,7 +580,7 @@ void func_0011ECB8(World* self, void* a1, void* a2)
     }
 }
 
-void func_0011EDA8(BaseObject* self)
+void ApplyObjectClassDefaults(BaseObject* self)
 {
     BufferedStream buf;
     s32 off = self->desc->id << 3;
@@ -602,7 +602,7 @@ void func_0011EDA8(BaseObject* self)
     }
 }
 
-void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr)
+void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr)
 {
     s32 hi = n;
     s32 lo = 1;
@@ -656,11 +656,11 @@ void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff
     *outPtr = p;
 }
 
-void func_0011EF40(void)
+void EvaluateNoPositionCurve(void)
 {
 }
 
-void func_0011EF48(PositionCurve* unused, s32* a, s32* b)
+void GetNoPositionCurveTimes(PositionCurve* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0) {
@@ -668,15 +668,15 @@ void func_0011EF48(PositionCurve* unused, s32* a, s32* b)
     }
 }
 
-void func_0011EF60(void)
+void EvaluateNoRotationCurve(void)
 {
 }
 
-void func_0011EF68(void)
+void GetNoRotationCurve(void)
 {
 }
 
-void func_0011EF70(RotationCurve* self, s32* first, s32* second)
+void GetNoRotationCurveTimes(RotationCurve* self, s32* first, s32* second)
 {
     *first = 0;
     if (second != 0) {
@@ -684,11 +684,11 @@ void func_0011EF70(RotationCurve* self, s32* first, s32* second)
     }
 }
 
-void func_0011EF88()
+void EvaluateNoScaleCurve()
 {
 }
 
-void func_0011EF90(ScaleCurve* a0, s32* a1, s32* a2)
+void GetNoScaleCurveTimes(ScaleCurve* a0, s32* a1, s32* a2)
 {
     *a1 = 0;
     if (a2 != 0) {
@@ -696,18 +696,18 @@ void func_0011EF90(ScaleCurve* a0, s32* a1, s32* a2)
     }
 }
 
-void func_0011EFA8()
+void EvaluateNoWeightCurve()
 {
 }
 
-void func_0011EFB0(WeightCurve* unused, s32* a, s32* b)
+void GetNoWeightCurveTimes(WeightCurve* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0)
         *b = 0;
 }
 
-void func_0011EFC8(TangentWeightCurve* self, Stream83* src)
+void ReadTangentWeightCurve(TangentWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
     self->keys = (TangentWeightKey*)AllocateFrontMemory(0x18 * self->count);
@@ -722,7 +722,7 @@ void func_0011EFC8(TangentWeightCurve* self, Stream83* src)
     }
 }
 
-void func_0011F0C8(TangentWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void EvaluateTangentWeightCurve(TangentWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
@@ -740,7 +740,7 @@ void func_0011F0C8(TangentWeightCurve* self, s32 unused, s32 flags, f32* outF, f
     EvaluateHermiteSegment(delta, diff, scale, ((TangentWeightKey*)p)->value, ((TangentWeightKey*)p)->f, ((TangentWeightKey*)p + 1)->value, ((TangentWeightKey*)p + 1)->d, outF, outI, 0);
 }
 
-void func_0011F180(TangentWeightCurve* src, s32* outCount, f32** outValues)
+void GetTangentWeightCurveTimes(TangentWeightCurve* src, s32* outCount, f32** outValues)
 {
     *outCount = src->count;
     if (outValues != 0)
@@ -753,7 +753,7 @@ void func_0011F180(TangentWeightCurve* src, s32* outCount, f32** outValues)
     }
 }
 
-void func_0011F210(ControlPointWeightCurve* self, Stream83* src)
+void ReadControlPointWeightCurve(ControlPointWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
     self->keys = (ControlPointWeightKey*)AllocateFrontMemory(0x20 * self->count);
@@ -772,7 +772,7 @@ void func_0011F210(ControlPointWeightCurve* self, Stream83* src)
     }
 }
 
-void func_0011F320(ControlPointWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void EvaluateControlPointWeightCurve(ControlPointWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
@@ -790,7 +790,7 @@ void func_0011F320(ControlPointWeightCurve* self, s32 unused, s32 flags, f32* ou
     SolveBezierSegment(delta, diff, scale, ((ControlPointWeightKey*)p)->value, ((ControlPointWeightKey*)p)->g, ((ControlPointWeightKey*)p)->h, ((ControlPointWeightKey*)p + 1)->value, ((ControlPointWeightKey*)p + 1)->d, ((ControlPointWeightKey*)p + 1)->e, outF, outI, 0);
 }
 
-void func_0011F3E8(ControlPointWeightCurve* self, s32* outCount, f32** outArr)
+void GetControlPointWeightCurveTimes(ControlPointWeightCurve* self, s32* outCount, f32** outArr)
 {
     s32 n = self->count;
     *outCount = n;
@@ -807,7 +807,7 @@ void func_0011F3E8(ControlPointWeightCurve* self, s32* outCount, f32** outArr)
     }
 }
 
-void func_0011F478(LinearWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void EvaluateLinearWeightCurve(LinearWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
@@ -831,7 +831,7 @@ void func_0011F478(LinearWeightCurve* self, s32 unused, s32 flags, f32* outF, f3
     }
 }
 
-void func_0011F568(LinearWeightCurve* self, Stream83* src)
+void ReadLinearWeightCurve(LinearWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
     self->keys = (LinearWeightKey*)AllocateFrontMemory(self->count << 3);
@@ -842,7 +842,7 @@ void func_0011F568(LinearWeightCurve* self, Stream83* src)
     }
 }
 
-void func_0011F620(LinearWeightCurve* self, s32* count, f32** out)
+void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
 {
     s32 n = self->count;
     *count = n;
@@ -856,7 +856,7 @@ void func_0011F620(LinearWeightCurve* self, s32* count, f32** out)
 
 ASM_FUNC(func_0011F6B0);
 
-void func_0011F798(WeightCurve** out, Vec02* dst, Stream83* src)
+void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
     s32 mask = ReadBufferedU8(src);
     WeightCurve** slot = out;
@@ -877,7 +877,7 @@ void func_0011F798(WeightCurve** out, Vec02* dst, Stream83* src)
     } while (i >= 0);
 }
 
-void func_0011F850(WeightCurve** objs, s32* outCount, f32** outArr)
+void GatherAxisCurveTimes(WeightCurve** objs, s32* outCount, f32** outArr)
 {
     s32 counts[3];
     f32* ptrs[3];
@@ -914,7 +914,7 @@ void func_0011F850(WeightCurve** objs, s32* outCount, f32** outArr)
     if (outArr) *outArr = arr;
 }
 
-void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
+void EvaluateVectorKeyCurve(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
 {
     CurveSegment s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
@@ -922,7 +922,7 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     EvaluateHermiteVectorSegment(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
 
-void func_0011FA88(s32* outCount, VectorKey** outItems, Stream83* src)
+void ReadVectorKeys(s32* outCount, VectorKey** outItems, Stream83* src)
 {
     s32 count = ReadBufferedU16(src);
     VectorKey* items = (VectorKey*)AllocateFrontMemory(count << 6);
@@ -948,7 +948,7 @@ void func_0011FA88(s32* outCount, VectorKey** outItems, Stream83* src)
     *outItems = items;
 }
 
-void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr)
+void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr)
 {
     *outCount = count;
     if (outArr) {
@@ -965,7 +965,7 @@ void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr)
     }
 }
 
-void func_0011FC20(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
 {
     EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
@@ -974,12 +974,12 @@ void func_0011FC20(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s
 
 ASM_FUNC(func_0011FC90);
 
-void func_0011FDB8(AxisPositionCurve* self, s32* outCount, f32** outTimes)
+void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_0011FDD8(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
 {
     EvaluateVectorKeyCurve(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
@@ -988,12 +988,12 @@ void func_0011FDD8(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s3
 
 ASM_FUNC(func_0011FE40);
 
-void func_0011FED8(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
+void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 {
     GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
-void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
+void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
 {
     AngleSample tmp;
     EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
@@ -1005,12 +1005,12 @@ void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3
         ((AxisRotationToldFn)other->desc02()->m29)(other, p3, p4);
 }
 
-void* func_0011FFA8(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void* GetAxisRotationCurve(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     return EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
 }
 
-void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
+void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
 {
     AxisCurveClosure loc;
     s32 result;
@@ -1031,12 +1031,12 @@ void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
     PopBackMemoryMark();
 }
 
-void func_00120110(AxisRotationCurve* self, s32* outCount, f32** outTimes)
+void GetAxisRotationCurveKeyTimes(AxisRotationCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_00120130(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
+void EvaluateKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
                    void* output, void* state)
 {
     KeyedAngleSample buffer;
@@ -1054,12 +1054,12 @@ void func_00120130(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
     }
 }
 
-void func_001201D0(KeyedRotationCurve* self)
+void GetKeyedRotationCurve(KeyedRotationCurve* self)
 {
 	EvaluateVectorKeyCurve(self->count, self->keys);
 }
 
-void func_001201F0(KeyedRotationCurve* self, Stream83* arg)
+void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
 {
     KeyedCurveClosure loc;
     s32 result;
@@ -1078,12 +1078,12 @@ void func_001201F0(KeyedRotationCurve* self, Stream83* arg)
     self->closed = result;
 }
 
-void func_001202C0(KeyedRotationCurve* self, s32* outCount, f32** outTimes)
+void GetKeyedRotationCurveKeyTimes(KeyedRotationCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-void func_001202F0(AxisScaleCurve* self, PlacedObject* second, void* third,
+void EvaluateAxisScaleCurve(AxisScaleCurve* self, PlacedObject* second, void* third,
                    Mat3U* output, f32 factor)
 {
     Vec3 result;
@@ -1097,17 +1097,17 @@ void func_001202F0(AxisScaleCurve* self, PlacedObject* second, void* third,
     }
 }
 
-void func_00120360(AxisScaleCurve* self, Stream83* p)
+void ReadAxisScaleCurve(AxisScaleCurve* self, Stream83* p)
 {
     ReadAxisCurves(self->axis, &self->base, p);
 }
 
-void func_00120388(AxisScaleCurve* self, s32* outCount, f32** outTimes)
+void GetAxisScaleCurveKeyTimes(AxisScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_001203A8(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
+void EvaluateKeyedScaleCurve(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
                    Mat3U* output, f32 factor)
 {
     Vec3 result;
@@ -1121,12 +1121,12 @@ void func_001203A8(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
     }
 }
 
-void func_00120418(KeyedScaleCurve* self, Stream83* stream)
+void ReadKeyedScaleCurve(KeyedScaleCurve* self, Stream83* stream)
 {
 	ReadVectorKeys(&self->count, &self->keys, stream);
 }
 
-void func_00120440(KeyedScaleCurve* self, s32* outCount, f32** outTimes)
+void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
@@ -1135,7 +1135,7 @@ ASM_FUNC(func_00120470);
 
 ASM_FUNC(func_00120700);
 
-void func_00120AA8(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 v0 = sum1;
@@ -1209,7 +1209,7 @@ void func_00120AA8(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0
         *out1 = sum1;
 }
 
-void func_00120D58(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 sum0 = sum1;
@@ -1274,7 +1274,7 @@ void func_00120D58(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0
         *out1 = sum1;
 }
 
-PositionCurve* func_00120FB0(s32 kind)
+PositionCurve* CreatePositionCurve(s32 kind)
 {
     PositionCurve* p;
     switch (kind) {
@@ -1300,7 +1300,7 @@ PositionCurve* func_00120FB0(s32 kind)
     return p;
 }
 
-RotationCurve* func_00121050(s32 kind) {
+RotationCurve* CreateRotationCurve(s32 kind) {
     RotationCurve* p;
     switch (kind) {
     case 0:
@@ -1325,7 +1325,7 @@ RotationCurve* func_00121050(s32 kind) {
     return p;
 }
 
-ScaleCurve* func_001210F0(s32 kind)
+ScaleCurve* CreateScaleCurve(s32 kind)
 {
     ScaleCurve* p;
     switch (kind) {
@@ -1347,7 +1347,7 @@ ScaleCurve* func_001210F0(s32 kind)
     return p;
 }
 
-WeightCurve* func_00121160(u32 kind)
+WeightCurve* CreateWeightCurve(u32 kind)
 {
     WeightCurve* o;
     switch (kind) {
@@ -1379,7 +1379,7 @@ WeightCurve* func_00121160(u32 kind)
     return o;
 }
 
-Attachment* func_00121228(World* root, PlacedObject* value, const T2195_Vt* table)
+Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table)
 {
 	Attachment* node = (Attachment*)PopZeroedFreeSlot(&root->pool1B20);
 	node->vt = table;
@@ -1387,14 +1387,14 @@ Attachment* func_00121228(World* root, PlacedObject* value, const T2195_Vt* tabl
 	return node;
 }
 
-Attachment* func_00121280(Attachment* self, World* a, PlacedObject* b)
+Attachment* ClonePoseSource(Attachment* self, World* a, PlacedObject* b)
 {
     Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)D_00219560);
     node->vt->copy(node, self);
     return node;
 }
 
-void func_001212D8(Attachment* self, Attachment* src)
+void CopyPoseSource(Attachment* self, Attachment* src)
 {
     Link2195 tmp = self->link;
     PlacedObject* saved = self->owner;
@@ -1403,7 +1403,7 @@ void func_001212D8(Attachment* self, Attachment* src)
     self->owner = saved;
 }
 
-void func_00121338(Attachment* self, PlacedObject* value)
+void InitPoseSource(Attachment* self, PlacedObject* value)
 {
 	s8 m = -1;
 	self->owner = value;
@@ -1413,7 +1413,7 @@ void func_00121338(Attachment* self, PlacedObject* value)
 	self->mode0 = m;
 }
 
-void func_00121358(Attachment* self, s32 flags)
+void ReleasePoseSource(Attachment* self, s32 flags)
 {
     PlacedObject* m = self->owner;
     s32 local[4];
@@ -1423,7 +1423,7 @@ void func_00121358(Attachment* self, s32 flags)
     m->desc02()->m2B(m);
     if (self == a && m->f1EC == 0 && (flags & 1) != 0) {
         if ((m->desc->flags & 2) != 0) {
-            func_001BA500(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
+            ConstrainColliderVector(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
         } else {
             SetPlacedObjectVelocity(m, D_00248D30);
@@ -1431,7 +1431,7 @@ void func_00121358(Attachment* self, s32 flags)
     }
     if (self == b && m->f1F0 == 0 && (flags & 2) != 0) {
         if ((m->desc->flags & 2) != 0) {
-            func_001BA500(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
+            ConstrainColliderVector(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
         } else {
             SetPlacedObjectSpin(m, D_00248D30);
@@ -1440,7 +1440,7 @@ void func_00121358(Attachment* self, s32 flags)
     PushFreeSlot(&m->world->pool1B20, self);
 }
 
-void func_001214B8(Attachment* self, Vec02* out1, Vec02* out2)
+void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
 {
     *out1 = self->owner->v190;
     *out2 = *(Vec02*)D_00248D30;
@@ -1449,21 +1449,21 @@ void func_001214B8(Attachment* self, Vec02* out1, Vec02* out2)
     }
 }
 
-void func_00121508(Attachment* self, Mat02* out1, Vec02* out2)
+void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
 {
     *out1 = self->owner->m1A0;
     *out2 = *(Vec02*)D_00248D30;
     ((FrameOutToldFn)self->owner->desc02()->m29)(self->owner, out1, out2);
 }
 
-void func_00121568(Attachment* self, f32* value, f32* slope)
+void GetOwnerValue(Attachment* self, f32* value, f32* slope)
 {
 	Rec2195_224* rec = (Rec2195_224*)self->owner->f224;
 	*value = rec->f8C;
 	*slope = 0.0f;
 }
 
-void func_00121580(Attachment* unused, Mat02* out)
+void GetIdentityMatrix(Attachment* unused, Mat02* out)
 {
     Mat02* src = (Mat02*)g_identityMatrix;
     out->r[0] = src->r[0];
@@ -1471,12 +1471,12 @@ void func_00121580(Attachment* unused, Mat02* out)
     out->r[2] = src->r[2];
 }
 
-f32 func_001215A8(Attachment* self, s32 index)
+f32 GetOwnerIndexedValue(Attachment* self, s32 index)
 {
 	return (*(f32**)((u8*)self->owner + 0x274))[index];
 }
 
-void func_001215C0(Attachment* obj)
+void ChoosePoseSourceModes(Attachment* obj)
 {
     PlacedObject* node = obj->owner;
     Collider* a2 = (node->desc->flags & 2) ? (Collider*)node : 0;
@@ -1502,7 +1502,7 @@ void func_001215C0(Attachment* obj)
     }
 }
 
-void func_00121648(Attachment* self, s32 flag)
+void ApplyPoseSource(Attachment* self, s32 flag)
 {
     PoseLocals loc;
     PlacedObject* s2 = self->owner;
@@ -1536,7 +1536,7 @@ INCLUDE_RODATA(jtbl_002499C0);
 
 ASM_FUNC(func_00121DE0);
 
-void func_00122488(Attachment* self, s32 val)
+void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 {
     f32 ret = self->vt->getIndexed(self, val);
     switch (self->mode3) {
@@ -1556,7 +1556,7 @@ ASM_FUNC(func_00122550);
 
 ASM_FUNC(func_001225D0);
 
-void func_001226D8(Attachment* self)
+void SettlePoseSourceModes(Attachment* self)
 {
     if (self->mode0 == 7) {
         self->mode0 = 3;
@@ -1566,7 +1566,7 @@ void func_001226D8(Attachment* self)
     }
 }
 
-void func_00122708(T2195_588* self, PlacedObject* src)
+void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
     self->pos = src->v190;
@@ -1587,7 +1587,7 @@ void func_00122708(T2195_588* self, PlacedObject* src)
     self->valuesC4 = *(f32**)((u8*)src + 0x274);
 }
 
-void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
+void GetSnapshotPosition(T2195_588* src, Vec02* d0, Vec02* d1)
 {
     *d0 = src->pos;
     *d1 = src->vec;
@@ -1598,7 +1598,7 @@ void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
     }
 }
 
-void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
+void GetSnapshotRotation(T2195_588* src, Mat02* d0, Vec02* d1)
 {
     d0->r[0] = src->rot.r[0];
     d0->r[1] = src->rot.r[1];
@@ -1609,25 +1609,25 @@ void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
     fn(obj, d0, d1);
 }
 
-void func_00122840(T2195_588* self, f32* first, f32* second)
+void GetSnapshotValue(T2195_588* self, f32* first, f32* second)
 {
 	*first = self->f80;
 	*second = self->f84;
 }
 
-void func_00122858(T2195_588* self, Mat02* output)
+void GetSnapshotMatrix(T2195_588* self, Mat02* output)
 {
 	output->r[0] = self->m90.r[0];
 	output->r[1] = self->m90.r[1];
 	output->r[2] = self->m90.r[2];
 }
 
-f32 func_00122878(T2195_588* self, s32 i)
+f32 GetSnapshotIndexedValue(T2195_588* self, s32 i)
 {
     return self->valuesC4[i];
 }
 
-void func_00122890(T2195_5B0* self, PlacedObject* src)
+void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
     self->pos = &src->v190;
@@ -1646,7 +1646,7 @@ void func_00122890(T2195_5B0* self, PlacedObject* src)
     self->ident = (Mat02*)g_identityMatrix;
 }
 
-void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
+void GetLinkedPosition(T2195_5B0* self, Vec02* first, Vec02* second)
 {
 	*first = *self->pos;
 	*second = *self->vec;
@@ -1655,7 +1655,7 @@ void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
 		callback(self->owner);
 }
 
-void func_00122968(T2195_5B0* self, Mat02* d1, Vec02* d2)
+void GetLinkedRotation(T2195_5B0* self, Mat02* d1, Vec02* d2)
 {
     Mat02* s = self->rot;
     d1->r[0] = s->r[0];
@@ -1666,13 +1666,13 @@ void func_00122968(T2195_5B0* self, Mat02* d1, Vec02* d2)
 
 }
 
-void func_001229C0(T2195_5B0* self, f32* a, f32* b)
+void GetLinkedValue(T2195_5B0* self, f32* a, f32* b)
 {
     *a = *self->p2C;
     *b = *self->p30;
 }
 
-void func_001229E0(T2195_5B0* self, Mat02* dst)
+void GetLinkedMatrix(T2195_5B0* self, Mat02* dst)
 {
     Mat02* s = self->ident;
     dst->r[0] = s->r[0];
@@ -1680,12 +1680,12 @@ void func_001229E0(T2195_5B0* self, Mat02* dst)
     dst->r[2] = s->r[2];
 }
 
-f32 func_00122A00(T2195_5B0* self, s32 i)
+f32 GetLinkedIndexedValue(T2195_5B0* self, s32 i)
 {
     return self->values[i];
 }
 
-void func_00122A18(T2195_5D8* self)
+void InitIdentityPoseSource(T2195_5D8* self)
 {
     InitPoseSource(self);
     Vec02* src = (Vec02*)g_identityMatrix;
@@ -1703,7 +1703,7 @@ ASM_FUNC(func_00122A80);
 
 ASM_FUNC(func_00122B30);
 
-void func_00122C48(Attachment* self, f32* a1, f32* a2)
+void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
 {
     Attachment* p = self;
     while ((p = p->link.next) != 0) {
@@ -1720,12 +1720,12 @@ void func_00122C48(Attachment* self, f32* a1, f32* a2)
 
 ASM_FUNC(func_00122CB0);
 
-f32 func_00122D90(void)
+f32 GetIdentityPoseIndexedValue(void)
 {
     return 0.0f;
 }
 
-void func_00122DA0(T2195_600* self, PlacedObject* a1)
+void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
 {
     InitPoseSource(self, a1);
     self->f1C = 1.0f;
@@ -1734,7 +1734,7 @@ void func_00122DA0(T2195_600* self, PlacedObject* a1)
 
 ASM_FUNC(func_00122DE0);
 
-void func_00122F28(T2195_7C0* self, s32 a1)
+void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 {
     AnimationPlayer* o = self->player;
     RemoveFromList(&o->list44, self);
@@ -1744,7 +1744,7 @@ void func_00122F28(T2195_7C0* self, s32 a1)
     ReleasePoseSource(self, a1);
 }
 
-void func_00122F88(T2195_7C0* self, Attachment* a1)
+void CopyTrackPoseSource(T2195_7C0* self, Attachment* a1)
 {
     AnimationPlayer* saved = self->player;
     Pair2195 tmp = self->w20;
@@ -1753,7 +1753,7 @@ void func_00122F88(T2195_7C0* self, Attachment* a1)
     self->player = saved;
 }
 
-void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
+void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
 {
     AnimationPlayer* track = self->player;
     Track83* e = &track->anim->tracks[self->index];
@@ -1780,7 +1780,7 @@ void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
     GetOwnerPosition(self, a1, a2);
 }
 
-void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
+void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
 {
     PlacedObject* p4 = self->owner;
     AnimationPlayer* track = self->player;
@@ -1808,7 +1808,7 @@ void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
     GetOwnerRotation(self, a1, a2);
 }
 
-void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
+void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
 {
     f32* saved = a1;
     PlacedObject* f4 = self->owner;
@@ -1822,7 +1822,7 @@ void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
     }
 }
 
-void func_001232E8(T2195_7C0* self, Mat02* a1)
+void GetTrackScaleMatrix(T2195_7C0* self, Mat02* a1)
 {
     Mat02* saved = a1;
     PlacedObject* f4 = self->owner;
@@ -1836,7 +1836,7 @@ void func_001232E8(T2195_7C0* self, Mat02* a1)
     }
 }
 
-f32 func_00123358(T2195_7C0* self, s32 index)
+f32 GetTrackIndexedValue(T2195_7C0* self, s32 index)
 {
     AnimationPlayer* track = self->player;
     Track83* row = &track->anim->tracks[self->index];

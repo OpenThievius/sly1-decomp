@@ -19,14 +19,14 @@ typedef struct MathError {
     s32 errorCode;
 } MathError;
 
-extern const s32 D_0024FF78;    /* the error mode: -1 none, 0, 1, 2 (only the error code) */
-extern const double D_0024FF70; /* a double's positive infinity */
+extern const s32 g_mathErrorMode;    /* the error mode: -1 none, 0, 1, 2 (only the error code) */
+extern const double g_mathInfinity; /* a double's positive infinity */
 
-s32 func_00208FE8(MathError* e);
-s32* func_002014F0(void);
-s32 func_00209210(f32 x);
-s32 func_00209238(f32 x);
-double func_00209010(double x);
+s32 HandleMathError(MathError* e);
+s32* GetErrorNumberAddress(void);
+s32 IsFinite(f32 x);
+s32 IsNotANumber(f32 x);
+double RoundToInteger(double x);
 
 double func_001FD868(f32 x);
 f32 func_001FD578(double x);

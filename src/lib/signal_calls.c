@@ -9,12 +9,12 @@ struct LibcState {
     s32 error;
 };
 
-extern s32 D_0027B328;
+extern s32 g_systemCallError;
 
-s32 func_001FA0E0(s32 pid, s32 sig);
-s32 func_001FA0D8(void);
+s32 SignalProcess(s32 pid, s32 sig);
+s32 GetProcessId(void);
 
-s32 func_002016A0(struct LibcState* state, s32 pid, s32 sig)
+s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig)
 {
     s32 ret;
 
@@ -25,7 +25,7 @@ s32 func_002016A0(struct LibcState* state, s32 pid, s32 sig)
     return ret;
 }
 
-s32 func_00201700(struct LibcState* state)
+s32 GetProcessIdFor(struct LibcState* state)
 {
     return GetProcessId();
 }

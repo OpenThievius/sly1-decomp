@@ -46,12 +46,12 @@ struct Frame_188270 {
     s32 res;
 };
 
-void func_0018D608(void);
-void* func_0018D658(s32 size);
-void func_0018D6F0(void);
+void PushBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+void PopBackMemoryMark(void);
 s32 func_0013E430(Item_188270* node, f32 f, void* p, Item_188270** out);
 
-s32 func_00188270(s32 unused, Pair_188270* pair, s32 arg)
+s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
 {
     Frame_188270 fr;
     fr.res = 0;
@@ -71,8 +71,8 @@ s32 func_00188270(s32 unused, Pair_188270* pair, s32 arg)
             most = n->f3F4;
         }
     }
-    func_0018D608();
-    Item_188270* buf = (Item_188270*)func_0018D658(most * 12);
+    PushBackMemoryMark();
+    Item_188270* buf = (Item_188270*)AllocateBackMemory(most * 12);
     s32 idx;
     for (n = *(Node_188270**)((u8*)fr.y + 0x2D8); n; n = *(Node_188270**)((u8*)n + 0x2E4)) {
         if (n->flags & 0x80000000000ULL) {
@@ -108,6 +108,6 @@ s32 func_00188270(s32 unused, Pair_188270* pair, s32 arg)
             fr.y->vt->f1(fr.y, n, n->f3F0, n->f3F8, n->f3F8, &fr.res);
         }
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
     return fr.res;
 }

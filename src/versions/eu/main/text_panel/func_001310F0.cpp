@@ -9,7 +9,7 @@ struct Obj_1310F0_eu {
     u32 f580;
 };
 void func_eu_001AAF38(Obj_1310F0_eu* self, s32 a1);
-void func_001310F0(Obj_1310F0_eu* self, s32 a1)
+void InitTextPanel(Obj_1310F0_eu* self, s32 a1)
 {
     self->f544 = 640.0f;
     self->f548 = 468.610168f;

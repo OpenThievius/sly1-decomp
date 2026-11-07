@@ -71,7 +71,7 @@ struct PadRecord {
 
 typedef char check_PadRecord[sizeof(PadRecord) == 0xC4 ? 1 : -1];
 
-extern PadRecord D_00262C70;      // pad_input.cpp
-extern PadRecord D_00262D38;      // pad_input.cpp
+extern PadRecord g_padRecord;      // pad_input.cpp
+extern PadRecord g_blankPadRecord;      // pad_input.cpp
 
 #endif

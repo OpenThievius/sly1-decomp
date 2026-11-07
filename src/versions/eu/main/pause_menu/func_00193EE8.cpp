@@ -8,11 +8,11 @@ extern f32 D_eu_0026BB30;
 extern f32 D_eu_0026BB34;
 extern f32 D_eu_0026BB38;
 extern f32 D_eu_0026BB3C;
-s32 func_001BE980(void);
-void func_001BE728(void* slot);
+s32 HasStreamVoice(void);
+void OpenKeyRecord(void* slot);
 void* func_eu_001DE018(s32 n);
 
-void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
+void ChangePauseMenuPage(Self_193EE8_eu* self, s32 a, s32 b)
 {
     if (a == b) {
         return;

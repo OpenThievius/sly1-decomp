@@ -17,114 +17,114 @@
 #include "state_walker.h"
 #include "asm_func.h"
 
-void func_001830D8(void* self);
+void CopyObjectData(void* self);
 
-void func_00192C58(void* self);
+void FinishSwitchedCollider(void* self);
 
-void func_00181DA8(ModeWalker* self, s32 n);
+void SetModeWalkerMode(ModeWalker* self, s32 n);
 
-void func_00152600(void* a, void* b);
+void RemoveFromList(void* a, void* b);
 
-void func_00128018(void* a0, s32 zero, void* table, void* out);
+void TransformPointBetweenFrames(void* a0, s32 zero, void* table, void* out);
 
-void func_001BC260(f32 t, void* obj, void* a, void* b);
+void ComputeColliderJumpVelocity(f32 t, void* obj, void* a, void* b);
 
-f32 func_00205778(f32 a, f32 b);
+f32 ArctangentOfRatio(f32 a, f32 b);
 
-f32 func_001EA408(f32 a);
+f32 WrapAngle(f32 a);
 
-void func_001C5D58(void* obj);
+void TurnColliderTowardHeading(void* obj);
 
-void func_00175170(void* obj, s32 a, s32 b);
+void SetPlayerState(void* obj, s32 a, s32 b);
 
-void func_001BC4D8(void* self, void* sub);
+void ExtractContactsByPartMode(void* self, void* sub);
 
-void func_0013CE40(void* self);
+void StartMaskedCollider(void* self);
 
-void func_00124DF8(void* self, s32 a, void* table);
+void ResolveObjectLinks(void* self, s32 a, void* table);
 
-s32 func_001B6290(void* a0, void* self, s32 b, s32 c);
+s32 CreateStateWalker(void* a0, void* self, s32 b, s32 c);
 
-s32 func_00121160(s32 a);
+s32 CreateWeightCurve(s32 a);
 
-void* func_0018D500(s32 size);
+void* AllocateFrontMemory(s32 size);
 
-void func_00152600(u8* p, void* self);
+void RemoveFromList(u8* p, void* self);
 
-void func_00152470(u8* p, void* self);
+void AppendToList(u8* p, void* self);
 
-void func_00152470(void* sub, void* self);
+void AppendToList(void* sub, void* self);
 
-void func_00182D48(void* self);
+void RegisterObject(void* self);
 
-void func_00152470(u8* table, void* self);
+void AppendToList(u8* table, void* self);
 
-void func_00152600(List01* list, BaseObject* item);
+void RemoveFromList(List01* list, BaseObject* item);
 
-void func_00182ED0(void* self);
+void UnregisterObject(void* self);
 
-void func_00152600(u8* table, void* self);
+void RemoveFromList(u8* table, void* self);
 
-void func_001D73A8(void* self);
+void InitPathFollower(void* self);
 
-void func_001DAE48(void);
+void CapturePathFollowerPose(void);
 
-void func_001DAF08(void* self, s32 code, MessageBody* rec);
+void HandlePathFollowerNotification(void* self, s32 code, MessageBody* rec);
 
-void func_0013DDB8(void* self);
+void InitPlayerFlaggedCollider(void* self);
 
-void func_00152470(List01* list, BaseObject* item);
+void AppendToList(List01* list, BaseObject* item);
 
 typedef void (*LaunchFn)(void);
 
-s32 func_00160C58();
+s32 HasSpareCount();
 
-void func_00192990(void* self, s32 value);
+void SetSwitchedColliderEnabled(void* self, s32 value);
 
-void func_00175170(void* self, s32 a, s32 b);
+void SetPlayerState(void* self, s32 a, s32 b);
 
-void func_001929D0(void* value);
+void ActivateSwitchedCollider(void* value);
 
-void func_001D7098(void* out, s32 mode, void* owner);
+void InitOwnerMessage(void* out, s32 mode, void* owner);
 
-void func_00181B20(void);
+void LaunchPlayerFromModeWalker(void);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
 // What func_00181BC8 builds on its stack: an owner message (InitOwnerMessage) whose function
 // the player calls (slot 76), then the two words it tells its listeners (kind 0x17).
 struct LaunchMessage { void* self; s32 val; s32 pad8; LaunchFn fn; };
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
-extern f32 D_00275C60[];
+extern f32 g_unitRange[];
 
-void func_001D9C98(ModeWalker* self, f32 dt);
+void UpdatePathFollower(ModeWalker* self, f32 dt);
 
-void func_001D7098(void* out, s32 mode, Collider* c);
+void InitOwnerMessage(void* out, s32 mode, Collider* c);
 
-void func_001861E8(void* a, void* head);
+void FreePooledContactChain(void* a, void* head);
 
-void func_00129E10(void* o, f32 v);
+void SetScaledPositionSpring(void* o, f32 v);
 
-void func_00129FB0(void* o, f32 v);
+void SetScaledRotationSpring(void* o, f32 v);
 
-s32 func_001DDA80(void* p);
+s32 IsPadSelectFlagHeld(void* p);
 
 
-void func_001D7440(void* self);
+void StartPathFollower(void* self);
 
-void func_00124DF8(void* self, s32 a1, void* a2);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
 
-void func_00129D00(void* a, s32 b, void* c);
+void AddMatrixAttachment(void* a, s32 b, void* c);
 
-void func_00128018(void* a, void* b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
 
-s32 func_001B4688(s32 key);
+s32 FindAnimRecord(s32 key);
 
-void func_001B64D8(void* p, s32 n);
+void SetStateWalkerTarget(void* p, s32 n);
 
-void func_001B6628(void* p, s32 n);
+void TeleportStateWalker(void* p, s32 n);
 
 struct ClampHelper
 {
@@ -144,18 +144,18 @@ struct ClampHelper
 
 extern Rgba4 D_002623E0[];
 
-f32 func_00205210(f32 x);
+f32 Cosine(f32 x);
 
-void func_00126A48(ModeWalker* o, u32 c);
+void SetObjectTreeRecordValue(ModeWalker* o, u32 c);
 
 void func_00125C90(ModeWalker* o, void* a, void* b);
 
-f32 func_00205210(f32 value);
+f32 Cosine(f32 value);
 
 // The file's .data, 0x2640B0 to 0x264260, in retail's order. GCC puts an object of eight bytes
 // or more on 8, so the words after D_00264128, D_00264154 and D_00264190 are padding: the three
 // vectors at 0x264160 are on 16 (Vec02; func_00128018 loads D_00264180 with lqc2).
-ObjectLink D_002640B0[10] = {
+ObjectLink g_modeWalkerLinks[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
 };
@@ -181,32 +181,32 @@ f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
 f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
-void func_00180EB0(ListedKeepObject* self)
+void RegisterListedKeepObject(ListedKeepObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C9C, self);
 }
 
-void func_00180EE8(ListedKeepObject* self)
+void UnregisterListedKeepObject(ListedKeepObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C9C, self);
 }
 
-void func_00180F20(ListedKeepObject* self)
+void CopyListedKeepObject(ListedKeepObject* self)
 {
     PathCurveKeptBits saved = self->keep;
     CopyObjectData(self);
     self->keep = saved;
 }
 
-void func_00180F68(ModeWalker* self)
+void InitModeWalkerObject(ModeWalker* self)
 {
     InitPathFollower(self);
     self->fBF4 = -10.0f;
 }
 
-void func_00180F98(ModeWalker* self)
+void StartModeWalkerObject(ModeWalker* self)
 {
     StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
@@ -215,7 +215,7 @@ void func_00180F98(ModeWalker* self)
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
-    func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
+    TransformPointBetweenFrames(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
     SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
     T217D_BF0* base = &D_00270650;
@@ -225,7 +225,7 @@ void func_00180F98(ModeWalker* self)
 
 ASM_FUNC(func_00181078);
 
-void func_00181448(ModeWalker* self, f32 dt)
+void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 {
     s32 buf[4];
     UpdatePathFollower(self, dt);
@@ -257,8 +257,8 @@ void func_00181448(ModeWalker* self, f32 dt)
     if (v < lo) x = lo;
     else if (hi < v) x = hi;
     else x = v;
-    func_00129E10(self->fBCC, x * D_00264150);
-    func_00129FB0(self->fBCC, x * D_00264154);
+    SetScaledPositionSpring(self->fBCC, x * D_00264150);
+    SetScaledRotationSpring(self->fBCC, x * D_00264154);
     if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
 }
 
@@ -266,7 +266,7 @@ ASM_FUNC(func_00181658);
 
 ASM_FUNC(func_00181780);
 
-void func_00181818(ModeWalker* o, void* a, void* b)
+void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 {
     Rgba4 c;
     u8 from[4];
@@ -296,35 +296,35 @@ void func_00181818(ModeWalker* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-void func_00181A58(ModeWalker* self, void* outv)
+void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {
     Vec02* out = (Vec02*)((u8*)outv + 0x10);
     CapturePathFollowerPose();
     *out = ((PlacedObject*)self->fBC0)->v140;
 }
 
-s32 func_00181A98(ModeWalker* self)
+s32 IsModeWalkerRequestBlocked(ModeWalker* self)
 {
     if (self->fBB0 != 1 || self->fBF0 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
-s32 func_00181AE0(ModeWalker* p) { return p->fBF0 != 0; }
+s32 HasModeWalkerAcceptedRequest(ModeWalker* p) { return p->fBF0 != 0; }
 
-void func_00181AF0(ModeWalker* self)
+void FinishModeWalker(ModeWalker* self)
 {
     FinishSwitchedCollider(self);
     SetModeWalkerMode(self, 1);
 }
 
-void func_00181B20(void* unused, void* obj_)
+void LaunchPlayerFromModeWalker(void* unused, void* obj_)
 {
     Player* obj = (Player*)obj_;
     Vec02 first;
     Vec02 second;
 
-    func_00128018(unused, 0, &D_00264180, &first);
-    func_001BC260(D_00264190, obj, &first, &second);
+    TransformPointBetweenFrames(unused, 0, &D_00264180, &first);
+    ComputeColliderJumpVelocity(D_00264190, obj, &first, &second);
     obj->desc02()->m20(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
     obj->f638 = WrapAngle(r + 3.1415927f);
@@ -332,7 +332,7 @@ void func_00181B20(void* unused, void* obj_)
     SetPlayerState(obj, 4, 0x2B);
 }
 
-s32 func_00181BC8(ModeWalker* self, s32* arg)
+s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg)
 {
     LaunchMessage loc;
     s32 r;
@@ -375,7 +375,7 @@ tail:
     return 1;
 }
 
-void func_00181D28(ModeWalker* self, s32 code, MessageBody* rec)
+void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
         StateWalker* sub = self->fBBC;
@@ -394,12 +394,12 @@ void func_00181D28(ModeWalker* self, s32 code, MessageBody* rec)
     HandlePathFollowerNotification(self, code, rec);
 }
 
-void func_00181D88(ModeWalker* self)
+void ExtractModeWalkerContacts(ModeWalker* self)
 {
     ExtractContactsByPartMode(self, (u8*)self + 0xC04);
 }
 
-void func_00181DA8(ModeWalker* self, s32 mode)
+void SetModeWalkerMode(ModeWalker* self, s32 mode)
 {
     s32 old;
 
@@ -448,7 +448,7 @@ ASM_FUNC(func_00181ED0);
 
 ASM_FUNC(func_001821B0);
 
-void func_00182470(C24* self)
+void InitC24Object(C24* self)
 {
     InitPlayerFlaggedCollider(self);
     self->f6DC = 10.0f;
@@ -459,7 +459,7 @@ void func_00182470(C24* self)
     self->f6D4 = 0.5f;
 }
 
-void func_001824D8(C24* self)
+void StartC24Object(C24* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 2, D_00264230);

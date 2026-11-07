@@ -15,7 +15,7 @@
 // the weights.
 struct SurfaceWeight { f32 a; f32 b; };
 
-SurfaceWeight D_00264840[13] = {
+SurfaceWeight g_surfaceFriction[13] = {
     {1.0f, 0.5f},
     {3.0f, 2.4f},
     {1.0f, 0.4f},
@@ -30,7 +30,7 @@ SurfaceWeight D_00264840[13] = {
     {1.0f, -10.0f},
     {1.0f, -10.0f}
 };
-SurfaceWeight D_002648A8[13] = {
+SurfaceWeight g_surfaceBounce[13] = {
     {1.0f, 0.5f},
     {5.0f, 1.0f},
     {1.0f, 0.8f},
@@ -45,14 +45,14 @@ SurfaceWeight D_002648A8[13] = {
     {1.0f, 0.5f},
     {1.0f, 1.0f}
 };
-void func_00121338(void* self);
+void InitPoseSource(void* self);
 
 // Two surface kinds, indexes into the weight tables.
 struct SurfacePair { s32 a; s32 b; };
 
-extern s32 D_00262C64;
+extern s32 g_buttonCodeFlags;
 
-f32 func_00185C18(SurfacePair* p)
+f32 GetSurfacePairFriction(SurfacePair* p)
 {
     f32 num = g_surfaceFriction[p->a].b + g_surfaceFriction[p->b].b;
     f32 den = g_surfaceFriction[p->a].a + g_surfaceFriction[p->b].a;
@@ -64,7 +64,7 @@ f32 func_00185C18(SurfacePair* p)
 
 
 
-f32 func_00185CA0(SurfacePair* p)
+f32 GetSurfacePairBounce(SurfacePair* p)
 {
     f32 one = 1.0f;
     f32 num = g_surfaceBounce[p->a].b + g_surfaceBounce[p->b].b;
@@ -81,9 +81,9 @@ ASM_FUNC(func_00185F48);
 
 ASM_FUNC(func_001860A8);
 
-void func_001B5F28(u8* a, void* b);
+void PushFreeSlot(u8* a, void* b);
 
-void func_001861E8(u8* self, Contact03* head)
+void FreePooledContactChain(u8* self, Contact03* head)
 {
     if (head != 0) {
         Contact03* cur = head;
@@ -99,18 +99,18 @@ ASM_FUNC(func_00186230);
 
 ASM_FUNC(func_00186320);
 
-extern s32 D_00261F14;
+extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
-void func_001F6C20(s32 unused);
-void func_00202A80(void* dma, void* addr);
-s32 func_00202C38(void* dma, s32 b, s32 c);
+void SyncDataCache(s32 unused);
+void StartDmaChain(void* dma, void* addr);
+s32 WaitDmaChannel(void* dma, s32 b, s32 c);
 
-extern u8 D_00261F18[];
+extern u8 g_vif1Channel[];
 extern u8 D_00212110[];
 
-void func_001F6C20(s32 a);
-void func_00202A80(void* a, void* b);
-s32 func_00202C38(void* a, s32 b, s32 c);
+void SyncDataCache(s32 a);
+void StartDmaChain(void* a, void* b);
+s32 WaitDmaChannel(void* a, s32 b, s32 c);
 
 // An edge of a collision mesh (Mesh03::edges): its two vertex indices first.
 struct MeshEdge {
@@ -146,9 +146,9 @@ struct MeshHit {
 
 typedef char check_MeshHit[sizeof(MeshHit) == 0x70 ? 1 : -1];
 
-s32 func_0013DFD8(void* a, u8* b, u8* c, s32 d, s32 e, MeshHit* f);
+s32 CollectTreeNodeSpans(void* a, u8* b, u8* c, s32 d, s32 e, MeshHit* f);
 
-s32 func_00186450(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
+s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 {
     s32 i = self->meshCopy.edgeCount;
     i--;
@@ -171,9 +171,9 @@ s32 func_00186450(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 
 ASM_FUNC(func_00186568);
 
-void func_001F5B08(void* dst, void* src, s32 size);
+void MoveMemory(void* dst, void* src, s32 size);
 
-void func_001867C8(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
+void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
 {
     MeshHit* single = 0;
     s32 n = 0;
@@ -255,7 +255,7 @@ struct PathEdge { u8 pad0[0x58]; PathEdgeEnds* pair; u8 pad1[4]; PathEdge* next;
 struct PathVertex { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
 struct PathSearchStep { PathSearchStep* parent; PathEdge* node; s32 id; };
 
-s32 func_00186A70(PathVertex* base, s32 key, s32 target, PathEdge* head, PathEdge** out)
+s32 FindGraphPath(PathVertex* base, s32 key, s32 target, PathEdge* head, PathEdge** out)
 {
     PathSearchStep recs[64];
     s32 n;
@@ -315,10 +315,10 @@ ASM_FUNC(func_00187260);
 // A 0x30-byte hit CollectMeshHits gives: its point at 0x10, a float, a kind and a part.
 struct MeshHitEntry { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
 
-s32 func_00187260(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, MeshHitEntry* a6);
-s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+s32 CollectMeshHits(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, MeshHitEntry* a6);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
-void func_001879C0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
+void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
     MeshHitEntry ents[64];
     s32 n = CollectMeshHits(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
@@ -333,11 +333,11 @@ ASM_FUNC(func_00187A88);
 ASM_FUNC(func_00187B60);
 
 
-s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
-s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
+s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
 
-s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
+s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
 {
     MeshHit recs[2];
     Vec4U v1;
@@ -361,11 +361,11 @@ ASM_FUNC(func_00187D08);
 // func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
-s32 func_00187D08(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
-void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
-s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+s32 IntersectSegmentWithSphere(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
+void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
-s32 func_00187E88(void* a0, void* a1, void* a2)
+s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
     SphereHitFrame loc;
     if (IntersectSegmentWithSphere((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {

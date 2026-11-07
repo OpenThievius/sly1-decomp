@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the two func_001615F0 calls pass 0x7800 and 0x8800 where US passes 0x7900 and 0x8700.
-void func_0018EF78(void* self, s32 a1, s32 a2)
+void DrawMovieFrame(void* self, s32 a1, s32 a2)
 {
     PacketWriter buf;
     InitGifPacket(&buf);

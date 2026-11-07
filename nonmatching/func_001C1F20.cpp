@@ -23,15 +23,15 @@ struct Val_001C1F20 {
     s32 value;
 };
 
-s32 func_0011B008(Quad_001C1F20* q);
-void func_0011B0A8(Quad_001C1F20* a, Quad_001C1F20* b);
-void func_0011B060(Quad_001C1F20* p, s32 mode);
-void func_0011B018(void* out, Quad_001C1F20* q);
-void func_0011B928(Quad_001C1F20* out, Val_001C1F20* in);
-void func_0011B9A8(Quad_001C1F20* out, Val_001C1F20* src);
-void func_001C1BF8(Quad_001C1F20* t, s32 n, Val_001C1F20* c, Desc_001C1F20* z, s32* arr);
+s32 InitScriptValue(Quad_001C1F20* q);
+void AssignScriptValue(Quad_001C1F20* a, Quad_001C1F20* b);
+void DestroyScriptValue(Quad_001C1F20* p, s32 mode);
+void CopyConstructScriptValue(void* out, Quad_001C1F20* q);
+void ConvertScriptValueToInt(Quad_001C1F20* out, Val_001C1F20* in);
+void ConvertScriptValueToFloat(Quad_001C1F20* out, Val_001C1F20* src);
+void StoreScriptArguments(Quad_001C1F20* t, s32 n, Val_001C1F20* c, Desc_001C1F20* z, s32* arr);
 
-void* func_001C1F20(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val)
+void* WritePropertyValue(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val)
 {
     Quad_001C1F20 a;
     Quad_001C1F20 b;
@@ -41,16 +41,16 @@ void* func_001C1F20(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val
     void (*setter)(void*, s32);
     void* target;
 
-    func_0011B008(&a);
+    InitScriptValue(&a);
     a.w[0] = 0x22;
     if (desc->flags & 0x10) {
         if (desc->flags & 0x1000)
             arr[0] = (s32)desc->getBase(obj, 1) + desc->off;
         else
             arr[0] = (s32)obj + desc->off;
-        func_001C1BF8(&b, 1, val, desc, arr);
-        func_0011B0A8(&a, &b);
-        func_0011B060(&b, 2);
+        StoreScriptArguments(&b, 1, val, desc, arr);
+        AssignScriptValue(&a, &b);
+        DestroyScriptValue(&b, 2);
     } else {
         target = (desc->flags & 0x1000) ? desc->getBase(obj, 1) : obj;
         setter = (desc->flags & 0x20) ? (void (*)(void*, s32))desc->off
@@ -61,12 +61,12 @@ void* func_001C1F20(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val
             if (val->type == 0x14) {
                 v = val->value;
             } else {
-                func_0011B008(&b);
-                func_0011B928(&c, val);
-                func_0011B0A8(&b, &c);
-                func_0011B060(&c, 2);
+                InitScriptValue(&b);
+                ConvertScriptValueToInt(&c, val);
+                AssignScriptValue(&b, &c);
+                DestroyScriptValue(&c, 2);
                 v = b.w[1];
-                func_0011B060(&b, 2);
+                DestroyScriptValue(&b, 2);
             }
             setter(target, v);
             break;
@@ -76,12 +76,12 @@ void* func_001C1F20(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val
             if (val->type == 0x15) {
                 f = *(f32*)&val->value;
             } else {
-                func_0011B008(&b);
-                func_0011B9A8(&d, val);
-                func_0011B0A8(&b, &d);
-                func_0011B060(&d, 2);
+                InitScriptValue(&b);
+                ConvertScriptValueToFloat(&d, val);
+                AssignScriptValue(&b, &d);
+                DestroyScriptValue(&d, 2);
                 f = *(f32*)&b.w[1];
-                func_0011B060(&b, 2);
+                DestroyScriptValue(&b, 2);
             }
             ((void (*)(void*, f32))setter)(target, f);
             break;
@@ -99,7 +99,7 @@ void* func_001C1F20(void* out, void* obj, Desc_001C1F20* desc, Val_001C1F20* val
             break;
         }
     }
-    func_0011B018(out, &a);
-    func_0011B060(&a, 2);
+    CopyConstructScriptValue(out, &a);
+    DestroyScriptValue(&a, 2);
     return out;
 }

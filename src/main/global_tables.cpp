@@ -17,14 +17,14 @@
 // func_001C0070 reads it from its second word, D_00245024).
 struct SoundEntry { s32 bank; s32 index; };
 
-void func_001B8540();
+void UpdateColliderBounds();
 
 extern const ClassHead D_00217410;
 extern const ClassDescriptor<28> D_00217418;
 extern const ClassDescriptor<48> D_00217498;
 extern const ClassDescriptor<86> D_00217568;
 extern const ClassDescriptor<28> D_00217740;
-extern const ClassDescriptor<28> D_002177C0;
+extern const ClassDescriptor<28> g_pointObjectClass;
 extern const ClassDescriptor<28> D_00217840;
 extern const ClassDescriptor<28> D_002178C0;
 extern const ClassDescriptor<28> D_00217940;
@@ -32,7 +32,7 @@ extern const ClassDescriptor<48> D_002179C0;
 extern const ClassDescriptor<48> D_00217A90;
 extern const ClassDescriptor<48> D_00217B60;
 extern const ClassDescriptor<124> D_00217C30;
-extern const ClassDescriptor<28> D_00218650;
+extern const ClassDescriptor<28> g_coloredTriangleSetClass;
 extern const ClassDescriptor<72> D_00218770;
 extern const ClassDescriptor<48> D_002188A0;
 extern const ClassDescriptor<74> D_00218970;
@@ -48,10 +48,10 @@ extern const ClassDescriptor<72> D_00219330;
 extern const ClassDescriptor<28> D_00219460;
 extern const ClassDescriptor<28> D_002194E0;
 extern const ClassDescriptor<28> D_00219738;
-extern const ClassHead D_002197B8;
+extern const ClassHead g_animationPlayerMethods;
 extern const ClassDescriptor<28> D_002197E8;
 extern const ClassDescriptor<28> D_00219868;
-extern const ClassHead D_002198E8;
+extern const ClassHead g_stateWalkerMethods;
 extern const ClassDescriptor<72> D_002198F0;
 extern const ClassDescriptor<48> D_00219A20;
 extern const ClassDescriptor<72> D_00219AF0;
@@ -77,26 +77,26 @@ extern const ClassDescriptor<78> D_0021B010;
 extern const ClassDescriptor<28> D_0021B158;
 extern const ClassDescriptor<28> D_0021B1D8;
 extern const ClassDescriptor<28> D_0021B258;
-extern const ClassDescriptor<72> D_0021B2D8;
-extern const ClassDescriptor<48> D_0021B408;
+extern const ClassDescriptor<72> g_idFilterObjectClass;
+extern const ClassDescriptor<48> g_redirectObjectClass;
 extern const ClassDescriptor<72> D_0021B4D8;
 extern const ClassDescriptor<28> D_0021B608;
 extern const ClassDescriptor<88> D_0021B688;
 extern const ClassDescriptor<28> D_0021B7F8;
 extern const ClassDescriptor<72> D_0021B878;
 extern const ClassDescriptor<72> D_0021B9A8;
-extern const ClassDescriptor<28> D_0021BAD8;
+extern const ClassDescriptor<28> g_itemKeeperClass;
 extern const ClassDescriptor<100> D_0021BB58;
 extern const ClassDescriptor<100> D_0021BCF8;
 extern const ClassDescriptor<100> D_0021BE98;
 extern const ClassDescriptor<72> D_0021C038;
 extern const ClassDescriptor<72> D_0021C168;
 extern const ClassDescriptor<28> D_0021C298;
-extern const ClassDescriptor<72> D_0021C318;
-extern const ClassDescriptor<28> D_0021C448;
+extern const ClassDescriptor<72> g_flaggedObjectClass;
+extern const ClassDescriptor<28> g_pointGraphObjectClass;
 extern const ClassDescriptor<48> D_0021C4C8;
-extern const ClassDescriptor<72> D_0021C598;
-extern const ClassDescriptor<48> D_0021C6C8;
+extern const ClassDescriptor<72> g_objectCyclerClass;
+extern const ClassDescriptor<48> g_stateNotifierClass;
 extern const ClassDescriptor<48> D_0021C798;
 extern const ClassDescriptor<48> D_0021C868;
 extern const ClassDescriptor<48> D_0021C938;
@@ -110,13 +110,13 @@ extern const ClassDescriptor<48> D_0021D038;
 extern const ClassDescriptor<48> D_0021D108;
 extern const ClassDescriptor<84> D_0021D1D8;
 extern const ClassDescriptor<28> D_0021D338;
-extern const ClassDescriptor<72> D_0021D3B8;
-extern const ClassDescriptor<48> D_0021D4E8;
+extern const ClassDescriptor<72> g_objectGathererClass;
+extern const ClassDescriptor<48> g_pairControllerClass;
 extern const ClassDescriptor<84> D_0021D5B8;
-extern const ClassDescriptor<72> D_0021D718;
-extern const ClassDescriptor<72> D_0021D848;
-extern const ClassDescriptor<72> D_0021D978;
-extern const ClassDescriptor<72> D_0021DAA8;
+extern const ClassDescriptor<72> g_pairedObjectClass;
+extern const ClassDescriptor<72> g_hitTargetClass;
+extern const ClassDescriptor<72> g_soundStateObjectClass;
+extern const ClassDescriptor<72> g_objectCreatorClass;
 extern const ClassDescriptor<72> D_0021DBD8;
 extern const ClassDescriptor<74> D_0021DD08;
 extern const ClassDescriptor<48> D_0021DE40;
@@ -124,7 +124,7 @@ extern const ClassDescriptor<74> D_0021DF10;
 extern const ClassDescriptor<74> D_0021E048;
 extern const ClassDescriptor<74> D_0021E180;
 extern const ClassDescriptor<36> D_0021E2B8;
-extern const ClassDescriptor<72> D_0021E458;
+extern const ClassDescriptor<72> g_scaledOffsetObjectClass;
 extern const ClassDescriptor<48> D_0021E588;
 extern const ClassDescriptor<48> D_0021E658;
 extern const ClassDescriptor<100> D_0021E728;
@@ -133,7 +133,7 @@ extern const ClassDescriptor<100> D_0021EA68;
 extern const ClassDescriptor<84> D_0021EC08;
 extern const ClassDescriptor<100> D_0021ED68;
 extern const ClassDescriptor<28> D_0021EF08;
-extern const ClassDescriptor<48> D_0021EF88;
+extern const ClassDescriptor<48> g_entryTableObjectClass;
 extern const ClassDescriptor<72> D_0021F058;
 extern const ClassDescriptor<72> D_0021F188;
 extern const ClassDescriptor<28> D_0021F2B8;
@@ -154,17 +154,17 @@ extern const ClassDescriptor<48> D_00220368;
 extern const ClassDescriptor<84> D_00220438;
 extern const ClassDescriptor<84> D_00220598;
 extern const ClassDescriptor<72> D_002206F8;
-extern const ClassDescriptor<72> D_00220828;
+extern const ClassDescriptor<72> g_countdownColliderClass;
 extern const ClassDescriptor<74> D_00220958;
 extern const ClassDescriptor<84> D_00220A90;
 extern const ClassDescriptor<28> D_00220C40;
 extern const ClassDescriptor<84> D_00220CC0;
 extern const ClassDescriptor<72> D_00220E20;
-extern const ClassDescriptor<48> D_00220F50;
+extern const ClassDescriptor<48> g_idLinkedObjectClass;
 extern const ClassDescriptor<48> D_00221020;
-extern const ClassDescriptor<48> D_00221140;
-extern const ClassDescriptor<48> D_00221210;
-extern const ClassDescriptor<48> D_002213D0;
+extern const ClassDescriptor<48> g_partHolderObjectClass;
+extern const ClassDescriptor<48> g_currentPlacedObjectClass;
+extern const ClassDescriptor<48> g_codeChecksumClass;
 extern const ClassDescriptor<28> D_002214A0;
 extern const ClassDescriptor<28> D_00221520;
 extern const char D_0024A2D0[8];
@@ -245,7 +245,7 @@ extern const char D_0024E0C8[];
 extern const char D_0024E0F8[];
 extern const char D_0024E118[];
 
-extern const KeyRecord D_00244F40[7] = {
+extern const KeyRecord g_soundBankKeys[7] = {
     { 0x586CE175, 0xA5D810DD, 0x6CE4D53F, 0xECC6A60C, 0xF9C79CAC, 0x586738D6, 0x6CE4D502, 0xA5D3AA4D },
     { 0x76189614, 0x6EE970CD, 0x717ACA47, 0xF4A7BE8B, 0x0813F34A, 0x7615DDF6, 0x717ACA02, 0x6EE0502D },
     { 0xD57DEF5E, 0xDE51C895, 0x60C9BCCE, 0x68BEB12D, 0x3C9CC701, 0xD57600A0, 0x60C9BC90, 0xDE5AA289 },
@@ -254,7 +254,7 @@ extern const KeyRecord D_00244F40[7] = {
     { 0x62D93F7B, 0xF44F6995, 0xE714AFF6, 0xE9D43879, 0x45BB4335, 0x62D5735D, 0xE714AFAC, 0xF4443211 },
     { 0x903B9250, 0x94FE5B03, 0xAE386CA4, 0x5CA78ADB, 0x9C29A26A, 0x9030552E, 0xAE386C98, 0x94FB9367 },
 };
-extern const SoundEntry D_00245020[771] = {
+extern const SoundEntry g_soundEntries[771] = {
     { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 }, { 0, 5 }, { 0, 6 }, { 0, 7 },
     { 0, 8 }, { 0, 9 }, { 0, 10 }, { 0, 11 }, { 0, 12 }, { 0, 13 }, { 0, 14 }, { 0, 15 },
     { 0, 16 }, { 0, 17 }, { 0, 18 }, { 0, 19 }, { 0, 20 }, { 0, 21 }, { 0, 22 }, { 0, 23 },
@@ -353,7 +353,7 @@ extern const SoundEntry D_00245020[771] = {
     { 6, 69 }, { 6, 70 }, { 6, 71 }, { 6, 72 }, { 6, 73 }, { 6, 74 }, { 6, 75 }, { 6, 76 },
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
-extern const s32 D_00246838[772] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+extern const s32 g_soundEntryForcedAvailable[772] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 extern ClassHead D_002505B8;  // in .data, below
 extern const void* const D_00247448[149] = {
     &D_00217410,
@@ -408,30 +408,30 @@ extern const void* const D_00247448[149] = {
     &D_0021AD80,
     &D_0021AEC8,
     &D_0021B010,
-    &D_0021B2D8,
+    &g_idFilterObjectClass,
     &D_002198F0,
     &D_0021C038,
     &D_0021C168,
-    &D_0021C318,
-    &D_0021E458,
+    &g_flaggedObjectClass,
+    &g_scaledOffsetObjectClass,
     &D_0021A660,
     &D_0021B4D8,
     &D_0021DF10,
     &D_0021E048,
     &D_0021E180,
     &D_0021B878,
-    &D_0021C598,
-    &D_0021D3B8,
-    &D_0021D718,
-    &D_0021D848,
-    &D_0021D978,
-    &D_0021DAA8,
+    &g_objectCyclerClass,
+    &g_objectGathererClass,
+    &g_pairedObjectClass,
+    &g_hitTargetClass,
+    &g_soundStateObjectClass,
+    &g_objectCreatorClass,
     &D_0021DBD8,
     &D_0021F188,
     &D_0021FC28,
     &D_0021FD58,
     &D_002206F8,
-    &D_00220828,
+    &g_countdownColliderClass,
     &D_0021B9A8,
     &D_00219F80,
     &D_00217A90,
@@ -441,7 +441,7 @@ extern const void* const D_00247448[149] = {
     &D_00219A20,
     &D_0021A320,
     &D_0021C4C8,
-    &D_0021C6C8,
+    &g_stateNotifierClass,
     &D_0021C868,
     &D_0021CAD8,
     &D_0021C798,
@@ -450,20 +450,20 @@ extern const void* const D_00247448[149] = {
     &D_0021CBA8,
     &D_0021D038,
     &D_0021D108,
-    &D_0021B408,
-    &D_0021D4E8,
+    &g_redirectObjectClass,
+    &g_pairControllerClass,
     &D_0021DE40,
     &D_0021E588,
     &D_0021E658,
     &D_002188A0,
-    &D_0021EF88,
+    &g_entryTableObjectClass,
     &D_0021A490,
-    &D_00220F50,
+    &g_idLinkedObjectClass,
     &D_00221020,
     &D_00220368,
-    &D_00221210,
-    &D_00221140,
-    &D_002213D0,
+    &g_currentPlacedObjectClass,
+    &g_partHolderObjectClass,
+    &g_codeChecksumClass,
     &D_002214A0,
     &D_00221520,
     &D_00217740,
@@ -482,7 +482,7 @@ extern const void* const D_00247448[149] = {
     &D_0021C298,
     &D_0021D338,
     &D_002179C0,
-    &D_002177C0,
+    &g_pointObjectClass,
     &D_0021A5E0,
     &D_0021B7F8,
     &D_0021F2B8,
@@ -493,20 +493,20 @@ extern const void* const D_00247448[149] = {
     &D_00219460,
     &D_002191E0,
     &D_00219868,
-    &D_0021BAD8,
-    &D_0021C448,
+    &g_itemKeeperClass,
+    &g_pointGraphObjectClass,
     &D_0021A7B8,
     &D_0021E2B8,
     &D_0021F438,
-    &D_00218650,
+    &g_coloredTriangleSetClass,
     &D_0021B608,
     &D_0021EF08,
     &D_00220C40,
-    &D_002197B8,
-    &D_002198E8,
+    &g_animationPlayerMethods,
+    &g_stateWalkerMethods,
     &D_002505B8
 };
-extern const u32 D_002476A0[256] = {
+extern const u32 g_crc32Table[256] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
     0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
     0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
@@ -545,7 +545,7 @@ extern const u32 D_00247AA4 = 0x14E0EF;
 extern const u32 D_00247AA8[2] = { 0x2E774159, 0 };
 extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
 extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
-extern const KeyedEntry D_00247AF0[46] = {
+extern const KeyedEntry g_keyedEntries[46] = {
     { { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 }, 0x00000002, D_0024A2D0, 0x00000000 },
     { { 0x70692A0C, 0x7C1ADFDF, 0x8DDAB8A2, 0xFEC7AC06, 0xCF2C336D, 0x7065AED2, 0x8DDAB8A8, 0x7C53A53E }, 0x00000003, D_0024A2D8, 0x00000000 },
     { { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 }, 0x00000004, D_0024A2E8, 0x00000000 },
@@ -593,7 +593,7 @@ extern const KeyedEntry D_00247AF0[46] = {
     { { 0x9EAE1C3C, 0xC2FEDE9B, 0x2AFD4D95, 0x573AF42F, 0xA18F6572, 0x9EA328CC, 0x2AFD4D91, 0xC2D3B7FC }, 0x00000506, D_0024A678, 0x00000000 },
     { { 0xAC0C665D, 0x524AA938, 0x33CB5B57, 0xE1FFC9B9, 0x35BE9ACD, 0xAC006598, 0x33CB5B54, 0x527D9E86 }, 0x00000508, D_0024A688, 0x00000000 },
 };
-extern const KeyRecord D_002482D8[7] = {
+extern const KeyRecord g_streamVoiceKeys[7] = {
     {0x239C1F4B, 0x4F1B6BCE, 0x332880C9, 0xDC1FC810, 0xB3EF7189, 0x239FB500, 0x332882F6, 0x4F1B486E},
     {0x674A1AEF, 0xEAAAB4AD, 0xCE2EF724, 0xB0B61237, 0x30E7A079, 0x67448204, 0xCE2EF564, 0xEAAA8C7D},
     {0x9FFD39A4, 0x92C0B086, 0x1904453E, 0x13763226, 0x52A098D3, 0x9FFD0941, 0x1904477F, 0x92C08E66},
@@ -603,11 +603,11 @@ extern const KeyRecord D_002482D8[7] = {
     {0x3909A2A2, 0xDA5D87C2, 0xC3446569, 0x59D126B9, 0x6943323B, 0x390995E6, 0xC344672C, 0xDA5DAE02}
 };
 extern const char D_002483B8[24] = "@KFWHJGL";
-extern const Mat02 D_002483D0 = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
+extern const Mat02 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
 extern const f32 D_00248400[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-extern const KeyRecord D_00248470 = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
+extern const KeyRecord g_memoryCardIconKey = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
 extern const IdentityKey D_00248490 = { { { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 } } };
-extern const IdentityKey D_002484B0[16] = {
+extern const IdentityKey g_movieKeys[16] = {
     { { { 0xF5248332, 0x853A4F27, 0x46B9CAE3, 0x13D7C04C, 0x74F101E3, 0xF524CCCD, 0x46B9C9A3, 0x80694F23 } } },
     { { { 0xCE3D9360, 0x2F5524C3, 0xAD69A291, 0xE6559C19, 0x9871938B, 0xCE3E40C9, 0xAD69A1D0, 0x2A3164C7 } } },
     { { { 0xFB4E86C1, 0x6C87A1D9, 0x52316802, 0x5104AFFE, 0xBE64E217, 0xFB5EE14F, 0x52316B3E, 0x7992A1DD } } },
@@ -625,47 +625,47 @@ extern const IdentityKey D_002484B0[16] = {
     { { { 0x92E9986B, 0xD7FD98C1, 0x9A3D4AC0, 0x93483E1B, 0x6D268427, 0x92EF8F9B, 0x9A3D49FB, 0xD59D18C5 } } },
     { { { 0x1B7736BC, 0x08EA9779, 0x9ABAE153, 0x01F1543B, 0x48D846BE, 0x1B72254A, 0x9ABAE26B, 0x0D7F577D } } },
 };
-extern void* const D_002486B0[38] = {
+extern void* const g_screenElements[38] = {
     (void*)&D_002721D0,
-    (void*)&D_002701F8,
+    (void*)&g_typedTextCaptionBox,
     (void*)&D_00270650,
     (void*)&D_0026C6C8,
     (void*)&D_0026C948,
     (void*)&D_0026CBC8,
     (void*)&D_0026CE48,
     (void*)&D_0026D0C8,
-    (void*)&D_0026D348,
+    (void*)&g_gaugeAmountCaption,
     (void*)&D_0026D5C8,
     (void*)&D_0026D848,
     (void*)&D_0026DAC8,
     (void*)&D_0026DD48,
     (void*)&D_0026DFC8,
-    (void*)&D_0026E248,
+    (void*)&g_gaugeBarElement,
     (void*)&D_0026E4E0,
-    (void*)&D_0026E760,
-    (void*)&D_0026E9F8,
-    (void*)&D_0026EC70,
+    (void*)&g_timerElement,
+    (void*)&g_timerCaption,
+    (void*)&g_buttonHintElement,
     (void*)&D_0026EED0,
     (void*)&D_0026F138,
     (void*)&D_0026F5A0,
-    (void*)&D_0026F808,
+    (void*)&g_mapScreenList,
     (void*)&D_0026FA90,
     (void*)&D_0026FD00,
-    (void*)&D_0026FF68,
+    (void*)&g_pauseMenuElement,
     (void*)&D_002708E0,
     (void*)&D_00271558,
     (void*)&D_00272430,
     (void*)&D_002726B0,
     (void*)&D_00272930,
     (void*)&D_00272B98,
-    (void*)&D_00272E08,
+    (void*)&g_stackedCaptionGroup,
     (void*)&D_002739F0,
     (void*)&D_00273C50,
     (void*)&D_00273EB0,
     (void*)&D_00274118,
     0,
 };
-extern const LevelEntry D_00248748[33] = {
+extern const LevelEntry g_levelEntries[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
     { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
     { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },
@@ -700,9 +700,9 @@ extern const LevelEntry D_00248748[33] = {
     { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, D_0024E0F8 },
     { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, D_0024E118 },
 };
-extern const Vec02 D_00248D00 = { 1.0f, 0.0f, 0.0f, 0.0f };
-extern const Vec02 D_00248D10 = { 0.0f, 1.0f, 0.0f, 0.0f };
-extern const Vec02 D_00248D20 = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const Vec02 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const Vec02 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const Vec02 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
 extern const Vec02 D_00248D30 = { 0.0f, 0.0f, 0.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };

@@ -29,8 +29,8 @@ struct EntryTableObject : PlacedObject {
 typedef char check_EntryTableObject[sizeof(EntryTableObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0016DD10(EntryTableObject* self);                       // 0x64 slot 0
-void func_0016DD90(EntryTableObject* self);                       // 0x64 slot 10
-void func_0016DDE8(EntryTableObject* self);                       // 0x64 slot 16
+void InitEntryTableObject(EntryTableObject* self);                       // 0x64 slot 0
+void LoadEntryTable(EntryTableObject* self);                       // 0x64 slot 10
+void StartEntryTableObject(EntryTableObject* self);                       // 0x64 slot 16
 
 #endif

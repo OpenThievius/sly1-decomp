@@ -5,7 +5,7 @@ struct Obj_12D448_eu {
     u8 state;
 };
 
-void func_0012D448(Obj_12D448_eu* self, s32 v)
+void SetAnimationPlayerPadSelect(Obj_12D448_eu* self, s32 v)
 {
     if (v == self->state) {
         return;

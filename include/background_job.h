@@ -23,6 +23,6 @@ struct BackgroundJob {
 
 typedef char check_BackgroundJob[sizeof(BackgroundJob) == 0x14 ? 1 : -1];
 
-extern BackgroundJob D_00269990;      // memory_card.cpp
+extern BackgroundJob g_backgroundJob;      // memory_card.cpp
 
 #endif

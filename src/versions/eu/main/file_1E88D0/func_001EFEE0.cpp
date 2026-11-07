@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's overlay height is 468.61017 where US has 492.80002.
-void func_001EFEE0(ScreenFade* self)
+void DrawScreenFade(ScreenFade* self)
 {
     if (g_currentWorld != 0 && g_screenFade.mode != 0) {
         s32 mode = self->style;

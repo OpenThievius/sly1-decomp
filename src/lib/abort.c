@@ -4,13 +4,13 @@
  * (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 
-s32 func_00201668(s32 sig);
-void func_001000B8(s32 status);
+s32 RaiseSignal(s32 sig);
+void ExitProgram(s32 status);
 
-void func_002014D0(void)
+void AbortProgram(void)
 {
     for (;;) {
         RaiseSignal(6);
-        func_001000B8(1);
+        ExitProgram(1);
     }
 }

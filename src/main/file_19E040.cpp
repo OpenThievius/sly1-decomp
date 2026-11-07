@@ -42,50 +42,50 @@
 #include "message_body.h"
 #include "asm_func.h"
 
-void func_001831E8(void* world, void* list, void* a, void* b);
-void func_00183238(void* world, void* list, void* a, void* b);
+void AddCallbackNode(void* world, void* list, void* a, void* b);
+void RemoveCallbackNode(void* world, void* list, void* a, void* b);
 
 
 
-void func_001B7968(Collider* self);
+void InitCollider(Collider* self);
 
-void func_00152438(void* p, s32 n);
+void SetListLinkOffset(void* p, s32 n);
 
-void* func_001B5EA0(void* p);
+void* PopFreeSlot(void* p);
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
-const Vt219C* func_0019E908(u32 n);
+const Vt219C* GetEffectKindTable(u32 n);
 
-void func_00152470(void* list, void* item);
+void AppendToList(void* list, void* item);
 
-void func_0019EC20(Effect* self);
+void CountEffectUse(Effect* self);
 
-void func_00152600(void* table, void* self);
+void RemoveFromList(void* table, void* self);
 
-void func_0019EC30(Effect* self);
+void ReleaseEffect(Effect* self);
 
-void func_001DBC18(void* a, void* b);
+void ReleaseCallRecords(void* a, void* b);
 
-void func_001B5F28(void* a, void* b);
+void PushFreeSlot(void* a, void* b);
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
-void func_0019EB28(Effect* self);
+void InitEffect(Effect* self);
 
 
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_0019EBE8(Effect* self);
+void RemoveEffect(Effect* self);
 
-s32 func_00182FC8(void* p);
+s32 IsObjectAttached(void* p);
 
 s32 func_0013E658(void* a, s32 b);
 
-void func_001F2EF0(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
+void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 
-s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
+s32 DrawEffectAt(void* self, void* a1, void* a2, void* a3);
 
 struct ColorFade;
 
@@ -93,19 +93,19 @@ struct ColorFade;
 
 
 
-s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 
-Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-
-
-extern Camera* D_00261990;
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
 
 
+extern Camera* g_camera;
 
 
 
 
-s32 func_00128018(void* a, s32 b, void* c, void* d);
+
+
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
 struct ListWalk : ListFrame {
@@ -133,69 +133,69 @@ struct ListWalk : ListFrame {
     }
 };
 
-void func_0019EBE8(Effect* node);
+void RemoveEffect(Effect* node);
 
-void func_001B7B78(Collider* self);
+void UnregisterCollider(Collider* self);
 
 
-void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
+void ComputeGridBlendWeights(f32 x, f32 y, f32 z, C8B* o, void* p);
 
 // An entry of the effect kinds' tables of functions (src/main/0019C000.cpp).
 typedef void (*Fn_Table)();
 
-extern const Fn_Table D_00219C20[];
+extern const Fn_Table g_basicEffectMethods[];
 
-extern const Fn_Table D_00219C40[];
+extern const Fn_Table g_fallingEffectMethods[];
 
-extern const Fn_Table D_00219C60[];
+extern const Fn_Table g_risingEffectMethods[];
 
-extern const Fn_Table D_00219C80[];
+extern const Fn_Table g_impactEffectMethods[];
 
-extern const Fn_Table D_00219CA0[];
+extern const Fn_Table g_growingEffectMethods[];
 
-extern const Fn_Table D_00219CC0[];
+extern const Fn_Table g_shrinkingFallEffectMethods[];
 
-extern const Fn_Table D_00219CE0[];
+extern const Fn_Table g_droppingEffectMethods[];
 
-extern const Fn_Table D_00219D00[];
+extern const Fn_Table g_streakEffectMethods[];
 
-extern const Fn_Table D_00219D20[];
+extern const Fn_Table g_scaledEffectMethods[];
 
-extern const Fn_Table D_00219D40[];
+extern const Fn_Table g_trailSegmentEffectMethods[];
 
-extern const Fn_Table D_00219D60[];
+extern const Fn_Table g_spawningEffectMethods[];
 
-extern const Fn_Table D_00219D80[];
+extern const Fn_Table g_followUpEffectMethods[];
 
-extern const Fn_Table D_00219DA0[];
+extern const Fn_Table g_wideTrailSegmentEffectMethods[];
 
-extern const Fn_Table D_00219DC0[];
+extern const Fn_Table g_shortFallingEffectMethods[];
 
-extern u8 D_00219DE0[];
+extern u8 g_emitterEffectMethods[];
 
-extern const Fn_Table D_00219E00[];
+extern const Fn_Table g_cameraSpaceEffectMethods[];
 
-extern const Fn_Table D_00219E20[];
+extern const Fn_Table g_longStreakEffectMethods[];
 
-extern const Fn_Table D_00219E40[];
+extern const Fn_Table g_phasedEffectMethods[];
 
-extern const Fn_Table D_00219E60[];
+extern const Fn_Table g_projectileEffectMethods[];
 
-extern const Fn_Table D_00219E80[];
+extern const Fn_Table g_hitMarkEffectMethods[];
 
-extern const Fn_Table D_00219EA0[];
+extern const Fn_Table g_tumblingEffectMethods[];
 
-extern const Fn_Table D_00219EC0[];
+extern const Fn_Table g_aimedEffectMethods[];
 
-extern const Fn_Table D_00219EE0[];
+extern const Fn_Table g_streakedEffectMethods[];
 
-extern const Fn_Table D_00219F00[];
+extern const Fn_Table g_spinningEffectMethods[];
 
-extern const Fn_Table D_00219F20[];
+extern const Fn_Table g_facingEffectMethods[];
 
-extern const Fn_Table D_00219F40[];
+extern const Fn_Table g_delayedEffectMethods[];
 
-extern const Fn_Table D_00219F60[];
+extern const Fn_Table g_messageEffectMethods[];
 
 // The loop walks an intrusive list with an iterator that registers itself on a global stack
 // (D_0027B314) for its lifetime and unregisters in its destructor.
@@ -204,128 +204,128 @@ extern const Fn_Table D_00219F60[];
 
 
 
-void func_00152600(List01 *a, ObjectGatherer *b);
+void RemoveFromList(List01 *a, ObjectGatherer *b);
 
-void func_00152470(List01 *a, ObjectGatherer *b);
+void AppendToList(List01 *a, ObjectGatherer *b);
 
 
-void func_0019ECE0();
+void EndEffect();
 
-void func_0019ED58();
+void HandleEffectContact();
 
-void func_0019F390();
+void MoveEffect();
 
-void func_0019FA98();
+void InitRisingEffect();
 
-void func_0019FB08();
+void MoveDriftingEffect();
 
-void func_0019FCE8();
+void EndEffectWithImpactOnExit();
 
-void func_0019FD08();
+void InitImpactEffect();
 
-void func_0019FE50();
+void UpdateDroppingEffect();
 
-void func_0019FF20();
+void DrawDroppingEffect();
 
-void func_001A0020();
+void EndDroppingEffect();
 
-void func_001A0040();
+void InitStreakEffect();
 
-void func_001A00A0();
+void DrawStreakEffect();
 
-void func_001A01B8();
+void InitScaledEffect();
 
-void func_001A0258();
+void InitTrailSegment();
 
-void func_001A0318();
+void DetachTrailSegment();
 
-void func_001A05D8();
+void MoveTrailSegment();
 
-void func_001A0758();
+void DrawTrailSegment();
 
-void func_001A09C0();
+void InitSpawningEffect();
 
-void func_001A0A78();
+void SpawnFollowUpEffect();
 
-void func_001A0B20();
+void InitFollowUpEffect();
 
-void func_001A0BA0();
+void InitWideTrailSegment();
 
-void func_001A0C50();
+void InitShortFallingEffect();
 
-void func_001A0C98();
+void InitCameraSpaceEffect();
 
-void func_001A0D60();
+void MoveCameraSpaceEffect();
 
-void func_001A0DF0();
+void DrawCameraSpaceEffect();
 
-void func_001A0F88();
+void RunEffectEndCallback();
 
-void func_001A1410();
+void InitLongStreakEffect();
 
-void func_001A1458();
+void InitPhasedEffect();
 
-void func_001A1498();
+void KeepPhasedEffectStill();
 
-void func_001A14A0();
+void AdvanceEffectPhases();
 
-void func_001A15D8();
+void DrawPhasedEffect();
 
-void func_001A22C8();
+void CopyEffectSourceIds();
 
-void func_001A22E0();
+void DrawProjectileEffect();
 
-s32 func_001A25F0();
+s32 HandleEffectImpact();
 
-void func_001A26B0();
+void UpdateEffectUntilDetached();
 
-void func_001A26F8();
+void DrawHitMarkEffect();
 
-void func_001A2770();
+void SetRandomEffectSpin();
 
-void func_001A2830();
+void MoveTumblingEffect();
 
-s32 func_001A2A68();
+s32 HandleTumblingEffectImpact();
 
-void func_001A2B48();
+void AimEffectAtNearestObject();
 
-void func_001A2D30();
+void PlaceEffectAtSource();
 
-void func_001A2D88();
+void DrawStreakedEffect();
 
-void func_001A2E68();
+void HandleStreakedEffectImpact();
 
-void func_001A3008();
+void RandomizeEffectSpin();
 
-s32 func_001A3128();
+s32 HandleEffectContactUnlessKind6();
 
-void func_001A31A0();
+void DrawSpinningEffect();
 
-void func_001A31F0();
+void InitFacingEffect();
 
-void func_001A3250();
+void DrawFacingEffect();
 
-void func_001A3598();
+void InitDelayedEffect();
 
-void func_001A3730();
+void MoveDelayedEffect();
 
-void func_001A38F0();
+void UpdateDelayedEffect();
 
-void func_001A3990();
+void DrawDelayedEffect();
 
-void func_001A39C8();
+void ResolveEffectTarget();
 
-void func_001A3A18();
+void SendEffectMessagesAtRate();
 
-void func_0019EC20(Effect* node);
+void CountEffectUse(Effect* node);
 
-void func_0019EC30(Effect* node);
+void ReleaseEffect(Effect* node);
 
-u32 func_00152720(List01* list);
+u32 IsListEmpty(List01* list);
 
-void func_0019E558(EffectOwner* self);
+void CollideEffects(EffectOwner* self);
 
-void func_00129DF8(PlacedObject* self);
+void ClearRootTries(PlacedObject* self);
 
 // The next object of a list walk, and the walk moved past it.
 struct NextEffect {
@@ -338,7 +338,7 @@ struct NextEffect {
 };
 
 
-void func_0019CC10(C8B* self, f32* out, f32 a, f32 b, f32 c);
+void ComputeGridBlendWeights(C8B* self, f32* out, f32 a, f32 b, f32 c);
 
 // A list walk's start: the frame takes the list and is pushed.
 struct BeginListWalk {
@@ -368,34 +368,34 @@ struct EndListWalk {
     }
 };
 
-void func_0018D608(void);
+void PushBackMemoryMark(void);
 
-void* func_0018D658(s32 size);
+void* AllocateBackMemory(s32 size);
 
-void func_0018D6F0(void);
+void PopBackMemoryMark(void);
 
 s32 func_0013E430(u8* a0, u8* a1, void** a2, f32 scale);
 
-s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
+s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
 
-u32 func_00152720(List01* p);
+u32 IsListEmpty(List01* p);
 
 
-void func_0019F560(Effect* self);
+void UpdateEffect(Effect* self);
 
-s32 func_00182FC8(s32 handle);
+s32 IsObjectAttached(s32 handle);
 
-void func_001BAC30(void* self);
+void LoadCollider(void* self);
 
-void func_00124DF8(void* self, s32 n, void* data);
+void ResolveObjectLinks(void* self, s32 n, void* data);
 
 extern Quad219C D_00275C50;
 
-void func_001A0338(void* self, s32 kind, s32 extra);
+void SetTrailSegmentAnchor(void* self, s32 kind, s32 extra);
 
-void func_001A0040(Effect* self);
+void InitStreakEffect(Effect* self);
 
-void func_001A1DF0(Effect* self, s32 n);
+void SetEffectPhase(Effect* self, s32 n);
 
 // A 0x30-byte point func_001A1F40 sorts by its angle about a centre (its position at 0x10, the
 // angle at 0x20).
@@ -405,26 +405,26 @@ struct AngledPoint { u8 pad00[0x20]; f32 angle; };
 
 extern s32 D_0026B6C0[4];
 
-void func_001A2380(Effect* self, s32 v, void* other, void* a2, void* a3, s32 zero);
+void AttachHitMarkEffect(Effect* self, s32 v, void* other, void* a2, void* a3, s32 zero);
 
-s32 func_001300E8(void* self, s32 kind);
+s32 IsObjectOfKind(void* self, s32 kind);
 
-s32 func_0019ED58(Effect* a, void* b, void* c, void* d);
-
-
-
-void func_001A35F0(Effect* self);
-
-void func_0019F858(Effect* self);
-
-void func_00128018(void* a0, void* a1, void* a2, void* a3);
-
-void func_00128150(void* a0, void* a1, void* a2, void* a3);
+s32 HandleEffectContact(Effect* a, void* b, void* c, void* d);
 
 
-s32 func_001300E8(void* node, s32 kind);
 
-void func_001A2380(Effect* self, s32 v, void* other, void* a2, void* a3, void* out);
+void TakeDelayedEffectSourcePose(Effect* self);
+
+void DrawEffect(Effect* self);
+
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+
+void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+
+
+s32 IsObjectOfKind(void* node, s32 kind);
+
+void AttachHitMarkEffect(Effect* self, s32 v, void* other, void* a2, void* a3, void* out);
 
 
 
@@ -433,48 +433,48 @@ extern f32 D_0026B5B0[4];
 
 extern f32 D_0026B5C0[4];
 
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 
 
-void func_00124A48(void* self);
+void StartPlacedObject(void* self);
 
-void func_00124DF8(void* self, s32 a1, void* a2);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
 
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
 
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 
-void func_001A4070(void* self, s32 n);
+void SetWalkerColliderState(void* self, s32 n);
 
-void func_001A42C8(void* self, s32 v);
+void SetWalkerColliderSubState(void* self, s32 v);
 
 
-void func_00144FF8(void* a, void* b, s32 c, void* d);
+void ComputeCameraRelativeStickHeading(void* a, void* b, s32 c, void* d);
 
 extern f32 D_0026B710[4];
 
 extern f32 D_0026B720[4];
 
-void func_0019EB28(Effect* self, f32 x);
+void InitEffect(Effect* self, f32 x);
 
 
-void func_0019F560(Effect* self, f32 s);
+void UpdateEffect(Effect* self, f32 s);
 
 // A quadword in a 128-bit register (the VU0 helpers func_00118D20 and func_00118D30).
 typedef int Quadword128 __attribute__((mode(TI)));
 
-void func_0019EB28(Effect* self, f32 f);
+void InitEffect(Effect* self, f32 f);
 
-void func_00118CF0(void* out, f32 f);
+void StoreFloatAsQuadword(void* out, f32 f);
 
-void* func_00118D10(void* out, void* in);
+void* CopyQuadword(void* out, void* in);
 
-Quadword128 func_00118D30(Quadword128 a, Quadword128 b);
+Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 
-void* func_00118D20(void* dst, Quadword128 v);
+void* StoreQuadword(void* dst, Quadword128 v);
 
 extern f32 D_0026B570[4];
 
@@ -484,7 +484,7 @@ extern f32 D_0026B5D0[4];
 
 extern f32 D_0026B5E0[4];
 
-void func_001A0338(void* self, s32 kind, void* extra);
+void SetTrailSegmentAnchor(void* self, s32 kind, void* extra);
 
 extern f32 D_0026B560[4];
 
@@ -500,62 +500,62 @@ struct HeadingFrame {
 
 extern const f32 D_0024C9C0[4];
 
-extern f32 D_00261860;
+extern f32 g_frameDt;
 
-void func_0012E760(AnimationPlayer* obj);
+void StopAnimationPlayer(AnimationPlayer* obj);
 
-void func_001A3F40(WalkerCollider* self, PadRecord* src);
+void ReadWalkerColliderInput(WalkerCollider* self, PadRecord* src);
 
-f32 func_00205778(f32 a, f32 b);
+f32 ArctangentOfRatio(f32 a, f32 b);
 
-f32 func_001EA728(u8* p, s32 a, f32 b, f32 c, f32 d);
+f32 ApproachAngleWithRamp(u8* p, s32 a, f32 b, f32 c, f32 d);
 
-void func_001892A0(f32* out, f32 unused, f32 value);
+void BuildYawPitchMatrix(f32* out, f32 unused, f32 value);
 
 extern f32 D_0026B6A0[4];
 
 extern f32 D_0026B6B0[4];
 
-void func_001921A8(void* self);
+void InitSwitchedCollider(void* self);
 
-void* func_00118D20(Quad219C* dst, Quadword128 v);
+void* StoreQuadword(Quad219C* dst, Quadword128 v);
 
 extern f32 D_0026B590[4];
 
 extern f32 D_0026B5A0[4];
 
-void func_001A76A0(void* child, int flag);
+void SetSoundStateObjectState(void* child, int flag);
 
-void func_00124DF8(void* self, int idx, void* table);
+void ResolveObjectLinks(void* self, int idx, void* table);
 
-void func_00159478(void* sub, void* self);
+void FindOrBuildMemberGroup(void* sub, void* self);
 
 // Eight bytes kept across a copy, at any alignment.
 struct Bytes8 { u8 b[8]; };
 
-void func_001BA130(void* self);
+void CopyCollider(void* self);
 
 
-void func_001A6BE0(PairedObject* self, int flag);
+void SetPairedState(PairedObject* self, int flag);
 
-s32 func_001300E8(void* self, int kind);
-
-
+s32 IsObjectOfKind(void* self, int kind);
 
 
-void func_001A7480(void* self, int flag);
+
+
+void SetHitTargetState(void* self, int flag);
 
 extern f32 D_0026B850[4];
 
-void func_001B9338(void* self);
+void StepCollider(void* self);
 
-void func_00189378(void* sub, int zero, void* out);
+void RotateMatrixUpright(void* sub, int zero, void* out);
 
-void func_001B9D10(void* self, void* out, void* data, f32 scale);
+void TurnColliderTowardRotation(void* self, void* out, void* data, f32 scale);
 
-void* func_0015A838(void* a, int b, int c, void* d);
+void* FindFirstObjectByIdGathered(void* a, int b, int c, void* d);
 
-void func_001A7998(ObjectCreator* self, int flag);
+void SetObjectCreatorState(ObjectCreator* self, int flag);
 
 // A step of a pad pattern: the two bytes the actuators get, and how long they keep them.
 struct PadStep {
@@ -584,120 +584,120 @@ struct PadPatternPlayer {
     f32 stepTime;           // 0x1C
 };
 
-int func_001A7EE8(void* a);
+int IsPadPatternEnabled(void* a);
 
-void func_00152600(void* a, void* b);
+void RemoveFromList(void* a, void* b);
 
-void func_00152470(void* a, void* b);
+void AppendToList(void* a, void* b);
 
-void func_001A76A0(void* child, s32 flag);
+void SetSoundStateObjectState(void* child, s32 flag);
 
-void func_001A5D50(void* self, void* obj);
+void DetachPairedPartner(void* self, void* obj);
 
-s32 func_001A6238(void* self, void* child);
+s32 PairWithNearestWaitingObject(void* self, void* child);
 
-f32 func_001EAAE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001A6BE0(void* self, s32 mode);
+void SetPairedState(void* self, s32 mode);
 
-s32 func_001A6090(void* self, void* child);
+s32 PairWithNearestFreeObject(void* self, void* child);
 
-void func_001B7968(void* self);
+void InitCollider(void* self);
 
 extern f32 D_0026B7D8[4];
 
-void func_001B9338(WalkerCollider* self);
+void StepCollider(WalkerCollider* self);
 
-void func_001B9D10(WalkerCollider* self, f32* buf, u8* table, f32 scale);
+void TurnColliderTowardRotation(WalkerCollider* self, f32* buf, u8* table, f32 scale);
 
-extern PadPattern D_0026B8B0[11];
+extern PadPattern g_padPatterns[11];
 
-s32 func_002049E8(s32 port, s32 slot, u8* bytes);
+s32 SetPadActuatorBytes(s32 port, s32 slot, u8* bytes);
 
-s32 func_00128230(void* ctx);
+s32 HasAnimationDrivenAttachment(void* ctx);
 
-extern s32 D_0026C3DC;
+extern s32 g_padPatternSetting;
 
-s32 func_001A4898(void);
+s32 GetCurrentEntryVariant(void);
 
-void func_001A5760(void* self, f32 t);
+void UpdatePairControllerTuning(void* self, f32 t);
 
-void func_001A4EF0(void* self, void* p);
+void SetPairControllerState(void* self, void* p);
 
-void* func_001E9970(void* zero);
+void* AreMenusAndFadeClear(void* zero);
 
-void func_00152600(void* table, void* node);
+void RemoveFromList(void* table, void* node);
 
-void func_00152470(void* table, void* node);
+void AppendToList(void* table, void* node);
 
-void func_001A76A0(void* node, s32 flag);
+void SetSoundStateObjectState(void* node, s32 flag);
 
-void func_001B93F8(void* self);
+void UpdateCollider(void* self);
 
-s32 func_001A7698(SoundStateObject* self);
+s32 GetSoundStateObjectState(SoundStateObject* self);
 
-void func_001A76A0(SoundStateObject* node, s32 flag);
+void SetSoundStateObjectState(SoundStateObject* node, s32 flag);
 
-void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
+void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
 
-void func_00152600(u8* a, void* b);
+void RemoveFromList(u8* a, void* b);
 
-void func_00152470(u8* a, void* b);
+void AppendToList(u8* a, void* b);
 
-void func_001ED650(void* self, f32 x, f32 y, f32 z);
+void ComputePolarOffset(void* self, f32 x, f32 y, f32 z);
 
-s32 func_001A7420(HitTarget* self);
+s32 ChooseHitTargetState(HitTarget* self);
 
-void func_001A7480(HitTarget* self, int flag);
+void SetHitTargetState(HitTarget* self, int flag);
 
-void func_00155FA0(void* x);
+void SetEffectSpawnerInactive(void* x);
 
-void func_00155F90(void* x);
+void SetEffectSpawnerActiveForever(void* x);
 
-void func_00192230(void* self, s32 code, void* rec);
+void HandleSwitchedColliderNotification(void* self, s32 code, void* rec);
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_00155FA0(void* self);
+void SetEffectSpawnerInactive(void* self);
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, void* a5);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, void* a5);
 
-void func_001B6628(void* a, s32 b);
+void TeleportStateWalker(void* a, s32 b);
 
-void func_001B64D8(void* a, s32 b);
+void SetStateWalkerTarget(void* a, s32 b);
 
 
-void func_0012E760(void* p);
+void StopAnimationPlayer(void* p);
 
-s32 func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* d, f32 x, f32 y);
 
-void func_001B6628(void* p, s32 a);
+void TeleportStateWalker(void* p, s32 a);
 
-void func_001B64D8(void* p, s32 a);
+void SetStateWalkerTarget(void* p, s32 a);
 
-void func_001BF788(void* p, s32 flag);
+void StopSoundRecord(void* p, s32 flag);
 
-void func_001BFCD8(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-extern void* D_0026B860[10];
+extern void* g_hitTargetStateIds[10];
 
-void func_001A5B28(void* a, void* b);
+void RemoveFinishedHitTarget(void* a, void* b);
 
-void func_001B6628(void* self, void* item);
+void TeleportStateWalker(void* self, void* item);
 
-void func_001B64D8(void* self, void* item);
+void SetStateWalkerTarget(void* self, void* item);
 
-void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void ComputeColliderImpulseResponse(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-s32 func_001527D8(List01* list);
+s32 CountListItems(List01* list);
 
-void func_00152600(void* list, void* item);
+void RemoveFromList(void* list, void* item);
 
-s32 func_001EAA70(s32 a, s32 b);
+s32 RandomIntInRange(s32 a, s32 b);
 
-void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, s32 d);
+void SetColliderAnchors(Collider* self, s32 a, void* b, s32 c, s32 d);
 
-void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, void* d);
+void SetColliderAnchors(Collider* self, s32 a, void* b, s32 c, void* d);
 
 // A pair controller's pose (0xC0 bytes, twelve quadwords): the table func_001A4718 copies into
 // PairController::poseA and poseB (g_pairControllerPoseTable).
@@ -705,87 +705,87 @@ struct __attribute__((aligned(16))) PairPose {
     AlignedQuad q[12];
 };
 
-extern const PairPose D_0024C9D0;
+extern const PairPose g_pairControllerPoseTable;
 
-void func_00123ED0(PairController* self);
+void InitPlacedObject(PairController* self);
 
-void func_00152438(void* self, s32 value);
+void SetListLinkOffset(void* self, s32 value);
 
-void func_0018D800(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, s32 count);
 
-void func_001F4408(WalkerCollider* a, s32 n);
+void BeginLevelExit(WalkerCollider* a, s32 n);
 
-void func_00155F90(void* p);
+void SetEffectSpawnerActiveForever(void* p);
 
-void func_00155FA0(void* p);
+void SetEffectSpawnerInactive(void* p);
 
-void func_001B6628(void* p, s32 n);
+void TeleportStateWalker(void* p, s32 n);
 
-void func_001B64D8(void* p, s32 n);
+void SetStateWalkerTarget(void* p, s32 n);
 
-s32 func_0012C7B0(void* a, WalkerCollider* self, s32 c, s32* out, f32 fa, f32 fb);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* a, WalkerCollider* self, s32 c, s32* out, f32 fa, f32 fb);
 
-void func_001BF788(s32* p, s32 n);
+void StopSoundRecord(s32* p, s32 n);
 
 struct LinkedObject { u8 pad0[0x2D4]; s32 f2D4; };
 
-void func_00124FC0(PairController* self);
+void UpdatePlacedObject(PairController* self);
 
-s32 func_001A4DC0(PairController* self);
+s32 ChoosePairControllerState(PairController* self);
 
-void func_001A4EF0(PairController* self, s32 mode);
+void SetPairControllerState(PairController* self, s32 mode);
 
-void func_001A5120(PairController* self);
+void SpawnPairedObject(PairController* self);
 
-void func_001A54F8(PairController* self);
+void StartPairedObjects(PairController* self);
 
-void func_001A7998(ObjectCreator* t, s32 flag);
+void SetObjectCreatorState(ObjectCreator* t, s32 flag);
 
-extern void func_001A6BE0(PairedObject* o, s32 n);
+extern void SetPairedState(PairedObject* o, s32 n);
 
 
-void func_001A7E40(PadPatternPlayer* self);
+void StopPadPatternOutput(PadPatternPlayer* self);
 
-void func_001A7D98(PadPatternPlayer* self, s32 state);
+void SetPadPatternState(PadPatternPlayer* self, s32 state);
 
 // func_001A7CE8 passes no time (whatever $f12 holds): this declaration leaves the float out.
-void func_001A7D18(PadPatternPlayer* self, PadPattern* p);
+void StartPadPattern(PadPatternPlayer* self, PadPattern* p);
 
-extern f32 D_0026186C;
+extern f32 g_frameStep;
 
-extern u8 D_00275BC0[];
+extern u8 g_elementStack[];
 
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 
-void func_001E9498(u8* a, u8* b);
+void PushStackElement(u8* a, u8* b);
 
-void func_001DDC38(void* host, PairController* self);
+void SetWorldActiveFollower(void* host, PairController* self);
 
-void func_001A6BE0(PairController* o, s32 n);
+void SetPairedState(PairController* o, s32 n);
 
-void func_001A4070(void* a, s32 n);
+void SetWalkerColliderState(void* a, s32 n);
 
-void func_00151E20(u8* a, f32 b);
+void RaiseScatterLevels(u8* a, f32 b);
 
-void func_00151FC8(u8* a);
+void ResetScatterLevels(u8* a);
 
-void func_00194D30(u8* a, s32 b, s32 c);
+void SetPauseMenuLayerPage(u8* a, s32 b, s32 c);
 
-void func_0012E760(PairedObject* o);
+void StopAnimationPlayer(PairedObject* o);
 
-void func_001B6438(PairedObject* o);
+void DestroyStateWalker(PairedObject* o);
 
-void func_001A5C38(void* p, PairedObject* o);
+void ReleasePairedAttachment(void* p, PairedObject* o);
 
-void func_001A5DD8(void* p, PairedObject* o);
+void ActivatePairedAttachment(void* p, PairedObject* o);
 
-void func_001A5DF8(void* p, PairedObject* o);
+void FinishPairedObjectTransition(void* p, PairedObject* o);
 
-void func_001A5F78(void* p, PairedObject* o);
+void RemovePairedObject(void* p, PairedObject* o);
 
-void func_001A5C90(void* p, PairedObject* o);
+void AttachPairedPartner(void* p, PairedObject* o);
 
-void func_0012C288(f32 a, f32 b, void* h, PairedObject* o, s32 n, TargetBinding* buf, s32 e, void** out);
+void CreateAnimationPlayer(f32 a, f32 b, void* h, PairedObject* o, s32 n, TargetBinding* buf, s32 e, void** out);
 
 
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
@@ -914,7 +914,7 @@ ObjectLink D_0026B790[6] = {
 
 f32 D_0026B7D8[4] = { 20.0f, 0.0f, 0.30000001192092896f, 0.0f };
 
-ObjectLink D_0026B7E8[6] = {
+ObjectLink g_pairedObjectLinks[6] = {
     { 0x2, 0x29C, 0x58C },
     { 0x2, 0x29D, 0x590 },
     { 0x2, 0x29E, 0x594 },
@@ -923,21 +923,21 @@ ObjectLink D_0026B7E8[6] = {
     { 0x2, 0x2A2, 0x5A4 }
 };
 
-ObjectLink D_0026B830[1] = { { 0x2, 0x2A3, 0x560 } };
+ObjectLink g_hitTargetLoadLinks[1] = { { 0x2, 0x2A3, 0x560 } };
 
-ObjectLink D_0026B840[1] = { { 0x6, 0x2AE, 0x578 } };
+ObjectLink g_hitTargetStartLinks[1] = { { 0x6, 0x2AE, 0x578 } };
 
 f32 D_0026B850[4] = { 2.0f, 0.0f, 0.699999988079071f, 0.0f };
 
-void* D_0026B860[10] = { (void*)0x2A4, (void*)0x2A5, (void*)0x2A6, (void*)0x2A7, (void*)0x2A8, (void*)0x2A9, (void*)0x2AA, (void*)0x2AB, (void*)0x2AC, (void*)0x2AD };
+void* g_hitTargetStateIds[10] = { (void*)0x2A4, (void*)0x2A5, (void*)0x2A6, (void*)0x2A7, (void*)0x2A8, (void*)0x2A9, (void*)0x2AA, (void*)0x2AB, (void*)0x2AC, (void*)0x2AD };
 
-ObjectLink D_0026B888[1] = { { 0x2, 0x2AF, 0x55C } };
+ObjectLink g_soundStateObjectLinks[1] = { { 0x2, 0x2AF, 0x55C } };
 
-s32 D_0026B898[2] = { 688, 689 };
+s32 g_soundStateSoundIds[2] = { 688, 689 };
 
-ObjectLink D_0026B8A0[1] = { { 0x2, 0x2B3, 0x560 } };
+ObjectLink g_objectCreatorLinks[1] = { { 0x2, 0x2B3, 0x560 } };
 
-PadPattern D_0026B8B0[11] = {
+PadPattern g_padPatterns[11] = {
     { 1, { { { 0x1, 0x0 }, { 0, 0 }, 0.05f } } },
     { 2, { { { 0x0, 0x96 }, { 0, 0 }, 0.05f }, { { 0x0, 0x0 }, { 0, 0 }, 0.05f } } },
     { 2, { { { 0x0, 0xD2 }, { 0, 0 }, 0.05f }, { { 0x0, 0x0 }, { 0, 0 }, 0.1f } } },
@@ -951,9 +951,9 @@ PadPattern D_0026B8B0[11] = {
     { 5, { { { 0x0, 0xFF }, { 0, 0 }, 0.2f }, { { 0x0, 0x0 }, { 0, 0 }, 0.08f }, { { 0x0, 0xC8 }, { 0, 0 }, 0.13f }, { { 0x0, 0x0 }, { 0, 0 }, 0.06f }, { { 0x0, 0x96 }, { 0, 0 }, 0.11f } } }
 };
 
-s32 D_0026C3DC = 0;
+s32 g_padPatternSetting = 0;
 
-EffectOwner* func_0019E040(World* self, s32 flag)
+EffectOwner* AcquireEffectOwner(World* self, s32 flag)
 {
     if (flag == 0 && self->f1B3C != 0) {
         return self->f1B3C;
@@ -970,7 +970,7 @@ EffectOwner* func_0019E040(World* self, s32 flag)
     return n;
 }
 
-void func_0019E0B8(EffectOwner* self)
+void InitEffectOwner(EffectOwner* self)
 {
     InitCollider(self);
     SetListLinkOffset(&self->list558, 0x10);
@@ -988,12 +988,12 @@ void func_0019E0B8(EffectOwner* self)
     self->flags = flags;
 }
 
-void func_0019E158(EffectOwner* a, Rec50* b)
+void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b)
 {
     a->f554 = b->f1E8;
 }
 
-void func_0019E168(EffectOwner* self)
+void ReleaseEffectOwner(EffectOwner* self)
 {
     ListWalk cur(&self->list558);
     Effect* node = (Effect*)cur.First();
@@ -1015,9 +1015,9 @@ INCLUDE_RODATA(D_0024C934);
 
 ASM_FUNC(func_0019E220);
 
-void func_0019E418(void) {}
+void KeepEffectOwnerBounds(void) {}
 
-void func_0019E420(EffectOwner* self, f32 t)
+void UpdateEffectOwner(EffectOwner* self, f32 t)
 {
     ListFrame it;
     BeginListWalk::Of(&it, &self->list558);
@@ -1041,7 +1041,7 @@ void func_0019E420(EffectOwner* self, f32 t)
     g_activeListFrames = it.prev;
 }
 
-void func_0019E558(EffectOwner* self)
+void CollideEffects(EffectOwner* self)
 {
     if (self->f550 != 1) return;
     ContactRow03* l;
@@ -1094,7 +1094,7 @@ void func_0019E558(EffectOwner* self)
     }
 }
 
-void func_0019E848(EffectOwner* self, void* arg)
+void DrawEffects(EffectOwner* self, void* arg)
 {
     ListFrame fr;
     s32 e = (s32)&self->list558;
@@ -1122,7 +1122,7 @@ void func_0019E848(EffectOwner* self, void* arg)
     g_activeListFrames = fr.prev;
 }
 
-const Vt219C* func_0019E908(u32 n)
+const Vt219C* GetEffectKindTable(u32 n)
 {
     switch (n) {
     case 0: return (const Vt219C*)(g_basicEffectMethods);
@@ -1156,7 +1156,7 @@ const Vt219C* func_0019E908(u32 n)
     }
 }
 
-Effect* func_0019EA78(s32 kind, EffectOwner* sys)
+Effect* CreateEffect(s32 kind, EffectOwner* sys)
 {
     if (sys == 0) {
         sys = AcquireEffectOwner(g_currentWorld, 0);
@@ -1177,18 +1177,18 @@ Effect* func_0019EA78(s32 kind, EffectOwner* sys)
 
 ASM_FUNC(func_0019EB28);
 
-void func_0019EBE8(Effect* self)
+void RemoveEffect(Effect* self)
 {
     RemoveFromList(&self->owner->list558, self);
     ReleaseEffect(self);
 }
 
-void func_0019EC20(Effect* counter)
+void CountEffectUse(Effect* counter)
 {
     counter->uses++;
 }
 
-void func_0019EC30(Effect* self)
+void ReleaseEffect(Effect* self)
 {
     s32 n = self->uses - 1;
     self->uses = n;
@@ -1210,12 +1210,12 @@ void func_0019EC30(Effect* self)
     PushFreeSlot(&self->owner->world->pool1B2C, self);
 }
 
-void func_0019ECE0(Effect* value, s32 enabled)
+void EndEffect(Effect* value, s32 enabled)
 {
     if (enabled) RemoveEffect(value);
 }
 
-void func_0019ED00(Effect* self, f32 x)
+void ShortenEffectLife(Effect* self, f32 x)
 {
     f32 span = g_gameClock[1] - self->start;
     f32 t = self->life - span;
@@ -1233,7 +1233,7 @@ ASM_FUNC(func_0019ED58);
 
 ASM_FUNC(func_0019F390);
 
-void func_0019F560(Effect* self)
+void UpdateEffect(Effect* self)
 {
     f32 t = g_gameTime - self->start;
     if (self->life < t) {
@@ -1262,13 +1262,13 @@ void func_0019F560(Effect* self)
 
 ASM_FUNC(func_0019F620);
 
-void func_0019F858(Effect* self, void* a1)
+void DrawEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
     void* a2;
     void* a3;
     if (self->p114 != 0) {
-        func_001F2EF0(50.0f, self->p114, &self->q80, self->rot50,
+        ComputeOscillatorDisplacement(50.0f, self->p114, &self->q80, self->rot50,
                       scratch, scratch + 0x10, 0);
         a2 = scratch;
         a3 = scratch + 0x10;
@@ -1282,23 +1282,23 @@ void func_0019F858(Effect* self, void* a1)
     }
 }
 
-void func_0019F8E8(void* obj, void* arg)
+void AddEffectListener(void* obj, void* arg)
 {
     const Desc01* desc = ((BaseObject*)arg)->desc;
     AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, (void*)desc->m0D, arg);
 }
 
-void func_0019F918(void* obj, void* a1, void* a2)
+void AddEffectCallback(void* obj, void* a1, void* a2)
 {
     AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, a1, a2);
 }
 
-void func_0019F950(void* obj, void* a1, void* a2)
+void RemoveEffectCallback(void* obj, void* a1, void* a2)
 {
     RemoveCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, a1, a2);
 }
 
-void func_0019F988(Effect* self)
+void InitFallingEffect(Effect* self)
 {
     InitEffect(self);
     self->life = 5.0f;
@@ -1307,13 +1307,13 @@ void func_0019F988(Effect* self)
     self->qC0 = *(Quad219C*)&g->gravity;
 }
 
-void func_0019F9D0(Effect* self, s32 flag)
+void EndEffectWithImpact(Effect* self, s32 flag)
 {
     if (flag != 0) {
         ColliderSpan s[16];
         *(Quad219C*)&s[0].q[0] = self->q80;
         if (self->target->tree.nodes != 0) {
-            func_0013DFD8(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, s);
+            CollectTreeNodeSpans(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, s);
         }
         Effect* p = CreateEffect(4, 0);
         if (p != 0) {
@@ -1332,14 +1332,14 @@ ASM_FUNC(func_0019FA98);
 
 ASM_FUNC(func_0019FB08);
 
-void func_0019FCE8(Effect* value, u32 enabled)
+void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 {
     EndEffectWithImpact(value, enabled < 1);
 }
 
 ASM_FUNC(func_0019FD08);
 
-void func_0019FD70(Effect* self)
+void InitGrowingEffect(Effect* self)
 {
     InitEffect(self);
     self->life = 3.0f;
@@ -1349,7 +1349,7 @@ void func_0019FD70(Effect* self)
     self->i20 = v;
 }
 
-void func_0019FDC0(Effect* self)
+void InitShrinkingFallEffect(Effect* self)
 {
     InitEffect(self);
     self->life = 2.0f;
@@ -1358,7 +1358,7 @@ void func_0019FDC0(Effect* self)
     self->m30[2] = -1.0f;
 }
 
-void func_0019FE10(Effect* self)
+void InitDroppingEffect(Effect* self)
 {
     InitEffect(self);
     World* g = g_currentWorld;
@@ -1371,14 +1371,14 @@ ASM_FUNC(func_0019FE50);
 
 ASM_FUNC(func_0019FF20);
 
-void func_001A0020(Effect* self, void* other)
+void EndDroppingEffect(Effect* self, void* other)
 {
     if (other != 0) {
         RemoveEffect(self);
     }
 }
 
-void func_001A0040(Effect* self)
+void InitStreakEffect(Effect* self)
 {
     InitEffect(self);
     self->life = 0.25f;
@@ -1390,7 +1390,7 @@ void func_001A0040(Effect* self)
 
 ASM_FUNC(func_001A00A0);
 
-void func_001A01B8(Effect* self, f32 f)
+void InitScaledEffect(Effect* self, f32 f)
 {
     InitEffect(self, f);
     self->life = 0.5f;
@@ -1398,7 +1398,7 @@ void func_001A01B8(Effect* self, f32 f)
     u8* p = (u8*)D_0026B560;
     self->i20 = v;
     Quadword128 t;
-    func_00118CF0(&t, f);
+    StoreFloatAsQuadword(&t, f);
     Quad219C* sub = &self->q30;
     Quadword128 tv = t;
     Quadword128 u;
@@ -1406,7 +1406,7 @@ void func_001A01B8(Effect* self, f32 f)
     StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
-void func_001A0258(Effect* self, f32 f)
+void InitTrailSegment(Effect* self, f32 f)
 {
     InitEffect(self, f);
     Quad219C* sub = &self->q30;
@@ -1417,21 +1417,21 @@ void func_001A0258(Effect* self, f32 f)
     self->q40 = *(Quad219C*)D_0026B570;
     self->life = 0.35f;
     Quadword128 t;
-    func_00118CF0(&t, f);
+    StoreFloatAsQuadword(&t, f);
     Quadword128 tv = t;
     Quadword128 u;
     CopyQuadword(&u, p);
     StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
-void func_001A0318(Effect* self)
+void DetachTrailSegment(Effect* self)
 {
     SetTrailSegmentAnchor(self, 0, 0);
 }
 
 ASM_FUNC(func_001A0338);
 
-void func_001A04A0(Effect* self)
+void SplitTrailSegment(Effect* self)
 {
     Effect* d = CreateEffect(10, 0);
     if (d != 0) {
@@ -1466,7 +1466,7 @@ ASM_FUNC(func_001A05D8);
 
 ASM_FUNC(func_001A0758);
 
-void func_001A0950(void* self, s32 kind, s32 extra)
+void OnTrailAnchorEnded(void* self, s32 kind, s32 extra)
 {
     if (kind == 3) {
         goto three;
@@ -1490,7 +1490,7 @@ three:
     SetTrailSegmentAnchor(self, 0, extra + 16);
 }
 
-void func_001A09C0(Effect* self, f32 f)
+void InitSpawningEffect(Effect* self, f32 f)
 {
     InitEffect(self, f);
     Quad219C* sub = &self->q30;
@@ -1499,7 +1499,7 @@ void func_001A09C0(Effect* self, f32 f)
     self->life = 0.25f;
     self->i20 = v;
     Quadword128 t;
-    func_00118CF0(&t, f);
+    StoreFloatAsQuadword(&t, f);
     Quadword128 tv = t;
     Quadword128 u;
     CopyQuadword(&u, p);
@@ -1508,7 +1508,7 @@ void func_001A09C0(Effect* self, f32 f)
     self->q40 = *(Quad219C*)q;
 }
 
-void func_001A0A78(Effect* self, f32 arg)
+void SpawnFollowUpEffect(Effect* self, f32 arg)
 {
     UpdateEffect(self);
     f32 d = g_gameTime - self->start;
@@ -1522,7 +1522,7 @@ void func_001A0A78(Effect* self, f32 arg)
     }
 }
 
-void func_001A0B20(Effect* self)
+void InitFollowUpEffect(Effect* self)
 {
     InitEffect(self);
     World* sys = g_currentWorld;
@@ -1534,7 +1534,7 @@ void func_001A0B20(Effect* self)
     self->fB0 = -1.0f;
 }
 
-void func_001A0BA0(Effect* self, f32 f)
+void InitWideTrailSegment(Effect* self, f32 f)
 {
     InitTrailSegment(self, f);
     Quad219C* sub = &self->q30;
@@ -1544,14 +1544,14 @@ void func_001A0BA0(Effect* self, f32 f)
     self->i20 = v;
     self->q40 = *(Quad219C*)D_0026B5D0;
     Quadword128 t;
-    func_00118CF0(&t, f);
+    StoreFloatAsQuadword(&t, f);
     Quadword128 tv = t;
     Quadword128 u;
     CopyQuadword(&u, p);
     StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
-void func_001A0C50(Effect* self)
+void InitShortFallingEffect(Effect* self)
 {
     InitEffect(self);
     World* g = g_currentWorld;
@@ -1567,7 +1567,7 @@ ASM_FUNC(func_001A0D60);
 
 ASM_FUNC(func_001A0DF0);
 
-void func_001A0F88(Effect* self)
+void RunEffectEndCallback(Effect* self)
 {
     if (self->life < g_gameTime - self->start) {
         RemoveEffect(self);
@@ -1575,7 +1575,7 @@ void func_001A0F88(Effect* self)
     }
 }
 
-void func_001A0FE8(Effect* self)
+void InitEmitterEffect(Effect* self)
 {
     InitEffect(self);
     self->q40 = D_00275C50;
@@ -1590,7 +1590,7 @@ ASM_FUNC(func_001A11C0);
 
 ASM_FUNC(func_001A1398);
 
-void func_001A1410(Effect* self)
+void InitLongStreakEffect(Effect* self)
 {
     InitStreakEffect(self);
     World* ctx = g_currentWorld;
@@ -1599,7 +1599,7 @@ void func_001A1410(Effect* self)
     self->i20 = v;
 }
 
-void func_001A1458(Effect* self)
+void InitPhasedEffect(Effect* self)
 {
     InitEffect(self);
     s32 v = g_currentWorld->f1D28;
@@ -1608,11 +1608,11 @@ void func_001A1458(Effect* self)
     self->i128 = -1;
 }
 
-void func_001A1498(Effect* self)
+void KeepPhasedEffectStill(Effect* self)
 {
 }
 
-void func_001A14A0(Effect* c, f32 dt)
+void AdvanceEffectPhases(Effect* c, f32 dt)
 {
     f32 t = (g_gameTime - c->start) / c->life;
     f32 k;
@@ -1637,7 +1637,7 @@ INCLUDE_RODATA(D_0024C9B4);
 
 ASM_FUNC(func_001A15D8);
 
-void func_001A1DF0(Effect* self, s32 mode)
+void SetEffectPhase(Effect* self, s32 mode)
 {
     f32 t;
     f32 x;
@@ -1677,7 +1677,7 @@ void func_001A1DF0(Effect* self, s32 mode)
     self->i120 = mode;
 }
 
-s32 func_001A1F18(AngledPoint* a, AngledPoint* b)
+s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
 {
     if (a->angle < b->angle) return -1;
     return 1;
@@ -1689,7 +1689,7 @@ INCLUDE_RODATA(D_0024C9BC);
 
 ASM_FUNC(func_001A2070);
 
-void func_001A22C8(Effect* self, Rec50* src)
+void CopyEffectSourceIds(Effect* self, Rec50* src)
 {
     self->p120 = src->found[1];
     self->i124 = src->f1F0;
@@ -1699,7 +1699,7 @@ ASM_FUNC(func_001A22E0);
 
 ASM_FUNC(func_001A2380);
 
-s32 func_001A25F0(Effect* self, PlacedObject* other, void* a2, void* a3)
+s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
     u32 i;
     for (i = 0; i < 4; i++) {
@@ -1714,7 +1714,7 @@ s32 func_001A25F0(Effect* self, PlacedObject* other, void* a2, void* a3)
     return 1;
 }
 
-void func_001A26B0(Effect* self)
+void UpdateEffectUntilDetached(Effect* self)
 {
     UpdateEffect(self);
     s32 h = self->i120;
@@ -1725,12 +1725,12 @@ void func_001A26B0(Effect* self)
     }
 }
 
-void func_001A26F8(Effect* self, void* a1)
+void DrawHitMarkEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
 
-    func_00128018(self->p120, 0, &self->q80, scratch);
-    func_00128150(self->p120, 0, self->rot50, scratch + 0x10);
+    TransformPointBetweenFrames(self->p120, 0, &self->q80, scratch);
+    TransformRotationBetweenFrames(self->p120, 0, self->rot50, scratch + 0x10);
     DrawEffectAt(self, a1, scratch, scratch + 0x10);
 }
 
@@ -1738,7 +1738,7 @@ ASM_FUNC(func_001A2770);
 
 ASM_FUNC(func_001A2830);
 
-s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
+s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
 {
     PlacedObject* other = (PlacedObject*)a1;
     u8 out[0x10];
@@ -1753,13 +1753,13 @@ s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
     AttachHitMarkEffect(self, self->i20, other, a2, a3, out);
     p = *(void**)out;
     if (p != 0) {
-        func_00128150(0, other, (u8*)p + 0x50, (u8*)p + 0x50);
+        TransformRotationBetweenFrames(0, other, (u8*)p + 0x50, (u8*)p + 0x50);
     }
     RemoveEffect(self);
     return 1;
 }
 
-s32 func_001A2B18(Rec50* self, Collider* other)
+s32 IsEffectAimCandidate(Rec50* self, Collider* other)
 {
     u64 flag = 0x8000;
 
@@ -1772,10 +1772,10 @@ s32 func_001A2B18(Rec50* self, Collider* other)
 
 ASM_FUNC(func_001A2B48);
 
-void func_001A2D30(Effect* dst, void* a1)
+void PlaceEffectAtSource(Effect* dst, void* a1)
 {
     Rec50* src = (Rec50*)a1;
-    func_00128018(src->target, 0, (u8*)src + 0x20, &dst->q80);
+    TransformPointBetweenFrames(src->target, 0, (u8*)src + 0x20, &dst->q80);
     dst->iB0 = 0;
     dst->i110 = 0;
     dst->i120 = src->i1F4;
@@ -1788,7 +1788,7 @@ ASM_FUNC(func_001A2E68);
 
 ASM_FUNC(func_001A3008);
 
-s32 func_001A3128(Effect* a0, PlacedObject* a1, void* a2, void* a3)
+s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 {
     if (IsObjectOfKind(a1->root, 6) != 0) {
         return 0;
@@ -1798,7 +1798,7 @@ s32 func_001A3128(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 
 ASM_FUNC(func_001A31A0);
 
-void func_001A31F0(Effect* self)
+void InitFacingEffect(Effect* self)
 {
     InitEffect(self);
     f32 half = 0.5f;
@@ -1811,7 +1811,7 @@ void func_001A31F0(Effect* self)
 
 ASM_FUNC(func_001A3250);
 
-void func_001A3598(Effect* self, f32 x)
+void InitDelayedEffect(Effect* self, f32 x)
 {
     InitEffect(self, x);
     self->q40 = *(Quad219C*)&D_00275C50;
@@ -1824,7 +1824,7 @@ ASM_FUNC(func_001A35F0);
 
 ASM_FUNC(func_001A3730);
 
-void func_001A38F0(Effect* self)
+void UpdateDelayedEffect(Effect* self)
 {
     if (self->start <= g_gameClock[1]) {
         if (self->i134 != 0) {
@@ -1839,7 +1839,7 @@ void func_001A38F0(Effect* self)
     }
 }
 
-void func_001A3990(Effect* self)
+void DrawDelayedEffect(Effect* self)
 {
     if (g_gameTime < self->start) {
         return;
@@ -1847,14 +1847,14 @@ void func_001A3990(Effect* self)
     DrawEffect(self);
 }
 
-void func_001A39C8(Effect* self, void* otherv)
+void ResolveEffectTarget(Effect* self, void* otherv)
 {
     Rec50* other = (Rec50*)otherv;
     self->i120 = FindFirstObjectById(g_currentWorld, 0x104, other->f1F0, other->target);
     self->f124 = other->f1F4;
 }
 
-void func_001A3A18(Effect* self, f32 scale)
+void SendEffectMessagesAtRate(Effect* self, f32 scale)
 {
     UpdateEffect(self, scale);
     if (self->p120 == 0) return;
@@ -1876,7 +1876,7 @@ void func_001A3A18(Effect* self, f32 scale)
 
 ASM_FUNC(func_001A3AC8);
 
-void func_001A3AE0(WalkerCollider* self)
+void InitWalkerCollider(WalkerCollider* self)
 {
     WalkerCollider* o = self;
     InitSwitchedCollider(self);
@@ -1885,13 +1885,13 @@ void func_001A3AE0(WalkerCollider* self)
     o->f614 = -1;
 }
 
-void func_001A3B20(WalkerCollider* self)
+void LoadWalkerCollider(WalkerCollider* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 2, (void*)D_0026B778);
 }
 
-void func_001A3B58(WalkerCollider* self)
+void StartWalkerCollider(WalkerCollider* self)
 {
     StartPlacedObject(self);
     if (self->f678 != 0) {
@@ -1913,7 +1913,7 @@ void func_001A3B58(WalkerCollider* self)
 
 extern const f32 D_0024C9C0[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
 
-void func_001A3C40(WalkerCollider* self, PadRecord* src)
+void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
 {
     HeadingFrame f;
     if (self->f688 != 0) {
@@ -1927,25 +1927,25 @@ void func_001A3C40(WalkerCollider* self, PadRecord* src)
     f32 r = ArctangentOfRatio(((PlacedObject*)self->f64C)->m110.r[0].y, ((PlacedObject*)self->f64C)->m110.r[0].x);
     r = ApproachAngleWithRamp((u8*)&f.ramp, 0, r, self->f620, g_frameDt);
     BuildYawPitchMatrix((f32*)&f.rot, r, 0.0f);
-    func_00128150(0, self, &f.rot, &f.rot);
+    TransformRotationBetweenFrames(0, self, &f.rot, &f.rot);
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
 ASM_FUNC(func_001A3D40);
 
-void func_001A3F40(WalkerCollider* out, PadRecord* src)
+void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
     if (0.3f < src->f48) {
-        func_00144FF8(g_camera, src, 0, &out->f618);
+        ComputeCameraRelativeStickHeading(g_camera, src, 0, &out->f618);
     }
     out->f61C = src->f48;
     if (0.8f < src->f7C) {
-        func_00144FF8(g_camera, src, 1, &out->f620);
+        ComputeCameraRelativeStickHeading(g_camera, src, 1, &out->f620);
     }
     out->f624 = src->f7C;
 }
 
-s32 func_001A3FE0(WalkerCollider* self)
+s32 ChooseWalkerColliderState(WalkerCollider* self)
 {
     s32 r = self->f610;
     switch (r) {
@@ -1968,7 +1968,7 @@ s32 func_001A3FE0(WalkerCollider* self)
     return r;
 }
 
-void func_001A4070(WalkerCollider* self, s32 n)
+void SetWalkerColliderState(WalkerCollider* self, s32 n)
 {
     s32 old = self->f610;
     if (old == n) return;
@@ -2017,7 +2017,7 @@ void func_001A4070(WalkerCollider* self, s32 n)
     }
 }
 
-s32 func_001A4258(WalkerCollider* self)
+s32 ChooseWalkerColliderSubState(WalkerCollider* self)
 {
     s32 r = self->f614;
     switch (r) {
@@ -2035,7 +2035,7 @@ s32 func_001A4258(WalkerCollider* self)
     return r;
 }
 
-void func_001A42C8(WalkerCollider* self, s32 state)
+void SetWalkerColliderSubState(WalkerCollider* self, s32 state)
 {
     s32 old = self->f614;
     if (old == state) {
@@ -2078,7 +2078,7 @@ void func_001A42C8(WalkerCollider* self, s32 state)
     StartSoundEffect(s1, &self->f658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
 }
 
-void func_001A43C8(WalkerCollider* self, s32 code, MessageBody* rec)
+void HandleWalkerColliderNotification(WalkerCollider* self, s32 code, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, code, rec);
     if (code == 5) {
@@ -2108,7 +2108,7 @@ code5:
     }
 }
 
-void func_001A44E8(WalkerCollider* self)
+void StepWalkerCollider(WalkerCollider* self)
 {
     f32 buf[12];
     StepCollider(self);
@@ -2118,9 +2118,9 @@ void func_001A44E8(WalkerCollider* self)
 
 ASM_FUNC(func_001A4538);
 
-void func_001A45B8(WalkerCollider* ctx, Contact03* obj)
+void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 {
-    if (func_00128230(ctx) != 0) {
+    if (HasAnimationDrivenAttachment(ctx) != 0) {
         return;
     }
     if (0.7f < obj->v80.z) {
@@ -2128,7 +2128,7 @@ void func_001A45B8(WalkerCollider* ctx, Contact03* obj)
     }
 }
 
-void func_001A4610(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     Vec02 s0;
     Vec02 s1;
@@ -2146,12 +2146,12 @@ void func_001A4610(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     self->q450 = s1;
 }
 
-s32 func_001A4710(void)
+s32 IsWalkerColliderCameraFree(void)
 {
     return 0;
 }
 
-extern const PairPose D_0024C9D0 = { {
+extern const PairPose g_pairControllerPoseTable = { {
     { 2.0f, 5.0f, 0.0f, 0.0f },
     { 0.0f, 1.0f, 0.0f, 0.0f },
     { 0.0f, 8.0f, 0.0f, 0.0f },
@@ -2166,7 +2166,7 @@ extern const PairPose D_0024C9D0 = { {
     { 0.0f, 1.0f, 0.0f, 0.0f }
 } };
 
-void func_001A4718(PairController* self)
+void InitPairController(PairController* self)
 {
     PairPose tmp;
 
@@ -2200,34 +2200,34 @@ void func_001A4718(PairController* self)
     self->mode340 = 0;
 }
 
-void func_001A4858(PairController* obj, s32 value)
+void SetPairControllerFirstTemplateId(PairController* obj, s32 value)
 {
     obj->id2D0 = value;
 }
 
-void func_001A4860(PairController* obj, s32 value)
+void SetPairControllerSecondTemplateId(PairController* obj, s32 value)
 {
     obj->id2D4 = value;
 }
 
-void func_001A4868(u8* self, s32 value)
+void SetPairControllerHostId(u8* self, s32 value)
 {
     *(s32*)(self + 0x2D8) = value;
 }
 
-void func_001A4870(PairController* obj, s32 value)
+void SetPairControllerExtraId(PairController* obj, s32 value)
 {
     obj->id2DC = value;
 }
 
-void func_001A4878(PairController* list, s32 value)
+void AppendPairControllerId(PairController* list, s32 value)
 {
     s32 n = list->idCount;
     list->ids[n] = value;
     list->idCount = n + 1;
 }
 
-s32 func_001A4898(void)
+s32 GetCurrentEntryVariant(void)
 {
     s32 flags = g_currentEntry->flags;
     if ((flags & 4) == 0) {
@@ -2239,7 +2239,7 @@ s32 func_001A4898(void)
 
 ASM_FUNC(func_001A48C0);
 
-void func_001A4B30(PairController* self)
+void BlendPairControllerPose(PairController* self)
 {
     StartPlacedObject(self);
     if (self->id64C != GetCurrentEntryVariant()) {
@@ -2270,7 +2270,7 @@ void func_001A4B30(PairController* self)
     }
 }
 
-void func_001A4C48(PairController* self)
+void UpdatePairController(PairController* self)
 {
     ObjectCreator* t;
     s32 st;
@@ -2310,7 +2310,7 @@ void func_001A4C48(PairController* self)
     }
 }
 
-void func_001A4D60(PairController* self)
+void ShowPairControllerElement(PairController* self)
 {
     void* p = 0;
     if (self->state == 2) {
@@ -2323,7 +2323,7 @@ void func_001A4D60(PairController* self)
     }
 }
 
-s32 func_001A4DC0(PairController* self)
+s32 ChoosePairControllerState(PairController* self)
 {
     u32 s = self->state;
     switch (s) {
@@ -2359,7 +2359,7 @@ s32 func_001A4DC0(PairController* self)
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 #define O(o, off) (*(PairController**)((u8*)(o) + (off)))
-void func_001A4EF0(PairController* self, s32 state)
+void SetPairControllerState(PairController* self, s32 state)
 {
     PairController* o;
     s32 v;
@@ -2436,7 +2436,7 @@ INCLUDE_RODATA(D_0024CAEC);
 
 ASM_FUNC(func_001A5120);
 
-void func_001A54F8(PairController* self)
+void StartPairedObjects(PairController* self)
 {
     if (self->count39C >= self->f628) {
         self->f640 = 3.4028234663852886e+38f;
@@ -2478,7 +2478,7 @@ void func_001A54F8(PairController* self)
 #define F(o) (*(f32*)((u8*)self + (o)))
 #define I(o) (*(s32*)((u8*)self + (o)))
 #define P(o) ((const QuadraticCoeffs*)((u8*)self + (o)))
-void func_001A5760(PairController* self, f32 dt)
+void UpdatePairControllerTuning(PairController* self, f32 dt)
 {
     f32 t0;
     ClampedQuadratic::Get(t0, P(0x5B0), dt);
@@ -2518,7 +2518,7 @@ void func_001A5760(PairController* self, f32 dt)
 #undef I
 #undef P
 
-void func_001A5B28(PairController* self, HitTarget* obj)
+void RemoveFinishedHitTarget(PairController* self, HitTarget* obj)
 {
     s32 n = self->f3C4 + 1;
     f32 x = (f32)self->limit3B8;
@@ -2547,7 +2547,7 @@ void func_001A5B28(PairController* self, HitTarget* obj)
     self->count380 = self->count380 - 1;
 }
 
-void func_001A5C38(u8* self, PairedObject* obj)
+void ReleasePairedAttachment(u8* self, PairedObject* obj)
 {
     RemoveFromList(self + 0x3AC, obj->attachment);
     AppendToList(self + 0x3A0, obj->attachment);
@@ -2555,7 +2555,7 @@ void func_001A5C38(u8* self, PairedObject* obj)
     obj->attachment = 0;
 }
 
-void func_001A5C90(void* a0, void* a1)
+void AttachPairedPartner(void* a0, void* a1)
 {
     PairedObject* s = (PairedObject*)a1;
     ((Collider*)s->partner)->desc->m15((Collider*)s->partner, (BaseObject*)a1);
@@ -2567,7 +2567,7 @@ void func_001A5C90(void* a0, void* a1)
     StartSoundEffect(0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-void func_001A5D50(PairController* unused, PairedObject* h)
+void DetachPairedPartner(PairController* unused, PairedObject* h)
 {
     Collider* o = (Collider*)h->partner;
 
@@ -2578,12 +2578,12 @@ void func_001A5D50(PairController* unused, PairedObject* h)
     SetColliderAnchors(o, 2, (void*)&g_unitZVector, 3, 0);
 }
 
-void func_001A5DD8(void* unused, PairedObject* obj)
+void ActivatePairedAttachment(void* unused, PairedObject* obj)
 {
     SetSoundStateObjectState(obj->attachment, 1);
 }
 
-void func_001A5DF8(PairController* self, PairedObject* obj)
+void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
 {
     self->f3C0 = self->f3C0 + 1;
     RemoveFromList(self->list35C, obj->partner);
@@ -2618,7 +2618,7 @@ void func_001A5DF8(PairController* self, PairedObject* obj)
     StartSoundEffect(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-void func_001A5F78(PairController* self, PairedObject* obj)
+void RemovePairedObject(PairController* self, PairedObject* obj)
 {
     RemoveFromList(self->list384, obj);
     AppendToList(self->list390, obj);
@@ -2652,7 +2652,7 @@ INCLUDE_RODATA(D_0024CAF4);
 
 ASM_FUNC(func_001A6090);
 
-void func_001A6168(u8* self, PairedObject* obj, PairedObject* node)
+void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 {
     PairedObject* cur = (PairedObject*)obj->partner;
     if (cur != 0 && cur == node) {
@@ -2688,7 +2688,7 @@ INCLUDE_RODATA(D_0024CAFC);
 
 ASM_FUNC(func_001A6328);
 
-void func_001A63F8(PairController* self, PairedObject* b)
+void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {
     f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
     f32 r1 = RandomFloatInRange(0.0f, self->tune348);
@@ -2696,13 +2696,13 @@ void func_001A63F8(PairController* self, PairedObject* b)
     b->f574 = b->f574 * self->tune34C;
 }
 
-void* func_001A6480(void* self)
+void* GetPairControllerPose(void* self)
 {
     PairController* obj = (PairController*)self;
     return (u8*)self + (obj->poseIndex * 0xC0 + 0x3E0);
 }
 
-void func_001A6498(PairedObject* self)
+void InitPairedObject(PairedObject* self)
 {
     InitCollider(self);
     self->state = -1;
@@ -2711,21 +2711,21 @@ void func_001A6498(PairedObject* self)
     SetColliderAnchors(self, 1, (void*)&g_unitZVector, 2, (void*)&g_unitZVector);
 }
 
-void func_001A64F8(PairedObject* self)
+void LoadPairedObject(PairedObject* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 6, g_pairedObjectLinks);
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
-void func_001A6540(PairedObject* self)
+void CopyPairedObject(PairedObject* self)
 {
     Bytes8 tmp = *(Bytes8*)&self->blob5B0;
     CopyCollider(self);
     *(Bytes8*)&self->blob5B0 = tmp;
 }
 
-void func_001A6588(PairedObject* self)
+void StartPairedObject(PairedObject* self)
 {
     StartPlacedObject(self);
     SetPairedState(self, 0);
@@ -2742,7 +2742,7 @@ INCLUDE_RODATA(jtbl_0024CB30);
 
 ASM_FUNC(func_001A69F8);
 
-void func_001A6BE0(PairedObject* self, s32 mode)
+void SetPairedState(PairedObject* self, s32 mode)
 {
     TargetBinding buf[2];
     TargetBinding* w;
@@ -2808,7 +2808,7 @@ void func_001A6BE0(PairedObject* self, s32 mode)
     if (s3) self->soundHandle = CreateStateWalker(s3, self, -1, 1);
 }
 
-s32 func_001A6DE0(PairedObject* o, ObjectEvent* ev) {
+s32 HandlePairedHit(PairedObject* o, ObjectEvent* ev) {
     if (ev->eventFlags & 0x20) {
         switch (o->state) {
         case 1: case 2: case 3: case 4: case 5: case 7: case 8:
@@ -2837,7 +2837,7 @@ s32 func_001A6DE0(PairedObject* o, ObjectEvent* ev) {
     return ev->eventFlags != 0;
 }
 
-void* func_001A6F28(Collider* self)
+void* FindHitTargetChild(Collider* self)
 {
     ContactRow03* cur = self->contacts->head;
     while (cur) {
@@ -2848,7 +2848,7 @@ void* func_001A6F28(Collider* self)
     return 0;
 }
 
-void func_001A6F88(HitTarget* self)
+void InitHitTarget(HitTarget* self)
 {
     s32* z;
     InitCollider(self);
@@ -2864,21 +2864,21 @@ self->hitInterval = pt2;
 z[1]=0;z[2]=0;
 }
 
-void func_001A7008(HitTarget* self)
+void LoadHitTarget(HitTarget* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_hitTargetLoadLinks);
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
-void func_001A7050(HitTarget* self)
+void CopyHitTarget(HitTarget* self)
 {
     Bytes8 tmp = *(Bytes8*)&self->blob5A0;
     CopyCollider(self);
     *(Bytes8*)&self->blob5A0 = tmp;
 }
 
-void func_001A7098(HitTarget* self)
+void StartHitTarget(HitTarget* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_hitTargetStartLinks);
@@ -2892,7 +2892,7 @@ void func_001A7098(HitTarget* self)
     self->desc->m03(self);
 }
 
-void func_001A7128(HitTarget* self)
+void UpdateHitTarget(HitTarget* self)
 {
     UpdateCollider(self);
     s32 n;
@@ -2927,22 +2927,22 @@ void func_001A7128(HitTarget* self)
     }
 }
 
-void func_001A7230(HitTarget* self)
+void StepHitTarget(HitTarget* self)
 {
     StepCollider(self);
     if (self->parent == 0) {
         u8 buf[0x30];
-        func_00189378(&self->m110, 0, buf);
+        RotateMatrixUpright(&self->m110, 0, buf);
         TurnColliderTowardRotation(self, buf, D_0026B850, g_frameDt);
     }
 }
 
-void func_001A7290(HitTarget* self, Contact03* obj)
+void ComputeHitTargetContactValue(HitTarget* self, Contact03* obj)
 {
     obj->f98 = obj->f98 * 0.6f;
 }
 
-s32 func_001A72B0(HitTarget* self, ObjectEvent* ev)
+s32 ApplyHitTargetHit(HitTarget* self, ObjectEvent* ev)
 {
     s32 st;
 
@@ -2981,7 +2981,7 @@ done:
     return ev->eventFlags != 0;
 }
 
-s32 func_001A7420(HitTarget* self)
+s32 ChooseHitTargetState(HitTarget* self)
 {
     s32 v = self->state;
     if (v > 0) {
@@ -3004,7 +3004,7 @@ end:
     return v;
 }
 
-void func_001A7480(HitTarget* self, s32 value)
+void SetHitTargetState(HitTarget* self, s32 value)
 {
     s32 old = self->state;
     if (value == old) {
@@ -3026,19 +3026,19 @@ void func_001A7480(HitTarget* self, s32 value)
     }
 }
 
-void func_001A7520(SoundStateObject* self)
+void InitSoundStateObject(SoundStateObject* self)
 {
     InitCollider(self);
     self->state = -1;
 }
 
-void func_001A7550(SoundStateObject* self)
+void LoadSoundStateObject(SoundStateObject* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_soundStateObjectLinks);
 }
 
-void func_001A7588(SoundStateObject* self)
+void CopySoundStateObject(SoundStateObject* self)
 {
     PackedWord8 tmp;
     tmp = self->keptBytes;
@@ -3046,7 +3046,7 @@ void func_001A7588(SoundStateObject* self)
     self->keptBytes = tmp;
 }
 
-void func_001A75D0(SoundStateObject* self)
+void StartSoundStateObject(SoundStateObject* self)
 {
     ListFrame frame;
     StartPlacedObject(self);
@@ -3064,7 +3064,7 @@ void func_001A75D0(SoundStateObject* self)
     SetSoundStateObjectState(self, 0);
 }
 
-void func_001A7648(SoundStateObject* self)
+void UpdateSoundStateObject(SoundStateObject* self)
 {
     UpdateCollider(self);
     s32 v;
@@ -3073,9 +3073,9 @@ void func_001A7648(SoundStateObject* self)
     }
 }
 
-s32 func_001A7698(SoundStateObject* p) { return p->state; }
+s32 GetSoundStateObjectState(SoundStateObject* p) { return p->state; }
 
-void func_001A76A0(SoundStateObject* self, s32 idx)
+void SetSoundStateObjectState(SoundStateObject* self, s32 idx)
 {
     s32 old = self->state;
     if (old == idx) return;
@@ -3089,21 +3089,21 @@ void func_001A76A0(SoundStateObject* self, s32 idx)
     else SetStateWalkerTarget(child, v);
 }
 
-void func_001A7708(ObjectCreator* self)
+void InitObjectCreator(ObjectCreator* self)
 {
     InitCollider(self);
     self->state = -1;
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-void func_001A7750(ObjectCreator* self)
+void LoadObjectCreator(ObjectCreator* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_objectCreatorLinks);
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
-void func_001A7798(ObjectCreator* self)
+void StartObjectCreator(ObjectCreator* self)
 {
     StartPlacedObject(self);
     if (self->createsObject == 0) {
@@ -3116,7 +3116,7 @@ void func_001A7798(ObjectCreator* self)
 
 ASM_FUNC(func_001A7800);
 
-void func_001A7998(ObjectCreator* self, s32 idx)
+void SetObjectCreatorState(ObjectCreator* self, s32 idx)
 {
     if (self->state != idx) {
         if (self->activeHandle != 0) {
@@ -3150,7 +3150,7 @@ void func_001A7998(ObjectCreator* self, s32 idx)
     }
 }
 
-s32 func_001A7AA0(ObjectCreator* self)
+s32 ChooseObjectCreatorState(ObjectCreator* self)
 {
     s32 mode = self->state;
     s32 r = mode;
@@ -3185,7 +3185,7 @@ out:
     return r;
 }
 
-void func_001A7B20(PadPatternPlayer* self, s32 a1, s32 a2)
+void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2)
 {
     if (self->state == 0) {
         SetPadPatternState(self, 1);
@@ -3196,7 +3196,7 @@ void func_001A7B20(PadPatternPlayer* self, s32 a1, s32 a2)
     self->slot = a2;
 }
 
-void func_001A7B88(PadPatternPlayer* s)
+void UpdatePadPattern(PadPatternPlayer* s)
 {
     f32 dt = g_gameClock[5];
     switch (s->state) {
@@ -3231,12 +3231,12 @@ void func_001A7B88(PadPatternPlayer* s)
     }
 }
 
-void func_001A7CE8(PadPatternPlayer* self, s32 index)
+void StartPadPatternFromTable(PadPatternPlayer* self, s32 index)
 {
     StartPadPattern(self, &g_padPatterns[index]);
 }
 
-void func_001A7D18(PadPatternPlayer* self, PadPattern* p, f32 f)
+void StartPadPattern(PadPatternPlayer* self, PadPattern* p, f32 f)
 {
     if (self->state != 0 && p->count > 0) {
         if (IsPadPatternEnabled((void*)g_saveData) != 0) {
@@ -3251,7 +3251,7 @@ void func_001A7D18(PadPatternPlayer* self, PadPattern* p, f32 f)
     }
 }
 
-void func_001A7D98(PadPatternPlayer* self, s32 state)
+void SetPadPatternState(PadPatternPlayer* self, s32 state)
 {
     u8 bytes[2];
     if (state == self->state) return;
@@ -3274,7 +3274,7 @@ void func_001A7D98(PadPatternPlayer* self, s32 state)
     self->state = state;
 }
 
-void func_001A7E40(PadPatternPlayer* self)
+void StopPadPatternOutput(PadPatternPlayer* self)
 {
     u8 bytes[2];
     bytes[0] = 0;
@@ -3282,14 +3282,14 @@ void func_001A7E40(PadPatternPlayer* self)
     SetPadActuatorBytes(self->port, self->slot, bytes);
 }
 
-void func_001A7E70(void)
+void InitPadPatternSetting(void)
 {
     if (g_padPatternSetting == 0) {
         g_padPatternSetting = 1;
     }
 }
 
-void func_001A7E90(GameProgress* ctx)
+void ApplyPadPatternSetting(GameProgress* ctx)
 {
     s32 v = g_padPatternSetting;
     if (v == 2) {
@@ -3309,7 +3309,7 @@ set:
     ctx->f19EC |= 0x20;
 }
 
-s32 func_001A7EE8(GameProgress* ctx)
+s32 IsPadPatternEnabled(GameProgress* ctx)
 {
     s32 v = g_padPatternSetting;
     if (v == 1) {
@@ -3336,7 +3336,7 @@ tail:
     return ((ctx->f19EC >> 5) ^ 1) & 1;
 }
 
-void func_001A7F50(GameProgress* self)
+void TogglePadPatternSetting(GameProgress* self)
 {
     s32 g = g_padPatternSetting;
     switch (g) {

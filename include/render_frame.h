@@ -40,7 +40,7 @@ struct RenderFrame {
 
 typedef char check_RenderFrame[sizeof(RenderFrame) == 0x48 ? 1 : -1];
 
-extern RenderFrame D_00262320[2];   // file_1549C8.cpp
-extern RenderFrame* D_002622D8;     // file_1549C8.cpp
+extern RenderFrame g_renderFrames[2];   // file_1549C8.cpp
+extern RenderFrame* g_buildFrame;     // file_1549C8.cpp
 
 #endif

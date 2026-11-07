@@ -16,6 +16,6 @@ struct ThresholdRange {
 
 typedef char check_ThresholdRange[sizeof(ThresholdRange) == 0xC ? 1 : -1];
 
-extern ThresholdRange D_00261D40[4];   // file_14EE40.cpp
+extern ThresholdRange g_thresholdRanges[4];   // file_14EE40.cpp
 
 #endif

@@ -7,7 +7,7 @@ struct State_001365A8_eu { u8 pad[0x58C]; f32 value;
         value = x;
     }
 };
-void func_001365A8(State_001365A8_eu* self, f32 value)
+void SetTextPanelValuePercent(State_001365A8_eu* self, f32 value)
 {
     self->set(value * 0.01f, 0.0f, 1.0f);
 }

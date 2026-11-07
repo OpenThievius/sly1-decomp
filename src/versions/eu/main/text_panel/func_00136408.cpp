@@ -15,7 +15,7 @@ s32 func_eu_001E3050(void* dst, const char* src);
 void* func_eu_0015DCB8(void* buf, void* name, Font* v, s32 zero);  // returns buf
 void func_eu_0015E4A8(void* buf, void* list, f32 lim);
 
-void func_00136408(Entry_00136408_eu* self, const char* name)
+void SetTextPanelText(Entry_00136408_eu* self, const char* name)
 {
     u8 buf[0xC0];
     s32 wide;

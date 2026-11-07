@@ -6,10 +6,10 @@ struct Self_135F48_eu {
     s32 f5B4;
 };
 
-void func_00135E78(Self_135F48_eu* self, s32 state, s32 flag);
-void func_001358D0(Self_135F48_eu* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
+void ReleasePanelEntries(Self_135F48_eu* self, s32 state, s32 flag);
+void CollectPanelEntriesOfClass(Self_135F48_eu* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
-void func_00135F48(Self_135F48_eu* self)
+void RefreshPanelEntries(Self_135F48_eu* self)
 {
     LevelBit flag;
     GetCurrentLevelBit(&flag);
@@ -21,7 +21,7 @@ void func_00135F48(Self_135F48_eu* self)
     if (self->f5B4 == 1) {
         f32 k = D_00249CFC;
         World* world = *(World**)g_currentWorld;
-        func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)world->slot1CE8[23], k);
-        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(*(World**)g_currentWorld)->slot1CE8[27], k);
+        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)world->slot1CE8[23], k);
+        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(*(World**)g_currentWorld)->slot1CE8[27], k);
     }
 }

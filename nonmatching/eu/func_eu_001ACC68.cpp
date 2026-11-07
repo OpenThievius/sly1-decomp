@@ -41,14 +41,14 @@ extern f32 D_eu_0027DB08;
 extern f32 D_eu_0027DB0C;
 
 void func_eu_001AAFB0(void* self);
-void func_0015C8B8(void* obj, f32 a, f32 b);
-void func_001AAB20(void* self, f32 a, f32 b);
-void func_0015C900(void* obj);
+void PushFontScale(void* obj, f32 a, f32 b);
+void SetScreenElementSize(void* self, f32 a, f32 b);
+void PopFontScale(void* obj);
 
 void func_eu_001ACC68(Menu_eu_1ACC68* self)
 {
     func_eu_001AAFB0(self);
-    self->font = (Font_eu_1ACC68*)func_0015C1C0(4);
+    self->font = (Font_eu_1ACC68*)GetFontById(4);
     self->a51C = 1.0f;
     self->a588 = 1.0f;
     self->a584 = 0.0f;
@@ -83,12 +83,12 @@ void func_eu_001ACC68(Menu_eu_1ACC68* self)
     self->b594 = D_eu_0027DB04 * t;
     self->b598 = D_eu_0027DB08 * t;
     self->b59C = D_eu_0027DB0C * t;
-    func_0015C8B8(self->font, t, t);
+    PushFontScale(self->font, t, t);
     f32 h = (f32)self->font->units * self->font->scale;
     f32 w = self->font->vt->width((u8*)self->font + self->font->vt->off, 0x7A);
     f32 h2 = (f32)self->font->units * self->font->scale;
-    func_001AAB20(self, h, (w + h2) + 5.0f);
-    func_0015C900(self->font);
+    SetScreenElementSize(self, h, (w + h2) + 5.0f);
+    PopFontScale(self->font);
     self->a58C = 0;
     self->cols2 = self->cols;
     self->rows2 = self->rows;

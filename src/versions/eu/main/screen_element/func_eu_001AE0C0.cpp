@@ -7,7 +7,7 @@ struct Obj_eu_001AE0C0 {
     s32 flag;
 };
 
-void func_001AA8F0(void* self);
+void ShowScreenElement(void* self);
 
 void func_eu_001AE0C0(Obj_eu_001AE0C0* self)
 {

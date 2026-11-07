@@ -21,5 +21,5 @@ void func_eu_001AAEC0(void)
         }
     }
     DrawScreenFade(D_eu_0027F700);
-    func_001AE820(D_eu_0027CFE8);
+    DrawCyclingGlyphElement(D_eu_0027CFE8);
 }

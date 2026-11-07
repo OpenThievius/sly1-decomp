@@ -44,65 +44,65 @@ f32 D_00260E90[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
 f32 D_00260EA0[4] = { 0.0f, 2.5f, 0.25f, 0.0f };
 f32 D_00260EB0[4] = { 1500.0f, 0.0f, 0.5f, 4500.0f };
 f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
-f32 D_00260ED0[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_fadeRampProfile[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
 f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
 
-void* func_0015A418(void* world, s32 kind, s32 id, void* scope);
-void* func_0015A448(void* world, s32 id, void* scope);
-AnimationPlayer* func_0012D3F8(World* pool);
-void func_0012FDE8(StreamReader* a0);
+void* FindFirstObjectById(void* world, s32 kind, s32 id, void* scope);
+void* FindFirstObjectByIdMode4(void* world, s32 id, void* scope);
+AnimationPlayer* NewAnimationPlayer(World* pool);
+void CloseStreamReader(StreamReader* a0);
 
-void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
+void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
-extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
-extern void func_00188A20(void*, void*);
-extern void func_001EDE38(void*, void*, void*);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*, s32, void*, void*);
+extern void BuildEulerRotationMatrix(void*, void*);
+extern void RotateVectorByTwoAngles(void*, void*, void*);
 
-extern void func_0011F9F8(s32, VectorKey*);
-extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*);
+extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
-extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void func_001F5C0C(void*, s32, s32);
+extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
+extern void FillMemory(void*, s32, s32);
 
-void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
+void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
-extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
+extern void EvaluateVectorKeyCurve(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
-extern void func_0011FA88(s32*, VectorKey**, Stream83*);
+extern void ReadVectorKeys(s32*, VectorKey**, Stream83*);
 
-extern void* func_001B5EE0(void*);
+extern void* PopZeroedFreeSlot(void*);
 
-extern World* D_00275710;
+extern World* g_currentWorld;
 
-void func_0018D800(Attachment* self, Attachment* src, s32 size);
+void CopyMemory(Attachment* self, Attachment* src, s32 size);
 
-void func_00121338(Attachment* self, PlacedObject* a1);
+void InitPoseSource(Attachment* self, PlacedObject* a1);
 
-void func_00152600(void* list, void* item);
-void func_00121358(Attachment* self, s32 flags);
+void RemoveFromList(void* list, void* item);
+void ReleasePoseSource(Attachment* self, s32 flags);
 
-extern f32 D_0026185C[];
-void func_001214B8(Attachment* self, Vec02* a1, Vec02* a2);
-s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
+extern f32 g_gameTime[];
+void GetOwnerPosition(Attachment* self, Vec02* a1, Vec02* a2);
+s32 ApplyAnimationLoopMode(AnimationPlayer* t, f32* a, f32* b);
 
-void func_00121508(Attachment* self, Mat02* a, Vec02* b);
+void GetOwnerRotation(Attachment* self, Mat02* a, Vec02* b);
 
-extern void func_0013D278(void*);
+extern void HandleMaskedColliderActivation(void*);
 
-extern u8 D_00261420[];
-void func_001B7968(Collider* self);
-s32 func_00140FF8(void* p);
+extern u8 g_flagTable[];
+void InitCollider(Collider* self);
+s32 TakeFlagTableIndex(void* p);
 
-extern void func_001BA130(Collider*);
+extern void CopyCollider(Collider*);
 
 
-void func_001B93F8(Collider* self);
-s32 func_001300E8(void* node, s32 kind);
+void UpdateCollider(Collider* self);
+s32 IsObjectOfKind(void* node, s32 kind);
 
-extern s32 func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
+extern s32 UpsertKeyedEntry(void*, s32, void*, void*, void*, void*, void*);
 
-s32 func_001C1A28(void* a, void* b);
+s32 AppendPropertyToScriptList(void* a, void* b);
 
 // An entry of PlacedObject::partStates: its word at +8.
 struct PartState { u8 pad[8]; s32 value; };
@@ -116,106 +116,106 @@ struct DrawPart {
     s32 value;              // 0x6C
 };
 
-extern void func_00189150(void*, void*, void*);
-extern void func_00188D28(void*, void*, void*);
+extern void MultiplyMatrices3x3(void*, void*, void*);
+extern void MatrixToAxisAngle(void*, void*, void*);
 
-extern f32 D_00260E60[4];
-extern f32 D_0026186C;
-extern f32 D_00261860;
-extern f32 func_001EA4B8(void*, s32, f32, f32, f32);
+extern f32 g_valueRampProfile[4];
+extern f32 g_frameStep;
+extern f32 g_frameDt;
+extern f32 ApproachValueWithRamp(void*, s32, f32, f32, f32);
 
-void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_00124A48(void* self);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_00182ED8(void* a);
+void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void StartPlacedObject(void* self);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void ResolveAndStartObject(void* a);
 
-void func_00121568(Attachment* self, f32* value, f32* slope);
+void GetOwnerValue(Attachment* self, f32* value, f32* slope);
 
-extern void func_00121568(Attachment* self, f32* a1, f32* a2);
+extern void GetOwnerValue(Attachment* self, f32* a1, f32* a2);
 
-extern void func_00121580(Attachment* self, Mat02* a1);
+extern void GetIdentityMatrix(Attachment* self, Mat02* a1);
 
-void func_00123400(CountedObject* node, StateTrigger* value);
-void func_001CAD40(void* node, void* self);
-s32 func_00141008(void* table, s32 v);
+void SetCountedObjectCounter(CountedObject* node, StateTrigger* value);
+void AddAgentStateTrigger(void* node, void* self);
+s32 TestFlagTableBit(void* table, s32 v);
 
 extern u8 D_002623D8[];
 
-void func_001BF788(s32 a, s32 b);
-void func_001BF048(s32 a);
-void func_0013ECB0(void* a, s32 b, void* c, void* d, s32 e);
-void func_00160D00(void* p);
-void func_001B64D8(void* a, s32 b);
-void func_001B6628(void* a, s32 b);
-s32 func_00141008(void* a, s32 b);
-void func_00141040(void* a, s32 b);
-void func_001837E0(BaseObject* self, s32 a, s32 b, s32 c);
-s32 func_001BEEF8(s32 a);
-s32 func_00160CF0(void* p);
-void func_001BFCD8(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StopSoundRecord(s32 a, s32 b);
+void ReleaseSoundLevel(s32 a);
+void SetGatheredWalkerTargets(void* a, s32 b, void* c, void* d, s32 e);
+void ReleaseCounterRef(void* p);
+void SetStateWalkerTarget(void* a, s32 b);
+void TeleportStateWalker(void* a, s32 b);
+s32 TestFlagTableBit(void* a, s32 b);
+void SetFlagTableBit(void* a, s32 b);
+void TriggerScriptEvent(BaseObject* self, s32 a, s32 b, s32 c);
+s32 PushSoundLevel(s32 a);
+s32 IncrementCounter(void* p);
+void StartSoundEffect(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 // The position curves' tables, defined at the end of this file.
-extern const PositionCurveVt D_002196B8;
-extern const PositionCurveVt D_002196C8;
-extern const PositionCurveVt D_002196D8;
-void* func_0018D5C0(s32 bytes);
+extern const PositionCurveVt g_positionCurveKind0Methods;
+extern const PositionCurveVt g_positionCurveKind1Methods;
+extern const PositionCurveVt g_positionCurveKind2Methods;
+void* AllocateZeroedFrontMemory(s32 bytes);
 
-void func_00152600(void* a, void* b);
-void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
-void func_001274F8(void* a, void* b);
-void func_00127590(void* a, void* b);
-void func_001B5F28(void* a, void* b);
+void RemoveFromList(void* a, void* b);
+void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
+void SetPlacedObjectVelocity(void* a, void* b);
+void SetPlacedObjectSpin(void* a, void* b);
+void PushFreeSlot(void* a, void* b);
 
 
-s32 func_00139970(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
-f32 func_001EA408(f32 a);
+s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
+f32 WrapAngle(f32 a);
 
-extern const RotationCurveVt D_002196E8;
-extern const RotationCurveVt D_002196F8;
-extern const RotationCurveVt D_00219708;
+extern const RotationCurveVt g_rotationCurveKind0Methods;
+extern const RotationCurveVt g_rotationCurveKind1Methods;
+extern const RotationCurveVt g_rotationCurveKind2Methods;
 
-extern const ScaleCurveVt D_00219718;
-extern const ScaleCurveVt D_00219728;
-void* func_0018D5C0(u32 n);
+extern const ScaleCurveVt g_scaleCurveKind0Methods;
+extern const ScaleCurveVt g_scaleCurveKind1Methods;
+void* AllocateZeroedFrontMemory(u32 n);
 
 extern u8 D_00219560[];
 
-void func_00121338(Attachment* self);
+void InitPoseSource(Attachment* self);
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
 // shared one, each table followed by a zero word.
-void func_0011F0C8();
-void func_0011EFC8();
-void func_0011F180();
-void func_0011F320();
-void func_0011F210();
-void func_0011F3E8();
-void func_0011F478();
-void func_0011F568();
-void func_0011F620();
-void func_0011EFB0();
-void func_00120AA8();
-void func_00120D58();
-void func_00120110();
-void func_00120130();
-void func_001201D0();
-void func_001201F0();
-void func_001202C0();
-void func_001202F0();
-void func_00120360();
-void func_00120388();
-void func_001203A8();
-void func_00120418();
-void func_00120440();
-extern const WeightCurveVt D_00219668;
-extern const WeightCurveVt D_00219678;
-extern const WeightCurveVt D_00219688;
-extern const WeightCurveVt D_00219698;
-extern const WeightCurveVt D_002196A8;
-void* func_0018D5C0(WeightCurve* n);
+void EvaluateTangentWeightCurve();
+void ReadTangentWeightCurve();
+void GetTangentWeightCurveTimes();
+void EvaluateControlPointWeightCurve();
+void ReadControlPointWeightCurve();
+void GetControlPointWeightCurveTimes();
+void EvaluateLinearWeightCurve();
+void ReadLinearWeightCurve();
+void GetLinearWeightCurveTimes();
+void GetNoWeightCurveTimes();
+void EvaluateAngleBlendCurve();
+void EvaluateValueBlendCurve();
+void GetAxisRotationCurveKeyTimes();
+void EvaluateKeyedRotationCurve();
+void GetKeyedRotationCurve();
+void ReadKeyedRotationCurve();
+void GetKeyedRotationCurveKeyTimes();
+void EvaluateAxisScaleCurve();
+void ReadAxisScaleCurve();
+void GetAxisScaleCurveKeyTimes();
+void EvaluateKeyedScaleCurve();
+void ReadKeyedScaleCurve();
+void GetKeyedScaleCurveKeyTimes();
+extern const WeightCurveVt g_weightCurveKind0Methods;
+extern const WeightCurveVt g_weightCurveKind1Methods;
+extern const WeightCurveVt g_weightCurveKind2Methods;
+extern const WeightCurveVt g_weightCurveKind3Methods;
+extern const WeightCurveVt g_weightCurveKind4Methods;
+void* AllocateZeroedFrontMemory(WeightCurve* n);
 
-void func_00152438(void* list, s32 n);
-void func_00182C18(BaseObject* self);
+void SetListLinkOffset(void* list, s32 n);
+void InitObject(BaseObject* self);
 
 // Two stores of the set-up written as small inline helpers, the shape that matches: a value
 // passed as an int, and a matrix copied through its own pointer (as each copy's own register).
@@ -228,20 +228,20 @@ struct SetupStores {
 #include "object_cycler.h"
 #include "paired_object.h"
 
-void func_00182ED0(BaseObject* self);
-void func_00152440(void* a);
-void func_0015F710(World* world, void* b);
-void func_00143B20(void* a, PlacedObject* b);
-void func_00129DF8(PlacedObject* self);
-void func_001837E0(PlacedObject* self, s32 a1, s32 a2, s32 a3);
+void UnregisterObject(BaseObject* self);
+void ClearList(void* a);
+void DissolveObjectLinkList(World* world, void* b);
+void RemoveCameraObject(void* a, PlacedObject* b);
+void ClearRootTries(PlacedObject* self);
+void TriggerScriptEvent(PlacedObject* self, s32 a1, s32 a2, s32 a3);
 
-extern WorldObjectNode* func_00159BB0();
-extern s32 func_00182FC8(void*);
+extern WorldObjectNode* AddObjectNodeToWorld();
+extern s32 IsObjectAttached(void*);
 
-extern void func_00188FD8(void*, void*);
+extern void MatrixToEulerAngles(void*, void*);
 
 
-s32 func_00182FC8(void* self);
+s32 IsObjectAttached(void* self);
 
 // What slot 29 tells the object's listeners (kind 3): the position before, and the object.
 struct MoveNotice {
@@ -250,54 +250,54 @@ struct MoveNotice {
     Vec02 q;
 };
 
-void func_001226D8(void* p);
+void SettlePoseSourceModes(void* p);
 
-s32 func_00123DC0(void* a);
-void func_00129DF8(void* self);
+s32 IsVelocityNegligible(void* a);
+void ClearRootTries(void* self);
 
-s32 func_00123E00(void* a);
-
-
-
-void func_00124EE8(void* self, f32 f);
+s32 IsSpinNegligible(void* a);
 
 
-void func_00128DB8(void* self);
-void func_00124540(void* self);
-void func_0012A860(void* self, void* v);
-void func_00165828(void* a, void* b);
+
+void UpdateObjectTree(void* self, f32 f);
 
 
-void func_001BFCD8(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
-
-void func_00182D48(BaseObject* self);
-void func_00152470(void* list, void* item);
-void func_0015F7D8(World* world, PlacedObject* item);
-void func_00143AF8(PlacedObject* a, PlacedObject* self);
+void ResolveFollowRecordObjects(void* self);
+void SavePlacedObjectInitialFrame(void* self);
+void SetAimTarget(void* self, void* v);
+void BindAttachmentTargets(void* a, void* b);
 
 
-void func_00182C58(BaseObject* self);
-void func_00124CC0(PlacedObject* self);
-void* func_001DBCC8(void* owner, void* fn, PlacedObject* arg, s32 a3, s32 a4);
-void func_00165728(void* a, PlacedObject* b);
-s32 func_001B1D38(RangeRecord* p);
-void func_001B1D70(RangeRecord* p, f32 v);
-void func_001B1DA8(RangeRecord* p, f32 v);
-void func_00152E48(void* a, RangeRecord* b);
-void func_001B1B38(RangeRecord* p);
-void func_001BFCD8(s32 a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, PlacedObject* a2, s32 a3, void* a4, s32 a5);
-s32 func_001833F0(BaseObject* a, s32 b);
-s32 func_00182FC8(BaseObject* p);
+void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
-void func_001830D8(BaseObject* self, BaseObject* src);
-void func_00165920(u8* a, PlacedObject* self, u8* src);
-void* func_0018D568(s32 size, void* src);
-Attachment* func_00121280(Attachment* src, World* world, PlacedObject* self);
-void func_001299E0(PlacedObject* self, void* v);
-u8* func_001B5EC0(Pool6C* pool);
-void func_0018D800(u8* dst, void* src, s32 n);
-void func_00152450(u8* p);
-void func_00143AF8(void* list, PlacedObject* item);
+void RegisterObject(BaseObject* self);
+void AppendToList(void* list, void* item);
+void MergeObjectGroupMembers(World* world, PlacedObject* item);
+void AddCameraObject(PlacedObject* a, PlacedObject* self);
+
+
+void StartObject(BaseObject* self);
+void StartAnimationFromContext(PlacedObject* self);
+void* AppendQueuedCall(void* owner, void* fn, PlacedObject* arg, s32 a3, s32 a4);
+void StartAttachments(void* a, PlacedObject* b);
+s32 HasRangeRecordRanges(RangeRecord* p);
+void StoreRangeRecordNear(RangeRecord* p, f32 v);
+void StoreRangeRecordFar(RangeRecord* p, f32 v);
+void BuildTexturePackets(void* a, RangeRecord* b);
+void PrepareRangeRecord(RangeRecord* p);
+void StartSoundEffect(s32 a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, PlacedObject* a2, s32 a3, void* a4, s32 a5);
+s32 MatchesObjectId(BaseObject* a, s32 b);
+s32 IsObjectAttached(BaseObject* p);
+
+void CopyObjectData(BaseObject* self, BaseObject* src);
+void CopyAttachmentBlock(u8* a, PlacedObject* self, u8* src);
+void* CopyToFrontMemory(s32 size, void* src);
+Attachment* ClonePoseSource(Attachment* src, World* world, PlacedObject* self);
+void InsertAttachment(PlacedObject* self, void* v);
+u8* TakePoolSlot(Pool6C* pool);
+void CopyMemory(u8* dst, void* src, s32 n);
+void ClearListLinks(u8* p);
+void AddCameraObject(void* list, PlacedObject* item);
 
 // NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
 // storing them (and computes the loop end in $v0), ours interleaves load and store.
@@ -312,10 +312,10 @@ struct ScaledTransform {
 
 extern u8 D_00248D40[];
 
-void func_00188C10(Vec02* a, Mat02* b, u8* c, void* d);
+void BuildScaledTransformMatrix(Vec02* a, Mat02* b, u8* c, void* d);
 
-void func_00182ED8(void* node);
-void func_001832F0(void* node, BaseObject* ctx);
+void ResolveAndStartObject(void* node);
+void AddObjectListener(void* node, BaseObject* ctx);
 
 
 struct ListWalkNext {
@@ -340,17 +340,17 @@ struct ListWalkBegin {
 
 
 
-void* func_00183058(BaseObject* item, World* world, PlacedObject* parent);
-void func_001BB580(PlacedObject* self);
+void* CreateObjectCopy(BaseObject* item, World* world, PlacedObject* parent);
+void UpdateAnchorModeFlags(PlacedObject* self);
 
 
-void func_00165FE0(u8* sub, PlacedObject* self, f32 f);
-void func_001B2140(void* p, f32 f);
+void UpdateAttachments(u8* sub, PlacedObject* self, f32 f);
+void UpdateRangeRecord(void* p, f32 f);
 void func_00126AC8(PlacedObject* self, f32 f);
-void func_001837E0(PlacedObject* self, s32 a, s32 b, void** args);
+void TriggerScriptEvent(PlacedObject* self, s32 a, s32 b, void** args);
 
 void func_0012C9E8(Animation* a, PlacedObject* b, f32 c, void* d, f32* e, s32 f, s32 g);
-void func_0012C288(Animation* a, PlacedObject* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
+void CreateAnimationPlayer(Animation* a, PlacedObject* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
 
 // A value kept within [lo, hi].
 struct ClampRange {
@@ -386,210 +386,210 @@ struct TakeFrameLocals {
     u8 pad60[0x30];
 };
 
-void func_00128018(PlacedObject* z, BaseObject* frame, void* c, u8* d);
-void func_00128150(PlacedObject* z, BaseObject* frame, void* c, u8* d);
+void TransformPointBetweenFrames(PlacedObject* z, BaseObject* frame, void* c, u8* d);
+void TransformRotationBetweenFrames(PlacedObject* z, BaseObject* frame, void* c, u8* d);
 void func_00128330(BaseObject* a, BaseObject* b, void* c, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_002197C0[10];
-Attachment* func_00121228(World* root, BaseObject* item, void* table);
+Attachment* CreatePoseSource(World* root, BaseObject* item, void* table);
 
-void func_0012A4A0(void* self, s32 a1);
+void SetOrientationSourceMode(void* self, s32 a1);
 
-void func_00129730(void* self);
+void EnsureAimAttachment(void* self);
 
 extern u8 D_00275C40[];
 
-extern u8 D_00275C60[];
+extern u8 g_unitRange[];
 
-void* func_001291D0(f32 x);
-void func_001B1DA8(void* p, f32 x);
+void* EnsureRangeRecord(f32 x);
+void StoreRangeRecordFar(void* p, f32 x);
 
 extern RangeRecord D_0027B520;
-void func_001B1AC8(void* p);
+void InitRangeRecord(void* p);
 
-void* func_0018D500(s32 n);
-
-
-void func_0012A320(void* self, f32* v);
-
-void func_0012A3E8(void* self, s32 flag);
-
-void* func_00185468(void* p);
-
-Class75Object* func_0012A970(void* self);
-
-void func_0012ABA8(void* self, f32 f);
+void* AllocateFrontMemory(s32 n);
 
 
-void func_001BF7F8(void* p);
+void SetRotationRamp(void* self, f32* v);
 
-extern ColorRecord D_00260F00[4];
+void SetGroupActivityMode(void* self, s32 flag);
 
-void func_0012B040(void* self);
+void* ResolveAimTarget(void* p);
 
+Class75Object* FindOrCreateClass75Object(void* self);
 
-void* func_0015A868(void* a0, s32 a1);
-
-
-void* func_0018D5C0(s32 size);
-
-void* func_001B5EE0(void* a0);
-void func_001B1AC8(void* a0);
-void func_00152470(void* a0, void* a1);
-
-void func_00129730(PlacedObject* self);
-
-void* func_0011E580(s32 a0, s32 a1, void* a2, s32 a3, s32 a4);
-
-void* func_001291D0(void* self);
-void func_001B1CF8(void* self, s32 value);
-
-void* func_001291D0(void* self, f32 x);
-void func_001B1D70(void* self, f32 v);
+void EnsureSoundRecord(void* self, f32 f);
 
 
+void SetSoundRecordPitch(void* p);
+
+extern ColorRecord g_colorPresets[4];
+
+void EnsureColorRecord(void* self);
+
+
+void* FindCommonAncestor(void* a0, s32 a1);
+
+
+void* AllocateZeroedFrontMemory(s32 size);
+
+void* PopZeroedFreeSlot(void* a0);
+void InitRangeRecord(void* a0);
+void AppendToList(void* a0, void* a1);
+
+void EnsureAimAttachment(PlacedObject* self);
+
+void* CreateTypedRecord(s32 a0, s32 a1, void* a2, s32 a3, s32 a4);
+
+void* EnsureRangeRecord(void* self);
+void LinkRangeRecord(void* self, s32 value);
+
+void* EnsureRangeRecord(void* self, f32 x);
+void StoreRangeRecordNear(void* self, f32 v);
 
 
 
-void func_0012ABA8(PlacedObject* self);
 
-s32 func_00182FC8(PlacedObject* self);
-void func_00143AF8(Camera* a, PlacedObject* self);
-void func_00143B20(Camera* a, PlacedObject* self);
 
-void func_001B1FB0(void* self, f32 x);
+void EnsureSoundRecord(PlacedObject* self);
 
-void func_001B1FE0(void* self, f32 x);
+s32 IsObjectAttached(PlacedObject* self);
+void AddCameraObject(Camera* a, PlacedObject* self);
+void RemoveCameraObject(Camera* a, PlacedObject* self);
 
-void func_001B2010(void* self, f32 x);
+void StoreRangeRecordInner(void* self, f32 x);
 
-void func_001B2068(void* self, void* src);
+void StoreRangeRecordOuter(void* self, f32 x);
+
+void ScaleRangeRecordByAngle(void* self, f32 x);
+
+void StoreRangeRecordVector(void* self, void* src);
 
 // A quadword moved whole (lq/sq), and the frame of the four scaled-spring setters: the
 // default profile, the argument as a quadword and their product.
 typedef u64 U128 __attribute__((mode(TI)));
 struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
-void func_00118CF0(U128* out, void* src);
-void* func_00118D10(U128* out, void* src);
-U128 func_00118D30(U128 a, U128 b);
-U128 func_00118D20(U128* out, U128 v);
-void func_00129F58(void* self, U128* src);
+void StoreFloatAsQuadword(U128* out, void* src);
+void* CopyQuadword(U128* out, void* src);
+U128 ScaleQuadword(U128 a, U128 b);
+U128 StoreQuadword(U128* out, U128 v);
+void SetVelocitySpring(void* self, U128* src);
 
 // A ramp profile (+0x21C, +0x220) as the setters copy it: four floats at an address they do not
 // trust to be aligned.
 struct __attribute__((packed)) RampProfile { f32 x, y, z, w; };
 
-void func_0012A200(PlacedObject* self, RampProfile* src);
+void SetPositionRamp(PlacedObject* self, RampProfile* src);
 
-void* func_0018D500(s32 size);
-
-
-extern void func_0012A320(PlacedObject* self, RampProfile* in);
-
-void* func_0018D500(u32 size);
+void* AllocateFrontMemory(s32 size);
 
 
-void func_001BF8E8(void* p);
+extern void SetRotationRamp(PlacedObject* self, RampProfile* in);
 
-RangeRecord* func_00129400(void* self);
-
-s32 func_001833F0(void* key, s32 item);
+void* AllocateFrontMemory(u32 size);
 
 
+void SetSoundRecordVolume(void* p);
+
+RangeRecord* GetRangeRecord(void* self);
+
+s32 MatchesObjectId(void* key, s32 item);
 
 
 
-void func_00129E88(void* self, U128* v);
+
+
+void SetPositionSpring(void* self, U128* v);
 
 
 // Newly matched US functions from the small-function wave.
-extern void func_0012A430(void*, s32);
-extern void func_001BE4D8(void*);
-extern s32 func_001833F0(void*, s32);
-extern void func_001296E0(void*);
-extern void func_00129A58(void*);
-extern void func_00129730(void*);
-extern void func_0012ABA8(void*);
-extern void func_001BF788(void*, s32);
-extern void func_0012B040(void*);
+extern void SetPositionSourceMode(void*, s32);
+extern void InitSoundParams(void*);
+extern s32 MatchesObjectId(void*, s32);
+extern void EnsureBaseAttachment(void*);
+extern void SortAttachments(void*);
+extern void EnsureAimAttachment(void*);
+extern void EnsureSoundRecord(void*);
+extern void StopSoundRecord(void*, s32);
+extern void EnsureColorRecord(void*);
 
-f32 func_00205778(f32 a, f32 b);
+f32 ArctangentOfRatio(f32 a, f32 b);
 
-void func_001B5388(void* part, f32 a, f32 b);
+void SetScrollScale(void* part, f32 a, f32 b);
 
-void func_00159A00(void* part, f32 value);
+void SetCrossfadeRatio(void* part, f32 value);
 
-extern ColorRecord D_00261000[2];
+extern ColorRecord g_defaultColorRecord[2];
 
-void func_001BF788(void* ptr, s32 value);
+void StopSoundRecord(void* ptr, s32 value);
 
-void func_00152540(void* list, Attachment* before, Attachment* value);
+void InsertBeforeInList(void* list, Attachment* before, Attachment* value);
 
-void func_00188FD8(void* a, f32* out);
+void MatrixToEulerAngles(void* a, f32* out);
 
 struct EulerLocals { f32 tmp[4]; f32 out[4]; u8 pad[0x20]; };
 
-void func_00188A20(void* a, void* b);
+void BuildEulerRotationMatrix(void* a, void* b);
 
-void func_00182C18(void* self);
-void func_00152438(void* self, s32 value);
+void InitObject(void* self);
+void SetListLinkOffset(void* self, s32 value);
 
 // NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
 
-void func_001BF788(void* self, s32 n);
-void func_001BFCD8(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, void* a2, s32 a3, void* a4, s32 a5);
+void StopSoundRecord(void* self, s32 n);
+void StartSoundEffect(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, void* a2, s32 a3, void* a4, s32 a5);
 
 // NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
 
 // NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
-s32 D_00261080[4];
+s32 g_checksumMismatch[4];
 
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
-s32 func_00137D10(Stream83* p);
-s32 func_00137BE0(Stream83* p);
-s32 func_00137CC0(Stream83* p);
-s32 func_00137B90(Stream83* p);
-void func_0012D2A8(Animation* a, Track83* b);
-void func_0012BC38(Animation* a, Stream83* b, s32 c, s32* d, AnimEvent** e);
-void func_0011EC40(Animation* a, Stream83* b);
-PositionCurve* func_00120FB0(s32 cc);
-RotationCurve* func_00121050(s32 cc);
-ScaleCurve* func_001210F0(s32 cc);
-WeightCurve* func_00121160(s32 cc);
+s32 ReadBufferedS16(Stream83* p);
+s32 ReadBufferedU16(Stream83* p);
+s32 ReadBufferedS8(Stream83* p);
+s32 ReadBufferedU8(Stream83* p);
+void MoveAnimationTrackToEnd(Animation* a, Track83* b);
+void ReadAnimationEvents(Animation* a, Stream83* b, s32 c, s32* d, AnimEvent** e);
+void ReadPropertyRecords(Animation* a, Stream83* b);
+PositionCurve* CreatePositionCurve(s32 cc);
+RotationCurve* CreateRotationCurve(s32 cc);
+ScaleCurve* CreateScaleCurve(s32 cc);
+WeightCurve* CreateWeightCurve(s32 cc);
 
-void func_00128018(void* a, void* b, void* c, void* d);
-void func_00128150(void* a, void* b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
+void TransformRotationBetweenFrames(void* a, void* b, void* c, void* d);
 
-s32 func_00137C40(void* a);
-void func_00137EB0(void* a, void* b);
-s32 func_00137D10(void* a);
-void func_00137E70(void* a, void* b);
-f32 func_00137DF8(void* a);
-s32 func_00137B90(void* a);
+s32 ReadBufferedU32(void* a);
+void ReadBufferedRotation3(void* a, void* b);
+s32 ReadBufferedS16(void* a);
+void ReadBufferedVector3(void* a, void* b);
+f32 ReadBufferedFloat(void* a);
+s32 ReadBufferedU8(void* a);
 
-void func_0012A028(PlacedObject* self, U128* src);
+void SetRotationSpring(PlacedObject* self, U128* src);
 
-void func_0012A0F8(PlacedObject* self, U128* src);
+void SetSpinSpring(PlacedObject* self, U128* src);
 
-void func_001299E0(PlacedObject* self, Attachment* src);
+void InsertAttachment(PlacedObject* self, Attachment* src);
 
 extern u8 D_0021A790[];
 
 extern const Fn_Table D_002195D8[];
 
-void func_001853F0(void* a, void* b, void* c);
+void AssignAimTarget(void* a, void* b, void* c);
 
 extern const Fn_Table D_00219600[];
 
 
 
 
-void func_001F5C0C(void** p, s32 v, s32 n);
-void func_001226D8(Attachment* n);
+void FillMemory(void** p, s32 v, s32 n);
+void SettlePoseSourceModes(Attachment* n);
 
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
 // The 0x28-byte record of a kind 0 event (a sound): up to six sound ids, one picked at random
@@ -607,16 +607,16 @@ struct SoundChoice {
     f32 f24;
 };
 
-s32 func_00137CC0(Stream83* r);
-void* func_0018D5C0(s32 n);
-void func_00138550(Stream83* r, void* out);
-s32 func_00137D10(Stream83* r);
-s32 func_00137D78(Stream83* r);
-f32 func_00137DF8(Stream83* r);
-s32 func_00137B90(Stream83* r);
-s32 func_00137BE0(Stream83* r);
-void func_00137A60(Stream83* r, s32 n, void* dst);
-void func_001384A0(Stream83* r, void* out);
+s32 ReadBufferedS8(Stream83* r);
+void* AllocateZeroedFrontMemory(s32 n);
+void ReadOptionalBufferedBlock(Stream83* r, void* out);
+s32 ReadBufferedS16(Stream83* r);
+s32 ReadBufferedS32(Stream83* r);
+f32 ReadBufferedFloat(Stream83* r);
+s32 ReadBufferedU8(Stream83* r);
+s32 ReadBufferedU16(Stream83* r);
+void ReadBufferedStreamBytes(Stream83* r, s32 n, void* dst);
+void ReadBufferedString(Stream83* r, void* out);
 
 #define F32(x) (*(f32*)&(x))
 #define H0(x) (*(s16*)&(x))
@@ -632,41 +632,41 @@ struct SetMode3 {
 extern const Fn_Table D_002195B0[];
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
-void func_001212D8();
-void func_00121358();
-void func_00122890();
-void func_00122920();
-void func_00122968();
-void func_001229C0();
-void func_001229E0();
-f32 func_00122A00();
-void func_00122A18();
-void func_00122A80();
-void func_00122B30();
-void func_00122C48();
-void func_00122CB0();
-f32 func_00122D90();
-void func_0011EF40();
-void func_0011EF48();
-void func_0011EF60();
-void func_0011EF68();
-void func_0011EF70();
-void func_0011EF88();
-void func_0011EF90();
-void func_0011EFA8();
-void func_001214B8();
-void func_00121568();
-void func_00121580();
-f32 func_001215A8();
-void func_00122DA0();
-void func_00122DE0();
+void CopyPoseSource();
+void ReleasePoseSource();
+void InitLinkedPoseSource();
+void GetLinkedPosition();
+void GetLinkedRotation();
+void GetLinkedValue();
+void GetLinkedMatrix();
+f32 GetLinkedIndexedValue();
+void InitIdentityPoseSource();
+void GetIdentityPosePosition();
+void GetIdentityPoseRotation();
+void GetNextPoseSourceValue();
+void GetIdentityPoseMatrix();
+f32 GetIdentityPoseIndexedValue();
+void EvaluateNoPositionCurve();
+void GetNoPositionCurveTimes();
+void EvaluateNoRotationCurve();
+void GetNoRotationCurve();
+void GetNoRotationCurveTimes();
+void EvaluateNoScaleCurve();
+void GetNoScaleCurveTimes();
+void EvaluateNoWeightCurve();
+void GetOwnerPosition();
+void GetOwnerValue();
+void GetIdentityMatrix();
+f32 GetOwnerIndexedValue();
+void InitAimPoseSource();
+void GetAimPoseRotation();
 extern const Fn_Table D_002195B0[10];
 extern const Fn_Table D_002195D8[10];
 extern const Fn_Table D_00219600[26];
 
 // The script list a property getter fills (file_1B7968 defines it; AppendPropertyToScriptList).
 struct ScriptListBuilder;
-s32 func_001C1A28(ScriptListBuilder* context, PlacedObject** obj);
+s32 AppendPropertyToScriptList(ScriptListBuilder* context, PlacedObject** obj);
 
 struct ListWalkNextPlaced {
     static PlacedObject* Of(ListFrame* it)
@@ -677,8 +677,8 @@ struct ListWalkNextPlaced {
     }
 };
 
-void func_00152600(List01* list, Attachment* node);
-void func_00152540(List01* list, Attachment* at, Attachment* node);
+void RemoveFromList(List01* list, Attachment* node);
+void InsertBeforeInList(List01* list, Attachment* at, Attachment* node);
 
 struct NextAttachment {
     static Attachment* Of(ListFrame* it)
@@ -689,142 +689,142 @@ struct NextAttachment {
     }
 };
 
-ColorRecord D_00260F00[4] = {
+ColorRecord g_colorPresets[4] = {
     { { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x433E0000, 0x42E60000, 0x00000000, 0x42F00000, 0x433E0000, 0x42700000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x437F0000, 0x437F0000, 0x00000000, 0x42F00000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000003, 0x00000000, 0x00000000, 0x00000000, 0x43700000, 0x437F0000, 0x437F0000, 0x00000000, 0x43700000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
 };
 
-ColorRecord D_00261000[2] = {
+ColorRecord g_defaultColorRecord[2] = {
     { { 0x00000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000005, 0x00000000, 0x00000000, 0x00000000, 0x43960000, 0x437F0000, 0x437F0000, 0x00000000, 0x43960000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
 };
 
-void func_00121338();
-void func_00122F88();
-void func_00122F28();
-void func_00122FE0();
-void func_00123120();
-void func_00123270();
-void func_001232E8();
-void func_00123358();
+void InitPoseSource();
+void CopyTrackPoseSource();
+void ReleaseTrackPoseSource();
+void GetTrackPosition();
+void GetTrackRotation();
+void GetTrackValue();
+void GetTrackScaleMatrix();
+void GetTrackIndexedValue();
 
 extern u8 D_00148D64[];
-void func_00123ED0(void* self);
+void InitPlacedObject(void* self);
 
-s32 func_0012C288(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
+s32 CreateAnimationPlayer(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
 
-void* func_0012CCE8(void);
+void* FindEntryByObjectId(void);
 
-s32 func_001833F0(void* a, void* b);
+s32 MatchesObjectId(void* a, void* b);
 
-void func_00121648(void* n, void* b);
-
-
-void func_001831E8(void* a, void* b, void* c, s32 d);
-
-s32 func_0012FF10(StreamReader* self);
-s32 func_001F8C38(s32 h);
-s32 func_002032C8(s32 x);
-void func_0012FFE8(StreamReader* self);
-
-void func_001830D8(void);
-
-void func_00182C58(void* self);
-void func_0012C208(void* self);
-void func_001DBC60(void* host, void* cb, void* ctx, s32 a3, s32 a4);
-
-s32 func_0012C7B0(void* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
-
-void func_0012C288(void* self, s32 a1, s32 a2, s32 a3, s32 a4, void** out);
-
-void* func_0012C808(void* self, s32 key);
-s32 func_0012C7B0(void* self, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
-void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
-
-void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb);
-
-void func_0012F6B0(AnimationPlayer* self, f32 x);
-void func_0012F190(AnimationPlayer* self, s32 zero);
-void func_0012F1D8(AnimationPlayer* self);
-void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out);
-void func_0012E760(AnimationPlayer* self);
-void func_0012D4A8(AnimationPlayer* self);
-
-void func_001226D8(T2195_7C0* item);
-
-void func_00152600(u8* a, void* b);
-void func_001B5F28(u8* a, void* b);
-
-Attachment* func_0012D570(void* a0, void* a1);
-
-void func_00129A58(void* p);
+void ApplyPoseSource(void* n, void* b);
 
 
-void* func_0012CBE8(void);
+void AddCallbackNode(void* a, void* b, void* c, s32 d);
 
-void func_001831E8(void* a, void* b, void* c, void* d);
+s32 IsReadPending(StreamReader* self);
+s32 CloseFile(s32 h);
+s32 SyncDiscNCommand(s32 x);
+void CommitChunk(StreamReader* self);
 
-void func_001B9AE0(Collider* self, s32 a, Vec02* b, s32 c, Vec02* d);
+void CopyObjectData(void);
 
-void func_001BA130(Collider* self);
-void func_00138F28(void* a, void* b);
+void StartObject(void* self);
+void StartLinkedObjectAnimation(void* self);
+void AppendQueuedCallOnce(void* host, void* cb, void* ctx, s32 a3, s32 a4);
 
-s32 func_001F92E8(s32 a, s32 b, s32* c);
-s32 func_00203D90(void);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
 
-void func_0018D778(void* self);
+void CreateAnimationPlayer(void* self, s32 a1, s32 a2, s32 a3, s32 a4, void** out);
 
-s32 func_0012FDA0(void* self, s32 a, s32 b);
+void* FindAnimationPlayerByScope(void* self, s32 key);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* self, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
 
-void func_001DDA20(void* a);
-void func_001DDA50(void* a);
+void FindOrCreateAnimationPlayerAndSeek(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb);
 
-void func_0012E760(void* obj);
-s32 func_0012C7B0(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
+void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x);
+void ApplyListedPoseSources(AnimationPlayer* self, s32 zero);
+void SettleListedPoseSources(AnimationPlayer* self);
+void RunSeekAnimationEvents(AnimationPlayer* self, Animation* sub, s32* out);
+void StopAnimationPlayer(AnimationPlayer* self);
+void SeekAnimationEventCursor(AnimationPlayer* self);
 
-s32 func_001833F0(void* a, s32 b);
+void SettlePoseSourceModes(T2195_7C0* item);
+
+void RemoveFromList(u8* a, void* b);
+void PushFreeSlot(u8* a, void* b);
+
+Attachment* FindPlayerAttachmentByOwner(void* a0, void* a1);
+
+void SortAttachments(void* p);
 
 
-s32 func_001B8A08(Collider* self, Collider* key);
-s32 func_001300E8(void* key, s32 kind);
+void* FindAnimationMarkerEvent(void);
 
-void func_0012FE70(StreamReader *self);
+void AddCallbackNode(void* a, void* b, void* c, void* d);
 
-s32 func_0012FF20(StreamReader* a0);
+void SetColliderAnchors(Collider* self, s32 a, Vec02* b, s32 c, Vec02* d);
+
+void CopyCollider(Collider* self);
+void InitContactPairFlags(void* a, void* b);
+
+s32 ControlFile(s32 a, s32 b, s32* c);
+s32 GetDiscError(void);
+
+void FreeObjectMemory(void* self);
+
+s32 OpenSectorStream(void* self, s32 a, s32 b);
+
+void AcquirePadSelectFlag(void* a);
+void ReleasePadSelectFlag(void* a);
+
+void StopAnimationPlayer(void* obj);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
+
+s32 MatchesObjectId(void* a, s32 b);
+
+
+s32 TestCollidersMayContact(Collider* self, Collider* key);
+s32 IsObjectOfKind(void* key, s32 kind);
+
+void StartChunkRead(StreamReader *self);
+
+s32 PollChunkRead(StreamReader* a0);
 
 struct AnimationPlayerTable { const void* tinfo; s32 f4; };
-extern const AnimationPlayerTable D_002197B8;
-void* func_001B5EE0(Pool6C* pool);
-void func_00152438(List01* self, s32 value);
+extern const AnimationPlayerTable g_animationPlayerMethods;
+void* PopZeroedFreeSlot(Pool6C* pool);
+void SetListLinkOffset(List01* self, s32 value);
 
 
-void func_00128018(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 
 struct EndEventLocals { s32 a; s32 b; };
 
-void func_0012D5D0(AnimationPlayer* self, AnimEvent* item, EndEventLocals* out);
-void func_0012F760(AnimationPlayer* self, s32 a, AnimationPlayer* b);
-void func_001DBC18(u8* self, void* node);
-void func_0015F9A0(u8* a, u8* s);
-void func_0012D448(AnimationPlayer* self, s32 v);
-void func_001DBD40(u8* a, s32 b, s32 c, AnimationPlayer* d, s32 e, s32 f);
-void func_00152600(u8* a, AnimationPlayer* b);
-void func_00152470(u8* a, AnimationPlayer* b);
-void func_001BF718(s32* slot);
-void func_001837E0(Animation* self, s32 a, s32 b, s32* c);
+void RunAnimationEvent(AnimationPlayer* self, AnimEvent* item, EndEventLocals* out);
+void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a, AnimationPlayer* b);
+void ReleaseCallRecords(u8* self, void* node);
+void UnregisterObjectGroup(u8* a, u8* s);
+void SetAnimationPlayerPadSelect(AnimationPlayer* self, s32 v);
+void RemoveQueuedCalls(u8* a, s32 b, s32 c, AnimationPlayer* d, s32 e, s32 f);
+void RemoveFromList(u8* a, AnimationPlayer* b);
+void AppendToList(u8* a, AnimationPlayer* b);
+void ClearSoundRecordHandle(s32* slot);
+void TriggerScriptEvent(Animation* self, s32 a, s32 b, s32* c);
 
-f32 func_002058A0(f32 a, f32 b);
-f32 func_001EAFE0(f32 a, f32 b);
+f32 FloatRemainder(f32 a, f32 b);
+f32 WrapModulo(f32 a, f32 b);
 
-void func_001F5B08(Track83* dst, Track83* src, s32 bytes);
+void MoveMemory(Track83* dst, Track83* src, s32 bytes);
 
 
 // was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ
 
 
-void* func_0018D658(s32 size);
+void* AllocateBackMemory(s32 size);
 
 struct EventObjectPair {
     s32 f0;
@@ -840,74 +840,74 @@ union EventScratch {
 };
 
 
-extern u8 D_00275F80[];
+extern u8 g_screenFade[];
 
-extern u8 D_00262C70[];
-extern u8 D_00269A00[];
-extern u8 D_00275BC0[];
+extern u8 g_padRecord[];
+extern u8 g_moviePlayer[];
+extern u8 g_elementStack[];
 
-s32 func_001BE810(void);
-void func_001BE728(void* p);
-void func_001BE998(void);
-s32 func_001EAA70(s32 lo, s32 hi);
-s32 func_001BE568(s32 id);
-void func_001BFCD8(s32 id, void** handle, Collider* target, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001BF788(void* h, s32 n);
-void func_001BED20(void);
-void func_001BECF8(void);
-void func_001518B8(Collider* t);
-s32 func_00126CB8(Collider* t, f32 v);
-s32 func_00126D60(Collider* t, f32 v);
-void func_001B9AE0(Collider* t, s32 a, s32 b, s32 c, s32 d);
-void func_001F4ED0(Collider* t);
-void func_001F4F20(Collider* t);
-void func_00177800(Player* g, s32 flag);
-void func_0012F190(AnimationPlayer* self, s32 v);
+s32 CheckStreamVoicePending(void);
+void OpenKeyRecord(void* p);
+void StopStreamVoice(void);
+s32 RandomIntInRange(s32 lo, s32 hi);
+s32 IsSoundEntryAvailable(s32 id);
+void StartSoundEffect(s32 id, void** handle, Collider* target, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StopSoundRecord(void* h, s32 n);
+void RestoreVolumeChannel2(void);
+void SilenceVolumeChannel2(void);
+void ChooseStepSequenceState(Collider* t);
+s32 FadeInPlacedObject(Collider* t, f32 v);
+s32 FadeOutPlacedObject(Collider* t, f32 v);
+void SetColliderAnchors(Collider* t, s32 a, s32 b, s32 c, s32 d);
+void PushObjectCameraController(Collider* t);
+void RemoveObjectCameraController(Collider* t);
+void SwitchPlayerState11(Player* g, s32 flag);
+void ApplyListedPoseSources(AnimationPlayer* self, s32 v);
 // the node keeps the inline setter of its second mode byte that retail's code calls (see NOTES.md)
 struct TrackAttachment : T2195_7C0 {
     void SetMode(s32 mode) { mode1 = mode; }
 };
-TrackAttachment* func_0012D570(AnimationPlayer* self, s32 key);
-void func_001215C0(TrackAttachment* n);
-void func_001EFFA0(u8* dst, s32 a, s32 b);
-void func_001F00C0(u8* dst, s32 a, s32 b);
-void func_001F4408(s32 a, s32 b);
-void func_001AB890(T217D_510* p, f32 x);
-void func_001AB938(T217D_510* p);
-void func_001AB958(T217D_510* p);
-s32 func_0012C7B0(Collider* a, Collider* b, s32 c, s32 d, f32 x, f32 y);
-void func_0016EC38(u8* p, s32 n, f32 f);
-void func_001837E0(void* self, s32 a, s32 b, void* c);
-void func_0012F760(AnimationPlayer* self, s32 a, void* b);
-void func_0012B2F8(Collider* t, s32 key);
-void* func_001B6388(Collider* a, Collider* b);
-void* func_001B6290(Collider* a, Collider* b, s32 c, s32 d);
-void func_001B6438(void* o);
-s32 func_001300E8(Collider* n, s32 kind);
-void func_001920B0(Collider* n, Vec4U* out);
-s32 func_001F3BD8(Collider* n, Vec4U* out);
-s32 func_00182FC8(void* p);
-void func_001DDB58(World* w);
-void func_001DDBB8(World* w);
-void func_0018F0E8(u8* a, s32 b);
-void func_0014AEA0(T217D_720* self, s32 n, f32 x, f32 y);
-void func_0014AF10(T217D_720* self);
-void func_0014AF38(T217D_720* self, s32 a, s32 b, f32 x);
-void func_001E96F8(u8* obj, s32 mode);
-void func_001DDAB8(World* w, f32 v);
-void func_001DDAC8(World* w, f32 v);
-void func_0017CE20(Collider* t, Player* g);
+TrackAttachment* FindPlayerAttachmentByOwner(AnimationPlayer* self, s32 key);
+void ChoosePoseSourceModes(TrackAttachment* n);
+void StartScreenFade(u8* dst, s32 a, s32 b);
+void SaveFadeRequest(u8* dst, s32 a, s32 b);
+void BeginLevelExit(s32 a, s32 b);
+void StartTimer(T217D_510* p, f32 x);
+void StartTimerCounting(T217D_510* p);
+void StopTimer(T217D_510* p);
+s32 CreateAnimationPlayerWithoutPresetTargets(Collider* a, Collider* b, s32 c, s32 d, f32 x, f32 y);
+void StartPadRecordPattern(u8* p, s32 n, f32 f);
+void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
+void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a, void* b);
+void SelectValueEntryByKey(Collider* t, s32 key);
+void* FindListNodeByKey(Collider* a, Collider* b);
+void* CreateStateWalker(Collider* a, Collider* b, s32 c, s32 d);
+void DestroyStateWalker(void* o);
+s32 IsObjectOfKind(Collider* n, s32 kind);
+void ConvertPositionToWorld(Collider* n, Vec4U* out);
+s32 GetObjectWorldPosition(Collider* n, Vec4U* out);
+s32 IsObjectAttached(void* p);
+void ShowCountedScreenElement(World* w);
+void HideCountedScreenElement(World* w);
+void QueueMovie(u8* a, s32 b);
+void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y);
+void ClearItemColumn(T217D_720* self);
+void PostItemColumnEntry(T217D_720* self, s32 a, s32 b, f32 x);
+void SetElementStackState(u8* obj, s32 mode);
+void SetWorldValueAndTarget(World* w, f32 v);
+void SetWorldValueTarget(World* w, f32 v);
+void BindEntryQueueToObject(Collider* t, Player* g);
 
 struct FalloffRange { u32 field0; f32 minimum; f32 maximum; };
 struct RangeFalloffOwner { u8 pad0[8]; FalloffRange* range; };
 
-s32 func_001F8DB8(void* p, s32 a, s32 b);
-void func_00140CC8(void* p, s32 n, s32 base);
+s32 ReadFile(void* p, s32 a, s32 b);
+void StartLowLevelDiscReadUntilAccepted(void* p, s32 n, s32 base);
 
 
 
-void func_00124A48(PlacedObject* self);
-s32 func_001300E8(void* n, s32 kind);
+void StartPlacedObject(PlacedObject* self);
+s32 IsObjectOfKind(void* n, s32 kind);
 
 
 // kept: the bitfields make `n->f10 = n->f11 = 3` store from two registers, as retail does
@@ -917,57 +917,57 @@ struct TrackAttachmentBits {
     u8 pad2[0x28 - 0x20]; s32 f28;
 };
 
-void func_00152470(u8* list, AnimationPlayer* o);
-void func_00152470(u8* list, TrackAttachmentBits* n);
-void func_0018D608(void);
-TrackAttachmentBits* func_00128998(PlacedObject* h);
-void func_001B5F28(u8* list, TrackAttachmentBits* n);
-void func_001215C0(TrackAttachmentBits* n);
-void func_001299E0(PlacedObject* h, TrackAttachmentBits* n);
-void func_0018D6F0(void);
-void func_0015F8B0(World* w, u8* p);
-void func_0012D5D0(AnimationPlayer* o, AnimEvent* item, s32* out);
-void func_0012F190(AnimationPlayer* o, s32 flag);
-void func_001837E0(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
+void AppendToList(u8* list, AnimationPlayer* o);
+void AppendToList(u8* list, TrackAttachmentBits* n);
+void PushBackMemoryMark(void);
+TrackAttachmentBits* CreateTrackAttachment(PlacedObject* h);
+void PushFreeSlot(u8* list, TrackAttachmentBits* n);
+void ChoosePoseSourceModes(TrackAttachmentBits* n);
+void InsertAttachment(PlacedObject* h, TrackAttachmentBits* n);
+void PopBackMemoryMark(void);
+void RegisterObjectGroup(World* w, u8* p);
+void RunAnimationEvent(AnimationPlayer* o, AnimEvent* item, s32* out);
+void ApplyListedPoseSources(AnimationPlayer* o, s32 flag);
+void TriggerScriptEvent(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 
-void func_00130B48(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
-void func_0014D0A8(s32 n, void* buf, s32 zero);
+void SampleCurvePoints(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
+void AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
 
-void func_001365A0(void* self, s32 arg);
+void SetTextPanelSubject(void* self, s32 arg);
 
-void func_0012FE70(void* self);
-void func_0012FFE8(void* self);
+void StartChunkRead(void* self);
+void CommitChunk(void* self);
 
-extern u8 D_00259F38[];
-void* func_0011BF30(void);
-void func_0011A708(void* dst, void* value);
+extern u8 g_markStacks[];
+void* NewKeyedList(void);
+void AddMarkRootList(void* dst, void* value);
 
 
 struct SampledCurve;
 struct CurvePoint { u8 pad0[16]; };
 
-void func_00130540(f32 f12, SampledCurve* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+void EvaluateHermiteVectorSegment(f32 f12, SampledCurve* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
-void func_001233C0(CountedObject* object)
+void ReleaseCountedObject(CountedObject* object)
 {
 	if (!object->hold)
 		CountStateTriggerDone(object->counter);
 	HandleMaskedColliderActivation(object);
 }
 
-void func_00123400(CountedObject* state, StateTrigger* value)
+void SetCountedObjectCounter(CountedObject* state, StateTrigger* value)
 {
     state->counter = value;
 }
 
-void func_00123408(StateTrigger* self)
+void InitStateTrigger(StateTrigger* self)
 {
     InitCollider(self);
     self->state = -1;
     self->id6B0 = TakeFlagTableIndex(g_flagTable);
 }
 
-void func_00123448(StateTrigger* self)
+void StartStateTrigger(StateTrigger* self)
 {
     WordListFrame fr;
     s32 s0;
@@ -1003,14 +1003,14 @@ void func_00123448(StateTrigger* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
-void func_00123540(StateTrigger* object)
+void CopyStateTrigger(StateTrigger* object)
 {
 	s32 value = object->id6B0;
 	CopyCollider(object);
 	object->id6B0 = value;
 }
 
-void func_00123578(StateTrigger* self)
+void UpdateStateTrigger(StateTrigger* self)
 {
     UpdateCollider(self);
     if (self->state == 2 && self->timeout != 0.0f) {
@@ -1042,7 +1042,7 @@ done:
     ;
 }
 
-void func_001236C8(StateTrigger* self)
+void ResolveStateTriggerObjects(StateTrigger* self)
 {
     s32 kept = 0;
     s32 i;
@@ -1076,7 +1076,7 @@ void func_001236C8(StateTrigger* self)
     }
 }
 
-void func_00123888(StateTrigger* self, s32 mode)
+void SetStateTriggerState(StateTrigger* self, s32 mode)
 {
     s32 cur = self->state;
     if (cur == mode) {
@@ -1145,7 +1145,7 @@ arm2:
     IncrementCounter(D_002623D8);
 }
 
-void func_00123AB0(StateTrigger* object, s32 mode)
+void SetStateTriggerStateFromMessage(StateTrigger* object, s32 mode)
 {
     s32 mapped;
     switch (mode) {
@@ -1157,12 +1157,12 @@ void func_00123AB0(StateTrigger* object, s32 mode)
     SetStateTriggerState(object, mapped);
 }
 
-void func_00123B18(StateTrigger* counter)
+void CountStateTriggerDone(StateTrigger* counter)
 {
 	counter->done++;
 }
 
-void func_00123B28(StateTrigger* self)
+void ResetStateTriggerOutputModes(StateTrigger* self)
 {
     for (s32 i = 0; i < self->outCount; i++) {
         TimedObject* e = self->outItems[i];
@@ -1172,7 +1172,7 @@ void func_00123B28(StateTrigger* self)
     }
 }
 
-void func_00123BB0(StateTrigger* self)
+void EndStateTriggerOutputs(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -1184,7 +1184,7 @@ void func_00123BB0(StateTrigger* self)
     }
 }
 
-void func_00123C20(StateTrigger* self)
+void FinishStateTriggerOutputs(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -1196,7 +1196,7 @@ void func_00123C20(StateTrigger* self)
     }
 }
 
-void func_00123C90(StateTrigger* self, s32 value)
+void AddStateTriggerCountedId(StateTrigger* self, s32 value)
 {
     u32 n = self->count1;
     if (n < 4) {
@@ -1205,7 +1205,7 @@ void func_00123C90(StateTrigger* self, s32 value)
     }
 }
 
-void func_00123CB8(StateTrigger* self, s32 value)
+void AddStateTriggerItemId(StateTrigger* self, s32 value)
 {
     u32 n = self->count2;
     if (n < 16) {
@@ -1214,7 +1214,7 @@ void func_00123CB8(StateTrigger* self, s32 value)
     }
 }
 
-void func_00123CE0(StateTrigger* self, s32 value)
+void AddStateTriggerAgentId(StateTrigger* self, s32 value)
 {
     u32 n = self->count3;
     if (n < 6) {
@@ -1223,13 +1223,13 @@ void func_00123CE0(StateTrigger* self, s32 value)
     }
 }
 
-void func_00123D08(StateTrigger* object, void* a1, void* a2, void* a3, void* a4)
+void AddStateTriggerTableEntry(StateTrigger* object, void* a1, void* a2, void* a3, void* a4)
 {
 	UpsertKeyedEntry((u8*)object + 0x630, 8, (u8*)object + 0x62C,
 			  a1, a2, a3, a4);
 }
 
-s32 func_00123D40(StateTrigger* self, void* arg)
+s32 TestStateTriggerItemsAccepted(StateTrigger* self, void* arg)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -1248,7 +1248,7 @@ ASM_FUNC(func_00123E48);
 
 ASM_FUNC(func_00123E88);
 
-void func_00123ED0(PlacedObject* self)
+void InitPlacedObject(PlacedObject* self)
 {
     SetListLinkOffset(&self->children, 0x1C);
     SetListLinkOffset(&self->list60, 0x58);
@@ -1278,7 +1278,7 @@ void func_00123ED0(PlacedObject* self)
     SetListLinkOffset(&self->list1E0, 8);
 }
 
-void func_00124050(PlacedObject* self)
+void AttachPlacedObject(PlacedObject* self)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, &self->children);
@@ -1291,7 +1291,7 @@ void func_00124050(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_001240F8(PlacedObject* self)
+void RegisterPlacedObject(PlacedObject* self)
 {
     Vec02 v0;
     Vec02 v1;
@@ -1337,7 +1337,7 @@ void func_001240F8(PlacedObject* self)
     ClearRootTries(self);
 }
 
-void func_00124338(PlacedObject* self)
+void DetachPlacedObject(PlacedObject* self)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, &self->children);
@@ -1350,7 +1350,7 @@ void func_00124338(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_001243E0(PlacedObject* self)
+void UnregisterPlacedObject(PlacedObject* self)
 {
     UnregisterObject(self);
     World* s1 = self->world;
@@ -1389,7 +1389,7 @@ void func_001243E0(PlacedObject* self)
     TriggerScriptEvent(self, 5, 0, 0);
 }
 
-void func_00124540(PlacedObject* object)
+void SavePlacedObjectInitialFrame(PlacedObject* object)
 {
 	object->v190 = object->pos;
 	object->m1A0.r[0] = object->rot.r[0];
@@ -1403,7 +1403,7 @@ ASM_FUNC(func_001245A8);
 
 ASM_FUNC(func_00124868);
 
-void func_001249A8(PlacedObject* self)
+void PostLoadPlacedObject(PlacedObject* self)
 {
     ListFrame frame;
     ResolveFollowRecordObjects(self);
@@ -1424,7 +1424,7 @@ void func_001249A8(PlacedObject* self)
     }
 }
 
-void func_00124A48(PlacedObject* self)
+void StartPlacedObject(PlacedObject* self)
 {
     WordListFrame fr;
     Key02* k;
@@ -1498,7 +1498,7 @@ void func_00124A48(PlacedObject* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
-void func_00124CC0(PlacedObject* self)
+void StartAnimationFromContext(PlacedObject* self)
 {
     AnimationStart* ctx = self->f2A0;
     Animation* node = FindStartAnimation::Of(self, ctx);
@@ -1524,7 +1524,7 @@ void func_00124CC0(PlacedObject* self)
     CreateAnimationPlayer(node, self, 1, &fr, fr.tmp, ctx->speedScale, 0, 0);
 }
 
-void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item)
 {
     World* host = self->world;
     if (count <= 0) {
@@ -1555,7 +1555,7 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
     } while (n != 0);
 }
 
-void func_00124EE8(void* self, f32 f)
+void UpdateObjectTree(void* self, f32 f)
 {
     PlacedObject* obj = (PlacedObject*)self;
     WordListFrame fr;
@@ -1589,7 +1589,7 @@ void func_00124EE8(void* self, f32 f)
     *(s32*)&g_activeListFrames = fr.prev;
 }
 
-void func_00124FC0(PlacedObject* self, f32 f)
+void UpdatePlacedObject(PlacedObject* self, f32 f)
 {
     UpdateAttachments(self->sub22C, self, f);
     if (self->f284 != 0) {
@@ -1612,7 +1612,7 @@ void func_00124FC0(PlacedObject* self, f32 f)
     TriggerScriptEvent(self, 1, 1, args);
 }
 
-void func_001250C8(PlacedObject* records)
+void ClearObjectRecordValues(PlacedObject* records)
 {
     for (s32 i = 0; i < records->drawPartCount; i++) {
         PartState* record = (PartState*)((u8*)records->partStates + i * 0x28);
@@ -1620,7 +1620,7 @@ void func_001250C8(PlacedObject* records)
     }
 }
 
-void func_00125108(PlacedObject* self)
+void RecomputePlacedObjectFrame(PlacedObject* self)
 {
     void (*fn)(BaseObject* self) = self->desc->m13;
     if (fn != 0) {
@@ -1630,7 +1630,7 @@ void func_00125108(PlacedObject* self)
 
 ASM_FUNC(func_00125138);
 
-void func_00125438(PlacedObject* self)
+void BeginPlacedObjectMove(PlacedObject* self)
 {
     (void)self;
 }
@@ -1641,7 +1641,7 @@ ASM_FUNC(func_00125750);
 
 ASM_FUNC(func_001259D8);
 
-void func_00125B70(PlacedObject* self, Quad16* src, ScaledTransform* dst)
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst)
 {
     if (src != 0) {
         if (src != (Quad16*)dst) {
@@ -1658,7 +1658,7 @@ ASM_FUNC(func_00125BF0);
 
 ASM_FUNC(func_00125C90);
 
-void func_001261C0(PlacedObject* self, void* b, void* m)
+void DrawPlacedObject(PlacedObject* self, void* b, void* m)
 {
     Quad16* src = (Quad16*)m;
     self->desc02()->m2C(self);
@@ -1686,7 +1686,7 @@ ASM_FUNC(func_00126270);
 
 ASM_FUNC(func_001268B8);
 
-void func_00126A48(PlacedObject* object, u32 value)
+void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 {
     ListFrame frame;
     PlacedObject* child = (PlacedObject*)object->children.head;
@@ -1699,7 +1699,7 @@ void func_00126A48(PlacedObject* object, u32 value)
     }
 }
 
-void func_00126AB0(PlacedObject* state, u32 value)
+void SetObjectRecordValue(PlacedObject* state, u32 value)
 {
 	*(u32*)(state->sub22C + 0x3C) = value;
 	*(u32*)(state->sub22C + 0x38) |= 2;
@@ -1707,7 +1707,7 @@ void func_00126AB0(PlacedObject* state, u32 value)
 
 ASM_FUNC(func_00126AC8);
 
-void func_00126BC0(PlacedObject* object, s32 value)
+void SetObjectTreeRecordsValue(PlacedObject* object, s32 value)
 {
     ListFrame frame;
     for (s32 i = 0; i < object->drawPartCount; i++) {
@@ -1723,7 +1723,7 @@ void func_00126BC0(PlacedObject* object, s32 value)
     }
 }
 
-void func_00126C58(PlacedObject* self)
+void EnsureObjectWorldNode(PlacedObject* self)
 {
     if (self->f298 == 0) {
         self->f298 = AddObjectNodeToWorld();
@@ -1741,7 +1741,7 @@ ASM_FUNC(func_00126D60);
 
 ASM_FUNC(func_00126DE8);
 
-void func_00126F78(PlacedObject* self, PlacedObject* owner)
+void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, &owner->children);
@@ -1757,7 +1757,7 @@ void func_00126F78(PlacedObject* self, PlacedObject* owner)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_00127048(PlacedObject* self, PlacedObject* src)
+void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
 {
     void* s54 = self->f54;
     PlacedObject* s50 = self->root;
@@ -1819,7 +1819,7 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
     if (self->p218 != (u8*)D_00260EA0) self->p218 = (u8*)CopyToFrontMemory(0x10, self->p218);
 }
 
-void func_00127378(PlacedObject* self, s32 mode)
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode)
 {
     if (mode == 1) {
         SoundRecord* s = self->f2AC;
@@ -1833,7 +1833,7 @@ void func_00127378(PlacedObject* self, s32 mode)
     }
 }
 
-void func_001273F0(PlacedObject* self, Vec02* src)
+void SetPlacedObjectPosition(PlacedObject* self, Vec02* src)
 {
     MoveNotice f;
     f.q = self->v140;
@@ -1850,7 +1850,7 @@ void func_001273F0(PlacedObject* self, Vec02* src)
 
 LINKER_REMNANT(func_00127468);
 
-void func_00127478(PlacedObject* self, Mat02* src)
+void SetPlacedObjectRotation(PlacedObject* self, Mat02* src)
 {
     self->rot = *src;
     if (self->desc->m12)
@@ -1860,7 +1860,7 @@ void func_00127478(PlacedObject* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
-void func_001274F8(PlacedObject* self, Vec02* src)
+void SetPlacedObjectVelocity(PlacedObject* self, Vec02* src)
 {
     self->v150 = *src;
     if (self->f1EC != 0) {
@@ -1871,7 +1871,7 @@ void func_001274F8(PlacedObject* self, Vec02* src)
     }
 }
 
-void func_00127558(ObjectCycler* self, f32 x, f32 y, f32 z)
+void SetPlacedObjectVelocityFromFloats(ObjectCycler* self, f32 x, f32 y, f32 z)
 {
     Vec3 v;
     v.x = x;
@@ -1880,7 +1880,7 @@ void func_00127558(ObjectCycler* self, f32 x, f32 y, f32 z)
     self->desc02()->m20(self, (Vec02*)&v);
 }
 
-void func_00127590(PlacedObject* self, Vec02* src)
+void SetPlacedObjectSpin(PlacedObject* self, Vec02* src)
 {
     self->v160 = *src;
     if (self->f1F0 != 0) {
@@ -1891,7 +1891,7 @@ void func_00127590(PlacedObject* self, Vec02* src)
     }
 }
 
-void func_001275F0(PairedObject* self, f32 x, f32 y, f32 z)
+void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z)
 {
     f32 v[3];
     v[0] = x;
@@ -1904,7 +1904,7 @@ ASM_FUNC(func_00127628);
 
 ASM_FUNC(func_00127678);
 
-void func_001276C0(PlacedObject* self, PlacedObject* other)
+void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
 {
     TakeFrameLocals L;
     TransformPointBetweenFrames(0, self->parent, &other->v140, L.a20);
@@ -1951,7 +1951,7 @@ ASM_FUNC(func_001280C0);
 
 ASM_FUNC(func_00128150);
 
-s32 func_00128230(SwitchedCollider *self) {
+s32 HasAnimationDrivenAttachment(SwitchedCollider *self) {
     Attachment *p = self->f1EC;
     if (p != 0 && p->mode0 == 5) {
         return 1;
@@ -1965,7 +1965,7 @@ s32 func_00128230(SwitchedCollider *self) {
     return 0;
 }
 
-void func_00128278(Player* self)
+void ReleaseAnimationDrivenAttachments(Player* self)
 {
     Attachment* a = self->f1EC;
     if (a != 0 && a->mode0 == 5) {
@@ -1987,7 +1987,7 @@ ASM_FUNC(func_00128330);
 
 ASM_FUNC(func_00128598);
 
-s32 func_001288F0(PlacedObject* self, ScriptListBuilder* context)
+s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, (List01*)&self->children);
@@ -2002,7 +2002,7 @@ s32 func_001288F0(PlacedObject* self, ScriptListBuilder* context)
     return 1;
 }
 
-void func_00128998(BaseObject* item)
+void CreateTrackAttachment(BaseObject* item)
 {
     CreatePoseSource(item->world, item, (void*)D_002197C0);
 }
@@ -2011,7 +2011,7 @@ INCLUDE_RODATA(D_00249A1C);
 
 ASM_FUNC(func_001289C0);
 
-void func_00128C10(PlacedObject* self, void* a1)
+void LoadFollowRecord(PlacedObject* self, void* a1)
 {
     s32 flags = ReadBufferedU32(a1);
     if (flags) {
@@ -2052,7 +2052,7 @@ void func_00128C10(PlacedObject* self, void* a1)
     }
 }
 
-void func_00128DB8(PlacedObject* self)
+void ResolveFollowRecordObjects(PlacedObject* self)
 {
     Rec2195_224* p = self->f224;
     if (p == 0) return;
@@ -2083,7 +2083,7 @@ ASM_FUNC(func_001290B8);
 
 ASM_FUNC(func_001290E0);
 
-AnimationStart* func_00129108(PlacedObject* self)
+AnimationStart* EnsureTimerRecord(PlacedObject* self)
 {
     if (self->f2A0 == 0) {
         AnimationStart* t = (AnimationStart*)AllocateZeroedFrontMemory(0x14);
@@ -2096,27 +2096,27 @@ AnimationStart* func_00129108(PlacedObject* self)
     return self->f2A0;
 }
 
-void func_00129170(PlacedObject* self, f32 x)
+void SetPlacedObjectScaleXY(PlacedObject* self, f32 x)
 {
     self->f28C = x * 0.01f;
 }
 
-void func_00129188(PlacedObject* self, f32* out)
+void GetPlacedObjectScaleXY(PlacedObject* self, f32* out)
 {
     *out = self->f28C * 100.0f;
 }
 
-void func_001291A0(PlacedObject* self, f32 x)
+void SetPlacedObjectScaleZ(PlacedObject* self, f32 x)
 {
     self->f290 = x * 0.01f;
 }
 
-void func_001291B8(PlacedObject* self, f32* out)
+void GetPlacedObjectScaleZ(PlacedObject* self, f32* out)
 {
     *out = self->f290 * 100.0f;
 }
 
-void* func_001291D0(PlacedObject* self)
+void* EnsureRangeRecord(PlacedObject* self)
 {
     if (self->f284 == 0) {
         void* o = PopZeroedFreeSlot((u8*)self->world + 0x1BF4);
@@ -2127,7 +2127,7 @@ void* func_001291D0(PlacedObject* self)
     return self->f284;
 }
 
-void func_00129228(PlacedObject* self, s32 flag)
+void SetRangeRecordPresent(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
         EnsureRangeRecord(self);
@@ -2141,59 +2141,59 @@ void func_00129228(PlacedObject* self, s32 flag)
     self->f284 = 0;
 }
 
-void func_00129288(void* self, s32 value)
+void SetRangeRecordKey(void* self, s32 value)
 {
     LinkRangeRecord(EnsureRangeRecord(self), value);
 }
 
-void func_001292B8(void* self, f32 x)
+void SetRangeRecordNear(void* self, f32 x)
 {
     StoreRangeRecordNear(EnsureRangeRecord(self, x), x);
 }
 
-void func_001292E8(f32 x)
+void SetRangeRecordFar(f32 x)
 {
     StoreRangeRecordFar(EnsureRangeRecord(x), x);
 }
 
-void func_00129318(f32 x)
+void SetRangeRecordInner(f32 x)
 {
     StoreRangeRecordInner(EnsureRangeRecord(x), x);
 }
 
-void func_00129348(f32 x)
+void SetRangeRecordOuter(f32 x)
 {
     StoreRangeRecordOuter(EnsureRangeRecord(x), x);
 }
 
-void func_00129378(f32 x)
+void SetRangeRecordInnerAndOuter(f32 x)
 {
     ScaleRangeRecordByAngle(EnsureRangeRecord(x), x);
 }
 
-void func_001293A8(void* self, void* src)
+void SetRangeRecordVector(void* self, void* src)
 {
     StoreRangeRecordVector(EnsureRangeRecord(self), src);
 }
 
-void func_001293D8(void* self, s32 value)
+void SetRangeRecordCode(void* self, s32 value)
 {
     ((RangeRecord*)EnsureRangeRecord(self))->fB0 = value;
 }
 
-RangeRecord* func_00129400(PlacedObject* self)
+RangeRecord* GetRangeRecord(PlacedObject* self)
 {
     if (self->f284 != 0) return self->f284;
     InitRangeRecord(&D_0027B520);
     return &D_0027B520;
 }
 
-void func_00129440(PlacedObject* self, s32* out)
+void GetRangeRecordPresent(PlacedObject* self, s32* out)
 {
     *out = self->f284 != 0;
 }
 
-void func_00129450(PlacedObject* self, s32* out)
+void GetRangeRecordKeyValue(PlacedObject* self, s32* out)
 {
     RangeRecord* p = self->f284;
     if (p == 0) {
@@ -2211,40 +2211,40 @@ fail:
     *out = -1;
 }
 
-void func_00129480(void* self, f32* out)
+void GetRangeRecordNear(void* self, f32* out)
 {
     RangeRecord* s = GetRangeRecord(self);
     *out = s->f04;
 }
 
-void func_001294B0(void* self, f32* out)
+void GetRangeRecordFar(void* self, f32* out)
 {
     *out = GetRangeRecord(self)->f08;
 }
 
-void func_001294E0(void* self, f32* out)
+void GetRangeRecordInner(void* self, f32* out)
 {
     *out = GetRangeRecord(self)->f40;
 }
 
-void func_00129510(PlacedObject* self, f32* out)
+void GetRangeRecordOuter(PlacedObject* self, f32* out)
 {
     *out = GetRangeRecord(self)->f44;
 }
 
-void func_00129540(void* self, f32* out)
+void GetRangeRecordAngle(void* self, f32* out)
 {
     RangeRecord* sub = GetRangeRecord(self);
     f32 value = ArctangentOfRatio(sub->f04 / sub->f40, 1.0f) * 57.2957763671875f;
     *out = value + value;
 }
 
-void func_00129598(void* self, Vec02* out)
+void GetRangeRecordVector(void* self, Vec02* out)
 {
     *out = GetRangeRecord(self)->v30;
 }
 
-void func_001295C8(PlacedObject* self, f32* out)
+void GetRotationDegrees(PlacedObject* self, f32* out)
 {
     Vec02 a[3];
     a[0] = self->rot.r[0];
@@ -2261,7 +2261,7 @@ void func_001295C8(PlacedObject* self, f32* out)
     } while (n >= 0);
 }
 
-void func_00129648(PlacedObject* self, f32* src)
+void SetRotationDegrees(PlacedObject* self, f32* src)
 {
     EulerLocals l;
     f32* out = l.out;
@@ -2279,7 +2279,7 @@ void func_00129648(PlacedObject* self, f32* src)
     self->desc02()->m1E(self, (Mat02*)out);
 }
 
-void func_001296E0(PlacedObject* self)
+void EnsureBaseAttachment(PlacedObject* self)
 {
     if (self->f1FC == 0) {
         Attachment* v = CreatePoseSource(self->world, self, D_00219560);
@@ -2288,7 +2288,7 @@ void func_001296E0(PlacedObject* self)
     }
 }
 
-void func_00129730(PlacedObject* self)
+void EnsureAimAttachment(PlacedObject* self)
 {
     if (self->f200 == 0) {
         T2195_790* v = (T2195_790*)CreatePoseSource(self->world, self, D_0021A790);
@@ -2297,7 +2297,7 @@ void func_00129730(PlacedObject* self)
     }
 }
 
-void func_00129780(PlacedObject* self)
+void ChooseActiveAttachments(PlacedObject* self)
 {
     Attachment* s3 = 0;
     Attachment* s2 = 0;
@@ -2346,7 +2346,7 @@ void func_00129780(PlacedObject* self)
     }
 }
 
-void func_001299E0(PlacedObject* self, Attachment* src)
+void InsertAttachment(PlacedObject* self, Attachment* src)
 {
     ListFrame frame;
     Attachment* node = (Attachment*)self->list1E0.head;
@@ -2360,7 +2360,7 @@ void func_001299E0(PlacedObject* self, Attachment* src)
     self->desc02()->m2B(self);
 }
 
-void func_00129A58(PlacedObject* self)
+void SortAttachments(PlacedObject* self)
 {
     ListFrame it;
     Attachment* nodes[20];
@@ -2382,7 +2382,7 @@ void func_00129A58(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-AnimationPlayer* func_00129B98(PlacedObject* self, s32 key)
+AnimationPlayer* FindObjectAnimationPlayer(PlacedObject* self, s32 key)
 {
     ListFrame frame;
     AnimationPlayer* node = (AnimationPlayer*)self->world->f1B64;
@@ -2396,7 +2396,7 @@ AnimationPlayer* func_00129B98(PlacedObject* self, s32 key)
     return 0;
 }
 
-StateWalker* func_00129C20(PlacedObject* self, s32 key)
+StateWalker* FindObjectHandle(PlacedObject* self, s32 key)
 {
     ListFrame frame;
     StateWalker* n = (StateWalker*)self->world->list1B94.head;
@@ -2411,7 +2411,7 @@ StateWalker* func_00129C20(PlacedObject* self, s32 key)
     return 0;
 }
 
-void* func_00129CA8(PlacedObject* node)
+void* FindTrackPlayer(PlacedObject* node)
 {
     while (node != 0) {
         Attachment* a = node->f1EC;
@@ -2427,7 +2427,7 @@ void* func_00129CA8(PlacedObject* node)
     return 0;
 }
 
-void func_00129D00(PlacedObject* self, s32 key, Attachment** out)
+void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out)
 {
     Attachment* n;
 
@@ -2439,7 +2439,7 @@ void func_00129D00(PlacedObject* self, s32 key, Attachment** out)
     }
 }
 
-s32 func_00129D70(Actor6C* self)
+s32 IsObjectTreeAtRest(Actor6C* self)
 {
     Actor6C* n;
     if (IsVelocityNegligible((u8*)self + 0x150) == 0) return 0;
@@ -2456,12 +2456,12 @@ body:
     return 1;
 }
 
-void func_00129DF8(PlacedObject* self)
+void ClearRootTries(PlacedObject* self)
 {
     if (self->root != 0) self->root->tries = 0;
 }
 
-void func_00129E10(void* self, void* src)
+void SetScaledPositionSpring(void* self, void* src)
 {
     ScaledSpringFrame f;
     u8* p = (u8*)D_00260E70;
@@ -2472,14 +2472,14 @@ void func_00129E10(void* self, void* src)
     SetPositionSpring(self, &f.r);
 }
 
-void func_00129E88(PlacedObject* self, Quad16* value)
+void SetPositionSpring(PlacedObject* self, Quad16* value)
 {
     if (self->p20C == (u8*)D_00260E70)
         self->p20C = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p20C = *value;
 }
 
-void func_00129EE0(void* self, void* src)
+void SetScaledVelocitySpring(void* self, void* src)
 {
     ScaledSpringFrame f;
     u8* p = (u8*)D_00260E80;
@@ -2490,13 +2490,13 @@ void func_00129EE0(void* self, void* src)
     SetVelocitySpring(self, &f.r);
 }
 
-void func_00129F58(PlacedObject* self, Quad16* src)
+void SetVelocitySpring(PlacedObject* self, Quad16* src)
 {
     if (self->p210 == (u8*)D_00260E80) self->p210 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p210 = *src;
 }
 
-void func_00129FB0(PlacedObject* self, void* src)
+void SetScaledRotationSpring(PlacedObject* self, void* src)
 {
     ScaledSpringFrame f;
     u8* p = (u8*)D_00260E90;
@@ -2507,13 +2507,13 @@ void func_00129FB0(PlacedObject* self, void* src)
     SetRotationSpring(self, &f.r);
 }
 
-void func_0012A028(PlacedObject* self, Quad16* src)
+void SetRotationSpring(PlacedObject* self, Quad16* src)
 {
     if (self->p214 == (u8*)D_00260E90) self->p214 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p214 = *src;
 }
 
-void func_0012A080(PlacedObject* self, void* src)
+void SetScaledSpinSpring(PlacedObject* self, void* src)
 {
     ScaledSpringFrame f;
     u8* p = (u8*)D_00260EA0;
@@ -2524,13 +2524,13 @@ void func_0012A080(PlacedObject* self, void* src)
     SetSpinSpring(self, &f.r);
 }
 
-void func_0012A0F8(PlacedObject* self, Quad16* src)
+void SetSpinSpring(PlacedObject* self, Quad16* src)
 {
     if (self->p218 == (u8*)D_00260EA0) self->p218 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p218 = *src;
 }
 
-void func_0012A150(PlacedObject* self, f32 scale)
+void SetScaledPositionRamp(PlacedObject* self, f32 scale)
 {
     Vec4U tmp;
     tmp.x = D_00260EB0[0] * scale;
@@ -2540,14 +2540,14 @@ void func_0012A150(PlacedObject* self, f32 scale)
     SetPositionRamp(self, (RampProfile*)&tmp);
 }
 
-void func_0012A1A0(PlacedObject* self, f32 scale)
+void SetPositionRampAccelScale(PlacedObject* self, f32 scale)
 {
     RampProfile tmp = *(RampProfile*)self->p21C;
     tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
     SetPositionRamp(self, &tmp);
 }
 
-void func_0012A200(PlacedObject* self, RampProfile* src)
+void SetPositionRamp(PlacedObject* self, RampProfile* src)
 {
     if (self->p21C == (u8*)D_00260EB0) {
         self->p21C = (u8*)AllocateFrontMemory(16);
@@ -2555,7 +2555,7 @@ void func_0012A200(PlacedObject* self, RampProfile* src)
     *(RampProfile*)self->p21C = *src;
 }
 
-void func_0012A270(void* self, f32 s)
+void SetScaledRotationRamp(void* self, f32 s)
 {
     f32 v[4];
     f32* m = (f32*)D_00260EC0;
@@ -2566,7 +2566,7 @@ void func_0012A270(void* self, f32 s)
     SetRotationRamp(self, v);
 }
 
-void func_0012A2C0(PlacedObject* self, f32 scale)
+void SetRotationRampAccelScale(PlacedObject* self, f32 scale)
 {
     RampProfile tmp;
     tmp = *(RampProfile*)self->p220;
@@ -2574,7 +2574,7 @@ void func_0012A2C0(PlacedObject* self, f32 scale)
     SetRotationRamp(self, &tmp);
 }
 
-void func_0012A320(PlacedObject* self, RampProfile* src)
+void SetRotationRamp(PlacedObject* self, RampProfile* src)
 {
     if (self->p220 == (u8*)D_00260EC0) {
         self->p220 = (u8*)AllocateFrontMemory(0x10);
@@ -2582,56 +2582,56 @@ void func_0012A320(PlacedObject* self, RampProfile* src)
     *(RampProfile*)self->p220 = *src;
 }
 
-void func_0012A390(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
+void SetDefaultPositionMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
 
-void func_0012A398(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
+void SetDefaultOrientationMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
 
-void func_0012A3A0(void* self, s32 value) { SetPositionSourceMode(self, value ? 1 : -1); }
+void SetPositionSourceEnabled(void* self, s32 value) { SetPositionSourceMode(self, value ? 1 : -1); }
 
-void func_0012A3C8(void* self, s32 a1)
+void SetGroupActivityModeEnabled(void* self, s32 a1)
 {
     SetGroupActivityMode(self, a1 != 0);
 }
 
-void func_0012A3E8(PlacedObject* self, u32 value)
+void SetGroupActivityMode(PlacedObject* self, u32 value)
 {
     self->flags = (self->flags & ~(3ull << 40)) | ((u64)(value & 3) << 40);
 }
 
-void func_0012A418(PlacedObject* self, u32* out)
+void GetGroupActivityMode(PlacedObject* self, u32* out)
 {
     u32 value = (u32)(self->flags >> 40);
     value &= 3;
     *out = value;
 }
 
-void func_0012A430(PlacedObject* self, s32 value)
+void SetPositionSourceMode(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
     self->f1FC->mode0 = value;
     self->desc02()->m2B(self);
 }
 
-void func_0012A478(void* self, s32 a1)
+void SetOrientationSourceEnabled(void* self, s32 a1)
 {
     SetOrientationSourceMode(self, a1 != 0 ? 1 : -1);
 }
 
-void func_0012A4A0(PlacedObject* self, s32 value)
+void SetOrientationSourceMode(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
     self->f1FC->mode1 = value;
     self->desc02()->m2B(self);
 }
 
-void func_0012A4E8(PlacedObject* self, s32 value)
+void SetBaseAttachmentSortKey(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
     self->f1FC->key = value;
     SortAttachments(self);
 }
 
-void func_0012A528(PlacedObject* self, s32 value)
+void SetAimOrientationMode(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
     if (value == 3) value = 9;
@@ -2639,87 +2639,87 @@ void func_0012A528(PlacedObject* self, s32 value)
     self->desc02()->m2B(self);
 }
 
-void func_0012A580(PlacedObject* self, f32 f)
+void SetAimRange(PlacedObject* self, f32 f)
 {
     EnsureAimAttachment(self);
     self->f200->f40 = f;
 }
 
-void func_0012A5B8(PlacedObject* self, f32* out)
+void GetAimRange(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
     if (self->f200 != 0) r = self->f200->f40;
     *out = r;
 }
 
-void func_0012A5D0(PlacedObject* self, Vec02* src)
+void SetAimYawCurve(PlacedObject* self, Vec02* src)
 {
     EnsureAimAttachment(self);
     self->f200->v50 = *src;
 }
 
-void func_0012A610(PlacedObject* self, Quad16* out)
+void GetAimYawCurve(PlacedObject* self, Quad16* out)
 {
     Quad16* src = self->f200 != 0 ? (Quad16*)((u8*)self->f200 + 0x50) : (Quad16*)D_00275C40;
     *out = *src;
 }
 
-void func_0012A630(PlacedObject* self, Pk8_2195* src)
+void SetAimYawLimits(PlacedObject* self, Pk8_2195* src)
 {
     EnsureAimAttachment(self);
     self->f200->p60 = *src;
 }
 
-void func_0012A678(PlacedObject* self, U64P* out)
+void GetAimYawLimits(PlacedObject* self, U64P* out)
 {
     U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x60) : (U64P*)g_unitRange;
     *out = *src;
 }
 
-void func_0012A6A0(PlacedObject* self, Vec02* src)
+void SetAimPitchCurve(PlacedObject* self, Vec02* src)
 {
     EnsureAimAttachment(self);
     self->f200->v70 = *src;
 }
 
-void func_0012A6E0(PlacedObject* self, Quad16* out)
+void GetAimPitchCurve(PlacedObject* self, Quad16* out)
 {
     Quad16* src = self->f200 != 0 ? (Quad16*)((u8*)self->f200 + 0x70) : (Quad16*)D_00275C40;
     *out = *src;
 }
 
-void func_0012A700(PlacedObject* self, Pk8_2195* src)
+void SetAimPitchLimits(PlacedObject* self, Pk8_2195* src)
 {
     EnsureAimAttachment(self);
     self->f200->p80 = *src;
 }
 
-void func_0012A748(PlacedObject* self, U64P* out)
+void GetAimPitchLimits(PlacedObject* self, U64P* out)
 {
     U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x80) : (U64P*)g_unitRange;
     *out = *src;
 }
 
-void func_0012A770(PlacedObject* self, s32 v)
+void SetAimNearKey(PlacedObject* self, s32 v)
 {
     EnsureAimAttachment(self);
     self->f200->f44 = v;
 }
 
-void func_0012A7A8(PlacedObject* self, s32* out)
+void GetAimNearKey(PlacedObject* self, s32* out)
 {
     s32 r = 0;
     if (self->f200 != 0) r = self->f200->f44;
     *out = r;
 }
 
-void func_0012A7C0(PlacedObject* self, s32 value)
+void SetAimFarKey(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
     self->f200->f48 = value;
 }
 
-void func_0012A7F8(PlacedObject* self, s32* out)
+void GetAimFarKey(PlacedObject* self, s32* out)
 {
     s32 v = 0;
     if (self->f200 != 0) {
@@ -2743,27 +2743,27 @@ void func_0012A848(PlacedObject* self, s32* out)
     *out = v;
 }
 
-void func_0012A860(PlacedObject* self, void* b)
+void SetAimTarget(PlacedObject* self, void* b)
 {
     AssignAimTarget(self->f200, b, (void*)&D_00248D30);
 }
 
-void func_0012A888(PlacedObject* self, void** out)
+void GetAimTarget(PlacedObject* self, void** out)
 {
     *out = ResolveAimTarget(self->f200);
 }
 
-void func_0012A8B8(PlacedObject* self)
+void ClearAimHold(PlacedObject* self)
 {
     self->f200->hold = 0;
 }
 
-void func_0012A8C8(PlacedObject* self)
+void SetAimHold(PlacedObject* self)
 {
     self->f200->hold = 1;
 }
 
-void func_0012A8D8(PlacedObject* self, s32 a1, f32 x, f32 y)
+void SetValueAttachment(PlacedObject* self, s32 a1, f32 x, f32 y)
 {
     if (self->f204 == 0) {
         T2195_600* r = (T2195_600*)CreatePoseSource(self->world, self, ((u8*)D_00219600));
@@ -2776,7 +2776,7 @@ void func_0012A8D8(PlacedObject* self, s32 a1, f32 x, f32 y)
     self->desc02()->m2B(self);
 }
 
-Class75Object* func_0012A970(PlacedObject* self)
+Class75Object* FindOrCreateClass75Object(PlacedObject* self)
 {
     void* r = FindFirstObjectById(self->world, 0x102, 0x22A, self);
     if (r != 0) {
@@ -2785,7 +2785,7 @@ Class75Object* func_0012A970(PlacedObject* self)
     return (Class75Object*)CreateTypedRecord(0x75, (s32)self->world, self, 0x22A, -1);
 }
 
-void func_0012A9C8(PlacedObject* self, s32 value)
+void SetClass75ObjectCount(PlacedObject* self, s32 value)
 {
     Class75Object* o = FindOrCreateClass75Object(self);
     if (value != -1) {
@@ -2793,7 +2793,7 @@ void func_0012A9C8(PlacedObject* self, s32 value)
     }
 }
 
-void func_0012AA00(void* self, f32 value)
+void SetClass75ObjectScale(void* self, f32 value)
 {
     FindOrCreateClass75Object(self)->scale = value;
 }
@@ -2804,7 +2804,7 @@ void func_0012AA28(void* self, void* value)
     ctx->f90 = value;
 }
 
-void func_0012AA50(PlacedObject* self, f32 a, f32 b)
+void SetElementsScrollScale(PlacedObject* self, f32 a, f32 b)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
         Elem02* p = self->elems[i];
@@ -2812,7 +2812,7 @@ void func_0012AA50(PlacedObject* self, f32 a, f32 b)
     }
 }
 
-void func_0012AAE8(PlacedObject* self, f32 value)
+void SetCrossfadeRatioDeep(PlacedObject* self, f32 value)
 {
     ListFrame frame;
     for (s32 i = 0; i < self->elemCount; i++) {
@@ -2824,18 +2824,18 @@ void func_0012AAE8(PlacedObject* self, f32 value)
     }
 }
 
-void func_0012ABA8(PlacedObject* self)
+void EnsureSoundRecord(PlacedObject* self)
 {
     if (self->f2AC == 0) InitSoundParams(&self->f2AC);
 }
 
-void func_0012ABD0(PlacedObject* self, s32 value)
+void SetSoundRecordId(PlacedObject* self, s32 value)
 {
     EnsureSoundRecord(self);
     self->f2AC->f00 = value;
 }
 
-void func_0012AC08(PlacedObject* self, void* value)
+void RestartSoundWithId(PlacedObject* self, void* value)
 {
     EnsureSoundRecord(self);
     StopSoundRecord(self->f2AC->p1C, 0);
@@ -2844,20 +2844,20 @@ void func_0012AC08(PlacedObject* self, void* value)
     StartSoundEffect(p->p00, p->f04, p->f08, p->f0C, p->f10, p->f20, &p->p1C, self, 0, &p->b14, 0);
 }
 
-void func_0012AC88(PlacedObject* self, s32* out)
+void GetSoundRecordId(PlacedObject* self, s32* out)
 {
     s32 v = -1;
     if (self->f2AC != 0) v = self->f2AC->f00;
     *out = v;
 }
 
-void func_0012ACA0(PlacedObject* self, f32 value)
+void SetSoundOuterRange(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->f2AC->f04 = value;
 }
 
-void func_0012ACD8(PlacedObject* self, f32* out)
+void GetSoundOuterRange(PlacedObject* self, f32* out)
 {
     SoundRecord* s = self->f2AC;
     f32 v = 3000.0f;
@@ -2865,19 +2865,19 @@ void func_0012ACD8(PlacedObject* self, f32* out)
     *out = v;
 }
 
-void func_0012ACF8(PlacedObject* self, f32 value)
+void SetSoundInnerRange(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->f2AC->f08 = value;
 }
 
-void func_0012AD30(PlacedObject* self, U64P* src)
+void SetSoundRecordPair(PlacedObject* self, U64P* src)
 {
     EnsureSoundRecord(self);
     self->f2AC->b14 = *src;
 }
 
-void func_0012AD78(PlacedObject* self, f32* out)
+void GetSoundInnerRange(PlacedObject* self, f32* out)
 {
     SoundRecord* s = self->f2AC;
     f32 v = 300.0f;
@@ -2885,7 +2885,7 @@ void func_0012AD78(PlacedObject* self, f32* out)
     *out = v;
 }
 
-void func_0012AD98(PlacedObject* self, f32 f)
+void SetSoundRecordScale(PlacedObject* self, f32 f)
 {
     EnsureSoundRecord(self, f);
     self->f2AC->f0C = f;
@@ -2906,7 +2906,7 @@ void func_0012AE08(PlacedObject* self, f32* out)
     *out = r;
 }
 
-void func_0012AE20(PlacedObject* self)
+void SetPlayingSoundVolume(PlacedObject* self)
 {
     SoundRecord* part = self->f2AC;
     if (part != 0) {
@@ -2917,7 +2917,7 @@ void func_0012AE20(PlacedObject* self)
     }
 }
 
-void func_0012AE58(PlacedObject* self, f32* out)
+void GetSoundRecordScale(PlacedObject* self, f32* out)
 {
     f32 v = 1.0f;
     if (self->f2AC != 0) {
@@ -2926,13 +2926,13 @@ void func_0012AE58(PlacedObject* self, f32* out)
     *out = v;
 }
 
-void func_0012AE78(PlacedObject* self, f32 f)
+void SetSoundStartPitch(PlacedObject* self, f32 f)
 {
     EnsureSoundRecord(self, f);
     self->f2AC->f10 = f;
 }
 
-void func_0012AEB0(PlacedObject* self)
+void SetPlayingSoundPitch(PlacedObject* self)
 {
     SoundRecord* in = self->f2AC;
     if (in != 0) {
@@ -2940,7 +2940,7 @@ void func_0012AEB0(PlacedObject* self)
     }
 }
 
-void func_0012AEE8(PlacedObject* self, f32* out)
+void GetSoundStartPitch(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
     if (self->f2AC != 0) {
@@ -2949,7 +2949,7 @@ void func_0012AEE8(PlacedObject* self, f32* out)
     *out = r;
 }
 
-void func_0012AF00(PlacedObject* self, U64P* out)
+void GetSoundRecordPair(PlacedObject* self, U64P* out)
 {
     SoundRecord* s = self->f2AC;
     if (s != 0) {
@@ -2961,7 +2961,7 @@ void func_0012AF00(PlacedObject* self, U64P* out)
     }
 }
 
-void func_0012AF38(PlacedObject* self, void* value, U64P* src, f32 x, f32 y, f32 z)
+void StartSoundWithParams(PlacedObject* self, void* value, U64P* src, f32 x, f32 y, f32 z)
 {
     EnsureSoundRecord(self);
     self->f2AC->p00 = value;
@@ -2974,13 +2974,13 @@ void func_0012AF38(PlacedObject* self, void* value, U64P* src, f32 x, f32 y, f32
     StartSoundEffect(p->p00, p->f04, p->f08, p->f0C, p->f10, p->f20, &p->p1C, self, 0, &p->b14, 0);
 }
 
-void func_0012B010(PlacedObject* self)
+void StopPlayingSound(PlacedObject* self)
 {
     SoundRecord* inner = self->f2AC;
     if (inner != 0) StopSoundRecord(inner->p1C, 0);
 }
 
-void func_0012B040(void* ptr)
+void EnsureColorRecord(void* ptr)
 {
     PlacedObject* self = (PlacedObject*)ptr;
     if (!self->f288) {
@@ -2990,7 +2990,7 @@ void func_0012B040(void* ptr)
     }
 }
 
-void func_0012B0B0(PlacedObject* self, s32 a1)
+void SetColorPreset(PlacedObject* self, s32 a1)
 {
     EnsureColorRecord(self);
     self->f288->preset = a1;
@@ -2999,39 +2999,39 @@ void func_0012B0B0(PlacedObject* self, s32 a1)
     if (k != -1) *e = g_colorPresets[k];
 }
 
-void func_0012B128(PlacedObject* self, s32* out) { *out = self->f288 ? *(s32*)self->f288 : -1; }
+void GetColorPreset(PlacedObject* self, s32* out) { *out = self->f288 ? *(s32*)self->f288 : -1; }
 
-void func_0012B140(PlacedObject* self, Quad16* input)
+void SetColorRecordFirstColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
     *(Quad16*)((u8*)self->f288 + 0x10) = *input;
 }
 
-void func_0012B180(PlacedObject* self, Quad16* out)
+void GetColorRecordFirstColor(PlacedObject* self, Quad16* out)
 {
     u8* src = self->f288 ? (u8*)self->f288 + 0x10 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
-void func_0012B1A0(PlacedObject* self, Quad16* input)
+void SetColorRecordSecondColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
     *(Quad16*)((u8*)self->f288 + 0x20) = *input;
 }
 
-void func_0012B1E0(PlacedObject* self, Quad16* out)
+void GetColorRecordSecondColor(PlacedObject* self, Quad16* out)
 {
     u8* src = self->f288 ? (u8*)self->f288 + 0x20 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
-void func_0012B200(PlacedObject* self, f32 value)
+void SetColorRecordFactor(PlacedObject* self, f32 value)
 {
     EnsureColorRecord(self);
     self->f288->factor = value;
 }
 
-void func_0012B238(PlacedObject* self, f32* out)
+void GetColorRecordFactor(PlacedObject* self, f32* out)
 {
     f32 v = 0.0f;
     ColorRecord* p = self->f288;
@@ -3039,71 +3039,71 @@ void func_0012B238(PlacedObject* self, f32* out)
     *out = v;
 }
 
-void func_0012B250(PlacedObject* self, s32 v)
+void SetTintRgb(PlacedObject* self, s32 v)
 {
     self->tint[2] = v;
     self->tint[1] = v;
     self->tint[0] = v;
 }
 
-void func_0012B260(PlacedObject* self, s32* out)
+void GetTintRgb(PlacedObject* self, s32* out)
 {
     *out = self->tint[0];
 }
 
-void func_0012B270(PlacedObject* self, s32 v)
+void SetTintByte0(PlacedObject* self, s32 v)
 {
     self->tint[0] = v;
 }
 
-void func_0012B278(PlacedObject* self, s32* out)
+void GetTintByte0(PlacedObject* self, s32* out)
 {
     *out = self->tint[0];
 }
 
-void func_0012B288(PlacedObject* self, u8 value) { self->tint[1] = value; }
+void SetTintByte1(PlacedObject* self, u8 value) { self->tint[1] = value; }
 
-void func_0012B290(PlacedObject* self, s32* out)
+void GetTintByte1(PlacedObject* self, s32* out)
 {
     *out = self->tint[1];
 }
 
-void func_0012B2A0(PlacedObject* self, s32 v)
+void SetTintByte2(PlacedObject* self, s32 v)
 {
     self->tint[2] = v;
 }
 
-void func_0012B2A8(PlacedObject* self, s32* out)
+void GetTintByte2(PlacedObject* self, s32* out)
 {
     *out = self->tint[2];
 }
 
-void func_0012B2B8(PlacedObject* self, s32 value)
+void SetTintByte3(PlacedObject* self, s32 value)
 {
     self->tint[3] = value;
 }
 
-void func_0012B2C0(PlacedObject* self, s32* out)
+void GetTintByte3(PlacedObject* self, s32* out)
 {
     *out = self->tint[3];
 }
 
-void func_0012B2D0(PlacedObject* self, u8 v)
+void SetTintByte4(PlacedObject* self, u8 v)
 {
     self->f2B4 = v;
 }
 
-void func_0012B2D8(PlacedObject* self, s32* out)
+void GetTintByte4(PlacedObject* self, s32* out)
 {
     *out = self->f2B4;
 }
 
-s32 func_0012B2E8(PlacedObject* self, BaseObject* a1)
+s32 TestOtherFlagged(PlacedObject* self, BaseObject* a1)
 {
     return a1->f0C != 0;
 }
 
-void func_0012B2F8(PlacedObject* self, s32 key)
+void SelectValueEntryByKey(PlacedObject* self, s32 key)
 {
     s32 callVt = 0;
     s32 i;
@@ -3135,7 +3135,7 @@ void func_0012B2F8(PlacedObject* self, s32 key)
     }
 }
 
-void func_0012B420(PlacedObject* self, s32 flag)
+void SetObjectCameraTracked(PlacedObject* self, s32 flag)
 {
     u64 want = flag != 0;
     if (want != (((self->flags >> 36) ^ 1) & 1)) {
@@ -3153,7 +3153,7 @@ void func_0012B420(PlacedObject* self, s32 flag)
     }
 }
 
-void func_0012B4C8(PlacedObject* self, s32 flag)
+void SetPlacedObjectFrameStepClock(PlacedObject* self, s32 flag)
 {
     if ((0 < (u32)flag) != (self->f294 == 0)) {
         goto done;
@@ -3174,7 +3174,7 @@ done:
     return;
 }
 
-void func_0012B550(PlacedObject* ctx, s32 on)
+void SetPlacedObjectSpecialFlag(PlacedObject* ctx, s32 on)
 {
     if (on != 0) {
         ctx->flags |= (u64)1 << 32;
@@ -3183,7 +3183,7 @@ void func_0012B550(PlacedObject* ctx, s32 on)
     }
 }
 
-void func_0012B590(PlacedObject* ctx, s32* out)
+void GetPlacedObjectSpecialFlag(PlacedObject* ctx, s32* out)
 {
     if ((ctx->flags & ((u64)1 << 32)) != 0) {
         *out = 1;
@@ -3192,7 +3192,7 @@ void func_0012B590(PlacedObject* ctx, s32* out)
     }
 }
 
-void func_0012B5B8(PlacedObject* self, void* a1, void* a2)
+void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
 {
     void* t = self->parent;
     if (a1 == t || a2 == t || a1 == a2) {
@@ -3221,7 +3221,7 @@ void func_0012B5B8(PlacedObject* self, void* a1, void* a2)
 
 ASM_FUNC(func_0012B6A0);
 
-void func_0012B6B8(CodeChecksum* self)
+void InitCodeChecksum(CodeChecksum* self)
 {
     u32 c;
     InitPlacedObject(self);
@@ -3242,7 +3242,7 @@ void func_0012B6B8(CodeChecksum* self)
     }
 }
 
-void func_0012B760(CodeChecksum* self)
+void UpdateCodeChecksum(CodeChecksum* self)
 {
     if (self->remaining != 0) {
         s32 n = self->remaining;
@@ -3273,9 +3273,9 @@ void func_0012B760(CodeChecksum* self)
     }
 }
 
-void func_0012B868(void) {}
+void InitPlacedObjectModule(void) {}
 
-void func_0012B870(Animation* self)
+void InitAnimation(Animation* self)
 {
     InitObject(self);
     SetListLinkOffset(&self->props6C, 0x3C);
@@ -3288,7 +3288,7 @@ void func_0012B870(Animation* self)
     self->out = 1.0f;
 }
 
-void func_0012B8C8(Animation* self, Stream83* other)
+void LoadAnimation(Animation* self, Stream83* other)
 {
     s32 k;
     Track83* sel = 0;
@@ -3360,7 +3360,7 @@ void func_0012B8C8(Animation* self, Stream83* other)
     ReadPropertyRecords(self, other);
 }
 
-void func_0012BC38(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
+void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
 {
     AnimEvent* e;
     s32 i;
@@ -3515,12 +3515,12 @@ void func_0012BC38(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** 
     }
 }
 
-void func_0012C140(void)
+void CopyAnimation(void)
 {
     CopyObjectData();
 }
 
-void func_0012C160(Animation* self)
+void StartClampedKinematicValue(Animation* self)
 {
     StartObject(self);
     Kin83* k = &self->kin;
@@ -3539,7 +3539,7 @@ void func_0012C160(Animation* self)
     }
 }
 
-void func_0012C208(Animation* self)
+void StartLinkedObjectAnimation(Animation* self)
 {
     s32 scratch[4];
     s32 v;
@@ -3554,7 +3554,7 @@ void func_0012C208(Animation* self)
     CreateAnimationPlayerWithoutPresetTargets(self, v, 0, scratch, 0.0f, 1.0f);
 }
 
-void func_0012C288(Animation* self, Animation* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
+void CreateAnimationPlayer(Animation* self, Animation* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
 {
     s32 tmp;
     AnimationPlayer* obj;
@@ -3659,19 +3659,19 @@ void func_0012C288(Animation* self, Animation* alt, s32 npairs, TargetBinding* p
     TriggerScriptEvent(self, 9, 1, &pobj);
 }
 
-s32 func_0012C7B0(void* a, void* b, s32 c, s32 d)
+s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d)
 {
     return CreateAnimationPlayer(a, b, 0, 0, c, d);
 }
 
-void* func_0012C7D8(void* self, s32 key, s32 a2)
+void* CreateAnimationPlayerReturned(void* self, s32 key, s32 a2)
 {
     void* out;
     CreateAnimationPlayer(self, key, 0, 0, a2, &out);
     return out;
 }
 
-AnimationPlayer* func_0012C808(Animation* self, s32 key)
+AnimationPlayer* FindAnimationPlayerByScope(Animation* self, s32 key)
 {
     ListFrame frame;
     AnimationPlayer* node = *(AnimationPlayer**)self->props6C;
@@ -3686,7 +3686,7 @@ AnimationPlayer* func_0012C808(Animation* self, s32 key)
     return 0;
 }
 
-void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb)
+void FindOrCreateAnimationPlayerAndSeek(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb)
 {
     void* hit;
     void** dst = out ? out : &hit;
@@ -3699,14 +3699,14 @@ void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 
     SeekAnimationPlayer(*dst, a2, fa, fb);
 }
 
-void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb)
+void* FindOrCreateSeekedAnimationPlayer(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb)
 {
     void* out;
     FindOrCreateAnimationPlayerAndSeek(self, key, a2, a3, &out, fa, fb);
     return out;
 }
 
-void func_0012C918(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
+void ReplaceAnimationPlayer(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
 {
     if (*out != 0) {
         StopAnimationPlayer(*out);
@@ -3717,7 +3717,7 @@ void func_0012C918(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
     }
 }
 
-s32 func_0012C9A8(Animation* a0)
+s32 HasAnimationEventKind19(Animation* a0)
 {
     s32 n = a0->timedCount;
     if (n > 0) {
@@ -3736,7 +3736,7 @@ INCLUDE_RODATA(D_00249B10);
 
 ASM_FUNC(func_0012C9E8);
 
-AnimEvent* func_0012CBE8(Animation* self, s32 key) {
+AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
     s32 i;
     AnimEvent* p;
     for (i = 0; i < self->startCount; i++) {
@@ -3760,7 +3760,7 @@ AnimEvent* func_0012CBE8(Animation* self, s32 key) {
     return 0;
 }
 
-f32 func_0012CCC0(void)
+f32 GetAnimationMarkerTime(void)
 {
     f32* p = (f32*)FindAnimationMarkerEvent();
     f32 r = 0.0f;
@@ -3770,7 +3770,7 @@ f32 func_0012CCC0(void)
     return r;
 }
 
-void* func_0012CCE8(Gr8B* self, void* key)
+void* FindEntryByObjectId(Gr8B* self, void* key)
 {
     for (s32 i = 0; i < self->f38; i++) {
         Entry8B* e = (Entry8B*)(self->f3C + i * 0x1C);
@@ -3783,7 +3783,7 @@ void* func_0012CCE8(Gr8B* self, void* key)
 
 ASM_FUNC(func_0012CD78);
 
-void func_0012D1B0(Animation* self, void* ctx, s32* outCount, s32** outArr)
+void GatherAnimationEventObjects(Animation* self, void* ctx, s32* outCount, s32** outArr)
 {
     s32 n = 0;
     s32 i;
@@ -3817,7 +3817,7 @@ void func_0012D1B0(Animation* self, void* ctx, s32* outCount, s32** outArr)
     }
 }
 
-void func_0012D2A8(Animation* self, Track83* p)
+void MoveAnimationTrackToEnd(Animation* self, Track83* p)
 {
     Track83 tmp = *p;
     s32 idx = p - self->tracks;
@@ -3831,7 +3831,7 @@ void func_0012D2A8(Animation* self, Track83* p)
     self->f9C = p;
 }
 
-void func_0012D398(Animation* a0)
+void MoveObjectAnimationTrackToEnd(Animation* a0)
 {
     if (a0->f9C == 0) {
         void* r = FindEntryByObjectId();
@@ -3839,13 +3839,13 @@ void func_0012D398(Animation* a0)
     }
 }
 
-void func_0012D3E0() {}
+void SkipAnimationPlayerLoad() {}
 
-void func_0012D3E8() {}
+void SkipAnimationPlayerStart() {}
 
-void func_0012D3F0() {}
+void SkipAnimationPlayerCopy() {}
 
-AnimationPlayer* func_0012D3F8(World* pool)
+AnimationPlayer* NewAnimationPlayer(World* pool)
 {
     AnimationPlayer* o = (AnimationPlayer*)PopZeroedFreeSlot(&pool->pool1B58);
 
@@ -3856,7 +3856,7 @@ AnimationPlayer* func_0012D3F8(World* pool)
     return o;
 }
 
-void func_0012D448(AnimationPlayer* self, s32 v)
+void SetAnimationPlayerPadSelect(AnimationPlayer* self, s32 v)
 {
     if (v == self->state24) {
         return;
@@ -3869,7 +3869,7 @@ void func_0012D448(AnimationPlayer* self, s32 v)
     self->state24 = (s8)v;
 }
 
-void func_0012D4A8(AnimationPlayer* self)
+void SeekAnimationEventCursor(AnimationPlayer* self)
 {
     Animation* track = self->anim;
     s32 n = track->timedCount;
@@ -3899,7 +3899,7 @@ void func_0012D4A8(AnimationPlayer* self)
     }
 }
 
-T2195_7C0* func_0012D570(AnimationPlayer* a0, void* a1)
+T2195_7C0* FindPlayerAttachmentByOwner(AnimationPlayer* a0, void* a1)
 {
     ListFrame frame;
     T2195_7C0* n = (T2195_7C0*)a0->list44.head;
@@ -3912,7 +3912,7 @@ T2195_7C0* func_0012D570(AnimationPlayer* a0, void* a1)
 
 LINKER_REMNANT(func_0012D5C8);
 
-void func_0012D5D0(AnimationPlayer* self, AnimEvent* msg, s32* out)
+void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
 {
     EventScratch u;
     s32 rev = 0;
@@ -4075,7 +4075,7 @@ void func_0012D5D0(AnimationPlayer* self, AnimEvent* msg, s32* out)
         if (rev) {
             on = !on;
         }
-        func_00177800(g_player, on);
+        SwitchPlayerState11(g_player, on);
         if (on && msg->aC.i != 0) {
             ApplyListedPoseSources(self, 1);
         }
@@ -4410,7 +4410,7 @@ void func_0012D5D0(AnimationPlayer* self, AnimEvent* msg, s32* out)
     }
 }
 
-void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out)
+void RunSeekAnimationEvents(AnimationPlayer* self, Animation* sub, s32* out)
 {
     f32 limit = self->time + 0.0001f;
     if (sub->timedCount != 0) {
@@ -4438,7 +4438,7 @@ void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out)
     }
 }
 
-void func_0012E5D0(AnimationPlayer* self, Animation* list, s32* out)
+void RunAnimationEventsToTime(AnimationPlayer* self, Animation* list, s32* out)
 {
     if (list->timedCount == 0) return;
     for (;;) {
@@ -4462,13 +4462,13 @@ void func_0012E5D0(AnimationPlayer* self, Animation* list, s32* out)
     }
 }
 
-void func_0012E710(void* a0)
+void ReleaseWorldListEntry(void* a0)
 {
     RemoveFromList((u8*)&g_currentWorld->list1B7C, a0);
     PushFreeSlot((u8*)&g_currentWorld->pool1B58, a0);
 }
 
-void func_0012E760(AnimationPlayer* self)
+void StopAnimationPlayer(AnimationPlayer* self)
 {
     WordListFrame fr;
     EndEventLocals tmp;
@@ -4520,13 +4520,13 @@ void func_0012E760(AnimationPlayer* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
-void func_0012E928(void* a0, void* a1, void* a2)
+void ReleasePlayerAttachment(void* a0, void* a1, void* a2)
 {
     Attachment* n = FindPlayerAttachmentByOwner(a0, a1);
     if (n) n->vt->release(n, (s32)a2);
 }
 
-f32 func_0012E968(RangeFalloffOwner* self, f32 value)
+f32 GetRangeFalloffScale(RangeFalloffOwner* self, f32 value)
 {
     FalloffRange* range = self->range;
     f32 r;
@@ -4541,7 +4541,7 @@ f32 func_0012E968(RangeFalloffOwner* self, f32 value)
     return r;
 }
 
-s32 func_0012E9E0(AnimationPlayer* o, f32* pos, f32* vel)
+s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
 {
     s32 r = 0;
     Animation* l = o->anim;
@@ -4608,7 +4608,7 @@ s32 func_0012E9E0(AnimationPlayer* o, f32* pos, f32* vel)
 
 ASM_FUNC(func_0012EBD8);
 
-void func_0012F0A0(AnimationPlayer* self, s32 mode, f32 a, f32 b)
+void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {
     s32 flag = 0;
     f32 t;
@@ -4646,7 +4646,7 @@ call:
     }
 }
 
-void func_0012F190(AnimationPlayer* a0, void* a1)
+void ApplyListedPoseSources(AnimationPlayer* a0, void* a1)
 {
     ListFrame frame;
     T2195_7C0* n = (T2195_7C0*)a0->list44.head;
@@ -4656,7 +4656,7 @@ void func_0012F190(AnimationPlayer* a0, void* a1)
     }
 }
 
-void func_0012F1D8(AnimationPlayer* self)
+void SettleListedPoseSources(AnimationPlayer* self)
 {
     ListFrame frame;
     for (T2195_7C0* p = (T2195_7C0*)self->list44.head; p != 0; p = (T2195_7C0*)p->w20.lo) {
@@ -4666,12 +4666,12 @@ void func_0012F1D8(AnimationPlayer* self)
 
 ASM_FUNC(func_0012F210);
 
-void func_0012F6B0(AnimationPlayer* self, f32 x)
+void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x)
 {
     self->speed = x * self->f1C * self->anim->out;
 }
 
-void func_0012F6D0(AnimationPlayer* self, f32 x)
+void SetAnimationPlayerSpeedScale(AnimationPlayer* self, f32 x)
 {
     f32 denom = self->f1C * self->anim->out;
     f32 r = self->speed;
@@ -4683,7 +4683,7 @@ void func_0012F6D0(AnimationPlayer* self, f32 x)
     SetAnimationPlayerSpeed(self, r);
 }
 
-void func_0012F718(AnimationPlayer* owner, s32 value)
+void SetAttachmentSortKeys(AnimationPlayer* owner, s32 value)
 {
     ListFrame frame;
     T2195_7C0* node = (T2195_7C0*)owner->list44.head;
@@ -4694,7 +4694,7 @@ void func_0012F718(AnimationPlayer* owner, s32 value)
     }
 }
 
-void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
+void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, s32 a2)
 {
     BaseObject* obj = (BaseObject*)self->fC;
     if (obj != 0) {
@@ -4708,24 +4708,24 @@ void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
     }
 }
 
-void func_0012F7E0(AnimationPlayer* a0, void* a1, s32 a2)
+void AddAnimationPlayerCallback(AnimationPlayer* a0, void* a1, s32 a2)
 {
     AddCallbackNode(a0->anim->world, &a0->fE4, a1, a2);
 }
 
-void func_0012F810(AnimationPlayer* a0, PlacedObject** a1)
+void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1)
 {
     AddCallbackNode(a0->anim->world, &a0->fE4, (void*)(*a1)->link40.prev, a1);
 }
 
-void func_0012F840(IdFilterObject* self)
+void InitIdFilterObject(IdFilterObject* self)
 {
     InitCollider(self);
     SetColliderAnchors(self, 3, 0, 3, 0);
     self->id = -1;
 }
 
-void func_0012F888(IdFilterObject* self)
+void CopyIdFilterObject(IdFilterObject* self)
 {
     CopyCollider(self);
     if (self->parent == 0) {
@@ -4733,7 +4733,7 @@ void func_0012F888(IdFilterObject* self)
     }
 }
 
-void func_0012F8C8(IdFilterObject* self)
+void StartIdFilterObject(IdFilterObject* self)
 {
     StartPlacedObject(self);
     if (self->id != -1) {
@@ -4758,7 +4758,7 @@ void func_0012F8C8(IdFilterObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_0012F9B8(IdFilterObject* self)
+void UpdateIdFilterObject(IdFilterObject* self)
 {
     Quad4 loc;
     PlacedObject* cur;
@@ -4783,7 +4783,7 @@ void func_0012F9B8(IdFilterObject* self)
     }
 }
 
-s32 func_0012FA88(IdFilterObject* self, Collider* key)
+s32 TestIdFilterMatch(IdFilterObject* self, Collider* key)
 {
     s32 hit;
     s32 i;
@@ -4816,14 +4816,14 @@ tail:
 
 ASM_FUNC(func_0012FB68);
 
-void func_0012FCB0(IdFilterObject* a0, s32 a1)
+void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 {
     a0->objectIds.items[a0->objectIds.count++] = a1;
 }
 
-void func_0012FCD0(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
+void AddIdFilterClassId(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
 
-StreamReader* func_0012FCF0(StreamReader* obj, s32 value)
+StreamReader* InitStreamReader(StreamReader* obj, s32 value)
 {
     obj->sector = 0;
     obj->buffer = (value + 0x3F) & -64;
@@ -4838,20 +4838,20 @@ StreamReader* func_0012FCF0(StreamReader* obj, s32 value)
     return obj;
 }
 
-void func_0012FD30(void* self, s32 flags)
+void DestroyStreamReader(void* self, s32 flags)
 {
     CloseStreamReader((StreamReader*)self);
     if (flags & 1) FreeObjectMemory(self);
 }
 
-s32 func_0012FD78(void* self, KeyId* pair)
+s32 OpenSectorStreamRange(void* self, KeyId* pair)
 {
     return OpenSectorStream(self, pair->first, pair->second);
 }
 
 LINKER_REMNANT(func_0012FD98);
 
-s32 func_0012FDA0(StreamReader *self, s32 a1, s32 a2) {
+s32 OpenSectorStream(StreamReader *self, s32 a1, s32 a2) {
     self->sector = a1;
     s32 t = self->buffer;
     self->total = a2;
@@ -4864,7 +4864,7 @@ s32 func_0012FDA0(StreamReader *self, s32 a1, s32 a2) {
     return 1;
 }
 
-void func_0012FDE8(StreamReader* a0)
+void CloseStreamReader(StreamReader* a0)
 {
     switch (a0->sourceKind) {
     case 0:
@@ -4882,7 +4882,7 @@ void func_0012FDE8(StreamReader* a0)
     a0->sourceKind = -1;
 }
 
-void func_0012FE70(StreamReader* self)
+void StartChunkRead(StreamReader* self)
 {
     if (IsReadPending(self) != 0) {
         return;
@@ -4911,12 +4911,12 @@ void func_0012FE70(StreamReader* self)
     }
 }
 
-s32 func_0012FF10(StreamReader* a0)
+s32 IsReadPending(StreamReader* a0)
 {
     return a0->pendingLength != 0;
 }
 
-s32 func_0012FF20(StreamReader* a0)
+s32 PollChunkRead(StreamReader* a0)
 {
     s32 r = 0;
     s32 done = 0;
@@ -4942,7 +4942,7 @@ s32 func_0012FF20(StreamReader* a0)
     return r;
 }
 
-void func_0012FFE8(StreamReader* self)
+void CommitChunk(StreamReader* self)
 {
     if (PollChunkRead(self) == 0) {
         return;
@@ -4959,7 +4959,7 @@ void func_0012FFE8(StreamReader* self)
     self->usedLength = 0;
 }
 
-void func_00130070(StreamReaderWindow* self)
+void PumpStreamReader(StreamReaderWindow* self)
 {
     switch (self->sourceKind) {
     case 0:
@@ -4973,12 +4973,12 @@ void func_00130070(StreamReaderWindow* self)
     }
 }
 
-void func_001300D8(StreamReaderWindow* a0, s32 a1)
+void ConsumeStreamBytes(StreamReaderWindow* a0, s32 a1)
 {
     a0->usedLength += a1;
 }
 
-s32 func_001300E8(BaseObject* list, s32 key)
+s32 IsObjectOfKind(BaseObject* list, s32 key)
 {
     const Desc01* node = list->desc;
     while (node != 0) {
@@ -4990,7 +4990,7 @@ s32 func_001300E8(BaseObject* list, s32 key)
     return 0;
 }
 
-void func_00130110(BaseObject* self)
+void EnsureKeyedList(BaseObject* self)
 {
     if (self->f04 == 0) {
         void* v = NewKeyedList();
@@ -5001,12 +5001,12 @@ void func_00130110(BaseObject* self)
 }
 
 // A property getter (func_00109488 installs it): the object's class id.
-void func_00130158(BaseObject* self, s32* out)
+void GetObjectClassId(BaseObject* self, s32* out)
 {
     *out = self->desc->id;
 }
 
-void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)
+void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)
 {
     f32 c[4];
     if (diff < 0.0001f) {
@@ -5064,7 +5064,7 @@ void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32
     }
 }
 
-void func_001303F0(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd)
+void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd)
 {
     f32 u = t / dur;
     f32 v = 1.0f - u;
@@ -5112,7 +5112,7 @@ ASM_FUNC(func_00130540);
 
 ASM_FUNC(func_00130748);
 
-void func_00130B48(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count, CurvePoint* out, f32 start, f32 end)
+void SampleCurvePoints(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count, CurvePoint* out, f32 start, f32 end)
 {
     f32 step = (end - start) / (f32)(count - 1);
     f32 cur = start;
@@ -5123,7 +5123,7 @@ void func_00130B48(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count,
     }
 }
 
-void func_00130C20(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
+void MeasureCurveSegmentLength(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
 {
     u8 buf[0x140];
     SampleCurvePoints(a, b, c, d, x, 0.0f, y, 20, buf);

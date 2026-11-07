@@ -8,10 +8,10 @@ struct Obj_eu_18EE08 {
     s32 stride;
 };
 
-void func_0018D608(void);
-u8* func_0018D658(s32 n);
-void func_0018D800(u8* dst, u8* src, u32 bytes);
-void func_0018D6F0(void);
+void PushBackMemoryMark(void);
+u8* AllocateBackMemory(s32 n);
+void CopyMemory(u8* dst, u8* src, u32 bytes);
+void PopBackMemoryMark(void);
 
 void func_eu_0018EE08(Obj_eu_18EE08* self, s32 len, u8* dst)
 {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the format string as unsigned bytes (lbu where US has lb)
-s32 func_001E08F8(u8* s, s32* out);
+s32 ParseSignedDecimal(u8* s, s32* out);
 
-s32 func_001E0978(u8* at, FormatSpec* spec, s32** va)
+s32 ParseFormatSpec(u8* at, FormatSpec* spec, s32** va)
 {
     s32 state = 0;
     u8* p = at;

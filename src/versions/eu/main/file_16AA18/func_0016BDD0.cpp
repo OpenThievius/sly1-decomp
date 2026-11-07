@@ -3,7 +3,7 @@
 typedef void (*VFn_16BDD0)(void* self);
 struct Mgr_16BDD0_eu { VFn_16BDD0* vtbl; u8 pad0[0x56C - 4]; s32 x56C; s32 x570; };
 
-void func_0016BDD0(Mgr_16BDD0_eu* self, s32 flag)
+void SetGridSelectorOpen(Mgr_16BDD0_eu* self, s32 flag)
 {
     if ((flag != 0) != (self->x56C == 0)) {
         return;

@@ -22,7 +22,7 @@ ASM_FUNC(func_001FAC00);
 
 void func_001FAD68(void);
 
-void func_001FAE18(void)
+void RunConstructorsOnce(void)
 {
     if (D_0062A76C == 0) {
         D_0062A76C = 1;

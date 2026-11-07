@@ -28,7 +28,7 @@
 #include "ramp_profile.h"
 #include "asm_func.h"
 
-extern void* const D_002486B0[];
+extern void* const g_screenElements[];
 
 // A 28-byte text style the static initialiser (func_001AEA70) clears (func_001F5C0C with 0x1C)
 // and then fills.
@@ -44,123 +44,123 @@ struct TextStyle {
 };
 
 // The font object's calls.
-Font* func_0015C1C0(s32 k);
-void func_0015C8B8(Font* font, f32 x, f32 y);
-f32 func_0015C418(Font* font, void* text);
-void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(Font* font);
-void* func_0015DB28(void* out, void* text, Font* font);
-void func_0015E318(void* buf, void* out, s32 zero, void* d);
+Font* GetFontById(s32 k);
+void PushFontScale(Font* font, f32 x, f32 y);
+f32 MeasureFontString(Font* font, void* text);
+void DrawFontString(Font* font, void* text, void* out, s32 zero, void* d);
+void PopFontScale(Font* font);
+void* InitTextReader(void* out, void* text, Font* font);
+void DrawAlignedText(void* buf, void* out, s32 zero, void* d);
 
-void func_001F3C08(void* a, f32* out);
-void func_00128150(int a, int b, void* c, f32* d);
+void GetObjectWorldRotation(void* a, f32* out);
+void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
 
-extern f32 D_0026185C;
-extern f32 D_00261860;
+extern f32 g_gameTime;
+extern f32 g_frameDt;
 
-void func_001AB980(T217D_510* self, f32 value);
+void StepTimer(T217D_510* self, f32 value);
 
-extern s32 D_0026227C;
+extern s32 g_defaultFont;
 
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
 
-void func_00137228(void* out, f32 x, f32 y);
-void func_00137238(void* out, f32 x, f32 y);
-void func_00137248(void* out, s32* value);
-void func_00137260(void* out, s32 flag);
-void func_00137268(void* out, s32 flag);
+void SetTextLayoutPosition(void* out, f32 x, f32 y);
+void SetTextLayoutSize(void* out, f32 x, f32 y);
+void SetTextLayoutColor(void* out, s32* value);
+void SetTextLayoutHorizontalAlign(void* out, s32 flag);
+void SetTextLayoutVerticalAlign(void* out, s32 flag);
 
 typedef void* (*VFn_1A9960)(void* self);
 
-extern ElementPlaceTable D_0026C3E0;
-s32 func_001300E8(void* node, s32 kind);
+extern ElementPlaceTable g_elementPlaces;
+s32 IsObjectOfKind(void* node, s32 kind);
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+void FillMemory(void* p, s32 value, s32 size);
 
-void func_001F3C08(void* self, void* arg);
-void func_00128150(void* a0, void* a1, void* a2, void* a3);
-void func_00152438(void* self, s32 value);
+void GetObjectWorldRotation(void* self, void* arg);
+void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void SetListLinkOffset(void* self, s32 value);
 
 
-void func_00137248(void* out, void* p);
-void func_00137260(void* out, s32 v);
-void func_00137268(void* out, s32 v);
+void SetTextLayoutColor(void* out, void* p);
+void SetTextLayoutHorizontalAlign(void* out, s32 v);
+void SetTextLayoutVerticalAlign(void* out, s32 v);
 
-extern u8 D_00262C68[];
+extern u8 g_padRouting[];
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-extern s8 D_00262250[];
-extern u8 D_0024E879[];
-s32 func_001E1FD0(char* dst, const char* fmt, ...);
-void* func_001E2138(void* dst, void* src);
-void func_00152438(void* p, s32 a);
-PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
+extern s8 g_fontEscapeKeys[];
+extern u8 g_charClassFlags[];
+s32 FormatToString(char* dst, const char* fmt, ...);
+void* CopyString(void* dst, void* src);
+void SetListLinkOffset(void* p, s32 a);
+PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
-void func_001AE820(u8* a);
+void DrawCyclingGlyphElement(u8* a);
 extern f32 D_002743A0[4];
 
-s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-f32 func_001EAF28(f32 x);
-void func_001AA790();
-void func_001AA898();
-void func_001AA8A0();
-void func_001AA8A8();
-void func_001AA8C8();
-void func_001AA8F0();
-void func_001AA958();
-void func_001AAF58();
-void func_001AAAC8();
-void func_001AA4F0();
-void func_001AA998();
-void func_001AB058();
-void func_001ABE70();
-void func_001AC0E8();
-void func_001AC888();
-void func_001AC910();
-void func_001AC990();
-s32 func_001AC9E0();
-void func_001ACA30();
-void func_001ACA68();
-void func_001ACAA8();
-void func_001ACDA0();
-void func_001ACE38();
-void func_001AD320();
-void func_001AD378();
-void func_001AD3B0();
-void func_001AD3F0();
-void func_001AD6A8();
-void func_001AD718();
-void func_001AD7B0();
-void func_001ADC60();
-void func_001ADD28();
-void func_001ADF28();
-void func_001AE130();
-void func_001AE178();
-void func_001AE220();
-void func_001AD940();
-void func_001AD970();
-void func_001ADB00();
-void func_001AE510();
-void func_001AE5E0();
-void func_001AE758();
-void func_001AE7F8();
+f32 TruncateFloat(f32 x);
+void DrawScreenElementText();
+void GetScreenElementSlideInTime();
+void GetScreenElementHoldTime();
+void GetScreenElementSlideOutTime();
+void ResetScreenElement();
+void ShowScreenElement();
+void HideScreenElement();
+void SetScreenElementClock();
+void AreScreenElementsTogether();
+void SetScreenElementText();
+void SetScreenElementMode();
+void UpdateCounterCaption();
+void InitGauge();
+void DrawGauge();
+void InitPointerTextCaption();
+void SetElementTextAfterSlideOut();
+void SetElementModeApplyingPendingText();
+s32 AreElementsTogetherOrPending();
+void ShowElementUnlessTextPending();
+void HideElementOrDropPendingText();
+void DrawSlidingGlyphElement();
+void InitCopiedTextCaption();
+void SetElementTextCopiedAfterSlideOut();
+void SetElementModeApplyingCopiedText();
+void ShowElementUnlessCopiedTextPending();
+void HideElementOrDropCopiedText();
+void DrawMessageElement();
+void InitHintGlyphElement();
+void UpdateHintGlyphElement();
+void DrawHintGlyphElement();
+void InitTitleElement();
+void DrawTitleElement();
+void InitPromptElement();
+void SetElementModeRebuildingText();
+void UpdatePromptElement();
+void DrawPromptElement();
+void InitLetterboxElement();
+void SetElementModeFollowingFade();
+void DrawLetterboxElement();
+void InitLetterGlyphElement();
+void DrawLetterGlyphElement();
+void InitCyclingGlyphElement();
+void SetElementModeClearingFlag();
 
-s32 func_001E2100(const char*);
-void* func_001E2138(char*, const char*);
-void func_0015E290(TextReader*, f32, f32*, f32*);
+s32 GetStringLength(const char*);
+void* CopyString(char*, const char*);
+void MeasureText(TextReader*, f32, f32*, f32*);
 
-void func_001AB2B8(T217D_E30* self);
-f32 func_0015DFF8(TextReader* loc);
+void FormatCounterCaption(T217D_E30* self);
+f32 SumTextWidth(TextReader* loc);
 
 
-s32 func_0015C188(s32 k);
+s32 IsFontLoaded(s32 k);
 
 // A text reader and the size MeasureText gives for it.
 struct MeasuredText {
@@ -169,11 +169,11 @@ struct MeasuredText {
     f32 y;
 };
 
-s32 func_001E2100(const char* p);
-void* func_001E2138(char* dst, const char* p);
-void func_0015E290(void* out, f32 t, f32* a, f32* b);
+s32 GetStringLength(const char* p);
+void* CopyString(char* dst, const char* p);
+void MeasureText(void* out, f32 t, f32* a, f32* b);
 
-void func_001ADFF0(T217D_4C0* self);
+void RebuildPromptText(T217D_4C0* self);
 
 
 extern TextStyle D_002743D0;
@@ -181,13 +181,13 @@ extern TextStyle D_002743D0;
 
 extern TextStyle D_002743F0;
 
-s32 func_001F6738(const char* a, const char* b);
+s32 CompareStrings(const char* a, const char* b);
 
 
-extern u8 D_00275BC0[];
+extern u8 g_elementStack[];
 
-s32 func_001833F0(void* key, s32 item);
-s32 func_001300E8(void* key, s32 item);
+s32 MatchesObjectId(void* key, s32 item);
+s32 IsObjectOfKind(void* key, s32 item);
 
 
 extern TextStyle D_00274410;
@@ -208,7 +208,7 @@ typedef u8 Letter_1AEA08;
 #else
 typedef s8 Letter_1AEA08;
 #endif
-Letter_1AEA08 func_001AEA08(void);
+Letter_1AEA08 GetCyclingGlyph(void);
 
 extern f32 D_0027446C;
 // The vertical scale of the clone func_001ADF28 makes of its font (D_0027446C is the
@@ -216,31 +216,31 @@ extern f32 D_0027446C;
 extern f32 D_00274470[2];
 extern TextStyle D_00274488;
 
-s32 func_001833F0(s32 value, s32 item);
-s32 func_001300E8(s32 value, s32 item);
+s32 MatchesObjectId(s32 value, s32 item);
+s32 IsObjectOfKind(s32 value, s32 item);
 
-s32 func_001833F0(void* a, s32 b);
+s32 MatchesObjectId(void* a, s32 b);
 
 typedef void (*VFn_1AF3B8)(void* self);
-void* func_00183058(void* a, void* b, void* c);
+void* CreateObjectCopy(void* a, void* b, void* c);
 
-extern f32 D_00261868;
+extern f32 g_elapsedTime;
 extern f32 D_0027240C;
 extern s32 D_00272420;
-extern u8 D_00269990[];
+extern u8 g_backgroundJob[];
 
-s32 func_0018B770(void* p);
-void* func_00160B28(void* p);
+s32 IsBackgroundJobRunning(void* p);
+void* ComputeCompletionPercent(void* p);
 
 
-void func_001AD0D0(ScreenElement* self, s32 hi, s32 lo);
+void SetElementTextFromEntry(ScreenElement* self, s32 hi, s32 lo);
 
 
 extern f32 D_00274448;
 extern f32 D_0027444C;
 extern TextStyle D_00274450;
 
-void* func_001B4688(s32 key);
+void* FindAnimRecord(s32 key);
 
 extern f32 D_002744A8;
 
@@ -250,16 +250,16 @@ struct ProgressEntry {
     f32 time;
 };
 
-extern s32 func_001E1FD0(char*, const char*, ...);
-extern s32 func_001E2180(char*, const char*);
+extern s32 FormatToString(char*, const char*, ...);
+extern s32 AppendString(char*, const char*);
 
 
 
-u32 func_001601D8(u32 packed);
-char* func_00160148(u32 packed);
+u32 GetEntryFlags(u32 packed);
+char* GetEntryName(u32 packed);
 
-f32 func_001EA408(f32 a);
-f32 func_00205210(f32 x);
+f32 WrapAngle(f32 a);
+f32 Cosine(f32 x);
 
 extern const char* D_00274478[];
 extern const char* D_00274484;
@@ -267,48 +267,48 @@ extern const char* D_00274484;
 // A colour and a text reader, one frame slot (func_001ADFF0).
 struct ColoredText { T217D_Rgba col; u8 pad[12]; TextReader reader; };
 
-s32 func_001E1FD0(char *dst, const char *fmt, ...);
-void* func_001E2138(char *dst, const char *src);
-f32 func_0015E1F0(void *obj);
-f32 func_0015E1B0(void *obj, f32 a);
+s32 FormatToString(char *dst, const char *fmt, ...);
+void* CopyString(char *dst, const char *src);
+f32 MeasureTextWidth(void *obj);
+f32 MeasureTextHeight(void *obj, f32 a);
 
 
 extern const char* D_00274430[];
 
-void func_00160208(s32 key, s32* a1, s32* a2, s32* a3);
-s32 func_001E2100(void* p);
+void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3);
+s32 GetStringLength(void* p);
 
 struct GlyphCycleTable { s8* p; s32 pad; };
 extern GlyphCycleTable D_002744B0;
 
 
 
-void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* p, u64 a, u64 b);
-void func_00161458(PacketWriter* p, u32 value);
-void func_001615F0(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
+void AddGifRgbaEntry(PacketWriter* p, u32 value);
+void AddGifXyzfEntry(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
 
 
-void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* p, u64 a, u64 b);
-void func_00161458(PacketWriter* p, u32 value);
-void func_001615F0(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_00161278(PacketWriter* p, s32 a);
+void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
+void AddGifRgbaEntry(PacketWriter* p, u32 value);
+void AddGifXyzfEntry(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void CloseGifTag(PacketWriter* p, s32 a);
 
 extern u8 D_00275B00[];
 
-void func_00137228(Layout_137228* out, f32 x, f32 y);
-void func_00137238(Layout_137228* out, f32 x, f32 y);
-void func_00137248(Layout_137228* out, s32* value);
-void func_00137260(Layout_137228* out, s32 flag);
-void func_00137268(Layout_137228* out, s32 flag);
+void SetTextLayoutPosition(Layout_137228* out, f32 x, f32 y);
+void SetTextLayoutSize(Layout_137228* out, f32 x, f32 y);
+void SetTextLayoutColor(Layout_137228* out, s32* value);
+void SetTextLayoutHorizontalAlign(Layout_137228* out, s32 flag);
+void SetTextLayoutVerticalAlign(Layout_137228* out, s32 flag);
 // A layout with its setters as calls (SetTextLayoutPosition and the others).
 struct LayoutBuilder : Layout_137228 {
     void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
     void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
     void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { func_00137260(this, f); }
-    void FlagB(s32 f) { func_00137268(this, f); }
+    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
 };
 struct StyleDrawer {
     static void Draw(Font** h, LayoutBuilder* out, void* tbl)
@@ -323,25 +323,25 @@ struct StyleDrawer {
 
 
 
-void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* p, u64 a, u64 b);
-void func_00161458(PacketWriter* p, u32 rgba);
-void func_001614C8(PacketWriter* p, s32 a, s32 b);
-void func_001615F0(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
-u64 func_001B2988(TextureTable* t, s32 i, s32 j);
+void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
+void AddGifRgbaEntry(PacketWriter* p, u32 rgba);
+void AddGifUvEntry(PacketWriter* p, s32 a, s32 b);
+void AddGifXyzfEntry(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
+u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j);
 
 
 
-void func_001613C0(PacketWriter* f, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* f, u64 a, u64 b);
-void func_00161458(PacketWriter* f, u32 v);
-void func_001615F0(PacketWriter* f, s32 a, s32 b, s32 c, s32 d);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* f, u64 a, u64 b);
+void AddGifRgbaEntry(PacketWriter* f, u32 v);
+void AddGifXyzfEntry(PacketWriter* f, s32 a, s32 b, s32 c, s32 d);
 struct LayoutByValue : Layout_137228 {
     void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
     void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
     void Color(s32 c) { SetTextLayoutColor(this, &c); }
-    void FlagA(s32 f) { func_00137260(this, f); }
-    void FlagB(s32 f) { func_00137268(this, f); }
+    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
 };
 
 struct FontCalls {
@@ -362,10 +362,10 @@ struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, 
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
 extern RampProfile D_002743C0;
 
-f32 func_001EA4B8(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
-void func_00137248(Layout_137228* out, Quad4* value);
-void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* d);
-f32 func_00205400(f32 x);
+f32 ApproachValueWithRamp(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
+void SetTextLayoutColor(Layout_137228* out, Quad4* value);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* d);
+f32 Sine(f32 x);
 
 struct ChannelLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -388,9 +388,9 @@ struct LerpRgba4 {
     }
 };
 
-void func_001AEA70(s32 a, s32 b);
+void ConstructScreenTextStyles(s32 a, s32 b);
 
-void func_001AA268(ScreenElement* self)
+void SetupScreenElementText(ScreenElement* self)
 {
     s32 value = g_defaultFont;
     u32 flags = 0xFF808080;
@@ -402,7 +402,7 @@ void func_001AA268(ScreenElement* self)
 
 f32 D_002743A0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
 
-void func_001AA298(ScreenElement* self) {
+void UpdateScreenElementSlide(ScreenElement* self) {
     f32 t = *self->clock;
     s32 s = self->mode;
     switch (s) {
@@ -448,7 +448,7 @@ void func_001AA298(ScreenElement* self) {
     self->vt->m16(self, s);
 }
 
-void func_001AA4F0(ScreenElement* self, const char* arg)
+void SetScreenElementText(ScreenElement* self, const char* arg)
 {
     if (arg && GetStringLength(arg)) {
         CopyString(self->text, arg);
@@ -465,7 +465,7 @@ void func_001AA4F0(ScreenElement* self, const char* arg)
 
 }
 
-void func_001AA5A0(ScreenElement* self)
+void SubstituteScreenElementGlyphs(ScreenElement* self)
 {
     char buf[0x200];
     char* s = self->text;
@@ -509,12 +509,12 @@ void func_001AA5A0(ScreenElement* self)
     CopyString(self->text, buf);
 }
 
-void func_001AA788(ScreenElement* self, f32 v)
+void SetScreenElementScale(ScreenElement* self, f32 v)
 {
     self->scale = v;
 }
 
-void func_001AA790(ScreenElement* self)
+void DrawScreenElementText(ScreenElement* self)
 {
     u8 out[32];
     s32 tmp;
@@ -529,8 +529,8 @@ void func_001AA790(ScreenElement* self)
         SetTextLayoutSize(out, p, q);
         tmp = held;
         SetTextLayoutColor(out, &tmp);
-        func_00137260(out, 0);
-        func_00137268(out, 0);
+        SetTextLayoutHorizontalAlign(out, 0);
+        SetTextLayoutVerticalAlign(out, 0);
 
         handle = self->frame;
         if (handle != 0) {
@@ -551,42 +551,42 @@ void func_001AA790(ScreenElement* self)
 
 LINKER_REMNANT(func_001AA890);
 
-f32 func_001AA898(ScreenElement* self)
+f32 GetScreenElementSlideInTime(ScreenElement* self)
 {
     return self->inTime;
 }
 
-f32 func_001AA8A0(ScreenElement* self)
+f32 GetScreenElementHoldTime(ScreenElement* self)
 {
     return self->holdTime;
 }
 
-f32 func_001AA8A8(ScreenElement* self)
+f32 GetScreenElementSlideOutTime(ScreenElement* self)
 {
     return self->outTime;
 }
 
-void func_001AA8B0(ScreenElement* self, f32 v)
+void SetScreenElementSlideInTime(ScreenElement* self, f32 v)
 {
     self->inTime = v;
 }
 
-void func_001AA8B8(ScreenElement* self, f32 v)
+void SetScreenElementHoldTime(ScreenElement* self, f32 v)
 {
     self->holdTime = v;
 }
 
-void func_001AA8C0(ScreenElement* self, f32 v)
+void SetScreenElementSlideOutTime(ScreenElement* self, f32 v)
 {
     self->outTime = v;
 }
 
-void func_001AA8C8(ScreenElement* self)
+void ResetScreenElement(ScreenElement* self)
 {
     self->vt->m16(self, 0);
 }
 
-void func_001AA8F0(ScreenElement* self)
+void ShowScreenElement(ScreenElement* self)
 {
     s32 s = self->mode;
     if (s == 2) {
@@ -608,7 +608,7 @@ store:
     self->since = *self->clock;
 }
 
-void func_001AA958(ScreenElement* self)
+void HideScreenElement(ScreenElement* self)
 {
     s32 m = self->mode;
     if (m < 3) {
@@ -618,7 +618,7 @@ void func_001AA958(ScreenElement* self)
     }
 }
 
-void func_001AA998(ScreenElement* self, s32 mode)
+void SetScreenElementMode(ScreenElement* self, s32 mode)
 {
     if (self->mode == mode) {
         return;
@@ -658,7 +658,7 @@ void func_001AA998(ScreenElement* self, s32 mode)
     }
 }
 
-s32 func_001AAAC8(ScreenElement* a, ScreenElement* b)
+s32 AreScreenElementsTogether(ScreenElement* a, ScreenElement* b)
 {
     s32 r = 0;
     s32 am = a->mode;
@@ -672,7 +672,7 @@ done:
     return r;
 }
 
-void func_001AAB20(ScreenElement *self, f32 x, f32 y) {
+void SetScreenElementSize(ScreenElement *self, f32 x, f32 y) {
     if (0.0f <= x) {
         self->w = x;
     }
@@ -682,7 +682,7 @@ void func_001AAB20(ScreenElement *self, f32 x, f32 y) {
     PlaceScreenElement(self);
 }
 
-void func_001AAB60(ScreenElement* self) {
+void PlaceScreenElement(ScreenElement* self) {
     T217D_Place* r = self->place;
     f32 x0 = 0.0f;
     f32 x1 = 640.0f;
@@ -753,7 +753,7 @@ void func_001AAB60(ScreenElement* self) {
     PlaceAnchoredScreenElements(self);
 }
 
-void func_001AAEC0(ScreenElement* changed)
+void PlaceAnchoredScreenElements(ScreenElement* changed)
 {
     T217D_Place* e = (T217D_Place*)&g_elementPlaces;
     s32 i;
@@ -768,7 +768,7 @@ void func_001AAEC0(ScreenElement* changed)
     }
 }
 
-void func_001AAF58(ScreenElement* self, f32* p)
+void SetScreenElementClock(ScreenElement* self, f32* p)
 {
     if (self->clock != p) {
         if (p == 0) {
@@ -779,7 +779,7 @@ void func_001AAF58(ScreenElement* self, f32* p)
     self->clock = p;
 }
 
-void func_001AAF88(T217D_E30* self)
+void InitCounterCaption(T217D_E30* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -807,7 +807,7 @@ void func_001AAF88(T217D_E30* self)
     }
 }
 
-void func_001AB058(T217D_E30* self)
+void UpdateCounterCaption(T217D_E30* self)
 {
     TextReader loc;
     f32 frac;
@@ -853,7 +853,7 @@ void func_001AB058(T217D_E30* self)
     }
 }
 
-void func_001AB198(T217D_E30* self)
+void DrawCounterCaption(T217D_E30* self)
 {
     u8 out[0x20];
     T217D_Word packed;
@@ -882,15 +882,15 @@ void func_001AB198(T217D_E30* self)
     SetTextLayoutSize(out, px, py);
     tmp[0] = held;
     SetTextLayoutColor(out, &tmp[0]);
-    func_00137260(out, 0);
-    func_00137268(out, 0);
+    SetTextLayoutHorizontalAlign(out, 0);
+    SetTextLayoutVerticalAlign(out, 0);
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader(buf, &self->text[0], self->font);
     DrawAlignedText(buf, out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 
-void func_001AB2B8(T217D_E30* self)
+void FormatCounterCaption(T217D_E30* self)
 {
     switch (self->index) {
     case 3:
@@ -961,12 +961,12 @@ void func_001AB2B8(T217D_E30* self)
     SubstituteScreenElementGlyphs(self);
 }
 
-f32 func_001AB5D8(void)
+f32 GetCaptionHoldTime(void)
 {
     return g_gameClock.running != 0 ? 2.5f : 0.0f;
 }
 
-void func_001AB600(T217D_510* self)
+void InitTimerElement(T217D_510* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -976,7 +976,7 @@ void func_001AB600(T217D_510* self)
     SetTimerState(self, 0);
 }
 
-void func_001AB660(T217D_510* self)
+void UpdateTimerElement(T217D_510* self)
 {
     UpdateScreenElementSlide(self);
     if (self->mode == 0) {
@@ -994,7 +994,7 @@ void func_001AB660(T217D_510* self)
     }
 }
 
-void func_001AB710(T217D_510* self)
+void DrawTimerElement(T217D_510* self)
 {
     Layout_137228 L;
     Quad4 tag;
@@ -1007,8 +1007,8 @@ void func_001AB710(T217D_510* self)
         SetTextLayoutSize(&L, f234, f238);
         tag.w[0] = s0v;
         SetTextLayoutColor(&L, &tag.w[0]);
-        func_00137260(&L, 0);
-        func_00137268(&L, 0);
+        SetTextLayoutHorizontalAlign(&L, 0);
+        SetTextLayoutVerticalAlign(&L, 0);
         void* obj = self->frame;
         if (obj != 0) {
             Font* sub = *(Font**)obj;
@@ -1036,7 +1036,7 @@ void func_001AB710(T217D_510* self)
     }
 }
 
-void func_001AB890(T217D_510* self, f32 x)
+void StartTimer(T217D_510* self, f32 x)
 {
     self->onWarn = 0;
     self->warned = 0;
@@ -1054,29 +1054,29 @@ void func_001AB890(T217D_510* self, f32 x)
     self->vt->m14(self);
 }
 
-void func_001AB920(T217D_510* self, f32 value)
+void SetTimerRate(T217D_510* self, f32 value)
 {
     self->rate = value;
 }
 
-void func_001AB928(T217D_510* self, T217D_510_Fn onEnd, f32 limit)
+void SetTimerLimit(T217D_510* self, T217D_510_Fn onEnd, f32 limit)
 {
     self->limit = limit;
     self->onEnd = onEnd;
 }
 
-void func_001AB938(T217D_510* self)
+void StartTimerCounting(T217D_510* self)
 {
     SetTimerState(self, 2);
 }
 
-void func_001AB958(T217D_510* self)
+void StopTimer(T217D_510* self)
 {
     self->f290 = 1;
     SetTimerState(self, 0);
 }
 
-void func_001AB980(T217D_510* self, f32 dt)
+void StepTimer(T217D_510* self, f32 dt)
 {
     f32 t = __builtin_fabsf(self->time);
     s32 sec = (s32)t;
@@ -1180,7 +1180,7 @@ void func_001AB980(T217D_510* self, f32 dt)
     }
 }
 
-void func_001ABE20(T217D_510* self, s32 state)
+void SetTimerState(T217D_510* self, s32 state)
 {
     if (self->state != state) {
         self->state = state;
@@ -1188,17 +1188,17 @@ void func_001ABE20(T217D_510* self, s32 state)
     }
 }
 
-f32 func_001ABE40(void)
+f32 GetPairCaptionHoldTime(void)
 {
     return 0.0f;
 }
 
-f32 func_001ABE50(void)
+f32 GetGaugeAmountCaptionHoldTime(void)
 {
     return 0.0f;
 }
 
-f32 func_001ABE60(void)
+f32 GetGaugeColliderCaptionHoldTime(void)
 {
     return 0.0f;
 }
@@ -1211,7 +1211,7 @@ f32 D_002743BC = 340.0f;
 INCLUDE_RODATA(jtbl_0024CD70);
 INCLUDE_ASM(func_001ABE70);
 
-void func_001AC060(T217D_2E0* self)
+void DecrementGaugeCount(T217D_2E0* self)
 {
     s32 n = self->f270 - 1;
     self->f270 = n;
@@ -1237,7 +1237,7 @@ void func_001AC060(T217D_2E0* self)
 
 RampProfile D_002743C0 = { 0.5f, 0.25f, 0.2f, 0.0f };
 
-void func_001AC0E8(T217D_2E0* self)
+void DrawGauge(T217D_2E0* self)
 {
     Layout_137228 out;
     f32 t = 0.0f;
@@ -1260,8 +1260,8 @@ void func_001AC0E8(T217D_2E0* self)
         tmp.w[0] = grey;
         SetTextLayoutColor(&out, &tmp);
     }
-    func_00137260(&out, 0);
-    func_00137268(&out, 0);
+    SetTextLayoutHorizontalAlign(&out, 0);
+    SetTextLayoutVerticalAlign(&out, 0);
     {
     Rgba4 col;
     col.r = 0x20; col.g = 0x20; col.b = 0x20; col.a = 0xC0;
@@ -1301,7 +1301,7 @@ void func_001AC0E8(T217D_2E0* self)
 
 TextStyle D_002743D0 = {0};
 
-void func_001AC5C0(T217D_330* self)
+void InitFramedElement(T217D_330* self)
 {
     const FontVt* vt;
 
@@ -1314,7 +1314,7 @@ void func_001AC5C0(T217D_330* self)
     }
 }
 
-void func_001AC638(T217D_330* self, const char* p)
+void SetCaptionTextAndSize(T217D_330* self, const char* p)
 {
     MeasuredText loc;
 
@@ -1333,7 +1333,7 @@ void func_001AC638(T217D_330* self, const char* p)
     PopFontScale(self->font);
 }
 
-void func_001AC700(T217D_330* self)
+void DrawElementWithFadedFrame(T217D_330* self)
 {
     T217D_Word tmp;
     LayoutBuilder out;
@@ -1369,7 +1369,7 @@ void func_001AC700(T217D_330* self)
 
 TextStyle D_002743F0 = {0};
 
-void func_001AC888(T217D_380* self)
+void InitPointerTextCaption(T217D_380* self)
 {
     const FontVt* vt;
 
@@ -1383,7 +1383,7 @@ void func_001AC888(T217D_380* self)
     }
 }
 
-void func_001AC910(T217D_380* self, const char* v)
+void SetElementTextAfterSlideOut(T217D_380* self, const char* v)
 {
     s32 k = self->mode;
     if (k == 0) {
@@ -1405,7 +1405,7 @@ done:
     return;
 }
 
-void func_001AC990(T217D_380* self, s32 v)
+void SetElementModeApplyingPendingText(T217D_380* self, s32 v)
 {
     if (self->pending != 0 && v == 0) {
         const char* x = self->pendingText;
@@ -1416,7 +1416,7 @@ void func_001AC990(T217D_380* self, s32 v)
     SetScreenElementMode(self, v);
 }
 
-s32 func_001AC9E0(T217D_380* self, ScreenElement* other)
+s32 AreElementsTogetherOrPending(T217D_380* self, ScreenElement* other)
 {
     s32 r = 0;
     if (AreScreenElementsTogether(self, other) != 0 || self->pending != 0) {
@@ -1425,14 +1425,14 @@ s32 func_001AC9E0(T217D_380* self, ScreenElement* other)
     return r;
 }
 
-void func_001ACA30(T217D_380* self)
+void ShowElementUnlessTextPending(T217D_380* self)
 {
     if (self->mode != 3 || self->pending == 0) {
         ShowScreenElement(self);
     }
 }
 
-void func_001ACA68(T217D_380* self)
+void HideElementOrDropPendingText(T217D_380* self)
 {
     if (self->mode == 3 && self->pending != 0) {
         self->pending = 0;
@@ -1441,7 +1441,7 @@ void func_001ACA68(T217D_380* self)
     }
 }
 
-void func_001ACAA8(T217D_380* self)
+void DrawSlidingGlyphElement(T217D_380* self)
 {
     LayoutByValue out;
     s32 n;
@@ -1499,7 +1499,7 @@ void func_001ACAA8(T217D_380* self)
 
 TextStyle D_00274410 = {0};
 
-void func_001ACDA0(T217D_3D0* self)
+void InitCopiedTextCaption(T217D_3D0* self)
 {
     Font* o;
     const FontVt* vt;
@@ -1516,7 +1516,7 @@ void func_001ACDA0(T217D_3D0* self)
     }
 }
 
-void func_001ACE38(T217D_3D0* self, const char* v)
+void SetElementTextCopiedAfterSlideOut(T217D_3D0* self, const char* v)
 {
     s32 k = self->mode;
     if (k == 0) {
@@ -1543,7 +1543,7 @@ void func_001ACE38(T217D_3D0* self, const char* v)
     self->vt->m16(self, 3);
 }
 
-void func_001ACEE0(char* buf, ProgressEntry* info, u32 mask)
+void FormatFlagGlyphs(char* buf, ProgressEntry* info, u32 mask)
 {
     u32 flags = info->flags;
     *buf = 0;
@@ -1578,7 +1578,7 @@ void func_001ACEE0(char* buf, ProgressEntry* info, u32 mask)
     }
 }
 
-void func_001AD088(ScreenElement* self, s32 value)
+void SetElementTextFromPackedEntry(ScreenElement* self, s32 value)
 {
     if (value != -1) {
         SetElementTextFromEntry(self, value >> 8, (u8)value);
@@ -1587,7 +1587,7 @@ void func_001AD088(ScreenElement* self, s32 value)
     }
 }
 
-void func_001AD0D0(ScreenElement* self, s32 a1, s32 a2)
+void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2)
 {
     char buf[64];
     char str[64];
@@ -1611,7 +1611,7 @@ void func_001AD0D0(ScreenElement* self, s32 a1, s32 a2)
 // The names the level picker shows, by level (the first, empty, for none).
 const char* D_00274430[6] = { "", "Tide of Terror", "Sunset Snake Eyes", "Vicious Voodoo", "Fire in the Sky", "The Cold Heart of Hate" };
 
-void func_001AD1E8(ScreenElement* self, s32 idx)
+void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx)
 {
     char buf[0x200];
     s32 a, b, c;
@@ -1628,7 +1628,7 @@ void func_001AD1E8(ScreenElement* self, s32 idx)
     self->vt->m08(self, buf);
 }
 
-void func_001AD320(T217D_3D0* self, s32 flag)
+void SetElementModeApplyingCopiedText(T217D_3D0* self, s32 flag)
 {
     if (self->pending != 0 && flag == 0) {
         self->pending = 0;
@@ -1641,13 +1641,13 @@ void func_001AD320(T217D_3D0* self, s32 flag)
     SetScreenElementMode(self, flag);
 }
 
-void func_001AD378(T217D_3D0* self)
+void ShowElementUnlessCopiedTextPending(T217D_3D0* self)
 {
     if (self->mode == 3 && self->pending != 0) return;
     ShowScreenElement(self);
 }
 
-void func_001AD3B0(T217D_3D0* self)
+void HideElementOrDropCopiedText(T217D_3D0* self)
 {
     if (self->mode == 3 && self->pending != 0) {
         self->pending = 0;
@@ -1656,7 +1656,7 @@ void func_001AD3B0(T217D_3D0* self)
     }
 }
 
-void func_001AD3F0(T217D_3D0* self)
+void DrawMessageElement(T217D_3D0* self)
 {
     T217D_Word packed;
     LayoutBuilder out;
@@ -1720,7 +1720,7 @@ void func_001AD3F0(T217D_3D0* self)
     PopFontScale(self->font);
 }
 
-void func_001AD6A8(T217D_420* self)
+void InitHintGlyphElement(T217D_420* self)
 {
     Font* o;
     const FontVt* vt;
@@ -1733,7 +1733,7 @@ void func_001AD6A8(T217D_420* self)
     self->flag = 0;
 }
 
-void func_001AD718(T217D_420* self)
+void UpdateHintGlyphElement(T217D_420* self)
 {
     Player* g;
     ElementStack* m;
@@ -1751,7 +1751,7 @@ tail:
     self->vt->m15(self);
 }
 
-void func_001AD7B0(T217D_420* self)
+void DrawHintGlyphElement(T217D_420* self)
 {
     Layout_137228 buf;
     Quad4 tmp;
@@ -1769,19 +1769,19 @@ void func_001AD7B0(T217D_420* self)
     SetTextLayoutSize(&buf, w, ht);
     tmp.w[0] = mask;
     SetTextLayoutColor(&buf, &tmp.w[0]);
-    func_00137260(&buf, 0);
-    func_00137268(&buf, 0);
+    SetTextLayoutHorizontalAlign(&buf, 0);
+    SetTextLayoutVerticalAlign(&buf, 0);
     DrawFontString(h, (void*)"L", &buf, 0, &g_gsPacketWriter);
     PopFontScale(h);
 }
 
-void func_001AD940(T217D_560* self)
+void InitLetterboxElement(T217D_560* self)
 {
     SetupScreenElementText(self);
     self->outTime = 0.5f;
 }
 
-void func_001AD970(T217D_560* self, s32 newval)
+void SetElementModeFollowingFade(T217D_560* self, s32 newval)
 {
     T217D_3D0* g;
     GameProgress* gg;
@@ -1824,7 +1824,7 @@ void func_001AD970(T217D_560* self, s32 newval)
     SetScreenElementMode(self, newval);
 }
 
-void func_001ADB00(T217D_560* self)
+void DrawLetterboxElement(T217D_560* self)
 {
     f32 x = self->blend * 66.40001f;
     f32 y = 492.80002f - x;
@@ -1842,7 +1842,7 @@ f32 D_00274448 = 0.9f;
 f32 D_0027444C = 0.9f;
 TextStyle D_00274450 = {0};
 
-void func_001ADC60(T217D_470* self)
+void InitTitleElement(T217D_470* self)
 {
     SetupScreenElementText(self);
     Font* in = self->font;
@@ -1860,7 +1860,7 @@ and the Thievius Raccoonus");
     }
 }
 
-void func_001ADD28(T217D_470* self)
+void DrawTitleElement(T217D_470* self)
 {
     if (self->icon != 0) {
         TextureTable* sub = ((AnimRecord*)self->icon)->elems;
@@ -1890,7 +1890,7 @@ const char* D_00274478[3] = { "Press START button for New Game", "Press START bu
 const char* D_00274484 = "No Controller";
 TextStyle D_00274488 = {0};
 
-void func_001ADF28(T217D_4C0* self)
+void InitPromptElement(T217D_4C0* self)
 {
     const FontVt* vt;
 
@@ -1912,7 +1912,7 @@ void func_001ADF28(T217D_4C0* self)
     RebuildPromptText(self);
 }
 
-void func_001ADFF0(T217D_4C0 *self)
+void RebuildPromptText(T217D_4C0 *self)
 {
     ColoredText loc;
     f32 y;
@@ -1945,7 +1945,7 @@ void func_001ADFF0(T217D_4C0 *self)
     PopFontScale(self->font);
 }
 
-void func_001AE130(T217D_4C0* self, s32 force)
+void SetElementModeRebuildingText(T217D_4C0* self, s32 force)
 {
     if (self->pending != 0 && force == 0) {
         self->pending = 0;
@@ -1955,7 +1955,7 @@ void func_001AE130(T217D_4C0* self, s32 force)
     SetScreenElementMode(self, force);
 }
 
-void func_001AE178(T217D_4C0* self)
+void UpdatePromptElement(T217D_4C0* self)
 {
     if (D_00275BF0 == 1) {
         s32 b = 0;
@@ -1974,7 +1974,7 @@ void func_001AE178(T217D_4C0* self)
 
 ASM_FUNC(func_001AE220);
 
-void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
 {
     BeginGifTag(&g_gsPacketWriter, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
 
@@ -1989,7 +1989,7 @@ void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32
 f32 D_002744A4 = 0.1f;
 f32 D_002744A8 = 1.3f;
 
-void func_001AE510(T217D_5B0* self)
+void InitLetterGlyphElement(T217D_5B0* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -2009,7 +2009,7 @@ ASM_FUNC(func_001AE5E0);
 
 f32 D_002744AC = 0.7f;
 
-void func_001AE758(T217D_600* self)
+void InitCyclingGlyphElement(T217D_600* self)
 {
     f32 k = 0.25f;
     char fl[2];
@@ -2030,7 +2030,7 @@ void func_001AE758(T217D_600* self)
     self->text[0] = 0;
 }
 
-void func_001AE7F8(T217D_600* self, s32 flag)
+void SetElementModeClearingFlag(T217D_600* self, s32 flag)
 {
     if (flag == 0) {
         self->flag = 0;
@@ -2038,7 +2038,7 @@ void func_001AE7F8(T217D_600* self, s32 flag)
     SetScreenElementMode(self, flag);
 }
 
-void func_001AE820(T217D_600* self)
+void DrawCyclingGlyphElement(T217D_600* self)
 {
     u8 out[0x20];
     s32 tmp[4];
@@ -2081,8 +2081,8 @@ void func_001AE820(T217D_600* self)
     SetTextLayoutSize(out, px, py);
     tmp[0] = held;
     SetTextLayoutColor(out, tmp);
-    func_00137260(out, 0);
-    func_00137268(out, 0);
+    SetTextLayoutHorizontalAlign(out, 0);
+    SetTextLayoutVerticalAlign(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;
     c = GetCyclingGlyph();
@@ -2095,7 +2095,7 @@ void func_001AE820(T217D_600* self)
 
 GlyphCycleTable D_002744B0 = { (s8*)"ab", 0 };
 
-Letter_1AEA08 func_001AEA08(void)
+Letter_1AEA08 GetCyclingGlyph(void)
 {
     s32 scaled = (s32)(g_elapsedTime * 5.0f);
     u32 divisor = GetStringLength((const char*)D_002744B0.p);
@@ -2110,7 +2110,7 @@ INCLUDE_ASM(func_001AEA70);
 
 LINKER_REMNANT(func_001AEC80);
 
-void func_001AEC90(void)
+void ConstructScreenTextStylesAtStartup(void)
 {
-    func_001AEA70(1, 0xFFFF);
+    ConstructScreenTextStyles(1, 0xFFFF);
 }

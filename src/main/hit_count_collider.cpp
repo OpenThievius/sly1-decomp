@@ -30,9 +30,9 @@ f32 D_00274AB4 = 1000.0f;
 f32 D_00274AB8[2] = { 0.0f, 300.0f };
 PaddedQuadratic D_00274AC0 = { { -1.0f, 1.0f, 0.0f } };
 
-void func_001921A8(void* self);
+void InitSwitchedCollider(void* self);
 
-void func_001C3390(HitCountCollider* self)
+void InitHitCountCollider(HitCountCollider* self)
 {
     InitSwitchedCollider(self);
     self->f610 = -1;
@@ -45,14 +45,14 @@ struct __attribute__((packed)) UnalignedFloatPair { u64 v; };
 struct __attribute__((packed)) UnalignedPointer { void* p; };
 
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void* func_001B6290(void* a, void* self, s32 b, s32 c);
-f32 func_00205778(f32 a, f32 b);
-void func_001DDC38(void* sub, void* self);
-void func_001C3FC8(void* self, s32 flag);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void SetWorldActiveFollower(void* sub, void* self);
+void SetHitCountColliderState(void* self, s32 flag);
 
-void func_001C33C8(HitCountCollider* self)
+void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
     self->f68C = self->radius3CC;
@@ -75,25 +75,25 @@ void func_001C33C8(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-extern f32 D_00275C60[];
-extern f32 D_0026185C[];
-extern f32 D_00261854;
-extern f32 D_00261858[];
+extern f32 g_unitRange[];
+extern f32 g_gameTime[];
+extern f32 g_stepScale;
+extern f32 g_gameClock[];
 extern s32 D_0026E228[8];
 
-void func_00192B58(void* self, f32 t);
-void* func_0015A838(void* a, s32 b, s32 c, s32 d);
-void func_00158730(void* x);
-void func_001C3F68(void* self, s32 v);
-void func_0012E760(void* p);
-void func_0012C7B0(void* a, void* b, s32 c, void* d, f32 fa, f32 fb);
-f32 func_00205778(f32 a, f32 b);
-void func_00188850(void* a, void* b, f32 f);
-void func_001EA918(void* a, void* b, void* c, void* d, s32 e, f32 f);
-f32 func_00205210(f32 a);
-void func_00126A48(void* o, u32 v);
+void UpdateSwitchedCollider(void* self, f32 t);
+void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
+void SendEmptyMessage(void* x);
+void SendHitCountColliderRequest(void* self, s32 v);
+void StopAnimationPlayer(void* p);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* d, f32 fa, f32 fb);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void BuildAxisAngleMatrix(void* a, void* b, f32 f);
+void ApproachRotationWithRamp(void* a, void* b, void* c, void* d, s32 e, f32 f);
+f32 Cosine(f32 a);
+void SetObjectTreeRecordValue(void* o, u32 v);
 
-void func_001C34C8(HitCountCollider* self, f32 t)
+void UpdateHitCountCollider(HitCountCollider* self, f32 t)
 {
     f32 buf[12];
     f32 buf2[12];
@@ -179,9 +179,9 @@ void func_001C34C8(HitCountCollider* self, f32 t)
     *(s32*)(((u8*)self->f62C) + 0x32C) = 0;
 }
 
-bool func_001E9970();
+bool AreMenusAndFadeClear();
 
-void func_001C3928()
+void ShowHitCountColliderCounters()
 {
     if (AreMenusAndFadeClear()) {
         D_0026DD48.vt->m14(&D_0026DD48);
@@ -196,10 +196,10 @@ ASM_FUNC(func_001C39A0);
 
 ASM_FUNC(func_001C3B40);
 
-s32 func_001300E8(s32 a, s32 b);
-s32 func_001833F0(s32 a, s32 b);
+s32 IsObjectOfKind(s32 a, s32 b);
+s32 MatchesObjectId(s32 a, s32 b);
 
-void func_001C3C00(HitCountCollider* self, Contact03* c, s32 end)
+void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
     ContactEnd03* e = &c->end[1 - end];
     if (IsObjectOfKind((s32)e->body, 0x21)) {
@@ -215,18 +215,18 @@ void func_001C3C00(HitCountCollider* self, Contact03* c, s32 end)
 
 ASM_FUNC(func_001C3C98);
 
-extern s32 D_00262C64;
-s32 func_001DDA80(void* p);
+extern s32 g_buttonCodeFlags;
+s32 IsPadSelectFlagHeld(void* p);
 
-s32 func_001C3D28(HitCountCollider* self)
-{ if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1; return 0; }
+s32 IsHitCountColliderRequestBlocked(HitCountCollider* self)
+{ if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1; return 0; }
 
 // What slot 76 tells its own slot 14 (kind 0x17) when it is hit: itself and the message's owner.
 struct OwnerNotice { void* sender; s32 owner; };
-s32 func_00160C58();
-void func_001C3FC8(void* self, s32 flag);
+s32 HasSpareCount();
+void SetHitCountColliderState(void* self, s32 flag);
 
-s32 func_001C3D60(HitCountCollider* self, OwnerMessage* arg)
+s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
 {
     OwnerNotice local;
     s32 m;
@@ -252,12 +252,12 @@ s32 func_001C3D60(HitCountCollider* self, OwnerMessage* arg)
     return 1;
 }
 
-s32 func_001C3E50(HitCountCollider* self) { if (self->f610 < 5) { if (self->f610 >= 2) return 1; } return self->f638 != 0; }
+s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->f610 < 5) { if (self->f610 >= 2) return 1; } return self->f638 != 0; }
 
-void func_00192C58(void* self);
-void func_001C3FC8(void* self, s32 flag);
+void FinishSwitchedCollider(void* self);
+void SetHitCountColliderState(void* self, s32 flag);
 
-void func_001C3E80(HitCountCollider* self)
+void FinishHitCountCollider(HitCountCollider* self)
 {
     FinishSwitchedCollider(self);
     SetHitCountColliderState(self, 1);
@@ -265,10 +265,10 @@ void func_001C3E80(HitCountCollider* self)
 
 ASM_FUNC(func_001C3EB0);
 
-void func_001D7098(void* self, s32 a, s32 b);
+void InitOwnerMessage(void* self, s32 a, s32 b);
 void func_001C3EB0(s32 c, void* receiver);
 
-void func_001C3F68(HitCountCollider* self, s32 value)
+void SendHitCountColliderRequest(HitCountCollider* self, s32 value)
 {
     OwnerMessage local;
     InitOwnerMessage(&local, 0, value);
@@ -277,22 +277,22 @@ void func_001C3F68(HitCountCollider* self, s32 value)
     self->desc05()->m4C(self, (void*)&local);
 }
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 extern s32 D_0026E228[8];
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EA408(f32 a);
-f32 func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
-void func_00151E20(u8* a, f32 b);
-void func_00194D30(T217D_6D0* a, s32 b, s32 c);
-void func_0012C918(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapAngle(f32 a);
+f32 ApproachAngleWithRamp(f32 x, f32 y, f32 z, u8* a, void* out);
+void RaiseScatterLevels(u8* a, f32 b);
+void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
+void ReplaceAnimationPlayer(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);
 
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 
-void func_001C3FC8(PlacedObject* self, s32 state)
+void SetHitCountColliderState(PlacedObject* self, s32 state)
 {
     void* s2;
     f32 f12;
@@ -334,7 +334,7 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     F(self, 0x614) = g_gameClock[1];
 }
 
-void func_001C4180(HitCountCollider* self, s32 value)
+void AddHitCountColliderId(HitCountCollider* self, s32 value)
 {
     s32 n = self->f698;
     self->f69C[n] = value;

@@ -6,19 +6,19 @@
 #include "camera.h"
 #include "pad_record.h"
 #include "asm_func.h"
-extern void func_001439A8(void*);
-extern void func_001439C8(void*);
-extern void func_001439E8(void*);
-extern void func_00143A08(void*);
-extern void func_001448C8(void*, s32, void*);
+extern void SetCameraFogNear(void*);
+extern void SetCameraFogFar(void*);
+extern void SetCameraFogStrength(void*);
+extern void SetCameraFogColor(void*);
+extern void SetCameraPlacement(void*, s32, void*);
 #include "list_iter.h"
 
 
-void func_00143968(void* arg);
+void SetCameraNearDistance(void* arg);
 
 
 
-void func_00143A38(void* arg);
+void SetCameraDistanceScale(void* arg);
 
 
 
@@ -33,7 +33,7 @@ struct PackedRgba
     PackedRgba(u32 v) { rgba = v; }
 };
 
-void func_00143560(void* self);
+void UpdateCameraProjection(void* self);
 
 
 
@@ -48,32 +48,21 @@ struct Target_00143148 {
     f32 f34;
 };
 
-void func_001ED650(void* self, f32 x, f32 y, f32 z);
+void ComputePolarOffset(void* self, f32 x, f32 y, f32 z);
 
 
 
-void func_00183FE0(f32* a, f32* b, f32 x, f32 y, f32 z, f32 w);
-
-
-
-
-void func_00143940(void* self);
+void FitReciprocalThroughPoints(f32* a, f32* b, f32 x, f32 y, f32 z, f32 w);
 
 
 
 
-void func_00143988(void* self);
+void SnapCameraZoom(void* self);
 
 
 
 
-
-
-
-
-void func_00144938(void* self, void* a, void* b);
-void func_001493B8(CameraController* p, s32 zero);
-void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
+void SetCameraFarDistance(void* self);
 
 
 
@@ -81,7 +70,18 @@ void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
 
 
 
-void func_0018D800(void* dst, void* src, u32 size);
+
+void PlaceCameraLookingAt(void* self, void* a, void* b);
+void SetCameraControllerValue(CameraController* p, s32 zero);
+void PushCameraController(void* self, s32 a1, void* a2, s32 a3, s32 a4);
+
+
+
+
+
+
+
+void CopyMemory(void* dst, void* src, u32 size);
 
 
 
@@ -93,7 +93,7 @@ typedef unsigned char u8;
 typedef float f32;
 
 
-void func_00143560(void* self);
+void UpdateCameraProjection(void* self);
 
 
 
@@ -102,19 +102,15 @@ typedef unsigned char u8;
 typedef float f32;
 
 
-void func_00143560(void* self);
+void UpdateCameraProjection(void* self);
 
 
 
-void func_00143560(void* self);
+void UpdateCameraProjection(void* self);
 
 
 
-void func_00143560(void* self);
-
-
-
-
+void UpdateCameraProjection(void* self);
 
 
 
@@ -124,7 +120,11 @@ void func_00143560(void* self);
 
 
 
-void func_001448C8(void* self, void* a, void* b);
+
+
+
+
+void SetCameraPlacement(void* self, void* a, void* b);
 
 
 
@@ -152,14 +152,14 @@ struct __attribute__((aligned(16))) FrameRow {
     s32 d;
 };
 
-void func_00182C18(BaseObject* self);
-void func_00143560(Camera* self);
-void func_00149398(CameraController* self, Camera* owner);
-void func_00149660(TargetCameraController* self, Camera* owner);
-void func_0014A888(FrameCameraController* self, Camera* owner);
-void func_00143A60(Camera* self, s32 a1);
+void InitObject(BaseObject* self);
+void UpdateCameraProjection(Camera* self);
+void SetCameraControllerOwner(CameraController* self, Camera* owner);
+void InitTargetCameraController(TargetCameraController* self, Camera* owner);
+void InitFrameCameraController(FrameCameraController* self, Camera* owner);
+void ResetCamera(Camera* self, s32 a1);
 
-extern u8 D_002483D0[];
+extern u8 g_identityMatrix[];
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_00217398[];
@@ -170,13 +170,13 @@ extern const Fn_Table D_002173F8[];
 
 
 
-extern s32 D_00262C68;
+extern s32 g_padRouting;
 
-f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* p, void* q);
-void func_001433E0(Camera* c, void* n, void* x);
-void func_00143208(Camera* c, void* n, f32 dt, void* x);
-void func_00143940(Camera* c, f32 v);
-void func_00143560(Camera* c);
+f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* p, void* q);
+void ResetCameraTargetTracking(Camera* c, void* n, void* x);
+void UpdateCameraTargetTracking(Camera* c, void* n, f32 dt, void* x);
+void SnapCameraZoom(Camera* c, f32 v);
+void UpdateCameraProjection(Camera* c);
 
 
 typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
@@ -185,8 +185,8 @@ typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
 
 
 
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EA408(f32 a);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapAngle(f32 a);
 
 
 
@@ -207,51 +207,51 @@ f32 func_001EA408(f32 a);
 
 
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
 
 
 
-void func_001495E8(TargetCameraController* self, s32 value);
+void PushStackValue(TargetCameraController* self, s32 value);
 
 
-s32 func_00149610(TargetCameraController* self);
+s32 PopStackValue(TargetCameraController* self);
 
 
-s32 func_00149638(TargetCameraController* self);
+s32 PeekStackValue(TargetCameraController* self);
 
 
 void func_00144008(void* self);
-void func_001EEBB0(void* a, void* b, void* c);
+void LookupValueTreeLeaf(void* a, void* b, void* c);
 
-extern World* D_00275710;
-
-
-
-
-
-
-extern u8 D_002622A8[];
-
-void func_00152B38(void* f);
-void func_001EE3B8(void* s, s32 a, s32 b);
-void func_001EE668(void* s, s32 a, s32 b, void* c, s32 d);
-void func_00152D70(void* self);
+extern World* g_currentWorld;
 
 
 
 
 
-void func_00144540(Camera* self);
+
+extern u8 g_vifPacketWriter[];
+
+void BeginDmaTag(void* f);
+void WriteVifBaseOffset(void* s, s32 a, s32 b);
+void CopyWordsToWriter(void* s, s32 a, s32 b, void* c, s32 d);
+void CloseDmaTag(void* self);
+
+
+
+
+
+void UpdateCameraMatrices(Camera* self);
 
 
 
 // NEAR: only a0/a1 saved regs swapped (s0/s1) and the four loads use the other base; stores/frame match
 
 
-void func_001885E0(void* self);
-void* func_00189AF0(void* a0, void* a1);
-void func_00188668(void* out, void* b, void* in);
+void InitIdentityMatrix(void* self);
+void* InvertMatrix4x4(void* a0, void* a1);
+void MultiplyMatrices(void* out, void* b, void* in);
 
 
 
@@ -262,65 +262,65 @@ void func_00144BE8(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 
 
 
 
-void func_00144AA0(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z);
-void func_00144978(Quad16* a, Quad16* b, Quad16* out, f32* x, f32* y, f32* z);
+void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z);
+void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32* x, f32* y, f32* z);
 
 
 
 
-s32 func_0013DFD8(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-s32 func_001429F8(s32 n, void* recs);
+s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 MergeOverlappingSpans(s32 n, void* recs);
 
 
 
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_00143140(void);
-void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3);
-void func_001434C8(Camera* self, f32* out, f32 p);
-void func_001437C0(void);
-void func_001437E8(void);
-void func_00143810(void);
-void func_00143838(void);
-void func_00143860(void);
-void func_00143888(void);
-void func_001438B0(void);
-void func_001438D8(void);
-void func_00143900(void* self, void* value);
-void func_00143920(void* arg, void* arg2);
-void func_00143940(void* self, f32 x);
-void func_00143968(void* self, f32 x);
-void func_00143988(Camera* self, f32 value);
-void func_001439A8(Camera* self, f32 value);
-void func_001439C8(Camera* self, f32 value);
-void func_001439E8(void* ptr, f32 value);
-void func_00143A08(void* self, void* value);
-void func_00143A38(Camera* self, f32 value);
-void func_00143A60(Camera* self, s32 flag);
-void func_00143AF0(Camera* obj);
-void func_00143AF8(Camera* list, void* item);
-void func_00143B20(Camera* list, s32 value);
-s32 func_00143BA8(void* unused, Collider* e);
-void func_00143E40(Camera* self, s32 flag, f32 dt);
-void func_00144270(Camera* self);
-void func_001442C8(f32* b, f32* a, void* c, Quad16* out);
-void func_00144848(u8* self);
-void func_001448C8(Camera* self, Quad16* a, Quad16* b);
-void func_00144938(Camera* self, void* p, s32 q);
-void func_00144B70(Camera* self, Quad16* arg);
-void func_00144FF8(Camera* self, PadRecord* p, s32 mode, f32* out);
-void func_001451F0(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3);
-void func_001455C0(Camera* self, f32* src);
-void func_001455E0(Camera* self);
-void func_001455F0(void* p);
-s32 func_00145810(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
-s32 func_00145DD8(void* unused, Collider* other);
-void func_00145FB8(Camera* self, s32 value);
-s32 func_00145FD8(Camera* self);
-s32 func_00145FF8(Camera* self);
-void func_00146018(Camera* obj, s32 value, f32 first, f32 second);
-void func_00146028(Camera* obj);
+void InitCameraModule(void);
+void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
+void ComputeCameraFogTerms(Camera* self, f32* out, f32 p);
+void SnapCurrentCameraZoom(void);
+void SetCurrentCameraNearDistance(void);
+void SetCurrentCameraFarDistance(void);
+void SetCurrentCameraFogNear(void);
+void SetCurrentCameraFogFar(void);
+void SetCurrentCameraFogStrength(void);
+void SetCurrentCameraFogColor(void);
+void SetCurrentCameraDistanceScale(void);
+void SetCameraPosition(void* self, void* value);
+void SetCameraOrientation(void* arg, void* arg2);
+void SnapCameraZoom(void* self, f32 x);
+void SetCameraNearDistance(void* self, f32 x);
+void SetCameraFarDistance(Camera* self, f32 value);
+void SetCameraFogNear(Camera* self, f32 value);
+void SetCameraFogFar(Camera* self, f32 value);
+void SetCameraFogStrength(void* ptr, f32 value);
+void SetCameraFogColor(void* self, void* value);
+void SetCameraDistanceScale(Camera* self, f32 value);
+void ResetCamera(Camera* self, s32 flag);
+void ClearCameraObjectList(Camera* obj);
+void AddCameraObject(Camera* list, void* item);
+void RemoveCameraObject(Camera* list, s32 value);
+s32 IsCameraObstacle(void* unused, Collider* e);
+void UpdateCamera(Camera* self, s32 flag, f32 dt);
+void UpdateCameraLocation(Camera* self);
+void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
+void WriteCameraMatricesPacket(u8* self);
+void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b);
+void PlaceCameraLookingAt(Camera* self, void* p, s32 q);
+void SetCameraLookAnchor(Camera* self, Quad16* arg);
+void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3);
+void RequestCameraSnap(Camera* self, f32* src);
+void QueueCameraSnap(Camera* self);
+void RequestPlainCameraSnap(void* p);
+s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
+s32 HasColliderSecondTree(void* unused, Collider* other);
+void PushCameraStackValue(Camera* self, s32 value);
+s32 PopCameraStackValue(Camera* self);
+s32 PeekCameraStackValue(Camera* self);
+void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second);
+void RecordCameraTimestamp(Camera* obj);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
 f32 D_00261880[4] = { 0.0f, -2000.0f, 500.0f, 0.0f };
@@ -345,13 +345,13 @@ INCLUDE_DATA(D_00261950);
 INCLUDE_DATA(D_00261958);
 INCLUDE_DATA(D_00261970);
 INCLUDE_DATA(D_00261980);
-void* D_00261990 = 0;
+void* g_camera = 0;
 
-void func_00143140(void)
+void InitCameraModule(void)
 {
 }
 
-void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3)
+void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3)
 {
     ComputePolarOffset(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
@@ -364,7 +364,7 @@ ASM_FUNC(func_001433E0);
 
 ASM_FUNC(func_00143418);
 
-void func_001434C8(Camera* self, f32* out, f32 p)
+void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 {
     f32 one = 1.0f;
     f32 scale = 4080.0f;
@@ -379,7 +379,7 @@ void func_001434C8(Camera* self, f32* out, f32 p)
 
 ASM_FUNC(func_00143560);
 
-void func_00143648(Camera* self)
+void InitCamera(Camera* self)
 {
     u8* s = (u8*)self;
 
@@ -419,42 +419,42 @@ void func_00143648(Camera* self)
     ResetCamera(self, 1);
 }
 
-void func_001437C0(void)
+void SnapCurrentCameraZoom(void)
 {
     SnapCameraZoom(g_camera);
 }
 
-void func_001437E8(void)
+void SetCurrentCameraNearDistance(void)
 {
     SetCameraNearDistance(g_camera);
 }
 
-void func_00143810(void)
+void SetCurrentCameraFarDistance(void)
 {
     SetCameraFarDistance(g_camera);
 }
 
-void func_00143838(void) { func_001439A8(g_camera); }
+void SetCurrentCameraFogNear(void) { SetCameraFogNear(g_camera); }
 
-void func_00143860(void) { func_001439C8(g_camera); }
+void SetCurrentCameraFogFar(void) { SetCameraFogFar(g_camera); }
 
-void func_00143888(void) { func_001439E8(g_camera); }
+void SetCurrentCameraFogStrength(void) { SetCameraFogStrength(g_camera); }
 
-void func_001438B0(void) { func_00143A08(g_camera); }
+void SetCurrentCameraFogColor(void) { SetCameraFogColor(g_camera); }
 
-void func_001438D8(void)
+void SetCurrentCameraDistanceScale(void)
 {
     SetCameraDistanceScale(g_camera);
 }
 
-void func_00143900(void* self, void* value)
+void SetCameraPosition(void* self, void* value)
 {
     SetCameraPlacement(self, value, 0);
 }
 
-void func_00143920(void* arg, void* arg2) { SetCameraPlacement(arg, 0, arg2); }
+void SetCameraOrientation(void* arg, void* arg2) { SetCameraPlacement(arg, 0, arg2); }
 
-void func_00143940(void* self, f32 x)
+void SnapCameraZoom(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
     c->f1C4 = x;
@@ -463,51 +463,51 @@ void func_00143940(void* self, f32 x)
     UpdateCameraProjection(self);
 }
 
-void func_00143968(void* self, f32 x)
+void SetCameraNearDistance(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
     c->f1E4 = x;
     UpdateCameraProjection(self);
 }
 
-void func_00143988(Camera* self, f32 value)
+void SetCameraFarDistance(Camera* self, f32 value)
 {
     self->f1E8 = value;
     UpdateCameraProjection(self);
 }
 
-void func_001439A8(Camera* self, f32 value)
+void SetCameraFogNear(Camera* self, f32 value)
 {
     self->f1F8 = value;
     UpdateCameraProjection(self);
 }
 
-void func_001439C8(Camera* self, f32 value)
+void SetCameraFogFar(Camera* self, f32 value)
 {
     self->f1FC = value;
     UpdateCameraProjection(self);
 }
 
-void func_001439E8(void* ptr, f32 value)
+void SetCameraFogStrength(void* ptr, f32 value)
 {
     Camera* self = (Camera*)ptr;
     self->f200 = value;
     UpdateCameraProjection(self);
 }
 
-void func_00143A08(void* self, void* value)
+void SetCameraFogColor(void* self, void* value)
 {
     *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
     UpdateCameraProjection(self);
 }
 
-void func_00143A38(Camera* self, f32 value)
+void SetCameraDistanceScale(Camera* self, f32 value)
 {
     self->f1C0 = value;
     UpdateCameraProjection(g_camera);
 }
 
-void func_00143A60(Camera* self, s32 flag)
+void ResetCamera(Camera* self, s32 flag)
 {
     if (flag != 0) {
         PlaceCameraLookingAt(self, D_00261880, D_00261890);
@@ -520,12 +520,12 @@ void func_00143A60(Camera* self, s32 flag)
     self->f218 = -10.0f;
 }
 
-void func_00143AF0(Camera* obj)
+void ClearCameraObjectList(Camera* obj)
 {
     obj->f340 = 0;
 }
 
-void func_00143AF8(Camera* list, void* item)
+void AddCameraObject(Camera* list, void* item)
 {
     u32 n = list->f340;
     if (n < 8) {
@@ -534,7 +534,7 @@ void func_00143AF8(Camera* list, void* item)
     }
 }
 
-void func_00143B20(Camera* list, s32 value)
+void RemoveCameraObject(Camera* list, s32 value)
 {
     for (s32 i = 0; i < list->f340; i++) {
         if (value == ((s32*)list->f344)[i]) {
@@ -545,7 +545,7 @@ void func_00143B20(Camera* list, s32 value)
     }
 }
 
-s32 func_00143BA8(void* unused, Collider* e)
+s32 IsCameraObstacle(void* unused, Collider* e)
 {
     s64 field = 0xF000;
     s64 want = 0x8000;
@@ -566,7 +566,7 @@ done:
 
 ASM_FUNC(func_00143BE0);
 
-void func_00143E40(Camera* self, s32 flag, f32 dt)
+void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {
     if (self->f220 != 0) {
         self->f220 = 0;
@@ -624,7 +624,7 @@ ASM_FUNC(func_00144128);
 
 ASM_FUNC(func_001441C0);
 
-void func_00144270(Camera* self)
+void UpdateCameraLocation(Camera* self)
 {
     Quad16 in;
     s32 out;
@@ -641,7 +641,7 @@ void func_00144270(Camera* self)
     }
 }
 
-void func_001442C8(f32* b, f32* a, void* c, Quad16* out)
+void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
 {
     Mat4 m;
     Mat4 v;
@@ -683,7 +683,7 @@ ASM_FUNC(func_001443C8);
 
 ASM_FUNC(func_00144540);
 
-void func_00144848(u8* self)
+void WriteCameraMatricesPacket(u8* self)
 {
     BeginDmaTag(g_vifPacketWriter);
     WriteVifBaseOffset(g_vifPacketWriter, 0, 0);
@@ -692,7 +692,7 @@ void func_00144848(u8* self)
     CloseDmaTag(g_vifPacketWriter);
 }
 
-void func_001448C8(Camera* self, Quad16* a, Quad16* b)
+void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
 {
     if (a != 0) {
         *(Quad16*)self->f40 = *a;
@@ -711,7 +711,7 @@ void func_001448C8(Camera* self, Quad16* a, Quad16* b)
     self->f2B8 = zero;
 }
 
-void func_00144938(Camera* self, void* p, s32 q)
+void PlaceCameraLookingAt(Camera* self, void* p, s32 q)
 {
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
@@ -720,7 +720,7 @@ ASM_FUNC(func_00144978);
 
 ASM_FUNC(func_00144AA0);
 
-void func_00144B70(Camera* self, Quad16* arg)
+void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {
     Quad16 tmp;
     ApplyLookFrameCoordinates((Quad16*)self->f2D0, (Quad16*)self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
@@ -730,7 +730,7 @@ void func_00144B70(Camera* self, Quad16* arg)
 
 ASM_FUNC(func_00144BE8);
 
-void func_00144FF8(Camera* self, PadRecord* p, s32 mode, f32* out)
+void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out)
 {
     f32 t;
     f32 x;
@@ -761,7 +761,7 @@ LINKER_REMNANT(func_00145080);
 
 INCLUDE_ASM(func_00145088);
 
-void func_001451F0(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3)
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3)
 {
     s32 s5 = 0;
     CameraController* s4 = 0;
@@ -808,7 +808,7 @@ ASM_FUNC(func_00145438);
 
 ASM_FUNC(func_001454E0);
 
-void func_001455C0(Camera* self, f32* src)
+void RequestCameraSnap(Camera* self, f32* src)
 {
     self->f224 = 1;
     if (src != 0) {
@@ -817,12 +817,12 @@ void func_001455C0(Camera* self, f32* src)
     }
 }
 
-void func_001455E0(Camera* self)
+void QueueCameraSnap(Camera* self)
 {
     self->f220 = 1;
 }
 
-void func_001455F0(void* p)
+void RequestPlainCameraSnap(void* p)
 {
     RequestCameraSnap((Camera*)p, 0);
 }
@@ -831,7 +831,7 @@ ASM_FUNC(func_00145610);
 
 ASM_FUNC(func_00145718);
 
-s32 func_00145810(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
+s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];
     s32 total = 0;
@@ -866,7 +866,7 @@ ASM_FUNC(func_00145950);
 
 ASM_FUNC(func_00145B68);
 
-s32 func_00145DD8(void* unused, Collider* other)
+s32 HasColliderSecondTree(void* unused, Collider* other)
 {
     return other->tree2.nodes != 0;
 }
@@ -875,24 +875,24 @@ ASM_FUNC(func_00145DE8);
 
 ASM_FUNC(func_00145E68);
 
-void func_00145FB8(Camera* self, s32 value)
+void PushCameraStackValue(Camera* self, s32 value)
 {
     PushStackValue(&self->ctl460, value);
 }
 
-s32 func_00145FD8(Camera* self)
+s32 PopCameraStackValue(Camera* self)
 {
     return PopStackValue(&self->ctl460);
 }
 
-s32 func_00145FF8(Camera* self)
+s32 PeekCameraStackValue(Camera* self)
 {
     return PeekStackValue(&self->ctl460);
 }
 
-void func_00146018(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
+void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
 
-void func_00146028(Camera* obj) { obj->f218 = g_gameTime; }
+void RecordCameraTimestamp(Camera* obj) { obj->f218 = g_gameTime; }
 
 ASM_FUNC(func_00146038);
 

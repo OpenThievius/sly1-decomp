@@ -12,7 +12,7 @@ static const f32 g_cosX10 = -2.7557314297e-07f;
 static const f32 g_cosX12 = 2.0875723372e-09f;
 static const f32 g_cosX14 = -1.1359647598e-11f;
 
-f32 func_002081A0(f32 x, f32 y)
+f32 CosineKernel(f32 x, f32 y)
 {
     s32 bits, magnitude;
     f32 x2, poly, x2Poly, quarter;

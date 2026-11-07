@@ -19,6 +19,6 @@ struct GameClock {
     s64 lastTick;           // 0x18: the tick count of the last step (func_00142F10, func_00143030)
 };
 
-extern GameClock D_00261858;
+extern GameClock g_gameClock;
 
 #endif

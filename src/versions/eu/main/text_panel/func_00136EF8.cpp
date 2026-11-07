@@ -2,9 +2,9 @@
 // PAL: the child pointer is at 0x5B0 (US 0x324).
 struct Owner_136EF8_eu { u8 pad0[0x5B0]; StepSequence* child; };
 
-void func_001356C0(Owner_136EF8_eu* self, s32 mode);
+void SetTextPanelState(Owner_136EF8_eu* self, s32 mode);
 
-void func_00136EF8(Owner_136EF8_eu* self)
+void ChooseTextPanelState(Owner_136EF8_eu* self)
 {
     if (self->child != 0) {
         switch (self->child->mode2D0) {

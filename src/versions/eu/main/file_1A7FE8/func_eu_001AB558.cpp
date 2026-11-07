@@ -20,12 +20,12 @@ void func_eu_001AB558(Actor_eu_001AB558* self)
         f32 f544 = self->f544;
         f32 f548 = self->f548;
         s32 s0v = self->f518;
-        func_00137228(&L, self->f52C, self->f530);
-        func_00137238(&L, f544, f548);
+        SetTextLayoutPosition(&L, self->f52C, self->f530);
+        SetTextLayoutSize(&L, f544, f548);
         L.tag = s0v;
-        func_00137248(&L, &L.tag);
-        func_00137260(&L, (s32)rt);
-        func_00137268(&L, 0);
+        SetTextLayoutColor(&L, &L.tag);
+        SetTextLayoutHorizontalAlign(&L, (s32)rt);
+        SetTextLayoutVerticalAlign(&L, 0);
         func_eu_001374E0(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {

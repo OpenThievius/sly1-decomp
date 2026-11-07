@@ -55,12 +55,12 @@ typedef char check_ContactTracker[sizeof(ContactTracker) == 0x860 ? 1 : -1];
 typedef char check_C37[sizeof(C37) == 0x860 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4F70(ContactTracker* self);                       // 0x36 slot 0
-void func_001F51A0(ContactTracker* self);                       // 0x36 slot 9
-void func_001F4FD8(ContactTracker* self);                       // 0x36 slot 16
-void func_001F5008(ContactTracker* self);                       // 0x36 slot 17
-void func_001F51C8();                                // 0x36 slot 36 (empty)
-int func_001F51E8(ContactTracker* self);                        // 0x36 slot 71
-void func_001F5218(C37* self);                       // 0x37 slot 0
+void InitContactTracker(ContactTracker* self);                       // 0x36 slot 0
+void CopyContactTracker(ContactTracker* self);                       // 0x36 slot 9
+void StartContactTracker(ContactTracker* self);                       // 0x36 slot 16
+void CollectTouchingObjects(ContactTracker* self);                       // 0x36 slot 17
+void ApplyContactTrackerTransform();                                // 0x36 slot 36 (empty)
+int RequestContactTrackerLaunch(ContactTracker* self);                        // 0x36 slot 71
+void InitC37(C37* self);                       // 0x37 slot 0
 
 #endif

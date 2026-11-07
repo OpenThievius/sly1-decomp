@@ -25,9 +25,9 @@ struct Text_eu_15DF58 {
 s32 func_eu_0015DEA0(Text_eu_15DF58* t, s32 i);
 void func_eu_0015DF18(Text_eu_15DF58* t, s32 n);
 s32 func_eu_001E3210(s32 c);
-void func_0015C9B0(Font_eu_15DF58* src, Font_eu_15DF58* dst);
-void func_0015C900(Font_eu_15DF58* f);
-void func_0015C8B8(Font_eu_15DF58* f, f32 x, f32 y);
+void CopyFont(Font_eu_15DF58* src, Font_eu_15DF58* dst);
+void PopFontScale(Font_eu_15DF58* f);
+void PushFontScale(Font_eu_15DF58* f, f32 x, f32 y);
 
 s32 func_eu_0015DF58(Text_eu_15DF58* t)
 {
@@ -84,10 +84,10 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
                 t->fA0 = 1;
                 func_eu_0015DF18(t, 2);
             } else if (func_eu_001E3210(func_eu_0015DEA0(t, 1))) {
-                Font_eu_15DF58* f = (Font_eu_15DF58*)func_0015C200(func_eu_0015DEA0(t, 1));
+                Font_eu_15DF58* f = (Font_eu_15DF58*)FindFontByKeyChar(func_eu_0015DEA0(t, 1));
                 if (f) {
                     Font_eu_15DF58* own = &t->own;
-                    func_0015C9B0(f, own);
+                    CopyFont(f, own);
                     func_eu_0015DF18(t, 2);
                     Font_eu_15DF58* b = t->base;
                     f32 r = ((f32)b->f8 * b->f48) / ((f32)own->f8 * own->f48);
@@ -113,13 +113,13 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
                 func_eu_0015DF18(t, 1);
                 done = 1;
             } else if (func_eu_0015DEA0(t, 1) == '.') {
-                func_0015C900(t->font);
+                PopFontScale(t->font);
                 func_eu_0015DF18(t, 2);
             } else if (func_eu_001E3210(func_eu_0015DEA0(t, 1)) && func_eu_001E3210(func_eu_0015DEA0(t, 2))) {
                 s32 a = func_eu_0015DEA0(t, 1);
                 s32 b = func_eu_0015DEA0(t, 2);
                 f32 s = (f32)(a - '0') + (f32)(b - '0') * 0.1f;
-                func_0015C8B8(t->font, s * t->font->f44, s * t->font->f48);
+                PushFontScale(t->font, s * t->font->f44, s * t->font->f48);
                 func_eu_0015DF18(t, 3);
             } else {
                 done = 1;

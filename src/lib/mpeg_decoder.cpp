@@ -18,11 +18,11 @@ char D_0027AF70[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'p', 'e', 'g', '
 u8 D_0027AF80[64] = { 0x08, 0x10, 0x10, 0x13, 0x10, 0x13, 0x16, 0x16, 0x16, 0x16, 0x16, 0x16, 0x1a, 0x18, 0x1a, 0x1b, 0x1b, 0x1b, 0x1a, 0x1a, 0x1a, 0x1a, 0x1b, 0x1b, 0x1b, 0x1d, 0x1d, 0x1d, 0x22, 0x22, 0x22, 0x1d, 0x1d, 0x1d, 0x1b, 0x1b, 0x1d, 0x1d, 0x20, 0x20, 0x22, 0x22, 0x25, 0x26, 0x25, 0x23, 0x23, 0x22, 0x23, 0x26, 0x26, 0x28, 0x28, 0x28, 0x30, 0x30, 0x2e, 0x2e, 0x38, 0x38, 0x3a, 0x45, 0x45, 0x53 };
 u8 D_0027AFC0[64] = { 16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16 };
 
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-void func_00211BA8(void);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+void ResetIpu(void);
 
-void func_0020ADA0(void) {
+void InitMpegLibrary(void) {
     DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 &= 0xFFFFFEFF;
@@ -63,18 +63,18 @@ struct Inner_20AE40 {
     Outer_20AE40* f858;
 };
 
-void* func_001F5C0C(s32 dst, s32 c, u32 n);
-s32 func_0020B978(Inner_20AE40* a, const char* msg);
-void func_0020B240(Ring_20AE40* r, u8* start, u32 size);
-s32 func_0020B278(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
+void* FillMemory(s32 dst, s32 c, u32 n);
+s32 ReportMpegError(Inner_20AE40* a, const char* msg);
+void InitMpegRing(Ring_20AE40* r, u8* start, u32 size);
+s32 AllocateFromMpegRing(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
 void func_0020B810(Inner_20AE40* a);
-void func_0020B0C0(Outer_20AE40* a);
-s32 func_0020B110(Outer_20AE40* a);
+void ResetMpegDecoder(Outer_20AE40* a);
+s32 ReleaseMpegPictures(Outer_20AE40* a);
 void func_0020B258(Ring_20AE40* r);
-void func_0020C178(void);
-void func_0020C188(void);
+void SaveMpegDmaState(void);
+void RestoreMpegDmaState(void);
 
-s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
+s32 CreateMpegDecoder(Outer_20AE40* out, s32 mem, u32 size)
 {
     FillMemory(mem, 0, size);
     Inner_20AE40* in = (Inner_20AE40*)(((u32)(mem + 3) >> 2) << 2);
@@ -162,7 +162,7 @@ s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
 
 #include "common.h"
 
-s32 func_0020B048(void) {
+s32 DeleteMpegDecoder(void) {
 	return 1;
 }
 
@@ -170,9 +170,9 @@ LINKER_REMNANT(func_0020B050);
 
 struct Obj_20B058 { u8 pad[0x40]; u8* state; };
 
-s32 func_0020B2E8(Obj_20B058* obj);
+s32 RunMpegPictureLoop(Obj_20B058* obj);
 
-s32 func_0020B058(Obj_20B058* obj, u32 a1, s32 a2)
+s32 DecodeMpegPicture(Obj_20B058* obj, u32 a1, s32 a2)
 {
     u8* st = obj->state;
     *(s32*)(st + 0xB0) = 1;
@@ -190,14 +190,14 @@ struct Device_20B0B0 {
 	void* state;
 };
 
-s32 func_0020B0B0(Device_20B0B0* device) {
+s32 GetMpegDecoderStatus(Device_20B0B0* device) {
 	return *(s32*)device->state;
 }
 
 void func_0020B780(void* s);
 void func_0020B870(void* s);
 struct S_20B0C0 { u8 pad0[8]; s32 f8; u8 pad[0x34]; u8* st; };
-void func_0020B0C0(S_20B0C0* d) {
+void ResetMpegDecoder(S_20B0C0* d) {
     u8* s = d->st;
     *(s32*)s = 0;
     *(s32*)(s + 4) = 0;
@@ -227,7 +227,7 @@ struct DeviceState_20B110 {
 	void* f;
 };
 
-s32 func_0020B110(Device_20B110* device) {
+s32 ReleaseMpegPictures(Device_20B110* device) {
 	DeviceState_20B110* state = (DeviceState_20B110*)device->state;
 	if (state->a) *(s32*)((char*)state->a + 0x28) = 0;
 	if (state->b) *(s32*)((char*)state->b + 0x28) = 0;
@@ -240,7 +240,7 @@ s32 func_0020B110(Device_20B110* device) {
 
 struct Obj_20B168 { u8 pad[0x40]; u32* values; };
 
-s32 func_0020B168(Obj_20B168* obj, s32 index, s32 value, s32 second)
+s32 SetMpegCallback(Obj_20B168* obj, s32 index, s32 value, s32 second)
 {
     u32* array = obj->values;
     u32* current = array + 3;
@@ -258,7 +258,7 @@ typedef s32 (*Fn_0020B190)(Ctx_0020B190*, s32*, s32);
 struct Ent_0020B190 { Fn_0020B190 fn; s32 arg; };
 struct Tab_0020B190 { u8 pad[0xC]; Ent_0020B190 e[1]; };
 struct Ctx_0020B190 { u8 pad[0x40]; Tab_0020B190* table; };
-s32 func_0020B190(Ctx_0020B190* p, s32* idx) {
+s32 RunMpegCallback(Ctx_0020B190* p, s32* idx) {
     s32 r = 0;
     if (p != 0) {
         Tab_0020B190* t = p->table;
@@ -273,9 +273,9 @@ s32 func_0020B190(Ctx_0020B190* p, s32* idx) {
 }
 
 struct Q_0020B1E0;
-s32 func_0020B190(Q_0020B1E0* q, s32* out);
+s32 RunMpegCallback(Q_0020B1E0* q, s32* out);
 
-s32 func_0020B1E0(Q_0020B1E0* q)
+s32 RunMpegStallCallback(Q_0020B1E0* q)
 {
     s32 flag[8];
     flag[0] = 1;
@@ -285,7 +285,7 @@ s32 func_0020B1E0(Q_0020B1E0* q)
 LINKER_REMNANT(func_0020B208);
 
 struct Item_20B240 { s32 a; s32 b; s32 c; s32 d; };
-void func_0020B240(Item_20B240* item, s32 value, s32 field)
+void InitMpegRing(Item_20B240* item, s32 value, s32 field)
 {
     item->a = value;
     item->b = field;
@@ -319,9 +319,9 @@ struct Pool_0020B278 {
 };
 
 
-s32 func_0020B978(Owner_0020B278* owner, const char* p);
+s32 ReportMpegError(Owner_0020B278* owner, const char* p);
 
-s32 func_0020B278(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align)
+s32 AllocateFromMpegRing(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align)
 {
     u32 base;
     u32 end;
@@ -353,12 +353,12 @@ struct Ctx_20B2E8 {
 };
 struct Self_20B2E8 { u8 pad[0x40]; Ctx_20B2E8* ctx; };
 
-void func_0020B940(Ctx_20B2E8* c, s32 msg, s32 flags);
-s32 func_0020F7F0(Ctx_20B2E8* c);
+void ReportMpegErrorFormat(Ctx_20B2E8* c, s32 msg, s32 flags);
+s32 ParseMpegHeaders(Ctx_20B2E8* c);
 s32 func_0020B570(Self_20B2E8* self, s32 a, s32 b);
 s32 func_0020B718(Self_20B2E8* self);
 
-s32 func_0020B2E8(Self_20B2E8* self)
+s32 RunMpegPictureLoop(Self_20B2E8* self)
 {
     s32 s3 = 1;
     s32 s2 = 0;
@@ -426,9 +426,9 @@ struct Ctx_20B458 {
 struct Ent_arg_20B458 { u32 v; };
 
 extern s32 func_002101F0(Ent_20B458* e, u32 a1);
-extern s32 func_00210090(Ent_20B458* e);
+extern s32 DecodePictureData(Ent_20B458* e);
 extern void func_00210160(Ent_20B458* e, s32 a1, s32 a2);
-extern s32 func_0020B1E0(Ctx_20B458* c);
+extern s32 RunMpegStallCallback(Ctx_20B458* c);
 
 struct Ent_ops_20B458 {
     static s8 Ready(Ent_20B458* e)
@@ -514,11 +514,11 @@ struct Ctx_20B5B8 {
 };
 
 s32 func_002101F0(Sub_20B5B8* sub, s32 flag);
-s32 func_00210090(Sub_20B5B8* sub);
-s32 func_0020F7F0(Sub_20B5B8* sub);
+s32 DecodePictureData(Sub_20B5B8* sub);
+s32 ParseMpegHeaders(Sub_20B5B8* sub);
 s32 func_0020B718(Ctx_20B5B8* ctx);
 void func_00210160(Sub_20B5B8* sub, s32 a1, s32 a2);
-s32 func_0020B1E0(Ctx_20B5B8* ctx);
+s32 RunMpegStallCallback(Ctx_20B5B8* ctx);
 
 s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
 {
@@ -611,7 +611,7 @@ s32 func_0020B718(Obj_20B718* self)
     return r;
 }
 
-void func_0020DEE8(s32 a);
+void SetIpuMpeg1Mode(s32 a);
 struct S_20B780 { u8 pad[0x848]; s32 f; };
 void func_0020B780(S_20B780* s) {
     s->f = 0;
@@ -633,7 +633,7 @@ struct Obj_0020B790 {
     s32 f1DC;
 };
 
-s32 func_0020B978(struct Obj_0020B790 *self, const char *msg);
+s32 ReportMpegError(struct Obj_0020B790 *self, const char *msg);
 void func_00210970(struct Obj_0020B790 *self, s32 a1, s32 a2);
 void func_00210A80(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
 
@@ -660,7 +660,7 @@ struct Dev_20B810 {
     u32 f810;
 };
 
-void func_0020DEE8(s32 a);
+void SetIpuMpeg1Mode(s32 a);
 
 void func_0020B810(Dev_20B810* self)
 {
@@ -673,9 +673,9 @@ void func_0020B810(Dev_20B810* self)
     self->f810 = 0;
 }
 
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-u32 func_00211AD8(s32 a, s32 b);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+u32 SyncIpu(s32 a, s32 b);
 
 struct Chan_20B870 {
     u8 pad0[0x1B0];
@@ -701,18 +701,18 @@ void func_0020B870(Chan_20B870* c) {
     SyncIpu(0, 0);
 }
 
-s32 func_001E1F10(const char* fmt, s32 msg);
+s32 PrintFormatted(const char* fmt, s32 msg);
 
-void func_0020B930(s32 msg) {
+void PrintMpegError(s32 msg) {
     PrintFormatted("[MPEG ERROR]%s\n", msg);
 }
 
 struct Buf_0020B940;
 struct Ctx_0020B940;
-s32 func_001E1FD0(Buf_0020B940* dst, const char* fmt, ...);
-s32 func_0020B978(Ctx_0020B940* self, char* buf);
+s32 FormatToString(Buf_0020B940* dst, const char* fmt, ...);
+s32 ReportMpegError(Ctx_0020B940* self, char* buf);
 
-void func_0020B940(Ctx_0020B940* self, const char* fmt)
+void ReportMpegErrorFormat(Ctx_0020B940* self, const char* fmt)
 {
     char buf[0x100];
     FormatToString((Buf_0020B940*)buf, fmt);
@@ -734,10 +734,10 @@ struct Pair_20B978 {
 struct Sub_20B978;
 struct Arg_20B978;
 
-s32 func_0020B190(Sub_20B978* sub, Pair_20B978* pair);
-s32 func_0020B930(Arg_20B978* arg);
+s32 RunMpegCallback(Sub_20B978* sub, Pair_20B978* pair);
+s32 PrintMpegError(Arg_20B978* arg);
 
-s32 func_0020B978(Self_20B978* self, s32 value)
+s32 ReportMpegError(Self_20B978* self, s32 value)
 {
     Pair_20B978 pair;
 
@@ -776,15 +776,15 @@ struct Dec_20B9F0 {
 };
 
 
-u32 func_0020F5B8(Dec_20B9F0* d, s32 bits);
-s32 func_0020B978(Dec_20B9F0* d, const char* msg);
-void func_0020F0F0(Dec_20B9F0* d);
-void func_0020F0C0(Dec_20B9F0* d, u32 value);
+u32 ReadIpuBits(Dec_20B9F0* d, s32 bits);
+s32 ReportMpegError(Dec_20B9F0* d, const char* msg);
+void WaitIpuCommandDone(Dec_20B9F0* d);
+void SendIpuCommand(Dec_20B9F0* d, u32 value);
 void func_0020BEA0(Dec_20B9F0* d, u32 value, u8* table);
-void func_0020F9C8(Dec_20B9F0* d);
+void ReadExtensionsAndUserData(Dec_20B9F0* d);
 void func_0020BB18(void* p);
 
-void func_0020B9F0(Dec_20B9F0* d) {
+void ReadSequenceHeader(Dec_20B9F0* d) {
     d->fD4 = 0;
     u32 v = ReadIpuBits(d, 0x20);
     d->f124 = v >> 20;
@@ -842,11 +842,11 @@ void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6
 struct Obj_20BEA0 { u8 pad000[0x858]; u32 field858; };
 struct Handle_20BEA0;
 struct Req_20BEA0 { s32 mode; s32 pad[7]; };
-s32 func_0020B190(Handle_20BEA0* h, Req_20BEA0* out);
-void func_0020F0F0(Obj_20BEA0* self);
-void func_0020F0C0(Obj_20BEA0* self, u32 value);
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
+s32 RunMpegCallback(Handle_20BEA0* h, Req_20BEA0* out);
+void WaitIpuCommandDone(Obj_20BEA0* self);
+void SendIpuCommand(Obj_20BEA0* self, u32 value);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
 
 void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
 {
@@ -881,9 +881,9 @@ struct Obj_20BF78 {
     u32 field848;
 };
 
-u32 func_0020DEE8(u32 value);
-u32 func_0020F5B8(struct Obj_20BF78 *self, u32 n);
-s32 func_0020B978(struct Obj_20BF78 *self, const void *p);
+u32 SetIpuMpeg1Mode(u32 value);
+u32 ReadIpuBits(struct Obj_20BF78 *self, u32 n);
+s32 ReportMpegError(struct Obj_20BF78 *self, const void *p);
 
 void func_0020BF78(struct Obj_20BF78 *self)
 {
@@ -917,7 +917,7 @@ void func_0020BF78(struct Obj_20BF78 *self)
 
 struct Node_20C0A8;
 
-s32 func_0020F5B8(struct Node_20C0A8* a, s32 b);
+s32 ReadIpuBits(struct Node_20C0A8* a, s32 b);
 
 struct Node_20C0A8 {
     u8 pad00[0x144];
@@ -940,51 +940,51 @@ void func_0020C0A8(struct Node_20C0A8* self)
 }
 
 struct Obj_0020C138;
-void func_0020B978(Obj_0020C138* self, const void* table);
+void ReportMpegError(Obj_0020C138* self, const void* table);
 
-void func_0020C138(Obj_0020C138* self)
+void RejectSequenceScalableExtension(Obj_0020C138* self)
 {
     ReportMpegError(self, "_sequenceScalableExtension() is not implemented");
 }
 
 struct Obj_0020C148;
-void func_0020B978(Obj_0020C148* self, const void* table);
+void ReportMpegError(Obj_0020C148* self, const void* table);
 
-void func_0020C148(Obj_0020C148* self)
+void RejectUnknownExtension(Obj_0020C148* self)
 {
     ReportMpegError(self, "Unknown Extension");
 }
 
 struct Obj_0020C158;
-void func_0020B978(Obj_0020C158* self, const void* table);
+void ReportMpegError(Obj_0020C158* self, const void* table);
 
-void func_0020C158(Obj_0020C158* self)
+void RejectSpatialScalableExtension(Obj_0020C158* self)
 {
     ReportMpegError(self, "_pictureSpatialScalableExtension is not supported");
 }
 
 struct Obj_0020C168;
-void func_0020B978(Obj_0020C168* self, const void* table);
+void ReportMpegError(Obj_0020C168* self, const void* table);
 
-void func_0020C168(Obj_0020C168* self)
+void RejectTemporalScalableExtension(Obj_0020C168* self)
 {
     ReportMpegError(self, "_pictureTemporalScalableExtension is not supported");
 }
 
 struct Out_002118A0;
 struct Obj_0020C178 { u8 pad00[0x40]; Out_002118A0* f40; };
-void func_002118A0(Out_002118A0* out);
+void SaveIpuDmaChannels(Out_002118A0* out);
 
-void func_0020C178(Obj_0020C178* self)
+void SaveMpegDmaState(Obj_0020C178* self)
 {
     SaveIpuDmaChannels((Out_002118A0*)((u8*)self->f40 + 0x4C));
 }
 
 struct Ctx_211988;
 struct Obj_0020C188 { u8 pad00[0x40]; u8* f40; };
-void func_00211988(Ctx_211988* s0);
+void RestoreIpuDmaChannels(Ctx_211988* s0);
 
-void func_0020C188(Obj_0020C188* self)
+void RestoreMpegDmaState(Obj_0020C188* self)
 {
     RestoreIpuDmaChannels((Ctx_211988*)(self->f40 + 0x4C));
 }

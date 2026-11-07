@@ -54,7 +54,7 @@ struct Sort_1F5CD0 {
 #define BLOCKSWAP_1F5CD0(x, y, count) \
     if ((count) > 0) Sort_1F5CD0::Exchange(x, y, count, kind)
 
-void func_001F5CD0(void* base, u32 n, u32 size, Compare_1F5CD0 compare)
+void SortElements(void* base, u32 n, u32 size, Compare_1F5CD0 compare)
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
     s32 d, r, kind, swapped;

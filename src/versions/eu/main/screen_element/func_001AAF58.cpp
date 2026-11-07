@@ -7,7 +7,7 @@ struct Obj_1AAF58_eu {
     void* f258;
 };
 
-void func_001AAF58(Obj_1AAF58_eu* self, f32* p)
+void SetScreenElementClock(Obj_1AAF58_eu* self, f32* p)
 {
     if (self->f258 != p) {
         if (p == 0) {

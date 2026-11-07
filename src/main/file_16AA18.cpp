@@ -22,19 +22,19 @@
 #include "texture_header.h"
 #include "shapes.h"
 
-extern f32 D_0026185C[];
-extern f32 D_00261868;
-extern s32 D_002623CC;
-extern u8 D_00264A40[];
-extern s32 D_0026FCF0;
-extern u8 D_00275BC0[];
+extern f32 g_gameTime[];
+extern f32 g_elapsedTime;
+extern s32 g_previousLevelIndex;
+extern u8 g_memoryCard[];
+extern s32 g_currentPlacedObject;
+extern u8 g_elementStack[];
 // An entry of the choice tables D_00262718 and D_00262788 (three words).
 struct ChoiceEntry { s32 a; s32 b; s32 c; };
 struct ChoiceTable { ChoiceEntry e[9]; s32 end; };
-extern ChoiceTable D_00262718;
+extern ChoiceTable g_partHolderLinks;
 // The element stack (D_00275BC0) as func_0016AED8 sets its state word.
 struct ElementStackState { u8 pad0[0x30]; s32 f30; };
-extern ChoiceEntry D_00262788[18];
+extern ChoiceEntry g_currentPlacedObjectLinks[18];
 // The entry LookupEntryById gives for a choice's level: StartObjectFade fades it when its
 // two words differ.
 struct ChoiceLevelEntry {
@@ -50,25 +50,25 @@ extern ChoiceKeys D_00262860[6];
 struct ChoiceSound { u32 w[8]; };
 extern ChoiceSound D_00262890[6];
 extern ChoiceSound D_00262950;
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 extern f32 D_00262970;
 extern s32 D_0026FCF4;
 struct BoxStyle;
 extern BoxStyle D_00262988;
 extern s32 D_00272420;
 struct CaptionLayout;
-void func_00137228(CaptionLayout* out, f32 x, f32 y);
-void func_00137238(CaptionLayout* out, f32 x, f32 y);
-void func_00137248(CaptionLayout* out, s32* value);
-void func_00137260(CaptionLayout* out, s32 flag);
-void func_00137268(CaptionLayout* out, s32 flag);
+void SetTextLayoutPosition(CaptionLayout* out, f32 x, f32 y);
+void SetTextLayoutSize(CaptionLayout* out, f32 x, f32 y);
+void SetTextLayoutColor(CaptionLayout* out, s32* value);
+void SetTextLayoutHorizontalAlign(CaptionLayout* out, s32 flag);
+void SetTextLayoutVerticalAlign(CaptionLayout* out, s32 flag);
 struct CaptionLayout {
     u8 b[32];
     void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
     void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
     void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { func_00137260(this, f); }
-    void FlagB(s32 f) { func_00137268(this, f); }
+    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
 };
 struct CaptionDrawer {
     static void Draw(Font** h, CaptionLayout* out, void* tbl)
@@ -81,11 +81,11 @@ struct CaptionDrawer {
 };
 extern BoxStyle D_002629A8;
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-u32 func_001601D8(s32 idx);
-u32* func_00160810(s32 idx);
-void func_0016AA18(PartHolderObject* self)
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+u32 GetEntryFlags(s32 idx);
+u32* GetLevelEntryByKey(s32 idx);
+void CallFlaggedParts(PartHolderObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 9, &g_partHolderLinks);
@@ -119,12 +119,12 @@ void func_0016AA18(PartHolderObject* self)
     }
 }
 
-StateWalker* func_001B6290(StateTrigger* o, s32 a, s32 b, s32 c);
-s32 func_001602A0();
-void func_0016B300(CurrentPlacedObject* self, s32 idx, s32 z);
-void func_001B6628(StateWalker* o, s32 id);
-void func_001E9498(u8* a, u8* b);
-void func_0016AB38(CurrentPlacedObject* self)
+StateWalker* CreateStateWalker(StateTrigger* o, s32 a, s32 b, s32 c);
+s32 ComputeCompletionMask();
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 idx, s32 z);
+void TeleportStateWalker(StateWalker* o, s32 id);
+void PushStackElement(u8* a, u8* b);
+void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 {
     if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker(self->walkers[0].graph, 0, -1, 0);
     if (self->walkers[1].graph) self->walkers[1].walker = CreateStateWalker(self->walkers[1].graph, 0, -1, 0);
@@ -197,11 +197,11 @@ void func_0016AB38(CurrentPlacedObject* self)
     PushStackElement(g_elementStack, (u8*)&D_0026FA90);
 }
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void func_001E96F8(void* obj, s32 mode);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_0016AED8(CurrentPlacedObject* self)
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void SetElementStackState(void* obj, s32 mode);
+void AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void BecomeCurrentObject(CurrentPlacedObject* self)
 {
     StartPlacedObject(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
@@ -213,8 +213,8 @@ void func_0016AED8(CurrentPlacedObject* self)
     AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
 }
 
-void func_001AD1E8(T217D_3D0* self);
-void func_0016AF80(CurrentPlacedObject* self)
+void SetElementTextFromIndexedCounts(T217D_3D0* self);
+void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
     StateWalker* p = self->walkers[0].walker;
@@ -247,9 +247,9 @@ void func_0016AF80(CurrentPlacedObject* self)
     }
 }
 
-s32 func_0016EC98(void* p);
-void func_0016B300(CurrentPlacedObject* self, s32 idx, s32 zero);
-void func_0016B0F8(CurrentPlacedObject* self, void* a1)
+s32 GetPadHorizontalStep(void* p);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 idx, s32 zero);
+void MoveCurrentObjectChoice(CurrentPlacedObject* self, void* a1)
 {
     s32 n = self->choice;
     s32 r = GetPadHorizontalStep(a1);
@@ -273,15 +273,15 @@ void func_0016B0F8(CurrentPlacedObject* self, void* a1)
     SetCurrentObjectChoice(self, n, 0);
 }
 
-void* func_00160180(s32 key);
-void func_00160340(s32 idx);
-void func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
-s32 func_0012C9A8(void* a);
-void func_001F0428(void* a, s32 b, s32 c);
-void func_001E9570(void* p);
-void func_001B64D8(void* a, s32 b);
-void func_0016B300(void* self, s32 idx, s32 flag);
-void func_0016B190(CurrentPlacedObject* self)
+void* LookupEntryById(s32 key);
+void MarkProgressStageFlag(s32 idx);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
+s32 HasAnimationEventKind19(void* a);
+void StartObjectFade(void* a, s32 b, s32 c);
+void PopStackElement(void* p);
+void SetStateWalkerTarget(void* a, s32 b);
+void SetCurrentObjectChoice(void* self, s32 idx, s32 flag);
+void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 {
     s32 callB = 1;
     s32 idx = self->choice;
@@ -332,11 +332,11 @@ void func_0016B190(CurrentPlacedObject* self)
 
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
 
-void func_001BE728(ChoiceSound* s);
-s32 func_001BE980(void);
-void func_001B6628(void* h, s32 arg);
-void func_001B64D8(void* h, s32 arg);
-void func_0016B300(CurrentPlacedObject* self, s32 a, s32 b)
+void OpenKeyRecord(ChoiceSound* s);
+s32 HasStreamVoice(void);
+void TeleportStateWalker(void* h, s32 arg);
+void SetStateWalkerTarget(void* h, s32 arg);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
     if (a == self->choice && b == self->keyIndex) return;
     if (a != self->walkerChoice && a > 0) {
@@ -375,9 +375,9 @@ void func_0016B300(CurrentPlacedObject* self, s32 a, s32 b)
     self->choiceTime = g_gameClock[1];
 }
 
-s32 func_0015C188(s32 index);
-Font* func_0015C1C0(s32 index);
-void func_0016B4A0(T217D_12E0* self)
+s32 IsFontLoaded(s32 index);
+Font* GetFontById(s32 index);
+void InitSelectionCaption(T217D_12E0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -391,9 +391,9 @@ void func_0016B4A0(T217D_12E0* self)
     self->lastAt = -D_00262970;
 }
 
-void* func_0015A448(void* obj, s32 id, s32 flags);
-void func_001F4ED0(void* p);
-void func_0016B520(T217D_12E0* self)
+void* FindFirstObjectByIdMode4(void* obj, s32 id, s32 flags);
+void PushObjectCameraController(void* p);
+void RestoreSelectionCaptionCamera(T217D_12E0* self)
 {
     if (self->open != 0) {
         void* p = FindFirstObjectByIdMode4(g_currentWorld, 0x4FD, 0);
@@ -403,24 +403,24 @@ void func_0016B520(T217D_12E0* self)
     }
 }
 
-void func_0016B560(T217D_12E0* self)
+void UpdateSelectionCaption(T217D_12E0* self)
 {
     UpdateScreenElementSlide(self);
 }
 
 // The object the element shows (a view of it: its mode at +0x2D0, its animation clock at +0x2D8).
-s32 func_001BE810(void);
-s32 func_0011CE30(void);
-s32 func_001BE980(void);
-void func_0018C7F8(u8* p);
-void func_001518B8(void* p);
-void func_0016AF80(CurrentPlacedObject* o);
-void func_001E9498(u8* a, void* b);
-void func_0016EC20(PadRecord* a, s32 mask);
-void func_00194D30(T217D_6D0* a, s32 b, s32 c);
-void func_0016B190(CurrentPlacedObject* o);
-void func_0016B0F8(CurrentPlacedObject* o, PadRecord* a);
-void func_0016B580(T217D_12E0* self, PadRecord* arg)
+s32 CheckStreamVoicePending(void);
+s32 PollIopCommands(void);
+s32 HasStreamVoice(void);
+void StartMemoryCardSave(u8* p);
+void ChooseStepSequenceState(void* p);
+void ShowCurrentObjectCaptions(CurrentPlacedObject* o);
+void PushStackElement(u8* a, void* b);
+void ClearPadPressedBits(PadRecord* a, s32 mask);
+void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
+void ConfirmCurrentObjectChoice(CurrentPlacedObject* o);
+void MoveCurrentObjectChoice(CurrentPlacedObject* o, PadRecord* a);
+void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
 {
     if (self->node == 0) {
         return;
@@ -483,12 +483,12 @@ void func_0016B580(T217D_12E0* self, PadRecord* arg)
     MoveCurrentObjectChoice(o, arg);
 }
 
-void func_0016B300(void* self, s32 idx, s32 flag);
-s32 func_0016E0F0(s32 bits);
-void func_0016EC88(void* p);
-void func_001BE998(void);
-void func_0016E118(s32 n);
-void func_0016B7A8(T217D_12E0* self, s32 v)
+void SetCurrentObjectChoice(void* self, s32 idx, s32 flag);
+s32 SetPadSelectFlags(s32 bits);
+void ResetPadStepRepeat(void* p);
+void StopStreamVoice(void);
+void ClearPadSelectFlags(s32 n);
+void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
 {
     s32 flag = (v != 0);
     if (flag != (self->open == 0)) {
@@ -510,12 +510,12 @@ void func_0016B7A8(T217D_12E0* self, s32 v)
     self->open = v;
 }
 
-f32 func_00205400(f32 x);
-void func_0015C8B8(Font* font, f32 a, f32 b);
-void* func_0015DB28(void* out, void* p, Font* font);
-void func_0015E318(void* a, void* b, s32 c, void* d);
-void func_0015C900(Font* font);
-void func_0016B860(T217D_12E0* self)
+f32 Sine(f32 x);
+void PushFontScale(Font* font, f32 a, f32 b);
+void* InitTextReader(void* out, void* p, Font* font);
+void DrawAlignedText(void* a, void* b, s32 c, void* d);
+void PopFontScale(Font* font);
+void DrawSelectionCaption(T217D_12E0* self)
 {
     T217D_Word tmp;
     CaptionLayout out;
@@ -553,10 +553,10 @@ void func_0016B860(T217D_12E0* self)
     }
 }
 
-s32 func_0015C188(s32 k);
-void func_0015C8B8(Font* font, f32 x, f32 y);
-void func_0015C900(Font* font);
-void func_0016BA40(T217D_1330* self)
+s32 IsFontLoaded(s32 k);
+void PushFontScale(Font* font, f32 x, f32 y);
+void PopFontScale(Font* font);
+void InitGridSelector(T217D_1330* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -581,7 +581,7 @@ void func_0016BA40(T217D_1330* self)
     SetScreenElementSize(self, f21, f20);
 }
 
-u32 func_0016BB78(u32 bit)
+u32 TestGridEntryBit(u32 bit)
 {
     u32 mask;
     if (bit >= 16) {
@@ -592,12 +592,12 @@ u32 func_0016BB78(u32 bit)
     return g_saveData->u19F4 & mask;
 }
 
-void func_0016EC20(PadRecord* self, s32 mask);
-void func_0018E4C0(s32 index);
-void func_001BFCD8(s32 sound, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 r2, s32 a5);
-s32 func_0016EC98(PadRecord* p);
-s32 func_0016EED0(PadRecord* p);
-void func_0016BBA8(T217D_1330* ctx, PadRecord* o)
+void ClearPadPressedBits(PadRecord* self, s32 mask);
+void QueueMovieByIndex(s32 index);
+void StartSoundEffect(s32 sound, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 r2, s32 a5);
+s32 GetPadHorizontalStep(PadRecord* p);
+s32 GetPadVerticalStep(PadRecord* p);
+void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 {
     s32 s1;
     s32 r2;
@@ -641,11 +641,11 @@ void func_0016BBA8(T217D_1330* ctx, PadRecord* o)
     StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-s32 func_0016E0F0(s32 n);
-void func_0016E118(s32 n);
-void func_0016EC88(void* p);
-s32 func_0016BB78(s32 n);
-void func_0016BDD0(T217D_1330* self, s32 flag)
+s32 SetPadSelectFlags(s32 n);
+void ClearPadSelectFlags(s32 n);
+void ResetPadStepRepeat(void* p);
+s32 TestGridEntryBit(s32 n);
+void SetGridSelectorOpen(T217D_1330* self, s32 flag)
 {
     if ((flag != 0) != (self->open == 0)) {
         return;
@@ -678,7 +678,7 @@ INCLUDE_ASM(func_0016BEA0);
 // initialiser GCC writes for them (func_0016C360); their bytes are zero until then.
 // The rodata from 0x24A7A0 is func_0016AF80's strings ("" to the mission prompt) and
 // func_0016BEA0's "???", all literals.
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
 struct BoxStyle {
     void* f0;
@@ -700,13 +700,13 @@ struct BoxStyle {
     }
 };
 
-ChoiceTable D_00262718 = {
+ChoiceTable g_partHolderLinks = {
     { { 2, 0x51A, 0x2D0 }, { 2, 0x51B, 0x2D4 }, { 2, 0x51C, 0x2D8 }, { 2, 0x51D, 0x2DC },
       { 2, 0x51E, 0x2E0 }, { 2, 0x51F, 0x2E4 }, { 2, 0x520, 0x2E8 }, { 2, 0x521, 0x2EC },
       { 2, 0x522, 0x2F0 } },
     0
 };
-ChoiceEntry D_00262788[18] = {
+ChoiceEntry g_currentPlacedObjectLinks[18] = {
     { 0, 0x4F9, 0x2DC }, { 0, 0x4FA, 0x2E4 }, { 0, 0x4FB, 0x2EC }, { 1, 0x4FC, 0x2F4 },
     { 0, 0x50B, 0x328 }, { 0, 0x50C, 0x32C }, { 0, 0x50D, 0x330 }, { 0, 0x50E, 0x334 },
     { 0, 0x50F, 0x338 }, { 1, 0x510, 0x310 }, { 1, 0x511, 0x314 }, { 1, 0x512, 0x318 },

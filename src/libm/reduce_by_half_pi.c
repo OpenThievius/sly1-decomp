@@ -47,10 +47,10 @@ static const f32 g_halfPiTail2 = 6.0770999344e-11f;
 static const f32 g_halfPiHead3 = 6.0770943833e-11f;
 static const f32 g_halfPiTail3 = 6.1232342629e-17f;
 
-f32 func_002052F8(f32 x);
-s32 func_002082F8(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi);
+f32 AbsoluteValue(f32 x);
+s32 ReduceLargeByHalfPi(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi);
 
-s32 func_00207C88(f32 x, f32* parts)
+s32 ReduceByHalfPi(f32 x, f32* parts)
 {
     s32 bits, magnitude, remBits, quadrant, i, xExp, exponent, digitCount;
     f32 scaled, rem, correction, absX, quadrantF, digits[3];

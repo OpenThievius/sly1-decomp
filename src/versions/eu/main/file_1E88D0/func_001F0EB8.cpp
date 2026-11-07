@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL passes 0.975 where US passes 1.0.
-void func_001F0EB8(void* obj, u8* s, void* c)
+void ApplyWarpPageTransform(void* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
     Camera* p = g_camera;

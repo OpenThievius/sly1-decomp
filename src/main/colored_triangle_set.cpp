@@ -13,7 +13,7 @@
 
 
 
-void func_00182C18(void* self);
+void InitObject(void* self);
 
 
 
@@ -24,27 +24,27 @@ struct TriangleGroupColor {
     u8 r, g, b, a;
     TriangleGroupColor(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
-TriangleGroupColor D_00264098(0xBF, 0xBF, 0xBF, 0x7F);
-TriangleGroupColor D_002640A0(0x00, 0x87, 0xFF, 0x7F);
-void* D_002640A4;
+TriangleGroupColor g_triangleGroupGrey(0xBF, 0xBF, 0xBF, 0x7F);
+TriangleGroupColor g_triangleGroupBlue(0x00, 0x87, 0xFF, 0x7F);
+void* g_coloredTriangleSet;
 
-void func_001830D8(void* self);
+void CopyObjectData(void* self);
 
 
 
-void func_00182C58(void* self);
-s32 func_0015A418(void* ref, s32 mode, s32 key, void* self);
+void StartObject(void* self);
+s32 FindFirstObjectById(void* ref, s32 mode, s32 key, void* self);
 
 
 
 // NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
 
-void func_0011EC40(BaseObject* o, Stream8E* r);
-s32 func_00137BE0(Stream8E* r);
-f32 func_00137DF8(Stream8E* r);
-TrianglePoint* func_0018D5C0(s32 bytes);
-TriangleIndices* func_0018D500(s32 bytes);
-TriangleColor* func_001B4688(s32 key);
+void ReadPropertyRecords(BaseObject* o, Stream8E* r);
+s32 ReadBufferedU16(Stream8E* r);
+f32 ReadBufferedFloat(Stream8E* r);
+TrianglePoint* AllocateZeroedFrontMemory(s32 bytes);
+TriangleIndices* AllocateFrontMemory(s32 bytes);
+TriangleColor* FindAnimRecord(s32 key);
 
 
 
@@ -61,23 +61,23 @@ union Quad128Floats {
     f32 f[4];
 };
 
-void func_0018A008(s32 zero, void* out, f32 v);
-void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
-void func_00161708(PacketWriter* p, s32 a, u64 v);
-void func_00161458(PacketWriter* p, u32 c);
-void func_001615F0(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
-Quad128 func_00188740(void* m, Quad128 v);
+void BuildUniformScaleAboutPoint(s32 zero, void* out, f32 v);
+void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* p, s32 a, u64 v);
+void AddGifRgbaEntry(PacketWriter* p, u32 c);
+void AddGifXyzfEntry(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
+Quad128 TransformVector4(void* m, Quad128 v);
 
-void func_00180108(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
+void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
 
-void func_0017FE00(C80* self)
+void CopyPointObject(C80* self)
 {
     KeptBits tmp = self->keep;
     CopyObjectData(self);
     self->keep = tmp;
 }
 
-void func_0017FE48(C80* self)
+void StartPointObject(C80* self)
 {
     StartObject(self);
     if (self->targetId != -1) {
@@ -85,13 +85,13 @@ void func_0017FE48(C80* self)
     }
 }
 
-void func_0017FE90(ColoredTriangleSet* self)
+void InitColoredTriangles(ColoredTriangleSet* self)
 {
     InitObject(self);
     g_coloredTriangleSet = self;
 }
 
-void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
+void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
 {
     s32 i;
     s32 m;
@@ -138,7 +138,7 @@ void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
     }
 }
 
-void func_00180108(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
+void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
 {
     f32 sp[16];
     TriangleColor col;
@@ -201,11 +201,11 @@ struct BlendColor {
     }
 };
 
-SwitchedCollider* func_001925F0(void);
-extern Camera* D_00261990;
-void func_001441C0(Camera* cam, void* pos, Vec02* out);
+SwitchedCollider* GetActiveSwitchedCollider(void);
+extern Camera* g_camera;
+void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
 
-void func_00180398(ColoredTriangleSet* self, f32 t)
+void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
 {
     f32 mat[16];
     SwitchedCollider* o;

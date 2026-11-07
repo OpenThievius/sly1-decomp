@@ -24,7 +24,7 @@ struct Obj_eu_001AAF38 {
 
 extern u8 D_eu_0026D810[];
 extern u8 D_eu_00262B68[];
-void func_001AAB20(void* self, f32 x, f32 y);
+void SetScreenElementSize(void* self, f32 x, f32 y);
 
 void func_eu_001AAF38(Obj_eu_001AAF38* self, s32 a1)
 {

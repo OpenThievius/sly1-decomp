@@ -18,11 +18,11 @@ struct Obj_16B580_eu {
     s32 f264;
 };
 
-void func_0016AF80(Obj_16B580_eu* o);
-void func_0016B190(Obj_16B580_eu* o);
-void func_0016B0F8(Obj_16B580_eu* o, PadRecord* a);
+void ShowCurrentObjectCaptions(Obj_16B580_eu* o);
+void ConfirmCurrentObjectChoice(Obj_16B580_eu* o);
+void MoveCurrentObjectChoice(Obj_16B580_eu* o, PadRecord* a);
 
-void func_0016B580(Obj_16B580_eu* self, PadRecord* arg)
+void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
 {
     if (self->p260 == 0) {
         return;
@@ -31,7 +31,7 @@ void func_0016B580(Obj_16B580_eu* self, PadRecord* arg)
         return;
     }
     if (self->f264 != 0) {
-        if (func_001BE810() != 0) {
+        if (CheckStreamVoicePending() != 0) {
             PollIopCommands();
         }
         self->f264 = HasStreamVoice();

@@ -4,7 +4,7 @@ struct __attribute__((packed)) Packed_1A4EF0_eu { u8 pad[0x5B0]; s32 v __attribu
 struct Glob_1A4EF0_eu { u8 pad[0x5B0]; s32 v; };
 struct Tab_1A4EF0_eu { u8 pad[0x574]; void* f574; void* f578; };
 
-void func_001A4EF0(PairController* self, s32 state)
+void SetPairControllerState(PairController* self, s32 state)
 {
     PairController* o;
     s32 v;
@@ -66,7 +66,7 @@ void func_001A4EF0(PairController* self, s32 state)
         SetPauseMenuLayerPage((u8*)&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
-        func_001A4070(P(self, 0x354), 3);
+        SetWalkerColliderState(P(self, 0x354), 3);
         g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }

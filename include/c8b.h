@@ -101,8 +101,8 @@ struct C8B : BaseObject {
 
 typedef char check_C8B[sizeof(C8B) == 0x3F0 ? 1 : -1];
 
-void func_0019C440(C8B* self);                  // 0x8B slot 0
+void InitC8BObject(C8B* self);                  // 0x8B slot 0
 // func_0019C470 (slot 10) takes the level stream the source file declares.
-void func_0019C728(C8B* self);                  // 0x8B slot 16
+void StartC8BObject(C8B* self);                  // 0x8B slot 16
 
 #endif

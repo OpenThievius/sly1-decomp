@@ -22,95 +22,95 @@
 #include "asm_func.h"
 
 // The font object's calls.
-Font* func_0015C1C0(s32 k);
-void func_0015C8B8(Font* font, f32 x, f32 y);
-f32 func_0015C418(Font* font, void* text);
-void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(Font* font);
-void* func_0015DB28(void* out, void* text, Font* font);
-void func_0015E318(void* buf, void* out, s32 zero, void* d);
+Font* GetFontById(s32 k);
+void PushFontScale(Font* font, f32 x, f32 y);
+f32 MeasureFontString(Font* font, void* text);
+void DrawFontString(Font* font, void* text, void* out, s32 zero, void* d);
+void PopFontScale(Font* font);
+void* InitTextReader(void* out, void* text, Font* font);
+void DrawAlignedText(void* buf, void* out, s32 zero, void* d);
 
-void func_00182ED0(void* self);
-void func_001A93C8(void* self);
-
-
-void func_001F3C08(void* a, f32* out);
-void func_00128150(int a, int b, void* c, f32* d);
-f32 func_00205778(f32 x, f32 y);
+void UnregisterObject(void* self);
+void ClearObjectPoolChoice(void* self);
 
 
-void func_001C7CB8(void* self);
-void func_0012E760(void* obj);
+void GetObjectWorldRotation(void* a, f32* out);
+void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
+f32 ArctangentOfRatio(f32 x, f32 y);
 
 
-extern f32 D_0026185C;
-extern f32 D_00261860;
+void UpdateAgent(void* self);
+void StopAnimationPlayer(void* obj);
 
-void func_001AB980(T217D_510* self, f32 value);
 
-extern s32 D_0026227C;
+extern f32 g_gameTime;
+extern f32 g_frameDt;
+
+void StepTimer(T217D_510* self, f32 value);
+
+extern s32 g_defaultFont;
 
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
 
-void func_00137228(void* out, f32 x, f32 y);
-void func_00137238(void* out, f32 x, f32 y);
-void func_00137248(void* out, s32* value);
-void func_00137260(void* out, s32 flag);
-void func_00137268(void* out, s32 flag);
+void SetTextLayoutPosition(void* out, f32 x, f32 y);
+void SetTextLayoutSize(void* out, f32 x, f32 y);
+void SetTextLayoutColor(void* out, s32* value);
+void SetTextLayoutHorizontalAlign(void* out, s32 flag);
+void SetTextLayoutVerticalAlign(void* out, s32 flag);
 
-void func_001C72A0(GaugeBarAgent* self);
-void func_001DDC38(void* sub, GaugeBarAgent* self);
+void StartAgent(GaugeBarAgent* self);
+void SetWorldActiveFollower(void* sub, GaugeBarAgent* self);
 
 
-s32 func_001DDA80(void* sub);
+s32 IsPadSelectFlagHeld(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void func_001C8C08(GaugeBarAgent* self);
+void UpdateAgentGoal(GaugeBarAgent* self);
 void func_001C8418(GaugeBarAgent* self, void* p);
 
 
-void func_001C8E28(GaugeBarAgent* self);
-void func_001C8BC0(GaugeBarAgent* self);
+void UpdateAgentState(GaugeBarAgent* self);
+void FaceAgentTowardGoalPoint(GaugeBarAgent* self);
 
 
-extern u8 D_00264A40[];
+extern u8 g_memoryCard[];
 
-void func_001C91C8(GaugeBarAgent* self);
-void func_001603E8(s32 n);
-void func_0018C7F8(u8* p);
-
-
-extern T217D_2E0 D_0026E248;
-
-s32 func_001E9970(void);
+void EnterAgentState(GaugeBarAgent* self);
+void MarkLevelDone(s32 n);
+void StartMemoryCardSave(u8* p);
 
 
+extern T217D_2E0 g_gaugeBarElement;
 
-extern ElementPlaceTable D_0026C3E0;
-extern u8 D_00261868[];
-
-
-void* func_0018D5C0(u32 n);
-
-
-void func_00182C58(void* self);
-void* func_0015A448(void* obj, s32 id, void* owner);
-s32 func_001300E8(void* node, s32 kind);
-
-
-s32 func_001F5C0C(void* p, s32 value, s32 size);
-
-
-s32 func_001F5C0C(void* p, s32 value, s32 size);
-
-
-void func_001A93C8(void* self);
+s32 AreMenusAndFadeClear(void);
 
 
 
-ObjectPoolEntry* func_001A8718(ObjectPool* table, s32 key);
+extern ElementPlaceTable g_elementPlaces;
+extern u8 g_elapsedTime[];
+
+
+void* AllocateZeroedFrontMemory(u32 n);
+
+
+void StartObject(void* self);
+void* FindFirstObjectByIdMode4(void* obj, s32 id, void* owner);
+s32 IsObjectOfKind(void* node, s32 kind);
+
+
+s32 FillMemory(void* p, s32 value, s32 size);
+
+
+s32 FillMemory(void* p, s32 value, s32 size);
+
+
+void ClearObjectPoolChoice(void* self);
+
+
+
+ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* table, s32 key);
 
 
 
@@ -129,65 +129,65 @@ struct FrameSource {
     Vec02 rot[3];
 };
 
-void func_001920B0(void* self, void* arg);
-s32 func_001F3BD8(void* self, void* arg);
-void func_001F3C08(void* self, void* arg);
-void func_00128018(void* a0, void* a1, void* a2, void* a3);
-void func_00128150(void* a0, void* a1, void* a2, void* a3);
+void ConvertPositionToWorld(void* self, void* arg);
+s32 GetObjectWorldPosition(void* self, void* arg);
+void GetObjectWorldRotation(void* self, void* arg);
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 
 
-extern u8 D_00261868[];
+extern u8 g_elapsedTime[];
 
-void func_001830D8(ObjectPool* self, void* o);
-void* func_001A8110(void* self);
-void func_00152438(void* self, s32 value);
-void func_00152470(void* list, void* item);
-u8* func_0018D568(s32 size, void* src);
-
-
-
-
-void func_00137228(void* out, f32 x, f32 y);
-void func_00137238(void* out, f32 x, f32 y);
-void func_00137248(void* out, s32* value);
-void func_00137260(void* out, s32 flag);
-void func_00137268(void* out, s32 flag);
+void CopyObjectData(ObjectPool* self, void* o);
+void* GetObjectPoolShare(void* self);
+void SetListLinkOffset(void* self, s32 value);
+void AppendToList(void* list, void* item);
+u8* CopyToFrontMemory(s32 size, void* src);
 
 
 
 
-void func_00137228(void* out, f32 x, f32 y);
-void func_00137238(void* out, f32 x, f32 y);
-void func_00137248(void* out, void* p);
-void func_00137260(void* out, s32 v);
-void func_00137268(void* out, s32 v);
-
-extern void* const D_002486B0[];
-extern u8 D_00262C68[];
-extern u8 D_00262C70[];
-extern u8 D_00262D38[];
-extern u8 D_00275F80[];
-
-void func_001EFD10(void* a, void* b);
+void SetTextLayoutPosition(void* out, f32 x, f32 y);
+void SetTextLayoutSize(void* out, f32 x, f32 y);
+void SetTextLayoutColor(void* out, s32* value);
+void SetTextLayoutHorizontalAlign(void* out, s32 flag);
+void SetTextLayoutVerticalAlign(void* out, s32 flag);
 
 
-extern void* const D_002486B0[];
+
+
+void SetTextLayoutPosition(void* out, f32 x, f32 y);
+void SetTextLayoutSize(void* out, f32 x, f32 y);
+void SetTextLayoutColor(void* out, void* p);
+void SetTextLayoutHorizontalAlign(void* out, s32 v);
+void SetTextLayoutVerticalAlign(void* out, s32 v);
+
+extern void* const g_screenElements[];
+extern u8 g_padRouting[];
+extern u8 g_padRecord[];
+extern u8 g_blankPadRecord[];
+extern u8 g_screenFade[];
+
+void UpdateScreenFade(void* a, void* b);
+
+
+extern void* const g_screenElements[];
 
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 // The screen elements' methods, in src/main/screen_element.cpp.
-void func_001AA268(ScreenElement* self);
-void func_001AA298(ScreenElement* self);
-void func_001AAF88(T217D_E30* self);
-void func_001AB198(T217D_E30* self);
-f32 func_001AB5D8(void);
-void func_001AB600(T217D_510* self);
-void func_001AB660(T217D_510* self);
-void func_001AB710(T217D_510* self);
-f32 func_001ABE40(void);
-f32 func_001ABE50(void);
-f32 func_001ABE60(void);
+void SetupScreenElementText(ScreenElement* self);
+void UpdateScreenElementSlide(ScreenElement* self);
+void InitCounterCaption(T217D_E30* self);
+void DrawCounterCaption(T217D_E30* self);
+f32 GetCaptionHoldTime(void);
+void InitTimerElement(T217D_510* self);
+void UpdateTimerElement(T217D_510* self);
+void DrawTimerElement(T217D_510* self);
+f32 GetPairCaptionHoldTime(void);
+f32 GetGaugeAmountCaptionHoldTime(void);
+f32 GetGaugeColliderCaptionHoldTime(void);
 
 extern const Fn_Table D_00217E30[];
 extern const Fn_Table D_00217E80[];
@@ -224,189 +224,189 @@ extern const Fn_Table D_002210F0[];
 extern const Fn_Table D_002212E0[];
 extern const Fn_Table D_00221330[];
 extern const Fn_Table D_00221380[];
-extern u8 D_00275F80[];
+extern u8 g_screenFade[];
 
-void func_001EFCE8(void* p);
-
-
-extern s8 D_00262250[];
-extern u8 D_0024E879[];
-s32 func_001E1FD0(char* dst, const char* fmt, ...);
-void* func_001E2138(void* dst, void* src);
+void ResetScreenFade(void* p);
 
 
-void* func_0018D500(s32 size);
-PlacedObject* func_0015A418(void* a, s32 b, s32 c, ObjectPool* d);
-void func_00152438(void* p, s32 a);
-s32 func_001527D8(void* p);
-PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
+extern s8 g_fontEscapeKeys[];
+extern u8 g_charClassFlags[];
+s32 FormatToString(char* dst, const char* fmt, ...);
+void* CopyString(void* dst, void* src);
 
 
-
-
-
-void func_001A8AF8(ObjectPool* self);
+void* AllocateFrontMemory(s32 size);
+PlacedObject* FindFirstObjectById(void* a, s32 b, s32 c, ObjectPool* d);
+void SetListLinkOffset(void* p, s32 a);
+s32 CountListItems(void* p);
+PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
 
 
 
 
-extern void* const D_002486B0[];
+void ChooseObjectPoolItem(ObjectPool* self);
 
 
-extern void* const D_002486B0[];
 
 
-extern void* const D_002486B0[];
 
-extern ElementPlaceTable D_0026C3E0;
+extern void* const g_screenElements[];
+
+
+extern void* const g_screenElements[];
+
+
+extern void* const g_screenElements[];
+
+extern ElementPlaceTable g_elementPlaces;
 
 
 
 // allocator puts the count in $s1 and the pointer in $s0; retail is the other way round.
 
-extern u8 D_00275F80[];
-void func_001EFEE0(u8* a);
-void func_001AE820(u8* a);
+extern u8 g_screenFade[];
+void DrawScreenFade(u8* a);
+void DrawCyclingGlyphElement(u8* a);
 
 
 
 
-void* func_0018D5C0(u32 n);
+void* AllocateZeroedFrontMemory(u32 n);
 
 
-s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
 
 // EXACT: dst built as i*4 + (u32)items
 
-void func_001A89E8(ObjectPool* self);
-s32 func_001A88A0(ObjectPool* self, s32 item);
-void func_001F5B08(s32* dst, s32* src, s32 size);
+void AdvanceObjectPoolEntry(ObjectPool* self);
+s32 IsObjectPoolItemFree(ObjectPool* self, s32 item);
+void MoveMemory(s32* dst, s32* src, s32 size);
 
 
 
-s32 func_001A88A0(ObjectPool* self, s32 item);
+s32 IsObjectPoolItemFree(ObjectPool* self, s32 item);
 
 
 
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 
-f32 func_001EAF28(f32 x);
+f32 TruncateFloat(f32 x);
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
-void func_001AA1F0();
-void func_001AA790();
-void func_001AA898();
-void func_001AA8A0();
-void func_001AA8A8();
-void func_001AA8C8();
-void func_001AA8F0();
-void func_001AA958();
-void func_001AAF58();
-void func_001AAAC8();
-void func_001AA4F0();
-void func_001AA998();
-void func_001AB058();
-void func_001ABE70();
-void func_001AC0E8();
-void func_001AC888();
-void func_001AC910();
-void func_001AC990();
-s32 func_001AC9E0();
-void func_001ACA30();
-void func_001ACA68();
-void func_001ACAA8();
-void func_001ACDA0();
-void func_001ACE38();
-void func_001AD320();
-void func_001AD378();
-void func_001AD3B0();
-void func_001AD3F0();
-void func_001AD6A8();
-void func_001AD718();
-void func_001AD7B0();
-void func_001ADC60();
-void func_001ADD28();
-void func_001ADF28();
-void func_001AE130();
-void func_001AE178();
-void func_001AE220();
-void func_001AD940();
-void func_001AD970();
-void func_001ADB00();
-void func_001AE510();
-void func_001AE5E0();
-void func_001AE758();
-void func_001AE7F8();
-void func_00193E58();
-void func_001940E8();
-void func_001943E8();
-void func_00194E60();
-void func_00194F00();
-void func_00194F38();
-void func_00194F80();
-void func_0014ABD0();
-void func_0014AC48();
-void func_0014AD00();
-void func_0014AD70();
-void func_0014ADE0();
-void func_001E5E70();
-void func_001E6188();
-void func_001E73B8();
-void func_001E76E0();
-void func_001E77C0();
-void func_001E7C60();
-void func_001E8840();
-void func_001310F0();
-void func_00131198();
-void func_00135550();
-void func_00136040();
-void func_00136238();
-void func_001363D0();
-void func_00136408();
-f32 func_001365F0();
-f32 func_00136648();
-void func_001366A0();
-void func_00136EF8();
-s32 func_00136FA8();
-void func_001821B0();
-void func_001F1960();
-void func_001F1A08();
-void func_001F1C90();
-void func_001F20A8();
-void func_0016B4A0();
-void func_0016B560();
-void func_0016B580();
-void func_0016B7A8();
-void func_0016B860();
-void func_0016BA40();
-void func_0016BBA8();
-void func_0016BDD0();
-void func_0016BEA0();
-void func_001DFEB8();
-void func_001E00B0();
-void func_001E0678();
+void InitScreenElement();
+void DrawScreenElementText();
+void GetScreenElementSlideInTime();
+void GetScreenElementHoldTime();
+void GetScreenElementSlideOutTime();
+void ResetScreenElement();
+void ShowScreenElement();
+void HideScreenElement();
+void SetScreenElementClock();
+void AreScreenElementsTogether();
+void SetScreenElementText();
+void SetScreenElementMode();
+void UpdateCounterCaption();
+void InitGauge();
+void DrawGauge();
+void InitPointerTextCaption();
+void SetElementTextAfterSlideOut();
+void SetElementModeApplyingPendingText();
+s32 AreElementsTogetherOrPending();
+void ShowElementUnlessTextPending();
+void HideElementOrDropPendingText();
+void DrawSlidingGlyphElement();
+void InitCopiedTextCaption();
+void SetElementTextCopiedAfterSlideOut();
+void SetElementModeApplyingCopiedText();
+void ShowElementUnlessCopiedTextPending();
+void HideElementOrDropCopiedText();
+void DrawMessageElement();
+void InitHintGlyphElement();
+void UpdateHintGlyphElement();
+void DrawHintGlyphElement();
+void InitTitleElement();
+void DrawTitleElement();
+void InitPromptElement();
+void SetElementModeRebuildingText();
+void UpdatePromptElement();
+void DrawPromptElement();
+void InitLetterboxElement();
+void SetElementModeFollowingFade();
+void DrawLetterboxElement();
+void InitLetterGlyphElement();
+void DrawLetterGlyphElement();
+void InitCyclingGlyphElement();
+void SetElementModeClearingFlag();
+void InitPauseMenu();
+void SetPauseMenuOpen();
+void UpdatePauseMenu();
+void SetPauseMenuMode();
+void ShowPauseMenu();
+void HidePauseMenu();
+void DrawPauseMenu();
+void InitItemColumn();
+void SetupItemColumn();
+void UpdateItemColumn();
+void UpdateItemColumnSlide();
+void DrawItemColumn();
+void InitArcPoints();
+void CreateArcSprite();
+void DrawArc();
+void SetArcMode();
+void UpdateArc();
+void QueueArcDraw();
+void ResetArc();
+void InitTextPanel();
+void SetupTextPanel();
+void SetTextPanelMode();
+void UpdatePanelStick();
+void SetTextPanelOpen();
+void ResetTextPanel();
+void SetTextPanelText();
+f32 GetTextPanelSlideInTime();
+f32 GetTextPanelSlideOutTime();
+void DrawTextPanel();
+void ChooseTextPanelState();
+s32 EndTextPanelState();
+void DrawSpinningSpriteElement();
+void InitWarpMenu();
+void HandleWarpMenuInput();
+void SetWarpMenuOpen();
+void DrawWarpMenu();
+void InitSelectionCaption();
+void UpdateSelectionCaption();
+void HandleSelectionCaptionInput();
+void SetSelectionCaptionOpen();
+void DrawSelectionCaption();
+void InitGridSelector();
+void HandleGridSelectorInput();
+void SetGridSelectorOpen();
+void DrawGridSelector();
+void InitCommentaryPromptElement();
+void UpdateBestTimeState();
+void DrawFramedText();
 
 
-s32 func_001E2100(const char*);
-void* func_001E2138(char*, const char*);
-void func_0015E290(TextReader*, f32, f32*, f32*);
+s32 GetStringLength(const char*);
+void* CopyString(char*, const char*);
+void MeasureText(TextReader*, f32, f32*, f32*);
 
-extern f32 D_00261860;
+extern f32 g_frameDt;
 
-void func_001AB2B8(T217D_E30* self);
-f32 func_0015DFF8(TextReader* loc);
+void FormatCounterCaption(T217D_E30* self);
+f32 SumTextWidth(TextReader* loc);
 
 
 // An object func_001A88A0 may add to a pool: a class 0x3B with 0x678 clear or a class 0x20
 // with 0x680 set is refused.
 struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 
-s32 func_00182FC8(PoolCandidate* p);
-s32 func_001300E8(PoolCandidate* p, s32 kind);
+s32 IsObjectAttached(PoolCandidate* p);
+s32 IsObjectOfKind(PoolCandidate* p, s32 kind);
 
 // The list walk (list_iter.h): push a frame, step through the elements, pop it.
 struct ListWalkBegin {
@@ -438,7 +438,7 @@ struct ListWalkEnd {
 
 
 // Data defined by this file.
-ElementPlaceTable D_0026C3E0 = {
+ElementPlaceTable g_elementPlaces = {
     {
         { 0.0f, 0.0f, -1, -1, -1 },
         { 0.0f, 0.0f, -1, -1, -1 },
@@ -488,25 +488,25 @@ T217D_E30 D_0026C948;
 T217D_E30 D_0026CBC8;
 T217D_E30 D_0026CE48;
 T217D_E30 D_0026D0C8;
-T217D_E30 D_0026D348;
+T217D_E30 g_gaugeAmountCaption;
 T217D_E30 D_0026D5C8;
 T217D_E30 D_0026D848;
 T217D_E30 D_0026DAC8;
 T217D_E30 D_0026DD48;
 T217D_E30 D_0026DFC8;
-T217D_2E0 D_0026E248;
+T217D_2E0 g_gaugeBarElement;
 T217D_E30 D_0026E4E0;
-T217D_510 D_0026E760;
-T217D_1380 D_0026E9F8;
-T217D_330 D_0026EC70;
+T217D_510 g_timerElement;
+T217D_1380 g_timerCaption;
+T217D_330 g_buttonHintElement;
 T217D_380 D_0026EED0;
 T217D_3D0 D_0026F138;
 T217D_420 D_0026F5A0;
-T217D_0F0 D_0026F808;
+T217D_0F0 g_mapScreenList;
 T217D_12E0 D_0026FA90;
 T217D_1330 D_0026FD00;
-T217D_6D0 D_0026FF68;
-T217D_440 D_002701F8;
+T217D_6D0 g_pauseMenuElement;
+T217D_440 g_typedTextCaptionBox;
 T217D_BF0 D_00270650;
 T217D_3F0 D_002708E0;
 T217D_3F0 D_00271558;
@@ -515,7 +515,7 @@ T217D_E30 D_00272430;
 T217D_E30 D_002726B0;
 T217D_470 D_00272930;
 T217D_4C0 D_00272B98;
-T217D_720 D_00272E08;
+T217D_720 g_stackedCaptionGroup;
 T217D_5B0 D_002739F0;
 T217D_5B0 D_00273C50;
 T217D_600 D_00273EB0;
@@ -524,14 +524,14 @@ T217D_E30 D_00274118;
 
 
 
-void func_00182C18(ObjectPool* self);
+void InitObject(ObjectPool* self);
 
-void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_001A8208(ObjectPool* self);
+void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void SpawnObjectPoolCopies(ObjectPool* self);
 
 
 
-void func_001A7FE8(ObjectPool* self)
+void InitObjectPool(ObjectPool* self)
 {
     InitObject(self);
     u8* s1 = (u8*)self + 0x60;
@@ -559,13 +559,13 @@ void func_001A7FE8(ObjectPool* self)
     AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
 }
 
-void func_001A80E0(ObjectPool* self)
+void UnregisterObjectPool(ObjectPool* self)
 {
     UnregisterObject(self);
     ClearObjectPoolChoice(self);
 }
 
-void* func_001A8110(ObjectPool* self)
+void* GetObjectPoolShare(ObjectPool* self)
 {
     if (self->sub == 0) {
         Sub8C* p = (Sub8C*)AllocateZeroedFrontMemory(0x20);
@@ -575,7 +575,7 @@ void* func_001A8110(ObjectPool* self)
     return self->sub;
 }
 
-void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
+void AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
         self->items = (ObjectPoolEntry*)AllocateZeroedFrontMemory(0x50);
@@ -586,7 +586,7 @@ void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
     e->flags = ((((e->flags & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
 }
 
-void func_001A8208(ObjectPool* self)
+void SpawnObjectPoolCopies(ObjectPool* self)
 {
     s32 i;
     if (self->sub != 0) {
@@ -655,7 +655,7 @@ void func_001A8208(ObjectPool* self)
     }
 }
 
-void func_001A84C8(ObjectPool* self, ObjectPool* other)
+void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 {
     CopyObjectData(self, other);
     if (self->sub != 0 && self->sub->f4 != 0) {
@@ -676,7 +676,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
     }
 }
 
-void func_001A8590(ObjectPool* self)
+void StartObjectPool(ObjectPool* self)
 {
     StartObject(self);
     if (self->f168 != 0) {
@@ -720,14 +720,14 @@ void func_001A8590(ObjectPool* self)
     }
 }
 
-void func_001A86F8(ObjectPool* self, s32 flag)
+void ClearObjectPoolChoiceIfFlag(ObjectPool* self, s32 flag)
 {
     if (flag) {
         ClearObjectPoolChoice(self);
     }
 }
 
-ObjectPoolEntry* func_001A8718(ObjectPool* self, s32 key)
+ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* self, s32 key)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
@@ -737,7 +737,7 @@ ObjectPoolEntry* func_001A8718(ObjectPool* self, s32 key)
     return 0;
 }
 
-void func_001A8778(ObjectPool* table, s32 key)
+void EnableObjectPoolEntry(ObjectPool* table, s32 key)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e) {
@@ -745,7 +745,7 @@ void func_001A8778(ObjectPool* table, s32 key)
     }
 }
 
-void func_001A87A8(ObjectPool* table, s32 key)
+void DisableObjectPoolEntry(ObjectPool* table, s32 key)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
@@ -753,7 +753,7 @@ void func_001A87A8(ObjectPool* table, s32 key)
     }
 }
 
-void func_001A87E0(ObjectPool* table, s32 key, s32 value)
+void SetObjectPoolEntryCount(ObjectPool* table, s32 key, s32 value)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
@@ -764,9 +764,9 @@ void func_001A87E0(ObjectPool* table, s32 key, s32 value)
     }
 }
 
-s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
+s32 IsObjectInPool(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
-s32 func_001A88A0(ObjectPool* self, PoolCandidate* key)
+s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
 
@@ -813,7 +813,7 @@ s32 func_001A88A0(ObjectPool* self, PoolCandidate* key)
     return 1;
 }
 
-void func_001A89E8(ObjectPool* self)
+void AdvanceObjectPoolEntry(ObjectPool* self)
 {
     s32 i;
     s32 pos;
@@ -845,7 +845,7 @@ found:
     }
 }
 
-void func_001A8AF8(ObjectPool* self)
+void ChooseObjectPoolItem(ObjectPool* self)
 {
     s32 s5 = 0;
     s32 s4 = 0;
@@ -883,7 +883,7 @@ void func_001A8AF8(ObjectPool* self)
     }
 }
 
-s32 func_001A8C50(ObjectPool* self)
+s32 HasObjectPoolChoice(ObjectPool* self)
 {
     if (self->f48 != 0) {
         return 1;
@@ -894,16 +894,16 @@ s32 func_001A8C50(ObjectPool* self)
 
 ASM_FUNC(func_001A8C90);
 
-void func_001A93C8(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
+void ClearObjectPoolChoice(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
 
-void func_001A93E8(u8* self)
+void ResetPlacementRecord(u8* self)
 {
     u8* p = self + 0x60;
     FillMemory(p, 0, 0x80);
     *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
-void func_001A9438(ObjectPool* self)
+void ResetObjectPoolReleaseRecord(ObjectPool* self)
 {
     FillMemory((u8*)self + 0xE0, 0, 0x70);
     V8C* t = &self->v110;
@@ -914,12 +914,12 @@ void func_001A9438(ObjectPool* self)
     self->f120 = 0;
 }
 
-void func_001A9498(u8* self)
+void ClearObjectPoolHeadingRecord(u8* self)
 {
     FillMemory(self + 0x150, 0, 0x18);
 }
 
-void func_001A94C0(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
+void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
     if (self->f0 != 0) {
         ConvertPositionToWorld(self->f0, a1);
@@ -951,7 +951,7 @@ void func_001A94C0(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 
 ASM_FUNC(func_001A95D0);
 
-void func_001A97C8(u8* self, f32* out, int x)
+void GetPlacementRecordAngle(u8* self, f32* out, int x)
 {
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
@@ -968,20 +968,20 @@ void func_001A97C8(u8* self, f32* out, int x)
 
 ASM_FUNC(func_001A9868);
 
-void func_001A98F8(GaugeBarAgent* self)
+void StartGaugeBarAgent(GaugeBarAgent* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
 }
 
-s32 func_001A9928(GaugeBarAgent* self)
+s32 IsGaugeBarAgentFree(GaugeBarAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
     return self->fC24;
 }
 
-void func_001A9960(GaugeBarAgent* self)
+void UpdateGaugeBarAgentGoal(GaugeBarAgent* self)
 {
     UpdateAgentGoal(self);
     if (self->f724 == 0x10) {
@@ -991,14 +991,14 @@ void func_001A9960(GaugeBarAgent* self)
     }
 }
 
-void func_001A99B8(GaugeBarAgent* self)
+void UpdateGaugeBarAgentState(GaugeBarAgent* self)
 {
     UpdateAgentState(self);
     if (self->f724 == 0x10)
         FaceAgentTowardGoalPoint(self);
 }
 
-void func_001A99F8(GaugeBarAgent* self)
+void EnterGaugeBarAgentState(GaugeBarAgent* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0xB) {
@@ -1007,7 +1007,7 @@ void func_001A99F8(GaugeBarAgent* self)
     }
 }
 
-void func_001A9A40(GaugeBarAgent* self)
+void UpdateGaugeBarAgent(GaugeBarAgent* self)
 {
     u8* s = (u8*)self;
     UpdateAgent(self);
@@ -1020,7 +1020,7 @@ void func_001A9A40(GaugeBarAgent* self)
     }
 }
 
-void func_001A9A98(void)
+void UpdateGaugeBarAgentVisibility(void)
 {
     if (AreMenusAndFadeClear()) {
         g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
@@ -1031,14 +1031,14 @@ void func_001A9A98(void)
 
 ASM_FUNC(func_001A9AE8);
 
-void func_001A9C58(GaugeBarAgent* self, s32 a, s32 b, s32 c)
+void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c)
 {
     self->fC14 = a;
     self->fC18 = b;
     self->fC1C = c;
 }
 
-void func_001A9C68()
+void InstallScreenElements()
 {
     D_0026C6C8.vt = (const T217D_Vt*)D_00217E30;
     D_0026C948.vt = (const T217D_Vt*)D_00217E80;
@@ -1083,7 +1083,7 @@ void func_001A9C68()
     ResetScreenFade(g_screenFade);
 }
 
-void func_001A9F78(void)
+void InitScreenElements(void)
 {
     ScreenElement** base = (ScreenElement**)g_screenElements;
     ScreenElement** p = base + 36;
@@ -1095,7 +1095,7 @@ void func_001A9F78(void)
     } while (i >= 0);
 }
 
-void func_001A9FD0(void)
+void UpdateScreenElements(void)
 {
     ScreenElement** slots = (ScreenElement**)g_screenElements;
     for (s32 i = 36; i >= 0; i--) {
@@ -1112,7 +1112,7 @@ void func_001A9FD0(void)
     UpdateScreenFade(g, b);
 }
 
-void func_001AA060(void)
+void HideScreenElements(void)
 {
     ScreenElement** base = (ScreenElement**)g_screenElements;
     ScreenElement** p = base + 36;
@@ -1125,7 +1125,7 @@ void func_001AA060(void)
     } while (i >= 0);
 }
 
-void func_001AA0C0(void)
+void ResetScreenElements(void)
 {
     ScreenElement** p = (ScreenElement**)g_screenElements;
     s32 n = 0x24;
@@ -1137,7 +1137,7 @@ void func_001AA0C0(void)
     } while (n >= 0);
 }
 
-void func_001AA110(void)
+void QueueEachScreenElementDraw(void)
 {
     s32 n = 0x24;
     ScreenElement** p = (ScreenElement**)g_screenElements;
@@ -1154,7 +1154,7 @@ void func_001AA110(void)
     } while (n >= 0);
 }
 
-void func_001AA178(void)
+void DrawScreenElements(void)
 {
     s32 i;
     for (i = 0; i < 0x25; i++) {
@@ -1167,7 +1167,7 @@ void func_001AA178(void)
     DrawCyclingGlyphElement((u8*)&D_00273EB0);
 }
 
-void func_001AA1F0(ScreenElement* self, s32 index)
+void InitScreenElement(ScreenElement* self, s32 index)
 {
     self->place = (T217D_Place*)((u8*)&g_elementPlaces + index * 20);
     self->outTime = 0.25f;

@@ -12,12 +12,12 @@ struct Obj_131140_eu {
     f32 f314;
 };
 
-void func_001365A0(Obj_131140_eu* self, s32 value);
+void SetTextPanelSubject(Obj_131140_eu* self, s32 value);
 
-void func_00131140(Obj_131140_eu* self)
+void ClearTextPanel(Obj_131140_eu* self)
 {
     self->vtbl[8](self, 0);
-    func_001365A0(self, 0);
+    SetTextPanelSubject(self, 0);
     self->f300 = 0;
     self->f304 = 0;
     self->f308 = 0;

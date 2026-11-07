@@ -94,21 +94,21 @@ typedef struct KeyedArray {
 /* The head of the blocks of frame descriptions. */
 static FrameTable* D_0062A7B8;
 
-s32 func_001F6738(const char* a, const char* b);
-s32 func_001E2100(const char* s);
-void* func_0018D740(u32 size);
-void func_0018D750(void* p);
-void func_002014D0(void) __attribute__((noreturn));
-void* func_001F5C0C(void* dst, s32 c, u32 n);
+s32 CompareStrings(const char* a, const char* b);
+s32 GetStringLength(const char* s);
+void* EnterRuntimeLock(u32 size);
+void LeaveRuntimeLock(void* p);
+void AbortProgram(void) __attribute__((noreturn));
+void* FillMemory(void* dst, s32 c, u32 n);
 FrameDesc* func_001FF658(void* pc);
 u8* func_001FF740(FrameDesc* f, CommonInfo* info);
 u8* func_001FF848(u8* insn, UnwindWork* work, CommonInfo* info, u32* pc);
-u8* func_001FF048(u8* input, u32* output);
+u8* ReadUnsignedLeb128(u8* input, u32* output);
 FrameDesc** func_001FF1E0(FrameList* list, s32 count);
 s32 func_001FF448(FrameDesc* p);
 void func_001FF490(FrameDesc* cur, FrameList* list, s32* lo, s32* hi);
 
-u8* func_001FF048(u8* input, u32* output)
+u8* ReadUnsignedLeb128(u8* input, u32* output)
 {
     u8 byte = *input;
     u32 shift = 0;
@@ -128,7 +128,7 @@ u8* func_001FF048(u8* input, u32* output)
     return input;
 }
 
-u8* func_001FF090(u8* input, s32* output)
+u8* ReadSignedLeb128(u8* input, s32* output)
 {
     u32 shift = 0;
     u32 value = 0;
@@ -235,8 +235,8 @@ void func_001FF518(FrameTable* self)
         count = func_001FF448(self->records);
     }
     self->count = count;
-    acc.items = (FrameDesc**)func_0018D740(count << 2);
-    acc.other = (FrameDesc**)func_0018D740(count << 2);
+    acc.items = (FrameDesc**)EnterRuntimeLock(count << 2);
+    acc.other = (FrameDesc**)EnterRuntimeLock(count << 2);
     acc.lo = 0xFFFFFFFF;
     acc.count = 0;
     acc.unused = 0;
@@ -271,7 +271,7 @@ u8* func_001FF740(FrameDesc* f, CommonInfo* info)
         info->augmentation[0] != 'z') {
         return 0;
     }
-    p = (u8*)info->augmentation + func_001E2100(info->augmentation) + 1;
+    p = (u8*)info->augmentation + GetStringLength(info->augmentation) + 1;
     if (CompareStrings(info->augmentation, "eh") == 0) {
         info->handlerData = (void*)((Unaligned32*)p)->v;
         p += 4;
@@ -361,7 +361,7 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
             rs->s.cfaOffset = offset;
             break;
         case 10: {
-            UnwindWork* copy = (UnwindWork*)func_0018D740(sizeof(UnwindWork));
+            UnwindWork* copy = (UnwindWork*)EnterRuntimeLock(sizeof(UnwindWork));
             *copy = *rs;
             rs->saved = copy;
             break;
@@ -369,7 +369,7 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
         case 11: {
             UnwindWork* copy = rs->saved;
             *rs = *copy;
-            func_0018D750(copy);
+            LeaveRuntimeLock(copy);
             break;
         }
         case 45:
@@ -392,7 +392,7 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
 
 INCLUDE_ASM(func_001FFBE0);
 
-FrameTable* func_001FFC08(void* value)
+FrameTable* DeregisterFrameInfo(void* value)
 {
     FrameTable** slot = &D_0062A7B8;
     FrameTable* t;
@@ -403,7 +403,7 @@ FrameTable* func_001FFC08(void* value)
             if (t->records == value) {
                 *slot = t->next;
                 if (t->start != 0)
-                    func_0018D750(t->sorted);
+                    LeaveRuntimeLock(t->sorted);
                 return t;
             }
             slot = &t->next;
@@ -412,7 +412,7 @@ FrameTable* func_001FFC08(void* value)
     AbortProgram();
 }
 
-UnwindState* func_001FFC80(void* target, UnwindState* out)
+UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
 {
     FrameDesc* f;
     u8* insn;

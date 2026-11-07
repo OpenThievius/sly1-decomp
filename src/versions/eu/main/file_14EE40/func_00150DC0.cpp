@@ -9,10 +9,10 @@ struct Hud_150DC0_eu {
 };
 
 u32 func_eu_001E3018(u16* a);
-void func_001365A8(Hud_150DC0_eu* a, f32 b);
-void func_001365A0(Hud_150DC0_eu* a, s32 b);
+void SetTextPanelValuePercent(Hud_150DC0_eu* a, f32 b);
+void SetTextPanelSubject(Hud_150DC0_eu* a, s32 b);
 
-void func_00150DC0(StepSequence* self, SequenceMessage* msg)
+void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
 {
     CaptionSpeaker* s2;
     CaptionSpeaker* s4;
@@ -85,7 +85,7 @@ void func_00150DC0(StepSequence* self, SequenceMessage* msg)
         }
         if (a0) {
             CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (CaptionSpeaker*)a0, (s32)s2, 1, &self->player2F8);
-            func_0012F810(self->player2F8, self);
+            AddAnimationPlayerRecordCallback(self->player2F8, self);
         }
         nm = (u16*)msg->f14;
         if (nm && *nm) {
@@ -122,7 +122,7 @@ void func_00150DC0(StepSequence* self, SequenceMessage* msg)
         }
         if (msg->f20 != -1) {
             s32 r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
-            func_001365A0(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
+            SetTextPanelSubject(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
             g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);

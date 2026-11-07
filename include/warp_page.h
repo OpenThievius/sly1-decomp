@@ -56,9 +56,9 @@ struct WarpPage : PlacedObject {
 typedef char check_WarpPage[sizeof(WarpPage) == 0x570 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F0F70(WarpPage* self, s32 kind, void* msg);  // 0x67 slot 13
-void func_001F0758(WarpPage* self);                       // 0x67 slot 15
-void func_001F0660(WarpPage* self);                       // 0x67 slot 16
-void func_001F0EB8(WarpPage* self, u8* s, void* c);       // 0x67 slot 36
+void HandleWarpPageNotification(WarpPage* self, s32 kind, void* msg);  // 0x67 slot 13
+void PostLoadWarpPage(WarpPage* self);                       // 0x67 slot 15
+void StartWarpPage(WarpPage* self);                       // 0x67 slot 16
+void ApplyWarpPageTransform(WarpPage* self, u8* s, void* c);       // 0x67 slot 36
 
 #endif

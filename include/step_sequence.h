@@ -79,10 +79,10 @@ struct StepSequence : PlacedObject {
 
 typedef char check_StepSequence[sizeof(StepSequence) == 0x340 ? 1 : -1];
 
-void func_001504E0(StepSequence* self);                          // 0x65 slot 0
-void func_00150528(StepSequence* self, void* arg);               // 0x65 slot 10
-void func_001512A8(StepSequence* self, u32 mode, u32 value);     // 0x65 slot 13
-void func_001506F0(StepSequence* self);                          // 0x65 slot 16
-void func_00150AE8(StepSequence* self);                          // 0x65 slot 17
+void InitStepSequence(StepSequence* self);                          // 0x65 slot 0
+void LoadStepSequence(StepSequence* self, void* arg);               // 0x65 slot 10
+void HandleStepSequenceNotification(StepSequence* self, u32 mode, u32 value);     // 0x65 slot 13
+void StartStepSequence(StepSequence* self);                          // 0x65 slot 16
+void UpdateStepSequence(StepSequence* self);                          // 0x65 slot 17
 
 #endif

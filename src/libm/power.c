@@ -5,17 +5,17 @@
  * (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "libm.h"
 
-f32 func_002073F8(f32 x, f32 y);
+f32 PowerKernel(f32 x, f32 y);
 
-f32 func_00205C78(f32 x, f32 y)
+f32 Power(f32 x, f32 y)
 {
-    f32 value = func_002073F8(x, y);
+    f32 value = PowerKernel(x, y);
     MathError e;
 
-    if (D_0024FF78 == -1 || func_00209238(y)) {
+    if (g_mathErrorMode == -1 || IsNotANumber(y)) {
         return value;
     }
-    if (func_00209238(x)) {
+    if (IsNotANumber(x)) {
         if (y == 0.0f) {
             e.kind = 1;
             e.function = "powf";
@@ -23,13 +23,13 @@ f32 func_00205C78(f32 x, f32 y)
             e.firstArg = (double)x;
             e.secondArg = (double)y;
             e.result = (double)x;
-            if (D_0024FF78 == 2) {
+            if (g_mathErrorMode == 2) {
                 e.result = 1.0;
-            } else if (!func_00208FE8(&e)) {
-                *func_002014F0() = 0x21;
+            } else if (!HandleMathError(&e)) {
+                *GetErrorNumberAddress() = 0x21;
             }
             if (e.errorCode != 0) {
-                *func_002014F0() = e.errorCode;
+                *GetErrorNumberAddress() = e.errorCode;
             }
             return (f32)e.result;
         }
@@ -43,51 +43,51 @@ f32 func_00205C78(f32 x, f32 y)
             e.firstArg = (double)x;
             e.secondArg = (double)y;
             e.result = 0.0;
-            if (D_0024FF78 != 0) {
+            if (g_mathErrorMode != 0) {
                 e.result = 1.0;
-            } else if (!func_00208FE8(&e)) {
-                *func_002014F0() = 0x21;
+            } else if (!HandleMathError(&e)) {
+                *GetErrorNumberAddress() = 0x21;
             }
             if (e.errorCode != 0) {
-                *func_002014F0() = e.errorCode;
+                *GetErrorNumberAddress() = e.errorCode;
             }
             return (f32)e.result;
         }
-        if (func_00209210(y) && y < 0.0f) {
+        if (IsFinite(y) && y < 0.0f) {
             e.kind = 1;
             e.function = "powf";
             e.errorCode = 0;
             e.firstArg = (double)x;
             e.secondArg = (double)y;
-            if (D_0024FF78 == 0) {
+            if (g_mathErrorMode == 0) {
                 e.result = 0.0;
             } else {
-                e.result = -D_0024FF70;
+                e.result = -g_mathInfinity;
             }
-            if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-                *func_002014F0() = 0x21;
+            if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+                *GetErrorNumberAddress() = 0x21;
             }
             if (e.errorCode != 0) {
-                *func_002014F0() = e.errorCode;
+                *GetErrorNumberAddress() = e.errorCode;
             }
             return (f32)e.result;
         }
         return value;
     }
-    if (!func_00209210(value) && func_00209210(x) && func_00209210(y)) {
-        if (func_00209238(value)) {
+    if (!IsFinite(value) && IsFinite(x) && IsFinite(y)) {
+        if (IsNotANumber(value)) {
             e.kind = 1;
             e.function = "powf";
             e.errorCode = 0;
             e.firstArg = (double)x;
             e.secondArg = (double)y;
-            if (D_0024FF78 == 0) {
+            if (g_mathErrorMode == 0) {
                 e.result = 0.0;
             } else {
                 e.result = 0.0 / 0.0;
             }
-            if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-                *func_002014F0() = 0x21;
+            if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+                *GetErrorNumberAddress() = 0x21;
             }
         } else {
             e.kind = 3;
@@ -95,40 +95,40 @@ f32 func_00205C78(f32 x, f32 y)
             e.errorCode = 0;
             e.firstArg = (double)x;
             e.secondArg = (double)y;
-            if (D_0024FF78 == 0) {
+            if (g_mathErrorMode == 0) {
                 e.result = 3.40282346638528859812e+38;
                 y *= 0.5;
-                if ((double)x < 0.0 && func_00209010((double)y) != (double)y) {
+                if ((double)x < 0.0 && RoundToInteger((double)y) != (double)y) {
                     e.result = -3.40282346638528859812e+38;
                 }
             } else {
-                e.result = D_0024FF70;
+                e.result = g_mathInfinity;
                 y *= 0.5;
-                if ((double)x < 0.0 && func_00209010((double)y) != (double)y) {
-                    e.result = -D_0024FF70;
+                if ((double)x < 0.0 && RoundToInteger((double)y) != (double)y) {
+                    e.result = -g_mathInfinity;
                 }
             }
-            if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-                *func_002014F0() = 0x22;
+            if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+                *GetErrorNumberAddress() = 0x22;
             }
         }
         if (e.errorCode != 0) {
-            *func_002014F0() = e.errorCode;
+            *GetErrorNumberAddress() = e.errorCode;
         }
         return (f32)e.result;
     }
-    if (value == 0.0f && func_00209210(x) && func_00209210(y)) {
+    if (value == 0.0f && IsFinite(x) && IsFinite(y)) {
         e.kind = 4;
         e.function = "powf";
         e.errorCode = 0;
         e.firstArg = (double)x;
         e.secondArg = (double)y;
         e.result = 0.0;
-        if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-            *func_002014F0() = 0x22;
+        if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+            *GetErrorNumberAddress() = 0x22;
         }
         if (e.errorCode != 0) {
-            *func_002014F0() = e.errorCode;
+            *GetErrorNumberAddress() = e.errorCode;
         }
         return (f32)e.result;
     }

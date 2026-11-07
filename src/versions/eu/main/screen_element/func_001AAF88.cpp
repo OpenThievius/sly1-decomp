@@ -12,9 +12,9 @@ struct Obj_1AAF88_eu {
     f32 f26C;
 };
 
-void func_001AA268(Obj_1AAF88_eu* self);
+void SetupScreenElementText(Obj_1AAF88_eu* self);
 
-void func_001AAF88(Obj_1AAF88_eu* self)
+void InitCounterCaption(Obj_1AAF88_eu* self)
 {
     SetupScreenElementText(self);
     self->f004 = (u32)GetFontById(2);

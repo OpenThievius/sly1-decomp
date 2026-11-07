@@ -2,7 +2,7 @@
 // PAL: T217D_2E0 fields f260 to f278 are at 0x570 to 0x588 (US 0x260 to 0x278).
 struct Sys_17B410_eu { void (**vtbl)(void* self); u8 pad0[0x570 - 4]; s32 f570; s32 f574; u8 pad1[0x57C - 0x578]; s32 f57C; s32 f580; s32 f584; f32 f588; };
 
-void func_0017B410(GaugeModeObject* self, s32 mode)
+void SetGaugeModeObjectMode(GaugeModeObject* self, s32 mode)
 {
     void* x;
     if (mode == self->mode) {

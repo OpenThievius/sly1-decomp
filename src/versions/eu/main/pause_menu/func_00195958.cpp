@@ -19,15 +19,15 @@ extern s32 D_eu_00263710;
 extern s32 D_eu_00263624;
 extern CardSlot D_eu_00255538[];
 
-void func_001961C0(Menu_195958_eu* self);
-void func_00194D30(Menu_195958_eu* self, s32 a, s32 b);
-void func_00194278(Menu_195958_eu* self, s32 a, s32 b);
-void func_001936A0(Menu_195958_eu* self);
-void func_001E9498(u8* a, Sub_195958_eu* b);
+void CancelPauseMenuPage(Menu_195958_eu* self);
+void SetPauseMenuLayerPage(Menu_195958_eu* self, s32 a, s32 b);
+void ExitLevelFromPauseMenu(Menu_195958_eu* self, s32 a, s32 b);
+void BuildPauseMenuPage(Menu_195958_eu* self);
+void PushStackElement(u8* a, Sub_195958_eu* b);
 void func_eu_00160620(s32 a);
 u8* func_eu_00160788(s32 a);
 
-void func_00195958(Menu_195958_eu* self)
+void ActivatePauseMenuSelection(Menu_195958_eu* self)
 {
     s32 sel = g_pauseMenuPages[self->f260].items ? g_pauseMenuPages[self->f260].items[self->f264] : -1;
     if (sel == 0x11) {
@@ -52,10 +52,10 @@ void func_00195958(Menu_195958_eu* self)
         }
         case 18: {
             s32 v;
-            void* s2 = (void*)func_00193660();
+            void* s2 = (void*)FindObject42CStateWalker();
             void* s0 = GetActiveSwitchedCollider();
             if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
-                func_001B6598(s2, &v);
+                GetStateWalkerCurrentKey(s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
                         RecordPathFollowerProgress(s0);
@@ -72,7 +72,7 @@ void func_00195958(Menu_195958_eu* self)
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
-            func_001F4408(1, 2);
+            BeginLevelExit(1, 2);
             return;
         case 22:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -108,18 +108,18 @@ void func_00195958(Menu_195958_eu* self)
             {
                 s32 keep;
                 keep = self->f264;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->f264 = keep;
             }
             return;
         case 15: {
             GameProgress* g = g_saveData;
             g->u19EC ^= 0x80;
-            func_001C0760(g->u19EC & 0x80);
+            SilenceVolumeChannel3(g->u19EC & 0x80);
             {
                 s32 keep;
                 keep = self->f264;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->f264 = keep;
             }
             return;
@@ -127,11 +127,11 @@ void func_00195958(Menu_195958_eu* self)
         case 16: {
             GameProgress* g = g_saveData;
             g->u19EC ^= 0x40;
-            func_001C0790(g->u19EC & 0x40);
+            ApplySoundOptionFlag(g->u19EC & 0x40);
             {
                 s32 keep;
                 keep = self->f264;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->f264 = keep;
             }
             return;
@@ -177,7 +177,7 @@ void func_00195958(Menu_195958_eu* self)
                     StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, b);
                 }
             } else {
-                func_00194398();
+                StartPauseMenuExitFade();
             }
             SetPauseMenuLayerPage(self, 0, -1);
             return;
@@ -189,21 +189,21 @@ void func_00195958(Menu_195958_eu* self)
         case 0x18: {
             g_saveData->u19EC ^= 0x200;
             s32 keep = self->f264;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->f264 = keep;
             return;
         }
         case 0x19: {
             g_saveData->u19EC ^= 0x400;
             s32 keep = self->f264;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->f264 = keep;
             return;
         }
         case 0x1A: {
             g_saveData->u19EC ^= 0x800;
             s32 keep = self->f264;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->f264 = keep;
             return;
         }
@@ -232,7 +232,7 @@ void func_00195958(Menu_195958_eu* self)
         return;
     case 4:
         if (sel == 0) {
-            StartBackgroundJob(&g_backgroundJob, (void*)func_0018C1A8, &g_memoryCard);
+            StartBackgroundJob(&g_backgroundJob, (void*)RunMemoryCardFormatJob, &g_memoryCard);
             SetPauseMenuLayerPage(self, 1, 5);
             return;
         }

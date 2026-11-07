@@ -10,7 +10,7 @@ struct Obj_148F80_eu {
     s32 f278;
 };
 
-void func_00148F80(void)
+void AddReserveUnitNow(void)
 {
     Obj_148F80_eu* obj = (Obj_148F80_eu*)&D_0026C6C8;
     obj->vtbl[14](obj);

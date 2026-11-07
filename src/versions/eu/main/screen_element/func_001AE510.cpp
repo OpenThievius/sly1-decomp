@@ -9,7 +9,7 @@ struct Obj_eu_1AE510 { Fn_eu_1AE510* vt; void* f4; };
 
 void func_eu_001AAFB0(Obj_1AE510* self);
 
-void func_001AE510(Obj_1AE510* base)
+void InitLetterGlyphElement(Obj_1AE510* base)
 {
     Obj_eu_1AE510* self = (Obj_eu_1AE510*)base;
     Key_eu_1AE510 key;

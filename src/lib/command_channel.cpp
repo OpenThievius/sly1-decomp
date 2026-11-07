@@ -66,32 +66,32 @@ static Channel_1FA068 D_00629398;
 static Slot_1FA068 D_006293C0[32];
 static s32 D_006294C0[32];
 
-s32 func_001FA9C0(void);
-void func_001F6920(s32 status);
-void func_001F6D10(s32 req, void* arg);
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-void func_001F6C20(s32 a);
-void func_001F6CC0(void);
-s32 func_001F6970(s32 cause, void* handler, s32 arg);
-s32 func_001F6990(s32 cause, s32 id);
-void func_001F6E78(s32 cause);
-s32 func_001F6E10(s32 cause);
-s32 func_001F6CF0(u32 reg);
-u32 func_001F6CE0(u32 reg, u32 value);
-s32 func_001F6CB0(Transfer_1FA4F8* transfers, s32 n);
-s32 func_001F6CA0(Transfer_1FA4F8* transfers, s32 n);
-void func_001FA6B0(void);
-void func_001FA7D8(void* data, s32 size);
+s32 SetUpTlbForMemory(void);
+void ExitProgramSyscall(s32 status);
+void CallDebugService(s32 req, void* arg);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+void SyncDataCache(s32 a);
+void ArmIopDmaChain(void);
+s32 AddDmaHandler(s32 cause, void* handler, s32 arg);
+s32 RemoveDmaHandler(s32 cause, s32 id);
+void EnableDmaInterrupt(s32 cause);
+s32 DisableDmaInterrupt(s32 cause);
+s32 ReadIopRegister(u32 reg);
+u32 WriteIopRegister(u32 reg, u32 value);
+s32 StartIopDmaFromInterrupt(Transfer_1FA4F8* transfers, s32 n);
+s32 StartIopDma(Transfer_1FA4F8* transfers, s32 n);
+void HandleCommandInterrupt(void);
+void WriteBackDataCacheRange(void* data, s32 size);
 
-void func_001FA068(void)
+void SetUpTlb(void)
 {
     SetUpTlbForMemory();
 }
 
 LINKER_REMNANT(func_001FA070);
 
-void func_001FA078(s32 status)
+void TerminateProgram(s32 status)
 {
     SetUpTlb();
     ExitProgramSyscall(status);
@@ -104,12 +104,12 @@ void func_001FA0A0(void)
 
 LINKER_REMNANT(func_001FA0B0);
 
-s32 func_001FA0D8(void)
+s32 GetProcessId(void)
 {
     return 1;
 }
 
-s32 func_001FA0E0(s32 mode, s32 status)
+s32 SignalProcess(s32 mode, s32 status)
 {
     if (mode == 1) {
         TerminateProgram(status);
@@ -119,7 +119,7 @@ s32 func_001FA0E0(s32 mode, s32 status)
 
 LINKER_REMNANT(func_001FA108);
 
-void func_001FA140(s32 value)
+void PrintToDebugConsole(s32 value)
 {
     s32 local = value;
     CallDebugService(0x10, &local);
@@ -127,28 +127,28 @@ void func_001FA140(s32 value)
 
 LINKER_REMNANT(func_001FA168);
 
-void func_001FA190(Packet_1FA068* packet, Channel_1FA068* channel)
+void StoreChannelWord(Packet_1FA068* packet, Channel_1FA068* channel)
 {
     channel->words[packet->index] = packet->value;
 }
 
-s32 func_001FA1B0(Packet_1FA068* packet, Channel_1FA068* channel)
+s32 StoreIopChannelAddress(Packet_1FA068* packet, Channel_1FA068* channel)
 {
     s32 value = packet->index;
     channel->iop = value;
     return value;
 }
 
-s32 func_001FA1C0(s32 index)
+s32 GetChannelWord(s32 index)
 {
     return D_006294C0[index];
 }
 
 LINKER_REMNANT(func_001FA1D8);
 
-s32 func_001FA630(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count);
+s32 SendCommand(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count);
 
-void func_001FA1E8(void)
+void InitCommandChannel(void)
 {
     s32 i;
     DisableInterrupts();
@@ -202,14 +202,14 @@ void func_001FA1E8(void)
     SendCommand(0x80000002, &D_00629380, 0x14, 0, 0, 0);
 }
 
-void func_001FA468(void)
+void ShutDownCommandChannel(void)
 {
     (void)DisableDmaInterrupt(5);
     (void)RemoveDmaHandler(5, D_00629394);
     D_002779B8[0] = 0;
 }
 
-void func_001FA4A0(s32 cmd, Handler_1FA068 handler, void* arg)
+void SetCommandHandler(s32 cmd, Handler_1FA068 handler, void* arg)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {
@@ -223,7 +223,7 @@ void func_001FA4A0(s32 cmd, Handler_1FA068 handler, void* arg)
     slot->arg = arg;
 }
 
-void func_001FA4D0(s32 cmd)
+void ClearCommandHandler(s32 cmd)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {
@@ -235,7 +235,7 @@ void func_001FA4D0(s32 cmd)
     ((Slot_1FA068*)off)->handler = 0;
 }
 
-s32 func_001FA4F8(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* data, s32 addr, s32 count)
+s32 SendCommandPacket(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* data, s32 addr, s32 count)
 {
     Transfer_1FA4F8 recs[2];
     s32 n;
@@ -277,12 +277,12 @@ s32 func_001FA4F8(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* data, 
     return result;
 }
 
-s32 func_001FA630(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
+s32 SendCommand(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
     return SendCommandPacket(cmd, 0, (Header_1FA4F8*)packet, size, data, addr, count);
 }
 
-s32 func_001FA670(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
+s32 SendCommandFromInterrupt(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
     return SendCommandPacket(cmd, 1, (Header_1FA4F8*)packet, size, data, addr, count);
 }

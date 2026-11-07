@@ -51,6 +51,6 @@ struct ScreenFade {
 typedef char check_FadeRequest[sizeof(FadeRequest) == 0x14 ? 1 : -1];
 typedef char check_ScreenFade[sizeof(ScreenFade) == 0x40 ? 1 : -1];
 
-extern ScreenFade D_00275F80;
+extern ScreenFade g_screenFade;
 
 #endif

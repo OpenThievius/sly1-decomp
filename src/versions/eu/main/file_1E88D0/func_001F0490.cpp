@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: reports whether an action is allowed, with the selector and index it used.
-s32 func_001F0490(WarpPage* self, s32 kind, s32* outA, s32* outB)
+s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
 {
     s32 sel = -1;
     s32 idx = -1;

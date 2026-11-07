@@ -22,7 +22,7 @@ struct LookupObject : PlacedObject {
 typedef char check_LookupObject[sizeof(LookupObject) == 0x320 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4E18(LookupObject* self);                       // 0x4E slot 0
-void func_001F4E48(LookupObject* self);                       // 0x4E slot 16
+void InitLookupObject(LookupObject* self);                       // 0x4E slot 0
+void StartLookupObject(LookupObject* self);                       // 0x4E slot 16
 
 #endif

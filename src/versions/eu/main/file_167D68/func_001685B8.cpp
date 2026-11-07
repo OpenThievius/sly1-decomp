@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: func_00201A18 is called with 3 where US passes 2.
 
-void func_001685B8(void)
+void ResetDisplayBuffers(void)
 {
     D_002BE470 = 1;
     SendDisplayResetPacket();
     SignalDisplaySync();
     D_002BE470 = 0;
-    func_00201A18(0, 1, 3, 1);
+    ResetGs(0, 1, 3, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
@@ -21,9 +21,9 @@ void func_001685B8(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    func_00202098(ptr, 0x800, 0x800, half);
-    func_001F6C20(0);
+    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    func_00201FF8(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
 }
 

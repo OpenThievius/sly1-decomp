@@ -4,8 +4,8 @@ struct Eng_1F0908;
 typedef void (*SetFn_1F0908)(Eng_1F0908* e, s32 mode);
 struct EngVt_1F0908 { u8 pad[0x40]; SetFn_1F0908 set; };
 struct Eng_1F0908 { EngVt_1F0908* vt; };
-void func_001AA8B8(Eng_1F0908* e, f32 x);
-void func_001AD0D0(Eng_1F0908* e, s32 a, s32 b);
+void SetScreenElementHoldTime(Eng_1F0908* e, f32 x);
+void SetElementTextFromEntry(Eng_1F0908* e, s32 a, s32 b);
 struct Eng_eu_1F0908 {
     EngVt_1F0908* vt;
     u8 pad4[0x56C];
@@ -14,7 +14,7 @@ struct Eng_eu_1F0908 {
     s32 i974;
 };
 
-void func_001F0908(WarpPage* self)
+void AnnouncePendingWarpEntry(WarpPage* self)
 {
     if (D_00276250 == -1) return;
     SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);

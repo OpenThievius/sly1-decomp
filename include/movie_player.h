@@ -88,6 +88,6 @@ struct MoviePlayer {
     u8 pad144[4];  // to the label after it, g_movieChecksumFailed
 };
 
-extern MoviePlayer D_00269A00;
+extern MoviePlayer g_moviePlayer;
 
 #endif

@@ -25,6 +25,6 @@ struct KeyedEntry {
 
 typedef char check_KeyedEntry[sizeof(KeyedEntry) == 0x2C ? 1 : -1];
 
-extern const KeyedEntry D_00247AF0[];   // 00160000.cpp: 46 entries
+extern const KeyedEntry g_keyedEntries[];   // 00160000.cpp: 46 entries
 
 #endif

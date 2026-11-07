@@ -17,7 +17,7 @@ struct __attribute__((packed)) PSys_1481A0_eu {
     f32 f26C;
 };
 
-void func_001481A0(void* self)
+void CountPickupTowardHundred(void* self)
 {
     Effect* s = (Effect*)self;
     GameProgress* g = g_saveData;

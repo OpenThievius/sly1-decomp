@@ -11,10 +11,10 @@ static const f32 g_halfPi = 1.5707963705e+00f;
 static const f32 g_pi = 3.1415925026e+00f;
 static const f32 g_piTail = 1.5099578832e-07f;
 
-f32 func_00204F68(f32 x);
-f32 func_002052F8(f32 x);
+f32 Arctangent(f32 x);
+f32 AbsoluteValue(f32 x);
 
-f32 func_00206A68(f32 y, f32 x)
+f32 ArctangentOfRatioKernel(f32 y, f32 x)
 {
     s32 xBits, yBits, xMag, yMag, quadrantCase, exponentGap, angleBits;
     f32 angle;

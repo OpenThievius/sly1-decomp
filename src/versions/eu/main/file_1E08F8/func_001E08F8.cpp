@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the characters as unsigned bytes.
-s32 func_001E08F8(u8* s, s32* out)
+s32 ParseSignedDecimal(u8* s, s32* out)
 {
     u8* p = s;
     s32 sign = 1;

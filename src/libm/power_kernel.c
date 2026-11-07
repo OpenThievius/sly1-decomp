@@ -36,11 +36,11 @@ static const f32 g_invLn2 = 1.4426950216e+00f;
 static const f32 g_invLn2Head = 1.4426879883e+00f;
 static const f32 g_invLn2Tail = 7.0526075433e-06f;
 
-f32 func_002052F8(f32 x);
-f32 func_00208068(f32 x);
-f32 func_00209260(f32 x, s32 n);
+f32 AbsoluteValue(f32 x);
+f32 SquareRootKernel(f32 x);
+f32 ScaleByPowerOfTwo(f32 x, s32 n);
 
-f32 func_002073F8(f32 x, f32 y)
+f32 PowerKernel(f32 x, f32 y)
 {
     f32 value, absX, logHead, logTail, prodHead, prodTail;
     f32 yHead, log2Head, log2Tail, poly, factor, tmp, partA, partB, corr;

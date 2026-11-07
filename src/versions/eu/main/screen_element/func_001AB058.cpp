@@ -24,14 +24,14 @@ struct Obj_eu_1AB058 {
 };
 
 void func_eu_001AAFE0(Obj_eu_1AB058* self);
-void func_001AB2B8(Obj_eu_1AB058* self);
-void func_0015C8B8(Handle_eu_1AB058* handle, f32 a, f32 b);
+void FormatCounterCaption(Obj_eu_1AB058* self);
+void PushFontScale(Handle_eu_1AB058* handle, f32 a, f32 b);
 void func_eu_0015DCB8(Loc_eu_1AB058* out, u16* flag, Handle_eu_1AB058* handle, s32 zero);
 f32 func_eu_0015E438(Loc_eu_1AB058* loc);
-void func_001AAB20(Obj_eu_1AB058* self, f32 x, f32 y);
-void func_0015C900(Handle_eu_1AB058* handle);
+void SetScreenElementSize(Obj_eu_1AB058* self, f32 x, f32 y);
+void PopFontScale(Handle_eu_1AB058* handle);
 
-void func_001AB058(Obj_eu_1AB058* self)
+void UpdateCounterCaption(Obj_eu_1AB058* self)
 {
     Loc_eu_1AB058 loc;
     f32 frac;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's reset of the game state when the flag is set.
-void func_001DB838(s32 a0)
+void ResetWorldSubsystems(s32 a0)
 {
     if (a0 != 0) {
         ActivateSwitchedColliderIndex(-1);
@@ -14,7 +14,7 @@ void func_001DB838(s32 a0)
         ClearTargetVectorList();
         ClearObjectLists();
         StopAllSoundsAndWait();
-        func_001B40C8();
+        ResetScreenResources();
         ShutDownScriptValuePools();
         ResetElementStack(g_elementStack);
         ResetFrontMemory();

@@ -7,13 +7,13 @@ struct Obj_18EAA0_eu {
     s32 fA4;
 };
 
-void func_0018EAA0(MovieStream* self_)
+void StopMovieStream(MovieStream* self_)
 {
     Obj_18EAA0_eu* self = (Obj_18EAA0_eu*)self_;
     self->f00 = 0;
-    func_0011E498();
+    StopIopMovieStream();
     SetIopVolumeChannel(2, self->fA0);
     SetIopVolumeChannel(16, self->fA4);
     PopIopChannel2Setting(g_currentWorld);
-    func_0011D6D8(0xFFFFFFFF);
+    ResumeIopVoices(0xFFFFFFFF);
 }

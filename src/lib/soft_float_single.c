@@ -20,9 +20,9 @@ typedef struct Packed {
 #define IS_ZERO(p) (((p)->kind ^ 2) == 0)
 #define IS_INF(p) (((p)->kind ^ 4) == 0)
 
-u64 func_001FD548(s32 a0, s32 a1, s32 a2, u64 a3);
+u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3);
 
-f32 func_001FD5D0(Packed* p)
+f32 PackFloat(Packed* p)
 {
     union {
         f32 f;
@@ -80,7 +80,7 @@ f32 func_001FD5D0(Packed* p)
     return bits.f;
 }
 
-void func_001FD6E0(u32* src, Packed* out)
+void UnpackFloat(u32* src, Packed* out)
 {
     u32 bits = *src;
     u32 exp = bits >> 23;
@@ -113,7 +113,7 @@ void func_001FD6E0(u32* src, Packed* out)
 
 LINKER_REMNANT(func_001FD770);
 
-u32 func_001FD7A0(f32 value)
+u32 ConvertFloatToU32(f32 value)
 {
     f32 in = value;
     Packed p;
@@ -143,7 +143,7 @@ u32 func_001FD7A0(f32 value)
     return p.mant >> (0x1E - p.exp);
 }
 
-f32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3)
+f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3)
 {
     Packed args;
 

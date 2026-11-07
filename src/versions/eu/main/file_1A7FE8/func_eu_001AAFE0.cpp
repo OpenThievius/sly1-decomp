@@ -18,7 +18,7 @@ struct Obj_eu_1AAFE0 {
 };
 struct Curve_eu_1AAFE0 { f32 c0; f32 c1; f32 c2; };
 extern Curve_eu_1AAFE0 D_eu_0027DAF0;
-void func_001AAEC0(void* self);
+void PlaceAnchoredScreenElements(void* self);
 
 static inline f32 clamp2_eu_1AAFE0(f32 v, f32 lo, f32 hi)
 {

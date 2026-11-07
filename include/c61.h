@@ -19,7 +19,7 @@ struct C61 : PlacedObject {
 
 typedef char check_C61[sizeof(C61) == 0x2F0 ? 1 : -1];
 
-void func_00152E28(C61* self);                          // 0x61 slot 0
-void func_00153328(C61* self, s32 unused, void* a2);    // 0x61 slot 37
+void InitC61Object(C61* self);                          // 0x61 slot 0
+void QueuePlacedObjectDraw(C61* self, s32 unused, void* a2);    // 0x61 slot 37
 
 #endif

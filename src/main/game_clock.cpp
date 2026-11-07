@@ -5,22 +5,22 @@
 
 // The file's .data, in retail's order: the two scale factors, the clock, and the tick count
 // the assembly func_001430C8 and func_001430F8 keep.
-f32 D_00261850 = 1.0f;
-f32 D_00261854 = 1.0f;
-GameClock D_00261858 = { 0 };
-u64 D_00261878 = 0;
+f32 g_timeScale = 1.0f;
+f32 g_stepScale = 1.0f;
+GameClock g_gameClock = { 0 };
+u64 g_lastCycleCount = 0;
 
-void func_001430C0(GameClock* clock, s32 running);
-s64 func_001430F8(void);
-f32 func_001FB6B0(s64 value);
+void SetGameClockRunning(GameClock* clock, s32 running);
+s64 ReadCycleCounter(void);
+f32 ConvertS64ToFloat(s64 value);
 
-void func_00142ED0(f32 x)
+void SetGameClockScale(f32 x)
 {
     g_timeScale = x;
     SetGameClockRunning(&g_gameClock, x > 0.0f ? 1 : 0);
 }
 
-void func_00142F10(GameClock* self)
+void AdvanceGameClock(GameClock* self)
 {
     s64 now = ReadCycleCounter();
     s64 delta = now - self->lastTick;
@@ -59,7 +59,7 @@ void func_00142F10(GameClock* self)
     self->lastTick = now;
 }
 
-void func_00143030(GameClock* self)
+void AdvanceGameClockElapsed(GameClock* self)
 {
     s64 now = ReadCycleCounter();
     s64 delta = now - self->lastTick;
@@ -77,12 +77,12 @@ void func_00143030(GameClock* self)
     self->elapsed = self->elapsed + dt;
 }
 
-void func_001430B8(GameClock* self, f32 value)
+void SetGameClockTime(GameClock* self, f32 value)
 {
     self->time = value;
 }
 
-void func_001430C0(GameClock* clock, s32 running)
+void SetGameClockRunning(GameClock* clock, s32 running)
 {
     clock->running = running;
 }

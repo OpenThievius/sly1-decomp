@@ -23,22 +23,22 @@
 // class 0x47 and the two floats func_0016D490 reads. Its .rodata, from 0x24A7F0, is the jump
 // tables and FLT_MAX literals of its VU0 functions.
 
-s32 D_002629C8 = 0;
-s32 D_002629D0[16] = { 0x0, 0x2EE, 0x550, 0x0, 0x2F8, 0x57C, 0x0, 0x2F9, 0x580, 0x0, 0x2FB, 0x588, 0x0, 0x2FC, 0x58C, 0x0 };
-s32 D_00262A10[6] = { 0x0, 0x2FA, 0x584, 0x0, 0x2F7, 0x568 };
+s32 g_currentTargetFollower = 0;
+s32 g_targetFollowerLoadLinks[16] = { 0x0, 0x2EE, 0x550, 0x0, 0x2F8, 0x57C, 0x0, 0x2F9, 0x580, 0x0, 0x2FB, 0x588, 0x0, 0x2FC, 0x58C, 0x0 };
+s32 g_targetFollowerResolveLinks[6] = { 0x0, 0x2FA, 0x584, 0x0, 0x2F7, 0x568 };
 f32 D_00262A28[2] = { 1.25f, 1.5f };
 
-void func_001BAC30(void* self);
-void func_00124DF8(void* self, s32 id, void* table);
-s32 func_001B6420(void* a, s32 b);
-s32 func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
-s32 func_0015A838(void* a0, s32 a1, s32 a2, void* a3);
+void LoadCollider(void* self);
+void ResolveObjectLinks(void* self, s32 id, void* table);
+s32 GetStateEntryKey(void* a, s32 b);
+s32 FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
+s32 FindFirstObjectByIdGathered(void* a0, s32 a1, s32 a2, void* a3);
 
-void func_001B7968(void* self);
-void func_00152438(void* self, s32 value);
-extern s32 D_002629C8;
+void InitCollider(void* self);
+void SetListLinkOffset(void* self, s32 value);
+extern s32 g_currentTargetFollower;
 
-void func_0016CE00(TargetFollower* self)
+void InitTargetFollower(TargetFollower* self)
 {
     InitCollider(self);
     self->f578 = -1;
@@ -53,7 +53,7 @@ void func_0016CE00(TargetFollower* self)
     g_currentTargetFollower = 0;
 }
 
-void func_0016CE80(TargetFollower* self)
+void LoadTargetFollowerRecords(TargetFollower* self)
 {
     s32 k1 = 0x2EF;
     s32 k2 = 0x2F0;
@@ -78,14 +78,14 @@ void func_0016CE80(TargetFollower* self)
     }
 }
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_001920B0(void* self, f32* arg);
-void func_0016D040(TargetFollower* self, void* x);
-void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void ConvertPositionToWorld(void* self, f32* arg);
+void FollowObjectById(TargetFollower* self, void* x);
+void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
 
-void func_0016CF70(TargetFollower* self)
+void ResolveTargetFollowerLinks(TargetFollower* self)
 {
     f32 scratch[4];
 
@@ -106,12 +106,12 @@ void func_0016CF70(TargetFollower* self)
     self->f594 = CreateTypedRecord(0x73, g_currentWorld, 0, 0x302, -1);
 }
 
-void* func_0015A448(void* obj, void* id, void* owner);
-void func_0016D3F0(TargetFollower* self, FollowableObject* x);
-void func_0016D788(TargetFollower* self);
-void func_0016DAC0(TargetFollower* self, s32 mode);
+void* FindFirstObjectByIdMode4(void* obj, void* id, void* owner);
+void SetFollowedObject(TargetFollower* self, FollowableObject* x);
+void PlaceTargetFollowerOnFollowed(TargetFollower* self);
+void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 
-void func_0016D040(TargetFollower* self, void* x)
+void FollowObjectById(TargetFollower* self, void* x)
 {
     self->f578 = (s32)x;
     FollowableObject* p = (FollowableObject*)FindFirstObjectByIdMode4(self->world, x, self);
@@ -126,13 +126,13 @@ void func_0016D040(TargetFollower* self, void* x)
     }
 }
 
-void func_001F5C0C(u8* p, s32 a, s32 b);
+void FillMemory(u8* p, s32 a, s32 b);
 
-void func_001B9338(Collider* self, f32 t);
-void func_00188850(const Vec02* tab, Mat3U* out, f32 v);
-void func_001B9D10(Collider* self, f32 t, Mat3U* out, void* data);
+void StepCollider(Collider* self, f32 t);
+void BuildAxisAngleMatrix(const Vec02* tab, Mat3U* out, f32 v);
+void TurnColliderTowardRotation(Collider* self, f32 t, Mat3U* out, void* data);
 
-void func_0016D0C0(TargetFollower* self, f32 t)
+void StepTargetFollower(TargetFollower* self, f32 t)
 {
     Mat3U buf;
 
@@ -141,7 +141,7 @@ void func_0016D0C0(TargetFollower* self, f32 t)
         return;
     }
     BuildAxisAngleMatrix(&g_unitZVector, &buf, self->f5A0);
-    func_001B9D10(self, t, &buf, self->sub5B0);
+    TurnColliderTowardRotation(self, t, &buf, self->sub5B0);
 }
 
 INCLUDE_RODATA(jtbl_0024A7F0);
@@ -150,19 +150,19 @@ ASM_FUNC(func_0016D128);
 INCLUDE_RODATA(jtbl_0024A810);
 ASM_FUNC(func_0016D1E0);
 
-extern s32 D_00262C6C;
+extern s32 g_padSelectFlags;
 
-extern s32 D_00262C6C;
+extern s32 g_padSelectFlags;
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+void FillMemory(void* p, s32 value, s32 size);
 
 struct Item_16D3F0 { u8 pad0[0x318]; s32 f318; };
 
-void func_001A8AF8(void* p);
-Obj_1BF0D8* func_001BEEF8(s32 kind);
-void func_001BF0D8(Obj_1BF0D8* p);
+void ChooseObjectPoolItem(void* p);
+Obj_1BF0D8* PushSoundLevel(s32 kind);
+void RemoveSoundLevelAndRecompute(Obj_1BF0D8* p);
 
-void func_0016D3F0(TargetFollower* self, FollowableObject* x)
+void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 {
     if (x == self->f558) {
         return;
@@ -195,10 +195,10 @@ ASM_FUNC(func_0016D490);
 
 typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 
-void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
-void func_001920B0(void* arg, Vec3* out);
+void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
+void ConvertPositionToWorld(void* arg, Vec3* out);
 
-void func_0016D788(TargetFollower* self) {
+void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     Vec3 v;
     SetColliderAnchors(self, 3, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
@@ -210,13 +210,13 @@ void func_0016D788(TargetFollower* self) {
 
 ASM_FUNC(func_0016D828);
 
-extern const KeyRecord D_002482D8[7];
+extern const KeyRecord g_streamVoiceKeys[7];
 
-s32 func_001BE980(void);
-s32 func_001EAA70(void* a, s32 b);
-void func_001BE728(KeyRecord* slot);
+s32 HasStreamVoice(void);
+s32 RandomIntInRange(void* a, s32 b);
+void OpenKeyRecord(KeyRecord* slot);
 
-void func_0016D928(TargetFollower* self)
+void StartRandomStreamVoice(TargetFollower* self)
 {
     s32 r;
 
@@ -235,10 +235,10 @@ void func_0016D928(TargetFollower* self)
     self->f5CC = 1;
 }
 
-s32 func_001BE810(void* self);
-void func_001BE8F8(void* self, s32 mode, f32 a, f32 b);
+s32 CheckStreamVoicePending(void* self);
+void PlaySoundAndApplyVolumePan(void* self, s32 mode, f32 a, f32 b);
 
-void func_0016D9A8(TargetFollower* self)
+void PlayPendingFollowerSound(TargetFollower* self)
 {
     if (self->f5CC != 0) {
         if (CheckStreamVoicePending(self) == 0) {
@@ -248,13 +248,13 @@ void func_0016D9A8(TargetFollower* self)
     }
 }
 
-void func_00127378(void* self, s32 type, void* packet);
-void func_0016D490(void* self);
-void func_0016D828(void* self);
-void func_0016D928(void* self);
-void func_0016DAC0(void* self, s32 mode);
+void HandlePlacedObjectNotification(void* self, s32 type, void* packet);
+void LaunchPoolItemAtTarget(void* self);
+void LaunchTargetFollowerAtFollowed(void* self);
+void StartRandomStreamVoice(void* self);
+void SetTargetFollowerMode(void* self, s32 mode);
 
-void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet)
+void HandleTargetFollowerNotification(TargetFollower* self, s32 type, Packet47* packet)
 {
     HandlePlacedObjectNotification(self, type, packet);
     if (type != 0x13) {
@@ -291,23 +291,23 @@ INCLUDE_RODATA(D_0024A824);
 INCLUDE_RODATA(jtbl_0024A830);
 ASM_FUNC(func_0016DAC0);
 
-extern s32 D_002629C8;
+extern s32 g_currentTargetFollower;
 
-void func_0016DCF0(s32 value)
+void SetCurrentTargetFollower(s32 value)
 {
     g_currentTargetFollower = value;
 }
 
-extern s32 D_002629C8;
+extern s32 g_currentTargetFollower;
 
-void func_0016DD00(void)
+void ClearCurrentTargetFollower(void)
 {
     g_currentTargetFollower = 0;
 }
 
-void func_00123ED0(void* self);
+void InitPlacedObject(void* self);
 
-void func_0016DD10(EntryTableObject* self)
+void InitEntryTableObject(EntryTableObject* self)
 {
     InitPlacedObject(self);
     self->tune31C = 2.25f;
@@ -319,10 +319,10 @@ void func_0016DD10(EntryTableObject* self)
     self->tune334 = 2000.0f;
 }
 
-void func_001289C0(void* self);
-s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+void LoadPlacedObject(void* self);
+s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 
-void func_0016DD90(EntryTableObject* self)
+void LoadEntryTable(EntryTableObject* self)
 {
     LoadPlacedObject(self);
     s32 r = GatherObjectsById((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
@@ -332,9 +332,9 @@ void func_0016DD90(EntryTableObject* self)
     }
 }
 
-void func_00124A48(void* self);
+void StartPlacedObject(void* self);
 
-void func_0016DDE8(EntryTableObject* self)
+void StartEntryTableObject(EntryTableObject* self)
 {
     StartPlacedObject(self);
     self->desc->m03(self);
@@ -343,7 +343,7 @@ void func_0016DDE8(EntryTableObject* self)
 INCLUDE_RODATA(D_0024A844);
 ASM_FUNC(func_0016DE20);
 
-void func_0016DF30(FollowableObject* self)
+void InitFollowableObject(FollowableObject* self)
 {
     InitZoneCollider(self);
     self->zone.duration = 0;
@@ -351,11 +351,11 @@ void func_0016DF30(FollowableObject* self)
     self->id7A8 = -1;
 }
 
-void func_001249A8(void* self);
-s32 func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
-s32 func_0015A838(void* a0, s32 a1, s32 a2, void* a3);
+void PostLoadPlacedObject(void* self);
+s32 FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
+s32 FindFirstObjectByIdGathered(void* a0, s32 a1, s32 a2, void* a3);
 
-void func_0016DF68(FollowableObject* self)
+void ResolveFollowableObjectLinks(FollowableObject* self)
 {
     PostLoadPlacedObject(self);
     if (self->id7A0 != -1) {
@@ -366,14 +366,14 @@ void func_0016DF68(FollowableObject* self)
     self->f7AC = (void*)FindFirstObjectById(self->world, 4, self->id7A8, self);
 }
 
-extern s32 D_002629C8;
+extern s32 g_currentTargetFollower;
 
-void func_00127378(void* self, s32 kind);
-s32 func_001526D0(void* a, void* b);
-void func_00152470(void* list, void* item);
-void func_00152600(void* table, void* self);
+void HandlePlacedObjectNotification(void* self, s32 kind);
+s32 IsInList(void* a, void* b);
+void AppendToList(void* list, void* item);
+void RemoveFromList(void* table, void* self);
 
-void func_0016DFE0(FollowableObject* self, s32 kind)
+void HandleFollowableObjectNotification(FollowableObject* self, s32 kind)
 {
     HandlePlacedObjectNotification(self, kind);
     switch (kind)

@@ -17,11 +17,11 @@
 char D_0027AEB8[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
 
 // The request in flight (0 when none) and the semaphore that serialises the requests.
-s32 D_0027AEC8 = 0;
-s32 D_0027AECC = -1;
+s32 g_cardRequestInFlight = 0;
+s32 g_cardSemaphore = -1;
 
 // The remote call's client record, bound to the server.
-static u8 D_0062AD40[0x28] __attribute__((aligned(64)));
+static u8 g_cardClient[0x28] __attribute__((aligned(64)));
 // Where func_00209C60 stores the results of the request func_00209CB8 sent.
 static u32* D_0062AD68;
 static u32* D_0062AD6C;
@@ -58,16 +58,16 @@ struct Info_2093F0 {
 };
 struct Obj_209B80;
 
-s32 func_001F6B20(Req_2093F0* r);
-s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2);
-s32 func_001F6B60(s32 sema);
-void func_001F7BE8(s32 a);
-s32 func_001F80C0(Sema_2093F0* p, u32 flags, s32 z);
-s32 func_001E1F10(const char* msg);
-s32 func_001F8290(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
-void func_001F6B40(s32 sema);
+s32 NewSemaphore(Req_2093F0* r);
+s32 SyncCardRequest(Obj_209B80* a0, s32* a1, s32* a2);
+s32 AwaitSemaphore(s32 sema);
+void InitRemoteCalls(s32 a);
+s32 BindRemoteService(Sema_2093F0* p, u32 flags, s32 z);
+s32 PrintFormatted(const char* msg);
+s32 CallRemoteService(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
+void PostSemaphore(s32 sema);
 
-s32 func_002093F0(void)
+s32 InitMemoryCardClient(void)
 {
     if (g_cardSemaphore < 0) {
         Req_2093F0 req;
@@ -120,12 +120,12 @@ struct Handle_2095B0;
 struct Pool_2095B0;
 struct Name_2095B0;
 
-s32 func_001F6B70(Handle_2095B0* h);
-void func_001F6B40(Handle_2095B0* h);
-s32 func_001F8290(Pool_2095B0* p, s32 a1, s32 a2, Rec_2095B0* r, s32 size, u8* desc, s32 a6, s32 a7, s32 extra);
-s32 func_00201720(Name_2095B0* dst, const char* src, s32 max);
+s32 TrySemaphore(Handle_2095B0* h);
+void PostSemaphore(Handle_2095B0* h);
+s32 CallRemoteService(Pool_2095B0* p, s32 a1, s32 a2, Rec_2095B0* r, s32 size, u8* desc, s32 a6, s32 a7, s32 extra);
+s32 CopyStringBounded(Name_2095B0* dst, const char* src, s32 max);
 
-s32 func_002095B0(s32 a0, s32 a1, const char* a2, s32 a3)
+s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
 {
     if (TrySemaphore((Handle_2095B0*)g_cardSemaphore) < 0) {
         return -200;
@@ -155,7 +155,7 @@ s32 func_002095B0(s32 a0, s32 a1, const char* a2, s32 a3)
     return result;
 }
 
-s32 func_002096E8(s32 a0, s32 a1, const char* a2)
+s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2)
 {
     s32 r = OpenCardFile(a0, a1, a2, 0x40);
     if (r == 0) {
@@ -168,11 +168,11 @@ struct Hdl_209720 { s32 v; };
 struct Elt_209720 { u8 pad[0x24]; s32 f24; };
 struct Slot_209720 { s32 v; };
 
-s32 func_001F6B70(Hdl_209720* h);
-s32 func_001F6B40(Hdl_209720* h);
-s32 func_001F8290(Elt_209720* a, s32 b, s32 c, Slot_209720* d, s32 e, void* f, s32 g, s32 h, s32 i);
+s32 TrySemaphore(Hdl_209720* h);
+s32 PostSemaphore(Hdl_209720* h);
+s32 CallRemoteService(Elt_209720* a, s32 b, s32 c, Slot_209720* d, s32 e, void* f, s32 g, s32 h, s32 i);
 
-s32 func_00209720(s32 value)
+s32 CloseCardFile(s32 value)
 {
     s32 r;
     Elt_209720* elt;
@@ -205,7 +205,7 @@ struct Pkt_2097E0 {
     u8 src1[0x40];
 };
 
-void func_002097E0(Pkt_2097E0* p)
+void CopyCardDirectoryReply(Pkt_2097E0* p)
 {
     Pkt_2097E0* q = (Pkt_2097E0*)((u32)p | 0x20000000);
     if (q->n0) {
@@ -226,12 +226,12 @@ struct Dev_00209870 { u8 pad[0x4]; };
 struct Ctl_00209870 { u8 pad[0x24]; s32 busy; };
 struct Slot_00209870 { void* owner; u8 pad0[8]; void* arg2; u8 pad1[8]; void* arg1; void* tab; };
 
-s32 func_001F6B70(Dev_00209870* d);
-void func_001F6B40(Dev_00209870* d);
-void func_001FA7D8(void* a, s32 b);
-s32 func_001F8290(Dev_00209870* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, void* h, void* i);
+s32 TrySemaphore(Dev_00209870* d);
+void PostSemaphore(Dev_00209870* d);
+void WriteBackDataCacheRange(void* a, s32 b);
+s32 CallRemoteService(Dev_00209870* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, void* h, void* i);
 
-s32 func_00209870(void* a0, void* a1, void* a2)
+s32 ReadCardFile(void* a0, void* a1, void* a2)
 {
     Ctl_00209870* ctl;
     Slot_00209870* slot;
@@ -266,12 +266,12 @@ struct Pool_209990 { u8 pad000[0x24]; s32 f24; };
 struct Obj_209990 { u8 pad000[0x20]; };
 struct Ctx_209990 { s32 f00; u8 p04[8]; s32 f0C; u8 p10[4]; u32 f14; s32 f18; u8 p1C[4]; u8 buf[16]; };
 
-s32 func_001F6B70(Obj_209990* a);
-void func_001F6B40(Obj_209990* a);
-void func_001F6C20(s32 a);
-s32 func_001F8290(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stk);
+s32 TrySemaphore(Obj_209990* a);
+void PostSemaphore(Obj_209990* a);
+void SyncDataCache(s32 a);
+s32 CallRemoteService(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stk);
 
-s32 func_00209990(s32 self, u32 src, s32 n)
+s32 WriteCardFile(s32 self, u32 src, s32 n)
 {
     s32 r;
     if (TrySemaphore((*(Obj_209990**)&g_cardSemaphore)) < 0) {
@@ -311,12 +311,12 @@ s32 func_00209990(s32 self, u32 src, s32 n)
 
 ASM_FUNC(func_00209B10);
 
-void func_00209B10(void);
-s32 func_001F6A90(void);
-void func_001F69E0(s32 id, void (*cb)(void), s32 ctx);
-void func_001F6AB0(void);
+void WakeCardWaiter(void);
+s32 GetCurrentThreadId(void);
+void ScheduleAlarm(s32 id, void (*cb)(void), s32 ctx);
+void SleepCurrentThread(void);
 
-void func_00209B38(u16 id)
+void WaitCardTicks(u16 id)
 {
     ScheduleAlarm(id, WakeCardWaiter, GetCurrentThreadId());
     SleepCurrentThread();
@@ -324,10 +324,10 @@ void func_00209B38(u16 id)
 
 struct Q_209B80;
 struct Dev_209B80;
-s32 func_001F8480(Q_209B80* q);
-s32 func_001F6B40(Dev_209B80* d);
+s32 IsRemoteCallPending(Q_209B80* q);
+s32 PostSemaphore(Dev_209B80* d);
 
-s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
+s32 SyncCardRequest(Obj_209B80* a0, s32* a1, s32* a2)
 {
     s32 ok;
     if (g_cardRequestInFlight == 0) {
@@ -342,7 +342,7 @@ s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
     }
     ok = (ok == 0);
     if (a1 != 0) {
-        *a1 = D_0027AEC8;
+        *a1 = g_cardRequestInFlight;
     }
     if (ok != 0) {
         g_cardRequestInFlight = 0;
@@ -354,7 +354,7 @@ s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
     return ok;
 }
 
-void func_00209C60(u32 base)
+void CopyCardInfoReply(u32 base)
 {
     volatile u32* regs = (volatile u32*)(base | 0x20000000);
     if (D_0062AD68) *D_0062AD68 = regs[0];
@@ -368,12 +368,12 @@ struct Pool_209CB8 { u8 pad[0x24]; s32 f24; };
 struct Blk_209CB8;
 typedef void (*Cb_209CB8)(u32 base);
 
-s32 func_001F6B70(Handle_209CB8* h);
-void func_001F6B40(Handle_209CB8* h);
-s32 func_001FA7D8(Blk_209CB8* p, s32 size);
-s32 func_001F8290(Pool_209CB8* p, s32 a1, s32 a2, Rec_209CB8* r, s32 size, u8* desc, s32 a6, Cb_209CB8 cb, u8* extra);
+s32 TrySemaphore(Handle_209CB8* h);
+void PostSemaphore(Handle_209CB8* h);
+s32 WriteBackDataCacheRange(Blk_209CB8* p, s32 size);
+s32 CallRemoteService(Pool_209CB8* p, s32 a1, s32 a2, Rec_209CB8* r, s32 size, u8* desc, s32 a6, Cb_209CB8 cb, u8* extra);
 
-s32 func_00209CB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
+s32 GetCardInfo(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (TrySemaphore((Handle_209CB8*)g_cardSemaphore) < 0) {
         return -200;
@@ -419,13 +419,13 @@ struct Lock_9E48;
 struct Mgr_9E48;
 struct Rec_9E48 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 name[0x400]; };
 
-s32 func_001F6B70(Lock_9E48* lock);
-void func_001F6B40(Lock_9E48* lock);
-void func_00201720(u8* dst, const char* src, s32 max);
-void func_001FA7D8(s32 a, s32 b);
-s32 func_001F8290(Mgr_9E48* a, s32 b, s32 c, Rec_9E48* d, s32 e, u8* f, s32 g, s32 h, s32 i);
+s32 TrySemaphore(Lock_9E48* lock);
+void PostSemaphore(Lock_9E48* lock);
+void CopyStringBounded(u8* dst, const char* src, s32 max);
+void WriteBackDataCacheRange(s32 a, s32 b);
+s32 CallRemoteService(Mgr_9E48* a, s32 b, s32 c, Rec_9E48* d, s32 e, u8* f, s32 g, s32 h, s32 i);
 
-s32 func_00209E48(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
+s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
 {
     s32 status = TrySemaphore((Lock_9E48*)g_cardSemaphore);
     if (status < 0) {
@@ -466,9 +466,9 @@ struct Pool_209FA8 { u8 pad[0x24]; s32 busy; };
 struct Req_209FA8 { s32 f0; s32 a; s32 b; };
 struct Handle_209FA8 { s32 h; };
 
-s32 func_001F6B70(Handle_209FA8* h);
-void func_001F6B40(Handle_209FA8* h);
-s32 func_001F8290(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
+s32 TrySemaphore(Handle_209FA8* h);
+void PostSemaphore(Handle_209FA8* h);
+s32 CallRemoteService(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
 
 s32 func_00209FA8(s32 a, s32 b)
 {
@@ -506,9 +506,9 @@ struct Buf_0020A078 {
     s8 text14[0x400];
 };
 
-s32 func_001F6B70(s32 v);
-void func_00201720(s8* dst, s8* src, s32 n);
-Buf_0020A078* func_001F8290(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
+s32 TrySemaphore(s32 v);
+void CopyStringBounded(s8* dst, s8* src, s32 n);
+Buf_0020A078* CallRemoteService(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
 
 s32 func_0020A078(s32 a0, s32 a1, s8* a2)
 {

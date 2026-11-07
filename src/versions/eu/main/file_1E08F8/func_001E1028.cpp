@@ -14,10 +14,10 @@ struct Fmt_1E1028_eu {
     u8 pad2D[3];
     s32 f30;
 };
-s32 func_001E0E18(Fmt_1E1028_eu* self, IntegerArg* v);
-s32 func_001E0EF8(u8 c);
+s32 ExtractIntegerSign(Fmt_1E1028_eu* self, IntegerArg* v);
+s32 GetConversionRadix(u8 c);
 
-void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
+void FormatIntegerArg(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
 {
     char buf[0x50];
     char pfx[0x10];

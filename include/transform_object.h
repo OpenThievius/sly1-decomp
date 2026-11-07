@@ -124,25 +124,25 @@ typedef char check_Class75Object[sizeof(Class75Object) == 0xA0 ? 1 : -1];
 typedef char check_Rec79[sizeof(Rec79) == 0x200 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F39F8(TransformObject* self);                       // 0x73 slot 0
-void func_001F3A40(TransformObject* self, void* stream);         // 0x73 slot 10
-void func_001F3A90(TransformObject* self, BaseObject* other);          // 0x73 slot 21
-void func_001F3AF0(TransformObject* self, BaseObject* other);          // 0x73 slot 22
-void func_001585F8(MemberObject* self);                       // 0x77 slot 16
-void func_001587C0();                                // 0x77 slot 27 (empty)
-void func_00158980(MemberGroup* self);                       // 0x78 slot 9
-void func_001587C8(MemberGroup* self, void* stream);         // 0x78 slot 10
-void func_00158A10(MemberGroup* self);                       // 0x78 slot 15
-void func_00158A80(MemberGroup* self, void* message);        // 0x78 slot 27
-void func_00158B00(RecordMember* self);                       // 0x79 slot 0
-void func_00158C28(RecordMember* self);                       // 0x79 slot 9
-void func_00158B30(RecordMember* self, void* stream);         // 0x79 slot 10
-void func_00158C60(RecordMember* self);                       // 0x79 slot 15
-void func_00158D38(void);                            // 0x79 slot 27 (empty)
-void func_00158E10(HoldingMember* self);                       // 0x7A slot 0
-void func_00158F10(HoldingMember* self, s32 kind, BaseObject* other); // 0x7A slot 13
-void func_00158E48(HoldingMember* self);                       // 0x7A slot 15
-void func_00158F80(HoldingMember* self, void* message);        // 0x7A slot 27
-Rec79* func_00158DD8(RecordMember* self, s32 own);            // the record, made the object's own first
+void InitTransformObject(TransformObject* self);                       // 0x73 slot 0
+void ReadTransformObject(TransformObject* self, void* stream);         // 0x73 slot 10
+void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other);          // 0x73 slot 21
+void TransformObjectIntoFrame(TransformObject* self, BaseObject* other);          // 0x73 slot 22
+void StartMemberObject(MemberObject* self);                       // 0x77 slot 16
+void SendMemberObjectMessage();                                // 0x77 slot 27 (empty)
+void CopyGroupMembers(MemberGroup* self);                       // 0x78 slot 9
+void LoadGroupMembers(MemberGroup* self, void* stream);         // 0x78 slot 10
+void ResolveGroupMembers(MemberGroup* self);                       // 0x78 slot 15
+void BroadcastMessageToMembers(MemberGroup* self, void* message);        // 0x78 slot 27
+void InitRecordMember(RecordMember* self);                       // 0x79 slot 0
+void CopyRecordMember(RecordMember* self);                       // 0x79 slot 9
+void LoadRecordMember(RecordMember* self, void* stream);         // 0x79 slot 10
+void ResolveRecordMemberTargets(RecordMember* self);                       // 0x79 slot 15
+void SendRecordMemberMessage(void);                            // 0x79 slot 27 (empty)
+void InitHoldingMember(HoldingMember* self);                       // 0x7A slot 0
+void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other); // 0x7A slot 13
+void ResolveHoldingMemberTargets(HoldingMember* self);                       // 0x7A slot 15
+void SendMessageAfterDelay(HoldingMember* self, void* message);        // 0x7A slot 27
+Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own);            // the record, made the object's own first
 
 #endif

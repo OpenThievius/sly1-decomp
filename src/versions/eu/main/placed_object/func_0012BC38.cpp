@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: case 54 reads its third value as a plain integer instead of calling func_001384A0, and cases 38, 45 and 47 are written apart.
-void func_0012BC38(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
+void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
 {
     AnimEvent* e;
     s32 i;

@@ -3,10 +3,10 @@
 // Still differs: Lays out the object with float constants inlined as literals and u32 for the 0x80000000 arg; only the prologue ordering of li a1,6 / li a2,7 against the float spills differs (10 lines).
 // Lays out the eight-part object at D_eu_00263590 from the scaled field at 0x54C, through the func_00161xxx helpers.
 extern u8 D_eu_00263590[];
-void func_001613C0(void* self, s32 a1, s32 a2, u64 a3);
-void func_00161708(void* self, s32 a1, s32 a2);
-void func_00161458(void* self, u32 a1);
-void func_001615F0(void* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void BeginGifTag(void* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(void* self, s32 a1, s32 a2);
+void AddGifRgbaEntry(void* self, u32 a1);
+void AddGifXyzfEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_eu_001AE860(u8* a0)
 {
     f32 f20 = *(f32*)(a0 + 0x54C) * 54.305084228515625f;

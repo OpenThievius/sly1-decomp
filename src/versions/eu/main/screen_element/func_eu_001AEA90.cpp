@@ -9,7 +9,7 @@ struct Obj_eu_1AEA90 {
 };
 extern u8 D_eu_00263590[];
 void func_eu_001AB558(void* self);
-s32 func_001B2988(void* p, s32 a, s32 b);
+s32 GetTextureRegisterBits(void* p, s32 a, s32 b);
 void func_eu_00161A20(void* ctx, s32 a, s32 b, u64 c);
 void func_eu_00161D68(void* ctx, s32 a, s64 b);
 void func_eu_00161AB8(void* ctx, s32 color);

@@ -15,9 +15,9 @@ static const f32 g_tanCoefficients[] = {
     2.5907305826e-05f,
 };
 
-f32 func_002052F8(f32 x);
+f32 AbsoluteValue(f32 x);
 
-f32 func_00208D50(f32 x, f32 y, s32 sign)
+f32 TangentKernel(f32 x, f32 y, s32 sign)
 {
     s32 bits, magnitude, chopBits;
     f32 x2, x4, poly, polyOdd, x3, negRecip, recipHead;

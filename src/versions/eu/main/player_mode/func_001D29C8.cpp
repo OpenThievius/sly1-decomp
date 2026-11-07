@@ -2,7 +2,7 @@
 // PAL's own definition: restores the mode, resets the camera sub-object and sets the mode's music/state.
 const char* func_eu_001DDAB0(s32 id);
 
-void func_001D29C8(u32 mode)
+void ShowModeLabel(u32 mode)
 {
     switch (g_currentMode) {
     case 1:
@@ -16,7 +16,7 @@ void func_001D29C8(u32 mode)
             goto tail;
         if (((PlayerHeldObject*)(*(Player**)&g_player)->f1518) != 0) {
             if (IsObjectAttached(((PlayerHeldObject*)(*(Player**)&g_player)->f1518)) != 0)
-                func_00126D60(((PlayerHeldObject*)(*(Player**)&g_player)->f1518), 0.5f);
+                FadeOutPlacedObject(((PlayerHeldObject*)(*(Player**)&g_player)->f1518), 0.5f);
         }
         break;
     }

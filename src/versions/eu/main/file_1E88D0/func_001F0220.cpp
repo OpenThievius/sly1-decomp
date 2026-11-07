@@ -4,7 +4,7 @@ struct Sys_1F0220_eu { u8 pad0[0x30]; s32 f30; } __attribute__((packed));
 struct Tbl_1F0220_eu { u8 pad0[0x570]; void* f570; void* f574[1]; };
 extern Tbl_1F0220_eu D_eu_00274868;
 
-void func_001F0220(ScreenFade* self, s32 mode)
+void SetScreenFadeMode(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {

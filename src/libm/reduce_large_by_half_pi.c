@@ -18,10 +18,10 @@ static const f32 g_one = 1.0f;
 static const f32 g_digitBase = 2.5600000000e+02f;
 static const f32 g_invDigitBase = 3.9062500000e-03f;
 
-f32 func_00209260(f32 x, s32 n);
-f32 func_00205318(f32 x);
+f32 ScaleByPowerOfTwo(f32 x, s32 n);
+f32 RoundDown(f32 x);
 
-s32 func_002082F8(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi)
+s32 ReduceLargeByHalfPi(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi)
 {
     s32 lastTerm, lastDigit, firstIndex, termCount, carry, quadrant, chunks[20], i, j, k, limit, chunkExp, roundState;
     f32 value, sum, tableDigits[20], products[20], terms[20];

@@ -23,9 +23,9 @@ struct C60 : PlacedObject {
 
 typedef char check_C60[sizeof(C60) == 0x300 ? 1 : -1];
 
-void func_0015A8B8(C60* self);                       // slot 0
-void func_0015A918(C60* self, void* other);          // slot 10
-void func_0015A960(C60* self);                       // slot 17
-void func_0015A9A8(C60* self, void* arg1, void* arg2); // slot 37
+void InitC60Object(C60* self);                       // slot 0
+void LoadC60Object(C60* self, void* other);          // slot 10
+void UpdateC60Object(C60* self);                       // slot 17
+void DrawC60Object(C60* self, void* arg1, void* arg2); // slot 37
 
 #endif

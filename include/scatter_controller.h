@@ -57,6 +57,6 @@ struct ScatterController {
 
 typedef char check_ScatterController[sizeof(ScatterController) == 0x24 ? 1 : -1];
 
-extern ScatterController D_00261EF0;      // file_14EE40.cpp
+extern ScatterController g_scatterController;      // file_14EE40.cpp
 
 #endif

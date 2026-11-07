@@ -95,24 +95,24 @@ struct SemaParams_1F80C0 {
     u32 option;
 };
 
-extern Pools_1F7BE8 D_00627800;
+extern Pools_1F7BE8 g_remoteCallState;
 
-Packet_1F7BE8* func_001F7DB0(Pools_1F7BE8* self);
-void func_001F7E58(Packet_1F7BE8* packet);
-s32 func_001F6B20(SemaParams_1F80C0* params);
-void func_001F6B30(s32 sema);
-s32 func_001F6B60(s32 sema);
-s32 func_001FA630(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
+Packet_1F7BE8* TakeRequestPacket(Pools_1F7BE8* self);
+void FreeRequestPacket(Packet_1F7BE8* packet);
+s32 NewSemaphore(SemaParams_1F80C0* params);
+void FreeSemaphore(s32 sema);
+s32 AwaitSemaphore(s32 sema);
+s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 
-void func_001FA7D8(void* data, s32 size);
+void WriteBackDataCacheRange(void* data, s32 size);
 
-s32 func_001F8290(Client_1F7BE8* self, u32 cmd, u32 mode, void* send, s32 send_size, void* recv, s32 recv_size, Callback_1F7BE8 callback, s32 callback_arg)
+s32 CallRemoteService(Client_1F7BE8* self, u32 cmd, u32 mode, void* send, s32 send_size, void* recv, s32 recv_size, Callback_1F7BE8 callback, s32 callback_arg)
 {
     SemaParams_1F80C0 params;
     Packet_1F7BE8* packet;
     s32 sema;
 
-    packet = func_001F7DB0(&D_00627800);
+    packet = TakeRequestPacket(&g_remoteCallState);
     if (packet == 0) return -1;
     self->callback_arg = callback_arg;
     self->id = packet->id;
@@ -127,10 +127,10 @@ s32 func_001F8290(Client_1F7BE8* self, u32 cmd, u32 mode, void* send, s32 send_s
     packet->client = (u32)self;
     if ((mode & 2) == 0) {
         if (send == recv) {
-            func_001FA7D8(send, send_size < recv_size ? recv_size : send_size);
+            WriteBackDataCacheRange(send, send_size < recv_size ? recv_size : send_size);
         } else {
-            if (send_size > 0) func_001FA7D8(send, send_size);
-            if (recv_size > 0) func_001FA7D8(recv, recv_size);
+            if (send_size > 0) WriteBackDataCacheRange(send, send_size);
+            if (recv_size > 0) WriteBackDataCacheRange(recv, recv_size);
         }
     }
     if (mode & 1) {
@@ -140,27 +140,27 @@ s32 func_001F8290(Client_1F7BE8* self, u32 cmd, u32 mode, void* send, s32 send_s
             packet->f30 = 1;
         }
         self->sema = -1;
-        if (func_001FA630(0x8000000A, packet, 0x40, (s32)send, self->f14, send_size) != 0) {
+        if (SendCommand(0x8000000A, packet, 0x40, (s32)send, self->f14, send_size) != 0) {
             return 0;
         }
-        func_001F7E58(packet);
+        FreeRequestPacket(packet);
         return -2;
     }
     params.init_count = 0;
     params.max_count = 1;
-    sema = func_001F6B20(&params);
+    sema = NewSemaphore(&params);
     self->sema = sema;
     if (sema < 0) {
-        func_001F7E58(packet);
+        FreeRequestPacket(packet);
         return -3;
     }
     packet->f30 = 1;
-    if (func_001FA630(0x8000000A, packet, 0x40, (s32)send, self->f14, send_size) == 0) {
-        func_001F6B30(self->sema);
-        func_001F7E58(packet);
+    if (SendCommand(0x8000000A, packet, 0x40, (s32)send, self->f14, send_size) == 0) {
+        FreeSemaphore(self->sema);
+        FreeRequestPacket(packet);
         return -2;
     }
-    func_001F6B60(self->sema);
-    func_001F6B30(self->sema);
+    AwaitSemaphore(self->sema);
+    FreeSemaphore(self->sema);
     return 0;
 }

@@ -10,9 +10,9 @@ static const f32 g_log10Of2Head = 3.0102920532e-01f;
 static const f32 g_log10Of2Tail = 7.9034151668e-07f;
 static const f32 g_zero = 0.0f;
 
-f32 func_00206FA0(f32 x);
+f32 LogarithmKernel(f32 x);
 
-f32 func_002072C8(f32 x)
+f32 LogarithmBase10Kernel(f32 x)
 {
     s32 bits, exponent, neg;
     f32 exponentF;

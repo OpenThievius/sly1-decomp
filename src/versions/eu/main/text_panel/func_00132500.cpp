@@ -9,7 +9,7 @@ struct Obj_eu_132500 {
     s32 f5AC;
 };
 
-void func_00136EC8(Obj_eu_132500* self, f32* x, f32* y);
+void GetTextPanelCenter(Obj_eu_132500* self, f32* x, f32* y);
 
 struct Gfx_eu_132500 {
     static s32 ScreenX(f32 x)
@@ -23,7 +23,7 @@ struct Gfx_eu_132500 {
     }
 };
 
-void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
+void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;

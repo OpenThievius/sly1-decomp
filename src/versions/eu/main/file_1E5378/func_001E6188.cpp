@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the instrument pointer is at 0x58C (US 0x27C).
-void func_001AA268(void* self);
+void SetupScreenElementText(void* self);
 struct Obj_1E6188_eu { u8 pad[0x58C]; ConeSprite* p58C; };
 
-void func_001E6188(Obj_1E6188_eu* self)
+void CreateArcSprite(Obj_1E6188_eu* self)
 {
     SetupScreenElementText(self);
     self->p58C = (ConeSprite*)CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode(self->p58C, 1);
-    func_001847F0(self->p58C, D_00275640);
-    func_00184858(self->p58C, D_00275650);
-    func_00184818(self->p58C, D_00275654);
-    func_00184878(self->p58C, D_00275658);
-    func_00184838(self->p58C, D_0027565C);
-    func_00184898(self->p58C, D_00275660);
+    SetConeVolumeColor(self->p58C, D_00275640);
+    SetConeVolumeFirstAngle(self->p58C, D_00275650);
+    SetConeVolumeSecondLevel(self->p58C, D_00275654);
+    SetConeVolumeSecondAngle(self->p58C, D_00275658);
+    SetConeVolumeThirdLevel(self->p58C, D_0027565C);
+    SetConeVolumeThirdAngle(self->p58C, D_00275660);
     SetConeVolumeRange(self->p58C, D_00275B58);
     SetConeVolumeValue(self->p58C, 1);
     self->p58C->vtbl[7](self->p58C);

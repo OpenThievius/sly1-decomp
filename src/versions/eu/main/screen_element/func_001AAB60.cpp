@@ -13,9 +13,9 @@ struct Self_1AAB60_eu {
     s32 f250;
 };
 
-void func_001AAEC0(Self_1AAB60_eu* self);
+void PlaceAnchoredScreenElements(Self_1AAB60_eu* self);
 
-void func_001AAB60(Self_1AAB60_eu* self) {
+void PlaceScreenElement(Self_1AAB60_eu* self) {
     Rec_1AAB60* r = self->f218;
     f32 x0 = 0.0f;
     f32 x1 = 640.0f;

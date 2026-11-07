@@ -8,16 +8,16 @@ s32 func_0020A078(s32 a0, s32 a1, s8* a2)
     Buf_0020A078* buf;
     Buf_0020A078* res;
 
-    if (func_001F6B70(D_0027AECC) < 0) {
+    if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    reg = ((Reg_0020A078*)&D_0062AD40);
+    reg = ((Reg_0020A078*)&g_cardClient);
     if (reg->f24 == 0) {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(g_cardSemaphore);
         return -100;
     }
     if (a2 == 0 || *a2 == 0) {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(g_cardSemaphore);
         return -210;
     }
     buf = ((Buf_0020A078*)&D_0062ADF0);
@@ -25,11 +25,11 @@ s32 func_0020A078(s32 a0, s32 a1, s8* a2)
     buf->f4 = a1;
     func_eu_001F7738(buf->text14, a2, 0x3FF);
     buf->text14[0x3FF] = 0;
-    res = func_001F8290(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
     if (res == 0) {
-        D_0027AEC8 = 0x12;
+        g_cardRequestInFlight = 0x12;
     } else {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(g_cardSemaphore);
     }
     return (s32)res;
 }

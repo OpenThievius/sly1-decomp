@@ -10,32 +10,32 @@
 #include "cursor_animator.h"
 #include "asm_func.h"
 
-void func_001B1BF0(RangeRecord* o);
-void func_001F5C0C(void* p, s32 v, s32 n);
-extern s32 D_002626D0;
+void InvalidateRangeRecordPacket(RangeRecord* o);
+void FillMemory(void* p, s32 v, s32 n);
+extern s32 g_meshQueueCount;
 extern u8 D_0027DC20[];
-void func_001B1CF8(RangeRecord* self, s32 code);
-s32 func_001B1D38(RangeRecord* self);
-void func_001B1D70(RangeRecord* self, f32 v);
-void func_001B1DA8(RangeRecord* self, f32 v);
-AnimRecord* func_001B4688(s32 key);
-void func_001B1BF8(RangeRecord* o);
-s32 func_00137B90(void* src);
-PathCurve* func_0014D9A8(s32 kind);
-void func_0011EC40(void* self, void* obj);
-void func_001B2358(void* o);
-s32 func_001B26F8(RangeRecord* node, void* a1, f32 f);
-f32 func_002054F0(RangeRecord* o, f32 s);
+void LinkRangeRecord(RangeRecord* self, s32 code);
+s32 HasRangeRecordRanges(RangeRecord* self);
+void StoreRangeRecordNear(RangeRecord* self, f32 v);
+void StoreRangeRecordFar(RangeRecord* self, f32 v);
+AnimRecord* FindAnimRecord(s32 key);
+void UpdateRangeRecordBounds(RangeRecord* o);
+s32 ReadBufferedU8(void* src);
+PathCurve* CreatePathCurve(s32 kind);
+void ReadPropertyRecords(void* self, void* obj);
+void BuildRangeRecordPacket(void* o);
+s32 RangeRecordReachesSphere(RangeRecord* node, void* a1, f32 f);
+f32 Tangent(RangeRecord* o, f32 s);
 extern u8 D_00248400[];
-void func_00188B08(void* a, void* b, Mat4A* dst);
-void func_00182F78(BaseObject* self, void* other);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, Mat4A* dst);
+void ReparentObject(BaseObject* self, void* other);
 
 // The file's .data, in retail's order.
 f32 D_002744F0 = 50.0f;
 
 ASM_FUNC(func_001B1AC8);
 
-void func_001B1B38(RangeRecord* self)
+void PrepareRangeRecord(RangeRecord* self)
 {
     if (self->link == 0) {
         LinkRangeRecord(self, 0x2C);
@@ -55,14 +55,14 @@ void func_001B1B38(RangeRecord* self)
     }
 }
 
-void func_001B1BF0(RangeRecord* self)
+void InvalidateRangeRecordPacket(RangeRecord* self)
 {
     self->fC0 = 0;
 }
 
 ASM_FUNC(func_001B1BF8);
 
-void func_001B1CF8(RangeRecord* self, s32 key)
+void LinkRangeRecord(RangeRecord* self, s32 key)
 {
     AnimRecord* found = FindAnimRecord(key != -1 ? key : 0x2C);
     self->link = found;
@@ -70,7 +70,7 @@ void func_001B1CF8(RangeRecord* self, s32 key)
         InvalidateRangeRecordPacket(self);
 }
 
-s32 func_001B1D38(RangeRecord* p)
+s32 HasRangeRecordRanges(RangeRecord* p)
 {
     s32 r = 0;
     if (0.0f <= p->f04 && 0.0f <= p->f08)
@@ -78,7 +78,7 @@ s32 func_001B1D38(RangeRecord* p)
     return r;
 }
 
-void func_001B1D70(RangeRecord* p, f32 v)
+void StoreRangeRecordNear(RangeRecord* p, f32 v)
 {
     p->f04 = v;
     if (p->f08 < 0.0f)
@@ -86,7 +86,7 @@ void func_001B1D70(RangeRecord* p, f32 v)
     InvalidateRangeRecordPacket(p);
 }
 
-void func_001B1DA8(RangeRecord* o, f32 v)
+void StoreRangeRecordFar(RangeRecord* o, f32 v)
 {
     o->f08 = v;
     if (o->f04 < 0.0f) {
@@ -99,34 +99,34 @@ ASM_FUNC(func_001B1DE0);
 
 ASM_FUNC(func_001B1EC8);
 
-void func_001B1FB0(RangeRecord* o, f32 v)
+void StoreRangeRecordInner(RangeRecord* o, f32 v)
 {
     o->f40 = v;
     UpdateRangeRecordBounds(o);
     InvalidateRangeRecordPacket(o);
 }
 
-void func_001B1FE0(RangeRecord* o, f32 v)
+void StoreRangeRecordOuter(RangeRecord* o, f32 v)
 {
     o->f44 = v;
     UpdateRangeRecordBounds(o);
     InvalidateRangeRecordPacket(o);
 }
 
-void func_001B2010(RangeRecord* o, f32 s) {
+void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
     f32 t = Tangent(o, s * 0.00872664712f);
     o->f04 = t * o->f40;
     o->f08 = t * o->f44;
     InvalidateRangeRecordPacket(o);
 }
 
-void func_001B2068(RangeRecord* self, Quad16* src)
+void StoreRangeRecordVector(RangeRecord* self, Quad16* src)
 {
     *(Quad16*)((u8*)self + 0x30) = *src;
     InvalidateRangeRecordPacket(self);
 }
 
-s32 func_001B2090(RangeRecord* self, u32 bits)
+s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits)
 {
     s32 r = 0;
     if (self->link != 0) {
@@ -146,7 +146,7 @@ s32 func_001B2090(RangeRecord* self, u32 bits)
     return r;
 }
 
-s32 func_001B2118(void* unused, Collider* o)
+s32 IsRangeRecordBodyCandidate(void* unused, Collider* o)
 {
     s32 r = 0;
     if ((o->flags538 & (1UL << 43)) == 0) {
@@ -163,7 +163,7 @@ extern const f32 D_0024D168 = 3.40282347e+38f;
 
 ASM_FUNC(func_001B2358);
 
-void func_001B2640(RangeRecord* o)
+void QueueRangeRecordPacket(RangeRecord* o)
 {
     if (o->link != 0) {
         Camera* c = g_camera;
@@ -199,7 +199,7 @@ done:
 
 ASM_FUNC(func_001B26F8);
 
-void func_001B2790(World* self, void* a1, s32 max, s32* outCount, RangeRecord** out, f32 f)
+void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, RangeRecord** out, f32 f)
 {
     ListFrame frame;
     s32 count = 0;
@@ -219,7 +219,7 @@ void func_001B2790(World* self, void* a1, s32 max, s32* outCount, RangeRecord** 
     *outCount = count;
 }
 
-void func_001B2840(PathCurveObject* self, void* obj)
+void LoadPathCurveObject(PathCurveObject* self, void* obj)
 {
     PathCurve* p = CreatePathCurve(ReadBufferedU8(obj));
     self->curve = p;
@@ -230,7 +230,7 @@ void func_001B2840(PathCurveObject* self, void* obj)
     ReadPropertyRecords(self, obj);
 }
 
-void func_001B28A8(PathCurveObject* self, BaseObject* other)
+void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other)
 {
     Mat4A a;
     Mat4A b;

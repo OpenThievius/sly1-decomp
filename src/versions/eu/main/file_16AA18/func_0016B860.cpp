@@ -20,12 +20,12 @@ struct Obj_16B860_eu {
     s32 f570;
 };
 
-extern f32 D_00261868;
-f32 func_00205400(f32 x);
-void func_0015C8B8(s32 handle, f32 a, f32 b);
-void* func_0015DB28(void* out, void* p, s32 handle);
-void func_0015E318(void* a, void* b, s32 c, void* d);
-void func_0015C900(s32 handle);
+extern f32 g_elapsedTime;
+f32 Sine(f32 x);
+void PushFontScale(s32 handle, f32 a, f32 b);
+void* InitTextReader(void* out, void* p, s32 handle);
+void DrawAlignedText(void* a, void* b, s32 c, void* d);
+void PopFontScale(s32 handle);
 
 void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 z);
 void func_eu_0015E7E0(void* a, void* b, s32 c, void* d);
@@ -35,7 +35,7 @@ struct Out_eu_16B860 : CaptionLayout {
     void Draw(void* loc, s32 z, void* tbl) { func_eu_0015E7E0(loc, this, z, tbl); }
 };
 
-void func_0016B860(Obj_16B860_eu* self)
+void DrawSelectionCaption(Obj_16B860_eu* self)
 {
     Pk4_16B860 tmp;
     Out_eu_16B860 out;
@@ -63,7 +63,7 @@ void func_0016B860(Obj_16B860_eu* self)
             CaptionDrawer::Draw((Font**)self->f520, &out, &g_gsPacketWriter);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
-        f32 r = func_00205400(g_elapsedTime * 10.0f);
+        f32 r = Sine(g_elapsedTime * 10.0f);
         f32 t = r * 0.5f + 0.5f;
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->f51c * k;

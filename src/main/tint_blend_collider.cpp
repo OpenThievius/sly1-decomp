@@ -25,7 +25,7 @@
 struct ColliderLink { s32 flags, id, offset; };
 struct ColliderLinkTable { ColliderLink e[9]; s32 end; };
 
-extern u8 D_00275C60[];
+extern u8 g_unitRange[];
 
 Quad16 D_00275730 = { 0x42C80000, 0, 0, 0 };
 Quad16 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
@@ -61,9 +61,9 @@ f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 
 
-void func_00123ED0(RedirectObject* self);
+void InitPlacedObject(RedirectObject* self);
 
-void func_001DDCE0(RedirectObject* self)
+void InitRedirectObject(RedirectObject* self)
 {
     InitPlacedObject(self);
     self->q320 = D_00275730;
@@ -73,9 +73,9 @@ ASM_FUNC(func_001DDD18);
 
 ASM_FUNC(func_001DDE90);
 
-void func_001276C0(RedirectObject* self);
+void CopyPlacedObjectFrame(RedirectObject* self);
 
-void func_001DE768(RedirectObject* self)
+void MarkRedirectToSelf(RedirectObject* self)
 {
     if (self->target == self) {
         self->targetIsSelf = 1;
@@ -84,11 +84,11 @@ void func_001DE768(RedirectObject* self)
 }
 
 
-void func_001C4458(TintBlendCollider* self);
-f32 func_00205778(f32 a, f32 b);
-void func_00188850(const Vec02* t, void* out, f32 x);
+void InitTurningCollider(TintBlendCollider* self);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
 
-void func_001DE798(TintBlendCollider* self)
+void InitTintBlendCollider(TintBlendCollider* self)
 {
     f32 f;
 
@@ -108,13 +108,13 @@ typedef void (*LinkTargetFn)(void* self, void* a1, s32 a2);
 typedef void (*AttachedEffectFn)(void* self);
 
 
-void func_001C44F0(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void func_00129D00(void* a, s32 b, void* c);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_001DFBE0(void* self, s32 flag);
+void StartTurningCollider(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void AddMatrixAttachment(void* a, s32 b, void* c);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void SetTintBlendColliderState(void* self, s32 flag);
 
-void func_001DE808(TintBlendCollider* self)
+void StartTintBlendCollider(TintBlendCollider* self)
 {
     TintBlendCollider* s = self;
     s32 flag;
@@ -145,17 +145,17 @@ void func_001DE808(TintBlendCollider* self)
 struct TintGlowEffect;
 typedef s32 (*ContactClaimFn)(void* self, void* a1, void* a2);
 typedef void (*OwnerMessageFn)(void* self, void* a1);
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
-void func_001C4ED0(void);
-s32 func_00128230(TintBlendCollider* self);
-void func_001DEB30(TintBlendCollider* self);
-void func_001D7098(OwnerMessage* l, s32 zero, Collider* c);
-void func_001861E8(World* a0, Contact03* a1);
-void func_00129E10(TintGlowEffect* a, f32 v);
-void func_00129FB0(TintGlowEffect* a, f32 v);
+void UpdateTurningCollider(void);
+s32 HasAnimationDrivenAttachment(TintBlendCollider* self);
+void ResetTintBlendColliderOrientation(TintBlendCollider* self);
+void InitOwnerMessage(OwnerMessage* l, s32 zero, Collider* c);
+void FreePooledContactChain(World* a0, Contact03* a1);
+void SetScaledPositionSpring(TintGlowEffect* a, f32 v);
+void SetScaledRotationSpring(TintGlowEffect* a, f32 v);
 
-void func_001DE910(TintBlendCollider* self)
+void UpdateTintBlendCollider(TintBlendCollider* self)
 {
     OwnerMessage loc;
     f32 f20;
@@ -165,7 +165,7 @@ void func_001DE910(TintBlendCollider* self)
     s32 idx;
 
     UpdateTurningCollider();
-    if (func_00128230(self) != 0) {
+    if (HasAnimationDrivenAttachment(self) != 0) {
         ResetTintBlendColliderOrientation(self);
     }
     Contact03* head = ((Contact03*)self->f740);
@@ -208,8 +208,8 @@ void func_001DE910(TintBlendCollider* self)
             f20 = x;
         }
     }
-    func_00129E10(((TintGlowEffect*)self->f748), f20 * D_002757D0[0]);
-    func_00129FB0(((TintGlowEffect*)self->f748), f20 * D_002757D4);
+    SetScaledPositionSpring(((TintGlowEffect*)self->f748), f20 * D_002757D0[0]);
+    SetScaledRotationSpring(((TintGlowEffect*)self->f748), f20 * D_002757D4);
     if (self->f728 != 0 && self->f720 != 2) {
         f32 e = g_gameClock[1] - self->f730;
         if (2.0f < e) {
@@ -220,20 +220,20 @@ void func_001DE910(TintBlendCollider* self)
 
 ASM_FUNC(func_001DEB30);
 
-void func_00192C58(void* self);
-void func_001DFBE0(void* self, s32 flag);
+void FinishSwitchedCollider(void* self);
+void SetTintBlendColliderState(void* self, s32 flag);
 
-void func_001DEBB8(TintBlendCollider* self)
+void FinishTintBlendColliderRequest(TintBlendCollider* self)
 {
-    func_00192C58(self);
+    FinishSwitchedCollider(self);
     SetTintBlendColliderState(self, 1);
 }
 
 ASM_FUNC(func_001DEBE8);
 
-void func_001922E8(void* self, void* p);
+void HandleSwitchedColliderActivation(void* self, void* p);
 
-void func_001DF290(TintBlendCollider* self, void* p)
+void SetTintBlendColliderTracked(TintBlendCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p == 0) {
@@ -241,7 +241,7 @@ void func_001DF290(TintBlendCollider* self, void* p)
     }
 }
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 extern Rgba4 D_002623E0;
 
 struct UnitClamp {
@@ -251,11 +251,11 @@ struct UnitClamp {
     }
 };
 
-f32 func_00205210(f32 x);
-void func_00126A48(TintBlendCollider* s, u32 c);
+f32 Cosine(f32 x);
+void SetObjectTreeRecordValue(TintBlendCollider* s, u32 c);
 void func_00125C90(TintBlendCollider* s, void* a, void* b);
 
-void func_001DF2C8(TintBlendCollider* self, void* a1, void* a2)
+void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 {
     Rgba4 out;
     Rgba4 col;
@@ -289,9 +289,9 @@ void func_001DF2C8(TintBlendCollider* self, void* a1, void* a2)
 
 ASM_FUNC(func_001DF520);
 
-s32 func_001DDA80(void* p);
+s32 IsPadSelectFlagHeld(void* p);
 
-s32 func_001DF5A0(TintBlendCollider* self, s32 mode)
+s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 {
     if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
@@ -301,22 +301,22 @@ ASM_FUNC(func_001DF600);
 
 ASM_FUNC(func_001DF700);
 
-void func_001BC4D8(void* self, void* sub);
-void func_001C57C8(void* self);
+void ExtractContactsByPartMode(void* self, void* sub);
+void CollectTurningColliderContacts(void* self);
 
-void func_001DFA10(TintBlendCollider* self)
+void CollectTintBlendColliderContacts(TintBlendCollider* self)
 {
     ExtractContactsByPartMode(self, (u8*)self + 0x740);
-    func_001C57C8(self);
+    CollectTurningColliderContacts(self);
 }
 
 struct TintBlendOutput { u8 pad0[0x94]; f32 f94; s32 f98; };
 
 typedef s32 (*TintBlendTestFn)(void* self, void* out);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_001DFA40(TintBlendCollider* self, void* out)
+void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
 {
     TintBlendCollider* obj = self;
     TintBlendOutput* o = (TintBlendOutput*)out;
@@ -343,11 +343,11 @@ void func_001DFA40(TintBlendCollider* self, void* out)
     }
 }
 
-void func_001B6598(void* dev, s32* out);
-void func_001B6568(void* dev, s32* out);
-void func_00192230(void* self, s32 kind, MessageBody* rec);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void GetStateWalkerTargetKey(void* dev, s32* out);
+void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
 
-void func_001DFB08(TintBlendCollider* self, s32 code, MessageBody* rec)
+void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, MessageBody* rec)
 {
     s32 loc[2];
 
@@ -375,20 +375,20 @@ void func_001DFB08(TintBlendCollider* self, s32 code, MessageBody* rec)
     HandleSwitchedColliderNotification(self, code, rec);
 }
 
-s32 func_001DFBD0(TintBlendCollider* self)
+s32 GetTintBlendColliderRequestPhase(TintBlendCollider* self)
 {
     return self->f728 != 0;
 }
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
 
 
-void func_001B64D8(StateTrigger* h, s32 b);
-void func_001B6628(StateTrigger* h, s32 b);
-void func_00188850(const Vec02* tab, void* out, f32 v);
+void SetStateWalkerTarget(StateTrigger* h, s32 b);
+void TeleportStateWalker(StateTrigger* h, s32 b);
+void BuildAxisAngleMatrix(const Vec02* tab, void* out, f32 v);
 
-void func_001DFBE0(TintBlendCollider* self, s32 mode)
+void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
 {
     s32 old = self->f720;
     if (mode != old) {

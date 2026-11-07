@@ -151,7 +151,7 @@ struct T217D_510 : ScreenElement {
     s32 f290;                   // 0x290: set by func_001AB600 and func_001AB958, 0 by func_001AB890
 };
 
-void func_001ABE20(T217D_510* self, s32 state);
+void SetTimerState(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
@@ -361,27 +361,27 @@ struct T217D_720 : ScreenElement {
 };
 
 // The base's functions (src/main/001A8000.cpp).
-void func_001AA1F0(ScreenElement* self, s32 index);
-void func_001AA268(ScreenElement* self);
-void func_001AA298(ScreenElement* self);
-void func_001AA4F0(ScreenElement* self, const char* text);
-void func_001AA788(ScreenElement* self, f32 scale);
-void func_001AA790(ScreenElement* self);
-f32 func_001AA898(ScreenElement* self);
-f32 func_001AA8A0(ScreenElement* self);
-f32 func_001AA8A8(ScreenElement* self);
-void func_001AA8B0(ScreenElement* self, f32 seconds);
-void func_001AA8B8(ScreenElement* self, f32 seconds);
-void func_001AA8C0(ScreenElement* self, f32 seconds);
-void func_001AA8C8(ScreenElement* self);
-void func_001AA8F0(ScreenElement* self);
-void func_001AA958(ScreenElement* self);
-void func_001AA998(ScreenElement* self, s32 mode);
-s32 func_001AAAC8(ScreenElement* self, ScreenElement* other);
-void func_001AAB20(ScreenElement* self, f32 w, f32 h);
-void func_001AAB60(ScreenElement* self);
-void func_001AAEC0(ScreenElement* changed);
-void func_001AAF58(ScreenElement* self, f32* clock);
+void InitScreenElement(ScreenElement* self, s32 index);
+void SetupScreenElementText(ScreenElement* self);
+void UpdateScreenElementSlide(ScreenElement* self);
+void SetScreenElementText(ScreenElement* self, const char* text);
+void SetScreenElementScale(ScreenElement* self, f32 scale);
+void DrawScreenElementText(ScreenElement* self);
+f32 GetScreenElementSlideInTime(ScreenElement* self);
+f32 GetScreenElementHoldTime(ScreenElement* self);
+f32 GetScreenElementSlideOutTime(ScreenElement* self);
+void SetScreenElementSlideInTime(ScreenElement* self, f32 seconds);
+void SetScreenElementHoldTime(ScreenElement* self, f32 seconds);
+void SetScreenElementSlideOutTime(ScreenElement* self, f32 seconds);
+void ResetScreenElement(ScreenElement* self);
+void ShowScreenElement(ScreenElement* self);
+void HideScreenElement(ScreenElement* self);
+void SetScreenElementMode(ScreenElement* self, s32 mode);
+s32 AreScreenElementsTogether(ScreenElement* self, ScreenElement* other);
+void SetScreenElementSize(ScreenElement* self, f32 w, f32 h);
+void PlaceScreenElement(ScreenElement* self);
+void PlaceAnchoredScreenElements(ScreenElement* changed);
+void SetScreenElementClock(ScreenElement* self, f32* clock);
 
 // The 37 objects, in .data in address order (GCC writes uninitialised globals in the order
 // they are first declared; D_002486B0 lists them in its own order). Each is of the variant of
@@ -391,25 +391,25 @@ extern T217D_E30 D_0026C948;    // D_00217E80
 extern T217D_E30 D_0026CBC8;    // D_00217ED0
 extern T217D_E30 D_0026CE48;    // D_00217F20
 extern T217D_E30 D_0026D0C8;    // D_00217F70
-extern T217D_E30 D_0026D348;    // D_00217FC0
+extern T217D_E30 g_gaugeAmountCaption;    // D_00217FC0
 extern T217D_E30 D_0026D5C8;    // D_002180B0
 extern T217D_E30 D_0026D848;    // D_00218010
 extern T217D_E30 D_0026DAC8;    // D_00218060
 extern T217D_E30 D_0026DD48;    // D_00218100
 extern T217D_E30 D_0026DFC8;    // D_00218150
-extern T217D_2E0 D_0026E248;    // D_002182E0
+extern T217D_2E0 g_gaugeBarElement;    // D_002182E0
 extern T217D_E30 D_0026E4E0;    // D_002181A0
-extern T217D_510 D_0026E760;    // D_00218510
-extern T217D_1380 D_0026E9F8;   // D_00221380
-extern T217D_330 D_0026EC70;    // D_00218330
+extern T217D_510 g_timerElement;    // D_00218510
+extern T217D_1380 g_timerCaption;   // D_00221380
+extern T217D_330 g_buttonHintElement;    // D_00218330
 extern T217D_380 D_0026EED0;    // D_00218380
 extern T217D_3D0 D_0026F138;    // D_002183D0
 extern T217D_420 D_0026F5A0;    // D_00218420
-extern T217D_0F0 D_0026F808;    // D_002210F0
+extern T217D_0F0 g_mapScreenList;    // D_002210F0
 extern T217D_12E0 D_0026FA90;   // D_002212E0
 extern T217D_1330 D_0026FD00;   // D_00221330
-extern T217D_6D0 D_0026FF68;    // D_002186D0
-extern T217D_440 D_002701F8;    // D_0021A440
+extern T217D_6D0 g_pauseMenuElement;    // D_002186D0
+extern T217D_440 g_typedTextCaptionBox;    // D_0021A440
 extern T217D_BF0 D_00270650;    // D_00220BF0
 extern T217D_3F0 D_002708E0;    // D_0021A3F0
 extern T217D_3F0 D_00271558;    // D_0021A3F0
@@ -418,7 +418,7 @@ extern T217D_E30 D_00272430;    // D_00218240
 extern T217D_E30 D_002726B0;    // D_00218290
 extern T217D_470 D_00272930;    // D_00218470
 extern T217D_4C0 D_00272B98;    // D_002184C0
-extern T217D_720 D_00272E08;    // D_00218720
+extern T217D_720 g_stackedCaptionGroup;    // D_00218720
 extern T217D_5B0 D_002739F0;    // D_002185B0
 extern T217D_5B0 D_00273C50;    // D_002185B0
 extern T217D_600 D_00273EB0;    // D_00218600

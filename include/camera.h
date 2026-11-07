@@ -73,6 +73,6 @@ struct Camera : BaseObject {
 
 typedef char check_Camera[sizeof(Camera) == 0x590 ? 1 : -1];
 
-void func_00143648(Camera* self);   // slot 0
+void InitCamera(Camera* self);   // slot 0
 
 #endif

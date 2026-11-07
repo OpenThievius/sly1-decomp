@@ -2,7 +2,7 @@
 // PAL: sets the object's state (0 to 3); 69 elements, fields 0x310 further on, tail 0x520 further on.
 struct Elem_1E7518_eu { u8 pad00[0x18]; f32 f18; f32 f1C; f32 f20; f32 f24; f32 f28; };
 struct Obj_1E7518_eu;
-void func_001E7460(Obj_1E7518_eu* self);
+void ApplyArcTarget(Obj_1E7518_eu* self);
 struct Obj_1E7518_eu
 {
     u8 pad000[0x578];
@@ -14,7 +14,7 @@ struct Obj_1E7518_eu
     f32 f1190;
 };
 
-void func_001E7518(Obj_1E7518_eu* self, s32 mode)
+void SetArcPhase(Obj_1E7518_eu* self, s32 mode)
 {
     if (mode == self->f578) {
         return;

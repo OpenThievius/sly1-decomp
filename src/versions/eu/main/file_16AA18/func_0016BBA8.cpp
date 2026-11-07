@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL definition: same code as US, PAL data addresses.
 struct Ctx_eu_16BBA8 { u8 pad0[0x570]; s32 f570; };
-void func_0016BBA8(Ctx_eu_16BBA8* ctx, PadRecord* o)
+void HandleGridSelectorInput(Ctx_eu_16BBA8* ctx, PadRecord* o)
 {
     s32 s1;
     s32 r2;

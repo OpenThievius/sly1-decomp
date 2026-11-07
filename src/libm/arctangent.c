@@ -11,9 +11,9 @@ static const f32 g_atanCoefficients[] = { 0.33333334f, -0.2f, 0.14285715f, -0.11
 static const f32 g_one = 1.0f;
 static const f32 g_tenTo30 = 1.0e30f;
 
-f32 func_002052F8(f32 x);
+f32 AbsoluteValue(f32 x);
 
-f32 func_00204F68(f32 x)
+f32 Arctangent(f32 x)
 {
     s32 bits;
     s32 magnitude;

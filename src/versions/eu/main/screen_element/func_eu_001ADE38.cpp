@@ -14,8 +14,8 @@ struct Frame_eu_1ADE38 {
 s32 func_eu_00160800(s32 key);
 s32 func_eu_00160750(s32 key);
 void* func_eu_001E3050(void* out, s32 v);
-void func_001ACEE0(void* a, u8* rec, s32 c);
-s32 func_001E2100(const void* s);
+void FormatFlagGlyphs(void* a, u8* rec, s32 c);
+s32 GetStringLength(const void* s);
 void func_eu_001E3178(void* a, const void* b);
 
 void func_eu_001ADE38(void* self, s32 a1, s32 a2)

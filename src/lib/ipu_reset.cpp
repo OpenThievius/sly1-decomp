@@ -30,10 +30,10 @@ Quad_27B0C0 D_0027B110[2] = {
     { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
 };
 
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
 
-void func_00211B40(u32 value)
+void StartIpuInputForReset(u32 value)
 {
     DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
@@ -42,7 +42,7 @@ void func_00211B40(u32 value)
     EnableInterrupts();
 }
 
-void func_00211BA8(void)
+void ResetIpu(void)
 {
     StartIpuInputForReset(1);
     *(volatile u32*)0x10002010 = 0x40000000;

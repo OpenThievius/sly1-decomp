@@ -137,33 +137,33 @@ typedef char check_FrameRange[sizeof(FrameRange) == 0x10 ? 1 : -1];
 typedef char check_BlinkObject[sizeof(BlinkObject) == 0x620 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001AECB0(TimedObject* self);                      // 0x30 slot 0
-void func_001AEFA0(TimedObject* self);                      // 0x30 slot 17
-void func_001AECE0(TimedObject* self, s32 value);           // 0x30 slot 76
-void func_001AECE8(TimedObject* self, s32 state);           // 0x30 slot 77
-void func_001AF0A0(TimedGroup* self);                      // 0x31 slot 0
-void func_001AF0D0(TimedGroup* self);                      // 0x31 slot 10
-void func_001AF3B8(TimedGroup* self);                      // 0x31 slot 16
-void func_001AF5C8(TimedGroup* self, f32 dt);              // 0x31 slot 17
-void func_001AF7A8(TimedGroup* self, void* p);             // 0x31 slot 20
-void func_001B00E8(TimedGroup* self, s32 flag);            // 0x31 slot 73
-void func_001B0120(TimedGroup* self);                      // 0x31 slot 74
-void func_001B0160(TimedGroup* self);                      // 0x31 slot 75
-void func_001B01B0(TimedGroup* self, s32 state);           // 0x31 slot 77
-void func_001B04A0(SequencedObject* self);                      // 0x32 slot 0
-void func_001B04D0(SequencedObject* self);                      // 0x32 slot 16
-void func_001B0578(SequencedObject* self);                      // 0x32 slot 17
-s32 func_001B0BD8();                                // 0x32 slot 56
-void func_001B0EA8(SequencedObject* self, s32 flag);            // 0x32 slot 73
-void func_001B0EE0(SequencedObject* self);                      // 0x32 slot 74
-void func_001B0F70(SequencedObject* self);                      // 0x32 slot 75
-void func_001B0FC0(SequencedObject* self, s32 state);           // 0x32 slot 77
-void func_001B1158(BlinkObject* self);                      // 0x33 slot 0
-void func_001B11A0(BlinkObject* self);                      // 0x33 slot 16
-void func_001B1238(BlinkObject* self);                      // 0x33 slot 17
-void func_001B15D0(BlinkObject* self, s32 flag);            // 0x33 slot 73
-void func_001B1608(BlinkObject* self);                      // 0x33 slot 74
-void func_001B1698(BlinkObject* self);                      // 0x33 slot 75
-void func_001B1710(BlinkObject* self, s32 state);           // 0x33 slot 77
+void InitTimedObject(TimedObject* self);                      // 0x30 slot 0
+void UpdateTimedObject(TimedObject* self);                      // 0x30 slot 17
+void SetTimedObjectTarget(TimedObject* self, s32 value);           // 0x30 slot 76
+void EnterTimedObjectState(TimedObject* self, s32 state);           // 0x30 slot 77
+void InitTimedGroup(TimedGroup* self);                      // 0x31 slot 0
+void LoadTimedGroup(TimedGroup* self);                      // 0x31 slot 10
+void CloneTimedGroupEntries(TimedGroup* self);                      // 0x31 slot 16
+void UpdateTimedGroup(TimedGroup* self, f32 dt);              // 0x31 slot 17
+void SetStaggeredColliderFrozen(TimedGroup* self, void* p);             // 0x31 slot 20
+void SetTimedGroupMode(TimedGroup* self, s32 flag);            // 0x31 slot 73
+void RequestTimedGroupEnd(TimedGroup* self);                      // 0x31 slot 74
+void FinishTimedGroup(TimedGroup* self);                      // 0x31 slot 75
+void EnterTimedGroupState(TimedGroup* self, s32 state);           // 0x31 slot 77
+void InitSequencedObject(SequencedObject* self);                      // 0x32 slot 0
+void SetupSequencedObject(SequencedObject* self);                      // 0x32 slot 16
+void UpdateSequencedObject(SequencedObject* self);                      // 0x32 slot 17
+s32 TestSequencedObjectMayContact();                                // 0x32 slot 56
+void SetSequencedObjectMode(SequencedObject* self, s32 flag);            // 0x32 slot 73
+void RequestSequencedObjectEnd(SequencedObject* self);                      // 0x32 slot 74
+void FinishSequencedObject(SequencedObject* self);                      // 0x32 slot 75
+void EnterSequencedObjectState(SequencedObject* self, s32 state);           // 0x32 slot 77
+void InitBlinkObject(BlinkObject* self);                      // 0x33 slot 0
+void SetupBlinkObject(BlinkObject* self);                      // 0x33 slot 16
+void UpdateBlinkObject(BlinkObject* self);                      // 0x33 slot 17
+void SetBlinkObjectMode(BlinkObject* self, s32 flag);            // 0x33 slot 73
+void RequestBlinkObjectEnd(BlinkObject* self);                      // 0x33 slot 74
+void FinishBlinkObject(BlinkObject* self);                      // 0x33 slot 75
+void EnterBlinkObjectState(BlinkObject* self, s32 state);           // 0x33 slot 77
 
 #endif

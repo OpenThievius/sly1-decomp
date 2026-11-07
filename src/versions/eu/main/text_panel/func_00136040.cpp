@@ -10,9 +10,9 @@ struct Self_136040_eu {
     f32 f314;
 };
 
-void func_00135F48(Self_136040_eu* self, PadRecord* p);
+void RefreshPanelEntries(Self_136040_eu* self, PadRecord* p);
 
-void func_00136040(Self_136040_eu* self, PadRecord* p)
+void UpdatePanelStick(Self_136040_eu* self, PadRecord* p)
 {
     switch (self->f260) {
     case 1: {
@@ -41,7 +41,7 @@ void func_00136040(Self_136040_eu* self, PadRecord* p)
         vb.y = v * 50.0f;
         vb.z = 0;
         f32* g = ((f32*)g_gameClock);
-        *(Quad_136040*)&r = func_001EA818(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
+        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
         self->f314 += u * -0.08f;
         self->f304 = r.x;
         self->f308 = r.y;

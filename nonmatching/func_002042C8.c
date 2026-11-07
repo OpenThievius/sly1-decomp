@@ -39,10 +39,10 @@ typedef struct PadFrame {
 } PadFrame;
 
 extern s32 D_0027AE84;
-static RpcClient D_0062AA80[2] __attribute__((aligned(64)));
-static PadSlot D_0062AAD0[2][4];
+static RpcClient g_padClients[2] __attribute__((aligned(64)));
+static PadSlot g_padSlots[2][4];
 static s32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
-static u8 D_0062ACC0[0x80] __attribute__((aligned(64)));
+static u8 g_padRequest[0x80] __attribute__((aligned(64)));
 
 typedef struct PadRequest {
     s32 command;
@@ -53,12 +53,12 @@ typedef struct PadRequest {
     s32 arg14;
 } PadRequest;
 
-s32 func_001E1F10(const char* format, ...);
-void* func_001F5C0C(void* dst, s32 value, s32 size);
-s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 PrintFormatted(const char* format, ...);
+void* FillMemory(void* dst, s32 value, s32 size);
+s32 CallRemoteService(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void* end, void* end_arg);
 
-s32 func_002042C8(s32 port, s32 slot, u8* buffer)
+s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
 {
     PadRequest* request;
     PadFrame* frame;
@@ -68,12 +68,12 @@ s32 func_002042C8(s32 port, s32 slot, u8* buffer)
 
     if ((u32)buffer & 0x3F) {
         if (D_0027AE84 != 0)
-            func_001E1F10("libpad: buffer addr is not 64 byte align. %08x\n", buffer);
+            PrintFormatted("libpad: buffer addr is not 64 byte align. %08x\n", buffer);
         return 0;
     }
-    if (D_0062AAD0[port][slot].open == 1) {
+    if (g_padSlots[port][slot].open == 1) {
         if (D_0027AE84 != 0)
-            func_001E1F10("libpad: pad port is already open [%d][%d]\n", port, slot);
+            PrintFormatted("libpad: pad port is already open [%d][%d]\n", port, slot);
         return 0;
     }
     frame = (PadFrame*)buffer;
@@ -82,23 +82,23 @@ s32 func_002042C8(s32 port, s32 slot, u8* buffer)
         frame->state = 5;
         frame->mode = 2;
         frame->f67 = 0;
-        func_001F5C0C(frame, 0xFF, 0x20);
+        FillMemory(frame, 0xFF, 0x20);
         frame->size = 0;
         frame++;
     }
-    request = (PadRequest*)D_0062ACC0;
+    request = (PadRequest*)g_padRequest;
     request->command = 1;
     request->port = port;
     request->slot = slot;
     request->arg10 = (s32)buffer;
-    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+    if (CallRemoteService(g_padClients, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
-    D_0062AAD0[port][slot].open = 1;
+    g_padSlots[port][slot].open = 1;
     dma = D_0062ABC0[port][slot];
     dma[0] = 0;
-    D_0062AAD0[port][slot].f0C = 0;
-    D_0062AAD0[port][slot].f08 = request->arg14;
-    D_0062AAD0[port][slot].buffer = buffer;
-    D_0062AAD0[port][slot].dma = dma;
+    g_padSlots[port][slot].f0C = 0;
+    g_padSlots[port][slot].f08 = request->arg14;
+    g_padSlots[port][slot].buffer = buffer;
+    g_padSlots[port][slot].dma = dma;
     return request->result;
 }

@@ -2,7 +2,7 @@
 // PAL: in D_0026F808 the pointer slot is at 0x570 and the table at 0x574 (US 0x260, 0x264).
 struct Tbl_1F0660_eu { u8 pad0[0x574]; void* f574[1]; };
 
-void func_001F0660(WarpPage* o) {
+void StartWarpPage(WarpPage* o) {
     StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->f19D8) {

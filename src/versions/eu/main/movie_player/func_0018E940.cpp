@@ -10,15 +10,15 @@ struct Obj_18E940_eu {
     s32 fA4;
 };
 
-s32 func_0018E940(MovieStream* self_)
+s32 StartMovieStream(MovieStream* self_)
 {
     Obj_18E940_eu* self = (Obj_18E940_eu*)self_;
-    func_0011D6A8(0xFFFFFFFF);
+    SuspendIopVoices(0xFFFFFFFF);
     PushIopChannel2Setting(g_currentWorld, 0, 0);
-    func_0011E010();
+    StopAllIopSounds();
     while (PollIopCommands() != 0) {
     }
-    func_0011E110(1);
+    WaitForIopSoundStop(1);
     SyncDiscRead(0);
     self->fA0 = GetIopVolumeChannel(2);
     self->fA4 = GetIopVolumeChannel(0x10);

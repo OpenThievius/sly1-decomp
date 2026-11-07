@@ -11,13 +11,13 @@
 #include "camera.h"
 #include "state_walker.h"
 #include "object_pool.h"
-extern u8* D_00262E10;
-extern u8* D_00275710;
+extern u8* g_player;
+extern u8* g_currentWorld;
 
-void func_001921A8(void* self);
-void* func_0018D500(s32 size);
+void InitSwitchedCollider(void* self);
+void* AllocateFrontMemory(s32 size);
 
-void func_001E5378(PlayerLinkedCollider* self)
+void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     InitSwitchedCollider(self);
     self->f644 = 1;
@@ -29,7 +29,7 @@ void func_001E5378(PlayerLinkedCollider* self)
     self->f654 = 0.7f;
 }
 
-void func_001E53F8(PlayerLinkedCollider* self, void* value)
+void AddPlayerLinkedColliderId(PlayerLinkedCollider* self, void* value)
 {
     s32 n = self->f638;
     if (n < 0x11) {
@@ -51,14 +51,14 @@ struct OwnedAgent {
 
 extern s32 D_00275B28[10];
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void* func_001B6290(void* a, void* self, s32 b, s32 c);
-void* func_0015A448(void* a, s32 b, void* c);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_00189230(void* a, void* b, void* c);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
+void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+void VectorToAngles(void* a, void* b, void* c);
 
-void func_001E5428(PlayerLinkedCollider* self)
+void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     void* r2;
     s32 i;
@@ -98,11 +98,11 @@ void func_001E5428(PlayerLinkedCollider* self)
     VectorToAngles((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
 }
 
-void func_00192B58(void* self);
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void func_001C8F20(void* node, s32 kind, s32 flag);
+void UpdateSwitchedCollider(void* self);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void ChangeAgentState(void* node, s32 kind, s32 flag);
 
-void func_001E55D0(PlayerLinkedCollider* self)
+void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     void* arr[8];
     s32 n;
@@ -134,17 +134,17 @@ void func_001E55D0(PlayerLinkedCollider* self)
     }
 }
 
-extern u8* D_00262E10;
+extern u8* g_player;
 
 typedef void (*PlayerFrameFn)(void* self, f32 t, void* buf);
 
-void func_001E5938(void);
-void func_0016EC20(void* obj, s32 n);
-void func_001E5C78(void* self);
-s32 func_00182FC8(void);
-void func_001F5C0C(void* p, s32 v, s32 n);
+void ChoosePlayerLinkedColliderTarget(void);
+void ClearPadPressedBits(void* obj, s32 n);
+void AdvancePlayerLinkedColliderWalker(void* self);
+s32 IsObjectAttached(void);
+void FillMemory(void* p, s32 v, s32 n);
 
-void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
+void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 {
     u8 buf[0xC4];
     u8* o;
@@ -170,20 +170,20 @@ void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
     }
 }
 
-extern Camera* D_00261990;
-extern u8 D_00275BC0[];
+extern Camera* g_camera;
+extern u8 g_elementStack[];
 
-void func_001922E8(void* a, void* b);
-void func_001E9498(void* self, void* node);
-void func_001E9570(void* self);
-void func_001356C0(T217D_440* self, s32 mode);
-void func_00145088(void* a, s32 b, void* c, void* d, s32 e);
-void func_001495E8(void* a, s32 b);
-void func_001451F0(void* a, s32 b, s32 c, void* d, void* e, s32 f);
-s32 func_00149610(void* a);
-void func_001B64D8(void* a, s32 b);
+void HandleSwitchedColliderActivation(void* a, void* b);
+void PushStackElement(void* self, void* node);
+void PopStackElement(void* self);
+void SetTextPanelState(T217D_440* self, s32 mode);
+void PushCameraController(void* a, s32 b, void* c, void* d, s32 e);
+void PushStackValue(void* a, s32 b);
+void RemoveCameraControllers(void* a, s32 b, s32 c, void* d, void* e, s32 f);
+s32 PopStackValue(void* a);
+void SetStateWalkerTarget(void* a, s32 b);
 
-void func_001E5750(PlayerLinkedCollider* self, u8* p)
+void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
@@ -208,9 +208,9 @@ void func_001E5750(PlayerLinkedCollider* self, u8* p)
     }
 }
 
-s32 func_001A8820(void* p, void* v);
+s32 IsObjectInPool(void* p, void* v);
 
-s32 func_001E5888(PlayerLinkedCollider* self, Collider* node)
+s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
 {
     Collider* a;
     Collider* b;
@@ -234,12 +234,12 @@ s32 func_001E5888(PlayerLinkedCollider* self, Collider* node)
 
 ASM_FUNC(func_001E5938);
 
-void func_001B6598(void* dev, s32* out);
-void func_001B6568(void* dev, s32* out);
-s32 func_001A8C50(void* a);
-void func_001B64D8(void* dev, s32 value);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void GetStateWalkerTargetKey(void* dev, s32* out);
+s32 HasObjectPoolChoice(void* a);
+void SetStateWalkerTarget(void* dev, s32 value);
 
-void func_001E5C78(PlayerLinkedCollider* self)
+void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 {
     s32 a;
     s32 b;
@@ -253,10 +253,10 @@ void func_001E5C78(PlayerLinkedCollider* self)
 }
 
 
-void func_00192230(void* self, s32 kind, MessageBody* rec);
+void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
 s32 func_001A8C90(void* a, s32 b);
 
-void func_001E5CE8(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
+void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, kind, rec);
     if (kind == 0x13) {
@@ -279,10 +279,10 @@ void func_001E5CE8(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
     }
 }
 
-s32 func_001B8A08(void* a, void* b);
-s32 func_001A8820(void* p, void* v);
+s32 TestCollidersMayContact(void* a, void* b);
+s32 IsObjectInPool(void* p, void* v);
 
-s32 func_001E5DA8(PlayerLinkedCollider* self, void* arg)
+s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 {
     if (TestCollidersMayContact(self, arg)) {
         return 1;
@@ -298,9 +298,9 @@ s32 func_001E5DA8(PlayerLinkedCollider* self, void* arg)
 
 typedef void (*PeerEffectFn)(void* self);
 
-void func_001924C8(void* self);
+void StartSwitchedColliderEffect(void* self);
 
-void func_001E5E08(PlayerLinkedCollider* self)
+void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self)
 {
     if (self->f624 != 0) {
         PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->f624 + 0x148);
@@ -312,13 +312,13 @@ void func_001E5E08(PlayerLinkedCollider* self)
 
 struct ZeroPair { s32 lo; s32 hi; };
 
-void func_001E5E50(PlayerLinkedCollider* a0, void* a1, ZeroPair* out)
+void GetPlayerLinkedColliderInteractFlags(PlayerLinkedCollider* a0, void* a1, ZeroPair* out)
 {
     out->lo = 0;
     out->hi = 0;
 }
 
-void* func_001E5E60(PlayerLinkedCollider* self) { return self->f620 ? self->f620 : self; }
+void* GetPlayerLinkedColliderTarget(PlayerLinkedCollider* self) { return self->f620 ? self->f620 : self; }
 
 // A view of the vertices that starts one vertex before the first (0x254): through it, the fields
 // of the vertex i are at 0x2C more (x at 0x2C, y at 0x34, the colours at 0x3C and 0x40, the
@@ -343,10 +343,10 @@ struct ArcPointStep {
     f32 f54;
 };
 
-void func_001AA1F0(ScreenElement* self, s32 kind);
-f32 func_001EAAE0(f32 a, f32 b);
+void InitScreenElement(ScreenElement* self, s32 kind);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001E5E70(T217D_3F0* self, s32 kind)
+void InitArcPoints(T217D_3F0* self, s32 kind)
 {
     self->w = 160.0f;
     self->h = 125.4f;
@@ -402,7 +402,7 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
     }
 }
 
-extern u8* D_00275710;
+extern u8* g_currentWorld;
 extern u8 D_00275640[];
 extern f32 D_00275B58[2];
 extern f32 D_00275650;
@@ -414,19 +414,19 @@ extern f32 D_00275660;
 typedef void (*ConeSpriteFn)(void* self);
 struct ConeSprite { ConeSpriteFn* vtbl; };
 
-void func_001AA268(ScreenElement* self);
-void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
-void func_00184768(void* p, s32 v);
-void func_001847F0(void* p, void* q);
-void func_00184858(void* p, f32 v);
-void func_00184818(void* p, f32 v);
-void func_00184878(void* p, f32 v);
-void func_00184838(void* p, f32 v);
-void func_00184898(void* p, f32 v);
-void func_00184990(void* p, void* q);
-void func_00184968(void* p, s32 v);
+void SetupScreenElementText(ScreenElement* self);
+void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+void SetConeVolumeMode(void* p, s32 v);
+void SetConeVolumeColor(void* p, void* q);
+void SetConeVolumeFirstAngle(void* p, f32 v);
+void SetConeVolumeSecondLevel(void* p, f32 v);
+void SetConeVolumeSecondAngle(void* p, f32 v);
+void SetConeVolumeThirdLevel(void* p, f32 v);
+void SetConeVolumeThirdAngle(void* p, f32 v);
+void SetConeVolumeRange(void* p, void* q);
+void SetConeVolumeValue(void* p, s32 v);
 
-void func_001E6188(T217D_3F0* self)
+void CreateArcSprite(T217D_3F0* self)
 {
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
@@ -442,13 +442,13 @@ void func_001E6188(T217D_3F0* self)
     ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
 
-void func_001E6268(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
+void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
-void func_00161670(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
-void func_001615F0(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
+void AddGifXyzfNoDrawEntry(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
+void AddGifXyzfEntry(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
 
-void func_001E62A8(T217D_3F0* self, PacketWriter* c, s32 k)
+void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->shownY;
@@ -490,13 +490,13 @@ void func_001E62A8(T217D_3F0* self, PacketWriter* c, s32 k)
 ASM_FUNC(func_001E6600);
 
 
-extern f32 D_00261868;
+extern f32 g_elapsedTime;
 extern Rgba4 D_002610D8;
 extern Rgba4 D_002610E0;
 
-void func_001613C0(PacketWriter* b, s32 a1, s32 a2, s32 a3);
-void func_00161458(PacketWriter* b, u32 c);
-void func_001615F0(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
+void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, s32 a3);
+void AddGifRgbaEntry(PacketWriter* b, u32 c);
+void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
 
 struct ColorLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -519,7 +519,7 @@ struct FadeClamp {
     }
 };
 
-void func_001E6C20(T217D_3F0* self, PacketWriter* buf)
+void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 {
     Rgba4 c;
     f32 t;
@@ -578,15 +578,15 @@ void func_001E6C20(T217D_3F0* self, PacketWriter* buf)
     AddGifXyzfEntry(buf, GIF_SCREEN_X(xe), GIF_SCREEN_Y(yb), 0, 0);
 }
 
-extern u8 D_00262280[];
+extern u8 g_gsPacketWriter[];
 
-s32 func_001E9A68(void);
-void func_001613C0(void* p, s32 a, s32 b, s32 c);
-void func_00161708(void* p, s32 a, u64 b);
-void func_001E6600(void* self, void* p);
-void func_001E6C20(void* self, void* p);
+s32 IsArcDrawAllowed(void);
+void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* p, s32 a, u64 b);
+void WriteArcPointVertices(void* self, void* p);
+void WriteArcTickVertices(void* self, void* p);
 
-void func_001E73B8(T217D_3F0* self)
+void DrawArc(T217D_3F0* self)
 {
     u8* s = g_gsPacketWriter;
     if (IsArcDrawAllowed()) {
@@ -598,9 +598,9 @@ void func_001E73B8(T217D_3F0* self)
     }
 }
 
-extern f32 D_00261868;
+extern f32 g_elapsedTime;
 
-void func_001E7440(T217D_3F0* a0, s32 a1)
+void SetArcFade(T217D_3F0* a0, s32 a1)
 {
     if (a1 != a0->fade) {
         a0->fade = a1;
@@ -608,10 +608,10 @@ void func_001E7440(T217D_3F0* a0, s32 a1)
     }
 }
 
-void func_00126BC0(PlacedObject* node, T217D_3F0* self);
+void SetObjectTreeRecordsValue(PlacedObject* node, T217D_3F0* self);
 extern s32 D_00270458;
 
-void func_001E7460(T217D_3F0* self)
+void ApplyArcTarget(T217D_3F0* self)
 {
     PlacedObject* cur = (PlacedObject*)self->current;
     if ((PlacedObject*)self->target == cur) {
@@ -632,11 +632,11 @@ void func_001E7460(T217D_3F0* self)
     }
 }
 
-extern f32 D_00261858[];
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 id, s32 a, s32 b, s32 c, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, s32 d, s32 e);
+extern f32 g_gameClock[];
+f32 RandomFloatInRange(f32 a, f32 b);
+void StartSoundEffect(s32 id, s32 a, s32 b, s32 c, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, s32 d, s32 e);
 
-void func_001E7518(T217D_3F0* self, s32 mode)
+void SetArcPhase(T217D_3F0* self, s32 mode)
 {
     if (mode == self->phase) {
         return;
@@ -670,9 +670,9 @@ void func_001E7518(T217D_3F0* self, s32 mode)
 }
 
 extern s32 D_00270458;
-void func_001AAB20(ScreenElement* self, f32 x, f32 y);
+void SetScreenElementSize(ScreenElement* self, f32 x, f32 y);
 
-void func_001E76E0(T217D_3F0* self, s32 value)
+void SetArcMode(T217D_3F0* self, s32 value)
 {
     s32 old = self->mode;
     SetScreenElementMode(self, value);
@@ -692,16 +692,16 @@ done:
     SetArcPhase(self, 3);
 }
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 extern s32 D_00270448;
 extern s32 D_00270458;
 
-void func_001AA298(ScreenElement* self);
-f32 func_001EA4B8(f32* p, s32 zero, f32 a, f32 b, f32 c);
-s32 func_001EAC68(f32 a, f32 b, f32 c);
-f32 func_001EAAE0(f32 a, f32 b);
+void UpdateScreenElementSlide(ScreenElement* self);
+f32 ApproachValueWithRamp(f32* p, s32 zero, f32 a, f32 b, f32 c);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001E77C0(T217D_3F0* self)
+void UpdateArc(T217D_3F0* self)
 {
     UpdateScreenElementSlide(self);
     s32 state = self->mode;
@@ -834,9 +834,9 @@ ASM_FUNC(func_001E80D8);
 
 ASM_FUNC(func_001E83E0);
 
-void func_001E87F0(T217D_3F0* self, void* a1);
+void SetArcSpecialObject(T217D_3F0* self, void* a1);
 
-void func_001E86E0(T217D_3F0* self, void* value)
+void SetArcTarget(T217D_3F0* self, void* value)
 {
     if (value == self->target) return;
     if (self->target == 0) {
@@ -863,7 +863,7 @@ void func_001E86E0(T217D_3F0* self, void* value)
     }
 }
 
-void func_001E87F0(T217D_3F0* self, void* a1)
+void SetArcSpecialObject(T217D_3F0* self, void* a1)
 {
     PlacedObject* old = (PlacedObject*)self->special;
     if (old != 0) {
@@ -875,7 +875,7 @@ void func_001E87F0(T217D_3F0* self, void* a1)
     }
 }
 
-void func_001E8840(T217D_3F0* self)
+void ResetArc(T217D_3F0* self)
 {
     ResetScreenElement(self);
     self->size = 0;
@@ -885,13 +885,13 @@ void func_001E8840(T217D_3F0* self)
 }
 
 extern u8 D_00275B50[8];
-void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
+void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
 
-void func_001E8878(s32 a0, s32 a1);
+void ConstructGreyColor(s32 a0, s32 a1);
 
-void func_001E88B0(void)
+void ConstructGreyColorAtStartup(void)
 {
-    func_001E8878(1, 0xFFFF);
+    ConstructGreyColor(1, 0xFFFF);
 }
 
 s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };

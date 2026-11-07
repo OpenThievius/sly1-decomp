@@ -6,18 +6,18 @@ struct Self_133B58_eu
     f32 phase;
 };
 
-void func_00133B58(Self_133B58_eu* self, PacketWriter* gs)
+void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;
     PanelColor c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
-    t = 0.5f - func_00205210(self->phase) * 0.5f;
+    t = 0.5f - Cosine(self->phase) * 0.5f;
     c0 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 1.5707964f) * 0.5f;
+    t = 0.5f - Cosine(self->phase + 1.5707964f) * 0.5f;
     c1 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 3.1415927f) * 0.5f;
+    t = 0.5f - Cosine(self->phase + 3.1415927f) * 0.5f;
     c2 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     s32 i;
     f32 x;

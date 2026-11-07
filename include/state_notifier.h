@@ -95,30 +95,30 @@ typedef char check_DeadlineNotifier[sizeof(DeadlineNotifier) == 0x390 ? 1 : -1];
 typedef char check_ArmedStateNotifier[sizeof(ArmedStateNotifier) == 0x390 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_00146340(StateNotifier* self);                       // 0x55 slot 0
-void func_001463C0(StateNotifier* self, void* stream);         // 0x55 slot 10
-void func_00146418(StateNotifier* self, void* other);          // 0x55 slot 9
-void func_00146470(StateNotifier* self);                       // 0x55 slot 16
-s32 func_001473E0(StateNotifier* self, ContactObject* other);           // 0x55 slot 45
-void func_00147428(StateNotifier* self);                       // 0x55 slot 17 (original assembly)
-void func_00147AB0(StateNotifier* self, s32 mode);             // 0x55 slot 47
-void func_00147E40(TimeRangeNotifier* self);                       // 0x58 slot 0
-void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target);
-void func_00147FB0(TimeRangeNotifier* self);
-void func_00148298(TimeRangeNotifier* self, s32 mode);
-void func_00148400(SoundNotifier* self);
-void func_00148470(SoundNotifier* self, s32 mode);
-void func_00148510(SaveNotifier* self);
-void func_00148598(SaveNotifier* self, s32 mode);
-void func_00148698(DeadlineNotifier* self);
-void func_00148718(DeadlineNotifier* self);
-void func_00148770(DeadlineNotifier* self, s32 kind, void* msg);
-void func_00148828(DeadlineNotifier* self);
-void func_00148888(DeadlineNotifier* self, s32 mode);
-void func_00148D90(CountdownNotifier* self);
-void func_00148E40(CountdownNotifier* self, s32 kind, void* msg);
-void func_00148EF8(CountdownNotifier* self);
-void func_00148FF0(CountdownNotifier* self, s32 mode);
-void func_00149168(ArmedStateNotifier* self);
+void InitStateNotifier(StateNotifier* self);                       // 0x55 slot 0
+void LoadStateNotifier(StateNotifier* self, void* stream);         // 0x55 slot 10
+void CopyStateNotifier(StateNotifier* self, void* other);          // 0x55 slot 9
+void StartStateNotifier(StateNotifier* self);                       // 0x55 slot 16
+s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* other);           // 0x55 slot 45
+void UpdateStateNotifier(StateNotifier* self);                       // 0x55 slot 17 (original assembly)
+void SetStateNotifierState(StateNotifier* self, s32 mode);             // 0x55 slot 47
+void InitTimeRangeNotifier(TimeRangeNotifier* self);                       // 0x58 slot 0
+void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void* target);
+void UpdateTimeRangeNotifier(TimeRangeNotifier* self);
+void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode);
+void InitSoundNotifier(SoundNotifier* self);
+void SetSoundNotifierState(SoundNotifier* self, s32 mode);
+void InitSaveNotifier(SaveNotifier* self);
+void SetSaveNotifierState(SaveNotifier* self, s32 mode);
+void InitDeadlineNotifier(DeadlineNotifier* self);
+void StartDeadlineNotifier(DeadlineNotifier* self);
+void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* msg);
+void UpdateNotifierWorldDeadline(DeadlineNotifier* self);
+void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode);
+void InitCountdownNotifier(CountdownNotifier* self);
+void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void* msg);
+void CountDownNotifierTimer(CountdownNotifier* self);
+void SetCountdownNotifierState(CountdownNotifier* self, s32 mode);
+void InitArmedStateNotifier(ArmedStateNotifier* self);
 
 #endif

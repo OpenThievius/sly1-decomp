@@ -7,7 +7,7 @@
 static const f32 g_one = 1.0f;
 static const f32 g_signedZeros[] = { 0.0f, -0.0f };
 
-f32 func_00206D50(f32 x, f32 y)
+f32 FloatRemainderKernel(f32 x, f32 y)
 {
     s32 xBits, yBits, sign, xExp, yExp, diff, probe;
     u32 shift;

@@ -28,9 +28,9 @@ struct EffectOwner : Collider {
 typedef char check_EffectOwner[sizeof(EffectOwner) == 0x570 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0019E0B8(EffectOwner* self);                      // 0x1E slot 0
-void func_0019E168(EffectOwner* self);                      // 0x1E slot 7
-void func_0019E420(EffectOwner* self, f32 t);               // 0x1E slot 17
-void func_0019E848(EffectOwner* self, void* arg);           // 0x1E slot 37
+void InitEffectOwner(EffectOwner* self);                      // 0x1E slot 0
+void ReleaseEffectOwner(EffectOwner* self);                      // 0x1E slot 7
+void UpdateEffectOwner(EffectOwner* self, f32 t);               // 0x1E slot 17
+void DrawEffects(EffectOwner* self, void* arg);           // 0x1E slot 37
 
 #endif

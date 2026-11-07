@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "pad_record.h"
 
-extern f32 D_0026185C[];
+extern f32 g_gameTime[];
 
 struct Rec_274BA0 { s32 a[12]; f32 b; };
 
@@ -33,12 +33,12 @@ ASM_FUNC(func_001C6028);
 
 ASM_FUNC(func_001C61E0);
 
-s32 func_00182FC8(void* p);
+s32 IsObjectAttached(void* p);
 void func_001C61E0(Player* self, s32 mode);
-void func_0019D2A8(Player* self, s32 v, void* p);
-void func_0019D338(Player* self, s32 v, s32 w, void* blk);
+void TrackAimTargetObject(Player* self, s32 v, void* p);
+void TrackAimTargetPoint(Player* self, s32 v, s32 w, void* blk);
 
-void func_001C6890(Player* s)
+void UpdatePlayerAimTarget(Player* s)
 {
     if (s->f2200 != 0 && IsObjectAttached(s->f2200) == 0) {
         s32 v = s->f223C;
@@ -54,18 +54,18 @@ void func_001C6890(Player* s)
     }
     void* p = s->f2200;
     if (p != 0) {
-        func_0019D2A8(s, s->f21C4, p);
+        TrackAimTargetObject(s, s->f21C4, p);
         return;
     }
     if (s->f2208 != 0) {
-        func_0019D338(s, s->f21C4, s->f2208, s->pad220C);
+        TrackAimTargetPoint(s, s->f21C4, s->f2208, s->pad220C);
     }
 }
 
-void func_00175170(Player* self, s32 a, s32 b);
+void SetPlayerState(Player* self, s32 a, s32 b);
 void func_001C61E0(Player* self, s32 state);
 
-void func_001C6928(Player* self, PadRecord* other)
+void HandlePlayerAimButton(Player* self, PadRecord* other)
 {
     s32 flag = 1;
     s32 held = other->flags & 0x80;
@@ -136,12 +136,12 @@ struct NearestAhead {
 // Two entries of a blend record, 0xC bytes apart, whose weights func_001399F8 takes.
 struct TwoBlendWeights { f32 a; u8 pad[0xC - 4]; f32 b; };
 
-void func_001C6AA8(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b);
-void func_001399F8(void* ctx, s32 n, s32 m, TwoBlendWeights* out);
-f32 func_00205778(f32 a, f32 b);
-void func_001C5D58(Player* self);
+void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b);
+void SetBlendItemWeights(void* ctx, s32 n, s32 m, TwoBlendWeights* out);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void TurnColliderTowardHeading(Player* self);
 
-void func_001C6D00(Player* s, TwoBlendWeights* out, void* ctx)
+void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 {
     NearestAhead fr;
     f32 k = 1.60000002f;
@@ -169,7 +169,7 @@ void func_001C6D00(Player* s, TwoBlendWeights* out, void* ctx)
     }
     out->a = 1.0f - t;
     out->b = t;
-    func_001399F8(ctx, 0xC, 2, out);
+    SetBlendItemWeights(ctx, 0xC, 2, out);
     s->f2204 = 0;
     s->f2200 = fr.found;
     s->f2208 = 0;
@@ -179,7 +179,7 @@ void func_001C6D00(Player* s, TwoBlendWeights* out, void* ctx)
     }
 }
 
-void func_001C6E58(Player* self)
+void TurnPlayerToClass75AheadMask8(Player* self)
 {
     NearestAhead t;
     FindNearestClass75Ahead(self, 8, D_00274BF0, &t.found, t.dir, 0.25f, 1.0f);
@@ -192,7 +192,7 @@ void func_001C6E58(Player* self)
     }
 }
 
-void func_001C6ED0(Player* self)
+void TurnPlayerToClass75AheadMask4(Player* self)
 {
     NearestAhead t;
     FindNearestClass75Ahead(self, 4, D_00274C00, &t.found, t.dir, 0.25f, 3.15f);

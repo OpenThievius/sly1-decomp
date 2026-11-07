@@ -11,10 +11,10 @@ struct Obj_16B4A0_eu {
     f32 f578;
 };
 
-void func_001AA268(Obj_16B4A0_eu* self);
-void func_001AA8B8(Obj_16B4A0_eu* self, f32 zero);
+void SetupScreenElementText(Obj_16B4A0_eu* self);
+void SetScreenElementHoldTime(Obj_16B4A0_eu* self, f32 zero);
 
-void func_0016B4A0(Obj_16B4A0_eu* self)
+void InitSelectionCaption(Obj_16B4A0_eu* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {

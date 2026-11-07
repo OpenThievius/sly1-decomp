@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Clears the screen with a colour: a GS packet of sprite-block fills; PAL uses other VRAM bases.
-void func_00168770(PacketWriter* self, u8* color, s32 flag)
+void FillScreenColor(PacketWriter* self, u8* color, s32 flag)
 {
     PacketWriter f;
     s32 x;

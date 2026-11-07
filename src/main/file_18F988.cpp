@@ -14,36 +14,36 @@
 #include "globals.h"
 #include "pad_record.h"
 #include "effect.h"
-void func_001B7968(void* self);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-void func_001C6F48(void* self);
-void func_001C72A0(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-s32 func_001CA758(void* self, s32 id);
-void func_001CB6F8(void* a, void* b);
-void func_001C91C8(void* self, s32 a, s32 b);
-s32 func_00182FC8();
-s32 func_00192688(SwitchedCollider* value);
-s32 func_00192688(void* value);
-void func_00192880(s32 index);
-void func_001F5B08(void* dst, void* src, s32 size);
-void func_001B7A98(void* self);
-void func_001926D0(void* self);
-void func_001B7B78(void* self);
-void func_00192780(void* self);
-void func_001926D0(SwitchedCollider* self);
-void func_00192780(SwitchedCollider* self);
-void* func_001925F0();
+void InitCollider(void* self);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void InitAgent(void* self);
+void StartAgent(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+s32 ResolveAgentClip(void* self, s32 id);
+void RemoveItemKeeperMember(void* a, void* b);
+void EnterAgentState(void* self, s32 a, s32 b);
+s32 IsObjectAttached();
+s32 FindSwitchedColliderIndex(SwitchedCollider* value);
+s32 FindSwitchedColliderIndex(void* value);
+void ActivateSwitchedColliderIndex(s32 index);
+void MoveMemory(void* dst, void* src, s32 size);
+void RegisterCollider(void* self);
+void AddToSwitchedColliderList(void* self);
+void UnregisterCollider(void* self);
+void RemoveFromSwitchedColliderList(void* self);
+void AddToSwitchedColliderList(SwitchedCollider* self);
+void RemoveFromSwitchedColliderList(SwitchedCollider* self);
+void* GetActiveSwitchedCollider();
 // The two interaction flags GetSwitchedColliderInteractFlags gives.
 struct InteractFlags {
     s32 a;
     s32 b;
 };
-s32 func_001A8820(void* p, s32 v);
-s32 func_001C9990(void* self, s32* arg);
-void func_00182C58(void* self);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-s32 func_00128018(void* a0, s32 a1, void* a2, void* a3);
+s32 IsObjectInPool(void* p, s32 v);
+s32 AcceptAgentRequest(void* self, s32* arg);
+void StartObject(void* self);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+s32 TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
 // The object a seeking agent of kind 0x10 keeps at 0xC2C: a method table, and at 0x618 what
 // func_001A8820 tests a request's argument against.
 typedef void (*ChildFn)(void* self);
@@ -52,127 +52,127 @@ struct SeekPartner {
     u8 pad04[0x618 - 0x04];
     void* p618;
 };
-void func_001C9008(void* self);
-extern s32 D_00262C64;
-s32 func_001DDA80(void* p);
-s32 func_001C9A48(void* self, s32 a);
-void* func_0019EA78(s32 kind, s32 zero);
-void func_0019F8E8(void* node, void* owner);
-f32 func_0012CCC0(void* obj, s32 id);
+void LeaveAgentState(void* self);
+extern s32 g_buttonCodeFlags;
+s32 IsPadSelectFlagHeld(void* p);
+s32 IsAgentRequestBlocked(void* self, s32 a);
+void* CreateEffect(s32 kind, s32 zero);
+void AddEffectListener(void* node, void* owner);
+f32 GetAnimationMarkerTime(void* obj, s32 id);
 // Descriptor slot 72 as func_00192880 calls it, with the collider switched from or to.
 typedef void (*ActivationHook)(void* self, s32 mode, void* other);
-extern u8 D_00275BC0[];
-void func_001E9498(void* a, void* b);
-extern s32 D_00262C68;
+extern u8 g_elementStack[];
+void PushStackElement(void* a, void* b);
+extern s32 g_padRouting;
 extern u8* D_0026F800;
 // A record whose 16-bit flags sit at 0xAA.
 
 
-s32 func_001493A0(void* p);
-void func_001516C0(StepSequence* ctx, PadRecord* rec);
-void func_00150790(void* p, s32 n);
-void func_0016EC20(PadRecord* rec, s32 n);
-s32 func_00182FC8(void* p);
-s32 func_001300E8(void* a, s32 b);
-void func_00182F78(void* self, s32 value);
-void func_001384A0(void* other, void* sub);
-void func_001B7968(void* self);
-void func_00192990(SwitchedCollider* self, s32 value);
-extern void func_001C8F20(SeekingAgent* self, s32 mode, s32 value);
+s32 IsTopCameraController(void* p);
+void SkipRemainingSteps(StepSequence* ctx, PadRecord* rec);
+void SetStepSequenceState(void* p, s32 n);
+void ClearPadPressedBits(PadRecord* rec, s32 n);
+s32 IsObjectAttached(void* p);
+s32 IsObjectOfKind(void* a, s32 b);
+void ReparentObject(void* self, s32 value);
+void ReadBufferedString(void* other, void* sub);
+void InitCollider(void* self);
+void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
+extern void ChangeAgentState(SeekingAgent* self, s32 mode, s32 value);
 // Notification 0x13: its source and an id.
 struct SourceNotice { s32 f_0; u8 pad4[4]; s32 f_8; };
-extern void func_001C9DE0(SeekingAgent* self, s32 code, SourceNotice* req);
-extern void func_00160DA0(void);
-void func_001BA130(SwitchedCollider* self);
-void func_00192990(SwitchedCollider* self, s32 mode);
-void func_00145088(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s32 a4);
-void func_001451F0(void* mgr, s32 a1, s32 a2, s32 a3, SwitchedCollider* self, s32 a5);
-void* func_001925F0(void);
-void func_001929D0(void* value);
+extern void HandleAgentNotification(SeekingAgent* self, s32 code, SourceNotice* req);
+extern void SpendReserveUnit(void);
+void CopyCollider(SwitchedCollider* self);
+void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 mode);
+void PushCameraController(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s32 a4);
+void RemoveCameraControllers(void* mgr, s32 a1, s32 a2, s32 a3, SwitchedCollider* self, s32 a5);
+void* GetActiveSwitchedCollider(void);
+void ActivateSwitchedCollider(void* value);
 // The point-graph query FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
 struct GraphQuery { u8 data[4]; };
 struct GraphQueryOwner { u8 head[0x34]; GraphQuery part; };
-void func_00191290(GraphQuery* part);
-void func_00191570(GraphQuery* part);
-void func_00137E70(void* a, void* b);
-void func_0011EC40(void* a, void* b);
-s32 func_00128018(void* a, s32 b, void* c, s32 d);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void FindPointGraphPath(GraphQuery* part);
+void SnapPointToPointGraph(GraphQuery* part);
+void ReadBufferedVector3(void* a, void* b);
+void ReadPropertyRecords(void* a, void* b);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 extern u8 D_0026A210[];
-void func_001AA268(void* self);
-s32 func_0015C188(s32 k);
-void* func_0015C1C0(s32 k);
+void SetupScreenElementText(void* self);
+s32 IsFontLoaded(s32 k);
+void* GetFontById(s32 k);
 struct Obj_191AA8 {
     u8 pad0[0x54];
     void* p54;
 };
 s32 func_001909F0(void* p);
-void func_001F6C20(s32 a);
-void func_001830D8(void* self);
-void func_00152438(void* self, s32 value);
-void func_00152440(void* p);
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
-extern s32 D_0026A068[];
-s32 func_001DDA80(void* p);
-void func_001B9F30(void);
+void SyncDataCache(s32 a);
+void CopyObjectData(void* self);
+void SetListLinkOffset(void* self, s32 value);
+void ClearList(void* p);
+void RegisterObject(void* self);
+void AppendToList(void* table, void* self);
+void UnregisterObject(void* self);
+void RemoveFromList(void* table, void* self);
+extern s32 g_menuChoiceLabels[];
+s32 IsPadSelectFlagHeld(void* p);
+void CaptureColliderPose(void);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
-f32 func_001EA4B8(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
 // An object event, and notification 0x17 that passes its id on.
 struct AgentEvent { s32 id; };
 struct EventNotice {
     SeekingAgent* self;
     s32 id;
 };
-s32 func_00160C58(void* a, void* b);
-s32 func_001C96D8(void* a, void* b);
-extern s32 D_00262C64;
-extern u8* D_002623C0;
+s32 HasSpareCount(void* a, void* b);
+s32 HandleAgentObjectEvent(void* a, void* b);
+extern s32 g_buttonCodeFlags;
+extern u8* g_saveData;
 // The parameters SpawnEffectsAt is given (word 0x28 set by the caller).
 struct EffectSpawnParams { s32 f0, f4, f8, fC; f32 f10, f14; s32 f18, f1C; f32 f20, f24; s32 f28, f2C, f30, f34, f38, f3C; };
-void func_00189378(void* sub, s32 zero, void* out);
-s32 func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
-void func_00157EF8(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
-void func_001833D0(BaseObject* o, Stream8A* in);
-s32 func_00137BE0(Stream8A* in);
-void* func_0018D5C0(s32 n);
-void func_00137E70(Stream8A* in, void* p);
-s32 func_00137B90(Stream8A* in);
-void* func_0018D500(s32 n);
-f32 func_00137DF8(Stream8A* in);
-s32 func_00137D10(Stream8A* in);
-void func_001919F8(PointGraph* m);
-void* func_001925F0(void);
-void func_00182C18(BaseObject* self);
+void RotateMatrixUpright(void* sub, s32 zero, void* out);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
+void SpawnEffectsAt(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
+void LoadObjectProperties(BaseObject* o, Stream8A* in);
+s32 ReadBufferedU16(Stream8A* in);
+void* AllocateZeroedFrontMemory(s32 n);
+void ReadBufferedVector3(Stream8A* in, void* p);
+s32 ReadBufferedU8(Stream8A* in);
+void* AllocateFrontMemory(s32 n);
+f32 ReadBufferedFloat(Stream8A* in);
+s32 ReadBufferedS16(Stream8A* in);
+void MeasurePointGraphEdges(PointGraph* m);
+void* GetActiveSwitchedCollider(void);
+void InitObject(BaseObject* self);
 // kind==0x10 loop test at the top (retail tests it with the first slot peeled) and
 // keeps one more register (frame 64 bytes as retail, but a different loop shape).
 
-void func_00127378(SwitchedCollider* self, s32 kind, void* msg);
-void func_001BF788(void* self, s32 n);
+void HandlePlacedObjectNotification(SwitchedCollider* self, s32 kind, void* msg);
+void StopSoundRecord(void* self, s32 n);
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
-void func_001BE998(void);
+void StopStreamVoice(void);
 // NEAR: the frame, calls and branch shape match; the saved registers are swapped (retail keeps the input base in $s2 and the moving "last" pointer in $s3, ours the other way round), which changes 18 lines.
 
-void func_0018D608(void);
-s32* func_0018D658(s32 bytes);
-void func_0018D800(void* dst, void* src, s32 bytes);
-void func_0018D6F0(void);
-s32 func_00190E30(void* self, s32 a, s32 b);
-s32 func_00160148(s32 v);
-void func_001C8C08(SeekingAgent* self);
+void PushBackMemoryMark(void);
+s32* AllocateBackMemory(s32 bytes);
+void CopyMemory(void* dst, void* src, s32 bytes);
+void PopBackMemoryMark(void);
+s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
+s32 GetEntryName(s32 v);
+void UpdateAgentGoal(SeekingAgent* self);
 void func_001C8418(SeekingAgent* self, void* p);
-s32 func_00182FC8(void* p);
-s32 func_001F3BD8(void* self, s32* arg);
+s32 IsObjectAttached(void* p);
+s32 GetObjectWorldPosition(void* self, s32* arg);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
 s32 func_001909F0(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
 typedef void (*SlotFn)(void* self);
-extern u8* D_002623C0;
-void func_001B93F8(SwitchedCollider* self);
+extern u8* g_saveData;
+void UpdateCollider(SwitchedCollider* self);
 void func_00192DD0(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)
@@ -182,18 +182,18 @@ struct ClampInt {
         return v;
     }
 };
-f32 func_001EAF28(f32 x);
+f32 TruncateFloat(f32 x);
 
-void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other);
-s32 func_001930B8(s32 a, s32 b);
+void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
+s32 ConstructSwitchedColliderDefaults(s32 a, s32 b);
 
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
 f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
-s32 D_00269BA4 = 0;
-List_269BA8 D_00269BA8 = { 0 };
+s32 g_screenOwner = 0;
+List_269BA8 g_targetVectors = { 0 };
 f32 D_00269BC0[3] = { 1000.0f, 10.0f, 1.0f };
-s32 D_00269BCC = -1;
+s32 g_activeSwitchedCollider = -1;
 EffectSpawnParams D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };
 // Built by the static initialiser (func_001930B8, still assembly below): each as a whole block,
 // D_00604700 zero but its last vector, D_00269C10 with its own values. Until that C matches they
@@ -201,10 +201,10 @@ EffectSpawnParams D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0
 // .bss, the global with the uninitialised ones at the end of .data.
 static Blk05 D_00604700;
 Blk05 D_00269C10;
-s32 D_00269C90;
-void* D_00269C98[16];
+s32 g_switchedColliderCount;
+void* g_switchedColliders[16];
 
-void func_0018F988(BoxCollider* self)
+void InitBoxCollider(BoxCollider* self)
 {
     InitCollider(self);
     self->flags538 |= (u64)0x8000 << 28;
@@ -215,14 +215,14 @@ ASM_FUNC(func_0018F9D8);
 INCLUDE_RODATA(D_0024B5E0);
 INCLUDE_RODATA(jtbl_0024B5F0);
 
-void func_0018FEF8(SeekingAgent* self)
+void InitSeekingAgent(SeekingAgent* self)
 {
     InitAgent(self);
     self->fBD4 = 0;
     self->fBD0 = 0;
 }
 
-void func_0018FF28(SeekingAgent* self)
+void StartSeekingAgent(SeekingAgent* self)
 {
     StartAgent(self);
     ResolveObjectLinks(self, 2, D_00269B60);
@@ -233,7 +233,7 @@ void func_0018FF28(SeekingAgent* self)
     self->fC44 = ResolveAgentClip(self, 0x16B);
 }
 
-void func_0018FFB0(SeekingAgent* self, s32 a1, s32 a2)
+void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
     switch (self->f724) {
@@ -266,7 +266,7 @@ void func_0018FFB0(SeekingAgent* self, s32 a1, s32 a2)
     }
 }
 
-void func_001900A0(SeekingAgent* self)
+void LeaveSeekingAgentState(SeekingAgent* self)
 {
     LeaveAgentState(self);
     s32 kind = self->f724;
@@ -284,7 +284,7 @@ void func_001900A0(SeekingAgent* self)
     }
 }
 
-void func_00190128(SeekingAgent* self, s32 flag)
+void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
 {
     s32 tmp[4];
 
@@ -330,7 +330,7 @@ void func_00190128(SeekingAgent* self, s32 flag)
 ASM_FUNC(func_00190258);
 INCLUDE_RODATA(jtbl_0024B610);
 
-s32 func_001903F0(SeekingAgent* self, s32 a1)
+s32 IsSeekingAgentRequestBlocked(SeekingAgent* self, s32 a1)
 {
     if (g_buttonCodeFlags & 1) {
         return 1;
@@ -341,7 +341,7 @@ s32 func_001903F0(SeekingAgent* self, s32 a1)
     return 1;
 }
 
-s32 func_00190450(SeekingAgent* self, s32* arg)
+s32 AcceptSeekingAgentRequest(SeekingAgent* self, s32* arg)
 {
     if (self->desc05()->m4B(self, arg[0])) {
         return 0;
@@ -356,7 +356,7 @@ s32 func_00190450(SeekingAgent* self, s32* arg)
     return AcceptAgentRequest(self, arg);
 }
 
-s32 func_001904E0(SeekingAgent* self, AgentEvent* msg)
+s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
 {
     EventNotice args;
     if (HasSpareCount(self, msg) != 0 && self->fC34 == 0) {
@@ -373,7 +373,7 @@ s32 func_001904E0(SeekingAgent* self, AgentEvent* msg)
     return 1;
 }
 
-s32 func_00190570(SeekingAgent* self)
+s32 HasAttachedSeekingTarget(SeekingAgent* self)
 {
     s32 i;
     if (self->fC28 != 0) {
@@ -400,12 +400,12 @@ s32 func_00190570(SeekingAgent* self)
     return 0;
 }
 
-s32 func_00190658(void)
+s32 IsSeekingAgentTargetInRange(void)
 {
     return 0;
 }
 
-s32 func_00190660(SeekingAgent* self, Agent* item)
+s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
         if (IsObjectOfKind(item, 8) == 0 || item->f724 != 0xB) {
@@ -420,17 +420,17 @@ s32 func_00190660(SeekingAgent* self, Agent* item)
     return 0;
 }
 
-void func_001906E8(SeekingAgent* self, s32 value)
+void SetSeekingAgentStateTarget(SeekingAgent* self, s32 value)
 {
     self->fC28 = (void*)value;
 }
 
-void func_001906F0(SeekingAgent* self, s32 value)
+void SetSeekingAgentTarget(SeekingAgent* self, s32 value)
 {
     self->fC24 = (void*)value;
 }
 
-void func_001906F8(SeekingAgent* self, s32 flag, PlacedObject* extra)
+void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
 {
     StartSwitchedColliderEffect(self, flag, extra);
     if (flag == 0) {
@@ -440,7 +440,7 @@ void func_001906F8(SeekingAgent* self, s32 flag, PlacedObject* extra)
 
 // was NEAR: GCC folds the final return 1/return 0 into sltiu/xori; retail keeps li v0,16 + bne and a separate move v0,zero tail
 
-s32 func_00190740(SeekingAgent* self)
+s32 GetSeekingAgentStateKind(SeekingAgent* self)
 {
     switch (self->f724) {
     case 0x10: return 1;
@@ -449,7 +449,7 @@ s32 func_00190740(SeekingAgent* self)
     return 0;
 }
 
-void func_00190770(SeekingAgent* self, s32 code, SourceNotice* req)
+void HandleSeekingAgentNotification(SeekingAgent* self, s32 code, SourceNotice* req)
 {
     HandleAgentNotification(self, code, req);
     if (code == 0x13) {
@@ -461,12 +461,12 @@ void func_00190770(SeekingAgent* self, s32 code, SourceNotice* req)
     }
 }
 
-u32 func_001907E0(u32 x)
+u32 GetNeighbourFace(u32 x)
 {
     return (x & 1) ? 0 : x;
 }
 
-s32 func_001907F0(s32 value)
+s32 GetNeighbourTriangle(s32 value)
 {
     if (value & 1) return value & -2;
     return 0;
@@ -476,7 +476,7 @@ ASM_FUNC(func_00190810);
 
 ASM_FUNC(func_001908C0);
 
-s32 func_001909B0(f32 value)
+s32 ClassifyAgainstUnitRange(f32 value)
 {
     if (value > 1.0f) return 0;
     if (value < -1.0f) return 1;
@@ -485,7 +485,7 @@ s32 func_001909B0(f32 value)
 
 ASM_FUNC(func_001909F0);
 
-s32 func_00190E30(void* a, s32 b, s32 c)
+s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
     ColliderSpan out[2];
     switch (func_001909F0(a, b, c, 2, out)) {
@@ -502,11 +502,11 @@ s32 func_00190E30(void* a, s32 b, s32 c)
     return 1;
 }
 
-s32 func_00190EA8(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
+s32 GetPointGraphItemIndex(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
 
 ASM_FUNC(func_00190EB8);
 
-void func_00191128(void* a0, s32* a1, s32* a2)
+void SimplifyPointPath(void* a0, s32* a1, s32* a2)
 {
     s32 count;
     s32* out;
@@ -560,7 +560,7 @@ ASM_FUNC(func_00191290);
 ASM_FUNC(func_00191570);
 INCLUDE_RODATA(D_0024B64C);
 
-void func_001916D0(PointGraphObject* o, Stream8A* in)
+void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 {
     PointGraph* m = &o->graph;
     s32 i;
@@ -645,17 +645,17 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
 
 ASM_FUNC(func_001919F8);
 
-void func_00191A68(GraphQueryOwner* self)
+void FindOwnerGraphPath(GraphQueryOwner* self)
 {
     FindPointGraphPath(&self->part);
 }
 
-void func_00191A88(GraphQueryOwner* self)
+void SnapPointToOwnerGraph(GraphQueryOwner* self)
 {
     SnapPointToPointGraph(&self->part);
 }
 
-void func_00191AA8(Obj_191AA8* self)
+void TestOwnerGraphSpan(Obj_191AA8* self)
 {
     func_001909F0(self->p54);
 }
@@ -664,7 +664,7 @@ ASM_FUNC(func_00191AC8);
 
 ASM_FUNC(func_00191C78);
 
-void func_00191E70(s32 value)
+void SetScreenOwner(s32 value)
 {
     if (g_screenOwner != value) {
         SyncDataCache(0);
@@ -672,22 +672,22 @@ void func_00191E70(s32 value)
     }
 }
 
-void func_00191EB0(void)
+void ClearScreenOwner(void)
 {
     g_screenOwner = 0;
 }
 
-void func_00191EC0()
+void SetTargetVectorListLinkOffset()
 {
     SetListLinkOffset(&g_targetVectors.list, 0x38);
 }
 
-void func_00191EE8(void)
+void ClearTargetVectorList(void)
 {
     ClearList(&g_targetVectors.list);
 }
 
-void func_00191F08(TargetVector* self)
+void InitTargetVector(TargetVector* self)
 {
     InitObject(self);
     self->q40 = *(TargetVectorQuad*)&g_unitXVector;
@@ -698,19 +698,19 @@ void func_00191F08(TargetVector* self)
     self->targetId = -1;
 }
 
-void func_00191F68(TargetVector* self)
+void RegisterTargetVector(TargetVector* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetVectors.list, self);
 }
 
-void func_00191FA0(TargetVector* self)
+void UnregisterTargetVector(TargetVector* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetVectors.list, self);
 }
 
-void func_00191FD8(TargetVector* self)
+void StartTargetVector(TargetVector* self)
 {
     StartObject(self);
     if (self->targetId != -1) {
@@ -718,7 +718,7 @@ void func_00191FD8(TargetVector* self)
     }
 }
 
-void func_00192020(TargetVector* self)
+void CopyTargetVector(TargetVector* self)
 {
     PathCurveKeptBits tmp;
     tmp = self->keep;
@@ -726,43 +726,43 @@ void func_00192020(TargetVector* self)
     self->keep = tmp;
 }
 
-void func_00192068(PointObject* self, void* other)
+void LoadPointObject(PointObject* self, void* other)
 {
     ReadBufferedVector3(other, &self->pos);
     ReadPropertyRecords(self, other);
 }
 
-void func_001920B0(BaseObject* self, s32 arg)
+void ConvertPositionToWorld(BaseObject* self, s32 arg)
 {
     TransformPointBetweenFrames((void*)self->parent, 0, (u8*)self + 0x40, arg);
 }
 
-void func_001920E0(PointObject* self, s32 value)
+void ReparentPointObject(PointObject* self, s32 value)
 {
     void* sub = &self->pos;
     TransformPointBetweenFrames(self->parent, value, sub, sub);
     ReparentObject(self, value);
 }
 
-s32 func_00192128(PointObject* self, void* other)
+s32 ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
     return TransformPointBetweenFrames(other, 0, p, p);
 }
 
-void func_00192150(TextPointObject* self, void* other)
+void LoadTextPointObject(TextPointObject* self, void* other)
 {
     LoadPointObject(self, other);
     ReadBufferedString(other, &self->text);
 }
 
-void func_00192190(TextPointObject* self)
+void ResetTextPointToHalf(TextPointObject* self)
 {
     self->f54 = 0.5f;
     self->f58 = 0.5f;
 }
 
-void func_001921A8(SwitchedCollider* self)
+void InitSwitchedCollider(SwitchedCollider* self)
 {
     InitCollider(self);
     self->f598 = self;
@@ -770,7 +770,7 @@ void func_001921A8(SwitchedCollider* self)
     SetSwitchedColliderEnabled(self, 1);
 }
 
-void func_001921E8(SwitchedCollider* self)
+void CopySwitchedCollider(SwitchedCollider* self)
 {
     CopyCollider(self);
     if (self->f550 != 0) {
@@ -780,7 +780,7 @@ void func_001921E8(SwitchedCollider* self)
     SetSwitchedColliderEnabled(self, 0);
 }
 
-void func_00192230(SwitchedCollider* self, s32 kind, void* msg)
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     switch (kind) {
@@ -800,7 +800,7 @@ void func_00192230(SwitchedCollider* self, s32 kind, void* msg)
     }
 }
 
-void func_001922E8(SwitchedCollider* self, s32 mode)
+void HandleSwitchedColliderActivation(SwitchedCollider* self, s32 mode)
 {
     if (mode != 0) {
         self->v560 = self->v140;
@@ -812,7 +812,7 @@ void func_001922E8(SwitchedCollider* self, s32 mode)
     }
 }
 
-void func_00192380(SwitchedCollider* self, u8* out, f32 a)
+void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
 {
     CaptureColliderPose();
     if (self->f554 != 0) {
@@ -826,38 +826,38 @@ void func_00192380(SwitchedCollider* self, u8* out, f32 a)
     *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
 }
 
-s32 func_00192410(void)
+s32 IsSwitchedColliderCameraFree(void)
 {
     return 1;
 }
 
-void func_00192418(void* self)
+void ActivateSwitchedColliderUnlessActive(void* self)
 {
     if (self != GetActiveSwitchedCollider()) ActivateSwitchedCollider(self);
 }
 
-s32 func_00192450(SwitchedCollider* self)
+s32 IsSwitchedColliderRequestBlocked(SwitchedCollider* self)
 {
     if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1;
     return 0;
 }
 
-s32 func_00192488(SwitchedCollider* self)
+s32 AcceptSwitchedColliderRequest(SwitchedCollider* self)
 {
     return 0;
 }
 
-s32 func_00192490(void)
+s32 HasSwitchedColliderAcceptedRequest(void)
 {
     return 0;
 }
 
-void func_00192498(SwitchedCollider* self, s32* out)
+void StoreSwitchedColliderAccepted(SwitchedCollider* self, s32* out)
 {
     *out = ((s32 (*)(SwitchedCollider*, s32*))self->desc05()->m4D)(self, out);
 }
 
-void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
+void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other)
 {
     switch (mode) {
     case 0:
@@ -871,7 +871,7 @@ void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
                 void (*init)(Effect* self, void* pos, f32 scale, s32 flags) = n->vt->m00;
                 init(n, (u8*)other + 0x140, 1.0f, 0);
                 AddEffectListener(n, self);
-                f32 r = func_0012CCC0(self->f5F0, 0x13F);
+                f32 r = GetAnimationMarkerTime(self->f5F0, 0x13F);
                 n->life = r;
                 n->i20 = self->f59C;
                 n->vC0 = other->world->gravity;
@@ -888,14 +888,14 @@ void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
 
 ASM_FUNC(func_001925C0);
 
-void* func_001925F0()
+void* GetActiveSwitchedCollider()
 {
     s32 i = g_activeSwitchedCollider;
     if (i < 0) return 0;
     return g_switchedColliders[i];
 }
 
-void* func_00192620(void)
+void* GetCurrentSwitchedCollider(void)
 {
     void* r = GetActiveSwitchedCollider();
     if (r == 0) {
@@ -911,7 +911,7 @@ void* func_00192620(void)
     return r;
 }
 
-s32 func_00192688(s32 key)
+s32 FindSwitchedColliderIndex(s32 key)
 {
     s32 i;
     for (i = 0; i < g_switchedColliderCount; i++) {
@@ -922,7 +922,7 @@ s32 func_00192688(s32 key)
     return -1;
 }
 
-void func_001926D0(SwitchedCollider* self)
+void AddToSwitchedColliderList(SwitchedCollider* self)
 {
     if (self->f550 == 0) return;
     if (self->parent != 0) return;
@@ -937,7 +937,7 @@ void func_001926D0(SwitchedCollider* self)
     }
 }
 
-void func_00192780(void* value)
+void RemoveFromSwitchedColliderList(void* value)
 {
     s32 idx = FindSwitchedColliderIndex(value);
     if (idx < 0) return;
@@ -948,19 +948,19 @@ void func_00192780(void* value)
     g_switchedColliderCount = g_switchedColliderCount - 1;
 }
 
-void func_00192820(SwitchedCollider* self)
+void RegisterSwitchedCollider(SwitchedCollider* self)
 {
     RegisterCollider(self);
     AddToSwitchedColliderList(self);
 }
 
-void func_00192850(SwitchedCollider* self)
+void UnregisterSwitchedCollider(SwitchedCollider* self)
 {
     UnregisterCollider(self);
     RemoveFromSwitchedColliderList(self);
 }
 
-void func_00192880(s32 index)
+void ActivateSwitchedColliderIndex(s32 index)
 {
     if (index == g_activeSwitchedCollider)
         return;
@@ -987,7 +987,7 @@ void func_00192880(s32 index)
 
 LINKER_REMNANT(func_00192988);
 
-void func_00192990(SwitchedCollider* self, s32 value)
+void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value)
 {
     if (self->f550 == value) return;
     self->f550 = value;
@@ -995,32 +995,32 @@ void func_00192990(SwitchedCollider* self, s32 value)
     else RemoveFromSwitchedColliderList(self);
 }
 
-void func_001929D0(void* value)
+void ActivateSwitchedCollider(void* value)
 {
     ActivateSwitchedColliderIndex(FindSwitchedColliderIndex(value));
 }
 
-void* func_001929F8()
+void* GetActiveSwitchedColliderData()
 {
     void* r = GetActiveSwitchedCollider();
     if (r) return (u8*)r + 0x580;
     return &D_00604700;
 }
 
-void func_00192A28(s32, s32, InteractFlags* out)
+void GetSwitchedColliderInteractFlags(s32, s32, InteractFlags* out)
 {
     out->b = 1;
     out->a = 1;
 }
 
-void func_00192A38(SwitchedCollider* self, u32 value)
+void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
     T217D_440* block = &g_typedTextCaptionBox;
     ((T217D_Word*)&block->child)->v = value;
     PushStackElement(g_elementStack, &g_typedTextCaptionBox);
 }
 
-void func_00192A70(void* self, PadRecord* rec)
+void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
 {
     if (IsTopCameraController(&g_camera->ctl454) != 0)
         return;
@@ -1035,7 +1035,7 @@ void func_00192A70(void* self, PadRecord* rec)
     ClearPadPressedBits(rec, 0xC);
 }
 
-void func_00192B58(SwitchedCollider* self)
+void UpdateSwitchedCollider(SwitchedCollider* self)
 {
     UpdateCollider(self);
 
@@ -1061,7 +1061,7 @@ void func_00192B58(SwitchedCollider* self)
     }
 }
 
-void func_00192C58(SwitchedCollider* self)
+void FinishSwitchedCollider(SwitchedCollider* self)
 {
     s32 flags = g_buttonCodeFlags & 2;
     if (flags == 0) {
@@ -1096,7 +1096,7 @@ void func_00192C58(SwitchedCollider* self)
 
 ASM_FUNC(func_00192DD0);
 
-void* func_001930B0(SwitchedCollider* p)
+void* GetSwitchedColliderTarget(SwitchedCollider* p)
 {
     return p;
 }
@@ -1104,7 +1104,7 @@ void* func_001930B0(SwitchedCollider* p)
 // The static initialiser, which builds D_00604700 and D_00269C10 (nonmatching/func_001930B8.cpp).
 INCLUDE_ASM(func_001930B8);
 
-s32 func_001931F0(void)
+s32 ConstructSwitchedColliderDefaultsAtStartup(void)
 {
-    return func_001930B8(1, 0xFFFF);
+    return ConstructSwitchedColliderDefaults(1, 0xFFFF);
 }

@@ -3,7 +3,7 @@
 typedef void (*VFn_16B7A8)(void* self);
 struct Obj_16B7A8_eu { VFn_16B7A8* vtbl; u8 pad0[0x56C - 4]; s32 f56C; void* f570; s32 f574; };
 
-void func_0016B7A8(Obj_16B7A8_eu* self, s32 v)
+void SetSelectionCaptionOpen(Obj_16B7A8_eu* self, s32 v)
 {
     s32 flag = (v != 0);
     if (flag != (self->f56C == 0)) {

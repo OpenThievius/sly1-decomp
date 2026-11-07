@@ -41,23 +41,23 @@ typedef struct DmaSettings {
     u32 hold;
 } DmaSettings;
 
-DmaChannel* D_00279340[10] = {
+DmaChannel* g_dmaChannels[10] = {
     (DmaChannel*)0x10008000, (DmaChannel*)0x10009000, (DmaChannel*)0x1000A000, (DmaChannel*)0x1000B000,
     (DmaChannel*)0x1000B400, (DmaChannel*)0x1000C000, (DmaChannel*)0x1000C400, (DmaChannel*)0x1000C800,
     (DmaChannel*)0x1000D000, (DmaChannel*)0x1000D400,
 };
 /* On 16 bytes, as retail has it after the table's 8 bytes of padding. */
 char D_00279370[16] __attribute__((aligned(16))) = "PsIIlibdma  2400";
-s32 D_00279380[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
+s32 g_dmaChannelsToReset[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
 u8 D_002793B8[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 u8 D_002793C8[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-DmaSettings D_002793D8 = { 0 };
+DmaSettings g_dmaSettings = { 0 };
 
-s32 func_001E1F10(const char* format, ...);
-s32 func_002028A8(DmaSettings* c);
+s32 PrintFormatted(const char* format, ...);
+s32 SetDmaSettings(DmaSettings* c);
 
-void func_00202768(u8* p, s32 n)
+void ClearBytes(u8* p, s32 n)
 {
     s32 i = n - 1;
     if (n != 0) {
@@ -69,14 +69,14 @@ void func_00202768(u8* p, s32 n)
     }
 }
 
-DmaChannel* func_002027A0(u32 index)
+DmaChannel* GetDmaChannel(u32 index)
 {
     if (index < 10)
         return g_dmaChannels[index];
     return 0;
 }
 
-s32 func_002027C8(s32 mode)
+s32 ResetDmaController(s32 mode)
 {
     DmaSettings settings;
     s32 flag = *(volatile u32*)0x1000E000 & 1;
@@ -106,7 +106,7 @@ s32 func_002027C8(s32 mode)
     return flag;
 }
 
-s32 func_002028A8(DmaSettings* c)
+s32 SetDmaSettings(DmaSettings* c)
 {
     u32 r = *(volatile u32*)0x1000E000;
     u32 w20 = *(volatile u32*)0x1000E020;
@@ -139,7 +139,7 @@ s32 func_002028A8(DmaSettings* c)
     return 0;
 }
 
-void func_00202A80(DmaChannel* ch, u32 tadr)
+void StartDmaChain(DmaChannel* ch, u32 tadr)
 {
     s32 timeout = 0x1000000;
     s32 cur;
@@ -147,7 +147,7 @@ void func_00202A80(DmaChannel* ch, u32 tadr)
 
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             cur = ch->chcr;
             if (((u32)cur >> 8) & 1) {
                 while (((u32)cur >> 8) & 1) {
@@ -167,7 +167,7 @@ void func_00202A80(DmaChannel* ch, u32 tadr)
 
 LINKER_REMNANT(func_00202B58);
 
-void func_00202B68(DmaChannel* ch)
+void StartDmaChainToMemory(DmaChannel* ch)
 {
     s32 timeout = 0x1000000;
     s32 cur;
@@ -175,7 +175,7 @@ void func_00202B68(DmaChannel* ch)
 
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             cur = ch->chcr;
             if (((u32)cur >> 8) & 1) {
                 while (((u32)cur >> 8) & 1) {
@@ -192,7 +192,7 @@ void func_00202B68(DmaChannel* ch)
 
 LINKER_REMNANT(func_00202C30);
 
-s32 func_00202C38(DmaChannel* ch, s32 mode, s32 timeout)
+s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout)
 {
     s32 cur;
     s32 next;
@@ -205,7 +205,7 @@ s32 func_00202C38(DmaChannel* ch, s32 mode, s32 timeout)
     }
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             cur = ch->chcr;
             if (((u32)cur >> 8) & 1) {
                 while (((u32)cur >> 8) & 1) {

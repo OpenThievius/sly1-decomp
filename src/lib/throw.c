@@ -24,27 +24,27 @@ typedef struct EhContext {
     s32 fC;
 } EhContext;
 
-UnwindFrame* func_001FFC80(void* pc, UnwindFrame* frame);
-void* func_001F5C0C(void* dst, s32 c, u32 n);
-s32 func_001F5A58(void* dst, void* src, s32 n);
-s32 func_001F6738(void* self, s32 v);
-void* func_0018D740(s32 size);
-void func_002014D0(void) __attribute__((noreturn));
+UnwindFrame* FindFrameUnwindState(void* pc, UnwindFrame* frame);
+void* FillMemory(void* dst, s32 c, u32 n);
+s32 CopyBytes(void* dst, void* src, s32 n);
+s32 CompareStrings(void* self, s32 v);
+void* EnterRuntimeLock(s32 size);
+void AbortProgram(void) __attribute__((noreturn));
 
-void func_001FD920(void);
+void AbortOnTerminate(void);
 EhContext* func_001FDA60(void);
 void func_001FDA38(void);
 
 /* The terminate hook, and the function that returns the exception context. */
-void (*D_00278048)(void) = func_001FD920;
+void (*D_00278048)(void) = AbortOnTerminate;
 EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))func_001FDA38;
 
-void func_001FD920(void)
+void AbortOnTerminate(void)
 {
     AbortProgram();
 }
 
-void func_001FD930(void)
+void RunTerminateHook(void)
 {
     (*D_00278048)();
 }
@@ -73,7 +73,7 @@ typedef struct Node_001FD990 {
 
 Node_001FD990* func_001FD990(void)
 {
-    Node_001FD990* p = (Node_001FD990*)func_0018D740(0x18);
+    Node_001FD990* p = (Node_001FD990*)EnterRuntimeLock(0x18);
     if (p == 0) {
         RunTerminateHook();
     }
@@ -131,10 +131,10 @@ typedef struct Ctx_1FDAF0 {
     void* active;
 } Ctx_1FDAF0;
 
-void func_001FDAF0(void) __attribute__((noreturn));
+void ThrowToTopHandler(void) __attribute__((noreturn));
 
 /* Throws: runs the cleanups registered in the top handler, then jumps to that handler. */
-void func_001FDAF0(void)
+void ThrowToTopHandler(void)
 {
     Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*D_0027804C)();
     void*** chain = &ctx->chain;
@@ -170,7 +170,7 @@ void func_001FDAF0(void)
 }
 
 /* Pops the top handler after running its cleanups, then throws again. */
-void func_001FDC68(void)
+void PopHandlerAndThrow(void)
 {
     Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*D_0027804C)();
     void*** chain = &ctx->chain;

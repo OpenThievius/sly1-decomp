@@ -57,9 +57,9 @@ struct Callback_1F84D8 {
     s32 arg;
 };
 
-volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+volatile s32 g_semaphoreSlots[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-s32 D_002771B8 = 0;
+s32 g_fileClientOpen = 0;
 s32 D_002771BC = -1;
 s32 D_002771C0 = -1;
 s32 D_002771C4 = -1;
@@ -70,28 +70,28 @@ static u8 D_00627880[0xC40] __attribute__((aligned(64)));
 static u8 D_006284C0[0x40] __attribute__((aligned(64)));
 static u8 D_00628500[0x440] __attribute__((aligned(64)));
 static u8 D_00628940[0x200] __attribute__((aligned(64)));
-static u8 D_00628B40[0x28] __attribute__((aligned(64)));
+static u8 g_fileClient[0x28] __attribute__((aligned(64)));
 static s32 D_00628B68;
 static u8 D_00628B80[0x40] __attribute__((aligned(64)));
 static Callback_1F84D8 D_00628BC0 __attribute__((aligned(64)));
 
-s32 func_001F6B20(SemaphoreParams* params);
-void func_001F6B30(s32 sema);
-s32 func_001F6B40(s32 sema);
-void func_001F6B50(s32 sema);
-s32 func_001F6B60(s32 sema);
-void* func_001F5A58(void* dst, const void* src, s32 n);
-void func_001F5C0C(void* p, s32 value, s32 size);
-s32 func_001F7BE8(s32 a);
-s32 func_001F80C0(RemoteCallClient* client, u32 cmd, s32 mode);
-s32 func_001F8290(RemoteCallClient* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size, s32 a7, s32 a8);
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-void func_001FA4A0(u32 cmd, void* handler, void* arg);
-void func_001FA7D8(void* data, s32 size);
+s32 NewSemaphore(SemaphoreParams* params);
+void FreeSemaphore(s32 sema);
+s32 PostSemaphore(s32 sema);
+void PostSemaphoreFromInterrupt(s32 sema);
+s32 AwaitSemaphore(s32 sema);
+void* CopyBytes(void* dst, const void* src, s32 n);
+void FillMemory(void* p, s32 value, s32 size);
+s32 InitRemoteCalls(s32 a);
+s32 BindRemoteService(RemoteCallClient* client, u32 cmd, s32 mode);
+s32 CallRemoteService(RemoteCallClient* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size, s32 a7, s32 a8);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+void SetCommandHandler(u32 cmd, void* handler, void* arg);
+void WriteBackDataCacheRange(void* data, s32 size);
 void func_001F89F8();
 
-void func_001F84D8(void)
+void CreateFileTableLock(void)
 {
     if (D_002771C0 == -1) {
         SemaphoreParams b;
@@ -103,7 +103,7 @@ void func_001F84D8(void)
     }
 }
 
-s32 func_001F8538(s32 a0)
+s32 FindFileHandle(s32 a0)
 {
     s32 s = a0;
     CreateFileTableLock();
@@ -140,7 +140,7 @@ struct Block40_1F85A8 {
     u8 b[0x40];
 };
 
-void func_001F85A8(void) {
+void HandleFileReply(void) {
     s32 sema;
     s32 type;
     void *dst;
@@ -207,7 +207,7 @@ void func_001F85A8(void) {
     }
 }
 
-void func_001F8968(void)
+void CreateFileRequestLock(void)
 {
     if (D_002771BC == -1) {
         SemaphoreParams d;
@@ -218,18 +218,18 @@ void func_001F8968(void)
     }
 }
 
-s32 func_001F89B8(s32 unused)
+s32 LockFileRequests(s32 unused)
 {
     CreateFileRequestLock();
     AwaitSemaphore(D_002771BC);
     return 0;
 }
 
-void func_001F89E8() { func_001F6B40(D_002771BC); }
+void UnlockFileRequests() { PostSemaphore(D_002771BC); }
 
 ASM_FUNC(func_001F89F8);
 
-s32 func_001F8A28(void)
+s32 OpenFileClient(void)
 {
     s32 i;
     RemoteCallClient* q;
@@ -260,7 +260,7 @@ s32 func_001F8A28(void)
 
 LINKER_REMNANT(func_001F8BF0);
 
-s32 func_001F8BF8(void)
+s32 ForgetFileClient(void)
 {
     g_fileClientOpen = 0;
     FillMemory(&D_00628B68, 0, 4);
@@ -269,10 +269,10 @@ s32 func_001F8BF8(void)
 
 LINKER_REMNANT(func_001F8C30);
 
-struct Lock_1F8C38 { static s32 Ready(s32 n) { func_001F89B8(n); return ((s32*)&D_002771B8)[0]; } };
+struct Lock_1F8C38 { static s32 Ready(s32 n) { LockFileRequests(n); return ((s32*)&g_fileClientOpen)[0]; } };
 struct Min_1F8C38 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
 
-s32 func_001F8C38(s32 a0)
+s32 CloseFile(s32 a0)
 {
     Close_1F84D8* g = (Close_1F84D8*)D_00627880;
     Handle_1F84D8* p;
@@ -324,7 +324,7 @@ INCLUDE_ASM(func_001F8DB8);
 
 INCLUDE_ASM(func_001F9028);
 
-s32 func_001F92E8(s32 a0, s32 mode, u32* out)
+s32 ControlFile(s32 a0, s32 mode, u32* out)
 {
     Ioctl_1F92E8* g = (Ioctl_1F92E8*)D_00627880;
     s32 ret = 1;

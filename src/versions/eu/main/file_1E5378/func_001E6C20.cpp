@@ -8,12 +8,12 @@ struct Self_eu_1E6C20 {
     f32 f116C; f32 f1170; f32 f1174;
 };
 
-void func_001E6268(Self_eu_1E6C20* self, s32* first, s32* last);
+void GetArcVisibleRange(Self_eu_1E6C20* self, s32* first, s32* last);
 
 #define SX_eu_1E6C20(x) ((s32)(((x) + 1728.0f) * 16.0f))
 #define SY_eu_1E6C20(y) ((s32)(((y) * 0.5462963f + 1920.0f) * 16.0f))
 
-void func_001E6C20(Self_eu_1E6C20* self, PacketWriter* buf)
+void WriteArcTickVertices(Self_eu_1E6C20* self, PacketWriter* buf)
 {
     Rgba4 c;
     f32 t;
