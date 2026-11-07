@@ -1449,6 +1449,7 @@
 #define InitTriggerZone                            func_0013F0E0
 #define LoadTriggerZone                            func_0013F110
 #define AddTriggerZoneQuad                         func_0013F140
+#define AddTriggerZoneRotation                     func_0013F1D8
 #define StartTriggerZone                           func_0013F290
 #define CopyTriggerZone                            func_0013F6C0
 #define SetTriggerZoneMode                         func_0013F6F8
@@ -1482,6 +1483,7 @@
 #define GetKeyIdSecond                             func_001407A0
 #define NormalizeDiscPath                          func_001407A8
 #define RefreshDiscStatus                          func_00140968
+#define SendDiscCommand22WhenReady                 func_001409A8
 #define InitDiscAccessModule                       func_001409D8
 #define StepDiscSectorCheck                        func_001409E0
 #define FormatDiscPath                             func_00140B60
@@ -1866,6 +1868,7 @@
 #define SpawnBriefEffectAt                         func_00158108
 #define AddRangeEntry                              func_00158198
 #define ResolveSpawnRecordTargets                  func_00158288
+#define TurnMatrixBySpin                           func_00158480
 #define StartMemberObject                          func_001585F8
 #define ComputeChainedWorldFrame                   func_00158630
 #define SendEmptyMessage                           func_00158730
@@ -2085,6 +2088,8 @@
 #define BuildAttachmentDmaChain                    func_001662A8
 #define FlipVifBaseOffset                          func_00166658
 #define DrawModelPart                              func_00166690
+#define ConstructDefaultRgbaColor                  func_00167D20
+#define ConstructDefaultRgbaColorAtStartup         func_00167D48
 #define InitConeAgent                              func_00167D68
 #define StartConeAgent                             func_00167E08
 #define DrawConeAgent                              func_00167EF0
@@ -2167,6 +2172,8 @@
 #define HandleGridSelectorInput                    func_0016BBA8
 #define SetGridSelectorOpen                        func_0016BDD0
 #define DrawGridSelector                           func_0016BEA0
+#define ConstructBoxStyles                         func_0016C360
+#define ConstructBoxStylesAtStartup                func_0016C450
 #define InitC76Object                              func_0016C470
 #define LoadC76Object                              func_0016C4B8
 #define DrawC35Collider                            func_0016C4E8
@@ -2231,6 +2238,7 @@
 #define ResolvePlayerContact                       func_00170820
 #define HandlePlayerNotification                   func_00170960
 #define AimPlayerAtTarget                          func_00171180
+#define UpdatePlayerState0                         func_00171DD8
 #define PlacePlayerOnGround                        func_00171F28
 #define ReleasePlayerToState2                      func_00171FE0
 #define OrientPlayerSpinPart                       func_00172078
@@ -2253,6 +2261,7 @@
 #define SelectPlayerStateAnimation                 func_00174F50
 #define SetPlayerPartLayers                        func_00175078
 #define SetPlayerState                             func_00175170
+#define IgnorePlayerArgument                       func_001777F8
 #define SwitchPlayerState11                        func_00177800
 #define SetPlayerProbeContactsDisabled             func_00177828
 #define FindNodeForQuery                           func_00177838
@@ -2331,6 +2340,7 @@
 #define AddQueueEntryKind11                        func_0017D1E8
 #define AddQueueEntryKind12                        func_0017D220
 #define TestProbeSegmentsAgainstColliders          func_0017DE88
+#define ChoosePlayerNextState                      func_0017E6D0
 #define SolveArrivalTimeAtHeight                   func_0017FAC0
 #define ComputePlayerJumpVelocity                  func_0017FB78
 #define SetPointObjectListLinkOffset               func_0017FD48
@@ -2343,6 +2353,8 @@
 #define LoadColoredTriangles                       func_0017FEC0
 #define DrawTriangleGroups                         func_00180108
 #define DrawColoredTriangles                       func_00180398
+#define ConstructTriangleGroupColors               func_00180E38
+#define ConstructTriangleGroupColorsAtStartup      func_00180E90
 #define RegisterListedKeepObject                   func_00180EB0
 #define UnregisterListedKeepObject                 func_00180EE8
 #define CopyListedKeepObject                       func_00180F20
@@ -2470,6 +2482,7 @@
 #define IntersectSegmentWithSphere                 func_00187D08
 #define AddSweptPartSphereContact                  func_00187E88
 #define CollideColliderParts                       func_00187F40
+#define BuildObjectPairContacts                    func_00188270
 #define ResetMatrixHomogeneous                     func_001884C0
 #define CopyRotationMatrix                         func_001884E0
 #define MultiplyByTransposedMatrix3x3              func_00188520
@@ -2509,6 +2522,7 @@
 #define InitGaugeAgent                             func_0018A388
 #define LoadGaugeAgent                             func_0018A3B8
 #define StartGaugeAgent                            func_0018A3F0
+#define DrawGaugeAgentMarkerRing                   func_0018A510
 #define DrawGaugeAgent                             func_0018A628
 #define FindNearestHitObject                       func_0018A6C0
 #define IsGaugeAgentBlocker                        func_0018A830
@@ -2730,6 +2744,8 @@
 #define SetPauseMenuPage                           func_00195928
 #define ActivatePauseMenuSelection                 func_00195958
 #define CancelPauseMenuPage                        func_001961C0
+#define ConstructMenuBoxStyle                      func_00196330
+#define ConstructMenuBoxStyleAtStartup             func_001963B8
 #define InitObjectGroup                            func_001963D8
 #define LoadObjectGroup                            func_00196410
 #define CopyObjectGroup                            func_00196810
@@ -3052,6 +3068,8 @@
 #define HasObjectPoolChoice                        func_001A8C50
 #define ClearObjectPoolChoice                      func_001A93C8
 #define ResetPlacementRecord                       func_001A93E8
+#define ResetObjectPoolSecondRecord                func_001A9438
+#define ClearObjectPoolThirdRecord                 func_001A9498
 #define GetPlacementRecordTransform                func_001A94C0
 #define GetPlacementRecordAngle                    func_001A97C8
 #define StartGaugeBarAgent                         func_001A98F8
@@ -3153,6 +3171,8 @@
 #define SetElementModeClearingFlag                 func_001AE7F8
 #define DrawCyclingGlyphElement                    func_001AE820
 #define GetCyclingGlyph                            func_001AEA08
+#define ConstructScreenTextStyles                  func_001AEA70
+#define ConstructScreenTextStylesAtStartup         func_001AEC90
 #define InitTimedObject                            func_001AECB0
 #define SetTimedObjectTarget                       func_001AECE0
 #define EnterTimedObjectState                      func_001AECE8
@@ -3883,6 +3903,8 @@
 #define SetBestTimeState                           func_001E02C8
 #define DrawFramedText                             func_001E0678
 #define FinishBestTimeRun                          func_001E0828
+#define ConstructBestTimeTextStyle                 func_001E0848
+#define ConstructBestTimeTextStyleAtStartup        func_001E08D8
 #define ParseSignedDecimal                         func_001E08F8
 #define ParseFormatSpec                            func_001E0978
 #define FormatStringArg                            func_001E0CD0
@@ -3972,6 +3994,8 @@
 #define SetArcTarget                               func_001E86E0
 #define SetArcSpecialObject                        func_001E87F0
 #define ResetArc                                   func_001E8840
+#define ConstructGreyColor                         func_001E8878
+#define ConstructGreyColorAtStartup                func_001E88B0
 #define InitKeyedConeAgent                         func_001E88D0
 #define StartKeyedConeAgent                        func_001E8948
 #define FindNearestAgentKey                        func_001E89F0
@@ -4202,6 +4226,7 @@
 #define StartArrivalPoint                          func_001F3F80
 #define PlaceAtArrivalPoint                        func_001F4008
 #define SetTransformObjectKeyedValue               func_001F42D0
+#define StoreValueAndMarkSet                       func_001F4308
 #define FindOrActivateSwitchedCollider             func_001F4318
 #define FindActiveObjectSubGroup                   func_001F4378
 #define BeginLevelExit                             func_001F4408

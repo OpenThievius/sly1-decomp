@@ -1,5 +1,6 @@
 symbol	name	evidence
 func_0017DE88	TestProbeSegmentsAgainstColliders	for each of the 11 segment pairs of D_00263EC0 transformed by the matrix, tests every unflagged part of the world's collider list with func_00141C28 and returns whether at least two hits had a normal above 0.7
+func_0017E6D0	ChoosePlayerNextState	returns the state the callers hand to SetPlayerState with sub-state -1 (ControlPlayer, func_0017F018): 0 unless the speed at +0x634 is above 0, then 1 when +0x900 is set, 5 when +0xA10 is, else 0
 func_0017FAC0	SolveArrivalTimeAtHeight	solves the quadratic of half the gravity (+0x358) with the z differences of its four points (SolveQuadratic) and writes the later positive root; returns 0 when there is none (StartNextQueueEntry, func_001CE590)
 func_0017FB78	ComputePlayerJumpVelocity	copies the player's velocity (+0x150) and sets its z by the jump kind at +0x224C (jtbl_0024B150): a square root of the height at +0x700 times one of D_00263E80/88/8C, or twice the drop from +0x148 to +0x6A8 plus D_00263E84 times +0x358, never below the current z; SetPlayerState and StartNextQueueEntry call it
 func_0017FD48	SetPointObjectListLinkOffset	sets the link offset 0x50 of the list D_00264088 with func_00152438

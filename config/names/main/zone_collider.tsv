@@ -50,6 +50,7 @@ func_0013F070	DeactivateZoneRecord	sends the owner script event 3, runs the entr
 func_0013F0E0	InitTriggerZone	slot 0 of class 0x28: runs InitCollider and InitZoneRecord on the zone record at 0x554
 func_0013F110	LoadTriggerZone	slot 10 of class 0x28: runs LoadCollider then CollectZoneChildren on the zone record
 func_0013F140	AddTriggerZoneQuad	appends a 16-byte quad to the trigger zone's list at 0x7C0 (count 0x7B4), or puts it first, moving the others up, when the object matches id 0x200; StartTriggerZone calls it
+func_0013F1D8	AddTriggerZoneRotation	AddTriggerZoneQuad's counterpart for the 0x30-byte entries at 0x7F0 (count 0x7E0): appends a copy of the argument, or puts it first and moves the others up (MoveMemory) when the object matches id 0x200 (MatchesObjectId); StartTriggerZone calls it after AddTriggerZoneQuad, and FindLargestEntryIndex reads the entries
 func_0013F290	StartTriggerZone	class 0x28's slot at 0x50, the start slot of the other classes (StartZoneCollider, StartMaskedCollider)
 func_0013F6C0	CopyTriggerZone	slot 9 of class 0x28: keeps id120 across the base copy and sets the zone's owner to itself
 func_0013F6F8	SetTriggerZoneMode	calls SetZoneMode on the zone record at 0x554

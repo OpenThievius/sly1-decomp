@@ -5,3 +5,5 @@ func_0017FE90	InitColoredTriangles	slot 0 of class 0x8E: runs the base init func
 func_0017FEC0	LoadColoredTriangles	reads the point list, two corner pairs and five lists of index triples from the stream, giving each list a colour from func_001B4688; slot 10
 func_00180108	DrawTriangleGroups	for each of four groups, emits a GIF colour entry (alpha scaled by d) and the projected XYZF of every triangle's three vertices
 func_00180398	DrawColoredTriangles	transforms the points by a matrix built from width and t and emits each list as coloured triangles to the packet buffer D_00262280, then a box over minX..maxX
+func_00180E38	ConstructTriangleGroupColors	the file's static initialiser: builds the colours D_00264098 (0xBF, 0xBF, 0xBF, 0x7F) and D_002640A0 (0x00, 0x87, 0xFF, 0x7F)
+func_00180E90	ConstructTriangleGroupColorsAtStartup	the file's _GLOBAL_$I$: calls ConstructTriangleGroupColors with (1, 0xFFFF); an entry of the startup init-list D_0027B130

@@ -31,3 +31,5 @@ func_001E83E0	DrawArcTickPacket	original assembly: the second request QueueArcDr
 func_001E86E0	SetArcTarget	stores the target object; in state 4 of D_002701F8 switches modes and phases (1 and 2 when set, 3 and 0 when cleared), otherwise enters phase 2
 func_001E87F0	SetArcSpecialObject	clears bit 32 of the old special object's flags, stores the new one and sets bit 32 on it
 func_001E8840	ResetArc	slot 5: runs ResetScreenElement and zeroes size, current and target and sets the phase to 3
+func_001E8878	ConstructGreyColor	the file's static initialiser: on the construction pass (1, 0xFFFF) sets the first four bytes of D_00275B50 to 0x80
+func_001E88B0	ConstructGreyColorAtStartup	the file's _GLOBAL_$I$: calls ConstructGreyColor with (1, 0xFFFF); an entry of the startup init-list D_0027B130
