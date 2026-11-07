@@ -10,19 +10,27 @@
 
 #include "common.h"
 
+struct StateGraph;
+struct StateEdge;
+struct AnimationPlayer;
+struct QueuedCall;
+
 struct StateWalker {
     const void* vt;         // 0x00: D_002198E8
-    u8 pad04[0x18 - 0x04];
-    void* owner;            // 0x18: func_001B6290's first argument; func_001B6568, func_001B6628
-    s32 f1C;                // 0x1C: the second
+    u8 pad04[0x08 - 0x04];
+    StateWalker* next;      // 0x08: in its graph's list (func_001B6388 walks it)
+    u8 pad0C[0x18 - 0x0C];
+    StateGraph* owner;      // 0x18: func_001B6290's first argument; func_001B6568, func_001B6628
+    s32 f1C;                // 0x1C: the second: the object it drives, its key in the graph's list
     s32 f20;                // 0x20: the fourth
-    s32 key;                // 0x24: the id a message's source is compared with (func_00181D28)
+    AnimationPlayer* player; // 0x24: what plays the current edge's animation (func_001B66A0); a
+                             // message from it names it as its source (func_00181D28)
     s32 f28;                // 0x28: func_001B6628
     s32 f2C;                // 0x2C: -1 at set-up; func_001B6628
     s32 index;              // 0x30: func_001B6568, func_001B6628
-    f32 f34;                // 0x34
-    f32 f38;                // 0x38: 1 at set-up
-    u8 pad3C[0x40 - 0x3C];
+    StateEdge* edge;        // 0x34: the edge it is on (func_001B66A0)
+    f32 f38;                // 0x38: 1 at set-up; the speed along an edge
+    QueuedCall* calls;      // 0x3C: told of each change (func_001B6D78), released with it
 };
 
 typedef char check_StateWalker[sizeof(StateWalker) == 0x40 ? 1 : -1];

@@ -380,7 +380,7 @@ void func_00181D28(ModeWalker* self, s32 code, MessageBody* rec)
     if (code == 0x13) {
         StateWalker* sub = self->fBBC;
         s32 key = rec->sourceId;
-        if (sub != 0 && key == sub->key) {
+        if (sub != 0 && key == (s32)sub->player) {
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
