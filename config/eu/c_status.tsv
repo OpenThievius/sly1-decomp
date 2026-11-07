@@ -3669,7 +3669,7 @@ func_00203CF8	func_00205038	match
 func_00203D90	func_002050D0	match	
 func_00203E28	func_00205168	match	
 func_00203EE0	func_00205220	match	
-func_002040E8	func_00205428	match	
+func_002040E8	func_00205428	match	rodata
 func_00204228	func_00205568	match	
 func_002044B0	func_002057F0	match	
 func_00204510	func_00205850	match	

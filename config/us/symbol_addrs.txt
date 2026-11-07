@@ -102,3 +102,15 @@ D_00249D80 = 0x00249D80;
 // 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
 // Named so that file_13CCF8 can hold them (LINKER_REMNANT).
 func_0013E650 = 0x0013E650; // type:func
+// The pad library's file (src/lib/pad.c): its .data starts with its identification string
+// inside the label of the CD library's last buffer (D_0027AE48), holds two tables of state
+// names and a word no code reads, and ends where the memory card library's string begins; its
+// .rodata ends with those tables' strings, which no code reads, before the math library's. Its
+// second message (0x24F758) has no reader either: a stripped function's.
+D_0024F758 = 0x0024F758;
+D_0024F830 = 0x0024F830;
+D_0027AE70 = 0x0027AE70;
+D_0027AE88 = 0x0027AE88;
+D_0027AEA8 = 0x0027AEA8;
+D_0027AEB4 = 0x0027AEB4;
+D_0027AEB8 = 0x0027AEB8;
