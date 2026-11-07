@@ -149,7 +149,7 @@ void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
     u8 buf[0xC4];
     u8* o;
 
-    func_001E5938();
+    ChoosePlayerLinkedColliderTarget();
     if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
         ClearPadPressedBits(obj, 0xC0);
         AdvancePlayerLinkedColliderWalker(self);
@@ -262,8 +262,8 @@ void func_001E5C78(PlayerLinkedCollider* self)
 {
     s32 a;
     s32 b;
-    func_001B6598(self->f614, &a);
-    func_001B6568(self->f614, &b);
+    GetStateWalkerCurrentKey(self->f614, &a);
+    GetStateWalkerTargetKey(self->f614, &b);
     if (a == 0x359 && b == a) {
         if (HasObjectPoolChoice(self->f618) != 0) {
             SetStateWalkerTarget(self->f614, 0x35A);
@@ -452,12 +452,12 @@ void func_001E6188(T217D_3F0* self)
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode(self->sprite, 1);
-    func_001847F0(self->sprite, D_00275640);
-    func_00184858(self->sprite, D_00275650);
-    func_00184818(self->sprite, D_00275654);
-    func_00184878(self->sprite, D_00275658);
-    func_00184838(self->sprite, D_0027565C);
-    func_00184898(self->sprite, D_00275660);
+    SetConeVolumeColor(self->sprite, D_00275640);
+    SetConeVolumeFirstAngle(self->sprite, D_00275650);
+    SetConeVolumeSecondLevel(self->sprite, D_00275654);
+    SetConeVolumeSecondAngle(self->sprite, D_00275658);
+    SetConeVolumeThirdLevel(self->sprite, D_0027565C);
+    SetConeVolumeThirdAngle(self->sprite, D_00275660);
     SetConeVolumeRange(self->sprite, D_00275B58);
     SetConeVolumeValue(self->sprite, 1);
     ((Inst_1E6188*)self->sprite)->vtbl[7](self->sprite);
@@ -615,7 +615,7 @@ void func_001E73B8(T217D_3F0* self)
         BeginGifTag(s, 0, 1, 0xE);
         AddGifRegisterWrite(s, 0x47, 0x31001);
         AddGifRegisterWrite(s, 0x42, 0x44);
-        func_001E6600(self, s);
+        WriteArcPointVertices(self, s);
         WriteArcTickVertices(self, s);
     }
 }

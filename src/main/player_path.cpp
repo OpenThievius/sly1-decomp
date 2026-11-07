@@ -14,7 +14,7 @@ float D_00274F1C = 0.400000006f;
 float D_00274F20[2] = {10.0f, 0.0f};
 float D_00274F28[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
 
-struct Entry_1D14F0 {
+struct TwoEntryBlendEntry {
     u8 pad0[4];
     void* p4;
     u8 pad8[4];
@@ -27,7 +27,7 @@ void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void*
 void func_001D14F0(Player* self)
 {
     f32 out[4];
-    Entry_1D14F0* e = (Entry_1D14F0*)self->f103C;
+    TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
         func_0012CD78(0.0f, 1.0f, e->p4, self->f614, self, 1, 0, 0, out, 0);

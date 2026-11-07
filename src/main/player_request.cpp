@@ -125,7 +125,7 @@ void func_001D40A0(TurningCollider* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12,
     a1->fF0 = 0;
     a1->f190 = 0;
     func_001399F8(a2, 0x50, 6, a1);
-    func_001D39E0(6, a1, a2->sub->f8, &a0->f640);
+    SumBlendEntryVectors(6, a1, a2->sub->f8, &a0->f640);
 }
 
 INCLUDE_RODATA(jtbl_0024DBD0);
@@ -163,7 +163,7 @@ void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
 void func_001D4A98(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
-        f32 t = func_00205778(self->v150.y, self->v150.x);
+        f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
         self->f638 = ApproachAngleWithRamp(D_00275030, 0, self->f638, t + 3.1415927f, g_gameClock.dt);
         if (0.25f < g_gameClock.time - self->f222C && self->f690 != 0) {
 
@@ -183,7 +183,7 @@ void func_001D4A98(Player* self) {
             } else {
                 void* o = self->f2B70;
                 SetPlayerState(self, 2, 2);
-                s32 r = func_001CF158(self, o);
+                s32 r = ChoosePlayerTargetByCost(self, o);
                 SetPlayerState(self, 2, r);
             }
         } else {
@@ -254,7 +254,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     }
     self->f26B4 = *msg;
     if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (g_buttonCodeFlags & 1) == 0 &&
-        func_001DDA80((s32)self->world) == 0) {
+        IsPadSelectFlagHeld((s32)self->world) == 0) {
         s32 c;
         switch (self->f26B4.kind) {
         case 3:
@@ -384,7 +384,7 @@ void func_001D51A0(Player* self)
             func_00192C58(self);
             void* p = self->f2B70;
             SetPlayerState(self, 2, 2);
-            SetPlayerState(self, 2, func_001CF158(self, p));
+            SetPlayerState(self, 2, ChoosePlayerTargetByCost(self, p));
         } else {
             SetPlayerState(self, 4, 0x2D);
         }
@@ -478,7 +478,7 @@ s32 func_001D54E0(Player* self, s32 n)
         default: {
             s32 r = 0;
             if (self->f2220 == 11) goto set;
-            if (func_001DDA80((PlayerWorld*)self->world) != 0) {
+            if (IsPadSelectFlagHeld((PlayerWorld*)self->world) != 0) {
 set:
                 r = 1;
             }
@@ -495,7 +495,7 @@ set:
     if (v == 11) goto one;
     if (self->f26C4 != 0) goto one;
     if ((g_buttonCodeFlags & 1) != 0) goto one;
-    if (func_001DDA80((PlayerWorld*)self->world) != 0) goto one;
+    if (IsPadSelectFlagHeld((PlayerWorld*)self->world) != 0) goto one;
     goto zero;
 one:
     return 1;
@@ -508,7 +508,7 @@ void func_00160DA0(void);
 
 void func_001D5620(void* self)
 {
-    func_0012AAE8(self, 1.0f);
+    SetCrossfadeRatioDeep(self, 1.0f);
     SpendReserveUnit();
 }
 
