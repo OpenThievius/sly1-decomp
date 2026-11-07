@@ -345,8 +345,8 @@ ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, Scri
 ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
@@ -1440,7 +1440,7 @@ ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1458,7 +1458,7 @@ ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
