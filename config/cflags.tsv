@@ -39,3 +39,4 @@ src/lib/memory_compare.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/memory_copy.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/memory_move.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/memory_set.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/sort.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
