@@ -117,7 +117,7 @@ void func_001DFEB8(T217D_1380* self)
         }
     }
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_002758E0;
+        self->frame = (V24A2**)&g_commentaryFrameStyle;
         *self->frame = GetFontById(2);
     }
     SetScreenElementScale(self, 0.6f);
@@ -251,7 +251,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
         f32 one = 1.0f;
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         func_00160C48(0);
-        func_001DDAD0(g_currentWorld);
+        PopActiveSequenceElement(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
         SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
         SetTimerLimit(&g_timerElement, zero, 0);
@@ -260,15 +260,15 @@ void func_001E02C8(T217D_1380* self, s32 n)
         if (cam->flags & 8) {
             f32 t = cam->f08;
             if (t < one) {
-                FormatToString(&D_00275900, "Best time: &10.%d", (s32)(t * 10.0f));
+                FormatToString(&g_bestTimeText, "Best time: &10.%d", (s32)(t * 10.0f));
             } else {
                 s32 s = (s32)t;
                 s32 minutes = s / 60;
                 s32 seconds = s % 60;
-                FormatToString(&D_00275900, "Best time: &1%d:%02d", minutes, seconds);
+                FormatToString(&g_bestTimeText, "Best time: &1%d:%02d", minutes, seconds);
             }
             SetScreenElementHoldTime(self, zero);
-            self->vt->m08(self, D_00275900.c);
+            self->vt->m08(self, g_bestTimeText.c);
         } else {
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->m08(self, "Beginning Master Thief Sprint!");
