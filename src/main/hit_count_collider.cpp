@@ -108,7 +108,7 @@ void func_001C34C8(HitCountCollider* self, f32 t)
         self->f688 = 0;
     }
     if (self->f684) {
-        func_001C3F68(self, self->f684);
+        SendHitCountColliderRequest(self, self->f684);
         self->f684 = 0;
     }
     if (self->f67C) {
@@ -146,7 +146,7 @@ void func_001C34C8(HitCountCollider* self, f32 t)
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     BuildAxisAngleMatrix((u8*)&g_unitZVector, buf, self->f648 - ang);
-    func_001EA918(&self->f660->rot, buf, D_00274A60, buf2, 0, t);
+    ApproachRotationWithRamp(&self->f660->rot, buf, D_00274A60, buf2, 0, t);
     self->f660->desc02()->m1E(self->f660, (Mat02*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
@@ -259,7 +259,7 @@ void func_001C3FC8(void* self, s32 flag);
 
 void func_001C3E80(HitCountCollider* self)
 {
-    func_00192C58(self);
+    FinishSwitchedCollider(self);
     SetHitCountColliderState(self, 1);
 }
 

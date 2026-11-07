@@ -1413,7 +1413,7 @@ void func_001E2870(OnOffObject* self) {
     }
     s32 st;
     if (self->f398 == -1) {
-        func_00128018(0, self, (u8*)p + 0x140, &loc);
+        TransformPointBetweenFrames(0, self, (u8*)p + 0x140, &loc);
         s32 r = IsPointInsideFaceTree((TreeNode03*)self->f2E0, &loc);
         st = (0u < (u32)r);
     } else {
@@ -1571,7 +1571,7 @@ void func_001E4EA8(WorldLoadRequest* self)
     NotifyScatterControllerLoaded(g_scatterController);
     ResetCounter(D_002623D8);
     RestoreSelectionCaptionCamera(&D_0026FA90);
-    func_00138C00(g_currentWorld, 0);
+    UpdateWorldContacts(g_currentWorld, 0);
     UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);
     if (self->flags & 0x10) D_0026C6C8.vt->m14(&D_0026C6C8);
     SetGameClockScale(1.0f);

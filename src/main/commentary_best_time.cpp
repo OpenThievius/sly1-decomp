@@ -63,7 +63,7 @@ struct BestTimeTextStyle {
     s32 f18;
     BestTimeTextStyle(s32 a, s32 b)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         kind = 0x2D;
         f8 = a;
         fC = b;
@@ -193,7 +193,7 @@ void func_001E00B0(T217D_1380* self)
             SetBestTimeState(self, 3);
             return;
         }
-        SetTimerRate(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));
         r = AreMenusAndFadeClear();
         if (r) o->vt->m14(o); else o->vt->m15(o);
         if (g_currentEntry->flags & 8) {
@@ -250,7 +250,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
         SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
-        SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
+        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)D_002623DC));
         SetTimerLimit(&g_timerElement, zero, 0);
         StartTimerCounting(&g_timerElement);
         G27C230* cam = g_currentEntry;
@@ -323,9 +323,9 @@ void func_00137260(TextLayout* out, s32 flag);
 void func_00137268(TextLayout* out, s32 flag);
 struct TextLayout {
     u8 b[32];
-    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
-    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
-    void Color(s32* c) { func_00137248(this, c); }
+    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
+    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
+    void Color(s32* c) { SetTextLayoutColor(this, c); }
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };

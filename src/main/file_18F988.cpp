@@ -255,7 +255,7 @@ void func_0018FFB0(SeekingAgent* self, s32 a1, s32 a2)
             a2v = self->fC38;
         }
         if (self->f720 != 0) {
-            func_001CB6F8(self->f720, self);
+            RemoveItemKeeperMember(self->f720, self);
         }
         break;
     }
@@ -349,7 +349,7 @@ s32 func_00190450(SeekingAgent* self, s32* arg)
     self->fC34 = 0;
     self->fC30 = arg[0];
     if (arg[0] == 0 && arg[1] != 0) {
-        if (func_001A8820(((SeekPartner*)self->fC2C)->p618, arg[1])) {
+        if (IsObjectInPool(((SeekPartner*)self->fC2C)->p618, arg[1])) {
             self->fC34 = 1;
         }
     }
@@ -734,20 +734,20 @@ void func_00192068(PointObject* self, void* other)
 
 void func_001920B0(BaseObject* self, s32 arg)
 {
-    func_00128018((void*)self->parent, 0, (u8*)self + 0x40, arg);
+    TransformPointBetweenFrames((void*)self->parent, 0, (u8*)self + 0x40, arg);
 }
 
 void func_001920E0(PointObject* self, s32 value)
 {
     void* sub = &self->pos;
-    func_00128018(self->parent, value, sub, sub);
+    TransformPointBetweenFrames(self->parent, value, sub, sub);
     ReparentObject(self, value);
 }
 
 s32 func_00192128(PointObject* self, void* other)
 {
     void* p = &self->pos;
-    return func_00128018(other, 0, p, p);
+    return TransformPointBetweenFrames(other, 0, p, p);
 }
 
 void func_00192150(TextPointObject* self, void* other)

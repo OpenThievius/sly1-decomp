@@ -136,7 +136,7 @@ struct MeshHit {
     u8 pad48[0x50 - 0x48];
     union {
         s32 i50;            // 0x50
-        void* p50;          // 0x50: the part hit (func_00187C28)
+        void* p50;          // 0x50: the part hit (AddSweptPartMeshContact)
     };
     s32 i54;                // 0x54
     MeshEdge* edge;         // 0x58
@@ -159,7 +159,7 @@ s32 func_00186450(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 
     while (i >= 0) {
         MeshEdge* e = &table[i];
-        total += func_0013DFD8(ctx, base + e->x * 16, base + e->y * 16, 0, cap - total, &out[total]);
+        total += CollectTreeNodeSpans(ctx, base + e->x * 16, base + e->y * 16, 0, cap - total, &out[total]);
         if (filled < total) {
             for (; filled < total; filled++)
                 out[filled].edge = e;
@@ -342,7 +342,7 @@ s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
     MeshHit recs[2];
     Vec4U v1;
     Vec4U v2;
-    s32 count = func_0013DFD8(a4, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, 2, recs);
+    s32 count = CollectTreeNodeSpans(a4, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, 2, recs);
     s32 idx = 0;
     if (count > 0) {
         idx = (recs[0].p50 == 0);

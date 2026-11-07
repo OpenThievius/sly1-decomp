@@ -46,6 +46,7 @@ func_001920B0	ConvertPositionToWorld	converts the vector at +0x40 out of the obj
 func_001920E0	ReparentPointObject	class 0x7E at table offset 0x64: converts the position (&pos) against the parent and the new value with func_00128018, then calls ReparentObject
 func_00192128	ConvertPointObjectPosition	slot 22 of class 0x7E: converts the position (&pos) into the other object's frame in place with func_00128018
 func_00192150	LoadTextPointObject	loads the point through func_00192068, then reads a string from the stream into text via func_001384A0; slot 10
+func_00192190	ResetTextPointToHalf	stores 0.5 in both floats +0x54 and +0x58 of a text point object (class 0x82); SetTextPanelOpen and func_00134B48 call it
 func_001921A8	InitSwitchedCollider	slot 0 of class 0x05: runs InitCollider, stores itself at 0x598, sets 0x580 to 1 and switches on through func_00192990
 func_001921E8	CopySwitchedCollider	slot 9 of class 0x05: runs CopyCollider and, if not yet on (0x550), sets it and switches on through func_00192990
 func_00192230	HandleSwitchedColliderNotification	slot 13 of class 0x05: after the base func_00127378, kind 0xB hands the object at 0x574 to func_001BF788 and kind 0x10 clears the matching entry of the list at 0x5AC

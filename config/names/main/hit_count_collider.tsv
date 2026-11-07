@@ -8,5 +8,6 @@ func_001C3D28	IsHitCountColliderRequestBlocked	slot 0x13C of class 0x1D (IsAgent
 func_001C3D60	AcceptHitCountColliderRequest	slot 0x140 of class 0x1D (AcceptAgentRequest's slot): unless slot 79 refuses, runs the request's callback, and outside states 2..4 enters state 2 (HasSpareCount) or 3 (SetHitCountColliderState) and sends notification 0x17
 func_001C3E50	HasHitCountColliderAcceptedRequest	slot 0x144 of class 0x1D: 1 in states 2..4 or while the accepted mark 0x638 is set
 func_001C3E80	FinishHitCountCollider	slot 0x150 of class 0x1D: func_00192C58, then state 1 (SetHitCountColliderState)
+func_001C3F68	SendHitCountColliderRequest	builds an owner message with the value (InitOwnerMessage) and the reply func_001C3EB0 and passes it to the object's slot 76 (+0x140, the request slot AcceptTintBlendColliderRequest fills); UpdateHitCountCollider and func_001091A8 call it
 func_001C3FC8	SetHitCountColliderState	changes the state 0x610 (its clock time 0x614): states 2 and 3 turn it to face back along its velocity, 3 raises the scatter levels and 4 sets pause-menu page 0x1A; then starts the state's clip (0x618..0x624) with ReplaceAnimationPlayer
 func_001C4180	AddHitCountColliderId	appends an id to the list at 0x69C (count 0x698); the script built-in func_00109258 calls it

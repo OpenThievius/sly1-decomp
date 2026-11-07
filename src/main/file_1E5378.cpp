@@ -221,7 +221,7 @@ s32 func_001E5888(PlayerLinkedCollider* self, Collider* node)
     if ((void*)node->root == (void*)self) {
         return 0;
     }
-    if (func_001A8820(self->f618, node) != 0) {
+    if (IsObjectInPool(self->f618, node) != 0) {
         return 0;
     }
     a = node->root03();
@@ -288,7 +288,7 @@ s32 func_001E5DA8(PlayerLinkedCollider* self, void* arg)
         return 1;
     }
     if (self->f618 != 0) {
-        s32 r = func_001A8820(self->f618, arg);
+        s32 r = IsObjectInPool(self->f618, arg);
         if (r != 0) {
             return 1;
         }
@@ -760,7 +760,7 @@ void func_001E77C0(T217D_3F0* self)
         if (D_00270458 != 4)
         {
             self->pulse = ApproachValueWithRamp(&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
-            if (func_001EAC68(self->pulse, self->pulseTarget, 1e-4f) != 0)
+            if (AreFloatsNearlyEqual(self->pulse, self->pulseTarget, 1e-4f) != 0)
             {
                 self->pulse = 1.0f;
                 if (self->index == 0x1A)
@@ -800,7 +800,7 @@ void func_001E77C0(T217D_3F0* self)
             s32 i;
             for (q = &self->pts[0].rateA, e = self->pts, i = 0; i < 57; q += 11, i++, e++)
             {
-                if (func_001EAC68(e->level, e->target, 1e-4f) != 0)
+                if (AreFloatsNearlyEqual(e->level, e->target, 1e-4f) != 0)
                 {
                     if (self->index == big)
                     {

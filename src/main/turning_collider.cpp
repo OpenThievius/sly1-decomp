@@ -57,7 +57,7 @@ void func_001C44F0(TurningCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 6, g_turningColliderLinks);
-    func_001C4578(self, 1);
+    SetTurningColliderLinkFlag(self, 1);
     if (self->f628 == 0) {
         self->f610 = self->f620;
     } else {

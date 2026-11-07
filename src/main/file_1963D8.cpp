@@ -526,7 +526,7 @@ void func_001969F8(GaugeCollider* self)
         AppendToList(&self->f69C, (void*)arr[i]);
     }
     self->f6B8 = CreateStateWalker(self->f6B4, 0, -1, 0);
-    func_001B6DF8(self->f6B8, self);
+    AddStateWalkerListener(self->f6B8, self);
 }
 
 ASM_FUNC(func_00196B78);
@@ -703,7 +703,7 @@ s32 func_001982A0(GaugeColliderAgent* self)
 
     switch (self->f724) {
     case 2:
-        if (func_001C96B8(self) == 0) {
+        if (GetAgentRosterState(self) == 0) {
             r = 4;
             break;
         }
@@ -769,7 +769,7 @@ void func_00198760(GaugeColliderAgent* s1, f32 f)
     if (IsObjectOfKind(s0, 0x18) != 0) {
         if (s0->f640 != 0) {
             if (IsObjectAttached(s0->f640) != 0) {
-                if (func_00141170(s0->f640, (u8*)s1 + 0x140) != 0) {
+                if (TestPointAgainstObjectShape(s0->f640, (u8*)s1 + 0x140) != 0) {
                     NodeQueryFrame t;
                     t.f00 = s1;
                     t.f10 = 2;

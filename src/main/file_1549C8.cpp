@@ -2459,7 +2459,7 @@ s32 func_0015C0A0(ObjectCycler* self)
     }
     PushBackMemoryMark(self);
     GroundProbe fr;
-    func_001DC4D0((s32)self->world, 0, &self->v140, IsCyclerGroundCandidate, self, &fr.a, &fr.b, self->f64C);
+    GatherCollidersInSphere((s32)self->world, 0, &self->v140, IsCyclerGroundCandidate, self, &fr.a, &fr.b, self->f64C);
     fr.q = self->v140;
     fr.q.z = fr.q.z - self->f64C;
     s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);

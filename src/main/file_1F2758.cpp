@@ -506,27 +506,27 @@ void func_001F3A40(TransformObject* self, void* stream)
 
 void func_001F3A90(TransformObject* self, BaseObject* other)
 {
-    func_00128018(self->parent, other, &self->pos, &self->pos);
-    func_00128150(self->parent, other, &self->rot, &self->rot);
+    TransformPointBetweenFrames(self->parent, other, &self->pos, &self->pos);
+    TransformRotationBetweenFrames(self->parent, other, &self->rot, &self->rot);
     ReparentObject(self, other);
 }
 
 void func_001F3AF0(TransformObject* self, BaseObject* other)
 {
-    func_00128018(other, 0, &self->pos, &self->pos);
-    func_00128150(other, 0, &self->rot, &self->rot);
+    TransformPointBetweenFrames(other, 0, &self->pos, &self->pos);
+    TransformRotationBetweenFrames(other, 0, &self->rot, &self->rot);
 }
 
 ASM_FUNC(func_001F3B48);
 
 s32 func_001F3BD8(BaseObject* self, s32 arg)
 {
-    return func_00128018(self->parent, 0, (u8*)self + 0x40, arg);
+    return TransformPointBetweenFrames(self->parent, 0, (u8*)self + 0x40, arg);
 }
 
 s32 func_001F3C08(BaseObject* self, s32 arg)
 {
-    return func_00128150(self->parent, 0, (u8*)self + 0x50, arg);
+    return TransformRotationBetweenFrames(self->parent, 0, (u8*)self + 0x50, arg);
 }
 
 HoldingMember* func_001F3C38(s32 id, s32 parent)

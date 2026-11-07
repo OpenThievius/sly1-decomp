@@ -34,5 +34,6 @@ func_001A9F78	InitScreenElements	calls slot 1 on each of the 37 elements of D_00
 func_001A9FD0	UpdateScreenElements	calls slot 2 on each of the 37 elements from the last to the first, then advances the screen fade g_screenFade
 func_001AA060	HideScreenElements	calls slot 16 with mode 0 on each of the 37 elements
 func_001AA0C0	ResetScreenElements	calls slot 5 on each of the 37 elements
+func_001AA110	QueueEachScreenElementDraw	runs slot 10 (+0x28) of each of the 37 screen elements of g_screenElements whose mode is set, when it has one; QueueScreenElementDraws calls it
 func_001AA178	DrawScreenElements	calls slot 9 on each element of D_002486B0 whose mode is not 0, then draws g_screenFade and D_00273EB0
 func_001AA1F0	InitScreenElement	slot 0 of the element tables: picks its 20-byte placement record from D_0026C3E0 by index, sets the slide times to 0.25, installs the default clock, places it and starts it hidden

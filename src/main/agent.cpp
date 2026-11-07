@@ -220,7 +220,7 @@ void func_001C72A0(Agent* self)
     SetTurningColliderGravityScale(self, self->f700);
     ChangeAgentState(self, 0, 0);
     if (TestFlagTableBit(g_flagTable, self->fB10)) {
-        AppendQueuedCall(self->world, (void*)func_001C7278, self, 0, 0);
+        AppendQueuedCall(self->world, (void*)RemoveAgentFromParent, self, 0, 0);
     }
 }
 
@@ -602,7 +602,7 @@ void func_001C8BC0(Agent* self)
 {
     f32 x;
     f32 y;
-    func_001454E0((u8*)self + 0xA40, (u8*)self + 0x140, &x, &y, 0);
+    ConvertOffsetToSpherical((u8*)self + 0xA40, (u8*)self + 0x140, &x, &y, 0);
     SetAgentFacingAngles(self, x, y);
 }
 
@@ -665,7 +665,7 @@ void func_001C8D78(Agent* self)
         pair[0] = sub->id;
         pair[1] = (s32)self;
         CreateAnimationPlayer((void*)sub->id2DC, self, 1, pair, 1, &self->f754, 0.0f, 1.0f);
-        func_0012F810(self->f754, ((C62*)self->fA74));
+        AddAnimationPlayerRecordCallback(self->f754, ((C62*)self->fA74));
         Attachment* node = FindPlayerAttachmentByOwner(self->f754, GetEffectiveObjectId(self));
         if ((void*)node == self->f1EC) {
             node->mode0 = 5;
@@ -866,7 +866,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         break;
     case 3:
         if (((C62*)self->fA74)->id2D0 == 2) {
-            func_001C8D78(self);
+            CreateAgentAnimationPlayer(self);
         }
         break;
     case 1:
@@ -886,7 +886,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         Quad4 vec;
         s32 count;
         BaseObject** list;
-        func_00128018(self, 0, self->fB60, &vec);
+        TransformPointBetweenFrames(self, 0, self->fB60, &vec);
         ScatterObjectsAtPoint(g_scatterController, &vec, self->fB58, self->fB70);
         InitContactPairFlags((s32)g_currentWorld, self);
         if (((Animation*)self->f750) != 0) {
@@ -910,7 +910,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
             if (tgt != 0) {
                 f += tgt->length;
             }
-            func_00126D60(self, f);
+            FadeOutPlacedObject(self, f);
         }
         self->fC04 = 1;
         break;

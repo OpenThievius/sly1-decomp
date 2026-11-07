@@ -95,7 +95,7 @@ void func_0018A3F0(GaugeAgent* self)
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 3, D_00264928);
-    func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
+    CreateSixEntryBlend(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
     self->f758[12].obj = (void*)self->fE00;
     self->fE10 = CreateStateWalker(self->fE0C, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
@@ -125,7 +125,7 @@ s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
 
     for (i = 0; i < a3; i++) {
         s32 self = table[i];
-        s32 r = func_00141D00((void*)self, a1, a2, f, 2, (void*)buf);
+        s32 r = TestColliderSegmentHit((void*)self, a1, a2, f, 2, (void*)buf);
         s32 k = 0;
         if (r > 0) {
             if (buf[0].score == 0.0f && (a0 & 1)) {
@@ -186,7 +186,7 @@ s32 func_0018A910(GaugeAgent* self, void* a1, void* a2)
     s32 x;
     s32 y;
     PushBackMemoryMark(self, a1, a2);
-    func_001DC238(self->world, 0, a1, a2, IsGaugeAgentBlocker, self, &x, &y);
+    GatherCollidersInBox(self->world, 0, a1, a2, IsGaugeAgentBlocker, self, &x, &y);
     s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, D_002649C4);
     PopBackMemoryMark();
     return r != 0;
@@ -240,7 +240,7 @@ s32 func_0018A9A8(GaugeAgent* self)
 one:
     return 1;
 second:
-    func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
+    ComputeObjectFrameAtTime(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
     if (IsGaugeAgentLineBlocked((GaugeAgent*)obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
@@ -292,7 +292,7 @@ s32 func_0018ABF0(GaugeAgent* self)
         s32 kind;
         GetStateWalkerCurrentKey(self->fE10, &kind);
         if (kind == 0x438) {
-            if (func_001C96B8(self) == 0)
+            if (GetAgentRosterState(self) == 0)
                 return 2;
         }
     }

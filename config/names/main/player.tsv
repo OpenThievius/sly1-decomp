@@ -33,6 +33,8 @@ func_00174808	UpdatePlayer	slot 17 of class 0x07: runs func_001C4ED0 and the per
 func_00174F50	SelectPlayerStateAnimation	picks the animation node for the player's state and sub-state from its tables at +0x1390, +0x13D4, +0x1418 (falling back through D_00263930) and +0x146C, and starts it (func_001C4D60); SetPlayerState calls it
 func_00175078	SetPlayerPartLayers	sets the word +0x10 of the player's five parts at +0x2500 to +0x2510 to 9 or -1 by bits 1 and 2 of its argument, then calls slot 47 of five of its objects (SetPlayerState calls it)
 func_00175170	SetPlayerState	original assembly: moves the player to a state and sub-state (+0x2220, +0x2228); some forty callers pass the pair, as (2, 2), (4, 0x2C) or (9, 0x1C)
+func_00177800	SwitchPlayerState11	moves the player to state 11 when its argument is set and to state 0 otherwise (SetPlayerState, sub-state -1); a script built-in (func_00105B60) and the placed-object messages 19 and 20 call it
+func_00177828	SetPlayerProbeContactsDisabled	the setter FillObjectPropertyTable registers for property 0xA2 (offset 0x2BD8): stores the value and clears +0x4B8; CollidePlayerWithObject runs AddTurningColliderProbeContact only while 0x2BD8 is 0
 func_00177838	FindNodeForQuery	walks the node chain from the query's hold, stores a byte of each node chosen by the query's kind into out, and returns the first node whose vtable +0xC4 method accepts the query
 func_00177968	CompareKeysAscending	a sort's comparison: 1 when the first record's key is greater, else -1 (func_00177990 sorts with it)
 func_00177E20	IsPlayerCameraFree	slot 0x138 of class 0x07: 0 in state 12/0x22, else whether the camera controller at g_camera's +0x454 is not the top one (IsTopCameraController)
