@@ -701,34 +701,34 @@ void func_001F5868();
 void func_001F5930();
 
 typedef void (*PropFn)();
-struct Prop_2505D8 { s32 f0; s32 flags; union { f32 f; s32 i; } f8; s32 fC; s32 f10; s32 f14; s32 f18; s32 f1C; };
-extern Prop_2505D8 D_002505D8[1179];
+struct PropertyDescriptor { s32 f0; s32 flags; union { f32 f; s32 i; } f8; s32 fC; s32 f10; s32 f14; s32 f18; s32 f1C; };
+extern PropertyDescriptor D_002505D8[1179];
 
 struct PropInit {
-    static void Set0(Prop_2505D8* p, s32 v4, s32 v0, s32 vc) { p->f0 = v0; p->flags = v4; p->fC = vc; }
-    static void Set1(Prop_2505D8* p, s32 v10, s32 vc, s32 v0, s32 v4, s32 v14) { p->f10 = v10; p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; }
-    static void Set2(Prop_2505D8* p, s32 v0, s32 v4, s32 v18) { p->f0 = v0; p->flags = v4; p->f18 = v18; }
-    static void Set3(Prop_2505D8* p, s32 v0, s32 v4, s32 v18, s32 v1c) { p->f18 = v18; p->f0 = v0; p->f1C = v1c; p->flags = v4; }
-    static void Set4(Prop_2505D8* p, s32 v4, s32 v0, s32 vc, s32 v14) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; }
-    static void Set5(Prop_2505D8* p, s32 v4, s32 v14, s32 vc, s32 v0, s32 v18) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; p->f18 = v18; }
-    static void Set6(Prop_2505D8* p, s32 v14, s32 v0, s32 v4, s32 v18) { p->f0 = v0; p->flags = v4; p->f14 = v14; p->f18 = v18; }
-    static void Set7(Prop_2505D8* p, s32 v0, s32 v4) { p->flags = v4; p->f0 = v0; }
-    static void Set8(Prop_2505D8* p, s32 v0, s32 v4, s32 vc, s32 v18) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = v18; }
-    static void Set8m(Prop_2505D8* p, s32 v0, s32 vc, s32 v4) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = vc; }
-    static void Set9(Prop_2505D8* p, s32 v4, s32 v0, s32 v14) { p->f14 = v14; p->flags = v4; p->f0 = v0; }
-    static void Set10(Prop_2505D8* p, s32 v0, s32 v4, s32 v18, s32 vc, s32 v14, f32 v8) { p->f0 = v0; p->f14 = v14; p->f8.f = v8; p->fC = vc; p->f18 = v18; p->flags = v4; }
-    static void Set11(Prop_2505D8* p, s32 v18, s32 v8, s32 v14, s32 vc, s32 v0, s32 v4) { p->f18 = v18; p->f14 = v14; p->f8.i = v8; p->fC = vc; p->f0 = v0; p->flags = v4; }
-    static void Set12(Prop_2505D8* p, s32 v4, s32 v18, s32 v8, s32 v0) { p->f0 = v0; p->flags = v4; p->f8.i = v8; p->f18 = v18; }
-    static void Set13(Prop_2505D8* p, s32 v14, s32 v4, s32 v0, s32 v1c) { p->f1C = v1c; p->flags = v4; p->f14 = v14; p->f0 = v0; }
-    static void Set14(Prop_2505D8* p, s32 v4, s32 v0, s32 vc, s32 v14, s32 v18, s32 v1c) { p->flags = v4; p->f0 = v0; p->fC = vc; p->f14 = v14; p->f18 = v18; p->f1C = v1c; }
-    static void Set15(Prop_2505D8* p, s32 v18, f32 v8, s32 v0, s32 v4) { p->f0 = v0; p->flags = v4; p->f8.f = v8; p->f18 = v18; }
-    static void Set16(Prop_2505D8* p, s32 v0, s32 vc, s32 v18, s32 v1c, s32 v4) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = v18; p->f1C = v1c; }
-    static void Set17(Prop_2505D8* p, s32 vc, s32 v18, s32 v8, s32 v0, s32 v4) { p->flags = v4; p->f8.i = v8; p->fC = vc; p->f0 = v0; p->f18 = v18; }
+    static void Set0(PropertyDescriptor* p, s32 v4, s32 v0, s32 vc) { p->f0 = v0; p->flags = v4; p->fC = vc; }
+    static void Set1(PropertyDescriptor* p, s32 v10, s32 vc, s32 v0, s32 v4, s32 v14) { p->f10 = v10; p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; }
+    static void Set2(PropertyDescriptor* p, s32 v0, s32 v4, s32 v18) { p->f0 = v0; p->flags = v4; p->f18 = v18; }
+    static void Set3(PropertyDescriptor* p, s32 v0, s32 v4, s32 v18, s32 v1c) { p->f18 = v18; p->f0 = v0; p->f1C = v1c; p->flags = v4; }
+    static void Set4(PropertyDescriptor* p, s32 v4, s32 v0, s32 vc, s32 v14) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; }
+    static void Set5(PropertyDescriptor* p, s32 v4, s32 v14, s32 vc, s32 v0, s32 v18) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f14 = v14; p->f18 = v18; }
+    static void Set6(PropertyDescriptor* p, s32 v14, s32 v0, s32 v4, s32 v18) { p->f0 = v0; p->flags = v4; p->f14 = v14; p->f18 = v18; }
+    static void Set7(PropertyDescriptor* p, s32 v0, s32 v4) { p->flags = v4; p->f0 = v0; }
+    static void Set8(PropertyDescriptor* p, s32 v0, s32 v4, s32 vc, s32 v18) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = v18; }
+    static void Set8m(PropertyDescriptor* p, s32 v0, s32 vc, s32 v4) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = vc; }
+    static void Set9(PropertyDescriptor* p, s32 v4, s32 v0, s32 v14) { p->f14 = v14; p->flags = v4; p->f0 = v0; }
+    static void Set10(PropertyDescriptor* p, s32 v0, s32 v4, s32 v18, s32 vc, s32 v14, f32 v8) { p->f0 = v0; p->f14 = v14; p->f8.f = v8; p->fC = vc; p->f18 = v18; p->flags = v4; }
+    static void Set11(PropertyDescriptor* p, s32 v18, s32 v8, s32 v14, s32 vc, s32 v0, s32 v4) { p->f18 = v18; p->f14 = v14; p->f8.i = v8; p->fC = vc; p->f0 = v0; p->flags = v4; }
+    static void Set12(PropertyDescriptor* p, s32 v4, s32 v18, s32 v8, s32 v0) { p->f0 = v0; p->flags = v4; p->f8.i = v8; p->f18 = v18; }
+    static void Set13(PropertyDescriptor* p, s32 v14, s32 v4, s32 v0, s32 v1c) { p->f1C = v1c; p->flags = v4; p->f14 = v14; p->f0 = v0; }
+    static void Set14(PropertyDescriptor* p, s32 v4, s32 v0, s32 vc, s32 v14, s32 v18, s32 v1c) { p->flags = v4; p->f0 = v0; p->fC = vc; p->f14 = v14; p->f18 = v18; p->f1C = v1c; }
+    static void Set15(PropertyDescriptor* p, s32 v18, f32 v8, s32 v0, s32 v4) { p->f0 = v0; p->flags = v4; p->f8.f = v8; p->f18 = v18; }
+    static void Set16(PropertyDescriptor* p, s32 v0, s32 vc, s32 v18, s32 v1c, s32 v4) { p->f0 = v0; p->flags = v4; p->fC = vc; p->f18 = v18; p->f1C = v1c; }
+    static void Set17(PropertyDescriptor* p, s32 vc, s32 v18, s32 v8, s32 v0, s32 v4) { p->flags = v4; p->f8.i = v8; p->fC = vc; p->f0 = v0; p->f18 = v18; }
 };
 
 void func_00109488()
 {
-    Prop_2505D8* p = D_002505D8;
+    PropertyDescriptor* p = D_002505D8;
     PropInit::Set0(p, 4, 7, (s32)func_00130158); p++;
     PropInit::Set1(p, (s32)func_001000C8, 0, 0, 1, 1); p++;
     PropInit::Set1(p, (s32)func_00100218, (s32)func_00100178, 18, 1025, 0); p++;
