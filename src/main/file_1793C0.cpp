@@ -209,7 +209,7 @@ void func_0017ABE8(void* self, s32 a1);
 
 void func_0017A6D0(ModeCollider* self)
 {
-    func_00192C58(self);
+    FinishSwitchedCollider(self);
     SetModeColliderMode(self, 2);
 }
 

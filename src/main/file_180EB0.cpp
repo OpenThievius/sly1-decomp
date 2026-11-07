@@ -361,7 +361,7 @@ s32 func_00181AE0(ModeWalker* p) { return p->fBF0 != 0; }
 
 void func_00181AF0(ModeWalker* self)
 {
-    func_00192C58(self);
+    FinishSwitchedCollider(self);
     SetModeWalkerMode(self, 1);
 }
 

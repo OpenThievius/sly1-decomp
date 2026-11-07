@@ -1058,7 +1058,7 @@ void func_00194E60(T217D_6D0* self, s32 v)
 
     if (self->mode == v) return;
     if (self->mode == 0 && self->page == 0) {
-        func_001936A0(self);
+        BuildPauseMenuPage(self);
     }
     if (v == 0) {
         if (self->queued != 0) {
@@ -1068,7 +1068,7 @@ void func_00194E60(T217D_6D0* self, s32 v)
             self->queuedPage = -1;
         } else {
             if (self->page == 0) {
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
             }
         }
     }
@@ -1255,7 +1255,7 @@ void func_00195928(T217D_6D0* self, s32 v)
 {
     if (self->page != v) {
         self->page = v;
-        if (v != -1) func_001936A0(self, v);
+        if (v != -1) BuildPauseMenuPage(self, v);
     }
 }
 
@@ -1340,7 +1340,7 @@ void func_00195958(T217D_6D0* self)
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
@@ -1351,7 +1351,7 @@ void func_00195958(T217D_6D0* self)
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
@@ -1363,7 +1363,7 @@ void func_00195958(T217D_6D0* self)
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
@@ -1421,21 +1421,21 @@ void func_00195958(T217D_6D0* self)
         case 0x18: {
             g_saveData->u19EC ^= 0x200;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }
         case 0x19: {
             g_saveData->u19EC ^= 0x400;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }
         case 0x1A: {
             g_saveData->u19EC ^= 0x800;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }

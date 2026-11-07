@@ -827,7 +827,7 @@ void func_0019A1E0(C17* o)
     StartPlacedObject(o);
     ResolveObjectLinks(o, 0x1A, (u8*)&D_0026AA50);
     for (i = 0; i < 3; i++)
-        func_0019A178(o->f61C + i * 12, 0x390);
+        StartC17Marker(o->f61C + i * 12, 0x390);
     s32 h = CreateStateWalker(o->f610, o, 0x384, 1);
     o->f764 = -1;
     o->f614 = (StateWalker*)h;
@@ -970,7 +970,7 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
             b = g_currentWorld->count2300;
             k = -1;
             if (a == b) {
-                k = func_0019A000(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
+                k = CompletesWorldBits(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
             } else if ((g_saveData->u19F0 & 0xF0000000) == 0) {
                 if (a == b - 1) {
                     k = 3;

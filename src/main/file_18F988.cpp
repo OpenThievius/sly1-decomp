@@ -658,7 +658,7 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
             f->neighbourB = (void*)((u32)(m->tris + a * 12) | 1);
         }
     }
-    func_001919F8(m);
+    MeasurePointGraphEdges(m);
 }
 
 ASM_FUNC(func_001919F8);
@@ -670,7 +670,7 @@ void func_00191A68(Owner_191A68* self)
 
 void func_00191A88(Owner_191A88* self)
 {
-    func_00191570(&self->part);
+    SnapPointToPointGraph(&self->part);
 }
 
 void func_00191AA8(Obj_191AA8* self)
