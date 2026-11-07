@@ -15,5 +15,3 @@ struct Obj_1F7FC0 { u8 pad[0x28]; struct Node* root; };
 struct Node { u8 pad0[8]; Node* child; u8 pad1[0x2C]; Node* next; };
 void* func_001F7FC0(u32 key, Obj_1F7FC0* obj) { Node* node = obj->root; while (node) { Node* child = node->child; while (child) { if (*(u32*)child == key) return child; child = child->next; } node = *(Node**)((u8*)node + 0x14); } return 0; }
 
-extern u8 D_0027696C[];
-void func_001F66F8(void* value) { void* p = *(void**)g_randomState; *(void**)((u8*)p + 0x58) = value; }

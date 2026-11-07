@@ -96,3 +96,4 @@ src/lib/memory_copy.cpp	001F5A58	001F5B08	-	-	-	-
 src/lib/memory_move.cpp	001F5B08	001F5C0C	-	-	-	-
 src/lib/memory_set.cpp	001F5C0C	001F5CD0	-	-	-	-
 src/lib/sort.cpp	001F5CD0	001F66F8	-	-	-	-
+src/lib/random.cpp	001F66F8	001F6738	-	-	-	-
