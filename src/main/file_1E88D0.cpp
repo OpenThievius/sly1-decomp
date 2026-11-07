@@ -32,6 +32,7 @@
 #include "animation.h"
 #include "ramp_profile.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 void SteerAgentAlongPath(void);
 void InitElementStack(void* p);
@@ -1878,7 +1879,32 @@ s32 AcceptBeatPressColliderRequest(void)
     return 0;
 }
 
-INCLUDE_ASM(func_001EBD10);
+// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18) and
+// a point in its frame (+0x40).
+struct FramePoint_001EBD10 {
+    u8 pad0[0x18];
+    void* object;           // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+};
+
+void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
+
+void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+{
+    if (self->f67C == 0) {
+        GetPlacedObjectPositionAt(self, t, pos, vel);
+        return;
+    }
+    Vec02 p;
+    Mat02 rot;
+    Vec02 v;
+    Vec02 w;
+    ComputeObjectFrameAtTime(((FramePoint_001EBD10*)self->f67C)->object, 0, &p, &rot, &v, &w, t);
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+    Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+}
 
 INCLUDE_ASM(func_001EBDD0);
 
