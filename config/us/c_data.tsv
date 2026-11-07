@@ -514,7 +514,7 @@ D_0024C930	0024C930	520	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
 D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
 D_0024CFC0	0024CFC0	356	.rodata	src/main/timed_object.cpp
-D_0024D164	0024D164	8	.rodata	src/main/file_1B1AC8.cpp
+D_0024D164	0024D164	8	.rodata	src/main/range_record.cpp
 D_0024D170	0024D170	212	.rodata	src/main/file_1B2988.cpp
 D_0024D268	0024D268	0	.rodata	src/main/file_1B5588.cpp
 D_0024D280	0024D280	624	.rodata	src/main/file_1B7968.cpp
@@ -694,7 +694,7 @@ D_0026B530	0026B530	3760	.data	src/main/file_19E040.cpp
 D_0026C3E0	0026C3E0	32696	.data	src/main/file_1A7FE8.cpp
 D_002743A0	002743A0	280	.data	src/main/screen_element.cpp
 D_002744B8	002744B8	56	.data	src/main/timed_object.cpp
-D_002744F0	002744F0	4	.data	src/main/file_1B1AC8.cpp
+D_002744F0	002744F0	4	.data	src/main/range_record.cpp
 D_002744F8	002744F8	80	.data	src/main/file_1B2988.cpp
 D_00274548	00274548	376	.data	src/main/file_1B5588.cpp
 D_002746C0	002746C0	724	.data	src/main/file_1B7968.cpp

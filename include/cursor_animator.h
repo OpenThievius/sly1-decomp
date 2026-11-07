@@ -73,7 +73,9 @@ struct AnimRecord {
     u8 kind;                // 0x00
     u8 flags;               // 0x01
     s16 key;                // 0x02
-    u8 pad04[0x13 - 0x04];
+    u8 pad04[0x0C - 0x04];
+    u32 maskC;              // 0x0C: a range record that links it is drawn when it has 0x10000000 or every bit of the camera's mask (func_001B2090)
+    u8 pad10[0x13 - 0x10];
     u8 nelem;               // 0x13: the elements at 0x14
     void* elems;           // 0x14: nelem elements of 0x14 bytes
     s32 entCount;           // 0x18: the number of entries at 0x1C
