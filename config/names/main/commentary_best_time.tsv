@@ -5,3 +5,5 @@ func_001E00B0	UpdateBestTimeState	per-frame update of the same object: in states
 func_001E02C8	SetBestTimeState	state 0..3 setter: on 2 starts the timer display and shows 'Best time' text or a begin text, on 3 compares the timer with the stored best time (D_002623C8), updates it and the memory card and plays a result sound; stores the state and the clock
 func_001E0678	DrawFramedText	when the text is non-empty sets the font scale, scales the colour alpha by blend, draws the optional frame box (self->frame) and then the text with the same placement
 func_001E0828	FinishBestTimeRun	calls SetBestTimeState with state 3, which compares the timer with the stored best time; func_001F4808 calls it
+func_001E0848	ConstructBestTimeTextStyle	the file's static initialiser: builds the text style the best-time commentary draws with (cleared, kind 0x2D, two integer sizes, 0.3 twice, colour); g_commentaryFrameStyle is it
+func_001E08D8	ConstructBestTimeTextStyleAtStartup	the file's _GLOBAL_$I$: calls ConstructBestTimeTextStyle with (1, 0xFFFF); an entry of the startup init-list D_0027B130
