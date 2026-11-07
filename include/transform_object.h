@@ -24,6 +24,19 @@ struct TransformObject : BaseObject {
     Mat3_73 rot;            // 0x50
 };
 
+// 0x74 (0x100 bytes): a set of objects of its own. Loading (slot 10, func_001F3D80) makes each
+// object from the stream and has it load itself, then reads a list of ids; copying (slot 9,
+// func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent
+// and starts it.
+struct TransformSet : TransformObject {
+    u8 pad80[0xA0 - 0x80];
+    s32 count;              // 0xA0
+    BaseObject** objects;   // 0xA4
+    s32 idCount;            // 0xA8
+    s32* ids;               // 0xAC
+    u8 padB0[0x100 - 0xB0];
+};
+
 struct MemberGroup;
 
 // 0x77: a member of a group (class 0x78, func_001587C8 and func_00159478 fill it).
@@ -86,6 +99,7 @@ struct HoldingMember : RecordMember {
 
 // Each class ends at its descriptor's size.
 typedef char check_TransformObject[sizeof(TransformObject) == 0x80 ? 1 : -1];
+typedef char check_TransformSet[sizeof(TransformSet) == 0x100 ? 1 : -1];
 typedef char check_MemberObject[sizeof(MemberObject) == 0x90 ? 1 : -1];
 typedef char check_MemberGroup[sizeof(MemberGroup) == 0xC0 ? 1 : -1];
 typedef char check_RecordMember[sizeof(RecordMember) == 0xA0 ? 1 : -1];
