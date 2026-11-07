@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "shapes.h"
+#include "placed_object.h"
 
 struct ObjectMessage {
     union {
@@ -25,8 +26,14 @@ struct SlotMessage {
     s32 kind;               // 0x00
     void* owner;            // 0x04
     u8 pad08[0x10 - 0x08];
-    Quad16 qa;              // 0x10
-    Quad16 qb;              // 0x20
+    union {
+        Quad16 qa;          // 0x10
+        Vec02 va;           // 0x10: as floats (kind 6: func_001A6DE0, func_001A72B0)
+    };
+    union {
+        Quad16 qb;          // 0x20
+        Vec02 vb;           // 0x20
+    };
     u8 pad30[0x50 - 0x30];
 };
 

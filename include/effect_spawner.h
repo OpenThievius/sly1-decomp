@@ -36,7 +36,13 @@ struct Rec50 {
     void* found[3];         // 0x1D8: objects named by the ids
     u8 pad1E4[0x1E8 - 0x1E4];
     f32 f1E8;               // 0x1E8
-    u8 pad1EC[0x200 - 0x1EC];
+    u8 pad1EC[0x1F0 - 0x1EC];
+    s32 f1F0;               // 0x1F0: an effect's i124 takes it (func_001A22C8, func_001A2D30), an object id (func_001A39C8)
+    union {
+        s32 i1F4;           // 0x1F4: an effect's i120 (func_001A2D30)
+        f32 f1F4;           // 0x1F4: an effect's rate (func_001A39C8)
+    };
+    u8 pad1F8[0x200 - 0x1F8];
 };
 
 struct EffectSpawner : PlacedObject {

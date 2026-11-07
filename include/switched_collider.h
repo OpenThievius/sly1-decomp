@@ -655,7 +655,8 @@ struct WalkerCollider : SwitchedCollider {
     f32 f620;               // 0x620
     f32 f624;               // 0x624
     f32 f628;               // 0x628
-    u8 pad62C[0x640 - 0x62C];
+    u8 pad62C[0x630 - 0x62C];
+    Vec02 v630;             // 0x630: the offset func_001A3C40 computes from the heading (ComputePolarOffset)
     void* f640;             // 0x640
     void* f644;             // 0x644
     s32* f648;              // 0x648

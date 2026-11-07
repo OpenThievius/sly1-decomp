@@ -57,8 +57,8 @@ void func_001A4EF0(PairController* self, s32 state)
             PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
-            Link_1A4EF0* l = (Link_1A4EF0*)P(o, 0x55C);
-            if (l == 0 || l->f18 != o) SetPairedState(o, 7);
+            BaseObject* l = (BaseObject*)P(o, 0x55C);
+            if (l == 0 || l->parent != o) SetPairedState(o, 7);
         }
         RaiseScatterLevels(g_scatterController, 1.0f);
         break;

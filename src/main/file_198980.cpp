@@ -24,6 +24,7 @@
 #include "game_progress.h"
 #include "object_message.h"
 #include "object_event.h"
+#include "object_link.h"
 #include "camera.h"
 #include "packet_writer.h"
 #include "screen_element.h"
@@ -63,15 +64,11 @@ struct ActiveColliderData {
     u8 pad0[0x18];
     void* f18;
 };
-struct Elem_199000 {
-    u8 pad0[0x4];
-    void* f4;
-    u8 pad1[0x40 - 0x8];
-};
 // One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
-struct Obj_19A0F0 { u8 pad0[0x30]; s32 f30; };
-extern Obj_19A0F0 D_00275BC0;
+// The element stack (g_elementStack), as file_15F678.cpp and file_16AA18.cpp view it.
+struct ElementStackState { u8 pad0[0x30]; s32 f30; };
+extern ElementStackState D_00275BC0;
 void func_0019A088(s32 index);
 void func_001E5278(s32 mode);
 void func_001921A8(C17* self);
@@ -180,14 +177,6 @@ struct Frame_19D338 {
     s32 w48;
     s32 w4C;
 };
-typedef s32 (*Slot_19D338)(void* self, void* a1, s32 a2, void* a3, s32 a4, s32 a5, f32 f, void* a6);
-struct Obj_19D338 { Slot_19D338* vtbl; };
-struct Src_19D338 {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1[0x34 - 0x1C];
-    Obj_19D338* f34;
-};
 void func_001B7B78(Collider* self);
 struct LoadStream;
 s32 func_00137D10(LoadStream* in);
@@ -241,23 +230,21 @@ void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, 
 // func_0019B378.
 f32 D_0026A910 = 100.0f;
 s32 D_0026A914 = 0;
-s32 D_0026A918[4] = { 0x0, 0x22B, 0x2D0, 0x0 };
-s32 D_0026A928[4] = { 0x0, 0x22D, 0x2D8, 0x0 };
-s32 D_0026A938[4] = { 0x0, 0x22C, 0x2D4, 0x0 };
-s32 D_0026A948[4] = { 0x0, 0x339, 0x5BC, 0x0 };
+ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
+ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
+ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
+ObjectLink D_0026A948[1] = { { 0x0, 0x339, 0x5BC } };
 f32 D_0026A958[2] = { 0.8f, 1.2f };
 f32 D_0026A960[2] = { 0.9f, 1.1f };
 f32 D_0026A968 = 300.0f;
 T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))func_00199850 };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
-struct Ent_26AA50 { s32 a; s32 b; s32 c; };
-struct Tab_26AA50 { Ent_26AA50 e[26]; s32 end[2]; };
-Tab_26AA50 D_0026AA50 = {
-    { { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } },
-    { 0, 0 }
-};
-s32 D_0026AB90[4] = { 0x0, 0x268, 0x5EC, 0x0 };
-s32 D_0026ABA0[4] = { 0x4, 0x267, 0x5FC, 0x0 };
+ObjectLink D_0026AA50[26] = {
+    { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } };
+// Eight zero bytes no code reads, inside retail's label D_0026AA50 after its 26 entries.
+s32 D_0026AB88[2] = { 0, 0 };
+ObjectLink D_0026AB90[1] = { { 0x0, 0x268, 0x5EC } };
+ObjectLink D_0026ABA0[1] = { { 0x4, 0x267, 0x5FC } };
 f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
 f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 s32 D_0026ABD0[2] = { 0x130, 0x132 };
@@ -388,14 +375,14 @@ s32 func_00198FB0(ObjectSet* unused, void* obj)
     return 0;
 }
 
-void func_00199000(ObjectSet* self, Elem_199000* elems, s32 idx)
+void func_00199000(ObjectSet* self, Contact03* elems, s32 idx)
 {
     ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
     if (r->f18 == 0) return;
     {
         s32 one = 1;
-        Elem_199000* e = (Elem_199000*)((u8*)elems + ((one - idx) << 6));
-        if (IsObjectDescendantOf(e->f4, r->f18) != 0) {
+        ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
+        if (IsObjectDescendantOf(e->part, r->f18) != 0) {
             self->f59C = one;
         }
     }
@@ -771,7 +758,7 @@ void func_0019A1E0(C17* o)
 {
     u32 i;
     StartPlacedObject(o);
-    ResolveObjectLinks(o, 0x1A, (u8*)&D_0026AA50);
+    ResolveObjectLinks(o, 0x1A, (u8*)D_0026AA50);
     for (i = 0; i < 3; i++)
         StartC17Marker(o->f61C + i * 12, 0x390);
     s32 h = CreateStateWalker(o->f610, o, 0x384, 1);
@@ -1341,15 +1328,15 @@ void func_0019D2A8(Player* self, void* x, void* y)
     }
 }
 
-void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
+void func_0019D338(void* self, void* dst, PathCurveObject* src, f32* k)
 {
     Frame_19D338 f;
-    func_00128018(0, src->f18, (u8*)self + 0x140, &f.q0);
-    Obj_19D338* o = src->f34;
-    if (o->vtbl[12] != 0) {
-        o->vtbl[12](o, &f.q0, 0, &f.q1, 0, 0, *k, k);
+    func_00128018(0, (s32)src->parent, (u8*)self + 0x140, &f.q0);
+    PathCurve* o = src->curve;
+    if (o->vt->m12 != 0) {
+        o->vt->m12(o, *k, &f.q0, 0, (f32*)&f.q1, 0, 0, k);
     }
-    func_00128018((void*)src->f18, (s32)self, &f.q1, &f.q2);
+    func_00128018((void*)src->parent, (s32)self, &f.q1, &f.q2);
     func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
     func_0019C9C8(dst, f.w40, &f.q3);
 }
