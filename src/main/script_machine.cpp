@@ -19,10 +19,42 @@
 // func_0011AB58). Its constructor (func_0011A678) and destructor (func_0011A680) are defined below at
 // their places; the compiler's initialiser, constructor and destructor for this file are
 // func_0011ADF8, func_0011AE38 and func_0011AE58 (config/us/generated.tsv).
-struct Gc_259F38 {
-    u8 data[0x2318];        // 0x0000
-    Gc_259F38();
-    ~Gc_259F38();
+// A pooled entry the collector marks: a scope (a count and that many values from 0x04, its
+// chain of keyed values at 0x14) or a value node (a tag, a payload, the next node at 0x08).
+struct MarkEntry {
+    s32 f0;                 // 0x00
+    MarkEntry* f4;          // 0x04
+    MarkEntry* f8;          // 0x08
+    MarkEntry* fC;          // 0x0C
+    MarkEntry* f10;         // 0x10
+    MarkEntry* f14;         // 0x14
+};
+
+// A tag 0x1F payload as the collector reads it: a scope, a chain of nodes and a third entry.
+struct MarkRecord {
+    MarkEntry* f0;          // 0x00
+    MarkEntry* f4;          // 0x04
+    s32 f8;                 // 0x08
+    s32 fC;                 // 0x0C
+    MarkEntry* f10;         // 0x10
+};
+
+// D_00259F38: the collector's roots and its three mark stacks. Each is a count followed by its
+// items; ResetMarkRoots clears the two root counts, CollectScriptPools the three stack counts.
+struct MarkStacks {
+    s32 rootCount;              // 0x0000: AddUniqueMarkRoot
+    MarkEntry* roots[0x140];    // 0x0004
+    s32 listCount;              // 0x0504: AddMarkRootList
+    R11B008List* lists[0x80];   // 0x0508
+    s32 objectCount;            // 0x0708: PushMarkObject, PopMarkObject
+    MarkEntry* objects[0x200];  // 0x070C
+    s32 chainCount;             // 0x0F0C: PushMarkChain, PopMarkChain
+    MarkEntry* chains[0x100];   // 0x0F10
+    s32 recordCount;            // 0x1310: PushMarkRecord, PopMarkRecord
+    MarkRecord* records[0x400]; // 0x1314
+    u8 pad2314[4];              // 0x2314: to the label's end
+    MarkStacks();
+    ~MarkStacks();
 };
 
 // The table of one-float math functions func_00115CA0 calls by index (src/libm, and
@@ -104,102 +136,9 @@ extern u8 D_00262C70[];
 extern R119BB0 D_00259958[];
 extern s32 D_00259DE8;
 
-// The collector's views (func_0011A6A8 to func_0011AB58).
-struct Stk_11A850;
-
-// One generic record: a queued event is { type, object, next }; the lists
-// and the object table use the same words.
-struct Obj_11A850 {
-    s32 f0;                 // 0x00
-    Obj_11A850* f4;         // 0x04
-    Obj_11A850* f8;         // 0x08
-    Obj_11A850* fC;         // 0x0C
-    Obj_11A850* f10;        // 0x10
-    Obj_11A850* f14;        // 0x14
-};
-
-// What func_0011A7D8 returns: a queue of records and two objects.
-struct Batch_11A850 {
-    Obj_11A850* f0;         // 0x00
-    Obj_11A850* f4;         // 0x04
-    s32 f8;                 // 0x08
-    s32 fC;                 // 0x0C
-    Obj_11A850* f10;        // 0x10
-};
-
-Obj_11A850* func_0011A748(Stk_11A850* s);
-void func_0011A770(Stk_11A850* s, Obj_11A850* o);
-void func_0011A7B8(Stk_11A850* s, Obj_11A850* o);
-void func_0011A728(Stk_11A850* s, Obj_11A850* o);
-Batch_11A850* func_0011A7D8(Stk_11A850* s);
-Obj_11A850* func_0011A790(Stk_11A850* s);
-void func_0011C3F0(Obj_11A850* o);
-s32 func_0011C3C8(Obj_11A850* o);
-
-struct Ent_11AB58;
-struct World_11AB58 {
-    s32 count;              // 0x000
-    Ent_11AB58* ents[0x140];    // 0x004
-    s32 n504;               // 0x504
-    R11B008List* lists[1];  // 0x508: the lists of keyed values func_0011AB58 marks
-};
-
-s32 func_0011C3C8(Ent_11AB58* e);
-void func_0011C3F0(Ent_11AB58* e);
-void func_0011A728(World_11AB58* w, Ent_11AB58* e);
-void func_0011A770(World_11AB58* w, Ent_11AB58* e);
-void func_0011A7B8(World_11AB58* w, Ent_11AB58* e);
-void func_0011A850(World_11AB58* w);
-
-// A count followed by that many values.
-struct IntList {
-    s32 count;              // 0x00
-    s32 items[1];           // 0x04
-};
-
-// A record that keeps a stack of values at 0x708.
-struct StackAt708 {
-    u8 pad[0x708];          // 0x000
-    s32 count;              // 0x708
-    s32 items[1];           // 0x70C
-};
-
-struct Counters_11A6A8 {
-    s32 count;              // 0x000
-    u8 pad[0x500];          // 0x004
-    s32 count2;             // 0x504
-};
-
-struct Obj_0011A708 {
-    u8 pad[0x504];          // 0x000
-    s32 count;              // 0x504
-    s32 values[1];          // 0x508
-};
-struct Obj_0011A728 {
-    u8 pad[0x708];          // 0x000
-    s32 count;              // 0x708
-    s32 values[1];          // 0x70C
-};
-struct Obj_0011A770 {
-    u8 pad[0xF0C];          // 0x000
-    s32 count;              // 0xF0C
-    s32 values[1];          // 0xF10
-};
-struct Stack_11A790 {
-    u8 pad[0xF0C];          // 0x000
-    s32 count;              // 0xF0C
-    s32 items[1];           // 0xF10
-};
-struct Stack_11A7B8 {
-    u8 pad[0x1310];         // 0x000
-    s32 count;              // 0x1310
-    s32 items[1];           // 0x1314
-};
-struct Stack_11A7D8 {
-    u8 pad[0x1310];         // 0x000
-    s32 count;              // 0x1310
-    s32 items[1];           // 0x1314
-};
+// The collector's calls on the pooled entries (value_pools.cpp).
+s32 func_0011C3C8(MarkEntry* e);
+void func_0011C3F0(MarkEntry* e);
 
 // What func_001419E8 fills in for func_00118198: 16-byte vectors, the first two read.
 struct Hit_118198 {
@@ -370,19 +309,19 @@ R11A630* func_0011A630(void);
 void func_0011A670(void);
 
 // The collector.
-void func_0011A6A8(Counters_11A6A8* self);
+void func_0011A6A8(MarkStacks* self);
 void func_0011A6B8();
-void func_0011A6C0(IntList* list, int value);
-void func_0011A708(Obj_0011A708* obj, s32 value);
-void func_0011A728(Obj_0011A728* obj, s32 value);
-int func_0011A748(StackAt708* stack);
-void func_0011A770(Obj_0011A770* obj, s32 value);
-s32 func_0011A790(Stack_11A790* s);
-void func_0011A7B8(Stack_11A7B8* s, s32 value);
-s32 func_0011A7D8(Stack_11A7D8* s);
+void func_0011A6C0(MarkStacks* self, MarkEntry* value);
+void func_0011A708(MarkStacks* self, R11B008List* list);
+void func_0011A728(MarkStacks* self, MarkEntry* value);
+MarkEntry* func_0011A748(MarkStacks* self);
+void func_0011A770(MarkStacks* self, MarkEntry* value);
+MarkEntry* func_0011A790(MarkStacks* self);
+void func_0011A7B8(MarkStacks* self, MarkRecord* value);
+MarkRecord* func_0011A7D8(MarkStacks* self);
 void func_0011A800(void);
-void func_0011A850(Stk_11A850* self);
-void func_0011AB58(World_11AB58* w);
+void func_0011A850(MarkStacks* self);
+void func_0011AB58(MarkStacks* self);
 
 // Tables of functions this file's code reads: the math functions of func_00115CA0.
 f32 func_001EA408(f32 x);
@@ -396,7 +335,7 @@ f32 func_00206180(f32 x);
 MathFn_259938 D_00259938[8] = { func_00206180, func_00205400, func_00205210, func_002054F0, func_00205678, func_00205578, func_00204F68, func_001EA408 };
 INCLUDE_DATA(D_00259958);
 INCLUDE_DATA(D_00259DE8);
-Gc_259F38 D_00259F38;
+MarkStacks D_00259F38;
 
 ASM_FUNC(func_00112698);
 
@@ -1422,9 +1361,9 @@ ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     InitScriptValue(&q);
     if (args->tag == 0x14) {
-        func_001F66F8(args->i);
+        SeedRandom(args->i);
     } else {
-        func_001F66F8((s32)args->f);
+        SeedRandom((s32)args->f);
     }
     q.tag = 0x22;
     CopyConstructScriptValue(ret, &q);
@@ -1534,7 +1473,7 @@ ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         }
         out++;
     }
-    f32 d = func_00205778(xy[0], xy[1]);
+    f32 d = ArctangentOfRatio(xy[0], xy[1]);
     SetScriptValueFloat(&obj, d);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2275,9 +2214,9 @@ ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 // calls, GCC cross-jumps that return into the last one. Their callers call them through the
 // plain declarations above (ScriptValue* first).
 struct RetValue : ScriptValue {
-    RetValue() { func_0011B008(this); }
-    RetValue(const RetValue& o) { func_0011B018(this, &o); }
-    ~RetValue() { func_0011B060(this, 2); }
+    RetValue() { InitScriptValue(this); }
+    RetValue(const RetValue& o) { CopyConstructScriptValue(this, &o); }
+    ~RetValue() { DestroyScriptValue(this, 2); }
 };
 
 RetValue func_00118198(s32 id, s32 count, ScriptValue* args, R11A630* scope)
@@ -3182,74 +3121,74 @@ void func_0011A5B0(R11A630* src, R11A630* dst)
 R11A630* func_0011A630(void)
 {
     R11A630* p = (R11A630*)TakePoolEntry(g_scopePool);
-    func_001F5C0C(p, 0, 0x1C);
+    FillMemory(p, 0, 0x1C);
     return p;
 }
 void func_0011A670(void)
 {
 }
 
-Gc_259F38::Gc_259F38()
+MarkStacks::MarkStacks()
 {
 }
 
-Gc_259F38::~Gc_259F38()
+MarkStacks::~MarkStacks()
 {
 }
 
-void func_0011A6A8(Counters_11A6A8* self)
+void func_0011A6A8(MarkStacks* self)
 {
-    self->count = 0;
-    self->count2 = 0;
+    self->rootCount = 0;
+    self->listCount = 0;
 }
 
 void func_0011A6B8() {}
 
-void func_0011A6C0(IntList* list, int value)
+void func_0011A6C0(MarkStacks* self, MarkEntry* value)
 {
-    for (int i = 0; i < list->count; i++)
-        if (list->items[i] == value)
+    for (int i = 0; i < self->rootCount; i++)
+        if (self->roots[i] == value)
             return;
-    list->items[list->count++] = value;
+    self->roots[self->rootCount++] = value;
 }
 
-void func_0011A708(Obj_0011A708* obj, s32 value) { obj->values[obj->count++] = value; }
+void func_0011A708(MarkStacks* self, R11B008List* list) { self->lists[self->listCount++] = list; }
 
-void func_0011A728(Obj_0011A728* obj, s32 value) { obj->values[obj->count++] = value; }
+void func_0011A728(MarkStacks* self, MarkEntry* value) { self->objects[self->objectCount++] = value; }
 
-int func_0011A748(StackAt708* stack)
+MarkEntry* func_0011A748(MarkStacks* self)
 {
-    if (stack->count > 0)
-        return stack->items[--stack->count];
+    if (self->objectCount > 0)
+        return self->objects[--self->objectCount];
     return 0;
 }
 
-void func_0011A770(Obj_0011A770* obj, s32 value) { obj->values[obj->count++] = value; }
+void func_0011A770(MarkStacks* self, MarkEntry* value) { self->chains[self->chainCount++] = value; }
 
-s32 func_0011A790(Stack_11A790* s)
+MarkEntry* func_0011A790(MarkStacks* self)
 {
-    if (s->count > 0) {
-        s32 n = s->count - 1;
-        s->count = n;
-        return s->items[n];
+    if (self->chainCount > 0) {
+        s32 n = self->chainCount - 1;
+        self->chainCount = n;
+        return self->chains[n];
     }
     return 0;
 }
 
-void func_0011A7B8(Stack_11A7B8* s, s32 value)
+void func_0011A7B8(MarkStacks* self, MarkRecord* value)
 {
-    s32 n = s->count;
-    s->items[n] = value;
-    s->count = n + 1;
+    s32 n = self->recordCount;
+    self->records[n] = value;
+    self->recordCount = n + 1;
 }
 
-s32 func_0011A7D8(Stack_11A7D8* s)
+MarkRecord* func_0011A7D8(MarkStacks* self)
 {
-    s32 n = s->count;
+    s32 n = self->recordCount;
     if (n > 0) {
         n = n - 1;
-        s->count = n;
-        return s->items[n];
+        self->recordCount = n;
+        return self->records[n];
     }
     return 0;
 }
@@ -3263,19 +3202,19 @@ void func_0011A800(void)
     MarkPoolLiveEnd(g_propertyRefPool);
 }
 
-void func_0011A850(Stk_11A850* self)
+void func_0011A850(MarkStacks* self)
 {
-    Obj_11A850* obj;
-    Obj_11A850* other;
-    Obj_11A850* group;
+    MarkEntry* obj;
+    MarkEntry* other;
+    MarkEntry* group;
     for (;;) {
         group = PopMarkObject(self);
         if (group) {
-            Obj_11A850* link = group->f14;
+            MarkEntry* link = group->f14;
             if (link) {
                 do {
                     MarkPoolEntryUsed(link);
-                    Obj_11A850* ev = (Obj_11A850*)&link->f4;
+                    MarkEntry* ev = (MarkEntry*)&link->f4;
                     switch (ev->f0) {
                     case 0x1E:
                         obj = ev->f4;
@@ -3288,7 +3227,7 @@ void func_0011A850(Stk_11A850* self)
                         other = ev->f4;
                         if (IsPoolEntryUnmarked(other)) {
                             MarkPoolEntryUsed(other);
-                            PushMarkRecord(self, other);
+                            PushMarkRecord(self, (MarkRecord*)other);
                         }
                         break;
                     case 0x21:
@@ -3300,7 +3239,7 @@ void func_0011A850(Stk_11A850* self)
             }
             if (group->f0 > 0) {
                 s32 i = 0;
-                Obj_11A850** p = &group->f4;
+                MarkEntry** p = &group->f4;
                 do {
                     obj = *p;
                     if (IsPoolEntryUnmarked(obj)) {
@@ -3313,7 +3252,7 @@ void func_0011A850(Stk_11A850* self)
             }
             continue;
         }
-        Batch_11A850* b = PopMarkRecord(self);
+        MarkRecord* b = PopMarkRecord(self);
         if (b) {
             obj = b->f4;
             if (obj) {
@@ -3349,7 +3288,7 @@ void func_0011A850(Stk_11A850* self)
             other = obj->f4;
             if (IsPoolEntryUnmarked(other)) {
                 MarkPoolEntryUsed(other);
-                PushMarkRecord(self, other);
+                PushMarkRecord(self, (MarkRecord*)other);
             }
             break;
         case 0x21:
@@ -3366,32 +3305,32 @@ void func_0011A850(Stk_11A850* self)
     }
 }
 
-void func_0011AB58(World_11AB58* w) {
+void func_0011AB58(MarkStacks* w) {
     ClearPoolLiveStates(g_valueNodePool);
     ClearPoolLiveStates(g_scopePool);
     ClearPoolLiveStates(g_keyedValuePool);
     ClearPoolLiveStates(g_payloadPool);
     ClearPoolLiveStates(g_propertyRefPool);
-    s32 i = w->count;
-    *(s32*)((u8*)w + 0x708) = 0;
-    *(s32*)((u8*)w + 0xF0C) = 0;
-    *(s32*)((u8*)w + 0x1310) = 0;
+    s32 i = w->rootCount;
+    w->objectCount = 0;
+    w->chainCount = 0;
+    w->recordCount = 0;
     for (i--; i >= 0; i--) {
-        Ent_11AB58* e = w->ents[i];
+        MarkEntry* e = w->roots[i];
         if (IsPoolEntryUnmarked(e)) {
             MarkPoolEntryUsed(e);
             PushMarkObject(w, e);
         }
     }
-    s32 j = w->n504;
+    s32 j = w->listCount;
     for (j--; j >= 0; j--) {
         R11B008Key* n = w->lists[j]->head;
         while (n) {
-            MarkPoolEntryUsed((Ent_11AB58*)n);
+            MarkPoolEntryUsed((MarkEntry*)n);
             ScriptValue* sp = &n->value;
             switch (sp->tag) {
             case 0x1E: {
-                Ent_11AB58* e = (Ent_11AB58*)sp->p;
+                MarkEntry* e = (MarkEntry*)sp->p;
                 if (IsPoolEntryUnmarked(e)) {
                     MarkPoolEntryUsed(e);
                     PushMarkChain(w, e);
@@ -3399,15 +3338,15 @@ void func_0011AB58(World_11AB58* w) {
                 break;
             }
             case 0x1F: {
-                Ent_11AB58* e = (Ent_11AB58*)sp->p;
+                MarkEntry* e = (MarkEntry*)sp->p;
                 if (IsPoolEntryUnmarked(e)) {
                     MarkPoolEntryUsed(e);
-                    PushMarkRecord(w, e);
+                    PushMarkRecord(w, (MarkRecord*)e);
                 }
                 break;
             }
             case 0x21:
-                MarkPoolEntryUsed((Ent_11AB58*)sp->p);
+                MarkPoolEntryUsed((MarkEntry*)sp->p);
                 break;
             }
             n = n->next;
@@ -3415,7 +3354,7 @@ void func_0011AB58(World_11AB58* w) {
     }
     for (S1DBBD8* it = (S1DBBD8*)g_currentWorld->f1EC8; it; it = it->next) {
         if ((void*)it->fn == (void*)RunScriptEventHandler) {
-            Ent_11AB58* e = (Ent_11AB58*)it->p0C;
+            MarkEntry* e = (MarkEntry*)it->p0C;
             if (e && IsPoolEntryUnmarked(e)) {
                 MarkPoolEntryUsed(e);
                 PushMarkChain(w, e);

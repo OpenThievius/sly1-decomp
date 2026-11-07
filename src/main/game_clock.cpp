@@ -27,9 +27,9 @@ void func_00142F10(GameClock* self)
     u64 half = (u64)delta >> 1;
     f32 t;
     if (delta >= 0) {
-        t = func_001FB6B0(delta);
+        t = ConvertS64ToFloat(delta);
     } else {
-        t = func_001FB6B0((delta & 1) | half);
+        t = ConvertS64ToFloat((delta & 1) | half);
         t = t + t;
     }
     f32 dt = t * 0.0000000033908420f;
@@ -66,9 +66,9 @@ void func_00143030(GameClock* self)
     u64 half = (u64)delta >> 1;
     f32 t;
     if (delta >= 0) {
-        t = func_001FB6B0(delta);
+        t = ConvertS64ToFloat(delta);
     } else {
-        t = func_001FB6B0((delta & 1) | half);
+        t = ConvertS64ToFloat((delta & 1) | half);
         t = t + t;
     }
     f32 dt = t * 0.0000000033908420f;

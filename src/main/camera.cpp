@@ -770,12 +770,12 @@ void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out)
         goto zero;
     }
 call:
-    t = func_00205778(-x, y);
+    t = ArctangentOfRatio(-x, y);
     goto store;
 zero:
     t = 0.0f;
 store:
-    *out = WrapAngle(t + func_00205778(self->g80[1], self->g80[0]));
+    *out = WrapAngle(t + ArctangentOfRatio(self->g80[1], self->g80[0]));
 
 }
 

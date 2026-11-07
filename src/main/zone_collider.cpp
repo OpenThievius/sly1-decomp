@@ -589,8 +589,8 @@ struct Begin_13E950 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_13E950*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_13E950*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -683,7 +683,7 @@ void func_0013EB68(void* a, s32 b)
     }
     *(s32*)((u8*)self + 0x12C) = b;
     self->stamp = g_gameTime;
-    func_00129DF8(self->owner);
+    ClearRootTries(self->owner);
     if (s1 != 0) {
         func_0013EF50(self, 0, 0);
     }
@@ -801,16 +801,16 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
                 if (t >= 0.0f) {
                     dir = 2;
                 }
-                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
             } else if (self->f138 != 0) {
                 f32 t = self->f118;
                 dir = 0;
                 if (t < 0.0f) {
                     dir = 2;
                 }
-                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
             } else {
-                func_0012C8F8(obj, other, 1, 0, 0.0f, self->f118);
+                FindOrCreateSeekedAnimationPlayer(obj, other, 1, 0, 0.0f, self->f118);
             }
         }
     }
@@ -899,7 +899,7 @@ void func_0013F140(TriggerZone* self, void* a1, Quad28* q)
         if (n > 0) {
             u8* p = (u8*)self + n * 16;
             s32 o = n * 16;
-            func_001F5B08((u8*)(o + (s32)self) + 0x7C0, &self->quads[0], o);
+            MoveMemory((u8*)(o + (s32)self) + 0x7C0, &self->quads[0], o);
         }
     } else {
         idx = n;
@@ -1011,7 +1011,7 @@ s32 func_0013F940(TriggerZone* s, f32* out)
         }
     }
     if (out != 0) {
-        *out = func_00205578(best);
+        *out = Arccosine(best);
     }
     return idx;
 }
@@ -1137,7 +1137,7 @@ void func_0013FD20(TriggerZone* self)
                 else if (s0 == 1 && !mode) r = 1;
             }
             if (self->f7B0 != s0) {
-                func_00129DF8(self);
+                ClearRootTries(self);
                 self->f7B0 = s0;
             }
             break;
@@ -1198,7 +1198,7 @@ void func_00140140(ZoneCollider* self)
 {
     StartPlacedObject(self);
     StartZoneRecord(&self->zone);
-    func_00140238(self, 0);
+    SetZoneColliderMode(self, 0);
     for (s32 i = 0; i < self->countIds; i++) {
         void* p = FindFirstObjectByIdMode4(self->world, self->ids[i], self);
         if (p != 0) {
@@ -1275,14 +1275,14 @@ void func_001405D0(void* a, void* b, s32 c)
 
 void func_001405F0(u8* self, s32 value)
 {
-    func_001405D0(self + 0x554, self, value);
+    AppendZoneFirstQueue(self + 0x554, self, value);
 }
 
 void func_001405D0(void* a, void* b, int c);
 
 void func_00140618(void* self, int value)
 {
-    func_001405D0((u8*)self + 0x5C0, self, value);
+    AppendZoneFirstQueue((u8*)self + 0x5C0, self, value);
 }
 
 bool func_0013E8F8(void* a, int b);
@@ -1296,7 +1296,7 @@ void func_00140640(void* self, void* unused, int value);
 
 void func_00140660(TriggerZone* self, int value)
 {
-    func_00140640(&self->zone, self, value);
+    AppendZoneSecondQueue(&self->zone, self, value);
 }
 
 void func_0013EB30(void* p);
@@ -1304,7 +1304,7 @@ void func_00140640(void* a, void* b, void* c);
 
 void func_00140688(void* self, void* b)
 {
-    func_00140640((u8*)self + 0x5C0, self, b);
+    AppendZoneSecondQueue((u8*)self + 0x5C0, self, b);
 }
 
 void func_001406B0(TriggerZone* list, s32 value)

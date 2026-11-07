@@ -63,12 +63,12 @@ struct Frame_13B610 {
     Frame_13B610(List_13B610* l) {
         cur = l;
         base = l;
-        Frame_13B610* p = (Frame_13B610*)D_0027B314;
+        Frame_13B610* p = (Frame_13B610*)g_activeListFrames;
         off = l->off;
-        D_0027B314 = (ListFrame*)this;
+        g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~Frame_13B610() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_13B610() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void func_00124A48(void* self);

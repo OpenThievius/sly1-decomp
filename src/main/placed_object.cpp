@@ -451,8 +451,8 @@ struct Begin_00124050 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_00124050*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_00124050*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -473,8 +473,8 @@ struct Begin_00124338 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_00124338*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_00124338*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -495,8 +495,8 @@ struct Begin_00126F78 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_00126F78*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_00126F78*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -526,8 +526,8 @@ struct Begin_124FC0 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_124FC0*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_124FC0*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -560,7 +560,7 @@ struct Find_124CC0 {
         if (ctx->node != 0) {
             return ctx->node;
         }
-        return (Animation*)func_0015A418(self->world, 0x104, (s32)ctx->key, self);
+        return (Animation*)FindFirstObjectById(self->world, 0x104, (s32)ctx->key, self);
     }
 };
 
@@ -641,7 +641,6 @@ struct Inner_12AD98 { u8 pad[0xC]; f32 value; };
 
 void func_0012ABA8(void* self, f32 f);
 
-struct Inner_12AEB0 { u8 pad[0x1C]; void* ptr; };
 
 void func_001BF7F8(void* p);
 
@@ -701,7 +700,6 @@ struct __attribute__((aligned(16))) Quad_12A0F8 { s32 w[4]; };
 
 struct Sub_12ACD8 { u8 pad0[4]; f32 value; };
 
-struct Sub_12ACF8 { u8 pad0[8]; f32 value; };
 
 void func_0012ABA8(PlacedObject* self);
 
@@ -738,7 +736,6 @@ void func_0012A200(PlacedObject* self, Vec4_12A150* src);
 
 void* func_0018D500(s32 size);
 
-struct Part_0012AC08 { void* link; f32 f4; f32 f8; f32 fc; f32 f10; u8 sub14[8]; u8 sub1C[4]; f32 f20; };
 
 struct __attribute__((packed)) Pack4_12A2C0 { f32 a, b, c, d; };
 
@@ -748,7 +745,6 @@ struct __attribute__((packed)) Pack4_12A320 { f32 a, b, c, d; };
 
 void* func_0018D500(u32 size);
 
-struct Part_12AE20 { u8 pad0[0xC]; f32 weight; u8 pad1[0xC]; void* ptr; };
 
 void func_001BF8E8(void* p);
 
@@ -779,9 +775,7 @@ s32 func_001833F0(void* key, s32 item);
 struct __attribute__((packed)) U64_12A700 { u64 v; };
 struct Sub_12A700 { u8 pad[0x80]; U64_12A700 v80; };
 
-struct Part_12AE78 { u8 pad[0x10]; f32 value; };
 
-struct Part_12AEE8 { u8 pad[0x10]; f32 value; };
 
 struct Inner_0012B238 { u8 pad[0x30]; f32 value; };
 
@@ -1033,8 +1027,8 @@ struct Begin_001288F0 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_001288F0*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_001288F0*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -1049,8 +1043,8 @@ struct Begin_129A58 {
         it->list = (List_001288F0*)list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_001288F0*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_001288F0*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -1463,8 +1457,8 @@ struct Begin_12F8C8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_12F8C8*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_12F8C8*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -1580,7 +1574,7 @@ void func_00130540(f32 f12, Self_130B48* a, u8* b, u8* c, u8* d, f32 f13, f32 f1
 void func_001233C0(C22* object)
 {
 	if (!object->hold)
-		func_00123B18(object->counter);
+		CountStateTriggerDone(object->counter);
 	func_0013D278(object);
 }
 
@@ -1746,13 +1740,13 @@ arm0:
     if (self->f55C != 0) {
         SetStateWalkerTarget(self->f55C, 0x21A);
     }
-    func_00123B28(self);
+    ResetStateTriggerOutputModes(self);
     return;
 arm1:
     if (self->f55C != 0) {
         TeleportStateWalker(self->f55C, 0x220);
     }
-    func_00123BB0(self);
+    EndStateTriggerOutputs(self);
     if (TestFlagTableBit(g_flagTable, self->id6B0) != 0) {
         TriggerScriptEvent(self, 0x16, 0, 0);
     } else {
@@ -1963,7 +1957,7 @@ void func_001240F8(PlacedObject* self)
     if (self->f284) AppendToList(&self->world->list1C00, self->f284);
     if (self->desc->m12) self->desc->m12(self);
     TriggerScriptEvent(self, 4, 0, 0);
-    func_00129DF8(self);
+    ClearRootTries(self);
 }
 
 void func_00124338(PlacedObject* self)
@@ -2013,7 +2007,7 @@ void func_001243E0(PlacedObject* self)
             fn(self, 0);
         }
     }
-    func_00129DF8(self);
+    ClearRootTries(self);
     self->root = 0;
     TriggerScriptEvent(self, 5, 0, 0);
 }
@@ -2496,7 +2490,7 @@ void func_001274F8(PlacedObject* self, Vec02* src)
         SettlePoseSourceModes(self->f1EC);
     }
     if (func_00123DC0(src) == 0) {
-        func_00129DF8(self);
+        ClearRootTries(self);
     }
 }
 
@@ -2516,7 +2510,7 @@ void func_00127590(PlacedObject* self, Vec02* src)
         SettlePoseSourceModes(self->f1F0);
     }
     if (func_00123E00(src) == 0) {
-        func_00129DF8(self);
+        ClearRootTries(self);
     }
 }
 
@@ -2864,7 +2858,7 @@ void func_00129510(PlacedObject* self, f32* out)
 void func_00129540(void* self, f32* out)
 {
     Sub_00129540* sub = (Sub_00129540*)GetRangeRecord(self);
-    f32 value = func_00205778(sub->value / sub->scale, 1.0f) * 57.2957763671875f;
+    f32 value = ArctangentOfRatio(sub->value / sub->scale, 1.0f) * 57.2957763671875f;
     *out = value + value;
 }
 
@@ -2932,7 +2926,7 @@ void func_00129780(PlacedObject* self)
     Attachment* s2 = 0;
     Attachment* s1 = 0;
     s32 i;
-    if (self->f1F8) func_001F5C0C(self->f1F8, 0, self->f26C << 2);
+    if (self->f1F8) FillMemory(self->f1F8, 0, self->f26C << 2);
     for (Attachment* n = (Attachment*)self->list1E0.head; n != 0; n = n->link.next) {
         if (s1 == 0) if (n->mode0 != -1) s1 = n;
         if (s2 == 0) if (n->mode1 != -1) s2 = n;
@@ -2963,7 +2957,7 @@ void func_00129780(PlacedObject* self)
     }
     self->f1F4 = s3;
     if (s1 != self->f1EC || s2 != self->f1F0) {
-        func_00129DF8(self);
+        ClearRootTries(self);
         if (s1 != self->f1EC) {
             self->f1EC = s1;
             if (s1) SettlePoseSourceModes(s1);
@@ -3097,7 +3091,7 @@ void func_00129E10(void* self, void* src)
     func_00118CF0(&f.a, src);
     Quad_129E10 av = f.a;
     CopyQuadword(&f.b, p);
-    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
+    (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     func_00129E88(self, &f.r);
 }
 
@@ -3115,7 +3109,7 @@ void func_00129EE0(void* self, void* src)
     func_00118CF0(&f.a, src);
     Quad_129EE0 av = f.a;
     CopyQuadword(&f.b, p);
-    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
+    (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     func_00129F58(self, &f.r);
 }
 
@@ -3132,7 +3126,7 @@ void func_00129FB0(PlacedObject* self, void* src)
     func_00118CF0(&f.a, src);
     Quad_129FB0 av = f.a;
     CopyQuadword(&f.b, p);
-    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
+    (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     func_0012A028(self, &f.r);
 }
 
@@ -3149,7 +3143,7 @@ void func_0012A080(PlacedObject* self, void* src)
     func_00118CF0(&f.a, src);
     Quad_12A080 av = f.a;
     CopyQuadword(&f.b, p);
-    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
+    (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     func_0012A0F8(self, &f.r);
 }
 
@@ -3449,7 +3443,7 @@ void func_0012AAE8(PlacedObject* self, f32 value)
         if (p->kind == 5) SetCrossfadeRatio(p, value);
     }
     for (PlacedObject* child = (PlacedObject*)self->children.head; child; child = (PlacedObject*)child->next) {
-        if (child->desc->flags & 1) func_0012AAE8(child, value);
+        if (child->desc->flags & 1) SetCrossfadeRatioDeep(child, value);
     }
 }
 
@@ -3483,7 +3477,7 @@ void func_0012AC88(PlacedObject* self, s32* out)
 void func_0012ACA0(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
-    ((Part_0012AC08*)self->f2AC)->f4 = value;
+    self->f2AC->f04 = value;
 }
 
 void func_0012ACD8(PlacedObject* self, f32* out)
@@ -3497,7 +3491,7 @@ void func_0012ACD8(PlacedObject* self, f32* out)
 void func_0012ACF8(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
-    ((Sub_12ACF8*)self->f2AC)->value = value;
+    self->f2AC->f08 = value;
 }
 
 void func_0012AD30(PlacedObject* self, Rec_12AD30* src)
@@ -3523,23 +3517,23 @@ void func_0012AD98(PlacedObject* self, f32 f)
 void func_0012ADD0(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
-    ((Part_0012AC08*)self->f2AC)->f20 = value;
+    self->f2AC->f20 = value;
 }
 
 void func_0012AE08(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
     if (self->f2AC != 0) {
-        r = ((Part_0012AC08*)self->f2AC)->f20;
+        r = self->f2AC->f20;
     }
     *out = r;
 }
 
 void func_0012AE20(PlacedObject* self)
 {
-    Part_12AE20* part = (Part_12AE20*)self->f2AC;
+    SoundRecord* part = self->f2AC;
     if (part != 0) {
-        void* p = part->ptr;
+        void* p = part->p1C;
         if (p != 0) {
             SetSoundRecordVolume(p);
         }
@@ -3558,14 +3552,14 @@ void func_0012AE58(PlacedObject* self, f32* out)
 void func_0012AE78(PlacedObject* self, f32 f)
 {
     EnsureSoundRecord(self, f);
-    ((Part_12AE78*)self->f2AC)->value = f;
+    self->f2AC->f10 = f;
 }
 
 void func_0012AEB0(PlacedObject* self)
 {
-    Inner_12AEB0* in = (Inner_12AEB0*)self->f2AC;
+    SoundRecord* in = self->f2AC;
     if (in != 0) {
-        if (in->ptr != 0) SetSoundRecordPitch(in->ptr);
+        if (in->p1C != 0) SetSoundRecordPitch(in->p1C);
     }
 }
 
@@ -3573,7 +3567,7 @@ void func_0012AEE8(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
     if (self->f2AC != 0) {
-        r = ((Part_12AEE8*)self->f2AC)->value;
+        r = self->f2AC->f10;
     }
     *out = r;
 }
@@ -3614,7 +3608,7 @@ void func_0012B040(void* ptr)
     PlacedObject* self = (PlacedObject*)ptr;
     if (!self->f288) {
         self->f288 = (Entry_12B0B0*)AllocateFrontMemory(64);
-        *(Entry_12B0B0*)self->f288 = D_00261000[0];
+        *(Entry_12B0B0*)self->f288 = g_defaultColorRecord[0];
         ((Entry_12B0B0*)self->f288)->w[0] = -1;
     }
 }
@@ -3625,7 +3619,7 @@ void func_0012B0B0(PlacedObject* self, s32 a1)
     ((Entry_12B0B0*)self->f288)->w[0] = a1;
     Entry_12B0B0* e = (Entry_12B0B0*)self->f288;
     s32 k = e->w[0];
-    if (k != -1) *e = D_00260F00[k];
+    if (k != -1) *e = g_colorPresets[k];
 }
 
 void func_0012B128(PlacedObject* self, s32* out) { *out = self->f288 ? *(s32*)self->f288 : -1; }
@@ -4273,7 +4267,7 @@ void func_0012C288(Animation* self, Animation* alt, s32 npairs, TargetBinding* p
         ((PlacedObject**)obj->f60)[j]->flags &= ~0x400000000000;
     }
     RegisterObjectGroup(world, obj->f54);
-    if (self->f4C != 0) func_0012D448(obj, 1);
+    if (self->f4C != 0) SetAnimationPlayerPadSelect(obj, 1);
     tmp = 0;
     for (s32 m = 0; m < self->startCount; m++) {
         RunAnimationEvent(obj, &((Item_12C288*)self->startList)[m], &tmp);
@@ -4452,7 +4446,7 @@ void func_0012D2A8(Animation* self, Track83* p)
     s32 idx = p - self->tracks;
     self->trackCount = self->trackCount - 1;
     if (idx < self->trackCount) {
-        func_001F5B08(p, p + 1, (self->trackCount - idx) * 0x1C);
+        MoveMemory(p, p + 1, (self->trackCount - idx) * 0x1C);
     }
     p = self->tracks + self->trackCount;
 
@@ -4695,7 +4689,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         if (rev) {
             on = !on;
         }
-        func_0012D448(self, on);
+        SetAnimationPlayerPadSelect(self, on);
     }
         break;
     case 19:
@@ -4959,7 +4953,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
                     u.req.flags |= 1;
                 } else if (IsObjectOfKind(s, 0x7E) != 0) {
                     u.req.flags |= 4;
-                    func_001920B0(s, &u.req.buf);
+                    ConvertPositionToWorld(s, &u.req.buf);
                 } else if (IsObjectOfKind(s, 0x73) != 0) {
                     u.req.flags |= 4;
                     GetObjectWorldPosition(s, &u.req.buf);
@@ -5113,7 +5107,7 @@ void func_0012E760(AnimationPlayer* self)
     ReleaseCallRecords(base, self->fE4);
     self->fE4 = 0;
     UnregisterObjectGroup(base, self->f54);
-    func_0012D448(self, 0);
+    SetAnimationPlayerPadSelect(self, 0);
     RemoveQueuedCalls(base, 2, 0, self, -1, 0);
     RemoveFromList(sub->props6C, self);
     if (sub->f50 != 0) {
@@ -5185,13 +5179,13 @@ s32 func_0012E9E0(AnimationPlayer* o, f32* pos, f32* vel)
             }
             break;
         case 1:
-            *pos = func_002058A0(x, lim);
+            *pos = FloatRemainder(x, lim);
             break;
         case 2: {
             f32 d = lim + lim;
             s32 flag = 1;
             if (d <= x) {
-                *pos = func_002058A0(x, d);
+                *pos = FloatRemainder(x, d);
                 if (*pos < l->length) flag = 0;
                 *vel = __builtin_fabsf(*vel);
             }
@@ -5498,12 +5492,12 @@ void func_0012FDE8(StreamReader* a0)
 {
     switch (a0->sourceKind) {
     case 0:
-        if (a0->fileHandle >= 0) func_001F8C38(a0->fileHandle);
+        if (a0->fileHandle >= 0) CloseFile(a0->fileHandle);
         a0->fileHandle = -1;
         break;
     case 1:
         if (IsReadPending(a0)) {
-            func_002032C8(0);
+            SyncDiscNCommand(0);
             CommitChunk(a0);
         }
         a0->sector = 0;
@@ -5533,7 +5527,7 @@ void func_0012FE70(StreamReader* self)
     self->pendingDest = base;
     switch (self->sourceKind) {
     case 0:
-        func_001F8DB8(self->fileRef, base, clamp);
+        ReadFile(self->fileRef, base, clamp);
         break;
     case 1:
         StartLowLevelDiscReadUntilAccepted(self->sectorRef, (s32)((u32)(clamp + 0x7FF) >> 11), base);
@@ -5554,13 +5548,13 @@ s32 func_0012FF20(StreamReader* a0)
         switch (a0->sourceKind) {
         case 0: {
             s32 tmp;
-            done = func_001F92E8(a0->fileHandle, 1, &tmp);
+            done = ControlFile(a0->fileHandle, 1, &tmp);
             r = tmp == 0;
             break;
         }
         case 1:
-            r = func_002032C8(1) == 0;
-            if (r) done = func_00203D90();
+            r = SyncDiscNCommand(1) == 0;
+            if (r) done = GetDiscError();
             break;
         }
     }

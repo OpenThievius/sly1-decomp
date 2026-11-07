@@ -162,7 +162,7 @@ s32 func_001429F8(s32 count, Span_1429F8* spans)
         }
     }
 
-    func_001F5CD0(mem, count * 2, 0x30, CompareSpanEndpoints);
+    SortElements(mem, count * 2, 0x30, CompareSpanEndpoints);
 
     dst = spans;
     end = rec;
