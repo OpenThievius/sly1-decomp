@@ -1593,8 +1593,45 @@ void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
     SetPlayerState(self, 4, 0x2C);
 }
 
-INCLUDE_RODATA(D_0024AFA0);
-INCLUDE_ASM(func_00178678);
+extern const f32 D_0024AFA0 = 3.4028235e+38f;
+
+void EvaluateHermiteVectorSegment(void* a, void* b, void* c, void* d, f32 f12, f32 f13, f32 f14, void* a4, s32 a5, s32 a6);
+s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5);
+
+void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider** list, f32* out)
+{
+    Vec02 start;
+    Vec02 b;
+    Vec02 a;
+    Vec02 c;
+    Vec02 cur;
+    Vec02 prev;
+    ColliderSpan spans[8];
+    f32 bestTime = D_0024AFA0;
+    f32 bestScore = bestTime;
+    start = self->v140;
+    start.z = start.z - 75.0f;
+    for (u32 i = 0; i < 9; i++) {
+        ComputeTargetArc(self, target, D_002639E8[i], &a, &b, &c);
+        b.z = b.z - 75.0f;
+        prev = start;
+        f32 total = 1.0f;
+        for (f32 u = 0.0f; u < D_002639E8[i]; u += 0.25f) {
+            EvaluateHermiteVectorSegment(&start, &a, &b, &c, D_002639E8[i], D_002639E8[i] <? (u + 0.25f), 1.0f, &cur, 0, 0);
+            s32 n = CollectSpansFromList(&prev, &cur, count, list, 8, spans);
+            for (s32 k = 0; k < n; k++) {
+                total += Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(spans[k].q[0]), Vu0::Q(spans[k].q[1]))));
+            }
+            prev = cur;
+        }
+        f32 score = total * Vu0::ToFloat(Vu0::Length(Vu0::Q(a)));
+        if (score < bestScore) {
+            bestScore = score;
+            bestTime = D_002639E8[i];
+        }
+    }
+    *out = bestTime;
+}
 
 INCLUDE_ASM(func_001788F0);
 
