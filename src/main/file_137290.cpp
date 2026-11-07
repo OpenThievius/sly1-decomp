@@ -13,6 +13,10 @@
 #include "owned_record.h"
 #include "object_message.h"
 #include "globals.h"
+#include "anim_curve.h"
+#include "attachment.h"
+#include "cursor_animator.h"
+#include "texture_table.h"
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
 // the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
@@ -50,46 +54,24 @@ void func_001372E0(void* self, s32 flags)
     if (flags & 1) FreeObjectMemory(self);
 }
 
-struct Ring_00137328 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    s32 f20;
-    u8 pad24[0x14];
-    s32 f38;
-    s32 f3C;
-    s32 f40;
-    s32 f44;
-    s32 f48;
-    s32 f4C;
-    s32 f50;
-    s32 f54;
-    s32 f58;
-};
-
-s32 func_00137328(Ring_00137328* r, s32 a1, s32 a2)
+s32 func_00137328(BufferedStream* r, s32 a1, s32 a2)
 {
-    r->f04 = 1;
-    r->f48 = a1;
+    r->mode = 1;
+    r->sector = a1;
     r->f10 = a2;
     r->f14 = a2;
     r->f40 = a2;
-    r->f20 = r->f08;
+    r->nextPtr = r->end;
     r->f38 = 0;
     r->f44 = 0;
     r->f3C = 0;
-    s32 count = r->f0C / 0x100000;
+    s32 count = r->start / 0x100000;
     s32 m = 2;
     if (m < count) m = count;
     r->f50 = 0;
     r->f54 = 0;
-    r->f4C = m;
-    r->f58 = m - 1;
+    r->chunkCount = m;
+    r->lastChunk = m - 1;
     return 1;
 }
 
@@ -164,29 +146,9 @@ s32 func_00182FC8(void* obj);
 
 void func_00199C10(void* obj, s32* out);
 
-struct Chan_1373D0 {
-    s32 a00;
-    s32 mode;
-    s32 a08;
-    s32 a0C;
-    s32 a10;
-    s32 a14;
-    s32 a18;
-    s32 a1C;
-    s32 a20;
-    s32 a24;
-    s32 a28;
-    s32 a2C;
-    void* a30;
-    void* a34;
-    s32 a38;
-    s32 a3C;
-    s32 a40;
-};
-
-s32 func_00137480(Chan_1373D0* self, s32 n)
+s32 func_00137480(BufferedStream* self, s32 n)
 {
-    return self->a40 -= n;
+    return self->f40 -= n;
 }
 
 void func_00160D30(u32* out);
@@ -662,7 +624,7 @@ void func_00138278(void* self, In_138278* in, Tree03* out)
 
 void func_001BA130(void* self, void* other);
 
-struct Item_138398 {
+struct LinkedItem {
     u8 pad0[0x10];
     f32 f10;
     s32 f14;
@@ -676,14 +638,14 @@ void func_00137E70(void* src, void* item);
 f32 func_00137DF8(void* src);
 s32 func_00137C40(void* src);
 
-void func_00138398(void* src, s32* count, Item_138398** out)
+void func_00138398(void* src, s32* count, LinkedItem** out)
 {
     s32 n = ReadBufferedU16(src);
     *count = n;
-    *out = (Item_138398*)AllocateZeroedFrontMemory(n << 5);
+    *out = (LinkedItem*)AllocateZeroedFrontMemory(n << 5);
 
     for (s32 i = 0; i < *count; i++) {
-        Item_138398* item = &(*out)[i];
+        LinkedItem* item = &(*out)[i];
         ReadBufferedVector3(src, item);
         item->f10 = ReadBufferedFloat(src);
 
@@ -1105,80 +1067,79 @@ void func_00138FF0(s32 a, s32 b, s32 c, s32 d)
     }
 }
 
-struct Track_139038 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; };
-struct Grp_139038 {
-    s32 key; Track_139038* a; Track_139038* b; s32 fC; Track_139038* c; s32 n; Track_139038** d;
+struct BlendCurveView { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; };
+struct BlendTrack {
+    s32 key; BlendCurveView* a; BlendCurveView* b; s32 fC; BlendCurveView* c; s32 n; BlendCurveView** d;
 };
-struct Src_139038 {
-    u8 pad0[0x38]; s32 count; Grp_139038* grps; u8 pad40[4]; s32 f44;
+struct BlendSourceAnim {
+    u8 pad0[0x38]; s32 count; BlendTrack* grps; u8 pad40[4]; s32 f44;
     u8 pad48[0x54 - 0x48]; s32 f54; s32 f58; s32 f5C; s32 f60; s32 f64; s32 f68;
     u8 pad6C[0x78 - 0x6C]; s32 f78; f32 f7C;
 };
-struct Item_139038 { s32 f0; Src_139038* src; };
-struct Key_139038 { s32 f0; s32 f4; void* f8; };
-struct Anim_139038;
-typedef void (*VFn_139038)(Anim_139038*);
-struct Anim_139038 {
-    VFn_139038* vtbl; u8 pad4[0x34]; s32 count; Grp_139038* grps; u8 pad40[4]; s32 f44;
+struct BlendItem { s32 f0; BlendSourceAnim* src; };
+struct BlendAnimation;
+typedef void (*BlendAnimationFn)(BlendAnimation*);
+struct BlendAnimation {
+    BlendAnimationFn* vtbl; u8 pad4[0x34]; s32 count; BlendTrack* grps; u8 pad40[4]; s32 f44;
     u8 pad48[0x54 - 0x48]; s32 f54; s32 f58; s32 f5C; s32 f60; s32 f64; s32 f68;
     u8 pad6C[0x78 - 0x6C]; s32 f78; f32 f7C;
-    u8 pad80[0xB0 - 0x80]; s32 stride; s32 nitems; void* data; s32 nkeys; Key_139038* keys;
+    u8 pad80[0xB0 - 0x80]; s32 stride; s32 nitems; void* data; s32 nkeys; BlendSequence* keys;
 };
 
 void func_0018D608(void);
 void func_0018D6F0(void);
-Anim_139038* func_0011E580(s32 kind, s32 a, Collider* ctx, s32 b, s32 c);
+BlendAnimation* func_0011E580(s32 kind, s32 a, Collider* ctx, s32 b, s32 c);
 void* func_0018D500(s32 size);
 void* func_0018D5C0(s32 size);
-Grp_139038* func_0018D6A8(s32 size);
-Grp_139038* func_0018D568(s32 size, Grp_139038* src);
-Track_139038* func_00120FB0(s32 kind);
-Track_139038* func_00121050(s32 kind);
-Track_139038* func_00121160(s32 kind);
+BlendTrack* func_0018D6A8(s32 size);
+BlendTrack* func_0018D568(s32 size, BlendTrack* src);
+BlendCurveView* func_00120FB0(s32 kind);
+BlendCurveView* func_00121050(s32 kind);
+BlendCurveView* func_00121160(s32 kind);
 void func_00138FF0(s32 a, s32 b, s32 c, s32 d);
 
-void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, Anim_139038** out)
+void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out)
 {
     s32 i;
-    Item_139038* item;
-    Grp_139038* buf;
+    BlendItem* item;
+    BlendTrack* buf;
     for (i = 0; ; i++) {
         if (i >= count) {
             *out = 0;
             return;
         }
-        item = (Item_139038*)(items + i * stride);
+        item = (BlendItem*)(items + i * stride);
         if (item->src != 0) break;
     }
-    Src_139038* src = item->src;
+    BlendSourceAnim* src = item->src;
     PushBackMemoryMark();
-    Anim_139038* anim = CreateTypedRecord(0x84, (s32)ctx->world, ctx, -1, -1);
+    BlendAnimation* anim = CreateTypedRecord(0x84, (s32)ctx->world, ctx, -1, -1);
     anim->vtbl[7](anim);
     anim->nitems = count;
     anim->stride = stride;
     anim->data = AllocateFrontMemory(count * stride);
     anim->nkeys = nkeys;
-    anim->keys = (Key_139038*)AllocateFrontMemory(nkeys * 12);
+    anim->keys = (BlendSequence*)AllocateFrontMemory(nkeys * 12);
     for (s32 k = 0; k < nkeys; k++) {
-        Key_139038* key = &anim->keys[k];
-        key->f0 = keyA[k];
-        key->f4 = keyB[k];
-        key->f8 = AllocateFrontMemory(key->f4 << 3);
+        BlendSequence* key = &anim->keys[k];
+        key->stride = keyA[k];
+        key->count = keyB[k];
+        key->pairs = (BlendTimeScale*)AllocateFrontMemory(key->count << 3);
     }
     s32 total = 0;
     for (i = 0; i < count; i++) {
-        item = (Item_139038*)(items + i * stride);
+        item = (BlendItem*)(items + i * stride);
         if (item->src != 0) total += item->src->count;
     }
     buf = AllocateZeroedBackMemory(total * 0x1C);
     s32 used = 0;
     for (i = 0; i < count; i++) {
-        item = (Item_139038*)(items + i * stride);
+        item = (BlendItem*)(items + i * stride);
         if (item->src == 0) continue;
         for (s32 j = 0; j < item->src->count; j++) {
-            Grp_139038* g = &item->src->grps[j];
+            BlendTrack* g = &item->src->grps[j];
             if (g->a == 0 && g->b == 0 && g->c == 0 && g->d == 0) continue;
-            Grp_139038* e;
+            BlendTrack* e;
             for (s32 m = 0; m < used; m++) {
                 e = &buf[m];
                 if (g->key == e->key) goto have;
@@ -1188,7 +1149,7 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
         have:
             if (g->a != 0) {
                 if (e->a == 0) {
-                    Track_139038* t = CreatePositionCurve(2);
+                    BlendCurveView* t = CreatePositionCurve(2);
                     t->fC = (s32)anim;
                     t->f10 = (s32)anim->keys;
                     t->f14 = (s32)AllocateZeroedFrontMemory(count << 2);
@@ -1196,11 +1157,11 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
                     e->a = t;
                 }
                 if (g->a->f8 == 0) e->a->f8 = 0;
-                ((Track_139038**)e->a->f14)[i] = g->a;
+                ((BlendCurveView**)e->a->f14)[i] = g->a;
             }
             if (g->b != 0) {
                 if (e->b == 0) {
-                    Track_139038* t = CreateRotationCurve(2);
+                    BlendCurveView* t = CreateRotationCurve(2);
                     t->fC = (s32)anim;
                     t->f10 = (s32)anim->keys;
                     t->f14 = (s32)AllocateZeroedFrontMemory(count << 2);
@@ -1208,29 +1169,29 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
                     e->b = t;
                 }
                 if (g->b->f8 == 0) e->b->f8 = 0;
-                ((Track_139038**)e->b->f14)[i] = g->b;
+                ((BlendCurveView**)e->b->f14)[i] = g->b;
             }
             if (g->c != 0) {
                 if (e->c == 0) {
-                    Track_139038* t = CreateWeightCurve(3);
+                    BlendCurveView* t = CreateWeightCurve(3);
                     t->f8 = (s32)anim;
                     t->fC = (s32)anim->keys;
                     t->f10 = (s32)AllocateZeroedFrontMemory(count << 2);
                     e->c = t;
                 }
-                ((Track_139038**)e->c->f10)[i] = g->c;
+                ((BlendCurveView**)e->c->f10)[i] = g->c;
             }
             if (g->d != 0) {
                 if (e->d == 0) {
                     e->n = g->n;
-                    e->d = (Track_139038**)AllocateZeroedFrontMemory(g->n << 2);
+                    e->d = (BlendCurveView**)AllocateZeroedFrontMemory(g->n << 2);
                 }
                 for (s32 q = 0; q < g->n; q++) {
-                    Track_139038* v = g->d[q];
+                    BlendCurveView* v = g->d[q];
                     if (v != 0) {
-                        Track_139038* t = e->d[q];
+                        BlendCurveView* t = e->d[q];
                         if (t == 0) {
-                            Track_139038* nt = CreateWeightCurve(4);
+                            BlendCurveView* nt = CreateWeightCurve(4);
                             nt->f8 = (s32)anim;
                             nt->fC = (s32)anim->keys;
                             nt->f10 = (s32)AllocateZeroedFrontMemory(count << 2);
@@ -1238,7 +1199,7 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
                             e->d[q] = nt;
                             t = nt;
                         }
-                        ((Track_139038**)t->f10)[i] = v;
+                        ((BlendCurveView**)t->f10)[i] = v;
                     }
                 }
             }
@@ -1262,22 +1223,18 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
     PopBackMemoryMark();
 }
 
-struct Obj_139600 { u8 pad0[0x34]; f32 f34; };
-struct Elem_139600 { s32 w0; Obj_139600* p4; };
-struct Pair_139600 { f32 a; f32 b; };
-
-f32 func_0012CCC0(Obj_139600* a, s32 b);
+f32 func_0012CCC0(BlendSource* a, s32 b);
 
 void func_00139600(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals)
 {
     s32 i;
     for (i = 0; i < count; i++) {
-        Elem_139600* e = (Elem_139600*)(base + i * stride);
-        if (e->p4 == 0) {
+        BlendEntry* e = (BlendEntry*)(base + i * stride);
+        if (e->sub == 0) {
             continue;
         }
-        Pair_139600* s1 = (Pair_139600*)((u8*)e + off);
-        Pair_139600* s5 = s1;
+        BlendTimeScale* s1 = (BlendTimeScale*)((u8*)e + off);
+        BlendTimeScale* s5 = s1;
         s32 n;
         s32 bytes = count2 * 8;
         if (count2 > 0) {
@@ -1285,20 +1242,20 @@ void func_00139600(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* va
             n = count2;
             do {
                 n--;
-                s1->a = func_0012CCC0(e->p4, *v);
+                s1->a = func_0012CCC0(e->sub, *v);
                 v++;
                 s1++;
             } while (n != 0);
         }
         s1 = s5;
-        Pair_139600* prev = (Pair_139600*)((u8*)s1 + (bytes - 8));
+        BlendTimeScale* prev = (BlendTimeScale*)((u8*)s1 + (bytes - 8));
         if (count2 > 0) {
             n = count2;
             do {
                 f32 d = s1->a - prev->a;
                 prev->b = d;
                 if (d < 0.0f) {
-                    prev->b = d + e->p4->f34;
+                    prev->b = d + e->sub->length;
                 }
                 prev = s1;
                 n--;
@@ -1310,9 +1267,7 @@ void func_00139600(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* va
 
 INCLUDE_ASM(func_00139740);
 
-struct Pair_139970 { f32 a; f32 b; };
-
-s32 func_00139970(s32 count, Pair_139970* p, f32 x, f32 period, f32* out)
+s32 func_00139970(s32 count, BlendTimeScale* p, f32 x, f32 period, f32* out)
 {
     s32 i;
     for (i = 0; i < count; p++, i++) {
@@ -1336,8 +1291,6 @@ LINKER_REMNANT(func_001399F0);
 
 #include "list_iter.h"
 
-struct Node_1399F8 { u8 pad0[0x14]; f32 f14; u8 pad18[0x3C - 0x18]; Node_1399F8* f3C; };
-struct Ent_1399F8 { s32 a; s32 b; s32 c; };
 
 void func_0018D800(void* a, void* b, s32 n);
 void func_00139740(s32 a0, s32 a1, void* a2, s32 a3, s32 a4, s32 a5, void* a6);
@@ -1345,16 +1298,16 @@ void func_0012F1D8(void* node);
 
 void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
 {
-    Node_1399F8* node = (Node_1399F8*)self->f6C;
+    AnimationPlayer* node = (AnimationPlayer*)self->f6C;
     s32 i;
     s32 count;
-    Ent_1399F8* ent;
+    BlendSequence* ent;
     ListFrame frame;
 
     if (node != 0) {
         do {
-            node->f14 = node->f14 / self->f34;
-            node = node->f3C;
+            node->time = node->time / self->f34;
+            node = node->animNext;
         } while (node != 0);
     }
     CopyMemory(self->fB8, a3, a2 * a1);
@@ -1363,16 +1316,16 @@ void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
         func_00139740(a1, a2, a3, 0, 0, 0, &self->f34);
     } else {
         for (i = 0; i < count; i++) {
-            ent = (Ent_1399F8*)((u8*)self->pC0 + i * 12);
-            func_00139740(a1, a2, a3, ent->a, ent->b, ent->c, &self->f34);
+            ent = (BlendSequence*)((u8*)self->pC0 + i * 12);
+            func_00139740(a1, a2, a3, ent->stride, ent->count, (s32)ent->pairs, &self->f34);
         }
     }
-    node = (Node_1399F8*)self->f6C;
+    node = (AnimationPlayer*)self->f6C;
     if (node != 0) {
         do {
-            node->f14 = node->f14 * self->f34;
+            node->time = node->time * self->f34;
             SettleListedPoseSources(node);
-            node = node->f3C;
+            node = node->animNext;
         } while (node != 0);
     }
 }
@@ -1423,16 +1376,14 @@ void func_00139C38(void)
     BuildAlphaStatePacket(2, &g_alphaStatePacket2);
 }
 
-struct Obj_139C70 { u8 pad0[0x14]; u8* ctx; u8 pad1[0x320 - 0x18]; s32 mode; };
-
 void* func_001B5EA0(void* p);
 void func_001B5F28(void* p, void* q);
 void func_001F5C0C(void* p, s32 v, s32 n);
 void func_00152470(void* list, void* item);
 
-OwnedRecord* func_00139C70(Obj_139C70* o)
+OwnedRecord* func_00139C70(WorldListedObject* o)
 {
-    OwnedRecord* s = (OwnedRecord*)PopFreeSlot(o->ctx + 0x1B40);
+    OwnedRecord* s = (OwnedRecord*)PopFreeSlot((u8*)o->world + 0x1B40);
     if (!s) {
         return 0;
     }
@@ -1440,61 +1391,41 @@ OwnedRecord* func_00139C70(Obj_139C70* o)
     if (o->mode != 2) {
         s->owner = o;
     } else {
-        void* r = PopFreeSlot(o->ctx + 0x1B4C);
+        void* r = PopFreeSlot((u8*)o->world + 0x1B4C);
         s->extraRecord = r;
         if (r) {
             FillMemory(r, 0, 0x580);
             s->owner = o;
         } else {
-            PushFreeSlot(o->ctx + 0x1B40, s);
+            PushFreeSlot((u8*)o->world + 0x1B40, s);
             return 0;
         }
     }
-    AppendToList((u8*)o + 0x624, s);
+    AppendToList(&o->members, s);
     return s;
 }
 
-struct Sub_139D28 { u8 pad[0x108C]; struct Obj_139D28* owner; };
-struct Obj_139D28 { u8 pad[0x1]; };
 
 
 void func_00152600(void* list, void* item);
 void func_00152470(void* list, void* item);
 
-void func_00139D28(Sub_139D28* o)
+void func_00139D28(OwnedRecord* o)
 {
-    RemoveFromList((u8*)o->owner + 0x624, o);
+    RemoveFromList(&((WorldListedObject*)o->owner)->members, o);
     AppendToList(&D_002622F0, o);
 }
 
-typedef void (*VFn_139D68)(void* self);
-
-struct Obj_139D68 {
-    VFn_139D68* vtbl;
-    u8 pad04[0x80 - 4];
-    f32 f80;
-    u8 pad84[0x2C8 - 0x84];
-    u64 bits2C8;
-    s32 w2D0;
-    u8 pad2D4[0x620 - 0x2D4];
-    s32 w620;
-};
-
-struct Outer_139D68 {
-    u8 pad0[0x1CC0];
-    Obj_139D68* obj1CC0;
-};
-
-Obj_139D68* func_00139D68(Outer_139D68* self)
+WorldListedObject* func_00139D68(World* self)
 {
-    Obj_139D68* s0 = self->obj1CC0;
+    WorldListedObject* s0 = (WorldListedObject*)self->list1CC0.head;
     if (s0 != 0) {
-        u64 b = ((s0->bits2C8 & 0xFFFFFFFFF3FFFFFFull) | 0x08000000ull) & 0xFFFFFFFFCFFFFFFFull | 0x20000000ull;
-        s0->w2D0 = 0;
+        u64 b = ((s0->flags & 0xFFFFFFFFF3FFFFFFull) | 0x08000000ull) & 0xFFFFFFFFCFFFFFFFull | 0x20000000ull;
+        s0->source = 0;
         s0->f80 = 1e10f;
-        s0->bits2C8 = b;
-        s0->w620 = 0;
-        s0->vtbl[6](s0);
+        s0->flags = b;
+        s0->f620 = 0;
+        s0->desc->m02(s0);
     }
     return s0;
 }
@@ -1537,32 +1468,25 @@ void func_00152600(u8* a, void* b);
 void func_00152470(u8* a, void* b);
 void func_001243E0(void* self);
 
-struct Frame_139EC8 {
-    s32 list;
-    s32 cursor;
-    s32 link;
-    s32 prev;
-};
-
 void func_00139EC8(WorldListedObject* self)
 {
     WorldListedObject* obj = self;
-    Frame_139EC8 fr;
+    WordListFrame fr;
     s32 e = (s32)&obj->members.head;
     fr.list = e;
-    fr.cursor = e;
+    fr.link = e;
     s32 old = *(s32*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
-    fr.link = link;
+    fr.offset = link;
     *(s32*)&g_activeListFrames = (s32)&fr;
     s32 head = obj->members.head;
-    fr.cursor = head + fr.link;
+    fr.link = head + fr.offset;
     s32 node = head;
     while (node != 0) {
         DetachOwnedRecord((void*)node);
-        s32 nx = *(s32*)fr.cursor;
-        fr.cursor = nx + fr.link;
+        s32 nx = *(s32*)fr.link;
+        fr.link = nx + fr.offset;
         node = nx;
     }
     RemoveFromList(&obj->world->list1CB4, self);
@@ -1572,25 +1496,24 @@ void func_00139EC8(WorldListedObject* self)
     *(s32*)&g_activeListFrames = fr.prev;
 }
 
-struct Obj_139F80 { u8 pad0[0x380]; s32 f380; u8 pad1[0x20C]; s32 f590; u8 f594[4]; };
 
 extern s32 D_002744FC;
 s32 func_001B4688(void* x);
-void func_0013A008(Obj_139F80* self);
+void func_0013A008(WorldListedObject* self);
 
-void func_00139F80(Obj_139F80* self, void* x)
+void func_00139F80(WorldListedObject* self, void* x)
 {
     s32 r = FindAnimRecord(x);
-    self->f380 = r;
+    self->flagRecord = (AnimRecord*)r;
     if (r == 0) {
-        self->f380 = g_animRecords;
+        self->flagRecord = (AnimRecord*)g_animRecords;
     }
-    if (self->f590 == 0) {
-        self->f590 = 1;
+    if (self->colorTaken == 0) {
+        self->colorTaken = 1;
         s32 i = 0;
-        u8* dst = self->f594;
+        u8* dst = self->color;
         do {
-            u8* src = (u8*)self->f380 + i;
+            u8* src = (u8*)self->flagRecord + i;
             dst[i] = (u8)((src[4] + 1) >> 1);
             i++;
         } while (i < 4);
@@ -1601,59 +1524,36 @@ void func_00139F80(Obj_139F80* self, void* x)
 s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
 
-struct __attribute__((aligned(16))) Entry_13A008 {
-    u64 value;
-    s32 tag;
-    s32 pad;
-};
-
-struct StateB_13A008 {
-    u8 pad0[0x4];
-    u8 bits4;
-};
-
-struct StateA_13A008 {
-    u8 pad0[0x14];
-    StateB_13A008* p14;
-};
-
-struct Ctx_13A008 {
-    u8 pad0[0x380];
-    StateA_13A008* p380;
-    s32 a384;
-    u8 pad388[0x8];
-    Entry_13A008 entries[1];
-};
 
 u64 func_001B2988(void* t, s32 i, s32 j);
 
-void func_0013A008(Ctx_13A008* self)
+void func_0013A008(WorldListedObject* self)
 {
-    StateB_13A008* blk = self->p380->p14;
+    TextureTable* blk = self->flagRecord->elems;
     s32 a = 1;
     s32 s4 = 0;
-    s32 t = blk->bits4 >> 1;
+    s32 t = blk->entryCount >> 1;
     s32 b;
     s32 i;
-    Entry_13A008* e;
+    TextureRegWrite* e;
 
     while (t != 0) {
         t >>= 1;
         a <<= 1;
     }
-    a = a << (a < blk->bits4);
+    a = a << (a < blk->entryCount);
     while (a >= 0x20) {
         a >>= 1;
     }
-    b = blk->bits4;
+    b = blk->entryCount;
     if (b < a) {
-        s4 = a - blk->bits4;
+        s4 = a - blk->entryCount;
     }
-    self->a384 = a;
-    e = self->entries;
+    self->regCount = a;
+    e = self->regs;
     for (i = 0; i < b; i++) {
         e->value = GetTextureRegisterBits(blk, i, 0);
-        e->tag = 6;
+        e->reg = 6;
         if (i < s4) {
             e[1] = *e;
             e++;
@@ -1671,10 +1571,10 @@ void func_0013A3A0(WorldListedObject* self)
 {
     UpdatePlacedObject(self);
     ClearRootTries(self);
-    FlagRecord* sub = self->flagRecord;
+    AnimRecord* sub = self->flagRecord;
     Camera* g = g_camera;
     s32 hit = 0;
-    u32 flags = sub->flags;
+    u32 flags = sub->maskC;
     u32 mask = g->f21C;
 
     if ((flags & 0x10000000) != 0 || (mask & flags) == mask)
@@ -1713,7 +1613,7 @@ ASM_FUNC(func_0013A618);
 
 ASM_FUNC(func_0013A940);
 
-struct ParamBlock_13AD08 { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
+struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
 void* func_001F5C0C(void* dst, s32 value, u32 size);
@@ -1722,7 +1622,7 @@ void func_0013AD80(void* self);
 
 void func_0013AD08(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
-    ParamBlock_13AD08 blk;
+    DeferredRadiusRequest blk;
     FillMemory(&blk, 0, (u32)0x80);
     blk.count = 0xF;
     blk.fn = func_0013AD80;
@@ -1740,25 +1640,23 @@ ASM_FUNC(func_0013AD80);
 
 // NEAR: frame and loop shape right; retail tests the call condition as a 0/1 value (li a0,1 / beqzl) and orders registers differently
 
-struct Sub_13B430 { u8 pad0[0xC]; s32 next_0C; };
-struct Node_13B430 { u8 pad0[0x380]; Sub_13B430* sub_380; u8 pad1[0x630 - 0x384]; Node_13B430* next_630; };
 
 
-void func_0013A008(Node_13B430* node);
+void func_0013A008(WorldListedObject* node);
 
 void func_0013B430(s32 mask)
 {
-    Node_13B430* node;
+    WorldListedObject* node;
     s32 v;
     s32 go;
     ListFrame frame;
 
     if (mask != 0) {
-        node = (Node_13B430*)g_currentWorld->list1CB4.head;
+        node = (WorldListedObject*)g_currentWorld->list1CB4.head;
 
         if (node != 0) {
             do {
-                v = node->sub_380->next_0C;
+                v = node->flagRecord->maskC;
                 go = 0;
                 if ((v & 0x10000000) != 0 || (mask & v) == mask) {
                     go = 1;
@@ -1766,7 +1664,7 @@ void func_0013B430(s32 mask)
                 if (go) {
                     RebuildAnimRecordEntries(node);
                 }
-                node = node->next_630;
+                node = node->next;
             } while (node != 0);
         }
     }

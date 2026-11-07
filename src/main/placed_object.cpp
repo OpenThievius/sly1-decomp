@@ -981,15 +981,6 @@ void func_00123408(StateTrigger* self)
     self->id6B0 = TakeFlagTableIndex(g_flagTable);
 }
 
-// A list frame (list_iter.h's ListFrame) as three walks of this file keep it: four words, each
-// pointer handled as an int.
-struct WordListFrame {
-    s32 list;
-    s32 link;
-    s32 offset;
-    s32 prev;
-};
-
 void func_00123448(StateTrigger* self)
 {
     WordListFrame fr;
