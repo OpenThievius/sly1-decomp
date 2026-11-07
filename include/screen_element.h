@@ -75,6 +75,14 @@ struct T217D_Vt {
     void (*m19)(ScreenElement* self);                   // 0x4C: unused, 0 in every table
 };
 
+// The types of the table's slots, to define a table with.
+typedef void (*ElementFn)(ScreenElement* self);
+typedef void (*ElementIntFn)(ScreenElement* self, s32 value);
+typedef void (*ElementTextFn)(ScreenElement* self, const char* text);
+typedef f32 (*ElementTimeFn)(ScreenElement* self);
+typedef void (*ElementClockFn)(ScreenElement* self, f32* clock);
+typedef s32 (*ElementPairFn)(ScreenElement* self, ScreenElement* other);
+
 // The base element, 0x260 bytes (the four sub-elements of D_00218720's object are this big).
 struct ScreenElement {
     const T217D_Vt* vt;         // 0x00

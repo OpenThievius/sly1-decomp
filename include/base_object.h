@@ -76,6 +76,14 @@ struct Desc01 {
     void (*m1B)(BaseObject* self, void* message);  // 0x7C: receive a message
 };
 
+// A class descriptor that is only a head (tools/classes.py's `head`): the parent's descriptor
+// and the class id, no size and no methods (classes 0x92 and 0x93; the root, D_00217410, is one
+// of zeros).
+struct ClassHead {
+    const void* parent;                     // 0x00
+    s32 id;                                 // 0x04
+};
+
 struct BaseObject {
     const Desc01* desc;     // 0x00
     void* f04;              // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9

@@ -35,6 +35,16 @@ struct T2195_Vt {
     void* m9;                                                           // 0x24
 };
 
+// The types of the table's slots, to define a table with.
+typedef void (*AttachInit)(Attachment* self, PlacedObject* owner);
+typedef void (*AttachCopy)(Attachment* self, Attachment* src);
+typedef void (*AttachRelease)(Attachment* self, s32 flags);
+typedef void (*AttachGetPos)(Attachment* self, f32 t, Vec02* pos, Vec02* vec);
+typedef void (*AttachGetRot)(Attachment* self, f32 t, Mat02* rot, Vec02* vec);
+typedef void (*AttachGetValue)(Attachment* self, f32* value, f32* slope);
+typedef void (*AttachGetMatrix)(Attachment* self, Mat02* out);
+typedef f32 (*AttachGetIndexed)(Attachment* self, s32 index);
+
 // The link in the owner's list (an unaligned doubleword, as PlacedObject::link40 and the others).
 struct __attribute__((packed)) Link2195 {
     Attachment* next;            // 0x00
