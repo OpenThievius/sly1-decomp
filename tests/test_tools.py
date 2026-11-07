@@ -296,6 +296,19 @@ class ClassifyAsmTest(unittest.TestCase):
         self.assertIn("mmi", got)
         self.assertNotIn("por", got)
 
+    def test_a_vu0_instruction_in_the_compilers_frame_is_c_with_inline_assembly(self):
+        body = ["lui $v0, 0x1", "addiu $sp, $sp, -0x20", "sq $ra, 0x0($sp)", "lqc2 $vf1, 0x0($a0)",
+                "jal func_00100000", "nop", "lq $ra, 0x0($sp)", "jr $ra", "addiu $sp, $sp, 0x20"]
+        self.assertEqual(self.classify([("f", 0x100000, "code", body)])["f"][0], "inline")
+        unfreed = body[:-1] + ["nop"]  # a frame the function never frees is not the compiler's
+        self.assertEqual(self.classify([("f", 0x100000, "code", unfreed)])["f"][0], "handwritten")
+
+    def test_max_and_min_are_c_with_inline_assembly_even_in_a_leaf(self):
+        got = self.classify([("f", 0x100000, "code", ["max.s $f0, $f0, $f12", "jr $ra", "nop"]),
+                             ("s", 0x100010, "code", ["addiu $v1, $zero, 0x3C", "syscall", "jr $ra", "nop"])])
+        self.assertEqual(got["f"][0], "inline")
+        self.assertEqual(got["s"][0], "handwritten")
+
     def test_the_disassemblers_mark_counts(self):
         got = self.classify([("f", 0x100000, "handwritten", self.RET)])
         self.assertEqual(got["f"][0], "handwritten")
@@ -375,7 +388,7 @@ class OriginalAsmTableTest(unittest.TestCase):
             self.assertIn(name, self.funcs, name)
 
     def test_the_kinds_are_known(self):
-        self.assertLessEqual(set(self.table.values()), {"handwritten", "remnant"})
+        self.assertLessEqual(set(self.table.values()), {"handwritten", "inline", "remnant"})
 
     def test_no_function_is_both_original_assembly_and_c(self):
         self.assertEqual(sorted(set(self.table) & todo.finished()), [])

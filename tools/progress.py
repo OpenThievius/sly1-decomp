@@ -77,6 +77,17 @@ def original_asm(key):
     return own | {eu for us, eu in version_check.eu_names().items() if us in listed}
 
 
+def inline_asm(key):
+    """Names of the version's functions that are C with inline assembly (kind `inline` of
+    config/us/original_asm.tsv, and for PAL its counterparts and config/eu/original_asm.tsv's)."""
+    kinds = classify_asm.read_table()
+    listed = {n for n, k in kinds.items() if k == "inline"}
+    if key == "us":
+        return listed
+    own = {n for n, k in classify_asm.read_table(classify_asm.EU_TABLE).items() if k == "inline"}
+    return own | {eu for us, eu in version_check.eu_names().items() if us in listed}
+
+
 def finished(key):
     """Names of the version's functions that count as matched: exact C, or original assembly."""
     both = set(version_check.defined_in_src()) & set(classify_asm.read_table())
@@ -283,17 +294,19 @@ def readme_table(reports):
     for key, r in reports.items():
         v = versions.get(key)
         m = r["measures"]
-        asm = len(original_asm(key))
-        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code (%s exact C, %s original assembly) |" % (
+        asm = original_asm(key)
+        inline = asm & inline_asm(key)
+        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code (%s exact C, %s C with inline assembly, %s original assembly) |" % (
             v["region"], v["serial"],
             badge(v["serial"], "Code", "matched_code_percent"), badge(v["serial"], "Functions", "matched_functions"),
             format(m["matched_functions"], ","), format(m["total_functions"], ","), m["matched_code_percent"],
-            format(len(exact_c(key)), ","), format(asm, ",")))
+            format(len(exact_c(key)), ","), format(len(inline), ","), format(len(asm - inline), ",")))
     lines.append("")
     lines.append("A US function counts when the build links its C and still prints `MATCH`; a PAL function "
                  "when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`). "
-                 "Original assembly (hand-written code and the linker's leftovers, `docs/ASM_CLASSIFICATION.md`) "
-                 "counts as finished too and is shown apart from the exact C.")
+                 "Original assembly (hand-written code and the linker's leftovers) and C with inline assembly "
+                 "(compiled C around a few instructions the compiler cannot emit, `docs/ASM_CLASSIFICATION.md`) "
+                 "count as finished too and are shown apart from the exact C.")
     lines.append(END)
     return "\n".join(lines)
 

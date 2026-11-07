@@ -79,6 +79,32 @@ The MMI rule is evidence-based. Six functions that are matched in C contain `por
 compiler's 128-bit `|`, so `por` proves nothing and is in `COMPILER_EMITS`. An instruction is
 added there only together with a function that is matched in C and contains it.
 
+### inline
+
+C with inline assembly (2026-11-07). An instruction the compiler cannot emit does not by itself
+make a function hand-written: in most of these functions it sits in code GCC shaped. The function
+has the compiler's own stack frame (`addiu $sp, $sp, -N` among its first four instructions, the
+same N freed at its return), saves and restores registers, calls with filled delay slots, and
+schedules the special instruction among its loads and stores; the special instructions are 1 to
+5% of it. The same short sequences recur across hundreds of functions (`lqc2`/`sqc2` around a
+vector, the three-term dot product `vmul.xyz vaddw.x vadday.x vmaddz.x`, `vwaitq vaddq.x
+qmfc2.ni`): a library of small inline-assembly helpers, called from C. So these functions were
+written in C, as retail's bare `sqrt.s` is (include/fpu.h's `Fpu::Sqrt`, AGENTS.md).
+
+- A function the rules above would call hand-written for a VU0, MMI or system instruction, or the
+  disassembler's mark, is `inline` when it has the compiler's frame. A frameless leaf stays
+  hand-written: its shape does not tell.
+- `max.s` and `min.s` are `inline` wherever they are: no hand-written routine of the game holds
+  one, and C with a one-line helper builds them (func_001EAC68 is its C and an inline `max.s`, word
+  for word). `-ffast-math` also emits them, but it changes the bytes of functions already matched
+  in 11 of the 18 files that hold them, so retail was not built with it.
+- The toolchain's `.S` members, a game-code tail jump and stores scheduled before the frame stay
+  hand-written.
+
+On 2026-11-07: 579 functions in US (565 of game code, 14 of the libraries, 366,176 bytes), and
+three of PAL's own functions. They are counted as finished, shown apart from the exact C and the
+original assembly, until their helpers exist and their C is matched (docs/ROADMAP.md).
+
 ### remnant
 
 A run of words the linker left of a function it stripped. It counts when:
