@@ -26,7 +26,10 @@
 #include "render_frame.h"
 #include "text_reader.h"
 #include "layout_137228.h"
+#include "vu0.h"
 
+
+s32 TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
 
 void SetEffectSpawnerActiveForever();
 void SetEffectSpawnerInactive(EffectSpawner* self);
@@ -1113,13 +1116,84 @@ INCLUDE_RODATA(jtbl_0024A130);
 
 INCLUDE_ASM(func_00156718);
 
-INCLUDE_ASM(func_00156F08);
+struct AnchoredSpawn {
+    u8 pad00[0x6C];
+    PlacedObject* anchor;   // 0x6C: the object whose frame the spawn is given in
+    s32 mode;               // 0x70: 1, 2 and 3 take less of the anchor's motion
+};
+
+void TransformDirectionBetweenFrames(void* from, void* to, void* dir, Vec02* out);
+void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
+
+void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
+{
+    Vec02 motion;
+    if (self->anchor) {
+        TransformPointBetweenFrames(self->anchor, 0, pos, pos);
+        if (self->mode != 3) {
+            TransformDirectionBetweenFrames(self->anchor, 0, dir, dir);
+            if (self->mode != 2) {
+                Vec02* ref = pos;
+                if (self->mode != 1)
+                    ref = &self->anchor->v140;
+                ComputeObjectMotionInFrame(self->anchor, 0, ref, &motion, 0, 0, 0);
+                Vu0::Q(*dir) = Vu0::Add(Vu0::Q(*dir), Vu0::Q(motion));
+            }
+        }
+    }
+}
 
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
-INCLUDE_ASM(func_00157098);
+void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 
-INCLUDE_ASM(func_00157248);
+void func_00157098(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
+{
+    Vec02 dir;
+    Mat02 basis;
+    s32 q = index / ring->count;
+    s32 r = index % ring->count;
+    f32 first = ring->phase + (f32)q * ring->step;
+    f32 second = ring->out10 + (f32)r * ring->rate;
+    if (jitter != 0.0f) {
+        first += jitter * RandomFloatInRange(-0.5f, 0.5f) * ring->step;
+        second += jitter * RandomFloatInRange(-0.5f, 0.5f) * ring->rate;
+    }
+    first = WrapAngle(first + 1.57079637f);
+    second = WrapAngle(second);
+    ComputeDirectionFromAngles(&dir, second, first, RandomFloatInRange(range->lo, range->hi));
+    basis.r[2] = *axis;
+    dir.z *= flatten;
+    BuildPerpendicularPair(&basis.r[2], &basis.r[0], &g_unitXVector, &g_unitZVector);
+    Vu0::Q(*out) = Vu0::Rotate(basis, Vu0::Q(dir));
+}
+
+struct SpawnPlacement {
+    SpawnSpan range;        // 0x00: the distance from the point
+    f32 flatten;            // 0x08: scales the z of the direction
+    u8 pad0C[0x50 - 0x0C];
+    f32 jitter;             // 0x50
+    f32 life;               // 0x54: added to the start time for the end
+    f32 lo58;               // 0x58: a distance along the direction, picked between lo58 and hi5C
+    f32 hi5C;               // 0x5C
+    f32 lo60;               // 0x60: how long before now it started, picked between lo60 and hi64
+    f32 hi64;               // 0x64
+};
+
+void func_00157248(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec02* pos, Vec02* axis,
+                   Vec02* dir, f32* start, f32* end)
+{
+    Vec02 k;
+    func_00157098(ring, &self->range, axis, index, dir, self->jitter, self->flatten);
+    *start = g_gameClock[1] - RandomFloatInRange(self->lo60, self->hi64);
+    *end = *start + self->life;
+    f32 along = RandomFloatInRange(self->lo58, self->hi5C);
+    if (along != 0.0f) {
+        Vu0::Q(k) = Vu0::FromFloat(along);
+        Vu0::Q(*pos) = Vu0::MulAddX(Vu0::Q(*pos), Vu0::Q(*dir), Vu0::Q(k));
+    }
+}
 
 void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
@@ -2155,7 +2229,19 @@ void DrawC60Object(C60* self, void* arg1, void* arg2)
     DrawPlacedObject(self, arg1, f.m40);
 }
 
-INCLUDE_ASM(func_0015AA50);
+s32 IsPointInsideFaceTree(s32 tree, Vec02* point);
+
+s32 func_0015AA50(C60* self, void* point)
+{
+    Vec02 local;
+    Vec02 k;
+    if (self->f2EC < 0.0001f)
+        return 0;
+    TransformPointBetweenFrames(0, self, point, &local);
+    Vu0::Q(k) = Vu0::FromFloat(1.0f / self->f2EC);
+    Vu0::Q(local) = Vu0::MulX(Vu0::Q(local), Vu0::Q(k));
+    return IsPointInsideFaceTree(self->out2DC, &local);
+}
 
 void InitObjectCycler(ObjectCycler* self)
 {
