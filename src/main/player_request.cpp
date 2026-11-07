@@ -12,6 +12,7 @@
 #include "shapes.h"
 #include "globals.h"
 #include "game_clock.h"
+#include "c8b.h"
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
@@ -81,7 +82,9 @@ s32 func_001D3C68(s32 stride, s32 n, s32 m, char* out, ...) {
 
 ASM_FUNC(func_001D3E00);
 
-struct Obj_1D40A0 {
+// The six blend records func_001D40A0 hands to func_001399F8 (0x50 bytes each): the weight
+// of each at its start; the second record's word at +4 says whether it blends at all.
+struct TurnBlendRecords {
     f32 f0;
     u8 pad4[0x4C];
     f32 f50;
@@ -96,20 +99,10 @@ struct Obj_1D40A0 {
     s32 f190;
 };
 
-struct Sub_1D40A0 {
-    u8 pad0[0x8];
-    s32 f8;
-};
-
-struct Ctx_1D40A0 {
-    u8 pad0[0xC0];
-    Sub_1D40A0* sub;
-};
-
-void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
+void func_001399F8(Gr8B* obj, s32 a1, s32 a2, void* a3);
 void func_001D39E0(s32 a0, void* a1, s32 a2, void* a3);
 
-void func_001D40A0(TurningCollider* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12, f32 f13)
+void func_001D40A0(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, f32 f12, f32 f13)
 {
     a0->f638 = f12;
     if (a1->f54 == 0) {
@@ -125,7 +118,7 @@ void func_001D40A0(TurningCollider* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12,
     a1->fF0 = 0;
     a1->f190 = 0;
     func_001399F8(a2, 0x50, 6, a1);
-    SumBlendEntryVectors(6, a1, a2->sub->f8, &a0->f640);
+    SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
 }
 
 INCLUDE_RODATA(jtbl_0024DBD0);

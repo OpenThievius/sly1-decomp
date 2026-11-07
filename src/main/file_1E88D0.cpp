@@ -217,61 +217,54 @@ struct Vtbl_1E9EE8 {
     void (*update)(Node_1E9EE8*, s32, f32);
 };
 struct Node_1E9EE8 { Vtbl_1E9EE8* vtbl; };
-struct Iter_1E9EE8 { List01* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
-struct Begin_1E9EE8 {
-    static void Of(Iter_1E9EE8* it, List01* list)
+struct BeginNodeWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        Iter_1E9EE8* prev = (Iter_1E9EE8*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        ListFrame* prev = g_activeListFrames;
+        g_activeListFrames = it;
         it->prev = prev;
     }
 };
-struct Next_1E9EE8 {
-    static Node_1E9EE8* Of(Iter_1E9EE8* it)
+struct NextNode {
+    static Node_1E9EE8* Of(ListFrame* it)
     {
         Node_1E9EE8* obj = *(Node_1E9EE8**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct End_1E9EE8 {
-    static void Of(Iter_1E9EE8* it) { g_activeListFrames = (ListFrame*)it->prev; }
+struct EndNodeWalk {
+    static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
 };
 void func_00124EE8(Node_1E9EE8* n, f32 dt);
 void func_0012EBD8(Node_1E9EE8* n, f32 dt);
 void func_00159AD0(Node_1E9EE8* n, f32 dt);
 void func_001DBE48(World* self);
-struct Iter_1E9C78 {
-    List01* list;
-    u8** link;
-    s32 offset;
-    Iter_1E9C78* prev;
-};
-struct Begin_1E9C78 {
-    static void Of(Iter_1E9C78* it, List01* list)
+struct BeginByteWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
-        it->link = (u8**)list;
+        it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_1E9C78*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
-struct Next_1E9C78 {
-    static u8* Of(Iter_1E9C78* it)
+struct NextByte {
+    static u8* Of(ListFrame* it)
     {
-        u8* obj = *it->link;
-        it->link = (u8**)(obj + it->offset);
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
         return obj;
     }
 };
-struct End_1E9C78 {
-    static void Of(Iter_1E9C78* it)
+struct EndByteWalk {
+    static void Of(ListFrame* it)
     {
-        g_activeListFrames = (ListFrame*)it->prev;
+        g_activeListFrames = it->prev;
     }
 };
 struct Holder_1E9C78;
@@ -290,23 +283,22 @@ void func_0012EBD8(u8* n, f32 dt);
 void func_00159AD0(u8* n, f32 dt);
 void func_00159588(World* self);
 void func_001C0070(void);
-struct Iter_1EA118 { ActorList6C* list; u8* link; s32 offset; Iter_1EA118* saved; };
-struct Next_1EA118 {
-    static Actor6C* Of(Iter_1EA118* it)
+struct NextActor {
+    static Actor6C* Of(ListFrame* it)
     {
         Actor6C* obj = *(Actor6C**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct Begin_1EA118 {
-    static void Of(Iter_1EA118* it, ActorList6C* list)
+struct BeginActorWalk {
+    static void Of(ListFrame* it, ActorList6C* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_1EA118*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 void func_001E9EE8(World* self, f32 t);
@@ -635,26 +627,25 @@ void func_00126C58(Sub_1F1050* o);
 void func_0012C918(Sub_1F1050* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
 void func_001BFCD8(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 struct Node_1F0758;
-struct Iter_1F0758 { List01* list; u8* link; s32 offset; Iter_1F0758* saved; };
 void func_001249A8(WarpPage* self);
 void func_00124DF8(WarpPage* self, s32 n, void* table);
 void func_00182ED8(Node_1F0758* node);
-struct Next_1F0758 {
-    static Node_1F0758* Of(Iter_1F0758* it)
+struct NextPageNode {
+    static Node_1F0758* Of(ListFrame* it)
     {
         Node_1F0758* obj = *(Node_1F0758**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct Begin_1F0758 {
-    static void Of(Iter_1F0758* it, List01* list)
+struct BeginPageWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_1F0758*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
@@ -1403,28 +1394,28 @@ void func_001E9C78(World* self, f32 dt)
     }
     func_0015FF58(self);
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->list60);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->list60);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             func_00124EE8(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->f1B64);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1B64);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             func_0012EBD8(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->f1C24);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1C24);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             StepObjectLevelRamp(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     DispatchDelayedMessages(self);
     UpdateSoundEmitters();
@@ -1456,19 +1447,19 @@ void func_001E9E30(World* self)
 void func_001E9EE8(World* self, f32 dt)
 {
     if (dt == 0.0f) return;
-    Iter_1E9EE8 it;
-    Begin_1E9EE8::Of(&it, &self->list78);
-    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00124EE8(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, (List01*)&self->f1B70);
-    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_0012EBD8(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, (List01*)&self->f1C30);
-    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) StepObjectLevelRamp(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, &self->list78);
-    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) obj->vtbl->update(obj, 0, dt);
-    End_1E9EE8::Of(&it);
+    ListFrame it;
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_00124EE8(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
+    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
+    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    EndNodeWalk::Of(&it);
     RunQueuedCalls(self);
 }
 
@@ -1486,7 +1477,7 @@ void func_001EA0A8(World* self, f32 x)
 
 void func_001EA118(World* self)
 {
-    Iter_1EA118 it;
+    ListFrame it;
     GameClock* clock = &g_gameClock;
     UpdateWorldStepLists(self, clock->step);
     if (clock->dt != 0.0f) {
@@ -1494,17 +1485,17 @@ void func_001EA118(World* self)
         UpdateUnflaggedParts(self);
         func_00138C00(self, 0);
         ProcessColliderGroups(self, 1, clock->dt);
-        Begin_1EA118::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->vtable->update != 0) {
                 obj->vtable->update(obj, clock->dt);
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
+        g_activeListFrames = it.prev;
         func_00138C00(self, 1);
         ProcessColliderGroups(self, 6, g_gameClock.dt);
-        Begin_1EA118::Of(&it, &self->list60);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        BeginActorWalk::Of(&it, &self->list60);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->tries < 2) {
                 if (func_00129D70(obj) != 0) {
                     obj->tries++;
@@ -1513,25 +1504,25 @@ void func_001EA118(World* self)
                 }
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
-        Begin_1EA118::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        g_activeListFrames = it.prev;
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             obj->vtable->post(obj);
             if (obj->flags & 0x8000000000000000ULL) {
                 UpdateTouchingParts(obj);
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
+        g_activeListFrames = it.prev;
         RunDueDelayedScriptCalls(self, g_gameClock.dt);
         RunQueuedCalls(self);
         StepAnimators(g_gameClock.dt);
     }
     NotifyWorldActiveFollower(self);
-    Begin_1EA118::Of(&it, &self->list1B7C);
-    for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+    BeginActorWalk::Of(&it, &self->list1B7C);
+    for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
         ReleaseWorldListEntry(obj);
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
     UpdateCamera(g_camera, 1, g_gameClock.dt);
     StepWorldValueTowardTarget(self, g_gameClock.step);
 }
@@ -3503,15 +3494,15 @@ void func_001F0660(WarpPage* o) {
 
 void func_001F0758(WarpPage* self)
 {
-    Iter_1F0758 it;
+    ListFrame it;
     Node_1F0758* node;
     WarpEntry* el;
     s32 i;
 
     PostLoadPlacedObject(self);
     ResolveObjectLinks(self, 0x34, D_00275FE0);
-    Begin_1F0758::Of(&it, &self->children);
-    while ((node = Next_1F0758::Of(&it)) != 0) {
+    BeginPageWalk::Of(&it, &self->children);
+    while ((node = NextPageNode::Of(&it)) != 0) {
         ResolveAndStartObject(node);
     }
     el = self->entries;
@@ -3524,7 +3515,7 @@ void func_001F0758(WarpPage* self)
         el++;
     }
     self->selected = -1;
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
 }
 
 void func_001F0878(WarpPage* self, s32 value)

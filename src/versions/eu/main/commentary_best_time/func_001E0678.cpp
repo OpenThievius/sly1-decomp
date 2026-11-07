@@ -24,20 +24,20 @@ struct Obj_eu_1E0678 {
 };
 
 extern f32 D_eu_0027939C;
-void func_00137260(Out_1E0678* out, void* tex);
-void func_eu_001374E0(Out_1E0678* out, s32 flag);
+void func_00137260(TextLayout* out, void* tex);
+void func_eu_001374E0(TextLayout* out, s32 flag);
 void func_0015C8B8(s32 handle, f32 a, f32 b);
 void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 z);
 void func_eu_0015E7E0(void* a, void* b, s32 c, void* d);
 void func_0015C900(s32 handle);
 
-struct OutT_eu_1E0678 : Out_1E0678 {
+struct OutT_eu_1E0678 : TextLayout {
     void Tex(void* t) { func_00137260(this, t); }
     void FlagC(s32 f) { func_eu_001374E0(this, f); }
 };
 
 struct Hd_eu_1E0678 {
-    static void Draw(void* h, Out_1E0678* out, void* tbl)
+    static void Draw(void* h, TextLayout* out, void* tbl)
     {
         if (*(void**)h != 0) {
             VTab_1E0678* vt = *(VTab_1E0678**)((u8*)*(void**)h + 0x4C);

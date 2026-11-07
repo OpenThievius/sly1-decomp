@@ -2,7 +2,7 @@
 // PAL reads the format string as unsigned bytes (lbu where US has lb)
 s32 func_001E08F8(u8* s, s32* out);
 
-s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
+s32 func_001E0978(u8* at, FormatSpec* spec, s32** va)
 {
     s32 state = 0;
     u8* p = at;

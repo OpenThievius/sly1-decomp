@@ -37,7 +37,7 @@ void func_001DFEB8(Obj_11A338_eu* self)
         SetBestTimeState(self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((Cur_11A338*)g_currentWorld->f2310)->differs()) {
+        if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
             self->vt->f20(self, func_eu_001DDAB0(0xAA));
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->f38(self);

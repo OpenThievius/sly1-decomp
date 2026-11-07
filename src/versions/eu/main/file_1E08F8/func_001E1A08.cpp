@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the %c argument as an unsigned byte (lbu where US has lb)
-void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
+void func_001E1A08(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
-    switch (sp->ch) {
+    switch (sp->conv) {
     case '%':
-        AppendToOutputBuffer(c, (const char*)sp + 0x2C, 1);
+        AppendToOutputBuffer(c, (const char*)&sp->conv, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -22,18 +22,18 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         return;
     }
     case 'p':
-        sp->i1C = 8;
-        sp->ch = 'x';
-        sp->i20 = 0;
+        sp->prec = 8;
+        sp->conv = 'x';
+        sp->length = 0;
     case 'b': case 'd': case 'i': case 'o': case 'u': case 'x':
-        switch (sp->i20) {
+        switch (sp->length) {
         case 0: case 1: { u8* p = *va; *va = p + 8; v = *(u32*)p; break; }
         case 2: { u8* p = *va; *va = p + 8; v = *(u64*)p; break; }
         }
         FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
-        if (sp->i24 != 0) {
+        if (sp->f24 != 0) {
             const char* s4 = "\n";
             u8* a = *va;
             const char* s8 = ",\n";
@@ -42,17 +42,17 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
             const char* s5 = ", ";
             const char* s6 = " }";
             f32* fp = *(f32**)a;
-            if (sp->i28 >= 2) {
+            if (sp->f28 >= 2) {
                 AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
-            for (s32 i = 0; i < sp->i28; ) {
+            for (s32 i = 0; i < sp->f28; ) {
                 s32 next;
                 if (i != 0) {
                     AppendToOutputBuffer(c, s8, GetStringLength(s8));
                 }
                 next = i + 1;
                 AppendToOutputBuffer(c, s7, GetStringLength(s7));
-                for (s32 j = 0; j < sp->i24; j++) {
+                for (s32 j = 0; j < sp->f24; j++) {
                     if (j != 0) {
                         AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
@@ -61,7 +61,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
                 AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;
             }
-            if (sp->i28 >= 2) {
+            if (sp->f28 >= 2) {
                 AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
         } else {
@@ -71,7 +71,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         }
         return;
     case 'n':
-        switch (sp->i20) {
+        switch (sp->length) {
         case 0: { u8* p = *va; *va = p + 8; **(s32**)p = c->count; break; }
         case 1: { u8* p = *va; *va = p + 8; s16* q = *(s16**)p; s32 n = c->count; *q = n; break; }
         case 2: { u8* p = *va; *va = p + 8; **(s64**)p = c->count; break; }

@@ -14,7 +14,7 @@ struct Fmt_1E1028_eu {
     u8 pad2D[3];
     s32 f30;
 };
-s32 func_001E0E18(Fmt_1E1028_eu* self, Val_1E1028* v);
+s32 func_001E0E18(Fmt_1E1028_eu* self, IntegerArg* v);
 s32 func_001E0EF8(u8 c);
 
 void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
@@ -22,7 +22,7 @@ void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
     char buf[0x50];
     char pfx[0x10];
     char padc[0x10];
-    Val_1E1028 val;
+    IntegerArg val;
     s32 total;
     s32 lead;
     s32 trail;

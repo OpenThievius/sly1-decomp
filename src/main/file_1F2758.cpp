@@ -20,18 +20,19 @@
 #include "object_sub_group.h"
 #include "switched_collider.h"
 #include "animation.h"
+#include "object_gatherer.h"
 #include "asm_func.h"
 
 #include "common.h"
 
-struct Entry_1F3358 { f32 w; f32 x; f32 y; f32 z; };
-struct Blob_1F3358 { f32 lo; f32 hi; f32 scale; s32 count; Entry_1F3358 items[1]; };
+struct NoiseOctave { f32 w; f32 x; f32 y; f32 z; };
+struct NoiseBlend { f32 lo; f32 hi; f32 scale; s32 count; NoiseOctave items[1]; };
 
 f32 func_001F3250(f32 a, f32 b, f32 c);
 f32 func_001F3328(f32 a, f32 b);
 
-struct Vec4_1F38F0 { f32 a; f32 b; f32 c; f32 d; };
-struct Buf_1F38F0 { u8 pad[0xC]; u32 count; Vec4_1F38F0 items[4]; };
+struct VectorListItem { f32 a; f32 b; f32 c; f32 d; };
+struct VectorList4 { u8 pad[0xC]; u32 count; VectorListItem items[4]; };
 
 void* func_001F37D8(void* self, s32 mode, s32 flag);
 
@@ -63,26 +64,13 @@ s32 func_00128150(void* a, s32 b, void* c, s32 d);
 
 void func_00182C18(void* self);
 
-struct Node_1F2798 { u8 pad0[0xC]; void* owner0C; u8 pad1[0x84 - 0x10]; Node_1F2798* next84; };
-struct Item_1F2798 { s32 link; u8 pad0[0x3C]; };
-struct Sub_1F2798 { u8 pad0[4]; void* listA[4]; void* listB[1]; };
-struct Elem_1F2798 { u8 pad0[0x20]; Sub_1F2798* sub20; u8 pad1[0x2C]; };
-struct Ctx_1F2798 { u8 pad0[0x54]; Node_1F2798* node54; s32 count58; Elem_1F2798* elems5C; };
-struct Owner_1F2798 { u8 pad0[0x3C]; s32 count3C; u8 pad1[0x6E0 - 0x40]; Item_1F2798 items6E0[4]; Item_1F2798 items7E0[1]; u8 pad2[0x8E0 - 0x820]; Node_1F2798* head8E0; };
+struct OwnedNode { u8 pad0[0xC]; void* owner0C; u8 pad1[0x84 - 0x10]; OwnedNode* next84; };
+struct OwnerSlot { s32 link; u8 pad0[0x3C]; };
+struct SlotPointers { u8 pad0[4]; void* listA[4]; void* listB[1]; };
+struct AttachmentElement { u8 pad0[0x20]; SlotPointers* sub20; u8 pad1[0x2C]; };
+struct NodeAttachment { u8 pad0[0x54]; OwnedNode* node54; s32 count58; AttachmentElement* elems5C; };
+struct NodeOwner { u8 pad0[0x3C]; s32 count3C; u8 pad1[0x6E0 - 0x40]; OwnerSlot items6E0[4]; OwnerSlot items7E0[1]; u8 pad2[0x8E0 - 0x820]; OwnedNode* head8E0; };
 
-typedef void (*VFn_1F3D80)(void* self, void* arg);
-struct Item_1F3D80 { VFn_1F3D80* vtbl; };
-struct Obj_1F3D80 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x40 - 0x18];
-    u8 pad2[0x50 - 0x40];
-    u8 pad3[0xA0 - 0x50];
-    s32 count;
-    Item_1F3D80** arr;
-    s32 count2;
-    void** arr2;
-};
 
 void func_00137EB0(void* a, void* b);
 void func_00137E70(void* a, void* b);
@@ -92,23 +80,14 @@ void* func_0018D500(int size);
 void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
 void func_00138518(void* self);
 
-typedef void (*VFn_1F3F80)(void* self, void* arg);
-struct Item_1F3F80 { VFn_1F3F80* vtbl; };
-struct Obj_1F3F80 { u8 pad0[0x18]; void* f18; u8 pad1[0xA0 - 0x1C]; s32 count; void** arr; };
 
 void func_00182C58(void* self);
 void func_00182ED8(void* a);
 
-struct Obj_1F3810;
+void* func_001F37D8(Oscillator* self, s32 mode, s32 flag);
 
-void* func_001F37D8(Obj_1F3810* self, s32 mode, s32 flag);
 
-struct Mgr_1F18B0;
-struct Loc_1F18B0;
-struct Obj_1F18B0;
-void func_00128018(Mgr_1F18B0* a0, Obj_1F18B0* a1, void* a2, Loc_1F18B0* a3);
-
-struct Node_1F36E8 {
+struct OscillatorAxisEntry {
     s32 f0;
     s32 f4;
     u8 pad8[0x8];
@@ -122,7 +101,7 @@ void func_00182C18(BaseObject* self);
 // NEAR: the two counter increments (0x38 and 0x6D0) are computed in the reverse
 // order of retail (addiu v0 before addiu v1); no statement order tried changed it.
 
-struct Entry_001F3768 {
+struct OscillatorPlaneEntry {
     s32 a;
     u8 pad0[0x0C];
     Quad16 q10;
@@ -133,48 +112,30 @@ struct Entry_001F3768 {
     f32 f88;
 };
 
-struct Tbl_1F3EE0 { u8 pad0[0x14]; s32 f14; u8 pad1[0xA0 - 0x18]; s32 count; s32* arr; };
-
-void func_001830D8(Tbl_1F3EE0* self, Tbl_1F3EE0* other);
-s32 func_00183058(s32 a, s32 b, s32 c);
+void func_001830D8(TransformSet* self, TransformSet* other);
+BaseObject* func_00183058(BaseObject* a, World* b, s32 c);
 
 extern f32 D_0026185C;
 
 f32 func_001F31F8(s32 i);
 
-struct Node_1F0758;
-
-void func_00182ED8(Node_1F0758* node);
 
 HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
 s32 func_0015A4F0(World* host, s32 kind, s32 a2, s32 a3, s32 max, HoldingMember** out);
 
-struct Min_1F3C38 {
+struct MinOf {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
 };
 
 extern s32 (*D_00276608[6])[4];
 
-struct Ent_1F0908 { s32 a; s32 type; s32 id; s32 d; };
-struct Tbl_1F0908 { u8 pad0[0x54]; s32 count; Ent_1F0908* ents; };
-struct Slot_1F0908 { u8 pad0[0x34]; f32 f34; };
-struct SlotRef_1F0908 { Slot_1F0908* s; u8 pad[0x30]; };
-struct Obj_1F0908 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad18[0x2E8 - 0x18];
-    Tbl_1F0908* tbl;
-    u8 pad2EC[4];
-    u8 f2F0[8];
-    SlotRef_1F0908 slots[1];
-};
 
 
 #include "common.h"
 
 void func_001451F0(u32, int, int, void*, int, void*);
 void func_00125C90();
-struct Obj_1F4308 { u8 pad[0x98]; s32 state; f32 value; };
+struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
 void func_00123ED0(void*);
 
@@ -205,7 +166,6 @@ void func_00124A48(void* self);
 extern f32 D_0026185C;
 void func_001DDA20(void* a);
 
-struct Glob_1F4A30 { s32 flags; };
 s32 func_001601A0(s32 a0);
 s32 func_00160850(s32 a0);
 void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
@@ -218,15 +178,13 @@ void func_001B7968(Collider* self);
 
 void func_001B9AE0(C37* o, s32 a, s32 b, s32 c, s32 d);
 
-struct Ev_1F5868;
-s32 func_001300E8(Ev_1F5868* e, s32 kind);
 
 
 
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 
-struct Self_57E0 { void* f0; s32 f4; };
-struct Out_57E0 { s32 f0; s32 f4; Self_57E0* f8; void* fC; };
+// The offer func_001F57E0 fills: the tracker's word, the tracker, and the launch to call.
+struct TrackedNodeOffer { s32 f0; s32 f4; Rec36* f8; void* fC; };
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
@@ -234,33 +192,26 @@ void func_0018D800(void* dst, void* src, s32 count);
 
 extern u8 D_00247AD0[];
 
-struct Ctx_1F4408 {
-    u8 pad00[0x19D8];
-    s32 f19D8;
-    s32 f19DC;
-};
-
-struct Obj_1F4408 {
+// The word at 0x78 of the current level's record (G27C230): bit 0 picks the level's own fade.
+struct LevelRecordWord78 {
     u8 pad00[0x78];
     s32 f78;
 };
 
-struct Val_1F4408 { s32 unused; };
-struct Key_1F4408 { s32 unused; };
-Val_1F4408* func_00160180(Key_1F4408* k);
-void func_001F0428(Val_1F4408* v, s32 m, s32 n);
+// What StartObjectFade (func_001F0428) fades: the entry LookupEntryById gives for a level.
+struct LevelFadeEntry { s32 unused; };
+LevelFadeEntry* func_00160180(s32 k);
+void func_001F0428(LevelFadeEntry* v, s32 m, s32 n);
 void func_001F4808(ObjectSubGroup* x);
 void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
 
-struct Ctx_1F56D8;
-struct Tab_1F56D8;
-struct Ctx_1F56D8 {
+struct TrackedTargetChoice {
     u8 pad00[0x0C];
     s32 cnt;            // 0x0C
     u8 pad10[0x84];
     s32 s94;            // 0x94
 };
-struct Frame_1F56D8 {
+struct TargetLaunchFrame {
     s32 a[4];           // 0x00
     u8 pad10[0x10];
     s32 b[4];           // 0x20
@@ -272,7 +223,7 @@ struct Frame_1F56D8 {
 
 void func_00178D98(Player* self, s32 a1, void* a2, void* a3, void* a4);
 void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
-void func_00188850(Tab_1F56D8* t, void* out, f32 x);
+void func_00188850(const Vec02* t, void* out, f32 x);
 void func_00175170(Player* self, s32 a, s32 b);
 void func_00178598(Player* self, void* s2, f32 f);
 
@@ -286,10 +237,8 @@ void* func_0018D500(s32 size);
 void* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 
 
-struct Iter_1F55A8 { List01* list; u8* link; s32 offset; Iter_1F55A8* saved; };
-
-struct Next_1F55A8 {
-    static BaseObject* Of(Iter_1F55A8* it)
+struct NextListed {
+    static BaseObject* Of(ListFrame* it)
     {
         BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
@@ -297,45 +246,40 @@ struct Next_1F55A8 {
     }
 };
 
-struct Begin_1F55A8 {
-    static void Of(Iter_1F55A8* it, List01* list)
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_1F55A8*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 
 BaseObject* func_0015A418(World* a, s32 b, void* c, ContactTracker* d);
 void func_001F5868(Rec36* self, BaseObject* n);
 
-struct Obj_1F5008 {
-    u8 pad0[0x550];
-    s32 f550;
-};
 
 void func_001B93F8(Collider* self);
-s32 func_00182F40(Obj_1F5008* o, ContactTracker* self);
-s32 func_001300E8(Obj_1F5008* o, s32 kind);
+s32 func_00182F40(Collider* o, ContactTracker* self);
 s32 func_001F5C0C(void* p, s32 a, s32 b);
 s32 func_00177838(void* t, s32 a, s32 b);
 
-struct Tmp_1F5008 {
+struct GathererQuery {
     ContactTracker* self;
-    Obj_1F5008* obj;
+    ObjectGatherer* obj;
     u8 pad[0x18];
     Vec02 q20;
     Vec02 q30;
 };
 
-struct Add_1F5008 {
-    static void Of(ContactTracker* self, Obj_1F5008* p, Vec02* a, Vec02* b)
+struct AddGathererContact {
+    static void Of(ContactTracker* self, ObjectGatherer* p, Vec02* a, Vec02* b)
     {
         s32 c = self->count;
         if ((u32)c < 10) {
-            if (p->f550 != 3) {
+            if (p->state != 3) {
                 Slot36* s = &self->slots[c];
                 self->count = c + 1;
                 s->obj = (Collider*)p;
@@ -367,15 +311,15 @@ void func_001F2758(Oscillator* self)
     self->currentEntry = -1;
 }
 
-void func_001F2798(Owner_1F2798* self, s32 unused, Ctx_1F2798* ctx)
+void func_001F2798(NodeOwner* self, s32 unused, NodeAttachment* ctx)
 {
-    Node_1F2798* node = ctx->node54;
+    OwnedNode* node = ctx->node54;
     node->next84 = self->head8E0;
     self->head8E0 = node;
     node->owner0C = self;
     for (s32 i = 0; i < ctx->count58; i++) {
-        Elem_1F2798* elem = ctx->elems5C + i;
-        Sub_1F2798* sub = elem->sub20;
+        AttachmentElement* elem = ctx->elems5C + i;
+        SlotPointers* sub = elem->sub20;
         for (s32 j = 0; j < self->count3C; j++) {
             if (sub->listA[j]) {
                 *(void**)sub->listA[j] = &self->items6E0[j];
@@ -425,12 +369,12 @@ f32 func_001F3328(f32 value, f32 denominator)
     return value / (1.0f + (1.0f / denominator - 2.0f) * (1.0f - value));
 }
 
-f32 func_001F3358(Blob_1F3358* obj)
+f32 func_001F3358(NoiseBlend* obj)
 {
     f32 num = 0.0f;
     f32 den = 0.0f;
     for (s32 i = 0; i < obj->count; i++) {
-        Entry_1F3358* e = &obj->items[i];
+        NoiseOctave* e = &obj->items[i];
         f32 r = SampleSmoothNoise(e->x, e->y, e->z);
         num += e->w * r;
         den += e->w;
@@ -445,13 +389,13 @@ void func_001F36E8(Oscillator* o)
 {
     s32 n = o->entryCount;
     s32 off;
-    Node_1F36E8* node;
+    OscillatorAxisEntry* node;
 
     o->entryCount = n + 1;
     o->currentEntry = o->currentEntry + 1;
     off = n * 0xD0;
     off += 0x50;
-    node = (Node_1F36E8*)((u8*)o + off);
+    node = (OscillatorAxisEntry*)((u8*)o + off);
     node->f0 = 0;
     node->q10 = *(Quad16*)&g_unitXVector;
     if (o->pendingId >= 0) {
@@ -472,7 +416,7 @@ void func_001F3768(Oscillator* self)
 {
     s32 n6 = self->currentEntry;
     s32 idx = self->entryCount;
-    Entry_001F3768* e = (Entry_001F3768*)((u8*)self + 0x50 + 0xD0 * idx);
+    OscillatorPlaneEntry* e = (OscillatorPlaneEntry*)((u8*)self + 0x50 + 0xD0 * idx);
     n6 = n6 + 1;
     idx = idx + 1;
     self->entryCount = idx;
@@ -496,7 +440,7 @@ void* func_001F37D8(Oscillator* obj, s32 value)
     return (u8*)obj + (obj->currentEntry * 0xD0 + 0x50);
 }
 
-void* func_001F3810(Obj_1F3810* self, s32 mode)
+void* func_001F3810(Oscillator* self, s32 mode)
 {
     return GetOscillatorCurrentEntry(self, mode, 0);
 }
@@ -521,11 +465,11 @@ void func_001F38A0(void* self, f32* out)
     else *out = 1.0f / v;
 }
 
-void func_001F38F0(Buf_1F38F0* buf, f32 x, f32 y, f32 z, f32 w)
+void func_001F38F0(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
 {
     u32 n = buf->count;
     if (n < 4) {
-        Vec4_1F38F0* e = &buf->items[n];
+        VectorListItem* e = &buf->items[n];
         buf->count = n + 1;
         e->a = x;
         e->b = y;
@@ -601,7 +545,7 @@ HoldingMember* func_001F3C38(s32 id, s32 parent)
         any = 0;
         other = 0;
         n = GatherObjectsById(g_currentWorld, 0x205, 0x74, 0, 0x100, buf);
-        n = Min_1F3C38::Of(n, 0x40);
+        n = MinOf::Of(n, 0x40);
         for (i = 0; i < n; i++) {
             HoldingMember* e = buf[i];
             if (id != -1 && id == e->idB0) {
@@ -625,44 +569,44 @@ HoldingMember* func_001F3C38(s32 id, s32 parent)
     return found;
 }
 
-void func_001F3D80(Obj_1F3D80* self, void* other)
+void func_001F3D80(TransformSet* self, void* other)
 {
-    ReadBufferedRotation3(other, (u8*)self + 0x50);
-    ReadBufferedVector3(other, (u8*)self + 0x40);
+    ReadBufferedRotation3(other, &self->rot);
+    ReadBufferedVector3(other, &self->pos);
     ReadPropertyRecords(self, other);
     self->count = ReadBufferedS16(other);
-    self->arr = (Item_1F3D80**)AllocateFrontMemory(self->count << 2);
+    self->objects = (BaseObject**)AllocateFrontMemory(self->count << 2);
     for (s32 i = 0; i < self->count; i++) {
         s32 a = ReadBufferedS16(other);
         s32 b = ReadBufferedS16(other);
         s32 c = ReadBufferedS16(other);
-        Item_1F3D80* it = (Item_1F3D80*)CreateTypedRecord(a, self->f14, 0, b, c);
-        self->arr[i] = it;
-        it->vtbl[14](it, other);
+        BaseObject* it = (BaseObject*)CreateTypedRecord(a, self->world, 0, b, c);
+        self->objects[i] = it;
+        it->desc->m0A(it, other);
     }
     SkipBufferedBlock(other);
-    self->count2 = ReadBufferedS16(other);
-    self->arr2 = (void**)AllocateFrontMemory(self->count2 << 2);
-    for (s32 i = 0; i < self->count2; i++) {
-        self->arr2[i] = (void*)ReadBufferedS16(other);
+    self->idCount = ReadBufferedS16(other);
+    self->ids = (s32*)AllocateFrontMemory(self->idCount << 2);
+    for (s32 i = 0; i < self->idCount; i++) {
+        self->ids[i] = ReadBufferedS16(other);
     }
 }
 
-void func_001F3EE0(Tbl_1F3EE0* self, Tbl_1F3EE0* other)
+void func_001F3EE0(TransformSet* self, TransformSet* other)
 {
     CopyObjectData(self, other);
-    self->arr = (s32*)AllocateFrontMemory(self->count << 2);
+    self->objects = (BaseObject**)AllocateFrontMemory(self->count << 2);
     for (s32 i = 0; i < self->count; i++) {
-        self->arr[i] = CreateObjectCopy(other->arr[i], self->f14, 0);
+        self->objects[i] = CreateObjectCopy(other->objects[i], self->world, 0);
     }
 }
 
-void func_001F3F80(Obj_1F3F80* self)
+void func_001F3F80(TransformSet* self)
 {
     StartObject(self);
     for (s32 i = 0; i < self->count; i++) {
-        Item_1F3F80* item = (Item_1F3F80*)self->arr[i];
-        item->vtbl[25](item, self->f18);
+        BaseObject* item = self->objects[i];
+        item->desc->m15(item, self->parent);
         ResolveAndStartObject(item);
     }
 }
@@ -671,7 +615,7 @@ ASM_FUNC(func_001F4008);
 
 void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
-void func_001F4308(Obj_1F4308* self, f32 value) { self->value = value; self->state = 1; }
+void func_001F4308(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 
 s32 func_001F4318(void* unused, void* a, void* b)
 {
@@ -711,10 +655,10 @@ ObjectSubGroup* func_001F4378(void)
 
 void func_001F4408(s32 flag, s32 n)
 {
-    Ctx_1F4408* ctx = (Ctx_1F4408*)g_saveData;
-    Obj_1F4408* o;
+    GameProgress* ctx = g_saveData;
+    LevelRecordWord78* o;
     ObjectSubGroup* v;
-    Val_1F4408* k;
+    LevelFadeEntry* k;
     FadeRequest args;
     if (ctx->f19D8 == 5) {
         goto lm1;
@@ -722,15 +666,15 @@ void func_001F4408(s32 flag, s32 n)
     if (ctx->f19DC != 0) {
         goto l4490;
     }
-    o = (Obj_1F4408*)g_currentLevelRecord;
+    o = (LevelRecordWord78*)g_currentLevelRecord;
     if ((o->f78 & 1) != 0) {
         goto l4470;
     }
 lm1:
-    StartObjectFade((Val_1F4408*)D_00247AD0, -1, n);
+    StartObjectFade((LevelFadeEntry*)D_00247AD0, -1, n);
     return;
 l4470:
-    k = LookupEntryById((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
+    k = LookupEntryById((ctx->f19D8 << 8) | 1);
     StartObjectFade(k, 0x1BD, n);
     return;
 l4490:
@@ -877,7 +821,7 @@ void func_001F4A30(ObjectSubGroup* self)
     m.kind = 1;
     switch (self->f304) {
     case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
-    case 1: ok = ((Glob_1F4A30*)(void*)g_currentEntry)->flags >> 1;
+    case 1: ok = g_currentEntry->flags >> 1;
     fin: ok &= 1;
     }
     if (ok) {
@@ -929,20 +873,20 @@ void func_001F4F70(ContactTracker* self)
 void func_001F4FD8(ContactTracker* self) { StartPlacedObject(self); FillTrackedNodes(&self->rec); }
 
 void func_001F5008(ContactTracker* self) {
-    Tmp_1F5008 tmp;
-    Obj_1F5008* p;
+    GathererQuery tmp;
+    ObjectGatherer* p;
     UpdateCollider(self);
     self->count = 0;
     Collider* owner = self->root03();
     for (ContactRow03* g = owner->contacts->head; g; g = g->next) {
         for (Contact03* it = g->head; it; it = it->next) {
             s32 side = (owner != it->end[0].body);
-            Obj_1F5008* near = (Obj_1F5008*)it->end[side].part;
+            Collider* near = it->end[side].part;
             if (IsObjectDescendantOf(near, self)) {
                 ContactEnd03* far = &it->end[1 - side];
-                Obj_1F5008* o = (Obj_1F5008*)far->part;
+                Collider* o = far->part;
                 if (IsObjectOfKind(o, 0x41)) {
-                    p = o; Add_1F5008::Of(self, p, &far->v10, &it->v80);
+                    p = (ObjectGatherer*)o; AddGathererContact::Of(self, p, &far->v10, &it->v80);
                 }
             }
         }
@@ -950,7 +894,7 @@ void func_001F5008(ContactTracker* self) {
     FillMemory(&tmp, 0, 0x40);
     for (s32 i = 0; i < self->count; i++) {
         Slot36* s = &self->slots[i];
-        p = (Obj_1F5008*)s->obj;
+        p = (ObjectGatherer*)s->obj;
         tmp.self = self;
         tmp.obj = p;
         tmp.q20 = *(Vec02*)((u8*)p + 0x140);
@@ -981,12 +925,12 @@ void func_001F5590(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f
 
 void func_001F55A8(Rec36* self)
 {
-    Iter_1F55A8 it;
+    ListFrame it;
     BaseObject* n;
     s32 i;
 
-    Begin_1F55A8::Of(&it, &self->owner->children);
-    while ((n = Next_1F55A8::Of(&it)) != 0) {
+    BeginListWalk::Of(&it, &self->owner->children);
+    while ((n = NextListed::Of(&it)) != 0) {
         s32 t = n->desc->id;
         if (t == 0x7E || t == 0x6E) {
             if (self->found < 0x20) {
@@ -1000,19 +944,19 @@ void func_001F55A8(Rec36* self)
             AddTrackedNode(self, n);
         }
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
 }
 
-void func_001F56D8(Ctx_1F56D8* ctx, Player* self)
+void func_001F56D8(TrackedTargetChoice* ctx, Player* self)
 {
-    Frame_1F56D8 f;
+    TargetLaunchFrame f;
     ChooseBestTargetCandidate(self, ctx->s94, (u8*)ctx + 0x98, f.a, &f.f60);
     if (ctx->cnt != 0) {
         ComputeTargetArc(self, f.a, 0.0f, 0, f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
-        BuildAxisAngleMatrix((Tab_1F56D8*)&g_unitZVector, f.c, self->f638);
+        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, f.c, self->f638);
         self->desc02()->m1E(self, (Mat02*)f.c);
         SetPlayerState(self, 2, 2);
     } else {
@@ -1020,19 +964,19 @@ void func_001F56D8(Ctx_1F56D8* ctx, Player* self)
     }
 }
 
-void func_001F57E0(Self_57E0* self, void* a1, Out_57E0* out)
+void func_001F57E0(Rec36* self, void* a1, TrackedNodeOffer* out)
 {
     GetActiveSwitchedCollider();
-    s32 v = self->f4;
+    s32 v = self->f04;
     out->f8 = self;
     out->f0 = v;
     out->fC = (void*)LaunchPlayerAtTrackedNode;
-    TriggerScriptEvent(self->f0, 2, 0, 0);
+    TriggerScriptEvent(self->owner, 2, 0, 0);
 }
 
 void func_001F5840(Rec36* self, void* entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
 
-void func_001F5868(Rec36* self, Ev_1F5868* e) {
+void func_001F5868(Rec36* self, BaseObject* e) {
     if (self->found < 0x20) {
         if (IsObjectOfKind(e, 0x7E) || IsObjectOfKind(e, 0x6E) || IsObjectOfKind(e, 0x76) ||
             IsObjectOfKind(e, 0x70) || IsObjectOfKind(e, 0x71) || IsObjectOfKind(e, 0x81)) {
