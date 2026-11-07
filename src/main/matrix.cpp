@@ -4,6 +4,7 @@
 #include "switched_collider.h"
 #include "fpu.h"
 #include "shapes.h"
+#include "vu0.h"
 
 // Matrices and vectors: identity and transposition, rotations from angles and an axis, the
 // transforms of placed objects, angles back from a matrix or a vector, inversion, a projection;
@@ -18,7 +19,7 @@ f32 ClampToMagnitude(f32, f32);
 f32 Arcsine(f32 x);
 f32 ArctangentOfRatio(f32 y, f32 x);
 void InvertRigidTransform(void* a, void* b, Quad16* out);
-void MultiplyMatrices(Quad16* out, void* b, Quad16* in);
+Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in);
 void BuildBasisFromXAndZHint(void* self, void* table, void* value);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
@@ -67,11 +68,33 @@ void InitIdentityMatrix(Mat4* self)
 
 ASM_FUNC(func_00188628);
 
-INCLUDE_ASM(func_00188668);
+// out = in times m, row by row: each row of in through m (TransformMatrixByObject's product).
+Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in)
+{
+    u128 m0 = Vu0::Q(m[0]);
+    u128 m1 = Vu0::Q(m[1]);
+    u128 m2 = Vu0::Q(m[2]);
+    u128 m3 = Vu0::Q(m[3]);
+    Quad16 r[4];
+    Vu0::Q(r[0]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[0]));
+    out[0] = r[0];
+    Vu0::Q(r[1]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[1]));
+    out[1] = r[1];
+    Vu0::Q(r[2]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[2]));
+    out[2] = r[2];
+    Vu0::Q(r[3]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[3]));
+    out[3] = r[3];
+    return out;
+}
+
 
 LINKER_REMNANT(func_001886F8);
 
-INCLUDE_ASM(func_00188700);
+// The point v through m, with w as its fourth coordinate.
+void TransformByMatrixWithW(const Quad16* m, const Quad16* v, f32 w, Quad16* out)
+{
+    Vu0::Q(*out) = Vu0::Transform(*m, Vu0::Q(*v), w);
+}
 
 ASM_FUNC(func_00188740);
 
@@ -215,7 +238,13 @@ void MatrixToEulerAngles(Mat4* self, Vec3* out)
 
 ASM_FUNC(func_001890A0);
 
-INCLUDE_ASM(func_00189150);
+// out = a's transpose times b, for 3x3 matrices.
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out)
+{
+    Mat02 t;
+    Vu0::MulTransposed(t, *a, *b);
+    *out = t;
+}
 
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
 {
@@ -223,7 +252,7 @@ void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
     Quad16 res[4];
 
     InvertRigidTransform(self + 0x30, self, tmp);
-    MultiplyMatrices(res, arg, tmp);
+    MultiplyMatrices(res, (Quad16*)arg, tmp);
     out[0] = res[0];
     out[1] = res[1];
     out[2] = res[2];

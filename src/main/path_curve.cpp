@@ -6,6 +6,7 @@
 #include "path_curve.h"
 #include "shapes.h"
 #include "placed_object.h"
+#include "vu0.h"
 
 // What the nearest-time search (func_001EB168) passes its measure: the curve and the two points
 // of the segment MeasurePathCurveDistance measures against (FindPathCurveNearestTime,
@@ -52,6 +53,7 @@ void TransformMatrixByObject(void* self, void* arg, Quad16* out);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(u32 n);
 void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
+void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, s32 e, s32 f, f32 x);
 void FindLocalMinimum(void* fn, f32 f12, f32 f13, f32 f14, f32 f15, void* ctx, void* out, s32 a3);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
@@ -397,7 +399,25 @@ void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
     }
 }
 
-INCLUDE_ASM(func_0014E710);
+// The segment from key idx to the next as a curve through the matrix m: its two points and
+// their tangents, drawn in the color at a4.
+void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, s32 a3, void* a4)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 ta;
+    Vec02 tb;
+    if (idx != self->count - 1) {
+        s32 next = idx + 1;
+        f32 dt = self->times[next] - self->times[idx];
+        Vu0::Q(a) = Vu0::Transform(*m, Vu0::Q(((Vec02*)self->points)[idx]), 1.0f);
+        Vu0::Q(b) = Vu0::Transform(*m, Vu0::Q(((Vec02*)self->points)[idx + 1]), 1.0f);
+        Vu0::Q(ta) = Vu0::Rotate(*m, Vu0::Q(((Vec02*)self->outTan)[idx]));
+        Vu0::Q(tb) = Vu0::Rotate(*m, Vu0::Q(((Vec02*)self->inTan)[idx + 1]));
+        U32P color = *(U32P*)a4;
+        DrawProjectedCurve(&a, &ta, &b, &tb, &color, a3, 1, dt);
+    }
+}
 
 INCLUDE_ASM(func_0014E828);
 

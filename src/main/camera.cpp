@@ -358,7 +358,23 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
     ComputePolarOffset(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
 
-INCLUDE_ASM(func_00143180);
+// One step of a damped spring pulling pos toward target: the velocity gains (target - pos) * k
+// + vel * damp over dt, and pos moves by the velocity over dt. With f224 set, pos is placed at
+// target at rest.
+void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt)
+{
+    if (self->f224 != 0) {
+        *pos = *target;
+        Vu0::Q(*vel) = Vu0::Zero();
+        return;
+    }
+    Vec02 d;
+    Vec02 acc;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*target), Vu0::Q(*pos));
+    Vu0::Q(acc) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(k), Vu0::Q(*vel), Vu0::Scalar(damp));
+    Vu0::Q(*vel) = Vu0::MulAddX(Vu0::Q(*vel), Vu0::Q(acc), Vu0::Scalar(dt));
+    Vu0::Q(*pos) = Vu0::MulAddX(Vu0::Q(*pos), Vu0::Q(*vel), Vu0::Scalar(dt));
+}
 
 INCLUDE_ASM(func_00143208);
 
@@ -864,7 +880,26 @@ void RequestPlainCameraSnap(void* p)
     RequestCameraSnap((Camera*)p, 0);
 }
 
-INCLUDE_ASM(func_00145610);
+extern const Vec02 D_00248D30;
+void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+
+// The view ray through the screen point (x, y): from the camera 100 units along the direction
+// (1, -x f1F0, y f1F4) in its frame, the point of it nearest p; v230 is that point less p.
+void func_00145610(Camera* self, Vec02* p, f32 x, f32 y)
+{
+    Vec02 dir;
+    Vec02 far;
+    f32 t;
+    f32 dist;
+    self->v240 = D_00248D30;
+    dir.x = 1.0f;
+    dir.y = -x * self->f1F0;
+    dir.z = y * self->f1F4;
+    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->f40), Vu0::Rotate(self->f80, Vu0::Q(dir)), Vu0::Scalar(100.0f));
+    MeasurePointToLine(p, (Vec02*)self->f40, &far, &t, &dist);
+    Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->f40), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
+    Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
+}
 
 INCLUDE_ASM(func_00145718);
 
