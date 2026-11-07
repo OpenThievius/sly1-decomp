@@ -618,6 +618,7 @@ func_00126A48	func_00126B68	match
 func_00126AB0	func_00126BD0	match	
 func_00126BC0	func_00126CE0	match	
 func_00126C58	func_00126D78	match	
+func_00126D60	func_00126E80	match	
 func_00126F78	func_00127098	match	
 func_00127048	func_00127168	match	
 func_00127378	func_00127498	match	
@@ -1181,6 +1182,7 @@ func_0014AD70	func_0014B048	match	version-specific
 func_0014ADE0	func_0014B0B8	match	version-specific
 func_0014AEA0	func_0014B178	match	version-specific
 func_0014AF10	func_0014B1E8	match	
+func_0014AF38	func_0014B210	match	version-specific
 func_0014B0C0	func_0014B370	match	
 func_0014B3E0	func_0014B690	match	
 func_0014B550	func_0014B800	match	
