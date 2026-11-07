@@ -10,6 +10,7 @@
 #include "vu0.h"
 #include "ramp_profile.h"
 #include "placed_object.h"
+#include "switched_collider.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
 extern void SetCameraFogStrength(void*);
@@ -362,7 +363,53 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
 
 INCLUDE_ASM(func_00143180);
 
-INCLUDE_ASM(func_00143208);
+// The camera func_00143208 springs towards the target's offset: the spring's two vectors
+// (+0x250/+0x260 and +0x270/+0x280) and the record func_00143148 reads.
+struct Spring_00143208 {
+    u8 pad0[0x250];
+    Vec02 v250;             // 0x250
+    Vec02 v260;             // 0x260
+    Vec02 v270;             // 0x270
+    Vec02 v280;             // 0x280
+};
+
+struct Record_00143208 {
+    u8 pad0[0x10];
+    Vec02 v10;              // 0x10
+    u8 pad20[0x40 - 0x20];
+    Vec02 v40;              // 0x40
+};
+
+extern Player* g_player;
+extern const Vec02 D_00248D30;
+void SpringCameraVector(Spring_00143208* self, Vec02* a, Vec02* b, const Vec02* target, f32 x, f32 y, f32 dt);
+void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
+
+void func_00143208(Spring_00143208* self, void* target, Record_00143208* rec, f32 dt)
+{
+    Vec02 offset;
+
+    ComputeOffsetBehindTarget(self, target, (Target_00143148*)rec, &offset);
+    if (target == g_player) {
+        switch (g_player->f268C) {
+        case 0:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+            SpringCameraVector(self, &self->v270, &self->v280, &D_00248D30, 5.0f, -3.5f, dt);
+            break;
+        case 1:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 1.0f, -10.0f, dt);
+            SpringCameraVector(self, &self->v270, &self->v280, &self->v270, 0.0f, -10.0f, dt);
+            break;
+        case 2:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+            break;
+        }
+    } else {
+        SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+        SpringCameraVector(self, &self->v270, &self->v280, &D_00248D30, 5.0f, -3.5f, dt);
+    }
+    Vu0::Q(rec->v40) = Vu0::Add(Vu0::Q(rec->v10), Vu0::Q(self->v250));
+}
 
 // What func_001433E0 resets: the offset ComputeOffsetBehindTarget gives (+0x250) and three
 // vectors after it.
@@ -893,7 +940,6 @@ void RequestPlainCameraSnap(void* p)
 INCLUDE_ASM(func_00145610);
 
 INCLUDE_ASM(func_00145718);
-
 s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];
