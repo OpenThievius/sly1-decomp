@@ -35,7 +35,7 @@ func_001CB618	InitItemKeeper	slot 0 of the 0x89 class: after the base set-up it 
 func_001CB7A0	FindWantedItems	slot 15 of the 0x89 class: looks each wanted id of both groups up with func_0015A448 and appends what it finds to the group (setting the owner for the first group)
 func_001CB6A8	AddOwnedWantedId	appends a value to the wanted list of the 0x89 object's first group (0x58 block) while it has fewer than 16
 func_001CB6D0	AddListedWantedId	appends a value to the wanted list of the 0x89 object's second group (0xE0 block) while it has fewer than 16
-D_00263E30	g_timeoutFired	defined in 00178000.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
+D_00263E30	g_timeoutFired	defined in file_1793C0.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
 D_00263E04	g_timeoutLimit	the float 3.0 that UpdateCountdown compares the time elapsed since the object's start time against
 D_00263E08	g_countdownTable	the three-entry table StartCountdown hands to func_00124DF8
 func_00146240	SetOffsetScale	Stores a new scale in the object only when it differs, then re-places the tag-6 entry through func_00146298.
