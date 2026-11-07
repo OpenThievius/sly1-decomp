@@ -2057,7 +2057,78 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
     }
 }
 
-INCLUDE_ASM(func_001278A8);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+
+void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum)
+{
+    PlacedObject* chain[16];
+    Vec02 V;
+    Vec02 W;
+    Vec02 d;
+    Vec02 c1;
+    Vec02 t;
+    Vec02 c2;
+    Vec02 c3;
+    u128 zero = Vu0::Zero();
+    if (vel != 0) {
+        Vu0::Q(*vel) = zero;
+    }
+    if (spin != 0) {
+        Vu0::Q(*spin) = zero;
+    }
+    Vu0::Q(V) = zero;
+    Vu0::Q(W) = zero;
+    PlacedObject* o = self;
+    PlacedObject** p = chain;
+    while (o != top) {
+        *p = o;
+        p++;
+        Rec2195_224* rec = o->f224;
+        if (rec != 0 && (rec->fB0 & 0xC)) {
+            o = (PlacedObject*)rec->p60;
+        } else {
+            o = (PlacedObject*)o->parent;
+        }
+    }
+    PlacedObject* prev = 0;
+    for (p--; p >= chain; p--) {
+        o = *p;
+        if (vel != 0 || velSum != 0 || spin != 0) {
+            TransformDirectionBetweenFrames(prev, top, &o->v160, &d);
+            Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(d));
+        }
+        if (spinSum != 0 || spin != 0) {
+            TransformDirectionBetweenFrames(prev, top, &o->v180, &d);
+            Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Q(d));
+        }
+        if (vel != 0 || spin != 0) {
+            Vec02* at = p > chain ? &p[-1]->v140 : origin;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*at), Vu0::Q(o->v140));
+            TransformDirectionBetweenFrames(0, top, &d, &d);
+            Vu0::Q(c1) = Vu0::Cross(Vu0::Q(V), Vu0::Q(d));
+            if (vel != 0) {
+                Vu0::Q(*vel) = Vu0::Add(Vu0::Q(*vel), Vu0::Q(c1));
+                TransformDirectionBetweenFrames(prev, top, &o->v150, &t);
+                Vu0::Q(*vel) = Vu0::Add(Vu0::Q(*vel), Vu0::Q(t));
+            }
+            if (spin != 0) {
+                Vu0::Q(c2) = Vu0::Cross(Vu0::Q(V), Vu0::Q(c1));
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(c2));
+                Vu0::Q(c3) = Vu0::Cross(Vu0::Q(W), Vu0::Q(d));
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(c3));
+                TransformDirectionBetweenFrames(prev, top, &o->v170, &t);
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(t));
+            }
+        }
+        prev = o;
+    }
+    if (velSum != 0) {
+        *velSum = V;
+    }
+    if (spinSum != 0) {
+        *spinSum = W;
+    }
+}
 
 INCLUDE_ASM(func_00127B20);
 

@@ -140,7 +140,7 @@ struct PlacedObject : BaseObject {
     Vec02 v140;             // 0x140
     Vec02 v150;             // 0x150: slot 32
     Vec02 v160;             // 0x160: slot 33
-    u8 pad170[0x180 - 0x170];
+    Vec02 v170;             // 0x170: added to the spin through the frames (func_001278A8)
     Vec02 v180;             // 0x180: crossed with the arm to the pivot (func_001C5148)
     Vec02 v190;             // 0x190
     Mat02 m1A0;             // 0x1A0
