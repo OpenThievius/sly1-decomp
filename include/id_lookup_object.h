@@ -7,11 +7,16 @@
 
 #include "base_object.h"
 
+struct PlacedObject;
+
 // A growing list of s32 (func_0015FF88 appends to it).
 struct FoundList {
     u8 pad0[8];
     s32 count;              // 0x08
-    s32* items;             // 0x0C
+    union {
+        s32* items;         // 0x0C
+        PlacedObject** objects; // (func_0015F7D8, func_0015F8B0, func_0015F9A0)
+    };
 };
 
 // 0x87: eight item ids (count at 0x34); func_0015FF88 (slot 16) looks each up in the level

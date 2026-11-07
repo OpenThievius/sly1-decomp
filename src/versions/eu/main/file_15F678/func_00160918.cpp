@@ -4,5 +4,5 @@ extern s32 D_eu_00263710;
 void func_00160918(void)
 {
     ResetGameSession();
-    StartObjectFade((Obj_160918*)((u8*)&D_00247AB0 + D_eu_00263710 * 32), -1, 0);
+    StartObjectFade((void*)((u8*)&D_00247AB0 + D_eu_00263710 * 32), -1, 0);
 }

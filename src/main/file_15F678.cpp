@@ -2,6 +2,7 @@
 #include "common.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
+#include "world.h"
 #include "animation.h"
 #include "sound_record.h"
 #include "asm_func.h"
@@ -15,58 +16,41 @@
 #include "vertex_batch.h"
 #include "shapes.h"
 
-struct Owner_15F678
-{
-    u8 pad[0x1ED0];
-    s32 count;
-    void** items;
-};
 
 void func_0015FA58(void* self);
 void func_0015FD78(void* self);
 
-struct Sub_15F9A0 { u8 pad0[8]; s32 count; void** items; };
-struct Obj_15F9A0 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; };
 
 void func_0015F930(void* list, void* base, void* item);
 void func_0015F710(void* self, void* value);
 
-struct Class_0015FB28 { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
-struct Node_0015FB28 { Class_0015FB28* cls; u8 pad0[0x18]; Node_0015FB28* next; u8 pad1[0x14]; Node_0015FB28* child; };
+struct VisitClass { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
+struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14]; VisitNode* child; };
 
 
-struct Elem_15F6C0 { u8 pad[0x54]; void* owner; Elem_15F6C0* next; };
-struct Owner_15F6C0 { u8 pad[0x60]; Elem_15F6C0* head; };
 
 void func_00152730(void* dst, void* src);
 
-struct Item_15F7D8 { u8 pad[0x54]; void* f54; };
-struct Group_15F7D8 { u8 pad[8]; s32 count; Item_15F7D8** items; };
 
 s32 func_00182FC8(void* p);
 void func_0015F6C0(void* ctx, void* a, void* b);
 
-struct Item_15F8B0 { u8 pad[0x6C]; s32 count6C; void* items70[4]; };
-struct Group_15F8B0 { u8 pad[8]; s32 count; Item_15F8B0** items; };
 
-void func_0015F7D8(void* self, Group_15F8B0* group);
+void func_0015F7D8(void* self, FoundList* group);
 
-struct Items_15F930
+struct CountedArray
 {
     s32 count;
 };
 
 void* func_001F5B08(void* dst, void* src, s32 bytes);
 
-struct Obj_15FA58 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; u8 pad2[0x2C8 - 0x74]; u64 flags2C8; };
-struct Self_15FA58 { u8 pad0[0x1ED0]; s32 count; Obj_15FA58** items; };
 
 void func_0015F7D8(void* self, void* item);
 
-struct Obj_15FBB8;
 extern u8 D_00248D30[];
 
-void func_001BF788(Obj_15FBB8* self, s32 n);
+void func_001BF788(void* self, s32 n);
 void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
 void func_00182C58(BaseObject* self);
@@ -75,38 +59,32 @@ s32 func_0015A480(World* world, s32 item, void* c);
 void func_0015F8B0(World* world, FoundList* sub);
 
 
-struct Iter_15F710 {
+struct LinkListWalk {
     List01* list;
     u8* link;
     s32 offset;
-    Iter_15F710* prev;
+    LinkListWalk* prev;
 };
 
-struct Node_15F710 {
-    u8 pad0[0x54];
-    Node_15F710* f54;
-    u8 pad58[8];
-    List01 list;
-};
 
-void func_00152600(List01* list, Node_15F710* node);
-void func_0015F678(void* self, Node_15F710* node);
+void func_00152600(List01* list, PlacedObject* node);
+void func_0015F678(void* self, PlacedObject* node);
 
-struct Begin_15F710 {
-    static void Of(Iter_15F710* it, List01* list)
+struct BeginLinkListWalk {
+    static void Of(LinkListWalk* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_15F710*)g_activeListFrames;
+        it->prev = (LinkListWalk*)g_activeListFrames;
         g_activeListFrames = (ListFrame*)it;
     }
 };
 
-struct Next_15F710 {
-    static Node_15F710* Of(Iter_15F710* it)
+struct NextInLinkList {
+    static PlacedObject* Of(LinkListWalk* it)
     {
-        Node_15F710* obj = *(Node_15F710**)it->link;
+        PlacedObject* obj = *(PlacedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -116,7 +94,7 @@ void* func_00160110();
 
 s32* func_00160810();
 
-struct Refs_160D00
+struct RefCounted
 {
     u8 pad[4];
     s32 refs;
@@ -126,9 +104,9 @@ struct Refs_160D00
 void func_001612E8(void* self, s32 a1, s32 a2);
 
 
-struct Entry_001601D8 { u8 pad0[0x28]; s32 f28; };
+struct EntryFlags { u8 pad0[0x28]; s32 f28; };
 
-Entry_001601D8* func_00160110(void* a0);
+EntryFlags* func_00160110(void* a0);
 
 s32 func_001602A0(void);
 
@@ -141,17 +119,16 @@ void func_00140F48(u8* p);
 void func_00140D90(u8* p);
 void func_00160880(void);
 
-struct Vec3_162680 { f32 x; f32 y; f32 z; };
 
 void* func_0018D500(s32 size);
 
-struct Item_162810 { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
+struct RefItem { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
 
-struct Owner_162810
+struct RefOwner
 {
     u8 pad0[0xC];
     s32 count;
-    Item_162810* items;
+    RefItem* items;
     u8 pad1[0x50 - 0x14];
     s32 capacity;
     void** refs;
@@ -159,25 +136,14 @@ struct Owner_162810
 
 void* func_001F5C0C(void* p, s32 value, s32 size);
 
-struct Counter_160CE8
+struct Counter
 {
     u8 pad[4];
     s32 count;
 };
 
-struct Counter_160CF0
-{
-    u8 pad[4];
-    s32 count;
-};
 
-struct Ctx_160D10
-{
-    u8 pad[0x235C];
-    s32 bits;
-};
-
-extern Ctx_160D10* D_00275710;
+extern World* D_00275710;
 
 void func_0018D778(void);
 
@@ -185,7 +151,7 @@ void func_00162508(void* self);
 void func_00188B08(void* a, void* b, void* c);
 void func_00188B48(void* a, void* b, void* c);
 
-struct Obj_00161BB0 {
+struct ColoredVertexBatch {
     u8 pad0[0xF8];
     s32 f0F8;
 };
@@ -195,10 +161,9 @@ void func_001626A8(void* self, u32* value);
 
 KeyedEntry* func_001600A0(void);
 
-struct __attribute__((packed)) Word_269984 { u32 value; };
 
 extern u8 D_00261EF0[];
-extern Word_269984 D_00269984;
+extern U32P D_00269984;
 extern s32 D_00262C64;
 extern s32 D_002623CC;
 
@@ -215,7 +180,7 @@ void func_001612E8(void* self, s32 a1, s32 a2);
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
-struct Rec_160E80 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
+struct ClearedRecord { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
 
 void func_001613C0(void* self, s32 a, s32 b, s32 c);
 
@@ -223,16 +188,16 @@ void func_001613C0(void* self, s32 a, s32 b, s32 c);
 
 void func_00160918();
 
-typedef void* (*Fill_161B80)(void*,s32,s32);
+typedef void* (*MemoryFillFn)(void*,s32,s32);
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
-struct Ctx_161028 { u8 pad0[4]; s32 count; u8* base; };
-struct Entry_161028 { s16 k0; s16 k1; u8 pad[4]; Entry_161028* next; };
-struct Holder_161028 { u8 pad0[0x14]; Entry_161028* head; };
-struct Elem_161028 { Holder_161028* holder; u8 pad[8]; };
+struct KeyedPointSet { u8 pad0[4]; s32 count; u8* base; };
+struct KeyedEdge { s16 k0; s16 k1; u8 pad[4]; KeyedEdge* next; };
+struct EdgeHolder { u8 pad0[0x14]; KeyedEdge* head; };
+struct ContactHit { EdgeHolder* holder; u8 pad[8]; };
 
 void func_0018D608(void);
 u8* func_0018D658(s32 size);
@@ -262,8 +227,8 @@ void func_001EE3F0(void* obj, void* text);
 void func_001A7E90(void* self);
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
-struct Key_160948 : IdentityKey {
-    s32 Same(Key_160948* o)
+struct SessionKey : IdentityKey {
+    s32 Same(SessionKey* o)
     {
         if (this == o) {
             return 1;
@@ -278,28 +243,28 @@ struct Key_160948 : IdentityKey {
     }
 };
 
-struct Frame_160948;
+struct PlayerListWalk;
 
-struct Lst_160948 {
+struct AnimationPlayerList {
     void* head;
     s32 pad4;
     s32 next_off;
 };
 
-struct Frame_160948 {
+struct PlayerListWalk {
     void* list;
     void* cursor;
     s32 next_off;
-    Frame_160948* prev;
-    Frame_160948(Lst_160948* l)
+    PlayerListWalk* prev;
+    PlayerListWalk(AnimationPlayerList* l)
     {
         list = l;
         cursor = l;
         next_off = l->next_off;
-        prev = (Frame_160948*)g_activeListFrames;
+        prev = (PlayerListWalk*)g_activeListFrames;
         g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_160948() { g_activeListFrames = (ListFrame*)prev; }
+    ~PlayerListWalk() { g_activeListFrames = (ListFrame*)prev; }
     void* Next()
     {
         void* n = *(void**)cursor;
@@ -308,12 +273,12 @@ struct Frame_160948 {
     }
 };
 
-struct Sys_160948 { u8 pad0[0x30]; s32 f30; };
-extern Sys_160948 D_00275BC0;
-extern Key_160948 D_00247AB0;
+struct ElementStackState { u8 pad0[0x30]; s32 f30; };
+extern ElementStackState D_00275BC0;
+extern SessionKey D_00247AB0;
 extern s32 D_00275F84;
 
-Key_160948* func_00160180(s32 key);
+SessionKey* func_00160180(s32 key);
 void func_00160CC8(void* p);
 void func_001F0428(void* a, s32 b, s32 c);
 void func_001C0760(s32 flag);
@@ -332,39 +297,34 @@ extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* s, s32 n);
 
-struct Sys_1608E0;
-void func_00140D90(Sys_1608E0* p);
+void func_00140D90(void* p);
 
 extern u8 D_00261420[];
 
-struct Call_160DA0;
 
 extern u8 D_00261EF0[];
 extern u8 D_00261420[];
 extern u8 D_0026FF68[];
 
-void func_001DDAD0(Call_160DA0* x);
+void func_001DDAD0(void* x);
 void func_001BE708(void);
-void func_001EFFA0(Call_160DA0* dst, FadeRequest* args, s32 count);
-void func_00140ED0(Call_160DA0* r);
-void func_00194D30(Call_160DA0* self, s32 a, s32 b);
-void func_00151E20(Call_160DA0* self, f32 amount);
+void func_001EFFA0(void* dst, FadeRequest* args, s32 count);
+void func_00140ED0(void* r);
+void func_00194D30(void* self, s32 a, s32 b);
+void func_00151E20(void* self, f32 amount);
 
 
-struct Key_1602A0;
-u32* func_00160810(Key_1602A0* key);
+u32* func_00160810(void* key);
 
-struct Obj_160578 { s32 f0; };
 
 extern u8 D_00247AD0[];
 
-void func_001F0428(Obj_160578* obj, s32 m, s32 n);
+void func_001F0428(void* obj, s32 m, s32 n);
 void func_0018E4F0(s32 slot, u32 n);
 
-struct Obj_160918 { u8 pad[0]; };
 
 void func_00160880(void);
-void func_001F0428(Obj_160918* obj, s32 value, s32 count);
+void func_001F0428(void* obj, s32 value, s32 count);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -375,44 +335,27 @@ void func_001604B8(s32 mode);
 
 // EXACT: self->block store ahead of self->f20 store.
 
-struct Pkt_1639E8;
-struct Hdr_1639E8
+struct MorphTargetHeader
 {
     u16* p;
     s32 count;
 };
-struct Vec3_1639E8
-{
-    f32 x;
-    f32 y;
-    f32 z;
-};
-struct Ent_1639E8
-{
-    u16* idx;
-    s32 pad;
-};
-struct Self_1639E8
-{
-    u8 pad00[0x40];
-    s32 f40;
-};
 // Built at startup: the compiler's initialiser and constructor for this file are func_00167D20
 // and func_00167D48 (config/us/generated.tsv).
-struct Rgba_1639E8
+struct ColorWord
 {
     union {
         struct { u8 r, g, b, a; };
         u32 rgba;
     };
-    Rgba_1639E8(u32 v) { rgba = v; }
+    ColorWord(u32 v) { rgba = v; }
 };
 
 // The file's .data, in retail's order.
 char D_002623D0[8] = "<none>";
 u8 D_002623D8[4] = { 0 };
 s32 D_002623DC = 0;
-Rgba_1639E8 D_002623E0(0x80101010);
+ColorWord D_002623E0(0x80101010);
 s32 D_002623E4 = 1;
 s32 D_002623E8[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
 s32 D_00262400[6] = { -1, 0, 4, 8, 12, 0 };
@@ -425,22 +368,22 @@ extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
 
-void func_001EE5C8(Pkt_1639E8* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 void* func_001F5C0C(void* p, s32 value, s32 size);
 void func_00152980(PacketWriter* f, s32 size);
 void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
 void func_00161708(PacketWriter* f, s32 a, u64 b);
 void func_00161278(PacketWriter* f, s32 n);
-void func_001EE668(Pkt_1639E8* s, s32 a, s32 b, void* data, s32 flags);
+void func_001EE668(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
 void func_001528E0(PacketWriter* f);
 void func_001615F0(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001EE4C0(Pkt_1639E8* s, u32* src);
-void func_001EE528(Pkt_1639E8* s, s32 value);
-void func_001EE3F0(Pkt_1639E8* s, void* data);
-void func_001EE480(Pkt_1639E8* s);
-void func_00163990(s32 mode, Pkt_1639E8* obj);
+void func_001EE4C0(PacketWriter* s, u32* src);
+void func_001EE528(PacketWriter* s, s32 value);
+void func_001EE3F0(PacketWriter* s, void* data);
+void func_001EE480(PacketWriter* s);
+void func_00163990(s32 mode, PacketWriter* obj);
 
-struct Zero_1639E8
+struct QuadClear
 {
     static void Clear(u32* q)
     {
@@ -448,7 +391,7 @@ struct Zero_1639E8
     }
 };
 
-struct Clamp_160B28 {
+struct PercentClamp {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
         if (v < lo) return lo;
@@ -468,18 +411,18 @@ public:
     void AddGifImageTag(s32 count);
 };
 
-struct Self_162508 { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
+struct FlushedVertexBatch { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
 
 extern PacketWriter D_002622A8;
 extern u8 D_000018C0[];
 
 void func_00166658(void);
 s32 func_001EE560(PacketWriter* s, s32 a, s32 b, s32 c);
-void func_00161B80(Self_162508* self);
-void func_00161C00(Self_162508* self);
-void func_00161F70(Self_162508* self);
+void func_00161B80(FlushedVertexBatch* self);
+void func_00161C00(FlushedVertexBatch* self);
+void func_00161F70(FlushedVertexBatch* self);
 
-struct Copy_162508 {
+struct WordCopy {
     static void Words(s32* dst, s32* src, s32 n)
     {
         s32 rem = n & 3;
@@ -503,89 +446,86 @@ struct Copy_162508 {
     }
 };
 
-struct __attribute__((packed)) Rec_1626D8 {
+struct __attribute__((packed)) BatchVertexWords {
     u64 q0;
     u64 q8;
     u64 q10;
     u64 q18;
     s32 f20;
     s32 value;
-    Rec_1626D8() {}
+    BatchVertexWords() {}
 };
 
-struct Obj_1626D8 {
+struct AppendVertexBatch {
     u8 pad0[0xF8];
     u8* pF8;
-    Rec_1626D8 cur;
+    BatchVertexWords cur;
     s32 count;
-    Rec_1626D8 recs[1];
+    BatchVertexWords recs[1];
 };
 
-void func_0018D800(Rec_1626D8* dst, const void* src, s32 size);
-void func_00162508(Obj_1626D8* self);
-void func_00161BB0(Obj_1626D8* self, u8* value);
+void func_0018D800(BatchVertexWords* dst, const void* src, s32 size);
+void func_00162508(AppendVertexBatch* self);
+void func_00161BB0(AppendVertexBatch* self, u8* value);
 
-struct Pair_161C00 { s32 f0; u8* f4; };
-struct Q_161C00 { u8 pad[0x18]; s32 f18; };
-struct P_161C00 { u8 pad[4]; u8 f4[4]; u8 pad2[0x10]; s32 f18; Pair_161C00* f1C; u8 pad3[4]; Q_161C00* f24; };
-struct V3_161C00 { f32 x; f32 y; f32 z; };
-struct V4_161C00 { V3_161C00 v; f32 w; };
-struct Elem_161C00 { V3_161C00 v; u8 pad[0xC]; u8 rgba[4]; f32 f1C; f32 f20; s32 f24; };
-struct Self_161C00 {
+struct DrawMesh;
+// A point and a fourth word, as the vertex packets write them.
+struct VifPoint { Vec3 v; f32 w; };
+struct UnlitVertex { Vec3 v; u8 pad[0xC]; u8 rgba[4]; f32 f1C; f32 f20; s32 f24; };
+struct UnlitVertexBatch {
     u8 pad[0x80];
     f32 f80;
     u8 pad2[0xF8 - 0x84];
-    P_161C00* fF8;
+    DrawMesh* fF8;
     u8 pad3[0x124 - 0xFC];
     s32 f124;
-    Elem_161C00 e[1];
+    UnlitVertex e[1];
 };
-struct Hd_161C00 { u16 f0; u16 f2; u8 pad[4]; u16 f8[4]; u16 f10; u8 pad3[6]; };
-struct Packet_161C00 { u32 w[8]; };
+struct UnlitUnpackHeader { u16 f0; u16 f2; u8 pad[4]; u16 f8[4]; u16 f10; u8 pad3[6]; };
+struct CopiedGifTags { u32 w[8]; };
 
-void func_001F5C0C(Hd_161C00* p, s32 v, s32 n);
+void func_001F5C0C(UnlitUnpackHeader* p, s32 v, s32 n);
 extern u8 D_00001A50[];
 extern u8 D_000002F8[];
-void func_0018D800(Packet_161C00* dst, u8* src, s32 n);
+void func_0018D800(CopiedGifTags* dst, u8* src, s32 n);
 
-struct Mem_161F70 { u8 b[1]; };
-struct Hd_161F70 { u16 f0; u16 f2; u8 pad4[4]; u16 f8[3]; u16 fE; u16 f10; u8 pad12[6]; };
-struct Vec3_161F70 { f32 x, y, z; };
-struct Out4_161F70 { Vec3_161F70 v; f32 w; };
-struct Out3_161F70 { f32 x, y, z; };
-struct Mat_161F70 { f32 m[4][4]; };
-struct Vert_161F70
+// A run of bytes, for the fill and copy calls.
+struct ByteSpan { u8 b[1]; };
+struct LitUnpackHeader { u16 f0; u16 f2; u8 pad4[4]; u16 f8[3]; u16 fE; u16 f10; u8 pad12[6]; };
+struct LitVertex
 {
-    Vec3_161F70 pos;
+    Vec3 pos;
     f32 nx, ny, nz;
     u8 col[4];
     f32 u, v;
     s32 flag;
 };
-struct Sub_161F70 { u8 pad[0x18]; s32 n; };
-struct Ent_161F70 { s32 n; u8* data; };
-struct Mesh_161F70
+// The mesh the two vertex-packet builders draw (the layout of StripMesh): its colour, its
+// frames of packet data and the cursor whose frame picks one.
+struct MeshFrameCursor { u8 pad[0x18]; s32 n; };
+struct MeshFrameData { s32 n; u8* data; };
+struct DrawMesh
 {
     u8 pad0[4];
     u8 col[4];
     u8 pad8[0x10];
     s32 count;
-    Ent_161F70* ents;
+    MeshFrameData* ents;
     u8 pad20[4];
-    Sub_161F70* sub;
+    MeshFrameCursor* sub;
 };
-struct Tex_161F70 { u8 pad[0x418]; s32 n; u8 pad41C[4]; u8 data[1]; };
-struct Self_161F70
+struct BatchTexture { u8 pad[0x418]; s32 n; u8 pad41C[4]; u8 data[1]; };
+struct LitVertexBatch
 {
     u8 pad0[0x80];
     f32 base;
     u8 pad84[0x30];
     s32 texCount;
-    Tex_161F70* tex[16];
-    Mesh_161F70* mesh;
+    BatchTexture* tex[16];
+    DrawMesh* mesh;
     u8 padFC[0x28];
     s32 n;
-    Vert_161F70 verts[1];
+    LitVertex verts[1];
 };
 
 extern u8 D_00000288[];
@@ -594,75 +534,77 @@ extern u8 D_00001AB0[];
 extern u8 D_00000010[];
 
 void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-Mem_161F70* func_001F5C0C(Mem_161F70* p, s32 value, s32 size);
+ByteSpan* func_001F5C0C(ByteSpan* p, s32 value, s32 size);
 void func_001EE3F0(PacketWriter* s, void* data);
 void func_001EE420(PacketWriter* s, void* data);
 void func_001EE480(PacketWriter* s);
 void func_00152D70(PacketWriter* s);
 void func_00152B80(PacketWriter* s, s32 n, void* data);
 void func_00152B38(PacketWriter* s);
-void func_0018D800(Mem_161F70* dst, void* src, s32 count);
+void func_0018D800(ByteSpan* dst, void* src, s32 count);
 
-struct Pkt_163ED8;
-struct Vec3_163ED8 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-struct Uv_163ED8 {
+struct MeshUv {
     f32 u;
     f32 v;
 };
-struct Rec_163ED8 {
+// A vertex's indices into the position, normal and uv arrays, and its flags.
+struct VertexRefs {
     u8 pos;
-    u8 pad1;
+    u8 nrm;
     u8 uv;
     u8 flags;
 };
-struct Ent_163ED8 {
-    u16* idx;
-    s32 pad;
+// A weight's two index lists: the positions it moves, then the normals.
+struct WeightIndices {
+    u16* pos;
+    u16* nrm;
 };
-struct Self_163ED8 {
+struct MeshBuildState {
     u8 pad00[0x40];
     s32 f40;
 };
-struct Info_163ED8 {
+struct StripMeshInfo {
     u8 pad00[0x10];
     s32 f10;
     s32 f14;
     s32 f18;
 };
-struct Hook_163ED8;
-typedef AnimCursor* (*HookFn_163ED8)(Hook_163ED8* self, StripMesh* mesh);
-struct Hook_163ED8 {
-    HookFn_163ED8* vt;
+struct CursorHook;
+typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
+struct CursorHook {
+    CursorHookFn* vt;
 };
-struct Obj_163ED8 {
-    u8 pad00[0x38];
-    Hook_163ED8* f38;
+struct StripMeshOwner {
+    u8 pad00[0x18];
+    s32 f18;
+    u8 pad1C[0x28 - 0x1C];
+    s32 f28;
+    u8 pad2C[0x38 - 0x2C];
+    CursorHook* f38;
     u8 pad3C[0x40 - 0x3C];
     f32 f40;
     u8 pad44[0x54 - 0x44];
-    Info_163ED8* f54;
+    StripMeshInfo* f54;
 };
-struct Extra_163ED8 {
+struct StripExtra {
     s32 f0;
     s32 a4[4];
     s32 a14[4];
     s32 a24[4];
 };
-struct Unpack_163ED8 {
+struct StripUnpack {
     u16 off[4];
     u16 strip[4];
     u16 f10;
     u16 f12;
     u16 pad14[2];
 };
-struct Hdr_163ED8 {
-    u8 pad00[0x1C];
-    Unpack_163ED8* p;
-    Extra_163ED8* extra;
+struct StripHeader {
+    u8 pad00[0x14];
+    u32 f14;
+    u8 pad18[0x1C - 0x18];
+    StripUnpack* p;
+    StripExtra* extra;
     s32 count;
 };
 
@@ -676,21 +618,21 @@ extern u8 D_000023B8[];
 extern u8 D_00003A80[];
 extern u8 D_00003A90[];
 
-void func_00152B38(Pkt_163ED8* pkt);
-void func_00152D70(Pkt_163ED8* pkt);
-void func_00152CA0(Pkt_163ED8* pkt);
-void func_001EE5C8(Pkt_163ED8* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void func_00152B38(PacketWriter* pkt);
+void func_00152D70(PacketWriter* pkt);
+void func_00152CA0(PacketWriter* pkt);
+void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_001EE498(Pkt_163ED8* s, s32 a, s32 b);
-void func_001EE4C0(Pkt_163ED8* s, u32* src);
-void func_001EE528(Pkt_163ED8* s, s32 value);
-void func_001EE3F0(Pkt_163ED8* s, void* data);
-void func_001EE420(Pkt_163ED8* s, void* data);
-void func_001EE480(Pkt_163ED8* s);
-void func_001EE668(Pkt_163ED8* s, s32 a, s32 b, void* data, s32 flags);
-void func_001EE718(Pkt_163ED8* s, s32 a, s32 b, s32 c, s32 d, s32* out);
+void func_001EE498(PacketWriter* s, s32 a, s32 b);
+void func_001EE4C0(PacketWriter* s, u32* src);
+void func_001EE528(PacketWriter* s, s32 value);
+void func_001EE3F0(PacketWriter* s, void* data);
+void func_001EE420(PacketWriter* s, void* data);
+void func_001EE480(PacketWriter* s);
+void func_001EE668(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
+void func_001EE718(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
-void func_00163938(s32 mode, Pkt_163ED8* pkt);
+void func_00163938(s32 mode, PacketWriter* pkt);
 void func_00169608(s32 a, s32 b, AnimCursor* node);
 void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
@@ -698,41 +640,41 @@ void func_001EE3B8(void* obj, s32 size, s32 flags);
 
 void func_0016C528(void*);
 
-typedef void (*VFn_165728)(void* self);
-struct Obj_165728 { VFn_165728* vtbl; };
-struct Entry_165728 { u8 pad0[0x38]; Obj_165728* f38; u8 pad1[0x70 - 0x3C]; };
-struct Node_165728 { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; Node_165728* next80; };
-struct Self_165728 { u8 pad0[0xC]; s32 count0C; Entry_165728* f10; u8* f14; u8 pad1[0x4C - 0x18]; Node_165728* f4C; };
+typedef void (*AttachmentHandlerFn)(void* self);
+struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
+struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0x3C]; };
+struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
+struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
 void func_001662A8(void* self, void* entry, void* sub, void* ctx);
 void func_001F2798(void* owner, void* unused, void* ctx);
 
-struct __attribute__((aligned(16))) Quad_165828 { s32 a, b, c, d; };
-struct Mat_165828 { Quad_165828 q[4]; };
-struct Node_165828 { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
-struct Elem_165828 { Node_165828* p0; u8 pad0[0xC]; Mat_165828 m; u8 tail[0x90 - 0x50]; };
-struct Obj_165828 { s32 count; Elem_165828* elems; s32* keys; };
-struct Frame_165828 { Quad_165828 a; u8 pad0[0x30]; Quad_165828 b; u8 pad1[0x30]; Mat_165828 m; };
+// Four quadwords: a matrix as the attachment code copies it.
+struct QuadMatrix { Quad16 q[4]; };
+struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
+struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
+struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
+struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
 void* func_0015A448(void* a, s32 b, void* c);
 void func_00188B08(void* a, void* b, void* out);
 void func_00188B48(void* a, void* b, void* out);
 void func_00188668(void* out, void* b, void* in);
 
-struct Elem_165FE0;
-typedef void (*VFn_165FE0)(void* self, f32 f);
+struct AnimatorStep;
+typedef void (*AnimatorStepFn)(void* self, f32 f);
 
-struct Elem_165FE0 {
-    VFn_165FE0* vtbl;
+struct AnimatorStep {
+    AnimatorStepFn* vtbl;
     u8 pad4[0x8];
     void* f0C;
     u8 pad10[0x70];
-    Elem_165FE0* next80;
+    AnimatorStep* next80;
 };
 
-struct Owner_165FE0 {
+struct AnimatorOwner {
     u8 pad0[0x4C];
-    Elem_165FE0* head4C;
+    AnimatorStep* head4C;
 };
 
 
@@ -742,10 +684,10 @@ void func_001F3408(void* p);
 extern u8 D_00000010[];
 extern u8 D_000000F0[];
 
-struct Ctx_165588 { u8 pad0[0x28]; s32 f28; };
-struct Range_165588 { u16 lo; u16 hi; };
-struct Rec_165588 { u8 pad0[0x18]; u8* f18; Range_165588* f1C; };
-struct Out_165588 { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
+struct PartPacketContext { u8 pad0[0x28]; s32 f28; };
+struct PartRange { u16 lo; u16 hi; };
+struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
+struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
 void* func_001EE318(void* p);
 void func_00152938(void* buf, u32 count, u32 kind);
@@ -754,108 +696,40 @@ void func_001EE5C8(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
 void func_001EE3F0(void* s, void* n);
 void func_001529E0(void* self, void* a, void* b);
 
-struct Node_165920 { s32 tag; Node_165920* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; Node_165920* next; u8 pad84[0xC]; };
-struct Sub_165920 { u8 pad[0x10]; u32 flags; };
-struct Rec_165920 { u8 pad[0x38]; Sub_165920* a; u8 pad3C[0x18]; void* b; };
-struct Obj_165920 { s32 n0; void* p4; u8 pad8[4]; s32 count; Rec_165920* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; Node_165920* head; s32 f50; };
+struct AttachmentLink { s32 tag; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
+struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
+struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
+struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
-void func_0018D800(Obj_165920* dst, void* src, s32 n);
+void func_0018D800(AttachmentCopy* dst, void* src, s32 n);
 void* func_0018D5C0(s32 n);
 void* func_0018D568(s32 size, void* src);
-void func_00165AE8(Obj_165920* o, void* a, void* b);
-void func_00162810(Obj_165920* o);
+void func_00165AE8(AttachmentCopy* o, void* a, void* b);
+void func_00162810(AttachmentCopy* o);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
-struct __attribute__((aligned(16))) Quad_1660E8 { s32 a, b, c, d; };
-struct Mat_1660E8 { Quad_1660E8 q[4]; };
-struct Obj_1660E8;
-typedef void (*VFn_1660E8)(Obj_1660E8* self);
-struct VT_1660E8 { u8 pad[0xC0]; VFn_1660E8 f; };
-struct Link_1660E8 { u8 pad0[0x60]; Mat_1660E8 m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
-struct Obj_1660E8 { VT_1660E8* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; Link_1660E8* link; };
-struct Elem_1660E8 { Obj_1660E8* obj; u8 pad[0xC]; Quad_1660E8 q10[4]; Mat_1660E8 m50;  };
-struct List_1660E8 { s32 count; Elem_1660E8* items; };
-struct Par_1660E8 { u8 pad[0x30]; };
+struct FramedObject;
+typedef void (*FramedObjectFn)(FramedObject* self);
+struct FramedObjectVt { u8 pad[0xC0]; FramedObjectFn f; };
+struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
+struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
+struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
+struct FramedAttachmentList { s32 count; FramedAttachment* items; };
+struct ParentFrame { u8 pad[0x30]; };
 
 void func_00188B48(void* a, void* b, void* out);
 void func_00188B08(void* a, void* b, void* out);
-Mat_1660E8 func_00188668(Mat_1660E8 a, void* q);
+QuadMatrix func_00188668(QuadMatrix a, void* q);
 
-struct Pkt_164868 {
+// The lit strip builder's packets: 0x24-byte slots, written two apart.
+struct PacketSlot {
     u8 pad[0x24];
 };
-struct Vec3_164868 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
-struct Uv_164868 {
-    f32 u;
-    f32 v;
-};
-struct Rec_164868 {
-    u8 pos;
-    u8 nrm;
-    u8 uv;
-    u8 flags;
-};
-struct Ent_164868 {
-    u16* pos;
-    u16* nrm;
-};
-struct Quad_164868 {
+struct QuadLanes {
     f32 x[4];
     f32 y[4];
     f32 z[4];
     f32 w[4];
-};
-struct Self_164868 {
-    u8 pad00[0x40];
-    s32 f40;
-};
-struct Info_164868 {
-    u8 pad00[0x10];
-    s32 f10;
-    s32 f14;
-    s32 f18;
-};
-struct Hook_164868;
-typedef AnimCursor* (*HookFn_164868)(Hook_164868* self, StripMesh* mesh);
-struct Hook_164868 {
-    HookFn_164868* vt;
-};
-struct Obj_164868 {
-    u8 pad00[0x18];
-    s32 f18;
-    u8 pad1C[0x28 - 0x1C];
-    s32 f28;
-    u8 pad2C[0x38 - 0x2C];
-    Hook_164868* f38;
-    u8 pad3C[0x40 - 0x3C];
-    f32 f40;
-    u8 pad44[0x54 - 0x44];
-    Info_164868* f54;
-};
-struct Extra_164868 {
-    s32 f0;
-    s32 a4[4];
-    s32 a14[4];
-    s32 a24[4];
-};
-struct Unpack_164868 {
-    u16 off[4];
-    u16 strip[4];
-    u16 f10;
-    u16 f12;
-    u16 pad14[2];
-};
-struct Hdr_164868 {
-    u8 pad00[0x14];
-    u32 f14;
-    u8 pad18[0x1C - 0x18];
-    Unpack_164868* p;
-    Extra_164868* extra;
-    s32 count;
 };
 
 extern u8 D_00000288[];
@@ -869,32 +743,32 @@ extern u8 D_000027C0[];
 extern u8 D_00003A80[];
 extern u8 D_00003AA0[];
 
-void func_00152B38(Pkt_164868* pkt);
-void func_00152D70(Pkt_164868* pkt);
-void func_00152CA0(Pkt_164868* pkt);
-void func_001EE5C8(Pkt_164868* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void func_00152B38(PacketSlot* pkt);
+void func_00152D70(PacketSlot* pkt);
+void func_00152CA0(PacketSlot* pkt);
+void func_001EE5C8(PacketSlot* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_001EE498(Pkt_164868* s, s32 a, s32 b);
-void func_001EE4C0(Pkt_164868* s, u32* src);
-void func_001EE528(Pkt_164868* s, s32 value);
-void func_001EE3F0(Pkt_164868* s, void* data);
-void func_001EE480(Pkt_164868* s);
-void func_001EE668(Pkt_164868* s, s32 a, s32 b, void* data, s32 flags);
-void func_001EE718(Pkt_164868* s, s32 a, s32 b, s32 c, s32 d, s32* out);
+void func_001EE498(PacketSlot* s, s32 a, s32 b);
+void func_001EE4C0(PacketSlot* s, u32* src);
+void func_001EE528(PacketSlot* s, s32 value);
+void func_001EE3F0(PacketSlot* s, void* data);
+void func_001EE480(PacketSlot* s);
+void func_001EE668(PacketSlot* s, s32 a, s32 b, void* data, s32 flags);
+void func_001EE718(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
-void func_00163938(s32 mode, Pkt_164868* pkt);
+void func_00163938(s32 mode, PacketSlot* pkt);
 void func_00169608(s32 a, s32 b, AnimCursor* node);
 void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
-void func_0015F678(Owner_15F678* owner, u8* obj);
-void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other);
-void func_0015F710(void* self, Node_15F710* owner);
-void func_0015F7D8(void* self, Group_15F7D8* group);
-void func_0015F8B0(void* self, Group_15F8B0* group);
-void func_0015F930(Items_15F930* list, s32* arr, s32 value);
-void func_0015F9A0(void* self, Sub_15F9A0* s);
-void func_0015FA58(Self_15FA58* self);
-void func_0015FB28(Node_0015FB28* self, void* arg);
+void func_0015F678(World* owner, u8* obj);
+void func_0015F6C0(void* ctx, PlacedObject* self, PlacedObject* other);
+void func_0015F710(void* self, PlacedObject* owner);
+void func_0015F7D8(void* self, FoundList* group);
+void func_0015F8B0(void* self, FoundList* group);
+void func_0015F930(CountedArray* list, s32* arr, s32 value);
+void func_0015F9A0(void* self, FoundList* s);
+void func_0015FA58(World* self);
+void func_0015FB28(VisitNode* self, void* arg);
 s32 func_0015FBA0(PlacedObject* self, s32* out);
 void func_0015FBB8(PlacedObject* self, s32 flag);
 void func_0015FF58(void* self);
@@ -927,15 +801,15 @@ void func_00160C48(s32 value);
 s32 func_00160C58();
 void* func_00160CA0(u8* self,s32 index);
 void func_00160CC8(void* p);
-void func_00160CE8(Counter_160CE8* c);
-s32 func_00160CF0(Counter_160CF0* c);
-void func_00160D00(Refs_160D00* self);
+void func_00160CE8(Counter* c);
+s32 func_00160CF0(Counter* c);
+void func_00160D00(RefCounted* self);
 s32 func_00160D10();
 void func_00160D30(u32* out);
 s32 func_00160D98(void);
 void func_00160DA0(void);
-void func_00160E80(Rec_160E80* self);
-s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out);
+void func_00160E80(ClearedRecord* self);
+s32 func_00161028(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
 PacketWriter* func_001611B8(PacketWriter* self);
 void func_00161200(PacketWriter* self);
 void func_00161278(PacketWriter* f, s32 n);
@@ -956,106 +830,106 @@ void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4);
 void func_00161A88(void* self, s32 flag);
 void func_00161AB0(u8* self, void* a1, void* a2);
 void func_00161B80(u8* self);
-void func_00161BB0(Obj_00161BB0* self, s32 value);
-void func_00161C00(Self_161C00* self);
-void func_00161F70(Self_161F70* self);
-void func_00162508(Self_162508* self);
-void func_00162680(VertexBatch* body, Vec3_162680* v);
+void func_00161BB0(ColoredVertexBatch* self, s32 value);
+void func_00161C00(UnlitVertexBatch* self);
+void func_00161F70(LitVertexBatch* self);
+void func_00162508(FlushedVertexBatch* self);
+void func_00162680(VertexBatch* body, Vec3* v);
 void func_001626A8(u8* dst, u8* src);
 void func_001626C0(VertexBatch* dst, U64P* src);
-void func_001626D8(Obj_1626D8* self, s32 value);
-void func_00162810(Owner_162810* owner);
+void func_001626D8(AppendVertexBatch* self, s32 value);
+void func_00162810(RefOwner* owner);
 void func_00163938(s32 mode, void* obj);
 void func_00163990(s32 mode, void* obj);
-void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
-                   void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt);
-void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, StripMesh* mesh,
-                   Vec3_163ED8* vecs, s32 unused6, u8 (*tints)[4], Uv_163ED8* uvs, s32 n, Rec_163ED8* recs,
-                   Ent_163ED8* ents, Vec3_163ED8* verts, s32 unused13, f32* weights, Pkt_163ED8* pkt,
+void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
+                   void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt);
+void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
+                   Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
+                   WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
                    s32** outs);
-void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hdr_164868* hdr,
-                   StripMesh* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
-                   s32 n, Rec_164868* recs, Ent_164868* ents, Vec3_164868* verts, Vec3_164868* vnrms,
-                   f32* weights, Pkt_164868* pkt, s32** outs);
-void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c);
-void func_00165728(Self_165728* self, PlacedObject* ctx);
-void func_00165828(Obj_165828* self, PlacedObject* ctx);
-void func_00165920(Obj_165920* self, s32 arg, void* src);
-void func_00165FE0(Owner_165FE0* self, PlacedObject* sub, f32 f);
+void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
+                   StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
+                   s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
+                   f32* weights, PacketSlot* pkt, s32** outs);
+void func_00165588(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
+void func_00165728(AttachmentBlock* self, PlacedObject* ctx);
+void func_00165828(AttachmentTargets* self, PlacedObject* ctx);
+void func_00165920(AttachmentCopy* self, s32 arg, void* src);
+void func_00165FE0(AnimatorOwner* self, PlacedObject* sub, f32 f);
 void func_001660A0(PlacedObject* self);
-void func_001660E8(PlacedObject* self, Par_1660E8* par);
+void func_001660E8(PlacedObject* self, ParentFrame* par);
 void func_00166658(void);
 
-void func_0015F678(Owner_15F678* owner, u8* obj)
+void func_0015F678(World* owner, u8* obj)
 {
     u64 flags = *(u64*)(obj + 0x2C8);
     u64 bit = (u64)0x8000 << 24;
     if (!(flags & bit))
     {
         *(u64*)(obj + 0x2C8) = flags | bit;
-        s32 n = owner->count;
-        owner->items[n] = obj;
-        owner->count = n + 1;
+        s32 n = owner->regroupCount;
+        owner->regroupObjects[n] = (PlacedObject*)obj;
+        owner->regroupCount = n + 1;
     }
 }
 
-void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
+void func_0015F6C0(void* ctx, PlacedObject* self, PlacedObject* other)
 {
     ListFrame frame;
     if (self != other) {
-        Elem_15F6C0* e = other->head;
+        PlacedObject* e = (PlacedObject*)other->list60.head;
         if (e != 0) {
-            e->owner = self;
-            for (e = e->next; e != 0; e = e->next) {
-                e->owner = self;
+            e->f54 = self;
+            for (e = (PlacedObject*)e->link58.next; e != 0; e = (PlacedObject*)e->link58.next) {
+                e->f54 = self;
             }
         }
-        SpliceListToEnd(&self->head, &other->head);
+        SpliceListToEnd(&self->list60.head, &other->list60.head);
     }
 }
 
-void func_0015F710(void* self, Node_15F710* owner)
+void func_0015F710(void* self, PlacedObject* owner)
 {
-    Iter_15F710 it;
-    Node_15F710* node;
-    Begin_15F710::Of(&it, &owner->list);
-    while ((node = Next_15F710::Of(&it)) != 0) {
+    LinkListWalk it;
+    PlacedObject* node;
+    BeginLinkListWalk::Of(&it, &owner->list60);
+    while ((node = NextInLinkList::Of(&it)) != 0) {
         if (node != owner) {
-            RemoveFromList(&owner->list, node);
+            RemoveFromList(&owner->list60, node);
             node->f54 = node;
-            node->list.tail = (u8*)node;
-            node->list.head = (u8*)node;
+            node->list60.tail = node;
+            node->list60.head = node;
         }
         QueueObjectForRegroup(self, node);
     }
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_0015F7D8(void* self, Group_15F7D8* group)
+void func_0015F7D8(void* self, FoundList* group)
 {
     s32 i = 0;
     while (i < group->count) {
-        if (IsObjectAttached(group->items[i]) != 0) {
+        if (IsObjectAttached(group->objects[i]) != 0) {
             break;
         }
         i++;
     }
     s32 first = i;
     for (; i < group->count; i++) {
-        if (IsObjectAttached(group->items[i]) != 0) {
-            MergeObjectLinkLists(self, group->items[first]->f54, group->items[i]->f54);
+        if (IsObjectAttached(group->objects[i]) != 0) {
+            MergeObjectLinkLists(self, group->objects[first]->f54, group->objects[i]->f54);
         }
     }
 }
 
-void func_0015F8B0(void* self, Group_15F8B0* group)
+void func_0015F8B0(void* self, FoundList* group)
 {
     if (group->count >= 2) {
         for (s32 i = 0; i < group->count; i++) {
-            Item_15F8B0* item = group->items[i];
+            PlacedObject* item = group->objects[i];
             u32 n = item->count6C;
             if (n < 4) {
-                item->items70[n] = group;
+                item->items70[n] = (PlacedObject*)group;
                 item->count6C = n + 1;
             }
         }
@@ -1063,7 +937,7 @@ void func_0015F8B0(void* self, Group_15F8B0* group)
     }
 }
 
-void func_0015F930(Items_15F930* list, s32* arr, s32 value)
+void func_0015F930(CountedArray* list, s32* arr, s32 value)
 {
     s32 i = list->count;
     s32* p = (s32*)(((s32)i << 2) + (s32)arr);
@@ -1085,17 +959,17 @@ void func_0015F930(Items_15F930* list, s32* arr, s32 value)
     list->count--;
 }
 
-void func_0015F9A0(void* self, Sub_15F9A0* s)
+void func_0015F9A0(void* self, FoundList* s)
 {
     s32 i;
-    Obj_15F9A0* obj;
+    PlacedObject* obj;
     if (s->count >= 2) {
         for (i = 0; i < s->count; i++) {
-            obj = (Obj_15F9A0*)s->items[i];
+            obj = s->objects[i];
             RemoveValueFromArray(&obj->count6C, obj->items70, s);
         }
         for (i = 0; i < s->count; i++) {
-            obj = (Obj_15F9A0*)s->items[i];
+            obj = s->objects[i];
             if (obj->f54 != 0) {
                 DissolveObjectLinkList(self, obj->f54);
                 break;
@@ -1104,15 +978,15 @@ void func_0015F9A0(void* self, Sub_15F9A0* s)
     }
 }
 
-void func_0015FA58(Self_15FA58* self)
+void func_0015FA58(World* self)
 {
-    s32 i = self->count;
+    s32 i = self->regroupCount;
     i--;
     if (i >= 0) {
         u64 mask = ((u64)~0x80 << 32) | 0xFFFFFFFF;
         do {
-            Obj_15FA58* obj = self->items[i];
-            obj->flags2C8 &= mask;
+            PlacedObject* obj = self->regroupObjects[i];
+            obj->flags &= mask;
             if (obj->f54 == obj) {
                 s32 j = obj->count6C;
                 j--;
@@ -1123,15 +997,15 @@ void func_0015FA58(Self_15FA58* self)
             i--;
         } while (i >= 0);
     }
-    self->count = 0;
+    self->regroupCount = 0;
 }
 
-void func_0015FB28(Node_0015FB28* self, void* arg)
+void func_0015FB28(VisitNode* self, void* arg)
 {
     ListFrame frame;
     if (self->cls->visit != 0)
         self->cls->visit(self, arg);
-    Node_0015FB28* node = self->child;
+    VisitNode* node = self->child;
     if (node != 0)
     {
         do
@@ -1157,7 +1031,7 @@ void func_0015FBB8(PlacedObject* self, s32 flag)
         self->vB0 = self->v160;
         self->f29C = 0;
         if (self->f2AC != 0) {
-            StopSoundRecord((Obj_15FBB8*)self->f2AC->p1C, 0);
+            StopSoundRecord((void*)self->f2AC->p1C, 0);
         }
         self->desc02()->m20(self, (Vec02*)D_00248D30);
         self->desc02()->m21(self, (Vec02*)D_00248D30);
@@ -1271,7 +1145,7 @@ LINKER_REMNANT(func_001601D0);
 
 s32 func_001601D8(void* a0)
 {
-    Entry_001601D8* e = FindEntryById(a0);
+    EntryFlags* e = FindEntryById(a0);
     s32 r = 0;
     if (e != 0) {
         r = e->f28;
@@ -1310,7 +1184,7 @@ s32 func_001602A0(void) {
     u8* p = (u8*)g_keyedEntries;
     u8* end = (u8*)g_keyedEntries + 0x7E8;
     do {
-        u32* r = GetLevelEntryByKey((Key_1602A0*)*(void**)(p + 0x20));
+        u32* r = GetLevelEntryByKey((void*)*(void**)(p + 0x20));
         mask &= ~*(u32*)(p + 0x28) | *r;
         p += 0x2C;
     } while (p < end);
@@ -1386,7 +1260,7 @@ void func_00160578(s32 kind)
     s32 s0 = -1;
 
     if (kind != 4) { if (kind < 5) { if (kind == 2) { s0 = 0xD; } } } else { s0 = 0xE; }
-    StartObjectFade((Obj_160578*)D_00247AD0, -1, 1);
+    StartObjectFade((void*)D_00247AD0, -1, 1);
     if (s0 != -1) {
         QueueMovieWithSuccessor(s0, 0xF);
     }
@@ -1468,7 +1342,7 @@ s32 func_00160850()
 void func_00160880(void)
 {
     ResetGameProgress(g_saveData);
-    D_00269984.value = 0;
+    D_00269984.v = 0;
     ClearTwoWords(D_002623D8);
     ClearScatterController(g_scatterController);
     g_buttonCodeFlags = 0;
@@ -1481,23 +1355,23 @@ void func_001608E0(void)
     GameProgress* g = g_saveData;
     g->f19E0 = 5;
     g->f19E4 = 0;
-    func_00140D90((Sys_1608E0*)g_flagTable);
+    func_00140D90((void*)g_flagTable);
 }
 
 void func_00160918(void)
 {
     ResetGameSession();
-    StartObjectFade((Obj_160918*)&D_00247AB0, -1, 0);
+    StartObjectFade((void*)&D_00247AB0, -1, 0);
 }
 
 void func_00160948(void)
 {
-    Key_160948* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    SessionKey* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
         k = &D_00247AB0;
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((Key_160948*)&D_00275B04)) {
+    if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
         if (D_00275F84 == 0) {
@@ -1505,7 +1379,7 @@ void func_00160948(void)
             func_001C0790(g_saveData->f19EC & 0x40);
             Animation* r = FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
             if (r != 0) {
-                Frame_160948 frame((Lst_160948*)r->props6C);
+                PlayerListWalk frame((AnimationPlayerList*)r->props6C);
                 void* head = *(void**)r->props6C;
                 frame.cursor = (u8*)head + frame.next_off;
                 void* node = head;
@@ -1552,7 +1426,7 @@ s32 func_00160B28(u8* p)
     }
     if (done == 0) return 0;
     if (done == total) return 100;
-    return Clamp_160B28::Of(done * 100 / total, 1, 99);
+    return PercentClamp::Of(done * 100 / total, 1, 99);
 }
 
 void func_00160C48(s32 value)
@@ -1580,24 +1454,24 @@ void func_00160CC8(void* p)
     FillMemory(p, 0, 8);
 }
 
-void func_00160CE8(Counter_160CE8* c)
+void func_00160CE8(Counter* c)
 {
     c->count = 0;
 }
 
-s32 func_00160CF0(Counter_160CF0* c)
+s32 func_00160CF0(Counter* c)
 {
     return ++c->count;
 }
 
-void func_00160D00(Refs_160D00* self)
+void func_00160D00(RefCounted* self)
 {
     self->refs--;
 }
 
 s32 func_00160D10()
 {
-    return g_saveData->f19F0 & g_currentWorld->bits;
+    return g_saveData->f19F0 & g_currentWorld->f235C;
 }
 
 void func_00160D30(u32* out)
@@ -1625,7 +1499,7 @@ void func_00160DA0(void)
     u8* x = (u8*)g_currentWorld;
     s32 t = o->f19E0 - 1;
     o->f19E0 = t;
-    PopActiveSequenceElement((Call_160DA0*)x);
+    PopActiveSequenceElement((void*)x);
     StopLockedStreamVoice();
     GameProgress* p = g_saveData;
     s32 m = p->f19DC;
@@ -1637,16 +1511,16 @@ void func_00160DA0(void)
         args.f08 = *(s32*)(base + 0x8);
         args.f0C = *(s32*)(base + 0xC);
         args.flags = 0x10;
-        StartScreenFade((Call_160DA0*)&g_screenFade, &args, 1);
+        StartScreenFade((void*)&g_screenFade, &args, 1);
     } else if (p->f19E0 >= 0) {
-        StartScreenFadeFromFlagTable((Call_160DA0*)g_flagTable);
+        StartScreenFadeFromFlagTable((void*)g_flagTable);
     } else {
-        SetPauseMenuLayerPage((Call_160DA0*)g_pauseMenuElement, 0, 1);
+        SetPauseMenuLayerPage((void*)g_pauseMenuElement, 0, 1);
     }
-    RaiseScatterLevels((Call_160DA0*)g_scatterController, 1.0f);
+    RaiseScatterLevels((void*)g_scatterController, 1.0f);
 }
 
-void func_00160E80(Rec_160E80* self)
+void func_00160E80(ClearedRecord* self)
 {
     self->f4 = 0;
     self->f8 = 0;
@@ -1658,7 +1532,7 @@ void func_00160E80(Rec_160E80* self)
 
 ASM_FUNC(func_00160EA0);
 
-s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out)
+s32 func_00161028(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {
     s32 buf[4];
 
@@ -1674,12 +1548,12 @@ s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_1
     s32 j = 0;
     if (n > 0) {
         for (; i < n; i++) {
-            Elem_161028* e = (Elem_161028*)(k + i * 12);
-            Entry_161028* p = e->holder->head;
+            ContactHit* e = (ContactHit*)(k + i * 12);
+            KeyedEdge* p = e->holder->head;
             if (p == 0) {
                 continue;
             }
-            Entry_161028** o = (Entry_161028**)(j * 4 + (s32)out);
+            KeyedEdge** o = (KeyedEdge**)(j * 4 + (s32)out);
             while (p != 0) {
                 if (key == p->k0 || key == p->k1) {
                     s32 m;
@@ -1913,7 +1787,7 @@ void Obj_161958::func_00161958(s32 count)
     p[1] = 0;
 }
 
-struct Bytes16_1619C0 { u8 b[16]; };
+struct CameraBlock16 { u8 b[16]; };
 extern u8* D_00261990;
 
 u8* func_001619C0(u8* self)
@@ -1926,7 +1800,7 @@ u8* func_001619C0(u8* self)
     u8* camera = g_camera;
     *(s32*)(self + 0x98) = 1;
     *(f32*)(self + 0x90) = 1.0f;
-    *(Bytes16_1619C0*)(self + 0x80) = *(Bytes16_1619C0*)(camera + 0x208);
+    *(CameraBlock16*)(self + 0x80) = *(CameraBlock16*)(camera + 0x208);
     *(s32*)(self + 0xB0) = 0;
     *(s32*)(self + 0xB4) = 0;
     *(s32*)(self + 0x94) = -1;
@@ -1956,10 +1830,10 @@ void func_00161B80(u8* self)
 {
     *(s32*)(self+0xF8)=0;
     *(s32*)(self+0x124)=0;
-    ((Fill_161B80)FillMemory)(self+0x128,0,0x1720);
+    ((MemoryFillFn)FillMemory)(self+0x128,0,0x1720);
 }
 
-void func_00161BB0(Obj_00161BB0* self, s32 value)
+void func_00161BB0(ColoredVertexBatch* self, s32 value)
 {
     u32 local;
     FlushVertexBatch(self);
@@ -1968,18 +1842,18 @@ void func_00161BB0(Obj_00161BB0* self, s32 value)
     SetVertexColor(self, &local);
 }
 
-void func_00161C00(Self_161C00* self)
+void func_00161C00(UnlitVertexBatch* self)
 {
-    Hd_161C00* hd;
+    UnlitUnpackHeader* hd;
     f32* out1;
-    V4_161C00* out2;
+    VifPoint* out2;
     u8* out3;
     s32 count;
-    Packet_161C00* dst;
+    CopiedGifTags* dst;
     s32 base;
     s32 i;
     s32 k;
-    Elem_161C00* c;
+    UnlitVertex* c;
 
     base = 0x24;
     ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
@@ -2010,43 +1884,43 @@ void func_00161C00(Self_161C00* self)
         s32 j;
         c = &self->e[i];
         for (j = 0; j < 4; j++) {
-            out3[j] = (self->fF8->f4[j] * c->rgba[j] + 0x100) / 0x1FE;
+            out3[j] = (self->fF8->col[j] * c->rgba[j] + 0x100) / 0x1FE;
         }
         out3 += 4;
     }
-    for (k = 0; k < self->fF8->f18; k++) {
-        Pair_161C00* pair = &self->fF8->f1C[k];
+    for (k = 0; k < self->fF8->count; k++) {
+        MeshFrameData* pair = &self->fF8->ents[k];
         s32 frame;
-        ReserveVifUnpack(&g_vifPacketWriter, 0xC, pair->f0, base, &count, &dst);
+        ReserveVifUnpack(&g_vifPacketWriter, 0xC, pair->n, base, &count, &dst);
         frame = 0;
-        if (self->fF8->f24 != 0) {
-            frame = self->fF8->f24->f18;
+        if (self->fF8->sub != 0) {
+            frame = self->fF8->sub->n;
         }
-        CopyMemory(dst, pair->f4 + ((frame * pair->f0) << 4), count);
+        CopyMemory(dst, pair->data + ((frame * pair->n) << 4), count);
         dst->w[0] |= 0x8000 | self->f124;
         dst->w[4] |= 0x8000;
         hd->f8[k] = base;
-        base += pair->f0;
+        base += pair->n;
     }
     WriteVifMscalf(&g_vifPacketWriter, D_000002F8);
 }
 
-void func_00161F70(Self_161F70* self)
+void func_00161F70(LitVertexBatch* self)
 {
-    Hd_161F70* hdr;
-    Out4_161F70* p4;
-    Mat_161F70* p8;
+    LitUnpackHeader* hdr;
+    VifPoint* p4;
+    Mat4* p8;
     u8* pC;
-    Out3_161F70* p10;
+    Vec3* p10;
     s32 size;
     u32* dst;
     s32 off = 0x24;
     s32 j;
     s32 i;
-    Vert_161F70* v;
+    LitVertex* v;
 
     ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
-    FillMemory((Mem_161F70*)hdr, 0, 0x18);
+    FillMemory((ByteSpan*)hdr, 0, 0x18);
     hdr->f10 = 4;
     hdr->f0 = off;
     off += self->n * 4;
@@ -2087,7 +1961,7 @@ void func_00161F70(Self_161F70* self)
                 p8->m[0][j] = p8->m[1][j] = p8->m[2][j] = 0.0f;
             }
         }
-        FillMemory((Mem_161F70*)p8->m[3], 0, 0x10);
+        FillMemory((ByteSpan*)p8->m[3], 0, 0x10);
         p8++;
     }
     for (i = 0; i < self->n; i++)
@@ -2118,11 +1992,11 @@ void func_00161F70(Self_161F70* self)
     s32 k = 0;
     for (s32 t = 0; t < self->mesh->count; t++)
     {
-        Ent_161F70* e = &self->mesh->ents[t];
+        MeshFrameData* e = &self->mesh->ents[t];
         ReserveVifUnpack(&g_vifPacketWriter, 0xC, e->n, off, &size, &dst);
-        Sub_161F70* sub = self->mesh->sub;
+        MeshFrameCursor* sub = self->mesh->sub;
         s32 m = sub ? sub->n : 0;
-        CopyMemory((Mem_161F70*)dst, e->data + m * e->n * 16, size);
+        CopyMemory((ByteSpan*)dst, e->data + m * e->n * 16, size);
         dst[0] |= 0x8000 | self->n;
         dst[4] |= 0x8000;
         hdr->f8[k] = off;
@@ -2132,7 +2006,7 @@ void func_00161F70(Self_161F70* self)
     WriteVifMscalf(&g_vifPacketWriter, D_00000010);
 }
 
-void func_00162508(Self_162508* self)
+void func_00162508(FlushedVertexBatch* self)
 {
     if (self->f0F8 == 0) {
         return;
@@ -2145,7 +2019,7 @@ void func_00162508(Self_162508* self)
         FlipVifBaseOffset();
         PacketWriter* s = &g_vifPacketWriter;
         s32 size = WriteVifUnpackHeader(s, 12, 11, 0);
-        Copy_162508::Words((s32*)s->cur, (s32*)self, size >> 2);
+        WordCopy::Words((s32*)s->cur, (s32*)self, size >> 2);
         s->cur += size;
         WriteVifMscal(&g_vifPacketWriter, D_000018C0);
         switch (*self->f0F8) {
@@ -2163,7 +2037,7 @@ void func_00162508(Self_162508* self)
     ResetVertexBatch(self);
 }
 
-void func_00162680(VertexBatch* body, Vec3_162680* v)
+void func_00162680(VertexBatch* body, Vec3* v)
 {
     body->x = v->x;
     body->y = v->y;
@@ -2182,7 +2056,7 @@ void func_001626C0(VertexBatch* dst, U64P* src)
     dst->texCoord.v = src->v;
 }
 
-void func_001626D8(Obj_1626D8* self, s32 value)
+void func_001626D8(AppendVertexBatch* self, s32 value)
 {
     s32 n;
     s64 max;
@@ -2194,7 +2068,7 @@ void func_001626D8(Obj_1626D8* self, s32 value)
     n++;
     self->count = n;
     if (n == max) {
-        Rec_1626D8 tmp[2];
+        BatchVertexWords tmp[2];
         u8* p = self->pF8;
         CopyMemory(tmp, &self->recs[self->count - 2], sizeof(tmp));
         FlushVertexBatch(self);
@@ -2204,7 +2078,7 @@ void func_001626D8(Obj_1626D8* self, s32 value)
     }
 }
 
-void func_00162810(Owner_162810* owner)
+void func_00162810(RefOwner* owner)
 {
     owner->refs = (void**)AllocateFrontMemory(owner->capacity << 2);
     s32 n = 0;
@@ -2242,13 +2116,13 @@ void func_00163990(s32 mode, void* obj)
     }
 }
 
-void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
-                   void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt)
+void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
+                   void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt)
 {
     PacketWriter f;
     u32 buf[4];
     s32 i;
-    Vec3_1639E8* out;
+    Vec3* out;
     s32 off = 0x2B;
 
     ReserveVifUnpack(pkt, 0xD, 2, 0x16, 0, hdr);
@@ -2286,7 +2160,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
         hdr->p[4] = off;
         off += hdr->count * 4;
         hdr->p[5] = off;
-        Zero_1639E8::Clear(buf);
+        QuadClear::Clear(buf);
         off += n;
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_002623E8[hdr->count]);
@@ -2302,10 +2176,10 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
         {
             CopyWordsToWriter(pkt, 0, 1, &i, 0x1D);
             ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, &out);
-            u16* idx = ents[i].idx;
+            u16* idx = ents[i].pos;
             for (s32 k = 0; k < n; k++)
             {
-                Vec3_1639E8* v = &verts[idx[k]];
+                Vec3* v = &verts[idx[k]];
                 out[k].x = v->x - vecs[k].x;
                 out[k].y = v->y - vecs[k].y;
                 out[k].z = v->z - vecs[k].z;
@@ -2322,9 +2196,9 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     WriteVifMscal(pkt, D_00000ED8);
 }
 
-void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, StripMesh* mesh,
-                   Vec3_163ED8* vecs, s32 unused6, u8 (*tints)[4], Uv_163ED8* uvs, s32 n, Rec_163ED8* recs,
-                   Ent_163ED8* ents, Vec3_163ED8* verts, s32 unused13, f32* weights, Pkt_163ED8* pkt,
+void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
+                   Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
+                   WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
                    s32** outs)
 {
     u32 buf[4];
@@ -2334,7 +2208,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     s32 b;
     f32* wOut;
     s32 k;
-    Vec3_163ED8* dOut;
+    Vec3* dOut;
     u8* cOut;
     s32 c;
     s32 d;
@@ -2345,7 +2219,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     void* head;
     AnimCursor* node;
     s32 i;
-    Rec_163ED8* r;
+    VertexRefs* r;
 
     if (obj->f54 != 0) {
         BeginDmaTag(pkt);
@@ -2400,7 +2274,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         *outs[2] = (s32)uvOut;
     }
     if (obj->f54 != 0) {
-        Extra_163ED8* e = (Extra_163ED8*)AllocateZeroedFrontMemory(0x34);
+        StripExtra* e = (StripExtra*)AllocateZeroedFrontMemory(0x34);
         hdr->extra = e;
         e->f0 = (s32)posOut;
     }
@@ -2416,7 +2290,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
             uvOut[2] = 1.0f;
             uvOut += 3;
         }
-        *(Vec3_163ED8*)posOut = vecs[recs[i].pos];
+        *(Vec3*)posOut = vecs[recs[i].pos];
         if (recs[i].flags >> 7) {
             posOut[3] = obj->f40 + 32768.0f;
         } else {
@@ -2429,7 +2303,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         node = obj->f38->vt[5](obj->f38, mesh);
     }
     if (node == 0 && mesh->hook != 0) {
-        node = ((Hook_163ED8*)mesh->hook)->vt[5]((Hook_163ED8*)mesh->hook, mesh);
+        node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
     WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
@@ -2465,10 +2339,10 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
             }
             CopyWordsToWriter(pkt, 0, 1, &k, 0x16);
             ReserveVifUnpack(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
-            u16* idx = ents[k].idx;
+            u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
-                Vec3_163ED8* v = &verts[idx[i]];
+                Vec3* v = &verts[idx[i]];
                 dOut[i].x = v->x - vecs[r->pos].x;
                 dOut[i].y = v->y - vecs[r->pos].y;
                 dOut[i].z = v->z - vecs[r->pos].z;
@@ -2477,7 +2351,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         }
     }
     if (hdr->extra != 0) {
-        Extra_163ED8* e = hdr->extra;
+        StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
             ReserveVifUnpack(pkt, 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
@@ -2528,20 +2402,20 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     }
 }
 
-void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hdr_164868* hdr,
-                   StripMesh* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
-                   s32 n, Rec_164868* recs, Ent_164868* ents, Vec3_164868* verts, Vec3_164868* vnrms,
-                   f32* weights, Pkt_164868* pkt, s32** outs)
+void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
+                   StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
+                   s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
+                   f32* weights, PacketSlot* pkt, s32** outs)
 {
     u32 buf[4];
     f32* posOut;
     f32* wOut;
     s32 k;
-    Vec3_164868* dOut;
-    Quad_164868* quads;
+    Vec3* dOut;
+    QuadLanes* quads;
     f32* nOut;
     u8* cOut;
-    Vec3_164868* nDelta;
+    Vec3* nDelta;
     f32* uvOut;
     s32 a;
     s32 b;
@@ -2550,7 +2424,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     s32 off;
     AnimCursor* node;
     s32 i;
-    Rec_164868* r;
+    VertexRefs* r;
 
     if (obj->f54 != 0) {
         BeginDmaTag(&pkt[2]);
@@ -2582,13 +2456,13 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         *outs[1] = (s32)posOut;
     }
     if (obj->f54 != 0) {
-        Extra_164868* e = (Extra_164868*)AllocateZeroedFrontMemory(0x34);
+        StripExtra* e = (StripExtra*)AllocateZeroedFrontMemory(0x34);
         hdr->extra = e;
         e->f0 = (s32)posOut;
     }
     for (i = 0; i < n; i++) {
         r = &recs[i];
-        *(Vec3_164868*)posOut = vecs[r->pos];
+        *(Vec3*)posOut = vecs[r->pos];
         if (r->flags >> 7) {
             posOut[3] = obj->f40 + 32768.0f;
         } else {
@@ -2624,7 +2498,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
-                Vec3_164868* v = &verts[idx[i]];
+                Vec3* v = &verts[idx[i]];
                 dOut[i].x = v->x - vecs[r->pos].x;
                 dOut[i].y = v->y - vecs[r->pos].y;
                 dOut[i].z = v->z - vecs[r->pos].z;
@@ -2655,7 +2529,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
             u16* idx = ents[m].nrm;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
-                Vec3_164868* v = &vnrms[idx[i]];
+                Vec3* v = &vnrms[idx[i]];
                 nDelta[i].x = v->x - nrms[r->nrm].x;
                 nDelta[i].y = v->y - nrms[r->nrm].y;
                 nDelta[i].z = v->z - nrms[r->nrm].z;
@@ -2681,7 +2555,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
             if (r->nrm == 0xFF) {
                 nOut[0] = nOut[1] = nOut[2] = 0.0f;
             } else {
-                *(Vec3_164868*)nOut = nrms[r->nrm];
+                *(Vec3*)nOut = nrms[r->nrm];
             }
             nOut[3] = (cOut[0] + cOut[1] + cOut[2]) * 0.33333334f;
             nOut += 4;
@@ -2725,7 +2599,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         node = obj->f38->vt[5](obj->f38, mesh);
     }
     if (node == 0 && mesh->hook != 0) {
-        node = ((Hook_164868*)mesh->hook)->vt[5]((Hook_164868*)mesh->hook, mesh);
+        node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
     if (node != 0 && (node->flags & 2)) {
         ReserveVifUnpack(&pkt[2], 4, 1, 0x16, &a, &b);
@@ -2733,7 +2607,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         WriteVifMscal(&pkt[2], D_000027C0);
     }
     if (hdr->extra != 0) {
-        Extra_164868* e = hdr->extra;
+        StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
             ReserveVifUnpack(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
@@ -2765,7 +2639,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     }
 }
 
-void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
+void func_00165588(PartPacketContext* a, PartPacketSource* b, PartPackets* c)
 {
     u8 buf[0x30];
     s32 s0;
@@ -2789,19 +2663,19 @@ void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
     DetachPacketBuffer(buf, &c->fC, &c->f10);
 }
 
-void func_00165728(Self_165728* self, PlacedObject* ctx)
+void func_00165728(AttachmentBlock* self, PlacedObject* ctx)
 {
     for (s32 i = 0; i < self->count0C; i++)
     {
-        Entry_165728* e = self->f10 + i;
-        Obj_165728* o = e->f38;
+        AttachmentEntry* e = self->f10 + i;
+        AttachmentHandler* o = e->f38;
         if (o != 0)
         {
             o->vtbl[1](o);
         }
         BuildAttachmentDmaChain(self, e, self->f14 + i * 0x28, ctx);
     }
-    Node_165728* n = self->f4C;
+    AttachmentNode* n = self->f4C;
     if (n != 0)
     {
         do
@@ -2816,14 +2690,14 @@ void func_00165728(Self_165728* self, PlacedObject* ctx)
     }
 }
 
-void func_00165828(Obj_165828* self, PlacedObject* ctx)
+void func_00165828(AttachmentTargets* self, PlacedObject* ctx)
 {
-    Frame_165828 f;
+    TargetFrames f;
     s32 i;
 
     for (i = 0; i < self->count; i++) {
-        Elem_165828* e = &self->elems[i];
-        Node_165828* r = (Node_165828*)FindFirstObjectByIdMode4(ctx->world, self->keys[i], ctx);
+        AttachmentTarget* e = &self->elems[i];
+        TargetObject* r = (TargetObject*)FindFirstObjectByIdMode4(ctx->world, self->keys[i], ctx);
         e->p0 = r;
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);
@@ -2834,38 +2708,38 @@ void func_00165828(Obj_165828* self, PlacedObject* ctx)
     }
 }
 
-void func_00165920(Obj_165920* self, s32 arg, void* src)
+void func_00165920(AttachmentCopy* self, s32 arg, void* src)
 {
     s32 i = 0;
-    Node_165920** link;
+    AttachmentLink** link;
     CopyMemory(self, src, 0x58);
     self->f50 = 0;
     self->p4 = AllocateZeroedFrontMemory(self->n0 * 0x90);
     self->p44 = CopyToFrontMemory(self->n40 << 2, self->p44);
     self->p14 = CopyToFrontMemory(self->count * 0x28, self->p14);
-    Rec_165920* old = self->recs;
+    AttachmentPart* old = self->recs;
     for (; i < self->count; i++) {
-        Rec_165920* r = (Rec_165920*)((u8*)self->recs + i * 0x70);
+        AttachmentPart* r = (AttachmentPart*)((u8*)self->recs + i * 0x70);
         if ((r->a && (r->a->flags & 4)) || r->b) {
-            self->recs = (Rec_165920*)CopyToFrontMemory(self->count * 0x70, self->recs);
+            self->recs = (AttachmentPart*)CopyToFrontMemory(self->count * 0x70, self->recs);
             break;
         }
     }
     link = &self->head;
-    Node_165920* s = self->head;
+    AttachmentLink* s = self->head;
     if (s) {
         do {
-            Node_165920* n = (Node_165920*)CopyToFrontMemory(0x90, s);
+            AttachmentLink* n = (AttachmentLink*)CopyToFrontMemory(0x90, s);
             n->tag = arg;
-            Node_165920** pf = &n->p4;
+            AttachmentLink** pf = &n->p4;
             u32 sz = self->count * 0x70;
             u32 nb = (u32)self->recs;
             if (pf) {
                 u32 v = (u32)n->p4;
                 if (!(v < (u32)old) && v < (u32)old + sz)
-                    n->p4 = (Node_165920*)(v + (nb - (u32)old));
+                    n->p4 = (AttachmentLink*)(v + (nb - (u32)old));
             }
-            ((Rec_165920*)n->p4)->b = n;
+            ((AttachmentPart*)n->p4)->b = n;
             *link = n;
             link = &n->next;
             s = n->next;
@@ -2887,15 +2761,15 @@ void func_00165920(Obj_165920* self, s32 arg, void* src)
 
 INCLUDE_ASM(func_00165AE8);
 
-void func_00165FE0(Owner_165FE0* self, PlacedObject* sub, f32 f)
+void func_00165FE0(AnimatorOwner* self, PlacedObject* sub, f32 f)
 {
-    Elem_165FE0* e;
+    AnimatorStep* e;
     s32 i;
 
     for (i = 0; i < sub->elemCount; i++) {
-        e = ((Elem_165FE0**)sub->elems)[i];
+        e = ((AnimatorStep**)sub->elems)[i];
         if (ClaimAnimatorStep(e) != 0) {
-            VFn_165FE0 fn = e->vtbl[2];
+            AnimatorStepFn fn = e->vtbl[2];
             if (fn != 0) {
                 fn(e, f);
             }
@@ -2912,14 +2786,14 @@ void func_001660A0(PlacedObject* self)
     if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint(*(void**)(p+0x60));
 }
 
-void func_001660E8(PlacedObject* self, Par_1660E8* par)
+void func_001660E8(PlacedObject* self, ParentFrame* par)
 {
-    Mat_1660E8 a;
-    Mat_1660E8 b;
-    Mat_1660E8 c;
-    Mat_1660E8 e;
+    QuadMatrix a;
+    QuadMatrix b;
+    QuadMatrix c;
+    QuadMatrix e;
     s32 i;
-    List_1660E8* l = (List_1660E8*)self->sub22C;
+    FramedAttachmentList* l = (FramedAttachmentList*)self->sub22C;
 
     if (l->count > 0) {
         InvertRigidTransform(&self->v140, &self->m110, &a);
@@ -2929,10 +2803,10 @@ void func_001660E8(PlacedObject* self, Par_1660E8* par)
             b = a;
         }
         for (i = 0; i < l->count; i++) {
-            Elem_1660E8* el = (Elem_1660E8*)((u8*)l->items + (i << 4) * 9);
+            FramedAttachment* el = (FramedAttachment*)((u8*)l->items + (i << 4) * 9);
             if (el->obj != 0) {
                 el->obj->vt->f(el->obj);
-                Link_1660E8* t = el->obj->link;
+                FrameLinkConstraint* t = el->obj->link;
                 if (t != 0 && (t->flags & 0x80) && t->a4 != 0) {
                     c = t->m60;
                     e = MultiplyMatrices(b, &c);

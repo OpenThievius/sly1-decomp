@@ -142,8 +142,11 @@ struct World : BaseObject {
     void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
     QueuedCall* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
     QueuedCall* f1ECC;         // 0x1ECC: its last
-    u8 pad1ED0[0x1ED4 - 0x1ED0];
-    void* buf1ED4;          // 0x1ED4: 0x1000 bytes
+    s32 regroupCount;       // 0x1ED0: objects queued for regrouping (func_0015F678; func_0015FA58 clears it)
+    union {
+        void* buf1ED4;      // 0x1ED4: 0x1000 bytes
+        PlacedObject** regroupObjects; // the queue func_0015F678 appends to
+    };
     u8 pad1ED8[0x1EE0 - 0x1ED8];
     Vec02 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
     s32 f1EF0;              // 0x1EF0: the number of f1EF4 entries

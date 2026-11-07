@@ -238,7 +238,7 @@ Measured on this compiler; add to this list when you learn something.
   - The linker pads before a file's `.data` or `.rodata` to that file's own alignment, up to 16.
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
-  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `Rgba_1639E8`, one word)
+  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (file_15F678), one word)
     and the 0x1C-byte style object (zeroed, then 0x2D, 0xFF7D4B00, two sizes given as integers,
     0.3 twice) recur in many files' static initialisers.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.

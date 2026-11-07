@@ -31,5 +31,5 @@ s32 func_00160B28(u8* p)
     }
     if (done == 0) return 0;
     if (done == total) return 100;
-    return Clamp_160B28::Of(done * 100 / total, 1, 99);
+    return PercentClamp::Of(done * 100 / total, 1, 99);
 }
