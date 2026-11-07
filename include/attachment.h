@@ -56,7 +56,9 @@ struct Rec2195_224 {
     u8 pad00[0x8C]; // 0x00
     f32 f8C;                // 0x8C
     f32 f90;                // 0x90: func_00120AA8
-    u8 pad94[0xB0 - 0x94]; // 0x94
+    u8 pad94[0x98 - 0x94]; // 0x94
+    s32 f98;                // 0x98: bit 2 set or cleared by func_001C4578 when fB0 has 0x20
+    u8 pad9C[0xB0 - 0x9C]; // 0x9C
     s32 fB0;                // 0xB0: bit 0x20 gives the value at +0x8C
 };
 

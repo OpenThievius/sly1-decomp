@@ -13,6 +13,7 @@ struct OwnerMessage {
     s32 c;                  // 0x08: func_001D7098 (the same object again)
     union {
         void (*fn)(void);   // 0x0C: func_001EB748
+        void (*reply)(s32 c, void* receiver);  // 0x0C: called with c by the receiver (func_001C3D60)
         s32 d;              // 0x0C: func_001DE910
     };
 };

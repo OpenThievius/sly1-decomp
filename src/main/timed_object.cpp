@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "object_link.h"
 #include "state_trigger.h"
+#include "owner_message.h"
 
 void func_001B7968(Collider* self);
 void func_001B93F8(Collider* self);
@@ -47,9 +48,11 @@ ObjectLink D_002744D8[2] = {
 };
 void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
-struct Sub_1B04D0 {
+// The record at PlacedObject::f200 of these objects: its word at 0x44 is cleared at start and
+// set to 4 or 0 as the sequence enters state 0 or 2.
+struct Record200 {
     u8 pad0[0x44];
-    s32 x44;
+    s32 f44;
 };
 
 s32 func_001925F0(void);
@@ -58,22 +61,9 @@ void func_001BF788(void* snd, s32 n);
 void func_001BFCD8(s32 kind, void* snd, void* owner, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00155F90(void* p);
 
-struct Cfg_1B0360 {
-    f32 pad0;
-    f32 f4;
-    f32 f8;
-};
-
 void func_001D7098(void* buf, s32 n, void* self);
 
 void func_001B46E0(s32 a, s32 frame);
-
-struct Node_1B1070 {
-    u8 pad0[0x44];
-    s32 f44;
-};
-
-struct Clk_1B1070 { f32 t; };
 
 void func_001B1070(SequencedObject* self, s32 arg);
 void func_001AEF68(TimedObject* self);
@@ -453,9 +443,9 @@ void func_001B01B0(TimedGroup* self, s32 s)
     EnterTimedObjectState(self, s);
 }
 
-f32 func_001B0360(TimedGroup* o, Cfg_1B0360* c)
+f32 func_001B0360(TimedGroup* o, TimedGroupChild* c)
 {
-    f32 s = c->f4;
+    f32 s = c->riseScale;
     f32 r;
     f32 m;
     f32 t;
@@ -496,7 +486,7 @@ f32 func_001B0360(TimedGroup* o, Cfg_1B0360* c)
             else if (m < r)
                 r = m;
         }
-        s = c->f8;
+        s = c->fallScale;
         break;
     case 8:
         r = 0.0f;
@@ -529,7 +519,7 @@ void func_001B04D0(SequencedObject* self)
         self->f5D4 = self->world->f1D14;
     }
     if (self->f200 != 0) {
-        ((Sub_1B04D0*)self->f200)->x44 = 0;
+        ((Record200*)self->f200)->f44 = 0;
     }
     u64 m = 0x8000;
     m <<= 28;
@@ -703,7 +693,7 @@ void func_001B1070(SequencedObject* self, s32 arg)
         break;
     case 0:
         if (self->f200 != 0) {
-            ((Node_1B1070*)self->f200)->f44 = 4;
+            ((Record200*)self->f200)->f44 = 4;
         }
         break;
     case 1:
@@ -711,12 +701,12 @@ void func_001B1070(SequencedObject* self, s32 arg)
         break;
     case 2:
         if (self->f200 != 0) {
-            ((Node_1B1070*)self->f200)->f44 = 0;
+            ((Record200*)self->f200)->f44 = 0;
         }
         break;
     }
     self->state5D8 = arg;
-    self->f5DC = (*(Clk_1B1070*)g_gameTime).t;
+    self->f5DC = g_gameTime[0];
 }
 
 void func_001B1158(BlinkObject* self)
@@ -812,46 +802,36 @@ void func_001B1238(BlinkObject* self)
     SetBlinkObjectFrame(self);
 }
 
-struct __attribute__((aligned(16))) Quad_1B1438 { s32 w[4]; };
-
-struct Tgt_1B1438;
-struct Req_1B1438;
-void func_001F5C0C(Req_1B1438* p, s32 zero, s32 size);
-// The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player.
-struct Req_1B1438 {
-    void Init(BlinkObject* s, Tgt_1B1438* o, Quad_1B1438* k);
+struct TouchQuery;
+void func_001F5C0C(TouchQuery* p, s32 zero, s32 size);
+// The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
+// the object, what touched it, where that is and the direction (the unit z).
+struct TouchQuery {
+    void Init(BlinkObject* s, Collider* o, const Vec02* k);
     void* self;
     void* tgt;
     s32 pad8[6];
-    Quad_1B1438 q20;
-    Quad_1B1438 q30;
+    Vec02 q20;
+    Vec02 q30;
 };
 
-typedef s32 (*VFn_1B1438)(void* self, void* arg);
-struct Tgt_1B1438 {
-    VFn_1B1438* vtbl;
-    u8 pad[0x13C];
-    Quad_1B1438 f140;
-};
-
-inline void Req_1B1438::Init(BlinkObject* s, Tgt_1B1438* o, Quad_1B1438* k)
+inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
 {
     FillMemory(this, 0, 0x40);
     tgt = o;
     self = s;
-    q20 = o->f140;
+    q20 = o->v140;
     q30 = *k;
 }
 
-s32 func_001AED78(BlinkObject* self, Tgt_1B1438* t);
-struct Buf_1B1438 { s32 w[4]; };
-void func_001D7098(Buf_1B1438* out, s32 a, BlinkObject* self);
-void func_00177838(Req_1B1438* p, s32 a, s32 b);
+s32 func_001AED78(BlinkObject* self, Collider* t);
+void func_001D7098(OwnerMessage* out, s32 a, BlinkObject* self);
+void func_00177838(TouchQuery* p, s32 a, s32 b);
 
 void func_001B1438(BlinkObject* self, s32* out)
 {
-    Buf_1B1438 buf;
-    Req_1B1438 req;
+    OwnerMessage buf;
+    TouchQuery req;
     Collider* owner = (Collider*)self->root;
     s32 lastSide = 1;       // a contact has two ends: end[lastSide - x] is the other one
     ContactRow03* l = owner->contacts->head;
@@ -859,20 +839,20 @@ void func_001B1438(BlinkObject* self, s32* out)
         do {
             Contact03* n = l->head;
             if (n != 0) {
-                Quad_1B1438* k = (Quad_1B1438*)&g_unitZVector;
+                const Vec02* k = &g_unitZVector;
                 do {
                     s32 x = owner != n->end[0].body;
                     ContactEnd03* b = &n->end[lastSide - x];
                     ContactEnd03* a = &n->end[x];
-                    Tgt_1B1438* o = (Tgt_1B1438*)b->body;
+                    Collider* o = b->body;
                     if (a->part == self && IsObjectInAcceptLists(self, o) != 0) {
                         if (self->f618 == 0) {
                             *out = self->f554 == 0 ? 2 : 6;
                         }
                         if ((u32)(*out - 5) < 2) {
-                            if (o == (Tgt_1B1438*)g_player) {
+                            if (o == g_player) {
                                 InitOwnerMessage(&buf, 1, self);
-                                if (((Tgt_1B1438*)g_player)->vtbl[0x140 / 4]((Tgt_1B1438*)g_player, &buf) != 0) {
+                                if (g_player->desc05()->m4C(g_player, &buf) != 0) {
                                     StopTrackPlayer(self);
                                 }
                             } else {

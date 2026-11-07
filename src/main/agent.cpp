@@ -17,24 +17,24 @@ extern f32 D_0026185C[];
 void* func_001CA758(Agent* self, void* arg);
 void* func_001CA758(Agent* self, s32 arg);
 
-struct __attribute__((aligned(16))) Quad_1C6F48 { f32 c[3]; };
+struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 
 // The file's .data, in retail's order; its assembly reads the quadratics.
 s32 D_00274C20[4] = { 2, 0x195, 0x87C, 0 };
 s32 D_00274C30[8] = { 2, 0x194, 0x750, 6, 0x50, 0x734, 0, 0 };
-Quad_1C6F48 D_00274C50 = { { 1.0f, -1.0f, 0.0f } };
-Quad_1C6F48 D_00274C60 = { { 0.0f, 0.0f, 1.0f } };
-Quad_1C6F48 D_00274C70 = { { 0.0f, 15.0f, 1.5f } };
-Quad_1C6F48 D_00274C80 = { { 0.0f, 2.5f, 0.25f } };
+PaddedQuadratic D_00274C50 = { { 1.0f, -1.0f, 0.0f } };
+PaddedQuadratic D_00274C60 = { { 0.0f, 0.0f, 1.0f } };
+PaddedQuadratic D_00274C70 = { { 0.0f, 15.0f, 1.5f } };
+PaddedQuadratic D_00274C80 = { { 0.0f, 2.5f, 0.25f } };
 float D_00274C90 = 40.0f;
 float D_00274C94 = 50.0f;
 float D_00274C98[2] = {0.5f, 0.0f};
-Quad_1C6F48 D_00274CA0 = { { 1.0f, -0.00100000005f, 0.0f } };
-Quad_1C6F48 D_00274CB0 = { { 0.25f, 1.0f, 0.0f } };
-Quad_1C6F48 D_00274CC0 = { { 0.0f, 0.00499999989f, 0.0f } };
+PaddedQuadratic D_00274CA0 = { { 1.0f, -0.00100000005f, 0.0f } };
+PaddedQuadratic D_00274CB0 = { { 0.25f, 1.0f, 0.0f } };
+PaddedQuadratic D_00274CC0 = { { 0.0f, 0.00499999989f, 0.0f } };
 float D_00274CD0[2] = {0.0f, 1.0f};
 float D_00274CD8[2] = {1.0f, 0.0f};
-Quad_1C6F48 D_00274CE0 = { { 0.0f, 0.00499999989f, 0.0f } };
+PaddedQuadratic D_00274CE0 = { { 0.0f, 0.00499999989f, 0.0f } };
 float D_00274CF0 = 0.349999994f;
 f32 D_00274CF4 = 0.85f;
 f32 D_00274CF8[1] = { 0 };
@@ -46,7 +46,7 @@ f32 D_00274D10[2] = { 0.0f, 1.5f };
 f32 D_00274D18[2] = { 0.0f, 0.3f };
 float D_00274D20[2] = {700.0f, 0.0f};
 float D_00274D28[2] = {-0.200000003f, 0.200000003f};
-Quad_1C6F48 D_00274D30 = { { 0.800000012f, 1.20000005f, 0.0f } };
+PaddedQuadratic D_00274D30 = { { 0.800000012f, 1.20000005f, 0.0f } };
 
 extern u8 D_00261420[];
 void func_001C4458(TurningCollider* self);
@@ -173,8 +173,6 @@ void func_001C5EA8(void* self, f32 v);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_00141008(u8* table, s32 v);
 void* func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
-struct Ent_274AD8 { s32 a; s32 b; s32 c; };
-extern Ent_274AD8 D_00274AD8[6];
 
 extern u8 D_00261420[];
 
@@ -1420,9 +1418,7 @@ void func_001CAD28(Agent* self, f32 value) { self->f74C = value * 0.017453294f; 
 
 void func_001CBE20(void* self, s32 value);
 
-struct Obj_1CAD40 { u8 pad0[0x720]; void* f720; };
-
-void func_001CAD40(Obj_1CAD40* self, s32 value)
+void func_001CAD40(Agent* self, s32 value)
 {
     AddItemKeeperStateTrigger(self->f720, value);
 }
@@ -1522,19 +1518,17 @@ s32 func_001CB3C8(void)
 ASM_FUNC(func_001CB3D0);
 
 
-struct Glob_1CB578 { u8 pad0[0x275C]; s32 f275C; };
-
 s32 func_001CB578(Agent* self)
 {
     s32 r = 0;
-    Glob_1CB578* g;
+    Player* g;
     if (self->fB7C != 0) {
         goto set;
     }
     if (self->fB80 != 0) {
         r = 1;
     } else {
-        g = (Glob_1CB578*)g_player;
+        g = g_player;
         if (g != 0 && g->f275C != 0) {
 set:
             r = 1;
@@ -1715,21 +1709,20 @@ void func_001CB8B8(Self_1CB8B8* self)
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001CBB20(void* self);
 
-struct Obj_1CBAA0 { u8 pad0[0x50]; s32 f50; u8 pad1[0x17C - 0x54]; s32 f17C; };
 
-void func_001CBAA0(Obj_1CBAA0* a0)
+void func_001CBAA0(ItemKeeper* a0)
 {
-    Obj_1CBAA0* self = a0;
-    if (self->f50 == 3) {
+    ItemKeeper* self = a0;
+    if (self->state == 3) {
         return;
     }
-    if (self->f17C != 0) {
+    if (self->queued != 0) {
         return;
     }
     {
         s32 one = 1;
         void* owner = *(void**)&g_currentWorld;
-        self->f17C = one;
+        self->queued = one;
         AppendQueuedCall(owner, (void*)(void (*)(void*))UpdateItemKeeper, self, -1, 0);
     }
 }
@@ -1744,22 +1737,21 @@ s32 func_001CBAF8(Obj_1CBAF8* self)
     return item->vtbl[102](item);
 }
 
-struct Obj_1CBB20 { u8 pad0[0x50]; s32 f50; u8 pad1[0x17C - 0x54]; s32 f17C; u8 pad2[0x188 - 0x180]; s32 f188; };
 
 s32 func_001CBCB8(void* self);
 s32 func_001CBB88(void* self);
 void func_001CBEE8(void* self, s32 arg);
 
-void func_001CBB20(Obj_1CBB20* self)
+void func_001CBB20(ItemKeeper* self)
 {
     s32 v;
 
-    self->f17C = 0;
-    if (self->f50 != 3) {
-        self->f188 = IsAnyItemKeeperMemberFree(self);
+    self->queued = 0;
+    if (self->state != 3) {
+        self->anyFree = IsAnyItemKeeperMemberFree(self);
         for (;;) {
             v = ChooseItemKeeperState(self);
-            if (v == self->f50) {
+            if (v == self->state) {
                 break;
             }
             SetItemKeeperState(self, v);
@@ -1768,49 +1760,39 @@ void func_001CBB20(Obj_1CBB20* self)
 }
 
 struct Key_1CBB88;
-struct Obj_1CBB88;
 s32 func_001300E8(Key_1CBB88* key, s32 kind);
-s32 func_001CBD58(Obj_1CBB88* self);
+s32 func_001CBD58(ItemKeeper* self);
 void func_001BFCD8(Key_1CBB88* a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-struct Obj_1CBB88 {
-    u8 pad0[0x50];
-    s32 f50;
-    s32 f54;
-    s32 f58;
-    void* f5C[75];
-    u8 pad1[0x188 - 0x5C - 75 * 4];
-    s32 f188;
-};
 
-s32 func_001CBB88(Obj_1CBB88* self)
+s32 func_001CBB88(ItemKeeper* self)
 {
-    s32 state = self->f50;
+    s32 state = self->state;
     s32 i;
 
     switch (state) {
     case 0:
-        if (self->f188 != 0) {
-            for (i = 0; i < self->f58; i++) {
-                if (IsObjectOfKind((Key_1CBB88*)self->f5C[i], 9) == 0) {
+        if (self->anyFree != 0) {
+            for (i = 0; i < self->owned.count; i++) {
+                if (IsObjectOfKind((Key_1CBB88*)self->owned.found[i], 9) == 0) {
                     break;
                 }
             }
-            if (i >= self->f58) {
+            if (i >= self->owned.count) {
                 StartSoundEffect((Key_1CBB88*)0x3F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
             state = 2;
         }
         break;
     case 1:
-        if (self->f188 != 0) {
+        if (self->anyFree != 0) {
             state = 2;
         } else if (PollItemKeeperMembers(self) != 0) {
             state = 0;
         }
         break;
     case 2:
-        if (self->f188 == 0) {
+        if (self->anyFree == 0) {
             state = 1;
         }
         break;
@@ -1891,8 +1873,7 @@ s32 func_001CBD58(Self_CBD58* a0)
     return result;
 }
 
-struct Obj_001CBE20 { u8 pad[0x168]; s32 count; s32 items[4]; };
-void func_001CBE20(Obj_001CBE20* self, s32 value) { for (s32 i = 0; i < self->count; i++) if (value == self->items[i]) return; s32 i = self->count; if ((u32)i < 4) { s32 next = i + 1; self->items[i] = value; self->count = next; } }
+void func_001CBE20(ItemKeeper* self, s32 value) { for (s32 i = 0; i < self->triggerCount; i++) if (value == self->triggers[i]) return; s32 i = self->triggerCount; if ((u32)i < 4) { s32 next = i + 1; self->triggers[i] = value; self->triggerCount = next; } }
 
 struct Self_1CBE70 { u8 pad[0x168]; s32 count; void* items[1]; };
 

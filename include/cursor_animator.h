@@ -68,6 +68,18 @@ struct AnimCursor {
     AnimCursor* next;     // 0x18: in the list to flush
 };
 
+struct Quad4;           // a quadword (shapes.h)
+
+// An entry of an AnimRecord's list (func_001B3040 allocates them): a count of quadwords per
+// frame and the buffer of them that func_001B3510 sends to the GIF.
+struct AnimRecordEntry {
+    s32 type;               // 0x00
+    union {
+        s32 addr;           // 0x04: func_001B3040 stores the allocation
+        Quad4* data;        // 0x04: func_001B3510 reads it
+    };
+};
+
 // A record of D_002744FC (0x28 bytes each, func_001B3040 reads them): func_001B4688 finds one
 // by its key. Its owner is the object that binds it.
 struct AnimRecord {
@@ -82,7 +94,7 @@ struct AnimRecord {
     u8 nelem;               // 0x13: the elements at 0x14
     TextureTable* elems;    // 0x14: nelem texture tables of 0x14 bytes (func_001B2F00 reads them)
     s32 entCount;           // 0x18: the number of entries at 0x1C
-    void* ents;             // 0x1C: entCount entries of 8 bytes
+    AnimRecordEntry* ents;  // 0x1C: entCount entries
     s32 count;              // 0x20: frames (the first element's second word)
     CursorAnimator* owner;  // 0x24
 };

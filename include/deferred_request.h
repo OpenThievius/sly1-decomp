@@ -7,6 +7,12 @@
 
 #include "shapes.h"
 
+// The five quadwords of transform BuildPlacedObjectTransform (func_00125B70) writes for a
+// drawn object; func_001533A8 copies them into the part drawer's request.
+struct DrawTransform {
+    Quad16 q[5];            // 0x00
+};
+
 struct __attribute__((aligned(16))) DeferredRequest {
     union {
         void* callback;          // 0x00: func_00159D00
@@ -14,8 +20,12 @@ struct __attribute__((aligned(16))) DeferredRequest {
     };
     f32 f04;                // 0x04: func_00159D00
     s32 group;             // 0x08
-    u8 pad0C[0x60 - 0x0C];
-    Rgba4 col;              // 0x60: func_00159D00
+    u8 pad0C[0x10 - 0x0C];
+    DrawTransform block;    // 0x10: the transform func_00153328 builds for func_001533A8
+    union {
+        Rgba4 col;          // 0x60: func_00159D00
+        void* arg;          // 0x60: the object func_00153328 queues func_001533A8 for
+    };
     u8 pad64[0x80 - 0x64];
 };
 

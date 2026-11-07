@@ -7,37 +7,21 @@
 #include "vertex_batch.h"
 #include "value_range.h"
 #include "game_clock.h"
+#include "hit_target.h"
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.
 struct TrailPoint { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
-struct Poly_1C30E8 {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
-struct Range_1C30E8 {
-    f32 lo;
-    f32 hi;
-    f32 Clamp(f32 v)
-    {
-        f32 l = lo;
-        f32 h = hi;
-        if (v < l)
-            v = l;
-        else if (h < v)
-            v = h;
-        return v;
-    }
-};
-// The ring of up to 0x40 points a trail keeps: the oldest live one at +0x08, the next free at
-// +0x0C (ResetTrailRing empties it), an alpha curve over age at +0x50.
+// The ring of up to 0x40 points a trail keeps: the placed object it follows (its 0x2A8 is read),
+// the oldest live one at +0x08, the next free at +0x0C (ResetTrailRing empties it), an alpha
+// curve over age at +0x50.
 struct TrailRing {
-    struct TrailOwner* f0;
+    PlacedObject* f0;
     s32 f4;
     s32 f8;
     s32 fC;
     f32 f10;
     u8 pad14[0x3C];
-    Poly_1C30E8 poly;
+    TimePolynomial poly;
     u8 pad5C[4];
     TrailPoint elems[1];
 };
@@ -48,7 +32,6 @@ struct TrailOwner {
     u8 pad54[0xC];
     TrailRing* f60;
 };
-struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
 
 void* func_001619C0(VertexBatch* b);
 void func_00152B38(PacketWriter* g);
@@ -95,7 +78,7 @@ void func_001C30E8(TrailOwner* self)
     b.f98 = 0;
     SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
     SetVertexBatchMode(&b, r->f4);
-    func_00161B10(&b, ((u8*)&D_00248D30), ((Obj2_1C30E8*)r->f0)->f2A8);
+    func_00161B10(&b, ((u8*)&D_00248D30), r->f0->f2A8);
     idx = r->f8;
     if (idx != r->fC) {
         do {
@@ -103,7 +86,7 @@ void func_001C30E8(TrailOwner* self)
             f32 full = 255.0f;
             TrailPoint* e = (TrailPoint*)((u8*)r->elems + idx * size);
             f32 t = g_gameClock.time - e->f0;
-            f32 v = (*(Range_1C30E8*)&g_unitRange).Clamp(r->poly.Eval(t));
+            f32 v = g_unitRange.Clamp(r->poly.Eval(t));
             f32 w = self->f50 * e->f4 * v;
             if (zero < w) {
                 w = w * full;

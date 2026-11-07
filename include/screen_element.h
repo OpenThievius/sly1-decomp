@@ -41,7 +41,14 @@ struct T217D_Place {
 
 typedef char check_T217D_Place[sizeof(T217D_Place) == 20 ? 1 : -1];   // func_001AA1F0 steps 20 bytes
 
+// D_0026C3E0: the 37 elements' places and a word after them.
+struct ElementPlaceTable {
+    T217D_Place e[37];
+    s32 end;
+};
+
 struct ScreenElement;
+struct StepSequence;    // include/step_sequence.h
 
 // The 20 slots. Those the base fills are the generic ones; the derived tables replace
 // slots 0, 1, 2, 8, 9, 14, 15, 16 and so on with their own.
@@ -177,7 +184,10 @@ struct T217D_3D0 : ScreenElement {
 
 // D_00218420.
 struct T217D_420 : ScreenElement {
-    s32 flag;                   // 0x260
+    union {
+        s32 flag;               // 0x260: nonzero, the element shows (func_001AD718)
+        StepSequence* owner;    // 0x260: the step sequence in state 5 that shows it (func_00150790)
+    };
 };
 
 // D_00218470: an element with an icon table.
