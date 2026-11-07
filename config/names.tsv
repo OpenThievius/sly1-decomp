@@ -2529,3 +2529,20 @@ func_0014C668	FinishGaugeOnTimeout	the callback HandleGaugeManagerNotification g
 func_0014C788	ShowGaugeManagerDisplays	slot 0xC8 of class 0x68: while the device is in state 0x3FD and AreMenusAndFadeClear holds, calls slot 14 of g_gaugeAmountCaption and g_timerElement, else their slot 15
 func_0014C858	RunGaugeTimedEvent	original assembly: UpdateGaugeManager runs it when the timer at +0x45C has passed
 func_0014CD70	CountDownGaugeContacts	when the gauge manager's count +0x458 equals +0x450, sets the timer +0x45C to the game time plus a random time between +0x43C and +0x440; then lowers the count (EnterContactAgentState calls it)
+func_0014DA18	GetBaseCurveLengthAtTime	slot 5 of the abstract curve table D_00217568: returns 0
+func_0014DA28	GetBaseCurveTimeAtLength	slot 6 of the abstract curve table D_00217568: returns 0
+func_0014DA98	MeasureSplinePathDistance	original assembly: the function FindSplinePathNearestTime minimises over time (func_001EB168), as MeasurePathCurveDistance is for the path curve
+func_0014DB78	MeasurePathCurveDistance	samples the curve at the time through its slot 1, then measures that point against the context's two points with func_00186320 and returns the second result; FindPathCurveNearestTime minimises it
+func_0014DBD0	FindPathCurveNearestTime	minimises MeasurePathCurveDistance over the curve's times from a start time (func_001EB168, a tenth of the first segment as step, unbounded when it wraps), samples the curve there through slot 1 and returns the time and its length (slot 5); func_001D87C8 calls it
+func_0014DE08	SamplePathCurveAtTime	slot 1 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its times
+func_0014DE40	SamplePathCurveAtLength	slot 2 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its lengths
+func_0014E090	FindPathCurveNearestPoint	slot 10 of the path curve table D_002176D0: finds the nearest segment and fraction (func_0014D3A8) and returns the time and length there
+func_0014E170	ProjectOntoPathCurveNearTime	slot 11 of the path curve table D_002176D0: from the segment at the given time (FindPathCurveSegment), finds the nearest point (func_0014D680) and returns its time and length
+func_0014E2A0	ProjectOntoPathCurveNearLength	slot 12 of the path curve table D_002176D0: as ProjectOntoPathCurveNearTime, from the segment at the given length
+func_0014E5B8	SampleSplinePathAtTime	original assembly: slot 1 of the spline curve table D_00217708, the counterpart of SamplePathCurveAtTime
+func_0014E6A8	SampleSplinePathAtLength	slot 2 of the spline curve table D_00217708: turns the length into a time (slot 6) and samples there through slot 1
+func_0014E710	DrawSplinePathSegment	original assembly: slot 3 of the spline curve table D_00217708, the counterpart of DrawPathCurveSegment
+func_0014E828	TransformSplinePathPoints	original assembly: slot 4 of the spline curve table D_00217708, the counterpart of TransformPathCurvePoints
+func_0014EB10	FindSplinePathNearestPoint	original assembly: slot 10 of the spline curve table D_00217708, the counterpart of FindPathCurveNearestPoint
+func_0014EC70	FindSplinePathNearestTime	slot 11 of the spline curve table D_00217708: minimises MeasureSplinePathDistance over the curve's times from a start time, samples there through slot 1 and returns the time and its length (slot 5)
+func_0014ED98	ProjectOntoSplinePathNearLength	slot 12 of the spline curve table D_00217708: turns the length into a time (slot 6) and calls slot 11 with it

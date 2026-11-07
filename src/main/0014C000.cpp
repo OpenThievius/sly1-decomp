@@ -238,7 +238,7 @@ struct VT_14DB78 {
 struct Src_14DB78 { VT_14DB78* vt; };
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
-// Defined in src/main/file_14D0A8.cpp.
+// Defined in src/main/path_curve.cpp.
 f32 func_0014DB40();
 f32 func_0014DB58();
 void func_0014DD28();
