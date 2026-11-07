@@ -16,6 +16,8 @@ extern f32 g_gameTime[];
 #include "screen_element.h"
 #include "sound_state_object.h"
 #include "pad_record.h"
+#include "mul_rotation.h"
+#include "value_range.h"
 
 
 
@@ -532,7 +534,78 @@ void StartGaugeCollider(GaugeCollider* self)
     AddStateWalkerListener(self->f6B8, self);
 }
 
-INCLUDE_ASM(func_00196B78);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildShortestArcRotation(const Vec02* from, void* to, Mat02* out);
+void RotateMatrixUpright(void* sub, void* a, void* out);
+Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
+f32 WrapAngle(f32 a);
+void StepCollider(void* self, f32 t);
+void TurnColliderTowardRotation(void* self, f32 scale, void* out, void* data);
+void AddColliderForce(void* self, Vec02* force);
+extern const Vec02 D_00248D20;
+
+static inline f32 ClampToRange(const ValueRange* range, f32 v)
+{
+    f32 lo = range->lo;
+    f32 hi = range->hi;
+    f32 r;
+    if (v < lo) {
+        r = lo;
+    } else if (hi < v) {
+        r = hi;
+    } else {
+        r = v;
+    }
+    return r;
+}
+
+void func_00196B78(GaugeCollider* self, f32 dt)
+{
+    Mat02 b;
+    Mat02 a;
+
+    StepCollider(self, dt);
+    BuildAxisAngleMatrix(&D_00248D20, &b, self->f618);
+    BuildShortestArcRotation(&D_00248D20, &self->v630, &a);
+    {
+        u128 a0 = Vu0::Q(a.r[0]);
+        u128 a1 = Vu0::Q(a.r[1]);
+        u128 a2 = Vu0::Q(a.r[2]);
+        Vec02 x;
+        Vec02 y;
+        Vec02 z;
+        Mat02 r;
+        u128 p0 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+        Vu0::Set(r.r[0], p0);
+        Vu0::Set(x, p0);
+        u128 p1 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+        Vu0::Set(r.r[1], p1);
+        Vu0::Set(y, p1);
+        u128 p2 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+        Vu0::Set(r.r[2], p2);
+        Vu0::Set(z, p2);
+        b = r;
+    }
+    TurnColliderTowardRotation(self, dt, &b, D_0026A7D8);
+    Mat02 u;
+    Mat02 v;
+    Mat02 c;
+    RotateMatrixUpright(&self->rot, &u, &v);
+    BuildAxisAngleMatrix(&D_00248D20, &c, self->f618);
+    c = MultiplyByTransposedMatrix3x3(u, c);
+    Vec02 force;
+    f32 turn = __builtin_fabsf(WrapAngle(ArctangentOfRatio(v.r[0].y, v.r[0].x) - self->f618));
+    f32 k1 = ClampToRange(&g_unitRange, D_0026A7F0.x + turn * (D_0026A7F0.y + turn * D_0026A7F0.z));
+    f32 phase = (g_gameTime[0] - self->f61C) / D_0026A800.x;
+    f32 k2 = ClampToRange(&g_unitRange, D_0026A810.x + phase * (D_0026A810.y + phase * D_0026A810.z));
+    Vu0::Q(force) = Vu0::MulX(Vu0::Q(c.r[0]), Vu0::Scalar(k1 * k2 * self->f620));
+    AddColliderForce(self, &force);
+    Vec02 drag;
+    drag = self->v150;
+    drag.z = 0.0f;
+    Vu0::Q(force) = Vu0::MulX(Vu0::Q(drag), Vu0::Scalar(-self->f624 / (self->f628 * self->f628) * k2 * Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(drag)))));
+    AddColliderForce(self, &force);
+}
 
 s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
 {
