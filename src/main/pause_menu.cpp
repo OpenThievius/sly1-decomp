@@ -13,21 +13,18 @@
 #include "pad_record.h"
 #include "memory_card.h"
 #include "background_job.h"
+#include "screen_fade.h"
 
-struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
-void func_00168AF8(State_193288*);
-void func_00193318(State_193288*);
+void func_00168AF8(LoadProgress*);
+void func_00193318(LoadProgress*);
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
 s32 func_0015C188(s32 k);
 Font* func_0015C1C0(s32 k);
 
-struct S_193270 { s32 a,b,c,d,e; };
-
-struct S_193300 { s32 a,b,c,d,e; };
-
-struct Dev_193EE8 {
+// The DISPLAY register pair at D_00262490 (0x18 and 0x40), read as func_00193EE8 reads them.
+struct DisplayRegRead {
     u8 pad[0x18];
     union {
         struct {
@@ -47,22 +44,11 @@ void func_001BE998(void);
 s32 func_00160148(s32 v);
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 
-struct __attribute__((packed)) Col_193318 { u8 r, g, b, a; };
-struct Obj_193318 {
-    u8 pad0[4];
-    s32 h;
-    s32 w;
-    s32 x;
-    s32 cnt;
-    u8 r, g, b, pad1;
-    Col_193318 c0;
-    Col_193318 c1;
-    Col_193318 c2;
-};
-struct Buf_193318 { u8 bytes[0x400]; PacketWriter f; };
+// The packet DrawLoadProgressBar builds on its stack: its memory, then the writer.
+struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
 
 void* func_001611B8(PacketWriter* f);
-void func_001529C8(PacketWriter* f, s32 n, Buf_193318* b);
+void func_001529C8(PacketWriter* f, s32 n, BarPacket* b);
 void func_00152B38(PacketWriter* f);
 f32 func_001EAF28(f32 x);
 void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, PacketWriter* e, f32 x, f32 y, f32 z, f32 w);
@@ -70,7 +56,7 @@ void func_00161200(PacketWriter* f);
 void func_00152D30(PacketWriter* f);
 void func_00152D70(PacketWriter* f);
 void func_001529E0(PacketWriter* f, s32 a, s32 b);
-void func_00168A48(Buf_193318* b);
+void func_00168A48(BarPacket* b);
 
 void func_001AA8F0(void* self);
 
@@ -78,11 +64,8 @@ void func_001AA958(void* self);
 
 void func_001936A0(void* self, s32 v);
 
-struct Rec_194278 { s32 f0; void* f4; s32 f8; s32 fC; s32 f10; };
 
 extern void* D_00275710;
-extern u8 D_00275B04[];
-extern u8 D_00275F80[];
 
 void func_00194D30(void* self, s32 a, s32 b);
 void func_001EFFA0(void* obj, void* rec, s32 n);
@@ -102,46 +85,34 @@ void func_001E9570(void* q);
 void func_001E9498(void* a, void* b);
 
 extern u8 D_00247AB0[];
-extern u8 D_00275F80[];
 
 void func_001EFFA0(void* dst, void* args, s32 count);
 
-struct Args_194398 {
-    s32 kind;
-    void* text;
-    s32 x;
-    s32 y;
-    s32 z;
-};
 
 extern u8 D_00248D20[];
 
+// The two DISPLAY registers at D_00262490 (the screen's position: 12 bits of x, 11 of y).
 // The register at +0x18 is described with 32-bit bit-fields, the one at +0x40 with 64-bit ones;
 // the mixed types are what give retail's copy of the masked value.
-struct Reg_1961C0 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
-struct RegA_1961C0 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
-struct Gs_1961C0 {
+struct DisplayReg64 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
+struct DisplayReg32 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
+struct DisplayRegs {
     u8 pad0[0x18];
-    RegA_1961C0 f18;
+    DisplayReg32 f18;
     u8 pad20[0x20];
-    Reg_1961C0 f40;
+    DisplayReg64 f40;
 };
-extern Gs_1961C0 D_00262490;
+extern DisplayRegs D_00262490;
 extern s32 D_00275BF0;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
 void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 s32 func_001FD7A0(f32 x);
 
-struct Ent_195958 {
-    u8 pad0[0xC];
-    f32 fC;
-    u8 pad1[0x1A5C - 0x10];
-};
 
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
-extern Ent_195958 D_002542D8[];
+extern CardSlot D_002542D8[];
 
 void func_001961C0(T217D_6D0* self);
 void func_00194D30(T217D_6D0* self, s32 a, s32 b);
@@ -172,39 +143,19 @@ void func_001C0760(s32 flag);
 s32 func_001C0790(s32 flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-struct Row_1943E8 {
-    void* f0;
-    u8 pad4[0xC - 0x4];
-    s32 fC;
-    s32 f10;
-    s32* items;
-};
-struct Ent_1943E8 {
-    u8 pad0[0xC];
-    f32 fC;
-    u8 pad10[0x1A5C - 0x10];
-};
-struct Item_1943E8 {
+// The glyph mark FindSubstring finds in a page title: the glyph is its third byte.
+struct GlyphMark {
     u8 pad0[2];
     u8 f2;
 };
-struct Reg_1943E8 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
-struct RegA_1943E8 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
-struct Gs_1943E8 {
-    u8 pad0[0x18];
-    RegA_1943E8 f18;
-    u8 pad20[0x20];
-    Reg_1943E8 f40;
-};
 
 extern f32 D_00261868;
-extern Ent_1943E8* D_0026998C;
-struct Words6_264A58 { s32 v[6]; };
-extern Words6_264A58 D_00264A58;
+extern CardSlot* D_0026998C;
 extern s32 D_00264A4C;
 extern f32 D_0026A22C;
-struct Pair_26A230 { f32 f0; f32 f4; };
-extern Pair_26A230 D_0026A230;
+// The speeds the screen-position page moves the screen at (x is D_0026A22C).
+struct ScreenAdjustRate { f32 f0; f32 f4; };
+extern ScreenAdjustRate D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 
@@ -223,11 +174,11 @@ void func_001961C0(T217D_6D0* self);
 void func_00194398(void);
 s32 func_0018B770(BackgroundJob* p);
 void func_0018B670(BackgroundJob* p, void* fn, void* arg);
-Item_1943E8* func_001F6880(void* a, const char* name);
+GlyphMark* func_001F6880(void* a, const char* name);
 s32 func_001AEA08(void);
 s32 func_001FD7A0(f32 x);
 
-struct Clamp_1943E8 {
+struct ClampFloat {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
         if (x < lo) {
@@ -240,8 +191,8 @@ struct Clamp_1943E8 {
     }
 };
 
-enum Bits_1940E8 {
-    BITS_1940E8_ZERO = 0
+enum PadSelectBits {
+    PAD_SELECT_NONE = 0
 };
 
 extern u8 D_00275BC0[];
@@ -251,18 +202,40 @@ void func_001BED48(void);
 void func_001BED70(void);
 void func_001E96F8(void* self, s32 mode);
 void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
-s32 func_0016E0F0(Bits_1940E8 bits);
-void func_0016E118(Bits_1940E8 n);
+s32 func_0016E0F0(PadSelectBits bits);
+void func_0016E118(PadSelectBits n);
 void func_0016EC88(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
-struct Rgba_194F80 { u8 r, g, b, a; };
-struct Owner_194F80;
-struct VEnt_194F80 { s16 delta; s16 idx; void (*fn)(void* self, Owner_194F80* o, Layout_137228* out, void* d); };
-struct Hook_194F80 { u8 pad[0x4C]; VEnt_194F80* vt; };
-struct Owner_194F80 { Hook_194F80* f0; u8 pad[0x14]; Rgba_194F80 f18; };
-struct Menu_194F80 { char* title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
+void func_001F5C0C(void* p, s32 zero, s32 size);
+
+// The style of the menu's box (D_0026A210, the element's frame): the font that draws it and
+// its colour; the static initialiser builds it.
+struct MenuBoxStyle {
+    Font* font;
+    u8 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    union {
+        u32 f18;
+        Rgba4 color;
+    };
+    MenuBoxStyle(s32 size)
+    {
+        FillMemory(this, 0, 0x1C);
+        f4 = 0x2D;
+        f8 = size;
+        f14 = f10 = 0.6f;
+        f18 = 0xFF7D4B00;
+    }
+};
+// A page of the pause menu (g_pauseMenuPages): its title, the scales of the title and the items,
+// whether the items stand in a column, and the items (indices of choice labels).
+struct MenuPage { char* title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
+extern MenuPage D_00269D50[33];
 
 extern f32 D_00261858[];
 extern s32 D_00275BEC;
@@ -284,9 +257,9 @@ f32 func_0015E1B0(TextReader* buf, f32 w);
 void func_0015C900(Font* font);
 f32 func_0015DFF8(TextReader* buf);
 char* func_00193598(s32 index);
-void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba_194F80* c, s32 k);
+void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba4* c, s32 k);
 
-struct Setup_194F80 { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
+struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {
     func_00137228(out, x, y);
     func_00137238(out, w, h);
@@ -297,15 +270,15 @@ struct Setup_194F80 { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f3
     func_00137268(out, 0);
 } };
 
-struct CallHook_194F80 { static void Do(Owner_194F80* o, Layout_137228* out, void* d)
+struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, Layout_137228* out, void* d)
 {
-    Hook_194F80* hk = o->f0;
+    Font* hk = o->font;
     if (hk != 0) {
-        hk->vt[9].fn((u8*)hk + hk->vt[9].delta, o, out, d);
+        hk->vt->drawBox((Font*)((u8*)hk + hk->vt->adj9), o, out, d);
     }
 } };
 
-struct LerpChan_194F80 { static s32 Do(s32 a, s32 b, f32 t)
+struct LerpChannel { static s32 Do(s32 a, s32 b, f32 t)
 {
     if (a == b) {
         return b;
@@ -316,13 +289,13 @@ struct LerpChan_194F80 { static s32 Do(s32 a, s32 b, f32 t)
     return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
 } };
 
-struct Lerp_194F80 { static void Do(Rgba_194F80* out, Rgba_194F80 a, Rgba_194F80 b, f32 t)
+struct LerpColor { static void Do(Rgba4* out, Rgba4 a, Rgba4 b, f32 t)
 {
-    Rgba_194F80 r;
-    r.r = LerpChan_194F80::Do(a.r, b.r, t);
-    r.g = LerpChan_194F80::Do(a.g, b.g, t);
-    r.b = LerpChan_194F80::Do(a.b, b.b, t);
-    r.a = LerpChan_194F80::Do(a.a, b.a, t);
+    Rgba4 r;
+    r.r = LerpChannel::Do(a.r, b.r, t);
+    r.g = LerpChannel::Do(a.g, b.g, t);
+    r.b = LerpChannel::Do(a.b, b.b, t);
+    r.a = LerpChannel::Do(a.a, b.a, t);
     *out = r;
 } };
 
@@ -331,24 +304,8 @@ void func_001F5C0C(void* p, s32 zero, s32 size);
 // The file's .data, in retail's order from 0x269CD8, and the strings of its menus, which open
 // its .rodata. The style (func_00196330, the static initialiser, builds it) and the buffers the
 // menus' labels are written into at run time are zeros until then.
-struct Style_196330 {
-    void* f0;
-    u8 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-    u32 f18;
-    Style_196330(s32 size)
-    {
-        FillMemory(this, 0, 0x1C);
-        f4 = 0x2D;
-        f8 = size;
-        f14 = f10 = 0.6f;
-        f18 = 0xFF7D4B00;
-    }
-};
-struct Choice_26A138 { s32 count; char** labels; };
+// A choice's labels, one per state (g_menuChoiceStates).
+struct ChoiceLabels { s32 count; char** labels; };
 
 extern s32 D_0026A238[];
 extern s32 D_0026A258[];
@@ -369,7 +326,7 @@ s32 D_00269D00[2] = { 2, 0 };
 s32 D_00269D08[4] = { 10, 11, 12, 17 };
 s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
 s32 D_00269D40[4] = { 24, 25, 26, 17 };
-Menu_194F80 D_00269D50[33] = {
+MenuPage D_00269D50[33] = {
     { "Paused", 1.0f, 1.0f, 1, 8, g_pauseMenuItems },
     { "Game Over. Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "Really Quit?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
@@ -444,7 +401,7 @@ char* D_0026A100[2] = { "Binoc-u-com: &2(&. Up = Look Down", "Binoc-u-com: &2(&.
 char* D_0026A108[2] = { "Turrets: &2(&. Up = Aim Down", "Turrets: &2(&. Up = Aim Up" };
 char* D_0026A110[2] = { "Jet Pack: &2(&. Up = Fly Down", "Jet Pack: &2(&. Up = Fly Up" };
 u32 D_0026A118[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
-Choice_26A138 D_0026A138[27] = {
+ChoiceLabels D_0026A138[27] = {
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
@@ -473,9 +430,9 @@ Choice_26A138 D_0026A138[27] = {
     { 2, D_0026A108 },
     { 2, D_0026A110 },
 };
-Style_196330 D_0026A210(15);
+MenuBoxStyle D_0026A210(15);
 f32 D_0026A22C = 5.0f;
-Pair_26A230 D_0026A230 = { 2.0f, 0.0f };
+ScreenAdjustRate D_0026A230 = { 2.0f, 0.0f };
 s32 D_0026A238[8] = { 0 };
 s32 D_0026A258[138] = { 0 };
 char D_0026A480[64] = { 0 };
@@ -494,10 +451,10 @@ f32 D_0026A708 = 0;
 f32 D_0026A70C = 0;
 
 LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
-void func_00193270(S_193270* p);
-void func_00193288(State_193288* self, s32 value);
-void func_00193300(S_193300* p);
-void func_00193318(Obj_193318* o);
+void func_00193270(LoadProgress* p);
+void func_00193288(LoadProgress* self, s32 value);
+void func_00193300(LoadProgress* p);
+void func_00193318(LoadProgress* o);
 void func_001935B0(GameProgress* self, char* dst);
 s32 func_00193660(void);
 void func_00193E58(T217D_6D0* self);
@@ -521,55 +478,55 @@ LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U3
     self->f18 = *s2;
     self->f1C = *s3;
     self->f20 = *s4;
-    self->f00 = 0;
-    self->f10 = 0;
-    self->f0C = 0;
-    self->f08 = 0;
-    self->f04 = 0;
+    self->active = 0;
+    self->stalls = 0;
+    self->current = 0;
+    self->total = 0;
+    self->scale = 0;
     return self;
 }
 
-void func_00193270(S_193270* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
+void func_00193270(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
 
-void func_00193288(State_193288* self, s32 value)
+void func_00193288(LoadProgress* self, s32 value)
 {
-	if (self->ptr != 0) {
-		if (self->size == 0) { self->scaled = value << 1; self->size = value; SendDisplayResetPacket(self); }
-		else if (self->value == value) self->repeat++;
-		else self->repeat = 0;
-		self->value = value;
+	if (self->active != 0) {
+		if (self->total == 0) { self->scale = value << 1; self->total = value; SendDisplayResetPacket(self); }
+		else if (self->current == value) self->stalls++;
+		else self->stalls = 0;
+		self->current = value;
 		DrawLoadProgressBar(self);
 	}
 }
 
-void func_00193300(S_193300* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
+void func_00193300(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
 
-void func_00193318(Obj_193318* o)
+void func_00193318(LoadProgress* o)
 {
-    Buf_193318 buf;
+    BarPacket buf;
     s32 n1;
     s32 n2;
-    Col_193318 c;
+    BarColor c;
 
-    n1 = (s32)((f32)o->w * 620.0f / (f32)o->h);
-    n2 = (s32)((f32)n1 * (f32)(o->w - o->x) / (f32)o->w);
+    n1 = (s32)((f32)o->total * 620.0f / (f32)o->scale);
+    n2 = (s32)((f32)n1 * (f32)(o->total - o->current) / (f32)o->total);
     InitGifPacket(&buf.f);
     UsePacketBufferMemory(&buf.f, 0x40, &buf);
     BeginDmaTag(&buf.f);
     {
-        u8 r = o->r;
-        u8 g = o->g;
-        u8 b = o->b;
+        u8 r = o->barColor.r;
+        u8 g = o->barColor.g;
+        u8 b = o->barColor.b;
         f32 y = TruncateFloat(412.909088f) * 1.1f;
         f32 z = (f32)(n2 + 10);
         WriteColoredSpritePacket(r, g, b, 255, &buf.f, 10.0f, y, z, TruncateFloat(412.909088f) * 1.1f + 6.6000004f);
     }
-    if (o->cnt <= 0) {
-        c = o->c0;
-    } else if (o->cnt == 1) {
-        c = o->c1;
+    if (o->stalls <= 0) {
+        c = o->color0;
+    } else if (o->stalls == 1) {
+        c = o->color1;
     } else {
-        c = o->c2;
+        c = o->color2;
     }
     {
         u8 r = c.r;
@@ -664,8 +621,8 @@ void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
         break;
     }
     case 24: {
-        D_0026A700 = D_0026A708 = (f32)(u32)((Dev_193EE8*)&D_00262490)->a.x;
-        D_0026A704 = D_0026A70C = (f32)((u32)(((Dev_193EE8*)&D_00262490)->q18 >> 12) & 0x7FF);
+        D_0026A700 = D_0026A708 = (f32)(u32)((DisplayRegRead*)&D_00262490)->a.x;
+        D_0026A704 = D_0026A70C = (f32)((u32)(((DisplayRegRead*)&D_00262490)->q18 >> 12) & 0x7FF);
         break;
     }
     case -1:
@@ -697,7 +654,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
         }
         ChangePauseMenuPage(self, -1, self->page);
         self->vt->m14(self);
-        SetPadSelectFlags((Bits_1940E8)1);
+        SetPadSelectFlags((PadSelectBits)1);
         ResetPadStepRepeat(&g_padRecord);
     } else {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
@@ -713,7 +670,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
         }
         ChangePauseMenuPage(self, self->page, -1);
         self->vt->m15(self);
-        ClearPadSelectFlags((Bits_1940E8)1);
+        ClearPadSelectFlags((PadSelectBits)1);
     }
     self->open = mode;
 }
@@ -725,13 +682,13 @@ void func_00194278(void* a0, s32 a1, s32 a2)
     s32 key = (g->f19D8 << 8) | g->f19DC;
     if (key == 0x106) {
         if (a1 != 0) {
-            Rec_194278 r;
-            r.f0 = 1;
-            r.f4 = D_00275B04;
-            r.f8 = -1;
-            r.fC = -1;
-            r.f10 = 0;
-            StartScreenFade(g_screenFade, &r, a2);
+            FadeRequest r;
+            r.kind = 1;
+            r.key = &D_00275B04;
+            r.f08 = -1;
+            r.f0C = -1;
+            r.flags = 0;
+            StartScreenFade(&g_screenFade, &r, a2);
         } else {
             void* p = FindFirstObjectByIdGathered(g_currentWorld, 5, 0x5F, 0);
             SetPairControllerState(p, 6);
@@ -739,13 +696,13 @@ void func_00194278(void* a0, s32 a1, s32 a2)
         return;
     }
     if (a1 != 0) {
-        Rec_194278 r;
-        r.f0 = 1;
-        r.f4 = D_00275B04;
-        r.f8 = -1;
-        r.fC = -1;
-        r.f10 = 0x10;
-        StartScreenFade(g_screenFade, &r, a2);
+        FadeRequest r;
+        r.kind = 1;
+        r.key = &D_00275B04;
+        r.f08 = -1;
+        r.f0C = -1;
+        r.flags = 0x10;
+        StartScreenFade(&g_screenFade, &r, a2);
     } else {
         BeginLevelExit(0, a2);
     }
@@ -753,19 +710,19 @@ void func_00194278(void* a0, s32 a1, s32 a2)
 
 void func_00194398(void)
 {
-    Args_194398 args;
+    FadeRequest args;
     args.kind = 1;
     args.text = D_00247AB0;
-    args.x = -1;
-    args.y = -1;
-    args.z = 4;
-    StartScreenFade(g_screenFade, &args, 0);
+    args.f08 = -1;
+    args.f0C = -1;
+    args.flags = 4;
+    StartScreenFade(&g_screenFade, &args, 0);
 }
 
 void func_001943E8(T217D_6D0* self)
 {
     GameProgress* g = g_saveData;
-    Row_1943E8* row = &((Row_1943E8*)&g_pauseMenuPages)[self->page];
+    MenuPage* row = &g_pauseMenuPages[self->page];
     s32 on;
     s32 n;
     PadRecord* pad;
@@ -818,20 +775,20 @@ void func_001943E8(T217D_6D0* self)
         ready = 0;
     }
     pad = &g_padRecord;
-    if (row->f10 == 0) {
+    if (row->count == 0) {
         n = 0;
-    } else if (row->fC != 0) {
+    } else if (row->vertical != 0) {
         n = GetPadVerticalStep(pad);
     } else {
         n = GetPadHorizontalStep(pad);
     }
     if (n > 0) {
-        self->cursor = (self->cursor + 1) % row->f10;
+        self->cursor = (self->cursor + 1) % row->count;
         StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     if (n < 0) {
-        self->cursor = (self->cursor + row->f10 - 1) % row->f10;
+        self->cursor = (self->cursor + row->count - 1) % row->count;
         StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
@@ -846,8 +803,8 @@ void func_001943E8(T217D_6D0* self)
     if (pad->flags & 0x80) {
         ClearPadPressedBits(&g_padRecord, 0x80);
         if (self->page == 11 || self->page == 16) {
-            Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[row->items[self->cursor]];
-            if (e->fC != 0.0f) {
+            CardSlot* e = &D_002542D8[row->items[self->cursor]];
+            if (e->f0C != 0.0f) {
                 D_0026998C = e;
                 SetPauseMenuLayerPage(self, 1, 0x12);
             }
@@ -869,14 +826,14 @@ void func_001943E8(T217D_6D0* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        D_0026A700 = Clamp_1943E8::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
-        v = Clamp_1943E8::Of(D_0026A704 + dy * D_0026A230.f0, 10.0f, 90.0f);
+        D_0026A700 = ClampFloat::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
+        v = ClampFloat::Of(D_0026A704 + dy * D_0026A230.f0, 10.0f, 90.0f);
         D_0026A704 = v;
         {
-            Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
+            DisplayRegs* gs = &D_00262490;
             s32 h = ConvertFloatToU32(D_0026A700);
-            Reg_1943E8 ra = gs->f40;
-            RegA_1943E8 rb = gs->f18;
+            DisplayReg64 ra = gs->f40;
+            DisplayReg32 rb = gs->f18;
             ra.lo = h;
             rb.lo = h;
             gs->f40 = ra;
@@ -892,27 +849,27 @@ void func_001943E8(T217D_6D0* self)
     case 11:
     case 16:
     case 17:
-        if (D_00264A58.v[0] != 1) {
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
             return;
         } else {
             s32 id = row->items[self->cursor];
             if ((u32)(id - 10) < 3) {
-                Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[id];
+                CardSlot* e = &D_002542D8[id];
                 if (self->page == 16) {
-                    if (e->fC != 0.0f) {
+                    if (e->f0C != 0.0f) {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2S&. : Erase Game");
                     } else {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : New Game");
                     }
                 } else if (self->page == 17) {
-                    if (e->fC != 0.0f) {
+                    if (e->f0C != 0.0f) {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Load Game");
                     } else {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : New Game");
                     }
                 } else {
-                    if (e->fC != 0.0f) {
+                    if (e->f0C != 0.0f) {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Overwrite Game\n&2S&. : Erase Game");
                     } else {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Save Game");
@@ -925,16 +882,16 @@ void func_001943E8(T217D_6D0* self)
         }
         break;
     case 18:
-        if (D_00264A58.v[0] != 1) {
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
         }
         break;
     case 20: {
-        Item_1943E8* it;
-        if (D_00264A58.v[0] != 1) {
+        GlyphMark* it;
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
         }
-        it = FindSubstring(row->f0, "&2");
+        it = FindSubstring(row->title, "&2");
         if (it != 0) {
             it->f2 = GetCyclingGlyph();
         }
@@ -1100,7 +1057,7 @@ void func_00194F80(T217D_6D0* self)
     f32 pulse;
     f32 fade;
     s32 alpha;
-    Menu_194F80* menu;
+    MenuPage* menu;
     f32 lineH;
     f32 base;
     f32 x;
@@ -1121,14 +1078,14 @@ void func_00194F80(T217D_6D0* self)
         h = hh * s; 
     }
     pulse = Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
-    menu = &((Menu_194F80*)&g_pauseMenuPages)[self->page];
+    menu = &g_pauseMenuPages[self->page];
     fade = 1.0f;
     if (self->page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
     self->fade = ApproachValueWithRamp(g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
     alpha = (u8)(s32)(self->fade * 255.0f);
-    if (((Owner_194F80*)self->frame) != 0) {
+    if (((MenuBoxStyle*)self->frame) != 0) {
         Layout_137228 out;
         s32 backColor = 0xFF808080;
         func_00137228(&out, cx, cy);
@@ -1140,30 +1097,30 @@ void func_00194F80(T217D_6D0* self)
         }
         func_00137260(&out, 0);
         func_00137268(&out, 0);
-        Rgba_194F80 saved = ((Owner_194F80*)self->frame)->f18;
+        Rgba4 saved = ((MenuBoxStyle*)self->frame)->color;
         {
-            Rgba_194F80 t = saved;
+            Rgba4 t = saved;
             t.a = alpha;
-            ((Owner_194F80*)self->frame)->f18 = t;
+            ((MenuBoxStyle*)self->frame)->color = t;
         }
         if (menu->count == 0) {
-            Owner_194F80* cur = ((Owner_194F80*)self->frame);
-            Rgba_194F80 gray;
+            MenuBoxStyle* cur = ((MenuBoxStyle*)self->frame);
+            Rgba4 gray;
             gray.r = 0x6F; 
             gray.g = 0x6F; 
             gray.b = 0x6F; 
             gray.a = alpha; 
-            Rgba_194F80 res;
-            Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
-            cur->f18 = res;
+            Rgba4 res;
+            LerpColor::Do(&res, cur->color, gray, pulse * pulse);
+            cur->color = res;
         }
-        CallHook_194F80::Do(((Owner_194F80*)self->frame), &out, g_gsPacketWriter);
-        ((Owner_194F80*)self->frame)->f18 = saved;
+        DrawBoxWithFont::Do(((MenuBoxStyle*)self->frame), &out, g_gsPacketWriter);
+        ((MenuBoxStyle*)self->frame)->color = saved;
     }
     if (menu->title != 0) {
         TextReader buf;
         Layout_137228 out;
-        Rgba_194F80 c;
+        Rgba4 c;
         f32 sc = menu->titleScale * self->blend;
         PushFontScale(self->font, sc, sc);
         InitTextReader(&buf, menu->title, self->font);
@@ -1171,7 +1128,7 @@ void func_00194F80(T217D_6D0* self)
         c.g = 0x7F;
         c.b = 0x7F;
         c.a = alpha;
-        Setup_194F80::Do(&out, cx, cy, w, h, *(s32*)&c, 1);
+        SetupLayout::Do(&out, cx, cy, w, h, *(s32*)&c, 1);
         DrawAlignedText(&buf, &out, 0, g_gsPacketWriter);
         cy += MeasureTextHeight(&buf, 500.0f);
         PopFontScale(self->font);
@@ -1196,13 +1153,13 @@ void func_00194F80(T217D_6D0* self)
         x = cx + (w - total) * 0.5f;
     }
     for (i = 0; i < menu->count; i++) {
-        Rgba_194F80 col;
+        Rgba4 col;
         f32 grow;
         f32 width;
         void* str;
         f32 th;
         if (i == self->cursor) {
-            Rgba_194F80 c;
+            Rgba4 c;
             c.r = 0x6F;
             c.g = 0x6F;
             c.b = (s32)(pulse * 64.0f) + 0x2F;
@@ -1210,7 +1167,7 @@ void func_00194F80(T217D_6D0* self)
             col = c;
             grow = (1.0f - pulse) * 0.1f + 1.0f;
         } else {
-            Rgba_194F80 c;
+            Rgba4 c;
             c.r = 0x5F;
             c.g = 0x5F;
             c.b = 0x5F;
@@ -1233,7 +1190,7 @@ void func_00194F80(T217D_6D0* self)
         f32 width2 = SumTextWidth(&buf);
         th = (f32)self->font->height * self->font->sy;
         Layout_137228 out;
-        Setup_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
+        SetupLayout::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
         DrawAlignedText(&buf, &out, 0, g_gsPacketWriter);
         PopFontScale(self->font);
         if (menu->vertical != 0) {
@@ -1244,7 +1201,7 @@ void func_00194F80(T217D_6D0* self)
     }
     PopFontScale(self->font);
     if (menu->title != 0 && menu->count != 0) {
-        Rgba_194F80 c = *(Rgba_194F80*)&D_0026A210.f18;
+        Rgba4 c = D_0026A210.color;
         c.a = alpha;
         s32 y = (s32)((base * 0.45454547f + 1936.0f) * 16.0f);
         DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
@@ -1490,8 +1447,8 @@ void func_00195958(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, 0x17);
         return;
     case 16: {
-        Ent_195958* e = &D_002542D8[sel];
-        if (e->fC == 0.0f) {
+        CardSlot* e = &D_002542D8[sel];
+        if (e->f0C == 0.0f) {
             SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
             ApplyMemoryCardImage(&g_memoryCard);
@@ -1508,13 +1465,13 @@ void func_00195958(T217D_6D0* self)
         ResumeAtSavedLevel();
         return;
     case 11: {
-        Ent_195958* e;
+        CardSlot* e;
         u32 p;
-        p = sel * sizeof(Ent_195958);
+        p = sel * sizeof(CardSlot);
         p += (u32)D_002542D8;
-        e = (Ent_195958*)p;
+        e = (CardSlot*)p;
         g_memoryCard.f4F4C = e;
-        if (e->fC == 0.0f) {
+        if (e->f0C == 0.0f) {
         c6030:
             MemoryCard* b;
             b = &g_memoryCard;
@@ -1576,10 +1533,10 @@ void func_001961C0(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
-        Gs_1961C0* g = &D_00262490;
+        DisplayRegs* g = &D_00262490;
         s32 v = ConvertFloatToU32(D_0026A708);
-        Reg_1961C0 a = g->f40;
-        RegA_1961C0 b = g->f18;
+        DisplayReg64 a = g->f40;
+        DisplayReg32 b = g->f18;
         a.lo = v;
         b.lo = v;
         g->f40 = a;

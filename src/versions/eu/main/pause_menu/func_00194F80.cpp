@@ -11,7 +11,7 @@ struct Self_eu_194F80 {
     u8 pad1[0x408 - 8];
     Lines_eu_194F80 lines;
     u8 pad1b[0x520 - 0x414];
-    Owner_194F80* f210;
+    MenuBoxStyle* f210;
     u8 pad2[0x534 - 0x524];
     f32 f224;
     f32 f228;
@@ -104,30 +104,30 @@ void func_00194F80(Self_eu_194F80* self)
         func_00137260(&out, 0);
         func_00137268(&out, 0);
         func_eu_001374E0(&out, 0);
-        Rgba_194F80 saved = self->f210->f18;
+        Rgba4 saved = self->f210->color;
         {
-            Rgba_194F80 t = saved;
+            Rgba4 t = saved;
             t.a = alpha;
-            self->f210->f18 = t;
+            self->f210->color = t;
         }
         if (menu->count == 0) {
-            Owner_194F80* cur = self->f210;
-            Rgba_194F80 gray;
+            MenuBoxStyle* cur = self->f210;
+            Rgba4 gray;
             gray.r = 0x6F; 
             gray.g = 0x6F; 
             gray.b = 0x6F; 
             gray.a = alpha; 
-            Rgba_194F80 res;
-            Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
-            cur->f18 = res;
+            Rgba4 res;
+            LerpColor::Do(&res, cur->color, gray, pulse * pulse);
+            cur->color = res;
         }
-        CallHook_194F80::Do(self->f210, (Layout_137228*)&out, g_gsPacketWriter);
-        self->f210->f18 = saved;
+        DrawBoxWithFont::Do(self->f210, (Layout_137228*)&out, g_gsPacketWriter);
+        self->f210->color = saved;
     }
     if (menu->title != -1) {
         Buf_eu_194F80 buf;
         Out_eu_194F80 out;
-        Rgba_194F80 c;
+        Rgba4 c;
         f32 sc = menu->titleScale * self->f23C;
         PushFontScale(self->f4, sc, sc);
         func_eu_0015DD18(&buf, menu->title, self->f4, 0);
@@ -161,13 +161,13 @@ void func_00194F80(Self_eu_194F80* self)
         x = cx + (w - total) * 0.5f;
     }
     for (i = 0; i < menu->count; i++) {
-        Rgba_194F80 col;
+        Rgba4 col;
         f32 grow;
         f32 width;
         void* str;
         f32 th;
         if (i == self->f264) {
-            Rgba_194F80 c;
+            Rgba4 c;
             c.r = 0x6F;
             c.g = 0x6F;
             c.b = (s32)(pulse * 64.0f) + 0x2F;
@@ -175,7 +175,7 @@ void func_00194F80(Self_eu_194F80* self)
             col = c;
             grow = (1.0f - pulse) * 0.1f + 1.0f;
         } else {
-            Rgba_194F80 c;
+            Rgba4 c;
             c.r = 0x5F;
             c.g = 0x5F;
             c.b = 0x5F;
@@ -209,7 +209,7 @@ void func_00194F80(Self_eu_194F80* self)
     }
     PopFontScale(self->f4);
     if (menu->title != -1 && menu->count != 0) {
-        Rgba_194F80 c = *(Rgba_194F80*)&D_0026A210.f18;
+        Rgba4 c = D_0026A210.color;
         c.a = alpha;
         s32 y = (s32)((base * 0.5462963f + 1920.0f) * 16.0f);
         DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);

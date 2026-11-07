@@ -24,7 +24,7 @@ struct Hud_1943E8_eu {
 void func_00194D30(Self_1943E8_eu* self, s32 a, s32 b);
 void func_00195958(Self_1943E8_eu* self);
 void func_001961C0(Self_1943E8_eu* self);
-extern Ent_195958 D_eu_00255538[];
+extern CardSlot D_eu_00255538[];
 extern f32 D_eu_0026BB30;
 extern f32 D_eu_0026BB34;
 extern u8 D_eu_00263550[];
@@ -34,7 +34,7 @@ const char* func_eu_001DDAB0(s32 id);
 void func_001943E8(Self_1943E8_eu* self)
 {
     GameProgress* g = g_saveData;
-    Row_1943E8* row = &((Row_1943E8*)&g_pauseMenuPages)[self->f570];
+    MenuPage* row = &g_pauseMenuPages[self->f570];
     s32 on;
     s32 n;
     PadRecord* pad;
@@ -87,20 +87,20 @@ void func_001943E8(Self_1943E8_eu* self)
         ready = 0;
     }
     pad = &g_padRecord;
-    if (row->f10 == 0) {
+    if (row->count == 0) {
         n = 0;
-    } else if (row->fC != 0) {
+    } else if (row->vertical != 0) {
         n = GetPadVerticalStep(pad);
     } else {
         n = GetPadHorizontalStep(pad);
     }
     if (n > 0) {
-        self->f574 = (self->f574 + 1) % row->f10;
+        self->f574 = (self->f574 + 1) % row->count;
         StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     if (n < 0) {
-        self->f574 = (self->f574 + row->f10 - 1) % row->f10;
+        self->f574 = (self->f574 + row->count - 1) % row->count;
         StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
@@ -115,8 +115,8 @@ void func_001943E8(Self_1943E8_eu* self)
     if (pad->flags & 0x80) {
         ClearPadPressedBits(&g_padRecord, 0x80);
         if (self->f570 == 11 || self->f570 == 16) {
-            Ent_1943E8* e = &((Ent_1943E8*)&D_eu_00255538)[row->items[self->f574]];
-            if (e->fC != 0.0f) {
+            CardSlot* e = &D_eu_00255538[row->items[self->f574]];
+            if (e->f0C != 0.0f) {
                 D_0026998C = e;
                 SetPauseMenuLayerPage(self, 1, 0x12);
             }
@@ -138,14 +138,14 @@ void func_001943E8(Self_1943E8_eu* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        D_eu_0026BB30 = Clamp_1943E8::Of(D_eu_0026BB30 + dx * D_0026A22C, 438.0f, 874.0f);
-        v = Clamp_1943E8::Of(D_eu_0026BB34 + dy * D_0026A230.f0, 15.0f, 129.0f);
+        D_eu_0026BB30 = ClampFloat::Of(D_eu_0026BB30 + dx * D_0026A22C, 438.0f, 874.0f);
+        v = ClampFloat::Of(D_eu_0026BB34 + dy * D_0026A230.f0, 15.0f, 129.0f);
         D_eu_0026BB34 = v;
         {
-            Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
+            DisplayRegs* gs = &D_00262490;
             s32 h = func_001FD7A0(D_eu_0026BB30);
-            Reg_1943E8 ra = gs->f40;
-            RegA_1943E8 rb = gs->f18;
+            DisplayReg64 ra = gs->f40;
+            DisplayReg32 rb = gs->f18;
             ra.lo = h;
             rb.lo = h;
             gs->f40 = ra;
@@ -161,19 +161,19 @@ void func_001943E8(Self_1943E8_eu* self)
     case 11:
     case 16:
     case 17:
-        if (D_00264A58.v[0] != 1) {
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
             return;
         } else {
             s32 id = row->items[self->f574];
             if ((u32)(id - 10) < 3) {
-                Ent_1943E8* e = &((Ent_1943E8*)&D_eu_00255538)[id];
+                CardSlot* e = &D_eu_00255538[id];
                 if (self->f570 == 16) {
-                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(157)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(157)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
                 } else if (self->f570 == 17) {
-                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(159)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(159)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
                 } else {
-                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(160)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(161)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(160)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(161)); }
                 }
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);
             } else {
@@ -182,18 +182,18 @@ void func_001943E8(Self_1943E8_eu* self)
         }
         break;
     case 18:
-        if (D_00264A58.v[0] != 1) {
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
         }
         break;
     case 20: {
         u16* p;
         s32 found;
-        if (D_00264A58.v[0] != 1) {
+        if (g_memoryCard.displayMode != 1) {
             CancelPauseMenuPage(self);
         }
         found = 0;
-        p = (u16*)func_eu_001DDAB0((s32)row->f0);
+        p = (u16*)func_eu_001DDAB0((s32)row->title);
         for (;;) {
             u16 c = p[0];
             u16 d;

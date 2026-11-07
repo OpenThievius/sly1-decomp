@@ -20,7 +20,10 @@ struct SoundStateObject : Collider {
     void* soundId;  // 0x55C: the sound's id (slot 16 starts it)
     void* soundHandle;  // 0x560: the sound's handle (func_001B6290)
     BaseObject* child7E;  // 0x564: the first child of kind 0x7E (slot 16)
-    PackedWord8 keptBytes;  // 0x568: kept across slot 9 (func_001A7588)
+    union {
+        PackedWord8 keptBytes;  // 0x568: kept across slot 9 (func_001A7588)
+        SoundStateObject* listNext; // 0x568: the link in the gauge collider's lists (func_001973D8)
+    };
 };
 
 typedef char check_SoundStateObject[sizeof(SoundStateObject) == 0x570 ? 1 : -1];
