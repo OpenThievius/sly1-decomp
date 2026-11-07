@@ -3528,8 +3528,6 @@ extern const SoundEntry D_00245020[771] = {
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 
-extern const f32 D_00249E4C = 3.4028235e+38f;
-
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;

@@ -859,6 +859,9 @@ s32 func_00145810(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f3
     return 1;
 }
 
+// The file's one .rodata word, the largest float, which the original assembly func_00145950
+// loads.
+extern const f32 D_00249E4C = 3.4028235e+38f;
 ASM_FUNC(func_00145950);
 
 ASM_FUNC(func_00145B68);
