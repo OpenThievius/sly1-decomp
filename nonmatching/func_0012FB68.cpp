@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/1 (0.0%), checked 2026-11-08
+// BYTES 320/328 (97.6%), checked 2026-11-07
 // NEAR: one swap: retail loads the target's reach (lwc1 f1,0x3D0(v0)) before the vsub.xyzw of the length; here after it. Six forms of the comparison and the radius (local before, after, doubled, reach+reach, reversed) tried.
 // In the context of its file, src/main/placed_object.cpp.
 // 0x1233C0 to 0x130F48: the state triggers (classes 0x22 and 0x2F), the placed object's set-up,
