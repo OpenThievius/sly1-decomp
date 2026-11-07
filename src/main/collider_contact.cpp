@@ -245,8 +245,8 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
             groups[j]->next = *head;
             *head = groups[j];
             s32 bytes = (n - j) * 4 - 4;
-            func_001F5B08(groups + j, groups + j + 1, bytes);
-            func_001F5B08(keys + j, keys + j + 1, bytes);
+            MoveMemory(groups + j, groups + j + 1, bytes);
+            MoveMemory(keys + j, keys + j + 1, bytes);
             j--;
             n--;
         }

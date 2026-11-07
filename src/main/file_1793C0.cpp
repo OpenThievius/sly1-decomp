@@ -242,7 +242,7 @@ void func_0017A788(C1B* self, void* s, void* out)
         } else {
             t = 0.0f;
         }
-        u = func_00205210((g_gameClock[1] - self->f6D4) * 10.0f);
+        u = Cosine((g_gameClock[1] - self->f6D4) * 10.0f);
         a = D_00263D30[0] + t * (D_00263D30[1] + t * D_00263D30[2]);
         hi = g_unitRange[1];
         if (a < g_unitRange[0]) {
@@ -619,7 +619,7 @@ void func_0017B648(CountdownCollider* self)
         }
     }
     if (D_00263E2C != -1) {
-        func_0017B8C0(self, D_00263E2C);
+        SetCountdownState(self, D_00263E2C);
     }
     if (self->mode == 2) {
         if (g_timeoutLimit < g_gameTime - self->startTime) {

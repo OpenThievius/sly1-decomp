@@ -153,13 +153,16 @@ void func_001DFD48();
 void func_001E2398();
 void func_001E9088();
 
-struct Ent_264670 { void* f0; s32 f4; s32 f8; s16 fC; s16 fE; };
+// A run of lights of one kind in g_sortedLights, as UploadLightVolumes groups them for
+// CollectLightsForSphere: the first light, the count, the flag bits a caller can mask out and
+// the kind that picks the VU0 test.
+struct LightGroup { void* lights; s32 count; s32 flags; s16 kind; s16 fE; };
 
 s32 D_00264260 = 0;
 s32 D_00264264 = 0;
 void* D_00264268[256] = {0};
 s32 D_00264668 = 0;
-Ent_264670 D_00264670[16] = {};
+LightGroup D_00264670[16] = {};
 Vec4_264770 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
 Vec4_264770 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
 Vec4_264770 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
@@ -236,7 +239,7 @@ ASM_FUNC(func_00185538);
 
 void func_00185758(s32 a, s32 b)
 {
-    func_001FAE18();
+    RunConstructorsOnce();
     D_00264834 = a;
     D_00264838 = b;
     RunStartupInitializers();
@@ -270,7 +273,7 @@ void func_00185758(s32 a, s32 b)
             func_001E9648(g_elementStack);
             SubmitRenderFrame();
         }
-        D_002622CC++;
+        g_frameCount++;
     }
 }
 
@@ -278,32 +281,32 @@ void func_001858F8()
 {
     u8 buf[0x100];
     FormatDiscPath(buf, (const u8*)"ioprp243.img", 1);
-    func_001F7BE8(0);
-    func_00203548(0);
+    InitRemoteCalls(0);
+    InitDiscLibrary(0);
     if (func_00140968() == 0) {
         for (;;) {
         }
     }
     func_001409A8();
-    func_001F8BF8();
-    while (func_001F9C50(buf) == 0) {
+    ForgetFileClient();
+    while (ResetIop(buf) == 0) {
     }
-    while (func_001F9C18() == 0) {
+    while (IsIopResetDone() == 0) {
     }
-    func_001F7BE8(0);
-    func_001F9820();
-    func_00203548(0);
+    InitRemoteCalls(0);
+    ForgetModuleLoader();
+    InitDiscLibrary(0);
     if (func_00140968() == 0) {
         for (;;) {
         }
     }
     func_001409A8();
-    func_001F8BF8();
-    func_00203828(0);
+    ForgetFileClient();
+    WaitDiscReady(0);
     TestDiscReadDone(1);
     for (u32 i = 0; i < 6; i++) {
         FormatDiscPath(buf, g_iopModuleNames[i], 1);
-        while (func_001F9A90(buf, 0, 0) < 0) {
+        while (LoadIopModuleFile(buf, 0, 0) < 0) {
         }
     }
 }
@@ -312,9 +315,9 @@ void func_00185A58(void)
 {
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
-    func_001F6C20(0);
-    func_00202A80((void*)g_vif0Channel, D_00211E10);
-    func_00202C38((void*)g_vif0Channel, 0, 0);
+    SyncDataCache(0);
+    StartDmaChain((void*)g_vif0Channel, D_00211E10);
+    WaitDmaChannel((void*)g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
 }
@@ -323,9 +326,9 @@ void func_00185AC8()
 {
     Flags_185AC8* p = *(Flags_185AC8**)g_vif1Channel;
     p->flags |= 0x40;
-    func_001F6C20(0);
-    func_00202A80(*(void**)g_vif1Channel, D_00212110);
-    func_00202C38(*(void**)g_vif1Channel, 0, 0);
+    SyncDataCache(0);
+    StartDmaChain(*(void**)g_vif1Channel, D_00212110);
+    WaitDmaChannel(*(void**)g_vif1Channel, 0, 0);
     (*(Flags_185AC8**)g_vif1Channel)->flags &= ~0x40;
 }
 

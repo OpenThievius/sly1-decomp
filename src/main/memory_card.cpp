@@ -96,7 +96,7 @@ s32 func_0018D368(void* self, void* code, void* data, s32 version);
 
 void func_0018B580(void)
 {
-	func_002093F0();
+	InitMemoryCardClient();
 	InitBackgroundJob(&g_backgroundJob);
 	InitMemoryCard(&g_memoryCard, 0, 0);
 }
@@ -109,7 +109,7 @@ void func_0018B5C0(BackgroundJob* self)
 
 void func_0018B600()
 {
-    func_001F6B60(g_backgroundJob.semaphore);
+    AwaitSemaphore(g_backgroundJob.semaphore);
     BackgroundJob* o = &g_backgroundJob;
     s32 r = o->job(o->arg);
     o->result = r;
@@ -117,8 +117,8 @@ void func_0018B600()
     o->thread = -1;
     o->arg = 0;
     o->job = 0;
-    func_001F6B40(g_backgroundJob.semaphore);
-    func_001F6A30();
+    PostSemaphore(g_backgroundJob.semaphore);
+    EndOwnThread();
 }
 
 // The parameters of the thread a job runs on (func_001F6A10 creates it from them).
@@ -136,24 +136,24 @@ void func_0018B670(BackgroundJob* job, void* fn, void* arg)
     job->job = (s32 (*)(void*))fn;
     job->arg = arg;
     job->result = 0x20;
-    func_001F5C0C(&param, 0, 0x30);
+    FillMemory(&param, 0, 0x30);
     param.entry = RunBackgroundJob;
     param.stack = D_002BEA10;
     param.stackSize = 0x4000;
     param.gp = D_002832F0;
     param.priority = 3;
-    job->thread = func_001F6A10(&param);
+    job->thread = MakeThread(&param);
     *(s32*)D_00275960 = job->thread;
-    func_001F6A20(job->thread, job);
+    RunThread(job->thread, job);
 }
 
 void func_0018B720(BackgroundJob* job)
 {
     if (IsBackgroundJobRunning(&g_backgroundJob)) {
-        func_001F6A50(job->thread, 1);
+        SetThreadPriority(job->thread, 1);
     }
-    func_001F6B60(job->semaphore);
-    func_001F6B40(job->semaphore);
+    AwaitSemaphore(job->semaphore);
+    PostSemaphore(job->semaphore);
 }
 
 s32 func_0018B770(void* p)
@@ -203,7 +203,7 @@ struct Dst_18B780 {
 
 void func_0018B780(Src_18B780* s, Dst_18B780* d)
 {
-    func_001F5C0C(d, 0, 0x5C);
+    FillMemory(d, 0, 0x5C);
     CopyString(d, s->sub20);
     d->f44 = s->f10;
     if (s->f14 & 0x1) {
@@ -413,7 +413,7 @@ s32 func_0018B988(s32 a, s32 b)
 s32 func_0018BC90(void* a0, void* a1, s32* a2)
 {
     Pair_18BC90 t;
-    s32 r = ClassifyMemoryCardSyncResult(func_00209B80(a0, &t.a, &t.b));
+    s32 r = ClassifyMemoryCardSyncResult(SyncCardRequest(a0, &t.a, &t.b));
     if (a2) {
         *a2 = t.b;
     }
@@ -433,7 +433,7 @@ s32 func_0018BD00(s32 value, void* first, s32 second)
 
 void func_0018BD58(MemoryCard* self, s32 a, s32 b)
 {
-    func_001F5C0C(self, 0, 0x4F50);
+    FillMemory(self, 0, 0x4F50);
     self->state = -1;
     self->targetState = 0;
     SetMemoryCardDisplayMode(self, 0);
@@ -537,7 +537,7 @@ void func_0018C178(MemoryCard* self, s32 value)
 
 s32 func_0018C1A8(MemoryCard* self)
 {
-    s32 r = func_0018D1F8(self);
+    s32 r = FormatMemoryCard(self);
     if (r != 0) {
         self->targetState = 2;
     } else {
@@ -640,7 +640,7 @@ s32 func_0018C420(void* p) {
     s32 local50;
     s32 local54;
 
-    r = FinishMemoryCardCall(func_00209E48(self->f4, self->f8, D_0024B348, 0, -1, 0), (void*)0xD, (s32)&local50);
+    r = FinishMemoryCardCall(ReadCardDirectory(self->f4, self->f8, D_0024B348, 0, -1, 0), (void*)0xD, (s32)&local50);
     if (local50 <= 0) {
         GetMemoryCardFreeBytes(self, &local54);
         if (local54 <= 0xC3FF) {
@@ -756,8 +756,8 @@ s32 func_0018C888(void* ctx, u8* b, s32 c, u8* d, s32* e)
         b = D_002BE9C0;
     }
     buf = D_002BE540;
-    func_001F5C0C(buf, 0, 0x480);
-    r = FinishMemoryCardCall(func_00209E48(a->p4, a->p8, b, flag, c, buf), (void*)0xD, (s32)e);
+    FillMemory(buf, 0, 0x480);
+    r = FinishMemoryCardCall(ReadCardDirectory(a->p4, a->p8, b, flag, c, buf), (void*)0xD, (s32)e);
     if (r != 0) {
         return r;
     }
@@ -863,7 +863,7 @@ s32 func_0018CA10(void* owner, void* a1, void* a2)
 {
     Cfg_18CA10 c;
     Buf_18CA10 buf;
-    (void)func_001F5C0C(&c, 0, 0x3C4);
+    (void)FillMemory(&c, 0, 0x3C4);
     c.f000 = ((Src_18CA10*)&D_0024B3D0)->w0;
     c.f004 = ((Src_18CA10*)&D_0024B3D0)->b4;
     c.f006 = 0x20;
@@ -920,7 +920,7 @@ struct Pair_18CC20 : KeyId {
     s32 Set(Key_18CC20* key)
     {
         s32 has;
-        func_0018D410(this);
+        ClearKeyId(this);
         if (!key) {
             has = 0;
         } else {
@@ -987,7 +987,7 @@ s32 func_0018CDD8(void* a0, void* a1, GameProgress* out, void* i)
     s32 r;
     s32 size;
     if (info == 0) info = &local;
-    func_001F5C0C(info, 0, 0x5C);
+    FillMemory(info, 0, 0x5C);
     ResetGameProgress(out);
     r = CheckMemoryCardFileExists(a0, a1, info);
     if (r != 0) return r;
@@ -1037,7 +1037,7 @@ s32 func_0018D028(void* a0, void* a1, void* a2, void* a3)
 
 s32 func_0018D0A0(MemoryCard* o)
 {
-    s32 r = FinishMemoryCardCall(func_00209CB8(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), (void*)1, 0);
+    s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), (void*)1, 0);
     switch (r) {
     case 9:
     case 11:
@@ -1066,7 +1066,7 @@ s32 func_0018D0A0(MemoryCard* o)
 s32 func_0018D168(void* p, s32* a1)
 {
     Obj_18D168* a0 = (Obj_18D168*)p;
-    s32 v = FinishMemoryCardCall(func_00209CB8(a0->p4, a0->p8, &a0->p24, &a0->p28, &a0->p2C), (void*)1, 0);
+    s32 v = FinishMemoryCardCall(GetCardInfo(a0->p4, a0->p8, &a0->p24, &a0->p28, &a0->p2C), (void*)1, 0);
     switch (v) {
     case 9: v = 0; break;
     case 10: v = 12; break;
@@ -1083,30 +1083,30 @@ s32 func_0018D1F8(void* p)
 
 s32 func_0018D228(void* p, void* value)
 {
-	s32 result = FinishMemoryCardCall((s32)func_002096E8(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), value), (void*)0xB, 0);
+	s32 result = FinishMemoryCardCall((s32)MakeCardDirectory(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), value), (void*)0xB, 0);
 	return result == 0x18 ? 0 : result;
 }
 
 s32 func_0018D268(void* p, void* a1, void* a2, void* a3)
 {
-	return FinishMemoryCardCall((s32)func_002095B0(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), a1, a2), (void*)2, (s32)a3);
+	return FinishMemoryCardCall((s32)OpenCardFile(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), a1, a2), (void*)2, (s32)a3);
 }
 
 s32 func_0018D2B0(void* unused, void* value)
 {
-	return FinishMemoryCardCall((s32)func_00209720(value), (void*)3, 0);
+	return FinishMemoryCardCall((s32)CloseCardFile(value), (void*)3, 0);
 }
 
 LINKER_REMNANT(func_0018D2E0);
 
 s32 func_0018D2E8(void* a0, void* a1, void* a2, void* a3, void* a4)
 {
-    return FinishMemoryCardCall(func_00209870(a1, a2, a3), (void*)5, (s32)a4);
+    return FinishMemoryCardCall(ReadCardFile(a1, a2, a3), (void*)5, (s32)a4);
 }
 
 s32 func_0018D328(void* unused, void* a1, void* a2, void* a3, void* a4)
 {
-	return FinishMemoryCardCall((s32)func_00209990(a1, a2, a3), (void*)6, (s32)a4);
+	return FinishMemoryCardCall((s32)WriteCardFile(a1, a2, a3), (void*)6, (s32)a4);
 }
 
 struct Result_18D368 { s32 first; s32 second; };

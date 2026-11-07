@@ -52,7 +52,7 @@ struct EffectSpawner : PlacedObject {
     };
     s32 id300;              // 0x300
     s32 id304;              // 0x304
-    s32 f308;               // 0x308
+    s32 continuous;         // 0x308: set, the spawner stays active forever
     s32 id30C;              // 0x30C
     s32 f310;               // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438

@@ -326,7 +326,7 @@ void func_00181818(C1A* o, void* a, void* b)
         } else {
             t = 0.0f;
         }
-        f32 s = func_00205210((g_gameClock[1] - o->fBF4) * 10.0f);
+        f32 s = Cosine((g_gameClock[1] - o->fBF4) * 10.0f);
         f32 p = D_00264160.x + t * (D_00264160.y + t * D_00264160.z);
         f32 x = Clamp_181818::Of(p, g_unitRange[0], g_unitRange[1]);
         f32 q = D_00264170.x + s * (D_00264170.y + s * D_00264170.z);
@@ -374,7 +374,7 @@ void func_00181B20(void* unused, void* obj_)
     func_00128018(unused, 0, &D_00264180, &first);
     func_001BC260(D_00264190, obj, &first, &second);
     ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
-    f32 r = func_00205778(second.y, second.x);
+    f32 r = ArctangentOfRatio(second.y, second.x);
     obj->x638 = WrapAngle(r + 3.1415927f);
     func_001C5D58(obj);
     SetPlayerState(obj, 4, 0x2B);
@@ -500,7 +500,7 @@ ASM_FUNC(func_001821B0);
 
 void func_00182470(C24* self)
 {
-    func_0013DDB8(self);
+    InitPlayerFlaggedCollider(self);
     self->f6DC = 10.0f;
     self->f6E0 = 1.0f;
     self->f6D8 = 3000.0f;
@@ -511,7 +511,7 @@ void func_00182470(C24* self)
 
 void func_001824D8(C24* self)
 {
-    func_0013CE40(self);
+    StartMaskedCollider(self);
     ResolveObjectLinks(self, 2, D_00264230);
     self->x6C8 = (StateWalker*)CreateStateWalker(self->x6C4, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)CreateWeightCurve(0);

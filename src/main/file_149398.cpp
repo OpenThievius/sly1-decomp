@@ -384,7 +384,7 @@ Quad_1493C8 func_001493C8(T2173_3B0* self)
 {
     Quad_1493C8 r;
     if (self->f5C != 0) {
-        func_001920B0(self->f5C, &r);
+        ConvertPositionToWorld(self->f5C, &r);
     } else {
         if (GetActiveSwitchedCollider() != 0) {
             r = *(Quad_1493C8*)((u8*)GetActiveSwitchedCollider() + 0x140);

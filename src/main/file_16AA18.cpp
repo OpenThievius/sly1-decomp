@@ -611,7 +611,7 @@ void func_0016B860(T217D_12E0* self)
             Hd_16B860::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
-        f32 r = func_00205400(g_elapsedTime * 10.0f);
+        f32 r = Sine(g_elapsedTime * 10.0f);
         f32 t = r * 0.5f + 0.5f;
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->scale * k;
@@ -761,7 +761,7 @@ struct Style_16C360 {
     u32 f18;
     Style_16C360(f32 w, f32 h)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
         f8 = w;
         fC = h;

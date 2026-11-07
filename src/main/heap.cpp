@@ -37,7 +37,7 @@ void func_0018D780(void* dst, void* src, u32 count);
 
 void func_0018D410(void* p)
 {
-    func_001F5C0C(p, 0, 8);
+    FillMemory(p, 0, 8);
 }
 
 void func_0018D430(void)
@@ -107,7 +107,7 @@ void* func_0018D5C0(u32 n)
 {
     void* p = AllocateFrontMemory(n);
     if (p) {
-        func_001F5C0C(p, 0, n);
+        FillMemory(p, 0, n);
     }
     return p;
 }
@@ -137,7 +137,7 @@ void* func_0018D6A8(s32 size)
 {
     u8* p = AllocateBackMemory(size);
     if (p) {
-        func_001F5C0C(p, 0, size);
+        FillMemory(p, 0, size);
     }
     return p;
 }

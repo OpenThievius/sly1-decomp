@@ -496,8 +496,8 @@ struct Begin_00159588 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_00159588*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_00159588*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 extern s32 D_002621C8[6];
@@ -798,8 +798,8 @@ struct Begin_15EFE8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = ((Iter_15EFE8*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->prev = ((Iter_15EFE8*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -925,7 +925,7 @@ void func_00154F98(EffectSpawner* self, s32 count)
 {
     void* mem = AllocateFrontMemory(0x200);
     self->rec = (Rec50*)mem;
-    func_001549C8(mem);
+    InitSpawnRecord(mem);
     LoadPlacedObject(self, count);
     s32 index = ReadBufferedS8(count);
     if (index != -1) {
@@ -1143,14 +1143,14 @@ void func_00156108(EffectSpawner* self, s32 a1)
 
 void func_00156178(EffectSpawner* a0, s32 a1)
 {
-    a0->f308 = a1;
+    a0->continuous = a1;
     a0->f34C = 1;
 }
 
 void func_00156188(u8* self,s32 kind)
 {
     *(s32*)(self+0x1B0)=kind;
-    func_001F5C0C(self+0x1F0,0,12);
+    FillMemory(self+0x1F0,0,12);
     if (kind!=24) {
         if (kind==27) {
             *(s32*)(self+0x1F0)=-1;
@@ -1306,7 +1306,7 @@ void func_00157E00(void* a, Rec50* b, void* c)
 void func_00157EF8(Quad16* self, Quad16* a1, void* a2, Tail_157EF8* a3, Blk_157EF8* a4, s32 a5, s32 a6)
 {
     Frame_157EF8 f;
-    func_001549C8(&f);
+    InitSpawnRecord(&f);
     Pair_157EF8 p;
     f.self_copy = *self;
     f.a1_copy = *a1;
@@ -1402,7 +1402,7 @@ ASM_FUNC(func_00158630);
 void func_00158730(C77* a0)
 {
     Blob_158730 b;
-    func_001F5C0C(&b, 0, 0x50);
+    FillMemory(&b, 0, 0x50);
     a0->desc->m1B(a0, &b);
 }
 
@@ -1511,7 +1511,7 @@ void func_00158B30(C79* self, void* stream)
 {
     Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
     self->rec = p;
-    func_001549C8(p);
+    InitSpawnRecord(p);
     ReadTransformObject(self, stream);
     s32 idx = ReadBufferedS8(stream);
     if (idx != -1) {
@@ -3337,7 +3337,7 @@ ASM_FUNC(func_0015E1F0);
 void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
 {
     s32 n = WrapTextLines(self, f);
-    f32 g = func_0015E1F0(self);
+    f32 g = MeasureTextWidth(self);
     TextReader* o = (TextReader*)self;
     f32 k = (f32)o->defaultFont->height * o->defaultFont->sy;
     f32 t = (f32)n * k;
@@ -3358,7 +3358,7 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
     f32 top;
     f32 left;
     s32 c;
-    func_001F5C0C(f, 0, 0x100);
+    FillMemory(f, 0, 0x100);
     RewindTextReader(self);
     while ((c = ReadTextChar(self)) != 0) {
         if (c == 10) {
@@ -3442,8 +3442,8 @@ void func_0015E810(void)
     SetListLinkOffset(&D_002622E0, 0x630);
     SetListLinkOffset(&D_002622F0, 0x1090);
     SetListLinkOffset(&g_deferredReleaseListC, 0xB8);
-    func_001F6950(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
-    func_001F6DA8(5);
+    AddInterruptHandler(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
+    EnableInterruptCause(5);
     g_frameReadySemaphore = CreateLockSemaphore(0, 2);
     g_frameDoneSemaphore = CreateLockSemaphore(2, 2);
     u32* tab = (u32*)D_002C3B00;
@@ -3458,7 +3458,7 @@ void func_0015E810(void)
         *(u32*)((u8*)tab + off) = c;
         n++;
     } while (n < 256);
-    func_001F6A20(g_mainAndRenderThreads[1], 0);
+    RunThread(g_mainAndRenderThreads[1], 0);
 }
 
 void func_0015E9F0(void)
@@ -3466,7 +3466,7 @@ void func_0015E9F0(void)
     s32 idx;
 
     func_00191E70(3);
-    func_001F6B60(g_frameDoneSemaphore);
+    AwaitSemaphore(g_frameDoneSemaphore);
     idx = g_nextBuildFrameIndex;
     g_nextBuildFrameIndex = idx + 1;
     g_buildFrame = &g_renderFrames[idx];
@@ -3534,7 +3534,7 @@ void func_0015EC68(void)
     ClearList(&g_deferredReleaseListC);
     g_buildFrameData = 0;
     g_buildFrame = 0;
-    func_001F6B40(g_frameReadySemaphore);
+    PostSemaphore(g_frameReadySemaphore);
 }
 
 void func_0015ED50(RenderFrame* self)
@@ -3543,7 +3543,7 @@ void func_0015ED50(RenderFrame* self)
     SwitchActiveImageMask(self->f44);
     if (self->f1C != 0 && D_00274538 != 0) {
         *(volatile s32*)0x10003010 = 4;
-        func_00202A80(g_gifChannel, D_00274538);
+        StartDmaChain(g_gifChannel, D_00274538);
     }
 }
 
@@ -3574,7 +3574,7 @@ void func_0015EE80(void)
     VerifyCodeChecksum();
     for (;;) {
         g_renderThreadWaiting = 1;
-        func_001F6B60(g_frameReadySemaphore);
+        AwaitSemaphore(g_frameReadySemaphore);
         g_renderThreadWaiting = 0;
         g_drawingFrame = &g_renderFrames[D_00262314];
         D_00262314++;
@@ -3587,8 +3587,8 @@ void func_0015EE80(void)
         *(volatile s32*)0x10003010 = 0;
         SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
         func_0015F320();
-        func_00202C38(g_vif1Channel, 0, 0);
-        func_001F6B40(g_frameDoneSemaphore);
+        WaitDmaChannel(g_vif1Channel, 0, 0);
+        PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
         D_002626CC = 1;
     }
@@ -3642,10 +3642,10 @@ void func_0015EFE8(RenderFrame* self)
 void func_0015F210(s32 flag)
 {
     for (s32 i = 0; (u32)i < 2; i++) {
-        func_001F6B60(g_frameDoneSemaphore);
+        AwaitSemaphore(g_frameDoneSemaphore);
     }
     for (s32 i = 0; (u32)i < 2; i++) {
-        func_001F6B40(g_frameDoneSemaphore);
+        PostSemaphore(g_frameDoneSemaphore);
     }
     while (g_renderThreadWaiting == 0) {
     }

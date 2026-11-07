@@ -209,10 +209,10 @@ struct Walk_16A758 {
         cursor = i;
         iter = i;
         link = i->offset;
-        prev = D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Walk_16A758() { D_0027B314 = (ListFrame*)prev; }
+    ~Walk_16A758() { g_activeListFrames = (ListFrame*)prev; }
     void* First()
     {
         void* n = *(void**)cursor;
@@ -295,10 +295,10 @@ struct Walk_16A820 {
         cursor = i;
         iter = i;
         link = i->offset;
-        prev = D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Walk_16A820() { D_0027B314 = (ListFrame*)prev; }
+    ~Walk_16A820() { g_activeListFrames = (ListFrame*)prev; }
     void* First()
     {
         void* n = *(void**)cursor;
@@ -514,7 +514,7 @@ ASM_FUNC(func_001682C0);
 
 void func_001683B8(void) {
     D_002BE46C = 1;
-    func_001F6B60((Arg_001683B8*)D_002BE460);
+    AwaitSemaphore((Arg_001683B8*)D_002BE460);
 }
 
 void func_001683E8(void)
@@ -539,14 +539,14 @@ void func_001683E8(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    func_00202098(ptr, 0x800, 0x800, half);
-    func_001F6C20(0);
+    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    func_00201FF8(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
     if ((u32)(D_002626CC - 1) < 2) {
         ApplyFieldDisplayOffset();
     }
-    func_00201988(0, 0);
+    WaitGsPaths(0, 0);
 }
 
 void func_001684E8(void)
@@ -566,15 +566,15 @@ void func_001684E8(void)
             ptr = D_002624F0;
         }
         s16 half = *(s16*)&D_002626C4;
-        func_00202098(ptr, 0x800, 0x800, half);
-        func_001F6C20(0);
+        SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+        SyncDataCache(0);
         u8* ptr2;
         if (g_displayFrameCounter & 1) {
             ptr2 = D_002625D0;
         } else {
             ptr2 = D_002624E0;
         }
-        func_00201C78(ptr2);
+        SendDrawEnvironment(ptr2);
     }
 }
 
@@ -584,7 +584,7 @@ void func_001685B8(void)
     SendDisplayResetPacket();
     SignalDisplaySync();
     D_002BE470 = 0;
-    func_00201A18(0, 1, 2, 1);
+    ResetGs(0, 1, 2, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
@@ -598,10 +598,10 @@ void func_001685B8(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    func_00202098(ptr, 0x800, 0x800, half);
-    func_001F6C20(0);
+    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    func_00201FF8(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
 }
 
 ASM_FUNC(func_00168698);
@@ -610,11 +610,11 @@ void func_001686E8(Self_1686E8* self, void* b)
 {
     D_002BE468 = 1;
     *(volatile u64*)0x12001000 |= 2;
-    s32 r = func_00202120();
-    func_00202058(r & -0x201);
-    func_001F6C20(0);
-    func_00202A80(self, b);
-    func_001F6B60(D_002BE464);
+    s32 r = GetGsInterruptMask();
+    SwapGsInterruptMask(r & -0x201);
+    SyncDataCache(0);
+    StartDmaChain(self, b);
+    AwaitSemaphore(D_002BE464);
 }
 
 void func_00168770(V24A0* self, u8* color, s32 flag)
@@ -640,9 +640,9 @@ void func_001688B8(void)
     Quad_1688B8 k;
     Quad_1688B8 t;
 
-    func_00201A18(0, 1, 2, 1);
+    ResetGs(0, 1, 2, 1);
     u8* s0 = D_00262490;
-    func_00201D60(s0, 0, 0x280, 0xE0, 3, 0x30, 0);
+    SetUpDoubleBuffer(s0, 0, 0x280, 0xE0, 3, 0x30, 0);
     u8* p = s0;
     s32 end = (s32)s0 + 0x50;
     do {
@@ -663,10 +663,10 @@ void func_001688B8(void)
     FillScreenColor(D_002BDEE0, &t, 1);
     D_002BE460 = CreateLockSemaphore((void*)0, (void*)1);
     D_002BE464 = CreateLockSemaphore((void*)0, (void*)1);
-    func_001F6950(2, func_001682C0, 0);
-    func_001F6DA8(2);
-    func_001F6950(0, func_00168698, 0);
-    func_001F6DA8(0);
+    AddInterruptHandler(2, HandleVblankStart, 0);
+    EnableInterruptCause(2);
+    AddInterruptHandler(0, HandleGsFinish, 0);
+    EnableInterruptCause(0);
     InitMeshQueue();
     ResetDisplayBuffers();
 }
@@ -674,7 +674,7 @@ void func_001688B8(void)
 void func_00168A48(Blob_168AF8* b)
 {
     s32 i = 0;
-    func_001F6C20(0);
+    SyncDataCache(0);
     do {
         void* p;
         if (((i + g_displayFrameCounter) & 1) != 0) {
@@ -682,11 +682,11 @@ void func_00168A48(Blob_168AF8* b)
         } else {
             p = D_002625D0;
         }
-        func_00201C78(p);
+        SendDrawEnvironment(p);
         i++;
-        func_00202A80(g_gifChannel, b);
+        StartDmaChain(g_gifChannel, b);
     } while (i < 2);
-    func_00202C38(g_gifChannel, 0, 0);
+    WaitDmaChannel(g_gifChannel, 0, 0);
 }
 
 void func_00168AF8(void)
@@ -1179,7 +1179,7 @@ void func_00169FC0(Self_169FC0* self, f32* out, void* a2, void* a3)
         }
         f.x = r;
     }
-    func_00169E20(self, a2, a3, f.x);
+    PlaceOnTargetCurve(self, a2, a3, f.x);
     *out = f.x;
 }
 

@@ -98,8 +98,8 @@ struct Begin_15F710 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_15F710*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = (Iter_15F710*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -296,10 +296,10 @@ struct Frame_160948 {
         list = l;
         cursor = l;
         next_off = l->next_off;
-        prev = (Frame_160948*)D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = (Frame_160948*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_160948() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_160948() { g_activeListFrames = (ListFrame*)prev; }
     void* Next()
     {
         void* n = *(void**)cursor;
@@ -444,7 +444,7 @@ struct Zero_1639E8
 {
     static void Clear(u32* q)
     {
-        func_001F5C0C(q, 0, 0x10);
+        FillMemory(q, 0, 0x10);
     }
 };
 
@@ -465,7 +465,7 @@ public:
     u64* cursor;
     u8 pad1[0x8];
     virtual void Begin(s32 arg);
-    void func_00161958(s32 count);
+    void AddGifImageTag(s32 count);
 };
 
 struct Self_162508 { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
@@ -1081,7 +1081,7 @@ void func_0015F930(Items_15F930* list, s32* arr, s32 value)
         }
         i--;
     }
-    (void)func_001F5B08(arr, arr + 1, (list->count - i) * 4 - 4);
+    (void)MoveMemory(arr, arr + 1, (list->count - i) * 4 - 4);
     list->count--;
 }
 
@@ -1394,7 +1394,7 @@ void func_00160578(s32 kind)
 
 void func_001605E8(GameProgress* self)
 {
-    func_001F5C0C(self, 0, 0x1A00);
+    FillMemory(self, 0, 0x1A00);
     self->type = 0x12;
     self->f19D8 = 0;
     self->f19F0 = 0;
@@ -1577,7 +1577,7 @@ void* func_00160CA0(u8* self,s32 index)
 
 void func_00160CC8(void* p)
 {
-    func_001F5C0C(p, 0, 8);
+    FillMemory(p, 0, 8);
 }
 
 void func_00160CE8(Counter_160CE8* c)
@@ -1921,8 +1921,8 @@ u8* func_001619C0(u8* self)
     s32 i;
     for (i = 0x93; i != -1; i--) {
     }
-    func_001F5C0C(self + 0xFC, 0, 0x28);
-    func_001F5C0C(self, 0, 0xB0);
+    FillMemory(self + 0xFC, 0, 0x28);
+    FillMemory(self, 0, 0xB0);
     u8* camera = g_camera;
     *(s32*)(self + 0x98) = 1;
     *(f32*)(self + 0x90) = 1.0f;
@@ -1956,7 +1956,7 @@ void func_00161B80(u8* self)
 {
     *(s32*)(self+0xF8)=0;
     *(s32*)(self+0x124)=0;
-    ((Fill_161B80)func_001F5C0C)(self+0x128,0,0x1720);
+    ((Fill_161B80)FillMemory)(self+0x128,0,0x1720);
 }
 
 void func_00161BB0(Obj_00161BB0* self, s32 value)
@@ -1983,7 +1983,7 @@ void func_00161C00(Self_161C00* self)
 
     base = 0x24;
     func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
-    func_001F5C0C(hd, 0, 0x18);
+    FillMemory(hd, 0, 0x18);
     hd->f10 = 3;
     hd->f0 = base;
     base = self->f124 * 3 + 0x24;
@@ -2046,7 +2046,7 @@ void func_00161F70(Self_161F70* self)
     Vert_161F70* v;
 
     func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
-    func_001F5C0C((Mem_161F70*)hdr, 0, 0x18);
+    FillMemory((Mem_161F70*)hdr, 0, 0x18);
     hdr->f10 = 4;
     hdr->f0 = off;
     off += self->n * 4;
@@ -2087,7 +2087,7 @@ void func_00161F70(Self_161F70* self)
                 p8->m[0][j] = p8->m[1][j] = p8->m[2][j] = 0.0f;
             }
         }
-        func_001F5C0C((Mem_161F70*)p8->m[3], 0, 0x10);
+        FillMemory((Mem_161F70*)p8->m[3], 0, 0x10);
         p8++;
     }
     for (i = 0; i < self->n; i++)
@@ -2252,7 +2252,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     s32 off = 0x2B;
 
     func_001EE5C8(pkt, 0xD, 2, 0x16, 0, hdr);
-    func_001F5C0C(hdr->p, 0, 0x10);
+    FillMemory(hdr->p, 0, 0x10);
     InitGifPacket(&f);
     AllocateTempPacketBuffer(&f, 8);
     BeginGifTag(&f, 0, 1, 0xE);
@@ -2352,7 +2352,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     }
     func_001EE5C8(pkt, 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
-    func_001F5C0C(hdr->p, 0, 0x18);
+    FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 3;
     hdr->p->off[0] = off;
     off = n * 3 + 0x24;
@@ -2442,7 +2442,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         off += hdr->count * 4;
         hdr->p->off[3] = off;
         off += n;
-        func_001F5C0C(buf, 0, 0x10);
+        FillMemory(buf, 0, 0x10);
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_00262418[hdr->count]);
         func_001EE5C8(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
@@ -2558,7 +2558,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     obj->f18 = 1;
     func_001EE5C8(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
-    func_001F5C0C(hdr->p, 0, 0x18);
+    FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 4;
     hdr->p->f12 = hdr->f14 * 0x7FA6 / 0xFF;
     hdr->p->off[0] = off;
@@ -2602,7 +2602,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         off += hdr->count * 4;
         hdr->p->off[3] = off;
         off += n;
-        func_001F5C0C(buf, 0, 0x10);
+        FillMemory(buf, 0, 0x10);
         WriteVifStrow(&pkt[0], buf);
         WriteVifStmask(&pkt[0], D_00262448[hdr->count]);
         func_001EE5C8(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
@@ -2699,7 +2699,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
                     quads->x[j] = quads->y[j] = quads->z[j] = 0.0f;
                 }
             }
-            func_001F5C0C(quads->w, 0, 0x10);
+            FillMemory(quads->w, 0, 0x10);
             quads++;
         }
     }
@@ -2799,7 +2799,7 @@ void func_00165728(Self_165728* self, PlacedObject* ctx)
         {
             o->vtbl[1](o);
         }
-        func_001662A8(self, e, self->f14 + i * 0x28, ctx);
+        BuildAttachmentDmaChain(self, e, self->f14 + i * 0x28, ctx);
     }
     Node_165728* n = self->f4C;
     if (n != 0)

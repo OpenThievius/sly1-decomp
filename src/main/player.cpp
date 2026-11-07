@@ -502,7 +502,7 @@ void func_001B6628(void* p, s32 n);
 void func_00171DD8(Player* self)
 {
     Loc_171DD8 loc;
-    if (func_00171180(self) == 0) {
+    if (AimPlayerAtTarget(self) == 0) {
         if (self->f690 != 0) {
             func_001278A8((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
             loc.f8 = ClampToMagnitude(loc.f8, 10.0f);
@@ -643,7 +643,7 @@ void func_001725E0(Player* self, void* a, void* b)
         out[16] *= 0.25f;
         for (i = 0; i < 4; i++)
         {
-            func_00172078(self, buf, (f32)i * 0.25f);
+            OrientPlayerSpinPart(self, buf, (f32)i * 0.25f);
             BuildMatrixFromRotationAndTranslation((u8*)((Aux_1725E0*)self->f61C) + 0x140, buf, out);
             ((void (*)(void*, void*, f32*))((VtObj_1725E0*)((Aux_1725E0*)self->f61C))->vt[0xA0 / 4])(((Aux_1725E0*)self->f61C), a, out);
         }
@@ -674,7 +674,7 @@ void func_001727B0(Player* self)
     }
     if (self->f242C != 0.0f) {
         *(f32*)((u8*)self + 0x2430) = self->f242C;
-        self->f2434 = func_002058A0(self->f2434 + self->f242C * g_frameDt[0], 6.2831855f);
+        self->f2434 = FloatRemainder(self->f2434 + self->f242C * g_frameDt[0], 6.2831855f);
     } else {
         if (self->f2434 == 0.0f) {
             return;
@@ -1164,7 +1164,7 @@ void func_00175170(void* self, s32 a, s32 b);
 
 void func_00177E70(Player* self, s32 mode)
 {
-    func_001924C8(self, mode);
+    StartSwitchedColliderEffect(self, mode);
     switch (mode) {
     case 0:
         (void)SetPlayerState(self, 9, 0x1C);
@@ -1348,14 +1348,14 @@ struct Pair_1781E0 { s32 a, b; };
 void func_001B6598(void* ptr, s32* out);
 void func_001B6568(void* ptr, s32* out);
 
-void func_001781E0(u8* self, u8* other)
+void func_001781E0(Player* self, u8* other)
 {
     Pair_1781E0 r;
-    if (*(s32*)(self + 0x2220) != 9) {
+    if (self->f2220 != 9) {
         func_001B6598(*(void**)(other + 0x2D8), &r.a);
         func_001B6568(*(void**)(other + 0x2D8), &r.b);
         if (r.a == 0x22E && (r.b == r.a || r.b == -1)) {
-            *(u8**)(self + 0x2BE0) = other;
+            self->walkerActivation = other;
         }
     }
 }
@@ -1424,7 +1424,7 @@ struct Item_178258 { u8 pad[0x2D0]; s32 link; };
 void func_00178258(Player* a0, Item_178258* a1)
 {
     if (a0->f2220 != 9 && a1->link == 0) {
-        a0->f2BE4 = a1;
+        a0->firstActivation = a1;
     }
 }
 
@@ -1433,7 +1433,7 @@ struct Item_178280 { u8 pad[0x2D0]; s32 link; };
 void func_00178280(Player* a0, Item_178280* a1)
 {
     if (a0->f2220 != 9 && a1->link == 0) {
-        a0->f2BE8 = a1;
+        a0->secondActivation = a1;
     }
 }
 
@@ -1652,7 +1652,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
             ComputeTargetArc(self, e, 0.7f, 0, e->f10, 0);
         }
     }
-    func_001F5CD0(buf, cnt, 0x20, func_00178D18);
+    SortElements(buf, cnt, 0x20, CompareDistanceFromPlayer);
     best = 3.40282347e+38f;
     for (s32 i = 0; i < cnt; i++) {
         r = func_001788F0(self, &buf[i], v, scratch, &hit, &dist);
@@ -1680,7 +1680,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
         }
     }
     if (best == 3.40282347e+38f) {
-        func_001F5C0C(out, 0, 0x20);
+        FillMemory(out, 0, 0x20);
         *(s32*)out = 0;
         out->q1 = *(Q_178D98*)&self->v140;
         ((f32*)out)[6] -= 75.0f;

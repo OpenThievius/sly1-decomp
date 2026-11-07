@@ -83,14 +83,14 @@ void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Vec02* out, f32* outf)
     }
     if (IsObjectOfKind(n, 0x7E))
     {
-        func_001920B0(n, &v);
+        ConvertPositionToWorld(n, &v);
         r = *(f32*)(s1 + 0x638);
     }
     else if (IsObjectOfKind(n, 0x73))
     {
         GetObjectWorldPosition(n, &v);
         GetObjectWorldRotation(n, &a);
-        r = func_00205778(a.y, a.x);
+        r = ArctangentOfRatio(a.y, a.x);
     }
     else if (IsObjectOfKind(n, 0x6E))
     {
@@ -105,12 +105,12 @@ void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Vec02* out, f32* outf)
         }
         func_00128018(n->f18, 0, &a, &v);
         func_001280C0(n->f18, 0, &b, &c);
-        r = func_00205778(c.y, c.x);
+        r = ArctangentOfRatio(c.y, c.x);
     }
     else if (IsObjectOfKind(n, 2))
     {
         v = n->f140;
-        r = func_00205778(((f32*)n)[0x114 / 4], ((f32*)n)[0x110 / 4]);
+        r = ArctangentOfRatio(((f32*)n)[0x114 / 4], ((f32*)n)[0x110 / 4]);
     }
     else
     {
@@ -292,7 +292,7 @@ void* func_0017CF38(EntryQueue* pool, s32 a, s32 b, s32 c)
     s32 n = pool->f34;
     u8* e = (u8*)pool->buffer + n * 0x14;
     pool->f34 = n + 1;
-    func_001F5C0C(e, 0, 0x14);
+    FillMemory(e, 0, 0x14);
     s32* f = (s32*)e;
     f[0] = a;
     f[1] = b;

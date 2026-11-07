@@ -360,9 +360,10 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BE4 - 0x2BDC];
-    void* f2BE4;            // 0x2BE4
-    void* f2BE8;            // 0x2BE8
+    u8 pad2BDC[0x2BE0 - 0x2BDC];
+    void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
+    void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
+    void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation
     u8 pad2BEC[0x2BF0 - 0x2BEC];
 };
 
