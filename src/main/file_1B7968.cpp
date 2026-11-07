@@ -81,7 +81,13 @@ s32 AppendPropertyToScriptList(s32 value, void* out);
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void AddColliderForce(void* a, void* b);
 void DrawPlacedObject(Collider* self, void* a, void* m);
-void ConstrainVectorByAnchor(void* a, void* b, void* c, s32 d);
+// What a vector is constrained by: an axis, and how (0 none, 1 the part along the axis removed,
+// 2 only the part along it kept, 3 zero).
+struct VectorConstraint {
+    Vec02 axis;             // 0x00
+    s32 kind;               // 0x10
+};
+void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 void ClearRootTries(void* self);
 // A quadword passed by value in one register (func_001B8820's position).
 typedef u64 Qword128 __attribute__((mode(TI)));
@@ -990,11 +996,36 @@ void CopyCollider(Collider* self, Collider* other)
 
 INCLUDE_ASM(func_001BA2E8);
 
-INCLUDE_ASM(func_001BA430);
+void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
+{
+    Vec02 tmp;
+    if (out == 0) {
+        out = &tmp;
+    }
+    switch (c->kind) {
+    case 0:
+        if (out != in) {
+            *out = *in;
+        }
+        break;
+    case 2:
+        Vu0::Q(*out) = Vu0::MulX(Vu0::Q(c->axis), Vu0::Dot(Vu0::Q(*in), Vu0::Q(c->axis)));
+        break;
+    case 1:
+        Vu0::Q(*out) = Vu0::Sub(Vu0::Q(*in), Vu0::MulX(Vu0::Q(c->axis), Vu0::Dot(Vu0::Q(*in), Vu0::Q(c->axis))));
+        break;
+    case 3:
+        Vu0::Q(*out) = Vu0::Zero();
+        break;
+    }
+    if (rem != 0) {
+        Vu0::Q(*rem) = Vu0::Sub(Vu0::Q(*in), Vu0::Q(*out));
+    }
+}
 
 void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d)
 {
-    ConstrainVectorByAnchor(a, b, c, d);
+    ConstrainVectorByAnchor((VectorConstraint*)a, (Vec02*)b, (Vec02*)c, (Vec02*)(s32)d);
 }
 
 void AddColliderAttachment(Collider* self, Attach03* node)
