@@ -343,7 +343,7 @@ typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
 void func_0011E560(void)
 {
-    func_00109488();
+    FillObjectPropertyTable();
 }
 
 Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
@@ -967,7 +967,7 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     Scratch_11F9F8 s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
-    func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
+    EvaluateHermiteVectorSegment(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
 
 void func_0011FA88(s32* outCount, VectorKey** outItems, Stream83* src)

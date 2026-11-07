@@ -2315,7 +2315,7 @@ ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    func_00128018(args[0].p, args[1].i, args[2].p, p);
+    TransformPointBetweenFrames(args[0].p, args[1].i, args[2].p, p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2327,7 +2327,7 @@ ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    func_001280C0(args[0].p, args[1].i, args[2].p, p);
+    TransformDirectionBetweenFrames(args[0].p, args[1].i, args[2].p, p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2340,7 +2340,7 @@ ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     f32* obj;
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
-    func_00128150(args[0].i, args[1].i, args[2].i, obj);
+    TransformRotationBetweenFrames(args[0].i, args[1].i, args[2].i, obj);
     ResetMatrixHomogeneous(obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);

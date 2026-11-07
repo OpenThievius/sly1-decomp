@@ -1049,6 +1049,8 @@
 #define SetPlacedObjectVelocityFromFloats          func_00127558
 #define SetPlacedObjectSpin                        func_00127590
 #define SetPlacedObjectSpinFromFloats              func_001275F0
+#define SetPlacedObjectLocalVelocity               func_00127628
+#define GetPlacedObjectLocalVelocity               func_00127678
 #define CopyPlacedObjectFrame                      func_001276C0
 #define ComputeObjectMotionInFrame                 func_001278A8
 #define TransformPointBetweenFrames                func_00128018
@@ -1059,6 +1061,8 @@
 #define LoadPlacedObject                           func_001289C0
 #define LoadFollowRecord                           func_00128C10
 #define ResolveFollowRecordObjects                 func_00128DB8
+#define StorePlacedObjectLocalVelocity             func_001290B8
+#define StorePlacedObjectLocalSpin                 func_001290E0
 #define EnsureTimerRecord                          func_00129108
 #define EnsureRangeRecord                          func_001291D0
 #define SetRangeRecordPresent                      func_00129228

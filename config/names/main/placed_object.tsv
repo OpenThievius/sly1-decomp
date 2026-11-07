@@ -56,6 +56,8 @@ func_001274F8	SetPlacedObjectVelocity	slot 32 of class 0x02: stores the vector a
 func_00127558	SetPlacedObjectVelocityFromFloats	packs x, y, z into a vector and calls slot 32 (SetPlacedObjectVelocity)
 func_00127590	SetPlacedObjectSpin	slot 33 of class 0x02: stores the vector at +0x160, refreshes the path object at +0x1F0 and wakes the object when non-zero; the path object's rotation rate goes here
 func_001275F0	SetPlacedObjectSpinFromFloats	packs x, y, z into a vector and calls slot 33 (SetPlacedObjectSpin)
+func_00127628	SetPlacedObjectLocalVelocity	original assembly: rotates a vector by the object's matrix at +0xD0 and passes the result to slot 32 (SetPlacedObjectVelocity); func_001A6788 calls it
+func_00127678	GetPlacedObjectLocalVelocity	original assembly: the velocity at +0x150 carried into the object's own frame (the transpose of its matrix at +0xD0 applied); FillObjectPropertyTable registers it as a property getter
 func_001276C0	CopyPlacedObjectFrame	slot 31 of class 0x02: converts another object's position, matrix and rates into its own parent's frame and sets them through slots 29, 30, 32 and 33
 func_001278A8	ComputeObjectMotionInFrame	original assembly: walks from the object up its parent chain to the given ancestor and adds each level's spin (+0x160, through TransformDirectionBetweenFrames) and velocity into the motion of a point in the ancestor's frame; ReparentPlacedObject, ReframePlacedObject, ConvertSpawnToAnchorSpace and many movers call it
 func_00128018	TransformPointBetweenFrames	original assembly: transforms a point from the first object's frame (rotation at +0x110, position at +0x140) to world, then into the second object's frame; nothing when both are the same; TransformScriptPointBetweenFrames, ReparentPlacedObject and CopyPlacedObjectFrame call it
@@ -66,6 +68,8 @@ func_00128998	CreateTrackAttachment	takes an attachment from the world's pool wi
 func_001289C0	LoadPlacedObject	slot 10 of class 0x02: reads from the stream the matrices at +0xD0 and +0x100, the placement bits, the floats at 0x80..0x88, then the property records and the child tables
 func_00128C10	LoadFollowRecord	reads a flag word from the stream; when non-zero allocates the 0xC0-byte record at +0x224 and fills its matrices, object ids and numbers by flag bits 1 to 0x80
 func_00128DB8	ResolveFollowRecordObjects	turns the ids in the +0x224 record into objects with func_0015A448 according to its flag bits 0x10, 0x20 and 0x40
+func_001290B8	StorePlacedObjectLocalVelocity	original assembly: rotates a vector by the object's matrix at +0xD0 into the velocity at +0x150 directly, without slot 32; FillObjectPropertyTable registers it as a property setter
+func_001290E0	StorePlacedObjectLocalSpin	original assembly: rotates a vector by the object's matrix at +0xD0 into the spin at +0x160; FillObjectPropertyTable registers it as a property setter
 func_00129108	EnsureTimerRecord	when +0x2A0 is empty takes a 0x14-byte record with +4 = -1, +8 = 0, +0xC = 0 and +0x10 = 1.0 and returns it
 func_001291D0	EnsureRangeRecord	when +0x284 is empty takes a 0x2E0-byte record from the world's pool at +0x1BF4, sets it up with func_001B1AC8 and appends it to the world's list at +0x1C00
 func_00129228	SetRangeRecordPresent	a non-zero argument makes the record at +0x284; zero takes it out of the list at +0x1C00, appends it to D_00262300 and clears +0x284
