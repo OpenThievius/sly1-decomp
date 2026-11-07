@@ -23,8 +23,10 @@
 #include "shapes.h"
 #include "object_pool.h"
 #include "owner_message.h"
+#include "vu0.h"
 
 s32 IsObjectOfKind(void* node, s32 kind);
+extern Player* g_player;
 extern s32 D_00275BEC;
 extern f32 g_timeScale;
 
@@ -67,6 +69,7 @@ void SetCameraControllerOwner(CameraController* self, Camera* owner);
 
 void VectorToAngles(void* a, void* b, void* c);
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
+void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
 void SetCameraLookAnchor(void* eng, void* tmp);
 void SetCameraNearDistance(void* eng, f32 x);
 extern void* g_deadlineNotifier;
@@ -340,7 +343,21 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
     return r;
 }
 
-INCLUDE_ASM(func_00149458);
+Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
+{
+    Quad16 r;
+    Mat02 m;
+    f32* offset;
+    if (g_player != 0 && g_player->f2228 == 0x22) {
+        offset = D_00261C20;
+    } else {
+        offset = D_00261C10;
+    }
+    BuildYawPitchMatrix(&m, *(f32*)&self->value, self->f10);
+    Quad16 target = GetCameraControllerTargetPoint(self);
+    Vu0::Q(r) = Vu0::Add(Vu0::Q(target), Vu0::Rotate(m, Vu0::Q(*(Quad16*)offset)));
+    return r;
+}
 
 void StartCameraSounds(CameraSoundOwner* self)
 {
