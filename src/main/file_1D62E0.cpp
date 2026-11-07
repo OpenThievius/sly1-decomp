@@ -1081,7 +1081,7 @@ void func_001D9C98(PathFollower* self, f32 t)
     SteerPathFollower(self);
     func_001D8E40(self);
     AdvancePathFollowerEntry(self, local);
-    func_001D9AC8(self);
+    ProcessPathFollowerContacts(self);
     if (self->rot.r[2].z > 0.5f) {
         self->f850 = g_gameTime;
     }

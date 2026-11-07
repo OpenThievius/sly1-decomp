@@ -10,6 +10,7 @@
 #include "key_id.h"
 #include "load_progress.h"
 #include "output_buffer.h"
+#include "game_progress.h"
 
 
 void* func_001D7120(u8* buf, char* dst, s32 cap);
@@ -36,7 +37,9 @@ s32 func_001E1EB0(void* self, void* ap);
 
 
 
-struct Stream_001E1F58 { u8 bytes[0x420]; };
+// The stack room of an output buffer as the format functions declare one: its header and the
+// 0x400 bytes AppendToOutputBuffer fills before it flushes.
+struct OutputBufferStorage { u8 bytes[0x420]; };
 
 void* func_001D7120(void* stream, char* dst, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -52,7 +55,6 @@ s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
 
 
 
-struct Stream_1E1EB0 { u8 bytes[0x420]; };
 
 void* func_001D7100(void* stream, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -74,7 +76,9 @@ void func_0018D800(void* dst, void* src, s32 count);
 
 s32 func_001E2268(s32 a, s32 b);
 
-struct IntPair_1E22C0 { u8 pad0[4]; s32 a; s32 b; };
+// A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
+// how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
+struct RecursiveLock { s32 count; s32 last; void* sema; };
 
 
 
@@ -91,7 +95,6 @@ void func_001E2870(void* self, s32 a, s32 b);
 
 
 
-struct Tally_1E2358 { s32 count; s32 last; void* ptr; };
 extern void func_001F6B40(void* a);
 
 
@@ -164,7 +167,6 @@ void func_00123ED0(void* self);
 
 
 
-struct Tally_1E22F8 { s32 count; s32 last; void* ptr; };
 extern s32 func_001F6A90(void);
 extern s32 func_001F6B60(void* a);
 
@@ -446,9 +448,7 @@ struct Self_1E4EA8 { s32 f0; Blob_1E4EA8* f4; s32 f8; s32 fC; s32 f10; Blob_1E4E
 struct Sub_1E4EA8 : BufferedStream {
     void SetOwner(void* o) { owner = o; }
 };
-struct Cur_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 f19E0; };
-struct Cur2_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 pad19E0[3]; u32 f19EC; };
-struct Pl_1E4EA8 { u8 pad[0x4F44]; Cur_1E4EA8* f4F44; };
+struct Pl_1E4EA8 { u8 pad[0x4F44]; GameProgress* f4F44; };
 struct Vo_1E4EA8 { void* vt; };
 
 extern u8 D_002C3B00[];
@@ -457,7 +457,6 @@ extern u8 D_002623D8[];
 extern u8 D_0026FA90[];
 extern f32 D_0026186C;
 extern Vo_1E4EA8 D_0026C6C8;
-extern Cur2_1E4EA8* D_002623C0;
 extern Pl_1E4EA8 D_00264A40;
 
 void func_00191E70(s32 a);
@@ -1196,7 +1195,7 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 
 s32 func_001E1EB0(const char* fmt, void* ap)
 {
-    Stream_1E1EB0 buf;
+    OutputBufferStorage buf;
     InitOutputBuffer(&buf, -1);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     DestroyOutputBuffer(&buf, 2);
@@ -1211,7 +1210,7 @@ s32 func_001E1F10(void* self, ...)
 
 s32 func_001E1F58(char* dst, const char* fmt, void* ap)
 {
-    Stream_001E1F58 buf;
+    OutputBufferStorage buf;
     InitStringOutputBuffer(&buf, dst, 0);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     dst += n;
@@ -1308,17 +1307,17 @@ void func_001E2268(void* a, void* b)
 
 LINKER_REMNANT(func_001E22B8);
 
-void func_001E22C0(IntPair_1E22C0* self)
+void func_001E22C0(RecursiveLock* self)
 {
-    self->a = -1;
-    self->b = CreateLockSemaphore(1, 1);
+    self->last = -1;
+    self->sema = (void*)CreateLockSemaphore(1, 1);
 }
 
-void func_001E22F8(Tally_1E22F8* self)
+void func_001E22F8(RecursiveLock* self)
 {
     s32 key = GetCurrentThreadId();
     if (key != self->last) {
-        (void)AwaitSemaphore(self->ptr);
+        (void)AwaitSemaphore(self->sema);
         self->last = key;
         self->count = 1;
     } else {
@@ -1326,11 +1325,11 @@ void func_001E22F8(Tally_1E22F8* self)
     }
 }
 
-void func_001E2358(Tally_1E2358* self)
+void func_001E2358(RecursiveLock* self)
 {
     if (--self->count == 0) {
         self->last = -1;
-        PostSemaphore(self->ptr);
+        PostSemaphore(self->sema);
     }
 }
 
@@ -1599,7 +1598,7 @@ void func_001E4EA8(Self_1E4EA8* self)
             CloseBufferedStream(&sub);
             if (sub.owner != 0) EndLoadProgress(sub.owner);
             if (g_saveData->f19EC & 0x100) {
-                Cur_1E4EA8* c = g_memoryCard.f4F44;
+                GameProgress* c = g_memoryCard.f4F44;
                 if (c != 0 && (c->f19D8 != g_saveData->f19D8 || c->f19DC != g_saveData->f19DC))
                     StartMemoryCardSave(&g_memoryCard);
             }

@@ -3301,6 +3301,7 @@
 #define RecordPathFollowerProgress                 func_001D9338
 #define AdvancePathFollowerEntry                   func_001D9488
 #define UpdatePathFollowerSound                    func_001D9678
+#define ProcessPathFollowerContacts                func_001D9AC8
 #define UpdatePathFollower                         func_001D9C98
 #define ControlPathFollower                        func_001D9D78
 #define UpdatePathFollowerScreenElements           func_001DA170
@@ -3539,6 +3540,7 @@
 #define PushStackElement                           func_001E9498
 #define PopStackElement                            func_001E9570
 #define DrawAllScreenElements                      func_001E9648
+#define QueueScreenElementDraws                    func_001E9668
 #define ResetElementStack                          func_001E9688
 #define SetElementStackState                       func_001E96F8
 #define ApplyStackTimeScale                        func_001E98E8
