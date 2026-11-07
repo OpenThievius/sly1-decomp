@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: each entry of the table is 0xAC bytes, not 0x2C, with its two fields 0x80 further on.
 
-s32 func_00160B28(u8* p)
+s32 ComputeCompletionPercent(u8* p)
 {
     s32 total = 0;
     s32 done = 0;

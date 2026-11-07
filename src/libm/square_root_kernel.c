@@ -7,7 +7,7 @@
 static const f32 g_one = 1.0f;
 static const f32 g_tenToMinus30 = 1.0e-30f;
 
-f32 func_00208068(f32 x)
+f32 SquareRootKernel(f32 x)
 {
     s32 bits, exponent, i, twiceRoot, root, trial, bit;
     f32 result;

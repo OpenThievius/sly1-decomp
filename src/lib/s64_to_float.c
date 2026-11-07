@@ -7,7 +7,7 @@
 typedef long long s64_t;
 typedef unsigned long long u64_t;
 
-f32 func_001FB6B0(s64_t x)
+f32 ConvertS64ToFloat(s64_t x)
 {
     double f;
 

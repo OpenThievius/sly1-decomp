@@ -27,10 +27,10 @@ struct BitReader_2115C0 {
     u32 bufSize;
 };
 
-s64 func_002115F8(BitReader_2115C0* self, s32 n);
-void func_00211618(BitReader_2115C0* self, s32 n);
+s64 PeekBits(BitReader_2115C0* self, s32 n);
+void AdvanceBits(BitReader_2115C0* self, s32 n);
 
-void func_002115C0(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
+void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
 {
     self->origin = buf;
     self->next = buf;
@@ -47,21 +47,21 @@ INCLUDE_ASM(func_002115F8);
 
 INCLUDE_ASM(func_00211618);
 
-s64 func_002116B0(BitReader_2115C0* self, s32 n)
+s64 ReadBits(BitReader_2115C0* self, s32 n)
 {
     s64 r = PeekBits(self, n);
     AdvanceBits(self, n);
     return r;
 }
 
-s64 func_00211700(BitReader_2115C0* self)
+s64 ReadBit(BitReader_2115C0* self)
 {
     s64 r = PeekBits(self, 1);
     AdvanceBits(self, 1);
     return r;
 }
 
-void func_00211748(BitReader_2115C0* self, s32 bytes)
+void SkipBytes(BitReader_2115C0* self, s32 bytes)
 {
     self->window = 0;
     self->loaded = 0;
@@ -73,7 +73,7 @@ void func_00211748(BitReader_2115C0* self, s32 bytes)
     AdvanceBits(self, 0);
 }
 
-u32 func_002117A0(BitReader_2115C0* stream, s32 amount)
+u32 GetPositionAhead(BitReader_2115C0* stream, s32 amount)
 {
     u32 position = stream->origin + (amount >> 3);
     if (position >= stream->bufEnd) {

@@ -13,7 +13,7 @@ struct Obj_193E58_eu {
     f32 f594;
 };
 
-void func_00193E58(Obj_193E58_eu* self)
+void InitPauseMenu(Obj_193E58_eu* self)
 {
     SetupScreenElementText((ScreenElement*)self);
     if (IsFontLoaded(2)) {

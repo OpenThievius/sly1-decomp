@@ -11,7 +11,7 @@ struct Obj_136530_eu {
 
 void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 d);
 
-s32 func_00136530(Obj_136530_eu* self)
+s32 IsTextPanelTextTyped(Obj_136530_eu* self)
 {
     u8 buf[0xC0];
 

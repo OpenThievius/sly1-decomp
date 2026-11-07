@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// A file of data only, after src/main/class_descriptors.cpp in the link (.rodata 0x2215A0 to
+// 0x244F40): the property registry. For each class, by class id, the list of its properties
+// (id, then the descriptor of D_002505D8 that FillObjectPropertyTable, func_00109488, fills at
+// startup); then the lists of values base_object.cpp reads by the offsets of D_00244EC0.
+// Named after what it holds.
 #include "common.h"
 #include "property_descriptor.h"
 
-// The property registry: for each class (D_00244950, by class id), its count of properties and
-// its list of (id, descriptor). The descriptors are filled at startup.
 struct PropTable_244DF0 { s32 f0; const PropertyList* lists; s32 f8; };
-// The lists by class id, then the record that names them.
-struct PropertyRegistry { PropertyList lists[148]; PropTable_244DF0 table; };
+// The lists by class id, the record that names them, then the lists of values (each ending in
+// 0x2000) that base_object.cpp reads from D_00244DFC by D_00244EC0's offsets: a word-aligned array
+// right after the record, so a part of the same object (an array of its own would be 8-aligned).
+struct PropertyRegistry { PropertyList lists[148]; PropTable_244DF0 table; s32 valueLists[49]; };
+
+
 extern PropertyDescriptor D_002505D8[1179];
+
+// The property lists, by class: (id, descriptor of D_002505D8, filled at startup).
 #define PROP(id, n) { id, &D_002505D8[n] }
 extern const PropertyEntry D_002215A0[2] = {
     PROP(0x1, 0), PROP(0x2, 1),
@@ -4872,7 +4881,7 @@ extern const PropertyEntry D_002448F8[11] = {
     PROP(0x13A, 522), PROP(0x16F, 515), PROP(0x1AD, 519), PROP(0x258, 516),
     PROP(0x259, 517), PROP(0x25A, 518), PROP(0x25B, 523),
 };
-extern const PropertyRegistry D_00244950 = { {
+extern const PropertyRegistry g_classPropertyLists = { {
     { 2, D_002215A0 }, { 21, D_002215B0 }, { 127, D_00221658 }, { 149, D_00221A50 },
     { 149, D_00221EF8 }, { 153, D_002223A0 }, { 156, D_00222868 }, { 170, D_00222D48 },
     { 198, D_00223298 }, { 211, D_002238C8 }, { 208, D_00223F60 }, { 208, D_002245E0 },
@@ -4910,5 +4919,7 @@ extern const PropertyRegistry D_00244950 = { {
     { 23, D_00243EC8 }, { 23, D_00243F80 }, { 22, D_00244038 }, { 27, D_002440E8 },
     { 62, D_002441C0 }, { 41, D_002443B0 }, { 21, D_002444F8 }, { 38, D_002445A0 },
     { 27, D_002446D0 }, { 29, D_002447A8 }, { 13, D_00244890 }, { 11, D_002448F8 },
-}, { 0, D_00244950.lists, 0x2000 } };
+}, { 0, g_classPropertyLists.lists, 0x2000 },
+    { 0x2000, 0x1, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x5, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x6, 0x6, 0x2000, 0x1000, 0x1000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000, 0x2000, 0x1000, 0x2000, 0x5, 0x2000, 0x2000, 0x2000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000 } };
 #undef PROP
+extern const s32 D_00244EC0[32] = { 0, 1, 3, 4, 5, 6, 7, 9, 11, 12, 14, 17, 19, 20, 22, 26, 29, 31, 33, 34, 36, 38, 39, 40, 41, 43, 44, 45, 47, 48, 50, 0 };

@@ -20,10 +20,10 @@ static const f32 g_denT2 = 2.0209457874e+00f;
 static const f32 g_denT3 = -6.8828397989e-01f;
 static const f32 g_denT4 = 7.7038154006e-02f;
 
-f32 func_002052F8(f32 x);
-f32 func_00208068(f32 x);
+f32 AbsoluteValue(f32 x);
+f32 SquareRootKernel(f32 x);
 
-f32 func_002066C8(f32 x)
+f32 ArcsineKernel(f32 x)
 {
     s32 bits, magnitude, rootBits;
     f32 arg, scratch, num, den, root, ratio, tail;

@@ -7,10 +7,10 @@
 typedef unsigned long long u64_t;
 typedef long long s64_t;
 
-u32 func_001FD4A8(double a);
-double func_001FB618(s64_t x);
+u32 ConvertDoubleToU32(double a);
+double ConvertS64ToDouble(s64_t x);
 
-u64_t func_001FB528(double a)
+u64_t ConvertDoubleToU64(double a)
 {
     double t;
     u64_t v;

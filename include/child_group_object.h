@@ -81,19 +81,19 @@ typedef char check_ChildGroupObject[sizeof(ChildGroupObject) == 0x690 ? 1 : -1];
 typedef char check_ContactListObject[sizeof(ContactListObject) == 0x6F0 ? 1 : -1];
 typedef char check_StandIn[sizeof(StandIn) == 0x6A0 ? 1 : -1];
 
-void func_0013B4C0(ChildGroupObject* self);                          // slot 0
-void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
-void func_0013B598(ChildGroupObject* self);                          // slot 10
-void func_0013B610(ChildGroupObject* self);                          // slot 16
-void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
-void func_0013BA70(ChildGroupObject* self);                          // slot 60
-void func_0018D8E0(ContactListObject* self);                          // slot 0
-void func_0018D910(ContactListObject* self);                          // slot 10
-void func_0018D978(ContactListObject* self);                          // slot 7
-void func_0018D9B8(ContactListObject* self, void* b, f32 x);          // slot 27
-void func_0018DB20(ContactListObject* self, void* in1, void* in2);    // slot 36
-s32 func_0018DC88(ContactListObject* self, void* key);                // slot 56
-s32 func_001D6DA0(StandIn* self, s32 value);                // slot 56
-void func_001D7018(StandIn* self);                          // slot 60
+void InitChildGroupObject(ChildGroupObject* self);                          // slot 0
+void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
+void LoadChildGroupObject(ChildGroupObject* self);                          // slot 10
+void StartChildGroupObject(ChildGroupObject* self);                          // slot 16
+void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
+void HandleChildGroupObjectContact(ChildGroupObject* self);                          // slot 60
+void InitContactListObject(ContactListObject* self);                          // slot 0
+void LoadContactListObject(ContactListObject* self);                          // slot 10
+void UnregisterContactListObject(ContactListObject* self);                          // slot 7
+void MoveContactListObject(ContactListObject* self, void* b, f32 x);          // slot 27
+void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2);    // slot 36
+s32 TestContactListMayContact(ContactListObject* self, void* key);                // slot 56
+s32 TestStandInMayContact(StandIn* self, s32 value);                // slot 56
+void StopStandIn(StandIn* self);                          // slot 60
 
 #endif

@@ -5,14 +5,14 @@
  * (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "libm.h"
 
-f32 func_00206A68(f32 y, f32 x);
+f32 ArctangentOfRatioKernel(f32 y, f32 x);
 
-f32 func_00205778(f32 y, f32 x)
+f32 ArctangentOfRatio(f32 y, f32 x)
 {
     MathError e;
-    f32 value = func_00206A68(y, x);
+    f32 value = ArctangentOfRatioKernel(y, x);
 
-    if (D_0024FF78 == -1 || func_00209238(x) || func_00209238(y)) {
+    if (g_mathErrorMode == -1 || IsNotANumber(x) || IsNotANumber(y)) {
         return value;
     }
     if (x == 0.0f && y == 0.0f) {
@@ -22,11 +22,11 @@ f32 func_00205778(f32 y, f32 x)
         e.function = "atan2f";
         e.result = 0.0;
         e.errorCode = 0;
-        if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-            *func_002014F0() = 0x21;
+        if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+            *GetErrorNumberAddress() = 0x21;
         }
         if (e.errorCode != 0) {
-            *func_002014F0() = e.errorCode;
+            *GetErrorNumberAddress() = e.errorCode;
         }
         return (f32)e.result;
     }

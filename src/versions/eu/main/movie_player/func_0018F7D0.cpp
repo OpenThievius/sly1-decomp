@@ -8,7 +8,7 @@ struct Obj_18F7D0_eu {
     s32 f148;
 };
 
-void func_0018F7D0(MoviePlayer* self_)
+void FinishMovie(MoviePlayer* self_)
 {
     Obj_18F7D0_eu* self = (Obj_18F7D0_eu*)self_;
     u8* base = (u8*)self;
@@ -17,14 +17,14 @@ void func_0018F7D0(MoviePlayer* self_)
     self->f0C = 0;
     ResetMovieStream((MovieStream*)(base + 0x80));
     StopMovieStream((MovieStream*)(base + 0x80));
-    func_0020B0C0((void*)(base + 0x10));
-    (void)func_0020B048((void*)(base + 0x10));
+    ResetMpegDecoder((void*)(base + 0x10));
+    (void)DeleteMpegDecoder((void*)(base + 0x10));
     if (self->f148 != 0) {
         do {
         } while (*(volatile s32*)&self->f148 != 0);
     }
     D_002626CC = 3;
-    func_001B3450();
+    SendResidentImages();
     if ((u32)self->f00 >= 16) {
         mask = 0;
     } else {

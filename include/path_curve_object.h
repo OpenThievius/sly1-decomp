@@ -82,25 +82,25 @@ typedef char check_C71[sizeof(C71) == 0x5C ? 1 : -1];
 typedef char check_ListedKeepObject[sizeof(ListedKeepObject) == 0x40 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001B2840(PathCurveObject* self, void* stream);        // 0x6E slot 10
-void func_001B28A8(PathCurveObject* self, BaseObject* other);   // 0x6E slot 21
-void func_00169CD8(TargetCurve* self);                          // 0x6F slot 0
-void func_00169D20(TargetCurve* self);                          // 0x6F slot 6
-void func_00169D58(TargetCurve* self);                          // 0x6F slot 7
-void func_00169DD8(TargetCurve* self);                          // 0x6F slot 9
-void func_00169D90(TargetCurve* self);                          // 0x6F slot 15
-void func_00191F08(TargetVector* self);                         // 0x70 slot 0
-void func_00191F68(TargetVector* self);                         // 0x70 slot 6
-void func_00191FA0(TargetVector* self);                         // 0x70 slot 7
-void func_00192020(TargetVector* self);                         // 0x70 slot 9
-void func_00191FD8(TargetVector* self);                         // 0x70 slot 16
-void func_0019AF00(C71* self);                                  // 0x71 slot 0
-void func_0019AF38(C71* self);                                  // 0x71 slot 6
-void func_0019AF70(C71* self);                                  // 0x71 slot 7
-void func_0019AFF0(C71* self);                                  // 0x71 slot 9
-void func_0019AFA8(C71* self);                                  // 0x71 slot 16
-void func_00180EB0(ListedKeepObject* self);                     // 0x72 slot 6
-void func_00180EE8(ListedKeepObject* self);                     // 0x72 slot 7
-void func_00180F20(ListedKeepObject* self);                     // 0x72 slot 9
+void LoadPathCurveObject(PathCurveObject* self, void* stream);        // 0x6E slot 10
+void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other);   // 0x6E slot 21
+void InitTargetCurve(TargetCurve* self);                          // 0x6F slot 0
+void RegisterTargetCurve(TargetCurve* self);                          // 0x6F slot 6
+void UnregisterTargetCurve(TargetCurve* self);                          // 0x6F slot 7
+void CopyTargetCurve(TargetCurve* self);                          // 0x6F slot 9
+void PostLoadTargetCurve(TargetCurve* self);                          // 0x6F slot 15
+void InitTargetVector(TargetVector* self);                         // 0x70 slot 0
+void RegisterTargetVector(TargetVector* self);                         // 0x70 slot 6
+void UnregisterTargetVector(TargetVector* self);                         // 0x70 slot 7
+void CopyTargetVector(TargetVector* self);                         // 0x70 slot 9
+void StartTargetVector(TargetVector* self);                         // 0x70 slot 16
+void InitC71Object(C71* self);                                  // 0x71 slot 0
+void RegisterC71Object(C71* self);                                  // 0x71 slot 6
+void UnregisterC71Object(C71* self);                                  // 0x71 slot 7
+void CopyC71Object(C71* self);                                  // 0x71 slot 9
+void StartC71Object(C71* self);                                  // 0x71 slot 16
+void RegisterListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 6
+void UnregisterListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 7
+void CopyListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 9
 
 #endif

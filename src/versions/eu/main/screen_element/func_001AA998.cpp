@@ -7,7 +7,7 @@ struct Vt_eu_1AA998 {
     void* s12;
     f32 (*m34)(Obj_eu_1AA998* self);
 };
-void func_001AAB60(Obj_eu_1AA998* self);
+void PlaceScreenElement(Obj_eu_1AA998* self);
 
 struct Obj_eu_1AA998 {
     Vt_eu_1AA998* vt;
@@ -27,7 +27,7 @@ struct Obj_eu_1AA998 {
     f32* f568;
 };
 
-void func_001AA998(Obj_eu_1AA998* self, s32 mode)
+void SetScreenElementMode(Obj_eu_1AA998* self, s32 mode)
 {
     if (self->f560 == mode) {
         return;

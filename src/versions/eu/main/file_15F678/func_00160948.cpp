@@ -2,7 +2,7 @@
 // PAL's fallback key is entry D_eu_00263710 of a table of 0x20-byte keys, not the first one.
 extern s32 D_eu_00263710;
 
-void func_00160948(void)
+void ResumeAtSavedLevel(void)
 {
     SessionKey* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
@@ -13,8 +13,8 @@ void func_00160948(void)
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
         if (D_00275F84 == 0) {
-            func_001C0760(g_saveData->f19EC & 0x80);
-            func_001C0790(g_saveData->f19EC & 0x40);
+            SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
+            ApplySoundOptionFlag(g_saveData->f19EC & 0x40);
             Animation* r = FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
             if (r != 0) {
                 PlayerListWalk frame((AnimationPlayerList*)r->props6C);

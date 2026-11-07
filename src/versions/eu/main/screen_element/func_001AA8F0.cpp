@@ -10,7 +10,7 @@ struct Obj_1AA8F0_eu {
     f32* p258;
 };
 
-void func_001AA8F0(Obj_1AA8F0_eu* self)
+void ShowScreenElement(Obj_1AA8F0_eu* self)
 {
     s32 s = self->state;
     if (s == 2) {

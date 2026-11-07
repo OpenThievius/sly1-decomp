@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -53,6 +54,7 @@ def kind_of(ret):
 def signatures(text):
     """[(name, kind, line, is_definition)] of the file-scope declarations and definitions in a text."""
     out = []
+    text = symbols.normalize(text)      # a declaration may use the readable name (tools/symbols.py)
     for m in SIGNATURE.finditer(text):
         ret = m.group("ret")
         if ret.split()[0] in ("return", "else", "case", "goto", "new", "delete", "typedef", "using", "friend"):

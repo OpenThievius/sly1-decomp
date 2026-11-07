@@ -23,9 +23,9 @@ void func_eu_001AEC90(Obj_eu_001AEC90* self)
     Inner_eu_001AEC90* a = (Inner_eu_001AEC90*)self->f4;
     Sub_eu_001AEC90* b = a->f4C;
     self->f4 = b->fC((u8*)a + b->f8, D_eu_0027DBBC, D_eu_0027DBC0);
-    if (func_0015C1C0(2) != 0) {
+    if (GetFontById(2) != 0) {
         self->f520 = (void**)&D_00274488;
-        *self->f520 = func_0015C1C0(2);
+        *self->f520 = GetFontById(2);
     }
     self->f570 = D_eu_00263EEC == 3;
     self->f574 = 0;

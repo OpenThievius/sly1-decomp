@@ -10,7 +10,7 @@ struct Self_1AB2B8_eu {
 };
 void func_eu_001AB370(Self_1AB2B8_eu* self, char* buf);
 
-void func_001AB2B8(Self_1AB2B8_eu* self)
+void FormatCounterCaption(Self_1AB2B8_eu* self)
 {
     char buf[0x200];
     switch (self->f524) {

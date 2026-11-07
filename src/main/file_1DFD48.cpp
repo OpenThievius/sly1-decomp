@@ -7,27 +7,27 @@
 #include "globals.h"
 #include "transform_object.h"
 
-u8 D_002758D0[16] = {0};
+u8 g_class75List[16] = {0};
 
 
-void func_00152438(void* p, s32 n);
+void SetListLinkOffset(void* p, s32 n);
 
-void func_001DFD48()
+void InitClass75List()
 {
     SetListLinkOffset(g_class75List, 0x80);
 }
 
 
-void func_00152440(void* p);
+void ClearList(void* p);
 
-void func_001DFD70()
+void ClearClass75List()
 {
     ClearList(g_class75List);
 }
 
-void func_001F39F8(void* self);
+void InitTransformObject(void* self);
 
-void func_001DFD90(void* self)
+void InitClass75Object(void* self)
 {
     Class75Object* o = (Class75Object*)self;
     InitTransformObject(self);
@@ -35,27 +35,27 @@ void func_001DFD90(void* self)
     o->scale = 25.0f;
 }
 
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
+void RegisterObject(void* self);
+void AppendToList(void* table, void* self);
 
-void func_001DFDC8(void* self)
+void RegisterClass75Object(void* self)
 {
     RegisterObject(self);
     AppendToList(g_class75List, self);
 }
 
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
+void UnregisterObject(void* self);
+void RemoveFromList(void* table, void* self);
 
-void func_001DFE00(void* self)
+void UnregisterClass75Object(void* self)
 {
     UnregisterObject(self);
     RemoveFromList(g_class75List, self);
 }
 
-void func_001830D8(void* self);
+void CopyObjectData(void* self);
 
-void func_001DFE38(Class75Object* self)
+void CopyClass75ObjectData(Class75Object* self)
 {
     Class75Link tmp;
     tmp = self->link;

@@ -18,7 +18,7 @@ struct ValueListObject : BaseObject {
 
 typedef char check_ValueListObject[sizeof(ValueListObject) == 0x44 ? 1 : -1];
 
-void func_001EE900(ValueListObject* self);                 // slot 0
-void func_001EE930(ValueListObject* self, void* stream);   // slot 10
+void InitValueListObject(ValueListObject* self);                 // slot 0
+void LoadValueList(ValueListObject* self, void* stream);   // slot 10
 
 #endif

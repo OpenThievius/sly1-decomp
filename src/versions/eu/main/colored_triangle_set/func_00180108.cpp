@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL scales y by 0.5462963f (not 0.45454547f) and offsets it by 1920.0f (not 1936.0f)
-void func_00180108(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
+void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
 {
     f32 sp[16];
     TriangleColor col;
     Quad128Floats vv, q;
     s32 g;
-    func_0018A008(0, sp, c);
+    BuildUniformScaleAboutPoint(0, sp, c);
     sp[12] = a;
     sp[13] = b;
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
@@ -27,7 +27,7 @@ void func_00180108(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
                     s32 j;
                     for (j = 2; j >= 0; j--) {
                         vv.v = *(Quad128*)&self->points[*idx++];
-                        q.v = func_00188740(sp, vv.v);
+                        q.v = TransformVector4(sp, vv.v);
                         AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
                     }
                 }

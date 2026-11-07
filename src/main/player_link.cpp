@@ -30,19 +30,19 @@ float D_00274DD8[2] = {-1.70000005f, 0.0f};
 float D_00274DE0[3] = {3000.0f, 1000.0f, 0.150000006f};
 float D_00274DF0[3] = {30.0f, 10.0f, 0.150000006f};
 
-void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
 
 struct ThreeBlendRecord { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
 
-void func_001CC410(void* a0, ThreeBlendRecord* a1, void** a2)
+void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2)
 {
     void* tmp;
     a1->f0 = 0;
     a1->fC = 0;
     a1->f18 = 1.0f;
-    func_00139038(a0, 12, 3, a1, 0, 0, 0, &tmp);
-    func_001399F8(tmp, 12, 3, a1);
+    BuildCombinedBlendAnimation(a0, 12, 3, a1, 0, 0, 0, &tmp);
+    SetBlendItemWeights(tmp, 12, 3, a1);
     if (a2 != 0) {
         *a2 = tmp;
     }
@@ -55,24 +55,24 @@ ASM_FUNC(func_001CC818);
 ASM_FUNC(func_001CCF98);
 
 struct LinkTargetHolder { s32 pad0; void* target; };
-void func_001B9AB0(void* target, void* slot);
-void func_001B9AC8(void* target, void* slot);
+void AddColliderForce(void* target, void* slot);
+void AddColliderTorque(void* target, void* slot);
 
-void func_001CD088(Player* self)
+void SyncPlayerTarget(Player* self)
 {
-    func_001B9AB0(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22D0);
-    func_001B9AC8(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
+    AddColliderForce(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22D0);
+    AddColliderTorque(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
 }
 
 ASM_FUNC(func_001CD0C8);
 
 ASM_FUNC(func_001CD6C0);
 
-s32 func_00182FC8(BaseObject* obj);
-void func_001385A0(World* world, Contacts03* a, Contacts03* b, s32 set, s32 clr);
+s32 IsObjectAttached(BaseObject* obj);
+void SetContactPairFlags(World* world, Contacts03* a, Contacts03* b, s32 set, s32 clr);
 
 // Walks up the parents to the first object whose class has flag bit 2.
-void func_001CD7E0(Collider* self, BaseObject* node, s32 flag)
+void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
 {
     BaseObject* n = node;
     while (n != 0) {
@@ -98,14 +98,14 @@ struct HeadingVector {
     f32 y;
 };
 
-void func_001280C0(void* a, s32 b, void* c, HeadingVector* d);
-f32 func_00205778(f32 a, f32 b);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, HeadingVector* d);
+f32 ArctangentOfRatio(f32 a, f32 b);
 
-void func_001CDB28(u8* a0, f32* a1)
+void GetLinkedObjectHeading(u8* a0, f32* a1)
 {
     HeadingVector v;
     void* owner = *(void**)(a0 + 0x2204);
-    func_001280C0(*(void**)((u8*)owner + 0x18), 0, (u8*)owner + 0x50, &v);
+    TransformDirectionBetweenFrames(*(void**)((u8*)owner + 0x18), 0, (u8*)owner + 0x50, &v);
     *a1 = ArctangentOfRatio(v.y, v.x);
 }
 
@@ -113,14 +113,14 @@ ASM_FUNC(func_001CDB70);
 
 ASM_FUNC(func_001CDD98);
 
-void func_001225D0(Player* self, f32 t, void* out, void* extra);
-void func_001C5DB8(Player* self, f32 t, void* out, void* extra);
+void GetPlacedObjectRotationAt(Player* self, f32 t, void* out, void* extra);
+void GetTurningColliderPose(Player* self, f32 t, void* out, void* extra);
 
-void func_001CDF78(Player* self, f32 t, void* out, void* extra)
+void GetPlayerPose(Player* self, f32 t, void* out, void* extra)
 {
     if (self->f2220 == 3) {
         GetPlacedObjectRotationAt(self, t, out, extra);
     } else {
-        func_001C5DB8(self, t, out, extra);
+        GetTurningColliderPose(self, t, out, extra);
     }
 }

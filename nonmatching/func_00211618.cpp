@@ -5,7 +5,7 @@
 
 struct Str_211618 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
 
-void func_00211618(Str_211618* self, s32 n)
+void AdvanceBits(Str_211618* self, s32 n)
 {
     u64 w = self->w0 << n;
     u32 cnt = self->f10 - n;

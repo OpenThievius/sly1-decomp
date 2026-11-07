@@ -9,7 +9,7 @@ struct Obj_eu_135228
     f32 f5CC[4];
 };
 
-void func_00135228(Obj_eu_135228* self, PacketWriter* q)
+void DrawTextPanelBlocks(Obj_eu_135228* self, PacketWriter* q)
 {
     if (self->f570 == 1)
     {
@@ -28,7 +28,7 @@ void func_00135228(Obj_eu_135228* self, PacketWriter* q)
             *(u32*)c0 = 0xFF408080;
             *(u32*)c1 = 0xFF406060;
             *(u32*)c2 = 0xFF404040;
-            f32 t = func_00205210(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
+            f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
                 f32 r = ApproachValueWithRamp(self->f5CC[i], self->f5BC[i] ? 1.0f : 0.0f, g_gameClock[2], &D_00261260[2], 0);

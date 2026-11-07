@@ -33,26 +33,26 @@ struct TrailOwner {
     TrailRing* f60;
 };
 
-void* func_001619C0(VertexBatch* b);
-void func_00152B38(PacketWriter* g);
-void func_00161AB0(VertexBatch* b, u8* a, u8* c);
-void func_00161BB0(VertexBatch* b, s32 v);
-void func_00161B10(VertexBatch* b, u8* a, f32 f);
-void func_001626C0(VertexBatch* b, u8* src);
-void func_001626A8(VertexBatch* b, Rgba4* c);
-void func_00162680(VertexBatch* b, void* v);
-void func_001626D8(VertexBatch* b, s32 z);
-void func_00162508(VertexBatch* b);
-void func_00152D70(PacketWriter* g);
-void func_00161A88(VertexBatch* b, s32 f);
+void* InitVertexBatch(VertexBatch* b);
+void BeginDmaTag(PacketWriter* g);
+void SetVertexBatchTransform(VertexBatch* b, u8* a, u8* c);
+void SetVertexBatchMode(VertexBatch* b, s32 v);
+void SelectVertexBatchLights(VertexBatch* b, u8* a, f32 f);
+void SetVertexTexCoord(VertexBatch* b, u8* src);
+void SetVertexColor(VertexBatch* b, Rgba4* c);
+void SetVertexPosition(VertexBatch* b, void* v);
+void AddVertex(VertexBatch* b, s32 z);
+void FlushVertexBatch(VertexBatch* b);
+void CloseDmaTag(PacketWriter* g);
+void DestroyVertexBatch(VertexBatch* b, s32 f);
 
-u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
-u8 D_002749A0[16] = { 0 };
+u8 g_trailEdgeTexCoord[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
+u8 g_trailZeroTexCoord[16] = { 0 };
 
-void func_001C29E8(TrailRing* o);
-void func_001C30E8(TrailOwner* self);
+void ResetTrailRing(TrailRing* o);
+void DrawTrailRibbon(TrailOwner* self);
 
-void func_001C29E8(TrailRing* o)
+void ResetTrailRing(TrailRing* o)
 {
     o->fC = 0;
     o->f8 = 0;
@@ -62,7 +62,7 @@ ASM_FUNC(func_001C29F8);
 
 ASM_FUNC(func_001C3028);
 
-void func_001C30E8(TrailOwner* self)
+void DrawTrailRibbon(TrailOwner* self)
 {
     VertexBatch b;
     Rgba4 c;
@@ -78,7 +78,7 @@ void func_001C30E8(TrailOwner* self)
     b.f98 = 0;
     SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
     SetVertexBatchMode(&b, r->f4);
-    func_00161B10(&b, ((u8*)&D_00248D30), r->f0->f2A8);
+    SelectVertexBatchLights(&b, ((u8*)&D_00248D30), r->f0->f2A8);
     idx = r->f8;
     if (idx != r->fC) {
         do {

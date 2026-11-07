@@ -18,10 +18,10 @@ struct Clock_1AB980_eu
     f32 limit;
     Cb_1AB980_eu onEnd;
 };
-void func_001ABE20(Clock_1AB980_eu* self, s32 state);
+void SetTimerState(Clock_1AB980_eu* self, s32 state);
 void func_eu_001AB238(void* self, const char* s);
 
-void func_001AB980(Clock_1AB980_eu* self, f32 dt)
+void StepTimer(Clock_1AB980_eu* self, f32 dt)
 {
     char buf[16];
     f32 t = __builtin_fabsf(self->time);

@@ -25,8 +25,8 @@ u32 D_00279418 = 0;
 u32 D_0027941C = 0;
 s32 D_00279420 = -1;
 s32 D_00279424 = 0;
-s32 D_00279428 = -1;
-s32 D_0027942C = -1;
+s32 g_discNSemaphore = -1;
+s32 g_discSSemaphore = -1;
 volatile s32 D_00279430 = 0;
 u32 D_00279434 = 0;
 s32 D_00279438 = -1;
@@ -42,10 +42,10 @@ u8 D_00279480[128] __attribute__((aligned(64))) = { 0 };
 u8 D_00279500[0x1000] __attribute__((aligned(64))) = { 0 };
 u8 D_0027A500[192] __attribute__((aligned(64))) = { 0 };
 u32 D_0027A5C0[4] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027A5D0 = { { 0 } };
+RpcClient g_discNClient = { { 0 } };
 u8 D_0027A600[1088] __attribute__((aligned(64))) = { 0 };
 u32 D_0027AA40[0x102] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027AE48 = { { 0 } };
+RpcClient g_discSClient = { { 0 } };
 
 static s32 D_0062A7C0;
 static void (*D_0062A7C4)(s32);
@@ -59,42 +59,42 @@ static s32 D_0062AA40[4] __attribute__((aligned(64)));
 /* What func_00203828 sends: its one word, in a buffer of 16 bytes as D_0062AA40. */
 static s32 D_0062AA50[4];
 
-s32 func_001F6A90(void);
-s32 func_001F6B40(s32 sema);
-s32 func_001F6B70(s32 sema);
-s32 func_001F7B88(const char* format, ...);
-void func_001F7BE8(s32 mode);
-s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
-s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 GetCurrentThreadId(void);
+s32 PostSemaphore(s32 sema);
+s32 TrySemaphore(s32 sema);
+s32 PrintBuffered(const char* format, ...);
+void InitRemoteCalls(s32 mode);
+s32 BindRemoteService(RpcClient* client, u32 server, s32 mode);
+s32 CallRemoteService(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void (*end)(void*), void* end_arg);
-void func_001FA7D8(void* start, s32 size);
-void func_00202EF0(void);
-void func_00202F88(void);
-s32 func_00203050(void);
-s32 func_00203368(s32 mode);
+void WriteBackDataCacheRange(void* start, s32 size);
+void CreateDiscSemaphores(void);
+void DeleteDiscSemaphores(void);
+s32 InstallDiscCallbackHandler(void);
+s32 SyncDiscSCommand(s32 mode);
 
-s32 func_00203828(s32 mode)
+s32 WaitDiscReady(s32 mode)
 {
     s32 i;
     s32 r;
 
     if (D_00279410 > 0) {
-        func_001F7B88("DiskReady 0\n");
+        PrintBuffered("DiskReady 0\n");
     }
-    func_00202EF0();
-    if (*(volatile s32*)&D_0027942C != func_001F6B70(*(volatile s32*)&D_0027942C)) {
+    CreateDiscSemaphores();
+    if (*(volatile s32*)&g_discSSemaphore != TrySemaphore(*(volatile s32*)&g_discSSemaphore)) {
         return 6;
     }
-    if (func_00203368(1)) {
-        func_001F6B40(*(volatile s32*)&D_0027942C);
+    if (SyncDiscSCommand(1)) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return mode == 8 ? -1 : 6;
     }
-    func_001F7BE8(0);
+    InitRemoteCalls(0);
     if (D_00279444 < 0) {
         while (1) {
-            if (func_001F80C0(&D_0062AA10, 0x8000059A, 0) < 0) {
+            if (BindRemoteService(&D_0062AA10, 0x8000059A, 0) < 0) {
                 if (D_00279410 > 0) {
-                    func_001F7B88("Libcdvd bind err CdDiskReady\n");
+                    PrintBuffered("Libcdvd bind err CdDiskReady\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
                 }
@@ -108,16 +108,16 @@ s32 func_00203828(s32 mode)
         D_00279444 = 0;
     }
     D_0062AA50[0] = mode;
-    func_001FA7D8(D_0062AA50, 4);
+    WriteBackDataCacheRange(D_0062AA50, 4);
     r = (s32)D_0027A600;
-    if (func_001F8290(&D_0062AA10, 0, 0, D_0062AA50, 4, (void*)r, 4, 0, 0) < 0) {
-        func_001F6B40(*(volatile s32*)&D_0027942C);
+    if (CallRemoteService(&D_0062AA10, 0, 0, D_0062AA50, 4, (void*)r, 4, 0, 0) < 0) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return mode == 8 ? -1 : 6;
     }
     if (D_00279410 > 0) {
-        func_001F7B88("DiskReady ended\n");
+        PrintBuffered("DiskReady ended\n");
     }
     r = *(s32*)((u32)r | 0x20000000);
-    func_001F6B40(D_0027942C);
+    PostSemaphore(g_discSSemaphore);
     return r;
 }

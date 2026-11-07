@@ -49,9 +49,9 @@ struct C62Group {
 typedef char check_C62Group[sizeof(C62Group) == 0x30 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001EF838(C62* self);                       // 0x62 slot 0
-void func_001EF9C8(C62* self, s32 kind, Msg62* msg); // 0x62 slot 13
-void func_001EF868(C62* self);                       // 0x62 slot 16
-void func_001EF8F8(void);                            // 0x62 slot 17 (empty)
+void InitStateResetObject(C62* self);                       // 0x62 slot 0
+void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg); // 0x62 slot 13
+void StartStateResetObject(C62* self);                       // 0x62 slot 16
+void UpdateStateResetObject(void);                            // 0x62 slot 17 (empty)
 
 #endif

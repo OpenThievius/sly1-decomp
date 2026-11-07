@@ -5,7 +5,7 @@
 // it takes the placement of a child object (func_0012F8C8, slot 16) or finds an object by id,
 // and slot 17 (func_0012F9B8) hands that placement on to an object it keeps at +0x5A0. Written
 // for this project from what retail's code does (config/us/classes.tsv;
-// src/main/0012C000.cpp).
+// src/main/placed_object.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset. The class adds no slot to 0x03's descriptor.
@@ -35,12 +35,12 @@ struct IdFilterObject : Collider {
 typedef char check_IdFilterObject[sizeof(IdFilterObject) == 0x5B0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0012F840(IdFilterObject* self);                      // 0x34 slot 0
-void func_0012F888(IdFilterObject* self);                      // 0x34 slot 9
-void func_0012F8C8(IdFilterObject* self);                      // 0x34 slot 16
-void func_0012F9B8(IdFilterObject* self);                      // 0x34 slot 17
-s32 func_0012FA88(IdFilterObject* self, Collider* key);             // 0x34 slot 56
-void func_0012FCB0(IdFilterObject* self, s32 id);              // the first list's add
-void func_0012FCD0(IdFilterObject* self, s32 id);              // the second list's add
+void InitIdFilterObject(IdFilterObject* self);                      // 0x34 slot 0
+void CopyIdFilterObject(IdFilterObject* self);                      // 0x34 slot 9
+void StartIdFilterObject(IdFilterObject* self);                      // 0x34 slot 16
+void UpdateIdFilterObject(IdFilterObject* self);                      // 0x34 slot 17
+s32 TestIdFilterMatch(IdFilterObject* self, Collider* key);             // 0x34 slot 56
+void AddIdFilterObjectId(IdFilterObject* self, s32 id);              // the first list's add
+void AddIdFilterClassId(IdFilterObject* self, s32 id);              // the second list's add
 
 #endif

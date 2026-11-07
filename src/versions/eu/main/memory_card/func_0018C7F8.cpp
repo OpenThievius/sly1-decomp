@@ -2,7 +2,7 @@
 // PAL: the Gx object's field is at 0x58C (not 0x27C) and the packed word at 0x570 (not 0x260).
 struct Gx_18C7F8_eu { u8 pad0[0x58C]; s32 f58C; };
 
-void func_0018C7F8(MemoryCard* self)
+void StartMemoryCardSave(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
         if ((g_saveData->f19EC & 0x100) == 0) {

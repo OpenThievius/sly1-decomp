@@ -3,7 +3,7 @@
 extern u8 D_eu_0024AFF8[];
 void func_eu_001AB238(void* self, const char* s);
 
-void func_0016F478(void)
+void ShowPasswordMessage(void)
 {
     char text[0x40];
     u8 buf[0x10];

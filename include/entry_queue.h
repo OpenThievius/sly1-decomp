@@ -43,6 +43,6 @@ struct EntryQueue : BaseObject {
 
 typedef char check_EntryQueue[sizeof(EntryQueue) == 0x6C ? 1 : -1];
 
-void func_0017B998(EntryQueue* self);   // slot 0
+void InitEntryQueue(EntryQueue* self);   // slot 0
 
 #endif

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's entries start at 0x574 with a 0x570 stride, call func_eu_001AAFB0 and func_eu_001AB550(0.5) and skip the sub-object writes.
 typedef void (*VFn_14AC48)(void* self);
-void func_001AA8B0(void* self, f32 v);
-void func_001AA8C0(void* self, f32 v);
-void func_001AA8B8(void* self, f32 v);
+void SetScreenElementSlideInTime(void* self, f32 v);
+void SetScreenElementSlideOutTime(void* self, f32 v);
+void SetScreenElementHoldTime(void* self, f32 v);
 struct Entry_14AC48_eu {
     VFn_14AC48* vtbl;
     u8 pad0[0x520 - 0x4];
@@ -19,7 +19,7 @@ struct Obj_14AC48_eu {
 void func_eu_001AAFB0(void* self);
 void func_eu_001AB550(void* self, f32 v);
 
-void func_0014AC48(Obj_14AC48_eu* self)
+void SetupItemColumn(Obj_14AC48_eu* self)
 {
     Entry_14AC48_eu* e;
     u32 i;

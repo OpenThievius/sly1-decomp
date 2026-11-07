@@ -18,27 +18,27 @@
 #include "flag_table.h"
 
 void func_0012AA28(void* a, s32 b);
-void func_001289C0(void* a, void* b);
-void func_00124DF8(void* a, s32 b, void* c);
-void func_00127048(void* a, void* b);
-extern u8 D_00261420[];
-void func_00124A48(void* a);
-void* func_0015A838(void* a, s32 b, s32 c, void* d);
-s32 func_00141008(void* a, s32 b);
+void LoadPlacedObject(void* a, void* b);
+void ResolveObjectLinks(void* a, s32 b, void* c);
+void CopyPlacedObject(void* a, void* b);
+extern u8 g_flagTable[];
+void StartPlacedObject(void* a);
+void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, void* d);
+s32 TestFlagTableBit(void* a, s32 b);
 
 extern s32 D_00270458;
-extern f32 D_00261860;
-void func_001BAC30(Collider* self, void* p);
-f32 func_00137DF8(void* p);
-void func_00124A48(void* self);
-void func_00146298(ScaledOffsetObject* self);
-void func_00138BE0(World* a, void* self, s32 n);
-void func_00129DF8(void* self);
-void func_001B7968(Collider* self);
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6598(void* sub, s32* out);
-void* func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
-void func_00147ED0(void* self);
+extern f32 g_frameDt;
+void LoadCollider(Collider* self, void* p);
+f32 ReadBufferedFloat(void* p);
+void StartPlacedObject(void* self);
+void ApplyScaledOffset(ScaledOffsetObject* self);
+void ClearRootObjectStateBits(World* a, void* self, s32 n);
+void ClearRootTries(void* self);
+void InitCollider(Collider* self);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerCurrentKey(void* sub, s32* out);
+void* AppendQueuedCall(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
+void CompleteTimeRangeNotifier(void* self);
 
 // What a notifier tells the world's object (World::f1D60, its slot 27) or its listener (slot 31)
 // when it fires: the state and itself.
@@ -64,76 +64,76 @@ struct ListenerMessage {
     u8 pad08[0x50 - 0x08];
 };
 
-s32 func_001300E8(void* node, s32 kind);
-extern u8 D_00261420[];
-void func_00123ED0(StateNotifier* self);
-void func_00152470(List01* list, StateNotifier* item);
-s32 func_00140FF8(FlagTable* p);
+s32 IsObjectOfKind(void* node, s32 kind);
+extern u8 g_flagTable[];
+void InitPlacedObject(StateNotifier* self);
+void AppendToList(List01* list, StateNotifier* item);
+s32 TakeFlagTableIndex(FlagTable* p);
 
 struct __attribute__((packed)) PSys_1481A0 {
     u8 pad0[0x26C];
     f32 f26C;
 };
 
-void func_00148038(World* self);
-void func_00148178(void);
-s32 func_00160D98(void);
+void PlaceSpareSoundNotifier(World* self);
+void AddReserveUnit(void);
+s32 GetSpareCountLimit(void);
 
 
 extern s32 D_0026EC58;
-s32 func_001300E8(void* node, s32 kind);
-SwitchedCollider* func_001925F0(void);
+s32 IsObjectOfKind(void* node, s32 kind);
+SwitchedCollider* GetActiveSwitchedCollider(void);
 
 
 extern s32 D_00275C34;
-extern u8 D_00261EF0[];
-extern u8 D_00264A40[];
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_00151FC8(void* p);
-void func_0018C7F8(void* p);
-extern void* D_0026EC68;
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6598(void* dev, s32* out);
-void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
+extern u8 g_scatterController[];
+extern u8 g_memoryCard[];
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void ResetScatterLevels(void* p);
+void StartMemoryCardSave(void* p);
+extern void* g_deadlineNotifier;
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void* AppendQueuedCall(void* target, void* fn, void* ctx, s32 a, s32 b);
 
-extern f32 D_0026185C;
-void func_00152470(void* table, void* self);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_001E02C8(T217D_1380* self, s32 n);
+extern f32 g_gameTime;
+void AppendToList(void* table, void* self);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void SetBestTimeState(T217D_1380* self, s32 n);
 
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6598(void* dev, s32* out);
-void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
-void func_00148E18(void* self);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void* AppendQueuedCall(void* target, void* fn, void* ctx, s32 a, s32 b);
+void CompleteCountdownNotifier(void* self);
 
 extern s32 D_00270458;
-extern f32 D_00261860;
+extern f32 g_frameDt;
 
 extern void* D_00261B60[28];
-extern u8 D_00261420[];
-f32 func_001EAAE0(f32 a, f32 b);
-Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_00141040(void* table, s32 v);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00148F80(void* self);
+extern u8 g_flagTable[];
+f32 RandomFloatInRange(f32 a, f32 b);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
+void SetFlagTableBit(void* table, s32 v);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void AddReserveUnitNow(void* self);
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern u8 D_0026EC60[];
 
-extern u8 D_00261990[];
-extern u8 D_002483D0[];
+extern u8 g_camera[];
+extern u8 g_identityMatrix[];
 
-extern u8 D_002483D0[];
+extern u8 g_identityMatrix[];
 extern u8 D_00248D30[];
 extern f32 D_00261B40;
-void func_0018D608(void);
-StateNotifier** func_0018D658(s32 size);
-s32 func_00148938(World* self, s32 a1, s32 n, StateNotifier** arr);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001ED650(void* out, f32 x, f32 y, f32 z);
-void func_001EEB60(World* a, f32 f, void* b, void* c);
-void func_0018D6F0(void);
+void PushBackMemoryMark(void);
+StateNotifier** AllocateBackMemory(s32 size);
+s32 GatherObjectsOfKind(World* self, s32 a1, s32 n, StateNotifier** arr);
+f32 RandomFloatInRange(f32 a, f32 b);
+void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
+void QueryValueListMask(World* a, f32 f, void* b, void* c);
+void PopBackMemoryMark(void);
 
 
 struct __attribute__((aligned(16))) Quad_148038 {
@@ -142,21 +142,21 @@ struct __attribute__((aligned(16))) Quad_148038 {
 
 struct Ctx_148038;
 extern f32 D_00261AB0[4];
-extern u8 D_002483D0[];
+extern u8 g_identityMatrix[];
 extern u8 D_00248D30[];
 extern Quad_148038 D_00261AC0;
-s32 func_00148938(World* self, s32 a1, s32 a2, void** out);
-s32 func_00160D98(void);
-void func_00144128(Ctx_148038* a, void* b, void* c);
-s32 func_001EEB60(Ctx_148038* self, f32 x, void* vec, void* out);
+s32 GatherObjectsOfKind(World* self, s32 a1, s32 a2, void** out);
+s32 GetSpareCountLimit(void);
+void UnprojectCameraPoint(Ctx_148038* a, void* b, void* c);
+s32 QueryValueListMask(Ctx_148038* self, f32 x, void* vec, void* out);
 
 extern void* D_00261AD0[28];
-Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_001481A0(void* self);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
+void CountPickupTowardHundred(void* self);
+f32 RandomFloatInRange(f32 a, f32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-ObjectLink D_002619A0[5] = {
+ObjectLink g_stateNotifierLinks[5] = {
 
     { 0, 0x25F, 0x2E4 },
     { 2, 0x25B, 0x324 },
@@ -207,20 +207,20 @@ f32 D_00261BD0[4] = { 0.0f, 0.0f, 200.0f, 0.0f };
 f32 D_00261BE0 = 0.75f;
 INCLUDE_DATA(D_00261BE4);
 
-void func_00146100(ScaledOffsetObject* self)
+void InitScaledOffsetObject(ScaledOffsetObject* self)
 {
     InitCollider(self);
     self->scale = 100.0f;
 }
 
-void func_00146130(ScaledOffsetObject* self, void* p)
+void LoadScaledOffsetObject(ScaledOffsetObject* self, void* p)
 {
     LoadCollider(self, p);
     self->factorX = ReadBufferedFloat(p);
     self->factorY = ReadBufferedFloat(p);
 }
 
-void func_00146178(ScaledOffsetObject* self)
+void StartScaledOffsetObject(ScaledOffsetObject* self)
 {
     StartPlacedObject(self);
     ApplyScaledOffset(self);
@@ -228,17 +228,17 @@ void func_00146178(ScaledOffsetObject* self)
 
 ASM_FUNC(func_001461A8);
 
-void func_00146240(ScaledOffsetObject* self, f32 v)
+void SetOffsetScale(ScaledOffsetObject* self, f32 v)
 {
     if (v != self->scale) {
         self->scale = v;
         ClearRootObjectStateBits(self->world, self, 7);
         ApplyScaledOffset(self);
-        func_00129DF8(self);
+        ClearRootTries(self);
     }
 }
 
-void func_00146298(ScaledOffsetObject* self)
+void ApplyScaledOffset(ScaledOffsetObject* self)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
         if (self->elems[i]->kind == 6) {
@@ -250,7 +250,7 @@ void func_00146298(ScaledOffsetObject* self)
     }
 }
 
-void func_00146340(StateNotifier* self)
+void InitStateNotifier(StateNotifier* self)
 {
     self->initialMode = 0;
     self->f388 = 30.0f;
@@ -266,14 +266,14 @@ void func_00146340(StateNotifier* self)
     self->armed = 1;
 }
 
-void func_001463C0(StateNotifier* self, void* arg)
+void LoadStateNotifier(StateNotifier* self, void* arg)
 {
     func_0012AA28(self, 1);
     LoadPlacedObject(self, arg);
     ResolveObjectLinks(self, 5, g_stateNotifierLinks);
 }
 
-void func_00146418(StateNotifier* self, void* arg)
+void CopyStateNotifier(StateNotifier* self, void* arg)
 {
     s32 keep = self->f37C;
     u64 tmp;
@@ -283,7 +283,7 @@ void func_00146418(StateNotifier* self, void* arg)
     self->f37C = keep;
 }
 
-void func_00146470(StateNotifier* self)
+void StartStateNotifier(StateNotifier* self)
 {
     StartPlacedObject(self);
     void* r = FindFirstObjectByIdGathered(self->world, 1, 0x75, self);
@@ -302,7 +302,7 @@ void func_00146470(StateNotifier* self)
 
 ASM_FUNC(func_00146518);
 
-s32 func_00146D10(void* unused, Collider* self)
+s32 IsEligibleNotifierTarget(void* unused, Collider* self)
 {
     u64 bit = 0x8000;
     bit <<= 28;
@@ -321,7 +321,7 @@ ASM_FUNC(func_00146DB0);
 
 ASM_FUNC(func_001471B0);
 
-s32 func_001473E0(StateNotifier* self, ContactObject* b)
+s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 {
     if (self->armed != 0) {
         if (b->fC & 0x10) {
@@ -341,7 +341,7 @@ INCLUDE_RODATA(jtbl_00249E70);
 
 ASM_FUNC(func_00147AB0);
 
-void func_00147E40(TimeRangeNotifier* self)
+void InitTimeRangeNotifier(TimeRangeNotifier* self)
 {
     InitStateNotifier(self);
     f32 k = 50.0f;
@@ -355,18 +355,18 @@ void func_00147E40(TimeRangeNotifier* self)
     self->timeMax = 10.0f;
 }
 
-void func_00147ED0(TimeRangeNotifier* self)
+void CompleteTimeRangeNotifier(TimeRangeNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
-void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target)
+void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void* target)
 {
     NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, target);
     if (kind != 0x14) return;
     if (target != self->f2E8) return;
-    func_001B6598(target, &fr.code);
+    GetStateWalkerCurrentKey(target, &fr.code);
     if (fr.code != 0x263) return;
     BaseObject* obj = self->world->f1D60;
     if (obj != 0) {
@@ -377,7 +377,7 @@ void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target)
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteTimeRangeNotifier, self, 0, 0);
 }
 
-void func_00147FB0(TimeRangeNotifier* self)
+void UpdateTimeRangeNotifier(TimeRangeNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
@@ -390,7 +390,7 @@ void func_00147FB0(TimeRangeNotifier* self)
     }
 }
 
-void func_00148038(World* self)
+void PlaceSpareSoundNotifier(World* self)
 {
     SoundNotifier* obj;
     s32 buf[4];
@@ -407,18 +407,18 @@ void func_00148038(World* self)
     } else {
         obj->desc->m02(obj);
         obj->desc->m15(obj, 0);
-        func_00144128(*(Ctx_148038**)g_camera, (void*)D_00261AB0, buf);
+        UnprojectCameraPoint(*(Ctx_148038**)g_camera, (void*)D_00261AB0, buf);
         obj->desc02()->m1D(obj, (Vec02*)buf);
         obj->desc02()->m1E(obj, (Mat02*)g_identityMatrix);
         obj->desc02()->m20(obj, (Vec02*)D_00248D30);
         obj->desc02()->m21(obj, (Vec02*)D_00248D30);
         obj->desc02()->m2F(obj, 4);
         *(Quad_148038*)((u8*)obj + 0x300) = D_00261AC0;
-        func_001EEB60((Ctx_148038*)self->f1EC4, obj->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
+        QueryValueListMask((Ctx_148038*)self->f1EC4, obj->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
     }
 }
 
-void func_00148178(void)
+void AddReserveUnit(void)
 {
     GameProgress* g = g_saveData;
     s32 r = 99;
@@ -426,7 +426,7 @@ void func_00148178(void)
     g->f19E0 = r;
 }
 
-void func_001481A0(void* self)
+void CountPickupTowardHundred(void* self)
 {
     Effect* s = (Effect*)self;
     GameProgress* g = g_saveData;
@@ -456,7 +456,7 @@ void func_001481A0(void* self)
     }
 }
 
-void func_00148298(TimeRangeNotifier* self, s32 mode)
+void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode)
 {
     TimeRangeNotifier* s = self;
     if (s->state != mode) {
@@ -495,7 +495,7 @@ void func_00148298(TimeRangeNotifier* self, s32 mode)
     }
 }
 
-void func_00148400(SoundNotifier* self)
+void InitSoundNotifier(SoundNotifier* self)
 {
     SoundNotifier* o = self;
     InitStateNotifier(o);
@@ -513,7 +513,7 @@ void func_00148400(SoundNotifier* self)
     o->f350 = k60;
 }
 
-void func_00148470(SoundNotifier* self, s32 mode)
+void SetSoundNotifierState(SoundNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
@@ -524,7 +524,7 @@ void func_00148470(SoundNotifier* self, s32 mode)
     SetStateNotifierState(self, mode);
 }
 
-void func_00148510(SaveNotifier* self)
+void InitSaveNotifier(SaveNotifier* self)
 {
     SaveNotifier* o = self;
     InitStateNotifier(o);
@@ -544,7 +544,7 @@ void func_00148510(SaveNotifier* self)
     }
 }
 
-void func_00148598(SaveNotifier* self, s32 mode)
+void SetSaveNotifierState(SaveNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
@@ -568,7 +568,7 @@ void func_00148598(SaveNotifier* self, s32 mode)
     SetStateNotifierState(self, mode);
 }
 
-void func_00148698(DeadlineNotifier* self)
+void InitDeadlineNotifier(DeadlineNotifier* self)
 {
     InitStateNotifier(self);
     self->f34C = 60.0f;
@@ -583,24 +583,24 @@ void func_00148698(DeadlineNotifier* self)
     }
 }
 
-void func_00148718(DeadlineNotifier* self)
+void StartDeadlineNotifier(DeadlineNotifier* self)
 {
     StartStateNotifier(self);
     g_deadlineNotifier = self;
 }
 
-void func_00148748(DeadlineNotifier* self)
+void CompleteDeadlineNotifier(DeadlineNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
-void func_00148770(DeadlineNotifier* self, s32 kind, void* msg)
+void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* msg)
 {
     NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
-    func_001B6598(msg, &fr.code);
+    GetStateWalkerCurrentKey(msg, &fr.code);
     if (fr.code != 0x263) return;
     BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
@@ -611,14 +611,14 @@ void func_00148770(DeadlineNotifier* self, s32 kind, void* msg)
     AppendQueuedCall(self->world, (void*)CompleteDeadlineNotifier, self, 0, 0);
 }
 
-void func_00148828(DeadlineNotifier* self)
+void UpdateNotifierWorldDeadline(DeadlineNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
     if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
 }
 
-void func_00148888(DeadlineNotifier* self, s32 mode)
+void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode)
 {
     ListenerMessage msg;
     if (self->state == mode) return;
@@ -635,7 +635,7 @@ void func_00148888(DeadlineNotifier* self, s32 mode)
     SetStateNotifierState(self, mode);
 }
 
-s32 func_00148910(const f32* first, const f32* second)
+s32 CompareFloatsDescending(const f32* first, const f32* second)
 {
     s32 result = -1;
     if (*first < *second) result = 1;
@@ -646,7 +646,7 @@ INCLUDE_RODATA(D_00249E90);
 
 ASM_FUNC(func_00148938);
 
-s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
+s32 ScatterObjectsAroundCircle(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
 {
     StateNotifier** p;
     s32 i;
@@ -681,14 +681,14 @@ s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
             b = RandomFloatInRange(D_00261B50[0], D_00261B50[1]);
             ComputePolarOffset(q, ang, a, b);
             ang += step;
-            func_001EEB60((World*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
+            QueryValueListMask((World*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
         }
     }
     PopBackMemoryMark();
     return count;
 }
 
-void func_00148CE0(World* self)
+void CompleteSoundNotifiers(World* self)
 {
     GameProgress* g = g_saveData;
     if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
@@ -706,7 +706,7 @@ void func_00148CE0(World* self)
     } while (p != 0);
 }
 
-void func_00148D90(CountdownNotifier* self)
+void InitCountdownNotifier(CountdownNotifier* self)
 {
     InitStateNotifier(self);
     f32 k = 50.0f;
@@ -720,18 +720,18 @@ void func_00148D90(CountdownNotifier* self)
     self->timeMax = 6.0f;
 }
 
-void func_00148E18(CountdownNotifier* self)
+void CompleteCountdownNotifier(CountdownNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
-void func_00148E40(CountdownNotifier* self, s32 kind, void* msg)
+void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void* msg)
 {
     NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
-    func_001B6598(msg, &fr.code);
+    GetStateWalkerCurrentKey(msg, &fr.code);
     if (fr.code != 0x263) return;
     BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
@@ -742,7 +742,7 @@ void func_00148E40(CountdownNotifier* self, s32 kind, void* msg)
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteCountdownNotifier, self, 0, 0);
 }
 
-void func_00148EF8(CountdownNotifier* self)
+void CountDownNotifierTimer(CountdownNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
@@ -755,7 +755,7 @@ void func_00148EF8(CountdownNotifier* self)
     }
 }
 
-void func_00148F80(void)
+void AddReserveUnitNow(void)
 {
     T217D_E30* obj = &D_0026C6C8;
     obj->vt->m14(obj);
@@ -770,7 +770,7 @@ void func_00148F80(void)
     }
 }
 
-void func_00148FF0(CountdownNotifier* self, s32 mode)
+void SetCountdownNotifierState(CountdownNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 0) goto zero_case;
@@ -813,7 +813,7 @@ call_tail:
     SetStateNotifierState(self, mode);
 }
 
-void func_00149168(ArmedStateNotifier* self)
+void InitArmedStateNotifier(ArmedStateNotifier* self)
 {
     InitStateNotifier(self);
     self->armed = 0;

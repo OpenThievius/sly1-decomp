@@ -42,7 +42,7 @@ float D_00274E50 = 1.5f;
 float D_00274E54 = 0.25f;
 float D_00274E58 = 0.5f;
 float D_00274E5C = 0.200000003f;
-OnOffDefaultsBlock D_00274E60 = {
+OnOffDefaultsBlock g_onOffObjectDefaults = {
     { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
       -225.0f, 1.0f, 0.0f, 0.0f, 20.0f, 1.0f, 0.0f, 0.0f,
       -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f,
@@ -61,10 +61,10 @@ ASM_FUNC(func_001CE800);
 struct TargetCostContext { void* p0; BaseObject* p4; u8 pad1[0x10 - 8]; };
 struct ObjectPlacementScore { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
 
-void func_001CE800(void* a0, void* a1, void* a2, void* a3);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
+void PlaceOnTargetObject(void* a0, void* a1, void* a2, void* a3);
+void ScorePlayerTargetPlacement(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CE9E8(TargetCostContext* self)
+f32 ScoreTargetObjectAt(TargetCostContext* self)
 {
     ObjectPlacementScore f;
     PlaceOnTargetObject(self->p0, self->p4, f.vecA, f.vecB);
@@ -74,10 +74,10 @@ f32 func_001CE9E8(TargetCostContext* self)
 
 struct PointPlacementScore { u8 vecA[0x10]; f32 result; };
 
-void func_0016A240(void* a0, void* a1, s32 a2);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
+void PlaceOnTargetPoint(void* a0, void* a1, s32 a2);
+void ScorePlayerTargetPlacement(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CEA58(TargetCostContext* self)
+f32 ScoreTargetPointAt(TargetCostContext* self)
 {
     PointPlacementScore f;
     PlaceOnTargetPoint(self->p4, f.vecA, 0);
@@ -85,10 +85,10 @@ f32 func_001CEA58(TargetCostContext* self)
     return f.result;
 }
 
-void func_00169E20(void* a0, void* a1, s32 a2);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
+void PlaceOnTargetCurve(void* a0, void* a1, s32 a2);
+void ScorePlayerTargetPlacement(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CEAB8(TargetCostContext* self)
+f32 ScoreTargetCurveAt(TargetCostContext* self)
 {
     PointPlacementScore f;
     PlaceOnTargetCurve(self->p4, f.vecA, 0);
@@ -103,7 +103,7 @@ ASM_FUNC(func_001CEB18);
 struct PathScoreArgs { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
 void func_001CEB18(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
 
-f32 func_001CEDF8(PathScoreArgs* o, f32 t)
+f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
     func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
@@ -136,9 +136,9 @@ struct PathScoreFrame {
     f32 out;
 };
 
-void func_001EB168(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
+void FindLocalMinimum(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
 
-f32 func_001CEE30(PathScoreContext* self)
+f32 ScoreTargetPathNearest(PathScoreContext* self)
 {
     PathScoreFrame l;
     PathTarget* n = self->node;
@@ -151,13 +151,13 @@ f32 func_001CEE30(PathScoreContext* self)
     l.b[1] = n->f18;
     l.c = l.a;
     
-    func_001EB168(0.5f, q, q, 3.0f, (void*)ScoreTargetPathAt, l.b, 0, &l.out);
+    FindLocalMinimum(0.5f, q, q, 3.0f, (void*)ScoreTargetPathAt, l.b, 0, &l.out);
     return l.out;
 }
 
 ASM_FUNC(func_001CEEC8);
 
-f32 func_001CF138(Player* self, s32 id, f32 a, f32 b)
+f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
 {
     f32 r = a + b;
     if (id == self->penalizedTargetId) {
@@ -176,9 +176,9 @@ ASM_FUNC(func_001D0C78);
 
 ASM_FUNC(func_001D0F20);
 
-void func_001861E8(void* a, s32 b);
+void FreePooledContactChain(void* a, s32 b);
 
-void func_001D1200(Player* self, s32 n)
+void SetPlayerOnOffPhase(Player* self, s32 n)
 {
     if (n == self->f2684) {
         return;
@@ -205,9 +205,9 @@ void func_001D1200(Player* self, s32 n)
     }
 }
 
-void func_001E2840(OnOffObject* o, s32 v);
+void SetOnOffObjectForcedState(OnOffObject* o, s32 v);
 
-void func_001D1260(Player* self)
+void ResetPlayerOnOffObject(Player* self)
 {
     OnOffObject* o = self->f2678;
     o->i414 = 5;
@@ -227,8 +227,8 @@ void func_001D1260(Player* self)
 
 ASM_FUNC(func_001D12F0);
 
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-s32 func_001D1478(Player* self)
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+s32 HasNoActiveObject89(Player* self)
 {
     void* arr[64];
     s32 n = GatherObjectsById(self->world, 5, 0x89, 0, 0x40, arr);

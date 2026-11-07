@@ -36,13 +36,13 @@ struct Rect_eu_15D4E0 { f32 x, y, w, h; };
 struct Entry_eu_15D4E0 { u8 p0[2]; u16 a2; u16 a4; u16 a6; };
 struct Strm_eu_15D4E0 { u8 pad[4]; };
 
-Entry_eu_15D4E0* func_0015DAB8(Self_eu_15D4E0* self, u8 key);
-void func_0015C8B8(Font_eu_15D4E0* p, f32 a, f32 b);
-void func_0015C900(Font_eu_15D4E0* p);
-void func_0015D338(Self_eu_15D4E0* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+Entry_eu_15D4E0* FindFontGlyph(Self_eu_15D4E0* self, u8 key);
+void PushFontScale(Font_eu_15D4E0* p, f32 a, f32 b);
+void PopFontScale(Font_eu_15D4E0* p);
+void DrawFontQuad(Self_eu_15D4E0* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, Strm_eu_15D4E0* s);
 
-void func_0015D4E0(Self_eu_15D4E0* self, Item_eu_15D4E0* item, Rect_eu_15D4E0* r, Strm_eu_15D4E0* s)
+void DrawFontFrame(Self_eu_15D4E0* self, Item_eu_15D4E0* item, Rect_eu_15D4E0* r, Strm_eu_15D4E0* s)
 {
     Entry_eu_15D4E0* e = FindFontGlyph(self, item->key);
     if (e != 0) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the key is passed zero-extended to 16 bits
-FontGlyph* func_0015DAB8(Font* self, u16 key);
-f32 func_0015CA60(Font* self, s32 key)
+FontGlyph* FindFontGlyph(Font* self, u16 key);
+f32 GetFontCharWidth(Font* self, s32 key)
 {
     FontGlyph* e = FindFontGlyph(self, (u16)key);
     f32 x;

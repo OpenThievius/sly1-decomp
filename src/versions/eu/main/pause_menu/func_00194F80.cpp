@@ -27,32 +27,32 @@ struct Self_eu_194F80 {
     u8 pad6[0x594 - 0x578];
     f32 f284;
 };
-void func_00137228(Out_eu_194F80* out, f32 x, f32 y);
-void func_00137238(Out_eu_194F80* out, f32 x, f32 y);
-void func_00137248(Out_eu_194F80* out, Rgba_137248* value);
-void func_00137268(Out_eu_194F80* out, s32 flag);
+void SetTextLayoutPosition(Out_eu_194F80* out, f32 x, f32 y);
+void SetTextLayoutSize(Out_eu_194F80* out, f32 x, f32 y);
+void SetTextLayoutColor(Out_eu_194F80* out, Rgba_137248* value);
+void SetTextLayoutVerticalAlign(Out_eu_194F80* out, s32 flag);
 void func_eu_001374E0(Out_eu_194F80* out, s32 v);
-void func_00137260(Out_eu_194F80* out, Lines_eu_194F80* lines);
+void SetTextLayoutHorizontalAlign(Out_eu_194F80* out, Lines_eu_194F80* lines);
 Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, Font* font, s32 zero);
 Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, Font* font, s32 zero);
 void func_eu_0015E4A8(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
 void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
 f32 func_eu_0015E438(Buf_eu_194F80* buf);
-void* func_00193598(s32 menu, s32 id);
+void* GetMenuChoiceLabel(s32 menu, s32 id);
 
 struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
 {
-    func_00137228(out, x, y);
-    func_00137238(out, w, h);
+    SetTextLayoutPosition(out, x, y);
+    SetTextLayoutSize(out, w, h);
     Rgba_137248 tmp;
     tmp.value = color;
-    func_00137248(out, &tmp);
-    func_00137260(out, lines);
-    func_00137268(out, flag);
+    SetTextLayoutColor(out, &tmp);
+    SetTextLayoutHorizontalAlign(out, lines);
+    SetTextLayoutVerticalAlign(out, flag);
     func_eu_001374E0(out, 0);
 } };
 
-void func_00194F80(Self_eu_194F80* self)
+void DrawPauseMenu(Self_eu_194F80* self)
 {
     f32 cx;
     f32 cy;
@@ -82,7 +82,7 @@ void func_00194F80(Self_eu_194F80* self)
         cy = self->f228 * s + y0 * (1.0f - s); 
         h = hh * s; 
     }
-    pulse = func_00205400(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
+    pulse = Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
     page = self->f260;
     menu = &((Menu_eu_194F80*)&g_pauseMenuPages)[page];
     fade = 1.0f;
@@ -94,15 +94,15 @@ void func_00194F80(Self_eu_194F80* self)
     if (self->f210 != 0) {
         Out_eu_194F80 out;
         s32 backColor = 0xFF808080;
-        func_00137228(&out, cx, cy);
-        func_00137238(&out, w, h);
+        SetTextLayoutPosition(&out, cx, cy);
+        SetTextLayoutSize(&out, w, h);
         {
             Rgba_137248 tmp;
             tmp.value = backColor;
-            func_00137248(&out, &tmp);
+            SetTextLayoutColor(&out, &tmp);
         }
-        func_00137260(&out, 0);
-        func_00137268(&out, 0);
+        SetTextLayoutHorizontalAlign(&out, 0);
+        SetTextLayoutVerticalAlign(&out, 0);
         func_eu_001374E0(&out, 0);
         Rgba4 saved = self->f210->color;
         {

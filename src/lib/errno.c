@@ -5,9 +5,9 @@
  * code. */
 #include "common.h"
 
-extern s32* D_0027696C;
+extern s32* g_libraryState;
 
-s32* func_002014F0(void)
+s32* GetErrorNumberAddress(void)
 {
-    return D_0027696C;
+    return g_libraryState;
 }

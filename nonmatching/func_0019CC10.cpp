@@ -4,7 +4,7 @@
 //       lines).
 #include "common.h"
 
-void func_0019CC10(void* self, f32* out, f32 x, f32 y, f32 z)
+void ComputeGridBlendWeights(void* self, f32* out, f32 x, f32 y, f32 z)
 {
     f32 xa, xb;
     f32 z1, z2, z3;

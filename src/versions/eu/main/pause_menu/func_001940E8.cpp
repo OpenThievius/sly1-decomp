@@ -7,15 +7,15 @@ struct Obj_1940E8_eu {
     s32 f570;
 };
 typedef void (*VFn_1940E8_eu)(Obj_1940E8_eu* self);
-void func_001E96F8(Obj_1940E8_eu* self, s32 mode);
-void func_00193EE8(Obj_1940E8_eu* self, s32 a, s32 b);
+void SetElementStackState(Obj_1940E8_eu* self, s32 mode);
+void ChangePauseMenuPage(Obj_1940E8_eu* self, s32 a, s32 b);
 
-void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
+void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
     if (self->f56C == mode) return;
     if (mode != 0) {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
-            func_001BED48();
+            PauseStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
         } else if (D_0027051C != 0) {
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
@@ -34,7 +34,7 @@ void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
     } else {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
-            func_001BED70();
+            ResumeStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
         } else if (D_0027051C != 0) {
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);

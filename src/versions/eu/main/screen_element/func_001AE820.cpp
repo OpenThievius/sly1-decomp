@@ -22,10 +22,10 @@ struct Obj_1AE820_eu {
     s32 f260;
 };
 void func_eu_001374E0(void* out, s32 flag);
-void* func_0015DB28(void* out, void* p, void* handle, s32 extra);
+void* InitTextReader(void* out, void* p, void* handle, s32 extra);
 void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
 
-void func_001AE820(Obj_1AE820_eu* self)
+void DrawCyclingGlyphElement(Obj_1AE820_eu* self)
 {
     u8 out[0x20];
     s32 tmp[4];
@@ -64,12 +64,12 @@ void func_001AE820(Obj_1AE820_eu* self)
     held = self->f208;
     px = self->f234;
     py = self->f238;
-    func_00137228(out, self->f21c, self->f220 + adj);
-    func_00137238(out, px, py);
+    SetTextLayoutPosition(out, self->f21c, self->f220 + adj);
+    SetTextLayoutSize(out, px, py);
     tmp[0] = held;
-    func_00137248(out, tmp);
-    func_00137260(out, 0);
-    func_00137268(out, 0);
+    SetTextLayoutColor(out, tmp);
+    SetTextLayoutHorizontalAlign(out, 0);
+    SetTextLayoutVerticalAlign(out, 0);
     func_eu_001374E0(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;

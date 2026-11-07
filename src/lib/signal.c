@@ -16,18 +16,18 @@ struct LibcState {
     s32* handlers;
 };
 
-extern struct LibcState* D_0027696C;
+extern struct LibcState* g_libraryState;
 
-void* func_0018D748(struct LibcState* state, s32 size);
-s32 func_002016A0(struct LibcState* state, s32 pid, s32 sig);
-s32 func_00201700(struct LibcState* state);
+void* AllocateSignalTable(struct LibcState* state, s32 size);
+s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig);
+s32 GetProcessIdFor(struct LibcState* state);
 
-s32 func_00201500(struct LibcState* state)
+s32 MakeSignalTable(struct LibcState* state)
 {
     s32 i;
 
     if (state->handlers == 0) {
-        state->handlers = (s32*)func_0018D748(state, 0x80);
+        state->handlers = (s32*)AllocateSignalTable(state, 0x80);
         if (state->handlers == 0)
             return -1;
         for (i = 31; i >= 0; i--)
@@ -38,7 +38,7 @@ s32 func_00201500(struct LibcState* state)
 
 LINKER_REMNANT(func_00201570);
 
-s32 func_00201578(struct LibcState* state, s32 sig)
+s32 RaiseSignalFor(struct LibcState* state, s32 sig)
 {
     s32 ret = 0;
     SignalHandler handler;
@@ -69,9 +69,9 @@ s32 func_00201578(struct LibcState* state, s32 sig)
     return ret;
 }
 
-s32 func_00201668(s32 sig)
+s32 RaiseSignal(s32 sig)
 {
-    return RaiseSignalFor(D_0027696C, sig);
+    return RaiseSignalFor(g_libraryState, sig);
 }
 
 LINKER_REMNANT(func_00201690);

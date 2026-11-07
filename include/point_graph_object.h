@@ -43,6 +43,6 @@ typedef char check_PointGraphObject[sizeof(PointGraphObject) == 0x58 ? 1 : -1];
 typedef char check_PointGraph[sizeof(PointGraph) == 0x24 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001916D0(PointGraphObject* self, Stream8A* stream);     // 0x8A slot 10
+void LoadPointGraph(PointGraphObject* self, Stream8A* stream);     // 0x8A slot 10
 
 #endif

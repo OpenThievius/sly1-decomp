@@ -21,7 +21,7 @@ struct Self_eu_1ADB10 {
 
 extern s32 D_eu_0027DB60[];
 void func_eu_001AAFB0(void* self);
-s32 func_0015C188(s32 i);
+s32 IsFontLoaded(s32 i);
 
 void func_eu_001ADB10(Self_eu_1ADB10* self)
 {

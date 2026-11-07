@@ -40,7 +40,7 @@ struct ItemKeeper : BaseObject {
 typedef char check_ItemGroup[sizeof(ItemGroup) == 0x88 ? 1 : -1];
 typedef char check_ItemKeeper[sizeof(ItemKeeper) == 0x190 ? 1 : -1];
 
-void func_001CB618(ItemKeeper* self);      // 0x89 slot 0
-void func_001CB7A0(ItemKeeper* self);      // 0x89 slot 15
+void InitItemKeeper(ItemKeeper* self);      // 0x89 slot 0
+void FindWantedItems(ItemKeeper* self);      // 0x89 slot 15
 
 #endif

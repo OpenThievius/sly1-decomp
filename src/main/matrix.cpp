@@ -9,22 +9,22 @@
 // transforms of placed objects, angles back from a matrix or a vector, inversion, a projection;
 // many of them VU0 assembly.
 
-extern u8 D_00248D20[];
+extern u8 g_unitZVector[];
 
-void func_001884C0(void*);
-void* func_001F5C0C(void* p, s32 v, s32 n);
-void func_001EAD88(f32 angle, f32* s, f32* c);
-f32 func_001EA480(f32, f32);
-f32 func_00205678(f32 x);
-f32 func_00205778(f32 y, f32 x);
-void func_00188B48(void* a, void* b, Quad16* out);
-void func_00188668(Quad16* out, void* b, Quad16* in);
-void func_00189C28(void* self, void* table, void* value);
-void func_0018D608(void);
-void* func_0018D658(s32 size);
-void func_0018D800(void* dst, void* src, s32 count);
-void func_0018D6F0(void);
-s32 func_00189438(s32 n, f32* a, f32* b);
+void ResetMatrixHomogeneous(void*);
+void* FillMemory(void* p, s32 v, s32 n);
+void ComputeSinCos(f32 angle, f32* s, f32* c);
+f32 ClampToMagnitude(f32, f32);
+f32 Arcsine(f32 x);
+f32 ArctangentOfRatio(f32 y, f32 x);
+void InvertRigidTransform(void* a, void* b, Quad16* out);
+void MultiplyMatrices(Quad16* out, void* b, Quad16* in);
+void BuildBasisFromXAndZHint(void* self, void* table, void* value);
+void PushBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+void CopyMemory(void* dst, void* src, s32 count);
+void PopBackMemoryMark(void);
+s32 InvertSquareMatrix(s32 n, f32* a, f32* b);
 
 // A 4x4 matrix as func_001884C0 writes it: the last word of the first three rows, then the
 // fourth row as one quadword.
@@ -37,7 +37,7 @@ struct HomogeneousMatrix {
 // The fourth row of a 4x4 matrix: 0 0 0 1.
 extern const Quad16 D_0024B260 = { { 0, 0, 0, 0x3F800000 } };
 
-void func_001884C0(HomogeneousMatrix* self)
+void ResetMatrixHomogeneous(HomogeneousMatrix* self)
 {
     self->f0C = 0;
     self->f1C = 0;
@@ -45,7 +45,7 @@ void func_001884C0(HomogeneousMatrix* self)
     self->q30 = D_0024B260;
 }
 
-void* func_001884E0(Quad16* destination, const Quad16* source)
+void* CopyRotationMatrix(Quad16* destination, const Quad16* source)
 {
 	destination[0] = source[0];
 	destination[1] = source[1];
@@ -56,7 +56,7 @@ void* func_001884E0(Quad16* destination, const Quad16* source)
 
 ASM_FUNC(func_00188520);
 
-void func_001885E0(Mat4* self)
+void InitIdentityMatrix(Mat4* self)
 {
     FillMemory(self, 0, 0x40);
     self->m[3][3] = 1.0f;
@@ -75,7 +75,7 @@ ASM_FUNC(func_00188700);
 
 ASM_FUNC(func_00188740);
 
-void func_00188770(Quad16* src, Quad16* dst)
+void CopyTransposedMatrix(Quad16* src, Quad16* dst)
 {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -91,7 +91,7 @@ void func_00188770(Quad16* src, Quad16* dst)
     }
 }
 
-void func_00188810(f32* a, f32* b, f32* out)
+void AddMatrices(f32* a, f32* b, f32* out)
 {
 	s32 count = 15;
 	do {
@@ -101,7 +101,7 @@ void func_00188810(f32* a, f32* b, f32* out)
 
 LINKER_REMNANT(func_00188848);
 
-void func_00188850(f32* axis, Mat4* mat, f32 angle)
+void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle)
 {
     f32 s;
     f32 c;
@@ -132,7 +132,7 @@ void func_00188850(f32* axis, Mat4* mat, f32 angle)
 
 ASM_FUNC(func_00188978);
 
-void func_00188A20(f32* in, f32* out)
+void BuildEulerRotationMatrix(f32* in, f32* out)
 {
     f32 sc[6];
     ComputeSinCos(in[0], &sc[0], &sc[1]);
@@ -152,7 +152,7 @@ void func_00188A20(f32* in, f32* out)
     out[10] = ca * cb;
 }
 
-void func_00188B08(Quad16* a, Quad16* b, Quad16* dst)
+void BuildMatrixFromRotationAndTranslation(Quad16* a, Quad16* b, Quad16* dst)
 {
     dst[0] = b[0];
     dst[1] = b[1];
@@ -166,7 +166,7 @@ void func_00188B08(Quad16* a, Quad16* b, Quad16* dst)
 
 ASM_FUNC(func_00188B48);
 
-void func_00188C10(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
+void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
 {
     s32 i;
     s32 j;
@@ -185,7 +185,7 @@ void func_00188C10(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
 
 LINKER_REMNANT(func_00188CC8);
 
-void func_00188CE0(f32* p)
+void GetMatrixRotationCosine(f32* p)
 {
 	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
@@ -194,7 +194,7 @@ ASM_FUNC(func_00188D28);
 
 LINKER_REMNANT(func_00188FD0);
 
-void func_00188FD8(Mat4* self, Vec3* out)
+void MatrixToEulerAngles(Mat4* self, Vec3* out)
 {
     f32 k = 1.57069635f;
     f32 r = Arcsine(-self->m[0][2]);
@@ -217,7 +217,7 @@ ASM_FUNC(func_001890A0);
 
 ASM_FUNC(func_00189150);
 
-void func_001891C0(u8* self, void* arg, Quad16* out)
+void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
 {
     Quad16 tmp[4];
     Quad16 res[4];
@@ -230,7 +230,7 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
     out[3] = res[3];
 }
 
-void func_00189230(Vec3* v, f32* a1, f32* a2)
+void VectorToAngles(Vec3* v, f32* a1, f32* a2)
 {
     *a1 = ArctangentOfRatio(v->y, v->x);
     *a2 = ArctangentOfRatio(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
@@ -238,7 +238,7 @@ void func_00189230(Vec3* v, f32* a1, f32* a2)
 
 ASM_FUNC(func_001892A0);
 
-void func_00189350(void* self, void* value)
+void BuildBasisFromX(void* self, void* value)
 {
     BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
@@ -249,7 +249,7 @@ LINKER_REMNANT(func_00189430);
 
 // Inverts the n-by-n matrix a into b by Gauss-Jordan elimination with partial
 // pivoting, on a scratch copy; returns 0 when a is singular.
-s32 func_00189438(s32 n, f32* a, f32* b)
+s32 InvertSquareMatrix(s32 n, f32* a, f32* b)
 {
     s32 ok = 0;
     PushBackMemoryMark();
@@ -316,8 +316,8 @@ done:
 
 struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
 
-extern Matrix3x4 D_002483D0;
-s32 func_001897F0(Matrix3x4* in, Matrix3x4* out)
+extern Matrix3x4 g_identityMatrix;
+s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out)
 {
     Matrix3x4 m;
     s32 i, j, k;
@@ -376,7 +376,7 @@ done:
     return ok;
 }
 
-s32 func_00189AF0(void* a0, void* a1)
+s32 InvertMatrix4x4(void* a0, void* a1)
 {
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
 }
@@ -387,7 +387,7 @@ ASM_FUNC(func_00189C28);
 
 ASM_FUNC(func_00189D38);
 
-void func_00189F58(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
+void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
     FillMemory(self, 0, 0x40);
     f32 value = (e + f) / (e - f);

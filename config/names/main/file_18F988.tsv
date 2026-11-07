@@ -32,6 +32,7 @@ func_001916D0	LoadPointGraph	reads the point count, link and triangle records, p
 func_001919F8	MeasurePointGraphEdges	stores in each 12-byte edge of the graph (+0x10, count +0x8) the horizontal distance between its two points; LoadPointGraph calls it
 func_00191A68	FindOwnerGraphPath	FindPointGraphPath on the point graph the object holds; BuildAgentPath calls it
 func_00191A88	SnapPointToOwnerGraph	SnapPointToPointGraph on the point graph the object holds; BuildAgentPath, UpdateGaugeColliderAgentGoal and func_001C8418 call it
+func_00191AA8	TestOwnerGraphSpan	runs func_001909F0 on the point graph the object holds (+0x54), passing the other arguments through; sibling of FindOwnerGraphPath and SnapPointToOwnerGraph, called by func_00191AC8 with a mode of 1
 func_00191E70	SetScreenOwner	stores which activity draws to the screen in g_screenOwner, syncing the data cache (SyncDataCache) when it changes: the startup loading screen (1), BeginRenderFrame (3) and PlayMovie (4)
 func_00191EB0	ClearScreenOwner	sets g_screenOwner back to 0; the startup loading screen, DrainRenderFrames (after BeginRenderFrame's 3) and PlayMovie call it when they finish
 func_00191EC0	SetTargetVectorListLinkOffset	gives the list D_00269BA8 its link offset 0x38 with func_00152438
@@ -77,3 +78,5 @@ func_00192A70	HandleStepSequenceSkipButtons	unless the camera controller is on t
 func_00192B58	UpdateSwitchedCollider	slot 17 of class 0x05: runs the base update, then of the three objects at 0x588 starts (slot 6) the one picked by the clamped counter at D_002623C0+0x19E4 and stops (slot 7) the others
 func_00192C58	FinishSwitchedCollider	slot 80 (+0x150) of class 0x05, the slot FinishModeCollider and FinishModeWalker run first: unless bit 2 of g_buttonCodeFlags is set lowers the save's count at +0x19E4 (not below 0); then places its object +0x604 at +0x584's position with its rotation made upright (RotateMatrixUpright, slots 29 to 33) and starts the animation 0x18C on it (CreateAnimationPlayerWithoutPresetTargets), or without one spawns its effect at that position (SpawnEffectsAt)
 func_001930B0	GetSwitchedColliderTarget	slot 83 (+0x15C) of class 0x05, the slot GetPlayerLinkedColliderTarget fills: returns the collider itself
+func_001930B8	ConstructSwitchedColliderDefaults	the file's static initialiser: on the construction pass builds the default data block D_00604700 (returned by GetActiveSwitchedColliderData when none is active) and D_00269C10 as zeroed 0x80-byte blocks with their own values
+func_001931F0	ConstructSwitchedColliderDefaultsAtStartup	the file's _GLOBAL_$I$: returns ConstructSwitchedColliderDefaults(1, 0xFFFF); entry of the startup init list D_0027B130

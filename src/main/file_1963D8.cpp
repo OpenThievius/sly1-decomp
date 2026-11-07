@@ -2,7 +2,7 @@
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"
-extern f32 D_0026185C[];
+extern f32 g_gameTime[];
 #include "list_iter.h"
 #include "object_group.h"
 #include "world.h"
@@ -16,80 +16,80 @@ extern f32 D_0026185C[];
 
 
 
-void func_00123ED0(ObjectGroup* self);
-void func_00152470(u8* dst, ObjectGroup* src);
+void InitPlacedObject(ObjectGroup* self);
+void AppendToList(u8* dst, ObjectGroup* src);
 
 
 
-void func_00124A48(ObjectGroup* self);
-
-
-
-
-void func_001BAC30(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
+void StartPlacedObject(ObjectGroup* self);
 
 
 
 
-s32 func_001300E8(void* self, s32 kind);
-
-
-
-void func_001B6598(void* obj, s32* out);
-void* func_001E9970(s32 arg);
-
-
-void func_001A76A0(void* node, s32 flag);
-void func_00152600(void* a, void* b);
-void func_00152470(void* a, void* b);
+void LoadCollider(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
 
 
 
 
+s32 IsObjectOfKind(void* self, s32 kind);
+
+
+
+void GetStateWalkerCurrentKey(void* obj, s32* out);
+void* AreMenusAndFadeClear(s32 arg);
+
+
+void SetSoundStateObjectState(void* node, s32 flag);
+void RemoveFromList(void* a, void* b);
+void AppendToList(void* a, void* b);
 
 
 
 
-void func_001922E8(void* a, void* b);
 
 
 
-extern u8 D_00261EF0[];
-void func_00151E20(void* self, f32 amount);
+
+void HandleSwitchedColliderActivation(void* a, void* b);
 
 
 
-void func_001B6568(void* dev, s32* out);
-void func_001B6598(void* dev, s32* out);
-void func_001B64D8(void* dev, s32 value);
-void func_001973D8(GaugeCollider* self);
+extern u8 g_scatterController[];
+void RaiseScatterLevels(void* self, f32 amount);
+
+
+
+void GetStateWalkerTargetKey(void* dev, s32* out);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void SetStateWalkerTarget(void* dev, s32 value);
+void ApplyGaugeColliderRatioToEffect(GaugeCollider* self);
 
 
 
 extern u8 D_0026E744[];
 
 
-void func_00192230(void* self, s32 kind, void* rec);
-void func_001B6598(void* dev, s32* out);
-void func_001DDC38(void* sub, void* self);
-void func_001AB890(void* obj, f32 x);
-void func_001AB928(void* obj, f32 x, void* fn);
-void func_001AB938(void* obj);
-void func_001AB958(void* obj);
-void func_00197458(s32 unused, s32 flag);
+void HandleSwitchedColliderNotification(void* self, s32 kind, void* rec);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void SetWorldActiveFollower(void* sub, void* self);
+void StartTimer(void* obj, f32 x);
+void SetTimerLimit(void* obj, f32 x, void* fn);
+void StartTimerCounting(void* obj);
+void StopTimer(void* obj);
+void EndGaugeColliderTimer(s32 unused, s32 flag);
 
 
 
 
-extern f32 D_00261858[];
-extern GaugeColliderAgent* func_00182FC8(GaugeColliderAgent*);
-extern s32 func_001527D8(void* list);
-extern s32 func_001EAA70(s32 a, s32 b);
-extern void func_00152600(void* a, void* b);
-extern void func_00152470(void* a, void* b);
-extern void func_001C8F20(void* node, s32 kind, s32 flag);
-extern void func_001A76A0(void* node, s32 flag);
+extern f32 g_gameClock[];
+extern GaugeColliderAgent* IsObjectAttached(GaugeColliderAgent*);
+extern s32 CountListItems(void* list);
+extern s32 RandomIntInRange(s32 a, s32 b);
+extern void RemoveFromList(void* a, void* b);
+extern void AppendToList(void* a, void* b);
+extern void ChangeAgentState(void* node, s32 kind, s32 flag);
+extern void SetSoundStateObjectState(void* node, s32 flag);
 
 
 
@@ -97,47 +97,47 @@ extern void func_001A76A0(void* node, s32 flag);
 
 
 
-void func_001921A8(GaugeCollider* self);
-void func_00152438(List01* p, s32 value);
+void InitSwitchedCollider(GaugeCollider* self);
+void SetListLinkOffset(List01* p, s32 value);
 
 
 
 
 extern u8 D_0021A790[];
 
-void func_00124A48(GaugeCollider* self);
-void func_00124DF8(GaugeCollider* self, s32 n, void* table);
-f32 func_00205778(f32 a, f32 b);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void* func_00121228(World* root, void* value, const T2195_Vt* table);
-void func_001299E0(void* a, void* b);
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void* func_0018D500(s32 size);
-void func_00152470(void* list, void* item);
-void func_001B6DF8(void* a, void* b);
+void StartPlacedObject(GaugeCollider* self);
+void ResolveObjectLinks(GaugeCollider* self, s32 n, void* table);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void* CreatePoseSource(World* root, void* value, const T2195_Vt* table);
+void InsertAttachment(void* a, void* b);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void* AllocateFrontMemory(s32 size);
+void AppendToList(void* list, void* item);
+void AddStateWalkerListener(void* a, void* b);
 
 
 
 
-void func_00152438(u8* a, s32 v);
-void func_00137EB0(LoadStream* r, void* out);
-void func_00137E70(LoadStream* r, void* out);
-s32 func_00137B90(LoadStream* r);
-s32 func_00137D10(LoadStream* r);
-PlacedObject* func_001DC208(void* host, s32 a);
-PlacedObject* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
-void func_001DC150(void* host, PlacedObject* n, s32 v);
-GroupCell* func_0018D5C0(s32 n);
-void func_00152470(u8* list, GroupCell* c);
-PlacedObject* func_0015A418(void* host, s32 kind, s32 id, PlacedObject* c);
-void* func_001C1390(s32 id, void* host);
-void func_0011A338(void* a, void* b);
-s32 func_00137C40(LoadStream* r);
-s32 func_00137CC0(LoadStream* r);
-f32 func_00137DF8(LoadStream* r);
-void func_0011EC40(PlacedObject* n, LoadStream* r);
-void func_0011ECB8(void* host, ObjectGroup* self, LoadStream* r);
-s32 func_00152720(List01* list);
+void SetListLinkOffset(u8* a, s32 v);
+void ReadBufferedRotation3(LoadStream* r, void* out);
+void ReadBufferedVector3(LoadStream* r, void* out);
+s32 ReadBufferedU8(LoadStream* r);
+s32 ReadBufferedS16(LoadStream* r);
+PlacedObject* PopSpawnedClone(void* host, s32 a);
+PlacedObject* CreateTypedRecord(s32 slot, void* host, s32 z, s32 key, s32 flag);
+void PushCloneBatch(void* host, PlacedObject* n, s32 v);
+GroupCell* AllocateZeroedFrontMemory(s32 n);
+void AppendToList(u8* list, GroupCell* c);
+PlacedObject* FindFirstObjectById(void* host, s32 kind, s32 id, PlacedObject* c);
+void* GetScriptEntryScope(s32 id, void* host);
+void AddScriptScopeParent(void* a, void* b);
+s32 ReadBufferedU32(LoadStream* r);
+s32 ReadBufferedS8(LoadStream* r);
+f32 ReadBufferedFloat(LoadStream* r);
+void ReadPropertyRecords(PlacedObject* n, LoadStream* r);
+void ReadSlotObjects(void* host, ObjectGroup* self, LoadStream* r);
+s32 IsListEmpty(List01* list);
 
 // The id that names no object.
 struct NoId {
@@ -147,58 +147,58 @@ struct NoId {
 
 
 
-void func_00127048(ObjectGroup* self, ObjectGroup* src);
-void func_00152440(GroupList* p);
-void func_00152470(GroupList* list, GroupCell* c);
+void CopyPlacedObject(ObjectGroup* self, ObjectGroup* src);
+void ClearList(GroupList* p);
+void AppendToList(GroupList* list, GroupCell* c);
 
 
 
-void func_001BA130(void*);
-void func_00198980(void*);
-void func_001B7F78(void);
-void func_00182D48(void*);
-void func_00152470(void*, void*);
-void func_00182ED0(void*);
-void func_00152600(void*, void*);
-void func_00182C58(void*);
-void* func_0015A418(void*, s32, s32, void*);
-void func_001B7A98(void*);
-void func_001B7B78(void*);
-void func_00182C18(void*);
-void func_00144848(void*);
-void func_0015EAE0(void*, void*, void*);
-void func_0019D860(void);
-void func_0019D968(void);
-void func_0019D930(void);
-void func_0019EBE8(void*);
-void func_001831E8(void*, void*, s32, void*);
-void func_001831E8(void*, void*, void*, void*);
-void func_00183238(void*, void*, void*, void*);
-void func_0019F9D0(void*, u32);
-
-
-
-
-
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void* func_0015A838(void* a, s32 b, s32 c, void* d);
-
-
-
-void func_001C72A0(void* self);
+void CopyCollider(void*);
+void InitObjectSet(void*);
+void ApplyColliderPendingImpulse(void);
+void RegisterObject(void*);
+void AppendToList(void*, void*);
+void UnregisterObject(void*);
+void RemoveFromList(void*, void*);
+void StartObject(void*);
+void* FindFirstObjectById(void*, s32, s32, void*);
+void RegisterCollider(void*);
+void UnregisterCollider(void*);
+void InitObject(void*);
+void WriteCameraMatricesPacket(void*);
+void AddDmaRefTagIfChanged(void*, void*, void*);
+void UploadProjectionConstants(void);
+void UploadGroupConstants(void);
+void UploadCameraOncePerFrame(void);
+void RemoveEffect(void*);
+void AddCallbackNode(void*, void*, s32, void*);
+void AddCallbackNode(void*, void*, void*, void*);
+void RemoveCallbackNode(void*, void*, void*, void*);
+void EndEffectWithImpact(void*, u32);
 
 
 
 
-void* func_001925F0(void);
-void func_00197A08(void* h, void* self);
-void func_001C9008(void* self, void* arg);
+
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, void* d);
+
+
+
+void StartAgent(void* self);
 
 
 
 
-void func_001C91C8(void* self);
+void* GetActiveSwitchedCollider(void);
+void ReleaseObjectNode(void* h, void* self);
+void LeaveAgentState(void* self, void* arg);
+
+
+
+
+void EnterAgentState(void* self);
 void func_001C8920(void* self);
 
 
@@ -209,23 +209,23 @@ struct AgentValueNotice {
     s32 b;
 };
 
-void func_001C9DE0(void* self, s32 code, void* req);
+void HandleAgentNotification(void* self, s32 code, void* req);
 
 
 
 
-s32 func_001C96B8(void* self);
-s32 func_001C8010(void* self);
+s32 GetAgentRosterState(void* self);
+s32 ChooseAgentState(void* self);
 
 
 
 
 
 
-void* func_001925F0(GaugeColliderAgent* self, f32 f);
-s32 func_001300E8(void* key, s32 kind);
-s32 func_00182FC8(void* p);
-s32 func_00141170(void* self, void* value);
+void* GetActiveSwitchedCollider(GaugeColliderAgent* self, f32 f);
+s32 IsObjectOfKind(void* key, s32 kind);
+s32 IsObjectAttached(void* p);
+s32 TestPointAgainstObjectShape(void* self, void* value);
 // The query FindNodeForQuery takes, in the 0x40-byte local retail keeps.
 struct NodeQueryFrame {
     void* f00;
@@ -235,17 +235,17 @@ struct NodeQueryFrame {
     s32 f10;
     u8 pad14[0x40 - 0x14];
 };
-s32 func_00177838(NodeQueryFrame* f, s32 a, s32 b);
-void func_001C7CB8(GaugeColliderAgent* self, f32 f);
+s32 FindNodeForQuery(NodeQueryFrame* f, s32 a, s32 b);
+void UpdateAgent(GaugeColliderAgent* self, f32 f);
 
 // The file's .data, in retail's order.
 f32 D_0026A710 = 2200.0f;
 f32 D_0026A714 = 4000.0f;
 f32 D_0026A718 = 2000.0f;
 f32 D_0026A71C = 4000.0f;
-s32 D_0026A720 = 5;
-ObjectLink D_0026A728[1] = { { 0, 0x3D9, 0x610 } };
-ObjectLink D_0026A738[13] = {
+s32 g_gaugeAgentCountLimit = 5;
+ObjectLink g_gaugeColliderLoadLinks[1] = { { 0, 0x3D9, 0x610 } };
+ObjectLink g_gaugeColliderStartLinks[13] = {
     { 0x24, 0x3DD, 0x640 },
     { 0x20, 0x3DE, 0x648 },
     { 0x0, 0x3E7, 0x64C },
@@ -285,42 +285,42 @@ Vec02 D_0026A8C0 = { 1.4f, -0.005f, 0.0f, 0.0f };
 f32 D_0026A8D0[2] = { 0.9f, 1.2f };
 f32 D_0026A8D8 = 2000.0f;
 f32 D_0026A8DC = 1100.0f;
-ObjectLink D_0026A8E0[3] = { { 0x0, 0x3E4, 0x558 }, { 0x0, 0x3E5, 0x554 }, { 0x20, 0x3E6, 0x55C } };
+ObjectLink g_gaugeCountedObjectLinks[3] = { { 0x0, 0x3E4, 0x558 }, { 0x0, 0x3E5, 0x554 }, { 0x20, 0x3E6, 0x55C } };
 // The object func_00196938 registers itself as; filled at run time.
-GaugeCollider* D_0026A904 = 0;
+GaugeCollider* g_gaugeCollider = 0;
 
-void func_001963D8(ObjectGroup* self);
-void func_00196410(ObjectGroup* self, LoadStream* rd);
-void func_00196810(ObjectGroup* self, ObjectGroup* src);
-void func_00196900(ObjectGroup* self);
-void func_00196938(GaugeCollider* self);
-void func_001969C0(GaugeCollider* self);
-void func_001969F8(GaugeCollider* self);
-s32 func_00196E48(s32 a0, Collider* self);
-void func_001973D8(GaugeCollider* self);
-void func_00197458(s32 unused, s32 flag);
-void func_001974D8(GaugeCollider* a, void* b);
-void func_00197788(GaugeCollider* self);
-void func_00197848(GaugeCollider* self);
-void func_00197A08(u8* self, GaugeColliderAgent* ctx);
-void func_00197A68(GaugeCollider* ctx, Contact03* out);
-void func_00197F10(GaugeCollider* self, s32 kind, void* rec);
-void func_00198090(GaugeColliderAgent* self);
-s32 func_001982A0(GaugeColliderAgent* self);
-void func_001984B8(GaugeColliderAgent* self, void* arg);
-void func_00198530(GaugeColliderAgent* self);
-void func_001986E8(GaugeColliderAgent* self, s32 code, AgentValueNotice* req);
-void func_00198760(GaugeColliderAgent* s1, f32 f);
-u32 func_00198858(void);
-void func_00198920(GaugeCountedObject* self);
+void InitObjectGroup(ObjectGroup* self);
+void LoadObjectGroup(ObjectGroup* self, LoadStream* rd);
+void CopyObjectGroup(ObjectGroup* self, ObjectGroup* src);
+void StartObjectGroup(ObjectGroup* self);
+void InitGaugeCollider(GaugeCollider* self);
+void LoadGaugeCollider(GaugeCollider* self);
+void StartGaugeCollider(GaugeCollider* self);
+s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self);
+void ApplyGaugeColliderRatioToEffect(GaugeCollider* self);
+void EndGaugeColliderTimer(s32 unused, s32 flag);
+void HandleGaugeColliderActivation(GaugeCollider* a, void* b);
+void UpdateGaugeColliderVisibility(GaugeCollider* self);
+void PlaceObjectAtRandomNode(GaugeCollider* self);
+void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx);
+void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out);
+void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec);
+void StartGaugeColliderAgent(GaugeColliderAgent* self);
+s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self);
+void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, void* arg);
+void EnterGaugeColliderAgentState(GaugeColliderAgent* self);
+void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, AgentValueNotice* req);
+void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f);
+u32 IsGaugeColliderAgentTargetInRange(void);
+void StartGaugeCountedObject(GaugeCountedObject* self);
 
-void func_001963D8(ObjectGroup* self)
+void InitObjectGroup(ObjectGroup* self)
 {
     InitPlacedObject(self);
     AppendToList(&self->world->list1C3C, self);
 }
 
-void func_00196410(ObjectGroup* self, LoadStream* rd)
+void LoadObjectGroup(ObjectGroup* self, LoadStream* rd)
 {
     PlacedObject* arr[64];
     ListFrame fr;
@@ -450,7 +450,7 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
     self->desc->m02(self);
 }
 
-void func_00196810(ObjectGroup* self, ObjectGroup* src)
+void CopyObjectGroup(ObjectGroup* self, ObjectGroup* src)
 {
     Pair53 saved = self->kept;
     CopyPlacedObject(self, src);
@@ -477,13 +477,13 @@ void func_00196810(ObjectGroup* self, ObjectGroup* src)
     }
 }
 
-void func_00196900(ObjectGroup* self)
+void StartObjectGroup(ObjectGroup* self)
 {
     StartPlacedObject(self);
     self->desc->m03(self);
 }
 
-void func_00196938(GaugeCollider* self)
+void InitGaugeCollider(GaugeCollider* self)
 {
     InitSwitchedCollider(self);
     self->f61C = -10.0f;
@@ -496,13 +496,13 @@ void func_00196938(GaugeCollider* self)
     g_gaugeCollider = self;
 }
 
-void func_001969C0(GaugeCollider* self)
+void LoadGaugeCollider(GaugeCollider* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_gaugeColliderLoadLinks);
 }
 
-void func_001969F8(GaugeCollider* self)
+void StartGaugeCollider(GaugeCollider* self)
 {
     s32 arr[32];
     StartPlacedObject(self);
@@ -531,7 +531,7 @@ void func_001969F8(GaugeCollider* self)
 
 ASM_FUNC(func_00196B78);
 
-s32 func_00196E48(s32 a0, Collider* self)
+s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
 {
     if (self->flags538 & 0x80000000000ULL) {
         if (IsObjectOfKind(self, 0x1F) == 0) return 0;
@@ -543,7 +543,7 @@ ASM_FUNC(func_00196EB0);
 
 ASM_FUNC(func_001971B8);
 
-void func_001973D8(GaugeCollider* self)
+void ApplyGaugeColliderRatioToEffect(GaugeCollider* self)
 {
     f32 one = 1.0f;
     f32 t = (f32)self->f680 / (f32)self->f684;
@@ -558,7 +558,7 @@ void func_001973D8(GaugeCollider* self)
     RaiseScatterLevels(g_scatterController, 1.0f - c * 0.8f);
 }
 
-void func_00197458(s32 unused, s32 flag)
+void EndGaugeColliderTimer(s32 unused, s32 flag)
 {
     s32 out[4];
     if (flag == 1) {
@@ -573,14 +573,14 @@ void func_00197458(s32 unused, s32 flag)
     }
 }
 
-void func_001974D8(GaugeCollider* a, void* b)
+void HandleGaugeColliderActivation(GaugeCollider* a, void* b)
 {
     HandleSwitchedColliderActivation(a, b);
 }
 
 ASM_FUNC(func_001974F8);
 
-void func_00197788(GaugeCollider* self)
+void UpdateGaugeColliderVisibility(GaugeCollider* self)
 {
     s32 v;
     GetStateWalkerCurrentKey(self->f6B8, &v);
@@ -597,7 +597,7 @@ void func_00197788(GaugeCollider* self)
     g_timerElement.vt->m15(&g_timerElement);
 }
 
-void func_00197848(GaugeCollider* self)
+void PlaceObjectAtRandomNode(GaugeCollider* self)
 {
     ListFrame frame;
     if (g_gameClock[1] < self->f698) return;
@@ -632,7 +632,7 @@ void func_00197848(GaugeCollider* self)
 }
 
 
-void func_00197A08(u8* self, GaugeColliderAgent* ctx)
+void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx)
 {
     void* p = ctx->fC14;
     SetSoundStateObjectState(p, 0);
@@ -641,7 +641,7 @@ void func_00197A08(u8* self, GaugeColliderAgent* ctx)
     ctx->fC14 = 0;
 }
 
-void func_00197A68(GaugeCollider* ctx, Contact03* out)
+void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
 {
     (void)ctx;
     out->f98 = D_0026A83C;
@@ -650,7 +650,7 @@ void func_00197A68(GaugeCollider* ctx, Contact03* out)
 
 ASM_FUNC(func_00197A88);
 
-void func_00197F10(GaugeCollider* self, s32 kind, void* rec)
+void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
 {
     s32 code;
     HandleSwitchedColliderNotification(self, kind, rec);
@@ -690,14 +690,14 @@ void func_00197F10(GaugeCollider* self, s32 kind, void* rec)
     }
 }
 
-void func_00198090(GaugeColliderAgent* self)
+void StartGaugeColliderAgent(GaugeColliderAgent* self)
 {
     StartAgent(self);
 }
 
 ASM_FUNC(func_001980B0);
 
-s32 func_001982A0(GaugeColliderAgent* self)
+s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 {
     s32 r;
 
@@ -724,7 +724,7 @@ s32 func_001982A0(GaugeColliderAgent* self)
 
 ASM_FUNC(func_00198318);
 
-void func_001984B8(GaugeColliderAgent* self, void* arg)
+void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, void* arg)
 {
     if (self->f724 == 0x10) {
         void* h = GetActiveSwitchedCollider();
@@ -736,7 +736,7 @@ void func_001984B8(GaugeColliderAgent* self, void* arg)
     LeaveAgentState(self, arg);
 }
 
-void func_00198530(GaugeColliderAgent* self)
+void EnterGaugeColliderAgentState(GaugeColliderAgent* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0x10) {
@@ -746,7 +746,7 @@ void func_00198530(GaugeColliderAgent* self)
 
 ASM_FUNC(func_00198570);
 
-void func_001986E8(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
+void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
 {
     HandleAgentNotification(self, code, req);
     if (code != 10) {
@@ -762,7 +762,7 @@ void func_001986E8(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
     }
 }
 
-void func_00198760(GaugeColliderAgent* s1, f32 f)
+void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
 {
     GaugeCollider* s0 = (GaugeCollider*)GetActiveSwitchedCollider(s1, f);
 
@@ -791,11 +791,11 @@ void func_00198760(GaugeColliderAgent* s1, f32 f)
     UpdateAgent(s1, f);
 }
 
-u32 func_00198858(void) { return 0; }
+u32 IsGaugeColliderAgentTargetInRange(void) { return 0; }
 
 ASM_FUNC(func_00198860);
 
-void func_00198920(GaugeCountedObject* self)
+void StartGaugeCountedObject(GaugeCountedObject* self)
 {
     ResolveObjectLinks(self, 3, g_gaugeCountedObjectLinks);
     StartPlacedObject(self);

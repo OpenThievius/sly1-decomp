@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: draws a rectangle outline, or the visible rows of a list, with PAL's object layout.
-void func_001E6268(void* self, s32* first, s32* second);
+void GetArcVisibleRange(void* self, s32* first, s32* second);
 struct Elem_1E62A8 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad10[0x1C]; };
 struct Self_1E62A8_eu {
     u8 pad0[0x52C];
@@ -13,7 +13,7 @@ struct Self_1E62A8_eu {
     f32 f116C; f32 f1170;
 };
 
-void func_001E62A8(Self_1E62A8_eu* self, PacketWriter* c, s32 k)
+void WriteArcOutlineVertices(Self_1E62A8_eu* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->f538;

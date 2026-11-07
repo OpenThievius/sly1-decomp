@@ -11,10 +11,10 @@ struct Self_001AB600_eu {
     s32 f290;
 };
 
-void func_001AA268(Self_001AB600_eu* self);
-void func_001ABE20(Self_001AB600_eu* self, s32 state);
+void SetupScreenElementText(Self_001AB600_eu* self);
+void SetTimerState(Self_001AB600_eu* self, s32 state);
 
-void func_001AB600(Self_001AB600_eu* self)
+void InitTimerElement(Self_001AB600_eu* self)
 {
     SetupScreenElementText(self);
     self->p4 = (void*)GetFontById(2);

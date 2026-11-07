@@ -4,11 +4,11 @@ struct Self_1961C0_eu {
     u8 pad0[0x570];
     s32 state;
 };
-void func_00194D30(Self_1961C0_eu* self, s32 a, s32 b);
+void SetPauseMenuLayerPage(Self_1961C0_eu* self, s32 a, s32 b);
 extern f32 D_eu_0026BB38;
 extern f32 D_eu_0026BB3C;
 
-void func_001961C0(Self_1961C0_eu* self)
+void CancelPauseMenuPage(Self_1961C0_eu* self)
 {
     switch (self->state) {
     case 0:
@@ -23,14 +23,14 @@ void func_001961C0(Self_1961C0_eu* self)
         break;
     case 24: {
         DisplayRegs* g = &D_00262490;
-        s32 v = func_001FD7A0(D_eu_0026BB38);
+        s32 v = ConvertFloatToU32(D_eu_0026BB38);
         DisplayReg64 a = g->f40;
         DisplayReg32 b = g->f18;
         a.lo = v;
         b.lo = v;
         g->f40 = a;
         g->f18 = b;
-        s32 w = func_001FD7A0(D_eu_0026BB3C);
+        s32 w = ConvertFloatToU32(D_eu_0026BB3C);
         a.mid = w;
         b.mid = w;
         g->f40 = a;

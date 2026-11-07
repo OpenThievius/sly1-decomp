@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL starts the counter at 0x1D and calls func_00193288 only while D_eu_0026321C is non-zero.
 extern s32 D_eu_0026321C;
-void func_00185B38(void)
+void RunStartupInitializers(void)
 {
     ProgressFrame fr;
     u32 i;
@@ -14,8 +14,8 @@ void func_00185B38(void)
     fr.w[24] = 0x3F;
     (void)InitLoadProgress(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
     idx = 0x1D;
-    func_00191E70(1);
-    func_00193270(&fr);
+    SetScreenOwner(1);
+    BeginLoadProgress(&fr);
     tbl = (StartupFn*)g_startupInitializers;
     i = 0;
     do {
@@ -27,6 +27,6 @@ void func_00185B38(void)
         idx--;
     } while (i < 0x1D);
     UpdateLoadProgress(&fr, 0);
-    func_00193300(&fr);
-    func_00191EB0(1);
+    EndLoadProgress(&fr);
+    ClearScreenOwner(1);
 }

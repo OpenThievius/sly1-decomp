@@ -4,7 +4,7 @@
 
 // NEAR: every instruction and offset matches; the allocation of the loop variables differs (retail: self in s5, key in s6, the base in s2, i+1 in s3; ours: key in s2, self in s6, base in s3)
 
-void func_001F5B08(void* dst, void* src, s32 bytes);
+void MoveMemory(void* dst, void* src, s32 bytes);
 
 struct Ent_1388A0 {
     s32 f0;
@@ -19,7 +19,7 @@ struct Self_1388A0 {
     u8* f1AD8;
 };
 
-void func_001388A0(Self_1388A0* self, s32 key)
+void RemoveColliderFromSweepAxes(Self_1388A0* self, s32 key)
 {
     s32 i;
     u8* base;
@@ -39,7 +39,7 @@ void func_001388A0(Self_1388A0* self, s32 key)
             last = cur;
             cur += 12;
         }
-        func_001F5B08(last, last + 12, ((((cur - last) * (s32)0xAAAAAAAB) >> 2) * 12) - 12);
-        func_001F5B08(cur - 12, cur + 12, ((self->f38 * 2 - (((cur - base) * (s32)0xAAAAAAAB) >> 2)) * 12) - 12);
+        MoveMemory(last, last + 12, ((((cur - last) * (s32)0xAAAAAAAB) >> 2) * 12) - 12);
+        MoveMemory(cur - 12, cur + 12, ((self->f38 * 2 - (((cur - base) * (s32)0xAAAAAAAB) >> 2)) * 12) - 12);
     }
 }

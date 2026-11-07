@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The camera controllers (CameraController), five sub-objects embedded in class 0x6D (include/c6d.h)
 // at +0x454, +0x460, +0x4C0, +0x510 and +0x520, and the stack of the ones in action. Written for
-// this project from what retail's code does (config/us/tables.tsv, src/main/00148000.cpp,
+// this project from what retail's code does (config/us/tables.tsv, src/main/state_notifier.cpp,
 // camera.cpp, file_1E08F8.cpp).
 //
 // func_00143648 (0x6D slot 0) stores each table and calls the base set-up func_00149398 (it
@@ -10,7 +10,7 @@
 // first entry is in action, and func_00143E40 gives it the frame (slot 4).
 //
 // The tables are D_00217398, D_002173B0, D_002173C8, D_002173E0 and D_002173F8, defined in
-// src/main/00140000.cpp as arrays of function pointers; CameraControllerVt gives their slots types, and
+// src/main/class_descriptors.cpp as arrays of function pointers; CameraControllerVt gives their slots types, and
 // every object's first field points to its table (cast from the array where it is stored).
 #ifndef CAMERA_CONTROLLER_H
 #define CAMERA_CONTROLLER_H

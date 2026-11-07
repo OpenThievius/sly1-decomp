@@ -82,11 +82,11 @@ struct TriggerZone : Collider {
 typedef char check_Zone28[sizeof(Zone28) == 0x1CC ? 1 : -1];
 typedef char check_TriggerZone[sizeof(TriggerZone) == 0x890 ? 1 : -1];
 
-void func_0013F0E0(TriggerZone* self);                          // slot 0
-void func_0013F6C0(TriggerZone* self);                          // slot 9
-void func_0013F110(TriggerZone* self);                          // slot 10
-void func_0013FA10(TriggerZone* self, f32 t);                   // slot 28
-void func_0013FD20(TriggerZone* self);                          // slot 17
-s32 func_00140028(TriggerZone* self, void* event);              // slot 48 (m30)
+void InitTriggerZone(TriggerZone* self);                          // slot 0
+void CopyTriggerZone(TriggerZone* self);                          // slot 9
+void LoadTriggerZone(TriggerZone* self);                          // slot 10
+void StepTriggerZone(TriggerZone* self, f32 t);                   // slot 28
+void UpdateTriggerZone(TriggerZone* self);                          // slot 17
+s32 HandleTriggerZoneEvent(TriggerZone* self, void* event);              // slot 48 (m30)
 
 #endif

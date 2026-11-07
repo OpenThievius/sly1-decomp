@@ -7,7 +7,7 @@
 // of 0x52) and the VU0 helper func_0016C528. Its .rodata is func_0016C470's FLT_MAX literal at
 // 0x24A7DC and, after it, two -FLT_MAX words no code reads.
 
-void func_001DFD90(void* self);
+void InitClass75Object(void* self);
 
 // An object of class 0x76 (0xC0 bytes, under 0x75): the fields its set-up writes.
 struct C76 {
@@ -20,7 +20,7 @@ struct C76 {
     f32 fB4;
 };
 
-void func_0016C470(void* a0)
+void InitC76Object(void* a0)
 {
     C76* self = (C76*)a0;
     InitClass75Object(a0);
@@ -36,27 +36,27 @@ void func_0016C470(void* a0)
 extern const f32 D_0024A7E0 = -3.40282347e+38f;
 extern const f32 D_0024A7E4 = -3.40282347e+38f;
 
-void func_001F3A40(void);
+void ReadTransformObject(void);
 
-void func_0016C4B8(void)
+void LoadC76Object(void)
 {
     ReadTransformObject();
 }
 
 LINKER_REMNANT(func_0016C4D8);
 
-void func_001B93D8(void);
+void DrawCollider(void);
 
-void func_0016C4E8(void)
+void DrawC35Collider(void)
 {
     DrawCollider();
 }
 
-void func_001261C0(void);
+void DrawPlacedObject(void);
 
-void func_0016C508(void)
+void DrawC52Object(void)
 {
-    func_001261C0();
+    DrawPlacedObject();
 }
 
 ASM_FUNC(func_0016C528);

@@ -19,7 +19,7 @@ struct C5C : PlacedObject {
 
 typedef char check_C5C[sizeof(C5C) == 0x2E0 ? 1 : -1];
 
-void func_00199170(C5C* self);  // 0x5C slot 10 (load)
-void func_001991A8(C5C* self);  // 0x5C slot 16 (after loading)
+void LoadC5CObject(C5C* self);  // 0x5C slot 10 (load)
+void StartC5CObject(C5C* self);  // 0x5C slot 16 (after loading)
 
 #endif

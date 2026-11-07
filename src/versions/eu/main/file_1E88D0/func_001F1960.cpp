@@ -10,11 +10,11 @@ struct Obj_1F1960_eu {
     WarpPage* f574[6];
 };
 
-void func_001AA268(Obj_1F1960_eu* self);
-void func_001AA8B8(Obj_1F1960_eu* self, f32 v);
-void func_001AA788(Obj_1F1960_eu* self, f32 v);
+void SetupScreenElementText(Obj_1F1960_eu* self);
+void SetScreenElementHoldTime(Obj_1F1960_eu* self, f32 v);
+void SetScreenElementScale(Obj_1F1960_eu* self, f32 v);
 
-void func_001F1960(Obj_1F1960_eu* self) {
+void InitWarpMenu(Obj_1F1960_eu* self) {
     SetupScreenElementText(self);
     SetScreenElementHoldTime(self, 0.0f);
     SetScreenElementScale(self, 0.6f);

@@ -5,14 +5,14 @@
  * (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "libm.h"
 
-f32 func_00208068(f32 x);
+f32 SquareRootKernel(f32 x);
 
-f32 func_00206180(f32 x)
+f32 SquareRoot(f32 x)
 {
     MathError e;
-    f32 value = func_00208068(x);
+    f32 value = SquareRootKernel(x);
 
-    if (D_0024FF78 == -1 || func_00209238(x)) {
+    if (g_mathErrorMode == -1 || IsNotANumber(x)) {
         return value;
     }
     if (x < 0.0f) {
@@ -20,16 +20,16 @@ f32 func_00206180(f32 x)
         e.function = "sqrtf";
         e.errorCode = 0;
         e.firstArg = e.secondArg = (double)x;
-        if (D_0024FF78 == 0) {
+        if (g_mathErrorMode == 0) {
             e.result = 0.0;
         } else {
             e.result = 0.0 / 0.0;
         }
-        if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-            *func_002014F0() = 0x21;
+        if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+            *GetErrorNumberAddress() = 0x21;
         }
         if (e.errorCode != 0) {
-            *func_002014F0() = e.errorCode;
+            *GetErrorNumberAddress() = e.errorCode;
         }
         return (f32)e.result;
     }

@@ -9,9 +9,9 @@ static const f32 g_scaleDown = 2.9802322388e-08f;
 static const f32 g_tenTo30 = 1.0e30f;
 static const f32 g_tenToMinus30 = 1.0e-30f;
 
-f32 func_002093C0(f32 x, f32 y);
+f32 CopySign(f32 x, f32 y);
 
-f32 func_00209260(f32 x, s32 n)
+f32 ScaleByPowerOfTwo(f32 x, s32 n)
 {
     s32 rawBits, bits, exponent;
 

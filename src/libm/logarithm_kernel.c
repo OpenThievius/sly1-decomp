@@ -16,7 +16,7 @@ static const f32 g_logS12 = 1.5313838422e-01f;
 static const f32 g_logS14 = 1.4798198640e-01f;
 static const f32 g_zero = 0.0f;
 
-f32 func_00206FA0(f32 x)
+f32 LogarithmKernel(f32 x)
 {
     s32 bits, flag, flagHigh;
     s32 exponent = 0;

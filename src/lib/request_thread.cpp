@@ -15,18 +15,18 @@ struct Entry_1F7020 { u8 kind; u8 arg; };
 struct Queue_1F7020 { u32 head; u32 tail; Entry_1F7020 e[0x200]; };
 
 static u8 D_00625770[0x400];
-static s32 D_00625B70;
-static Queue_1F7020 D_00625B78;
+static s32 g_requestSemaphore;
+static Queue_1F7020 g_requestRing;
 
-s32 func_001F6B60(s32 h);
-void func_001F6A70(s32 v);
-void func_001F6AC0(s32 v);
-void func_001F6AF0(s32 v);
-s32 func_001F7B50(const char* fmt, ...);
+s32 AwaitSemaphore(s32 h);
+void RotateReadyThreads(s32 v);
+void WakeThread(s32 v);
+void PauseThread(s32 v);
+s32 PrintToOutputHook(const char* fmt, ...);
 
 extern const char D_0024E988[40] = "## internel error in libkernl.a!\n";
 
-void func_001F7020(Queue_1F7020* q)
+void RunRequestThread(Queue_1F7020* q)
 {
     for (;;) {
         AwaitSemaphore(g_requestSemaphore);
@@ -53,17 +53,17 @@ struct Ctx_1F70F8 { s32 f0; void* f4; void* f8; s32 fC; void* f10; s32 f14; };
 struct Init_1F70F8 { s32 a; s32 b; s32 c; };
 struct Frame_1F70F8 { Ctx_1F70F8 ctx; u8 pad[0x18]; Init_1F70F8 init; u8 pad2[0x14]; };
 
-s32 D_00277128 = 0;
+s32 g_requestThreadId = 0;
 extern u8 D_002832F0[];
 
-s32 func_001F6B20(Init_1F70F8* p);
-s32 func_001F6A10(Ctx_1F70F8* p);
-void func_001F6B30(s32 h);
-void func_001F6A20(s32 h, Queue_1F7020* q);
-s32 func_001F6A90(void);
-void func_001F6A50(s32 h, s32 v);
+s32 NewSemaphore(Init_1F70F8* p);
+s32 MakeThread(Ctx_1F70F8* p);
+void FreeSemaphore(s32 h);
+void RunThread(s32 h, Queue_1F7020* q);
+s32 GetCurrentThreadId(void);
+void SetThreadPriority(s32 h, s32 v);
 
-s32 func_001F70F8(void)
+s32 StartRequestThread(void)
 {
     Frame_1F70F8 f;
     if (g_requestThreadId > 0) {

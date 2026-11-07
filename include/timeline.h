@@ -29,7 +29,7 @@ struct Timeline : BaseObject {
 
 typedef char check_Timeline[sizeof(Timeline) == 0x48 ? 1 : -1];
 
-void func_001ED168(Timeline* self);   // slot 0
-void func_001ED198(Timeline* self);   // slot 16
+void InitTimeline(Timeline* self);   // slot 0
+void FindTimelineTarget(Timeline* self);   // slot 16
 
 #endif

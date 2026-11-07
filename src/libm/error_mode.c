@@ -6,4 +6,4 @@
  * for this project from retail's data. */
 #include "libm.h"
 
-const s32 D_0024FF78 = 1;
+const s32 g_mathErrorMode = 1;

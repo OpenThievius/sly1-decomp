@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Kind 0x21E3: cursor animators, objects that move a cursor (a frame index or a pair of
-// coordinates) over a record (src/main/anim_record.cpp and 00158000.cpp). Each is read from the
+// coordinates) over a record (src/main/anim_record.cpp and file_1549C8.cpp). Each is read from the
 // level stream by func_001B4A10: a type (1 to 8), an
 // object of func_001B4920(type) bytes on the heap whose table func_001B4980(type) is stored at
 // +0 and the type at +8, then slot 0 with the 0x1C-byte block the stream holds. func_001B3040

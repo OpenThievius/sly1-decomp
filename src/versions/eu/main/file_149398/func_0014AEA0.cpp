@@ -13,9 +13,9 @@ struct Obj_14AEA0_eu {
     Font* q;
 };
 
-void func_001AAB20(Obj_14AEA0_eu* self, f32 a, f32 b);
+void SetScreenElementSize(Obj_14AEA0_eu* self, f32 a, f32 b);
 
-void func_0014AEA0(Obj_14AEA0_eu* self, s32 n, f32 x, f32 y)
+void ResizeItemColumn(Obj_14AEA0_eu* self, s32 n, f32 x, f32 y)
 {
     self->pair->dx = x;
     self->pair->dy = y;

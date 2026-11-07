@@ -2,7 +2,7 @@
 // PAL: the two floats of the global are at 0x584 and 0x588 (US 0x274, 0x278).
 struct Glob_1EC528_eu { u8 pad0[0x584]; f32 f584; f32 f588; };
 
-void func_001EC528(TempoAgent* self)
+void DecrementTempoAgentGauge(TempoAgent* self)
 {
     Glob_1EC528_eu* g = (Glob_1EC528_eu*)&g_gaugeBarElement;
     DecrementGaugeCount((u8*)&g_gaugeBarElement);

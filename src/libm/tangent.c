@@ -5,10 +5,10 @@
 #include "common.h"
 #include "float_bits.h"
 
-s32 func_00207C88(f32 x, f32* parts);
-f32 func_00208D50(f32 x, f32 y, s32 sign);
+s32 ReduceByHalfPi(f32 x, f32* parts);
+f32 TangentKernel(f32 x, f32 y, s32 sign);
 
-f32 func_002054F0(f32 x)
+f32 Tangent(f32 x)
 {
     f32 parts[2];
     s32 magnitude;

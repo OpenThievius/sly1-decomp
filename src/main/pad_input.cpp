@@ -20,83 +20,83 @@
 extern const char D_0024A848[24] = "The password is: %s";
 f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
 
-u16 D_00262A50[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
-u32 D_00262A68[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
+u16 g_padButtonMasks[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
+u32 g_worldLoadButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
 
-void func_001E5278(s32 mode);
-void func_0016F408(void);
-void func_0016F430(s32 flags);
-void func_0016F478(void);
-void func_00199F38(void);
-void func_00199FF0(void);
-void func_0019A0F0(void);
-ButtonCodeSlot D_00262A80 = { { (const u16*)D_00262A68, 0xB, (ButtonCodeFn)func_001E5278, 0x0 } };
-u32 D_00262AA0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
-ButtonCodeSlot D_00262AB8 = { { (const u16*)D_00262AA0, 0xB, (ButtonCodeFn)func_0016F408, 0x0 } };
+void RequestWorldLoadByMode(s32 mode);
+void ClearButtonCodeFlags(void);
+void SetButtonCodeFlags(s32 flags);
+void ShowPasswordMessage(void);
+void FlagAllNumberedItems(void);
+void SetSavedWorldBits(void);
+void MarkAllLevelRecordsComplete(void);
+ButtonCodeSlot g_worldLoadButtonCode = { { (const u16*)g_worldLoadButtonSequence, 0xB, (ButtonCodeFn)RequestWorldLoadByMode, 0x0 } };
+u32 g_clearFlagsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
+ButtonCodeSlot g_clearFlagsButtonCode = { { (const u16*)g_clearFlagsButtonSequence, 0xB, (ButtonCodeFn)ClearButtonCodeFlags, 0x0 } };
 u32 D_00262AD8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x8000 };
-ButtonCodeSlot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (ButtonCodeFn)func_0016F430, 0x4004 } };
+ButtonCodeSlot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x4004 } };
 u32 D_00262B10[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x2000 };
-ButtonCodeSlot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (ButtonCodeFn)func_0016F430, 0x8 } };
-u32 D_00262B48[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x20 };
-ButtonCodeSlot D_00262B60 = { { (const u16*)D_00262B48, 0xB, (ButtonCodeFn)func_0016F430, 0x2 } };
-u32 D_00262B80[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x1000 };
-ButtonCodeSlot D_00262B98 = { { (const u16*)D_00262B80, 0xB, (ButtonCodeFn)func_00199F38, 0x0 } };
+ButtonCodeSlot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x8 } };
+u32 g_setFlagsButtonSequenceC[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x20 };
+ButtonCodeSlot g_setFlagsButtonCodeC = { { (const u16*)g_setFlagsButtonSequenceC, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x2 } };
+u32 g_flagNumberedItemsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x1000 };
+ButtonCodeSlot g_flagNumberedItemsButtonCode = { { (const u16*)g_flagNumberedItemsButtonSequence, 0xB, (ButtonCodeFn)FlagAllNumberedItems, 0x0 } };
 u32 D_00262BB8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x4000 };
-ButtonCodeSlot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (ButtonCodeFn)func_00199FF0, 0xF000FFFF } };
+ButtonCodeSlot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (ButtonCodeFn)SetSavedWorldBits, 0xF000FFFF } };
 u32 D_00262BF0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x10 };
-ButtonCodeSlot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (ButtonCodeFn)func_0019A0F0, 0x0 } };
-u32 D_00262C28[8] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800080, 0x80, 0x0 };
-ButtonCode D_00262C48 = { (const u16*)D_00262C28, 0xD, (ButtonCodeFn)func_0016F478, 0x0 };
+ButtonCodeSlot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (ButtonCodeFn)MarkAllLevelRecordsComplete, 0x0 } };
+u32 g_passwordMessageButtonSequence[8] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800080, 0x80, 0x0 };
+ButtonCode g_passwordMessageButtonCode = { (const u16*)g_passwordMessageButtonSequence, 0xD, (ButtonCodeFn)ShowPasswordMessage, 0x0 };
 // size: s32 flags, word accesses only
-s32 D_00262C64 = 0;
+s32 g_buttonCodeFlags = 0;
 // size: s32 flags, word accesses only
-s32 D_00262C68 = 0;
+s32 g_padRouting = 0;
 // size: s32 flags, word accesses only
-s32 D_00262C6C = 0;
-PadRecord D_00262C70 = {};
+s32 g_padSelectFlags = 0;
+PadRecord g_padRecord = {};
 // size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
-PadRecord D_00262D38 = {};
+PadRecord g_blankPadRecord = {};
 
-ButtonCode* D_00262DFC = 0;
+ButtonCode* g_buttonCodes = 0;
 
-extern f32 D_00261868[];
+extern f32 g_elapsedTime[];
 struct ButtonCodeTimer { f32 time; f32 pad[3]; };
 ButtonCodeTimer D_00262E00 = { 0.0f, { 0.0f, 0.0f, 0.0f } };
 
-void func_0016E148(void);
-s32 func_002040E8(void* a);
-void func_0016E1A0(PadRecord* self, s32 a, s32 b);
+void UpdatePadRouting(void);
+s32 InitPadLibrary(void* a);
+void InitPadRecord(PadRecord* self, s32 a, s32 b);
 
-void func_0016E0B8(void)
+void InitPadSystem(void)
 {
     UpdatePadRouting();
     InitPadLibrary(0);
     InitPadRecord(&g_padRecord, 0, 0);
 }
 
-extern s32 D_00262C6C;
+extern s32 g_padSelectFlags;
 
-void func_0016E148();
+void UpdatePadRouting();
 
-s32 func_0016E0F0(s32 bits)
+s32 SetPadSelectFlags(s32 bits)
 {
     g_padSelectFlags |= bits;
     return ((s32 (*)())UpdatePadRouting)();
 }
 
-void func_0016E148(void);
+void UpdatePadRouting(void);
 
-void func_0016E118(u32 mask)
+void ClearPadSelectFlags(u32 mask)
 {
     mask = ~mask;
     g_padSelectFlags = g_padSelectFlags & mask;
     UpdatePadRouting();
 }
 
-extern s32 D_00262C6C;
-extern s32 D_00262C68;
+extern s32 g_padSelectFlags;
+extern s32 g_padRouting;
 
-void func_0016E148()
+void UpdatePadRouting()
 {
     s32 flags = g_padSelectFlags;
     if ((flags & 0x84) != 0)
@@ -117,12 +117,12 @@ void func_0016E148()
     g_padRouting = 7;
 }
 
-void func_001F5C0C(void* p, s32 value, s32 size);
-void* func_0018D4B0(s32 size);
-void func_002042C8(s32 a, s32 b, s32 c);
-void func_0016E630(PadRecord* self, s32 mode, s32 n);
+void FillMemory(void* p, s32 value, s32 size);
+void* ReservePermanentMemory(s32 size);
+void OpenPadPort(s32 a, s32 b, s32 c);
+void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
-void func_0016E1A0(PadRecord* self, s32 a, s32 b)
+void InitPadRecord(PadRecord* self, s32 a, s32 b)
 {
     FillMemory(self, 0, 0xC4);
     SetPadConnectionState(self, 1, 0);
@@ -135,20 +135,20 @@ void func_0016E1A0(PadRecord* self, s32 a, s32 b)
     self->fC0 = 1;
 }
 
-s32 func_00204590(s32 a, s32 b);
+s32 GetPadSlotState(s32 a, s32 b);
 s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
-s32 func_00204930(s32 a, s32 b, s32 c, s32 d);
+s32 SendPadTwoWordRequest(s32 a, s32 b, s32 c, s32 d);
 s32 func_002046D0(s32 a, s32 b, s32 c, s32 d);
-void func_001F5C0C(u8* p, s32 value, s32 size);
-s32 func_00204AA8(s32 a, s32 b, u8* buf);
-s32 func_00204CE8(s32 a, s32 b);
-s32 func_00204D48(s32 a, s32 b);
-s32 func_00204678(s32 a, s32 b);
-s32 func_0016E940(PadRecord* self);
-void func_001A7B88(void* p);
-void func_0016E630(PadRecord* self, s32 mode, s32 n);
+void FillMemory(u8* p, s32 value, s32 size);
+s32 SendPadSixByteRequest(s32 a, s32 b, u8* buf);
+s32 HasFullPadMask(s32 a, s32 b);
+s32 SendFullPadMask(s32 a, s32 b);
+s32 GetPadRequestMode(s32 a, s32 b);
+s32 PollPadInput(PadRecord* self);
+void UpdatePadPattern(void* p);
+void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
-void func_0016E238(PadRecord* self)
+void UpdatePadConnection(PadRecord* self)
 {
     u8 buf[16];
     if (self->f14 == 0)
@@ -296,9 +296,9 @@ void func_0016E238(PadRecord* self)
     SetPadConnectionState(self, mode, n);
 }
 
-void func_001A7B20(void* a, s32 b, s32 c);
+void RequestPadPattern(void* a, s32 b, s32 c);
 
-void func_0016E630(PadRecord* self, s32 mode, s32 n)
+void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 {
     s32 next = mode;
     if (mode == self->f14)
@@ -338,13 +338,13 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n)
 
 INCLUDE_ASM(func_0016E738);
 
-void func_001F5C0C(u8* p, s32 a, s32 b);
-s32 func_00204510(s32 a, s32 b, u8* c);
-void func_0018D800(u8* dst, u8* src, s32 n);
-void func_0016E738(PadRecord* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
-void func_0016F238(PadRecord* p, s32 old);
+void FillMemory(u8* p, s32 a, s32 b);
+s32 ReadPadFrame(s32 a, s32 b, u8* c);
+void CopyMemory(u8* dst, u8* src, s32 n);
+void ReadAnalogStick(PadRecord* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
+void AdvanceButtonCodes(PadRecord* p, s32 old);
 
-s32 func_0016E940(PadRecord* self)
+s32 PollPadInput(PadRecord* self)
 {
     u8 buf[0x40];
     s32 res;
@@ -404,15 +404,15 @@ s32 func_0016E940(PadRecord* self)
     return res;
 }
 
-void func_0016EC20(PadRecord* self, u32 mask)
+void ClearPadPressedBits(PadRecord* self, u32 mask)
 {
     u16 m = (u16)mask;
     self->flags &= (u16)~m;
 }
 
-void func_001A7CE8(void* p);
+void StartPadPatternFromTable(void* p);
 
-void func_0016EC38(PadRecord* self)
+void StartPadRecordPattern(PadRecord* self)
 {
     if (self->pC0 == 0) return;
     if (self->f18 < 3) return;
@@ -422,11 +422,11 @@ void func_0016EC38(PadRecord* self)
 
 LINKER_REMNANT(func_0016EC80);
 
-void func_0016EC88(PadRecord* p) { p->f28 = 0; p->f2C = 0; }
+void ResetPadStepRepeat(PadRecord* p) { p->f28 = 0; p->f2C = 0; }
 
-extern f32 D_00261868[];
+extern f32 g_elapsedTime[];
 
-s32 func_0016EC98(PadRecord* self)
+s32 GetPadHorizontalStep(PadRecord* self)
 {
     f32 c;
     f32 base;
@@ -504,9 +504,9 @@ done:
     return self->f28;
 }
 
-void func_0016EC20(PadRecord* self, s32 mask);
+void ClearPadPressedBits(PadRecord* self, s32 mask);
 
-s32 func_0016EED0(PadRecord* self)
+s32 GetPadVerticalStep(PadRecord* self)
 {
     f32 c;
     f32 base;
@@ -584,7 +584,7 @@ done:
     return self->f2C;
 }
 
-f32 func_0016F108(PadRecord* self, s32 idx)
+f32 GetPadButtonAnalog(PadRecord* self, s32 idx)
 {
     if (self->keyA8 & g_padButtonMasks[idx]) {
         if (self->f18 >= 4) {
@@ -602,7 +602,7 @@ f32 func_0016F108(PadRecord* self, s32 idx)
 
 extern u16 D_00262D18;
 
-void func_0016F188(ButtonCode* node)
+void AddButtonCode(ButtonCode* node)
 {
     ButtonCode* p = g_buttonCodes;
     if (p != 0) {
@@ -624,7 +624,7 @@ void func_0016F188(ButtonCode* node)
 
 LINKER_REMNANT(func_0016F1F0);
 
-void func_0016F1F8(void)
+void ResetButtonCodes(void)
 {
     ButtonCode* p = g_buttonCodes;
     if (p != 0) {
@@ -651,7 +651,7 @@ struct ButtonCodeAdvance {
     }
 };
 
-void func_0016F238(PadRecord* self, s32 value)
+void AdvanceButtonCodes(PadRecord* self, s32 value)
 {
     u16 id = (u16)value;
     ButtonCode* head = g_buttonCodes;
@@ -664,10 +664,10 @@ void func_0016F238(PadRecord* self, s32 value)
     D_00262E00.time = clock->elapsed + 1.0f;
 }
 
-void func_0016F1F8(void);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void ResetButtonCodes(void);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 
-void func_0016F2E0(void)
+void RunCompletedButtonCode(void)
 {
     if (D_00262E00.time == 0.0f) {
         return;
@@ -702,21 +702,21 @@ void func_0016F2E0(void)
     D_00262E00.time = 0.0f;
 }
 
-extern s32 D_00262C64;
+extern s32 g_buttonCodeFlags;
 
-void func_001E5278(s32 mode);
+void RequestWorldLoadByMode(s32 mode);
 
-void func_0016F408(void)
+void ClearButtonCodeFlags(void)
 {
     g_buttonCodeFlags = 0;
     RequestWorldLoadByMode(0);
 }
 
-extern s32 D_00262C64;
+extern s32 g_buttonCodeFlags;
 
-void func_001E5278(s32 mode);
+void RequestWorldLoadByMode(s32 mode);
 
-void func_0016F430(s32 flags)
+void SetButtonCodeFlags(s32 flags)
 {
     g_buttonCodeFlags = g_buttonCodeFlags | (flags & ~0x4000);
     if (flags & 0x4000)
@@ -729,11 +729,11 @@ LINKER_REMNANT(func_0016F470);
 
 extern const char D_002483B8[24];
 
-s32 func_001602A0(void);
-void* func_001E2138(char* dst, const u8* src);
-s32 func_001E1FD0(char* dst, const u8* fmt, ...);
+s32 ComputeCompletionMask(void);
+void* CopyString(char* dst, const u8* src);
+s32 FormatToString(char* dst, const u8* fmt, ...);
 
-void func_0016F478(void)
+void ShowPasswordMessage(void)
 {
     char text[0x40];
     char buf[0x10];
@@ -756,9 +756,9 @@ void func_0016F478(void)
     }
 }
 
-void func_0016F188(ButtonCode* entry);
+void AddButtonCode(ButtonCode* entry);
 
-void func_0016F588(void)
+void RegisterButtonCodes(void)
 {
     AddButtonCode(&g_worldLoadButtonCode.rec);
     AddButtonCode(&g_clearFlagsButtonCode.rec);

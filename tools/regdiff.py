@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check  # noqa: E402
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -98,6 +99,8 @@ def main(argv=None):
     parser.add_argument("func", nargs="?")
     parser.add_argument("--all", action="store_true", help="every US near miss in nonmatching/")
     args = parser.parse_args(argv)
+    if args.func:
+        args.func = symbols.canonical(args.func)    # either name (tools/symbols.py)
     if args.all:
         counts = collections.Counter(report(p, f) for p, f in near_misses())
         print("; ".join("%s %d" % kv for kv in sorted(counts.items())))

@@ -2,7 +2,7 @@
 // PAL prints the RPC collision message only while a PAL-only flag is clear.
 extern s32 D_eu_0025D6B8;
 
-s32 func_0011D968(s32 id, s32 size, void* data)
+s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
 {
     s32 i;
     s32 r;
@@ -10,23 +10,23 @@ s32 func_0011D968(s32 id, s32 size, void* data)
         g_iopCommandArgs[i] = ((u8*)data)[i];
     while ((s32)g_iopReplyBuffer) {
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
-    ArmIopReplyBuffer(&D_0025C3C0, 1);
-    while (func_001F8480(&g_iopCommandRpc)) {
+    ArmIopReplyBuffer(&g_iopCommandReply, 1);
+    while (IsRemoteCallPending(&g_iopCommandRpc)) {
         if (D_eu_0025D6B8 == 0)
             PrintFormatted(D_002494E8);
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     if (size)
-        func_001F8290(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &g_iopCommandReply, 0xC, 0, 0);
     else
-        func_001F8290(&g_iopCommandRpc, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, id, 1, 0, 0, &g_iopCommandReply, 0xC, 0, 0);
     while (!IsIopReplyReady()) {
     }
-    r = D_0025C3C0.result;
-    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && D_0025C384 == 0)
+    r = g_iopCommandReply.result;
+    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && g_iopFlushDeferred == 0)
         FlushIopCommandBuffer();
     return r;
 }

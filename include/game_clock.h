@@ -14,11 +14,11 @@ struct GameClock {
     f32 time;               // 0x04: func_00142F10, func_001430B8, func_001AB980 (D_0026185C)
     f32 dt;                 // 0x08: func_00142F10, func_001AB980, func_001EA118, main_loop.cpp
     f32 previousDt;         // 0x0C: the last step's dt (func_00142F10 copies dt here; func_001EA118)
-    f32 elapsed;            // 0x10: the sum of every step (func_00142F10, func_00143030 add to it); func_00143030, func_0016F238, func_001EA118, 0018C000.cpp
+    f32 elapsed;            // 0x10: the sum of every step (func_00142F10, func_00143030 add to it); func_00143030, func_0016F238, func_001EA118, memory_card.cpp
     f32 step;               // 0x14: func_00142F10, func_00143030 (step), func_001EA118 (real)
     s64 lastTick;           // 0x18: the tick count of the last step (func_00142F10, func_00143030)
 };
 
-extern GameClock D_00261858;
+extern GameClock g_gameClock;
 
 #endif

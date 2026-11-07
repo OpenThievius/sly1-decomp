@@ -28,14 +28,14 @@
 #include "layout_137228.h"
 
 
-void func_00155F90();
-void func_00155FA0(EffectSpawner* self);
+void SetEffectSpawnerActiveForever();
+void SetEffectSpawnerInactive(EffectSpawner* self);
 
-void* func_00155778(void* a0, s32 a1);
-void func_00156188(void* self, s32 a1);
+void* GetOwnSpawnRecord(void* a0, s32 a1);
+void SetSpawnRecordKind(void* self, s32 a1);
 
-void* func_00158DD8(void* a0, s32 a1);
-void func_00156188(void* self, s32 a1);
+void* GetOwnedSpawnRecord(void* a0, s32 a1);
+void SetSpawnRecordKind(void* self, s32 a1);
 
 // The message SendPointEventToWorldListener sends (kind 12): a point and a float.
 struct PointEventMessage {
@@ -49,7 +49,7 @@ struct PointEventMessage {
 
 
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
 struct SpawnSetup {
     s32 out[4];
@@ -59,10 +59,10 @@ struct SpawnSetup {
     u8 tail[0x18];
 };
 
-void func_0018D608(void);
-void func_0018D6F0(void);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
 void func_001579B0(void* a, void* b, s32* out);
-void func_00157320(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3);
+void SpawnRecordEffects(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3);
 void func_00157B88(void* a, void* b, s32* out, s32* pair);
 void func_001575D8(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
 
@@ -77,69 +77,69 @@ struct CappedWordList {
     void* source;
 };
 
-void* func_0018D500(s32 size);
-void* func_00137B90(void* src);
-StreamWord func_00137C40(void* src);
+void* AllocateFrontMemory(s32 size);
+void* ReadBufferedU8(void* src);
+StreamWord ReadBufferedU32(void* src);
 
-void* func_0018D500(s32 size);
-void func_001549C8(void* mem);
-void func_001289C0(void* self, s32 count);
-s32 func_00137CC0(s32 count);
-PathCurve* func_0014D9A8(s32 kind);
+void* AllocateFrontMemory(s32 size);
+void InitSpawnRecord(void* mem);
+void LoadPlacedObject(void* self, s32 count);
+s32 ReadBufferedS8(s32 count);
+PathCurve* CreatePathCurve(s32 kind);
 void func_00154C80(void* self, s32 count);
-s32 func_00137BE0(s32 count);
-void* func_00155778(void* self, s32 flag);
-void func_00154EE0(void* self, s32 count, void* unused, s32 src);
+s32 ReadBufferedU16(s32 count);
+void* GetOwnSpawnRecord(void* self, s32 flag);
+void ReadCappedWordList(void* self, s32 count, void* unused, s32 src);
 
-void func_00127048(void* self);
+void CopyPlacedObject(void* self);
 
 struct SpawnerLinkedObject { u8 pad00[0x18]; void* f18; u8 pad1C[0x18]; s32 f34; };
 
-void func_001249A8(EffectSpawner* self);
-Rec50* func_00155778(EffectSpawner* self, s32 mode);
-void func_00158288(Rec50* p, EffectSpawner* self);
-SpawnerLinkedObject* func_0015A418(void* a0, s32 a1, s32 a2, EffectSpawner* a3);
-s32 func_001300E8(SpawnerLinkedObject* p, s32 k);
-void* func_001DBCC8(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
+void PostLoadPlacedObject(EffectSpawner* self);
+Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+void ResolveSpawnRecordTargets(Rec50* p, EffectSpawner* self);
+SpawnerLinkedObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, EffectSpawner* a3);
+s32 IsObjectOfKind(SpawnerLinkedObject* p, s32 k);
+void* AppendQueuedCall(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
 
-void* func_0018D568(s32 size, void* owner);
+void* CopyToFrontMemory(s32 size, void* owner);
 
-extern f32 D_0026185C;
-
-
-void func_00155F90();
+extern f32 g_gameTime;
 
 
-s32 func_00155FB0(EffectSpawner* self);
+void SetEffectSpawnerActiveForever();
 
-void func_00123ED0(void*);
-void func_00152438(void*,s32);
 
-void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
+s32 IsEffectSpawnerActive(EffectSpawner* self);
+
+void InitPlacedObject(void*);
+void SetListLinkOffset(void*,s32);
+
+void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
 
 void func_0013A128(void*,void*);
-void func_0019E158(void*,void*);
-f32 func_001EAAE0(f32,f32);
+void CopyEffectOwnerMargin(void*,void*);
+f32 RandomFloatInRange(f32,f32);
 
-void* func_001F5C0C(void*,s32,s32);
+void* FillMemory(void*,s32,s32);
 
 
 
-void func_0018D608(void);
-void func_0018D6F0(void);
-void* func_0018D658(s32 size);
-void func_0018D800(void* dst, void* src, s32 size);
-void func_00153528(ActiveSetSolver* loc, s32 count);
-void func_00153EC0(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+void CopyMemory(void* dst, void* src, s32 size);
+void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
+void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
 struct EffectOwnerSlot { u8 pad[4]; s32* f4; s32 f8; };
-EffectOwner* func_0019E040(u8* ctx, s32 flag);
-void func_0019E158(EffectOwner* a, Rec50* b);
-Effect* func_0019EA78(s32 a, EffectOwner* b);
-void func_001A0338(EffectOwner* self, s32 kind, Effect* extra);
+EffectOwner* AcquireEffectOwner(u8* ctx, s32 flag);
+void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
+Effect* CreateEffect(s32 a, EffectOwner* b);
+void SetTrailSegmentAnchor(EffectOwner* self, s32 kind, Effect* extra);
 void func_001583E8(Effect* a, Rec50* b);
-f32 func_001EAAE0(f32 a, f32 b);
-s32 func_00152720(void* p);
+f32 RandomFloatInRange(f32 a, f32 b);
+s32 IsListEmpty(void* p);
 
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 typedef void (*VFn)();
@@ -157,8 +157,8 @@ struct SpawnRing {
     f32 out10;
 };
 
-f32 func_001EA408(f32 x);
-f32 func_001EAAE0(f32 a, f32 b);
+f32 WrapAngle(f32 x);
+f32 RandomFloatInRange(f32 a, f32 b);
 
 
 typedef void (*BroadcastFn)(void* self, void* frame);
@@ -184,21 +184,21 @@ struct KeyedWorldView { u8 pad0[0x1CE8]; KeyedObjectList* list; };
 
 struct __attribute__((aligned(16))) SpawnBlock { Quad16 q[8]; };
 struct __attribute__((aligned(16))) SpawnTail { Quad16 q[4]; };
-void* func_001F5C0C(void* p, s32 v, u32 n);
-struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { func_001F5C0C(this, 0, sizeof(*this)); } };
+void* FillMemory(void* p, s32 v, u32 n);
+struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { FillMemory(this, 0, sizeof(*this)); } };
 struct __attribute__((aligned(16))) SpawnRecord { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; SpawnBlock blk; s32 f120; u8 pad3[0x8C]; SpawnTail tail; u8 pad4[0x10]; };
 
-void func_001549C8(void* mem);
-void func_00157E00(void* a, void* b, void* c);
+void InitSpawnRecord(void* mem);
+void SpawnEffectsFromRecord(void* a, void* b, void* c);
 
 
 struct BriefEffectParams { u8 pad0[0xC]; s32 fC; };
 struct BriefEffectSource { u8 pad0[0x278]; BriefEffectParams* f278; };
 typedef void (*EffectStartFn)(Effect* self, void* a, s32 z, f32 f);
 
-void* func_0019EA78(s32 a, s32 b);
+void* CreateEffect(s32 a, s32 b);
 
-void func_00182C58(void* a0);
+void StartObject(void* a0);
 
 struct EmptyMessage { u8 data[0x50]; };
 
@@ -214,15 +214,15 @@ struct TwoVectorMessage {
     u8 pad1[0x50 - 0x38];
 };
 
-void func_001830D8(void* self);
-MemberObject* func_00183058(void* a, void* b, void* c);
+void CopyObjectData(void* self);
+MemberObject* CreateObjectCopy(void* a, void* b, void* c);
 
-void func_001B4AD0(CursorAnimator* self);
-AnimRecord* func_001B4688(s32 key);
-void func_00159770(CrossfadeAnimator* self, s32 mode);
+void BindAnimatorRecord(CursorAnimator* self);
+AnimRecord* FindAnimRecord(s32 key);
+void SetCrossfadeMode(CrossfadeAnimator* self, s32 mode);
 
-s32 func_00182FC8(void* obj);
-void func_00159C28(WorldObjectNode* self);
+s32 IsObjectAttached(void* obj);
+void RemoveObjectNodeFromWorld(WorldObjectNode* self);
 extern PackedFloatPair D_00262180;
 extern PackedFloatPair D_00262188;
 extern PackedFloatPair D_00262190;
@@ -233,33 +233,33 @@ extern PackedFloatPair D_002621B0;
 extern PackedFloatPair D_002621B8;
 extern PackedFloatPair D_002621C0;
 
-void func_001B7968(Collider* self);
-void func_00152470(List01* a, ObjectCycler* b);
+void InitCollider(Collider* self);
+void AppendToList(List01* a, ObjectCycler* b);
 
-void* func_001556E8(void* x);
+void* CloneSharedSpawnRecord(void* x);
 
 struct MemberTargetObject;
-MemberTargetObject* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
-s32 func_001300E8(void* self, s32 kind);
+MemberTargetObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
+s32 IsObjectOfKind(void* self, s32 kind);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
 struct DelayedMessageBody { Quad16 q[5]; };
 struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
-void* func_001B5EA0(void* p);
-void func_00152450(void* p);
-void func_00152470(void* list, void* item);
+void* PopFreeSlot(void* p);
+void ClearListLinks(void* p);
+void AppendToList(void* list, void* item);
 void func_001590A0(void* self, void* body);
 
-void func_001BE4D8(void* p);
+void InitSoundParams(void* p);
 
 
-void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
-void func_0018D800(void* dst, void* src, s32 size);
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+void CopyMemory(void* dst, void* src, s32 size);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 
 struct MemberTargetObject {
     u8 pad0[0x18];
@@ -272,74 +272,74 @@ struct MemberTargetObject {
     MemberTargetObject* f7c;
 };
 
-MemberTargetObject* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
-void func_00158288(Rec79* rec, RecordMember* self);
+MemberTargetObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
+void ResolveSpawnRecordTargets(Rec79* rec, RecordMember* self);
 
-extern f32 D_0026185C;
-f32 func_001EAAE0(f32 a, f32 b);
+extern f32 g_gameTime;
+f32 RandomFloatInRange(f32 a, f32 b);
 
-extern f32 D_0026185C;
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001B46E0(AnimCursor* cur, s32 idx);
+extern f32 g_gameTime;
+f32 RandomFloatInRange(f32 a, f32 b);
+void SetCursorFrame(AnimCursor* cur, s32 idx);
 
 
-void* func_0018D5C0(s32 size);
-void func_001549C8(void* p);
-s32 func_00137CC0(void* other);
-PathCurve* func_0014D9A8(s32 kind);
-void* func_00137BE0(void* other);
+void* AllocateZeroedFrontMemory(s32 size);
+void InitSpawnRecord(void* p);
+s32 ReadBufferedS8(void* other);
+PathCurve* CreatePathCurve(s32 kind);
+void* ReadBufferedU16(void* other);
 void func_00154C80(void* p, void* other);
-void func_00154EE0(void* a, void* b, void* c, void* d);
-extern s32 D_002621E0[6];
+void ReadCappedWordList(void* a, void* b, void* c, void* d);
+extern s32 g_objectCyclerStartLinks[6];
 
-void func_00124DF8(void* self, s32 n, void* p);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_0015B7B8(ObjectCycler* self, s32 x);
-void func_00124A48(void* self);
-
-
-
-void* func_001B5EE0(void* where);
-void func_00152470(void* where, WorldObjectNode* node);
+void ResolveObjectLinks(void* self, s32 n, void* p);
+f32 RandomFloatInRange(f32 a, f32 b);
+void SetObjectCyclerState(ObjectCycler* self, s32 x);
+void StartPlacedObject(void* self);
 
 
 
-void func_00152600(void* where, WorldObjectNode* node);
-void func_001B5F28(void* where, WorldObjectNode* node);
-void func_001B5F28(void* l, void* n);
+void* PopZeroedFreeSlot(void* where);
+void AppendToList(void* where, WorldObjectNode* node);
 
-extern f32 D_00261860;
-void func_00124FC0(void* self);
-f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
+
+
+void RemoveFromList(void* where, WorldObjectNode* node);
+void PushFreeSlot(void* where, WorldObjectNode* node);
+void PushFreeSlot(void* l, void* n);
+
+extern f32 g_frameDt;
+void UpdatePlacedObject(void* self);
+f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
 
 struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
 
-void func_0018A008(s32 zero, void* out, f32 v);
-void func_00125B70(void* obj, void* c, void* out);
-void func_00188668(Quad16* out, void* b, Quad16* in);
-void func_001261C0(void* obj, void* b, void* m);
+void BuildUniformScaleAboutPoint(s32 zero, void* out, f32 v);
+void BuildPlacedObjectTransform(void* obj, void* c, void* out);
+void MultiplyMatrices(Quad16* out, void* b, Quad16* in);
+void DrawPlacedObject(void* obj, void* b, void* m);
 
 
 struct ScreenFillPacket { u8 buf[0x2C0]; s32 value; };
 
-void func_00168770(void* buf, s32* value, s32 flag);
-void func_00152B38(void* self);
-void func_001EE7D0(void* self, s32 n, void* buf, s32 flag);
-void func_00152D70(void* self);
+void FillScreenColor(void* buf, s32* value, s32 flag);
+void BeginDmaTag(void* self);
+void WriteVifDirect(void* self, s32 n, void* buf, s32 flag);
+void CloseDmaTag(void* self);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
 
-void func_00152470(void* list, void* item);
+void AppendToList(void* list, void* item);
 
-s32 func_0015A198(void*,s32,s32,void*,s32,void*);
+s32 GatherObjectsByMode(void*,s32,s32,void*,s32,void*);
 
-void func_001289C0(void*,void*);
-s32 func_001E4C48(void*,void*,void*,void*,void*);
+void LoadPlacedObject(void*,void*);
+s32 ReadMeshTables(void*,void*,void*,void*,void*);
 
-AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key);
+AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key);
 
-void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
+void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
 
 struct CyclerEventMessage {
     u8 pad0[0x8];
@@ -357,22 +357,22 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
     u8 pad1[0x50 - 0x30];
 };
 
-void func_0015B7B8(void* self, s32 x);
+void SetObjectCyclerState(void* self, s32 x);
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void func_001BA130();
-s32 func_001526D0(void* sub, ObjectCycler* self);
-void func_00152600(void* data, ObjectCycler* self);
-void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+void CopyCollider();
+s32 IsInList(void* sub, ObjectCycler* self);
+void RemoveFromList(void* data, ObjectCycler* self);
+void StartSoundEffect(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void func_001BF788(void* self, s32 n);
-void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+void StopSoundRecord(void* self, s32 n);
+void StartSoundEffect(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
 
 // The colour UpdateColorFade blends, word-aligned, and its request: DeferredRequest's layout
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
@@ -381,10 +381,10 @@ struct FadeRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 
 extern s32 D_00275BC4;
 
 extern s32 D_00270458;
-extern f32 D_0026185C;
-void func_00152600(u8* a, ColorFade* b);
-void func_00159CA0(ColorFade* o);
-void func_0019D410(FadeRequest* r);
+extern f32 g_gameTime;
+void RemoveFromList(u8* a, ColorFade* b);
+void DrawScreenFill(ColorFade* o);
+void QueueDeferredRequest(FadeRequest* r);
 
 struct RangeEntry {
     s32 a;
@@ -403,43 +403,43 @@ struct RangeEmitter {
     RangeEntry* entries;
 };
 
-void* func_0018D5C0(s32 bytes);
+void* AllocateZeroedFrontMemory(s32 bytes);
 
 
 // A cell of a group's list (ObjectGroup::cells): the object and the next cell.
 
-s32 func_00137D10(void* src);
-s32 func_001300E8(void* node, s32 kind);
-void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+s32 ReadBufferedS16(void* src);
+s32 IsObjectOfKind(void* node, s32 kind);
+void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
 
 struct ClassKindNode { ClassKindNode* next; s32 value; };
 
 extern u8 D_00247448[];
 
-s32 func_00182FC8(PlacedObject* o);
+s32 IsObjectAttached(PlacedObject* o);
 
 typedef int Quadword128 __attribute__((mode(TI)));
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
-void func_001B93F8(ObjectCycler* self);
-void func_0015B7B8(ObjectCycler* self, s32 mode);
+void UpdateCollider(ObjectCycler* self);
+void SetObjectCyclerState(ObjectCycler* self, s32 mode);
 s32 func_0015BEF0(ObjectCycler* self);
 s32 func_0015BD48(ObjectCycler* self, Quadword128* out);
 void func_0015BC78(ObjectCycler* self);
-s32 func_0015C0A0(ObjectCycler* self);
+s32 IsObjectCyclerUnsupported(ObjectCycler* self);
 s32 func_0015BFC0(ObjectCycler* self);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+f32 RandomFloatInRange(f32 a, f32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_00123ED0(void* self);
+void InitPlacedObject(void* self);
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
 
 void func_001590A0(void* a, void* b);
-void func_00152600(List01* list, DelayedMessage* node);
-void func_001B5F28(Pool6C* set, DelayedMessage* node);
+void RemoveFromList(List01* list, DelayedMessage* node);
+void PushFreeSlot(Pool6C* set, DelayedMessage* node);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -463,46 +463,46 @@ template <class T> struct NextInList {
         return obj;
     }
 };
-extern s32 D_002621C8[6];
+extern s32 g_objectCyclerLoadLinks[6];
 
-void func_001BAC30(ObjectCycler* self, void* arg);
-void func_00124DF8(ObjectCycler* self, s32 n, void* table);
-void func_00159478(void** out, ObjectCycler* self);
-s32 func_0015A480(u8* self, s32 kind, ObjectCycler* arg);
-void func_00182ED8(s32 a);
-s32 func_001526D0(List01* sub, ObjectCycler* self);
-void func_00152600(List01* data, ObjectCycler* self);
+void LoadCollider(ObjectCycler* self, void* arg);
+void ResolveObjectLinks(ObjectCycler* self, s32 n, void* table);
+void FindOrBuildMemberGroup(void** out, ObjectCycler* self);
+s32 FindFirstObjectByIdMode1(u8* self, s32 kind, ObjectCycler* arg);
+void ResolveAndStartObject(s32 a);
+s32 IsInList(List01* sub, ObjectCycler* self);
+void RemoveFromList(List01* data, ObjectCycler* self);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 extern f32 D_00262230[4];
 extern f32 D_00262240[4];
-extern f32 D_00275C60[];
-void func_00125B70(ObjectCycler* self, void* c, void* out);
+extern f32 g_unitRange[];
+void BuildPlacedObjectTransform(ObjectCycler* self, void* c, void* out);
 
-s32 func_001300E8(PlacedObject* obj, s32 id);
-s32 func_00182FC8(PlacedObject* obj);
-s32 func_0015A4B8(u32 i, s32 id);
-void func_00159F48(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedObject* root, s32 max,
+s32 IsObjectOfKind(PlacedObject* obj, s32 id);
+s32 IsObjectAttached(PlacedObject* obj);
+s32 IsClassOfKind(u32 i, s32 id);
+void CollectObjectByMode(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedObject* root, s32 max,
                    s32* countOut, PlacedObject** found, s32* minOut);
 
-void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
+void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src);
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
 struct VtableEntry { s32 delta; void (*fn)(); };
 struct FloatPair2 { f32 x; f32 y; };
-extern const VtableEntry D_0024A220[22];
-void* func_0018D758(u32);
-void func_0015C9B0(Font*, Font*);
+extern const VtableEntry g_fontMethods[22];
+void* AllocateObjectMemory(u32);
+void CopyFont(Font*, Font*);
 
-extern s32 D_00262268[];
-extern s32 D_0026227C;
+extern s32 g_fonts[];
+extern s32 g_defaultFont;
 
-FontGlyph* func_0015DAB8(Font* a, s32 b);
+FontGlyph* FindFontGlyph(Font* a, s32 b);
 
-void func_0015DB80(void* self);
-s32 func_0015DBE0(void* self);
+void RewindTextReader(void* self);
+s32 ReadTextChar(void* self);
 
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
@@ -510,47 +510,47 @@ typedef u64 UQuadword128 __attribute__((mode(TI)));
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
-void* func_001611B8(void* p);
-void func_001529C8(void* p, s32 n, void* q);
-void func_001613C0(void* p, s32 a, s32 b, s32 c);
-void func_00161708(void* p, s32 a, s32 b);
-void func_00161200(void* p);
-void func_001EE450(void* self);
-void func_001EE8D0(void* self, void* p);
-void func_0015EAE0(void* self, void* a, void* b);
-void func_00152D30(void* self);
-void func_001529E0(void* self, void* p, s32 n);
+void* InitGifPacket(void* p);
+void UsePacketBufferMemory(void* p, s32 n, void* q);
+void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* p, s32 a, s32 b);
+void EndGifPacket(void* p);
+void WriteVifFlush(void* self);
+void WriteVifDirectFromWriter(void* self, void* p);
+void AddDmaRefTagIfChanged(void* self, void* a, void* b);
+void AddDmaEndTag(void* self);
+void DetachPacketBuffer(void* self, void* p, s32 n);
 
-void func_0015C260(Font* self, Font* dst);
+void CopyFontMetrics(Font* self, Font* dst);
 
-FontGlyph* func_0015DAB8(Font* table, s8 key);
+FontGlyph* FindFontGlyph(Font* table, s8 key);
 
-void func_00152D70(void* obj);
-void func_00152B80(void* obj, s32 a, s32 b);
-void func_00152B38(void* obj);
+void CloseDmaTag(void* obj);
+void AddDmaRefTag(void* obj, s32 a, s32 b);
+void BeginDmaTag(void* obj);
 
-void func_0015C2E8(Font* a0, s32 a1, void* a2);
-s32 func_0015CAB8(Font* self, void* obj);
-void func_001613C0(void* obj, s32 a, s32 b, s32 c);
-void func_00161708(void* obj, s32 tag, s64 value);
-void func_00161768(void* obj, s32 tag, s64 value);
+void SetFontClipRect(Font* a0, s32 a1, void* a2);
+s32 AddFontImagesToFrame(Font* self, void* obj);
+void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
+void BeginGifRegListTag(void* obj, s32 tag, s64 value);
 
-extern s32 D_0026227C;
+extern s32 g_defaultFont;
 
-void func_0018D800(void* dst, void* src, s32 size);
-
-
-extern s32 D_00261F18;
-extern s32 D_00261F1C;
-
-void func_0015ED50(void* a, s32 b);
-void func_001686E8(s32 a, s32 b);
+void CopyMemory(void* dst, void* src, s32 size);
 
 
-void* func_001611B8(void* p);
-void* func_001EE318(void* p);
+extern s32 g_vif1Channel;
+extern s32 g_gifChannel;
 
-void func_0015F618(s32 flag, s32 code);
+void ActivateRenderFrame(void* a, s32 b);
+void SendGsPacketAndWait(s32 a, s32 b);
+
+
+void* InitGifPacket(void* p);
+void* InitPacketWriter(void* p);
+
+void ConstructPacketWriters(s32 flag, s32 code);
 
 struct GroundProbe {
     Vec02 q;
@@ -558,111 +558,111 @@ struct GroundProbe {
     s32 b;
 };
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
 typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
-s32 func_0015C058(void* a, void* b);
-void func_0018D608(void* self);
-s32 func_001419E8(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
-void func_0018D6F0(void);
-void func_001DC4D0(s32 a0, s32 a1, void* a2, ObjectFilterFn a3, void* a4, s32* a5, s32* a6, f32 f12);
+s32 IsCyclerGroundCandidate(void* a, void* b);
+void PushBackMemoryMark(void* self);
+s32 FindNearestSpanObject(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
+void PopBackMemoryMark(void);
+void GatherCollidersInSphere(s32 a0, s32 a1, void* a2, ObjectFilterFn a3, void* a4, s32* a5, s32* a6, f32 f12);
 
-void func_00152B80(void* list, u32 count, s32 value);
+void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 D_0026230C;
 
-void func_001613C0(void* obj, s32 a, s32 b, s32 c);
-void func_00161708(void* obj, s32 a, s32 b);
-void func_00161200(void* obj);
-void func_00152D30(void* obj);
-void func_001529E0(void* obj, void* a, s32 b);
+void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(void* obj, s32 a, s32 b);
+void EndGifPacket(void* obj);
+void AddDmaEndTag(void* obj);
+void DetachPacketBuffer(void* obj, void* a, s32 b);
 
-void func_0015EB20(void* list, void* a, s32 b);
-void func_0015EBF0(void* obj, void* a, s32 b);
-void func_00152440(void* p);
-s32 func_001F6B40(void* a);
+void WriteGsFinishPacket(void* list, void* a, s32 b);
+void CloseDrawBuffer(void* obj, void* a, s32 b);
+void ClearList(void* p);
+s32 PostSemaphore(void* a);
 
 extern List01 D_002622E0;
 extern List01 D_002622F0;
-extern List01 D_00262300;
-extern s32 D_002622D0;
-extern void* D_002623B0;
+extern List01 g_deferredReleaseListC;
+extern s32 g_buildFrameData;
+extern void* g_frameReadySemaphore;
 
 
 
-extern s32 D_002622D4;
-extern s32 D_00274538;
-extern s32 D_00261F1C;
+extern s32 g_drawFrameData;
+extern s32 g_maskedImagesPacket;
+extern s32 g_gifChannel;
 
-void func_001B3488(s32 value);
-void func_00202A80(s32 a, s32 b);
-
-
-void func_0015DB80(void* self);
-s32 func_0015DBE0(void* self);
-
-void func_0015DB80(void* self);
-s32 func_0015DBE0(void* self);
+void SwitchActiveImageMask(s32 value);
+void StartDmaChain(s32 a, s32 b);
 
 
-void func_0015DB80(void* self);
-s32 func_0015DBE0(void* self);
+void RewindTextReader(void* self);
+s32 ReadTextChar(void* self);
 
-s32 func_0015E068(void* self);
+void RewindTextReader(void* self);
+s32 ReadTextChar(void* self);
 
-extern s8 D_00262250[];
-extern s32 D_00262268[];
 
-s32 func_0015C4E8(Font* self, u8* s);
+void RewindTextReader(void* self);
+s32 ReadTextChar(void* self);
+
+s32 WrapTextLines(void* self);
+
+extern s8 g_fontEscapeKeys[];
+extern s32 g_fonts[];
+
+s32 WrapFontString(Font* self, u8* s);
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
 struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
-PacketWriter* func_001611B8(PacketWriter* p);
-s32 func_00168D88(void* self, s32 size);
-void func_00168FB0(void* self, s32 v);
-void func_001529C8(void* self, s32 count, void* base);
-void func_00169088(void* self, s32 dbp, void* ctx);
-void func_00152A50(void* self, s32* count, u32* begin, s32* out, s32 flag);
-void func_00168E78(void* self, s32 v);
-void func_00168F48(void* self, s32 v, void* ctx);
+PacketWriter* InitGifPacket(PacketWriter* p);
+s32 AllocateBump(void* self, s32 size);
+void BuildImageTexRegister(void* self, s32 v);
+void UsePacketBufferMemory(void* self, s32 count, void* base);
+void StartImageUpload(void* self, s32 dbp, void* ctx);
+void DetachPacketBufferCopy(void* self, s32* count, u32* begin, s32* out, s32 flag);
+void BuildPaletteTexRegister(void* self, s32 v);
+void StartPaletteUpload(void* self, s32 v, void* ctx);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 
-extern s32 D_00262260;
-extern u8* D_00262264;
+extern s32 g_fontCount;
+extern u8* g_fontRecords;
 
-void func_00168D68(void* dst, s32 size, s32 align);
-void func_0015D998(void* item, void* buf);
+void InitBumpAllocator(void* dst, s32 size, s32 align);
+void UploadFontImages(void* item, void* buf);
 
 
-void func_001617E8(PacketWriter* s, u32 tag, f32 value);
-void func_00161860(PacketWriter* s, s32 a, s32 b);
-void func_001618C0(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
+void AddGifRegListFloat(PacketWriter* s, u32 tag, f32 value);
+void AddGifUvRegListEntry(PacketWriter* s, s32 a, s32 b);
+void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
-FontGlyph* func_0015DAB8(Font* self, s8 key);
+FontGlyph* FindFontGlyph(Font* self, s8 key);
 
-s32 func_0015E068(void* self, f32 f);
-f32 func_0015E1F0(void* self);
+s32 WrapTextLines(void* self, f32 f);
+f32 MeasureTextWidth(void* self);
 
 
 
 extern u32 D_002C3B00[];
 extern u8 D_00148D74[];
-extern s32 D_00262310;
+extern s32 g_codeChecksumFailed;
 
-extern void* D_002623B4;
-extern volatile s32 D_002623B8;
-extern void* D_0026231C;
+extern void* g_frameDoneSemaphore;
+extern volatile s32 g_renderThreadWaiting;
+extern void* g_drawingFrame;
 extern s32 D_002626CC;
 
-s32 func_001F6B60(void* a);
-void func_0015EF88(void* self, s32 flag);
-void func_0015F320(void);
-void func_001683E8(void);
-void func_0015EFE8(void* p);
-void func_00191EB0(s32 a);
+s32 AwaitSemaphore(void* a);
+void SendRenderFrameToDma(void* self, s32 flag);
+void BlitFrameToDisplay(void);
+void FlipDisplayFrame(void);
+void ReleaseFrameNodes(void* p);
+void ClearScreenOwner(s32 a);
 
 struct FontHeader {
     u16 u0;
@@ -678,53 +678,53 @@ struct FontHeader {
 
 
 
-void func_00137A60(void* src, s32 n, void* dst);
-void* func_0018D500(s32 n);
+void ReadBufferedStreamBytes(void* src, s32 n, void* dst);
+void* AllocateFrontMemory(s32 n);
 extern s32 D_00262258;
 extern s32 D_0026225C;
 
-FontGlyph* func_0015DAB8(Font* self, s8 key);
-s32 func_0015CAB8(Font* self, PacketWriter* s);
-void func_001613C0(PacketWriter* s, s32 a, s32 b, s32 c);
-void func_00161708(PacketWriter* s, s32 a, u64 b);
-void func_00161768(PacketWriter* s, s32 a, u64 b);
-void func_001617E8(PacketWriter* s, u32 tag, f32 value);
-void func_00161860(PacketWriter* s, s32 a, s32 b);
-void func_001618C0(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
+FontGlyph* FindFontGlyph(Font* self, s8 key);
+s32 AddFontImagesToFrame(Font* self, PacketWriter* s);
+void BeginGifTag(PacketWriter* s, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(PacketWriter* s, s32 a, u64 b);
+void BeginGifRegListTag(PacketWriter* s, s32 a, u64 b);
+void AddGifRegListFloat(PacketWriter* s, u32 tag, f32 value);
+void AddGifUvRegListEntry(PacketWriter* s, s32 a, s32 b);
+void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
 extern u8 D_003C3B00[], D_005C3B00[];
-extern void* D_002623B0;
-extern void* D_002623B4;
-extern void* D_00275958[];
-void func_00152438(List01* self, s32 value);
-void func_001F6950(s32 a0, void (*fn)(void), s32 a2);
-void func_001F6DA8(s32 a0);
-void* func_001E2268(s32 a, s32 b);
-void func_001F6A20(void* a, s32 b);
+extern void* g_frameReadySemaphore;
+extern void* g_frameDoneSemaphore;
+extern void* g_mainAndRenderThreads[];
+void SetListLinkOffset(List01* self, s32 value);
+void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
+void EnableInterruptCause(s32 a0);
+void* CreateLockSemaphore(s32 a, s32 b);
+void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
-void func_0015DB80(TextReader* self);
+void RewindTextReader(TextReader* self);
 
 struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
 struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
 
-extern void* D_002623B0;
-extern void* D_002623B4;
+extern void* g_frameReadySemaphore;
+extern void* g_frameDoneSemaphore;
 extern u32 D_00262314;
-extern s32 D_00261F18;
-extern s32 D_00261F1C;
+extern s32 g_vif1Channel;
+extern s32 g_gifChannel;
 extern s32 D_002626CC;
 
-void func_0015EDB8(void);
-s32 func_001F6B60(void* p);
-void func_0015ED50(RenderFrame* f);
-void func_001684E8(void);
-void func_001686E8(s32 a, s32 b);
-void func_0015F320(void);
-s32 func_00202C38(s32 a, s32 b, s32 c);
-void func_001683E8(void);
+void VerifyCodeChecksum(void);
+s32 AwaitSemaphore(void* p);
+void ActivateRenderFrame(RenderFrame* f);
+void ApplyPendingDisplayFlip(void);
+void SendGsPacketAndWait(s32 a, s32 b);
+void BlitFrameToDisplay(void);
+s32 WaitDmaChannel(s32 a, s32 b, s32 c);
+void FlipDisplayFrame(void);
 
 
 struct FrameNode {
@@ -735,10 +735,10 @@ struct FrameNode {
 };
 
 
-s32 func_00152720(List01* l);
-void func_00152600(List01* l, FrameNode* n);
-void func_00152470(u8* l, FrameNode* n);
-void func_00152440(List01* l);
+s32 IsListEmpty(List01* l);
+void RemoveFromList(List01* l, FrameNode* n);
+void AppendToList(u8* l, FrameNode* n);
+void ClearList(List01* l);
 
 
 
@@ -764,15 +764,15 @@ struct StringLayout
 };
 
 
-void func_0015DB80(TextReader* self);
-s32 func_0015DBE0(TextReader* self);
-void func_0015DBB8(TextReader* self, Rgba_137248* p);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
+void SetTextDefaultColor(TextReader* self, Rgba_137248* p);
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
-s32 func_0015C200(s32 id);
-void func_0015C9B0(Font* font, Font* out);
-void func_0015C900(Font* font);
-void func_0015C8B8(Font* font, f32 a, f32 b);
+s32 FindFontByKeyChar(s32 id);
+void CopyFont(Font* font, Font* out);
+void PopFontScale(Font* font);
+void PushFontScale(Font* font, f32 a, f32 b);
 
 struct FrameGlyph {
     Font* f0;
@@ -786,27 +786,27 @@ struct FrameGlyph {
 };
 struct FrameRect { f32 x, y, w, h; };
 
-FontGlyph* func_0015DAB8(Font* self, s8 key);
-void func_0015C8B8(Font* p, f32 a, f32 b);
-void func_0015C900(Font* p);
-void func_0015D338(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+FontGlyph* FindFontGlyph(Font* self, s8 key);
+void PushFontScale(Font* p, f32 a, f32 b);
+void PopFontScale(Font* p);
+void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
-extern void* D_0026231C;
-extern void* D_002623B0;
-extern volatile s32 D_002623B8;
+extern void* g_drawingFrame;
+extern void* g_frameReadySemaphore;
+extern volatile s32 g_renderThreadWaiting;
 
-extern void* D_002623B4;
-extern s32 D_00262318;
-extern s32 D_002622D0;
+extern void* g_frameDoneSemaphore;
+extern s32 g_nextBuildFrameIndex;
+extern s32 g_buildFrameData;
 
-void func_00191E70(s32 v);
-s32 func_001F6B60(void* a);
-void func_001529C8(void* self, s32 count, void* base);
-void func_00152B38(void* self);
+void SetScreenOwner(s32 v);
+s32 AwaitSemaphore(void* a);
+void UsePacketBufferMemory(void* self, s32 count, void* base);
+void BeginDmaTag(void* self);
 
 INCLUDE_ASM(func_001549C8);
 
-void func_00154C10(EffectSpawner* self)
+void InitEffectSpawner(EffectSpawner* self)
 {
     InitPlacedObject(self);
     self->f2D8=-1;
@@ -825,7 +825,7 @@ void func_00154C10(EffectSpawner* self)
 
 ASM_FUNC(func_00154C80);
 
-void func_00154EE0(CappedWordList* self, s32 count, void* unused, void* src)
+void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src)
 {
     s32 limit = 31;
     s32 cap = (limit < count) ? 32 : count;
@@ -840,7 +840,7 @@ void func_00154EE0(CappedWordList* self, s32 count, void* unused, void* src)
     }
 }
 
-void func_00154F98(EffectSpawner* self, s32 count)
+void LoadEffectSpawner(EffectSpawner* self, s32 count)
 {
     void* mem = AllocateFrontMemory(0x200);
     self->rec = (Rec50*)mem;
@@ -865,18 +865,18 @@ void func_00154F98(EffectSpawner* self, s32 count)
     }
 }
 
-void func_00155080(EffectSpawner* self)
+void CopyEffectSpawner(EffectSpawner* self)
 {
     CopyPlacedObject(self);
     self->rec->uses++;
 }
 
-void func_001550B8(EffectSpawner* self)
+void ReparentEffectSpawnerToSource(EffectSpawner* self)
 {
     self->desc->m15(self, (BaseObject*)self->rec->target);
 }
 
-void func_001550E8(EffectSpawner* self)
+void ResolveEffectSpawnerLinks(EffectSpawner* self)
 {
     Rec50* s2;
 
@@ -914,7 +914,7 @@ extern const f32 D_0024A120 = 3.4028235e+38f;
 
 ASM_FUNC(func_00155270);
 
-void func_00155678(EffectSpawner* self, s32 mode, BaseObject* p)
+void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 {
     if (mode == 2) {
         if (p == self->held344) {
@@ -927,7 +927,7 @@ void func_00155678(EffectSpawner* self, s32 mode, BaseObject* p)
     }
 }
 
-Rec50* func_001556E8(Rec50* self)
+Rec50* CloneSharedSpawnRecord(Rec50* self)
 {
     Rec50* n;
     if (self->uses < 2) return self;
@@ -940,7 +940,7 @@ Rec50* func_001556E8(Rec50* self)
     return n;
 }
 
-Rec50* func_00155778(EffectSpawner* self, s32 mode)
+Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
 {
     if (mode == 1) {
         self->f34C = mode;
@@ -949,7 +949,7 @@ Rec50* func_00155778(EffectSpawner* self, s32 mode)
     return self->rec;
 }
 
-EffectSpawner* func_001557B8(EffectSpawner* self, s32 value)
+EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
 {
     if (value == 1) {
         self->f34C = value;
@@ -957,7 +957,7 @@ EffectSpawner* func_001557B8(EffectSpawner* self, s32 value)
     return self;
 }
 
-void func_001557D0(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
+void AddSpawnRangeEntry(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
 {
     u8* p=(u8*)GetOwnSpawnRecord(self,1);
     AddRangeEntry(p+16,a,b,x,y,z,w,self);
@@ -967,7 +967,7 @@ ASM_FUNC(func_00155868);
 
 ASM_FUNC(func_00155AB0);
 
-void func_00155F28(EffectSpawner* self)
+void InheritFlaggedAncestorValue(EffectSpawner* self)
 {
     if ((self->flags & 0x0C000000) == 0x08000000) {
         return;
@@ -984,22 +984,22 @@ void func_00155F28(EffectSpawner* self)
     }
 }
 
-void func_00155F78(EffectSpawner* self, f32 f)
+void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f)
 {
     self->f340 = g_gameTime + f;
 }
 
-void func_00155F90(EffectSpawner* self)
+void SetEffectSpawnerActiveForever(EffectSpawner* self)
 {
     self->f340 = 3.4028234663852886e+38f;
 }
 
-void func_00155FA0(EffectSpawner* self)
+void SetEffectSpawnerInactive(EffectSpawner* self)
 {
     self->f340 = -1.0f;
 }
 
-s32 func_00155FB0(EffectSpawner* self)
+s32 IsEffectSpawnerActive(EffectSpawner* self)
 {
     if (g_gameTime < self->f340) {
         return 1;
@@ -1014,7 +1014,7 @@ s32 func_00155FB0(EffectSpawner* self)
     return 0;
 }
 
-void func_00156000(EffectSpawner* self, s32 a1)
+void SetEffectSpawnerDisabled(EffectSpawner* self, s32 a1)
 {
     if (a1 != 0) {
         SetEffectSpawnerInactive(self);
@@ -1023,17 +1023,17 @@ void func_00156000(EffectSpawner* self, s32 a1)
     }
 }
 
-void func_00156030(EffectSpawner* self, s32* out)
+void GetEffectSpawnerInactive(EffectSpawner* self, s32* out)
 {
     *out = IsEffectSpawnerActive(self) == 0;
 }
 
-void func_00156060(void* self,s32* out)
+void GetEffectSpawnerActive(void* self,s32* out)
 {
     *out=IsEffectSpawnerActive((EffectSpawner*)self);
 }
 
-void func_00156088(u8* self)
+void RandomizeEffectSpawnerDelay(u8* self)
 {
     *(s32*)(self+0x34C)=0;
     if (*(void**)(self+0x348)) func_0013A128(*(void**)(self+0x348),*(void**)(self+0x2D0));
@@ -1044,7 +1044,7 @@ void func_00156088(u8* self)
     *(f32*)(self+0x328)=value;
 }
 
-void func_00156108(EffectSpawner* self, s32 a1)
+void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
 {
     if (self->f2D4 == -1) {
         self->f2D8 = a1;
@@ -1060,13 +1060,13 @@ void func_00156108(EffectSpawner* self, s32 a1)
     self->f34C = 1;
 }
 
-void func_00156178(EffectSpawner* a0, s32 a1)
+void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 {
     a0->continuous = a1;
     a0->f34C = 1;
 }
 
-void func_00156188(u8* self,s32 kind)
+void SetSpawnRecordKind(u8* self,s32 kind)
 {
     *(s32*)(self+0x1B0)=kind;
     FillMemory(self+0x1F0,0,12);
@@ -1082,13 +1082,13 @@ void func_00156188(u8* self,s32 kind)
     }
 }
 
-void func_00156218(void* a0, s32 a1)
+void SetEffectSpawnerKind(void* a0, s32 a1)
 {
     void* r = GetOwnSpawnRecord(a0, 1);
     SetSpawnRecordKind(r, a1);
 }
 
-void func_00156250(void* a0, s32 a1)
+void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
     void* r = GetOwnedSpawnRecord(a0, 1);
     SetSpawnRecordKind(r, a1);
@@ -1096,7 +1096,7 @@ void func_00156250(void* a0, s32 a1)
 
 ASM_FUNC(func_00156288);
 
-void func_001566C8(Quad16* a0, f32 f)
+void SendPointEventToWorldListener(Quad16* a0, f32 f)
 {
     BaseObject* obj = g_currentWorld->slot1CE8[9];
     if (obj != 0) {
@@ -1115,13 +1115,13 @@ ASM_FUNC(func_00156718);
 
 ASM_FUNC(func_00156F08);
 
-void func_00156FC8(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
+void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
 ASM_FUNC(func_00157098);
 
 ASM_FUNC(func_00157248);
 
-void func_00157320(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
+void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
     u8* s7 = AT(u8*, self, 0x7C);
     EffectOwner* node = 0;
@@ -1198,7 +1198,7 @@ INCLUDE_RODATA(D_0024A144);
 
 ASM_FUNC(func_00157B88);
 
-void func_00157E00(void* a, Rec50* b, void* c)
+void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
 {
     SpawnSetup f;
     if (a == 0) {
@@ -1221,7 +1221,7 @@ void func_00157E00(void* a, Rec50* b, void* c)
     PopBackMemoryMark();
 }
 
-void func_00157EF8(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6)
+void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6)
 {
     SpawnRecord f;
     InitSpawnRecord(&f);
@@ -1238,7 +1238,7 @@ void func_00157EF8(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock
 
 LINKER_REMNANT(func_00157FF0);
 
-void func_00157FF8(void* self, void* obj, f32 x)
+void BroadcastPointEvent(void* self, void* obj, f32 x)
 {
     BroadcastMessage frame;
     KeyedObjectList* list = (*(KeyedWorldView**)((u8*)&g_currentWorld))->list;
@@ -1264,7 +1264,7 @@ void func_00157FF8(void* self, void* obj, f32 x)
     }
 }
 
-void func_00158108(void* a0, BriefEffectSource* a1, f32 f)
+void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f)
 {
     Effect* o = (Effect*)CreateEffect(4, 0);
     if (o != 0) {
@@ -1276,7 +1276,7 @@ void func_00158108(void* a0, BriefEffectSource* a1, f32 f)
     }
 }
 
-void func_00158198(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15)
+void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15)
 {
     self->kind = 3;
     if (self->entries == 0) {
@@ -1309,7 +1309,7 @@ ASM_FUNC(func_001583E8);
 
 INCLUDE_ASM(func_00158480);
 
-void func_001585F8(MemberObject* self)
+void StartMemberObject(MemberObject* self)
 {
     StartObject(self);
     self->desc->m03(self);
@@ -1317,14 +1317,14 @@ void func_001585F8(MemberObject* self)
 
 ASM_FUNC(func_00158630);
 
-void func_00158730(MemberObject* a0)
+void SendEmptyMessage(MemberObject* a0)
 {
     EmptyMessage b;
     FillMemory(&b, 0, 0x50);
     a0->desc->m1B(a0, &b);
 }
 
-void func_00158778(MemberObject* a0, s32 a1, s32 a2, Quad16* a3, Quad16* a4, f32 x, f32 y)
+void SendTwoVectorMessage(MemberObject* a0, s32 a1, s32 a2, Quad16* a3, Quad16* a4, f32 x, f32 y)
 {
     TwoVectorMessage m;
     m.a = a1;
@@ -1336,11 +1336,11 @@ void func_00158778(MemberObject* a0, s32 a1, s32 a2, Quad16* a3, Quad16* a4, f32
     a0->desc->m1B(a0, &m);
 }
 
-void func_001587C0()
+void SendMemberObjectMessage()
 {
 }
 
-void func_001587C8(MemberGroup* self, void* src)
+void LoadGroupMembers(MemberGroup* self, void* src)
 {
     void* arr[8];
     s32 total;
@@ -1388,7 +1388,7 @@ void func_001587C8(MemberGroup* self, void* src)
     }
 }
 
-void func_00158980(MemberGroup* self)
+void CopyGroupMembers(MemberGroup* self)
 {
     CopyObjectData(self);
     for (s32 i = 0; i < self->count; i++) {
@@ -1399,7 +1399,7 @@ void func_00158980(MemberGroup* self)
     }
 }
 
-void func_00158A10(MemberGroup* self)
+void ResolveGroupMembers(MemberGroup* self)
 {
     for (s32 i = 0; i < self->count; i++) {
         MemberObject* it = self->members[i];
@@ -1410,7 +1410,7 @@ void func_00158A10(MemberGroup* self)
     }
 }
 
-void func_00158A80(MemberGroup* self, void* message)
+void BroadcastMessageToMembers(MemberGroup* self, void* message)
 {
     for (s32 i = 0; i < self->count; i++) {
         MemberObject* it = self->members[i];
@@ -1418,14 +1418,14 @@ void func_00158A80(MemberGroup* self, void* message)
     }
 }
 
-void func_00158B00(RecordMember* self)
+void InitRecordMember(RecordMember* self)
 {
     InitTransformObject(self);
     self->id94 = -1;
     self->id98 = -1;
 }
 
-void func_00158B30(RecordMember* self, void* stream)
+void LoadRecordMember(RecordMember* self, void* stream)
 {
     Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
     self->rec = p;
@@ -1450,13 +1450,13 @@ void func_00158B30(RecordMember* self, void* stream)
     }
 }
 
-void func_00158C28(RecordMember* self)
+void CopyRecordMember(RecordMember* self)
 {
     CopyObjectData(self);
     self->rec->uses += 1;
 }
 
-void func_00158C60(RecordMember* self)
+void ResolveRecordMemberTargets(RecordMember* self)
 {
     Rec79* r;
     Rec79* c;
@@ -1489,17 +1489,17 @@ tail_c:
     ResolveSpawnRecordTargets(c, self);
 }
 
-void func_00158D38(void)
+void SendRecordMemberMessage(void)
 {
 }
 
-void func_00158D40(RecordMember* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
+void AddRecordMemberRangeEntry(RecordMember* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
     AddRangeEntry(p+16,a,b,x,y,z,w,self);
 }
 
-Rec79* func_00158DD8(RecordMember* self, s32 own)
+Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own)
 {
     if (own == 1) {
         self->rec = (Rec79*)CloneSharedSpawnRecord(self->rec);
@@ -1507,7 +1507,7 @@ Rec79* func_00158DD8(RecordMember* self, s32 own)
     return self->rec;
 }
 
-void func_00158E10(HoldingMember* self)
+void InitHoldingMember(HoldingMember* self)
 {
     InitRecordMember(self);
     self->idAC = -1;
@@ -1515,7 +1515,7 @@ void func_00158E10(HoldingMember* self)
     self->idB4 = -1;
 }
 
-void func_00158E48(HoldingMember* self)
+void ResolveHoldingMemberTargets(HoldingMember* self)
 {
     Rec79* s;
     void* p;
@@ -1539,7 +1539,7 @@ void func_00158E48(HoldingMember* self)
     }
 }
 
-void func_00158F10(HoldingMember* self, s32 kind, BaseObject* other)
+void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other)
 {
     if (kind == 2) {
         if (other == self->heldC0) {
@@ -1552,7 +1552,7 @@ void func_00158F10(HoldingMember* self, s32 kind, BaseObject* other)
     }
 }
 
-void func_00158F80(HoldingMember* self, void* message)
+void SendMessageAfterDelay(HoldingMember* self, void* message)
 {
     DelayedMessage* r;
     f32* k;
@@ -1575,7 +1575,7 @@ void func_00158F80(HoldingMember* self, void* message)
     }
 }
 
-s32 func_00159068(void* self)
+s32 GetOrCreateSoundParams(void* self)
 {
     HoldingMember* o = (HoldingMember*)self;
     if (o->fA0 == 0) {
@@ -1588,7 +1588,7 @@ INCLUDE_RODATA(jtbl_0024A150);
 
 ASM_FUNC(func_001590A0);
 
-void func_00159478(void** out, void* self)
+void FindOrBuildMemberGroup(void** out, void* self)
 {
     BaseObject* o = (BaseObject*)self;
     void* arr[32];
@@ -1623,7 +1623,7 @@ void func_00159478(void** out, void* self)
     *out = s2;
 }
 
-void func_00159588(World* self)
+void DispatchDelayedMessages(World* self)
 {
     ListFrame it;
     BeginListWalk::Of(&it, &self->list1BDC);
@@ -1640,7 +1640,7 @@ void func_00159588(World* self)
 
 ASM_FUNC(func_00159668);
 
-void func_00159680(CrossfadeAnimator* self, AnimatorParams* src)
+void LoadCrossfadeAnimator(CrossfadeAnimator* self, AnimatorParams* src)
 {
     LoadAnimatorBase(self, src);
     self->cursor2.flags = self->cursor.flags;
@@ -1651,7 +1651,7 @@ void func_00159680(CrossfadeAnimator* self, AnimatorParams* src)
     self->limit = src->f10;
 }
 
-void func_001596E0(CrossfadeAnimator* self)
+void BindCrossfadeAnimator(CrossfadeAnimator* self)
 {
     BindAnimatorRecord(self);
     AnimRecord* a = FindAnimRecord(self->recordKey2);
@@ -1676,7 +1676,7 @@ void func_001596E0(CrossfadeAnimator* self)
     SetCrossfadeMode(self, 0);
 }
 
-void func_00159770(CrossfadeAnimator* s, s32 mode)
+void SetCrossfadeMode(CrossfadeAnimator* s, s32 mode)
 {
     if (s->mode == mode) return;
     if (mode == 1) goto store;
@@ -1721,7 +1721,7 @@ tail:
     s->stamp2 = g_gameTime;
 }
 
-void func_00159890(CrossfadeAnimator* s, f32 dt)
+void StepCrossfadeAnimator(CrossfadeAnimator* s, f32 dt)
 {
     s32 count = s->count;
     if (count < 2) return;
@@ -1769,7 +1769,7 @@ call:
     SetCursorFrame(&s->cursor2, (s32)s->pos);
 }
 
-void func_00159A00(CrossfadeAnimator* a0, f32 f12)
+void SetCrossfadeRatio(CrossfadeAnimator* a0, f32 f12)
 {
     a0->ratio = f12;
     if (1.0f <= f12) {
@@ -1782,7 +1782,7 @@ void func_00159A00(CrossfadeAnimator* a0, f32 f12)
     SetCursorFrame(&a0->cursor2, (s32)a0->pos);
 }
 
-AnimCursor* func_00159A80(CrossfadeAnimator* self, const AnimRecord* key)
+AnimCursor* FindCrossfadeCursor(CrossfadeAnimator* self, const AnimRecord* key)
 {
     AnimCursor* p = FindAnimatorCursor(self, key);
     if (p == 0) {
@@ -1794,7 +1794,7 @@ AnimCursor* func_00159A80(CrossfadeAnimator* self, const AnimRecord* key)
     return p;
 }
 
-void func_00159AD0(WorldObjectNode* self, f32 dt)
+void StepObjectLevelRamp(WorldObjectNode* self, f32 dt)
 {
     if (self->rate != 0.0f) {
         if (IsObjectAttached(self->owner) == 0) {
@@ -1815,7 +1815,7 @@ void func_00159AD0(WorldObjectNode* self, f32 dt)
     }
 }
 
-WorldObjectNode* func_00159BB0(PlacedObject* self)
+WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 {
     WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((u8*)g_currentWorld + 0x1C18);
     node->owner = self;
@@ -1827,7 +1827,7 @@ WorldObjectNode* func_00159BB0(PlacedObject* self)
     return node;
 }
 
-void func_00159C28(WorldObjectNode* node)
+void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 {
     if (node->owner->f294 != 0) {
         RemoveFromList((u8*)g_currentWorld + 0x1C30, node);
@@ -1838,7 +1838,7 @@ void func_00159C28(WorldObjectNode* node)
     PushFreeSlot((u8*)g_currentWorld + 0x1C18, node);
 }
 
-void func_00159CA0(u8* a0)
+void DrawScreenFill(u8* a0)
 {
     ScreenFillPacket f;
     f.value = *(s32*)(a0 + 0x60);
@@ -1849,7 +1849,7 @@ void func_00159CA0(u8* a0)
     CloseDmaTag(s);
 }
 
-void func_00159D00(ColorFade* self)
+void UpdateColorFade(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
     s32 g = D_00270458;
@@ -1894,7 +1894,7 @@ void func_00159D00(ColorFade* self)
     QueueDeferredRequest(&q);
 }
 
-void func_00159ED0(ColorFade* a0)
+void StartColorFade(ColorFade* a0)
 {
     if (a0->running == 0) {
         a0->running = 1;
@@ -1903,12 +1903,12 @@ void func_00159ED0(ColorFade* a0)
     }
 }
 
-u8* func_00159F20(u8* base, s32 n)
+u8* GetHashedSlot(u8* base, s32 n)
 {
     return base + (((n * 0x95675) & 0x1FF) * 12 + 0x84);
 }
 
-void func_00159F48(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a4, s32 cap,
+void CollectObjectByMode(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a4, s32 cap,
                    s32* count, PlacedObject** arr, s32* lvlp)
 {
     PlacedObject* a0;
@@ -1982,28 +1982,28 @@ void func_00159F48(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a
 
 INCLUDE_ASM(func_0015A198);
 
-MemberTargetObject* func_0015A418(void* self,s32 flags,s32 kind,void* arg)
+MemberTargetObject* FindFirstObjectById(void* self,s32 flags,s32 kind,void* arg)
 {
     s32 out=0;
     GatherObjectsByMode(self,flags|0x200,kind,arg,1,&out);
     return (MemberTargetObject*)out;
 }
 
-s32 func_0015A448(void* self,s32 kind,void* arg)
+s32 FindFirstObjectByIdMode4(void* self,s32 kind,void* arg)
 {
     s32 out=0;
     GatherObjectsByMode(self,0x204,kind,arg,1,&out);
     return out;
 }
 
-s32 func_0015A480(void* self,s32 kind,void* arg)
+s32 FindFirstObjectByIdMode1(void* self,s32 kind,void* arg)
 {
     s32 out=0;
     GatherObjectsByMode(self,0x201,kind,arg,1,&out);
     return out;
 }
 
-s32 func_0015A4B8(s32 index, s32 value)
+s32 IsClassOfKind(s32 index, s32 value)
 {
     ClassKindNode* p = ((ClassKindNode**)D_00247448)[index];
     while (p != 0) {
@@ -2016,7 +2016,7 @@ s32 func_0015A4B8(s32 index, s32 value)
     return 0;
 }
 
-s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, PlacedObject** found)
+s32 GatherObjectsById(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, PlacedObject** found)
 {
     s32 c;
     s32 min;
@@ -2098,14 +2098,14 @@ s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, 
     return c;
 }
 
-s32 func_0015A838(void* self,s32 flags,s32 kind,void* arg)
+s32 FindFirstObjectByIdGathered(void* self,s32 flags,s32 kind,void* arg)
 {
     s32 out=0;
     GatherObjectsById(self,flags|0x200,kind,arg,1,&out);
     return out;
 }
 
-BaseObject* func_0015A868(BaseObject* list, BaseObject* other)
+BaseObject* FindCommonAncestor(BaseObject* list, BaseObject* other)
 {
     for (BaseObject* p = list; p != 0; p = p->parent) {
         for (BaseObject* q = other; q != 0; q = q->parent) {
@@ -2119,7 +2119,7 @@ BaseObject* func_0015A868(BaseObject* list, BaseObject* other)
 
 LINKER_REMNANT(func_0015A8B0);
 
-void func_0015A8B8(C60* self)
+void InitC60Object(C60* self)
 {
     InitPlacedObject(self);
     f32* v = self->v;
@@ -2130,19 +2130,19 @@ void func_0015A8B8(C60* self)
     v[2] = 0.1f;
 }
 
-void func_0015A918(C60* self,void* other)
+void LoadC60Object(C60* self,void* other)
 {
     LoadPlacedObject(self,other);
     ReadMeshTables(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-void func_0015A960(C60* self)
+void UpdateC60Object(C60* self)
 {
     UpdatePlacedObject(self);
     self->f2EC = ApproachValueWithRamp(self->v, 0, self->f2EC, self->f2F0, g_frameDt);
 }
 
-void func_0015A9A8(C60* self, void* arg1, void* arg2)
+void DrawC60Object(C60* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
     BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
@@ -2152,12 +2152,12 @@ void func_0015A9A8(C60* self, void* arg1, void* arg2)
     f.m40[1] = f.m90[1];
     f.m40[2] = f.m90[2];
     f.m40[3] = f.m90[3];
-    func_001261C0(self, arg1, f.m40);
+    DrawPlacedObject(self, arg1, f.m40);
 }
 
 ASM_FUNC(func_0015AA50);
 
-void func_0015AAE0(ObjectCycler* self)
+void InitObjectCycler(ObjectCycler* self)
 {
     InitCollider(self);
     self->state = -1;
@@ -2176,7 +2176,7 @@ void func_0015AAE0(ObjectCycler* self)
     AppendToList(&self->world->list1C48, self);
 }
 
-void func_0015AC08(ObjectCycler* self, void* arg)
+void LoadObjectCycler(ObjectCycler* self, void* arg)
 {
     u32 i;
     LoadCollider(self, arg);
@@ -2209,7 +2209,7 @@ void func_0015AC08(ObjectCycler* self, void* arg)
     }
 }
 
-void func_0015AD80(ObjectCycler* self)
+void CopyObjectCycler(ObjectCycler* self)
 {
     PackedFloatPair tmp;
     tmp = self->f5DC;
@@ -2224,7 +2224,7 @@ void func_0015AD80(ObjectCycler* self)
     }
 }
 
-void func_0015AE38(ObjectCycler* self, s32 flag)
+void SetObjectCyclerHandle(ObjectCycler* self, s32 flag)
 {
     if (self->mode == 0) {
         if (flag != 0) {
@@ -2235,7 +2235,7 @@ void func_0015AE38(ObjectCycler* self, s32 flag)
     }
 }
 
-void func_0015AEB0(ObjectCycler* self)
+void StartObjectCycler(ObjectCycler* self)
 {
     ResolveObjectLinks(self, 2, g_objectCyclerStartLinks);
     if (self->mode == 1) {
@@ -2253,7 +2253,7 @@ INCLUDE_RODATA(jtbl_0024A190);
 
 ASM_FUNC(func_0015AF50);
 
-void func_0015B128(ObjectCycler* self)
+void UpdateObjectCycler(ObjectCycler* self)
 {
     UpdateCollider(self);
     if (self->stateEnd <= g_gameClock[1]) {
@@ -2360,7 +2360,7 @@ void func_0015B128(ObjectCycler* self)
     }
 }
 
-void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
+void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
 {
     CyclerDrawParams out;
     BuildPlacedObjectTransform(self, a2, &out);
@@ -2409,7 +2409,7 @@ void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
     }
 }
 
-s32 func_0015B720(ObjectCycler* self, CyclerEventMessage* r)
+s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 {
     if (self->state != 1) {
         SetObjectCyclerState(self, 1);
@@ -2444,14 +2444,14 @@ ASM_FUNC(func_0015BEF0);
 
 ASM_FUNC(func_0015BFC0);
 
-s32 func_0015C058(GroundFilterContext* a0, GroundCandidate* a1)
+s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
     if ((a1->f538 & 0x80000000000ULL) || a1->f50 == a0->f50) return 0;
     u64 v = a1->f2CC;
     return ((s32)v ^ 1) & 1;
 }
 
-s32 func_0015C0A0(ObjectCycler* self)
+s32 IsObjectCyclerUnsupported(ObjectCycler* self)
 {
     f32* tbl = g_gameClock;
     if (tbl[1] - self->f66C < 0.05f) {
@@ -2468,12 +2468,12 @@ s32 func_0015C0A0(ObjectCycler* self)
     return r == 0;
 }
 
-void func_0015C178(void)
+void ClearDefaultFont(void)
 {
     g_defaultFont = 0;
 }
 
-s32 func_0015C188(s32 a0)
+s32 IsFontLoaded(s32 a0)
 {
     if (a0 == -1) {
         goto none;
@@ -2487,7 +2487,7 @@ some:
     return 1;
 }
 
-s32 func_0015C1C0(s32 a)
+s32 GetFontById(s32 a)
 {
     if (a == -1) {
         return 0;
@@ -2499,7 +2499,7 @@ s32 func_0015C1C0(s32 a)
     return g_defaultFont;
 }
 
-s32 func_0015C200(s32 a0)
+s32 FindFontByKeyChar(s32 a0)
 {
     s8 key = (s8)a0;
     s32 i = 0;
@@ -2512,7 +2512,7 @@ s32 func_0015C200(s32 a0)
     return 0;
 }
 
-void func_0015C260(Font* src, Font* dst)
+void CopyFontMetrics(Font* src, Font* dst)
 {
     dst->f00 = src->f00;
     dst->advance = src->advance;
@@ -2526,7 +2526,7 @@ void func_0015C260(Font* src, Font* dst)
     dst->f40 = src->f40;
 }
 
-void func_0015C2E8(Font* unused, Vec4U* v, PacketWriter* obj)
+void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj)
 {
     if (v != 0) {
         s32 pw = (s32)(v->x + v->z) - 1;
@@ -2539,7 +2539,7 @@ void func_0015C2E8(Font* unused, Vec4U* v, PacketWriter* obj)
     }
 }
 
-void func_0015C3C0(Font* unused, s32 flag, PacketWriter* obj)
+void ResetFontClipRect(Font* unused, s32 flag, PacketWriter* obj)
 {
     if (flag != 0) {
         BeginGifTag(obj, 0, 1, 0xE);
@@ -2547,7 +2547,7 @@ void func_0015C3C0(Font* unused, s32 flag, PacketWriter* obj)
     }
 }
 
-f32 func_0015C418(Font* self, s8* s)
+f32 MeasureFontString(Font* self, s8* s)
 {
     f32 acc;
     s8* p;
@@ -2563,14 +2563,14 @@ f32 func_0015C418(Font* self, s8* s)
     return acc;
 }
 
-f32 func_0015C4A8(Font* self, u8* s)
+f32 MeasureFontStringHeight(Font* self, u8* s)
 {
     f32 a = (f32)self->height * self->sy;
     s32 n = WrapFontString(self, s);
     return a * (f32)n;
 }
 
-s32 func_0015C4E8(Font* self, u8* s, f32 w)
+s32 WrapFontString(Font* self, u8* s, f32 w)
 {
     s32 count = 1;
     s8* cur = (s8*)s;
@@ -2613,7 +2613,7 @@ s32 func_0015C4E8(Font* self, u8* s, f32 w)
 
 LINKER_REMNANT(func_0015C630);
 
-void func_0015C638(Font *self, char *str, StringLayout *par, s32 a3, s32 a4)
+void DrawFontString(Font *self, char *str, StringLayout *par, s32 a3, s32 a4)
 {
   char *p;
   char *next;
@@ -2696,7 +2696,7 @@ void func_0015C638(Font *self, char *str, StringLayout *par, s32 a3, s32 a4)
 }
 
 // Points recorded in order, the first of them scaled into u and v.
-void func_0015C8B8(Font* trail, f32 su, f32 sv)
+void PushFontScale(Font* trail, f32 su, f32 sv)
 {
     FontScale* point = &trail->stack[trail->depth++];
     point->x = trail->sx;
@@ -2705,9 +2705,9 @@ void func_0015C8B8(Font* trail, f32 su, f32 sv)
     trail->sy = trail->stack[0].y * sv;
 }
 
-void func_0015C900(Font* obj) { obj->depth--; FontScale* item = &obj->stack[obj->depth]; obj->sx = item->x; obj->sy = item->y; }
+void PopFontScale(Font* obj) { obj->depth--; FontScale* item = &obj->stack[obj->depth]; obj->sx = item->x; obj->sy = item->y; }
 
-Font* func_0015C930(Font* owner, f32 x, f32 y)
+Font* CloneFont(Font* owner, f32 x, f32 y)
 {
 	Font* out = (Font*)AllocateObjectMemory(0x88);
 	out->vt = (const FontVt*)&g_fontMethods;
@@ -2717,7 +2717,7 @@ Font* func_0015C930(Font* owner, f32 x, f32 y)
 	return out;
 }
 
-void func_0015C9B0(Font* self, Font* dst)
+void CopyFont(Font* self, Font* dst)
 {
     CopyFontMetrics(self, dst);
     dst->id = self->id;
@@ -2733,12 +2733,12 @@ void func_0015C9B0(Font* self, Font* dst)
     dst->mask = self->mask;
 }
 
-s32 func_0015CA38(Font* a, s32 b)
+s32 HasFontGlyph(Font* a, s32 b)
 {
     return FindFontGlyph(a, (s8)b) != 0;
 }
 
-f32 func_0015CA60(Font* self, s8 key)
+f32 GetFontCharWidth(Font* self, s8 key)
 {
     FontGlyph* e = FindFontGlyph(self, key);
     f32 x;
@@ -2753,7 +2753,7 @@ f32 func_0015CA60(Font* self, s8 key)
     return x * y;
 }
 
-s32 func_0015CAB8(Font* self, void* obj)
+s32 AddFontImagesToFrame(Font* self, void* obj)
 {
     s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
@@ -2770,7 +2770,7 @@ s32 func_0015CAB8(Font* self, void* obj)
     return r;
 }
 
-void func_0015CB88(Font* self, s32 a1, void* obj)
+void BeginFontDraw(Font* self, s32 a1, void* obj)
 {
     SetFontClipRect(self, a1, obj);
     s32 ok = AddFontImagesToFrame(self, obj);
@@ -2791,7 +2791,7 @@ void func_0015CB88(Font* self, s32 a1, void* obj)
     BeginGifRegListTag(obj, 5, 0x43431);
 }
 
-void func_0015CC80(Font* self, void* obj)
+void BeginFontGlyphPacket(Font* self, void* obj)
 {
     s32 ok = AddFontImagesToFrame(self, obj);
     BeginGifTag(obj, 6, 1, 0xE);
@@ -2803,7 +2803,7 @@ void func_0015CC80(Font* self, void* obj)
     BeginGifRegListTag(obj, 5, 0x43431);
 }
 
-f32 func_0015CD18(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
+f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
@@ -2828,7 +2828,7 @@ f32 func_0015CD18(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
     return (f32)self->advance * self->sx;
 }
 
-void func_0015CF70(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
+void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
@@ -2878,7 +2878,7 @@ void func_0015CF70(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
     }
 }
 
-void func_0015D338(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s)
 {
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
@@ -2889,7 +2889,7 @@ void func_0015D338(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
     AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
 }
 
-void func_0015D4E0(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
+void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, item->key);
     if (e != 0) {
@@ -2933,20 +2933,20 @@ void func_0015D4E0(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
     }
 }
 
-void func_0015C2E8();
-void func_0015C3C0();
-void func_0015C930();
-void func_0015CA38();
-void func_0015CA60();
-void func_0015CB88();
-void func_0015CC80();
-void func_0015CD18();
-void func_0015CF70();
-void func_0015D4E0();
-void func_001FBDF8();
-extern const VtableEntry D_0024A220[22] = {{0, 0}, {0, func_0015C930}, {0, func_0015CA38}, {0, func_0015CA60}, {0, func_0015CB88}, {0, func_0015CC80}, {0, func_0015CD18}, {0, func_0015C3C0}, {0, func_0015CF70}, {0, func_0015D4E0}, {0, 0}, {0, 0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C2E8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C3C0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, 0}};
+void SetFontClipRect();
+void ResetFontClipRect();
+void CloneFont();
+void HasFontGlyph();
+void GetFontCharWidth();
+void BeginFontDraw();
+void BeginFontGlyphPacket();
+void DrawFontGlyph();
+void DrawFontGlyphTurned();
+void DrawFontFrame();
+void HandleAbstractCall();
+extern const VtableEntry g_fontMethods[22] = {{0, 0}, {0, CloneFont}, {0, HasFontGlyph}, {0, GetFontCharWidth}, {0, BeginFontDraw}, {0, BeginFontGlyphPacket}, {0, DrawFontGlyph}, {0, ResetFontClipRect}, {0, DrawFontGlyphTurned}, {0, DrawFontFrame}, {0, 0}, {0, 0}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, SetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, ResetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, 0}};
 
-void func_0015D8A8(Font* obj, void* src)
+void LoadFont(Font* obj, void* src)
 {
     FontHeader l;
     ReadBufferedStreamBytes(src, 0x10, &l);
@@ -2973,7 +2973,7 @@ void func_0015D8A8(Font* obj, void* src)
     ReadBufferedStreamBytes(src, obj->glyphCount << 3, obj->glyphs);
 }
 
-void func_0015D998(Font* self, void* arg)
+void UploadFontImages(Font* self, void* arg)
 {
     FontUploadFrame f;
     s32 n;
@@ -3000,7 +3000,7 @@ void func_0015D998(Font* self, void* arg)
 
 // EXACT: element address written as off + (u32)entries
 
-FontGlyph* func_0015DAB8(Font* self, u8 key)
+FontGlyph* FindFontGlyph(Font* self, u8 key)
 {
     s32 lo = 0;
     s32 hi = self->glyphCount - 1;
@@ -3025,7 +3025,7 @@ FontGlyph* func_0015DAB8(Font* self, u8 key)
     return 0;
 }
 
-TextReader* func_0015DB28(TextReader* self, s32 a1, s32 a2)
+TextReader* InitTextReader(TextReader* self, s32 a1, s32 a2)
 {
     self->inlineFont.vt = (const FontVt*)&g_fontMethods;
     self->text = a1;
@@ -3038,7 +3038,7 @@ TextReader* func_0015DB28(TextReader* self, s32 a1, s32 a2)
     return self;
 }
 
-void func_0015DB80(TextReader* self)
+void RewindTextReader(TextReader* self)
 {
     s32 t;
     self->cur = (char*)self->text;
@@ -3050,7 +3050,7 @@ void func_0015DB80(TextReader* self)
     self->fontChanged = 0;
 }
 
-void func_0015DBB8(u8* dst, u8* src)
+void SetTextDefaultColor(u8* dst, u8* src)
 {
     s32 v = ((U32P*)src)->v;
     ((U32P*)(dst + 0xA4))->v = v;
@@ -3058,7 +3058,7 @@ void func_0015DBB8(u8* dst, u8* src)
     ((U32P*)(dst + 0x9C))->v = v;
 }
 
-s32 func_0015DBE0(TextReader* self)
+s32 ReadTextChar(TextReader* self)
 {
     s32 done = 0;
     s32 changed = 1;
@@ -3161,7 +3161,7 @@ s32 func_0015DBE0(TextReader* self)
     return r;
 }
 
-s32 func_0015DF58(void* self)
+s32 CountTextChars(void* self)
 {
     s32 n = 0;
     RewindTextReader(self);
@@ -3171,7 +3171,7 @@ s32 func_0015DF58(void* self)
     return n;
 }
 
-void func_0015DFA0(TextReader* self, s32 n)
+void SeekTextReader(TextReader* self, s32 n)
 {
     RewindTextReader(self);
     for (;;) {
@@ -3186,7 +3186,7 @@ void func_0015DFA0(TextReader* self, s32 n)
     *self->cur = 0;
 }
 
-f32 func_0015DFF8(TextReader* self)
+f32 SumTextWidth(TextReader* self)
 {
     f32 acc = 0.0f;
     RewindTextReader(self);
@@ -3199,7 +3199,7 @@ f32 func_0015DFF8(TextReader* self)
     return acc;
 }
 
-s32 func_0015E068(TextReader* self, f32 limit)
+s32 WrapTextLines(TextReader* self, f32 limit)
 {
     s32 lines = 1;
     f32 width = 0.0f;
@@ -3242,7 +3242,7 @@ s32 func_0015E068(TextReader* self, f32 limit)
     return lines;
 }
 
-f32 func_0015E1B0(TextReader* self)
+f32 MeasureTextHeight(TextReader* self)
 {
     Font* holder = self->defaultFont;
     f32 width = (f32)holder->height * holder->sy;
@@ -3252,7 +3252,7 @@ f32 func_0015E1B0(TextReader* self)
 
 ASM_FUNC(func_0015E1F0);
 
-void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
+void MeasureText(void* self, f32 f, f32* out1, f32* out2)
 {
     s32 n = WrapTextLines(self, f);
     f32 g = MeasureTextWidth(self);
@@ -3267,7 +3267,7 @@ void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
     }
 }
 
-void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
+void DrawAlignedText(TextReader* self, Layout_137228* p, s32 x, s32 y)
 {
     f32 f[64];
     Rgba_137248 u;
@@ -3333,7 +3333,7 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
     self->font->End(x, y);
 }
 
-void func_0015E5F0(void)
+void UploadAllFontImages(void)
 {
     u8 buf[16];
     InitBumpAllocator(buf, 0x1400, 0x1E00);
@@ -3346,7 +3346,7 @@ LINKER_REMNANT(func_0015E678);
 
 ASM_FUNC(func_0015E6A8);
 
-void func_0015E810(void)
+void InitRenderFrames(void)
 {
     for (u32 i = 0; i < 2; i++) {
         RenderFrame* r = &g_renderFrames[i];
@@ -3379,7 +3379,7 @@ void func_0015E810(void)
     RunThread(g_mainAndRenderThreads[1], 0);
 }
 
-void func_0015E9F0(void)
+void BeginRenderFrame(void)
 {
     s32 idx;
 
@@ -3406,7 +3406,7 @@ void func_0015E9F0(void)
     BeginDmaTag(&g_vifPacketWriter);
 }
 
-void func_0015EAE0(void* list, s32 value, s32 end)
+void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
 {
     if (D_0026230C != value) {
         D_0026230C = value;
@@ -3414,7 +3414,7 @@ void func_0015EAE0(void* list, s32 value, s32 end)
     }
 }
 
-void func_0015EB20(void* self, void* p, s32 n)
+void WriteGsFinishPacket(void* self, void* p, s32 n)
 {
     UQuadword128 mem[8];
     PacketWriter gif;
@@ -3431,7 +3431,7 @@ void func_0015EB20(void* self, void* p, s32 n)
     DetachPacketBuffer(self, p, n);
 }
 
-void func_0015EBF0(void* obj, void* a, s32 b)
+void CloseDrawBuffer(void* obj, void* a, s32 b)
 {
     BeginGifTag(obj, 0, 1, 0xE);
     AddGifRegisterWrite(obj, 0x61, 0);
@@ -3440,7 +3440,7 @@ void func_0015EBF0(void* obj, void* a, s32 b)
     DetachPacketBuffer(obj, a, b);
 }
 
-void func_0015EC68(void)
+void SubmitRenderFrame(void)
 {
     WriteGsFinishPacket(&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
     CloseDrawBuffer(&g_gsPacketWriter, g_buildFrame, 0);
@@ -3455,7 +3455,7 @@ void func_0015EC68(void)
     PostSemaphore(g_frameReadySemaphore);
 }
 
-void func_0015ED50(RenderFrame* self)
+void ActivateRenderFrame(RenderFrame* self)
 {
     g_drawFrameData = self->i10;
     SwitchActiveImageMask(self->f44);
@@ -3465,7 +3465,7 @@ void func_0015ED50(RenderFrame* self)
     }
 }
 
-void func_0015EDB8(void)
+void VerifyCodeChecksum(void)
 {
     const u8* table = (const u8*)D_002C3B00;
     s32 n = (s32)D_00148D74;
@@ -3487,7 +3487,7 @@ void func_0015EDB8(void)
     }
 }
 
-void func_0015EE80(void)
+void RunRenderThread(void)
 {
     VerifyCodeChecksum();
     for (;;) {
@@ -3512,7 +3512,7 @@ void func_0015EE80(void)
     }
 }
 
-void func_0015EF88(RenderFrame* self, s32 flag)
+void SendRenderFrameToDma(RenderFrame* self, s32 flag)
 {
     ActivateRenderFrame(self, flag);
     SendGsPacketAndWait(g_vif1Channel, self->bufBAddr);
@@ -3522,7 +3522,7 @@ void func_0015EF88(RenderFrame* self, s32 flag)
     }
 }
 
-void func_0015EFE8(RenderFrame* self)
+void ReleaseFrameNodes(RenderFrame* self)
 {
     ListFrame it;
     FrameNode* n;
@@ -3557,7 +3557,7 @@ void func_0015EFE8(RenderFrame* self)
     }
 }
 
-void func_0015F210(s32 flag)
+void DrainRenderFrames(s32 flag)
 {
     for (s32 i = 0; (u32)i < 2; i++) {
         AwaitSemaphore(g_frameDoneSemaphore);
@@ -3588,7 +3588,7 @@ void func_0015F210(s32 flag)
 
 INCLUDE_ASM(func_0015F320);
 
-void func_0015F618(s32 flag, s32 code)
+void ConstructPacketWriters(s32 flag, s32 code)
 {
     if (code == 0xFFFF && flag != 0) {
         InitGifPacket(&g_gsPacketWriter);
@@ -3596,7 +3596,72 @@ void func_0015F618(s32 flag, s32 code)
     }
 }
 
-void func_0015F658(void)
+void ResetPacketWriters(void)
 {
     ConstructPacketWriters(1, 0xFFFF);
 }
+
+// The file's .data, 0x261F70 to 0x2623BC, in retail's order. The labels only func_001549C8 (not
+// matched yet) and the original assembly func_00156288 use, and the two packet streams
+// (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
+// size: s32 (lw/sw), 4-byte label
+s32 D_00261F70 = 0;
+INCLUDE_DATA(D_00261F74);
+INCLUDE_DATA(D_00261F80);
+INCLUDE_DATA(D_00262050);
+f32 D_00262178[2] = { 0.5f, 2.0f };
+PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
+PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
+PackedFloatPair D_00262190 = { 0x4448000043FA0000ULL };
+PackedFloatPair D_00262198 = { 0x43960000C3960000ULL };
+PackedFloatPair D_002621A0 = { 0x4270000041700000ULL };
+PackedFloatPair D_002621A8 = { 0x42F0000041F00000ULL };
+PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
+PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
+PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
+s32 g_objectCyclerLoadLinks[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
+s32 g_objectCyclerStartLinks[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
+f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
+f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
+f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
+f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+s8 g_fontEscapeKeys[8] = "02134";
+s32 D_00262258 = -8;
+s32 D_0026225C = -8;
+// size: s32 (lw/sw), 4-byte label
+s32 g_fontCount = 0;
+// size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
+u8* g_fontRecords = 0;
+// size: loop bound 5, stride 4 in func_0015C200
+s32 g_fonts[5] = {0};
+// size: s32 (lw/sw), 4-byte label
+s32 g_defaultFont = 0;
+INCLUDE_DATA(D_00262280);
+INCLUDE_DATA(D_002622A8);
+s32 g_frameCount = 1;
+// size: s32 (lw/sw), 4-byte label
+s32 g_buildFrameData = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 g_drawFrameData = 0;
+// size: pointer (lw/sw), 4 bytes before an 8-aligned next label
+RenderFrame* g_buildFrame = 0;
+// size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
+List01 D_002622E0 = {};
+// size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
+List01 D_002622F0 = {};
+// size: 12-byte record copied into Slot r38 by func_0015EC68
+List01 g_deferredReleaseListC = {};
+s32 D_0026230C = 0;
+// size: s32 (sw), 4-byte label
+s32 g_codeChecksumFailed = 0;
+u32 D_00262314 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 g_nextBuildFrameIndex = 0;
+void* g_drawingFrame = 0;
+// size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
+RenderFrame g_renderFrames[2] = {};
+void* g_frameReadySemaphore = 0;
+// size: pointer (lw/sw), 4-byte label
+void* g_frameDoneSemaphore = 0;
+volatile s32 g_renderThreadWaiting = 0;

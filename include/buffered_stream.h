@@ -2,7 +2,7 @@
 // The reader func_00137290(rec, base, size, flags) sets up over a buffer (it aligns the end to
 // 64 bytes and returns rec): func_001372E0, func_00137398, func_001373B0, func_001373D0,
 // func_00137820, func_001378A0, func_00137A60 and the readers func_00137B90 .. func_00137DF8
-// (00134000.cpp) work on it. Written for this project from what retail's code does
+// (file_137290.cpp) work on it. Written for this project from what retail's code does
 // (build/swarm/st3/groups.tsv, g828).
 //
 // No code shows its size: three of its callers (func_0011EDA8, func_0018CC20, func_001E4EA8)

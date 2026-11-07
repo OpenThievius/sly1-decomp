@@ -8,7 +8,7 @@ struct Obj_eu_1E9970 {
     s32 f570;
 };
 
-s32 func_001E9970(void)
+s32 AreMenusAndFadeClear(void)
 {
     if (g_screenFade.mode != 0) goto fail;
     if (IsPadSelectFlagHeld((World*)g_currentWorld) != 0) goto fail;

@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: same flow with a stop flag after the device test
-void func_0018F198(MoviePlayer* self, IdentityKey* key)
+void PlayMovie(MoviePlayer* self, IdentityKey* key)
 {
     StreamReader loc;
     KeyId pr;
-    func_00191E70(4);
+    SetScreenOwner(4);
     self->movieIndex = FindKeyIndex(key);
     InitStreamReader(&loc, D_002C3B00);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
-        while (!func_0020B0B0(&self->decoder)) {
+        while (!GetMpegDecoderStatus(&self->decoder)) {
             AdvanceGameClockElapsed(((u8*)g_gameClock));
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
@@ -38,6 +38,6 @@ void func_0018F198(MoviePlayer* self, IdentityKey* key)
     } else {
         StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
-    func_00191EB0(4);
+    ClearScreenOwner(4);
     DestroyStreamReader(&loc, 2);
 }

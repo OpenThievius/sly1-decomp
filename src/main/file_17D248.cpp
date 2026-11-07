@@ -71,7 +71,7 @@ f32 D_00264060[4] = { -3.40282347e+38f, 682.0f, 0.0f, 0.0f };
 f32 D_00264070[4] = { 682.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 // size: list head of three words, link offset at +8 (0x50)
-List01 D_00264088 = {0};
+List01 g_pointObjects = {0};
 
 INCLUDE_RODATA(jtbl_0024B060);
 ASM_FUNC(func_0017D248);
@@ -82,12 +82,12 @@ ASM_FUNC(func_0017D5D8);
 ASM_FUNC(func_0017DCE0);
 
 
-void func_001ED780(Quad16* q, void* out, const Vec02* a, const Vec02* b);
-void func_00188B08(void* a, Quad16* b, void* out);
-void func_00188700(void* a, f32 w, const void* b, void* c);
-s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, void* a4);
+void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
+void BuildMatrixFromRotationAndTranslation(void* a, Quad16* b, void* out);
+void TransformByMatrixWithW(void* a, f32 w, const void* b, void* c);
+s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
 
-s32 func_0017DE88(Collider* self, void* ctx, Quad16* src)
+s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
     Quad16& q = *(Quad16*)buf;
@@ -124,7 +124,7 @@ ASM_FUNC(func_0017E088);
 
 ASM_FUNC(func_0017E3C8);
 
-s32 func_0017E6D0(Player* self)
+s32 ChoosePlayerNextState(Player* self)
 {
     s32 r;
     if (0.0f < self->f634) {
@@ -154,33 +154,33 @@ ASM_FUNC(func_0017FC48);
 
 ASM_FUNC(func_0017FCC8);
 
-void func_00152438(void* self, s32 value);
+void SetListLinkOffset(void* self, s32 value);
 
-void func_0017FD48(void)
+void SetPointObjectListLinkOffset(void)
 {
     SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
-void func_00152440(void* p);
+void ClearList(void* p);
 
-void func_0017FD70(void)
+void ClearPointObjectList(void)
 {
     ClearList(&g_pointObjects);
 }
 
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
+void RegisterObject(void* self);
+void AppendToList(void* table, void* self);
 
-void func_0017FD90(C80* self)
+void RegisterPointObject(C80* self)
 {
     RegisterObject(self);
     AppendToList(&g_pointObjects, self);
 }
 
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
+void UnregisterObject(void* self);
+void RemoveFromList(void* table, void* self);
 
-void func_0017FDC8(C80* self)
+void UnregisterPointObject(C80* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_pointObjects, self);

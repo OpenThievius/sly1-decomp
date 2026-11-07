@@ -48,10 +48,10 @@ struct ConeVolume : PlacedObject {
 
 typedef char check_ConeVolume[sizeof(ConeVolume) == 0x620 ? 1 : -1];
 
-void func_00183CC8(ConeVolume* self);                       // slot 0
-void func_00183E40(ConeVolume* self);                       // slot 6
-void func_00183E70(ConeVolume* self);                       // slot 7
-void func_00183EA0(ConeVolume* self, ConeVolume* other);           // slot 9
-void func_00183D88(ConeVolume* self);                       // slot 19
+void InitConeVolume(ConeVolume* self);                       // slot 0
+void RegisterConeVolume(ConeVolume* self);                       // slot 6
+void UnregisterConeVolume(ConeVolume* self);                       // slot 7
+void CopyConeVolume(ConeVolume* self, ConeVolume* other);           // slot 9
+void RefreshConeVolume(ConeVolume* self);                       // slot 19
 
 #endif

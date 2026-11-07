@@ -28,24 +28,24 @@ struct SortKeyedObject : PlacedObject {
 
 
 
-void func_00121338(Attachment* self);
+void InitPoseSource(Attachment* self);
 
 
 
-extern s32 D_00261F14;
+extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
-void func_001F6C20(s32 unused);
-void func_00202A80(void* dma, void* addr);
-s32 func_00202C38(void* dma, s32 b, s32 c);
+void SyncDataCache(s32 unused);
+void StartDmaChain(void* dma, void* addr);
+s32 WaitDmaChannel(void* dma, s32 b, s32 c);
 
 
 
-extern u8 D_00261F18[];
+extern u8 g_vif1Channel[];
 extern u8 D_00212110[];
 
-void func_001F6C20(s32 a);
-void func_00202A80(void* a, void* b);
-s32 func_00202C38(void* a, s32 b, s32 c);
+void SyncDataCache(s32 a);
+void StartDmaChain(void* a, void* b);
+s32 WaitDmaChannel(void* a, s32 b, s32 c);
 
 // The first word of a DMA channel's register block (CHCR), which g_vif1Channel points to.
 struct DmaChannelFlags {
@@ -54,28 +54,28 @@ struct DmaChannelFlags {
 
 
 
-extern s32 D_00275AF0;
-extern u8 D_00275BC0[];
-extern s32 D_002622CC;
+extern s32 g_worldLoadRequest;
+extern u8 g_elementStack[];
+extern s32 g_frameCount;
 
-void func_001FAE18(void);
-void func_00185B38(void);
-void func_0015F210(s32 flag);
-void func_0018F148(MoviePlayer* self);
-void func_001E4EA8(void* p);
-void func_0016E238(void* p);
-void func_0016F2E0(void);
-void func_0018BDC8(void* p);
-void func_001E9108(void* p);
-void func_001607D0(f32 dt);
-void func_00144270(void* p);
-void func_0015E9F0(void);
-void func_00142F10(void* p);
-void func_0019D6C0(World* o, void* a);
-void func_001E9668(void* p);
-void func_0019DC98(World* o, void* a);
-void func_001E9648(void* p);
-void func_0015EC68(void);
+void RunConstructorsOnce(void);
+void RunStartupInitializers(void);
+void DrainRenderFrames(s32 flag);
+void PlayQueuedMovies(MoviePlayer* self);
+void RunPendingWorldLoad(void* p);
+void UpdatePadConnection(void* p);
+void RunCompletedButtonCode(void);
+void UpdateMemoryCard(void* p);
+void UpdateElementStack(void* p);
+void AddElapsedTime(f32 dt);
+void UpdateCameraLocation(void* p);
+void BeginRenderFrame(void);
+void AdvanceGameClock(void* p);
+void RunWorldFrameLists(World* o, void* a);
+void QueueScreenElementDraws(void* p);
+void SubmitDeferredRequests(World* o, void* a);
+void DrawAllScreenElements(void* p);
+void SubmitRenderFrame(void);
 
 
 
@@ -87,95 +87,95 @@ typedef void (*StartupFn)(void);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-s32 func_00193210(void* a, void* b, void* c, void* d, void* e);
-void func_00191E70(s32 value);
-void func_00193270(void* p);
-void func_00193288(void* self, s32 value);
-void func_00193300(void* p);
-void func_00191EB0(s32 value);
+s32 InitLoadProgress(void* a, void* b, void* c, void* d, void* e);
+void SetScreenOwner(s32 value);
+void BeginLoadProgress(void* p);
+void UpdateLoadProgress(void* self, s32 value);
+void EndLoadProgress(void* p);
+void ClearScreenOwner(s32 value);
 
 
 
-s32 func_001925F0(void);
+s32 GetActiveSwitchedCollider(void);
 
 
 
 
 
 
-void func_00140B60(void* buf, const u8* name, s32 n);
-void func_001F7BE8(s32 a);
-s32 func_00203548(s32 a);
-s32 func_00140968();
-void func_001409A8();
-s32 func_001F8BF8();
-s32 func_001F9C50(void* buf);
-s32 func_001F9C18();
-s32 func_001F9820();
-s32 func_00203828(s32 a);
-s32 func_00140D68(s32 a);
-s32 func_001F9A90(void* buf, s32 a, s32 b);
+void FormatDiscPath(void* buf, const u8* name, s32 n);
+void InitRemoteCalls(s32 a);
+s32 InitDiscLibrary(s32 a);
+s32 RefreshDiscStatus();
+void SendDiscCommand22WhenReady();
+s32 ForgetFileClient();
+s32 ResetIop(void* buf);
+s32 IsIopResetDone();
+s32 ForgetModuleLoader();
+s32 WaitDiscReady(s32 a);
+s32 TestDiscReadDone(s32 a);
+s32 LoadIopModuleFile(void* buf, s32 a, s32 b);
 
-s32 func_00184D78(SortKeyedObject** a, SortKeyedObject** b);
-void func_00185358(T2195_790* self);
-void func_001853F0(T2195_790* self, void* obj, Vec02* src);
-s32 func_00185468(T2195_790* a0);
-void func_00185758(s32 a, s32 b);
-void func_001858F8();
-void func_00185A58(void);
-void func_00185AC8();
-void func_00185B38(void);
+s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b);
+void InitAim(T2195_790* self);
+void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
+s32 ResolveAimTarget(T2195_790* a0);
+void RunMainLoop(s32 a, s32 b);
+void LoadIopModules();
+void SendVif0StartupPacket(void);
+void SendVif1StartupPacket();
+void RunStartupInitializers(void);
 
-void func_0012B868();
-void func_00139C38();
-void func_00140790();
-void func_001409D8();
-void func_0011E560();
-void func_001430C8();
-void func_00143140();
-void func_00152810();
-void func_0015C178();
-void func_0015E810();
-void func_00160070();
-void func_001688B8();
-void func_00169C58();
-void func_0016E0B8();
-void func_0016F588();
-void func_0017FD48();
-void func_0018B580();
-void func_0018D430();
-void func_0018E5E8();
-void func_00191EC0();
-void func_0019DF48();
-void func_001A9C68();
-void func_001BF130();
-void func_001DFD48();
-void func_001E2398();
-void func_001E9088();
+void InitPlacedObjectModule();
+void InitAlphaStatePackets();
+void ResetDiscSectorCheck();
+void InitDiscAccessModule();
+void InitObjectBuiltinTable();
+void ResetGameClockTick();
+void InitCameraModule();
+void InitDmaChannels();
+void ClearDefaultFont();
+void InitRenderFrames();
+void RunResetGameSession();
+void InitDisplay();
+void SetObjectListLinkOffsets();
+void InitPadSystem();
+void RegisterButtonCodes();
+void SetPointObjectListLinkOffset();
+void InitMemoryCardSystem();
+void InitHeap();
+void CreateMovieDecodeThread();
+void SetTargetVectorListLinkOffset();
+void InitGroupMarkers();
+void InstallScreenElements();
+void InitSoundSystem();
+void InitClass75List();
+void CreateRenderThread();
+void InitGlobalElementStack();
 
 // A run of lights of one kind in g_sortedLights, as UploadLightVolumes groups them for
 // CollectLightsForSphere: the first light, the count, the flag bits a caller can mask out and
 // the kind that picks the VU0 test.
 struct LightGroup { void* lights; s32 count; s32 flags; s16 kind; s16 fE; };
 
-s32 D_00264260 = 0;
-s32 D_00264264 = 0;
-void* D_00264268[256] = {0};
-s32 D_00264668 = 0;
-LightGroup D_00264670[16] = {};
+s32 g_lightingChangeFrame = 0;
+s32 g_lightCount = 0;
+void* g_sortedLights[256] = {0};
+s32 g_lightGroupCount = 0;
+LightGroup g_lightGroups[16] = {};
 Vec02 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
 Vec02 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
 Vec02 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
 ValueRange D_002647A0 = { -1.0f, 1.0f };
-const u8* D_002647A8[6] = {
+const u8* g_iopModuleNames[6] = {
     (const u8*)"sio2man.irx", (const u8*)"padman.irx", (const u8*)"mcman.irx",
     (const u8*)"mcserv.irx", (const u8*)"libsd.irx", (const u8*)"989snd.irx",
 };
-Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (Fn_Table)func_00152810, (Fn_Table)func_001E2398, (Fn_Table)func_001688B8, (Fn_Table)func_001858F8, (Fn_Table)func_001409D8, (Fn_Table)func_00140790, (Fn_Table)func_0016E0B8, (Fn_Table)func_0016F588, (Fn_Table)func_0015E810, (Fn_Table)func_0015C178, (Fn_Table)func_0011E560, (Fn_Table)func_00143140, (Fn_Table)func_001BF130, (Fn_Table)func_001A9C68, (Fn_Table)func_001E9088, (Fn_Table)func_001DFD48, (Fn_Table)func_0017FD48, (Fn_Table)func_00191EC0, (Fn_Table)func_00169C58, (Fn_Table)func_00185A58, (Fn_Table)func_00185AC8, (Fn_Table)func_00139C38, (Fn_Table)func_0019DF48, (Fn_Table)func_001430C8, (Fn_Table)func_0018B580, (Fn_Table)func_00160070, (Fn_Table)func_0018E5E8 };
+Fn_Table g_startupInitializers[29] = { (Fn_Table)InitPlacedObjectModule, (Fn_Table)InitHeap, (Fn_Table)InitDmaChannels, (Fn_Table)CreateRenderThread, (Fn_Table)InitDisplay, (Fn_Table)LoadIopModules, (Fn_Table)InitDiscAccessModule, (Fn_Table)ResetDiscSectorCheck, (Fn_Table)InitPadSystem, (Fn_Table)RegisterButtonCodes, (Fn_Table)InitRenderFrames, (Fn_Table)ClearDefaultFont, (Fn_Table)InitObjectBuiltinTable, (Fn_Table)InitCameraModule, (Fn_Table)InitSoundSystem, (Fn_Table)InstallScreenElements, (Fn_Table)InitGlobalElementStack, (Fn_Table)InitClass75List, (Fn_Table)SetPointObjectListLinkOffset, (Fn_Table)SetTargetVectorListLinkOffset, (Fn_Table)SetObjectListLinkOffsets, (Fn_Table)SendVif0StartupPacket, (Fn_Table)SendVif1StartupPacket, (Fn_Table)InitAlphaStatePackets, (Fn_Table)InitGroupMarkers, (Fn_Table)ResetGameClockTick, (Fn_Table)InitMemoryCardSystem, (Fn_Table)RunResetGameSession, (Fn_Table)CreateMovieDecodeThread };
 s32 D_00264834;
 s32 D_00264838;
 
-s32 func_00184D78(SortKeyedObject** a, SortKeyedObject** b)
+s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
 {
     SortKeyedObject* x = *a;
     SortKeyedObject* y = *b;
@@ -200,7 +200,7 @@ INCLUDE_ASM(func_00184DE8);
 
 ASM_FUNC(func_00185150);
 
-void func_00185358(T2195_790* self)
+void InitAim(T2195_790* self)
 {
     InitPoseSource(self);
     self->f20 = -1;
@@ -213,7 +213,7 @@ void func_00185358(T2195_790* self)
     self->f48 = -1;
 }
 
-void func_001853F0(T2195_790* self, void* obj, Vec02* src)
+void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
 {
     if (obj == 0 || obj == (void*)GetActiveSwitchedCollider()) {
         self->hasTarget = 0;
@@ -226,7 +226,7 @@ void func_001853F0(T2195_790* self, void* obj, Vec02* src)
     }
 }
 
-s32 func_00185468(T2195_790* a0) {
+s32 ResolveAimTarget(T2195_790* a0) {
     if (a0->hasTarget == 0) {
         return GetActiveSwitchedCollider();
     }
@@ -237,7 +237,7 @@ ASM_FUNC(func_00185498);
 
 ASM_FUNC(func_00185538);
 
-void func_00185758(s32 a, s32 b)
+void RunMainLoop(s32 a, s32 b)
 {
     RunConstructorsOnce();
     D_00264834 = a;
@@ -262,32 +262,32 @@ void func_00185758(s32 a, s32 b)
         UpdateElementStack(g_elementStack);
         AddElapsedTime(g_gameClock.dt);
         if (g_currentWorld != 0) {
-            func_00144270(g_camera);
+            UpdateCameraLocation(g_camera);
             BeginRenderFrame();
             AdvanceGameClock(&g_gameClock);
             if (g_currentWorld->desc->m11 != 0)
                 g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
             RunWorldFrameLists(g_currentWorld, g_camera);
-            func_001E9668(g_elementStack);
+            QueueScreenElementDraws(g_elementStack);
             SubmitDeferredRequests(g_currentWorld, g_camera);
-            func_001E9648(g_elementStack);
+            DrawAllScreenElements(g_elementStack);
             SubmitRenderFrame();
         }
         g_frameCount++;
     }
 }
 
-void func_001858F8()
+void LoadIopModules()
 {
     u8 buf[0x100];
     FormatDiscPath(buf, (const u8*)"ioprp243.img", 1);
     InitRemoteCalls(0);
     InitDiscLibrary(0);
-    if (func_00140968() == 0) {
+    if (RefreshDiscStatus() == 0) {
         for (;;) {
         }
     }
-    func_001409A8();
+    SendDiscCommand22WhenReady();
     ForgetFileClient();
     while (ResetIop(buf) == 0) {
     }
@@ -296,11 +296,11 @@ void func_001858F8()
     InitRemoteCalls(0);
     ForgetModuleLoader();
     InitDiscLibrary(0);
-    if (func_00140968() == 0) {
+    if (RefreshDiscStatus() == 0) {
         for (;;) {
         }
     }
-    func_001409A8();
+    SendDiscCommand22WhenReady();
     ForgetFileClient();
     WaitDiscReady(0);
     TestDiscReadDone(1);
@@ -311,7 +311,7 @@ void func_001858F8()
     }
 }
 
-void func_00185A58(void)
+void SendVif0StartupPacket(void)
 {
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
@@ -322,7 +322,7 @@ void func_00185A58(void)
     *q &= ~0x40;
 }
 
-void func_00185AC8()
+void SendVif1StartupPacket()
 {
     DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
     p->flags |= 0x40;
@@ -332,7 +332,7 @@ void func_00185AC8()
     (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }
 
-void func_00185B38(void)
+void RunStartupInitializers(void)
 {
     ProgressFrame fr;
     u32 i;

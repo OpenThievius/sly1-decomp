@@ -19,7 +19,7 @@ struct CameraPositionedObject : PlacedObject {
 typedef char check_CameraPositionedObject[sizeof(CameraPositionedObject) == 0x2E0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001B5CD8(CameraPositionedObject* self);   // 0x54 slot 16
-void func_001B5D28(CameraPositionedObject* self);   // 0x54 slot 17
+void StartCameraPositionedObject(CameraPositionedObject* self);   // 0x54 slot 16
+void MoveObjectToCamera(CameraPositionedObject* self);   // 0x54 slot 17
 
 #endif

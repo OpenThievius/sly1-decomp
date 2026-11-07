@@ -76,6 +76,10 @@ func_00128DB8	ResolveFollowRecordObjects	turns the ids in the +0x224 record into
 func_001290B8	StorePlacedObjectLocalVelocity	original assembly: rotates a vector by the object's matrix at +0xD0 into the velocity at +0x150 directly, without slot 32; FillObjectPropertyTable registers it as a property setter
 func_001290E0	StorePlacedObjectLocalSpin	original assembly: rotates a vector by the object's matrix at +0xD0 into the spin at +0x160; FillObjectPropertyTable registers it as a property setter
 func_00129108	EnsureTimerRecord	when +0x2A0 is empty takes a 0x14-byte record with +4 = -1, +8 = 0, +0xC = 0 and +0x10 = 1.0 and returns it
+func_00129170	SetPlacedObjectScaleXY	stores its argument times 0.01 (a percentage) at +0x28C, the scale func_00125BF0 gives both x and y of the scale quad it hands to BuildScaledTransformMatrix; DrawPlacedObject only runs func_00125BF0 when it is above 0
+func_00129188	GetPlacedObjectScaleXY	stores the float at +0x28C times 100 through the pointer (the getter of SetPlacedObjectScaleXY)
+func_001291A0	SetPlacedObjectScaleZ	stores its argument times 0.01 (a percentage) at +0x290, the z of the scale quad func_00125BF0 builds from +0x28C, +0x28C and +0x290
+func_001291B8	GetPlacedObjectScaleZ	stores the float at +0x290 times 100 through the pointer (the getter of SetPlacedObjectScaleZ)
 func_001291D0	EnsureRangeRecord	when +0x284 is empty takes a 0x2E0-byte record from the world's pool at +0x1BF4, sets it up with func_001B1AC8 and appends it to the world's list at +0x1C00
 func_00129228	SetRangeRecordPresent	a non-zero argument makes the record at +0x284; zero takes it out of the list at +0x1C00, appends it to D_00262300 and clears +0x284
 func_00129288	SetRangeRecordKey	passes its argument to func_001B1CF8, which looks the key up (0x2C for -1) and links the record to what it finds
@@ -178,6 +182,10 @@ func_0012B010	StopPlayingSound	calls func_001BF788 with 0 on the sound handle at
 func_0012B040	EnsureColorRecord	when +0x288 is empty allocates 64 bytes, copies the preset D_00261000[0] into them and sets the index word to -1
 func_0012B0B0	SetColorPreset	makes the color record, stores the index and, unless it is -1, copies the 64-byte preset D_00260F00[index] over the record
 func_0012B128	GetColorPreset	stores the first word of the color record, -1 when there is none
+func_0012B140	SetColorRecordFirstColor	makes the color record and copies a 16-byte colour to +0x10, the first of the two colours func_00126AC8 blends by a sine of the clock over the period at +0x30 and passes to SetObjectTreeRecordValue
+func_0012B180	GetColorRecordFirstColor	copies the 16 bytes at +0x10 of the color record (SetColorRecordFirstColor) to the caller, D_00248D30 when there is none
+func_0012B1A0	SetColorRecordSecondColor	makes the color record and copies a 16-byte colour to +0x20, the second of the two colours func_00126AC8 blends (weighted by 1 minus the sine term)
+func_0012B1E0	GetColorRecordSecondColor	copies the 16 bytes at +0x20 of the color record (SetColorRecordSecondColor) to the caller, D_00248D30 when there is none
 func_0012B200	SetColorRecordFactor	makes the color record and stores a float at +0x30 (2.0 in the presets)
 func_0012B238	GetColorRecordFactor	float at +0x30 of the color record, 0.0 when there is none
 func_0012B250	SetTintRgb	stores its argument in tint bytes 0, 1 and 2 (+0x2B0..+0x2B2)
@@ -190,10 +198,14 @@ func_0012B2A0	SetTintByte2	stores its argument in tint byte 2 (+0x2B2)
 func_0012B2A8	GetTintByte2	stores tint byte 2 (+0x2B2)
 func_0012B2B8	SetTintByte3	stores its argument in tint byte 3 (+0x2B3)
 func_0012B2C0	GetTintByte3	stores tint byte 3 (+0x2B3)
+func_0012B2D0	SetTintByte4	stores its argument in the byte at +0x2B4, the fifth after the four tint bytes (SetTintByte0..3); func_00177838's byte chooser reads +0x2B0 to +0x2B4 by index
+func_0012B2D8	GetTintByte4	the byte at +0x2B4 through the pointer (the getter of SetTintByte4)
 func_0012B2E8	TestOtherFlagged	slot 45 of class 0x02: true when the other object's word at +0x0C is non-zero
 func_0012B2F8	SelectValueEntryByKey	looks the key up in the (key, value) table at +0x2BC; -1 clears mode3 of the attachment at +0x2C0, a hit makes it (table D_002195B0), sets mode3 to 3 and gives it the value
 func_0012B420	SetObjectCameraTracked	sets or clears bit 36 of the flags at +0x2C8 and, when that changes it on an attached object, adds it to or removes it from the camera's objects (AddCameraObject, RemoveCameraObject)
 func_0012B4C8	SetPlacedObjectFrameStepClock	sets +0x294, which puts a parentless object in the world's list at +0x78 instead of +0x54 and makes ApplyPoseSourcePosition use g_frameStep instead of g_frameDt; an attached root is taken out of and put back in its list (slots 3 and 2) around the change
+func_0012B550	SetPlacedObjectSpecialFlag	sets or clears bit 32 of the flags, the bit SetArcSpecialObject sets on its special object and UpdateSwitchedCollider tests
+func_0012B590	GetPlacedObjectSpecialFlag	1 or 0 through the pointer by bit 32 of the flags (the getter of SetPlacedObjectSpecialFlag)
 func_0012B5B8	SetFollowObjects	makes the +0x224 record when either argument is set, stores them as the followed objects (flag bits 4 and 8, none when it is the parent) and refreshes the two matrices
 func_0012B6B8	InitCodeChecksum	slot 0: sets range 0x100018 .. D_00148D64, crc to 0xFFFFFFFF and fills table with the CRC-32 table
 func_0012B760	UpdateCodeChecksum	slot 17: folds up to 64 words of the range into crc and flags a mismatch when the sum is nonzero at the end

@@ -21,9 +21,9 @@ struct Hud_1943E8_eu {
     u8 pad578[0x58C - 0x578];
     s32 f58C;
 };
-void func_00194D30(Self_1943E8_eu* self, s32 a, s32 b);
-void func_00195958(Self_1943E8_eu* self);
-void func_001961C0(Self_1943E8_eu* self);
+void SetPauseMenuLayerPage(Self_1943E8_eu* self, s32 a, s32 b);
+void ActivatePauseMenuSelection(Self_1943E8_eu* self);
+void CancelPauseMenuPage(Self_1943E8_eu* self);
 extern CardSlot D_eu_00255538[];
 extern f32 D_eu_0026BB30;
 extern f32 D_eu_0026BB34;
@@ -31,7 +31,7 @@ extern u8 D_eu_00263550[];
 extern u16 D_eu_00263558[];
 const char* func_eu_001DDAB0(s32 id);
 #define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
-void func_001943E8(Self_1943E8_eu* self)
+void UpdatePauseMenu(Self_1943E8_eu* self)
 {
     GameProgress* g = g_saveData;
     MenuPage* row = &g_pauseMenuPages[self->f570];
@@ -77,7 +77,7 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     if (self->f598 != 0) {
-        if (func_001BE810() != 0) {
+        if (CheckStreamVoicePending() != 0) {
             PollIopCommands();
         }
         self->f598 = HasStreamVoice();
@@ -143,14 +143,14 @@ void func_001943E8(Self_1943E8_eu* self)
         D_eu_0026BB34 = v;
         {
             DisplayRegs* gs = &D_00262490;
-            s32 h = func_001FD7A0(D_eu_0026BB30);
+            s32 h = ConvertFloatToU32(D_eu_0026BB30);
             DisplayReg64 ra = gs->f40;
             DisplayReg32 rb = gs->f18;
             ra.lo = h;
             rb.lo = h;
             gs->f40 = ra;
             gs->f18 = rb;
-            s32 w = func_001FD7A0(v);
+            s32 w = ConvertFloatToU32(v);
             ra.mid = w & ~1;
             rb.mid = w & 0x7FE;
             gs->f40 = ra;
@@ -253,7 +253,7 @@ void func_001943E8(Self_1943E8_eu* self)
             if (p->result == 0) {
                 SetPauseMenuLayerPage(self, 1, -1);
                 if (self->f58C == 2) {
-                    func_00194398();
+                    StartPauseMenuExitFade();
                 }
             } else {
                 SetPauseMenuLayerPage(self, 0, 0x17);

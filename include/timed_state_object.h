@@ -26,9 +26,9 @@ struct TimedStateObject : Collider {
 
 typedef char check_TimedStateObject[sizeof(TimedStateObject) == 0x570 ? 1 : -1];
 
-void func_0013DCA8(TimedStateObject* self, s32 kind, void* msg);     // slot 13
-void func_0013DC38(TimedStateObject* self);                          // slot 17
-s32 func_0013DD08(TimedStateObject* self, Collider* other);               // slot 57
-void func_0013DD78(TimedStateObject* self, s32 state);               // sets the state
+void HandleTimedStateNotification(TimedStateObject* self, s32 kind, void* msg);     // slot 13
+void UpdateTimedState(TimedStateObject* self);                          // slot 17
+s32 TestTimedStateContact(TimedStateObject* self, Collider* other);               // slot 57
+void SetTimedState(TimedStateObject* self, s32 state);               // sets the state
 
 #endif

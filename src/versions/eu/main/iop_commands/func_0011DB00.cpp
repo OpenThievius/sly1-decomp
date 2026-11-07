@@ -2,20 +2,20 @@
 // PAL: the three debug messages are only printed while a global (US 0x25C3B8) is zero
 extern s32 D_0025C3B8;
 
-void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
+void QueueIopCommand(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
 {
     s32 flag = 0;
     s32 i;
 
-    if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
-        ArmIopReplyBuffer((&D_0025C3C0), 1);
-        while (func_001F8480(&g_iopCommandRpc) != 0) {
+    if (g_iopFlushDeferred == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
+        ArmIopReplyBuffer((&g_iopCommandReply), 1);
+        while (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
             if (D_0025C3B8 == 0)
                 PrintFormatted("989snd.c: RPC collision!\n");
             PollIopCommands();
-            func_001F6C20(0);
+            SyncDataCache(0);
         }
-        func_001F8290(&g_iopCommandRpc, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, cmd, 1, 0, 0, (&g_iopCommandReply), 12, 0, 0);
         return;
     }
 
@@ -30,8 +30,8 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     for (;; i++) {
         if (*g_iopCommandBuffers[g_iopBufferIndex] != 0x100 && g_iopCommandSpace[g_iopBufferIndex] >= size)
             break;
-        if (D_0025C384 != 0) {
-            D_0025C384 = 0;
+        if (g_iopFlushDeferred != 0) {
+            g_iopFlushDeferred = 0;
             flag = 1;
         }
         PollIopCommands();
@@ -41,7 +41,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     if (i != 0 && D_0025C3B8 == 0)
         PrintFormatted("snd_SendIOPCommandNoWait: continuing (%d).\n", i);
     if (flag != 0)
-        D_0025C384 = 1;
+        g_iopFlushDeferred = 1;
 
     {
         s16* p = (s16*)(((u8*)g_iopCommandBuffers[g_iopBufferIndex]) - (g_iopCommandSpace[g_iopBufferIndex] - 0x1000));

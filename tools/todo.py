@@ -61,30 +61,54 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
 # A C++ file's `extern "C"` definition counts as well (src/lib/type_info_kinds.cpp).
-DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))(?:extern \"C\" )?[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?:extern \"C\" )?[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+TYPE_LINE = re.compile(r"(?:struct|union|class|enum|typedef)\b")
+
+
+class Definition:
+    """A DEFINITION match whose group(1) is the function's address name, whether the source wrote it
+    that way or by its readable name (tools/symbols.py); everything else is the match's."""
+
+    def __init__(self, match):
+        self.match = match
+        self.name = symbols.canonical(match.group(1))
+
+    def group(self, *groups):
+        return self.name if groups == (1,) else self.match.group(*groups)
+
+    def __getattr__(self, attr):
+        return getattr(self.match, attr)
 
 
 def definitions(text):
     """The DEFINITION matches of `text` that open a body: a signature that runs over several
     lines is a definition only if a `{` comes before any `;` (else it is a declaration)."""
     for m in DEFINITION.finditer(text):
+        d = Definition(m)
+        address = d.name.startswith("func_")
+        # A class, struct or typedef line is a definition only where it returns a type by an
+        # address name (`struct Obj* func_X(...)`), not where it declares the type.
+        line = m.group(0).split("\n", 1)[0]
+        if TYPE_LINE.match(line) and not re.search(r"\bfunc_", symbols.normalize(line)):
+            continue
         brace, semi = text.find("{", m.start()), text.find(";", m.start())
         # A class's own constructor or method (`Node::Node()`) is named by the compiler: a whole
         # file's takes retail's name from config/us/generated.tsv.
-        member = text[:m.start(1)].endswith("::") and not m.group(1).startswith("func_")
+        member = text[:m.start(1)].endswith("::") and not address
         # A C file's static inline helper (src/lib/divide.c) is compiled into its callers only.
-        helper = m.group(0).startswith("static inline ") and not m.group(1).startswith("func_")
+        helper = m.group(0).startswith("static inline ") and not address
         # An `extern "C"` routine under the name the compiler calls it by (__dynamic_cast) takes
         # retail's name from config/us/generated.tsv, as a member does.
-        runtime = m.group(0).startswith('extern "C" ') and not m.group(1).startswith("func_")
+        runtime = m.group(0).startswith('extern "C" ') and not address
         if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper and not runtime:
-            yield m
+            yield d
 
 
 PROLOGUE = 12  # instructions from the top of a listing that a register save may be in

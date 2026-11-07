@@ -30,7 +30,7 @@ static Unpacked D_0062A770;
 /* Tiny values read as zero. */
 #define FLUSH_TINY 1
 
-u64 func_001FC910(Unpacked* p)
+u64 PackDouble(Unpacked* p)
 {
     union {
         u64 u;
@@ -88,7 +88,7 @@ u64 func_001FC910(Unpacked* p)
     return bits.u;
 }
 
-void func_001FCA40(u64* in, Unpacked* out)
+void UnpackDouble(u64* in, Unpacked* out)
 {
     u64 bits = *in;
     u64 fraction = bits & 0x000FFFFFFFFFFFFFull;
@@ -126,7 +126,7 @@ void func_001FCA40(u64* in, Unpacked* out)
     }
 }
 
-Unpacked* func_001FCAE0(Unpacked* a, Unpacked* b, Unpacked* tmp)
+Unpacked* AddUnpackedDoubles(Unpacked* a, Unpacked* b, Unpacked* tmp)
 {
     s32 ae, be;
     u64 af, bf;
@@ -388,7 +388,7 @@ static inline Unpacked* Divide(Unpacked* a, Unpacked* b)
     return a;
 }
 
-u64 func_001FD088(u64 x, u64 y)
+u64 DivideDoubles(u64 x, u64 y)
 {
     Unpacked pa;
     Unpacked pb;
@@ -398,7 +398,7 @@ u64 func_001FD088(u64 x, u64 y)
     return PackDouble((Unpacked*)Divide(&pa, &pb));
 }
 
-s32 func_001FD1F0(Unpacked* a, Unpacked* b)
+s32 CompareUnpackedDoubles(Unpacked* a, Unpacked* b)
 {
     if (a->kind < 2) {
         return 1;
@@ -488,7 +488,7 @@ u64 func_001FD358(s32 value)
     return PackDouble(&parts);
 }
 
-s32 func_001FD410(u64 value)
+s32 ConvertDoubleToS32(u64 value)
 {
     u64 in = value;
     Unpacked out;
@@ -520,7 +520,7 @@ compute:
     return v;
 }
 
-u32 func_001FD4A8(u64 value)
+u32 ConvertDoubleToU32(u64 value)
 {
     Unpacked d;
     u64 b;
@@ -553,7 +553,7 @@ u32 func_001FD4A8(u64 value)
     return (u32)(d.fraction.ll >> (0x3C - e));
 }
 
-u64 func_001FD548(s32 a0, s32 a1, s32 a2, u64 a3)
+u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3)
 {
     Unpacked args;
 
@@ -564,7 +564,7 @@ u64 func_001FD548(s32 a0, s32 a1, s32 a2, u64 a3)
     return PackDouble(&args);
 }
 
-f32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3);
+f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3);
 
 f32 func_001FD578(u64 bits)
 {

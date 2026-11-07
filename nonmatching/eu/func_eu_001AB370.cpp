@@ -11,7 +11,7 @@ extern char D_eu_0024E0A0[];
 extern char D_eu_0024E0A8[];
 extern char D_eu_0024E0B8[];
 extern u8 D_eu_0024FB49[];
-s32 func_001E1FD0(char* dst, const char* fmt, ...);
+s32 FormatToString(char* dst, const char* fmt, ...);
 void func_eu_001AB238(void* self, char* buf);
 
 void func_eu_001AB370(Self_eu_1AB370* self, u8* s)
@@ -22,29 +22,29 @@ void func_eu_001AB370(Self_eu_1AB370* self, u8* s)
     while (*s != 0) {
         Font_eu_1AB370* f = self->font;
         if (f->vt->has((u8*)f + f->vt->off, *s) == 0) {
-            Font_eu_1AB370* f3 = (Font_eu_1AB370*)func_0015C1C0(3);
+            Font_eu_1AB370* f3 = (Font_eu_1AB370*)GetFontById(3);
             u32 code;
             if (f3->vt->has((u8*)f3 + f3->vt->off, *s) != 0) {
                 code = D_eu_00263550[3];
             } else {
-                Font_eu_1AB370* f4 = (Font_eu_1AB370*)func_0015C1C0(4);
+                Font_eu_1AB370* f4 = (Font_eu_1AB370*)GetFontById(4);
                 if (f4->vt->has((u8*)f4 + f4->vt->off, *s) == 0) {
                     goto plain;
                 }
                 code = D_eu_00263550[4];
             }
-            cur += func_001E1FD0(cur, D_eu_0024E0A0, code, *s);
+            cur += FormatToString(cur, D_eu_0024E0A0, code, *s);
             goto next;
         }
     plain:
         c = *s;
         if (c == 0x2F && (D_eu_0024FB49[s[1]] & 4) != 0) {
-            cur += func_001E1FD0(cur, D_eu_0024E0A8);
+            cur += FormatToString(cur, D_eu_0024E0A8);
             s++;
             while (*s != 0 && (D_eu_0024FB49[*s] & 4) != 0) {
                 *cur++ = *s++;
             }
-            cur += func_001E1FD0(cur, D_eu_0024E0B8);
+            cur += FormatToString(cur, D_eu_0024E0B8);
             s--;
         } else {
             *cur++ = c;

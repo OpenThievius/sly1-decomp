@@ -18,14 +18,14 @@
 #include "screen_element.h"
 
 
-void* func_001D7120(u8* buf, char* dst, s32 cap);
-s32 func_001E1DB8(u8* buf, s32 a, s32 b);
-void func_001D7148(u8* buf, s32 n);
+void* InitStringOutputBuffer(u8* buf, char* dst, s32 cap);
+s32 FormatToOutputBuffer(u8* buf, s32 a, s32 b);
+void DestroyOutputBuffer(u8* buf, s32 n);
 
 
 
-void func_001F5C0C(void* p, s32 v, s32 n);
-s32 func_001F6B20(void* self);
+void FillMemory(void* p, s32 v, s32 n);
+s32 NewSemaphore(void* self);
 
 
 
@@ -33,7 +33,7 @@ s32 func_001F6B20(void* self);
 
 
 
-s32 func_001E1EB0(void* self, void* ap);
+s32 PrintFormattedVa(void* self, void* ap);
 
 
 
@@ -41,40 +41,40 @@ s32 func_001E1EB0(void* self, void* ap);
 // 0x400 bytes AppendToOutputBuffer fills before it flushes.
 struct OutputBufferStorage { u8 bytes[0x420]; };
 
-void* func_001D7120(void* stream, char* dst, s32 cap);
-s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
-void func_001D7148(void* stream, s32 mode);
+void* InitStringOutputBuffer(void* stream, char* dst, s32 cap);
+s32 FormatToOutputBuffer(void* stream, const char* fmt, void* ap);
+void DestroyOutputBuffer(void* stream, s32 mode);
 
 
 
-s32 func_001E1F58(char* dst, const char* fmt, void* ap);
+s32 FormatToStringVa(char* dst, const char* fmt, void* ap);
 
 
 
-s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
-
-
-
-
-void* func_001D7100(void* stream, s32 cap);
-s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
-void func_001D7148(void* stream, s32 mode);
-
-
-
-s32 func_001E2100(void* p);
-void func_0018D800(void* dst, void* src, s32 count);
-
-
-
-s32 func_001E2100(void* p);
-void func_0018D800(void* dst, void* src, s32 count);
+s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* fmt, void* ap);
 
 
 
 
+void* InitOutputBuffer(void* stream, s32 cap);
+s32 FormatToOutputBuffer(void* stream, const char* fmt, void* ap);
+void DestroyOutputBuffer(void* stream, s32 mode);
 
-s32 func_001E2268(s32 a, s32 b);
+
+
+s32 GetStringLength(void* p);
+void CopyMemory(void* dst, void* src, s32 count);
+
+
+
+s32 GetStringLength(void* p);
+void CopyMemory(void* dst, void* src, s32 count);
+
+
+
+
+
+s32 CreateLockSemaphore(s32 a, s32 b);
 
 // A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
 // how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
@@ -83,30 +83,30 @@ struct RecursiveLock { s32 count; s32 last; void* sema; };
 
 
 
-void func_001451F0(u32 a0, int a1, int a2, void* a3, int a4, void* a5);
-void func_00145088(u32 a0, int a1, void* a2, int a3, void* a4);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-extern f32 D_0026185C;
+void RemoveCameraControllers(u32 a0, int a1, int a2, void* a3, int a4, void* a5);
+void PushCameraController(u32 a0, int a1, void* a2, int a3, void* a4);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+extern f32 g_gameTime;
 
 
 
 
-void func_001E2870(void* self, s32 a, s32 b);
+void UpdateOnOffObjectState(void* self, s32 a, s32 b);
 
 
 
-extern void func_001F6B40(void* a);
+extern void PostSemaphore(void* a);
 
 
 
 
-void func_00124FC0(void* self);
-void func_001E2870(void* self, s32 a, s32 b);
-void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void UpdatePlacedObject(void* self);
+void UpdateOnOffObjectState(void* self, s32 a, s32 b);
+void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
 
 
-void func_001261C0(void);
+void DrawPlacedObject(void);
 
 
 
@@ -119,27 +119,27 @@ extern f32 D_00275980[16];
 
 
 
-void func_001243E0(void* self);
-void func_001E2778(void* self, s32 state);
-void func_001DBD40(void* a, s32 b, s32 c, void* d, s32 e, s32 f);
+void UnregisterPlacedObject(void* self);
+void SetOnOffObjectState(void* self, s32 state);
+void RemoveQueuedCalls(void* a, s32 b, s32 c, void* d, s32 e, s32 f);
 
 
 
-void func_00124A48(void* self);
+void StartPlacedObject(void* self);
 
 
 
-void func_0015FBB8(void* self, void* p);
-void func_001E2778(void* selfv, s32 state);
+void SetPlacedObjectFrozen(void* self, void* p);
+void SetOnOffObjectState(void* selfv, s32 state);
 
 
 
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-s32 func_001E4C48(void* a, void* b, void* c, void* d, void* e);
-s32 func_00137CC0(void* a);
-void* func_0014D9A8(s32 idx);
-void func_0011EC40(void* a, void* b);
+void ReadBufferedRotation3(void* a, void* b);
+void ReadBufferedVector3(void* a, void* b);
+s32 ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
+s32 ReadBufferedS8(void* a);
+void* CreatePathCurve(s32 idx);
+void ReadPropertyRecords(void* a, void* b);
 
 
 
@@ -149,13 +149,13 @@ struct CameraFovSource { u8 pad[0x438]; f32 f438; f32 f43C; };
 
 
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
 extern u8 D_00275940[0x18];
 
 u64 func_001FBE00(u64 value, u64 radix);
 s64 func_001FC3D0(u64 value, u64 radix);
-void func_0018D800(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, s32 count);
 
 
 
@@ -163,13 +163,13 @@ extern f32 D_00275980[];
 extern f32 D_00275A10[4];
 extern f32 D_00275A20[2];
 
-void func_00123ED0(void* self);
+void InitPlacedObject(void* self);
 
 
 
 
-extern s32 func_001F6A90(void);
-extern s32 func_001F6B60(void* a);
+extern s32 GetCurrentThreadId(void);
+extern s32 AwaitSemaphore(void* a);
 
 
 
@@ -203,10 +203,10 @@ struct FacePoint {
 };
 
 
-void* func_001925F0(void);
-void func_00128018(void* a0, OnOffObject* a1, void* a2, FacePoint* a3);
-s32 func_001E4DC0(TreeNode03* self, FacePoint* value);
-void func_001E2778(OnOffObject* self, s32 state);
+void* GetActiveSwitchedCollider(void);
+void TransformPointBetweenFrames(void* a0, OnOffObject* a1, void* a2, FacePoint* a3);
+s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
+void SetOnOffObjectState(OnOffObject* self, s32 state);
 
 
 
@@ -219,16 +219,16 @@ struct FormatFrame {
     u8 pad44[0xC];
 };
 
-void func_001D72C8(OutputBuffer* ctx);
-s32 func_001D7190(OutputBuffer* ctx, const char* p, s32 n);
-char* func_001E21D8(const char* s, s32 c);
-s32 func_001E2100(const char* s);
-s32 func_001E0978(const char* at, FormatSpec* spec, void* va);
-void func_001E1A08(FormatSpec* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
+void FlushOutputBuffer(OutputBuffer* ctx);
+s32 AppendToOutputBuffer(OutputBuffer* ctx, const char* p, s32 n);
+char* FindCharInString(const char* s, s32 c);
+s32 GetStringLength(const char* s);
+s32 ParseFormatSpec(const char* at, FormatSpec* spec, void* va);
+void FormatConversionArg(FormatSpec* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
 
 
 
-extern u8 D_0024E879[];
+extern u8 g_charClassFlags[];
 
 
 
@@ -245,33 +245,33 @@ struct IntegerArg {
 
 
 
-s32 func_001E0E18(FormatSpec* self, IntegerArg* v);
-s32 func_001E2100(char* p);
-s32 func_001E0EF8(s8 c);
-s32 func_001E0F58(char* buf, s32 len, u64 value, u32 radix);
-s32 func_001D7190(OutputBuffer* sink, const char* p, s32 n);
-void func_001E2218(char* p);
+s32 ExtractIntegerSign(FormatSpec* self, IntegerArg* v);
+s32 GetStringLength(char* p);
+s32 GetConversionRadix(s8 c);
+s32 WriteIntegerDigits(char* buf, s32 len, u64 value, u32 radix);
+s32 AppendToOutputBuffer(OutputBuffer* sink, const char* p, s32 n);
+void UppercaseString(char* p);
 
 
 
 
-void func_001F5C0C(FormatSpec* dst, s32 value, s32 size);
-s32 func_001E08F8(s8* s, s32* out);
-extern u8 D_0024E879[];
+void FillMemory(FormatSpec* dst, s32 value, s32 size);
+s32 ParseSignedDecimal(s8* s, s32* out);
+extern u8 g_charClassFlags[];
 
 
 
 
 
 
-s32 func_001E2100(const char* s);
-s32 func_001D7190(OutputBuffer* c, const char* s, s32 n);
-void func_001E0CD0(FormatSpec* sp, OutputBuffer* c, const char* s);
-void func_001E1028(FormatSpec* sp, OutputBuffer* c, u64 v);
-void func_001E17A8(FormatSpec* sp, OutputBuffer* c, s64 s);
-void func_001E17A8(FormatSpec* sp, OutputBuffer* c, double value);
-s32 func_001E1498(char* buf, s32 n, FormatSpec* sp, double value);
-void func_001E2218(char* p);
+s32 GetStringLength(const char* s);
+s32 AppendToOutputBuffer(OutputBuffer* c, const char* s, s32 n);
+void FormatStringArg(FormatSpec* sp, OutputBuffer* c, const char* s);
+void FormatIntegerArg(FormatSpec* sp, OutputBuffer* c, u64 v);
+void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
+void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
+s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
+void UppercaseString(char* p);
 double func_001FD868(f32 f);
 
 
@@ -300,12 +300,12 @@ struct PaddedOutput : OutputBuffer {
 struct RegDouble { u8 pad; };
 
 
-f32 func_00205C78(f32 a, f32 b);
+f32 Power(f32 a, f32 b);
 RegDouble* func_001FCDE0(RegDouble* self, u64 v);
 RegDouble* func_001FCDE0(RegDouble* self, double v); // soft-float double in a1
-RegDouble* func_001EAE78(RegDouble* self);
+RegDouble* TruncateDouble(RegDouble* self);
 RegDouble* func_001FCD78(RegDouble* self, RegDouble* v);
-s32 func_001FD410(RegDouble* self);
+s32 ConvertDoubleToS32(RegDouble* self);
 
 
 
@@ -314,11 +314,11 @@ extern u8 D_00275940[];
 
 
 
-void* func_001E2138(char* dst, char* src);
-s32 func_001E2100(char* p);
-s32 func_001E1330(double v);
-u8 func_001E13D0(double v, s32 e, s32 i);
-f32 func_00205C78(f32 a, f32 b);
+void* CopyString(char* dst, char* src);
+s32 GetStringLength(char* p);
+s32 GetDecimalExponent(double v);
+u8 GetDecimalDigit(double v, s32 e, s32 i);
+f32 Power(f32 a, f32 b);
 double func_001FD868(f32 f);
 double func_001FCDE0(double a, double b);
 double func_001FCD20(double a, double b);
@@ -331,35 +331,35 @@ union DoubleBits {
 
 
 
-extern u8 D_006056D0[];
+extern u8 g_renderThreadStack[];
 extern u8 D_002832F0[];
 // The ids of the main thread and of the render thread func_001E2398 starts.
 struct ThreadIds { s32 main; s32 render; };
-extern ThreadIds D_00275958;
+extern ThreadIds g_mainAndRenderThreads;
 
-void func_0015EE80(void);
-s32 func_001F6A90(void);
-void func_001F6A50(s32 a, s32 b);
-s32 func_001F5C0C(ThreadParams* p, s32 zero, s32 size);
-s32 func_001F6A10(ThreadParams* p);
+void RunRenderThread(void);
+s32 GetCurrentThreadId(void);
+void SetThreadPriority(s32 a, s32 b);
+s32 FillMemory(ThreadParams* p, s32 zero, s32 size);
+s32 MakeThread(ThreadParams* p);
 
 
 
 s32 func_001FD308(double a, double b);
 f32 func_001FD578(double a);
-f32 func_00205B28(f32 x);
+f32 LogarithmBase10(f32 x);
 double func_001FD868(f32 x);
-s32 func_001FD410(double a);
+s32 ConvertDoubleToS32(double a);
 double func_001FD358(s32 a);
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 
 
 struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
-void func_001F5C0C(void* p, s32 v, s32 n);
+void FillMemory(void* p, s32 v, s32 n);
 
 // The eight scrambled words that locate a level's data on the disc: the key of the sector
 // range is w[0] ^ w[5] and w[1] ^ w[7]; two blocks are the same level when w[2] ^ w[6] agree.
@@ -392,11 +392,11 @@ struct WorldLoadRequest {
 
 
 
-extern FlagTable D_00261420;
+extern FlagTable g_flagTable;
 
-void func_001C05D0(f32 x);
-void func_00140ED0(FlagTable* r);
-void func_001E4E80(WorldLoadRequest* self, WorldKeyBlock* key, s32 a, s32 b, s32 flags);
+void SetIopVolumeChannel8(f32 x);
+void StartScreenFadeFromFlagTable(FlagTable* r);
+void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a, s32 b, s32 flags);
 
 
 
@@ -413,45 +413,45 @@ struct OwnedStream : BufferedStream {
 };
 
 extern u8 D_002C3B00[];
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 extern u8 D_002623D8[];
 
-extern f32 D_0026186C;
+extern f32 g_frameStep;
 
-void func_00191E70(s32 a);
-void func_0018D410(KeyId* q);
-LoadProgress* func_00193210(LoadProgress* q, U32P* a, U32P* b, U32P* c, U32P* d);
-void* func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
-void func_00193270(void* q);
-s32 func_001373B0(BufferedStream* q, KeyId* k);
-void func_001372E0(BufferedStream* q, s32 n);
-void func_001DB838(World* q);
-void func_001DB928(s32 a, BufferedStream* q);
-void func_001430B8(u8* q, f32 v);
-s32 func_0016E0F0(s32 n);
-void func_00160690(WorldKeyBlock* q, s32 n);
-World* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
-void func_001C06A0(s32 a, s32 b, f32 x);
-void func_001373D0(BufferedStream* q);
-void func_00193300(void* q);
-void func_0018C7F8(MemoryCard* q);
-void func_00143A60(s32 q, s32 f);
-void func_001C0070(void);
-s32 func_001F4318(World* q, s32 a, s32 b);
-void func_00151E18(u8* q);
-void func_00160CE8(u8* q);
-void func_0016B520(T217D_12E0* q);
-void func_00138C00(World* q, s32 n);
-void func_00143E40(s32 q, s32 n, f32 v);
-void func_00142ED0(f32 x);
-void func_001C06D8(void);
-void func_00191EB0(s32 a);
+void SetScreenOwner(s32 a);
+void ClearKeyId(KeyId* q);
+LoadProgress* InitLoadProgress(LoadProgress* q, U32P* a, U32P* b, U32P* c, U32P* d);
+void* InitBufferedStream(BufferedStream* q, s32 a, u8* b, s32 c);
+void BeginLoadProgress(void* q);
+s32 OpenBufferedSectorStreamRange(BufferedStream* q, KeyId* k);
+void DestroyBufferedStream(BufferedStream* q, s32 n);
+void ResetWorldSubsystems(World* q);
+void ReadBufferedBlockHeader(s32 a, BufferedStream* q);
+void SetGameClockTime(u8* q, f32 v);
+s32 SetPadSelectFlags(s32 n);
+void SetCurrentLevelEntry(WorldKeyBlock* q, s32 n);
+World* CreateTypedRecord(s32 a, s32 b, s32 c, s32 d, s32 e);
+void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
+void CloseBufferedStream(BufferedStream* q);
+void EndLoadProgress(void* q);
+void StartMemoryCardSave(MemoryCard* q);
+void ResetCamera(s32 q, s32 f);
+void UpdateSoundEmitters(void);
+s32 FindOrActivateSwitchedCollider(World* q, s32 a, s32 b);
+void NotifyScatterControllerLoaded(u8* q);
+void ResetCounter(u8* q);
+void RestoreSelectionCaptionCamera(T217D_12E0* q);
+void UpdateWorldContacts(World* q, s32 n);
+void UpdateCamera(s32 q, s32 n, f32 v);
+void SetGameClockScale(f32 x);
+void ResetVolumeChannelFactors(void);
+void ClearScreenOwner(s32 a);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
 u8 D_00275940[0x18] = "0123456789abcdef";
-ThreadIds D_00275958 = { 0, 0 };
+ThreadIds g_mainAndRenderThreads = { 0, 0 };
 u8 D_00275960[4] = { 0 };
-s32 D_00275964 = 0;
+s32 g_movieDecodeThread = 0;
 INCLUDE_DATA(D_00275970);
 INCLUDE_DATA(D_00275974);
 INCLUDE_DATA(D_00275978);
@@ -470,7 +470,7 @@ INCLUDE_DATA(D_00275A80);
 INCLUDE_DATA(D_00275A90);
 INCLUDE_DATA(D_00275AA0);
 
-s32 func_001E08F8(s8* s, s32* out)
+s32 ParseSignedDecimal(s8* s, s32* out)
 {
     s8* p = s;
     s32 sign = 1;
@@ -498,7 +498,7 @@ s32 func_001E08F8(s8* s, s32* out)
     return count;
 }
 
-s32 func_001E0978(s8* at, FormatSpec* spec, s32** va)
+s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va)
 {
     s32 state = 0;
     s8* p = at;
@@ -664,7 +664,7 @@ s32 func_001E0978(s8* at, FormatSpec* spec, s32** va)
 }
 
 
-void func_001E0CD0(FormatSpec* self, PaddedOutput* ctx, const char* str) {
+void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str) {
     s32 n;
     s32 right;
     s32 left;
@@ -696,7 +696,7 @@ void func_001E0CD0(FormatSpec* self, PaddedOutput* ctx, const char* str) {
 }
 
 
-s32 func_001E0E18(FormatSpec* self, void* dst)
+s32 ExtractIntegerSign(FormatSpec* self, void* dst)
 {
     s32 ret = 0;
     if (self->length != 1) {
@@ -733,7 +733,7 @@ s32 func_001E0E18(FormatSpec* self, void* dst)
     return ret;
 }
 
-s32 func_001E0EF8(s8 c)
+s32 GetConversionRadix(s8 c)
 {
     switch (c) {
     case 0x64:
@@ -751,7 +751,7 @@ s32 func_001E0EF8(s8 c)
     return 10;
 }
 
-s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
+s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg)
 {
     u64 radix = radixArg;
     u8* end = buf + len;
@@ -771,7 +771,7 @@ s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
 }
 
 
-void func_001E1028(FormatSpec* self, OutputBuffer* sink, u64 value)
+void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value)
 {
     char buf[0x50];
     char pfx[0x10];
@@ -876,7 +876,7 @@ void func_001E1028(FormatSpec* self, OutputBuffer* sink, u64 value)
 }
 
 
-s32 func_001E1330(double v)
+s32 GetDecimalExponent(double v)
 {
     s32 i;
     if (func_001FD308(v, 0.0) > 0) {
@@ -890,7 +890,7 @@ s32 func_001E1330(double v)
     return i;
 }
 
-s8 func_001E13D0(RegDouble* self0, s32 a, s32 b)
+s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
 {
     RegDouble* self = self0;
     s32 idx;
@@ -908,7 +908,7 @@ s8 func_001E13D0(RegDouble* self0, s32 a, s32 b)
 }
 
 
-s32 func_001E1498(char* buf, s32 unused, FormatSpec* sp, double v)
+s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
 {
     DoubleBits bits;
     bits.d = v;
@@ -976,7 +976,7 @@ s32 func_001E1498(char* buf, s32 unused, FormatSpec* sp, double v)
 }
 
 
-void func_001E17A8(FormatSpec* spec, OutputBuffer* ctx, double value)
+void FormatFloatArg(FormatSpec* spec, OutputBuffer* ctx, double value)
 {
     char buf[0x1C0];
     char sign[16];
@@ -1035,7 +1035,7 @@ void func_001E17A8(FormatSpec* spec, OutputBuffer* ctx, double value)
 }
 
 
-void func_001E1A08(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
+void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
     switch (sp->conv) {
     case '%':
@@ -1121,7 +1121,7 @@ void func_001E1A08(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s3
 }
 
 
-s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
+s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
 {
     FormatFrame loc;
     const char* s1 = fmt;
@@ -1152,7 +1152,7 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
     return ctx->count;
 }
 
-s32 func_001E1EB0(const char* fmt, void* ap)
+s32 PrintFormattedVa(const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
     InitOutputBuffer(&buf, -1);
@@ -1161,13 +1161,13 @@ s32 func_001E1EB0(const char* fmt, void* ap)
     return n;
 }
 
-s32 func_001E1F10(void* self, ...)
+s32 PrintFormatted(void* self, ...)
 {
     void* ap = (char*)__builtin_next_arg(self) - 56;
     return PrintFormattedVa(self, ap);
 }
 
-s32 func_001E1F58(char* dst, const char* fmt, void* ap)
+s32 FormatToStringVa(char* dst, const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
     InitStringOutputBuffer(&buf, dst, 0);
@@ -1178,13 +1178,13 @@ s32 func_001E1F58(char* dst, const char* fmt, void* ap)
     return n;
 }
 
-s32 func_001E1FD0(char* dst, const char* fmt, ...)
+s32 FormatToString(char* dst, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 48;
     return FormatToStringVa(dst, fmt, ap);
 }
 
-s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
+s32 FormatToStringBoundedVa(char* dst, s32 cap, s32 a, s32 b)
 {
     u8 buf[0x420];
     s32 n;
@@ -1203,7 +1203,7 @@ s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
 
 LINKER_REMNANT(func_001E20B0);
 
-s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
+s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 40;
     return FormatToStringBoundedVa(dst, cap, fmt, ap);
@@ -1211,16 +1211,16 @@ s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
 
 LINKER_REMNANT(func_001E20F8);
 
-s32 func_001E2100(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
+s32 GetStringLength(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
 
-void* func_001E2138(void* dst, void* src)
+void* CopyString(void* dst, void* src)
 {
     s32 n = GetStringLength(src);
     CopyMemory(dst, src, n + 1);
     return dst;
 }
 
-void* func_001E2180(void* dst, void* src)
+void* AppendString(void* dst, void* src)
 {
     s32 len = GetStringLength(dst);
     s32 n = GetStringLength(src);
@@ -1228,7 +1228,7 @@ void* func_001E2180(void* dst, void* src)
     return dst;
 }
 
-char* func_001E21D8(char* s, s32 c)
+char* FindCharInString(char* s, s32 c)
 {
     while (*s != 0) {
         if ((s8)*s == c) {
@@ -1241,7 +1241,7 @@ char* func_001E21D8(char* s, s32 c)
 
 LINKER_REMNANT(func_001E2210);
 
-void func_001E2218(s8* p)
+void UppercaseString(s8* p)
 {
     while (*p != 0) {
         s32 c = *p;
@@ -1254,7 +1254,7 @@ void func_001E2218(s8* p)
     }
 }
 
-void func_001E2268(void* a, void* b)
+void CreateLockSemaphore(void* a, void* b)
 {
     SemaphoreParams tmp;
 
@@ -1266,13 +1266,13 @@ void func_001E2268(void* a, void* b)
 
 LINKER_REMNANT(func_001E22B8);
 
-void func_001E22C0(RecursiveLock* self)
+void InitRecursiveLock(RecursiveLock* self)
 {
     self->last = -1;
     self->sema = (void*)CreateLockSemaphore(1, 1);
 }
 
-void func_001E22F8(RecursiveLock* self)
+void EnterRecursiveLock(RecursiveLock* self)
 {
     s32 key = GetCurrentThreadId();
     if (key != self->last) {
@@ -1284,7 +1284,7 @@ void func_001E22F8(RecursiveLock* self)
     }
 }
 
-void func_001E2358(RecursiveLock* self)
+void LeaveRecursiveLock(RecursiveLock* self)
 {
     if (--self->count == 0) {
         self->last = -1;
@@ -1294,7 +1294,7 @@ void func_001E2358(RecursiveLock* self)
 
 LINKER_REMNANT(func_001E2390);
 
-void func_001E2398(void)
+void CreateRenderThread(void)
 {
     ThreadParams l;
 
@@ -1309,11 +1309,11 @@ void func_001E2398(void)
     g_mainAndRenderThreads.render = MakeThread(&l);
 }
 
-void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
+void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
 ASM_FUNC(func_001E2438);
 
-void func_001E2520(OnOffObject* self)
+void InitOnOffObject(OnOffObject* self)
 {
     InitPlacedObject(self);
     self->block2F0 = *(Block63*)D_00275980;
@@ -1331,14 +1331,14 @@ void func_001E2520(OnOffObject* self)
     self->f398 = -1;
 }
 
-void func_001E25F8(OnOffObject* self)
+void UnregisterOnOffObject(OnOffObject* self)
 {
     UnregisterPlacedObject(self);
     SetOnOffObjectState(self, 0);
     RemoveQueuedCalls(self->world, 2, 0, self, -1, 0);
 }
 
-void func_001E2648(OnOffObject* self, void* a1)
+void LoadOnOffObject(OnOffObject* self, void* a1)
 {
     ReadBufferedRotation3(a1, &self->rot);
     ReadBufferedVector3(a1, &self->pos);
@@ -1366,12 +1366,12 @@ void func_001E2648(OnOffObject* self, void* a1)
     ReadPropertyRecords(self, a1);
 }
 
-void func_001E2758(OnOffObject* self)
+void StartOnOffObject(OnOffObject* self)
 {
     StartPlacedObject(self);
 }
 
-void func_001E2778(void* selfv, s32 state)
+void SetOnOffObjectState(void* selfv, s32 state)
 {
     OnOffObject* self = (OnOffObject*)selfv;
     if (self->f394 == state) return;
@@ -1393,7 +1393,7 @@ tail:
     self->f39C = g_gameTime;
 }
 
-void func_001E2840(void* selfv, s32 value)
+void SetOnOffObjectForcedState(void* selfv, s32 value)
 {
     OnOffObject* self = (OnOffObject*)selfv;
     if (value == self->f398) return;
@@ -1401,7 +1401,7 @@ void func_001E2840(void* selfv, s32 value)
     UpdateOnOffObjectState(self, 0, 0);
 }
 
-void func_001E2870(OnOffObject* self) {
+void UpdateOnOffObjectState(OnOffObject* self) {
     FacePoint loc;
     void* p = GetActiveSwitchedCollider();
     if (p == 0) {
@@ -1428,7 +1428,7 @@ void func_001E2870(OnOffObject* self) {
     SetOnOffObjectState(self, st);
 }
 
-void func_001E2940(OnOffObject* self)
+void UpdateOnOffObject(OnOffObject* self)
 {
     UpdatePlacedObject(self);
     if (self->f398 != 0) {
@@ -1436,12 +1436,12 @@ void func_001E2940(OnOffObject* self)
     }
 }
 
-void func_001E2988(void)
+void DrawOnOffObject(void)
 {
-    func_001261C0();
+    DrawPlacedObject();
 }
 
-void func_001E29A8(OnOffObject* self, void* p)
+void SetOnOffObjectFrozen(OnOffObject* self, void* p)
 {
     SetPlacedObjectFrozen(self, p);
     if (p != 0) {
@@ -1449,7 +1449,7 @@ void func_001E29A8(OnOffObject* self, void* p)
     }
 }
 
-void func_001E29E8(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
+void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
 
 ASM_FUNC(func_001E2A00);
 
@@ -1457,7 +1457,7 @@ ASM_FUNC(func_001E2BF0);
 
 ASM_FUNC(func_001E2E68);
 
-void func_001E30A0(OnOffCameraController* self)
+void DeactivateOnOffCameraController(OnOffCameraController* self)
 {
     CameraFovSource* s = (CameraFovSource*)self->ptr;
     if (s != 0) {
@@ -1469,11 +1469,11 @@ void func_001E30A0(OnOffCameraController* self)
     self->ptr = 0;
 }
 
-void func_001E30D8(OnOffCameraController* self, s32 arg)
+void NoteOnOffCameraControllerPushed(OnOffCameraController* self, s32 arg)
 {
 }
 
-void func_001E30E0(OnOffCameraController* self, s32 arg) {}
+void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
 ASM_FUNC(func_001E30E8);
 
@@ -1481,7 +1481,7 @@ ASM_FUNC(func_001E31F0);
 
 ASM_FUNC(func_001E4578);
 
-f32 func_001E4880(void* a0, void* a1, void* a2, SpanCandidate* a3)
+f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
     return a3->value;
 }
@@ -1501,9 +1501,9 @@ WorldLoadRequest::WorldLoadRequest()
     FillMemory(&current, 0, 0x20);
 }
 
-WorldLoadRequest D_00275AF0;
+WorldLoadRequest g_worldLoadRequest;
 
-void func_001E4E80(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s32 flags)
+void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s32 flags)
 {
     if (self->state == 0) {
         self->state = 1;
@@ -1514,7 +1514,7 @@ void func_001E4E80(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s
     }
 }
 
-void func_001E4EA8(WorldLoadRequest* self)
+void RunPendingWorldLoad(WorldLoadRequest* self)
 {
     KeyId key;
     WorldKeyBlock blob;
@@ -1582,7 +1582,7 @@ end:
     self->state = 0;
 }
 
-void func_001E5278(s32 mode)
+void RequestWorldLoadByMode(s32 mode)
 {
     s32 n;
     SetIopVolumeChannel8(0.0f);

@@ -2,7 +2,7 @@
 // PAL: the Gl_150AE8 global has f260 at 0x570 and f26C at 0x57C (US 0x260, 0x26C).
 struct Gl_150AE8_eu { u8 pad0[0x570]; s32 f570; u8 pad1[8]; s32 f57C; };
 
-void func_00150AE8(StepSequence* self)
+void UpdateStepSequence(StepSequence* self)
 {
     s32 q[2];
     s32 s1;
@@ -19,7 +19,7 @@ void func_00150AE8(StepSequence* self)
             return;
         }
     }
-    func_001F5C0C(q, 0, 8);
+    FillMemory(q, 0, 8);
     s2 = GetActiveSwitchedCollider();
     if (IsTopCameraController(&((Camera*)g_camera)->ctl454) != 0) {
         q[1] = 0;

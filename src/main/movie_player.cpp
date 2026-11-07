@@ -16,9 +16,9 @@
 #include "thread_params.h"
 #include "packet_writer.h"
 
-ObjectLink D_002699B0[1] = { { 2, 0x317, 0x6B0 } };
+ObjectLink g_contactListObjectLinks[1] = { { 2, 0x317, 0x6B0 } };
 f32 D_002699BC = 0.5f;
-const char* D_002699C0[16] = {
+const char* g_movieTitles[16] = {
     "The Secret Police File",
     "The Tokyo Police File",
     "The Making Of Sly Cooper",
@@ -36,16 +36,16 @@ const char* D_002699C0[16] = {
     "The Thievius Raccoonus",
     "Credits"
 };
-MoviePlayer D_00269A00;
-s32 D_00269B48;
-s32 D_00269B4C;
+MoviePlayer g_moviePlayer;
+s32 g_movieChecksumFailed;
+s32 g_keyedMovieWatched;
 
-extern u8 D_00261858[];
-
-
+extern u8 g_gameClock[];
 
 
-void func_00124DF8(void* self, s32 mode, void* data);
+
+
+void ResolveObjectLinks(void* self, s32 mode, void* data);
 
 // A transfer to the IOP's memory, as StartIopDma takes it.
 struct IopDmaTransfer {
@@ -55,61 +55,61 @@ struct IopDmaTransfer {
     s32 attr;
 };
 
-void func_001F6C20(s32 a);
-void* func_001F6CA0(IopDmaTransfer* span, s32 n);
-s32 func_001F6C90(void* obj);
+void SyncDataCache(s32 a);
+void* StartIopDma(IopDmaTransfer* span, s32 n);
+s32 GetIopDmaStatus(void* obj);
 
 
-s32 func_001833F0(void* key, void* item);
-s32 func_001300E8(void* key, void* item);
-s32 func_001B8A08(void* self, void* key);
+s32 MatchesObjectId(void* key, void* item);
+s32 IsObjectOfKind(void* key, void* item);
+s32 TestCollidersMayContact(void* self, void* key);
 
 
 
-void func_0011E460(void);
-void func_0013C9B0(void* state);
+void ResetIopRing(void);
+void ResetRingBuffer(void* state);
 
-void func_001B7B78(void* self);
-void func_0012E760(void* obj);
+void UnregisterCollider(void* self);
+void StopAnimationPlayer(void* obj);
 
 extern u8 D_002CBB40[];
 
-void func_0011D6A8(u32 a0);
-void func_0011D6D8(u32 a0);
-void func_0011E010(void);
-s32 func_0011CE30(void);
-void func_0011E110(s32 a0);
-s32 func_0011E1F8(s32 flag);
-s32 func_0011D4B8(s32 arg);
-void func_0011D480(s32 a0, s32 a1);
-s32 func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001C08B0(void* p, s32 a, s32 b);
-void func_0013C988(void* state, s32 size, void* buf);
+void SuspendIopVoices(u32 a0);
+void ResumeIopVoices(u32 a0);
+void StopAllIopSounds(void);
+s32 PollIopCommands(void);
+void WaitForIopSoundStop(s32 a0);
+s32 SyncDiscRead(s32 flag);
+s32 GetIopVolumeChannel(s32 arg);
+void SetIopVolumeChannel(s32 a0, s32 a1);
+s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
+void PushIopChannel2Setting(void* p, s32 a, s32 b);
+void InitRingBuffer(void* state, s32 size, void* buf);
 
-void func_0011E498(void);
-void func_001C0950(void* p);
+void StopIopMovieStream(void);
+void PopIopChannel2Setting(void* p);
 
-s32 func_0013CC00(void* queue, s32 size, void* data);
+s32 FillRingBufferFromMemory(void* queue, s32 size, void* data);
 
 // A block of data the decoder hands a stream callback.
 struct MovieDataBlock { u8 pad0[8]; u8* data; s32 size; };
 
-s32 func_0013CAD8(void* queue, s32 n, void* sink);
-void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 DrainRingBuffer(void* queue, s32 n, void* sink);
+void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 
 
-void* func_001611B8(void* b);
-void func_001529C8(void* b, s32 a1, void* self);
-void func_00152B38(void* b);
-void func_001613C0(void* b, s32 a1, s32 a2, u64 a3);
-void func_00161708(void* b, s32 a1, u64 a2);
-void func_001614C8(void* b, s32 a1, s32 a2);
-void func_001615F0(void* b, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_00161200(void* b);
-void func_00152D30(void* b);
-void func_001529E0(void* b, s32 a1, s32 a2);
-void func_00161958(void* f, s32 a);
-void func_00152B80(void* f, s32 a, s32 b);
+void* InitGifPacket(void* b);
+void UsePacketBufferMemory(void* b, s32 a1, void* self);
+void BeginDmaTag(void* b);
+void BeginGifTag(void* b, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(void* b, s32 a1, u64 a2);
+void AddGifUvEntry(void* b, s32 a1, s32 a2);
+void AddGifXyzfEntry(void* b, s32 a1, s32 a2, s32 a3, s32 a4);
+void EndGifPacket(void* b);
+void AddDmaEndTag(void* b);
+void DetachPacketBuffer(void* b, s32 a1, s32 a2);
+void AddGifImageTag(void* f, s32 a);
+void AddDmaRefTag(void* f, s32 a, s32 b);
 
 struct AttachedTransformFrame {
     Vec02 q00;
@@ -127,34 +127,34 @@ struct AttachedTransformFrame {
 
 
 
-void func_00125B70(void* obj, void* c, void* out);
-void func_00188B08(void* a, void* b, void* out);
-void func_00188668(void* out, void* b, void* in);
+void BuildPlacedObjectTransform(void* obj, void* c, void* out);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+void MultiplyMatrices(void* out, void* b, void* in);
 void func_00125C90(void* obj, void* s, void* out);
 
-extern s32 D_00261F1C;
+extern s32 g_gifChannel;
 
-s32 func_001F6B60(s32 a);
-void func_001686E8(s32 a, s32 b);
-void func_001684E8(void);
-void func_001683E8(void);
+s32 AwaitSemaphore(s32 a);
+void SendGsPacketAndWait(s32 a, s32 b);
+void ApplyPendingDisplayFlip(void);
+void FlipDisplayFrame(void);
 
 extern u8 D_005A2E60[];
 
 extern s32 D_002626CC;
 
-void func_0020B0C0(void* self);
-s32 func_0020B048(void* self);
-void func_001B3450(void);
+void ResetMpegDecoder(void* self);
+s32 DeleteMpegDecoder(void* self);
+void SendResidentImages(void);
 
 
 
-extern const u32 D_002484B0[128];
+extern const u32 g_movieKeys[128];
 
-void* func_001F5C0C(void* dst, s32 value, s32 size);
-void func_0013CC48(void* queue, s32 n);
+void* FillMemory(void* dst, s32 value, s32 size);
+void ConsumeSpan(void* queue, s32 n);
 
-void func_0018D410(KeyId* p);
+void ClearKeyId(KeyId* p);
 struct SameMovieKey {
     static s32 Of(IdentityKey* a, const IdentityKey* b)
     {
@@ -182,46 +182,46 @@ struct KeyIdOfMovie {
 };
 
 extern u8 D_002C3B00[];
-extern u8 D_00275F80[];
-extern s32 D_002613EC;
+extern u8 g_screenFade[];
+extern s32 g_discSectorCheckState;
 
-void func_00191E70(s32 v);
-void* func_0012FCF0(StreamReader* o, u8* d);
-s32 func_0012FD78(StreamReader* o, KeyId* k);
-void func_0016EC20(PadRecord* d, s32 n);
-void func_00143030(u8* t);
-void func_0016E238(PadRecord* d);
-s32 func_001F00F0(u8* a, PadRecord* b, s32 c);
-void func_001409E0();
-s32 func_0020B0B0(void* l);
-void func_0012FDE8(StreamReader* o);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00191EB0(s32 v);
-void func_0012FD30(StreamReader* o, s32 f);
+void SetScreenOwner(s32 v);
+void* InitStreamReader(StreamReader* o, u8* d);
+s32 OpenSectorStreamRange(StreamReader* o, KeyId* k);
+void ClearPadPressedBits(PadRecord* d, s32 n);
+void AdvanceGameClockElapsed(u8* t);
+void UpdatePadConnection(PadRecord* d);
+s32 RestoreFadeRequest(u8* a, PadRecord* b, s32 c);
+void StepDiscSectorCheck();
+s32 GetMpegDecoderStatus(void* l);
+void CloseStreamReader(StreamReader* o);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void ClearScreenOwner(s32 v);
+void DestroyStreamReader(StreamReader* o, s32 f);
 
-extern u8 D_002C2B00[];
+extern u8 g_movieDecodeThreadStack[];
 extern u8 D_002832F0[];
-extern s32 D_00275964;
+extern s32 g_movieDecodeThread;
 
-s32 func_001E2268(void* a, void* b);
-s32 func_001F6A10(ThreadParams* p);
-void func_001F6A20(s32 thread, s32 arg);
+s32 CreateLockSemaphore(void* a, void* b);
+s32 MakeThread(ThreadParams* p);
+void RunThread(s32 thread, s32 arg);
 
-s32 func_0011E4F8(void* self);
+s32 GetIopRingPosition(void* self);
 
-void func_00189350(void* a, void* b);
-void func_001BC088(Collider* self, f32 x, void* b);
+void BuildBasisFromX(void* a, void* b);
+void MoveCollider(Collider* self, f32 x, void* b);
 
 struct ReaderEmpty {
     static bool Of(StreamReaderWindow* b) { return b->readyLength == b->usedLength; }
 };
-void func_00130070(StreamReaderWindow*);
-s32 func_0020A518(void*, s32, s32);
-void func_001300D8(StreamReaderWindow*, s32);
+void PumpStreamReader(StreamReaderWindow*);
+s32 DemultiplexBuffer(void*, s32, s32);
+void ConsumeStreamBytes(StreamReaderWindow*, s32);
 
 
-s32 func_0020B058(void* a, s32 b, s32 c);
-void func_001F6B40(s32 a);
+s32 DecodeMpegPicture(void* a, s32 b, s32 c);
+void PostSemaphore(s32 a);
 
 
 extern u8 D_002D7B40[];
@@ -231,49 +231,49 @@ extern u8 D_00586AC0[];
 extern u8 D_005A2D40[];
 extern u8 D_00148D68[];
 
-void func_0020ADA0(void);
-s32 func_0020AE40(void* self, void* a, s32 b);
-s32 func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
-s32 func_0020B168(void* self, s32 a, void* fn, void* arg);
+void InitMpegLibrary(void);
+s32 CreateMpegDecoder(void* self, void* a, s32 b);
+s32 SetStreamCallback(void* self, s32 a, s32 b, void* fn, void* arg);
+s32 SetMpegCallback(void* self, s32 a, void* fn, void* arg);
 
-s32 func_0018E410(IdentityKey* key);
-u8* func_0018E480(s32 index);
-void func_0018E4C0(s32 idx);
-void func_0018E4F0(s32 idx, u32 n);
-void func_0018E558(void);
-void func_0018E5E8(void);
-void func_0018E678(IopRingSink* self, s32 a1, s32 a2);
-void func_0018E6A0(IopRingSink* c);
-s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf);
-void func_0018E838(IopRingSink* self);
-s32 func_0018E940(MovieStream* self);
-void func_0018EA48(MovieStream* self);
-void func_0018EAA0(MovieStream* self);
-s32 func_0018EAF8(MovieStream* self, s32 left, u8* right);
-void func_0018EB98(MovieStream* self);
-s32 func_0018EC40(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
-void func_0018EC80(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
-s32 func_0018ECA8(void* u0, void* u1, MoviePlayer* self);
-s32 func_0018ED78(void* a0, s32 a1, MoviePlayer* a2);
-s32 func_0018EDA0(void);
-void func_0018EDA8(void* p, s32 addr, s32 w, s32 h);
-void func_0018EF78(void* self, s32 a1, s32 a2);
-void func_0018F0E8(MoviePlayer* self, void* p);
-void func_0018F148(MoviePlayer* self);
-void func_0018F198(MoviePlayer* self, IdentityKey* key);
-void func_0018F448(MoviePlayer* self, void* v);
-void func_0018F610(MoviePlayer* self);
-void func_0018F6E8(MoviePlayer* self);
-void func_0018F7D0(MoviePlayer* self);
-s32 func_0018F890(MoviePlayer* self, s32 wait);
+s32 FindKeyIndex(IdentityKey* key);
+u8* GetMovieTitle(s32 index);
+void QueueMovieByIndex(s32 idx);
+void QueueMovieWithSuccessor(s32 idx, u32 n);
+void RunMovieDecodeThread(void);
+void CreateMovieDecodeThread(void);
+void InitIopRingSink(IopRingSink* self, s32 a1, s32 a2);
+void ResetIopRingSink(IopRingSink* c);
+s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf);
+void UpdateIopRingSink(IopRingSink* self);
+s32 StartMovieStream(MovieStream* self);
+void ResetMovieStream(MovieStream* self);
+void StopMovieStream(MovieStream* self);
+s32 FeedMovieStream(MovieStream* self, s32 left, u8* right);
+void UpdateMovieStream(MovieStream* self);
+s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self);
+s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2);
+s32 AcceptMovieDecoderEvent(void);
+void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h);
+void DrawMovieFrame(void* self, s32 a1, s32 a2);
+void QueueMovie(MoviePlayer* self, void* p);
+void PlayQueuedMovies(MoviePlayer* self);
+void PlayMovie(MoviePlayer* self, IdentityKey* key);
+void InitMoviePlayback(MoviePlayer* self, void* v);
+void AdvanceCodeChecksum(MoviePlayer* self);
+void StepMovieFrame(MoviePlayer* self);
+void FinishMovie(MoviePlayer* self);
+s32 FeedMovieDecoder(MoviePlayer* self, s32 wait);
 
-void func_0018D8E0(ContactListObject* self)
+void InitContactListObject(ContactListObject* self)
 {
     InitChildGroupObject(self);
     self->ready = 1;
 }
 
-void func_0018D910(ContactListObject* self)
+void LoadContactListObject(ContactListObject* self)
 {
     u64 mask = (u64)(s64)-0x301;
     u64 set = 0x8000;
@@ -287,7 +287,7 @@ void func_0018D910(ContactListObject* self)
     self->flags = (self->flags & mask) | set;
 }
 
-void func_0018D978(ContactListObject* self)
+void UnregisterContactListObject(ContactListObject* self)
 {
     UnregisterCollider(self);
     void* p = self->f6B4;
@@ -297,7 +297,7 @@ void func_0018D978(ContactListObject* self)
     }
 }
 
-void func_0018D9B8(ContactListObject* self, void* b, f32 x)
+void MoveContactListObject(ContactListObject* self, void* b, f32 x)
 {
     if (self->ready != 0) {
         BuildBasisFromX(&self->v150, &self->rot);
@@ -306,14 +306,14 @@ void func_0018D9B8(ContactListObject* self, void* b, f32 x)
     s32 s0 = (s32)self->f1F0;
     self->f1EC = 0;
     self->f1F0 = 0;
-    func_001BC088(self, x, b);
+    MoveCollider(self, x, b);
     self->f1EC = (Attachment*)s1;
     self->f1F0 = (Attachment*)s0;
 }
 
 ASM_FUNC(func_0018DA40);
 
-void func_0018DB20(ContactListObject* self, void* in1, void* in2)
+void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 {
     AttachedTransformFrame f;
 
@@ -341,7 +341,7 @@ void func_0018DB20(ContactListObject* self, void* in1, void* in2)
     }
 }
 
-s32 func_0018DC88(ContactListObject* self, void* key)
+s32 TestContactListMayContact(ContactListObject* self, void* key)
 {
     if (key == self->f6E4) {
         return 1;
@@ -359,7 +359,7 @@ s32 func_0018DC88(ContactListObject* self, void* key)
     return TestCollidersMayContact(self, key);
 }
 
-void func_0018DD50(ContactListObject* self, void* item)
+void AddContactListId(ContactListObject* self, void* item)
 {
     u32 n = self->count6BC;
     if (n < 4) {
@@ -368,7 +368,7 @@ void func_0018DD50(ContactListObject* self, void* item)
     }
 }
 
-void func_0018DD78(ContactListObject* self, s32 value)
+void AddContactListKind(ContactListObject* self, s32 value)
 {
     s32 n = self->count6D0;
     if ((u32)n < 4) {
@@ -377,7 +377,7 @@ void func_0018DD78(ContactListObject* self, s32 value)
     }
 }
 
-void func_0018DDA0(ContactListObject* self)
+void InitContactListObjectWithoutGravity(ContactListObject* self)
 {
     InitContactListObject(self);
     self->gravity = D_00248D30;
@@ -391,7 +391,7 @@ ASM_FUNC(func_0018DEE8);
 
 ASM_FUNC(func_0018E040);
 
-s32 func_0018E410(IdentityKey* key)
+s32 FindKeyIndex(IdentityKey* key)
 {
     IdentityKey* p = (IdentityKey*)(u8*)g_movieKeys;
     s32 i = 0;
@@ -415,7 +415,7 @@ s32 func_0018E410(IdentityKey* key)
     return -1;
 }
 
-u8* func_0018E480(s32 index)
+u8* GetMovieTitle(s32 index)
 {
     if ((u32)index < 16) {
         return (u8*)g_movieTitles[index];
@@ -426,12 +426,12 @@ u8* func_0018E480(s32 index)
     return (u8*)"(unknown)";
 }
 
-void func_0018E4C0(s32 idx)
+void QueueMovieByIndex(s32 idx)
 {
     QueueMovie(&g_moviePlayer, (u8*)g_movieKeys + (idx << 5));
 }
 
-void func_0018E4F0(s32 idx, u32 n)
+void QueueMovieWithSuccessor(s32 idx, u32 n)
 {
     GameProgress* dev;
     s32 m;
@@ -443,7 +443,7 @@ void func_0018E4F0(s32 idx, u32 n)
     dev->u19F4 |= m;
 }
 
-void func_0018E558(void)
+void RunMovieDecodeThread(void)
 {
     MoviePlayer* t = &g_moviePlayer;
 
@@ -461,7 +461,7 @@ void func_0018E558(void)
     }
 }
 
-void func_0018E5E8(void)
+void CreateMovieDecodeThread(void)
 {
     ThreadParams l;
     s32 v;
@@ -479,14 +479,14 @@ void func_0018E5E8(void)
     RunThread(v, 0);
 }
 
-void func_0018E678(IopRingSink* self, s32 a1, s32 a2)
+void InitIopRingSink(IopRingSink* self, s32 a1, s32 a2)
 {
     self->f04 = a2;
     self->f08 = a1;
     ResetIopRingSink(self);
 }
 
-void func_0018E6A0(IopRingSink* c)
+void ResetIopRingSink(IopRingSink* c)
 {
     c->f14 = c->f08;
     c->f18 = 0;
@@ -526,7 +526,7 @@ s32 IopRingSink::Put(s32 count, u8* dst)
     return total;
 }
 
-s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf)
+s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf)
 {
     IopDmaTransfer span;
     void* obj;
@@ -542,7 +542,7 @@ s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf)
     return size;
 }
 
-void func_0018E838(IopRingSink* self) { s32 raw = GetIopRingPosition(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
+void UpdateIopRingSink(IopRingSink* self) { s32 raw = GetIopRingPosition(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
 
 s32 IopRingSink::Idle()
 {
@@ -570,7 +570,7 @@ s32 IpuDmaSink::Idle()
 
 // Declared to return a value it never sets: func_0018F448, its caller, is retail's only with a
 // callee that returns one.
-s32 func_0018E940(MovieStream* self)
+s32 StartMovieStream(MovieStream* self)
 {
     s32 r;
     SuspendIopVoices(0xFFFFFFFF);
@@ -578,7 +578,7 @@ s32 func_0018E940(MovieStream* self)
     StopAllIopSounds();
     while (PollIopCommands() != 0) {
     }
-    func_0011E110(1);
+    WaitForIopSoundStop(1);
     SyncDiscRead(0);
     self->savedVolume2 = GetIopVolumeChannel(2);
     self->savedVolume8 = GetIopVolumeChannel(8);
@@ -595,7 +595,7 @@ s32 func_0018E940(MovieStream* self)
     }
 }
 
-void func_0018EA48(MovieStream* self)
+void ResetMovieStream(MovieStream* self)
 {
     if (self->state != 0) {
         ResetIopRing();
@@ -606,7 +606,7 @@ void func_0018EA48(MovieStream* self)
     }
 }
 
-void func_0018EAA0(MovieStream* self)
+void StopMovieStream(MovieStream* self)
 {
     self->state = 0;
     StopIopMovieStream();
@@ -616,7 +616,7 @@ void func_0018EAA0(MovieStream* self)
     ResumeIopVoices(0xFFFFFFFF);
 }
 
-s32 func_0018EAF8(MovieStream* self, s32 left, u8* right)
+s32 FeedMovieStream(MovieStream* self, s32 left, u8* right)
 {
     s32 n;
 
@@ -645,7 +645,7 @@ one:
     return 1;
 }
 
-void func_0018EB98(MovieStream* self)
+void UpdateMovieStream(MovieStream* self)
 {
     switch (self->state) {
     case 2:
@@ -665,7 +665,7 @@ void func_0018EB98(MovieStream* self)
     }
 }
 
-s32 func_0018EC40(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
+s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
     if ((u32)a2->videoRing.space >= (u32)a1->size) {
         FillRingBufferFromMemory(&a2->videoRing, a1->size, a1->data);
@@ -674,12 +674,12 @@ s32 func_0018EC40(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
     return 0;
 }
 
-void func_0018EC80(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
+void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
     FeedMovieStream(&a2->stream, a1->size, a1->data);
 }
 
-s32 func_0018ECA8(void* u0, void* u1, MoviePlayer* self)
+s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
 {
     s32 total = 0x40;
     while (self->videoRing.filled < 0x1000) {
@@ -699,18 +699,18 @@ s32 func_0018ECA8(void* u0, void* u1, MoviePlayer* self)
     return 1;
 }
 
-s32 func_0018ED78(void* a0, s32 a1, MoviePlayer* a2)
+s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2)
 {
     FeedMovieDecoder(a2, 0);
     return 1;
 }
 
-s32 func_0018EDA0(void)
+s32 AcceptMovieDecoderEvent(void)
 {
     return 1;
 }
 
-void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
+void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
 {
     s32 ny = w / 16;
     s32 nx = h / 16;
@@ -742,7 +742,7 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
     DetachPacketBuffer(&f, 0, 0);
 }
 
-void func_0018EF78(void* self, s32 a1, s32 a2)
+void DrawMovieFrame(void* self, s32 a1, s32 a2)
 {
     PacketWriter buf;
     InitGifPacket(&buf);
@@ -765,7 +765,7 @@ void func_0018EF78(void* self, s32 a1, s32 a2)
     DetachPacketBuffer(&buf, 0, 0);
 }
 
-void func_0018F0E8(MoviePlayer* self, void* p)
+void QueueMovie(MoviePlayer* self, void* p)
 {
     s32 m;
     s32 v;
@@ -783,7 +783,7 @@ void func_0018F0E8(MoviePlayer* self, void* p)
     g_saveData->u19F4 |= m;
 }
 
-void func_0018F148(MoviePlayer* self)
+void PlayQueuedMovies(MoviePlayer* self)
 {
     IdentityKey* pending = self->queuedNext;
     IdentityKey* first = self->queued;
@@ -795,7 +795,7 @@ void func_0018F148(MoviePlayer* self)
     }
 }
 
-void func_0018F198(MoviePlayer* self, IdentityKey* key)
+void PlayMovie(MoviePlayer* self, IdentityKey* key)
 {
     StreamReader loc;
     KeyId pr;
@@ -834,7 +834,7 @@ void func_0018F198(MoviePlayer* self, IdentityKey* key)
     DestroyStreamReader(&loc, 2);
 }
 
-void func_0018F448(MoviePlayer* self, void* v)
+void InitMoviePlayback(MoviePlayer* self, void* v)
 {
     s32 i;
 
@@ -874,7 +874,7 @@ void func_0018F448(MoviePlayer* self, void* v)
     } while (j < 256);
 }
 
-void func_0018F610(MoviePlayer* self)
+void AdvanceCodeChecksum(MoviePlayer* self)
 {
     if (self->remain > 0) {
         s32 n = self->remain - 4;
@@ -901,7 +901,7 @@ void func_0018F610(MoviePlayer* self)
     }
 }
 
-void func_0018F6E8(MoviePlayer* self)
+void StepMovieFrame(MoviePlayer* self)
 {
     MovieStream* s1;
     if (self->threadStep == 1) {
@@ -928,7 +928,7 @@ void func_0018F6E8(MoviePlayer* self)
     UpdateMovieStream(s1);
 }
 
-void func_0018F7D0(MoviePlayer* self)
+void FinishMovie(MoviePlayer* self)
 {
     s32 mask;
 
@@ -951,7 +951,7 @@ void func_0018F7D0(MoviePlayer* self)
     g_saveData->f19F8 |= mask;
 }
 
-s32 func_0018F890(MoviePlayer* self, s32 wait)
+s32 FeedMovieDecoder(MoviePlayer* self, s32 wait)
 {
     while (ReaderEmpty::Of(self->reader)) {
         PumpStreamReader(self->reader);

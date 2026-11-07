@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Calls PAL-only func_eu_001AAFB0, replaces f4 with the result of the callback at +0xC of the object at f4 + 0x4C (given f4 + f8 and 0.9, 0.9), sets f518, and when func_0015C188(2) is set stores func_0015C1C0(2) through the pointer at f520 (= D_002743F0).
 void func_eu_001AAFB0(void* self);
-s32 func_0015C188(s32 k);
+s32 IsFontLoaded(s32 k);
 
 typedef void* (*FnF_eu_001AD5E0)(void* p, f32 a, f32 b);
 struct Sub_eu_001AD5E0 { u8 pad[8]; s16 f8; u8 pad2[2]; FnF_eu_001AD5E0 fC; };

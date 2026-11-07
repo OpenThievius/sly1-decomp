@@ -9,7 +9,7 @@ func_0011E580(id, ...) creates an object of class `id` from entry `id` (it
 allocates the descriptor's size, stores the descriptor at +0 and calls the
 slot at +0x10), and func_0015A4B8(id, ...) walks the parent pointers from
 entry `id`. Each pointer leads to a descriptor (the ClassDesc_217418 tables of
-src/main/001E4000.cpp):
+src/main/class_descriptors.cpp):
 
     +0x00  the parent's descriptor
     +0x04  the class id (equal to its index in the table)

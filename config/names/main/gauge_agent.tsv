@@ -2,6 +2,7 @@ symbol	name	evidence
 func_0018A388	InitGaugeAgent	slot 0x10 of class 0x0C: runs InitAgent and sets +0xE3C to -1
 func_0018A3B8	LoadGaugeAgent	slot 0x38 of class 0x0C: runs LoadAgent and resolves its links (D_00264910)
 func_0018A3F0	StartGaugeAgent	slot 0x50 of class 0x0C: runs StartAgent, takes the world's gauge object (func_001DDC38), resolves its links, creates its state walker (0x438), its three clips and the six keyed objects of D_00264960
+func_0018A510	DrawGaugeAgentMarkerRing	DrawPlayerMarkerRing1's counterpart: fills its parameter block D_002BE490 once (flag D_002649A8), finds the anim record 0x15D (FindAnimRecord) and draws the ring of 7 entries of D_00275070 around the position of the owner at +0x60 with DrawAngleSortedRing; DrawGaugeAgent loads its address at 0x18A660
 func_0018A628	DrawGaugeAgent	original assembly: slot 0xA4 of class 0x0C
 func_0018A6C0	FindNearestHitObject	tests each candidate object against a segment (func_00141D00) and returns the one with the lowest score, copying its hit out, skipping a zero-score first hit when bit 0 of the mode is set
 func_0018A830	IsGaugeAgentBlocker	the filter of IsGaugeAgentLineBlocked: rejects the kinds of D_002649B0, class 3, objects of kind 0x34 whose slot 60 refuses, and the ids 0x449 and 0x44A

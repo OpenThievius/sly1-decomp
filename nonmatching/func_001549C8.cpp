@@ -6,18 +6,18 @@
 
 struct __attribute__((aligned(16))) Q_1549C8 { s32 a, b, c, d; };
 struct Dst_1549C8;
-void* func_001F5C0C(void* p, s32 v, s32 n);
-extern Q_1549C8 D_00248D00;
-extern Q_1549C8 D_00248D20;
+void* FillMemory(void* p, s32 v, s32 n);
+extern Q_1549C8 g_unitXVector;
+extern Q_1549C8 g_unitZVector;
 extern Q_1549C8 D_00248D30;
 
 struct A_1549C8 {
     Q_1549C8 q[9];
     A_1549C8()
     {
-        func_001F5C0C(this, 0, 0x90);
+        FillMemory(this, 0, 0x90);
         q[1] = D_00248D30;
-        q[5] = D_00248D00;
+        q[5] = g_unitXVector;
         q[8] = D_00248D30;
     }
 };
@@ -42,13 +42,13 @@ struct B_1549C8 {
     s32 pad7C;
     B_1549C8()
     {
-        func_001F5C0C(this, 0, 0x80);
+        FillMemory(this, 0, 0x80);
         f18 = -1500.0f;
         f04 = 750.0f;
         f50 = 1.0f;
         i4C = 200;
         f54 = 1.0f;
-        q30 = D_00248D20;
+        q30 = g_unitZVector;
         f70 = 1.0f;
         f78 = -1.0f;
         f20 = -1.0f;
@@ -70,7 +70,7 @@ extern A_1549C8 D_0027C010;
 extern B_1549C8 D_0027C0A0;
 extern C_1549C8 D_00261F80;
 
-void func_001549C8(Dst_1549C8* self)
+void InitSpawnRecord(Dst_1549C8* self)
 {
     if (!D_00261F70) {
         D_0027C010 = A_1549C8();
@@ -80,7 +80,7 @@ void func_001549C8(Dst_1549C8* self)
         D_0027C0A0 = B_1549C8();
         D_00261F74 = 1;
     }
-    func_001F5C0C(self, 0, 0x200);
+    FillMemory(self, 0, 0x200);
     self->f0 = 1;
     self->a = D_0027C010;
     self->b = D_0027C0A0;

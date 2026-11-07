@@ -11,15 +11,15 @@ struct Args_1D61C8 { s32 pad; f32 f4; u8* inner; };
 extern s32 D_00275138;
 extern Cfg_1D61C8 D_00605650;
 extern u8 D_002750A8[];
-void func_001F5C0C(void* p, s32 zero, s32 size);
-s32 func_001B4688(s32 id);
-void func_001D5678(void* a, s32 b, void* c, s32 d, void* e, void* f, void* g);
+void FillMemory(void* p, s32 zero, s32 size);
+s32 FindAnimRecord(s32 id);
+void DrawAngleSortedRing(void* a, s32 b, void* c, s32 d, void* e, void* f, void* g);
 
-void func_001D61C8(Host_1D61C8* self)
+void DrawPlayerMarkerRing3(Host_1D61C8* self)
 {
     u8* inner = self->inner;
     if (D_00275138 == 0) {
-        func_001F5C0C(&D_00605650, 0, 0x80);
+        FillMemory(&D_00605650, 0, 0x80);
         D_00605650.f44 = -100.0f;
         D_00605650.f4 = 5.0f;
         D_00605650.f40 = 0.5f;
@@ -35,8 +35,8 @@ void func_001D61C8(Host_1D61C8* self)
     }
     Args_1D61C8 args;
     D_00605650.i70 = 0;
-    D_00605650.i74 = func_001B4688(0x15C);
+    D_00605650.i74 = FindAnimRecord(0x15C);
     args.f4 = 60.0f;
     args.inner = inner;
-    func_001D5678(inner + 0x140, 0x11, D_002750A8, 1, &args, &D_00605650, self);
+    DrawAngleSortedRing(inner + 0x140, 0x11, D_002750A8, 1, &args, &D_00605650, self);
 }

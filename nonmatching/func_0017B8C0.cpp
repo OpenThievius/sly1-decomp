@@ -24,15 +24,15 @@ struct Table_17B8C0 {
 };
 
 extern s32 D_00263E2C;
-extern f32 D_0026185C;
-extern u8 D_0026E248[];
-extern u8 D_00264A40[];
+extern f32 g_gameTime;
+extern u8 g_gaugeBarElement[];
+extern u8 g_memoryCard[];
 
-void func_001DDC38(void* a, void* b);
-void func_001603E8(s32 n);
-void func_0018C7F8(void* p);
+void SetWorldActiveFollower(void* a, void* b);
+void MarkLevelDone(s32 n);
+void StartMemoryCardSave(void* p);
 
-void func_0017B8C0(Obj_17B8C0* self, s32 state)
+void SetCountdownState(Obj_17B8C0* self, s32 state)
 {
     Table_17B8C0* t;
 
@@ -42,7 +42,7 @@ void func_0017B8C0(Obj_17B8C0* self, s32 state)
     D_00263E2C = -1;
     switch (state) {
     case 1:
-        t = (Table_17B8C0*)D_0026E248;
+        t = (Table_17B8C0*)g_gaugeBarElement;
         t->f27C = -1.0f;
         t->f270 = 4;
         t->f268 = 0x10;
@@ -51,17 +51,17 @@ void func_0017B8C0(Obj_17B8C0* self, s32 state)
         t->f26C = 4;
         t->f264 = 4;
         t->f274 = 0;
-        func_001DDC38(self->f14, self);
+        SetWorldActiveFollower(self->f14, self);
         self->f550 = state;
         break;
     case 2:
-        func_001603E8(5);
-        func_0018C7F8(g_memoryCard);
+        MarkLevelDone(5);
+        StartMemoryCardSave(g_memoryCard);
         self->f550 = state;
         break;
     default:
         self->f550 = state;
         break;
     }
-    self->f554 = D_0026185C;
+    self->f554 = g_gameTime;
 }

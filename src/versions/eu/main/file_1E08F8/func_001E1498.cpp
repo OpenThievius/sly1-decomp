@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the trailing '0' and '.' are read as unsigned bytes.
 
-s32 func_001E1498(char* buf, s32 unused, FormatSpec* sp, double v)
+s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
 {
     DoubleBits bits;
     bits.d = v;

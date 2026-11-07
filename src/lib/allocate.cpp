@@ -7,9 +7,9 @@
 #include "common.h"
 #include "new.h"
 
-void* func_0018D758(u32 size);
+void* AllocateObjectMemory(u32 size);
 
-void* func_001FD8A8(u32 size) throw(bad_alloc)
+void* AllocateOrThrow(u32 size) throw(bad_alloc)
 {
     return AllocateObjectMemory(size);
 }

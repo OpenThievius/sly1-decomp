@@ -4,8 +4,8 @@ struct Ent_0014ABD0 {
     void* link;
     u8 pad0[0x570 - 4];
 };
-void func_001AA1F0(Ent_0014ABD0* self, s32 index);
-void func_0014ABD0(Ent_0014ABD0* self)
+void InitScreenElement(Ent_0014ABD0* self, s32 index);
+void InitItemColumn(Ent_0014ABD0* self)
 {
     u32 n;
 

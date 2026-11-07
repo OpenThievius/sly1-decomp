@@ -72,22 +72,22 @@ typedef char check_ListedPointObject[sizeof(ListedPointObject) == 0x60 ? 1 : -1]
 typedef char check_TextPointObject[sizeof(TextPointObject) == 0x60 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_00192068(PointObject* self, void* stream);         // 0x7E slot 10
-void func_001920E0(PointObject* self, s32 value);            // 0x7E slot 21
-s32 func_00192128(PointObject* self, void* other);           // 0x7E slot 22
-void func_0016A100(TargetPoint* self);                       // 0x7F slot 0
-void func_0016A140(TargetPoint* self);                       // 0x7F slot 6
-void func_0016A178(TargetPoint* self);                       // 0x7F slot 7
-void func_0016A1F8(TargetPoint* self);                       // 0x7F slot 9
-void func_0016A1B0(TargetPoint* self);                       // 0x7F slot 15
-void func_0017FD90(C80* self);                       // 0x80 slot 6
-void func_0017FDC8(C80* self);                       // 0x80 slot 7
-void func_0017FE00(C80* self);                       // 0x80 slot 9
-void func_0017FE48(C80* self);                       // 0x80 slot 16
-void func_001C10A8(ListedPointObject* self);                       // 0x81 slot 0
-void func_001C10D8(ListedPointObject* self);                       // 0x81 slot 6
-void func_001C1110(ListedPointObject* self);                       // 0x81 slot 7
-void func_001C1148(ListedPointObject* self);                       // 0x81 slot 9
-void func_00192150(TextPointObject* self, void* stream);         // 0x82 slot 10
+void LoadPointObject(PointObject* self, void* stream);         // 0x7E slot 10
+void ReparentPointObject(PointObject* self, s32 value);            // 0x7E slot 21
+s32 ConvertPointObjectPosition(PointObject* self, void* other);           // 0x7E slot 22
+void InitTargetPoint(TargetPoint* self);                       // 0x7F slot 0
+void RegisterTargetPoint(TargetPoint* self);                       // 0x7F slot 6
+void UnregisterTargetPoint(TargetPoint* self);                       // 0x7F slot 7
+void CopyTargetPoint(TargetPoint* self);                       // 0x7F slot 9
+void PostLoadTargetPoint(TargetPoint* self);                       // 0x7F slot 15
+void RegisterPointObject(C80* self);                       // 0x80 slot 6
+void UnregisterPointObject(C80* self);                       // 0x80 slot 7
+void CopyPointObject(C80* self);                       // 0x80 slot 9
+void StartPointObject(C80* self);                       // 0x80 slot 16
+void InitListedPointObject(ListedPointObject* self);                       // 0x81 slot 0
+void RegisterListedPointObject(ListedPointObject* self);                       // 0x81 slot 6
+void UnregisterListedPointObject(ListedPointObject* self);                       // 0x81 slot 7
+void CopyListedPointObject(ListedPointObject* self);                       // 0x81 slot 9
+void LoadTextPointObject(TextPointObject* self, void* stream);         // 0x82 slot 10
 
 #endif

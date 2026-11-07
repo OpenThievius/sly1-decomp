@@ -41,53 +41,53 @@ f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A34 = 20.0f;
 f32 D_00264A38 = 20.0f;
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_001C6F48(void*);
-void func_001C7140(void*);
-void func_00124DF8(void* self, s32 n, void* table);
-void func_001C72A0(void* self);
-void func_001DDC38(void* sub, void* self);
-void func_001D36F0(void* self, void* a, void* b);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-s32 func_001CA758(void* self, s32 id);
-u8* func_0018D568(s32 size, void* src);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-s32 func_00141D00(void* self, void* p1, void* p2, f32 x, s32 p3, void* p4);
-s32 func_001300E8(BaseObject* a, s32 b);
-s32 func_001833F0(BaseObject* a, s32 b);
-void func_0018D608(void* self, void* a1, void* a2);
-void func_0018D6F0(void);
-s32 func_00125750(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
-void func_001B6598(void* dev, s32* out);
-s32 func_001DDA80(void* p);
-void func_001C91C8(void* self);
-void func_001603E8(s32 n);
-void func_0018C7F8(MemoryCard* p);
-s32 func_001C96B8(void* self);
-s32 func_001C8010(void* self);
-void func_001AC060(void* p);
-void func_001C8F20(void* node, s32 kind, s32 flag);
-void func_001C7CB8(void);
-s32 func_001E9970(void);
-void func_001C9008(void*);
-void func_001B64D8(s32, s32);
+void InitAgent(void*);
+void LoadAgent(void*);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+void StartAgent(void* self);
+void SetWorldActiveFollower(void* sub, void* self);
+void CreateSixEntryBlend(void* self, void* a, void* b);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+s32 ResolveAgentClip(void* self, s32 id);
+u8* CopyToFrontMemory(s32 size, void* src);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+s32 TestColliderSegmentHit(void* self, void* p1, void* p2, f32 x, s32 p3, void* p4);
+s32 IsObjectOfKind(BaseObject* a, s32 b);
+s32 MatchesObjectId(BaseObject* a, s32 b);
+void PushBackMemoryMark(void* self, void* a1, void* a2);
+void PopBackMemoryMark(void);
+s32 ComputeObjectFrameAtTime(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+s32 IsPadSelectFlagHeld(void* p);
+void EnterAgentState(void* self);
+void MarkLevelDone(s32 n);
+void StartMemoryCardSave(MemoryCard* p);
+s32 GetAgentRosterState(void* self);
+s32 ChooseAgentState(void* self);
+void DecrementGaugeCount(void* p);
+void ChangeAgentState(void* node, s32 kind, s32 flag);
+void UpdateAgent(void);
+s32 AreMenusAndFadeClear(void);
+void LeaveAgentState(void*);
+void SetStateWalkerTarget(s32, s32);
 s32 func_001A8C90(void* obj, s32 v);
-void func_001C9DE0(void* self, s32 code, void* req);
+void HandleAgentNotification(void* self, s32 code, void* req);
 
-void func_0018A388(GaugeAgent* self)
+void InitGaugeAgent(GaugeAgent* self)
 {
 	InitAgent(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
-void func_0018A3B8(GaugeAgent* self)
+void LoadGaugeAgent(GaugeAgent* self)
 {
     LoadAgent(self);
     ResolveObjectLinks(self, 2, D_00264910);
 }
 
-void func_0018A3F0(GaugeAgent* self)
+void StartGaugeAgent(GaugeAgent* self)
 {
     s32 n;
     s32 i;
@@ -115,7 +115,7 @@ ASM_FUNC(func_0018A628);
 // A 0x70-byte hit func_00141D00 gives (collider_contact.cpp's MeshHit): its score at 0x40.
 struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
 
-s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
+s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
 {
     HitCandidate buf[2];
     s32* table = (s32*)a4;
@@ -150,7 +150,7 @@ typedef s32 (*VFn_18A830)(BaseObject* self, void* arg);
 // What func_001DC238 hands its filter (IsGaugeAgentBlocker): the object hit at 0x50.
 struct BlockerQuery { u8 pad[0x50]; BaseObject* sub; };
 
-s32 func_0018A830(void* self, BlockerQuery* rec)
+s32 IsGaugeAgentBlocker(void* self, BlockerQuery* rec)
 {
     s32* e = D_002649B0;
     u32 i;
@@ -178,9 +178,9 @@ s32 func_0018A830(void* self, BlockerQuery* rec)
 
 typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
-void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
+void GatherCollidersInBox(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
 
-s32 func_0018A910(GaugeAgent* self, void* a1, void* a2)
+s32 IsGaugeAgentLineBlocked(GaugeAgent* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
@@ -201,7 +201,7 @@ struct LineCheckFrame {
     s32 code;
 };
 
-s32 func_0018A9A8(GaugeAgent* self)
+s32 HasGaugeAgentClearLine(GaugeAgent* self)
 {
     u8* obj = (u8*)self;
     LineCheckFrame loc;
@@ -249,7 +249,7 @@ second:
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
-s32 func_0018AAE0(GaugeAgent* self)
+s32 IsGaugeAgentFree(GaugeAgent* self)
 {
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
@@ -270,7 +270,7 @@ one:
     return 1;
 }
 
-void func_0018AB88(GaugeAgent* self)
+void EnterGaugeAgentState(GaugeAgent* self)
 {
     EnterAgentState(self);
     s32 st = self->f724;
@@ -286,7 +286,7 @@ void func_0018AB88(GaugeAgent* self)
     }
 }
 
-s32 func_0018ABF0(GaugeAgent* self)
+s32 ChooseGaugeAgentState(GaugeAgent* self)
 {
     if (self->f724 == 4) {
         s32 kind;
@@ -299,7 +299,7 @@ s32 func_0018ABF0(GaugeAgent* self)
     return ChooseAgentState(self);
 }
 
-void func_0018AC58(GaugeAgent* self)
+void AdvanceGaugeAgentPhase(GaugeAgent* self)
 {
     DecrementGaugeCount((u8*)&g_gaugeBarElement);
     s32 idx = self->fE28;
@@ -309,12 +309,12 @@ void func_0018AC58(GaugeAgent* self)
     self->fE28 = n + 1;
 }
 
-void func_0018ACD0(void)
+void UpdateGaugeAgent(void)
 {
     UpdateAgent();
 }
 
-void func_0018ACF0(GaugeAgent* self)
+void ShowGaugeAgentBar(GaugeAgent* self)
 {
     s32 kind;
     GetStateWalkerCurrentKey(self->fE10, &kind);
@@ -338,7 +338,7 @@ INCLUDE_ASM(func_0018AD88);
 
 ASM_FUNC(func_0018AE38);
 
-void func_0018B2E8(GaugeAgent* self)
+void LeaveGaugeAgentState(GaugeAgent* self)
 {
     LeaveAgentState(self);
     if (self->f724 == 16) {
@@ -349,7 +349,7 @@ void func_0018B2E8(GaugeAgent* self)
     }
 }
 
-void func_0018B340(GaugeAgent* self, s32 a1, MessageBody* key)
+void HandleGaugeAgentNotification(GaugeAgent* self, s32 a1, MessageBody* key)
 {
     if (a1 == 0x13 && key->sourceId == (s32)self->f7E0) {
         switch (key->code) {
@@ -389,7 +389,7 @@ void func_0018B340(GaugeAgent* self, s32 a1, MessageBody* key)
 }
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
-void func_0018B460(GaugeAgent* a0, f32* a1)
+void GetGaugeAgentLevelFactor(GaugeAgent* a0, f32* a1)
 {
     s32 kind;
     GetStateWalkerCurrentKey(a0->fE10, &kind);

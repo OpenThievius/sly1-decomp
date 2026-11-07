@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the table byte unsigned (lbu).
-u8 func_001E13D0(RegDouble* self0, s32 a, s32 b)
+u8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
 {
     RegDouble* self = self0;
     s32 idx;

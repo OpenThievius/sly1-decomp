@@ -12,7 +12,7 @@ static const f32 g_sinX9 = 2.7557314297e-06f;
 static const f32 g_sinX11 = -2.5050759689e-08f;
 static const f32 g_sinX13 = 1.5896910177e-10f;
 
-f32 func_00208C48(s32 hasTail, f32 x, f32 y)
+f32 SineKernel(s32 hasTail, f32 x, f32 y)
 {
     s32 bits, magnitude;
     f32 x2, x3, poly;

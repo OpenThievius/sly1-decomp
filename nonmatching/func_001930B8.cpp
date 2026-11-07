@@ -11,30 +11,30 @@ struct __attribute__((aligned(16))) Cfg_1930B8 {
 typedef char check_Cfg_1930B8[sizeof(Cfg_1930B8) == 0x80 ? 1 : -1];
 
 extern u8 D_00248D30[];
-extern u8 D_00248D20[];
+extern u8 g_unitZVector[];
 extern Cfg_1930B8 D_00604700;
 extern Cfg_1930B8 D_00269C10;
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
-void func_001930B8(s32 a0, s32 a1)
+void ConstructSwitchedColliderDefaults(s32 a0, s32 a1)
 {
     if (a1 == 0xFFFF && a0 != 0) {
         {
             Cfg_1930B8 c;
             Cfg_1930B8* p = &D_00604700;
-            func_001F5C0C(&c, 0, 0x80);
+            FillMemory(&c, 0, 0x80);
             c.q60 = *(Quad16*)D_00248D30;
             *p = c;
         }
         {
             Cfg_1930B8 c;
             Cfg_1930B8* p = &D_00269C10;
-            func_001F5C0C(&c, 0, 0x80);
+            FillMemory(&c, 0, 0x80);
             c.f0 = 1000.0f;
             c.f18 = -1750.0f;
             c.f4 = 1200.0f;
             c.f20 = -0.5f;
-            c.q30 = *(Quad16*)D_00248D20;
+            c.q30 = *(Quad16*)g_unitZVector;
             c.i4c = 1;
             c.f50 = 0.5f;
             c.f54 = 2.0f;

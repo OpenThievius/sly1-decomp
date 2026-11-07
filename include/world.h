@@ -193,7 +193,7 @@ struct World : BaseObject {
 
 typedef char check_World[sizeof(World) == 0x2360 ? 1 : -1];
 
-void func_001DB4C8(World* self);      // 0x6C slot 0
-void func_001EA118(World* self);      // 0x6C slot 17 (every frame)
+void InitWorldPools(World* self);      // 0x6C slot 0
+void UpdateWorld(World* self);      // 0x6C slot 17 (every frame)
 
 #endif

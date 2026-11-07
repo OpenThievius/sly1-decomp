@@ -65,11 +65,11 @@ struct Dev_20C1A0 {
     s32 f810;
 };
 
-void func_0020B940(Dev_20C1A0* d, const char* msg, s32 code);
-void func_0020C3F0(Dev_20C1A0* d, s32 a, s32 b, s32 flags);
+void ReportMpegErrorFormat(Dev_20C1A0* d, const char* msg, s32 code);
+void ComputeMotionVectors(Dev_20C1A0* d, s32 a, s32 b, s32 flags);
 void func_00210C38(Dev_20C1A0* d);
 
-s32 func_0020C1A0(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code)
+s32 PrepareMacroblockPrediction(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code)
 {
     s32 dir = flags & 1;
     s32 q = n / d->f12C;
@@ -141,12 +141,12 @@ struct Dev_0020C3F0 {
     s32 f810;
 };
 
-void func_0020CAF8(Dev_0020C3F0* self, Frame_0020C3F0* src, s32 srcField, s32 dstField, s32 dstY, s32 height, s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average);
+void PredictMacroblock(Dev_0020C3F0* self, Frame_0020C3F0* src, s32 srcField, s32 dstField, s32 dstY, s32 height, s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average);
 void func_0020E120(Dev_0020C3F0* self, s32* out, s32* base, s32 dx, s32 dy);
-void func_0020B940(Dev_0020C3F0* self, const char* fmt, s32 value);
+void ReportMpegErrorFormat(Dev_0020C3F0* self, const char* fmt, s32 value);
 
 
-void func_0020C3F0(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* vec,
+void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* vec,
                    s32* sel, s32* base)
 {
     s32 dual[4];

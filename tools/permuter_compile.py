@@ -58,8 +58,10 @@ def only_definition(text, func):
     """The candidate with every other function definition cut down to its declaration: a near miss
     holds its whole unit, and the permuter scores all the code in the object against retail's one
     function. Inline helpers, which have readable names, keep their bodies."""
+    import symbols
     import todo
     import version_src
+    func = symbols.canonical(func)
     spans = []
     for m in todo.definitions(text):
         name = m.group(1)

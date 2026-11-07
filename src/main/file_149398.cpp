@@ -24,17 +24,17 @@
 #include "object_pool.h"
 #include "owner_message.h"
 
-s32 func_001300E8(void* node, s32 kind);
+s32 IsObjectOfKind(void* node, s32 kind);
 extern s32 D_00275BEC;
-extern f32 D_00261850;
+extern f32 g_timeScale;
 
 
 
 
-void func_001C91C8(NumberedAgent* self);
+void EnterAgentState(NumberedAgent* self);
 
 
-void func_0012F6B0(void* handle, f32 scale);
+void SetAnimationPlayerSpeed(void* handle, f32 scale);
 // An agent of the world's list at +0x1CCC (linked at +0xC10), seen as its table of slots:
 // slot 0x50 takes an owner message (func_0014BDC8, func_0014BEF8).
 typedef void (*AgentMessageFn)(void* self, void* arg);
@@ -51,60 +51,60 @@ struct Scratch_0014BDC8 {
     s32 words[8];
 };
 
-s32 func_001C8010(ContactAgent* self);
+s32 ChooseAgentState(ContactAgent* self);
 
 
-s32 func_001B9FB0(void* a, void* b);
-void func_001D7098(void* out, s32 mode, ContactAgent* owner);
-void func_001C8F20(void* node, s32 kind, s32 flag);
-s32 func_001DDA80(void* p);
+s32 IsContactBetweenParts(void* a, void* b);
+void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
+void ChangeAgentState(void* node, s32 kind, s32 flag);
+s32 IsPadSelectFlagHeld(void* p);
 
 
-s32 func_001C96D8(ContactAgent* self, ListedAgentView** slot);
-void func_001D7098(void* out, s32 mode, ContactAgent* owner);
-void func_00149398(CameraController* self, Camera* owner);
+s32 HandleAgentObjectEvent(ContactAgent* self, ListedAgentView** slot);
+void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
+void SetCameraControllerOwner(CameraController* self, Camera* owner);
 
 
-void func_00189230(void* a, void* b, void* c);
-s32 func_001493C8(void* out, TargetCameraController* self);
-void func_00144B70(void* eng, void* tmp);
-void func_00143968(void* eng, f32 x);
-extern void* D_0026EC68;
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6598(void* dev, s32* out);
-void func_001C74E8(void* self);
-void func_00152470(void* table, void* self);
+void VectorToAngles(void* a, void* b, void* c);
+s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
+void SetCameraLookAnchor(void* eng, void* tmp);
+void SetCameraNearDistance(void* eng, f32 x);
+extern void* g_deadlineNotifier;
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void RegisterAgent(void* self);
+void AppendToList(void* table, void* self);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void func_001EAD88(void* a, void* b, f32 value);
-void func_001C7520(void*);
-void func_00152600(void*, void*);
-void func_001C7188(void*, void*);
-void func_001C6F48(void*);
-void func_001C72A0(void*);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6598(void* dev, s32* out);
+void ComputeSinCos(void* a, void* b, f32 value);
+void UnregisterAgent(void*);
+void RemoveFromList(void*, void*);
+void CopyAgent(void*, void*);
+void InitAgent(void*);
+void StartAgent(void*);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
 
 
-s32 func_001493C8(void* out, TargetCameraController* self);
-void func_00149458(void* out, void* self);
-void func_001BF788(void* self, s32 n);
-void func_00144938(void* self, void* a, void* b);
-s32 func_001EAC68(f32 a, f32 b, f32 c);
-void func_00143940(void* self, f32 x);
-void func_00143968(void* self, f32 x);
+s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
+void GetTargetCameraControllerEyePoint(void* out, void* self);
+void StopSoundRecord(void* self, s32 n);
+void PlaceCameraLookingAt(void* self, void* a, void* b);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
+void SnapCameraZoom(void* self, f32 x);
+void SetCameraNearDistance(void* self, f32 x);
 
 
-void func_001C91C8(void* self);
-void func_0014CD70(void* mgr, void* self);
-void func_0012F6B0(void* sub, f32 x);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_0011D640(s32 a);
+void EnterAgentState(void* self);
+void CountDownGaugeContacts(void* mgr, void* self);
+void SetAnimationPlayerSpeed(void* sub, f32 x);
+f32 RandomFloatInRange(f32 a, f32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void PauseIopVoice(s32 a);
 
 // What StartCameraSounds keeps of each sound it starts: the IOP voice at +0x18 it pauses.
 struct CameraSound {
@@ -120,111 +120,111 @@ struct CameraSoundOwner {
     s32 f4C;
 };
 
-s32 func_001C96D8(NumberedAgent* self);
-extern u8 D_00261990[];
-void func_001920B0(void* n, void* out);
-extern u8 D_002483D0[];
-extern u8 D_002483D0[];
+s32 HandleAgentObjectEvent(NumberedAgent* self);
+extern u8 g_camera[];
+void ConvertPositionToWorld(void* n, void* out);
+extern u8 g_identityMatrix[];
+extern u8 g_identityMatrix[];
 extern u8 D_00248D30[];
-f32 func_001EAAE0(f32 a, f32 b);
-extern u8 D_002483D0[];
+f32 RandomFloatInRange(f32 a, f32 b);
+extern u8 g_identityMatrix[];
 extern u8 D_00248D30[];
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+f32 RandomFloatInRange(f32 a, f32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern T217D_Vt D_00218330;
-void func_00152600(void* a, void* b);
-s32 func_001300E8(void* a, s32 b);
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 idx, void* table);
+void RemoveFromList(void* a, void* b);
+s32 IsObjectOfKind(void* a, s32 b);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 idx, void* table);
 
 
-void func_001B6568(void* dev, s32* out);
-void func_001B6598(void* dev, s32* out);
-void func_001B64D8(void* dev, s32 value);
-void func_0014C5E8(GaugeManager* self);
-extern f32 D_00261858[];
-void func_00124FC0(void* self);
-void func_0014C858(void* self);
-void func_0014CBA8(void* self);
-void* func_001925F0(void);
+void GetStateWalkerTargetKey(void* dev, s32* out);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void SetStateWalkerTarget(void* dev, s32 value);
+void ApplyGaugeRatioToEffect(GaugeManager* self);
+extern f32 g_gameClock[];
+void UpdatePlacedObject(void* self);
+void RunGaugeTimedEvent(void* self);
+void ActivateRandomGaugeSlot(void* self);
+void* GetActiveSwitchedCollider(void);
 // The active collider seen as its table of slots: slot 81 (func_0014C6E0, func_0014CDC8).
 typedef void (*ColliderSlotFn)(void* self);
 
 struct ColliderSlots { ColliderSlotFn* vtbl; };
 
-void* func_001E9970(void* zero);
-extern f32 D_0026185C[];
-f32 func_001EAAE0(f32 a, f32 b);
+void* AreMenusAndFadeClear(void* zero);
+extern f32 g_gameTime[];
+f32 RandomFloatInRange(f32 a, f32 b);
 
 
-void* func_0015A448(void* a, void* b, void* c);
-s32 func_001300E8(void* obj, s32 kind);
-void func_001B6598(void* h, s32* out);
-void func_001B6568(void* h, s32* out);
-void func_001B64D8(void* h, s32 code);
-void func_00152470(void*,void*);
-void func_00127378(void* self, s32 kind, void* msg);
-void func_00127378(void* self, s32 kind, void* msg);
-void func_001B6568(void* dev, s32* out);
+void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
+s32 IsObjectOfKind(void* obj, s32 kind);
+void GetStateWalkerCurrentKey(void* h, s32* out);
+void GetStateWalkerTargetKey(void* h, s32* out);
+void SetStateWalkerTarget(void* h, s32 code);
+void AppendToList(void*,void*);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void GetStateWalkerTargetKey(void* dev, s32* out);
 
 
-void func_00124DF8(void* self, s32 n, void* table);
-BaseObject* func_0015A480(void* a, s32 kind, void* arg);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+BaseObject* FindFirstObjectByIdMode1(void* a, s32 kind, void* arg);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
 
 
 
-extern f32 D_00275C60[];
-void func_00124A48(GaugeManager* self);
-void func_00124DF8(GaugeManager* self, s32 n, void* table);
-void* func_001B6290(void* a, s32 b, s32 c, s32 d);
-void func_001B6598(void* a, void* b);
-void func_001B6DF8(void* a, void* b);
-void func_0014C2F0(GaugeManager* self);
-extern f32 D_0026185C[];
+extern f32 g_unitRange[];
+void StartPlacedObject(GaugeManager* self);
+void ResolveObjectLinks(GaugeManager* self, s32 n, void* table);
+void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
+void GetStateWalkerCurrentKey(void* a, void* b);
+void AddStateWalkerListener(void* a, void* b);
+void ComputeGaugeOutputs(GaugeManager* self);
+extern f32 g_gameTime[];
 
 
-void func_0014CDC8(GaugeManager* self, NumberedAgent* arg);
+void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg);
 typedef s32 (*ColliderQueryFn)(void* self);
 
 struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
 
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001B6568(void* dev, s32* out);
-void func_001B6598(void* dev, s32* out);
-void* func_001925F0(void);
-void func_001B64D8(void* dev, s32 value);
-s32 func_0015A4F0(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
-void func_001C8F20(s32 value, s32 a1, s32 a2);
-void func_001AB958(void* obj);
-void func_0014C2F0(GaugeManager* self);
-extern f32 D_0026185C[];
-void func_00151E20(void* self, f32 amount);
+f32 RandomFloatInRange(f32 a, f32 b);
+void GetStateWalkerTargetKey(void* dev, s32* out);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void* GetActiveSwitchedCollider(void);
+void SetStateWalkerTarget(void* dev, s32 value);
+s32 GatherObjectsById(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
+void ChangeAgentState(s32 value, s32 a1, s32 a2);
+void StopTimer(void* obj);
+void ComputeGaugeOutputs(GaugeManager* self);
+extern f32 g_gameTime[];
+void RaiseScatterLevels(void* self, f32 amount);
 extern u8 D_00248D30[];
 extern u8 D_00248D30[];
-void func_001B6598(void* p, s32* out);
-void func_001B6568(void* p, s32* out);
+void GetStateWalkerCurrentKey(void* p, s32* out);
+void GetStateWalkerTargetKey(void* p, s32* out);
 
 extern u8 D_00248D30[];
-void func_001A8AF8(ObjectPool* p);
-s32 func_001EAA70(s32 a, s32 b);
+void ChooseObjectPoolItem(ObjectPool* p);
+s32 RandomIntInRange(s32 a, s32 b);
 s32 func_001A8C90(ObjectPool* h, s32 v);
-s32 func_001F3BD8(void* p, f32* out);
-s32 func_001F3C08(void* p, f32* out);
-s32 func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
-void func_0012F810(void* a, GaugeManager* self);
-f32 func_001EAAE0(f32 a, f32 b);
+s32 GetObjectWorldPosition(void* p, f32* out);
+s32 GetObjectWorldRotation(void* p, f32* out);
+s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
+void AddAnimationPlayerRecordCallback(void* a, GaugeManager* self);
+f32 RandomFloatInRange(f32 a, f32 b);
 
 
-void func_00123ED0(GaugeManager* self);
+void InitPlacedObject(GaugeManager* self);
 typedef void (*TimerDoneFn)(void* self);
-void func_00127378(GaugeManager* self, s32 kind, void* key);
-void func_001B6598(void* key, s32* out);
-void func_001DDC38(void* sub, GaugeManager* self);
-void func_001AB890(T217D_510* self, f32 v);
-void func_001AB928(T217D_510* self, f32 v, TimerDoneFn cb);
-void func_001AB938(T217D_510* self);
-void func_0014C668(void* self);
+void HandlePlacedObjectNotification(GaugeManager* self, s32 kind, void* key);
+void GetStateWalkerCurrentKey(void* key, s32* out);
+void SetWorldActiveFollower(void* sub, GaugeManager* self);
+void StartTimer(T217D_510* self, f32 v);
+void SetTimerLimit(T217D_510* self, f32 v, TimerDoneFn cb);
+void StartTimerCounting(T217D_510* self);
+void FinishGaugeOnTimeout(void* self);
 
 // The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
 struct Quadratic {
@@ -278,8 +278,8 @@ struct BlendedGaugeParams {
     Quadratic qA0;
 };
 
-extern f32 D_00275C60[];
-extern f32 D_00261858[];
+extern f32 g_unitRange[];
+extern f32 g_gameClock[];
 
 // The file's statics (.bss from 0x27C008).
 static s32 D_0027C008;  // a running count, reset by func_0014B608
@@ -302,29 +302,29 @@ f32 D_00261C8C = 24.0f;
 s32 D_00261C90 = 4;
 f32 D_00261C94 = 900.0f;
 f32 D_00261C98 = 1200.0f;
-ObjectLink D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
+ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
-void func_00149398(CameraController* self, Camera* owner)
+void SetCameraControllerOwner(CameraController* self, Camera* owner)
 {
     self->owner = owner;
 }
 
-s32 func_001493A0(CameraController* self)
+s32 IsTopCameraController(CameraController* self)
 {
     return self->owner->stack[0].ctl == self;
 }
 
-void func_001493B8(CameraController* self, s32 value)
+void SetCameraControllerValue(CameraController* self, s32 value)
 {
     self->value = value;
 }
 
-void func_001493C0(CameraController* self, u8* eye, u8* tail, f32 dt)
+void UpdateIdleCameraController(CameraController* self, u8* eye, u8* tail, f32 dt)
 {
 }
 
 
-Quad16 func_001493C8(TargetCameraController* self)
+Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
 {
     Quad16 r;
     if (self->f5C != 0) {
@@ -342,17 +342,17 @@ Quad16 func_001493C8(TargetCameraController* self)
 
 ASM_FUNC(func_00149458);
 
-void func_00149508(CameraSoundOwner* self)
+void StartCameraSounds(CameraSoundOwner* self)
 {
     StartSoundEffect(0x71, &self->f48, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     if (self->f48 != 0) {
-        func_0011D640(self->f48->voice);
+        PauseIopVoice(self->f48->voice);
     }
     StartSoundEffect(0x70, &self->f4C, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     self->f44 = 1;
 }
 
-void func_001495E8(TargetCameraController* s, s32 value)
+void PushStackValue(TargetCameraController* s, s32 value)
 {
     s32 n = s->count;
     if ((u32)n < 4) {
@@ -361,7 +361,7 @@ void func_001495E8(TargetCameraController* s, s32 value)
     }
 }
 
-s32 func_00149610(TargetCameraController* s)
+s32 PopStackValue(TargetCameraController* s)
 {
     s32 n = s->count;
     if (n <= 0) {
@@ -372,7 +372,7 @@ s32 func_00149610(TargetCameraController* s)
     return s->items[n];
 }
 
-s32 func_00149638(TargetCameraController* s)
+s32 PeekStackValue(TargetCameraController* s)
 {
     s32 n = s->count;
     if (n <= 0) {
@@ -381,7 +381,7 @@ s32 func_00149638(TargetCameraController* s)
     return s->items[n - 1];
 }
 
-void func_00149660(TargetCameraController* self, Camera* owner)
+void InitTargetCameraController(TargetCameraController* self, Camera* owner)
 {
     SetCameraControllerOwner(self, owner);
     self->count = 0;
@@ -392,7 +392,7 @@ void func_00149660(TargetCameraController* self, Camera* owner)
     self->f50 = 0;
 }
 
-void func_001496C0(TargetCameraController* self)
+void ActivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
@@ -407,7 +407,7 @@ void func_001496C0(TargetCameraController* self)
     self->f28 = a;
     self->f24 = a / d;
     GetCameraControllerTargetPoint(&tmp, self);
-    func_00144B70(eng, &tmp);
+    SetCameraLookAnchor(eng, &tmp);
     self->f2C = eng->f1E4;
     SetCameraNearDistance(eng, 49.0f);
 }
@@ -418,7 +418,7 @@ INCLUDE_RODATA(jtbl_00249ED0);
 
 ASM_FUNC(func_00149760);
 
-void func_0014A7B8(TargetCameraController* self)
+void DeactivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 a;
     Quad4 b;
@@ -429,8 +429,8 @@ void func_0014A7B8(TargetCameraController* self)
     n = (Camera*)self->owner;
     StopSoundRecord(self->p48, 0);
     StopSoundRecord(self->p4C, 500);
-    func_00144938(n, &b, &a);
-    if (func_001EAC68(n->f1C4, self->f28, 1e-4f) == 0) {
+    PlaceCameraLookingAt(n, &b, &a);
+    if (AreFloatsNearlyEqual(n->f1C4, self->f28, 1e-4f) == 0) {
         SnapCameraZoom(n, self->f28);
     }
     self->f5C = 0;
@@ -439,28 +439,28 @@ void func_0014A7B8(TargetCameraController* self)
     }
 }
 
-void func_0014A888(FrameCameraController* self, Camera* a1)
+void InitFrameCameraController(FrameCameraController* self, Camera* a1)
 {
     SetCameraControllerOwner(self, a1);
     CameraFrameBlock* dst = &self->frame20;
     *dst = *(CameraFrameBlock*)g_identityMatrix;
 }
 
-void func_0014A8D0(FrameCameraController* self)
+void ActivateFrameCameraController(FrameCameraController* self)
 {
     Camera* parent = self->owner;
-    func_00144B70(parent, (u8*)parent->stack[0].target + 0x370);
+    SetCameraLookAnchor(parent, (u8*)parent->stack[0].target + 0x370);
 }
 
 ASM_FUNC(func_0014A8F8);
 
-void func_0014AA90(ValueCameraController* obj, s32 value) { obj->value = value; }
+void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj->value = value; }
 
-void func_0014AA98(ValueCameraController* obj) { obj->value = 0; }
+void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 
 ASM_FUNC(func_0014AAA0);
 
-void func_0014ABD0(T217D_720* self)
+void InitItemColumn(T217D_720* self)
 {
     u32 n;
 
@@ -473,7 +473,7 @@ void func_0014ABD0(T217D_720* self)
     }
 }
 
-void func_0014AC48(T217D_720* self)
+void SetupItemColumn(T217D_720* self)
 {
     T217D_330* e;
     u32 i;
@@ -493,7 +493,7 @@ void func_0014AC48(T217D_720* self)
     }
 }
 
-void func_0014AD00(T217D_720* self, f32* clock)
+void UpdateItemColumn(T217D_720* self, f32* clock)
 {
     SetScreenElementClock(self, clock);
     T217D_330* e = self->items;
@@ -503,7 +503,7 @@ void func_0014AD00(T217D_720* self, f32* clock)
     }
 }
 
-void func_0014AD70(T217D_720* self)
+void UpdateItemColumnSlide(T217D_720* self)
 {
     UpdateScreenElementSlide(self);
     for (s32 i = 0; i < self->count; i++) {
@@ -512,7 +512,7 @@ void func_0014AD70(T217D_720* self)
     }
 }
 
-void func_0014ADE0(T217D_720* self)
+void DrawItemColumn(T217D_720* self)
 {
     if (D_00275BEC == 1) {
         f32 acc = self->y;
@@ -532,7 +532,7 @@ void func_0014ADE0(T217D_720* self)
     }
 }
 
-void func_0014AEA0(T217D_720* self, s32 n, f32 x, f32 y)
+void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
 {
     self->place->dx = x;
     self->place->dy = y;
@@ -542,14 +542,14 @@ void func_0014AEA0(T217D_720* self, s32 n, f32 x, f32 y)
     self->vt->m16(self, 2);
 }
 
-void func_0014AF10(T217D_720* self)
+void ClearItemColumn(T217D_720* self)
 {
     self->vt->m16(self, 0);
 }
 
 ASM_FUNC(func_0014AF38);
 
-void func_0014B0C0(s32 n, f32* a, f32* l)
+void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
 {
     s32 i;
     s32 j;
@@ -621,7 +621,7 @@ void func_0014B0C0(s32 n, f32* a, f32* l)
     }
 }
 
-void func_0014B3E0(s32 n, f32* m, f32* b, f32* x)
+void SolveFactoredSystem(s32 n, f32* m, f32* b, f32* x)
 {
     s32 i;
     s32 k;
@@ -650,21 +650,21 @@ void func_0014B3E0(s32 n, f32* m, f32* b, f32* x)
     }
 }
 
-void func_0014B550(WorldListedAgent* self)
+void RegisterWorldListedAgent(WorldListedAgent* self)
 {
     RegisterAgent(self);
     AppendToList(&self->world->list1CCC, self);
 }
 
-void func_0014B588(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
+void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
 
-void func_0014B5C0(WorldListedAgent* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
+void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
 
-void func_0014B608(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
+void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
 
-void func_0014B640(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
+void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
 
-void func_0014B678(SinCosPair* self, f32 value)
+void SetSinCosPair(SinCosPair* self, f32 value)
 {
     ComputeSinCos(&self->b, self, value);
     self->value = 0;
@@ -676,7 +676,7 @@ ASM_FUNC(func_0014B6A8);
 
 ASM_FUNC(func_0014BB08);
 
-s32 func_0014BCE8(NumberedAgent* self)
+s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
 {
     if (self->f724 == 0x10) {
         return 1;
@@ -691,7 +691,7 @@ s32 func_0014BCE8(NumberedAgent* self)
     return 1;
 }
 
-void func_0014BD38(NumberedAgent* self)
+void EnterNumberedAgentState(NumberedAgent* self)
 {
     EnterAgentState(self);
     switch (self->f724) {
@@ -706,7 +706,7 @@ void func_0014BD38(NumberedAgent* self)
     }
 }
 
-s32 func_0014BDC8(ContactAgent* self)
+s32 ChooseAgentStateByContact(ContactAgent* self)
 {
     s32 result = ChooseAgentState(self);
     if (result == 0xB) return result;
@@ -725,14 +725,14 @@ s32 func_0014BDC8(ContactAgent* self)
     return result;
 }
 
-s32 func_0014BEA8(ContactAgent* self)
+s32 IsContactAgentFree(ContactAgent* self)
 {
-    if (func_001DDA80(self->world) != 0) return 0;
+    if (IsPadSelectFlagHeld(self->world) != 0) return 0;
     if (self->f724 == 0xB || self->f724 == 0x10) return 0;
     return 1;
 }
 
-s32 func_0014BEF8(ContactAgent* self, ListedAgentView** slot)
+s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 {
     if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
     if (HandleAgentObjectEvent(self, slot) == 0) return 0;
@@ -746,7 +746,7 @@ s32 func_0014BEF8(ContactAgent* self, ListedAgentView** slot)
     return 1;
 }
 
-void func_0014BF88(ContactAgent* self)
+void EnterContactAgentState(ContactAgent* self)
 {
     EnterAgentState(self);
     switch (self->f724) {
@@ -767,13 +767,13 @@ void func_0014BF88(ContactAgent* self)
     }
 }
 
-extern const GaugeParams D_00249F00 = {
+extern const GaugeParams g_defaultGaugeParams = {
     { 0x41000000, 0x40C00000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A, 0x3F19999A, 0x3F4CCCCD, 0x3FA66666, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A },
     { 3.5f, 5.0f }, { 2.0f, 2.5f },
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }
 };
 
-void func_0014C018(GaugeManager* self)
+void InitGaugeManager(GaugeManager* self)
 {
     InitPlacedObject(self);
     self->maxAmount = 50;
@@ -790,14 +790,14 @@ void func_0014C018(GaugeManager* self)
     D_0027C00C = self;
 }
 
-void func_0014C138(GaugeManager* self)
+void BlendParamSets(GaugeManager* self)
 {
     s32 i = 0;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
     self->device = CreateStateWalker(self->f428, 0, 0x3FB, 0);
-    func_001B6598(self->device, self->buf430);
-    func_001B6DF8(self->device, self);
+    GetStateWalkerCurrentKey(self->device, self->buf430);
+    AddStateWalkerListener(self->device, self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
         BaseObject* n = (BaseObject*)FindFirstObjectByIdMode4(self->world, s->obj, self);
@@ -829,7 +829,7 @@ void func_0014C138(GaugeManager* self)
     ComputeGaugeOutputs(self);
 }
 
-void func_0014C2F0(GaugeManager* o)
+void ComputeGaugeOutputs(GaugeManager* o)
 {
     f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
     BlendedGaugeParams* p = (BlendedGaugeParams*)o->o5E0;
@@ -855,7 +855,7 @@ void func_0014C2F0(GaugeManager* o)
     }
 }
 
-void func_0014C5E8(GaugeManager* self)
+void ApplyGaugeRatioToEffect(GaugeManager* self)
 {
     f32 one = 1.0f;
     f32 ratio = (f32)self->amount / (f32)self->maxAmount;
@@ -870,12 +870,12 @@ void func_0014C5E8(GaugeManager* self)
     RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
 }
 
-void func_0014C668(void* unused, s32 mode)
+void FinishGaugeOnTimeout(void* unused, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
-        func_001B6568(D_0027C00C->device, &t[0]);
-        func_001B6598(D_0027C00C->device, &t[1]);
+        GetStateWalkerTargetKey(D_0027C00C->device, &t[0]);
+        GetStateWalkerCurrentKey(D_0027C00C->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
             SetStateWalkerTarget(D_0027C00C->device, 0x3FF);
             ApplyGaugeRatioToEffect(D_0027C00C);
@@ -883,11 +883,11 @@ void func_0014C668(void* unused, s32 mode)
     }
 }
 
-void func_0014C6E0(GaugeManager* self)
+void UpdateGaugeManager(GaugeManager* self)
 {
     s32 tag;
     UpdatePlacedObject(self);
-    func_001B6598(self->device, &tag);
+    GetStateWalkerCurrentKey(self->device, &tag);
     if (tag == 0x3FD) {
         if (self->f45C < g_gameClock[1]) {
             RunGaugeTimedEvent(self);
@@ -901,10 +901,10 @@ void func_0014C6E0(GaugeManager* self)
     }
 }
 
-void func_0014C788(GaugeManager* self)
+void ShowGaugeManagerDisplays(GaugeManager* self)
 {
     s32 tag;
-    func_001B6598(self->device, &tag);
+    GetStateWalkerCurrentKey(self->device, &tag);
     void* p = 0;
     if (tag == 0x3FD) {
         p = AreMenusAndFadeClear(p);
@@ -918,12 +918,12 @@ void func_0014C788(GaugeManager* self)
     }
 }
 
-void* func_0014C820(GaugeManager* self)
+void* GetGaugeParams(GaugeManager* self)
 {
     return (u8*)self + (self->setIndex * 0xB0 + 0x480);
 }
 
-void func_0014C838(GaugeManager* self, s32 value)
+void AppendGaugeSlot(GaugeManager* self, s32 value)
 {
     s32 i = self->slotCount;
     self->slotCount = i + 1;
@@ -934,7 +934,7 @@ INCLUDE_RODATA(D_00249FB4);
 
 ASM_FUNC(func_0014C858);
 
-void func_0014CBA8(GaugeManager* self)
+void ActivateRandomGaugeSlot(GaugeManager* self)
 {
     GaugeSlot* list[16];
     f32 v0[4];
@@ -963,7 +963,7 @@ void func_0014CBA8(GaugeManager* self)
     c->desc02()->m20(c, (Vec02*)D_00248D30);
     c->desc02()->m21(c, (Vec02*)D_00248D30);
     CreateAnimationPlayerWithoutPresetTargets(s->f8, s->obj, 0, &s->key, 0.0f, 1.0f);
-    func_0012F810(s->key, self);
+    AddAnimationPlayerRecordCallback(s->key, self);
     self->f454 = self->f454 + 1;
     f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
     self->f460 = (*(f32*)&g_gameTime) + r;
@@ -971,7 +971,7 @@ void func_0014CBA8(GaugeManager* self)
     s->taken = 1;
 }
 
-void func_0014CD70(GaugeManager* self)
+void CountDownGaugeContacts(GaugeManager* self)
 {
     if (self->f458 == self->f450) {
         self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
@@ -979,7 +979,7 @@ void func_0014CD70(GaugeManager* self)
     self->f458 = self->f458 - 1;
 }
 
-void func_0014CDC8(GaugeManager* self, NumberedAgent* arg)
+void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
 {
     s32 hi = self->maxAmount;
     s32 v = self->amount + arg->fC24;
@@ -995,8 +995,8 @@ void func_0014CDC8(GaugeManager* self, NumberedAgent* arg)
         s32 arr[32];
         s32 t1;
         s32 t2;
-        func_001B6598(self->device, &t1);
-        func_001B6568(self->device, &t2);
+        GetStateWalkerCurrentKey(self->device, &t1);
+        GetStateWalkerTargetKey(self->device, &t2);
         void* p = GetActiveSwitchedCollider();
         ColliderQuerySlots* o = (ColliderQuerySlots*)p;
         s32 r = o->vtbl[81](p);
@@ -1021,7 +1021,7 @@ void func_0014CDC8(GaugeManager* self, NumberedAgent* arg)
     self->f454 = self->f454 - 1;
 }
 
-void func_0014CF30(GaugeManager* self, s32 kind, void* key)
+void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
 {
     HandlePlacedObjectNotification(self, kind, key);
     switch (kind) {
@@ -1040,7 +1040,7 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
     case 0x14:
         if (key == self->device) {
             s32 out;
-            func_001B6598(key, &out);
+            GetStateWalkerCurrentKey(key, &out);
             if (out == 0x3FD) {
                 g_gaugeAmountCaption.target = &self->amount;
                 g_gaugeAmountCaption.limit = &self->maxAmount;

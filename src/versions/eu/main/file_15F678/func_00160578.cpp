@@ -3,7 +3,7 @@
 extern u8 D_eu_00249050[];
 extern s32 D_eu_00263710;
 
-void func_00160578(s32 kind)
+void FadeOutAndQueueMovie(s32 kind)
 {
     s32 s0 = -1;
 

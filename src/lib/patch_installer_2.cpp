@@ -33,10 +33,10 @@ ASM_FUNC(func_001F9F40);
 
 struct Word_1F9F50 { u32 value; };
 
-void func_001F6BA0(Word_1F9F50* w);
-void func_001F6B90(Word_1F9F50* w);
+void ReadSystemConfig(Word_1F9F50* w);
+void WriteSystemConfig(Word_1F9F50* w);
 
-s32 func_001F9F50(void)
+s32 IsSecondKernelPatchNeeded(void)
 {
     Word_1F9F50 a;
     Word_1F9F50 b;
@@ -115,13 +115,13 @@ u32 D_002771F0[490] = {
 
 struct Slot_1F9FB8 { s32 key; s32 value; };
 Slot_1F9FB8 D_00277998[3] = { { 0x5A, (s32)func_001F9F08 }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
-s32 func_001F9F50(void);
+s32 IsSecondKernelPatchNeeded(void);
 void func_001F9EE8(s32 a, s32 b);
 void func_001F9EF8(s32 a, void* b, s32 c);
-void func_001F6C20(s32 a);
+void SyncDataCache(s32 a);
 s32 func_001F9F40(s32 key);
 
-void func_001F9FB8(void)
+void InstallSecondKernelPatch(void)
 {
     Slot_1F9FB8* q;
     u32 i;

@@ -34,8 +34,8 @@ u32 D_00279418 = 0;
 u32 D_0027941C = 0;
 s32 D_00279420 = -1;
 s32 D_00279424 = 0;
-s32 D_00279428 = -1;
-s32 D_0027942C = -1;
+s32 g_discNSemaphore = -1;
+s32 g_discSSemaphore = -1;
 volatile s32 D_00279430 = 0;
 u32 D_00279434 = 0;
 s32 D_00279438 = -1;
@@ -51,10 +51,10 @@ u8 D_00279480[128] __attribute__((aligned(64))) = { 0 };
 u8 D_00279500[0x1000] __attribute__((aligned(64))) = { 0 };
 u8 D_0027A500[192] __attribute__((aligned(64))) = { 0 };
 u32 D_0027A5C0[4] __attribute__((aligned(64))) = { 0 };
-RemoteCallClient D_0027A5D0 = { 0 };
+RemoteCallClient g_discNClient = { 0 };
 u8 D_0027A600[1088] __attribute__((aligned(64))) = { 0 };
 u32 D_0027AA40[0x102] __attribute__((aligned(64))) = { 0 };
-RemoteCallClient D_0027AE48 = { 0 };
+RemoteCallClient g_discSClient = { 0 };
 
 static s32 D_0062A7C0;
 static void (*D_0062A7C4)(s32);
@@ -67,40 +67,40 @@ static RemoteCallClient D_0062AA10;
 static s32 D_0062AA40[4] __attribute__((aligned(64)));
 static RemoteCallClient D_0062AA50;
 
-s32 func_001F69E0(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
-s32 func_001F6A90(void);
-s32 func_001F6AA0(s32 thread, void* status);
-s32 func_001F6B20(SemaphoreParams* param);
-s32 func_001F6B30(s32 sema);
-s32 func_001F6B40(s32 sema);
-s32 func_001F6B50(s32 sema);
-s32 func_001F6B60(s32 sema);
-s32 func_001F6B70(s32 sema);
-s32 func_001F7B88(const char* format, ...);
-void func_001F7BE8(s32 mode);
-s32 func_001F80C0(RemoteCallClient* client, u32 server, s32 mode);
-s32 func_001F8290(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 ScheduleAlarm(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
+s32 GetCurrentThreadId(void);
+s32 QueryThreadStatus(s32 thread, void* status);
+s32 NewSemaphore(SemaphoreParams* param);
+s32 FreeSemaphore(s32 sema);
+s32 PostSemaphore(s32 sema);
+s32 PostSemaphoreFromInterrupt(s32 sema);
+s32 AwaitSemaphore(s32 sema);
+s32 TrySemaphore(s32 sema);
+s32 PrintBuffered(const char* format, ...);
+void InitRemoteCalls(s32 mode);
+s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
+s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void (*end)(void*), void* end_arg);
-s32 func_001F8480(RemoteCallClient* client);
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-s32 func_001FA4A0(s32 cause, void (*handler)(void), s32 next);
-s32 func_001FA4D0(s32 cause);
-void func_001FA7D8(void* start, s32 size);
+s32 IsRemoteCallPending(RemoteCallClient* client);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+s32 SetCommandHandler(s32 cause, void (*handler)(void), s32 next);
+s32 ClearCommandHandler(s32 cause);
+void WriteBackDataCacheRange(void* start, s32 size);
 
-void func_00202D08(s32 id, u16 time, s32 sema);
-void func_00202DA0(s32* code);
-void func_00202E50(ReadTail* tail);
-void func_00202EF0(void);
-void func_00203010(void);
-s32 func_002030C0(s32 command);
-s32 func_002032C8(s32 mode);
-s32 func_00203368(s32 mode);
-s32 func_002033D8(s32 command);
+void WakeDiscWaiter(s32 id, u16 time, s32 sema);
+void EndDiscCommand(s32* code);
+void CopyDiscReadTail(ReadTail* tail);
+void CreateDiscSemaphores(void);
+void RunDiscCallback(void);
+s32 BeginDiscNCommand(s32 command);
+s32 SyncDiscNCommand(s32 mode);
+s32 SyncDiscSCommand(s32 mode);
+s32 BeginDiscSCommand(s32 command);
 
 ASM_FUNC(func_00202D08);
 
-void func_00202D30(u16 ticks)
+void WaitDiscTicks(u16 ticks)
 {
     SemaphoreParams param;
     s32 sema;
@@ -119,7 +119,7 @@ LINKER_REMNANT(func_00202D98);
 /* The end of a command: called from the remote call's end callback, in the interrupt, with the
  * status it received. It releases the command's semaphore, and the callback's when one is set;
  * the words it reads and writes are shared with the threads, read and written as volatile. */
-void func_00202DA0(s32* code)
+void EndDiscCommand(s32* code)
 {
     D_00279454 = *code;
     D_00279458 = D_00279454;
@@ -139,7 +139,7 @@ void func_00202DA0(s32* code)
 
 LINKER_REMNANT(func_00202E40);
 
-void func_00202E50(ReadTail* tail)
+void CopyDiscReadTail(ReadTail* tail)
 {
     ReadTail* q = (ReadTail*)((u32)tail | 0x20000000);
     s32 i;
@@ -160,7 +160,7 @@ void func_00202E50(ReadTail* tail)
 }
 
 /* Creates the semaphores of the two clients' commands and of the callback, once. */
-void func_00202EF0(void)
+void CreateDiscSemaphores(void)
 {
     SemaphoreParams param;
 
@@ -168,15 +168,15 @@ void func_00202EF0(void)
         param.option = 0;
         param.initCount = 1;
         param.maxCount = 1;
-        *(volatile s32*)&D_00279428 = func_001F6B20(&param);
-        *(volatile s32*)&D_0027942C = func_001F6B20(&param);
+        *(volatile s32*)&g_discNSemaphore = NewSemaphore(&param);
+        *(volatile s32*)&g_discSSemaphore = NewSemaphore(&param);
         param.initCount = 0;
-        *(volatile s32*)&D_00279420 = func_001F6B20(&param);
+        *(volatile s32*)&D_00279420 = NewSemaphore(&param);
         D_00279430 = 0;
     }
 }
 
-void func_00202F88(void)
+void DeleteDiscSemaphores(void)
 {
     if (D_00279414) {
         /* A bare do/while(0), allowed for this function alone by the project's decision: retail
@@ -195,14 +195,14 @@ void func_00202F88(void)
 
 LINKER_REMNANT(func_00203008);
 
-void func_00203010(void)
+void RunDiscCallback(void)
 {
     if (D_0062A7C4 && !D_00279424) {
         D_0062A7C4(D_0062A7C8[0]);
     }
 }
 
-s32 func_00203050(void)
+s32 InstallDiscCallbackHandler(void)
 {
     D_00279424 = 1;
     DisableInterrupts();
@@ -226,7 +226,7 @@ const char D_0024F5E0[] = "search loc lbn %d\n";
  * retrying after a busy wait (cc1 pads the one-instruction wait loop with four nops, for the
  * R5900's short-loop erratum). The semaphore word is read as volatile, as the end callback
  * releases it. */
-s32 func_002030C0(s32 command)
+s32 BeginDiscNCommand(s32 command)
 {
     s32 i;
 
@@ -281,7 +281,7 @@ s32 func_00203230(void)
     return recv;
 }
 
-s32 func_002032C8(s32 mode)
+s32 SyncDiscNCommand(s32 mode)
 {
     if (mode == 0) {
         if (D_00279410 > 0) {
@@ -298,7 +298,7 @@ s32 func_002032C8(s32 mode)
     return 0;
 }
 
-s32 func_00203368(s32 mode)
+s32 SyncDiscSCommand(s32 mode)
 {
     if (mode == 0) {
         if (D_00279410 > 0) {
@@ -313,7 +313,7 @@ s32 func_00203368(s32 mode)
 }
 
 /* The same for the second client's commands. */
-s32 func_002033D8(s32 command)
+s32 BeginDiscSCommand(s32 command)
 {
     s32 i;
 
@@ -386,7 +386,7 @@ u32 func_00203A20(u32 value)
     return recv;
 }
 
-s32 func_00203AE8(void)
+s32 GetDiscReadPosition(void)
 {
     if (D_00279454 == 1)
         return *(u32*)((u32)D_0027A5C0 | 0x20000000);
@@ -399,7 +399,7 @@ INCLUDE_ASM(func_00203B18);
 const char D_0024F710[] = "call cdread cmd\n";
 const char D_0024F728[] = "cdread end\n";
 
-s32 func_00203CF8(void)
+s32 GetDiscStatus(void)
 {
     u32 base;
     s32 v;
@@ -416,7 +416,7 @@ s32 func_00203CF8(void)
     return v;
 }
 
-s32 func_00203D90(void)
+s32 GetDiscError(void)
 {
     u32 base;
     s32 v;
@@ -433,7 +433,7 @@ s32 func_00203D90(void)
     return v;
 }
 
-s32 func_00203E28(void)
+s32 StopDiscRead(void)
 {
     s32 r;
 
@@ -452,7 +452,7 @@ s32 func_00203E28(void)
     return r;
 }
 
-s32 func_00203EE0(s32 value, s32* out)
+s32 CheckDiscChanged(s32 value, s32* out)
 {
     s32 base;
     s32 r;

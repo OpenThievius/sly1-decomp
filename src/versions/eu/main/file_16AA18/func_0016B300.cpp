@@ -7,7 +7,7 @@ extern s32 D_eu_00263BC0[];
 extern s32 D_eu_00275374;
 ChoiceSound* func_eu_001DE018(s32 id);
 
-void func_0016B300(CurrentPlacedObject* self, s32 a, s32 b)
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
     if (a == self->choice && b == self->keyIndex) return;
     if (a != self->walkerChoice && a > 0) {

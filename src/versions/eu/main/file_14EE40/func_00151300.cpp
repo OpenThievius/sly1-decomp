@@ -3,7 +3,7 @@
 struct Hld_151300_eu { u8 pad[0x578]; s32 f578; u8 pad2[4]; s32 f580; };
 struct Sc_151300_eu { u8 pad[0x584]; u8 f584; u8 pad2[7]; f32 f58C; };
 
-s32 func_00151300(StepSequence* self)
+s32 TestStepWaitConditions(StepSequence* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
@@ -19,7 +19,7 @@ s32 func_00151300(StepSequence* self)
         if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
-        if (func_001BE810() == 0) flags &= 0xFFFFFFFE;
+        if (CheckStreamVoicePending() == 0) flags &= 0xFFFFFFFE;
     }
     if (flags & 8) {
         if (HasStreamVoice() == 0) flags &= 0xFFFFFFF7;

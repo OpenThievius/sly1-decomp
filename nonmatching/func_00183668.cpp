@@ -31,10 +31,10 @@ struct Self_183668 {
     f32 f29C;
 };
 
-void func_001834A0(Self_183668* self, s32 key, Node_183668* list);
-void func_001DBC18(Ctx_183668* ctx, Node_183668* n);
+void RunScriptEventHandler(Self_183668* self, s32 key, Node_183668* list);
+void ReleaseCallRecords(Ctx_183668* ctx, Node_183668* n);
 
-s32 func_00183668(Self_183668* self, s32 key, void* unused, s32** p)
+s32 SuppressScriptEvent(Self_183668* self, s32 key, void* unused, s32** p)
 {
     s32 tag = -1;
     switch (key) {
@@ -63,7 +63,7 @@ s32 func_00183668(Self_183668* self, s32 key, void* unused, s32** p)
     }
     Node_183668* prev = 0;
     for (Node_183668* n = self->ctx->head; n != 0; n = n->next) {
-        if (n->fn == func_001834A0 && n->owner == self) {
+        if (n->fn == RunScriptEventHandler && n->owner == self) {
             if (n->key == key) {
                 if (key >= 8) return 1;
                 if (key >= 6) { s32* q = p[0]; return n->data->f4 == *q; }
@@ -81,7 +81,7 @@ s32 func_00183668(Self_183668* self, s32 key, void* unused, s32** p)
                     c->head = 0;
                 }
                 n->next = 0;
-                func_001DBC18(self->ctx, n);
+                ReleaseCallRecords(self->ctx, n);
                 return 1;
             }
         }

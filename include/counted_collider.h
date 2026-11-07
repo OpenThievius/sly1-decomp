@@ -23,8 +23,8 @@ typedef char check_CountedCollider[sizeof(CountedCollider) == 0x560 ? 1 : -1];
 // The methods that take only types known here (config/us/classes.tsv); a slot's function takes
 // its class's object. Slots 13 (func_001D3678) and 45 (func_001D3500) take records that
 // player_mode.cpp declares; slots 17 and 19 (func_001D3398, func_001D35A8) are assembly.
-void func_001D3290(CountedCollider* self);                       // 0x4C slot 16
-void func_001D3470(CountedCollider* self, f32 t);                // 0x4C slot 28
-void func_001D34E0(CountedCollider* self);                       // 0x4C slot 63
+void StartCountedCollider(CountedCollider* self);                       // 0x4C slot 16
+void StepCountedCollider(CountedCollider* self, f32 t);                // 0x4C slot 28
+void CollectCountedColliderContacts(CountedCollider* self);                       // 0x4C slot 63
 
 #endif

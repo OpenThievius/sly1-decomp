@@ -66,13 +66,13 @@ struct Rec_20A220 {
     s32 f4C;
 };
 
-void func_002115C0(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
-s32 func_002115F8(Bits_20A220* s, s32 n);
-u8* func_002117A0(Bits_20A220* s, s32 n);
-s32 func_0020A630(Bits_20A220* s, Rec_20A220* r);
-s32 func_0020A7F0(Prog_20A220* p, Bits_20A220* s, u64* r);
+void InitBitReader(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
+s32 PeekBits(Bits_20A220* s, s32 n);
+u8* GetPositionAhead(Bits_20A220* s, s32 n);
+s32 ParsePackHeader(Bits_20A220* s, Rec_20A220* r);
+s32 ParsePacketHeader(Prog_20A220* p, Bits_20A220* s, u64* r);
 
-s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
+s32 DemultiplexPacks(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
 {
     Bits_20A220 bits;
     Rec_20A220 rec;
@@ -148,7 +148,7 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
     return result;
 }
 
-s32 func_0020A518(Ctx_20A220* ctx, s32 a, s32 b)
+s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b)
 {
     return DemultiplexPacks(ctx, a, b, 0, -1);
 }
@@ -158,7 +158,7 @@ struct Ctx_20A538 { u8 pad[0x44]; struct Ent_20A538* ents; s32 count; };
 struct Obj_20A538 { u8 pad[0x40]; struct Ctx_20A538* ctx; };
 struct Pair_20A538 { u64 a; u64 b; };
 // The stream ids the demultiplexer knows, each with the mask of its significant bits.
-Pair_20A538 D_0027AED0[10] = {
+Pair_20A538 g_streamIds[10] = {
     { 0xE000000000ULL, 0xFF00000000ULL },
     { 0xBDFFC00000ULL, 0xFFFFFFFFFFULL },
     { 0xBDFFA00000ULL, 0xFFFFFFFFFFULL },
@@ -170,9 +170,9 @@ Pair_20A538 D_0027AED0[10] = {
     { 0xBD88000000ULL, 0xFFFF000000ULL },
     { 0xBD90000000ULL, 0xFFFF000000ULL },
 };
-u64 func_0020A190(s32 idx, u64 key);
+u64 GetStreamId(s32 idx, u64 key);
 
-s32 func_0020A538(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
+s32 SetStreamCallback(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
 {
     s32 result = 0;
     struct Ctx_20A538* ctx = self->ctx;
@@ -200,12 +200,12 @@ s32 func_0020A538(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
 struct Reader_0020A630 { u8 pad[0x10]; };
 struct Out_0020A630 { s32 w0; s32 w4; s32 w8; s32 wC; };
 
-s32 func_002116B0(Reader_0020A630* r, s32 bits);
-void func_00211700(Reader_0020A630* r);
-s32 func_002115F8(Reader_0020A630* r, s32 bits);
-s32 func_0020A780(Reader_0020A630* r, Out_0020A630* o);
+s32 ReadBits(Reader_0020A630* r, s32 bits);
+void ReadBit(Reader_0020A630* r);
+s32 PeekBits(Reader_0020A630* r, s32 bits);
+s32 ParseSystemHeader(Reader_0020A630* r, Out_0020A630* o);
 
-s32 func_0020A630(Reader_0020A630* r, Out_0020A630* o)
+s32 ParsePackHeader(Reader_0020A630* r, Out_0020A630* o)
 {
     u32 i; u32 n; u32 a; u32 b; u32 c;
     i = 0;
@@ -235,10 +235,10 @@ s32 func_0020A630(Reader_0020A630* r, Out_0020A630* o)
 
 struct Obj_0020A780;
 
-s64 func_002116B0(Obj_0020A780* self, s32 size);
-s32 func_002115F8(Obj_0020A780* self, s32 n);
+s64 ReadBits(Obj_0020A780* self, s32 size);
+s32 PeekBits(Obj_0020A780* self, s32 n);
 
-s32 func_0020A780(Obj_0020A780* self)
+s32 ParseSystemHeader(Obj_0020A780* self)
 {
     ReadBits(self, 0x38);
     ReadBits(self, 0x28);
@@ -276,12 +276,12 @@ struct Table_20A7F0
 // The length of each optional field the header's flags announce.
 extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
 
-u32 func_002116B0(Bits_20A7F0* bs, s32 n);
-void func_00211700(Bits_20A7F0* bs);
-void func_00211748(Bits_20A7F0* bs, s32 n);
-s32 func_0020B978(Ctx_20A7F0* ctx, const char* msg);
+u32 ReadBits(Bits_20A7F0* bs, s32 n);
+void ReadBit(Bits_20A7F0* bs);
+void SkipBytes(Bits_20A7F0* bs, s32 n);
+s32 ReportMpegError(Ctx_20A7F0* ctx, const char* msg);
 
-s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
+s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
 {
     Table_20A7F0 tbl;
     s32 flags;

@@ -9,9 +9,9 @@ struct Object_18F890_eu {
     u8 pad74[0xE0 - 0x74];
     s32 fE0;
 };
-void func_00130070(StreamReaderWindow*);
+void PumpStreamReader(StreamReaderWindow*);
 
-s32 func_0018F890(MoviePlayer* self_, s32 wait)
+s32 FeedMovieDecoder(MoviePlayer* self_, s32 wait)
 {
     Object_18F890_eu* self = (Object_18F890_eu*)self_;
     s32 count = self->buffer->head - self->buffer->tail;
@@ -21,9 +21,9 @@ s32 func_0018F890(MoviePlayer* self_, s32 wait)
         count = self->buffer->head - self->buffer->tail;
         if (count == 0 && !wait) return 0;
     }
-    func_001F6C20(0);
+    SyncDataCache(0);
     Buffer_18F890_eu* buffer = self->buffer;
-    s32 result = func_0020A518(self->pad10, buffer->base + buffer->tail, count);
+    s32 result = DemultiplexBuffer(self->pad10, buffer->base + buffer->tail, count);
     ConsumeStreamBytes((StreamReaderWindow*)self->buffer, result);
     if (result != 0) return 0;
     if (self->f70 >= count) {

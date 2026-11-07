@@ -18,6 +18,8 @@ func_001A8AF8	ChooseObjectPoolItem	in the current enabled entry picks the first 
 func_001A8C50	HasObjectPoolChoice	returns 1 if an item is chosen at 0x48, else runs ChooseObjectPoolItem and returns whether it chose one
 func_001A93C8	ClearObjectPoolChoice	zeroes the chosen item at 0x48 and, if the shared record is lent, its word at 0x10
 func_001A93E8	ResetPlacementRecord	zeroes the 0x80-byte placement record at +0x60 of an object (an object pool, the object object_host_functions sets up) and sets its rotation (+0x20) to the identity matrix
+func_001A9438	ResetObjectPoolReleaseRecord	zeroes the 0x70 bytes at +0xE0 of an object pool and sets the vector at +0x110 to (0, 1, 0), +0x120 to 0 and +0x124 to 20000.0, as InitObjectPool does; the script host function func_00106B10 calls it, as ResetScriptPlacementRecord calls ResetPlacementRecord for +0x60
+func_001A9498	ClearObjectPoolHeadingRecord	zeroes the 0x18 bytes at +0x150 of an object pool, as InitObjectPool does; the script host function func_00106BB0 calls it
 func_001A94C0	GetPlacementRecordTransform	gives the position and rotation a placement record names: through its frame object (+0x0, ConvertPositionToWorld), its object (+0x4, world position and rotation), its collider (+0x8, +0x140 and +0x110) or its own values (+0x10, +0x20)
 func_001A97C8	GetPlacementRecordAngle	gives the heading a placement record names: the angle of its object's world rotation (+0x10) or its collider's (+0x14), else its own angle at +0x8
 func_001A98F8	StartGaugeBarAgent	slot 16 of class 0x0D: runs StartAgent, then registers itself with its world through func_001DDC38

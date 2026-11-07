@@ -11,21 +11,21 @@ struct Obj_1F1C90_eu {
     f32 f590;
 };
 
-void func_001AA060(void* self);
-s32 func_001F0468(void);
-s32 func_001F0490(void* o, s32 n, s32* a, s32* b);
-void func_001F1590(void* self, s32 a1, s32 a2);
-void func_001F1610(void* self);
-void func_001AA8B0(void* self, f32 v);
-void func_001AA8C0(void* self, f32 v);
-void func_001BED48(void);
-void func_001BED70(void);
-s32 func_0016E0F0(s32 bits);
-void func_0016E118(s32 n);
-void func_0016EC88(void* p);
-void func_001E96F8(void* obj, s32 mode);
+void HideScreenElements(void* self);
+s32 GetCurrentWarpEntry(void);
+s32 IsWarpEntryAvailable(void* o, s32 n, s32* a, s32* b);
+void SetWarpCursor(void* self, s32 a1, s32 a2);
+void BeginWarpPageClose(void* self);
+void SetScreenElementSlideInTime(void* self, f32 v);
+void SetScreenElementSlideOutTime(void* self, f32 v);
+void PauseStagedBankVoice(void);
+void ResumeStagedBankVoice(void);
+s32 SetPadSelectFlags(s32 bits);
+void ClearPadSelectFlags(s32 n);
+void ResetPadStepRepeat(void* p);
+void SetElementStackState(void* obj, s32 mode);
 
-void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
+void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
 {
     if ((a1 != 0) != (self->f56C == 0)) return;
     if (a1 != 0) {
@@ -43,7 +43,7 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
         }
         GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
-            func_001BED48();
+            PauseStagedBankVoice();
         }
         self->vtbl[14](self);
         SetPadSelectFlags(1);
@@ -61,7 +61,7 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
             SetElementStackState(g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
-                func_001BED70();
+                ResumeStagedBankVoice();
             }
         }
     }

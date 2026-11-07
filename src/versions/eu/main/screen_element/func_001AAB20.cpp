@@ -6,9 +6,9 @@ struct Obj_001AAB20_eu {
     f32 f238;
 };
 
-void func_001AAB60(Obj_001AAB20_eu* self);
+void PlaceScreenElement(Obj_001AAB20_eu* self);
 
-void func_001AAB20(Obj_001AAB20_eu* self, f32 x, f32 y) {
+void SetScreenElementSize(Obj_001AAB20_eu* self, f32 x, f32 y) {
     if (0.0f <= x) {
         self->f234 = x;
     }

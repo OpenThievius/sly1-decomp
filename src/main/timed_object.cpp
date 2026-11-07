@@ -11,42 +11,42 @@
 #include "state_trigger.h"
 #include "owner_message.h"
 
-void func_001B7968(Collider* self);
-void func_001B93F8(Collider* self);
-TrackPlayer* func_00129CA8(TimedObject* self);
+void InitCollider(Collider* self);
+void UpdateCollider(Collider* self);
+TrackPlayer* FindTrackPlayer(TimedObject* self);
 // Slot 17 takes the frame time (Desc01::m11); func_001AEFA0 ignores it, but func_001AF5C8's call
 // passes it (retail's frame shows the argument live).
-void func_001AEFA0(TimedObject* self, f32 dt);
+void UpdateTimedObject(TimedObject* self, f32 dt);
 
-ObjectLink D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
+ObjectLink g_timedGroupLinks[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
-void func_001BAC30(Collider* self);
-void func_00124DF8(void* self, s32 n, void* table);
+void LoadCollider(Collider* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
 
-s32 func_001833F0(void* key, s32 item);
-s32 func_001300E8(void* key, s32 item);
+s32 MatchesObjectId(void* key, s32 item);
+s32 IsObjectOfKind(void* key, s32 item);
 
-extern f32 D_00261858[];
-s32 D_002744D0 = 0;
+extern f32 g_gameClock[];
+s32 g_groupStaggerDirty = 0;
 
-void func_0015FCD8(void* self, void* p);
-void func_00152470(void* list, void* item);
-void func_00152600(void* list, void* item);
+void SetColliderFrozen(void* self, void* p);
+void AppendToList(void* list, void* item);
+void RemoveFromList(void* list, void* item);
 
-void func_00124A48(PlacedObject* self);
-void* func_00183058(void* a, void* b, void* c);
+void StartPlacedObject(PlacedObject* self);
+void* CreateObjectCopy(void* a, void* b, void* c);
 
-s32 func_001AEE50(TimedObject* self, void* key);
-s32 func_00160D10();
+s32 IsObjectExcluded(TimedObject* self, void* key);
+s32 MaskWorldBitsBySave();
 
-extern f32 D_0026185C[];
-void func_001837E0(PlacedObject* self, s32 a, s32 b, s32 c);
+extern f32 g_gameTime[];
+void TriggerScriptEvent(PlacedObject* self, s32 a, s32 b, s32 c);
 
-ObjectLink D_002744D8[2] = {
+ObjectLink g_sequencedObjectLinks[2] = {
     { 2, 0x28C, 0x5D0 },
     { 2, 0x28D, 0x5D4 },
 };
-void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 // The record at PlacedObject::f200 of these objects: its word at 0x44 is cleared at start and
 // set to 4 or 0 as the sequence enters state 0 or 2.
@@ -55,34 +55,34 @@ struct Record200 {
     s32 f44;
 };
 
-s32 func_001925F0(void);
+s32 GetActiveSwitchedCollider(void);
 
-void func_001BF788(void* snd, s32 n);
-void func_001BFCD8(s32 kind, void* snd, void* owner, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00155F90(void* p);
+void StopSoundRecord(void* snd, s32 n);
+void StartSoundEffect(s32 kind, void* snd, void* owner, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void SetEffectSpawnerActiveForever(void* p);
 
-void func_001D7098(void* buf, s32 n, void* self);
+void InitOwnerMessage(void* buf, s32 n, void* self);
 
-void func_001B46E0(s32 a, s32 frame);
+void SetCursorFrame(s32 a, s32 frame);
 
-void func_001B1070(SequencedObject* self, s32 arg);
-void func_001AEF68(TimedObject* self);
-s32 func_001AEF00(TimedObject* o, void* p);
-void func_001AF508();
-void func_001B1898(BlinkObject* self);
+void EnterSequencedSubstate(SequencedObject* self, s32 arg);
+void StopTrackPlayer(TimedObject* self);
+s32 IsSoleAcceptedObject(TimedObject* o, void* p);
+void StaggerGroupOffsets();
+void SetBlinkObjectFrame(BlinkObject* self);
 
-void func_001AECB0(TimedObject* a0) {
+void InitTimedObject(TimedObject* a0) {
     InitCollider(a0);
     a0->f554 = 0;
     a0->state = -1;
 }
 
-void func_001AECE0(TimedObject* self, s32 value)
+void SetTimedObjectTarget(TimedObject* self, s32 value)
 {
     self->trigger = (StateTrigger*)value;
 }
 
-void func_001AECE8(TimedObject* self, s32 state)
+void EnterTimedObjectState(TimedObject* self, s32 state)
 {
     if (self->state == state) return;
     if (self->state == 1 && state == 2) {
@@ -96,7 +96,7 @@ void func_001AECE8(TimedObject* self, s32 state)
     self->f55C = g_gameTime[0];
 }
 
-s32 func_001AED78(TimedObject* self, void* value)
+s32 IsObjectInAcceptLists(TimedObject* self, void* value)
 {
 
     if (self->f5B4 != 0) {
@@ -118,7 +118,7 @@ s32 func_001AED78(TimedObject* self, void* value)
     return 0;
 }
 
-s32 func_001AEE50(TimedObject* self, void* key)
+s32 IsObjectExcluded(TimedObject* self, void* key)
 {
     for (s32 i = 0; i < self->ids578.count; i++) {
         if (MatchesObjectId(key, self->ids578.items[i]) != 0) {
@@ -133,14 +133,14 @@ s32 func_001AEE50(TimedObject* self, void* key)
     return 0;
 }
 
-s32 func_001AEF00(TimedObject* o, void* p)
+s32 IsSoleAcceptedObject(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
     if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId(p, o->ids564.items[0]) != 0) return 1;
     return 0;
 }
 
-void func_001AEF68(TimedObject* self)
+void StopTrackPlayer(TimedObject* self)
 {
     TrackPlayer* node = FindTrackPlayer(self);
 
@@ -151,7 +151,7 @@ void func_001AEF68(TimedObject* self)
     }
 }
 
-void func_001AEFA0(TimedObject* self)
+void UpdateTimedObject(TimedObject* self)
 {
     UpdateCollider(self);
     TrackPlayer* sink = self->f5C8;
@@ -167,7 +167,7 @@ void func_001AEFA0(TimedObject* self)
     }
 }
 
-void func_001AF000(TimedObject* self, s32 value)
+void AddTimedObjectAcceptedObjectId(TimedObject* self, s32 value)
 {
     u32 n = self->ids564.count;
     if (n < 4) {
@@ -176,7 +176,7 @@ void func_001AF000(TimedObject* self, s32 value)
     }
 }
 
-void func_001AF028(TimedObject* self, s32 item)
+void AddTimedObjectExcludedObjectId(TimedObject* self, s32 item)
 {
     s32 n = self->ids578.count;
     if ((u32)n < 4) {
@@ -185,7 +185,7 @@ void func_001AF028(TimedObject* self, s32 item)
     }
 }
 
-void func_001AF050(TimedObject* self, s32 item)
+void AddTimedObjectAcceptedClassId(TimedObject* self, s32 item)
 {
     s32 n = self->ids58C.count;
     if ((u32)n < 4) {
@@ -194,7 +194,7 @@ void func_001AF050(TimedObject* self, s32 item)
     }
 }
 
-void func_001AF078(TimedObject* q, u32 value)
+void AddTimedObjectExcludedClassId(TimedObject* q, u32 value)
 {
     u32 n = q->ids5A0.count;
     if (n < 4) {
@@ -203,13 +203,13 @@ void func_001AF078(TimedObject* q, u32 value)
     }
 }
 
-void func_001AF0A0(TimedGroup* self)
+void InitTimedGroup(TimedGroup* self)
 {
     InitTimedObject(self);
     self->fB04 = 1.0f;
 }
 
-void func_001AF0D0(TimedGroup* self)
+void LoadTimedGroup(TimedGroup* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 2, g_timedGroupLinks);
@@ -217,7 +217,7 @@ void func_001AF0D0(TimedGroup* self)
 
 ASM_FUNC(func_001AF108);
 
-void func_001AF3B8(TimedGroup* self)
+void CloneTimedGroupEntries(TimedGroup* self)
 {
     TimedGroupChild* src = &self->groups[0];
     StartPlacedObject(self);
@@ -248,7 +248,7 @@ void func_001AF3B8(TimedGroup* self)
     self->desc30()->m4D(self, self->f560);
 }
 
-void func_001AF508()
+void StaggerGroupOffsets()
 {
     ListFrame frame;
     s32 count = 0;
@@ -272,7 +272,7 @@ void func_001AF508()
     g_groupStaggerDirty = 0;
 }
 
-void func_001AF5C8(TimedGroup* self, f32 amount)
+void UpdateTimedGroup(TimedGroup* self, f32 amount)
 {
     s32 cmd;
     f32 v;
@@ -343,7 +343,7 @@ void func_001AF5C8(TimedGroup* self, f32 amount)
     self->desc30()->m4D(self, cmd);
 }
 
-void func_001AF7A8(TimedGroup* self, void* p)
+void SetStaggeredColliderFrozen(TimedGroup* self, void* p)
 {
     SetColliderFrozen(self, p);
     if (p != 0) {
@@ -360,7 +360,7 @@ void func_001AF7A8(TimedGroup* self, void* p)
 
 ASM_FUNC(func_001AF820);
 
-s32 func_001AFAF8(TimedObject* a0, Collider* a1)
+s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 {
     u64 m = 0x8000;
     m <<= 28;
@@ -380,7 +380,7 @@ s32 func_001AFAF8(TimedObject* a0, Collider* a1)
 INCLUDE_RODATA(jtbl_0024CFF0);
 ASM_FUNC(func_001AFBB0);
 
-void func_001B00E8(TimedGroup* self, s32 flag)
+void SetTimedGroupMode(TimedGroup* self, s32 flag)
 {
     s32 m = 5;
     self->f554 = flag;
@@ -390,7 +390,7 @@ void func_001B00E8(TimedGroup* self, s32 flag)
     self->desc30()->m4D(self, m);
 }
 
-void func_001B0120(TimedGroup* self)
+void RequestTimedGroupEnd(TimedGroup* self)
 {
     if (self->state == 8) {
         return;
@@ -402,7 +402,7 @@ void func_001B0120(TimedGroup* self)
     self->desc30()->m4D(self, m);
 }
 
-void func_001B0160(TimedGroup* self)
+void FinishTimedGroup(TimedGroup* self)
 {
     if (self->state < 3) {
         if (self->state >= 0) {
@@ -412,7 +412,7 @@ void func_001B0160(TimedGroup* self)
     self->f554 = 1;
 }
 
-void func_001B01B0(TimedGroup* self, s32 s)
+void EnterTimedGroupState(TimedGroup* self, s32 s)
 {
     s32 st = self->state;
     if (st == s) return;
@@ -443,7 +443,7 @@ void func_001B01B0(TimedGroup* self, s32 s)
     EnterTimedObjectState(self, s);
 }
 
-f32 func_001B0360(TimedGroup* o, TimedGroupChild* c)
+f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
 {
     f32 s = c->riseScale;
     f32 r;
@@ -495,20 +495,20 @@ f32 func_001B0360(TimedGroup* o, TimedGroupChild* c)
     return s * r;
 }
 
-void func_001B0470(TimedGroup* self, f32 x)
+void SetTimedGroupFadeOutTime(TimedGroup* self, f32 x)
 {
     self->fB08 = -1.0f / x;
 }
 
-void func_001B0488(TimedGroup* p, f32 x) { p->fB08 = 1.0f / x; }
+void SetTimedGroupFadeInTime(TimedGroup* p, f32 x) { p->fB08 = 1.0f / x; }
 
-void func_001B04A0(SequencedObject* o)
+void InitSequencedObject(SequencedObject* o)
 {
     InitTimedObject(o);
     o->state5D8 = -1;
 }
 
-void func_001B04D0(SequencedObject* self)
+void SetupSequencedObject(SequencedObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 2, g_sequencedObjectLinks);
@@ -528,7 +528,7 @@ void func_001B04D0(SequencedObject* self)
     self->desc30()->m4D(self, self->f560);
 }
 
-void func_001B0578(SequencedObject* self) {
+void UpdateSequencedObject(SequencedObject* self) {
     s32 st;
     s32 s1;
     UpdateTimedObject(self);
@@ -602,9 +602,9 @@ tail:
 INCLUDE_RODATA(jtbl_0024D070);
 ASM_FUNC(func_001B0838);
 
-s32 func_001B0BD8() { return 1; }
+s32 TestSequencedObjectMayContact() { return 1; }
 
-s32 func_001B0BE0(TimedObject* self, Collider* other)
+s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 {
     if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == GetActiveSwitchedCollider() || other->root == self->root || IsObjectExcluded(self, other) != 0) {
         return 0;
@@ -615,7 +615,7 @@ s32 func_001B0BE0(TimedObject* self, Collider* other)
 
 ASM_FUNC(func_001B0C68);
 
-void func_001B0EA8(SequencedObject* self, s32 value)
+void SetSequencedObjectMode(SequencedObject* self, s32 value)
 {
     s32 m = 5;
     self->f554 = value;
@@ -625,7 +625,7 @@ void func_001B0EA8(SequencedObject* self, s32 value)
     self->desc30()->m4D(self, m);
 }
 
-void func_001B0EE0(SequencedObject* self)
+void RequestSequencedObjectEnd(SequencedObject* self)
 {
     if (self->state != 8) {
         self->desc30()->m4D(self, self->f554 == 0 ? 3 : 7);
@@ -640,7 +640,7 @@ void func_001B0EE0(SequencedObject* self)
     }
 }
 
-void func_001B0F70(SequencedObject* o)
+void FinishSequencedObject(SequencedObject* o)
 {
     if (o->f554 == 0) {
         o->f554 = 1;
@@ -650,7 +650,7 @@ void func_001B0F70(SequencedObject* o)
     }
 }
 
-void func_001B0FC0(SequencedObject* self, s32 s)
+void EnterSequencedObjectState(SequencedObject* self, s32 s)
 {
     if (self->state != s) {
         switch (self->state) {
@@ -674,7 +674,7 @@ void func_001B0FC0(SequencedObject* self, s32 s)
     }
 }
 
-void func_001B1070(SequencedObject* self, s32 arg)
+void EnterSequencedSubstate(SequencedObject* self, s32 arg)
 {
     if (self->state5D8 == arg) return;
     switch (self->state5D8) {
@@ -709,7 +709,7 @@ void func_001B1070(SequencedObject* self, s32 arg)
     self->f5DC = g_gameTime[0];
 }
 
-void func_001B1158(BlinkObject* self)
+void InitBlinkObject(BlinkObject* self)
 {
     InitTimedObject(self);
     self->animB.first = -1;
@@ -721,7 +721,7 @@ void func_001B1158(BlinkObject* self)
     self->blinkFrame = -1;
 }
 
-void func_001B11A0(BlinkObject* self)
+void SetupBlinkObject(BlinkObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->elemCount; i++) {
@@ -734,7 +734,7 @@ void func_001B11A0(BlinkObject* self)
     self->desc30()->m4D(self, self->f560);
 }
 
-void func_001B1238(BlinkObject* self)
+void UpdateBlinkObject(BlinkObject* self)
 {
     s32 state;
 
@@ -803,7 +803,7 @@ void func_001B1238(BlinkObject* self)
 }
 
 struct TouchQuery;
-void func_001F5C0C(TouchQuery* p, s32 zero, s32 size);
+void FillMemory(TouchQuery* p, s32 zero, s32 size);
 // The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
 // the object, what touched it, where that is and the direction (the unit z).
 struct TouchQuery {
@@ -824,11 +824,11 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
     q30 = *k;
 }
 
-s32 func_001AED78(BlinkObject* self, Collider* t);
-void func_001D7098(OwnerMessage* out, s32 a, BlinkObject* self);
-void func_00177838(TouchQuery* p, s32 a, s32 b);
+s32 IsObjectInAcceptLists(BlinkObject* self, Collider* t);
+void InitOwnerMessage(OwnerMessage* out, s32 a, BlinkObject* self);
+void FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
 
-void func_001B1438(BlinkObject* self, s32* out)
+void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {
     OwnerMessage buf;
     TouchQuery req;
@@ -869,13 +869,13 @@ void func_001B1438(BlinkObject* self, s32* out)
     }
 }
 
-void func_001B15D0(BlinkObject* self, s32 mode)
+void SetBlinkObjectMode(BlinkObject* self, s32 mode)
 {
     self->f554 = mode;
     self->desc30()->m4D(self, mode == 0 ? 1 : 5);
 }
 
-void func_001B1608(BlinkObject* self)
+void RequestBlinkObjectEnd(BlinkObject* self)
 {
     if (self->state != 8) {
         self->desc30()->m4D(self, self->f554 == 0 ? 3 : 7);
@@ -890,7 +890,7 @@ void func_001B1608(BlinkObject* self)
     }
 }
 
-void func_001B1698(BlinkObject* self)
+void FinishBlinkObject(BlinkObject* self)
 {
     self->f554 = 1;
     if (self->f608 < 0.0f) {
@@ -906,7 +906,7 @@ void func_001B1698(BlinkObject* self)
     }
 }
 
-void func_001B1710(BlinkObject* self, s32 n)
+void EnterBlinkObjectState(BlinkObject* self, s32 n)
 {
     if (self->state == n) return;
     switch (self->state) {
@@ -943,7 +943,7 @@ void func_001B1710(BlinkObject* self, s32 n)
     }
 }
 
-void func_001B1898(BlinkObject* self)
+void SetBlinkObjectFrame(BlinkObject* self)
 {
     s32 first, last, mode, frame;
     f32 duration, start;

@@ -96,10 +96,10 @@ struct GaugeManager : PlacedObject {
 
 typedef char check_GaugeManager[sizeof(GaugeManager) == 0x6A0 ? 1 : -1];
 
-void func_0014C018(GaugeManager* self);                       // slot 0
-void func_0014CF30(GaugeManager* self, s32 kind, void* key);  // slot 13
-void func_0014C138(GaugeManager* self);                       // slot 16
-void func_0014C6E0(GaugeManager* self);                       // slot 17
-void func_0014C788(GaugeManager* self);                       // slot 46
+void InitGaugeManager(GaugeManager* self);                       // slot 0
+void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key);  // slot 13
+void BlendParamSets(GaugeManager* self);                       // slot 16
+void UpdateGaugeManager(GaugeManager* self);                       // slot 17
+void ShowGaugeManagerDisplays(GaugeManager* self);                       // slot 46
 
 #endif

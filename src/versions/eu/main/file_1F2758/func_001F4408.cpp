@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL picks the element D_eu_00263710 (32 bytes each) of the table at D_00247AD0 + 0x80 for the first call.
 extern s32 D_eu_00263710;
-void func_001F4408(s32 flag, s32 n)
+void BeginLevelExit(s32 flag, s32 n)
 {
     GameProgress* ctx = g_saveData;
     LevelRecordWord78* o;

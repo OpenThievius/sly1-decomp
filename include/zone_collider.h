@@ -37,12 +37,12 @@ struct FollowableObject : ZoneCollider {
 typedef char check_ZoneCollider[sizeof(ZoneCollider) == 0x7A0 ? 1 : -1];
 typedef char check_FollowableObject[sizeof(FollowableObject) == 0x7C0 ? 1 : -1];
 
-void func_001400A8(ZoneCollider* self);                          // slot 0
-void func_00140200(ZoneCollider* self);                          // slot 9
-void func_00140100(ZoneCollider* self);                          // slot 10
-void func_00140140(ZoneCollider* self);                          // slot 16
-void func_0016DF30(FollowableObject* self);                          // slot 0
-void func_0016DFE0(FollowableObject* self, s32 kind);                // slot 13
-void func_0016DF68(FollowableObject* self);                          // slot 15
+void InitZoneCollider(ZoneCollider* self);                          // slot 0
+void CopyZoneCollider(ZoneCollider* self);                          // slot 9
+void LoadZoneCollider(ZoneCollider* self);                          // slot 10
+void StartZoneCollider(ZoneCollider* self);                          // slot 16
+void InitFollowableObject(FollowableObject* self);                          // slot 0
+void HandleFollowableObjectNotification(FollowableObject* self, s32 kind);                // slot 13
+void ResolveFollowableObjectLinks(FollowableObject* self);                          // slot 15
 
 #endif

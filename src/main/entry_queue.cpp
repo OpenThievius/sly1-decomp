@@ -30,25 +30,25 @@ f32 D_00263E3C = 15.0f;
 f32 D_00263E40 = 0.200000003f;
 f32 D_00263E44 = 0.5f;
 
-void func_00182C18(void* self);
-void* func_0018D500(int size);
+void InitObject(void* self);
+void* AllocateFrontMemory(int size);
 
-void func_0017B998(EntryQueue* self)
+void InitEntryQueue(EntryQueue* self)
 {
     InitObject(self);
     self->buffer = AllocateFrontMemory(0xA00);
     self->flag68 = 1;
 }
 
-s32 func_001300E8(BaseObject* n, s32 kind);
-void func_001920B0(BaseObject* n, Vec02* out);
-s32 func_001F3BD8(BaseObject* n, Vec02* out);
-s32 func_001F3C08(BaseObject* n, Vec02* out);
-f32 func_00205778(f32 a, f32 b);
-void func_00128018(void* a, void* b, void* c, Vec02* d);
-void func_001280C0(void* a, void* b, Vec02* c, Vec02* d);
+s32 IsObjectOfKind(BaseObject* n, s32 kind);
+void ConvertPositionToWorld(BaseObject* n, Vec02* out);
+s32 GetObjectWorldPosition(BaseObject* n, Vec02* out);
+s32 GetObjectWorldRotation(BaseObject* n, Vec02* out);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
+void TransformDirectionBetweenFrames(void* a, void* b, Vec02* c, Vec02* d);
 
-void func_0017B9D0(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
+void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
 {
     Vec02 v;
     Vec02 a;
@@ -74,7 +74,7 @@ void func_0017B9D0(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
     }
     else if (IsObjectOfKind(n, 0x6E))
     {
-        func_00128018(0, n->parent, &s1->pos, &a);
+        TransformPointBetweenFrames(0, n->parent, &s1->pos, &a);
         {
             PathCurve* curve = ((PathCurveObject*)n)->curve;
             void (*fn)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32) =
@@ -84,8 +84,8 @@ void func_0017B9D0(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
                 fn(curve, &a, 0, &a, &b, 0, 0);
             }
         }
-        func_00128018(n->parent, 0, &a, &v);
-        func_001280C0(n->parent, 0, &b, &c);
+        TransformPointBetweenFrames(n->parent, 0, &a, &v);
+        TransformDirectionBetweenFrames(n->parent, 0, &b, &c);
         r = ArctangentOfRatio(c.y, c.x);
     }
     else if (IsObjectOfKind(n, 2))
@@ -113,10 +113,10 @@ void func_0017B9D0(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
 ASM_FUNC(func_0017BB78);
 
 
-void func_001E2840(void* p, s32 n);
-s32 func_00182FC8(void* p);
+void SetOnOffObjectForcedState(void* p, s32 n);
+s32 IsObjectAttached(void* p);
 
-void func_0017BC20(EntryQueue* self, OnOffObject* next)
+void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 {
     if (self->f58 != 0) {
         SetOnOffObjectForcedState(self->f58, -1);
@@ -144,10 +144,10 @@ ASM_FUNC(func_0017BCD0);
 INCLUDE_RODATA(jtbl_0024B030);
 ASM_FUNC(func_0017C428);
 
-void func_0017BCD0(EntryQueue* self);
-s32 func_0017C428(EntryQueue* self, void* item);
+void StartNextQueueEntry(EntryQueue* self);
+s32 CheckQueueEntryDone(EntryQueue* self, void* item);
 
-void func_0017C660(EntryQueue* self)
+void AdvanceEntryQueue(EntryQueue* self)
 {
     if (self->f40 < 0 && self->f34 > 0)
         StartNextQueueEntry(self);
@@ -163,9 +163,9 @@ void func_0017C660(EntryQueue* self)
 
 ASM_FUNC(func_0017C718);
 
-void func_0017C660(EntryQueue* self);
+void AdvanceEntryQueue(EntryQueue* self);
 
-s32 func_0017CDA8(EntryQueue* self)
+s32 IsEntryQueueRunning(EntryQueue* self)
 {
     AdvanceEntryQueue(self);
     if (self->f34 > 0) {
@@ -174,9 +174,9 @@ s32 func_0017CDA8(EntryQueue* self)
     return 0;
 }
 
-void func_0017CE80(EntryQueue* self);
+void UnbindEntryQueue(EntryQueue* self);
 
-void func_0017CDE0(EntryQueue* self)
+void ResetEntryQueue(EntryQueue* self)
 {
     if (self->f3C != 0) {
         UnbindEntryQueue(self);
@@ -187,12 +187,12 @@ void func_0017CDE0(EntryQueue* self)
     self->f40 = 0;
 }
 
-void func_001837E0(void* self, s32 kind, s32 a, s32 b);
-s32 func_0016E0F0(s32 a);
-void func_001DDA20(void* a);
+void TriggerScriptEvent(void* self, s32 kind, s32 a, s32 b);
+s32 SetPadSelectFlags(s32 a);
+void AcquirePadSelectFlag(void* a);
 
 
-void func_0017CE20(void* a0, void* a1)
+void BindEntryQueueToObject(void* a0, void* a1)
 {
     EntryQueue* self = (EntryQueue*)a0;
     ((Player*)a1)->entryQueue = self;
@@ -206,14 +206,14 @@ void func_0017CE20(void* a0, void* a1)
 }
 
 
-void func_0017BB78(void* self, s32 n);
-void func_0012E760(void* p);
-void func_00142ED0(f32 x);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_0016E118(s32 n);
-void func_001DDA50(void* p);
+void SetEntryQueueTargetNode(void* self, s32 n);
+void StopAnimationPlayer(void* p);
+void SetGameClockScale(f32 x);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void ClearPadSelectFlags(s32 n);
+void ReleasePadSelectFlag(void* p);
 
-void func_0017CE80(EntryQueue* self)
+void UnbindEntryQueue(EntryQueue* self)
 {
     if (self->f3C != 0) {
         ReplaceQueueOnOffObject(self, 0);
@@ -238,9 +238,9 @@ void func_0017CE80(EntryQueue* self)
 
 // The entry AddQueueEntry hands out once the queue's 0x80 entries are used (0x14 bytes).
 static u8 D_002BE478[0x14];
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
-void* func_0017CF38(EntryQueue* pool, s32 a, s32 b, s32 c)
+void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
     if (pool->f34 >= 0x80) {
         return D_002BE478;
@@ -256,76 +256,76 @@ void* func_0017CF38(EntryQueue* pool, s32 a, s32 b, s32 c)
     return e;
 }
 
-void* func_0017CFC8(void* self, s32 b)
+void* AddQueueEntryKind0(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 0, b, 1);
 }
 
-void* func_0017CFF0(void* self, s32 b)
+void* AddQueueEntryKind1(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 1, b, 1);
 }
 
-void* func_0017D018(void* self, s32 b)
+void* AddQueueEntryKind10(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 10, b, 1);
 }
 
 
-void func_0017D040(void* self, s32 value)
+void AddQueueEntryKind2(void* self, s32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 2, -1, 1);
     o->value = value;
 }
 
-void* func_0017D078(void* self, s32 value)
+void* AddQueueEntryKind3(void* self, s32 value)
 {
     return AddQueueEntry((EntryQueue*)self, 3, value, 1);
 }
 
-void func_0017D0A0(void* self, s32 a, f32 value)
+void AddQueueEntryKind4(void* self, s32 a, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 4, a, 0);
     o->valueF = value;
 }
 
-void* func_0017D0D8(void* self, s32 value, s32 c)
+void* AddQueueEntryKind9(void* self, s32 value, s32 c)
 {
     return AddQueueEntry((EntryQueue*)self, 9, value, c);
 }
 
-void func_0017D100(void* self, s32 b, s32 c, s32 d, s32 e)
+void AddQueueEntryKind5(void* self, s32 b, s32 c, s32 d, s32 e)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 5, b, e);
     o->value = c;
     o->value10 = d;
 }
 
-void func_0017D148(void* self, s32 a, s32 b, f32 value)
+void AddQueueEntryKind6(void* self, s32 a, s32 b, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 6, a, b);
     o->valueF = value;
 }
 
-void func_0017D180(void* self, s32 b, s32 c, f32 value)
+void AddQueueEntryKind7(void* self, s32 b, s32 c, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 7, b, c);
     o->valueF = value;
 }
 
-void func_0017D1B8(void* self, s32 b, s32 c, s32 d)
+void AddQueueEntryKind8(void* self, s32 b, s32 c, s32 d)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 8, b, d);
     o->value = c;
 }
 
-void func_0017D1E8(void* self, f32 value)
+void AddQueueEntryKind11(void* self, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 11, -1, 1);
     o->valueF = value;
 }
 
-s32 func_0017D220(void* self)
+s32 AddQueueEntryKind12(void* self)
 {
     return (s32)AddQueueEntry((EntryQueue*)self, 0xC, -1, 0);
 }

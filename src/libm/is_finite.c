@@ -4,7 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-s32 func_00209210(f32 x)
+s32 IsFinite(f32 x)
 {
     s32 bits;
 

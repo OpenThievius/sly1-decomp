@@ -15,13 +15,13 @@ extern const f32 D_00249E40 = 3.4028235e+38f;
 
 // The file's .data, in retail's order: the loader's link table of class 0x38, then the flag
 // table (its bitmap and the snapshot func_00140E10 saves, 0x430 bytes in two labels).
-u32 D_00261410[4] = { 2, 0x545, 0x5A8, 0 };
-u8 D_00261420[528] = {0};
-u8 D_00261630[544] = {0};
+u32 g_flaggedObjectLinks[4] = { 2, 0x545, 0x5A8, 0 };
+u8 g_flagTable[528] = {0};
+u8 g_flagTableSaved[544] = {0};
 
 ASM_FUNC(func_00140D90);
 
-void func_00140E10(FlagTable* r, s32 a, s32 b)
+void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
 {
     r->changed = 0;
     r->saved = r->live;
@@ -30,9 +30,9 @@ void func_00140E10(FlagTable* r, s32 a, s32 b)
     r->hasFade = 1;
 }
 
-void func_001EFFA0(ScreenFade* fade, FadeRequest* args, s32 count);
+void StartScreenFade(ScreenFade* fade, FadeRequest* args, s32 count);
 
-void func_00140ED0(FlagTable* r)
+void StartScreenFadeFromFlagTable(FlagTable* r)
 {
     FadeRequest args;
     args.kind = 1;
@@ -49,20 +49,20 @@ void func_00140ED0(FlagTable* r)
     StartScreenFade(&g_screenFade, &args, 1);
 }
 
-void func_00140F48(FlagTable* p)
+void RestoreFlagTableSnapshot(FlagTable* p)
 {
     p->nextIndex = 0;
     p->live = p->saved;
     p->changed = 0;
 }
 
-s32 func_00140FF8(FlagTable* c)
+s32 TakeFlagTableIndex(FlagTable* c)
 {
     c->nextIndex = c->nextIndex + 1;
     return c->nextIndex;
 }
 
-s32 func_00141008(FlagTable* table, s32 index)
+s32 TestFlagTableBit(FlagTable* table, s32 index)
 {
     u8* bits = (u8*)table;
     s32 mask = 1 << (index & 7);
@@ -70,7 +70,7 @@ s32 func_00141008(FlagTable* table, s32 index)
     return (bits[0xC] & mask) != 0;
 }
 
-void func_00141040(FlagTable* self, s32 bit)
+void SetFlagTableBit(FlagTable* self, s32 bit)
 {
     u8* base = self->live.bits;
     u8* byte = base + bit / 8;
@@ -87,7 +87,7 @@ done:
     }
 }
 
-void func_001410A0(FlagTable* self, s32 bit)
+void ClearFlagTableBit(FlagTable* self, s32 bit)
 {
     u8* base = self->live.bits;
     u8* byte = base + bit / 8;
@@ -104,12 +104,12 @@ done:
     }
 }
 
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-s32 func_001E4C48(void*, void*, void*, void*, void*);
-void func_0011EC40(void* a, void* b);
+void ReadBufferedRotation3(void* a, void* b);
+void ReadBufferedVector3(void* a, void* b);
+s32 ReadMeshTables(void*, void*, void*, void*, void*);
+void ReadPropertyRecords(void* a, void* b);
 
-void func_00141108(void* a0, void* a1)
+void ReadObjectTransformAndTables(void* a0, void* a1)
 {
     ReadBufferedRotation3(a1, (u8*)a0 + 0x50);
     ReadBufferedVector3(a1, (u8*)a0 + 0x40);
@@ -118,20 +118,20 @@ void func_00141108(void* a0, void* a1)
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
-void func_001F3B48(void* self, void* value, void* out);
-s32 func_001E4DC0(void* self, void* value);
+void ConvertPointIntoObjectFrame(void* self, void* value, void* out);
+s32 IsPointInsideFaceTree(void* self, void* value);
 
-s32 func_00141170(ObjectGatherer* self, void* value)
+s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
-    func_001F3B48(self, value, &local);
-    return func_001E4DC0(self->f8C, &local);
+    ConvertPointIntoObjectFrame(self, value, &local);
+    return IsPointInsideFaceTree(self->f8C, &local);
 }
 
-void func_001B7968(Collider* self);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+void InitCollider(Collider* self);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 
-void func_001411A8(FlaggedObject* self)
+void InitFlaggedObject(FlaggedObject* self)
 {
     InitCollider(self);
     self->flagIndex = TakeFlagTableIndex((FlagTable*)g_flagTable);
@@ -160,12 +160,12 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void func_001BAC30(Collider* self);
-void func_00124DF8(void* self, s32 a, void* b);
-s32 func_001300E8(void* node, s32 kind);
-void func_00182ED8(void* node);
+void LoadCollider(Collider* self);
+void ResolveObjectLinks(void* self, s32 a, void* b);
+s32 IsObjectOfKind(void* node, s32 kind);
+void ResolveAndStartObject(void* node);
 
-void func_00141210(FlaggedObject* self)
+void CollectChildLists(FlaggedObject* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_flaggedObjectLinks);
@@ -197,10 +197,10 @@ skip:
     }
 }
 
-void func_001249A8(void* self);
-void* func_0015A448(void* host, s32 id, void* ctx);
+void PostLoadPlacedObject(void* self);
+void* FindFirstObjectByIdMode4(void* host, s32 id, void* ctx);
 
-void func_00141338(FlaggedObject* self)
+void ResolveListIds(FlaggedObject* self)
 {
     PostLoadPlacedObject(self);
     s32 i = 0;
@@ -244,12 +244,12 @@ struct ListWalkBegin {
     }
 };
 
-void func_00124A48(FlaggedObject* self);
-s32 func_00183438(u8* node);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_001B64D8(void* p, s32 n);
+void StartPlacedObject(FlaggedObject* self);
+s32 GetAliasId(u8* node);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void SetStateWalkerTarget(void* p, s32 n);
 
-void func_00141438(FlaggedObject* self)
+void StartFlaggedObject(FlaggedObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->countA; i++)
@@ -280,10 +280,10 @@ void func_00141438(FlaggedObject* self)
     }
 }
 
-void func_001BA130(Collider* self);
-void* func_00183058(void* item, void* x, FlaggedObject* self);
+void CopyCollider(Collider* self);
+void* CreateObjectCopy(void* item, void* x, FlaggedObject* self);
 
-void func_001415D0(FlaggedObject* self)
+void CopyFlaggedObject(FlaggedObject* self)
 {
     s32 keepB = self->flagIndex;
     s32 keepA = self->ordinal;
@@ -300,14 +300,14 @@ void func_001415D0(FlaggedObject* self)
 
 ASM_FUNC(func_00141690);
 
-extern u8 D_00262C70[];
+extern u8 g_padRecord[];
 
-void func_00141870(FlaggedObject* self);
-s32 func_001925F0(void* self, ObjectEvent* ev);
-s32 func_001BC320(void* self, ObjectEvent* ev);
-void func_0016EC38(void* p, f32 f, s32 n);
+void RaiseObjectFlag(FlaggedObject* self);
+s32 GetActiveSwitchedCollider(void* self, ObjectEvent* ev);
+s32 HandleObjectEvent(void* self, ObjectEvent* ev);
+void StartPadRecordPattern(void* p, f32 f, s32 n);
 
-s32 func_001417F0(FlaggedObject* self, ObjectEvent* ev)
+s32 HandleFlaggedObjectEvent(FlaggedObject* self, ObjectEvent* ev)
 {
     s32 r = GetActiveSwitchedCollider(self, ev);
     if (ev->type == r) {
@@ -320,13 +320,13 @@ s32 func_001417F0(FlaggedObject* self, ObjectEvent* ev)
     return HandleObjectEvent(self, ev);
 }
 
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 
-void func_00151ED8(void* table, FlaggedObject* self);
-s32 func_00182F40(s32 v, FlaggedObject* self);
-void func_0012C7B0(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
+void RaiseScatterLevelForObject(void* table, FlaggedObject* self);
+s32 IsObjectDescendantOf(s32 v, FlaggedObject* self);
+void CreateAnimationPlayerWithoutPresetTargets(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
 
-void func_00141870(FlaggedObject* self)
+void RaiseObjectFlag(FlaggedObject* self)
 {
     RaiseScatterLevelForObject(g_scatterController, self);
     s32 sel;
@@ -355,19 +355,19 @@ void func_00141870(FlaggedObject* self)
     }
 }
 
-void func_001419A0(FlaggedObject* q, s32 value)
+void AppendFlaggedObjectIdB(FlaggedObject* q, s32 value)
 {
     q->idsB[q->nIdsB++] = value;
 }
 
-void func_001419C0(FlaggedObject* obj, void* item)
+void AppendFlaggedObjectIdA(FlaggedObject* obj, void* item)
 {
     s32 n = obj->nIdsA;
     obj->idsA[n] = (s32)item;
     obj->nIdsA = n + 1;
 }
 
-void func_001419E0(FlaggedObject* self, s32 value)
+void SetFlaggedChildId(FlaggedObject* self, s32 value)
 {
     self->childId = value;
 }

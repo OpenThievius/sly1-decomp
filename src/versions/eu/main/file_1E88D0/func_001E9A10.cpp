@@ -3,7 +3,7 @@
 struct Gate_1E9A10_eu { u8 pad0[0x560]; s32 f560; u8 pad1[8]; s32 f56C; };
 
 
-s32 func_001E9A10(void)
+s32 AreMenusClosed(void)
 {
     if (g_screenFade.mode != 0) goto fail;
     if (((Gate_1E9A10_eu*)&g_pauseMenuElement)->f56C != 0) goto fail;

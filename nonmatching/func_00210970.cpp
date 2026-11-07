@@ -12,7 +12,7 @@ struct Ctx_210970 {
 extern u32 D_0027B068[];
 s32 func_002107E0(Ctx_210970* c, Src_210970* s, void* a, void* b, void* d);
 s32 func_002104A8(Ctx_210970* c, Src_210970* s);
-s32 func_00211348(Ctx_210970* c, Src_210970* s);
+s32 ConvertPictureColours(Ctx_210970* c, Src_210970* s);
 s32 func_00210548(Ctx_210970* c, Src_210970* s);
 void func_002107B8(Ctx_210970* c);
 
@@ -34,7 +34,7 @@ void func_00210970(Ctx_210970* c, Src_210970* s)
     if (func_002104A8(c, s)) {
         if (s->f28 == 1) {
             if (c->fB0) {
-                func_00211348(c, s);
+                ConvertPictureColours(c, s);
             } else {
                 func_00210548(c, s);
             }

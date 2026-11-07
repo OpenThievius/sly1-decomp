@@ -13,7 +13,7 @@ ASM_FUNC(func_001F6EE0);
 
 ASM_FUNC(func_001F6EF0);
 
-s32 func_001F6F00(s32* dst, const s32* src, u32 bytes)
+s32 CopyKernelWords(s32* dst, const s32* src, u32 bytes)
 {
     u32 n = bytes >> 2;
     u32 i = 0;
@@ -114,10 +114,10 @@ Slot_1F6F48 D_002770E8[8] = {
 
 void func_001F6EE0(s32 a, s32 b);
 void func_001F6EF0(u32 a, void* b, s32 c);
-void func_001F6C20(s32 a);
+void SyncDataCache(s32 a);
 s32 func_001F6F38(s32 key);
 
-void func_001F6F48(void)
+void InstallFirstKernelPatch(void)
 {
     if ((*(volatile u32*)0x10001810 & 0x100) != 0) {
         return;

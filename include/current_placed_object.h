@@ -50,6 +50,6 @@ struct CurrentPlacedObject : PlacedObject {
 typedef char check_CurrentPlacedObject[sizeof(CurrentPlacedObject) == 0x350 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0016AED8(CurrentPlacedObject* self);                       // 0x69 slot 16
+void BecomeCurrentObject(CurrentPlacedObject* self);                       // 0x69 slot 16
 
 #endif

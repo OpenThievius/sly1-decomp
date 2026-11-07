@@ -7,23 +7,23 @@
 
 // An entry of the file's two GCC vtables, written out as tables of functions.
 typedef void (*Fn_Table)();
-s32 func_0013CC80(MemoryReader* self, s32 want, void* dst);
-int func_0013CCE8();
+s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst);
+int ReadNothing();
 
 // The file's .rodata, in retail's order: the vtable of the reader's base (its one virtual,
 // func_0013CCE8, returns 0; nothing builds that class) and the memory reader's (D_00249D98).
-extern const Fn_Table D_00249D80[6] = { 0, 0, 0, (Fn_Table)func_0013CCE8, 0, 0 };
-extern const Fn_Table D_00249D98[6] = { 0, 0, 0, (Fn_Table)func_0013CC80, 0, 0 };
+extern const Fn_Table g_baseReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadNothing, 0, 0 };
+extern const Fn_Table g_memoryReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadMemoryReader, 0, 0 };
 
-extern void func_0013C9B0(RingBuffer* ring);
+extern void ResetRingBuffer(RingBuffer* ring);
 
-void func_0013C988(RingBuffer* ring, s32 size, u8* buf) {
+void InitRingBuffer(RingBuffer* ring, s32 size, u8* buf) {
 	ring->size = size;
 	ring->buf = buf;
 	ResetRingBuffer(ring);
 }
 
-void func_0013C9B0(RingBuffer* ring)
+void ResetRingBuffer(RingBuffer* ring)
 {
     ring->written = 0;
     ring->held = 0;
@@ -33,7 +33,7 @@ void func_0013C9B0(RingBuffer* ring)
     ring->space = ring->size;
 }
 
-s32 func_0013C9D0(RingBuffer* self, s32 n, MemoryReader* port)
+s32 FillRingBuffer(RingBuffer* self, s32 n, MemoryReader* port)
 {
     s32 total = 0;
     s32 rem = n;
@@ -61,7 +61,7 @@ s32 func_0013C9D0(RingBuffer* self, s32 n, MemoryReader* port)
     return total;
 }
 
-s32 func_0013CAD8(RingBuffer* self, s32 n, StreamSink* o)
+s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
 {
     s32 total = 0;
     s32 rem = n;
@@ -90,7 +90,7 @@ s32 func_0013CAD8(RingBuffer* self, s32 n, StreamSink* o)
     return total;
 }
 
-s32 func_0013CC00(RingBuffer* self, void* a1, void* a2)
+s32 FillRingBufferFromMemory(RingBuffer* self, void* a1, void* a2)
 {
     if (a1 != 0) {
         MemoryReader arg;
@@ -104,7 +104,7 @@ s32 func_0013CC00(RingBuffer* self, void* a1, void* a2)
     return 0;
 }
 
-void func_0013CC48(RingBuffer* p, s32 n)
+void ConsumeSpan(RingBuffer* p, s32 n)
 {
     if (n == 0) {
         n = p->held;
@@ -116,9 +116,9 @@ void func_0013CC48(RingBuffer* p, s32 n)
     p->held -= n;
 }
 
-void func_001F5A58(void* dst, void* src, s32 n);
+void CopyBytes(void* dst, void* src, s32 n);
 
-s32 func_0013CC80(MemoryReader* self, s32 want, void* dst)
+s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst)
 {
     s32 n = self->remain;
     u8* base = self->base;
@@ -132,7 +132,7 @@ s32 func_0013CC80(MemoryReader* self, s32 want, void* dst)
     return n;
 }
 
-int func_0013CCE8() {
+int ReadNothing() {
 	return 0;
 }
 

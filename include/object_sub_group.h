@@ -41,7 +41,7 @@ struct ObjectSubGroup : PlacedObject {
 typedef char check_ObjectSubGroup[sizeof(ObjectSubGroup) == 0x330 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4500(ObjectSubGroup* self, void* stream);         // 0x7D slot 10
-void func_001F4660(ObjectSubGroup* self);                       // 0x7D slot 16
+void LoadObjectSubGroup(ObjectSubGroup* self, void* stream);         // 0x7D slot 10
+void StartObjectSubGroup(ObjectSubGroup* self);                       // 0x7D slot 16
 
 #endif

@@ -2,7 +2,7 @@
 // Class 0x36 (descriptor D_0021C038, 0x860 bytes), a part with collision that keeps a list of
 // the objects it touches in a record of its own (+0x550), and class 0x37 (D_0021C168, the same
 // size) under it. Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/001F4000.cpp).
+// (config/us/classes.tsv; src/main/file_1F2758.cpp).
 //
 // Their fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
@@ -55,12 +55,12 @@ typedef char check_ContactTracker[sizeof(ContactTracker) == 0x860 ? 1 : -1];
 typedef char check_C37[sizeof(C37) == 0x860 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4F70(ContactTracker* self);                       // 0x36 slot 0
-void func_001F51A0(ContactTracker* self);                       // 0x36 slot 9
-void func_001F4FD8(ContactTracker* self);                       // 0x36 slot 16
-void func_001F5008(ContactTracker* self);                       // 0x36 slot 17
-void func_001F51C8();                                // 0x36 slot 36 (empty)
-int func_001F51E8(ContactTracker* self);                        // 0x36 slot 71
-void func_001F5218(C37* self);                       // 0x37 slot 0
+void InitContactTracker(ContactTracker* self);                       // 0x36 slot 0
+void CopyContactTracker(ContactTracker* self);                       // 0x36 slot 9
+void StartContactTracker(ContactTracker* self);                       // 0x36 slot 16
+void CollectTouchingObjects(ContactTracker* self);                       // 0x36 slot 17
+void ApplyContactTrackerTransform();                                // 0x36 slot 36 (empty)
+int RequestContactTrackerLaunch(ContactTracker* self);                        // 0x36 slot 71
+void InitC37(C37* self);                       // 0x37 slot 0
 
 #endif

@@ -20,7 +20,7 @@ typedef struct FrameTable {
 
 static FrameTable* D_0062A7B8;
 
-void func_001FFBE0(void* begin, FrameTable* ob)
+void RegisterFrameInfo(void* begin, FrameTable* ob)
 {
     ob->records = begin;
     ob->end = 0;

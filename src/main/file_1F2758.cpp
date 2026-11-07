@@ -28,41 +28,41 @@
 struct NoiseOctave { f32 w; f32 x; f32 y; f32 z; };
 struct NoiseBlend { f32 lo; f32 hi; f32 scale; s32 count; NoiseOctave items[1]; };
 
-f32 func_001F3250(f32 a, f32 b, f32 c);
-f32 func_001F3328(f32 a, f32 b);
+f32 SampleSmoothNoise(f32 a, f32 b, f32 c);
+f32 ApplyBiasCurve(f32 a, f32 b);
 
 struct VectorListItem { f32 a; f32 b; f32 c; f32 d; };
 struct VectorList4 { u8 pad[0xC]; u32 count; VectorListItem items[4]; };
 
-void* func_001F37D8(void* self, s32 mode, s32 flag);
+void* GetOscillatorCurrentEntry(void* self, s32 mode, s32 flag);
 
 // The scale (the reciprocal of the period) of an oscillator entry.
 struct OscillatorEntryScale { u8 pad[0x64]; f32 scale; };
 
-void* func_001F3810(void* self, s32 mode);
+void* GetOscillatorEntryForPeriod(void* self, s32 mode);
 
 
-void* func_001F3810(void* self, s32 mode);
+void* GetOscillatorEntryForPeriod(void* self, s32 mode);
 
-void* func_001F3830(void* self, s32 mode);
-void func_001F38F0(void* buf, f32 a, f32 b, f32 c, f32 d);
+void* GetOscillatorEntryForVectors(void* self, s32 mode);
+void AppendVector4ToBuffer(void* buf, f32 a, f32 b, f32 c, f32 d);
 
-void* func_001F3830(void* self, s32 mode);
-void func_001F38F0(void* buf, f32 x, f32 y, f32 z, f32 w);
+void* GetOscillatorEntryForVectors(void* self, s32 mode);
+void AppendVector4ToBuffer(void* buf, f32 x, f32 y, f32 z, f32 w);
 
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-void func_0011EC40(void* a, void* b);
+void ReadBufferedRotation3(void* a, void* b);
+void ReadBufferedVector3(void* a, void* b);
+void ReadPropertyRecords(void* a, void* b);
 
-void func_00128018(void* a0, void* a1, void* a2, void* a3);
-void func_00128150(void* a0, void* a1, void* a2, void* a3);
-void func_00182F78(void* self, void* value);
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void ReparentObject(void* self, void* value);
 
-s32 func_00128018(void* a, s32 b, void* c, s32 d);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 
-s32 func_00128150(void* a, s32 b, void* c, s32 d);
+s32 TransformRotationBetweenFrames(void* a, s32 b, void* c, s32 d);
 
-void func_00182C18(void* self);
+void InitObject(void* self);
 
 struct OwnedNode { u8 pad0[0xC]; void* owner0C; u8 pad1[0x84 - 0x10]; OwnedNode* next84; };
 struct OwnerSlot { s32 link; u8 pad0[0x3C]; };
@@ -72,19 +72,19 @@ struct NodeAttachment { u8 pad0[0x54]; OwnedNode* node54; s32 count58; Attachmen
 struct NodeOwner { u8 pad0[0x3C]; s32 count3C; u8 pad1[0x6E0 - 0x40]; OwnerSlot items6E0[4]; OwnerSlot items7E0[1]; u8 pad2[0x8E0 - 0x820]; OwnedNode* head8E0; };
 
 
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-void func_0011EC40(void* a, void* b);
-s32 func_00137D10(void* p);
-void* func_0018D500(int size);
-void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
-void func_00138518(void* self);
+void ReadBufferedRotation3(void* a, void* b);
+void ReadBufferedVector3(void* a, void* b);
+void ReadPropertyRecords(void* a, void* b);
+s32 ReadBufferedS16(void* p);
+void* AllocateFrontMemory(int size);
+void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void SkipBufferedBlock(void* self);
 
 
-void func_00182C58(void* self);
-void func_00182ED8(void* a);
+void StartObject(void* self);
+void ResolveAndStartObject(void* a);
 
-void* func_001F37D8(Oscillator* self, s32 mode, s32 flag);
+void* GetOscillatorCurrentEntry(Oscillator* self, s32 mode, s32 flag);
 
 
 struct OscillatorAxisEntry {
@@ -96,7 +96,7 @@ struct OscillatorAxisEntry {
     s32 f60;
 };
 
-void func_00182C18(BaseObject* self);
+void InitObject(BaseObject* self);
 
 // NEAR: the two counter increments (0x38 and 0x6D0) are computed in the reverse
 // order of retail (addiu v0 before addiu v1); no statement order tried changed it.
@@ -112,16 +112,16 @@ struct OscillatorPlaneEntry {
     f32 f88;
 };
 
-void func_001830D8(TransformSet* self, TransformSet* other);
-BaseObject* func_00183058(BaseObject* a, World* b, s32 c);
+void CopyObjectData(TransformSet* self, TransformSet* other);
+BaseObject* CreateObjectCopy(BaseObject* a, World* b, s32 c);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-f32 func_001F31F8(s32 i);
+f32 HashToUnitFloat(s32 i);
 
 
-HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
-s32 func_0015A4F0(World* host, s32 kind, s32 a2, s32 a3, s32 max, HoldingMember** out);
+HoldingMember* FindFirstObjectById(World* host, s32 kind, s32 id, HoldingMember* ctx);
+s32 GatherObjectsById(World* host, s32 kind, s32 a2, s32 a3, s32 max, HoldingMember** out);
 
 struct MinOf {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
@@ -133,62 +133,62 @@ extern s32 (*D_00276608[6])[4];
 
 #include "common.h"
 
-void func_001451F0(u32, int, int, void*, int, void*);
+void RemoveCameraControllers(u32, int, int, void*, int, void*);
 void func_00125C90();
 struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
-void func_00123ED0(void*);
+void InitPlacedObject(void*);
 
-void func_001F57E0(void*);
+void OfferTrackedNodeLaunch(void*);
 
-void func_00145088(u32, int, void*, int, void*);
+void PushCameraController(u32, int, void*, int, void*);
 
-void func_001BA130(void*);
+void CopyCollider(void*);
 
-s32 func_0013EC00(void*, int, void*, void*, void*, void*, void*);
+s32 UpsertKeyedEntry(void*, int, void*, void*, void*, void*, void*);
 
-void func_00124A48(void*);
-void func_001F55A8(Rec36*);
+void StartPlacedObject(void*);
+void FillTrackedNodes(Rec36*);
 
-void func_001FA468();
+void ShutDownCommandChannel();
 
-s32 func_001F3C38(void* a, void* b);
-s32 func_001F4008(void* x);
-s32 func_001925F0(void);
-s32 func_00192620(void);
-s32 func_001929D0(void* v);
+s32 FindArrivalPoint(void* a, void* b);
+s32 PlaceAtArrivalPoint(void* x);
+s32 GetActiveSwitchedCollider(void);
+s32 GetCurrentSwitchedCollider(void);
+s32 ActivateSwitchedCollider(void* v);
 
 // NEAR: only the vtbl[19] load differs: retail loads it into $v1 (lw v1,76(v1)), we use $v0 for the test and the call.
 
 
-void func_00124A48(void* self);
+void StartPlacedObject(void* self);
 
-extern f32 D_0026185C;
-void func_001DDA20(void* a);
+extern f32 g_gameTime;
+void AcquirePadSelectFlag(void* a);
 
-s32 func_001601A0(s32 a0);
-s32 func_00160850(s32 a0);
-void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
+s32 GetEntryIdByKey(s32 a0);
+s32 GetLevelEntryWord(s32 a0);
+void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
-void func_00124A48(LookupObject* self);
-BaseObject* func_0015A418(void* host, s32 a1, s32 a2, LookupObject* ctx);
-s32 func_001300E8(BaseObject* n, s32 kind);
+void StartPlacedObject(LookupObject* self);
+BaseObject* FindFirstObjectById(void* host, s32 a1, s32 a2, LookupObject* ctx);
+s32 IsObjectOfKind(BaseObject* n, s32 kind);
 
-void func_001B7968(Collider* self);
+void InitCollider(Collider* self);
 
-void func_001B9AE0(C37* o, s32 a, s32 b, s32 c, s32 d);
-
-
+void SetColliderAnchors(C37* o, s32 a, s32 b, s32 c, s32 d);
 
 
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+
+
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 
 // The offer func_001F57E0 fills: the tracker's word, the tracker, and the launch to call.
 struct TrackedNodeOffer { s32 f0; s32 f4; Rec36* f8; void* fC; };
 
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
-void func_0018D800(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, s32 count);
 
 extern u8 D_00247AD0[];
 
@@ -200,10 +200,10 @@ struct LevelRecordWord78 {
 
 // What StartObjectFade (func_001F0428) fades: the entry LookupEntryById gives for a level.
 struct LevelFadeEntry { s32 unused; };
-LevelFadeEntry* func_00160180(s32 k);
-void func_001F0428(LevelFadeEntry* v, s32 m, s32 n);
-void func_001F4808(ObjectSubGroup* x);
-void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
+LevelFadeEntry* LookupEntryById(s32 k);
+void StartObjectFade(LevelFadeEntry* v, s32 m, s32 n);
+void StartObjectSubGroupFinish(ObjectSubGroup* x);
+void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
 struct TrackedTargetChoice {
     u8 pad00[0x0C];
@@ -221,20 +221,20 @@ struct TargetLaunchFrame {
 };
 
 
-void func_00178D98(Player* self, s32 a1, void* a2, void* a3, void* a4);
-void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
-void func_00188850(const Vec02* t, void* out, f32 x);
-void func_00175170(Player* self, s32 a, s32 b);
-void func_00178598(Player* self, void* s2, f32 f);
+void ChooseBestTargetCandidate(Player* self, s32 a1, void* a2, void* a3, void* a4);
+void ComputeTargetArc(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
+void SetPlayerState(Player* self, s32 a, s32 b);
+void LaunchPlayerAtTarget(Player* self, void* s2, f32 f);
 
-void func_00138550(void* a, void* b);
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-s32 func_001E4C48(void* a, void* b, void* c, void* d, void* e);
-void func_0011EC40(void* a, void* b);
-s32 func_00137D10(void* a);
-void* func_0018D500(s32 size);
-void* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
+void ReadOptionalBufferedBlock(void* a, void* b);
+void ReadBufferedRotation3(void* a, void* b);
+void ReadBufferedVector3(void* a, void* b);
+s32 ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
+void ReadPropertyRecords(void* a, void* b);
+s32 ReadBufferedS16(void* a);
+void* AllocateFrontMemory(s32 size);
+void* CreateTypedRecord(s32 a, s32 b, s32 c, s32 d, s32 e);
 
 
 struct NextListed {
@@ -257,14 +257,14 @@ struct BeginListWalk {
     }
 };
 
-BaseObject* func_0015A418(World* a, s32 b, void* c, ContactTracker* d);
-void func_001F5868(Rec36* self, BaseObject* n);
+BaseObject* FindFirstObjectById(World* a, s32 b, void* c, ContactTracker* d);
+void AddTrackedNode(Rec36* self, BaseObject* n);
 
 
-void func_001B93F8(Collider* self);
-s32 func_00182F40(Collider* o, ContactTracker* self);
-s32 func_001F5C0C(void* p, s32 a, s32 b);
-s32 func_00177838(void* t, s32 a, s32 b);
+void UpdateCollider(Collider* self);
+s32 IsObjectDescendantOf(Collider* o, ContactTracker* self);
+s32 FillMemory(void* p, s32 a, s32 b);
+s32 FindNodeForQuery(void* t, s32 a, s32 b);
 
 struct GathererQuery {
     ContactTracker* self;
@@ -292,18 +292,18 @@ struct AddGathererContact {
 
 
 
-s32 func_001601A0(s32 a);
-void func_001E0828(T217D_1380* g);
-void func_001F4760(ObjectSubGroup* self, s32 state);
-void func_001E02C8(T217D_1380* g, s32 n);
-void func_001F4408(s32 flag, s32 n);
-s32 func_001300E8(BaseObject* key, s32 kind);
-void func_001451F0(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
-s32 func_0012C7B0(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
-s32 func_0012C9A8(Animation* node);
-void func_001837E0(ObjectSubGroup* self, s32 a, s32 b, s32 c);
+s32 GetEntryIdByKey(s32 a);
+void FinishBestTimeRun(T217D_1380* g);
+void SetObjectSubGroupState(ObjectSubGroup* self, s32 state);
+void SetBestTimeState(T217D_1380* g, s32 n);
+void BeginLevelExit(s32 flag, s32 n);
+s32 IsObjectOfKind(BaseObject* key, s32 kind);
+void RemoveCameraControllers(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
+s32 CreateAnimationPlayerWithoutPresetTargets(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 HasAnimationEventKind19(Animation* node);
+void TriggerScriptEvent(ObjectSubGroup* self, s32 a, s32 b, s32 c);
 
-void func_001F2758(Oscillator* self)
+void InitOscillator(Oscillator* self)
 {
     InitObject(self);
     self->pendingId = -1;
@@ -311,7 +311,7 @@ void func_001F2758(Oscillator* self)
     self->currentEntry = -1;
 }
 
-void func_001F2798(NodeOwner* self, s32 unused, NodeAttachment* ctx)
+void AttachNodeToOwner(NodeOwner* self, s32 unused, NodeAttachment* ctx)
 {
     OwnedNode* node = ctx->node54;
     node->next84 = self->head8E0;
@@ -338,7 +338,7 @@ ASM_FUNC(func_001F2EF0);
 
 ASM_FUNC(func_001F3140);
 
-f32 func_001F31F8(s32 a0)
+f32 HashToUnitFloat(s32 a0)
 {
     s32 n = a0;
     n ^= n << 13;
@@ -346,7 +346,7 @@ f32 func_001F31F8(s32 a0)
     return (f32)n * 4.656612873077393e-10f;
 }
 
-f32 func_001F3250(f32 x, f32 y, f32 z)
+f32 SampleSmoothNoise(f32 x, f32 y, f32 z)
 {
     f32 t = (x + x) * g_gameTime + y;
     s32 i = (s32)t;
@@ -364,12 +364,12 @@ f32 func_001F3250(f32 x, f32 y, f32 z)
     return a + u * (b - a);
 }
 
-f32 func_001F3328(f32 value, f32 denominator)
+f32 ApplyBiasCurve(f32 value, f32 denominator)
 {
     return value / (1.0f + (1.0f / denominator - 2.0f) * (1.0f - value));
 }
 
-f32 func_001F3358(NoiseBlend* obj)
+f32 EvaluateNoiseBlend(NoiseBlend* obj)
 {
     f32 num = 0.0f;
     f32 den = 0.0f;
@@ -385,7 +385,7 @@ f32 func_001F3358(NoiseBlend* obj)
 
 ASM_FUNC(func_001F3408);
 
-void func_001F36E8(Oscillator* o)
+void AddOscillatorXEntry(Oscillator* o)
 {
     s32 n = o->entryCount;
     s32 off;
@@ -412,7 +412,7 @@ void func_001F36E8(Oscillator* o)
     }
 }
 
-void func_001F3768(Oscillator* self)
+void AddOscillatorYZEntry(Oscillator* self)
 {
     s32 n6 = self->currentEntry;
     s32 idx = self->entryCount;
@@ -429,7 +429,7 @@ void func_001F3768(Oscillator* self)
     self->nextId = self->nextId + 1;
 }
 
-void* func_001F37D8(Oscillator* obj, s32 value)
+void* GetOscillatorCurrentEntry(Oscillator* obj, s32 value)
 {
     if (obj->entryCount == 0) {
         return 0;
@@ -440,24 +440,24 @@ void* func_001F37D8(Oscillator* obj, s32 value)
     return (u8*)obj + (obj->currentEntry * 0xD0 + 0x50);
 }
 
-void* func_001F3810(Oscillator* self, s32 mode)
+void* GetOscillatorEntryForPeriod(Oscillator* self, s32 mode)
 {
     return GetOscillatorCurrentEntry(self, mode, 0);
 }
 
-void* func_001F3830(void* self, s32 mode)
+void* GetOscillatorEntryForVectors(void* self, s32 mode)
 {
     return GetOscillatorCurrentEntry(self, mode, 1);
 }
 
-void func_001F3850(void* self, f32 x)
+void SetOscillatorEntryPeriod(void* self, f32 x)
 {
     OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod(self, 1);
     if (x == 0.0f) s->scale = 0.0f;
     else s->scale = 1.0f / x;
 }
 
-void func_001F38A0(void* self, f32* out)
+void GetOscillatorEntryPeriod(void* self, f32* out)
 {
     OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod(self, 1);
     f32 v = s->scale;
@@ -465,7 +465,7 @@ void func_001F38A0(void* self, f32* out)
     else *out = 1.0f / v;
 }
 
-void func_001F38F0(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
+void AppendVector4ToBuffer(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
 {
     u32 n = buf->count;
     if (n < 4) {
@@ -478,40 +478,40 @@ void func_001F38F0(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
     }
 }
 
-void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d)
+void AddOscillatorEntryVectorA(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer(p + 0x30, a, b, c, d);
 }
 
-void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d)
+void AddOscillatorEntryVectorB(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer(p + 0x80, a, b, c, d);
 }
 
-void func_001F39F8(TransformObject* self)
+void InitTransformObject(TransformObject* self)
 {
     InitObject(self);
     Mat3_73* dst = &self->rot;
     *dst = *(Mat3_73*)&g_identityMatrix;
 }
 
-void func_001F3A40(TransformObject* self, void* stream)
+void ReadTransformObject(TransformObject* self, void* stream)
 {
     ReadBufferedRotation3(stream, &self->rot);
     ReadBufferedVector3(stream, &self->pos);
     ReadPropertyRecords(self, stream);
 }
 
-void func_001F3A90(TransformObject* self, BaseObject* other)
+void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other)
 {
     TransformPointBetweenFrames(self->parent, other, &self->pos, &self->pos);
     TransformRotationBetweenFrames(self->parent, other, &self->rot, &self->rot);
     ReparentObject(self, other);
 }
 
-void func_001F3AF0(TransformObject* self, BaseObject* other)
+void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
 {
     TransformPointBetweenFrames(other, 0, &self->pos, &self->pos);
     TransformRotationBetweenFrames(other, 0, &self->rot, &self->rot);
@@ -519,17 +519,17 @@ void func_001F3AF0(TransformObject* self, BaseObject* other)
 
 ASM_FUNC(func_001F3B48);
 
-s32 func_001F3BD8(BaseObject* self, s32 arg)
+s32 GetObjectWorldPosition(BaseObject* self, s32 arg)
 {
     return TransformPointBetweenFrames(self->parent, 0, (u8*)self + 0x40, arg);
 }
 
-s32 func_001F3C08(BaseObject* self, s32 arg)
+s32 GetObjectWorldRotation(BaseObject* self, s32 arg)
 {
     return TransformRotationBetweenFrames(self->parent, 0, (u8*)self + 0x50, arg);
 }
 
-HoldingMember* func_001F3C38(s32 id, s32 parent)
+HoldingMember* FindArrivalPoint(s32 id, s32 parent)
 {
     HoldingMember* found = 0;
     HoldingMember* buf[64];
@@ -569,7 +569,7 @@ HoldingMember* func_001F3C38(s32 id, s32 parent)
     return found;
 }
 
-void func_001F3D80(TransformSet* self, void* other)
+void LoadArrivalPoint(TransformSet* self, void* other)
 {
     ReadBufferedRotation3(other, &self->rot);
     ReadBufferedVector3(other, &self->pos);
@@ -592,7 +592,7 @@ void func_001F3D80(TransformSet* self, void* other)
     }
 }
 
-void func_001F3EE0(TransformSet* self, TransformSet* other)
+void CopyArrivalPoint(TransformSet* self, TransformSet* other)
 {
     CopyObjectData(self, other);
     self->objects = (BaseObject**)AllocateFrontMemory(self->count << 2);
@@ -601,7 +601,7 @@ void func_001F3EE0(TransformSet* self, TransformSet* other)
     }
 }
 
-void func_001F3F80(TransformSet* self)
+void StartArrivalPoint(TransformSet* self)
 {
     StartObject(self);
     for (s32 i = 0; i < self->count; i++) {
@@ -613,11 +613,11 @@ void func_001F3F80(TransformSet* self)
 
 ASM_FUNC(func_001F4008);
 
-void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
+void SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
-void func_001F4308(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
+void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 
-s32 func_001F4318(void* unused, void* a, void* b)
+s32 FindOrActivateSwitchedCollider(void* unused, void* a, void* b)
 {
     s32 r = FindArrivalPoint(a, b);
     if (r != 0) {
@@ -635,7 +635,7 @@ done:
     return r;
 }
 
-ObjectSubGroup* func_001F4378(void)
+ObjectSubGroup* FindActiveObjectSubGroup(void)
 {
     void* arr[64];
     ObjectSubGroup* found = 0;
@@ -653,7 +653,7 @@ ObjectSubGroup* func_001F4378(void)
     return found;
 }
 
-void func_001F4408(s32 flag, s32 n)
+void BeginLevelExit(s32 flag, s32 n)
 {
     GameProgress* ctx = g_saveData;
     LevelRecordWord78* o;
@@ -696,7 +696,7 @@ larg:
     StartScreenFade(&g_screenFade, &args, n);
 }
 
-void func_001F4500(ObjectSubGroup* self, void* s3)
+void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
     ReadOptionalBufferedBlock(s3, (u8*)self + 0x2FC);
     ReadOptionalBufferedBlock(s3, (u8*)self + 0x308);
@@ -724,7 +724,7 @@ void func_001F4500(ObjectSubGroup* self, void* s3)
     }
 }
 
-void func_001F4660(ObjectSubGroup* self)
+void StartObjectSubGroup(ObjectSubGroup* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->count; i++) {
@@ -748,7 +748,7 @@ void func_001F4660(ObjectSubGroup* self)
     }
 }
 
-void func_001F4760(ObjectSubGroup* self, s32 state)
+void SetObjectSubGroupState(ObjectSubGroup* self, s32 state)
 {
     if (state != self->f2E4) {
         if (self->f2E4 == 4 && state != 5)
@@ -764,7 +764,7 @@ void func_001F4760(ObjectSubGroup* self, s32 state)
     }
 }
 
-void func_001F4808(ObjectSubGroup* self)
+void StartObjectSubGroupFinish(ObjectSubGroup* self)
 {
     BaseObject* key;
     s32 i;
@@ -814,7 +814,7 @@ tail:
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void func_001F4A30(ObjectSubGroup* self)
+void StartObjectSubGroupFade(ObjectSubGroup* self)
 {
     FadeRequest m;
     s32 ok = 0;
@@ -839,9 +839,9 @@ void func_001F4A30(ObjectSubGroup* self)
 INCLUDE_RODATA(jtbl_0024E860);
 ASM_FUNC(func_001F4AE0);
 
-void func_001F4E18(LookupObject* self) { InitPlacedObject(self); self->id = -1; }
+void InitLookupObject(LookupObject* self) { InitPlacedObject(self); self->id = -1; }
 
-void func_001F4E48(LookupObject* self)
+void StartLookupObject(LookupObject* self)
 {
     StartPlacedObject(self);
     if (self->id != -1) {
@@ -856,13 +856,13 @@ void func_001F4E48(LookupObject* self)
     }
 }
 
-void func_001F4ED0(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController((u32)g_camera, 7, (u8*)g_camera + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
+void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController((u32)g_camera, 7, (u8*)g_camera + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
 
-void func_001F4F20(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers((u32)g_camera, 0xB, 7, (u8*)g_camera + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
+void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers((u32)g_camera, 0xB, 7, (u8*)g_camera + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
-void func_001F5590(Rec36* a, ContactTracker* b);
+void InitTrackedNodes(Rec36* a, ContactTracker* b);
 
-void func_001F4F70(ContactTracker* self)
+void InitContactTracker(ContactTracker* self)
 {
     InitCollider(self);
     InitTrackedNodes(&self->rec, self);
@@ -870,9 +870,9 @@ void func_001F4F70(ContactTracker* self)
     self->flags538 = (self->flags538 & ~0xF000000000ULL) | 0x2000000000ULL;
 }
 
-void func_001F4FD8(ContactTracker* self) { StartPlacedObject(self); FillTrackedNodes(&self->rec); }
+void StartContactTracker(ContactTracker* self) { StartPlacedObject(self); FillTrackedNodes(&self->rec); }
 
-void func_001F5008(ContactTracker* self) {
+void CollectTouchingObjects(ContactTracker* self) {
     GathererQuery tmp;
     ObjectGatherer* p;
     UpdateCollider(self);
@@ -903,17 +903,17 @@ void func_001F5008(ContactTracker* self) {
     }
 }
 
-void func_001F51A0(ContactTracker* self) { CopyCollider(self); self->rec.owner = self; }
+void CopyContactTracker(ContactTracker* self) { CopyCollider(self); self->rec.owner = self; }
 
-void func_001F51C8() { func_00125C90(); }
+void ApplyContactTrackerTransform() { func_00125C90(); }
 
-int func_001F51E8(ContactTracker* self) { func_001F57E0(&self->rec); return 1; }
+int RequestContactTrackerLaunch(ContactTracker* self) { OfferTrackedNodeLaunch(&self->rec); return 1; }
 
-void* func_001F5208(void* self) { return (u8*)self + 0x550; }
+void* GetContactTrackerRecord(void* self) { return (u8*)self + 0x550; }
 
-void func_001F5210(ContactTracker* self) { self->rec.found = 0; }
+void ClearTrackedNodes(ContactTracker* self) { self->rec.found = 0; }
 
-void func_001F5218(C37* o) {
+void InitC37(C37* o) {
     InitContactTracker(o);
     o->flags538 |= ((u64)0x8000 << 28);
     SetColliderAnchors(o, 3, 0, 3, 0);
@@ -921,9 +921,9 @@ void func_001F5218(C37* o) {
 
 ASM_FUNC(func_001F5268);
 
-void func_001F5590(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
+void InitTrackedNodes(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 
-void func_001F55A8(Rec36* self)
+void FillTrackedNodes(Rec36* self)
 {
     ListFrame it;
     BaseObject* n;
@@ -947,7 +947,7 @@ void func_001F55A8(Rec36* self)
     g_activeListFrames = it.prev;
 }
 
-void func_001F56D8(TrackedTargetChoice* ctx, Player* self)
+void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 {
     TargetLaunchFrame f;
     ChooseBestTargetCandidate(self, ctx->s94, (u8*)ctx + 0x98, f.a, &f.f60);
@@ -964,7 +964,7 @@ void func_001F56D8(TrackedTargetChoice* ctx, Player* self)
     }
 }
 
-void func_001F57E0(Rec36* self, void* a1, TrackedNodeOffer* out)
+void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
 {
     GetActiveSwitchedCollider();
     s32 v = self->f04;
@@ -974,9 +974,9 @@ void func_001F57E0(Rec36* self, void* a1, TrackedNodeOffer* out)
     TriggerScriptEvent(self->owner, 2, 0, 0);
 }
 
-void func_001F5840(Rec36* self, void* entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
+void AddTrackedKey(Rec36* self, void* entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
 
-void func_001F5868(Rec36* self, BaseObject* e) {
+void AddTrackedNode(Rec36* self, BaseObject* e) {
     if (self->found < 0x20) {
         if (IsObjectOfKind(e, 0x7E) || IsObjectOfKind(e, 0x6E) || IsObjectOfKind(e, 0x76) ||
             IsObjectOfKind(e, 0x70) || IsObjectOfKind(e, 0x71) || IsObjectOfKind(e, 0x81)) {
@@ -985,7 +985,7 @@ void func_001F5868(Rec36* self, BaseObject* e) {
     }
 }
 
-void func_001F5930(Rec36* self, s32 value)
+void RemoveTrackedNode(Rec36* self, s32 value)
 {
     s32 i;
     for (i = 0; i < (s32)self->found; i++) {

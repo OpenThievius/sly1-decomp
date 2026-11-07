@@ -2,10 +2,10 @@
 // PAL: calls func_0018C178(g, 1) before func_0018C568 and handles a third button (0x10) when D_eu_002636EC >= 2
 extern s32 D_eu_002636EC;
 struct G2_1E9108_eu { u8 pad[0x570]; WarpPage* f570; };
-extern void func_001E9498(ElementStack* o, G2_1E9108_eu* g);
-extern void func_0018C178(MemoryCard* g, s32 a);
+extern void PushStackElement(ElementStack* o, G2_1E9108_eu* g);
+extern void SetMemoryCardDisplayMode(MemoryCard* g, s32 a);
 
-void func_001E9108(ElementStack* obj)
+void UpdateElementStack(ElementStack* obj)
 {
     f32 d = g_gameClock.elapsed - obj->stateTime;
     s32 s1 = obj->state;

@@ -2,15 +2,15 @@
 // PAL returns 0 early when a PAL-only flag is set, before the final func_001E1F10 call.
 extern s32 D_eu_0025D6B8;
 
-s32 func_0011D078(void)
+s32 IsIopReplyReady(void)
 {
     u32* table;
 
-    func_001F6C20(0);
+    SyncDataCache(0);
     if (g_iopReplyBuffer == 0) {
         return 1;
     }
-    if (func_001F8480(&g_iopCommandRpc) != 0) {
+    if (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
         return 0;
     }
     table = (u32*)g_iopReplyBuffer;

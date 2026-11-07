@@ -20,7 +20,7 @@ static inline f32 Clamp_16E738(f32 v, f32 lo, f32 hi)
     return v;
 }
 
-void func_0016E738(Pad_16E738* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag,
+void ReadAnalogStick(Pad_16E738* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag,
                    u8* prevX, u8* prevY, s32* flag, Range_16E738* range)
 {
     f32 nx, ny;

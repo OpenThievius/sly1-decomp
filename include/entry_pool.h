@@ -36,10 +36,10 @@ struct EntryPool {
 
 typedef char check_EntryPool[sizeof(EntryPool) == 0x20 ? 1 : -1];
 
-extern EntryPool D_0025C250;
-extern EntryPool D_0025C270;
-extern EntryPool D_0025C290;
-extern EntryPool D_0025C2B0;
-extern EntryPool D_0025C2D0;
+extern EntryPool g_valueNodePool;
+extern EntryPool g_scopePool;
+extern EntryPool g_keyedValuePool;
+extern EntryPool g_payloadPool;
+extern EntryPool g_propertyRefPool;
 
 #endif

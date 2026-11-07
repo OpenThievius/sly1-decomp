@@ -2,7 +2,7 @@
 // PAL: D_0026FF68 fields f25C and f268 are at 0x56C and 0x578 (US 0x25C, 0x268).
 struct Glob_18BDC8_eu { u8 pad0[0x56C]; s32 f56C; u8 pad570[8]; s32 f578; };
 
-void func_0018BDC8(MemoryCard* self)
+void UpdateMemoryCard(MemoryCard* self)
 {
     if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
     if (self->state == self->targetState) {

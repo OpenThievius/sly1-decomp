@@ -25,6 +25,6 @@ struct PartHolderObject : PlacedObject {
 typedef char check_PartHolderObject[sizeof(PartHolderObject) == 0x300 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0016AA18(PartHolderObject* self);                       // 0x6A slot 16
+void CallFlaggedParts(PartHolderObject* self);                       // 0x6A slot 16
 
 #endif

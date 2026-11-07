@@ -69,12 +69,12 @@ struct OnOffObject : PlacedObject {
 
 typedef char check_OnOffObject[sizeof(OnOffObject) == 0x470 ? 1 : -1];
 
-void func_001E2520(OnOffObject* self);                  // 0x63 slot 0
-void func_001E25F8(OnOffObject* self);                  // 0x63 slot 7
-void func_001E2648(OnOffObject* self, void* stream);    // 0x63 slot 10
-void func_001E2758(OnOffObject* self);                  // 0x63 slot 16
-void func_001E2940(OnOffObject* self);                  // 0x63 slot 17
-void func_001E29A8(OnOffObject* self, void* p);         // 0x63 slot 20
-void func_001E2988(void);                       // 0x63 slot 37 (calls the common slot)
+void InitOnOffObject(OnOffObject* self);                  // 0x63 slot 0
+void UnregisterOnOffObject(OnOffObject* self);                  // 0x63 slot 7
+void LoadOnOffObject(OnOffObject* self, void* stream);    // 0x63 slot 10
+void StartOnOffObject(OnOffObject* self);                  // 0x63 slot 16
+void UpdateOnOffObject(OnOffObject* self);                  // 0x63 slot 17
+void SetOnOffObjectFrozen(OnOffObject* self, void* p);         // 0x63 slot 20
+void DrawOnOffObject(void);                       // 0x63 slot 37 (calls the common slot)
 
 #endif

@@ -17,6 +17,6 @@ struct BumpAllocator {
 };
 
 
-extern BumpAllocator D_002626D8;        // file_167D68.cpp
+extern BumpAllocator g_bumpAllocator;        // file_167D68.cpp
 
 #endif

@@ -78,7 +78,9 @@ def skip(text, i):
 
 def definition_span(text, name):
     """(start, end) of the definition of `name` in a file's text: its first line to its closing brace."""
+    import symbols
     import todo
+    name = symbols.canonical(name)      # the definition may be written by either name
     for m in todo.definitions(text):
         if m.group(1) != name:
             continue

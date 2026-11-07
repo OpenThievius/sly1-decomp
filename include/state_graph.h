@@ -37,6 +37,6 @@ struct StateGraph : BaseObject {
 
 typedef char check_StateGraph[sizeof(StateGraph) == 0x54 ? 1 : -1];
 
-void func_001B61A8(StateGraph* self);                  // slot 16
+void StartStateGraph(StateGraph* self);                  // slot 16
 
 #endif

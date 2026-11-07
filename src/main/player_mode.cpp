@@ -10,13 +10,13 @@
 #include "screen_element.h"
 #include "game_clock.h"
 
-s32 D_00274F38[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
-const char* D_00274F58[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
-s32 D_00274F74 = -1;
+s32 g_modeMasks[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
+const char* g_modeLabels[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
+s32 g_currentMode = -1;
 float D_00274F78[3] = {2.0f, 0.0f, 0.100000001f};
 float D_00274F84 = 1.5f;
 float D_00274F88[2] = {0.25f, 0.0f};
-s32 D_00274F90[4] = { 0x22, 0x152, 0x558, 0 };
+s32 g_countedColliderLinkIds[4] = { 0x22, 0x152, 0x558, 0 };
 
 struct ContactObject;
 
@@ -35,58 +35,58 @@ struct ContactObject {
 };
 
 
-void* func_001BC320(Collider* a);
-void func_001861E8(void* a, s32 b);
+void* HandleObjectEvent(Collider* a);
+void FreePooledContactChain(void* a, s32 b);
 
-void func_001BC4D8(void* self, void* sub);
+void ExtractContactsByPartMode(void* self, void* sub);
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 a1, void* a2);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
 
 struct CountedTouchMessage {
     void* self;
     void* v;
 };
 
-void func_00158730(void* x);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void SendEmptyMessage(void* x);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
 struct AnimatedObject105 { u8 pad[0x7E0]; void* obj; };
 
 
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
 
 
-void func_001B9338(Collider* self, f32 t);
-void func_00189378(Mat02* sub, s32 zero, void* out);
-void func_001B91A8(Collider* self, void* buf, s32 a, void* p, s32 b, f32 t);
+void StepCollider(Collider* self, f32 t);
+void RotateMatrixUpright(Mat02* sub, s32 zero, void* out);
+void SteerColliderTowardRotation(Collider* self, void* buf, s32 a, void* p, s32 b, f32 t);
 
 
-void func_00127378(PlacedObject* self, s32 kind, ObjectMessage* msg);
-s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 kind, ObjectMessage* msg);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
-void func_0016EC20(PadRecord* self, s32 mask);
-s32 func_00160D10(void);
+void ClearPadPressedBits(PadRecord* self, s32 mask);
+s32 MaskWorldBitsBySave(void);
 
 struct PlayerHeldObject;
-extern f32 D_00261854;
+extern f32 g_stepScale;
 
-void func_00175170(Player* self, s32 a, s32 b);
-s32 func_00182FC8(PlayerHeldObject* self);
-void func_00126D60(PlayerHeldObject* self, f32 v);
-void func_001D32D8(PlayerHeldObject* self, Player* a, s32 b);
-void func_001D31D0(Player* self, s32 a);
-void* func_001925F0(void);
+void SetPlayerState(Player* self, s32 a, s32 b);
+s32 IsObjectAttached(PlayerHeldObject* self);
+void FadeOutPlacedObject(PlayerHeldObject* self, f32 v);
+void TakeCountedColliderTouch(PlayerHeldObject* self, Player* a, s32 b);
+void SeekObjects105Animations(Player* self, s32 a);
+void* GetActiveSwitchedCollider(void);
 
-void func_001D29C8(u32 mode);
-s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table);
-void func_001D32D8(CountedCollider* self, void* v, s32 flag);
-void* func_001D3500(CountedCollider* a0, ContactEvent* a1);
-void func_001D3678(CountedCollider* self, s32 kind, ObjectMessage* msg);
+void ShowModeLabel(u32 mode);
+s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table);
+void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
+void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
+void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg);
 
-void func_001D29C8(u32 mode)
+void ShowModeLabel(u32 mode)
 {
     switch (g_currentMode) {
     case 1:
@@ -100,7 +100,7 @@ void func_001D29C8(u32 mode)
             goto tail;
         if (((PlayerHeldObject*)g_player->f1518) != 0) {
             if (IsObjectAttached(((PlayerHeldObject*)g_player->f1518)) != 0)
-                func_00126D60(((PlayerHeldObject*)g_player->f1518), 0.5f);
+                FadeOutPlacedObject(((PlayerHeldObject*)g_player->f1518), 0.5f);
         }
         break;
     }
@@ -130,7 +130,7 @@ INCLUDE_RODATA(jtbl_0024DB90);
 INCLUDE_RODATA(jtbl_0024DBB0);
 ASM_FUNC(func_001D2BB8);
 
-s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
+s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table)
 {
     s32 step;
     s32 left;
@@ -157,7 +157,7 @@ s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
     return idx;
 }
 
-void func_001D31D0(Player* self, s32 value)
+void SeekObjects105Animations(Player* self, s32 value)
 {
     void* buf[0x100];
     if (value == self->f275C) {
@@ -174,14 +174,14 @@ void func_001D31D0(Player* self, s32 value)
     self->f2758 = g_gameClock.time;
 }
 
-void func_001D3290(CountedCollider* self)
+void StartCountedCollider(CountedCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_countedColliderLinkIds);
     self->desc->m03(self);
 }
 
-void func_001D32D8(CountedCollider* self, void* v, s32 flag)
+void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
 {
     if (flag == 0) {
         CountedTouchMessage msg;
@@ -201,23 +201,23 @@ void func_001D32D8(CountedCollider* self, void* v, s32 flag)
 
 ASM_FUNC(func_001D3398);
 
-void func_001D3470(CountedCollider* self, f32 t)
+void StepCountedCollider(CountedCollider* self, f32 t)
 {
     u8 buf[0x30];
 
     StepCollider(self, t);
     if (self->parent == 0) {
-        func_00189378(&self->rot, 0, buf);
-        func_001B91A8(self, buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
+        RotateMatrixUpright(&self->rot, 0, buf);
+        SteerColliderTowardRotation(self, buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
     }
 }
 
-void func_001D34E0(CountedCollider* self)
+void CollectCountedColliderContacts(CountedCollider* self)
 {
     ExtractContactsByPartMode(self, &self->contacts);
 }
 
-void* func_001D3500(CountedCollider* a0, ContactEvent* a1)
+void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
 {
     void* r = HandleObjectEvent(a0);
     if (r != 0 && (a1->flags & 0x20)) {
@@ -237,10 +237,10 @@ void* func_001D3500(CountedCollider* a0, ContactEvent* a1)
 
 ASM_FUNC(func_001D35A8);
 
-void func_001D3678(CountedCollider* self, s32 kind, ObjectMessage* msg)
+void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 10) {
-        func_00185D20(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->contacts);
+        CreatePooledContact(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->contacts);
     }
 }

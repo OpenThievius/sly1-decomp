@@ -2,7 +2,7 @@
 // PAL: the linked pointer is at 0x588 (US 0x278).
 struct Obj_1E87F0_eu { u8 pad0[0x588]; PlacedObject* f588; };
 
-void func_001E87F0(Obj_1E87F0_eu* self, PlacedObject* a1)
+void SetArcSpecialObject(Obj_1E87F0_eu* self, PlacedObject* a1)
 {
     PlacedObject* old = self->f588;
     if (old != 0) {

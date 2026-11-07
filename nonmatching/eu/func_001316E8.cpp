@@ -34,7 +34,7 @@ struct Gfx_eu_1316E8 {
     }
 };
 
-void func_001316E8(Obj_eu_1316E8* self, PacketWriter* gs)
+void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
 {
     Str_eu_1316E8 sCur;
     Str_eu_1316E8 sPrev;

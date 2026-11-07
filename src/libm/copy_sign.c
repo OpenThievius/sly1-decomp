@@ -4,7 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-f32 func_002093C0(f32 x, f32 y)
+f32 CopySign(f32 x, f32 y)
 {
     s32 xBits, yBits;
 

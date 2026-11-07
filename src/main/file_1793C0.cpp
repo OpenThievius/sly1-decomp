@@ -18,7 +18,7 @@
 // The float func_0017AF38 reads as zero; the word after it is padding before the link table.
 f32 D_00263AC0 = 0.0f;
 
-ObjectLink D_00263AC8[26] = {
+ObjectLink g_modeColliderLinks[26] = {
     { 0, 0x453, 0x688 },
     { 0, 0x454, 0x694 },
     { 0, 0x455, 0x6A0 },
@@ -69,11 +69,11 @@ f32 D_00263D00[2] = { 0.0f, 0.300000012f };
 f32 D_00263D08[4] = { 30.0f, 0.0f, 0.5f, 0.0f };
 f32 D_00263D18[6] = { 30.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 f32 D_00263D30[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
 f32 D_00263D40[6] = { 0.7f, 0.3f, 0.0f, 0.0f, 7e+02f, 6.5e+02f };
 
-ObjectLink D_00263D58[13] = {
+ObjectLink g_gaugeHolderLinks[13] = {
     { 0, 0x468, 0x584 },
     { 0, 0x469, 0x56C },
     { 0, 0x46A, 0x560 },
@@ -94,10 +94,10 @@ f32 D_00263DFC = 750.0f;
 f32 D_00263E00 = 750.0f;
 
 extern s32 D_00263E2C;
-extern s32 D_00263E30;
-f32 D_00263E04 = 3.0f;
+extern s32 g_timeoutFired;
+f32 g_timeoutLimit = 3.0f;
 
-ObjectLink D_00263E08[3] = {
+ObjectLink g_countdownTable[3] = {
     { 0, 0x478, 0x55C },
     { 0, 0x479, 0x560 },
     { 0, 0x47A, 0x564 }
@@ -106,11 +106,11 @@ ObjectLink D_00263E08[3] = {
 s32 D_00263E2C = 0;
 
 extern s32 D_00263E2C;
-s32 D_00263E30 = 0;
+s32 g_timeoutFired = 0;
 
-void func_001921A8(void* self);
+void InitSwitchedCollider(void* self);
 
-void func_001793C0(ModeCollider* self)
+void InitModeCollider(ModeCollider* self)
 {
     InitSwitchedCollider(self);
     self->f610 = -1;
@@ -118,25 +118,25 @@ void func_001793C0(ModeCollider* self)
 
 struct Sub_1793F0 { u8 pad0[0xE0]; void* fE0; };
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 a1, void* a2);
-void func_0012B5B8(void* a, s32 b, s32 c);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
-void func_0017ABE8(void* self, s32 a1);
-s32 func_001B4688(s32 key);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void SetFollowObjects(void* a, s32 b, s32 c);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+void SetModeColliderMode(void* self, s32 a1);
+s32 FindAnimRecord(s32 key);
 
-void func_001793F0(ModeCollider* self)
+void StartModeCollider(ModeCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects(self->f6E8, self->f680, self->f680);
     ((Sub_1793F0*)self->f650)->fE0 = self->f660;
     self->f658 = CreateStateWalker(self->f654, self, -1, 0);
-    func_00139038(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
+    BuildCombinedBlendAnimation(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
     self->f684 = 1.0f;
-    func_001399F8(self->f6C0, 0xC, 5, &self->f684);
+    SetBlendItemWeights(self->f6C0, 0xC, 5, &self->f684);
     SetModeColliderMode(self, 2);
     T217D_BF0* base = &D_00270650;
     ((T217D_Float*)&base->f288)->v = 0.0f;
@@ -151,13 +151,13 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void func_001B9338(ModeCollider* self, f32 t);
-void func_001794E0(ModeCollider* self, Vec02* a, Vec02* b);
+void StepCollider(ModeCollider* self, f32 t);
+void ComputeModeColliderAnchors(ModeCollider* self, Vec02* a, Vec02* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void func_001B9058(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
-void func_001B9D10(ModeCollider* self, f32 scale, void* out, void* data);
+void SteerColliderTowardPosition(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
+void TurnColliderTowardRotation(ModeCollider* self, f32 scale, void* out, void* data);
 
-void func_00179590(ModeCollider* self, f32 f)
+void StepModeCollider(ModeCollider* self, f32 f)
 {
     Vec02 a;
     Vec02 b;
@@ -183,15 +183,15 @@ path3:
     a = *(Vec02*)&self->pos;
     b = D_00248D30;
 tail:
-    func_001B9058(self, &a, f, D_00263C20, &b, D_00263C30);
-    func_001B9D10(self, f, (u8*)self + 0x620, D_00263C40);
+    SteerColliderTowardPosition(self, &a, f, D_00263C20, &b, D_00263C30);
+    TurnColliderTowardRotation(self, f, (u8*)self + 0x620, D_00263C40);
 }
 
-void func_001BC088(void* self, void* b);
+void MoveCollider(void* self, void* b);
 
-void func_00179690(ModeCollider* self)
+void MoveModeCollider(ModeCollider* self)
 {
-    func_001BC088(self, 0);
+    MoveCollider(self, 0);
     void (*fn)(BaseObject*) = self->desc->m12;
     if (fn != 0) fn(self);
 }
@@ -200,24 +200,24 @@ ASM_FUNC(func_001796D0);
 
 ASM_FUNC(func_00179A68);
 
-void func_00192C58(void* self);
-void func_0017ABE8(void* self, s32 a1);
+void FinishSwitchedCollider(void* self);
+void SetModeColliderMode(void* self, s32 a1);
 
-void func_0017A6D0(ModeCollider* self)
+void FinishModeCollider(ModeCollider* self)
 {
     FinishSwitchedCollider(self);
     SetModeColliderMode(self, 2);
 }
 
 ASM_FUNC(func_0017A700);
-extern f32 D_00275C60[];
+extern f32 g_unitRange[];
 extern Rgba4 D_002623E0;
 
-f32 func_00205210(f32 x);
-void func_00126A48(ModeCollider* o, u32 value);
+f32 Cosine(f32 x);
+void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
 void func_00125C90(ModeCollider* o, void* s, void* out);
 
-void func_0017A788(ModeCollider* self, void* s, void* out)
+void ApplyModeColliderTint(ModeCollider* self, void* s, void* out)
 {
     Rgba4 res;
     f32 t;
@@ -270,8 +270,8 @@ void func_0017A788(ModeCollider* self, void* s, void* out)
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 
-s32 func_001DDA80(World* world);
-s32 func_0017A9E0(ModeCollider* self, s32 a1)
+s32 IsPadSelectFlagHeld(World* world);
+s32 IsModeColliderRequestBlocked(ModeCollider* self, s32 a1)
 {
     if (a1 == 5) goto one;
     if (self->f610 == 3) goto one;
@@ -293,14 +293,14 @@ struct SenderValueMessage {
     s32 v;
 };
 
-s32 func_00160C58(void);
-void func_001794E0(void* self, void* a, void* b);
+s32 HasSpareCount(void);
+void ComputeModeColliderAnchors(void* self, void* a, void* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void func_0017ABE8(void* self, s32 a1);
+void SetModeColliderMode(void* self, s32 a1);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-s32 func_0017AA40(ModeCollider* self, s32* arg)
+s32 AcceptModeColliderRequest(ModeCollider* self, s32* arg)
 {
     u8 bufA[16];
     u8 bufB[16];
@@ -333,9 +333,9 @@ s32 func_0017AA40(ModeCollider* self, s32* arg)
     return 1;
 }
 
-void func_00192230(void* self, s32 kind, MessageBody* rec);
+void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
 
-void func_0017AB58(ModeCollider* self, s32 kind, MessageBody* rec)
+void HandleModeColliderNotification(ModeCollider* self, s32 kind, MessageBody* rec)
 {
     if (kind == 0x13 && rec->sourceId == self->f618) {
         switch (rec->code) {
@@ -353,7 +353,7 @@ void func_0017AB58(ModeCollider* self, s32 kind, MessageBody* rec)
     HandleSwitchedColliderNotification(self, kind, rec);
 }
 
-s32 func_0017ABD8(ModeCollider* self)
+s32 HasModeColliderAcceptedRequest(ModeCollider* self)
 {
     return self->f6D0 != 0;
 }
@@ -361,10 +361,10 @@ s32 func_0017ABD8(ModeCollider* self)
 INCLUDE_RODATA(D_0024AFF4);
 ASM_FUNC(func_0017ABE8);
 
-void func_001794E0(void* self, void* a, void* b);
+void ComputeModeColliderAnchors(void* self, void* a, void* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 
-void func_0017AD50(ModeCollider* self)
+void PlaceModeColliderAtAnchor(ModeCollider* self)
 {
     u8 bufA[16];
     u8 bufB[16];
@@ -374,38 +374,38 @@ void func_0017AD50(ModeCollider* self)
     self->desc02()->m20(self, (Vec02*)bufB);
 }
 
-void func_001B7968(void* self);
+void InitCollider(void* self);
 
-void func_0017ADD0(GaugeModeObject* self)
+void InitGaugeModeObject(GaugeModeObject* self)
 {
     InitCollider(self);
     self->mode = -1;
 }
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 a1, void* a2);
-void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
-void func_0017B410(GaugeModeObject* self, s32 a1);
-s32 func_0017B510(GaugeModeObject* self, s32 a1);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+void SetGaugeModeObjectMode(GaugeModeObject* self, s32 a1);
+s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 a1);
 
-void func_0017AE00(GaugeModeObject* self)
+void StartGaugeModeObject(GaugeModeObject* self)
 {
     StartPlacedObject(self);
     f32 one = 1.0f;
     ResolveObjectLinks(self, 13, g_gaugeHolderLinks);
 
-    func_00139038(self, 12, 4, self->grpA, 0, 0, 0, &self->mode0Handle);
+    BuildCombinedBlendAnimation(self, 12, 4, self->grpA, 0, 0, 0, &self->mode0Handle);
     self->fA = one;
-    func_001399F8(self->mode0Handle, 12, 4, self->grpA);
+    SetBlendItemWeights(self->mode0Handle, 12, 4, self->grpA);
 
-    func_00139038(self, 12, 4, &self->fB, 0, 0, 0, &self->mode1Handle);
+    BuildCombinedBlendAnimation(self, 12, 4, &self->fB, 0, 0, 0, &self->mode1Handle);
     self->fB = one;
-    func_001399F8(self->mode1Handle, 12, 4, &self->fB);
+    SetBlendItemWeights(self->mode1Handle, 12, 4, &self->fB);
 
-    func_00139038(self, 12, 5, &self->fC, 0, 0, 0, &self->loopHandle);
+    BuildCombinedBlendAnimation(self, 12, 5, &self->fC, 0, 0, 0, &self->loopHandle);
     self->fC = one;
-    func_001399F8(self->loopHandle, 12, 5, &self->fC);
+    SetBlendItemWeights(self->loopHandle, 12, 5, &self->fC);
 
     SetGaugeModeObjectMode(self, 0);
     PlayGaugeModeObjectLoop(self, 1);
@@ -416,9 +416,9 @@ ASM_FUNC(func_0017AF38);
 extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
-s32 func_001E9970(void* self);
+s32 AreMenusAndFadeClear(void* self);
 
-void func_0017B308(GaugeModeObject* self)
+void ShowGaugeModeObjectBar(GaugeModeObject* self)
 {
     s32 busy = 0;
     s32 mode = self->mode;
@@ -433,11 +433,11 @@ void func_0017B308(GaugeModeObject* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void func_001AC060(void* p);
-void func_0017B598(GaugeModeObject* self);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void DecrementGaugeCount(void* p);
+void PlayGaugeModeObjectTarget(GaugeModeObject* self);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
-s32 func_0017B3A8(GaugeModeObject* self, ObjectEvent* msg)
+s32 HandleGaugeModeObjectEvent(GaugeModeObject* self, ObjectEvent* msg)
 {
     if (msg->extraFlags & 0x10) {
         if (msg->id == self->f608) {
@@ -449,12 +449,12 @@ s32 func_0017B3A8(GaugeModeObject* self, ObjectEvent* msg)
     return 1;
 }
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_001DDC38(void* a, void* b);
-s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void SetWorldActiveFollower(void* a, void* b);
+s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
-void func_0017B410(GaugeModeObject* self, s32 mode)
+void SetGaugeModeObjectMode(GaugeModeObject* self, s32 mode)
 {
     void* x;
     if (mode == self->mode) {
@@ -489,9 +489,9 @@ done:
     return;
 }
 
-s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
-s32 func_0017B510(GaugeModeObject* self, s32 flag)
+s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 flag)
 {
     void* p = 0;
     if (flag != 0) {
@@ -500,9 +500,9 @@ s32 func_0017B510(GaugeModeObject* self, s32 flag)
     return ReplaceAnimationPlayer(p, self, 1, self->loopPlayer, 0.0f, 1.0f);
 }
 
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_0017B550(GaugeModeObject* self, s32 index)
+void SetGaugeModeObjectTarget(GaugeModeObject* self, s32 index)
 {
     if (index == -1) {
         self->target = 0;
@@ -511,12 +511,12 @@ void func_0017B550(GaugeModeObject* self, s32 index)
     }
 }
 
-void func_0017B598(GaugeModeObject* self)
+void PlayGaugeModeObjectTarget(GaugeModeObject* self)
 {
     ReplaceAnimationPlayer(self->target, self, 1, self->targetPlayer, 0.0f, 1.0f);
 }
 
-void func_0017B5D0(CountdownCollider* self)
+void InitCountdown(CountdownCollider* self)
 {
     InitCollider(self);
     self->countdown = 0x10;
@@ -524,22 +524,22 @@ void func_0017B5D0(CountdownCollider* self)
     g_timeoutFired = 0;
 }
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, int n, void* table);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, int n, void* table);
 
-void func_0017B610(CountdownCollider* self)
+void StartCountdown(CountdownCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_countdownTable);
 }
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_001B93F8(void* self);
-void func_0012E760(void* p);
-void func_0017B8C0(void* self, s32 state);
-void func_00160578(s32 n);
+void UpdateCollider(void* self);
+void StopAnimationPlayer(void* p);
+void SetCountdownState(void* self, s32 state);
+void FadeOutAndQueueMovie(s32 n);
 
-void func_0017B648(CountdownCollider* self)
+void UpdateCountdown(CountdownCollider* self)
 {
     CountdownRecord* p;
 
@@ -567,9 +567,9 @@ void func_0017B648(CountdownCollider* self)
 extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
-s32 func_001E9970(void* self);
+s32 AreMenusAndFadeClear(void* self);
 
-void func_0017B710(CountdownCollider* self)
+void UpdateCountdownVisibility(CountdownCollider* self)
 {
     s32 busy = 0;
     if (self->mode == 1 && AreMenusAndFadeClear(self) != 0) {
@@ -583,12 +583,12 @@ void func_0017B710(CountdownCollider* self)
 
 extern s32 D_00263E2C;
 
-void func_001AC060(void* p);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_0012C918(void* a, CountdownCollider* b, s32 c, void* d, f32 e, f32 f);
-s32 func_001BC320(void* self, ObjectEvent* msg);
+void DecrementGaugeCount(void* p);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void ReplaceAnimationPlayer(void* a, CountdownCollider* b, s32 c, void* d, f32 e, f32 f);
+s32 HandleObjectEvent(void* self, ObjectEvent* msg);
 
-s32 func_0017B7A8(CountdownCollider* self, ObjectEvent* msg)
+s32 HandleCountdownObjectEvent(CountdownCollider* self, ObjectEvent* msg)
 {
     void* p;
     if (msg->eventFlags & 0x20) {

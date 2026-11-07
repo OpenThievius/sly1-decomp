@@ -2,17 +2,17 @@
 // PAL centres y on 234.30508f (not 246.40001f), clamps it to 452.61017f (not 476.80002f), tests
 // 468.61017f (not 492.80002f), scales y by 0.5462963f and offsets it by 1920.0f, and the frame's
 // y corners are 0x7800 and 0x8800 (not 0x7900 and 0x8700)
-void func_00180398(ColoredTriangleSet* self, f32 t)
+void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
 {
     f32 mat[16];
     SwitchedCollider* o;
 
-    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
+    BuildUniformScaleAboutPoint(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc05()->m53(o)) != 0 && o->desc05()->m4D(o) == 2) {
         Vec02 v;
         f32 x, y;
-        func_001441C0(g_camera, &o->v140, &v);
+        ProjectPointToCamera(g_camera, &o->v140, &v);
         x = ClampHelper::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
         y = ClampHelper::Clamp(v.y * -234.30508f + 234.30508f, 16.0f, 452.61017f);
@@ -57,7 +57,7 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
                     for (j = 2; j >= 0; j--, idx++) {
                         Quad128Floats p, q;
                         p.v = *(Quad128*)&self->points[*idx];
-                        q.v = func_00188740(mat, p.v);
+                        q.v = TransformVector4(mat, p.v);
                         AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 468.61017f;
                     }
@@ -67,8 +67,8 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
         if (vis) {
             Quad128Floats lo, hi;
             f32 d;
-            lo.v = func_00188740(mat, *(Quad128*)&self->minX);
-            hi.v = func_00188740(mat, *(Quad128*)&self->maxX);
+            lo.v = TransformVector4(mat, *(Quad128*)&self->minX);
+            hi.v = TransformVector4(mat, *(Quad128*)&self->maxX);
             BeginGifTag(&g_gsPacketWriter, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
             AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&base);
             AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7800, 0, 0);

@@ -28,6 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import version_src  # noqa: E402
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -117,6 +118,7 @@ def main(argv=None):
     parser.add_argument("--minutes", type=float, default=28)
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 4)
     args = parser.parse_args(argv)
+    args.funcs = [symbols.canonical(f) for f in args.funcs]     # either name (tools/symbols.py)
     missing = [f for f in args.funcs if not (ROOT / "nonmatching" / ("%s.cpp" % f)).exists()]
     if missing:
         parser.error("no near miss in nonmatching/ for %s" % ", ".join(missing))

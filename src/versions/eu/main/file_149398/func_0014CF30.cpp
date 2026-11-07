@@ -6,7 +6,7 @@ struct Glob_eu_14CF30 {
     void* f578;
 };
 
-void func_0014CF30(GaugeManager* self, s32 kind, void* key)
+void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
 {
     HandlePlacedObjectNotification(self, kind, key);
     switch (kind) {
@@ -25,7 +25,7 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
     case 0x14:
         if (key == self->device) {
             s32 out;
-            func_001B6598(key, &out);
+            GetStateWalkerCurrentKey(key, &out);
             if (out == 0x3FD) {
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f574 = &self->amount;
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f578 = &self->maxAmount;

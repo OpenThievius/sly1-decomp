@@ -25,6 +25,6 @@ struct Oscillator : BaseObject {
 
 typedef char check_Oscillator[sizeof(Oscillator) == 0x8F0 ? 1 : -1];
 
-void func_001F2758(Oscillator* self);   // slot 0
+void InitOscillator(Oscillator* self);   // slot 0
 
 #endif

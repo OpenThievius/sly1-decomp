@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: mode, flag, timer and extra sit 784 (0x310) bytes further on than in US.
-extern f32 D_0026185C;
-extern f32 D_00261860;
+extern f32 g_gameTime;
+extern f32 g_frameDt;
 
 typedef void (*VFn_1AB660)(void* self);
 
-void func_001AA298(void* self);
-void func_001AB980(void* self, f32 value);
+void UpdateScreenElementSlide(void* self);
+void StepTimer(void* self, f32 value);
 
 struct Obj_1AB660_eu {
     VFn_1AB660* vtbl;
@@ -19,7 +19,7 @@ struct Obj_1AB660_eu {
     s32 extra;
 };
 
-void func_001AB660(Obj_1AB660_eu* self)
+void UpdateTimerElement(Obj_1AB660_eu* self)
 {
     UpdateScreenElementSlide(self);
     if (self->mode == 0) {

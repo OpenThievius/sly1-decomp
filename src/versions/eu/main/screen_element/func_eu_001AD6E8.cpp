@@ -7,7 +7,7 @@ struct Obj_eu_001AD6E8 {
 };
 
 void func_eu_001AB2B0(void* self, s32 v);
-void func_001AA998(void* self, s32 a1);
+void SetScreenElementMode(void* self, s32 a1);
 
 void func_eu_001AD6E8(Obj_eu_001AD6E8* self, s32 a1)
 {

@@ -31,14 +31,14 @@ struct PooledObject : Collider {
 
 typedef char check_PooledObject[sizeof(PooledObject) == 0x590 ? 1 : -1];
 
-void func_0014EE40(PooledObject* self);                          // slot 0
-void func_0014EF00(PooledObject* self);                          // slot 3
-void func_0014EE70(PooledObject* self);                          // slot 6
-void func_0014EF40(PooledObject* self, Collider* other);              // slot 9
-void func_0014EF88(PooledObject* self);                          // slot 10
-void func_0014EFB8(PooledObject* self, s32 kind, void* msg);     // slot 13
-void func_0014F020(PooledObject* self);                          // slot 16
-void func_0014F058(PooledObject* self, f32 dt);                  // slot 17
-void func_0014F110(PooledObject* self, s32 state);               // sets the state
+void InitPooledObject(PooledObject* self);                          // slot 0
+void AddToWorldQueue(PooledObject* self);                          // slot 3
+void RemoveFromWorldQueue(PooledObject* self);                          // slot 6
+void CopyPooledObject(PooledObject* self, Collider* other);              // slot 9
+void LoadPooledObject(PooledObject* self);                          // slot 10
+void HandlePooledObjectNotification(PooledObject* self, s32 kind, void* msg);     // slot 13
+void StartPooledObject(PooledObject* self);                          // slot 16
+void UpdatePooledObject(PooledObject* self, f32 dt);                  // slot 17
+void SetPooledObjectState(PooledObject* self, s32 state);               // sets the state
 
 #endif

@@ -12,7 +12,7 @@
 #include "new.h"
 #include "typeinfo.h"
 
-extern "C" int func_001F6738(const char* a, const char* b);
+extern "C" int CompareStrings(const char* a, const char* b);
 
 // A pointer type: what it points to.
 class __pointer_type_info : public type_info {

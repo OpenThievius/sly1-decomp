@@ -9,10 +9,10 @@ struct Obj2_1E02C8_eu { VT2_1E00B0* vt; u8 pad04[0x574]; f32 f578; };
 const char* func_eu_001DDAB0(s32 id);
 u16* func_eu_001E3050(u16* dst, const char* src);
 u16* func_eu_001E3178(u16* dst, const u8* src);
-s32 func_001E1FD0(char* dst, const char* fmt, ...);
-void func_001AA8B8(Obj_1E02C8_eu* o, f32 v);
+s32 FormatToString(char* dst, const char* fmt, ...);
+void SetScreenElementHoldTime(Obj_1E02C8_eu* o, f32 v);
 
-void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
+void SetBestTimeState(Obj_1E02C8_eu* self, s32 n)
 {
     if (self->f570 == n) {
         return;
@@ -38,7 +38,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
-        SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
+        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)D_002623DC));
         SetTimerLimit(&g_timerElement, zero, 0);
         StartTimerCounting(&g_timerElement);
         G27C230* cam = g_currentEntry;

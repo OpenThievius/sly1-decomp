@@ -14,13 +14,13 @@ void func_eu_0018ECA8(void)
 
     D_eu_0026AC60.f144 = CreateLockSemaphore(0, (void*)1);
     ((Head_eu_18ECA8*)&D_eu_0026AC60)->f0C = 0;
-    (void)func_001F5C0C(&l, 0, sizeof(l));
+    (void)FillMemory(&l, 0, sizeof(l));
     l.entry = func_eu_0018EBE8;
     l.stack = D_eu_002CC280;
     l.gp = D_eu_0028CA70;
     l.stackSize = 0x1000;
     l.priority = 2;
-    v = func_001F6A10(&l);
+    v = MakeThread(&l);
     D_eu_0027F0DC = v;
-    func_001F6A20(v, 0);
+    RunThread(v, 0);
 }

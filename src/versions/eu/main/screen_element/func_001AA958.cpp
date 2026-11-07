@@ -6,7 +6,7 @@ struct Obj_1AA958_eu {
     s32 mode;
 };
 
-void func_001AA958(Obj_1AA958_eu* self)
+void HideScreenElement(Obj_1AA958_eu* self)
 {
     s32 m = self->mode;
     if (m < 3) {

@@ -6,7 +6,7 @@
 #include "float_bits.h"
 static const double g_roundBias[] = { 4.50359962737049600000e+15, -4.50359962737049600000e+15 };
 
-double func_00209010(double x)
+double RoundToInteger(double x)
 {
     s32 high, low, exponent, sign;
     u32 mask;

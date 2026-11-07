@@ -26,36 +26,36 @@ extern u8 D_eu_0027F330[];
 extern Owner_eu_1DDC68 D_eu_00274868;
 extern Mode_eu_1DDC68* D_eu_002636F0;
 
-void func_00151A88(void* p);
-void func_0011BF70(void);
-s32 func_00137B90(void* ctx);
-s32 func_00137D10(void* ctx);
-void func_001DCCC0(void* ctx);
+void ResetScatterController(void* p);
+void InitScriptValuePools(void);
+s32 ReadBufferedU8(void* ctx);
+s32 ReadBufferedS16(void* ctx);
+void SkipBufferedBlocks(void* ctx);
 void func_eu_001DDA10(void* ctx);
-Node_eu_1DDC68* func_0011E580(s32 kind, void* world, s32 a, s32 b, s32 c);
-void func_001C1190(void* world, void* ctx);
-void func_0011EC40(void* world, void* ctx);
-void func_00138550(void* ctx, void* p);
-void func_001384A0(void* ctx, void* p);
-void func_001B3040(void* ctx);
-void func_0011ECB8(void* world, s32 a, void* ctx);
-void func_001DBA38(void* ctx);
-void func_001BE268(s32 a);
-void func_001BECF8(void);
-void func_001BEB10(s32 a);
-void func_001B3450(void);
-s32 func_00152720(void* p);
-void func_001DC9A0(void* world);
-void func_00168770(void* d, void* p, s32 a, s32 w);
-void func_001DCD28(void* world);
-void func_001DBE48(void* world);
-void func_00151D28(void* p);
-void func_001E90E8(void* p);
-void* func_0018D5C0(u32 n);
-void func_00144270(void* p);
-void func_00138C00(void* world, s32 a);
-void func_001BEC58(s32 a);
-void func_001C0B38(void* world);
+Node_eu_1DDC68* CreateTypedRecord(s32 kind, void* world, s32 a, s32 b, s32 c);
+void LoadScriptEntryTable(void* world, void* ctx);
+void ReadPropertyRecords(void* world, void* ctx);
+void ReadOptionalBufferedBlock(void* ctx, void* p);
+void ReadBufferedString(void* ctx, void* p);
+void LoadScreenResources(void* ctx);
+void ReadSlotObjects(void* world, s32 a, void* ctx);
+void ReadBufferedBlockBody(void* ctx);
+void EnsureSoundBankLoaded(s32 a);
+void SilenceVolumeChannel2(void);
+void RequestStagedBank(s32 a);
+void SendResidentImages(void);
+s32 IsListEmpty(void* p);
+void CreateConeVolumes(void* world);
+void FillScreenColor(void* d, void* p, s32 a, s32 w);
+void SpawnListedObjectCopies(void* world);
+void RunQueuedCalls(void* world);
+void UpdateScatterLevelLimits(void* p);
+void ResumeElementStackState(void* p);
+void* AllocateZeroedFrontMemory(u32 n);
+void UpdateCameraLocation(void* p);
+void UpdateWorldContacts(void* world, s32 a);
+void PlayStagedBank(s32 a);
+void StartWorldSoundEntries(void* world);
 
 void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
 {
@@ -65,57 +65,57 @@ void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
     s32 i;
     s32 j;
     s32 k;
-    func_00151A88(D_eu_002631F0);
-    func_0011BF70();
-    D_eu_0027EE84 = func_00137B90(ctx);
-    self->f1D70 = func_00137D10(ctx);
-    func_001DCCC0(ctx);
+    ResetScatterController(D_eu_002631F0);
+    InitScriptValuePools();
+    D_eu_0027EE84 = ReadBufferedU8(ctx);
+    self->f1D70 = ReadBufferedS16(ctx);
+    SkipBufferedBlocks(ctx);
     func_eu_001DDA10(ctx);
-    D_eu_00262C90 = func_0011E580(0x6D, self, 0, 4, -1);
+    D_eu_00262C90 = CreateTypedRecord(0x6D, self, 0, 4, -1);
     itp = &iter;
     for (i = 9; i >= 0; i--) {
-        Node_eu_1DDC68* n = func_0011E580(0x1E, self, 0, 0xA, -1);
+        Node_eu_1DDC68* n = CreateTypedRecord(0x1E, self, 0, 0xA, -1);
         n->vt->f1C(n);
     }
     for (j = 0x27; j >= 0; j--) {
-        Node_eu_1DDC68* n = func_0011E580(0x4D, self, 0, 0xB, -1);
+        Node_eu_1DDC68* n = CreateTypedRecord(0x4D, self, 0, 0xB, -1);
         n->vt->f1C(n);
     }
-    func_001C1190(self, ctx);
-    func_0011EC40(self, ctx);
-    func_00138550(ctx, &self->f2310);
-    func_001384A0(ctx, &self->f2314);
-    func_00138550(ctx, &self->f1D74);
+    LoadScriptEntryTable(self, ctx);
+    ReadPropertyRecords(self, ctx);
+    ReadOptionalBufferedBlock(ctx, &self->f2310);
+    ReadBufferedString(ctx, &self->f2314);
+    ReadOptionalBufferedBlock(ctx, &self->f1D74);
     for (k = 0xD; k >= 0; k--) {
-        func_00138550(ctx, &D_eu_0027EEA0[13 - k]);
+        ReadOptionalBufferedBlock(ctx, &D_eu_0027EEA0[13 - k]);
     }
-    func_001B3040(ctx);
-    func_0011ECB8(self, 0, ctx);
-    func_001DBA38(ctx);
+    LoadScreenResources(ctx);
+    ReadSlotObjects(self, 0, ctx);
+    ReadBufferedBlockBody(ctx);
     if (self->f1D70 >= 0) {
-        func_001BE268(self->f1D70);
+        EnsureSoundBankLoaded(self->f1D70);
     }
     if (self->f1D78 == 0) {
-        func_001BECF8();
+        SilenceVolumeChannel2();
     }
-    func_001BEB10(self->f1D74);
-    func_001B3450();
-    if (func_00152720(self->f1BE8) != 0) {
-        func_001DC9A0(self);
+    RequestStagedBank(self->f1D74);
+    SendResidentImages();
+    if (IsListEmpty(self->f1BE8) != 0) {
+        CreateConeVolumes(self);
     }
     ((u8*)self)[0x1D67] = 0x80;
     w = self->f1D64;
-    func_00168770(D_eu_002C73A0, &w, 0, w.v);
+    FillScreenColor(D_eu_002C73A0, &w, 0, w.v);
     self->f1D68 = self->f1D68 * 0.003921569f;
     self->f1D6C = self->f1D6C * 0.003921569f;
-    func_001DCD28(self);
-    func_001DBE48(self);
+    SpawnListedObjectCopies(self);
+    RunQueuedCalls(self);
     for (Node_eu_1DDC68* n = (Node_eu_1DDC68*)self->list.head; n != 0; n = n->next) {
         if (n->vt->f4C != 0) {
             n->vt->f4C(n);
         }
     }
-    func_001DBE48(self);
+    RunQueuedCalls(self);
     iter.prev = D_eu_00284A94;
     D_eu_00284A94 = itp;
     List_eu_1DDC68* lp = &self->list;
@@ -126,16 +126,16 @@ void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
         n->vt->f50(n);
     }
     D_eu_00284A94 = iter.prev;
-    func_001DBE48(self);
-    func_00151D28(D_eu_002631F0);
-    func_001E90E8(D_eu_0027F330);
+    RunQueuedCalls(self);
+    UpdateScatterLevelLimits(D_eu_002631F0);
+    ResumeElementStackState(D_eu_0027F330);
     if (D_eu_00274868.f570 == 0) {
         if (D_eu_002636F0->mode != 0) {
-            func_0018D5C0(0x80000);
+            AllocateZeroedFrontMemory(0x80000);
         }
     }
-    func_00144270(D_eu_00262C90);
-    func_00138C00(self, 0);
-    func_001BEC58(self->f1D74);
-    func_001C0B38(self);
+    UpdateCameraLocation(D_eu_00262C90);
+    UpdateWorldContacts(self, 0);
+    PlayStagedBank(self->f1D74);
+    StartWorldSoundEntries(self);
 }

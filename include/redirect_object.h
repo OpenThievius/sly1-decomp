@@ -24,7 +24,7 @@ struct RedirectObject : PlacedObject {
 typedef char check_RedirectObject[sizeof(RedirectObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001DDCE0(RedirectObject* self);                       // 0x5E slot 0
-void func_001DE768(RedirectObject* self);                       // 0x5E slot 31
+void InitRedirectObject(RedirectObject* self);                       // 0x5E slot 0
+void MarkRedirectToSelf(RedirectObject* self);                       // 0x5E slot 31
 
 #endif

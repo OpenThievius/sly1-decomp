@@ -1,8 +1,8 @@
 symbol	name	evidence
 D_002176D0	g_pathCurveKind0Methods	table CreatePathCurve stores in a kind 0 curve (time-sorted list of points)
 D_00217708	g_pathCurveKind1Methods	table CreatePathCurve stores in a kind 1 curve (Hermite spline with tangents)
-D_002177C0	g_pointObjectClass	class descriptor of PointObject (include/point_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_00218650	g_coloredTriangleSetClass	class descriptor of ColoredTriangleSet (include/colored_triangle_set.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_002177C0	g_pointObjectClass	class descriptor of PointObject (include/point_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00218650	g_coloredTriangleSetClass	class descriptor of ColoredTriangleSet (include/colored_triangle_set.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_00219668	g_weightCurveKind0Methods	method table func_00121160 stores for weight curve kind 0
 D_00219678	g_weightCurveKind1Methods	method table func_00121160 stores for weight curve kind 1
 D_00219688	g_weightCurveKind2Methods	method table func_00121160 stores for weight curve kind 2
@@ -45,19 +45,19 @@ D_00219F00	g_spinningEffectMethods	the 8-slot table of effect kind 24 (GetEffect
 D_00219F20	g_facingEffectMethods	the 8-slot table of effect kind 25 (GetEffectKindTable): InitFacingEffect and DrawFacingEffect
 D_00219F40	g_delayedEffectMethods	the 8-slot table of effect kind 26 (GetEffectKindTable): InitDelayedEffect, MoveDelayedEffect, UpdateDelayedEffect and DrawDelayedEffect
 D_00219F60	g_messageEffectMethods	the 8-slot table of effect kind 27 (GetEffectKindTable): ResolveEffectTarget and SendEffectMessagesAtRate
-D_0021B2D8	g_idFilterObjectClass	class descriptor of IdFilterObject (include/id_filter_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021B408	g_redirectObjectClass	class descriptor of RedirectObject (include/redirect_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021BAD8	g_itemKeeperClass	class descriptor of ItemKeeper (include/item_keeper.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021C318	g_flaggedObjectClass	class descriptor of FlaggedObject (include/flagged_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021C448	g_pointGraphObjectClass	class descriptor of PointGraphObject (include/point_graph_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021C598	g_objectCyclerClass	class descriptor of ObjectCycler (include/object_cycler.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021C6C8	g_stateNotifierClass	class descriptor of StateNotifier (include/state_notifier.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021D3B8	g_objectGathererClass	class descriptor of ObjectGatherer (include/object_gatherer.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021D4E8	g_pairControllerClass	class descriptor of PairController (include/pair_controller.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021D718	g_pairedObjectClass	class descriptor of PairedObject (include/paired_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021D848	g_hitTargetClass	class descriptor of HitTarget (include/hit_target.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021D978	g_soundStateObjectClass	class descriptor of SoundStateObject (include/sound_state_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021DAA8	g_objectCreatorClass	class descriptor of ObjectCreator (include/object_creator.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021B2D8	g_idFilterObjectClass	class descriptor of IdFilterObject (include/id_filter_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021B408	g_redirectObjectClass	class descriptor of RedirectObject (include/redirect_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021BAD8	g_itemKeeperClass	class descriptor of ItemKeeper (include/item_keeper.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021C318	g_flaggedObjectClass	class descriptor of FlaggedObject (include/flagged_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021C448	g_pointGraphObjectClass	class descriptor of PointGraphObject (include/point_graph_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021C598	g_objectCyclerClass	class descriptor of ObjectCycler (include/object_cycler.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021C6C8	g_stateNotifierClass	class descriptor of StateNotifier (include/state_notifier.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021D3B8	g_objectGathererClass	class descriptor of ObjectGatherer (include/object_gatherer.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021D4E8	g_pairControllerClass	class descriptor of PairController (include/pair_controller.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021D718	g_pairedObjectClass	class descriptor of PairedObject (include/paired_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021D848	g_hitTargetClass	class descriptor of HitTarget (include/hit_target.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021D978	g_soundStateObjectClass	class descriptor of SoundStateObject (include/sound_state_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021DAA8	g_objectCreatorClass	class descriptor of ObjectCreator (include/object_creator.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_0021E358	g_frameRunAnimatorMethods	method table func_001B4980 returns for cursor animator type 1, the table of FrameRunAnimator (include/cursor_animator.h)
 D_0021E378	g_framePingPongAnimatorMethods	method table func_001B4980 returns for cursor animator type 2, the table of FramePingPongAnimator (include/cursor_animator.h)
 D_0021E398	g_randomJumpAnimatorMethods	method table func_001B4980 returns for cursor animator type 3, the table of RandomJumpAnimator (include/cursor_animator.h)
@@ -66,13 +66,13 @@ D_0021E3D8	g_scrollAnimatorMethods	method table func_001B4980 returns for cursor
 D_0021E3F8	g_circleAnimatorMethods	method table func_001B4980 returns for cursor animator type 7, the table of CircleAnimator (include/cursor_animator.h)
 D_0021E418	g_triangleAnimatorMethods	method table func_001B4980 returns for cursor animator type 8, the table of TriangleAnimator (include/cursor_animator.h)
 D_0021E438	g_crossfadeAnimatorMethods	method table func_001B4980 returns for cursor animator type 5, the table of CrossfadeAnimator (include/cursor_animator.h)
-D_0021E458	g_scaledOffsetObjectClass	class descriptor of ScaledOffsetObject (include/scaled_offset_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_0021EF88	g_entryTableObjectClass	class descriptor of EntryTableObject (include/entry_table_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_00220828	g_countdownColliderClass	class descriptor of CountdownCollider (include/countdown_collider.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_00220F50	g_idLinkedObjectClass	class descriptor of IdLinkedObject (include/id_linked_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_00221140	g_partHolderObjectClass	class descriptor of PartHolderObject (include/part_holder_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_00221210	g_currentPlacedObjectClass	class descriptor of CurrentPlacedObject (include/current_placed_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
-D_002213D0	g_codeChecksumClass	class descriptor of CodeChecksum (include/code_checksum.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021E458	g_scaledOffsetObjectClass	class descriptor of ScaledOffsetObject (include/scaled_offset_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_0021EF88	g_entryTableObjectClass	class descriptor of EntryTableObject (include/entry_table_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00220828	g_countdownColliderClass	class descriptor of CountdownCollider (include/countdown_collider.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00220F50	g_idLinkedObjectClass	class descriptor of IdLinkedObject (include/id_linked_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00221140	g_partHolderObjectClass	class descriptor of PartHolderObject (include/part_holder_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00221210	g_currentPlacedObjectClass	class descriptor of CurrentPlacedObject (include/current_placed_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_002213D0	g_codeChecksumClass	class descriptor of CodeChecksum (include/code_checksum.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_00244950	g_classPropertyLists	property registry indexed by class id, each record a count and a list of (id, descriptor); ApplyObjectClassDefaults walks it and FindPropertyDescriptor binary-searches it
 D_00244F40	g_soundBankKeys	seven 32-byte records whose xored word pairs func_001BE268 decodes into the key it loads each bank with
 D_00245020	g_soundEntries	table of (bank, index) pairs indexed by sound id; StartSoundEffect and EnsureSoundEntryBankLoaded read the entry's bank before starting or loading
@@ -86,7 +86,7 @@ D_002484B0	g_movieKeys	16 key records of 32 bytes; FindKeyIndex looks an argumen
 D_002486B0	g_screenElements	array of the 37 screen element objects InstallScreenElements, InitScreenElements and the teardown call slots on in turn
 D_00248748	g_levelEntries	the 33 LevelEntry records func_001DFE80 searches by their first word
 D_00248D00	g_unitXVector	constant quad (1,0,0,0) copied into object axis fields (InitTargetVector and others)
-D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in 001B8000.cpp
+D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in file_1B7968.cpp
 D_00248D20	g_unitZVector	constant quad (0,0,1,0) used as the rotation axis of the heading matrix (BuildTurningColliderHeadingMatrix) and copied into direction fields
 D_00249428	g_rpcBindErrorFormat	the format string InitIopCommandChannels prints (func_001E1F10) when binding an RPC client fails
 D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
@@ -142,7 +142,7 @@ D_00260540	g_iopReplyTable0	the reply words of the first command buffer, g_iopRe
 D_00260980	g_iopReplyTable1	the reply words of the second command buffer, g_iopReplyTables[1]
 D_00260DC0	g_iopSharedPacket	the packet whose address InitIopCommandChannels sends to the IOP; StartDiscRead sets its busy word, GetDiscReadError reads +0x10
 D_00260E00	g_iopChannel2Result	reply word of the RPC channel D_0027B4F0: set to 0xFFFFFFFF while a command is pending, polled by PollIopCommands, cleared when its callback ran
-D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at 0011C000.cpp:1665 sends as command 3 over channel D_0027B4F0
+D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at iop_commands.cpp:263 sends as command 3 over channel D_0027B4F0
 D_00260E60	g_valueRampProfile	three-float profile (3.0, 1.0, 0.1) passed to ApproachValueWithRamp for the pose-source indexed value in ApplyPoseSourceIndexedValue
 D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in pause_menu.cpp:1129
 D_00260F00	g_colorPresets	the 64-byte colour records SetColorPreset copies over an object's colour record by index
@@ -158,12 +158,12 @@ D_00261410	g_flaggedObjectLinks	one-entry link table func_00141210 (FlaggedObjec
 D_00261420	g_flagTable	the table TakeFlagTableIndex hands bit indices out of (counter at +4) and TestFlagTableBit / func_00141040 read and set (bitmap at +0xC); class set-up code takes its indices from it
 D_00261630	g_flagTableSaved	the second label of the flag table g_flagTable, from its +0x210: the snapshot SaveFlagTableSnapshot keeps (+0x220) and its saved fade words
 D_00261850	g_timeScale	set by func_00142ED0 (which also turns the clock's running flag on when it is positive) and multiplied into the step in func_00142F10
-D_00261854	g_stepScale	second factor of the step in func_00142F10; reset to 1.0 on level reset and set from a clamped quadratic of a ratio in 001C0000.cpp
+D_00261854	g_stepScale	second factor of the step in func_00142F10; reset to 1.0 on level reset and set from a clamped quadratic of a ratio in hit_count_collider.cpp
 D_00261858	g_gameClock	the GameClock struct func_00142F10 advances each frame and the readers take time, dt and elapsed from
 D_0026185C	g_gameTime	the game clock's time field (D_00261858+4): func_00142F10 adds the step to it; readers compare it with stored times
 D_00261860	g_frameDt	the game clock's dt field (D_00261858+8): the per-frame step that timers subtract and ramps use
 D_00261868	g_elapsedTime	the game clock's elapsed field (D_00261858+0x10): sum of every step; readers store it as a start time and subtract it later
-D_0026186C	g_frameStep	the game clock's step field (D_00261858+0x14); 00120000.cpp uses it instead of dt for one owner kind
+D_0026186C	g_frameStep	the game clock's step field (D_00261858+0x14); pose_source.cpp uses it instead of dt for one owner kind
 D_00261878	g_lastCycleCount	the CPU count register's last value: ResetGameClockTick sets it and ReadCycleCounter compares the new count against it to count wraps, then stores the new count
 D_00261990	g_camera	pointer to the class 0x6D object (InitCamera is its slot 0): zoom and projection settings, and the lists of objects func_00143AF8 / func_00143B20 add to and remove from
 D_002619A0	g_stateNotifierLinks	five-entry link table LoadStateNotifier installs through func_00124DF8
@@ -179,11 +179,11 @@ D_00261F20	g_fromSprChannel	handle from func_002027A0(8) (DMA channel 8, fromSPR
 D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); file_1B7968.cpp reads it as a channel record
 D_002621C8	g_objectCyclerLoadLinks	two-entry link table LoadObjectCycler installs through func_00124DF8
 D_002621E0	g_objectCyclerStartLinks	two-entry link table StartObjectCycler installs through func_00124DF8
-D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and 001A8000.cpp writes entries 3 and 4 into text escapes
+D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and screen_element.cpp writes entries 3 and 4 into text escapes
 D_00262260	g_fontCount	number of font records: set by func_001B2DF8 (anim_record.cpp) from ReadBufferedU16, which then allocates g_fontRecords with it; looped over in func_0015E5F0 (file_1549C8.cpp)
 D_00262264	g_fontRecords	array allocated with new for g_fontCount entries; func_0015D8A8 initialises each and registers it by id in g_fonts
 D_00262268	g_fonts	five font pointers by id, filled by func_0015D8A8 and read by GetFontById
-D_0026227C	g_defaultFont	font GetFontById returns when an id has none; set from func_0015C1C0(0) and read by 001A8000.cpp as the default font
+D_0026227C	g_defaultFont	font GetFontById returns when an id has none; set from func_0015C1C0(0) and read by screen_element.cpp as the default font
 D_00262280	g_gsPacketWriter	writer DrawColoredCircle and DrawColoredTriangles emit GS packets into; BeginRenderFrame points it at the build frame's bufA (0x8000 bytes)
 D_002622A8	g_vifPacketWriter	writer the VIF-code helpers (WriteVifMscal, WriteVifBaseOffset, ReserveWriterSpace) append to; BeginRenderFrame points it at bufB (0x10000 bytes)
 D_002622CC	g_frameCount	starts at 1 and RunMainLoop adds one after every frame; g_lightingChangeFrame records it
@@ -251,7 +251,7 @@ D_002647A8	g_iopModuleNames	six module file names (sio2man.irx ... 989snd.irx) t
 D_002647C0	g_startupInitializers	29 function pointers that RunStartupInitializers walks at start-up (tables.tsv: data table of 29 methods)
 D_00264840	g_surfaceFriction	thirteen weight and value pairs, one per surface kind, that GetSurfacePairFriction combines
 D_002648A8	g_surfaceBounce	thirteen weight and value pairs, one per surface kind, that GetSurfacePairBounce combines
-D_00264A40	g_memoryCard	the one MemoryCard record that the memory-card functions of 0018C000.cpp take as their first parameter
+D_00264A40	g_memoryCard	the one MemoryCard record that the memory-card functions of memory_card.cpp take as their first parameter
 D_00269990	g_backgroundJob	the one BackgroundJob record: func_0018B5C0 sets it up, func_0018B670 starts a job on it and func_0018B770 asks whether its thread still runs; the memory-card code is its only user
 D_002699A4	g_heapStart	InitHeap-style func_0018D430 sets it to the end of the loaded image rounded to 16 and copies it into the four front pointers of the heap
 D_002699A8	g_heapEnd	func_0018D430 sets it to 0x2000000 and copies it into the heap's back pointer D_002C2A20 and D_002C2A24
@@ -352,7 +352,7 @@ D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in 
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
 D_00275AF0	g_worldLoadRequest	the WorldLoadRequest built at start-up by its constructor (func_001E4E38) that QueueWorldLoad fills and RunPendingWorldLoad consumes
 D_00275BC0	g_elementStack	the stack object InitGlobalElementStack, func_0016B580, func_0016BBA8, func_001940E8 and func_001DB838 pass to PushStackElement, PopStackElement, SetElementStackState and ResetElementStack
-D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
+D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (file_14EE40.cpp) and func_001EB460 clamps its blend factor to.
 D_00275F80	g_screenFade	the one ScreenFade record: func_001EFFA0 starts a fade on it, func_001EFD10 advances it, func_001EFEE0 draws it
 D_0027696C	g_libraryState	the C library's state record: its first word is the error number (GetErrorNumberAddress returns it), +0x58 the random seed SeedRandom and NextRandom use, +0x1D4 the signal table MakeSignalTable allocates
 D_00277128	g_requestThreadId	the request thread's id; StartRequestThread returns early when it is already positive

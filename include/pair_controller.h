@@ -83,9 +83,9 @@ struct PairController : PlacedObject {
 typedef char check_PairController[sizeof(PairController) == 0x660 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001A4718(PairController* self);                       // 0x5F slot 0
-void func_001A4B30(PairController* self);                       // 0x5F slot 16
-void func_001A4C48(PairController* self);                       // 0x5F slot 17
-void func_001A4D60(PairController* self);                       // 0x5F slot 46
+void InitPairController(PairController* self);                       // 0x5F slot 0
+void BlendPairControllerPose(PairController* self);                       // 0x5F slot 16
+void UpdatePairController(PairController* self);                       // 0x5F slot 17
+void ShowPairControllerElement(PairController* self);                       // 0x5F slot 46
 
 #endif

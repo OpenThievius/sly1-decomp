@@ -3,9 +3,9 @@
 struct __attribute__((packed)) Tail_1356C0_eu { u8 pad0[0x974]; s32 v; };
 struct Obj_1356C0_eu { u8 pad0[0x570]; s32 state; f32 timer; };
 
-void func_00131140(Obj_1356C0_eu* self);
+void ClearTextPanel(Obj_1356C0_eu* self);
 
-void func_001356C0(Obj_1356C0_eu* self, s32 mode)
+void SetTextPanelState(Obj_1356C0_eu* self, s32 mode)
 {
     if (mode != self->state) {
         if (self->state != 1) {

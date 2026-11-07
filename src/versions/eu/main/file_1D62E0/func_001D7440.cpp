@@ -8,7 +8,7 @@ struct Blk_eu_1D7440 {
 };
 struct __attribute__((packed)) BlkP_eu_1D7440 { u8 pad[0x58C]; s32 v; };
 
-void func_001D7440(PathFollower* self)
+void StartPathFollower(PathFollower* self)
 {
     BaseObject* buf[16];
     s32 id0;

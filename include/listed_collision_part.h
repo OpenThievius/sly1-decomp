@@ -24,12 +24,12 @@ struct ListedCollisionPart : Collider {
 typedef char check_ListedCollisionPart[sizeof(ListedCollisionPart) == 0x570 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0016A3A8(ListedCollisionPart* self);                       // 0x3A slot 0
-void func_0016A490(ListedCollisionPart* self);                       // 0x3A slot 6
-void func_0016A4C8(ListedCollisionPart* self);                       // 0x3A slot 7
-void func_0016A500(ListedCollisionPart* self);                       // 0x3A slot 9
-void func_0016A420(ListedCollisionPart* self);                       // 0x3A slot 10
-void func_0016A580(ListedCollisionPart* self, f32 t);                // 0x3A slot 28
-s32 func_0016A548(Collider* self, Collider* other);            // 0x3A slot 56
+void InitListedCollisionPart(ListedCollisionPart* self);                       // 0x3A slot 0
+void AddToPartList(ListedCollisionPart* self);                       // 0x3A slot 6
+void RemoveFromPartList(ListedCollisionPart* self);                       // 0x3A slot 7
+void CopyKeepingListLink(ListedCollisionPart* self);                       // 0x3A slot 9
+void LoadListedCollisionPart(ListedCollisionPart* self);                       // 0x3A slot 10
+void StepListedCollisionPart(ListedCollisionPart* self, f32 t);                // 0x3A slot 28
+s32 TestListedCollisionPartMayContact(Collider* self, Collider* other);            // 0x3A slot 56
 
 #endif

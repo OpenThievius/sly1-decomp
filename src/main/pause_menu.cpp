@@ -15,13 +15,13 @@
 #include "background_job.h"
 #include "screen_fade.h"
 
-void func_00168AF8(LoadProgress*);
-void func_00193318(LoadProgress*);
+void SendDisplayResetPacket(LoadProgress*);
+void DrawLoadProgressBar(LoadProgress*);
 
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
-s32 func_0015C188(s32 k);
-Font* func_0015C1C0(s32 k);
+s32 IsFontLoaded(s32 k);
+Font* GetFontById(s32 k);
 
 // The DISPLAY register pair at D_00262490 (0x18 and 0x40), read as func_00193EE8 reads them.
 struct DisplayRegRead {
@@ -39,57 +39,57 @@ extern f32 D_0026A704;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
 
-void func_001BE998(void);
+void StopStreamVoice(void);
 
-s32 func_00160148(s32 v);
-s32 func_001E1FD0(char* dst, const char* fmt, ...);
+s32 GetEntryName(s32 v);
+s32 FormatToString(char* dst, const char* fmt, ...);
 
 // The packet DrawLoadProgressBar builds on its stack: its memory, then the writer.
 struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
 
-void* func_001611B8(PacketWriter* f);
-void func_001529C8(PacketWriter* f, s32 n, BarPacket* b);
-void func_00152B38(PacketWriter* f);
-f32 func_001EAF28(f32 x);
-void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, PacketWriter* e, f32 x, f32 y, f32 z, f32 w);
-void func_00161200(PacketWriter* f);
-void func_00152D30(PacketWriter* f);
-void func_00152D70(PacketWriter* f);
-void func_001529E0(PacketWriter* f, s32 a, s32 b);
-void func_00168A48(BarPacket* b);
+void* InitGifPacket(PacketWriter* f);
+void UsePacketBufferMemory(PacketWriter* f, s32 n, BarPacket* b);
+void BeginDmaTag(PacketWriter* f);
+f32 TruncateFloat(f32 x);
+void WriteColoredSpritePacket(s32 a, s32 b, s32 c, s32 d, PacketWriter* e, f32 x, f32 y, f32 z, f32 w);
+void EndGifPacket(PacketWriter* f);
+void AddDmaEndTag(PacketWriter* f);
+void CloseDmaTag(PacketWriter* f);
+void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
+void SendPacketToBothBuffers(BarPacket* b);
 
-void func_001AA8F0(void* self);
+void ShowScreenElement(void* self);
 
-void func_001AA958(void* self);
+void HideScreenElement(void* self);
 
-void func_001936A0(void* self, s32 v);
+void BuildPauseMenuPage(void* self, s32 v);
 
 
-extern void* D_00275710;
+extern void* g_currentWorld;
 
-void func_00194D30(void* self, s32 a, s32 b);
-void func_001EFFA0(void* obj, void* rec, s32 n);
-void* func_0015A838(void* a, s32 b, s32 c, s32 d);
-void func_001A4EF0(void* p, s32 mode);
-void func_001F4408(void* a, s32 b);
+void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
+void StartScreenFade(void* obj, void* rec, s32 n);
+void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
+void SetPairControllerState(void* p, s32 mode);
+void BeginLevelExit(void* a, s32 b);
 
-void func_001936A0(T217D_6D0* self);
-void func_00195928(void* self, s32 v);
-void func_001AA998(void* self, s32 flag);
+void BuildPauseMenuPage(T217D_6D0* self);
+void SetPauseMenuPage(void* self, s32 v);
+void SetScreenElementMode(void* self, s32 flag);
 
-extern u8 D_00275BC0[];
+extern u8 g_elementStack[];
 
-void func_00193EE8(void* self, s32 a, s32 b);
-void func_00195928(void* self, s32 v);
-void func_001E9570(void* q);
-void func_001E9498(void* a, void* b);
+void ChangePauseMenuPage(void* self, s32 a, s32 b);
+void SetPauseMenuPage(void* self, s32 v);
+void PopStackElement(void* q);
+void PushStackElement(void* a, void* b);
 
 extern u8 D_00247AB0[];
 
-void func_001EFFA0(void* dst, void* args, s32 count);
+void StartScreenFade(void* dst, void* args, s32 count);
 
 
-extern u8 D_00248D20[];
+extern u8 g_unitZVector[];
 
 // The two DISPLAY registers at D_00262490 (the screen's position: 12 bits of x, 11 of y).
 // The register at +0x18 is described with 32-bit bit-fields, the one at +0x40 with 64-bit ones;
@@ -106,42 +106,42 @@ extern DisplayRegs D_00262490;
 extern s32 D_00275BF0;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
-void func_00194D30(T217D_6D0* self, s32 a, s32 b);
-s32 func_001FD7A0(f32 x);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
+s32 ConvertFloatToU32(f32 x);
 
 
-extern u8 D_00275BC0[];
+extern u8 g_elementStack[];
 extern u8 D_00247AD0[];
 extern CardSlot D_002542D8[];
 
-void func_001961C0(T217D_6D0* self);
-void func_00194D30(T217D_6D0* self, s32 a, s32 b);
-void func_00194278(T217D_6D0* self, s32 a, s32 b);
-void func_001E9498(u8* a, void* b);
-void func_001F4408(s32 a, s32 b);
-void func_001F0428(u8* a, s32 b, s32 c);
-void func_0018C178(MemoryCard* a, s32 b);
-void func_0018B670(BackgroundJob* a, void* fn, MemoryCard* self);
-s32 func_0018C638(MemoryCard* self);
-s32 func_0018C1A8(MemoryCard* self);
-s32 func_0018C250(MemoryCard* self);
-s32 func_0018C770(MemoryCard* self);
-s32 func_0018C568(MemoryCard* self);
-void func_00160948(void);
-void func_001936A0(T217D_6D0* self);
-void* func_001925F0(void);
-s32 func_001300E8(void* node, s32 kind);
-void func_001B6598(void* ptr, s32* out);
-void func_001D9338(void* p);
-void func_001B6628(void* h, s32 arg);
-void func_001B64D8(s32 a, s32 b);
-s32 func_001602A0(void);
-void func_00160578(s32 n);
-void func_00194398(void);
-void func_001A7F50(GameProgress* g);
-void func_001C0760(s32 flag);
-s32 func_001C0790(s32 flag);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void CancelPauseMenuPage(T217D_6D0* self);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
+void ExitLevelFromPauseMenu(T217D_6D0* self, s32 a, s32 b);
+void PushStackElement(u8* a, void* b);
+void BeginLevelExit(s32 a, s32 b);
+void StartObjectFade(u8* a, s32 b, s32 c);
+void SetMemoryCardDisplayMode(MemoryCard* a, s32 b);
+void StartBackgroundJob(BackgroundJob* a, void* fn, MemoryCard* self);
+s32 SaveGameToMemoryCardSlot(MemoryCard* self);
+s32 RunMemoryCardFormatJob(MemoryCard* self);
+s32 CreateMemoryCardSaveFiles(MemoryCard* self);
+s32 WriteSelectedMemoryCardSlot(MemoryCard* self);
+s32 ApplyMemoryCardImage(MemoryCard* self);
+void ResumeAtSavedLevel(void);
+void BuildPauseMenuPage(T217D_6D0* self);
+void* GetActiveSwitchedCollider(void);
+s32 IsObjectOfKind(void* node, s32 kind);
+void GetStateWalkerCurrentKey(void* ptr, s32* out);
+void RecordPathFollowerProgress(void* p);
+void TeleportStateWalker(void* h, s32 arg);
+void SetStateWalkerTarget(s32 a, s32 b);
+s32 ComputeCompletionMask(void);
+void FadeOutAndQueueMovie(s32 n);
+void StartPauseMenuExitFade(void);
+void TogglePadPatternSetting(GameProgress* g);
+void SilenceVolumeChannel3(s32 flag);
+s32 ApplySoundOptionFlag(s32 flag);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 // The glyph mark FindSubstring finds in a page title: the glyph is its third byte.
 struct GlyphMark {
@@ -149,7 +149,7 @@ struct GlyphMark {
     u8 f2;
 };
 
-extern f32 D_00261868;
+extern f32 g_elapsedTime;
 extern CardSlot* D_0026998C;
 extern s32 D_00264A4C;
 extern f32 D_0026A22C;
@@ -159,24 +159,24 @@ extern ScreenAdjustRate D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 
-s32 func_00160B28(GameProgress* g);
-s32 func_001BE810(void);
-s32 func_0011CE30(void);
-s32 func_001BE980(void);
-s32 func_0016EED0(PadRecord* p);
-s32 func_0016EC98(PadRecord* p);
-void func_0016EC20(PadRecord* p, s32 mask);
-f32 func_0016F108(PadRecord* p, s32 idx);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00194D30(T217D_6D0* self, s32 a, s32 b);
-void func_00195958(T217D_6D0* self);
-void func_001961C0(T217D_6D0* self);
-void func_00194398(void);
-s32 func_0018B770(BackgroundJob* p);
-void func_0018B670(BackgroundJob* p, void* fn, void* arg);
-GlyphMark* func_001F6880(void* a, const char* name);
-s32 func_001AEA08(void);
-s32 func_001FD7A0(f32 x);
+s32 ComputeCompletionPercent(GameProgress* g);
+s32 CheckStreamVoicePending(void);
+s32 PollIopCommands(void);
+s32 HasStreamVoice(void);
+s32 GetPadVerticalStep(PadRecord* p);
+s32 GetPadHorizontalStep(PadRecord* p);
+void ClearPadPressedBits(PadRecord* p, s32 mask);
+f32 GetPadButtonAnalog(PadRecord* p, s32 idx);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
+void ActivatePauseMenuSelection(T217D_6D0* self);
+void CancelPauseMenuPage(T217D_6D0* self);
+void StartPauseMenuExitFade(void);
+s32 IsBackgroundJobRunning(BackgroundJob* p);
+void StartBackgroundJob(BackgroundJob* p, void* fn, void* arg);
+GlyphMark* FindSubstring(void* a, const char* name);
+s32 GetCyclingGlyph(void);
+s32 ConvertFloatToU32(f32 x);
 
 struct ClampFloat {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -195,20 +195,20 @@ enum PadSelectBits {
     PAD_SELECT_NONE = 0
 };
 
-extern u8 D_00275BC0[];
+extern u8 g_elementStack[];
 extern u8* D_0027051C;
 
-void func_001BED48(void);
-void func_001BED70(void);
-void func_001E96F8(void* self, s32 mode);
-void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
-s32 func_0016E0F0(PadSelectBits bits);
-void func_0016E118(PadSelectBits n);
-void func_0016EC88(PadRecord* p);
+void PauseStagedBankVoice(void);
+void ResumeStagedBankVoice(void);
+void SetElementStackState(void* self, s32 mode);
+void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
+s32 SetPadSelectFlags(PadSelectBits bits);
+void ClearPadSelectFlags(PadSelectBits n);
+void ResetPadStepRepeat(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
 // The style of the menu's box (D_0026A210, the element's frame): the font that draws it and
 // its colour; the static initialiser builds it.
@@ -235,29 +235,29 @@ struct MenuBoxStyle {
 // A page of the pause menu (g_pauseMenuPages): its title, the scales of the title and the items,
 // whether the items stand in a column, and the items (indices of choice labels).
 struct MenuPage { char* title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
-extern MenuPage D_00269D50[33];
+extern MenuPage g_pauseMenuPages[33];
 
-extern f32 D_00261858[];
+extern f32 g_gameClock[];
 extern s32 D_00275BEC;
 extern f32 D_00262CEC;
-extern u8 D_00260ED0[];
-extern u8 D_00262280[];
+extern u8 g_fadeRampProfile[];
+extern u8 g_gsPacketWriter[];
 
-f32 func_00205400(f32 x);
-void func_00137228(Layout_137228* out, f32 x, f32 y);
-void func_00137238(Layout_137228* out, f32 x, f32 y);
-void func_00137248(Layout_137228* out, Quad4* value);
-void func_00137260(Layout_137228* out, s32 flag);
-void func_00137268(Layout_137228* out, s32 flag);
-f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
-void func_0015C8B8(Font* font, f32 a, f32 b);
-TextReader* func_0015DB28(TextReader* out, void* str, Font* font);
-void func_0015E318(TextReader* buf, Layout_137228* out, s32 zero, void* data);
-f32 func_0015E1B0(TextReader* buf, f32 w);
-void func_0015C900(Font* font);
-f32 func_0015DFF8(TextReader* buf);
-char* func_00193598(s32 index);
-void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba4* c, s32 k);
+f32 Sine(f32 x);
+void SetTextLayoutPosition(Layout_137228* out, f32 x, f32 y);
+void SetTextLayoutSize(Layout_137228* out, f32 x, f32 y);
+void SetTextLayoutColor(Layout_137228* out, Quad4* value);
+void SetTextLayoutHorizontalAlign(Layout_137228* out, s32 flag);
+void SetTextLayoutVerticalAlign(Layout_137228* out, s32 flag);
+f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
+void PushFontScale(Font* font, f32 a, f32 b);
+TextReader* InitTextReader(TextReader* out, void* str, Font* font);
+void DrawAlignedText(TextReader* buf, Layout_137228* out, s32 zero, void* data);
+f32 MeasureTextHeight(TextReader* buf, f32 w);
+void PopFontScale(Font* font);
+f32 SumTextWidth(TextReader* buf);
+char* GetMenuChoiceLabel(s32 index);
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba4* c, s32 k);
 
 struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {
@@ -266,8 +266,8 @@ struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32
     Quad4 tmp;
     tmp.w[0] = color;
     SetTextLayoutColor(out, &tmp);
-    func_00137260(out, flag);
-    func_00137268(out, 0);
+    SetTextLayoutHorizontalAlign(out, flag);
+    SetTextLayoutVerticalAlign(out, 0);
 } };
 
 struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, Layout_137228* out, void* d)
@@ -299,7 +299,7 @@ struct LerpColor { static void Do(Rgba4* out, Rgba4 a, Rgba4 b, f32 t)
     *out = r;
 } };
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
 // The file's .data, in retail's order from 0x269CD8, and the strings of its menus, which open
 // its .rodata. The style (func_00196330, the static initialiser, builds it) and the buffers the
@@ -307,8 +307,8 @@ void func_001F5C0C(void* p, s32 zero, s32 size);
 // A choice's labels, one per state (g_menuChoiceStates).
 struct ChoiceLabels { s32 count; char** labels; };
 
-extern s32 D_0026A238[];
-extern s32 D_0026A258[];
+extern s32 g_pauseMenuItems[];
+extern s32 g_optionsMenuItems[];
 extern char D_0026A480[];
 extern char D_0026A4C0[];
 extern char D_0026A500[];
@@ -321,12 +321,12 @@ extern char D_0026A680[];
 extern char D_0026A6C0[];
 
 s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
-s32 D_00269CF8[2] = { 0, 1 };
+s32 g_yesNoItems[2] = { 0, 1 };
 s32 D_00269D00[2] = { 2, 0 };
 s32 D_00269D08[4] = { 10, 11, 12, 17 };
 s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
 s32 D_00269D40[4] = { 24, 25, 26, 17 };
-MenuPage D_00269D50[33] = {
+MenuPage g_pauseMenuPages[33] = {
     { "Paused", 1.0f, 1.0f, 1, 8, g_pauseMenuItems },
     { "Game Over. Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "Really Quit?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
@@ -361,7 +361,7 @@ MenuPage D_00269D50[33] = {
     { "Controls", 1.0f, 0.8f, 1, 4, D_00269D40 },
     { "\nPlease insert a Memory Card (PS2) in Memory Card Slot 1 that contains a Sly Cooper Save File\n", 1.0f, 1.0f, 1, 1, D_00269D00 },
 };
-char* D_0026A068[28] = {
+char* g_menuChoiceLabels[28] = {
     "Yes",
     "No",
     "Continue",
@@ -433,8 +433,8 @@ ChoiceLabels D_0026A138[27] = {
 MenuBoxStyle D_0026A210(15);
 f32 D_0026A22C = 5.0f;
 ScreenAdjustRate D_0026A230 = { 2.0f, 0.0f };
-s32 D_0026A238[8] = { 0 };
-s32 D_0026A258[138] = { 0 };
+s32 g_pauseMenuItems[8] = { 0 };
+s32 g_optionsMenuItems[138] = { 0 };
 char D_0026A480[64] = { 0 };
 char D_0026A4C0[64] = { 0 };
 char D_0026A500[64] = { 0 };
@@ -450,29 +450,29 @@ f32 D_0026A704 = 0;
 f32 D_0026A708 = 0;
 f32 D_0026A70C = 0;
 
-LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
-void func_00193270(LoadProgress* p);
-void func_00193288(LoadProgress* self, s32 value);
-void func_00193300(LoadProgress* p);
-void func_00193318(LoadProgress* o);
-void func_001935B0(GameProgress* self, char* dst);
-s32 func_00193660(void);
-void func_00193E58(T217D_6D0* self);
-void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
-void func_001940E8(T217D_6D0* self, s32 mode);
-void func_00194278(void* a0, s32 a1, s32 a2);
-void func_00194398(void);
-void func_001943E8(T217D_6D0* self);
-void func_00194D30(T217D_6D0* self, s32 idx, s32 value);
-void func_00194E60(T217D_6D0* self, s32 v);
-void func_00194F00(T217D_6D0* self);
-void func_00194F38(T217D_6D0* self);
-void func_00194F80(T217D_6D0* self);
-void func_00195928(T217D_6D0* self, s32 v);
-void func_00195958(T217D_6D0* self);
-void func_001961C0(T217D_6D0* self);
+LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
+void BeginLoadProgress(LoadProgress* p);
+void UpdateLoadProgress(LoadProgress* self, s32 value);
+void EndLoadProgress(LoadProgress* p);
+void DrawLoadProgressBar(LoadProgress* o);
+void FormatGameSummary(GameProgress* self, char* dst);
+s32 FindObject42CStateWalker(void);
+void InitPauseMenu(T217D_6D0* self);
+void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
+void SetPauseMenuOpen(T217D_6D0* self, s32 mode);
+void ExitLevelFromPauseMenu(void* a0, s32 a1, s32 a2);
+void StartPauseMenuExitFade(void);
+void UpdatePauseMenu(T217D_6D0* self);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuMode(T217D_6D0* self, s32 v);
+void ShowPauseMenu(T217D_6D0* self);
+void HidePauseMenu(T217D_6D0* self);
+void DrawPauseMenu(T217D_6D0* self);
+void SetPauseMenuPage(T217D_6D0* self, s32 v);
+void ActivatePauseMenuSelection(T217D_6D0* self);
+void CancelPauseMenuPage(T217D_6D0* self);
 
-LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4)
+LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4)
 {
     self->f14 = *s1;
     self->f18 = *s2;
@@ -486,9 +486,9 @@ LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U3
     return self;
 }
 
-void func_00193270(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
+void BeginLoadProgress(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
 
-void func_00193288(LoadProgress* self, s32 value)
+void UpdateLoadProgress(LoadProgress* self, s32 value)
 {
 	if (self->active != 0) {
 		if (self->total == 0) { self->scale = value << 1; self->total = value; SendDisplayResetPacket(self); }
@@ -499,9 +499,9 @@ void func_00193288(LoadProgress* self, s32 value)
 	}
 }
 
-void func_00193300(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
+void EndLoadProgress(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0; p->total=0; p->scale=0; }
 
-void func_00193318(LoadProgress* o)
+void DrawLoadProgressBar(LoadProgress* o)
 {
     BarPacket buf;
     s32 n1;
@@ -544,12 +544,12 @@ void func_00193318(LoadProgress* o)
     SendPacketToBothBuffers(&buf);
 }
 
-char* func_00193598(s32 index)
+char* GetMenuChoiceLabel(s32 index)
 {
     return g_menuChoiceLabels[index];
 }
 
-void func_001935B0(GameProgress* self, char* dst)
+void FormatGameSummary(GameProgress* self, char* dst)
 {
     s32 a = ComputeCompletionPercent(self);
     s32 b = GetEntryName((self->f19D8 << 8) | self->f19DC);
@@ -558,7 +558,7 @@ void func_001935B0(GameProgress* self, char* dst)
     FormatToString(dst, "%d%% - %s - %d:%02d", a, b, t / 60, t % 60);
 }
 
-s32 func_00193660(void)
+s32 FindObject42CStateWalker(void)
 {
     s32 r = FindFirstObjectById(g_currentWorld, 5, 0x42C, 0);
     s32 v;
@@ -576,7 +576,7 @@ INCLUDE_RODATA(jtbl_0024C480);
 INCLUDE_RODATA(jtbl_0024C4D0);
 ASM_FUNC(func_001936A0);
 
-void func_00193E58(T217D_6D0* self)
+void InitPauseMenu(T217D_6D0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -591,7 +591,7 @@ void func_00193E58(T217D_6D0* self)
     self->fade = 1.0f;
 }
 
-void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
+void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
 {
     if (a == b) {
         return;
@@ -635,7 +635,7 @@ void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
     }
 }
 
-void func_001940E8(T217D_6D0* self, s32 mode) {
+void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
     if (self->open == mode) return;
     if (mode != 0) {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
@@ -675,7 +675,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
     self->open = mode;
 }
 
-void func_00194278(void* a0, s32 a1, s32 a2)
+void ExitLevelFromPauseMenu(void* a0, s32 a1, s32 a2)
 {
     SetPauseMenuLayerPage(a0, 0, -1);
     GameProgress* g = g_saveData;
@@ -708,7 +708,7 @@ void func_00194278(void* a0, s32 a1, s32 a2)
     }
 }
 
-void func_00194398(void)
+void StartPauseMenuExitFade(void)
 {
     FadeRequest args;
     args.kind = 1;
@@ -719,7 +719,7 @@ void func_00194398(void)
     StartScreenFade(&g_screenFade, &args, 0);
 }
 
-void func_001943E8(T217D_6D0* self)
+void UpdatePauseMenu(T217D_6D0* self)
 {
     GameProgress* g = g_saveData;
     MenuPage* row = &g_pauseMenuPages[self->page];
@@ -960,7 +960,7 @@ void func_001943E8(T217D_6D0* self)
     }
 }
 
-void func_00194D30(T217D_6D0* self, s32 idx, s32 value)
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value)
 {
     s32 s1;
     s32 s2;
@@ -1009,7 +1009,7 @@ void func_00194D30(T217D_6D0* self, s32 idx, s32 value)
     }
 }
 
-void func_00194E60(T217D_6D0* self, s32 v)
+void SetPauseMenuMode(T217D_6D0* self, s32 v)
 {
     s32 flag = v;
 
@@ -1032,13 +1032,13 @@ void func_00194E60(T217D_6D0* self, s32 v)
     SetScreenElementMode(self, flag);
 }
 
-void func_00194F00(T217D_6D0* self)
+void ShowPauseMenu(T217D_6D0* self)
 {
     if (self->mode == 3 && self->queued != 0) return;
     ShowScreenElement(self);
 }
 
-void func_00194F38(T217D_6D0* self)
+void HidePauseMenu(T217D_6D0* self)
 {
     if (self->mode == 3 && self->queued != 0) {
         self->queued = 0;
@@ -1048,7 +1048,7 @@ void func_00194F38(T217D_6D0* self)
     HideScreenElement(self);
 }
 
-void func_00194F80(T217D_6D0* self)
+void DrawPauseMenu(T217D_6D0* self)
 {
     f32 cx;
     f32 cy;
@@ -1095,8 +1095,8 @@ void func_00194F80(T217D_6D0* self)
             tmp.w[0] = backColor;
             SetTextLayoutColor(&out, &tmp);
         }
-        func_00137260(&out, 0);
-        func_00137268(&out, 0);
+        SetTextLayoutHorizontalAlign(&out, 0);
+        SetTextLayoutVerticalAlign(&out, 0);
         Rgba4 saved = ((MenuBoxStyle*)self->frame)->color;
         {
             Rgba4 t = saved;
@@ -1208,7 +1208,7 @@ void func_00194F80(T217D_6D0* self)
     }
 }
 
-void func_00195928(T217D_6D0* self, s32 v)
+void SetPauseMenuPage(T217D_6D0* self, s32 v)
 {
     if (self->page != v) {
         self->page = v;
@@ -1216,7 +1216,7 @@ void func_00195928(T217D_6D0* self, s32 v)
     }
 }
 
-void func_00195958(T217D_6D0* self)
+void ActivatePauseMenuSelection(T217D_6D0* self)
 {
     s32 sel = g_pauseMenuPages[self->page].items ? g_pauseMenuPages[self->page].items[self->cursor] : -1;
     if (sel == 0x11) {
@@ -1316,7 +1316,7 @@ void func_00195958(T217D_6D0* self)
         case 16: {
             GameProgress* g = g_saveData;
             g->u19EC ^= 0x40;
-            func_001C0790(g->u19EC & 0x40);
+            ApplySoundOptionFlag(g->u19EC & 0x40);
             {
                 s32 keep;
                 keep = self->cursor;
@@ -1519,7 +1519,7 @@ void func_00195958(T217D_6D0* self)
     }
 }
 
-void func_001961C0(T217D_6D0* self)
+void CancelPauseMenuPage(T217D_6D0* self)
 {
     switch (self->page) {
     case 0:

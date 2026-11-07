@@ -30,10 +30,10 @@ struct FlaggedObject : Collider {
 
 typedef char check_FlaggedObject[sizeof(FlaggedObject) == 0x5C0 ? 1 : -1];
 
-void func_001411A8(FlaggedObject* self);                  // slot 0
-void func_001415D0(FlaggedObject* self);                  // slot 9
-void func_00141210(FlaggedObject* self);                  // slot 10
-void func_00141338(FlaggedObject* self);                  // slot 15
-void func_00141438(FlaggedObject* self);                  // slot 16
+void InitFlaggedObject(FlaggedObject* self);                  // slot 0
+void CopyFlaggedObject(FlaggedObject* self);                  // slot 9
+void CollectChildLists(FlaggedObject* self);                  // slot 10
+void ResolveListIds(FlaggedObject* self);                  // slot 15
+void StartFlaggedObject(FlaggedObject* self);                  // slot 16
 
 #endif

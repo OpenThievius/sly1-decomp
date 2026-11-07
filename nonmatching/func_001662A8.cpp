@@ -22,46 +22,46 @@
 #include "shapes.h"
 
 
-void func_0015FA58(void* self);
-void func_0015FD78(void* self);
+void RegroupQueuedObjects(void* self);
+void UpdateGroupsNearCamera(void* self);
 
 
-void func_0015F930(void* list, void* base, void* item);
-void func_0015F710(void* self, void* value);
+void RemoveValueFromArray(void* list, void* base, void* item);
+void DissolveObjectLinkList(void* self, void* value);
 
 struct VisitClass { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
 struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14]; VisitNode* child; };
 
 
 
-void func_00152730(void* dst, void* src);
+void SpliceListToEnd(void* dst, void* src);
 
 
-s32 func_00182FC8(void* p);
-void func_0015F6C0(void* ctx, void* a, void* b);
+s32 IsObjectAttached(void* p);
+void MergeObjectLinkLists(void* ctx, void* a, void* b);
 
 
-void func_0015F7D8(void* self, FoundList* group);
+void MergeObjectGroupMembers(void* self, FoundList* group);
 
 struct CountedArray
 {
     s32 count;
 };
 
-void* func_001F5B08(void* dst, void* src, s32 bytes);
+void* MoveMemory(void* dst, void* src, s32 bytes);
 
 
-void func_0015F7D8(void* self, void* item);
+void MergeObjectGroupMembers(void* self, void* item);
 
 extern u8 D_00248D30[];
 
-void func_001BF788(void* self, s32 n);
-void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
+void StopSoundRecord(void* self, s32 n);
+void StartSoundEffect(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
-void func_00182C58(BaseObject* self);
-void* func_0018D500(s32 size);
-s32 func_0015A480(World* world, s32 item, void* c);
-void func_0015F8B0(World* world, FoundList* sub);
+void StartObject(BaseObject* self);
+void* AllocateFrontMemory(s32 size);
+s32 FindFirstObjectByIdMode1(World* world, s32 item, void* c);
+void RegisterObjectGroup(World* world, FoundList* sub);
 
 
 struct LinkListWalk {
@@ -72,8 +72,8 @@ struct LinkListWalk {
 };
 
 
-void func_00152600(List01* list, PlacedObject* node);
-void func_0015F678(void* self, PlacedObject* node);
+void RemoveFromList(List01* list, PlacedObject* node);
+void QueueObjectForRegroup(void* self, PlacedObject* node);
 
 struct BeginLinkListWalk {
     static void Of(LinkListWalk* it, List01* list)
@@ -81,8 +81,8 @@ struct BeginLinkListWalk {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (LinkListWalk*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = (LinkListWalk*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -95,9 +95,9 @@ struct NextInLinkList {
     }
 };
 
-void* func_00160110();
+void* FindEntryById();
 
-s32* func_00160810();
+s32* GetLevelEntryByKey();
 
 struct RefCounted
 {
@@ -106,26 +106,26 @@ struct RefCounted
 };
 
 
-void func_001612E8(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2);
 
 
 struct EntryFlags { u8 pad0[0x28]; s32 f28; };
 
-EntryFlags* func_00160110(void* a0);
+EntryFlags* FindEntryById(void* a0);
 
-s32 func_001602A0(void);
+s32 ComputeCompletionMask(void);
 
-extern s32 D_002623CC;
-extern u8 D_00261420[];
+extern s32 g_previousLevelIndex;
+extern u8 g_flagTable[];
 
-s32 func_001601A0(s32 a0);
-void func_001608E0(void);
-void func_00140F48(u8* p);
-void func_00140D90(u8* p);
-void func_00160880(void);
+s32 GetEntryIdByKey(s32 a0);
+void ResetReserveCounts(void);
+void RestoreFlagTableSnapshot(u8* p);
+void ResetFlagTable(u8* p);
+void ResetGameSession(void);
 
 
-void* func_0018D500(s32 size);
+void* AllocateFrontMemory(s32 size);
 
 struct RefItem { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
 
@@ -139,7 +139,7 @@ struct RefOwner
     void** refs;
 };
 
-void* func_001F5C0C(void* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 struct Counter
 {
@@ -148,88 +148,88 @@ struct Counter
 };
 
 
-extern World* D_00275710;
+extern World* g_currentWorld;
 
-void func_0018D778(void);
+void FreeObjectMemory(void);
 
-void func_00162508(void* self);
-void func_00188B08(void* a, void* b, void* c);
-void func_00188B48(void* a, void* b, void* c);
+void FlushVertexBatch(void* self);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* c);
+void InvertRigidTransform(void* a, void* b, void* c);
 
 struct ColoredVertexBatch {
     u8 pad0[0xF8];
     s32 f0F8;
 };
 
-void func_00162508(void* self);
-void func_001626A8(void* self, u32* value);
+void FlushVertexBatch(void* self);
+void SetVertexColor(void* self, u32* value);
 
-KeyedEntry* func_001600A0(void);
+KeyedEntry* FindKeyEntry(void);
 
 
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 extern U32P D_00269984;
-extern s32 D_00262C64;
-extern s32 D_002623CC;
+extern s32 g_buttonCodeFlags;
+extern s32 g_previousLevelIndex;
 
-void func_001605E8(void* self);
-void func_00160CC8(void* self);
-void func_00151A68(void* self);
-void func_001608E0(void);
+void ResetGameProgress(void* self);
+void ClearTwoWords(void* self);
+void ClearScatterController(void* self);
+void ResetReserveCounts(void);
 
-void func_001612E8(void* self, s32 a1, s32 a2);
-
-
-void func_001612E8(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2);
 
 
-void func_001612E8(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2);
+
+
+void CountGifEntry(void* self, s32 a1, s32 a2);
 
 struct ClearedRecord { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
 
-void func_001613C0(void* self, s32 a, s32 b, s32 c);
+void BeginGifTag(void* self, s32 a, s32 b, s32 c);
 
 
 
-void func_00160918();
+void ResetGameSessionAndFade();
 
 typedef void* (*MemoryFillFn)(void*,s32,s32);
 
-void func_001612E8(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2);
 
-void func_001612E8(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2);
 
 struct KeyedPointSet { u8 pad0[4]; s32 count; u8* base; };
 struct KeyedEdge { s16 k0; s16 k1; u8 pad[4]; KeyedEdge* next; };
 struct EdgeHolder { u8 pad0[0x14]; KeyedEdge* head; };
 struct ContactHit { EdgeHolder* holder; u8 pad[8]; };
 
-void func_0018D608(void);
-u8* func_0018D658(s32 size);
-void func_0018D6F0(void);
+void PushBackMemoryMark(void);
+u8* AllocateBackMemory(s32 size);
+void PopBackMemoryMark(void);
 s32 func_0013E430(u8* a0, u8* a1, s32* a2, f32 scale);
 
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
-void func_001EE3F0(void* s, s32 n);
+void WriteVifMscal(void* s, s32 n);
 
 extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
-void func_001EE3F0(void* s, s32 n);
+void WriteVifMscal(void* s, s32 n);
 
 extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
-void func_001EE3F0(void* obj, void* data);
+void WriteVifMscal(void* obj, void* data);
 
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
-void func_001EE3F0(void* obj, void* text);
+void WriteVifMscal(void* obj, void* text);
 
-void func_001A7E90(void* self);
+void ApplyPadPatternSetting(void* self);
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
 struct SessionKey : IdentityKey {
@@ -266,10 +266,10 @@ struct PlayerListWalk {
         list = l;
         cursor = l;
         next_off = l->next_off;
-        prev = (PlayerListWalk*)D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = (PlayerListWalk*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~PlayerListWalk() { D_0027B314 = (ListFrame*)prev; }
+    ~PlayerListWalk() { g_activeListFrames = (ListFrame*)prev; }
     void* Next()
     {
         void* n = *(void**)cursor;
@@ -279,64 +279,64 @@ struct PlayerListWalk {
 };
 
 struct ElementStackState { u8 pad0[0x30]; s32 f30; };
-extern ElementStackState D_00275BC0;
+extern ElementStackState g_elementStack;
 extern SessionKey D_00247AB0;
 extern s32 D_00275F84;
 
-SessionKey* func_00160180(s32 key);
-void func_00160CC8(void* p);
-void func_001F0428(void* a, s32 b, s32 c);
-void func_001C0760(s32 flag);
-void func_001C0790(s32 flag);
-Animation* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_0012E760(void* obj);
-void func_001E96F8(void* obj, s32 mode);
+SessionKey* LookupEntryById(s32 key);
+void ClearTwoWords(void* p);
+void StartObjectFade(void* a, s32 b, s32 c);
+void SilenceVolumeChannel3(s32 flag);
+void ApplySoundOptionFlag(s32 flag);
+Animation* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+void StopAnimationPlayer(void* obj);
+void SetElementStackState(void* obj, s32 mode);
 
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
-void func_001EE3F0(void* s, s32 n);
+void WriteVifMscal(void* s, s32 n);
 
 extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
-void func_001EE3F0(void* s, s32 n);
+void WriteVifMscal(void* s, s32 n);
 
-void func_00140D90(void* p);
+void ResetFlagTable(void* p);
 
-extern u8 D_00261420[];
-
-
-extern u8 D_00261EF0[];
-extern u8 D_00261420[];
-extern u8 D_0026FF68[];
-
-void func_001DDAD0(void* x);
-void func_001BE708(void);
-void func_001EFFA0(void* dst, FadeRequest* args, s32 count);
-void func_00140ED0(void* r);
-void func_00194D30(void* self, s32 a, s32 b);
-void func_00151E20(void* self, f32 amount);
+extern u8 g_flagTable[];
 
 
-u32* func_00160810(void* key);
+extern u8 g_scatterController[];
+extern u8 g_flagTable[];
+extern u8 g_pauseMenuElement[];
+
+void PopActiveSequenceElement(void* x);
+void StopLockedStreamVoice(void);
+void StartScreenFade(void* dst, FadeRequest* args, s32 count);
+void StartScreenFadeFromFlagTable(void* r);
+void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
+void RaiseScatterLevels(void* self, f32 amount);
+
+
+u32* GetLevelEntryByKey(void* key);
 
 
 extern u8 D_00247AD0[];
 
-void func_001F0428(void* obj, s32 m, s32 n);
-void func_0018E4F0(s32 slot, u32 n);
+void StartObjectFade(void* obj, s32 m, s32 n);
+void QueueMovieWithSuccessor(s32 slot, u32 n);
 
 
-void func_00160880(void);
-void func_001F0428(void* obj, s32 value, s32 count);
+void ResetGameSession(void);
+void StartObjectFade(void* obj, s32 value, s32 count);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-extern const Fn_Table D_0024A6F8[];
-s32 func_00152888(PacketWriter* a);
+extern const Fn_Table g_gifPacketMethods[];
+s32 InitPacketBuffer(PacketWriter* a);
 
-void func_001604B8(s32 mode);
+void ApplyCompletionFlags(s32 mode);
 
 // EXACT: self->block store ahead of self->f20 store.
 
@@ -373,26 +373,26 @@ extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
 
-void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_00152980(PacketWriter* f, s32 size);
-void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
-void func_00161708(PacketWriter* f, s32 a, u64 b);
-void func_00161278(PacketWriter* f, s32 n);
-void func_001EE668(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
-void func_001528E0(PacketWriter* f);
-void func_001615F0(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_001EE4C0(PacketWriter* s, u32* src);
-void func_001EE528(PacketWriter* s, s32 value);
-void func_001EE3F0(PacketWriter* s, void* data);
-void func_001EE480(PacketWriter* s);
-void func_00163990(s32 mode, PacketWriter* obj);
+void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void* FillMemory(void* p, s32 value, s32 size);
+void AllocateTempPacketBuffer(PacketWriter* f, s32 size);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
+void CloseGifTag(PacketWriter* f, s32 n);
+void CopyWordsToWriter(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
+void RewindPacketBuffer(PacketWriter* f);
+void AddGifXyzfEntry(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
+void WriteVifStrow(PacketWriter* s, u32* src);
+void WriteVifStmask(PacketWriter* s, s32 value);
+void WriteVifMscal(PacketWriter* s, void* data);
+void WriteVifFlushE(PacketWriter* s);
+void WriteMorphTargetMscal(s32 mode, PacketWriter* obj);
 
 struct QuadClear
 {
     static void Clear(u32* q)
     {
-        func_001F5C0C(q, 0, 0x10);
+        FillMemory(q, 0, 0x10);
     }
 };
 
@@ -413,19 +413,19 @@ public:
     u64* cursor;
     u8 pad1[0x8];
     virtual void Begin(s32 arg);
-    void func_00161958(s32 count);
+    void AddGifImageTag(s32 count);
 };
 
 struct FlushedVertexBatch { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
 
-extern PacketWriter D_002622A8;
+extern PacketWriter g_vifPacketWriter;
 extern u8 D_000018C0[];
 
-void func_00166658(void);
-s32 func_001EE560(PacketWriter* s, s32 a, s32 b, s32 c);
-void func_00161B80(FlushedVertexBatch* self);
-void func_00161C00(FlushedVertexBatch* self);
-void func_00161F70(FlushedVertexBatch* self);
+void FlipVifBaseOffset(void);
+s32 WriteVifUnpackHeader(PacketWriter* s, s32 a, s32 b, s32 c);
+void ResetVertexBatch(FlushedVertexBatch* self);
+void BuildUnlitVertexPacket(FlushedVertexBatch* self);
+void BuildLitVertexPacket(FlushedVertexBatch* self);
 
 struct WordCopy {
     static void Words(s32* dst, s32* src, s32 n)
@@ -469,9 +469,9 @@ struct AppendVertexBatch {
     BatchVertexWords recs[1];
 };
 
-void func_0018D800(BatchVertexWords* dst, const void* src, s32 size);
-void func_00162508(AppendVertexBatch* self);
-void func_00161BB0(AppendVertexBatch* self, u8* value);
+void CopyMemory(BatchVertexWords* dst, const void* src, s32 size);
+void FlushVertexBatch(AppendVertexBatch* self);
+void SetVertexBatchMode(AppendVertexBatch* self, u8* value);
 
 struct DrawMesh;
 // A point and a fourth word, as the vertex packets write them.
@@ -489,10 +489,10 @@ struct UnlitVertexBatch {
 struct UnlitUnpackHeader { u16 f0; u16 f2; u8 pad[4]; u16 f8[4]; u16 f10; u8 pad3[6]; };
 struct CopiedGifTags { u32 w[8]; };
 
-void func_001F5C0C(UnlitUnpackHeader* p, s32 v, s32 n);
+void FillMemory(UnlitUnpackHeader* p, s32 v, s32 n);
 extern u8 D_00001A50[];
 extern u8 D_000002F8[];
-void func_0018D800(CopiedGifTags* dst, u8* src, s32 n);
+void CopyMemory(CopiedGifTags* dst, u8* src, s32 n);
 
 // A run of bytes, for the fill and copy calls.
 struct ByteSpan { u8 b[1]; };
@@ -538,15 +538,15 @@ extern u8 D_00001210[];
 extern u8 D_00001AB0[];
 extern u8 D_00000010[];
 
-void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-ByteSpan* func_001F5C0C(ByteSpan* p, s32 value, s32 size);
-void func_001EE3F0(PacketWriter* s, void* data);
-void func_001EE420(PacketWriter* s, void* data);
-void func_001EE480(PacketWriter* s);
-void func_00152D70(PacketWriter* s);
-void func_00152B80(PacketWriter* s, s32 n, void* data);
-void func_00152B38(PacketWriter* s);
-void func_0018D800(ByteSpan* dst, void* src, s32 count);
+void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+ByteSpan* FillMemory(ByteSpan* p, s32 value, s32 size);
+void WriteVifMscal(PacketWriter* s, void* data);
+void WriteVifMscalf(PacketWriter* s, void* data);
+void WriteVifFlushE(PacketWriter* s);
+void CloseDmaTag(PacketWriter* s);
+void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
+void BeginDmaTag(PacketWriter* s);
+void CopyMemory(ByteSpan* dst, void* src, s32 count);
 
 struct MeshUv {
     f32 u;
@@ -623,27 +623,27 @@ extern u8 D_000023B8[];
 extern u8 D_00003A80[];
 extern u8 D_00003A90[];
 
-void func_00152B38(PacketWriter* pkt);
-void func_00152D70(PacketWriter* pkt);
-void func_00152CA0(PacketWriter* pkt);
-void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_001EE498(PacketWriter* s, s32 a, s32 b);
-void func_001EE4C0(PacketWriter* s, u32* src);
-void func_001EE528(PacketWriter* s, s32 value);
-void func_001EE3F0(PacketWriter* s, void* data);
-void func_001EE420(PacketWriter* s, void* data);
-void func_001EE480(PacketWriter* s);
-void func_001EE668(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
-void func_001EE718(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
-void* func_0018D5C0(s32 bytes);
-void func_00163938(s32 mode, PacketWriter* pkt);
-void func_00169608(s32 a, s32 b, AnimCursor* node);
-void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
+void BeginDmaTag(PacketWriter* pkt);
+void CloseDmaTag(PacketWriter* pkt);
+void AddDmaReturnTag(PacketWriter* pkt);
+void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void* FillMemory(void* p, s32 value, s32 size);
+void WriteVifStcycl(PacketWriter* s, s32 a, s32 b);
+void WriteVifStrow(PacketWriter* s, u32* src);
+void WriteVifStmask(PacketWriter* s, s32 value);
+void WriteVifMscal(PacketWriter* s, void* data);
+void WriteVifMscalf(PacketWriter* s, void* data);
+void WriteVifFlushE(PacketWriter* s);
+void CopyWordsToWriter(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
+void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
+void* AllocateZeroedFrontMemory(s32 bytes);
+void WriteStripMeshMscal(s32 mode, PacketWriter* pkt);
+void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
+void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
-void func_001EE3B8(void* obj, s32 size, s32 flags);
+void WriteVifBaseOffset(void* obj, s32 size, s32 flags);
 
-void func_0016C528(void*);
+void ApplyLinkConstraint(void*);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
@@ -651,8 +651,8 @@ struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0
 struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
 struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
-void func_001662A8(void* self, void* entry, void* sub, void* ctx);
-void func_001F2798(void* owner, void* unused, void* ctx);
+void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
+void AttachNodeToOwner(void* owner, void* unused, void* ctx);
 
 // Four quadwords: a matrix as the attachment code copies it.
 struct QuadMatrix { Quad16 q[4]; };
@@ -661,10 +661,10 @@ struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[
 struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
 struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
-void* func_0015A448(void* a, s32 b, void* c);
-void func_00188B08(void* a, void* b, void* out);
-void func_00188B48(void* a, void* b, void* out);
-void func_00188668(void* out, void* b, void* in);
+void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+void InvertRigidTransform(void* a, void* b, void* out);
+void MultiplyMatrices(void* out, void* b, void* in);
 
 struct AnimatorStep;
 typedef void (*AnimatorStepFn)(void* self, f32 f);
@@ -683,8 +683,8 @@ struct AnimatorOwner {
 };
 
 
-s32 func_001B4B08(void* p);
-void func_001F3408(void* p);
+s32 ClaimAnimatorStep(void* p);
+void EvaluateOscillator(void* p);
 
 extern u8 D_00000010[];
 extern u8 D_000000F0[];
@@ -694,23 +694,23 @@ struct PartRange { u16 lo; u16 hi; };
 struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
 struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
-void* func_001EE318(void* p);
-void func_00152938(void* buf, u32 count, u32 kind);
-void func_001EE498(void* b, u32 x, u32 y);
-void func_001EE5C8(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
-void func_001EE3F0(void* s, void* n);
-void func_001529E0(void* self, void* a, void* b);
+void* InitPacketWriter(void* p);
+void AllocateQuadwordBuffer(void* buf, u32 count, u32 kind);
+void WriteVifStcycl(void* b, u32 x, u32 y);
+void ReserveVifUnpack(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
+void WriteVifMscal(void* s, void* n);
+void DetachPacketBuffer(void* self, void* a, void* b);
 
 struct AttachmentLink { s32 tag; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
 struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
 struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
 struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
-void func_0018D800(AttachmentCopy* dst, void* src, s32 n);
-void* func_0018D5C0(s32 n);
-void* func_0018D568(s32 size, void* src);
-void func_00165AE8(AttachmentCopy* o, void* a, void* b);
-void func_00162810(AttachmentCopy* o);
+void CopyMemory(AttachmentCopy* dst, void* src, s32 n);
+void* AllocateZeroedFrontMemory(s32 n);
+void* CopyToFrontMemory(s32 size, void* src);
+void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
+void CollectNonNullRefs(AttachmentCopy* o);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
 struct FramedObject;
@@ -722,9 +722,9 @@ struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMat
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
 struct ParentFrame { u8 pad[0x30]; };
 
-void func_00188B48(void* a, void* b, void* out);
-void func_00188B08(void* a, void* b, void* out);
-QuadMatrix func_00188668(QuadMatrix a, void* q);
+void InvertRigidTransform(void* a, void* b, void* out);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
 struct PacketSlot {
@@ -748,124 +748,124 @@ extern u8 D_000027C0[];
 extern u8 D_00003A80[];
 extern u8 D_00003AA0[];
 
-void func_00152B38(PacketSlot* pkt);
-void func_00152D70(PacketSlot* pkt);
-void func_00152CA0(PacketSlot* pkt);
-void func_001EE5C8(PacketSlot* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_001EE498(PacketSlot* s, s32 a, s32 b);
-void func_001EE4C0(PacketSlot* s, u32* src);
-void func_001EE528(PacketSlot* s, s32 value);
-void func_001EE3F0(PacketSlot* s, void* data);
-void func_001EE480(PacketSlot* s);
-void func_001EE668(PacketSlot* s, s32 a, s32 b, void* data, s32 flags);
-void func_001EE718(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
-void* func_0018D5C0(s32 bytes);
-void func_00163938(s32 mode, PacketSlot* pkt);
-void func_00169608(s32 a, s32 b, AnimCursor* node);
-void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
+void BeginDmaTag(PacketSlot* pkt);
+void CloseDmaTag(PacketSlot* pkt);
+void AddDmaReturnTag(PacketSlot* pkt);
+void ReserveVifUnpack(PacketSlot* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void* FillMemory(void* p, s32 value, s32 size);
+void WriteVifStcycl(PacketSlot* s, s32 a, s32 b);
+void WriteVifStrow(PacketSlot* s, u32* src);
+void WriteVifStmask(PacketSlot* s, s32 value);
+void WriteVifMscal(PacketSlot* s, void* data);
+void WriteVifFlushE(PacketSlot* s);
+void CopyWordsToWriter(PacketSlot* s, s32 a, s32 b, void* data, s32 flags);
+void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
+void* AllocateZeroedFrontMemory(s32 bytes);
+void WriteStripMeshMscal(s32 mode, PacketSlot* pkt);
+void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
+void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
-void func_0015F678(World* owner, u8* obj);
-void func_0015F6C0(void* ctx, PlacedObject* self, PlacedObject* other);
-void func_0015F710(void* self, PlacedObject* owner);
-void func_0015F7D8(void* self, FoundList* group);
-void func_0015F8B0(void* self, FoundList* group);
-void func_0015F930(CountedArray* list, s32* arr, s32 value);
-void func_0015F9A0(void* self, FoundList* s);
-void func_0015FA58(World* self);
-void func_0015FB28(VisitNode* self, void* arg);
-s32 func_0015FBA0(PlacedObject* self, s32* out);
-void func_0015FBB8(PlacedObject* self, s32 flag);
-void func_0015FF58(void* self);
-void func_00160050(IdLookupObject* obj, s32 value);
-void func_00160070();
-KeyedEntry* func_001600A0(KeyedEntry* key);
-void* func_00160110(s32 key);
-void* func_00160148();
-s32 func_00160180(void);
-s32 func_001601A0(void);
-s32 func_001601D8(void* a0);
-void func_00160208(s32 key, s32* a1, s32* a2, s32* a3);
-s32 func_001602A0(void);
-void func_00160340(s32 n);
-void func_001603E8(s32 n);
-void func_001604B8(s32 mode);
-void func_00160578(s32 kind);
-void func_001605E8(GameProgress* self);
-s32 func_00160650(GameProgress* s);
-void func_00160690(s32 a0, s32 flags);
-void func_001607D0(f32 dx);
-void* func_00160810(s32 key);
-s32 func_00160850();
-void func_00160880(void);
-void func_001608E0(void);
-void func_00160918(void);
-void func_00160948(void);
-s32 func_00160B28(u8* p);
-void func_00160C48(s32 value);
-s32 func_00160C58();
-void* func_00160CA0(u8* self,s32 index);
-void func_00160CC8(void* p);
-void func_00160CE8(Counter* c);
-s32 func_00160CF0(Counter* c);
-void func_00160D00(RefCounted* self);
-s32 func_00160D10();
-void func_00160D30(u32* out);
-s32 func_00160D98(void);
-void func_00160DA0(void);
-void func_00160E80(ClearedRecord* self);
-s32 func_00161028(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
-PacketWriter* func_001611B8(PacketWriter* self);
-void func_00161200(PacketWriter* self);
-void func_00161278(PacketWriter* f, s32 n);
-s32 func_001612E8(PacketWriter* obj);
-void func_001612F8(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
-void func_001613C0(PacketWriter* self, s32 a1, s32 a2, s32 a3);
-void func_00161458(PacketWriter* self, u32 value);
-void func_001614C8(PacketWriter* self,s32 a,s32 b);
-void func_00161520(PacketWriter* self,f32 a,f32 b,f32 c);
-void func_00161588(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void func_00161670(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void func_00161708(PacketWriter* self, u64 a1, u64 a2);
-void func_00161768(PacketWriter* self, u32 a1, u64 a2);
-void func_001617E8(PacketWriter* self, s32 tag, f32 value);
-void func_00161860(PacketWriter* self, s32 a1, s32 a2);
-void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4);
-void func_00161A88(void* self, s32 flag);
-void func_00161AB0(u8* self, void* a1, void* a2);
-void func_00161B80(u8* self);
-void func_00161BB0(ColoredVertexBatch* self, s32 value);
-void func_00161C00(UnlitVertexBatch* self);
-void func_00161F70(LitVertexBatch* self);
-void func_00162508(FlushedVertexBatch* self);
-void func_00162680(VertexBatch* body, Vec3* v);
-void func_001626A8(u8* dst, u8* src);
-void func_001626C0(VertexBatch* dst, U64P* src);
-void func_001626D8(AppendVertexBatch* self, s32 value);
-void func_00162810(RefOwner* owner);
-void func_00163938(s32 mode, void* obj);
-void func_00163990(s32 mode, void* obj);
-void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
+void QueueObjectForRegroup(World* owner, u8* obj);
+void MergeObjectLinkLists(void* ctx, PlacedObject* self, PlacedObject* other);
+void DissolveObjectLinkList(void* self, PlacedObject* owner);
+void MergeObjectGroupMembers(void* self, FoundList* group);
+void RegisterObjectGroup(void* self, FoundList* group);
+void RemoveValueFromArray(CountedArray* list, s32* arr, s32 value);
+void UnregisterObjectGroup(void* self, FoundList* s);
+void RegroupQueuedObjects(World* self);
+void VisitObjectTree(VisitNode* self, void* arg);
+s32 GetPlacedObjectFrozen(PlacedObject* self, s32* out);
+void SetPlacedObjectFrozen(PlacedObject* self, s32 flag);
+void UpdateWorldObjectLists(void* self);
+void AddLookupId(IdLookupObject* obj, s32 value);
+void RunResetGameSession();
+KeyedEntry* FindKeyEntry(KeyedEntry* key);
+void* FindEntryById(s32 key);
+void* GetEntryName();
+s32 LookupEntryById(void);
+s32 GetEntryIdByKey(void);
+s32 GetEntryFlags(void* a0);
+void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3);
+s32 ComputeCompletionMask(void);
+void MarkProgressStageFlag(s32 n);
+void MarkLevelDone(s32 n);
+void ApplyCompletionFlags(s32 mode);
+void FadeOutAndQueueMovie(s32 kind);
+void ResetGameProgress(GameProgress* self);
+s32 ChecksumGameProgress(GameProgress* s);
+void SetCurrentLevelEntry(s32 a0, s32 flags);
+void AddElapsedTime(f32 dx);
+void* GetLevelEntryByKey(s32 key);
+s32 GetLevelEntryWord();
+void ResetGameSession(void);
+void ResetReserveCounts(void);
+void ResetGameSessionAndFade(void);
+void ResumeAtSavedLevel(void);
+s32 ComputeCompletionPercent(u8* p);
+void SetSpareCount(s32 value);
+s32 HasSpareCount();
+void* GetIndexedTargetSlot(u8* self,s32 index);
+void ClearTwoWords(void* p);
+void ResetCounter(Counter* c);
+s32 IncrementCounter(Counter* c);
+void ReleaseCounterRef(RefCounted* self);
+s32 MaskWorldBitsBySave();
+void GetCurrentLevelBit(u32* out);
+s32 GetSpareCountLimit(void);
+void SpendReserveUnit(void);
+void ClearRecordBody(ClearedRecord* self);
+s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
+PacketWriter* InitGifPacket(PacketWriter* self);
+void EndGifPacket(PacketWriter* self);
+void CloseGifTag(PacketWriter* f, s32 n);
+s32 CountGifEntry(PacketWriter* obj);
+void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, s32 a3);
+void AddGifRgbaEntry(PacketWriter* self, u32 value);
+void AddGifUvEntry(PacketWriter* self,s32 a,s32 b);
+void AddGifStEntry(PacketWriter* self,f32 a,f32 b,f32 c);
+void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2);
+void AddGifRegListFloat(PacketWriter* self, s32 tag, f32 value);
+void AddGifUvRegListEntry(PacketWriter* self, s32 a1, s32 a2);
+void AddGifXyzfRegListEntry(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4);
+void DestroyVertexBatch(void* self, s32 flag);
+void SetVertexBatchTransform(u8* self, void* a1, void* a2);
+void ResetVertexBatch(u8* self);
+void SetVertexBatchMode(ColoredVertexBatch* self, s32 value);
+void BuildUnlitVertexPacket(UnlitVertexBatch* self);
+void BuildLitVertexPacket(LitVertexBatch* self);
+void FlushVertexBatch(FlushedVertexBatch* self);
+void SetVertexPosition(VertexBatch* body, Vec3* v);
+void SetVertexColor(u8* dst, u8* src);
+void SetVertexTexCoord(VertexBatch* dst, U64P* src);
+void AddVertex(AppendVertexBatch* self, s32 value);
+void CollectNonNullRefs(RefOwner* owner);
+void WriteStripMeshMscal(s32 mode, void* obj);
+void WriteMorphTargetMscal(s32 mode, void* obj);
+void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
                    void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt);
-void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
+void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
                    Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
                    WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
                    s32** outs);
-void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
+void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
                    s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
                    f32* weights, PacketSlot* pkt, s32** outs);
-void func_00165588(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
-void func_00165728(AttachmentBlock* self, PlacedObject* ctx);
-void func_00165828(AttachmentTargets* self, PlacedObject* ctx);
-void func_00165920(AttachmentCopy* self, s32 arg, void* src);
-void func_00165FE0(AnimatorOwner* self, PlacedObject* sub, f32 f);
-void func_001660A0(PlacedObject* self);
-void func_001660E8(PlacedObject* self, ParentFrame* par);
-void func_00166658(void);
+void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
+void StartAttachments(AttachmentBlock* self, PlacedObject* ctx);
+void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx);
+void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src);
+void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f);
+void UpdateLinkConstraint(PlacedObject* self);
+void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par);
+void FlipVifBaseOffset(void);
 
-void func_0015F678(World* owner, u8* obj)
+void QueueObjectForRegroup(World* owner, u8* obj)
 {
     u64 flags = *(u64*)(obj + 0x2C8);
     u64 bit = (u64)0x8000 << 24;
@@ -878,7 +878,7 @@ void func_0015F678(World* owner, u8* obj)
     }
 }
 
-void func_0015F6C0(void* ctx, PlacedObject* self, PlacedObject* other)
+void MergeObjectLinkLists(void* ctx, PlacedObject* self, PlacedObject* other)
 {
     ListFrame frame;
     if (self != other) {
@@ -893,7 +893,7 @@ void func_0015F6C0(void* ctx, PlacedObject* self, PlacedObject* other)
     }
 }
 
-void func_0015F710(void* self, PlacedObject* owner)
+void DissolveObjectLinkList(void* self, PlacedObject* owner)
 {
     LinkListWalk it;
     PlacedObject* node;
@@ -910,7 +910,7 @@ void func_0015F710(void* self, PlacedObject* owner)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-void func_0015F7D8(void* self, FoundList* group)
+void MergeObjectGroupMembers(void* self, FoundList* group)
 {
     s32 i = 0;
     while (i < group->count) {
@@ -927,7 +927,7 @@ void func_0015F7D8(void* self, FoundList* group)
     }
 }
 
-void func_0015F8B0(void* self, FoundList* group)
+void RegisterObjectGroup(void* self, FoundList* group)
 {
     if (group->count >= 2) {
         for (s32 i = 0; i < group->count; i++) {
@@ -942,7 +942,7 @@ void func_0015F8B0(void* self, FoundList* group)
     }
 }
 
-void func_0015F930(CountedArray* list, s32* arr, s32 value)
+void RemoveValueFromArray(CountedArray* list, s32* arr, s32 value)
 {
     s32 i = list->count;
     s32* p = (s32*)(((s32)i << 2) + (s32)arr);
@@ -960,11 +960,11 @@ void func_0015F930(CountedArray* list, s32* arr, s32 value)
         }
         i--;
     }
-    (void)func_001F5B08(arr, arr + 1, (list->count - i) * 4 - 4);
+    (void)MoveMemory(arr, arr + 1, (list->count - i) * 4 - 4);
     list->count--;
 }
 
-void func_0015F9A0(void* self, FoundList* s)
+void UnregisterObjectGroup(void* self, FoundList* s)
 {
     s32 i;
     PlacedObject* obj;
@@ -983,7 +983,7 @@ void func_0015F9A0(void* self, FoundList* s)
     }
 }
 
-void func_0015FA58(World* self)
+void RegroupQueuedObjects(World* self)
 {
     s32 i = self->regroupCount;
     i--;
@@ -1005,7 +1005,7 @@ void func_0015FA58(World* self)
     self->regroupCount = 0;
 }
 
-void func_0015FB28(VisitNode* self, void* arg)
+void VisitObjectTree(VisitNode* self, void* arg)
 {
     ListFrame frame;
     if (self->cls->visit != 0)
@@ -1022,14 +1022,14 @@ void func_0015FB28(VisitNode* self, void* arg)
     }
 }
 
-s32 func_0015FBA0(PlacedObject* self, s32* out)
+s32 GetPlacedObjectFrozen(PlacedObject* self, s32* out)
 {
     s32 bit = (s32)(self->flags >> 38) & 1;
     *out = bit;
     return bit;
 }
 
-void func_0015FBB8(PlacedObject* self, s32 flag)
+void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
         self->vA0 = self->v150;
@@ -1056,32 +1056,32 @@ ASM_FUNC(func_0015FCD8);
 
 ASM_FUNC(func_0015FD78);
 
-void func_0015FF58(void* self)
+void UpdateWorldObjectLists(void* self)
 {
     RegroupQueuedObjects(self);
-    func_0015FD78(self);
+    UpdateGroupsNearCamera(self);
 }
 
-void func_0015FF88(IdLookupObject* self)
+void ResolveLookupIds(IdLookupObject* self)
 {
     StartObject(self);
     World* cur = self->world;
     FoundList* sub = &self->found;
     sub->items = (s32*)AllocateFrontMemory(self->idCount * 4);
     for (s32 i = 0; i < self->idCount; i++) {
-        s32 r = func_0015A480(cur, self->ids[i], self->parent);
+        s32 r = FindFirstObjectByIdMode1(cur, self->ids[i], self->parent);
         if (r != 0) { s32 n = sub->count; sub->items[n] = r; sub->count = n + 1; }
     }
     RegisterObjectGroup(cur, &self->found);
 }
 
-void func_00160050(IdLookupObject* obj, s32 value) { obj->ids[obj->idCount++] = value; }
+void AddLookupId(IdLookupObject* obj, s32 value) { obj->ids[obj->idCount++] = value; }
 
-void func_00160070() { func_00160918(); }
+void RunResetGameSession() { ResetGameSessionAndFade(); }
 
 LINKER_REMNANT(func_00160090);
 
-KeyedEntry* func_001600A0(KeyedEntry* key)
+KeyedEntry* FindKeyEntry(KeyedEntry* key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
     KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
@@ -1104,7 +1104,7 @@ KeyedEntry* func_001600A0(KeyedEntry* key)
     return 0;
 }
 
-void* func_00160110(s32 key)
+void* FindEntryById(s32 key)
 {
     u8* p = (u8*)g_keyedEntries;
     u8* end = (u8*)g_keyedEntries + 0x7E8;
@@ -1120,7 +1120,7 @@ void* func_00160110(s32 key)
     }
 }
 
-void* func_00160148()
+void* GetEntryName()
 {
     void* p = FindEntryById();
     if (p == 0)
@@ -1132,12 +1132,12 @@ void* func_00160148()
 
 LINKER_REMNANT(func_00160178);
 
-s32 func_00160180(void)
+s32 LookupEntryById(void)
 {
     return (s32)FindEntryById();
 }
 
-s32 func_001601A0(void)
+s32 GetEntryIdByKey(void)
 {
     s32 v;
     KeyedEntry* r = FindKeyEntry();
@@ -1148,7 +1148,7 @@ s32 func_001601A0(void)
 
 LINKER_REMNANT(func_001601D0);
 
-s32 func_001601D8(void* a0)
+s32 GetEntryFlags(void* a0)
 {
     EntryFlags* e = FindEntryById(a0);
     s32 r = 0;
@@ -1158,7 +1158,7 @@ s32 func_001601D8(void* a0)
     return r;
 }
 
-void func_00160208(s32 key, s32* a1, s32* a2, s32* a3)
+void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
 {
     KeyedEntry* p;
     KeyedEntry* end;
@@ -1184,7 +1184,7 @@ void func_00160208(s32 key, s32* a1, s32* a2, s32* a3)
     } while (p < end);
 }
 
-s32 func_001602A0(void) {
+s32 ComputeCompletionMask(void) {
     u32 mask = 0xE;
     u8* p = (u8*)g_keyedEntries;
     u8* end = (u8*)g_keyedEntries + 0x7E8;
@@ -1205,7 +1205,7 @@ s32 func_001602A0(void) {
     return mask;
 }
 
-void func_00160340(s32 n)
+void MarkProgressStageFlag(s32 n)
 {
     switch (n) {
     case 1: g_saveData->f19F4 |= 0x10; break;
@@ -1216,7 +1216,7 @@ void func_00160340(s32 n)
     }
 }
 
-void func_001603E8(s32 n)
+void MarkLevelDone(s32 n)
 {
     g_saveData->levels[n].f448 |= 0x20;
     switch (n) {
@@ -1234,12 +1234,12 @@ void func_001603E8(s32 n)
         g_saveData->f19F4 |= 0x800;
         break;
     case 5:
-        func_001604B8(2);
+        ApplyCompletionFlags(2);
         break;
     }
 }
 
-void func_001604B8(s32 mode)
+void ApplyCompletionFlags(s32 mode)
 {
     switch (mode) {
     case 2:
@@ -1247,12 +1247,12 @@ void func_001604B8(s32 mode)
         g_saveData->f19F8 |= 2;
         break;
     case 4:
-        if ((func_001602A0() & 4) != 0) {
+        if ((ComputeCompletionMask() & 4) != 0) {
             g_saveData->f19F4 |= 0xC000;
         }
         break;
     case 8:
-        if ((func_001602A0() & 8) != 0) {
+        if ((ComputeCompletionMask() & 8) != 0) {
             g_saveData->f19F4 |= 0xC;
             g_saveData->f19F8 |= 0xC;
         }
@@ -1260,7 +1260,7 @@ void func_001604B8(s32 mode)
     }
 }
 
-void func_00160578(s32 kind)
+void FadeOutAndQueueMovie(s32 kind)
 {
     s32 s0 = -1;
 
@@ -1271,9 +1271,9 @@ void func_00160578(s32 kind)
     }
 }
 
-void func_001605E8(GameProgress* self)
+void ResetGameProgress(GameProgress* self)
 {
-    func_001F5C0C(self, 0, 0x1A00);
+    FillMemory(self, 0, 0x1A00);
     self->type = 0x12;
     self->f19D8 = 0;
     self->f19F0 = 0;
@@ -1284,7 +1284,7 @@ void func_001605E8(GameProgress* self)
     ApplyPadPatternSetting(self);
 }
 
-s32 func_00160650(GameProgress* s)
+s32 ChecksumGameProgress(GameProgress* s)
 {
     u8* p = (u8*)&s->fC;
     s32 sum = 0;
@@ -1294,7 +1294,7 @@ s32 func_00160650(GameProgress* s)
     return sum;
 }
 
-void func_00160690(s32 a0, s32 flags)
+void SetCurrentLevelEntry(s32 a0, s32 flags)
 {
     s32 r = GetEntryIdByKey(a0);
     s32 hi = (r != -1) ? (r >> 8) : 0;
@@ -1305,13 +1305,13 @@ void func_00160690(s32 a0, s32 flags)
     g_currentLevelRecord = base;
     g_currentEntry = (G27C230*)((u8*)base + lo * 0x78);
     if (gate < 0 || (flags & 2) != 0) {
-        func_001608E0();
+        ResetReserveCounts();
     } else if ((flags & 1) != 0) {
         RestoreFlagTableSnapshot(g_flagTable);
     } else if ((flags & 4) != 0) {
-        func_00160880();
+        ResetGameSession();
     } else {
-        func_00140D90(g_flagTable);
+        ResetFlagTable(g_flagTable);
     }
     g = g_saveData;
     g_previousLevelIndex = g->f19D8;
@@ -1321,19 +1321,19 @@ void func_00160690(s32 a0, s32 flags)
     g_currentEntry->flags |= 1;
 }
 
-void func_001607D0(f32 dx)
+void AddElapsedTime(f32 dx)
 {
     g_saveData->fC += dx;
     g_currentLevelRecord->f444 += dx;
     g_currentEntry->f04 += dx;
 }
 
-void* func_00160810(s32 key)
+void* GetLevelEntryByKey(s32 key)
 {
     return key == -1 ? 0 : (u8*)&g_saveData->levels[key >> 8] + (key & 0xFF) * 0x78;
 }
 
-s32 func_00160850()
+s32 GetLevelEntryWord()
 {
     s32* p = GetLevelEntryByKey();
     s32 value = 0;
@@ -1344,44 +1344,44 @@ s32 func_00160850()
     return value;
 }
 
-void func_00160880(void)
+void ResetGameSession(void)
 {
     ResetGameProgress(g_saveData);
     D_00269984.v = 0;
-    func_00160CC8(D_002623D8);
-    func_00151A68(D_00261EF0);
+    ClearTwoWords(D_002623D8);
+    ClearScatterController(g_scatterController);
     g_buttonCodeFlags = 0;
     g_previousLevelIndex = -1;
-    func_001608E0();
+    ResetReserveCounts();
 }
 
-void func_001608E0(void)
+void ResetReserveCounts(void)
 {
     GameProgress* g = g_saveData;
     g->f19E0 = 5;
     g->f19E4 = 0;
-    func_00140D90((void*)g_flagTable);
+    ResetFlagTable((void*)g_flagTable);
 }
 
-void func_00160918(void)
+void ResetGameSessionAndFade(void)
 {
-    func_00160880();
+    ResetGameSession();
     StartObjectFade((void*)&D_00247AB0, -1, 0);
 }
 
-void func_00160948(void)
+void ResumeAtSavedLevel(void)
 {
-    SessionKey* k = func_00160180((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    SessionKey* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
         k = &D_00247AB0;
     }
-    func_00160CC8(D_002623D8);
+    ClearTwoWords(D_002623D8);
     if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
         if (D_00275F84 == 0) {
-            func_001C0760(g_saveData->f19EC & 0x80);
-            func_001C0790(g_saveData->f19EC & 0x40);
+            SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
+            ApplySoundOptionFlag(g_saveData->f19EC & 0x40);
             Animation* r = FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
             if (r != 0) {
                 PlayerListWalk frame((AnimationPlayerList*)r->props6C);
@@ -1401,7 +1401,7 @@ void func_00160948(void)
     }
 }
 
-s32 func_00160B28(u8* p)
+s32 ComputeCompletionPercent(u8* p)
 {
     s32 total = 0;
     s32 done = 0;
@@ -1434,12 +1434,12 @@ s32 func_00160B28(u8* p)
     return PercentClamp::Of(done * 100 / total, 1, 99);
 }
 
-void func_00160C48(s32 value)
+void SetSpareCount(s32 value)
 {
     g_saveData->f19E4 = value;
 }
 
-s32 func_00160C58()
+s32 HasSpareCount()
 {
     s32 result=0;
     if (g_saveData->f19E4>0 || (g_buttonCodeFlags&2)) result=1;
@@ -1448,38 +1448,38 @@ s32 func_00160C58()
 
 LINKER_REMNANT(func_00160C90);
 
-void* func_00160CA0(u8* self,s32 index)
+void* GetIndexedTargetSlot(u8* self,s32 index)
 {
     if ((u32)(index-0x33B)>=12) return 0;
     else return self+(index*4-0xCD8);
 }
 
-void func_00160CC8(void* p)
+void ClearTwoWords(void* p)
 {
-    func_001F5C0C(p, 0, 8);
+    FillMemory(p, 0, 8);
 }
 
-void func_00160CE8(Counter* c)
+void ResetCounter(Counter* c)
 {
     c->count = 0;
 }
 
-s32 func_00160CF0(Counter* c)
+s32 IncrementCounter(Counter* c)
 {
     return ++c->count;
 }
 
-void func_00160D00(RefCounted* self)
+void ReleaseCounterRef(RefCounted* self)
 {
     self->refs--;
 }
 
-s32 func_00160D10()
+s32 MaskWorldBitsBySave()
 {
     return g_saveData->f19F0 & g_currentWorld->f235C;
 }
 
-void func_00160D30(u32* out)
+void GetCurrentLevelBit(u32* out)
 {
     s32 m;
     switch (g_saveData->f19D8) {
@@ -1493,18 +1493,18 @@ void func_00160D30(u32* out)
     if (out) *out = m;
 }
 
-s32 func_00160D98(void)
+s32 GetSpareCountLimit(void)
 {
     return 2;
 }
 
-void func_00160DA0(void)
+void SpendReserveUnit(void)
 {
     GameProgress* o = g_saveData;
     u8* x = (u8*)g_currentWorld;
     s32 t = o->f19E0 - 1;
     o->f19E0 = t;
-    func_001DDAD0((void*)x);
+    PopActiveSequenceElement((void*)x);
     StopLockedStreamVoice();
     GameProgress* p = g_saveData;
     s32 m = p->f19DC;
@@ -1522,10 +1522,10 @@ void func_00160DA0(void)
     } else {
         SetPauseMenuLayerPage((void*)g_pauseMenuElement, 0, 1);
     }
-    func_00151E20((void*)D_00261EF0, 1.0f);
+    RaiseScatterLevels((void*)g_scatterController, 1.0f);
 }
 
-void func_00160E80(ClearedRecord* self)
+void ClearRecordBody(ClearedRecord* self)
 {
     self->f4 = 0;
     self->f8 = 0;
@@ -1537,7 +1537,7 @@ void func_00160E80(ClearedRecord* self)
 
 ASM_FUNC(func_00160EA0);
 
-s32 func_00161028(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
+s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {
     s32 buf[4];
 
@@ -1581,9 +1581,9 @@ s32 func_00161028(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, K
     return j;
 }
 
-extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(PacketWriter* f, s32 n))func_00161278, 0, 0 };
+extern const Fn_Table g_gifPacketMethods[6] = { 0, 0, 0, (Fn_Table)(void (*)(PacketWriter* f, s32 n))CloseGifTag, 0, 0 };
 
-PacketWriter* func_001611B8(PacketWriter* self)
+PacketWriter* InitGifPacket(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
     self->f14 = 1;
@@ -1594,7 +1594,7 @@ PacketWriter* func_001611B8(PacketWriter* self)
     return self;
 }
 
-void func_00161200(PacketWriter* self)
+void EndGifPacket(PacketWriter* self)
 {
     if (self->f1C != 0) {
         const PacketWriterVt* s = self->vt;
@@ -1606,7 +1606,7 @@ void func_00161200(PacketWriter* self)
     }
 }
 
-void func_00161278(PacketWriter* f, s32 n)
+void CloseGifTag(PacketWriter* f, s32 n)
 {
     if (f->f1C == 0)
         return;
@@ -1629,9 +1629,9 @@ void func_00161278(PacketWriter* f, s32 n)
     f->f1C = 0;
 }
 
-s32 func_001612E8(PacketWriter* obj) { return ++obj->f24; }
+s32 CountGifEntry(PacketWriter* obj) { return ++obj->f24; }
 
-void func_001612F8(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
+void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
 {
     PacketWriter* w = self;
     const PacketWriterVt* sub = w->vt;
@@ -1648,7 +1648,7 @@ void func_001612F8(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, 
     w->cur = w->cur + nloop * nreg * 16;
 }
 
-void func_001613C0(PacketWriter* self, s32 a1, s32 a2, s32 a3)
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, s32 a3)
 {
     const PacketWriterVt* d = self->vt;
     d->close((PacketWriter*)((u8*)self + d->adj1), 0);
@@ -1663,7 +1663,7 @@ void func_001613C0(PacketWriter* self, s32 a1, s32 a2, s32 a3)
     self->f24 = 0;
 }
 
-void func_00161458(PacketWriter* self, u32 value)
+void AddGifRgbaEntry(PacketWriter* self, u32 value)
 {
     CountGifEntry(self, 1, 1);
     u32* p = (u32*)self->cur;
@@ -1674,7 +1674,7 @@ void func_00161458(PacketWriter* self, u32 value)
     p[3] = value >> 24;
 }
 
-void func_001614C8(PacketWriter* self,s32 a,s32 b)
+void AddGifUvEntry(PacketWriter* self,s32 a,s32 b)
 {
     CountGifEntry(self,1,3);
     s32* p=(s32*)self->cur;
@@ -1683,7 +1683,7 @@ void func_001614C8(PacketWriter* self,s32 a,s32 b)
     p[1]=b;
 }
 
-void func_00161520(PacketWriter* self,f32 a,f32 b,f32 c)
+void AddGifStEntry(PacketWriter* self,f32 a,f32 b,f32 c)
 {
     CountGifEntry(self,1,2);
     f32* p=(f32*)self->cur;
@@ -1693,7 +1693,7 @@ void func_00161520(PacketWriter* self,f32 a,f32 b,f32 c)
     p[2]=c;
 }
 
-void func_00161588(PacketWriter* self, s32 a1, s32 a2, u64 a3)
+void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     CountGifEntry(self, 1, 5);
     u8* p = self->cur;
@@ -1703,7 +1703,7 @@ void func_00161588(PacketWriter* self, s32 a1, s32 a2, u64 a3)
     *(u64*)(p + 0x8) = a3;
 }
 
-void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
     u32* p = (u32*)self->cur;
@@ -1714,7 +1714,7 @@ void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = (a4 & 0xFF) << 4;
 }
 
-void func_00161670(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
     u32* p = (u32*)self->cur;
@@ -1725,7 +1725,7 @@ void func_00161670(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = ((a4 & 0xFF) << 4) | 0x8000;
 }
 
-void func_00161708(PacketWriter* self, u64 a1, u64 a2)
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2)
 {
     CountGifEntry(self, 1, 14);
     u64* p = self->cur64;
@@ -1736,7 +1736,7 @@ void func_00161708(PacketWriter* self, u64 a1, u64 a2)
 
 LINKER_REMNANT(func_00161760);
 
-void func_00161768(PacketWriter* self, u32 a1, u64 a2)
+void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2)
 {
     const PacketWriterVt* sub = self->vt;
     sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
@@ -1749,7 +1749,7 @@ void func_00161768(PacketWriter* self, u32 a1, u64 a2)
     self->f24 = 0;
 }
 
-void func_001617E8(PacketWriter* self, s32 tag, f32 value)
+void AddGifRegListFloat(PacketWriter* self, s32 tag, f32 value)
 {
     CountGifEntry(self, 0, 1);
     s32 bits = *(s32*)&value;
@@ -1762,7 +1762,7 @@ void func_001617E8(PacketWriter* self, s32 tag, f32 value)
 
 LINKER_REMNANT(func_00161858);
 
-void func_00161860(PacketWriter* self, s32 a1, s32 a2)
+void AddGifUvRegListEntry(PacketWriter* self, s32 a1, s32 a2)
 {
     CountGifEntry(self, 0, 3);
     u64 v = (u64)a1 | (u64)(a2 << 16);
@@ -1771,7 +1771,7 @@ void func_00161860(PacketWriter* self, s32 a1, s32 a2)
     *p = v;
 }
 
-void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
+void AddGifXyzfRegListEntry(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 0, 4);
     u64 lo = (u64)a1 | (u64)(a2 << 16);
@@ -1783,7 +1783,7 @@ void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 
 LINKER_REMNANT(func_00161950);
 
-void Obj_161958::func_00161958(s32 count)
+void Obj_161958::AddGifImageTag(s32 count)
 {
     Begin(0);
     u64* p = cursor;
@@ -1793,15 +1793,15 @@ void Obj_161958::func_00161958(s32 count)
 }
 
 struct CameraBlock16 { u8 b[16]; };
-extern u8* D_00261990;
+extern u8* g_camera;
 
-u8* func_001619C0(u8* self)
+u8* InitVertexBatch(u8* self)
 {
     s32 i;
     for (i = 0x93; i != -1; i--) {
     }
-    func_001F5C0C(self + 0xFC, 0, 0x28);
-    func_001F5C0C(self, 0, 0xB0);
+    FillMemory(self + 0xFC, 0, 0x28);
+    FillMemory(self, 0, 0xB0);
     u8* camera = g_camera;
     *(s32*)(self + 0x98) = 1;
     *(f32*)(self + 0x90) = 1.0f;
@@ -1814,31 +1814,31 @@ u8* func_001619C0(u8* self)
     return self;
 }
 
-void func_00161A88(void* self, s32 flag)
+void DestroyVertexBatch(void* self, s32 flag)
 {
     (void)self;
     if (flag & 1) {
-        func_0018D778();
+        FreeObjectMemory();
     }
 }
 
-void func_00161AB0(u8* self, void* a1, void* a2)
+void SetVertexBatchTransform(u8* self, void* a1, void* a2)
 {
     FlushVertexBatch(self);
     BuildMatrixFromRotationAndTranslation(a1, a2, self);
-    func_00188B48(a1, a2, self + 0x40);
+    InvertRigidTransform(a1, a2, self + 0x40);
 }
 
 INCLUDE_ASM(func_00161B10);
 
-void func_00161B80(u8* self)
+void ResetVertexBatch(u8* self)
 {
     *(s32*)(self+0xF8)=0;
     *(s32*)(self+0x124)=0;
-    ((MemoryFillFn)func_001F5C0C)(self+0x128,0,0x1720);
+    ((MemoryFillFn)FillMemory)(self+0x128,0,0x1720);
 }
 
-void func_00161BB0(ColoredVertexBatch* self, s32 value)
+void SetVertexBatchMode(ColoredVertexBatch* self, s32 value)
 {
     u32 local;
     FlushVertexBatch(self);
@@ -1847,7 +1847,7 @@ void func_00161BB0(ColoredVertexBatch* self, s32 value)
     SetVertexColor(self, &local);
 }
 
-void func_00161C00(UnlitVertexBatch* self)
+void BuildUnlitVertexPacket(UnlitVertexBatch* self)
 {
     UnlitUnpackHeader* hd;
     f32* out1;
@@ -1861,15 +1861,15 @@ void func_00161C00(UnlitVertexBatch* self)
     UnlitVertex* c;
 
     base = 0x24;
-    func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
-    func_001F5C0C(hd, 0, 0x18);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
+    FillMemory(hd, 0, 0x18);
     hd->f10 = 3;
     hd->f0 = base;
     base = self->f124 * 3 + 0x24;
     hd->f2 = base;
     WriteVifStcycl(&g_vifPacketWriter, 1, 3);
-    func_001EE5C8(&g_vifPacketWriter, 8, self->f124, hd->f0, 0, &out1);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, self->f124, hd->f0 + 2, 0, &out2);
+    ReserveVifUnpack(&g_vifPacketWriter, 8, self->f124, hd->f0, 0, &out1);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, self->f124, hd->f0 + 2, 0, &out2);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->f124; i++) {
         c = &self->e[i];
@@ -1883,7 +1883,7 @@ void func_00161C00(UnlitVertexBatch* self)
     }
     WriteVifMscal(&g_vifPacketWriter, D_00001A50);
     WriteVifStcycl(&g_vifPacketWriter, 1, 3);
-    func_001EE5C8(&g_vifPacketWriter, 0xE, self->f124, hd->f0 + 1, 0, &out3);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->f124, hd->f0 + 1, 0, &out3);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->f124; i++) {
         s32 j;
@@ -1896,7 +1896,7 @@ void func_00161C00(UnlitVertexBatch* self)
     for (k = 0; k < self->fF8->count; k++) {
         MeshFrameData* pair = &self->fF8->ents[k];
         s32 frame;
-        func_001EE5C8(&g_vifPacketWriter, 0xC, pair->n, base, &count, &dst);
+        ReserveVifUnpack(&g_vifPacketWriter, 0xC, pair->n, base, &count, &dst);
         frame = 0;
         if (self->fF8->sub != 0) {
             frame = self->fF8->sub->n;
@@ -1910,7 +1910,7 @@ void func_00161C00(UnlitVertexBatch* self)
     WriteVifMscalf(&g_vifPacketWriter, D_000002F8);
 }
 
-void func_00161F70(LitVertexBatch* self)
+void BuildLitVertexPacket(LitVertexBatch* self)
 {
     LitUnpackHeader* hdr;
     VifPoint* p4;
@@ -1924,8 +1924,8 @@ void func_00161F70(LitVertexBatch* self)
     s32 i;
     LitVertex* v;
 
-    func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
-    func_001F5C0C((ByteSpan*)hdr, 0, 0x18);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
+    FillMemory((ByteSpan*)hdr, 0, 0x18);
     hdr->f10 = 4;
     hdr->f0 = off;
     off += self->n * 4;
@@ -1934,7 +1934,7 @@ void func_00161F70(LitVertexBatch* self)
     hdr->fE = off;
     off += self->n;
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, self->n, hdr->f0 + 3, 0, &p4);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, self->n, hdr->f0 + 3, 0, &p4);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->n; i++)
     {
@@ -1947,8 +1947,8 @@ void func_00161F70(LitVertexBatch* self)
         p4++;
     }
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, (self->n + 3) & ~3, hdr->f0, 0, &p8);
-    func_001EE5C8(&g_vifPacketWriter, 0xE, self->n, hdr->f0 + 1, 0, &pC);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, (self->n + 3) & ~3, hdr->f0, 0, &p8);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->n, hdr->f0 + 1, 0, &pC);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     WriteVifMscal(&g_vifPacketWriter, D_00000288);
     for (i = 0; i < self->n; i += 4)
@@ -1966,7 +1966,7 @@ void func_00161F70(LitVertexBatch* self)
                 p8->m[0][j] = p8->m[1][j] = p8->m[2][j] = 0.0f;
             }
         }
-        func_001F5C0C((ByteSpan*)p8->m[3], 0, 0x10);
+        FillMemory((ByteSpan*)p8->m[3], 0, 0x10);
         p8++;
     }
     for (i = 0; i < self->n; i++)
@@ -1983,7 +1983,7 @@ void func_00161F70(LitVertexBatch* self)
     WriteVifMscal(&g_vifPacketWriter, D_00001210);
     WriteVifFlushE(&g_vifPacketWriter);
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 8, self->n, hdr->f0, 0, &p10);
+    ReserveVifUnpack(&g_vifPacketWriter, 8, self->n, hdr->f0, 0, &p10);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     WriteVifMscal(&g_vifPacketWriter, D_00001AB0);
     for (i = 0; i < self->n; i++)
@@ -1998,7 +1998,7 @@ void func_00161F70(LitVertexBatch* self)
     for (s32 t = 0; t < self->mesh->count; t++)
     {
         MeshFrameData* e = &self->mesh->ents[t];
-        func_001EE5C8(&g_vifPacketWriter, 0xC, e->n, off, &size, &dst);
+        ReserveVifUnpack(&g_vifPacketWriter, 0xC, e->n, off, &size, &dst);
         MeshFrameCursor* sub = self->mesh->sub;
         s32 m = sub ? sub->n : 0;
         CopyMemory((ByteSpan*)dst, e->data + m * e->n * 16, size);
@@ -2011,7 +2011,7 @@ void func_00161F70(LitVertexBatch* self)
     WriteVifMscalf(&g_vifPacketWriter, D_00000010);
 }
 
-void func_00162508(FlushedVertexBatch* self)
+void FlushVertexBatch(FlushedVertexBatch* self)
 {
     if (self->f0F8 == 0) {
         return;
@@ -2042,7 +2042,7 @@ void func_00162508(FlushedVertexBatch* self)
     ResetVertexBatch(self);
 }
 
-void func_00162680(VertexBatch* body, Vec3* v)
+void SetVertexPosition(VertexBatch* body, Vec3* v)
 {
     body->x = v->x;
     body->y = v->y;
@@ -2051,17 +2051,17 @@ void func_00162680(VertexBatch* body, Vec3* v)
 
 LINKER_REMNANT(func_001626A0);
 
-void func_001626A8(u8* dst, u8* src)
+void SetVertexColor(u8* dst, u8* src)
 {
     *(U32P*)(dst + 0x114) = *(U32P*)src;
 }
 
-void func_001626C0(VertexBatch* dst, U64P* src)
+void SetVertexTexCoord(VertexBatch* dst, U64P* src)
 {
     dst->texCoord.v = src->v;
 }
 
-void func_001626D8(AppendVertexBatch* self, s32 value)
+void AddVertex(AppendVertexBatch* self, s32 value)
 {
     s32 n;
     s64 max;
@@ -2077,13 +2077,13 @@ void func_001626D8(AppendVertexBatch* self, s32 value)
         u8* p = self->pF8;
         CopyMemory(tmp, &self->recs[self->count - 2], sizeof(tmp));
         FlushVertexBatch(self);
-        func_00161BB0(self, p);
+        SetVertexBatchMode(self, p);
         CopyMemory(self->recs, tmp, sizeof(tmp));
         self->count = 2;
     }
 }
 
-void func_00162810(RefOwner* owner)
+void CollectNonNullRefs(RefOwner* owner)
 {
     owner->refs = (void**)AllocateFrontMemory(owner->capacity << 2);
     s32 n = 0;
@@ -2097,7 +2097,7 @@ void func_00162810(RefOwner* owner)
 INCLUDE_RODATA(D_0024A710);
 ASM_FUNC(func_00162890);
 
-void func_00163938(s32 mode, void* obj)
+void WriteStripMeshMscal(s32 mode, void* obj)
 {
     switch (mode) {
     case 0:
@@ -2109,7 +2109,7 @@ void func_00163938(s32 mode, void* obj)
     }
 }
 
-void func_00163990(s32 mode, void* obj)
+void WriteMorphTargetMscal(s32 mode, void* obj)
 {
     switch (mode) {
     case 0:
@@ -2121,7 +2121,7 @@ void func_00163990(s32 mode, void* obj)
     }
 }
 
-void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
+void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
                    void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt)
 {
     PacketWriter f;
@@ -2130,8 +2130,8 @@ void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n
     Vec3* out;
     s32 off = 0x2B;
 
-    func_001EE5C8(pkt, 0xD, 2, 0x16, 0, hdr);
-    func_001F5C0C(hdr->p, 0, 0x10);
+    ReserveVifUnpack(pkt, 0xD, 2, 0x16, 0, hdr);
+    FillMemory(hdr->p, 0, 0x10);
     InitGifPacket(&f);
     AllocateTempPacketBuffer(&f, 8);
     BeginGifTag(&f, 0, 1, 0xE);
@@ -2180,7 +2180,7 @@ void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n
         for (i = 0; i < self->f40; i++)
         {
             CopyWordsToWriter(pkt, 0, 1, &i, 0x1D);
-            func_001EE5C8(pkt, 8, n, hdr->p[6], 0, &out);
+            ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, &out);
             u16* idx = ents[i].pos;
             for (s32 k = 0; k < n; k++)
             {
@@ -2196,12 +2196,12 @@ void func_001639E8(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n
     hdr->p[2] = off;
     hdr->p[3] = end;
     CopyWordsToWriter(pkt, 0xE, extra, extraData, hdr->p[2]);
-    func_00163990(mode, pkt);
+    WriteMorphTargetMscal(mode, pkt);
     WriteVifMscal(pkt, D_00001368);
     WriteVifMscal(pkt, D_00000ED8);
 }
 
-void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
+void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
                    Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
                    WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
                    s32** outs)
@@ -2229,9 +2229,9 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     if (obj->f54 != 0) {
         BeginDmaTag(pkt);
     }
-    func_001EE5C8(pkt, 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack(pkt, 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
-    func_001F5C0C(hdr->p, 0, 0x18);
+    FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 3;
     hdr->p->off[0] = off;
     off = n * 3 + 0x24;
@@ -2265,9 +2265,9 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     uvOut = 0;
     WriteVifStcycl(pkt, 1, 3);
     if (hasUv) {
-        func_001EE5C8(pkt, 8, n, hdr->p->off[0], 0, &uvOut);
+        ReserveVifUnpack(pkt, 8, n, hdr->p->off[0], 0, &uvOut);
     }
-    func_001EE5C8(pkt, 0xC, n, hdr->p->off[0] + 2, 0, &posOut);
+    ReserveVifUnpack(pkt, 0xC, n, hdr->p->off[0] + 2, 0, &posOut);
     WriteVifStcycl(pkt, 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
@@ -2310,9 +2310,9 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     if (node == 0 && mesh->hook != 0) {
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
-    func_00163938(mode, pkt);
+    WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
-        func_001EE5C8(pkt, 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(pkt, D_000027C0);
     }
@@ -2321,10 +2321,10 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
         off += hdr->count * 4;
         hdr->p->off[3] = off;
         off += n;
-        func_001F5C0C(buf, 0, 0x10);
+        FillMemory(buf, 0, 0x10);
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_00262418[hdr->count]);
-        func_001EE5C8(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
+        ReserveVifUnpack(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
         WriteVifStmask(pkt, 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -2343,7 +2343,7 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
                 WriteVifFlushE(pkt);
             }
             CopyWordsToWriter(pkt, 0, 1, &k, 0x16);
-            func_001EE5C8(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
+            ReserveVifUnpack(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2358,7 +2358,7 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            func_001EE5C8(pkt, 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack(pkt, 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(pkt, 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(pkt, D_00003A80);
@@ -2376,7 +2376,7 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     WriteVifMscal(pkt, tail);
     if (tinted) {
         WriteVifStcycl(pkt, 1, 3);
-        func_001EE5C8(pkt, 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
+        ReserveVifUnpack(pkt, 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
         WriteVifStcycl(pkt, 1, 1);
         for (i = 0; i < n; i++) {
             s32 j;
@@ -2395,7 +2395,7 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        func_001EE5C8(pkt, 0xC, s->stride, off, &c, &d);
+        ReserveVifUnpack(pkt, 0xC, s->stride, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
         off += s->stride;
@@ -2407,7 +2407,7 @@ void func_00163ED8(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHea
     }
 }
 
-void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
+void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
                    s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
                    f32* weights, PacketSlot* pkt, s32** outs)
@@ -2435,9 +2435,9 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
         BeginDmaTag(&pkt[2]);
     }
     obj->f18 = 1;
-    func_001EE5C8(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
-    func_001F5C0C(hdr->p, 0, 0x18);
+    FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 4;
     hdr->p->f12 = hdr->f14 * 0x7FA6 / 0xFF;
     hdr->p->off[0] = off;
@@ -2452,7 +2452,7 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
     hdr->p->strip[3] = off;
     off += n;
     WriteVifStcycl(&pkt[0], 1, 4);
-    func_001EE5C8(&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, &posOut);
+    ReserveVifUnpack(&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, &posOut);
     WriteVifStcycl(&pkt[0], 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
@@ -2475,16 +2475,16 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
         }
         posOut += 4;
     }
-    func_00163938(mode, &pkt[0]);
+    WriteStripMeshMscal(mode, &pkt[0]);
     if (hdr->count > 0) {
         hdr->p->off[2] = off;
         off += hdr->count * 4;
         hdr->p->off[3] = off;
         off += n;
-        func_001F5C0C(buf, 0, 0x10);
+        FillMemory(buf, 0, 0x10);
         WriteVifStrow(&pkt[0], buf);
         WriteVifStmask(&pkt[0], D_00262448[hdr->count]);
-        func_001EE5C8(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
+        ReserveVifUnpack(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
         WriteVifStmask(&pkt[0], 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -2499,7 +2499,7 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
         off += self->f40;
         for (k = 0; k < self->f40; k++) {
             CopyWordsToWriter(&pkt[0], 0, 1, &k, 0x16);
-            func_001EE5C8(&pkt[0], 8, n, hdr->p->strip[3], 0, &dOut);
+            ReserveVifUnpack(&pkt[0], 8, n, hdr->p->strip[3], 0, &dOut);
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2514,13 +2514,13 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
     }
     WriteVifStcycl(&pkt[1], 1, 4);
     if (obj->f28 != 0 && hdr->count == 0 && self->f40 == 0) {
-        func_001EE5C8(&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, &quads);
+        ReserveVifUnpack(&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, &quads);
         nOut = 0;
     } else {
-        func_001EE5C8(&pkt[1], 0xC, n, hdr->p->off[0], 0, &nOut);
+        ReserveVifUnpack(&pkt[1], 0xC, n, hdr->p->off[0], 0, &nOut);
         quads = 0;
     }
-    func_001EE5C8(&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
+    ReserveVifUnpack(&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
     WriteVifStcycl(&pkt[1], 1, 1);
     if (hdr->count > 0) {
         WriteVifMscal(&pkt[1], D_00002088);
@@ -2530,7 +2530,7 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
             if (m > 0) {
                 WriteVifFlushE(&pkt[1]);
             }
-            func_001EE5C8(&pkt[1], 8, n, hdr->p->strip[3], 0, &nDelta);
+            ReserveVifUnpack(&pkt[1], 8, n, hdr->p->strip[3], 0, &nDelta);
             u16* idx = ents[m].nrm;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2578,12 +2578,12 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
                     quads->x[j] = quads->y[j] = quads->z[j] = 0.0f;
                 }
             }
-            func_001F5C0C(quads->w, 0, 0x10);
+            FillMemory(quads->w, 0, 0x10);
             quads++;
         }
     }
     WriteVifStcycl(&pkt[2], 1, 4);
-    func_001EE5C8(&pkt[2], 8, n, hdr->p->off[0], 0, &uvOut);
+    ReserveVifUnpack(&pkt[2], 8, n, hdr->p->off[0], 0, &uvOut);
     WriteVifStcycl(&pkt[2], 1, 1);
     if (outs[2] != 0) {
         *outs[2] = (s32)uvOut;
@@ -2607,14 +2607,14 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
     if (node != 0 && (node->flags & 2)) {
-        func_001EE5C8(&pkt[2], 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack(&pkt[2], 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(&pkt[2], D_000027C0);
     }
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            func_001EE5C8(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(&pkt[2], D_00003A80);
@@ -2633,7 +2633,7 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        func_001EE5C8(&pkt[2], 0xC, s->stride, off, &c, &d);
+        ReserveVifUnpack(&pkt[2], 0xC, s->stride, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;
         off += s->stride;
@@ -2644,7 +2644,7 @@ void func_00164868(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 m
     }
 }
 
-void func_00165588(PartPacketContext* a, PartPacketSource* b, PartPackets* c)
+void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c)
 {
     u8 buf[0x30];
     s32 s0;
@@ -2655,20 +2655,20 @@ void func_00165588(PartPacketContext* a, PartPacketSource* b, PartPackets* c)
     s0 = (b->f1C->hi - b->f1C->lo) / 4;
     AllocateQuadwordBuffer(buf, (u32)((s0 + 7) / 4), 0x1A);
     WriteVifStcycl(buf, 1, 4);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
     WriteVifStcycl(buf, 1, 1);
     WriteVifMscal(buf, D_00000010);
     DetachPacketBuffer(buf, &c->f0, &c->f4);
     AllocateQuadwordBuffer(buf, (u32)((s0 + 4) / 2), 0x1A);
     WriteVifStcycl(buf, 1, 4);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
     WriteVifStcycl(buf, 1, 1);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->hi, 0, 0);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->hi, 0, 0);
     WriteVifMscal(buf, D_000000F0);
     DetachPacketBuffer(buf, &c->fC, &c->f10);
 }
 
-void func_00165728(AttachmentBlock* self, PlacedObject* ctx)
+void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
 {
     for (s32 i = 0; i < self->count0C; i++)
     {
@@ -2678,7 +2678,7 @@ void func_00165728(AttachmentBlock* self, PlacedObject* ctx)
         {
             o->vtbl[1](o);
         }
-        func_001662A8(self, e, self->f14 + i * 0x28, ctx);
+        BuildAttachmentDmaChain(self, e, self->f14 + i * 0x28, ctx);
     }
     AttachmentNode* n = self->f4C;
     if (n != 0)
@@ -2695,25 +2695,25 @@ void func_00165728(AttachmentBlock* self, PlacedObject* ctx)
     }
 }
 
-void func_00165828(AttachmentTargets* self, PlacedObject* ctx)
+void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
 {
     TargetFrames f;
     s32 i;
 
     for (i = 0; i < self->count; i++) {
         AttachmentTarget* e = &self->elems[i];
-        TargetObject* r = (TargetObject*)func_0015A448(ctx->world, self->keys[i], ctx);
+        TargetObject* r = (TargetObject*)FindFirstObjectByIdMode4(ctx->world, self->keys[i], ctx);
         e->p0 = r;
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);
-            func_00188B48(&e->p0->sub140, &e->p0->sub110, &f.b);
-            func_00188668(&f.m, &f.b, &f.a);
+            InvertRigidTransform(&e->p0->sub140, &e->p0->sub110, &f.b);
+            MultiplyMatrices(&f.m, &f.b, &f.a);
             e->m = f.m;
         }
     }
 }
 
-void func_00165920(AttachmentCopy* self, s32 arg, void* src)
+void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src)
 {
     s32 i = 0;
     AttachmentLink** link;
@@ -2756,7 +2756,7 @@ void func_00165920(AttachmentCopy* self, s32 arg, void* src)
         s32 b = 0, a = 0;
         do {
             i++;
-            func_00165AE8(self, (u8*)self->recs + a, (u8*)self->p14 + b);
+            CopyAttachmentPart(self, (u8*)self->recs + a, (u8*)self->p14 + b);
             a += 0x70;
             b += 0x28;
         } while (i < self->count);
@@ -2766,7 +2766,7 @@ void func_00165920(AttachmentCopy* self, s32 arg, void* src)
 
 INCLUDE_ASM(func_00165AE8);
 
-void func_00165FE0(AnimatorOwner* self, PlacedObject* sub, f32 f)
+void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 {
     AnimatorStep* e;
     s32 i;
@@ -2781,17 +2781,17 @@ void func_00165FE0(AnimatorOwner* self, PlacedObject* sub, f32 f)
         }
     }
     for (e = self->head4C; e != 0; e = e->next80) {
-        func_001F3408(e->f0C);
+        EvaluateOscillator(e->f0C);
     }
 }
 
-void func_001660A0(PlacedObject* self)
+void UpdateLinkConstraint(PlacedObject* self)
 {
     u8* p=(u8*)self->f224;
-    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) func_0016C528(*(void**)(p+0x60));
+    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint(*(void**)(p+0x60));
 }
 
-void func_001660E8(PlacedObject* self, ParentFrame* par)
+void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
 {
     QuadMatrix a;
     QuadMatrix b;
@@ -2801,9 +2801,9 @@ void func_001660E8(PlacedObject* self, ParentFrame* par)
     FramedAttachmentList* l = (FramedAttachmentList*)self->sub22C;
 
     if (l->count > 0) {
-        func_00188B48(&self->v140, &self->m110, &a);
+        InvertRigidTransform(&self->v140, &self->m110, &a);
         if (par != 0) {
-            func_00188B48((u8*)par + 0x30, par, &b);
+            InvertRigidTransform((u8*)par + 0x30, par, &b);
         } else {
             b = a;
         }
@@ -2814,12 +2814,12 @@ void func_001660E8(PlacedObject* self, ParentFrame* par)
                 FrameLinkConstraint* t = el->obj->link;
                 if (t != 0 && (t->flags & 0x80) && t->a4 != 0) {
                     c = t->m60;
-                    e = func_00188668(b, &c);
+                    e = MultiplyMatrices(b, &c);
                 } else {
                     BuildMatrixFromRotationAndTranslation(el->obj->sub140, el->obj->sub110, &c);
-                    e = func_00188668(a, &c);
+                    e = MultiplyMatrices(a, &c);
                 }
-                el->m50 = func_00188668(e, &el->q10);
+                el->m50 = MultiplyMatrices(e, &el->q10);
             }
         }
     }
@@ -2840,18 +2840,18 @@ struct Cfg_1662A8 {
 struct Out_1662A8 { u8 pad0[4]; Row_1662A8* f4; u8 pad8[0x18 - 8]; s32 f18[2]; s32 f20[2]; };
 struct Self_1662A8 { u8 pad[0x40]; s32 f40; };
 
-Buf_1662A8* func_001EE318(Buf_1662A8* b);
-void func_00152980(Buf_1662A8* b, s32 n);
-void func_00152B38(Buf_1662A8* b);
-void func_001EE3B8(Buf_1662A8* b, s32 n, s32 f);
-void func_00152D70(Buf_1662A8* b);
-void func_00152B80(Buf_1662A8* b, s32 x, s32 y);
-void func_00152C18(Buf_1662A8* b, s32 x);
-void func_001EE668(Buf_1662A8* b, s32 a, s32 c, Q_1662A8* q, s32 d);
-void func_00152CA0(Buf_1662A8* b);
-void func_00152A50(Buf_1662A8* b, s32* a1, s32 a2, s32* a3, s32 a4);
+Buf_1662A8* InitPacketWriter(Buf_1662A8* b);
+void AllocateTempPacketBuffer(Buf_1662A8* b, s32 n);
+void BeginDmaTag(Buf_1662A8* b);
+void WriteVifBaseOffset(Buf_1662A8* b, s32 n, s32 f);
+void CloseDmaTag(Buf_1662A8* b);
+void AddDmaRefTag(Buf_1662A8* b, s32 x, s32 y);
+void AddDmaCallTag(Buf_1662A8* b, s32 x);
+void CopyWordsToWriter(Buf_1662A8* b, s32 a, s32 c, Q_1662A8* q, s32 d);
+void AddDmaReturnTag(Buf_1662A8* b);
+void DetachPacketBufferCopy(Buf_1662A8* b, s32* a1, s32 a2, s32* a3, s32 a4);
 
-void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
+void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx)
 {
     Self_1662A8* self = (Self_1662A8*)selfArg;
     Cfg_1662A8* cfg = (Cfg_1662A8*)cfgArg;
@@ -2863,7 +2863,7 @@ void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
     s32 n;
     s32 sz;
 
-    func_001EE318(&buf);
+    InitPacketWriter(&buf);
     if (cfg->f28) return;
     if (!out) return;
     if (self->f40) return;
@@ -2876,8 +2876,8 @@ void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
     for (pass = 0; pass < 2; pass++) {
         s32 total = 0x23C;
         sz = 0x214;
-        func_0018D608();
-        func_00152980(&buf, 0x1000);
+        PushBackMemoryMark();
+        AllocateTempPacketBuffer(&buf, 0x1000);
         n = 0;
         if (pass == 0) sz = 0x28;
         s32 co, ro;
@@ -2892,27 +2892,27 @@ void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
             r = (Row_1662A8*)((u8*)out->f4 + ro);
             sz = total - sz;
             if (n++ > 0) {
-                func_00152B38(&buf);
-                func_001EE3B8(&buf, sz, 0);
-                func_00152D70(&buf);
+                BeginDmaTag(&buf);
+                WriteVifBaseOffset(&buf, sz, 0);
+                CloseDmaTag(&buf);
             }
             switch (*c->f18) {
             case 0:
-                func_00152B80(&buf, c->f38, c->f44);
+                AddDmaRefTag(&buf, c->f38, c->f44);
                 if (cfg->f54) {
-                    func_00152C18(&buf, c->f4C);
+                    AddDmaCallTag(&buf, c->f4C);
                 } else {
-                    func_00152B80(&buf, c->f40, c->f4C);
+                    AddDmaRefTag(&buf, c->f40, c->f4C);
                 }
-                func_00152B80(&buf, r->f0, r->f4);
-                func_00152B80(&buf, r->fC, r->f10);
+                AddDmaRefTag(&buf, r->f0, r->f4);
+                AddDmaRefTag(&buf, r->fC, r->f10);
                 break;
             case 1:
             case 4: case 5: case 6: case 7: case 8: case 9: case 10:
                 if (cfg->f54) {
-                    func_00152C18(&buf, c->f44);
+                    AddDmaCallTag(&buf, c->f44);
                 } else {
-                    func_00152B80(&buf, c->f38, c->f44);
+                    AddDmaRefTag(&buf, c->f38, c->f44);
                 }
                 break;
             }
@@ -2922,17 +2922,17 @@ void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
         for (k = 0; k < cfg->f60; k++) {
             Spr_1662A8* s = &cfg->f64[k];
             sz = total - sz;
-            func_00152B38(&buf);
-            if (n++ > 0) func_001EE3B8(&buf, sz, 0);
+            BeginDmaTag(&buf);
+            if (n++ > 0) WriteVifBaseOffset(&buf, sz, 0);
             q.b = 1;
             q.a = (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16) | ((u64)D_002623E0.a << 24) | ((u64)1 << 32);
-            func_001EE668(&buf, 0xC, 1, &q, 0x1A);
-            func_00152D70(&buf);
-            func_00152B80(&buf, s->f18, s->f1C);
+            CopyWordsToWriter(&buf, 0xC, 1, &q, 0x1A);
+            CloseDmaTag(&buf);
+            AddDmaRefTag(&buf, s->f18, s->f1C);
         }
-        func_00152CA0(&buf);
-        func_00152A50(&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
-        func_0018D6F0();
+        AddDmaReturnTag(&buf);
+        DetachPacketBufferCopy(&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
+        PopBackMemoryMark();
         if (n < 2) {
             out->f18[1] = out->f18[0];
             out->f20[1] = out->f20[0];
@@ -2941,7 +2941,7 @@ void func_001662A8(void* selfArg, void* cfgArg, void* outArg, void* ctx)
     }
 }
 
-void func_00166658(void)
+void FlipVifBaseOffset(void)
 {
     s32 v = 0x23C - D_00262474;
     D_00262474 = v;

@@ -5,6 +5,7 @@ func_001310F0	InitTextPanel	slot 0 of the T217D_440 element: sets width 640, hei
 func_00131140	ClearTextPanel	sets the panel's text to empty (slot 8), clears +0x2FC, the value and both stick floats and sets +0x314 to 0.4
 func_00131198	SetupTextPanel	original assembly; slot 1 of the text panel's table D_0021A440, the slot of SetupScreenElementText in the other screen elements' tables: calls SetupScreenElementText, measures its strings and builds its curve spans and GIF packets
 func_001316E8	DrawCompassStrip	DrawTextPanel's top strip: eleven ticks scrolled by 0x314 and the names of the current, previous and next of the eight compass points (D_00261128) around g_camera's heading, each measured and drawn with the panel's font at 0x310
+func_00131F60	DrawTextPanelControlLabels	original assembly draw helper DrawTextPanel calls after DrawCompassStrip: draws a frame with func_001613C0/func_00161708/func_00161670, then the strings Move and Zoom (D_00249CE8, D_00249CF0) and a %c glyph (D_00249CE0, formatted with func_001E1FD0) with DrawFontString at fixed positions, picking by the panel's open flag at 0x25C and the value at 0x260
 func_00132500	DrawTextPanelCenterFrame	DrawTextPanel's frame around GetTextPanelCenter: advances the spin at the panel's angle with the right stick (pad record 0x78), picks two colours by the palette and state, and draws the curved edges (EvalCurveSpan on D_002612E0) and the dotted rows scaled by g_camera's 0x478
 func_00133B58	DrawTextPanelBorders	DrawTextPanel's full-width bands: three colours mixed from D_002610E0/D_002610D8 by the spin's cosine, then the curves D_00261280 and D_002612B0 across the 640-pixel screen with 4-pixel offsets
 func_00135228	DrawTextPanelBlocks	in state 1 draws four quads whose colour fades toward blockA by blockB with the clock, when a button mask from func_00160D30 is held
@@ -30,6 +31,10 @@ func_001366A0	DrawTextPanel	original assembly; slot 9 of D_0021A440, the draw sl
 func_00136EC8	GetTextPanelCenter	returns the panel's stick position plus (320, 180.4)
 func_00136EF8	ChooseTextPanelState	slot 6 of the panel table: with a child, sets state 2, 3 or 4 by the child's mode at +0x2D0 and calls func_00150790 with 3; without one sets state 1
 func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanelState: with a child it sets the child's step sequence to state 4, without one it puts the panel back in state 0 (SetTextPanelState)
+func_00136FE8	ConstructTextPanelStatics	the compiler's static initialiser of this file: when called with a nonzero first argument and 0xFFFF it builds the PanelColor globals D_002610D0..D_00261118 and the two PanelStyle globals D_00261148 and D_00261168 (bytes zero until then)
 func_00137228	SetTextLayoutPosition	the text layout's setter of x and y (Layout_137228::Pos, written out by this file); DrawTextPanel and the screen-element and menu draw code call it
 func_00137238	SetTextLayoutSize	the text layout's setter of width and height at 0x8/0xC (Layout_137228::Size)
 func_00137248	SetTextLayoutColor	the text layout's setter of the 32-bit colour at 0x10 (Layout_137228::Color)
+func_00137260	SetTextLayoutHorizontalAlign	stores its argument at +0x14 of the text layout (Layout_137228::SetF14); DrawFontString aligns each line left when it is 0, right when it is 2 and centred otherwise from it
+func_00137268	SetTextLayoutVerticalAlign	stores its argument at +0x18 of the text layout (Layout_137228::SetF18); DrawFontString places the text at the top of the rectangle when it is 0, at the bottom when 2 and centred otherwise
+func_00137270	ConstructTextPanelStaticsAtStartup	the file's entry in the initialiser list D_0027B130: calls ConstructTextPanelStatics(1, 0xFFFF)

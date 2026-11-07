@@ -15,7 +15,7 @@ struct ListFrame {
     ListFrame* prev;
 };
 
-extern ListFrame* D_0027B314;
+extern ListFrame* g_activeListFrames;
 
 // The same frame as some walks keep it: four words, each pointer handled as an int.
 struct WordListFrame {

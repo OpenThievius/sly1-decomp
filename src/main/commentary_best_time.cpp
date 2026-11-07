@@ -48,7 +48,7 @@ extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel"
 extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
 extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
 // The text style the best time draws with: the static initialiser (func_001E0848) zeroes it,
 // then sets its kind, two sizes given as integers, 0.3 twice and its colour.
@@ -71,12 +71,12 @@ struct BestTimeTextStyle {
         f18 = (s32)0xFF7D4B00;
     }
 };
-BestTimeTextStyle D_002758E0(2, 1);
+BestTimeTextStyle g_commentaryFrameStyle(2, 1);
 
 struct BestTimeTextBuffer { char c[0x40]; };
-BestTimeTextBuffer D_00275900 = {};
+BestTimeTextBuffer g_bestTimeText = {};
 
-void* func_001DFE80(s32 key)
+void* FindLevelEntry(s32 key)
 {
     const LevelEntry* p = g_levelEntries;
     const LevelEntry* end = g_levelEntries + 33;
@@ -95,14 +95,14 @@ void* func_001DFE80(s32 key)
 struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
 
 
-void* func_001DFE80(s32 k);
-s32 func_001E2100(void* p);
-s32 func_0015C188(s32 k);
-Font* func_0015C1C0(s32 k);
-s32 func_001DD7A0(World* g, s32 k);
-void func_001E02C8(T217D_1380* self, s32 n);
+void* FindLevelEntry(s32 k);
+s32 GetStringLength(void* p);
+s32 IsFontLoaded(s32 k);
+Font* GetFontById(s32 k);
+s32 CheckEntryThreeBitRequirement(World* g, s32 k);
+void SetBestTimeState(T217D_1380* self, s32 n);
 
-void func_001DFEB8(T217D_1380* self)
+void InitCommentaryPromptElement(T217D_1380* self)
 {
     const LevelEntry* e;
 
@@ -145,22 +145,22 @@ void func_001DFEB8(T217D_1380* self)
     self->f270 = 0;
 }
 
-void func_001E02C8(void* self, s32 n);
+void SetBestTimeState(void* self, s32 n);
 
-void func_001F5C0C(void* p, s32 zero, s32 size);
+void FillMemory(void* p, s32 zero, s32 size);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 extern s32 D_002701C4;
 extern s32 D_002623DC;
 
-void func_0016EC20(PadRecord* q, s32 n);
-void func_001BE5F8(s32 q);
-void func_001E02C8(T217D_1380* q, s32 n);
-f32 func_00205C78(f32 a, f32 b);
-void func_001AB920(T217D_510* q, f32 v);
-s32 func_001E9970(void);
+void ClearPadPressedBits(PadRecord* q, s32 n);
+void StartLockedStreamVoice(s32 q);
+void SetBestTimeState(T217D_1380* q, s32 n);
+f32 Power(f32 a, f32 b);
+void SetTimerRate(T217D_510* q, f32 v);
+s32 AreMenusAndFadeClear(void);
 
-void func_001E00B0(T217D_1380* self)
+void UpdateBestTimeState(T217D_1380* self)
 {
     UpdateScreenElementSlide(self);
     switch (self->state) {
@@ -208,23 +208,23 @@ void func_001E00B0(T217D_1380* self)
 
 extern s32 D_002623DC;
 
-void func_001AB958(T217D_510* o);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00160C48(s32 v);
-void func_001DDAD0(World* g);
-void func_001AB890(T217D_510* o, f32 v);
-f32 func_00205C78(f32 a, f32 b);
-void func_001AB920(T217D_510* o, f32 v);
-void func_001AB928(T217D_510* o, f32 v, void* fn);
-void func_001AB938(T217D_510* o);
-s32 func_001E1FD0(BestTimeTextBuffer* dst, const char* fmt, ...);
-void func_0018C7F8(MemoryCard* x);
-s32 func_001602A0(void);
-void func_001604B8(s32 m);
-void func_00194D30(T217D_6D0* y, s32 a, s32 b);
-void func_00148CE0(World* g);
+void StopTimer(T217D_510* o);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void SetSpareCount(s32 v);
+void PopActiveSequenceElement(World* g);
+void StartTimer(T217D_510* o, f32 v);
+f32 Power(f32 a, f32 b);
+void SetTimerRate(T217D_510* o, f32 v);
+void SetTimerLimit(T217D_510* o, f32 v, void* fn);
+void StartTimerCounting(T217D_510* o);
+s32 FormatToString(BestTimeTextBuffer* dst, const char* fmt, ...);
+void StartMemoryCardSave(MemoryCard* x);
+s32 ComputeCompletionMask(void);
+void ApplyCompletionFlags(s32 m);
+void SetPauseMenuLayerPage(T217D_6D0* y, s32 a, s32 b);
+void CompleteSoundNotifiers(World* g);
 
-void func_001E02C8(T217D_1380* self, s32 n)
+void SetBestTimeState(T217D_1380* self, s32 n)
 {
     if (self->state == n) {
         return;
@@ -316,18 +316,18 @@ void func_001E02C8(T217D_1380* self, s32 n)
 }
 
 struct TextLayout;
-void func_00137228(TextLayout* out, f32 x, f32 y);
-void func_00137238(TextLayout* out, f32 x, f32 y);
-void func_00137248(TextLayout* out, s32* value);
-void func_00137260(TextLayout* out, s32 flag);
-void func_00137268(TextLayout* out, s32 flag);
+void SetTextLayoutPosition(TextLayout* out, f32 x, f32 y);
+void SetTextLayoutSize(TextLayout* out, f32 x, f32 y);
+void SetTextLayoutColor(TextLayout* out, s32* value);
+void SetTextLayoutHorizontalAlign(TextLayout* out, s32 flag);
+void SetTextLayoutVerticalAlign(TextLayout* out, s32 flag);
 struct TextLayout {
     u8 b[32];
     void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
     void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
     void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { func_00137260(this, f); }
-    void FlagB(s32 f) { func_00137268(this, f); }
+    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
 };
 struct FrameFont {
     static void Draw(Font** h, TextLayout* out, void* tbl)
@@ -340,12 +340,12 @@ struct FrameFont {
 };
 
 extern f32 D_0027240C;
-void func_0015C8B8(Font* font, f32 a, f32 b);
-void* func_0015DB28(void* out, void* p, Font* font);
-void func_0015E318(void* a, void* b, s32 c, void* d);
-void func_0015C900(Font* font);
+void PushFontScale(Font* font, f32 a, f32 b);
+void* InitTextReader(void* out, void* p, Font* font);
+void DrawAlignedText(void* a, void* b, s32 c, void* d);
+void PopFontScale(Font* font);
 
-void func_001E0678(T217D_1380* self)
+void DrawFramedText(T217D_1380* self)
 {
     T217D_Word tmp;
     TextLayout out;
@@ -381,7 +381,7 @@ void func_001E0678(T217D_1380* self)
 
 LINKER_REMNANT(func_001E0820);
 
-void func_001E0828(void* self)
+void FinishBestTimeRun(void* self)
 {
     SetBestTimeState(self, 3);
 }

@@ -6,7 +6,7 @@
 
 typedef long long s64_t;
 
-double func_001FB618(s64_t x)
+double ConvertS64ToDouble(s64_t x)
 {
     double d = (s32)(x >> 32);
 

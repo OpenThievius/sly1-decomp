@@ -45,32 +45,32 @@ struct Syscall_1F9E50 {
     s32 f8;
 };
 
-s32* func_001F9E08(s32 value);
+s32* FindKernelWord(s32 value);
 
-Syscall_1F9E50 D_002771D8 = { 0x83, func_001F9E08, 0 };
+Syscall_1F9E50 D_002771D8 = { 0x83, FindKernelWord, 0 };
 s32 D_002771E4;
 s32 D_002771E8;
 
 static Cmd_1F9AD8 D_00628E40 __attribute__((aligned(64)));
 
-void func_001F6C40(char* text, void* q);
-s32 func_001F6CF0(u32 a0);
-u32 func_001F6CE0(u32 reg, u32 value);
-s32 func_001F6CA0(Span_1F9AD8* span, s32 n);
-s32 func_001F6B20(Frame_001F9DC0* q);
-void func_001F6F48();
-void func_001F70F8();
-s32 func_001F7B88(const char* fmt, ...);
-s32 func_001F7BE8(s32 a);
-void func_001F7D88(void);
+void StopIopDma(char* text, void* q);
+s32 ReadIopRegister(u32 a0);
+u32 WriteIopRegister(u32 reg, u32 value);
+s32 StartIopDma(Span_1F9AD8* span, s32 n);
+s32 NewSemaphore(Frame_001F9DC0* q);
+void InstallFirstKernelPatch();
+void StartRequestThread();
+s32 PrintBuffered(const char* fmt, ...);
+s32 InitRemoteCalls(s32 a);
+void ShutDownRemoteCalls(void);
 void func_001F9E90(s32 num, s32* (*handler)(s32 value));
 s32 func_001F9E40(s32* (*handler)(s32 value));
-void func_001F9FB8();
+void InstallSecondKernelPatch();
 void func_001FA0A0(void);
-void func_001FA7D8(Cmd_1F9AD8* a0, s32 a1);
-void func_001FA8F8();
+void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
+void InstallThirdKernelPatch();
 
-s32 func_001F9AD8(char* text, void* q)
+s32 SendIopReset(char* text, void* q)
 {
     Span_1F9AD8 span;
     s32 len;
@@ -107,7 +107,7 @@ s32 func_001F9AD8(char* text, void* q)
     return 0;
 }
 
-s32 func_001F9C18(void)
+s32 IsIopResetDone(void)
 {
     if ((ReadIopRegister(4) & 0x40000) != 0) {
         func_001FA0A0();
@@ -116,7 +116,7 @@ s32 func_001F9C18(void)
     return 0;
 }
 
-s32 func_001F9C50(char* arg)
+s32 ResetIop(char* arg)
 {
     char buf[80];
     char* e = arg;
@@ -155,7 +155,7 @@ ASM_FUNC(func_001F9D60);
 
 ASM_FUNC(func_001F9DA8);
 
-void func_001F9DC0(void)
+void CreateLibrarySemaphores(void)
 {
     Frame_001F9DC0 f;
     f.w[1] = 1;
@@ -166,7 +166,7 @@ void func_001F9DC0(void)
     D_002771E8 = NewSemaphore((Frame_001F9DC0*)&f.w[8]);
 }
 
-s32* func_001F9E08(s32 value)
+s32* FindKernelWord(s32 value)
 {
     s32* p = (s32*)0x80000000;
     while (*p != value)
@@ -176,7 +176,7 @@ s32* func_001F9E08(s32 value)
 
 ASM_FUNC(func_001F9E40);
 
-s32 func_001F9E50(void)
+s32 InstallKernelWordSearch(void)
 {
     func_001F9E90(D_002771D8.num, D_002771D8.handler);
     s32 r = func_001F9E40(FindKernelWord);
@@ -187,7 +187,7 @@ ASM_FUNC(func_001F9E90);
 
 LINKER_REMNANT(func_001F9EA0);
 
-void func_001F9EA8()
+void InitKernelLibrary()
 {
     CreateLibrarySemaphores();
     InstallKernelWordSearch();

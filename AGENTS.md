@@ -28,6 +28,7 @@ procedure; read it before you match anything.
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv`, `config/eu/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md); PAL's table holds the functions only PAL has | `tools/classify_asm.py` |
 | `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
+| `tools/symbols.py` | the shared name map: either name of a symbol, for the tools that read source text | by hand |
 | `config/names/`, `include/names.h` | readable names for address-named functions and globals, each with its evidence, one table per source file (`config/names/main/value.tsv`) and one for globals (`data.tsv`), and the macros generated from them (docs/NAMING.md) | by hand; `names.h` by `tools/names.py header` |
 | `config/us/tables.tsv`, `members.tsv`, `installers.tsv`, `dispatch.tsv` | every other table of function pointers in retail's data (method tables, GCC vtables, callback records), the tables each function is in, the functions that install each table, and the calls through an object's table by slot | `tools/tables.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
@@ -69,7 +70,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
 | `python3 tools/classes.py [--check]` | the class map: classes, their methods and creators (needs `asm/us/`) |
 | `python3 tools/tables.py [--check]` | the other function-pointer tables, their members and installers (needs `asm/us/`) |
-| `python3 tools/names.py header\|check` | the readable names: `config/names/` to `include/names.h` (each row moved to its table), and the tables' rules (docs/NAMING.md) |
+| `python3 tools/names.py header\|check\|apply` | the readable names: `config/names/` to `include/names.h` (each row moved to its table), the tables' rules, and `apply [--dry-run] [FILE ...]`, which writes the readable names in declarations and definitions (docs/NAMING.md) |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |
 | `python3 tools/proprietary.py` | scans what git would commit for game data and proprietary material |
 | `python3 tests/check_repository.py` | `proprietary.py`, licence headers (CI) |

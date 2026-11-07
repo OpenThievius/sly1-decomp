@@ -4,7 +4,7 @@ struct Gate_1E9A68_eu { u8 pad0[0x560]; s32 f560; u8 pad1[8]; s32 f56C; };
 
 extern s32 D_00270458;
 
-s32 func_001E9A68(void)
+s32 IsArcDrawAllowed(void)
 {
     s32 m;
     if (g_screenFade.mode != 0) goto fail;

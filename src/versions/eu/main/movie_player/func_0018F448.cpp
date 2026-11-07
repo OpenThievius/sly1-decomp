@@ -25,7 +25,7 @@ extern u8 D_eu_005C04C0[];
 extern u8 D_eu_005A4240[];
 extern u8 D_eu_005C05E0[];
 extern u8 D_eu_0014B588[];
-void func_0018F448(MoviePlayer* self_, void* v)
+void InitMoviePlayback(MoviePlayer* self_, void* v)
 {
     Obj_eu_18F448* self = (Obj_eu_18F448*)self_;
     s32 i;
@@ -36,16 +36,16 @@ void func_0018F448(MoviePlayer* self_, void* v)
     self->f5C = D_eu_00478240;
     InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_eu_00448240 | 0x20000000));
     StartMovieStream((MovieStream*)((u8*)self + 0x80));
-    func_0020ADA0();
-    func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
-    func_0020A538((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
+    InitMpegLibrary();
+    CreateMpegDecoder((u8*)self + 0x10, self->f58, 0x152F68);
+    SetStreamCallback((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
     for (n = 0; D_eu_002636EC >= n; n++) {
-        func_0020A538((u8*)self + 0x10, 2, n, (void*)PassMovieDataToStream, self);
-        func_0020A538((u8*)self + 0x10, 3, n, (void*)PassMovieDataToStream, self);
+        SetStreamCallback((u8*)self + 0x10, 2, n, (void*)PassMovieDataToStream, self);
+        SetStreamCallback((u8*)self + 0x10, 3, n, (void*)PassMovieDataToStream, self);
     }
-    func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    func_0020B168((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
-    func_0020B168((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
+    SetMpegCallback((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
+    SetMpegCallback((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    SetMpegCallback((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder((MoviePlayer*)self, 1) == 0) {
     }
     self->f128 = D_eu_005A4240;

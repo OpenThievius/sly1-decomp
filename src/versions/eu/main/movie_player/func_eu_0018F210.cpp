@@ -14,7 +14,7 @@ struct Obj_eu_18F210 {
     s32 f28;
 };
 s32 func_eu_0011E628(void);
-s32 func_0011E4F8(void);
+s32 GetIopRingPosition(void);
 
 void func_eu_0018F210(Obj_eu_18F210* self)
 {

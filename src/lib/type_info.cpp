@@ -12,7 +12,7 @@
 #pragma implementation "typeinfo.h"
 #include "typeinfo.h"
 
-extern "C" int func_001F6738(const char* a, const char* b);
+extern "C" int CompareStrings(const char* a, const char* b);
 
 type_info::~type_info()
 {

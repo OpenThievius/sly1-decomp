@@ -12,7 +12,7 @@ struct SlotBank_135E78_eu {
     T217D_440_Slot entries[1];
 };
 
-void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
+void ReleasePanelEntries(SlotBank_135E78_eu* self, s32 state, s32 flag)
 {
     if (state == self->state) return;
     s32 i = 0;
@@ -22,7 +22,7 @@ void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
         do {
             if (flag != 0) {
                 RemoveEffect(e->handle);
-                func_001F5C0C(self->blockB, 0, 16);
+                FillMemory(self->blockB, 0, 16);
             } else {
                 SetEffectPhase(e->handle, 2);
             }
@@ -32,6 +32,6 @@ void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
     }
     self->count = 0;
     self->countA = 0;
-    func_001F5C0C(blockA, 0, 16);
+    FillMemory(blockA, 0, 16);
     self->state = state;
 }

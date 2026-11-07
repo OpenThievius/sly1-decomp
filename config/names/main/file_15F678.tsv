@@ -102,3 +102,5 @@ func_001660E8	UpdateAttachmentFrames	slot 43 of class 0x02: for each attachment 
 func_001662A8	BuildAttachmentDmaChain	builds in a temporary packet buffer the DMA chain of call and ref tags for an attachment's parts and keeps a copy of it (DetachPacketBufferCopy); StartAttachments calls it
 func_00166658	FlipVifBaseOffset	sets D_00262474 to 0x23C minus itself and writes it as the VIF base offset of g_vifPacketWriter, toggling between two buffer halves
 func_00166690	DrawModelPart	the part drawer DrawPlacedObjectParts runs for each 0x70-byte part: picks the part's lights (CollectLightsForSphere, rechecked when g_lightingChangeFrame moves), transforms it and writes its VIF packets with g_vifPacketWriter
+func_00167D20	ConstructDefaultRgbaColor	the file's static initialiser (config/us/generated.tsv): on the construction pass (arguments 1 and 0xFFFF) stores 0x80101010 in D_002623E0, the colour the vertex-batch code reads as bytes r, g, b, a
+func_00167D48	ConstructDefaultRgbaColorAtStartup	the file's _GLOBAL_$I$: calls ConstructDefaultRgbaColor with (1, 0xFFFF); an entry of the startup init-list D_0027B130

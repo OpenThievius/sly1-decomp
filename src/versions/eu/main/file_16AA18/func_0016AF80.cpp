@@ -12,7 +12,7 @@ struct Obj_16AF80_eu {
     s32 f974;
 };
 
-void func_0016AF80(CurrentPlacedObject* self)
+void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
     StateWalker* p = self->walkers[0].walker;

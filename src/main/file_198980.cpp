@@ -30,35 +30,35 @@
 #include "screen_element.h"
 #include "step_sequence.h"
 #include "asm_func.h"
-void func_001B7968(void* self);
-void func_001249A8(void* self);
-void* func_0015A448(void* a, void* b, void* c);
+void InitCollider(void* self);
+void PostLoadPlacedObject(void* self);
+void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
 // A descriptor slot called by its index (the slots past class 0x01's, whose types the
 // descriptors give differently).
 typedef s32 (*SlotTest)(void* self);
-void func_00124A48(void* self);
-s32 func_0012C9A8(void* node);
-void func_00182ED8(void* node);
+void StartPlacedObject(void* self);
+s32 HasAnimationEventKind19(void* node);
+void ResolveAndStartObject(void* node);
 typedef void (*SlotFn)(void* self);
-void* func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
-void func_001837E0(void* self, s32 a, s32 b, s32 c);
-s32 func_00182FC8(void* self);
-void func_001BA130(void*);
-void func_00198980(ObjectSet*);
-void func_001B7F78(void);
-void func_00182D48(void*);
-void func_00152470(void*, void*);
-void func_00182ED0(void*);
-void func_00152600(void*, void*);
-void func_00182C58(void*);
-void* func_0015A418(void*, s32, s32, void*);
-void func_001B7A98(void*);
-void func_001B7B78(void*);
-void func_00182C18(void*);
-void func_00127378(ObjectSet* self, s32 msg, ObjectMessage* m);
-s32 func_001300E8(void* obj, s32 kind);
-void* func_001929F8();
-s32 func_00182F40(void* e, void* b);
+void* FindOrCreateSeekedAnimationPlayer(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+s32 IsObjectAttached(void* self);
+void CopyCollider(void*);
+void InitObjectSet(ObjectSet*);
+void ApplyColliderPendingImpulse(void);
+void RegisterObject(void*);
+void AppendToList(void*, void*);
+void UnregisterObject(void*);
+void RemoveFromList(void*, void*);
+void StartObject(void*);
+void* FindFirstObjectById(void*, s32, s32, void*);
+void RegisterCollider(void*);
+void UnregisterCollider(void*);
+void InitObject(void*);
+void HandlePlacedObjectNotification(ObjectSet* self, s32 msg, ObjectMessage* m);
+s32 IsObjectOfKind(void* obj, s32 kind);
+void* GetActiveSwitchedColliderData();
+s32 IsObjectDescendantOf(void* e, void* b);
 // The active switched collider's data block (SwitchedCollider + 0x580): at 0x18 the collider.
 struct ActiveColliderData {
     u8 pad0[0x18];
@@ -68,79 +68,79 @@ struct ActiveColliderData {
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
 // The element stack (g_elementStack), as file_15F678.cpp and file_16AA18.cpp view it.
 struct ElementStackState { u8 pad0[0x30]; s32 f30; };
-extern ElementStackState D_00275BC0;
-void func_0019A088(s32 index);
-void func_001E5278(s32 mode);
-void func_001921A8(C17* self);
+extern ElementStackState g_elementStack;
+void MarkLevelRecordComplete(s32 index);
+void RequestWorldLoadByMode(s32 mode);
+void InitSwitchedCollider(C17* self);
 // One of C17's three markers at 0x61C (StartC17Marker): its owner, the object found for it and
 // that object's state walker.
 struct C17Marker { s32 owner; s32 object; s32 walker; };
-s32 func_0015A418(s32 a, s32 b, s32 c, s32 d);
-void func_00182ED8(s32 a);
-s32 func_001B6290(s32 a, s32 b, s32 c, s32 d);
-void func_001B6568(void* dev, s32* out);
-void func_001B6598(void* dev, s32* out);
-void func_001B64D8(void* dev, s32 value);
-void func_0016EC88(void* p);
-s32 func_001602A0(void);
-void func_00160578(s32 value);
-void* func_0015A448(void* a, s32 code, void* c);
-extern u8 D_00262C70[];
-void func_001830D8(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-extern u8 D_00261420[];
-void func_00198980(ObjectSet* self);
-void* func_00140FF8(void* p);
-void func_001989B0(ObjectSet* self);
-void func_00124DF8(void* self, s32 a1, void* a2);
-void* func_0018D500(s32 size);
+s32 FindFirstObjectById(s32 a, s32 b, s32 c, s32 d);
+void ResolveAndStartObject(s32 a);
+s32 CreateStateWalker(s32 a, s32 b, s32 c, s32 d);
+void GetStateWalkerTargetKey(void* dev, s32* out);
+void GetStateWalkerCurrentKey(void* dev, s32* out);
+void SetStateWalkerTarget(void* dev, s32 value);
+void ResetPadStepRepeat(void* p);
+s32 ComputeCompletionMask(void);
+void FadeOutAndQueueMovie(s32 value);
+void* FindFirstObjectByIdMode4(void* a, s32 code, void* c);
+extern u8 g_padRecord[];
+void CopyObjectData(void* self);
+void ResolveObjectLinks(void* self, s32 n, void* table);
+extern u8 g_flagTable[];
+void InitObjectSet(ObjectSet* self);
+void* TakeFlagTableIndex(void* p);
+void LoadObjectSet(ObjectSet* self);
+void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void* AllocateFrontMemory(s32 size);
 // What func_0019BE08 is given: two quadwords at 0x20 and 0x30.
 struct GatherTrigger { u8 pad[0x20]; Quad16 q20; Quad16 q30; };
 void func_0019C1C0(void* self, s32 mode);
-s32 func_00198E98(ObjectSet* self);
-s32 func_00141008(void* table, s32 index);
-void func_00141040(void* table, s32 index);
-void func_00198DA8(ObjectSet* self);
+s32 GetObjectSetActivationState(ObjectSet* self);
+s32 TestFlagTableBit(void* table, s32 index);
+void SetFlagTableBit(void* table, s32 index);
+void CollectObjectSet(ObjectSet* self);
 typedef void (*SlotFnInt)(void* self, s32 a);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_001BC320(void* self, ObjectEvent* ev);
-void func_001BA130(void* self);
-void func_001289C0(void* self);
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void func_00199B18(void* obj);
-s32 func_001300E8(void* node, s32 kind);
-extern f32 D_0026185C[];
-f32 func_001EAB48(f32 a, f32 b, f32 c);
-void func_001BAC30(void* self);
-void func_00159478(void* sub, void* self);
-void* func_0015A480(void* self, s32 kind, void* arg);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+s32 HandleObjectEvent(void* self, ObjectEvent* ev);
+void CopyCollider(void* self);
+void LoadPlacedObject(void* self);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void FlagNumberedItem(void* obj);
+s32 IsObjectOfKind(void* node, s32 kind);
+extern f32 g_gameTime[];
+f32 RandomGaussian(f32 a, f32 b, f32 c);
+void LoadCollider(void* self);
+void FindOrBuildMemberGroup(void* sub, void* self);
+void* FindFirstObjectByIdMode1(void* self, s32 kind, void* arg);
 extern s32 D_00270454;
-extern u8 D_00264A40[];
-void func_001B64D8(void* a, s32 b);
-void func_001E9570(void* q);
-void func_001604B8(s32 mode);
-void func_0018C7F8(void* p);
-void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+extern u8 g_memoryCard[];
+void SetStateWalkerTarget(void* a, s32 b);
+void PopStackElement(void* q);
+void ApplyCompletionFlags(s32 mode);
+void StartMemoryCardSave(void* p);
+void* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 extern s32 D_00275C34;
-void func_00198B28(ObjectSet* self);
-f32 func_001EAAE0(f32 a, f32 b);
-s32 func_001EAA70(s32 a, s32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00128018(void* a0, s32 a1, void* a2, void* a3);
-Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_00199850(NumberedItem* self);
-void func_001518B8(s32 x);
-void func_00124A48(C17* o);
-void func_00124DF8(C17* o, s32 n, u8* t);
-void func_0019A178(void* p, s32 x);
-s32 func_001B6290(s32 a, C17* b, s32 c, s32 d);
-void func_001B64D8(s32 a, s32 b);
-BaseObject* func_0015A448(World* a, s32 b, C17* c);
-void func_00160D30(s32* p);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-void func_001B64D8(void* p, s32 n);
-void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb);
-void func_001781E0(Player* a, s32 v);
+void StartObjectSet(ObjectSet* self);
+f32 RandomFloatInRange(f32 a, f32 b);
+s32 RandomIntInRange(s32 a, s32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
+void SetNumberedItemFlag(NumberedItem* self);
+void ChooseStepSequenceState(s32 x);
+void StartPlacedObject(C17* o);
+void ResolveObjectLinks(C17* o, s32 n, u8* t);
+void StartC17Marker(void* p, s32 x);
+s32 CreateStateWalker(s32 a, C17* b, s32 c, s32 d);
+void SetStateWalkerTarget(s32 a, s32 b);
+BaseObject* FindFirstObjectByIdMode4(World* a, s32 b, C17* c);
+void GetCurrentLevelBit(s32* p);
+void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+void SetStateWalkerTarget(void* p, s32 n);
+void* FindOrCreateSeekedAnimationPlayer(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb);
+void QueuePlayerWalkerActivation(Player* a, s32 v);
 // A list walk's frame (as ListFrame), pushed by its constructor.
 struct ListWalkFrame {
     s32 list; s32 cursor; s32 link; s32 prev;
@@ -152,30 +152,30 @@ struct ListWalkFrame {
         *(s32*)&g_activeListFrames = (s32)this;
     }
 };
-void func_00182ED8(BaseObject* n);
-s32 func_001300E8(void* key, s32 kind);
-s32 func_00182FC8(void* p);
-void func_00192230(void* self, s32 code, s32* rec);
-void func_00175170(void* self, s32 a, s32 b);
-s32 func_0019A000(s32 bits);
-void func_001518B8(StepSequence* s);
-void func_001B7968(Collider* self);
-void func_00152470(void* list, void* item);
-void func_00152600(void* table, void* self);
-extern f32 D_00261858[];
+void ResolveAndStartObject(BaseObject* n);
+s32 IsObjectOfKind(void* key, s32 kind);
+s32 IsObjectAttached(void* p);
+void HandleSwitchedColliderNotification(void* self, s32 code, s32* rec);
+void SetPlayerState(void* self, s32 a, s32 b);
+s32 CompletesWorldBits(s32 bits);
+void ChooseStepSequenceState(StepSequence* s);
+void InitCollider(Collider* self);
+void AppendToList(void* list, void* item);
+void RemoveFromList(void* table, void* self);
+extern f32 g_gameClock[];
 void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
-void func_001B7B78(Collider* self);
+void UnregisterCollider(Collider* self);
 struct LoadStream;
-s32 func_00137D10(LoadStream* in);
+s32 ReadBufferedS16(LoadStream* in);
 void func_00137FB0(LoadStream* in, void* p);
-void* func_0018D5C0(s32 n);
-s32 func_00137CC0(LoadStream* in);
-void func_0019CD90(C8B* o, s32 i, f32* x, f32* y, f32* z);
-void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
-f32 func_00137DF8(LoadStream* in);
-void func_0011EC40(C8B* o, LoadStream* in);
+void* AllocateZeroedFrontMemory(s32 n);
+s32 ReadBufferedS8(LoadStream* in);
+void DecodeC8BGridIndex(C8B* o, s32 i, f32* x, f32* y, f32* z);
+void ComputeGridBlendWeights(f32 x, f32 y, f32 z, C8B* o, void* p);
+f32 ReadBufferedFloat(LoadStream* in);
+void ReadPropertyRecords(C8B* o, LoadStream* in);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ListWalker;
 struct ListWalker {
@@ -199,19 +199,19 @@ struct ListWalker {
         return n;
     }
 };
-void func_00152600(List01 *a, ObjectGatherer *b);
-void func_00152470(List01 *a, ObjectGatherer *b);
-void func_00128018(void *a, s32 b, void *c, Quad4 *d);
-void func_001B9860(ObjectGatherer *a, Quad4 *b, void *c);
-void func_001B7C40(ObjectGatherer *self, s32 flag);
-void func_00182C58(void* self);
-void* func_0015A448(void* a, s32 b, void* c);
-void* func_0015A480(void* a, s32 b, void* c);
-void func_00139600(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
-void func_00139038(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
-void func_00139B38(void* g, void* n);
-void func_0019CC10(C8B* self, f32* out, f32 a, f32 b, f32 c);
-void func_001399F8(void* g, s32 a, s32 b, void* c);
+void RemoveFromList(List01 *a, ObjectGatherer *b);
+void AppendToList(List01 *a, ObjectGatherer *b);
+void TransformPointBetweenFrames(void *a, s32 b, void *c, Quad4 *d);
+void PlaceColliderClearOfContacts(ObjectGatherer *a, Quad4 *b, void *c);
+void SetColliderPartListed(ObjectGatherer *self, s32 flag);
+void StartObject(void* self);
+void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+void* FindFirstObjectByIdMode1(void* a, s32 b, void* c);
+void ComputeWrappedDeltas(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
+void BuildCombinedBlendAnimation(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
+void SetBlendEntryRecordFlag(void* g, void* n);
+void ComputeGridBlendWeights(C8B* self, f32* out, f32 a, f32 b, f32 c);
+void SetBlendItemWeights(void* g, s32 a, s32 b, void* c);
 void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
 
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
@@ -222,19 +222,19 @@ s32 D_0026A914 = 0;
 ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
 ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
 ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
-ObjectLink D_0026A948[1] = { { 0x0, 0x339, 0x5BC } };
+ObjectLink g_numberedItemLinks[1] = { { 0x0, 0x339, 0x5BC } };
 f32 D_0026A958[2] = { 0.8f, 1.2f };
 f32 D_0026A960[2] = { 0.9f, 1.1f };
 f32 D_0026A968 = 300.0f;
-T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))func_00199850 };
+T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
 // The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
 // holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
 struct C17LinkTable { ObjectLink e[26]; s32 end[2]; };
 C17LinkTable D_0026AA50 = { {
     { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
-ObjectLink D_0026AB90[1] = { { 0x0, 0x268, 0x5EC } };
-ObjectLink D_0026ABA0[1] = { { 0x4, 0x267, 0x5FC } };
+ObjectLink g_objectGathererLoadLinks[1] = { { 0x0, 0x268, 0x5EC } };
+ObjectLink g_objectGathererStartLinks[1] = { { 0x4, 0x267, 0x5FC } };
 f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
 f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 s32 D_0026ABD0[2] = { 0x130, 0x132 };
@@ -242,13 +242,13 @@ s32 D_0026ABD8[2] = { 2, 0 };
 s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 
 
-void func_00198980(ObjectSet* self)
+void InitObjectSet(ObjectSet* self)
 {
     InitCollider(self);
     self->f554 = 1;
 }
 
-void func_001989B0(ObjectSet* self)
+void LoadObjectSet(ObjectSet* self)
 {
     LoadCollider(self);
     FindOrBuildMemberGroup(&self->f584, self);
@@ -269,7 +269,7 @@ void func_001989B0(ObjectSet* self)
     *(s32*)&g_activeListFrames = fr.prev;
 }
 
-void func_00198A88(ObjectSet* self)
+void PostLoadObjectSet(ObjectSet* self)
 {
     s32 i;
 
@@ -282,7 +282,7 @@ void func_00198A88(ObjectSet* self)
     }
 }
 
-void func_00198B28(ObjectSet* self)
+void StartObjectSet(ObjectSet* self)
 {
     s32 i;
 
@@ -301,7 +301,7 @@ void func_00198B28(ObjectSet* self)
 
 ASM_FUNC(func_00198BD8);
 
-void func_00198DA8(ObjectSet* self)
+void CollectObjectSet(ObjectSet* self)
 {
     SlotFn fn = ((SlotFn*)self->desc)[7];
     fn(self);
@@ -314,7 +314,7 @@ void func_00198DA8(ObjectSet* self)
     (void)TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void func_00198E58(ObjectSet* self)
+void NotifyObjectSetTarget(ObjectSet* self)
 {
     BaseObject* t = (BaseObject*)self->f584;
     if (t != 0) {
@@ -325,7 +325,7 @@ void func_00198E58(ObjectSet* self)
     }
 }
 
-s32 func_00198E98(ObjectSet* self)
+s32 GetObjectSetActivationState(ObjectSet* self)
 {
     if (IsObjectAttached(self)) {
         return (self->f554 != 0) ? 1 : 2;
@@ -333,12 +333,12 @@ s32 func_00198E98(ObjectSet* self)
     return 0;
 }
 
-void func_00198ED8(ObjectSet* queue, void* item)
+void AddObjectSetKey(ObjectSet* queue, void* item)
 {
     queue->keys560[queue->n55C++] = item;
 }
 
-void func_00198EF8(ObjectSet* self, s32 msg, ObjectMessage* m)
+void HandleObjectSetNotification(ObjectSet* self, s32 msg, ObjectMessage* m)
 {
     (void)HandlePlacedObjectNotification(self, msg, m);
     if (msg == 5) {
@@ -357,7 +357,7 @@ void func_00198EF8(ObjectSet* self, s32 msg, ObjectMessage* m)
     }
 }
 
-s32 func_00198FB0(ObjectSet* unused, void* obj)
+s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
 {
     if (IsObjectOfKind(obj, 8) != 0 || IsObjectOfKind(obj, 0x3B) != 0) {
         return 1;
@@ -365,7 +365,7 @@ s32 func_00198FB0(ObjectSet* unused, void* obj)
     return 0;
 }
 
-void func_00199000(ObjectSet* self, Contact03* elems, s32 idx)
+void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
 {
     ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
     if (r->f18 == 0) return;
@@ -378,20 +378,20 @@ void func_00199000(ObjectSet* self, Contact03* elems, s32 idx)
     }
 }
 
-void func_00199070(FlaggedObjectSet* self)
+void InitFlaggedObjectSet(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
     self->f5A0 = (s32)TakeFlagTableIndex(g_flagTable);
 }
 
-void func_001990A8(FlaggedObjectSet* obj)
+void CopyFlaggedObjectSet(FlaggedObjectSet* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-s32 func_001990E0(FlaggedObjectSet* self)
+s32 GetFlaggedObjectSetActivationState(FlaggedObjectSet* self)
 {
     s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
@@ -400,31 +400,31 @@ s32 func_001990E0(FlaggedObjectSet* self)
     return r;
 }
 
-void func_00199138(FlaggedObjectSet* self)
+void CollectFlaggedObjectSet(FlaggedObjectSet* self)
 {
     SetFlagTableBit(g_flagTable, self->f5A0);
     CollectObjectSet(self);
 }
 
-void func_00199170(C5C* self)
+void LoadC5CObject(C5C* self)
 {
     LoadPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A918);
 }
 
-void func_001991A8(C5C* self)
+void StartC5CObject(C5C* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A928);
 }
 
-void func_001991E0(C5D* self)
+void LoadC5DObject(C5D* self)
 {
     LoadPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A938);
 }
 
-void func_00199218(C5D* self)
+void StartC5DObject(C5D* self)
 {
     StartPlacedObject(self);
     self->count300 = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objs304);
@@ -450,12 +450,12 @@ void func_00199218(C5D* self)
     SetStateWalkerTarget(self->f2D8, s4);
 }
 
-void func_00199380(C5D* flags, u32 bit)
+void SetC5DObjectMaskBit(C5D* flags, u32 bit)
 {
     flags->mask2D0 = 1 << (bit + 1);
 }
 
-void func_00199398(C5D* queue, void* item)
+void AddC5DObjectId(C5D* queue, void* item)
 {
     u32 count = queue->count2DC;
     if (count < 8) {
@@ -464,19 +464,19 @@ void func_00199398(C5D* queue, void* item)
     }
 }
 
-void func_001993C0(s32 a0) {
+void QueueWalkerActivationOnPlayer(s32 a0) {
     if (g_player != 0) {
         (void)QueuePlayerWalkerActivation(g_player, a0);
     }
 }
 
-void func_001993F0(NumberedItem* obj)
+void InitNumberedItem(NumberedItem* obj)
 {
     InitObjectSet(obj);
     obj->f5A0 = obj->world->count2300++;
 }
 
-void func_00199428(NumberedItem* self)
+void LoadNumberedItem(NumberedItem* self)
 {
     LoadObjectSet(self);
     s32 i = 0x318;
@@ -495,14 +495,14 @@ void func_00199428(NumberedItem* self)
     }
 }
 
-void func_001994C8(NumberedItem* obj)
+void CopyNumberedItem(NumberedItem* obj)
 {
     s32 value = obj->f5A0;
     CopyCollider(obj);
     obj->f5A0 = value;
 }
 
-void func_00199500(NumberedItem* self)
+void StartNumberedItem(NumberedItem* self)
 {
     s32 neg;
     s32 one;
@@ -544,7 +544,7 @@ void func_00199500(NumberedItem* self)
 
 ASM_FUNC(func_00199698);
 
-void func_00199850(NumberedItem* self)
+void SetNumberedItemFlag(NumberedItem* self)
 {
     f32 zf;
     G27C230* ctx = g_currentEntry;
@@ -586,7 +586,7 @@ L980:
     }
 }
 
-void func_001999D0(NumberedItem* self)
+void CollectNumberedItem(NumberedItem* self)
 {
     Quad16 loc;
     T217D_E30* g = &D_0026C948;
@@ -613,7 +613,7 @@ void func_00199AF0(NumberedItem* p)
     ((SlotFn*)p->desc)[77](p);
 }
 
-void func_00199B18(NumberedItem* self)
+void FlagNumberedItem(NumberedItem* self)
 {
     self->desc->m03(self);
     s32 n = self->f5A0;
@@ -634,7 +634,7 @@ void func_00199B18(NumberedItem* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void func_00199C10(NumberedItem* self, s32* out)
+void GetNumberedItemFlag(NumberedItem* self, s32* out)
 {
     s32 n = self->f5A0;
     s32 byte = n / 8;
@@ -645,12 +645,12 @@ void func_00199C10(NumberedItem* self, s32* out)
     *out = (b & mask) != 0;
 }
 
-void func_00199C58(void)
+void ApplyNumberedItemPendingImpulse(void)
 {
     ApplyColliderPendingImpulse();
 }
 
-s32 func_00199C78(NumberedItem* self, ObjectEvent* a1)
+s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
 {
     if (a1->eventFlags & 0x8) {
         ((SlotFnInt)((void**)self->desc)[25])(self, 0);
@@ -665,7 +665,7 @@ s32 func_00199C78(NumberedItem* self, ObjectEvent* a1)
 
 ASM_FUNC(func_00199D08);
 
-void func_00199F38(void)
+void FlagAllNumberedItems(void)
 {
     void* arr[0x100];
     s32 i = GatherObjectsById((void*)g_currentWorld, 0x105, 0x2E, 0, 0x100, arr) - 1;
@@ -686,12 +686,12 @@ void func_00199F38(void)
     D_0026C948.vt->m14(&D_0026C948);
 }
 
-void func_00199FF0(u32 value)
+void SetSavedWorldBits(u32 value)
 {
     g_saveData->u19F0 = value;
 }
 
-s32 func_0019A000(s32 bits)
+s32 CompletesWorldBits(s32 bits)
 {
     s64 mask = 0xF000;
     mask <<= 16;
@@ -711,7 +711,7 @@ s32 func_0019A000(s32 bits)
     return r;
 }
 
-void func_0019A088(s32 index)
+void MarkLevelRecordComplete(s32 index)
 {
     if (index == -1) index = g_saveData->f19D8;
     u8* base = (u8*)g_saveData + (index * 0x44C + 0x10);
@@ -724,27 +724,27 @@ void func_0019A088(s32 index)
     *(s32*)(base + 0x448) |= 0x1F;
 }
 
-void func_0019A0F0()
+void MarkAllLevelRecordsComplete()
 {
     for (s32 i = 0; i < 6; i++) MarkLevelRecordComplete(i);
     if (g_elementStack.f30 == 2) RequestWorldLoadByMode(0);
 }
 
-void func_0019A148(C17* self)
+void InitC17Collider(C17* self)
 {
     InitSwitchedCollider(self);
     self->f64C = -1;
     self->f644 = -1;
 }
 
-void func_0019A178(C17Marker* self, s32 x)
+void StartC17Marker(C17Marker* self, s32 x)
 {
     self->object = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->owner);
     ResolveAndStartObject(self->object);
     self->walker = CreateStateWalker(self->object, self->owner, x, 0);
 }
 
-void func_0019A1E0(C17* o)
+void StartC17Collider(C17* o)
 {
     u32 i;
     StartPlacedObject(o);
@@ -820,7 +820,7 @@ lookup:
         o->f764 = -1;
 }
 
-void func_0019A520(C17* self, s32 flag)
+void HandleC17ColliderActivation(C17* self, s32 flag)
 {
     s32 r;
     s32 flags;
@@ -876,7 +876,7 @@ INCLUDE_RODATA(jtbl_0024C870);
 INCLUDE_RODATA(jtbl_0024C8A0);
 INCLUDE_ASM(func_0019A6A8);
 
-void func_0019AB78(C17* self, s32 msg, s32* rec)
+void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
 {
     HandleSwitchedColliderNotification(self, msg, rec);
     if (msg == 12 && rec[1] == (s32)self->f650) {
@@ -918,7 +918,7 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
     }
 }
 
-void func_0019AD30(C17* list, u32 index, void* item)
+void AddEntryRecordKey(C17* list, u32 index, void* item)
 {
     Ent17* record = (Ent17*)((u8*)list + 0x658 + index * 0x2C);
     u32 count = record->count;
@@ -928,7 +928,7 @@ void func_0019AD30(C17* list, u32 index, void* item)
     }
 }
 
-void func_0019AD68(C17* self)
+void RecordC17ColliderCompletion(C17* self)
 {
     s32 sel;
     s32 idx;
@@ -993,33 +993,33 @@ void func_0019AD68(C17* self)
     }
 }
 
-void func_0019AF00(C71* self)
+void InitC71Object(C71* self)
 {
     InitObject(self);
     self->targetId = -1;
     self->f4C = 3.4028235e+38f;
 }
 
-void func_0019AF38(C71* obj)
+void RegisterC71Object(C71* obj)
 {
     RegisterObject(obj);
     AppendToList(&obj->world->list1C90, obj);
 }
 
-void func_0019AF70(C71* obj)
+void UnregisterC71Object(C71* obj)
 {
     UnregisterObject(obj);
     RemoveFromList(&obj->world->list1C90, obj);
 }
 
-void func_0019AFA8(C71* obj)
+void StartC71Object(C71* obj)
 {
     StartObject(obj);
     if (obj->targetId != -1)
         obj->target = (s32)FindFirstObjectById(obj->world, 4, obj->targetId, obj);
 }
 
-void func_0019AFF0(C71* self)
+void CopyC71Object(C71* self)
 {
     PathCurveKeptBits tmp;
 
@@ -1028,7 +1028,7 @@ void func_0019AFF0(C71* self)
     self->keep = tmp;
 }
 
-void func_0019B038(ObjectGatherer* self)
+void InitObjectGatherer(ObjectGatherer* self)
 {
     InitCollider(self);
     self->f60C = 1.0f;
@@ -1037,7 +1037,7 @@ void func_0019B038(ObjectGatherer* self)
     self->f664 = -1;
 }
 
-void func_0019B0A0(ObjectGatherer* self)
+void LoadObjectGatherer(ObjectGatherer* self)
 {
     s32 k = 0x269;
     LoadCollider(self);
@@ -1056,7 +1056,7 @@ void func_0019B0A0(ObjectGatherer* self)
     }
 }
 
-void func_0019B188(ObjectGatherer* self)
+void StartObjectGatherer(ObjectGatherer* self)
 {
     ResolveObjectLinks(self, 1, (u8*)g_objectGathererStartLinks);
     StartPlacedObject(self);
@@ -1065,19 +1065,19 @@ void func_0019B188(ObjectGatherer* self)
     self->v650 = self->v140;
 }
 
-void func_0019B1E0(ObjectGatherer* obj)
+void AddObjectGatherer(ObjectGatherer* obj)
 {
     RegisterCollider(obj);
     AppendToList(&obj->world->list1C60, obj);
 }
 
-void func_0019B218(ObjectGatherer* obj)
+void RemoveObjectGatherer(ObjectGatherer* obj)
 {
     UnregisterCollider(obj);
     RemoveFromList(&obj->world->list1C60, obj);
 }
 
-void func_0019B250(ObjectGatherer* self)
+void CopyObjectGatherer(ObjectGatherer* self)
 {
     PackedS64 tmp;
     tmp = self->q600;
@@ -1097,7 +1097,7 @@ ASM_FUNC(func_0019BB90);
 
 ASM_FUNC(func_0019BC40);
 
-s32 func_0019BE08(ObjectGatherer* self, GatherTrigger* src)
+s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
     SlotMessage loc;
     if (self->state != 3) {
@@ -1115,7 +1115,7 @@ s32 func_0019BE08(ObjectGatherer* self, GatherTrigger* src)
 
 ASM_FUNC(func_0019BE80);
 
-void func_0019C068(ObjectGatherer *self, s32 a1) {
+void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         RemoveFromList(&self->world->list1C60, self);
         ((BaseObject *)self->f5FC)->desc->m03((BaseObject *)self->f5FC);
@@ -1141,26 +1141,26 @@ void func_0019C068(ObjectGatherer *self, s32 a1) {
 INCLUDE_RODATA(jtbl_0024C910);
 ASM_FUNC(func_0019C1C0);
 
-void func_0019C3D0(BaseObject* obj)
+void RegisterC7CObject(BaseObject* obj)
 {
     RegisterObject(obj);
     AppendToList(&obj->world->list1C6C, obj);
 }
 
-void func_0019C408(BaseObject* obj)
+void UnregisterC7CObject(BaseObject* obj)
 {
     UnregisterObject(obj);
     RemoveFromList(&obj->world->list1C6C, obj);
 }
 
-void func_0019C440(C8B* obj)
+void InitC8BObject(C8B* obj)
 {
     InitObject(obj);
     obj->second38 = -1;
     obj->first34 = -1;
 }
 
-void func_0019C470(C8B* o, LoadStream* in)
+void LoadC8BObject(C8B* o, LoadStream* in)
 {
     {
         s32 i = 0x17;
@@ -1182,7 +1182,7 @@ void func_0019C470(C8B* o, LoadStream* in)
         Rec8B* r = &o->fC4[i];
         o->fC4[i].id = ReadBufferedS8(in);
         DecodeC8BGridIndex(o, i, &x, &y, &z);
-        func_0019CC10(x, y, z, o, r->pos);
+        ComputeGridBlendWeights(x, y, z, o, r->pos);
     }
     o->fC8 = ReadBufferedS16(in);
     o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
@@ -1224,7 +1224,7 @@ void func_0019C470(C8B* o, LoadStream* in)
     ReadPropertyRecords(o, in);
 }
 
-void func_0019C728(C8B* self)
+void StartC8BObject(C8B* self)
 {
     Slot8B* s;
     s32 i;
@@ -1243,21 +1243,21 @@ void func_0019C728(C8B* self)
     BuildCombinedBlendAnimation(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
     void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
-    if (nd != 0) func_00139B38(self->f3E4, nd);
+    if (nd != 0) SetBlendEntryRecordFlag(self->f3E4, nd);
     f32 buf[24];
-    func_0019CC10(self, buf, self->f54, self->f58, self->f5C);
+    ComputeGridBlendWeights(self, buf, self->f54, self->f58, self->f5C);
     Slot8B* d = self->slots;
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-    func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
+    SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
     func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q70, 0, 0, 0);
     self->f60 = self->f3E4->pC0->p8->f8;
     if (self->f80 != 0) {
-        func_0019CC10(self, buf, self->f84, self->f88, self->f8C);
+        ComputeGridBlendWeights(self, buf, self->f84, self->f88, self->f8C);
         d = self->slots;
         src = buf;
         for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-        func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
+        SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
         func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q90, 0, 0, 0);
     } else {
         self->q90 = self->q70;
@@ -1269,7 +1269,7 @@ ASM_FUNC(func_0019C9C8);
 
 INCLUDE_ASM(func_0019CC10);
 
-void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
+void DecodeC8BGridIndex(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
 {
     s32 n = self->f48;
     s32 q = p / ((n + 1) * (3 * n + 1));
@@ -1281,14 +1281,14 @@ void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
     *out2 = (f32)s / (f32)self->f48;
 }
 
-void func_0019CE28(C8B* value, f32 x, f32 y, f32 z)
+void SetC8BObjectVector(C8B* value, f32 x, f32 y, f32 z)
 {
     value->f54 = x;
     value->f58 = y;
     value->f5C = z;
 }
 
-void func_0019CE38(C8B* self, f32 x, f32 y, f32 z)
+void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z)
 {
     self->f80 = 1;
     self->f54 = x;
@@ -1304,7 +1304,7 @@ ASM_FUNC(func_0019CF68);
 
 ASM_FUNC(func_0019D0E0);
 
-void func_0019D2A8(Player* self, void* x, void* y)
+void TrackAimTargetObject(Player* self, void* x, void* y)
 {
     Quad16 q0;
     Quad16 q1;
@@ -1321,7 +1321,7 @@ void func_0019D2A8(Player* self, void* x, void* y)
     }
 }
 
-void func_0019D338(void* self, void* dst, PathCurveObject* src, f32* k)
+void TrackAimTargetPoint(void* self, void* dst, PathCurveObject* src, f32* k)
 {
     Quad16 q0;
     Quad16 q1;

@@ -4,8 +4,8 @@
 // docs/DISC.md ("Collision"). Written for this project from what retail's code does
 // (config/us/classes.tsv).
 //
-// The fields are the ones the class's own methods (src/main/001B4000.cpp, 001B8000.cpp,
-// 001BC000.cpp) and the families under it read. A 0x03 object is a part of a body: the
+// The fields are the ones the class's own methods (src/main/file_1B7968.cpp, collider_contact.cpp,
+// file_15F678.cpp) and the families under it read. A 0x03 object is a part of a body: the
 // topmost 0x03 object above it (PlacedObject::root, root03()) is the body, which keeps the list of its
 // parts, the contacts between bodies and the flags that sum up its parts.
 #ifndef COLLIDER_H

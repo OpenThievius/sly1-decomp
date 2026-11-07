@@ -85,21 +85,21 @@ Obj_001FE998* func_001FE998(void)
 }
 
 struct Arg_1FE9D0;
-s32 func_0018D740(Arg_1FE9D0* size);
+s32 EnterRuntimeLock(Arg_1FE9D0* size);
 
 s32 func_001FE9D0(Arg_1FE9D0* size)
 {
-    s32 p = func_0018D740(size);
+    s32 p = EnterRuntimeLock(size);
     if (p == 0)
         func_001FE8F0();
     return p;
 }
 
-s32 func_0018D750(void);
+s32 LeaveRuntimeLock(void);
 
 s32 func_001FE9F8(void)
 {
-    return func_0018D750();
+    return LeaveRuntimeLock();
 }
 
 struct Node_001FEA18 {

@@ -5,14 +5,14 @@
 // Takes a count from func_00137BE0 into D_eu_0027EE8C, allocates that many words into D_eu_0027ED80 and fills each through func_eu_001387C8; returns the buffer.
 extern s32 D_eu_0027EE8C;
 extern s32* D_eu_0027ED80;
-s32 func_00137BE0(void);
-void* func_0018D500(s32 size);
+s32 ReadBufferedU16(void);
+void* AllocateFrontMemory(s32 size);
 void func_eu_001387C8(void* a0, void** a1);
 s32* func_eu_001DDA10(void* a0)
 {
     s32 i;
-    D_eu_0027EE8C = func_00137BE0();
-    D_eu_0027ED80 = (s32*)func_0018D500(D_eu_0027EE8C * 4);
+    D_eu_0027EE8C = ReadBufferedU16();
+    D_eu_0027ED80 = (s32*)AllocateFrontMemory(D_eu_0027EE8C * 4);
     i = 0;
     while (i < D_eu_0027EE8C) {
         func_eu_001387C8(a0, (void**)(D_eu_0027ED80 + i));

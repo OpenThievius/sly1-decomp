@@ -16,7 +16,7 @@ extern const f32 D_0024D594 = 3.40282347e+38f;
 
 // The file's .data, in retail's order.
 f32 D_00274AD0[2] = { 1.0f, -1.0f };
-ObjectLink D_00274AD8[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
+ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
 f32 D_00274B20 = 0.5f;
 Vec02 D_00274B30 = { 1.0f, -1.0f, 0.0f, 0.0f };
 s32 D_00274B40[3] = { 0x453B8000, 0, 0x40000000 };
@@ -35,10 +35,10 @@ f32 D_00274B80[3] = { 25.0f, 0.0f, 0.25f };
 struct __attribute__((packed)) UnalignedPair { u64 v; };
 struct ThreeWords { UnalignedPair a; s32 b; };
 
-void func_001921A8(void* self);
-void func_001C5E50(void* self, f32 x);
+void InitSwitchedCollider(void* self);
+void ScaleTurningColliderRamp(void* self, f32 x);
 
-void func_001C4458(TurningCollider* self)
+void InitTurningCollider(TurningCollider* self)
 {
     InitSwitchedCollider(self);
     self->f700 = 1.0f;
@@ -49,11 +49,11 @@ void func_001C4458(TurningCollider* self)
     *(ThreeWords*)self->f704 = *(ThreeWords*)D_00274B50;
 }
 
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 a1, void* table);
-void func_001C4578(void* self, s32 a1);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 a1, void* table);
+void SetTurningColliderLinkFlag(void* self, s32 a1);
 
-void func_001C44F0(TurningCollider* self)
+void StartTurningCollider(TurningCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 6, g_turningColliderLinks);
@@ -72,7 +72,7 @@ void func_001C44F0(TurningCollider* self)
     *dst = g_identityMatrix;
 }
 
-void func_001C4578(TurningCollider* self, s32 a1)
+void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
 {
     PlacedObject* h = (PlacedObject*)self->f61C;
     if (h != 0) {
@@ -94,9 +94,9 @@ void func_001C4578(TurningCollider* self, s32 a1)
 
 ASM_FUNC(func_001C4618);
 
-s32 func_00141C90(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
+s32 CollectColliderSpansInTree(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
 
-void func_001C4790(void* unused, void* a1, void* a2, Part07* self)
+void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
 {
     ColliderSpan ents[2];
     s32 n;
@@ -115,23 +115,23 @@ void func_001C4790(void* unused, void* a1, void* a2, Part07* self)
 
 ASM_FUNC(func_001C4848);
 
-void func_001B93D8(void);
+void DrawCollider(void);
 
-void func_001C49C8(void)
+void DrawTurningCollider(void)
 {
     DrawCollider();
 }
 
 ASM_FUNC(func_001C49E8);
 
-extern f32 D_0026185C[];
+extern f32 g_gameTime[];
 extern s32 D_00605548;
-f32 func_001EAFE0(f32 x, f32 y);
-s32 func_001EAA70(s32 a, s32 b);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, u8* a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_001C0EC0();
+f32 WrapModulo(f32 x, f32 y);
+s32 RandomIntInRange(s32 a, s32 b);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, u8* a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void PlaySoundWithWanderingPitch();
 
-void func_001C4A80(Player* self, f32* p, f32 f) {
+void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     f32 old = self->f6C4;
     f32 ang;
     self->f6C4 = f;
@@ -158,20 +158,20 @@ ASM_FUNC(func_001C4C20);
 ASM_FUNC(func_001C4D60);
 
 
-void func_00192B58(void* self);
+void UpdateSwitchedCollider(void* self);
 void func_001C4C20(void* self);
 
-void func_001C4ED0(TurningCollider* self)
+void UpdateTurningCollider(TurningCollider* self)
 {
     UpdateSwitchedCollider(self);
     func_001C4C20(self);
 }
 
-s32 func_001C4F00(void) { return 3; }
+s32 GetTurningColliderContactMode(void) { return 3; }
 
-void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void ComputeColliderImpulseResponse(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void func_001C4F08(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 old = self->mode470;
     self->mode470 = self->desc06()->m55(self);
@@ -179,10 +179,10 @@ void func_001C4F08(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5
     self->mode470 = old;
 }
 
-void func_001B97E0(void* self, void* src);
-f32 func_00205778(f32 a, f32 b);
+void SetColliderRotation(void* self, void* src);
+f32 ArctangentOfRatio(f32 a, f32 b);
 
-void func_001C4FA0(TurningCollider* self, Mat02* rot)
+void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 {
     SetColliderRotation(self, rot);
     f32 r = ArctangentOfRatio(rot->r[0].y, rot->r[0].x);
@@ -193,10 +193,10 @@ void func_001C4FA0(TurningCollider* self, Mat02* rot)
 
 ASM_FUNC(func_001C4FF8);
 
-void func_001B9338(void* self);
-void func_001C5148(void* self);
+void StepCollider(void* self);
+void ApplyTurningColliderDrive(void* self);
 
-void func_001C5118(TurningCollider* self)
+void StepTurningCollider(TurningCollider* self)
 {
     StepCollider(self);
     ApplyTurningColliderDrive(self);
@@ -204,7 +204,7 @@ void func_001C5118(TurningCollider* self)
 
 ASM_FUNC(func_001C5148);
 
-s32 func_001C5248(TurningCollider* self, Contact03* a, s32 idx)
+s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
     if (self->f6DC == 0) {
         return 0;
@@ -242,7 +242,7 @@ s32 func_001C5248(TurningCollider* self, Contact03* a, s32 idx)
 // Slot 86 (func_001C5248: does a contact hold the body up), called with the caller's own
 // arguments left in place.
 typedef s32 (*ContactTestFn)(void* self);
-void func_001C5338(TurningCollider* self, Contact03* out)
+void ComputeTurningColliderContactValue(TurningCollider* self, Contact03* out)
 {
     if (((ContactTestFn*)self->desc)[0x168 / 4](self)) {
         f32 d = D_00274B74;
@@ -254,40 +254,40 @@ void func_001C5338(TurningCollider* self, Contact03* out)
     }
 }
 
-void func_001C53A8(void);
+void ClampColliderContactLimit(void);
 
-void func_001C5388(void)
+void ClampTurningColliderContactLimit(void)
 {
     ClampColliderContactLimit();
 }
 
-void func_001C53A8(void)
+void ClampColliderContactLimit(void)
 {
 }
 
-void func_00188850(const Vec02* t, f32 x, void* p);
+void BuildAxisAngleMatrix(const Vec02* t, f32 x, void* p);
 
-void func_001C53B0(TurningCollider* self)
+void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 {
     BuildAxisAngleMatrix(&g_unitZVector, self->f638, (u8*)self + 0x660);
 }
 
-void func_001C54D0(TurningCollider* self, void* b, s32 c);
+void ResolveTurningColliderGroundContact(TurningCollider* self, void* b, s32 c);
 
-void func_001C53E0(TurningCollider* self, void* b, s32 c)
+void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
 {
     if (((ContactTestFn*)self->desc)[90](self)) {
         ResolveTurningColliderGroundContact(self, b, c);
     }
 }
 
-extern f32 D_00275C60[];
+extern f32 g_unitRange[];
 
-void func_001B89B8(TurningCollider* self);
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EA408(f32 a);
+void RecomputeColliderFrame(TurningCollider* self);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapAngle(f32 a);
 
-void func_001C5438(TurningCollider* self)
+void RecomputeTurningColliderFrame(TurningCollider* self)
 {
     RecomputeColliderFrame(self);
     f32 t = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
@@ -309,19 +309,19 @@ ASM_FUNC(func_001C54D0);
 
 ASM_FUNC(func_001C57C8);
 
-void func_001C5C10(void* a, s32 b, s32 c, s32 d);
+void AddTurningColliderProbeContact(void* a, s32 b, s32 c, s32 d);
 
-void func_001C5BF0(TurningCollider* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
+void CollideTurningColliderWithObject(TurningCollider* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
 {
     AddTurningColliderProbeContact(a0, a1, a4, a5);
 }
 
 ASM_FUNC(func_001C5C10);
 
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
 
-void func_001C5D58(TurningCollider* self)
+void TurnColliderTowardHeading(TurningCollider* self)
 {
     Vec02 q = self->v160;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
@@ -332,7 +332,7 @@ void func_001C5D58(TurningCollider* self)
 ASM_FUNC(func_001C5DB8);
 
 
-void func_001C5E50(TurningCollider* self, f32 s)
+void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 {
     *(ThreeWords*)&self->f6E0 = *(ThreeWords*)D_00274B80;
     self->f6E0 *= s;

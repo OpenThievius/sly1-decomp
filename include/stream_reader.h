@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // A double-buffered stream reader, set up by InitStreamReader (func_0012FCF0)(rec, buffer): it aligns
 // the buffer address to 64 at 0x14, sets 0x04 to -1, clears the rest and returns rec: func_0012FD30, func_0012FD78, func_0012FDE8, func_0012FE70,
-// func_0012FF10, func_0012FF20 and func_0012FFE8 (0012C000.cpp) work on it, func_0018F198 keeps one
+// func_0012FF10, func_0012FF20 and func_0012FFE8 (placed_object.cpp) work on it, func_0018F198 keeps one
 // on its stack. Written for this project from what retail's code does (build/swarm/st3/groups.tsv,
 // g1158). No code shows its size: the set-up and the views end at 0x2C.
 #ifndef STREAM_READER_H

@@ -5,7 +5,7 @@
 // touches the bodies it is in contact with, func_0019E558). The objects are pooled: the world
 // keeps the unused ones in a list at +0x1B38 (linked at +0x564) and the last one it handed out
 // at +0x1B3C (func_0019E040). Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/0019C000.cpp).
+// (config/us/classes.tsv; src/main/class_descriptors.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset. The class adds no slot to 0x03's descriptor.
@@ -28,9 +28,9 @@ struct EffectOwner : Collider {
 typedef char check_EffectOwner[sizeof(EffectOwner) == 0x570 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0019E0B8(EffectOwner* self);                      // 0x1E slot 0
-void func_0019E168(EffectOwner* self);                      // 0x1E slot 7
-void func_0019E420(EffectOwner* self, f32 t);               // 0x1E slot 17
-void func_0019E848(EffectOwner* self, void* arg);           // 0x1E slot 37
+void InitEffectOwner(EffectOwner* self);                      // 0x1E slot 0
+void ReleaseEffectOwner(EffectOwner* self);                      // 0x1E slot 7
+void UpdateEffectOwner(EffectOwner* self, f32 t);               // 0x1E slot 17
+void DrawEffects(EffectOwner* self, void* arg);           // 0x1E slot 37
 
 #endif

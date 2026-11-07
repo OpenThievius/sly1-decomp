@@ -16,8 +16,8 @@ struct ScaledOffsetObject : Collider {
 
 typedef char check_ScaledOffsetObject[sizeof(ScaledOffsetObject) == 0x560 ? 1 : -1];
 
-void func_00146100(ScaledOffsetObject* self);                  // slot 0
-void func_00146130(ScaledOffsetObject* self, void* stream);    // slot 10
-void func_00146178(ScaledOffsetObject* self);                  // slot 16
+void InitScaledOffsetObject(ScaledOffsetObject* self);                  // slot 0
+void LoadScaledOffsetObject(ScaledOffsetObject* self, void* stream);    // slot 10
+void StartScaledOffsetObject(ScaledOffsetObject* self);                  // slot 16
 
 #endif

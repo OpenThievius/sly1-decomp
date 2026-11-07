@@ -6,7 +6,7 @@
 #include "float_bits.h"
 static const f32 g_tenTo30 = 1.0e30f;
 
-f32 func_00205318(f32 x)
+f32 RoundDown(f32 x)
 {
     s32 bits = *(s32*)&x;
     s32 exponent = ((bits >> 23) & 0xff) - 0x7f;

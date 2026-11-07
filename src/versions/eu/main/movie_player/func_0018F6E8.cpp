@@ -15,7 +15,7 @@ struct Obj_18F6E8_eu {
     volatile s32 f148;
 };
 
-void func_0018F6E8(MoviePlayer* self_)
+void StepMovieFrame(MoviePlayer* self_)
 {
     Obj_18F6E8_eu* self = (Obj_18F6E8_eu*)self_;
     void* s1;
@@ -24,13 +24,13 @@ void func_0018F6E8(MoviePlayer* self_)
             (void)FeedMovieDecoder((MoviePlayer*)self, 0);
         } while (self->f148 == 1);
     }
-    if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+    if (DecodeMpegPicture((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {
         UploadMovieFrame(self->f128, self->f5C, self->f10, self->f14);
         DrawMovieFrame(self->f12C, self->f10, self->f14);
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     s1 = (u8*)self + 0x80;
     if (self->f148 != 0) {
@@ -39,6 +39,6 @@ void func_0018F6E8(MoviePlayer* self_)
             AdvanceCodeChecksum((MoviePlayer*)self);
         } while (self->f148 != 0);
     }
-    func_001F6B40(self->f144);
+    PostSemaphore(self->f144);
     UpdateMovieStream((MovieStream*)s1);
 }

@@ -22,7 +22,7 @@ struct Obj_14ADE0_eu {
     Elem_14ADE0_eu items[1];
 };
 
-void func_0014ADE0(Obj_14ADE0_eu* self)
+void DrawItemColumn(Obj_14ADE0_eu* self)
 {
     if (D_00275BEC == 1) {
         f32 acc = self->f220;

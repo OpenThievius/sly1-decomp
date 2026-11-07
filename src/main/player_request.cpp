@@ -20,7 +20,7 @@ s32 D_00274FB0[2] = {2, 2};
 s32 D_00274FB8[2] = {48, 64};
 
 struct PlayerTableEntry { s32 id; f32 v; s32 object; };
-PlayerTableEntry D_00274FC0[8] = {
+PlayerTableEntry g_playerObjectTable[8] = {
     { 0x35, 30.0f, 0 }, { 0x36, 30.0f, 0 }, { 0x37, 30.0f, 0 }, { 0x3A, 30.0f, 0 },
     { 0x50, 60.0f, 0 }, { 0x58, 30.0f, 0 }, { 0x170, 30.0f, 0 }, { 0, 0.0f, 0 }
 };
@@ -44,7 +44,7 @@ ASM_FUNC(func_001D3B58);
 
 f32 func_001FD578(u64 v);
 
-s32 func_001D3C68(s32 stride, s32 n, s32 m, char* out, ...) {
+s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
     f32 cols[16];
     u64* ap = (u64*)((char*)__builtin_next_arg(out) - 32);
@@ -99,10 +99,10 @@ struct TurnBlendRecords {
     s32 f190;
 };
 
-void func_001399F8(Gr8B* obj, s32 a1, s32 a2, void* a3);
-void func_001D39E0(s32 a0, void* a1, s32 a2, void* a3);
+void SetBlendItemWeights(Gr8B* obj, s32 a1, s32 a2, void* a3);
+void SumBlendEntryVectors(s32 a0, void* a1, s32 a2, void* a3);
 
-void func_001D40A0(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, f32 f12, f32 f13)
+void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, f32 f12, f32 f13)
 {
     a0->f638 = f12;
     if (a1->f54 == 0) {
@@ -117,7 +117,7 @@ void func_001D40A0(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, f32 f12,
     a1->f140 = 0;
     a1->fF0 = 0;
     a1->f190 = 0;
-    func_001399F8(a2, 0x50, 6, a1);
+    SetBlendItemWeights(a2, 0x50, 6, a1);
     SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
 }
 
@@ -128,10 +128,10 @@ ASM_FUNC(func_001D4698);
 
 
 
-u8* func_0018D568(s32 size, void* src);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+u8* CopyToFrontMemory(s32 size, void* src);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001D4848(Player* self)
+void ResolvePlayerTableObjects(Player* self)
 {
     self->f26A8 = 7;
     self->f26AC = CopyToFrontMemory(0x54, g_playerObjectTable);
@@ -145,15 +145,15 @@ void func_001D4848(Player* self)
 INCLUDE_RODATA(jtbl_0024DBF0);
 ASM_FUNC(func_001D48E8);
 
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EA728(f32* p, s32 a, f32 b, f32 c, f32 d);
-s32 func_001300E8(void* e, s32 k);
-void func_001D4C98(Player* self);
-void func_00175170(Player* self, s32 a, s32 b);
-s32 func_001CF158(Player* self, void* b);
-void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 ApproachAngleWithRamp(f32* p, s32 a, f32 b, f32 c, f32 d);
+s32 IsObjectOfKind(void* e, s32 k);
+void RunPlayerCallback(Player* self);
+void SetPlayerState(Player* self, s32 a, s32 b);
+s32 ChoosePlayerTargetByCost(Player* self, void* b);
+void ComputeTargetArc(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
 
-void func_001D4A98(Player* self) {
+void UpdatePlayerRequestSubState(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
         f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
@@ -187,15 +187,15 @@ void func_001D4A98(Player* self) {
     }
 }
 
-void func_001D4C90(Player* self, s32 value)
+void SetPlayerCallback(Player* self, s32 value)
 {
     self->f26B0 = value;
 }
 
-extern void func_001D5620(Player* self);
-extern void func_00175170(Player* self, s32 mode, s32 count);
+extern void EndPlayerRequestState(Player* self);
+extern void SetPlayerState(Player* self, s32 mode, s32 count);
 
-void func_001D4C98(Player* self)
+void RunPlayerCallback(Player* self)
 {
     s32 v = self->f2254;
     void (*fn)(Player* self) = self->cb26B0;
@@ -215,26 +215,26 @@ void func_001D4C98(Player* self)
     }
 }
 
-void func_001D51A0(Player* self);
-void func_001D5398(Player* self);
-void func_001D5418(Player* self);
-void func_001D5468(Player* self);
-void func_001D6608(void);
+void ContinuePlayerRequestKind0(Player* self);
+void ContinuePlayerRequestKind6(Player* self);
+void ContinuePlayerSubState2A(Player* self);
+void ContinuePlayerRequestKind1Or2(Player* self);
+void FinishPlayerRequest(void);
 
 typedef void (*PlayerRequestFn)(s32 data, Player* self);
 struct PlayerRequestMessage { Player* self; s32 v; };
 
-void func_001837E0(s32 target, s32 a, s32 b, Ev07** c);
-void func_00175170(Player* self, s32 a, s32 b);
-void func_001D4C90(Player* self, s32 value);
-s32 func_001DDA80(s32 p);
-s32 func_00160D10(void);
-s32 func_00160C58(void);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-extern u32 D_00262C64;
-extern f32 D_0026185C[];
+void TriggerScriptEvent(s32 target, s32 a, s32 b, Ev07** c);
+void SetPlayerState(Player* self, s32 a, s32 b);
+void SetPlayerCallback(Player* self, s32 value);
+s32 IsPadSelectFlagHeld(s32 p);
+s32 MaskWorldBitsBySave(void);
+s32 HasSpareCount(void);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+extern u32 g_buttonCodeFlags;
+extern f32 g_gameTime[];
 
-s32 func_001D4D08(Player* self, Ev07* msg)
+s32 AcceptPlayerRequest(Player* self, Ev07* msg)
 {
     if (self->desc05()->m4B(self, msg->kind) != 0) {
         return 0;
@@ -359,22 +359,22 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     return self->f2730;
 }
 
-s32 func_00160C58(void);
-void func_00192C58(Player* o);
-void func_00175170(Player* o, s32 a, s32 b);
-s32 func_001CF158(Player* o, void* p);
-void func_001D4C90(Player* o, s32 value);
-void func_001D6608(void);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+s32 HasSpareCount(void);
+void FinishSwitchedCollider(Player* o);
+void SetPlayerState(Player* o, s32 a, s32 b);
+s32 ChoosePlayerTargetByCost(Player* o, void* p);
+void SetPlayerCallback(Player* o, s32 value);
+void FinishPlayerRequest(void);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_001D51A0(Player* self)
+void ContinuePlayerRequestKind0(Player* self)
 {
     if (self->f2228 == 0x2C && self->f2B70 != 0 &&
         (IsObjectOfKind(self->f2B70, 0x70) || IsObjectOfKind(self->f2B70, 0x71) ||
          IsObjectOfKind(self->f2B70, 0x81) || IsObjectOfKind(self->f2B70, 0x6F) ||
          IsObjectOfKind(self->f2B70, 0x7F) || IsObjectOfKind(self->f2B70, 0x76))) {
         if (HasSpareCount()) {
-            func_00192C58(self);
+            FinishSwitchedCollider(self);
             void* p = self->f2B70;
             SetPlayerState(self, 2, 2);
             SetPlayerState(self, 2, ChoosePlayerTargetByCost(self, p));
@@ -404,16 +404,16 @@ void func_001D51A0(Player* self)
     }
 }
 
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 
-void func_001D5398(Player* self)
+void ContinuePlayerRequestKind6(Player* self)
 {
     StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
     SetPlayerState(self, 4, 0x2A);
     SetPlayerCallback(self, (s32)ContinuePlayerSubState2A);
 }
 
-void func_001D5418(Player* self)
+void ContinuePlayerSubState2A(Player* self)
 {
     if (HasSpareCount()) {
         self->desc05()->m50(self);
@@ -422,7 +422,7 @@ void func_001D5418(Player* self)
     }
 }
 
-void func_001D5468(Player* self)
+void ContinuePlayerRequestKind1Or2(Player* self)
 {
     self->desc02()->m20(self, &self->v2BB0);
     self->desc02()->m21(self, &self->v2BC0);
@@ -434,10 +434,10 @@ void func_001D5468(Player* self)
 }
 
 struct PlayerWorld;
-s32 func_001DDA80(PlayerWorld* k);
-extern u32 D_00262C64;
+s32 IsPadSelectFlagHeld(PlayerWorld* k);
+extern u32 g_buttonCodeFlags;
 
-s32 func_001D54E0(Player* self, s32 n)
+s32 IsPlayerRequestBlocked(Player* self, s32 n)
 {
     s32 v;
     s32 k;
@@ -496,17 +496,17 @@ zero:
     return 0;
 }
 
-void func_0012AAE8(void* self, f32 value);
-void func_00160DA0(void);
+void SetCrossfadeRatioDeep(void* self, f32 value);
+void SpendReserveUnit(void);
 
-void func_001D5620(void* self)
+void EndPlayerRequestState(void* self)
 {
     SetCrossfadeRatioDeep(self, 1.0f);
     SpendReserveUnit();
 }
 
 struct SortedTarget { u8 pad[0x10]; f32 key; };
-s32 func_001D5650(SortedTarget* a, SortedTarget* b) { if (a->key < b->key) return -1; return 1; }
+s32 CompareSortedTargets(SortedTarget* a, SortedTarget* b) { if (a->key < b->key) return -1; return 1; }
 
 
 INCLUDE_RODATA(D_0024DC88);

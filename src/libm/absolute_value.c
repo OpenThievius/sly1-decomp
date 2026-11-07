@@ -5,7 +5,7 @@
 #include "common.h"
 #include "float_bits.h"
 
-f32 func_002052F8(f32 x)
+f32 AbsoluteValue(f32 x)
 {
     s32 bits;
 

@@ -6,19 +6,19 @@ struct Actor_eu_1AD438 {
     f32 f52C; f32 f530; u8 pad4[0x10]; f32 f544; f32 f548; f32 f54C;
 };
 struct Out_eu_1AD438;
-void func_00137228(Out_eu_1AD438* out, f32 x, f32 y);
-void func_00137238(Out_eu_1AD438* out, f32 x, f32 y);
-void func_00137248(Out_eu_1AD438* out, s32* value);
-void func_00137260(Out_eu_1AD438* out, void* p);
-void func_00137268(Out_eu_1AD438* out, s32 flag);
+void SetTextLayoutPosition(Out_eu_1AD438* out, f32 x, f32 y);
+void SetTextLayoutSize(Out_eu_1AD438* out, f32 x, f32 y);
+void SetTextLayoutColor(Out_eu_1AD438* out, s32* value);
+void SetTextLayoutHorizontalAlign(Out_eu_1AD438* out, void* p);
+void SetTextLayoutVerticalAlign(Out_eu_1AD438* out, s32 flag);
 void func_eu_001374E0(Out_eu_1AD438* out, s32 v);
 struct Out_eu_1AD438 {
     u8 d[0x20];
-    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
-    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
-    void Color(s32* c) { func_00137248(this, c); }
-    void Link(void* p) { func_00137260(this, p); }
-    void FlagB(s32 f) { func_00137268(this, f); }
+    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
+    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
+    void Color(s32* c) { SetTextLayoutColor(this, c); }
+    void Link(void* p) { SetTextLayoutHorizontalAlign(this, p); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
     void FlagC(s32 f) { func_eu_001374E0(this, f); }
 };
 struct Attach_eu_1AD438 { u8 pad0[0x18]; T217D_Word col; };

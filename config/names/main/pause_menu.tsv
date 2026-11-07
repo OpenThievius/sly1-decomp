@@ -22,3 +22,5 @@ func_00194F80	DrawPauseMenu	slot 9 of the pause menu: draws the page's title and
 func_00195928	SetPauseMenuPage	stores the page and, unless it is -1, calls func_001936A0
 func_00195958	ActivatePauseMenuSelection	reads the chosen row of the page's table and acts on it by page and item
 func_001961C0	CancelPauseMenuPage	goes back from the page: sets the layer's page to -1, 0 or 0x17 by the current page number
+func_00196330	ConstructMenuBoxStyle	the file's static initialiser: builds the style of the menu's box, the 0x1C-byte record D_0026A210 that the menu's element installs as its frame
+func_001963B8	ConstructMenuBoxStyleAtStartup	the file's _GLOBAL_$I$: calls ConstructMenuBoxStyle with (1, 0xFFFF); an entry of the startup init-list D_0027B130

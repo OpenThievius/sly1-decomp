@@ -24,7 +24,7 @@ typedef struct GsParam {
 u32 D_00279300[4] __attribute__((aligned(16))) = { 0x01000404, 0x20000000, 0, 0x05000000 };
 u32 D_00279310[4] __attribute__((aligned(16))) = { 0x06000000, 0x03000000, 0x02000000, 0x04000000 };
 char D_00279320[16] = "PsIIlibgraph2400";
-GsParam D_00279330 = { 1, 2, 1, 3, 0, 0 };
+GsParam g_gsParams = { 1, 2, 1, 3, 0, 0 };
 
 /* The display environment: what the reset writes to the GS's privileged registers. */
 typedef struct GsDispEnv {
@@ -70,23 +70,23 @@ typedef struct GsOffset {
     u64 in;
 } GsOffset;
 
-s32 func_001E1F10(const char* format, ...);
-void func_001F6910(s32 interlace, s32 mode, s32 field);
-void func_001F6960(s32 cause, s32 id);
-s32 func_001F6C60(s32 mask);
-s32 func_001F6C70(u64 mask);
-void func_001F6D40(s32 cause);
-GsParam* func_00201BA8(void);
-void func_00202140(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
-void func_00202478(void* env, s32 psm, s32 w, s32 h, s32 dx, s32 dy);
-void func_00202660(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
-s32 func_002023B0(s16 psm, s16 w, s16 h);
+s32 PrintFormatted(const char* format, ...);
+void SetVideoModeSyscall(s32 interlace, s32 mode, s32 field);
+void RemoveInterruptHandler(s32 cause, s32 id);
+s32 ReadGsInterruptMask(s32 mask);
+s32 WriteGsInterruptMask(u64 mask);
+void DisableInterruptCause(s32 cause);
+GsParam* GetGsParams(void);
+void DefineDisplayEnvironment(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
+void DefineDrawEnvironment(void* env, s32 psm, s32 w, s32 h, s32 dx, s32 dy);
+void DefineClearPacket(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
+s32 CountFrameBufferPages(s16 psm, s16 w, s16 h);
 
 LINKER_REMNANT(func_002018E0);
 ASM_FUNC(func_002018E8);
 ASM_FUNC(func_00201988);
 
-void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
+void ResetGs(s16 mode, s16 x, s16 y, s16 flag)
 {
     GsParam* p;
     u16 ext;
@@ -125,12 +125,12 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
     }
 }
 
-GsParam* func_00201BA8(void)
+GsParam* GetGsParams(void)
 {
     return &g_gsParams;
 }
 
-void func_00201BB8(void* self)
+void WriteDisplayRegisters(void* self)
 {
     s16 kind = GetGsParams()->version;
     if (kind == 1) {
@@ -147,13 +147,13 @@ void func_00201BB8(void* self)
     }
 }
 
-s32 func_00201C78(void* self)
+s32 SendDrawEnvironment(void* self)
 {
     u32 n = 0;
     if (*(volatile u32*)0x1000A000 & 0x100) {
         do {
             if (n++ > 0x1000000) {
-                func_001E1F10("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
+                PrintFormatted("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
         } while (*(volatile u32*)0x1000A000 & 0x100);
@@ -168,7 +168,7 @@ s32 func_00201C78(void* self)
     return 0;
 }
 
-void func_00201D60(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
+void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
 {
     u8* base = (u8*)self;
     u64* mode = (u64*)GetGsParams();
@@ -202,7 +202,7 @@ void func_00201D60(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag
     }
 }
 
-s32 func_00201FF8(void* self, s32 flag)
+s32 SwapDoubleBuffer(void* self, s32 flag)
 {
     u8* base = (u8*)self;
     s32 idx = flag & 1;
@@ -217,14 +217,14 @@ s32 func_00201FF8(void* self, s32 flag)
     return r;
 }
 
-s32 func_00202058(s32 mask)
+s32 SwapGsInterruptMask(s32 mask)
 {
     s32 r = ReadGsInterruptMask(mask);
     WriteGsInterruptMask(mask);
     return r;
 }
 
-void func_00202098(GsOffset* self, s16 a1, s16 a2, s16 a3)
+void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3)
 {
     u64 v = self->in;
     s64 y = (u64)((s32)((v >> 48) & 0x7FF) + 1) >> 1;
@@ -247,7 +247,7 @@ void func_00202098(GsOffset* self, s16 a1, s16 a2, s16 a3)
     self->out = lo | hi;
 }
 
-s32 func_00202120(s32 mask)
+s32 GetGsInterruptMask(s32 mask)
 {
     return ReadGsInterruptMask(mask);
 }
@@ -257,7 +257,7 @@ INCLUDE_ASM(func_00202140);
 /* The message of func_00202140, defined here while it is assembly. */
 const char D_0024F510[] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
 
-s32 func_002023B0(s16 px, s16 py, s16 pz)
+s32 CountFrameBufferPages(s16 px, s16 py, s16 pz)
 {
     u64* bits = (u64*)GetGsParams();
     s32 yS = (py + 63) / 64;

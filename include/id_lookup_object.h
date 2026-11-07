@@ -29,6 +29,6 @@ struct IdLookupObject : BaseObject {
 
 typedef char check_IdLookupObject[sizeof(IdLookupObject) == 0x68 ? 1 : -1];
 
-void func_0015FF88(IdLookupObject* self);   // slot 16
+void ResolveLookupIds(IdLookupObject* self);   // slot 16
 
 #endif

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the %c argument as an unsigned byte (lbu where US has lb)
-void func_001E1A08(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
+void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
     switch (sp->conv) {
     case '%':

@@ -12,7 +12,7 @@ struct Self_194D30_eu {
     s32 f588;
 };
 
-void func_00194D30(Self_194D30_eu* self, s32 idx, s32 value)
+void SetPauseMenuLayerPage(Self_194D30_eu* self, s32 idx, s32 value)
 {
     s32 s1;
     s32 s2;

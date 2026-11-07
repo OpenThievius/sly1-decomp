@@ -2,7 +2,7 @@
 // BYTES 215/232 (92.7%), checked 2026-11-07
 // NEAR: registers only: every instruction lines up once the last test is `if (base == 0)` and the
 //       table is read through a pointer local; temporaries differ in the two table paths. The
-//       tables are SjisCharEntry in 001E4000.cpp.
+//       tables are SjisCharEntry in state_walker.cpp.
 #include "common.h"
 #include "script_value.h"
 #include "cursor_animator.h"
@@ -16,37 +16,37 @@
 #include "state_walker.h"
 #include "globals.h"
 
-void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
-void func_001B4AD0(CursorAnimator* self);
-void func_001B46E0(AnimCursor* cur, s32 idx);
-void func_001B4750(AnimCursor* cur, f32 x, f32 y);
-AnimRecord* func_001B4688(s32 key);
-extern AnimCursor* D_00274544;
-extern AnimCursor* D_0027451C;
+void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src);
+void BindAnimatorRecord(CursorAnimator* self);
+void SetCursorFrame(AnimCursor* cur, s32 idx);
+void SetCursorCoords(AnimCursor* cur, f32 x, f32 y);
+AnimRecord* FindAnimRecord(s32 key);
+extern AnimCursor* g_lastPendingCursor;
+extern AnimCursor* g_pendingCursors;
 
-f32 func_001EAAE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001B4BC8(FrameRunAnimator* p)
+void BindFrameRunAnimator(FrameRunAnimator* p)
 {
-    func_001B4AD0(p);
+    BindAnimatorRecord(p);
     if (p->cursor.record != 0) {
-        f32 a = func_001EAAE0(p->durMin, p->durMax);
+        f32 a = RandomFloatInRange(p->durMin, p->durMax);
         p->rate = (f32)p->cursor.record->count / a;
-        f32 b = func_001EAAE0(p->waitMin, p->waitMax);
+        f32 b = RandomFloatInRange(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
 }
 
-f32 func_001B4D18(FrameRunAnimator* p)
+f32 GetFrameRunProgress(FrameRunAnimator* p)
 {
     return (p->pos / p->rate) / ((f32)p->cursor.record->count / p->rate + p->wait0);
 }
 
 
-void func_001B4D48(FramePingPongAnimator* p, AnimatorParams* s)
+void LoadFramePingPongAnimator(FramePingPongAnimator* p, AnimatorParams* s)
 {
-    func_001B4AA0(p, s);
+    LoadAnimatorBase(p, s);
     p->durMin = s->f4;
     p->durMax = s->f8;
     p->waitMin = s->fC;
@@ -54,7 +54,7 @@ void func_001B4D48(FramePingPongAnimator* p, AnimatorParams* s)
     p->pos = (f32)s->u14;
 }
 
-f32 func_001B4F18(FramePingPongAnimator* p)
+f32 GetFramePingPongProgress(FramePingPongAnimator* p)
 {
     f32 x = p->rate;
     f32 a;
@@ -68,17 +68,17 @@ f32 func_001B4F18(FramePingPongAnimator* p)
 }
 
 
-void func_001B4F80(RandomJumpAnimator* p, AnimatorParams* s)
+void LoadRandomJumpAnimator(RandomJumpAnimator* p, AnimatorParams* s)
 {
-    func_001B4AA0(p, s);
+    LoadAnimatorBase(p, s);
     p->waitMin = s->f4;
     p->waitMax = s->f8;
 }
 
 
-void func_001B5108(AngleFrameAnimator* p)
+void BindAngleFrameAnimator(AngleFrameAnimator* p)
 {
-    func_001B4AD0(p);
+    BindAnimatorRecord(p);
     if (p->cursor.record != 0) {
         s32 n = p->cursor.record->count;
         if (n >= 2) {
@@ -93,11 +93,11 @@ struct DrawnPart {
     void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
 
-extern u8 func_00166690[];
-f32 func_00205778(f32 a, f32 b);
-f32 func_001EAFE0(f32 a, f32 b);
+extern u8 DrawModelPart[];
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapModulo(f32 a, f32 b);
 
-void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q)
+void FollowObjectAngle(AngleFrameAnimator* p, void* unused, DrawnPart* q)
 {
     if (p->cursor.record == 0) {
         return;
@@ -105,40 +105,40 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q)
     if (p->cursor.record->count < 2) {
         return;
     }
-    if (*(void**)q != (void*)func_00166690) {
+    if (*(void**)q != (void*)DrawModelPart) {
         return;
     }
     FacingXY* vv;
     if (q->p78->i34 != 0) {
         vv = &q->vec;
     } else {
-        vv = (FacingXY*)D_00261990->g80;
+        vv = (FacingXY*)g_camera->g80;
     }
-    f32 t = func_00205778(vv->y, vv->x);
-    f32 r = func_001EAFE0(p->phase - t, p->sector);
+    f32 t = ArctangentOfRatio(vv->y, vv->x);
+    f32 r = WrapModulo(p->phase - t, p->sector);
     s32 k = (s32)(r / p->step);
-    func_001B46E0(&p->cursor, k);
+    SetCursorFrame(&p->cursor, k);
 }
 
-f32 func_002058A0(f32 a, f32 b);
+f32 FloatRemainder(f32 a, f32 b);
 
-void func_001B5278(ScrollAnimator* p, f32 t)
+void StepScrollAnimator(ScrollAnimator* p, f32 t)
 {
     if (p->cursor.record != 0) {
-        f32 r1 = func_002058A0(p->cursor.u + p->velU * p->mulU * t, p->wrapU);
-        f32 r2 = func_002058A0(p->cursor.v + p->velV * p->mulV * t, p->wrapV);
-        func_001B4750(&p->cursor, r1, r2);
+        f32 r1 = FloatRemainder(p->cursor.u + p->velU * p->mulU * t, p->wrapU);
+        f32 r2 = FloatRemainder(p->cursor.v + p->velV * p->mulV * t, p->wrapV);
+        SetCursorCoords(&p->cursor, r1, r2);
     }
 }
 
-void func_001B5388(ScrollAnimator* p, f32 a, f32 b)
+void SetScrollScale(ScrollAnimator* p, f32 a, f32 b)
 {
     p->mulU = a;
     p->mulV = b;
 }
 
 
-void func_001B4750(AnimCursor* a0, f32 a, f32 b)
+void SetCursorCoords(AnimCursor* a0, f32 a, f32 b)
 {
     if (a0->record == 0) return;
     if (a0->u == a && a0->v == b) return;
@@ -146,18 +146,18 @@ void func_001B4750(AnimCursor* a0, f32 a, f32 b)
     AnimCursor* v = a0->next;
     a0->v = b;
     if (v != 0) return;
-    if (a0 == D_00274544) return;
-    if (D_00274544 == 0) D_00274544 = a0;
-    a0->next = D_0027451C;
-    D_0027451C = a0;
+    if (a0 == g_lastPendingCursor) return;
+    if (g_lastPendingCursor == 0) g_lastPendingCursor = a0;
+    a0->next = g_pendingCursors;
+    g_pendingCursors = a0;
 }
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-s32 func_001B4B08(CursorAnimator* a0)
+s32 ClaimAnimatorStep(CursorAnimator* a0)
 {
-    if (a0->stamp != D_0026185C) {
-        a0->stamp = D_0026185C;
+    if (a0->stamp != g_gameTime) {
+        a0->stamp = g_gameTime;
         return 1;
     }
     return 0;
@@ -165,7 +165,7 @@ s32 func_001B4B08(CursorAnimator* a0)
 
 struct Vec2_1B55A8 { f32 x; f32 y; };
 
-void func_001B55A8(Vec2_1B55A8* a0, Vec2_1B55A8* a1)
+void CopyVec2(Vec2_1B55A8* a0, Vec2_1B55A8* a1)
 {
     a0->x = a1->x;
     a0->y = a1->y;
@@ -173,7 +173,7 @@ void func_001B55A8(Vec2_1B55A8* a0, Vec2_1B55A8* a1)
 
 struct Walk_1B5D80 { s32 a; u32 b; u32 c; };
 
-void func_001B5D80(Walk_1B5D80* s, s32 v, s32 n)
+void BuildFreeList(Walk_1B5D80* s, s32 v, s32 n)
 {
     u32 cur = s->b;
     s->a = v;
@@ -187,7 +187,7 @@ void func_001B5D80(Walk_1B5D80* s, s32 v, s32 n)
     *(u32*)cur = 0;
 }
 
-void func_001B5F28(Pool6C* list, Attachment* item)
+void PushFreeSlot(Pool6C* list, Attachment* item)
 {
     if (item) {
         item->vt = (const T2195_Vt*)list->head;
@@ -195,7 +195,7 @@ void func_001B5F28(Pool6C* list, Attachment* item)
     }
 }
 
-u32 func_001B6420(StateGraph* a0, s32 a1)
+u32 GetStateEntryKey(StateGraph* a0, s32 a1)
 {
     a1 = (a1 << 3) + (u32)a0->f38;
     return *(u32*)a1;
@@ -208,13 +208,13 @@ struct Obj_1B65F8 {
     f32 f38;
 };
 
-void func_0012F6B0(void* p);
+void SetAnimationPlayerSpeed(void* p);
 
-void func_001B65F8(Obj_1B65F8* self, f32 v)
+void SetStateWalkerSpeed(Obj_1B65F8* self, f32 v)
 {
     self->f38 = v;
     if (self->f24 != 0) {
-        func_0012F6B0(self->f24);
+        SetAnimationPlayerSpeed(self->f24);
     }
 }
 
@@ -230,36 +230,36 @@ struct Self_1B71C8 {
     Slot_1B71C8 slots[1];
 };
 
-s32 func_001300E8(void* a, s32 b);
-s32 func_00182F40(Collider* e, void* b);
+s32 IsObjectOfKind(void* a, s32 b);
+s32 IsObjectDescendantOf(Collider* e, void* b);
 
-s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
+s32 IsCompanionAgentBlocker(Self_1B71C8* self, Collider* ent)
 {
     if (ent->flags538 & (1ULL << 43)) {
         return 0;
     }
-    if (func_001300E8(ent->root, 5) != 0) {
+    if (IsObjectOfKind(ent->root, 5) != 0) {
         return 0;
     }
-    if (func_001300E8(ent->root, 0x4C) != 0) {
+    if (IsObjectOfKind(ent->root, 0x4C) != 0) {
         return 0;
     }
     for (s32 i = 0; i < self->count; i++) {
-        if (func_00182F40(ent, self->slots[i].first) != 0) {
+        if (IsObjectDescendantOf(ent, self->slots[i].first) != 0) {
             return 0;
         }
     }
     return 1;
 }
 
-void func_0015FCD8(CompanionAgent* self, void* p);
-void func_001BF048(void* p);
+void SetColliderFrozen(CompanionAgent* self, void* p);
+void ReleaseSoundLevel(void* p);
 
-void func_001B7920(CompanionAgent* self, void* p)
+void SetCompanionAgentFrozen(CompanionAgent* self, void* p)
 {
-    func_0015FCD8(self, p);
+    SetColliderFrozen(self, p);
     if (p != 0) {
-        func_001BF048(self->fCC0);
+        ReleaseSoundLevel(self->fCC0);
         self->fCC0 = 0;
     }
 }
@@ -268,7 +268,7 @@ struct Entry_1B65C8 { s32 value; s32 extra; };
 struct Host_1B65C8 { u8 pad[0x38]; Entry_1B65C8* entries; };
 struct Node_1B65C8 { u8 pad[0x18]; Host_1B65C8* host; u8 pad2[0x2C - 0x1C]; s32 index; };
 
-void func_001B65C8(Node_1B65C8* self, s32* out)
+void GetStateWalkerNextKey(Node_1B65C8* self, s32* out)
 {
     s32 value;
     if (self->index >= 0) {
@@ -285,11 +285,11 @@ struct Node_1B6C68 {
     s32 index;
 };
 
-void func_001B6E28(Node_1B6C68* self, s32 a, s32 b);
+void NotifyStateWalkerChange(Node_1B6C68* self, s32 a, s32 b);
 
-void func_001B6C68(Node_1B6C68* self)
+void CommitStateWalkerArrival(Node_1B6C68* self)
 {
-    func_001B6E28(self, self->f28, self->index);
+    NotifyStateWalkerChange(self, self->f28, self->index);
     s32 v = self->index;
     self->index = -1;
     self->f28 = v;
@@ -300,14 +300,14 @@ struct Node_1B6CA8 {
     s32 f24;
 };
 
-void func_001B6C68(Node_1B6CA8* self);
-void func_001B66A0(Node_1B6CA8* self);
+void CommitStateWalkerArrival(Node_1B6CA8* self);
+void StartNextStateWalkerEdge(Node_1B6CA8* self);
 
-void func_001B6CA8(Node_1B6CA8* self, s32 a, s32 b)
+void HandleStateWalkerTrackEnd(Node_1B6CA8* self, s32 a, s32 b)
 {
     if (a == 5 && b == self->f24) {
-        func_001B6C68(self);
-        func_001B66A0(self);
+        CommitStateWalkerArrival(self);
+        StartNextStateWalkerEdge(self);
     }
 }
 
@@ -327,7 +327,7 @@ struct Node_1B6D78 {
     Link_1B6D78* f3C;
 };
 
-void func_001B6D78(Node_1B6D78* self, s32 a, s32 b)
+void CallStateWalkerListeners(Node_1B6D78* self, s32 a, s32 b)
 {
     Obj_1B6D78* o = self->f1C;
     if (o != 0) {
@@ -347,9 +347,9 @@ void func_001B6D78(Node_1B6D78* self, s32 a, s32 b)
 struct Entry_1B6E28 { s32 value; s32 extra; };
 struct Node_1B6E28 { u8 pad[0x18]; StateGraph* host; };
 
-void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
+void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void** args);
 
-void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
+void NotifyStateWalkerChange(Node_1B6E28* self, s32 idx1, s32 idx2)
 {
     void* args[3];
     s32 v1;
@@ -367,11 +367,11 @@ void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
     args[0] = &self;
     args[1] = &v1;
     args[2] = &v2;
-    func_001837E0(self->host, 0xE, 3, args);
+    TriggerScriptEvent(self->host, 0xE, 3, args);
 }
 
 
-void func_001B46E0(AnimCursor* a0, s32 a1)
+void SetCursorFrame(AnimCursor* a0, s32 a1)
 {
     if (a0->record != 0) {
         s32 hi = a0->record->count - 1;
@@ -384,12 +384,12 @@ void func_001B46E0(AnimCursor* a0, s32 a1)
             AnimCursor* n = a0->next;
             a0->frame = a1;
             if (n == 0) {
-                if (a0 != D_00274544) {
-                    if (D_00274544 == 0) {
-                        D_00274544 = a0;
+                if (a0 != g_lastPendingCursor) {
+                    if (g_lastPendingCursor == 0) {
+                        g_lastPendingCursor = a0;
                     }
-                    a0->next = D_0027451C;
-                    D_0027451C = a0;
+                    a0->next = g_pendingCursors;
+                    g_pendingCursors = a0;
                 }
             }
         }
@@ -397,36 +397,36 @@ void func_001B46E0(AnimCursor* a0, s32 a1)
 }
 
 
-void func_001694A0(void* p);
+void SubmitMeshQueueEntry(void* p);
 
-void func_001B47C0(void)
+void FlushCursors(void)
 {
-    AnimCursor* n = D_0027451C;
+    AnimCursor* n = g_pendingCursors;
     while (n != 0) {
         for (FrameLink* e = n->links; e != 0; e = e->next) {
             if (n->flags & 1) {
                 e->dst->value = e->src->base + ((n->frame * e->src->stride) << 4);
             }
-            func_001694A0(e->dst);
+            SubmitMeshQueueEntry(e->dst);
         }
         AnimCursor* nx = n->next;
         n->next = 0;
         n = nx;
     }
-    D_0027451C = 0;
-    D_00274544 = 0;
+    g_pendingCursors = 0;
+    g_lastPendingCursor = 0;
 }
 
-extern s32 D_0027453C;
-extern CursorAnimator** D_00274540;
+extern s32 g_cursorAnimatorCount;
+extern CursorAnimator** g_cursorAnimators;
 
-s32 func_001B4B08(CursorAnimator* p);
+s32 ClaimAnimatorStep(CursorAnimator* p);
 
-void func_001B4878(f32 t)
+void StepAnimators(f32 t)
 {
-    for (s32 i = 0; i < D_0027453C; i++) {
-        CursorAnimator* o = D_00274540[i];
-        if (func_001B4B08(o) != 0) {
+    for (s32 i = 0; i < g_cursorAnimatorCount; i++) {
+        CursorAnimator* o = g_cursorAnimators[i];
+        if (ClaimAnimatorStep(o) != 0) {
             void (*fn)(CursorAnimator*, f32) = o->methods->step;
             if (fn != 0) {
                 fn(o, t);
@@ -435,23 +435,23 @@ void func_001B4878(f32 t)
     }
 }
 
-s32 func_00137BE0(void* a);
-s32 func_001B4920(s32 type);
-void* func_0018D5C0(s32 size);
-void* func_001B4980(s32 type);
-void func_00137A60(void* owner, s32 key, void* out);
+s32 ReadBufferedU16(void* a);
+s32 GetAnimatorSize(s32 type);
+void* AllocateZeroedFrontMemory(s32 size);
+void* GetAnimatorMethods(s32 type);
+void ReadBufferedStreamBytes(void* owner, s32 key, void* out);
 
-CursorAnimator* func_001B4A10(void* a0)
+CursorAnimator* ReadAnimator(void* a0)
 {
-    s32 type = func_00137BE0(a0);
+    s32 type = ReadBufferedU16(a0);
     CursorAnimator* result = 0;
     if (type != 0) {
-        CursorAnimator* o = (CursorAnimator*)func_0018D5C0(func_001B4920(type));
-        void* vt = func_001B4980(type);
+        CursorAnimator* o = (CursorAnimator*)AllocateZeroedFrontMemory(GetAnimatorSize(type));
+        void* vt = GetAnimatorMethods(type);
         o->type = type;
         o->methods = (const CursorAnimatorMethods*)vt;
         u32 buf[8];
-        func_00137A60(a0, 0x1C, buf);
+        ReadBufferedStreamBytes(a0, 0x1C, buf);
         o->methods->load(o, (AnimatorParams*)buf);
         result = o;
     }
@@ -461,7 +461,7 @@ CursorAnimator* func_001B4A10(void* a0)
 struct Node_1B5EA0 { Node_1B5EA0* next; };
 struct Pool_1B5EA0 { u8 pad[8]; Node_1B5EA0* head; };
 
-void* func_001B5EA0(Pool_1B5EA0* pool)
+void* PopFreeSlot(Pool_1B5EA0* pool)
 {
     Node_1B5EA0* n = pool->head;
     if (n != 0) {
@@ -473,103 +473,103 @@ void* func_001B5EA0(Pool_1B5EA0* pool)
 struct Node_1B5EC0 { Node_1B5EC0* next; };
 struct Pool_1B5EC0 { u8 pad[8]; Node_1B5EC0* head; };
 
-void* func_001B5EA0(Pool_1B5EC0* pool);
+void* PopFreeSlot(Pool_1B5EC0* pool);
 
-void* func_001B5EC0(Pool_1B5EC0* pool)
+void* TakePoolSlot(Pool_1B5EC0* pool)
 {
-    return func_001B5EA0(pool);
+    return PopFreeSlot(pool);
 }
 
 struct Node_1B5EE0 { Node_1B5EE0* next; };
 struct Pool_1B5EE0 { s32 count; u8 pad[4]; Node_1B5EE0* head; };
 
-void* func_001B5EA0(Pool_1B5EE0* pool);
-void func_001F5C0C(void* p, int zero, s32 count);
+void* PopFreeSlot(Pool_1B5EE0* pool);
+void FillMemory(void* p, int zero, s32 count);
 
-void* func_001B5EE0(Pool_1B5EE0* pool)
+void* PopZeroedFreeSlot(Pool_1B5EE0* pool)
 {
-    void* p = func_001B5EA0(pool);
-    func_001F5C0C(p, 0, pool->count);
+    void* p = PopFreeSlot(pool);
+    FillMemory(p, 0, pool->count);
     return p;
 }
 
-void func_00138828(void* owner, void* self);
-Contacts03* func_001DC7D0(void* owner, void* self);
-void func_00138F28(void* owner, void* self);
-void func_00152470(void* p, void* self);
-void func_001240F8(void* self);
-void func_001B7C40(Collider* self, s32 flag);
-void func_001BB580(void* p);
-void func_001BB4A0(void* self);
+void AddColliderToSweepAxes(void* owner, void* self);
+Contacts03* TakeContactTable(void* owner, void* self);
+void InitContactPairFlags(void* owner, void* self);
+void AppendToList(void* p, void* self);
+void RegisterPlacedObject(void* self);
+void SetColliderPartListed(Collider* self, s32 flag);
+void UpdateAnchorModeFlags(void* p);
+void ResolveContactHandler(void* self);
 
-void func_001B7A98(Collider* self)
+void RegisterCollider(Collider* self)
 {
     World* owner = self->world;
     owner->count34++;
     if (self->parent == 0) {
-        func_00138828(owner, self);
-        self->contacts = func_001DC7D0(owner, self);
-        func_00138F28(owner, self);
+        AddColliderToSweepAxes(owner, self);
+        self->contacts = TakeContactTable(owner, self);
+        InitContactPairFlags(owner, self);
         owner->count38++;
-        func_00152470(&owner->bodies, self);
+        AppendToList(&owner->bodies, self);
     }
-    func_001240F8(self);
-    func_001B7C40(self, 1);
+    RegisterPlacedObject(self);
+    SetColliderPartListed(self, 1);
     self->desc03()->m44(self);
     if (!(self->flags538 & (1ULL << 54))) {
-        func_001BB580(self->root03());
+        UpdateAnchorModeFlags(self->root03());
     } else {
-        func_001BB580(self);
+        UpdateAnchorModeFlags(self);
     }
-    func_001BB4A0(self);
+    ResolveContactHandler(self);
 }
 
-void func_001243E0(void* self);
-void func_001388A0(void* owner, void* self);
-void func_001DC828(void* owner, Contacts03* contacts);
-void func_00152600(void* p, void* self);
-void func_001DC108(void* owner, Touch03* list);
+void UnregisterPlacedObject(void* self);
+void RemoveColliderFromSweepAxes(void* owner, void* self);
+void ReleaseContactTable(void* owner, Contacts03* contacts);
+void RemoveFromList(void* p, void* self);
+void FreeTouchNodes(void* owner, Touch03* list);
 
-void func_001B7B78(Collider* self)
+void UnregisterCollider(Collider* self)
 {
     Collider* old50 = self->root03();
     World* owner = self->world;
-    func_001B7C40(self, 0);
-    func_001243E0(self);
+    SetColliderPartListed(self, 0);
+    UnregisterPlacedObject(self);
     owner->count34--;
     if (self->parent == 0) {
-        func_001388A0(owner, self);
-        func_001DC828(owner, self->contacts);
+        RemoveColliderFromSweepAxes(owner, self);
+        ReleaseContactTable(owner, self->contacts);
         owner->count38--;
-        func_00152600(&owner->bodies, self);
+        RemoveFromList(&owner->bodies, self);
     }
-    func_001DC108(owner, self->touching);
+    FreeTouchNodes(owner, self->touching);
     u64 flags = self->flags538;
     self->touching = 0;
     if (!(flags & (1ULL << 54)) && old50 != self) {
-        func_001BB580(old50);
+        UpdateAnchorModeFlags(old50);
     }
 }
 
-void func_00138BE0(void* owner, void* self, s32 n);
+void ClearRootObjectStateBits(void* owner, void* self, s32 n);
 
-void func_001B7C40(Collider* self, s32 flag)
+void SetColliderPartListed(Collider* self, s32 flag)
 {
     if (flag == ((self->flags538 >> 50) & 1)) {
         return;
     }
     if (flag != 0) {
-        func_00152470(&self->root03()->parts, self);
+        AppendToList(&self->root03()->parts, self);
     } else {
-        func_00152600(&self->root03()->parts, self);
+        RemoveFromList(&self->root03()->parts, self);
     }
     self->flags538 = (self->flags538 & ~(1ULL << 50)) | ((u64)(flag & 1) << 50);
-    func_00138BE0(self->world, self, 7);
+    ClearRootObjectStateBits(self->world, self, 7);
     Collider* sub = self->root03();
     sub->desc03()->m32(sub);
 }
 
-void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src)
+void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src)
 {
     s32 old = self->cursor.flags;
     self->recordKey = src->recordKey;
@@ -580,19 +580,19 @@ void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src)
 }
 
 
-void func_001B4AD0(CursorAnimator* self)
+void BindAnimatorRecord(CursorAnimator* self)
 {
     if (self->cursor.record == 0) {
-        self->cursor.record = func_001B4688(self->recordKey);
+        self->cursor.record = FindAnimRecord(self->recordKey);
     }
 }
 
-f32 func_001B4B38(void)
+f32 GetAnimatorZeroProgress(void)
 {
     return 0.0f;
 }
 
-AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key)
+AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key)
 {
     if (key->key == self->recordKey) {
         return &self->cursor;
@@ -601,15 +601,15 @@ AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key)
 }
 
 
-void func_00182C58(void* self);
-void func_001B61F0(void* self);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void StartObject(void* self);
+void SpawnInitialStateWalker(void* self);
+void AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001B61A8(StateGraph* self)
+void StartStateGraph(StateGraph* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     if (self->armed != 0) {
-        func_001DBCC8(self->world, (void*)func_001B61F0, self, 0, 0);
+        AppendQueuedCall(self->world, (void*)SpawnInitialStateWalker, self, 0, 0);
     }
 }
 
@@ -618,7 +618,7 @@ struct Pair_1B63C0 {
     s32 value_04;
 };
 
-s32 func_001B63C0(StateGraph* self, s32 key)
+s32 FindStateEntryIndex(StateGraph* self, s32 key)
 {
     s32 count = self->f34;
     if (count > 0) {
@@ -636,9 +636,9 @@ s32 func_001B63C0(StateGraph* self, s32 key)
 }
 
 
-void func_001B4B68(FrameRunAnimator* p, AnimatorParams* s)
+void LoadFrameRunAnimator(FrameRunAnimator* p, AnimatorParams* s)
 {
-    func_001B4AA0(p, s);
+    LoadAnimatorBase(p, s);
     p->durMin = s->f4;
     p->durMax = s->f8;
     p->waitMin = s->fC;
@@ -646,10 +646,10 @@ void func_001B4B68(FrameRunAnimator* p, AnimatorParams* s)
     p->pos = (f32)s->u14;
 }
 
-f32 func_001EAAE0(f32 a, f32 b);
-f32 func_001EAFE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
+f32 WrapModulo(f32 a, f32 b);
 
-void func_001B4C30(FrameRunAnimator* p, f32 dt)
+void StepFrameRunAnimator(FrameRunAnimator* p, f32 dt)
 {
     if (p->cursor.record == 0) {
         return;
@@ -663,22 +663,22 @@ void func_001B4C30(FrameRunAnimator* p, f32 dt)
     }
     p->pos = p->pos + p->rate * dt;
     if ((f32)p->cursor.record->count <= p->pos) {
-        f32 a = func_001EAAE0(p->durMin, p->durMax);
+        f32 a = RandomFloatInRange(p->durMin, p->durMax);
         p->rate = (f32)p->cursor.record->count / a;
-        f32 b = func_001EAAE0(p->waitMin, p->waitMax);
+        f32 b = RandomFloatInRange(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
-    f32 t = func_001EAFE0(p->pos, (f32)p->cursor.record->count);
+    f32 t = WrapModulo(p->pos, (f32)p->cursor.record->count);
     p->pos = t;
-    func_001B46E0(&p->cursor, (s32)t);
+    SetCursorFrame(&p->cursor, (s32)t);
 }
 
-s32 func_001B63C0(void* self, s32 key);
+s32 FindStateEntryIndex(void* self, s32 key);
 
-s32 func_001B63F8(void* self, s32 key)
+s32 FindStateEntryIndexOrZero(void* self, s32 key)
 {
-    s32 r = func_001B63C0(self, key);
+    s32 r = FindStateEntryIndex(self, key);
     return r < 0 ? 0 : r;
 }
 
@@ -693,79 +693,79 @@ struct Obj_001B6438 {
     void* ptr_3C;
 };
 
-void func_0012E760(void* p);
-void func_001DBC18(void* a, void* b);
-void func_00152600(void* a, void* b);
-void func_001B5F28(void* a, void* b);
-void func_001837E0(void* a, s32 b, s32 c, s32 d);
+void StopAnimationPlayer(void* p);
+void ReleaseCallRecords(void* a, void* b);
+void RemoveFromList(void* a, void* b);
+void PushFreeSlot(void* a, void* b);
+void TriggerScriptEvent(void* a, s32 b, s32 c, s32 d);
 
-void func_001B6438(Obj_001B6438* self)
+void DestroyStateWalker(Obj_001B6438* self)
 {
     Owner_001B6438* owner = self->owner_18;
     if (self->handle_24 != 0) {
-        func_0012E760(self->handle_24);
+        StopAnimationPlayer(self->handle_24);
         self->handle_24 = 0;
     }
-    func_001DBC18(self->owner_18->reg_14, self->ptr_3C);
+    ReleaseCallRecords(self->owner_18->reg_14, self->ptr_3C);
     self->ptr_3C = 0;
-    func_00152600((u8*)self->owner_18 + 0x48, self);
-    func_00152600((u8*)self->owner_18->reg_14 + 0x1B94, self);
-    func_001B5F28((u8*)self->owner_18->reg_14 + 0x1B88, self);
-    func_001837E0(owner, 0x12, 0, 0);
+    RemoveFromList((u8*)self->owner_18 + 0x48, self);
+    RemoveFromList((u8*)self->owner_18->reg_14 + 0x1B94, self);
+    PushFreeSlot((u8*)self->owner_18->reg_14 + 0x1B88, self);
+    TriggerScriptEvent(owner, 0x12, 0, 0);
 }
 
 struct Vec3_1B5588 { f32 x; f32 y; f32 z; };
 
-void func_001B5588(Vec3_1B5588* dst, Vec3_1B5588* src)
+void CopyVec3(Vec3_1B5588* dst, Vec3_1B5588* src)
 {
     dst->x = src->x;
     dst->y = src->y;
     dst->z = src->z;
 }
 
-void func_00152438(void* self, s32 value);
-void func_00123ED0(void* self);
-void func_00160E80(Mesh03* mesh);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
-void func_001BB4A0(void* self);
+void SetListLinkOffset(void* self, s32 value);
+void InitPlacedObject(void* self);
+void ClearRecordBody(Mesh03* mesh);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+s32 LookupScriptVariable(void* a, s32 b, s32 c, ScriptValue* d);
+void ResolveContactHandler(void* self);
 
-void func_001B7968(Collider* self)
+void InitCollider(Collider* self)
 {
     ScriptValue local;
     s32 s0;
-    func_0011B008(&local);
-    func_00152438(&self->parts, 0x2E4);
-    func_00123ED0(self);
-    func_00160E80(&self->mesh);
+    InitScriptValue(&local);
+    SetListLinkOffset(&self->parts, 0x2E4);
+    InitPlacedObject(self);
+    ClearRecordBody(&self->mesh);
     self->meshCopy = self->mesh;
     if (self->parent != 0) {
-        func_001B9AE0(self, 3, 0, 3, 0);
+        SetColliderAnchors(self, 3, 0, 3, 0);
     }
     self->f4BC = -1;
     self->index = -1;
     if (self->f2C != 0) {
-        s0 = func_0011A498(self->f2C, 6, 1, &local);
-        s0 |= func_0011A498(self->f2C, 7, 1, &local);
+        s0 = LookupScriptVariable(self->f2C, 6, 1, &local);
+        s0 |= LookupScriptVariable(self->f2C, 7, 1, &local);
         if (s0 != 0) {
             self->flags538 |= (u64)0x8000 << 48;
         }
     }
     self->gravity = self->world->gravity;
-    func_001BB4A0(self);
-    func_0011B060(&local, 2);
+    ResolveContactHandler(self);
+    DestroyScriptValue(&local, 2);
 }
 
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 
-void func_001B4330(Quad_001B4580* p);
+void ConvertHsvToRgb(Quad_001B4580* p);
 
-void func_001B4580(Quad_001B4580* src, f32* dst)
+void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
 {
     Quad_001B4580 tmp = *src;
     tmp.v[1] = tmp.v[1] * 0.003921569f;
     tmp.v[2] = tmp.v[2] * 0.003921569f;
-    func_001B4330(&tmp);
+    ConvertHsvToRgb(&tmp);
     dst[0] = dst[0] * 255.0f;
     dst[1] = dst[1] * 255.0f;
     dst[2] = dst[2] * 255.0f;
@@ -774,16 +774,16 @@ void func_001B4580(Quad_001B4580* src, f32* dst)
 struct Slot_1B70B0 { s32 value; s32 pad4; };
 struct Self_1B70B0 { u8 pad0[0xC38]; Slot_1B70B0 slots[1]; };
 
-s32 func_001CA600(s32 index);
+s32 IsAgentSlotIndex(s32 index);
 
-void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
+void SetCompanionAgentLookId(Self_1B70B0* self, s32 index, s32 value)
 {
-    (void)func_001CA600(index);
+    (void)IsAgentSlotIndex(index);
     self->slots[index].value = value;
 }
 
 
-void func_001B7100(CompanionAgent* self, s32 value)
+void AddCompanionAgentExcludedId(CompanionAgent* self, s32 value)
 {
     s32 n = self->fCD4;
     if ((u32)n < 4) {
@@ -793,40 +793,40 @@ void func_001B7100(CompanionAgent* self, s32 value)
     }
 }
 
-f32 func_001B5308(ScrollAnimator* p) { f32 result=0.0f; if (p->velU != 0.0f) result=(p->cursor.u/p->wrapU)*0.5f; else result=0.5f; if (p->velV != 0.0f) result += (p->cursor.v/p->wrapV)*0.5f; else result += 0.5f; return result; }
+f32 GetScrollProgress(ScrollAnimator* p) { f32 result=0.0f; if (p->velU != 0.0f) result=(p->cursor.u/p->wrapU)*0.5f; else result=0.5f; if (p->velV != 0.0f) result += (p->cursor.v/p->wrapV)*0.5f; else result += 0.5f; return result; }
 
-void func_001B5568(TriangleAnimator* self, void** out) { out[0] = &self->out44; out[1] = &self->out4C; out[2] = &self->out48; }
+void GetTriangleOutputs(TriangleAnimator* self, void** out) { out[0] = &self->out44; out[1] = &self->out4C; out[2] = &self->out48; }
 
-void func_00124A48(void* self);
+void StartPlacedObject(void* self);
 
-void func_001B5CD8(CameraPositionedObject* self)
+void StartCameraPositionedObject(CameraPositionedObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
 struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
 
-void* func_0018D500(s32 size);
-void func_001B5D80(void* s, s32 v, s32 n);
+void* AllocateFrontMemory(s32 size);
+void BuildFreeList(void* s, s32 v, s32 n);
 
-void func_001B5DD0(Walk_1B5DD0* s, s32 size, s32 count)
+void InitSlotPool(Walk_1B5DD0* s, s32 size, s32 count)
 {
     s32 stride = (size + 7) & ~7;
-    s->b = func_0018D500(stride * count);
-    func_001B5D80(s, stride, count);
+    s->b = AllocateFrontMemory(stride * count);
+    BuildFreeList(s, stride, count);
 }
 
 struct Walk_1B5E30 { s32 a; void* b; s32 c; };
 
-void* func_0018D500(s32 size);
-void func_001B5D80(void* s, s32 v, s32 n);
+void* AllocateFrontMemory(s32 size);
+void BuildFreeList(void* s, s32 v, s32 n);
 
-void func_001B5E30(Walk_1B5E30* s, s32 size, s32 count)
+void InitAlignedSlotPool(Walk_1B5E30* s, s32 size, s32 count)
 {
-    s32 addr = (s32)func_0018D500(size * count + 0x30);
+    s32 addr = (s32)AllocateFrontMemory(size * count + 0x30);
     s->b = (void*)((addr + 0x3F) & -0x40);
-    func_001B5D80(s, size, count);
+    BuildFreeList(s, size, count);
 }
 
 struct Node_1B6388 {
@@ -841,7 +841,7 @@ struct Owner_1B6388 {
     Node_1B6388* head;
 };
 
-void* func_001B6388(Owner_1B6388* self, s32 key)
+void* FindListNodeByKey(Owner_1B6388* self, s32 key)
 {
     ListFrame frame;
     Node_1B6388* node = self->head;
@@ -866,11 +866,11 @@ struct Self_1B6DF8 {
     Holder_1B6DF8* holder;
 };
 
-void func_001831E8(void* a, void* b, s32 c, void* d);
+void AddCallbackNode(void* a, void* b, s32 c, void* d);
 
-void func_001B6DF8(Self_1B6DF8* self, PlacedObject** p)
+void AddStateWalkerListener(Self_1B6DF8* self, PlacedObject** p)
 {
-    func_001831E8(self->holder->ptr, (u8*)self + 0x3C, (s32)(*p)->link40.prev, p);
+    AddCallbackNode(self->holder->ptr, (u8*)self + 0x3C, (s32)(*p)->link40.prev, p);
 }
 
 struct Pair_1B7128 {
@@ -878,46 +878,46 @@ struct Pair_1B7128 {
     s32 value;
 };
 
-void func_001C72A0(void* self);
-void func_001B6F50(void* self);
-s32 func_0015A448(void* host, s32 id, void* ctx);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void StartAgent(void* self);
+void ResolveCompanionAgentObjects(void* self);
+s32 FindFirstObjectByIdMode4(void* host, s32 id, void* ctx);
+s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001B7128(CompanionAgent* self)
+void StartCompanionAgent(CompanionAgent* self)
 {
-    func_001C72A0(self);
-    func_001B6F50(self);
+    StartAgent(self);
+    ResolveCompanionAgentObjects(self);
     if (self->fC28 != -1) {
-        self->fC2C = func_0015A448(self->world, self->fC28, self);
+        self->fC2C = FindFirstObjectByIdMode4(self->world, self->fC28, self);
     }
     if (self->fCD4 > 0) {
         s32 i = 0;
         Pair_1B7128* p = (Pair_1B7128*)self->fCD8;
         do {
-            p->value = func_0015A418(self->world, 0x104, p->key, self);
+            p->value = FindFirstObjectById(self->world, 0x104, p->key, self);
             p++;
             i++;
         } while (i < self->fCD4);
     }
 }
 
-void func_001C7CB8(void* self);
-void func_001B7638(void* self);
+void UpdateAgent(void* self);
+void AimCompanionAgentPose(void* self);
 
-void func_001B7608(CompanionAgent* self)
+void UpdateCompanionAgent(CompanionAgent* self)
 {
-    func_001C7CB8(self);
-    func_001B7638(self);
+    UpdateAgent(self);
+    AimCompanionAgentPose(self);
 }
 
 typedef void (*VFn_1B7790)(void* self);
 struct Sub_1B7790 { VFn_1B7790* vtbl; };
-void func_001C91C8(void* self);
-void func_001BF048(void* p);
+void EnterAgentState(void* self);
+void ReleaseSoundLevel(void* p);
 
-void func_001B7790(CompanionAgent* self)
+void EnterCompanionAgentState(CompanionAgent* self)
 {
-    func_001C91C8(self);
+    EnterAgentState(self);
     switch (self->f724) {
     case 6:
         self->fCC4 = 0;
@@ -927,7 +927,7 @@ void func_001B7790(CompanionAgent* self)
         if (p != 0) {
             p->vtbl[7](p);
         }
-        func_001BF048(self->fCC0);
+        ReleaseSoundLevel(self->fCC0);
         self->fCC0 = 0;
         break;
     }
@@ -937,21 +937,21 @@ void func_001B7790(CompanionAgent* self)
 
 typedef s32 (*VFn_1B7818)(void* self);
 
-s32 func_001CA468(void* self);
+s32 IsAgentTargetInRange(void* self);
 
-s32 func_001B7818(CompanionAgent* self)
+s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
 {
-    if (func_001CA468(self) == 0) {
+    if (IsAgentTargetInRange(self) == 0) {
         return 0;
     }
     return ((VFn_1B7818*)self->desc)[91](self);
 }
 
-void func_001C9DE0(void* self, s32 code, void* req);
+void HandleAgentNotification(void* self, s32 code, void* req);
 
-void func_001B78C0(CompanionAgent* self, s32 code, void* req)
+void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
 {
-    func_001C9DE0(self, code, req);
+    HandleAgentNotification(self, code, req);
     if (code == 7) {
         if (req == self->f7E0) {
             self->fCC4++;
@@ -959,23 +959,23 @@ void func_001B78C0(CompanionAgent* self, s32 code, void* req)
     }
 }
 
-f32 func_001EAAE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001B4DA8(FramePingPongAnimator* p)
+void BindFramePingPongAnimator(FramePingPongAnimator* p)
 {
-    func_001B4AD0(p);
+    BindAnimatorRecord(p);
     if (p->cursor.record != 0) {
-        f32 a = func_001EAAE0(p->durMin, p->durMax);
+        f32 a = RandomFloatInRange(p->durMin, p->durMax);
         p->rate = (f32)(p->cursor.record->count * 2) / a;
-        f32 b = func_001EAAE0(p->waitMin, p->waitMax);
+        f32 b = RandomFloatInRange(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
 }
 
-f32 func_001EAAE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001B4E18(FramePingPongAnimator* p, f32 dt)
+void StepFramePingPongAnimator(FramePingPongAnimator* p, f32 dt)
 {
     AnimRecord* d = p->cursor.record;
     if (d == 0) return;
@@ -993,44 +993,44 @@ void func_001B4E18(FramePingPongAnimator* p, f32 dt)
     }
     if (p->pos < 0.0f) {
         p->pos = 0.0f;
-        f32 a = func_001EAAE0(p->durMin, p->durMax);
+        f32 a = RandomFloatInRange(p->durMin, p->durMax);
         p->rate = (f32)(p->cursor.record->count * 2) / a;
-        f32 b = func_001EAAE0(p->waitMin, p->waitMax);
+        f32 b = RandomFloatInRange(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
-    func_001B46E0(&p->cursor, (s32)p->pos);
+    SetCursorFrame(&p->cursor, (s32)p->pos);
 }
 
-extern f32 D_0026185C;
-f32 func_001EA408(f32 a);
-void func_001EAD88(f32 angle, f32* a, f32* b);
+extern f32 g_gameTime;
+f32 WrapAngle(f32 a);
+void ComputeSinCos(f32 angle, f32* a, f32* b);
 
-void func_001B5400(CircleAnimator* self)
+void StepCircleAnimator(CircleAnimator* self)
 {
     if (self->cursor.record != 0) {
         f32 t[2];
-        f32 ang = func_001EA408(D_0026185C * self->omega);
-        func_001EAD88(ang, &t[0], &t[1]);
+        f32 ang = WrapAngle(g_gameTime * self->omega);
+        ComputeSinCos(ang, &t[0], &t[1]);
         t[0] = t[0] * self->radius + self->centerU;
         t[1] = t[1] * self->radius + self->centerV;
-        func_001B4750(&self->cursor, t[0], t[1]);
+        SetCursorCoords(&self->cursor, t[0], t[1]);
     }
 }
 
-extern f32 D_0026185C;
-f32 func_001EAFE0(f32 x, f32 y);
+extern f32 g_gameTime;
+f32 WrapModulo(f32 x, f32 y);
 
-f32 func_001B5488(CircleAnimator* p)
+f32 GetCircleProgress(CircleAnimator* p)
 {
-    f32 a = func_001EAFE0(D_0026185C * p->omega, 6.2831855f);
+    f32 a = WrapModulo(g_gameTime * p->omega, 6.2831855f);
     return a * 0.15915494f;
 }
 
 
-void func_001B54D0(TriangleAnimator* self, AnimatorParams* src)
+void LoadTriangleAnimator(TriangleAnimator* self, AnimatorParams* src)
 {
-    func_001B4AA0(self, src);
+    LoadAnimatorBase(self, src);
     s32 fl = self->cursor.flags;
     self->u0 = src->f4;
     self->v0 = src->f8;
@@ -1042,13 +1042,13 @@ void func_001B54D0(TriangleAnimator* self, AnimatorParams* src)
     self->dv2 = d;
 }
 
-void func_00124FC0(void* self);
+void UpdatePlacedObject(void* self);
 
 
-void func_001B5D28(CameraPositionedObject* self)
+void MoveObjectToCamera(CameraPositionedObject* self)
 {
-    func_00124FC0(self);
-    Vec02* src = (Vec02*)D_00261990->f40;
+    UpdatePlacedObject(self);
+    Vec02* src = (Vec02*)g_camera->f40;
     Vec02 q = *src;
     if (self->followHeight == 0) {
         q.z = self->v140.z;
@@ -1056,12 +1056,12 @@ void func_001B5D28(CameraPositionedObject* self)
     self->desc02()->m1D(self, &q);
 }
 
-void func_001C6F48(void* self);
+void InitAgent(void* self);
 
 struct Ent_1B6EC8 { s32 v; s32 pad; };
-void func_001B6EC8(CompanionAgent* self)
+void InitCompanionAgent(CompanionAgent* self)
 {
-    func_001C6F48(self);
+    InitAgent(self);
     self->fC20 = 2000.0f;
     self->fC18 = 300.0f;
     self->fC1C = 300.0f;
@@ -1079,15 +1079,15 @@ void func_001B6EC8(CompanionAgent* self)
 }
 
 
-void func_001B5398(CircleAnimator* p, AnimatorParams* s)
+void LoadCircleAnimator(CircleAnimator* p, AnimatorParams* s)
 {
-    func_001B4AA0(p, s);
+    LoadAnimatorBase(p, s);
     p->omega = s->f4; p->radius = s->f8; p->centerU = s->fC; p->centerV = s->f10; p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-s32 func_001B7860(CompanionAgent* self)
+s32 AnswerCompanionAgentRosterPoll(CompanionAgent* self)
 {
     s32 r;
     if (self->f724 == 11) {
@@ -1099,7 +1099,7 @@ s32 func_001B7860(CompanionAgent* self)
     if (self->fCC4 <= 0) {
         goto ret0;
     }
-    if (5.0f < D_0026185C - self->f728) {
+    if (5.0f < g_gameTime - self->f728) {
         r = 2;
         return r;
     }
@@ -1110,24 +1110,24 @@ ret0:
     return r;
 }
 
-extern s32 D_002744F8;
-extern AnimRecord* D_002744FC;
+extern s32 g_animRecordCount;
+extern AnimRecord* g_animRecords;
 
-AnimRecord* func_001B4688(s32 key)
+AnimRecord* FindAnimRecord(s32 key)
 {
     if (key == -1) {
         return 0;
     }
     s32 i = 0;
-    if (i < D_002744F8) {
-        AnimRecord* p = D_002744FC;
+    if (i < g_animRecordCount) {
+        AnimRecord* p = g_animRecords;
         do {
             if (p->key == key) {
                 return p;
             }
             i++;
             p++;
-        } while (i < D_002744F8);
+        } while (i < g_animRecordCount);
     }
     return 0;
 }
@@ -1150,10 +1150,10 @@ struct Bank_1B61F0 {
     Slot_1B61F0* slots_40;
 };
 
-s32 func_0015A448(void* owner, s32 value, void* bank);
-void func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
+s32 FindFirstObjectByIdMode4(void* owner, s32 value, void* bank);
+void CreateStateWalker(void* bank, s32 r, s32 minus_one, s32 zero);
 
-void func_001B61F0(Bank_1B61F0* self)
+void SpawnInitialStateWalker(Bank_1B61F0* self)
 {
     s32 i = 0;
     s32 n = self->count_3C;
@@ -1168,16 +1168,16 @@ void func_001B61F0(Bank_1B61F0* self)
     }
     s32 r;
     if (self->count_3C > 0 && e != 0 && e->value_40 != -1) {
-        r = func_0015A448(self->owner_14, e->value_40, self);
+        r = FindFirstObjectByIdMode4(self->owner_14, e->value_40, self);
     } else {
         r = 0;
     }
-    func_001B6290(self, r, -1, 0);
+    CreateStateWalker(self, r, -1, 0);
 }
 
-void func_001B5200(ScrollAnimator* p, AnimatorParams* s)
+void LoadScrollAnimator(ScrollAnimator* p, AnimatorParams* s)
 {
-    func_001B4AA0(p, s);
+    LoadAnimatorBase(p, s);
     p->velU = s->f4;
     p->velV = s->f8;
     p->wrapU = s->fC;
@@ -1191,7 +1191,7 @@ struct SjisCharEntry { u16 sjis; u16 ascii; };
 extern SjisCharEntry D_00274588[];
 extern SjisCharEntry D_00274610[];
 
-u16 func_001B5B58(u8 ch)
+u16 MapCharToCode(u8 ch)
 {
     s32 base = 0;
     s32 idx;
@@ -1218,14 +1218,14 @@ u16 func_001B5B58(u8 ch)
     SjisCharEntry* e = &D_00274588[ch - (base + 0x1F)];
     return e->sjis;
 }
-s32 func_001E2100(void* p);
+s32 GetStringLength(void* p);
 
-void func_001B5C40(u8* src, u16* dst)
+void ConvertStringToCharCodes(u8* src, u16* dst)
 {
-    s32 n = func_001E2100(src);
+    s32 n = GetStringLength(src);
     s32 i;
     for (i = 0; i < n; i++) {
-        u32 r = func_001B5B58(src[i]);
+        u32 r = MapCharToCode(src[i]);
         u32 lo = (r & 0xFF) << 8;
         u32 hi = (r >> 8) & 0xFF;
         dst[i] = (u16)(hi | lo);
@@ -1242,38 +1242,38 @@ struct Item_1B6CF0 {
 };
 struct Node_1B6CF0 { u8 pad[0x24]; s32 f24; };
 
-f32 func_001B6C68(Node_1B6CF0* self);
-void func_001B66A0(Node_1B6CF0* self);
-void func_0012F0A0(void* a, f32 b, f32 c, s32 d);
+f32 CommitStateWalkerArrival(Node_1B6CF0* self);
+void StartNextStateWalkerEdge(Node_1B6CF0* self);
+void SeekAnimationPlayer(void* a, f32 b, f32 c, s32 d);
 
-void func_001B6CF0(Node_1B6CF0* self, f32 t)
+void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t)
 {
     f32 rem = t;
     Item_1B6CF0* item = (Item_1B6CF0*)self->f24;
     while (item) {
         f32 diff = item->inner->f34 - item->f14;
         if (rem < diff) {
-            func_0012F0A0(item, rem, 1.0f, 1);
+            SeekAnimationPlayer(item, rem, 1.0f, 1);
             break;
         }
         rem = rem - diff;
-        (void)func_001B6C68(self);
-        func_001B66A0(self);
+        (void)CommitStateWalkerArrival(self);
+        StartNextStateWalkerEdge(self);
         item = (Item_1B6CF0*)self->f24;
     }
 }
 
-f32 func_001EAAE0(f32 a, f32 b);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001B5060(AngleFrameAnimator* self, AnimatorParams* key)
+void LoadAngleFrameAnimator(AngleFrameAnimator* self, AnimatorParams* key)
 {
-    func_001B4AA0(self, key);
+    LoadAnimatorBase(self, key);
     self->phase = key->f4;
     f32 d = (f32)(u32)key->i8;
     f32 q = 6.2831855f / d;
     self->sector = q;
     if (self->phase == 3.4028234663852886e+38f) {
-        self->phase = func_001EAAE0(0.0f, q);
+        self->phase = RandomFloatInRange(0.0f, q);
     }
 }
 
@@ -1285,7 +1285,7 @@ struct Sub_001B6568 {
     u8 pad0[0x38];
     Entry_001B6568* table;
 };
-void func_001B6568(StateWalker* a0, s32* out) {
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
     if (idx >= 0) {
@@ -1311,7 +1311,7 @@ struct Ctx_001B6598 {
     s32 index;
 };
 
-void func_001B6598(Ctx_001B6598* a0, s32* out) {
+void GetStateWalkerCurrentKey(Ctx_001B6598* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
     if (idx >= 0) {
@@ -1322,24 +1322,24 @@ void func_001B6598(Ctx_001B6598* a0, s32* out) {
     *out = v;
 }
 
-s32 func_001B63F8(void* self, s32 key);
-void func_001B6E28(StateWalker* self, s32 a, s32 b);
-void func_001B66A0(StateWalker* self);
+s32 FindStateEntryIndexOrZero(void* self, s32 key);
+void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
+void StartNextStateWalkerEdge(StateWalker* self);
 
-void func_001B6628(StateWalker* self, s32 key)
+void TeleportStateWalker(StateWalker* self, s32 key)
 {
-    s32 s1 = func_001B63F8(self->owner, key);
+    s32 s1 = FindStateEntryIndexOrZero(self->owner, key);
     if (self->f28 == s1) {
         s32 v = self->index;
         if (v == s1 || v == -1) {
             return;
         }
     }
-    func_001B6E28(self, self->f28, s1);
+    NotifyStateWalkerChange(self, self->f28, s1);
     self->index = s1;
     self->f28 = s1;
     self->f2C = -1;
-    func_001B66A0(self);
+    StartNextStateWalkerEdge(self);
 }
 
 struct Flags_1B64D8 { u8 pad0[0xC]; s32 flags; };
@@ -1353,16 +1353,16 @@ struct Node_1B64D8 {
     Flags_1B64D8* f34;
 };
 
-s32 func_001B63F8(StateGraph* self, s32 key);
-void func_001B6C68(Node_1B64D8* self);
-void func_0012E760(AnimationPlayer* obj);
-void func_001B66A0(Node_1B64D8* self);
+s32 FindStateEntryIndexOrZero(StateGraph* self, s32 key);
+void CommitStateWalkerArrival(Node_1B64D8* self);
+void StopAnimationPlayer(AnimationPlayer* obj);
+void StartNextStateWalkerEdge(Node_1B64D8* self);
 
-void func_001B64D8(Node_1B64D8* self, s32 key)
+void SetStateWalkerTarget(Node_1B64D8* self, s32 key)
 {
     s32 v;
     if (key != -1) {
-        v = func_001B63F8((StateGraph*)self->f18, key);
+        v = FindStateEntryIndexOrZero((StateGraph*)self->f18, key);
     } else {
         v = -1;
     }
@@ -1370,51 +1370,51 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
         self->f30 = v;
         Flags_1B64D8* p = self->f34;
         if (p != 0 && (p->flags & 2)) {
-            func_001B6C68(self);
-            func_0012E760((AnimationPlayer*)self->f24);
+            CommitStateWalkerArrival(self);
+            StopAnimationPlayer((AnimationPlayer*)self->f24);
             self->f24 = 0;
         }
         if (self->f24 == 0) {
-            func_001B66A0(self);
+            StartNextStateWalkerEdge(self);
         }
     }
 }
 
-extern const ClassHead D_002198E8;
+extern const ClassHead g_stateWalkerMethods;
 extern const u8 D_00217410[];
 
-void* func_001B5EE0(Pool6C* pool);
-void func_00152470(List01* list, StateWalker* item);
-s32 func_001B63F8(StateGraph* self, s32 key);
-void func_001B6E28(StateWalker* self, s32 a, s32 b);
-void func_001B66A0(StateWalker* self);
-void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
+void* PopZeroedFreeSlot(Pool6C* pool);
+void AppendToList(List01* list, StateWalker* item);
+s32 FindStateEntryIndexOrZero(StateGraph* self, s32 key);
+void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
+void StartNextStateWalkerEdge(StateWalker* self);
+void TriggerScriptEvent(StateGraph* self, s32 a, s32 b, void* c);
 
-StateWalker* func_001B6290(StateGraph* self, s32 a1, s32 a2, s32 a3)
+StateWalker* CreateStateWalker(StateGraph* self, s32 a1, s32 a2, s32 a3)
 {
-    StateWalker* obj = (StateWalker*)func_001B5EE0(&self->world->pool1B88);
+    StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
     obj->f1C = a1;
-    obj->vt = (void*)&D_002198E8;
+    obj->vt = (void*)&g_stateWalkerMethods;
     obj->f20 = a3;
     obj->f38 = 1.0f;
     obj->owner = self;
     obj->f2C = -1;
-    func_00152470(&self->world->list1B94, obj);
+    AppendToList(&self->world->list1B94, obj);
 
-    func_00152470((List01*)((u8*)self + 0x48), obj);
+    AppendToList((List01*)((u8*)self + 0x48), obj);
     if (a2 != -1) {
-        s32 v = func_001B63F8(self, a2);
+        s32 v = FindStateEntryIndexOrZero(self, a2);
         obj->f28 = v;
         obj->index = v;
-        func_001B6E28(obj, -1, v);
+        NotifyStateWalkerChange(obj, -1, v);
     }
-    func_001B66A0(obj);
+    StartNextStateWalkerEdge(obj);
     StateWalker** pp = &obj;
-    func_001837E0(self, 0x11, 1, (void*)&pp);
+    TriggerScriptEvent(self, 0x11, 1, (void*)&pp);
     return obj;
 }
 
-s32 func_001B4920(s32 k)
+s32 GetAnimatorSize(s32 k)
 {
     switch (k) {
     case 1:
@@ -1437,26 +1437,26 @@ s32 func_001B4920(s32 k)
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-extern const Fn_Table D_0021E358[];
-extern const Fn_Table D_0021E378[];
-extern const Fn_Table D_0021E398[];
-extern const Fn_Table D_0021E3B8[];
-extern u8 D_0021E438[];
-extern const Fn_Table D_0021E3D8[];
-extern const Fn_Table D_0021E3F8[];
-extern const Fn_Table D_0021E418[];
+extern const Fn_Table g_frameRunAnimatorMethods[];
+extern const Fn_Table g_framePingPongAnimatorMethods[];
+extern const Fn_Table g_randomJumpAnimatorMethods[];
+extern const Fn_Table g_angleFrameAnimatorMethods[];
+extern u8 g_crossfadeAnimatorMethods[];
+extern const Fn_Table g_scrollAnimatorMethods[];
+extern const Fn_Table g_circleAnimatorMethods[];
+extern const Fn_Table g_triangleAnimatorMethods[];
 
-void* func_001B4980(s32 n)
+void* GetAnimatorMethods(s32 n)
 {
     switch (n) {
-    case 1: return ((u8*)D_0021E358);
-    case 2: return ((u8*)D_0021E378);
-    case 3: return ((u8*)D_0021E398);
-    case 4: return ((u8*)D_0021E3B8);
-    case 5: return D_0021E438;
-    case 6: return ((u8*)D_0021E3D8);
-    case 7: return ((u8*)D_0021E3F8);
-    case 8: return ((u8*)D_0021E418);
+    case 1: return ((u8*)g_frameRunAnimatorMethods);
+    case 2: return ((u8*)g_framePingPongAnimatorMethods);
+    case 3: return ((u8*)g_randomJumpAnimatorMethods);
+    case 4: return ((u8*)g_angleFrameAnimatorMethods);
+    case 5: return g_crossfadeAnimatorMethods;
+    case 6: return ((u8*)g_scrollAnimatorMethods);
+    case 7: return ((u8*)g_circleAnimatorMethods);
+    case 8: return ((u8*)g_triangleAnimatorMethods);
     }
     return 0;
 }
@@ -1468,16 +1468,16 @@ typedef void (*VFn_1B6F50)(void* self);
 struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
 struct Ent_1B6F50 { s32 key; void* val; };
 extern u8 D_0021A790[];
-void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
-s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
-s32 func_001833F0(Elem_1B6F50* a, s32 b);
-void func_0018D608(void);
-void func_0018D6F0(void);
-void* func_0018D658(u32 bytes);
-void* func_00121228(Hdr_1B6F50* root, s32 value, void* table);
-void func_001299E0(Hdr_1B6F50* self, void* src);
+void* FindFirstObjectByIdMode4(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
+s32 GatherObjectsById(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
+s32 MatchesObjectId(Elem_1B6F50* a, s32 b);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(u32 bytes);
+void* CreatePoseSource(Hdr_1B6F50* root, s32 value, void* table);
+void InsertAttachment(Hdr_1B6F50* self, void* src);
 
-void func_001B6F50(CompanionAgent* self)
+void ResolveCompanionAgentObjects(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
@@ -1487,20 +1487,20 @@ void func_001B6F50(CompanionAgent* self)
         if (key == best) {
             e->val = 0;
         } else {
-            e->val = func_0015A448((Hdr_1B6F50*)self->world, key, self);
+            e->val = FindFirstObjectByIdMode4((Hdr_1B6F50*)self->world, key, self);
         }
         e++;
         j--;
     } while (j >= 0);
 
-    func_0018D608();
+    PushBackMemoryMark();
     best = 0;
-    s32 count = func_0015A4F0((Hdr_1B6F50*)self->world, 0x201, 0x60, self, 0, 0);
-    Elem_1B6F50** list = (Elem_1B6F50**)func_0018D658(count << 2);
-    count = func_0015A4F0((Hdr_1B6F50*)self->world, 0x201, 0x60, self, count, list);
+    s32 count = GatherObjectsById((Hdr_1B6F50*)self->world, 0x201, 0x60, self, 0, 0);
+    Elem_1B6F50** list = (Elem_1B6F50**)AllocateBackMemory(count << 2);
+    count = GatherObjectsById((Hdr_1B6F50*)self->world, 0x201, 0x60, self, count, list);
     if (count > 0) {
         do {
-            if (func_001833F0(*list, self->fC10) != 0) {
+            if (MatchesObjectId(*list, self->fC10) != 0) {
                 best = (s32)*list;
             } else {
                 (*list)->vtbl[7](*list);
@@ -1510,13 +1510,13 @@ void func_001B6F50(CompanionAgent* self)
         } while (count != 0);
     }
     self->fC14 = (void*)best;
-    func_0018D6F0();
+    PopBackMemoryMark();
     if (self->fC14 != 0) {
-        self->fC34 = func_00121228((Hdr_1B6F50*)self->world, (s32)self->fC14, D_0021A790);
+        self->fC34 = CreatePoseSource((Hdr_1B6F50*)self->world, (s32)self->fC14, D_0021A790);
         ((Sub_1B6F50*)self->fC34)->f11 = 2;
         ((Sub_1B6F50*)self->fC34)->f1C = 1;
         ((Sub_1B6F50*)self->fC34)->f84 = ((Sub_1B6F50*)self->fC34)->f80 = 0;
-        func_001299E0((Hdr_1B6F50*)self->fC14, self->fC34);
+        InsertAttachment((Hdr_1B6F50*)self->fC14, self->fC34);
         self->fBF0 = (s32)self->fC14;
     }
 }
@@ -1543,10 +1543,10 @@ struct Target_1B7638 {
 };
 
 
-s32 func_001C96B8(CompanionAgent *self);
-s32 func_001CB578(CompanionAgent *self);
+s32 GetAgentRosterState(CompanionAgent *self);
+s32 IsAgentFacingBlocked(CompanionAgent *self);
 
-void func_001B7638(CompanionAgent *self) {
+void AimCompanionAgentPose(CompanionAgent *self) {
     struct Target_1B7638 *t;
     s32 r;
     s32 res;
@@ -1556,7 +1556,7 @@ void func_001B7638(CompanionAgent *self) {
         return;
     }
     t = (struct Target_1B7638 *)self->fC34;
-    r = func_001C96B8(self);
+    r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
@@ -1576,7 +1576,7 @@ void func_001B7638(CompanionAgent *self) {
         if ((void *)self->fC30 != 0) {
             t->field24 = (void *)self->fC30;
             t->quad30 = *(struct Quad_1B7638 *)&D_00248D30;
-        } else if (func_001CB578(self) != 0) {
+        } else if (IsAgentFacingBlocked(self) != 0) {
             t->field24 = self;
             t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
         } else {
@@ -1601,10 +1601,10 @@ void func_001B7638(CompanionAgent *self) {
 }
 
 struct RandomRangeLow { s32 v; };
-s32 func_001EAA70(RandomRangeLow lo, s32 hi);
-f32 func_001EAAE0(f32 a, f32 b);
+s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-void func_001B4FC0(RandomJumpAnimator* self, f32 x)
+void StepRandomJumpAnimator(RandomJumpAnimator* self, f32 x)
 {
     AnimRecord* p = self->cursor.record;
     if (p == 0)
@@ -1618,21 +1618,21 @@ void func_001B4FC0(RandomJumpAnimator* self, f32 x)
     }
     RandomRangeLow lo;
     lo.v = 1;
-    s32 v = func_001EAA70(lo, count - 1);
+    s32 v = RandomIntInRange(lo, count - 1);
     s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
-    func_001B46E0(&self->cursor, rem);
-    self->wait = func_001EAAE0(self->waitMin, self->waitMax);
+    SetCursorFrame(&self->cursor, rem);
+    self->wait = RandomFloatInRange(self->waitMin, self->waitMax);
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void func_001B55C0();
-extern const Fn_Table D_0021E358[8] = { (Fn_Table)func_001B4B68, (Fn_Table)func_001B4BC8, (Fn_Table)func_001B4C30, (Fn_Table)func_001B4D18, 0, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E378[8] = { (Fn_Table)func_001B4D48, (Fn_Table)func_001B4DA8, (Fn_Table)func_001B4E18, (Fn_Table)func_001B4F18, 0, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E398[8] = { (Fn_Table)func_001B4F80, (Fn_Table)func_001B4AD0, (Fn_Table)func_001B4FC0, (Fn_Table)func_001B4B38, 0, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E3B8[8] = { (Fn_Table)func_001B5060, (Fn_Table)func_001B5108, 0, (Fn_Table)func_001B4B38, (Fn_Table)func_001B5160, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E3D8[8] = { (Fn_Table)func_001B5200, (Fn_Table)func_001B4AD0, (Fn_Table)func_001B5278, (Fn_Table)func_001B5308, 0, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E3F8[8] = { (Fn_Table)func_001B5398, (Fn_Table)func_001B4AD0, (Fn_Table)func_001B5400, (Fn_Table)func_001B5488, 0, (Fn_Table)func_001B4B48, 0, 0 };
-extern const Fn_Table D_0021E418[8] = { (Fn_Table)func_001B54D0, (Fn_Table)func_001B4AD0, 0, (Fn_Table)func_001B4B38, (Fn_Table)func_001B55C0, (Fn_Table)func_001B4B48, (Fn_Table)func_001B5568, 0 };
+extern const Fn_Table g_frameRunAnimatorMethods[8] = { (Fn_Table)LoadFrameRunAnimator, (Fn_Table)BindFrameRunAnimator, (Fn_Table)StepFrameRunAnimator, (Fn_Table)GetFrameRunProgress, 0, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_framePingPongAnimatorMethods[8] = { (Fn_Table)LoadFramePingPongAnimator, (Fn_Table)BindFramePingPongAnimator, (Fn_Table)StepFramePingPongAnimator, (Fn_Table)GetFramePingPongProgress, 0, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_randomJumpAnimatorMethods[8] = { (Fn_Table)LoadRandomJumpAnimator, (Fn_Table)BindAnimatorRecord, (Fn_Table)StepRandomJumpAnimator, (Fn_Table)GetAnimatorZeroProgress, 0, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_angleFrameAnimatorMethods[8] = { (Fn_Table)LoadAngleFrameAnimator, (Fn_Table)BindAngleFrameAnimator, 0, (Fn_Table)GetAnimatorZeroProgress, (Fn_Table)FollowObjectAngle, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_scrollAnimatorMethods[8] = { (Fn_Table)LoadScrollAnimator, (Fn_Table)BindAnimatorRecord, (Fn_Table)StepScrollAnimator, (Fn_Table)GetScrollProgress, 0, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_circleAnimatorMethods[8] = { (Fn_Table)LoadCircleAnimator, (Fn_Table)BindAnimatorRecord, (Fn_Table)StepCircleAnimator, (Fn_Table)GetCircleProgress, 0, (Fn_Table)FindAnimatorCursor, 0, 0 };
+extern const Fn_Table g_triangleAnimatorMethods[8] = { (Fn_Table)LoadTriangleAnimator, (Fn_Table)BindAnimatorRecord, 0, (Fn_Table)GetAnimatorZeroProgress, (Fn_Table)func_001B55C0, (Fn_Table)FindAnimatorCursor, (Fn_Table)GetTriangleOutputs, 0 };
 
 struct Track_1B66A0
 {
@@ -1674,22 +1674,22 @@ struct Mover_1B66A0
     f32 f38;
 };
 
-void func_0018D608(void);
-void* func_0018D658(s32 size);
-void func_0018D6F0(void);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001B6E28(Mover_1B66A0* self, s32 a, s32 b);
-void func_0012C7B0(Track_1B66A0* track, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
-void func_0012F7E0(void* obj, void (*fn)(Mover_1B66A0*, s32, s32), Mover_1B66A0* self);
-void func_001B6CA8(Mover_1B66A0* self, s32 a, s32 b);
-void func_0012F190(void* obj, s32 zero);
-void func_0012E760(void* obj);
-void func_001B6D78(Mover_1B66A0* self, s32 a, Mover_1B66A0* b);
+void PushBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+void PopBackMemoryMark(void);
+f32 RandomFloatInRange(f32 a, f32 b);
+void NotifyStateWalkerChange(Mover_1B66A0* self, s32 a, s32 b);
+void CreateAnimationPlayerWithoutPresetTargets(Track_1B66A0* track, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+void AddAnimationPlayerCallback(void* obj, void (*fn)(Mover_1B66A0*, s32, s32), Mover_1B66A0* self);
+void HandleStateWalkerTrackEnd(Mover_1B66A0* self, s32 a, s32 b);
+void ApplyListedPoseSources(void* obj, s32 zero);
+void StopAnimationPlayer(void* obj);
+void CallStateWalkerListeners(Mover_1B66A0* self, s32 a, Mover_1B66A0* b);
 
-void func_001B66A0(Mover_1B66A0* self)
+void StartNextStateWalkerEdge(Mover_1B66A0* self)
 {
     Graph_1B66A0* g = self->graph;
-    func_0018D608();
+    PushBackMemoryMark();
     if (self->target == self->cur)
     {
         self->target = g->links[self->target].next;
@@ -1701,7 +1701,7 @@ void func_001B66A0(Mover_1B66A0* self)
     }
     {
         s32 cur = self->cur;
-        s32* dist = (s32*)func_0018D658(g->nodeCount * 4);
+        s32* dist = (s32*)AllocateBackMemory(g->nodeCount * 4);
         s32 i;
         s32 j;
         Edge_1B66A0* p;
@@ -1778,7 +1778,7 @@ void func_001B66A0(Mover_1B66A0* self)
                 }
             }
         }
-        Edge_1B66A0** cand = (Edge_1B66A0**)func_0018D658(g->edgeCount * 4);
+        Edge_1B66A0** cand = (Edge_1B66A0**)AllocateBackMemory(g->edgeCount * 4);
         Edge_1B66A0* e;
         for (;;)
         {
@@ -1800,7 +1800,7 @@ void func_001B66A0(Mover_1B66A0* self)
             {
                 sum += cand[i]->weight;
             }
-            f32 r = func_001EAAE0(0.0f, sum);
+            f32 r = RandomFloatInRange(0.0f, sum);
             for (i = 0; i < n; i++)
             {
                 r -= cand[i]->weight;
@@ -1816,12 +1816,12 @@ void func_001B66A0(Mover_1B66A0* self)
             }
             if (e->a == cur)
             {
-                func_001B6E28(self, self->cur, e->b);
+                NotifyStateWalkerChange(self, self->cur, e->b);
                 self->cur = cur = e->b;
             }
             else
             {
-                func_001B6E28(self, self->cur, e->a);
+                NotifyStateWalkerChange(self, self->cur, e->a);
                 self->cur = cur = e->a;
             }
             if (cur == target)
@@ -1850,36 +1850,36 @@ void func_001B66A0(Mover_1B66A0* self)
             self->f24 = 0;
             if (e->track != 0)
             {
-                func_0012C7B0(e->track, self->f1C, self->f20, &self->f24, fa, fb);
+                CreateAnimationPlayerWithoutPresetTargets(e->track, self->f1C, self->f20, &self->f24, fa, fb);
                 if (self->f24 != 0)
                 {
-                    func_0012F7E0(self->f24, func_001B6CA8, self);
+                    AddAnimationPlayerCallback(self->f24, HandleStateWalkerTrackEnd, self);
                 }
             }
             if (old != 0)
             {
-                func_0012F190(old, 0);
-                func_0012E760(old);
+                ApplyListedPoseSources(old, 0);
+                StopAnimationPlayer(old);
             }
             goto done;
         }
     }
 arrived:
-    func_001B66A0(self);
-    func_0018D6F0();
+    StartNextStateWalkerEdge(self);
+    PopBackMemoryMark();
     return;
 fail:
     self->edge = 0;
     if (self->f24 != 0)
     {
-        func_0012F190(self->f24, 0);
-        func_0012E760(self->f24);
+        ApplyListedPoseSources(self->f24, 0);
+        StopAnimationPlayer(self->f24);
         self->f24 = 0;
     }
 done:
-    func_0018D6F0();
-    func_001B6D78(self, 0x14, self);
+    PopBackMemoryMark();
+    CallStateWalkerListeners(self, 0x14, self);
 }
 
-extern const ClassHead D_002198E8 = { D_00217410, 0x93 };
+extern const ClassHead g_stateWalkerMethods = { D_00217410, 0x93 };
 f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };

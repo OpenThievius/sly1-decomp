@@ -17,9 +17,9 @@ INCLUDE_DATA(D_00261364);
 f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
 
-void func_001B7968(Collider* self);
+void InitCollider(Collider* self);
 
-void func_0013B4C0(ChildGroupObject* self)
+void InitChildGroupObject(ChildGroupObject* self)
 {
     InitCollider(self);
     self->f554 = 3.4028235e+38f;
@@ -38,19 +38,19 @@ void func_0013B4C0(ChildGroupObject* self)
     self->f67C = 0;
 }
 
-void func_001BAC30(void* self);
-void func_00159478(void* sub, void* self);
+void LoadCollider(void* self);
+void FindOrBuildMemberGroup(void* sub, void* self);
 
-void func_0013B598(ChildGroupObject* self)
+void LoadChildGroupObject(ChildGroupObject* self)
 {
     LoadCollider(self);
     FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
-void func_001BA130(void* self, void* other);
-u32 func_0018D568(s32 size, void* src);
+void CopyCollider(void* self, void* other);
+u32 CopyToFrontMemory(s32 size, void* src);
 
-void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other)
+void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
 {
     CopyCollider(self, other);
     if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
@@ -70,12 +70,12 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void func_00124A48(void* self);
-s32 func_001300E8(void* node, s32 kind);
-void func_00182ED8(s32 a);
-void* func_0018D500(s32 size);
+void StartPlacedObject(void* self);
+s32 IsObjectOfKind(void* node, s32 kind);
+void ResolveAndStartObject(s32 a);
+void* AllocateFrontMemory(s32 size);
 
-void func_0013B610(ChildGroupObject* self)
+void StartChildGroupObject(ChildGroupObject* self)
 {
     StartPlacedObject(self);
     ScopedListFrame f(&self->children);
@@ -102,10 +102,10 @@ void func_0013B610(ChildGroupObject* self)
     }
 }
 
-void func_00127378(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
-void func_0013BE00(ChildGroupObject* p, f32 delta);
+void HandlePlacedObjectNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
+void StartChildGroupDelay(ChildGroupObject* p, f32 delta);
 
-void func_0013B708(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
+void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0xA) {
@@ -121,9 +121,9 @@ ASM_FUNC(func_0013B778);
 
 ASM_FUNC(func_0013B828);
 
-s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
-void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
+void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
 {
     s32 i;
     if (self->active) {
@@ -143,9 +143,9 @@ ASM_FUNC(func_0013BBA0);
 
 ASM_FUNC(func_0013BC80);
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 
-void func_0013BE00(ChildGroupObject* self, f32 delta)
+void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
 {
     self->f554 = g_gameTime + delta;
 }
@@ -157,9 +157,9 @@ extern const f32 D_00249D78 = 3.4028235e+38f;
 
 ASM_FUNC(func_0013BF68);
 
-void func_001BE4D8(void* p);
+void InitSoundParams(void* p);
 
-s32 func_0013C950(ChildGroupObject* self)
+s32 GetChildGroupSoundParams(ChildGroupObject* self)
 {
     if (self->slot == 0) {
         InitSoundParams(&self->slot);

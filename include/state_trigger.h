@@ -37,20 +37,20 @@ struct StateTrigger : Collider {
 
 typedef char check_StateTrigger[sizeof(StateTrigger) == 0x6C0 ? 1 : -1];
 
-void func_00123408(StateTrigger* self);                  // slot 0
-void func_00123540(StateTrigger* self);                  // slot 9
-void func_00123448(StateTrigger* self);                  // slot 16
-void func_00123578(StateTrigger* self);                  // slot 17
-void func_001236C8(StateTrigger* self);                  // the callback func_00123448 queues
-void func_00123888(StateTrigger* self, s32 mode);        // sets the state
-void func_00123AB0(StateTrigger* self, s32 mode);        // sets the state from a message's mode
-void func_00123B18(StateTrigger* self);                  // one more object done
-void func_00123B28(StateTrigger* self);
-void func_00123BB0(StateTrigger* self);
-void func_00123C20(StateTrigger* self);
-void func_00123C90(StateTrigger* self, s32 value);
-void func_00123CB8(StateTrigger* self, s32 value);
-void func_00123CE0(StateTrigger* self, s32 value);
-s32 func_00123D40(StateTrigger* self, void* arg);
+void InitStateTrigger(StateTrigger* self);                  // slot 0
+void CopyStateTrigger(StateTrigger* self);                  // slot 9
+void StartStateTrigger(StateTrigger* self);                  // slot 16
+void UpdateStateTrigger(StateTrigger* self);                  // slot 17
+void ResolveStateTriggerObjects(StateTrigger* self);                  // the callback func_00123448 queues
+void SetStateTriggerState(StateTrigger* self, s32 mode);        // sets the state
+void SetStateTriggerStateFromMessage(StateTrigger* self, s32 mode);        // sets the state from a message's mode
+void CountStateTriggerDone(StateTrigger* self);                  // one more object done
+void ResetStateTriggerOutputModes(StateTrigger* self);
+void EndStateTriggerOutputs(StateTrigger* self);
+void FinishStateTriggerOutputs(StateTrigger* self);
+void AddStateTriggerCountedId(StateTrigger* self, s32 value);
+void AddStateTriggerItemId(StateTrigger* self, s32 value);
+void AddStateTriggerAgentId(StateTrigger* self, s32 value);
+s32 TestStateTriggerItemsAccepted(StateTrigger* self, void* arg);
 
 #endif

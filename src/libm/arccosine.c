@@ -5,28 +5,28 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "libm.h"
 
-f32 func_00206298(f32 x);
-f32 func_002052F8(f32 x);
+f32 ArccosineKernel(f32 x);
+f32 AbsoluteValue(f32 x);
 
-f32 func_00205578(f32 x)
+f32 Arccosine(f32 x)
 {
     MathError e;
-    f32 value = func_00206298(x);
+    f32 value = ArccosineKernel(x);
 
-    if (D_0024FF78 == -1 || func_00209238(x)) {
+    if (g_mathErrorMode == -1 || IsNotANumber(x)) {
         return value;
     }
-    if (func_002052F8(x) > 1.0f) {
+    if (AbsoluteValue(x) > 1.0f) {
         e.kind = 1;
         e.function = "acosf";
         e.errorCode = 0;
         e.firstArg = e.secondArg = (double)x;
         e.result = 0.0;
-        if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
-            *func_002014F0() = 0x21;
+        if (g_mathErrorMode == 2 || !HandleMathError(&e)) {
+            *GetErrorNumberAddress() = 0x21;
         }
         if (e.errorCode != 0) {
-            *func_002014F0() = e.errorCode;
+            *GetErrorNumberAddress() = e.errorCode;
         }
         return (f32)e.result;
     }

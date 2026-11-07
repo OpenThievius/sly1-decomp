@@ -2,7 +2,7 @@
 // PAL: the slots are 12 bytes apart (US 44) and the table ends at +0x18C (US +0x5AC).
 struct Slot_001DFE80_eu { s32 key; s32 rest[2]; };
 
-void* func_001DFE80(s32 key)
+void* FindLevelEntry(s32 key)
 {
     Slot_001DFE80_eu* p = (Slot_001DFE80_eu*)g_levelEntries;
     Slot_001DFE80_eu* end = (Slot_001DFE80_eu*)((u8*)g_levelEntries + 0x18C);

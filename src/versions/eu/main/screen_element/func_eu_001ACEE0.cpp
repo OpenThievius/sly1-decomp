@@ -18,19 +18,19 @@ struct Col_eu_1ACEE0 { s32 v[4]; };
 
 extern Q3_eu_1ACEE0 D_eu_0027DB10;
 
-f32 func_001EA4B8(Q3_eu_1ACEE0* p, s32 a1, f32 f12, f32 f13, f32 f14);
-void func_00137228(Rect_eu_1ACEE0* out, f32 x, f32 y);
-void func_00137238(Rect_eu_1ACEE0* out, f32 x, f32 y);
-void func_00137248(Rect_eu_1ACEE0* out, Col_eu_1ACEE0* value);
-void func_00137260(Rect_eu_1ACEE0* out, s32 flag);
-void func_00137268(Rect_eu_1ACEE0* out, s32 flag);
+f32 ApproachValueWithRamp(Q3_eu_1ACEE0* p, s32 a1, f32 f12, f32 f13, f32 f14);
+void SetTextLayoutPosition(Rect_eu_1ACEE0* out, f32 x, f32 y);
+void SetTextLayoutSize(Rect_eu_1ACEE0* out, f32 x, f32 y);
+void SetTextLayoutColor(Rect_eu_1ACEE0* out, Col_eu_1ACEE0* value);
+void SetTextLayoutHorizontalAlign(Rect_eu_1ACEE0* out, s32 flag);
+void SetTextLayoutVerticalAlign(Rect_eu_1ACEE0* out, s32 flag);
 void func_eu_001374E0(Rect_eu_1ACEE0* out, s32 flag);
-void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
-void func_0015C8B8(Text_eu_1ACEE0* handle, f32 a, f32 b);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
+void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
 void func_eu_0015C778(Text_eu_1ACEE0* handle, char* str, Rect_eu_1ACEE0* r, s32 zero, u8* d);
-void func_0015C900(Text_eu_1ACEE0* handle);
-f32 func_00205400(f32 x);
-f32 func_00205210(f32 x);
+void PopFontScale(Text_eu_1ACEE0* handle);
+f32 Sine(f32 x);
+f32 Cosine(f32 x);
 
 struct Lerp_eu_1ACEE0 {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -69,15 +69,15 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     f32 h = self->f584 * y;
     y -= h;
     f32 w = self->f598;
-    func_00137228(&out, self->f52C + self->f590, self->f530 + self->f594);
-    func_00137238(&out, w, y);
+    SetTextLayoutPosition(&out, self->f52C + self->f590, self->f530 + self->f594);
+    SetTextLayoutSize(&out, w, y);
     {
         Col_eu_1ACEE0 tmp;
         tmp.v[0] = grey;
-        func_00137248(&out, &tmp);
+        SetTextLayoutColor(&out, &tmp);
     }
-    func_00137260(&out, 0);
-    func_00137268(&out, 0);
+    SetTextLayoutHorizontalAlign(&out, 0);
+    SetTextLayoutVerticalAlign(&out, 0);
     func_eu_001374E0(&out, 0);
     {
     Rgba_eu_1ACEE0 col;
@@ -101,8 +101,8 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     f32 dx = 0.0f;
     f32 dy = dx;
     if (flag) {
-        dx = func_00205400(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 40.0f) * 8.0f;
-        dy = func_00205210(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 15.0f) * 4.0f;
+        dx = Sine(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 40.0f) * 8.0f;
+        dy = Cosine(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 15.0f) * 4.0f;
     }
     out.x = self->f52C + self->f5A0 + dx;
     out.y = self->f530 + self->f5A4 + dy;

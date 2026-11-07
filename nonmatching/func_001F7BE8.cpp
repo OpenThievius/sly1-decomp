@@ -19,36 +19,36 @@ struct Ctl_1F7BE8 {
 extern u8 D_00626000[];
 extern u8 D_00626800[];
 extern u8 D_00627000[];
-extern Ctl_1F7BE8 D_00627800;
-extern s32 D_00277134;
+extern Ctl_1F7BE8 g_remoteCallState;
+extern s32 g_remoteCallsReady;
 
-s32 func_001F9D60(void);
-void func_001F9DA8(void);
-void func_001FA1E8(void);
-s32 func_001FA1C0(s32 index);
-void func_001FA4A0(u32 index, void (*fn)(void), void* arg);
-s32 func_001FA630(u32 a, void* b, s32 c, s32 d, s32 e, s32 f);
-s32 func_001F6CF0(u32 reg);
-void func_001F6CE0(u32 reg, u32 value);
-void func_001F7EA8(void);
-void func_001F8010(void);
-void func_001F8200(void);
-void func_001F7F60(void);
+s32 DisableInterrupts(void);
+void EnableInterrupts(void);
+void InitCommandChannel(void);
+s32 GetChannelWord(s32 index);
+void SetCommandHandler(u32 index, void (*fn)(void), void* arg);
+s32 SendCommand(u32 a, void* b, s32 c, s32 d, s32 e, s32 f);
+s32 ReadIopRegister(u32 reg);
+void WriteIopRegister(u32 reg, u32 value);
+void HandleRemoteCallReply(void);
+void AnswerServiceLookup(void);
+void QueueServerRequest(void);
+void AnswerIopCall(void);
 
-void func_001F7BE8(void)
+void InitRemoteCalls(void)
 {
-    func_001F9D60();
-    if (D_00277134 != 0) {
-        func_001F9DA8();
+    DisableInterrupts();
+    if (g_remoteCallsReady != 0) {
+        EnableInterrupts();
         return;
     }
     s32 one = 1;
-    D_00277134 = one;
-    func_001F9DA8();
-    func_001FA1E8();
-    func_001F9D60();
+    g_remoteCallsReady = one;
+    EnableInterrupts();
+    InitCommandChannel();
+    DisableInterrupts();
     u8* buf = D_00626000;
-    Ctl_1F7BE8* c = &D_00627800;
+    Ctl_1F7BE8* c = &g_remoteCallState;
     c->f4 = (s32)buf | 0x20000000;
     c->f0 = one;
     c->f8 = 0x20;
@@ -59,18 +59,18 @@ void func_001F7BE8(void)
     c->f1C = (s32)D_00627000 | 0x20000000;
     c->f20 = 0x20;
     c->f24 = 0;
-    func_001FA4A0(0x80000008, func_001F7EA8, c);
-    func_001FA4A0(0x80000009, func_001F8010, c);
-    func_001FA4A0(0x8000000A, func_001F8200, c);
-    func_001FA4A0(0x8000000C, func_001F7F60, c);
-    func_001F9DA8();
-    if (func_001F6CF0(0x80000002) != 0) {
+    SetCommandHandler(0x80000008, HandleRemoteCallReply, c);
+    SetCommandHandler(0x80000009, AnswerServiceLookup, c);
+    SetCommandHandler(0x8000000A, QueueServerRequest, c);
+    SetCommandHandler(0x8000000C, AnswerIopCall, c);
+    EnableInterrupts();
+    if (ReadIopRegister(0x80000002) != 0) {
         return;
     }
     s32* p = (s32*)(buf + 0x40);
     p[3] = one;
-    func_001FA630(0x80000002, p, 0x10, 0, 0, 0);
-    while (func_001FA1C0(0) == 0) {
+    SendCommand(0x80000002, p, 0x10, 0, 0, 0);
+    while (GetChannelWord(0) == 0) {
     }
-    func_001F6CE0(0x80000002, 1);
+    WriteIopRegister(0x80000002, 1);
 }

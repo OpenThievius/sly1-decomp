@@ -75,24 +75,24 @@ char D_0027AE70[16] = "PsIIlibpad  2410";
 s32 D_0027AE80 = 0;
 s32 D_0027AE84 = 1;
 
-static RemoteCallClient D_0062AA80[2] __attribute__((aligned(64)));
-static PadSlot D_0062AAD0[2][4];
+static RemoteCallClient g_padClients[2] __attribute__((aligned(64)));
+static PadSlot g_padSlots[2][4];
 static u32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
-static u8 D_0062ACC0[0x80] __attribute__((aligned(64)));
+static u8 g_padRequest[0x80] __attribute__((aligned(64)));
 
-s32 func_001E1F10(const char* format, ...);
-void* func_001F5A58(void* dst, const void* src, s32 size);
-void* func_001F5C0C(void* dst, s32 value, s32 size);
-s32 func_001F80C0(RemoteCallClient* client, u32 server, s32 mode);
-s32 func_001F8290(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 PrintFormatted(const char* format, ...);
+void* CopyBytes(void* dst, const void* src, s32 size);
+void* FillMemory(void* dst, s32 value, s32 size);
+s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
+s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void* end, void* end_arg);
-s32 func_00203FD0(s32 port, s32 slot);
+s32 SendPadDma(s32 port, s32 slot);
 s32 func_00204228(s32 mode);
-s32 func_00204610(s32 port, s32 slot, s32 mode);
+s32 SetPadRequestMode(s32 port, s32 slot, s32 mode);
 s32 func_00204B80(s32 port, s32 slot);
-s32 func_00204C38(s32 port, s32 slot, s32 data);
+s32 SendPadMaskRequest(s32 port, s32 slot, s32 data);
 s32 func_00204DB8(void);
-void func_00204EC8(void* start, void* end);
+void RefreshPadFrames(void* start, void* end);
 
 INCLUDE_ASM(func_00203FD0);
 
@@ -101,7 +101,7 @@ INCLUDE_ASM(func_00203FD0);
 const char D_0024F738[] = "libpad: sceSifSetDma faild\n";
 const char D_0024F758[] = "libpad: tPadDma Structure Invalid\n";
 
-s32 func_002040E8(s32 mode)
+s32 InitPadLibrary(s32 mode)
 {
     s32 i;
     s32 version;
@@ -123,8 +123,8 @@ s32 func_002040E8(s32 mode)
     major = version >> 8;
     if (major != 4) {
         if (D_0027AE84 != 0) {
-            func_001E1F10("libpad: Module version mismatch ");
-            func_001E1F10("[libpad.a = %d.%d, padman.irx = %d.%d]\n", 4, 0, major, version & 0xFF);
+            PrintFormatted("libpad: Module version mismatch ");
+            PrintFormatted("[libpad.a = %d.%d, padman.irx = %d.%d]\n", 4, 0, major, version & 0xFF);
         }
         return 0;
     }
@@ -156,7 +156,7 @@ INCLUDE_ASM(func_002042C8);
 const char D_0024F7D0[] = "libpad: buffer addr is not 64 byte align. %08x\n";
 const char D_0024F800[] = "libpad: pad port is already open [%d][%d]\n";
 
-PadFrame* func_002044B0(s32 port, s32 slot)
+PadFrame* GetNewerPadFrame(s32 port, s32 slot)
 {
     PadFrame* frames = (PadFrame*)g_padSlots[port][slot].buffer;
     s32 newer;
@@ -166,7 +166,7 @@ PadFrame* func_002044B0(s32 port, s32 slot)
     return &frames[newer];
 }
 
-s32 func_00204510(s32 port, s32 slot, u8* data)
+s32 ReadPadFrame(s32 port, s32 slot, u8* data)
 {
     PadFrame* frame;
 
@@ -177,7 +177,7 @@ s32 func_00204510(s32 port, s32 slot, u8* data)
     return frame->size;
 }
 
-s32 func_00204590(s32 port, s32 slot)
+s32 GetPadSlotState(s32 port, s32 slot)
 {
     PadFrame* frame;
 
@@ -193,7 +193,7 @@ s32 func_00204590(s32 port, s32 slot)
 
 LINKER_REMNANT(func_00204608);
 
-s32 func_00204610(s32 port, s32 slot, s32 mode)
+s32 SetPadRequestMode(s32 port, s32 slot, s32 mode)
 {
     if (g_padSlots[port][slot].open == 0)
         return 0;
@@ -201,7 +201,7 @@ s32 func_00204610(s32 port, s32 slot, s32 mode)
     return 1;
 }
 
-u32 func_00204678(s32 port, s32 slot)
+u32 GetPadRequestMode(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
         return 0;
@@ -213,7 +213,7 @@ INCLUDE_ASM(func_002046D0);
 LINKER_REMNANT(func_002047F0);
 INCLUDE_ASM(func_002047F8);
 
-s32 func_00204930(s32 port, s32 slot, s32 a2, s32 a3)
+s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3)
 {
     PadModeRequest* request = (PadModeRequest*)g_padRequest;
     s32 result;
@@ -235,7 +235,7 @@ s32 func_00204930(s32 port, s32 slot, s32 a2, s32 a3)
 
 INCLUDE_ASM(func_002049E8);
 
-s32 func_00204AA8(s32 port, s32 slot, u8* src)
+s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
 {
     PadActRequest* request = (PadActRequest*)g_padRequest;
     s32 i;
@@ -257,7 +257,7 @@ s32 func_00204AA8(s32 port, s32 slot, u8* src)
 
 INCLUDE_ASM(func_00204B80);
 
-s32 func_00204C38(s32 port, s32 slot, s32 data)
+s32 SendPadMaskRequest(s32 port, s32 slot, s32 data)
 {
     PadInfoRequest* request = (PadInfoRequest*)g_padRequest;
     s32 status;
@@ -278,14 +278,14 @@ s32 func_00204C38(s32 port, s32 slot, s32 data)
     return result;
 }
 
-s32 func_00204CE8(s32 port, s32 slot)
+s32 HasFullPadMask(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
         return 0;
     return func_00204B80(port, slot) == 0x3FFFF;
 }
 
-s32 func_00204D48(s32 port, s32 slot)
+s32 SendFullPadMask(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
         return 0;

@@ -87,10 +87,10 @@ struct ObjectPool : BaseObject {
 
 typedef char check_ObjectPool[sizeof(ObjectPool) == 0x170 ? 1 : -1];
 
-void func_001A7FE8(ObjectPool* self);                  // slot 0
-void func_001A80E0(ObjectPool* self);                  // slot 7
-void func_001A84C8(ObjectPool* self, ObjectPool* other);      // slot 9
-void func_001A8590(ObjectPool* self);                  // slot 16
-void func_001A86F8(ObjectPool* self, s32 flag);        // slot 20
+void InitObjectPool(ObjectPool* self);                  // slot 0
+void UnregisterObjectPool(ObjectPool* self);                  // slot 7
+void CopyObjectPool(ObjectPool* self, ObjectPool* other);      // slot 9
+void StartObjectPool(ObjectPool* self);                  // slot 16
+void ClearObjectPoolChoiceIfFlag(ObjectPool* self, s32 flag);        // slot 20
 
 #endif

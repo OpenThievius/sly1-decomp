@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the state at offset 0x570 of the global block (US 0x260).
 struct Gl_eu_1F4808 { u8 pad[0x570]; s32 f570; };
-void func_001F4808(ObjectSubGroup* self)
+void StartObjectSubGroupFinish(ObjectSubGroup* self)
 {
     BaseObject* key;
     s32 i;
@@ -33,7 +33,7 @@ void func_001F4808(ObjectSubGroup* self)
         it = (Animation*)self->items[i];
         CreateAnimationPlayerWithoutPresetTargets(it, 0, 0, 0, 0.0f, 1.0f);
         next = 0;
-        if (found != 0 || func_0012C9A8(it) != 0) {
+        if (found != 0 || HasAnimationEventKind19(it) != 0) {
             next = 1;
         }
         found = next;

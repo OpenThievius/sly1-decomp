@@ -11,10 +11,10 @@ struct Glob_eu_18EBE8 {
 
 extern Glob_eu_18EBE8 D_eu_0026AC60;
 extern s32 D_eu_0026321C;
-s32 func_001F6B60(s32 a);
-void func_001686E8(s32 a, s32 b);
-void func_001684E8(void);
-void func_001683E8(void);
+s32 AwaitSemaphore(s32 a);
+void SendGsPacketAndWait(s32 a, s32 b);
+void ApplyPendingDisplayFlip(void);
+void FlipDisplayFrame(void);
 
 void func_eu_0018EBE8(void)
 {
@@ -23,7 +23,7 @@ void func_eu_0018EBE8(void)
     for (;;) {
         i++;
         g->f148 = 0;
-        func_001F6B60(g->f144);
+        AwaitSemaphore(g->f144);
         g->f148 = 1;
         SendGsPacketAndWait(D_eu_0026321C, g->f128);
         g->f148 = 2;

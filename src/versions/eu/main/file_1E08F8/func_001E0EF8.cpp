@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL takes the character unsigned (andi 0xff instead of sign extension).
-s32 func_001E0EF8(u8 c)
+s32 GetConversionRadix(u8 c)
 {
     switch (c) {
     case 0x64:

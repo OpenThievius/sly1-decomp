@@ -19,13 +19,13 @@ struct Obj_158480 {
     void* parent;       // 0x44
 };
 typedef int V128_158480 __attribute__((mode(TI)));
-void func_001280C0(void* a, s32 b, void* c, void* d);
-void func_00188850(void* axis, Mat4* mat, f32 angle);
-void func_00188668(void* out, void* b, void* in);
-void func_00188628(void* out, void* in, V128_158480 q);
-void func_00188810(f32* a, f32* b, f32* out);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
+void BuildAxisAngleMatrix(void* axis, Mat4* mat, f32 angle);
+void MultiplyMatrices(void* out, void* b, void* in);
+void ScaleMatrix(void* out, void* in, V128_158480 q);
+void AddMatrices(f32* a, f32* b, f32* out);
 
-void func_00158480(Obj_158480* self, f32* out, f32 f)
+void TurnMatrixBySpin(Obj_158480* self, f32* out, f32 f)
 {
     Mat4A a = D_00248400;
     Mat4A b;
@@ -43,15 +43,15 @@ void func_00158480(Obj_158480* self, f32* out, f32 f)
     b = D_00248400;
     if (self->angle != 0.0f) {
         if (self->mode == 1 && self->parent != 0) {
-            func_001280C0(self->parent, 0, &self->axis, &axis);
+            TransformDirectionBetweenFrames(self->parent, 0, &self->axis, &axis);
         } else {
             axis = self->axis;
         }
-        func_00188850(&axis, (Mat4*)p, self->angle * f);
+        BuildAxisAngleMatrix(&axis, (Mat4*)p, self->angle * f);
     }
-    func_00188668(&c, p, &a);
+    MultiplyMatrices(&c, p, &a);
     *(V128_158480*)&axis = (V128_158480)*(s32*)&f;
-    func_00188628(&d, &c, *(V128_158480*)&axis);
+    ScaleMatrix(&d, &c, *(V128_158480*)&axis);
     e = d;
-    func_00188810((f32*)p, (f32*)&e, out);
+    AddMatrices((f32*)p, (f32*)&e, out);
 }

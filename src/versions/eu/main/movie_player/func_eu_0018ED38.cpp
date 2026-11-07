@@ -18,7 +18,7 @@ struct Self_eu_0018ED38 {
     s32 size;
 };
 
-s32 func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 void func_eu_0018EDE8(void* self);
 
 s32 func_eu_0018ED38(Self_eu_0018ED38* self, Src_eu_0018ED38* src)

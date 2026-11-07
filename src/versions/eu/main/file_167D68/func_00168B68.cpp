@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL runs at 50 Hz (50.0f) and uses a 468.61017f screen height.
-void func_00168B68(f32 t)
+void FadeScreenToBlack(f32 t)
 {
     FadePacket f;
     s32 i = 0;

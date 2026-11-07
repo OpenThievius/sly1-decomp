@@ -89,9 +89,14 @@ class UseOrDefinitionTest(unittest.TestCase):
             self.assertTrue(self.check(text), text)
 
     def test_declarations_are_not(self):
-        for text in ("s32 g_buttonCodes;", "extern Slot* g_buttonCodes[4];", "void f(s32 a, u8* g_buttonCodes)",
-                     "struct g_buttonCodes {};"):
+        for text in ("void f()\n{\n    s32 g_buttonCodes;\n}\n", "void f(s32 a, u8* g_buttonCodes)",
+                     "struct g_buttonCodes {};", "struct S { Slot* g_buttonCodes[4]; };"):
             self.assertFalse(self.check(text), text)
+
+    def test_the_symbols_own_declaration_in_the_first_column_is_a_use(self):
+        # The converter writes the readable name in definitions and extern declarations too.
+        for text in ("s32 g_buttonCodes;", "extern Slot* g_buttonCodes[4];", "EntryPool g_buttonCodes = {0};"):
+            self.assertTrue(self.check(text), text)
 
 
 class CommittedNamesTest(unittest.TestCase):

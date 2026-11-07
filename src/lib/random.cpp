@@ -6,14 +6,14 @@
 #include "common.h"
 
 struct RandomState_1F6708 { u8 pad[0x58]; u32 state; };
-extern RandomState_1F6708* D_0027696C;
+extern RandomState_1F6708* g_libraryState;
 
-void func_001F66F8(u32 value)
+void SeedRandom(u32 value)
 {
     g_libraryState->state = value;
 }
 
-u32 func_001F6708(void)
+u32 NextRandom(void)
 {
     u32 state = g_libraryState->state * 0x41C64E6Du + 0x3039u;
     g_libraryState->state = state;

@@ -6,41 +6,41 @@
 // with a stack of marks, under a lock), the copy routines, and the allocation hooks the
 // libraries call.
 
-extern u8 D_0064C70F[];
+extern u8 g_imageEnd[];
 
-s32 D_002699A4 = 0;
-s32 D_002699A8;
+s32 g_heapStart = 0;
+s32 g_heapEnd;
 
 extern s32 D_002C2A10;
-extern u8* D_002C2A14;
-extern u8* D_002C2A18;
-extern u8* D_002C2A1C;
-extern u8* D_002C2A20;
+extern u8* g_permanentCursor;
+extern u8* g_frontResetMark;
+extern u8* g_frontCursor;
+extern u8* g_backCursor;
 extern s32 D_002C2A24;
-extern u8 D_002C2A28[];
-extern s32 D_002C2A34;
-extern u8 D_002C2A38[];
+extern u8 g_heapLock[];
+extern s32 g_backMarkIndex;
+extern u8 g_backMarks[];
 
-void func_001F5C0C(void* p, s32 v, s32 n);
-void func_001E22C0(void* self);
-void func_001E22F8(void* obj);
-void func_001E2358(void* obj);
+void FillMemory(void* p, s32 v, s32 n);
+void InitRecursiveLock(void* self);
+void EnterRecursiveLock(void* obj);
+void LeaveRecursiveLock(void* obj);
 
-void func_0018D4F8(s32 size);
-u8* func_0018D500(s32 size);
-void* func_0018D5C0(u32 n);
-u8* func_0018D658(s32 size);
+void CheckAllocationSize(s32 size);
+u8* AllocateFrontMemory(s32 size);
+void* AllocateZeroedFrontMemory(u32 n);
+u8* AllocateBackMemory(s32 size);
 
 typedef u64 Q18D780 __attribute__((mode(TI)));
 
-void func_0018D780(void* dst, void* src, u32 count);
+void CopyQuadwords(void* dst, void* src, u32 count);
 
-void func_0018D410(void* p)
+void ClearKeyId(void* p)
 {
     FillMemory(p, 0, 8);
 }
 
-void func_0018D430(void)
+void InitHeap(void)
 {
     g_heapStart = (s32)g_imageEnd & -16;
     g_heapEnd = 0x2000000;
@@ -51,7 +51,7 @@ void func_0018D430(void)
     InitRecursiveLock(g_heapLock);
 }
 
-u8* func_0018D4B0(s32 size)
+u8* ReservePermanentMemory(s32 size)
 {
     u8* result;
     u8* next;
@@ -68,12 +68,12 @@ u8* func_0018D4B0(s32 size)
 
 LINKER_REMNANT(func_0018D4F0);
 
-void func_0018D4F8(s32 size)
+void CheckAllocationSize(s32 size)
 {
     (void)size;
 }
 
-u8* func_0018D500(s32 size)
+u8* AllocateFrontMemory(s32 size)
 {
     u8* result;
 
@@ -86,14 +86,14 @@ u8* func_0018D500(s32 size)
     return result;
 }
 
-void func_0018D550(void)
+void ResetFrontMemory(void)
 {
     g_frontCursor = g_frontResetMark;
 }
 
-void func_0018D800(u8* dst, void* src, s32 count);
+void CopyMemory(u8* dst, void* src, s32 count);
 
-u8* func_0018D568(s32 size, void* src)
+u8* CopyToFrontMemory(s32 size, void* src)
 {
     u8* result = AllocateFrontMemory(size);
 
@@ -103,7 +103,7 @@ u8* func_0018D568(s32 size, void* src)
     return result;
 }
 
-void* func_0018D5C0(u32 n)
+void* AllocateZeroedFrontMemory(u32 n)
 {
     void* p = AllocateFrontMemory(n);
     if (p) {
@@ -112,14 +112,14 @@ void* func_0018D5C0(u32 n)
     return p;
 }
 
-void func_0018D608(void)
+void PushBackMemoryMark(void)
 {
     EnterRecursiveLock(g_heapLock);
     g_backMarkIndex = g_backMarkIndex + 1;
     ((u8**)g_backMarks)[g_backMarkIndex] = g_backCursor;
 }
 
-u8* func_0018D658(s32 size)
+u8* AllocateBackMemory(s32 size)
 {
     u8* result;
 
@@ -133,7 +133,7 @@ u8* func_0018D658(s32 size)
     return result;
 }
 
-void* func_0018D6A8(s32 size)
+void* AllocateZeroedBackMemory(s32 size)
 {
     u8* p = AllocateBackMemory(size);
     if (p) {
@@ -142,7 +142,7 @@ void* func_0018D6A8(s32 size)
     return p;
 }
 
-void func_0018D6F0(void)
+void PopBackMemoryMark(void)
 {
     s32 n = g_backMarkIndex;
     u8** slot = &((u8**)g_backMarks)[n];
@@ -152,25 +152,25 @@ void func_0018D6F0(void)
     LeaveRecursiveLock(g_heapLock);
 }
 
-int func_0018D740(void)
+int EnterRuntimeLock(void)
 {
     return 0;
 }
 
-s32 func_0018D748() { return 0; }
+s32 AllocateSignalTable() { return 0; }
 
-void func_0018D750() {}
+void LeaveRuntimeLock() {}
 
-void* func_0018D758(u32 n)
+void* AllocateObjectMemory(u32 n)
 {
     return AllocateZeroedFrontMemory(n);
 }
 
-void func_0018D778(void* self)
+void FreeObjectMemory(void* self)
 {
 }
 
-void func_0018D780(Q18D780* dst, Q18D780* src, s32 n)
+void CopyQuadwords(Q18D780* dst, Q18D780* src, s32 n)
 {
     Q18D780* d = dst;
     Q18D780* s = src;
@@ -201,7 +201,7 @@ void func_0018D780(Q18D780* dst, Q18D780* src, s32 n)
     }
 }
 
-void func_0018D800(u8* dst, u8* src, u32 size)
+void CopyMemory(u8* dst, u8* src, u32 size)
 {
     u32 any = (u32)dst | (u32)src | size;
     if (any & 3) {

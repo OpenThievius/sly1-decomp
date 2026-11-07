@@ -24,7 +24,7 @@ typedef char check_IdLinkedObject[sizeof(IdLinkedObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 // Slot 0, func_001C0F30, is original assembly.
-void func_001C0FF0(IdLinkedObject* self);                       // 0x66 slot 16
-void func_001C1030(IdLinkedObject* self, s32 id);               // sets linkId (called by slot 16)
+void StartIdLinkedObject(IdLinkedObject* self);                       // 0x66 slot 16
+void SetObjectLinkId(IdLinkedObject* self, s32 id);               // sets linkId (called by slot 16)
 
 #endif
