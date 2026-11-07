@@ -540,10 +540,8 @@ V24A2_Glyph* func_0015DAB8(V24A2* a, s32 b);
 void func_0015DB80(void* self);
 s32 func_0015DBE0(void* self);
 
-struct Frame_15EB20 {
-    u8 scratch[0x80];
-    u8 obj[0x30];
-};
+// The packet memory a GIF writer fills: quadwords.
+typedef u64 Qword_15EB20 __attribute__((mode(TI)));
 
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
@@ -3500,10 +3498,11 @@ void func_0015EAE0(void* list, s32 value, s32 end)
 
 void func_0015EB20(void* self, void* p, s32 n)
 {
-    Frame_15EB20 fr;
-    void* buf = fr.obj;
+    Qword_15EB20 mem[8];
+    V24A0 gif;
+    void* buf = &gif;
     InitGifPacket(buf);
-    UsePacketBufferMemory(buf, 8, fr.scratch);
+    UsePacketBufferMemory(buf, 8, mem);
     BeginGifTag(buf, 0, 1, 0xE);
     AddGifRegisterWrite(buf, 0x61, 0);
     EndGifPacket(buf);
