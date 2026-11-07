@@ -5,13 +5,13 @@
 struct Gl_eu_16B300 { u8 pad[0x578]; f32 f578; };
 extern s32 D_eu_00263BC0[];
 extern s32 D_eu_00275374;
-Slot_16B300* func_eu_001DE018(s32 id);
+ChoiceSound* func_eu_001DE018(s32 id);
 
 void func_0016B300(Self_16B300* self, s32 a, s32 b)
 {
     if (a == self->f2D0 && b == self->f2D4) return;
     if (a != self->f300 && a > 0) {
-        Slot_16B300* slot = 0;
+        ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
             if (!(g_saveData->f19EC & 2)) {
                 slot = func_eu_001DE018(5);
@@ -33,8 +33,8 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     if (h) {
         if (self->f2D0 == -1) {
             if (a != 0) {
-                TeleportStateWalker(h, D_00262860[a].b);
-                SetStateWalkerTarget(self->f2E0, D_00262860[a].a);
+                TeleportStateWalker(h, D_00262860[a].targetKey);
+                SetStateWalkerTarget(self->f2E0, D_00262860[a].walkerKey);
             }
         } else {
             SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
