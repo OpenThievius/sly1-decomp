@@ -25,10 +25,6 @@ src/main/text_panel.cpp	SetF14__13Layout_137228i	func_00137260
 src/main/text_panel.cpp	SetF18__13Layout_137228Pv	func_00137268
 src/main/movie_player.cpp	__static_initialization_and_destruction_0	func_0018F940
 src/main/movie_player.cpp	_GLOBAL_$I$*	func_0018F968
-src/main/movie_player.cpp	Put__11Ring_18E6C0iPUc	func_0018E6C0
-src/main/movie_player.cpp	Idle__11Ring_18E6C0	func_0018E8C0
-src/main/movie_player.cpp	Put__10Dma_18E8C8iPUc	func_0018E8C8
-src/main/movie_player.cpp	Idle__10Dma_18E8C8	func_0018E938
 src/main/pause_menu.cpp	__static_initialization_and_destruction_0	func_00196330
 src/main/pause_menu.cpp	_GLOBAL_$I$*	func_001963B8
 src/lib/new_handler.cpp	what__C9bad_alloc	func_001FFFF0
