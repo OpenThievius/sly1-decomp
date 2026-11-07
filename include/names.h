@@ -3501,6 +3501,7 @@
 #define SumChildPoseOffsets                        func_001C5F18
 #define CombineChildPoseRotations                  func_001C6028
 #define UpdatePlayerAimTarget                      func_001C6890
+#define HandlePlayerAimButton                      func_001C6928
 #define FindNearestClass75Ahead                    func_001C6AA8
 #define SetPlayerClass75AheadBlend                 func_001C6D00
 #define TurnPlayerToClass75AheadMask8              func_001C6E58
