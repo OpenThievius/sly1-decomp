@@ -20,6 +20,7 @@ struct Ent65;
 struct VtEnt65 {
     u8 pad[0x154];
     void (*f154)(void* o, StepSequence* self, s32* q);
+    void (*f158)(Ent65* o, void* value);    // 0x158: shows a step's text (func_00151860)
 };
 struct Ent65 { VtEnt65* vt; };
 

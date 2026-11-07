@@ -32,6 +32,9 @@
 #include "effect_spawner.h"
 #include "effect_owner.h"
 #include "effect.h"
+#include "deferred_request.h"
+#include "cursor_animator.h"
+#include "texture_table.h"
 
 
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
@@ -306,14 +309,6 @@ extern void func_00127378(void*, u32, u32);
 extern u8 D_00275BC0[];
 void func_001E9498(void* a, void* b);
 
-typedef void (*Callback_151860)(void* self, void* value);
-struct VTable_151860 {
-    u8 pad[0x158];
-    Callback_151860 callback;
-};
-struct Object_151860 {
-    VTable_151860* vtable;
-};
 
 // The caption box as func_00150790 clears its child (T217D_440::child, +0x324): an unaligned
 // store (swl/swr), so a packed view.
@@ -332,7 +327,8 @@ f32 func_001EB0F8(void*, f32);
 
 extern f32 func_001EB0F8(void*, f32);
 
-struct Pair_00152450 { u32 first, second; };
+// An item's link in a list (List01::offset bytes into it): the next and the previous item.
+struct ListLink { s32 next; s32 prev; };
 
 void func_001524D8(List01*, u32);
 
@@ -344,7 +340,6 @@ extern u32 D_00261F14, D_00261F18, D_00261F1C, D_00261F20, D_00261F24;
 u8* func_0018D4B0(s32 size);
 
 extern u8* func_0018D500(u32);
-struct Buffer_00152938 { u8* end; u8* current; u8 pad[4]; u8* allocated; };
 
 extern u8* func_0018D658(u32);
 
@@ -365,25 +360,13 @@ s32 func_00151300(StepSequence* self);
 void func_0012E760(void* obj);
 void func_001516C0(StepSequence* self);
 
-struct Frame_153328 {
-    void* fn;
-    s32 f04;
-    s32 f08;
-    u8 pad0[4];
-    u8 out[0x50];
-    void* self;
-    u8 pad1[0x1C];
-};
 
-struct Self_1533A8;
-void func_001533A8(Self_1533A8* self);
+void func_001533A8(DeferredRequest* self);
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
 void func_00125B70(void* obj, void* c, void* out);
 void func_0019D410(void* p);
 
-struct Part_151ED8 { u8 pad0[0x14]; f32 f14; f32 f18; };
 
-struct Link_00152600 { s32 f0; s32 f4; };
 void* func_00152460(void* a, void* b);
 
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
@@ -397,8 +380,6 @@ void func_00150790(StepSequence* self, s32 mode);
 u32 func_00152460(List01* node, u32 value);
 void func_00152440(List01* node);
 
-struct Obj_151D28 { u8 pad0[0x2C]; f32 f2C; s32 f30; f32 f34; s32 f38; };
-struct Self_151D28 { u8 pad0[0x1C]; Obj_151D28* field_1C; s32 field_20; };
 
 extern s32 D_00275B00;
 void func_00160C48(s32 value);
@@ -406,7 +387,8 @@ f32 func_001EB0F8(void*, f32);
 void func_00152410(void*, f32);
 void func_00148CE0(void*);
 
-struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
+// An entry of a GCC 2.95 vtable as this file defines D_0024A0E0 (packet_writer.h).
+struct VtableEntry { s32 delta; void (*fn)(); };
 void func_00152E18();
 void func_001528C8(PacketWriter* p);
 
@@ -430,7 +412,8 @@ void* func_0015A448(void* a, s32 b, s32 c);
 void func_001E86E0(T217D_3F0* a, s32 b);
 void func_001E87F0(T217D_3F0* a, s32 b);
 
-struct Frame_153EC0 {
+// A ListFrame (list_iter.h) as func_00153EC0 builds it, word by word.
+struct ListFrameWords {
     s32 list;
     s32 cursor;
     s32 link;
@@ -495,13 +478,16 @@ void func_00152470(List01* list, ActiveSetItem* n);
 void func_0014B0C0(s32 n, f32* mat, f32* vec);
 void func_0014B3E0(s32 n, f32* a, f32* b, f32* c);
 
-struct Raw4_150DC0 { u8 b[4]; };
-struct Slot_150DC0 { u8 pad0[0x2D0]; Raw4_150DC0 f2D0; u8 pad1[0x334 - 0x2D4]; s32 f334; };
-union W_150DC0 { s32 i; f32 f; };
+// The object a caption is spoken by (kind 0x104, found by id by func_00150DC0): its colour
+// becomes the caption box's highlight, its state walker (+0x334) is sent key 0x34C.
+struct CaptionSpeaker { u8 pad0[0x2D0]; Rgba4 f2D0; u8 pad1[0x334 - 0x2D4]; s32 f334; };
+// A word of a step sequence's message, read as an id or a time.
+union MessageWord { s32 i; f32 f; };
 
-struct Msg_150DC0 {
+// The message HandleStepSequenceMessage takes.
+struct SequenceMessage {
     u32 type;
-    W_150DC0 f4, f8;
+    MessageWord f4, f8;
     s32 fC, f10;
     s8* f14;
     s32 f18, f1C, f20, f24;
@@ -512,11 +498,11 @@ extern u8 D_00269A00[];
 void func_001BE728(s32 a);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001B64D8(s32 a, s32 b);
-void func_001E86E0(T217D_3F0* a, Slot_150DC0* b);
-void func_001E87F0(T217D_3F0* a, Slot_150DC0* b);
-s32 func_001833F0(Slot_150DC0* a, s32 b);
+void func_001E86E0(T217D_3F0* a, CaptionSpeaker* b);
+void func_001E87F0(T217D_3F0* a, CaptionSpeaker* b);
+s32 func_001833F0(CaptionSpeaker* a, s32 b);
 void func_001E7440(T217D_3F0* a, s32 b);
-s32 func_0012C7B0(f32 e, f32 f, Slot_150DC0* a, s32 b, s32 c, AnimationPlayer** d);
+s32 func_0012C7B0(f32 e, f32 f, CaptionSpeaker* a, s32 b, s32 c, AnimationPlayer** d);
 void func_0012F810(AnimationPlayer* a, StepSequence* b);
 u32 func_001E2100(s8* a);
 void func_001365A8(T217D_440* a, f32 b);
@@ -527,18 +513,13 @@ void func_001DDB58(void* a);
 void func_001DDBB8(void* a);
 void func_0018F0E8(u8* a, s32 b);
 
-struct Range_152010 { f32 threshold; s32 lo; s32 hi; };
-struct Table_152010 {
-    u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28;
-    u8 pad2C[0x44 - 0x2C]; f32 f44; f32 f48;
-    u8 pad4C[0x54 - 0x4C]; s32 count; Range_152010* ranges;
-};
 
 s32 func_001EAA70(s32 lo, s32 hi);
 f32 func_001EB0F8(void* p, f32 v);
 s32 func_00148AC0(World* mgr, s32 kind, void* p, s32 n, void* arr);
 
-struct Lerp_152010
+// Draws a count between two bounds by the level (g_currentEntry->dt), rounding toward the second.
+struct LevelLerp
 {
     static s32 Get(s32 lo, s32 hi)
     {
@@ -549,17 +530,6 @@ struct Lerp_152010
     }
 };
 
-struct Vec_152E48 { f32 x, y, z, w; };
-struct C_152E48 { u8 pad[0xC]; TextureHeader** tex; };
-struct B_152E48 { u8 pad[0x14]; C_152E48* c; };
-struct Self_152E48 {
-    u8 pad[0x2D0];
-    RangeRecord* f2D0;
-    s32 f2D4;
-    s32 f2D8;
-    s32 f2DC;
-    s32 f2E0;
-};
 
 void* func_001611B8(PacketWriter* p);
 void* func_001EE318(PacketWriter* p);
@@ -583,34 +553,19 @@ void func_0018D6F0(void);
 void func_001614C8(PacketWriter* p, s32 a, s32 b);
 void func_001EE450(PacketWriter* p);
 
-struct Sub_1533A8 {
-    u8 pad0[0x238];
-    s32 f238;
-    void* f23C;
-    u8 pad1[0x2D0 - 0x240];
-    void* f2D0;
-    s32 f2D4;
-    s32 f2D8;
-    s32 f2DC;
-    s32 f2E0;
-};
 
-struct Block_1533A8 { Quad16 q[5]; };
 
-struct Self_1533A8 {
-    u8 pad0[0x10];
-    Block_1533A8 copy;
-    Sub_1533A8* f60;
-};
 
-struct Frame_1533A8 {
+// What func_001533A8 hands the part drawer (DrawModelPart) for each part: the object's
+// transform, the object, its record at +0x22C, the part, and the view matrix.
+struct PartDrawFrame {
     void* fn;
     u8 pad0[4];
     s32 f08;
     u8 pad1[0x10 - 0x0C];
-    Block_1533A8 copy;
+    DrawTransform copy;
     u8 pad2[0x70 - 0x60];
-    Sub_1533A8* f70;
+    C61* f70;
     void* f74;
     void* f78;
     u8 pad3[0x80 - 0x7C];
@@ -618,23 +573,20 @@ struct Frame_1533A8 {
     Quad16 qC0[4];
 };
 
-struct Gfx_1533A8;
 extern f32 D_00261F30[16];
 
-void func_00152B80(Gfx_1533A8* obj, s32 a, s32 b);
-void func_001F5C0C(Frame_1533A8* p, s32 zero, s32 size);
+void func_00152B80(PacketWriter* obj, s32 a, s32 b);
+void func_001F5C0C(PartDrawFrame* p, s32 zero, s32 size);
 void func_00188668(Quad16* out, void* b, void* in);
-void func_00152B38(Gfx_1533A8* self);
-void func_001EE3B8(Gfx_1533A8* obj, s32 a, s32 b);
-void func_001EE668(Gfx_1533A8* obj, s32 a, s32 b, void* c, s32 d);
-void func_00152D70(Gfx_1533A8* self);
-void func_00166690(Frame_1533A8* frame);
+void func_00152B38(PacketWriter* self);
+void func_001EE3B8(PacketWriter* obj, s32 a, s32 b);
+void func_001EE668(PacketWriter* obj, s32 a, s32 b, void* c, s32 d);
+void func_00152D70(PacketWriter* self);
+void func_00166690(PartDrawFrame* frame);
 
-struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; ThresholdRange* list; };
-struct Tab_261D70 { u32 w[21]; s32 count; ThresholdRange* list; s32 f5C; };
-extern Tab_261D70 D_00261D70[2];
-extern Tab_261D70 D_00261E30;
-extern Tab_261D70 D_00261E90;
+extern ScatterTable D_00261D70[2];
+extern ScatterTable D_00261E30;
+extern ScatterTable D_00261E90;
 s32 func_001EAA70(s32 a, s32 b);
 
 void func_00123ED0(void* self);
@@ -1326,10 +1278,10 @@ void func_00150AE8(StepSequence* self)
     }
 }
 
-void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
+void func_00150DC0(StepSequence* self, SequenceMessage* msg)
 {
-    Slot_150DC0* s2;
-    Slot_150DC0* s4;
+    CaptionSpeaker* s2;
+    CaptionSpeaker* s4;
     s32 a2;
     s32 a0;
     f32 f20;
@@ -1342,12 +1294,12 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
     case 1:
     case 2:
         if (msg->f4.i != -1) {
-            s2 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
+            s2 = (CaptionSpeaker*)FindFirstObjectById(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
         } else {
             s2 = 0;
         }
         if (msg->f8.i != -1) {
-            s4 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
+            s4 = (CaptionSpeaker*)FindFirstObjectById(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
         } else {
             s4 = 0;
         }
@@ -1376,12 +1328,12 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
         }
         break;
     case 3:
-        if (self->p2F0 && MatchesObjectId((Slot_150DC0*)self->p2F0, msg->f18)) {
-            s2 = (Slot_150DC0*)self->p2F0;
+        if (self->p2F0 && MatchesObjectId((CaptionSpeaker*)self->p2F0, msg->f18)) {
+            s2 = (CaptionSpeaker*)self->p2F0;
             SetArcFade(&D_002708E0, 1);
             SetArcFade(&D_00271558, 0);
-        } else if (self->p2F4 && MatchesObjectId((Slot_150DC0*)self->p2F4, msg->f18)) {
-            s2 = (Slot_150DC0*)self->p2F4;
+        } else if (self->p2F4 && MatchesObjectId((CaptionSpeaker*)self->p2F4, msg->f18)) {
+            s2 = (CaptionSpeaker*)self->p2F4;
             SetArcFade(&D_00271558, 1);
             SetArcFade(&D_002708E0, 0);
         } else {
@@ -1398,14 +1350,14 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->player2F8);
+            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (CaptionSpeaker*)a0, (s32)s2, 1, &self->player2F8);
             func_0012F810(self->player2F8, self);
         }
         nm = msg->f14;
         if (nm && *nm) {
             g_typedTextCaptionBox.vt->m08(&g_typedTextCaptionBox, (const char*)nm);
             if (s2) {
-                *(Raw4_150DC0*)&g_typedTextCaptionBox.highlight = s2->f2D0;
+                *(Rgba4*)&g_typedTextCaptionBox.highlight = s2->f2D0;
             } else {
                 g_typedTextCaptionBox.highlight = 0x80808080;
             }
@@ -1604,10 +1556,10 @@ void func_001517C0(StepSequence* self)
     }
 }
 
-void func_00151860(void* value, Object_151860* object)
+void func_00151860(void* value, Ent65* object)
 {
     if (object != 0) {
-        object->vtable->callback(object, value);
+        object->vt->f158(object, value);
     } else {
         g_typedTextCaptionBox.child = value;
         PushStackElement(g_elementStack, &g_typedTextCaptionBox);
@@ -1682,15 +1634,15 @@ void func_00151A88(ScatterController* self)
     else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
     else self->table = &D_00261E30;
     SetScatterLevel(self, g_currentEntry->dt);
-    s32 a = ((Tab_151A88*)self->table)->f1C;
-    s32 b = ((Tab_151A88*)self->table)->f24;
+    s32 a = ((ScatterTable*)self->table)->countLoStart;
+    s32 b = ((ScatterTable*)self->table)->countLoEnd;
     f32 t = g_currentEntry->dt;
     s32 ra;
     if (a == b) ra = b;
     else if (a < b) ra = a + (s32)(t * ((f32)b + 0.99900001f - (f32)a));
     else ra = b + (s32)((1.0f - t) * ((f32)a + 0.99900001f - (f32)b));
-    s32 c = ((Tab_151A88*)self->table)->f20;
-    s32 d = ((Tab_151A88*)self->table)->f28;
+    s32 c = ((ScatterTable*)self->table)->countHiStart;
+    s32 d = ((ScatterTable*)self->table)->countHiEnd;
     t = g_currentEntry->dt;
     s32 rc;
     if (c == d) rc = d;
@@ -1700,30 +1652,30 @@ void func_00151A88(ScatterController* self)
     s32 i = 0;
     ThresholdRange* e = 0;
     self->countdown = r;
-    for (; i < ((Tab_151A88*)self->table)->count; i++) {
-        e = &((Tab_151A88*)self->table)->list[i];
+    for (; i < ((ScatterTable*)self->table)->count; i++) {
+        e = &((ScatterTable*)self->table)->ranges[i];
         if (e->threshold <= g_currentEntry->f10) break;
     }
     self->bandCountdown = RandomIntInRange(e->low, e->high);
     self->f20 = 0;
 }
 
-void func_00151D28(Self_151D28* self)
+void func_00151D28(ScatterController* self)
 {
     if (D_00275B00 & 8) {
-                if (self->field_1C->f2C <= g_currentEntry->dt && g_currentEntry->dt < self->field_1C->f34) {
-            if (g_saveData->f19E4 < self->field_1C->f30) {
-                SetSpareCount(self->field_1C->f30);
-                self->field_20 = 1;
+                if (((ScatterTable*)self->table)->bandStart1 <= g_currentEntry->dt && g_currentEntry->dt < ((ScatterTable*)self->table)->bandStart2) {
+            if (g_saveData->f19E4 < ((ScatterTable*)self->table)->spareCount1) {
+                SetSpareCount(((ScatterTable*)self->table)->spareCount1);
+                self->f20 = 1;
             }
-        } else if (self->field_1C->f34 <= g_currentEntry->dt) {
-            if (g_saveData->f19E4 < self->field_1C->f38) {
-                SetSpareCount(self->field_1C->f38);
-                self->field_20 = 1;
+        } else if (((ScatterTable*)self->table)->bandStart2 <= g_currentEntry->dt) {
+            if (g_saveData->f19E4 < ((ScatterTable*)self->table)->spareCount2) {
+                SetSpareCount(((ScatterTable*)self->table)->spareCount2);
+                self->f20 = 1;
             }
         }
     } else {
-        f32 v = ClampToRange((u8*)self->field_1C + 8, g_currentEntry->dt);
+        f32 v = ClampToRange((u8*)((ScatterTable*)self->table)->levelRange, g_currentEntry->dt);
         SetScatterLevel(self, v);
     }
     CompleteSoundNotifiers(g_currentWorld);
@@ -1758,11 +1710,11 @@ void func_00151ED8(ScatterController* obj, FlaggedObject* node)
         s32 idx = node->ordinal;
         s32 bit = 1 << (idx & 7);
         if (g_currentEntry->bits74[idx / 8] & bit) {
-            value = ((Part_151ED8*)obj->table)->f18;
+            value = ((ScatterTable*)obj->table)->raiseSeen;
             goto have;
         }
     }
-    value = ((Part_151ED8*)obj->table)->f14;
+    value = ((ScatterTable*)obj->table)->raiseNew;
 have:
     SetScatterLevel(obj, g_currentEntry->dt + value);
     if (node != 0) {
@@ -1799,21 +1751,21 @@ void func_00152010(ScatterController* self, void* p, s32 n, s32 flag)
             if (self->bandCountdown < 0) {
                 if (g_currentEntry->f10 != 0.0f) {
                     did = 1;
-                    g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((Table_152010*)self->table)->f44);
+                    g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->f44);
                 }
                 s32 i = 0;
-                Range_152010* r = 0;
-                while (i < ((Table_152010*)self->table)->count) {
-                    r = &((Table_152010*)self->table)->ranges[i];
+                ThresholdRange* r = 0;
+                while (i < ((ScatterTable*)self->table)->count) {
+                    r = &((ScatterTable*)self->table)->ranges[i];
                     if (g_currentEntry->f10 >= r->threshold) break;
                     i++;
                 }
-                self->bandCountdown = RandomIntInRange(r->lo, r->hi);
+                self->bandCountdown = RandomIntInRange(r->low, r->high);
             }
             if (!flag) {
-                for (s32 i = 0; i < ((Table_152010*)self->table)->count - 1; i++) {
-                    if (((Table_152010*)self->table)->ranges[i].threshold <= g_currentEntry->f10) {
-                        s32 v = RandomIntInRange(((Table_152010*)self->table)->ranges[i].lo, ((Table_152010*)self->table)->ranges[i].hi);
+                for (s32 i = 0; i < ((ScatterTable*)self->table)->count - 1; i++) {
+                    if (((ScatterTable*)self->table)->ranges[i].threshold <= g_currentEntry->f10) {
+                        s32 v = RandomIntInRange(((ScatterTable*)self->table)->ranges[i].low, ((ScatterTable*)self->table)->ranges[i].high);
                         self->bandCountdown = (self->bandCountdown < v) ? self->bandCountdown : v;
                         goto done;
                     }
@@ -1827,7 +1779,7 @@ void func_00152010(ScatterController* self, void* p, s32 n, s32 flag)
                 if (self->countdown < 0) {
                     a = self->refillLo;
                     b = self->refillHi;
-                    self->countdown = RandomIntInRange(Lerp_152010::Get(((Table_152010*)self->table)->f1C, ((Table_152010*)self->table)->f24), Lerp_152010::Get(((Table_152010*)self->table)->f20, ((Table_152010*)self->table)->f28));
+                    self->countdown = RandomIntInRange(LevelLerp::Get(((ScatterTable*)self->table)->countLoStart, ((ScatterTable*)self->table)->countLoEnd), LevelLerp::Get(((ScatterTable*)self->table)->countHiStart, ((ScatterTable*)self->table)->countHiEnd));
                 } else {
                     a = self->countLo;
                     b = self->countHi;
@@ -1838,7 +1790,7 @@ void func_00152010(ScatterController* self, void* p, s32 n, s32 flag)
         }
     }
     if (!flag) {
-        g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((Table_152010*)self->table)->f48);
+        g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->f48);
     }
 }
 
@@ -1859,10 +1811,10 @@ void func_00152440(List01* p)
 	p->head = 0;
 }
 
-void func_00152450(Pair_00152450* p)
+void func_00152450(ListLink* p)
 {
-	p->second = 0;
-	p->first = 0;
+	p->prev = 0;
+	p->next = 0;
 }
 
 u32 func_00152460(List01* p, u32 value)
@@ -1923,29 +1875,29 @@ LINKER_REMNANT(func_001525F8);
 
 void func_00152600(u8* a, void* b)
 {
-    Link_00152600* link = (Link_00152600*)GetListLinks(a, b);
+    ListLink* link = (ListLink*)GetListLinks(a, b);
     ListFrame* e = g_activeListFrames;
     while (e != 0) {
         if ((s32)e->link != (s32)link) {
             e = e->prev;
             continue;
         }
-        if (link->f4 != 0) e->link = (u8*)GetListLinks(a, (void*)link->f4);
+        if (link->prev != 0) e->link = (u8*)GetListLinks(a, (void*)link->prev);
         else e->link = a;
         e = e->prev;
     }
-    if (link->f4 != 0) {
-        *(s32*)GetListLinks(a, (void*)link->f4) = link->f0;
+    if (link->prev != 0) {
+        *(s32*)GetListLinks(a, (void*)link->prev) = link->next;
     } else {
-        *(s32*)a = link->f0;
+        *(s32*)a = link->next;
     }
-    if (link->f0 != 0) {
-        *(s32*)((u8*)GetListLinks(a, (void*)link->f0) + 4) = link->f4;
+    if (link->next != 0) {
+        *(s32*)((u8*)GetListLinks(a, (void*)link->next) + 4) = link->prev;
     } else {
-        *(s32*)(a + 4) = link->f4;
+        *(s32*)(a + 4) = link->prev;
     }
-    link->f0 = 0;
-    link->f4 = 0;
+    link->next = 0;
+    link->prev = 0;
 }
 
 s32 func_001526D0(void* self, u8* item)
@@ -2011,7 +1963,7 @@ void func_00152810()
 	g_toSprChannel = GetDmaChannel(9);
 }
 
-extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
+extern const VtableEntry D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
 
 PacketWriter* func_00152888(PacketWriter* self)
 {
@@ -2046,13 +1998,13 @@ void func_001528F0(PacketWriter* self, s32 count)
     self->begin = base;
 }
 
-void func_00152938(Buffer_00152938* buffer, u32 count)
+void func_00152938(PacketWriter* buffer, u32 count)
 {
 	u32 bytes = count << 4;
 	u8* memory = AllocateFrontMemory(bytes);
-	buffer->allocated = memory;
+	buffer->cur = memory;
 	buffer->end = memory + bytes;
-	buffer->current = memory;
+	buffer->begin = memory;
 }
 
 void func_00152980(PacketWriter* buffer, u32 count)
@@ -2213,12 +2165,12 @@ void func_00152E28(C61* self)
     InitPlacedObject(self);
 }
 
-void func_00152E48(Self_152E48* self, RangeRecord* a)
+void func_00152E48(C61* self, RangeRecord* a)
 {
     PacketWriter pa;
     PacketWriter pb;
-    Vec_152E48 v0;
-    Vec_152E48 v1;
+    Vec4U v0;
+    Vec4U v1;
     Quad4 q;
     TextureHeader* tex;
     s32 i;
@@ -2232,7 +2184,7 @@ void func_00152E48(Self_152E48* self, RangeRecord* a)
     if (a == 0) {
         return;
     }
-    tex = *((B_152E48*)a->link)->c->tex;
+    tex = (TextureHeader*)*a->link->elems->entries;
     InitGifPacket(&pa);
     InitPacketWriter(&pb);
     PushBackMemoryMark();
@@ -2308,49 +2260,49 @@ void func_00153328(C61* self, s32 unused, void* a2)
     (void)unused;
     if (self->f2D0 != 0) {
         self->desc02()->m27(self, a2);
-        Frame_153328 f;
+        DeferredRequest f;
         (void)FillMemory(&f, 0, 0x80);
-        f.fn = (void*)DrawPlacedObjectParts;
-        f.f08 = 0;
-        BuildPlacedObjectTransform(self, a2, f.out);
-        f.self = self;
+        f.callback = (void*)DrawPlacedObjectParts;
+        f.group = 0;
+        BuildPlacedObjectTransform(self, a2, &f.block);
+        f.arg = self;
         QueueDeferredRequest(&f);
     }
 }
 
-void func_001533A8(Self_1533A8* self)
+void func_001533A8(DeferredRequest* self)
 {
-    Frame_1533A8 f;
+    PartDrawFrame f;
     s32 i;
     u8* base = (u8*)&g_vifPacketWriter;
-    Sub_1533A8* s1 = self->f60;
-    AddDmaRefTag((Gfx_1533A8*)base, s1->f2D4, s1->f2D8);
+    C61* s1 = (C61*)self->arg;
+    AddDmaRefTag((PacketWriter*)base, s1->f2D4, s1->f2D8);
     FillMemory(&f, 0, 0x80);
     f.f08 = 3;
     f.fn = (void*)DrawModelPart;
-    f.copy = self->copy;
+    f.copy = self->block;
     f.f70 = s1;
-    f.f74 = (u8*)s1 + 0x22C;
+    f.f74 = s1->sub22C;
     i = 0;
     MultiplyMatrices(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
     f.q80[3] = f.qC0[3];
-    BeginDmaTag((Gfx_1533A8*)&g_vifPacketWriter);
-    WriteVifBaseOffset((Gfx_1533A8*)&g_vifPacketWriter, 0, 0);
-    CopyWordsToWriter((Gfx_1533A8*)&g_vifPacketWriter, 0xC, 4, f.q80, 4);
-    CloseDmaTag((Gfx_1533A8*)&g_vifPacketWriter);
-    if (s1->f238 > 0) {
+    BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
+    WriteVifBaseOffset((PacketWriter*)&g_vifPacketWriter, 0, 0);
+    CopyWordsToWriter((PacketWriter*)&g_vifPacketWriter, 0xC, 4, f.q80, 4);
+    CloseDmaTag((PacketWriter*)&g_vifPacketWriter);
+    if (s1->drawPartCount > 0) {
         s32 off = 0;
         do {
             i++;
-            f.f78 = (u8*)s1->f23C + off;
+            f.f78 = (u8*)s1->drawParts + off;
             DrawModelPart(&f);
             off += 0x70;
-        } while (i < s1->f238);
+        } while (i < s1->drawPartCount);
     }
-    AddDmaRefTag((Gfx_1533A8*)&g_vifPacketWriter, s1->f2DC, s1->f2E0);
+    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->f2DC, s1->f2E0);
 }
 
 void func_00153528(ActiveSetSolver* self, s32 count)
@@ -2526,7 +2478,7 @@ void func_00153A50(ActiveSetSolver* self, ActiveSetItem* x)
 
 void func_00153EC0(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
-    Frame_153EC0 fr;
+    ListFrameWords fr;
     ListFrame frame;
     s32 e = (s32)&self->pending;
     fr.cursor = e;
