@@ -23,7 +23,7 @@ struct IdentityKey {
 
 typedef char check_IdentityKey[sizeof(IdentityKey) == 0x20 ? 1 : -1];
 
-extern IdentityKey D_00248490;      // 0018C000.cpp
+extern const IdentityKey D_00248490;    // 0018C000.cpp
 extern IdentityKey D_00275B04;      // 001F0000.cpp, file_15F678.cpp (label of 0x1C bytes)
 
 #endif

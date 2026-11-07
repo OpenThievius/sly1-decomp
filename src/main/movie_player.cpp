@@ -270,7 +270,7 @@ void func_0013CC48(void* queue, s32 n);
 
 void func_0018D410(KeyId* p);
 struct Same_18F198 {
-    static s32 Of(IdentityKey* a, IdentityKey* b)
+    static s32 Of(IdentityKey* a, const IdentityKey* b)
     {
         if (a == b) return 1;
         if (!a) return 0;
