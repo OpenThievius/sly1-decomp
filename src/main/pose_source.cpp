@@ -1534,7 +1534,35 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_00121760);
+void ComputePositionSpringAcceleration(PlacedObject* self, Vec02* a, Vec02* b, Vec02* out, f32 dt)
+{
+    Vec02 force = *(Vec02*)D_00248D30;
+    Vec02 d;
+    f32* k = (f32*)self->p20C;
+    f32* k2;
+    if (k != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(self->pos));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32 s = k[2] * len + k[1] + k[0] / len;
+            Vu0::Q(force) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    k2 = (f32*)self->p210;
+    if (k2 != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(self->v150));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32 s = k2[2] * len + k2[1] + k2[0] / len;
+            f32 limit = 1.0f / dt;
+            if (limit < s) {
+                s = limit;
+            }
+            Vu0::Q(force) = Vu0::MulAddX(Vu0::Q(force), Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    *out = force;
+}
 
 INCLUDE_RODATA(jtbl_00249990);
 
