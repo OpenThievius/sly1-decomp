@@ -7,7 +7,7 @@ void func_001F0660(WarpPage* o) {
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->f19D8) {
         u8* t = (u8*)&g_mapScreenList;
-        ((Ptr_1F0660*)(t + 0x570))->p = o;
+        ((U32P*)(t + 0x570))->v = (u32)o;
     }
     switch (o->id) {
     case 0x1C7: o->slot = 1; break;

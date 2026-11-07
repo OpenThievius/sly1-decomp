@@ -21,8 +21,8 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     if (self->f570->mode != 2) return;
     if (self->f570->f560 != 0) return;
     if ((t->flags & 0x910) != 0 || t->f14 == 1) {
-        PopStackElement((Q_1F1A08*)g_elementStack);
-        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x910);
+        PopStackElement((ElementStack*)g_elementStack);
+        ClearPadPressedBits(&g_padRecord, 0x910);
         return;
     }
     if (self->f560 != self->f570->mode) return;
@@ -42,18 +42,18 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     } else if (s2 > 0) {
         MoveWarpCursor(self->f570, 3);
     } else if ((t->flags & 0x40) != 0) {
-        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
+        ClearPadPressedBits(&g_padRecord, 0x40);
         if (self->f570->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
+                IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->f570->f560 = 1;
-                PopStackElement((Q_1F1A08*)g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((Q_1F1A08*)g_elementStack);
+            PopStackElement((ElementStack*)g_elementStack);
         }
     }
 
@@ -62,5 +62,5 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     } else {
         self->f590 = D_00275FC0;
     }
-    self->f58C = ApproachValueWithRamp((Q3_1F1A08*)D_00276278, 0, self->f58C, self->f590, g_gameClock.step);
+    self->f58C = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->f58C, self->f590, g_gameClock.step);
 }

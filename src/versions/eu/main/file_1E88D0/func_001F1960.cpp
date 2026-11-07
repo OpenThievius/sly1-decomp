@@ -7,7 +7,7 @@ struct Obj_1F1960_eu {
     u32 f518;
     u8 pad51C[0x54];
     u32 f570;
-    Clr_1F1960 f574;
+    WarpPage* f574[6];
 };
 
 void func_001AA268(Obj_1F1960_eu* self);

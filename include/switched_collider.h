@@ -21,6 +21,8 @@ struct StateTrigger;      // state_trigger.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
 struct EntryQueue;       // class 0x8F (entry_queue.h)
+struct Timeline;         // class 0x90 (timeline.h)
+struct PadRecord;        // pad_record.h
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
 struct Blk05 {
@@ -124,7 +126,7 @@ struct __attribute__((packed)) Pack10 {
 // Class 0x05's descriptor: 0x03's slots, then twelve more (slot n at 0x10 + 4n).
 struct Desc05 : Desc03 {
     void (*m48)(SwitchedCollider* self, s32 mode);               // 0x130: slot 72 (func_001922E8)
-    void* m49;                                      // 0x134: slot 73
+    void (*m49)(SwitchedCollider* self, f32 dt, PadRecord* pad);   // 0x134: slot 73: the pad each frame while it is the active one (func_001E9C78)
     s32 (*m4A)(SwitchedCollider* self);                          // 0x138: slot 74 (func_00192410)
     s32 (*m4B)(SwitchedCollider* self, s32 a);                   // 0x13C: slot 75 (func_00192450, class 0x08: func_001C9A48)
     s32 (*m4C)(SwitchedCollider* self, void* arg);               // 0x140: slot 76 (func_00192488, class 0x08: func_001C9990)
@@ -538,7 +540,7 @@ struct KeyedConeAgent : ConeAgent {
     s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
     s32 fC5C;               // 0xC5C: the count it lowers (ChooseKeyedConeAgentState stops at 0)
     void* fC60;             // 0xC60
-    s32 fC64[6];            // 0xC64: keys slot 56 answers for itself (func_001E9038)
+    PlacedObject* fC64[6];  // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
     s32 fC7C;               // 0xC7C
     void* fC80[4];          // 0xC80
     s32 fC90;               // 0xC90
@@ -613,18 +615,25 @@ struct ContactAgent : WorldListedAgent {
     u8 padC28[0xC30 - 0xC28];
 };
 
+// An entry of the tempo agent's table at 0xC6C (func_001ED090 adds one): an animation player
+// and the number of beats its animation spans, whose speed SyncTempoAgentEntries sets.
+struct TempoPlayerEntry {
+    AnimationPlayer* player; // 0x00
+    s32 beats;              // 0x04
+};
+
 // 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeBeatPressInput).
 struct TempoAgent : Agent {
-    u8 padC10[0xC20 - 0xC10];
+    s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
     u8 padC24[0xC34 - 0xC24];
-    void* fC34;             // 0xC34: the timeline to start when the beat clock restarts
-    void* fC38;             // 0xC38: the timeline it runs (EndHeldTimeline)
+    Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
+    Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldTimeline)
     BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
     u8 padC40[0xC48 - 0xC40];
     void* fC48;             // 0xC48
-    u8 padC4C[0xC50 - 0xC4C];
+    s32 fC4C;               // 0xC4C: set and cleared by timeline entries of kinds 4 and 5 (func_001ED318)
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     u8 padC58[0xC5C - 0xC58];
@@ -632,7 +641,7 @@ struct TempoAgent : Agent {
     s32 fC60;               // 0xC60: a span in beats (SetTempoAgentSpanBeats)
     f32 fC64;               // 0xC64: that span in seconds
     s32 fC68;               // 0xC68: the number of fC6C entries (func_001ED090)
-    void* fC6C;             // 0xC6C: a 0x400-byte table (slot 0)
+    TempoPlayerEntry* fC6C; // 0xC6C: a 0x400-byte table (slot 0)
     s32 fC70;               // 0xC70: the bars counted (four beats each)
     s32 fC74;               // 0xC74: the beats counted
     s32 fC78;               // 0xC78: the beat in the bar, 0 to 3
