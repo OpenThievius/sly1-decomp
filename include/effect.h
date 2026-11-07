@@ -105,8 +105,12 @@ struct Effect {
         Quad219C qC0;       // 0xC0
         Vec02 vC0;          // 0xC0: kind 26's direction (func_001924C8 gives it the world's gravity)
     };
-    u8 padD0[0x110 - 0xD0]; // 0xD0
-    s32 i110;               // 0x110
+    u8 padD0[0x100 - 0xD0]; // 0xD0
+    Vec02 v100;             // 0x100: a spin the effect turns by (func_0019F390)
+    union {
+        s32 i110;           // 0x110
+        f32 f110;           // 0x110: its drag, per second (func_0019F390)
+    };
     void* p114;             // 0x114: the frame func_0019F858 places the record by
     T219CHook* hooks;       // 0x118: run at its end (func_0019EC30)
     u8 pad11C[0x120 - 0x11C];   // 0x11C
