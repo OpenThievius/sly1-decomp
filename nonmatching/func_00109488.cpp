@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 37344/37392, checked 2026-11-06
+// SIZE 37344/37392, checked 2026-11-07
 #include "common.h"
 // NEAR: 9,336 instructions against retail's 9,348 (li -27, lui +7, addiu +7, move +1). 7,557
 // instructions match ignoring registers, 2,815 exactly, and 1,059 of 1,179 entries store in
@@ -77,6 +77,44 @@
 // 1,500 tries: most swaps compile to the same bytes, the rest lose the store order. This file stays
 // the best. Neither order reaches retail's allocation in this shape; what is left is the shape of
 // the entries themselves, of which the plain stores and the forms above score worse.
+//
+// CSE windows (2026-11-07, build/swarm/g4/: winprobe.py, pmerge.py, split.py, tr.py, cnt.py).
+// cse_basic_block flushes its hash table every 1,002 insns (1,001 counted, then the flush), in
+// both passes, so each constant gets a fresh pseudo per window: in the first pass by the .jump
+// count (every parameter load counts, including the copies of repeated arguments), in the second by
+// the .cse2 count (only what survives the first). Our register for value 1 changes exactly at the
+// predicted entries. Retail's register runs for 1 give the landmarks: first pass, entry 553 still
+// old and 554 new, 838 old and 841 new, 1122 old and 1129 new; second pass, 122 old and 124 new,
+// 1065 old and 1067 new. This file passes 5 of the 10, being a few first-pass insns too long by
+// entry 553: retail has about 8 to 16 fewer by then. That rules out merging repeated arguments in
+// the big kinds (flags 146, 4242, 2194: ~94 insns by entry 553), and leaves the 16 calls with
+// flags 162 (fC = f18, one parameter: s5 in that folder, 9,331 instructions, 2,864 exact, 7,576
+// ignoring registers, 1,066 in order, 8 of 10) or the 21 with flags 130 (s8, 8 of 10). Entry 1065
+// is then met by also merging the coincidental f0 = flags of the three flags-2 Set0 calls (9 of
+// 10). Entry 122 needs 2 fewer surviving insns before its flags store, which no merge gives; taking
+// Set1's f10 (the function pointer) out of the helper as a plain `p->f10 = ...;` after the call
+// does it, and gives Set1 retail's commonest store order, 0-4-C-14-10. With both, every register
+// run of value 1 lands on retail's entries. None of these forms scores closer than this file
+// (s5 + f10 split: 2,544 exact; all three: 2,273): fitting the windows looks necessary, not
+// sufficient. About 360 merge and split combinations were probed.
+//
+// What is left is reload's choice of spill registers. In .lreg, local-alloc gives the first
+// window's 256 (pseudo 137, entries 3 to 76) s5, as retail has it; in .greg it has lost s5, and
+// every pseudo of 4 takes s5 for the whole function, where retail holds 4 in s3, then t8, then
+// rebuilds it. Our rebuild registers in the first window are s3, s1 and s6, retail's t9 and t6:
+// reload spilled other hard registers, by a cost summed over the whole function.
+//
+// Spill choice (2026-11-07, build/swarm/g4/spill.py, disp.py): scored by the registers that rebuild
+// a constant inside one entry, per 50 entries, against retail's, and by where 4 lives. Every form
+// with this file's store order keeps all of 4's pseudos in s5 (0 of retail's 60 stores of 4 in
+// retail's register): this file, s5, s8, the f10 split, flags as literals per kind, every parameter
+// order of the merged helper, and the lead's hill-climbed body orders (build/swarm/lead/f109/
+// best13.cpp and best22.cpp, up to 2,370 stores in retail's register). The only forms that move 4
+// out of s5 (up to 16 of 60) are the merges of the big kinds (flags 146, 4242, 2194), which break
+// the windows above and the store order (about 500 entries in order, two fewer spills). The .greg
+// dump shows why it is global: reload spills v1, a1, s1 and t2 hundreds of times and s3 in the
+// first window, where retail rebuilds in t9 and t6, and its spill cost is summed over the whole
+// function. No plausible source change tried steers that choice; this lead is closed.
 
 void func_001000C8();
 void func_00100178();
