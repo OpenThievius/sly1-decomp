@@ -102,3 +102,4 @@ src/lib/substring.cpp	001F6880	001F6900	-	-	-	-
 src/lib/tlb.cpp	001FA9B0	001FAC00	0024EC30	00277D70	-	-
 src/lib/patch_installer_3.cpp	001FA890	001FA9B0	-	002779C0	-	-
 src/lib/patch_installer_2.cpp	001F9EE8	001FA068	-	002771F0	-	-
+src/lib/patch_installer_1.cpp	001F6EE0	001F7020	-	00276980	-	-
