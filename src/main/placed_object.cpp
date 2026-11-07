@@ -5,6 +5,7 @@
 // reader and the curve segment helpers. One file between two edges; it could be several.
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -1900,7 +1901,12 @@ void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z)
     self->desc02()->m21(self, (Vec02*)v);
 }
 
-INCLUDE_ASM(func_00127628);
+void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local)
+{
+    Vec02 v;
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(*local));
+    self->desc02()->m20(self, &v);
+}
 
 ASM_FUNC(func_00127678);
 

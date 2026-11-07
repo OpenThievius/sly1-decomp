@@ -30,6 +30,7 @@
 #include "screen_element.h"
 #include "step_sequence.h"
 #include "asm_func.h"
+#include "vu0.h"
 void InitCollider(void* self);
 void PostLoadPlacedObject(void* self);
 void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
@@ -1296,7 +1297,23 @@ void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z)
     self->f5C = z;
 }
 
-INCLUDE_ASM(func_0019CE50);
+// What func_0019CE50 reads: an object to place at a time (+0x18) and a point in its frame (+0x40).
+struct FramePoint_0019CE50 {
+    u8 pad0[0x18];
+    void* object;           // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+};
+
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+
+void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
+{
+    Vec02 pos;
+    Mat02 rot;
+    ComputeObjectFrameAtTime(p->object, 0, &pos, &rot, 0, 0, t);
+    Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
+}
 
 INCLUDE_ASM(func_0019CEC0);
 

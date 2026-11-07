@@ -7,7 +7,7 @@
 # Linux build 2.9-ee-991111-01, as OpenRAC's rac1-decomp builds those objects
 # (docs/TOOLCHAIN.md).
 compiler	2.95.3
-default	-O2 -G0 -fno-exceptions -fno-rtti
+default	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf15
 src/lib/001F8000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/divide.c	-O2 -G0	2.9-ee-991111-01
 src/lib/divide_unsigned.c	-O2 -G0	2.9-ee-991111-01

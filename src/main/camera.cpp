@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "pad_record.h"
 #include "asm_func.h"
+#include "vu0.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
 extern void SetCameraFogStrength(void*);
@@ -360,7 +361,23 @@ INCLUDE_ASM(func_00143180);
 
 INCLUDE_ASM(func_00143208);
 
-INCLUDE_ASM(func_001433E0);
+// What func_001433E0 resets: the offset ComputeOffsetBehindTarget gives (+0x250) and three
+// vectors after it.
+struct Tracking_001433E0 {
+    u8 pad0[0x250];
+    Quad16 offset;          // 0x250
+    Quad16 v260;            // 0x260
+    Quad16 v270;            // 0x270
+    Quad16 v280;            // 0x280
+};
+
+void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_00143148* a2)
+{
+    ComputeOffsetBehindTarget(self, a1, a2, &self->offset);
+    Vu0::Q(self->v260) = Vu0::Zero();
+    Vu0::Q(self->v270) = Vu0::Zero();
+    Vu0::Q(self->v280) = Vu0::Zero();
+}
 
 INCLUDE_ASM(func_00143418);
 

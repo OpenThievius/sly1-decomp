@@ -3300,7 +3300,6 @@ void DrawAlignedText(TextReader* self, Layout_137228* p, s32 x, s32 y)
     Font* started = 0;
     f32 half = 0.5f;
     RewindTextReader(self);
-    s32 right = 2;
     f32* fp = f;
     while ((n = ReadTextChar(self)) != 0) {
         if (n == 10) {
@@ -3314,7 +3313,7 @@ void DrawAlignedText(TextReader* self, Layout_137228* p, s32 x, s32 y)
                 left = p->x;
             } else {
                 f32 g = *fp;
-                if (p->f14 == right)
+                if (p->f14 == 2)
                     left = (p->x + p->w) - g;
                 else
                     left = p->x + (p->w - g) * half;

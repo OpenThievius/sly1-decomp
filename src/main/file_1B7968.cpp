@@ -23,6 +23,7 @@
 #include "game_progress.h"
 #include "shapes.h"
 #include "property_descriptor.h"
+#include "vu0.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -876,7 +877,17 @@ void ReparentCollider(Collider* self, BaseObject* p)
     ResolveContactHandler(self);
 }
 
-INCLUDE_ASM(func_001B9C80);
+void ReframePlacedObject(void* self, PlacedObject* frame);
+
+void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
+{
+    Vec02 a;
+    Vec02 b;
+    ReframePlacedObject(self, frame);
+    Vu0::Q(a) = Vu0::Rotate(frame->rot, Vu0::Q(self->v440));
+    Vu0::Q(b) = Vu0::Rotate(frame->rot, Vu0::Q(self->v460));
+    SetColliderAnchors(self, self->mode450, &a, self->mode470, &b);
+}
 
 LINKER_REMNANT(func_001B9D08);
 
@@ -1106,9 +1117,25 @@ void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
     *dst = *D_002746E0[index].quad;
 }
 
-INCLUDE_ASM(func_001BB058);
+void SetColliderTurnAnchorPreset(Collider* self, s32 index)
+{
+    Vec02 v;
+    Vec02 local;
+    s32 mode;
+    GetAnchorPreset(index, &mode, &local);
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(local));
+    SetColliderAnchors(self, mode, &v, self->mode470, &self->v460);
+}
 
-INCLUDE_ASM(func_001BB0C8);
+void SetColliderMoveAnchorPreset(Collider* self, s32 index)
+{
+    Vec02 v;
+    Vec02 local;
+    s32 mode;
+    GetAnchorPreset(index, &mode, &local);
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(local));
+    SetColliderAnchors(self, self->mode450, &self->v440, mode, &v);
+}
 
 void SetColliderFlagNibble32(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
 
