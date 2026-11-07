@@ -28,7 +28,7 @@
 #include "transform_object.h"
 #include "object_sub_group.h"
 #include "animation.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c8b.h"
 #include "object_pool.h"
 #include "c8d.h"
@@ -159,7 +159,7 @@ void func_001A9498(void*);
 void func_001A9C58(C0D* self, s32 a, s32 b, s32 c);
 void func_001B0470(void* p, f32 x);
 void func_001B0488(void* p, f32 x);
-void* func_001B6290(C88* a, s32 b, s32 c, s32 d);
+void* func_001B6290(StateGraph* a, s32 b, s32 c, s32 d);
 void func_001B6438(void* x);
 void func_001B70B0(C09* p, s32 a, s32 b);
 void func_001BB1E0(void* self, u32 value);
@@ -345,8 +345,8 @@ ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, Scri
 ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
@@ -356,7 +356,7 @@ ScriptValue* func_00102D40(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* 
 ScriptValue* func_00102DE0(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102F10(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102FB0(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001030E0(ScriptValue* ret, C88* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001030E0(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
@@ -1440,7 +1440,7 @@ ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, Scrip
     return ret;
 }
 
-ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_001027C0(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1458,7 +1458,7 @@ ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00102870(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -1642,7 +1642,7 @@ ScriptValue* func_00102FB0(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_001030E0(ScriptValue* ret, C88* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_001030E0(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;

@@ -28693,7 +28693,7 @@
    }
   },
   {
-   "name": "game/file_1AECB0",
+   "name": "game/timed_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "11716",
@@ -29169,11 +29169,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1AECB0.cpp"
+    "source_path": "src/main/timed_object.cpp"
    }
   },
   {
-   "name": "game/file_1B1AC8",
+   "name": "game/range_record",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "3740",
@@ -29406,11 +29406,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1B1AC8.cpp"
+    "source_path": "src/main/range_record.cpp"
    }
   },
   {
-   "name": "game/file_1B2988",
+   "name": "game/anim_record",
    "measures": {
     "fuzzy_match_percent": 98.35243553008596,
     "total_code": "11168",
@@ -29922,11 +29922,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1B2988.cpp"
+    "source_path": "src/main/anim_record.cpp"
    }
   },
   {
-   "name": "game/file_1B5588",
+   "name": "game/state_walker",
    "measures": {
     "fuzzy_match_percent": 90.83665338645419,
     "total_code": "9036",
@@ -30429,7 +30429,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1B5588.cpp"
+    "source_path": "src/main/state_walker.cpp"
    }
   },
   {
@@ -32335,7 +32335,7 @@
    }
   },
   {
-   "name": "game/file_1C29E8",
+   "name": "game/trail_ribbon",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "2464",
@@ -32397,7 +32397,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C29E8.cpp"
+    "source_path": "src/main/trail_ribbon.cpp"
    }
   },
   {
@@ -32584,7 +32584,7 @@
    }
   },
   {
-   "name": "game/file_1C4458",
+   "name": "game/turning_collider",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6796",
@@ -32907,7 +32907,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C4458.cpp"
+    "source_path": "src/main/turning_collider.cpp"
    }
   },
   {
@@ -33022,7 +33022,7 @@
    }
   },
   {
-   "name": "game/file_1C6F48",
+   "name": "game/agent",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "21520",
@@ -33876,7 +33876,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C6F48.cpp"
+    "source_path": "src/main/agent.cpp"
    }
   },
   {

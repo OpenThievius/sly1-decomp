@@ -1447,7 +1447,7 @@ func_00143E40	UpdateCamera	runs the top controller on the frame time (calls the 
 func_00145FB8	PushCameraStackValue	calls PushStackValue on the camera's controller at 0x460
 func_00145FD8	PopCameraStackValue	returns PopStackValue of the camera's controller at 0x460
 func_00145FF8	PeekCameraStackValue	returns PeekStackValue of the camera's controller at 0x460
-D_002744D0	g_groupStaggerDirty	set to 1 by func_001AF7A8 and func_001B01B0, tested by the group update and cleared by StaggerGroupOffsets; only file_1AECB0.cpp uses it
+D_002744D0	g_groupStaggerDirty	set to 1 by func_001AF7A8 and func_001B01B0, tested by the group update and cleared by StaggerGroupOffsets; only timed_object.cpp uses it
 func_001AECB0	InitTimedObject	slot 0 of the 0x30 class: runs the base set-up func_001B7968, sets the mode at 0x554 to 0 and the state at 0x558 to -1
 func_001AECE0	SetTimedObjectTarget	slot 76: stores its argument in 0x550, the object whose state and time the subclasses read
 func_001AECE8	EnterTimedObjectState	slot 77: stores the new state at 0x558 and the time D_0026185C[0] at 0x55C (after notifying the target when going from 1 to 2)
@@ -3334,3 +3334,86 @@ func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the de
 func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
 func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
 func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks
+func_001AEF68	StopTrackPlayer	takes the object's track player (FindTrackPlayer), keeps the value at its 0x18 in +0x5CC, zeroes it and keeps the player at +0x5C8; UpdateTimedObject gives it back, and the sequenced and blink objects' state code calls it when the player accepts their message
+func_001AEFA0	UpdateTimedObject	slot 17 (update) of class 0x30: runs UpdateCollider, then gives the track player kept at +0x5C8 its value at 0x18 back once the player's state at 0x2220 is no longer 4; the three subclasses' updates call it first
+func_001AF0D0	LoadTimedGroup	slot 10 (load) of class 0x31: runs LoadCollider, then resolves the two object links of g_timedGroupLinks (+0xAE4, +0xAE8)
+D_002744B8	g_timedGroupLinks	the two object-link records (+0xAE4 and +0xAE8 of a class 0x31 object) LoadTimedGroup hands to ResolveObjectLinks
+func_001AF108	PostLoadTimedGroup	slot 15 (after loading) of class 0x31: runs PostLoadPlacedObject, then walks the object's children and files the effect spawners among them into its groups at +0x5E0
+func_001AF820	DrawTimedGroup	slot 37 of class 0x31 (the draw slot of QueuePlacedObjectDraw and DrawPlayer): runs class 0x03's func_001B93D8, then places the group's children by ComputeTimedGroupRamp on back memory
+func_001AFAF8	IsTimedGroupCandidate	tells whether a body may set a class 0x31 object off: not when its flag bit 43 is set, its root is the object's, IsObjectExcluded rejects it or it is the player in state 6/3 with func_00160D10's bits 0x12000; otherwise the low bit of its high flags clear; ChooseTimedGroupState calls it
+func_001AFBB0	ChooseTimedGroupState	slot 72 (0x130, pick the next state) of class 0x31: finds the nearest object the group may act on (FindNearestSpanObject, IsTimedGroupCandidate, IsObjectInAcceptLists) and tells it or the player (InitOwnerMessage, StopTrackPlayer)
+func_001B0160	FinishTimedGroup	slot 75 (0x13C) of class 0x31: moves a state 0 to 2 on to the closing state 3 and sets +0x554 to 1
+func_001B0838	DrawSequencedObject	slot 37 of class 0x32 (the draw slot): builds the object's transform (BuildPlacedObjectTransform) and a scaled matrix (BuildScaledTransformMatrix) from the time in its state
+func_001B0BD8	TestSequencedObjectMayContact	slot 56 (0xF0, may-contact test) of class 0x32: always 1
+func_001B0BE0	IsSequencedObjectCandidate	tells whether a body may set a class 0x32 object off: not when its flag bit 43 is set, its root is the active switched collider or the object's own, or IsObjectExcluded rejects it; otherwise the low bit of its high flags clear (ChooseSequencedObjectState)
+func_001B0C68	ChooseSequencedObjectState	slot 72 (0x130, pick the next state) of class 0x32: looks at the player and the nearest span object (FindNearestSpanObject, IsSequencedObjectCandidate) to pick the state UpdateSequencedObject enters
+func_001B0F70	FinishSequencedObject	slot 75 (0x13C) of class 0x32: sets +0x554 to 1 the first time and moves the object to the closing state 3 unless it is in state 8
+func_001B1438	ChooseBlinkObjectState	slot 72 (0x130, pick the next state) of class 0x33: walks its root's contacts for a body touching it that IsObjectInAcceptLists accepts, picks state 2 or 6, and tells the player (InitOwnerMessage, StopTrackPlayer) or another object (FindNodeForQuery)
+func_001B1698	FinishBlinkObject	slot 75 (0x13C) of class 0x33: sets +0x554 to 1 and, when it has no hold time (+0x608 negative), moves state 1 to 3 and 5 to 7
+func_001B1AC8	InitRangeRecord	sets a RangeRecord up: both ranges at +0x04 and +0x08 to -1, the vectors at +0x20 and +0x30 from the unit Z and Y vectors, 100 and 400 at +0x40 and +0x44, -1 at +0xB0 (EnsureRangeRecord and GetRangeRecord's default)
+func_001B1B38	PrepareRangeRecord	links the record to key 0x2C when it has no link, gives it ranges 100 and 400 when HasRangeRecordRanges says it has none, and takes a 16-byte mesh-queue slot (g_meshQueueCount) for +0x2D0 unless its link has bit 0x10000000; StartPlacedObject calls it
+func_001B1BF0	InvalidateRangeRecordPacket	clears +0xC0, the packet QueueRangeRecordPacket builds again when it is 0; every setter of the record calls it after a change
+func_001B1BF8	UpdateRangeRecordBounds	works out the sphere at +0x50 (centre) and +0x60 (radius) from the position, the direction, the ranges at +0x04, +0x08 and the values at +0x40, +0x44; the setters call it after a change
+func_001B1CF8	LinkRangeRecord	links the record to the AnimRecord FindAnimRecord finds for a key (0x2C for -1) and drops its packet when there is one (SetRangeRecordKey)
+func_001B1D38	HasRangeRecordRanges	1 when both ranges at +0x04 and +0x08 are non-negative
+func_001B1D70	StoreRangeRecordNear	stores the near range at +0x04, copies it to +0x08 while that is negative and drops the packet (SetRangeRecordNear)
+func_001B1DA8	StoreRangeRecordFar	stores the far range at +0x08, copies it to +0x04 while that is negative and drops the packet (SetRangeRecordFar)
+func_001B1DE0	SetRangeRecordPosition	copies a vector to +0x10 when it differs from it beyond func_001EAC68's tolerance, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket; ComputePlacedObjectWorldFrame calls it
+func_001B1EC8	SetRangeRecordDirection	copies a vector to +0x20 when it differs from it beyond func_001EAC68's tolerance, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket; ComputePlacedObjectWorldFrame calls it
+func_001B1FB0	StoreRangeRecordInner	stores +0x40, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket (SetRangeRecordInner)
+func_001B1FE0	StoreRangeRecordOuter	stores +0x44, then UpdateRangeRecordBounds and InvalidateRangeRecordPacket (SetRangeRecordOuter)
+func_001B2010	ScaleRangeRecordByAngle	sets the ranges +0x04 and +0x08 to +0x40 and +0x44 times the tangent (func_002054F0) of half the angle given in degrees (SetRangeRecordInnerAndOuter)
+func_001B2068	StoreRangeRecordVector	copies a 16-byte vector to +0x30 and drops the packet (SetRangeRecordVector)
+func_001B2090	RangeRecordMatchesKinds	1 when the record's link is shown under the camera's mask at 0x21C (or has bit 0x10000000) and is of kind 2 with bit 1 asked or kind 3 with bit 2 asked
+func_001B2140	UpdateRangeRecord	UpdatePlacedObject's per-frame call for the record: gathers bodies from the world on back memory (func_001DC4D0) through func_001B2118 and RangeRecordMatchesKinds and builds the packet with BuildRangeRecordPacket
+func_001B2358	BuildRangeRecordPacket	writes the record's VIF packet with the camera's packet writer (InitPacketWriter, SubmitMeshQueueEntry, WriteVifMscal, WriteVifFlushE) and keeps it in +0xC0
+func_001B2640	QueueRangeRecordPacket	when the link is shown under the camera's mask, builds the packet if +0xC0 is empty and writes a reference to it into g_vifPacketWriter
+func_001B26F8	RangeRecordReachesSphere	tests the record's bounding sphere (+0x50, +0x60) against a point and radius under the camera's mask; the part drawer func_00166690 and CollectRangeRecordsInReach call it
+func_001B2790	CollectRangeRecordsInReach	walks the world's list at +0x1C00 and stores up to max records that RangeRecordReachesSphere accepts, with their count
+func_001B2B50	ReadImageRecordB	reads a 12-byte image record from the stream, rebases its word at 8 by D_00275718 and stores its size in quadwords at +0xC; LoadImageRecordsB calls it for each record
+func_001B2BA8	LoadImageRecordsB	reads the count of the second image records, allocates g_imageRecordsB (0x18 bytes each) and reads each with ReadImageRecordB, then keeps in g_imageSlotsB the larger of those with bit 0x10000000 and the rest
+func_001B2CA8	ReadImageRecordA	reads a 0x14-byte image record from the stream, keeps its size in quadwords at +0x14 and rebases its offset at +0x10 by D_00275718; LoadImageRecordsA calls it for each record
+func_001B2CF8	LoadImageRecordsA	reads the count of the first image records, allocates g_imageRecordsA (0x20 bytes each) and reads each with ReadImageRecordA, then keeps in g_imageSlotsA the larger of those with bit 0x10000000 and the rest
+func_001B2F00	ReadTextureTable	reads a record's 0x14-byte texture table: six bytes, then entryCount indexes into g_imageRecordsA and cellCount indexes into g_imageRecordsB (0xFFFF for none), each table on front memory
+func_001B3450	SendResidentImages	sends the images of mask 0x10000000 to the GIF from a bump allocator at 0x1E00 and forgets the active image mask (g_activeImageMask = 0)
+func_001B40C8	ResetScreenResources	clears every count and table LoadScreenResources fills (image records, fonts, anim records, cursor animators, the pending cursors and the per-mask uploads)
+func_001B4188	ConvertRgbToHsv	takes the largest and smallest of three colour components (max.s, min.s) and computes hue, saturation and value from them in place
+func_001B4330	ConvertHsvToRgb	splits the hue into six sectors (a jump table) and computes three colour components from hue, saturation and value in place
+func_001B4580	ConvertHsv255ToRgb255	scales the second and third components of a 0..255 colour by 1/255, runs ConvertHsvToRgb and scales the result by 255
+func_001B4600	ConvertRgb255ToHsv255	scales a 0..255 colour by 1/255, runs ConvertRgbToHsv and scales saturation and value back by 255
+D_00274510	g_imageSlotsA	the larger of the counts of first image records with and without bit 0x10000000 (LoadImageRecordsA); the image senders func_001692B0, func_001693A8 and func_00169780 read it
+D_00274514	g_imageSlotsB	the larger of the counts of second image records with and without bit 0x10000000 (LoadImageRecordsB); the image senders func_001692B0, func_001693A8 and func_00169780 read it
+D_00274518	g_activeImageMask	the image mask SwitchActiveImageMask last sent; it sends again only for another mask, and SendResidentImages clears it
+D_00274520	g_maskImageUploads	six results of UploadImagesByMask, one per mask bit 0 to 5 with 0x40000000, kept by LoadScreenResources
+D_00274538	g_maskedImagesPacket	what BuildMaskedImagesPacket returns for mask 0x20000000 at the end of LoadScreenResources
+D_00274544	g_lastPendingCursor	the first cursor SetCursorFrame or SetCursorCoords put in the pending list, so the list's last; a cursor is pushed only when its next link is empty and it is not this one
+func_001B5CD8	StartCameraPositionedObject	slot 16 (start) of class 0x54: StartPlacedObject, then clears flag bits 40 and 41 and sets bit 40
+func_001B5D28	MoveObjectToCamera	slot 17 (update) of class 0x54: UpdatePlacedObject, then sets its position (slot 29) to the camera's vector at +0x40, keeping its own height unless +0x2D0 is set
+func_001B5F50	LoadStateGraph	slot 10 (load) of class 0x88: reads the graph's state table (keys, FindStateEntryIndexOrZero) and its edges with their vectors from the stream onto front memory
+func_001B61A8	StartStateGraph	slot 16 (start) of class 0x88: StartObject, and when the graph is armed (+0x44) queues SpawnInitialStateWalker on the world
+func_001B6568	GetStateWalkerTargetKey	stores the key of the walker's target state (+0x30) in the graph's state table, or -1 for none
+func_001B6598	GetStateWalkerCurrentKey	stores the key of the walker's current state (+0x28) in the graph's state table, or -1 for none
+func_001B65C8	GetStateWalkerNextKey	stores the key of the state the walker is moving to (+0x2C) in the graph's state table, or -1 for none
+func_001B65F8	SetStateWalkerSpeed	stores the walker's speed at +0x38 and tells the animation player at +0x24 when there is one (SetAnimationPlayerSpeed)
+func_001B93D8	DrawCollider	slot 37 of class 0x03 (the draw slot): only runs class 0x02's func_001261C0 with its two arguments; DrawTimedGroup and others call it as their base
+func_001BAC28	IgnoreColliderAttachmentStep	slot 51 of class 0x03 (0xDC, called by what the object is attached to with the frame time): does nothing
+func_001BB000	ResetColliderAnchors	runs SetColliderAnchors(self, 3, 0, 3, 0), the anchors SetupSequencedObject also gives
+func_001BE810	CheckStreamVoicePending	0 when the stream voice is locked or absent; 1 while g_streamVoicePending is set; otherwise queues IOP command 0x2E for g_streamVoice and returns 0
+func_001BECF8	SilenceVolumeChannel2	SetVolumeChannelFactor(2, 1, 0.0); RestoreVolumeChannel2 sets it back to 1.0
+func_001BED20	RestoreVolumeChannel2	SetVolumeChannelFactor(2, 1, 1.0), undoing SilenceVolumeChannel2
+func_001C0000	SetVolumeChannel6Factors	sets factors 0, 2 and 3 of volume channel 6 to the value, and factor 1 too when the flag is set
+func_001C05D0	SetIopVolumeChannel8	sends volume channel 8 to the IOP as the value times 1024 (SetIopVolumeChannel)
+func_001C0760	SilenceVolumeChannel3	sets factor 1 of volume channel 3 to 0.0 when the flag is set and to 1.0 otherwise
+func_001C0AB8	SetLastWorldSoundEntryFromPoint	sets the two values of the world's last sound entry (+0x1D84, count at +0x1D80) to 8000 - 50 y and 8000 - 50 x of the point
+func_001C0B08	SetLastWorldSoundEntryValues	copies an 8-byte pair into the world's last sound entry at its offset 4 (AddWorldSoundEntry appends the entries)
+func_001C0EC0	PlaySoundWithWanderingPitch	when D_002748EC is set, starts sound 0x77 with a pitch of StepBiasedRandomWalk's value over 12
+func_001C29F8	AddTrailPoint	adds a point to an object's trail ring (+0x60): its time from g_gameClock, its alpha, and the ribbon's two edges built from the object's frame and the camera (BuildAxisAngleMatrix); func_001721B0 calls it
+func_001C3028	QueueTrailRibbonDraw	clears a request record and queues DrawTrailRibbon for the object with QueueDeferredRequest
+D_00274998	g_trailEdgeTexCoord	the texture coordinate (0, 1.0) DrawTrailRibbon gives each point's first edge
+D_002749A0	g_trailZeroTexCoord	the zero texture coordinate DrawTrailRibbon gives each point's second edge
+func_001C49C8	DrawTurningCollider	slot 37 of class 0x06 (the draw slot): only runs DrawCollider; DrawAgent calls it as its base
+func_001C5D58	TurnColliderTowardHeading	turns the rotation vector at +0x160's third angle toward the heading of the object's x axis with ApproachAngleWithRamp and the ramp at +0x6E0, then sets it through slot 33 (0x94)
+func_001C5E50	ScaleTurningColliderRamp	copies the ramp D_00274B80 to +0x6E0 and scales its first two values by the factor and the third by the factor's inverse square root
+func_001C8BC0	FaceAgentTowardGoalPoint	works out the two angles from the agent's position (+0x140) to the point at +0xA40 with func_001454E0 and sets them with SetAgentFacingAngles
+func_001C8FD0	ForceAgentState	clears the forced flag at +0xB88 for mode -1; otherwise sets it and runs ChangeAgentState with the mode and value (func_00105360 calls it)
+func_001D27C0	SetPlayerPadSelectMode	stores a mode at +0x2718 of the player: leaving -1 takes the world's pad-select flag and shows the counted screen element (AcquirePadSelectFlag, ShowCountedScreenElement), going back to -1 releases and hides them; func_00109488 and func_001D1BB0 call it

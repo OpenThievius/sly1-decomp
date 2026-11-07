@@ -19,6 +19,6 @@ struct S1EB050 {
 typedef char check_S1EB050[sizeof(S1EB050) == 8 ? 1 : -1];
 
 extern S1EB050 D_002754C8;      // file_1D62E0.cpp defines it; file_1E88D0.cpp
-extern S1EB050 D_00275C60;      // file_1E88D0.cpp defines it (and D_00275C68 after it); 00128000.cpp, 00150000.cpp, file_1C29E8.cpp
+extern S1EB050 D_00275C60;      // file_1E88D0.cpp defines it (and D_00275C68 after it); 00128000.cpp, 00150000.cpp, trail_ribbon.cpp
 
 #endif

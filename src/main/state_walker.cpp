@@ -5,7 +5,7 @@
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "collider.h"
-#include "c88.h"
+#include "state_graph.h"
 #include "c54.h"
 #include "world.h"
 #include "attachment.h"
@@ -38,9 +38,6 @@ s32 func_001300E8(void* a, s32 b);
 s32 func_00182F40(Collider* e, void* b);
 void func_0015FCD8(C09* self, void* p);
 void func_001BF048(void* p);
-struct Entry_1B65C8 { s32 value; s32 extra; };
-struct Host_1B65C8 { u8 pad[0x38]; Entry_1B65C8* entries; };
-struct Node_1B65C8 { u8 pad[0x18]; Host_1B65C8* host; u8 pad2[0x2C - 0x1C]; s32 index; };
 struct Node_1B6C68 {
     u8 pad[0x28];
     s32 f28;
@@ -68,9 +65,8 @@ struct Node_1B6D78 {
     u8 pad2[0x3C - 0x20];
     Link_1B6D78* f3C;
 };
-struct Entry_1B6E28 { s32 value; s32 extra; };
-struct Node_1B6E28 { u8 pad[0x18]; C88* host; };
-void func_001837E0(C88* host, s32 a, s32 b, void** args);
+struct Node_1B6E28 { u8 pad[0x18]; StateGraph* host; };
+void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
 struct Node_1B5EA0 { Node_1B5EA0* next; };
 struct Pool_1B5EA0 { u8 pad[8]; Node_1B5EA0* head; };
 struct Node_1B5EC0 { Node_1B5EC0* next; };
@@ -183,28 +179,6 @@ struct Node_1B6CF0 { u8 pad[0x24]; s32 f24; };
 f32 func_001B6C68(Node_1B6CF0* self);
 void func_001B66A0(Node_1B6CF0* self);
 void func_0012F0A0(void* a, f32 b, f32 c, s32 d);
-struct Entry_001B6568 {
-    s32 value;
-    s32 extra;
-};
-struct Sub_001B6568 {
-    u8 pad0[0x38];
-    Entry_001B6568* table;
-};
-struct Entry_001B6598 {
-    s32 value;
-    s32 extra;
-};
-struct Sub_001B6598 {
-    u8 pad0[0x38];
-    Entry_001B6598* table;
-};
-struct Ctx_001B6598 {
-    u8 pad0[0x18];
-    Sub_001B6598* sub;
-    u8 pad1[0x28 - 0x1C];
-    s32 index;
-};
 s32 func_001B63F8(void* self, s32 key);
 void func_001B6E28(StateWalker* self, s32 a, s32 b);
 void func_001B66A0(StateWalker* self);
@@ -218,7 +192,7 @@ struct Node_1B64D8 {
     s32 f30;
     Flags_1B64D8* f34;
 };
-s32 func_001B63F8(C88* self, s32 key);
+s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6C68(Node_1B64D8* self);
 void func_0012E760(AnimationPlayer* obj);
 void func_001B66A0(Node_1B64D8* self);
@@ -226,7 +200,7 @@ struct Entry_2198E8 { const u8* f0; s32 f4; };
 extern const Entry_2198E8 D_002198E8;
 void* func_001B5EE0(Pool6C* pool);
 void func_00152470(List01* list, StateWalker* item);
-void func_001837E0(C88* self, s32 a, s32 b, void* c);
+void func_001837E0(StateGraph* self, s32 a, s32 b, void* c);
 struct Hdr_1B6F50;
 struct Elem_1B6F50;
 struct Sub_1B6F50 { u8 p0[0x11]; u8 f11; u8 p1[0x0A]; s32 f1C; u8 p2[0x60]; s32 f80; s32 f84; };
@@ -447,7 +421,7 @@ LINKER_REMNANT(func_001B5F48);
 
 INCLUDE_ASM(func_001B5F50);
 
-void func_001B61A8(C88* self)
+void func_001B61A8(StateGraph* self)
 {
     StartObject(self);
     if (self->armed != 0) {
@@ -477,7 +451,7 @@ void func_001B61F0(Bank_1B61F0* self)
     CreateStateWalker(self, r, -1, 0);
 }
 
-StateWalker* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
+StateWalker* func_001B6290(StateGraph* self, s32 a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
     obj->f1C = a1;
@@ -516,7 +490,7 @@ void* func_001B6388(Owner_1B6388* self, s32 key)
     return 0;
 }
 
-s32 func_001B63C0(C88* self, s32 key)
+s32 func_001B63C0(StateGraph* self, s32 key)
 {
     s32 count = self->f34;
     if (count > 0) {
@@ -539,7 +513,7 @@ s32 func_001B63F8(void* self, s32 key)
     return r < 0 ? 0 : r;
 }
 
-u32 func_001B6420(C88* a0, s32 a1)
+u32 func_001B6420(StateGraph* a0, s32 a1)
 {
     a1 = (a1 << 3) + (u32)a0->f38;
     return *(u32*)a1;
@@ -564,7 +538,7 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
 {
     s32 v;
     if (key != -1) {
-        v = FindStateEntryIndexOrZero((C88*)self->f18, key);
+        v = FindStateEntryIndexOrZero((StateGraph*)self->f18, key);
     } else {
         v = -1;
     }
@@ -586,29 +560,29 @@ void func_001B6568(StateWalker* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
     if (idx >= 0) {
-        v = ((Sub_001B6568*)a0->owner)->table[idx].value;
+        v = ((StateGraph*)a0->owner)->f38[idx].key;
     } else {
         v = -1;
     }
     *out = v;
 }
 
-void func_001B6598(Ctx_001B6598* a0, s32* out) {
-    s32 idx = a0->index;
+void func_001B6598(StateWalker* a0, s32* out) {
+    s32 idx = a0->f28;
     s32 v;
     if (idx >= 0) {
-        v = a0->sub->table[idx].value;
+        v = ((StateGraph*)a0->owner)->f38[idx].key;
     } else {
         v = -1;
     }
     *out = v;
 }
 
-void func_001B65C8(Node_1B65C8* self, s32* out)
+void func_001B65C8(StateWalker* self, s32* out)
 {
     s32 value;
-    if (self->index >= 0) {
-        value = self->host->entries[self->index].value;
+    if (self->f2C >= 0) {
+        value = ((StateGraph*)self->owner)->f38[self->f2C].key;
     } else {
         value = -1;
     }
@@ -895,12 +869,12 @@ void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
     s32 v1;
     s32 v2;
     if (idx1 >= 0) {
-        v1 = ((Entry_1B6E28*)self->host->f38)[idx1].value;
+        v1 = self->host->f38[idx1].key;
     } else {
         v1 = -1;
     }
     if (idx2 >= 0) {
-        v2 = ((Entry_1B6E28*)self->host->f38)[idx2].value;
+        v2 = self->host->f38[idx2].key;
     } else {
         v2 = -1;
     }

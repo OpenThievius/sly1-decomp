@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Kind 0x21E3: cursor animators, objects that move a cursor (a frame index or a pair of
-// coordinates) over a record (src/main/001B4000.cpp and 00158000.cpp). Each is read from the
+// coordinates) over a record (src/main/anim_record.cpp and 00158000.cpp). Each is read from the
 // level stream by func_001B4A10: a type (1 to 8), an
 // object of func_001B4920(type) bytes on the heap whose table func_001B4980(type) is stored at
 // +0 and the type at +8, then slot 0 with the 0x1C-byte block the stream holds. func_001B3040
-// (001B0000.cpp) keeps the objects in D_00274540 and each owns a record (AnimRecord) it binds
+// (anim_record.cpp) keeps the objects in D_00274540 and each owns a record (AnimRecord) it binds
 // with slot 1; func_001B4878 calls slot 2 on them every frame.
 //
 // The 0x2C-byte base is the same for all eight tables: a frame stamp, the type, the id of the
@@ -18,6 +18,7 @@
 
 struct CursorAnimator;
 struct AnimRecord;
+struct TextureTable;
 
 // The 0x1C bytes slot 0 reads from the stream (func_00137A60(stream, 0x1C, block)).
 struct AnimatorParams {
@@ -73,9 +74,13 @@ struct AnimRecord {
     u8 kind;                // 0x00
     u8 flags;               // 0x01
     s16 key;                // 0x02
-    u8 pad04[0x13 - 0x04];
+    u8 pad04[0x08 - 0x04];
+    u8 color[4];            // 0x08: halved into the GIF packet of a kind 4 record (func_001B3510)
+    u32 maskC;              // 0x0C: a range record that links it is drawn when it has 0x10000000 or every bit of the camera's mask (func_001B2090)
+    s16 linkKey;            // 0x10: the key of the record a kind 0 record takes its third pass's textures from (func_001B3510)
+    u8 pad12[0x13 - 0x12];
     u8 nelem;               // 0x13: the elements at 0x14
-    void* elems;           // 0x14: nelem elements of 0x14 bytes
+    TextureTable* elems;    // 0x14: nelem texture tables of 0x14 bytes (func_001B2F00 reads them)
     s32 entCount;           // 0x18: the number of entries at 0x1C
     void* ents;             // 0x1C: entCount entries of 8 bytes
     s32 count;              // 0x20: frames (the first element's second word)

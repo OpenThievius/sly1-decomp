@@ -737,7 +737,7 @@ void func_001C8E28(Agent* self)
     case 10:
     case 13:
     case 14:
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
         break;
     }
 }
@@ -1028,7 +1028,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
     case 10:
     case 13:
     case 14:
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
         break;
     }
 }
@@ -1158,7 +1158,7 @@ void func_001C49C8(void);
 
 void func_001CA5E0(void)
 {
-    func_001C49C8();
+    DrawTurningCollider();
 }
 
 s32 func_001CA600(s32 index)
