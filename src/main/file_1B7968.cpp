@@ -152,18 +152,56 @@ void func_0011E3A0(s32 a, s32 b);
 void* func_001B5EA0(void* p);
 void func_001F5C0C(void* p, s32 zero, s32 size);
 void func_00152470(void* list, void* item);
-struct Entry_1BF718 { u8 pad[0xC]; s32 f0C; };
-struct Slot_1BF718 { Entry_1BF718* entry; };
-struct Obj_1BF728 { u8 pad0[4]; s32 f04; u8 pad1[4]; void* f0C; };
-void func_00152600(u8* p, Obj_1BF728* self);
-void func_001B5F28(u8* p, Obj_1BF728* self);
-struct Obj_1BF788 { u8 pad[0x18]; u8* f18; };
-void func_001BF728(Obj_1BF788* self);
-void func_0011D600(u8* p);
-void func_0011D860(u8* p, s32 a, s32 b, s32 c);
-struct Obj_1BF8E8 { u8 pad0[0x14]; f32 f14; u8 pad1[0x38]; f32 f50; };
-void func_001BE860(Obj_1BF8E8* self);
-struct Rec_1BFFC8 { u8 pad0[4]; s32 f04; u8 pad1[0x40]; s32 f48; };
+// A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
+// World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
+// voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
+struct PlayingSound {
+    s32 entry;              // 0x00: its row of g_soundEntries, -2 for the stream voice
+    s32 serial;             // 0x04: g_nextSoundRecordId when filled, checked by func_001BFFC8
+    s32 bank;               // 0x08: the bank handle its voice starts from (func_001BFAF8)
+    PlayingSound** owner;   // 0x0C: the caller's pointer to it, cleared when it ends
+    f32 startTime;          // 0x10: g_gameTime when its voice started
+    f32 baseVolume;         // 0x14: the volume before distance; func_001BF8E8 rescales by it
+    s32 voice;              // 0x18: the IOP voice handle, 0 while silent
+    u8 pad1C[4];
+    Quad16 position;        // 0x20: where it plays when it follows no object
+    BaseObject* object;     // 0x30: the object it follows (its position at 0x140)
+    f32 farRange;           // 0x34: beyond it the sound is silenced or ended (func_001C0070)
+    f32 nearRange;          // 0x38
+    s32 keepWhenFar;        // 0x3C: silenced instead of ended out of range
+    s32 silent;             // 0x40: no voice is playing
+    s32 positional;         // 0x44: volume and pan follow the listener
+    s32 finished;           // 0x48: its voice has ended (func_001BFFC8 sets it)
+    u8 pollTick;            // 0x4C: frames to the next end-of-voice query, modulo 4
+    f32 volume;             // 0x50
+    f32 pan;                // 0x54
+    f32 pitch;              // 0x58: in octaves, 1524 units each (func_001BF7F8)
+    f32 f5C;                // 0x5C
+    s32 pitchOffset;        // 0x60: added to the pitch (func_001BF7F8)
+    U64P link;              // 0x64: kept when func_001BF920 clears the record
+    s32 pitchBaseValid;     // 0x6C
+    s32 pitchBase;          // 0x70: the entry's pitch from func_0011D7D8, cached
+    f32 nextTime;           // 0x74: when an ambient repeat plays next
+    union { U64P bytes; f32 value; } interval;  // 0x78: the ambient repeat interval, < 0 for none
+    union { U64P bytes; f32 value; } f80;       // 0x80
+    u8 pad88[8];
+    s32 Clamp(s32 v, s32 lo, s32 hi)
+    {
+        if (v < lo) {
+            return lo;
+        }
+        if (hi < v) {
+            return hi;
+        }
+        return v;
+    }
+};
+void func_00152600(u8* p, PlayingSound* self);
+void func_001B5F28(u8* p, PlayingSound* self);
+void func_001BF728(PlayingSound* self);
+void* func_001F5C0C(PlayingSound* p, s32 v, s32 n);
+void func_0011D860(s32 voice, s32 a, s32 b, s32 c);
+void func_001BE860(PlayingSound* self);
 void func_001BBEB8(Collider* self);
 void func_00125440(Collider* self, f32 x, void* b);
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
@@ -171,8 +209,12 @@ void func_001C06A0(s32 a, s32 b, f32 x);
 void func_0011D640(s32 a);
 void func_0011D670(s32 a);
 void func_00152470(u8* a, void* b);
-struct Entry_1BF048 {
-    s32 key;
+// A request for a sound level: a 12-byte record of the pool at World::pool1BB8, kept on
+// World::list1BC4 (func_001BEEF8 makes one). The highest level among them is the current one
+// (func_001BEF88); the IOP is sent the level plus 20.
+struct SoundLevelEntry {
+    s32 level;              // 0x00: -20 to 0x6B (func_001BEEF8)
+    u8 pad4[8];
 };
 extern s32 D_002748EC;
 extern s32 D_00274734;
@@ -185,15 +227,15 @@ extern s32 D_00274720;
 extern s32 D_0027473C;
 void func_0011D450(s32 handle);
 void func_0011D600(s32 handle);
-struct Obj_1BF0D8 { s32 kind; };
-void func_001BEDF8(Obj_1BF0D8* self);
-void func_001BEF88(Obj_1BF0D8* self);
+void func_001BEDF8(SoundLevelEntry* self);
+void func_001BEF88(SoundLevelEntry* self);
 extern s32 D_0027472C;
-typedef void (*Fn_001BF578)(void);
+// How far the listener is from a position (func_001BF2E0 or func_001BF398, as func_001BF578 chooses).
+typedef f32 (*ListenerDistanceFn)(void* listener, void* position);
 s32 func_001493A0(u8* p);
 s32 func_00149638(u8* s);
-void func_001BF398(void);
-void func_001BF2E0(void);
+f32 func_001BF398(void* listener, void* position);
+f32 func_001BF2E0(void* listener, void* position);
 void* func_0018D5C0(s32 bytes);
 extern s32 D_00274730;
 typedef s32 (*Cmp_1BE0A8)(void* a, void* b);
@@ -205,17 +247,11 @@ void func_001BE5D8(void);
 void func_0011E0E0(s32 a0, void (*a1)(void), u64 a2);
 void func_0011D420(void);
 void* func_001925F0(void);
-typedef s32 (*VFn_001BF3D0)(void* self);
-struct Obj_001BF3D0 {
-    VFn_001BF3D0* vtbl;
-};
 f32 func_001BF5E0(void* self);
 void func_001BF200(f32 r, void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
-struct Obj_1BE860 { u8 pad0[0x18]; void* f18; u8 pad1[0x34]; f32 f50; f32 f54; };
-void func_0011D798(void* a0, s32 a1, s32 a2);
-void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001BE860(void* self);
-void func_001BF718(void* slot);
+void func_0011D798(s32 voice, s32 volume, s32 pan);
+void func_001BFCD8(s32 a0, PlayingSound** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BF718(PlayingSound** slot);
 void func_001BEA78(void);
 void func_001BE1E8(void);
 s32 func_0011E1F8(s32 a);
@@ -241,102 +277,33 @@ void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
 s32 func_00129D70(Collider* n);
 void func_00129DF8(Collider* n);
 void func_0011E0B0(s32 a0);
-struct Ent_1BE4A8 { u8 pad[0]; };
-struct Ent_1BFAF8 { s32 a; s32 b; };
-extern Ent_1BFAF8 D_00245020[];
-s32 func_001BE268(Ent_1BE4A8* e);
-struct Sel_1BE568;
-struct Pair_1BE568 { s32 key; s32 w4; };
+// A row of g_soundEntries (001E4000.cpp defines it): the bank a sound is in, -1 for none, and
+// its index in that bank.
+struct SoundEntry { s32 bank; s32 index; };
+extern SoundEntry D_00245020[];
 extern u8 D_006047B0[];
 extern u8 D_006047D0[];
-void func_001BE4A8(Sel_1BE568* self);
+s32 func_001BE4A8(s32 idx);
 // NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
 
-struct Idx_1BFAF8;
-struct Link_1BFAF8;
-struct Node_1BFAF8 {
-    s32 idx;            // 0x00
-    u8 pad04[0x04];
-    s32 link;           // 0x08
-    u8 pad0c[0x04];
-    f32 f10;            // 0x10
-    u8 pad14[0x04];
-    s32 f18;            // 0x18
-    u8 pad1c[0x24];
-    s32 f40;            // 0x40
-    u8 pad44[0x0C];
-    f32 f50;            // 0x50
-    u8 pad54[0x04];
-    f32 f58;            // 0x58
-    u8 pad5c[0x1C];
-    f32 f78;            // 0x78
-};
-s32 func_001BE4A8(Idx_1BFAF8* idx);
-s32 func_0011D598(Link_1BFAF8* a, s32 b, s32 c, s32 d, s32 e, s32 f);
-void func_001BF428(Node_1BFAF8* self);
-void func_001BF7F8(Node_1BFAF8* self, f32 x);
-void func_001BE860(Node_1BFAF8* self);
+void func_001BF428(PlayingSound* self);
+void func_001BF7F8(PlayingSound* self, f32 x);
 // NEAR: first load of the chain pointer lands in $v1 and the sum in $v0, retail has them in $v0/$v1; one instruction short so the final branch targets 0x1BF028 instead of 0x1BF02C
 
-struct Frame_1BEF88 { s32 f0; s32 f4; s32 f8; s32 fC; };
-s32 func_00152720(Frame_1BEF88* p);
 // NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
 
-struct Ent_1BF7F8 {
-    s32 idx;
-    s32 f4;
-    s32 f8;
-    u8 pad0C[0xC];
-    s32 f18;
-    u8 pad1C[0x14];
-    s32 f30;
-    u8 pad34[0x24];
-    f32 f58;
-    f32 f5C;
-    s32 f60;
-    u8 pad64[8];
-    s32 flag6C;
-    s32 f70;
-    s32 clampv(s32 v, s32 lo, s32 hi)
-    {
-        if (v < lo) {
-            return lo;
-        }
-        if (hi < v) {
-            return hi;
-        }
-        return v;
-    }
-};
 s32 func_0011D7D8(s32 a, s32 b);
 void func_0011D810(s32 x, s32 y);
-struct Ent_1BE268 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; s32 w14; s32 w18; s32 w1C; };
-struct Pair_1BE268 { s32 id; s32 arg; };
-extern const Ent_1BE268 D_00244F40[7];
+extern const KeyRecord D_00244F40[7];
 void func_0011D450(void);
 void func_0018D410(KeyId* p);
 s32 func_00203828(s32 a);
 s32 func_0011D140(s32 a, s32 b);
 s32 func_0011D760(s32 a, s32 b);
-struct Eight_1BFCD8 { u8 b[8]; };
-struct __attribute__((aligned(16))) Buf_1BFCD8 {
-    u8 p0[0x50]; f32 f50;
-    u8 p54[0x64 - 0x54]; Eight_1BFCD8 f64;
-    u8 p6C[0x74 - 0x6C]; f32 f74; f32 f78;
-    u8 p7C[0x90 - 0x7C];
-};
-struct Glob_1BFCD8 { u8 p[0x1D70]; s32 f1D70; };
-enum Id_1BFCD8 { ID_1BFCD8_NONE = -1 };
-s32 func_001BE568(Id_1BFCD8 id);
-s32 func_001BE4A8(Id_1BFCD8 id);
-void func_001BF920(Buf_1BFCD8* buf, Buf_1BFCD8** out, s32 a2, s32 a3, s32 a4, f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* a5, s32 a6);
-void func_0011D798(Id_1BFCD8 a0, s32 a1, s32 a2);
-void func_001BFBF8(Buf_1BFCD8* b);
-void func_001BFAF8(Buf_1BFCD8* b, s32 id);
-s32 func_0011D598(Id_1BFCD8 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-struct Arg_1BF5E0;
-struct Obj_1BF5E0;
-typedef f32 (*Fn_1BF5E0)(Obj_1BF5E0* self, Arg_1BF5E0* arg);
+s32 func_001BE568(s32 id);
+void func_001BF920(PlayingSound* self, PlayingSound** owner, s32 a2, s32 a3, s32 a4, f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* a5, s32 a6);
+void func_001BFBF8(PlayingSound* self);
+void func_001BFAF8(PlayingSound* self, s32 id);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
 struct ListWalk {
     static void Begin(ListFrame* it, List01* list)
@@ -355,82 +322,30 @@ struct ListWalk {
     }
     static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
-struct Node_1BEE48;
-void func_001BEDF8(Node_1BEE48* node);
 Contact03* func_001B5EC0(u8* p);
 void func_001861E8(u8* a, Contact03* b);
-struct B8_1BF920 { u8 b[8]; };
-struct Q16_1BF920 { u64 a; u64 b; } __attribute__((aligned(16)));
-struct Obj_1BF920 {
-    u8 pad0[4];
-    s32 f04;
-    u8 pad8[4];
-    Obj_1BF920* f0C;
-    f32 f10;
-    f32 f14;
-    u8 pad18[8];
-    Q16_1BF920 f20;
-    u8* f30;
-    f32 f34;
-    f32 f38;
-    s32 f3C;
-    u8 pad40[4];
-    s32 f44;
-    s32 f48;
-    u8 f4C;
-    u8 pad4D[3];
-    f32 f50;
-    s32 f54;
-    f32 f58;
-    f32 f5C;
-    u8 pad60[4];
-    B8_1BF920 f64;
-    u8 pad6C[0xC];
-    union { B8_1BF920 v; f32 f; } f78;
-    union { B8_1BF920 v; f32 f; } f80;
-};
-void* func_001F5C0C(Obj_1BF920* p, s32 v, s32 n);
 s32 func_001EAA70(s32 a, s32 b);
-void func_001BF620(Q16_1BF920* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
-void func_001BF428(Obj_1BF920* self);
+void func_001BF620(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void func_001BCD00(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void func_001BD790(u8* node, s32 flag);
-struct Ent_1C0070;
-struct Frame_1C0070 : ListFrame {
-    Ent_1C0070* Next() { Ent_1C0070* n = *(Ent_1C0070**)link; link = (u8*)n + offset; return n; }
+// The list walk of World::list1BAC, element by element.
+struct PlayingSoundFrame : ListFrame {
+    PlayingSound* Next() { PlayingSound* n = *(PlayingSound**)link; link = (u8*)n + offset; return n; }
 };
-struct Ent_1C0070 {
-    s32 f0; s32 f4; s32 f8; u8 pad0c[0x08]; f32 f14;
-    s32 f18; u8 pad1c[0x04];
-    u8 f20[0x10];
-    BaseObject* f30; f32 f34; f32 f38; s32 f3C; s32 f40; s32 f44; s32 f48; u8 f4C;
-    u8 pad4d[3];
-    s32 f50; s32 f54; f32 f58; u8 pad5c[0x18];
-    f32 f74; f32 f78;
-};
-struct Pair_1C0070 { s32 a; s32 b; };
-extern Pair_1C0070 D_00245024[];
 s32 func_001BF1F0(void);
 void* func_001BF3D0(void);
-typedef f32 (*Fn_1C0070)(void* a, void* b);
 s32 func_0011D708(ListFrame* h);
 s32 func_00182FC8(BaseObject* o);
 void func_0011D600(s32 h);
 void func_0011D730(s32 h, void (*fn)(void), s64 arg);
 void func_001BFFC8(void);
-void func_001BFBF8(Ent_1C0070* e);
-void func_001BF200(f32 r, void* pos, s32* o1, s32* o2, f32 a, f32 b, f32 c);
-void func_001BF428(Ent_1C0070* e);
-void func_001BF7F8(Ent_1C0070* e, f32 x);
-void func_001BE860(Ent_1C0070* e);
-void func_001BF788(Ent_1C0070* e, s32 n);
+void func_001BF200(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void func_001BF788(PlayingSound* self, s32 n);
 void func_00130110(void* p);
 void func_001C27B0(s32 a, s32 b);
 s32 func_0011D4E0(s32 flag);
-struct Pk8_1C0A50 { u64 v; } __attribute__((packed));
-struct Ent_1C0A50 { s32 key; Pk8_1C0A50 a; Pk8_1C0A50 b; };
-extern Pk8_1C0A50 D_00274820;
-extern Pk8_1C0A50 D_00274828;
+extern U64P D_00274820;
+extern U64P D_00274828;
 extern s32 D_006053E0[];
 s32 func_0011D8F0(s32 a, s32 b);
 void func_00182ED0(void* self);
@@ -450,16 +365,12 @@ void func_0011D480(s32 a, s32 b);
 extern s32 D_00274808[6];
 void func_0011E328(s32 a, s32 b);
 void func_0011E360(s32 a, s32 b, s32 c);
-struct Pt_1C0AB8 { f32 x; f32 y; };
-struct Ent_1C0AB8 { s32 key; f32 a0; f32 a1; f32 b0; f32 b1; };
+struct Point2 { f32 x; f32 y; };
 extern f32 D_00274838[11][4];
 void func_0011D480(s32 slot, s32 value);
 void func_001C0600(s32 column);
-struct __attribute__((packed)) Pk8_1C0B38 { u64 v; };
-struct Ent_1C0B38 { s32 key; Pk8_1C0B38 a; Pk8_1C0B38 b; };
 extern u8 D_002748E8[4];
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-struct Packed_001C0B08 { u64 value; } __attribute__((packed));
 void func_0011E010(void);
 void func_0011E110(s32 a0);
 s32 func_0011E1F8(s32 flag);
@@ -519,8 +430,7 @@ extern const TabB_24D350 D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
 void func_001C15D8(ScriptValue* self, void* a, s32 r);
-struct Owner_1C0C08 { u8 pad0[1]; };
-void func_0011D8B0(Owner_1C0C08* a0, s32 a1, s32 a2);
+void func_0011D8B0(s32 voice, s32 a1, s32 a2);
 void func_00182C18(BaseObject* self);
 s32 func_00137C40(void* src);
 void* func_0018D500(u32 size);
@@ -574,8 +484,8 @@ void func_001C08B0(World* self, s32 a, s32 b);
 void func_001C0950(World* self);
 void func_001C09D8(World* self, s32 index, s32 value);
 void func_001C0A50(World* self, s32 key);
-void func_001C0AB8(World* self, Pt_1C0AB8* p);
-void func_001C0B08(World* self, Packed_001C0B08* item);
+void func_001C0AB8(World* self, Point2* p);
+void func_001C0B08(World* self, U64P* item);
 void func_001C0B38(World* self);
 void func_001C0C08(s32 idx, s32 val);
 s32 func_001C0C50(s32 index);
@@ -633,8 +543,8 @@ f32 D_00274750 = -2.0f;
 s32 D_00274754 = 3;
 f32 D_00274758[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
-Pk8_1C0A50 D_00274820 = { 0x40C0000040800000ULL };
-Pk8_1C0A50 D_00274828 = { 0x45FA0000453B8000ULL };
+U64P D_00274820 = { 0x40C0000040800000ULL };
+U64P D_00274828 = { 0x45FA0000453B8000ULL };
 s32 D_00274830 = 0;
 f32 D_00274838[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
@@ -1923,13 +1833,13 @@ s32 func_001BE268(s32 n)
         g_loadedSoundBank = n;
     }
     ClearKeyId(&l);
-    const Ent_1BE268* e = &g_soundBankKeys[n];
+    const KeyRecord* e = &g_soundBankKeys[n];
     s32 ok;
     if (e == 0) {
         ok = 0;
     } else {
-        l.second = e->w4 ^ e->w1C;
-        l.first = e->w0 ^ e->w14;
+        l.second = e->wordB ^ e->maskB;
+        l.first = e->wordA ^ e->maskA;
         ok = l.second != 0;
     }
     if (ok) {
@@ -1943,8 +1853,8 @@ s32 func_001BE268(s32 n)
             if (((s32*)&g_soundBankLoaded)[n] == 0) {
                 ((s32*)&g_soundBankLoaded)[n] = 1;
                 for (s32 i = 0; i < 0x303; i++) {
-                    if (((Pair_1BE268*)&g_soundEntries)[i].id == n) {
-                        ((s32*)&g_soundEntryAvailable)[i] = func_0011D760(((s32*)&g_soundBankHandles)[n], ((Pair_1BE268*)&g_soundEntries)[i].arg) != 0 || g_soundEntryForcedAvailable[i] != 0;
+                    if (g_soundEntries[i].bank == n) {
+                        ((s32*)&g_soundEntryAvailable)[i] = func_0011D760(((s32*)&g_soundBankHandles)[n], g_soundEntries[i].index) != 0 || g_soundEntryForcedAvailable[i] != 0;
                     }
                 }
             }
@@ -1953,9 +1863,9 @@ s32 func_001BE268(s32 n)
     return ((s32*)&g_soundBankHandles)[n];
 }
 
-void func_001BE4A8(s32 idx)
+s32 func_001BE4A8(s32 idx)
 {
-    EnsureSoundBankLoaded(*(Ent_1BE4A8**)((u8*)g_soundEntries + idx * 8));
+    return EnsureSoundBankLoaded(g_soundEntries[idx].bank);
 }
 
 void func_001BE4D8(SoundRecord** self)
@@ -1973,10 +1883,10 @@ void func_001BE4D8(SoundRecord** self)
 
 s32 func_001BE568(s32 idx)
 {
-    Pair_1BE568* p = (Pair_1BE568*)g_soundEntries + idx;
+    const SoundEntry* p = g_soundEntries + idx;
 
-    if (((s32*)g_soundBankLoaded)[p->key] == 0) {
-        EnsureSoundEntryBankLoaded((Sel_1BE568*)idx);
+    if (((s32*)g_soundBankLoaded)[p->bank] == 0) {
+        EnsureSoundEntryBankLoaded(idx);
     }
     return ((s32*)g_soundEntryAvailable)[idx];
 }
@@ -2070,26 +1980,26 @@ s32 func_001BE810(void)
     return 0;
 }
 
-void func_001BE860(Obj_1BE860* self)
+void func_001BE860(PlayingSound* self)
 {
-    s32 a1 = (s32)(self->f50 * 1024.0f);
+    s32 a1 = (s32)(self->volume * 1024.0f);
     s32 a2;
-    if (0.0f < self->f54) {
-        a2 = (s32)((self->f54 + 2.0f) * 179.5f) - 359;
+    if (0.0f < self->pan) {
+        a2 = (s32)((self->pan + 2.0f) * 179.5f) - 359;
     } else {
-        a2 = (s32)((self->f54 + 2.0f) * 179.5f);
+        a2 = (s32)((self->pan + 2.0f) * 179.5f);
     }
-    SetVoiceVolumePan(self->f18, a1, a2);
+    SetVoiceVolumePan(self->voice, a1, a2);
 }
 
-void func_001BE8F8(s32 a0, void** a1, f32 f12, f32 f13)
+void func_001BE8F8(s32 a0, PlayingSound** a1, f32 f12, f32 f13)
 {
     s32 flag = 0;
-    void* local;
-    void** p = a1;
+    PlayingSound* local;
+    PlayingSound** p = a1;
     if (p == 0) {
         flag = 1;
-        p = (void**)&local;
+        p = &local;
     }
     StartSoundEffect(-2, p, a0, 0, f12, f13, 1.0f, 0.0f, 0.0f, 0, 0);
     if (*p != 0) {
@@ -2256,8 +2166,8 @@ void func_001BEE48(void)
 {
     ListFrame it;
     ListWalk::Begin(&it, &g_currentWorld->list1BC4);
-    Node_1BEE48* node;
-    for (node = (Node_1BEE48*)ListWalk::Next(&it); node != 0; node = (Node_1BEE48*)ListWalk::Next(&it)) {
+    SoundLevelEntry* node;
+    for (node = (SoundLevelEntry*)ListWalk::Next(&it); node != 0; node = (SoundLevelEntry*)ListWalk::Next(&it)) {
         RemoveSoundLevelEntry(node);
     }
     SendIopSoundLevel(0x14);
@@ -2271,14 +2181,14 @@ void func_001BEE48(void)
 void* func_001BEEF8(s32 x)
 {
     s32 flag = IsListEmpty((u8*)g_currentWorld + 0x1BC4);
-    void* p = AllocateSoundLevelEntry();
+    SoundLevelEntry* p = (SoundLevelEntry*)AllocateSoundLevelEntry();
     s32 hi = 0x6B;
     s32 v = -20;
     if (x >= -20) {
         if (hi < x) v = hi; else v = x;
     }
     if (p != 0) {
-        *(s32*)p = v;
+        p->level = v;
         s32 cur = g_currentSoundLevel;
         if (cur < v || flag != 0) {
             g_currentSoundLevel = v;
@@ -2290,40 +2200,40 @@ void* func_001BEEF8(s32 x)
 
 void func_001BEF88(void)
 {
-    Frame_1BEF88 f;
-    s32 P = (s32)g_currentWorld + 0x1BC4;
-    s32 x;
-    f.f0 = P;
-    f.f4 = P;
-    f.f8 = *(s32*)(P + 8);
-    f.fC = (s32)g_activeListFrames;
-    g_activeListFrames = (ListFrame*)&f;
-    if (IsListEmpty((Frame_1BEF88*)P) != 0) {
+    ListFrame f;
+    u8* P = (u8*)g_currentWorld + 0x1BC4;
+    SoundLevelEntry* x;
+    f.list = P;
+    f.link = P;
+    f.offset = *(s32*)(P + 8);
+    f.prev = g_activeListFrames;
+    g_activeListFrames = &f;
+    if (IsListEmpty(P) != 0) {
         g_currentSoundLevel = 0;
     } else {
         g_currentSoundLevel = -20;
-        s32 x0 = *(s32*)f.f4;
-        f.f4 = x0 + f.f8;
+        SoundLevelEntry* x0 = *(SoundLevelEntry**)f.link;
+        f.link = (u8*)x0 + f.offset;
         x = x0;
         if (x != 0) {
             do {
-                s32 v = *(s32*)x;
+                s32 v = x->level;
                 if (g_currentSoundLevel < v) {
                     g_currentSoundLevel = v;
                 }
-                s32 y = *(s32*)f.f4;
-                f.f4 = y + f.f8;
+                SoundLevelEntry* y = *(SoundLevelEntry**)f.link;
+                f.link = (u8*)y + f.offset;
                 x = y;
             } while (x != 0);
         }
     }
-    g_activeListFrames = (ListFrame*)f.fC;
+    g_activeListFrames = f.prev;
 }
 
-void func_001BF048(Entry_1BF048* self)
+void func_001BF048(SoundLevelEntry* self)
 {
     if (self != 0) {
-        s32 key = self->key;
+        s32 key = self->level;
         RemoveSoundLevelEntry(self);
         if (key == g_currentSoundLevel) {
             RecomputeSoundLevel(self);
@@ -2339,12 +2249,12 @@ void func_001BF048(Entry_1BF048* self)
     }
 }
 
-void func_001BF0D8(Obj_1BF0D8* self)
+void func_001BF0D8(SoundLevelEntry* self)
 {
     if (self == 0) {
         return;
     }
-    s32 k = self->kind;
+    s32 k = self->level;
     RemoveSoundLevelEntry(self);
     if (k == g_currentSoundLevel) {
         g_previousSoundLevel = k;
@@ -2380,9 +2290,9 @@ ASM_FUNC(func_001BF398);
 
 void* func_001BF3D0(void)
 {
-    Obj_001BF3D0* p = (Obj_001BF3D0*)GetActiveSwitchedCollider();
+    SwitchedCollider* p = (SwitchedCollider*)GetActiveSwitchedCollider();
     u8* r;
-    if (p != 0 && p->vtbl[78](p) != 0) {
+    if (p != 0 && p->desc05()->m4A(p) != 0) {
         r = (u8*)p + 0x140;
     } else {
         r = (u8*)g_camera + 0x40;
@@ -2392,7 +2302,7 @@ void* func_001BF3D0(void)
 
 ASM_FUNC(func_001BF428);
 
-Fn_001BF578 func_001BF578(void)
+ListenerDistanceFn func_001BF578(void)
 {
     s32 n;
     if (IsTopCameraController((u8*)g_camera + 0x460) == 0) return MeasureListenerDistance;
@@ -2402,10 +2312,10 @@ Fn_001BF578 func_001BF578(void)
     return MeasureCameraWeightedDistance;
 }
 
-f32 func_001BF5E0(Arg_1BF5E0* arg)
+f32 func_001BF5E0(void* position)
 {
-    Obj_1BF5E0* obj = (Obj_1BF5E0*)GetSoundListenerPosition();
-    return ((Fn_1BF5E0)ChooseSoundListenerFunction())(obj, arg);
+    void* listener = GetSoundListenerPosition();
+    return ChooseSoundListenerFunction()(listener, position);
 }
 
 void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
@@ -2429,175 +2339,175 @@ void* func_001BF6B8(void)
     return s;
 }
 
-void func_001BF718(Slot_1BF718* slot)
+void func_001BF718(PlayingSound** slot)
 {
-    Entry_1BF718* e = slot->entry;
-    e->f0C = 0;
-    slot->entry = 0;
+    PlayingSound* e = *slot;
+    e->owner = 0;
+    *slot = 0;
 }
 
-void func_001BF728(Obj_1BF728* self)
+void func_001BF728(PlayingSound* self)
 {
-    if (self->f0C != 0) {
-        *(s32*)self->f0C = 0;
+    if (self->owner != 0) {
+        *self->owner = 0;
     }
-    self->f04 = -1;
+    self->serial = -1;
     RemoveFromList((u8*)g_currentWorld + 0x1BAC, self);
     PushFreeSlot((u8*)g_currentWorld + 0x1BA0, self);
 }
 
-void func_001BF788(Obj_1BF788* self, s32 n)
+void func_001BF788(PlayingSound* self, s32 n)
 {
     if (self != 0) {
         if (n == 0) {
-            StopSoundVoice(self->f18);
+            StopSoundVoice(self->voice);
         } else {
             f32 t = (f32)n * 0.24000001f;
             s32 q = (s32)t;
-            func_0011D860(self->f18, -4, q, 2);
+            func_0011D860(self->voice, -4, q, 2);
         }
         FreeSoundRecord(self);
     }
 }
 
-void func_001BF7F8(Ent_1BF7F8* p, f32 a)
+void func_001BF7F8(PlayingSound* p, f32 a)
 {
     if (p == 0) {
         return;
     }
-    if (a == p->f58) {
-        if (p->f30 == 0) {
+    if (a == p->pitch) {
+        if (p->object == 0) {
             return;
         }
         if (!(0.0001f < p->f5C)) {
             return;
         }
     }
-    s32 v0 = p->flag6C;
-    p->f58 = a;
+    s32 v0 = p->pitchBaseValid;
+    p->pitch = a;
     if (v0 == 0) {
-        p->f70 = GetSoundPitchBase(p->f8, g_soundEntries[p->idx].b);
-        p->flag6C = 1;
+        p->pitchBase = GetSoundPitchBase(p->bank, g_soundEntries[p->entry].index);
+        p->pitchBaseValid = 1;
     }
-    s32 v = p->f70 + (s32)(p->f58 * 1524.0f) + p->f60;
-    SetVoicePitch(p->f18, p->clampv(v, -0x8000, 0x7FFF));
+    s32 v = p->pitchBase + (s32)(p->pitch * 1524.0f) + p->pitchOffset;
+    SetVoicePitch(p->voice, p->Clamp(v, -0x8000, 0x7FFF));
 }
 
-void func_001BF8E8(Obj_1BF8E8* self, f32 a)
+void func_001BF8E8(PlayingSound* self, f32 a)
 {
     if (self != 0) {
-        f32 scale = a / self->f14;
-        f32 base = self->f50;
-        self->f14 = a;
-        self->f50 = base * scale;
+        f32 scale = a / self->baseVolume;
+        f32 base = self->volume;
+        self->baseVolume = a;
+        self->volume = base * scale;
         ApplySoundRecordVolumePan(self);
     }
 }
 
-void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF920* q, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, B8_1BF920* p78, B8_1BF920* p80)
+void func_001BF920(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80)
 {
-    B8_1BF920 keep = self->f64;
+    U64P keep = self->link;
     FillMemory(self, 0, 0x90);
-    self->f64 = keep;
-    if (a3) q = (Q16_1BF920*)(a3 + 0x140);
-    self->f0C = parent;
-    if (parent) *(Obj_1BF920**)parent = self;
-    self->f58 = f15;
+    self->link = keep;
+    if (object) position = (Quad16*)((u8*)object + 0x140);
+    self->owner = owner;
+    if (owner) *owner = self;
+    self->pitch = pitch;
     self->f5C = f16;
     s32 id = g_nextSoundRecordId;
-    self->f04 = id++;
-    self->f3C = a2;
-    self->f30 = a3;
-    self->f34 = f12;
-    self->f38 = f13;
-    self->f14 = f14;
-    self->f48 = 0;
+    self->serial = id++;
+    self->keepWhenFar = keepWhenFar;
+    self->object = object;
+    self->farRange = farRange;
+    self->nearRange = nearRange;
+    self->baseVolume = baseVolume;
+    self->finished = 0;
     g_nextSoundRecordId = id;
-    self->f4C = RandomIntInRange(0, 3);
-    if (p78) self->f78.v = *p78; else self->f78.f = -1.0f;
-    if (p80) self->f80.v = *p80; else self->f80.f = -1.0f;
-    if (q) self->f20 = *q;
+    self->pollTick = RandomIntInRange(0, 3);
+    if (interval) self->interval.bytes = *interval; else self->interval.value = -1.0f;
+    if (p80) self->f80.bytes = *p80; else self->f80.value = -1.0f;
+    if (position) self->position = *position;
     s32 fl = 0;
-    if (q || self->f78.f >= 0.0f) fl = 1;
-    self->f44 = fl;
-    ComputeSoundAttenuation(q, &self->f50, &self->f54, f14, f12, f13);
+    if (position || self->interval.value >= 0.0f) fl = 1;
+    self->positional = fl;
+    ComputeSoundAttenuation(position, &self->volume, &self->pan, baseVolume, farRange, nearRange);
     ComputeSoundRecordDoppler(self);
 }
 
-void func_001BFAF8(Node_1BFAF8* self, s32 idx)
+void func_001BFAF8(PlayingSound* self, s32 idx)
 {
     s32 link;
     s32 v3;
     if (idx != -2) {
-        link = EnsureSoundEntryBankLoaded((Idx_1BFAF8*)idx);
-        v3 = g_soundEntries[idx].b;
-        self->link = link;
+        link = EnsureSoundEntryBankLoaded(idx);
+        v3 = g_soundEntries[idx].index;
+        self->bank = link;
     }
-    self->idx = idx;
-    self->f10 = g_gameTime[0];
+    self->entry = idx;
+    self->startTime = g_gameTime[0];
     if (idx == -2) {
         v3 = g_streamVoice;
-        self->f40 = 0;
-        self->f18 = v3;
+        self->silent = 0;
+        self->voice = v3;
         return;
     }
-    if (self->f50 != 0.0f && self->f78 < 0.0f) {
-        s32 r = StartSoundVoice((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
-        self->f40 = 0;
-        self->f18 = r;
+    if (self->volume != 0.0f && self->interval.value < 0.0f) {
+        s32 r = StartSoundVoice(link, v3, 0, 0, 0, 0);
+        self->silent = 0;
+        self->voice = r;
         ComputeSoundRecordDoppler(self);
-        SetSoundRecordPitch(self, self->f58);
+        SetSoundRecordPitch(self, self->pitch);
         ApplySoundRecordVolumePan(self);
     } else {
-        self->f18 = 0;
-        self->f40 = 1;
+        self->voice = 0;
+        self->silent = 1;
     }
 }
 
 ASM_FUNC(func_001BFBF8);
 
-void func_001BFCD8(s32 id, Buf_1BFCD8** out, s32 p2, s32 p3,
+void func_001BFCD8(s32 id, PlayingSound** out, s32 p2, s32 p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, s32 p5) {
-    Buf_1BFCD8* s1;
+    PlayingSound* s1;
     s32 s0;
     if (id == -1) return;
     if (id != -2) {
-        s32 a1 = g_soundEntries[id].a;
-        if (a1 > 0 && a1 != (*(Glob_1BFCD8**)&g_currentWorld)->f1D70) return;
-        s0 = IsSoundEntryAvailable((Id_1BFCD8)id);
+        s32 a1 = g_soundEntries[id].bank;
+        if (a1 > 0 && a1 != g_currentWorld->f1D70) return;
+        s0 = IsSoundEntryAvailable(id);
     } else {
         s0 = 0;
     }
     s1 = 0;
     if (p3 || p2 || out) {
         if (s0 == 0 && (p4 == 0 || *p4 < 0.0f)) {
-            Buf_1BFCD8 tmp;
+            PlayingSound tmp;
             InitSoundRecord(&tmp, out, 0, p2, p3, fa, fb, fc, fd, fe, 0, 0);
-            if (tmp.f50 != 0.0f) {
-                s1 = (Buf_1BFCD8*)AllocateSoundRecord();
+            if (tmp.volume != 0.0f) {
+                s1 = (PlayingSound*)AllocateSoundRecord();
                 if (s1) {
-                    tmp.f64 = s1->f64;
+                    tmp.link = s1->link;
                     *s1 = tmp;
                 }
             } else if (id == -2) {
-                SetVoiceVolumePan((Id_1BFCD8)g_streamVoice, 0, 0);
+                SetVoiceVolumePan(g_streamVoice, 0, 0);
             }
             if (out) *out = s1;
         } else {
-            s1 = (Buf_1BFCD8*)AllocateSoundRecord();
+            s1 = (PlayingSound*)AllocateSoundRecord();
             if (!s1) return;
             InitSoundRecord(s1, out, s0, p2, p3, fa, fb, fc, fd, fe, p4, p5);
         }
         if (s1) {
-            if (0.0f <= s1->f78) {
+            if (0.0f <= s1->interval.value) {
                 ScheduleAmbientSoundRecord(s1);
-                s1->f74 = (*(f32*)&g_gameTime) + RandomFloatInRange(0.0f, s1->f78);
+                s1->nextTime = (*(f32*)&g_gameTime) + RandomFloatInRange(0.0f, s1->interval.value);
             }
             StartSoundRecordVoice(s1, id);
         }
     } else {
-        s32 v = EnsureSoundEntryBankLoaded((Id_1BFCD8)id);
-        StartSoundVoice((Id_1BFCD8)v, g_soundEntries[id].b, (s32)(fc * 1024.0f), 0, (s32)(fd * 1524.0f), 0);
+        s32 v = EnsureSoundEntryBankLoaded(id);
+        StartSoundVoice(v, g_soundEntries[id].index, (s32)(fc * 1024.0f), 0, (s32)(fd * 1524.0f), 0);
     }
 }
 
@@ -2605,9 +2515,9 @@ void func_001BFFC8(void* guard, s64 key)
 {
     if (guard == 0) {
         s32 tag = (s32)(key >> 32);
-        Rec_1BFFC8* r = (Rec_1BFFC8*)(s32)(key & 0xFFFFFFFFu);
-        if (r->f04 == tag) {
-            r->f48 = 1;
+        PlayingSound* r = (PlayingSound*)(s32)(key & 0xFFFFFFFFu);
+        if (r->serial == tag) {
+            r->finished = 1;
         }
     }
 }
@@ -2624,10 +2534,10 @@ void func_001C0000(s32 flag, f32 x)
 
 void func_001C0070(void)
 {
-    Frame_1C0070 f;
+    PlayingSoundFrame f;
     if (func_001BF1F0() != 0) return;
     void* v4 = GetSoundListenerPosition();
-    Fn_1C0070 v5 = (Fn_1C0070)ChooseSoundListenerFunction();
+    ListenerDistanceFn v5 = ChooseSoundListenerFunction();
     u8* P = (u8*)g_currentWorld + 0x1BAC;
     ListFrame* saved = g_activeListFrames;
     f.list = P;
@@ -2682,72 +2592,72 @@ void func_001C0070(void)
             g_previousSoundLevel = -100;
         }
     }
-    Ent_1C0070* e;
+    PlayingSound* e;
     {
         while ((e = f.Next()) != 0) {
             u8* s1;
             f32 r;
-            if (e->f30 != 0 && IsObjectAttached(e->f30) == 0) {
+            if (e->object != 0 && IsObjectAttached(e->object) == 0) {
                 StopSoundRecord(e, 0);
                 goto next;
             }
-            if (e->f40 == 0) {
-                if (e->f48 != 0) {
-                    if (0.0f <= e->f78) {
-                        e->f18 = 0;
+            if (e->silent == 0) {
+                if (e->finished != 0) {
+                    if (0.0f <= e->interval.value) {
+                        e->voice = 0;
                     } else {
-                        if (e->f30 != 0) e->f30->desc->m0E(e->f30, 9, e);
-                        if (e->f3C == 0) goto kill;
-                        StopSoundVoice(e->f18);
-                        e->f18 = 0;
+                        if (e->object != 0) e->object->desc->m0E(e->object, 9, e);
+                        if (e->keepWhenFar == 0) goto kill;
+                        StopSoundVoice(e->voice);
+                        e->voice = 0;
                     }
-                    e->f48 = 0;
-                    e->f40 = 1;
+                    e->finished = 0;
+                    e->silent = 1;
                     goto next;
                 }
-                e->f4C = (e->f4C + 1) % 4;
-                if (e->f4C == 0) {
-                    RequestVoiceCallback(e->f18, MarkSoundRecordIfIdMatches, ((s64)e->f4 << 32) | (s64)(s32)e);
+                e->pollTick = (e->pollTick + 1) % 4;
+                if (e->pollTick == 0) {
+                    RequestVoiceCallback(e->voice, MarkSoundRecordIfIdMatches, ((s64)e->serial << 32) | (s64)(s32)e);
                 }
             }
-            if (0.0f <= e->f78) {
+            if (0.0f <= e->interval.value) {
                 f32* s1 = g_gameClock;
-                if (s1[1] < e->f74) {
-                    if (e->f40 != 0) goto next;
+                if (s1[1] < e->nextTime) {
+                    if (e->silent != 0) goto next;
                 } else {
                     ScheduleAmbientSoundRecord(e);
-                    if (e->f40 != 0) {
+                    if (e->silent != 0) {
                         if (s1[1] - D_00274750 < 1.0f) goto next;
                         D_00274750 = s1[1];
                     }
                 }
             }
-            if (e->f44 == 0) goto next;
+            if (e->positional == 0) goto next;
             {
-                s1 = (u8*)e + 0x20;
-                if (e->f30 != 0) s1 = (u8*)e->f30 + 0x140;
+                s1 = (u8*)&e->position;
+                if (e->object != 0) s1 = (u8*)e->object + 0x140;
                 r = v5(v4, s1);
-                if (e->f34 < r) {
-                    if (0.0f <= e->f78) goto next;
-                    if (e->f40 != 0) goto next;
-                    if (e->f3C != 0 || 0.0f < e->f74) {
-                        StopSoundVoice(e->f18);
-                        e->f18 = 0;
-                        e->f40 = 1;
+                if (e->farRange < r) {
+                    if (0.0f <= e->interval.value) goto next;
+                    if (e->silent != 0) goto next;
+                    if (e->keepWhenFar != 0 || 0.0f < e->nextTime) {
+                        StopSoundVoice(e->voice);
+                        e->voice = 0;
+                        e->silent = 1;
                         goto next;
                     }
                 kill:
                     StopSoundRecord(e, 0);
                     goto next;
                 }
-                ComputeSoundVolumeAndPan(r, s1, &e->f50, &e->f54, e->f14, e->f34, e->f38);
+                ComputeSoundVolumeAndPan(r, s1, &e->volume, &e->pan, e->baseVolume, e->farRange, e->nearRange);
             }
-            if (e->f40 != 0 && e->f0 != -2) {
-                e->f18 = StartSoundVoice(e->f8, D_00245024[e->f0].a, 0, 0, 0, 0);
-                e->f40 = 0;
+            if (e->silent != 0 && e->entry != -2) {
+                e->voice = StartSoundVoice(e->bank, g_soundEntries[e->entry].index, 0, 0, 0, 0);
+                e->silent = 0;
             }
             ComputeSoundRecordDoppler(e);
-            SetSoundRecordPitch(e, e->f58);
+            SetSoundRecordPitch(e, e->pitch);
             ApplySoundRecordVolumePan(e);
         next:;
         }
@@ -2869,32 +2779,38 @@ void func_001C09D8(World* self, s32 index, s32 value)
 
 void func_001C0A50(World* self, s32 key)
 {
-    if (self->f1D80 < 16) {
-        Ent_1C0A50* e = &((Ent_1C0A50*)self->f1D84)[self->f1D80];
-        e->key = key;
-        e->a = D_00274820;
-        e->b = D_00274828;
-        self->f1D80++;
+    if (self->soundCount < 16) {
+        WorldSoundEntry* e = &self->soundEntries[self->soundCount];
+        e->sound = key;
+        e->repeat = D_00274820;
+        e->range = D_00274828;
+        self->soundCount++;
     }
 }
 
-void func_001C0AB8(World* self, Pt_1C0AB8* p)
+void func_001C0AB8(World* self, Point2* p)
 {
-    s32 n = self->f1D80;
+    s32 n = self->soundCount;
     if (n != 0) {
-        Ent_1C0AB8* e = (Ent_1C0AB8*)((u8*)self + 0x1D70 + n * 20);
-        e->b0 = 8000.0f - p->y * 50.0f;
-        e->b1 = 8000.0f - p->x * 50.0f;
+        WorldSoundEntry* e = &self->soundEntries[n - 1];
+        e->range0 = 8000.0f - p->y * 50.0f;
+        e->range1 = 8000.0f - p->x * 50.0f;
     }
 }
 
-void func_001C0B08(World* self, Packed_001C0B08* item) { if (!self->f1D80) return; u8* dst = (u8*)self + 0x1D70 + self->f1D80 * 20; *(Packed_001C0B08*)(dst + 4) = *item; }
+void func_001C0B08(World* self, U64P* item)
+{
+    if (!self->soundCount) return;
+    // &soundEntries[soundCount - 1], written from 0x1D70 as retail computes it
+    WorldSoundEntry* e = (WorldSoundEntry*)((u8*)self + 0x1D70 + self->soundCount * 20);
+    e->repeat = *item;
+}
 
 void func_001C0B38(World* self)
 {
-    for (s32 i = 0; i < self->f1D80; i++) {
-        Ent_1C0B38* e = &((Ent_1C0B38*)self->f1D84)[i];
-        StartSoundEffect(e->key, D_002748E8, 0, 0, &e->a, &e->b, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
+    for (s32 i = 0; i < self->soundCount; i++) {
+        WorldSoundEntry* e = &self->soundEntries[i];
+        StartSoundEffect(e->sound, D_002748E8, 0, 0, &e->repeat, &e->range, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
     }
 }
 
@@ -2902,7 +2818,7 @@ void func_001C0C08(s32 idx, s32 val)
 {
     if (val != D_006053E0[idx]) {
         D_006053E0[idx] = val;
-        SetVoiceParam((Owner_1C0C08*)g_stagedBankVoice, idx, val);
+        SetVoiceParam(g_stagedBankVoice, idx, val);
     }
 }
 
