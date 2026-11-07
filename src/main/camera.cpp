@@ -134,16 +134,18 @@ struct __attribute__((packed)) Value_00143A08 { u32 value; };
 
 // EXACT: float constants and .data floats as locals, 1.0f stores in source order 1C0,1C4,1C8
 
-struct __attribute__((packed)) Pk16_00143648 {
+// What func_00143648 copies whole: the four settings at 0x1D0 (from D_002618B8), the fog
+// colour at 0x204 and the three rows of the identity frame at 0x80.
+struct __attribute__((packed)) ParamBlock16 {
     u64 a;
     u64 b;
 };
 
-struct __attribute__((packed)) Pk4_00143648 {
+struct __attribute__((packed)) FogColorWord {
     s32 a;
 };
 
-struct __attribute__((aligned(16))) Quad_00143648 {
+struct __attribute__((aligned(16))) FrameRow {
     s32 a;
     s32 b;
     s32 c;
@@ -386,7 +388,7 @@ void func_00143648(Camera* self)
     *(f32*)(s + 0x1C0) = one;
     *(f32*)(s + 0x1C4) = one;
     *(f32*)(s + 0x1C8) = one;
-    *(struct Pk16_00143648*)(s + 0x1D0) = *(struct Pk16_00143648*)D_002618B8;
+    *(struct ParamBlock16*)(s + 0x1D0) = *(struct ParamBlock16*)D_002618B8;
     f32 k = 1.29870129f;
     f32 x = D_002618A0;
     f32 y = D_002618A4;
@@ -399,10 +401,10 @@ void func_00143648(Camera* self)
     *(f32*)(s + 0x1F8) = x;
     *(f32*)(s + 0x1FC) = y;
     *(f32*)(s + 0x200) = z;
-    *(struct Pk4_00143648*)(s + 0x204) = *(struct Pk4_00143648*)&D_002618B0;
-    *(struct Quad_00143648*)(s + 0x80) = *(struct Quad_00143648*)g_identityMatrix;
-    *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(g_identityMatrix + 0x10);
-    *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(g_identityMatrix + 0x20);
+    *(struct FogColorWord*)(s + 0x204) = *(struct FogColorWord*)&D_002618B0;
+    *(struct FrameRow*)(s + 0x80) = *(struct FrameRow*)g_identityMatrix;
+    *(struct FrameRow*)(s + 0x90) = *(struct FrameRow*)(g_identityMatrix + 0x10);
+    *(struct FrameRow*)(s + 0xA0) = *(struct FrameRow*)(g_identityMatrix + 0x20);
     UpdateCameraProjection(self);
     self->ctl454.vt = (const CameraControllerVt*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);

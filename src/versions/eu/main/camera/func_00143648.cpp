@@ -9,7 +9,7 @@ void func_00143648(Camera* self)
     *(f32*)(s + 0x1C0) = one;
     *(f32*)(s + 0x1C4) = one;
     *(f32*)(s + 0x1C8) = one;
-    *(struct Pk16_00143648*)(s + 0x1D0) = *(struct Pk16_00143648*)D_002618B8;
+    *(struct ParamBlock16*)(s + 0x1D0) = *(struct ParamBlock16*)D_002618B8;
     f32 k = 1.36574075f;
     f32 x = D_002618A0;
     f32 y = D_002618A4;
@@ -22,10 +22,10 @@ void func_00143648(Camera* self)
     *(f32*)(s + 0x1F8) = x;
     *(f32*)(s + 0x1FC) = y;
     *(f32*)(s + 0x200) = z;
-    *(struct Pk4_00143648*)(s + 0x204) = *(struct Pk4_00143648*)&D_002618B0;
-    *(struct Quad_00143648*)(s + 0x80) = *(struct Quad_00143648*)g_identityMatrix;
-    *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(g_identityMatrix + 0x10);
-    *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(g_identityMatrix + 0x20);
+    *(struct FogColorWord*)(s + 0x204) = *(struct FogColorWord*)&D_002618B0;
+    *(struct FrameRow*)(s + 0x80) = *(struct FrameRow*)g_identityMatrix;
+    *(struct FrameRow*)(s + 0x90) = *(struct FrameRow*)(g_identityMatrix + 0x10);
+    *(struct FrameRow*)(s + 0xA0) = *(struct FrameRow*)(g_identityMatrix + 0x20);
     UpdateCameraProjection(self);
     self->ctl454.vt = (const CameraControllerVt*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);

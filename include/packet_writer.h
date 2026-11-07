@@ -46,6 +46,9 @@ struct PacketWriter {
     u32 f20;                // 0x20: the packet's element count (func_00161278's divisor)
     u32 f24;                // 0x24: the words written
     u8 pad28[8];            // 0x28
+
+    // The one virtual, through its table's entry 1 (func_00161958 calls it with 0).
+    void Close(s32 flag) { vt->close((PacketWriter*)((u8*)this + vt->adj1), flag); }
 };
 
 typedef char check_PacketWriter[sizeof(PacketWriter) == 0x30 ? 1 : -1];

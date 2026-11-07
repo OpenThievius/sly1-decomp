@@ -112,6 +112,13 @@ struct Font {
 
     // Whether the font has a glyph for `c`, through its table's entry 2.
     s32 Has(s32 c) { return vt->has((Font*)((u8*)this + vt->adj2), c); }
+    // Entries 3 to 7, as func_0015E318 calls them: a character's width, then the begin, flush,
+    // draw and end of a run of characters.
+    f32 Width(s32 c) { return vt->width((Font*)((u8*)this + vt->adj3), c); }
+    void Begin(s32 a, s32 b) { vt->begin((Font*)((u8*)this + vt->adj4), a, b); }
+    void Flush(s32 a) { vt->flush((Font*)((u8*)this + vt->adj5), a); }
+    f32 Draw(f32 x, f32 y, s32 c, s32 color, s32 s) { return vt->draw(x, y, (Font*)((u8*)this + vt->adj6), c, color, s); }
+    void End(s32 a, s32 b) { vt->end((Font*)((u8*)this + vt->adj7), a, b); }
 };
 
 typedef char check_Font[sizeof(Font) == 0x88 ? 1 : -1];

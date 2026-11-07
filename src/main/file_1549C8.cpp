@@ -763,17 +763,6 @@ struct StringLayout
   s32 f18;
 };
 
-class Font_15E318 {
-public:
-    u8 pad[0x4C];
-    virtual void V0();
-    virtual void V1();
-    virtual f32 Width(s32 c);
-    virtual void Begin(s32 x, s32 y);
-    virtual void Flush(s32 y);
-    virtual f32 Draw(f32 left, f32 top, s32 c, s32 d, s32 y);
-    virtual void End(s32 x, s32 y);
-};
 
 void func_0015DB80(TextReader* self);
 s32 func_0015DBE0(TextReader* self);
@@ -3293,7 +3282,7 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
         if (c == 10) {
             n++;
         } else {
-            f[n] += ((Font_15E318*)self->font)->Width(c);
+            f[n] += self->font->Width(c);
         }
     }
     c = (s32)p->f18;
@@ -3308,7 +3297,7 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
     }
     u = p->color;
     SetTextDefaultColor(self, &u);
-    Font_15E318* started = 0;
+    Font* started = 0;
     f32 half = 0.5f;
     RewindTextReader(self);
     s32 right = 2;
@@ -3333,15 +3322,15 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
             first = 0;
         }
         if (started == 0) {
-            ((Font_15E318*)self->font)->Begin(x, y);
-            started = (Font_15E318*)self->font;
+            self->font->Begin(x, y);
+            started = self->font;
         } else if (self->fontChanged != 0) {
-            ((Font_15E318*)self->font)->Flush(y);
+            self->font->Flush(y);
             self->fontChanged = 0;
         }
-        left += ((Font_15E318*)self->font)->Draw(left, top, n, self->colorBits, y);
+        left += self->font->Draw(left, top, n, self->colorBits, y);
     }
-    ((Font_15E318*)self->font)->End(x, y);
+    self->font->End(x, y);
 }
 
 void func_0015E5F0(void)

@@ -402,15 +402,6 @@ struct PercentClamp {
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 
-class Obj_161958 {
-public:
-    u8 pad0[0xC];
-    u64* cursor;
-    u8 pad1[0x8];
-    virtual void Begin(s32 arg);
-    void AddGifImageTag(s32 count);
-};
-
 struct FlushedVertexBatch { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
 
 extern PacketWriter D_002622A8;
@@ -1778,11 +1769,11 @@ void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 
 LINKER_REMNANT(func_00161950);
 
-void Obj_161958::func_00161958(s32 count)
+void func_00161958(PacketWriter* self, s32 count)
 {
-    Begin(0);
-    u64* p = cursor;
-    cursor = p + 2;
+    self->Close(0);
+    u64* p = self->cur64;
+    self->cur64 = p + 2;
     p[0] = (u64)count | ((u64)2 << 58);
     p[1] = 0;
 }
