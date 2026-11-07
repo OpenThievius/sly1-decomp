@@ -17,7 +17,7 @@
 #include "camera.h"
 #include "object_gatherer.h"
 #include "switched_collider.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "effect.h"
 #include "globals.h"
 #include "group_marker.h"
@@ -629,7 +629,7 @@ extern f32 D_00261860;
 
 void func_0012E760(Ptr_1A3C40* obj);
 
-void func_001A3F40(C15* self, Src_1A3C40* src);
+void func_001A3F40(WalkerCollider* self, Src_1A3C40* src);
 
 void func_001ED650(Out_1A3C40* out, f32 unused, f32 scale, f32 z);
 
@@ -723,9 +723,9 @@ void func_001B7968(void* self);
 
 extern f32 D_0026B7D8[4];
 
-void func_001B9338(C15* self);
+void func_001B9338(WalkerCollider* self);
 
-void func_001B9D10(C15* self, f32* buf, u8* table, f32 scale);
+void func_001B9D10(WalkerCollider* self, f32* buf, u8* table, f32 scale);
 
 void func_001A7D18(void* self, void* entry);
 
@@ -904,7 +904,7 @@ void func_0018D800(void* dst, void* src, s32 count);
 
 enum Kind_1A4070 { K_1A4070_0 };
 
-void func_001F4408(C15* a, s32 n);
+void func_001F4408(WalkerCollider* a, s32 n);
 
 void func_00155F90(void* p);
 
@@ -914,7 +914,7 @@ void func_001B6628(void* p, s32 n);
 
 void func_001B64D8(void* p, s32 n);
 
-s32 func_0012C7B0(void* a, C15* self, s32 c, s32* out, f32 fa, f32 fb);
+s32 func_0012C7B0(void* a, WalkerCollider* self, s32 c, s32* out, f32 fa, f32 fb);
 
 void func_001BF788(s32* p, s32 n);
 
@@ -2108,22 +2108,22 @@ void func_001A3A18(Effect* self, f32 scale)
 
 ASM_FUNC(func_001A3AC8);
 
-void func_001A3AE0(C15* self)
+void func_001A3AE0(WalkerCollider* self)
 {
-    C15* o = self;
+    WalkerCollider* o = self;
     InitSwitchedCollider(self);
     o->f610 = -1;
     o->f628 = 2000.0f;
     o->f614 = -1;
 }
 
-void func_001A3B20(C15* self)
+void func_001A3B20(WalkerCollider* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 2, (void*)D_0026B778);
 }
 
-void func_001A3B58(C15* self)
+void func_001A3B58(WalkerCollider* self)
 {
     StartPlacedObject(self);
     if (self->f678 != 0) {
@@ -2145,7 +2145,7 @@ void func_001A3B58(C15* self)
 
 extern const f32 D_0024C9C0[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
 
-void func_001A3C40(C15* self, Src_1A3C40* src)
+void func_001A3C40(WalkerCollider* self, Src_1A3C40* src)
 {
     Frame_1A3C40 f;
     if (self->f688 != 0) {
@@ -2165,7 +2165,7 @@ void func_001A3C40(C15* self, Src_1A3C40* src)
 
 ASM_FUNC(func_001A3D40);
 
-void func_001A3F40(C15* out, Src_1A3F40* src)
+void func_001A3F40(WalkerCollider* out, Src_1A3F40* src)
 {
     if (0.3f < src->f48) {
         func_00144FF8(g_camera, src, 0, &out->f618);
@@ -2177,7 +2177,7 @@ void func_001A3F40(C15* out, Src_1A3F40* src)
     out->f624 = src->f7C;
 }
 
-s32 func_001A3FE0(C15* self)
+s32 func_001A3FE0(WalkerCollider* self)
 {
     s32 r = self->f610;
     switch (r) {
@@ -2200,7 +2200,7 @@ s32 func_001A3FE0(C15* self)
     return r;
 }
 
-void func_001A4070(C15* self, s32 n)
+void func_001A4070(WalkerCollider* self, s32 n)
 {
     s32 old = self->f610;
     if (old == n) return;
@@ -2249,7 +2249,7 @@ void func_001A4070(C15* self, s32 n)
     }
 }
 
-s32 func_001A4258(C15* self)
+s32 func_001A4258(WalkerCollider* self)
 {
     s32 r = self->f614;
     switch (r) {
@@ -2267,7 +2267,7 @@ s32 func_001A4258(C15* self)
     return r;
 }
 
-void func_001A42C8(C15* self, s32 state)
+void func_001A42C8(WalkerCollider* self, s32 state)
 {
     s32 old = self->f614;
     if (old == state) {
@@ -2310,7 +2310,7 @@ void func_001A42C8(C15* self, s32 state)
     StartSoundEffect(s1, &self->f658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
 }
 
-void func_001A43C8(C15* self, s32 code, Rec_1A43C8* rec)
+void func_001A43C8(WalkerCollider* self, s32 code, Rec_1A43C8* rec)
 {
     HandleSwitchedColliderNotification(self, code, rec);
     if (code == 5) {
@@ -2340,7 +2340,7 @@ code5:
     }
 }
 
-void func_001A44E8(C15* self)
+void func_001A44E8(WalkerCollider* self)
 {
     f32 buf[12];
     StepCollider(self);
@@ -2350,7 +2350,7 @@ void func_001A44E8(C15* self)
 
 ASM_FUNC(func_001A4538);
 
-void func_001A45B8(C15* ctx, Obj_1A45B8* obj)
+void func_001A45B8(WalkerCollider* ctx, Obj_1A45B8* obj)
 {
     if (func_00128230(ctx) != 0) {
         return;
@@ -2360,7 +2360,7 @@ void func_001A45B8(C15* ctx, Obj_1A45B8* obj)
     }
 }
 
-void func_001A4610(C15* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void func_001A4610(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     Vec02 s0;
     Vec02 s1;

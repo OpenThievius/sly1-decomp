@@ -26,7 +26,7 @@ void func_eu_001AE500(Obj_eu_1AE500* self)
     f32 s1 = func_00205210(WrapAngle(D_eu_00262B68 * 8.0f)) * half + half;
     font = (Font_eu_1AE500*)GetFontById(1);
     s = s1 * 0.1f + 0.5f;
-    PushFontScale((V24A2*)font, s, s);
+    PushFontScale((Font*)font, s, s);
     w = func_eu_0015C6F0(font, D_eu_0024E350);
     h = (f32)font->units * font->scale;
     func_00137228(out, ((self->f52C + 2.0f) + self->f544 * half) - w * half,
@@ -38,5 +38,5 @@ void func_eu_001AE500(Obj_eu_1AE500* self)
     func_00137268(out, 0);
     func_eu_001374E0(out, 0);
     func_eu_0015C778(font, D_eu_0024E350, out, 0, D_eu_00263590);
-    PopFontScale((V24A2*)font);
+    PopFontScale((Font*)font);
 }

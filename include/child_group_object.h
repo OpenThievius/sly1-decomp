@@ -58,7 +58,7 @@ struct ChildGroupObject : Collider {
 
 // The movie player's object (movie_player.cpp): the lists of objects it asks about (slot 56),
 // the movie's data (+0x6B4) and a flag.
-struct C3C : ChildGroupObject {
+struct ContactListObject : ChildGroupObject {
     u8 pad690[0x6B4 - 0x690];
     void* f6B4;             // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
@@ -71,15 +71,15 @@ struct C3C : ChildGroupObject {
 };
 
 // 0x3F, the player's stand-in: SwapInPlayerStandIn puts it in the place of an attached object.
-struct C3F : ChildGroupObject {
+struct StandIn : ChildGroupObject {
     f32 f690;               // 0x690: the clock when SwapInPlayerStandIn started it
     s32 f694;               // 0x694: 1 while it runs
     u8 pad698[0x6A0 - 0x698];
 };
 
 typedef char check_ChildGroupObject[sizeof(ChildGroupObject) == 0x690 ? 1 : -1];
-typedef char check_C3C[sizeof(C3C) == 0x6F0 ? 1 : -1];
-typedef char check_C3F[sizeof(C3F) == 0x6A0 ? 1 : -1];
+typedef char check_ContactListObject[sizeof(ContactListObject) == 0x6F0 ? 1 : -1];
+typedef char check_StandIn[sizeof(StandIn) == 0x6A0 ? 1 : -1];
 
 void func_0013B4C0(ChildGroupObject* self);                          // slot 0
 void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
@@ -87,13 +87,13 @@ void func_0013B598(ChildGroupObject* self);                          // slot 10
 void func_0013B610(ChildGroupObject* self);                          // slot 16
 void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
 void func_0013BA70(ChildGroupObject* self);                          // slot 60
-void func_0018D8E0(C3C* self);                          // slot 0
-void func_0018D910(C3C* self);                          // slot 10
-void func_0018D978(C3C* self);                          // slot 7
-void func_0018D9B8(C3C* self, void* b, f32 x);          // slot 27
-void func_0018DB20(C3C* self, void* in1, void* in2);    // slot 36
-s32 func_0018DC88(C3C* self, void* key);                // slot 56
-s32 func_001D6DA0(C3F* self, s32 value);                // slot 56
-void func_001D7018(C3F* self);                          // slot 60
+void func_0018D8E0(ContactListObject* self);                          // slot 0
+void func_0018D910(ContactListObject* self);                          // slot 10
+void func_0018D978(ContactListObject* self);                          // slot 7
+void func_0018D9B8(ContactListObject* self, void* b, f32 x);          // slot 27
+void func_0018DB20(ContactListObject* self, void* in1, void* in2);    // slot 36
+s32 func_0018DC88(ContactListObject* self, void* key);                // slot 56
+s32 func_001D6DA0(StandIn* self, s32 value);                // slot 56
+void func_001D7018(StandIn* self);                          // slot 60
 
 #endif

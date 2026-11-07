@@ -10,22 +10,22 @@
 #define ANIMATION_H
 
 #include "base_object.h"
-#include "t2196.h"
+#include "anim_curve.h"
 
 struct Stream83;  // the level stream an animation is read from (func_00137D10 and friends)
 
 // A track (28 bytes, func_0012B8C8): the target and one curve for each property the flags
 // select (position 0x1, rotation 0x2, scale 0x4, weight 0x8), and the morph channels (0x10).
-// The curves are kind t2196 (t2196.h); slot 1 (slot 2 of the rotation curves) reads each from
+// The curves are kind t2196 (anim_curve.h); slot 1 (slot 2 of the rotation curves) reads each from
 // the stream.
 struct Track83 {
     s32 target;             // 0x00
-    T2196_Pos* pos;         // 0x04
-    T2196_Rot* rot;         // 0x08
-    T2196_Scale* scale;     // 0x0C
-    T2196_Weight* weight;   // 0x10
+    PositionCurve* pos;         // 0x04
+    RotationCurve* rot;         // 0x08
+    ScaleCurve* scale;     // 0x0C
+    WeightCurve* weight;   // 0x10
     s32 morphCount;         // 0x14
-    T2196_Weight** morph;   // 0x18
+    WeightCurve** morph;   // 0x18
 };
 
 // A value that moves with a speed and an acceleration (func_0012C160 steps it by the frame time).

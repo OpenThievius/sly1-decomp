@@ -12,7 +12,7 @@
 #include "list_iter.h"
 #include "globals.h"
 #include "camera.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "group_marker.h"
 #include "deferred_request.h"
 #include "color_fade.h"
@@ -300,7 +300,7 @@ void func_0019DB68(void)
 
 void func_0019DBB0(void)
 {
-    V24A0* self = &g_vifPacketWriter;
+    PacketWriter* self = &g_vifPacketWriter;
     AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
     UploadProjectionConstants();
     UploadCameraOncePerFrame();

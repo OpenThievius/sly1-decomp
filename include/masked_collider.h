@@ -11,7 +11,7 @@
 
 struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
-// The object at the 0x200 field of what C23 keeps at 0x734: a flag at 0x1C and one at 0x4C.
+// The object at the 0x200 field of what PooledHolder keeps at 0x734: a flag at 0x1C and one at 0x4C.
 struct Held23 {
     void** vtbl;            // 0x00
     u8 pad04[0x1C - 4];
@@ -74,19 +74,19 @@ struct MaskedCollider : Collider {
 typedef char check_MaskedCollider[sizeof(MaskedCollider) == 0x6C0 ? 1 : -1];
 typedef char check_Desc20[sizeof(Desc20) == 0x138 ? 1 : -1];
 
-struct C21 : MaskedCollider {
+struct PlayerFlaggedCollider : MaskedCollider {
 };
 
-typedef char check_C21[sizeof(C21) == 0x6C0 ? 1 : -1];
+typedef char check_PlayerFlaggedCollider[sizeof(PlayerFlaggedCollider) == 0x6C0 ? 1 : -1];
 
-struct C22 : C21 {
+struct CountedObject : PlayerFlaggedCollider {
     StateTrigger* counter;           // 0x6C0: told when the object is done (func_00123B18)
     u8 pad6C4[0x6D0 - 0x6C4];
 };
 
-typedef char check_C22[sizeof(C22) == 0x6D0 ? 1 : -1];
+typedef char check_CountedObject[sizeof(CountedObject) == 0x6D0 ? 1 : -1];
 
-struct C23 : C21 {
+struct PooledHolder : PlayerFlaggedCollider {
     s32 f6C0;               // 0x6C0: -1 at set-up; the kind of object slot 16 looks up
     s32 cnt;                // 0x6C4
     BaseObject* p6C8;              // 0x6C8: slot 72 lets go of it
@@ -113,7 +113,7 @@ struct C23 : C21 {
     u8 pad7B4[0x7C0 - 0x7B4];
 };
 
-typedef char check_C23[sizeof(C23) == 0x7C0 ? 1 : -1];
+typedef char check_PooledHolder[sizeof(PooledHolder) == 0x7C0 ? 1 : -1];
 
 struct Alloc24 {
     u8 pad0[8];
@@ -121,7 +121,7 @@ struct Alloc24 {
     void* field_c;          // 0x0C
 };
 
-struct C24 : C21 {
+struct C24 : PlayerFlaggedCollider {
     u8 pad6C0[4];
     void* x6C4;             // 0x6C4: loaded (D_00264230)
     StateWalker* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
@@ -138,21 +138,21 @@ struct C24 : C21 {
 
 typedef char check_C24[sizeof(C24) == 0x6F0 ? 1 : -1];
 
-struct C25 : MaskedCollider {
+struct MassScalingCollider : MaskedCollider {
     f32 scale;              // 0x6C0
     s32 sel6C4;             // 0x6C4: -1 at set-up
     s32 sel6C8;             // 0x6C8: -1 at set-up
     s32 cur;                // 0x6CC
 };
 
-typedef char check_C25[sizeof(C25) == 0x6D0 ? 1 : -1];
+typedef char check_MassScalingCollider[sizeof(MassScalingCollider) == 0x6D0 ? 1 : -1];
 
-struct C26 : C25 {
+struct LatchedSwitchCollider : MassScalingCollider {
     void* f6D0;             // 0x6D0
     SwitchedCollider* sel6D4;            // 0x6D4
     u8 pad6D8[0x6E0 - 0x6D8];
 };
 
-typedef char check_C26[sizeof(C26) == 0x6E0 ? 1 : -1];
+typedef char check_LatchedSwitchCollider[sizeof(LatchedSwitchCollider) == 0x6E0 ? 1 : -1];
 
 #endif

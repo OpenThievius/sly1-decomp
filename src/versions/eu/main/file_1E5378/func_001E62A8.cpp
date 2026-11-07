@@ -13,7 +13,7 @@ struct Self_1E62A8_eu {
     f32 f116C; f32 f1170;
 };
 
-void func_001E62A8(Self_1E62A8_eu* self, V24A0* c, s32 k)
+void func_001E62A8(Self_1E62A8_eu* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->f538;

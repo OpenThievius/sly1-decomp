@@ -12,7 +12,7 @@
 #include "sound_record.h"
 #include "asm_func.h"
 #include "list_iter.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "game_progress.h"
 #include "screen_fade.h"
 #include "keyed_entry.h"
@@ -375,7 +375,7 @@ void func_001F0428(Obj_160918* obj, s32 value, s32 count);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_0024A6F8[];
-s32 func_00152888(V24A0* a);
+s32 func_00152888(PacketWriter* a);
 
 void func_001604B8(s32 mode);
 
@@ -433,13 +433,13 @@ extern u8 D_00000ED8[];
 
 void func_001EE5C8(Pkt_1639E8* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_00152980(V24A0* f, s32 size);
-void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* f, s32 a, u64 b);
-void func_00161278(V24A0* f, s32 n);
+void func_00152980(PacketWriter* f, s32 size);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* f, s32 a, u64 b);
+void func_00161278(PacketWriter* f, s32 n);
 void func_001EE668(Pkt_1639E8* s, s32 a, s32 b, void* data, s32 flags);
-void func_001528E0(V24A0* f);
-void func_001615F0(V24A0* f, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_001528E0(PacketWriter* f);
+void func_001615F0(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001EE4C0(Pkt_1639E8* s, u32* src);
 void func_001EE528(Pkt_1639E8* s, s32 value);
 void func_001EE3F0(Pkt_1639E8* s, void* data);
@@ -476,11 +476,11 @@ public:
 
 struct Self_162508 { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
 
-extern V24A0 D_002622A8;
+extern PacketWriter D_002622A8;
 extern u8 D_000018C0[];
 
 void func_00166658(void);
-s32 func_001EE560(V24A0* s, s32 a, s32 b, s32 c);
+s32 func_001EE560(PacketWriter* s, s32 a, s32 b, s32 c);
 void func_00161B80(Self_162508* self);
 void func_00161C00(Self_162508* self);
 void func_00161F70(Self_162508* self);
@@ -599,14 +599,14 @@ extern u8 D_00001210[];
 extern u8 D_00001AB0[];
 extern u8 D_00000010[];
 
-void func_001EE5C8(V24A0* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void func_001EE5C8(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 Mem_161F70* func_001F5C0C(Mem_161F70* p, s32 value, s32 size);
-void func_001EE3F0(V24A0* s, void* data);
-void func_001EE420(V24A0* s, void* data);
-void func_001EE480(V24A0* s);
-void func_00152D70(V24A0* s);
-void func_00152B80(V24A0* s, s32 n, void* data);
-void func_00152B38(V24A0* s);
+void func_001EE3F0(PacketWriter* s, void* data);
+void func_001EE420(PacketWriter* s, void* data);
+void func_001EE480(PacketWriter* s);
+void func_00152D70(PacketWriter* s);
+void func_00152B80(PacketWriter* s, s32 n, void* data);
+void func_00152B38(PacketWriter* s);
 void func_0018D800(Mem_161F70* dst, void* src, s32 count);
 
 struct Pkt_163ED8;
@@ -942,23 +942,23 @@ s32 func_00160D98(void);
 void func_00160DA0(void);
 void func_00160E80(Rec_160E80* self);
 s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out);
-V24A0* func_001611B8(V24A0* self);
-void func_00161200(V24A0* self);
-void func_00161278(V24A0* f, s32 n);
-s32 func_001612E8(V24A0* obj);
-void func_001612F8(V24A0* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
-void func_001613C0(V24A0* self, s32 a1, s32 a2, s32 a3);
-void func_00161458(V24A0* self, u32 value);
-void func_001614C8(V24A0* self,s32 a,s32 b);
-void func_00161520(V24A0* self,f32 a,f32 b,f32 c);
-void func_00161588(V24A0* self, s32 a1, s32 a2, u64 a3);
-void func_001615F0(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void func_00161670(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void func_00161708(V24A0* self, u64 a1, u64 a2);
-void func_00161768(V24A0* self, u32 a1, u64 a2);
-void func_001617E8(V24A0* self, s32 tag, f32 value);
-void func_00161860(V24A0* self, s32 a1, s32 a2);
-void func_001618C0(V24A0* self, s32 a1, s32 a2, u32 a3, u32 a4);
+PacketWriter* func_001611B8(PacketWriter* self);
+void func_00161200(PacketWriter* self);
+void func_00161278(PacketWriter* f, s32 n);
+s32 func_001612E8(PacketWriter* obj);
+void func_001612F8(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
+void func_001613C0(PacketWriter* self, s32 a1, s32 a2, s32 a3);
+void func_00161458(PacketWriter* self, u32 value);
+void func_001614C8(PacketWriter* self,s32 a,s32 b);
+void func_00161520(PacketWriter* self,f32 a,f32 b,f32 c);
+void func_00161588(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void func_00161670(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void func_00161708(PacketWriter* self, u64 a1, u64 a2);
+void func_00161768(PacketWriter* self, u32 a1, u64 a2);
+void func_001617E8(PacketWriter* self, s32 tag, f32 value);
+void func_00161860(PacketWriter* self, s32 a1, s32 a2);
+void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4);
 void func_00161A88(void* self, s32 flag);
 void func_00161AB0(u8* self, void* a1, void* a2);
 void func_00161B80(u8* self);
@@ -1708,32 +1708,32 @@ s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_1
     return j;
 }
 
-extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(V24A0* f, s32 n))func_00161278, 0, 0 };
+extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(PacketWriter* f, s32 n))func_00161278, 0, 0 };
 
-V24A0* func_001611B8(V24A0* self)
+PacketWriter* func_001611B8(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
     self->f14 = 1;
-    self->vt = (const V24A0_Vt*)g_gifPacketMethods;
+    self->vt = (const PacketWriterVt*)g_gifPacketMethods;
     self->f1C = 0;
     self->f20 = 0;
     self->f24 = 0;
     return self;
 }
 
-void func_00161200(V24A0* self)
+void func_00161200(PacketWriter* self)
 {
     if (self->f1C != 0) {
-        const V24A0_Vt* s = self->vt;
-        s->close((V24A0*)((u8*)self + s->adj1), 1);
+        const PacketWriterVt* s = self->vt;
+        s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     } else {
         BeginGifTag(self, 0, 1, 0xE);
-        const V24A0_Vt* s = self->vt;
-        s->close((V24A0*)((u8*)self + s->adj1), 1);
+        const PacketWriterVt* s = self->vt;
+        s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     }
 }
 
-void func_00161278(V24A0* f, s32 n)
+void func_00161278(PacketWriter* f, s32 n)
 {
     if (f->f1C == 0)
         return;
@@ -1756,13 +1756,13 @@ void func_00161278(V24A0* f, s32 n)
     f->f1C = 0;
 }
 
-s32 func_001612E8(V24A0* obj) { return ++obj->f24; }
+s32 func_001612E8(PacketWriter* obj) { return ++obj->f24; }
 
-void func_001612F8(V24A0* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
+void func_001612F8(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
 {
-    V24A0* w = self;
-    const V24A0_Vt* sub = w->vt;
-    sub->close((V24A0*)((u8*)self + sub->adj1), 0);
+    PacketWriter* w = self;
+    const PacketWriterVt* sub = w->vt;
+    sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
 
     u8* p = w->cur;
     u64 tag = (prim << 47) | (1ULL << 46) | (u64)nloop | ((u64)nreg << 60);
@@ -1775,10 +1775,10 @@ void func_001612F8(V24A0* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* ou
     w->cur = w->cur + nloop * nreg * 16;
 }
 
-void func_001613C0(V24A0* self, s32 a1, s32 a2, s32 a3)
+void func_001613C0(PacketWriter* self, s32 a1, s32 a2, s32 a3)
 {
-    const V24A0_Vt* d = self->vt;
-    d->close((V24A0*)((u8*)self + d->adj1), 0);
+    const PacketWriterVt* d = self->vt;
+    d->close((PacketWriter*)((u8*)self + d->adj1), 0);
     u8* blk = self->cur;
     s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
     s64 hdr = ((s64)a1 << 47) | lo;
@@ -1790,7 +1790,7 @@ void func_001613C0(V24A0* self, s32 a1, s32 a2, s32 a3)
     self->f24 = 0;
 }
 
-void func_00161458(V24A0* self, u32 value)
+void func_00161458(PacketWriter* self, u32 value)
 {
     CountGifEntry(self, 1, 1);
     u32* p = (u32*)self->cur;
@@ -1801,7 +1801,7 @@ void func_00161458(V24A0* self, u32 value)
     p[3] = value >> 24;
 }
 
-void func_001614C8(V24A0* self,s32 a,s32 b)
+void func_001614C8(PacketWriter* self,s32 a,s32 b)
 {
     CountGifEntry(self,1,3);
     s32* p=(s32*)self->cur;
@@ -1810,7 +1810,7 @@ void func_001614C8(V24A0* self,s32 a,s32 b)
     p[1]=b;
 }
 
-void func_00161520(V24A0* self,f32 a,f32 b,f32 c)
+void func_00161520(PacketWriter* self,f32 a,f32 b,f32 c)
 {
     CountGifEntry(self,1,2);
     f32* p=(f32*)self->cur;
@@ -1820,7 +1820,7 @@ void func_00161520(V24A0* self,f32 a,f32 b,f32 c)
     p[2]=c;
 }
 
-void func_00161588(V24A0* self, s32 a1, s32 a2, u64 a3)
+void func_00161588(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     CountGifEntry(self, 1, 5);
     u8* p = self->cur;
@@ -1830,7 +1830,7 @@ void func_00161588(V24A0* self, s32 a1, s32 a2, u64 a3)
     *(u64*)(p + 0x8) = a3;
 }
 
-void func_001615F0(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
     u32* p = (u32*)self->cur;
@@ -1841,7 +1841,7 @@ void func_001615F0(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = (a4 & 0xFF) << 4;
 }
 
-void func_00161670(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void func_00161670(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
     u32* p = (u32*)self->cur;
@@ -1852,7 +1852,7 @@ void func_00161670(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = ((a4 & 0xFF) << 4) | 0x8000;
 }
 
-void func_00161708(V24A0* self, u64 a1, u64 a2)
+void func_00161708(PacketWriter* self, u64 a1, u64 a2)
 {
     CountGifEntry(self, 1, 14);
     u64* p = self->cur64;
@@ -1863,10 +1863,10 @@ void func_00161708(V24A0* self, u64 a1, u64 a2)
 
 LINKER_REMNANT(func_00161760);
 
-void func_00161768(V24A0* self, u32 a1, u64 a2)
+void func_00161768(PacketWriter* self, u32 a1, u64 a2)
 {
-    const V24A0_Vt* sub = self->vt;
-    sub->close((V24A0*)((u8*)self + sub->adj1), 0);
+    const PacketWriterVt* sub = self->vt;
+    sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
     u64* p = self->cur64;
     self->cur64 = p + 2;
     p[1] = a2;
@@ -1876,7 +1876,7 @@ void func_00161768(V24A0* self, u32 a1, u64 a2)
     self->f24 = 0;
 }
 
-void func_001617E8(V24A0* self, s32 tag, f32 value)
+void func_001617E8(PacketWriter* self, s32 tag, f32 value)
 {
     CountGifEntry(self, 0, 1);
     s32 bits = *(s32*)&value;
@@ -1889,7 +1889,7 @@ void func_001617E8(V24A0* self, s32 tag, f32 value)
 
 LINKER_REMNANT(func_00161858);
 
-void func_00161860(V24A0* self, s32 a1, s32 a2)
+void func_00161860(PacketWriter* self, s32 a1, s32 a2)
 {
     CountGifEntry(self, 0, 3);
     u64 v = (u64)a1 | (u64)(a2 << 16);
@@ -1898,7 +1898,7 @@ void func_00161860(V24A0* self, s32 a1, s32 a2)
     *p = v;
 }
 
-void func_001618C0(V24A0* self, s32 a1, s32 a2, u32 a3, u32 a4)
+void func_001618C0(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 0, 4);
     u64 lo = (u64)a1 | (u64)(a2 << 16);
@@ -2149,7 +2149,7 @@ void func_00162508(Self_162508* self)
     }
     {
         FlipVifBaseOffset();
-        V24A0* s = &g_vifPacketWriter;
+        PacketWriter* s = &g_vifPacketWriter;
         s32 size = WriteVifUnpackHeader(s, 12, 11, 0);
         Copy_162508::Words((s32*)s->cur, (s32*)self, size >> 2);
         s->cur += size;
@@ -2251,7 +2251,7 @@ void func_00163990(s32 mode, void* obj)
 void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
                    void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt)
 {
-    V24A0 f;
+    PacketWriter f;
     u32 buf[4];
     s32 i;
     Vec3_1639E8* out;
@@ -3084,63 +3084,63 @@ s32 func_001B26F8(void* node, void* v, f32 f);
 void func_001B2640(void* node);
 
 struct Vif_166690 {
-    static u32* Open(V24A0* w)
+    static u32* Open(PacketWriter* w)
     {
         u32* tag = (u32*)w->cur;
         *(u64*)w->cur = 0x10000000;
         w->cur += 16;
         return tag;
     }
-    static void Cnt1(V24A0* w)
+    static void Cnt1(PacketWriter* w)
     {
         *(u64*)w->cur = 0x10000001;
         w->cur += 16;
     }
-    static void Word(V24A0* w, u32 v)
+    static void Word(PacketWriter* w, u32 v)
     {
         *(u32*)w->cur = v;
         w->cur += 4;
     }
-    static void Copy(V24A0* w, void* src, s32 size)
+    static void Copy(PacketWriter* w, void* src, s32 size)
     {
         Copy_162508::Words((s32*)w->cur, (s32*)src, size >> 2);
         w->cur += size;
     }
-    static void Pad(V24A0* w)
+    static void Pad(PacketWriter* w)
     {
         while (w->curU & 0xF) {
             *(u32*)w->cur = 0;
             w->cur += 4;
         }
     }
-    static void Close(V24A0* w, u32* tag)
+    static void Close(PacketWriter* w, u32* tag)
     {
         *tag |= ((w->cur - (u8*)tag) >> 4) - 1;
     }
-    static void Refs(V24A0* w, s32 qwc, s32 addr)
+    static void Refs(PacketWriter* w, s32 qwc, s32 addr)
     {
         *(u64*)w->cur = (s64)(qwc | 0x40000000) | ((s64)addr << 32);
         w->cur += 16;
     }
-    static void Call(V24A0* w, s32 addr)
+    static void Call(PacketWriter* w, s32 addr)
     {
         *(u64*)w->cur = ((s64)addr << 32) | 0x50000000;
         w->cur += 16;
     }
-    static void Mscal(V24A0* w, u8* addr)
+    static void Mscal(PacketWriter* w, u8* addr)
     {
         Word(w, ((u32)addr >> 3) | 0x14000000);
     }
-    static void Mscalf(V24A0* w, u8* addr)
+    static void Mscalf(PacketWriter* w, u8* addr)
     {
         Word(w, ((u32)addr >> 3) | 0x15000000);
     }
-    static void Unpack(V24A0* w, u32 cmd, void* src, s32 size)
+    static void Unpack(PacketWriter* w, u32 cmd, void* src, s32 size)
     {
         Word(w, cmd);
         Copy(w, src, size);
     }
-    static void UnpackAt(V24A0* w, u32 cmd, u32 addr, void* src, s32 size)
+    static void UnpackAt(PacketWriter* w, u32 cmd, u32 addr, void* src, s32 size)
     {
         Word(w, cmd | addr);
         Copy(w, src, size);

@@ -10,7 +10,7 @@
 #define EFFECT_SPAWNER_H
 
 #include "placed_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
 // own before a change, func_001550E8 fills it from the ids).
@@ -20,7 +20,7 @@ struct Rec50 {
     s32 kind;               // 0x10: 3, 4 seen
     u8 pad14[0x20 - 0x14];
     union {
-        T2176* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
+        PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
         s32 value20;        // 0x20: a value taken from another object (func_001550E8)
     };
     void* f24;              // 0x24
