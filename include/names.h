@@ -182,8 +182,11 @@
 #define g_backgroundJob                            D_00269990
 #define g_heapStart                                D_002699A4
 #define g_heapEnd                                  D_002699A8
+#define g_contactListObjectLinks                   D_002699B0
 #define g_movieTitles                              D_002699C0
 #define g_moviePlayer                              D_00269A00
+#define g_movieChecksumFailed                      D_00269B48
+#define g_keyedMovieWatched                        D_00269B4C
 #define g_targetVectors                            D_00269BA8
 #define g_activeSwitchedCollider                   D_00269BCC
 #define g_switchedColliderCount                    D_00269C90
@@ -1648,6 +1651,13 @@
 #define PopBackMemoryMark                          func_0018D6F0
 #define CopyQuadwords                              func_0018D780
 #define CopyMemory                                 func_0018D800
+#define InitContactListObject                      func_0018D8E0
+#define LoadContactListObject                      func_0018D910
+#define UnregisterContactListObject                func_0018D978
+#define TestContactListMayContact                  func_0018DC88
+#define AddContactListId                           func_0018DD50
+#define AddContactListKind                         func_0018DD78
+#define InitContactListObjectWithoutGravity        func_0018DDA0
 #define FindKeyIndex                               func_0018E410
 #define GetMovieTitle                              func_0018E480
 #define QueueMovieByIndex                          func_0018E4C0
@@ -1663,7 +1673,11 @@
 #define StopMovieStream                            func_0018EAA0
 #define FeedMovieStream                            func_0018EAF8
 #define UpdateMovieStream                          func_0018EB98
+#define AcceptMovieDataIntoRing                    func_0018EC40
+#define PassMovieDataToStream                      func_0018EC80
 #define FlushMovieToIpu                            func_0018ECA8
+#define FeedMovieDecoderWithoutWaiting             func_0018ED78
+#define AcceptMovieDecoderEvent                    func_0018EDA0
 #define UploadMovieFrame                           func_0018EDA8
 #define DrawMovieFrame                             func_0018EF78
 #define QueueMovie                                 func_0018F0E8

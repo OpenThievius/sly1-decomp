@@ -651,7 +651,7 @@ func_0011DF58	EnableIopDiscAccess	sends command 0x2A with four words (001BC000 p
 func_0011E138	StartDiscRead	with D_0025C34C zero it forwards to func_00203B18, otherwise it checks the drive is idle, sets busy in the shared packet and sends command 0x38 with three words; 00140000's read loops call it and repeat until it returns 1
 func_0011E1F8	SyncDiscRead	with D_0025C34C zero it forwards to func_002032C8, otherwise it polls until the shared packet's busy word clears (argument 1 only tests and returns 1 when still busy); callers loop it after StartDiscRead
 func_0011E2E8	GetDiscReadError	with D_0025C34C zero it forwards to func_00203D90, otherwise returns the word at +0x10 of the shared packet D_00260DC0; 00134000 and 00140000 read it after SyncDiscRead as the read's error
-func_0011E428	OpenIopRing	sends command 0x3B with five words (file_18D8E0 passes 0x6000, 0x400, 0, 2, 2) and returns the reply, which becomes the ring address handed to func_0018E678
+func_0011E428	OpenIopRing	sends command 0x3B with five words (movie_player passes 0x6000, 0x400, 0, 2, 2) and returns the reply, which becomes the ring address handed to func_0018E678
 func_0011E4F8	GetIopRingPosition	sends command 0x40 and returns the reply; func_0018E838 masks it with 0xFFFFFF to find the IOP's position in its ring
 func_0011D480	SetIopVolumeChannel	sends command 9 with a channel number and a value; callers pass values scaled by 1024 (the master channel 8 from func_001C05D0, channels 0 to 3 from func_001C0600)
 func_0011D4B8	GetIopVolumeChannel	sends command 10 with a channel number and returns the reply; func_0018E940 saves channels 2 and 8 with it and func_0018EAA0 restores them with SetIopVolumeChannel
@@ -1551,7 +1551,7 @@ func_0018EA48	ResetMovieStream	if the stream is open, resets its two buffers and
 func_0018EAA0	StopMovieStream	clears the open flag and restores both volume channels and the previous state saved by func_0018E940
 func_0018EAF8	FeedMovieStream	skips the 4-byte header, fills the first buffer (mode 1) and then the second (mode 2) from a chunk; returns 0 until enough data is available
 func_0018EB98	UpdateMovieStream	state 2 drains the buffer then starts the ring (state 3); state 3 refreshes the ring and keeps draining
-func_0018ECA8	FlushMovieToIpu	tops up the stream until 0x1000 bytes, pads with zeroes to a 32-byte multiple and drains the buffer into a Dma_18E8C8 sink
+func_0018ECA8	FlushMovieToIpu	tops up the stream until 0x1000 bytes, pads with zeroes to a 32-byte multiple and drains the buffer into an IpuDmaSink
 func_0018EDA8	UploadMovieFrame	builds a GIF packet that uploads the decoded frame in 16 by 16 blocks (0x400 bytes each)
 func_0018EF78	DrawMovieFrame	builds a GIF packet that sets up registers and draws the frame's sprite at the given x, y
 func_0018F448	InitMoviePlayback	sets up buffers, the stream and decoder callbacks, sets the checksum cursor and fills the 256-entry CRC table (0xEDB88320)
@@ -2144,7 +2144,7 @@ D_0026D348	g_gaugeAmountCaption	a plain caption (T217D_E30) whose target counter
 D_00264088	g_pointObjects	the list head RegisterPointObject and UnregisterPointObject append to and unlink from for the 0x80 class (ClearPointObjectList empties it)
 D_00269BA8	g_targetVectors	the list head RegisterTargetVector and UnregisterTargetVector append to and unlink from for class 0x70 (set up with element size 0x38)
 D_002640A4	g_coloredTriangleSet	the single object InitColoredTriangles (class 0x8E) stores itself in; func_001EFEE0 passes it to func_00180398 with its opacity and the teardown code clears it
-D_00269A00	g_moviePlayer	the movie player state (Movie_269A00): QueueMovieByIndex, QueueMovieWithSuccessor, RunMovieDecodeThread, CreateMovieDecodeThread, InitMoviePlayback and the main loop's on flag all use it
+D_00269A00	g_moviePlayer	the movie player state (MoviePlayer): QueueMovieByIndex, QueueMovieWithSuccessor, RunMovieDecodeThread, CreateMovieDecodeThread, InitMoviePlayback and the main loop's on flag all use it
 D_0026A068	g_menuChoiceLabels	28 label strings (Yes, No, Continue, Return to Game, ...) that func_00193598 returns by index for the pause menu's items
 D_00269D50	g_pauseMenuPages	33-entry table of title, scales, item count and item list that DrawPauseMenu, UpdatePauseMenu and ActivatePauseMenuSelection index by page
 D_0026A238	g_pauseMenuItems	the item list (8 entries) of the first page "Paused" in g_pauseMenuPages
@@ -2221,7 +2221,7 @@ D_00263D58	g_gaugeHolderLinks	13-entry link table StartGaugeHolder (class 0x4A) 
 D_00261410	g_flaggedObjectLinks	one-entry link table func_00141210 (FlaggedObject, class 0x38) installs through func_00124DF8
 D_00262718	g_partHolderLinks	nine-entry link table func_0016AA18 (PartHolderObject) installs through func_00124DF8
 D_00262788	g_currentPlacedObjectLinks	0x12-entry link table func_0016AED8 (CurrentPlacedObject) installs through func_00124DF8
-D_002613EC	g_discSectorCheckState	state of StepDiscSectorCheck: ResetDiscSectorCheck stores 3, the steps move it to 1 and 2, file_18D8E0 tests it for 3
+D_002613EC	g_discSectorCheckState	state of StepDiscSectorCheck: ResetDiscSectorCheck stores 3, the steps move it to 1 and 2, movie_player tests it for 3
 D_002613F4	g_lastDiscReadResult	result of the last StartDiscRead call, stored by StartDiscReadUntilAccepted and its twin func_00140CC8
 D_002613F8	g_discReadErrors	array whose word 0 receives GetDiscReadError after each refused disc read in StartDiscReadUntilAccepted
 D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); file_184D78.cpp sets bit 0x40 in its first word
@@ -2483,3 +2483,17 @@ func_001DAFB8	SetPathFollowerPath	stores the path object at +0x830, queries its 
 func_001D8578	UpdatePathFollowerPace	moves the value at +0x85C toward the target at +0x860 and, once the time at +0x864 has passed, picks a new target from a clamped polynomial of lap and entry index plus a random offset and a random next time
 func_001D9C98	UpdatePathFollower	slot of class 0x19: runs the base update func_00192B58, then per mode (+0xB34) UpdateFollowerPace and the rest of the per-frame follower functions, and records the time at +0x850 when the third row's z exceeds 0.5
 func_001DAE68	HandlePathFollowerActivation	slot of class 0x19: runs HandleSwitchedColliderActivation, then on activation points the global element targets at its +0xB00..+0xB0C fields, and on deactivation in mode 2 resets the mode to 0
+func_0018D8E0	InitContactListObject	slot 0 of class 0x3C: runs InitChildGroupObject, then sets the flag at 0x6B8 that its slot 27 tests
+func_0018D910	LoadContactListObject	slot 10 of class 0x3C: runs LoadChildGroupObject, resolves its one object link (D_002699B0, id 0x317 into +0x6B0) and clears flag bits 32, 40 and 41 and sets bit 40
+func_0018D978	UnregisterContactListObject	slot 7 of class 0x3C: runs UnregisterCollider, then stops the animation player at +0x6B4 with StopAnimationPlayer and clears the field
+func_0018DC88	TestContactListMayContact	slot 56 of class 0x3C: returns 1 for the object at +0x6E4, one whose id matches an id of the list at +0x6C0, or one of a kind of the list at +0x6D4, otherwise what TestCollidersMayContact returns
+func_0018DD50	AddContactListId	appends an object id to the list at +0x6C0 (count at +0x6BC, at most four) that TestContactListMayContact matches
+func_0018DD78	AddContactListKind	appends a kind to the list at +0x6D4 (count at +0x6D0, at most four) that TestContactListMayContact tests with IsObjectOfKind
+func_0018DDA0	InitContactListObjectWithoutGravity	slot 0 of class 0x3D: runs InitContactListObject, then sets the gravity vector to the zero vector D_00248D30
+func_0018EC40	AcceptMovieDataIntoRing	the decoder's callback 0 (InitMoviePlayback installs it through func_0020A538): when the ring at +0x60 has room (+0x70) for the request's size, copies the request's bytes in with FillRingBufferFromMemory and returns 1, else 0
+func_0018EC80	PassMovieDataToStream	the decoder's callback 2 (InitMoviePlayback installs it through func_0020A538): hands the request's size and buffer to FeedMovieStream on the stream at +0x80
+func_0018ED78	FeedMovieDecoderWithoutWaiting	the decoder's callback 4 (InitMoviePlayback installs it through func_0020B168): runs FeedMovieDecoder with wait 0 and returns 1
+func_0018EDA0	AcceptMovieDecoderEvent	the decoder's callback 0 of func_0020B168 (InitMoviePlayback installs it): does nothing and returns 1
+D_002699B0	g_contactListObjectLinks	the one ObjectLink of class 0x3C (kind 2, id 0x317, stored at +0x6B0) that LoadContactListObject resolves with ResolveObjectLinks
+D_00269B48	g_movieChecksumFailed	set to 1 by AdvanceCodeChecksum, which InitMoviePlayback starts over the code from 0x100010 and StepMovieFrame advances while a movie plays, when it reaches the end with a nonzero CRC-32
+D_00269B4C	g_keyedMovieWatched	set to 1 by PlayMovie once the movie of key D_00248490 has played; from then on PlayMovie lets the pad skip that movie

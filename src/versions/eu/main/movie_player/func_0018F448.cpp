@@ -35,17 +35,17 @@ void func_0018F448(Obj_18F448* self_, void* v)
     self->f58 = D_eu_002F52C0;
     self->f5C = D_eu_00478240;
     InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_eu_00448240 | 0x20000000));
-    StartMovieStream((Obj_18E940*)((u8*)self + 0x80));
+    StartMovieStream((MovieStream*)((u8*)self + 0x80));
     func_0020ADA0();
     func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
-    func_0020A538((u8*)self + 0x10, 0, 0, (void*)func_0018EC40, self);
+    func_0020A538((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
     for (n = 0; D_eu_002636EC >= n; n++) {
-        func_0020A538((u8*)self + 0x10, 2, n, (void*)func_0018EC80, self);
-        func_0020A538((u8*)self + 0x10, 3, n, (void*)func_0018EC80, self);
+        func_0020A538((u8*)self + 0x10, 2, n, (void*)PassMovieDataToStream, self);
+        func_0020A538((u8*)self + 0x10, 3, n, (void*)PassMovieDataToStream, self);
     }
     func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    func_0020B168((u8*)self + 0x10, 4, (void*)func_0018ED78, self);
-    func_0020B168((u8*)self + 0x10, 0, (void*)func_0018EDA0, self);
+    func_0020B168((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    func_0020B168((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
     }
     self->f128 = D_eu_005A4240;

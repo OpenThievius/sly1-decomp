@@ -17,14 +17,14 @@
 // sinks a transfer goes to (a ring buffer, and the IPU's DMA channel).
 
 // Where a transfer's data goes: two virtual methods, which retail's vtables list in this order.
-class Sink_18E6C0 {
+class TransferSink {
 public:
     virtual s32 Put(s32 size, u8* buf) = 0;
     virtual s32 Idle() = 0;
 };
 
 // A ring buffer in the IOP's memory, read through the SIF.
-class Ring_18E6C0 : public Sink_18E6C0 {
+class IopRingSink : public TransferSink {
 public:
     s32 f04;
     s32 f08;
@@ -38,29 +38,29 @@ public:
 };
 
 // The IPU's input DMA channel.
-class Dma_18E8C8 : public Sink_18E6C0 {
+class IpuDmaSink : public TransferSink {
 public:
     s32 Put(s32 size, u8* buf);
     s32 Idle();
 };
 
 // The stream the movie's data comes through (func_0018E940 opens it).
-struct Obj_18E940 {
+struct MovieStream {
     s32 f00;
     s32 f04;
 #ifdef VERSION_EU
-    u8 pad08[0x28];     // a word longer in PAL: its func_0018E940 has sub-objects at 0x30 and 0x50
+    u8 pad08[0x28];     // a word longer in PAL: its StartMovieStream has sub-objects at 0x30 and 0x50
 #else
     u8 pad08[0x24];
 #endif
     u8 sub2C[0x20];
     u8 sub4C[0x20];
-    Ring_18E6C0 sub6C;
+    IopRingSink sub6C;
     s32 f8C;
     s32 f90;
 };
 
-struct Movie_269A00 {
+struct MoviePlayer {
     s32 mode;
     void* f04;
     void* f08;
@@ -69,16 +69,16 @@ struct Movie_269A00 {
     void* f58;
     void* f5C;
     u8 queue60[0x20];
-    Obj_18E940 stream;
+    MovieStream stream;
     void* f114;
     void* f118;
     u8 pad11C[0x14];
     s32 f130;
-    s32 f134;
+    volatile s32 f134;   // 0x134: the decode thread's step (0, 1, 2); FinishMovie waits for 0
     u32 crc;
     u8* cur;
     s32 remain;
-    u8 pad144[4];  // to the label after it, D_00269B48
+    u8 pad144[4];  // to the label after it, g_movieChecksumFailed
 };
 
 ObjectLink D_002699B0[1] = { { 2, 0x317, 0x6B0 } };
@@ -101,7 +101,7 @@ const char* D_002699C0[16] = {
     "The Thievius Raccoonus",
     "Credits"
 };
-Movie_269A00 D_00269A00;
+MoviePlayer D_00269A00;
 s32 D_00269B48;
 s32 D_00269B4C;
 
@@ -236,15 +236,6 @@ void func_001686E8(s32 a, s32 b);
 void func_001684E8(void);
 void func_001683E8(void);
 
-struct Task_18E558 {
-    u8 pad0[0x114];
-    s32 f114;
-    s32 f118;
-    u8 pad1[0x14];
-    s32 f130;
-    volatile s32 f134;
-};
-
 struct Obj_18F610 {
     u8 pad0[0x138];
     u32 crc;
@@ -290,7 +281,7 @@ struct Same_18F198 {
 struct Fill_18F198 {
     static s32 Of(KeyId* p, IdentityKey* key)
     {
-        func_0018D410(p);
+        ClearKeyId(p);
         s32 ok;
         if (!key) {
             ok = 0;
@@ -331,7 +322,6 @@ extern u8 D_002C2B00[];
 extern u8 D_002832F0[];
 extern s32 D_00275964;
 
-struct Glob_18E5E8 { u8 pad0[0xC]; s32 f0C; u8 pad1[0x120]; s32 f130; };
 struct Init_18E5E8 { s32 f00; void (*f04)(void); s32 f08; s32 f0C; s32 f10; s32 f14; u8 pad[0x18]; };
 struct Mgr_18E5E8 { s32 f00; };
 
@@ -366,7 +356,7 @@ struct Obj_18F6E8 {
     void* f118;
     u8 pad3[0x130 - 0x11C];
     s32 f130;
-    volatile s32 f134;  // state another thread changes: func_0018F7D0 busy-waits on it
+    volatile s32 f134;  // state another thread changes: FinishMovie busy-waits on it
 };
 
 s32 func_0020B058(void* a, s32 b, s32 c);
@@ -401,11 +391,11 @@ void func_0018E4C0(s32 idx);
 void func_0018E4F0(s32 idx, u32 n);
 void func_0018E558(void);
 void func_0018E5E8(void);
-void func_0018E678(Ring_18E6C0* self, s32 a1, s32 a2);
-void func_0018E6A0(Ring_18E6C0* c);
-s32 func_0018E7C0(Ring_18E6C0* p, s32 size, u8* buf);
-void func_0018E838(Ring_18E6C0* self);
-s32 func_0018E940(Obj_18E940* self);
+void func_0018E678(IopRingSink* self, s32 a1, s32 a2);
+void func_0018E6A0(IopRingSink* c);
+s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf);
+void func_0018E838(IopRingSink* self);
+s32 func_0018E940(MovieStream* self);
 void func_0018EA48(Obj_18EA48* self);
 void func_0018EAA0(Obj_18EAA0* self);
 s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right);
@@ -437,7 +427,7 @@ void func_0018D910(C3C* self)
     u64 mask = (u64)(s64)-0x301;
     u64 set = 0x8000;
     LoadChildGroupObject(self);
-    ResolveObjectLinks(self, 1, D_002699B0);
+    ResolveObjectLinks(self, 1, g_contactListObjectLinks);
     mask <<= 16;
     mask |= 0xFFFF;
     mask <<= 16;
@@ -538,7 +528,7 @@ void func_0018DD78(C3C* self, s32 value)
 
 void func_0018DDA0(C3C* self)
 {
-    func_0018D8E0(self);
+    InitContactListObject(self);
     self->gravity = D_00248D30;
 }
 
@@ -604,18 +594,18 @@ void func_0018E4F0(s32 idx, u32 n)
 
 void func_0018E558(void)
 {
-    Task_18E558* t = (Task_18E558*)&g_moviePlayer;
+    MoviePlayer* t = &g_moviePlayer;
 
     for (;;) {
         t->f134 = 0;
         func_001F6B60(t->f130);
         t->f134 = 1;
-        func_001686E8(g_gifChannel, t->f114);
+        func_001686E8(g_gifChannel, (s32)t->f114);
         t->f134 = 2;
         func_001684E8();
-        func_001686E8(g_gifChannel, t->f118);
+        func_001686E8(g_gifChannel, (s32)t->f118);
         FlipDisplayFrame();
-        func_001686E8(g_gifChannel, t->f118);
+        func_001686E8(g_gifChannel, (s32)t->f118);
         FlipDisplayFrame();
     }
 }
@@ -625,8 +615,8 @@ void func_0018E5E8(void)
     Init_18E5E8 l;
     s32 v;
 
-    ((Glob_18E5E8*)&g_moviePlayer)->f130 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
-    ((Glob_18E5E8*)&g_moviePlayer)->f0C = 0;
+    g_moviePlayer.f130 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
+    g_moviePlayer.f0C = 0;
     (void)func_001F5C0C(&l, 0, sizeof(l));
     l.f04 = RunMovieDecodeThread;
     l.f08 = (s32)g_movieDecodeThreadStack;
@@ -638,14 +628,14 @@ void func_0018E5E8(void)
     func_001F6A20((Mgr_18E5E8*)v, 0);
 }
 
-void func_0018E678(Ring_18E6C0* self, s32 a1, s32 a2)
+void func_0018E678(IopRingSink* self, s32 a1, s32 a2)
 {
     self->f04 = a2;
     self->f08 = a1;
     ResetIopRingSink(self);
 }
 
-void func_0018E6A0(Ring_18E6C0* c)
+void func_0018E6A0(IopRingSink* c)
 {
     c->f14 = c->f08;
     c->f18 = 0;
@@ -654,7 +644,7 @@ void func_0018E6A0(Ring_18E6C0* c)
     c->f1C = 0;
 }
 
-s32 Ring_18E6C0::Put(s32 count, u8* dst)
+s32 IopRingSink::Put(s32 count, u8* dst)
 {
     s32 n = count;
     s32 total = 0;
@@ -667,7 +657,7 @@ s32 Ring_18E6C0::Put(s32 count, u8* dst)
     left &= -0x400;
     while (left != 0) {
         s32 avail = f08 - f0C;
-        r = func_0018E7C0(this, left < avail ? left : avail, dst + total);
+        r = WriteIopRingBlock(this, left < avail ? left : avail, dst + total);
         if (r == 0) {
             break;
         }
@@ -685,7 +675,7 @@ s32 Ring_18E6C0::Put(s32 count, u8* dst)
     return total;
 }
 
-s32 func_0018E7C0(Ring_18E6C0* p, s32 size, u8* buf)
+s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf)
 {
     Span_18E7C0 span;
     void* obj;
@@ -701,14 +691,14 @@ s32 func_0018E7C0(Ring_18E6C0* p, s32 size, u8* buf)
     return size;
 }
 
-void func_0018E838(Ring_18E6C0* self) { s32 raw = GetIopRingPosition(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
+void func_0018E838(IopRingSink* self) { s32 raw = GetIopRingPosition(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
 
-s32 Ring_18E6C0::Idle()
+s32 IopRingSink::Idle()
 {
     return 0;
 }
 
-s32 Dma_18E8C8::Put(s32 size, u8* buf)
+s32 IpuDmaSink::Put(s32 size, u8* buf)
 {
     s32 n = size & 0xFFFFFFF0;
     if (n > 0x1000) n = 0x1000;
@@ -722,14 +712,14 @@ s32 Dma_18E8C8::Put(s32 size, u8* buf)
     return n;
 }
 
-s32 Dma_18E8C8::Idle()
+s32 IpuDmaSink::Idle()
 {
     return 1;
 }
 
 // Declared to return a value it never sets: func_0018F448, its caller, is retail's only with a
 // callee that returns one.
-s32 func_0018E940(Obj_18E940* self)
+s32 func_0018E940(MovieStream* self)
 {
     s32 r;
     func_0011D6A8(0xFFFFFFFF);
@@ -761,7 +751,7 @@ void func_0018EA48(Obj_18EA48* self)
         self->flag = 1;
         ResetRingBuffer((u8*)self + 0x2C);
         ResetRingBuffer((u8*)self + 0x4C);
-        ResetIopRingSink((Ring_18E6C0*)((u8*)self + 0x6C));
+        ResetIopRingSink((IopRingSink*)((u8*)self + 0x6C));
     }
 }
 
@@ -817,7 +807,7 @@ void func_0018EB98(Self_18EB98* self)
         break;
     case 3: {
         void* s0 = (u8*)&self->f4C + 0x20;
-        UpdateIopRingSink((Ring_18E6C0*)s0);
+        UpdateIopRingSink((IopRingSink*)s0);
         DrainRingBuffer(&self->f4C, self->f80, s0);
         break;
     }
@@ -851,7 +841,7 @@ s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
         }
     }
     {
-        Dma_18E8C8 dma;
+        IpuDmaSink dma;
         ConsumeSpan(&self->sub, 0);
         DrainRingBuffer(&self->sub, 0, &dma);
     }
@@ -967,7 +957,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             AdvanceGameClockElapsed(((u8*)g_gameClock));
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
-            if (Same_18F198::Of(key, &D_00248490)) flag = D_00269B4C != 0;
+            if (Same_18F198::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
             u32 m;
             if (self->mode >= 16) m = 0;
             else m = 1u << self->mode;
@@ -983,7 +973,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             if (g_discSectorCheckState != 3) break;
             StepMovieFrame((Obj_18F6E8*)self);
         }
-        if (Same_18F198::Of(key, &D_00248490)) D_00269B4C = 1;
+        if (Same_18F198::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
         FinishMovie((Obj_18F7D0*)self);
         CloseStreamReader(&loc);
     } else {
@@ -1001,14 +991,14 @@ void func_0018F448(Obj_18F448* self, void* v)
     self->f58 = D_002D7B40;
     self->f5C = D_0045AAC0;
     InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
-    StartMovieStream((Obj_18E940*)((u8*)self + 0x80));
+    StartMovieStream((MovieStream*)((u8*)self + 0x80));
     func_0020ADA0();
     func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
-    func_0020A538((u8*)self + 0x10, 0, 0, (void*)func_0018EC40, self);
-    func_0020A538((u8*)self + 0x10, 2, 0, (void*)func_0018EC80, self);
+    func_0020A538((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
+    func_0020A538((u8*)self + 0x10, 2, 0, (void*)PassMovieDataToStream, self);
     func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    func_0020B168((u8*)self + 0x10, 4, (void*)func_0018ED78, self);
-    func_0020B168((u8*)self + 0x10, 0, (void*)func_0018EDA0, self);
+    func_0020B168((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    func_0020B168((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder((Object_18F890*)self, 1) != 0) {
     }
     self->f114 = D_00586AC0;
@@ -1055,7 +1045,7 @@ void func_0018F610(Obj_18F610* self)
         u32 c = t ^ (c3 >> 8);
         self->crc = c;
         if (n == 0 && c != 0) {
-            D_00269B48 = 1;
+            g_movieChecksumFailed = 1;
         }
     }
 }

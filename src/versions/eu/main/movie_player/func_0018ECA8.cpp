@@ -17,7 +17,7 @@ s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
         }
     }
     {
-        Dma_18E8C8 dma;
+        IpuDmaSink dma;
         ConsumeSpan(&self->sub, 0);
         DrainRingBuffer(&self->sub, 0, &dma);
     }

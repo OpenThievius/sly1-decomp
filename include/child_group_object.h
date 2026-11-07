@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x3B (descriptor D_0021B4D8, 0x690 bytes) and its children 0x3C (D_0021DF10, 0x6F0 bytes, the
-// movie player's object, file_18D8E0.cpp) and 0x3F (0x6A0 bytes, file_1D62E0.cpp). A 0x3B object
+// movie player's object, movie_player.cpp) and 0x3F (0x6A0 bytes, file_1D62E0.cpp). A 0x3B object
 // waits until a time (+0x554), collects up to sixteen of its children of kind 0x27 (slot 16) and
 // keeps a table of animation entries it starts by key (slot 58). Written for this project from
 // what retail's code does (config/us/classes.tsv).
@@ -56,7 +56,7 @@ struct ChildGroupObject : Collider {
     Entry3B* entries;       // 0x68C: entryCount of them (0xC0 bytes allocated when active)
 };
 
-// The movie player's object (file_18D8E0.cpp): the lists of objects it asks about (slot 56),
+// The movie player's object (movie_player.cpp): the lists of objects it asks about (slot 56),
 // the movie's data (+0x6B4) and a flag.
 struct C3C : ChildGroupObject {
     u8 pad690[0x6B4 - 0x690];
