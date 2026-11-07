@@ -2,6 +2,7 @@
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "world.h"
 #include "globals.h"
 #include "shapes.h"
@@ -74,6 +75,7 @@ R11B008Key* NewKeyedValue(void);
 void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 first);
 
 // The pools (value.cpp) and the collector's calls on them (value_pools.cpp).
+void BuildBasisFromXAndZHint(void* self, void* table, void* value);
 extern u8 g_valueNodePool[];
 extern u8 g_scopePool[];
 extern u8 g_keyedValuePool[];
@@ -1478,7 +1480,15 @@ ScriptValue* GetScriptAtan2(ScriptValue* ret, s32 count, ScriptValue* args, Scri
     return ret;
 }
 
-INCLUDE_ASM(func_00115F70);
+ScriptValue* GetScriptDotProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].v))));
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 INCLUDE_ASM(func_00115FF8);
 
@@ -1494,13 +1504,51 @@ ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* arg
 
 INCLUDE_ASM(func_00116108);
 
-INCLUDE_ASM(func_001161F8);
+ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    if (args[1].tag == 0) {
+        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(D_00248D30));
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(d, d)));
+    } else {
+        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v));
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(d, d)));
+    }
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 INCLUDE_ASM(func_001162D0);
 
-INCLUDE_ASM(func_00116400);
+ScriptValue* ProjectScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    f32* p = AcquireVectorAPayload();
+    u128 a = Vu0::Q(*(Vec02*)args[0].v);
+    u128 b = Vu0::Q(*(Vec02*)args[1].v);
+    Vu0::Q(*(Vec02*)p) = Vu0::MulX(b, Vu0::Dot(a, b));
+    SetScriptValueVectorA(&obj, p);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
-INCLUDE_ASM(func_00116490);
+ScriptValue* RemoveScriptVectorComponent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    f32* p = AcquireVectorAPayload();
+    u128 a = Vu0::Q(*(Vec02*)args[0].v);
+    u128 b = Vu0::Q(*(Vec02*)args[1].v);
+    Vu0::Q(*(Vec02*)p) = Vu0::Sub(a, Vu0::MulX(b, Vu0::Dot(a, b)));
+    SetScriptValueVectorA(&obj, p);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -1636,7 +1684,26 @@ ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* 
     return ret;
 }
 
-INCLUDE_ASM(func_00116BC8);
+ScriptValue* MakeScriptDirectionMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    u128 dir;
+    const Vec02* up;
+    InitScriptValue(&obj);
+    if (args[2].tag == 0) {
+        up = &g_unitZVector;
+    } else {
+        up = (const Vec02*)args[2].node->v;
+    }
+    dir = Vu0::Sub(Vu0::Q(*(Vec02*)args[1].v), Vu0::Q(*(Vec02*)args[0].v));
+    f32* m = AcquireMatrixPayload();
+    BuildBasisFromXAndZHint(&dir, (void*)up, m);
+    ResetMatrixHomogeneous(m);
+    SetScriptValueMatrix(&obj, m);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 // What func_00189378 fills in for func_00188B08: 0x30 bytes.
 struct UprightBasis {

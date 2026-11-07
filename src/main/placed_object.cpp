@@ -389,6 +389,9 @@ struct TakeFrameLocals {
 
 void TransformPointBetweenFrames(PlacedObject* z, BaseObject* frame, void* c, u8* d);
 void TransformRotationBetweenFrames(PlacedObject* z, BaseObject* frame, void* c, u8* d);
+BaseObject* FindCommonAncestor(BaseObject* a, BaseObject* b);
+void TransformDirectionBetweenFrames(BaseObject* from, BaseObject* to, void* in, void* out);
+void ComputeObjectMotionInFrame(BaseObject* from, BaseObject* to, void* pt, void* a, void* b, void* c, void* d);
 void func_00128330(BaseObject* a, BaseObject* b, void* c, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
 
 // An entry of a table of functions defined at the end of this file.
@@ -1400,7 +1403,72 @@ void SavePlacedObjectInitialFrame(PlacedObject* object)
 	MatrixToEulerAngles(&object->m1A0, &object->v1D0);
 }
 
-INCLUDE_ASM(func_001245A8);
+void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
+{
+    Vec02 pos;
+    Vec02 vel;
+    Vec02 spin;
+    Mat02 rot;
+    Vec02 velDir;
+    Vec02 spinDir;
+    Vec02 velDiff;
+    Vec02 spinDiff;
+    Vec02* pv;
+    Vec02* ps;
+    if (self->parent == parent) {
+        return;
+    }
+    pos = self->v140;
+    rot.r[0] = self->m110.r[0];
+    rot.r[1] = self->m110.r[1];
+    rot.r[2] = self->m110.r[2];
+    if (self->parent != 0) {
+        ComputeObjectMotionInFrame(self, 0, &self->v140, &vel, &spin, 0, 0);
+        pv = &vel;
+        ps = &spin;
+    } else {
+        vel = self->v150;
+        spin = self->v160;
+        pv = &vel;
+        ps = &spin;
+    }
+    self->desc->m03(self);
+    TransformPointBetweenFrames(0, parent, &pos, &self->pos);
+    TransformRotationBetweenFrames(0, parent, &rot, &self->rot);
+    if (parent != 0) {
+        ComputeObjectMotionInFrame(parent, 0, &self->v140, &velDiff, &spinDiff, 0, 0);
+        Vu0::Q(vel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(velDiff));
+        Vu0::Q(spin) = Vu0::Sub(Vu0::Q(spin), Vu0::Q(spinDiff));
+    }
+    TransformDirectionBetweenFrames(0, parent, pv, &velDir);
+    self->desc02()->m20(self, &velDir);
+    TransformDirectionBetweenFrames(0, parent, ps, &spinDir);
+    self->desc02()->m21(self, &spinDir);
+    if ((parent == 0) != (self->parent == 0)) {
+        if (parent == 0) {
+            self->bits24 = 2;
+            if (self->bits26 != 1) {
+                self->bits26 = 2;
+            }
+            if (self->bits28 != 1) {
+                self->bits28 = 2;
+            }
+        } else {
+            self->bits24 = 1;
+            if (self->bits26 != 1) {
+                self->bits26 = 0;
+            }
+            if (self->bits28 != 1) {
+                if (self->bits28 != 2 || self->f80 == 1.0e10f) {
+                    self->bits28 = 0;
+                }
+            }
+        }
+    }
+    func_00124540(self);
+    self->parent = parent;
+    self->desc->m02(self);
+}
 
 INCLUDE_ASM(func_00124868);
 
@@ -2002,7 +2070,66 @@ void ReleaseAnimationDrivenAttachments(Player* self)
     }
 }
 
-INCLUDE_ASM(func_00128330);
+void func_00128330(BaseObject* from, BaseObject* to, void* pt, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k)
+{
+    Vec02 a[4];
+    Vec02 b[4];
+    BaseObject* root = FindCommonAncestor(from, to);
+    if (d != 0) {
+        TransformDirectionBetweenFrames(from, root, d, &a[0]);
+    }
+    if (e != 0) {
+        TransformDirectionBetweenFrames(from, root, e, &a[1]);
+    }
+    if (f != 0) {
+        TransformDirectionBetweenFrames(from, root, (void*)f, &a[2]);
+    }
+    if (g != 0) {
+        TransformDirectionBetweenFrames(from, root, (void*)g, &a[3]);
+    }
+    if (from != 0) {
+        ComputeObjectMotionInFrame(from, root, pt, d != 0 ? &b[0] : 0, e != 0 ? &b[1] : 0, f != 0 ? &b[2] : 0, g != 0 ? &b[3] : 0);
+        if (d != 0) {
+            Vu0::Q(a[0]) = Vu0::Add(Vu0::Q(a[0]), Vu0::Q(b[0]));
+        }
+        if (e != 0) {
+            Vu0::Q(a[1]) = Vu0::Add(Vu0::Q(a[1]), Vu0::Q(b[1]));
+        }
+        if (f != 0) {
+            Vu0::Q(a[2]) = Vu0::Add(Vu0::Q(a[2]), Vu0::Q(b[2]));
+        }
+        if (g != 0) {
+            Vu0::Q(a[3]) = Vu0::Add(Vu0::Q(a[3]), Vu0::Q(b[3]));
+        }
+    }
+    if (to != 0) {
+        ComputeObjectMotionInFrame(to, root, pt, h != 0 ? &b[0] : 0, i != 0 ? &b[1] : 0, j != 0 ? &b[2] : 0, k != 0 ? &b[3] : 0);
+        if (h != 0) {
+            Vu0::Q(a[0]) = Vu0::Sub(Vu0::Q(a[0]), Vu0::Q(b[0]));
+        }
+        if (i != 0) {
+            Vu0::Q(a[1]) = Vu0::Sub(Vu0::Q(a[1]), Vu0::Q(b[1]));
+        }
+        if (j != 0) {
+            Vu0::Q(a[2]) = Vu0::Sub(Vu0::Q(a[2]), Vu0::Q(b[2]));
+        }
+        if (k != 0) {
+            Vu0::Q(a[3]) = Vu0::Sub(Vu0::Q(a[3]), Vu0::Q(b[3]));
+        }
+    }
+    if (h != 0) {
+        TransformDirectionBetweenFrames(root, to, &a[0], h);
+    }
+    if (i != 0) {
+        TransformDirectionBetweenFrames(root, to, &a[1], i);
+    }
+    if (j != 0) {
+        TransformDirectionBetweenFrames(root, to, &a[2], (void*)j);
+    }
+    if (k != 0) {
+        TransformDirectionBetweenFrames(root, to, &a[3], (void*)k);
+    }
+}
 
 INCLUDE_ASM(func_00128598);
 
