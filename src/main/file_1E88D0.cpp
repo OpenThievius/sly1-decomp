@@ -31,6 +31,7 @@
 #include "attachment.h"
 #include "animation.h"
 #include "ramp_profile.h"
+#include "vu0.h"
 #include "asm_func.h"
 
 void SteerAgentAlongPath(void);
@@ -2429,7 +2430,18 @@ void ForwardBallisticLaunchVelocity(void* self)
     ComputeBallisticLaunchVelocity(self);
 }
 
-INCLUDE_ASM(func_001EE2B0);
+void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
+{
+    u128 q = Vu0::Q(*v);
+    f32 len = Vu0::ToFloat(Vu0::Length(q));
+    if (max < len) {
+        Vec02 s;
+        Vu0::Q(s) = Vu0::FromFloat(max / len);
+        Vu0::Q(*out) = Vu0::MulX(q, Vu0::Q(s));
+    } else if (v != out) {
+        Vu0::Q(*out) = q;
+    }
+}
 
 PacketWriter* InitPacketWriter(PacketWriter* self)
 {

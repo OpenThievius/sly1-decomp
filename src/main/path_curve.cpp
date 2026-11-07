@@ -3,6 +3,7 @@
 // with the method tables D_002176D0 and D_00217708), and the segment-length and lookup helpers.
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "path_curve.h"
 #include "shapes.h"
 #include "placed_object.h"
@@ -94,7 +95,24 @@ void FillSplinePathLengths(SplinePathCurve* self);
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
-INCLUDE_ASM(func_0014D0A8);
+f32 AccumulateSegmentLengths(s32 n, void* buf, void* other)
+{
+    Vec02* pts = (Vec02*)buf;
+    f32* lengths = (f32*)other;
+    Vec02 d;
+    f32 total = 0.0f;
+    if (lengths != 0) {
+        lengths[0] = total;
+    }
+    for (s32 i = 1; i < n; i++) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(pts[i]), Vu0::Q(pts[i - 1]));
+        total += Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (lengths != 0) {
+            lengths[i] = total;
+        }
+    }
+    return total;
+}
 
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x)
 {

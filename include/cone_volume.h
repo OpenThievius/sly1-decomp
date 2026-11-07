@@ -26,7 +26,8 @@ struct ConeVolume : PlacedObject {
     f32 secondAngle;        // 0x2FC: 240.0 at setup
     f32 thirdAngle;         // 0x300: 180.0 at setup
     s32 value;              // 0x304: compared by slot 9
-    u8 pad308[0x320 - 0x308];
+    u8 pad308[0x310 - 0x308];
+    Quad16 q310;            // 0x310: the direction SetConeVolumeDirection stores; q320 is its negated unit vector
     Quad16 q320;            // 0x320: D_00248D20 at setup
     f32 rangeMin;           // 0x330: 200.0 at setup
     f32 rangeMax;           // 0x334: 2000.0 at setup

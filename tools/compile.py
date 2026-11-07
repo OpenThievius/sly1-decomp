@@ -79,15 +79,18 @@ def generated_names(source):
     return {sym: func for f, sym, func in rows if f == rel}
 
 
-def rename_generated(asm, names):
+def rename_generated(asm, names, strict=True):
     """The assembly with each compiler-made symbol under its function name. A name ending in `*`
     stands for any rest: `_GLOBAL_$I$*` is the file's constructor, which GCC names after the
-    file's first public definition."""
+    file's first public definition. Not strict, a symbol the compiler did not make is skipped:
+    a near miss holds one function of its file, not the file's static initialiser."""
     for sym, func in names.items():
         rest = r"[\w$.]*" if sym.endswith("*") else ""
         # Its own section (.text.SYMBOL, -ffunction-sections) takes the name too.
         pattern = re.compile(r"(?<![\w$])%s%s(?![\w$.])" % (re.escape(sym.rstrip("*")), rest))
         if not pattern.search(asm):
+            if not strict:
+                continue
             raise CompileError("config/us/generated.tsv names %s, which the compiler did not make" % sym)
         asm = pattern.sub(func, asm)
     return asm
@@ -309,7 +312,7 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             s.write_text(asm)
         names = generated_names(source)
         if names:
-            asm = rename_generated(asm, names)
+            asm = rename_generated(asm, names, strict=(ROOT / "nonmatching") not in src.parents)
         if release == "2.9-ee-991111":
             # The assembler that built Sony's libraries put a volatile store into the slot of
             # the call after it; ours leaves the slot empty (tools/volatile_slots.py).

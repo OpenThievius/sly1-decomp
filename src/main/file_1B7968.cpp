@@ -1474,7 +1474,21 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
     }
 }
 
-INCLUDE_ASM(func_001BC670);
+s32 func_0013E658(void* a, s32 b);
+
+s32 IsPointInsideCollider(Collider* self, Vec02* p)
+{
+    if ((self->flags538 & ((u64)0x8000 << 25)) != 0) {
+        s32 inside = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->v140)))) < self->radius3CC;
+        if (inside) {
+            return 1;
+        }
+    }
+    if (self->tree.nodes != 0 && func_0013E658(p, (s32)self->tree.nodes) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 void SetColliderFlagBit52(Collider* self, u32 flag)
 {
@@ -2306,7 +2320,20 @@ s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
 
 INCLUDE_ASM(func_001BF200);
 
-INCLUDE_ASM(func_001BF2E0);
+f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
+{
+    Vec02 d;
+    Vec02 r;
+    Vec02 k;
+    Camera* cam = g_camera;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    f32 w = cam->ctl460.g18;
+    u128 side = Vu0::Sub(Vu0::Q(d), Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80))));
+    Vu0::Q(k) = Vu0::FromFloat(1.0f / ((1.0f - w) + w * 10.0f));
+    u128 along = Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80)));
+    Vu0::Q(r) = Vu0::Add(side, Vu0::MulX(along, Vu0::Q(k)));
+    return Vu0::ToFloat(Vu0::Length(Vu0::Q(r)));
+}
 
 ASM_FUNC(func_001BF398);
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "shapes.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -320,7 +321,23 @@ void SettleAgentState(Agent* self)
     }
 }
 
-INCLUDE_ASM(func_001C7BE8);
+extern f32 g_frameDt;
+void func_00128598(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
+
+void func_001C7BE8(Agent* self)
+{
+    f32 out[3];
+    f32 zero = 0.0f;
+    out[1] = zero;
+    func_00128598(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v640)));
+    if (0.0001f < out[2] && 0.0001f < len) {
+        self->f754->speed *= len / out[2];
+    }
+    f32 y = out[1];
+    SetAgentFacingAngles(self, out[0], y);
+}
 
 INCLUDE_ASM(func_001C7CB8);
 

@@ -112,13 +112,40 @@ What retail shows, and what the compiler does:
 - **Matrices by reference.** Rotate reads its rows where they are: retail
   forms the matrix's address once (`addiu v0, s0, 0xD0`) and loads the rows
   through it, which a helper taking three row values does not give.
+- **The Q register.** Sqrt (vsqrt Q, a.x; vwaitq; vaddq.x) and DivX (vdiv
+  Q, vf0w, s.x; vwaitq; vmulq.xyzw) are one asm each: nothing in retail is
+  scheduled inside them. Dot and Sqrt stay two (Length calls both): retail
+  puts loads between them (func_001EF768). DivX lists the scale first, as
+  MulX does: the result takes the length's register when the length dies
+  there (func_001C3B40, func_0018DE70 take the vector's).
+- **A float from memory.** FromFloat's f32 operand is a pseudo the compiler
+  loads into an FPR and moves with mfc1, even when its only use is the
+  qmtc2, and so does a raw asm with the field as its operand. Retail loads
+  such a float with lw (97 qmtc2 in retail take a register lw just loaded,
+  against 35 lwc1 and mfc1, those with other uses of the float):
+  FromFloatAt passes the float's bits, which the compiler loads with lw.
+- **A normalisation with a fallback.** Retail's "the unit vector, or this
+  one when shorter than 1e-4" loads the fallback before the test (lq, then
+  qmtc2 on the fallback's path), and the result's address, when it is a
+  store's, is formed before the test too: the fallback is an argument of a
+  function (NormalizeOr) and the store's pointer an argument of Q, both
+  copied into registers when inlined.
+- **Not yet reproduced.** In func_0018DDD8, func_001C3C98 and func_001C3EB0
+  retail moves a float into the VU (lw or div.s, mfc1, qmtc2, and the store
+  to its local) early, before the length's square root or the loads after
+  it, and keeps it in a register across a branch; here sched1 moves it after
+  the VU work, which changes the allocation (nonmatching/). A volatile
+  FromFloat or one through a union changes matched functions. A boolean of a
+  float comparison that retail sets with `li 1; bc1fl ...; move 0` is a
+  variable assigned the comparison (func_001BC670, func_0013B778).
 
 The sequences still without a helper, by how often retail has them (runs of
-VU0 instructions in the `inline` functions): vsqrt/vwaitq/vaddq.x (208),
-vdiv/vwaitq/vmulq.xyzw (140), vmulax.xyzw/vmaddx.xyzw (75), the cross product
-vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31), the 4x4 forms with
-vmaddw, vmove, vmax/vmini. The assembler takes `vsqrt` (the disassembler
-prints it as a `.word`).
+VU0 instructions in the `inline` functions): vmulax.xyzw/vmaddx.xyzw (75),
+the cross product vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31),
+the 4x4 forms with vmaddw, vmove, vmax/vmini, and a vector built from three
+floats in GPRs (pextlw, pcpyld, qmtc2) and rotated with a result not tied to
+it (func_00144AA0). The assembler takes `vsqrt` (the disassembler prints it
+as a `.word`).
 
 ## Getting the compiler
 

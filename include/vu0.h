@@ -20,6 +20,12 @@
 //   helper lists its inputs in the order retail's registers show (MulX the scale first), and
 //   Rotate's result is tied to the vector it rotates ("0"). A register a sequence only
 //   writes (Dot's 1.0) is a second output.
+// - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
+//   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
+//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+// - Length and NormalizeOr are C over the helpers, not sequences of their own: NormalizeOr's
+//   test is compiled code, and its fallback is an argument because retail loads it before the
+//   test (lq, then qmtc2 on the fallback's path).
 #ifndef VU0_H
 #define VU0_H
 
@@ -65,6 +71,15 @@ struct Vu0 {
         return r;
     }
 
+    // A float in memory into the x of a VU0 register: qmtc2 of its bits, which the compiler
+    // loads with lw (FromFloat's operand would be loaded into an FPR and moved with mfc1).
+    static u128 FromFloatAt(const f32& f)
+    {
+        u128 r;
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(*(const u32*)&f));
+        return r;
+    }
+
     // The x of a VU0 register as a float: qmfc2 (the compiler moves it on to an FPR).
     static f32 ToFloat(u128 a)
     {
@@ -97,6 +112,41 @@ struct Vu0 {
         __asm__("vmul.xyz %0, %2, %3\n\tvaddw.x %1, vf0, vf0w\n\tvadday.x ACC, %0, %0y\n\tvmaddz.x %0, %1, %0z"
                 : "=j"(r), "=j"(one) : "j"(a), "j"(b));
         return r;
+    }
+
+    // The square root of a's x, in x: vsqrt Q, a.x; vwaitq; vaddq.x (the disassembler prints
+    // vsqrt as a .word). The result may take a's register.
+    static u128 Sqrt(u128 a)
+    {
+        u128 r;
+        __asm__("vsqrt Q, %1x\n\tvwaitq\n\tvaddq.x %0, vf0, Q" : "=j"(r) : "j"(a));
+        return r;
+    }
+
+    // a / s.x: vdiv Q, vf0w, s.x (1 / s.x into Q); vwaitq; vmulq.xyzw. The scale comes first,
+    // as in MulX: the result takes its register when it dies there, a's otherwise.
+    static u128 DivX(u128 a, u128 s)
+    {
+        u128 r;
+        __asm__("vdiv Q, vf0w, %1x\n\tvwaitq\n\tvmulq.xyzw %0, %2, Q" : "=j"(r) : "j"(s), "j"(a));
+        return r;
+    }
+
+    // The length of v's xyz, in x: Dot of v with itself, then Sqrt (the sequences stay two:
+    // retail schedules other code between them).
+    static u128 Length(u128 v)
+    {
+        return Sqrt(Dot(v, v));
+    }
+
+    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001.
+    static u128 NormalizeOr(u128 v, u128 fallback)
+    {
+        u128 len = Length(v);
+        if (ToFloat(len) < 0.0001f) {
+            return fallback;
+        }
+        return DivX(v, len);
     }
 
     // The xyz of a 3x3 matrix's rows m[0], m[1], m[2] weighted by v's x, y and z (the matrix

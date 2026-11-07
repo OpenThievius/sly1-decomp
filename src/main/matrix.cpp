@@ -4,6 +4,7 @@
 #include "switched_collider.h"
 #include "fpu.h"
 #include "shapes.h"
+#include "vu0.h"
 
 // Matrices and vectors: identity and transposition, rotations from angles and an axis, the
 // transforms of placed objects, angles back from a matrix or a vector, inversion, a projection;
@@ -130,7 +131,24 @@ void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle)
     mat->m[2][1] -= t;
 }
 
-INCLUDE_ASM(func_00188978);
+struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
+
+extern Matrix3x4 g_identityMatrix;
+
+void BuildRotationFromVector(Vec02* v, Mat4* mat)
+{
+    u128 q = Vu0::Q(*v);
+    f32 len = Vu0::ToFloat(Vu0::Length(q));
+    if (0.0001f < len) {
+        Vec02 axis;
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(1.0f / len);
+        Vu0::Q(axis) = Vu0::MulX(q, Vu0::Q(k));
+        BuildAxisAngleMatrix(&axis.x, mat, len);
+    } else {
+        *(Matrix3x4*)mat = g_identityMatrix;
+    }
+}
 
 void BuildEulerRotationMatrix(f32* in, f32* out)
 {
@@ -314,9 +332,6 @@ done:
     return ok;
 }
 
-struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
-
-extern Matrix3x4 g_identityMatrix;
 s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out)
 {
     Matrix3x4 m;

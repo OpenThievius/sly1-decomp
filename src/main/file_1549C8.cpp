@@ -5,6 +5,7 @@
 // func_0015F658. One file between two edges; it could be several.
 #include "common.h"
 #include "effect_spawner.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "effect_owner.h"
 #include "effect.h"
@@ -2440,7 +2441,27 @@ INCLUDE_ASM(func_0015BC78);
 
 INCLUDE_ASM(func_0015BD48);
 
-INCLUDE_ASM(func_0015BEF0);
+s32 func_0015BEF0(ObjectCycler* self)
+{
+    s32 touching = 0;
+    s32 next;
+    for (ContactRow03* n = self->contacts->head; n != 0; n = n->next) {
+        if (n->head != 0) {
+            touching = 1;
+            break;
+        }
+    }
+    if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v5F0)))) < self->f64C) {
+        next = 6;
+    } else if (touching) {
+        next = 0;
+        self->nextCheckTime = g_gameTime + RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
+    } else {
+        SetObjectCyclerState(self, -1);
+        next = 5;
+    }
+    return next;
+}
 
 INCLUDE_ASM(func_0015BFC0);
 

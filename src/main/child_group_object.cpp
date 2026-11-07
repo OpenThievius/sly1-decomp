@@ -4,6 +4,9 @@
 #include "list_iter.h"
 #include "child_group_object.h"
 #include "object_message.h"
+#include "vu0.h"
+#include "object_event.h"
+#include "globals.h"
 
 // The file's .data, in retail's order: class 0x3B's set-up values, then the constants of its
 // assembly functions.
@@ -117,7 +120,23 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
     }
 }
 
-INCLUDE_ASM(func_0013B778);
+extern f32 g_gameTime;
+void UpdateCollider(Collider* self);
+void func_0013B828(ChildGroupObject* self);
+void func_0013BF68(ChildGroupObject* self);
+
+void UpdateChildGroupObject(ChildGroupObject* self)
+{
+    s32 slow;
+    if (self->f554 <= g_gameTime || (slow = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f558)) {
+        func_0013BF68(self);
+    } else {
+        UpdateCollider(self);
+        if (self->active != 0) {
+            func_0013B828(self);
+        }
+    }
+}
 
 INCLUDE_ASM(func_0013B828);
 
@@ -139,7 +158,20 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s3
 
 INCLUDE_ASM(func_0013BA70);
 
-INCLUDE_ASM(func_0013BBA0);
+s32 HandleObjectEvent(Collider* self, ObjectEvent* ev);
+void RecordChildGroupPose(ChildGroupObject* self, s32 a, s32 b, Vec02* dir);
+
+s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
+{
+    s32 handled = HandleObjectEvent(self, ev);
+    if (handled != 0 && (ev->eventFlags & 0x10) != 0) {
+        Vec02 dir;
+        Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(ev->v30), Vu0::Q(g_unitZVector));
+        RecordChildGroupPose(self, 0, 0, &dir);
+        StartChildGroupDelay(self, 0.0f);
+    }
+    return handled;
+}
 
 INCLUDE_ASM(func_0013BC80);
 

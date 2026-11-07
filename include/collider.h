@@ -192,7 +192,8 @@ struct Collider : PlacedObject {
     void* hook;             // 0x3C8: slot 27 calls func_001BBEB8 while it is set
     f32 radius3CC;          // 0x3CC: mesh.radius at load
     f32 radius3D0;          // 0x3D0: mesh.radius at load
-    u8 pad3D4[0x3F0 - 0x3D4];
+    f32 radius3D4;          // 0x3D4: grown with radius3D0 by an attached set's swing (func_001EF768)
+    u8 pad3D8[0x3F0 - 0x3D8];
     Tree03 tree;            // 0x3F0: meshCopy's tree
     s32 groupCount;         // 0x3FC
     Pair03* groups;         // 0x400: groupCount of them
@@ -201,7 +202,9 @@ struct Collider : PlacedObject {
     Pair03* refs;           // 0x40C: the face references
     s32* faceStarts;        // 0x410: meshCopy.faceCount + 1 of them, with refs
     Link02 link414;         // 0x414: kept by slot 9
-    u8 pad41C[0x440 - 0x41C];
+    u8 pad41C[0x420 - 0x41C];
+    Vec02 boundsMin;        // 0x420: the low corner of its box on the sweep axes (func_00138828)
+    Vec02 boundsMax;        // 0x430: the high corner
     Vec02 v440;             // 0x440: in the parent's frame (slot 21 carries it over)
     union {
         s32 mode450;        // 0x450: a body sums up 3 and 3 in flag bit 54 (func_001B9AE0)
