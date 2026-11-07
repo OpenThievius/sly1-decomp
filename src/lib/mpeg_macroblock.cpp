@@ -2,15 +2,15 @@
 // The MPEG library's macroblock layer, from 0x20C1A0 to 0x20D138, built whole
 // (config/us/files.tsv): the decoding of a macroblock's modes and motion vectors
 // (func_0020C1A0, func_0020C3F0, func_0020E120's prediction set-up), the prediction that calls the
-// hand-written routines of src/lib/file_20D138.cpp through the two tables of this file's .data
+// hand-written routines of src/lib/mpeg_motion_compensation.cpp through the two tables of this file's .data
 // (func_0020CAF8), and the residual's addition (func_0020CF18). Its start is the 16-byte boundary
 // after func_0020C188's padding (two more words of nops than 8-byte alignment explains), its end
-// the hand-written object. Its .rodata is its messages. Named after its first address. Written for
+// the hand-written object. Its .rodata is its messages. Written for
 // this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
 
-// The hand-written prediction routines (src/lib/file_20D138.cpp), by kind of motion: whole
+// The hand-written prediction routines (src/lib/mpeg_motion_compensation.cpp), by kind of motion: whole
 // pixel and half pixel.
 void func_0020D138();
 void func_0020D1B0();

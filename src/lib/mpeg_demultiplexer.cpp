@@ -6,7 +6,7 @@
 // (func_0020A220, and func_0020A518 over a whole buffer), and the parsers of a pack header
 // (func_0020A630), a system header (func_0020A780) and a packet header (func_0020A7F0). Its
 // .rodata is the packet header's table of field lengths and its one message, its .data the stream
-// table. Named after its first address. Written for this project from retail's code.
+// table. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
 

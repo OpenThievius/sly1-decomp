@@ -5,7 +5,7 @@
 // tables at D_0027B000 and D_0027B020 point to them, func_0020CAF8 calls through them), and the
 // two that add the prediction to the decoded residual and saturate the result (func_0020DE28,
 // func_0020DE88, with their constant at D_0020DED0 in .text). All of it is original assembly
-// (config/us/original_asm.tsv). Named after its first address.
+// (config/us/original_asm.tsv).
 #include "asm_func.h"
 
 ASM_FUNC(func_0020D138);

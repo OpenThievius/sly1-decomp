@@ -5,7 +5,7 @@
 // list (D_0027B130) ends with func_00211DE0 and its destructor list (D_0027B180) with
 // func_00211DF8. D_0027B198 is the linker's list of the objects with frame information; this
 // file's only data is the runtime's bookkeeping record for it, the 0x18 bytes of .bss at
-// D_0062C540. Named after its first address. Written for this project from retail's code.
+// D_0062C540. Written for this project from retail's code.
 #include "common.h"
 
 extern u8 D_0027B198[];

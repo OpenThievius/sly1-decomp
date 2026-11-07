@@ -4,11 +4,11 @@
 // channel 4), each with the DMA suspended while its control register is written, the saving of
 // both channels' state (func_002118A0) and its restoring (func_00211988), which the MPEG library
 // calls around a picture, and the wait for the IPU (func_00211AD8). No data. Its end is chosen:
-// src/lib/file_211B40.cpp has its own copy of func_00211838, so the boundary is at 0x211AD8 or
+// src/lib/ipu_reset.cpp has its own copy of func_00211838, so the boundary is at 0x211AD8 or
 // 0x211B40; this file ends at the second, with each file's helpers first. Its start is chosen
 // too: the MPEG library's bit reader before it (func_002115C0 to func_002117A0) is called only
 // by the MPEG library and uses no IPU register, so its own file ends here; the data can't
-// decide. Named after its first address. Written for this project from retail's code.
+// decide. Written for this project from retail's code.
 #include "common.h"
 
 s32 func_001F9D60(void);

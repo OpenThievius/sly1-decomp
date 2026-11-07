@@ -8,7 +8,7 @@
 // message of a function the linker stripped); its .data the library's identification string, the
 // request in flight and the semaphore; its .bss the client record, the result pointers, and the
 // 64-byte aligned request, name, transfer and reply buffers. The bytes of the stripped functions'
-// last words (func_002095A8, ...) are linker remnants. Named after its first address. Written for
+// last words (func_002095A8, ...) are linker remnants. Written for
 // this project from retail's code.
 #include "common.h"
 #include "asm_func.h"

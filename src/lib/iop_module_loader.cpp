@@ -33,7 +33,7 @@ s32 func_001F9690(void);
 
 struct __attribute__((packed)) Word_1F9690 { u32 v; };
 
-// A client of the command channel (src/lib/file_1F7BE8.cpp): 0x24 is set once it is bound.
+// A client of the command channel (src/lib/remote_call.cpp): 0x24 is set once it is bound.
 struct Client_1F9690 {
     s32 pad[9];
     s32 bound;

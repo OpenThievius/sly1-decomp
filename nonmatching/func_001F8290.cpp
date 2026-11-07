@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 482/492 (98.0%), checked 2026-11-06
-// NEAR: in its file, src/lib/file_1F7BE8.cpp (Sony's 2.9-ee-991111). Left: retail loads the
+// BYTES 482/492 (98.0%), checked 2026-11-07
+// NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: retail loads the
 //       packet's id first and stores the client's fields in the order argument, packet, id,
 //       callback, and tests mode & 2 into $a0; ours stores the callback before loading the id,
 //       and the test lands in $v1. Tried: every order of the client's four stores and of the

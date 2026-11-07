@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 612/624, checked 2026-11-06
-// NEAR: in its file, src/lib/file_1F84D8.cpp (Sony's 2.9-ee-991111). Left: ours keeps
+// SIZE 612/624, checked 2026-11-07
+// NEAR: in its file, src/lib/iop_file_client.cpp (Sony's 2.9-ee-991111). Left: ours keeps
 //       mode & 0x8000 in $s8 for both tests, where retail computes it twice and keeps the high
 //       half of D_006284C0's address in $s8 instead (hoisted into both arms of the first test);
 //       the slot search's first iteration then schedules differently. Tried: mode as u32, the

@@ -7,12 +7,12 @@
 // their buffers (func_00210160 to func_00210A80), and the colour conversion by DMA and its
 // interrupt handlers (func_00210C38 to func_00211348). Its start is exact: the hand-written
 // prediction object ends at 0x20DEE8, and this file's .rodata starts at 0x250300 and its .data
-// at 0x27B040, after src/lib/file_20C1A0.cpp's. Its end is chosen: the bit reader of
-// src/lib/file_2115C0.cpp follows, which nothing here calls. Its .rodata is its messages and the
+// at 0x27B040, after src/lib/mpeg_macroblock.cpp's. Its end is chosen: the bit reader of
+// src/lib/mpeg_bit_reader.cpp follows, which nothing here calls. Its .rodata is its messages and the
 // extension table, its .data the IPU commands' table D_0027B040 and the table D_0027B068 (which
 // ends at 0x27B0A8, before the padding to the IPU library's .data), its .bss func_00210C38's
 // buffer. One file between those edges, with no evidence of a boundary inside it; it could be
-// several. Named after its first address. Written for this project from retail's code.
+// several. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
 
@@ -966,7 +966,7 @@ void func_0020FAF0(Ctx_20FAF0* c);
 void func_0020FE40(struct Obj_20FE40 *self);
 void func_0020FF08(Self_0020FF08* self);
 void func_00210000(Bits_210000* self);
-// The handlers of the extensions by their 4-bit id, the sequence's in src/lib/file_20ADA0.cpp.
+// The handlers of the extensions by their 4-bit id, the sequence's in src/lib/mpeg_decoder.cpp.
 void func_0020BF78();
 void func_0020C0A8();
 void func_0020C138();

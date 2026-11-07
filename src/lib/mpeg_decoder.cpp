@@ -7,7 +7,7 @@
 // stop and restart around a picture (func_0020C178, func_0020C188). One file between two edges,
 // with no evidence of a boundary inside it; it could be several. Its .rodata is its messages and
 // the jump table of func_0020B2E8, its .data the library's identification string and the default
-// quantiser matrices. Named after its first address. Written for this project from retail's code.
+// quantiser matrices. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
 
