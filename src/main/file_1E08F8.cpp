@@ -1617,7 +1617,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     func_001F4318(g_currentWorld, self->f8, self->fC);
     NotifyScatterControllerLoaded(g_scatterController);
     ResetCounter(D_002623D8);
-    func_0016B520(D_0026FA90);
+    RestoreSelectionCaptionCamera(D_0026FA90);
     func_00138C00(g_currentWorld, 0);
     UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);
     if (self->f10 & 0x10) ((VT1_1E4EA8*)D_0026C6C8.vt)->m38(&D_0026C6C8);

@@ -1568,6 +1568,7 @@
 #define ConfirmCurrentObjectChoice                 func_0016B190
 #define SetCurrentObjectChoice                     func_0016B300
 #define InitSelectionCaption                       func_0016B4A0
+#define RestoreSelectionCaptionCamera              func_0016B520
 #define UpdateSelectionCaption                     func_0016B560
 #define HandleSelectionCaptionInput                func_0016B580
 #define SetSelectionCaptionOpen                    func_0016B7A8
