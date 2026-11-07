@@ -28,7 +28,7 @@ Quad_1C3390 D_00274AC0 = { { -1.0f, 1.0f, 0.0f } };
 
 void func_001921A8(void* self);
 
-void func_001C3390(C1D* self)
+void func_001C3390(HitCountCollider* self)
 {
     InitSwitchedCollider(self);
     self->f610 = -1;
@@ -50,15 +50,15 @@ f32 func_00205778(f32 a, f32 b);
 void func_001DDC38(void* sub, void* self);
 void func_001C3FC8(void* self, s32 flag);
 
-void func_001C33C8(C1D* self)
+void func_001C33C8(HitCountCollider* self)
 {
     StartPlacedObject(self);
     self->f68C = self->radius3CC;
     ResolveObjectLinks(self, 0xC, D_002749B0);
     self->f668 = CreateStateWalker(self->f664, self, -1, 0);
-    self->f644 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    self->f644 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = (PlacedObject*)self->f660;
-    self->f648 = func_00205778(v->rot.r[0].y, v->rot.r[0].x);
+    self->f648 = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(Pk8_1C33C8*)&self->f630 = *(Pk8_1C33C8*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&D_0026DD48;
     ((Pp_1C33C8*)(g1 + 0x264))->p = (u8*)self + 0x690;
@@ -70,7 +70,7 @@ void func_001C33C8(C1D* self)
     s32 c = self->f71C;
     self->f720[c] = self;
     self->f71C = c + 1;
-    func_001C3FC8(self, 1);
+    SetHitCountColliderState(self, 1);
 }
 
 struct Vt_1C34C8 { void* pad[7]; void (*f1C)(void*); void* pad2[0x1A]; void (*f88)(void*, void*); };
@@ -95,7 +95,7 @@ void func_001EA918(void* a, void* b, void* c, void* d, s32 e, f32 f);
 f32 func_00205210(f32 a);
 void func_00126A48(void* o, u32 v);
 
-void func_001C34C8(C1D* self, f32 t)
+void func_001C34C8(HitCountCollider* self, f32 t)
 {
     f32 buf[12];
     f32 buf2[12];
@@ -146,7 +146,7 @@ void func_001C34C8(C1D* self, f32 t)
     if (self->f638) {
         if (g_gameTime[0] - self->f640 > 2.0f) self->f638 = 0;
     }
-    f32 ang = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     BuildAxisAngleMatrix((u8*)&g_unitZVector, buf, self->f648 - ang);
     func_001EA918((u8*)((Obj_1C34C8_Vt*)self->f660) + 0xD0, buf, D_00274A60, buf2, 0, t);
     ((Obj_1C34C8_Vt*)self->f660)->vt->f88(((Obj_1C34C8_Vt*)self->f660), buf2);
@@ -156,7 +156,7 @@ void func_001C34C8(C1D* self, f32 t)
         f32 q;
         if (self->f610 != 2) q = (g_gameClock[1] - self->f614) * 0.5f;
         else q = 0.0f;
-        f32 z = func_00205210((g_gameClock[1] - self->f63C) * 10.0f);
+        f32 z = Cosine((g_gameClock[1] - self->f63C) * 10.0f);
         f32 x0 = D_00274A70.c[0] + q * (D_00274A70.c[1] + q * D_00274A70.c[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
@@ -202,7 +202,7 @@ struct Entry_1C3C00 { s32 first; u8 pad[60]; };
 s32 func_001300E8(s32 a, s32 b);
 s32 func_001833F0(s32 a, s32 b);
 
-void func_001C3C00(C1D* self, Entry_1C3C00* table, s32 idx)
+void func_001C3C00(HitCountCollider* self, Entry_1C3C00* table, s32 idx)
 {
     Entry_1C3C00* e = (Entry_1C3C00*)((u8*)table + ((1 - idx) << 6));
     if (IsObjectOfKind(e->first, 0x21)) {
@@ -221,7 +221,7 @@ ASM_FUNC(func_001C3C98);
 extern s32 D_00262C64;
 s32 func_001DDA80(void* p);
 
-s32 func_001C3D28(C1D* self)
+s32 func_001C3D28(HitCountCollider* self)
 { if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1; return 0; }
 
 typedef s32 (*VFnA_1C3D60)(void* self, s32 v);
@@ -237,7 +237,7 @@ struct Local_1C3D60 { void* self; s32 v; };
 s32 func_00160C58();
 void func_001C3FC8(void* self, s32 flag);
 
-s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
+s32 func_001C3D60(HitCountCollider* self, Arg_1C3D60* arg)
 {
     Local_1C3D60 local;
     s32 m;
@@ -251,11 +251,11 @@ s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
     }
     if (self->f638 != 0) return 1;
     if (HasSpareCount()) {
-        func_001C3FC8(self, 2);
+        SetHitCountColliderState(self, 2);
         self->f638 = 1;
         self->f63C = g_gameTime[0];
     } else {
-        func_001C3FC8(self, 3);
+        SetHitCountColliderState(self, 3);
     }
     local.self = self;
     local.v = arg->f4;
@@ -263,15 +263,15 @@ s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
     return 1;
 }
 
-s32 func_001C3E50(C1D* self) { if (self->f610 < 5) { if (self->f610 >= 2) return 1; } return self->f638 != 0; }
+s32 func_001C3E50(HitCountCollider* self) { if (self->f610 < 5) { if (self->f610 >= 2) return 1; } return self->f638 != 0; }
 
 void func_00192C58(void* self);
 void func_001C3FC8(void* self, s32 flag);
 
-void func_001C3E80(C1D* self)
+void func_001C3E80(HitCountCollider* self)
 {
     func_00192C58(self);
-    func_001C3FC8(self, 1);
+    SetHitCountColliderState(self, 1);
 }
 
 ASM_FUNC(func_001C3EB0);
@@ -281,7 +281,7 @@ struct Local_1C3F68 { s32 pad[2]; s32 value; VFn_1C3F68 fn; };
 void func_001D7098(void* self, s32 a, s32 b);
 void func_001C3EB0(void* self, void* data);
 
-void func_001C3F68(C1D* self, s32 value)
+void func_001C3F68(HitCountCollider* self, s32 value)
 {
     Local_1C3F68 local;
     InitOwnerMessage(&local, 0, value);
@@ -319,12 +319,12 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     W(self, 0x670) = 0;
     if (state < 4) if (state >= 2) {
         Vec02 q;
-        f32 a = func_00205778(F(self, 0x154), F(self, 0x150));
+        f32 a = ArctangentOfRatio(F(self, 0x154), F(self, 0x150));
         f32 b = WrapAngle(a + 3.14159274f);
         F(self, 0x644) = b;
         F(self, 0x648) = b;
         q = D_00248D30;
-        f32 r = func_00205778(F(self, 0xD4), F(self, 0xD0));
+        f32 r = ArctangentOfRatio(F(self, 0xD4), F(self, 0xD0));
         ApproachAngleWithRamp(r, F(self, 0x644), 0.0f, (u8*)D_00274AA8, (u8*)&q + 8);
         self->desc02()->m21(self, (Vec02*)&q);
         W(self, 0x694) = 0;
@@ -348,7 +348,7 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     F(self, 0x614) = g_gameClock[1];
 }
 
-void func_001C4180(C1D* self, s32 value)
+void func_001C4180(HitCountCollider* self, s32 value)
 {
     s32 n = self->f698;
     self->f69C[n] = value;

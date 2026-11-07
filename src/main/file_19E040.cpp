@@ -1268,7 +1268,7 @@ void func_0019E420(EffectOwner* self, f32 t)
     } else {
         CollideEffects(self);
     }
-    func_00129DF8(self);
+    ClearRootTries(self);
     g_activeListFrames = (ListFrame*)it.saved;
 }
 
@@ -1634,7 +1634,7 @@ void func_001A01B8(Effect* self, f32 f)
     V128_1A01B8 tv = t;
     V128_1A01B8 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0258(Effect* self, f32 f)
@@ -1652,7 +1652,7 @@ void func_001A0258(Effect* self, f32 f)
     V128_1A0258 tv = t;
     V128_1A0258 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0318(Effect* self)
@@ -1734,7 +1734,7 @@ void func_001A09C0(Effect* self, f32 f)
     V128_1A09C0 tv = t;
     V128_1A09C0 u;
     CopyQuadword(&u, p);
-    (void)StoreQuadword(sub, func_00118D30(tv, u));
+    (void)StoreQuadword(sub, ScaleQuadword(tv, u));
     u8* q = (u8*)D_0026B5A0;
     self->q40 = *(Quad219C*)q;
 }
@@ -1779,7 +1779,7 @@ void func_001A0BA0(Effect* self, f32 f)
     V128_1A0258 tv = t;
     V128_1A0258 u;
     CopyQuadword(&u, p);
-    StoreQuadword(sub, func_00118D30(tv, u));
+    StoreQuadword(sub, ScaleQuadword(tv, u));
 }
 
 void func_001A0C50(Effect* self)
@@ -2059,7 +2059,7 @@ void func_001A38F0(Effect* self)
 {
     if (self->start <= g_gameClock[1]) {
         if (self->i134 != 0) {
-            func_001A35F0(self);
+            TakeDelayedEffectSourcePose(self);
         }
     }
     f32 span = g_gameClock[1] - self->start;
@@ -2158,7 +2158,7 @@ void func_001A3C40(WalkerCollider* self, Src_1A3C40* src)
     f.tri = *(Tri_1A3C40*)D_0024C9C0;
     f32 r = ArctangentOfRatio(((Inner_1A3C40*)self->f64C)->f114, ((Inner_1A3C40*)self->f64C)->f110);
     r = ApproachAngleWithRamp((u8*)&f.tri, 0, r, self->f620, g_frameDt);
-    func_001892A0(f.buf, r, 0.0f);
+    BuildYawPitchMatrix(f.buf, r, 0.0f);
     func_00128150(0, self, f.buf, f.buf);
     ((Inner_1A3C40*)self->f64C)->vtbl[34](((Inner_1A3C40*)self->f64C), f.buf);
 }
@@ -2225,7 +2225,7 @@ void func_001A4070(WalkerCollider* self, s32 n)
     case 3:
         snd = 0x290;
         h = self->f67C;
-        func_001F4408(0, 1);
+        BeginLevelExit(0, 1);
         break;
     }
     for (s32 i = 0; i < self->f668; i++) {
@@ -2344,8 +2344,8 @@ void func_001A44E8(WalkerCollider* self)
 {
     f32 buf[12];
     StepCollider(self);
-    func_001892A0(buf, self->f618, 0.0f);
-    func_001B9D10(self, buf, D_0026B7D8, g_frameDt);
+    BuildYawPitchMatrix(buf, self->f618, 0.0f);
+    TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 
 ASM_FUNC(func_001A4538);
@@ -2373,7 +2373,7 @@ void func_001A4610(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
             self->v440 = g_unitZVector;
         }
     }
-    func_001BC828(self, a1, a2, a3, a4, a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->v440 = s0;
     self->q450 = s1;
 }
@@ -2474,7 +2474,7 @@ ASM_FUNC(func_001A48C0);
 void func_001A4B30(PairController* self)
 {
     StartPlacedObject(self);
-    if (self->id64C != func_001A4898()) {
+    if (self->id64C != GetCurrentEntryVariant()) {
         self->desc->m03(self);
     } else {
         BlendMotion* k = &self->kin;
@@ -2520,7 +2520,7 @@ void func_001A4C48(PairController* self)
     case 2:
         if (self->count3BC < self->limit3B8) {
             if (self->f634 < g_gameClock[1]) {
-                func_001A5120(self);
+                SpawnPairedObject(self);
             }
         }
         if (self->f640 < g_gameClock[1]) {
@@ -2763,7 +2763,7 @@ void func_001A5B28(PairController* self, HitTarget* obj)
     }
     AppendToList(self->list374, obj);
     if (obj->partner != 0) {
-        if (func_001A6090(self, obj->partner) != 0) {
+        if (PairWithNearestFreeObject(self, obj->partner) != 0) {
             SetPairedState(obj->partner, 3);
         } else {
             ((HitTarget*)obj->partner)->partner = 0;
@@ -2862,11 +2862,11 @@ void func_001A5F78(PairController* self, PairedObject* obj)
     PairedObject* child = (PairedObject*)obj->partner;
     if (child != 0) {
         if (child->parent == obj) {
-            func_001A5D50(self, obj);
+            DetachPairedPartner(self, obj);
         }
         RemoveFromList(self->list35C, child);
         AppendToList(self->list368, child);
-        if (func_001A6238(self, child) == 0) {
+        if (PairWithNearestWaitingObject(self, child) == 0) {
             child->partner = 0;
         }
     }
@@ -2901,12 +2901,12 @@ void func_001A6168(u8* self, PairedObject* obj, PairedObject* node)
         RemoveFromList(self + 0x35C, cur);
         AppendToList(self + 0x368, cur);
         cur->partner = 0;
-        func_001A6238(self, cur);
+        PairWithNearestWaitingObject(self, cur);
     }
     if (s2 != 0) {
         s2->partner = 0;
         SetPairedState(s2, 2);
-        if (func_001A6090(self, s2) != 0) {
+        if (PairWithNearestFreeObject(self, s2) != 0) {
             SetPairedState(s2, 3);
         }
     }
@@ -3019,7 +3019,7 @@ void func_001A6BE0(PairedObject* self, s32 mode)
         h = self->f58C;
         break;
     case 4:
-        func_001A5C90(self->controller, self);
+        AttachPairedPartner(self->controller, self);
         w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f594;
         break;
@@ -3167,7 +3167,7 @@ void func_001A7230(HitTarget* self)
     if (self->parent == 0) {
         u8 buf[0x30];
         func_00189378(&self->m110, 0, buf);
-        func_001B9D10(self, buf, D_0026B850, g_frameDt);
+        TurnColliderTowardRotation(self, buf, D_0026B850, g_frameDt);
     }
 }
 

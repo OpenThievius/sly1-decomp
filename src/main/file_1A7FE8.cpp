@@ -992,7 +992,7 @@ void func_001A98F8(GaugeBarAgent* self)
 
 s32 func_001A9928(GaugeBarAgent* self)
 {
-    if (func_001DDA80(self->world) != 0)
+    if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
     return self->fC24;
 }
@@ -1011,7 +1011,7 @@ void func_001A99B8(GaugeBarAgent* self)
 {
     UpdateAgentState(self);
     if (self->f724 == 0x10)
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
 }
 
 void func_001A99F8(GaugeBarAgent* self)

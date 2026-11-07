@@ -1,0 +1,12 @@
+symbol	name	evidence
+func_001C3390	InitHitCountCollider	slot 0 of class 0x1D: InitSwitchedCollider, then the state 0x610 set to -1 and the hit count 0x694 to 5
+func_001C33C8	StartHitCountCollider	slot 16 (start) of class 0x1D: StartPlacedObject, keeps its radius in 0x68C, resolves its links (D_002749B0), creates its state walker (CreateStateWalker) into 0x668, points the two counter elements D_0026DD48 and D_0026DFC8 at 0x690 and 0x694, becomes the world's active follower and enters state 1 (SetHitCountColliderState)
+func_001C34C8	UpdateHitCountCollider	slot 17 (update) of class 0x1D: UpdateSwitchedCollider, then counts a collected id-0x52F object into 0x690, passes a struck object on (func_001C3F68), plays the hit clip 0x678 taking one from 0x694 and slows the world (g_stepScale) while it runs, and turns the linked object 0x660 to its heading
+func_001C3928	ShowHitCountColliderCounters	slot 0xC8 of class 0x1D (the display slot ShowGaugeAgentBar fills): shows the two counter elements D_0026DD48 and D_0026DFC8 (slot 14) while AreMenusAndFadeClear, else hides them (slot 15)
+func_001C3C00	NoteHitCountColliderContact	slot 0x100 of class 0x1D: an object of kind 0x21 on the other side marks a hit (0x680) while hits remain at 0x694, else is kept at 0x684 when no hit clip runs; an object of id 0x52F is kept at 0x688 to be collected
+func_001C3D28	IsHitCountColliderRequestBlocked	slot 0x13C of class 0x1D (IsAgentRequestBlocked's slot): 1 while bit 0 of g_buttonCodeFlags is set or IsPadSelectFlagHeld holds for the world
+func_001C3D60	AcceptHitCountColliderRequest	slot 0x140 of class 0x1D (AcceptAgentRequest's slot): unless slot 79 refuses, runs the request's callback, and outside states 2..4 enters state 2 (HasSpareCount) or 3 (SetHitCountColliderState) and sends notification 0x17
+func_001C3E50	HasHitCountColliderAcceptedRequest	slot 0x144 of class 0x1D: 1 in states 2..4 or while the accepted mark 0x638 is set
+func_001C3E80	FinishHitCountCollider	slot 0x150 of class 0x1D: func_00192C58, then state 1 (SetHitCountColliderState)
+func_001C3FC8	SetHitCountColliderState	changes the state 0x610 (its clock time 0x614): states 2 and 3 turn it to face back along its velocity, 3 raises the scatter levels and 4 sets pause-menu page 0x1A; then starts the state's clip (0x618..0x624) with ReplaceAnimationPlayer
+func_001C4180	AddHitCountColliderId	appends an id to the list at 0x69C (count 0x698); the script built-in func_00109258 calls it

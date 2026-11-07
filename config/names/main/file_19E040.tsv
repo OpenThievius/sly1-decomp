@@ -66,6 +66,8 @@ func_001A14A0	AdvanceEffectPhases	slot 4 of the 0x219E40 effect table: advances 
 func_001A15D8	DrawPhasedEffect	slot 5 of the kind-18 table: draws the effect by its phase (+0x120) and the value AdvanceEffectPhases moves (+0x124), with sizes and turns from the curves D_0026B620 to D_0026B690
 func_001A1DF0	SetEffectPhase	switches the effect's phase at +0x120 to 0, 1 or 2, giving each its own table at +0x40 and life (0.25, unlimited, 0.5) and rescaling start so the fraction of life already spent carries over between phases 0 and 2
 func_001A1F18	CompareByFloatKeyAscending	compares the f32 at +0x20 of two records and returns -1 when the first is smaller, else 1 (a sort comparator)
+func_001A1F40	ComputeHullSeenFromCamera	builds the frame looking from the camera (g_camera's position +0x40) toward a point (BuildBasisFromX, MultiplyMatrices) and returns the convex hull of the points in it (ComputeProjectedHull); func_00135E48 calls it
+func_001A2070	ComputeProjectedHull	transforms the points (0x30 bytes each) through a matrix with perspective (TransformByMatrixWithW, dividing by depth), moves the lowest one first, sorts the rest by angle around it (SortElements, CompareByFloatKeyAscending) and keeps the convex turns; returns the hull's count
 func_001A22C8	CopyEffectSourceIds	slot 1 of the kind-19 table D_00219E60: copies the source object's words at +0x1DC and +0x1F0 to the effect's +0x120 and +0x124
 func_001A22E0	DrawProjectileEffect	slot 5 of the kind-19 table: places the effect facing along its velocity, turned to the camera (func_00189C28), and draws it with DrawEffectAt
 func_001A2380	AttachHitMarkEffect	creates a kind-20 effect where an effect hit an object, kept on that object (+0x120) at the hit point with a random turn (HandleEffectImpact and HandleTumblingEffectImpact call it)
@@ -86,6 +88,7 @@ func_001A31A0	DrawSpinningEffect	slot 5 of the kind-24 table: turns the placemen
 func_001A31F0	InitFacingEffect	slot 0 of the kind-25 table D_00219F20: InitEffect, a life of 0.5, the world's template slot 18, the fade D_0026B710 and the size D_0026B720
 func_001A3250	DrawFacingEffect	slot 5 of the kind-25 table: removes the effect when its object is gone, else draws it turned to the camera (func_00189C28) with sizes and turns from the curves D_0026B730 to D_0026B770
 func_001A3598	InitDelayedEffect	slot 0 of the kind-26 table D_00219F40: InitEffect, the fade D_00275C50 and a size curve that runs from the scale to 1
+func_001A35F0	TakeDelayedEffectSourcePose	copies the position (+0x140) and rotation (+0x110) of the delayed effect's source object (+0x134) into the effect, derives its velocity and spin (MatrixToAxisAngle), calls the source's slot 7 and clears the source; UpdateDelayedEffect calls it when the start time comes
 func_001A3730	MoveDelayedEffect	slot 3 of the kind-26 table: once its start time has come, moves the effect with its object at +0x20 over the life it has left (func_00125750), keeping its last place at +0x90
 func_001A38F0	UpdateDelayedEffect	slot 4 of the kind-26 table: once started runs func_001A35F0 when +0x134 is set, and when its life is over calls slot 6 of the object at +0x20 and removes the effect
 func_001A3990	DrawDelayedEffect	slot 5 of the kind-26 table: DrawEffect once the start time has come
@@ -105,22 +108,34 @@ func_001A43C8	HandleWalkerColliderNotification	slot 0x44 of class 0x15: HandleSw
 func_001A44E8	StepWalkerCollider	slot 0x80 (step) of class 0x15: StepCollider, then func_001B9D10 with a turn by its angle at +0x618 and the table D_0026B7D8
 func_001A4538	ResolveWalkerColliderContact	slot 0x104 of class 0x15 (as ResolvePlayerContact): unless func_00128230, takes the part of its drive at +0x630 along the contact's normal out of the contact's velocity
 func_001A45B8	ComputeWalkerColliderContactValue	slot 0x100 of class 0x15: unless func_00128230, sets the contact's value at +0x94 to 20 when its ratio at +0x88 is above 0.7
+func_001A4610	ComputeWalkerColliderImpulseResponse	slot 57 (0xE8) of class 0x15: ComputeColliderImpulseResponse with the move anchor held to the z axis (mode 1, g_unitZVector) while the other side is of kind 0x42 or 0x43, then the anchor put back
+func_001A4710	IsWalkerColliderCameraFree	slot 0x138 of class 0x15, the slot IsPlayerCameraFree fills for class 0x07 (1 in the switched-collider base func_00192410): always 0
 func_001A4718	InitPairController	slot 0 of the 0x5F class: after the base set-up sets the element size of its seven lists, ids to -1, the limit 0x28, copies the pose table D_0024C9D0 into both pose arrays and stores the tuning floats 3000, 2300, 1500 and 1.46
+func_001A4858	SetPairControllerFirstTemplateId	script built-in: stores the id at 0x2D0 of the object ResolvePairControllerLinks finds and copies into the list at 0x374
+func_001A4860	SetPairControllerSecondTemplateId	script built-in: stores the id at 0x2D4 of the second object ResolvePairControllerLinks finds and copies
+func_001A4868	SetPairControllerHostId	script built-in: stores the id at 0x2D8 of the object ResolvePairControllerLinks finds into 0x354, giving it a link back at +0x678
+func_001A4870	SetPairControllerExtraId	script built-in: stores the id at 0x2DC (-1 for none) of the optional object ResolvePairControllerLinks finds into 0x358
 func_001A4878	AppendPairControllerId	appends its argument to the PairController's ids array and increments idCount
+func_001A4898	GetCurrentEntryVariant	2 when bit 2 of g_currentEntry's flags is set, else 1 or 0 by bit 1; ResolvePairControllerLinks and BlendPairControllerPose act only when it equals the controller's 0x64C
 func_001A48C0	ResolvePairControllerLinks	slot 0x4C of class 0x5F (as ResolveListIds): PostLoadPlacedObject, then finds its objects by id, copies them into its lists and gathers the class-0x44 objects
 func_001A4B30	BlendPairControllerPose	slot 16: steps the blend weight by the frame time, clamps it and mixes poseA and poseB into poseOut
 func_001A4C48	UpdatePairController	slot 17 of the 0x5F class: runs the base update, moves the state to the one func_001A4DC0 chooses, then by state spawns paired objects (func_001A5120 below the limit, func_001A54F8 on a timer) or sets its creator target to state 1
 func_001A4D60	ShowPairControllerElement	slot 0xC8 of class 0x5F (the visibility slot): shows the screen element D_0026D0C8 in state 2 while AreMenusAndFadeClear holds, hides it otherwise
 func_001A4DC0	ChoosePairControllerState	returns the PairController's next state from its link, flags, counts and the target's state and time
 func_001A4EF0	SetPairControllerState	stores the controller's state and time and does the per-state work (messages, sets partners' states 7 and 8)
+func_001A5120	SpawnPairedObject	the spawn UpdatePairController runs below its limit: places an object at a random polar offset (ComputePolarOffset, RandomFloatInRange) around the active switched collider, sets its anchors (SetColliderAnchors), puts it in a hit-target state (SetHitTargetState), moves it between the controller's lists and pairs it (PairWithNearestWaitingObject)
 func_001A54F8	StartPairedObjects	takes a PairedObject from one list and an attachment from another at random, links them, sets both to state 1 and sets the next time
 func_001A5760	UpdatePairControllerTuning	evaluates six clamped quadratic curves at dt and linearly blends the tuning pairs into +0x62C..+0x648 and the two counts at +0x624 and +0x628, re-arming the spawn timers with func_001EAAE0 when a count grows
 func_001A5B28	RemoveFinishedHitTarget	controller method called when a hit target leaves state 9: counts it done, updates the tuning with progress count/total (func_001A5760), moves it between the controller's lists, releases its partner and re-arms the spawn timer
 func_001A5C38	ReleasePairedAttachment	moves the object's attachment from the list at +0x3AC to the list at +0x3A0, sets the attachment's state to 0 with func_001A76A0 and clears the object's attachment field
+func_001A5C90	AttachPairedPartner	makes the paired object the parent of its partner (slot 15), stops the partner's velocity and spin, fixes its anchors (SetColliderAnchors 3, 3) and plays sound 0x151; SetPairedState calls it
+func_001A5D50	DetachPairedPartner	clears the partner's parent (slot 15), stops its velocity and spin and lets it move only along z (SetColliderAnchors 2 with g_unitZVector, turn 3); RemovePairedObject calls it
 func_001A5DD8	ActivatePairedAttachment	sets the object's attachment to state 1 with func_001A76A0 (SetPairedState calls it on the 5 to 6 transition)
 func_001A5DF8	FinishPairedObjectTransition	controller method for the 6 to 0 transition of a paired object: moves it, its partner and its attachment out of the controller's lists, calls the partner's and its own slot 3, counts the controller's finished objects up, re-arms both spawn timers and plays sound 0x51
 func_001A5F78	RemovePairedObject	controller method for leaving state 9: moves the object, its attachment and its partner out of the controller's lists, releases the attachment, calls the object's slot 3, re-arms the spawn timer and decrements the count at +0x39C
+func_001A6090	PairWithNearestFreeObject	takes from the controller's free list (0x368) the object nearest in x and y within D_0024CAF4, links it and the given object as partners (+0x55C) and moves it to the used list (0x35C); RemoveFinishedHitTarget, LinkPairedObjects and ChoosePairedObjectState call it
 func_001A6168	LinkPairedObjects	sets obj->partner = node and node->partner = obj, moves the lists' entries and unlinks and re-states the partner each one had before
+func_001A6238	PairWithNearestWaitingObject	walks the chain at 0x384 for the nearest unpartnered object in state 2 within D_0024CAF8 in x and y, links the two as partners (+0x55C), moves the given one from the free list (0x368) to the used list (0x35C) and puts the found one in state 3 (SetPairedState)
 func_001A63F8	RandomizePairedObjectOffset	gives a paired object a random polar offset at +0x570, up to the controller's radius at +0x348, and scales its +0x574 by the controller's +0x34C
 func_001A6480	GetPairControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
 func_001A6498	InitPairedObject	slot 0 of the 0x42 class: after the collider set-up sets state -1, the floats at 0x584 and 0x588 to 1.0 and 2.5 and calls func_001B9AE0
@@ -128,6 +143,7 @@ func_001A64F8	LoadPairedObject	slot 10 of the 0x42 class: LoadCollider, then res
 func_001A6540	CopyPairedObject	slot 9 of the 0x42 class: saves the 8-byte field at 0x5B0, runs CopyCollider (func_001BA130) and restores the field
 func_001A6588	StartPairedObject	slot 16 of the 0x42 class: StartPlacedObject, sets state 0 with func_001A6BE0, then calls its own slot 7
 func_001A65C8	UpdatePairedObject	slot 0x54 (update) of class 0x42: UpdateCollider, then SetPairedState until the state is the one ChoosePairedObjectState returns, and per state moves the object (func_001A6788)
+func_001A6788	SteerPairedObjectWithinArea	the per-state motion UpdatePairedObject runs: picks a point within the controller's area (centre +0x330, radius +0x340, func_00141F48) and turns the object toward it, setting its spin (SetPlacedObjectSpinFromFloats)
 func_001A69F8	ChoosePairedObjectState	returns the next state of a PairedObject from its state at +0x550 (a jump table of 11 cases), linking it to a hit target child (FindHitTargetChild, LinkPairedObjects) where that state calls for it
 func_001A6BE0	SetPairedState	stops the handle and sound started for the old state, runs the leave function of states 1, 5, 6 and 9, stores the new state and its time, and starts the handle or sound of the new state
 func_001A6DE0	HandlePairedHit	slot 31 message handler: on a hit (flag 0x20) it moves a PairedObject in states 1-8 to state 9, sends its notify record a message and plays a sound

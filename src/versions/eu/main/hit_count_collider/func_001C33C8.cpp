@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the two global pointer slots are at 0x574 and 0x578 (US 0x264, 0x268), and the float at 0x57C (US 0x26C).
-void func_001C33C8(C1D* self)
+void func_001C33C8(HitCountCollider* self)
 {
     StartPlacedObject(self);
     self->f68C = self->radius3CC;

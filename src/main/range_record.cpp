@@ -50,7 +50,7 @@ void func_001B1B38(RangeRecord* self)
             u8* p = D_0027DC20 + idx * 16;
             self->f2D0 = p;
             g_meshQueueCount = idx + 1;
-            func_001F5C0C(p, 0, 16);
+            FillMemory(p, 0, 16);
         }
     }
 }
@@ -114,7 +114,7 @@ void func_001B1FE0(RangeRecord* o, f32 v)
 }
 
 void func_001B2010(RangeRecord* o, f32 s) {
-    f32 t = func_002054F0(o, s * 0.00872664712f);
+    f32 t = Tangent(o, s * 0.00872664712f);
     o->f04 = t * o->f40;
     o->f08 = t * o->f44;
     InvalidateRangeRecordPacket(o);

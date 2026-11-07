@@ -36,7 +36,7 @@ struct Self_1B71C8 {
 };
 s32 func_001300E8(void* a, s32 b);
 s32 func_00182F40(Collider* e, void* b);
-void func_0015FCD8(C09* self, void* p);
+void func_0015FCD8(CompanionAgent* self, void* p);
 void func_001BF048(void* p);
 struct Node_1B6C68 {
     u8 pad[0x28];
@@ -208,8 +208,8 @@ typedef void (*VFn_1B6F50)(void* self);
 struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
 struct Ent_1B6F50 { s32 key; void* val; };
 extern u8 D_0021A790[];
-void* func_0015A448(Hdr_1B6F50* obj, s32 id, C09* flags);
-s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, C09* a3, s32 a4, void* a5);
+void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
+s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
 s32 func_001833F0(Elem_1B6F50* a, s32 b);
 void func_0018D608(void);
 void func_0018D6F0(void);
@@ -233,8 +233,8 @@ struct Target_1B7638 {
     u8 pad1[0x30 - 0x28];
     struct Quad_1B7638 quad30;
 };
-s32 func_001C96B8(C09 *self);
-s32 func_001CB578(C09 *self);
+s32 func_001C96B8(CompanionAgent *self);
+s32 func_001CB578(CompanionAgent *self);
 struct Track_1B66A0
 {
     u8 pad00[0x34];
@@ -333,7 +333,7 @@ void func_001B5C40(u8* src, u16* dst)
     s32 n = GetStringLength(src);
     s32 i;
     for (i = 0; i < n; i++) {
-        u32 r = func_001B5B58(src[i]);
+        u32 r = MapCharToCode(src[i]);
         u32 lo = (r & 0xFF) << 8;
         u32 hi = (r >> 8) & 0xFF;
         dst[i] = (u16)(hi | lo);
@@ -405,7 +405,7 @@ void* func_001B5EC0(Pool_1B5EC0* pool)
 void* func_001B5EE0(Pool_1B5EE0* pool)
 {
     void* p = PopFreeSlot(pool);
-    func_001F5C0C(p, 0, pool->count);
+    FillMemory(p, 0, pool->count);
     return p;
 }
 
@@ -884,7 +884,7 @@ void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
     TriggerScriptEvent(self->host, 0xE, 3, args);
 }
 
-void func_001B6EC8(C09* self)
+void func_001B6EC8(CompanionAgent* self)
 {
     InitAgent(self);
     self->fC20 = 2000.0f;
@@ -903,7 +903,7 @@ void func_001B6EC8(C09* self)
     self->fC10 = -1;
 }
 
-void func_001B6F50(C09* self)
+void func_001B6F50(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
@@ -953,7 +953,7 @@ void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
     self->slots[index].value = value;
 }
 
-void func_001B7100(C09* self, s32 value)
+void func_001B7100(CompanionAgent* self, s32 value)
 {
     s32 n = self->fCD4;
     if ((u32)n < 4) {
@@ -963,10 +963,10 @@ void func_001B7100(C09* self, s32 value)
     }
 }
 
-void func_001B7128(C09* self)
+void func_001B7128(CompanionAgent* self)
 {
     StartAgent(self);
-    func_001B6F50(self);
+    ResolveCompanionAgentObjects(self);
     if (self->fC28 != -1) {
         self->fC2C = FindFirstObjectByIdMode4(self->world, self->fC28, self);
     }
@@ -1002,13 +1002,13 @@ s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
 
 ASM_FUNC(func_001B7280);
 
-void func_001B7608(C09* self)
+void func_001B7608(CompanionAgent* self)
 {
     UpdateAgent(self);
-    func_001B7638(self);
+    AimCompanionAgentPose(self);
 }
 
-void func_001B7638(C09 *self) {
+void func_001B7638(CompanionAgent *self) {
     struct Target_1B7638 *t;
     s32 r;
     s32 res;
@@ -1018,7 +1018,7 @@ void func_001B7638(C09 *self) {
         return;
     }
     t = (struct Target_1B7638 *)self->fC34;
-    r = func_001C96B8(self);
+    r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
@@ -1062,7 +1062,7 @@ void func_001B7638(C09 *self) {
     ((struct Sub_1B7638 *)self->fC14)->f2F0 = f;
 }
 
-void func_001B7790(C09* self)
+void func_001B7790(CompanionAgent* self)
 {
     EnterAgentState(self);
     switch (self->f724) {
@@ -1082,7 +1082,7 @@ void func_001B7790(C09* self)
     self->fC30 = *(s32*)((u8*)self + (self->f724 << 3) + 0xC3C);
 }
 
-s32 func_001B7818(C09* self)
+s32 func_001B7818(CompanionAgent* self)
 {
     if (IsAgentTargetInRange(self) == 0) {
         return 0;
@@ -1090,7 +1090,7 @@ s32 func_001B7818(C09* self)
     return ((VFn_1B7818*)self->desc)[91](self);
 }
 
-s32 func_001B7860(C09* self)
+s32 func_001B7860(CompanionAgent* self)
 {
     s32 r;
     if (self->f724 == 11) {
@@ -1113,7 +1113,7 @@ ret0:
     return r;
 }
 
-void func_001B78C0(C09* self, s32 code, void* req)
+void func_001B78C0(CompanionAgent* self, s32 code, void* req)
 {
     HandleAgentNotification(self, code, req);
     if (code == 7) {
@@ -1123,7 +1123,7 @@ void func_001B78C0(C09* self, s32 code, void* req)
     }
 }
 
-void func_001B7920(C09* self, void* p)
+void func_001B7920(CompanionAgent* self, void* p)
 {
     SetColliderFrozen(self, p);
     if (p != 0) {
