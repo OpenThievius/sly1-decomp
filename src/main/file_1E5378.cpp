@@ -136,7 +136,7 @@ void func_001E55D0(PlayerLinkedCollider* self)
 
 extern u8* D_00262E10;
 
-typedef void (*VFn_56A0)(void* self, f32 t, void* buf);
+typedef void (*PlayerFrameFn)(void* self, f32 t, void* buf);
 
 void func_001E5938(void);
 void func_0016EC20(void* obj, s32 n);
@@ -158,10 +158,10 @@ void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
     if (o != 0) {
         if (*(s32*)(o + 0x2740) != 0) {
             if (IsObjectAttached()) {
-                VFn_56A0 fn;
+                PlayerFrameFn fn;
                 FillMemory(buf, 0, 0xC4);
                 o = g_player;
-                fn = *(VFn_56A0*)(*(u8**)o + 0x134);
+                fn = *(PlayerFrameFn*)(*(u8**)o + 0x134);
                 if (fn != 0) {
                     fn(o, t, buf);
                 }
@@ -296,14 +296,14 @@ s32 func_001E5DA8(PlayerLinkedCollider* self, void* arg)
     return 0;
 }
 
-typedef void (*VFn_5E08)(void* self);
+typedef void (*PeerEffectFn)(void* self);
 
 void func_001924C8(void* self);
 
 void func_001E5E08(PlayerLinkedCollider* self)
 {
     if (self->f624 != 0) {
-        VFn_5E08 fn = *(VFn_5E08*)(*(u8**)self->f624 + 0x148);
+        PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->f624 + 0x148);
         fn(self->f624);
     } else {
         StartSwitchedColliderEffect(self);
@@ -507,8 +507,8 @@ struct ColorLerp {
     }
 };
 
-#define SX_1E6C20(x) ((s32)(((x) + 1728.0f) * 16.0f))
-#define SY_1E6C20(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
+#define GIF_SCREEN_X(x) ((s32)(((x) + 1728.0f) * 16.0f))
+#define GIF_SCREEN_Y(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
 
 struct FadeClamp {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -555,27 +555,27 @@ void func_001E6C20(T217D_3F0* self, PacketWriter* buf)
     f32 xb = x0 + (len + 62.7f) * e->x;
     f32 ya = y0 + e->y * 62.7f;
     f32 yb = ya - len;
-    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xe), GIF_SCREEN_Y(ya), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xe), GIF_SCREEN_Y(yb), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xa), GIF_SCREEN_Y(ya), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xb), GIF_SCREEN_Y(yb), 0, 0);
     for (s32 i = first; i < last; i++) {
         e = &self->pts[i];
         xa = x0 + e->x * 62.7f;
         ya = y0 + e->y * 62.7f;
         xb = x0 + (self->lineLen + 62.7f) * e->x;
         yb = y0 + (self->lineLen + 62.7f) * e->y;
-        AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-        AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xa), GIF_SCREEN_Y(ya), 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xb), GIF_SCREEN_Y(yb), 0, 0);
     }
     xa = x0 + e->nextX * 62.7f;
     ya = y0 + e->nextY * 62.7f;
     yb = ya + self->lineLen;
     xb = x0 + (self->lineLen + 62.7f) * e->nextX;
-    AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xa), GIF_SCREEN_Y(ya), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xb), GIF_SCREEN_Y(yb), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xe), GIF_SCREEN_Y(ya), 0, 0);
+    AddGifXyzfEntry(buf, GIF_SCREEN_X(xe), GIF_SCREEN_Y(yb), 0, 0);
 }
 
 extern u8 D_00262280[];
