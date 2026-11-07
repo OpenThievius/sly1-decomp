@@ -425,8 +425,8 @@ D_00248D80	00248D80	608	.rodata	src/main/file_1000C8.cpp
 D_00248FE0	00248FE0	532	.rodata	src/main/script_machine.cpp
 D_00249200	00249200	16	.rodata.D_00249200	src/main/00118000.cpp
 D_002492F0	002492F0	308	.rodata	src/main/value.cpp
-D_00249428	00249428	1096	.rodata	src/main/file_11CBB8.cpp
-D_00249870	00249870	288	.rodata	src/main/file_11E560.cpp
+D_00249428	00249428	1096	.rodata	src/main/iop_commands.cpp
+D_00249870	00249870	288	.rodata	src/main/pose_source.cpp
 D_002499F0	002499F0	612	.rodata	src/main/file_1233C0.cpp
 D_00249CA0	00249CA0	156	.rodata	src/main/file_130F48.cpp
 D_00249D64	00249D64	16	.rodata	src/main/file_137290.cpp
@@ -593,8 +593,8 @@ D_002505D8	002505D8	37728	.data	src/main/file_1000C8.cpp
 D_00259938	00259938	9016	.data	src/main/script_machine.cpp
 D_0025C250	0025C250	160	.data	src/main/value.cpp
 D_0025C2F0	0025C2F0	80	.data	src/main/value_pools.cpp
-D_0025C340	0025C340	19232	.data	src/main/file_11CBB8.cpp
-D_00260E60	00260E60	16	.data	src/main/file_11E560.cpp
+D_0025C340	0025C340	19232	.data	src/main/iop_commands.cpp
+D_00260E60	00260E60	16	.data	src/main/pose_source.cpp
 D_00260E70	00260E70	544	.data	src/main/file_1233C0.cpp
 D_00261090	00261090	644	.data	src/main/file_130F48.cpp
 D_00261314	00261314	8	.data	src/main/file_137290.cpp

@@ -91,7 +91,12 @@
 #define g_pairPayloadCapacity                      D_0025C2FC
 #define g_triplePayloadCapacity                    D_0025C300
 #define g_iopReplyBuffer                           D_0025C340
+#define g_iopReplyWordCount                        D_0025C344
 #define g_iopDiscAccess                            D_0025C34C
+#define g_iopCommandBuffers                        D_0025C360
+#define g_iopCommandSpace                          D_0025C368
+#define g_iopCallbackTables                        D_0025C370
+#define g_iopReplyTables                           D_0025C378
 #define g_iopBufferIndex                           D_0025C380
 #define g_iopBankLoadResult                        D_0025C3C4
 #define g_iopCommandArgs                           D_0025C400
@@ -268,6 +273,8 @@
 #define g_payloadRefCounts                         D_0027B300
 #define g_triplePayloadRefCounts                   D_0027B310
 #define g_activeListFrames                         D_0027B314
+#define g_iopCommandRpc                            D_0027B4C8
+#define g_iopBankLoadRpc                           D_0027B4F0
 #define g_permanentCursor                          D_002C2A14
 #define g_frontResetMark                           D_002C2A18
 #define g_frontCursor                              D_002C2A1C
@@ -600,6 +607,8 @@
 #define GetIopVolumeChannel                        func_0011D4B8
 #define StartSoundVoice                            func_0011D598
 #define StopSoundVoice                             func_0011D600
+#define SuspendIopVoices                           func_0011D6A8
+#define ResumeIopVoices                            func_0011D6D8
 #define IsVoiceBusy                                func_0011D708
 #define RequestVoiceCallback                       func_0011D730
 #define SetVoiceVolumePan                          func_0011D798
@@ -620,6 +629,7 @@
 #define SetIopChannelValue                         func_0011E328
 #define SetIopChannelValuePair                     func_0011E360
 #define OpenIopRing                                func_0011E428
+#define ResetIopRing                               func_0011E460
 #define GetIopRingPosition                         func_0011E4F8
 #define CreateTypedRecord                          func_0011E580
 #define ApplyPropertyRecord                        func_0011E680

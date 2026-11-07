@@ -2513,3 +2513,13 @@ D_0025C2F8	g_vectorBPayloadCapacity	64: the slot count InitPayloadPools gives th
 D_0025C2FC	g_pairPayloadCapacity	64: the slot count InitPayloadPools gives the tag 0x19 pair pool and its reference counts
 D_0025C300	g_triplePayloadCapacity	32 (the first word of a 0x40-byte label): the slot count InitPayloadPools gives the tag 0x1A triple pool and its reference counts
 D_0027B310	g_triplePayloadRefCounts	the triple pool's reference count bytes (InitPayloadPools allocates one per slot); AddRefTriplePayload and ReleaseTriplePayload index it by (address - pool origin) / 12
+func_0011D6A8	SuspendIopVoices	queues command 0x16 with a voice mask; func_0018E940 passes 0xFFFFFFFF before it saves the volume channels and syncs the disc, and func_0018EAA0 undoes it with ResumeIopVoices
+func_0011D6D8	ResumeIopVoices	queues command 0x17 with a voice mask; func_0018EAA0 passes 0xFFFFFFFF last, after restoring the volume channels SuspendIopVoices' caller saved
+func_0011E460	ResetIopRing	sends command 0x3D and waits; func_0018EA48 calls it when its ring is active, then marks it and resets its two ring buffers
+D_0025C344	g_iopReplyWordCount	the word count of the armed reply buffer: ArmIopReplyBuffer stores it beside g_iopReplyBuffer and IsIopReplyReady reads the word after that many
+D_0025C360	g_iopCommandBuffers	the two command buffers (D_0025C540, D_0025D540) InitIopCommandChannels points at their storage; word 0 is the command count CommitQueuedIopCommand raises and PollIopCommands walks
+D_0025C368	g_iopCommandSpace	the bytes left in each of the two command buffers, 0xFFC when emptied (InitIopCommandChannels, FlushIopCommandBuffer)
+D_0025C370	g_iopCallbackTables	the two callback tables, one 16-byte entry (function, argument) per queued command, which PollIopCommands calls with the matching reply word
+D_0025C378	g_iopReplyTables	the two reply word tables (D_00260540, D_00260980) PollIopCommands hands to each queued command's callback
+D_0027B4C8	g_iopCommandRpc	the first RPC channel InitIopCommandChannels binds (id 0x123456); SendIopCommandAndWait and FlushIopCommandBuffer call over it
+D_0027B4F0	g_iopBankLoadRpc	the second RPC channel InitIopCommandChannels binds (id 0x123457); LoadSoundBankAtLocation and StartSoundBankLoad send command 3 over it

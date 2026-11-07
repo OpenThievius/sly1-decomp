@@ -7,12 +7,12 @@ void func_0011CBB8(s32 flags)
     s32 n;
     s32 args[2];
 
-    D_0025C360[0] = (s32*)D_0025C540;
-    D_0025C360[1] = (s32*)D_0025D540;
-    D_0025C378[0] = D_00260540;
-    D_0025C378[1] = D_00260980;
-    ((s32**)&D_0025C370)[0] = D_0025E540;
-    ((s32**)&D_0025C370)[1] = D_0025F540;
+    g_iopCommandBuffers[0] = (s32*)D_0025C540;
+    g_iopCommandBuffers[1] = (s32*)D_0025D540;
+    g_iopReplyTables[0] = D_00260540;
+    g_iopReplyTables[1] = D_00260980;
+    ((s32**)&g_iopCallbackTables)[0] = D_0025E540;
+    ((s32**)&g_iopCallbackTables)[1] = D_0025F540;
     if (flags & 2) {
         D_eu_0025D6B8 = 1;
     } else {
@@ -20,24 +20,24 @@ void func_0011CBB8(s32 flags)
     }
     func_001F7BE8(0);
     do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4C8, 0x123456, 0) >= 0, 0xAF);
+        ASSERT_0011CBB8(func_001F80C0(&g_iopCommandRpc, 0x123456, 0) >= 0, 0xAF);
         for (n = 10000; --n != -1;) {
         }
-    } while (((Rpc_0011CBB8*)D_0027B4C8)->f24 == 0);
+    } while (g_iopCommandRpc.server == 0);
     D_0025C388.busy = 0;
     D_0025C390.fn = 0;
     D_0025C390.arg = 0;
     g_iopChannel2Result.result = 0;
     do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0xC4);
+        ASSERT_0011CBB8(func_001F80C0(&g_iopBankLoadRpc, 0x123457, 0) >= 0, 0xC4);
         for (n = 10000; --n != -1;) {
         }
-    } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
+    } while (g_iopBankLoadRpc.server == 0);
     g_iopSharedPacket.f00 = 0;
     D_0025C540[0] = 0;
     D_0025D540[0] = 0;
-    D_0025C368[0] = 0xFFC;
-    D_0025C368[1] = 0xFFC;
+    g_iopCommandSpace[0] = 0xFFC;
+    g_iopCommandSpace[1] = 0xFFC;
     g_iopSharedPacket.f10 = 0;
     args[0] = (s32)&g_iopSharedPacket;
     args[1] = flags;

@@ -10,12 +10,12 @@ s32 func_0011D078(void)
     if (g_iopReplyBuffer == 0) {
         return 1;
     }
-    if (func_001F8480((Arg_0011D078*)D_0027B4C8) != 0) {
+    if (func_001F8480(&g_iopCommandRpc) != 0) {
         return 0;
     }
     table = (u32*)g_iopReplyBuffer;
     if (table[0] == 0xFFFFFFFF) {
-        if (table[D_0025C344 + 1] == table[0]) {
+        if (table[g_iopReplyWordCount + 1] == table[0]) {
             g_iopReplyBuffer = 0;
             return 1;
         }
@@ -23,6 +23,6 @@ s32 func_0011D078(void)
     if (D_eu_0025D6B8 != 0) {
         return 0;
     }
-    PrintFormatted((Arg_0011D078*)D_00249460);
+    PrintFormatted(D_00249460);
     return 0;
 }
