@@ -251,17 +251,6 @@ s32 func_001FA670(Ctx_1FA670* a, s32 b, s32 c, s32 d, s32 e, s32 f)
     return func_001FA4F8(a, 1, b, c, d, e, f);
 }
 
-// NEAR: retail tail-calls with j and fills its delay slot with the store; default compiler emits jal with a frame
-extern s32 D_0062A76C;
-void func_001FAD68(void);
-
-void func_001FAE18(void)
-{
-	if (D_0062A76C == 0) {
-		D_0062A76C = 1;
-		func_001FAD68();
-	}
-}
 
 struct Node_001F8200 {
     s32 f00;

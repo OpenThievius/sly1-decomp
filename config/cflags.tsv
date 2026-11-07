@@ -82,3 +82,4 @@ src/lib/patch_installer_2.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/patch_installer_1.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/request_thread.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/formatted_output.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_1FAC00.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111

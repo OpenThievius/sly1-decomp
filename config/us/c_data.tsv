@@ -839,6 +839,7 @@ D_002BE478	002BE478	20	.bss	src/main/file_17B998.cpp
 D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
+D_0062A540	0062A540	560	.bss	src/lib/file_1FAC00.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	4	.bss	src/lib/unwind.c
