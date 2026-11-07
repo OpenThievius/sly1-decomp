@@ -270,6 +270,7 @@ void func_00144BE8(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 
 
 void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z);
 void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32* x, f32* y, f32* z);
+void BuildBasisFromX(void* self, void* value);
 
 
 
@@ -909,7 +910,26 @@ void PlaceCameraLookingAt(Camera* self, void* p, s32 q)
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-INCLUDE_ASM(func_00144978);
+void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* y, f32* z)
+{
+    Mat02 m;
+    Vec02 d;
+    Vec02 v;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    BuildBasisFromX(&d, &m);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+    if (len < 1e-4f) {
+        *z = *x = *y = 0.0f;
+    } else {
+        Vu0::Q(v) = Vu0::RotateTransposed(m, Vu0::Q(*in));
+        if (len < 100.0f) {
+            len = 100.0f;
+        }
+        *z = v.x;
+        *x = v.y / len;
+        *y = v.z / len;
+    }
+}
 
 INCLUDE_ASM(func_00144AA0);
 
