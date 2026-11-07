@@ -20,16 +20,6 @@ extern f32 D_0026185C;
 struct Vec2_1B55A8 { f32 x; f32 y; };
 struct Walk_1B5D80 { s32 a; u32 b; u32 c; };
 void func_0012F6B0(void* p);
-struct Slot_1B71C8 {
-    void* first;
-    s32 second;
-};
-struct Self_1B71C8 {
-    u8 pad0[0xCD4];
-    s32 count;
-    u8 pad1[4];
-    Slot_1B71C8 slots[1];
-};
 s32 func_001300E8(void* a, s32 b);
 s32 func_00182F40(Collider* e, void* b);
 void func_0015FCD8(CompanionAgent* self, void* p);
@@ -56,8 +46,6 @@ void func_00152600(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 struct Vec3_1B5588 { f32 x; f32 y; f32 z; };
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
-struct Slot_1B70B0 { s32 value; s32 pad4; };
-struct Self_1B70B0 { u8 pad0[0xC38]; Slot_1B70B0 slots[1]; };
 s32 func_001CA600(s32 index);
 void func_00124A48(void* self);
 struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
@@ -65,10 +53,6 @@ void* func_0018D500(s32 size);
 void func_001B5D80(void* s, s32 v, s32 n);
 struct Walk_1B5E30 { s32 a; void* b; s32 c; };
 void func_001831E8(void* a, void* b, s32 c, void* d);
-struct Pair_1B7128 {
-    s32 key;
-    s32 value;
-};
 void func_001C72A0(void* self);
 void func_001B6F50(void* self);
 s32 func_0015A448(void* host, s32 id, void* ctx);
@@ -83,7 +67,6 @@ s32 func_001CA468(void* self);
 void func_001C9DE0(void* self, s32 code, void* req);
 void func_00124FC0(void* self);
 void func_001C6F48(void* self);
-struct Ent_1B6EC8 { s32 v; s32 pad; };
 s32 func_0015A448(void* owner, s32 value, void* bank);
 void* func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
 u16 func_001B5B58(u8 ch);
@@ -106,7 +89,6 @@ struct Elem_1B6F50;
 struct Sub_1B6F50 { u8 p0[0x11]; u8 f11; u8 p1[0x0A]; s32 f1C; u8 p2[0x60]; s32 f80; s32 f84; };
 typedef void (*VFn_1B6F50)(void* self);
 struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
-struct Ent_1B6F50 { s32 key; void* val; };
 extern u8 D_0021A790[];
 void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
 s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
@@ -761,9 +743,9 @@ void func_001B6EC8(CompanionAgent* self)
     self->fC28 = -1;
     self->fC2C = 0;
     s32 i = 16;
-    Ent_1B6EC8* e = (Ent_1B6EC8*)((u8*)self + 0xCB8);
+    Slot08* e = &self->fC38[16];
     do {
-        e->v = -1;
+        e->id = -1;
         i--;
         e--;
     } while (i >= 0);
@@ -774,13 +756,13 @@ void func_001B6F50(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
-    Ent_1B6F50* e = (Ent_1B6F50*)self->fC38;
+    Slot08* e = self->fC38;
     do {
-        s32 key = e->key;
+        s32 key = e->id;
         if (key == best) {
-            e->val = 0;
+            e->obj = 0;
         } else {
-            e->val = FindFirstObjectByIdMode4((Hdr_1B6F50*)self->world, key, self);
+            e->obj = (void*)FindFirstObjectByIdMode4((Hdr_1B6F50*)self->world, key, self);
         }
         e++;
         j--;
@@ -814,10 +796,10 @@ void func_001B6F50(CompanionAgent* self)
     }
 }
 
-void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
+void func_001B70B0(CompanionAgent* self, s32 index, s32 value)
 {
     (void)IsAgentSlotIndex(index);
-    self->slots[index].value = value;
+    self->fC38[index].id = value;
 }
 
 void func_001B7100(CompanionAgent* self, s32 value)
@@ -839,16 +821,16 @@ void func_001B7128(CompanionAgent* self)
     }
     if (self->fCD4 > 0) {
         s32 i = 0;
-        Pair_1B7128* p = (Pair_1B7128*)self->fCD8;
+        Slot08* p = self->fCD8;
         do {
-            p->value = FindFirstObjectById(self->world, 0x104, p->key, self);
+            p->obj = (void*)FindFirstObjectById(self->world, 0x104, p->id, self);
             p++;
             i++;
         } while (i < self->fCD4);
     }
 }
 
-s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
+s32 func_001B71C8(CompanionAgent* self, Collider* ent)
 {
     if (ent->flags538 & (1ULL << 43)) {
         return 0;
@@ -859,8 +841,8 @@ s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
     if (IsObjectOfKind(ent->root, 0x4C) != 0) {
         return 0;
     }
-    for (s32 i = 0; i < self->count; i++) {
-        if (IsObjectDescendantOf(ent, self->slots[i].first) != 0) {
+    for (s32 i = 0; i < self->fCD4; i++) {
+        if (IsObjectDescendantOf(ent, self->fCD8[i].obj) != 0) {
             return 0;
         }
     }

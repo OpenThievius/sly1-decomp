@@ -483,7 +483,7 @@ struct CompanionAgent : Agent {
     s32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
     void* fC34;             // 0xC34
-    u8 fC38[0x88];          // 0xC38
+    Slot08 fC38[17];        // 0xC38: ids -1 at set-up (func_001B6EC8), resolved by func_001B6F50
     void* fCC0;             // 0xCC0
     s32 fCC4;               // 0xCC4
     u8 padCC8[0xCD4 - 0xCC8];
