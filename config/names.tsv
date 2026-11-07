@@ -2559,12 +2559,12 @@ func_001ED090	AddTempoAgentEntry	appends an (object, word) entry to the array at
 func_001EB550	CopyPlayerAttachBlock	copies the block at +0x580 and the word at +0x604 of the player g_player into the class 0x1C object (its slot 16 calls it)
 func_001EBCD8	AppendBeatPressEntry	appends an eight-byte (time, direction) entry to the array at +0x634 of a class 0x1C beat-press collider, counted at its +0x630 word, the entries JudgeBeatPressInput works through (func_001EC7A8 calls it)
 func_001EFA30	CreateRecord2505C0	allocates 48 zeroed bytes from the front memory and sets their table to D_002505C0
-func_001F2758	InitC8D	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
-func_001F36E8	AddC8DXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
-func_001F3768	AddC8DYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
-func_001F37D8	GetC8DCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
-func_001F3850	SetC8DEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
-func_001F38A0	GetC8DEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetC8DEntryPeriod stores
+func_001F2758	InitOscillator	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
+func_001F36E8	AddOscillatorXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
+func_001F3768	AddOscillatorYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
+func_001F37D8	GetOscillatorCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
+func_001F3850	SetOscillatorEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
+func_001F38A0	GetOscillatorEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetOscillatorEntryPeriod stores
 func_001F3AF0	TransformObjectIntoFrame	slot 22 of class 0x73: transforms its position and rotation by the other object's frame with func_00128018 and func_00128150
 func_001F4318	FindOrActivateSwitchedCollider	RunPendingWorldLoad's helper: returns func_001F4008 of the object func_001F3C38 finds, else the active switched collider, else activates the current one
 func_001F5208	GetContactTrackerRecord	returns the record at +0x550 of the contact tracker (the script built-in func_00109488 calls it)
@@ -3343,9 +3343,9 @@ func_001D73A8	InitPathFollower	slot 0 of class 0x19: runs InitSwitchedCollider, 
 func_001D7440	StartPathFollower	slot 16 of class 0x19: starts the placed object, resolves its links (D_002752A0), stores its heading, creates its state walker, starts the three engine sounds of worlds 3, 5 and 6, finds its class 0x104 partner, and for kind 1 points the 0x426 objects at it
 func_001DACB0	StartPathFollowerEffect	slot 78 of class 0x19: with a target at +0xB78 clears its main clip (SetAgentMainClip) and forwards the call to the target's slot 78, else runs StartSwitchedColliderEffect
 func_001DAE48	CapturePathFollowerPose	slot 69 of class 0x19: runs CaptureColliderPose (CaptureModeWalkerTarget calls it too)
-func_001DB0C8	SetPathFollowerSecondPath	as SetPathFollowerPath for a second path: stores the path object at +0x848 and asks its slot 10 for the location of the position at +0x100 into +0x84C (SetPathFollowerPath and the script built-ins call it)
+func_001DB0C8	SetPathFollowerSecondPath	as SetPathFollowerPath for a second path: stores the path object at +0x848 and asks its slot 10 for the location of the position at +0x100 into +0x84C (the script built-in func_00109488 calls it)
 func_001DB480	InitWorldHashLists	CreateTypedRecord calls it for a world (type 0x6C): sets the link offset 0xC on each of the 0x200 lists at +0x84 that GetHashedSlot picks from
-func_001DBEC8	RunDueDelayedScriptCalls	UpdateWorld and RunQueuedCalls call it with the time step: takes it off the delay of each (delay, expression) entry of the world's script variable +0x1EF8 (the list func_00117668 appends to), evaluates the expressions that fall due and drops their entries from the list
+func_001DBEC8	RunDueDelayedScriptCalls	UpdateWorld calls it with the time step: takes it off the delay of each (delay, expression) entry of the world's script variable +0x1EF8 (the list func_00117668 appends to), evaluates the expressions that fall due and drops their entries from the list
 func_001DD218	ClipSegmentToPlanes	clips a segment of two homogeneous points against the six planes D_002756B0, moving the outside end onto each plane it crosses; returns 0 when both ends lie outside one plane (DrawProjectedLine calls it)
 func_001DD690	TestLevelEntryFlag1	the script built-in func_00103590 calls it: returns bit 0x1 of the level entry's word (GetLevelEntryWord)
 func_001DD6B0	TestLevelEntryFlag2	the script built-in func_00103640 calls it: returns bit 0x2 of the level entry's word (GetLevelEntryWord)
@@ -3413,7 +3413,7 @@ func_001EF868	StartStateResetObject	slot 16 of class 0x62: starts the placed obj
 func_001EF900	SetStateAndNotify	sets the state +0x2D0 of a class 0x62 object when it changes: entering or leaving state 2 adds or removes its keyed entries (+0x2E4, +0x2E8) with func_0013ECB0, stamps the clock at +0x2D4 and sends message 0x16 with the old and new state (slot 14)
 func_001EF8C0	AddStateResetEntry	the script built-in func_001063D0 calls it: adds or updates a keyed entry in the table at +0x2E8 of a class 0x62 object, counted at +0x2E4 (UpsertKeyedEntry, capacity 4)
 func_001F3C38	FindArrivalPoint	finds the class 0x74 object with an id (under a parent id) for FindOrActivateSwitchedCollider; failing that, of all class 0x74 objects, the one with the id, else one with +0x94 set while a style 2 screen fade runs, else one with a record
-func_001F4008	PlaceAtArrivalPoint	FindOrActivateSwitchedCollider's step with the class 0x74 object FindArrivalPoint found: gives the current switched collider (GetCurrentSwitchedCollider) the point's world rotation and position (GetObjectWorldRotation, GetObjectWorldPosition) and activates it (ActivateSwitchedCollider); with none it moves the camera there
+func_001F4008	PlaceAtArrivalPoint	with a class 0x74 object (the one FindArrivalPoint found, for FindOrActivateSwitchedCollider; also func_00101950 and func_0017BCD0): gives the current switched collider (GetCurrentSwitchedCollider) the point's world rotation and position (GetObjectWorldRotation, GetObjectWorldPosition) and activates it (ActivateSwitchedCollider); with none it moves the camera there
 func_001F3D80	LoadArrivalPoint	slot 10 of class 0x74: reads its rotation and position, its property records, a count of typed records it creates (CreateTypedRecord) and loads, and a list of 16-bit ids
 func_001F3EE0	CopyArrivalPoint	slot 9 of class 0x74: runs CopyObjectData and makes copies of the other's records (CreateObjectCopy) into a new array
 func_001F3F80	StartArrivalPoint	slot 16 of class 0x74: runs StartObject and, for each of its records, calls its slot 21 with +0x18 and starts it (ResolveAndStartObject)
@@ -3422,3 +3422,18 @@ func_001F4808	StartObjectSubGroupFinish	finishes a best-time run in progress (Fi
 func_001F57E0	OfferTrackedNodeLaunch	fills the request with the record's word +0x04, the record and LaunchPlayerAtTrackedNode as its callback, and raises script event 2 on the record's owner (RequestAttachedSetLaunch, RequestContactTrackerLaunch)
 func_001F56D8	LaunchPlayerAtTrackedNode	the callback OfferTrackedNodeLaunch hands over: picks the best target among the record's nodes (ChooseBestTargetCandidate); with nodes found sets the player on the arc to it and puts it in state 2, else LaunchPlayerAtTarget
 func_001F51E8	RequestContactTrackerLaunch	slot 71 of class 0x36: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
+func_001D35A8	ComputeCountedColliderWorldFrame	slot 19 of class 0x4C, its override of ComputeColliderWorldFrame
+func_001D6DD8	StepStandIn	slot 28 of class 0x3F (the stand-in SwapInPlayerStandIn places), its override of StepCollider
+func_001D7778	StepPathFollower	slot 28 of class 0x19, its override of StepCollider
+func_001DA7E0	UpdatePathFollowerAttachmentFrames	slot 39 of class 0x19, its override of UpdateAttachmentFrames
+func_001DCEA0	LoadWorld	slot 10 of class 0x6C (the world), its override of LoadObjectProperties: reads the world's strings, property records and slot objects, its script entry table and blocks, creates its records (CreateTypedRecord) and cone volumes, loads its screen resources and sound banks, fills the screen colour, spawns the listed copies (SpawnListedObjectCopies) and runs the queued calls
+func_001DDD18	StartRedirectObject	slot 16 of class 0x5E, its override of StartPlacedObject
+func_001DF520	ApplyTintBlendColliderPendingImpulse	slot 48 of class 0x14, its override of ApplyColliderPendingImpulse
+func_001EBD10	GetBeatPressColliderPositionAt	slot 34 of class 0x1C, its override of GetPlacedObjectPositionAt
+func_001EBDD0	GetBeatPressColliderRotationAt	slot 35 of class 0x1C, its override of GetPlacedObjectRotationAt
+func_001EC3D8	DrawTempoAgent	slot 37 of class 0x13, its override of DrawAgent
+func_001EF768	UpdateAttachedSetBounds	slot 50 of class 0x1F, its override of UpdateColliderBounds
+func_001F0AE0	UpdateWarpPage	slot 17 of class 0x67, its override of UpdatePlacedObject
+func_001F4AE0	UpdateObjectSubGroup	slot 17 of class 0x7D, its override of UpdatePlacedObject; it finishes the group with StartObjectSubGroupFinish
+func_001F3408	EvaluateOscillator	UpdateAttachments calls it on each chained node: once per clock time (+0x34 keeps the last), rebuilds the frames when +0x8E4 is set (RefreshOscillatorFrames), then for each 0xD0-byte entry at +0x50 turns kind 0 by the sine and cosine of 2 pi (time * rate + phase) and kind 1 by a noise blend (EvaluateNoiseBlend)
+func_001F2840	RefreshOscillatorFrames	EvaluateOscillator calls it while the dirty flag +0x8E4 of a class 0x8D object is set: rebuilds the entries' matrices (InitIdentityMatrix, BuildMatrixFromRotationAndTranslation, MultiplyMatrices, InvertMatrix4x4)

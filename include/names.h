@@ -2670,6 +2670,7 @@
 #define StepCountedCollider                        func_001D3470
 #define CollectCountedColliderContacts             func_001D34E0
 #define HandleCountedColliderEvent                 func_001D3500
+#define ComputeCountedColliderWorldFrame           func_001D35A8
 #define HandleCountedColliderNotification          func_001D3678
 #define FillOuterProductTable                      func_001D3C68
 #define SetPlayerBlendWeights                      func_001D40A0
@@ -2689,6 +2690,7 @@
 #define FinishPlayerRequest                        func_001D6608
 #define SwapInPlayerStandIn                        func_001D6CB0
 #define TestStandInMayContact                      func_001D6DA0
+#define StepStandIn                                func_001D6DD8
 #define StopStandIn                                func_001D7018
 #define HandleStandInNotification                  func_001D7040
 #define InitOwnerMessage                           func_001D7098
@@ -2699,6 +2701,7 @@
 #define FlushOutputBuffer                          func_001D72C8
 #define InitPathFollower                           func_001D73A8
 #define StartPathFollower                          func_001D7440
+#define StepPathFollower                           func_001D7778
 #define FindNearestValueOutsideSpans               func_001D8470
 #define UpdatePathFollowerPace                     func_001D8578
 #define GetWrappedDifference                       func_001D86F8
@@ -2708,6 +2711,7 @@
 #define RecordPathFollowerProgress                 func_001D9338
 #define UpdatePathFollower                         func_001D9C98
 #define UpdatePathFollowerScreenElements           func_001DA170
+#define UpdatePathFollowerAttachmentFrames         func_001DA7E0
 #define UpdatePathFollowerBounds                   func_001DAC20
 #define StartPathFollowerEffect                    func_001DACB0
 #define RecomputePathFollowerFrame                 func_001DAE18
@@ -2749,6 +2753,7 @@
 #define CreateConeVolumes                          func_001DC9A0
 #define SkipBufferedBlocks                         func_001DCCC0
 #define SpawnListedObjectCopies                    func_001DCD28
+#define LoadWorld                                  func_001DCEA0
 #define ClipSegmentToPlanes                        func_001DD218
 #define DrawProjectedLine                          func_001DD3E0
 #define DrawProjectedCurve                         func_001DD548
@@ -2788,6 +2793,7 @@
 #define GetSaveSpareCount                          func_001DDCB0
 #define GetReserveUnitCount                        func_001DDCC8
 #define InitRedirectObject                         func_001DDCE0
+#define StartRedirectObject                        func_001DDD18
 #define MarkRedirectToSelf                         func_001DE768
 #define InitTintBlendCollider                      func_001DE798
 #define StartTintBlendCollider                     func_001DE808
@@ -2795,6 +2801,7 @@
 #define FinishTintBlendColliderRequest             func_001DEBB8
 #define SetTintBlendColliderTracked                func_001DF290
 #define ApplyTintBlendColliderTint                 func_001DF2C8
+#define ApplyTintBlendColliderPendingImpulse       func_001DF520
 #define IsTintBlendColliderRequestBlocked          func_001DF5A0
 #define AcceptTintBlendColliderRequest             func_001DF700
 #define CollectTintBlendColliderContacts           func_001DFA10
@@ -2942,12 +2949,15 @@
 #define JudgeBeatPressInput                        func_001EB748
 #define IsBeatPressColliderRequestBlocked          func_001EBC88
 #define AppendBeatPressEntry                       func_001EBCD8
+#define GetBeatPressColliderPositionAt             func_001EBD10
+#define GetBeatPressColliderRotationAt             func_001EBDD0
 #define InitTempoAgent                             func_001EBEB0
 #define LoadTempoAgent                             func_001EBF40
 #define StartTempoAgent                            func_001EBFB0
 #define UnregisterTempoAgent                       func_001EC098
 #define RegisterTempoAgent                         func_001EC0B8
 #define IsTempoAgentTargetInRange                  func_001EC0D8
+#define DrawTempoAgent                             func_001EC3D8
 #define LeaveTempoAgentState                       func_001EC478
 #define DecrementTempoAgentGauge                   func_001EC528
 #define EnterTempoAgentState                       func_001EC570
@@ -3008,6 +3018,7 @@
 #define UpdateAttachedSet                          func_001EEF90
 #define HandleAttachedSetNotification              func_001EF3D8
 #define RebuildAttachedSet                         func_001EF520
+#define UpdateAttachedSetBounds                    func_001EF768
 #define RequestAttachedSetLaunch                   func_001EF808
 #define GetAttachedSetTrackedNodes                 func_001EF828
 #define ClearAttachedSetTrackedNodes               func_001EF830
@@ -3036,6 +3047,7 @@
 #define StartWarpPage                              func_001F0758
 #define SelectWarpPageEntry                        func_001F0878
 #define SetPendingWarpEntry                        func_001F08F0
+#define UpdateWarpPage                             func_001F0AE0
 #define HandleWarpPageNotification                 func_001F0F70
 #define SetWarpPageMode                            func_001F1050
 #define SetWarpCursor                              func_001F1590
@@ -3046,17 +3058,19 @@
 #define HandleWarpMenuInput                        func_001F1A08
 #define SetWarpMenuOpen                            func_001F1C90
 #define DrawColoredCircle                          func_001F1E38
-#define InitC8D                                    func_001F2758
+#define InitOscillator                             func_001F2758
 #define AttachNodeToOwner                          func_001F2798
+#define RefreshOscillatorFrames                    func_001F2840
 #define HashToUnitFloat                            func_001F31F8
 #define SampleSmoothNoise                          func_001F3250
 #define ApplyBiasCurve                             func_001F3328
 #define EvaluateNoiseBlend                         func_001F3358
-#define AddC8DXEntry                               func_001F36E8
-#define AddC8DYZEntry                              func_001F3768
-#define GetC8DCurrentEntry                         func_001F37D8
-#define SetC8DEntryPeriod                          func_001F3850
-#define GetC8DEntryPeriod                          func_001F38A0
+#define EvaluateOscillator                         func_001F3408
+#define AddOscillatorXEntry                        func_001F36E8
+#define AddOscillatorYZEntry                       func_001F3768
+#define GetOscillatorCurrentEntry                  func_001F37D8
+#define SetOscillatorEntryPeriod                   func_001F3850
+#define GetOscillatorEntryPeriod                   func_001F38A0
 #define AppendVector4ToBuffer                      func_001F38F0
 #define InitTransformObject                        func_001F39F8
 #define ReadTransformObject                        func_001F3A40
@@ -3077,6 +3091,7 @@
 #define SetObjectSubGroupState                     func_001F4760
 #define StartObjectSubGroupFinish                  func_001F4808
 #define StartObjectSubGroupFade                    func_001F4A30
+#define UpdateObjectSubGroup                       func_001F4AE0
 #define InitLookupObject                           func_001F4E18
 #define StartLookupObject                          func_001F4E48
 #define PushObjectCameraController                 func_001F4ED0

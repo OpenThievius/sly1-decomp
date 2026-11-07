@@ -500,12 +500,12 @@ void* func_001F37D8(C8D* obj, s32 value)
 
 void* func_001F3810(Obj_1F3810* self, s32 mode)
 {
-    return GetC8DCurrentEntry(self, mode, 0);
+    return GetOscillatorCurrentEntry(self, mode, 0);
 }
 
 void* func_001F3830(void* self, s32 mode)
 {
-    return GetC8DCurrentEntry(self, mode, 1);
+    return GetOscillatorCurrentEntry(self, mode, 1);
 }
 
 void func_001F3850(void* self, f32 x)
