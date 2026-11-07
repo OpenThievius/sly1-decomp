@@ -17,6 +17,7 @@
 #include "key_record.h"
 #include "key_id.h"
 #include "base_object.h"
+#include "fpu.h"
 #include "asm_func.h"
 #include "point_object.h"
 #include "id_linked_object.h"
@@ -1362,6 +1363,8 @@ s32 RequestColliderLaunch(Collider* self)
     return 0;
 }
 
+s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+
 INCLUDE_ASM(func_001BBC38);
 
 INCLUDE_ASM(func_001BBEB8);
@@ -1376,7 +1379,19 @@ void MoveCollider(Collider* self, void* b, f32 x)
 
 INCLUDE_ASM(func_001BC0E0);
 
-INCLUDE_ASM(func_001BC260);
+void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
+{
+    f32 roots[4];
+    f32 m = p[2] >? self->v140.z;
+    out[2] = Fpu::Sqrt(self->gravity.z * ((m + a - self->v140.z) * -2.0f));
+    SolveQuadratic(roots, self->gravity.z * 0.5f, out[2], self->v140.z - p[2]);
+    f32 dx = p[0] - self->v140.x;
+    f32 r0 = roots[0];
+    f32 r1 = roots[1];
+    f32 t = r1 >? r0;
+    out[0] = dx / t;
+    out[1] = (p[1] - self->v140.y) / t;
+}
 
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {

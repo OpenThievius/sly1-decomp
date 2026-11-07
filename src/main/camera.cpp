@@ -5,6 +5,7 @@
 #include "world.h"
 #include "camera.h"
 #include "pad_record.h"
+#include "fpu.h"
 #include "asm_func.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
@@ -377,7 +378,26 @@ void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
     out[3] = out[0] + 36864.0f;
 }
 
-INCLUDE_ASM(func_00143560);
+void func_00189F58(void* out, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+f32 func_002054F0(f32 x);
+
+void func_00143560(Camera* self)
+{
+    u8* s = (u8*)self;
+    f32 one = 1.0f;
+    f32 t = func_002054F0(self->f1C4 * 0.5f);
+    f32 inv = one / self->f1C4;
+    f32 w = *(f32*)(s + 0x1E0);
+    *(f32*)(s + 0x1F4) = t;
+    *(f32*)(s + 0x1F0) = t * w;
+    f32 d = w * w + one;
+    *(f32*)(s + 0xB0) = (one >? self->f1C0 * inv);
+    f32 q = t * Fpu::Sqrt(d);
+    *(f32*)(s + 0x1EC) = q * self->f1E4 + one;
+    func_00189F58(s + 0xC0, 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->f1E4, self->f1E8);
+    ComputeCameraFogTerms(self, (f32*)(s + 0x208), one);
+    func_00144540(self);
+}
 
 void InitCamera(Camera* self)
 {
