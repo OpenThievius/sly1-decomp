@@ -1534,13 +1534,71 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_00121760);
+void ComputePositionSpringAcceleration(PlacedObject* self, Vec02* a, Vec02* b, Vec02* out, f32 dt)
+{
+    Vec02 force = *(Vec02*)D_00248D30;
+    Vec02 d;
+    f32* k = (f32*)self->p20C;
+    f32* k2;
+    if (k != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(self->pos));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32 s = k[2] * len + k[1] + k[0] / len;
+            Vu0::Q(force) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    k2 = (f32*)self->p210;
+    if (k2 != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(self->v150));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32 s = k2[2] * len + k2[1] + k2[0] / len;
+            f32 limit = 1.0f / dt;
+            if (limit < s) {
+                s = limit;
+            }
+            Vu0::Q(force) = Vu0::MulAddX(Vu0::Q(force), Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    *out = force;
+}
 
 INCLUDE_RODATA(jtbl_00249990);
 
 INCLUDE_ASM(func_001218C0);
 
-INCLUDE_ASM(func_00121C48);
+void ComputeRotationSpringAcceleration(PlacedObject* self, Mat02* rot, Vec02* spin, Vec02* out, f32 dt)
+{
+    Vec02 force = *(Vec02*)D_00248D30;
+    if (self->p214 != 0) {
+        Mat02 m;
+        Vec02 axis;
+        f32 angle;
+        MultiplyMatrices3x3(&self->rot, rot, &m);
+        MatrixToAxisAngle(&m, &angle, &axis);
+        if (1e-4f < angle) {
+            f32* k = (f32*)self->p214;
+            f32 s = k[2] * angle * angle + k[1] * angle + k[0];
+            Vu0::Q(force) = Vu0::MulX(Vu0::Q(axis), Vu0::Scalar(s));
+        }
+    }
+    if (self->p218 != 0) {
+        Vec02 d;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*spin), Vu0::Q(self->v160));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32* k = (f32*)self->p218;
+            f32 s = k[2] * len + k[1] + k[0] / len;
+            f32 limit = 1.0f / dt;
+            if (limit < s) {
+                s = limit;
+            }
+            Vu0::Q(force) = Vu0::MulAddX(Vu0::Q(force), Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    *out = force;
+}
 
 INCLUDE_RODATA(jtbl_002499C0);
 
@@ -1758,7 +1816,43 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     }
 }
 
-INCLUDE_ASM(func_00122CB0);
+// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
+// once.
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* p = (const u128*)&a;
+    const u128* q = (const u128*)&b;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 b0 = q[0], b1 = q[1], b2 = q[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
+    r.r[2] = z;
+    *out = r;
+}
+
+void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
+{
+    Mat02 m;
+    Attachment* p = self;
+    while ((p = p->link.next) != 0) {
+        s8 f = p->mode2;
+        if (f == 0) { p = 0; break; }
+        if (f != -1) break;
+    }
+    if (p != 0) {
+        p->vt->getMatrix(p, &m);
+    } else {
+        GetIdentityMatrix(0, &m);
+    }
+    MulRotation(out, self->m90, m);
+}
 
 f32 GetIdentityPoseIndexedValue(void)
 {
