@@ -8,7 +8,7 @@ void func_00168B68(f32 t)
 
     InitGifPacket(&f);
     n = (s32)(t * 50.0f);
-    func_001683B8();
+    SignalDisplaySync();
     D_002626CC = 0;
     if (n > 0) {
         do {
@@ -24,7 +24,7 @@ void func_00168B68(f32 t)
             EndGifPacket(&f);
             AddDmaEndTag(&f);
             DetachPacketBuffer(&f, 0, 0);
-            func_001686E8(g_gifChannel, &f.value);
+            SendGsPacketAndWait(g_gifChannel, &f.value);
             FlipDisplayFrame();
         } while (i < n);
     }

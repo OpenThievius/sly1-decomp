@@ -139,7 +139,7 @@ void func_001C71E0(Agent* self)
     s32 v;
     PostLoadPlacedObject(self);
     if (self->f924 != -1) {
-        self->f928 = func_0015A448((s32)self->world, self->f924, self);
+        self->f928 = FindFirstObjectByIdMode4((s32)self->world, self->f924, self);
     }
     if (self->fB4C != -1) {
         func_001CAB10(self);
@@ -923,7 +923,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         s32 count;
         BaseObject** list;
         func_00128018(self, 0, self->fB60, &vec);
-        func_00152010(D_00261EF0, &vec, self->fB58, self->fB70);
+        ScatterObjectsAtPoint(g_scatterController, &vec, self->fB58, self->fB70);
         InitContactPairFlags((s32)g_currentWorld, self);
         if (((Animation*)self->f750) != 0) {
             s32 i;
@@ -1223,7 +1223,7 @@ void* func_001CA758(Agent* self, void* arg)
     if (item != 0) {
         item->state = 0;
         func_0012D398(item, self);
-        func_00182ED8(item);
+        ResolveAndStartObject(item);
     }
     return item;
 }
@@ -1287,7 +1287,7 @@ void func_001CA8E8(Agent* self)
         if (e->id != -1) {
             void* r = FindFirstObjectById(self->world, 0x101, e->id, self);
             e->obj = r;
-            if (r != 0) func_00182ED8(r);
+            if (r != 0) ResolveAndStartObject(r);
         }
     }
 }
@@ -1311,7 +1311,7 @@ void func_001CA998(Agent* self, s32 index)
     if (index == -1) {
         v = 0;
     } else {
-        v = func_0015A448(self->world, index, self);
+        v = FindFirstObjectByIdMode4(self->world, index, self);
         if (v == 0)
             return;
     }
@@ -1476,7 +1476,7 @@ void func_001CAEE0(u8* self, Obj_1CAEE0* other)
 {
     other->vtbl[0x90 / 4](other, self + 0xAB0);
     if (IsObjectOfKind(other, 7) != 0) {
-        func_00175170(other, 4, 0x2B);
+        SetPlayerState(other, 4, 0x2B);
     }
 }
 
@@ -1621,7 +1621,7 @@ FoundItem* func_0015A448(u32 a, FoundItem* b, ItemKeeper* c);
 void func_001CB7A0(ItemKeeper* a0)
 {
     for (s32 i = 0; i < a0->owned.wantedCount; i++) {
-        FoundItem* r = func_0015A448((u32)g_currentWorld, a0->owned.wanted[i], a0);
+        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->owned.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->owned.count;
             if ((u32)n < 16) {
@@ -1632,7 +1632,7 @@ void func_001CB7A0(ItemKeeper* a0)
         }
     }
     for (s32 i = 0; i < a0->listed.wantedCount; i++) {
-        FoundItem* r = func_0015A448((u32)g_currentWorld, a0->listed.wanted[i], a0);
+        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->listed.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->listed.count;
             if ((u32)n < 16) {

@@ -73,7 +73,7 @@ void func_001C6928(Player* self, Other_1C6928* other)
     case 3:
         if (held == 0) goto tail;
         flag = 0;
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
         break;
     case 6:
         if (self->f239C < 6) {

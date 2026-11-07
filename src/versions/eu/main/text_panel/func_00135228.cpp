@@ -13,13 +13,13 @@ void func_00135228(Obj_eu_135228* self, V24A0* q)
 {
     if (self->f570 == 1)
     {
-        if ((u32)func_00160D10() & 0x800)
+        if ((u32)MaskWorldBitsBySave() & 0x800)
         {
             func_00134B48((T217D_440*)self, q);
         }
         u32 mask;
         GetCurrentLevelBit(&mask);
-        if ((u32)func_00160D10() & mask)
+        if ((u32)MaskWorldBitsBySave() & mask)
         {
             u8 c0[4];
             u8 c1[4];

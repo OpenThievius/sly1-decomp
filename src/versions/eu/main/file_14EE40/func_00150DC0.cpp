@@ -125,9 +125,9 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             func_001365A0(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
             g_camera->ctl460.f5C = 0;
         }

@@ -483,7 +483,7 @@ void func_0018DB20(C3C* self, void* in1, void* in2)
             }
             BuildPlacedObjectTransform(self, in2, &f.blkA0);
             BuildMatrixFromRotationAndTranslation(&f, &f.tbl30, &f.q60);
-            func_00188668(&f.blkF0, &f.blkA0, &f.q60);
+            MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             func_00125C90(self, in1, &f.blkA0);
         }
@@ -600,12 +600,12 @@ void func_0018E558(void)
         t->f134 = 0;
         func_001F6B60(t->f130);
         t->f134 = 1;
-        func_001686E8(g_gifChannel, (s32)t->f114);
+        SendGsPacketAndWait(g_gifChannel, (s32)t->f114);
         t->f134 = 2;
-        func_001684E8();
-        func_001686E8(g_gifChannel, (s32)t->f118);
+        ApplyPendingDisplayFlip();
+        SendGsPacketAndWait(g_gifChannel, (s32)t->f118);
         FlipDisplayFrame();
-        func_001686E8(g_gifChannel, (s32)t->f118);
+        SendGsPacketAndWait(g_gifChannel, (s32)t->f118);
         FlipDisplayFrame();
     }
 }
@@ -722,7 +722,7 @@ s32 IpuDmaSink::Idle()
 s32 func_0018E940(MovieStream* self)
 {
     s32 r;
-    func_0011D6A8(0xFFFFFFFF);
+    SuspendIopVoices(0xFFFFFFFF);
     PushIopChannel2Setting(g_currentWorld, 0, 0);
     func_0011E010();
     while (PollIopCommands() != 0) {
@@ -747,7 +747,7 @@ s32 func_0018E940(MovieStream* self)
 void func_0018EA48(Obj_18EA48* self)
 {
     if (self->flag != 0) {
-        func_0011E460();
+        ResetIopRing();
         self->flag = 1;
         ResetRingBuffer((u8*)self + 0x2C);
         ResetRingBuffer((u8*)self + 0x4C);
@@ -762,7 +762,7 @@ void func_0018EAA0(Obj_18EAA0* self)
     SetIopVolumeChannel(2, self->f8C);
     SetIopVolumeChannel(8, self->f90);
     PopIopChannel2Setting(g_currentWorld);
-    func_0011D6D8(0xFFFFFFFF);
+    ResumeIopVoices(0xFFFFFFFF);
 }
 
 s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right)

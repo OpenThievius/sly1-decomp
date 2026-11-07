@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x17B998 to 0x17D248: the entry queue, class 0x8F (include/entry_queue.h), and
+// the adders of each kind of entry. Its name is ours, after the class.
 #include "common.h"
 #include "switched_collider.h"
 #include "c4a.h"

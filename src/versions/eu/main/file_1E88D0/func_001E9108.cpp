@@ -11,13 +11,13 @@ void func_001E9108(Obj_1E9108* obj)
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
-    if (D_00262C68 & 4) {
+    if (g_padRouting & 4) {
         s2 = &g_padRecord;
     } else {
         s2 = &g_blankPadRecord;
     }
     s5 = 0;
-    if (D_00262C6C & 0x80) {
+    if (g_padSelectFlags & 0x80) {
         if (0.1f < g_gameClock.time) {
             ClearPadSelectFlags(0x80);
         }
@@ -49,7 +49,7 @@ void func_001E9108(Obj_1E9108* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);
@@ -63,7 +63,7 @@ void func_001E9108(Obj_1E9108* obj)
         break;
     }
     case 3: {
-        if (D_00262C6C & 2) break;
+        if (g_padSelectFlags & 2) break;
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;

@@ -377,7 +377,7 @@ s32 func_00190450(C0E* self, s32* arg)
 s32 func_001904E0(C0E* self, Msg_1904E0* msg)
 {
     Args_1904E0 args;
-    if (func_00160C58(self, msg) != 0 && self->fC34 == 0) {
+    if (HasSpareCount(self, msg) != 0 && self->fC34 == 0) {
         self->fA68 = 1;
     } else {
         self->fA68 = 0;
@@ -473,7 +473,7 @@ void func_00190770(C0E* self, s32 code, Req_190770* req)
     if (code == 0x13) {
         if (req->f_0 == (s32)self->f7E0) {
             if (req->f_8 == 0x53A) {
-                func_00160DA0();
+                SpendReserveUnit();
             }
         }
     }
@@ -697,7 +697,7 @@ void func_00191EB0(void)
 
 void func_00191EC0()
 {
-    func_00152438(&g_targetVectors.list, 0x38);
+    SetListLinkOffset(&g_targetVectors.list, 0x38);
 }
 
 void func_00191EE8(void)
@@ -1042,7 +1042,7 @@ void func_00192A70(void* self, PadRecord* rec)
 {
     if (IsTopCameraController(&g_camera->ctl454) != 0)
         return;
-    PadRecord* a1 = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
+    PadRecord* a1 = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
     StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {

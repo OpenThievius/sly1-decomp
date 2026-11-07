@@ -55,7 +55,7 @@ extern void func_00137A60(void*, s32, void*);
 void func_001372E0(void* self, s32 flags)
 {
     CloseBufferedStream(self);
-    if (flags & 1) func_0018D778(self);
+    if (flags & 1) FreeObjectMemory(self);
 }
 
 struct Ring_00137328 {
@@ -1579,7 +1579,7 @@ void func_00139DE8(WorldListedObject* self)
 {
     AppendToList(&self->world->list1CC0, self);
     InitPlacedObject(self);
-    func_00152438(&self->members, 0x1090);
+    SetListLinkOffset(&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;

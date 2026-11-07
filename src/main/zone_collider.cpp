@@ -59,7 +59,7 @@ void func_0013CD80(MaskedCollider* self)
     s32 v = FindFirstObjectById(self->world, 0x101, self->f614, self);
     self->f618 = v;
     if (v != 0) {
-        func_00182ED8(v);
+        ResolveAndStartObject(v);
     }
 }
 
@@ -500,7 +500,7 @@ void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
         void* object = FindFirstObjectById(self, 0x104, items[i], context);
         if (object) {
             AppendToQueuedObjects(list, object);
-            func_00182ED8(object);
+            ResolveAndStartObject(object);
         }
     }
 }
@@ -744,7 +744,7 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
     if (n > 0) {
         Ent_13ECB0* p = ent;
         do {
-            s32 r = func_0015A198(self, 0x304, p->f0, arg, 1, &out);
+            s32 r = GatherObjectsByMode(self, 0x304, p->f0, arg, 1, &out);
             if (r != 1) {
                 return r;
             }
@@ -791,7 +791,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
             if (MatchesObjectId(self->owner, obj->key40)) {
                 other = self->owner;
             } else if (obj->key40 != -1) {
-                other = func_0015A448(self->owner->world, obj->key40, self->owner);
+                other = FindFirstObjectByIdMode4(self->owner->world, obj->key40, self->owner);
             } else {
                 other = 0;
             }
@@ -816,7 +816,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
     }
     func_0013ECB0(self->owner->world, self->count148, (Ent_13ECB0*)self->table14C, self->owner, mode == 0);
     if (self->f140 != -1 && q == 0) {
-        void* t = func_0015A448(self->owner->world, self->f140, self->owner);
+        void* t = FindFirstObjectByIdMode4(self->owner->world, self->f140, self->owner);
         if (mode != 0) {
             if (mode == 1) {
                 ResetStepSequence(t);
@@ -1004,7 +1004,7 @@ s32 func_0013F940(TriggerZone* s, f32* out)
     for (i = s->count7E0 - 1; i >= 0; i--) {
         Entry28* e = (Entry28*)((u8*)s + 0x7F0 + i * 0x30);
         func_00189150(&s->rot, e, &loc);
-        f32 t = func_00188CE0(&loc);
+        f32 t = GetMatrixRotationCosine(&loc);
         if (best < t) {
             best = t;
             idx = i;
@@ -1200,7 +1200,7 @@ void func_00140140(ZoneCollider* self)
     StartZoneRecord(&self->zone);
     func_00140238(self, 0);
     for (s32 i = 0; i < self->countIds; i++) {
-        void* p = func_0015A448(self->world, self->ids[i], self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->ids[i], self);
         if (p != 0) {
             s32 n = self->countObjs;
             self->objs[n] = (s32)p;

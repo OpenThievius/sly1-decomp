@@ -93,7 +93,7 @@ void func_001D29C8(u32 mode)
         if (g_player == 0)
             goto tail;
         if (g_player->f2220 == 0xD)
-            func_00175170(g_player, 0, -1);
+            SetPlayerState(g_player, 0, -1);
         break;
     case 3:
         if (g_player == 0)
@@ -153,7 +153,7 @@ s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
         } else if (idx >= count) {
             idx = 0;
         }
-    } while (!(func_00160D10() & table[idx]));
+    } while (!(MaskWorldBitsBySave() & table[idx]));
     return idx;
 }
 

@@ -227,7 +227,11 @@ struct Player : TurningCollider {
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
     Part07 f1290;           // 0x1290: the same with f614
-    u8 pad1390[0x1504 - 0x1390];
+    void* f1390[0x11];      // 0x1390: the animation node of each state (func_00174F50)
+    void* f13D4[0x11];      // 0x13D4: those of state 6, by +0x239C
+    void* f1418[0x15];      // 0x1418: those of state 4, by sub-state
+    void* f146C;            // 0x146C: the node of state 6's special cases
+    u8 pad1470[0x1504 - 0x1470];
     void* f1504;            // 0x1504
     void* f1508[4];         // 0x1508
     void* f1518;            // 0x1518

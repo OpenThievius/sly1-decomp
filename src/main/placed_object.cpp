@@ -1627,7 +1627,7 @@ void func_00123448(StateTrigger* self)
     }
     if (self->found558 != 0) {
         self->f55C = (StateWalker*)CreateStateWalker(self->found558, self, -1, 1);
-        func_00182ED8(self->found558);
+        ResolveAndStartObject(self->found558);
     }
     g_activeListFrames = (ListFrame*)fr.f0C;
 }
@@ -1724,7 +1724,7 @@ void func_00123888(StateTrigger* self, s32 mode)
     ReleaseSoundLevel(self->f624);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 0);
     if (mode == 1) {
-        func_00160D00(D_002623D8);
+        ReleaseCounterRef(D_002623D8);
     }
 store:
     self->state = mode;
@@ -1771,7 +1771,7 @@ arm2:
     func_00123C20(self);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 1);
     TriggerScriptEvent(self, 2, 0, 0);
-    func_00160CF0(D_002623D8);
+    IncrementCounter(D_002623D8);
 }
 
 void func_00123AB0(StateTrigger* object, s32 mode)
@@ -1879,8 +1879,8 @@ ASM_FUNC(func_00123E88);
 
 void func_00123ED0(PlacedObject* self)
 {
-    func_00152438(&self->children, 0x1C);
-    func_00152438(&self->list60, 0x58);
+    SetListLinkOffset(&self->children, 0x1C);
+    SetListLinkOffset(&self->list60, 0x58);
     if (self->parent != 0) {
         self->bits24 = 1;
         self->bits26 = 0;
@@ -1904,7 +1904,7 @@ void func_00123ED0(PlacedObject* self)
     Init_00123ED0::Copy(&self->rot, &g_identityMatrix);
     Init_00123ED0::Copy(&self->m110, &g_identityMatrix);
     Init_00123ED0::Copy(&self->m1A0, &g_identityMatrix);
-    func_00152438(&self->list1E0, 8);
+    SetListLinkOffset(&self->list1E0, 8);
 }
 
 void func_00124050(PlacedObject* self)
@@ -2039,7 +2039,7 @@ void func_001249A8(PlacedObject* self)
     SavePlacedObjectInitialFrame(self);
     Sub_1249A8* sub = (Sub_1249A8*)self->f200;
     if (sub != 0 && sub->f20 != -1) {
-        void* v = func_0015A448(self->world, sub->f20, self);
+        void* v = FindFirstObjectByIdMode4(self->world, sub->f20, self);
         if (v != 0) {
             SetAimTarget(self, v);
         }
@@ -2078,7 +2078,7 @@ void func_00124A48(PlacedObject* self)
             func_001B1DA8(self->f284, self->f2A8 * 0.5f);
         }
         if ((self->f284)->fB0 != -1) {
-            (self->f284)->fB4 = func_0015A448(self->world, (self->f284)->fB0, self);
+            (self->f284)->fB4 = FindFirstObjectByIdMode4(self->world, (self->f284)->fB0, self);
             if ((self->f284)->fB4 != 0) {
                 BuildTexturePackets((self->f284)->fB4, self->f284);
             }
@@ -2173,7 +2173,7 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
                 *(void**)((u8*)self + it->offset) = node;
             }
             if (!(it->flags & 4)) {
-                func_00182ED8(node);
+                ResolveAndStartObject(node);
             }
             if (it->flags & 0x10) {
                 AddObjectListener(node, self);
@@ -2426,7 +2426,7 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
     if (src->f284) {
         u8* p = func_001B5EC0(&self->world->pool1BF4);
         CopyMemory(p, src->f284, 0x2E0);
-        func_00152450(p + 0xB8);
+        ClearListLinks(p + 0xB8);
         self->f284 = (RangeRecord*)p;
         AppendToList(&self->world->list1C00, p);
     }
@@ -2688,19 +2688,19 @@ void func_00128DB8(PlacedObject* self)
     s32 v = p->flags | 0x8000;
     p->flags = v;
     if (v & 0x10) {
-        p->p60 = (BaseObject*)func_0015A448(self->world, (s32)p->p60, self);
+        p->p60 = (BaseObject*)FindFirstObjectByIdMode4(self->world, (s32)p->p60, self);
         p->p64 = (BaseObject*)1;
     }
     if (p->flags & 0x20) {
-        BaseObject* r = (BaseObject*)func_0015A448(self->world, (s32)p->p84, self);
+        BaseObject* r = (BaseObject*)FindFirstObjectByIdMode4(self->world, (s32)p->p84, self);
         p->p84 = r;
         s32 x = (s32)r->parent;
         p->f80 = x;
         p->p88 = FindCommonAncestor(self, x);
     }
     if (p->flags & 0x40) {
-        p->p60 = (BaseObject*)func_0015A448(self->world, (s32)p->p60, self);
-        p->p64 = (BaseObject*)func_0015A448(self->world, (s32)p->p64, self);
+        p->p60 = (BaseObject*)FindFirstObjectByIdMode4(self->world, (s32)p->p60, self);
+        p->p64 = (BaseObject*)FindFirstObjectByIdMode4(self->world, (s32)p->p64, self);
     }
 }
 
@@ -3907,7 +3907,7 @@ void func_0012B868(void) {}
 void func_0012B870(Animation* self)
 {
     InitObject(self);
-    func_00152438(&self->props6C, 0x3C);
+    SetListLinkOffset(&self->props6C, 0x3C);
     Kin83* k = &self->kin;
     k->pos = 1.0f;
     k->vel = 0.0f;
@@ -4479,7 +4479,7 @@ AnimationPlayer* func_0012D3F8(World* pool)
     AnimationPlayer* o = (AnimationPlayer*)PopZeroedFreeSlot(&pool->pool1B58);
 
     o->vt = &g_animationPlayerMethods;
-    func_00152438(&o->list44, 0x20);
+    SetListLinkOffset(&o->list44, 0x20);
     o->f60 = (u8*)o + 0x64;
 
     return o;
@@ -4784,10 +4784,10 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         StopTimer(g_timerElement);
         break;
     case 28: {
-        Collider* a = (Collider*)func_0015A448(world, ((Info_12D5D0*)msg->a8.p)->f0, owner->f18);
+        Collider* a = (Collider*)FindFirstObjectByIdMode4(world, ((Info_12D5D0*)msg->a8.p)->f0, owner->f18);
         Collider* b;
         if (((Info_12D5D0*)msg->a8.p)->f4 != -1) {
-            b = (Collider*)func_0015A448(owner->world, ((Info_12D5D0*)msg->a8.p)->f4, owner->f18);
+            b = (Collider*)FindFirstObjectByIdMode4(owner->world, ((Info_12D5D0*)msg->a8.p)->f4, owner->f18);
         } else {
             b = 0;
         }
@@ -4867,7 +4867,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         if (msg->a8.i == -1) {
             t = (Collider*)self->fC;
         } else {
-            t = (Collider*)func_0015A448(world, msg->a8.i, self->fC);
+            t = (Collider*)FindFirstObjectByIdMode4(world, msg->a8.i, self->fC);
         }
         if (t == 0) {
             break;
@@ -4934,9 +4934,9 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         if (scope == 0) {
             scope = self->anim;
         }
-        Collider* a = (Collider*)func_0015A448(world, msg->a8.i, scope);
+        Collider* a = (Collider*)FindFirstObjectByIdMode4(world, msg->a8.i, scope);
         if (a != 0) {
-            link = FindListNodeByKey(a, (Collider*)func_0015A448(world, msg->aC.i, scope));
+            link = FindListNodeByKey(a, (Collider*)FindFirstObjectByIdMode4(world, msg->aC.i, scope));
         }
         if (link != 0) {
             DestroyStateWalker(link);
@@ -5004,10 +5004,10 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         break;
     case 53:
         ((VFnP_12D5D0)g_stackedCaptionGroup.vt[17])(&g_stackedCaptionGroup, 0);
-        func_0014AF10(&g_stackedCaptionGroup);
+        ClearItemColumn(&g_stackedCaptionGroup);
         break;
     case 54:
-        func_0014AF38(&g_stackedCaptionGroup, msg->a8.h.lo, msg->aC.i, (f32)msg->a8.h.hi * 0.00390625f);
+        PostItemColumnEntry(&g_stackedCaptionGroup, msg->a8.h.lo, msg->aC.i, (f32)msg->a8.h.hi * 0.00390625f);
         break;
     case 55:
     {
@@ -5367,7 +5367,7 @@ void func_0012F8C8(IdFilterObject* self)
 {
     StartPlacedObject(self);
     if (self->id != -1) {
-        self->id = (s32)func_0015A448(self->world, self->id, self);
+        self->id = (s32)FindFirstObjectByIdMode4(self->world, self->id, self);
         self->mode = 2;
         return;
     }
@@ -5471,7 +5471,7 @@ StreamReader* func_0012FCF0(StreamReader* obj, s32 value)
 void func_0012FD30(void* self, s32 flags)
 {
     CloseStreamReader((StreamReader*)self);
-    if (flags & 1) func_0018D778(self);
+    if (flags & 1) FreeObjectMemory(self);
 }
 
 s32 func_0012FD78(void* self, KeyId* pair)

@@ -250,7 +250,7 @@ s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
         if (!(m < 2)) return 1;
     }
     if (self->f638 != 0) return 1;
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         func_001C3FC8(self, 2);
         self->f638 = 1;
         self->f63C = g_gameTime[0];
@@ -329,7 +329,7 @@ void func_001C3FC8(PlacedObject* self, s32 state)
         self->desc02()->m21(self, (Vec02*)&q);
         W(self, 0x694) = 0;
         D_0026E228[0] = -1;
-        if (state == 3) func_00151E20(D_00261EF0, 1.0f);
+        if (state == 3) RaiseScatterLevels(g_scatterController, 1.0f);
     }
     f12 = 0.0f;
     switch (state) {

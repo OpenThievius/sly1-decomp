@@ -139,7 +139,7 @@ void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
     Quad16 mat[4];
     Quad16 tmp;
 
-    func_001891C0(self, arg, mat);
+    TransformMatrixByObject(self, arg, mat);
     if (count > 0) {
         do {
             func_00188700(mat, dst, &tmp, 1.0f);
@@ -224,7 +224,7 @@ void func_0014DBD0(T2176* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6
     ctx.a2 = a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    func_001EB168((void*)func_0014DB78, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
+    func_001EB168((void*)MeasurePathCurveDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
@@ -453,7 +453,7 @@ void func_0014EC70(T2176_708* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32
     ctx.a2 = a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    func_001EB168((void*)func_0014DA98, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
+    func_001EB168((void*)MeasureSplinePathDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {

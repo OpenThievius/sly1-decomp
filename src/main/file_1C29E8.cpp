@@ -92,7 +92,7 @@ void func_001C30E8(Obj_1C30E8* self)
     BeginDmaTag(&g_vifPacketWriter);
     b.f98 = 0;
     SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
-    func_00161BB0(&b, r->f4);
+    SetVertexBatchMode(&b, r->f4);
     func_00161B10(&b, ((u8*)&D_00248D30), ((Obj2_1C30E8*)r->f0)->f2A8);
     idx = r->f8;
     if (idx != r->fC) {

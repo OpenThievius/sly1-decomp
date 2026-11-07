@@ -74,7 +74,7 @@ void func_00150790(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+                    g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
                 } else {
                     g_camera->ctl460.f5C = 0;
                 }

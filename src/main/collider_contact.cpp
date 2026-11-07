@@ -9,10 +9,11 @@
 // contact chains, the searches over a collider's edges, and class 0x03's contact method
 // (func_00187F40) with the routines it runs, most of them VU0 assembly.
 
-struct Weight_264840 { f32 a; f32 b; };
-struct Weight_2648A8 { f32 a; f32 b; };
+// A surface kind's weight and value; a pair's number is the sum of the values over the sum of
+// the weights.
+struct SurfaceWeight { f32 a; f32 b; };
 
-Weight_264840 D_00264840[13] = {
+SurfaceWeight D_00264840[13] = {
     {1.0f, 0.5f},
     {3.0f, 2.4f},
     {1.0f, 0.4f},
@@ -27,7 +28,7 @@ Weight_264840 D_00264840[13] = {
     {1.0f, -10.0f},
     {1.0f, -10.0f}
 };
-Weight_2648A8 D_002648A8[13] = {
+SurfaceWeight D_002648A8[13] = {
     {1.0f, 0.5f},
     {5.0f, 1.0f},
     {1.0f, 0.8f},
@@ -44,28 +45,28 @@ Weight_2648A8 D_002648A8[13] = {
 };
 void func_00121338(void* self);
 
-struct IndexPair_185C18 { s32 a; s32 b; };
+// Two surface kinds, indexes into the weight tables.
+struct SurfacePair { s32 a; s32 b; };
 
 extern s32 D_00262C64;
 
-f32 func_00185C18(IndexPair_185C18* p)
+f32 func_00185C18(SurfacePair* p)
 {
-    f32 num = D_00264840[p->a].b + D_00264840[p->b].b;
-    f32 den = D_00264840[p->a].a + D_00264840[p->b].a;
+    f32 num = g_surfaceFriction[p->a].b + g_surfaceFriction[p->b].b;
+    f32 den = g_surfaceFriction[p->a].a + g_surfaceFriction[p->b].a;
     f32 r = num / den;
     if (r < 0.0f) r = 0.0f;
     if (g_buttonCodeFlags & 8) r = r * 0.2f;
     return r;
 }
 
-struct IndexPair_185CA0 { s32 a; s32 b; };
 
 
-f32 func_00185CA0(IndexPair_185CA0* p)
+f32 func_00185CA0(SurfacePair* p)
 {
     f32 one = 1.0f;
-    f32 num = D_002648A8[p->a].b + D_002648A8[p->b].b;
-    f32 den = D_002648A8[p->a].a + D_002648A8[p->b].a;
+    f32 num = g_surfaceBounce[p->a].b + g_surfaceBounce[p->b].b;
+    f32 den = g_surfaceBounce[p->a].a + g_surfaceBounce[p->b].a;
     f32 r = num / den;
     if (r < 0.0f) return 0.0f;
     if (one < r) r = one;

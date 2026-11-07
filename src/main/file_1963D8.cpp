@@ -346,7 +346,7 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
     PlacedObject* x;
     PlacedObject* h;
 
-    func_00152438((u8*)&self->cells, 8);
+    SetListLinkOffset((u8*)&self->cells, 8);
     ReadBufferedRotation3(rd, &self->rot);
     ReadBufferedVector3(rd, &self->pos);
     n = ReadBufferedU8(rd);
@@ -503,8 +503,8 @@ void func_00196938(C18* self)
     self->f688 = 120.0f;
     self->f624 = D_0026A71C;
     self->f628 = D_0026A718;
-    func_00152438(&self->f6A8, 0x568);
-    func_00152438(&self->f69C, 0x568);
+    SetListLinkOffset(&self->f6A8, 0x568);
+    SetListLinkOffset(&self->f69C, 0x568);
     g_gaugeCollider = self;
 }
 
@@ -567,7 +567,7 @@ void func_001973D8(C18* self)
     } else {
         c = t;
     }
-    func_00151E20(D_00261EF0, 1.0f - c * 0.8f);
+    RaiseScatterLevels(g_scatterController, 1.0f - c * 0.8f);
 }
 
 void func_00197458(s32 unused, s32 flag)

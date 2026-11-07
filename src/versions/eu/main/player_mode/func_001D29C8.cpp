@@ -9,7 +9,7 @@ void func_001D29C8(u32 mode)
         if ((*(Player**)&g_player) == 0)
             goto tail;
         if ((*(Player**)&g_player)->f2220 == 0xD)
-            func_00175170((*(Player**)&g_player), 0, -1);
+            SetPlayerState((*(Player**)&g_player), 0, -1);
         break;
     case 3:
         if ((*(Player**)&g_player) == 0)

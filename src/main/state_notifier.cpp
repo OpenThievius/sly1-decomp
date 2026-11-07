@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The file from 0x146100 to 0x149398 (its .rodata from 0x249E50, its .data from 0x2619A0):
 // class 0x39's methods (0x146100 to 0x146340), then class 0x55 and the classes 0x56 to 0x5B
-// derived from it, with their helpers. Its name is ours, after its first address.
+// derived from it, with their helpers. Its name is ours, after the state notifiers it
+// holds most of.
 #include "common.h"
 #include "asm_func.h"
 #include "state_notifier.h"
@@ -460,7 +461,7 @@ void func_00147EF8(C58* self, s32 kind, void* target)
         args.self = self;
         obj->desc->m1B(obj, &args);
     }
-    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_00147ED0, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteTimeRangeNotifier, self, 0, 0);
 }
 
 void func_00147FB0(C58* self)
@@ -484,9 +485,9 @@ void func_00148038(World* self)
     s32 n;
     s32 c;
 
-    if (func_00148938(self, 0x56, 1, &obj) == 0) {
+    if (GatherObjectsOfKind(self, 0x56, 1, &obj) == 0) {
         g = g_saveData;
-        n = func_00160D98();
+        n = GetSpareCountLimit();
         c = g->f19E4 + 1;
         c = (c < n) ? c : n;
         g_saveData->f19E4 = c;
@@ -520,11 +521,11 @@ void func_001481A0(void* self)
     s32 r;
     g->f19E8 = c;
     if (c >= 100) {
-        r = func_00160D98();
+        r = GetSpareCountLimit();
         if (g->f19E4 < r) {
             g_saveData->f19E8 = 0;
             ((PSys_1481A0*)&D_0026CE48)->f26C = 250.0f;
-            D_0026CE48.onDone = (void (*)(void*))func_00148038;
+            D_0026CE48.onDone = (void (*)(void*))PlaceSpareSoundNotifier;
             D_0026CE48.doneArg = s->prev;
             return;
         }
@@ -532,7 +533,7 @@ void func_001481A0(void* self)
             g_saveData->f19E8 = 0;
             D_0026CE48.rate = 250.0f;
             D_0026CE48.doneArg = 0;
-            D_0026CE48.onDone = (void (*)(void*))func_00148178;
+            D_0026CE48.onDone = (void (*)(void*))AddReserveUnit;
             {
                 D_0026C6C8.vt->m14(&D_0026C6C8);
             }
@@ -563,7 +564,7 @@ void func_00148298(C58* self, s32 mode)
                     n->rot50[1] = s->m110.r[1];
                     n->rot50[2] = s->m110.r[2];
                 } else {
-                    func_001481A0(self);
+                    CountPickupTowardHundred(self);
                 }
                 D_0026CE48.vt->m14(&D_0026CE48);
                 f32 z = 0.0f;
@@ -648,7 +649,7 @@ void func_00148598(C59* self, s32 mode)
         }
         TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;
-        func_00151FC8(D_00261EF0);
+        ResetScatterLevels(g_scatterController);
         StartMemoryCardSave(g_memoryCard);
     }
     SetStateNotifierState(self, mode);
@@ -672,7 +673,7 @@ void func_00148698(C5A* self)
 void func_00148718(C5A* self)
 {
     StartStateNotifier(self);
-    D_0026EC68 = self;
+    g_deadlineNotifier = self;
 }
 
 void func_00148748(Dispatch_148748* self)
@@ -694,7 +695,7 @@ void func_00148770(C5A* self, s32 kind, void* msg)
         fr.note.owner = self;
         dev->desc->m1B(dev, &fr.note);
     }
-    AppendQueuedCall(self->world, (void*)func_00148748, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)CompleteDeadlineNotifier, self, 0, 0);
 }
 
 void func_00148828(C5A* self)
@@ -743,7 +744,7 @@ s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
     if (arr == 0) {
         arr = AllocateBackMemory(n * 4);
     }
-    count = func_00148938(self, a1, n, arr);
+    count = GatherObjectsOfKind(self, a1, n, arr);
     i = 0;
     step = 6.2831855f / (f32)n;
     ang = RandomFloatInRange(0.0f, 6.2831855f);
@@ -778,7 +779,7 @@ void func_00148CE0(World* self)
 {
     GameProgress* g = g_saveData;
     if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
-    s32 r = func_00160D98();
+    s32 r = GetSpareCountLimit();
     if (g->f19E4 < r) {
         if (D_0026EC58 < 2) return;
     }
@@ -825,7 +826,7 @@ void func_00148E40(C57* self, s32 kind, void* msg)
         fr.note.owner = self;
         dev->desc->m1B(dev, &fr.note);
     }
-    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_00148E18, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteCountdownNotifier, self, 0, 0);
 }
 
 void func_00148EF8(C57* self)
@@ -881,7 +882,7 @@ one_case:
             c->rot50[1] = self->m110.r[1];
             c->rot50[2] = self->m110.r[2];
         } else {
-            func_00148F80(self);
+            AddReserveUnitNow(self);
         }
         D_0026C6C8.vt->m14(&D_0026C6C8);
         SetFlagTableBit(g_flagTable, self->f37C);

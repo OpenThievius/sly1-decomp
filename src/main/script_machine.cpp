@@ -1250,7 +1250,7 @@ ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     switch (count) {
     case 3:
     case 4: {
-        func_001884C0(a);
+        ResetMatrixHomogeneous(a);
         for (s32 i = 0; i < count; i++) {
             a[i] = *(Row_115510*)n->v;
             n = n->next;
@@ -1258,7 +1258,7 @@ ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         break;
     }
     case 9:
-        func_001884C0(a);
+        ResetMatrixHomogeneous(a);
     case 16: {
         s32 m = count == 9 ? 3 : 4;
         for (s32 i = 0; i < m; i++) {
@@ -1626,7 +1626,7 @@ ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue t;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    func_001891C0(args[0].i, args[1].i, a);
+    TransformMatrixByObject(args[0].i, args[1].i, a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -1654,7 +1654,7 @@ ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
     *(Mat4A*)obj = *(Mat4A*)args[0].v;
-    func_001884C0(obj);
+    ResetMatrixHomogeneous(obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2166,7 +2166,7 @@ ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     u8 buf[0x100];
     ScriptValue t;
     InitScriptValue(&q);
-    s32 r = func_0015A198(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
+    s32 r = GatherObjectsByMode(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
     MakeScriptRefList(&t, r, buf);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2193,7 +2193,7 @@ ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     u8 buf[0x100];
     ScriptValue t;
     InitScriptValue(&q);
-    s32 r = func_0015A198(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
+    s32 r = GatherObjectsByMode(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
     MakeScriptRefList(&t, r, buf);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2402,7 +2402,7 @@ ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
     func_00128150(args[0].i, args[1].i, args[2].i, obj);
-    func_001884C0(obj);
+    ResetMatrixHomogeneous(obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2458,7 +2458,7 @@ ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     InitScriptValue(&t);
     void* s1 = args[0].p;
     ConvertScriptValueToFloat(&u, args + 1);
-    func_001566C8(s1, u.f);
+    SendPointEventToWorldListener(s1, u.f);
     DestroyScriptValue(&u, 2);
     SetScriptValueTag(&t, 0x22);
     CopyConstructScriptValue(ret, &t);

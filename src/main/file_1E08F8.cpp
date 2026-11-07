@@ -308,7 +308,7 @@ struct Ctx_1E0CD0 : OutputBuffer {
     {
         u8 buf = ch;
         while (count-- > 0) {
-            if (func_001D7190(this, (const char*)&buf, 1) != 1) {
+            if (AppendToOutputBuffer(this, (const char*)&buf, 1) != 1) {
                 break;
             }
         }
@@ -1615,9 +1615,9 @@ void func_001E4EA8(Self_1E4EA8* self)
     UpdateSoundEmitters();
     SetVolumeChannelFactor(0xA, 0, 1.0f);
     FindOrActivateSwitchedCollider(g_currentWorld, self->f8, self->fC);
-    func_00151E18(D_00261EF0);
-    func_00160CE8(D_002623D8);
-    func_0016B520(D_0026FA90);
+    NotifyScatterControllerLoaded(g_scatterController);
+    ResetCounter(D_002623D8);
+    RestoreSelectionCaptionCamera(D_0026FA90);
     func_00138C00(g_currentWorld, 0);
     UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);
     if (self->f10 & 0x10) ((VT1_1E4EA8*)D_0026C6C8.vt)->m38(&D_0026C6C8);

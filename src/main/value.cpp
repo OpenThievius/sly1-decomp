@@ -130,7 +130,7 @@ void func_0011B060(ScriptValue* self, s32 flags)
 {
     ReleaseScriptValuePayload(self);
     if (flags & 1) {
-        func_0018D778(self);
+        FreeObjectMemory(self);
     }
 }
 

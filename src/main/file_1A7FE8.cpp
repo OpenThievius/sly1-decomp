@@ -631,7 +631,7 @@ void func_001A8208(Self_1A8208* self)
             goto done;
         c0:
             self->f3C->f8 = 1;
-            func_00152438((u8*)self->f3C + 0x14, 0x18);
+            SetListLinkOffset((u8*)self->f3C + 0x14, 0x18);
         c1: {
                 s32 r = CountListItems((u8*)self->f3C + 0x14);
                 s32 lim = r + 1;
@@ -679,7 +679,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         } else {
             other->sub->f8 = 1;
-            func_00152438((u8*)other->sub + 0x14, 0x18);
+            SetListLinkOffset((u8*)other->sub + 0x14, 0x18);
             self->sub = 0;
         }
         GetObjectPoolShare(self);
@@ -700,7 +700,7 @@ void func_001A8590(ObjectPool* self)
     }
     self->f168 = 1;
     if (self->id4C != -1) {
-        void* p = func_0015A448(self->world, self->id4C, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id4C, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 0x7E) != 0) {
                 self->f60 = p;
@@ -712,7 +712,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id50 != -1) {
-        void* p = func_0015A448(self->world, self->id50, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id50, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 2) != 0) {
                 self->fE0 = p;
@@ -722,7 +722,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id54 != -1) {
-        void* p = func_0015A448(self->world, self->id54, self);
+        void* p = FindFirstObjectByIdMode4(self->world, self->id54, self);
         if (p != 0) {
             if (IsObjectOfKind(p, 0x73) != 0) {
                 self->f160 = p;
@@ -732,7 +732,7 @@ void func_001A8590(ObjectPool* self)
         }
     }
     if (self->id58 != -1) {
-        self->f5C = func_0015A448(self->world, self->id58, self);
+        self->f5C = FindFirstObjectByIdMode4(self->world, self->id58, self);
     }
 }
 
@@ -1120,7 +1120,7 @@ void func_001A9FD0(void)
     }
     u8* g = g_screenFade;
     void* b;
-    if (*(s32*)D_00262C68 & 4) {
+    if (*(s32*)g_padRouting & 4) {
         b = g_padRecord;
     } else {
         b = g_blankPadRecord;

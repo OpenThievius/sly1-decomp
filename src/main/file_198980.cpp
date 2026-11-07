@@ -336,7 +336,7 @@ void func_001989B0(ObjectSet* self)
             s32 i = self->count570;
             self->found574[i] = p;
             self->count570 = i + 1;
-            func_00182ED8(p);
+            ResolveAndStartObject(p);
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
@@ -351,7 +351,7 @@ void func_00198A88(ObjectSet* self)
 
     PostLoadPlacedObject(self);
     for (i = 0; i < self->n55C; i++) {
-        void* r = func_0015A448(self->world, self->keys560[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->keys560[i], self);
         if (r != 0) {
             self->found574[self->count570++] = r;
         }
@@ -368,7 +368,7 @@ void func_00198B28(ObjectSet* self)
         if (func_0012C9A8(node)) {
             self->f558 = 1;
         }
-        func_00182ED8(node);
+        ResolveAndStartObject(node);
     }
     if (((VFn_198B28*)self->desc)[76](self) == 0) {
         ((VFn_198B28*)self->desc)[7](self);
@@ -567,7 +567,7 @@ void func_00199428(C2E* self)
         i++;
         ((s32*)self->f5B0)[count] = r;
         self->n5AC = count + 1;
-        func_00182ED8(r);
+        ResolveAndStartObject(r);
     }
 }
 
@@ -776,7 +776,7 @@ s32 func_0019A000(s32 bits)
     if ((g_saveData->f19F0 & mask) == mask) {
         return 0;
     }
-    if (func_001602A0() & 2) {
+    if (ComputeCompletionMask() & 2) {
         return 0;
     }
     GameProgress* c = g_saveData;
@@ -817,7 +817,7 @@ void func_0019A148(C17* self)
 void func_0019A178(Obj_19A178* self, s32 x)
 {
     self->f4 = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->f0);
-    func_00182ED8(self->f4);
+    ResolveAndStartObject(self->f4);
     self->f8 = CreateStateWalker(self->f4, self->f0, x, 0);
 }
 
@@ -840,7 +840,7 @@ void func_0019A1E0(C17* o)
     for (s32 e = 0; e < 6; e++) {
         Ent17* en = &o->f658[e];
         for (s32 k = 0; k < en->count; k++) {
-            VObj_19A1E0* r = func_0015A448(o->world, en->keys[k], o);
+            VObj_19A1E0* r = FindFirstObjectByIdMode4(o->world, en->keys[k], o);
             if (r) {
                 en->list[en->n++] = r;
             }
@@ -848,8 +848,8 @@ void func_0019A1E0(C17* o)
         if (en->n > 0)
             en->pick = RandomIntInRange(0, en->n - 1);
     }
-    o->f648 = (void*)func_0015A448(o->world, o->f644, o);
-    o->f650 = func_0015A448(o->world, o->f64C, o);
+    o->f648 = (void*)FindFirstObjectByIdMode4(o->world, o->f644, o);
+    o->f650 = FindFirstObjectByIdMode4(o->world, o->f64C, o);
     if (((VObj_19A1E0*)o->f650))
         ((VObj_19A1E0*)o->f650)->vtbl[0x6C / 4](((VObj_19A1E0*)o->f650), o);
     if (((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 3) {
@@ -915,12 +915,12 @@ void func_0019A520(C17* self, s32 flag)
         ResetPadStepRepeat(g_padRecord);
         flags = g_saveData->f19EC;
         if ((flags & 8) == 0) {
-            a = func_0015A448((void*)g_currentWorld, 0x39A, self);
+            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39A, self);
         } else {
             if ((flags & 0x10) != 0) {
                 goto tail;
             }
-            a = func_0015A448((void*)g_currentWorld, 0x39B, self);
+            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39B, self);
         }
         if (a != 0) {
             n = self->f7D8;
@@ -943,8 +943,8 @@ tail:
             SetStateWalkerTarget(self->f614, 0x384);
         }
         self->f7D8 = 0;
-        if ((func_001602A0() & 4) != 0) {
-            func_00160578(4);
+        if ((ComputeCompletionMask() & 4) != 0) {
+            FadeOutAndQueueMovie(4);
         }
     }
 }
@@ -960,7 +960,7 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
         if (self->f654 != 0 && g_player != 0) {
             g_player->f23CC = self;
             g_player->f239C = 7;
-            func_00175170(g_player, 6, 16);
+            SetPlayerState(g_player, 6, 16);
         } else {
             s32 k;
             s32 a;
@@ -1043,8 +1043,8 @@ void func_0019AD68(C17* self)
             g->f19EC = v | 0x10;
         }
 
-        if (func_001602A0() & 4) {
-            func_001604B8(4);
+        if (ComputeCompletionMask() & 4) {
+            ApplyCompletionFlags(4);
         }
 
         sel = 0x37E;
@@ -1121,9 +1121,9 @@ void func_0019B0A0(ObjectGatherer* self)
     FindOrBuildMemberGroup(&self->group, self);
     ResolveObjectLinks(self, 1, (u8*)g_objectGathererLoadLinks);
     for (; k < 0x288; k++) {
-        void* node = func_0015A480(self->world, k, self);
+        void* node = FindFirstObjectByIdMode1(self->world, k, self);
         if (node != 0) {
-            func_00182ED8(node);
+            ResolveAndStartObject(node);
             if (k < 0x279) {
                 self->lowObjects[self->lowCount++] = node;
             } else {
@@ -1306,20 +1306,20 @@ void func_0019C728(C8B* self)
     Slot8B* s;
     s32 i;
     StartObject(self);
-    self->f3C = func_0015A448(self->world, self->first34, self);
+    self->f3C = FindFirstObjectByIdMode4(self->world, self->first34, self);
     if (self->f3C == 0) return;
-    self->f40 = func_0015A480(self->world, self->second38, self->f3C);
+    self->f40 = FindFirstObjectByIdMode1(self->world, self->second38, self->f3C);
     if (self->f40 == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        Node8B* n = (Node8B*)func_0015A480(self->world, s->fC, self->f3C);
+        Node8B* n = (Node8B*)FindFirstObjectByIdMode1(self->world, s->fC, self->f3C);
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
     ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
     func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
-    void* nd = func_0015A480(self->world, 0x36, self->f3C);
+    void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
     if (nd != 0) func_00139B38(self->f3E4, nd);
     f32 buf[24];
     func_0019CC10(self, buf, self->f54, self->f58, self->f5C);

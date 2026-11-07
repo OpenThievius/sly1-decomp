@@ -80,7 +80,7 @@ u8* func_0018D500(s32 size)
     if (size == 0) {
         return 0;
     }
-    func_0018D4F8(size);
+    CheckAllocationSize(size);
     result = g_frontCursor;
     g_frontCursor = result + ((size + 15) & ~15);
     return result;
@@ -126,7 +126,7 @@ u8* func_0018D658(s32 size)
     if (size == 0) {
         return 0;
     }
-    func_0018D4F8(size);
+    CheckAllocationSize(size);
     result = g_backCursor;
     result = result - ((size + 15) & ~15);
     g_backCursor = result;

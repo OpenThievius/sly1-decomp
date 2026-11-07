@@ -534,7 +534,7 @@ void func_00193270(S_193270* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
 void func_00193288(State_193288* self, s32 value)
 {
 	if (self->ptr != 0) {
-		if (self->size == 0) { self->scaled = value << 1; self->size = value; func_00168AF8(self); }
+		if (self->size == 0) { self->scaled = value << 1; self->size = value; SendDisplayResetPacket(self); }
 		else if (self->value == value) self->repeat++;
 		else self->repeat = 0;
 		self->value = value;
@@ -584,7 +584,7 @@ void func_00193318(Obj_193318* o)
     AddDmaEndTag(&buf.f);
     CloseDmaTag(&buf.f);
     DetachPacketBuffer(&buf.f, 0, 0);
-    func_00168A48(&buf);
+    SendPacketToBothBuffers(&buf);
 }
 
 char* func_00193598(s32 index)
@@ -1377,8 +1377,8 @@ void func_00195958(T217D_6D0* self)
         }
         return;
     case 27:
-        if ((func_001602A0() & 8) != 0) {
-            func_00160578(8);
+        if ((ComputeCompletionMask() & 8) != 0) {
+            FadeOutAndQueueMovie(8);
             return;
         }
         ExitLevelFromPauseMenu(self, 0, 2);
@@ -1495,7 +1495,7 @@ void func_00195958(T217D_6D0* self)
             SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
             ApplyMemoryCardImage(&g_memoryCard);
-            func_00160948();
+            ResumeAtSavedLevel();
             return;
         }
         StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1505,7 +1505,7 @@ void func_00195958(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, -1);
         g_memoryCard.f4F44 = &D_002542D8[sel];
         ApplyMemoryCardImage(&g_memoryCard);
-        func_00160948();
+        ResumeAtSavedLevel();
         return;
     case 11: {
         Ent_195958* e;

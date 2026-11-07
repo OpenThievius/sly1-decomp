@@ -190,7 +190,7 @@ void func_00141210(FlaggedObject* self)
                 self->objsA[n] = node;
                 self->countA = n + 1;
             }
-            func_00182ED8(node);
+            ResolveAndStartObject(node);
 skip:
             void* next = *(void**)frame.cursor;
             frame.cursor = (void*)((s32)next + frame.next_off);
@@ -207,7 +207,7 @@ void func_00141338(FlaggedObject* self)
     PostLoadPlacedObject(self);
     s32 i = 0;
     while (i < self->nIdsA) {
-        void* r = func_0015A448(self->world, self->idsA[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->idsA[i], self);
         if (r != 0) {
             s32 k = self->countA;
             self->objsA[k] = r;
@@ -217,7 +217,7 @@ void func_00141338(FlaggedObject* self)
     }
     i = 0;
     while (i < self->nIdsB) {
-        void* r = func_0015A448(self->world, self->idsB[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->idsB[i], self);
         if (r != 0) {
             s32 k = self->countB;
             self->objsB[k] = r;
@@ -257,9 +257,9 @@ void func_00141438(FlaggedObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->countA; i++)
-        func_00182ED8(self->objsA[i]);
+        ResolveAndStartObject(self->objsA[i]);
     for (s32 i = 0; i < self->countB; i++)
-        func_00182ED8(self->objsB[i]);
+        ResolveAndStartObject(self->objsB[i]);
     if (self->childId == -1) {
         Iter_141438 it;
         u8* obj;
@@ -274,7 +274,7 @@ void func_00141438(FlaggedObject* self)
         }
         g_activeListFrames = (ListFrame*)it.saved;
     } else {
-        self->child = func_0015A448(self->world, self->childId, self);
+        self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
     if (self->f5A8 != 0) {
         self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);
@@ -332,7 +332,7 @@ void func_0012C7B0(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
 
 void func_00141870(FlaggedObject* self)
 {
-    func_00151ED8(D_00261EF0, self);
+    RaiseScatterLevelForObject(g_scatterController, self);
     s32 sel;
     if (self->handle != 0) {
         sel = TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) ? 0x549 : 0x548;

@@ -4,11 +4,11 @@ extern s32 D_eu_00263710;
 
 void func_00160948(void)
 {
-    Key_160948* k = func_00160180((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    Key_160948* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
         k = (Key_160948*)((u8*)&D_00247AB0 + D_eu_00263710 * 0x20);
     }
-    func_00160CC8(D_002623D8);
+    ClearTwoWords(D_002623D8);
     if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((Key_160948*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {

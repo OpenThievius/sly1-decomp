@@ -385,7 +385,7 @@ s32 func_001AFAF8(TimedObject* a0, Collider* a1)
         return 0;
     }
     if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
-        if ((func_00160D10() & 0x12000) != 0) {
+        if ((MaskWorldBitsBySave() & 0x12000) != 0) {
             return 0;
         }
     }
@@ -904,19 +904,19 @@ void func_001B1438(Self_1B1438* self, s32* out)
                     Side_1B1438* b = &n->side[lastSide - x];
                     Side_1B1438* a = &n->side[x];
                     Tgt_1B1438* o = (Tgt_1B1438*)b->f0;
-                    if (a->f4 == self && func_001AED78(self, o) != 0) {
+                    if (a->f4 == self && IsObjectInAcceptLists(self, o) != 0) {
                         if (self->f618 == 0) {
                             *out = self->f554 == 0 ? 2 : 6;
                         }
                         if ((u32)(*out - 5) < 2) {
                             if (o == (Tgt_1B1438*)g_player) {
-                                func_001D7098(&buf, 1, self);
+                                InitOwnerMessage(&buf, 1, self);
                                 if (((Tgt_1B1438*)g_player)->vtbl[0x140 / 4]((Tgt_1B1438*)g_player, &buf) != 0) {
                                     func_001AEF68(self);
                                 }
                             } else {
                                 req.Init(self, o, k);
-                                func_00177838(&req, 0, 0);
+                                FindNodeForQuery(&req, 0, 0);
                             }
                         }
                     }

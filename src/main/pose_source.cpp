@@ -622,7 +622,7 @@ void func_0011ECB8(World* self, void* a1, void* a2)
             if (r >= 0) {
                 self->slot1CE8[r] = (BaseObject*)obj;
 
-                func_00182ED8(obj);
+                ResolveAndStartObject(obj);
             }
         } while (--i != 0);
     }

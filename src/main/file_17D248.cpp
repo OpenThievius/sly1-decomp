@@ -7,7 +7,7 @@
 #include "placed_object.h"
 #include "asm_func.h"
 
-// From 0x17D248 to file_17FE00: player helpers in VU0 code, the probe test func_0017DE88, and the
+// From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
 // VU0 functions read, vectors, the probe segments and the list head g_pointObjects); its
 // .rodata from 0x24B060 to 0x24B164 is the jump tables of its VU0 functions.
@@ -163,7 +163,7 @@ void func_00152438(void* self, s32 value);
 
 void func_0017FD48(void)
 {
-    func_00152438(&g_pointObjects, 0x50);
+    SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
 void func_00152440(void* p);

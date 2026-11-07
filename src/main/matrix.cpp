@@ -50,7 +50,7 @@ void* func_001884E0(Quad_001884E0* destination, const Quad_001884E0* source)
 	destination[0] = source[0];
 	destination[1] = source[1];
 	destination[2] = source[2];
-	func_001884C0(destination);
+	ResetMatrixHomogeneous(destination);
 	return destination;
 }
 
@@ -236,7 +236,7 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
     Quad16 res[4];
 
     func_00188B48(self + 0x30, self, tmp);
-    func_00188668(res, arg, tmp);
+    MultiplyMatrices(res, arg, tmp);
     out[0] = res[0];
     out[1] = res[1];
     out[2] = res[2];

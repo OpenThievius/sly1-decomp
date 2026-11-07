@@ -788,9 +788,9 @@ void func_001B7968(Collider* self)
     ScriptValue local;
     s32 s0;
     InitScriptValue(&local);
-    func_00152438(&self->parts, 0x2E4);
+    SetListLinkOffset(&self->parts, 0x2E4);
     InitPlacedObject(self);
-    func_00160E80(&self->mesh);
+    ClearRecordBody(&self->mesh);
     self->meshCopy = self->mesh;
     if (self->parent != 0) {
         SetColliderAnchors(self, 3, 0, 3, 0);
@@ -3292,7 +3292,7 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         }
         case 4: {
             void* r = AcquireMatrixPayload();
-            func_001884E0(r, p);
+            CopyRotationMatrix(r, p);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
@@ -3358,7 +3358,7 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         case 4: {
             void* r = AcquireMatrixPayload();
             fn(p, r);
-            func_001884C0(r);
+            ResetMatrixHomogeneous(r);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }

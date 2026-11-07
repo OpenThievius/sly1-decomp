@@ -40,10 +40,10 @@ void func_00136238(Obj_136238_eu* self, s32 on)
     if (on != 0) {
         self->vt->f40(self, 2);
         GetCurrentLevelBit(&in);
-        if (func_00160D10() & in.a) {
-            if (func_00160D10() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
+        if (MaskWorldBitsBySave() & in.a) {
+            if (MaskWorldBitsBySave() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
         }
-        if (func_00160D10() & 0x800) {
+        if (MaskWorldBitsBySave() & 0x800) {
             n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = Min_136238_eu::Of(n, 0x100);
             if (n > 0) {

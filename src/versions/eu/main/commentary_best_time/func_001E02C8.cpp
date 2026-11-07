@@ -35,7 +35,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         f32 zero = 0.0f;
         f32 one = 1.0f;
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
-        func_00160C48(0);
+        SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
         SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
@@ -84,8 +84,8 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
                 cam->flags |= 8;
                 cam->f08 = o->f578;
                 g_currentLevelRecord->f440 = g_currentLevelRecord->f440 + 1;
-                if (func_001602A0() & 8) {
-                    func_001604B8(8);
+                if (ComputeCompletionMask() & 8) {
+                    ApplyCompletionFlags(8);
                     StartMemoryCardSave(&g_memoryCard);
                 }
             }
@@ -102,7 +102,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
     self->f570 = n;
     self->f574 = *self->f568;
     if (n == 2) {
-        func_00148CE0(g_currentWorld);
+        CompleteSoundNotifiers(g_currentWorld);
     }
     self->f578 = (self->f570 != 0);
 }

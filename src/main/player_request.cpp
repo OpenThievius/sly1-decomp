@@ -182,12 +182,12 @@ void func_001D4A98(Player* self) {
                 RunPlayerCallback(self);
             } else {
                 void* o = self->f2B70;
-                func_00175170(self, 2, 2);
+                SetPlayerState(self, 2, 2);
                 s32 r = func_001CF158(self, o);
-                func_00175170(self, 2, r);
+                SetPlayerState(self, 2, r);
             }
         } else {
-            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
+            ComputeTargetArc(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
         }
         break;
     }
@@ -218,7 +218,7 @@ void func_001D4C98(Player* self)
     if ((u32)(self->f2228 - 0x2D) < 5) {
         EndPlayerRequestState(self);
     } else {
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     }
 }
 
@@ -249,7 +249,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     if (self->f2220 == 6 && self->f239C == 2) {
         Ev07* tmp = msg;
         TriggerScriptEvent((s32)self->f23B0, 0x13, 1, &tmp);
-        func_00175170(self, 2, 5);
+        SetPlayerState(self, 2, 5);
         return 0;
     }
     self->f26B4 = *msg;
@@ -258,10 +258,10 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         s32 c;
         switch (self->f26B4.kind) {
         case 3:
-            c = func_00160D10() & 0x100;
+            c = MaskWorldBitsBySave() & 0x100;
             break;
         case 5:
-            c = func_00160D10() & 0x4000;
+            c = MaskWorldBitsBySave() & 0x4000;
             break;
         default:
             self->f2730 = 1;
@@ -272,7 +272,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         }
     check:
         if (self->f2730 != 0) {
-            if (func_00160C58() != 0) {
+            if (HasSpareCount() != 0) {
                 self->f26C4 = 1;
                 self->f26C8 = g_gameTime[0];
             }
@@ -288,7 +288,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
             } else {
-                func_00175170(self, 4, 0x2B);
+                SetPlayerState(self, 4, 0x2B);
             }
         }
         SetPlayerCallback(self, (s32)ContinuePlayerRequestKind0);
@@ -300,7 +300,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
             } else {
-                func_00175170(self, 4, 0x2B);
+                SetPlayerState(self, 4, 0x2B);
             }
         }
         if (400.0f < self->v150.z) {
@@ -327,33 +327,33 @@ s32 func_001D4D08(Player* self, Ev07* msg)
             id = 0x26;
             break;
         }
-        func_00175170(self, 4, id);
+        SetPlayerState(self, 4, id);
         SetPlayerCallback(self, (s32)ContinuePlayerRequestKind1Or2);
         break;
     }
     case 3:
-        if (self->f2730 == 0 || func_00160C58() != 0) {
-            func_00175170(self, 4, 0x27);
+        if (self->f2730 == 0 || HasSpareCount() != 0) {
+            SetPlayerState(self, 4, 0x27);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x2F);
+            SetPlayerState(self, 4, 0x2F);
         }
         break;
     case 4:
         self->desc02()->m20(self, (Vec02*)D_00275040);
-        if (func_00160C58() != 0) {
-            func_00175170(self, 4, 0x28);
+        if (HasSpareCount() != 0) {
+            SetPlayerState(self, 4, 0x28);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x31);
+            SetPlayerState(self, 4, 0x31);
         }
         break;
     case 5:
-        if (self->f2730 == 0 || func_00160C58() != 0) {
-            func_00175170(self, 4, 0x29);
+        if (self->f2730 == 0 || HasSpareCount() != 0) {
+            SetPlayerState(self, 4, 0x29);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x30);
+            SetPlayerState(self, 4, 0x30);
         }
         break;
     }
@@ -380,20 +380,20 @@ void func_001D51A0(Player* self)
         (IsObjectOfKind(self->f2B70, 0x70) || IsObjectOfKind(self->f2B70, 0x71) ||
          IsObjectOfKind(self->f2B70, 0x81) || IsObjectOfKind(self->f2B70, 0x6F) ||
          IsObjectOfKind(self->f2B70, 0x7F) || IsObjectOfKind(self->f2B70, 0x76))) {
-        if (func_00160C58()) {
+        if (HasSpareCount()) {
             func_00192C58(self);
             void* p = self->f2B70;
-            func_00175170(self, 2, 2);
-            func_00175170(self, 2, func_001CF158(self, p));
+            SetPlayerState(self, 2, 2);
+            SetPlayerState(self, 2, func_001CF158(self, p));
         } else {
-            func_00175170(self, 4, 0x2D);
+            SetPlayerState(self, 4, 0x2D);
         }
     } else {
-        if (func_00160C58()) {
-            func_00175170(self, 4, 0x24);
+        if (HasSpareCount()) {
+            SetPlayerState(self, 4, 0x24);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x2D);
+            SetPlayerState(self, 4, 0x2D);
         }
     }
     if (self->f2220 == 4) {
@@ -416,16 +416,16 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f3
 void func_001D5398(Player* self)
 {
     StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
-    func_00175170(self, 4, 0x2A);
+    SetPlayerState(self, 4, 0x2A);
     SetPlayerCallback(self, (s32)ContinuePlayerSubState2A);
 }
 
 void func_001D5418(Player* self)
 {
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         self->desc05()->m50(self);
     } else {
-        func_00175170(self, 4, 0x2D);
+        SetPlayerState(self, 4, 0x2D);
     }
 }
 
@@ -433,10 +433,10 @@ void func_001D5468(Player* self)
 {
     self->desc02()->m20(self, &self->v2BB0);
     self->desc02()->m21(self, &self->v2BC0);
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         self->desc05()->m50(self);
     } else {
-        func_00175170(self, 4, 0x2D);
+        SetPlayerState(self, 4, 0x2D);
     }
 }
 
@@ -509,7 +509,7 @@ void func_00160DA0(void);
 void func_001D5620(void* self)
 {
     func_0012AAE8(self, 1.0f);
-    func_00160DA0();
+    SpendReserveUnit();
 }
 
 struct SortedTarget { u8 pad[0x10]; f32 key; };

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Kind 0x2176: key-frame curves (src/main/file_14D0A8.cpp). A curve is a heap object that
+// Kind 0x2176: key-frame curves (src/main/path_curve.cpp). A curve is a heap object that
 // func_0014D9A8(kind) makes (0x1C bytes for kind 0, 0x1D0 for kind 1) and stores the table at
 // +0 and the kind at +4; the slot-10 loaders of classes 0x50 (func_00154F98, Rec50+0x20), 0x79
 // (func_00158B30, Rec79+0x20), 0x6E (func_001B2840, C6E+0x34) and 0x63 (func_001E2648,

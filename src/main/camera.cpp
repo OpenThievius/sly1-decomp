@@ -431,9 +431,9 @@ void func_00143648(Camera* self)
     self->ctl454.vt = (const Vt2173*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);
     self->ctl460.vt = (const Vt2173*)D_002173B0;
-    func_00149660(&self->ctl460, self);
+    InitTargetCameraController(&self->ctl460, self);
     self->ctl4C0.vt = (const Vt2173*)D_002173C8;
-    func_0014A888(&self->ctl4C0, self);
+    InitFrameCameraController(&self->ctl4C0, self);
     self->ctl510.vt = (const Vt2173*)D_002173E0;
     SetCameraControllerOwner(&self->ctl510, self);
     self->ctl520.vt = (const Vt2173*)D_002173F8;
@@ -535,7 +535,7 @@ void func_00143A60(Camera* self, s32 flag)
         func_00144938(self, D_00261880, D_00261890);
     }
     self->stackCount = 0;
-    func_001493B8(&self->ctl454, 0);
+    SetCameraControllerValue(&self->ctl454, 0);
     PushCameraController(self, 0, &self->ctl454, 0, 0);
     func_001455C0(self, 0);
     self->f21C = 0x0FFFFFFF;
@@ -619,7 +619,7 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                 }
                 const Vt2173* vt = n->vt;
                 if (vt->m04 != 0) {
-                    u8* t = (D_00262C68 & 1) ? g_padRecord : g_blankPadRecord;
+                    u8* t = (g_padRouting & 1) ? g_padRecord : g_blankPadRecord;
                     vt->m04(n, x, t, dt);
                 }
                 prev = n;
@@ -694,7 +694,7 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
         pa++;
     } while (n >= 0);
     InvertMatrix4x4(&m, &v);
-    func_00188668(r, c, &v);
+    MultiplyMatrices(r, c, &v);
     out[0] = r[0];
     out[1] = r[1];
     out[2] = r[2];

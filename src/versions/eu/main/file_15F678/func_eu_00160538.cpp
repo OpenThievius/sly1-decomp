@@ -8,5 +8,5 @@ void func_eu_00160538(void)
 {
     D_eu_00263710 = 0;
     func_eu_00160568(func_eu_0020A810());
-    func_00160918();
+    ResetGameSessionAndFade();
 }

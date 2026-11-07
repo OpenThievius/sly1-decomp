@@ -30,9 +30,9 @@ void func_00143648(Camera* self)
     self->ctl454.vt = (const Vt2173*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);
     self->ctl460.vt = (const Vt2173*)D_002173B0;
-    func_00149660(&self->ctl460, self);
+    InitTargetCameraController(&self->ctl460, self);
     self->ctl4C0.vt = (const Vt2173*)D_002173C8;
-    func_0014A888(&self->ctl4C0, self);
+    InitFrameCameraController(&self->ctl4C0, self);
     self->ctl510.vt = (const Vt2173*)D_002173E0;
     SetCameraControllerOwner(&self->ctl510, self);
     self->ctl520.vt = (const Vt2173*)D_002173F8;

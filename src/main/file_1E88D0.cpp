@@ -919,7 +919,7 @@ s32 D_00276654;
 
 void func_001E88D0(C0B* self)
 {
-    func_00167D68(self);
+    InitConeAgent(self);
     self->fC58 = 0x2D8;
     self->fC14 = 30000.0f;
     self->fC10 = 30000000.0f;
@@ -943,7 +943,7 @@ void func_001E8948(C0B* self)
     for (u32 i = 0; i < 4; i++) {
         self->fC80[i] = TakeFlagTableIndex(g_flagTable);
     }
-    func_00167E08(self);
+    StartConeAgent(self);
 }
 
 ASM_FUNC(func_001E89F0);
@@ -1094,13 +1094,13 @@ void func_001E9108(Obj_1E9108* obj)
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
-    if (D_00262C68 & 4) {
+    if (g_padRouting & 4) {
         s2 = &g_padRecord;
     } else {
         s2 = &g_blankPadRecord;
     }
     s5 = 0;
-    if (D_00262C6C & 0x80) {
+    if (g_padSelectFlags & 0x80) {
         if (0.1f < g_gameClock.time) {
             ClearPadSelectFlags(0x80);
         }
@@ -1131,7 +1131,7 @@ void func_001E9108(Obj_1E9108* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);
@@ -1141,7 +1141,7 @@ void func_001E9108(Obj_1E9108* obj)
         break;
     }
     case 3: {
-        if (D_00262C6C & 2) break;
+        if (g_padSelectFlags & 2) break;
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
@@ -1417,7 +1417,7 @@ void func_001E9C78(World* self, f32 dt)
         Vt_1E9C78* vt = h->vt;
         if (vt->fn134 != 0) {
             u8* a;
-            if ((*(s32*)&D_00262C68) & 2)
+            if ((*(s32*)&g_padRouting) & 2)
                 a = (u8*)&g_padRecord;
             else
                 a = ((u8*)&g_blankPadRecord);
@@ -2004,7 +2004,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (func_00160C58() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
                 C13* o;
                 ActivateSwitchedCollider(g_player);
@@ -2816,7 +2816,7 @@ void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
     self->cur = (u8*)(p + 1);
     w = w | 0x50000000u;
     *p = (u32)n | w;
-    func_00152CE0(self, n, (s32)buf);
+    AppendPacketQuadwords(self, n, (s32)buf);
 }
 
 void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)
@@ -3535,7 +3535,7 @@ void func_001F0758(C67* self)
     ResolveObjectLinks(self, 0x34, D_00275FE0);
     Begin_1F0758::Of(&it, &self->children);
     while ((node = Next_1F0758::Of(&it)) != 0) {
-        func_00182ED8(node);
+        ResolveAndStartObject(node);
     }
     el = self->elems;
     for (i = 0; i < 11; i++) {
@@ -3940,7 +3940,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
         if (self->current->f2DC != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                Val_1F1A08* v = func_00160180((loc[0] << 8) | loc[1]);
+                Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
                 PopStackElement((Q_1F1A08*)g_elementStack);
                 StartObjectFade(v, -1, 2);

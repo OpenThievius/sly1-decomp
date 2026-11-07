@@ -665,7 +665,7 @@ void func_001F3F80(Obj_1F3F80* self)
     for (s32 i = 0; i < self->count; i++) {
         Item_1F3F80* item = (Item_1F3F80*)self->arr[i];
         item->vtbl[25](item, self->f18);
-        func_00182ED8(item);
+        ResolveAndStartObject(item);
     }
 }
 
@@ -732,7 +732,7 @@ lm1:
     StartObjectFade((Val_1F4408*)D_00247AD0, -1, n);
     return;
 l4470:
-    k = func_00160180((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
+    k = LookupEntryById((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
     StartObjectFade(k, 0x1BD, n);
     return;
 l4490:
@@ -878,7 +878,7 @@ void func_001F4A30(ObjectSubGroup* self)
     s32 ok = 0;
     m.kind = 1;
     switch (self->f304) {
-    case 0: ok = func_00160850(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
+    case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
     case 1: ok = ((Glob_1F4A30*)(void*)g_currentEntry)->flags >> 1;
     fin: ok &= 1;
     }
@@ -1010,15 +1010,15 @@ void func_001F56D8(Ctx_1F56D8* ctx, Player* self)
     Frame_1F56D8 f;
     ChooseBestTargetCandidate(self, ctx->s94, (u8*)ctx + 0x98, f.a, &f.f60);
     if (ctx->cnt != 0) {
-        func_001782C0(self, f.a, 0.0f, 0, f.b, 0);
+        ComputeTargetArc(self, f.a, 0.0f, 0, f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
         BuildAxisAngleMatrix((Tab_1F56D8*)&g_unitZVector, f.c, self->f638);
         self->desc02()->m1E(self, (Mat02*)f.c);
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     } else {
-        func_00178598(self, f.a, f.f60);
+        LaunchPlayerAtTarget(self, f.a, f.f60);
     }
 }
 

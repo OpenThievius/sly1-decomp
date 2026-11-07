@@ -91,7 +91,7 @@ void func_0013B610(ChildGroupObject* self)
                 if ((u32)c < 16) {
                     self->arr[c] = (s32)n;
                     self->count = c + 1;
-                    func_00182ED8((s32)n);
+                    ResolveAndStartObject((s32)n);
                 }
             }
             void* c = f.cur; s32 o = f.off; void* a = *(void**)c;

@@ -40,5 +40,5 @@ void func_00193318(Obj_193318* o)
     AddDmaEndTag(&buf.f);
     CloseDmaTag(&buf.f);
     DetachPacketBuffer(&buf.f, 0, 0);
-    func_00168A48(&buf);
+    SendPacketToBothBuffers(&buf);
 }

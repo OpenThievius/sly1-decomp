@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x16E0B8 to 0x16F608: the pads (set-up, connection, polling, repeat steps and
+// analog values, include/pad_record.h) and the button codes (include/button_code.h). Its name
+// is ours, after the pad input it reads.
 #include "common.h"
 #include "button_code.h"
 #include "globals.h"
@@ -65,7 +68,7 @@ void func_0016E1A0(PadRecord* self, s32 a, s32 b);
 
 void func_0016E0B8(void)
 {
-    func_0016E148();
+    UpdatePadRouting();
     func_002040E8(0);
     InitPadRecord(&g_padRecord, 0, 0);
 }
@@ -76,8 +79,8 @@ void func_0016E148();
 
 s32 func_0016E0F0(s32 bits)
 {
-    D_00262C6C |= bits;
-    return ((s32 (*)())func_0016E148)();
+    g_padSelectFlags |= bits;
+    return ((s32 (*)())UpdatePadRouting)();
 }
 
 void func_0016E148(void);
@@ -85,8 +88,8 @@ void func_0016E148(void);
 void func_0016E118(u32 mask)
 {
     mask = ~mask;
-    D_00262C6C = D_00262C6C & mask;
-    func_0016E148();
+    g_padSelectFlags = g_padSelectFlags & mask;
+    UpdatePadRouting();
 }
 
 extern s32 D_00262C6C;
@@ -94,23 +97,23 @@ extern s32 D_00262C68;
 
 void func_0016E148()
 {
-    s32 flags = D_00262C6C;
+    s32 flags = g_padSelectFlags;
     if ((flags & 0x84) != 0)
     {
-        D_00262C68 = 0;
+        g_padRouting = 0;
         return;
     }
     if ((flags & 1) != 0)
     {
-        D_00262C68 = 5;
+        g_padRouting = 5;
         return;
     }
     if ((flags & 2) != 0)
     {
-        D_00262C68 = 4;
+        g_padRouting = 4;
         return;
     }
-    D_00262C68 = 7;
+    g_padRouting = 7;
 }
 
 void func_001F5C0C(void* p, s32 value, s32 size);
@@ -744,7 +747,7 @@ void func_0016F478(void)
     char buf[0x10];
 
     if ((g_saveData->f19D8 << 8 | g_saveData->f19DC) == 0x400) {
-        if ((func_001602A0() & 6) == 6) {
+        if ((ComputeCompletionMask() & 6) == 6) {
             if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
                 char* p = buf;
                 CopyString(p, (const u8*)D_002483B8);

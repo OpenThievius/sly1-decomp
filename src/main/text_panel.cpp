@@ -594,7 +594,7 @@ void func_00132500(T217D_440* self, V24A0* gs)
     AddGifRegisterWrite(gs, 0x42, 0x44);
     AddGifRegisterWrite(gs, 0x40, 0xA90003027F0000);
 
-    pad = (D_00262C68 & 2) ? &g_padRecord : &g_blankPadRecord;
+    pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
     if (0.0f < pad->f78) {
         k = 6.0f;
@@ -868,13 +868,13 @@ void func_00135228(T217D_440* self, V24A0* q)
 {
     if (self->state == 1)
     {
-        if ((u32)func_00160D10() & 0x800)
+        if ((u32)MaskWorldBitsBySave() & 0x800)
         {
             func_00134B48(self, q);
         }
         u32 mask;
         GetCurrentLevelBit(&mask);
-        if ((u32)func_00160D10() & mask)
+        if ((u32)MaskWorldBitsBySave() & mask)
         {
             u8 c0[4];
             u8 c1[4];
@@ -1048,7 +1048,7 @@ void func_00135F48(T217D_440* self)
 {
     Flag_135F48 flag;
     GetCurrentLevelBit(&flag);
-    if ((func_00160D10() & flag.v) == 0) {
+    if ((MaskWorldBitsBySave() & flag.v) == 0) {
         ReleasePanelEntries(self, 0, 1);
         return;
     }
@@ -1121,10 +1121,10 @@ void func_00136238(T217D_440* self, s32 on)
     if (on != 0) {
         self->vt->m16(self, 2);
         GetCurrentLevelBit(&in);
-        if (func_00160D10() & in.a) {
-            if (func_00160D10() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
+        if (MaskWorldBitsBySave() & in.a) {
+            if (MaskWorldBitsBySave() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
         }
-        if (func_00160D10() & 0x800) {
+        if (MaskWorldBitsBySave() & 0x800) {
             n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = Min_136238::Of(n, 0x100);
             if (n > 0) {

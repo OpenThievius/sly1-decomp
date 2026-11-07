@@ -18,7 +18,7 @@ void func_00148598(C59* self, s32 mode)
         }
         TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;
-        func_00151FC8(D_00261EF0);
+        ResetScatterLevels(g_scatterController);
         StartMemoryCardSave(g_memoryCard);
     }
     SetStateNotifierState(self, mode);

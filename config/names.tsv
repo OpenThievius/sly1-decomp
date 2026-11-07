@@ -1238,7 +1238,7 @@ func_00148EF8	CountDownNotifierTimer	slot 17 of class 0x57: runs UpdateStateNoti
 func_00148828	UpdateNotifierWorldDeadline	slot 17 of class 0x5A: runs UpdateStateNotifier and in state 0 calls slot 47 with 6 once the world's clock at 0x2308 has passed D_0026185C
 func_00140C28	StartDiscReadUntilAccepted	calls StartDiscRead (func_0011E138) with the descriptor D_00247AA0 until it returns 1, and after each refusal runs SyncDiscRead(0) and stores GetDiscReadError in D_002613F8[0]; the sector-stream refill func_00137490 calls it
 func_00140CC8	StartLowLevelDiscReadUntilAccepted	the same retry loop as func_00140C28 but calling the low-level pair func_00203B18, func_002032C8 and func_00203D90 that StartDiscRead, SyncDiscRead and GetDiscReadError forward to; func_00137490 picks it when flags bit 2 is set
-func_00140D68	TestDiscReadDone	calls SyncDiscRead with (value < 1), which only polls when value is 0, and returns whether it answered 0; func_001409E0 and the disc set-up in file_184D78 call it
+func_00140D68	TestDiscReadDone	calls SyncDiscRead with (value < 1), which only polls when value is 0, and returns whether it answered 0; func_001409E0 and the disc set-up in main_loop call it
 func_00140B60	FormatDiscPath	copies the name behind a backslash, runs func_001407A8 on it, turns the NULs between its components back into backslashes and writes it with "%s\%s" after "cdrom0:" (or an empty prefix when flag is 0)
 func_001407A8	NormalizeDiscPath	uppercases the path, appends ";1" unless it ends in a separator, then rewrites it in place as NUL-separated components of at most 8 name and 3 extension characters with non-alphanumerics replaced by '_', returning the component count
 func_001409E0	StepDiscSectorCheck	state machine on D_002613EC: reads sector data into D_0027B800 with StartDiscRead and, once TestDiscReadDone reports the read finished, runs a CRC-32 over 0x800 bytes with the table D_002476A0 and compares it with the constant D_00247AA8, going back to state 1 on a mismatch
@@ -2224,7 +2224,7 @@ D_00262788	g_currentPlacedObjectLinks	0x12-entry link table func_0016AED8 (Curre
 D_002613EC	g_discSectorCheckState	state of StepDiscSectorCheck: ResetDiscSectorCheck stores 3, the steps move it to 1 and 2, movie_player tests it for 3
 D_002613F4	g_lastDiscReadResult	result of the last StartDiscRead call, stored by StartDiscReadUntilAccepted and its twin func_00140CC8
 D_002613F8	g_discReadErrors	array whose word 0 receives GetDiscReadError after each refused disc read in StartDiscReadUntilAccepted
-D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); file_184D78.cpp sets bit 0x40 in its first word
+D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); main_loop.cpp sets bit 0x40 in its first word
 D_00261F18	g_vif1Channel	handle from func_002027A0(1) (DMA channel 1, VIF1): the render thread sends it the buffer of the second packet writer (bufB)
 D_00261F1C	g_gifChannel	handle from func_002027A0(2) (DMA channel 2, GIF): the render thread sends it the buffer of the first packet writer (bufA)
 D_00261F20	g_fromSprChannel	handle from func_002027A0(8) (DMA channel 8, fromSPR), stored once by func_00152810
@@ -2671,15 +2671,15 @@ func_00197458	EndGaugeColliderTimer	the timer's limit callback that HandleGaugeC
 func_001974D8	HandleGaugeColliderActivation	slot 72 of class 0x18: only runs HandleSwitchedColliderActivation
 func_00197788	UpdateGaugeColliderVisibility	slot 46 of class 0x18: shows g_gaugeAmountCaption, D_0026E4E0 and g_timerElement while its walker is at 0x3F3 and AreMenusAndFadeClear, else hides them
 func_00197F10	HandleGaugeColliderNotification	slot 13 of class 0x18: after HandleSwitchedColliderNotification keeps the kind-10 value at 0x644, and when its walker reaches 0x3F3 points g_gaugeAmountCaption at its count and limit and starts g_timerElement, stopping and hiding them on 0x3F4 and 0x3F5
-func_00198090	StartGaugeAgent	slot 16 of class 0x0F: only runs StartAgent
-func_001982A0	ChooseGaugeAgentState	slot 93 of class 0x0F: in state 2 picks 4 when func_001C96B8 fails, in state 0x10 stays until its value 0xC10 is set, else ChooseAgentState
-func_001984B8	LeaveGaugeAgentState	slot 91 of class 0x0F: leaving state 0x10 releases its node of the active switched collider and sets its height to 0, then runs LeaveAgentState
-func_00198530	EnterGaugeAgentState	slot 92 of class 0x0F: runs EnterAgentState, then func_001C8920 in state 0x10
-func_001986E8	HandleGaugeAgentNotification	slot 13 of class 0x0F: after HandleAgentNotification stores the value of a kind-10 notification about itself at 0xC10 and clears it on kind 11
-func_00198760	UpdateGaugeAgent	slot 17 of class 0x0F: when the active switched collider is a class 0x18 gauge whose object at 0x640 reaches it and a node is found, adds one to its count at 0x67C (up to D_0026A720) and starts its clock 0x698, then runs UpdateAgent
+func_00198090	StartGaugeColliderAgent	slot 16 of class 0x0F: only runs StartAgent
+func_001982A0	ChooseGaugeColliderAgentState	slot 93 of class 0x0F: in state 2 picks 4 when func_001C96B8 fails, in state 0x10 stays until its value 0xC10 is set, else ChooseAgentState
+func_001984B8	LeaveGaugeColliderAgentState	slot 91 of class 0x0F: leaving state 0x10 releases its node of the active switched collider and sets its height to 0, then runs LeaveAgentState
+func_00198530	EnterGaugeColliderAgentState	slot 92 of class 0x0F: runs EnterAgentState, then func_001C8920 in state 0x10
+func_001986E8	HandleGaugeColliderAgentNotification	slot 13 of class 0x0F: after HandleAgentNotification stores the value of a kind-10 notification about itself at 0xC10 and clears it on kind 11
+func_00198760	UpdateGaugeColliderAgent	slot 17 of class 0x0F: when the active switched collider is a class 0x18 gauge whose object at 0x640 reaches it and a node is found, adds one to its count at 0x67C (up to D_0026A720) and starts its clock 0x698, then runs UpdateAgent
 func_00198920	StartGaugeCountedObject	slot 16 of class 0x48: resolves g_gaugeCountedObjectLinks, runs StartPlacedObject and adds one to the limit at 0x684 of the first class 0x18 object
 D_0026A904	g_gaugeCollider	the one class 0x18 gauge collider: InitGaugeCollider stores itself here and EndGaugeColliderTimer reads its walker at 0x6B8 through it
-D_0026A720	g_gaugeAgentCountLimit	5: the most UpdateGaugeAgent lets the gauge collider's count at 0x67C reach
+D_0026A720	g_gaugeAgentCountLimit	5: the most UpdateGaugeColliderAgent lets the gauge collider's count at 0x67C reach
 func_00198DA8	CollectObjectSet	slot 73 of class 0x2C: unregisters itself (slot 7), runs func_0012C8F8 on each object of its found list at 0x574 from the last, calls slot 78 and triggers script event 2
 func_00198E58	NotifyObjectSetTarget	slot 74 of class 0x2C: sends a message of kind 1 naming itself to the object at 0x584 through that object's slot 31
 func_00198E98	GetObjectSetActivationState	slot 72 of class 0x2C: returns 0 while it is not attached, else 1 when the word at 0x554 is set and 2 when not
@@ -2709,3 +2709,262 @@ func_001A9A98	UpdateGaugeBarAgentVisibility	slot 46 of class 0x0D: shows g_gauge
 func_001A9C58	SetGaugeBarAgentValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent
 func_001AC638	SetCaptionTextAndSize	slot 8 of the screen-element table D_00218330: copies the string into the element's text (or clears it), measures it with MeasureText at the element's scale and sets the element's size from it
 func_001AE7F8	SetElementModeClearingFlag	slot 16 (set mode) of the screen-element table D_00218600: clears the element's flag when the mode is 0, then runs SetScreenElementMode
+func_00146D10	IsEligibleNotifierTarget	returns 0 when the object's flag bit 43 (+0x538) is set or the object at +0x50 is of kind 5, 0x27, 0x3B, 0x40 or 0x2E, else 1; func_00146DB0 calls it for the state notifier's update
+func_00147ED0	CompleteTimeRangeNotifier	calls the class 0x58 object's slot 51 (its SetState, 0xCC) with state 2; HandleTimeRangeNotifierNotification queues it
+func_00148038	PlaceSpareSoundNotifier	gathers one object of kind 0x56 (GatherObjectsOfKind): with none raises g_saveData's 0x19E4 count up to func_00160D98's limit, else sets its state to 4 and places it on the camera's view with D_00261AB0's offset; func_001481A0 sets it as a fade's done callback
+func_00148178	AddReserveUnit	raises g_saveData's 0x19E0 count by one, at most 99; func_001481A0 sets it as a fade's done callback
+func_001481A0	CountPickupTowardHundred	an effect's callback (D_00261B30): raises g_saveData's 0x19E8 count and at 100 resets it, queueing PlaceSpareSoundNotifier while 0x19E4 is below its limit or else AddReserveUnit while 0x19E0 is below 99
+func_00148400	InitSoundNotifier	slot 0x10 of class 0x56 (its SetState is SetSoundNotifierState): runs InitStateNotifier, then sets its movement numbers (0.35, 300, 0.75, 0.5, 60)
+func_00148510	InitSaveNotifier	slot 0x10 of class 0x59: runs InitStateNotifier, sets its movement numbers and starts in state 2 when g_currentEntry's flag 2 is set
+func_00148598	SetSaveNotifierState	slot 0xCC of class 0x59 (overriding SetStateNotifierState): on state 1 sets g_currentEntry's flag 2, triggers script event 2, starts a memory-card save (StartMemoryCardSave) and moves to state 2
+func_00148698	InitDeadlineNotifier	slot 0x10 of class 0x5A: runs InitStateNotifier, sets its movement numbers and starts in state 2 when D_0026EC60's word is 0
+func_00148718	StartDeadlineNotifier	slot 0x50 of class 0x5A: runs StartStateNotifier and stores the object in g_deadlineNotifier
+func_00148748	CompleteDeadlineNotifier	calls the class 0x5A object's slot 51 (its SetState, 0xCC) with state 2; HandleDeadlineNotifierNotification queues it
+func_00148770	HandleDeadlineNotifierNotification	slot 0x44 of class 0x5A: after HandlePlacedObjectNotification, on notification 0x14 from its +0x2E8 object with code 0x263 tells the world's +0x1D60 object and queues CompleteDeadlineNotifier
+func_00148888	SetDeadlineNotifierState	slot 0xCC of class 0x5A (overriding SetStateNotifierState): on state 1 sets the timer caption's best-time state (SetBestTimeState), tells the listener and moves to state 2
+func_00148938	GatherObjectsOfKind	original assembly: fills an array with up to n objects of the given kind from the world's list and returns their count (PlaceSpareSoundNotifier and ScatterObjectsAroundCircle call it)
+func_00148CE0	CompleteSoundNotifiers	sets state 2 on every object of kind 0x56 in the world's list at +0x1C54, unless g_saveData's 0x19D8/0x19DC pair is 3/8 or the 0x19E4 count is below its limit with D_0026EC58 under 2
+func_00148D90	InitCountdownNotifier	slot 0x10 of class 0x57 (its update is CountDownNotifierTimer): runs InitStateNotifier, sets its movement numbers and its timer limits 4 and 6
+func_00148E18	CompleteCountdownNotifier	calls the class 0x57 object's slot 51 (its SetState, 0xCC) with state 2; HandleCountdownNotifierNotification queues it
+func_00148E40	HandleCountdownNotifierNotification	slot 0x44 of class 0x57: after HandlePlacedObjectNotification, on notification 0x14 from its +0x2E8 object with code 0x263 tells the world's +0x1D60 object and queues CompleteCountdownNotifier
+func_00148F80	AddReserveUnitNow	restarts D_0026C6C8 and raises g_saveData's 0x19E0 count by one, at most 99; SetCountdownNotifierState calls it when no effect can be created (D_00261BC0 holds it as a callback)
+func_00148FF0	SetCountdownNotifierState	slot 0xCC of class 0x57 (overriding SetStateNotifierState): state 0 draws a random time, state 1 creates an effect (CreateEffect), sets a flag-table bit, plays sound 0x69, tells the listener and moves to 2
+func_00149190	UpdateArmedNotifier	slot 0x54 of class 0x5B (original assembly; its Init is InitArmedStateNotifier)
+D_0026EC68	g_deadlineNotifier	StartDeadlineNotifier stores the class 0x5A object here; func_00149398's file reads it
+func_001493B8	SetCameraControllerValue	stores its argument in a camera controller's word at +0x08 (ResetCamera calls it)
+func_001493C0	UpdateIdleCameraController	the every-frame slot (m04) of the base controller table D_00217398: does nothing
+func_00149458	GetTargetCameraControllerEyePoint	original assembly: writes a point that DeactivateTargetCameraController and UpdateTargetCameraController pass to func_00144938 with the target point (GetCameraControllerTargetPoint) after it
+func_00149508	StartCameraSounds	starts sound 0x71 into the camera's record at +0x48 and sound 0x70 into the one at +0x4C, and sets +0x44 to 1 (func_00175170 calls it with g_camera)
+func_00149660	InitTargetCameraController	set-up of the D_002173B0 controller: SetCameraControllerOwner, an empty value stack with 0 pushed (PushStackValue), the rate divisor 10 and the numbers 0.5 and -1
+func_001496C0	ActivateTargetCameraController	slot m00 of D_002173B0 (it has become the top): takes the camera's angles, its zoom (+0x1C8) and near distance (+0x1E4) to give back later, aims at the target point and sets the near distance to 49
+func_00149760	UpdateTargetCameraController	original assembly: the every-frame slot (m04) of D_002173B0
+func_0014A7B8	DeactivateTargetCameraController	slot m01 of D_002173B0 (it has stopped being the top): stops its two sound records, places the camera at the eye and target points and gives back the zoom and the near distance ActivateTargetCameraController kept
+func_0014A888	InitFrameCameraController	set-up of the D_002173C8 controller: SetCameraControllerOwner and the identity frame (g_identityMatrix) at +0x20
+func_0014A8D0	ActivateFrameCameraController	slot m00 of D_002173C8: points the camera (func_00144B70) at +0x370 of the target of the camera stack's first entry
+func_0014A8F8	UpdateFrameCameraController	original assembly: the every-frame slot (m04) of D_002173C8
+func_0014AA90	ActivateValueCameraController	slot m00 of D_002173E0: stores its argument in the controller's word at +0x08
+func_0014AA98	DeactivateValueCameraController	slot m01 of D_002173E0: clears the controller's word at +0x08
+func_0014AAA0	UpdateValueCameraController	original assembly: the every-frame slot (m04) of D_002173E0
+func_0014AC48	SetupItemColumn	slot 1 of the item column table D_00218720: sets up its text (SetupScreenElementText), then each of its four items' slot 1, font scale 0.8 and slide times 1, 1 and 0
+func_0014AD70	UpdateItemColumnSlide	slot 2 of the item column table D_00218720: runs UpdateScreenElementSlide, then slot 2 of each of its items up to its count
+func_0014AF10	ClearItemColumn	calls the item column's slot 16 with mode 0, as ResetScreenElement does (RunAnimationEvent calls it on g_stackedCaptionGroup)
+func_0014AF38	PostItemColumnEntry	original assembly: RunAnimationEvent passes it g_stackedCaptionGroup, two words of its event and a fraction (a byte times 1/256)
+func_0014B678	SetSinCosPair	writes the sine and cosine of its angle into the record's first two floats (ComputeSinCos) and clears the word after them; func_0014B6A8 of class 0x11 calls it
+func_0014BEA8	IsContactAgentFree	slot 0x16C of class 0x12: 0 when func_001DDA80 holds for the world or the agent's state (+0x724) is 0xB or 0x10, else 1
+func_0014C668	FinishGaugeOnTimeout	the callback HandleGaugeManagerNotification gives g_timerElement with SetTimerLimit: on mode 1, unless either tag of the gauge manager's device (func_001B6568, func_001B6598) is 0x3FE, moves the device to state 0x3FF and applies the gauge ratio (ApplyGaugeRatioToEffect)
+func_0014C788	ShowGaugeManagerDisplays	slot 0xC8 of class 0x68: while the device is in state 0x3FD and AreMenusAndFadeClear holds, calls slot 14 of g_gaugeAmountCaption and g_timerElement, else their slot 15
+func_0014C858	RunGaugeTimedEvent	original assembly: UpdateGaugeManager runs it when the timer at +0x45C has passed
+func_0014CD70	CountDownGaugeContacts	when the gauge manager's count +0x458 equals +0x450, sets the timer +0x45C to the game time plus a random time between +0x43C and +0x440; then lowers the count (EnterContactAgentState calls it)
+func_0014DA18	GetBaseCurveLengthAtTime	slot 5 of the abstract curve table D_00217568: returns 0
+func_0014DA28	GetBaseCurveTimeAtLength	slot 6 of the abstract curve table D_00217568: returns 0
+func_0014DA98	MeasureSplinePathDistance	original assembly: the function FindSplinePathNearestTime minimises over time (func_001EB168), as MeasurePathCurveDistance is for the path curve
+func_0014DB78	MeasurePathCurveDistance	samples the curve at the time through its slot 1, then measures that point against the context's two points with func_00186320 and returns the second result; FindPathCurveNearestTime minimises it
+func_0014DBD0	FindPathCurveNearestTime	minimises MeasurePathCurveDistance over the curve's times from a start time (func_001EB168, a tenth of the first segment as step, unbounded when it wraps), samples the curve there through slot 1 and returns the time and its length (slot 5); func_001D87C8 calls it
+func_0014DE08	SamplePathCurveAtTime	slot 1 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its times
+func_0014DE40	SamplePathCurveAtLength	slot 2 of the path curve table D_002176D0: interpolates its points (func_0014D280) by its lengths
+func_0014E090	FindPathCurveNearestPoint	slot 10 of the path curve table D_002176D0: finds the nearest segment and fraction (func_0014D3A8) and returns the time and length there
+func_0014E170	ProjectOntoPathCurveNearTime	slot 11 of the path curve table D_002176D0: from the segment at the given time (FindPathCurveSegment), finds the nearest point (func_0014D680) and returns its time and length
+func_0014E2A0	ProjectOntoPathCurveNearLength	slot 12 of the path curve table D_002176D0: as ProjectOntoPathCurveNearTime, from the segment at the given length
+func_0014E5B8	SampleSplinePathAtTime	original assembly: slot 1 of the spline curve table D_00217708, the counterpart of SamplePathCurveAtTime
+func_0014E6A8	SampleSplinePathAtLength	slot 2 of the spline curve table D_00217708: turns the length into a time (slot 6) and samples there through slot 1
+func_0014E710	DrawSplinePathSegment	original assembly: slot 3 of the spline curve table D_00217708, the counterpart of DrawPathCurveSegment
+func_0014E828	TransformSplinePathPoints	original assembly: slot 4 of the spline curve table D_00217708, the counterpart of TransformPathCurvePoints
+func_0014EB10	FindSplinePathNearestPoint	original assembly: slot 10 of the spline curve table D_00217708, the counterpart of FindPathCurveNearestPoint
+func_0014EC70	FindSplinePathNearestTime	slot 11 of the spline curve table D_00217708: minimises MeasureSplinePathDistance over the curve's times from a start time, samples there through slot 1 and returns the time and its length (slot 5)
+func_0014ED98	ProjectOntoSplinePathNearLength	slot 12 of the spline curve table D_00217708: turns the length into a time (slot 6) and calls slot 11 with it
+func_0014F900	SyncPooledHolderWithPlayer	copies the player's word at +0x24F8 into the class 0x23 holder's +0x6DC when g_player is set (StartPooledHolder calls it)
+func_0014FDA8	UpdatePooledHolderAim	in state 0x2B8 clears the held object's +0x1C and after the delay +0x6D0 acquires a pooled object (state 0x2BA); otherwise keeps a target among the attached pooled objects (FindFirstAttachedPooledObject), aims at it (AssignAimTarget) and acquires one after the delay (state 0x2BB)
+func_001503E0	AddPooledHolderItem	appends an object to the class 0x23 holder's list at +0x748 (count +0x744, at most 8); the script built-in func_00109488 calls it
+func_00150408	ResetCollectedItems	zeroes the holder's collected count +0x78C and its flag +0x7B0 (the script built-in ResetScriptCollectedItems calls it)
+func_00150418	RecordCollectedItem	sets the holder's flag +0x7B0 for an object of kind 7, and appends an object of kind 0x41 that is in its list at +0x76C to the collected list at +0x790 (at most 8); the script built-in CollectScriptItem calls it
+func_00150750	SetStepSequenceModeOne	sets a step sequence's mode (+0x2D0) to 1, which keeps SetStepSequenceState from counting it in D_00261D38 (script built-in func_00106C50)
+func_00150760	SetStepSequenceCameraMode	sets a step sequence's mode (+0x2D0) to 2, in which SetStepSequenceState's state 3 pushes camera controller 6, takes the pad select flag and lowers volume channel 9 (script built-in func_00106CF0)
+func_001512A8	HandleStepSequenceNotification	slot 0x44 of class 0x65: after HandlePlacedObjectNotification, notification 6 about the object at +0x2F8 clears it
+func_00151860	ShowStepSequenceText	passes a value to the object's callback slot, or with no object puts it in g_typedTextCaptionBox and pushes that box on g_elementStack (UpdateStepSequence calls it)
+func_00151A58	GetScatterController	returns the address of g_scatterController (func_00109488 calls it)
+func_00151A68	ClearScatterController	zeroes the 0x24 bytes of a scatter controller (func_00160880 calls it)
+func_00151A88	ResetScatterController	sets the scatter controller's count ranges (4..6, 1..3), picks its table by g_saveData's progress words and g_currentEntry's flag 2, sets the level and draws its two counts from the table's ranges
+func_00151D28	UpdateScatterLevelLimits	with flag 8 of D_00275B00 raises g_saveData's 0x19E4 count (func_00160C48) to the table's value for the level's band, else clamps the level to the table's range; then runs CompleteSoundNotifiers (func_001DCEA0 calls it)
+func_00151E18	NotifyScatterControllerLoaded	does nothing; RunPendingWorldLoad calls it with g_scatterController
+func_00151E20	RaiseScatterLevels	raises g_currentEntry's level (+0x0C, SetScatterLevel) by an amount times the table's rate and its second level (+0x10) by the amount times a rate chosen by g_saveData's 0x19E0 count, clamped to 0..1
+func_00151ED8	RaiseScatterLevelForObject	raises the level by the table's +0x14, or +0x18 when the object's ordinal bit is already set in g_currentEntry's bits at +0x74, and sets that bit, counting it at +0x70
+func_00151FC8	ResetScatterLevels	sets the level and the second level of g_currentEntry to 0 and clears its count +0x70 and its first bit byte (SetSaveNotifierState calls it)
+func_00152010	ScatterObjectsAtPoint	counts down the scatter controller's two counts and scatters objects of kind 0x58 (and one of 0x57 when the second level falls) around a point with ScatterObjectsAroundCircle, redrawing the counts from the table's ranges
+func_00152410	SetScatterLevel	clamps a value to the scatter controller's table range (ClampToRange) and stores it as g_currentEntry's level
+func_00152438	SetListLinkOffset	stores the offset of the link pair in each item in a list's +0x08 (InitActiveSetSolver and many set-ups call it)
+func_00152450	ClearListLinks	zeroes an item's two link words (func_00127048 and func_00158F80 call it)
+func_00152CE0	AppendPacketQuadwords	copies a number of quadwords to the packet buffer's cursor (+0x0C) and moves the cursor past them (CopyQuadwords)
+func_00152E18	SkipDisplayListWriterSlot	slot 3 of the display-list writer's base table D_0024A0E0: does nothing
+func_00152E28	InitC61Object	slot 0 of class 0x61: runs InitPlacedObject only
+D_00261EF0	g_scatterController	the 0x24-byte record ResetScatterController sets up and ScatterObjectsAtPoint counts down: count ranges, two counts and the table of level bands
+func_001550B8	ReparentEffectSpawnerToSource	calls the spawner's slot 25 (0x64, reparent) with the word at +0x7C of the object at +0x2D0 (ResolveEffectSpawnerLinks calls it)
+func_00155270	StartEffectSpawner	original assembly: slot 0x50 of class 0x50
+func_00155AB0	UpdateEffectSpawner	original assembly: slot 0x54 of class 0x50
+func_00155FA0	SetEffectSpawnerInactive	stores -1 as the deadline at 0x340, so IsEffectSpawnerActive fails on the clock (script built-ins and five other functions call it)
+func_00156000	SetEffectSpawnerDisabled	with a nonzero argument makes the spawner inactive (SetEffectSpawnerInactive), else active forever (SetEffectSpawnerActiveForever); a script built-in of func_00109488
+func_00156030	GetEffectSpawnerInactive	writes the negation of IsEffectSpawnerActive through its out pointer (a script built-in of func_00109488)
+func_00156108	SetEffectSpawnerLimit	stores its argument at 0x2D8 while the state 0x2D4 is -1; in state 0 maps 0 to active forever, -1 to inactive and stores other values; marks the spawner changed (+0x34C)
+func_00156250	SetOwnedSpawnRecordKind	gets the spawner's owned record (GetOwnedSpawnRecord) and passes it to SetSpawnRecordKind
+func_001566C8	SendPointEventToWorldListener	sends message kind 12 with a point and a float to the world's object at +0x1D0C through its slot 31, when there is one
+func_00157FF8	BroadcastPointEvent	sends each object of the world's list a message with the point: kind 4, or 0x14 with a float or 0x24 with an object as its +0x90 record asks (func_001EEF90 calls it)
+func_00158108	SpawnBriefEffectAt	creates an effect of kind 4 (CreateEffect) at a point, gives it 0.75 of life and the owner's +0x278 record's +0x0C (func_0019ED58 calls it)
+func_001585F8	StartMemberObject	slot 0x50 of class 0x77: runs StartObject, then the object's slot 3
+func_001587C0	SendMemberObjectMessage	slot 0x7C of class 0x77: does nothing (0x78 and 0x7A override it)
+func_00158A10	ResolveGroupMembers	slot 0x4C of class 0x78: calls the resolve slot (15) of each of its members
+func_00158D38	SendRecordMemberMessage	slot 0x7C of class 0x79: does nothing
+func_0015A198	GatherObjectsByMode	unmatched yet: collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
+func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and some thirty others call it)
+func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object
+func_0015A8B8	InitC60Object	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
+func_0015A918	LoadC60Object	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
+func_0015A960	UpdateC60Object	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
+func_0015A9A8	DrawC60Object	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
+func_0015AF50	StepObjectCycler	original assembly: slot 0x80 of class 0x40
+func_0015C058	IsCyclerGroundCandidate	the filter IsObjectCyclerUnsupported passes: rejects an object with flag bit 43 or the cycler's own +0x50, else accepts it when bit 0 of its +0x2CC is clear
+func_0015C0A0	IsObjectCyclerUnsupported	at most every 0.05 s: looks for a span object under the cycler, between its position and that point lowered by +0x64C (FindNearestSpanObject), and returns 1 when there is none (UpdateObjectCycler calls it)
+func_0015CC80	BeginFontGlyphPacket	a slot of the font's GCC vtable D_0024A220: adds the font's images (AddFontImagesToFrame) and opens a GIF tag with its register writes
+func_0015ED50	ActivateRenderFrame	sets g_drawFrameData and the image mask of a render frame, and when it has a pending list sends D_00274538 on the GIF channel (RunRenderThread and SendRenderFrameToDma call it)
+func_0015F618	ConstructPacketWriters	the file's static initialiser: on the construction pass sets up g_gsPacketWriter and g_vifPacketWriter (ResetPacketWriters calls it)
+func_00160070	RunResetGameSession	a menu callback (D_0026482C): runs ResetGameSessionAndFade
+func_00160180	LookupEntryById	returns what FindEntryById returns for the id it is given (ResumeAtSavedLevel and three others call it)
+func_001602A0	ComputeCompletionMask	starts from bits 1 to 3 and clears each bit some keyed entry's level entry lacks, and bit 1 when one of the five level records lacks flag 0x20 at +0x448 (func_001604B8 and seven others read it)
+func_00160340	MarkProgressStageFlag	sets one of the bits 0x10, 0x40, 0x100, 0x400 and 0x1000 of g_saveData's word 0x19F4 for stages 1 to 5 (func_0016B190 calls it)
+func_001604B8	ApplyCompletionFlags	sets bits of g_saveData's words 0x19F4 and 0x19F8 for modes 2, 4 and 8, the last two only when ComputeCompletionMask has the bit (MarkLevelDone calls it)
+func_00160578	FadeOutAndQueueMovie	starts the fade of D_00247AD0 and, for kind 2 or 4, queues movie 0xD or 0xE followed by 0xF (QueueMovieWithSuccessor)
+func_00160850	GetLevelEntryWord	returns the first word of the level entry GetLevelEntryByKey finds, or 0
+func_00160880	ResetGameSession	resets g_saveData (ResetGameProgress), D_00269984, the pair D_002623D8, g_scatterController, g_buttonCodeFlags and g_previousLevelIndex, then the reserve counts (ResetReserveCounts)
+func_001608E0	ResetReserveCounts	sets g_saveData's reserve count 0x19E0 to 5 and its spare count 0x19E4 to 0, and resets the flag table (func_00140D90)
+func_00160918	ResetGameSessionAndFade	runs ResetGameSession and starts the fade of D_00247AB0
+func_00160948	ResumeAtSavedLevel	finds the entry of g_saveData's level key (0x19D8, 0x19DC) and fades to it, or, when the element stack is in state 1 at that level, stops the animation players of object 0x494 and moves the element stack to state 3
+func_00160C48	SetSpareCount	stores g_saveData's spare count 0x19E4 (UpdateScatterLevelLimits calls it)
+func_00160C58	HasSpareCount	1 when g_saveData's spare count 0x19E4 is above 0 or flag 2 of g_buttonCodeFlags is set
+func_00160CA0	GetIndexedTargetSlot	returns the word of the object for an index from 0x33B to 0x346 (the object plus index times 4 less 0xCD8), else 0 (StartStepSequence and AddSequenceExtraTarget call it)
+func_00160CC8	ClearTwoWords	zeroes eight bytes (ResetGameSession and ResumeAtSavedLevel clear D_002623D8 with it)
+func_00160CE8	ResetCounter	sets a counter's word at +0 to 0 (RunPendingWorldLoad calls it)
+func_00160CF0	IncrementCounter	adds one to a counter's word at +0 and returns it (func_00123888 calls it)
+func_00160D00	ReleaseCounterRef	subtracts one from the reference count at +0 (func_00123888 calls it)
+func_00160D10	MaskWorldBitsBySave	returns g_saveData's word 0x19F0 masked by the current world's bits (seventeen functions test it)
+func_00160D98	GetSpareCountLimit	returns 2, the limit PlaceSpareSoundNotifier and CountPickupTowardHundred hold the spare count 0x19E4 to
+func_00160DA0	SpendReserveUnit	lowers g_saveData's reserve count 0x19E0, stops the locked stream voice and starts a screen fade, a fade from the flag table, or the pause menu's page when the count is below 0; then RaiseScatterLevels by 1
+func_00160E80	ClearRecordBody	zeroes the six words from +0x04 to +0x18 of a record (func_001B7968 calls it)
+func_00161860	AddGifUvRegListEntry	counts a register-list entry and writes the 64-bit UV word (u and v << 16) at the writer's cursor (the font's glyph drawing calls it)
+func_001618C0	AddGifXyzfRegListEntry	counts a register-list entry and writes the 64-bit XYZF word (x, y << 16, z in bits 32 to 55, fog in the top byte) at the writer's cursor
+func_00161BB0	SetVertexBatchMode	flushes the vertex batch (FlushVertexBatch), stores the mode at +0xF8 and sets the vertex colour to white
+func_00163938	WriteStripMeshMscal	writes the VIF MSCAL of the strip mesh's microprogram (0x18C0 or 0x18F8 by mode); BuildStripMeshPacket and BuildLitStripMeshPacket call it
+func_00163990	WriteMorphTargetMscal	writes the VIF MSCAL of the morph target's microprogram (0xFA0 or 0xFD8 by mode); BuildMorphTargetPacket calls it
+func_00167D68	InitConeAgent	slot 0x10 of class 0x0A: runs InitAgent and sets its two ranges (1000, 1500), two angles (pi/4, pi), the distances 2000 and 300, the angle pi/3 at +0x74C and the ids +0xC18 and +0xC30 to -1
+func_00167E08	StartConeAgent	slot 0x50 of class 0x0A: runs StartAgent, finds the objects of its ids +0xC18 and +0xC30 (FindFirstObjectByIdMode4) and gives each object its animation events gather a small list of its own
+func_00167EF0	DrawConeAgent	slot 0xA4 of class 0x0A: runs DrawAgent
+func_001683B8	SignalDisplaySync	sets D_002BE46C and signals D_002BE460 (func_001F6B60); FlipDisplayFrame, ResetDisplayBuffers and FadeScreenToBlack call it
+func_001684E8	ApplyPendingDisplayFlip	when a flip is pending (D_002BE474) clears it, reads the field bit of the GS CSR and sets the display and draw buffers for the frame counter's parity (RunRenderThread calls it)
+func_001685B8	ResetDisplayBuffers	sends the display reset packet, sets the GS mode, zeroes the flip state, sets the buffers by the field bit and advances g_displayFrameCounter (InitDisplay calls it)
+func_001686E8	SendGsPacketAndWait	sets D_002BE468, sets the GS CSR's FINISH bit, sends a packet on a DMA channel and waits on D_002BE464 (SendMaskedImagesToGif and the render thread call it)
+func_00168A48	SendPacketToBothBuffers	sends a packet on the GIF channel once for each of the two draw buffers and waits for the channel
+func_00168AF8	SendDisplayResetPacket	builds a packet that refers to the 0x2C quadwords at D_002BE1A0 and sends it to both draw buffers (SendPacketToBothBuffers)
+func_00169FC0	FindTargetCurveLengthNearCollider	projects the active switched collider's position onto the target curve's track through its slot 10, keeps the result 30 inside the track's ends unless it wraps, places the target there (func_00169E20) and returns it (func_001CFFD0 calls it)
+func_0016A5F0	SetPooledObjectPlayerHold	sets a pooled object's hold state +0x550: leaving 1 reparents it to nothing and sends script event 3; entering 1 reparents it to g_player, anchors it and sends script event 2; stamps the game time at +0x554 (func_00175170 calls it)
+func_0016A758	CountHeldPooledChildren	counts the objects of kind 0x46 in a list at +0x34 whose state +0x550 is 3 or 4 (func_0014F270 calls it)
+func_0016B520	RestoreSelectionCaptionCamera	while the selection caption is open, pushes the camera controller of object 0x4FD (FindFirstObjectByIdMode4, PushObjectCameraController); RunPendingWorldLoad calls it
+func_0016C470	InitC76Object	slot 0x10 of class 0x76: runs its parent's set-up (func_001DFD90), then sets +0x88 to 1, +0xA8 to 8, +0xAC to 9 and +0xB4 to the largest float
+func_0016C4B8	LoadC76Object	slot 0x38 of class 0x76: a tail call to ReadTransformObject
+func_0016C4E8	DrawC35Collider	slot 0xA4 of class 0x35: a tail call to func_001B93D8
+func_0016C508	DrawC52Object	slot 0xA4 of class 0x52: a tail call to func_001261C0, the transform draw DrawC60Object ends with
+func_0016D0C0	StepTargetFollower	slot 0x80 of class 0x47: runs StepCollider and, unless +0x5D8 is set, turns about the z axis by the angle at +0x5A0 (BuildAxisAngleMatrix) and steps its sub-object at +0x5B0 (func_001B9D10)
+func_0016D128	UpdateTargetFollower	original assembly: slot 0x54 of class 0x47
+func_0016D788	PlaceTargetFollowerOnFollowed	anchors the follower (SetColliderAnchors), clears its two motion vectors and places it at the followed object's point (func_001920B0) raised by +0x56C (FollowObjectById and func_0016DAC0 call it)
+func_0016D9A8	PlayPendingFollowerSound	when a sound is pending (+0x5CC) and func_001BE810 no longer holds, clears it and plays it with the volume and pan at +0x5C4 and +0x5C8 (PlaySoundAndApplyVolumePan)
+func_0016DD00	ClearCurrentTargetFollower	sets g_currentTargetFollower to 0 (the script built-in func_00106560 calls it)
+func_0016DDE8	StartEntryTableObject	slot 0x50 of class 0x64: runs StartPlacedObject, then its slot 3
+func_0016E148	UpdatePadRouting	sets g_padRouting from g_padSelectFlags: 0 with flag 0x80 or 4, 5 with flag 1, 4 with flag 2, else 7 (InitPadSystem, SetPadSelectFlags and ClearPadSelectFlags call it)
+D_00262C68	g_padRouting	the mask of which readers see g_padRecord rather than g_blankPadRecord (bits 1, 2 and 4, tested by the camera, the step sequence and others); UpdatePadRouting sets it
+D_00262C6C	g_padSelectFlags	the flags SetPadSelectFlags sets and ClearPadSelectFlags clears, from which UpdatePadRouting sets g_padRouting
+func_00170410	ComputePlayerSlideRates	slot 0x100 of class 0x07: picks two rates for the player's state (+0x2220) and sub-state (+0x2228) from D_00262E34/38 and D_002637B0 to B8, or zeroes them, and divides the first by +0x700
+func_00171F28	PlacePlayerOnGround	a script built-in's call (func_00105878): finds a point under the player's position lowered by 75 (func_001EDEF0), moves the player there through slot 0x84 and, outside state 4, sets state 2/6 and scales +0x226C
+func_00171FE0	ReleasePlayerToState2	in states 3 and 7 sets +0x224C and moves the player to state 2/2 (SetPlayerState); in state 6 only with sub-state 4 or 5 (HandlePlayerNotification and a script built-in call it)
+func_00172EB8	GetPlayerContactMode	slot 0x164 of class 0x07: 0 in states 3 and 0xD, else 3
+func_00174F50	SelectPlayerStateAnimation	picks the animation node for the player's state and sub-state from its tables at +0x1390, +0x13D4, +0x1418 (falling back through D_00263930) and +0x146C, and starts it (func_001C4D60); SetPlayerState calls it
+func_00175078	SetPlayerPartLayers	sets the word +0x10 of the player's five parts at +0x2500 to +0x2510 to 9 or -1 by bits 1 and 2 of its argument, then calls slot 47 of five of its objects (SetPlayerState calls it)
+func_00175170	SetPlayerState	original assembly: moves the player to a state and sub-state (+0x2220, +0x2228); some forty callers pass the pair, as (2, 2), (4, 0x2C) or (9, 0x1C)
+func_00177968	CompareKeysAscending	a sort's comparison: 1 when the first record's key is greater, else -1 (func_00177990 sorts with it)
+func_00177E20	IsPlayerCameraFree	slot 0x138 of class 0x07: 0 in state 12/0x22, else whether the camera controller at g_camera's +0x454 is not the top one (IsTopCameraController)
+func_001782C0	ComputeTargetArc	original assembly: from a target pair and a time computes the start velocity and the two points LaunchPlayerAtTarget stores (also called by ChooseBestTargetCandidate and four others)
+func_00178598	LaunchPlayerAtTarget	takes a target pair (or the best candidate, ChooseBestTargetCandidate), computes the arc to it (ComputeTargetArc), stores its end time and points in the record at +0x2514, sets the player's velocity and moves it to state 4/0x2C
+func_001796D0	UpdateModeCollider	original assembly: slot 0x54 of class 0x1B
+func_0017A6D0	FinishModeCollider	slot 0x150 of class 0x1B: runs func_00192C58, then func_0017ABE8 with 2
+func_0017ADD0	InitGaugeModeObject	slot 0x10 of class 0x4A: runs InitCollider and sets the mode (+0x550) to -1
+func_0017AE00	StartGaugeModeObject	slot 0x50 of class 0x4A: runs StartPlacedObject, resolves its links (g_gaugeHolderLinks), makes its three sound handles with their volumes at 1, enters mode 0 (SetGaugeModeObjectMode) and starts its loop (PlayGaugeModeObjectLoop)
+func_0017AF38	UpdateGaugeModeObject	original assembly: slot 0x54 of class 0x4A
+func_0017B308	ShowGaugeModeObjectBar	slot 0xC8 of class 0x4A: in modes 0 and 1, while AreMenusAndFadeClear holds and D_00270458 allows, calls g_gaugeBarElement's slot 14, else its slot 15
+func_0017B3A8	HandleGaugeModeObjectEvent	slot 0xC4 of class 0x4A: on an event with flag 0x10 from its +0x608 object, lowers the gauge count (DecrementGaugeCount), plays its target's animation (PlayGaugeModeObjectTarget) and sends script event 2
+func_0017B410	SetGaugeModeObjectMode	sets the mode (+0x550): modes 0 and 1 reset g_gaugeBarElement's blend and take the world's gauge object (func_001DDC38), modes 2 and 3 call the bar's slot 15 and give it up; starts the mode's animation (ReplaceAnimationPlayer) and stamps the game time
+func_0017B510	PlayGaugeModeObjectLoop	with a nonzero flag starts the animation of its handle at +0x600 (ReplaceAnimationPlayer, with +0x604), else stops it
+func_0017B550	SetGaugeModeObjectTarget	stores at +0x60C the object of kind 0x101 with the index (FindFirstObjectById), or 0 for -1
+func_0017B598	PlayGaugeModeObjectTarget	starts the animation of the object at +0x60C (ReplaceAnimationPlayer, with +0x610)
+func_0017CFC8	AddQueueEntryKind0	adds an entry of kind 0 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107C00 calls it
+func_0017CFF0	AddQueueEntryKind1	adds an entry of kind 1 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107CB0 calls it
+func_0017D018	AddQueueEntryKind10	adds an entry of kind 10 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107D60 calls it
+func_0017D040	AddQueueEntryKind2	adds an entry of kind 2 to the entry queue (AddQueueEntry) with value -1, flag 1, and its argument at the entry's +0x0C; the script built-in func_00107E10 calls it
+func_0017D078	AddQueueEntryKind3	adds an entry of kind 3 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107EC0 calls it
+func_0017D0A0	AddQueueEntryKind4	adds an entry of kind 4 to the entry queue (AddQueueEntry) with its first argument as the value, flag 0, and a float at +0x0C; the script built-in func_00107F70 calls it
+func_0017D0D8	AddQueueEntryKind9	adds an entry of kind 9 to the entry queue (AddQueueEntry) with its two arguments as the value and the flag; the script built-in func_001083C8 calls it
+func_0017D100	AddQueueEntryKind5	adds an entry of kind 5 to the entry queue (AddQueueEntry) with value, flag and two words at +0x0C and +0x10; the script built-in func_00108038 calls it
+func_0017D148	AddQueueEntryKind6	adds an entry of kind 6 to the entry queue (AddQueueEntry) with value, flag and a float at +0x0C; the script built-in func_00108128 calls it
+func_0017D180	AddQueueEntryKind7	adds an entry of kind 7 to the entry queue (AddQueueEntry) with value, flag and a float at +0x0C; the script built-in func_00108208 calls it
+func_0017D1B8	AddQueueEntryKind8	adds an entry of kind 8 to the entry queue (AddQueueEntry) with value, flag and a word at +0x0C; the script built-in func_001082E8 calls it
+func_0017D1E8	AddQueueEntryKind11	adds an entry of kind 11 to the entry queue (AddQueueEntry) with value -1, flag 1, and a float at +0x0C; the script built-in func_00108498 calls it
+func_0017D220	AddQueueEntryKind12	adds an entry of kind 12 to the entry queue (AddQueueEntry) with value -1, flag 0; the script built-in func_00108548 calls it
+func_0017FE00	CopyPointObject	slot 0x34 of class 0x80: runs CopyObjectData, keeping its own kept bits
+func_0017FE48	StartPointObject	slot 0x50 of class 0x80: runs StartObject and, when its target id is set, finds the object of kind 0x104 with that id (FindFirstObjectById)
+D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleGroups gives the groups of kinds 3 and 4
+D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups
+func_00181658	RecomputeModeWalker	original assembly: slot 0x58 of class 0x1A
+func_00181A58	CaptureModeWalkerTarget	slot 0x124 of class 0x1A: runs func_001DAE48 and copies the position (+0x140) of its object at +0xBC0 to the output's +0x10
+func_00181A98	IsModeWalkerRequestBlocked	slot 0x13C of class 0x1A (as IsModeColliderRequestBlocked for 0x1B): 1 unless its mode +0xBB0 is 1, its accepted flag +0xBF0 is clear and func_001DDA80 does not hold for the world
+func_00181AE0	HasModeWalkerAcceptedRequest	slot 0x144 of class 0x1A: whether +0xBF0 is set
+func_00181AF0	FinishModeWalker	slot 0x150 of class 0x1A: runs func_00192C58, then SetModeWalkerMode with 1
+func_00181B20	LaunchPlayerFromModeWalker	the callback AcceptModeWalkerRequest gives the player: places it from D_00264180 through D_00264190 (func_001BC260), turns it to face the other way and sets state 4/0x2B (SetPlayerState)
+func_00181BC8	AcceptModeWalkerRequest	slot 0x140 of class 0x1A: unless its slot 79 refuses, sets +0xBF0 when HasSpareCount holds; without one and with a player, takes the player over (state 2/2, mode 3, LaunchPlayerFromModeWalker as its callback), else mode 2; then sends itself message 0x17
+func_00182470	InitC24Object	slot 0x10 of class 0x24: runs func_0013DDB8 and sets its numbers (10, 1, 3000, 1000, 0, 0.5)
+func_001824D8	StartC24Object	slot 0x50 of class 0x24: runs func_0013CE40, resolves its links (D_00264230), creates its state walker (0x36E) and a weight curve with a 0xC00-byte buffer
+func_00182E40	AddObjectKeyIfLevelInRange	runs AddObjectKeyToOwner when the target's range holds g_currentEntry's level (IsInsideRange); a script built-in of func_00109488
+func_00182ED8	ResolveAndStartObject	when the object is attached (IsObjectAttached), calls its resolve slot (15) if any, its start slot (16) and its slot 3 (a dozen loaders call it)
+func_00183028	GetObjectAttached	writes IsObjectAttached through its out pointer (a script built-in of func_00109488)
+func_00183478	GetObjectAliasId	writes GetAliasId through its out pointer (a script built-in of func_00109488)
+func_00183990	SetExtraObjectPropertyInt	wraps an integer in a script value and passes it to SetExtraObjectProperty (func_00100720 calls it)
+func_00183A90	SetExtraObjectPropertyVectorB	copies a vector into a payload of the second vector kind (AcquireVectorBPayload), wraps it and passes it to SetExtraObjectProperty
+func_00183BB8	SetExtraObjectPropertyWord	the same body as SetExtraObjectPropertyInt: wraps an integer in a script value for SetExtraObjectProperty (func_00100A78 calls it)
+func_00183C38	SetExtraObjectPropertyVectorA	copies a vector into a payload of the first vector kind (AcquireVectorAPayload), wraps it and passes it to SetExtraObjectProperty
+func_001841D0	RefreshConeVolumeShape	original assembly: recomputes a cone volume after any of its settings changes (SetConeVolumeMode, SetConeVolumeRange and every setter after them call it)
+func_00185A58	SendVif0StartupPacket	a startup initializer (D_00264814, run by RunStartupInitializers): sets bit 0x40 of the VIF0 channel's control word, sends the packet D_00211E10 on it, waits and clears the bit
+func_00185AC8	SendVif1StartupPacket	a startup initializer (D_00264818, run by RunStartupInitializers): sets bit 0x40 of the VIF1 channel's control word, sends the packet D_00212110 on it, waits and clears the bit
+func_00185C18	GetSurfacePairFriction	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceFriction, at least 0, scaled by 0.2 with flag 8 of g_buttonCodeFlags (func_00185D20 reads it)
+func_00185CA0	GetSurfacePairBounce	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceBounce, clamped to 0..1 (func_00185D20 reads it)
+func_00186450	CollectEdgeContacts	tests each of the collider's edges (pairs of indexes into its points) against the context with func_0013DFD8, appending the hits to the output and pointing each at its edge; returns their count (func_00186BA8 calls it)
+D_00264840	g_surfaceFriction	thirteen weight and value pairs, one per surface kind, that GetSurfacePairFriction combines
+D_002648A8	g_surfaceBounce	thirteen weight and value pairs, one per surface kind, that GetSurfacePairBounce combines
+func_001884C0	ResetMatrixHomogeneous	zeroes the fourth word of a matrix's first three rows and sets its fourth row to D_0024B260 (CopyRotationMatrix and six others call it)
+func_001884E0	CopyRotationMatrix	copies a matrix's first three rows and resets the rest (ResetMatrixHomogeneous); returns the destination
+func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawC60Object multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
+func_00188CE0	GetMatrixRotationCosine	returns half of the matrix's trace less one, clamped to -1..1 (ClampToMagnitude): the cosine of its rotation's angle
+func_001891C0	TransformMatrixByObject	builds a matrix from the object's rotation and translation at +0x30 (func_00188B48), multiplies it with the argument (MultiplyMatrices) and copies the four rows out (TransformPointArray calls it)
+func_0018A388	InitGaugeAgent	slot 0x10 of class 0x0C: runs InitAgent and sets +0xE3C to -1
+func_0018A3B8	LoadGaugeAgent	slot 0x38 of class 0x0C: runs LoadAgent and resolves its links (D_00264910)
+func_0018A3F0	StartGaugeAgent	slot 0x50 of class 0x0C: runs StartAgent, takes the world's gauge object (func_001DDC38), resolves its links, creates its state walker (0x438), its three clips and the six keyed objects of D_00264960
+func_0018A628	DrawGaugeAgent	original assembly: slot 0xA4 of class 0x0C
+func_0018A6C0	FindNearestHitObject	tests each candidate object against a segment (func_00141D00) and returns the one with the lowest score, copying its hit out, skipping a zero-score first hit when bit 0 of the mode is set
+func_0018A830	IsGaugeAgentBlocker	the filter of IsGaugeAgentLineBlocked: rejects the kinds of D_002649B0, class 3, objects of kind 0x34 whose slot 60 refuses, and the ids 0x449 and 0x44A
+func_0018A910	IsGaugeAgentLineBlocked	gathers the world's objects along a segment that pass IsGaugeAgentBlocker (func_001DC238) and returns whether one is hit (FindNearestHitObject)
+func_0018A9A8	HasGaugeAgentClearLine	slot 0x184 of class 0x0C: after its delay, with a target and its walker in state 0x43A, 0x43C or 0x43E, 1 when the line to the target or to a second point of it is not blocked (IsGaugeAgentLineBlocked)
+func_0018AAE0	IsGaugeAgentFree	slot 0x16C of class 0x0C: 1 when the world allows it, +0xC10 is clear, its state is not 0x10 or 0xB, its slot 0x66 agrees and its walker is in state 0x43A, 0x43C or 0x43E
+func_0018AB88	EnterGaugeAgentState	slot 0x180 of class 0x0C: runs EnterAgentState; state 0xB marks the level done (MarkLevelDone with 2) and starts a memory-card save, state 0x10 counts at +0xA68
+func_0018ABF0	ChooseGaugeAgentState	slot 0x174 of class 0x0C: state 2 when in state 4 with its walker in 0x438 and func_001C96B8 failing, else ChooseAgentState
+func_0018AC58	AdvanceGaugeAgentPhase	lowers the gauge count (DecrementGaugeCount), changes to the phase's state and clip (D_002649D8, +0xE30) and its walker target (D_002649E8), and moves to the next phase
+func_0018ACD0	UpdateGaugeAgent	slot 0x54 of class 0x0C: runs UpdateAgent
+func_0018ACF0	ShowGaugeAgentBar	slot 0xC8 of class 0x0C: with its walker in state 0x43A, 0x43C or 0x43E and AreMenusAndFadeClear, calls g_gaugeBarElement's slot 14, else its slot 15
+func_0018B2E8	LeaveGaugeAgentState	slot 0x17C of class 0x0C: runs LeaveAgentState; leaving state 0x10 sends its walker to the pending target +0xE3C and clears it
+func_0018B340	HandleGaugeAgentNotification	slot 0x44 of class 0x0C: on notification 0x13 from its +0x7E0 object, codes 0x442 and 0x443 place one of its two objects and start it, 0x444 and 0x445 set and clear +0xE2C; then HandleAgentNotification
+func_0018B460	GetGaugeAgentLevelFactor	writes a factor from g_currentEntry's level: 1.3 times it less 0.3, clamped to 0..1, with the walker in state 0x43A or 0x43C, else its square
+func_0018B720	WaitForBackgroundJob	when a job is running calls func_001F6A50 on its thread, then takes and releases the job's lock (func_001F6B60, func_001F6B40), as RunBackgroundJob holds it while the job runs; StartBackgroundJob calls it first
+func_0018D4F8	CheckAllocationSize	takes a size and does nothing; AllocateFrontMemory and AllocateBackMemory call it before they move their cursors
+func_0018D758	AllocateObjectMemory	returns AllocateZeroedFrontMemory of its size: the allocation the libraries and CloneFont call for a new object
+func_0018D778	FreeObjectMemory	does nothing: the release a deleting destructor calls (some dozen callers, as func_00137290's flag-1 path), since front memory is only freed by a reset

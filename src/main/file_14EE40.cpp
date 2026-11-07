@@ -322,7 +322,7 @@ struct Src_14DB78 { VT_14DB78* vt; };
 void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2);
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
-// Defined in src/main/file_14D0A8.cpp.
+// Defined in src/main/path_curve.cpp.
 f32 func_0014DB40();
 f32 func_0014DB58();
 void func_0014DD28();
@@ -453,10 +453,6 @@ f32 func_001EB0F8(void*, f32);
 
 extern f32 func_001EB0F8(void*, f32);
 
-struct Obj_152438 { u8 pad[8]; void* link; };
-
-struct Pair_00152440 { u32 first, second; };
-
 struct Pair_00152450 { u32 first, second; };
 
 void func_001524D8(List01*, u32);
@@ -512,7 +508,7 @@ struct Link_00152600 { s32 f0; s32 f4; };
 void* func_00152460(void* a, void* b);
 
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
-void func_00152438(Obj_152438* self, void* value);
+void func_00152438(List01* self, s32 offset);
 
 struct Gl_0026E9F8 { u8 pad0[0x260]; s32 f260; u8 pad1[0x8]; s32 f26C; };
 
@@ -960,7 +956,7 @@ void func_0014F850(C23* self)
     PostLoadPlacedObject(self);
     if (self->count744 > 0) {
         do {
-            void* p = func_0015A448(self->world, self->items748[i], self);
+            void* p = FindFirstObjectByIdMode4(self->world, self->items748[i], self);
             if (p != 0) {
                 if (IsObjectOfKind(p, 0x41) != 0) {
                     s32 n = self->count768;
@@ -985,7 +981,7 @@ void func_0014F920(C23* self)
     func_0013CE40(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
     ((Held23*)self->p734->f200)->f4C = 1;
-    Src_14F920* s2 = func_0015A480(self->world, self->f6C0, self);
+    Src_14F920* s2 = FindFirstObjectByIdMode1(self->world, self->f6C0, self);
     *(Quad16*)&self->q6F0[0] = s2->q190[0];
     *(Quad16*)&self->q6F0[1] = s2->q190[1];
     *(Quad16*)&self->q6F0[2] = s2->q190[2];
@@ -1005,7 +1001,7 @@ void func_0014F920(C23* self)
     }
     ((VFn_14F920Arg)s2->vtbl[25])(s2, 0);
     ((VFn_14F920)s2->vtbl[7])(s2);
-    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))SyncPooledHolderWithPlayer, self, 0, 0);
     self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
 }
 
@@ -1028,13 +1024,13 @@ void func_0014FA88(C23* self)
                     if (self->f78C > 0) st[1] = 0x2B9;
                     else st[1] = 0x2B7;
                 } else {
-                    func_0014FDA8(self, &st[1]);
+                    UpdatePooledHolderAim(self, &st[1]);
                 }
                 break;
             case 0x2B9:
                 if (self->f7B0 != 0) st[1] = 0x2B8;
                 else if (self->f78C <= 0) st[1] = 0x2B7;
-                else func_0014FDA8(self, &st[1]);
+                else UpdatePooledHolderAim(self, &st[1]);
                 break;
             case 0x2BA:
                 func_00150008(self);
@@ -1290,7 +1286,7 @@ void func_001506F0(StepSequence* self)
     if (self->first30C == -1) {
         self->first30C = self->id;
     }
-    void* v = func_00160CA0(g_currentEntry, self->first30C);
+    void* v = GetIndexedTargetSlot(g_currentEntry, self->first30C);
     self->target304 = v;
     if (!v) {
         self->target304 = self->fallback308;
@@ -1388,7 +1384,7 @@ void func_00150790(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+                    g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
                 } else {
                     g_camera->ctl460.f5C = 0;
                 }
@@ -1464,7 +1460,7 @@ void func_00150AE8(StepSequence* self)
         if (q[1] != 0) {
             StepSequence* o = D_0027051C;
             if (o == 0) {
-                func_00151860(self, s2);
+                ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
                 if (o->f328 == 0 && o->state2D4 == 3) {
@@ -1619,9 +1615,9 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             func_001365A0(&g_typedTextCaptionBox, r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
             g_camera->ctl460.f5C = 0;
         }
@@ -1691,7 +1687,7 @@ s32 func_00151300(StepSequence* self)
     g_typedTextCaptionBox.f2F8 = 0;
     if (flags == 0x100) {
         s32 r;
-        PadRecord* in = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
+        PadRecord* in = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {
@@ -1833,7 +1829,7 @@ void func_001519E0(StepSequence* collection, const char* name, u32 kind)
 	if ((u32)collection->f310 >= 4) return;
 	void* item = GetLevelEntryByKey(name);
 	if (!item) return;
-	void* value = func_00160CA0(item, kind);
+	void* value = GetIndexedTargetSlot(item, kind);
 	if (!value) return;
 	u32 count = collection->f310;
 	collection->f314[count] = value;
@@ -1842,7 +1838,7 @@ void func_001519E0(StepSequence* collection, const char* name, u32 kind)
 
 void* func_00151A58(void)
 {
-    return &D_00261EF0;
+    return &g_scatterController;
 }
 
 void func_00151A68(void* state)
@@ -1860,7 +1856,7 @@ void func_00151A88(G261EF0* self)
     if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
     else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
     else self->table = &D_00261E30;
-    func_00152410(self, g_currentEntry->dt);
+    SetScatterLevel(self, g_currentEntry->dt);
     s32 a = ((Tab_151A88*)self->table)->f1C;
     s32 b = ((Tab_151A88*)self->table)->f24;
     f32 t = g_currentEntry->dt;
@@ -1892,20 +1888,20 @@ void func_00151D28(Self_151D28* self)
     if (D_00275B00 & 8) {
                 if (self->field_1C->f2C <= g_currentEntry->dt && g_currentEntry->dt < self->field_1C->f34) {
             if (g_saveData->f19E4 < self->field_1C->f30) {
-                func_00160C48(self->field_1C->f30);
+                SetSpareCount(self->field_1C->f30);
                 self->field_20 = 1;
             }
         } else if (self->field_1C->f34 <= g_currentEntry->dt) {
             if (g_saveData->f19E4 < self->field_1C->f38) {
-                func_00160C48(self->field_1C->f38);
+                SetSpareCount(self->field_1C->f38);
                 self->field_20 = 1;
             }
         }
     } else {
         f32 v = ClampToRange((u8*)self->field_1C + 8, g_currentEntry->dt);
-        func_00152410(self, v);
+        SetScatterLevel(self, v);
     }
-    func_00148CE0(g_currentWorld);
+    CompleteSoundNotifiers(g_currentWorld);
 }
 
 void func_00151E18(void* self)
@@ -1915,7 +1911,7 @@ void func_00151E18(void* self)
 void func_00151E20(G261EF0* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
-    func_00152410(self, x);
+    SetScatterLevel(self, x);
     s32 index = g_saveData->f19E0;
     f32 y;
     if (index < 0) {
@@ -1943,7 +1939,7 @@ void func_00151ED8(G261EF0* obj, FlaggedObject* node)
     }
     value = ((Part_151ED8*)obj->table)->f14;
 have:
-    func_00152410(obj, g_currentEntry->dt + value);
+    SetScatterLevel(obj, g_currentEntry->dt + value);
     if (node != 0) {
         G27C230* m = g_currentEntry;
         s32 idx = node->ordinal;
@@ -1957,7 +1953,7 @@ have:
 
 void func_00151FC8(G261EF0* object)
 {
-	func_00152410(object, 0.0f);
+	SetScatterLevel(object, 0.0f);
 	G27C230* manager = g_currentEntry;
 	manager->f10 = 0.0f;
 	manager->count70 = 0;
@@ -2027,15 +2023,15 @@ void func_00152410(G261EF0* object, f32 unused)
 	g_currentEntry->dt = value;
 }
 
-void func_00152438(Obj_152438* self, void* value)
+void func_00152438(List01* self, s32 offset)
 {
-    self->link = value;
+    self->offset = offset;
 }
 
-void func_00152440(Pair_00152440* p)
+void func_00152440(List01* p)
 {
-	p->second = 0;
-	p->first = 0;
+	p->tail = 0;
+	p->head = 0;
 }
 
 void func_00152450(Pair_00152450* p)
@@ -2511,7 +2507,7 @@ void func_001533A8(Self_1533A8* self)
     f.f70 = s1;
     f.f74 = (u8*)s1 + 0x22C;
     i = 0;
-    func_00188668(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
+    MultiplyMatrices(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
@@ -2540,10 +2536,10 @@ void func_00153528(ActiveSetSolver* self, s32 count)
 	s32 size = 0x60 * n;
 	self->items = AllocateBackMemory(size);
 	(void)func_001F5C0C(self->items, 0, size);
-	func_00152438((Obj_152438*)&self->active, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->atLow, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->atHigh, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->pending, (void*)0x4C);
+	SetListLinkOffset(&self->active, 0x4C);
+	SetListLinkOffset(&self->atLow, 0x4C);
+	SetListLinkOffset(&self->atHigh, 0x4C);
+	SetListLinkOffset(&self->pending, 0x4C);
 	s32 sq = (n * n) << 2;
 	self->matrix = (f32*)AllocateBackMemory(sq);
 	self->factor = (f32*)AllocateBackMemory(sq);

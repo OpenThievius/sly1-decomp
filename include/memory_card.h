@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x4F50-byte record at D_00264A40 (file_18B580.cpp defines it as zeros): the state of the
-// memory-card functions of file_18B580.cpp (func_0018B670 .. func_0018D0A0), which take it as their
+// The 0x4F50-byte record at D_00264A40 (memory_card.cpp defines it as zeros): the state of the
+// memory-card functions of memory_card.cpp (func_0018B670 .. func_0018D0A0), which take it as their
 // first parameter, and of func_001943E8, func_00195958 and func_001E9108, which name it.
 // Written for this project from what retail's code does (build/swarm/st3/groups.tsv, g2213).
 //
-// The size is the label's (0x4F50 to the next one), which file_18B580.cpp's definition spans.
+// The size is the label's (0x4F50 to the next one), which memory_card.cpp's definition spans.
 //
 // func_0018BDC8 runs every frame: when its job thread is idle it polls the card
 // (func_0018D0A0) at nextPollTime, or moves `state` to `targetState` (func_0018C028).
@@ -46,6 +46,6 @@ struct MemoryCard {
 
 typedef char check_MemoryCard[sizeof(MemoryCard) == 0x4F50 ? 1 : -1];
 
-extern MemoryCard D_00264A40;      // file_18B580.cpp
+extern MemoryCard D_00264A40;      // memory_card.cpp
 
 #endif

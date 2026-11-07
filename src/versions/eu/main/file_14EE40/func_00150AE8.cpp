@@ -56,7 +56,7 @@ void func_00150AE8(StepSequence* self)
         if (q[1] != 0) {
             StepSequence* o = (StepSequence*)D_0027051C;
             if (o == 0) {
-                func_00151860(self, s2);
+                ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
                 if (o->f328 == 0 && o->state2D4 == 3) {

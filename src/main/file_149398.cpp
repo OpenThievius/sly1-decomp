@@ -481,7 +481,7 @@ void func_0014A7B8(T2173_3B0* self)
     Camera* n;
 
     GetCameraControllerTargetPoint(&a, self);
-    func_00149458(&b, self);
+    GetTargetCameraControllerEyePoint(&b, self);
     n = (Camera*)self->owner;
     StopSoundRecord(self->p48, 0);
     StopSoundRecord(self->p4C, 500);
@@ -807,7 +807,7 @@ void func_0014BF88(C12* self)
     EnterAgentState(self);
     switch (self->f724) {
     case 0xB:
-        func_0014CD70((void*)D_0027C00C, self);
+        CountDownGaugeContacts((void*)D_0027C00C, self);
         if (((Slot_14BF88*)self->fC20) != 0) {
             ((Slot_14BF88*)self->fC20)->v10 = 0;
             self->fC20 = 0;
@@ -856,10 +856,10 @@ void func_0014C138(GaugeManager* self)
     func_001B6DF8(self->device, self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
-        Node_14C138* n = (Node_14C138*)func_0015A448(self->world, s->obj, self);
+        Node_14C138* n = (Node_14C138*)FindFirstObjectByIdMode4(self->world, s->obj, self);
         s->obj = n;
-        s->f8 = func_0015A480(n->f14, 0x3F7, n);
-        s->f4 = func_0015A480(n->f14, 0x3F6, n);
+        s->f8 = FindFirstObjectByIdMode1(n->f14, 0x3F7, n);
+        s->f4 = FindFirstObjectByIdMode1(n->f14, 0x3F6, n);
     }
     f32* p = self->poly;
     f32 g = g_currentEntry->dt;
@@ -923,7 +923,7 @@ void func_0014C5E8(GaugeManager* self)
     } else {
         c = ratio;
     }
-    func_00151E20(&D_00261EF0, 1.0f - c * 0.8f);
+    RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
 }
 
 void func_0014C668(void* unused, s32 mode)
@@ -946,7 +946,7 @@ void func_0014C6E0(GaugeManager* self)
     func_001B6598(self->device, &tag);
     if (tag == 0x3FD) {
         if (self->f45C < g_gameClock[1]) {
-            func_0014C858(self);
+            RunGaugeTimedEvent(self);
         }
         if (self->f460 < g_gameClock[1]) {
             ActivateRandomGaugeSlot(self);
@@ -1102,7 +1102,7 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
                 g_gaugeAmountCaption.limit = &self->maxAmount;
                 SetWorldActiveFollower(self->world, self);
                 StartTimer(&g_timerElement, self->f2D8);
-                SetTimerLimit(&g_timerElement, 0.0f, func_0014C668);
+                SetTimerLimit(&g_timerElement, 0.0f, FinishGaugeOnTimeout);
                 StartTimerCounting(&g_timerElement);
             }
             if (self->tag430 == 0x3FD) {

@@ -219,9 +219,9 @@ void func_0016AB38(Self_16AB38* self)
             s32 v = 0;
             switch (i) {
             case 0: v = 1; break;
-            case 1: v = func_001602A0() >> 1; goto mask;
-            case 2: v = func_001602A0() >> 2; goto mask;
-            case 3: v = func_001602A0() >> 3;
+            case 1: v = ComputeCompletionMask() >> 1; goto mask;
+            case 2: v = ComputeCompletionMask() >> 2; goto mask;
+            case 3: v = ComputeCompletionMask() >> 3;
             mask: v &= 1; break;
             default: break;
             }
@@ -360,7 +360,7 @@ void func_0016B190(Obj_16B190* self)
             s32 s2 = 1;
             void* elt;
             u8* table = (u8*)self + 0x324;
-            func_00160340(idx);
+            MarkProgressStageFlag(idx);
             elt = *(void**)(table + (self->f2D0 << 2));
             if (elt != 0) {
                 CreateAnimationPlayerWithoutPresetTargets(elt, self, 0, 0, 0.0f, 1.0f);
@@ -370,7 +370,7 @@ void func_0016B190(Obj_16B190* self)
                 }
             }
             {
-                Rec_16B190* a = (Rec_16B190*)func_00160180(self->f2D0 << 8);
+                Rec_16B190* a = (Rec_16B190*)LookupEntryById(self->f2D0 << 8);
                 s32 flag = 0;
                 if (a != 0) {
                     flag = (a->f4 != a->f1C);
@@ -465,7 +465,7 @@ void func_001F4ED0(void* p);
 void func_0016B520(T217D_12E0* self)
 {
     if (self->open != 0) {
-        void* p = func_0015A448(g_currentWorld, 0x4FD, 0);
+        void* p = FindFirstObjectByIdMode4(g_currentWorld, 0x4FD, 0);
         if (p != 0) {
             PushObjectCameraController(p);
         }

@@ -338,7 +338,7 @@ s32 func_0017AA40(C1B* self, s32* arg)
     if (((VFn_17AA40_A)((void**)self->desc)[79])(self, *arg) != 0) {
         return 0;
     }
-    if (func_00160C58() != 0) {
+    if (HasSpareCount() != 0) {
         self->f6D0 = 1;
         self->f6D4 = *(f32*)&g_gameTime;
     }
@@ -349,7 +349,7 @@ s32 func_0017AA40(C1B* self, s32* arg)
         func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
         ((VFn_17AA40_B)((void**)self->desc)[36])(self, bufB);
     }
-    if (func_00160C58() != 0) {
+    if (HasSpareCount() != 0) {
         func_0017ABE8(self, 3);
     } else {
         func_0017ABE8(self, 4);
@@ -437,8 +437,8 @@ void func_0017AE00(C4A* self)
     self->fC = one;
     func_001399F8(self->ptrC, 12, 5, &self->fC);
 
-    func_0017B410(self, 0);
-    func_0017B510(self, 1);
+    SetGaugeModeObjectMode(self, 0);
+    PlayGaugeModeObjectLoop(self, 1);
 }
 
 ASM_FUNC(func_0017AF38);
@@ -479,7 +479,7 @@ s32 func_0017B3A8(C4A* self, Msg_17B3A8* msg)
     if (msg->f10 & 0x10) {
         if (msg->f4 == self->f608) {
             DecrementGaugeCount(&g_gaugeBarElement);
-            func_0017B598(self);
+            PlayGaugeModeObjectTarget(self);
             TriggerScriptEvent(self, 2, 0, 0);
         }
     }
@@ -625,7 +625,7 @@ void func_0017B648(CountdownCollider* self)
         if (g_timeoutLimit < g_gameTime - self->startTime) {
             if (g_timeoutFired == 0) {
                 g_timeoutFired = 1;
-                func_00160578(2);
+                FadeOutAndQueueMovie(2);
             }
         }
     }
