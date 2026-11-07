@@ -2,6 +2,9 @@
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
+#include "game_clock.h"
+#include "globals.h"
+#include "vu0.h"
 
 // The file's .data, in retail's order; the label only its assembly reads is included.
 float D_00274F00 = 35.0f;
@@ -47,7 +50,38 @@ void CreatePlayerTwoEntryBlend(Player* self)
 
 INCLUDE_ASM(func_001D1630);
 
-INCLUDE_ASM(func_001D1A80);
+// What the player watches while it follows the path (+0x2230) in states 0x17 and 0x1B: a record
+// whose second word points to an object with a float at +0x34, and a float at +0x14.
+struct PathWatch { u8 pad00[8]; struct PathWatchTarget* target; u8 pad0C[8]; f32 f14; };
+struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
+
+void func_001D1630(Player* self, void* path, Mat02* out, f32 length);
+void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, const Vec02* zero, Mat02* out, s32 d, s32 e);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, Vec02* angle, Vec02* axis);
+
+void func_001D1A80(Player* self)
+{
+    Mat02 placed;
+    Mat02 goal;
+    Mat02 delta;
+    Vec02 axis;
+    Vec02 k;
+    Vec02 angle;
+    func_001D1630(self, (void*)self->f2208, &placed, self->f2410);
+    if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
+        PathWatch* w = (PathWatch*)self->watched2230;
+        f32 dt = g_gameClock.dt;
+        f32 t = w->target->f34 - w->f14;
+        func_00130748(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &D_00248D30, &goal, 0, 0);
+    } else {
+        goal = placed;
+    }
+    MultiplyMatrices3x3(&self->rot, &goal, &delta);
+    MatrixToAxisAngle(&delta, &angle, &axis);
+    Vu0::Q(k) = Vu0::FromFloat(angle.x / g_gameClock.dt);
+    Vu0::Q(self->v160) = Vu0::MulX(Vu0::Q(axis), Vu0::Q(k));
+}
 
 INCLUDE_ASM(func_001D1BB0);
 
@@ -73,4 +107,51 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
     }
 }
 
-INCLUDE_ASM(func_001D2830);
+// The path object (+0x2208): a frame at +0x18 and a holder at +0x34 whose descriptor has the
+// two methods the player calls (slot 2 at +8 and slot 10 at +0x28).
+struct PathHolder;
+struct PathHolderDesc {
+    u8 pad00[8];
+    void (*m2)(PathHolder* self, Vec02* out, f32 t, s32 a);
+    u8 pad0C[0x28 - 0x0C];
+    void (*m10)(PathHolder* self, Vec02* in, s32 a, s32 b, s32 c, s32 d, f32* out);
+};
+struct PathHolder { PathHolderDesc* desc; };
+struct PathObject { const Desc01* desc; u8 pad04[0x14]; void* frame; u8 pad1C[0x34 - 0x1C]; PathHolder* holder; };
+
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
+void SetPlayerState(void* self, s32 mode, s32 count);
+
+void func_001D2830(Player* self, PathObject* path)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Vec02 local;
+    Vec02 world;
+    if ((PathObject*)self->f2208 != path) {
+        if (self->f2220 == 7) {
+            TriggerScriptEvent((void*)self->f2208, 3, 0, 0);
+            ((PathObject*)self->f2208)->desc->m18((BaseObject*)self->f2208, self);
+            TriggerScriptEvent(path, 2, 0, 0);
+            path->desc->m17((BaseObject*)path, self);
+        }
+        self->f2208 = (s32)path;
+        self->f2204 = 0;
+        self->f2200 = 0;
+        TransformPointBetweenFrames(0, path->frame, &self->v140, &pos);
+        if (path->holder->desc->m10 != 0) {
+            path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, (f32*)((u8*)self + 0x220C));
+        }
+    }
+    func_001D1630(self, path, &rot, *(f32*)((u8*)self + 0x220C));
+    self->desc02()->m1E(self, &rot);
+    if (path->holder->desc->m2 != 0) {
+        path->holder->desc->m2(path->holder, &pos, *(f32*)((u8*)self + 0x220C), 0);
+    }
+    TransformPointBetweenFrames(path->frame, self, &pos, &local);
+    Vu0::Q(local) = Vu0::Sub(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x23E0)));
+    TransformPointBetweenFrames(self, 0, &local, &world);
+    self->desc02()->m1D(self, &world);
+    SetPlayerState(self, 7, 0x17);
+}

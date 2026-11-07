@@ -85,11 +85,15 @@ struct Ev07 {
 // One of class 0x19's four slots at 0x6B0: an object and a position.
 struct Slot19 {
     PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
-    u8 pad04[0x10 - 0x04];
+    PlacedObject* obj2;     // 0x04: the object a second link gives (func_001DA7E0 places it with this one)
+    u8 pad08[0x0C - 0x08];
+    s32 f0C;                // 0x0C: compared with PathFollower::f6A0 (func_001DA7E0)
     Vec02 v10;              // 0x10
-    u8 pad20[0x50 - 0x20];
+    Vec02 v20;              // 0x20
+    u8 pad30[0x50 - 0x30];
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
-    u8 pad54[0x60 - 0x54];
+    f32 f54;                // 0x54: an angle f50 advances by the clock's step (func_001DA7E0)
+    u8 pad58[0x60 - 0x58];
 };
 
 // A marker on class 0x19's path (sixteen at 0x874): an object (kind 0, func_001DB110) or a
@@ -223,9 +227,10 @@ struct TurningCollider : SwitchedCollider {
     void* f6C0;             // 0x6C0
     f32 f6C4;               // 0x6C4
     f32 f6C8;               // 0x6C8
-    u8 pad6CC[0x6D4 - 0x6CC];
+    f32 f6CC;               // 0x6CC
+    s32 f6D0;               // 0x6D0: the index of the mesh's last vertex (func_001C4FF8)
     s32 f6D4;               // 0x6D4
-    u8 pad6D8[0x6DC - 0x6D8];
+    Vec02* f6D8;            // 0x6D8: the lowest vertex of the mesh copy (func_001C4FF8)
     void* f6DC;             // 0x6DC
     f32 f6E0;               // 0x6E0
     f32 f6E4;               // 0x6E4
@@ -299,7 +304,9 @@ struct Player : TurningCollider {
     void* f22AC;            // 0x22AC
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
-    u8 pad23A0[0x23B0 - 0x23A0];
+    void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8)
+    f32 f23A4;              // 0x23A4
+    u8 pad23A8[0x23B0 - 0x23A8];
     void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
@@ -313,7 +320,9 @@ struct Player : TurningCollider {
     u8 pad23E8[0x23F0 - 0x23E8];
     f32 f23F0;              // 0x23F0
     f32 f23F4;              // 0x23F4
-    u8 pad23F8[0x2420 - 0x23F8];
+    u8 pad23F8[0x2410 - 0x23F8];
+    f32 f2410;              // 0x2410: the length along the path (func_001D1A80)
+    u8 pad2414[0x2420 - 0x2414];
     f32 f2420;              // 0x2420
     f32 f2424;              // 0x2424
     u8 pad2428[0x242C - 0x2428];
@@ -326,7 +335,10 @@ struct Player : TurningCollider {
     void* f24A0;            // 0x24A0
     u8 pad24A4[0x24B0 - 0x24A4];
     u8 f24B0[0x10];         // 0x24B0: filled by func_00128018 (func_00172898)
-    u8 pad24C0[0x24F8 - 0x24C0];
+    Vec02 v24C0;            // 0x24C0
+    Vec02 v24D0;            // 0x24D0
+    Vec02 v24E0;            // 0x24E0
+    u8 pad24F0[0x24F8 - 0x24F0];
     PlacedObject* f24F8;    // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
     u8 pad24FC[0x2500 - 0x24FC];
     void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
@@ -348,7 +360,7 @@ struct Player : TurningCollider {
     s32 f2684;              // 0x2684
     f32 f2688;              // 0x2688
     s32 f268C;              // 0x268C
-    u8 pad2690[0x26A0 - 0x2690];
+    Vec02 v2690;            // 0x2690
     s32 f26A0;              // 0x26A0
     u8 pad26A4[0x26A8 - 0x26A4];
     s32 f26A8;              // 0x26A8
@@ -360,7 +372,9 @@ struct Player : TurningCollider {
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
-    u8 pad26CC[0x2718 - 0x26CC];
+    u8 pad26CC[0x26D4 - 0x26CC];
+    void* f26D4;            // 0x26D4: the object that sent the player to state 9 (func_00178068)
+    u8 pad26D8[0x2718 - 0x26D8];
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730

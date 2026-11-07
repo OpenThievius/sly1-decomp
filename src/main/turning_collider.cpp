@@ -3,10 +3,12 @@
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
+#include "vu0.h"
 #include "globals.h"
 #include "object_link.h"
 #include "attachment.h"
 #include "pad_record.h"
+#include "game_clock.h"
 
 
 // The file's .rodata: the constants only its assembly reads.
@@ -353,4 +355,16 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
 
-INCLUDE_ASM(func_001C5EA8);
+void SetColliderMass(Collider* self, f32 m);
+
+void func_001C5EA8(TurningCollider* self, f32 s)
+{
+    f32 n = 0.1f;
+    n >?= s;
+    SetColliderMass(self, self->mass * self->f700 / n);
+    f32 ratio = n / self->f700;
+    Vec02 k;
+    Vu0::Q(k) = Vu0::FromFloat(ratio);
+    self->f700 = n;
+    Vu0::Q(self->gravity) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
+}

@@ -10,6 +10,7 @@
 #include "object_message.h"
 #include "screen_element.h"
 #include "game_clock.h"
+#include "vu0.h"
 
 s32 g_modeMasks[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
 const char* g_modeLabels[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
