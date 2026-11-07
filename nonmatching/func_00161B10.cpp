@@ -637,7 +637,7 @@ struct Info_163ED8 {
     s32 f18;
 };
 struct Hook_163ED8;
-typedef MeshNode* (*HookFn_163ED8)(Hook_163ED8* self, StripMesh* mesh);
+typedef AnimCursor* (*HookFn_163ED8)(Hook_163ED8* self, StripMesh* mesh);
 struct Hook_163ED8 {
     HookFn_163ED8* vt;
 };
@@ -694,8 +694,8 @@ void func_001EE668(Pkt_163ED8* s, s32 a, s32 b, void* data, s32 flags);
 void func_001EE718(Pkt_163ED8* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
 void func_00163938(s32 mode, Pkt_163ED8* pkt);
-void func_00169608(s32 a, s32 b, MeshNode* node);
-void func_001694F8(StripMesh* mesh, MeshStrip* strip, s32 a, s32 b, s32 n, MeshNode* node);
+void func_00169608(s32 a, s32 b, AnimCursor* node);
+void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
 void func_001EE3B8(void* obj, s32 size, s32 flags);
 
@@ -823,7 +823,7 @@ struct Info_164868 {
     s32 f18;
 };
 struct Hook_164868;
-typedef MeshNode* (*HookFn_164868)(Hook_164868* self, StripMesh* mesh);
+typedef AnimCursor* (*HookFn_164868)(Hook_164868* self, StripMesh* mesh);
 struct Hook_164868 {
     HookFn_164868* vt;
 };
@@ -886,8 +886,8 @@ void func_001EE668(Pkt_164868* s, s32 a, s32 b, void* data, s32 flags);
 void func_001EE718(Pkt_164868* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
 void func_00163938(s32 mode, Pkt_164868* pkt);
-void func_00169608(s32 a, s32 b, MeshNode* node);
-void func_001694F8(StripMesh* mesh, MeshStrip* strip, s32 a, s32 b, s32 n, MeshNode* node);
+void func_00169608(s32 a, s32 b, AnimCursor* node);
+void func_001694F8(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
 void func_0015F678(Owner_15F678* owner, u8* obj);
 void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other);
@@ -2351,7 +2351,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     s32 tinted;
     void* tail;
     void* head;
-    MeshNode* node;
+    AnimCursor* node;
     s32 i;
     Rec_163ED8* r;
 
@@ -2523,11 +2523,11 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         }
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
-        MeshStrip* s = &mesh->strips[i];
-        func_001EE5C8(pkt, 0xC, s->count, off, &c, &d);
+        FrameSource* s = &mesh->strips[i];
+        func_001EE5C8(pkt, 0xC, s->stride, off, &c, &d);
         func_001694F8(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
-        off += s->count;
+        off += s->stride;
     }
     func_001EE420(pkt, head);
     if (obj->f54 != 0) {
@@ -2556,7 +2556,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     s32 c;
     s32 d;
     s32 off;
-    MeshNode* node;
+    AnimCursor* node;
     s32 i;
     Rec_164868* r;
 
@@ -2761,11 +2761,11 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     func_001EE3F0(&pkt[2], D_00001AB0);
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
-        MeshStrip* s = &mesh->strips[i];
-        func_001EE5C8(&pkt[2], 0xC, s->count, off, &c, &d);
+        FrameSource* s = &mesh->strips[i];
+        func_001EE5C8(&pkt[2], 0xC, s->stride, off, &c, &d);
         func_001694F8(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;
-        off += s->count;
+        off += s->stride;
     }
     if (obj->f54 != 0) {
         func_00152D70(&pkt[2]);

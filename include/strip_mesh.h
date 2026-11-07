@@ -8,24 +8,12 @@
 #define STRIP_MESH_H
 
 #include "common.h"
+#include "cursor_animator.h"
 
-struct MeshStrip;
-struct MeshNode;
-
-// The node, parameter 5: func_001694F8 tests flag 1, func_00169608 walks its links.
-struct MeshNode {
-    s32 flags;              // 0x00: func_001694F8, func_00163ED8, func_00164868
-    u8 pad04[0x08 - 0x04];
-    s32 index;              // 0x08: func_001694F8 (multiplies the strip's count)
-    u8 pad0C[0x14 - 0x0C];
-    void* links;            // 0x14: func_001694F8, func_00169608 (Link_1694F8: src, dst, next)
-};
-
-// A strip, parameter 1: the elements of the mesh's array at 0x1C.
-struct MeshStrip {
-    s32 count;              // 0x00: func_00163ED8, func_00164868; func_001694F8 (scale)
-    s32 base;               // 0x04: func_001694F8
-};
+// The node, parameter 5, is a cursor animator's cursor (AnimCursor): func_001694F8 tests its
+// flag 1, multiplies the strip's stride by its frame and links a FrameLink to its list,
+// func_00169608 links one too. A strip, parameter 1, is a FrameSource (an element of the
+// mesh's array at 0x1C): its stride is the quadwords of one frame.
 
 // The mesh, parameter 0.
 struct StripMesh {
@@ -37,7 +25,7 @@ struct StripMesh {
     s32 flags;              // 0x0C: func_001694F8 tests 0x10000000
     u8 pad10[0x18 - 0x10];
     s32 nstrips;            // 0x18: func_00163ED8, func_00164868
-    MeshStrip* strips;      // 0x1C
+    FrameSource* strips;    // 0x1C
     u8 pad20[0x24 - 0x20];
     void* hook;             // 0x24: an object whose first slot gives the node (Hook_163ED8)
 };

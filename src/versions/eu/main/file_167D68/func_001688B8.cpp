@@ -3,8 +3,8 @@
 
 void func_001688B8(void)
 {
-    Quad_1688B8 k;
-    Quad_1688B8 t;
+    Rgba4 k;
+    Rgba4 t;
 
     func_00201A18(0, 1, 3, 1);
     u8* s0 = D_00262490;
@@ -17,10 +17,10 @@ void func_001688B8(void)
         *(s32*)p |= 0x20;
         p += 0x28;
     } while ((s32)p < end);
-    k.b0 = 0;
-    k.b1 = 0;
-    k.b2 = 0;
-    k.b3 = 0x80;
+    k.r = 0;
+    k.g = 0;
+    k.b = 0;
+    k.a = 0x80;
     t = k;
     FillScreenColor(D_002BDC20, &t, 0);
     t = k;

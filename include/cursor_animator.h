@@ -44,9 +44,16 @@ struct FrameSource {
     s32 stride;             // 0x00
     s32 base;               // 0x04
 };
+// An entry of the mesh queue (D_0027DC20, 0x4000 of them; file_167D68.cpp): func_001694A0
+// copies count quadwords from value to dst and, with a flag, marks the copy's GIF tags.
 struct FrameTarget {
-    u8 pad00[4];
-    s32 value;              // 0x04
+    s32 count;              // 0x00: the quadwords to copy
+    s32 value;              // 0x04: where they come from
+    union {
+        struct QueuedGifTags* dst;  // 0x08: where they go (func_001694A0)
+        u32 dstAddr;        // 0x08: func_001696B8 moves the ones inside a range
+    };
+    s32 flag;               // 0x0C: or-ed into the first tag (func_001694A0)
 };
 struct FrameLink {
     FrameSource* src;      // 0x00

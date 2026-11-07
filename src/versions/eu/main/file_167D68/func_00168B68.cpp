@@ -2,7 +2,7 @@
 // PAL runs at 50 Hz (50.0f) and uses a 468.61017f screen height.
 void func_00168B68(f32 t)
 {
-    Frame_168B68 f;
+    FadePacket f;
     s32 i = 0;
     s32 n;
 
