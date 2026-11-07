@@ -8,7 +8,7 @@
 #include "list_iter.h"
 #include "fpu.h"
 #include "world.h"
-#include "c67.h"
+#include "warp_page.h"
 #include "screen_element.h"
 #include "globals.h"
 #include "shapes.h"
@@ -538,10 +538,10 @@ struct Q3_1F1A08;
 struct Val_1F1A08;
 typedef s32 Key_1F1A08;
 typedef s32 Id_1F1A08;
-s32 func_001F0490(C67* o, s32 n, s32* a, s32* b);
+s32 func_001F0490(WarpPage* o, s32 n, s32* a, s32* b);
 s32 func_0016EC98(PadRecord* t);
 s32 func_0016EED0(PadRecord* t);
-void func_001F1648(C67* o, s32 n);
+void func_001F1648(WarpPage* o, s32 n);
 void func_0016EC20(Pool_1F1A08* p, s32 n);
 s32 func_001F0468(void);
 void func_001E9570(Q_1F1A08* q);
@@ -619,8 +619,8 @@ struct Clr_1F1960 { s32 a, b, c, d, e, f; };
 s32 func_0015C188(s32 n);
 V24A2* func_0015C1C0(s32 n);
 void func_001F5C0C(Clr_1F1960* p, s32 v, s32 size);
-struct __attribute__((packed)) Ptr_1F0660 { C67* p; };
-extern void func_00124A48(C67* o);
+struct __attribute__((packed)) Ptr_1F0660 { WarpPage* p; };
+extern void func_00124A48(WarpPage* o);
 struct Rec_1F1050 { s32 f0; f32 f4; s32 f8; };
 struct Sub_1F1050 {
     void (**vtbl)(Sub_1F1050*);
@@ -629,19 +629,19 @@ struct Sub_1F1050 {
     u8 pad38[0x298 - 0x38];
     Rec_1F1050* f298;
 };
-s32 func_001F0580(C67* o, s32 n);
-void func_001F0878(C67* o, s32 n);
-void func_001F0908(C67* o);
-void func_001F18B0(C67* o, s32 n);
+s32 func_001F0580(WarpPage* o, s32 n);
+void func_001F0878(WarpPage* o, s32 n);
+void func_001F0908(WarpPage* o);
+void func_001F18B0(WarpPage* o, s32 n);
 void func_001BF788(void* p, s32 n);
 void func_00159C28(Rec_1F1050* r);
 void func_00126C58(Sub_1F1050* o);
-void func_0012C918(Sub_1F1050* a, C67* b, s32 c, void* d, f32 e, f32 f);
+void func_0012C918(Sub_1F1050* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
 void func_001BFCD8(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 struct Node_1F0758;
 struct Iter_1F0758 { List01* list; u8* link; s32 offset; Iter_1F0758* saved; };
-void func_001249A8(C67* self);
-void func_00124DF8(C67* self, s32 n, void* table);
+void func_001249A8(WarpPage* self);
+void func_00124DF8(WarpPage* self, s32 n, void* table);
 void func_00182ED8(Node_1F0758* node);
 struct Next_1F0758 {
     static Node_1F0758* Of(Iter_1F0758* it)
@@ -700,8 +700,8 @@ void func_001ED278(Timeline* self);
 void func_001ED318(Timeline* self, Msg_1ED318* msg);
 void func_001EF900(C62* self, s32 state);
 s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2);
-void func_001F1050(C67* self, u32 next);
-void func_001F1590(C67* self, s32 a1, s32 a2);
+void func_001F1050(WarpPage* self, u32 next);
+void func_001F1590(WarpPage* self, s32 a1, s32 a2);
 void func_001F18B0(Obj_1F18B0* self, s32 idx);
 
 ObjectLink D_00275B60[8] = {
@@ -1132,7 +1132,7 @@ void func_001E9108(Obj_1E9108* obj)
                 ClearPadPressedBits(s2, 0x800);
             } else if ((v = s2->flags) & 0x100) {
                 T217D_0F0* g2 = &g_mapScreenList;
-                C67* x = g2->current;
+                WarpPage* x = g2->current;
                 if (x == 0) break;
                 if (x->mode) break;
                 PushStackElement(obj, g2);
@@ -3408,7 +3408,7 @@ s32 func_001F0468(void)
     return 10;
 }
 
-s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
+s32 func_001F0490(WarpPage* self, s32 kind, s32* outA, s32* outB)
 {
     s32 flag = 0;
     s32 sel;
@@ -3487,7 +3487,7 @@ s32 func_001F0580(void* self, s32 code)
     return r;
 }
 
-void func_001F0660(C67* o) {
+void func_001F0660(WarpPage* o) {
     StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->f19D8) {
@@ -3505,11 +3505,11 @@ void func_001F0660(C67* o) {
     g_mapScreenList.nodes[o->slot] = o;
 }
 
-void func_001F0758(C67* self)
+void func_001F0758(WarpPage* self)
 {
     Iter_1F0758 it;
     Node_1F0758* node;
-    Elem67* el;
+    WarpEntry* el;
     s32 i;
 
     PostLoadPlacedObject(self);
@@ -3518,20 +3518,20 @@ void func_001F0758(C67* self)
     while ((node = Next_1F0758::Of(&it)) != 0) {
         ResolveAndStartObject(node);
     }
-    el = self->elems;
+    el = self->entries;
     for (i = 0; i < 11; i++) {
         f32 zero = 0.0f;
         el->f28 = zero;
         el->f24 = zero;
-        el->f2C = RandomFloatInRange(zero, 6.2831855f);
-        el->f30 = RandomFloatInRange(0.5f, 0.7f);
+        el->phase = RandomFloatInRange(zero, 6.2831855f);
+        el->speed = RandomFloatInRange(0.5f, 0.7f);
         el++;
     }
-    self->f534 = -1;
+    self->selected = -1;
     g_activeListFrames = (ListFrame*)it.saved;
 }
 
-void func_001F0878(C67* self, s32 value)
+void func_001F0878(WarpPage* self, s32 value)
 {
     if (value == 10) {
         SetElementTextFromEntry(&D_0026F138, 0, 4);
@@ -3582,7 +3582,7 @@ void func_001F0908(Obj_1F0908* self)
 
 INCLUDE_ASM(func_001F0AE0);
 
-void func_001F0EB8(C67* obj, u8* s, void* c)
+void func_001F0EB8(WarpPage* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
     Camera* p = g_camera;
@@ -3596,7 +3596,7 @@ void func_001F0EB8(C67* obj, u8* s, void* c)
     g_camera->f1C8 = keep2;
 }
 
-void func_001F0F70(C67* self, s32 kind, void* msg)
+void func_001F0F70(WarpPage* self, s32 kind, void* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 5) return;
@@ -3623,7 +3623,7 @@ L_four:
     SetWarpPageMode(self, 0);
 }
 
-void func_001F1050(C67* self, u32 next)
+void func_001F1050(WarpPage* self, u32 next)
 {
     s32 i;
     Sub_1F1050* t;
@@ -3634,28 +3634,28 @@ void func_001F1050(C67* self, u32 next)
     switch (cur) {
     case 1:
     case 4:
-        StopSoundRecord(self->f564, 0);
+        StopSoundRecord(self->sound, 0);
         break;
     case 2:
         if (self->f560 == 0) {
             D_0026F138.vt->m15(&D_0026F138);
         }
         for (s32 k = 0; k < 11; k++) {
-            self->elems[k].f28 = 0;
+            self->entries[k].f28 = 0;
         }
         break;
     case 0: {
         f32 one = 1.0f;
         self->desc->m02(self);
         for (s32 n = 0; n < 11; n++) {
-            Elem67* s = &self->elems[n];
+            WarpEntry* s = &self->entries[n];
             if (IsWarpEntryAvailable(self, n, (s32*)0, (s32*)0)) {
                 s->f08 = one;
                 s32 want;
                 if (self->f2E0 == 3) {
                     want = GetCurrentWarpEntry();
                 } else {
-                    want = self->f2DC;
+                    want = self->cursor;
                 }
                 if (n == want) {
                     s->f10 = one;
@@ -3669,7 +3669,7 @@ void func_001F1050(C67* self, u32 next)
         }
         *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
         for (s32 j = 0; j <= 10; j++) {
-            Elem67* s = &self->elems[j];
+            WarpEntry* s = &self->entries[j];
             Sub_1F1050* a = (Sub_1F1050*)s->f04;
             Sub_1F1050* b = (Sub_1F1050*)s->f0C;
             if (a) {
@@ -3691,11 +3691,11 @@ void func_001F1050(C67* self, u32 next)
     switch (next) {
     case 1: {
         if (self->f2E0 == 3) {
-            s32 ne = self->f2DC != 1;
+            s32 ne = self->cursor != 1;
             Sub_1F1050* a;
             s32 off;
             if (ne) {
-                off = self->f2DC * 52;
+                off = self->cursor * 52;
             } else {
                 off = GetCurrentWarpEntry() * 52;
             }
@@ -3708,21 +3708,21 @@ void func_001F1050(C67* self, u32 next)
                 ReplaceAnimationPlayer(a, self, 0, &self->f2F0, fa, 0.0f);
             }
         } else {
-            Sub_1F1050* a = (Sub_1F1050*)self->elems[1].f00;
+            Sub_1F1050* a = (Sub_1F1050*)self->entries[1].f00;
             if (a) {
                 ReplaceAnimationPlayer(a, self, 0, &self->f2F0, 0.0f, 0.0f);
             }
             f32 z = 0.0f;
-            SetWarpPageSelectedEntry(self, self->f2DC);
+            SetWarpPageSelectedEntry(self, self->cursor);
             self->q540 = self->q550;
-            SelectWarpPageEntry(self, self->f2DC);
+            SelectWarpPageEntry(self, self->cursor);
             SetScreenElementHoldTime(&D_0026F138, z);
             D_0026F138.vt->m14(&D_0026F138);
-            StartSoundEffect(0x8A, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
+            StartSoundEffect(0x8A, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
             for (i = 0; i < 11; i++) {
-                Elem67* s = &self->elems[i];
+                WarpEntry* s = &self->entries[i];
                 s32 r = IsWarpEntryReachable(self, i);
-                s->f1C = r;
+                s->reachable = r;
                 s32 v = 0;
                 if (r != 0 && ((u32)(i - 2) < 6 || i == 0)) {
                     v = 1;
@@ -3731,7 +3731,7 @@ void func_001F1050(C67* self, u32 next)
                 s->f24 = s->f28 = 0.0f;
             }
         }
-        self->f2D8 = self->f2DC;
+        self->f2D8 = self->cursor;
         t = (Sub_1F1050*)self->f2E4;
         if (t != 0) {
             goto L146C;
@@ -3742,7 +3742,7 @@ void func_001F1050(C67* self, u32 next)
         if (self->f560 == 0) {
             D_0026F138.vt->m15(&D_0026F138);
             if (self->f2E0 == 2) {
-                StartSoundEffect(0x8B, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x8B, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
         func_001F0908(self);
@@ -3757,8 +3757,8 @@ void func_001F1050(C67* self, u32 next)
     }
     case 2:
         for (s32 m = 0; m < 11; m++) {
-            if (m != self->f534) {
-                self->elems[m].f28 = 1.0f;
+            if (m != self->selected) {
+                self->entries[m].f28 = 1.0f;
             }
         }
         self->mode = next;
@@ -3768,8 +3768,8 @@ void func_001F1050(C67* self, u32 next)
         break;
     case 0:
         for (i = 0; i < 11; i++) {
-            Sub_1F1050* a = (Sub_1F1050*)self->elems[i].f04;
-            Sub_1F1050* b = (Sub_1F1050*)self->elems[i].f0C;
+            Sub_1F1050* a = (Sub_1F1050*)self->entries[i].f04;
+            Sub_1F1050* b = (Sub_1F1050*)self->entries[i].f0C;
             if (a) {
                 if (a->f298) {
                     RemoveObjectNodeFromWorld(a->f298);
@@ -3790,14 +3790,14 @@ void func_001F1050(C67* self, u32 next)
 L154C:
     self->mode = next;
 L1550:
-    self->f2D4 = g_gameClock.elapsed;
+    self->modeTime = g_gameClock.elapsed;
     return;
 Lz:
     next = 0;
     goto L154C;
 }
 
-void func_001F1590(C67* self, s32 a1, s32 a2)
+void func_001F1590(WarpPage* self, s32 a1, s32 a2)
 {
     s32 v = self->mode;
     if (v == 2) goto L_two;
@@ -3808,18 +3808,18 @@ void func_001F1590(C67* self, s32 a1, s32 a2)
     }
     return;
 L_store:
-    self->f2DC = a1;
+    self->cursor = a1;
     self->f2E0 = a2;
     SetWarpPageMode(self, 1);
     return;
 L_two:
-    self->f2DC = a1;
+    self->cursor = a1;
     if (a2 == 3) {
         SetWarpPageMode(self, 3);
     }
 }
 
-void func_001F1610(C67* self)
+void func_001F1610(WarpPage* self)
 {
     s32 v = self->mode;
     if (v < 3) {
@@ -3903,7 +3903,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     }
     if (self->mode != self->current->mode) return;
 
-    s3 = IsWarpEntryAvailable(self->current, self->current->f2DC, &loc[0], &loc[1]);
+    s3 = IsWarpEntryAvailable(self->current, self->current->cursor, &loc[0], &loc[1]);
     s2 = GetPadHorizontalStep(t);
     v1 = GetPadVerticalStep(t);
     t->f30 = g_gameClock.elapsed + t->f34;
@@ -3919,7 +3919,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
         MoveWarpCursor(self->current, 3);
     } else if ((t->flags & 0x40) != 0) {
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
-        if (self->current->f2DC != GetCurrentWarpEntry()) {
+        if (self->current->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
                 Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;

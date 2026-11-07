@@ -5,7 +5,7 @@ struct Obj_1F1C90_eu {
     VFn_1F1C90* vtbl;
     u8 pad0[0x56C - 4];
     s32 f56C;
-    C67* f570;
+    WarpPage* f570;
     u8 pad1[0x58C - 0x574];
     f32 f58C;
     f32 f590;

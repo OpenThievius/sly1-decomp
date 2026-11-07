@@ -4,7 +4,7 @@
 // Its .rodata is the two jump tables of its assembly at 0x24E840 and 0x24E860; it has no .data
 // or .bss. Named after its first address until what it was is known.
 #include "transform_object.h"
-#include "c67.h"
+#include "warp_page.h"
 #include "oscillator.h"
 #include "camera.h"
 #include "list_iter.h"

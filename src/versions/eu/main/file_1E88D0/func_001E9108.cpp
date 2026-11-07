@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: calls func_0018C178(g, 1) before func_0018C568 and handles a third button (0x10) when D_eu_002636EC >= 2
 extern s32 D_eu_002636EC;
-struct G2_1E9108_eu { u8 pad[0x570]; C67* f570; };
+struct G2_1E9108_eu { u8 pad[0x570]; WarpPage* f570; };
 extern void func_001E9498(Obj_1E9108* o, G2_1E9108_eu* g);
 extern void func_0018C178(MemoryCard* g, s32 a);
 
@@ -73,7 +73,7 @@ void func_001E9108(Obj_1E9108* obj)
                 ClearPadPressedBits(s2, 0x800);
             } else if ((v = s2->flags) & 0x100) {
                 G2_1E9108_eu* g2 = (G2_1E9108_eu*)&g_mapScreenList;
-                C67* x = g2->f570;
+                WarpPage* x = g2->f570;
                 if (x == 0) break;
                 if (x->mode) break;
                 PushStackElement(obj, g2);
