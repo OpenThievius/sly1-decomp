@@ -86,7 +86,7 @@ D_002484B0	g_movieKeys	16 key records of 32 bytes; FindKeyIndex looks an argumen
 D_002486B0	g_screenElements	array of the 37 screen element objects InstallScreenElements, InitScreenElements and the teardown call slots on in turn
 D_00248748	g_levelEntries	the 33 LevelEntry records func_001DFE80 searches by their first word
 D_00248D00	g_unitXVector	constant quad (1,0,0,0) copied into object axis fields (InitTargetVector and others)
-D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in 001B8000.cpp
+D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in file_1B7968.cpp
 D_00248D20	g_unitZVector	constant quad (0,0,1,0) used as the rotation axis of the heading matrix (BuildTurningColliderHeadingMatrix) and copied into direction fields
 D_00249428	g_rpcBindErrorFormat	the format string InitIopCommandChannels prints (func_001E1F10) when binding an RPC client fails
 D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
@@ -142,7 +142,7 @@ D_00260540	g_iopReplyTable0	the reply words of the first command buffer, g_iopRe
 D_00260980	g_iopReplyTable1	the reply words of the second command buffer, g_iopReplyTables[1]
 D_00260DC0	g_iopSharedPacket	the packet whose address InitIopCommandChannels sends to the IOP; StartDiscRead sets its busy word, GetDiscReadError reads +0x10
 D_00260E00	g_iopChannel2Result	reply word of the RPC channel D_0027B4F0: set to 0xFFFFFFFF while a command is pending, polled by PollIopCommands, cleared when its callback ran
-D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at 0011C000.cpp:1665 sends as command 3 over channel D_0027B4F0
+D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at iop_commands.cpp:263 sends as command 3 over channel D_0027B4F0
 D_00260E60	g_valueRampProfile	three-float profile (3.0, 1.0, 0.1) passed to ApproachValueWithRamp for the pose-source indexed value in ApplyPoseSourceIndexedValue
 D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in pause_menu.cpp:1129
 D_00260F00	g_colorPresets	the 64-byte colour records SetColorPreset copies over an object's colour record by index

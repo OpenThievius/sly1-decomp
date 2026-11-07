@@ -2,7 +2,7 @@
 // Class 0x36 (descriptor D_0021C038, 0x860 bytes), a part with collision that keeps a list of
 // the objects it touches in a record of its own (+0x550), and class 0x37 (D_0021C168, the same
 // size) under it. Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/001F4000.cpp).
+// (config/us/classes.tsv; src/main/file_1F2758.cpp).
 //
 // Their fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

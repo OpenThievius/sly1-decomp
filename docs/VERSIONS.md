@@ -60,7 +60,7 @@ What makes PAL differ, from the first `differs` rows read one by one:
   Where that changes a function's type, not only its body, the shared file declares the type
   for both: a version's unit starts with `#define VERSION_EU 1`, so the declaration can read
   `#ifdef VERSION_EU` / `typedef u8 Letter_1AEA08;` / `#else` / `typedef s8 ...` / `#endif`
-  (src/main/001AC000.cpp, func_001AEA08). A struct whose layout differs is declared the same way:
+  (src/main/screen_element.cpp, func_001AEA08). A struct whose layout differs is declared the same way:
   `MovieStream` (src/main/movie_player.cpp) is a word longer in PAL, which the static initialiser
   GCC generates for that file needs, having no definition of its own to replace. That is the
   macro's one use: it never selects code, which is PAL's own definition's job.

@@ -62,7 +62,7 @@ struct MarkStacks {
 // func_001EA408).
 typedef f32 (*MathFn_259938)(f32 x);
 
-// The pooled payloads (0011C000.cpp): the 16-byte vectors of tags 0x16 and 0x18, the 0x40-byte
+// The pooled payloads (value_pools.cpp): the 16-byte vectors of tags 0x16 and 0x18, the 0x40-byte
 // block of tag 0x17, the two and three floats of tags 0x19 and 0x1A.
 f32* AcquireVectorAPayload(void);
 f32* AcquireMatrixPayload(void);
@@ -72,7 +72,7 @@ f32* AcquireTriplePayload(void);
 R11B008Key* NewKeyedValue(void);
 void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 first);
 
-// The pools (value.cpp) and the collector's calls on them (0011C000.cpp).
+// The pools (value.cpp) and the collector's calls on them (value_pools.cpp).
 extern u8 g_valueNodePool[];
 extern u8 g_scopePool[];
 extern u8 g_keyedValuePool[];

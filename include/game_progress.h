@@ -30,8 +30,8 @@ struct G27C230 {
     s32 count70;            // 0x70: the bits of bits74 (func_00151ED8, func_001D9338)
     u8 bits74[0x438 - 0x74]; // 0x74: no code bounds it; it runs to the next known word
     s32 f438;               // 0x438: func_00148598
-    s32 f43C;               // 0x43C: 00198000.cpp (Ctx_002623C4)
-    s32 f440;               // 0x440: 001E0000.cpp (Cnt_1E02C8)
+    s32 f43C;               // 0x43C: file_198980.cpp (Ctx_002623C4)
+    s32 f440;               // 0x440: commentary_best_time.cpp (Cnt_1E02C8)
     f32 f444;               // 0x444: func_00160690 (Obj_002623C4)
     s32 f448;               // 0x448: func_00199218; func_001603E8 sets 0x20 in record n's
 };
