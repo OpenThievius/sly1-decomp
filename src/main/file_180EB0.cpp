@@ -392,11 +392,11 @@ s32 func_00181BC8(C1A* self, s32* arg)
     if (((VFnQ_181BC8)((void**)self->desc)[79])(self, arg[0])) {
         return 0;
     }
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         self->fBF0 = 1;
     }
     self->fBF4 = g_gameTime;
-    r = func_00160C58();
+    r = HasSpareCount();
     if (r == 0) {
         g = g_player;
         if (g != 0) {

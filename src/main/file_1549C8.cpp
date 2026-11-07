@@ -2898,11 +2898,11 @@ f32 func_0015CD18(f32 x, f32 y, V24A2* self, s8 key, u32 color, V24A0* s)
         if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
             AddGifRegListFloat(s, tag, 0.0f);
-            func_00161860(s, e->u << 4, (s4 - e->v) << 4);
-            func_001618C0(s, (s32)((x + 1728.0f) * 16.0f),
+            AddGifUvRegListEntry(s, e->u << 4, (s4 - e->v) << 4);
+            AddGifXyzfRegListEntry(s, (s32)((x + 1728.0f) * 16.0f),
                           (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
-            func_00161860(s, (e->u + e->w) << 4, (s4 - (e->v + self->height)) << 4);
-            func_001618C0(s, (s32)((px + 1728.0f) * 16.0f),
+            AddGifUvRegListEntry(s, (e->u + e->w) << 4, (s4 - (e->v + self->height)) << 4);
+            AddGifXyzfRegListEntry(s, (s32)((px + 1728.0f) * 16.0f),
                           (s32)((py * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
         }
         return (f32)(e->w + 1) * self->sx;
@@ -2943,18 +2943,18 @@ void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
             BeginGifRegListTag(s, 9, 0x434343431ULL);
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
             AddGifRegListFloat(s, tag, 0.0f);
-            func_00161860(s, u0, v0);
+            AddGifUvRegListEntry(s, u0, v0);
             s32 sx = (s32)((x + 1728.0f) * 16.0f);
             s32 sy = (s32)((py * 0.45454547f + 1936.0f) * 16.0f);
-            func_001618C0(s, sx, sy, self->f40, 0);
-            func_00161860(s, u1, v0);
+            AddGifXyzfRegListEntry(s, sx, sy, self->f40, 0);
+            AddGifUvRegListEntry(s, u1, v0);
             s32 sy2 = (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
-            func_001618C0(s, sx, sy2, self->f40, 0);
-            func_00161860(s, u0, v1);
+            AddGifXyzfRegListEntry(s, sx, sy2, self->f40, 0);
+            AddGifUvRegListEntry(s, u0, v1);
             s32 sx2 = (s32)((px + 1728.0f) * 16.0f);
-            func_001618C0(s, sx2, sy, self->f40, 0);
-            func_00161860(s, u1, v1);
-            func_001618C0(s, sx2, sy2, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
+            AddGifUvRegListEntry(s, u1, v1);
+            AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
             self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
         }
     }
@@ -2965,10 +2965,10 @@ void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
 {
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
     AddGifRegListFloat(s, color, 0.0f);
-    func_00161860(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
-    func_001618C0(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
-    func_00161860(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
-    func_001618C0(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+    AddGifUvRegListEntry(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
+    AddGifXyzfRegListEntry(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+    AddGifUvRegListEntry(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
+    AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
 }
 
 void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)

@@ -45,7 +45,7 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
         if (self->f570->f2DC != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                Val_1F1A08* v = func_00160180((loc[0] << 8) | loc[1]);
+                Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->f570->f560 = 1;
                 PopStackElement((Q_1F1A08*)g_elementStack);
                 StartObjectFade(v, -1, 2);

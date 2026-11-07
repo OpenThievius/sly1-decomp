@@ -2065,22 +2065,22 @@ void func_001DD628(void* self, f32 x)
 
 s32 func_001DD690(void* self, void* obj)
 {
-    return func_00160850(obj) & 0x1;
+    return GetLevelEntryWord(obj) & 0x1;
 }
 
 s32 func_001DD6B0(void* self, void* obj)
 {
-    return func_00160850(obj) & 0x2;
+    return GetLevelEntryWord(obj) & 0x2;
 }
 
 s32 func_001DD6D0(void* self, void* obj)
 {
-    return func_00160850(obj) & 0x4;
+    return GetLevelEntryWord(obj) & 0x4;
 }
 
 s32 func_001DD6F0(void* self, void* obj)
 {
-    return func_00160850(obj) & 0x8;
+    return GetLevelEntryWord(obj) & 0x8;
 }
 
 s32 func_001DD710(World* a0, Arg_001DD710* a1)

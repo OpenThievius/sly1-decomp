@@ -1377,8 +1377,8 @@ void func_00195958(T217D_6D0* self)
         }
         return;
     case 27:
-        if ((func_001602A0() & 8) != 0) {
-            func_00160578(8);
+        if ((ComputeCompletionMask() & 8) != 0) {
+            FadeOutAndQueueMovie(8);
             return;
         }
         func_00194278(self, 0, 2);
@@ -1495,7 +1495,7 @@ void func_00195958(T217D_6D0* self)
             SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
             ApplyMemoryCardImage(&g_memoryCard);
-            func_00160948();
+            ResumeAtSavedLevel();
             return;
         }
         StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1505,7 +1505,7 @@ void func_00195958(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, -1);
         g_memoryCard.f4F44 = &D_002542D8[sel];
         ApplyMemoryCardImage(&g_memoryCard);
-        func_00160948();
+        ResumeAtSavedLevel();
         return;
     case 11: {
         Ent_195958* e;

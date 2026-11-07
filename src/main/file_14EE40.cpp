@@ -1286,7 +1286,7 @@ void func_001506F0(StepSequence* self)
     if (self->first30C == -1) {
         self->first30C = self->id;
     }
-    void* v = func_00160CA0(g_currentEntry, self->first30C);
+    void* v = GetIndexedTargetSlot(g_currentEntry, self->first30C);
     self->target304 = v;
     if (!v) {
         self->target304 = self->fallback308;
@@ -1829,7 +1829,7 @@ void func_001519E0(StepSequence* collection, const char* name, u32 kind)
 	if ((u32)collection->f310 >= 4) return;
 	void* item = GetLevelEntryByKey(name);
 	if (!item) return;
-	void* value = func_00160CA0(item, kind);
+	void* value = GetIndexedTargetSlot(item, kind);
 	if (!value) return;
 	u32 count = collection->f310;
 	collection->f314[count] = value;
@@ -1888,12 +1888,12 @@ void func_00151D28(Self_151D28* self)
     if (D_00275B00 & 8) {
                 if (self->field_1C->f2C <= g_currentEntry->dt && g_currentEntry->dt < self->field_1C->f34) {
             if (g_saveData->f19E4 < self->field_1C->f30) {
-                func_00160C48(self->field_1C->f30);
+                SetSpareCount(self->field_1C->f30);
                 self->field_20 = 1;
             }
         } else if (self->field_1C->f34 <= g_currentEntry->dt) {
             if (g_saveData->f19E4 < self->field_1C->f38) {
-                func_00160C48(self->field_1C->f38);
+                SetSpareCount(self->field_1C->f38);
                 self->field_20 = 1;
             }
         }

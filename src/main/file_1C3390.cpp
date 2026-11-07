@@ -250,7 +250,7 @@ s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
         if (!(m < 2)) return 1;
     }
     if (self->f638 != 0) return 1;
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         func_001C3FC8(self, 2);
         self->f638 = 1;
         self->f63C = g_gameTime[0];

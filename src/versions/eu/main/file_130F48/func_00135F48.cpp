@@ -13,7 +13,7 @@ void func_00135F48(Self_135F48_eu* self)
 {
     Flag_135F48 flag;
     GetCurrentLevelBit(&flag);
-    if ((func_00160D10() & flag.v) == 0) {
+    if ((MaskWorldBitsBySave() & flag.v) == 0) {
         ReleasePanelEntries(self, 0, 1);
         return;
     }

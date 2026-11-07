@@ -262,10 +262,10 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         s32 c;
         switch (self->f26B4.kind) {
         case 3:
-            c = func_00160D10() & 0x100;
+            c = MaskWorldBitsBySave() & 0x100;
             break;
         case 5:
-            c = func_00160D10() & 0x4000;
+            c = MaskWorldBitsBySave() & 0x4000;
             break;
         default:
             self->f2730 = 1;
@@ -276,7 +276,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         }
     check:
         if (self->f2730 != 0) {
-            if (func_00160C58() != 0) {
+            if (HasSpareCount() != 0) {
                 self->f26C4 = 1;
                 self->f26C8 = g_gameTime[0];
             }
@@ -336,7 +336,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         break;
     }
     case 3:
-        if (self->f2730 == 0 || func_00160C58() != 0) {
+        if (self->f2730 == 0 || HasSpareCount() != 0) {
             func_00175170(self, 4, 0x27);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
@@ -345,7 +345,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         break;
     case 4:
         self->desc02()->m20(self, (Vec02*)D_00275040);
-        if (func_00160C58() != 0) {
+        if (HasSpareCount() != 0) {
             func_00175170(self, 4, 0x28);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
@@ -353,7 +353,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         }
         break;
     case 5:
-        if (self->f2730 == 0 || func_00160C58() != 0) {
+        if (self->f2730 == 0 || HasSpareCount() != 0) {
             func_00175170(self, 4, 0x29);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
@@ -384,7 +384,7 @@ void func_001D51A0(Player* self)
         (IsObjectOfKind(self->f2B70, 0x70) || IsObjectOfKind(self->f2B70, 0x71) ||
          IsObjectOfKind(self->f2B70, 0x81) || IsObjectOfKind(self->f2B70, 0x6F) ||
          IsObjectOfKind(self->f2B70, 0x7F) || IsObjectOfKind(self->f2B70, 0x76))) {
-        if (func_00160C58()) {
+        if (HasSpareCount()) {
             func_00192C58(self);
             void* p = self->f2B70;
             func_00175170(self, 2, 2);
@@ -393,7 +393,7 @@ void func_001D51A0(Player* self)
             func_00175170(self, 4, 0x2D);
         }
     } else {
-        if (func_00160C58()) {
+        if (HasSpareCount()) {
             func_00175170(self, 4, 0x24);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
@@ -439,7 +439,7 @@ void func_00175170(void* a, s32 b, s32 c);
 
 void func_001D5418(Obj_D5418* a0)
 {
-    if (func_00160C58(a0)) {
+    if (HasSpareCount(a0)) {
         a0->vtbl[84](a0);
     } else {
         func_00175170(a0, 4, 0x2D);
@@ -457,7 +457,7 @@ void func_001D5468(Obj_1D5468* self)
 {
     ((VFnB_1D5468)self->vtbl[36])(self, (u8*)self + 0x2BB0);
     ((VFnB_1D5468)self->vtbl[37])(self, (u8*)self + 0x2BC0);
-    if (func_00160C58()) {
+    if (HasSpareCount()) {
         ((VFnA_1D5468)self->vtbl[84])(self);
     } else {
         func_00175170(self, 4, 0x2D);
@@ -533,7 +533,7 @@ void func_00160DA0(void);
 void func_001D5620(void* self)
 {
     func_0012AAE8(self, 1.0f);
-    func_00160DA0();
+    SpendReserveUnit();
 }
 
 struct Obj_001D5650 { u8 pad[0x10]; f32 value; };

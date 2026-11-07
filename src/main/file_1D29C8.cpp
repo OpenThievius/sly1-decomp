@@ -158,7 +158,7 @@ s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
         } else if (idx >= count) {
             idx = 0;
         }
-    } while (!(func_00160D10() & table[idx]));
+    } while (!(MaskWorldBitsBySave() & table[idx]));
     return idx;
 }
 

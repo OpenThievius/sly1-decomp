@@ -22,7 +22,7 @@ lm1:
     StartObjectFade((Val_1F4408*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
-    k = func_00160180((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
+    k = LookupEntryById((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
     StartObjectFade(k, 0x1BD, n);
     return;
 l4490:

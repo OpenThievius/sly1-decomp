@@ -2599,3 +2599,30 @@ func_0015C0A0	IsObjectCyclerUnsupported	at most every 0.05 s: looks for a span o
 func_0015CC80	BeginFontGlyphPacket	a slot of the font's GCC vtable D_0024A220: adds the font's images (AddFontImagesToFrame) and opens a GIF tag with its register writes
 func_0015ED50	ActivateRenderFrame	sets g_drawFrameData and the image mask of a render frame, and when it has a pending list sends D_00274538 on the GIF channel (RunRenderThread and SendRenderFrameToDma call it)
 func_0015F618	ConstructPacketWriters	the file's static initialiser: on the construction pass sets up g_gsPacketWriter and g_vifPacketWriter (ResetPacketWriters calls it)
+func_00160070	RunResetGameSession	a menu callback (D_0026482C): runs ResetGameSessionAndFade
+func_00160180	LookupEntryById	returns what FindEntryById returns for the id it is given (ResumeAtSavedLevel and three others call it)
+func_001602A0	ComputeCompletionMask	starts from bits 1 to 3 and clears each bit some keyed entry's level entry lacks, and bit 1 when one of the five level records lacks flag 0x20 at +0x448 (func_001604B8 and seven others read it)
+func_00160340	MarkProgressStageFlag	sets one of the bits 0x10, 0x40, 0x100, 0x400 and 0x1000 of g_saveData's word 0x19F4 for stages 1 to 5 (func_0016B190 calls it)
+func_001604B8	ApplyCompletionFlags	sets bits of g_saveData's words 0x19F4 and 0x19F8 for modes 2, 4 and 8, the last two only when ComputeCompletionMask has the bit (MarkLevelDone calls it)
+func_00160578	FadeOutAndQueueMovie	starts the fade of D_00247AD0 and, for kind 2 or 4, queues movie 0xD or 0xE followed by 0xF (QueueMovieWithSuccessor)
+func_00160850	GetLevelEntryWord	returns the first word of the level entry GetLevelEntryByKey finds, or 0
+func_00160880	ResetGameSession	resets g_saveData (ResetGameProgress), D_00269984, the pair D_002623D8, g_scatterController, g_buttonCodeFlags and g_previousLevelIndex, then the reserve counts (ResetReserveCounts)
+func_001608E0	ResetReserveCounts	sets g_saveData's reserve count 0x19E0 to 5 and its spare count 0x19E4 to 0, and resets the flag table (func_00140D90)
+func_00160918	ResetGameSessionAndFade	runs ResetGameSession and starts the fade of D_00247AB0
+func_00160948	ResumeAtSavedLevel	finds the entry of g_saveData's level key (0x19D8, 0x19DC) and fades to it, or, when the element stack is in state 1 at that level, stops the animation players of object 0x494 and moves the element stack to state 3
+func_00160C48	SetSpareCount	stores g_saveData's spare count 0x19E4 (UpdateScatterLevelLimits calls it)
+func_00160C58	HasSpareCount	1 when g_saveData's spare count 0x19E4 is above 0 or flag 2 of g_buttonCodeFlags is set
+func_00160CA0	GetIndexedTargetSlot	returns the word of the object for an index from 0x33B to 0x346 (the object plus index times 4 less 0xCD8), else 0 (StartStepSequence and AddSequenceExtraTarget call it)
+func_00160CC8	ClearTwoWords	zeroes eight bytes (ResetGameSession and ResumeAtSavedLevel clear D_002623D8 with it)
+func_00160CE8	ResetCounter	sets a counter's word at +0 to 0 (RunPendingWorldLoad calls it)
+func_00160CF0	IncrementCounter	adds one to a counter's word at +0 and returns it (func_00123888 calls it)
+func_00160D00	ReleaseCounterRef	subtracts one from the reference count at +0 (func_00123888 calls it)
+func_00160D10	MaskWorldBitsBySave	returns g_saveData's word 0x19F0 masked by the current world's bits (some fifteen functions test it)
+func_00160D98	GetSpareCountLimit	returns 2, the limit PlaceSpareSoundNotifier and CountPickupTowardHundred hold the spare count 0x19E4 to
+func_00160DA0	SpendReserveUnit	lowers g_saveData's reserve count 0x19E0, stops the locked stream voice and starts a screen fade, a fade from the flag table, or the pause menu's page when the count is below 0; then RaiseScatterLevels by 1
+func_00160E80	ClearRecordBody	zeroes the six words from +0x04 to +0x18 of a record (func_001B7968 calls it)
+func_00161860	AddGifUvRegListEntry	counts a register-list entry and writes the 64-bit UV word (u and v << 16) at the writer's cursor (the font's glyph drawing calls it)
+func_001618C0	AddGifXyzfRegListEntry	counts a register-list entry and writes the 64-bit XYZF word (x, y << 16, z in bits 32 to 55, fog in the top byte) at the writer's cursor
+func_00161BB0	SetVertexBatchMode	flushes the vertex batch (FlushVertexBatch), stores the mode at +0xF8 and sets the vertex colour to white
+func_00163938	WriteStripMeshMscal	writes the VIF MSCAL of the strip mesh's microprogram (0x18C0 or 0x18F8 by mode); BuildStripMeshPacket and BuildLitStripMeshPacket call it
+func_00163990	WriteMorphTargetMscal	writes the VIF MSCAL of the morph target's microprogram (0xFA0 or 0xFD8 by mode); BuildMorphTargetPacket calls it

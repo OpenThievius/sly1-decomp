@@ -1616,7 +1616,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     SetVolumeChannelFactor(0xA, 0, 1.0f);
     func_001F4318(g_currentWorld, self->f8, self->fC);
     NotifyScatterControllerLoaded(g_scatterController);
-    func_00160CE8(D_002623D8);
+    ResetCounter(D_002623D8);
     func_0016B520(D_0026FA90);
     func_00138C00(g_currentWorld, 0);
     UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);

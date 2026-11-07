@@ -9,7 +9,7 @@ void func_0016F478(void)
     u8 buf[0x10];
 
     if ((g_saveData->f19D8 << 8 | g_saveData->f19DC) == 0x400) {
-        if ((func_001602A0() & 6) == 6) {
+        if ((ComputeCompletionMask() & 6) == 6) {
             if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
                 u8* p = buf;
                 CopyString((char*)p, D_eu_0024AFF8);

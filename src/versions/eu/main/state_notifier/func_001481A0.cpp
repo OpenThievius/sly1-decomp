@@ -25,7 +25,7 @@ void func_001481A0(void* self)
     s32 r;
     g->f19E8 = c;
     if (c >= 100) {
-        r = func_00160D98();
+        r = GetSpareCountLimit();
         if (g->f19E4 < r) {
             g_saveData->f19E8 = 0;
             ((PSys_1481A0_eu*)&D_0026CE48)->f26C = 250.0f;

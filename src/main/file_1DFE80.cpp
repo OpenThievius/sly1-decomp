@@ -250,7 +250,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
         f32 zero = 0.0f;
         f32 one = 1.0f;
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
-        func_00160C48(0);
+        SetSpareCount(0);
         func_001DDAD0(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
         SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
@@ -295,8 +295,8 @@ void func_001E02C8(T217D_1380* self, s32 n)
                 cam->flags |= 8;
                 cam->f08 = o->time;
                 g_currentLevelRecord->f440 = g_currentLevelRecord->f440 + 1;
-                if (func_001602A0() & 8) {
-                    func_001604B8(8);
+                if (ComputeCompletionMask() & 8) {
+                    ApplyCompletionFlags(8);
                     StartMemoryCardSave(&g_memoryCard);
                 }
             }

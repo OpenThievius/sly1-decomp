@@ -338,7 +338,7 @@ s32 func_0017AA40(C1B* self, s32* arg)
     if (((VFn_17AA40_A)((void**)self->desc)[79])(self, *arg) != 0) {
         return 0;
     }
-    if (func_00160C58() != 0) {
+    if (HasSpareCount() != 0) {
         self->f6D0 = 1;
         self->f6D4 = *(f32*)&g_gameTime;
     }
@@ -349,7 +349,7 @@ s32 func_0017AA40(C1B* self, s32* arg)
         func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
         ((VFn_17AA40_B)((void**)self->desc)[36])(self, bufB);
     }
-    if (func_00160C58() != 0) {
+    if (HasSpareCount() != 0) {
         func_0017ABE8(self, 3);
     } else {
         func_0017ABE8(self, 4);
@@ -625,7 +625,7 @@ void func_0017B648(CountdownCollider* self)
         if (g_timeoutLimit < g_gameTime - self->startTime) {
             if (g_timeoutFired == 0) {
                 g_timeoutFired = 1;
-                func_00160578(2);
+                FadeOutAndQueueMovie(2);
             }
         }
     }

@@ -790,7 +790,7 @@ void func_001B7968(Collider* self)
     InitScriptValue(&local);
     SetListLinkOffset(&self->parts, 0x2E4);
     InitPlacedObject(self);
-    func_00160E80(&self->mesh);
+    ClearRecordBody(&self->mesh);
     self->meshCopy = self->mesh;
     if (self->parent != 0) {
         SetColliderAnchors(self, 3, 0, 3, 0);

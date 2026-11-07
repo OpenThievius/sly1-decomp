@@ -1198,7 +1198,7 @@ void func_0015FF88(IdLookupObject* self)
 
 void func_00160050(IdLookupObject* obj, s32 value) { obj->ids[obj->idCount++] = value; }
 
-void func_00160070() { func_00160918(); }
+void func_00160070() { ResetGameSessionAndFade(); }
 
 LINKER_REMNANT(func_00160090);
 
@@ -1355,7 +1355,7 @@ void func_001603E8(s32 n)
         g_saveData->f19F4 |= 0x800;
         break;
     case 5:
-        func_001604B8(2);
+        ApplyCompletionFlags(2);
         break;
     }
 }
@@ -1368,12 +1368,12 @@ void func_001604B8(s32 mode)
         g_saveData->f19F8 |= 2;
         break;
     case 4:
-        if ((func_001602A0() & 4) != 0) {
+        if ((ComputeCompletionMask() & 4) != 0) {
             g_saveData->f19F4 |= 0xC000;
         }
         break;
     case 8:
-        if ((func_001602A0() & 8) != 0) {
+        if ((ComputeCompletionMask() & 8) != 0) {
             g_saveData->f19F4 |= 0xC;
             g_saveData->f19F8 |= 0xC;
         }
@@ -1426,11 +1426,11 @@ void func_00160690(s32 a0, s32 flags)
     g_currentLevelRecord = base;
     g_currentEntry = (G27C230*)((u8*)base + lo * 0x78);
     if (gate < 0 || (flags & 2) != 0) {
-        func_001608E0();
+        ResetReserveCounts();
     } else if ((flags & 1) != 0) {
         RestoreFlagTableSnapshot(g_flagTable);
     } else if ((flags & 4) != 0) {
-        func_00160880();
+        ResetGameSession();
     } else {
         func_00140D90(g_flagTable);
     }
@@ -1469,11 +1469,11 @@ void func_00160880(void)
 {
     ResetGameProgress(g_saveData);
     D_00269984.value = 0;
-    func_00160CC8(D_002623D8);
+    ClearTwoWords(D_002623D8);
     ClearScatterController(g_scatterController);
     g_buttonCodeFlags = 0;
     g_previousLevelIndex = -1;
-    func_001608E0();
+    ResetReserveCounts();
 }
 
 void func_001608E0(void)
@@ -1486,17 +1486,17 @@ void func_001608E0(void)
 
 void func_00160918(void)
 {
-    func_00160880();
+    ResetGameSession();
     StartObjectFade((Obj_160918*)&D_00247AB0, -1, 0);
 }
 
 void func_00160948(void)
 {
-    Key_160948* k = func_00160180((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    Key_160948* k = LookupEntryById((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (k == 0) {
         k = &D_00247AB0;
     }
-    func_00160CC8(D_002623D8);
+    ClearTwoWords(D_002623D8);
     if (g_elementStack.f30 != 1 || g_saveData->fC != 0.0f || !k->Same((Key_160948*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
@@ -2198,7 +2198,7 @@ void func_001626D8(Obj_1626D8* self, s32 value)
         u8* p = self->pF8;
         CopyMemory(tmp, &self->recs[self->count - 2], sizeof(tmp));
         FlushVertexBatch(self);
-        func_00161BB0(self, p);
+        SetVertexBatchMode(self, p);
         CopyMemory(self->recs, tmp, sizeof(tmp));
         self->count = 2;
     }
@@ -2317,7 +2317,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     hdr->p[2] = off;
     hdr->p[3] = end;
     CopyWordsToWriter(pkt, 0xE, extra, extraData, hdr->p[2]);
-    func_00163990(mode, pkt);
+    WriteMorphTargetMscal(mode, pkt);
     WriteVifMscal(pkt, D_00001368);
     WriteVifMscal(pkt, D_00000ED8);
 }
@@ -2431,7 +2431,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     if (node == 0 && mesh->hook != 0) {
         node = ((Hook_163ED8*)mesh->hook)->vt[5]((Hook_163ED8*)mesh->hook, mesh);
     }
-    func_00163938(mode, pkt);
+    WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
         func_001EE5C8(pkt, 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
@@ -2596,7 +2596,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         }
         posOut += 4;
     }
-    func_00163938(mode, &pkt[0]);
+    WriteStripMeshMscal(mode, &pkt[0]);
     if (hdr->count > 0) {
         hdr->p->off[2] = off;
         off += hdr->count * 4;

@@ -1724,7 +1724,7 @@ void func_00123888(StateTrigger* self, s32 mode)
     ReleaseSoundLevel(self->f624);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 0);
     if (mode == 1) {
-        func_00160D00(D_002623D8);
+        ReleaseCounterRef(D_002623D8);
     }
 store:
     self->state = mode;
@@ -1771,7 +1771,7 @@ arm2:
     func_00123C20(self);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 1);
     TriggerScriptEvent(self, 2, 0, 0);
-    func_00160CF0(D_002623D8);
+    IncrementCounter(D_002623D8);
 }
 
 void func_00123AB0(StateTrigger* object, s32 mode)

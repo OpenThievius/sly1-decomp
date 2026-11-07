@@ -49,7 +49,7 @@ void func_001E9108(Obj_1E9108* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);

@@ -384,7 +384,7 @@ s32 func_00190450(C0E* self, s32* arg)
 s32 func_001904E0(C0E* self, Msg_1904E0* msg)
 {
     Args_1904E0 args;
-    if (func_00160C58(self, msg) != 0 && self->fC34 == 0) {
+    if (HasSpareCount(self, msg) != 0 && self->fC34 == 0) {
         self->fA68 = 1;
     } else {
         self->fA68 = 0;
@@ -480,7 +480,7 @@ void func_00190770(C0E* self, s32 code, Req_190770* req)
     if (code == 0x13) {
         if (req->f_0 == (s32)self->f7E0) {
             if (req->f_8 == 0x53A) {
-                func_00160DA0();
+                SpendReserveUnit();
             }
         }
     }

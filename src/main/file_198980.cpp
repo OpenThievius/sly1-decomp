@@ -779,7 +779,7 @@ s32 func_0019A000(s32 bits)
     if ((g_saveData->f19F0 & mask) == mask) {
         return 0;
     }
-    if (func_001602A0() & 2) {
+    if (ComputeCompletionMask() & 2) {
         return 0;
     }
     GameProgress* c = g_saveData;
@@ -946,8 +946,8 @@ tail:
             SetStateWalkerTarget(self->f614, 0x384);
         }
         self->f7D8 = 0;
-        if ((func_001602A0() & 4) != 0) {
-            func_00160578(4);
+        if ((ComputeCompletionMask() & 4) != 0) {
+            FadeOutAndQueueMovie(4);
         }
     }
 }
@@ -1046,8 +1046,8 @@ void func_0019AD68(C17* self)
             g->f19EC = v | 0x10;
         }
 
-        if (func_001602A0() & 4) {
-            func_001604B8(4);
+        if (ComputeCompletionMask() & 4) {
+            ApplyCompletionFlags(4);
         }
 
         sel = 0x37E;

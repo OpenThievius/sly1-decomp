@@ -385,7 +385,7 @@ s32 func_001AFAF8(TimedObject* a0, Collider* a1)
         return 0;
     }
     if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
-        if ((func_00160D10() & 0x12000) != 0) {
+        if ((MaskWorldBitsBySave() & 0x12000) != 0) {
             return 0;
         }
     }

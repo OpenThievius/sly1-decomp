@@ -1131,7 +1131,7 @@ void func_001E9108(Obj_1E9108* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);
@@ -2004,7 +2004,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (func_00160C58() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
                 C13* o;
                 ActivateSwitchedCollider(g_player);
@@ -3940,7 +3940,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
         if (self->current->f2DC != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                Val_1F1A08* v = func_00160180((loc[0] << 8) | loc[1]);
+                Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
                 PopStackElement((Q_1F1A08*)g_elementStack);
                 StartObjectFade(v, -1, 2);

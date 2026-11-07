@@ -732,7 +732,7 @@ lm1:
     StartObjectFade((Val_1F4408*)D_00247AD0, -1, n);
     return;
 l4470:
-    k = func_00160180((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
+    k = LookupEntryById((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
     StartObjectFade(k, 0x1BD, n);
     return;
 l4490:
@@ -878,7 +878,7 @@ void func_001F4A30(ObjectSubGroup* self)
     s32 ok = 0;
     m.kind = 1;
     switch (self->f304) {
-    case 0: ok = func_00160850(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
+    case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
     case 1: ok = ((Glob_1F4A30*)(void*)g_currentEntry)->flags >> 1;
     fin: ok &= 1;
     }
