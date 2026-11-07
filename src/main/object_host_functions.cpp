@@ -5,6 +5,7 @@
 // this file's .data, with them and the property setters. Named after what it holds.
 #include "common.h"
 #include "asm_func.h"
+#include "property_descriptor.h"
 #include "script_value.h"
 #include "shapes.h"
 #include "base_object.h"
@@ -47,7 +48,6 @@ struct Kinds4 { s32 k[4]; };
 struct Kinds5 { s32 k[5]; };
 struct Kinds6 { s32 k[6]; };
 
-struct Obj_101D38;
 
 void func_00123AB0(void* object, s32 mode);
 s32 func_00123D08(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
@@ -70,7 +70,7 @@ void* func_0012C8F8(Animation* item, s32 a, f32 x, f32 y, s32 b, s32 c);
 f32 func_0012CCC0(void* obj, s32 id);
 void func_0012E760(void* obj);
 void func_0012E928(void* obj, s32 a, s32 b);
-void func_0012F0A0(Obj_101D38* self, s32 a, f32 x, f32 y);
+void func_0012F0A0(AnimationPlayer* self, s32 a, f32 x, f32 y);
 void func_0012F190(void* obj, s32 v);
 s32 func_001300E8(void* list, s32 value);
 void func_0013BE00(void* p, f32 x);
@@ -294,8 +294,7 @@ extern const s32 D_00248FC8[4] = { 0x2000, 0x2000, 0x2000, 0 };
 extern const s32 D_00248FD8[2] = { 0x2000, 0 };
 
 // The file's .data: the property descriptors, filled at startup by func_00109488.
-struct Prop_2505D8 { s32 f0; s32 flags; u8 body[24]; };
-Prop_2505D8 D_002505D8[1179];
+PropertyDescriptor D_002505D8[1179];
 
 ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
@@ -335,7 +334,7 @@ ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, Sc
 ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00101D38(ScriptValue* ret, Obj_101D38* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101D38(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
@@ -1186,7 +1185,7 @@ ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     return ret;
 }
 
-ScriptValue* func_00101D38(ScriptValue* ret, Obj_101D38* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00101D38(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;

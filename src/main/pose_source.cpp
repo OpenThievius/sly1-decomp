@@ -6,6 +6,7 @@
 // read them. The state trigger code at 0x1233C0 starts the next file.
 #include "common.h"
 #include "asm_func.h"
+#include "property_descriptor.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -36,7 +37,7 @@ void func_0011E680(void* self, void* slot, void* obj);
 s32 func_00137D10(void* p);
 
 // The owner's slot 44 (Desc02::m28) is told what was asked.
-typedef void (*Hook_11FC20)(PlacedObject* self, s32 a, s32 b);
+typedef void (*VectorCurveToldFn)(PlacedObject* self, s32 a, s32 b);
 
 void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
 
@@ -60,16 +61,19 @@ void func_00137E70(void* src, void* dst);
 
 WeightCurve* func_00121160(s32 index);
 
-struct Scratch_11F9F8 { f32 diff; f32 delta; u8* ptr; };
+// What FindCurveSegment (func_0011EE70) gives back: the segment's length and the time into it,
+// and the segment's first key.
+struct CurveSegment { f32 diff; f32 delta; u8* ptr; };
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 
 void func_00130540(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
-typedef void (*Method_11FF08)(PlacedObject* self, void* a, void* b);
+typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
 
-struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
+// The angles and their rates EvaluateAxisCurves gives an axis rotation curve (func_0011FF08).
+struct AngleSample { s32 a[4]; s32 b[4]; };
 
 void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
 
@@ -79,7 +83,7 @@ void func_001EDE38(void* a, void* b, void* c);
 
 extern void* func_0011F6B0(void*, u32, u32, void*, u32, u32);
 
-struct Locals_11FFD8 {
+struct AxisCurveClosure {
     u8 a[0x30];
     u8 b[0x30];
     u8 c[0x30];
@@ -107,21 +111,15 @@ void func_001303F0(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32
 
 void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
-typedef void (*Slot_11ECB8)(void* self, void* arg);
-
-struct Obj_11ECB8 {
-    Slot_11ECB8* vtbl;
-};
-
 void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
 
 s32 func_0011ECA0(s32 value);
 
 void func_00182ED8(void* obj);
 
-struct Pair_11EDA8 { void* node; s32 pad; };
-
-struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
+// A class's property list (g_classPropertyLists) seen from its first descriptor pointer: the
+// descriptor, then the word before the next one.
+struct PropertyListSlot { void* node; s32 pad; };
 
 extern u8 D_00244950[];
 
@@ -129,32 +127,13 @@ void* func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
 
 void func_00137398(BufferedStream* self, s32 a1, u8* a2);
 
-void func_0011E680(BaseObject* self, Node_11EDA8* slot, BufferedStream* obj);
+void func_0011E680(BaseObject* self, PropertyDescriptor* slot, BufferedStream* obj);
 
 void func_001372E0(BufferedStream* self, s32 flags);
 
 // EXACT: reuse parameter a1 directly instead of a local copy
 
 extern u8 D_00247448[];
-
-struct Owner_11E580 {
-    u8 pad00[0x0C];
-    s32 f0C;
-    void (*f10)(void*);
-};
-
-struct Rec_11E580 {
-    Owner_11E580* f00;
-    s32 f04;
-    s32 f08;
-    u8 pad0C[8];
-    void* f14;
-    s32 f18;
-    u8 pad1C[8];
-    void* f24;
-    u8 pad28[4];
-    void* f2C;
-};
 
 struct Arg_11E580 { s32 v; };
 
@@ -170,24 +149,13 @@ void func_00152470(void* list, void* item);
 
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
-struct Dsc_11E680 {
-    s32 type;
-    u32 flags;
-    u8 pad8[4];
-    void (*fC)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args);
-    u8 pad10[4];
-    s32 count;
-    s32 off;
-    void* (*f1C)(void* obj, s32 one);
-};
-
 void* func_0011C508(void);
 void* func_0011C748(void);
 void* func_0011C858(void);
 
-typedef void (*Fn_11E680)(void);
+typedef void (*PropertyMethodFn)(void);
 
-union Sc_11E680 { ScriptValue buf[32]; f32 f[8]; s32 i[2]; };
+union PropertyValues { ScriptValue buf[32]; f32 f[8]; s32 i[2]; };
 
 s32 func_00137D10(BufferedStream* r);
 
@@ -207,8 +175,9 @@ void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
 
 extern u8 func_001EB128[];
 
-struct Buffer_00120130 { u8 bytes[0x20]; };
-typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
+// The angles and their rates EvaluateVectorKeyCurve gives a keyed rotation curve (func_00120130).
+struct KeyedAngleSample { u8 bytes[0x20]; };
+typedef void (*KeyedRotationToldFn)(PlacedObject* self, void* output, void* state);
 extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
@@ -216,25 +185,11 @@ extern void func_001EDE38(void*, void*, void*);
 extern void func_0011F9F8(s32, VectorKey*);
 extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
 
-struct Result_001202F0 { f32 x; f32 y; f32 z; };
-struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
 extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
 void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
 
-struct Result_001203A8 {
-    f32 first;
-    f32 second;
-    f32 third;
-};
-struct Output_001203A8 {
-    f32 first;
-    u8 pad4[0x10];
-    f32 second;
-    u8 pad18[0x10];
-    f32 third;
-};
 extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
 extern void func_0011FA88(s32*, VectorKey**, Stream83*);
@@ -246,18 +201,18 @@ extern World* D_00275710;
 void func_0018D800(Attachment* self, Attachment* src, s32 size);
 
 // Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
-struct Locals_121648 {
+struct PoseLocals {
     Vec02 pos;
     Vec02 vec;
     Mat02 rot;
 };
 
 // The owner's slot 44 (Desc02::m28) and 45 (m29) are told what was asked.
-typedef void (*Told_1227B0)(PlacedObject* self, Vec02* a, Vec02* b);
+typedef void (*PositionToldFn)(PlacedObject* self, Vec02* a, Vec02* b);
 
-typedef void (*Told_1227F0)(PlacedObject* self, Mat02* b, Vec02* q);
+typedef void (*OrientationToldFn)(PlacedObject* self, Mat02* b, Vec02* q);
 
-typedef void (*Told_122920)(PlacedObject* self);
+typedef void (*OwnerToldFn)(PlacedObject* self);
 
 void func_00121338(Attachment* self, PlacedObject* a1);
 
@@ -270,7 +225,7 @@ s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
 
 void func_00121508(Attachment* self, Mat02* a, Vec02* b);
 
-struct Locals_001201F0 {
+struct KeyedCurveClosure {
     u8 a[0x30];
     u8 b[0x30];
     u8 c[0x30];
@@ -316,7 +271,7 @@ void* func_0018D5C0(u32 n);
 
 extern u8 D_00219560[];
 
-typedef void (*Told_1214B8)(PlacedObject* self, Vec02* out);
+typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
 void func_00121338(Attachment* self);
 
@@ -339,40 +294,40 @@ extern const WeightCurveVt D_00219698;
 extern const WeightCurveVt D_002196A8;
 void* func_0018D5C0(WeightCurve* n);
 
-typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
+typedef void (*FrameOutToldFn)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
 void func_0011E560(void)
 {
     FillObjectPropertyTable();
 }
 
-Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
+BaseObject* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
-    Owner_11E580* owner = *(Owner_11E580**)((u8*)D_00247448 + off);
-    Rec_11E580* r = (Rec_11E580*)AllocateZeroedFrontMemory(owner->f0C);
-    r->f00 = owner;
-    r->f08 = a3;
+    Desc01* owner = *(Desc01**)((u8*)D_00247448 + off);
+    BaseObject* r = (BaseObject*)AllocateZeroedFrontMemory(owner->size);
+    r->desc = owner;
+    r->id = a3;
     if (index == 0x6C) {
         a1 = r;
         InitWorldHashLists(r);
     }
-    r->f18 = a2;
-    r->f14 = a1;
+    r->parent = (BaseObject*)a2;
+    r->world = (World*)a1;
     Arg_11E580* id = (Arg_11E580*)a4;
     r->f2C = GetScriptEntryScope(id, a1);
-    AppendToList(GetHashedSlot(r->f14, r->f08), r);
-    u8* base = (u8*)r->f14 + 0x1884;
+    AppendToList(GetHashedSlot(r->world, r->id), r);
+    u8* base = (u8*)r->world + 0x1884;
     void** slot = (void**)(base + off);
-    r->f24 = *slot;
+    r->nextById = (BaseObject*)*slot;
     *slot = r;
-    r->f00->f10(r);
+    r->desc->m00(r);
     return r;
 }
 
-void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
+void func_0011E680(void* obj, PropertyDescriptor* d, BufferedStream* r)
 {
-    Sc_11E680 sc;
+    PropertyValues sc;
     ScriptValue ret;
     u32 flags = d->flags;
     if (flags & 0x400) {
@@ -388,7 +343,7 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
             InitScriptValue(p);
             p++;
         }
-        n = d->count;
+        n = d->argCount;
         for (k = 0; k < n; k++) {
             u32 t = ReadBufferedS16(r);
             switch (t) {
@@ -444,7 +399,7 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
                 break;
             }
         }
-        d->fC(rp, obj, n, sc.buf);
+        d->setter(rp, obj, n, sc.buf);
         DestroyScriptValue(rp, 2);
         e = rp;
         while (sc.buf != e) {
@@ -454,9 +409,9 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
     } else if (flags & 0x80) {
         u8* dst;
         if (flags & 0x1000) {
-            dst = (u8*)d->f1C(obj, 1) + d->off;
+            dst = (u8*)d->target(obj, 1) + d->offset;
         } else {
-            dst = (u8*)obj + d->off;
+            dst = (u8*)obj + d->offset;
         }
         switch (d->type) {
         case 0:
@@ -512,16 +467,16 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         }
     } else {
         void* tgt;
-        Fn_11E680 fn;
+        PropertyMethodFn fn;
         if (flags & 0x100) {
-            fn = (Fn_11E680)(d->off);
+            fn = (PropertyMethodFn)(d->offset);
             if (flags & 0x1000) {
-                tgt = d->f1C(obj, 1);
+                tgt = d->target(obj, 1);
             } else {
                 tgt = obj;
             }
         } else {
-            fn = *(Fn_11E680*)(*(s32*)obj + d->off);
+            fn = *(PropertyMethodFn*)(*(s32*)obj + d->offset);
             tgt = obj;
         }
         switch (d->type) {
@@ -616,8 +571,8 @@ void func_0011ECB8(World* self, void* a1, void* a2)
             s32 slot = ReadBufferedS16(a2);
             s32 key = ReadBufferedS16(a2);
             s32 flag = ReadBufferedS16(a2);
-            Obj_11ECB8* obj = (Obj_11ECB8*)CreateTypedRecord(slot, self, a1, key, flag);
-            obj->vtbl[14](obj, a2);
+            BaseObject* obj = (BaseObject*)CreateTypedRecord(slot, self, a1, key, flag);
+            obj->desc->m0A(obj, a2);
             s32 r = MapKeyToSlotIndex(key);
             if (r >= 0) {
                 self->slot1CE8[r] = (BaseObject*)obj;
@@ -635,13 +590,13 @@ void func_0011EDA8(BaseObject* self)
     s32 n = *(s32*)(g_classPropertyLists + off);
     u8* list = *(u8**)(g_classPropertyLists + off + 4);
     if (n > 0) {
-        Pair_11EDA8* p = (Pair_11EDA8*)(list + 4);
+        PropertyListSlot* p = (PropertyListSlot*)(list + 4);
         s32 i = n;
         do {
-            Node_11EDA8* node = (Node_11EDA8*)p->node;
+            PropertyDescriptor* node = (PropertyDescriptor*)p->node;
             if (node->flags & 0x800) {
                 InitBufferedStream(&buf, 0, 0, 0);
-                OpenBufferedMemoryStream(&buf, 4, node->body);
+                OpenBufferedMemoryStream(&buf, 4, node->value);
                 ApplyPropertyRecord(self, node, &buf);
                 DestroyBufferedStream(&buf, 2);
             }
@@ -964,7 +919,7 @@ void func_0011F850(WeightCurve** objs, s32* outCount, f32** outArr)
 
 void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
 {
-    Scratch_11F9F8 s;
+    CurveSegment s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
     EvaluateHermiteVectorSegment(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
@@ -1017,7 +972,7 @@ void func_0011FC20(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s
 {
     EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
-        ((Hook_11FC20)other->desc02()->m28)(other, e, f);
+        ((VectorCurveToldFn)other->desc02()->m28)(other, e, f);
 }
 
 ASM_FUNC(func_0011FC90);
@@ -1031,7 +986,7 @@ void func_0011FDD8(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s3
 {
     EvaluateVectorKeyCurve(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
-        ((Hook_11FC20)other->desc02()->m28)(other, a3, a4);
+        ((VectorCurveToldFn)other->desc02()->m28)(other, a3, a4);
 }
 
 ASM_FUNC(func_0011FE40);
@@ -1043,14 +998,14 @@ void func_0011FED8(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 
 void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
 {
-    Scratch_11FF08 tmp;
+    AngleSample tmp;
     EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
     if (p3)
         BuildEulerRotationMatrix(&tmp, p3);
     if (p4)
         RotateVectorByTwoAngles(&tmp, tmp.b, p4);
     if (other)
-        ((Method_11FF08)other->desc02()->m29)(other, p3, p4);
+        ((AxisRotationToldFn)other->desc02()->m29)(other, p3, p4);
 }
 
 void* func_0011FFA8(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
@@ -1060,7 +1015,7 @@ void* func_0011FFA8(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 
 void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
 {
-    Locals_11FFD8 loc;
+    AxisCurveClosure loc;
     s32 result;
 
     ReadAxisCurves(self->axis, &self->base, arg);
@@ -1087,7 +1042,7 @@ void func_00120110(AxisRotationCurve* self, s32* outCount, f32** outTimes)
 void func_00120130(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
                    void* output, void* state)
 {
-    Buffer_00120130 buffer;
+    KeyedAngleSample buffer;
     EvaluateVectorKeyCurve(self->count, self->keys, mode,
                   output ? &buffer.bytes[0] : 0,
                   state ? &buffer.bytes[0x10] : 0);
@@ -1098,7 +1053,7 @@ void func_00120130(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
         RotateVectorByTwoAngles(&buffer.bytes[0], &buffer.bytes[0x10], state);
     }
     if (parent) {
-        ((Finish_00120130)parent->desc02()->m29)(parent, output, state);
+        ((KeyedRotationToldFn)parent->desc02()->m29)(parent, output, state);
     }
 }
 
@@ -1109,7 +1064,7 @@ void func_001201D0(KeyedRotationCurve* self)
 
 void func_001201F0(KeyedRotationCurve* self, Stream83* arg)
 {
-    Locals_001201F0 loc;
+    KeyedCurveClosure loc;
     s32 result;
 
     ReadVectorKeys(&self->count, &self->keys, arg);
@@ -1132,16 +1087,16 @@ void func_001202C0(KeyedRotationCurve* self, s32* outCount, f32** outTimes)
 }
 
 void func_001202F0(AxisScaleCurve* self, PlacedObject* second, void* third,
-                   Output_001202F0* output, f32 factor)
+                   Mat3U* output, f32 factor)
 {
-    Result_001202F0 result;
+    Vec3 result;
     EvaluateAxisCurves(self->axis, second, third, &self->base,
                   output ? &result : 0, 0, factor, 1.0f);
     if (output) {
         FillMemory(output, 0, 0x30);
-        output->x = result.x;
-        output->y = result.y;
-        output->z = result.z;
+        output->m[0][0] = result.x;
+        output->m[1][1] = result.y;
+        output->m[2][2] = result.z;
     }
 }
 
@@ -1156,16 +1111,16 @@ void func_00120388(AxisScaleCurve* self, s32* outCount, f32** outTimes)
 }
 
 void func_001203A8(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
-                   Output_001203A8* output, f32 factor)
+                   Mat3U* output, f32 factor)
 {
-    Result_001203A8 result;
+    Vec3 result;
     EvaluateVectorKeyCurve(self->count, self->keys, mode,
-                  output ? &result.first : 0, 0, factor, 1.0f);
+                  output ? &result.x : 0, 0, factor, 1.0f);
     if (output) {
         FillMemory(output, 0, 0x30);
-        output->first = result.first;
-        output->second = result.second;
-        output->third = result.third;
+        output->m[0][0] = result.x;
+        output->m[1][1] = result.y;
+        output->m[2][2] = result.z;
     }
 }
 
@@ -1493,7 +1448,7 @@ void func_001214B8(Attachment* self, Vec02* out1, Vec02* out2)
     *out1 = self->owner->v190;
     *out2 = *(Vec02*)D_00248D30;
     if (self->owner->desc02()->m28 != 0) {
-        ((Told_1214B8)self->owner->desc02()->m28)(self->owner, out1);
+        ((PositionOutToldFn)self->owner->desc02()->m28)(self->owner, out1);
     }
 }
 
@@ -1501,7 +1456,7 @@ void func_00121508(Attachment* self, Mat02* out1, Vec02* out2)
 {
     *out1 = self->owner->m1A0;
     *out2 = *(Vec02*)D_00248D30;
-    ((Told_121508)self->owner->desc02()->m29)(self->owner, out1, out2);
+    ((FrameOutToldFn)self->owner->desc02()->m29)(self->owner, out1, out2);
 }
 
 void func_00121568(Attachment* self, f32* value, f32* slope)
@@ -1552,7 +1507,7 @@ void func_001215C0(Attachment* obj)
 
 void func_00121648(Attachment* self, s32 flag)
 {
-    Locals_121648 loc;
+    PoseLocals loc;
     PlacedObject* s2 = self->owner;
 
     if (self == s2->f1EC) {
@@ -1640,7 +1595,7 @@ void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
     *d0 = src->pos;
     *d1 = src->vec;
     PlacedObject* obj = src->owner;
-    Told_1227B0 fn = obj->desc02()->m28;
+    PositionToldFn fn = obj->desc02()->m28;
     if (fn != 0) {
         fn(obj, d0, d1);
     }
@@ -1653,7 +1608,7 @@ void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
     d0->r[2] = src->rot.r[2];
     *d1 = src->v70;
     PlacedObject* obj = src->owner;
-    Told_1227F0 fn = (Told_1227F0)obj->desc02()->m29;
+    OrientationToldFn fn = (OrientationToldFn)obj->desc02()->m29;
     fn(obj, d0, d1);
 }
 
@@ -1698,7 +1653,7 @@ void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
 {
 	*first = *self->pos;
 	*second = *self->vec;
-	Told_122920 callback = (Told_122920)self->owner->desc02()->m28;
+	OwnerToldFn callback = (OwnerToldFn)self->owner->desc02()->m28;
 	if (callback)
 		callback(self->owner);
 }
