@@ -38,3 +38,6 @@ func_0011BEE0	CopyKeyedList	makes a keyed node, copies the list into it with Cop
 func_0011BF30	NewKeyedList	allocates the 4-byte list head with func_0018D5C0 and clears it
 func_0011BF70	InitScriptValuePools	sets up the five pools D_0025C250..D_0025C2D0 with InitEntryPool and installs the removeCallbacks of the node, scope and keyed pools
 func_0011C040	ShutDownScriptValuePools	calls the pools' teardown func_0011C1D0 for each, func_0011CBB0 and func_0011A6B8 (mirror of InitValuePools)
+func_0011C0A8	ConstructValuePools	the file's static initialiser: on the construction pass (first argument set, second 0xFFFF) zeroes the head word of each of the five value pools D_0025C250..D_0025C2D0 (+0x18)
+func_0011C0E8	CallValuePoolsConstructor	the file's _GLOBAL_$I: calls ConstructValuePools(1, 0xFFFF); it is in the constructor list D_0027B130
+func_0011C108	CallValuePoolsDestructor	the file's _GLOBAL_$D: calls ConstructValuePools(0, 0xFFFF), which does nothing on the destruction pass
