@@ -592,7 +592,27 @@ done:
     return s;
 }
 
-INCLUDE_ASM(func_001C8418);
+void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
+
+void func_001C8418(Agent* self, Vec02* p)
+{
+    Vec02 t;
+    self->vA40 = *p;
+    t = self->vA40;
+    if (self->f928 != 0) {
+        SnapPointToOwnerGraph(self->f928, &t, &t);
+    }
+    if (self->fA60 != 0) {
+        u128 d = Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(t));
+        s32 far = D_00274C90 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (far) {
+            self->fA60 = 0;
+        }
+    }
+    if (self->fA60 == 0) {
+        self->vA50 = t;
+    }
+}
 
 s32 HasAgentReachedPathEnd(Agent* self)
 {

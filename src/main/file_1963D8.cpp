@@ -2,6 +2,7 @@
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"
+#include "vu0.h"
 extern f32 g_gameTime[];
 #include "list_iter.h"
 #include "object_group.h"
@@ -793,7 +794,23 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
 
 u32 IsGaugeColliderAgentTargetInRange(void) { return 0; }
 
-INCLUDE_ASM(func_00198860);
+s32 IsGaugeColliderAgentNear(GaugeColliderAgent* self)
+{
+    SwitchedCollider* c = (SwitchedCollider*)GetActiveSwitchedCollider();
+    if (c == 0 || IsObjectOfKind(c, 0x18) == 0) {
+        return 0;
+    }
+    u128 d = Vu0::Sub(Vu0::Q(c->v140), Vu0::Q(self->v140));
+    f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+    if (self->fC18 != 0) {
+        if (D_0026A8D8 < dist) {
+            self->fC18 = 0;
+        }
+    } else if (dist < D_0026A8DC) {
+        self->fC18 = 1;
+    }
+    return self->fC18;
+}
 
 void StartGaugeCountedObject(GaugeCountedObject* self)
 {

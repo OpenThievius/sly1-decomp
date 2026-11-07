@@ -27,7 +27,8 @@ struct Mesh03 {
     void* faces;            // 0x10
     s32 edgeCount;          // 0x14: CollectEdgeContacts (func_00186450)
     void* edges;            // 0x18: edgeCount of them, 0x10 bytes each (two vertex indices first)
-    u8 pad1C[0x24 - 0x1C];
+    void* points;           // 0x1C: faceCount 16-byte points (func_00160EA0)
+    void* words;            // 0x20: faceCount words (func_00160EA0)
 };
 
 // A node of a mesh's BSP tree (func_00138278): its face, then its back and front children.

@@ -2894,9 +2894,30 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
     self->count39C = self->count39C - 1;
 }
 
-INCLUDE_RODATA(D_0024CAF4);
-
-INCLUDE_ASM(func_001A6090);
+s32 PairWithNearestFreeObject(void* self, void* child)
+{
+    ListFrame frame;
+    PairController* c = (PairController*)self;
+    PairedObject* o = (PairedObject*)child;
+    if (IsListEmpty((List01*)c->list368) != 0) {
+        return 0;
+    }
+    f32 best = 3.4028234663852886e+38f;
+    PairedObject* found;
+    for (PairedObject* p = *(PairedObject**)c->list368; p != 0; p = *(PairedObject**)((u8*)p + 0x5A0)) {
+        u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(o->v140));
+        f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (dist < best) {
+            best = dist;
+            found = p;
+        }
+    }
+    o->partner = found;
+    found->partner = o;
+    RemoveFromList(c->list368, found);
+    AppendToList(c->list35C, found);
+    return 1;
+}
 
 void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 {
@@ -2926,13 +2947,55 @@ void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
     }
 }
 
-INCLUDE_RODATA(D_0024CAF8);
+s32 PairWithNearestWaitingObject(void* self, void* child)
+{
+    ListFrame frame;
+    PairController* c = (PairController*)self;
+    PairedObject* o = (PairedObject*)child;
+    f32 best = 3.4028234663852886e+38f;
+    PairedObject* found = 0;
+    for (PairedObject* p = *(PairedObject**)c->list384; p != 0; p = *(PairedObject**)((u8*)p + 0x5B0)) {
+        if (p->partner == 0 && p->state == 2) {
+            u128 d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(p->v140));
+            f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+            if (dist < best) {
+                best = dist;
+                found = p;
+            }
+        }
+    }
+    if (found == 0) {
+        return 0;
+    }
+    o->partner = found;
+    found->partner = o;
+    RemoveFromList(c->list368, o);
+    AppendToList(c->list35C, o);
+    SetPairedState(found, 3);
+    return 1;
+}
 
-INCLUDE_ASM(func_001A6238);
-
-INCLUDE_RODATA(D_0024CAFC);
-
-INCLUDE_ASM(func_001A6328);
+s32 func_001A6328(PairController* self, PairedObject* obj)
+{
+    ListFrame frame;
+    if (IsListEmpty((List01*)self->list3A0) != 0) {
+        return 0;
+    }
+    f32 best = 3.4028234663852886e+38f;
+    PlacedObject* found = 0;
+    for (PlacedObject* p = *(PlacedObject**)self->list3A0; p != 0; p = *(PlacedObject**)((u8*)p + 0x568)) {
+        u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(obj->v140));
+        f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (dist < best) {
+            best = dist;
+            found = p;
+        }
+    }
+    RemoveFromList(self->list3A0, found);
+    AppendToList(self->list3AC, found);
+    obj->attachment = found;
+    return 1;
+}
 
 void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {

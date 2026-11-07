@@ -1101,7 +1101,53 @@ ASM_FUNC(func_0019BB10);
 
 ASM_FUNC(func_0019BB90);
 
-INCLUDE_ASM(func_0019BC40);
+void BuildPlacedObjectTransform(void* self, void* a, void* out);
+
+void func_0019BC40(ObjectGatherer* self, void* a1, void* a2)
+{
+    Vec02 tmp[4];
+    ListFrame frame;
+    PlacedObject* obj;
+    if (self->state == 4) {
+        return;
+    }
+    if (self->flags & 0x100000000ULL) {
+        return;
+    }
+    BuildPlacedObjectTransform(self, a2, tmp);
+    switch (self->state) {
+    case 0:
+        obj = (PlacedObject*)self->base5EC;
+        obj->desc02()->m24(obj, a1, tmp);
+        break;
+    case 1: {
+        f32 r = self->near5F0 * self->near5F0;
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v650));
+        s32 far = r < Vu0::ToFloatMoved(Vu0::Dot(d, d));
+        if (far) {
+            self->ring = (self->ring + 1) % self->lowCount;
+            Vu0::Q(self->v650) = Vu0::Q(self->v140);
+        }
+        obj = (PlacedObject*)self->lowObjects[self->ring];
+        obj->desc02()->m24(obj, a1, tmp);
+        break;
+    }
+    case 2: {
+        f32 r = self->near5F4 * self->near5F4;
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v650));
+        s32 far = r < Vu0::ToFloatMoved(Vu0::Dot(d, d));
+        if (far) {
+            self->ring = (self->ring + 1) % self->highCount;
+            Vu0::Q(self->v650) = Vu0::Q(self->v140);
+        }
+        obj = (PlacedObject*)self->highObjects[self->ring];
+        obj->desc02()->m24(obj, a1, tmp);
+        break;
+    }
+    default:
+        return;
+    }
+}
 
 s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
@@ -1381,7 +1427,46 @@ void func_0019CEC0(void* self, void* p, void* out, f32 t)
     Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
 }
 
-INCLUDE_ASM(func_0019CF68);
+struct TreePlane {
+    Vec02 normal;
+    f32 dist;
+};
+
+u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
+{
+    if (node == 0) {
+        node = self->fD8;
+    }
+    for (;;) {
+        TreePlane* plane = (TreePlane*)node->a;
+        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*pt), Vu0::Q(plane->normal))) - plane->dist;
+        if (d < -0.0001f) {
+            if (node->b == 0) {
+                return self->fDC[node - self->fD8].a;
+            }
+            node = (Tri8B*)node->b;
+        } else if (d > 0.0001f) {
+            if (node->c == 0) {
+                return self->fDC[node - self->fD8].b;
+            }
+            node = (Tri8B*)node->c;
+        } else {
+            u8* r;
+            if (node->c == 0) {
+                r = self->fDC[node - self->fD8].b;
+            } else {
+                r = func_0019CF68(self, (Tri8B*)node->c, pt);
+            }
+            if (r != 0) {
+                return r;
+            }
+            if (node->b == 0) {
+                return self->fDC[node - self->fD8].a;
+            }
+            node = (Tri8B*)node->b;
+        }
+    }
+}
 
 INCLUDE_ASM(func_0019D0E0);
 

@@ -451,8 +451,10 @@ struct Agent : TurningCollider {
     s32 f928;               // 0x928
     s32 f92C;               // 0x92C: func_001C84C0 compares it with f930
     s32 f930;               // 0x930
-    u8 pad934[0xA60 - 0x934];
-    s32 fA60;               // 0xA60
+    u8 pad934[0xA40 - 0x934];
+    Vec02 vA40;             // 0xA40: the last point func_001C8418 was given
+    Vec02 vA50;             // 0xA50: that point (after SnapPointToOwnerGraph) while fA60 is clear
+    s32 fA60;               // 0xA60: cleared by func_001C8418 once the point is 40 (D_00274C90) from vA50 on the ground
     u8 padA64[0xA68 - 0xA64];
     s32 fA68;               // 0xA68
     s32 fA6C;               // 0xA6C
@@ -610,7 +612,8 @@ struct SeekingAgent : Agent {
 struct GaugeColliderAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
-    u8 padC18[0xC20 - 0xC18];
+    s32 fC18;               // 0xC18: set within 1100 of the active collider on the ground, cleared past 2000 (func_00198860)
+    u8 padC1C[0xC20 - 0xC1C];
 };
 
 struct WorldListedAgent : Agent {
