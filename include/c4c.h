@@ -2,7 +2,7 @@
 // Class 0x4C (descriptor D_0021B9A8, 0x560 bytes), a part with collision that counts down and
 // then goes away (func_001D32D8 sends its message, lets go of its handle and removes it).
 // Written for this project from what retail's code does (config/us/classes.tsv;
-// src/main/file_1D29C8.cpp).
+// src/main/player_mode.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
@@ -22,7 +22,7 @@ typedef char check_C4C[sizeof(C4C) == 0x560 ? 1 : -1];
 
 // The methods that take only types known here (config/us/classes.tsv); a slot's function takes
 // its class's object. Slots 13 (func_001D3678) and 45 (func_001D3500) take records that
-// file_1D29C8.cpp declares; slots 17 and 19 (func_001D3398, func_001D35A8) are assembly.
+// player_mode.cpp declares; slots 17 and 19 (func_001D3398, func_001D35A8) are assembly.
 void func_001D3290(C4C* self);                       // 0x4C slot 16
 void func_001D3470(C4C* self, f32 t);                // 0x4C slot 28
 void func_001D34E0(C4C* self);                       // 0x4C slot 63
