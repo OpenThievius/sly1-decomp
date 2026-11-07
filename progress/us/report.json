@@ -45241,7 +45241,7 @@
    }
   },
   {
-   "name": "libm/file_204F68",
+   "name": "libm/arctangent",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "680",
@@ -45276,11 +45276,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_204F68.c"
+    "source_path": "src/libm/arctangent.c"
    }
   },
   {
-   "name": "libm/file_205210",
+   "name": "libm/cosine",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "232",
@@ -45315,11 +45315,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205210.c"
+    "source_path": "src/libm/cosine.c"
    }
   },
   {
-   "name": "libm/file_2052F8",
+   "name": "libm/absolute_value",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "28",
@@ -45354,11 +45354,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2052F8.c"
+    "source_path": "src/libm/absolute_value.c"
    }
   },
   {
-   "name": "libm/file_205318",
+   "name": "libm/round_down",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "228",
@@ -45393,11 +45393,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205318.c"
+    "source_path": "src/libm/round_down.c"
    }
   },
   {
-   "name": "libm/file_205400",
+   "name": "libm/sine",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "240",
@@ -45432,11 +45432,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205400.c"
+    "source_path": "src/libm/sine.c"
    }
   },
   {
-   "name": "libm/file_2054F0",
+   "name": "libm/tangent",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "136",
@@ -45471,11 +45471,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2054F0.c"
+    "source_path": "src/libm/tangent.c"
    }
   },
   {
-   "name": "libm/file_205578",
+   "name": "libm/arccosine",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "252",
@@ -45510,11 +45510,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205578.c"
+    "source_path": "src/libm/arccosine.c"
    }
   },
   {
-   "name": "libm/file_205678",
+   "name": "libm/arcsine",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "252",
@@ -45549,11 +45549,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205678.c"
+    "source_path": "src/libm/arcsine.c"
    }
   },
   {
-   "name": "libm/file_205778",
+   "name": "libm/arctangent_of_ratio",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "296",
@@ -45588,11 +45588,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205778.c"
+    "source_path": "src/libm/arctangent_of_ratio.c"
    }
   },
   {
-   "name": "libm/file_2058A0",
+   "name": "libm/float_remainder",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "316",
@@ -45627,11 +45627,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2058A0.c"
+    "source_path": "src/libm/float_remainder.c"
    }
   },
   {
-   "name": "libm/file_2059E0",
+   "name": "libm/logarithm",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "328",
@@ -45666,11 +45666,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2059E0.c"
+    "source_path": "src/libm/logarithm.c"
    }
   },
   {
-   "name": "libm/file_205B28",
+   "name": "libm/logarithm_base10",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "332",
@@ -45705,11 +45705,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205B28.c"
+    "source_path": "src/libm/logarithm_base10.c"
    }
   },
   {
-   "name": "libm/file_205C78",
+   "name": "libm/power",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "1288",
@@ -45744,11 +45744,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_205C78.c"
+    "source_path": "src/libm/power.c"
    }
   },
   {
-   "name": "libm/file_206180",
+   "name": "libm/square_root",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "276",
@@ -45783,11 +45783,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_206180.c"
+    "source_path": "src/libm/square_root.c"
    }
   },
   {
-   "name": "libm/file_206298",
+   "name": "libm/arccosine_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "1072",
@@ -45822,11 +45822,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_206298.c"
+    "source_path": "src/libm/arccosine_kernel.c"
    }
   },
   {
-   "name": "libm/file_2066C8",
+   "name": "libm/arcsine_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "924",
@@ -45861,11 +45861,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2066C8.c"
+    "source_path": "src/libm/arcsine_kernel.c"
    }
   },
   {
-   "name": "libm/file_206A68",
+   "name": "libm/arctangent_of_ratio_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "744",
@@ -45900,11 +45900,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_206A68.c"
+    "source_path": "src/libm/arctangent_of_ratio_kernel.c"
    }
   },
   {
-   "name": "libm/file_206D50",
+   "name": "libm/float_remainder_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "592",
@@ -45939,11 +45939,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_206D50.c"
+    "source_path": "src/libm/float_remainder_kernel.c"
    }
   },
   {
-   "name": "libm/file_206FA0",
+   "name": "libm/logarithm_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "804",
@@ -45978,11 +45978,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_206FA0.c"
+    "source_path": "src/libm/logarithm_kernel.c"
    }
   },
   {
-   "name": "libm/file_2072C8",
+   "name": "libm/logarithm_base10_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "304",
@@ -46017,11 +46017,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2072C8.c"
+    "source_path": "src/libm/logarithm_base10_kernel.c"
    }
   },
   {
-   "name": "libm/file_2073F8",
+   "name": "libm/power_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "2188",
@@ -46056,11 +46056,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2073F8.c"
+    "source_path": "src/libm/power_kernel.c"
    }
   },
   {
-   "name": "libm/file_207C88",
+   "name": "libm/reduce_by_half_pi",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "992",
@@ -46095,11 +46095,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_207C88.c"
+    "source_path": "src/libm/reduce_by_half_pi.c"
    }
   },
   {
-   "name": "libm/file_208068",
+   "name": "libm/square_root_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "312",
@@ -46134,11 +46134,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_208068.c"
+    "source_path": "src/libm/square_root_kernel.c"
    }
   },
   {
-   "name": "libm/file_2081A0",
+   "name": "libm/cosine_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "344",
@@ -46173,11 +46173,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2081A0.c"
+    "source_path": "src/libm/cosine_kernel.c"
    }
   },
   {
-   "name": "libm/file_2082F8",
+   "name": "libm/reduce_large_by_half_pi",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "2380",
@@ -46212,11 +46212,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2082F8.c"
+    "source_path": "src/libm/reduce_large_by_half_pi.c"
    }
   },
   {
-   "name": "libm/file_208C48",
+   "name": "libm/sine_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "260",
@@ -46251,11 +46251,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_208C48.c"
+    "source_path": "src/libm/sine_kernel.c"
    }
   },
   {
-   "name": "libm/file_208D50",
+   "name": "libm/tangent_kernel",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "660",
@@ -46290,11 +46290,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_208D50.c"
+    "source_path": "src/libm/tangent_kernel.c"
    }
   },
   {
-   "name": "libm/file_208FE8",
+   "name": "libm/error_hook",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "36",
@@ -46329,11 +46329,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_208FE8.c"
+    "source_path": "src/libm/error_hook.c"
    }
   },
   {
-   "name": "libm/file_209010",
+   "name": "libm/round_to_integer",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "508",
@@ -46368,11 +46368,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_209010.c"
+    "source_path": "src/libm/round_to_integer.c"
    }
   },
   {
-   "name": "libm/file_209210",
+   "name": "libm/is_finite",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "36",
@@ -46407,11 +46407,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_209210.c"
+    "source_path": "src/libm/is_finite.c"
    }
   },
   {
-   "name": "libm/file_209238",
+   "name": "libm/is_not_a_number",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "36",
@@ -46446,11 +46446,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_209238.c"
+    "source_path": "src/libm/is_not_a_number.c"
    }
   },
   {
-   "name": "libm/file_209260",
+   "name": "libm/scale_by_power_of_two",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "352",
@@ -46485,11 +46485,11 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_209260.c"
+    "source_path": "src/libm/scale_by_power_of_two.c"
    }
   },
   {
-   "name": "libm/file_2093C0",
+   "name": "libm/copy_sign",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "48",
@@ -46524,7 +46524,7 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/libm/file_2093C0.c"
+    "source_path": "src/libm/copy_sign.c"
    }
   },
   {
