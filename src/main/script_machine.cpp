@@ -8,6 +8,7 @@
 #include "script_value.h"
 #include "script_builtin.h"
 #include "queued_call.h"
+#include "vu0.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
 // lists them from func_00112698 on), their helpers and the collector's mark stacks: one source
@@ -1479,7 +1480,17 @@ ScriptValue* GetScriptAtan2(ScriptValue* ret, s32 count, ScriptValue* args, Scri
 
 INCLUDE_ASM(func_00115F70);
 
-INCLUDE_ASM(func_00115FF8);
+ScriptValue* func_00115FF8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue t;
+    InitScriptValue(&t);
+    f32* p = AcquireVectorAPayload();
+    Vu0::Q(*p) = Vu0::Cross(Vu0::Q(*args[0].v), Vu0::Q(*args[1].v));
+    SetScriptValueVectorA(&t, p);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
+    return ret;
+}
 
 INCLUDE_ASM(func_00116080);
 
