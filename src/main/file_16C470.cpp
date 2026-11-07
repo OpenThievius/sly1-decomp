@@ -48,7 +48,7 @@ void func_001B93D8(void);
 
 void func_0016C4E8(void)
 {
-    func_001B93D8();
+    DrawCollider();
 }
 
 void func_001261C0(void);

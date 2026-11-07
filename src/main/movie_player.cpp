@@ -449,7 +449,7 @@ void func_0018D978(C3C* self)
 void func_0018D9B8(C3C* self, void* b, f32 x)
 {
     if (self->ready != 0) {
-        func_00189350(&self->v150, &self->rot);
+        BuildBasisFromX(&self->v150, &self->rot);
     }
     s32 s1 = (s32)self->f1EC;
     s32 s0 = (s32)self->f1F0;
@@ -724,7 +724,7 @@ s32 func_0018E940(MovieStream* self)
     s32 r;
     SuspendIopVoices(0xFFFFFFFF);
     PushIopChannel2Setting(g_currentWorld, 0, 0);
-    func_0011E010();
+    StopAllIopSounds();
     while (PollIopCommands() != 0) {
     }
     func_0011E110(1);
@@ -758,7 +758,7 @@ void func_0018EA48(Obj_18EA48* self)
 void func_0018EAA0(Obj_18EAA0* self)
 {
     self->f00 = 0;
-    func_0011E498();
+    StopIopMovieStream();
     SetIopVolumeChannel(2, self->f8C);
     SetIopVolumeChannel(8, self->f90);
     PopIopChannel2Setting(g_currentWorld);
@@ -802,7 +802,7 @@ void func_0018EB98(Self_18EB98* self)
         if (self->f80 != 0) {
             break;
         }
-        func_0011E4C0(self->f70, self->f74, self->f70, 0, 0);
+        UpdateIopMovieStream(self->f70, self->f74, self->f70, 0, 0);
         self->state = 3;
         break;
     case 3: {
@@ -1092,7 +1092,7 @@ void func_0018F7D0(Obj_18F7D0* self)
         } while (*(volatile s32*)&self->f134 != 0);
     }
     D_002626CC = 3;
-    func_001B3450();
+    SendResidentImages();
     if ((u32)self->f00 >= 16) {
         mask = 0;
     } else {

@@ -261,7 +261,7 @@ void func_0017CE80(EntryQueue* self)
 {
     if (self->f3C != 0) {
         ReplaceQueueOnOffObject(self, 0);
-        func_0017BB78(self, 0);
+        SetEntryQueueTargetNode(self, 0);
         if (self->f50 != 0) {
             StopAnimationPlayer(self->f50);
             self->f50 = 0;

@@ -1180,7 +1180,7 @@ ASM_FUNC(func_0015FD78);
 void func_0015FF58(void* self)
 {
     RegroupQueuedObjects(self);
-    func_0015FD78(self);
+    UpdateGroupsNearCamera(self);
 }
 
 void func_0015FF88(IdLookupObject* self)
@@ -1501,7 +1501,7 @@ void func_00160948(void)
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
         if (D_00275F84 == 0) {
-            func_001C0760(g_saveData->f19EC & 0x80);
+            SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
             func_001C0790(g_saveData->f19EC & 0x40);
             Animation* r = FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
             if (r != 0) {
@@ -1982,15 +1982,15 @@ void func_00161C00(Self_161C00* self)
     Elem_161C00* c;
 
     base = 0x24;
-    func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hd);
     FillMemory(hd, 0, 0x18);
     hd->f10 = 3;
     hd->f0 = base;
     base = self->f124 * 3 + 0x24;
     hd->f2 = base;
     WriteVifStcycl(&g_vifPacketWriter, 1, 3);
-    func_001EE5C8(&g_vifPacketWriter, 8, self->f124, hd->f0, 0, &out1);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, self->f124, hd->f0 + 2, 0, &out2);
+    ReserveVifUnpack(&g_vifPacketWriter, 8, self->f124, hd->f0, 0, &out1);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, self->f124, hd->f0 + 2, 0, &out2);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->f124; i++) {
         c = &self->e[i];
@@ -2004,7 +2004,7 @@ void func_00161C00(Self_161C00* self)
     }
     WriteVifMscal(&g_vifPacketWriter, D_00001A50);
     WriteVifStcycl(&g_vifPacketWriter, 1, 3);
-    func_001EE5C8(&g_vifPacketWriter, 0xE, self->f124, hd->f0 + 1, 0, &out3);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->f124, hd->f0 + 1, 0, &out3);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->f124; i++) {
         s32 j;
@@ -2017,7 +2017,7 @@ void func_00161C00(Self_161C00* self)
     for (k = 0; k < self->fF8->f18; k++) {
         Pair_161C00* pair = &self->fF8->f1C[k];
         s32 frame;
-        func_001EE5C8(&g_vifPacketWriter, 0xC, pair->f0, base, &count, &dst);
+        ReserveVifUnpack(&g_vifPacketWriter, 0xC, pair->f0, base, &count, &dst);
         frame = 0;
         if (self->fF8->f24 != 0) {
             frame = self->fF8->f24->f18;
@@ -2045,7 +2045,7 @@ void func_00161F70(Self_161F70* self)
     s32 i;
     Vert_161F70* v;
 
-    func_001EE5C8(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xD, 3, 0xB, 0, &hdr);
     FillMemory((Mem_161F70*)hdr, 0, 0x18);
     hdr->f10 = 4;
     hdr->f0 = off;
@@ -2055,7 +2055,7 @@ void func_00161F70(Self_161F70* self)
     hdr->fE = off;
     off += self->n;
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, self->n, hdr->f0 + 3, 0, &p4);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, self->n, hdr->f0 + 3, 0, &p4);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     for (i = 0; i < self->n; i++)
     {
@@ -2068,8 +2068,8 @@ void func_00161F70(Self_161F70* self)
         p4++;
     }
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 0xC, (self->n + 3) & ~3, hdr->f0, 0, &p8);
-    func_001EE5C8(&g_vifPacketWriter, 0xE, self->n, hdr->f0 + 1, 0, &pC);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xC, (self->n + 3) & ~3, hdr->f0, 0, &p8);
+    ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->n, hdr->f0 + 1, 0, &pC);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     WriteVifMscal(&g_vifPacketWriter, D_00000288);
     for (i = 0; i < self->n; i += 4)
@@ -2104,7 +2104,7 @@ void func_00161F70(Self_161F70* self)
     WriteVifMscal(&g_vifPacketWriter, D_00001210);
     WriteVifFlushE(&g_vifPacketWriter);
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
-    func_001EE5C8(&g_vifPacketWriter, 8, self->n, hdr->f0, 0, &p10);
+    ReserveVifUnpack(&g_vifPacketWriter, 8, self->n, hdr->f0, 0, &p10);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
     WriteVifMscal(&g_vifPacketWriter, D_00001AB0);
     for (i = 0; i < self->n; i++)
@@ -2119,7 +2119,7 @@ void func_00161F70(Self_161F70* self)
     for (s32 t = 0; t < self->mesh->count; t++)
     {
         Ent_161F70* e = &self->mesh->ents[t];
-        func_001EE5C8(&g_vifPacketWriter, 0xC, e->n, off, &size, &dst);
+        ReserveVifUnpack(&g_vifPacketWriter, 0xC, e->n, off, &size, &dst);
         Sub_161F70* sub = self->mesh->sub;
         s32 m = sub ? sub->n : 0;
         CopyMemory((Mem_161F70*)dst, e->data + m * e->n * 16, size);
@@ -2251,7 +2251,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     Vec3_1639E8* out;
     s32 off = 0x2B;
 
-    func_001EE5C8(pkt, 0xD, 2, 0x16, 0, hdr);
+    ReserveVifUnpack(pkt, 0xD, 2, 0x16, 0, hdr);
     FillMemory(hdr->p, 0, 0x10);
     InitGifPacket(&f);
     AllocateTempPacketBuffer(&f, 8);
@@ -2301,7 +2301,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
         for (i = 0; i < self->f40; i++)
         {
             CopyWordsToWriter(pkt, 0, 1, &i, 0x1D);
-            func_001EE5C8(pkt, 8, n, hdr->p[6], 0, &out);
+            ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, &out);
             u16* idx = ents[i].idx;
             for (s32 k = 0; k < n; k++)
             {
@@ -2350,7 +2350,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     if (obj->f54 != 0) {
         BeginDmaTag(pkt);
     }
-    func_001EE5C8(pkt, 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack(pkt, 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
     FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 3;
@@ -2386,9 +2386,9 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     uvOut = 0;
     WriteVifStcycl(pkt, 1, 3);
     if (hasUv) {
-        func_001EE5C8(pkt, 8, n, hdr->p->off[0], 0, &uvOut);
+        ReserveVifUnpack(pkt, 8, n, hdr->p->off[0], 0, &uvOut);
     }
-    func_001EE5C8(pkt, 0xC, n, hdr->p->off[0] + 2, 0, &posOut);
+    ReserveVifUnpack(pkt, 0xC, n, hdr->p->off[0] + 2, 0, &posOut);
     WriteVifStcycl(pkt, 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
@@ -2433,7 +2433,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     }
     WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
-        func_001EE5C8(pkt, 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(pkt, D_000027C0);
     }
@@ -2445,7 +2445,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         FillMemory(buf, 0, 0x10);
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_00262418[hdr->count]);
-        func_001EE5C8(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
+        ReserveVifUnpack(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
         WriteVifStmask(pkt, 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -2464,7 +2464,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
                 WriteVifFlushE(pkt);
             }
             CopyWordsToWriter(pkt, 0, 1, &k, 0x16);
-            func_001EE5C8(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
+            ReserveVifUnpack(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
             u16* idx = ents[k].idx;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2479,7 +2479,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     if (hdr->extra != 0) {
         Extra_163ED8* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            func_001EE5C8(pkt, 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack(pkt, 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(pkt, 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(pkt, D_00003A80);
@@ -2497,7 +2497,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     WriteVifMscal(pkt, tail);
     if (tinted) {
         WriteVifStcycl(pkt, 1, 3);
-        func_001EE5C8(pkt, 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
+        ReserveVifUnpack(pkt, 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
         WriteVifStcycl(pkt, 1, 1);
         for (i = 0; i < n; i++) {
             s32 j;
@@ -2516,7 +2516,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
         MeshStrip* s = &mesh->strips[i];
-        func_001EE5C8(pkt, 0xC, s->count, off, &c, &d);
+        ReserveVifUnpack(pkt, 0xC, s->count, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
         off += s->count;
@@ -2556,7 +2556,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         BeginDmaTag(&pkt[2]);
     }
     obj->f18 = 1;
-    func_001EE5C8(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
     off = 0x24;
     FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 4;
@@ -2573,7 +2573,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     hdr->p->strip[3] = off;
     off += n;
     WriteVifStcycl(&pkt[0], 1, 4);
-    func_001EE5C8(&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, &posOut);
+    ReserveVifUnpack(&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, &posOut);
     WriteVifStcycl(&pkt[0], 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
@@ -2605,7 +2605,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         FillMemory(buf, 0, 0x10);
         WriteVifStrow(&pkt[0], buf);
         WriteVifStmask(&pkt[0], D_00262448[hdr->count]);
-        func_001EE5C8(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
+        ReserveVifUnpack(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
         WriteVifStmask(&pkt[0], 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -2620,7 +2620,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         off += self->f40;
         for (k = 0; k < self->f40; k++) {
             CopyWordsToWriter(&pkt[0], 0, 1, &k, 0x16);
-            func_001EE5C8(&pkt[0], 8, n, hdr->p->strip[3], 0, &dOut);
+            ReserveVifUnpack(&pkt[0], 8, n, hdr->p->strip[3], 0, &dOut);
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2635,13 +2635,13 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     }
     WriteVifStcycl(&pkt[1], 1, 4);
     if (obj->f28 != 0 && hdr->count == 0 && self->f40 == 0) {
-        func_001EE5C8(&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, &quads);
+        ReserveVifUnpack(&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, &quads);
         nOut = 0;
     } else {
-        func_001EE5C8(&pkt[1], 0xC, n, hdr->p->off[0], 0, &nOut);
+        ReserveVifUnpack(&pkt[1], 0xC, n, hdr->p->off[0], 0, &nOut);
         quads = 0;
     }
-    func_001EE5C8(&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
+    ReserveVifUnpack(&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
     WriteVifStcycl(&pkt[1], 1, 1);
     if (hdr->count > 0) {
         WriteVifMscal(&pkt[1], D_00002088);
@@ -2651,7 +2651,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
             if (m > 0) {
                 WriteVifFlushE(&pkt[1]);
             }
-            func_001EE5C8(&pkt[1], 8, n, hdr->p->strip[3], 0, &nDelta);
+            ReserveVifUnpack(&pkt[1], 8, n, hdr->p->strip[3], 0, &nDelta);
             u16* idx = ents[m].nrm;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -2704,7 +2704,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         }
     }
     WriteVifStcycl(&pkt[2], 1, 4);
-    func_001EE5C8(&pkt[2], 8, n, hdr->p->off[0], 0, &uvOut);
+    ReserveVifUnpack(&pkt[2], 8, n, hdr->p->off[0], 0, &uvOut);
     WriteVifStcycl(&pkt[2], 1, 1);
     if (outs[2] != 0) {
         *outs[2] = (s32)uvOut;
@@ -2728,14 +2728,14 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
         node = ((Hook_164868*)mesh->hook)->vt[5]((Hook_164868*)mesh->hook, mesh);
     }
     if (node != 0 && (node->flags & 2)) {
-        func_001EE5C8(&pkt[2], 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack(&pkt[2], 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(&pkt[2], D_000027C0);
     }
     if (hdr->extra != 0) {
         Extra_164868* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            func_001EE5C8(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(&pkt[2], D_00003A80);
@@ -2754,7 +2754,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         MeshStrip* s = &mesh->strips[i];
-        func_001EE5C8(&pkt[2], 0xC, s->count, off, &c, &d);
+        ReserveVifUnpack(&pkt[2], 0xC, s->count, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;
         off += s->count;
@@ -2776,15 +2776,15 @@ void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
     s0 = (b->f1C->hi - b->f1C->lo) / 4;
     AllocateQuadwordBuffer(buf, (u32)((s0 + 7) / 4), 0x1A);
     WriteVifStcycl(buf, 1, 4);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
     WriteVifStcycl(buf, 1, 1);
     WriteVifMscal(buf, D_00000010);
     DetachPacketBuffer(buf, &c->f0, &c->f4);
     AllocateQuadwordBuffer(buf, (u32)((s0 + 4) / 2), 0x1A);
     WriteVifStcycl(buf, 1, 4);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
     WriteVifStcycl(buf, 1, 1);
-    func_001EE5C8(buf, 0xE, s0, b->f1C->hi, 0, 0);
+    ReserveVifUnpack(buf, 0xE, s0, b->f1C->hi, 0, 0);
     WriteVifMscal(buf, D_000000F0);
     DetachPacketBuffer(buf, &c->fC, &c->f10);
 }
@@ -2877,7 +2877,7 @@ void func_00165920(Obj_165920* self, s32 arg, void* src)
         s32 b = 0, a = 0;
         do {
             i++;
-            func_00165AE8(self, (u8*)self->recs + a, (u8*)self->p14 + b);
+            CopyAttachmentPart(self, (u8*)self->recs + a, (u8*)self->p14 + b);
             a += 0x70;
             b += 0x28;
         } while (i < self->count);
@@ -2902,14 +2902,14 @@ void func_00165FE0(Owner_165FE0* self, PlacedObject* sub, f32 f)
         }
     }
     for (e = self->head4C; e != 0; e = e->next80) {
-        func_001F3408(e->f0C);
+        EvaluateOscillator(e->f0C);
     }
 }
 
 void func_001660A0(PlacedObject* self)
 {
     u8* p=(u8*)self->f224;
-    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) func_0016C528(*(void**)(p+0x60));
+    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint(*(void**)(p+0x60));
 }
 
 void func_001660E8(PlacedObject* self, Par_1660E8* par)

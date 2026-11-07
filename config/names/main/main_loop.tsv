@@ -5,6 +5,8 @@ func_00185150	CollectLightsForSphere	tests a sphere (a point and a radius) again
 func_00185358	InitAim	sets the aim record's field 0x20 to -1, 0x40 to 800.0, copies the vectors D_00264770..D_002647A0 and sets 0x44 and 0x48
 func_001853F0	AssignAimTarget	stores the object and a point as the target (hasTarget 1), or clears the target when the object is null or is the active collider
 func_00185468	ResolveAimTarget	returns the aim's target, or the active switched collider when it has none
+func_00185498	SwitchAimByTargetDistance	slot 3 of the aim's table D_0021A790: picks +0x48 when the target (ResolveAimTarget) is farther than +0x40 from the owner, else +0x44 after ClearRootTries, and when that changes the value at +0x14 re-sorts the owner's attachments (SortAttachments)
+func_00185538	GetAimRotation	slot 5 of the aim's table D_0021A790: the owner's rotation (+0xD0 with flag +0x4C, or +0x1A0 when the target is within +0x40), else a yaw and pitch matrix (GetVectorAngles, BuildYawPitchMatrix) towards the target (ResolveAimTarget)
 func_00185758	RunMainLoop	after startup it loops forever: updates the fade, pad, memory card and menus each frame and runs the world's update and draw
 func_001858F8	LoadIopModules	loads the IOP image ioprp243.img and the six modules named in D_002647A8 one by one
 func_00185A58	SendVif0StartupPacket	a startup initializer (D_00264814, run by RunStartupInitializers): sets bit 0x40 of the VIF0 channel's control word, sends the packet D_00211E10 on it, waits and clears the bit

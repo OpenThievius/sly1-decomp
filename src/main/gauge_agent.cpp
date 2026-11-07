@@ -210,7 +210,7 @@ s32 func_0018A9A8(C0C* self)
             return 0;
         }
     }
-    func_001B6598(*(void**)(obj + 0xE10), &loc.code);
+    GetStateWalkerCurrentKey(*(void**)(obj + 0xE10), &loc.code);
     code = loc.code;
     if (code != 0x43C) {
         if (code < 0x43D) {
@@ -242,12 +242,12 @@ typedef s32 (*VFnI_0018AAE0)(void* self);
 s32 func_0018AAE0(C0C* self)
 {
     s32 out;
-    if (func_001DDA80(self->world) != 0) goto zero;
+    if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
     if (self->fC10 != 0) goto zero;
     if (self->f724 == 0x10) goto zero;
     if (self->f724 == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
-    func_001B6598(self->fE10, &out);
+    GetStateWalkerCurrentKey(self->fE10, &out);
     if (out == 0x43C) goto one;
     if (out < 0x43D) {
         if (out == 0x43A) goto one;
@@ -280,7 +280,7 @@ s32 func_0018ABF0(C0C* self)
 {
     if (self->f724 == 4) {
         s32 kind;
-        func_001B6598(self->fE10, &kind);
+        GetStateWalkerCurrentKey(self->fE10, &kind);
         if (kind == 0x438) {
             if (func_001C96B8(self) == 0)
                 return 2;
@@ -307,7 +307,7 @@ void func_0018ACD0(void)
 void func_0018ACF0(C0C* self)
 {
     s32 kind;
-    func_001B6598(self->fE10, &kind);
+    GetStateWalkerCurrentKey(self->fE10, &kind);
     s32 pick = 0;
     switch (kind) {
     case 0x43A:
@@ -365,7 +365,7 @@ void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
                 obj = (Obj_18B340*)self->fE1C;
             }
             s32 kind;
-            func_001B6598(self->fE10, &kind);
+            GetStateWalkerCurrentKey(self->fE10, &kind);
             switch (kind) {
             case 0x43A:
             case 0x43C:
@@ -395,7 +395,7 @@ void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
 void func_0018B460(C0C* a0, f32* a1)
 {
     s32 kind;
-    func_001B6598(a0->fE10, &kind);
+    GetStateWalkerCurrentKey(a0->fE10, &kind);
     switch (kind) {
     case 0x43A:
         {

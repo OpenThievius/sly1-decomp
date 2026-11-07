@@ -365,7 +365,7 @@ void func_00198B28(ObjectSet* self)
     StartPlacedObject(self);
     for (i = 0; i < self->count570; i++) {
         void* node = self->found574[i];
-        if (func_0012C9A8(node)) {
+        if (HasAnimationEventKind19(node)) {
             self->f558 = 1;
         }
         ResolveAndStartObject(node);
@@ -384,7 +384,7 @@ void func_00198DA8(ObjectSet* self)
     s32 i = self->count570;
     i--;
     for (; i >= 0; i--) {
-        (void)func_0012C8F8(self->found574[i], 0, 0.0f, 1, 1.0f, 0);
+        (void)FindOrCreateSeekedAnimationPlayer(self->found574[i], 0, 0.0f, 1, 1.0f, 0);
     }
     ((VFn_198DA8*)self->desc)[78](self);
     (void)TriggerScriptEvent(self, 2, 0, 0);
@@ -542,7 +542,7 @@ void func_00199398(C5D* queue, void* item)
 
 void func_001993C0(s32 a0) {
     if (g_player != 0) {
-        (void)func_001781E0((Arg_001993C0*)g_player, a0);
+        (void)QueuePlayerWalkerActivation((Arg_001993C0*)g_player, a0);
     }
 }
 
@@ -704,7 +704,7 @@ void func_00199B18(Actor_199B18* self)
     s32 i = self->n570;
     i--;
     while (i >= 0) {
-        func_0012C8F8(self->arr574[i], 0, 1, 0, 0.0f, 1.0f);
+        FindOrCreateSeekedAnimationPlayer(self->arr574[i], 0, 1, 0, 0.0f, 1.0f);
         i--;
     }
     TriggerScriptEvent(self, 2, 0, 0);
@@ -904,9 +904,9 @@ void func_0019A520(C17* self, s32 flag)
     void* a;
     s32 n;
 
-    func_001B6568(self->f614, &r);
+    GetStateWalkerTargetKey(self->f614, &r);
     if (r == -1) {
-        func_001B6598(self->f614, &r);
+        GetStateWalkerCurrentKey(self->f614, &r);
     }
     if (flag != 0) {
         if (r != 0x38F) {

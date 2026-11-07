@@ -1,6 +1,7 @@
 symbol	name	evidence
 func_001793C0	InitModeCollider	slot 0 of the 0x1B class: runs InitSwitchedCollider (func_001921A8) and sets the mode at 0x610 to -1
 func_001793F0	StartModeCollider	slot 16 of the 0x1B class: base start, installs the 26-entry table D_00263AC8, makes a state walker at 0x658 (CreateStateWalker), a blend value at 0x684 set to 1.0 and enters mode 2
+func_001794E0	ComputeModeColliderAnchors	evaluates the quadratics D_00263C00 and D_00263C10 of the blend values at +0x6FC and +0x700 and scales +0x704 and +0x708, writing the two anchor vectors; StepModeCollider, AcceptModeColliderRequest and PlaceModeColliderAtAnchor call it
 func_00179590	StepModeCollider	slot 28 of the 0x1B class: by the mode at 0x610 either runs StepCollider (modes below 2) or places the anchors (func_001794E0, func_00127E60) and runs func_001B9058 and func_001B9D10 with the tables D_00263C20..D_00263C40
 func_00179690	MoveModeCollider	slot 0x7C of class 0x1B, the per-frame motion slot (func_001BC088 for class 0x03): runs func_001BC088 with 0, then calls the class's slot 0x58 when it has one
 func_001796D0	UpdateModeCollider	original assembly: slot 0x54 of class 0x1B
@@ -12,6 +13,7 @@ func_0017A9E0	IsModeColliderRequestBlocked	slot 75 of the 0x1B class: returns 1 
 func_0017AA40	AcceptModeColliderRequest	slot 76 of the 0x1B class: refuses (0) while slot 75 refuses, else sets the flag 0x6D0 and time 0x6D4, places the anchors, enters mode 3 or 4 and sends message 0x17 through slot 18
 func_0017AB58	HandleModeColliderNotification	slot 13 of the 0x1B class: on message kind 0x13 from the source at 0x618 sets 0x6E0 for code 0x15E, clears it for 0x15F and sets 0x70C for 0x467, then runs HandleSwitchedColliderNotification
 func_0017ABD8	HasModeColliderAcceptedRequest	slot 77 of the 0x1B class: returns whether the flag 0x6D0 AcceptModeColliderRequest sets is nonzero
+func_0017ABE8	SetModeColliderMode	changes the mode at +0x610: mode 2 resets the element D_00270650 through its slot 0x40, mode 4 sets the follow objects (SetFollowObjects), modes 3 and 4 set the time +0x6D8; then starts the mode's animation from +0x6C0..+0x6CC (ReplaceAnimationPlayer) and stamps the clock at +0x614
 func_0017AD50	PlaceModeColliderAtAnchor	gets the two anchor buffers with func_001794E0, applies them to the object at 0x668 (func_00127E60) and sets the position (slot 29) and the second vector (slot 32) from them
 func_0017ADD0	InitGaugeModeObject	slot 0x10 of class 0x4A: runs InitCollider and sets the mode (+0x550) to -1
 func_0017AE00	StartGaugeModeObject	slot 0x50 of class 0x4A: runs StartPlacedObject, resolves its links (g_gaugeHolderLinks), makes its three sound handles with their volumes at 1, enters mode 0 (SetGaugeModeObjectMode) and starts its loop (PlayGaugeModeObjectLoop)

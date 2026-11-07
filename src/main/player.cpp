@@ -653,10 +653,10 @@ void func_001725E0(Player* self, void* a, void* b)
     {
         func_001CDD98(self);
     }
-    func_001C49C8(self, a, b);
+    DrawTurningCollider(self, a, b);
     if (self->f21C0)
     {
-        func_001C3028(self->f1520, a);
+        QueueTrailRibbonDraw(self->f1520, a);
     }
     func_001D62E0(self, a, b);
 }
@@ -1330,8 +1330,8 @@ void func_001781E0(Player* self, u8* other)
 {
     Pair_1781E0 r;
     if (self->f2220 != 9) {
-        func_001B6598(*(void**)(other + 0x2D8), &r.a);
-        func_001B6568(*(void**)(other + 0x2D8), &r.b);
+        GetStateWalkerCurrentKey(*(void**)(other + 0x2D8), &r.a);
+        GetStateWalkerTargetKey(*(void**)(other + 0x2D8), &r.b);
         if (r.a == 0x22E && (r.b == r.a || r.b == -1)) {
             self->walkerActivation = other;
         }

@@ -365,7 +365,7 @@ void func_0016B190(Obj_16B190* self)
             if (elt != 0) {
                 CreateAnimationPlayerWithoutPresetTargets(elt, self, 0, 0, 0.0f, 1.0f);
                 elt = *(void**)(table + (self->f2D0 << 2));
-                if (elt != 0 && func_0012C9A8(elt) != 0) {
+                if (elt != 0 && HasAnimationEventKind19(elt) != 0) {
                     goto tail;
                 }
             }
@@ -498,7 +498,7 @@ void func_0016B580(T217D_12E0* self, PadRecord* arg)
         return;
     }
     if (self->sound != 0) {
-        if (func_001BE810() != 0) {
+        if (CheckStreamVoicePending() != 0) {
             PollIopCommands();
         }
         self->sound = HasStreamVoice();

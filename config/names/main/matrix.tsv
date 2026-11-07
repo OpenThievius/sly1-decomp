@@ -24,11 +24,13 @@ func_001891C0	TransformMatrixByObject	builds a matrix from the object's rotation
 func_00189230	VectorToAngles	atan2(y, x) and atan2(z, sqrt(x*x + y*y)) stored through the two output pointers
 func_001892A0	BuildYawPitchMatrix	multiplies a rotation by the yaw about z with one by the negated pitch about y (BuildAxisAngleMatrix twice) into a 3x3 matrix (GetTargetCameraControllerEyePosition)
 func_00189350	BuildBasisFromX	BuildBasisFromXAndZHint with the unit z vector as the hint
+func_00189378	RotateMatrixUpright	builds the rotation that turns the matrix's row 2 onto the unit z vector (BuildShortestArcRotation) and, given an output, writes the matrix's rows rotated by it; StepGaugeCollider, StepPathFollower and a dozen others call it
 func_00189438	InvertSquareMatrix	same elimination for n by n floats on a scratch copy taken between PushBackMemoryMark and PopBackMemoryMark; returns 0 when singular
 func_001897F0	InvertMatrix3x3	Gauss-Jordan elimination with row pivoting on a copy, starting from an identity table; returns 0 when a pivot is 0
 func_00189AF0	InvertMatrix4x4	calls InvertSquareMatrix with dimension 4
 func_00189B18	BuildBasisFromXAndYHint	a rotation whose row 0 is the normalised x direction and row 2 the normalised cross product of it with the y hint (func_001ED840 when that is shorter than 1e-4); InvertMatrix4x4's neighbour, used by func_001A2D88
 func_00189C28	BuildBasisFromXAndZHint	a rotation whose row 0 is the normalised x direction and row 1 the normalised cross product of the z hint with it (row 2 from func_001ED840 when that is shorter than 1e-4)
+func_00189D38	BuildShortestArcRotation	normalises both vectors (the unit z vector for a short one), takes their cross product as the axis (crossing with the unit x or y vector when they are parallel) and the arc cosine of their dot product as the angle (BuildAxisAngleMatrix)
 func_00189F58	BuildProjectionMatrix	clears 0x40 bytes and fills a, b, c, d, (e+f)/(e-f), e*(1-that) and 1.0 at fixed elements from six floats
 func_0018A008	BuildUniformScaleAboutPoint	BuildScaleAboutFrame about a point with no rotation and the same scale on all three axes (DrawC60Object, DrawTriangleGroups)
 func_0018A040	BuildScaleAboutFrame	builds the frame of a translation and a rotation (BuildMatrixFromRotationAndTranslation; the origin and the identity by default), its inverse (InvertRigidTransform) and a diagonal scale, and writes frame times scale times inverse (MultiplyMatrices)

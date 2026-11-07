@@ -357,7 +357,7 @@ s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
         return 0;
     }
     void* p = recs[idx].p;
-    func_00187B60(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
+    FindPartSupportPoint(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
     CreatePooledContact(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
     return 1;
 }
@@ -373,10 +373,10 @@ s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5,
 s32 func_00187E88(void* a0, void* a1, void* a2)
 {
     Loc_00187E88 loc;
-    if (func_00187D08((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
+    if (IntersectSegmentWithSphere((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
         return 0;
     }
-    func_00187B60(a0, loc.b, loc.a, &loc.fb, loc.fa);
+    FindPartSupportPoint(a0, loc.b, loc.a, &loc.fb, loc.fa);
     CreatePooledContact(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
     return 1;
 }

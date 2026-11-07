@@ -119,9 +119,9 @@ void func_0016D040(TargetFollower* self, void* x)
         SetFollowedObject(self, p);
         PlaceTargetFollowerOnFollowed(self);
         if (p->f7AC != 0) {
-            func_0016DAC0(self, 2);
+            SetTargetFollowerMode(self, 2);
         } else {
-            func_0016DAC0(self, 4);
+            SetTargetFollowerMode(self, 4);
         }
     }
 }
@@ -242,7 +242,7 @@ void func_001BE8F8(void* self, s32 mode, f32 a, f32 b);
 void func_0016D9A8(TargetFollower* self)
 {
     if (self->f5CC != 0) {
-        if (func_001BE810(self) == 0) {
+        if (CheckStreamVoicePending(self) == 0) {
             self->f5CC = 0;
             PlaySoundAndApplyVolumePan(self, 0, self->f5C4, self->f5C8);
         }
@@ -279,10 +279,10 @@ void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet)
     }
     return;
 call490:
-    func_0016D490(self);
+    LaunchPoolItemAtTarget(self);
     return;
 callDAC0:
-    func_0016DAC0(self, 2);
+    SetTargetFollowerMode(self, 2);
     return;
 call928:
     StartRandomStreamVoice(self);
