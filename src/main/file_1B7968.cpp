@@ -73,6 +73,7 @@ s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
 void* AllocateBackMemory(s32 size);
 void RecomputePlacedObjectFrame(Collider* self);
 void ClearRootObjectStateBits(void* a, void* b, s32 c);
+void UpdateWorldContacts(World* w, s32 arg);
 void MarkSweepAxesUnsorted(void* a);
 void DropColliderContacts(Collider* self, s32 value);
 void InitContactPairFlags(void* a, void* b);
@@ -835,7 +836,25 @@ void SetColliderRotation(Collider* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
-INCLUDE_ASM(func_001B9860);
+void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
+{
+    Vec02 pos = *start;
+    s32 i = 9;
+    do {
+        self->desc02()->m1D(self, &pos);
+        UpdateWorldContacts(self->world, 0);
+        for (ContactRow03* node = self->contacts->head; node != 0; node = node->next) {
+            for (Contact03* c = node->head; c != 0; c = c->next) {
+                if (c->f90 < -2.0f) {
+                    goto moved;
+                }
+            }
+        }
+        return;
+    moved:
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(*step));
+    } while (--i >= 0);
+}
 
 LINKER_REMNANT(func_001B9938);
 
