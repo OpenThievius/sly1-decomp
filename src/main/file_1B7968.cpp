@@ -31,12 +31,6 @@ void func_001BF048(void* p);
 void func_001837E0(StateGraph* host, s32 a, s32 b, void** args);
 s32 func_00137BE0(void* a);
 void* func_0018D5C0(s32 size);
-struct Node_1B5EC0 { Node_1B5EC0* next; };
-struct Pool_1B5EC0 { u8 pad[8]; Node_1B5EC0* head; };
-void* func_001B5EA0(Pool_1B5EC0* pool);
-struct Node_1B5EE0 { Node_1B5EE0* next; };
-struct Pool_1B5EE0 { s32 count; u8 pad[4]; Node_1B5EE0* head; };
-void* func_001B5EA0(Pool_1B5EE0* pool);
 void func_001F5C0C(void* p, int zero, s32 count);
 void func_00138828(void* owner, void* self);
 Contacts03* func_001DC7D0(void* owner, void* self);
@@ -247,41 +241,22 @@ void func_0011D2A8(s32 a0, s32 a1, void* a2, s32 a3);
 void func_0018D800(void* dst, void* src, s32 count);
 s32 func_00152720(void* a);
 void* func_001BED98(void);
-struct Item_1BD558 { u8 pad0[0xD0]; Item_1BD558* next; };
-struct Node_1BD558;
-struct Group_1BD558 { Item_1BD558* items; Group_1BD558* next; u8 pad[4]; Node_1BD558* child; };
-struct GroupHead_1BD558 { Group_1BD558* first; };
-struct Node_1BD558 { u8 pad0[0x480]; GroupHead_1BD558* groups; u8 pad1[0x4B4 - 0x484]; Item_1BD558* items; u8 pad2[0x538 - 0x4B8]; u64 flags; };
 s32 func_0011D708(s32 handle);
 extern f32 D_00261858[];
-struct Frame_1BDD00 { s32 list; s32 cursor; s32 link; s32 prev; };
 struct Cnt_1BDD00 { s32 pad; s32 n1; s32 n2; };
-struct Cls_1BDD00;
-struct Node_1BDD00;
-typedef void (*VFn_1BDD00)(Node_1BDD00* self, s32 a, f32 f);
-struct Cls_1BDD00 {
-    u8 pad0[8];
-    s32 flags;
-    u8 pad0C[0x70];
-    VFn_1BDD00 fn7C;
-};
-struct Node_1BDD00 {
-    Cls_1BDD00* cls;
-    u8 pad4[0x224];
-    s32 f228;
-    u8 pad22C[0x30C];
-    u64 flags538;
-};
+// What the update pass calls through slot 27 of a collider's class (func_001BDD00).
+typedef void (*ColliderStepFn)(Collider* self, s32 a, f32 dt);
+// The next object of World::list6C, at Collider::link414 read as one aligned word.
 struct Item_1BDD00 {
     u8 pad0[0x414];
     Item_1BDD00* next;
 };
 void func_0018D608();
 void func_0018D6F0();
-void func_001BD678(Node_1BDD00* n, s32* c1, Node_1BDD00** a1, s32* c2, Node_1BDD00** a2);
-void func_001BDA50(World* ctx, s32 n, Node_1BDD00** arr, f32 f, s32 flags);
-s32 func_00129D70(Node_1BDD00* n);
-void func_00129DF8(Node_1BDD00* n);
+void func_001BD678(Collider* n, s32* c1, Collider** a1, s32* c2, Collider** a2);
+void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
+s32 func_00129D70(Collider* n);
+void func_00129DF8(Collider* n);
 void func_0011E0B0(s32 a0);
 struct Ent_1BE4A8 { u8 pad[0]; };
 struct Ent_1BFAF8 { s32 a; s32 b; };
@@ -324,23 +299,6 @@ struct Frame_1BEF88 { s32 f0; s32 f4; s32 f8; s32 fC; };
 s32 func_00152720(Frame_1BEF88* p);
 // NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
 
-struct Obj_1BD678;
-struct Node_1BD678;
-struct Holder_1BD678 {
-    Node_1BD678* head;
-};
-struct Node_1BD678 {
-    Obj_1BD678* list0;
-    Node_1BD678* next4;
-    u8 pad[4];
-    Obj_1BD678* owner;
-};
-struct Obj_1BD678 {
-    u8 pad0[0x480];
-    Holder_1BD678* holder480;
-    u8 pad1[0x538 - 0x484];
-    u64 flags;
-};
 struct Ent_1BF7F8 {
     s32 idx;
     s32 f4;
@@ -396,29 +354,26 @@ s32 func_0011D598(Id_1BFCD8 a, s32 b, s32 c, s32 d, s32 e, s32 f);
 struct Arg_1BF5E0;
 struct Obj_1BF5E0;
 typedef f32 (*Fn_1BF5E0)(Obj_1BF5E0* self, Arg_1BF5E0* arg);
-struct Node_1BEE48;
-struct List_1BEE48 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_1BEE48 { List_1BEE48* list; u8* link; s32 offset; Iter_1BEE48* saved; };
-struct World_1BEE48 { u8 pad[0x1BC4]; List_1BEE48 list; };
-void func_001BEDF8(Node_1BEE48* node);
-struct Next_1BEE48 {
-    static Node_1BEE48* Of(Iter_1BEE48* it)
-    {
-        Node_1BEE48* node = *(Node_1BEE48**)it->link;
-        it->link = (u8*)node + it->offset;
-        return node;
-    }
-};
-struct Begin_1BEE48 {
-    static void Of(Iter_1BEE48* it, List_1BEE48* list)
+// The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
+struct ListWalk {
+    static void Begin(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_1BEE48*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
+    static u8* Next(ListFrame* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+    static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
+struct Node_1BEE48;
+void func_001BEDF8(Node_1BEE48* node);
 Contact03* func_001B5EC0(u8* p);
 void func_001861E8(u8* a, Contact03* b);
 struct B8_1BF920 { u8 b[8]; };
@@ -455,41 +410,7 @@ void* func_001F5C0C(Obj_1BF920* p, s32 v, s32 n);
 s32 func_001EAA70(s32 a, s32 b);
 void func_001BF620(Q16_1BF920* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
 void func_001BF428(Obj_1BF920* self);
-struct Frame_1BDA50;
-struct Ctx_1BDA50;
-struct Buf_1BDA50 { u8 b[0x100]; };
-struct List_1BDA50 { u8* first; s32 pad04; s32 offset; };
-struct Frame_1BDA50 { List_1BDA50* list; u8** link; s32 offset; Frame_1BDA50* prev; };
-struct Item_1BDA50 {
-    u8 pad0[0x2D8];
-    List_1BDA50 list;
-    u8 pad2E4[0x254];
-    u64 flags;
-};
-struct Begin_1BDA50 {
-    static void Of(Frame_1BDA50* it, List_1BDA50* list)
-    {
-        it->list = list;
-        it->link = (u8**)list;
-        it->offset = list->offset;
-        it->prev = ((Frame_1BDA50*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
-struct Next_1BDA50 {
-    static u8* Of(Frame_1BDA50* it)
-    {
-        u8* obj = *it->link;
-        it->link = (u8**)(obj + it->offset);
-        return obj;
-    }
-};
-struct End_1BDA50 {
-    static void Of(Frame_1BDA50* it) { g_activeListFrames = (ListFrame*)it->prev; }
-};
-s32 func_001BD558(s32 n, Item_1BDA50** arr, s32 cap, Buf_1BDA50* buf);
-void func_001BCD00(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, s32 v, Buf_1BDA50* buf, f32 f, s32 ex);
-void func_001BD888(s32 n, Item_1BDA50** arr);
+void func_001BCD00(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void func_001BD790(u8* node, s32 flag);
 struct Ent_1C0070;
 struct Frame_1C0070 : ListFrame {
@@ -562,10 +483,8 @@ void func_001BEE48(void);
 void func_001C0CB0(void);
 struct Rec_1C1530 { s32 a; R11B008Node* head; s32 cnt; };
 typedef void (*Cb_1C1530)(void* a, void* b);
-struct Obj_1C2238 { u8 pad[4]; R11B008List* f4; };
 void* func_001C14C0(void* a, s32 b);
 void func_001C1F20(ScriptValue* self, void* a, void* b, ScriptValue* c);
-struct Obj_1C22B8 { u8 pad[4]; R11B008List* f4; };
 struct Ring_1C25B0 {
     s32 f0;
     s32 f4;
@@ -583,13 +502,9 @@ extern Dma_1C25B0* D_00261F20;
 s32 func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
 void func_00202B68(Dma_1C25B0* d);
 extern f32 D_00274758[11][4];
-struct Pair_1C08B0 { s32 a; s32 b; };
-struct Stack_1C08B0 { u8 pad0[0x2328]; Pair_1C08B0 pairs[4]; s32 count; };
 extern s32 D_00274808[];
 void func_0011E328(s32 channel, s32 value);
 void func_0011E360(s32 channel, s32 value, s32 value2);
-struct Pair_1C0950 { s32 a; s32 b; };
-struct Stack_1C0950 { u8 pad0[0x2328]; Pair_1C0950 pairs[4]; s32 count; };
 struct List_1C1A28 { s32 type; R11B008Node* head; R11B008Node* tail; };
 struct Desc_1C15D8;
 typedef void (*Get_1C15D8)(void* obj, void* out);
@@ -618,7 +533,6 @@ extern const TabA_24D2A8 D_0024D2A8;
 extern const TabB_24D350 D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
-struct Obj_1C21A0 { u8 pad[4]; R11B008List* f4; };
 void func_001C15D8(ScriptValue* self, void* a, s32 r);
 struct Owner_1C0C08 { u8 pad0[1]; };
 void func_0011D8B0(Owner_1C0C08* a0, s32 a1, s32 a2);
@@ -648,42 +562,7 @@ extern void func_001884C0(void* d);
 extern void* func_0011C748(void);
 extern void* func_0011C858(void);
 extern void* func_0011C968(void);
-struct List_1C0808 {
-    u8* first;
-    s32 pad04;
-    s32 offset;
-};
-struct Iter_1C0808 {
-    List_1C0808* list;
-    u8** link;
-    s32 offset;
-    Iter_1C0808* prev;
-};
 void func_001BF788(u8* obj, void* item);
-struct Begin_1C0808 {
-    static void Of(Iter_1C0808* it, List_1C0808* list)
-    {
-        it->list = list;
-        it->link = (u8**)list;
-        it->offset = list->offset;
-        it->prev = (Iter_1C0808*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
-struct Next_1C0808 {
-    static u8* Of(Iter_1C0808* it)
-    {
-        u8* obj = *it->link;
-        it->link = (u8**)(obj + it->offset);
-        return obj;
-    }
-};
-struct End_1C0808 {
-    static void Of(Iter_1C0808* it)
-    {
-        g_activeListFrames = (ListFrame*)it->prev;
-    }
-};
 struct Tag_1C2430 { u64 lo; u64 hi; };
 struct Slot_1C2430 {
     Tag_1C2430* tags;
@@ -708,8 +587,8 @@ void func_001C0760(s32 flag);
 s32 func_001C0790(s32 value);
 void func_001C07B0(void);
 void func_001C0808(void* item);
-void func_001C08B0(Stack_1C08B0* self, s32 a, s32 b);
-void func_001C0950(Stack_1C0950* self);
+void func_001C08B0(World* self, s32 a, s32 b);
+void func_001C0950(World* self);
 void func_001C09D8(World* self, s32 index, s32 value);
 void func_001C0A50(World* self, s32 key);
 void func_001C0AB8(World* self, Pt_1C0AB8* p);
@@ -730,9 +609,9 @@ s32 func_001C1A28(List_1C1A28* self, s32 value);
 s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val);
 ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
 ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals);
-ScriptValue* func_001C21A0(ScriptValue* self, Obj_1C21A0* p, s32 n);
-ScriptValue* func_001C2238(ScriptValue* self, Obj_1C2238* p, s32 key, ScriptValue* value);
-ScriptValue* func_001C22B8(ScriptValue* self, Obj_1C22B8* p, s32 key, ScriptValue* value);
+ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n);
+ScriptValue* func_001C2238(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* func_001C22B8(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 void func_001C2430(s32 size, ...);
@@ -1712,22 +1591,22 @@ ASM_FUNC(func_001BC978);
 
 ASM_FUNC(func_001BCD00);
 
-s32 func_001BD558(s32 count, Node_1BD558** roots, s32 cap, Item_1BD558** out)
+s32 func_001BD558(s32 count, Collider** roots, s32 cap, Contact03** out)
 {
     s32 n = 0;
     s32 i;
-    Node_1BD558* root;
+    Collider* root;
     for (i = 0; i < count; i++) {
         root = roots[i];
-        root->flags |= ((u64)1 << 58);
-        for (Item_1BD558* item = root->items; item; item = item->next) {
+        root->flags538 |= ((u64)1 << 58);
+        for (Contact03* item = root->contacts4B4; item; item = item->next) {
             if (n >= cap) goto done;
             out[n++] = item;
         }
-        GroupHead_1BD558* gh = root->groups;
-        for (Group_1BD558* g = gh->first; g; g = g->next) {
-            if (g->child->flags & ((u64)1 << 58)) continue;
-            for (Item_1BD558* item = g->items; item; item = item->next) {
+        Contacts03* gh = root->contacts;
+        for (ContactRow03* g = gh->head; g; g = g->next) {
+            if (g->other->flags538 & ((u64)1 << 58)) continue;
+            for (Contact03* item = g->head; item; item = item->next) {
                 if (n >= cap) goto done;
                 out[n++] = item;
             }
@@ -1735,52 +1614,52 @@ s32 func_001BD558(s32 count, Node_1BD558** roots, s32 cap, Item_1BD558** out)
     }
 done:
     {
-        Node_1BD558** r = roots;
+        Collider** r = roots;
         if (count > 0) {
             i = count;
             do {
                 root = *r;
                 i--;
                 r++;
-                root->flags &= ~((u64)1 << 58);
+                root->flags538 &= ~((u64)1 << 58);
             } while (i != 0);
         }
     }
     return n;
 }
 
-void func_001BD678(Obj_1BD678* self, s32* outQueued, Obj_1BD678** queue, s32* outFlagged, Obj_1BD678** list)
+void func_001BD678(Collider* self, s32* outQueued, Collider** queue, s32* outFlagged, Collider** list)
 {
     s32 nq = 1;
     s32 nl = 0;
     queue[0] = self;
-    self->flags |= (u64)1 << 57;
+    self->flags538 |= (u64)1 << 57;
     s32 qi;
     for (qi = 0; qi < nq; qi++) {
-        Obj_1BD678* x = queue[qi];
-        Node_1BD678* node = x->holder480->head;
+        Collider* x = queue[qi];
+        ContactRow03* node = x->contacts->head;
         while (node != 0) {
-            Obj_1BD678* y = node->owner;
-            if ((y->flags & ((u64)1 << 57)) == 0 && node->list0 != 0) {
-                if (y->flags & ((u64)1 << 55)) {
+            Collider* y = node->other;
+            if ((y->flags538 & ((u64)1 << 57)) == 0 && node->head != 0) {
+                if (y->flags538 & ((u64)1 << 55)) {
                     list[nl] = y;
                     nl++;
                 } else {
                     queue[nq] = y;
                     nq++;
                 }
-                y->flags |= (u64)1 << 57;
+                y->flags538 |= (u64)1 << 57;
             }
-            node = node->next4;
+            node = node->next;
         }
     }
     if (nl > 0) {
         qi = nl;
-        Obj_1BD678** p = list;
+        Collider** p = list;
         do {
-            Obj_1BD678* z = *p;
+            Collider* z = *p;
             p++;
-            z->flags &= ~((u64)1 << 57);
+            z->flags538 &= ~((u64)1 << 57);
         } while (--qi != 0);
     }
     *outQueued = nq;
@@ -1866,13 +1745,13 @@ void func_001BD888(s32 n, Collider** objs)
     PopBackMemoryMark();
 }
 
-void func_001BDA50(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, f32 f, s32 ex)
+void func_001BDA50(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
 {
-    Buf_1BDA50 buf;
-    Frame_1BDA50 it;
-    s32 v = CollectGroupItems(n, arr, 0x40, &buf);
+    Contact03* buf[0x40];
+    ListFrame it;
+    s32 v = CollectGroupItems(n, arr, 0x40, buf);
     if (v < 0x40 || n < 2) {
-        SolveColliderGroupContacts(ctx, n, arr, v, &buf, f, ex);
+        SolveColliderGroupContacts(ctx, n, arr, v, buf, f, ex);
         return;
     }
     SortCollidersByContactCount(n, arr);
@@ -1880,85 +1759,85 @@ void func_001BDA50(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, f32 f, s32 ex)
     s32 i;
     u8* p;
     for (i = 0; i < half; i++) {
-        arr[i]->flags |= 1ULL << 58;
+        arr[i]->flags538 |= 1ULL << 58;
     }
     ProcessColliderGroup(ctx, n - half, arr + half, f, ex);
     for (i = 0; i < half; i++) {
-        arr[i]->flags &= ~(1ULL << 58);
+        arr[i]->flags538 &= ~(1ULL << 58);
     }
     for (i = half; i < n; i++) {
-        Begin_1BDA50::Of(&it, &arr[i]->list);
-        for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
+        ListWalk::Begin(&it, &arr[i]->parts);
+        for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
             SetColliderForcedState(p, 1);
         }
-        End_1BDA50::Of(&it);
+        ListWalk::End(&it);
     }
     ProcessColliderGroup(ctx, half, arr, f, ex);
     for (i = half; i < n; i++) {
-        Begin_1BDA50::Of(&it, &arr[i]->list);
-        for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
+        ListWalk::Begin(&it, &arr[i]->parts);
+        for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
             SetColliderForcedState(p, 0);
         }
-        End_1BDA50::Of(&it);
+        ListWalk::End(&it);
     }
 }
 
 void func_001BDD00(World* self, s32 flags, f32 f)
 {
-    Frame_1BDD00 fr;
+    ListFrame fr;
     Cnt_1BDD00 c;
-    Node_1BDD00** arr1;
-    Node_1BDD00** arr2;
+    Collider** arr1;
+    Collider** arr2;
     s32 j;
     s32 i;
-    Node_1BDD00* s;
+    Collider* s;
     PushBackMemoryMark();
-    arr1 = (Node_1BDD00**)AllocateBackMemory(self->count38 * 4);
+    arr1 = (Collider**)AllocateBackMemory(self->count38 * 4);
     c.n1 = 0;
-    arr2 = (Node_1BDD00**)AllocateBackMemory(self->count38 * 4);
+    arr2 = (Collider**)AllocateBackMemory(self->count38 * 4);
     c.n2 = 0;
     SyncDataCache(0);
     if (flags & 1) {
         s32 e = (s32)&self->list60;
-        fr.cursor = e;
-        fr.list = e;
+        fr.link = (u8*)e;
+        fr.list = (void*)e;
         s32 old = (s32)g_activeListFrames;
         s32 link = *(s32*)(e + 8);
-        g_activeListFrames = (ListFrame*)&fr;
-        fr.prev = old;
+        g_activeListFrames = &fr;
+        fr.prev = (ListFrame*)old;
         s32 h = *(s32*)e;
-        fr.link = link;
-        fr.cursor = h + link;
+        fr.offset = link;
+        fr.link = (u8*)(h + link);
         s32 p = h;
         while (p != 0) {
-            Node_1BDD00* node = (Node_1BDD00*)p;
-            if (!(node->cls->flags & 2) || (node->flags538 & (1ULL << 55))) {
-                if (node->f228 < 2) {
-                    node->cls->fn7C(node, 0, g_gameClock[2]);
+            Collider* node = (Collider*)p;
+            if (!(node->desc->flags & 2) || (node->flags538 & (1ULL << 55))) {
+                if (node->tries < 2) {
+                    ((ColliderStepFn)node->desc->m1B)(node, 0, g_gameClock[2]);
                 }
             }
-            s32 nx = *(s32*)fr.cursor;
-            fr.cursor = nx + fr.link;
+            s32 nx = *(s32*)fr.link;
+            fr.link = (u8*)(nx + fr.offset);
             p = nx;
         }
-        g_activeListFrames = (ListFrame*)fr.prev;
+        g_activeListFrames = fr.prev;
     }
-    for (s = (Node_1BDD00*)self->list6C.head; s != 0; s = (Node_1BDD00*)((Item_1BDD00*)s)->next) {
+    for (s = (Collider*)self->list6C.head; s != 0; s = (Collider*)((Item_1BDD00*)s)->next) {
         if (s->flags538 & (1ULL << 57)) continue;
         if (s->flags538 & (1ULL << 55)) continue;
         CollectConnectedColliders(s, &c.n1, arr1, &c.n2, arr2);
         if (flags & 1) {
             for (i = 0; i < c.n1; i++) {
-                if (arr1[i]->f228 < 2) break;
+                if (arr1[i]->tries < 2) break;
             }
             if (i >= c.n1) {
                 for (j = 0; j < c.n2; j++) {
-                    if (arr2[j]->f228 < 2) break;
+                    if (arr2[j]->tries < 2) break;
                 }
                 if (j >= c.n2) continue;
             }
             for (i = 0; i < c.n1; i++) {
-                arr1[i]->cls->fn7C(arr1[i], 0, g_gameClock[2]);
+                ((ColliderStepFn)arr1[i]->desc->m1B)(arr1[i], 0, g_gameClock[2]);
             }
         }
         ProcessColliderGroup(self, c.n1, arr1, f, flags);
@@ -1968,7 +1847,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
             }
         }
     }
-    for (s = (Node_1BDD00*)self->bodies.head; s != 0; s = *(Node_1BDD00**)((u8*)s + 0x2D0)) {
+    for (s = (Collider*)self->bodies.head; s != 0; s = *(Collider**)((u8*)s + 0x2D0)) {
         s->flags538 &= ~(1ULL << 57);
     }
     PopBackMemoryMark();
@@ -2392,15 +2271,15 @@ void func_001BEDF8(void* self)
 
 void func_001BEE48(void)
 {
-    Iter_1BEE48 it;
-    Begin_1BEE48::Of(&it, &(*(World_1BEE48**)&g_currentWorld)->list);
+    ListFrame it;
+    ListWalk::Begin(&it, &g_currentWorld->list1BC4);
     Node_1BEE48* node;
-    for (node = Next_1BEE48::Of(&it); node != 0; node = Next_1BEE48::Of(&it)) {
+    for (node = (Node_1BEE48*)ListWalk::Next(&it); node != 0; node = (Node_1BEE48*)ListWalk::Next(&it)) {
         RemoveSoundLevelEntry(node);
     }
     SendIopSoundLevel(0x14);
     D_002748EC = 0;
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
     g_previousSoundLevel = 0;
     g_currentSoundLevel = 0;
 
@@ -2964,35 +2843,35 @@ void func_001C07B0(void)
 void func_001C0808(void* item)
 {
     if (g_currentWorld) {
-        Iter_1C0808 it;
+        ListFrame it;
         u8* obj;
-        Begin_1C0808::Of(&it, (List_1C0808*)&g_currentWorld->f1BAC);
-        for (obj = Next_1C0808::Of(&it); obj; obj = Next_1C0808::Of(&it)) {
+        ListWalk::Begin(&it, &g_currentWorld->list1BAC);
+        for (obj = ListWalk::Next(&it); obj; obj = ListWalk::Next(&it)) {
             StopSoundRecord(obj, item);
         }
-        End_1C0808::Of(&it);
+        ListWalk::End(&it);
     }
     PollIopCommands();
 }
 
-void func_001C08B0(Stack_1C08B0* self, s32 a, s32 b)
+void func_001C08B0(World* self, s32 a, s32 b)
 {
-    if ((u32)self->count < 4) {
+    if ((u32)self->channel2Count < 4) {
         SetIopChannelValue(2, D_00274808[a]);
         SetIopChannelValuePair(2, b, b);
-        self->pairs[self->count].a = a;
-        self->pairs[self->count].b = b;
-        self->count++;
+        self->channel2[self->channel2Count].index = a;
+        self->channel2[self->channel2Count].value = b;
+        self->channel2Count++;
     }
 }
 
-void func_001C0950(Stack_1C0950* self)
+void func_001C0950(World* self)
 {
-    s32 n = self->count;
+    s32 n = self->channel2Count;
     if (n >= 2) {
-        self->count = n - 1;
-        SetIopChannelValue(2, D_00274808[self->pairs[n - 2].a]);
-        SetIopChannelValuePair(2, self->pairs[self->count - 1].b, self->pairs[self->count - 1].b);
+        self->channel2Count = n - 1;
+        SetIopChannelValue(2, D_00274808[self->channel2[n - 2].index]);
+        SetIopChannelValuePair(2, self->channel2[self->channel2Count - 1].value, self->channel2[self->channel2Count - 1].value);
     }
 }
 
@@ -3000,9 +2879,9 @@ void func_001C09D8(World* self, s32 index, s32 value)
 {
     SetIopChannelValue(2, D_00274808[index]);
     SetIopChannelValuePair(2, value, value);
-    *(s32*)self->f2328 = index;
-    *(s32*)(self->f2328 + 4) = value;
-    self->f2348 = 1;
+    self->channel2[0].index = index;
+    self->channel2[0].value = value;
+    self->channel2Count = 1;
 }
 
 void func_001C0A50(World* self, s32 key)
@@ -3554,7 +3433,7 @@ ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals)
 INCLUDE_RODATA(jtbl_0024D510);
 INCLUDE_ASM(func_001C1F20);
 
-ScriptValue* func_001C21A0(ScriptValue* self, Obj_1C21A0* p, s32 n)
+ScriptValue* func_001C21A0(ScriptValue* self, BaseObject* p, s32 n)
 {
     if (n < 0x495) {
         s32 r = (s32)FindPropertyDescriptor(p, n);
@@ -3562,28 +3441,28 @@ ScriptValue* func_001C21A0(ScriptValue* self, Obj_1C21A0* p, s32 n)
     } else {
         ScriptValue q;
         InitScriptValue(&q);
-        FindKeyedValue(p->f4, n, &q);
+        FindKeyedValue((R11B008List*)p->f04, n, &q);
         CopyConstructScriptValue(self, &q);
         DestroyScriptValue(&q, 2);
     }
     return self;
 }
 
-ScriptValue* func_001C2238(ScriptValue* self, Obj_1C2238* p, s32 key, ScriptValue* value)
+ScriptValue* func_001C2238(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     if (key < 0x495) {
         void* v = FindPropertyDescriptor(p, key);
         WritePropertyValue(self, p, v, value);
     } else {
-        UpdateKeyedValue(self, p->f4, key, value);
+        UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
     }
     return self;
 }
 
-ScriptValue* func_001C22B8(ScriptValue* self, Obj_1C22B8* p, s32 key, ScriptValue* value)
+ScriptValue* func_001C22B8(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
-    AddKeyedValue(self, p->f4, key, value);
+    AddKeyedValue(self, (R11B008List*)p->f04, key, value);
     return self;
 }
 
