@@ -81,7 +81,6 @@ s32 func_001493A0(void* p);
 void func_001516C0(StepSequence* ctx, PadRecord* rec);
 void func_00150790(void* p, s32 n);
 void func_0016EC20(PadRecord* rec, s32 n);
-struct Item_190660 { u8 pad0[0x724]; s32 kind; };
 s32 func_00182FC8(void* p);
 s32 func_001300E8(void* a, s32 b);
 void func_00182F78(void* self, s32 value);
@@ -181,12 +180,6 @@ void func_001C8C08(C0E* self);
 void func_001C8418(C0E* self, void* p);
 s32 func_00182FC8(void* p);
 s32 func_001F3BD8(void* self, s32* arg);
-struct Elem_190570 {
-    u8 pad0[0x724];
-    s32 kind;
-};
-s32 func_001300E8(Elem_190570* node, s32 kind);
-s32 func_00182FC8(Elem_190570* p);
 struct Out_190E30 {
     u8 pad0[0x40];
     f32 f40;
@@ -403,9 +396,9 @@ s32 func_00190570(C0E* self)
     s32 i;
     if (self->fC28 != 0) {
         for (i = 0; i < self->fC10; i++) {
-            Elem_190570* n = (Elem_190570*)self->fC14[i];
+            Agent* n = (Agent*)self->fC14[i];
             if (IsObjectOfKind(n, 8) != 0) {
-                s32 k = n->kind;
+                s32 k = n->f724;
                 if (k == 0xB) {
                     continue;
                 }
@@ -430,10 +423,10 @@ s32 func_00190658(void)
     return 0;
 }
 
-s32 func_00190660(C0E* self, Item_190660* item)
+s32 func_00190660(C0E* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
-        if (IsObjectOfKind(item, 8) == 0 || item->kind != 0xB) {
+        if (IsObjectOfKind(item, 8) == 0 || item->f724 != 0xB) {
             s32 n = self->fC10;
             if ((u32)n < 4) {
                 self->fC14[n] = item;
@@ -457,7 +450,7 @@ void func_001906F0(C0E* self, s32 value)
 
 void func_001906F8(C0E* self, s32 flag, PlacedObject* extra)
 {
-    func_001924C8(self, flag, extra);
+    StartSwitchedColliderEffect(self, flag, extra);
     if (flag == 0) {
         ChangeAgentState(self, 8, (s32)self->f5F0);
     }

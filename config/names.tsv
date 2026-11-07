@@ -2497,3 +2497,23 @@ func_0018EDA0	AcceptMovieDecoderEvent	the decoder's callback 0 of func_0020B168 
 D_002699B0	g_contactListObjectLinks	the one ObjectLink of class 0x3C (kind 2, id 0x317, stored at +0x6B0) that LoadContactListObject resolves with ResolveObjectLinks
 D_00269B48	g_movieChecksumFailed	set to 1 by AdvanceCodeChecksum, which InitMoviePlayback starts over the code from 0x100010 and StepMovieFrame advances while a movie plays, when it reaches the end with a nonzero CRC-32
 D_00269B4C	g_keyedMovieWatched	set to 1 by PlayMovie once the movie of key D_00248490 has played; from then on PlayMovie lets the pad skip that movie
+func_0018FEF8	InitSeekingAgent	slot 0 of class 0x0E: runs InitAgent, then clears the words at 0xBD0 and 0xBD4
+func_0018FF28	StartSeekingAgent	slot 16 of class 0x0E: runs StartAgent, resolves its two object links (D_00269B60) and looks up the clips 0xEF, 0x16C, 0x16D, 0x16A and 0x16B with ResolveAgentClip
+func_0018FFB0	EnterSeekingAgentState	slot 92 of class 0x0E: in state 4 clears the object list and the state target, in states 0xB and 0x10 picks the clip by whether 0xC30 is 4, then runs EnterAgentState
+func_001900A0	LeaveSeekingAgentState	slot 91 of class 0x0E: runs LeaveAgentState, then in state 0x10 calls slot 0x54 of the object at 0xC2C, or in state 8 calls its own slot 0x4F with 0 when 0x600 is 1
+func_00190128	UpdateSeekingAgentGoal	slot 94 of class 0x0E: heads for the first attached object of its list (state 7), the target at 0xC24 (state 4), the state target at 0xC28 (states 12, 13), else runs UpdateAgentGoal
+func_001903F0	IsSeekingAgentRequestBlocked	slot 75 of class 0x0E: returns 1 while bit 0 of g_buttonCodeFlags is set or func_001DDA80 of its world is nonzero, else what IsAgentRequestBlocked returns
+func_00190450	AcceptSeekingAgentRequest	slot 76 of class 0x0E: refuses a request its slot 0x4B rejects, else keeps the request's kind at 0xC30 and a flag at 0xC34 from func_001A8820, then runs AcceptAgentRequest
+func_001904E0	HandleSeekingAgentObjectEvent	slot 45 of class 0x0E: sets 0xA68 from func_00160C58 and the flag 0xC34, runs HandleAgentObjectEvent and on success sends message 0x17 with itself and the event's id through slot 0x0E
+func_00190570	HasAttachedSeekingTarget	slot 87 of class 0x0E: while a state target is set, returns 1 when an object of its list is attached (skipping kinds 0xB and 0xA), else clears the state target at 0xC28 and returns 0
+func_00190660	AddSeekingAgentObject	appends an attached object that is not of kind 0xB to the list at 0xC14 (count 0xC10, at most four) and returns 1, else 0
+func_001906E8	SetSeekingAgentStateTarget	stores an object at 0xC28, the target that UpdateSeekingAgentGoal heads for in states 12 and 13
+func_001906F0	SetSeekingAgentTarget	stores an object at 0xC24, the target that UpdateSeekingAgentGoal heads for in state 4
+func_001906F8	StartSeekingAgentEffect	slot 78 of class 0x0E: runs StartSwitchedColliderEffect and, for mode 0, changes to state 8 with the clip at 0x5F0
+func_00190740	GetSeekingAgentStateKind	slot 77 of class 0x0E: returns 1 in state 0x10, 2 in state 0xB, otherwise 0
+func_00190770	HandleSeekingAgentNotification	slot 13 of class 0x0E: runs HandleAgentNotification, then for code 0x13 from its own object 0x7E0 with value 0x53A calls func_00160DA0
+func_001920B0	ConvertPositionToWorld	converts the vector at +0x40 out of the object's parent frame (func_00128018 with frame 0) into the output, as GetObjectWorldPosition does
+func_00192128	ConvertPointObjectPosition	slot 22 of class 0x7E: converts the position (&pos) into the other object's frame in place with func_00128018
+func_001924C8	StartSwitchedColliderEffect	slot 78 of class 0x05: for mode 0 creates effect 0x1A at the other object's position, keeps it at 0x5AC, sets its range from clip 0x13F and its gravity, then calls slot 0x4F with 1; for mode 1 calls slot 0x4F with 2
+func_001929F8	GetActiveSwitchedColliderData	returns the block at +0x580 of GetActiveSwitchedCollider's object, or the default block D_00604700 when none is active
+func_00192A70	HandleStepSequenceSkipButtons	unless the camera controller is on top, skips the remaining steps of the running step sequence D_0027051C or sets D_0026F800 to state 1 on buttons 0xC, then clears those buttons with ClearPadPressedBits
