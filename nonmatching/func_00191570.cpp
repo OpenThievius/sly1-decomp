@@ -4,11 +4,11 @@
 #include "point_graph_object.h"
 #include "placed_object.h"
 #include "vu0.h"
-// NEAR (2026-11-07, worker vu0-b): all but four instructions. Retail loads the link's two point
-// pointers [0] then [1] into v0 and v1 before the weights; here [1] is loaded first (or, with
-// the locals the other way round, into the other registers), and the second weight's store
-// comes before the first row's lqc2.
-
+// NEAR (2026-11-08, wave 3 retry): Scalar is used. All but four instructions: retail loads
+// nearest[0] into v0 and nearest[1] into v1 before the weights and stores the second weight
+// after the first row's lqc2; here nearest[1] is loaded first and the second weight's store
+// comes before the lqc2. The four operands as u128 values (a, Scalar, b, Scalar) in retail's
+// order move the weights and are worse.
 s32 FindPointGraphTriangleWithin(GraphFace* faces, Vec02* p);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 

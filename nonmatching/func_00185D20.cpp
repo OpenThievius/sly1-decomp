@@ -7,13 +7,10 @@
 #include "vu0.h"
 struct SurfacePair { s32 a; s32 b; };
 f32 GetSurfacePairBounce(SurfacePair* p);
-// NEAR (2026-11-07, worker vu0-e6): the shape is retail's (the contact lives in a stack slot whose
-// address goes to func_001860A8, the first loop walks a pointer, the second indexes) but the
-// allocator spills one argument fewer: retail keeps a1..a4 and a7 in s-registers and stores a5
-// and a6 (0x24, 0x28), here a5 stays in s8 and only a6 is stored, which shifts every register
-// of the prologue and 8 bytes of code. Tried: the contact as an array of one, the first loop with
-// an index, the second loop sharing the first one's pointer, the stores of a5/a6 first.
-
+// NEAR (2026-11-08, wave 3 retry): Scalar(-f) in place of the k local gives the same code (the
+// lever is not what blocks it): retail stores the arguments a5 and a6 at 36 and 40(sp) and a
+// third word at 44(sp), and keeps a2, a3, a4 and a7 in s4, s5, s6 and s7; here a5 stays in s8
+// and only a6 is stored, which shifts the registers of the prologue and 8 bytes of code.
 // A pooled contact as func_00185D20 fills it: two ends of 0x40 bytes (the body and the part, a
 // surface number, the point and its two transforms), the normal, then the numbers.
 struct PooledEnd {

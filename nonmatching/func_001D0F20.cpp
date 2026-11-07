@@ -6,14 +6,11 @@
 #include "vu0.h"
 extern float D_00274E04;
 void TransformPointBetweenFrames(void* frame, void* player, void* in, void* out);
-// NEAR (2026-11-07, worker vu0-e6): the same code as retail, 736 bytes, but for scheduling and
-// the numbering of two VU0 registers (15 lines differ): retail compares the first dot product
-// with -2.0 (c.lt.s f4, f1) before it loads the matrix rows of the rotation and keeps the row
-// at +0x10 in vf1 and the vector in vf2, here the compare comes after the rotation and the two
-// swap. `f32 nlimit = -2.0f` as a local after the first dot product got the size right (the
-// literal in the condition makes it 4 bytes bigger). Tried: the vector in a u128 local, the
-// rotation in its own local, the limit before the first dot product.
-
+// NEAR (2026-11-08, wave 3 retry): RotateUntied is not the lever here: retail's rotation result
+// takes the vector's register (vf2, Rotate's tie) and the row at +0x10 is vf1, as the Rotate
+// form gives; with RotateUntied the result takes the first row's register and the rest is the
+// same. What differs is the schedule: retail compares the first dot product with -2.0 (c.lt.s
+// f4,f1) before it loads the matrix rows, here the compare comes after the rotation.
 struct TargetMover {
     struct Vt {
         u8 pad0[8];

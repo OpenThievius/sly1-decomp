@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 460/456, checked 2026-11-07
-// NEAR: two differences: self lives in $s2 and the loop counter in $s1 (retail the other way round), and FromFloat(self->f624) is lwc1+mfc1 here but lw in retail (the word read straight into a general register).
+// BYTES 429/456 (94.1%), checked 2026-11-07
 #include "common.h"
 #include "masked_collider.h"
 #include "switched_collider.h"
 #include "object_message.h"
 #include "vu0.h"
+// NEAR (2026-11-08, wave 3 retry): FromFloatAt gives retail's lw. Left: self lives in s2 and
+// the loop counter in s1 (retail the other way round); every other instruction is retail's. The
+// declaration of i first, a while loop and ++i give the same allocation.
 struct PathFollower;
 void* GetActiveSwitchedCollider(void);
 s32 IsObjectOfKind(MaskedCollider* n, s32 kind);
@@ -64,7 +66,7 @@ s32 func_0013D0B0(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         return 1;
     }
     if ((ev->flags & 8) != 0) {
-        Vu0::Q(k) = Vu0::FromFloat(self->f624);
+        Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
         func_001BC0E0(self, &ev->v20, &push, ev->f08);
