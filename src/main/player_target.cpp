@@ -157,7 +157,64 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
     return l.out;
 }
 
-INCLUDE_ASM(func_001CEEC8);
+struct TargetSpanHit {
+    Vec02 point;
+    u8 pad10[0x34];
+    f32 f44;
+    u8 pad48[0x28];
+};
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, BaseObject* self, Vec02* lo, Vec02* hi, void* a, void* b, s32* n0, s32* n1);
+void EvaluateHermiteVectorSegment(f32 t, f32 u, f32 v, void* a, void* b, void* c, void* d, Vec02* out, void* e, void* f);
+s32 FindNearestSpanObject(s32 zero, Vec02* in, void* out, s32 n0, s32 n1, TargetSpanHit* hit);
+
+s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec02* pc, void* pd, Vec02* pe)
+{
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 p;
+    Vec02 q;
+    TargetSpanHit hit;
+    s32 n0;
+    s32 n1;
+    PushBackMemoryMark();
+    if (pe != 0) {
+        Vu0::Q(lo) = Vu0::Min(Vu0::Q(*(Vec02*)pa), Vu0::Min(Vu0::Q(*pc), Vu0::Q(*pe)));
+        Vu0::Q(hi) = Vu0::Max(Vu0::Q(*(Vec02*)pa), Vu0::Max(Vu0::Q(*pc), Vu0::Q(*pe)));
+    } else {
+        lo = *(Vec02*)pa;
+        hi = *pc;
+    }
+    GatherCollidersInBox(self->world, self, &lo, &hi, a1, a2, &n0, &n1);
+    f32 t = 0.0f;
+    for (;;) {
+        EvaluateHermiteVectorSegment(limit, t, 1.0f, pa, pb, pc, pd, &q, 0, 0);
+        if (t != 0.0f) {
+            if (FindNearestSpanObject(0, &p, &q, n0, n1, &hit) != 0) {
+                if (100.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pc))))) {
+                    break;
+                }
+            }
+        }
+        p = q;
+        if (t == limit) {
+            break;
+        }
+        t = limit <? (t + 0.1f);
+    }
+    if (pe != 0) {
+        if (FindNearestSpanObject(0, &p, pe, n0, n1, &hit) != 0) {
+            if (hit.f44 != 1.0f) {
+                if (50.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pe))))) {
+                    t = limit - 1.0f;
+                }
+            }
+        }
+    }
+    PopBackMemoryMark();
+    return t < limit;
+}
 
 f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
 {
