@@ -1,0 +1,4080 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 321/392 (81.9%), checked 2026-11-07
+// NEAR: same code with ToFloat where retail ends with qmfc2 and sw of the dot product to the distance (ToBits), plus: retail loads b into vf1 and d into vf2 (ours the reverse), stores the two zero floats in the other order, loads its zero (mtc1 zero,f0) after the cross products, and keeps the normalised vector in a register copied by the compiler's own vmove (ours writes the divide straight into the register).
+// In the context of its file, src/main/file_1E88D0.cpp.
+// The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
+// file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
+// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
+// zero-initialised D_00276654 last. Named after its first address until what it was is known.
+#include "common.h"
+#include "switched_collider.h"
+#include "list_iter.h"
+#include "fpu.h"
+#include "world.h"
+#include "warp_page.h"
+#include "screen_element.h"
+#include "globals.h"
+#include "shapes.h"
+#include "object_link.h"
+#include "owner_message.h"
+#include "game_clock.h"
+#include "pad_record.h"
+#include "memory_card.h"
+#include "timeline.h"
+#include "value_list_object.h"
+#include "c62.h"
+#include "attached_set.h"
+#include "packet_writer.h"
+#include "screen_fade.h"
+#include "transform_object.h"
+#include "oscillator.h"
+#include "camera.h"
+#include "game_progress.h"
+#include "item_keeper.h"
+#include "attachment.h"
+#include "animation.h"
+#include "ramp_profile.h"
+#include "vu0.h"
+#include "asm_func.h"
+#include "vu0.h"
+
+void SteerAgentAlongPath(void);
+void InitElementStack(void* p);
+void QueueEachScreenElementDraw(void);
+void StartPlacedObject(void* self);
+void ResolveObjectLinks(void* self, s32 a, void* p);
+void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
+void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
+void CopyPlayerAttachBlock(BeatPressCollider* self);
+void HandleSwitchedColliderActivation(void* self);
+s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
+void SetStateWalkerTarget(void* a, s32 b);
+extern s32 g_buttonCodeFlags;
+s32 IsPadSelectFlagHeld(void* p);
+s32 TestAgentMayContact(void* self, void* probe);
+void SetElementStackState(void* self, s32 mode);
+s32 IsStreamVoiceLocked(void);
+void PauseStreamVoice(void);
+f32 FloatRemainder(f32 v);
+s32 IsInsideRange(ValueRange* span, f32 x);
+void ResumeStreamVoice(void);
+void DrawScreenElements(void);
+extern float g_gameTime[];
+void SetVolumeChannelFactor(int a, int b, float t);
+void SetGameClockScale(float x);
+void LoadCollider(void* self);
+f32 WrapModulo(f32 x, f32 y);
+s32 FindColliderFloorContact(void* a, s32 b, s32 c);
+s32 FindNearestAgentKey(void* a, void* b);
+void* FindObjectHandle(s32 a, s32 b);
+void RestartAgentClip(void* a);
+typedef void* (*TargetObjectFn)(void* self);
+void func_001C8418(KeyedConeAgent* self, void* p);
+void UpdateAgentGoal(KeyedConeAgent* self);
+s32 GetObjectWorldPosition(void* self, void* arg);
+void FaceAgentTowardGoalPoint(KeyedConeAgent* self);
+void UpdateAgentState(KeyedConeAgent* self);
+extern u8 g_flagTable[];
+void SetWorldActiveFollower(void* sub, void* self);
+void* TakeFlagTableIndex(void* p);
+void StartConeAgent(void* self);
+s32 AreMenusAndFadeClear(void);
+extern s32 D_00270458;
+extern s32 D_00275DBC;
+void InitAgent(void* self);
+void* AllocateFrontMemory(s32 size);
+void StopStagedBankVoice(void);
+void PopStackElement(void* g);
+void SetPadPatternState(void* self, s32 mode);
+void ResetScreenElements(void);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
+f32 WrapAngle(f32 a);
+f32 ApproachValueClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
+s32 NextRandom(void);
+s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+void InitConeAgent(void* self);
+void StartAgent(void* self);
+void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
+void AddStateWalkerListener(void* a, void* self);
+void* CopyToFrontMemory(s32 size, void* name);
+s32 FindFirstObjectById(void* a, s32 b, s32 c, void* self);
+// An object the tempo agent finds by id at its start (func_001EBFB0 copies D_00275D48 to
+// 0xC9C and fills each obj).
+struct TempoObjectRef { s32 id; f32 f04; s32 obj; };
+f32 ApproachValueWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
+s32 ChooseAgentState(KeyedConeAgent* self);
+extern s32 g_previousSoundLevel;
+extern f32 g_elapsedTime[];
+void ApplyStackTimeScale(ElementStack* a, f32 f);
+void SetMemoryCardDisplayMode(MemoryCard* a, s32 v);
+void SetScreenFadeMode(u8* a, s32 v);
+void ReleasePadSelectFlag(void* a);
+void AcquirePadSelectFlag(void* a);
+void InitPadPatternSetting();
+extern u32 g_padRouting;
+extern u32 g_padSelectFlags;
+extern s32 D_002701B8;
+extern void ClearPadSelectFlags(s32 n);
+extern void* FindActiveObjectSubGroup(void);
+extern void StartObjectSubGroupFinish(void* x);
+extern void ClearPadPressedBits(PadRecord* p, s32 n);
+extern s32 ApplyMemoryCardImage(MemoryCard* g);
+extern void ResetGameProgress(void* p);
+extern void ResumeAtSavedLevel(void);
+extern void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
+extern void PushStackElement(ElementStack* o, ScreenElement* g);
+extern void ApplyStackTimeScale(ElementStack* o, f32 v);
+extern void SetElementStackState(ElementStack* o, s32 mode);
+extern void StepDiscSectorCheck(void);
+extern void UpdateScreenElements(void);
+typedef s32 (*BeatPressSlotFn)(BeatPressCollider* self, void* arg);
+typedef void (*PlayerSlotFn)(Player* g, void* arg);
+s32 GetObjectWorldPosition(void* a, Vec4U* out);
+s32 GetObjectWorldRotation(void* a, Mat3U* out);
+void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+s32 HasSpareCount(void);
+void ActivateSwitchedCollider(Player* g);
+void InitOwnerMessage(OwnerMessage* out, s32 mode, BeatPressCollider* self);
+void ContinueBeatPressColliderRequest(void);
+void EndHeldTimeline(TempoAgent* o);
+void SetCachedVoiceParam(s32 a, s32 b);
+void BindEntryQueueToObject(void* a, Player* g);
+extern s32 D_00275C34;
+extern u32* g_memoryChecksumCursor;
+extern s32 g_memoryChecksumRemaining;
+extern u32 g_memoryChecksumValue;
+extern u8 D_00148D7C[];
+extern u32 g_crc32Table[];
+struct Crc32 {
+    static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
+};
+void InitSwitchedCollider(BeatPressCollider* self);
+f32 RandomFloatInRange(f32 lo, f32 hi);
+f32 Logarithm(f32 x);
+s32 IsPadSelectFlagHeld(World* p);
+union DoubleBits {
+    double d;
+    u64 u;
+};
+double func_001FCD20(double a, double b);
+// An object of the world's lists at 0x78, 0x1B70 and 0x1C30 as func_001E9EE8 walks them: the
+// slot at 0x7C of the first list's objects is called with the frame time.
+struct ListedObject;
+struct ListedObjectVt {
+    u8 pad0[0x7C];
+    void (*update)(ListedObject*, s32, f32);
+};
+struct ListedObject { ListedObjectVt* vtbl; };
+struct BeginNodeWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        ListFrame* prev = g_activeListFrames;
+        g_activeListFrames = it;
+        it->prev = prev;
+    }
+};
+struct NextNode {
+    static ListedObject* Of(ListFrame* it)
+    {
+        ListedObject* obj = *(ListedObject**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+struct EndNodeWalk {
+    static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
+};
+void UpdateObjectTree(ListedObject* n, f32 dt);
+void func_0012EBD8(ListedObject* n, f32 dt);
+void StepObjectLevelRamp(ListedObject* n, f32 dt);
+void RunQueuedCalls(World* self);
+struct BeginByteWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+struct NextByte {
+    static u8* Of(ListFrame* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+};
+struct EndByteWalk {
+    static void Of(ListFrame* it)
+    {
+        g_activeListFrames = it->prev;
+    }
+};
+void StepMemoryChecksum(void);
+SwitchedCollider* GetActiveSwitchedCollider(void);
+void UpdateWorldObjectLists(World* self);
+void UpdateObjectTree(u8* n, f32 dt);
+void func_0012EBD8(u8* n, f32 dt);
+void StepObjectLevelRamp(u8* n, f32 dt);
+void DispatchDelayedMessages(World* self);
+void UpdateSoundEmitters(void);
+struct NextActor {
+    static Actor6C* Of(ListFrame* it)
+    {
+        Actor6C* obj = *(Actor6C**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+struct BeginActorWalk {
+    static void Of(ListFrame* it, ActorList6C* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+void UpdateWorldStepLists(World* self, f32 t);
+void UpdateWorldDeltaLists(World* self, f32 t);
+void UpdateUnflaggedParts(World* self);
+void UpdateWorldContacts(World* self, s32 a);
+void ProcessColliderGroups(World* self, s32 a, f32 t);
+s32 IsObjectTreeAtRest(Actor6C* n);
+void ClearRootTries(Actor6C* n);
+void UpdateTouchingParts(Actor6C* n);
+void RunDueDelayedScriptCalls(World* self, f32 t);
+void StepAnimators(f32 t);
+void NotifyWorldActiveFollower(World* self);
+void ReleaseWorldListEntry(Actor6C* n);
+void UpdateCamera(Camera* a, s32 b, f32 t);
+void StepWorldValueTowardTarget(World* self, f32 t);
+void StartObject(void);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void RunTimelineEntry(Timeline* self, s32* p);
+Entry90* AppendTimelineEntry(void* self, s32 kind, s32 p);
+// What ComputeSinCos writes for func_001ED650.
+struct SinCos { f32 sine; f32 cosine; };
+void ComputeSinCos(f32* a, f32* b);
+void RegisterSwitchedCollider(void);
+void GetStateWalkerCurrentKey(void* sub, s32* out);
+void AddAnimationPlayerRecordCallback(void* a, TempoAgent* self);
+s32 ComputeBallisticLaunchVelocity(void* self);
+s32 WriteVifUnpackHeader(PacketWriter* s);
+void InitObject(BaseObject* self);
+void RemoveColliderAttachment(Collider* o, Attach03* node);
+void AddColliderAttachment(Collider* o, Attach03* node);
+void ReleaseAttachRecords(void* owner, Attach03* list);
+void SetScreenFadeMode(void* o, s32 mode);
+void UnregisterObjectGroup(void* a, AttachedGroup* s);
+void RegisterObjectGroup(void* a, AttachedGroup* s);
+void OfferTrackedNodeLaunch(void* p);
+void InitPlacedObject(void* self);
+void SetStateAndNotify(void* self, s32 b);
+s32 UpsertKeyedEntry(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
+void* AppendQueuedCall(s32 a, void* b, void* c, s32 d, s32 e);
+void UnregisterSwitchedCollider(void);
+void EndTimeline(void* p);
+void ComputeSinCos(f32 angle, f32* a, f32* b);
+typedef u64 Bits128 __attribute__((mode(TI)));
+s32 QueryValueTreeMask(void* self, void* node, Bits128 q, s32* out);
+typedef void (*AttachNotifyFn)(void* self, void* arg);
+void BuildPlacedObjectTransform(void* obj, void* c, void* out);
+void func_00125C90(void* obj, void* s, void* out);
+void func_001C8418(void* self, void* p);
+void UpdateAgentGoal(void* self);
+void InitObject(void* self);
+void PadPacketToQuadSlot(void* s, s32 target);
+s32 WriteVifUnpackHeader(void* self, s32 a, s32 b, s32 c);
+void AddDmaRefTag(void* obj, s32 a, s32 b);
+void ReadLinkedItemArray(void* src, s32* count, void** out);
+s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU32(void* src);
+void ReadPropertyRecords(void* a, void* b);
+// The message (kind 11) func_001EF3D8 sends the object it detaches.
+struct DetachMsg { AttachedSet* self; Collider* obj; };
+void RebuildAttachedSet(AttachedSet* self);
+void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void InitCollider(void* self);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void InitTrackedNodes(void* a, void* b);
+extern s32 g_worldLoadRequest;
+s32 RestoreFadeRequest(ScreenFade* self, s32 a1, s32 a2);
+void SetScreenFadeMode(ScreenFade* self, s32 state);
+void SetVolumeChannel6Factors(s32 flag, f32 x);
+typedef void (*TempoCallFn)(void);
+void UpdateAgent(TempoAgent* self);
+void RestartTimeline(Timeline* sub);
+void RunTimelineEntries(Timeline* sub);
+void RefreshCachedVoiceParam(s32 a, void* b);
+s32 GetCachedVoiceParam(s32 a);
+void* AppendQueuedCall(World* world, TempoCallFn cb, TempoAgent* self, s32 a3, s32 a4);
+void SyncTempoAgentEntries(void);
+void LeaveAgentState(void* self, void* arg);
+void AppendPacketQuadwords(void* self, s32 index, s32 count);
+extern void* D_002505C0[6];
+void* AllocateZeroedFrontMemory(u32 n);
+void ReserveVifUnpack(void* s, void* a1, s32 size, void* a3, s32* outSize, u8** outCursor);
+extern s32 g_coloredTriangleSet;
+void DrawColoredTriangles(s32 a, f32 v);
+void WriteColoredSpritePacket(s32 a, s32 b, s32 c, s32 d, void* e, f32 f, f32 g, f32 h, f32 i);
+void DecrementGaugeCount(void* p);
+void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
+extern u8 D_0024A0E0[];
+s32 InitPacketBuffer(PacketWriter* self);
+// The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
+struct ChildWalkFrame {
+    s32* a; s32* b; s32 c; ChildWalkFrame* prev;
+    ChildWalkFrame(s32* p) : a(p), b(p), c(p[2]), prev((ChildWalkFrame*)g_activeListFrames) {}
+    ~ChildWalkFrame() { g_activeListFrames = (ListFrame*)prev; }
+};
+void StartPlacedObject(AttachedSet* self);
+void FillTrackedNodes(void* self);
+// The message (kind 0x16) func_001EF900 sends with a state change: the old and new states.
+struct StateChangeMsg {
+    void* self;
+    s32 old;
+    s32 cur;
+};
+s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, C62* self, s32 c);
+void GetStateWalkerCurrentKey(s32 sub, s32* out);
+void ScheduleTempoAgentBeatPress(TempoAgent* p);
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
+void ResetPadStepRepeat(void* p);
+void StartSoundEffect(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+extern u8 D_00625760[];
+s32 FillMemory(Entry90* dst, s32 value, s32 size);
+// The dead "li v0,2" after the func_001ED090 call is the compare constant of an
+// "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
+// reload, deletes the branch and leaves the constant load.
+void EnterAgentState(TempoAgent* self, s32 a, s32 b);
+void MarkLevelDone(s32 n);
+void StartMemoryCardSave(void* p);
+f32 ArctangentOfRatio(f32 a, f32 b);
+void CopyMemory(TempoPlayerEntry* dst, TempoPlayerEntry* src, s32 bytes);
+void RunTimelineEntry(Timeline* self, Entry90* e);
+void* MoveMemory(void* dst, void* src, s32 size);
+// An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
+// Moves n bytes of the item list down over a removed item.
+struct MoveItemsDown {
+    static void Of(C62** dst, C62** src, s32 n)
+    {
+        MoveMemory(dst, src, n);
+    }
+};
+void PopActiveSequenceElement(World* x);
+struct SameAsFixedKey {
+    static s32 Of(IdentityKey* t)
+    {
+        IdentityKey* p;
+        p = &D_00275B04;
+        if (t == p) {
+            return 1;
+        }
+        if (p == 0) {
+            return 0;
+        }
+        return ((p->signedWords[2] ^ p->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
+    }
+};
+void SnapCameraZoom(void* p, f32 v);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+// A FadeRequest moved as a 16-byte unaligned block and its last word.
+struct FadeRequestBlock {
+    QuadP pair;
+    s32 mid;
+};
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void SetElementTextFromEntry(T217D_3D0* self, s32 a, s32 b);
+void SetWarpPageSelectedEntry(void* self, s32 value);
+extern s32 D_00276654;
+void StartScreenFade(void* dst, void* args, s32 count);
+void SetWarpPageMode(void* self, u32 mode);
+void* AllocateFrontMemory(int size);
+void StartObject(void* self);
+void ResolveAndStartObject(void* a);
+// The pad (include/c73.h's neighbours): its buttons at +0xAA, its direction timers at +0x30 .. 0x3C.
+s32 IsWarpEntryAvailable(WarpPage* o, s32 n, s32* a, s32* b);
+s32 GetPadHorizontalStep(PadRecord* t);
+s32 GetPadVerticalStep(PadRecord* t);
+void MoveWarpCursor(WarpPage* o, s32 n);
+void ClearPadPressedBits(PadRecord* p, s32 n);
+s32 GetCurrentWarpEntry(void);
+void PopStackElement(ElementStack* q);
+IdentityKey* LookupEntryById(s32 k);
+void StartObjectFade(IdentityKey* v, s32 m, s32 n);
+void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+f32 ApproachValueWithRamp(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
+void HideScreenElements(void* self);
+s32 IsWarpEntryAvailable(void* o, s32 n, s32* a, s32* b);
+void SetWarpCursor(void* self, s32 a1, s32 a2);
+void BeginWarpPageClose(void* self);
+void SetScreenElementSlideInTime(void* self, f32 v);
+void SetScreenElementSlideOutTime(void* self, f32 v);
+void PauseStagedBankVoice(void);
+void ResumeStagedBankVoice(void);
+s32 SetPadSelectFlags(s32 bits);
+struct SameKeys {
+    static s32 Of(IdentityKey* t, IdentityKey* o)
+    {
+        if (t == o) {
+            return 1;
+        }
+        if (o == 0) {
+            return 0;
+        }
+        return ((o->signedWords[2] ^ o->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
+    }
+};
+extern void* D_0026FA68;
+extern s32 g_previousLevelIndex;
+void QueueWorldLoad(void* a, s32 b, s32 c, s32 d, s32 e);
+s32 GetEntryIdByKey(s32 a);
+void ShowCountedScreenElement(void* a);
+void FadeScreenToBlack(f32 t);
+struct WarpTextStyle;
+s32 FillMemory(WarpTextStyle* p, s32 zero, s32 size);
+// The text style the warp menu draws with: the static initialiser (func_001F2688) zeroes it, then
+// sets its kind, two sizes given as integers, 0.3 twice and its colour.
+struct WarpTextStyle {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[3];
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    s32 f18;
+    WarpTextStyle(s32 a, s32 b)
+    {
+        FillMemory(this, 0, 0x1C);
+        kind = 0x3D;
+        f8 = a;
+        fC = b;
+        f14 = f10 = 0.3f;
+        f18 = (s32)0xFF7D4B00;
+    }
+};
+extern f32 D_00276650;
+s32 IsFontLoaded(s32 n);
+Font* GetFontById(s32 n);
+void FillMemory(void* p, s32 v, s32 size);
+extern void StartPlacedObject(WarpPage* o);
+s32 IsWarpEntryReachable(WarpPage* o, s32 n);
+void SelectWarpPageEntry(WarpPage* o, s32 n);
+void AnnouncePendingWarpEntry(WarpPage* o);
+void SetWarpPageSelectedEntry(WarpPage* o, s32 n);
+void StopSoundRecord(void* p, s32 n);
+void RemoveObjectNodeFromWorld(WorldObjectNode* r);
+void EnsureObjectWorldNode(PlacedObject* o);
+void ReplaceAnimationPlayer(Animation* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
+void StartSoundEffect(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void PostLoadPlacedObject(WarpPage* self);
+void ResolveObjectLinks(WarpPage* self, s32 n, void* table);
+void ResolveAndStartObject(BaseObject* node);
+struct NextPageNode {
+    static BaseObject* Of(ListFrame* it)
+    {
+        BaseObject* obj = *(BaseObject**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+struct BeginPageWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+HoldingMember* FindFirstObjectById(World* host, s32 kind, s32 id, HoldingMember* ctx);
+extern s32 (*D_00276608[6])[4];
+// The sounds MoveWarpCursor plays: the cursor moved, or it could not.
+enum WarpCursorSound { WARP_SOUND_MOVE = 0x79, WARP_SOUND_REFUSE = 0x7B };
+void StartSoundEffect(WarpCursorSound a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+BaseObject* FindFirstObjectById(void* o, s32 a, s32 b, WarpPage* c);
+// A point of the fan func_001F1E38 draws: its colour and, at 0x10, its position.
+struct FanPoint { s32 k; s32 pad[3]; f32 x; f32 y; };
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
+void AddGifRegisterWrite(PacketWriter* f, u64 a, u64 b);
+void AddGifRgbaEntry(PacketWriter* self, u32 value);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void InitElementStack(ElementStack* self);
+void PushStackElement(ElementStack* self, ScreenElement* node);
+void SetElementStackState(ElementStack* self, s32 state);
+void ApplyStackTimeScale(float x);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
+void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
+void RestartTimeline(Timeline* self);
+void EndTimeline(Timeline* self);
+void RunTimelineEntries(Timeline* self);
+void SetStateAndNotify(C62* self, s32 state);
+s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
+void SetWarpPageMode(WarpPage* self, u32 next);
+void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
+void SetWarpPageSelectedEntry(WarpPage* self, s32 idx);
+
+ObjectLink D_00275B60[8] = {
+    { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
+    { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
+};
+// word read whole / address only, 4 bytes to next label
+// readers pass only its address; byte buffer, size to next label
+u8 g_elementStack[4] = {0};
+INCLUDE_DATA(D_00275BC4);
+// size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
+// size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
+s32 D_00275BEC = 0;
+s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
+f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
+INCLUDE_DATA(D_00275C34);
+// size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
+Quad16 D_00275C40 = {0};
+f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+ValueRange g_unitRange = { 0.0f, 1.0f };
+ValueRange D_00275C68 = { -1.0f, 1.0f };
+f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
+f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
+ObjectLink D_00275CA0[4] = {
+    { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
+};
+f32 D_00275CD0 = 700.0f;
+f32 D_00275CD4 = 650.0f;
+s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
+s32 D_00275CE8[4] = { 574, 576, 575, 577 };
+s32 D_00275CF8[4] = { 1247, 1248, 1249, 1250 };
+ObjectLink D_00275D08[5] = {
+    { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
+    { 0, 0x4EA, 0xC30 }
+};
+TempoObjectRef D_00275D48[9] = {
+    { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 }, { 0x3B, 80.0f, 0 },
+    { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
+    { 0x54, 80.0f, 0 }
+};
+// word read whole / address only, 4 bytes to next label
+s32 D_00275DB4 = 0;
+// size: s32 state compared/assigned in 001EC000
+s32 D_00275DB8 = 0;
+INCLUDE_DATA(D_00275DBC);
+s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
+s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
+// word read whole / address only, 4 bytes to next label
+ScreenFade g_screenFade = { 0 };
+f32 D_00275FC0 = 0.5f;
+// Globals defined from C.
+s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
+ObjectLink D_00275FE0[52] = {
+    { 0x2, 0x1CB, 0x2E4 },
+    { 0x2, 0x1CC, 0x2E8 },
+    { 0x2, 0x1CD, 0x2F8 },
+    { 0x2, 0x1CE, 0x32C },
+    { 0x2, 0x1CF, 0x360 },
+    { 0x2, 0x1D0, 0x394 },
+    { 0x2, 0x1D1, 0x3C8 },
+    { 0x2, 0x1D2, 0x3FC },
+    { 0x2, 0x1D3, 0x430 },
+    { 0x2, 0x1D4, 0x464 },
+    { 0x2, 0x1D5, 0x498 },
+    { 0x2, 0x1D6, 0x500 },
+    { 0x2, 0x1E2, 0x304 },
+    { 0x2, 0x1E3, 0x338 },
+    { 0x2, 0x1E4, 0x36C },
+    { 0x2, 0x1E5, 0x3A0 },
+    { 0x2, 0x1E6, 0x3D4 },
+    { 0x2, 0x1E7, 0x408 },
+    { 0x2, 0x1E8, 0x43C },
+    { 0x2, 0x1E9, 0x470 },
+    { 0x2, 0x1EA, 0x4A4 },
+    { 0x2, 0x1EC, 0x50C },
+    { 0x2, 0x1EB, 0x4D8 },
+    { 0x2, 0x1D7, 0x2FC },
+    { 0x2, 0x1D8, 0x330 },
+    { 0x2, 0x1D9, 0x364 },
+    { 0x2, 0x1DA, 0x398 },
+    { 0x2, 0x1DB, 0x3CC },
+    { 0x2, 0x1DC, 0x400 },
+    { 0x2, 0x1DD, 0x434 },
+    { 0x2, 0x1DE, 0x468 },
+    { 0x2, 0x1DF, 0x49C },
+    { 0x2, 0x1E1, 0x504 },
+    { 0x2, 0x1E0, 0x4D0 },
+    { 0x2, 0x1F8, 0x310 },
+    { 0x2, 0x1F9, 0x378 },
+    { 0x2, 0x1FA, 0x3AC },
+    { 0x2, 0x1FB, 0x3E0 },
+    { 0x2, 0x1FC, 0x414 },
+    { 0x2, 0x1FD, 0x448 },
+    { 0x2, 0x1FE, 0x47C },
+    { 0x2, 0x1FF, 0x4B0 },
+    { 0x2, 0x1ED, 0x30C },
+    { 0x2, 0x1EE, 0x340 },
+    { 0x2, 0x1EF, 0x374 },
+    { 0x2, 0x1F0, 0x3A8 },
+    { 0x2, 0x1F1, 0x3DC },
+    { 0x2, 0x1F2, 0x410 },
+    { 0x2, 0x1F3, 0x444 },
+    { 0x2, 0x1F4, 0x478 },
+    { 0x2, 0x1F5, 0x4AC },
+    { 0x2, 0x1F7, 0x514 },
+};
+s32 D_00276250 = -1;
+f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
+s32 D_00276298[11][4] = {
+    { 1, 10, 10, 5 },
+    { 2, 0, 3, 5 },
+    { -1, 1, 3, 5 },
+    { 2, 10, -1, 1 },
+    { 8, -1, 5, 7 },
+    { 2, 0, 1, 4 },
+    { -1, 7, 7, 8 },
+    { 6, 8, 4, 6 },
+    { 6, -1, 7, -1 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 D_00276348[11][4] = {
+    { 4, 10, 4, 10 },
+    { 8, 0, 4, 3 },
+    { 5, 3, 1, -1 },
+    { 2, 10, 1, -1 },
+    { 7, 0, -1, 1 },
+    { 8, 2, 8, -1 },
+    { 8, 7, -1, 8 },
+    { 6, 4, -1, 1 },
+    { -1, 1, 6, 5 },
+    { -1, -1, -1, -1 },
+    { 3, -1, 0, -1 }
+};
+s32 D_002763F8[11][4] = {
+    { 1, 10, 10, 1 },
+    { 3, 0, 7, 2 },
+    { 4, 0, 1, -1 },
+    { 8, 1, 1, 4 },
+    { 3, 2, 1, 2 },
+    { 6, 10, -1, 8 },
+    { -1, 5, -1, 8 },
+    { -1, 0, 8, 1 },
+    { -1, 7, 5, 7 },
+    { -1, -1, -1, -1 },
+    { 5, -1, -1, 0 }
+};
+s32 D_002764A8[11][4] = {
+    { 1, 10, 10, 2 },
+    { 7, 0, 4, 2 },
+    { 5, 0, 1, 5 },
+    { 8, 4, -1, 4 },
+    { 3, 10, 3, 1 },
+    { 6, 2, 1, -1 },
+    { -1, 5, 7, -1 },
+    { 8, 1, 8, 6 },
+    { -1, 4, 3, 1 },
+    { -1, -1, -1, -1 },
+    { 4, -1, -1, 0 }
+};
+s32 D_00276558[11][4] = {
+    { 2, 10, 2, 4 },
+    { -1, -1, -1, -1 },
+    { 3, 0, -1, 3 },
+    { 8, 0, 2, 4 },
+    { 5, 0, 3, 5 },
+    { 6, 4, 4, -1 },
+    { 8, 5, 8, -1 },
+    { -1, -1, -1, -1 },
+    { -1, 3, -1, 6 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
+#ifndef VERSION_EU
+// PAL has no style here (its func_001F1960 draws without one): its static initialiser only
+// sets D_00276650.
+WarpTextStyle D_00276620(2, 1);
+#endif
+INCLUDE_DATA(D_0027663C);
+#ifdef VERSION_EU
+// PAL's own addresses for these two, which the tools do not pair with US's (VERSION_NAME).
+f32 D_eu_0027FDAC = 24.0f;
+f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
+#else
+f32 D_00276648 = 24.0f;
+f32 D_00276650 = D_00276648 * 0.75f;
+#endif
+s32 D_00276654;
+
+
+void InitKeyedConeAgent(KeyedConeAgent* self)
+{
+    InitConeAgent(self);
+    self->fC58 = 0x2D8;
+    self->fC14 = 30000.0f;
+    self->fC10 = 30000000.0f;
+    self->fC20 = 3000000.0f;
+    self->fC24 = 3000000.0f;
+    self->fC28 = 0;
+    self->fC2C = 6.2831855f;
+}
+
+// The file's first read-only data, for func_001E89F0.
+extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
+
+void StartKeyedConeAgent(KeyedConeAgent* self)
+{
+    ResolveObjectLinks(self, 8, D_00275B60);
+    SetWorldActiveFollower(self->world, self);
+    if (self->fC50 != 0) {
+        self->fC54 = CreateStateWalker(self->fC50, 0, 0x2D7, 0);
+    }
+    self->fC90 = 4;
+    for (u32 i = 0; i < 4; i++) {
+        self->fC80[i] = TakeFlagTableIndex(g_flagTable);
+    }
+    StartConeAgent(self);
+}
+
+ASM_FUNC(func_001E89F0);
+
+INCLUDE_RODATA(jtbl_0024E610);
+INCLUDE_RODATA(jtbl_0024E650);
+INCLUDE_ASM(func_001E8A50);
+
+s32 ChooseKeyedConeAgentState(KeyedConeAgent* self)
+{
+    s32 a1;
+    if (self->fC5C <= 0) {
+        self->fBFC = 3.4028235e+38f;
+    }
+    a1 = self->f724;
+    if (a1 == 10) {
+        a1 = (self->f7E0 == 0) ? 8 : 10;
+    } else {
+        a1 = ChooseAgentState(self);
+    }
+    return a1;
+}
+
+s32 IsKeyedConeAgentFree(KeyedConeAgent* a0)
+{
+    if (a0->fC40 != 0) return 0;
+    return a0->fC5C != 0;
+}
+
+s32 IsKeyedConeAgentTargetInRange(KeyedConeAgent* a0)
+{
+    if (a0->fC58 != 0x2DB) return 0;
+    {
+        s32 v = a0->fC5C;
+        if (v == 5 || v == 0) return 0;
+        return 1;
+    }
+}
+
+void SteerKeyedConeAgentAlongPath(KeyedConeAgent* a0)
+{
+    if (a0->fC58 != 0x2DA) {
+        s32 v = a0->fC5C - 1;
+        if (!(0 < v)) v = 0;
+        a0->fC5C = v;
+    }
+    SteerAgentAlongPath();
+}
+
+void RestartKeyedConeAgentClip(KeyedConeAgent* self)
+{
+    if (self->fC58 == 0x2DA && self->f724 == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
+        s32 s = FindNearestAgentKey(self, (u8*)self + 0x140);
+        if (s != self->fC7C) {
+            s32 n = self->fC5C - 1;
+            if (!(0 < n)) n = 0;
+            self->fC5C = n;
+            if (n > 0) {
+                void* p = FindObjectHandle(s, -1);
+                if (p != 0) SetStateWalkerTarget(p, 0x2E0);
+                self->fC7C = s;
+            }
+        }
+    }
+    RestartAgentClip(self);
+}
+
+void UpdateKeyedConeAgentGoal(KeyedConeAgent* self)
+{
+    Vec4U loc;
+    switch (self->f724) {
+    case 4:
+        if (self->fC40 != 0) {
+            func_001C8418(self, (u8*)self + 0x190);
+        } else {
+            GetObjectWorldPosition(self->fC60, &loc);
+            func_001C8418(self, &loc);
+        }
+        break;
+    case 8: {
+        void* r = ((TargetObjectFn*)self->desc)[102](self);
+        if (r != 0) func_001C8418(self, (u8*)r + 0x140);
+        break;
+    }
+    default:
+        UpdateAgentGoal(self);
+        break;
+    }
+}
+
+void UpdateKeyedConeAgentState(KeyedConeAgent* self)
+{
+    if (self->f724 == 8) {
+        FaceAgentTowardGoalPoint(self);
+    } else {
+        UpdateAgentState(self);
+    }
+}
+
+void ShowElementWhenMenusClear(void)
+{
+    if (AreMenusAndFadeClear()) {
+        g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
+    } else {
+        g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
+    }
+}
+
+s32 TestAgentMayContactExceptKeys(KeyedConeAgent* self, Collider* probe)
+{
+    PlacedObject* key = probe->root;
+    u32 i = 0;
+    s32 result;
+    do {
+        if (key == self->fC64[i]) {
+            result = 0;
+            goto done;
+        }
+        i++;
+    } while (i < 6);
+    result = TestAgentMayContact(self, probe);
+done:
+    return result;
+}
+
+void InitGlobalElementStack(void)
+{
+    InitElementStack(g_elementStack);
+}
+
+void InitElementStack(ElementStack* self)
+{
+    self->resumeState = -1;
+    self->state = -1;
+    SetElementStackState(self, 3);
+    self->items[0] = 0;
+    self->count = 1;
+}
+
+void ResumeElementStackState(void* self)
+{
+    SetElementStackState(self, 3);
+}
+
+void UpdateElementStack(ElementStack* obj)
+{
+    f32 d = g_gameClock.elapsed - obj->stateTime;
+    s32 s1 = obj->state;
+    PadRecord* s2;
+    s32 s5;
+    if (g_padRouting & 4) {
+        s2 = &g_padRecord;
+    } else {
+        s2 = &g_blankPadRecord;
+    }
+    s5 = 0;
+    if (g_padSelectFlags & 0x80) {
+        if (0.1f < g_gameClock.time) {
+            ClearPadSelectFlags(0x80);
+        }
+    }
+    switch (obj->state) {
+    case 0: {
+        s32 a2 = 0;
+        if (D_002701B8 == 0) {
+            s32 m = g_memoryCard.displayMode;
+            if (m == 2 || (m == 1 && g_memoryCard.state == 5)) {
+                a2 = 1;
+            }
+        }
+        if (a2) {
+            StartObjectSubGroupFinish(FindActiveObjectSubGroup());
+        }
+        break;
+    }
+    case 1: {
+        u32 v = s2->flags;
+        if (v & 0x800) {
+            s32 t;
+            ClearPadPressedBits(s2, 0x800);
+            t = g_memoryCard.i4F48;
+            g_memoryCard.i4F44 = t;
+            if (t) {
+                ApplyMemoryCardImage(&g_memoryCard);
+            } else {
+                ResetGameProgress(g_saveData);
+            }
+            ResumeAtSavedLevel();
+            s1 = obj->state;
+        } else if (v & 0x100) {
+            ClearPadPressedBits(s2, 0x100);
+            SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x17);
+            s1 = obj->state;
+        }
+        break;
+    }
+    case 3: {
+        if (g_padSelectFlags & 2) break;
+        if (g_screenFade.mode) break;
+        {
+            u32 v = s2->flags;
+            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= g_gameClock.time)) {
+                SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0);
+                s1 = obj->state;
+                ClearPadPressedBits(s2, 0x800);
+            } else if ((v = s2->flags) & 0x100) {
+                T217D_0F0* g2 = &g_mapScreenList;
+                WarpPage* x = g2->current;
+                if (x == 0) break;
+                if (x->mode) break;
+                PushStackElement(obj, g2);
+                s1 = obj->state;
+                ClearPadPressedBits(s2, 0x100);
+            }
+        }
+        break;
+    }
+    case 4:
+        if (d <= 0.2f) {
+            ApplyStackTimeScale(obj, (0.2f - d) * 5.0f);
+        } else {
+            s1 = 5;
+        }
+        break;
+    case 6:
+        if (d <= 0.5f) {
+            ApplyStackTimeScale(obj, d + d);
+        } else {
+            s1 = 3;
+        }
+        break;
+    case 2:
+    case 5:
+    case 7:
+        s5 = 1;
+        break;
+    case 8:
+    default:
+        break;
+    }
+    SetElementStackState(obj, s1);
+    {
+        ScreenElement* e = obj->items[obj->count - 1];
+        if (e) {
+            if (e->vt->m04) {
+                e->vt->m04(e, s2);
+            }
+        } else if (s5) {
+            SetElementStackState(obj, 3);
+        }
+    }
+    StepDiscSectorCheck();
+    UpdateScreenElements();
+}
+
+void PushStackElement(ElementStack* self, ScreenElement* node)
+{
+    if (IsStreamVoiceLocked() && self->count == 1) {
+        PauseStreamVoice();
+    }
+    if (self->count >= 2) {
+        ScreenElement* last = self->items[self->count - 1];
+        if (last->vt->m03) {
+            last->vt->m03(last, 0);
+        }
+    }
+    if (node->vt->m03) {
+        node->vt->m03(node, 1);
+    }
+    s32 index = self->count;
+    self->items[index] = node;
+    self->count = index + 1;
+    if (node->vt->m06) {
+        node->vt->m06(node);
+    }
+}
+
+void PopStackElement(ElementStack* g)
+{
+    ScreenElement* item = g->items[--g->count];
+    if (item->vt->m03) item->vt->m03(item, 0);
+    if (item->vt->m07) item->vt->m07(item);
+    if (g->count >= 2) {
+        ScreenElement* other = g->items[g->count - 1];
+        if (other->vt->m03) other->vt->m03(other, 1);
+    }
+    if (IsStreamVoiceLocked()) {
+        if (g->count == 1) ResumeStreamVoice();
+    }
+}
+
+void DrawAllScreenElements(void)
+{
+    DrawScreenElements();
+}
+
+void QueueScreenElementDraws(void)
+{
+    QueueEachScreenElementDraw();
+}
+
+void ResetElementStack(ElementStack* self)
+{
+    while (self->count >= 2) {
+        PopStackElement(self);
+    }
+    s32 one = 1;
+    self->resumeState = -1;
+    u8* base = (u8*)&g_padRecord;
+    self->count = one;
+    self->items[0] = 0;
+    SetPadPatternState(*(void**)(base + 0xBC), 3);
+    ResetScreenElements();
+}
+
+void SetElementStackState(ElementStack* self, s32 state)
+{
+    if (state == 3) {
+        s32 t = self->resumeState;
+        if (t != -1) state = t;
+    }
+    if (self->state != state) {
+        if (self->state != 0) {
+            if (self->state == 1) {
+                D_00272930.vt->m15(&D_00272930);
+                D_00272B98.vt->m15(&D_00272B98);
+                ReleasePadSelectFlag(g_currentWorld);
+            }
+        }
+        self->state = state;
+    self->stateTime = g_elapsedTime[0];
+    switch (state) {
+    case 0:
+        if (g_memoryCard.displayMode == 0) SetMemoryCardDisplayMode(&g_memoryCard, 1);
+        SetScreenFadeMode(&g_screenFade, 0);
+        ApplyStackTimeScale(self, 1.0f);
+        break;
+    case 1:
+        ApplyStackTimeScale(self, 1.0f);
+        D_00272930.vt->m14(&D_00272930);
+        D_00272B98.vt->m14(&D_00272B98);
+        AcquirePadSelectFlag(g_currentWorld);
+        InitPadPatternSetting();
+        break;
+    case 2:
+        ApplyStackTimeScale(self, 1.0f);
+        break;
+    case 3:
+        ApplyStackTimeScale(self, 1.0f);
+        g_previousSoundLevel = -100;
+        break;
+    case 5:
+    case 7:
+        ApplyStackTimeScale(self, 0.0f);
+        break;
+    case 8:
+        D_0026C6C8.vt->m15(&D_0026C6C8);
+        D_0026C948.vt->m15(&D_0026C948);
+        D_0026CBC8.vt->m15(&D_0026CBC8);
+        D_0026CE48.vt->m15(&D_0026CE48);
+        break;
+    }
+    }
+}
+
+void ApplyStackTimeScale(float x)
+{
+    if (0.0f < g_gameTime[0]) {
+        float t = (1.0f - x) * 0.6f + x;
+        SetVolumeChannelFactor(4, 1, t);
+        SetVolumeChannelFactor(4, 0, t);
+    }
+    SetGameClockScale(x);
+}
+
+s32 AreMenusAndFadeClear(void)
+{
+    if (g_screenFade.mode != 0) goto fail;
+    if (IsPadSelectFlagHeld((World*)g_currentWorld) != 0) goto fail;
+    if (g_pauseMenuElement.open != 0 && g_pauseMenuElement.page != 0) goto fail;
+    if (g_mapScreenList.open != 0) goto fail;
+    if (g_mapScreenList.mode != 0) goto fail;
+    if (D_00270458 == 2) goto fail;
+    if (D_00270458 == 1) goto fail;
+    if (D_00270458 != 4) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+s32 AreMenusClosed(void)
+{
+    if (g_screenFade.mode != 0) goto fail;
+    if (g_pauseMenuElement.open != 0) goto fail;
+    if (g_pauseMenuElement.mode != 0) goto fail;
+    if (g_mapScreenList.open != 0) goto fail;
+    if (g_mapScreenList.mode == 0) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+s32 IsArcDrawAllowed(void)
+{
+    s32 m;
+    if (g_screenFade.mode != 0) goto fail;
+    if (g_pauseMenuElement.open != 0) goto fail;
+    if (g_pauseMenuElement.mode != 0) goto fail;
+    if (g_mapScreenList.open != 0) goto fail;
+    if (g_mapScreenList.mode != 0) goto fail;
+    m = D_00270458;
+    if (m == 4) goto fail;
+    if (m != 1) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+s32 AreArcMenusClosed(void)
+{
+    if (g_screenFade.mode != 0) goto fail;
+    if (g_pauseMenuElement.open != 0) goto fail;
+    if (g_pauseMenuElement.mode != 0) goto fail;
+    if (g_mapScreenList.open != 0) goto fail;
+    if (g_mapScreenList.mode == 0) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+void StepMemoryChecksum(void) {
+    if (D_00275C34 == 0) {
+        if (g_memoryChecksumRemaining == 0) {
+            g_memoryChecksumCursor = (u32*)0x100004;
+            g_memoryChecksumRemaining = (s32)D_00148D7C;
+            g_memoryChecksumValue = 0xFFFFFFFF;
+        }
+    }
+    if (g_memoryChecksumRemaining == 0) {
+        return;
+    }
+    u32* p = g_memoryChecksumCursor;
+    s32 cnt = g_memoryChecksumRemaining;
+    u32 h = g_memoryChecksumValue;
+    for (s32 i = 0; i < 32 && cnt > 0; i++) {
+        u32 w = *p;
+        cnt -= 4;
+        p++;
+        h = Crc32::Step(h, w);
+        h = Crc32::Step(h, w >> 8);
+        h = Crc32::Step(h, w >> 16);
+        h = Crc32::Step(h, w >> 24);
+    }
+    g_memoryChecksumCursor = p;
+    g_memoryChecksumValue = h;
+    g_memoryChecksumRemaining = cnt;
+    if (cnt == 0 && h != 0) {
+        D_00275C34 = 1;
+    }
+}
+
+void UpdateWorldDeltaLists(World* self, f32 dt)
+{
+    StepMemoryChecksum();
+    SwitchedCollider* h = GetActiveSwitchedCollider();
+    if (h != 0) {
+        const Desc05* vt = h->desc05();
+        if (vt->m49 != 0) {
+            PadRecord* a;
+            if ((*(s32*)&g_padRouting) & 2)
+                a = &g_padRecord;
+            else
+                a = &g_blankPadRecord;
+            vt->m49(h, dt, a);
+        }
+    }
+    UpdateWorldObjectLists(self);
+    {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->list60);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
+            UpdateObjectTree(n, dt);
+        }
+        EndByteWalk::Of(&it);
+    }
+    {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1B64);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
+            func_0012EBD8(n, dt);
+        }
+        EndByteWalk::Of(&it);
+    }
+    {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1C24);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
+            StepObjectLevelRamp(n, dt);
+        }
+        EndByteWalk::Of(&it);
+    }
+    DispatchDelayedMessages(self);
+    UpdateSoundEmitters();
+    RunQueuedCalls(self);
+}
+
+void UpdateUnflaggedParts(World* self)
+{
+    ListFrame frame;
+    Collider* s1 = (Collider*)self->list6C.head;
+    if (s1 != 0) {
+        do {
+            Collider* s0 = (Collider*)s1->parts.head;
+            if (s0 != 0) {
+                do {
+                    u64 bit = (u64)1 << 53;
+                    if ((s0->flags538 & bit) == 0) {
+                        ((Desc03*)s0->desc)->m44(s0);
+                    }
+                    s0->flags538 &= ~bit;
+                    s0 = (Collider*)s0->link2E4.next;
+                } while (s0 != 0);
+            }
+            s1 = (Collider*)s1->link414.next;
+        } while (s1 != 0);
+    }
+}
+
+void UpdateWorldStepLists(World* self, f32 dt)
+{
+    if (dt == 0.0f) return;
+    ListFrame it;
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateObjectTree(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    EndNodeWalk::Of(&it);
+    RunQueuedCalls(self);
+}
+
+void StepWorldValueTowardTarget(World* self, f32 x)
+{
+    World* o = self;
+    f32 a = o->f234C;
+    f32 b = o->f2350;
+    if (b < a) {
+        o->f234C = ApproachValueWithRamp(D_00275C18, 0, a, b, x);
+    } else if (a < b) {
+        o->f234C = ApproachValueWithRamp(D_00275C28, 0, a, b, x);
+    }
+}
+
+void UpdateWorld(World* self)
+{
+    ListFrame it;
+    GameClock* clock = &g_gameClock;
+    UpdateWorldStepLists(self, clock->step);
+    if (clock->dt != 0.0f) {
+        UpdateWorldDeltaLists(self, clock->dt);
+        UpdateUnflaggedParts(self);
+        UpdateWorldContacts(self, 0);
+        ProcessColliderGroups(self, 1, clock->dt);
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+            if (obj->vtable->update != 0) {
+                obj->vtable->update(obj, clock->dt);
+            }
+        }
+        g_activeListFrames = it.prev;
+        UpdateWorldContacts(self, 1);
+        ProcessColliderGroups(self, 6, g_gameClock.dt);
+        BeginActorWalk::Of(&it, &self->list60);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+            if (obj->tries < 2) {
+                if (IsObjectTreeAtRest(obj) != 0) {
+                    obj->tries++;
+                } else {
+                    ClearRootTries(obj);
+                }
+            }
+        }
+        g_activeListFrames = it.prev;
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+            obj->vtable->post(obj);
+            if (obj->flags & 0x8000000000000000ULL) {
+                UpdateTouchingParts(obj);
+            }
+        }
+        g_activeListFrames = it.prev;
+        RunDueDelayedScriptCalls(self, g_gameClock.dt);
+        RunQueuedCalls(self);
+        StepAnimators(g_gameClock.dt);
+    }
+    NotifyWorldActiveFollower(self);
+    BeginActorWalk::Of(&it, &self->list1B7C);
+    for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+        ReleaseWorldListEntry(obj);
+    }
+    g_activeListFrames = it.prev;
+    UpdateCamera(g_camera, 1, g_gameClock.dt);
+    StepWorldValueTowardTarget(self, g_gameClock.step);
+}
+
+f32 WrapAngle(f32 a)
+{
+    f32 r = a;
+    if (a < -3.1415927f || a > 3.1415927f) {
+        r = WrapModulo(a + 3.1415927f, 6.2831855f) - 3.1415927f;
+    }
+    return r;
+}
+
+f32 ClampToMagnitude(f32 a, f32 b)
+{
+    f32 r = a;
+    if (b < r) {
+        r = b;
+    } else {
+        b = -b;
+        if (r < b) {
+            r = b;
+        }
+    }
+    return r;
+}
+
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
+{
+    f32 roots[4];
+    s32 flip = 0;
+    f32 d = x - y;
+    f32 c = z;
+    f32 half;
+    f32 t;
+    f32 res;
+    f32 r;
+    if (d < 0.0f) {
+        flip = 1;
+        d = -d;
+    }
+    half = (k->endSpeed + k->maxSpeed) * k->rampTime * 0.5f;
+    if (half <= d) {
+        f32 u = (d - half) / k->maxSpeed;
+        if (c <= u) {
+            res = d - k->maxSpeed * c;
+            t = -k->maxSpeed;
+            goto tail;
+        }
+        c = c - u;
+        d = half;
+    }
+    SolveQuadratic(roots, (k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d);
+    r = roots[0] - c;
+    if (0.0f < r) {
+        res = (k->maxSpeed - k->endSpeed) * r * r / (k->rampTime + k->rampTime) + k->endSpeed * r;
+        t = -(k->endSpeed + (k->maxSpeed - k->endSpeed) * r / k->rampTime);
+    } else {
+        t = -k->endSpeed;
+        res = 0.0f;
+    }
+tail:
+    if (flip) {
+        res = y - res;
+        if (out) {
+            *out = -t;
+        }
+    } else {
+        res = res + y;
+        if (out) {
+            *out = t;
+        }
+    }
+    return res;
+}
+
+f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out)
+{
+    RampProfile* o = (RampProfile*)self;
+    f32 tmp;
+    f32 res = ApproachValueWithRamp(a, c, d, self, &tmp);
+    f32 k = o->maxAccel;
+    if (0.0f < k) {
+        f32 hi = b + k * d;
+        f32 lo = b - k * d;
+        if (hi < tmp) {
+            tmp = hi;
+            res = a + b * d + (k * (d * 0.5f)) * d;
+        } else if (tmp < lo) {
+            tmp = lo;
+            res = a + b * d - (k * (d * 0.5f)) * d;
+        }
+    }
+    if (out != 0) *out = tmp;
+    return res;
+}
+
+LINKER_REMNANT(func_001EA720);
+
+f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out)
+{
+    f32 t = WrapAngle(b - a);
+    f32 r = ApproachValueWithRamp(0.0f, t, c, self, out);
+    return WrapAngle(a + r);
+}
+
+f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1)
+{
+    f32 t = WrapAngle(f14 - f12);
+    f32 r = ApproachValueClampingVelocity(0.0f, f13, t, f15, self, a1);
+    return WrapAngle(f12 + r);
+}
+
+INCLUDE_ASM(func_001EA818);
+
+INCLUDE_ASM(func_001EA918);
+
+s32 RandomIntInRange(s32 a, s32 b)
+{
+    if (a == b) {
+        return a;
+    }
+    s32 r = (s32)(u32)NextRandom();
+    s32 span = b - a + 1;
+    r = r % 0x95675;
+    r = r % span;
+    return a + r;
+}
+
+f32 RandomFloatInRange(f32 a, f32 b)
+{
+    f32 r;
+    if (a != b) {
+        s32 n = NextRandom();
+        r = a + (b - a) * (f32)n * 0.0000000004656613f;
+    } else {
+        r = a;
+    }
+    return r;
+}
+
+f32 RandomGaussian(f32 mean, f32 deviation, f32 limit)
+{
+    f32 x;
+    f32 y;
+    f32 r;
+    do {
+        x = RandomFloatInRange(-1.0f, 1.0f);
+        y = RandomFloatInRange(-1.0f, 1.0f);
+        r = x * x + y * y;
+    } while (r > 1.0f || r == 0.0f);
+    f32 v = mean + deviation * y * Fpu::Sqrt(Logarithm(r) * -2.0f / r);
+    if (limit != 0.0f) {
+        f32 lo = mean - limit;
+        f32 hi = mean + limit;
+        if (v < lo) {
+            v = lo;
+        } else if (hi < v) {
+            v = hi;
+        }
+    }
+    return v;
+}
+
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
+{
+    f32 scale = 1.0f;
+    scale = scale >? __builtin_fabsf(a);
+    return __builtin_fabsf(a - b) / scale < tolerance;
+}
+
+s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)
+{
+    f32 disc = b * b - a * (4.0f * c);
+    if (disc < 0.0f) {
+        return 0;
+    }
+    a = a + a;
+    disc = Fpu::Sqrt(disc) / a;
+    b = b / a;
+    if (__builtin_fabsf(disc) < 0.0001f) {
+        roots[0] = -b;
+        return 1;
+    }
+    roots[0] = -b + disc;
+    roots[1] = -b - disc;
+    return 2;
+}
+
+void RemapQuadraticParameter(Vec3* in, Vec3* out, f32 s, f32 t)
+{
+    out->z = in->z * s * s;
+    out->y = (in->z + in->z) * s * t + in->y * s;
+    out->x = (in->z * t * t + in->y * t) + in->x;
+}
+
+void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle)
+{
+    f32 t = (angle + 1.5707964f) * 0.31830987f;
+    s32 n = (s32)t;
+    if (t < 0.0f) {
+        n--;
+    }
+    angle -= (f32)n * 3.1415927f;
+    if (n & 1) {
+        angle = -angle;
+    }
+    f32 x2 = angle * angle;
+    f32 s = angle;
+    angle *= x2;
+    s += angle * -0.166666567f;
+    angle *= x2;
+    s += angle * 0.00833302550f;
+    angle *= x2;
+    s += angle * -0.000198074136f;
+    angle *= x2;
+    s += angle * 2.60188699e-06f;
+    f32 c = Fpu::Sqrt(1.0f - s * s);
+    if (n & 1) {
+        *cosOut = -c;
+    } else {
+        *cosOut = c;
+    }
+    *sinOut = s;
+}
+
+double TruncateDouble(double x)
+{
+    DoubleBits v;
+    v.d = x;
+    s32 e = ((u16)(v.u >> 52) & 0x7FF) - 0x3FF;
+    if (e < 0) {
+        return 0.0;
+    }
+    if (e < 0x34) {
+        u64 frac = ((u64)1 << (0x34 - e)) - 1;
+        u64 mant = v.u & ((u64)-1 >> 12);
+        if ((mant & frac) == frac) {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+            x = func_001FCD20(x, 1.0);
+        } else {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+        }
+    }
+    return x;
+}
+
+f32 TruncateFloat(f32 x)
+{
+    f32 buf[2];
+    u64* qp = (u64*)buf;
+    buf[0] = x;
+    u64 bits = *qp;
+    u32 ex = (u32)((s64)(bits << 9) >> 32) & 0xFF;
+    s32 e = (s32)ex - 0x7F;
+    if (e < 0)
+        return 0.0f;
+    if (e < 0x17) {
+        s32 mask = (s32)(((u64)1 << (0x17 - e)) - 1);
+        s32 frac = *(s32*)buf & 0x7FFFFF;
+        if ((frac & mask) == mask) {
+            { u64 lo = (u64)(s64)(frac & ~mask); *qp = (bits & (s32)0xFF800000) | lo; }
+            buf[0] = buf[0] + 1.0f;
+        } else {
+            { u64 lo = (u64)(s64)(frac & ~mask); *qp = (bits & (s32)0xFF800000) | lo; }
+        }
+    }
+    return buf[0];
+}
+
+f32 WrapModulo(f32 x, f32 y)
+{
+    f32 r = FloatRemainder(x);
+    if (r < 0.0f) {
+        r += y;
+    }
+    return r;
+}
+
+void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w)
+{
+    f32 p = w - x;
+    f32 q = y - x;
+    a0[0] = x;
+    f32 r = p / z - q;
+    r = r / (z - 1.0f);
+    a0[2] = r;
+    a0[1] = q - r;
+}
+
+s32 IsInsideRange(ValueRange* span, f32 x)
+{
+    s32 inside = 0;
+    if (span->lo < x) {
+        if (x < span->hi) {
+            inside = 1;
+        }
+    }
+    return inside;
+}
+
+s32 IsInsideAnyRange(s32 count, ValueRange* spans, f32 x)
+{
+    for (s32 i = 0; i < count; i++) {
+        if (IsInsideRange(&spans[i], x)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+f32 ClampToRange(ValueRange* span, f32 x)
+{
+    if (x < span->lo) {
+        return span->lo;
+    }
+    if (span->hi < x) {
+        return span->hi;
+    }
+    return x;
+}
+
+s32 CompareFloats(f32* a, f32* b)
+{
+    f32 x = *a;
+    f32 y = *b;
+    if (y < x) return 1;
+    if (x < y) return -1;
+    return 0;
+}
+
+void IgnoreStackLocal(void)
+{
+}
+
+INCLUDE_ASM(func_001EB168);
+
+LINKER_REMNANT(func_001EB458);
+
+void InitBeatPressCollider(BeatPressCollider* self)
+{
+    InitSwitchedCollider(self);
+    f32 t = g_currentEntry->dt;
+    f32 x = D_00275C80[0] + t * (D_00275C80[1] + t * D_00275C80[2]);
+    f32 lo = g_unitRange.lo;
+    f32 hi = g_unitRange.hi;
+    f32 c;
+    if (x < lo) {
+        c = lo;
+    } else if (hi < x) {
+        c = hi;
+    } else {
+        c = x;
+    }
+    self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
+}
+
+void LoadBeatPressCollider(BeatPressCollider* self)
+{
+    LoadCollider(self);
+    ResolveObjectLinks(self, 1, D_00275C90);
+}
+
+void CopyPlayerAttachBlock(BeatPressCollider* a0)
+{
+    a0->blk580 = g_player->blk580;
+    a0->f604 = g_player->f604;
+}
+
+void StartBeatPressCollider(BeatPressCollider* self)
+{
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 4, D_00275CA0);
+    self->f614 = CreateStateWalker(self->f610, self, 0x4CA, 1);
+    AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
+}
+
+void HandleBeatPressColliderActivation(BeatPressCollider* self, void* p)
+{
+    HandleSwitchedColliderActivation(self);
+    TempoAgent* r = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+    if (p != 0) {
+        SetStateWalkerTarget(self->f614, 0x4CB);
+        r->fC3C = self;
+        self->f68C = r;
+    } else {
+        SetStateWalkerTarget(self->f614, 0x4CA);
+        *(f32*)((u8*)g_player + 0x26D0) = 2.0f;
+    }
+}
+
+INCLUDE_ASM(func_001EB698);
+
+void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
+{
+    if (self->f67C != 0 && g_player != 0) {
+        Vec4U pos;
+        Mat3U mat;
+        GetObjectWorldPosition(self->f67C, &pos);
+        GetObjectWorldRotation(self->f67C, &mat);
+        ((PlayerSlotFn*)g_player->desc)[0x84 / 4](g_player, &pos);
+        ((PlayerSlotFn*)g_player->desc)[0x88 / 4](g_player, &mat);
+        ((BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
+        ((BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
+    }
+    if (self->f680 != 0) {
+        u32 f = in->flags;
+        if (f & 0xF0) {
+            s32 dir;
+            s32 ok;
+            f32 at;
+            if (f & 0x80) {
+                dir = 0;
+            } else if (f & 0x10) {
+                dir = 1;
+            } else if (f & 0x20) {
+                dir = 2;
+            } else if (f & 0x40) {
+                dir = 3;
+            }
+            ok = 0;
+            if (self->f62C < self->f630) {
+                Ent1C* e = &self->f634[self->f62C];
+                if (e->dir == dir) {
+                    TempoAgent* g = ((TempoAgent*)self->f68C);
+                    at = (f32)g->fC70 * 4.0f + g->fC7C;
+                    if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
+                        ok = 1;
+                    }
+                }
+            }
+            if (ok) {
+                self->f678 = dir;
+                self->f674 = at;
+            } else {
+                StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        }
+    }
+    if (self->f62C < self->f630) {
+        Ent1C* e = &self->f634[self->f62C];
+        TempoAgent* g = ((TempoAgent*)self->f68C);
+        f32 at = (f32)g->fC70 * 4.0f + g->fC7C;
+        f32 win = self->f684;
+        if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
+            SetStateWalkerTarget(self->f614, D_00275CD8[self->f678]);
+            StartSoundEffect(D_00275CE8[self->f678], 0, 0, 0, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0, 0);
+        } else {
+            if (!(at - e->t > win * 0.5f)) {
+                return;
+            }
+            StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
+            if (HasSpareCount() == 0 && ((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+                OwnerMessage msg;
+                TempoAgent* o;
+                ActivateSwitchedCollider(g_player);
+                InitOwnerMessage(&msg, 0, self);
+                msg.fn = ContinueBeatPressColliderRequest;
+                ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
+                o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+                EndHeldTimeline(o);
+                o->fBFC = g_gameTime[0];
+                SetCachedVoiceParam(2, 1);
+                goto next;
+            }
+            if (((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+                Timeline* l;
+                ((void (*)(BeatPressCollider*))((BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
+                Player* gl = g_player;
+                self->f688 = 1;
+                gl->f26C4 = 1;
+                f32 v = g_gameTime[0];
+                *(f32*)((u8*)gl + 0x26CC) = v;
+                gl->f26C8 = v;
+                l = ((TempoAgent*)self->f68C)->fC38;
+                *(f32*)((u8*)gl + 0x26D0) = 2.0f;
+                if (l != 0) {
+                    s32 j = l->index;
+                    while (j < l->f34) {
+                        Entry90* p = &((Entry90*)l->buffer)[j];
+                        if (p->f0 == 3) break;
+                        j++;
+                    }
+                    if (j < l->f34) {
+                        Entry90* it = &((Entry90*)l->buffer)[j];
+                        TempoAgent* gg = ((TempoAgent*)self->f68C);
+                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->f4 * 4.0f + it->f8 - ((f32)gg->fC70 * 4.0f + gg->fC7C)) * gg->fC88;
+                    }
+                }
+            }
+        }
+        if (e->dir == 3) {
+            ActivateSwitchedCollider(g_player);
+            BindEntryQueueToObject(self->f628, g_player);
+            self->f628 = 0;
+        }
+    next:
+        self->f62C++;
+        if (self->f62C == self->f630) {
+            self->f62C = 0;
+            self->f630 = 0;
+        }
+    }
+}
+
+s32 IsBeatPressColliderRequestBlocked(BeatPressCollider* self)
+{
+    if (g_buttonCodeFlags & 1) return 1;
+    if (IsPadSelectFlagHeld(self->world) == 0) return self->f688 != 0;
+    return 1;
+}
+
+void AppendBeatPressEntry(BeatPressCollider* list, const U64P* src)
+{
+    s32 n = list->f630;
+    list->f630 = n + 1;
+    U64P* dst = (U64P*)((u8*)list + (n * 8 + 0x634));
+    *dst = *src;
+}
+
+s32 AcceptBeatPressColliderRequest(void)
+{
+    return 0;
+}
+
+// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18) and
+// a point in its frame (+0x40).
+struct FramePoint_001EBD10 {
+    u8 pad0[0x18];
+    void* object;           // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+};
+
+void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
+
+void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+{
+    if (self->f67C == 0) {
+        GetPlacedObjectPositionAt(self, t, pos, vel);
+        return;
+    }
+    Vec02 p;
+    Mat02 rot;
+    Vec02 v;
+    Vec02 w;
+    ComputeObjectFrameAtTime(((FramePoint_001EBD10*)self->f67C)->object, 0, &p, &rot, &v, &w, t);
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+    Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+}
+
+INCLUDE_ASM(func_001EBDD0);
+
+void InitTempoAgent(TempoAgent* self)
+{
+    InitAgent(self);
+    *(s32*)((u8*)self + 0xC5C) = 0x3C;
+    self->fC8C = 1.0f;
+    self->fC64 = 8.0f;
+    self->fC70 = 0;
+    self->fC78 = -1;
+    self->fC74 = -1;
+    self->fC60 = 8;
+    *(s32*)((u8*)self + 0xC6C) = (s32)AllocateFrontMemory(0x400);
+    self->world->f2358 = 1;
+    StopStagedBankVoice();
+    D_00275DB8 = 2;
+    D_00275DBC = 0;
+}
+
+INCLUDE_ASM(func_001EBF40);
+
+void StartTempoAgent(TempoAgent* self)
+{
+    StartAgent(self);
+    SetWorldActiveFollower(self->world, self);
+    ResolveObjectLinks(self, 5, D_00275D08);
+    void* r = CreateStateWalker(self->fC50, 0, -1, 0);
+    self->fC54 = r;
+    AddStateWalkerListener(r, self);
+    self->fC98 = 9;
+    self->fC9C = CopyToFrontMemory(0x6C, D_00275D48);
+    s32 i = 0;
+    if (self->fC98 > 0) {
+        s32 off = 0;
+        do {
+            TempoObjectRef* e = (TempoObjectRef*)((u8*)self->fC9C + off);
+            e->obj = FindFirstObjectById(self->world, 1, e->id, self);
+            i++;
+            off += 12;
+        } while (i < self->fC98);
+    }
+}
+
+
+void UnregisterTempoAgent(void)
+{
+    UnregisterSwitchedCollider();
+}
+
+void RegisterTempoAgent(void)
+{
+    RegisterSwitchedCollider();
+}
+
+s32 IsTempoAgentTargetInRange(TempoAgent* self)
+{
+    s32 r[4];
+    GetStateWalkerCurrentKey(self->fC54, r);
+    switch (r[0]) {
+    case 0x4ED:
+    case 0x4F0:
+    case 0x4F3:
+    case 0x4F6:
+        if (self->fC20 == 0) goto zero;
+    yes:
+        return 1;
+    case 0x4EE:
+    case 0x4F1:
+    case 0x4F4:
+    case 0x4F7:
+        if (self->fC94 == 1) goto zero;
+        if (self->fC94 < 2) {
+            if (self->fC94 == 0) goto set;
+            return 0;
+        }
+        if (self->fC94 == 2) goto yes;
+        return 0;
+    set:
+        self->fC94 = 1;
+    }
+zero:
+    return 0;
+}
+
+s32 IsTempoAgentFree(void)
+{
+    return 1;
+}
+
+INCLUDE_ASM(func_001EC190);
+
+void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
+{
+    u8 tmp[0x50];
+    void* out = c;
+    if (self->f724 == 16) {
+        BuildPlacedObjectTransform(self, c, tmp);
+        *(s32*)(tmp + 0x44) = 0;
+        out = tmp;
+    }
+    func_00125C90(self, s, out);
+}
+
+INCLUDE_ASM(func_001EC3D8);
+
+void LeaveTempoAgentState(TempoAgent* self, void* arg)
+{
+    s32 out;
+    s32 sel;
+    LeaveAgentState(self, arg);
+    s32 st = self->f724;
+    if (st != 0xE) {
+        if (st != 0x10) {
+            return;
+        }
+        self->fC94 = 0;
+        GetStateWalkerCurrentKey(*(void**)((u8*)self + 0xC54), &out);
+        switch (out) {
+        case 0x4EE:
+            sel = 0x4EF;
+            break;
+        case 0x4F1:
+            sel = 0x4F2;
+            break;
+        case 0x4F4:
+            sel = 0x4F5;
+            break;
+        }
+        SetStateWalkerTarget(*(void**)((u8*)self + 0xC54), sel);
+    } else {
+        self->fC94 = 0;
+    }
+}
+
+void DecrementTempoAgentGauge(TempoAgent* self)
+{
+    T217D_2E0* g = &g_gaugeBarElement;
+    DecrementGaugeCount((u8*)&g_gaugeBarElement);
+    self->fA68 = 2;
+    g->fill = g->fillTarget;
+}
+
+void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
+{
+    s32 r[3];
+    switch (self->f724) {
+    case 0xE:
+        GetStateWalkerCurrentKey(self->fC54, &r[0]);
+        switch (r[0]) {
+        case 0x4ED:
+        case 0x4F0:
+        case 0x4F3:
+        case 0x4F6:
+            b = self->fC20;
+            self->fC20 = 0;
+            break;
+        }
+        break;
+    case 0x10:
+        DecrementGaugeCount(&g_gaugeBarElement);
+        break;
+    case 0xB:
+        DecrementGaugeCount(&g_gaugeBarElement);
+        MarkLevelDone(3);
+        StartMemoryCardSave(&g_memoryCard);
+        break;
+    }
+    EnterAgentState(self, a, b);
+    switch (self->f724) {
+    case 14: {
+        GetStateWalkerCurrentKey(self->fC54, &r[1]);
+        f32 q;
+        switch (r[1]) {
+        case 0x4EE:
+            q = 0.083333336f;
+            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 + self->fC88);
+            break;
+        case 0x4F1:
+        case 0x4F4:
+        case 0x4F7:
+            q = 0.083333336f;
+            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 * 4.0f);
+            break;
+        default:
+            return;
+        }
+        ((AnimationPlayer*)self->f7E0)->time = q;
+        break;
+    }
+    case 2:
+    case 13: {
+        s32 n = 4;
+        GetStateWalkerCurrentKey(self->fC54, &r[2]);
+        if (r[2] < 0x4EF) {
+            if (r[2] >= 0x4EC) n = 2;
+        }
+        AddTempoAgentEntry(self, ((AnimationPlayer*)self->f7E0), n);
+        if (n == 2) ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
+        else ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
+        break;
+    }
+    case 11:
+    case 16:
+        self->fC04 = 0;
+        break;
+    }
+}
+
+INCLUDE_ASM(func_001EC7A8);
+
+INCLUDE_RODATA(jtbl_0024E740);
+INCLUDE_ASM(func_001EC828);
+
+void SyncTempoAgentEntries(TempoAgent* self)
+{
+    f32 den = self->fC84 - (*(f32*)&g_gameTime);
+    for (s32 k = 0; k < self->fC68; k++) {
+        TempoPlayerEntry* e = &self->fC6C[k];
+        AnimationPlayer* o = e->player;
+        f32 len = o->anim->length;
+        f32 start = o->time;
+        f32 t = len / (f32)e->beats * (f32)((self->fC74 + 1) % e->beats);
+        if (t <= start)
+            t += len;
+        o->speed = (t - start) / den;
+    }
+
+}
+
+void UpdateTempoAgent(TempoAgent* self)
+{
+    Timeline* sub;
+    s32 code;
+
+    UpdateAgent(self);
+    if (D_00275DB8 == 2) {
+        if (self->fC88 != self->fC8C) {
+            self->fC88 = self->fC8C;
+            self->fC64 = self->fC8C * (f32)self->fC60;
+        }
+        sub = self->fC34;
+        self->fC84 = g_gameClock.time + self->fC88;
+        self->fC80 = g_gameClock.time;
+        self->fC70 = 0;
+        self->fC78 = 0;
+        self->fC74 = 0;
+        if (sub != 0) {
+            self->fC34 = 0;
+            self->fC38 = sub;
+            RestartTimeline(sub);
+        }
+        D_00275DB8 = 0;
+    }
+    if (self->fC84 <= g_gameClock.time) {
+        s32 a = self->fC74 + 1;
+        s32 b = self->fC78 + 1;
+        self->fC80 = self->fC84;
+        self->fC74 = a;
+        self->fC78 = b;
+        if (b >= 4) {
+            self->fC78 = 0;
+            self->fC70 = self->fC70 + 1;
+            if (self->fC88 != self->fC8C) {
+                self->fC88 = self->fC8C;
+                self->fC64 = self->fC8C * (f32)self->fC60;
+            }
+        }
+        if (self->fC94 == 1) {
+            GetStateWalkerCurrentKey(self->fC54, &code);
+            if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->fC94 = 2;
+        }
+        self->fC84 = self->fC84 + self->fC88;
+    }
+    self->fC7C = (f32)self->fC78 + (g_gameClock.time - self->fC80) / self->fC88;
+    if (self->fC38 != 0) RunTimelineEntries(self->fC38);
+    if (D_00275DB8 == 1) {
+        RefreshCachedVoiceParam(1, 0);
+        if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
+    }
+    AppendQueuedCall(self->world, SyncTempoAgentEntries, self, 0, 0);
+}
+
+void ShowTempoAgentGauge(TempoAgent* self)
+{
+    s32 code;
+    GetStateWalkerCurrentKey(self->fC54, &code);
+    s32 obj = 0;
+    if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) {
+        obj = AreMenusAndFadeClear();
+    }
+    if (obj) g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
+    else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
+}
+
+void UpdateTempoAgentGoal(TempoAgent* self)
+{
+    s32 loc[4];
+    s32 v = self->f724;
+    if (v >= 14) goto tail;
+    if (v < 12) goto tail;
+    {
+        void* q = self->fC48;
+        if (q != 0) {
+            GetObjectWorldPosition(q, loc);
+            func_001C8418(self, loc);
+        } else {
+            func_001C8418(self, (u8*)self + 0x140);
+        }
+    }
+    return;
+tail:
+    UpdateAgentGoal(self);
+}
+
+void UpdateAgentState(TempoAgent* self);
+void SetAgentFacingAngles(TempoAgent* self, f32 angle, f32 zero);
+
+void UpdateTempoAgentState(TempoAgent* self)
+{
+    Vec02 diff;
+    Mat3U rot;
+    s32 code;
+    SwitchedCollider* p;
+    f32 y;
+    f32 x;
+    GetStateWalkerCurrentKey(self->fC54, &code);
+    switch (code) {
+    case 0x4ED:
+    case 0x4F0:
+    case 0x4F3:
+    case 0x4F6:
+        p = GetActiveSwitchedCollider();
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(self->v140));
+        goto fromDiff;
+    case 0x4EC:
+    case 0x4EF:
+    case 0x4F2:
+    case 0x4F5:
+        if (self->f724 >= 15) goto other;
+        if (self->f724 < 13) goto other;
+        if (self->fC48 == 0) goto other;
+        GetObjectWorldRotation(self->fC48, &rot);
+        y = rot.m[0][1];
+        x = rot.m[0][0];
+        goto angle;
+    case 0x4EE:
+    case 0x4F1:
+    case 0x4F4:
+    case 0x4F7:
+        if (self->f724 >= 15) goto other;
+        if (self->f724 < 13) goto other;
+        p = GetActiveSwitchedCollider();
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(p->v140));
+    fromDiff:
+        y = diff.y;
+        x = diff.x;
+    angle:
+        SetAgentFacingAngles(self, ArctangentOfRatio(y, x), 0.0f);
+        return;
+    default:
+    other:
+        UpdateAgentState(self);
+    }
+}
+
+void SetTempoAgentPendingTimeline(TempoAgent* self, s32 value)
+{
+    self->fC34 = (Timeline*)value;
+}
+
+void EndHeldTimeline(TempoAgent* self)
+{
+    EndTimeline(self->fC38);
+    self->fC38 = 0;
+}
+
+void SetTempoAgentTempo(TempoAgent* self, s32 v)
+{
+    self->fC5C = v;
+    self->fC8C = 60.0f / (f32)v;
+}
+
+void SetTempoAgentSpanBeats(TempoAgent* self, s32 v)
+{
+    self->fC60 = v;
+    self->fC64 = self->fC88 * (f32)v;
+}
+
+void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b)
+{
+    TempoPlayerEntry* e = &self->fC6C[self->fC68++];
+    e->beats = b;
+    e->player = a;
+    AddAnimationPlayerRecordCallback(a, self);
+}
+
+void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key)
+{
+    s32 i = 0;
+    if (self->fC68 > 0) {
+        TempoPlayerEntry* p = self->fC6C;
+        while (p->player != key) {
+            i++;
+            if (i >= self->fC68)
+                return;
+            p++;
+        }
+        if (i < self->fC68) {
+            TempoPlayerEntry* e = self->fC6C + i;
+            CopyMemory(e, e + 1, (self->fC68 - i - 1) * 8);
+            self->fC68 = self->fC68 - 1;
+        }
+    }
+}
+
+void InitTimeline(Timeline* self)
+{
+    InitObject(self);
+    self->buffer = AllocateFrontMemory(0xC00);
+}
+
+void FindTimelineTarget(Timeline* self)
+{
+    StartObject();
+    self->found = FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+}
+
+void RestartTimeline(Timeline* self)
+{
+    self->index = 0;
+    self->f44 = ((TempoAgent*)self->found)->fC70;
+    TriggerScriptEvent(self, 0x1A, 0, 0);
+}
+
+void EndTimeline(Timeline* self)
+{
+    s32 n;
+    TriggerScriptEvent(self, 0x1C, 0, 0);
+    n = 5;
+    RunTimelineEntry(self, &n);
+    if (((TempoAgent*)self->found)->fC3C) {
+        n = 3;
+        RunTimelineEntry(self, &n);
+    }
+}
+
+void RunTimelineEntries(Timeline* self)
+{
+    Entry90* e;
+    s32 v;
+    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((TempoAgent*)self->found)->fC70 < v))) {
+        if (v == ((TempoAgent*)self->found)->fC70 && ((TempoAgent*)self->found)->fC7C < e->f8) return;
+        RunTimelineEntry(self, e);
+        self->index++;
+    }
+}
+
+void RunTimelineEntry(Timeline* self, Entry90* msg)
+{
+    switch (msg->f0) {
+    case 0:
+        ScheduleTempoAgentBeatPress((TempoAgent*)self->found);
+        break;
+    case 1: {
+        s32* loc = &msg->fC;
+        TriggerScriptEvent(self, 0x1B, 1, (s32*)&loc);
+        break;
+    }
+    case 2:
+        ((TempoAgent*)self->found)->fC3C->f680 = 1;
+        D_00273C50.vt->m16(&D_00273C50, 2);
+        ResetPadStepRepeat(&g_padRecord);
+        StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
+        break;
+    case 3:
+        ((TempoAgent*)self->found)->fC3C->f680 = 0;
+        ((TempoAgent*)self->found)->fC3C->f688 = 0;
+        D_00273C50.vt->m16(&D_00273C50, 0);
+        break;
+    case 4:
+        ((TempoAgent*)self->found)->fC4C = 1;
+        D_002739F0.vt->m16(&D_002739F0, 2);
+        StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, -0.25f, 0.0f, 0, 0);
+        break;
+    case 5:
+        ((TempoAgent*)self->found)->fC4C = 0;
+        D_002739F0.vt->m16(&D_002739F0, 0);
+        break;
+    }
+}
+
+void* AppendTimelineEntry(Timeline* self, s32 a, s32 b, f32 c)
+{
+    if (self->f34 >= 0xC0) return D_00625760;
+    Entry90* e = (Entry90*)((u8*)self->buffer + self->f34 * 16);
+    self->f34 = self->f34 + 1;
+    (void)FillMemory(e, 0, 16);
+    e->f0 = a;
+    e->f4 = b;
+    e->f8 = c;
+    return e;
+}
+
+void AppendTimelineKind0Entry(void* self, s32 p, s32 val)
+{
+    AppendTimelineEntry(self, 0, p)->fC = val;
+}
+
+void AppendTimelineKind1Entry(void* self, s32 p, s32 val)
+{
+    AppendTimelineEntry(self, 1, p)->fC = val;
+}
+
+void AppendTimelineKind2Entry(void* self, s32 p)
+{
+    AppendTimelineEntry(self, 2, p);
+}
+
+void AppendTimelineKind3Entry(void* self, s32 p)
+{
+    AppendTimelineEntry(self, 3, p);
+}
+
+void AppendTimelineKind4Entry(void* self, s32 p)
+{
+    AppendTimelineEntry(self, 4, p);
+}
+
+void AppendTimelineKind5Entry(void* self, s32 p)
+{
+    AppendTimelineEntry(self, 5, p);
+}
+
+ASM_FUNC(func_001ED638);
+
+void ComputePolarOffset(Vec3* out, f32 unused, f32 scale, f32 z)
+{
+    SinCos p;
+    ComputeSinCos(&p.sine, &p.cosine);
+    out->x = p.cosine * scale;
+    out->y = p.sine * scale;
+    out->z = z;
+}
+
+void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale)
+{
+    f32 t[4];
+    ComputeSinCos(first, &t[0], &t[1]);
+    ComputeSinCos(second, &t[2], &t[3]);
+    out->x = t[3] * t[1] * scale;
+    out->y = t[3] * t[0] * scale;
+    out->z = t[2] * scale;
+}
+
+ASM_FUNC(func_001ED738);
+
+ASM_FUNC(func_001ED780);
+
+void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
+{
+    Vec02 w;
+    f32 x = v->x;
+    f32 y = v->y;
+    f32 ax = __builtin_fabsf(x);
+    f32 z = v->z;
+    f32 ay = __builtin_fabsf(y);
+    f32 az = __builtin_fabsf(z);
+    if (ax <= ay) {
+        if (ax <= az) {
+            w.y = z;
+            w.x = 0.0f;
+            w.z = -y;
+        } else {
+            w.x = y;
+            w.z = 0.0f;
+            w.y = -x;
+        }
+    } else if (ay <= az) {
+        w.x = z;
+        w.y = 0.0f;
+        w.z = -x;
+    } else {
+        w.x = y;
+        w.z = 0.0f;
+        w.y = -x;
+    }
+    u128 c = Vu0::Cross(Vu0::Q(*v), Vu0::Q(w));
+    Vu0::Q(*out) = Vu0::DivX(c, Vu0::Length(c));
+}
+
+LINKER_REMNANT(func_001ED900);
+
+INCLUDE_ASM(func_001ED908);
+
+void func_001EDA80(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
+{
+    u128 u = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*a));
+    u128 v = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    u128 w = Vu0::Sub(Vu0::Q(*d), Vu0::Q(*c));
+    u128 n = Vu0::Cross(v, w);
+    f32 len2 = Vu0::ToFloat(Vu0::Dot(n, n));
+    if (len2 < 0.0001f) {
+        f32 z = 0.0f;
+        out2[0] = z;
+        out2[1] = z;
+        n = u;
+    } else {
+        u128 c1 = Vu0::Cross(u, w);
+        u128 c2 = Vu0::Cross(u, v);
+        f32 d1 = Vu0::ToFloat(Vu0::Dot(c1, n));
+        f32 d2 = Vu0::ToFloat(Vu0::Dot(c2, n));
+        out2[0] = d1 / len2;
+        out2[1] = d2 / len2;
+        if (Vu0::ToFloat(Vu0::Dot(u, n)) < 0.0f) {
+            n = Vu0::MulX(n, Vu0::Scalar(-1.0f));
+        }
+    }
+    u128 nn = Vu0::NormalizeOr(n, Vu0::Q(g_unitZVector));
+    *dist = Vu0::ToFloat(Vu0::Dot(nn, u));
+    Vu0::Q(*normal) = nn;
+}
+
+INCLUDE_ASM(func_001EDC08);
+
+void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
+{
+    if (a1)
+        *a1 = WrapAngle(ArctangentOfRatio(v->y, v->x));
+    if (a2) {
+        f32 r = Fpu::Sqrt(v->x * v->x + v->y * v->y);
+        *a2 = WrapAngle(ArctangentOfRatio(v->z, r));
+    }
+}
+
+void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
+{
+    f32 t[4];
+    ComputeSinCos(in->y, &t[0], &t[1]);
+    ComputeSinCos(in->z, &t[2], &t[3]);
+    out->x = t[1] * t[3] * b->x - t[2] * b->y;
+    out->y = t[1] * t[2] * b->x + t[3] * b->y;
+    out->z = -t[0] * b->x + b->z;
+}
+
+INCLUDE_ASM(func_001EDEF0);
+
+INCLUDE_ASM(func_001EE090);
+
+void ForwardBallisticLaunchVelocity(void* self)
+{
+    ComputeBallisticLaunchVelocity(self);
+}
+
+void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
+{
+    u128 q = Vu0::Q(*v);
+    f32 len = Vu0::ToFloat(Vu0::Length(q));
+    if (max < len) {
+        Vec02 s;
+        Vu0::Q(s) = Vu0::FromFloat(max / len);
+        Vu0::Q(*out) = Vu0::MulX(q, Vu0::Q(s));
+    } else if (v != out) {
+        Vu0::Q(*out) = q;
+    }
+}
+
+PacketWriter* InitPacketWriter(PacketWriter* self)
+{
+    (void)InitPacketBuffer(self);
+    self->f10 = 1;
+    self->vt = (const PacketWriterVt*)D_0024A0E0;
+    self->f1C = 0;
+    self->f20 = 0;
+    return self;
+}
+
+LINKER_REMNANT(func_001EE360);
+
+void PadPacketToQuadSlot(PacketWriter* s, s32 target)
+{
+    u32 raw = s->curU;
+    s32 idx = (s32)((raw & 0xC) >> 2);
+    u32* p = (u32*)raw;
+    if (idx == target) goto done;
+    do {
+        *p = 0;
+        idx = (idx + 1) % 4;
+        p++;
+    } while (idx != target);
+done:
+    s->cur = (u8*)p;
+}
+
+void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b)
+{
+    u32* p = (u32*)s->cur;
+    s->cur = (u8*)(p + 1);
+    *p = a | 0x3000000;
+    u32* q = (u32*)s->cur;
+    s->cur = (u8*)(q + 1);
+    *q = b | 0x2000000;
+}
+
+void WriteVifMscal(PacketWriter* s, s32 n)
+{
+    u32* p = (u32*)s->cur;
+    s->cur = (u8*)(p + 1);
+    *p = (u32)((n / 8) | 0x14000000);
+}
+
+void WriteVifMscalf(PacketWriter* s, s32 n)
+{
+    u32* p = (u32*)s->cur;
+    s->cur = (u8*)(p + 1);
+    *p = (u32)((n / 8) | 0x15000000);
+}
+
+void WriteVifFlush(PacketWriter* b)
+{
+    u32* p = (u32*)b->cur;
+    b->cur = (u8*)(p + 1);
+    *p = 0x11000000;
+}
+
+void WriteVifFlushA(PacketWriter* b)
+{
+    u32* p = (u32*)b->cur;
+    b->cur = (u8*)(p + 1);
+    *p = 0x13000000;
+}
+
+void WriteVifFlushE(PacketWriter* b)
+{
+    u32* p = (u32*)b->cur;
+    b->cur = (u8*)(p + 1);
+    *p = 0x10000000;
+}
+
+void WriteVifStcycl(PacketWriter* b, u32 x, u32 y)
+{
+    u32* p = (u32*)b->cur;
+    b->cur = (u8*)(p + 1);
+    *p = y | (x << 8) | 0x01000000;
+}
+
+void WriteVifStrow(PacketWriter* b, u32* src){
+ u32 *p1,*p2,*p3,*p4,*p5;
+ p1=(u32*)b->cur; b->cur = (u8*)(p1 + 1); *p1=0x30000000;
+ p2=(u32*)b->cur; b->cur = (u8*)(p2 + 1); *p2=src[0];
+ p3=(u32*)b->cur; b->cur = (u8*)(p3 + 1); *p3=src[1];
+ p4=(u32*)b->cur; b->cur = (u8*)(p4 + 1); *p4=src[2];
+ p5=(u32*)b->cur; b->cur = (u8*)(p5 + 1); *p5=src[3];
+}
+
+void WriteVifStmask(PacketWriter* self, s32 value)
+{
+    if (value != 0) {
+        u32* p = (u32*)self->cur;
+        self->cur = (u8*)(p + 1);
+        *p = 0x20000000;
+        u32* q = (u32*)self->cur;
+        self->cur = (u8*)(q + 1);
+        *q = (u32)value;
+    }
+    self->mask = value;
+}
+
+s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c)
+{
+    u32 lo = ((u32)b << 16) | 0x6000C000u;
+    u32 head = ((u32)a << 24) | lo;
+    u32* p = (u32*)self->cur;
+    self->cur = (u8*)(p + 1);
+    u32 tag = head | (u32)c;
+    *p = tag;
+    if (self->f1C != 0) {
+        *p = tag | 0x10000000;
+    }
+    return D_00275DD0[a] * b;
+}
+
+void ReserveVifUnpack(PacketWriter* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
+{
+    if (size == 0) {
+        if (outCursor) *outCursor = 0;
+        if (outSize) *outSize = 0;
+    } else {
+        size = WriteVifUnpackHeader(s);
+        if (outCursor) *outCursor = s->cur;
+        s->cur += ((size + 3) / 4) * 4;
+        if (outSize) *outSize = size;
+    }
+}
+
+void CopyWordsToWriter(void* s, void* a1, s32 size, u32* src, void* a4)
+{
+    s32 outSize;
+    u8* outCursor;
+    s32 n;
+    s32 rem;
+    s32 full;
+    s32 i;
+    u32* dst;
+
+    ReserveVifUnpack(s, a1, size, a4, &outSize, &outCursor);
+    dst = (u32*)outCursor;
+    n = (outSize + 3) >> 2;
+    rem = n & 3;
+    full = n - rem;
+    if (rem != 0) {
+        i = rem;
+        do {
+            *dst++ = *src++;
+        } while (--i != 0);
+    }
+    i = 0;
+    if (full > 0) {
+        do {
+            u32 w0 = src[0];
+            u32 w1 = src[1];
+            u32 w2 = src[2];
+            u32 w3 = src[3];
+            i += 4;
+            dst[0] = w0;
+            dst[1] = w1;
+            dst[2] = w2;
+            dst[3] = w3;
+            src += 4;
+            dst += 4;
+        } while (i < full);
+    }
+}
+
+void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
+{
+    if (b != 0) {
+        PadPacketToQuadSlot(self, 3);
+        s32 r = WriteVifUnpackHeader(self, a, b, d);
+        s32 t = r + 0xF;
+        s32 u = r + 0x1E;
+        s32 n = (t >= 0) ? t : u;
+        AddDmaRefTag(self, n >> 4, c);
+        if (out != 0) {
+            *out = (s32)self->f08 - 0xC;
+        }
+    }
+}
+
+void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag)
+{
+    PadPacketToQuadSlot(self, 3);
+    u32* p = (u32*)self->cur;
+    u32 w = (u32)flag << 31;
+    self->cur = (u8*)(p + 1);
+    w = w | 0x50000000u;
+    *p = (u32)n | w;
+    AppendPacketQuadwords(self, n, (s32)buf);
+}
+
+void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c)
+{
+    PadPacketToQuadSlot(self, 3);
+    u32* p = (u32*)self->cur;
+    u32 w = (u32)c << 31;
+    self->cur = (u8*)(p + 1);
+    w = w | 0x50000000u;
+    *p = (u32)a | w;
+    AddDmaRefTag(self, a, b);
+}
+
+void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1) {
+    u32 span = a1->curU - (u32)a1->begin;
+    WriteVifDirect(a0, span >> 4, (void*)a1->begin, 0);
+}
+
+void InitValueListObject(ValueListObject* self)
+{
+    InitObject(self);
+    self->world->f1EC4 = self;
+}
+
+void LoadValueList(ValueListObject* self, void* src)
+{
+    s32 i;
+    s32 n;
+
+    ReadLinkedItemArray(src, &self->count34, &self->data38);
+    n = ReadBufferedU16(src);
+    self->valueCount = n;
+    self->values = (s32*)AllocateFrontMemory(n * 4);
+    for (i = 0; i < self->valueCount; i++) {
+        self->values[i] = ReadBufferedU32(src);
+    }
+    ReadPropertyRecords(self, src);
+}
+
+s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
+{
+    s32 acc;
+    bits &= 0x7FFFFFFF;
+    if (bits == 0) return 0;
+    acc = -1;
+    for (s32 i = 0; i < self->valueCount; i++) {
+        if ((bits >> i) & 1) acc &= self->values[i];
+    }
+    return acc | bits;
+}
+
+INCLUDE_ASM(func_001EEA40);
+
+s32 QueryValueListMask(ValueListObject* self, Bits128* vec, s32* out)
+{
+    s32 r;
+    if (self != 0 && self->data38 != 0) {
+        Bits128 q = *vec;
+        *out = 0;
+        r = QueryValueTreeMask(self, self->data38, q, out);
+
+    } else {
+        r = 0x0FFFFFFF;
+        *out = r;
+    }
+    return r;
+}
+
+ASM_FUNC(func_001EEBB0);
+
+void InitAttachedSet(AttachedSet* self)
+{
+    u64 bits;
+    s32 one;
+
+    InitCollider(self);
+    bits = self->flags538;
+    one = 0x8000;
+    bits |= (u64)one << 28;
+    self->flags538 = bits;
+    self->f584 = 1;
+    self->f588 = 1;
+    self->f364 = 1.0f;
+    self->f360 = 1.0f;
+    SetColliderAnchors(self, 3, 0, 3, 0);
+    InitTrackedNodes(&self->trackedNodes, self);
+    self->trackedNodes.f04 = 3;
+}
+
+void StartAttachedSet(AttachedSet* self)
+{
+    ChildWalkFrame fr((s32*)&self->children);
+    g_activeListFrames = (ListFrame*)&fr;
+    StartPlacedObject(self);
+    FillTrackedNodes(&self->trackedNodes);
+    self->group.items = (void**)AllocateFrontMemory(0x80);
+    if (self->f278 != 0) {
+        self->desc03()->m32(self);
+    }
+}
+
+void TransformDirectionBetweenFrames(s32 a, void* obj, void* in, void* out);
+void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, void* a5);
+void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
+
+void func_001EED68(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
+{
+    Vec02 a;
+    Quad16 b;
+    Quad16 c;
+    Vec02 d;
+    TransformDirectionBetweenFrames(0, self, in, &a);
+    b = *(Quad16*)((u8*)self + 0x570);
+    a.z = 0.0f;
+    c = *(Quad16*)&D_00248D30;
+    func_00127E60(self, 0, &a, 0, &b, &c);
+    if (self->f278 != 0) {
+        ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), in, 0, 0, 0, &d);
+        Vu0::Q(*(Vec02*)&b) = Vu0::Add(Vu0::Q(*(Vec02*)&b), Vu0::Q(d));
+    }
+    if (outA != 0) {
+        *outA = b;
+    }
+    if (outB != 0) {
+        *outB = c;
+    }
+}
+
+void ReconcileColliderAttachments(void* owner, Attach03** head)
+{
+    Attach03** link = head;
+    Attach03* node = *head;
+    Attach03* removed = 0;
+    while (node != 0) {
+        Collider* o = node->target;
+        Attach03* next = node->nextOwn;
+        if (((o->flags538 >> 59) & 1) != ((o->flags538 >> 60) & 1)) {
+            if (o->flags538 & (1ULL << 59)) {
+                RemoveColliderAttachment(o, node);
+            } else {
+                AddColliderAttachment(o, node);
+            }
+        }
+        Collider* p = node->target;
+        if (p->flags538 & (1ULL << 60)) {
+            link = &node->nextOwn;
+        } else {
+            *link = next;
+            node->nextOwn = removed;
+            removed = node;
+        }
+        Collider* q = node->target;
+        q->flags538 = q->flags538 & ~(1ULL << 60);
+        q->flags538 = q->flags538 & ~(1ULL << 59);
+        node = next;
+    }
+    ReleaseAttachRecords(owner, removed);
+}
+
+INCLUDE_ASM(func_001EEF90);
+
+void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
+{
+    Collider* target = link->target;
+    ((AttachNotifyFn)target->desc03()->m46)(target, self);
+}
+
+void HandleAttachedSetNotification(AttachedSet* self, s32 kind, void* msg)
+{
+    s32 flag = 0;
+    if (kind == 2) {
+        if (msg == (void*)self) {
+            Attach03* n = self->links;
+            if (n != 0) {
+                do {
+                    RemoveColliderAttachment(n->target, n);
+                    n = n->nextOwn;
+                } while (n != 0);
+            }
+            flag = 1;
+            ReleaseAttachRecords(self->world, self->links);
+            self->links = 0;
+        } else {
+            Attach03** link = &self->links;
+            Attach03* n = *link;
+            if (n != 0) {
+                if (n->target == (Collider*)msg) {
+                    *link = n->nextOwn;
+                } else {
+                    for (;;) {
+                        link = &(*link)->nextOwn;
+                        n = *link;
+                        if (n == 0) {
+                            break;
+                        }
+                        if (n->target == (Collider*)msg) {
+                            *link = n->nextOwn;
+                            break;
+                        }
+                    }
+                }
+            }
+            DetachMsg m;
+            m.self = self;
+            m.obj = n->target;
+            if (n != 0) {
+                n->nextOwn = 0;
+                flag = 1;
+                RemoveColliderAttachment(n->target, n);
+                ReleaseAttachRecords(self->world, n);
+            }
+            m.obj->desc->m0E(m.obj, 11, &m);
+        }
+    }
+    if (flag != 0) {
+        RebuildAttachedSet(self);
+    }
+    HandlePlacedObjectNotification(self, kind, msg);
+}
+
+void RebuildAttachedSet(AttachedSet* self)
+{
+    if (self->root == self) {
+        AttachedGroup* s = &self->group;
+        UnregisterObjectGroup(self->world, s);
+        s->items[0] = self;
+        s->count = 1;
+        Attach03* node = self->links;
+        if (node) {
+            do {
+                s->items[s->count++] = node->target;
+                node = node->nextOwn;
+            } while (node);
+        }
+        RegisterObjectGroup(self->world, s);
+    }
+}
+
+s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+
+f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
+{
+    Vec02 from;
+    Vec02 to;
+    ColliderSpan spans[16];
+    if (self->f278 != 0) {
+        ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), &o->v140, 0, &from, 0, 0);
+        Vu0::Q(from) = Vu0::Q(to) = Vu0::MulXSum(Vu0::Q(o->v140), Vu0::Scalar(2.0f), Vu0::Q(from), Vu0::Scalar(-1.0f));
+    } else {
+        from = to = o->v140;
+    }
+    if (o == g_player) {
+        from.z = from.z + -75.0f;
+        if (o->f690 != 0) {
+            from.z = o->v6A0.z >? from.z;
+        }
+    } else {
+        from.z = from.z + (*(f32*)((u8*)o + 0x428) - o->v140.z);
+    }
+    to.z = to.z + (*(f32*)((u8*)o + 0x438) - o->v140.z);
+    s32 n = CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans);
+    if (n == 0) {
+        if (hitOut != 0) {
+            *hitOut = g_unitZVector;
+        }
+        return 0.0f;
+    }
+    if (nOut != 0) {
+        *nOut = *(Vec02*)&spans[0].q[1];
+    }
+    if (hitOut != 0) {
+        if (*(Vec02**)((u8*)&spans[0] + 0x54) != 0) {
+            *hitOut = **(Vec02**)((u8*)&spans[0] + 0x54);
+        } else {
+            *hitOut = g_unitZVector;
+        }
+    }
+    return spans[0].time[1] - spans[0].time[0];
+}
+
+INCLUDE_ASM(func_001EF768);
+
+s32 RequestAttachedSetLaunch(AttachedSet* self)
+{
+    OfferTrackedNodeLaunch(&self->trackedNodes);
+    return 1;
+}
+
+void* GetAttachedSetTrackedNodes(AttachedSet* self)
+{
+    return &self->trackedNodes;
+}
+
+void ClearAttachedSetTrackedNodes(AttachedSet* o)
+{
+    o->trackedNodes.found = 0;
+}
+
+void InitStateResetObject(C62* self)
+{
+    InitPlacedObject(self);
+    self->id2D0 = -1;
+    self->id2E0 = -1;
+}
+
+void StartStateResetObject(C62* self)
+{
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 1, D_00275E10);
+    SetStateAndNotify(self, 0);
+    self->desc->m03(self);
+}
+
+void AddStateResetEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+{
+    UpsertKeyedEntry((u8*)self + 0x2E8, 4, (u8*)self + 0x2E4, a1, a2, a3, a4, a7);
+}
+
+void UpdateStateResetObject(void) {}
+
+void SetStateAndNotify(C62* self, s32 state)
+{
+    if (self->id2D0 != state) {
+        if (state != 0) {
+            if (state == 2)
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, self->f2E8, self, 1);
+        } else {
+            if (self->id2D0 == 2)
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, self->f2E8, self, 0);
+        }
+        StateChangeMsg evt;
+        evt.old = self->id2D0;
+        evt.self = self;
+        evt.cur = state;
+        self->id2D0 = state;
+        self->f2D4 = g_gameTime[0];
+        self->desc->m0E(self, 0x16, &evt);
+    }
+}
+
+void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg)
+{
+    HandlePlacedObjectNotification(self, kind, msg);
+    if (kind == 5) {
+        if (msg->id == self->id2DC) {
+            SetStateAndNotify(self, 0);
+        }
+    }
+}
+
+void* CreateRecord2505C0(void)
+{
+    C62Group* p = (C62Group*)AllocateZeroedFrontMemory(48);
+    p->vtbl = D_002505C0;
+    return p;
+}
+
+void AppendToSmallList(C62Group* self, C62* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
+
+void RemoveFromSmallList(C62Group* self, C62* value)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (self->items[i] == value) break;
+    }
+    if (i < self->count) {
+        MoveItemsDown::Of(&self->items[i], &self->items[i + 1], (self->count - i) * 4 - 4);
+        self->count--;
+    }
+}
+
+void UpdateItemTimeouts(C62Group* s)
+{
+    s->scheduled = 0;
+    if (s->owner != 0 && s->owner->f180 != -1 && s->items[0]->id2E0 == s->owner->f180) {
+        s32 i;
+        for (i = 0; i < s->count; i++) {
+            if (s->items[i]->id2D0 != 1) break;
+        }
+        if (i >= s->count) {
+            for (i = 0; i < s->count; i++) {
+                SetStateAndNotify(s->items[i], 2);
+            }
+            s->owner->f180 = -1;
+        }
+        return;
+    }
+    for (s32 i = 0; i < s->count; i++) {
+        C62* it = s->items[i];
+        if (it->id2D0 != 2) continue;
+        if (it->id2DC != 0) continue;
+        f32 d = g_gameClock.time - it->f2D4;
+        if (it->f2D8 < d) {
+            SetStateAndNotify(it, 0);
+        }
+    }
+}
+
+void ScheduleItemTimeouts(C62Group* self)
+{
+    if (self->scheduled == 0) {
+        self->scheduled = 1;
+        AppendQueuedCall((s32)g_currentWorld, (void*)UpdateItemTimeouts, self, -1, 0);
+    }
+}
+
+LINKER_REMNANT(func_001EFCE0);
+
+void ResetScreenFade(ScreenFade* o)
+{
+    o->mode = -1;
+    SetScreenFadeMode(o, 0);
+}
+
+void UpdateScreenFade(ScreenFade* self, s32 a1)
+{
+    s32 s = self->mode;
+    f32 t = g_gameClock.elapsed - self->modeStartTime;
+    f32 thr;
+    f32 r;
+    switch (s) {
+    case 0:
+        if (RestoreFadeRequest(self, a1, 1) != 0) return;
+        break;
+    case 1:
+        if (self->style != 2) {
+            thr = 0.5f;
+            if (self->style == s) thr = 1.5f;
+            if (thr < t) {
+                s = 2;
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
+            } else {
+                r = t / thr;
+                f32 hi = 1.0f;
+                f32 lo = 0.0f;
+                if (r < lo) r = lo;
+                else if (hi < r) r = hi;
+                self->opacity = r;
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
+            }
+        }
+        break;
+    case 3: {
+        s32 v = self->style;
+        if (v != 2) {
+            thr = 0.25f;
+            if (v == 1) thr = 1.0f;
+            if (thr < t) {
+                if (v == s) {
+                    self->style = 0;
+                    self->modeStartTime = g_gameClock.elapsed;
+                    self->opacity = 1.0f;
+                } else {
+                    s = 0;
+                }
+            } else {
+                self->opacity = 1.0f - t / thr;
+            }
+        }
+        break;
+    }
+    case 2:
+        if (self->active.kind == 0 && g_worldLoadRequest != 0) {
+        } else {
+            s = 3;
+        }
+        break;
+    }
+    SetScreenFadeMode(self, s);
+}
+
+void DrawScreenFade(ScreenFade* self)
+{
+    if (g_currentWorld != 0 && g_screenFade.mode != 0) {
+        s32 mode = self->style;
+        if (mode != 1) {
+            if (mode < 2) {
+                if (mode == 0) goto draw;
+            }
+            return;
+        }
+        if (g_coloredTriangleSet != 0) {
+        DrawColoredTriangles(g_coloredTriangleSet, self->opacity);
+            return;
+        }
+        draw:
+    f32 v = self->opacity * 255.0f;
+    WriteColoredSpritePacket(0, 0, 0, (s32)v, &g_gsPacketWriter, 0.0f, 0.0f, 640.0f, 492.80002f);
+    }
+}
+
+void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count)
+{
+    IdentityKey* p;
+    s32 mode;
+
+    if (dst->mode == 0) {
+        if (D_0027051C != 0) {
+            if (*(s32*)((u8*)D_0027051C + 0x2D0) != 2) {
+                PopActiveSequenceElement(g_currentWorld);
+            }
+        }
+        if (args->key == 0 || SameAsFixedKey::Of(args->key)) {
+            args->flags |= 8;
+        } else {
+            args->flags &= ~8;
+        }
+        dst->active = *args;
+        dst->style = count;
+        mode = 2;
+        if (g_currentWorld != 0) {
+            mode = 1;
+        }
+        SetScreenFadeMode(dst, mode);
+    }
+}
+
+
+void SaveFadeRequest(ScreenFade* dst, FadeRequestBlock* src, s32 last)
+{
+    s32 mid = src->mid;
+    u64 lo = src->pair.lo;
+    u64 hi = src->pair.hi;
+    ((QuadP*)&dst->queued)->lo = lo;
+    ((QuadP*)&dst->queued)->hi = hi;
+    dst->queuedStyle = last;
+    dst->queued.flags = mid;
+}
+
+s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2)
+{
+    if (IsPadSelectFlagHeld(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
+        ClearPadPressedBits(o, 0x800);
+        *(FadeRequestBlock*)&self->active = *(FadeRequestBlock*)&self->queued;
+        self->style = self->queuedStyle;
+        FadeRequest* rr = &self->active;
+        IdentityKey* kk = rr->key;
+        if (kk == 0 || SameKeys::Of(kk, &D_00275B04)) {
+            rr->flags |= 8;
+        } else {
+            rr->flags &= ~8;
+        }
+        SetScreenFadeMode(self, (s32)param2);
+        return 1;
+    }
+    return 0;
+}
+
+LINKER_REMNANT(func_001F0218);
+
+void SetScreenFadeMode(ScreenFade* self, s32 mode)
+{
+    if (self->mode == mode) goto L0410;
+    if (self->mode == 2) {
+        if (D_0026FA68 != 0) {
+            SetWarpPageMode(D_0026FA68, 0);
+        }
+    }
+    if (mode == 1) goto L02E0;
+    if (mode < 2) {
+        if (mode == 0) {
+            self->opacityWord = 0;
+            goto L0400;
+        }
+        self->mode = mode;
+        goto L0404;
+    }
+    if (mode == 2) goto L02A0;
+    if (mode == 3) goto L0374;
+    self->mode = mode;
+    goto L0404;
+
+L02A0:
+    if (self->active.kind != 0) {
+        FadeRequest* q = &self->active;
+        QueueWorldLoad((u8*)&g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
+    }
+    self->active.kind = 0;
+    self->opacity = 1.0f;
+    self->queued.kind = 0;
+    goto L0400;
+
+L02E0:
+    {
+        s32 v = self->style;
+        if (v == 2) goto L0300;
+        if (v == 3) goto L0354;
+        goto L0364;
+    }
+
+L0300:
+    {
+        s32 v = GetEntryIdByKey((s32)self->active.key);
+        s32 a3 = v >> 8;
+        s32 a2 = v & 0xFF;
+        if (D_0026FA68 == 0) goto L034C;
+        if (v == -1) goto L034C;
+        s32 a1 = 10;
+        if (a3 != 0) a1 = a2;
+        SetWarpCursor(D_0026FA68, a1, 3);
+        ShowCountedScreenElement(g_currentWorld);
+        goto L0364;
+    }
+
+L034C:
+    self->style = 0;
+    goto L0364;
+
+L0354:
+    mode = 2;
+    goto L02A0;
+
+L0364:
+    SetElementStackState(g_elementStack, 8);
+    self->mode = mode;
+    goto L0404;
+
+L0374:
+    {
+        s32 a = self->style;
+        if (a == 2) goto L038C;
+        if (a == mode) goto L03EC;
+        self->mode = mode;
+        goto L0404;
+    }
+
+L038C:
+    {
+        if (self->style == D_00275BF0[0]) {
+            s32 idx = g_previousLevelIndex;
+            if (idx != -1) {
+                g_mapScreenList.current = g_mapScreenList.nodes[idx];
+            }
+        }
+        if (g_mapScreenList.current != 0) {
+            g_mapScreenList.current->f2E0 = 3;
+            SetWarpPageMode(g_mapScreenList.current, 4);
+            self->mode = mode;
+            goto L0404;
+        }
+        self->style = 3;
+        goto L0400;
+    }
+
+L03EC:
+    FadeScreenToBlack(0.25f);
+    self->style = 0;
+    goto L0400;
+
+L0400:
+    self->mode = mode;
+L0404:
+    self->modeStartTime = g_elapsedTime[0];
+L0410:
+    return;
+}
+
+void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
+{
+    FadeRequest m;
+    m.kind = 1;
+    m.key = obj;
+    m.f08 = value;
+    m.flags = 0;
+    StartScreenFade(&g_screenFade, &m, count);
+}
+
+s32 GetCurrentWarpEntry(void)
+{
+    if (D_00275BF0[0] != 2) {
+        return g_saveData->f19DC;
+    }
+    return 10;
+}
+
+s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
+{
+    s32 flag = 0;
+    s32 sel;
+    s32 idx;
+    if (kind == 10) {
+        sel = 0;
+        idx = 4;
+        flag = 1;
+    } else {
+        s32 mode = self->slot;
+        s32 allowed = 1;
+        if (mode == 5 && (kind == 1 || kind == 7)) {
+            allowed = 0;
+        }
+        if (kind == 9) {
+            if (allowed != 0) {
+                s32 m = mode * 0x44C;
+                if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
+                    s32 q = g_saveData->levels[mode].f448;
+                    flag = (q & D_00275FC8[mode]) != 0;
+                }
+            }
+        } else {
+            s32 c = kind < 9;
+            idx = -1;
+            if (c) {
+                idx = kind;
+            }
+            sel = mode;
+            flag = 0;
+            if (allowed != 0) {
+                flag = *(s32*)((u8*)g_saveData + (sel * 0x44C + idx * 0x78) + 0x10) & 1;
+            }
+        }
+    }
+    if (outA != 0) {
+        *outA = sel;
+    }
+    if (outB != 0) {
+        *outB = idx;
+    }
+    return flag;
+}
+
+s32 IsWarpEntryReachable(void* self, s32 code)
+{
+    s32 r;
+    if (code == 9) {
+        return 0;
+    }
+    r = IsWarpEntryAvailable(self, code, 0, 0);
+    if (r == 0) {
+        switch (((WarpPage*)self)->slot) {
+        case 1:
+            if (code >= 2) {
+                if (code < 6) {
+                    r = IsWarpEntryAvailable(self, 1, 0, 0);
+                } else if (code < 8) {
+                    r = IsWarpEntryAvailable(self, 9, 0, 0);
+                }
+            }
+            break;
+        case 2:
+        case 3:
+        case 4:
+            if (code >= 2) {
+                if (code < 5) {
+                    r = IsWarpEntryAvailable(self, 1, 0, 0);
+                } else if (code < 8) {
+                    r = IsWarpEntryAvailable(self, 9, 0, 0);
+                }
+            }
+            break;
+        }
+    }
+    return r;
+}
+
+void StartWarpPage(WarpPage* o) {
+    StartPlacedObject(o);
+    o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
+    if (g_saveData->f19D8) {
+        u8* t = (u8*)&g_mapScreenList;
+        ((U32P*)(t + 0x260))->v = (u32)o;
+    }
+    switch (o->id) {
+    case 0x1C7: o->slot = 1; break;
+    case 0x1C8: o->slot = 2; break;
+    case 0x1C9: o->slot = 3; break;
+    case 0x1C6: o->slot = 4; break;
+    case 0x1CA: o->slot = 5; break;
+    default: o->slot = g_saveData->f19D8; break;
+    }
+    g_mapScreenList.nodes[o->slot] = o;
+}
+
+void PostLoadWarpPage(WarpPage* self)
+{
+    ListFrame it;
+    BaseObject* node;
+    WarpEntry* el;
+    s32 i;
+
+    PostLoadPlacedObject(self);
+    ResolveObjectLinks(self, 0x34, D_00275FE0);
+    BeginPageWalk::Of(&it, &self->children);
+    while ((node = NextPageNode::Of(&it)) != 0) {
+        ResolveAndStartObject(node);
+    }
+    el = self->entries;
+    for (i = 0; i < 11; i++) {
+        f32 zero = 0.0f;
+        el->f28 = zero;
+        el->f24 = zero;
+        el->phase = RandomFloatInRange(zero, 6.2831855f);
+        el->speed = RandomFloatInRange(0.5f, 0.7f);
+        el++;
+    }
+    self->selected = -1;
+    g_activeListFrames = it.prev;
+}
+
+void SelectWarpPageEntry(WarpPage* self, s32 value)
+{
+    if (value == 10) {
+        SetElementTextFromEntry(&D_0026F138, 0, 4);
+    } else {
+        T217D_3D0* base = &D_0026F138;
+        s32 t = value < 9;
+        s32 idx = t ? value : -1;
+        SetElementTextFromEntry(base, self->slot, idx);
+    }
+    SetWarpPageSelectedEntry(self, value);
+}
+
+void SetPendingWarpEntry(s32 unused, s32 a, s32 b)
+{
+    D_00276250 = a;
+    D_00276654 = b;
+}
+
+void AnnouncePendingWarpEntry(WarpPage* self)
+{
+    if (D_00276250 == -1) return;
+    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
+    D_002721D0.vt->m16(&D_002721D0, 2);
+    T217D_3D0* e = &D_0026F138;
+    e->pending = 0;
+    e->vt->m16(e, 0);
+    SetElementTextFromEntry(e, g_saveData->f19D8, g_saveData->f19DC);
+    e->announce = 1;
+    SetScreenElementHoldTime(e, 0.0f);
+    e->vt->m16(e, 2);
+    Animation* sl = self->entries[D_00276250].f00;
+    if (sl != 0) {
+        f32 f = 0.0f;
+        if (D_00276654 == 0) f = sl->length;
+        ReplaceAnimationPlayer(sl, self, 0, &self->f2F0, f, 0.0f);
+    }
+    if (self->f2E8 != 0) {
+        for (s32 i = 0; i < self->f2E8->startCount; i++) {
+            AnimEvent* en = &self->f2E8->startList[i];
+            if (en->kind == 10) {
+                BaseObject* n = FindFirstObjectById(self->world, 0x104, en->a8.i, self);
+                if (n != 0) n->desc->m02(n);
+            }
+        }
+    }
+    D_00276250 = -1;
+}
+
+INCLUDE_ASM(func_001F0AE0);
+
+void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
+{
+    u8 tmp[0x50];
+    Camera* p = g_camera;
+    f32 keep1 = p->f1C4;
+    f32 keep2 = p->f1C8;
+    SnapCameraZoom(p, 1.0f);
+    BuildPlacedObjectTransform(obj, c, tmp);
+    BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
+    func_00125C90(obj, s, tmp);
+    SnapCameraZoom(g_camera, keep1);
+    g_camera->f1C8 = keep2;
+}
+
+void HandleWarpPageNotification(WarpPage* self, s32 kind, void* msg)
+{
+    HandlePlacedObjectNotification(self, kind, msg);
+    if (kind != 5) return;
+    s32 v = self->mode;
+    if (v == 3) goto L_three;
+    if (v >= 4) goto L_ge4;
+    if (v == 1) goto L_one;
+    return;
+L_ge4:
+    if (v == 4) goto L_four;
+    return;
+L_one:
+    SetWarpPageMode(self, self->f2E0);
+    return;
+L_three:
+    SetScreenFadeMode(&g_screenFade, 2);
+    return;
+L_four:
+    if ((s32)msg != self->f2EC) return;
+    ScreenFade* g = &g_screenFade;
+    if (g->mode == 3) {
+        SetScreenFadeMode(g, 0);
+    }
+    SetWarpPageMode(self, 0);
+}
+
+void SetWarpPageMode(WarpPage* self, u32 next)
+{
+    s32 i;
+    Animation* t;
+    s32 cur = self->mode;
+    if (cur == (s32)next) {
+        return;
+    }
+    switch (cur) {
+    case 1:
+    case 4:
+        StopSoundRecord(self->sound, 0);
+        break;
+    case 2:
+        if (self->f560 == 0) {
+            D_0026F138.vt->m15(&D_0026F138);
+        }
+        for (s32 k = 0; k < 11; k++) {
+            self->entries[k].f28 = 0;
+        }
+        break;
+    case 0: {
+        f32 one = 1.0f;
+        self->desc->m02(self);
+        for (s32 n = 0; n < 11; n++) {
+            WarpEntry* s = &self->entries[n];
+            if (IsWarpEntryAvailable(self, n, (s32*)0, (s32*)0)) {
+                s->f08 = one;
+                s32 want;
+                if (self->f2E0 == 3) {
+                    want = GetCurrentWarpEntry();
+                } else {
+                    want = self->cursor;
+                }
+                if (n == want) {
+                    s->f10 = one;
+                } else {
+                    s->f10 = 0;
+                }
+            } else {
+                s->f10 = 0;
+                s->f08 = 0;
+            }
+        }
+        *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
+        for (s32 j = 0; j <= 10; j++) {
+            WarpEntry* s = &self->entries[j];
+            PlacedObject* a = (PlacedObject*)s->f04;
+            PlacedObject* b = (PlacedObject*)s->f0C;
+            if (a) {
+                a->desc->m02(a);
+                EnsureObjectWorldNode(a);
+                a->f298->rate = 0;
+                a->f298->level = s->f08;
+            }
+            if (b) {
+                b->desc->m02(b);
+                EnsureObjectWorldNode(b);
+                b->f298->rate = 0;
+                b->f298->level = s->f10;
+            }
+        }
+        break;
+    }
+    }
+    switch (next) {
+    case 1: {
+        if (self->f2E0 == 3) {
+            s32 ne = self->cursor != 1;
+            Animation* a;
+            s32 off;
+            if (ne) {
+                off = self->cursor * 52;
+            } else {
+                off = GetCurrentWarpEntry() * 52;
+            }
+            a = *(Animation**)((u8*)self + off + 0x2F8);
+            if (a) {
+                f32 fa = 0;
+                if (ne) {
+                    fa = a->length;
+                }
+                ReplaceAnimationPlayer(a, self, 0, &self->f2F0, fa, 0.0f);
+            }
+        } else {
+            Animation* a = self->entries[1].f00;
+            if (a) {
+                ReplaceAnimationPlayer(a, self, 0, &self->f2F0, 0.0f, 0.0f);
+            }
+            f32 z = 0.0f;
+            SetWarpPageSelectedEntry(self, self->cursor);
+            self->q540 = self->q550;
+            SelectWarpPageEntry(self, self->cursor);
+            SetScreenElementHoldTime(&D_0026F138, z);
+            D_0026F138.vt->m14(&D_0026F138);
+            StartSoundEffect(0x8A, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
+            for (i = 0; i < 11; i++) {
+                WarpEntry* s = &self->entries[i];
+                s32 r = IsWarpEntryReachable(self, i);
+                s->reachable = r;
+                s32 v = 0;
+                if (r != 0 && ((u32)(i - 2) < 6 || i == 0)) {
+                    v = 1;
+                }
+                s->f20 = v;
+                s->f24 = s->f28 = 0.0f;
+            }
+        }
+        self->f2D8 = self->cursor;
+        t = self->f2E4;
+        if (t != 0) {
+            goto L146C;
+        }
+        goto Lz;
+    }
+    case 4: {
+        if (self->f560 == 0) {
+            D_0026F138.vt->m15(&D_0026F138);
+            if (self->f2E0 == 2) {
+                StartSoundEffect(0x8B, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        }
+        AnnouncePendingWarpEntry(self);
+        t = self->f2E8;
+        if (t == 0) {
+            goto Lz;
+        }
+    L146C:
+        ReplaceAnimationPlayer(t, self, 0, &self->f2EC, 0.0f, 1.0f);
+        self->mode = next;
+        goto L1550;
+    }
+    case 2:
+        for (s32 m = 0; m < 11; m++) {
+            if (m != self->selected) {
+                self->entries[m].f28 = 1.0f;
+            }
+        }
+        self->mode = next;
+        goto L1550;
+    case 3:
+        self->f2D8 = -1;
+        break;
+    case 0:
+        for (i = 0; i < 11; i++) {
+            PlacedObject* a = (PlacedObject*)self->entries[i].f04;
+            PlacedObject* b = (PlacedObject*)self->entries[i].f0C;
+            if (a) {
+                if (a->f298) {
+                    RemoveObjectNodeFromWorld(a->f298);
+                }
+                a->desc->m03(a);
+            }
+            if (b) {
+                if (b->f298) {
+                    RemoveObjectNodeFromWorld(b->f298);
+                }
+                b->desc->m03(b);
+            }
+        }
+        break;
+    default:
+        break;
+    }
+L154C:
+    self->mode = next;
+L1550:
+    self->modeTime = g_gameClock.elapsed;
+    return;
+Lz:
+    next = 0;
+    goto L154C;
+}
+
+void SetWarpCursor(WarpPage* self, s32 a1, s32 a2)
+{
+    s32 v = self->mode;
+    if (v == 2) goto L_two;
+    if (v < 3) {
+        if (v == 0) goto L_store;
+    } else {
+        if (v == 4) goto L_store;
+    }
+    return;
+L_store:
+    self->cursor = a1;
+    self->f2E0 = a2;
+    SetWarpPageMode(self, 1);
+    return;
+L_two:
+    self->cursor = a1;
+    if (a2 == 3) {
+        SetWarpPageMode(self, 3);
+    }
+}
+
+void BeginWarpPageClose(WarpPage* self)
+{
+    s32 v = self->mode;
+    if (v < 3) {
+        if (v > 0) {
+            SetWarpPageMode(self, 4);
+        }
+    }
+}
+
+void MoveWarpCursor(WarpPage* self, s32 idx)
+{
+    s32 (*table)[4] = D_00276608[self->slot];
+    if (table == 0) {
+        StartSoundEffect(WARP_SOUND_REFUSE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        return;
+    }
+    s32 e = table[self->cursor][idx];
+    while (e != -1 && self->entries[e].reachable == 0) {
+        e = table[e][idx];
+    }
+    if (e != -1 && self->entries[e].reachable != 0) {
+        SetWarpCursor(self, e, 2);
+        StartSoundEffect(WARP_SOUND_MOVE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    } else {
+        StartSoundEffect(WARP_SOUND_REFUSE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    }
+}
+
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+void ProjectPointToCamera(Camera* cam, void* point, f32* out);
+
+void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
+{
+    Vec02 v;
+    BaseObject* o;
+    if (flag != 0) {
+        o = (BaseObject*)self->entries[idx].f18;
+    } else {
+        o = (BaseObject*)self->entries[idx].f14;
+    }
+    if (o != 0) {
+        TransformPointBetweenFrames(o->parent, self, (u8*)o + 0x40, &v);
+        Camera* g = g_camera;
+        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        ProjectPointToCamera(g, &v, out);
+        out[0] = out[0] * 320.0f + 320.0f;
+        out[1] = out[1] * -246.40001f + 246.40001f;
+    } else {
+        out[0] = 320.0f;
+        out[1] = 246.40001f;
+    }
+}
+
+void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
+    u8* base = (u8*)self;
+    if (*(s32*)(base + 0x534) == idx) {
+        return;
+    }
+    BaseObject* r = *(BaseObject**)(base + idx * 0x34 + 0x30C);
+    if (r != 0) {
+        TransformPointBetweenFrames(r->parent, self, (u8*)r + 0x40, (Quad16*)(base + 0x550));
+    } else {
+        *(Quad16*)(base + 0x550) = *(Quad16*)&D_00248D30;
+    }
+    u8* arr = base + 0x320;
+    u8* slot = arr + idx * 0x34;
+    *(s32*)slot = 0;
+    s32 old = *(s32*)(base + 0x534);
+    if (old != -1) {
+        *(f32*)(arr + old * 0x34) = 1.0f;
+    }
+    *(s32*)(base + 0x534) = idx;
+}
+
+extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
+void InitWarpMenu(T217D_0F0* self) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2) != 0) {
+        self->frame = (Font**)&D_00276620;
+        *self->frame = GetFontById(2);
+    }
+    SetScreenElementHoldTime(self, 0.0f);
+    SetScreenElementScale(self, 0.6f);
+    self->color = 0xDF7F7F7F;
+    self->vt->m08(self, D_0024E808);
+    self->current = 0;
+    FillMemory(self->nodes, 0, 0x18);
+}
+
+void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
+{
+    s32 loc[2];
+    s32 s3;
+    s32 s2;
+    s32 v1;
+
+    if (self->current == 0) return;
+    if (self->current->mode != 2) return;
+    if (self->current->f560 != 0) return;
+    if ((t->flags & 0x910) != 0 || t->f14 == 1) {
+        PopStackElement((ElementStack*)g_elementStack);
+        ClearPadPressedBits(&g_padRecord, 0x910);
+        return;
+    }
+    if (self->mode != self->current->mode) return;
+
+    s3 = IsWarpEntryAvailable(self->current, self->current->cursor, &loc[0], &loc[1]);
+    s2 = GetPadHorizontalStep(t);
+    v1 = GetPadVerticalStep(t);
+    t->f30 = g_gameClock.elapsed + t->f34;
+    t->f38 = g_gameClock.elapsed + t->f3C;
+
+    if (v1 < 0) {
+        MoveWarpCursor(self->current, 0);
+    } else if (v1 > 0) {
+        MoveWarpCursor(self->current, 1);
+    } else if (s2 < 0) {
+        MoveWarpCursor(self->current, 2);
+    } else if (s2 > 0) {
+        MoveWarpCursor(self->current, 3);
+    } else if ((t->flags & 0x40) != 0) {
+        ClearPadPressedBits(&g_padRecord, 0x40);
+        if (self->current->cursor != GetCurrentWarpEntry()) {
+            if (s3 != 0) {
+                IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
+                self->current->f560 = 1;
+                PopStackElement((ElementStack*)g_elementStack);
+                StartObjectFade(v, -1, 2);
+            } else {
+                StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        } else {
+            PopStackElement((ElementStack*)g_elementStack);
+        }
+    }
+
+    if (s3 != 0) {
+        self->scaleTarget = 1.0f;
+    } else {
+        self->scaleTarget = D_00275FC0;
+    }
+    self->scale = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->scale, self->scaleTarget, g_gameClock.step);
+}
+
+void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
+{
+    if ((a1 != 0) != (self->open == 0)) return;
+    if (a1 != 0) {
+        HideScreenElements(self);
+        s32 r = GetCurrentWarpEntry();
+        if (r == 10) {
+            r = (IsWarpEntryAvailable(self->current, 1, 0, 0) != 0);
+        }
+        SetWarpCursor(self->current, r, 2);
+        self->scaleTarget = 1.0f;
+        self->scale = 1.0f;
+        Animation* an = self->current->f2E4;
+        if (an != 0) {
+            SetScreenElementSlideInTime(self, an->length);
+        }
+        GameProgress* g = g_saveData;
+        if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+            PauseStagedBankVoice();
+        }
+        self->vt->m14(self);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
+        SetElementStackState(g_elementStack, 7);
+    } else {
+        self->vt->m15(self);
+        if (self->current->f560 == 0) {
+            BeginWarpPageClose(self->current);
+            Animation* an = self->current->f2E8;
+            if (an != 0) {
+                SetScreenElementSlideOutTime(self, an->length);
+            }
+            ClearPadSelectFlags(1);
+            SetElementStackState(g_elementStack, 3);
+            GameProgress* g = g_saveData;
+            if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+                ResumeStagedBankVoice();
+            }
+        }
+    }
+    self->open = a1;
+}
+
+void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c2, s32 flags)
+{
+    FanPoint loc;
+    s32 i;
+    f32 step = 6.2831855f / (f32)n;
+    BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x31001);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x42, (flags & 1) ? 0x48 : 0x44);
+    BeginGifTag(&g_gsPacketWriter, 0x4D, 2, 0x41);
+    AddGifRgbaEntry(&g_gsPacketWriter, *c1);
+    AddGifXyzfEntry(&g_gsPacketWriter, (u32)(s32)((cx + 1728.0f) * 16.0f),
+                  (u32)(s32)((cy * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
+    loc.k = 0;
+    for (i = 0; i < n + 1; i++) {
+        ComputeSinCos(WrapAngle(angle), &loc.x, &loc.y);
+        loc.x = loc.x * radius + cx;
+        loc.y = loc.y * radius + cy;
+        if ((i & 1) && (flags & 2)) {
+            AddGifRgbaEntry(&g_gsPacketWriter, loc.k);
+        } else {
+            AddGifRgbaEntry(&g_gsPacketWriter, *c2);
+        }
+        angle += step;
+        AddGifXyzfEntry(&g_gsPacketWriter, (u32)(s32)((loc.x + 1728.0f) * 16.0f),
+                      (u32)(s32)((loc.y * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
+    }
+}
+
+INCLUDE_RODATA(D_0024E830);
+INCLUDE_RODATA(D_0024E838);
+INCLUDE_ASM(func_001F20A8);
+
+// The style above (D_00276620) and D_00276650 are built by the static initialiser GCC writes
+// here (func_001F2688), and its _GLOBAL_$I$ (func_001F2738) follows the 12 bytes the linker left
+// of a function this file wrote out after it (tools/compile.py moves the block there).
+LINKER_REMNANT_AFTER_INIT(func_001F2728);

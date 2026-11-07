@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/1 (0.0%), checked 2026-11-08
+// BYTES 381/396 (96.2%), checked 2026-11-07
 // NEAR: one swap: retail loads the 0.01 constant (lui, ori, mtc1 f1) before the qmfc2 of the cross product's length; ours after it (the constant as a named local, on either side of the compare, and the rows' statements in every order tried: the stores, the ScaledTransform's scales and the fallback address then match). The unnormalised length stays in vf4 as retail has it only when the fallback address is formed first (a pointer local).
 // In the context of its file, src/main/placed_object.cpp.
 // 0x1233C0 to 0x130F48: the state triggers (classes 0x22 and 0x2F), the placed object's set-up,

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/1 (0.0%), checked 2026-11-08
+// SIZE 412/416, checked 2026-11-07
 // NEAR: one copy: retail's sqrt.s writes f0 and a mov.s f20,f0 moves it into the speed's register, with the multiply by the distance in the delay slot of the Cosine call; ours multiplies from f0 directly and fills the delay slot with the argument move (the float registers, the calls, the vector code and the tail all match: the speed is one variable, h declared before the Sine call). Fpu::Sqrt(q) assigned to q, to a fresh local and to a product tried.
 // In the context of its file, src/main/file_1E88D0.cpp.
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
