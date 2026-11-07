@@ -1051,7 +1051,7 @@ void func_001D9338(C19* self)
         t = g_currentEntry->bits74[s0 / 8] & mk;
     }
     if (s0 < 3 || t) {
-        func_00151E20(D_00261EF0, f);
+        RaiseScatterLevels(g_scatterController, f);
     }
     if (s0 >= 0) {
         do {
@@ -1363,7 +1363,7 @@ void func_001DB480(u8* self)
 {
     u32 i;
     for (i = 0; i < 0x200; i++) {
-        func_00152438(self + 0x84 + i * 0xC, 0xC);
+        SetListLinkOffset(self + 0x84 + i * 0xC, 0xC);
     }
 }
 
@@ -1392,37 +1392,37 @@ void func_001DB4C8(World* self)
     InitSlotPool(SUB(0x1C0C), 0x8, 0x80);
     InitSlotPool(SUB(0x1C18), 0x14, 0x100);
     self->buf1ED4 = (void*)AllocateFrontMemory(0x1000);
-    func_00152438(SUB(0x48), 0x1C);
-    func_00152438(SUB(0x54), 0x48);
-    func_00152438(SUB(0x78), 0x48);
-    func_00152438(SUB(0x60), 0x40);
-    func_00152438(SUB(0x6C), 0x414);
-    func_00152438(SUB(0x3C), 0x2D0);
-    func_00152438(SUB(0x1B64), 0x34);
-    func_00152438(SUB(0x1B70), 0x34);
-    func_00152438(SUB(0x1B7C), 0x34);
-    func_00152438(SUB(0x1B94), 0x10);
-    func_00152438(SUB(0x1BAC), 0x64);
-    func_00152438(SUB(0x1BC4), 0x4);
-    func_00152438(SUB(0x1BE8), 0x410);
-    func_00152438(SUB(0x1C00), 0xB8);
-    func_00152438(SUB(0x1BDC), 0x64);
-    func_00152438(SUB(0x1C3C), 0x2DC);
-    func_00152438(SUB(0x1C48), 0x5DC);
-    func_00152438(SUB(0x1C54), 0x374);
-    func_00152438(SUB(0x1C60), 0x600);
-    func_00152438(SUB(0x1C6C), 0x90);
-    func_00152438(SUB(0x1C78), 0x56C);
-    func_00152438(SUB(0x1C84), 0x50);
-    func_00152438(SUB(0x1C90), 0x38);
-    func_00152438(SUB(0x1C9C), 0x38);
-    func_00152438(SUB(0x1CA8), 0xAF0);
-    func_00152438(SUB(0x1CB4), 0x630);
-    func_00152438(SUB(0x1CC0), 0x630);
-    func_00152438(SUB(0x1C24), 0xC);
-    func_00152438(SUB(0x1C30), 0xC);
-    func_00152438(SUB(0x1CCC), 0xC10);
-    func_00152438(SUB(0x1CD8), 0x34);
+    SetListLinkOffset(SUB(0x48), 0x1C);
+    SetListLinkOffset(SUB(0x54), 0x48);
+    SetListLinkOffset(SUB(0x78), 0x48);
+    SetListLinkOffset(SUB(0x60), 0x40);
+    SetListLinkOffset(SUB(0x6C), 0x414);
+    SetListLinkOffset(SUB(0x3C), 0x2D0);
+    SetListLinkOffset(SUB(0x1B64), 0x34);
+    SetListLinkOffset(SUB(0x1B70), 0x34);
+    SetListLinkOffset(SUB(0x1B7C), 0x34);
+    SetListLinkOffset(SUB(0x1B94), 0x10);
+    SetListLinkOffset(SUB(0x1BAC), 0x64);
+    SetListLinkOffset(SUB(0x1BC4), 0x4);
+    SetListLinkOffset(SUB(0x1BE8), 0x410);
+    SetListLinkOffset(SUB(0x1C00), 0xB8);
+    SetListLinkOffset(SUB(0x1BDC), 0x64);
+    SetListLinkOffset(SUB(0x1C3C), 0x2DC);
+    SetListLinkOffset(SUB(0x1C48), 0x5DC);
+    SetListLinkOffset(SUB(0x1C54), 0x374);
+    SetListLinkOffset(SUB(0x1C60), 0x600);
+    SetListLinkOffset(SUB(0x1C6C), 0x90);
+    SetListLinkOffset(SUB(0x1C78), 0x56C);
+    SetListLinkOffset(SUB(0x1C84), 0x50);
+    SetListLinkOffset(SUB(0x1C90), 0x38);
+    SetListLinkOffset(SUB(0x1C9C), 0x38);
+    SetListLinkOffset(SUB(0x1CA8), 0xAF0);
+    SetListLinkOffset(SUB(0x1CB4), 0x630);
+    SetListLinkOffset(SUB(0x1CC0), 0x630);
+    SetListLinkOffset(SUB(0x1C24), 0xC);
+    SetListLinkOffset(SUB(0x1C30), 0xC);
+    SetListLinkOffset(SUB(0x1CCC), 0xC10);
+    SetListLinkOffset(SUB(0x1CD8), 0x34);
     x = -1500.0f;
     if (g_buttonCodeFlags & 4) {
         x = -900.0f;
@@ -2181,7 +2181,7 @@ void func_001DD950(void* unused, void* a, void* b, void* c)
 
 void func_001DD9A0(void)
 {
-    func_00152410(D_00261EF0);
+    SetScatterLevel(g_scatterController);
 }
 
 void func_001DD9C0(void* unused, f32* out)

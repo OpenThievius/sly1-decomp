@@ -42,7 +42,7 @@ void func_0016CE00(TargetFollower* self)
     self->f598 = -1;
     self->f5C4 = 3000.0f;
     self->f5C8 = 1000.0f;
-    func_00152438(&self->list55C, 0x7B0);
+    SetListLinkOffset(&self->list55C, 0x7B0);
     Tune47* q = &self->tune5B0;
     q->a = 25.0f;
     q->c = 0.25f;

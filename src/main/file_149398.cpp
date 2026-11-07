@@ -923,7 +923,7 @@ void func_0014C5E8(GaugeManager* self)
     } else {
         c = ratio;
     }
-    func_00151E20(&D_00261EF0, 1.0f - c * 0.8f);
+    RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
 }
 
 void func_0014C668(void* unused, s32 mode)

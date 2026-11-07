@@ -1879,8 +1879,8 @@ ASM_FUNC(func_00123E88);
 
 void func_00123ED0(PlacedObject* self)
 {
-    func_00152438(&self->children, 0x1C);
-    func_00152438(&self->list60, 0x58);
+    SetListLinkOffset(&self->children, 0x1C);
+    SetListLinkOffset(&self->list60, 0x58);
     if (self->parent != 0) {
         self->bits24 = 1;
         self->bits26 = 0;
@@ -1904,7 +1904,7 @@ void func_00123ED0(PlacedObject* self)
     Init_00123ED0::Copy(&self->rot, &g_identityMatrix);
     Init_00123ED0::Copy(&self->m110, &g_identityMatrix);
     Init_00123ED0::Copy(&self->m1A0, &g_identityMatrix);
-    func_00152438(&self->list1E0, 8);
+    SetListLinkOffset(&self->list1E0, 8);
 }
 
 void func_00124050(PlacedObject* self)
@@ -2426,7 +2426,7 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
     if (src->f284) {
         u8* p = func_001B5EC0(&self->world->pool1BF4);
         CopyMemory(p, src->f284, 0x2E0);
-        func_00152450(p + 0xB8);
+        ClearListLinks(p + 0xB8);
         self->f284 = (RangeRecord*)p;
         AppendToList(&self->world->list1C00, p);
     }
@@ -3907,7 +3907,7 @@ void func_0012B868(void) {}
 void func_0012B870(Animation* self)
 {
     InitObject(self);
-    func_00152438(&self->props6C, 0x3C);
+    SetListLinkOffset(&self->props6C, 0x3C);
     Kin83* k = &self->kin;
     k->pos = 1.0f;
     k->vel = 0.0f;
@@ -4479,7 +4479,7 @@ AnimationPlayer* func_0012D3F8(World* pool)
     AnimationPlayer* o = (AnimationPlayer*)PopZeroedFreeSlot(&pool->pool1B58);
 
     o->vt = &g_animationPlayerMethods;
-    func_00152438(&o->list44, 0x20);
+    SetListLinkOffset(&o->list44, 0x20);
     o->f60 = (u8*)o + 0x64;
 
     return o;

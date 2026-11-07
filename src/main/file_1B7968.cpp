@@ -788,7 +788,7 @@ void func_001B7968(Collider* self)
     ScriptValue local;
     s32 s0;
     InitScriptValue(&local);
-    func_00152438(&self->parts, 0x2E4);
+    SetListLinkOffset(&self->parts, 0x2E4);
     InitPlacedObject(self);
     func_00160E80(&self->mesh);
     self->meshCopy = self->mesh;

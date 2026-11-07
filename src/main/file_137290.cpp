@@ -1579,7 +1579,7 @@ void func_00139DE8(WorldListedObject* self)
 {
     AppendToList(&self->world->list1CC0, self);
     InitPlacedObject(self);
-    func_00152438(&self->members, 0x1090);
+    SetListLinkOffset(&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;

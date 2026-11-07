@@ -163,7 +163,7 @@ void func_00152438(void* self, s32 value);
 
 void func_0017FD48(void)
 {
-    func_00152438(&g_pointObjects, 0x50);
+    SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
 void func_00152440(void* p);

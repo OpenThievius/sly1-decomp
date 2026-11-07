@@ -2836,7 +2836,7 @@ ScriptValue* func_00106120(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00150408(obj);
+    ResetCollectedItems(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2854,7 +2854,7 @@ ScriptValue* func_001061C0(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00150418(obj, out);
+    RecordCollectedItem(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3112,7 +3112,7 @@ ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00150750(obj);
+    SetStepSequenceModeOne(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3127,7 +3127,7 @@ ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00150760(obj);
+    SetStepSequenceCameraMode(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

@@ -1470,7 +1470,7 @@ void func_00160880(void)
     ResetGameProgress(g_saveData);
     D_00269984.value = 0;
     func_00160CC8(D_002623D8);
-    func_00151A68(D_00261EF0);
+    ClearScatterController(g_scatterController);
     g_buttonCodeFlags = 0;
     g_previousLevelIndex = -1;
     func_001608E0();
@@ -1643,7 +1643,7 @@ void func_00160DA0(void)
     } else {
         SetPauseMenuLayerPage((Call_160DA0*)g_pauseMenuElement, 0, 1);
     }
-    func_00151E20((Call_160DA0*)D_00261EF0, 1.0f);
+    RaiseScatterLevels((Call_160DA0*)g_scatterController, 1.0f);
 }
 
 void func_00160E80(Rec_160E80* self)

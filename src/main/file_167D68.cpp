@@ -1106,9 +1106,9 @@ void func_00169B18(TextureHeader* src, void* dst)
 
 void func_00169C58()
 {
-    func_00152438(&g_targetCurveList, 0x38);
-    func_00152438(&g_targetPointList, 0x50);
-    func_00152438(&g_partList, 0x558);
+    SetListLinkOffset(&g_targetCurveList, 0x38);
+    SetListLinkOffset(&g_targetPointList, 0x50);
+    SetListLinkOffset(&g_partList, 0x558);
 }
 
 void func_00169CA0()

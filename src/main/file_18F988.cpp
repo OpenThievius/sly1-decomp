@@ -704,7 +704,7 @@ void func_00191EB0(void)
 
 void func_00191EC0()
 {
-    func_00152438(&g_targetVectors.list, 0x38);
+    SetListLinkOffset(&g_targetVectors.list, 0x38);
 }
 
 void func_00191EE8(void)

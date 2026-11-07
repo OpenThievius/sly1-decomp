@@ -2816,7 +2816,7 @@ void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
     self->cur = (u8*)(p + 1);
     w = w | 0x50000000u;
     *p = (u32)n | w;
-    func_00152CE0(self, n, (s32)buf);
+    AppendPacketQuadwords(self, n, (s32)buf);
 }
 
 void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)

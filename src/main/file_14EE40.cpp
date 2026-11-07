@@ -1001,7 +1001,7 @@ void func_0014F920(C23* self)
     }
     ((VFn_14F920Arg)s2->vtbl[25])(s2, 0);
     ((VFn_14F920)s2->vtbl[7])(s2);
-    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))SyncPooledHolderWithPlayer, self, 0, 0);
     self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
 }
 
@@ -1024,13 +1024,13 @@ void func_0014FA88(C23* self)
                     if (self->f78C > 0) st[1] = 0x2B9;
                     else st[1] = 0x2B7;
                 } else {
-                    func_0014FDA8(self, &st[1]);
+                    UpdatePooledHolderAim(self, &st[1]);
                 }
                 break;
             case 0x2B9:
                 if (self->f7B0 != 0) st[1] = 0x2B8;
                 else if (self->f78C <= 0) st[1] = 0x2B7;
-                else func_0014FDA8(self, &st[1]);
+                else UpdatePooledHolderAim(self, &st[1]);
                 break;
             case 0x2BA:
                 func_00150008(self);
@@ -1460,7 +1460,7 @@ void func_00150AE8(StepSequence* self)
         if (q[1] != 0) {
             StepSequence* o = D_0027051C;
             if (o == 0) {
-                func_00151860(self, s2);
+                ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
                 if (o->f328 == 0 && o->state2D4 == 3) {
@@ -1838,7 +1838,7 @@ void func_001519E0(StepSequence* collection, const char* name, u32 kind)
 
 void* func_00151A58(void)
 {
-    return &D_00261EF0;
+    return &g_scatterController;
 }
 
 void func_00151A68(void* state)
@@ -1856,7 +1856,7 @@ void func_00151A88(G261EF0* self)
     if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
     else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
     else self->table = &D_00261E30;
-    func_00152410(self, g_currentEntry->dt);
+    SetScatterLevel(self, g_currentEntry->dt);
     s32 a = ((Tab_151A88*)self->table)->f1C;
     s32 b = ((Tab_151A88*)self->table)->f24;
     f32 t = g_currentEntry->dt;
@@ -1899,7 +1899,7 @@ void func_00151D28(Self_151D28* self)
         }
     } else {
         f32 v = ClampToRange((u8*)self->field_1C + 8, g_currentEntry->dt);
-        func_00152410(self, v);
+        SetScatterLevel(self, v);
     }
     CompleteSoundNotifiers(g_currentWorld);
 }
@@ -1911,7 +1911,7 @@ void func_00151E18(void* self)
 void func_00151E20(G261EF0* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
-    func_00152410(self, x);
+    SetScatterLevel(self, x);
     s32 index = g_saveData->f19E0;
     f32 y;
     if (index < 0) {
@@ -1939,7 +1939,7 @@ void func_00151ED8(G261EF0* obj, FlaggedObject* node)
     }
     value = ((Part_151ED8*)obj->table)->f14;
 have:
-    func_00152410(obj, g_currentEntry->dt + value);
+    SetScatterLevel(obj, g_currentEntry->dt + value);
     if (node != 0) {
         G27C230* m = g_currentEntry;
         s32 idx = node->ordinal;
@@ -1953,7 +1953,7 @@ have:
 
 void func_00151FC8(G261EF0* object)
 {
-	func_00152410(object, 0.0f);
+	SetScatterLevel(object, 0.0f);
 	G27C230* manager = g_currentEntry;
 	manager->f10 = 0.0f;
 	manager->count70 = 0;
@@ -2536,10 +2536,10 @@ void func_00153528(ActiveSetSolver* self, s32 count)
 	s32 size = 0x60 * n;
 	self->items = AllocateBackMemory(size);
 	(void)func_001F5C0C(self->items, 0, size);
-	func_00152438(&self->active, 0x4C);
-	func_00152438(&self->atLow, 0x4C);
-	func_00152438(&self->atHigh, 0x4C);
-	func_00152438(&self->pending, 0x4C);
+	SetListLinkOffset(&self->active, 0x4C);
+	SetListLinkOffset(&self->atLow, 0x4C);
+	SetListLinkOffset(&self->atHigh, 0x4C);
+	SetListLinkOffset(&self->pending, 0x4C);
 	s32 sq = (n * n) << 2;
 	self->matrix = (f32*)AllocateBackMemory(sq);
 	self->factor = (f32*)AllocateBackMemory(sq);

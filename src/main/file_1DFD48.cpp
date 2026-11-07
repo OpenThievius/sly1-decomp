@@ -13,7 +13,7 @@ void func_00152438(void* p, s32 n);
 
 void func_001DFD48()
 {
-    func_00152438(D_002758D0, 0x80);
+    SetListLinkOffset(D_002758D0, 0x80);
 }
 
 

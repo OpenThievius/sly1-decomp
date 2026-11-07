@@ -365,7 +365,7 @@ void func_0012C7B0(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
 
 void func_00141870(FlaggedObject* self)
 {
-    func_00151ED8(D_00261EF0, self);
+    RaiseScatterLevelForObject(g_scatterController, self);
     s32 sel;
     if (self->handle != 0) {
         sel = TestFlagTableBit(g_flagTable, self->flagIndex) ? 0x549 : 0x548;

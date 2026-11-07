@@ -901,7 +901,7 @@ void func_00154C10(EffectSpawner* self)
     self->f2DC=10.0f;
     self->f340=-1.0f;
     self->f310=-1;
-    func_00152438(self->list314,0x320);
+    SetListLinkOffset(self->list314,0x320);
 }
 
 ASM_FUNC(func_00154C80);
@@ -1648,7 +1648,7 @@ void func_00158F80(C7A* self, void* message)
             done = 1;
             k = (f32*)g_gameClock;
             r->f60 = k[1] + self->delay;
-            func_00152450((u8*)r + 0x64);
+            ClearListLinks((u8*)r + 0x64);
             AppendToList(&self->world->list1BDC, r);
         }
     }
@@ -3435,13 +3435,13 @@ void func_0015E810(void)
         r->bufA = (u8*)D_002C3B00 + i * 0x80000;
         r->bufB = D_003C3B00 + i * 0x100000;
         r->f10 = D_005C3B00 + i * 0x10600;
-        func_00152438(&r->l20, 0x630);
-        func_00152438(&r->l2C, 0x1090);
-        func_00152438(&r->l38, 0xB8);
+        SetListLinkOffset(&r->l20, 0x630);
+        SetListLinkOffset(&r->l2C, 0x1090);
+        SetListLinkOffset(&r->l38, 0xB8);
     }
-    func_00152438(&D_002622E0, 0x630);
-    func_00152438(&D_002622F0, 0x1090);
-    func_00152438(&g_deferredReleaseListC, 0xB8);
+    SetListLinkOffset(&D_002622E0, 0x630);
+    SetListLinkOffset(&D_002622F0, 0x1090);
+    SetListLinkOffset(&g_deferredReleaseListC, 0xB8);
     func_001F6950(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
     func_001F6DA8(5);
     g_frameReadySemaphore = CreateLockSemaphore(0, 2);

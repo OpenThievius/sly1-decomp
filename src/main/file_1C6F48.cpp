@@ -923,7 +923,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         s32 count;
         BaseObject** list;
         func_00128018(self, 0, self->fB60, &vec);
-        func_00152010(D_00261EF0, &vec, self->fB58, self->fB70);
+        ScatterObjectsAtPoint(g_scatterController, &vec, self->fB58, self->fB70);
         InitContactPairFlags((s32)g_currentWorld, self);
         if (((Animation*)self->f750) != 0) {
             s32 i;

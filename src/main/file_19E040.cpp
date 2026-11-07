@@ -1266,7 +1266,7 @@ EffectOwner* func_0019E040(World* self, s32 flag)
 void func_0019E0B8(EffectOwner* self)
 {
     InitCollider(self);
-    func_00152438(&self->list558, 0x10);
+    SetListLinkOffset(&self->list558, 0x10);
     u64 flags = self->flags;
     flags &= (u64)(s64)(s32)0xCFFFFFFF;
     flags |= 0x20000000ULL;
@@ -2465,13 +2465,13 @@ void func_001A4718(PairController* self)
     Table_1A4718 tmp;
 
     InitPlacedObject(self);
-    func_00152438(self->list35C, 0x5A0);
-    func_00152438(self->list368, 0x5A0);
-    func_00152438(self->list374, 0x5A0);
-    func_00152438(self->list384, 0x5B0);
-    func_00152438(self->list390, 0x5B0);
-    func_00152438(self->list3A0, 0x568);
-    func_00152438(self->list3AC, 0x568);
+    SetListLinkOffset(self->list35C, 0x5A0);
+    SetListLinkOffset(self->list368, 0x5A0);
+    SetListLinkOffset(self->list374, 0x5A0);
+    SetListLinkOffset(self->list384, 0x5B0);
+    SetListLinkOffset(self->list390, 0x5B0);
+    SetListLinkOffset(self->list3A0, 0x568);
+    SetListLinkOffset(self->list3AC, 0x568);
     self->id2D0 = -1;
     self->id2D4 = -1;
     self->id2D8 = -1;
@@ -2697,7 +2697,7 @@ void func_001A4EF0(PairController* self, s32 state)
             PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) SetPairedState(o, 8);
-        func_00151FC8(D_00261EF0);
+        ResetScatterLevels(g_scatterController);
         break;
     case 3:
         v = FindFirstObjectById(self->world, 0x105, 0x33E, 0);
@@ -2710,7 +2710,7 @@ void func_001A4EF0(PairController* self, s32 state)
             Link_1A4EF0* l = (Link_1A4EF0*)P(o, 0x55C);
             if (l == 0 || l->f18 != o) SetPairedState(o, 7);
         }
-        func_00151E20(D_00261EF0, 1.0f);
+        RaiseScatterLevels(g_scatterController, 1.0f);
         break;
     case 4:
         SetPauseMenuLayerPage((u8*)&g_pauseMenuElement, 0, 0x1A);

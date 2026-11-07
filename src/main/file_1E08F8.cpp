@@ -1615,7 +1615,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     UpdateSoundEmitters();
     SetVolumeChannelFactor(0xA, 0, 1.0f);
     func_001F4318(g_currentWorld, self->f8, self->fC);
-    func_00151E18(D_00261EF0);
+    NotifyScatterControllerLoaded(g_scatterController);
     func_00160CE8(D_002623D8);
     func_0016B520(D_0026FA90);
     func_00138C00(g_currentWorld, 0);

@@ -648,7 +648,7 @@ void func_001A8208(Self_1A8208* self)
             goto done;
         c0:
             self->f3C->f8 = 1;
-            func_00152438((u8*)self->f3C + 0x14, 0x18);
+            SetListLinkOffset((u8*)self->f3C + 0x14, 0x18);
         c1: {
                 s32 r = CountListItems((u8*)self->f3C + 0x14);
                 s32 lim = r + 1;
@@ -696,7 +696,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         } else {
             other->sub->f8 = 1;
-            func_00152438((u8*)other->sub + 0x14, 0x18);
+            SetListLinkOffset((u8*)other->sub + 0x14, 0x18);
             self->sub = 0;
         }
         GetObjectPoolShare(self);
