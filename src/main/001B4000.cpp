@@ -5,7 +5,7 @@
 void func_001B4AD0(CursorAnimator* self);
 
 // Defined in src/main/anim_record.cpp.
-struct Other_1B5160;
+struct DrawnPart;
 
 extern const u8 D_00217410[];
 
@@ -23,7 +23,7 @@ void func_001B4F80(RandomJumpAnimator* p, AnimatorParams* s);
 void func_001B4FC0(RandomJumpAnimator* self, f32 x);
 void func_001B5060(AngleFrameAnimator* self, AnimatorParams* key);
 void func_001B5108(AngleFrameAnimator* p);
-void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q);
+void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q);
 void func_001B5200(ScrollAnimator* p, AnimatorParams* s);
 void func_001B5278(ScrollAnimator* p, f32 t);
 f32 func_001B5308(ScrollAnimator* p);

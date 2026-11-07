@@ -45,7 +45,10 @@ struct Actor6C {
 struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
 
 // A pool of free records of one size (func_001B5EA0 takes the first, func_001B5EE0 clears it).
-struct Pool6C { s32 size; u8 pad4[4]; void* head; };
+struct Pool6C { s32 size; void* base; void* head; };
+
+// A setting of an IOP channel: the index into its table and the value (func_001C08B0).
+struct IopChannelSetting { s32 index; s32 value; };   // base: the records' block (func_001B5DD0)
 
 struct World : BaseObject {
     s32 count34;            // 0x34: the 0x03 objects in the world (func_001B7A98, func_001B7B78)
@@ -85,10 +88,9 @@ struct World : BaseObject {
     Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
     List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
     u8 pad1BA0[0x1BAC - 0x1BA0];
-    u8* f1BAC;              // 0x1BAC
-    s32 f1BB0;              // 0x1BB0
-    s32 f1BB4;              // 0x1BB4
-    u8 pad1BB8[0x1BD0 - 0x1BB8];
+    List01 list1BAC;        // 0x1BAC: the sound records (func_001C0808 walks them)
+    Pool6C pool1BB8;        // 0x1BB8: the sound level entries (func_001BEDF8 gives one back)
+    List01 list1BC4;        // 0x1BC4: the sound level entries in use (func_001BEE48 walks them)
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
     List01 list1BDC;        // 0x1BDC
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
@@ -165,8 +167,8 @@ struct World : BaseObject {
     s32 f231C;              // 0x231C
     s32 f2320;              // 0x2320
     void* f2324;            // 0x2324
-    u8 f2328[0x20];         // 0x2328
-    s32 f2348;              // 0x2348
+    IopChannelSetting channel2[4]; // 0x2328: the stack of IOP channel 2 settings (func_001C08B0 pushes, func_001C0950 pops)
+    s32 channel2Count;      // 0x2348
     f32 f234C;              // 0x234C
     f32 f2350;              // 0x2350
     s32 f2354;              // 0x2354

@@ -13,7 +13,8 @@
 struct KeyRecord {
     s32 wordA;             // 0x00: func_001BE728 (xor maskA gives the id word)
     s32 wordB;             // 0x04: func_001BE728 (xor maskB; only its non-zero is tested)
-    s32 idA;               // 0x08: with idB, what identifies the key (identity_key.h: w[2] ^ w[6])
+    s32 idA;               // 0x08: with idB, what identifies the key (identity_key.h: w[2] ^ w[6];
+                           // func_001BEB10 compares two banks' idA ^ idB)
     s32 word0C;            // 0x0C
     s32 word10;            // 0x10
     s32 maskA;               // 0x14: func_001BE728

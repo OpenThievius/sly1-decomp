@@ -106,10 +106,10 @@ AnimRecord* func_001B4688(s32 key);
 extern AnimCursor* D_00274544;
 extern AnimCursor* D_0027451C;
 f32 func_001EAAE0(f32 a, f32 b);
-struct Vec2_1B5160 { f32 x; f32 y; };
-struct Inner_1B5160 { u8 pad0[0x34]; s32 i34; };
-struct Other_1B5160 {
-    void* vt; u8 pad0[0xC]; Vec2_1B5160 vec; u8 pad1[0x60]; Inner_1B5160* p78;
+struct FacingXY { f32 x; f32 y; };
+struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
+struct DrawnPart {
+    void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
 extern u8 func_00166690[];
 f32 func_00205778(f32 a, f32 b);
@@ -137,8 +137,8 @@ extern u8 D_0021E438[];
 extern const Fn_Table D_0021E3D8[];
 extern const Fn_Table D_0021E3F8[];
 extern const Fn_Table D_0021E418[];
-struct Lo_1B4FC0 { s32 v; };
-s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
+struct RandomRangeLow { s32 v; };
+s32 func_001EAA70(RandomRangeLow lo, s32 hi);
 
 // The file's .data, in retail's order.
 s32 D_002744F8 = 0;
@@ -992,7 +992,7 @@ void func_001B4FC0(RandomJumpAnimator* self, f32 x)
         self->wait = self->wait - x;
         return;
     }
-    Lo_1B4FC0 lo;
+    RandomRangeLow lo;
     lo.v = 1;
     s32 v = RandomIntInRange(lo, count - 1);
     s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
@@ -1023,7 +1023,7 @@ void func_001B5108(AngleFrameAnimator* p)
     }
 }
 
-void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
+void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q)
 {
     if (p->cursor.record == 0) {
         return;
@@ -1034,11 +1034,11 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
     if (*(void**)q != (void*)DrawModelPart) {
         return;
     }
-    Vec2_1B5160* vv;
+    FacingXY* vv;
     if (q->p78->i34 != 0) {
         vv = &q->vec;
     } else {
-        vv = (Vec2_1B5160*)g_camera->g80;
+        vv = (FacingXY*)g_camera->g80;
     }
     f32 t = ArctangentOfRatio(vv->y, vv->x);
     f32 r = WrapModulo(p->phase - t, p->sector);

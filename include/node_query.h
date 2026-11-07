@@ -6,6 +6,7 @@
 #define NODE_QUERY_H
 
 #include "common.h"
+#include "placed_object.h"
 
 struct NodeQuery {
     union {
@@ -16,6 +17,9 @@ struct NodeQuery {
     s32 f08;                // 0x08
     s32 out;                // 0x0C: func_00177838
     s32 kind;               // 0x10: func_00177838
+    u8 pad14[0x20 - 0x14];
+    Vec02 pos;              // 0x20: where (func_001C9990: the agent's position)
+    Vec02 dir;              // 0x30
 };
 
 

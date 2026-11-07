@@ -29,10 +29,10 @@ void func_eu_001AB558(Actor_eu_001AB558* self)
         func_eu_001374E0(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {
-            SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
+            Font* sub = *(Font**)obj;
             if (sub != 0) {
-                VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, D_eu_00263590);
+                const FontVt* d = sub->vt;
+                d->drawBox((Font*)((u8*)sub + d->adj9), obj, &L, D_eu_00263590);
             }
         }
         f32 v = self->f51C;

@@ -123,16 +123,16 @@ struct Desc06 : Desc05 {
     void (*m54)(TurningCollider* self);             // 0x160: slot 84, the matrix from the heading (class 0x06: func_001C53B0)
     s32 (*m55)(TurningCollider* self);                          // 0x164: slot 85 (class 0x06: func_001C4F00)
     void* m56;                                      // 0x168: slot 86 (class 0x06: func_001C5248)
-    void* m57;                                      // 0x16C: slot 87 (class 0x08: func_001CB3C8)
+    s32 (*m57)(Agent* self);                          // 0x16C: slot 87 (class 0x08: func_001CB3C8)
 };
 
 // Class 0x08's descriptor (and its subclasses'): twelve more slots.
 struct Desc08 : Desc06 {
-    void* m58;                                      // 0x170: slot 88 (class 0x08: func_001CA460)
-    void* m59;                                      // 0x174: slot 89 (class 0x08: func_001C8010)
+    s32 (*m58)(Agent* self);                          // 0x170: slot 88 (class 0x08: func_001CA460)
+    s32 (*m59)(Agent* self);                          // 0x174: slot 89 (class 0x08: func_001C8010)
     void* m5A;                                      // 0x178: slot 90 (class 0x08: func_001C8E28)
-    void* m5B;                                      // 0x17C: slot 91 (class 0x08: func_001C9008)
-    void* m5C;                                      // 0x180: slot 92 (class 0x08: func_001C91C8)
+    void (*m5B)(Agent* self, s32 state, void* context);   // 0x17C: slot 91 (class 0x08: func_001C9008)
+    void (*m5C)(Agent* self, s32 old, void* context);     // 0x180: slot 92 (class 0x08: func_001C91C8)
     s32 (*m5D)(Agent* self);                          // 0x184: slot 93 (class 0x08: func_001CA468)
     void (*m5E)(Agent* self, s32 on);                 // 0x188: slot 94 (class 0x08: func_001C8C08)
     void* m5F;                                      // 0x18C: slot 95 (class 0x08: func_001C8590)

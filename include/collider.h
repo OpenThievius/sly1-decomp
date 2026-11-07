@@ -79,7 +79,7 @@ struct Contact03 {
     Vec02 v80;              // 0x80: func_001F5008; its z, signed by the end, is how much end 0 faces up (func_001C5248)
     u8 pad90[0x94 - 0x90];
     f32 f94;                // 0x94: set by a body's slot 60 (func_001C5338: 1.5 or 0)
-    s32 f98;                // 0x98: cleared with it
+    f32 f98;                // 0x98: cleared with it (func_001CAC30 sets a float)
     s32 kind;               // 0x9C: 8 and 9 are dropped when a part stops colliding (func_001B94F0)
     s32 fA0;                // 0xA0: compared with TurningCollider::f6D4 at end 0 (kinds 1, 10; func_001C5248)
     s32 fA4;                // 0xA4: the same at end 1 (kind 4)
@@ -142,7 +142,7 @@ struct Desc03 : Desc02 {
     void* m31;                                      // 0xD4: func_001B8148
     void (*m32)(Collider* self);                         // 0xD8: a body's parts changed (func_001B8540)
     void (*m33)(Collider* self, Attach03* node, f32 dt); // 0xDC: called by what it is attached to (func_001BAC28)
-    void* m34;                                      // 0xE0: func_001BC368
+    void (*m34)(Collider* self, void* src, s32 flag);    // 0xE0: take src's meshes (func_001BC368)
     void (*m35)(Collider* self, s32* index, Collider** list); // 0xE4: number the parts (func_001BC760)
     void* m36;                                      // 0xE8: func_001BC828
     void* m37;                                      // 0xEC: func_001BC978
