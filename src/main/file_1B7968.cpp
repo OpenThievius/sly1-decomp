@@ -74,7 +74,6 @@ void* AllocateBackMemory(s32 size);
 void RecomputePlacedObjectFrame(Collider* self);
 void ClearRootObjectStateBits(void* a, void* b, s32 c);
 void MarkSweepAxesUnsorted(void* a);
-void ComputeColliderInverseInertia(Collider* self);
 void DropColliderContacts(Collider* self, s32 value);
 void InitContactPairFlags(void* a, void* b);
 s32 ScriptListContainsValue(s32 value, void* out);
@@ -115,6 +114,8 @@ f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
 void ReadBufferedVector3(BufferedStream* in, Vec02* p);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
+void CopyBytes(void* dst, void* src, s32 n);
+s32 InvertMatrix3x3(Mat02* in, Mat02* out);
 s32 ReadBufferedU16(BufferedStream* in);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
@@ -739,10 +740,24 @@ void SetColliderMass(Collider* self, f32 v)
     f32 a = self->mass;
     f32 q = v / a;
     self->mass = a * q;
-    ComputeColliderInverseInertia(self);
+    ComputeColliderInverseInertia(self, q);
 }
 
-INCLUDE_ASM(func_001B9448);
+void ComputeColliderInverseInertia(Collider* self, f32 scale)
+{
+    Mat02 m;
+    Vec02 k;
+    Mat02 s;
+    Vu0::Q(k) = Vu0::FromFloat(scale);
+    Vu0::Q(s.r[0]) = Vu0::MulX(Vu0::Q(self->inertia.r[0]), Vu0::Q(k));
+    Vu0::Q(s.r[1]) = Vu0::MulX(Vu0::Q(self->inertia.r[1]), Vu0::Q(k));
+    Vu0::Q(s.r[2]) = Vu0::MulX(Vu0::Q(self->inertia.r[2]), Vu0::Q(k));
+    CopyBytes(&m, &s, 0x30);
+    self->inertia = m;
+    if (!InvertMatrix3x3(&self->inertia, &self->invInertia)) {
+        FillMemory(&self->invInertia, 0, 0x30);
+    }
+}
 
 void DropColliderContacts(Collider* self, s32 mode)
 {
