@@ -20,15 +20,17 @@ splits are taken from other projects or from the prototype
 
 ## Next
 
-Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-06: the
-matching is in its long tail, the data mostly from C (88.7%), the original assembly classified, 18
-source files proved, PAL close behind US, and names and types under way.
+Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-07: the
+matching is in its long tail, the data mostly from C, the original assembly classified, every byte
+of code in a proved source file, PAL close behind US, and names and types well under way.
 
 1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-06,
    77 US functions are left (about 79 KB: 53 in game code, 24 in the libraries), 34 of them with
-   a near miss in `nonmatching/`. The largest, func_00109488 (37 KB, the property registry fill,
-   47% of what is left), is close but differs in code as well as registers: 9,336 instructions
-   against retail's 9,348. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
+   a near miss in `nonmatching/`. The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB,
+   47% of what is left), is close but differs in code as well as registers: 9,338 instructions
+   against retail's 9,348, 2,990 of them exact. Its header records why: GCC keeps the value 4 in
+   one callee-saved register where retail rebuilds it, and every source form found that frees
+   that register also moves the CSE windows the rest of the function depends on. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
    files under `src/lib/`, by Sony's Linux build of 2.9-ee-991111 (docs/TOOLCHAIN.md).
 2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
    code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
@@ -52,6 +54,11 @@ source files proved, PAL close behind US, and names and types under way.
    `src/main/` then give way to real files, with names that are ours. A file is proved by
    building it whole, as the original was, and linking each of its sections in one piece
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
+   On 2026-11-06 every byte of code, 0x100000 to 0x211E0C, is in one of 165 proved files (74 of
+   game code, 91 of the libraries, the math library and the toolchain's runtime). Many are one
+   file between two exact edges that could be several; each commit says which. What is left is
+   refinement: splitting those when evidence appears, and placing the data the 16 KiB windows
+   still define (class method tables) in their files.
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
@@ -68,19 +75,23 @@ source files proved, PAL close behind US, and names and types under way.
 6. **Names and types.** Ours, from what the code does, as the C is cleaned up. Types come
    first, one per object, so that each name is chosen once: a header per class family of
    retail's class descriptors (`include/cNN.h`, `config/us/classes.tsv`), per kind of the other
-   method tables (`tXXXX.h`, `vXXXX.h`, `config/us/tables.tsv`), per record several files share
-   (`sXXXXXX.h`, named by the function that produces it) and per global several files read
-   (`gXXXXXX.h`), with the common shapes (`shapes.h`) and the hub globals (`globals.h`). Each
+   method tables (`config/us/tables.tsv`), per record several files share and per global several
+   files read, with the common shapes (`shapes.h`) and the hub globals (`globals.h`); each header
+   is named after its role once the code shows it (`box_collider.h`, `font.h`, `anim_curve.h`),
+   and keeps its class id until then. Each
    field line ends with its offset, which a compiled assertion checks. They replace the views
    each matched function declared for itself; what is left is the script machine's value and
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
    names as macros over their address names (`config/names/`, `include/names.h`,
-   [NAMING.md](NAMING.md)). On 2026-11-06, 2,484 symbols have one, and about a hundred
-   types are named, from the base classes (`BaseObject`, `PlacedObject`, `Collider`) to the
-   leaf families, shared records and global types; the types whose role the code does not show
-   keep their ids. Function bodies use the readable names; declarations and definitions
-   still use the address names.
+   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-07, 4,559 symbols have one;
+   367 game functions do not yet (255 of them original assembly, mostly VU0 routines and
+   linker leftovers, and 112 in C whose role the code does not show yet). Eight class headers
+   keep their ids, and of the views matched functions declared for themselves (`Obj_XXXXXX`,
+   `Sub_XXXXXX`, 2,018 of them that morning) 18 are left, each for a stated reason (a
+   declaration retail's code needs, data only assembly reads) or a role still unclear; the rest
+   are their shared types or local types named by role. Function bodies use the readable
+   names; declarations and definitions still use the address names.
 7. **The disc's data.** Its loader and index, then each format from the code that reads it
    ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 
