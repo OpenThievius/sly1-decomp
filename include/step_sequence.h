@@ -23,6 +23,24 @@ struct VtEnt65 {
 };
 struct Ent65 { VtEnt65* vt; };
 
+// A step (0x28 bytes): func_00150570 reads `type` and then, by type, the words after it
+// (0 and 7: an optional block at +4; 1, 2: two shorts; 3: two floats, two bytes, a string at
+// +0x14 and four shorts; 4: a short). func_001516C0 plays them; func_00151300 looks ahead.
+struct SequenceStep {
+    s32 type;               // 0x00
+    s32 w4;                 // 0x04
+    s32 w8;                 // 0x08
+    s32 wC;                 // 0x0C
+    s32 w10;                // 0x10
+    s32 w14[1];             // 0x14
+    s32 w18;                // 0x18
+    s32 w1C;                // 0x1C
+    s32 w20;                // 0x20
+    s32 w24;                // 0x24
+};
+
+typedef char check_SequenceStep[sizeof(SequenceStep) == 0x28 ? 1 : -1];
+
 struct StepSequence : PlacedObject {
     s32 mode2D0;            // 0x2D0: 1 and 2 are set by func_00150750 and func_00150760
     s32 state2D4;           // 0x2D4: the state machine's state (0 to 6)
