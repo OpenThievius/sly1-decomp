@@ -105,7 +105,7 @@ struct World : BaseObject {
     List01 list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
     List01 list1C54;        // 0x1C54: the 0x55 family's objects
     List01 list1C60;        // 0x1C60: class 0x41's objects (offset 0x600)
-    u8 pad1C6C[0x1C78 - 0x1C6C];
+    List01 list1C6C;        // 0x1C6C: class 0x7C's objects (func_0019C3D0, func_0019C408)
     List01 list1C78;        // 0x1C78: class 0x46's objects (offset 0x56C)
     List01 list1C84;        // 0x1C84: class 0x81's objects
     List01 list1C90;        // 0x1C90: class 0x71's objects

@@ -2536,3 +2536,15 @@ func_00198760	UpdateGaugeAgent	slot 17 of class 0x0F: when the active switched c
 func_00198920	StartGaugeCountedObject	slot 16 of class 0x48: resolves g_gaugeCountedObjectLinks, runs StartPlacedObject and adds one to the limit at 0x684 of the first class 0x18 object
 D_0026A904	g_gaugeCollider	the one class 0x18 gauge collider: InitGaugeCollider stores itself here and EndGaugeColliderTimer reads its walker at 0x6B8 through it
 D_0026A720	g_gaugeAgentCountLimit	5: the most UpdateGaugeAgent lets the gauge collider's count at 0x67C reach
+func_00198DA8	CollectObjectSet	slot 73 of class 0x2C: unregisters itself (slot 7), runs func_0012C8F8 on each object of its found list at 0x574 from the last, calls slot 78 and triggers script event 2
+func_00198E58	NotifyObjectSetTarget	slot 74 of class 0x2C: sends a message of kind 1 naming itself to the object at 0x584 through that object's slot 31
+func_00198E98	GetObjectSetActivationState	slot 72 of class 0x2C: returns 0 while it is not attached, else 1 when the word at 0x554 is set and 2 when not
+func_00198FB0	TestObjectSetMayContact	slot 56 of class 0x2C: returns 1 for objects of kind 8 or 0x3B, else 0
+func_00199070	InitFlaggedObjectSet	slot 0 of class 0x2D: runs InitObjectSet, then takes an index of g_flagTable with TakeFlagTableIndex into 0x5A0
+func_001990A8	CopyFlaggedObjectSet	slot 9 of class 0x2D: runs CopyCollider while keeping its own flag-table index at 0x5A0
+func_001990E0	GetFlaggedObjectSetActivationState	slot 72 of class 0x2D: what GetObjectSetActivationState returns, except 0 instead of 1 once its bit of g_flagTable is set
+func_00199138	CollectFlaggedObjectSet	slot 73 of class 0x2D: sets its bit of g_flagTable with SetFlagTableBit, then runs CollectObjectSet
+func_001994C8	CopyNumberedItem	slot 9 of class 0x2E: runs CopyCollider while keeping its own number at 0x5A0
+func_001999D0	CollectNumberedItem	slot 73 of class 0x2E: creates effect 0x10 at its position (playing sound 0x21 when it is the world's last item), or runs SetNumberedItemFlag when no effect is made, then runs CollectObjectSet
+func_0019A088	MarkLevelRecordComplete	for a level index (or the current one, 0x19D8, for -1) of the save data, sets bit 0 of each record of its 0x438-byte table and the bits 0x1F of its word at 0x448
+func_0019A0F0	MarkAllLevelRecordsComplete	runs MarkLevelRecordComplete for the six level indices, then requests a world load when the element stack is in mode 2

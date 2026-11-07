@@ -271,7 +271,9 @@ struct Player : TurningCollider {
     void* f23B0;            // 0x23B0
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
-    u8 pad23C0[0x23D4 - 0x23C0];
+    u8 pad23C0[0x23CC - 0x23C0];
+    void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
+    u8 pad23D0[0x23D4 - 0x23D0];
     void* f23D4;            // 0x23D4
     u8 pad23D8[0x23E0 - 0x23D8];
     f32 f23E0;              // 0x23E0

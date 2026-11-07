@@ -97,8 +97,6 @@ void func_00160578(s32 value);
 void* func_0015A448(void* a, s32 code, void* c);
 extern u8 D_00262C70[];
 void func_001830D8(void* self);
-struct Obj_0019C3D0 { u8 pad[0x14]; u8* owner; };
-struct Obj_0019C408 { u8 pad[0x14]; u8* owner; };
 void func_00124DF8(void* self, s32 n, void* table);
 extern u8 D_00261420[];
 void func_00198980(ObjectSet* self);
@@ -195,8 +193,8 @@ struct Frame_1989B0 {
         cursor = (s32)l;
         list = (s32)l;
         link = l->link;
-        prev = *(s32*)&D_0027B314;
-        *(s32*)&D_0027B314 = (s32)this;
+        prev = *(s32*)&g_activeListFrames;
+        *(s32*)&g_activeListFrames = (s32)this;
     }
 };
 void func_00182ED8(BaseObject* n);
@@ -207,7 +205,6 @@ struct Slot_19AB78;
 struct Ent_19AB78 { u8 pad[0x14]; s32 f14; Slot_19AB78* f18[4]; s32 f28; };
 struct Obj_19AB78 { void** vt; };
 typedef void (*VFn_19AB78)(Obj_19AB78*);
-struct Vi_19AB78 { u8 pad[0x239C]; s32 f239C; u8 p2[0x2C]; void* f23CC; };
 void func_00192230(void* self, s32 code, s32* rec);
 void func_00175170(void* self, s32 a, s32 b);
 s32 func_0019A000(s32 bits);
@@ -262,10 +259,10 @@ struct Frame_19C068 {
         list = l;
         cur = (s32 *)&l->head;
         step = l->offset;
-        prev = ((Frame_19C068*)D_0027B314);
-        D_0027B314 = (ListFrame*)this;
+        prev = ((Frame_19C068*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_19C068() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_19C068() { g_activeListFrames = (ListFrame*)prev; }
     s32 Next()
     {
         s32 n = *cur;
@@ -446,7 +443,7 @@ s32 func_00198FB0(ObjectSet* unused, void* obj)
 
 void func_00199000(ObjectSet* self, Elem_199000* elems, s32 idx)
 {
-    Rec_199000* r = (Rec_199000*)func_001929F8();
+    Rec_199000* r = (Rec_199000*)GetActiveSwitchedColliderData();
     if (r->f18 == 0) return;
     {
         s32 one = 1;
@@ -472,7 +469,7 @@ void func_001990A8(C2D* obj)
 
 s32 func_001990E0(C2D* self)
 {
-    s32 r = func_00198E98(self);
+    s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
         r = TestFlagTableBit(g_flagTable, self->f5A0) ? 0 : r;
     }
@@ -482,7 +479,7 @@ s32 func_001990E0(C2D* self)
 void func_00199138(C2D* self)
 {
     SetFlagTableBit(g_flagTable, self->f5A0);
-    func_00198DA8(self);
+    CollectObjectSet(self);
 }
 
 void func_00199170(C5C* self)
@@ -684,7 +681,7 @@ void func_001999D0(C2E* self)
     } else {
         SetNumberedItemFlag(self);
     }
-    func_00198DA8(self);
+    CollectObjectSet(self);
 }
 
 void func_00199AF0(C2E* p)
@@ -806,7 +803,7 @@ void func_0019A088(s32 index)
 
 void func_0019A0F0()
 {
-    for (s32 i = 0; i < 6; i++) func_0019A088(i);
+    for (s32 i = 0; i < 6; i++) MarkLevelRecordComplete(i);
     if (g_elementStack.f30 == 2) RequestWorldLoadByMode(0);
 }
 
@@ -961,9 +958,9 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
     HandleSwitchedColliderNotification(self, msg, rec);
     if (msg == 12 && rec[1] == (s32)self->f650) {
         if (self->f654 != 0 && g_player != 0) {
-            ((Vi_19AB78*)g_player)->f23CC = self;
-            ((Vi_19AB78*)g_player)->f239C = 7;
-            func_00175170((Vi_19AB78*)g_player, 6, 16);
+            g_player->f23CC = self;
+            g_player->f239C = 7;
+            func_00175170(g_player, 6, 16);
         } else {
             s32 k;
             s32 a;
@@ -1221,16 +1218,16 @@ void func_0019C068(ObjectGatherer *self, s32 a1) {
 INCLUDE_RODATA(jtbl_0024C910);
 ASM_FUNC(func_0019C1C0);
 
-void func_0019C3D0(Obj_0019C3D0* obj)
+void func_0019C3D0(BaseObject* obj)
 {
     RegisterObject(obj);
-    AppendToList(obj->owner + 0x1C6C, obj);
+    AppendToList(&obj->world->list1C6C, obj);
 }
 
-void func_0019C408(Obj_0019C408* obj)
+void func_0019C408(BaseObject* obj)
 {
     UnregisterObject(obj);
-    RemoveFromList(obj->owner + 0x1C6C, obj);
+    RemoveFromList(&obj->world->list1C6C, obj);
 }
 
 void func_0019C440(C8B* obj)
