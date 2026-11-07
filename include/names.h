@@ -1855,6 +1855,7 @@
 #define InitBackgroundJob                          func_0018B5C0
 #define RunBackgroundJob                           func_0018B600
 #define StartBackgroundJob                         func_0018B670
+#define WaitForBackgroundJob                       func_0018B720
 #define IsBackgroundJobRunning                     func_0018B770
 #define ConvertMemoryCardDirEntry                  func_0018B780
 #define ClassifyMemoryCardCallResult               func_0018B910

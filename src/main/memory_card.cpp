@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x18B580 to 0x18D410: the background job (include/background_job.h) and the
+// memory card (include/memory_card.h): its states, its save files and the calls to the card.
+// Its name is ours, after the card.
 #include "common.h"
 #include "asm_func.h"
 #include "memory_card.h"
@@ -28,7 +31,7 @@ s32 func_001E2268(s32 a, s32 b);
 s32 func_001F6B60(void* a);
 void func_001F6B40(void* a);
 s32 func_001F6A30();
-void func_001F6A50(void* a, s32 b);
+void func_001F6A50(s32 thread, s32 b);
 s32 func_00209B80(void* a0, s32* a1, s32* a2);
 void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 s32 func_001E2100(void* p);
@@ -58,11 +61,9 @@ void func_00137A60(BufferedStream* o, s32 n, u8* d);
 void func_001373D0(BufferedStream* o);
 void func_001372E0(BufferedStream* o, s32 f);
 
-struct Obj_18B720 { void* f0; void* f4; };
-
 void func_0018B5C0(BackgroundJob* self);
 void func_0018B670(BackgroundJob* job, void* fn, void* arg);
-void func_0018B720(Obj_18B720* a0);
+void func_0018B720(BackgroundJob* job);
 s32 func_0018B770(void* p);
 s32 func_0018B910(s32 value);
 s32 func_0018B930(s32 value);
@@ -131,7 +132,7 @@ void func_001F6A20(s32 thread, void* arg);
 void func_0018B670(BackgroundJob* job, void* fn, void* arg)
 {
     ThreadParam_18B670 param;
-    func_0018B720((Obj_18B720*)job);
+    WaitForBackgroundJob(job);
     job->job = (s32 (*)(void*))fn;
     job->arg = arg;
     job->result = 0x20;
@@ -146,13 +147,13 @@ void func_0018B670(BackgroundJob* job, void* fn, void* arg)
     func_001F6A20(job->thread, job);
 }
 
-void func_0018B720(Obj_18B720* a0)
+void func_0018B720(BackgroundJob* job)
 {
     if (IsBackgroundJobRunning(&g_backgroundJob)) {
-        func_001F6A50(a0->f4, 1);
+        func_001F6A50(job->thread, 1);
     }
-    func_001F6B60(a0->f0);
-    func_001F6B40(a0->f0);
+    func_001F6B60(job->semaphore);
+    func_001F6B40(job->semaphore);
 }
 
 s32 func_0018B770(void* p)
