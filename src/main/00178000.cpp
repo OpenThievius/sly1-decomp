@@ -56,30 +56,7 @@ struct Obj_17BC20 {
     s32 f5C;
 };
 
-void func_001E2840(void* p, s32 n);
 s32 func_00182FC8(void* p);
-
-void func_0017BC20(Obj_17BC20* self, Comp_17BC20* next)
-{
-    if (self->f58 != 0) {
-        SetOnOffObjectForcedState(self->f58, -1);
-        self->f58->f2D0 = 0;
-        if (self->f5C != 0) {
-            self->f58->vtbl[7](self->f58);
-        }
-        self->f58 = 0;
-    }
-    if (next != 0) {
-        self->f58 = next;
-        s32 isNull = IsObjectAttached(next) == 0;
-        self->f5C = isNull;
-        if (isNull != 0) {
-            next->vtbl[6](next);
-        }
-        next->f2D0 = self->f3C;
-        SetOnOffObjectForcedState(next, 1);
-    }
-}
 
 void func_0017B598(C4A* self)
 {
@@ -97,7 +74,6 @@ void func_0017B5D0(CountdownCollider* self)
     g_timeoutFired = 0;
 }
 
-
 void func_00124A48(void* self);
 void func_00124DF8(void* self, int n, void* table);
 
@@ -105,16 +81,6 @@ void func_0017B610(CountdownCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_countdownTable);
-}
-
-void func_00182C18(void* self);
-void* func_0018D500(int size);
-
-void func_0017B998(EntryQueue* self)
-{
-    InitObject(self);
-    self->buffer = AllocateFrontMemory(0xA00);
-    self->flag68 = 1;
 }
 
 s32 func_0017ABD8(C1B* self)
@@ -134,7 +100,6 @@ void func_0017AD50(C1B* self)
     self->desc02()->m1D(self, (Vec02*)bufA);
     self->desc02()->m20(self, (Vec02*)bufB);
 }
-
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
@@ -171,7 +136,6 @@ struct Msg_17B3A8 {
     u8 pad1[8];
     u32 f10;
 };
-
 
 void func_001AC060(void* p);
 void func_0017B598(C4A* self);
@@ -319,7 +283,6 @@ struct Sub_178598 {
     Quad_178598 q20;
     Quad_178598 q30;
 };
-
 
 struct Frame_178598 {
     Quad_178598 q0;
@@ -476,73 +439,7 @@ struct Self_17B9D0
 };
 
 s32 func_001300E8(Node_17B9D0* n, s32 kind);
-void func_001920B0(Node_17B9D0* n, Vec02* out);
-s32 func_001F3BD8(Node_17B9D0* n, Vec02* out);
-s32 func_001F3C08(Node_17B9D0* n, Vec02* out);
-f32 func_00205778(f32 a, f32 b);
 void func_00128018(void* a, void* b, void* c, Vec02* d);
-void func_001280C0(void* a, void* b, Vec02* c, Vec02* d);
-
-void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Vec02* out, f32* outf)
-{
-    Vec02 v;
-    Vec02 a;
-    Vec02 b;
-    Vec02 c;
-    u8* s1 = self->f3C;
-    f32 r;
-
-    if (n == 0)
-    {
-        goto tail;
-    }
-    if (IsObjectOfKind(n, 0x7E))
-    {
-        func_001920B0(n, &v);
-        r = *(f32*)(s1 + 0x638);
-    }
-    else if (IsObjectOfKind(n, 0x73))
-    {
-        GetObjectWorldPosition(n, &v);
-        GetObjectWorldRotation(n, &a);
-        r = func_00205778(a.y, a.x);
-    }
-    else if (IsObjectOfKind(n, 0x6E))
-    {
-        func_00128018(0, n->f18, s1 + 0x100, &a);
-        {
-            void (*fn)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32) =
-                (void (*)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32))n->f34->vt->f28;
-            if (fn)
-            {
-                fn(n->f34, &a, 0, &a, &b, 0, 0);
-            }
-        }
-        func_00128018(n->f18, 0, &a, &v);
-        func_001280C0(n->f18, 0, &b, &c);
-        r = func_00205778(c.y, c.x);
-    }
-    else if (IsObjectOfKind(n, 2))
-    {
-        v = n->f140;
-        r = func_00205778(((f32*)n)[0x114 / 4], ((f32*)n)[0x110 / 4]);
-    }
-    else
-    {
-    tail:
-        v = *(Vec02*)(s1 + 0x100);
-        v.z -= 75.0f;
-        r = *(f32*)(s1 + 0x638);
-    }
-    if (out)
-    {
-        *out = v;
-    }
-    if (outf)
-    {
-        *outf = r;
-    }
-}
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 

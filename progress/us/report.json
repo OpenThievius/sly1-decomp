@@ -5,15 +5,15 @@
   "matched_code": "1032232",
   "matched_code_percent": 92.79357351159119,
   "total_data": "431059",
-  "matched_data": "389736",
-  "matched_data_percent": 90.4136092739045,
+  "matched_data": "389740",
+  "matched_data_percent": 90.41453722112286,
   "total_functions": 4806,
   "matched_functions": 4721,
   "matched_functions_percent": 98.23137744486058,
   "complete_code": "1032232",
   "complete_code_percent": 92.79357351159119,
-  "complete_data": "389736",
-  "complete_data_percent": 90.4136092739045,
+  "complete_data": "389740",
+  "complete_data_percent": 90.41453722112286,
   "total_units": 75,
   "complete_units": 30
  },
@@ -20118,8 +20118,7 @@
     "complete": true,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/0017C000.cpp"
+    ]
    }
   },
   {
@@ -45449,15 +45448,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "175156",
-    "matched_data": "164296",
-    "matched_data_percent": 93.79981273835895,
+    "matched_data": "164300",
+    "matched_data_percent": 93.80209641690836,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "164296",
-    "complete_data_percent": 93.79981273835895,
+    "complete_data": "164300",
+    "complete_data_percent": 93.80209641690836,
     "total_units": 1,
     "complete_units": 0
    },
@@ -45551,15 +45550,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "389736",
-    "matched_data_percent": 90.4136092739045,
+    "matched_data": "389740",
+    "matched_data_percent": 90.41453722112286,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "389736",
-    "complete_data_percent": 90.4136092739045,
+    "complete_data": "389740",
+    "complete_data_percent": 90.41453722112286,
     "total_units": 4,
     "complete_units": 1
    }

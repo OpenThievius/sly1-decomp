@@ -511,6 +511,7 @@ D_0024A7F0	0024A7F0	0	.rodata	src/main/file_16CE00.cpp
 D_0024A848	0024A848	24	.rodata	src/main/file_16E0B8.cpp
 D_0024AB7C	0024AB7C	4	.rodata.D_0024AB7C	src/main/001E4000.cpp
 D_0024AFA0	0024AFA0	4	.rodata.D_0024AFA0	src/main/001E4000.cpp
+D_0024B000	0024B000	0	.rodata	src/main/file_17B998.cpp
 D_0024B060	0024B060	0	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	4	.rodata.D_0024B164	src/main/001E4000.cpp
 D_0024B168	0024B168	4	.rodata.D_0024B168	src/main/00180000.cpp
@@ -980,10 +981,7 @@ D_00263E04	00263E04	4	.data.D_00263E04	src/main/00178000.cpp
 D_00263E08	00263E08	36	.data.D_00263E08	src/main/00178000.cpp
 D_00263E2C	00263E2C	4	.data.D_00263E2C	src/main/001E4000.cpp
 D_00263E30	00263E30	4	.data.D_00263E30	src/main/00178000.cpp
-D_00263E34	00263E34	4	.data.D_00263E34	src/main/001E4000.cpp
-D_00263E38	00263E38	4	.data.D_00263E38	src/main/001E4000.cpp
-D_00263E3C	00263E3C	4	.data.D_00263E3C	src/main/001E4000.cpp
-D_00263E40	00263E40	4	.data.D_00263E40	src/main/001E4000.cpp
+D_00263E34	00263E34	20	.data	src/main/file_17B998.cpp
 D_00263E50	00263E50	580	.data	src/main/file_17D248.cpp
 D_00264098	00264098	16	.data	src/main/file_17FE00.cpp
 D_002640B0	002640B0	120	.data.D_002640B0	src/main/00180000.cpp
@@ -1449,6 +1447,7 @@ D_0027B130	0027B130	84	.data.D_0027B130	src/lib/001F8000.cpp
 D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
 D_0027C008	0027C008	4	.bss	src/main/00148000.cpp
+D_002BE478	002BE478	20	.bss	src/main/file_17B998.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	4	.bss	src/lib/unwind.c
