@@ -3591,3 +3591,178 @@ D_002613F0	g_discStatus	-1 at start; func_00140968 stores GetDiscStatus's result
 D_00261630	g_flagTableSaved	the second label of the flag table g_flagTable, from its +0x210: the snapshot SaveFlagTableSnapshot keeps (+0x220) and its saved fade words
 func_00102178	SetScriptTriggerZoneEntry	builtin: four arguments forwarded to func_00140750 (SetTriggerZoneEntry), empty result
 func_00102268	SetScriptZoneColliderEntry	builtin: four arguments forwarded to func_00140770 (SetZoneColliderEntry), empty result
+func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (file_1549C8's spawners call it)
+func_0019E220	MoveEffectsAndBounds	slot 0x7C of class 0x1E: runs slot 3 (motion) of every started effect of the list at +0x558 and grows the box at +0x420/+0x430 over each effect's two points, then widens it by +0x554
+func_0019E418	KeepEffectOwnerBounds	slot 0xD8 of class 0x1E (the bounds update other classes fill, UpdateColliderBounds): empty, as MoveEffectsAndBounds already keeps the box
+func_0019E848	DrawEffects	slot 0xA4 of class 0x1E (the draw slot): runs slot 5 (draw) of every effect of the list at +0x558 whose start time has come
+func_0019EB28	InitEffect	slot 0 of eight effect tables and the start of every other kind's set-up: stamps the start time, a life of 1.0, the scale at +0x30, the default curve D_0026B530 at +0x40 and the place at +0x80/+0x90, and grows the owner's radius at +0x2A4 to reach it
+func_0019ED58	HandleEffectContact	the shared slot 7 (contact) of 23 effect tables: by kind shortens the effect's life (ShortenEffectLife), spawns a brief effect where it touched (SpawnBriefEffectAt)
+func_0019F390	MoveEffect	the shared slot 3 (motion) of 19 effect tables: turns the placement at +0x50 by the spin at +0x100 (damped by +0x110), then moves the place +0x80 by the velocity +0xA0, which the drag +0xB0 and the acceleration +0xC0 change
+func_0019F620	DrawEffectAt	draws an effect's template object (+0x20) at a place and placement, scaled by the curve at +0x30 and faded by the one at +0x40 over its life; returns 0 when its life is 0, when func_001453B0 rejects it or when its size and fade have both reached 0 (DrawEffect removes it then)
+func_0019F858	DrawEffect	the shared slot 5 (draw) of 13 effect tables: places the effect by the frame at +0x114 when it has one, draws it with DrawEffectAt and removes it when that returns 0
+func_0019F988	InitFallingEffect	slot 0 of the kind-2 effect table D_00219C40: InitEffect, a life of 5.0, the world's template slot 1 and the world's gravity as its acceleration
+func_0019F9D0	EndEffectWithImpact	slot 6 (end) of the kind-2 table: when the flag is set (the place is inside its target), spawns a kind-4 impact effect of size 40 and life 0.75 at the target's surface and removes the effect
+func_0019FA98	InitRisingEffect	slot 0 of the kind-3 table D_00219C60: InitFallingEffect, then scale 0.33, drag -8 and -0.2 times gravity as acceleration, so it rises
+func_0019FB08	MoveDriftingEffect	slot 3 (motion) of the kind-3 table: MoveEffect, then when the effect has almost stopped or at random moves it a random step across its velocity
+func_0019FCE8	EndEffectWithImpactOnExit	slot 6 (end) of the kind-3 table: EndEffectWithImpact with the flag inverted, so it bursts when its place leaves the target
+func_0019FD08	InitImpactEffect	slot 0 of the kind-4 table D_00219C80, the effect SpawnBriefEffectAt and EndEffectWithImpact make where something hits: InitEffect, the size capped at 200 with 0.6 of it as growth and the world's template slot 2
+func_0019FD70	InitGrowingEffect	slot 0 of the kind-5 table D_00219CA0: InitEffect, a life of 3.0, the world's template slot 3 and a growth of 0.6 in its size curve
+func_0019FDC0	InitShrinkingFallEffect	slot 0 of the kind-6 table D_00219CC0: InitEffect, a life of 2.0, the world's gravity as acceleration and -1 as the square term of its size curve
+func_0019FE10	InitDroppingEffect	slot 0 of the kind-7 table D_00219CE0: InitEffect, a life of 0.5 and the world's template slot 6
+func_0019FE50	UpdateDroppingEffect	slot 4 of the kind-7 table: moves its target up to the first attached ancestor, after 0.15 s gives it drag -8 and half the world's gravity, then runs UpdateEffect
+func_0019FF20	DrawDroppingEffect	slot 5 of the kind-7 table: DrawEffect, then once it has moved more than 10 draws a streak from +0x90 to +0x80 with the world's template slot 7 (func_001268B8)
+func_001A0020	EndDroppingEffect	slot 6 (end) of the kind-7 table: removes the effect when the flag is set
+func_001A0040	InitStreakEffect	slot 0 of the kind-8 table D_00219D00: InitEffect, a life of 0.25, the world's template slot 4, the curve D_00275C50 and a streak time of 0.05 at +0x120
+func_001A00A0	DrawStreakEffect	slot 5 of the kind-8 and kind-17 tables: draws a streak (func_001268B8) from the place back along the velocity for the effect's age, up to its streak time at +0x120, and removes the effect when its size or fade reaches 0
+func_001A01B8	InitScaledEffect	slot 0 of the kind-9 table D_00219D20: InitEffect, a life of 0.5, the world's template slot 5 and a size curve of the scale times D_0026B560
+func_001A0258	InitTrailSegment	slot 0 of the kind-10 table D_00219D40 and the start of kind 13's: InitEffect, a life of 0.35, drag -15, the world's template slot 7, the fade D_0026B570 and a size curve of the scale times D_0026B580
+func_001A0318	DetachTrailSegment	slot 2 (release) of the kind-10 and kind-13 tables: sets the segment's anchor mode to 0 (SetTrailSegmentAnchor)
+func_001A0338	SetTrailSegmentAnchor	changes what a trail segment's back end (+0x90) follows, +0x120: 0 its own point, 1 another effect (+0x124, with an end callback), 2 an object's position (+0x128), 3 the next segment; registers and removes OnTrailAnchorEnded on the anchor
+func_001A04A0	SplitTrailSegment	creates a kind-10 segment at the front of a trail segment that has grown too long, hands it the old anchor and the curves, and anchors the old segment to it (mode 3)
+func_001A05D8	MoveTrailSegment	slot 3 (motion) of the kind-10 and kind-13 tables: moves the front by velocity, drag and acceleration and the back with its anchor, drops the anchor when it moves too fast and splits the segment (SplitTrailSegment) when it is longer than 25
+func_001A0758	DrawTrailSegment	slot 5 (draw) of the kind-10 and kind-13 tables: draws a streak (func_001268B8) from the anchor's point to the front, sized and faded by the curves, and removes the segment when off screen or faded out
+func_001A0950	OnTrailAnchorEnded	the end callback SetTrailSegmentAnchor registers on a segment's anchor: kinds 2, 10 and 16 release the anchor (mode 0), kind 3 anchors the segment to the point the anchor passes
+func_001A09C0	InitSpawningEffect	slot 0 of the kind-11 table D_00219D60: InitEffect, a life of 0.25, the world's template slot 8, a size curve of the scale times D_0026B590 and the fade D_0026B5A0
+func_001A0A78	SpawnFollowUpEffect	slot 4 of the kind-11 table: UpdateEffect, then in the frame its age passes 0.15 creates a kind-12 effect at its place
+func_001A0B20	InitFollowUpEffect	slot 0 of the kind-12 table D_00219D80 (the effect kind 11 spawns): InitEffect, a life of 3.0, the world's template slot 9, the fade D_0026B5B0, a growth of a quarter of the size, drag -1 and the acceleration D_0026B5C0
+func_001A0BA0	InitWideTrailSegment	slot 0 of the kind-13 table D_00219DA0: InitTrailSegment, then the world's template slot 10, the fade D_0026B5D0 and the size curve D_0026B5E0
+func_001A0C50	InitShortFallingEffect	slot 0 of the kind-14 table D_00219DC0: InitEffect, a life of 0.5, the world's template slot 1 and the world's gravity as acceleration
+func_001A0C98	InitCameraSpaceEffect	slot 0 of the kind-16 table D_00219E00: InitEffect, its place in camera space at +0x120 (func_001441C0), a random velocity from its parameter block's ranges, the block's life and size curve
+func_001A0D60	MoveCameraSpaceEffect	slot 3 of the kind-16 table: steers the camera-space place at +0x120 to its parameter block's point in the life left (func_00130540) and converts it to the world place +0x80 (func_00144128)
+func_001A0DF0	DrawCameraSpaceEffect	slot 5 of the kind-16 table: converts the camera-space place to the world, turns the placement by the time and draws it with DrawEffectAt
+func_001A0FE8	InitEmitterEffect	slot 0 of the kind-15 table D_00219DE0: InitEffect, a life of 2.0 and the fade D_00275C50
+func_001A1030	MoveEmitterEffect	slot 3 of the kind-15 table: moves the place and velocity along fixed quadratic curves of its life fraction
+func_001A11C0	UpdateEmitterEffect	slot 4 of the kind-15 table: spins its placement by the rate at +0xA4 and, each time it faces the camera, creates a kind-16 effect at its offset from the object at +0x120, counting +0x124 down and removing itself at 0
+func_001A1398	DrawEmitterEffect	slot 5 of the kind-15 table: DrawEffectAt with the identity placement
+func_001A1410	InitLongStreakEffect	slot 0 of the kind-17 table D_00219E20: InitStreakEffect, then the world's template slot 16 and a streak time of 0.15
+func_001A1458	InitPhasedEffect	slot 0 of the kind-18 table D_00219E40: InitEffect, the world's template slot 16 and -1 in its phase (+0x120) and +0x128
+func_001A1498	KeepPhasedEffectStill	slot 3 (motion) of the kind-18 table: empty, the effect does not move
+func_001A15D8	DrawPhasedEffect	slot 5 of the kind-18 table: draws the effect by its phase (+0x120) and the value AdvanceEffectPhases moves (+0x124), with sizes and turns from the curves D_0026B620 to D_0026B690
+func_001A22C8	CopyEffectSourceIds	slot 1 of the kind-19 table D_00219E60: copies the source object's words at +0x1DC and +0x1F0 to the effect's +0x120 and +0x124
+func_001A22E0	DrawProjectileEffect	slot 5 of the kind-19 table: places the effect facing along its velocity, turned to the camera (func_00189C28), and draws it with DrawEffectAt
+func_001A2380	AttachHitMarkEffect	creates a kind-20 effect where an effect hit an object, kept on that object (+0x120) at the hit point with a random turn (HandleEffectImpact and HandleTumblingEffectImpact call it)
+func_001A26F8	DrawHitMarkEffect	slot 5 of the kind-20 table D_00219E80: converts its place and placement through the object it is on (+0x120) and draws it with DrawEffectAt
+func_001A2770	SetRandomEffectSpin	slot 1 of the kind-21 table D_00219EA0: gives the effect a random spin axis and rate
+func_001A2830	MoveTumblingEffect	slot 3 of the kind-21 table: turns the placement about a fixed axis by D_0026B6D0/D_0026B6E0, sets drag and acceleration from D_0026B6E8/D_0026B6EC, then MoveEffect
+func_001A2A68	HandleTumblingEffectImpact	slot 7 (contact) of the kind-21 table: ignores owners of kinds 0x40 and 6, else leaves a hit mark (AttachHitMarkEffect) turned with the object and removes the effect
+func_001A2B18	IsEffectAimCandidate	the filter AimEffectAtNearestObject passes to FindNearestSpanObject: rejects an object with bit 0x8000<<28 of +0x538 set and the effect's own source (+0x7C)
+func_001A2B48	AimEffectAtNearestObject	slot 1 of the kind-22 table D_00219EC0: finds the nearest object in front of the source (FindNearestSpanObject with IsEffectAimCandidate) and turns the effect's velocity towards it
+func_001A2D30	PlaceEffectAtSource	slot 1 of the kind-23 table D_00219EE0: converts the source's point at +0x20 to the world for the effect's place, clears drag and spin damping and copies the source's +0x1F4 and +0x1F0
+func_001A2D88	DrawStreakedEffect	slot 5 of the kind-23 table: draws a streak from +0x90 to +0x80 with the world's template slot 11 (func_001268B8), then the effect itself with DrawEffectAt
+func_001A2E68	HandleStreakedEffectImpact	slot 7 (contact) of the kind-23 table: looks the hit point up in the other object (FindNodeForQuery) and on a hit throws it with a random turn and removes the effect
+func_001A3008	RandomizeEffectSpin	slot 1 of the kind-24 table D_00219F00: random spin rates in +0x120 and +0x128 from D_0026B6F0 and a random size from D_0026B700
+func_001A3128	HandleEffectContactUnlessKind6	slot 7 (contact) of the kind-24 table: ignores an owner of kind 6, else HandleEffectContact
+func_001A31A0	DrawSpinningEffect	slot 5 of the kind-24 table: turns the placement by the rates of RandomizeEffectSpin and draws it with DrawEffectAt
+func_001A31F0	InitFacingEffect	slot 0 of the kind-25 table D_00219F20: InitEffect, a life of 0.5, the world's template slot 18, the fade D_0026B710 and the size D_0026B720
+func_001A3250	DrawFacingEffect	slot 5 of the kind-25 table: removes the effect when its object is gone, else draws it turned to the camera (func_00189C28) with sizes and turns from the curves D_0026B730 to D_0026B770
+func_001A3598	InitDelayedEffect	slot 0 of the kind-26 table D_00219F40: InitEffect, the fade D_00275C50 and a size curve that runs from the scale to 1
+func_001A3730	MoveDelayedEffect	slot 3 of the kind-26 table: once its start time has come, moves the effect with its object at +0x20 over the life it has left (func_00125750), keeping its last place at +0x90
+func_001A38F0	UpdateDelayedEffect	slot 4 of the kind-26 table: once started runs func_001A35F0 when +0x134 is set, and when its life is over calls slot 6 of the object at +0x20 and removes the effect
+func_001A3990	DrawDelayedEffect	slot 5 of the kind-26 table: DrawEffect once the start time has come
+D_00219C20	g_basicEffectMethods	the 8-slot table of effect kind 0 (GetEffectKindTable): InitEffect, MoveEffect, UpdateEffect, DrawEffect, EndEffect and HandleEffectContact, the shared slots only
+D_00219C40	g_fallingEffectMethods	the 8-slot table of effect kind 2 (GetEffectKindTable): InitFallingEffect and EndEffectWithImpact
+D_00219C60	g_risingEffectMethods	the 8-slot table of effect kind 3 (GetEffectKindTable): InitRisingEffect, MoveDriftingEffect and EndEffectWithImpactOnExit
+D_00219C80	g_impactEffectMethods	the 8-slot table of effect kind 4 (GetEffectKindTable): InitImpactEffect; SpawnBriefEffectAt and EndEffectWithImpact create this kind where something hits
+D_00219CA0	g_growingEffectMethods	the 8-slot table of effect kind 5 (GetEffectKindTable): InitGrowingEffect
+D_00219CC0	g_shrinkingFallEffectMethods	the 8-slot table of effect kind 6 (GetEffectKindTable): InitShrinkingFallEffect
+D_00219CE0	g_droppingEffectMethods	the 8-slot table of effect kind 7 (GetEffectKindTable): InitDroppingEffect, UpdateDroppingEffect, DrawDroppingEffect and EndDroppingEffect
+D_00219D00	g_streakEffectMethods	the 8-slot table of effect kind 8 (GetEffectKindTable): InitStreakEffect and DrawStreakEffect
+D_00219D20	g_scaledEffectMethods	the 8-slot table of effect kind 9 (GetEffectKindTable): InitScaledEffect
+D_00219D40	g_trailSegmentEffectMethods	the 8-slot table of effect kind 10 (GetEffectKindTable): InitTrailSegment, DetachTrailSegment, MoveTrailSegment and DrawTrailSegment; SplitTrailSegment creates this kind
+D_00219D60	g_spawningEffectMethods	the 8-slot table of effect kind 11 (GetEffectKindTable): InitSpawningEffect and SpawnFollowUpEffect
+D_00219D80	g_followUpEffectMethods	the 8-slot table of effect kind 12 (GetEffectKindTable): InitFollowUpEffect; SpawnFollowUpEffect creates this kind
+D_00219DA0	g_wideTrailSegmentEffectMethods	the 8-slot table of effect kind 13 (GetEffectKindTable): InitWideTrailSegment and the trail segment slots of kind 10
+D_00219DC0	g_shortFallingEffectMethods	the 8-slot table of effect kind 14 (GetEffectKindTable): InitShortFallingEffect
+D_00219DE0	g_emitterEffectMethods	the 8-slot table of effect kind 15 (GetEffectKindTable): InitEmitterEffect, MoveEmitterEffect, UpdateEmitterEffect and DrawEmitterEffect
+D_00219E00	g_cameraSpaceEffectMethods	the 8-slot table of effect kind 16 (GetEffectKindTable): InitCameraSpaceEffect, MoveCameraSpaceEffect, RunEffectEndCallback and DrawCameraSpaceEffect; UpdateEmitterEffect creates this kind
+D_00219E20	g_longStreakEffectMethods	the 8-slot table of effect kind 17 (GetEffectKindTable): InitLongStreakEffect and DrawStreakEffect
+D_00219E40	g_phasedEffectMethods	the 8-slot table of effect kind 18 (GetEffectKindTable): InitPhasedEffect, KeepPhasedEffectStill, AdvanceEffectPhases and DrawPhasedEffect
+D_00219E60	g_projectileEffectMethods	the 8-slot table of effect kind 19 (GetEffectKindTable): CopyEffectSourceIds, DrawProjectileEffect and HandleEffectImpact
+D_00219E80	g_hitMarkEffectMethods	the 8-slot table of effect kind 20 (GetEffectKindTable): UpdateEffectUntilDetached and DrawHitMarkEffect; AttachHitMarkEffect creates this kind
+D_00219EA0	g_tumblingEffectMethods	the 8-slot table of effect kind 21 (GetEffectKindTable): SetRandomEffectSpin, MoveTumblingEffect and HandleTumblingEffectImpact
+D_00219EC0	g_aimedEffectMethods	the 8-slot table of effect kind 22 (GetEffectKindTable): AimEffectAtNearestObject
+D_00219EE0	g_streakedEffectMethods	the 8-slot table of effect kind 23 (GetEffectKindTable): PlaceEffectAtSource, DrawStreakedEffect and HandleStreakedEffectImpact
+D_00219F00	g_spinningEffectMethods	the 8-slot table of effect kind 24 (GetEffectKindTable): RandomizeEffectSpin, DrawSpinningEffect and HandleEffectContactUnlessKind6
+D_00219F20	g_facingEffectMethods	the 8-slot table of effect kind 25 (GetEffectKindTable): InitFacingEffect and DrawFacingEffect
+D_00219F40	g_delayedEffectMethods	the 8-slot table of effect kind 26 (GetEffectKindTable): InitDelayedEffect, MoveDelayedEffect, UpdateDelayedEffect and DrawDelayedEffect
+D_00219F60	g_messageEffectMethods	the 8-slot table of effect kind 27 (GetEffectKindTable): ResolveEffectTarget and SendEffectMessagesAtRate
+func_001A3C40	ControlWalkerCollider	slot 0x134 of class 0x15 (the control slot, as ControlPlayerLinkedCollider): stops its animation player, reads the input (ReadWalkerColliderInput), sets the polar drive at +0x630 and turns the object at +0x64C towards the input's angle
+func_001A3D40	UpdateWalkerCollider	slot 0x54 (update) of class 0x15: UpdateSwitchedCollider, steers by the input, then moves to the states ChooseWalkerColliderState and ChooseWalkerColliderSubState return
+func_001A3F40	ReadWalkerColliderInput	copies the input record's two magnitudes (+0x48, +0x7C) to +0x61C and +0x624 and, above 0.3 and 0.8, their camera-relative angles (func_00144FF8) to +0x618 and +0x620
+func_001A4070	SetWalkerColliderState	stores the state at +0x610: activates or deactivates its effect spawners (+0x66C), moves its state walker (+0x644), starts the animation of states 2 and 3 and switches its looping sound
+func_001A4258	ChooseWalkerColliderSubState	returns the next second state (+0x614) of a class 0x15 object: 0 goes to 1 when the magnitude at +0x624 reaches 0.8, 1 goes back to 0 below it
+func_001A42C8	SetWalkerColliderSubState	stores the second state at +0x614, moves its second state walker (+0x654) and switches the sound held at +0x658
+func_001A43C8	HandleWalkerColliderNotification	slot 0x44 of class 0x15: HandleSwitchedColliderNotification, then on messages 0x295 and 0x296 plays a sound and deactivates the spawner at +0x65C or +0x660, and notes when its animation player ends (code 5)
+func_001A44E8	StepWalkerCollider	slot 0x80 (step) of class 0x15: StepCollider, then func_001B9D10 with a turn by its angle at +0x618 and the table D_0026B7D8
+func_001A4538	ResolveWalkerColliderContact	slot 0x104 of class 0x15 (as ResolvePlayerContact): unless func_00128230, takes the part of its drive at +0x630 along the contact's normal out of the contact's velocity
+func_001A45B8	ComputeWalkerColliderContactValue	slot 0x100 of class 0x15: unless func_00128230, sets the contact's value at +0x94 to 20 when its ratio at +0x88 is above 0.7
+func_001A48C0	ResolvePairControllerLinks	slot 0x4C of class 0x5F (as ResolveListIds): PostLoadPlacedObject, then finds its objects by id, copies them into its lists and gathers the class-0x44 objects
+func_001A4D60	ShowPairControllerElement	slot 0xC8 of class 0x5F (the visibility slot): shows the screen element D_0026D0C8 in state 2 while AreMenusAndFadeClear holds, hides it otherwise
+func_001A63F8	RandomizePairedObjectOffset	gives a paired object a random polar offset at +0x570, up to the controller's radius at +0x348, and scales its +0x574 by the controller's +0x34C
+func_001A65C8	UpdatePairedObject	slot 0x54 (update) of class 0x42: UpdateCollider, then SetPairedState until the state is the one ChoosePairedObjectState returns, and per state moves the object (func_001A6788)
+func_001A7230	StepHitTarget	slot 0x80 (step) of class 0x43: StepCollider, then with no parent func_001B9D10 with its placement and the table D_0026B850
+func_001A7290	ComputeHitTargetContactValue	slot 0x100 of class 0x43: scales the contact's value at +0x98 by 0.6
+func_001A7800	UpdateObjectCreator	slot 0x54 (update) of class 0x45: UpdateCollider, then SetObjectCreatorState to the state ChooseObjectCreatorState returns
+func_001A7E70	InitPadPatternSetting	sets the pad pattern setting (g_padPatternSetting) to 1 when it is still 0
+func_001A69F8	ChoosePairedObjectState	returns the next state of a PairedObject from its state at +0x550 (a jump table of 11 cases), linking it to a hit target child (FindHitTargetChild, LinkPairedObjects) where that state calls for it
+func_0018D9B8	MoveContactListObject	slot 0x7C (motion) of class 0x3C: when ready turns its placement by its velocity (func_00189350), then runs the base motion func_001BC088 with its two attachments (+0x1EC, +0x1F0) cleared and puts them back
+func_0018DA40	LaunchContactListObject	slot 0x130 of class 0x3C: stores its argument at +0x694 and the vector at +0x6A0, starts the animation of +0x6B0 into +0x6B4 and, when +0x6B8 is set and it moves, turns it to face its velocity (slot 0x88)
+func_0018DB20	ApplyContactListAttachments	slot 0xA0 of class 0x3C: with attachments at +0x1EC/+0x1F0, multiplies the transform by their position and rotation before the base slot 0xA0 (func_00125C90); without them, the base slot alone
+func_0018DDD8	LaunchContactListObjectWithoutGravity	slot 0x130 of class 0x3D: LaunchContactListObject, then stores the direction of its velocity times the speed at +0x6F0 as the velocity it keeps (+0x700)
+func_0018DE70	StepContactListObjectWithoutGravity	slot 0x80 (step) of class 0x3D: StepCollider, then accelerates towards the velocity at +0x700 at the rate +0x6F4 (func_001EE2B0, func_001B9AB0)
+func_0018F988	InitBoxCollider	slot 0 of class 0x49: InitCollider, then sets bit 0x8000<<28 of flags538 (the bit CollectColliderSpans reads to test the box at +0x140 instead of a tree) and its anchors with SetColliderAnchors(3, 0, 3, 0)
+func_00190258	UpdateSeekingAgentState	slot 0x178 of class 0x0E (UpdateAgentState's slot): per state turns the agent towards the active switched collider or the camera (SetAgentFacingAngles), then UpdateAgentState
+func_00190658	IsSeekingAgentTargetInRange	slot 0x184 of class 0x0E (IsAgentTargetInRange's slot): always 0
+func_00190E30	IsPointPathShortcutBlocked	returns 0 only when func_001909F0 (mode 2) finds the whole span from 0 to 1 between two points of the graph clear; SimplifyPointPath keeps a point where this returns 1
+func_00191E70	SetScreenOwner	stores which activity draws to the screen in g_screenOwner, syncing the data cache (SyncDataCache) when it changes: the startup loading screen (1), BeginRenderFrame (3) and PlayMovie (4)
+func_00191EB0	ClearScreenOwner	sets g_screenOwner back to 0; the startup loading screen, DrainRenderFrames (after BeginRenderFrame's 3) and PlayMovie call it when they finish
+D_00269BA4	g_screenOwner	the activity SetScreenOwner records as drawing to the screen (1 the startup loading screen, 3 a rendered frame, 4 a movie); ClearScreenOwner sets it back to 0
+func_00196B78	StepGaugeCollider	slot 0x80 (step) of class 0x18: StepCollider, then turns it with BuildAxisAngleMatrix and passes the turn to func_001B9D10
+func_00196EB0	UpdateGaugeCollider	slot 0x54 (update) of class 0x18: UpdateSwitchedCollider, then its own per-frame work (func_001BB290, ConvertPositionToWorld)
+func_001974F8	ControlGaugeCollider	slot 0x134 of class 0x18 (the control slot, as ControlWalkerCollider): reads the input against the camera (func_00144FF8), moves its state walkers between 0x3DB/0x3DC and 0x3F3 to 0x3F5, stops the timer element and places objects (PlaceObjectAtRandomNode)
+func_00197A68	ComputeGaugeColliderContactValue	slot 0x100 of class 0x18: sets the contact's values at +0x98 and +0x94 from D_0026A83C and D_0026A840
+func_001980B0	StepGaugeColliderAgent	slot 0x80 (step) of class 0x0F: the agent step func_001C5148, then turns it towards its heading (ArctangentOfRatio, WrapAngle)
+func_00198318	UpdateGaugeColliderAgentGoal	slot 0x188 of class 0x0F (UpdateAgentGoal's slot): per state heads for the active switched collider or a point of its path, else UpdateAgentGoal
+func_00198570	UpdateGaugeColliderAgentState	slot 0x178 of class 0x0F (UpdateAgentState's slot): UpdateAgentState, then in state 0xC sets its animation speed from the entry's curves D_0026A8A0 to D_0026A8D0
+func_00198858	IsGaugeColliderAgentTargetInRange	slot 0x184 of class 0x0F (IsAgentTargetInRange's slot): always 0
+func_00198860	IsGaugeColliderAgentNear	slot 0x16C of class 0x0F: while the active switched collider is a gauge collider (class 0x18), latches +0xC18 on when their horizontal distance drops below D_0026A8DC and off above D_0026A8D8, and returns it
+func_00194398	StartPauseMenuExitFade	starts the screen fade (StartScreenFade, kind 1) to the entry D_00247AB0 that ResetGameSessionAndFade also fades to; the pause menu calls it when a save of stage 2 ends well and on leaving
+func_00193270	BeginLoadProgress	zeroes the five counters of a load progress record; the startup loading calls it after InitLoadProgress, before running the initialisers
+func_00193300	EndLoadProgress	zeroes the five counters of a load progress record again; the startup loading calls it after the last UpdateLoadProgress
+func_00198BD8	UpdateObjectSet	slot 0x54 (update) of class 0x2C: UpdateCollider, then works with the active switched collider (GetActiveSwitchedCollider) through the hooks D_0026A910 and D_0026A914
+func_00199000	LatchObjectSetContact	slot 0x100 of class 0x2C (as LatchContactObject): sets +0x59C when the other object of the contact descends from the object at +0x18 of the active switched collider's data block
+func_00199698	UpdateNumberedItem	slot 0x54 (update) of class 0x2E: UpdateObjectSet, then, when its world bits allow (MaskWorldBitsBySave), acts on the active switched collider's data block
+func_00199C58	ApplyNumberedItemPendingImpulse	slot 0xD0 of class 0x2E: a call to ApplyColliderPendingImpulse
+func_00199D08	SpinNumberedItemTransform	slot 0xA0 of class 0x2E: turns its transform about Z by the clock (BuildAxisAngleMatrix) before the base slot 0xA0 (func_00125C90)
+func_0019B298	StepObjectGatherer	slot 0x80 (step) of class 0x41: StepCollider, then outside states 1 and 2 passes its placement to func_001B9D10 with the table D_0026ABB0
+func_0019B378	UpdateObjectGatherer	slot 0x54 (update) of class 0x41: works with the active switched collider, UpdateCollider, and the per-state sounds (StartSoundEffect)
+func_0019BB90	ResolveObjectGathererContact	slot 0x104 of class 0x41 (as ResolvePlayerContact): when the contact is steep enough and its speed at +0x61C is not 0, pushes the contact's velocity along its own direction less the part along the contact's normal
+func_0019D968	UploadGroupConstants	the first time in a frame (D_00604780 clear) uploads the 0x2C quadwords of D_002BDC20 through the VIF packet writer (func_001EE7D0); later, when D_00604784 is clear, flushes and uploads D_002BDEE0 instead; sets both flags
+func_0019DA30	PrepareBasicGroup	the handler of group-marker row 0 (InitGroupMarkers): only adds the DMA ref tag of the block D_00212160 to D_00215C50 (AddDmaRefTagIfChanged)
+func_0019DA60	PrepareFlushedGroup	the handler of group-marker row 1: UploadProjectionConstants, UploadCameraOncePerFrame, the ref tag of D_00212160, marks the base constants sent, sets the build frame's +0x1C and writes a VIF flush
+func_0019DAD8	PrepareGroupWithoutCamera	the handler of group-marker row 2: UploadProjectionConstants, UploadGroupConstants and the ref tag of D_00212160, then clears g_cameraUploadedThisFrame
+func_0019DB20	PrepareStandardGroup	the handler of 11 group-marker rows (3, 4, 6 to 8, 10 to 13, 16): UploadProjectionConstants, UploadCameraOncePerFrame, UploadGroupConstants and the ref tag of D_00212160
+func_0019DB68	PrepareAlternateBlockGroup	the handler of group-marker rows 5, 9, 14 and 15: as PrepareStandardGroup, with the block D_00215C60 to D_00217348 in place of D_00212160
+func_0019DBB0	PrepareUnzoomedGroup	the handler of group-marker row 17: the ref tag of D_00212160, the projection and camera uploads, the world object's VIF word from D_00274520, and the camera uploaded again with its zoom snapped to 1.0 (SnapCameraZoom) and put back
+func_0019DC98	SubmitDeferredRequests	once a frame (main loop, with the world and camera): sorts the deferred requests, clears the frame's upload flags, buckets them (BucketDeferredRequests) and for each group runs its row's handler and sends its requests, then resets g_nextDeferredRequest
+func_001ABE70	InitGauge	slot 1 of the gauge element's table D_002182E0 (whose slot 9 is DrawGauge): SetupScreenElementText, font 4, and the gauge's segment layout chosen by the save's value (g_saveData)
+func_001AC5C0	InitFramedElement	slot 1 of the plain framed element's table D_00218330: SetupScreenElementText, its font cloned at 1.25 scale and, when font 2 is loaded, the frame D_002743D0 drawn with it
+func_001AC888	InitPointerTextCaption	slot 1 of the pointer-text caption's table D_00218380: SetupScreenElementText, its font cloned at 0.9, the colour 0xDF7F7F7F and the frame D_002743F0 with font 2
+func_001ACDA0	InitCopiedTextCaption	slot 1 of the copied-text caption's table D_002183D0: SetupScreenElementText, font 0 cloned at 1.0, scale 0.8, a slide-out of 0.5 and the frame D_00274410 with font 2
+func_001AD6A8	InitHintGlyphElement	slot 1 of the screen-element table D_00218420: SetupScreenElementText, font 2 cloned at 1.0 and the text "B", with its show flag cleared
+func_001AD718	UpdateHintGlyphElement	slot 2 of the table D_00218420: UpdateScreenElementSlide, then shows itself (slot 14) while its flag is set, the player is not in state 6 and the element stack's top is 3 with fewer than 2 entries, else hides (slot 15)
+func_001AD7B0	DrawHintGlyphElement	slot 9 of the table D_00218420: DrawScreenElementText, then a pulsing "L" of font 1 scaled by a sine of the elapsed time
+func_001AD940	InitLetterboxElement	slot 1 of the screen-element table D_00218560 (whose slot 16 is SetElementModeFollowingFade): SetupScreenElementText and a slide-out of 0.5
+func_001ADB00	DrawLetterboxElement	slot 9 of the table D_00218560: draws two black sprites across the screen, at the top and the bottom, each 66.4 times its blend high
+func_001ADC60	InitTitleElement	slot 1 of the screen-element table D_00218470: SetupScreenElementText, its font cloned at D_00274448/D_0027444C, the frame D_00274450 with font 2 and the image record 0x493 sized 366.75 by 165.75, or else the game's title as text
+func_001ADD28	DrawTitleElement	slot 9 of the table D_00218470: draws the image record when it has one, else DrawScreenElementText
+func_001ADF28	InitPromptElement	slot 1 of the prompt element's table D_002184C0 (whose slot 2 is UpdatePromptElement): SetupScreenElementText, its font scaled by D_0027446C, the frame D_00274488, the two flags UpdatePromptElement recomputes, then RebuildPromptText
+func_001AE220	DrawPromptElement	slot 9 of the prompt element's table D_002184C0: draws its text (DrawAlignedText) at its font scale, pulsing by a sine of the elapsed time
+func_001AE510	InitLetterGlyphElement	slot 1 of the screen-element table D_002185B0: SetupScreenElementText, font 2 and the one-letter text "L" for D_00273C50 or "K" for D_002739F0, measured at the scale D_002744A8
+func_001AE5E0	DrawLetterGlyphElement	slot 9 of the table D_002185B0: draws its one-letter glyph at its scale
+func_001AE758	InitCyclingGlyphElement	slot 1 of the screen-element table D_00218600: SetupScreenElementText, slide-in and slide-out of 0.25, no hold, font 1 at the scale D_002744AC and the glyph GetCyclingGlyph returns
+func_001AE820	DrawCyclingGlyphElement	draws the cycling-glyph element D_00273EB0 (file_1A7FE8's element drawing calls it last): raised while its flag holds, hiding itself a second into mode 2 once the background job has ended
+func_001A93E8	ResetPlacementRecord	zeroes the 0x80-byte placement record at +0x60 of an object (an object pool, the object file_1000C8 sets up) and sets its rotation (+0x20) to the identity matrix
+func_001A94C0	GetPlacementRecordTransform	gives the position and rotation a placement record names: through its frame object (+0x0, ConvertPositionToWorld), its object (+0x4, world position and rotation), its collider (+0x8, +0x140 and +0x110) or its own values (+0x10, +0x20)
+func_001A97C8	GetPlacementRecordAngle	gives the heading a placement record names: the angle of its object's world rotation (+0x10) or its collider's (+0x14), else its own angle at +0x8
+func_001A9928	IsGaugeBarAgentFree	slot 0x16C of class 0x0D (as IsGaugeAgentFree): returns 0 when func_001DDA80 holds for its world, else its flag at +0xC24

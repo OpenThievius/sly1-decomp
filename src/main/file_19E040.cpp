@@ -7,7 +7,7 @@
 // the pad pattern player. Its .rodata (0x24C930 to 0x24CBC4) is the FLT_MAX constants of the VU0
 // functions and of func_001A1DF0 and func_001A54F8 (literals in their code), the jump tables, the
 // triangle func_001A3C40 copies and the pose table func_001A4718 copies; its .data (0x26B530 to
-// 0x26C3E0) is the globals below. Named after its first address until what it was is known.
+// 0x26C3E0) is the globals below. Named after its first address: it holds several families (the effects, class 0x15, the pair controller and its objects, the pad pattern player) and none of them names the whole.
 #include "common.h"
 #include "list_iter.h"
 #include "c8b.h"
@@ -703,25 +703,6 @@ int func_001A7EE8(void* a);
 
 void func_001A7D98(void* self, int mode);
 
-struct Self_1A5F78 {
-    u8 pad0[0x35C];
-    u8 a35C[0xC];
-    u8 a368[0xC];
-    u8 a374[0xC];
-    s32 a380;
-    u8 a384[0xC];
-    u8 a390[0xC];
-    s32 a39C;
-    u8 a3A0[0xC];
-    u8 a3AC[0x14];
-    u8 pad1[0x628 - 0x3C0];
-    s32 a628;
-    u8 pad2[0x638 - 0x62C];
-    f32 a638;
-    f32 a63C;
-    f32 a640;
-};
-
 void func_00152600(void* a, void* b);
 
 void func_00152470(void* a, void* b);
@@ -790,27 +771,7 @@ void func_00152600(u8* a, void* b);
 
 void func_00152470(u8* a, void* b);
 
-struct Self_1A5B28 {
-    u8 pad0[0x35C];
-    u8 a35C[0x368 - 0x35C];
-    u8 a368[0x374 - 0x368];
-    u8 a374[0x380 - 0x374];
-    s32 i380;
-    u8 pad1[0x3B8 - 0x384];
-    s32 i3B8;
-    u8 pad2[0x3C4 - 0x3BC];
-    s32 i3C4;
-    u8 pad3[0x624 - 0x3C8];
-    s32 i624;
-    u8 pad4[0x62C - 0x628];
-    f32 f62C;
-    f32 f630;
-    f32 f634;
-};
-
 void func_001ED650(void* self, f32 x, f32 y, f32 z);
-
-struct Self_1A63F8 { u8 pad[0x348]; f32 f348; f32 f34C; };
 
 s32 func_001A7420(HitTarget* self);
 
@@ -831,29 +792,6 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 void func_00155FA0(void* self);
 
 struct Rec_1A43C8 { u8 pad[8]; s32 kind; };
-
-struct Self_1A5DF8 {
-    u8 pad0[0x35C];
-    u8 a35C[0x374 - 0x35C];
-    u8 a374[0x380 - 0x374];
-    s32 i380;
-    u8 pad1[0x384 - 0x384];
-    u8 a384[0x390 - 0x384];
-    u8 a390[0x39C - 0x390];
-    s32 i39C;
-    u8 a3A0[0x3AC - 0x3A0];
-    u8 a3AC[0x3C0 - 0x3AC];
-    s32 i3C0;
-    u8 pad2[0x624 - 0x3C4];
-    s32 i624;
-    s32 i628;
-    f32 f62C;
-    f32 f630;
-    f32 f634;
-    f32 f638;
-    f32 f63C;
-    f32 f640;
-};
 
 struct __attribute__((aligned(16))) Quad_1A72B0 { s32 a; s32 b; f32 f; s32 d; };
 
@@ -1418,33 +1356,33 @@ void func_0019E848(EffectOwner* self, void* arg)
 const Vt219C* func_0019E908(u32 n)
 {
     switch (n) {
-    case 0: return (const Vt219C*)(D_00219C20);
-    case 2: return (const Vt219C*)(D_00219C40);
-    case 3: return (const Vt219C*)(D_00219C60);
-    case 4: return (const Vt219C*)(D_00219C80);
-    case 5: return (const Vt219C*)(D_00219CA0);
-    case 6: return (const Vt219C*)(D_00219CC0);
-    case 7: return (const Vt219C*)(D_00219CE0);
-    case 8: return (const Vt219C*)(D_00219D00);
-    case 9: return (const Vt219C*)(D_00219D20);
-    case 10: return (const Vt219C*)(D_00219D40);
-    case 11: return (const Vt219C*)(D_00219D60);
-    case 12: return (const Vt219C*)(D_00219D80);
-    case 13: return (const Vt219C*)(D_00219DA0);
-    case 14: return (const Vt219C*)(D_00219DC0);
-    case 15: return (const Vt219C*)D_00219DE0;
-    case 16: return (const Vt219C*)(D_00219E00);
-    case 17: return (const Vt219C*)(D_00219E20);
-    case 18: return (const Vt219C*)(D_00219E40);
-    case 19: return (const Vt219C*)(D_00219E60);
-    case 20: return (const Vt219C*)(D_00219E80);
-    case 21: return (const Vt219C*)(D_00219EA0);
-    case 22: return (const Vt219C*)(D_00219EC0);
-    case 23: return (const Vt219C*)(D_00219EE0);
-    case 24: return (const Vt219C*)(D_00219F00);
-    case 25: return (const Vt219C*)(D_00219F20);
-    case 26: return (const Vt219C*)(D_00219F40);
-    case 27: return (const Vt219C*)(D_00219F60);
+    case 0: return (const Vt219C*)(g_basicEffectMethods);
+    case 2: return (const Vt219C*)(g_fallingEffectMethods);
+    case 3: return (const Vt219C*)(g_risingEffectMethods);
+    case 4: return (const Vt219C*)(g_impactEffectMethods);
+    case 5: return (const Vt219C*)(g_growingEffectMethods);
+    case 6: return (const Vt219C*)(g_shrinkingFallEffectMethods);
+    case 7: return (const Vt219C*)(g_droppingEffectMethods);
+    case 8: return (const Vt219C*)(g_streakEffectMethods);
+    case 9: return (const Vt219C*)(g_scaledEffectMethods);
+    case 10: return (const Vt219C*)(g_trailSegmentEffectMethods);
+    case 11: return (const Vt219C*)(g_spawningEffectMethods);
+    case 12: return (const Vt219C*)(g_followUpEffectMethods);
+    case 13: return (const Vt219C*)(g_wideTrailSegmentEffectMethods);
+    case 14: return (const Vt219C*)(g_shortFallingEffectMethods);
+    case 15: return (const Vt219C*)g_emitterEffectMethods;
+    case 16: return (const Vt219C*)(g_cameraSpaceEffectMethods);
+    case 17: return (const Vt219C*)(g_longStreakEffectMethods);
+    case 18: return (const Vt219C*)(g_phasedEffectMethods);
+    case 19: return (const Vt219C*)(g_projectileEffectMethods);
+    case 20: return (const Vt219C*)(g_hitMarkEffectMethods);
+    case 21: return (const Vt219C*)(g_tumblingEffectMethods);
+    case 22: return (const Vt219C*)(g_aimedEffectMethods);
+    case 23: return (const Vt219C*)(g_streakedEffectMethods);
+    case 24: return (const Vt219C*)(g_spinningEffectMethods);
+    case 25: return (const Vt219C*)(g_facingEffectMethods);
+    case 26: return (const Vt219C*)(g_delayedEffectMethods);
+    case 27: return (const Vt219C*)(g_messageEffectMethods);
     default: return 0;
     }
 }
@@ -1457,7 +1395,7 @@ Effect* func_0019EA78(s32 kind, EffectOwner* sys)
     }
     Effect* o = (Effect*)PopFreeSlot(&sys->world->pool1B2C);
     if (o != 0) {
-        func_001F5C0C(o, 0, sys->world->pool1B2C.size);
+        FillMemory(o, 0, sys->world->pool1B2C.size);
         const Vt219C* r = GetEffectKindTable(kind);
         o->kind = kind;
         o->owner = sys;
@@ -1569,7 +1507,7 @@ void func_0019F858(Effect* self, void* a1)
         a2 = &self->q80;
         a3 = self->rot50;
     }
-    s32 r = func_0019F620(self, a1, a2, a3);
+    s32 r = DrawEffectAt(self, a1, a2, a3);
     if (r == 0) {
         RemoveEffect(self);
     }
@@ -1593,7 +1531,7 @@ void func_0019F950(void* obj, void* a1, void* a2)
 
 void func_0019F988(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     self->life = 5.0f;
     World* g = g_currentWorld;
     self->i20 = (s32)g->slot1CE8[1];
@@ -1627,14 +1565,14 @@ ASM_FUNC(func_0019FB08);
 
 void func_0019FCE8(Effect* value, u32 enabled)
 {
-    func_0019F9D0(value, enabled < 1);
+    EndEffectWithImpact(value, enabled < 1);
 }
 
 ASM_FUNC(func_0019FD08);
 
 void func_0019FD70(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     self->life = 3.0f;
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[3];
@@ -1644,7 +1582,7 @@ void func_0019FD70(Effect* self)
 
 void func_0019FDC0(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     self->life = 2.0f;
     World* g = g_currentWorld;
     self->qC0 = *(Quad219C*)&g->gravity;
@@ -1653,7 +1591,7 @@ void func_0019FDC0(Effect* self)
 
 void func_0019FE10(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[6];
     self->life = 0.5f;
@@ -1673,7 +1611,7 @@ void func_001A0020(Effect* self, void* other)
 
 void func_001A0040(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     self->life = 0.25f;
     s32 v = (s32)g_currentWorld->slot1CE8[4];
     self->i20 = v;
@@ -1685,7 +1623,7 @@ ASM_FUNC(func_001A00A0);
 
 void func_001A01B8(Effect* self, f32 f)
 {
-    func_0019EB28(self, f);
+    InitEffect(self, f);
     self->life = 0.5f;
     s32 v = (s32)g_currentWorld->slot1CE8[5];
     u8* p = (u8*)D_0026B560;
@@ -1701,7 +1639,7 @@ void func_001A01B8(Effect* self, f32 f)
 
 void func_001A0258(Effect* self, f32 f)
 {
-    func_0019EB28(self, f);
+    InitEffect(self, f);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B580;
     s32 v = (s32)g_currentWorld->slot1CE8[7];
@@ -1719,7 +1657,7 @@ void func_001A0258(Effect* self, f32 f)
 
 void func_001A0318(Effect* self)
 {
-    func_001A0338(self, 0, 0);
+    SetTrailSegmentAnchor(self, 0, 0);
 }
 
 ASM_FUNC(func_001A0338);
@@ -1748,10 +1686,10 @@ void func_001A04A0(Effect* self)
             d->q30 = self->q30;
             p = self->p128;
         }
-        func_001A0338(d, self->i120, p);
-        func_001A0338(self, 3, d);
+        SetTrailSegmentAnchor(d, self->i120, p);
+        SetTrailSegmentAnchor(self, 3, d);
     } else {
-        func_001A0338(self, 0, 0);
+        SetTrailSegmentAnchor(self, 0, 0);
     }
 }
 
@@ -1777,15 +1715,15 @@ void func_001A0950(void* self, s32 kind, s32 extra)
         return;
     }
 zero:
-    func_001A0338(self, 0, 0);
+    SetTrailSegmentAnchor(self, 0, 0);
     return;
 three:
-    func_001A0338(self, 0, extra + 16);
+    SetTrailSegmentAnchor(self, 0, extra + 16);
 }
 
 void func_001A09C0(Effect* self, f32 f)
 {
-    func_0019EB28(self, f);
+    InitEffect(self, f);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B590;
     s32 v = (s32)g_currentWorld->slot1CE8[8];
@@ -1817,7 +1755,7 @@ void func_001A0A78(Effect* self, f32 arg)
 
 void func_001A0B20(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     World* sys = g_currentWorld;
     self->i20 = (s32)sys->slot1CE8[9];
     self->life = 3.0f;
@@ -1829,7 +1767,7 @@ void func_001A0B20(Effect* self)
 
 void func_001A0BA0(Effect* self, f32 f)
 {
-    func_001A0258(self, f);
+    InitTrailSegment(self, f);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B5E0;
     s32 v = (s32)g_currentWorld->slot1CE8[10];
@@ -1846,7 +1784,7 @@ void func_001A0BA0(Effect* self, f32 f)
 
 void func_001A0C50(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[1];
     self->life = 0.5f;
@@ -1870,7 +1808,7 @@ void func_001A0F88(Effect* self)
 
 void func_001A0FE8(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     self->q40 = D_00275C50;
     self->life = 2.0f;
 }
@@ -1885,7 +1823,7 @@ ASM_FUNC(func_001A1398);
 
 void func_001A1410(Effect* self)
 {
-    func_001A0040(self);
+    InitStreakEffect(self);
     World* ctx = g_currentWorld;
     s32 v = ctx->f1D28;
     self->f120 = 0.15f;
@@ -1894,7 +1832,7 @@ void func_001A1410(Effect* self)
 
 void func_001A1458(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     s32 v = g_currentWorld->f1D28;
     self->i120 = -1;
     self->i20 = v;
@@ -2001,7 +1939,7 @@ s32 func_001A25F0(Effect* self, Obj_1A25F0* other, void* a2, void* a3)
         }
     }
     if (IsObjectOfKind(other, 0x1F) == 0) {
-        func_001A2380(self, self->i120, other, a2, a3, 0);
+        AttachHitMarkEffect(self, self->i120, other, a2, a3, 0);
     }
     RemoveEffect(self);
     return 1;
@@ -2024,7 +1962,7 @@ void func_001A26F8(Effect* self, void* a1)
 
     func_00128018(self->p120, 0, &self->q80, scratch);
     func_00128150(self->p120, 0, self->rot50, scratch + 0x10);
-    func_0019F620(self, a1, scratch, scratch + 0x10);
+    DrawEffectAt(self, a1, scratch, scratch + 0x10);
 }
 
 ASM_FUNC(func_001A2770);
@@ -2043,7 +1981,7 @@ s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
     if (IsObjectOfKind(other->f50, 6) != 0) {
         return 0;
     }
-    func_001A2380(self, self->i20, other, a2, a3, out);
+    AttachHitMarkEffect(self, self->i20, other, a2, a3, out);
     p = *(void**)out;
     if (p != 0) {
         func_00128150(0, other, (u8*)p + 0x50, (u8*)p + 0x50);
@@ -2086,14 +2024,14 @@ s32 func_001A3128(Effect* a0, Obj_1A3128* a1, void* a2, void* a3)
     if (IsObjectOfKind(a1->p50, 6) != 0) {
         return 0;
     }
-    return func_0019ED58(a0, a1, a2, a3);
+    return HandleEffectContact(a0, a1, a2, a3);
 }
 
 ASM_FUNC(func_001A31A0);
 
 void func_001A31F0(Effect* self)
 {
-    func_0019EB28(self);
+    InitEffect(self);
     f32 half = 0.5f;
     u8* sys = (u8*)g_currentWorld;
     self->life = half;
@@ -2106,7 +2044,7 @@ ASM_FUNC(func_001A3250);
 
 void func_001A3598(Effect* self, f32 x)
 {
-    func_0019EB28(self, x);
+    InitEffect(self, x);
     self->q40 = *(Quad219C*)&D_00275C50;
     self->m30[0] = x;
     self->m30[1] = 1.0f - x;
@@ -2137,7 +2075,7 @@ void func_001A3990(Effect* self)
     if (g_gameTime < self->start) {
         return;
     }
-    func_0019F858(self);
+    DrawEffect(self);
 }
 
 void func_001A39C8(Effect* self, void* otherv)
@@ -2198,8 +2136,8 @@ void func_001A3B58(C15* self)
             self->f654 = CreateStateWalker(self->f650, self, -1, 1);
         }
         self->f668 = GatherObjectsById(g_currentWorld, 1, 0x50, self->f664, 3, self->f66C);
-        func_001A4070(self, 2);
-        func_001A42C8(self, 0);
+        SetWalkerColliderState(self, 2);
+        SetWalkerColliderSubState(self, 0);
     } else {
         ((VFn_1A3B58*)self->desc)[7](self);
     }
@@ -2215,10 +2153,10 @@ void func_001A3C40(C15* self, Src_1A3C40* src)
         self->f684 = 0;
         self->f688 = 0;
     }
-    func_001A3F40(self, src);
+    ReadWalkerColliderInput(self, src);
     ComputePolarOffset((Out_1A3C40*)((u8*)self + 0x630), self->f618, self->f61C * self->f628, 0.0f);
     f.tri = *(Tri_1A3C40*)D_0024C9C0;
-    f32 r = func_00205778(((Inner_1A3C40*)self->f64C)->f114, ((Inner_1A3C40*)self->f64C)->f110);
+    f32 r = ArctangentOfRatio(((Inner_1A3C40*)self->f64C)->f114, ((Inner_1A3C40*)self->f64C)->f110);
     r = ApproachAngleWithRamp((u8*)&f.tri, 0, r, self->f620, g_frameDt);
     func_001892A0(f.buf, r, 0.0f);
     func_00128150(0, self, f.buf, f.buf);
@@ -2716,7 +2654,7 @@ void func_001A4EF0(PairController* self, s32 state)
         SetPauseMenuLayerPage((u8*)&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
-        func_001A4070(P(self, 0x354), 3);
+        SetWalkerColliderState(P(self, 0x354), 3);
         g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }
@@ -2732,7 +2670,7 @@ ASM_FUNC(func_001A5120);
 
 void func_001A54F8(PairController* self)
 {
-    if (*(s32*)(self->list390 + 0xC) >= self->f628) {
+    if (self->count39C >= self->f628) {
         self->f640 = 3.4028234663852886e+38f;
     } else {
         Node_1A54F8* owner = *(Node_1A54F8**)(self->list390);
@@ -2753,7 +2691,7 @@ void func_001A54F8(PairController* self)
             RemoveFromList(self->list390, owner);
             AppendToList(self->list384, owner);
             *(void**)((u8*)owner + 0x560) = node;
-            (*(s32*)(self->list390 + 0xC))++;
+            (self->count39C)++;
             ((void (*)(void*))owner->vtbl[0x18 / 4])(owner);
             ((void (*)(void*, void*))owner->vtbl[0x84 / 4])(owner, node + 0x140);
             ((void (*)(void*, void*))owner->vtbl[0x88 / 4])(owner, node + 0x110);
@@ -2812,18 +2750,18 @@ void func_001A5760(PairController* self, f32 dt)
 #undef I
 #undef P
 
-void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
+void func_001A5B28(PairController* self, HitTarget* obj)
 {
-    s32 n = self->i3C4 + 1;
-    f32 x = (f32)self->i3B8;
-    self->i3C4 = n;
+    s32 n = self->f3C4 + 1;
+    f32 x = (f32)self->limit3B8;
+    self->f3C4 = n;
     UpdatePairControllerTuning(self, (f32)n / x);
     if (obj->partner != 0) {
-        RemoveFromList(self->a35C, obj);
+        RemoveFromList(self->list35C, obj);
     } else {
-        RemoveFromList(self->a368, obj);
+        RemoveFromList(self->list368, obj);
     }
-    AppendToList(self->a374, obj);
+    AppendToList(self->list374, obj);
     if (obj->partner != 0) {
         if (func_001A6090(self, obj->partner) != 0) {
             SetPairedState(obj->partner, 3);
@@ -2834,11 +2772,11 @@ void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
     }
     obj->partner = 0;
     obj->desc->m03(obj);
-    if (self->i380 == self->i624) {
+    if (self->count380 == self->limit624) {
         f32 t = RandomFloatInRange(self->f62C, self->f630);
         self->f634 = g_gameClock[1] + t;
     }
-    self->i380 = self->i380 - 1;
+    self->count380 = self->count380 - 1;
 }
 
 void func_001A5C38(u8* self, PairedObject* obj)
@@ -2877,15 +2815,15 @@ void func_001A5DD8(void* unused, PairedObject* obj)
     SetSoundStateObjectState(obj->attachment, 1);
 }
 
-void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
+void func_001A5DF8(PairController* self, PairedObject* obj)
 {
-    self->i3C0 = self->i3C0 + 1;
-    RemoveFromList(self->a35C, obj->partner);
-    AppendToList(self->a374, obj->partner);
-    RemoveFromList(self->a384, obj);
-    AppendToList(self->a390, obj);
-    RemoveFromList(self->a3AC, obj->attachment);
-    AppendToList(self->a3A0, obj->attachment);
+    self->f3C0 = self->f3C0 + 1;
+    RemoveFromList(self->list35C, obj->partner);
+    AppendToList(self->list374, obj->partner);
+    RemoveFromList(self->list384, obj);
+    AppendToList(self->list390, obj);
+    RemoveFromList(self->list3AC, obj->attachment);
+    AppendToList(self->list3A0, obj->attachment);
     {
         PairedObject* p = (PairedObject*)obj->partner;
         p->desc->m15(p, 0);
@@ -2899,26 +2837,26 @@ void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
     obj->attachment = 0;
     ((PairedObject*)obj->partner)->partner = 0;
     obj->partner = 0;
-    if (self->i380 == self->i624) {
+    if (self->count380 == self->limit624) {
         f32 t = RandomFloatInRange(self->f62C, self->f630);
         self->f634 = g_gameClock[1] + t;
     }
-    self->i380 = self->i380 - 1;
-    if (self->i39C == self->i628) {
+    self->count380 = self->count380 - 1;
+    if (self->count39C == self->f628) {
         f32 t2 = RandomFloatInRange(self->f638, self->f63C);
         self->f640 = g_gameClock[1] + t2;
     }
-    self->i39C = self->i39C - 1;
+    self->count39C = self->count39C - 1;
     StartSoundEffect(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
+void func_001A5F78(PairController* self, PairedObject* obj)
 {
-    RemoveFromList(self->a384, obj);
-    AppendToList(self->a390, obj);
+    RemoveFromList(self->list384, obj);
+    AppendToList(self->list390, obj);
     if (obj->attachment != 0) {
-        RemoveFromList(self->a3AC, obj->attachment);
-        AppendToList(self->a3A0, obj->attachment);
+        RemoveFromList(self->list3AC, obj->attachment);
+        AppendToList(self->list3A0, obj->attachment);
         SetSoundStateObjectState(obj->attachment, 0);
     }
     PairedObject* child = (PairedObject*)obj->partner;
@@ -2926,8 +2864,8 @@ void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
         if (child->parent == obj) {
             func_001A5D50(self, obj);
         }
-        RemoveFromList(self->a35C, child);
-        AppendToList(self->a368, child);
+        RemoveFromList(self->list35C, child);
+        AppendToList(self->list368, child);
         if (func_001A6238(self, child) == 0) {
             child->partner = 0;
         }
@@ -2935,11 +2873,11 @@ void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
     obj->attachment = 0;
     obj->partner = 0;
     obj->desc->m03(obj);
-    if (self->a39C == self->a628) {
-        f32 r = RandomFloatInRange(self->a638, self->a63C);
-        self->a640 = g_gameClock[1] + r;
+    if (self->count39C == self->f628) {
+        f32 r = RandomFloatInRange(self->f638, self->f63C);
+        self->f640 = g_gameClock[1] + r;
     }
-    self->a39C = self->a39C - 1;
+    self->count39C = self->count39C - 1;
 }
 
 INCLUDE_RODATA(D_0024CAF4);
@@ -2982,12 +2920,12 @@ INCLUDE_RODATA(D_0024CAFC);
 
 ASM_FUNC(func_001A6328);
 
-void func_001A63F8(Self_1A63F8* self, PairedObject* b)
+void func_001A63F8(PairController* self, PairedObject* b)
 {
     f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
-    f32 r1 = RandomFloatInRange(0.0f, self->f348);
+    f32 r1 = RandomFloatInRange(0.0f, self->tune348);
     ComputePolarOffset((u8*)b + 0x570, r0, r1, 0.0f);
-    b->f574 = b->f574 * self->f34C;
+    b->f574 = b->f574 * self->tune34C;
 }
 
 void* func_001A6480(void* self)
@@ -3511,7 +3449,7 @@ void func_001A7B88(Obj_1A7B88* s)
                 Entry_1A7B88* e = (Entry_1A7B88*)((u8*)s->table + (s->index << 3));
                 bytes[0] = e->b[0];
                 bytes[1] = e->b[1];
-                func_002049E8(s->owner, s->channel, bytes);
+                SetPadActuatorBytes(s->owner, s->channel, bytes);
                 s->f1C = ((Entry_1A7B88*)((u8*)s->table + (s->index << 3)))->delay;
             }
             s->f18 -= dt;
@@ -3560,7 +3498,7 @@ void func_001A7D98(Obj_1A7D98* self, s32 state)
     case 2:
         bytes[0] = self->src->b4;
         bytes[1] = self->src->b5;
-        func_002049E8(self->owner, self->channel, bytes);
+        SetPadActuatorBytes(self->owner, self->channel, bytes);
         self->state = state;
         return;
     case 3:
@@ -3580,7 +3518,7 @@ void func_001A7E40(Pair_001A7E40* self)
     u8 bytes[2];
     bytes[0] = 0;
     bytes[1] = 0;
-    func_002049E8(self->owner, self->channel, bytes);
+    SetPadActuatorBytes(self->owner, self->channel, bytes);
 }
 
 void func_001A7E70(void)

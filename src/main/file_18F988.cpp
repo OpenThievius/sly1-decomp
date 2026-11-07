@@ -548,7 +548,7 @@ void func_00191128(void* a0, s32* a1, s32* a2)
     count = 1;
     if (q < end) {
         do {
-            if (func_00190E30(a0, *last, *q) != 0) {
+            if (IsPointPathShortcutBlocked(a0, *last, *q) != 0) {
                 val = *p;
                 last = p;
                 p = q;
@@ -684,15 +684,15 @@ ASM_FUNC(func_00191C78);
 
 void func_00191E70(s32 value)
 {
-    if (D_00269BA4 != value) {
-        func_001F6C20(0);
-        D_00269BA4 = value;
+    if (g_screenOwner != value) {
+        SyncDataCache(0);
+        g_screenOwner = value;
     }
 }
 
 void func_00191EB0(void)
 {
-    D_00269BA4 = 0;
+    g_screenOwner = 0;
 }
 
 void func_00191EC0()
@@ -961,7 +961,7 @@ void func_00192780(void* value)
     if (idx < 0) return;
     if (idx == g_activeSwitchedCollider) ActivateSwitchedColliderIndex(-1);
     s32 n = g_switchedColliderCount;
-    func_001F5B08(&g_switchedColliders[idx], &g_switchedColliders[idx + 1], (n - idx) * 4 - 4);
+    MoveMemory(&g_switchedColliders[idx], &g_switchedColliders[idx + 1], (n - idx) * 4 - 4);
     if (idx < g_activeSwitchedCollider) g_activeSwitchedCollider = g_activeSwitchedCollider - 1;
     g_switchedColliderCount = g_switchedColliderCount - 1;
 }

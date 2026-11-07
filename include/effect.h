@@ -10,6 +10,13 @@
 // func_0019EBE8 takes it out again and, when the last use goes, func_0019EC30 runs its end
 // hooks and gives it back to the pool.
 //
+// The kinds, by what their own slots do (config/names.tsv names each table g_<kind>EffectMethods):
+// 0 basic (the shared slots only), 2 falling, 3 rising, 4 impact, 5 growing, 6 shrinking fall,
+// 7 dropping, 8 streak, 9 scaled, 10 trail segment, 11 spawning, 12 follow-up, 13 wide trail
+// segment, 14 short falling, 15 emitter, 16 camera space, 17 long streak, 18 phased, 19
+// projectile, 20 hit mark, 21 tumbling, 22 aimed, 23 streaked, 24 spinning, 25 facing, 26 delayed
+// and 27 message.
+//
 // The 27 kinds share one layout: the header and the fields the shared slots read are the same
 // for all, and each kind's own fields sit in the span from +0x28 to +0x140 where the others
 // leave it free. Where two kinds read one offset differently (a float, an integer, a pointer),

@@ -598,7 +598,7 @@ void func_0018E558(void)
 
     for (;;) {
         t->f134 = 0;
-        func_001F6B60(t->f130);
+        AwaitSemaphore(t->f130);
         t->f134 = 1;
         SendGsPacketAndWait(g_gifChannel, (s32)t->f114);
         t->f134 = 2;
@@ -617,15 +617,15 @@ void func_0018E5E8(void)
 
     g_moviePlayer.f130 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
     g_moviePlayer.f0C = 0;
-    (void)func_001F5C0C(&l, 0, sizeof(l));
+    (void)FillMemory(&l, 0, sizeof(l));
     l.f04 = RunMovieDecodeThread;
     l.f08 = (s32)g_movieDecodeThreadStack;
     l.f10 = (s32)D_002832F0;
     l.f0C = 0x1000;
     l.f14 = 2;
-    v = func_001F6A10(&l);
+    v = MakeThread(&l);
     g_movieDecodeThread = v;
-    func_001F6A20((Mgr_18E5E8*)v, 0);
+    RunThread((Mgr_18E5E8*)v, 0);
 }
 
 void func_0018E678(IopRingSink* self, s32 a1, s32 a2)
@@ -684,9 +684,9 @@ s32 func_0018E7C0(IopRingSink* p, s32 size, u8* buf)
     span.b = p->f04 + p->f0C;
     span.c = (void*)size;
     span.d = 0;
-    func_001F6C20(0);
-    obj = func_001F6CA0(&span, 1);
-    while (func_001F6C90(obj) >= 0) {
+    SyncDataCache(0);
+    obj = StartIopDma(&span, 1);
+    while (GetIopDmaStatus(obj) >= 0) {
     }
     return size;
 }
@@ -834,7 +834,7 @@ s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
     while (self->f74 < 0x1000) {
         if (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
             u8 zero[0x40];
-            func_001F5C0C(zero, 0, 0x40);
+            FillMemory(zero, 0, 0x40);
             s32 k = self->f74;
             FillRingBufferFromMemory(&self->sub, total - (k % 32), zero);
             break;
@@ -948,12 +948,12 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
 {
     StreamReader loc;
     KeyId pr;
-    func_00191E70(4);
+    SetScreenOwner(4);
     self->mode = FindKeyIndex(key);
     InitStreamReader(&loc, D_002C3B00);
     if (Fill_18F198::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback((Obj_18F448*)self, &loc);
-        while (!func_0020B0B0(self->list)) {
+        while (!GetMpegDecoderStatus(self->list)) {
             AdvanceGameClockElapsed(((u8*)g_gameClock));
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
@@ -979,7 +979,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
     } else {
         StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
-    func_00191EB0(4);
+    ClearScreenOwner(4);
     DestroyStreamReader(&loc, 2);
 }
 
@@ -992,13 +992,13 @@ void func_0018F448(Obj_18F448* self, void* v)
     self->f5C = D_0045AAC0;
     InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
     StartMovieStream((MovieStream*)((u8*)self + 0x80));
-    func_0020ADA0();
-    func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
-    func_0020A538((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
-    func_0020A538((u8*)self + 0x10, 2, 0, (void*)PassMovieDataToStream, self);
-    func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    func_0020B168((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
-    func_0020B168((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
+    InitMpegLibrary();
+    CreateMpegDecoder((u8*)self + 0x10, self->f58, 0x152F68);
+    SetStreamCallback((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
+    SetStreamCallback((u8*)self + 0x10, 2, 0, (void*)PassMovieDataToStream, self);
+    SetMpegCallback((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
+    SetMpegCallback((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    SetMpegCallback((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder((Object_18F890*)self, 1) != 0) {
     }
     self->f114 = D_00586AC0;
@@ -1058,13 +1058,13 @@ void func_0018F6E8(Obj_18F6E8* self)
             (void)FeedMovieDecoder((Object_18F890*)self, 0);
         } while (self->f134 == 1);
     }
-    if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+    if (DecodeMpegPicture((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {
         UploadMovieFrame(self->f114, self->f5C, self->f10, self->f14);
         DrawMovieFrame(self->f118, self->f10, self->f14);
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     s1 = (u8*)self + 0x80;
     if (self->f134 != 0) {
@@ -1073,7 +1073,7 @@ void func_0018F6E8(Obj_18F6E8* self)
             AdvanceCodeChecksum((Obj_18F610*)self);
         } while (self->f134 != 0);
     }
-    func_001F6B40(self->f130);
+    PostSemaphore(self->f130);
     UpdateMovieStream((Self_18EB98*)s1);
 }
 
@@ -1085,8 +1085,8 @@ void func_0018F7D0(Obj_18F7D0* self)
     self->f0C = 0;
     ResetMovieStream((Obj_18EA48*)(base + 0x80));
     StopMovieStream((Obj_18EAA0*)(base + 0x80));
-    func_0020B0C0(base + 0x10);
-    (void)func_0020B048(base + 0x10);
+    ResetMpegDecoder(base + 0x10);
+    (void)DeleteMpegDecoder(base + 0x10);
     if (self->f134 != 0) {
         do {
         } while (*(volatile s32*)&self->f134 != 0);
@@ -1107,10 +1107,10 @@ s32 func_0018F890(Object_18F890* self, s32 wait)
         PumpStreamReader(self->buffer);
         if (Empty_18F890::Of(self->buffer) && !wait) return 0;
     }
-    func_001F6C20(0);
+    SyncDataCache(0);
     StreamReaderWindow* buffer = self->buffer;
     s32 count = buffer->readyLength - buffer->usedLength;
-    s32 result = func_0020A518(self->pad10, buffer->readyStart + buffer->usedLength, count);
+    s32 result = DemultiplexBuffer(self->pad10, buffer->readyStart + buffer->usedLength, count);
     ConsumeStreamBytes(self->buffer, result);
     return result;
 }
