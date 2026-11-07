@@ -634,7 +634,7 @@ void func_00144270(Camera* self)
     g = g_currentWorld;
     if (g != 0) {
         in = *(Quad16*)self->f40;
-        func_001EEBB0((void*)g->f1EC4, &in, &out);
+        LookupValueTreeLeaf((void*)g->f1EC4, &in, &out);
         if (out != 0) {
             self->f21C = out;
         }

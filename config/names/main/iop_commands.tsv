@@ -33,6 +33,7 @@ func_0011DE18	FlushIopCommandBuffer	sends the current command buffer as command 
 func_0011DF58	EnableIopDiscAccess	sends command 0x2A with four words (001BC000 passes 1, 0x2000, 1, 1 at start-up) and keeps the reply in D_0025C34C, which StartDiscRead, SyncDiscRead and GetDiscReadError test to choose the IOP path
 func_0011E010	StopAllIopSounds	queues IOP command 0x34 without data; StopAllSoundsAndWait and StartMovieStream call it before waiting on command 0x36
 func_0011E048	StartStreamedVoice	packs seven words (location, two packed halfword pairs and three flags) and sends command 0x2C, returning the voice handle; func_001BE728 and func_001BE5F8 keep it in D_0027472C
+func_0011E0B0	QueryIopStreamVoice	queues IOP command 0x2E with one word; CheckStreamVoicePending sends it for g_streamVoice while no reply is pending
 func_0011E0E0	RequestStreamCallback	queues command 0x4F with a stream handle plus a callback function and 64-bit argument (func_001BE5F8 passes func_001BE5D8 and the handle)
 func_0011E110	WaitForIopSoundStop	sends IOP command 0x36 with one word and waits; StopAllSoundsAndWait and StartMovieStream pass 1 after StopAllIopSounds and draining PollIopCommands, before SyncDiscRead
 func_0011E138	StartDiscRead	with D_0025C34C zero it forwards to func_00203B18, otherwise it checks the drive is idle, sets busy in the shared packet and sends command 0x38 with three words; 00140000's read loops call it and repeat until it returns 1
@@ -46,3 +47,4 @@ func_0011E460	ResetIopRing	sends command 0x3D and waits; func_0018EA48 calls it 
 func_0011E498	StopIopMovieStream	sends IOP command 0x3C without data and waits (SendIopCommandAndWait); StopMovieStream calls it
 func_0011E4C0	UpdateIopMovieStream	sends IOP command 0x3E with five words and waits; UpdateMovieStream calls it with its two stream words
 func_0011E4F8	GetIopRingPosition	sends command 0x40 and returns the reply; func_0018E838 masks it with 0xFFFFFF to find the IOP's position in its ring
+func_0011E538	ConvertSpeedToPitchOffset	returns its argument times 1524 / 741; ComputeSoundRecordDoppler converts the bodies' relative speed with it into the pitch offset at +0x60

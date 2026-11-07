@@ -52,6 +52,7 @@ func_001455C0	RequestCameraSnap	sets the snap flag at 0x224 (UpdateCamera then j
 func_001455E0	QueueCameraSnap	sets the flag at 0x220, which UpdateCamera turns into the snap flag at 0x224 at its next run
 func_001455F0	RequestPlainCameraSnap	calls RequestCameraSnap with no value
 func_00145810	FindFirstFreeSpan	collects spans of every object with func_0013DFD8, merges them with MergeOverlappingSpans, and returns the first gap in [0,1] wider than thresh through lo/hi
+func_00145DD8	HasColliderSecondTree	the filter func_00145E68 and FindFreeOnOffCameraScreenSpan pass to the object gathering: accepts an object whose second mesh's tree (0x530) has nodes
 func_00145FB8	PushCameraStackValue	calls PushStackValue on the camera's controller at 0x460
 func_00145FD8	PopCameraStackValue	returns PopStackValue of the camera's controller at 0x460
 func_00145FF8	PeekCameraStackValue	returns PeekStackValue of the camera's controller at 0x460

@@ -75,6 +75,8 @@ func_001161F8	GetScriptDistanceSquared	built-in (original assembly): GetScriptDi
 func_001162D0	NormalizeScriptVector	built-in (original assembly): divides the vector argument by its length into a new vector payload, unless the length is below 0.0001
 func_00116400	ProjectScriptVector	built-in (original assembly): the second vector scaled by its dot product with the first (vmul, vmulx), in a new vector payload
 func_00116490	RemoveScriptVectorComponent	built-in (original assembly): the first vector minus its component along the second (the second scaled by their dot product), in a new vector payload
+func_00116520	GetScriptBallisticVelocity	a script built-in: ComputeBallisticLaunchVelocity from its first two arguments (object and target point) at the launch angle of the third, with the optional fourth, returned as a vector
+func_00116600	GetScriptAngleAndAxis	a script built-in: returns a two-item list of the angle between its two vector arguments and their unit axis, from ComputeAngleBetweenVectors
 func_001166C0	TransposeScriptMatrix	builtin: allocates a matrix payload, fills it with CopyTransposedMatrix of the argument and returns it
 func_00116740	InvertScriptMatrix	builtin: allocates a matrix payload, fills it with InvertMatrix4x4 of the argument and returns it
 func_001167C0	TransformScriptMatrixByObject	built-in: TransformMatrixByObject with the two arguments into a new matrix payload, returned as a script matrix
@@ -84,6 +86,7 @@ func_001169E8	GetScriptMatrixRotation	builtin: copies the matrix argument into a
 func_00116A88	GetScriptMatrixEuler	builtin: returns MatrixToEulerAngles of its matrix argument as a vector
 func_00116B08	GetScriptMatrixAxisAngle	built-in: MatrixToAxisAngle of its matrix argument, returned as a chain of the angle (a float) and the axis (a new vector payload)
 func_00116BC8	MakeScriptDirectionMatrix	built-in (original assembly): a matrix payload built by func_00189C28 from the difference of its two vector arguments and an up vector (the third argument, else g_unitZVector), reset with ResetMatrixHomogeneous
+func_00116C80	MakeScriptUprightObjectMatrix	a script built-in: the object argument's rotation turned upright (RotateMatrixUpright) with its position at +0x30, as a matrix (BuildMatrixFromRotationAndTranslation)
 func_00116D20	EvalScriptQuadratic	builtin: with a tag 0x1A triple (a, b, c) and a float t returns a + t * (b + t * c)
 func_00116DC8	EvalScriptClampedQuadratic	builtin: evaluates the quadratic of a triple at a float and clamps the result to the low and high of a pair
 func_00116EA8	MakeScriptVector4FromFour	builtin: converts four arguments to floats and passes x, y, z, w to func_001EB018 to fill a pooled block returned as tag 0x18
@@ -99,6 +102,7 @@ func_00117478	GetScriptMinimum	builtin: keeps the smallest of args[0] and every 
 func_00117598	GetScriptRemainder	builtin: returns the int args[0].i % args[1].i
 func_00117610	GetScriptClock	builtin: returns the float D_0026185C, the game clock other functions stamp their state changes with
 func_00117668	ScheduleScriptCall	built-in: builds a record of a delay (the float argument) and a call of its function argument on its quoted (tag 0x11) remaining arguments, and prepends it to the list in the world's scope variable g_currentWorld->f1EF8, which func_001DBEC8 counts down and evaluates when due
+func_00117880	SetScriptObjectEventTimer	a script built-in: stores its second argument, as a float, in the object argument's event timer at 0x29C (the timer SuppressScriptEvent drops events by)
 func_00117910	DispatchScriptObjectProperty	builtin core: switch on kind 0x63..0x66 calling AddObjectProperty, SetExtraObjectProperty, UpdateObjectProperty or GetObjectProperty with the first two int arguments
 func_00117A30	AddScriptObjectProperty	builtin: calls func_00117910 with kind 0x63, which selects AddObjectProperty
 func_00117A60	SetScriptExtraObjectProperty	builtin: calls func_00117910 with kind 0x64, which selects SetExtraObjectProperty
@@ -114,6 +118,7 @@ func_00117E78	GetScriptWorld	builtin: returns D_00275710 as a tag 0x20 pointer
 func_00117ED0	GetScriptCamera	builtin: returns g_camera (D_00261990, the class 0x6D object) as a tag 0x20 pointer
 func_00117F28	GatherScriptObjectsById	builtin: GatherObjectsById on the current world (0x101 or 0x105 by arg1) into a 0x100 buffer, returned as a script reference list
 func_00117FE0	FindScriptObjectsInBox	built-in (original assembly): the box between the component-wise minimum and maximum (vmini, vmax) of its two vector arguments, the objects func_001DC238 finds in it on g_currentWorld, returned through MakeScriptRefList
+func_001180C0	FindScriptObjectsInSphere	a script built-in: inside a back-memory mark gathers the world's objects within the radius of its second argument around the point of its first (GatherCollidersInSphere) and returns them as a list (MakeScriptRefList), as FindScriptObjectsInBox does for a box
 func_00118198	SearchScriptObjectHits	walks the chain args[0], tests each object with func_001419E8 and, for id 0x71, collects every hit as (object, vector, vector) triples in a chain, otherwise returns the first hit as (object, vector)
 func_001183B8	CollectScriptObjectHits	builtin: calls func_00118198 with id 0x71 (every hit)
 func_00118458	FindScriptObjectHit	builtin: calls func_00118198 with id 0x72 (the first hit only)

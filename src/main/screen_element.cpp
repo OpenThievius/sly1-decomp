@@ -304,9 +304,9 @@ void func_00137260(Layout_137228* out, s32 flag);
 void func_00137268(Layout_137228* out, s32 flag);
 // A layout with its setters as calls (SetTextLayoutPosition and the others).
 struct LayoutBuilder : Layout_137228 {
-    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
-    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
-    void Color(s32* c) { func_00137248(this, c); }
+    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
+    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
+    void Color(s32* c) { SetTextLayoutColor(this, c); }
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
@@ -337,9 +337,9 @@ void func_00161708(PacketWriter* f, u64 a, u64 b);
 void func_00161458(PacketWriter* f, u32 v);
 void func_001615F0(PacketWriter* f, s32 a, s32 b, s32 c, s32 d);
 struct LayoutByValue : Layout_137228 {
-    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
-    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
-    void Color(s32 c) { func_00137248(this, &c); }
+    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
+    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
+    void Color(s32 c) { SetTextLayoutColor(this, &c); }
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
@@ -525,10 +525,10 @@ void func_001AA790(ScreenElement* self)
         f32 p = self->w;
         f32 q = self->h;
         s32 held = self->color;
-        func_00137228(out, self->x, self->y);
-        func_00137238(out, p, q);
+        SetTextLayoutPosition(out, self->x, self->y);
+        SetTextLayoutSize(out, p, q);
         tmp = held;
-        func_00137248(out, &tmp);
+        SetTextLayoutColor(out, &tmp);
         func_00137260(out, 0);
         func_00137268(out, 0);
 
@@ -878,10 +878,10 @@ void func_001AB198(T217D_E30* self)
     held = packed.v;
     px = self->w;
     py = self->h;
-    func_00137228(out, self->x, self->y);
-    func_00137238(out, px, py);
+    SetTextLayoutPosition(out, self->x, self->y);
+    SetTextLayoutSize(out, px, py);
     tmp[0] = held;
-    func_00137248(out, &tmp[0]);
+    SetTextLayoutColor(out, &tmp[0]);
     func_00137260(out, 0);
     func_00137268(out, 0);
     PushFontScale(self->font, self->scale, self->scale);
@@ -1003,10 +1003,10 @@ void func_001AB710(T217D_510* self)
         f32 f234 = self->w;
         f32 f238 = self->h;
         s32 s0v = self->color;
-        func_00137228(&L, self->x, self->y);
-        func_00137238(&L, f234, f238);
+        SetTextLayoutPosition(&L, self->x, self->y);
+        SetTextLayoutSize(&L, f234, f238);
         tag.w[0] = s0v;
-        func_00137248(&L, &tag.w[0]);
+        SetTextLayoutColor(&L, &tag.w[0]);
         func_00137260(&L, 0);
         func_00137268(&L, 0);
         void* obj = self->frame;
@@ -1253,12 +1253,12 @@ void func_001AC0E8(T217D_2E0* self)
     f32 h = self->fill * y;
     y -= h;
     f32 w = self->barW;
-    func_00137228(&out, self->x + self->barX, self->y + self->barY);
-    func_00137238(&out, w, y);
+    SetTextLayoutPosition(&out, self->x + self->barX, self->y + self->barY);
+    SetTextLayoutSize(&out, w, y);
     {
         Quad4 tmp;
         tmp.w[0] = grey;
-        func_00137248(&out, &tmp);
+        SetTextLayoutColor(&out, &tmp);
     }
     func_00137260(&out, 0);
     func_00137268(&out, 0);
@@ -1764,11 +1764,11 @@ void func_001AD7B0(T217D_420* self)
     PushFontScale(h, s2, s2);
     f32 w = MeasureFontString(h, (void*)"L");
     f32 ht = (f32)h->height * h->sy;
-    func_00137228(&buf, self->x + 2.0f + self->w * half - w * half,
+    SetTextLayoutPosition(&buf, self->x + 2.0f + self->w * half - w * half,
                   self->y + 14.0f + self->h * half - ht * half);
-    func_00137238(&buf, w, ht);
+    SetTextLayoutSize(&buf, w, ht);
     tmp.w[0] = mask;
-    func_00137248(&buf, &tmp.w[0]);
+    SetTextLayoutColor(&buf, &tmp.w[0]);
     func_00137260(&buf, 0);
     func_00137268(&buf, 0);
     DrawFontString(h, (void*)"L", &buf, 0, &g_gsPacketWriter);
@@ -2077,10 +2077,10 @@ void func_001AE820(T217D_600* self)
     held = self->color;
     px = self->w;
     py = self->h;
-    func_00137228(out, self->x, self->y + adj);
-    func_00137238(out, px, py);
+    SetTextLayoutPosition(out, self->x, self->y + adj);
+    SetTextLayoutSize(out, px, py);
     tmp[0] = held;
-    func_00137248(out, tmp);
+    SetTextLayoutColor(out, tmp);
     func_00137260(out, 0);
     func_00137268(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";

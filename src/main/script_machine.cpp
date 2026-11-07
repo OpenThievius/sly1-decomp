@@ -758,7 +758,7 @@ ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
             out[k] = args[k].f;
         }
     }
-    s32 flag = func_001EAC68(out[0], out[1], out[2]);
+    s32 flag = AreFloatsNearlyEqual(out[0], out[1], out[2]);
     SetScriptValueBool(&q, flag);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1508,7 +1508,7 @@ ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     void* s1 = args[0].p;
     void* fc = args[1].p;
     ConvertScriptValueToFloat(&v, &args[2]);
-    func_001EDEF0(s1, fc, p, s3, v.f);
+    ComputeBallisticLaunchVelocity(s1, fc, p, s3, v.f);
     DestroyScriptValue(&v, 2);
     SetScriptValueVectorA(&q, p);
     CopyConstructScriptValue(ret, &q);
@@ -1525,7 +1525,7 @@ ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     a->next = b;
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
-    f32 d = func_001ED908(args[0].i, args[1].i, c);
+    f32 d = ComputeAngleBetweenVectors(args[0].i, args[1].i, c);
     SetScriptValueFloat(a, d);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -1640,7 +1640,7 @@ ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     UprightBasis v;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    func_00189378(args[0].p, 0, &v);
+    RotateMatrixUpright(args[0].p, 0, &v);
     BuildMatrixFromRotationAndTranslation((u8*)args[0].p + 0x30, &v, a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2189,7 +2189,7 @@ ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     InitScriptValue(&q);
     if (args[1].tag == 0x14) scale = (f32)args[1].i; else scale = args[1].f;
     PushBackMemoryMark();
-    func_001DC4D0(g_currentWorld, scale, 0, args[0].i, 0, 0, &n, &list);
+    GatherCollidersInSphere(g_currentWorld, scale, 0, args[0].i, 0, 0, &n, &list);
     MakeScriptRefList(&t, n, list);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);

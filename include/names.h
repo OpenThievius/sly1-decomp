@@ -674,6 +674,8 @@
 #define NormalizeScriptVector                      func_001162D0
 #define ProjectScriptVector                        func_00116400
 #define RemoveScriptVectorComponent                func_00116490
+#define GetScriptBallisticVelocity                 func_00116520
+#define GetScriptAngleAndAxis                      func_00116600
 #define TransposeScriptMatrix                      func_001166C0
 #define InvertScriptMatrix                         func_00116740
 #define TransformScriptMatrixByObject              func_001167C0
@@ -683,6 +685,7 @@
 #define GetScriptMatrixEuler                       func_00116A88
 #define GetScriptMatrixAxisAngle                   func_00116B08
 #define MakeScriptDirectionMatrix                  func_00116BC8
+#define MakeScriptUprightObjectMatrix              func_00116C80
 #define EvalScriptQuadratic                        func_00116D20
 #define EvalScriptClampedQuadratic                 func_00116DC8
 #define MakeScriptVector4FromFour                  func_00116EA8
@@ -698,6 +701,7 @@
 #define GetScriptRemainder                         func_00117598
 #define GetScriptClock                             func_00117610
 #define ScheduleScriptCall                         func_00117668
+#define SetScriptObjectEventTimer                  func_00117880
 #define DispatchScriptObjectProperty               func_00117910
 #define AddScriptObjectProperty                    func_00117A30
 #define SetScriptExtraObjectProperty               func_00117A60
@@ -713,6 +717,7 @@
 #define GetScriptCamera                            func_00117ED0
 #define GatherScriptObjectsById                    func_00117F28
 #define FindScriptObjectsInBox                     func_00117FE0
+#define FindScriptObjectsInSphere                  func_001180C0
 #define SearchScriptObjectHits                     func_00118198
 #define CollectScriptObjectHits                    func_001183B8
 #define FindScriptObjectHit                        func_00118458
@@ -873,6 +878,7 @@
 #define EnableIopDiscAccess                        func_0011DF58
 #define StopAllIopSounds                           func_0011E010
 #define StartStreamedVoice                         func_0011E048
+#define QueryIopStreamVoice                        func_0011E0B0
 #define RequestStreamCallback                      func_0011E0E0
 #define WaitForIopSoundStop                        func_0011E110
 #define StartDiscRead                              func_0011E138
@@ -886,6 +892,7 @@
 #define StopIopMovieStream                         func_0011E498
 #define UpdateIopMovieStream                       func_0011E4C0
 #define GetIopRingPosition                         func_0011E4F8
+#define ConvertSpeedToPitchOffset                  func_0011E538
 #define InitObjectBuiltinTable                     func_0011E560
 #define CreateTypedRecord                          func_0011E580
 #define ApplyPropertyRecord                        func_0011E680
@@ -1282,6 +1289,7 @@
 #define OpenBufferedMemoryStream                   func_00137398
 #define OpenBufferedSectorStreamRange              func_001373B0
 #define CloseBufferedStream                        func_001373D0
+#define ReduceBufferedStreamBytesLeft              func_00137480
 #define RefillBufferedStreamFromSectors            func_00137490
 #define RefillBufferedStreamFromFile               func_001377C0
 #define RefillBufferedStream                       func_00137820
@@ -1316,6 +1324,7 @@
 #define ClearRootObjectStateBits                   func_00138BE0
 #define UpdateWorldContacts                        func_00138C00
 #define InitContactPairFlags                       func_00138F28
+#define BuildCombinedBlendAnimation                func_00139038
 #define ComputeWrappedDeltas                       func_00139600
 #define FindCyclicRangeIndex                       func_00139970
 #define BuildAlphaStatePacket                      func_00139B70
@@ -1532,6 +1541,7 @@
 #define QueueCameraSnap                            func_001455E0
 #define RequestPlainCameraSnap                     func_001455F0
 #define FindFirstFreeSpan                          func_00145810
+#define HasColliderSecondTree                      func_00145DD8
 #define PushCameraStackValue                       func_00145FB8
 #define PopCameraStackValue                        func_00145FD8
 #define PeekCameraStackValue                       func_00145FF8
@@ -2754,6 +2764,7 @@
 #define HandleC17ColliderActivation                func_0019A520
 #define HandleC17ColliderNotification              func_0019AB78
 #define AddEntryRecordKey                          func_0019AD30
+#define RecordC17ColliderCompletion                func_0019AD68
 #define InitC71Object                              func_0019AF00
 #define RegisterC71Object                          func_0019AF38
 #define UnregisterC71Object                        func_0019AF70
@@ -2776,8 +2787,11 @@
 #define InitC8BObject                              func_0019C440
 #define LoadC8BObject                              func_0019C470
 #define StartC8BObject                             func_0019C728
+#define DecodeC8BGridIndex                         func_0019CD90
 #define SetC8BObjectVector                         func_0019CE28
 #define SetC8BObjectVectorFlagged                  func_0019CE38
+#define TrackAimTargetObject                       func_0019D2A8
+#define TrackAimTargetPoint                        func_0019D338
 #define QueueDeferredRequest                       func_0019D410
 #define CompareEntriesByValueDescending            func_0019D468
 #define BucketDeferredRequests                     func_0019D4B0
@@ -3049,6 +3063,9 @@
 #define StopTimer                                  func_001AB958
 #define StepTimer                                  func_001AB980
 #define SetTimerState                              func_001ABE20
+#define GetPairCaptionHoldTime                     func_001ABE40
+#define GetGaugeAmountCaptionHoldTime              func_001ABE50
+#define GetGaugeColliderCaptionHoldTime            func_001ABE60
 #define InitGauge                                  func_001ABE70
 #define DecrementGaugeCount                        func_001AC060
 #define DrawGauge                                  func_001AC0E8
@@ -3318,6 +3335,7 @@
 #define SetColliderTurnAnchorPreset                func_001BB058
 #define SetColliderMoveAnchorPreset                func_001BB0C8
 #define SendColliderNotification                   func_001BB210
+#define SetColliderGravityDisabled                 func_001BB378
 #define SetColliderTreeContactsDropped             func_001BB3B0
 #define SetColliderContactsDropped                 func_001BB400
 #define SetColliderKindContactsDropped             func_001BB450
@@ -3406,6 +3424,7 @@
 #define SetVolumeChannelFactor                     func_001C06A0
 #define ResetVolumeChannelFactors                  func_001C06D8
 #define SilenceVolumeChannel3                      func_001C0760
+#define ApplySoundOptionFlag                       func_001C0790
 #define StopAllSoundsAndWait                       func_001C07B0
 #define StopWorldSoundRecords                      func_001C0808
 #define PushIopChannel2Setting                     func_001C08B0

@@ -52,6 +52,7 @@ func_001BB028	GetAnchorPreset	copies the value and the vector at the index of th
 func_001BB058	SetColliderTurnAnchorPreset	script built-in: sets the second anchor (0x460, its mode 0x470) to an entry of the preset table (GetAnchorPreset) with its axis turned into the body's frame (0xD0), keeping the first (SetColliderAnchors)
 func_001BB0C8	SetColliderMoveAnchorPreset	script built-in: sets the first anchor (0x440, its mode 0x450) to an entry of the preset table (GetAnchorPreset) with its axis turned into the body's frame (0xD0), keeping the second (SetColliderAnchors)
 func_001BB210	SendColliderNotification	slot 14 of class 0x03: calls the base func_00183350, then calls slot 13 (kind, arg) of each owner in its attachment list at 0x4B0
+func_001BB378	SetColliderGravityDisabled	stores its flag in bit 51 of the 64-bit flags at 0x538, which StepCollider tests before adding the constrained gravity (+0x350) as a force; a setter in the object property records FillObjectPropertyTable (func_00109488) fills
 func_001BB3B0	SetColliderTreeContactsDropped	script built-in: stores bit 42 of the flags at 0x538 and drops the contacts with the parts under the body (DropColliderContacts mode 1) when set; SetPlayerState calls it too
 func_001BB400	SetColliderContactsDropped	script built-in: stores bit 43 of the flags at 0x538 (the bit the notifier and range filters refuse) and drops the body's own contacts (DropColliderContacts mode 2) when set
 func_001BB450	SetColliderKindContactsDropped	script built-in: stores bit 44 of the flags at 0x538 and drops the contacts with kinds 8 and 9 (DropColliderContacts mode 3) when set
@@ -140,6 +141,7 @@ func_001C0600	ApplyVolumeChannelFactors	multiplies the 11 factors of one column 
 func_001C06A0	SetVolumeChannelFactor	stores a float at [row][column] of D_00274838 and re-applies that column with ApplyVolumeChannelFactors
 func_001C06D8	ResetVolumeChannelFactors	copies the default table D_00274758 over D_00274838 (0xB0 bytes), sets channel 8 to full and re-applies columns 0..3
 func_001C0760	SilenceVolumeChannel3	sets factor 1 of volume channel 3 to 0.0 when the flag is set and to 1.0 otherwise
+func_001C0790	ApplySoundOptionFlag	passes whether its argument is nonzero to SetIopSoundOptionFlag; ResetVolumeChannelFactors, ResumeAtSavedLevel and ActivatePauseMenuSelection call it with the save data's option bit 0x40
 func_001C07B0	StopAllSoundsAndWait	stops the world's sound records, ClearSoundLevels, ClearCachedVoiceParams, then polls the IOP commands until none are left and syncs the disc read
 func_001C0808	StopWorldSoundRecords	walks the world's list at +0x1BAC calling StopSoundRecord on each object with item, then PollIopCommands
 func_001C08B0	PushIopChannel2Setting	while fewer than 4 pairs are stacked, applies a setting to IOP channel 2 (func_0011E328/func_0011E360) and pushes the pair on the stack at +0x2328
