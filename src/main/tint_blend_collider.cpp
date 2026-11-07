@@ -92,7 +92,7 @@ void func_001DE798(C14* self)
     f32 f;
 
     InitTurningCollider(self);
-    f = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    f = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->f638 = f;
     BuildAxisAngleMatrix(&g_unitZVector, (u8*)self + 0x660, f);
     self->f720 = -1;
@@ -268,7 +268,7 @@ void func_001DF2C8(C14* self, void* a1, void* a2)
             } else {
                 t = 0.0f;
             }
-            f32 r = func_00205210((g_gameClock[1] - self->f72C) * 10.0f);
+            f32 r = Cosine((g_gameClock[1] - self->f72C) * 10.0f);
             f32 a = D_00275870.x + t * (D_00275870.y + t * D_00275870.z);
             a = Clamp_1DF2C8::Of(a, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
             f32 b = D_00275880[0] + r * (D_00275880[1] + r * D_00275880[2]);
@@ -293,7 +293,7 @@ s32 func_001DDA80(void* p);
 
 s32 func_001DF5A0(C14* self, s32 mode)
 {
-    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || func_001DDA80(self->world) != 0) return 1;
+    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 

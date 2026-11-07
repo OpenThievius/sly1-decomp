@@ -70,8 +70,9 @@ struct C3C : ChildGroupObject {
     u8 pad6E8[0x6F0 - 0x6E8];
 };
 
+// 0x3F, the player's stand-in: SwapInPlayerStandIn puts it in the place of an attached object.
 struct C3F : ChildGroupObject {
-    f32 f690;               // 0x690: the clock when func_001D6CB0 started it
+    f32 f690;               // 0x690: the clock when SwapInPlayerStandIn started it
     s32 f694;               // 0x694: 1 while it runs
     u8 pad698[0x6A0 - 0x698];
 };

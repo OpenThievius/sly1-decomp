@@ -496,11 +496,13 @@ struct C0A : Agent {
     u8 padC44[0xC50 - 0xC44];
 };
 
+// 0x0B, the keyed cone agent: a cone agent that counts down (+0xC5C) as it moves between its six
+// key objects (FindNearestAgentKey).
 struct C0B : C0A {
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
-    s32 fC58;               // 0xC58
-    s32 fC5C;               // 0xC5C
+    s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
+    s32 fC5C;               // 0xC5C: the count it lowers (ChooseKeyedConeAgentState stops at 0)
     void* fC60;             // 0xC60
     s32 fC64[6];            // 0xC64: keys slot 56 answers for itself (func_001E9038)
     s32 fC7C;               // 0xC7C
@@ -577,31 +579,33 @@ struct C12 : C10 {
     u8 padC28[0xC30 - 0xC28];
 };
 
+// 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
+// beat-press colliders to judge presses against (JudgeBeatPressInput).
 struct C13 : Agent {
     u8 padC10[0xC20 - 0xC10];
     s32 fC20;               // 0xC20
     u8 padC24[0xC34 - 0xC24];
-    void* fC34;             // 0xC34
-    void* fC38;             // 0xC38
+    void* fC34;             // 0xC34: the timeline to start when the beat clock restarts
+    void* fC38;             // 0xC38: the timeline it runs (EndHeldTimeline)
     u8 padC3C[0xC48 - 0xC3C];
     void* fC48;             // 0xC48
     u8 padC4C[0xC50 - 0xC4C];
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     u8 padC58[0xC5C - 0xC58];
-    s32 fC5C;               // 0xC5C
-    s32 fC60;               // 0xC60
-    f32 fC64;               // 0xC64
+    s32 fC5C;               // 0xC5C: the tempo in beats a minute (SetTempoAgentTempo)
+    s32 fC60;               // 0xC60: a span in beats (SetTempoAgentSpanBeats)
+    f32 fC64;               // 0xC64: that span in seconds
     s32 fC68;               // 0xC68: the number of fC6C entries (func_001ED090)
     void* fC6C;             // 0xC6C: a 0x400-byte table (slot 0)
-    s32 fC70;               // 0xC70
-    s32 fC74;               // 0xC74
-    s32 fC78;               // 0xC78
-    f32 fC7C;               // 0xC7C
-    f32 fC80;               // 0xC80
-    f32 fC84;               // 0xC84
-    f32 fC88;               // 0xC88
-    f32 fC8C;               // 0xC8C
+    s32 fC70;               // 0xC70: the bars counted (four beats each)
+    s32 fC74;               // 0xC74: the beats counted
+    s32 fC78;               // 0xC78: the beat in the bar, 0 to 3
+    f32 fC7C;               // 0xC7C: the position in the bar, in beats
+    f32 fC80;               // 0xC80: the time of the last beat
+    f32 fC84;               // 0xC84: the time of the next beat
+    f32 fC88;               // 0xC88: the beat length in use, in seconds
+    f32 fC8C;               // 0xC8C: the beat length set, 60 over the tempo (taken at the bar)
     u8 padC90[0xC94 - 0xC90];
     s32 fC94;               // 0xC94
     s32 fC98;               // 0xC98

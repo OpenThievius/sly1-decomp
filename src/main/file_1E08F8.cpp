@@ -551,7 +551,7 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
     s8* p = at;
     s32 next;
 
-    func_001F5C0C(spec, 0, 0x34);
+    FillMemory(spec, 0, 0x34);
     if (*at != 0) {
         for (;;) {
             s32 adv = 0;
@@ -927,8 +927,8 @@ s32 func_001E1330(double v)
 {
     s32 i;
     if (func_001FD308(v, 0.0) > 0) {
-        double l = func_001FD868(func_00205B28(func_001FD578(v)));
-        i = func_001FD410(l);
+        double l = func_001FD868(LogarithmBase10(func_001FD578(v)));
+        i = ConvertDoubleToS32(l);
         if (func_001FD308(l, 0.0) < 0 && func_001FD308(l, func_001FD358(i)) != 0)
             i--;
     } else {
@@ -944,12 +944,12 @@ s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
     if (a < b || a - 15 >= b) {
         idx = 0;
     } else {
-        f32 t = func_00205C78(10.0f, (f32)(-b));
+        f32 t = Power(10.0f, (f32)(-b));
         Obj_1E13D0* p = func_001FCDE0(self, func_001FD868(t));
         self = TruncateDouble(p);
         p = TruncateDouble(func_001FCDE0(self, 0.1));
         p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
-        idx = func_001FD410(func_001FCD78(self, p));
+        idx = ConvertDoubleToS32(func_001FCD78(self, p));
     }
     return ((s8*)&D_00275940)[idx];
 }
@@ -976,7 +976,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     s32 base = 0;
     if (isE) base = e;
     s32 prec = sp->prec;
-    f32 p = func_00205C78(10.0f, (f32)(base - prec));
+    f32 p = Power(10.0f, (f32)(base - prec));
     double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
     s32 e2 = GetDecimalExponent(r);
     if (e < GetDecimalExponent(r)) e = e2;
@@ -1013,7 +1013,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
         } else {
             *out++ = '+';
         }
-        s32 d = (s32)func_00205C78(10.0f, 2.0f);
+        s32 d = (s32)Power(10.0f, 2.0f);
         for (s32 k = 2; k >= 0; k--) {
             *out++ = D_00275940[e / d];
             e = (e % d) * 10;
@@ -1202,7 +1202,7 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 s32 func_001E1EB0(const char* fmt, void* ap)
 {
     Stream_1E1EB0 buf;
-    func_001D7100(&buf, -1);
+    InitOutputBuffer(&buf, -1);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     DestroyOutputBuffer(&buf, 2);
     return n;
@@ -1217,7 +1217,7 @@ s32 func_001E1F10(void* self, ...)
 s32 func_001E1F58(char* dst, const char* fmt, void* ap)
 {
     Stream_001E1F58 buf;
-    func_001D7120(&buf, dst, 0);
+    InitStringOutputBuffer(&buf, dst, 0);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     dst += n;
     *dst = 0;
@@ -1236,7 +1236,7 @@ s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
     u8 buf[0x420];
     s32 n;
 
-    func_001D7120(buf, dst, cap);
+    InitStringOutputBuffer(buf, dst, cap);
     n = FormatToOutputBuffer(buf, a, b);
     if (n >= cap) {
         n = -1;
@@ -1305,10 +1305,10 @@ void func_001E2268(void* a, void* b)
 {
     Ctor_1E2268 tmp;
 
-    func_001F5C0C(&tmp, 0, 0x18);
+    FillMemory(&tmp, 0, 0x18);
     tmp.a = a;
     tmp.b = b;
-    func_001F6B20(&tmp);
+    NewSemaphore(&tmp);
 }
 
 LINKER_REMNANT(func_001E22B8);
@@ -1321,9 +1321,9 @@ void func_001E22C0(IntPair_1E22C0* self)
 
 void func_001E22F8(Tally_1E22F8* self)
 {
-    s32 key = func_001F6A90();
+    s32 key = GetCurrentThreadId();
     if (key != self->last) {
-        (void)func_001F6B60(self->ptr);
+        (void)AwaitSemaphore(self->ptr);
         self->last = key;
         self->count = 1;
     } else {
@@ -1335,7 +1335,7 @@ void func_001E2358(Tally_1E2358* self)
 {
     if (--self->count == 0) {
         self->last = -1;
-        func_001F6B40(self->ptr);
+        PostSemaphore(self->ptr);
     }
 }
 
@@ -1345,15 +1345,15 @@ void func_001E2398(void)
 {
     Init_1E2398 l;
 
-    g_mainAndRenderThreads.f0 = func_001F6A90();
-    func_001F6A50(g_mainAndRenderThreads.f0, 4);
-    (void)func_001F5C0C(&l, 0, sizeof(l));
+    g_mainAndRenderThreads.f0 = GetCurrentThreadId();
+    SetThreadPriority(g_mainAndRenderThreads.f0, 4);
+    (void)FillMemory(&l, 0, sizeof(l));
     l.f0C = 0x20000;
     l.f08 = (s32)g_renderThreadStack;
     l.f14 = 2;
     l.f10 = (s32)D_002832F0;
     l.f04 = RunRenderThread;
-    g_mainAndRenderThreads.f4 = func_001F6A10(&l);
+    g_mainAndRenderThreads.f4 = MakeThread(&l);
 }
 
 void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
@@ -1545,7 +1545,7 @@ Ctor_1E4E38::Ctor_1E4E38()
     f4 = 0;
     f10 = 0;
     fC = f8 = -1;
-    func_001F5C0C(body, 0, 0x20);
+    FillMemory(body, 0, 0x20);
 }
 
 Ctor_1E4E38 D_00275AF0;

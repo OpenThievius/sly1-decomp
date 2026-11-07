@@ -1165,8 +1165,8 @@ func_001F1590	SetWarpCursor	in modes 0 and 4 stores the cursor entry (+0x2DC) an
 func_001F1610	BeginWarpPageClose	enters mode 4 through func_001F1050 when the page is in mode 1 or 2
 func_001F1050	SetWarpPageMode	leaves the current mode (stops the sound, hides or shows the elements, restarts the element animations) and enters the next one (starts the animation, cursor placement and sound), stamping the clock D_00261858[4] at +0x2D4
 func_001F0F70	HandleWarpPageNotification	runs HandlePlacedObjectNotification, then for kind 5 moves the page on by its mode: mode 1 re-enters mode 1, mode 3 sets the screen fade to mode 2, mode 4 ends the fade and sets mode 0
-func_001F0660	InitWarpPage	base set-up, then sets the page's slot from its id (0x1C6 to 0x1CA give slots 4, 1, 2, 3, 5) and stores the page in D_0026F808.nodes[slot]
-func_001F0758	StartWarpPage	runs the placed-object start, installs the table D_00275FE0 with func_00124DF8, starts each child and gives each of the 11 elements random phase (0 to 2*pi) and speed (0.5 to 0.7), selection -1
+func_001F0660	StartWarpPage	slot 16 of class 0x67: runs StartPlacedObject, sets flag bits 40-41 to 1, sets the page's slot from its id (0x1C6 to 0x1CA give slots 4, 1, 2, 3, 5, others the save data's level) and stores the page in D_0026F808.nodes[slot]
+func_001F0758	PostLoadWarpPage	slot 15 of class 0x67: runs PostLoadPlacedObject, resolves its links (D_00275FE0, with ResolveObjectLinks), starts each child and gives each of the 11 elements a random phase (0 to 2 pi) and speed (0.5 to 0.7), selection -1
 func_001F18B0	SetWarpPageSelectedEntry	stores a new selected entry at +0x534: copies the entry's placement to +0x550 (or the identity from D_00248D30), clears the entry's float and sets the previous selection's float to 1
 func_001F08F0	SetPendingWarpEntry	stores its second and third arguments into D_00276250 and D_00276654, which func_001F0908 reads and clears
 func_001F1960	InitWarpMenu	base set-up, takes the font record (func_0015C1C0) if one exists, sets colour and scale, writes the help text 'Back / Move / Warp' with slot 2, clears current and the 6 node pointers
@@ -2506,7 +2506,7 @@ func_001D5468	ContinuePlayerRequestKind1Or2	the callback AcceptPlayerRequest ins
 func_001D5620	EndPlayerRequestState	RunPlayerCallback's ending for sub-states 0x2D..0x31 with no callback: calls func_0012AAE8 with 1.0 and func_00160DA0
 func_001D5650	CompareSortedTargets	the comparison func_001D5678 passes to the sort func_001F5CD0 for its 0x20-byte entries: -1 when the float at +0x10 of the first entry is below the second's, else 1
 D_00274FC0	g_playerObjectTable	the seven (id, value, object) entries ResolvePlayerTableObjects copies to the player's +0x26AC and fills with the object of each id
-func_001D6DA0	TestC3FMayContact	slot 56 of class 0x3F: returns 1 for the player (g_player) and otherwise asks TestCollidersMayContact
+func_001D6DA0	TestStandInMayContact	slot 56 of class 0x3F, the stand-in SwapInPlayerStandIn places: returns 1 for the player (g_player) and otherwise asks TestCollidersMayContact
 func_001D8D90	SteerPathFollower	UpdatePathFollower's helper: eases the turn rate at +0x69C toward the clamped wrapped difference between the target heading at +0x694 and the heading of its first matrix row, and sets the value at +0x50 of each of the four slots at +0x6B0 to the speed at +0x698 over the radius at +0x610 (first two) or +0x614
 func_001D92F0	CountDownPathFollowerLap	stores the game time at +0x854, counts the laps at +0x858 down by one and calls slot 6 of the object at +0xB14 when there is one
 func_001D9338	RecordPathFollowerProgress	passes a 0..1 fraction from the lap index at +0xB00 to func_00151E20 on D_00261EF0, then sets every bit from 0 up to the index +0xB0C minus +0xB08 in the current entry's bit set at +0x74, counting each newly set bit at +0x70
@@ -2553,18 +2553,18 @@ func_001ED5B8	AppendTimelineKind2Entry	appends a timeline entry of kind 2 with A
 func_001ED5D8	AppendTimelineKind3Entry	appends a timeline entry of kind 3 with AppendTimelineEntry
 func_001ED5F8	AppendTimelineKind4Entry	appends a timeline entry of kind 4 with AppendTimelineEntry
 func_001ED618	AppendTimelineKind5Entry	appends a timeline entry of kind 5 with AppendTimelineEntry
-func_001ED050	SetC13FrameRate	stores the count at +0xC5C of a class 0x13 object and 60 over it at +0xC8C (the script built-in func_00109488 calls it)
-func_001ED070	SetC13ScaledCount	stores the count at +0xC60 of a class 0x13 object and the count times +0xC88 at +0xC64 (the script built-in func_00109488 calls it)
-func_001ED090	AddC13Entry	appends an (object, word) entry to the array at +0xC6C of a class 0x13 object, counted at +0xC68, and hands the object to func_0012F810; slot 92 of the class (func_001EC570) and the script built-in func_001089C8 call it
+func_001ED050	SetTempoAgentTempo	stores the tempo in beats a minute at +0xC5C of a class 0x13 tempo agent and 60 over it, the beat length in seconds UpdateTempoAgent counts beats by, at +0xC8C (the script built-in func_00109488 calls it)
+func_001ED070	SetTempoAgentSpanBeats	stores a number of beats at +0xC60 of a class 0x13 tempo agent and that many beat lengths (+0xC88) in seconds at +0xC64 (the script built-in func_00109488 calls it)
+func_001ED090	AddTempoAgentEntry	appends an (object, word) entry to the array at +0xC6C of a class 0x13 tempo agent, counted at +0xC68, and hands the object to func_0012F810; slot 92 of the class (func_001EC570) and the script built-in func_001089C8 call it
 func_001EB550	CopyPlayerAttachBlock	copies the block at +0x580 and the word at +0x604 of the player g_player into the class 0x1C object (its slot 16 calls it)
-func_001EBCD8	AppendC1CEntry	appends an eight-byte entry to the array at +0x634 of the list, counted at its +0x630 word (func_001EC7A8 calls it)
+func_001EBCD8	AppendBeatPressEntry	appends an eight-byte (time, direction) entry to the array at +0x634 of a class 0x1C beat-press collider, counted at its +0x630 word, the entries JudgeBeatPressInput works through (func_001EC7A8 calls it)
 func_001EFA30	CreateRecord2505C0	allocates 48 zeroed bytes from the front memory and sets their table to D_002505C0
-func_001F2758	InitC8D	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
-func_001F36E8	AddC8DXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
-func_001F3768	AddC8DYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
-func_001F37D8	GetC8DCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
-func_001F3850	SetC8DEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
-func_001F38A0	GetC8DEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetC8DEntryPeriod stores
+func_001F2758	InitOscillator	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
+func_001F36E8	AddOscillatorXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
+func_001F3768	AddOscillatorYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
+func_001F37D8	GetOscillatorCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
+func_001F3850	SetOscillatorEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
+func_001F38A0	GetOscillatorEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetOscillatorEntryPeriod stores
 func_001F3AF0	TransformObjectIntoFrame	slot 22 of class 0x73: transforms its position and rotation by the other object's frame with func_00128018 and func_00128150
 func_001F4318	FindOrActivateSwitchedCollider	RunPendingWorldLoad's helper: returns func_001F4008 of the object func_001F3C38 finds, else the active switched collider, else activates the current one
 func_001F5208	GetContactTrackerRecord	returns the record at +0x550 of the contact tracker (the script built-in func_00109488 calls it)
@@ -3766,3 +3766,106 @@ func_001A93E8	ResetPlacementRecord	zeroes the 0x80-byte placement record at +0x6
 func_001A94C0	GetPlacementRecordTransform	gives the position and rotation a placement record names: through its frame object (+0x0, ConvertPositionToWorld), its object (+0x4, world position and rotation), its collider (+0x8, +0x140 and +0x110) or its own values (+0x10, +0x20)
 func_001A97C8	GetPlacementRecordAngle	gives the heading a placement record names: the angle of its object's world rotation (+0x10) or its collider's (+0x14), else its own angle at +0x8
 func_001A9928	IsGaugeBarAgentFree	slot 0x16C of class 0x0D (as IsGaugeAgentFree): returns 0 when func_001DDA80 holds for its world, else its flag at +0xC24
+func_001D6CB0	SwapInPlayerStandIn	the script built-in func_00105CC0 calls it: when the player has a class 0x3F object at +0x1518, adds it to its parent's list (slot 2), clears its parent (ReparentCollider), copies the frame of the first attached object of the four at +0x1508 (else of +0x1504) with CopyPlacedObjectFrame, stamps the clock at +0x690, sets +0x694 to 1 and removes that object from its parent's list (slot 3)
+func_001D7018	StopStandIn	slot 60 of class 0x3F: runs the base func_0013BA70 and clears the running flag at +0x694 that SwapInPlayerStandIn sets
+func_001D7040	HandleStandInNotification	slot 13 of class 0x3F: runs HandleChildGroupNotification and, for a kind 10 message about itself, clears the running flag at +0x694 that SwapInPlayerStandIn sets
+func_001D7100	InitOutputBuffer	sets an output buffer's handle (+0x0C) and zeroes its target, capacity, used, count and pending words; PrintFormattedVa sets one up with handle -1 for the console
+func_001D7120	InitStringOutputBuffer	sets an output buffer up to write into memory: target and capacity from its arguments, used, count and pending 0 and handle -1 (FormatToStringVa, FormatToStringBoundedVa)
+func_001D73A8	InitPathFollower	slot 0 of class 0x19: runs InitSwitchedCollider, sets its distances (50.0, 50.0, 3000.0, 1300.0), its rate 2.0 and mode 3, copies its default vectors from D_00275290 and D_00275250 and resets it with ResetPathFollower
+func_001D7440	StartPathFollower	slot 16 of class 0x19: starts the placed object, resolves its links (D_002752A0), stores its heading, creates its state walker, starts the three engine sounds of worlds 3, 5 and 6, finds its class 0x104 partner, and for kind 1 points the 0x426 objects at it
+func_001DACB0	StartPathFollowerEffect	slot 78 of class 0x19: with a target at +0xB78 clears its main clip (SetAgentMainClip) and forwards the call to the target's slot 78, else runs StartSwitchedColliderEffect
+func_001DAE48	CapturePathFollowerPose	slot 69 of class 0x19: runs CaptureColliderPose (CaptureModeWalkerTarget calls it too)
+func_001DB0C8	SetPathFollowerSecondPath	as SetPathFollowerPath for a second path: stores the path object at +0x848 and asks its slot 10 for the location of the position at +0x100 into +0x84C (the script built-in func_00109488 calls it)
+func_001DB480	InitWorldHashLists	CreateTypedRecord calls it for a world (type 0x6C): sets the link offset 0xC on each of the 0x200 lists at +0x84 that GetHashedSlot picks from
+func_001DBEC8	RunDueDelayedScriptCalls	UpdateWorld calls it with the time step: takes it off the delay of each (delay, expression) entry of the world's script variable +0x1EF8 (the list func_00117668 appends to), evaluates the expressions that fall due and drops their entries from the list
+func_001DD218	ClipSegmentToPlanes	clips a segment of two homogeneous points against the six planes D_002756B0, moving the outside end onto each plane it crosses; returns 0 when both ends lie outside one plane (DrawProjectedLine calls it)
+func_001DD690	TestLevelEntryFlag1	the script built-in func_00103590 calls it: returns bit 0x1 of the level entry's word (GetLevelEntryWord)
+func_001DD6B0	TestLevelEntryFlag2	the script built-in func_00103640 calls it: returns bit 0x2 of the level entry's word (GetLevelEntryWord)
+func_001DD6D0	TestLevelEntryFlag4	the script built-in func_001036F0 calls it: returns bit 0x4 of the level entry's word (GetLevelEntryWord)
+func_001DD6F0	TestLevelEntryFlag8	the script built-in func_001037A0 calls it: returns bit 0x8 of the level entry's word (GetLevelEntryWord)
+func_001DD710	CheckEntryOneBitRequirement	as CheckEntryTwoBitRequirement with one bit: when bit 2 of the entry's flags (GetEntryFlags) is set returns whether bit 0 of g_currentEntry's flags is set, else 0
+func_001DD8E8	IsLevelRecordComplete	the script built-in func_00103C10 calls it: returns bit 0 of word +0x448 of the save data's level record n, which MarkLevelRecordComplete sets
+func_001DD908	IsLevelDone	the script built-in func_00103CC0 calls it: returns bit 0x20 of word +0x448 of the save data's level record n, which MarkLevelDone sets
+func_001DD9A0	SetScatterLevelBuiltin	passes its value to SetScatterLevel on g_scatterController, for the script built-ins (func_00109488)
+func_001DD9D8	SetCurrentScatterLevel	clamps its value to g_unitRange (ClampToRange) and stores it as g_currentEntry's scatter level (+0x10), for the script built-ins
+func_001DDA08	GetCurrentScatterLevel	writes g_currentEntry's scatter level (+0x10) through its out pointer, for the script built-ins
+func_001DDA80	IsPadSelectFlagHeld	returns whether the world's use count at +0x231C, which AcquirePadSelectFlag raises and ReleasePadSelectFlag lowers, is above 0 (AreMenusAndFadeClear and the request-blocked tests call it)
+func_001DDAB8	SetWorldValueAndTarget	stores a value both as the world's value at +0x234C and as its target at +0x2350, so StepWorldValueTowardTarget has nothing to do (RunAnimationEvent and the script built-ins)
+func_001DDAC8	SetWorldValueTarget	stores the target at +0x2350 that StepWorldValueTowardTarget moves the world's value at +0x234C towards (RunAnimationEvent and the script built-ins)
+func_001DDCB0	GetSaveSpareCount	writes g_saveData's count at +0x19E4 (the one PlaceSpareSoundNotifier raises) through its out pointer, for the script built-ins
+func_001DDCC8	GetReserveUnitCount	writes g_saveData's count at +0x19E0 (the one AddReserveUnitNow raises) through its out pointer, for the script built-ins
+func_001E5E08	StartPlayerLinkedColliderEffect	slot 78 of class 0x16: forwards the call to slot 78 of its linked object at +0x624 when it has one, else runs StartSwitchedColliderEffect
+func_001E88D0	InitKeyedConeAgent	slot 0 of class 0x0B: runs InitConeAgent, sets the mode +0xC58 to 0x2D8 and its ranges (30000.0, 3e7, 3e6, 3e6) and a full turn (2 pi) at +0xC2C
+func_001E8948	StartKeyedConeAgent	slot 16 of class 0x0B: resolves its links (D_00275B60), makes itself the world's active follower (SetWorldActiveFollower), creates its state walker, takes four flag-table indices into +0xC80 and starts the cone agent
+func_001E89F0	FindNearestAgentKey	returns the one of the six key objects at +0xC64 of a class 0x0B agent whose position (+0x140) is nearest a point in x and y
+func_001E8A50	EnterKeyedConeAgentState	slot 92 of class 0x0B, its override of EnterAgentState
+func_001E8D58	ChooseKeyedConeAgentState	slot 89 of class 0x0B: with its count at +0xC5C used up clears the deadline +0xBFC to FLT_MAX; keeps state 10 while +0x7E0 is set (else 8), otherwise asks ChooseAgentState
+func_001E8DD0	IsKeyedConeAgentTargetInRange	slot 93 of class 0x0B: true only in mode 0x2DB with the count at +0xC5C neither 0 nor 5
+func_001E8E08	SteerKeyedConeAgentAlongPath	slot 97 of class 0x0B: outside mode 0x2DA lowers the count at +0xC5C by one (not below 0), then runs SteerAgentAlongPath
+func_001E8E48	RestartKeyedConeAgentClip	slot 96 of class 0x0B: in mode 0x2DA and state 12, when the nearest key (FindNearestAgentKey) has changed, lowers the count at +0xC5C and points that key's state walker at 0x2E0; then runs RestartAgentClip
+func_001E8EF8	UpdateKeyedConeAgentGoal	slot 94 of class 0x0B: in state 4 heads for +0x190 or the object at +0xC60, in state 8 for the object its slot 98 returns, else runs UpdateAgentGoal
+func_001E8FA8	UpdateKeyedConeAgentState	slot 90 of class 0x0B: in state 8 runs func_001C8BC0, else UpdateAgentState
+func_001E9A68	IsArcDrawAllowed	DrawArc's test: as AreMenusClosed (fade off, pause menu and map list closed with no mode) and D_00270458 neither 1 nor 4
+func_001E9AD8	AreArcMenusClosed	the same test as AreMenusClosed, a separate copy that func_001E7C60 (beside the arc's functions) calls
+func_001EB460	InitBeatPressCollider	slot 0 of class 0x1C: runs InitSwitchedCollider and sets the timing window +0x684 between the two values D_00275C70 by the polynomial D_00275C80 of g_currentEntry's dt, clamped to g_unitRange
+func_001EB518	LoadBeatPressCollider	slot 10 of class 0x1C: runs LoadCollider and resolves its link (D_00275C90)
+func_001EB598	StartBeatPressCollider	slot 16 of class 0x1C: starts the placed object, resolves its links (D_00275CA0), creates its state walker at 0x4CA and queues CopyPlayerAttachBlock for itself
+func_001EB608	HandleBeatPressColliderActivation	slot 72 of class 0x1C: runs HandleSwitchedColliderActivation; on activation points its walker at 0x4CB and links itself and the class 0x13 tempo agent at +0x68C, on deactivation points it back at 0x4CA
+func_001EB748	JudgeBeatPressInput	slot 73 of class 0x1C: holds the player at its anchor, matches a pressed direction (pad bits 0x10..0x80) against the current entry of +0x634 within half the window +0x684 of the tempo agent's beat, plays the hit or miss sounds, and on a missed beat ends the run or the player's hold; then moves to the next entry
+func_001EBC88	IsBeatPressColliderRequestBlocked	slot 75 of class 0x1C: blocked while g_buttonCodeFlags bit 0 is set or the pad select flag is held (IsPadSelectFlagHeld), else while +0x688 is set
+func_001EBEB0	InitTempoAgent	slot 0 of class 0x13: runs InitAgent, sets the tempo +0xC5C to 60 beats a minute and the beat length +0xC8C to 1.0, the span +0xC60 to 8 beats (8.0 at +0xC64), allocates its 0x400-byte entry array and stops the staged bank voice
+func_001EBF40	LoadTempoAgent	slot 10 of class 0x13
+func_001EBFB0	StartTempoAgent	slot 16 of class 0x13: starts the agent, makes itself the world's active follower, resolves its links (D_00275D08), creates its state walker and copies its nine-entry object table from D_00275D48, finding each entry's object by id
+func_001EC098	UnregisterTempoAgent	slot 7 of class 0x13: runs UnregisterSwitchedCollider
+func_001EC0B8	RegisterTempoAgent	slot 6 of class 0x13: runs RegisterSwitchedCollider
+func_001EC0D8	IsTempoAgentTargetInRange	slot 93 of class 0x13: decides by the state its walker is in (func_001B6598): the 0x4ED group while +0xC20 is set, the 0x4EE group by the phase +0xC94 (0 moves it to 1)
+func_001EC478	LeaveTempoAgentState	slot 91 of class 0x13: runs LeaveAgentState and, leaving state 16, resets the phase +0xC94 and moves its walker from 0x4EE, 0x4F1 or 0x4F4 to the next state
+func_001EC528	DecrementTempoAgentGauge	the script built-in func_00108B48 calls it: lowers the gauge bar's count (DecrementGaugeCount), sets +0xA68 to 2 and snaps the bar's fill to its target
+func_001EC570	EnterTempoAgentState	slot 92 of class 0x13: lowers the gauge bar on states 16 and 11 (11 also marks level 3 done and saves), runs EnterAgentState, then sets the clip rates from the beat length +0xC88 and adds its entry for states 2 and 13 (AddTempoAgentEntry)
+func_001EC828	HandleTempoAgentNotification	slot 13 of class 0x13
+func_001ECB18	SyncTempoAgentEntries	queued each frame by UpdateTempoAgent: sets each entry's object rate (+0x18) so that it reaches its next division of the beat count +0xC74 by the next beat time +0xC84
+func_001ECBC8	UpdateTempoAgent	slot 17 of class 0x13: runs UpdateAgent, restarts the beat clock when D_00275DB8 is 2, and on each beat time +0xC84 advances the beat +0xC74, the beat in the bar +0xC78 (four to a bar, +0xC70 counts bars) and the next beat time by the beat length; then runs its timeline and queues SyncTempoAgentEntries
+func_001ECDF8	ShowTempoAgentGauge	slot 46 of class 0x13: shows the gauge bar g_gaugeBarElement (slot 14) while its walker is in state 0x4EE, 0x4F1, 0x4F4 or 0x4F7 and AreMenusAndFadeClear holds, else hides it (slot 15)
+func_001ECE98	UpdateTempoAgentGoal	slot 94 of class 0x13: in states 12 and 13 heads for the object at +0xC48 (else its own position), otherwise runs UpdateAgentGoal
+func_001ECF10	UpdateTempoAgentState	slot 90 of class 0x13, its override of UpdateAgentState
+func_001ED018	SetTempoAgentPendingTimeline	stores the timeline at +0xC34 that UpdateTempoAgent starts when the beat clock restarts (the script built-in func_00108878 calls it)
+func_001ED0D8	RemoveTempoAgentEntry	removes the entry with the key from the array at +0xC6C (count +0xC68) that AddTempoAgentEntry fills, shifting the rest down (the script built-in func_00108A98 and HandleTempoAgentNotification call it)
+func_001EE5C8	ReserveVifUnpack	writes a VIF unpack header (WriteVifUnpackHeader) and reserves its data in the packet, returning the data's start and size through the out pointers (0 for an empty unpack); the mesh packet builders call it
+func_001EE7D0	WriteVifDirect	pads the packet to the quadword slot, writes a VIF DIRECT code (0x50) with the quadword count and the interrupt bit, and appends that many quadwords (AppendPacketQuadwords)
+func_001EE850	WriteVifDirectRef	as WriteVifDirect, but adds a DMA reference tag to the data (AddDmaRefTag) instead of copying it (UploadImagesByMask)
+func_001EEB60	QueryValueListMask	asks the world's value list object (+0x1EC4) for the mask at a position (func_001EEA40 over its data +0x38), returning 0x0FFFFFFF when there is none (ComputePlacedObjectWorldFrame, PlaceSpareSoundNotifier, ScatterObjectsAroundCircle)
+func_001EEC60	InitAttachedSet	slot 0 of class 0x1F: runs InitCollider, sets flag bit 43, +0x584 and +0x588 to 1, both rates to 1.0, its anchors to 3, 0, 3, 0 and sets up its tracked nodes at +0x590 (InitTrackedNodes) with +0x594 at 3
+func_001EECE0	StartAttachedSet	slot 16 of class 0x1F: starts the placed object, fills its tracked nodes (FillTrackedNodes), allocates the 0x80-byte item block of its set and calls its slot 50 (func_001B8540, its parts changed) when +0x278 is set
+func_001EEF90	UpdateAttachedSet	slot 17 of class 0x1F
+func_001EF808	RequestAttachedSetLaunch	slot 71 of class 0x1F: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
+func_001EF828	GetAttachedSetTrackedNodes	returns the tracked-node record at +0x590 of a class 0x1F object (the script built-in func_00109488 calls it)
+func_001EF830	ClearAttachedSetTrackedNodes	sets the found count of the tracked-node record at +0x590 of a class 0x1F object to 0, as ClearTrackedNodes does (the script built-in func_00102030 calls it)
+func_001EF838	InitStateResetObject	slot 0 of class 0x62: runs InitPlacedObject and sets the state +0x2D0 and the id +0x2E0 to -1
+func_001EF868	StartStateResetObject	slot 16 of class 0x62: starts the placed object, resolves its link (D_00275E10), sets its state to 0 (SetStateAndNotify) and takes itself out of its parent's list (slot 3)
+func_001EF900	SetStateAndNotify	sets the state +0x2D0 of a class 0x62 object when it changes: entering or leaving state 2 adds or removes its keyed entries (+0x2E4, +0x2E8) with func_0013ECB0, stamps the clock at +0x2D4 and sends message 0x16 with the old and new state (slot 14)
+func_001EF8C0	AddStateResetEntry	the script built-in func_001063D0 calls it: adds or updates a keyed entry in the table at +0x2E8 of a class 0x62 object, counted at +0x2E4 (UpsertKeyedEntry, capacity 4)
+func_001F3C38	FindArrivalPoint	finds the class 0x74 object with an id (under a parent id) for FindOrActivateSwitchedCollider; failing that, of all class 0x74 objects, the one with the id, else one with +0x94 set while a style 2 screen fade runs, else one with a record
+func_001F4008	PlaceAtArrivalPoint	with a class 0x74 object (the one FindArrivalPoint found, for FindOrActivateSwitchedCollider; also func_00101950 and func_0017BCD0): gives the current switched collider (GetCurrentSwitchedCollider) the point's world rotation and position (GetObjectWorldRotation, GetObjectWorldPosition) and activates it (ActivateSwitchedCollider); with none it moves the camera there
+func_001F3D80	LoadArrivalPoint	slot 10 of class 0x74: reads its rotation and position, its property records, a count of typed records it creates (CreateTypedRecord) and loads, and a list of 16-bit ids
+func_001F3EE0	CopyArrivalPoint	slot 9 of class 0x74: runs CopyObjectData and makes copies of the other's records (CreateObjectCopy) into a new array
+func_001F3F80	StartArrivalPoint	slot 16 of class 0x74: runs StartObject and, for each of its records, calls its slot 21 with +0x18 and starts it (ResolveAndStartObject)
+func_001F4408	BeginLevelExit	ExitLevelFromPauseMenu, ActivatePauseMenuSelection and RunAnimationEvent call it: in level 5 or a level without its +0x78 flag starts the object fade D_00247AD0, else with a sub-level hands the active object sub-group to StartObjectSubGroupFinish, else starts the screen fade with D_00275B04
+func_001F4808	StartObjectSubGroupFinish	finishes a best-time run in progress (FinishBestTimeRun) or, for a group that leaves (+0x2D8), runs BeginLevelExit; else sets state 5, starts its animations and sets its end time +0x31C, and raises its script event 2
+func_001F57E0	OfferTrackedNodeLaunch	fills the request with the record's word +0x04, the record and LaunchPlayerAtTrackedNode as its callback, and raises script event 2 on the record's owner (RequestAttachedSetLaunch, RequestContactTrackerLaunch)
+func_001F56D8	LaunchPlayerAtTrackedNode	the callback OfferTrackedNodeLaunch hands over: picks the best target among the record's nodes (ChooseBestTargetCandidate); with nodes found sets the player on the arc to it and puts it in state 2, else LaunchPlayerAtTarget
+func_001F51E8	RequestContactTrackerLaunch	slot 71 of class 0x36: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
+func_001D35A8	ComputeCountedColliderWorldFrame	slot 19 of class 0x4C, its override of ComputeColliderWorldFrame
+func_001D6DD8	StepStandIn	slot 28 of class 0x3F (the stand-in SwapInPlayerStandIn places), its override of StepCollider
+func_001D7778	StepPathFollower	slot 28 of class 0x19, its override of StepCollider
+func_001DA7E0	UpdatePathFollowerAttachmentFrames	slot 39 of class 0x19, its override of UpdateAttachmentFrames
+func_001DCEA0	LoadWorld	slot 10 of class 0x6C (the world), its override of LoadObjectProperties: reads the world's strings, property records and slot objects, its script entry table and blocks, creates its records (CreateTypedRecord) and cone volumes, loads its screen resources and sound banks, fills the screen colour, spawns the listed copies (SpawnListedObjectCopies) and runs the queued calls
+func_001DDD18	StartRedirectObject	slot 16 of class 0x5E, its override of StartPlacedObject
+func_001DF520	ApplyTintBlendColliderPendingImpulse	slot 48 of class 0x14, its override of ApplyColliderPendingImpulse
+func_001EBD10	GetBeatPressColliderPositionAt	slot 34 of class 0x1C, its override of GetPlacedObjectPositionAt
+func_001EBDD0	GetBeatPressColliderRotationAt	slot 35 of class 0x1C, its override of GetPlacedObjectRotationAt
+func_001EC3D8	DrawTempoAgent	slot 37 of class 0x13, its override of DrawAgent
+func_001EF768	UpdateAttachedSetBounds	slot 50 of class 0x1F, its override of UpdateColliderBounds
+func_001F0AE0	UpdateWarpPage	slot 17 of class 0x67, its override of UpdatePlacedObject
+func_001F4AE0	UpdateObjectSubGroup	slot 17 of class 0x7D, its override of UpdatePlacedObject; it finishes the group with StartObjectSubGroupFinish
+func_001F3408	EvaluateOscillator	UpdateAttachments calls it on each chained node: once per clock time (+0x34 keeps the last), rebuilds the frames when +0x8E4 is set (RefreshOscillatorFrames), then for each 0xD0-byte entry at +0x50 turns kind 0 by the sine and cosine of 2 pi (time * rate + phase) and kind 1 by a noise blend (EvaluateNoiseBlend)
+func_001F2840	RefreshOscillatorFrames	EvaluateOscillator calls it while the dirty flag +0x8E4 of a class 0x8D object is set: rebuilds the entries' matrices (InitIdentityMatrix, BuildMatrixFromRotationAndTranslation, MultiplyMatrices, InvertMatrix4x4)

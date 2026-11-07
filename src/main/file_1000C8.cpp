@@ -3206,7 +3206,7 @@ ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AddC8DXEntry(obj);
+    AddOscillatorXEntry(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3221,7 +3221,7 @@ ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AddC8DYZEntry(obj);
+    AddOscillatorYZEntry(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3825,7 +3825,7 @@ ScriptValue* func_001089C8(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* 
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AddC13Entry(obj, o1, o2);
+    AddTempoAgentEntry(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

@@ -7,16 +7,18 @@
 
 #include "base_object.h"
 
-// 0x8D: func_001F2758 (slot 0) resets three indices and a scale to -1.
+// 0x8D, an oscillator: a set of 0xD0-byte entries (at +0x50) that EvaluateOscillator turns by a
+// sine (kind 0) or a noise blend (kind 1) of the clock. func_001F2758 (slot 0) resets three
+// indices and a scale to -1.
 struct C8D : BaseObject {
-    f32 scale34;            // 0x34
-    s32 f38;                // 0x38
+    f32 scale34;            // 0x34: the clock time EvaluateOscillator last ran at (-1.0 at set-up)
+    s32 f38;                // 0x38: the entries
     s32 f3C;                // 0x3C
     s32 index40;            // 0x40
     u8 pad44[0x6D0 - 0x44];
     s32 index6D0;           // 0x6D0
     u8 pad6D4[0x8E4 - 0x6D4];
-    s32 f8E4;               // 0x8E4
+    s32 f8E4;               // 0x8E4: set when an entry changed (RefreshOscillatorFrames)
     u8 pad8E8[0x8F0 - 0x8E8];
 };
 

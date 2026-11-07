@@ -8,7 +8,7 @@ s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
     u8* p = at;
     s32 next;
 
-    func_001F5C0C(spec, 0, 0x34);
+    FillMemory(spec, 0, 0x34);
     if (*at != 0) {
         for (;;) {
             s32 adv = 0;
