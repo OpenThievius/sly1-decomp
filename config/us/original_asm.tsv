@@ -418,7 +418,6 @@ func_001A1030	001A1030	396	inline	C with inline assembly: VU0 macro instruction 
 func_001A11C0	001A11C0	468	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A15D8	001A15D8	2072	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A1F40	001A1F40	304	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001A2070	001A2070	600	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A22E0	001A22E0	160	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A2380	001A2380	624	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A2770	001A2770	188	inline	C with inline assembly: 128-bit MMI instruction in the compiler's frame

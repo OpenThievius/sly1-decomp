@@ -1717,9 +1717,60 @@ s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
 
 INCLUDE_ASM(func_001A1F40);
 
-INCLUDE_RODATA(D_0024C9BC);
+// A point of ComputeProjectedHull: where it is, where it projects (x and y over z), and its
+// angle about the lowest one (0x30 bytes).
+struct HullPoint {
+    Vec02 world;            // 0x00
+    Vec02 screen;           // 0x10
+    f32 angle;              // 0x20
+    u8 pad24[0x30 - 0x24];
+};
 
-INCLUDE_ASM(func_001A2070);
+void TransformByMatrixWithW(void* m, Vec02* in, Vec02* out, f32 w);
+void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));
+
+s32 func_001A2070(void* m, s32 n, HullPoint* pts)
+{
+    HullPoint tmp;
+    f32 lowest = 3.40282347e+38f;
+    s32 low = -1;
+    s32 i;
+    HullPoint* p;
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        TransformByMatrixWithW(m, &p->world, &p->screen, 1.0f);
+        f32 z = p->screen.z;
+        p->screen.y /= z;
+        p->screen.x /= z;
+        if (p->screen.y < lowest) {
+            lowest = p->screen.y;
+            low = i;
+        }
+    }
+    tmp = pts[0];
+    pts[0] = pts[low];
+    pts[low] = tmp;
+    for (i = 1; i < n; i++) {
+        p = &pts[i];
+        Vu0::Q(tmp.world) = Vu0::Sub(Vu0::Q(p->screen), Vu0::Q(pts[0].screen));
+        p->angle = ArctangentOfRatio(tmp.world.y, tmp.world.x);
+    }
+    SortElements(&pts[1], n - 1, 0x30, CompareByFloatKeyAscending);
+    HullPoint* out = pts;
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        while (out >= &pts[2]) {
+            u128 side = Vu0::Cross(Vu0::Sub(Vu0::Q(out[-1].screen), Vu0::Q(out[-2].screen)), Vu0::Q(g_unitZVector));
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(p->screen), Vu0::Q(out[-2].screen)), side)) < 0.0f) {
+                break;
+            }
+            out--;
+        }
+        *out = *p;
+        out++;
+    }
+    return out - pts;
+}
 
 void CopyEffectSourceIds(Effect* self, Rec50* src)
 {
