@@ -20,7 +20,7 @@
 #include "font.h"
 
 // The world: 28 views in 15 files agree with class 0x6C (c6c.h), and every one of them reaches
-// it through this pointer. 001E4000.cpp defines it (= 0).
+// it through this pointer. file_1D62E0.cpp defines it (= 0).
 extern World* g_currentWorld;
 
 // The camera, class 0x6D (c6d.h): 22 views in 5 files. camera.cpp defines it (= 0).
@@ -29,7 +29,7 @@ extern Camera* g_camera;
 // The player, an object of class 0x07 (c05.h): its views reach 0x2758..0x275C, inside the class's
 // 0x2BF0 bytes and past the 0x720 of its parent 0x06; no class derives from 0x07
 // (config/us/classes.tsv), and func_001D29C8 and func_001D31D0, which name it, are class 0x07's
-// (methods.tsv). 001E4000.cpp defines it (= 0).
+// (methods.tsv). player.cpp defines it (= 0).
 extern Player* g_player;
 
 // An object of class 0x65 (c65.h) or none: func_001516C0 and func_00192A70 read its fields.
@@ -51,7 +51,7 @@ extern PacketWriter g_gsPacketWriter;
 
 // The image records func_001B2BA8 and func_001B2CF8 allocate (func_0018D5C0: count * 0x18 and
 // count * 0x20) and func_001690C0, func_00169780, func_001B2B50, func_001B2CA8 read: the 24- and
-// 32-byte records of font.h. 001E4000.cpp defines both pointers.
+// 32-byte records of font.h. anim_record.cpp defines both pointers.
 extern ImageRecord* g_imageRecordsA;
 extern PaletteRecord* g_imageRecordsB;
 

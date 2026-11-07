@@ -47,7 +47,7 @@ in the shared file's translation unit, in place of the shared definition, with t
 flags (`tools/version_src.py`): PAL never builds a function with options or a context its object
 did not have. The US build and `tools/todo.py` never see these files.
 
-    python3 tools/check.py src/versions/eu/main/00140000/func_00142F10.cpp func_00142F10
+    python3 tools/check.py src/versions/eu/main/game_clock/func_00142F10.cpp func_00142F10
     python3 tools/version_check.py      # c_status.tsv notes these rows `version-specific`
 
 What makes PAL differ, from the first `differs` rows read one by one:

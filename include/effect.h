@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Kind t219c: the records of class 0x1E's list (EffectOwner::list558) -- the effects a part with
 // collision shows: a spark, a flash, a ring that follows a body. Written for this project from
-// what retail's code does (config/us/tables.tsv, src/main/0019C000.cpp, 001A0000.cpp).
+// what retail's code does (config/us/tables.tsv, src/main/class_descriptors.cpp, file_19E040.cpp).
 //
 // func_0019EA78(kind, owner) takes a record from the world's pool at World+0x1B2C (0x180 records
 // of 0x140 bytes), zeroes it, stores the kind's table (func_0019E908: kind 0 is D_00219C20, kind
@@ -20,7 +20,7 @@
 // The 27 kinds share one layout: the header and the fields the shared slots read are the same
 // for all, and each kind's own fields sit in the span from +0x28 to +0x140 where the others
 // leave it free. Where two kinds read one offset differently (a float, an integer, a pointer),
-// a union holds them. The tables are defined in src/main/0019C000.cpp as arrays of function
+// a union holds them. The tables are defined in src/main/class_descriptors.cpp as arrays of function
 // pointers; Vt219C gives their slots types.
 #ifndef EFFECT_H
 #define EFFECT_H

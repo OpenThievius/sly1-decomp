@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x80-byte requests func_0019D410 (0019C000.cpp) queues in the table at D_005E4700 (.bss),
+// The 0x80-byte requests func_0019D410 (group_marker.cpp) queues in the table at D_005E4700 (.bss),
 // 16-aligned; func_00159D00 fills one. Written for this project from what retail's code does
 // (build/swarm/st3/groups.tsv, g1785).
 #ifndef DEFERRED_REQUEST_H

@@ -17,16 +17,16 @@
 struct RenderFrame {
     u8 pad00[0x04];
     union {
-        u8* bufA;           // 0x04: 001E4000.cpp (Slot12_262320), func_0015E810
+        u8* bufA;           // 0x04: file_1549C8.cpp (g_renderFrames), func_0015E810
         s32 bufAAddr;       // 0x04: func_0015EE80
     };
     u8 pad08[0x0C - 0x08];
     union {
-        u8* bufB;           // 0x0C: 001E4000.cpp, func_0015E810
+        u8* bufB;           // 0x0C: file_1549C8.cpp, func_0015E810
         s32 bufBAddr;       // 0x0C: func_0015EE80
     };
     union {
-        u8* f10;            // 0x10: 001E4000.cpp, func_0015E810
+        u8* f10;            // 0x10: file_1549C8.cpp, func_0015E810
         s32 i10;            // 0x10: func_0015ED50
     };
     u8 pad14[0x18 - 0x14];

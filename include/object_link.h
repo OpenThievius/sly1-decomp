@@ -8,7 +8,7 @@
 //
 // 55 tables are passed to func_00124DF8 (every `func_00124DF8(..., D_X)` in src/, and
 // D_00263558, which func_0016F810's assembly passes with 27). They are declared here without a
-// length: their definitions (in C, in 001E4000.cpp, the proved files and the window files) keep
+// length: their definitions (in C, in the proved files and global_tables.cpp) keep
 // theirs. A few labels end with one more word after the entries (D_00262718: nine entries and a
 // word; D_00262E40: 151 and a word; D_00275750: nine and a word): the next table's alignment on
 // 8, so player.cpp defines D_00262E40 with its 151 entries. D_0026AA50 ends with two zero words
