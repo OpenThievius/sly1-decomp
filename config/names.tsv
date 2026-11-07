@@ -2550,3 +2550,9 @@ func_0019A088	MarkLevelRecordComplete	for a level index (or the current one, 0x1
 func_0019A0F0	MarkAllLevelRecordsComplete	runs MarkLevelRecordComplete for the six level indices, then requests a world load when the element stack is in mode 2
 func_0019D930	UploadCameraOncePerFrame	unless D_00604788 is set, sets it and runs func_00144848 on g_camera; the group set-ups call it, and func_0019DAD8 clears the flag
 D_00604788	g_cameraUploadedThisFrame	set by UploadCameraOncePerFrame when it runs func_00144848 on the camera and cleared by func_0019DAD8, so the camera goes up once between clears
+func_0019EC20	CountEffectUse	adds one to the effect's use count; UpdateEffectOwner calls it before running each started effect's slot 4
+func_0019ECE0	EndEffect	the shared slot 6 (end) of 24 effect tables: runs RemoveEffect when its flag is set (func_0019F560 passes whether the target was hit)
+func_0019F560	UpdateEffect	the shared slot 4 (every frame) of 19 effect tables: removes the effect once its life has passed, else, unless its owner's 0x550 is 1, calls slot 6 with whether the attached target's tree contains the effect's point (func_0013E658)
+func_0019F8E8	AddEffectListener	adds to the callback list at +0x118 of an effect, through AddCallbackNode on the world, the listener's function from its first word with the listener as context (StartSwitchedColliderEffect calls it), as AddObjectListener does for objects
+func_0019F918	AddEffectCallback	adds a function and context to the callback list at +0x118 of an effect through AddCallbackNode on the world, as AddObjectCallback does for objects
+func_0019F950	RemoveEffectCallback	removes a function and context from the callback list at +0x118 of an effect through RemoveCallbackNode on the world, as RemoveObjectCallback does for objects

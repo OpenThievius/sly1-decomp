@@ -888,7 +888,7 @@ void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
             if (n != 0) {
                 Init_001924C8 init = n->vtbl[0];
                 init(n, (u8*)other + 0x140, 0, 1.0f);
-                func_0019F8E8(n, self);
+                AddEffectListener(n, self);
                 f32 r = func_0012CCC0(self->f5F0, 0x13F);
                 n->f1C = r;
                 n->f20 = self->f59C;

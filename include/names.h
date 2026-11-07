@@ -1834,8 +1834,14 @@
 #define GetEffectKindTable                         func_0019E908
 #define CreateEffect                               func_0019EA78
 #define RemoveEffect                               func_0019EBE8
+#define CountEffectUse                             func_0019EC20
 #define ReleaseEffect                              func_0019EC30
+#define EndEffect                                  func_0019ECE0
 #define ShortenEffectLife                          func_0019ED00
+#define UpdateEffect                               func_0019F560
+#define AddEffectListener                          func_0019F8E8
+#define AddEffectCallback                          func_0019F918
+#define RemoveEffectCallback                       func_0019F950
 #define RunEffectEndCallback                       func_001A0F88
 #define AdvanceEffectPhases                        func_001A14A0
 #define SetEffectPhase                             func_001A1DF0
