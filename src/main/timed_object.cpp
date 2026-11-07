@@ -839,7 +839,6 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
         do {
             Contact03* n = l->head;
             if (n != 0) {
-                const Vec02* k = &g_unitZVector;
                 do {
                     s32 x = owner != n->end[0].body;
                     ContactEnd03* b = &n->end[lastSide - x];
@@ -856,7 +855,7 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
                                     StopTrackPlayer(self);
                                 }
                             } else {
-                                req.Init(self, o, k);
+                                req.Init(self, o, &g_unitZVector);
                                 FindNodeForQuery(&req, 0, 0);
                             }
                         }
