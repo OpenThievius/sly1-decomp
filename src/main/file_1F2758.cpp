@@ -304,8 +304,8 @@ struct Begin_1F55A8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_1F55A8*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_1F55A8*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -677,9 +677,9 @@ void func_001F4308(Obj_1F4308* self, f32 value) { self->value = value; self->sta
 
 s32 func_001F4318(void* unused, void* a, void* b)
 {
-    s32 r = func_001F3C38(a, b);
+    s32 r = FindArrivalPoint(a, b);
     if (r != 0) {
-        r = func_001F4008((void*)r);
+        r = PlaceAtArrivalPoint((void*)r);
         goto done;
     }
     r = GetActiveSwitchedCollider();
@@ -743,7 +743,7 @@ l4490:
     if (flag != 0) {
         v->count = 0;
     }
-    func_001F4808(v);
+    StartObjectSubGroupFinish(v);
     return;
 larg:
     args.kind = 1;
@@ -842,7 +842,7 @@ void func_001F4808(ObjectSubGroup* self)
         SetBestTimeState(&g_timerCaption, 4);
     }
     if (self->f2D8 != 0) {
-        func_001F4408(1, self->f318);
+        BeginLevelExit(1, self->f318);
         SetObjectSubGroupState(self, 0);
         return;
     }
@@ -949,7 +949,7 @@ void func_001F5008(ContactTracker* self) {
             }
         }
     }
-    func_001F5C0C(&tmp, 0, 0x40);
+    FillMemory(&tmp, 0, 0x40);
     for (s32 i = 0; i < self->count; i++) {
         Slot36* s = &self->slots[i];
         p = (Obj_1F5008*)s->obj;
@@ -1028,7 +1028,7 @@ void func_001F57E0(Self_57E0* self, void* a1, Out_57E0* out)
     s32 v = self->f4;
     out->f8 = self;
     out->f0 = v;
-    out->fC = (void*)func_001F56D8;
+    out->fC = (void*)LaunchPlayerAtTrackedNode;
     TriggerScriptEvent(self->f0, 2, 0, 0);
 }
 

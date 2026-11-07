@@ -22,7 +22,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     s32 base = 0;
     if (isE) base = e;
     s32 prec = sp->prec;
-    f32 p = func_00205C78(10.0f, (f32)(base - prec));
+    f32 p = Power(10.0f, (f32)(base - prec));
     double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
     s32 e2 = GetDecimalExponent(r);
     if (e < GetDecimalExponent(r)) e = e2;
@@ -59,7 +59,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
         } else {
             *out++ = '+';
         }
-        s32 d = (s32)func_00205C78(10.0f, 2.0f);
+        s32 d = (s32)Power(10.0f, 2.0f);
         for (s32 k = 2; k >= 0; k--) {
             *out++ = D_00275940[e / d];
             e = (e % d) * 10;

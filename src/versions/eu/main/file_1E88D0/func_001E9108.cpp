@@ -32,7 +32,7 @@ void func_001E9108(Obj_1E9108* obj)
             }
         }
         if (a2) {
-            func_001F4808(FindActiveObjectSubGroup());
+            StartObjectSubGroupFinish(FindActiveObjectSubGroup());
         }
         break;
     }

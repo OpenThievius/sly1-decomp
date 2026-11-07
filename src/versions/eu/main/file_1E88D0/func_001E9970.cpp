@@ -11,7 +11,7 @@ struct Obj_eu_1E9970 {
 s32 func_001E9970(void)
 {
     if (g_screenFade.mode != 0) goto fail;
-    if (func_001DDA80((World*)g_currentWorld) != 0) goto fail;
+    if (IsPadSelectFlagHeld((World*)g_currentWorld) != 0) goto fail;
     if (((Obj_eu_1E9970*)&g_pauseMenuElement)->f56C != 0 && ((Obj_eu_1E9970*)&g_pauseMenuElement)->f570 != 0) goto fail;
     if (((Obj_eu_1E9970*)&g_mapScreenList)->f56C != 0) goto fail;
     if (((Obj_eu_1E9970*)&g_mapScreenList)->f560 != 0) goto fail;

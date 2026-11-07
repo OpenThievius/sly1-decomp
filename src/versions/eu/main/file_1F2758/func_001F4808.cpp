@@ -21,7 +21,7 @@ void func_001F4808(ObjectSubGroup* self)
         SetBestTimeState(&g_timerCaption, 4);
     }
     if (self->f2D8 != 0) {
-        func_001F4408(1, self->f318);
+        BeginLevelExit(1, self->f318);
         SetObjectSubGroupState(self, 0);
         return;
     }

@@ -3825,7 +3825,7 @@ ScriptValue* func_001089C8(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* 
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AddC13Entry(obj, o1, o2);
+    AddTempoAgentEntry(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

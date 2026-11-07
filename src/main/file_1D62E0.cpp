@@ -42,16 +42,7 @@ s32 func_00182FC8(void* node);
 
 s32 func_001B8A08(void* self, s32 value);
 
-struct Node_1D7100 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-};
 
-struct Obj_001D7120 { s32 a; s32 b; s32 c; s32 d; s32 e; s32 f; };
 
 struct __attribute__((aligned(16))) Quad_1D73A8 { s32 a, b, c, d; };
 
@@ -739,18 +730,18 @@ void func_001D7098(OwnerMessage* self, s32 mode, s32 owner) { func_001F5C0C(self
 
 ASM_FUNC(func_001D70E8);
 
-Node_1D7100* func_001D7100(Node_1D7100* self, s32 value)
+OutputBuffer* func_001D7100(OutputBuffer* self, s32 handle)
 {
-    self->fC = value;
-    self->f0 = 0;
-    self->f4 = 0;
-    self->f8 = 0;
-    self->f10 = 0;
-    self->f14 = 0;
+    self->handle = handle;
+    self->targetWord = 0;
+    self->capacity = 0;
+    self->used = 0;
+    self->count = 0;
+    self->pending = 0;
     return self;
 }
 
-Obj_001D7120* func_001D7120(Obj_001D7120* self, s32 a, s32 b) { self->a = a; self->b = b; self->c = 0; self->d = -1; self->e = 0; self->f = 0; return self; }
+OutputBuffer* func_001D7120(OutputBuffer* self, u8* target, s32 capacity) { self->target = target; self->capacity = capacity; self->used = 0; self->handle = -1; self->count = 0; self->pending = 0; return self; }
 
 void func_001D7148(OutputBuffer* a0, s32 a1)
 {
@@ -820,10 +811,10 @@ void func_001D72C8(OutputBuffer* self)
             CopyMemory(buf, p, chunk);
             p += chunk;
             buf[chunk] = 0;
-            func_001F7B88((void*)"%s", buf);
+            PrintBuffered((void*)"%s", buf);
         }
     } else {
-        func_001F9028(self->handle, self->buf, self->pending);
+        WriteFile(self->handle, self->buf, self->pending);
     }
     self->pending = 0;
 }
@@ -850,7 +841,7 @@ void func_001D7440(C19* self)
     s32 id2;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x14, D_002752A0);
-    self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     if (((Snd_1D7440*)self->fB44) != 0) {
         StateTrigger* v = CreateStateWalker(((Snd_1D7440*)self->fB44), self, -1, 0);
         self->fB48 = v;
@@ -1006,7 +997,7 @@ ASM_FUNC(func_001D8BD0);
 
 void func_001D8D90(C19* self)
 {
-    f32 a = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 b = WrapAngle(self->f694 - a);
     f32 c = ClampToMagnitude(D_002754F8 * b, D_002754F4);
     self->f69C = ApproachAngleWithRamp((u8*)D_002754E8, 0, self->f69C, c, g_frameDt);
@@ -1182,7 +1173,7 @@ void func_001DACB0(C19* self, void* a, void* b)
         Target_1DACB0* t = ((Target_1DACB0*)self->fB78);
         t->vtbl[82](t, a, b);
     } else {
-        func_001924C8(self, a, b);
+        StartSwitchedColliderEffect(self, a, b);
     }
 }
 
@@ -1532,7 +1523,7 @@ s32 func_001DBB20(World* self, Link_001DBB20** link, u32 value) { return ((*link
 void* func_001DBB50(u8* self)
 {
     void* p = func_001B5EC0(self + 0x1B08);
-    func_001F5C0C(p, 0, 16);
+    FillMemory(p, 0, 16);
     return p;
 }
 
@@ -1550,7 +1541,7 @@ void func_001DBB90(u8* self, Attach03* node)
 void* func_001DBBD8(u8* self)
 {
     void* p = func_001B5EC0(self + 0x1B14);
-    func_001F5C0C(p, 0, 0x14);
+    FillMemory(p, 0, 0x14);
     return p;
 }
 
@@ -1662,7 +1653,7 @@ void func_001DBEC8(World* self, f32 limit)
     ScriptValue t;
     InitScriptValue(&a);
     InitScriptValue(&q);
-    MarkPoolLiveEnds(D_00259F38);
+    MarkPoolLiveEnds(g_markStacks);
     LookupScriptVariable(self->f2C, self->f1EF8, 0, &a);
     R11B008Node* n;
     s32 found;
@@ -1723,7 +1714,7 @@ void func_001DBEC8(World* self, f32 limit)
 void* func_001DC0C8(u8* self)
 {
     void* p = func_001B5EC0(self + 0x1C0C);
-    func_001F5C0C(p, 0, 0x8);
+    FillMemory(p, 0, 0x8);
     return p;
 }
 
@@ -2002,7 +1993,7 @@ void func_001DD3E0(Quad_001DD3E0* a, Quad_001DD3E0* b, Word_001DD3E0* c, u8* obj
         p++;
     } while (n >= 0);
 
-    if (func_001DD218(base) != 0) {
+    if (ClipSegmentToPlanes(base) != 0) {
         void* tp = &L.tmp;
         Quad_001DD3E0* q = base;
         n = 1;

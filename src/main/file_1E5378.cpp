@@ -159,7 +159,7 @@ void func_001E56A0(C16* self, void* obj, f32 t)
         if (*(s32*)(o + 0x2740) != 0) {
             if (IsObjectAttached()) {
                 VFn_56A0 fn;
-                func_001F5C0C(buf, 0, 0xC4);
+                FillMemory(buf, 0, 0xC4);
                 o = g_player;
                 fn = *(VFn_56A0*)(*(u8**)o + 0x134);
                 if (fn != 0) {
@@ -327,7 +327,7 @@ void func_001E5E08(C16* self)
         VFn_5E08 fn = *(VFn_5E08*)(*(u8**)self->f624 + 0x148);
         fn(self->f624);
     } else {
-        func_001924C8(self);
+        StartSwitchedColliderEffect(self);
     }
 }
 
@@ -611,7 +611,7 @@ void func_001E6C20(void* self, void* p);
 void func_001E73B8(T217D_3F0* self)
 {
     u8* s = g_gsPacketWriter;
-    if (func_001E9A68()) {
+    if (IsArcDrawAllowed()) {
         BeginGifTag(s, 0, 1, 0xE);
         AddGifRegisterWrite(s, 0x47, 0x31001);
         AddGifRegisterWrite(s, 0x42, 0x44);

@@ -20,5 +20,5 @@ void func_001F1960(Obj_1F1960_eu* self) {
     SetScreenElementScale(self, 0.6f);
     self->f518 = 0xDF7F7F7F;
     self->f570 = 0;
-    func_001F5C0C(&self->f574, 0, 0x18);
+    FillMemory(&self->f574, 0, 0x18);
 }

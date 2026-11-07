@@ -33,7 +33,7 @@ l4490:
     if (flag != 0) {
         v->count = 0;
     }
-    func_001F4808(v);
+    StartObjectSubGroupFinish(v);
     return;
 larg:
     args.kind = 1;
