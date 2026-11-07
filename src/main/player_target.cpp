@@ -4,6 +4,8 @@
 #include "switched_collider.h"
 #include "on_off_object.h"
 #include "game_clock.h"
+#include "item_keeper.h"
+#include "shapes.h"
 
 // The file's .rodata, in retail's order: the constants and jump tables only its assembly reads.
 extern const f32 D_0024DAA0 = -3.40282347e+38f;
@@ -57,27 +59,27 @@ ASM_FUNC(func_001CE800);
 // What a target cost search passes to its scorer: the player, the target, and the record at
 // +0x10 the scorer hands on.
 struct TargetCostContext { void* p0; BaseObject* p4; u8 pad1[0x10 - 8]; };
-struct Frame_001CE9E8 { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
+struct ObjectPlacementScore { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
 
 void func_001CE800(void* a0, void* a1, void* a2, void* a3);
 void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
 f32 func_001CE9E8(TargetCostContext* self)
 {
-    Frame_001CE9E8 f;
+    ObjectPlacementScore f;
     PlaceOnTargetObject(self->p0, self->p4, f.vecA, f.vecB);
     ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, f.vecB, 0, &f.result, 0, 0);
     return f.result;
 }
 
-struct Frame_001CEA58 { u8 vecA[0x10]; f32 result; };
+struct PointPlacementScore { u8 vecA[0x10]; f32 result; };
 
 void func_0016A240(void* a0, void* a1, s32 a2);
 void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
 f32 func_001CEA58(TargetCostContext* self)
 {
-    Frame_001CEA58 f;
+    PointPlacementScore f;
     PlaceOnTargetPoint(self->p4, f.vecA, 0);
     ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
@@ -88,7 +90,7 @@ void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, voi
 
 f32 func_001CEAB8(TargetCostContext* self)
 {
-    Frame_001CEA58 f;
+    PointPlacementScore f;
     PlaceOnTargetCurve(self->p4, f.vecA, 0);
     ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
@@ -98,53 +100,49 @@ ASM_FUNC(func_001CEB18);
 
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.
-struct Obj_1CEDF8 { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
+struct PathScoreArgs { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
 void func_001CEB18(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
 
-f32 func_001CEDF8(Obj_1CEDF8* o, f32 t)
+f32 func_001CEDF8(PathScoreArgs* o, f32 t)
 {
     f32 out;
     func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
     return out;
 }
 
-typedef void (*VFn_1CEE30)(void* self, void* out, s32 x);
+typedef void (*PathShapeFn)(void* self, void* out, s32 x);
 
-struct Obj_1CEE30 {
-    VFn_1CEE30* vtbl;
+struct PathShape {
+    PathShapeFn* vtbl;
 };
 
-struct Node_1CEE30 {
+struct PathTarget {
     u8 pad0[0x18];
     s32 f18;
     u8 pad1C[0x34 - 0x1C];
-    Obj_1CEE30* f34;
+    PathShape* f34;
 };
 
-struct Self_1CEE30 {
+struct PathScoreContext {
     s32 f0;
-    Node_1CEE30* node;
+    PathTarget* node;
 };
 
-struct __attribute__((aligned(16))) Quad_1CEE30 {
-    s32 a, b, c, d;
-};
-
-struct Locals_1CEE30 {
-    Quad_1CEE30 a;
+struct PathScoreFrame {
+    Quad16 a;
     s32 b[2];
     u8 pad18[8];
-    Quad_1CEE30 c;
+    Quad16 c;
     f32 out;
 };
 
 void func_001EB168(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
 
-f32 func_001CEE30(Self_1CEE30* self)
+f32 func_001CEE30(PathScoreContext* self)
 {
-    Locals_1CEE30 l;
-    Node_1CEE30* n = self->node;
-    Obj_1CEE30* o = n->f34;
+    PathScoreFrame l;
+    PathTarget* n = self->node;
+    PathShape* o = n->f34;
     if (o->vtbl[2] != 0) {
         o->vtbl[2](o, &l.a, 0);
     }
@@ -229,15 +227,14 @@ void func_001D1260(Player* self)
 
 ASM_FUNC(func_001D12F0);
 
-struct Obj_1D1478 { u8 pad[0x50]; s32 f50; };
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 s32 func_001D1478(Player* self)
 {
     void* arr[64];
     s32 n = GatherObjectsById(self->world, 5, 0x89, 0, 0x40, arr);
     for (s32 i = 0; i < n; i++) {
-        Obj_1D1478* o = (Obj_1D1478*)arr[i];
-        s32 v = o->f50;
+        ItemKeeper* o = (ItemKeeper*)arr[i];
+        s32 v = o->state;
         if (v < 3) {
             if (v > 0) {
                 return 0;

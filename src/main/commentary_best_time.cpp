@@ -14,6 +14,7 @@
 #include "game_progress.h"
 #include "level_entry.h"
 #include "pad_record.h"
+#include "memory_card.h"
 
 extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
 extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
@@ -89,8 +90,9 @@ void* func_001DFE80(s32 key)
     return 0;
 }
 
-struct Ent_11A338 { u32 pad0; f32 f4; u8 pad1[0x1C - 8]; s32 w1c; u8 pad2[0x28 - 0x20]; void* w28; };
-struct Cur_11A338 { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
+// The record a level entry keeps at +8 (World::f2310 points to it; func_001E00B0 streams it):
+// its two words at +4 and +0x1C differ while there is commentary to play.
+struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
 
 
 void* func_001DFE80(s32 k);
@@ -102,19 +104,19 @@ void func_001E02C8(T217D_1380* self, s32 n);
 
 void func_001DFEB8(T217D_1380* self)
 {
-    Ent_11A338* e;
+    const LevelEntry* e;
 
     SetupScreenElementText(self);
-    e = (Ent_11A338*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    e = (const LevelEntry*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (e) {
-        if (e->f4 != 0.0f) {
-            g_currentWorld->f230C = e->f4;
+        if (e->f04 != 0.0f) {
+            g_currentWorld->f230C = e->f04;
         }
-        if (!(((Cur_11A338*)g_currentWorld->f2310)->differs())) {
-            g_currentWorld->f2310 = (Cur_11A338*)((u8*)e + 8);
+        if (!(((CommentaryRecord*)g_currentWorld->f2310)->differs())) {
+            g_currentWorld->f2310 = (CommentaryRecord*)e->record;
         }
         if (g_currentWorld->f2314 == 0 || !GetStringLength(g_currentWorld->f2314)) {
-            g_currentWorld->f2314 = e->w28;
+            g_currentWorld->f2314 = (void*)e->credits;
         }
     }
     if (IsFontLoaded(2)) {
@@ -129,7 +131,7 @@ void func_001DFEB8(T217D_1380* self)
         SetBestTimeState(self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((Cur_11A338*)g_currentWorld->f2310)->differs()) {
+        if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
             self->vt->m08(self, "Press &2L&. for Bonus Commentary");
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->m14(self);
@@ -204,10 +206,7 @@ void func_001E00B0(T217D_1380* self)
     }
 }
 
-struct X_1E02C8 { u8 pad[4]; };
-
 extern s32 D_002623DC;
-extern X_1E02C8 D_00264A40;
 
 void func_001AB958(T217D_510* o);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -219,7 +218,7 @@ void func_001AB920(T217D_510* o, f32 v);
 void func_001AB928(T217D_510* o, f32 v, void* fn);
 void func_001AB938(T217D_510* o);
 s32 func_001E1FD0(BestTimeTextBuffer* dst, const char* fmt, ...);
-void func_0018C7F8(X_1E02C8* x);
+void func_0018C7F8(MemoryCard* x);
 s32 func_001602A0(void);
 void func_001604B8(s32 m);
 void func_00194D30(T217D_6D0* y, s32 a, s32 b);
@@ -316,13 +315,13 @@ void func_001E02C8(T217D_1380* self, s32 n)
     self->active = (self->state != 0);
 }
 
-struct Out_1E0678;
-void func_00137228(Out_1E0678* out, f32 x, f32 y);
-void func_00137238(Out_1E0678* out, f32 x, f32 y);
-void func_00137248(Out_1E0678* out, s32* value);
-void func_00137260(Out_1E0678* out, s32 flag);
-void func_00137268(Out_1E0678* out, s32 flag);
-struct Out_1E0678 {
+struct TextLayout;
+void func_00137228(TextLayout* out, f32 x, f32 y);
+void func_00137238(TextLayout* out, f32 x, f32 y);
+void func_00137248(TextLayout* out, s32* value);
+void func_00137260(TextLayout* out, s32 flag);
+void func_00137268(TextLayout* out, s32 flag);
+struct TextLayout {
     u8 b[32];
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
@@ -330,8 +329,8 @@ struct Out_1E0678 {
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
-struct Hd_1E0678 {
-    static void Draw(Font** h, Out_1E0678* out, void* tbl)
+struct FrameFont {
+    static void Draw(Font** h, TextLayout* out, void* tbl)
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
@@ -349,7 +348,7 @@ void func_0015C900(Font* font);
 void func_001E0678(T217D_1380* self)
 {
     T217D_Word tmp;
-    Out_1E0678 out;
+    TextLayout out;
     T217D_Word slot;
     u8 loc[0xB0];
 
@@ -371,7 +370,7 @@ void func_001E0678(T217D_1380* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_1E0678::Draw(self->frame, &out, &g_gsPacketWriter);
+            FrameFont::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
         InitTextReader(loc, &self->text[0], self->font);

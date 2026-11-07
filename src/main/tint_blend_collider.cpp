@@ -18,17 +18,18 @@
 #include "message_body.h"
 #include "owner_message.h"
 #include "shapes.h"
+#include "state_walker.h"
 
-struct __attribute__((aligned(16))) Quad_1DE798 { s32 w[4]; };
-struct Ent_275750 { s32 a, b, c; };
-struct Tab_275750 { Ent_275750 e[9]; s32 end; };
-struct F4_2758B0 { f32 a, b, c, d; };
+// The links func_001DE808 resolves (ResolveObjectLinks: flags, id, offset), and the word after
+// them that aligns the next table.
+struct ColliderLink { s32 flags, id, offset; };
+struct ColliderLinkTable { ColliderLink e[9]; s32 end; };
 
 extern u8 D_00275C60[];
 
 Quad16 D_00275730 = { 0x42C80000, 0, 0, 0 };
-Quad_1DE798 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
-Tab_275750 D_00275750 = { {
+Quad16 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
+ColliderLinkTable D_00275750 = { {
     { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },
     { 0x4, 0x50, 0x750 }, { 0x4, 0x34E, 0x744 }, { 0x2, 0x161, 0x588 },
     { 0x2, 0x162, 0x58C }, { 0x2, 0x163, 0x590 }, { 0x4, 0x160, 0x584 }
@@ -55,7 +56,7 @@ f32 D_002758A0 = 300.0f;
 f32 D_002758A4 = 400.0f;
 f32 D_002758A8 = -100.0f;
 f32 D_002758AC = 5.0f;
-F4_2758B0 D_002758B0 = { 1.5f, 0.0f, 0.0f, 0.0f };
+f32 D_002758B0[4] = { 1.5f, 0.0f, 0.0f, 0.0f };
 f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 
@@ -97,14 +98,14 @@ void func_001DE798(TintBlendCollider* self)
     BuildAxisAngleMatrix(&g_unitZVector, (u8*)self + 0x660, f);
     self->f720 = -1;
     self->f72C = -10.0f;
-    (*(Quad_1DE798*)&self->v6F0) = D_00275740;
+    (*(Quad16*)&self->v6F0) = D_00275740;
 }
 
 // EXACT: literal 1 stores (no `one` local), `||` condition, D_00262E10 compared as a pointer
 
-struct Base_1DE808 { void** vtbl; };
-typedef void (*Fn3_1DE808)(void* self, void* a1, s32 a2);
-typedef void (*Fn0_1DE808)(void* self);
+struct AttachedEffect { void** vtbl; };
+typedef void (*LinkTargetFn)(void* self, void* a1, s32 a2);
+typedef void (*AttachedEffectFn)(void* self);
 
 
 void func_001C44F0(void* self);
@@ -120,14 +121,14 @@ void func_001DE808(TintBlendCollider* self)
 
     StartTurningCollider(self);
     ResolveObjectLinks(self, 9, &D_00275750);
-    ((Fn3_1DE808)s->desc03()->m34)(self, s->f6DC, 1);
+    ((LinkTargetFn)s->desc03()->m34)(self, s->f6DC, 1);
     AddMatrixAttachment(s->f748, 5, &s->f74C);
     ((u8*)s->f74C)[0x10] = 1;
     ((u8*)s->f74C)[0x11] = 1;
-    ((Fn0_1DE808)((Base_1DE808*)s->f748)->vtbl[47])(s->f748);
+    ((AttachedEffectFn)((AttachedEffect*)s->f748)->vtbl[47])(s->f748);
     AddMatrixAttachment(s->f750, 5, &s->f754);
     ((u8*)s->f754)[0x11] = 1;
-    ((Fn0_1DE808)((Base_1DE808*)s->f750)->vtbl[47])(s->f750);
+    ((AttachedEffectFn)((AttachedEffect*)s->f750)->vtbl[47])(s->f750);
     s->f75C = (StateWalker*)CreateStateWalker(s->f758, self, -1, 1);
     if (s->f73C == 0 || g_player == 0) {
         flag = 1;
@@ -141,19 +142,18 @@ void func_001DE808(TintBlendCollider* self)
 
 // NEAR: the call sequence, the list walk and the frame (0xC0) match; the scale constant D_002757D0 is held in s8 in retail but the C here addresses it through a pointer, so the register numbering of the constants 1 and 4 and the float tail differ (40 differing lines).
 
-struct Pa_1DE910;
-struct Pb_1DE910;
-typedef s32 (*VFnChild_1DE910)(void* self, void* a1, void* a2);
-typedef void (*VFnObj_1DE910)(void* self, void* a1);
+struct TintGlowEffect;
+typedef s32 (*ContactClaimFn)(void* self, void* a1, void* a2);
+typedef void (*OwnerMessageFn)(void* self, void* a1);
 extern f32 D_00261858[];
 
 void func_001C4ED0(void);
 s32 func_00128230(TintBlendCollider* self);
 void func_001DEB30(TintBlendCollider* self);
 void func_001D7098(OwnerMessage* l, s32 zero, Collider* c);
-void func_001861E8(Pa_1DE910* a0, Contact03* a1);
-void func_00129E10(Pb_1DE910* a, f32 v);
-void func_00129FB0(Pb_1DE910* a, f32 v);
+void func_001861E8(World* a0, Contact03* a1);
+void func_00129E10(TintGlowEffect* a, f32 v);
+void func_00129FB0(TintGlowEffect* a, f32 v);
 
 void func_001DE910(TintBlendCollider* self)
 {
@@ -182,17 +182,17 @@ void func_001DE910(TintBlendCollider* self)
                 if (v == 1 || v == 4) {
                     InitOwnerMessage(&loc, 0, s0);
                     while (s0 != 0) {
-                        if (((VFnChild_1DE910)s0->desc03()->m47)(s0, s1, &loc)) {
+                        if (((ContactClaimFn)s0->desc03()->m47)(s0, s1, &loc)) {
                             break;
                         }
                         s0 = (Collider*)s0->parent;
                     }
-                    ((VFnObj_1DE910*)self->desc)[80](self, &loc);
+                    ((OwnerMessageFn*)self->desc)[80](self, &loc);
                 }
             }
             s1 = s1->next;
         } while (s1 != 0);
-        FreePooledContactChain((Pa_1DE910*)self->world, ((Contact03*)self->f740));
+        FreePooledContactChain(self->world, ((Contact03*)self->f740));
         self->f740 = 0;
     }
     {
@@ -208,8 +208,8 @@ void func_001DE910(TintBlendCollider* self)
             f20 = x;
         }
     }
-    func_00129E10(((Pb_1DE910*)self->f748), f20 * D_002757D0[0]);
-    func_00129FB0(((Pb_1DE910*)self->f748), f20 * D_002757D4);
+    func_00129E10(((TintGlowEffect*)self->f748), f20 * D_002757D0[0]);
+    func_00129FB0(((TintGlowEffect*)self->f748), f20 * D_002757D4);
     if (self->f728 != 0 && self->f720 != 2) {
         f32 e = g_gameClock[1] - self->f730;
         if (2.0f < e) {
@@ -244,7 +244,7 @@ void func_001DF290(TintBlendCollider* self, void* p)
 extern f32 D_00261858[];
 extern Rgba4 D_002623E0;
 
-struct Clamp_1DF2C8 {
+struct UnitClamp {
     static f32 Of(f32 v, f32 lo, f32 hi)
     {
         return v < lo ? lo : (hi < v ? hi : v);
@@ -270,9 +270,9 @@ void func_001DF2C8(TintBlendCollider* self, void* a1, void* a2)
             }
             f32 r = Cosine((g_gameClock[1] - self->f72C) * 10.0f);
             f32 a = D_00275870.x + t * (D_00275870.y + t * D_00275870.z);
-            a = Clamp_1DF2C8::Of(a, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
+            a = UnitClamp::Of(a, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
             f32 b = D_00275880[0] + r * (D_00275880[1] + r * D_00275880[2]);
-            b = Clamp_1DF2C8::Of(b, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
+            b = UnitClamp::Of(b, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
             f32 k = a * b;
             f32 inv = 1.0f - k;
             out.r = (s32)(inv * D_002623E0.r + k * col.r);
@@ -310,18 +310,18 @@ void func_001DFA10(TintBlendCollider* self)
     func_001C57C8(self);
 }
 
-struct Out_1DFA40 { u8 pad0[0x94]; f32 f94; s32 f98; };
+struct TintBlendOutput { u8 pad0[0x94]; f32 f94; s32 f98; };
 
-typedef s32 (*Pred_1DFA40)(void* self, void* out);
+typedef s32 (*TintBlendTestFn)(void* self, void* out);
 
 extern f32 D_0026185C;
 
 void func_001DFA40(TintBlendCollider* self, void* out)
 {
     TintBlendCollider* obj = self;
-    Out_1DFA40* o = (Out_1DFA40*)out;
+    TintBlendOutput* o = (TintBlendOutput*)out;
 
-    if (((Pred_1DFA40)obj->desc06()->m56)(self, out)) {
+    if (((TintBlendTestFn)obj->desc06()->m56)(self, out)) {
         f32 d = g_gameTime - obj->f72C;
         f32 lo = ((f32*)g_unitRange)[0];
         f32 hi = ((f32*)g_unitRange)[1];
@@ -334,7 +334,7 @@ void func_001DFA40(TintBlendCollider* self, void* out)
         } else {
             r = v;
         }
-        f32 k = D_002758B0.a;
+        f32 k = D_002758B0[0];
         o->f98 = 0;
         o->f94 = r * k;
     } else {
@@ -342,11 +342,6 @@ void func_001DFA40(TintBlendCollider* self, void* out)
         o->f98 = 0;
     }
 }
-
-struct Dev_001DFB08 {
-    u8 pad0[0x24];
-    s32 f24;
-};
 
 void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
@@ -358,15 +353,15 @@ void func_001DFB08(TintBlendCollider* self, s32 code, MessageBody* rec)
 
     if (code != 0x13) {
         if (code == 0x14) {
-            if (rec == (MessageBody*)((Dev_001DFB08*)self->f75C)) {
+            if (rec == (MessageBody*)self->f75C) {
                 GetStateWalkerCurrentKey(rec, &loc[0]);
-                GetStateWalkerTargetKey(((Dev_001DFB08*)self->f75C), &loc[1]);
+                GetStateWalkerTargetKey(self->f75C, &loc[1]);
             }
         }
     } else {
-        Dev_001DFB08* dev = ((Dev_001DFB08*)self->f75C);
+        StateWalker* dev = self->f75C;
         s32 key = rec->sourceId;
-        if (dev != 0 && key == dev->f24) {
+        if (dev != 0 && key == (s32)dev->player) {
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
