@@ -3472,3 +3472,19 @@ func_00198860	IsGaugeColliderAgentNear	slot 0x16C of class 0x0F: while the activ
 func_00194398	StartPauseMenuExitFade	starts the screen fade (StartScreenFade, kind 1) to the entry D_00247AB0 that ResetGameSessionAndFade also fades to; the pause menu calls it when a save of stage 2 ends well and on leaving
 func_00193270	BeginLoadProgress	zeroes the five counters of a load progress record; the startup loading calls it after InitLoadProgress, before running the initialisers
 func_00193300	EndLoadProgress	zeroes the five counters of a load progress record again; the startup loading calls it after the last UpdateLoadProgress
+func_00198BD8	UpdateObjectSet	slot 0x54 (update) of class 0x2C: UpdateCollider, then works with the active switched collider (GetActiveSwitchedCollider) through the hooks D_0026A910 and D_0026A914
+func_00199000	LatchObjectSetContact	slot 0x100 of class 0x2C (as LatchContactObject): sets +0x59C when the other object of the contact descends from the object at +0x18 of the active switched collider's data block
+func_00199698	UpdateNumberedItem	slot 0x54 (update) of class 0x2E: UpdateObjectSet, then, when its world bits allow (MaskWorldBitsBySave), acts on the active switched collider's data block
+func_00199C58	ApplyNumberedItemPendingImpulse	slot 0xD0 of class 0x2E: a call to ApplyColliderPendingImpulse
+func_00199D08	SpinNumberedItemTransform	slot 0xA0 of class 0x2E: turns its transform about Z by the clock (BuildAxisAngleMatrix) before the base slot 0xA0 (func_00125C90)
+func_0019B298	StepObjectGatherer	slot 0x80 (step) of class 0x41: StepCollider, then outside states 1 and 2 passes its placement to func_001B9D10 with the table D_0026ABB0
+func_0019B378	UpdateObjectGatherer	slot 0x54 (update) of class 0x41: works with the active switched collider, UpdateCollider, and the per-state sounds (StartSoundEffect)
+func_0019BB90	ResolveObjectGathererContact	slot 0x104 of class 0x41 (as ResolvePlayerContact): when the contact is steep enough and its speed at +0x61C is not 0, pushes the contact's velocity along its own direction less the part along the contact's normal
+func_0019D968	UploadGroupConstants	the first time in a frame (D_00604780 clear) uploads the 0x2C quadwords of D_002BDC20 through the VIF packet writer (func_001EE7D0); later, when D_00604784 is clear, flushes and uploads D_002BDEE0 instead; sets both flags
+func_0019DA30	PrepareBasicGroup	the handler of group-marker row 0 (InitGroupMarkers): only adds the DMA ref tag of the block D_00212160 to D_00215C50 (AddDmaRefTagIfChanged)
+func_0019DA60	PrepareFlushedGroup	the handler of group-marker row 1: UploadProjectionConstants, UploadCameraOncePerFrame, the ref tag of D_00212160, marks the base constants sent, sets the build frame's +0x1C and writes a VIF flush
+func_0019DAD8	PrepareGroupWithoutCamera	the handler of group-marker row 2: UploadProjectionConstants, UploadGroupConstants and the ref tag of D_00212160, then clears g_cameraUploadedThisFrame
+func_0019DB20	PrepareStandardGroup	the handler of 11 group-marker rows (3, 4, 6 to 8, 10 to 13, 16): UploadProjectionConstants, UploadCameraOncePerFrame, UploadGroupConstants and the ref tag of D_00212160
+func_0019DB68	PrepareAlternateBlockGroup	the handler of group-marker rows 5, 9, 14 and 15: as PrepareStandardGroup, with the block D_00215C60 to D_00217348 in place of D_00212160
+func_0019DBB0	PrepareUnzoomedGroup	the handler of group-marker row 17: the ref tag of D_00212160, the projection and camera uploads, the world object's VIF word from D_00274520, and the camera uploaded again with its zoom snapped to 1.0 (SnapCameraZoom) and put back
+func_0019DC98	SubmitDeferredRequests	once a frame (main loop, with the world and camera): sorts the deferred requests, clears the frame's upload flags, buckets them (BucketDeferredRequests) and for each group runs its row's handler and sends its requests, then resets g_nextDeferredRequest

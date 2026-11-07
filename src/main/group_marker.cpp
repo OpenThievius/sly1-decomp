@@ -277,7 +277,7 @@ void func_0019DA60(void)
 void func_0019DAD8(void)
 {
     UploadProjectionConstants();
-    func_0019D968();
+    UploadGroupConstants();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
     g_cameraUploadedThisFrame = 0;
 }
@@ -286,7 +286,7 @@ void func_0019DB20(void)
 {
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
-    func_0019D968();
+    UploadGroupConstants();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
 }
 
@@ -294,7 +294,7 @@ void func_0019DB68(void)
 {
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
-    func_0019D968();
+    UploadGroupConstants();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00215C60, D_00217348);
 }
 
@@ -350,24 +350,24 @@ void func_0019DF48(void)
     ReserveGifPackedData(buf.raw, 0x7D, 0, 3, 0x412, 0);
     rows = g_groupMarkers;
 
-    rows[0].handler = func_0019DA30;
-    rows[1].handler = func_0019DA60;
-    rows[2].handler = func_0019DAD8;
-    rows[3].handler = func_0019DB20;
-    rows[4].handler = func_0019DB20;
-    rows[5].handler = func_0019DB68;
-    rows[6].handler = func_0019DB20;
-    rows[7].handler = func_0019DB20;
-    rows[8].handler = func_0019DB20;
-    rows[9].handler = func_0019DB68;
-    rows[12].handler = func_0019DB20;
-    rows[11].handler = func_0019DB20;
-    rows[10].handler = func_0019DB20;
-    rows[13].handler = func_0019DB20;
-    rows[14].handler = func_0019DB68;
-    rows[15].handler = func_0019DB68;
-    rows[16].handler = func_0019DB20;
-    rows[17].handler = func_0019DBB0;
+    rows[0].handler = PrepareBasicGroup;
+    rows[1].handler = PrepareFlushedGroup;
+    rows[2].handler = PrepareGroupWithoutCamera;
+    rows[3].handler = PrepareStandardGroup;
+    rows[4].handler = PrepareStandardGroup;
+    rows[5].handler = PrepareAlternateBlockGroup;
+    rows[6].handler = PrepareStandardGroup;
+    rows[7].handler = PrepareStandardGroup;
+    rows[8].handler = PrepareStandardGroup;
+    rows[9].handler = PrepareAlternateBlockGroup;
+    rows[12].handler = PrepareStandardGroup;
+    rows[11].handler = PrepareStandardGroup;
+    rows[10].handler = PrepareStandardGroup;
+    rows[13].handler = PrepareStandardGroup;
+    rows[14].handler = PrepareAlternateBlockGroup;
+    rows[15].handler = PrepareAlternateBlockGroup;
+    rows[16].handler = PrepareStandardGroup;
+    rows[17].handler = PrepareUnzoomedGroup;
 
     p = (u8*)g_groupMarkers + 0x888;
     i = 17;
