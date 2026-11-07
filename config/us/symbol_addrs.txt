@@ -147,3 +147,10 @@ D_00279320 = 0x00279320;
 D_002793F0 = 0x002793F0;
 D_00279400 = 0x00279400;
 D_0024F560 = 0x0024F560;
+// The IPU library's identification string, which no code reads, inside a coarse label
+// (D_0027B068): the end of the MPEG library's last table and the start of the IPU library's
+// .data (src/lib/file_211B40.cpp).
+D_0027B0B0 = 0x0027B0B0;
+// The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
+// zeros after it, to 0x250580, are the padding before .data.
+D_00250540 = 0x00250540;

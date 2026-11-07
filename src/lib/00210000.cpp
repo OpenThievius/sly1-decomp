@@ -100,55 +100,6 @@ s64 func_00211700(Self_211700* self)
     return r;
 }
 
-struct Ctx_211988 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-};
-struct Arg_211988 { u32 v; };
-
-extern void func_002117D0(Arg_211988* a);
-extern void func_00211838(Arg_211988* a);
-
-void func_00211988(Ctx_211988* s0)
-{
-    u32 v = (u32)s0->f1C;
-    u32 s3 = v & 0x7Fu;
-    u32 t = ((v >> 16) & 3u) + ((v >> 8) & 0xFu);
-    s32 s1 = s0->f0 - (s32)(t << 4);
-    s32 s2 = s0->f8 + (s32)t;
-
-    if (s0->f10 != 0) {
-        if (s0->f14 != 0) {
-            *(volatile u32*)0x1000B010 = s0->f10;
-            *(volatile u32*)0x1000B020 = s0->f14;
-            func_002117D0((Arg_211988*)(u32)(s0->f18 | 0x100));
-        }
-    }
-    while (*(volatile s32*)0x10002010 < 0) {
-        ;
-    }
-    *(volatile u32*)0x10002000 = s3;
-    while (*(volatile s32*)0x10002010 < 0) {
-        ;
-    }
-    if (s1 == 0) {
-        return;
-    }
-    if (s2 == 0) {
-        return;
-    }
-    *(volatile u32*)0x1000B410 = s1;
-    *(volatile u32*)0x1000B430 = s0->f4;
-    *(volatile u32*)0x1000B420 = s2;
-    func_00211838((Arg_211988*)(u32)(s0->fC | 0x100));
-}
-
 extern const char D_002504B8[];
 extern const char D_002504D8[];
 
@@ -199,31 +150,6 @@ s32 func_00210090(Obj_210090* self)
         s1->f28 = 1;
     }
     return v;
-}
-
-// EXACT: hardware registers read through volatile u32 pointers (lui/ori into a register, lw 0).
-
-struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };
-struct Q_002118A0;
-void func_00211838(Q_002118A0* q);
-void func_002117D0(Q_002118A0* q);
-
-void func_002118A0(Out_002118A0* out)
-{
-    func_00211838((Q_002118A0*)1);
-    volatile u32* a = (volatile u32*)0x1000B410;
-    out->w00 = *a;
-    out->w04 = *(volatile u32*)0x1000B430;
-    out->w08 = *(volatile u32*)0x1000B420;
-    out->w0C = *(volatile u32*)0x1000B400;
-    while ((*(volatile u32*)0x10002010 & 0xF0) != 0) {
-    }
-    func_002117D0((Q_002118A0*)0);
-    out->w10 = *(volatile u32*)0x1000B010;
-    out->w14 = *(volatile u32*)0x1000B020;
-    out->w18 = *(volatile u32*)0x1000B000;
-    out->w1C = *(volatile u32*)0x10002020;
-    out->w20 = *(volatile u32*)0x10002010;
 }
 
 struct Node_2104A8 {
@@ -287,42 +213,6 @@ void func_00210D90(u32 a, s32 b)
     func_001F9DA8();
 }
 
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-
-void func_002117D0(u32 value)
-{
-    func_001F9D60();
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
-    *(volatile u32*)0x1000B000 = value;
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
-}
-
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-
-void func_00211838(u32 value)
-{
-    func_001F9D60();
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
-    *(volatile u32*)0x1000B400 = value;
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
-}
-
-s32 func_001F9D60(void);
-s32 func_001F9DA8(void);
-
-void func_00211B40(u32 value)
-{
-    func_001F9D60();
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
-    *(volatile u32*)0x1000B400 = value;
-    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
-}
-
 struct Str_2115C0 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
 void func_00211618(Str_2115C0* self, s32 n);
 
@@ -364,22 +254,6 @@ s64 func_002116B0(Bits_2116B0* self, s32 n)
     s64 r = func_002115F8(self, n);
     func_00211618(self, n);
     return r;
-}
-
-u32 func_00211AD8(s32 mode)
-{
-    u32 result = 0;
-    switch (mode) {
-    case 0:
-        while (*(volatile s32*)0x10002010 < 0) {
-        }
-        result = 0;
-        break;
-    case 1:
-        result = *(volatile u32*)0x10002010 >> 31;
-        break;
-    }
-    return result;
 }
 
 struct Blk_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; s32 f28; u8 p2C[0xC]; u64 f38; };
@@ -515,51 +389,6 @@ void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s6
     }
     *out3 = node->f20;
     *out4 = ((s64)node->f34 << 8) | (node->f2C | ((s64)node->f38 << 7) | ((s64)node->f3C << 6) | ((s64)node->f40 << 5) | ((s64)node->f30 << 3));
-}
-
-typedef u64 Quad_211BA8 __attribute__((mode(TI)));
-struct Quad_27B0C0 { u64 lo; u64 hi; } __attribute__((aligned(16)));
-extern volatile Quad_27B0C0 D_0027B0C0[];
-extern Quad_27B0C0 D_0027B110[];
-void func_00211B40(u32 value);
-
-void func_00211BA8(void)
-{
-    func_00211B40(1);
-    *(volatile u32*)0x10002010 = 0x40000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile u32*)0x10002000 = 0;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[0];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[1];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[2];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[3];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile u32*)0x10002000 = 0x50000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile u32*)0x10002000 = 0x58000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[0];
-    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[1];
-    *(volatile u32*)0x10002000 = 0x60000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile u32*)0x10002000 = 0x90000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile u32*)0x10002010 = 0x40000000;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
-    *(volatile u32*)0x10002000 = 0;
-    while (*(volatile s32*)0x10002010 < 0) {
-    }
 }
 
 struct Sub_2101F0 {
@@ -817,18 +646,6 @@ void func_00211090(Self_211090* self, s32 addr, s32 size)
 }
 
 extern u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
-
-volatile Quad_27B0C0 D_0027B0C0[5] = {
-    { 0x1616131013101008ULL, 0x1B1A181A16161616ULL },
-    { 0x1B1B1A1A1A1A1B1BULL, 0x1D2222221D1D1D1BULL },
-    { 0x20201D1D1B1B1D1DULL, 0x2223232526252222ULL },
-    { 0x3030282828262623ULL, 0x5345453A38382E2EULL },
-    { 0x1010101010101010ULL, 0x1010101010101010ULL },
-};
-Quad_27B0C0 D_0027B110[2] = {
-    { 0x03E0084204210000ULL, 0x1CE718C614A51084ULL },
-    { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
-};
 
 extern const char D_002504B8[32] = "odd number of field pictures";
 extern const char D_002504D8[32] = "unknown picture sutructure";
