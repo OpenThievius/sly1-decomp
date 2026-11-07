@@ -629,6 +629,7 @@ func_00125B70	func_00125C90	match
 func_001261C0	func_001262E0	match	
 func_00126A48	func_00126B68	match	
 func_00126AB0	func_00126BD0	match	
+func_00126AC8	func_00126BE8	match	
 func_00126BC0	func_00126CE0	match	
 func_00126C58	func_00126D78	match	
 func_00126D60	func_00126E80	match	
@@ -647,6 +648,7 @@ func_001278A8	func_001279C8	match
 func_00127E60	func_00127F80	match	
 func_00128018	func_00128138	match	
 func_001280C0	func_001281E0	match	
+func_00128150	func_00128270	match	
 func_00128230	func_00128350	match	
 func_00128278	func_00128398	match	
 func_00128330	func_00128450	match	
@@ -654,6 +656,7 @@ func_001288F0	func_00128A10	match
 func_00128998	func_00128AB8	match	
 func_00128C10	func_00128D30	match	
 func_00128DB8	func_00128ED8	match	
+func_00128E88	func_00128FA8	match	
 func_00128FD0	func_001290F0	match	
 func_00129108	func_00129228	match	
 func_00129170	func_00129290	match	
@@ -1659,6 +1662,7 @@ func_00169D20	func_0016A378	match
 func_00169D58	func_0016A3B0	match	
 func_00169D90	func_0016A3E8	match	
 func_00169DD8	func_0016A430	match	
+func_00169E20	func_0016A478	match	
 func_00169FC0	func_0016A618	match	
 func_0016A100	func_0016A758	match	rodata
 func_0016A140	func_0016A798	match	
@@ -3056,6 +3060,7 @@ func_001D34E0	func_001D41C8	match
 func_001D3500	func_001D41E8	match	
 func_001D3678	func_001D4360	match	
 func_001D39E0	func_001D46C8	match	
+func_001D3B58	func_001D4840	match	
 func_001D3C68	func_001D4950	match	
 func_001D40A0	func_001D4D88	match	
 func_001D4148	func_001D4E30	match	rodata
@@ -3388,6 +3393,7 @@ func_001ED5F8	func_001EE670	match
 func_001ED618	func_001EE690	match	
 func_001ED650	func_001EE6C8	match	
 func_001ED6B0	func_001EE728	match	
+func_001ED840	func_001EE8B8	match	
 func_001EDDB0	func_001EEE28	match	
 func_001EDE38	func_001EEEB0	match	
 func_001EE290	func_001EF308	match	
@@ -3421,6 +3427,7 @@ func_001EEE50	func_001EFEC8	match
 func_001EF3A8	func_001F0420	match	
 func_001EF3D8	func_001F0450	match	
 func_001EF520	func_001F0598	match	
+func_001EF5B8	func_001F0630	match	
 func_001EF808	func_001F0880	match	
 func_001EF828	func_001F08A0	match	
 func_001EF830	func_001F08A8	match	
