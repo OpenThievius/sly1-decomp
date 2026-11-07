@@ -802,7 +802,20 @@ void func_00144128(Frame_00144128* self, f32* a, Vec02* out)
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(self->rot, Vu0::Q(v)), Vu0::Q(self->pos));
 }
 
-INCLUDE_ASM(func_001441C0);
+void func_001441C0(Frame_00144128* self, Vec02* in, f32* out)
+{
+    Vec02 v;
+    Vu0::Q(v) = Vu0::RotateTransposed(self->rot, Vu0::Sub(Vu0::Q(*in), Vu0::Q(self->pos)));
+    out[2] = v.x;
+    out[1] = v.z;
+    out[0] = -v.y;
+    out[0] /= self->scaleY;
+    out[1] /= self->scaleZ;
+    if (1e-4f < v.x) {
+        out[0] /= v.x;
+        out[1] /= v.x;
+    }
+}
 
 void UpdateCameraLocation(Camera* self)
 {
