@@ -8,6 +8,9 @@
 #include "screen_element.h"
 #include "message_body.h"
 #include "shapes.h"
+#include "camera.h"
+#include "state_walker.h"
+#include "object_pool.h"
 extern u8* D_00262E10;
 extern u8* D_00275710;
 
@@ -35,13 +38,13 @@ void func_001E53F8(PlayerLinkedCollider* self, void* value)
     }
 }
 
-typedef void (*VFn_1E5428)(void* self, void* other);
+typedef void (*ListenFn)(void* self, void* other);
 
-struct Vt_1E5428 {
-    VFn_1E5428* vtbl;
+struct ListenerObject {
+    ListenFn* vtbl;
 };
 
-struct Peer_1E5428 {
+struct OwnedAgent {
     u8 pad0[0xC2C];
     PlayerLinkedCollider* owner;
 };
@@ -64,12 +67,12 @@ void func_001E5428(PlayerLinkedCollider* self)
 
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, D_00275B28);
-    self->f614 = CreateStateWalker(self->f610, self, -1, 1);
+    self->f614 = (StateWalker*)CreateStateWalker(self->f610, self, -1, 1);
     r = FindFirstObjectByIdMode4(g_currentWorld, 7, self);
     if (r != 0) {
         self->f620 = r;
         self->f624 = r;
-        ((Peer_1E5428*)r)->owner = self;
+        ((OwnedAgent*)r)->owner = self;
         self->f598 = r;
         self->f584 = (void*)FindFirstObjectById(self->world, 1, 0x160, r);
         i = 0;
@@ -78,7 +81,7 @@ void func_001E5428(PlayerLinkedCollider* self)
             i++;
         } while (i < 3);
         self->f594 = 300.0f;
-        ((Vt_1E5428*)r)->vtbl[27](r, self);
+        ((ListenerObject*)r)->vtbl[27](r, self);
     } else {
         self->f620 = (void*)g_player;
     }
@@ -95,9 +98,6 @@ void func_001E5428(PlayerLinkedCollider* self)
     VectorToAngles((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
 }
 
-typedef s32 (*VFn_1E55D0)(void* self);
-struct Obj_1E55D0 { VFn_1E55D0* vtbl; };
-struct Item_1E55D0 { u8 pad0[0x724]; s32 f724; };
 void func_00192B58(void* self);
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void func_001C8F20(void* node, s32 kind, s32 flag);
@@ -110,16 +110,16 @@ void func_001E55D0(PlayerLinkedCollider* self)
     s32 i;
 
     UpdateSwitchedCollider(self);
-    if (((Obj_1E55D0*)self->f620) != 0) {
-        if (((Obj_1E55D0*)self->f620)->vtbl[81](((Obj_1E55D0*)self->f620))) {
+    if (((SwitchedCollider*)self->f620) != 0) {
+        if (((SwitchedCollider*)self->f620)->desc05()->m4D(((SwitchedCollider*)self->f620))) {
             n = GatherObjectsById(self->world, 5, 8, 0, 8, arr);
             if (n > 0) {
                 count = n;
                 i = 0;
                 do {
                     void* item = arr[i];
-                    if (item != ((Obj_1E55D0*)self->f620)) {
-                        if (((Item_1E55D0*)item)->f724 != 0xB) {
+                    if (item != self->f620) {
+                        if (((Agent*)item)->f724 != 0xB) {
                             ChangeAgentState(item, 0xA, 0);
                         }
                     }
@@ -170,20 +170,7 @@ void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_1E5750 { s32 a, b, c, d; };
-
-struct Ctx_1E5750 {
-    u8 pad0[0x80];
-    Quad_1E5750 q80;
-    Quad_1E5750 q90;
-    Quad_1E5750 qA0;
-    u8 pad1[0x480 - 0xB0];
-    f32 f480;
-    u8 pad2[0x4BC - 0x484];
-    s32 f4BC;
-};
-
-extern Ctx_1E5750* D_00261990;
+extern Camera* D_00261990;
 extern u8 D_00275BC0[];
 
 void func_001922E8(void* a, void* b);
@@ -200,52 +187,46 @@ void func_001E5750(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
-        g_camera->f480 = 100.0f;
+        g_camera->ctl460.f20 = 100.0f;
         PushStackElement(g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
-        g_camera->f4BC = self->f61C;
+        g_camera->ctl460.f5C = (void*)self->f61C;
         if (self->f630 != 0) {
-            g_camera->q80 = *(Quad_1E5750*)&self->m110.r[0];
-            g_camera->q90 = *(Quad_1E5750*)&self->m110.r[1];
-            g_camera->qA0 = *(Quad_1E5750*)&self->m110.r[2];
+            *(Quad16*)g_camera->f80 = *(Quad16*)&self->m110.r[0];
+            *(Quad16*)g_camera->f90 = *(Quad16*)&self->m110.r[1];
+            *(Quad16*)g_camera->fA0 = *(Quad16*)&self->m110.r[2];
         }
-        PushCameraController(g_camera, 6, (u8*)g_camera + 0x460, self, 0);
-        PushStackValue((u8*)g_camera + 0x460, self->f644);
+        PushCameraController(g_camera, 6, &g_camera->ctl460, self, 0);
+        PushStackValue(&g_camera->ctl460, self->f644);
         SetStateWalkerTarget(self->f614, 0x359);
     } else {
-        g_camera->f480 = 10.0f;
+        g_camera->ctl460.f20 = 10.0f;
         PopStackElement(g_elementStack);
-        RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
-        PopStackValue((u8*)g_camera + 0x460);
+        RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
+        PopStackValue(&g_camera->ctl460);
         SetStateWalkerTarget(self->f614, 0x358);
     }
 }
 
-typedef s32 (*VFn_1E5888)(void* self, void* other);
-struct Vobj_1E5888 { VFn_1E5888* vtbl; };
-struct Rec_1E5888 { u8 pad0[0x48]; Vobj_1E5888* f48; };
-struct Ctx_1E5888 { u8 pad0[0x618]; Rec_1E5888* f618; };
-struct Node_1E5888 { u8 pad0[0x50]; Vobj_1E5888* f50; u8 pad1[0x4E0]; u64 f538; };
-
 s32 func_001A8820(void* p, void* v);
 
-s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
+s32 func_001E5888(PlayerLinkedCollider* self, Collider* node)
 {
-    Vobj_1E5888* a;
-    Vobj_1E5888* b;
+    Collider* a;
+    Collider* b;
 
-    if (node->f538 & (1ULL << 43)) {
+    if (node->flags538 & (1ULL << 43)) {
         return 0;
     }
-    if ((void*)node->f50 == (void*)self) {
+    if ((void*)node->root == (void*)self) {
         return 0;
     }
     if (func_001A8820(self->f618, node) != 0) {
         return 0;
     }
-    a = node->f50;
-    b = self->f618->f48;
-    if (a->vtbl[60](a, b) != 0 || b->vtbl[60](b, a) != 0) {
+    a = node->root03();
+    b = (Collider*)self->f618->f48;
+    if (a->desc03()->m38(a, b) != 0 || b->desc03()->m38(b, a) != 0) {
         return 0;
     }
     return 1;
@@ -271,8 +252,6 @@ void func_001E5C78(PlayerLinkedCollider* self)
     }
 }
 
-struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
-struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
 
 void func_00192230(void* self, s32 kind, MessageBody* rec);
 s32 func_001A8C90(void* a, s32 b);
@@ -281,13 +260,13 @@ void func_001E5CE8(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, kind, rec);
     if (kind == 0x13) {
-        Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
+        StateWalker* dev = self->f614;
         s32 id = rec->sourceId;
-        if (id == dev->f24) {
+        if (id == (s32)dev->player) {
             if (rec->code == 0x35B) {
                 func_001A8C90(self->f618, 1);
             }
-        } else if (((Hdl_1E5CE8*)self->f624) != 0 && id == ((Hdl_1E5CE8*)self->f624)->f7E0) {
+        } else if (((Agent*)self->f624) != 0 && id == (s32)((Agent*)self->f624)->f7E0) {
             s32 k = rec->code;
             if (k != 0x15E) {
                 if (k == 0x15F) {
@@ -331,9 +310,9 @@ void func_001E5E08(PlayerLinkedCollider* self)
     }
 }
 
-struct Pair_1E5E50 { s32 lo; s32 hi; };
+struct ZeroPair { s32 lo; s32 hi; };
 
-void func_001E5E50(PlayerLinkedCollider* a0, void* a1, Pair_1E5E50* out)
+void func_001E5E50(PlayerLinkedCollider* a0, void* a1, ZeroPair* out)
 {
     out->lo = 0;
     out->hi = 0;
@@ -345,7 +324,7 @@ void* func_001E5E60(PlayerLinkedCollider* self) { return self->f620 ? self->f620
 // of the vertex i are at 0x2C more (x at 0x2C, y at 0x34, the colours at 0x3C and 0x40, the
 // brightness at 0x44 and 0x48, the rates from 0x4C), and the previous vertex's next place is at
 // 0x04 and 0x0C.
-struct Elem_1E5E70 {
+struct ArcPointStep {
     u8 pad0[4];
     f32 f4;
     u8 pad1[4];
@@ -387,8 +366,8 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
     s32 i = 0;
     u32 dim = 0x30000000;
     s32 special = 0x1A;
-    Elem_1E5E70* p;
-    for (p = (Elem_1E5E70*)(self->pts - 1); i < 0x39; i++) {
+    ArcPointStep* p;
+    for (p = (ArcPointStep*)(self->pts - 1); i < 0x39; i++) {
         f32 t = (f32)i * step;
         f32 y = t + t - 1.0f;
         p->f34 = y;
@@ -408,7 +387,7 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
             p->fC = p->f34;
             p->f4 = p->f2C;
         }
-        p = (Elem_1E5E70*)((u8*)p + 0x2C);
+        p = (ArcPointStep*)((u8*)p + 0x2C);
     }
     self->pts[56].nextY = 1.0f;
     self->pts[56].nextX = 0.0f;
@@ -432,8 +411,8 @@ extern f32 D_00275658;
 extern f32 D_0027565C;
 extern f32 D_00275660;
 
-typedef void (*VFn_1E6188)(void* self);
-struct Inst_1E6188 { VFn_1E6188* vtbl; };
+typedef void (*ConeSpriteFn)(void* self);
+struct ConeSprite { ConeSpriteFn* vtbl; };
 
 void func_001AA268(ScreenElement* self);
 void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
@@ -460,7 +439,7 @@ void func_001E6188(T217D_3F0* self)
     SetConeVolumeThirdAngle(self->sprite, D_00275660);
     SetConeVolumeRange(self->sprite, D_00275B58);
     SetConeVolumeValue(self->sprite, 1);
-    ((Inst_1E6188*)self->sprite)->vtbl[7](self->sprite);
+    ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
 
 void func_001E6268(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
@@ -510,17 +489,16 @@ void func_001E62A8(T217D_3F0* self, PacketWriter* c, s32 k)
 
 ASM_FUNC(func_001E6600);
 
-struct Buf_1E6C20;
 
 extern f32 D_00261868;
 extern Rgba4 D_002610D8;
 extern Rgba4 D_002610E0;
 
-void func_001613C0(Buf_1E6C20* b, s32 a1, s32 a2, s32 a3);
-void func_00161458(Buf_1E6C20* b, u32 c);
-void func_001615F0(Buf_1E6C20* b, s32 x, s32 y, s32 a3, s32 a4);
+void func_001613C0(PacketWriter* b, s32 a1, s32 a2, s32 a3);
+void func_00161458(PacketWriter* b, u32 c);
+void func_001615F0(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
 
-struct Lerp_1E6C20 {
+struct ColorLerp {
     static u8 Of(s32 a, s32 b, f32 t)
     {
     if (a == b) return b;
@@ -532,7 +510,7 @@ struct Lerp_1E6C20 {
 #define SX_1E6C20(x) ((s32)(((x) + 1728.0f) * 16.0f))
 #define SY_1E6C20(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
 
-struct Clamp_1E6C20 {
+struct FadeClamp {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
         if (x < lo) return lo;
@@ -541,16 +519,16 @@ struct Clamp_1E6C20 {
     }
 };
 
-void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
+void func_001E6C20(T217D_3F0* self, PacketWriter* buf)
 {
     Rgba4 c;
     f32 t;
     switch (self->fade) {
     case 0:
-        t = Clamp_1E6C20::Of((g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
+        t = FadeClamp::Of((g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
         break;
     case 1:
-        t = Clamp_1E6C20::Of(1.0f - (g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
+        t = FadeClamp::Of(1.0f - (g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
         break;
     }
     BeginGifTag(buf, 0, 1, 1);
@@ -558,10 +536,10 @@ void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
         Rgba4 a = D_002610D8;
         Rgba4 b = D_002610E0;
         Rgba4 r;
-        r.r = Lerp_1E6C20::Of(a.r, b.r, t);
-        r.g = Lerp_1E6C20::Of(a.g, b.g, t);
-        r.b = Lerp_1E6C20::Of(a.b, b.b, t);
-        r.a = Lerp_1E6C20::Of(a.a, b.a, t);
+        r.r = ColorLerp::Of(a.r, b.r, t);
+        r.g = ColorLerp::Of(a.g, b.g, t);
+        r.b = ColorLerp::Of(a.b, b.b, t);
+        r.a = ColorLerp::Of(a.a, b.a, t);
         c = r;
     }
     AddGifRgbaEntry(buf, *(u32*)&c);

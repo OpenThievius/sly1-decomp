@@ -675,10 +675,12 @@ struct WalkerCollider : SwitchedCollider {
     u8 pad68C[0x690 - 0x68C];
 };
 
+struct ObjectPool;      // object_pool.h
+
 struct PlayerLinkedCollider : SwitchedCollider {
     void* f610;             // 0x610
-    void* f614;             // 0x614
-    void* f618;             // 0x618
+    StateWalker* f614;      // 0x614: the walker on f610 (func_001E5428)
+    ObjectPool* f618;       // 0x618: the pool it chooses from (func_001E5888, func_001E5C78)
     s32 f61C;               // 0x61C
     void* f620;             // 0x620
     void* f624;             // 0x624
