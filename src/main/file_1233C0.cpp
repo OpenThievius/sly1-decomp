@@ -1627,7 +1627,7 @@ void func_00123448(StateTrigger* self)
     }
     if (self->found558 != 0) {
         self->f55C = (StateWalker*)CreateStateWalker(self->found558, self, -1, 1);
-        func_00182ED8(self->found558);
+        ResolveAndStartObject(self->found558);
     }
     g_activeListFrames = (ListFrame*)fr.f0C;
 }
@@ -2173,7 +2173,7 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
                 *(void**)((u8*)self + it->offset) = node;
             }
             if (!(it->flags & 4)) {
-                func_00182ED8(node);
+                ResolveAndStartObject(node);
             }
             if (it->flags & 0x10) {
                 AddObjectListener(node, self);

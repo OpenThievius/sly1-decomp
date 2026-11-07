@@ -3535,7 +3535,7 @@ void func_001F0758(C67* self)
     ResolveObjectLinks(self, 0x34, D_00275FE0);
     Begin_1F0758::Of(&it, &self->children);
     while ((node = Next_1F0758::Of(&it)) != 0) {
-        func_00182ED8(node);
+        ResolveAndStartObject(node);
     }
     el = self->elems;
     for (i = 0; i < 11; i++) {

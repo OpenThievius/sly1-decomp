@@ -2269,7 +2269,7 @@ void func_0015AC08(ObjectCycler* self, void* arg)
         s32 p = FindFirstObjectByIdMode1((u8*)self->world, kind, self);
         if (!p)
             continue;
-        func_00182ED8(p);
+        ResolveAndStartObject(p);
         if (self->mode == 1) {
             if (self->swapKind == kind)
                 self->swapIndex = self->count;
@@ -2280,7 +2280,7 @@ void func_0015AC08(ObjectCycler* self, void* arg)
         for (i = 0; i < 8; i++) {
             s32 p = FindFirstObjectByIdMode1((u8*)self->world, i + 0x24D, self);
             if (p) {
-                func_00182ED8(p);
+                ResolveAndStartObject(p);
                 self->altObjects[self->altCount++] = (PlacedObject*)p;
             }
         }

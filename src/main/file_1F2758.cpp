@@ -665,7 +665,7 @@ void func_001F3F80(Obj_1F3F80* self)
     for (s32 i = 0; i < self->count; i++) {
         Item_1F3F80* item = (Item_1F3F80*)self->arr[i];
         item->vtbl[25](item, self->f18);
-        func_00182ED8(item);
+        ResolveAndStartObject(item);
     }
 }
 

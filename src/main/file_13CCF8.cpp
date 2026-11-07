@@ -58,7 +58,7 @@ void func_0013CD80(MaskedCollider* self)
     s32 v = FindFirstObjectById(self->world, 0x101, self->f614, self);
     self->f618 = v;
     if (v != 0) {
-        func_00182ED8(v);
+        ResolveAndStartObject(v);
     }
 }
 
@@ -499,7 +499,7 @@ void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
         void* object = FindFirstObjectById(self, 0x104, items[i], context);
         if (object) {
             AppendToQueuedObjects(list, object);
-            func_00182ED8(object);
+            ResolveAndStartObject(object);
         }
     }
 }

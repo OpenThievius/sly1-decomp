@@ -1223,7 +1223,7 @@ void* func_001CA758(Agent* self, void* arg)
     if (item != 0) {
         item->state = 0;
         func_0012D398(item, self);
-        func_00182ED8(item);
+        ResolveAndStartObject(item);
     }
     return item;
 }
@@ -1287,7 +1287,7 @@ void func_001CA8E8(Agent* self)
         if (e->id != -1) {
             void* r = FindFirstObjectById(self->world, 0x101, e->id, self);
             e->obj = r;
-            if (r != 0) func_00182ED8(r);
+            if (r != 0) ResolveAndStartObject(r);
         }
     }
 }

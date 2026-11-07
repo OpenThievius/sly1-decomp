@@ -2700,3 +2700,12 @@ func_00181B20	LaunchPlayerFromModeWalker	the callback AcceptModeWalkerRequest gi
 func_00181BC8	AcceptModeWalkerRequest	slot 0x140 of class 0x1A: unless its slot 79 refuses, sets +0xBF0 when HasSpareCount holds; without one and with a player, takes the player over (state 2/2, mode 3, LaunchPlayerFromModeWalker as its callback), else mode 2; then sends itself message 0x17
 func_00182470	InitC24Object	slot 0x10 of class 0x24: runs func_0013DDB8 and sets its numbers (10, 1, 3000, 1000, 0, 0.5)
 func_001824D8	StartC24Object	slot 0x50 of class 0x24: runs func_0013CE40, resolves its links (D_00264230), creates its state walker (0x36E) and a weight curve with a 0xC00-byte buffer
+func_00182E40	AddObjectKeyIfLevelInRange	runs AddObjectKeyToOwner when the target's range holds g_currentEntry's level (IsInsideRange); a script built-in of func_00109488
+func_00182ED8	ResolveAndStartObject	when the object is attached (IsObjectAttached), calls its resolve slot (15) if any, its start slot (16) and its slot 3 (a dozen loaders call it)
+func_00183028	GetObjectAttached	writes IsObjectAttached through its out pointer (a script built-in of func_00109488)
+func_00183478	GetObjectAliasId	writes GetAliasId through its out pointer (a script built-in of func_00109488)
+func_00183990	SetExtraObjectPropertyInt	wraps an integer in a script value and passes it to SetExtraObjectProperty (func_00100720 calls it)
+func_00183A90	SetExtraObjectPropertyVectorB	copies a vector into a payload of the second vector kind (AcquireVectorBPayload), wraps it and passes it to SetExtraObjectProperty
+func_00183BB8	SetExtraObjectPropertyWord	the same body as SetExtraObjectPropertyInt: wraps an integer in a script value for SetExtraObjectProperty (func_00100A78 calls it)
+func_00183C38	SetExtraObjectPropertyVectorA	copies a vector into a payload of the first vector kind (AcquireVectorAPayload), wraps it and passes it to SetExtraObjectProperty
+func_001841D0	RefreshConeVolumeShape	original assembly: recomputes a cone volume after any of its settings changes (SetConeVolumeMode, SetConeVolumeRange and every setter after them call it)

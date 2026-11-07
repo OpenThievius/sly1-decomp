@@ -339,7 +339,7 @@ void func_001989B0(ObjectSet* self)
             s32 i = self->count570;
             self->found574[i] = p;
             self->count570 = i + 1;
-            func_00182ED8(p);
+            ResolveAndStartObject(p);
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
@@ -371,7 +371,7 @@ void func_00198B28(ObjectSet* self)
         if (func_0012C9A8(node)) {
             self->f558 = 1;
         }
-        func_00182ED8(node);
+        ResolveAndStartObject(node);
     }
     if (((VFn_198B28*)self->desc)[76](self) == 0) {
         ((VFn_198B28*)self->desc)[7](self);
@@ -570,7 +570,7 @@ void func_00199428(C2E* self)
         i++;
         ((s32*)self->f5B0)[count] = r;
         self->n5AC = count + 1;
-        func_00182ED8(r);
+        ResolveAndStartObject(r);
     }
 }
 
@@ -820,7 +820,7 @@ void func_0019A148(C17* self)
 void func_0019A178(Obj_19A178* self, s32 x)
 {
     self->f4 = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->f0);
-    func_00182ED8(self->f4);
+    ResolveAndStartObject(self->f4);
     self->f8 = CreateStateWalker(self->f4, self->f0, x, 0);
 }
 
@@ -1126,7 +1126,7 @@ void func_0019B0A0(ObjectGatherer* self)
     for (; k < 0x288; k++) {
         void* node = FindFirstObjectByIdMode1(self->world, k, self);
         if (node != 0) {
-            func_00182ED8(node);
+            ResolveAndStartObject(node);
             if (k < 0x279) {
                 self->lowObjects[self->lowCount++] = node;
             } else {

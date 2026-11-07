@@ -660,7 +660,7 @@ ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_00183990(obj, o1, o2);
+    (void)SetExtraObjectPropertyInt(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -698,7 +698,7 @@ ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00183A90(obj, out, &vec);
+    SetExtraObjectPropertyVectorB(obj, out, &vec);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -736,7 +736,7 @@ ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_00183BB8(obj, o1, o2);
+    (void)SetExtraObjectPropertyWord(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -755,7 +755,7 @@ ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00183C38(obj, out, &vec);
+    SetExtraObjectPropertyVectorA(obj, out, &vec);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

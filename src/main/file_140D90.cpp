@@ -223,7 +223,7 @@ void func_00141210(FlaggedObject* self)
                 self->objsA[n] = node;
                 self->countA = n + 1;
             }
-            func_00182ED8(node);
+            ResolveAndStartObject(node);
 skip:
             void* next = *(void**)frame.cursor;
             frame.cursor = (void*)((s32)next + frame.next_off);
@@ -290,9 +290,9 @@ void func_00141438(FlaggedObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->countA; i++)
-        func_00182ED8(self->objsA[i]);
+        ResolveAndStartObject(self->objsA[i]);
     for (s32 i = 0; i < self->countB; i++)
-        func_00182ED8(self->objsB[i]);
+        ResolveAndStartObject(self->objsB[i]);
     if (self->childId == -1) {
         Iter_141438 it;
         u8* obj;

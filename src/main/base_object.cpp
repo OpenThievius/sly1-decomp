@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x182C18 to 0x184D78: the methods of class 0x01, the root of every object class
+// (include/base_object.h), with its callbacks, properties and script events, then the cone
+// volume and its fitting helpers. Its name is ours, after the class.
 #include "common.h"
 #include "screen_element.h"
 #include "switched_collider.h"
@@ -691,7 +694,7 @@ void func_00183CC8(ConeVolume* self)
 void func_00183D88(ConeVolume* self)
 {
     ComputePlacedObjectWorldFrame(self);
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
     func_00184B58(self);
 }
 
@@ -795,44 +798,44 @@ void func_00184768(ConeVolume* self, s32 flag)
     } else {
         self->flags = self->flags & ~(u64)0x30000000000;
     }
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
     func_00184B58(self);
 }
 
 void func_001847F0(ConeVolume* self, Quad_001847F0* src)
 {
     *(Quad_001847F0*)self->f2E0 = *src;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184818(ConeVolume* self, f32 v)
 {
     self->f2F0 = v;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184838(ConeVolume* self, f32 v)
 {
     self->f2F4 = v;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184858(ConeVolume* self, f32 v)
 {
     self->f2f8 = v;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184878(ConeVolume* self, f32 v)
 {
     self->f2fc = v;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184898(ConeVolume* self, f32 v)
 {
     self->f300 = v;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 ASM_FUNC(func_001848B8);
@@ -841,14 +844,14 @@ void func_00184968(ConeVolume* self, s32 v)
 {
     if (v != self->value) {
         self->value = v;
-        func_001841D0(self);
+        RefreshConeVolumeShape(self);
     }
 }
 
 void func_00184990(ConeVolume* self, Packed8_184990* src)
 {
     *(Packed8_184990*)&self->rangeMin = *src;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
     func_00184B58(self);
 }
 
@@ -856,7 +859,7 @@ void func_001849D0(ConeVolume* self, f32 v)
 {
     self->outerAngle = v;
     UpdateConeVolumeTangents(self);
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
     func_00184B58(self);
 }
 
@@ -864,14 +867,14 @@ void func_00184A08(ConeVolume* self, f32 v)
 {
     self->innerAngle = v;
     UpdateConeVolumeTangents(self);
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
 }
 
 void func_00184A38(ConeVolume* self, Quad16* src)
 
 {
     self->q340 = *src;
-    func_001841D0(self);
+    RefreshConeVolumeShape(self);
     func_00184B58(self);
 }
 

@@ -499,7 +499,7 @@ D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
 D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	0	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	8	.rodata	src/main/file_180EB0.cpp
-D_0024B170	0024B170	0	.rodata	src/main/file_182C18.cpp
+D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
 D_0024B1E8	0024B1E8	109	.rodata	src/main/file_184D78.cpp
 D_0024B258	0024B258	4	.rodata	src/main/file_185C18.cpp
 D_0024B260	0024B260	16	.rodata	src/main/file_1884C0.cpp
