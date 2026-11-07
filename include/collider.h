@@ -57,7 +57,8 @@ struct ContactEnd03 {
     Collider* part;              // 0x04
     u8 pad08[0x10 - 0x08];
     Vec02 v10;              // 0x10: handed on with v80 by func_001F5008
-    u8 pad20[0x40 - 0x20];
+    u8 pad20[0x30 - 0x20];
+    Vec02 v30;              // 0x30: the player adds to it (func_00170820)
 };
 
 // A span a collider query writes (func_0013DFD8 collects them from a tree, func_001429F8 merges
@@ -68,7 +69,8 @@ struct ColliderSpan {
     Quad16 q[4];            // 0x00
     f32 time[2];            // 0x40: entry, exit
     s32 f48;                // 0x48
-    u8 pad4C[0x70 - 0x4C];
+    s32 group;              // 0x4C: the collider's group the span is in, negative for none (func_00143BE0)
+    u8 pad50[0x70 - 0x50];
 };
 
 // A contact between two bodies (0xE0 bytes, the world's pool at +0x1AFC: func_001DB4C8 sets it
@@ -201,7 +203,9 @@ struct Collider : PlacedObject {
     Pair03* refs;           // 0x40C: the face references
     s32* faceStarts;        // 0x410: meshCopy.faceCount + 1 of them, with refs
     Link02 link414;         // 0x414: kept by slot 9
-    u8 pad41C[0x440 - 0x41C];
+    u8 pad41C[0x420 - 0x41C];
+    Vec02 boundsMin;        // 0x420: the corners of its box, tested against a query's (func_001DC238)
+    Vec02 boundsMax;        // 0x430
     Vec02 v440;             // 0x440: in the parent's frame (slot 21 carries it over)
     union {
         s32 mode450;        // 0x450: a body sums up 3 and 3 in flag bit 54 (func_001B9AE0)
