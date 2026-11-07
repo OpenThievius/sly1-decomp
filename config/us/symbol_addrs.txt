@@ -117,3 +117,10 @@ D_0027AEB8 = 0x0027AEB8;
 // The graphics library's identification string (src/lib/graph.c's .data), inside the label of
 // the VIF1 words before it, which no code reads.
 D_00279320 = 0x00279320;
+// The end of the DMA library's .data (src/lib/dma.c): its last settings (D_002793D8, 0x14
+// bytes) end at 0x2793EC; after the padding to 16, 16 zero bytes no code reads, then the CD
+// library's identification string; its .rodata (one message) is followed by the CD library's
+// messages, which no code reads.
+D_002793F0 = 0x002793F0;
+D_00279400 = 0x00279400;
+D_0024F560 = 0x0024F560;

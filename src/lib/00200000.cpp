@@ -459,17 +459,6 @@ struct Cfg_00202120;
 s32 func_001F6C60(Cfg_00202120* c);
 
 
-void func_00202768(u8* p, s32 n)
-{
-    s32 i = n - 1;
-    if (n != 0) {
-        do {
-            *p = 0;
-            i--;
-            p++;
-        } while (i != -1);
-    }
-}
 
 // BYTES 183/188 (97.3%), checked 2026-11-01
 // NEAR: the function body matches in behavior, but the candidate is 192 bytes versus retail 188 and uses sq/lq instead of sd/ld.
@@ -652,44 +641,7 @@ void func_001F6960(s32 n, s32 ptr);
 void func_001F6910(s32 a, s32 b, s32 c);
 
 
-struct Buf_2027C8 { u8 bytes[0x14]; };
-struct Slot_2027C8 { s32 w00; u8 pad04[0x0C]; s32 w10; u8 pad14[0x1C]; s32 w30; u8 pad34[0x0C]; s32 w40; u8 pad44[0x0C]; s32 w50; u8 pad54[0x2C]; s32 w80; };
 
-s32 D_00279380[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
-struct Tbl_279340 { Slot_2027C8* slots[10]; u8 pad28[8]; char tag[16]; };
-extern Tbl_279340 D_00279340;
-
-void func_00202768(Buf_2027C8* b, s32 n);
-s32 func_002028A8(Buf_2027C8* b);
-
-s32 func_002027C8(s32 mode)
-{
-    Buf_2027C8 buf;
-    s32 flag = *(volatile u32*)0x1000E000 & 1;
-    s32 i;
-
-    for (i = 0; i < 10; i++) {
-        if (D_00279380[i] != 0) {
-            Slot_2027C8* p = D_00279340.slots[i];
-            p->w00 = 0;
-            p->w30 = 0;
-            p->w10 = 0;
-            p->w50 = 0;
-            p->w40 = 0;
-            p->w80 = 0;
-        }
-    }
-    *(volatile u32*)0x1000E010 = 0xFF1F;
-    u32 m = *(volatile u32*)0x1000E010 & 0xFF1F0000;
-    *(u32*)0x1000E010 = m;
-    func_00202768(&buf, 0x14);
-    func_002028A8(&buf);
-    if (mode == 1) {
-        volatile u32* p = (volatile u32*)0x1000E000;
-        *p |= 1;
-    }
-    return flag;
-}
 
 // The runtime's type names of the built-in types: each function builds its object in place
 // the first time it is asked for, and returns it.
@@ -772,29 +724,6 @@ struct DmaChan_202A80 {
 
 extern "C" int func_001E1F10(const char* fmt, ...);
 
-void func_00202A80(DmaChan_202A80* ch, u32 tadr)
-{
-    s32 timeout = 0x1000000;
-    while (ch->chcr & 0x100) {
-        if (--timeout < 0) {
-            PrintFormatted("libdma: sync timeout\n");
-            s32 cur = ch->chcr;
-            s32 next;
-            if (((u32)cur >> 8) & 1) {
-                while (((u32)cur >> 8) & 1) {
-                    next = cur & ~0x100;
-                    cur = next;
-                }
-                ch->chcr = next;
-            }
-        }
-    }
-    if (ch->tadr != 0xFFFFFFFF) {
-        ch->tadr = tadr;
-    }
-    ch->qwc = 0;
-    ch->chcr = (ch->chcr & ~0xC) | 0x105;
-}
 
 // The EE DMA channel's register block (CHCR at 0x00, QWC at 0x20; bit 8 of CHCR is STR),
 // passed in by pointer: volatile as a hardware register, which retail re-reads at every use.
@@ -806,26 +735,6 @@ struct DmaChan_202B68 {
 
 extern "C" int func_001E1F10(const char* fmt, ...);
 
-void func_00202B68(DmaChan_202B68* ch)
-{
-    s32 timeout = 0x1000000;
-    while (ch->chcr & 0x100) {
-        if (--timeout < 0) {
-            PrintFormatted("libdma: sync timeout\n");
-            s32 cur = ch->chcr;
-            s32 next;
-            if (((u32)cur >> 8) & 1) {
-                while (((u32)cur >> 8) & 1) {
-                    next = cur & ~0x100;
-                    cur = next;
-                }
-                ch->chcr = next;
-            }
-        }
-    }
-    ch->qwc = 0;
-    ch->chcr = ((((ch->chcr & ~0xC) | 0x4) & ~0x1) | 0x100);
-}
 
 // The EE DMA channel's register block (CHCR at 0x00; bit 8 of CHCR is STR), passed in by
 // pointer: volatile as a hardware register, which retail re-reads at every use.
@@ -835,30 +744,6 @@ struct DmaChan_202C38 {
 
 extern "C" int func_001E1F10(const char* fmt, ...);
 
-s32 func_00202C38(DmaChan_202C38* ch, s32 mode, s32 timeout)
-{
-    if (mode == 1) {
-        return ((u32)ch->chcr >> 8) & 1;
-    }
-    if (timeout == 0) {
-        timeout = 0x1000000;
-    }
-    while (ch->chcr & 0x100) {
-        if (--timeout < 0) {
-            PrintFormatted("libdma: sync timeout\n");
-            s32 cur = ch->chcr;
-            s32 next;
-            if (((u32)cur >> 8) & 1) {
-                while (((u32)cur >> 8) & 1) {
-                    next = cur & ~0x100;
-                    cur = next;
-                }
-                ch->chcr = next;
-            }
-        }
-    }
-    return 0;
-}
 
 struct Pkt_202E50 {
     s32 n0;
@@ -998,52 +883,7 @@ struct Tab_200220 { s32 p0; s32 p4; Ent_200220* ents; u32 count; };
 
 s32 func_002000B0(Tab_200220* a, Obj_200220* b);
 
-struct Cfg_2028A8 {
-    u8 a, b, c, d;
-    u16 e, f;
-    u16 g, h;
-    void* i;
-    u32 j;
-};
 
-extern u8 D_002793A8[16];
-extern u8 D_002793B8[16];
-extern u8 D_002793C8[16];
-struct Data_2793D8 { Cfg_2028A8 cfg; u8 pad14[20]; char tag[16]; };
-extern Data_2793D8 D_002793D8;
-
-s32 func_002028A8(Cfg_2028A8* c)
-{
-    u32 r = *(volatile u32*)0x1000E000;
-    u32 w20 = *(volatile u32*)0x1000E020;
-    u32 w30 = *(volatile u32*)0x1000E030;
-    u32 w50 = *(volatile u32*)0x1000E050;
-    u32 w40 = *(volatile u32*)0x1000E040;
-    if (c->a >= 10) return -1;
-    if (c->b >= 10) return -2;
-    if (c->c >= 10) return -3;
-    if (c->d >= 7) return -4;
-    r = (r & ~0x30u) | (D_002793A8[c->a] << 4);
-    r = (r & ~0xC0u) | (D_002793B8[c->b] << 6);
-    r = (r & ~0xCu) | (D_002793C8[c->c] << 2);
-    if (c->d) {
-        r |= 2;
-        r = (r & ~0x300u) | ((c->d - 1) << 8);
-    } else {
-        r &= ~2u;
-    }
-    w20 = (c->e << 16) | c->f;
-    w30 = (c->h << 16) | c->g;
-    w40 = c->j;
-    *(volatile u32*)0x1000E000 = r;
-    *(volatile u32*)0x1000E020 = w20;
-    w50 = (u32)c->i;
-    *(volatile u32*)0x1000E030 = w30;
-    *(volatile u32*)0x1000E050 = w50;
-    *(volatile u32*)0x1000E040 = w40;
-    D_002793D8.cfg = *c;
-    return 0;
-}
 
 struct Obj_200778;
 typedef void* (*Fn_200778)(Obj_200778* self, Obj_200778* want, s32 boff, void* obj, void* sub, void* subobj);
@@ -1082,12 +922,11 @@ template <void* (*TF)(void)> struct Cast_200778
 // Data of this file: type-name strings, class tables and the runtime's zero-initialised objects.
 extern const char D_0024F638[16] = "N cmd wait\n";
 extern const char D_0024F648[16] = "S cmd wait\n";
-struct Strs_24F548 { char s0[24]; char s1[40]; char s2[32]; char s3[24]; char s4[16]; char s5[16]; char s6[24]; };
-extern const Strs_24F548 D_0024F548 = { "libdma: sync timeout\n", "sceCdCbfunc= %d sceCdCbfunc_num= %d\n", "Libcdvd bind err CdSearchFile\n", "ee call cmd search %s\n", "search name %s\n", "search size %d\n", "search loc lbn %d\n" };
-Tbl_279340 D_00279340 = { { (Slot_2027C8*)0x10008000, (Slot_2027C8*)0x10009000, (Slot_2027C8*)0x1000A000, (Slot_2027C8*)0x1000B000, (Slot_2027C8*)0x1000B400, (Slot_2027C8*)0x1000C000, (Slot_2027C8*)0x1000C400, (Slot_2027C8*)0x1000C800, (Slot_2027C8*)0x1000D000, (Slot_2027C8*)0x1000D400 }, { 0 }, { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'd', 'm', 'a', ' ', ' ', '2', '4', '0', '0' } };
-u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
-u8 D_002793B8[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-u8 D_002793C8[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-Data_2793D8 D_002793D8 = { { 0 }, { 0 }, { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'c', 'd', 'v', 'd', ' ', '2', '4', '2', '0' } };
+// The CD library's first messages, which no function left in retail reads.
+struct Strs_24F560 { char s1[40]; char s2[32]; char s3[24]; char s4[16]; char s5[16]; char s6[24]; };
+extern const Strs_24F560 D_0024F560 = { "sceCdCbfunc= %d sceCdCbfunc_num= %d\n", "Libcdvd bind err CdSearchFile\n", "ee call cmd search %s\n", "search name %s\n", "search size %d\n", "search loc lbn %d\n" };
+// 16 zero bytes no code reads before the CD library's identification string, and the string.
+s32 D_002793F0[4] = { 0 };
+char D_00279400[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'c', 'd', 'v', 'd', ' ', '2', '4', '2', '0' };
 u8 D_00279480[128];
 Buf_27AA40 D_0027AA40;
