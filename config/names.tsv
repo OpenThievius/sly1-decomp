@@ -2643,3 +2643,9 @@ func_0016C470	InitC76Object	slot 0x10 of class 0x76: runs its parent's set-up (f
 func_0016C4B8	LoadC76Object	slot 0x38 of class 0x76: a tail call to ReadTransformObject
 func_0016C4E8	DrawC35Collider	slot 0xA4 of class 0x35: a tail call to func_001B93D8
 func_0016C508	DrawC52Object	slot 0xA4 of class 0x52: a tail call to func_001261C0, the transform draw DrawC60Object ends with
+func_0016D0C0	StepTargetFollower	slot 0x80 of class 0x47: runs StepCollider and, unless +0x5D8 is set, turns about the z axis by the angle at +0x5A0 (BuildAxisAngleMatrix) and steps its sub-object at +0x5B0 (func_001B9D10)
+func_0016D128	UpdateTargetFollower	original assembly: slot 0x54 of class 0x47
+func_0016D788	PlaceTargetFollowerOnFollowed	anchors the follower (SetColliderAnchors), clears its two motion vectors and places it at the followed object's point (func_001920B0) raised by +0x56C (FollowObjectById and func_0016DAC0 call it)
+func_0016D9A8	PlayPendingFollowerSound	when a sound is pending (+0x5CC) and func_001BE810 no longer holds, clears it and plays it with the volume and pan at +0x5C4 and +0x5C8 (PlaySoundAndApplyVolumePan)
+func_0016DD00	ClearCurrentTargetFollower	sets g_currentTargetFollower to 0 (the script built-in func_00106560 calls it)
+func_0016DDE8	StartEntryTableObject	slot 0x50 of class 0x64: runs StartPlacedObject, then its slot 3

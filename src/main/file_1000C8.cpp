@@ -2942,7 +2942,7 @@ ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, Sc
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0016DD00(obj);
+    ClearCurrentTargetFollower(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

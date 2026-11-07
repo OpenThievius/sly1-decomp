@@ -31,7 +31,7 @@ void func_0016C470(void* a0)
 
 // Two words no code reads, after func_0016C470's literal: those of functions the linker stripped
 // (func_0016C4D8 is what it left of one). The zeros after them are the linker's padding before
-// file_16CE00's 16-aligned .rodata.
+// target_follower's 16-aligned .rodata.
 extern const f32 D_0024A7E0 = -3.40282347e+38f;
 extern const f32 D_0024A7E4 = -3.40282347e+38f;
 

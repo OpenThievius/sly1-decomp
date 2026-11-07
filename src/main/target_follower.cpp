@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x16CE00 to 0x16E0B8: the target follower (class 0x47, include/target_follower.h),
+// the entry-table object (0x64) and the followable object (0x2A) that tells it what to follow.
+// Its name is ours, after the follower that most of its code serves.
 #include "common.h"
 #include "switched_collider.h"
 #include "c52.h"
@@ -114,7 +117,7 @@ void func_0016D040(TargetFollower* self, void* x)
     C2A* p = (C2A*)FindFirstObjectByIdMode4(self->world, x, self);
     if (p != 0) {
         SetFollowedObject(self, p);
-        func_0016D788(self);
+        PlaceTargetFollowerOnFollowed(self);
         if (p->f7AC != 0) {
             func_0016DAC0(self, 2);
         } else {
