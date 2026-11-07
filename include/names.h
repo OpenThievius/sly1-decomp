@@ -1400,9 +1400,13 @@
 #define ClearRootObjectStateBits                   func_00138BE0
 #define UpdateWorldContacts                        func_00138C00
 #define InitContactPairFlags                       func_00138F28
+#define LoopOverMinCountNoOp                       func_00138FF0
 #define BuildCombinedBlendAnimation                func_00139038
 #define ComputeWrappedDeltas                       func_00139600
+#define ComputeBlendedDuration                     func_00139740
 #define FindCyclicRangeIndex                       func_00139970
+#define SetBlendItemWeights                        func_001399F8
+#define SetBlendEntryRecordFlag                    func_00139B38
 #define BuildAlphaStatePacket                      func_00139B70
 #define InitAlphaStatePackets                      func_00139C38
 #define AcquireOwnedRecord                         func_00139C70
@@ -1625,8 +1629,11 @@
 #define PushCameraStackValue                       func_00145FB8
 #define PopCameraStackValue                        func_00145FD8
 #define PeekCameraStackValue                       func_00145FF8
+#define SetCameraControllerSettings                func_00146018
 #define RecordCameraTimestamp                      func_00146028
 #define IsSphereInCameraView                       func_00146038
+#define ConstructCameraStaticColor                 func_001460B8
+#define RunCameraStaticInitializer                 func_001460E0
 #define InitScaledOffsetObject                     func_00146100
 #define LoadScaledOffsetObject                     func_00146130
 #define StartScaledOffsetObject                    func_00146178
@@ -2661,8 +2668,12 @@
 #define CreateMovieDecodeThread                    func_0018E5E8
 #define InitIopRingSink                            func_0018E678
 #define ResetIopRingSink                           func_0018E6A0
+#define PutIopRingSink                             func_0018E6C0
 #define WriteIopRingBlock                          func_0018E7C0
 #define UpdateIopRingSink                          func_0018E838
+#define GetIopRingSinkHeldFlag                     func_0018E8C0
+#define PutIpuDmaSink                              func_0018E8C8
+#define GetIpuDmaSinkHeldFlag                      func_0018E938
 #define StartMovieStream                           func_0018E940
 #define ResetMovieStream                           func_0018EA48
 #define StopMovieStream                            func_0018EAA0
@@ -2683,6 +2694,8 @@
 #define StepMovieFrame                             func_0018F6E8
 #define FinishMovie                                func_0018F7D0
 #define FeedMovieDecoder                           func_0018F890
+#define ConstructMovieRingSink                     func_0018F940
+#define RunMovieRingSinkInitializer                func_0018F968
 #define InitBoxCollider                            func_0018F988
 #define InitSeekingAgent                           func_0018FEF8
 #define StartSeekingAgent                          func_0018FF28
@@ -2716,6 +2729,7 @@
 #define MeasurePointGraphEdges                     func_001919F8
 #define FindOwnerGraphPath                         func_00191A68
 #define SnapPointToOwnerGraph                      func_00191A88
+#define TestOwnerGraphSpan                         func_00191AA8
 #define SetScreenOwner                             func_00191E70
 #define ClearScreenOwner                           func_00191EB0
 #define SetTargetVectorListLinkOffset              func_00191EC0
@@ -2761,6 +2775,8 @@
 #define UpdateSwitchedCollider                     func_00192B58
 #define FinishSwitchedCollider                     func_00192C58
 #define GetSwitchedColliderTarget                  func_001930B0
+#define ConstructSwitchedColliderDefaults          func_001930B8
+#define RunSwitchedColliderDefaultsInitializer     func_001931F0
 #define InitLoadProgress                           func_00193210
 #define BeginLoadProgress                          func_00193270
 #define UpdateLoadProgress                         func_00193288
@@ -2861,6 +2877,7 @@
 #define StartC17Marker                             func_0019A178
 #define StartC17Collider                           func_0019A1E0
 #define HandleC17ColliderActivation                func_0019A520
+#define ControlC17Collider                         func_0019A6A8
 #define HandleC17ColliderNotification              func_0019AB78
 #define AddEntryRecordKey                          func_0019AD30
 #define RecordC17ColliderCompletion                func_0019AD68
@@ -2886,6 +2903,7 @@
 #define InitC8BObject                              func_0019C440
 #define LoadC8BObject                              func_0019C470
 #define StartC8BObject                             func_0019C728
+#define ComputeGridBlendWeights                    func_0019CC10
 #define DecodeC8BGridIndex                         func_0019CD90
 #define SetC8BObjectVector                         func_0019CE28
 #define SetC8BObjectVectorFlagged                  func_0019CE38
@@ -3996,6 +4014,7 @@
 #define UpdateOnOffObject                          func_001E2940
 #define DrawOnOffObject                            func_001E2988
 #define SetOnOffObjectFrozen                       func_001E29A8
+#define SetOnOffObjectBlockValue                   func_001E29E8
 #define PlaceOnOffCameraFrame                      func_001E2A00
 #define PlaceOnOffCameraOrbit                      func_001E2BF0
 #define ActivateOnOffCameraController              func_001E2E68
@@ -4009,9 +4028,12 @@
 #define FindFreeOnOffCameraAngle                   func_001E4888
 #define ReadMeshTables                             func_001E4C48
 #define IsPointInsideFaceTree                      func_001E4DC0
+#define ConstructWorldLoadRequest                  func_001E4E38
 #define QueueWorldLoad                             func_001E4E80
 #define RunPendingWorldLoad                        func_001E4EA8
 #define RequestWorldLoadByMode                     func_001E5278
+#define ConstructWorldLoadRequestGlobal            func_001E5328
+#define RunWorldLoadRequestInitializer             func_001E5358
 #define InitPlayerLinkedCollider                   func_001E5378
 #define AddPlayerLinkedColliderId                  func_001E53F8
 #define StartPlayerLinkedCollider                  func_001E5428
@@ -4103,6 +4125,7 @@
 #define IsInsideAnyRange                           func_001EB080
 #define ClampToRange                               func_001EB0F8
 #define CompareFloats                              func_001EB128
+#define IgnoreStackLocal                           func_001EB160
 #define FindLocalMinimum                           func_001EB168
 #define InitBeatPressCollider                      func_001EB460
 #define LoadBeatPressCollider                      func_001EB518
@@ -4166,6 +4189,7 @@
 #define GetVectorAngles                            func_001EDDB0
 #define RotateVectorByTwoAngles                    func_001EDE38
 #define ComputeBallisticLaunchVelocity             func_001EDEF0
+#define ForwardBallisticLaunchVelocity             func_001EE290
 #define ClampVectorLength                          func_001EE2B0
 #define InitPacketWriter                           func_001EE318
 #define PadPacketToQuadSlot                        func_001EE368
@@ -4243,6 +4267,8 @@
 #define SetWarpMenuOpen                            func_001F1C90
 #define DrawColoredCircle                          func_001F1E38
 #define DrawWarpMenu                               func_001F20A8
+#define ConstructWarpTextStyleGlobals              func_001F2688
+#define RunWarpTextStyleInitializer                func_001F2738
 #define InitOscillator                             func_001F2758
 #define AttachNodeToOwner                          func_001F2798
 #define RefreshOscillatorFrames                    func_001F2840
