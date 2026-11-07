@@ -3248,6 +3248,7 @@
 #define CreateSixEntryBlend                        func_001D36F0
 #define SumBlendEntryVectors                       func_001D39E0
 #define InterpolateBlendEntryPosition              func_001D3A38
+#define FindObjectAlongSegment                     func_001D3B58
 #define FillOuterProductTable                      func_001D3C68
 #define UpdateSixEntryBlendWeights                 func_001D3E00
 #define SetPlayerBlendWeights                      func_001D40A0

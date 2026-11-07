@@ -12,6 +12,7 @@
 struct SwitchedCollider;
 struct TurningCollider;
 struct Player;
+struct BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
@@ -593,7 +594,8 @@ struct TempoAgent : Agent {
     u8 padC24[0xC34 - 0xC24];
     void* fC34;             // 0xC34: the timeline to start when the beat clock restarts
     void* fC38;             // 0xC38: the timeline it runs (EndHeldTimeline)
-    u8 padC3C[0xC48 - 0xC3C];
+    BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
+    u8 padC40[0xC48 - 0xC40];
     void* fC48;             // 0xC48
     u8 padC4C[0xC50 - 0xC4C];
     void* fC50;             // 0xC50

@@ -39,7 +39,6 @@ void func_00124DF8(void* self, s32 a, void* p);
 void* func_001B6290(void* a, void* self, s32 b, s32 c);
 void func_001DBCC8(void* a, void* cb, void* ctx, s32 b, s32 c);
 void func_001EB550(BeatPressCollider* self);
-struct Inner_1EB608 { u8 pad[0xC3C]; void* c3C; };
 void func_001922E8(void* self);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
 void func_001B64D8(void* a, s32 b);
@@ -184,7 +183,6 @@ struct Item_1EB748 { s32 type; s32 a; f32 b; s32 c; };
 struct List_1EB748 { u8 pad[0x34]; s32 n; Item_1EB748* items; s32 cur; };
 typedef s32 (*Fn_1EB748)(BeatPressCollider* self, void* arg);
 typedef void (*GFn_1EB748)(Player* g, void* arg);
-struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 s32 func_001F3BD8(void* a, Vec4U* out);
 s32 func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -329,7 +327,6 @@ void func_00182C58(void);
 struct Inner_1ED1D8 { u8 pad[0xC70]; s32 c70; };
 struct Obj_1ED1D8 { u8 pad0[0x3C]; s32 f3C; Inner_1ED1D8* f40; s32 f44; };
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-struct Inner_1ED210 { u8 pad[0xC3C]; s32 c3C; };
 void func_001ED318(Timeline* self, s32* p);
 struct Item_1ED558 { s32 kind; s32 p; f32 f8; s32 fC; };
 Item_1ED558* func_001ED4C8(void* self, s32 kind, s32 p);
@@ -478,7 +475,6 @@ struct Vec3_1EDDB0 { f32 x; f32 y; f32 z; };
 f32 func_00205778(f32 a, f32 b);
 struct Entry_1ED0D8 { s32 key; s32 val; };
 void func_0018D800(Entry_1ED0D8* dst, Entry_1ED0D8* src, s32 bytes);
-struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
 void func_001ED318(Timeline* self, Entry90* e);
 struct List_1EFA88 { s32 pad0; s32 count; s32 items[1]; };
 void* func_001F5B08(void* dst, void* src, s32 size);
@@ -1913,10 +1909,10 @@ void func_001EB598(BeatPressCollider* self)
 void func_001EB608(BeatPressCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self);
-    Inner_1EB608* r = (Inner_1EB608*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+    TempoAgent* r = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
     if (p != 0) {
         SetStateWalkerTarget(self->f614, 0x4CB);
-        r->c3C = self;
+        r->fC3C = self;
         self->f68C = r;
     } else {
         SetStateWalkerTarget(self->f614, 0x4CA);
@@ -1926,7 +1922,7 @@ void func_001EB608(BeatPressCollider* self, void* p)
 
 ASM_FUNC(func_001EB698);
 
-void func_001EB748(BeatPressCollider* self, In_1EB748* in)
+void func_001EB748(BeatPressCollider* self, PadRecord* in)
 {
     if (self->f67C != 0 && g_player != 0) {
         Vec4U pos;
@@ -1939,7 +1935,7 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
         ((Fn_1EB748*)self->desc)[0x88 / 4](self, &mat);
     }
     if (self->f680 != 0) {
-        u32 f = in->fAA;
+        u32 f = in->flags;
         if (f & 0xF0) {
             s32 dir;
             s32 ok;
@@ -2452,7 +2448,7 @@ void func_001ED210(Timeline* self)
     TriggerScriptEvent(self, 0x1C, 0, 0);
     n = 5;
     RunTimelineEntry(self, &n);
-    if (((Inner_1ED210*)self->found)->c3C) {
+    if (((TempoAgent*)self->found)->fC3C) {
         n = 3;
         RunTimelineEntry(self, &n);
     }
@@ -2462,8 +2458,8 @@ void func_001ED278(Timeline* self)
 {
     Entry90* e;
     s32 v;
-    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((Inner_1ED278*)self->found)->fC70 < v))) {
-        if (v == ((Inner_1ED278*)self->found)->fC70 && ((Inner_1ED278*)self->found)->fC7C < e->f8) return;
+    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((TempoAgent*)self->found)->fC70 < v))) {
+        if (v == ((TempoAgent*)self->found)->fC70 && ((TempoAgent*)self->found)->fC7C < e->f8) return;
         RunTimelineEntry(self, e);
         self->index++;
     }
