@@ -100,7 +100,7 @@ struct AnimationPlayer {
     const void* vt;         // 0x00: D_002197B8
     u8 pad04[0x08 - 0x04]; // 0x04
     Animation* anim;              // 0x08: its tracks (Animation::tracks at +0x3C) are what the attachment follows
-    void* fC;               // 0x0C: an object func_0012F760 calls slot 18 of
+    void* fC;               // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
     f32 f10;                // 0x10
     f32 time;               // 0x14
     f32 speed;              // 0x18

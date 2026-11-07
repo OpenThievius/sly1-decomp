@@ -1972,22 +1972,16 @@ ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
-// The object func_00117880 writes: a float at 0x29C.
-struct Obj_117880 {
-    u8 pad[0x29C];          // 0x000
-    f32 value;              // 0x29C
-};
-
 ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     ScriptValue u;
     InitScriptValue(&t);
-    Obj_117880* obj = (Obj_117880*)args[0].p;
+    PlacedObject* obj = (PlacedObject*)args[0].p;
     ConvertScriptValueToFloat(&u, args + 1);
     f32 f = u.f;
     DestroyScriptValue(&u, 2);
-    obj->value = f;
+    obj->eventTimer = f;
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
     return ret;

@@ -213,8 +213,9 @@ typedef s8 Letter_1AEA08;
 Letter_1AEA08 func_001AEA08(void);
 
 extern f32 D_0027446C;
-struct Pair_274470 { f32 a; f32 b; };
-extern Pair_274470 D_00274470;
+// The vertical scale of the clone func_001ADF28 makes of its font (D_0027446C is the
+// horizontal one); the label runs on over a word nothing reads.
+extern f32 D_00274470[2];
 extern TextStyle D_00274488;
 
 s32 func_001833F0(s32 value, s32 item);
@@ -1887,7 +1888,7 @@ void func_001ADD28(T217D_470* self)
 }
 
 f32 D_0027446C = 0.7f;
-Pair_274470 D_00274470 = { 0.6f, 0.0f };
+f32 D_00274470[2] = { 0.6f, 0.0f };
 const char* D_00274478[3] = { "Press START button for New Game", "Press START button to Resume Game", "Press SELECT button for Menu" };
 const char* D_00274484 = "No Controller";
 TextStyle D_00274488 = {0};
@@ -1898,7 +1899,7 @@ void func_001ADF28(T217D_4C0* self)
 
     SetupScreenElementText(self);
     vt = self->font->vt;
-    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470.a);
+    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470[0]);
     if (GetFontById(2)) {
         self->frame = (Font**)&D_00274488;
         *self->frame = GetFontById(2);

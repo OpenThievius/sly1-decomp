@@ -761,9 +761,6 @@ Attachment* func_0012D570(void* a0, void* a1);
 
 void func_00129A58(void* p);
 
-struct Obj_12F760 {
-    void (**vtbl)(void* self);
-};
 
 void* func_0012CBE8(void);
 
@@ -945,8 +942,6 @@ extern u8 D_00259F38[];
 void* func_0011BF30(void);
 void func_0011A708(void* dst, void* value);
 
-struct Inner_130158 { s32 pad0; s32 value; };
-struct Holder_130158 { Inner_130158* inner; };
 
 struct SampledCurve;
 struct CurvePoint { u8 pad0[16]; };
@@ -4701,9 +4696,9 @@ void func_0012F718(AnimationPlayer* owner, s32 value)
 
 void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
 {
-    Obj_12F760* obj = (Obj_12F760*)self->fC;
+    BaseObject* obj = (BaseObject*)self->fC;
     if (obj != 0) {
-        obj->vtbl[18](obj);
+        obj->desc->m0E(obj, a1, (void*)a2);
     }
     QueuedCall* node = self->fE4;
     while (node != 0) {
@@ -5005,9 +5000,10 @@ void func_00130110(BaseObject* self)
     }
 }
 
-void func_00130158(Holder_130158* holder, s32* out)
+// A property getter (func_00109488 installs it): the object's class id.
+void func_00130158(BaseObject* self, s32* out)
 {
-    *out = holder->inner->value;
+    *out = self->desc->id;
 }
 
 void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)

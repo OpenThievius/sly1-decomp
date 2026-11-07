@@ -182,7 +182,11 @@ struct PlacedObject : BaseObject {
     f32 f290;               // 0x290
     s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
     WorldObjectNode* f298;  // 0x298: its node in the world's list (func_00126C58)
-    s32 f29C;               // 0x29C
+    union {
+        s32 f29C;           // 0x29C: cleared by func_0015FBB8 (slot 20)
+        f32 eventTimer;     // 0x29C: a timer SuppressScriptEvent (func_00183668) drops events by;
+                            // the script builtin func_00117880 sets it
+    };
     AnimationStart* f2A0;   // 0x2A0
     u8 pad2A4[0x2A8 - 0x2A4];
     f32 f2A8;               // 0x2A8
