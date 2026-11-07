@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 236/312 (75.6%), checked 2026-11-06
+// BYTES 236/312 (75.6%), checked 2026-11-07
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 #include "common.h"

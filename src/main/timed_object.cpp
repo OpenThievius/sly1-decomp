@@ -215,7 +215,7 @@ void LoadTimedGroup(TimedGroup* self)
     ResolveObjectLinks(self, 2, g_timedGroupLinks);
 }
 
-ASM_FUNC(func_001AF108);
+INCLUDE_ASM(func_001AF108);
 
 void CloneTimedGroupEntries(TimedGroup* self)
 {
@@ -358,7 +358,7 @@ void SetStaggeredColliderFrozen(TimedGroup* self, void* p)
     g_groupStaggerDirty = 1;
 }
 
-ASM_FUNC(func_001AF820);
+INCLUDE_ASM(func_001AF820);
 
 s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 {
@@ -378,7 +378,7 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 }
 
 INCLUDE_RODATA(jtbl_0024CFF0);
-ASM_FUNC(func_001AFBB0);
+INCLUDE_ASM(func_001AFBB0);
 
 void SetTimedGroupMode(TimedGroup* self, s32 flag)
 {
@@ -600,7 +600,7 @@ tail:
 }
 
 INCLUDE_RODATA(jtbl_0024D070);
-ASM_FUNC(func_001B0838);
+INCLUDE_ASM(func_001B0838);
 
 s32 TestSequencedObjectMayContact() { return 1; }
 
@@ -613,7 +613,7 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
     return ((s32)t ^ 1) & 1;
 }
 
-ASM_FUNC(func_001B0C68);
+INCLUDE_ASM(func_001B0C68);
 
 void SetSequencedObjectMode(SequencedObject* self, s32 value)
 {
@@ -839,7 +839,6 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
         do {
             Contact03* n = l->head;
             if (n != 0) {
-                const Vec02* k = &g_unitZVector;
                 do {
                     s32 x = owner != n->end[0].body;
                     ContactEnd03* b = &n->end[lastSide - x];
@@ -856,7 +855,7 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
                                     StopTrackPlayer(self);
                                 }
                             } else {
-                                req.Init(self, o, k);
+                                req.Init(self, o, &g_unitZVector);
                                 FindNodeForQuery(&req, 0, 0);
                             }
                         }

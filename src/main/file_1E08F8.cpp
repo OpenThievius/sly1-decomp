@@ -1311,7 +1311,7 @@ void CreateRenderThread(void)
 
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
-ASM_FUNC(func_001E2438);
+INCLUDE_ASM(func_001E2438);
 
 void InitOnOffObject(OnOffObject* self)
 {
@@ -1451,11 +1451,11 @@ void SetOnOffObjectFrozen(OnOffObject* self, void* p)
 
 void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
 
-ASM_FUNC(func_001E2A00);
+INCLUDE_ASM(func_001E2A00);
 
-ASM_FUNC(func_001E2BF0);
+INCLUDE_ASM(func_001E2BF0);
 
-ASM_FUNC(func_001E2E68);
+INCLUDE_ASM(func_001E2E68);
 
 void DeactivateOnOffCameraController(OnOffCameraController* self)
 {
@@ -1475,11 +1475,11 @@ void NoteOnOffCameraControllerPushed(OnOffCameraController* self, s32 arg)
 
 void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
-ASM_FUNC(func_001E30E8);
+INCLUDE_ASM(func_001E30E8);
 
-ASM_FUNC(func_001E31F0);
+INCLUDE_ASM(func_001E31F0);
 
-ASM_FUNC(func_001E4578);
+INCLUDE_ASM(func_001E4578);
 
 f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
@@ -1487,7 +1487,7 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
 }
 
 INCLUDE_RODATA(D_0024E5F0);
-ASM_FUNC(func_001E4888);
+INCLUDE_ASM(func_001E4888);
 
 INCLUDE_ASM(func_001E4C48);
 

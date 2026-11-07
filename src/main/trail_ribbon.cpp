@@ -58,9 +58,9 @@ void ResetTrailRing(TrailRing* o)
     o->f8 = 0;
 }
 
-ASM_FUNC(func_001C29F8);
+INCLUDE_ASM(func_001C29F8);
 
-ASM_FUNC(func_001C3028);
+INCLUDE_ASM(func_001C3028);
 
 void DrawTrailRibbon(TrailOwner* self)
 {

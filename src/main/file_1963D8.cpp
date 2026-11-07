@@ -529,7 +529,7 @@ void StartGaugeCollider(GaugeCollider* self)
     AddStateWalkerListener(self->f6B8, self);
 }
 
-ASM_FUNC(func_00196B78);
+INCLUDE_ASM(func_00196B78);
 
 s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
 {
@@ -539,9 +539,9 @@ s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
     return (s32)self->root != a0;
 }
 
-ASM_FUNC(func_00196EB0);
+INCLUDE_ASM(func_00196EB0);
 
-ASM_FUNC(func_001971B8);
+INCLUDE_ASM(func_001971B8);
 
 void ApplyGaugeColliderRatioToEffect(GaugeCollider* self)
 {
@@ -578,7 +578,7 @@ void HandleGaugeColliderActivation(GaugeCollider* a, void* b)
     HandleSwitchedColliderActivation(a, b);
 }
 
-ASM_FUNC(func_001974F8);
+INCLUDE_ASM(func_001974F8);
 
 void UpdateGaugeColliderVisibility(GaugeCollider* self)
 {
@@ -648,7 +648,7 @@ void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
     out->f94 = D_0026A840;
 }
 
-ASM_FUNC(func_00197A88);
+INCLUDE_ASM(func_00197A88);
 
 void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
 {
@@ -695,7 +695,7 @@ void StartGaugeColliderAgent(GaugeColliderAgent* self)
     StartAgent(self);
 }
 
-ASM_FUNC(func_001980B0);
+INCLUDE_ASM(func_001980B0);
 
 s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 {
@@ -722,7 +722,7 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
     return r;
 }
 
-ASM_FUNC(func_00198318);
+INCLUDE_ASM(func_00198318);
 
 void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, void* arg)
 {
@@ -744,7 +744,7 @@ void EnterGaugeColliderAgentState(GaugeColliderAgent* self)
     }
 }
 
-ASM_FUNC(func_00198570);
+INCLUDE_ASM(func_00198570);
 
 void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
 {
@@ -793,7 +793,7 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
 
 u32 IsGaugeColliderAgentTargetInRange(void) { return 0; }
 
-ASM_FUNC(func_00198860);
+INCLUDE_ASM(func_00198860);
 
 void StartGaugeCountedObject(GaugeCountedObject* self)
 {

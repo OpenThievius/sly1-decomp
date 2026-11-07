@@ -93,13 +93,13 @@ s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, void* p3, 
     return 0;
 }
 
-ASM_FUNC(func_00141D88);
+INCLUDE_ASM(func_00141D88);
 
-ASM_FUNC(func_00141F48);
+INCLUDE_ASM(func_00141F48);
 
-ASM_FUNC(func_00142170);
+INCLUDE_ASM(func_00142170);
 
-ASM_FUNC(func_00142278);
+INCLUDE_ASM(func_00142278);
 
 LINKER_REMNANT(func_00142990);
 
@@ -180,7 +180,7 @@ s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
     return dst - spans;
 }
 
-ASM_FUNC(func_00142B78);
+INCLUDE_ASM(func_00142B78);
 
 LINKER_REMNANT(func_00142EC8);
 

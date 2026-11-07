@@ -435,7 +435,7 @@ void ClearTextPanel(T217D_440* self)
     self->f314 = 0.4f;
 }
 
-ASM_FUNC(func_00131198);
+INCLUDE_ASM(func_00131198);
 
 
 
@@ -832,10 +832,10 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     AddGifXyzfEntry(gs, 0x9400, 0x80C0, 0, 0);
 }
 
-ASM_FUNC(func_00134AA0);
+INCLUDE_ASM(func_00134AA0);
 
 INCLUDE_RODATA(D_00249CF8);
-ASM_FUNC(func_00134B48);
+INCLUDE_ASM(func_00134B48);
 
 void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
 {
@@ -973,7 +973,7 @@ s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b)
     return 1;
 }
 
-ASM_FUNC(func_001358D0);
+INCLUDE_ASM(func_001358D0);
 
 LINKER_REMNANT(func_00135E20);
 
@@ -1210,7 +1210,7 @@ f32 GetTextPanelSlideOutTime(T217D_440* s) {
 }
 
 INCLUDE_RODATA(D_00249D58);
-ASM_FUNC(func_001366A0);
+INCLUDE_ASM(func_001366A0);
 
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
 {

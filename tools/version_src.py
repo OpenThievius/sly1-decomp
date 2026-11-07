@@ -190,8 +190,11 @@ def main(argv=None):
         assembly = classify_asm.read_table(ROOT / "config" / args.version / "original_asm.tsv")
         for name, addr, size, shared in only_here(args.version):
             own = "func_%s_%08X" % (args.version, addr)
-            if own not in done and name not in assembly:
-                tags = ",".join(sorted(todo.tags_of(bodies.get(name, []), "code"))) or "none"
+            if own not in done and assembly.get(name) in (None, "inline"):
+                tags = todo.tags_of(bodies.get(name, []), "code")
+                if assembly.get(name) == "inline":
+                    tags.add("inline")  # C with inline assembly: to match with the shared helpers
+                tags = ",".join(sorted(tags)) or "none"
                 print("%s\t%d\t%s\t%s" % (own, size, tags, shared.relative_to(ROOT)))
     return 0
 

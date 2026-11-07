@@ -211,7 +211,7 @@ void InitBoxCollider(BoxCollider* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-ASM_FUNC(func_0018F9D8);
+INCLUDE_ASM(func_0018F9D8);
 INCLUDE_RODATA(D_0024B5E0);
 INCLUDE_RODATA(jtbl_0024B5F0);
 
@@ -327,7 +327,7 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
     }
 }
 
-ASM_FUNC(func_00190258);
+INCLUDE_ASM(func_00190258);
 INCLUDE_RODATA(jtbl_0024B610);
 
 s32 IsSeekingAgentRequestBlocked(SeekingAgent* self, s32 a1)
@@ -472,9 +472,9 @@ s32 GetNeighbourTriangle(s32 value)
     return 0;
 }
 
-ASM_FUNC(func_00190810);
+INCLUDE_ASM(func_00190810);
 
-ASM_FUNC(func_001908C0);
+INCLUDE_ASM(func_001908C0);
 
 s32 ClassifyAgainstUnitRange(f32 value)
 {
@@ -483,7 +483,7 @@ s32 ClassifyAgainstUnitRange(f32 value)
     return 2;
 }
 
-ASM_FUNC(func_001909F0);
+INCLUDE_ASM(func_001909F0);
 
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
@@ -504,7 +504,7 @@ s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 
 s32 GetPointGraphItemIndex(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
 
-ASM_FUNC(func_00190EB8);
+INCLUDE_ASM(func_00190EB8);
 
 void SimplifyPointPath(void* a0, s32* a1, s32* a2)
 {
@@ -555,9 +555,9 @@ void SimplifyPointPath(void* a0, s32* a1, s32* a2)
     PopBackMemoryMark();
 }
 
-ASM_FUNC(func_00191290);
+INCLUDE_ASM(func_00191290);
 
-ASM_FUNC(func_00191570);
+INCLUDE_ASM(func_00191570);
 INCLUDE_RODATA(D_0024B64C);
 
 void LoadPointGraph(PointGraphObject* o, Stream8A* in)
@@ -660,9 +660,9 @@ void TestOwnerGraphSpan(Obj_191AA8* self)
     func_001909F0(self->p54);
 }
 
-ASM_FUNC(func_00191AC8);
+INCLUDE_ASM(func_00191AC8);
 
-ASM_FUNC(func_00191C78);
+INCLUDE_ASM(func_00191C78);
 
 void SetScreenOwner(s32 value)
 {
@@ -1094,7 +1094,7 @@ void FinishSwitchedCollider(SwitchedCollider* self)
     }
 }
 
-ASM_FUNC(func_00192DD0);
+INCLUDE_ASM(func_00192DD0);
 
 void* GetSwitchedColliderTarget(SwitchedCollider* p)
 {

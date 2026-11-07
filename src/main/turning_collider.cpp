@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "object_link.h"
 #include "attachment.h"
+#include "pad_record.h"
 
 
 // The file's .rodata: the constants only its assembly reads.
@@ -92,7 +93,7 @@ void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
     }
 }
 
-ASM_FUNC(func_001C4618);
+INCLUDE_ASM(func_001C4618);
 
 s32 CollectColliderSpansInTree(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
 
@@ -113,7 +114,7 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
     }
 }
 
-ASM_FUNC(func_001C4848);
+INCLUDE_ASM(func_001C4848);
 
 void DrawCollider(void);
 
@@ -122,7 +123,20 @@ void DrawTurningCollider(void)
     DrawCollider();
 }
 
-ASM_FUNC(func_001C49E8);
+void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
+
+void func_001C49E8(TurningCollider* self, PadRecord* pad)
+{
+    D_00274B5C = (D_00274B5C - 0.25f >? 0.0f);
+    if (D_00274B5C < pad->f48) {
+        ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f630);
+    } else {
+        self->f630 = self->f638;
+    }
+    f32 level = pad->f48;
+    self->f634 = level;
+    D_00274B5C = level;
+}
 
 extern f32 g_gameTime[];
 extern s32 D_00605548;
@@ -153,9 +167,9 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     PlaySoundWithWanderingPitch();
 }
 
-ASM_FUNC(func_001C4C20);
+INCLUDE_ASM(func_001C4C20);
 
-ASM_FUNC(func_001C4D60);
+INCLUDE_ASM(func_001C4D60);
 
 
 void UpdateSwitchedCollider(void* self);
@@ -191,7 +205,7 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
     self->desc06()->m54(self);
 }
 
-ASM_FUNC(func_001C4FF8);
+INCLUDE_ASM(func_001C4FF8);
 
 void StepCollider(void* self);
 void ApplyTurningColliderDrive(void* self);
@@ -202,7 +216,7 @@ void StepTurningCollider(TurningCollider* self)
     ApplyTurningColliderDrive(self);
 }
 
-ASM_FUNC(func_001C5148);
+INCLUDE_ASM(func_001C5148);
 
 s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
@@ -281,7 +295,6 @@ void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
     }
 }
 
-extern f32 g_unitRange[];
 
 void RecomputeColliderFrame(TurningCollider* self);
 f32 ArctangentOfRatio(f32 a, f32 b);
@@ -292,11 +305,11 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     RecomputeColliderFrame(self);
     f32 t = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 ay = __builtin_fabsf(WrapAngle(self->f638 - t));
-    f32* lim = g_unitRange;
+    ValueRange* lim = &g_unitRange;
     Vec02* p = &self->v6F0;
     f32 v = self->v6F0.x + ay * (p->y + ay * p->z);
-    f32 lo = lim[0];
-    f32 hi = lim[1];
+    f32 lo = lim->lo;
+    f32 hi = lim->hi;
     if (v < lo) {
         v = lo;
     } else if (hi < v) {
@@ -305,9 +318,9 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     self->f63C = v;
 }
 
-ASM_FUNC(func_001C54D0);
+INCLUDE_ASM(func_001C54D0);
 
-ASM_FUNC(func_001C57C8);
+INCLUDE_ASM(func_001C57C8);
 
 void AddTurningColliderProbeContact(void* a, s32 b, s32 c, s32 d);
 
@@ -316,7 +329,7 @@ void CollideTurningColliderWithObject(TurningCollider* a0, s32 a1, s32 unused2, 
     AddTurningColliderProbeContact(a0, a1, a4, a5);
 }
 
-ASM_FUNC(func_001C5C10);
+INCLUDE_ASM(func_001C5C10);
 
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
@@ -329,7 +342,7 @@ void TurnColliderTowardHeading(TurningCollider* self)
     self->desc02()->m21(self, &q);
 }
 
-ASM_FUNC(func_001C5DB8);
+INCLUDE_ASM(func_001C5DB8);
 
 
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
@@ -340,4 +353,4 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
 
-ASM_FUNC(func_001C5EA8);
+INCLUDE_ASM(func_001C5EA8);

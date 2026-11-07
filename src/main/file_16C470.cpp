@@ -59,4 +59,4 @@ void DrawC52Object(void)
     DrawPlacedObject();
 }
 
-ASM_FUNC(func_0016C528);
+INCLUDE_ASM(func_0016C528);

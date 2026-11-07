@@ -770,7 +770,7 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
     }
 }
 
-ASM_FUNC(func_001841D0);
+INCLUDE_ASM(func_001841D0);
 
 void SetConeVolumeMode(ConeVolume* self, s32 flag)
 {
@@ -820,7 +820,7 @@ void SetConeVolumeThirdAngle(ConeVolume* self, f32 v)
     RefreshConeVolumeShape(self);
 }
 
-ASM_FUNC(func_001848B8);
+INCLUDE_ASM(func_001848B8);
 
 void SetConeVolumeValue(ConeVolume* self, s32 v)
 {
@@ -875,7 +875,7 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     self->f35C = 1.0f;
 }
 
-ASM_FUNC(func_00184B58);
+INCLUDE_ASM(func_00184B58);
 
 void SetConeVolumeOuterLevels(ConeVolume* self, f32 v)
 {

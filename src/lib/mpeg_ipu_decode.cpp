@@ -1638,7 +1638,7 @@ void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
 // The buffer of the hand-written func_00210C38, which only it reads.
 static u8 D_0062C340[0x200];
 
-ASM_FUNC(func_00210C38);
+INCLUDE_ASM(func_00210C38);
 
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
@@ -1675,7 +1675,7 @@ void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
     while (*(volatile s32*)0x10002010 < 0) { }
 }
 
-ASM_FUNC(func_00210F18);
+INCLUDE_ASM(func_00210F18);
 
 struct Queue_211090;
 struct Self_211090 {

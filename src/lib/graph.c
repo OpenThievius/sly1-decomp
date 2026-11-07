@@ -273,5 +273,5 @@ s32 CountFrameBufferPages(s16 px, s16 py, s16 pz)
     return ((yS * c) << 17) >> 16;
 }
 
-ASM_FUNC(func_00202478);
+INCLUDE_ASM(func_00202478);
 ASM_FUNC(func_00202660);

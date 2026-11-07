@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 268/272 (98.5%), checked 2026-11-06
+// BYTES 268/272 (98.5%), checked 2026-11-07
 // NEAR: registers only: four lines differ, all register numbers; the 24 orders of the four stores
 //       were tried.
 #include "common.h"

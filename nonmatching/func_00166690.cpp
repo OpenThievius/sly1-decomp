@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 5796/5772, checked 2026-11-06
+// SIZE 5796/5772, checked 2026-11-07
 // NEAR: func_00166690 at 96.7% (regdiff: code, 1395/1443); the C is 5796 bytes, retail's 5772.
 // The structure, switches, calls and packet writes all match. What differs: in the strip loop
 // (part->strips) retail keeps &D_002623E0 in s8 and the constant 1 in t9 while ours gives those

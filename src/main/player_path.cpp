@@ -45,13 +45,13 @@ void CreatePlayerTwoEntryBlend(Player* self)
     self->f23E0 = avg;
 }
 
-ASM_FUNC(func_001D1630);
+INCLUDE_ASM(func_001D1630);
 
-ASM_FUNC(func_001D1A80);
+INCLUDE_ASM(func_001D1A80);
 
-ASM_FUNC(func_001D1BB0);
+INCLUDE_ASM(func_001D1BB0);
 
-ASM_FUNC(func_001D2518);
+INCLUDE_ASM(func_001D2518);
 
 void AcquirePadSelectFlag(void* a);
 void ShowCountedScreenElement(void* a);
@@ -73,4 +73,4 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
     }
 }
 
-ASM_FUNC(func_001D2830);
+INCLUDE_ASM(func_001D2830);

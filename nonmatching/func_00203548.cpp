@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 723/736 (98.2%), checked 2026-11-06
+// BYTES 723/736 (98.2%), checked 2026-11-07
 // NEAR: D_0027943C's store comes last before the loop, as the Ryzen PC's permuter run found
 //       (26 lines to 7). Left: the hoisted lui of D_00279444's and D_00279434's high halves
 //       take t2/t3 the other way round, and one lui/sw pair near the end is swapped.

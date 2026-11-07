@@ -198,7 +198,7 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
 
 INCLUDE_ASM(func_00184DE8);
 
-ASM_FUNC(func_00185150);
+INCLUDE_ASM(func_00185150);
 
 void InitAim(T2195_790* self)
 {
@@ -233,9 +233,9 @@ s32 ResolveAimTarget(T2195_790* a0) {
     return (s32)a0->target;
 }
 
-ASM_FUNC(func_00185498);
+INCLUDE_ASM(func_00185498);
 
-ASM_FUNC(func_00185538);
+INCLUDE_ASM(func_00185538);
 
 void RunMainLoop(s32 a, s32 b)
 {

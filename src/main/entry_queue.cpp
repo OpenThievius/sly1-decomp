@@ -110,7 +110,7 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     }
 }
 
-ASM_FUNC(func_0017BB78);
+INCLUDE_ASM(func_0017BB78);
 
 
 void SetOnOffObjectForcedState(void* p, s32 n);
@@ -139,10 +139,10 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 }
 
 INCLUDE_RODATA(jtbl_0024B000);
-ASM_FUNC(func_0017BCD0);
+INCLUDE_ASM(func_0017BCD0);
 
 INCLUDE_RODATA(jtbl_0024B030);
-ASM_FUNC(func_0017C428);
+INCLUDE_ASM(func_0017C428);
 
 void StartNextQueueEntry(EntryQueue* self);
 s32 CheckQueueEntryDone(EntryQueue* self, void* item);
@@ -161,7 +161,7 @@ void AdvanceEntryQueue(EntryQueue* self)
         self->f48 = 0;
 }
 
-ASM_FUNC(func_0017C718);
+INCLUDE_ASM(func_0017C718);
 
 void AdvanceEntryQueue(EntryQueue* self);
 

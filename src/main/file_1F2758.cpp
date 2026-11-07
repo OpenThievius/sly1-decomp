@@ -332,11 +332,11 @@ void AttachNodeToOwner(NodeOwner* self, s32 unused, NodeAttachment* ctx)
 }
 
 INCLUDE_RODATA(jtbl_0024E840);
-ASM_FUNC(func_001F2840);
+INCLUDE_ASM(func_001F2840);
 
-ASM_FUNC(func_001F2EF0);
+INCLUDE_ASM(func_001F2EF0);
 
-ASM_FUNC(func_001F3140);
+INCLUDE_ASM(func_001F3140);
 
 f32 HashToUnitFloat(s32 a0)
 {
@@ -383,7 +383,7 @@ f32 EvaluateNoiseBlend(NoiseBlend* obj)
     return obj->lo + t * (obj->hi - obj->lo);
 }
 
-ASM_FUNC(func_001F3408);
+INCLUDE_ASM(func_001F3408);
 
 void AddOscillatorXEntry(Oscillator* o)
 {
@@ -517,7 +517,7 @@ void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
     TransformRotationBetweenFrames(other, 0, &self->rot, &self->rot);
 }
 
-ASM_FUNC(func_001F3B48);
+INCLUDE_ASM(func_001F3B48);
 
 s32 GetObjectWorldPosition(BaseObject* self, s32 arg)
 {
@@ -611,7 +611,7 @@ void StartArrivalPoint(TransformSet* self)
     }
 }
 
-ASM_FUNC(func_001F4008);
+INCLUDE_ASM(func_001F4008);
 
 void SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
@@ -837,7 +837,7 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
 }
 
 INCLUDE_RODATA(jtbl_0024E860);
-ASM_FUNC(func_001F4AE0);
+INCLUDE_ASM(func_001F4AE0);
 
 void InitLookupObject(LookupObject* self) { InitPlacedObject(self); self->id = -1; }
 
@@ -919,7 +919,7 @@ void InitC37(C37* o) {
     SetColliderAnchors(o, 3, 0, 3, 0);
 }
 
-ASM_FUNC(func_001F5268);
+INCLUDE_ASM(func_001F5268);
 
 void InitTrackedNodes(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 

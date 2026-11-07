@@ -50,11 +50,11 @@ OnOffDefaultsBlock g_onOffObjectDefaults = {
 };
 float D_00274EF0[3] = {2500.0f, 0.0f, 1.0f};
 
-ASM_FUNC(func_001CDFB8);
+INCLUDE_ASM(func_001CDFB8);
 
-ASM_FUNC(func_001CE590);
+INCLUDE_ASM(func_001CE590);
 
-ASM_FUNC(func_001CE800);
+INCLUDE_ASM(func_001CE800);
 
 // What a target cost search passes to its scorer: the player, the target, and the record at
 // +0x10 the scorer hands on.
@@ -96,7 +96,7 @@ f32 ScoreTargetCurveAt(TargetCostContext* self)
     return f.result;
 }
 
-ASM_FUNC(func_001CEB18);
+INCLUDE_ASM(func_001CEB18);
 
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.
@@ -155,7 +155,7 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
     return l.out;
 }
 
-ASM_FUNC(func_001CEEC8);
+INCLUDE_ASM(func_001CEEC8);
 
 f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
 {
@@ -166,15 +166,15 @@ f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
     return r;
 }
 
-ASM_FUNC(func_001CF158);
+INCLUDE_ASM(func_001CF158);
 
-ASM_FUNC(func_001CFFD0);
+INCLUDE_ASM(func_001CFFD0);
 
-ASM_FUNC(func_001D0B20);
+INCLUDE_ASM(func_001D0B20);
 
-ASM_FUNC(func_001D0C78);
+INCLUDE_ASM(func_001D0C78);
 
-ASM_FUNC(func_001D0F20);
+INCLUDE_ASM(func_001D0F20);
 
 void FreePooledContactChain(void* a, s32 b);
 
@@ -225,7 +225,7 @@ void ResetPlayerOnOffObject(Player* self)
     SetOnOffObjectForcedState(o, 0);
 }
 
-ASM_FUNC(func_001D12F0);
+INCLUDE_ASM(func_001D12F0);
 
 s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 s32 HasNoActiveObject89(Player* self)

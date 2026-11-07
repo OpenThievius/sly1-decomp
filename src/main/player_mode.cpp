@@ -128,7 +128,7 @@ tail:
 
 INCLUDE_RODATA(jtbl_0024DB90);
 INCLUDE_RODATA(jtbl_0024DBB0);
-ASM_FUNC(func_001D2BB8);
+INCLUDE_ASM(func_001D2BB8);
 
 s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table)
 {
@@ -199,7 +199,7 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
     self->desc->m03(self);
 }
 
-ASM_FUNC(func_001D3398);
+INCLUDE_ASM(func_001D3398);
 
 void StepCountedCollider(CountedCollider* self, f32 t)
 {
@@ -235,7 +235,7 @@ void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
     return r;
 }
 
-ASM_FUNC(func_001D35A8);
+INCLUDE_ASM(func_001D35A8);
 
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg)
 {

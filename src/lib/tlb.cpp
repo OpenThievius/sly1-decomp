@@ -24,7 +24,7 @@ s32 SetUpTlbForMemory(void)
     return func_001F6D30();
 }
 
-ASM_FUNC(func_001FAA00);
+INCLUDE_ASM(func_001FAA00);
 
 extern const char D_0024EC30[56] = "# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n";
 extern const char D_0024EC68[24] = "# TLB over flow (1)";

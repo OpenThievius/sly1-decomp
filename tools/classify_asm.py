@@ -10,13 +10,17 @@ come from. This follows OpenRAC's classification (rac1-decomp, docs/ASM_CLASSIFI
 credited in THIRD_PARTY_NOTICES.md): the rules below are ours, from the evidence in the
 bytes, and the table they write is committed so that CI needs no disc.
 
-Two kinds, over game code and Sony's libraries; a function matched in C is C and is left out.
+Three kinds, over game code and Sony's libraries; a function matched in C is C and is left out.
 
 - handwritten: the function holds an instruction the compiler cannot emit, so it was not
   made from C. A VU0 macro-mode instruction (COP2), a 128-bit multimedia instruction
   (MMI) that no function matched in C contains (COMPILER_EMITS), or the disassembler's own
   "handwritten" mark; or, in game code, a tail jump to another function, which SN GCC 2.95.3
   never writes (OpenRAC finds the same: a tail jump means not SN 2.95.3).
+- inline: C with inline assembly. The instruction that would make it hand-written sits in code
+  the compiler shaped (GCC's own stack frame around it): the original developers wrote C that
+  called small inline-assembly helpers, the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. It is C to
+  match with shared helpers (AGENTS.md), not finished: tools/progress.py does not count it.
 - remnant: a run of words the linker left of a stripped function. It starts on an
   8-byte boundary, has no jump or branch in it, nothing refers to it (no instruction
   or data names it), and the code before it is finished: going back over earlier
@@ -60,7 +64,14 @@ COMPILER_EMITS = todo.COMPILER_EMITS
 # function matched in C holds one, and neither compiler emits them from plain C (docs/
 # ASM_CLASSIFICATION.md, "Kernel and system code"). sqrt.s is not here: __builtin_sqrtf gives it.
 SYSTEM = {"syscall", "eret", "ei", "di", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "mtsa", "mfsa",
-          "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1", "max.s", "min.s"}
+          "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1"}
+# max.s and min.s are not here: g++'s minimum and maximum operators (`a <? b`, `a >? b`) emit them
+# from plain C++ under the files' own flags (func_001EAC68 is word for word one).
+# The reasons handwritten() gives that inline() may find in compiled code (not the tail jump, the
+# toolchain's .S members, or stores scheduled before the frame).
+INLINE_REASONS = ("VU0 macro instruction", "128-bit MMI instruction", "marked handwritten by the disassembler",
+                  "kernel or system instruction")
+PROLOGUE_REACH = 4  # how many instructions GCC may schedule before it sets up the frame
 FRAME = re.compile(r"^addiu\s+\$sp, \$sp, -0x")
 STORES = {"sw", "swc1", "sd", "sq", "sh", "sb"}
 
@@ -131,6 +142,30 @@ def handwritten(ops, kind, lines=()):
     return None
 
 
+def compiled_frame(lines):
+    """True when a listing has the compiler's own frame: `addiu $sp, $sp, -N` among its first
+    instructions (GCC may schedule a load or two before it) and the same N freed later."""
+    ins = [line.replace(" ", "") for line in lines if line.split() and not line.startswith(("jlabel", ".L"))]
+    for line in ins[:PROLOGUE_REACH]:
+        m = re.match(r"addiu\$sp,\$sp,-(0x[0-9A-Fa-f]+|\d+)$", line)
+        if m:
+            size = int(m.group(1), 0)
+            return any(re.match(r"addiu\$sp,\$sp,(0x[0-9A-Fa-f]+|\d+)$", x) and int(x.split(",")[-1], 0) == size
+                       for x in ins)
+    return False
+
+
+def inline(why, lines):
+    """Why a function the rules above call hand-written is C with inline assembly, or None. Its
+    special instruction sits in code the compiler shaped: inside GCC's own stack frame (the
+    VU0, MMI and system instructions of a function that also calls, saves and schedules as
+    compiled code does), the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. A
+    frameless leaf stays hand-written: its shape does not tell."""
+    if why.startswith(INLINE_REASONS) and compiled_frame(lines):
+        return "C with inline assembly: %s in the compiler's frame" % why
+    return None
+
+
 def game_tail_jump(addr, lines, key="us"):
     """Why a game-code function that ends in a tail jump is original assembly, or None: SN GCC
     2.95.3, which builds the game, never turns a call into a jump (Sony's 2.9-ee, which builds
@@ -162,7 +197,8 @@ def classify(funcs, bodies, references, sdk=None, key="us"):
         ops = ops_of(lines)
         why = sdk.get(name) or handwritten(ops, kind, lines) or game_tail_jump(addr, lines, key)
         if why:
-            out.append((name, addr, size, "handwritten", why))
+            shaped = None if name in sdk else inline(why, lines)
+            out.append((name, addr, size, "inline", shaped) if shaped else (name, addr, size, "handwritten", why))
             ok = ends_finished(ops)
             continue
         if ("fragment" in tags and ok and addr % 8 == 0 and not any(BRANCH.match(o) for o in ops)

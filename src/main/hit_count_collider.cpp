@@ -192,9 +192,58 @@ void ShowHitCountColliderCounters()
     }
 }
 
-ASM_FUNC(func_001C39A0);
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
 
-ASM_FUNC(func_001C3B40);
+void func_00144FF8(Camera* cam, void* ev, s32 n, f32* out);
+void func_001B64D8(void* walker, s32 id);
+void func_00192A70(void* self, void* ev);
+void func_00129DF8(void* self);
+void func_001ED650(void* out, f32 a, f32 b, f32 c);
+void func_001C3FC8(void* self, s32 state);
+
+void func_001C39A0(HitCountCollider* self, void* ev)
+{
+    void* obj = P(self, 0x628);
+    if (obj != 0 && F(obj, 0x18) == 0.0f) {
+        switch (self->f610) {
+        case 2:
+            self->desc05()->m50(self);
+            break;
+        case 3:
+            func_001C3FC8(self, 4);
+            break;
+        }
+    }
+    if (self->f610 != 1) {
+        F(self, 0x66C) = D_00274A98;
+        *(Vec02*)((u8*)self + 0x650) = D_00248D30;
+    } else {
+        if (0.0f < F(ev, 0x48)) {
+            func_00144FF8(g_camera, ev, 0, &self->f644);
+        }
+        f32 k = D_00274A90[0];
+        f32 m = D_00274A98;
+        m = m >? F(ev, 0x48);
+        F(self, 0x66C) = m;
+        func_001ED650((u8*)self + 0x650, self->f644, k * F(ev, 0x48), 0.0f);
+        self->f670 = (D_00274AA0 >? F(ev, 0x48));
+        if (0.0f < F(ev, 0x7C)) {
+            func_00144FF8(g_camera, ev, 1, &self->f648);
+            if (self->f668 != 0) {
+                func_001B64D8(self->f668, 0x485);
+            }
+        } else if (self->f668 != 0) {
+            func_001B64D8(self->f668, 0x484);
+        }
+    }
+    func_00192A70(self, ev);
+    func_00129DF8(self);
+}
+
+
+INCLUDE_ASM(func_001C3B40);
 
 s32 IsObjectOfKind(s32 a, s32 b);
 s32 MatchesObjectId(s32 a, s32 b);
@@ -213,7 +262,7 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
     if (MatchesObjectId((s32)e->body, 0x52F)) self->f688 = e->body;
 }
 
-ASM_FUNC(func_001C3C98);
+INCLUDE_ASM(func_001C3C98);
 
 extern s32 g_buttonCodeFlags;
 s32 IsPadSelectFlagHeld(void* p);
@@ -263,7 +312,7 @@ void FinishHitCountCollider(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-ASM_FUNC(func_001C3EB0);
+INCLUDE_ASM(func_001C3EB0);
 
 void InitOwnerMessage(void* self, s32 a, s32 b);
 void func_001C3EB0(s32 c, void* receiver);
@@ -287,10 +336,6 @@ f32 ApproachAngleWithRamp(f32 x, f32 y, f32 z, u8* a, void* out);
 void RaiseScatterLevels(u8* a, f32 b);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 void ReplaceAnimationPlayer(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);
-
-#define F(o, off) (*(f32*)((u8*)(o) + (off)))
-#define W(o, off) (*(s32*)((u8*)(o) + (off)))
-#define P(o, off) (*(void**)((u8*)(o) + (off)))
 
 void SetHitCountColliderState(PlacedObject* self, s32 state)
 {
@@ -345,4 +390,4 @@ void AddHitCountColliderId(HitCountCollider* self, s32 value)
 // jump table of func_001C3FC8.
 extern const f32 D_0024D584 = 3.40282347e+38f;
 
-ASM_FUNC(func_001C41A0);
+INCLUDE_ASM(func_001C41A0);

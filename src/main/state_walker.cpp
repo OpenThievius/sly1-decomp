@@ -141,7 +141,7 @@ void CopyVec2(Point2* a0, Point2* a1)
 }
 
 INCLUDE_RODATA(D_0024D268);
-ASM_FUNC(func_001B55C0);
+INCLUDE_ASM(func_001B55C0);
 
 LINKER_REMNANT(func_001B5B48);
 
@@ -825,7 +825,7 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
     return 1;
 }
 
-ASM_FUNC(func_001B7280);
+INCLUDE_ASM(func_001B7280);
 
 void UpdateCompanionAgent(CompanionAgent* self)
 {

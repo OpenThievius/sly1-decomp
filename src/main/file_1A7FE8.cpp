@@ -892,7 +892,7 @@ s32 HasObjectPoolChoice(ObjectPool* self)
     return self->f48 != 0;
 }
 
-ASM_FUNC(func_001A8C90);
+INCLUDE_ASM(func_001A8C90);
 
 void ClearObjectPoolChoice(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
 
@@ -949,7 +949,7 @@ void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* 
     }
 }
 
-ASM_FUNC(func_001A95D0);
+INCLUDE_ASM(func_001A95D0);
 
 void GetPlacementRecordAngle(u8* self, f32* out, int x)
 {
@@ -966,7 +966,7 @@ void GetPlacementRecordAngle(u8* self, f32* out, int x)
     }
 }
 
-ASM_FUNC(func_001A9868);
+INCLUDE_ASM(func_001A9868);
 
 void StartGaugeBarAgent(GaugeBarAgent* self)
 {
@@ -1029,7 +1029,7 @@ void UpdateGaugeBarAgentVisibility(void)
     }
 }
 
-ASM_FUNC(func_001A9AE8);
+INCLUDE_ASM(func_001A9AE8);
 
 void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c)
 {

@@ -27,11 +27,11 @@ f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
 s32 D_00274C10 = 0;
 s32 D_00274C14 = 0;
 
-ASM_FUNC(func_001C5F18);
+INCLUDE_ASM(func_001C5F18);
 
-ASM_FUNC(func_001C6028);
+INCLUDE_ASM(func_001C6028);
 
-ASM_FUNC(func_001C61E0);
+INCLUDE_ASM(func_001C61E0);
 
 s32 IsObjectAttached(void* p);
 void func_001C61E0(Player* self, s32 mode);
@@ -125,7 +125,7 @@ tail:
     func_001C61E0(self, st);
 }
 
-ASM_FUNC(func_001C6AA8);
+INCLUDE_ASM(func_001C6AA8);
 
 // What FindNearestClass75Ahead finds: the direction to the nearest class 0x75 object ahead
 // and the object, 0 for none.

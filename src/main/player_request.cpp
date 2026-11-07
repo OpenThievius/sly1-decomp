@@ -37,10 +37,10 @@ s32 D_00275130 = 0;
 s32 D_00275134 = 0;
 s32 D_00275138 = 0;
 
-ASM_FUNC(func_001D36F0);
-ASM_FUNC(func_001D39E0);
+INCLUDE_ASM(func_001D36F0);
+INCLUDE_ASM(func_001D39E0);
 ASM_FUNC(func_001D3A38);
-ASM_FUNC(func_001D3B58);
+INCLUDE_ASM(func_001D3B58);
 
 f32 func_001FD578(u64 v);
 
@@ -80,7 +80,7 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-ASM_FUNC(func_001D3E00);
+INCLUDE_ASM(func_001D3E00);
 
 // The six blend records func_001D40A0 hands to func_001399F8 (0x50 bytes each): the weight
 // of each at its start; the second record's word at +4 says whether it blends at all.
@@ -122,9 +122,9 @@ void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, 
 }
 
 INCLUDE_RODATA(jtbl_0024DBD0);
-ASM_FUNC(func_001D4148);
-ASM_FUNC(func_001D4348);
-ASM_FUNC(func_001D4698);
+INCLUDE_ASM(func_001D4148);
+INCLUDE_ASM(func_001D4348);
+INCLUDE_ASM(func_001D4698);
 
 
 
@@ -143,7 +143,7 @@ void ResolvePlayerTableObjects(Player* self)
 
 
 INCLUDE_RODATA(jtbl_0024DBF0);
-ASM_FUNC(func_001D48E8);
+INCLUDE_ASM(func_001D48E8);
 
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 ApproachAngleWithRamp(f32* p, s32 a, f32 b, f32 c, f32 d);
@@ -510,7 +510,7 @@ s32 CompareSortedTargets(SortedTarget* a, SortedTarget* b) { if (a->key < b->key
 
 
 INCLUDE_RODATA(D_0024DC88);
-ASM_FUNC(func_001D5678);
+INCLUDE_ASM(func_001D5678);
 
 
 INCLUDE_ASM(func_001D5FA8);

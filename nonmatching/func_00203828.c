@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 475/504 (94.2%), checked 2026-11-06
+// BYTES 475/504 (94.2%), checked 2026-11-07
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 /* NEAR (src/lib/cdvd.c's declarations; built as C by 2.9-ee-991111): 22 lines in its unit,
  * every one a register. The code is retail's instruction for instruction (the bind loop and its padded delay

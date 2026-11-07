@@ -196,9 +196,9 @@ void MoveModeCollider(ModeCollider* self)
     if (fn != 0) fn(self);
 }
 
-ASM_FUNC(func_001796D0);
+INCLUDE_ASM(func_001796D0);
 
-ASM_FUNC(func_00179A68);
+INCLUDE_ASM(func_00179A68);
 
 void FinishSwitchedCollider(void* self);
 void SetModeColliderMode(void* self, s32 a1);
@@ -209,7 +209,7 @@ void FinishModeCollider(ModeCollider* self)
     SetModeColliderMode(self, 2);
 }
 
-ASM_FUNC(func_0017A700);
+INCLUDE_ASM(func_0017A700);
 extern f32 g_unitRange[];
 extern Rgba4 D_002623E0;
 
@@ -359,7 +359,7 @@ s32 HasModeColliderAcceptedRequest(ModeCollider* self)
 }
 
 INCLUDE_RODATA(D_0024AFF4);
-ASM_FUNC(func_0017ABE8);
+INCLUDE_ASM(func_0017ABE8);
 
 void ComputeModeColliderAnchors(void* self, void* a, void* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
@@ -411,7 +411,7 @@ void StartGaugeModeObject(GaugeModeObject* self)
     PlayGaugeModeObjectLoop(self, 1);
 }
 
-ASM_FUNC(func_0017AF38);
+INCLUDE_ASM(func_0017AF38);
 
 extern s32 D_00270458;
 extern s32 D_00270B54;

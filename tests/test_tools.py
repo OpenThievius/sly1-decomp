@@ -296,6 +296,20 @@ class ClassifyAsmTest(unittest.TestCase):
         self.assertIn("mmi", got)
         self.assertNotIn("por", got)
 
+    def test_a_vu0_instruction_in_the_compilers_frame_is_c_with_inline_assembly(self):
+        body = ["lui $v0, 0x1", "addiu $sp, $sp, -0x20", "sq $ra, 0x0($sp)", "lqc2 $vf1, 0x0($a0)",
+                "jal func_00100000", "nop", "lq $ra, 0x0($sp)", "jr $ra", "addiu $sp, $sp, 0x20"]
+        self.assertEqual(self.classify([("f", 0x100000, "code", body)])["f"][0], "inline")
+        unfreed = body[:-1] + ["nop"]  # a frame the function never frees is not the compiler's
+        self.assertEqual(self.classify([("f", 0x100000, "code", unfreed)])["f"][0], "handwritten")
+
+    def test_max_and_min_are_plain_c(self):
+        # g++'s `>?` and `<?` operators emit them; a system call stub stays hand-written
+        got = self.classify([("f", 0x100000, "code", ["max.s $f0, $f0, $f12", "jr $ra", "nop"]),
+                             ("s", 0x100010, "code", ["addiu $v1, $zero, 0x3C", "syscall", "jr $ra", "nop"])])
+        self.assertNotIn("f", got)
+        self.assertEqual(got["s"][0], "handwritten")
+
     def test_the_disassemblers_mark_counts(self):
         got = self.classify([("f", 0x100000, "handwritten", self.RET)])
         self.assertEqual(got["f"][0], "handwritten")
@@ -326,7 +340,7 @@ class SystemEvidenceTest(unittest.TestCase):
 
     def test_a_kernel_instruction_is_original_assembly(self):
         self.assertIn("syscall", classify_asm.handwritten(["addiu", "syscall", "jr", "nop"], "code"))
-        self.assertIn("max.s", classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
+        self.assertIsNone(classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
 
     def test_a_tail_jump_in_game_code_is_original_assembly(self):
         lines = ["j          func_001FA078", "daddu     $a0, $zero, $zero", "nop"]
@@ -360,7 +374,7 @@ class SystemEvidenceTest(unittest.TestCase):
         self.assertIn("system", todo.tags_of(["break 1023, 1023", "jr $ra"], "code"))
         # A bare sqrt.s is written with include/fpu.h's Fpu::Sqrt; max.s still has no C form.
         self.assertNotIn("nonc", todo.tags_of(["sqrt.s $f0, $f12", "c.eq.s $f2, $f4", "jr $ra"], "code"))
-        self.assertIn("nonc", todo.tags_of(["max.s $f0, $f12, $f13", "jr $ra"], "code"))
+        self.assertNotIn("nonc", todo.tags_of(["max.s $f0, $f12, $f13", "jr $ra"], "code"))  # g++ >?
 
 
 class OriginalAsmTableTest(unittest.TestCase):
@@ -375,7 +389,7 @@ class OriginalAsmTableTest(unittest.TestCase):
             self.assertIn(name, self.funcs, name)
 
     def test_the_kinds_are_known(self):
-        self.assertLessEqual(set(self.table.values()), {"handwritten", "remnant"})
+        self.assertLessEqual(set(self.table.values()), {"handwritten", "inline", "remnant"})
 
     def test_no_function_is_both_original_assembly_and_c(self):
         self.assertEqual(sorted(set(self.table) & todo.finished()), [])
@@ -384,9 +398,18 @@ class OriginalAsmTableTest(unittest.TestCase):
 class ProgressCountTest(unittest.TestCase):
     def test_original_assembly_counts_as_finished_but_not_as_exact_c(self):
         asm = progress.original_asm("us")
-        self.assertTrue(asm)
-        self.assertEqual(progress.finished("us"), progress.exact_c("us") | asm)
+        inline = progress.inline_asm("us")
+        self.assertTrue(asm and inline)
+        self.assertEqual(progress.finished("us"), progress.exact_c("us") | (asm - inline))
         self.assertEqual(progress.exact_c("us") & asm, set())
+
+    def test_c_with_inline_assembly_is_c_to_match(self):
+        inline = progress.inline_asm("us")
+        self.assertEqual(progress.finished("us") & inline, set())
+        kinds = todo.classified()  # the committed table only: CI has no disassembly
+        self.assertTrue(all(kinds[name] == "inline" for name in inline))
+        self.assertEqual(todo.blocker({"inline", "vu", "calls"}), "helper")
+        self.assertEqual(todo.blocker({"inline", "calls"}), "none")
 
     def test_a_pal_function_follows_its_us_counterpart(self):
         pal = progress.original_asm("eu") - set(classify_asm.read_table(classify_asm.EU_TABLE))

@@ -5,6 +5,7 @@
 // reader and the curve segment helpers. One file between two edges; it could be several.
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -857,7 +858,7 @@ void RestoreVolumeChannel2(void);
 void SilenceVolumeChannel2(void);
 void ChooseStepSequenceState(Collider* t);
 s32 FadeInPlacedObject(Collider* t, f32 v);
-s32 FadeOutPlacedObject(Collider* t, f32 v);
+void FadeOutPlacedObject(Collider* t, f32 v);
 void SetColliderAnchors(Collider* t, s32 a, s32 b, s32 c, s32 d);
 void PushObjectCameraController(Collider* t);
 void RemoveObjectCameraController(Collider* t);
@@ -1399,9 +1400,9 @@ void SavePlacedObjectInitialFrame(PlacedObject* object)
 	MatrixToEulerAngles(&object->m1A0, &object->v1D0);
 }
 
-ASM_FUNC(func_001245A8);
+INCLUDE_ASM(func_001245A8);
 
-ASM_FUNC(func_00124868);
+INCLUDE_ASM(func_00124868);
 
 void PostLoadPlacedObject(PlacedObject* self)
 {
@@ -1628,18 +1629,18 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-ASM_FUNC(func_00125138);
+INCLUDE_ASM(func_00125138);
 
 void BeginPlacedObjectMove(PlacedObject* self)
 {
     (void)self;
 }
 
-ASM_FUNC(func_00125440);
+INCLUDE_ASM(func_00125440);
 
-ASM_FUNC(func_00125750);
+INCLUDE_ASM(func_00125750);
 
-ASM_FUNC(func_001259D8);
+INCLUDE_ASM(func_001259D8);
 
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst)
 {
@@ -1654,9 +1655,9 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
     }
 }
 
-ASM_FUNC(func_00125BF0);
+INCLUDE_ASM(func_00125BF0);
 
-ASM_FUNC(func_00125C90);
+INCLUDE_ASM(func_00125C90);
 
 void DrawPlacedObject(PlacedObject* self, void* b, void* m)
 {
@@ -1682,9 +1683,9 @@ INCLUDE_RODATA(D_002499F4);
 
 INCLUDE_RODATA(jtbl_00249A00);
 
-ASM_FUNC(func_00126270);
+INCLUDE_ASM(func_00126270);
 
-ASM_FUNC(func_001268B8);
+INCLUDE_ASM(func_001268B8);
 
 void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 {
@@ -1705,7 +1706,7 @@ void SetObjectRecordValue(PlacedObject* state, u32 value)
 	*(u32*)(state->sub22C + 0x38) |= 2;
 }
 
-ASM_FUNC(func_00126AC8);
+INCLUDE_ASM(func_00126AC8);
 
 void SetObjectTreeRecordsValue(PlacedObject* object, s32 value)
 {
@@ -1735,11 +1736,24 @@ void EnsureObjectWorldNode(PlacedObject* self)
     }
 }
 
-ASM_FUNC(func_00126CB8);
+INCLUDE_ASM(func_00126CB8);
 
-ASM_FUNC(func_00126D60);
+void func_00126D60(Collider* self, f32 time)
+{
+    if (IsObjectAttached(self)) {
+        EnsureObjectWorldNode(self);
+        f32 rate;
+        if (time == 0.0f) {
+            f32 zero = 0.0f;
+            rate = zero <? -self->f298->level - 0.0001f;
+        } else {
+            rate = -1.0f / time;
+        }
+        self->f298->rate = rate;
+    }
+}
 
-ASM_FUNC(func_00126DE8);
+INCLUDE_ASM(func_00126DE8);
 
 void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 {
@@ -1900,7 +1914,12 @@ void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z)
     self->desc02()->m21(self, (Vec02*)v);
 }
 
-ASM_FUNC(func_00127628);
+void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local)
+{
+    Vec02 v;
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(*local));
+    self->desc02()->m20(self, &v);
+}
 
 ASM_FUNC(func_00127678);
 
@@ -1939,17 +1958,17 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
     }
 }
 
-ASM_FUNC(func_001278A8);
+INCLUDE_ASM(func_001278A8);
 
-ASM_FUNC(func_00127B20);
+INCLUDE_ASM(func_00127B20);
 
-ASM_FUNC(func_00127E60);
+INCLUDE_ASM(func_00127E60);
 
-ASM_FUNC(func_00128018);
+INCLUDE_ASM(func_00128018);
 
-ASM_FUNC(func_001280C0);
+INCLUDE_ASM(func_001280C0);
 
-ASM_FUNC(func_00128150);
+INCLUDE_ASM(func_00128150);
 
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self) {
     Attachment *p = self->f1EC;
@@ -1983,9 +2002,9 @@ void ReleaseAnimationDrivenAttachments(Player* self)
     }
 }
 
-ASM_FUNC(func_00128330);
+INCLUDE_ASM(func_00128330);
 
-ASM_FUNC(func_00128598);
+INCLUDE_ASM(func_00128598);
 
 s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
 {
@@ -2009,7 +2028,7 @@ void CreateTrackAttachment(BaseObject* item)
 
 INCLUDE_RODATA(D_00249A1C);
 
-ASM_FUNC(func_001289C0);
+INCLUDE_ASM(func_001289C0);
 
 void LoadFollowRecord(PlacedObject* self, void* a1)
 {
@@ -2075,9 +2094,9 @@ void ResolveFollowRecordObjects(PlacedObject* self)
     }
 }
 
-ASM_FUNC(func_00128E88);
+INCLUDE_ASM(func_00128E88);
 
-ASM_FUNC(func_00128FD0);
+INCLUDE_ASM(func_00128FD0);
 
 ASM_FUNC(func_001290B8);
 
@@ -3734,7 +3753,7 @@ s32 HasAnimationEventKind19(Animation* a0)
 
 INCLUDE_RODATA(D_00249B10);
 
-ASM_FUNC(func_0012C9E8);
+INCLUDE_ASM(func_0012C9E8);
 
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
     s32 i;
@@ -3781,7 +3800,7 @@ void* FindEntryByObjectId(Gr8B* self, void* key)
     return 0;
 }
 
-ASM_FUNC(func_0012CD78);
+INCLUDE_ASM(func_0012CD78);
 
 void GatherAnimationEventObjects(Animation* self, void* ctx, s32* outCount, s32** outArr)
 {
@@ -4606,7 +4625,7 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-ASM_FUNC(func_0012EBD8);
+INCLUDE_ASM(func_0012EBD8);
 
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {
@@ -4664,7 +4683,7 @@ void SettleListedPoseSources(AnimationPlayer* self)
     }
 }
 
-ASM_FUNC(func_0012F210);
+INCLUDE_ASM(func_0012F210);
 
 void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x)
 {
@@ -4814,7 +4833,7 @@ tail:
     return hit ^ 1;
 }
 
-ASM_FUNC(func_0012FB68);
+INCLUDE_ASM(func_0012FB68);
 
 void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 {
@@ -5108,9 +5127,9 @@ void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f3
     }
 }
 
-ASM_FUNC(func_00130540);
+INCLUDE_ASM(func_00130540);
 
-ASM_FUNC(func_00130748);
+INCLUDE_ASM(func_00130748);
 
 void SampleCurvePoints(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count, CurvePoint* out, f32 start, f32 end)
 {

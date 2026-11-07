@@ -27,6 +27,7 @@
 #include "warp_page.h"
 #include "ramp_profile.h"
 #include "asm_func.h"
+#include "fpu.h"
 
 extern void* const g_screenElements[];
 
@@ -1972,7 +1973,7 @@ void UpdatePromptElement(T217D_4C0* self)
     UpdateScreenElementSlide(self);
 }
 
-ASM_FUNC(func_001AE220);
+INCLUDE_ASM(func_001AE220);
 
 void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
 {
@@ -2005,7 +2006,49 @@ void InitLetterGlyphElement(T217D_5B0* self)
     PopFontScale(self->font);
 }
 
-ASM_FUNC(func_001AE5E0);
+// The curve func_001AE5E0 keeps in memory: where it starts, a floor stored as the word 0, and a rate.
+struct PopCurve {
+    f32 start;
+    union {
+        s32 none;
+        f32 floor;
+    };
+    f32 k;
+};
+
+void DrawLetterGlyphElement(ScreenElement* self)
+{
+    PopCurve curve;
+    LayoutBuilder out;
+    s32 tmp;
+    f32 size = 1.0f;
+    curve.start = D_002744A8;
+    curve.none = 0;
+    curve.k = (1.0f - D_002744A8) / (D_002744A4 * D_002744A4);
+    f32 peak = Fpu::Sqrt(D_002744A8 / curve.k);
+    f32 age = g_elapsedTime - self->since;
+    if (!(peak + D_002744A4 < age)) {
+        f32 t = age - peak;
+        size = (curve.floor >? curve.start + t * (t * curve.k));
+    }
+    size *= self->scale;
+    if (!(size <= 0.0f)) {
+        PushFontScale(self->font, size, size);
+        char* text = self->text;
+        f32 w = MeasureFontString(self->font, text);
+        Font* font = self->font;
+        f32 h = (f32)font->height * font->sy;
+        s32 held = self->color;
+        out.Pos(self->x, self->y);
+        out.Size(w, h);
+        tmp = held;
+        out.Color(&tmp);
+        out.FlagA(0);
+        out.FlagB(0);
+        DrawFontString(self->font, text, &out, 0, &g_gsPacketWriter);
+        PopFontScale(self->font);
+    }
+}
 
 f32 D_002744AC = 0.7f;
 

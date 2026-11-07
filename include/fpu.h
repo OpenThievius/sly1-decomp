@@ -3,7 +3,8 @@
 // project. Retail's bare sqrt.s instructions behave as an inline-assembly helper does: the
 // compiler never moves code past them and never gives the result its input's register, which
 // neither __builtin_sqrtf (a NaN check and a call to sqrtf) nor -ffast-math reproduces
-// (docs/TOOLCHAIN.md). AGENTS.md allows inline assembly here and nowhere else.
+// (docs/TOOLCHAIN.md). AGENTS.md allows it as one of the shared inline-assembly helpers. (max.s
+// and min.s need none: they are g++'s `>?` and `<?` operators.)
 #ifndef FPU_H
 #define FPU_H
 

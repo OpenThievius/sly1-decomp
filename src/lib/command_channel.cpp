@@ -287,7 +287,7 @@ s32 SendCommandFromInterrupt(u32 cmd, void* packet, s32 size, void* data, s32 ad
     return SendCommandPacket(cmd, 1, (Header_1FA4F8*)packet, size, data, addr, count);
 }
 
-ASM_FUNC(func_001FA6B0);
+INCLUDE_ASM(func_001FA6B0);
 
 ASM_FUNC(func_001FA7D8);
 

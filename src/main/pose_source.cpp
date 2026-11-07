@@ -854,7 +854,7 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
     }
 }
 
-ASM_FUNC(func_0011F6B0);
+INCLUDE_ASM(func_0011F6B0);
 
 void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
@@ -972,7 +972,7 @@ void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32
         ((VectorCurveToldFn)other->desc02()->m28)(other, e, f);
 }
 
-ASM_FUNC(func_0011FC90);
+INCLUDE_ASM(func_0011FC90);
 
 void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
@@ -986,7 +986,7 @@ void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* 
         ((VectorCurveToldFn)other->desc02()->m28)(other, a3, a4);
 }
 
-ASM_FUNC(func_0011FE40);
+INCLUDE_ASM(func_0011FE40);
 
 void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 {
@@ -1131,9 +1131,9 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-ASM_FUNC(func_00120470);
+INCLUDE_ASM(func_00120470);
 
-ASM_FUNC(func_00120700);
+INCLUDE_ASM(func_00120700);
 
 void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
@@ -1524,17 +1524,17 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     }
 }
 
-ASM_FUNC(func_00121760);
+INCLUDE_ASM(func_00121760);
 
 INCLUDE_RODATA(jtbl_00249990);
 
-ASM_FUNC(func_001218C0);
+INCLUDE_ASM(func_001218C0);
 
-ASM_FUNC(func_00121C48);
+INCLUDE_ASM(func_00121C48);
 
 INCLUDE_RODATA(jtbl_002499C0);
 
-ASM_FUNC(func_00121DE0);
+INCLUDE_ASM(func_00121DE0);
 
 void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 {
@@ -1552,9 +1552,9 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     }
 }
 
-ASM_FUNC(func_00122550);
+INCLUDE_ASM(func_00122550);
 
-ASM_FUNC(func_001225D0);
+INCLUDE_ASM(func_001225D0);
 
 void SettlePoseSourceModes(Attachment* self)
 {
@@ -1699,9 +1699,9 @@ void InitIdentityPoseSource(T2195_5D8* self)
     d2[2] = src[2];
 }
 
-ASM_FUNC(func_00122A80);
+INCLUDE_ASM(func_00122A80);
 
-ASM_FUNC(func_00122B30);
+INCLUDE_ASM(func_00122B30);
 
 void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
 {
@@ -1718,7 +1718,7 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     }
 }
 
-ASM_FUNC(func_00122CB0);
+INCLUDE_ASM(func_00122CB0);
 
 f32 GetIdentityPoseIndexedValue(void)
 {
@@ -1732,7 +1732,7 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
     self->f20 = 0.25f;
 }
 
-ASM_FUNC(func_00122DE0);
+INCLUDE_ASM(func_00122DE0);
 
 void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 {

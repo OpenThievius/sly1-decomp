@@ -328,7 +328,7 @@ f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
 
 INCLUDE_RODATA(D_0024A860);
-ASM_FUNC(func_0016F608);
+INCLUDE_ASM(func_0016F608);
 
 void LoadCollider(void* self);
 void ResolveObjectLinks(void* self, s32 id, void* table);
@@ -344,12 +344,12 @@ void LoadPlayer(Player* self)
     g_player = self;
 }
 
-ASM_FUNC(func_0016F810);
+INCLUDE_ASM(func_0016F810);
 
-ASM_FUNC(func_0016FD70);
+INCLUDE_ASM(func_0016FD70);
 
 INCLUDE_RODATA(jtbl_0024A870);
-ASM_FUNC(func_001701B0);
+INCLUDE_ASM(func_001701B0);
 
 void ComputePlayerSlideRates(Player* self, Contact03* out)
 {
@@ -439,7 +439,7 @@ void ApplyPendingPlayerStateRequest(Player* self)
     }
 }
 
-ASM_FUNC(func_00170660);
+INCLUDE_ASM(func_00170660);
 
 extern f32 D_00274AD0[];
 
@@ -463,20 +463,20 @@ s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
     return 0;
 }
 
-ASM_FUNC(func_00170820);
+INCLUDE_ASM(func_00170820);
 
 INCLUDE_RODATA(jtbl_0024A8A0);
 INCLUDE_RODATA(jtbl_0024A8F0);
 INCLUDE_RODATA(jtbl_0024A930);
-ASM_FUNC(func_00170960);
+INCLUDE_ASM(func_00170960);
 
-ASM_FUNC(func_00171180);
+INCLUDE_ASM(func_00171180);
 
-ASM_FUNC(func_00171238);
+INCLUDE_ASM(func_00171238);
 
-ASM_FUNC(func_001719E8);
+INCLUDE_ASM(func_001719E8);
 
-ASM_FUNC(func_00171C80);
+INCLUDE_ASM(func_00171C80);
 
 s32 AimPlayerAtTarget(void* self);
 s32 func_00171C80(void* self, void* p, void* part);
@@ -558,9 +558,9 @@ void ReleasePlayerToState2(Player* self)
     }
 }
 
-ASM_FUNC(func_00172078);
+INCLUDE_ASM(func_00172078);
 
-ASM_FUNC(func_001721B0);
+INCLUDE_ASM(func_001721B0);
 
 void RecomputeTurningColliderFrame(Player* self);
 void func_001C4618(Player* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
@@ -897,9 +897,9 @@ s32 GetPlayerContactMode(Player* self)
 }
 
 INCLUDE_RODATA(jtbl_0024A9D0);
-ASM_FUNC(func_00172EE0);
+INCLUDE_ASM(func_00172EE0);
 
-ASM_FUNC(func_001733B8);
+INCLUDE_ASM(func_001733B8);
 
 
 void HandleSwitchedColliderActivation(void* a, void* b);
@@ -914,19 +914,19 @@ void SetPlayerTracked(Player* a, void* b)
     ShowModeLabel(id);
 }
 
-ASM_FUNC(func_00173750);
+INCLUDE_ASM(func_00173750);
 
 INCLUDE_RODATA(jtbl_0024A9F0);
 INCLUDE_RODATA(jtbl_0024AA10);
 INCLUDE_RODATA(jtbl_0024AA60);
 INCLUDE_RODATA(jtbl_0024AAB0);
-ASM_FUNC(func_00173888);
+INCLUDE_ASM(func_00173888);
 
 INCLUDE_RODATA(jtbl_0024AB00);
-ASM_FUNC(func_00174808);
+INCLUDE_ASM(func_00174808);
 
 INCLUDE_RODATA(jtbl_0024AB40);
-ASM_FUNC(func_00174E20);
+INCLUDE_ASM(func_00174E20);
 
 
 void func_001C4D60(Player* self, void* a1, s32 zero);
@@ -1021,7 +1021,7 @@ INCLUDE_RODATA(jtbl_0024AD80);
 INCLUDE_RODATA(jtbl_0024AE70);
 INCLUDE_RODATA(jtbl_0024AE90);
 INCLUDE_RODATA(jtbl_0024AEB0);
-ASM_FUNC(func_00175170);
+INCLUDE_ASM(func_00175170);
 
 void IgnorePlayerArgument(void)
 {
@@ -1078,7 +1078,7 @@ s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
     return r;
 }
 
-ASM_FUNC(func_00177990);
+INCLUDE_ASM(func_00177990);
 
 s32 IsTopCameraController(u8* p);
 
@@ -1210,7 +1210,7 @@ void RegisterPlayer(Player* self)
     RegisterSwitchedCollider(self);
 }
 
-ASM_FUNC(func_00178068);
+INCLUDE_ASM(func_00178068);
 
 // NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
 
@@ -1312,7 +1312,7 @@ void QueuePlayerSecondActivation(Player* a0, InteractTarget* a1)
 
 ASM_FUNC(func_001782A8);
 
-ASM_FUNC(func_001782C0);
+INCLUDE_ASM(func_001782C0);
 
 
 void MoveCollider(void* self, void* b);
@@ -1377,9 +1377,9 @@ void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
 }
 
 INCLUDE_RODATA(D_0024AFA0);
-ASM_FUNC(func_00178678);
+INCLUDE_ASM(func_00178678);
 
-ASM_FUNC(func_001788F0);
+INCLUDE_ASM(func_001788F0);
 
 ASM_FUNC(func_00178D18);
 
@@ -1524,4 +1524,4 @@ done:
 }
 
 INCLUDE_RODATA(jtbl_0024AFB0);
-ASM_FUNC(func_001790B8);
+INCLUDE_ASM(func_001790B8);

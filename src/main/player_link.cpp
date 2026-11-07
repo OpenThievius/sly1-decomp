@@ -48,11 +48,11 @@ void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2)
     }
 }
 
-ASM_FUNC(func_001CC490);
+INCLUDE_ASM(func_001CC490);
 
-ASM_FUNC(func_001CC818);
+INCLUDE_ASM(func_001CC818);
 
-ASM_FUNC(func_001CCF98);
+INCLUDE_ASM(func_001CCF98);
 
 struct LinkTargetHolder { s32 pad0; void* target; };
 void AddColliderForce(void* target, void* slot);
@@ -64,9 +64,9 @@ void SyncPlayerTarget(Player* self)
     AddColliderTorque(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
 }
 
-ASM_FUNC(func_001CD0C8);
+INCLUDE_ASM(func_001CD0C8);
 
-ASM_FUNC(func_001CD6C0);
+INCLUDE_ASM(func_001CD6C0);
 
 s32 IsObjectAttached(BaseObject* obj);
 void SetContactPairFlags(World* world, Contacts03* a, Contacts03* b, s32 set, s32 clr);
@@ -91,7 +91,7 @@ void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
     self->f4B8 = 0;
 }
 
-ASM_FUNC(func_001CD870);
+INCLUDE_ASM(func_001CD870);
 
 struct HeadingVector {
     f32 x;
@@ -109,9 +109,9 @@ void GetLinkedObjectHeading(u8* a0, f32* a1)
     *a1 = ArctangentOfRatio(v.y, v.x);
 }
 
-ASM_FUNC(func_001CDB70);
+INCLUDE_ASM(func_001CDB70);
 
-ASM_FUNC(func_001CDD98);
+INCLUDE_ASM(func_001CDD98);
 
 void GetPlacedObjectRotationAt(Player* self, f32 t, void* out, void* extra);
 void GetTurningColliderPose(Player* self, f32 t, void* out, void* extra);

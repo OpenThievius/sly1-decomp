@@ -98,7 +98,7 @@ s32 SyncDiscNCommand(s32 mode);
 s32 SyncDiscSCommand(s32 mode);
 s32 BeginDiscSCommand(s32 command);
 
-ASM_FUNC(func_00202D08);
+INCLUDE_ASM(func_00202D08);
 
 void WaitDiscTicks(u16 ticks)
 {

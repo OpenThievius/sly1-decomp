@@ -17,12 +17,14 @@
 #include "key_record.h"
 #include "key_id.h"
 #include "base_object.h"
+#include "fpu.h"
 #include "asm_func.h"
 #include "point_object.h"
 #include "id_linked_object.h"
 #include "game_progress.h"
 #include "shapes.h"
 #include "property_descriptor.h"
+#include "vu0.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -617,11 +619,11 @@ void SetColliderPartListed(Collider* self, s32 flag)
     sub->desc03()->m32(sub);
 }
 
-ASM_FUNC(func_001B7D00);
+INCLUDE_ASM(func_001B7D00);
 
-ASM_FUNC(func_001B7F78);
+INCLUDE_ASM(func_001B7F78);
 
-ASM_FUNC(func_001B8148);
+INCLUDE_ASM(func_001B8148);
 
 ASM_FUNC(func_001B8420);
 
@@ -687,18 +689,18 @@ void NotifyContactHandlers(Collider* self)
     }
 }
 
-ASM_FUNC(func_001B8B30);
+INCLUDE_ASM(func_001B8B30);
 
 INCLUDE_RODATA(jtbl_0024D280);
-ASM_FUNC(func_001B8B90);
+INCLUDE_ASM(func_001B8B90);
 
 ASM_FUNC(func_001B8FE0);
 
 ASM_FUNC(func_001B8FE8);
 
-ASM_FUNC(func_001B9058);
+INCLUDE_ASM(func_001B9058);
 
-ASM_FUNC(func_001B91A8);
+INCLUDE_ASM(func_001B91A8);
 
 void StepCollider(Collider* self, f32 t)
 {
@@ -740,7 +742,7 @@ void SetColliderMass(Collider* self, f32 v)
     ComputeColliderInverseInertia(self);
 }
 
-ASM_FUNC(func_001B9448);
+INCLUDE_ASM(func_001B9448);
 
 void DropColliderContacts(Collider* self, s32 mode)
 {
@@ -796,7 +798,7 @@ void SaveColliderPreviousPosition(Collider* self)
     self->v370 = self->v140;
 }
 
-ASM_FUNC(func_001B9690);
+INCLUDE_ASM(func_001B9690);
 
 void SetColliderRotation(Collider* self, Mat02* src)
 {
@@ -812,13 +814,13 @@ void SetColliderRotation(Collider* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
-ASM_FUNC(func_001B9860);
+INCLUDE_ASM(func_001B9860);
 
 LINKER_REMNANT(func_001B9938);
 
-ASM_FUNC(func_001B9940);
+INCLUDE_ASM(func_001B9940);
 
-ASM_FUNC(func_001B99F0);
+INCLUDE_ASM(func_001B99F0);
 
 LINKER_REMNANT(func_001B9AA8);
 
@@ -876,11 +878,21 @@ void ReparentCollider(Collider* self, BaseObject* p)
     ResolveContactHandler(self);
 }
 
-ASM_FUNC(func_001B9C80);
+void ReframePlacedObject(void* self, PlacedObject* frame);
+
+void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
+{
+    Vec02 a;
+    Vec02 b;
+    ReframePlacedObject(self, frame);
+    Vu0::Q(a) = Vu0::Rotate(frame->rot, Vu0::Q(self->v440));
+    Vu0::Q(b) = Vu0::Rotate(frame->rot, Vu0::Q(self->v460));
+    SetColliderAnchors(self, self->mode450, &a, self->mode470, &b);
+}
 
 LINKER_REMNANT(func_001B9D08);
 
-ASM_FUNC(func_001B9D10);
+INCLUDE_ASM(func_001B9D10);
 
 LINKER_REMNANT(func_001B9F28);
 
@@ -961,9 +973,9 @@ void CopyCollider(Collider* self, Collider* other)
     self->flags538 |= 0x20000000000ULL;
 }
 
-ASM_FUNC(func_001BA2E8);
+INCLUDE_ASM(func_001BA2E8);
 
-ASM_FUNC(func_001BA430);
+INCLUDE_ASM(func_001BA430);
 
 void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d)
 {
@@ -1005,7 +1017,7 @@ tail:
     ClearRootTries(o);
 }
 
-ASM_FUNC(func_001BA5B0);
+INCLUDE_ASM(func_001BA5B0);
 
 void IgnoreColliderAttachmentStep(Collider* self, Attach03* node, f32 dt)
 {
@@ -1106,9 +1118,25 @@ void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
     *dst = *D_002746E0[index].quad;
 }
 
-ASM_FUNC(func_001BB058);
+void SetColliderTurnAnchorPreset(Collider* self, s32 index)
+{
+    Vec02 v;
+    Vec02 local;
+    s32 mode;
+    GetAnchorPreset(index, &mode, &local);
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(local));
+    SetColliderAnchors(self, mode, &v, self->mode470, &self->v460);
+}
 
-ASM_FUNC(func_001BB0C8);
+void SetColliderMoveAnchorPreset(Collider* self, s32 index)
+{
+    Vec02 v;
+    Vec02 local;
+    s32 mode;
+    GetAnchorPreset(index, &mode, &local);
+    Vu0::Q(v) = Vu0::Rotate(self->rot, Vu0::Q(local));
+    SetColliderAnchors(self, self->mode450, &self->v440, mode, &v);
+}
 
 void SetColliderFlagNibble32(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
 
@@ -1362,9 +1390,11 @@ s32 RequestColliderLaunch(Collider* self)
     return 0;
 }
 
-ASM_FUNC(func_001BBC38);
+s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
 
-ASM_FUNC(func_001BBEB8);
+INCLUDE_ASM(func_001BBC38);
+
+INCLUDE_ASM(func_001BBEB8);
 
 void MoveCollider(Collider* self, void* b, f32 x)
 {
@@ -1374,9 +1404,21 @@ void MoveCollider(Collider* self, void* b, f32 x)
     MovePlacedObject(self, x, b);
 }
 
-ASM_FUNC(func_001BC0E0);
+INCLUDE_ASM(func_001BC0E0);
 
-ASM_FUNC(func_001BC260);
+void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
+{
+    f32 roots[4];
+    f32 m = p[2] >? self->v140.z;
+    out[2] = Fpu::Sqrt(self->gravity.z * ((m + a - self->v140.z) * -2.0f));
+    SolveQuadratic(roots, self->gravity.z * 0.5f, out[2], self->v140.z - p[2]);
+    f32 dx = p[0] - self->v140.x;
+    f32 r0 = roots[0];
+    f32 r1 = roots[1];
+    f32 t = r1 >? r0;
+    out[0] = dx / t;
+    out[1] = (p[1] - self->v140.y) / t;
+}
 
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {
@@ -1386,7 +1428,7 @@ s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
     return shape->eventFlags != 0;
 }
 
-ASM_FUNC(func_001BC368);
+INCLUDE_ASM(func_001BC368);
 
 void ExtractContactsByPartMode(Collider* self, Contact03** out)
 {
@@ -1432,7 +1474,7 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
     }
 }
 
-ASM_FUNC(func_001BC670);
+INCLUDE_ASM(func_001BC670);
 
 void SetColliderFlagBit52(Collider* self, u32 flag)
 {
@@ -1458,11 +1500,11 @@ void NumberColliderParts(Collider* self, s32* index, Collider** list)
 
 ASM_FUNC(func_001BC7F8);
 
-ASM_FUNC(func_001BC828);
+INCLUDE_ASM(func_001BC828);
 
-ASM_FUNC(func_001BC978);
+INCLUDE_ASM(func_001BC978);
 
-ASM_FUNC(func_001BCD00);
+INCLUDE_ASM(func_001BCD00);
 
 s32 CollectGroupItems(s32 count, Collider** roots, s32 cap, Contact03** out)
 {
@@ -2262,9 +2304,9 @@ LINKER_REMNANT(func_001BF1E8);
 
 s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
 
-ASM_FUNC(func_001BF200);
+INCLUDE_ASM(func_001BF200);
 
-ASM_FUNC(func_001BF2E0);
+INCLUDE_ASM(func_001BF2E0);
 
 ASM_FUNC(func_001BF398);
 
@@ -2280,7 +2322,7 @@ void* GetSoundListenerPosition(void)
     return r;
 }
 
-ASM_FUNC(func_001BF428);
+INCLUDE_ASM(func_001BF428);
 
 ListenerDistanceFn ChooseSoundListenerFunction(void)
 {
@@ -2444,7 +2486,7 @@ void StartSoundRecordVoice(PlayingSound* self, s32 idx)
     }
 }
 
-ASM_FUNC(func_001BFBF8);
+INCLUDE_ASM(func_001BFBF8);
 
 void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, s32 p5) {
@@ -2838,7 +2880,7 @@ void PlaySoundWithWanderingPitch(void)
     }
 }
 
-ASM_FUNC(func_001C0F30);
+INCLUDE_ASM(func_001C0F30);
 
 void StartIdLinkedObject(IdLinkedObject* self)
 {

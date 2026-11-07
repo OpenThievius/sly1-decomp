@@ -305,7 +305,7 @@ s32 func_00204DB8(void)
 }
 
 ASM_FUNC(func_00204E20);
-ASM_FUNC(func_00204EC8);
+INCLUDE_ASM(func_00204EC8);
 LINKER_REMNANT(func_00204F48);
 
 /* The names of a slot's states and of a command's results, which no function left in retail

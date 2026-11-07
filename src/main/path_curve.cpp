@@ -94,7 +94,7 @@ void FillSplinePathLengths(SplinePathCurve* self);
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
-ASM_FUNC(func_0014D0A8);
+INCLUDE_ASM(func_0014D0A8);
 
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x)
 {
@@ -129,12 +129,12 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
     return i;
 }
 
-ASM_FUNC(func_0014D280);
+INCLUDE_ASM(func_0014D280);
 
 INCLUDE_RODATA(D_00249FBC);
-ASM_FUNC(func_0014D3A8);
+INCLUDE_ASM(func_0014D3A8);
 
-ASM_FUNC(func_0014D680);
+INCLUDE_ASM(func_0014D680);
 
 void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
 {
@@ -194,7 +194,7 @@ s32 FindPathCurveSegmentByLength(PathCurve* self, f32 t, f32* a1, f32* a2)
     return FindPathCurveSegment(t, self->count, self->lengths, self->wrap, a1, a2);
 }
 
-ASM_FUNC(func_0014DA98);
+INCLUDE_ASM(func_0014DA98);
 
 f32 GetPathCurveEndTime(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->times; return *(f32*)(address - 4); }
 
@@ -386,7 +386,7 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
     }
 }
 
-ASM_FUNC(func_0014E5B8);
+INCLUDE_ASM(func_0014E5B8);
 
 void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
 {
@@ -397,9 +397,9 @@ void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
     }
 }
 
-ASM_FUNC(func_0014E710);
+INCLUDE_ASM(func_0014E710);
 
-ASM_FUNC(func_0014E828);
+INCLUDE_ASM(func_0014E828);
 
 f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
 {
@@ -440,7 +440,7 @@ void FillSplinePathLengths(SplinePathCurve* self)
     }
 }
 
-ASM_FUNC(func_0014EB10);
+INCLUDE_ASM(func_0014EB10);
 
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {

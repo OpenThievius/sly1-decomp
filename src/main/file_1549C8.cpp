@@ -823,7 +823,7 @@ void InitEffectSpawner(EffectSpawner* self)
     SetListLinkOffset(self->list314,0x320);
 }
 
-ASM_FUNC(func_00154C80);
+INCLUDE_ASM(func_00154C80);
 
 void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src)
 {
@@ -912,7 +912,7 @@ tail:
 
 extern const f32 D_0024A120 = 3.4028235e+38f;
 
-ASM_FUNC(func_00155270);
+INCLUDE_ASM(func_00155270);
 
 void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 {
@@ -963,9 +963,9 @@ void AddSpawnRangeEntry(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
     AddRangeEntry(p+16,a,b,x,y,z,w,self);
 }
 
-ASM_FUNC(func_00155868);
+INCLUDE_ASM(func_00155868);
 
-ASM_FUNC(func_00155AB0);
+INCLUDE_ASM(func_00155AB0);
 
 void InheritFlaggedAncestorValue(EffectSpawner* self)
 {
@@ -1094,7 +1094,7 @@ void SetOwnedSpawnRecordKind(void* a0, s32 a1)
     SetSpawnRecordKind(r, a1);
 }
 
-ASM_FUNC(func_00156288);
+INCLUDE_ASM(func_00156288);
 
 void SendPointEventToWorldListener(Quad16* a0, f32 f)
 {
@@ -1111,15 +1111,15 @@ void SendPointEventToWorldListener(Quad16* a0, f32 f)
 
 INCLUDE_RODATA(jtbl_0024A130);
 
-ASM_FUNC(func_00156718);
+INCLUDE_ASM(func_00156718);
 
-ASM_FUNC(func_00156F08);
+INCLUDE_ASM(func_00156F08);
 
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
-ASM_FUNC(func_00157098);
+INCLUDE_ASM(func_00157098);
 
-ASM_FUNC(func_00157248);
+INCLUDE_ASM(func_00157248);
 
 void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
@@ -1190,13 +1190,13 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
     }
 }
 
-ASM_FUNC(func_001575D8);
+INCLUDE_ASM(func_001575D8);
 
-ASM_FUNC(func_001579B0);
+INCLUDE_ASM(func_001579B0);
 
 INCLUDE_RODATA(D_0024A144);
 
-ASM_FUNC(func_00157B88);
+INCLUDE_ASM(func_00157B88);
 
 void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
 {
@@ -1303,7 +1303,7 @@ void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14
     }
 }
 
-ASM_FUNC(func_00158288);
+INCLUDE_ASM(func_00158288);
 
 ASM_FUNC(func_001583E8);
 
@@ -1586,7 +1586,7 @@ s32 GetOrCreateSoundParams(void* self)
 
 INCLUDE_RODATA(jtbl_0024A150);
 
-ASM_FUNC(func_001590A0);
+INCLUDE_ASM(func_001590A0);
 
 void FindOrBuildMemberGroup(void** out, void* self)
 {
@@ -2155,7 +2155,7 @@ void DrawC60Object(C60* self, void* arg1, void* arg2)
     DrawPlacedObject(self, arg1, f.m40);
 }
 
-ASM_FUNC(func_0015AA50);
+INCLUDE_ASM(func_0015AA50);
 
 void InitObjectCycler(ObjectCycler* self)
 {
@@ -2251,7 +2251,7 @@ void StartObjectCycler(ObjectCycler* self)
 
 INCLUDE_RODATA(jtbl_0024A190);
 
-ASM_FUNC(func_0015AF50);
+INCLUDE_ASM(func_0015AF50);
 
 void UpdateObjectCycler(ObjectCycler* self)
 {
@@ -2434,15 +2434,15 @@ INCLUDE_RODATA(jtbl_0024A1F0);
 extern const FloatPair2 D_0024A210 = {0.0f, 4.73242188f};
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
-ASM_FUNC(func_0015B7B8);
+INCLUDE_ASM(func_0015B7B8);
 
-ASM_FUNC(func_0015BC78);
+INCLUDE_ASM(func_0015BC78);
 
-ASM_FUNC(func_0015BD48);
+INCLUDE_ASM(func_0015BD48);
 
-ASM_FUNC(func_0015BEF0);
+INCLUDE_ASM(func_0015BEF0);
 
-ASM_FUNC(func_0015BFC0);
+INCLUDE_ASM(func_0015BFC0);
 
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
@@ -3250,7 +3250,7 @@ f32 MeasureTextHeight(TextReader* self)
     return width * (f32)lines;
 }
 
-ASM_FUNC(func_0015E1F0);
+INCLUDE_ASM(func_0015E1F0);
 
 void MeasureText(void* self, f32 f, f32* out1, f32* out2)
 {
@@ -3300,7 +3300,6 @@ void DrawAlignedText(TextReader* self, Layout_137228* p, s32 x, s32 y)
     Font* started = 0;
     f32 half = 0.5f;
     RewindTextReader(self);
-    s32 right = 2;
     f32* fp = f;
     while ((n = ReadTextChar(self)) != 0) {
         if (n == 10) {
@@ -3314,7 +3313,7 @@ void DrawAlignedText(TextReader* self, Layout_137228* p, s32 x, s32 y)
                 left = p->x;
             } else {
                 f32 g = *fp;
-                if (p->f14 == right)
+                if (p->f14 == 2)
                     left = (p->x + p->w) - g;
                 else
                     left = p->x + (p->w - g) * half;
@@ -3344,7 +3343,7 @@ void UploadAllFontImages(void)
 
 LINKER_REMNANT(func_0015E678);
 
-ASM_FUNC(func_0015E6A8);
+INCLUDE_ASM(func_0015E6A8);
 
 void InitRenderFrames(void)
 {

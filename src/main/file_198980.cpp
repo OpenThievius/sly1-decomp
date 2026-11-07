@@ -30,6 +30,7 @@
 #include "screen_element.h"
 #include "step_sequence.h"
 #include "asm_func.h"
+#include "vu0.h"
 void InitCollider(void* self);
 void PostLoadPlacedObject(void* self);
 void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
@@ -299,7 +300,7 @@ void StartObjectSet(ObjectSet* self)
     }
 }
 
-ASM_FUNC(func_00198BD8);
+INCLUDE_ASM(func_00198BD8);
 
 void CollectObjectSet(ObjectSet* self)
 {
@@ -542,7 +543,7 @@ void StartNumberedItem(NumberedItem* self)
     }
 }
 
-ASM_FUNC(func_00199698);
+INCLUDE_ASM(func_00199698);
 
 void SetNumberedItemFlag(NumberedItem* self)
 {
@@ -663,7 +664,7 @@ s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
     return 1;
 }
 
-ASM_FUNC(func_00199D08);
+INCLUDE_ASM(func_00199D08);
 
 void FlagAllNumberedItems(void)
 {
@@ -1085,17 +1086,17 @@ void CopyObjectGatherer(ObjectGatherer* self)
     self->q600 = tmp;
 }
 
-ASM_FUNC(func_0019B298);
+INCLUDE_ASM(func_0019B298);
 
 INCLUDE_RODATA(jtbl_0024C8D0);
 INCLUDE_RODATA(jtbl_0024C8F0);
-ASM_FUNC(func_0019B378);
+INCLUDE_ASM(func_0019B378);
 
 ASM_FUNC(func_0019BB10);
 
 ASM_FUNC(func_0019BB90);
 
-ASM_FUNC(func_0019BC40);
+INCLUDE_ASM(func_0019BC40);
 
 s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
@@ -1113,7 +1114,7 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
     return 1;
 }
 
-ASM_FUNC(func_0019BE80);
+INCLUDE_ASM(func_0019BE80);
 
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
@@ -1139,7 +1140,7 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
 }
 
 INCLUDE_RODATA(jtbl_0024C910);
-ASM_FUNC(func_0019C1C0);
+INCLUDE_ASM(func_0019C1C0);
 
 void RegisterC7CObject(BaseObject* obj)
 {
@@ -1265,7 +1266,7 @@ void StartC8BObject(C8B* self)
     self->f50 = 1;
 }
 
-ASM_FUNC(func_0019C9C8);
+INCLUDE_ASM(func_0019C9C8);
 
 INCLUDE_ASM(func_0019CC10);
 
@@ -1296,13 +1297,29 @@ void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z)
     self->f5C = z;
 }
 
-ASM_FUNC(func_0019CE50);
+// What func_0019CE50 reads: an object to place at a time (+0x18) and a point in its frame (+0x40).
+struct FramePoint_0019CE50 {
+    u8 pad0[0x18];
+    void* object;           // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+};
 
-ASM_FUNC(func_0019CEC0);
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 
-ASM_FUNC(func_0019CF68);
+void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
+{
+    Vec02 pos;
+    Mat02 rot;
+    ComputeObjectFrameAtTime(p->object, 0, &pos, &rot, 0, 0, t);
+    Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
+}
 
-ASM_FUNC(func_0019D0E0);
+INCLUDE_ASM(func_0019CEC0);
+
+INCLUDE_ASM(func_0019CF68);
+
+INCLUDE_ASM(func_0019D0E0);
 
 void TrackAimTargetObject(Player* self, void* x, void* y)
 {

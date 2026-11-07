@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 206/276 (74.6%), checked 2026-11-06
+// BYTES 206/276 (74.6%), checked 2026-11-07
 // NEAR: order: as func_001D5FA8; it passes a 12-byte stack struct as the pointer argument.
 #include "common.h"
 

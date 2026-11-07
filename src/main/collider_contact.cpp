@@ -75,11 +75,11 @@ f32 GetSurfacePairBounce(SurfacePair* p)
     return r;
 }
 
-ASM_FUNC(func_00185D20);
+INCLUDE_ASM(func_00185D20);
 
-ASM_FUNC(func_00185F48);
+INCLUDE_ASM(func_00185F48);
 
-ASM_FUNC(func_001860A8);
+INCLUDE_ASM(func_001860A8);
 
 void PushFreeSlot(u8* a, void* b);
 
@@ -95,9 +95,9 @@ void FreePooledContactChain(u8* self, Contact03* head)
     }
 }
 
-ASM_FUNC(func_00186230);
+INCLUDE_ASM(func_00186230);
 
-ASM_FUNC(func_00186320);
+INCLUDE_ASM(func_00186320);
 
 extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
@@ -169,7 +169,7 @@ s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* o
     return total;
 }
 
-ASM_FUNC(func_00186568);
+INCLUDE_ASM(func_00186568);
 
 void MoveMemory(void* dst, void* src, s32 size);
 
@@ -308,9 +308,9 @@ done:
 
 // The lowest float, read by func_00186BA8.
 extern const f32 D_0024B258 = -3.40282347e+38f;
-ASM_FUNC(func_00186BA8);
+INCLUDE_ASM(func_00186BA8);
 
-ASM_FUNC(func_00187260);
+INCLUDE_ASM(func_00187260);
 
 // A 0x30-byte hit CollectMeshHits gives: its point at 0x10, a float, a kind and a part.
 struct MeshHitEntry { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
@@ -328,9 +328,9 @@ void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5,
     }
 }
 
-ASM_FUNC(func_00187A88);
+INCLUDE_ASM(func_00187A88);
 
-ASM_FUNC(func_00187B60);
+INCLUDE_ASM(func_00187B60);
 
 
 s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
@@ -356,7 +356,7 @@ s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, vo
     return 1;
 }
 
-ASM_FUNC(func_00187D08);
+INCLUDE_ASM(func_00187D08);
 
 // func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
@@ -376,6 +376,6 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
     return 1;
 }
 
-ASM_FUNC(func_00187F40);
+INCLUDE_ASM(func_00187F40);
 
 INCLUDE_ASM(func_00188270);

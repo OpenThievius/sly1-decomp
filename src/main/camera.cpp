@@ -5,7 +5,9 @@
 #include "world.h"
 #include "camera.h"
 #include "pad_record.h"
+#include "fpu.h"
 #include "asm_func.h"
+#include "vu0.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
 extern void SetCameraFogStrength(void*);
@@ -356,13 +358,29 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
     ComputePolarOffset(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
 
-ASM_FUNC(func_00143180);
+INCLUDE_ASM(func_00143180);
 
-ASM_FUNC(func_00143208);
+INCLUDE_ASM(func_00143208);
 
-ASM_FUNC(func_001433E0);
+// What func_001433E0 resets: the offset ComputeOffsetBehindTarget gives (+0x250) and three
+// vectors after it.
+struct Tracking_001433E0 {
+    u8 pad0[0x250];
+    Quad16 offset;          // 0x250
+    Quad16 v260;            // 0x260
+    Quad16 v270;            // 0x270
+    Quad16 v280;            // 0x280
+};
 
-ASM_FUNC(func_00143418);
+void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_00143148* a2)
+{
+    ComputeOffsetBehindTarget(self, a1, a2, &self->offset);
+    Vu0::Q(self->v260) = Vu0::Zero();
+    Vu0::Q(self->v270) = Vu0::Zero();
+    Vu0::Q(self->v280) = Vu0::Zero();
+}
+
+INCLUDE_ASM(func_00143418);
 
 void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 {
@@ -377,7 +395,26 @@ void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
     out[3] = out[0] + 36864.0f;
 }
 
-ASM_FUNC(func_00143560);
+void func_00189F58(void* out, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+f32 func_002054F0(f32 x);
+
+void func_00143560(Camera* self)
+{
+    u8* s = (u8*)self;
+    f32 one = 1.0f;
+    f32 t = func_002054F0(self->f1C4 * 0.5f);
+    f32 inv = one / self->f1C4;
+    f32 w = *(f32*)(s + 0x1E0);
+    *(f32*)(s + 0x1F4) = t;
+    *(f32*)(s + 0x1F0) = t * w;
+    f32 d = w * w + one;
+    *(f32*)(s + 0xB0) = (one >? self->f1C0 * inv);
+    f32 q = t * Fpu::Sqrt(d);
+    *(f32*)(s + 0x1EC) = q * self->f1E4 + one;
+    func_00189F58(s + 0xC0, 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->f1E4, self->f1E8);
+    ComputeCameraFogTerms(self, (f32*)(s + 0x208), one);
+    func_00144540(self);
+}
 
 void InitCamera(Camera* self)
 {
@@ -564,7 +601,7 @@ done:
     return r;
 }
 
-ASM_FUNC(func_00143BE0);
+INCLUDE_ASM(func_00143BE0);
 
 void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {
@@ -620,9 +657,9 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
 
 ASM_FUNC(func_00144008);
 
-ASM_FUNC(func_00144128);
+INCLUDE_ASM(func_00144128);
 
-ASM_FUNC(func_001441C0);
+INCLUDE_ASM(func_001441C0);
 
 void UpdateCameraLocation(Camera* self)
 {
@@ -679,9 +716,9 @@ void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
     out[3] = r[3];
 }
 
-ASM_FUNC(func_001443C8);
+INCLUDE_ASM(func_001443C8);
 
-ASM_FUNC(func_00144540);
+INCLUDE_ASM(func_00144540);
 
 void WriteCameraMatricesPacket(u8* self)
 {
@@ -716,9 +753,9 @@ void PlaceCameraLookingAt(Camera* self, void* p, s32 q)
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-ASM_FUNC(func_00144978);
+INCLUDE_ASM(func_00144978);
 
-ASM_FUNC(func_00144AA0);
+INCLUDE_ASM(func_00144AA0);
 
 void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {
@@ -728,7 +765,7 @@ void SetCameraLookAnchor(Camera* self, Quad16* arg)
     *(Quad16*)self->f2D0 = *arg;
 }
 
-ASM_FUNC(func_00144BE8);
+INCLUDE_ASM(func_00144BE8);
 
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out)
 {
@@ -804,9 +841,9 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 
 ASM_FUNC(func_001453B0);
 
-ASM_FUNC(func_00145438);
+INCLUDE_ASM(func_00145438);
 
-ASM_FUNC(func_001454E0);
+INCLUDE_ASM(func_001454E0);
 
 void RequestCameraSnap(Camera* self, f32* src)
 {
@@ -827,9 +864,9 @@ void RequestPlainCameraSnap(void* p)
     RequestCameraSnap((Camera*)p, 0);
 }
 
-ASM_FUNC(func_00145610);
+INCLUDE_ASM(func_00145610);
 
-ASM_FUNC(func_00145718);
+INCLUDE_ASM(func_00145718);
 
 s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
 {
@@ -862,18 +899,18 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3
 // The file's one .rodata word, the largest float, which the original assembly func_00145950
 // loads.
 extern const f32 D_00249E4C = 3.4028235e+38f;
-ASM_FUNC(func_00145950);
+INCLUDE_ASM(func_00145950);
 
-ASM_FUNC(func_00145B68);
+INCLUDE_ASM(func_00145B68);
 
 s32 HasColliderSecondTree(void* unused, Collider* other)
 {
     return other->tree2.nodes != 0;
 }
 
-ASM_FUNC(func_00145DE8);
+INCLUDE_ASM(func_00145DE8);
 
-ASM_FUNC(func_00145E68);
+INCLUDE_ASM(func_00145E68);
 
 void PushCameraStackValue(Camera* self, s32 value)
 {
@@ -894,6 +931,6 @@ void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) 
 
 void RecordCameraTimestamp(Camera* obj) { obj->f218 = g_gameTime; }
 
-ASM_FUNC(func_00146038);
+INCLUDE_ASM(func_00146038);
 
 

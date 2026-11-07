@@ -67,11 +67,11 @@ void InitIdentityMatrix(Mat4* self)
 
 ASM_FUNC(func_00188628);
 
-ASM_FUNC(func_00188668);
+INCLUDE_ASM(func_00188668);
 
 LINKER_REMNANT(func_001886F8);
 
-ASM_FUNC(func_00188700);
+INCLUDE_ASM(func_00188700);
 
 ASM_FUNC(func_00188740);
 
@@ -130,7 +130,7 @@ void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle)
     mat->m[2][1] -= t;
 }
 
-ASM_FUNC(func_00188978);
+INCLUDE_ASM(func_00188978);
 
 void BuildEulerRotationMatrix(f32* in, f32* out)
 {
@@ -164,7 +164,7 @@ void BuildMatrixFromRotationAndTranslation(Quad16* a, Quad16* b, Quad16* dst)
     *(f32*)&dst[3].w[3] = 1.0f;
 }
 
-ASM_FUNC(func_00188B48);
+INCLUDE_ASM(func_00188B48);
 
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
 {
@@ -190,7 +190,7 @@ void GetMatrixRotationCosine(f32* p)
 	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
 
-ASM_FUNC(func_00188D28);
+INCLUDE_ASM(func_00188D28);
 
 LINKER_REMNANT(func_00188FD0);
 
@@ -215,7 +215,7 @@ void MatrixToEulerAngles(Mat4* self, Vec3* out)
 
 ASM_FUNC(func_001890A0);
 
-ASM_FUNC(func_00189150);
+INCLUDE_ASM(func_00189150);
 
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
 {
@@ -236,14 +236,14 @@ void VectorToAngles(Vec3* v, f32* a1, f32* a2)
     *a2 = ArctangentOfRatio(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }
 
-ASM_FUNC(func_001892A0);
+INCLUDE_ASM(func_001892A0);
 
 void BuildBasisFromX(void* self, void* value)
 {
     BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
 
-ASM_FUNC(func_00189378);
+INCLUDE_ASM(func_00189378);
 
 LINKER_REMNANT(func_00189430);
 
@@ -381,11 +381,11 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
 }
 
-ASM_FUNC(func_00189B18);
+INCLUDE_ASM(func_00189B18);
 
-ASM_FUNC(func_00189C28);
+INCLUDE_ASM(func_00189C28);
 
-ASM_FUNC(func_00189D38);
+INCLUDE_ASM(func_00189D38);
 
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
@@ -400,8 +400,8 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-ASM_FUNC(func_0018A008);
+INCLUDE_ASM(func_0018A008);
 
 INCLUDE_ASM(func_0018A040);
 
-ASM_FUNC(func_0018A160);
+INCLUDE_ASM(func_0018A160);

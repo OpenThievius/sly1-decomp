@@ -11,7 +11,8 @@ from the evidence in this game's bytes.
 
 ## What is counted
 
-The progress report's `matched_functions` and `matched_code` now include the listed functions.
+The progress report's `matched_functions` and `matched_code` include the listed functions of
+kinds `handwritten` and `remnant`; the kind `inline` is C still to match (below).
 The README table and `tools/progress.py` show the two apart:
 
     3,183 exact C, 670 original assembly, of 4,770 functions
@@ -78,6 +79,37 @@ outside a delay slot (462 functions matched in C have one).
 The MMI rule is evidence-based. Six functions that are matched in C contain `por`, the
 compiler's 128-bit `|`, so `por` proves nothing and is in `COMPILER_EMITS`. An instruction is
 added there only together with a function that is matched in C and contains it.
+
+### inline
+
+C with inline assembly (2026-11-07). An instruction the compiler cannot emit does not by itself
+make a function hand-written: in most of these functions it sits in code GCC shaped. The function
+has the compiler's own stack frame (`addiu $sp, $sp, -N` among its first four instructions, the
+same N freed at its return), saves and restores registers, calls with filled delay slots, and
+schedules the special instruction among its loads and stores; the special instructions are 1 to
+5% of it. The same short sequences recur across hundreds of functions (`lqc2`/`sqc2` around a
+vector, the three-term dot product `vmul.xyz vaddw.x vadday.x vmaddz.x`, `vwaitq vaddq.x
+qmfc2.ni`): a library of small inline-assembly helpers, called from C. So these functions were
+written in C, as retail's bare `sqrt.s` is (include/fpu.h's `Fpu::Sqrt`, AGENTS.md).
+
+- A function the rules above would call hand-written for a VU0, MMI or system instruction, or the
+  disassembler's mark, is `inline` when it has the compiler's frame. A frameless leaf stays
+  hand-written: its shape does not tell.
+- `max.s` and `min.s` are not evidence at all. g++ 2.95's GNU minimum and maximum operators
+  (`a <? b`, `a >? b`) emit them as ordinary instructions under the files' own flags, which the
+  scheduler moves and puts in branch delay slots as retail's are; func_001EAC68 is word for word
+  `scale = scale >? __builtin_fabsf(a)`. (`-ffast-math` also emits them from `?:`, but it changes
+  the bytes of functions already matched in 11 of the 18 files that hold them, so retail was not
+  built with it.) A function whose only special instructions are these is plain C.
+- The toolchain's `.S` members, a game-code tail jump and stores scheduled before the frame stay
+  hand-written.
+
+On 2026-11-07: 547 functions in US (533 of game code, 14 of the libraries), and one of PAL's
+own. They are C to match, not finished: `tools/progress.py` leaves them out of the count, their
+files include them with `INCLUDE_ASM` (not `ASM_FUNC`), and `tools/todo.py` lists them with the
+tag `inline` and the blocker `helper` until the shared helper headers for their VU0, MMI and
+system sequences exist (AGENTS.md). `tools/version_src.py todo` lists PAL's own one. The 31
+functions whose only special instructions were `max.s` and `min.s` are plain C.
 
 ### remnant
 

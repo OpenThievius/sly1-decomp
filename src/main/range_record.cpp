@@ -60,7 +60,7 @@ void InvalidateRangeRecordPacket(RangeRecord* self)
     self->fC0 = 0;
 }
 
-ASM_FUNC(func_001B1BF8);
+INCLUDE_ASM(func_001B1BF8);
 
 void LinkRangeRecord(RangeRecord* self, s32 key)
 {
@@ -95,9 +95,9 @@ void StoreRangeRecordFar(RangeRecord* o, f32 v)
     InvalidateRangeRecordPacket(o);
 }
 
-ASM_FUNC(func_001B1DE0);
+INCLUDE_ASM(func_001B1DE0);
 
-ASM_FUNC(func_001B1EC8);
+INCLUDE_ASM(func_001B1EC8);
 
 void StoreRangeRecordInner(RangeRecord* o, f32 v)
 {
@@ -155,13 +155,13 @@ s32 IsRangeRecordBodyCandidate(void* unused, Collider* o)
     return r;
 }
 
-ASM_FUNC(func_001B2140);
+INCLUDE_ASM(func_001B2140);
 
 // The literals func_001B2358 loads.
 extern const f32 D_0024D164 = -3.40282347e+38f;
 extern const f32 D_0024D168 = 3.40282347e+38f;
 
-ASM_FUNC(func_001B2358);
+INCLUDE_ASM(func_001B2358);
 
 void QueueRangeRecordPacket(RangeRecord* o)
 {

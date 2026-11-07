@@ -95,7 +95,7 @@ def included_asm():
     return names
 
 
-EXPECTED_MARKER = {"handwritten": "ASM_FUNC", "remnant": "LINKER_REMNANT"}
+EXPECTED_MARKER = {"handwritten": "ASM_FUNC", "inline": "INCLUDE_ASM", "remnant": "LINKER_REMNANT"}
 
 
 def marker_errors(files=None, table=None):

@@ -21,12 +21,16 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-07: the
-matching is in its long tail, the data mostly from C, the original assembly classified, every byte
-of code in a proved source file, PAL close behind US, and names and types well under way.
+C with inline assembly (547 functions, 344 KB) newly opened for matching, the rest of the matching
+in its long tail, the data mostly from C, the original assembly classified, every byte of code in a
+proved source file, PAL close behind US, and names and types well under way.
 
 1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-07,
-   79 US functions are left (78,688 bytes: 51 in game code, 28 in the libraries), 36 of them with
-   a near miss in `nonmatching/`. The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB,
+   657 US functions are left (US is at 60.01% of code). 547 of them (344 KB) are C with inline
+   assembly (item 3): compiled C around a few VU0, MMI or system instructions, matched with
+   shared helpers in `include/` (AGENTS.md). The other 110 are plain C: 79 (78,688 bytes: 51 in
+   game code, 28 in the libraries), 36 of them with a near miss in `nonmatching/`, and 31 whose
+   `max.s` and `min.s` are g++'s `>?` and `<?` operators. The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB,
    47% of what is left), is close but differs in code as well as registers: 9,338 instructions
    against retail's 9,348, 2,990 of them exact. Its header records why: GCC keeps the value 4 in
    one callee-saved register where retail rebuilds it, and every source form found that frees
@@ -42,12 +46,19 @@ of code in a proved source file, PAL close behind US, and names and types well u
    startup brings the compiler's static initialiser, which `config/us/generated.tsv` names. The
    reports count the bytes C defines as matched data (`config/us/c_data.tsv`). The rest of the
    data still comes from the disassembly.
-3. **Original assembly.** The functions that were not made from C (VU0 and multimedia
-   instructions, kernel and system instructions, code scheduled by hand, the disassembler's own
-   mark, the toolchain's own `.S` routines) and the linker's leftovers, in game code and in Sony's
-   libraries, are listed in `config/us/original_asm.tsv` and counted as finished, apart from the
-   exact C matches (docs/ASM_CLASSIFICATION.md; #18). PAL's own functions are classified in
-   `config/eu/original_asm.tsv`.
+3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
+   the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
+   code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are
+   listed in `config/us/original_asm.tsv` and counted as finished, apart from the exact C matches
+   (docs/ASM_CLASSIFICATION.md; #18): 311 functions on 2026-11-07. An audit that day found that
+   most of the 890 listed before were compiled C around a few instructions the compiler cannot
+   emit, which the original developers wrote as small inline-assembly helpers, as retail's bare
+   `sqrt.s` is: GCC's frame and scheduling around them, the same short sequences across hundreds
+   of functions. Those are kind `inline` in the table, C still to match with shared helpers
+   (include/fpu.h's `Fpu::Sqrt`; a VU0 header in progress), and no longer counted. The functions
+   listed for `max.s` or `min.s` alone are plain C: g++'s `>?` and `<?` operators emit them, and
+   func_001EAC68 is word for word one. PAL's own functions are
+   classified in `config/eu/original_asm.tsv`.
 4. **File boundaries, found in retail.** Where one source file ends and the next begins, from
    retail's own code: which functions share static data, how `.rodata` and `.data` group, and
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of

@@ -223,7 +223,7 @@ void StartModeWalkerObject(ModeWalker* self)
     base->icon = FindAnimRecord(0x36A);
 }
 
-ASM_FUNC(func_00181078);
+INCLUDE_ASM(func_00181078);
 
 void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 {
@@ -262,9 +262,9 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
 }
 
-ASM_FUNC(func_00181658);
+INCLUDE_ASM(func_00181658);
 
-ASM_FUNC(func_00181780);
+INCLUDE_ASM(func_00181780);
 
 void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 {
@@ -444,9 +444,9 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
 }
 
 INCLUDE_RODATA(D_0024B16C);
-ASM_FUNC(func_00181ED0);
+INCLUDE_ASM(func_00181ED0);
 
-ASM_FUNC(func_001821B0);
+INCLUDE_ASM(func_001821B0);
 
 void InitC24Object(C24* self)
 {
@@ -470,8 +470,8 @@ void StartC24Object(C24* self)
     self->x6E8->field_c = AllocateFrontMemory(0xC00);
 }
 
-ASM_FUNC(func_00182548);
+INCLUDE_ASM(func_00182548);
 
-ASM_FUNC(func_00182748);
+INCLUDE_ASM(func_00182748);
 
-ASM_FUNC(func_00182948);
+INCLUDE_ASM(func_00182948);

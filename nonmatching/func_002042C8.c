@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 480/484, checked 2026-11-06
+// SIZE 480/484, checked 2026-11-07
 /* NEAR: the pad library's slot opener (src/lib/pad.c, where it is INCLUDE_ASM). All but the
  * tail matches; retail stores the first DMA word right after marking the slot open and before
  * the other fields, and loads the reply's result last; here the compiler sinks that store to
