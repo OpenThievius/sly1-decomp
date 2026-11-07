@@ -19,8 +19,6 @@ src/lib/soft_float_single.c	-O2 -G0	2.9-ee-991111-01
 src/lib/unwind.c	-O2 -G0	2.9-ee-991111-01
 src/lib/throw.c	-O2 -G0 -fexceptions	2.9-ee-991111-01
 src/lib/00200000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
-src/lib/0020C000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
-src/lib/00210000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/double_to_u64.c	-O2 -G0	2.9-ee-991111-01
 src/lib/s64_to_double.c	-O2 -G0	2.9-ee-991111-01
 src/lib/s64_to_float.c	-O2 -G0	2.9-ee-991111-01
@@ -86,6 +84,10 @@ src/lib/file_20A190.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20D138.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20ADA0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20C1A0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_20DEE8.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_2115C0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_2117D0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_211B40.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/abort.c	-O2 -G0	2.9-ee-991111-01
 src/lib/errno.c	-O2 -G0	2.9-ee-991111-01
 src/lib/signal.c	-O2 -G0	2.9-ee-991111-01

@@ -151,3 +151,15 @@ D_0024F5A8 = 0x0024F5A8;
 D_0024F5C0 = 0x0024F5C0;
 D_0024F5D0 = 0x0024F5D0;
 D_0024F5E0 = 0x0024F5E0;
+// bytes) end at 0x2793EC; after the padding to 16, 16 zero bytes no code reads, then the CD
+// library's identification string; its .rodata (one message) is followed by the CD library's
+// messages, which no code reads.
+D_002793F0 = 0x002793F0;
+// The end of the MPEG library's .data inside a coarse label (D_0027B068): its last table (16
+// words) ends at 0x27B0A8, then 8 zero bytes of padding to the IPU library's .data, which starts
+// on 16 with its identification string (src/lib/file_211B40.cpp), which no code reads.
+D_0027B0A8 = 0x0027B0A8;
+D_0027B0B0 = 0x0027B0B0;
+// The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
+// zeros after it, to 0x250580, are the padding before .data.
+D_00250540 = 0x00250540;
