@@ -9,6 +9,7 @@
 #include "shapes.h"
 #include "globals.h"
 #include "range_record.h"
+#include "vu0.h"
 #include "texture_table.h"
 #include "bump_allocator.h"
 #include "buffered_stream.h"
@@ -674,7 +675,18 @@ void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
     dst[2] = dst[2] * 255.0f;
 }
 
-INCLUDE_ASM(func_001B4600);
+void ConvertRgbToHsv(Quad_001B4580* p, f32* dst);
+
+void ConvertRgb255ToHsv255(Quad_001B4580* src, f32* dst)
+{
+    Quad_001B4580 tmp;
+    Quad_001B4580 k;
+    Vu0::Q(k) = Vu0::FromFloat(0.003921569f);
+    Vu0::Q(tmp) = Vu0::MulX(Vu0::Q(*src), Vu0::Q(k));
+    ConvertRgbToHsv(&tmp, dst);
+    dst[1] = dst[1] * 255.0f;
+    dst[2] = dst[2] * 255.0f;
+}
 
 LINKER_REMNANT(func_001B4670);
 
