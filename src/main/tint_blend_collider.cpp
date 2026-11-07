@@ -166,7 +166,7 @@ void func_001DE910(TintBlendCollider* self)
 
     UpdateTurningCollider();
     if (func_00128230(self) != 0) {
-        func_001DEB30(self);
+        ResetTintBlendColliderOrientation(self);
     }
     Contact03* head = ((Contact03*)self->f740);
     if (head != 0) {
@@ -359,8 +359,8 @@ void func_001DFB08(TintBlendCollider* self, s32 code, MessageBody* rec)
     if (code != 0x13) {
         if (code == 0x14) {
             if (rec == (MessageBody*)((Dev_001DFB08*)self->f75C)) {
-                func_001B6598(rec, &loc[0]);
-                func_001B6568(((Dev_001DFB08*)self->f75C), &loc[1]);
+                GetStateWalkerCurrentKey(rec, &loc[0]);
+                GetStateWalkerTargetKey(((Dev_001DFB08*)self->f75C), &loc[1]);
             }
         }
     } else {

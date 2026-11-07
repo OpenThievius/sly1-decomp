@@ -337,6 +337,7 @@ D_00274838	g_volumeChannelFactors	the 11 x 4 float table SetVolumeChannelFactor 
 D_00274998	g_trailEdgeTexCoord	the texture coordinate (0, 1.0) DrawTrailRibbon gives each point's first edge
 D_002749A0	g_trailZeroTexCoord	the zero texture coordinate DrawTrailRibbon gives each point's second edge
 D_00274AD8	g_turningColliderLinks	the six-entry ObjectLink table StartTurningCollider passes to ResolveObjectLinks
+D_00274E60	g_onOffObjectDefaults	the 0x90-byte block ResetPlayerOnOffObject copies into the on-off object's +0x2F0: ranges at the float maximum and unit scales
 D_00274F38	g_modeMasks	the eight mode masks UpdateModeSelection and FindNextTableIndexMatchingMask test against func_00160D10's mask, one per mode ShowModeLabel shows
 D_00274F58	g_modeLabels	the seven label strings ShowModeLabel shows for modes 0..6
 D_00274F74	g_currentMode	the selected mode: ShowModeLabel stores it for the player and UpdateModeSelection reads and steps it
