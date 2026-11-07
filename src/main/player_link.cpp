@@ -33,9 +33,9 @@ float D_00274DF0[3] = {30.0f, 10.0f, 0.150000006f};
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
 
-struct Obj_1CC410 { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
+struct ThreeBlendRecord { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
 
-void func_001CC410(void* a0, Obj_1CC410* a1, void** a2)
+void func_001CC410(void* a0, ThreeBlendRecord* a1, void** a2)
 {
     void* tmp;
     a1->f0 = 0;
@@ -54,61 +54,59 @@ ASM_FUNC(func_001CC818);
 
 ASM_FUNC(func_001CCF98);
 
-struct Target_001CD088 { s32 pad0; void* target; };
+struct LinkTargetHolder { s32 pad0; void* target; };
 void func_001B9AB0(void* target, void* slot);
 void func_001B9AC8(void* target, void* slot);
 
 void func_001CD088(Player* self)
 {
-    func_001B9AB0(((Target_001CD088*)self->f22AC)->target, (u8*)self + 0x22D0);
-    func_001B9AC8(((Target_001CD088*)self->f22AC)->target, (u8*)self + 0x22E0);
+    func_001B9AB0(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22D0);
+    func_001B9AC8(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
 }
 
 ASM_FUNC(func_001CD0C8);
 
 ASM_FUNC(func_001CD6C0);
 
-struct Flags_001CD7E0 { u8 pad[8]; u32 flags; };
-struct Node_001CD7E0 { Flags_001CD7E0* item; u8 pad0[0x14]; Node_001CD7E0* next; u8 pad1[0x34]; void* sub; };
-struct Owner_001CD7E0 { u8 pad0[0x14]; void* a14; u8 pad1[0x480 - 0x18]; void* a480; u8 pad2[0x4B8 - 0x484]; s32 b4B8; };
+s32 func_00182FC8(BaseObject* obj);
+void func_001385A0(World* world, Contacts03* a, Contacts03* b, s32 set, s32 clr);
 
-s32 func_00182FC8(Node_001CD7E0* node);
-void func_001385A0(void* a0, void* a1, void* a2, s32 a3, s32 a4);
-
-void func_001CD7E0(Owner_001CD7E0* self, Node_001CD7E0* node, s32 flag)
+// Walks up the parents to the first object whose class has flag bit 2.
+void func_001CD7E0(Collider* self, BaseObject* node, s32 flag)
 {
-    Node_001CD7E0* n = node;
+    BaseObject* n = node;
     while (n != 0) {
-        if ((n->item->flags & 2) != 0) {
+        if ((n->desc->flags & 2) != 0) {
             break;
         }
-        n = n->next;
+        n = n->parent;
     }
     if (n != 0) {
         if (IsObjectAttached(n) != 0) {
-            SetContactPairFlags(self->a14, self->a480, ((Owner_001CD7E0*)n->sub)->a480,
-                          flag != 0 ? 0x40 : 0, flag != 0 ? 0 : 0x40);
+            SetContactPairFlags(self->world, self->contacts,
+                                ((Collider*)((PlacedObject*)n)->root)->contacts,
+                                flag != 0 ? 0x40 : 0, flag != 0 ? 0 : 0x40);
         }
     }
-    self->b4B8 = 0;
+    self->f4B8 = 0;
 }
 
 ASM_FUNC(func_001CD870);
 
-struct Vec2_CDB28 {
+struct HeadingVector {
     f32 x;
     f32 y;
 };
 
-void func_001280C0(void* a, s32 b, void* c, Vec2_CDB28* d);
+void func_001280C0(void* a, s32 b, void* c, HeadingVector* d);
 f32 func_00205778(f32 a, f32 b);
 
 void func_001CDB28(u8* a0, f32* a1)
 {
-    Vec2_CDB28 v;
+    HeadingVector v;
     void* owner = *(void**)(a0 + 0x2204);
     func_001280C0(*(void**)((u8*)owner + 0x18), 0, (u8*)owner + 0x50, &v);
-    *a1 = func_00205778(v.y, v.x);
+    *a1 = ArctangentOfRatio(v.y, v.x);
 }
 
 ASM_FUNC(func_001CDB70);

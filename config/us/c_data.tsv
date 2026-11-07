@@ -703,7 +703,7 @@ D_002749B0	002749B0	288	.data	src/main/file_1C3390.cpp
 D_00274AD0	00274AD0	188	.data	src/main/turning_collider.cpp
 D_00274B90	00274B90	136	.data	src/main/file_1C5F18.cpp
 D_00274C20	00274C20	288	.data	src/main/agent.cpp
-D_00274D40	00274D40	188	.data	src/main/file_1CC410.cpp
+D_00274D40	00274D40	188	.data	src/main/player_link.cpp
 D_00274E00	00274E00	252	.data	src/main/file_1CDFB8.cpp
 D_00274F00	00274F00	48	.data	src/main/file_1D14F0.cpp
 D_00274F38	00274F38	104	.data	src/main/player_mode.cpp

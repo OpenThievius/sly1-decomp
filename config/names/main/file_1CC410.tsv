@@ -1,3 +1,0 @@
-symbol	name	evidence
-func_001CD088	SyncPlayerTarget	slot 51 of class 0x07: passes the vectors at 0x22D0 and 0x22E0 to func_001B9AB0 and func_001B9AC8 of the object at 0x22AC (StepCollider calls slot 51 of each owner)
-func_001CDF78	GetPlayerPose	slot 35 of class 0x07: in state 3 returns the placed-object pose func_001225D0, otherwise the character pose func_001C5DB8 (a rotation about the heading at 0x638 into the output)
