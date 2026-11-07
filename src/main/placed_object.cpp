@@ -326,7 +326,6 @@ void func_00129DF8(void* self);
 
 s32 func_00123E00(void* a);
 
-struct Vec3_127558 { f32 x; f32 y; f32 z; };
 
 typedef void (*VFn0_124EE8)(void* self);
 
@@ -360,8 +359,7 @@ struct Frame_124EE8 {
 
 void func_00124EE8(void* self, f32 f);
 
-struct __attribute__((aligned(16))) Quad_1261C0 { s32 w[4]; };
-struct Inner_1261C0 { u8 pad0[0x60]; Quad_1261C0 q60[4]; u8 pad1[4]; s32 fA4; u8 pad2[8]; s32 fB0; };
+struct Inner_1261C0 { u8 pad0[0x60]; Quad16 q60[4]; u8 pad1[4]; s32 fA4; u8 pad2[8]; s32 fB0; };
 
 void func_00128DB8(void* self);
 void func_00124540(void* self);
@@ -418,9 +416,8 @@ void func_00143AF8(void* list, PlacedObject* item);
 // NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
 // storing them (and computes the loop end in $v0), ours interleaves load and store.
 
-struct __attribute__((aligned(16))) Quad_00125B70 { s32 w[4]; };
 struct Dst_00125B70 {
-    Quad_00125B70 q[4];
+    Quad16 q[4];
     f32 f40;
     f32 f44;
     f32 f48;
@@ -434,10 +431,9 @@ void func_00188C10(Vec02* a, Mat02* b, u8* c, void* d);
 void func_00182ED8(void* node);
 void func_001832F0(void* node, BaseObject* ctx);
 
-struct Iter_00124050 { List01* list; u8* link; s32 offset; Iter_00124050* saved; };
 
-struct Next_00124050 {
-    static BaseObject* Of(Iter_00124050* it)
+struct ListWalkNext {
+    static BaseObject* Of(ListFrame* it)
     {
         BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
@@ -445,60 +441,18 @@ struct Next_00124050 {
     }
 };
 
-struct Begin_00124050 {
-    static void Of(Iter_00124050* it, List01* list)
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_00124050*)g_activeListFrames;
+        it->prev = g_activeListFrames;
         g_activeListFrames = (ListFrame*)it;
     }
 };
 
-struct Iter_00124338 { List01* list; u8* link; s32 offset; Iter_00124338* saved; };
 
-struct Next_00124338 {
-    static BaseObject* Of(Iter_00124338* it)
-    {
-        BaseObject* obj = *(BaseObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-struct Begin_00124338 {
-    static void Of(Iter_00124338* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_00124338*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
-
-struct Iter_00126F78 { List01* list; u8* link; s32 offset; Iter_00126F78* saved; };
-
-struct Next_00126F78 {
-    static BaseObject* Of(Iter_00126F78* it)
-    {
-        BaseObject* obj = *(BaseObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-struct Begin_00126F78 {
-    static void Of(Iter_00126F78* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_00126F78*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 void* func_00183058(BaseObject* item, World* world, PlacedObject* parent);
 void func_001BB580(PlacedObject* self);
@@ -509,25 +463,13 @@ struct Vtable_124FC0 {
     void (*update)(Object_124FC0*, f32);
 };
 struct Object_124FC0 { Vtable_124FC0* vtable; };
-struct Iter_124FC0 { List01* list; u8* link; s32 offset; Iter_124FC0* saved; };
 
 struct Next_124FC0 {
-    static Object_124FC0* Of(Iter_124FC0* it)
+    static Object_124FC0* Of(ListFrame* it)
     {
         Object_124FC0* obj = *(Object_124FC0**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
-    }
-};
-
-struct Begin_124FC0 {
-    static void Of(Iter_124FC0* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = ((Iter_124FC0*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -598,18 +540,15 @@ struct Sub_12A580 { u8 pad[0x40]; f32 f40; };
 
 struct Sub_12A5B8 { u8 pad[0x40]; f32 f40; };
 
-struct Vec16_12A5D0 { s32 v[4]; } __attribute__((aligned(16)));
-struct Sub_12A5D0 { u8 pad[0x50]; Vec16_12A5D0 v50; };
+struct Sub_12A5D0 { u8 pad[0x50]; Quad16 v50; };
 
 extern u8 D_00275C40[];
 
-struct __attribute__((packed)) U64_12A630 { u64 v; };
-struct Sub_12A630 { u8 pad[0x60]; U64_12A630 v60; };
+struct Sub_12A630 { u8 pad[0x60]; U64P v60; };
 
 extern u8 D_00275C60[];
 
-struct Vec16_12A6A0 { s32 v[4]; } __attribute__((aligned(16)));
-struct Sub_12A6A0 { u8 pad[0x70]; Vec16_12A6A0 v70; };
+struct Sub_12A6A0 { u8 pad[0x70]; Quad16 v70; };
 
 void* func_001291D0(f32 x);
 void func_001B1DA8(void* p, f32 x);
@@ -621,7 +560,6 @@ struct Sub_129510 { u8 pad[0x44]; f32 f44; };
 
 void* func_0018D500(s32 n);
 
-struct __attribute__((aligned(16))) Quad_129F58 { s32 v[4]; };
 
 void func_0012A320(void* self, f32* v);
 
@@ -694,9 +632,7 @@ void func_001B1CF8(void* self, s32 value);
 void* func_001291D0(void* self, f32 x);
 void func_001B1D70(void* self, f32 v);
 
-struct __attribute__((aligned(16))) Quad_12A028 { s32 w[4]; };
 
-struct __attribute__((aligned(16))) Quad_12A0F8 { s32 w[4]; };
 
 struct Sub_12ACD8 { u8 pad0[4]; f32 value; };
 
@@ -730,7 +666,6 @@ Quad_129EE0 func_00118D20(Quad_129EE0* out, Quad_129EE0 v);
 void func_00129F58(void* self, Quad_129EE0* src);
 
 struct __attribute__((packed)) Vec4_12A150 { f32 x, y, z, w; };
-struct Vec4F_12A150 { f32 x, y, z, w; };
 
 void func_0012A200(PlacedObject* self, Vec4_12A150* src);
 
@@ -772,8 +707,7 @@ struct Node_129C20 {
 
 s32 func_001833F0(void* key, s32 item);
 
-struct __attribute__((packed)) U64_12A700 { u64 v; };
-struct Sub_12A700 { u8 pad[0x80]; U64_12A700 v80; };
+struct Sub_12A700 { u8 pad[0x80]; U64P v80; };
 
 
 
@@ -794,14 +728,12 @@ void func_00129E88(void* self, Quad_129E10* v);
 
 struct Sub_12A7A8 { u8 pad[0x44]; s32 v44; };
 
-struct __attribute__((packed)) U64_12AF00 { u64 v; };
-struct Sub_12AF00 { u8 pad[0x14]; U64_12AF00 p14; };
+struct Sub_12AF00 { u8 pad[0x14]; U64P p14; };
 
 // Newly matched US functions from the small-function wave.
 extern void func_0012A430(void*, s32);
 extern void func_001BE4D8(void*);
-struct Quad_129598 { s32 words[4]; } __attribute__((aligned(16)));
-struct Result_129598 { u8 pad[0x30]; Quad_129598 value; };
+struct Result_129598 { u8 pad[0x30]; Quad16 value; };
 struct Node_129B98 { u8 pad0[8]; void* item; void* owner; u8 pad2[0x34 - 0x10]; Node_129B98* next; };
 extern s32 func_001833F0(void*, s32);
 struct State_12A430 { u8 pad[0x10]; u8 value; };
@@ -816,8 +748,6 @@ struct Inner_12ABD0 { s32 value; };
 extern void func_001BF788(void*, s32);
 struct Inner_12B010 { u8 pad[0x1C]; void* resource; };
 extern void func_0012B040(void*);
-struct Vec_12B140 { s32 v[4]; } __attribute__((aligned(16)));
-struct Vec_12B1A0 { s32 v[4]; } __attribute__((aligned(16)));
 
 struct Sub_00129540 { u8 pad[4]; f32 value; u8 gap[0x38]; f32 scale; };
 f32 func_00205778(f32 a, f32 b);
@@ -932,9 +862,7 @@ struct Inner_0012A8D8 {
 
 void func_001299E0(PlacedObject* self, Inner_0012A8D8* src);
 
-struct __attribute__((aligned(16))) Quad_12B180 { s32 a, b, c, d; };
 
-struct __attribute__((aligned(16))) Quad_12B1E0 { s32 a, b, c, d; };
 
 void func_001F5C0C(void** p, s32 v, s32 n);
 void func_001226D8(Attachment* n);
@@ -1008,27 +936,14 @@ extern const Fn_Table D_002195D8[10];
 extern const Fn_Table D_00219600[26];
 
 struct Context_001288F0;
-struct List_001288F0 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_001288F0 { List_001288F0* list; u8* link; s32 offset; Iter_001288F0* saved; };
 s32 func_001C1A28(Context_001288F0* context, PlacedObject** obj);
 
-struct Next_001288F0 {
-    static PlacedObject* Of(Iter_001288F0* it)
+struct ListWalkNextPlaced {
+    static PlacedObject* Of(ListFrame* it)
     {
         PlacedObject* obj = *(PlacedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
-    }
-};
-
-struct Begin_001288F0 {
-    static void Of(Iter_001288F0* it, List_001288F0* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_001288F0*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -1037,19 +952,8 @@ struct Node_129A58 { u8 pad0[8]; Node_129A58* next; u8 padC[8]; s32 key; };
 void func_00152600(List01* list, Node_129A58* node);
 void func_00152540(List01* list, Node_129A58* at, Node_129A58* node);
 
-struct Begin_129A58 {
-    static void Of(Iter_001288F0* it, List01* list)
-    {
-        it->list = (List_001288F0*)list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_001288F0*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
-
 struct Next_129A58 {
-    static Node_129A58* Of(Iter_001288F0* it)
+    static Node_129A58* Of(ListFrame* it)
     {
         Node_129A58* node = *(Node_129A58**)it->link;
         it->link = (u8*)node + it->offset;
@@ -1208,7 +1112,6 @@ extern const Head_2197B8 D_002197B8;
 void* func_001B5EE0(Pool6C* pool);
 void func_00152438(List01* self, s32 value);
 
-struct Quad_12F9B8 { s32 a, b, c, d; };
 
 void func_00128018(void* a, s32 b, void* c, void* d);
 
@@ -1440,27 +1343,6 @@ struct Obj_12CBE8 {
     Rec_12CBE8* f68;
 };
 
-struct Iter_12F8C8 { List01* list; u8* link; s32 offset; Iter_12F8C8* saved; };
-
-struct Next_12F8C8 {
-    static PlacedObject* Of(Iter_12F8C8* it)
-    {
-        PlacedObject* obj = *(PlacedObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-struct Begin_12F8C8 {
-    static void Of(Iter_12F8C8* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = ((Iter_12F8C8*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 void func_00124A48(PlacedObject* self);
 s32 func_001300E8(void* n, s32 kind);
@@ -1903,15 +1785,15 @@ void func_00123ED0(PlacedObject* self)
 
 void func_00124050(PlacedObject* self)
 {
-    Iter_00124050 it;
-    Begin_00124050::Of(&it, &self->children);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->children);
     self->desc->m06(self);
     BaseObject* obj;
-    while ((obj = Next_00124050::Of(&it)) != 0) {
+    while ((obj = ListWalkNext::Of(&it)) != 0) {
         obj->desc->m04(obj);
     }
     self->desc->m0E(self, 1, self);
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 void func_001240F8(PlacedObject* self)
@@ -1962,15 +1844,15 @@ void func_001240F8(PlacedObject* self)
 
 void func_00124338(PlacedObject* self)
 {
-    Iter_00124338 it;
-    Begin_00124338::Of(&it, &self->children);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->children);
     self->desc->m07(self);
     BaseObject* obj;
-    while ((obj = Next_00124338::Of(&it)) != 0) {
+    while ((obj = ListWalkNext::Of(&it)) != 0) {
         obj->desc->m05(obj);
     }
     self->desc->m0E(self, 2, self);
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 void func_001243E0(PlacedObject* self)
@@ -2221,15 +2103,15 @@ void func_00124FC0(PlacedObject* self, f32 f)
     if (self->f288 != 0) {
         func_00126AC8(self, f);
     }
-    Iter_124FC0 it;
-    Begin_124FC0::Of(&it, &self->list1E0);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->list1E0);
     Object_124FC0* obj;
     while ((obj = Next_124FC0::Of(&it)) != 0) {
         if (obj->vtable->update != 0) {
             obj->vtable->update(obj, f);
         }
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
     void* args[1];
     args[0] = &f;
     TriggerScriptEvent(self, 1, 1, args);
@@ -2264,10 +2146,10 @@ ASM_FUNC(func_00125750);
 
 ASM_FUNC(func_001259D8);
 
-void func_00125B70(PlacedObject* self, Quad_00125B70* src, Dst_00125B70* dst)
+void func_00125B70(PlacedObject* self, Quad16* src, Dst_00125B70* dst)
 {
     if (src != 0) {
-        if (src != (Quad_00125B70*)dst) {
+        if (src != (Quad16*)dst) {
             *dst = *(Dst_00125B70*)src;
         }
     } else {
@@ -2283,7 +2165,7 @@ ASM_FUNC(func_00125C90);
 
 void func_001261C0(PlacedObject* self, void* b, void* m)
 {
-    Quad_1261C0* src = (Quad_1261C0*)m;
+    Quad16* src = (Quad16*)m;
     self->desc02()->m2C(self);
     Inner_1261C0* in = (Inner_1261C0*)self->f224;
     if (in != 0 && (in->fB0 & 0x80) != 0) {
@@ -2366,18 +2248,18 @@ ASM_FUNC(func_00126DE8);
 
 void func_00126F78(PlacedObject* self, PlacedObject* owner)
 {
-    Iter_00126F78 it;
-    Begin_00126F78::Of(&it, &owner->children);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &owner->children);
     self->desc->m09(self, owner);
-    BaseObject* obj = Next_00126F78::Of(&it);
+    BaseObject* obj = ListWalkNext::Of(&it);
     while (obj != 0) {
         (void)CreateObjectCopy(obj, self->world, self);
-        obj = Next_00126F78::Of(&it);
+        obj = ListWalkNext::Of(&it);
     }
     if ((self->desc->flags & 2) && self->parent == 0) {
         UpdateAnchorModeFlags(self);
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 void func_00127048(PlacedObject* self, PlacedObject* src)
@@ -2496,7 +2378,7 @@ void func_001274F8(PlacedObject* self, Vec02* src)
 
 void func_00127558(ObjectCycler* self, f32 x, f32 y, f32 z)
 {
-    Vec3_127558 v;
+    Vec3 v;
     v.x = x;
     v.y = y;
     v.z = z;
@@ -2612,16 +2494,16 @@ ASM_FUNC(func_00128598);
 
 s32 func_001288F0(PlacedObject* self, Context_001288F0* context)
 {
-    Iter_001288F0 it;
-    Begin_001288F0::Of(&it, (List_001288F0*)&self->children);
+    ListFrame it;
+    ListWalkBegin::Of(&it, (List01*)&self->children);
     PlacedObject* obj;
-    for (obj = Next_001288F0::Of(&it); obj != 0; obj = Next_001288F0::Of(&it)) {
+    for (obj = ListWalkNextPlaced::Of(&it); obj != 0; obj = ListWalkNextPlaced::Of(&it)) {
         if (AppendPropertyToScriptList(context, &obj) == 0) {
-            g_activeListFrames = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.prev;
             return 0;
         }
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
     return 1;
 }
 
@@ -2862,7 +2744,7 @@ void func_00129540(void* self, f32* out)
     *out = value + value;
 }
 
-void func_00129598(void* self, Quad_129598* out)
+void func_00129598(void* self, Quad16* out)
 {
     *out = ((Result_129598*)GetRangeRecord(self))->value;
 }
@@ -2985,11 +2867,11 @@ void func_001299E0(PlacedObject* self, Node_1299E0* src)
 
 void func_00129A58(PlacedObject* self)
 {
-    Iter_001288F0 it;
+    ListFrame it;
     Node_129A58* nodes[20];
     s32 n = 0;
     Node_129A58* node;
-    Begin_129A58::Of(&it, &self->list1E0);
+    ListWalkBegin::Of(&it, &self->list1E0);
     for (node = Next_129A58::Of(&it); node != 0; node = Next_129A58::Of(&it)) {
         nodes[n] = node;
         RemoveFromList(&self->list1E0, node);
@@ -3002,7 +2884,7 @@ void func_00129A58(PlacedObject* self)
         InsertBeforeInList(&self->list1E0, c, node);
     }
     self->desc02()->m2B(self);
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 Node_129B98* func_00129B98(PlacedObject* self, s32 key)
@@ -3095,11 +2977,11 @@ void func_00129E10(void* self, void* src)
     SetPositionSpring(self, &f.r);
 }
 
-void func_00129E88(PlacedObject* self, Vec16_12A5D0* value)
+void func_00129E88(PlacedObject* self, Quad16* value)
 {
     if (self->p20C == (u8*)D_00260E70)
         self->p20C = (u8*)AllocateFrontMemory(16);
-    *(Vec16_12A5D0*)self->p20C = *value;
+    *(Quad16*)self->p20C = *value;
 }
 
 void func_00129EE0(void* self, void* src)
@@ -3113,10 +2995,10 @@ void func_00129EE0(void* self, void* src)
     SetVelocitySpring(self, &f.r);
 }
 
-void func_00129F58(PlacedObject* self, Quad_129F58* src)
+void func_00129F58(PlacedObject* self, Quad16* src)
 {
     if (self->p210 == (u8*)D_00260E80) self->p210 = (u8*)AllocateFrontMemory(16);
-    *(Quad_129F58*)self->p210 = *src;
+    *(Quad16*)self->p210 = *src;
 }
 
 void func_00129FB0(PlacedObject* self, void* src)
@@ -3130,10 +3012,10 @@ void func_00129FB0(PlacedObject* self, void* src)
     SetRotationSpring(self, &f.r);
 }
 
-void func_0012A028(PlacedObject* self, Quad_12A028* src)
+void func_0012A028(PlacedObject* self, Quad16* src)
 {
     if (self->p214 == (u8*)D_00260E90) self->p214 = (u8*)AllocateFrontMemory(16);
-    *(Quad_12A028*)self->p214 = *src;
+    *(Quad16*)self->p214 = *src;
 }
 
 void func_0012A080(PlacedObject* self, void* src)
@@ -3147,15 +3029,15 @@ void func_0012A080(PlacedObject* self, void* src)
     SetSpinSpring(self, &f.r);
 }
 
-void func_0012A0F8(PlacedObject* self, Quad_12A0F8* src)
+void func_0012A0F8(PlacedObject* self, Quad16* src)
 {
     if (self->p218 == (u8*)D_00260EA0) self->p218 = (u8*)AllocateFrontMemory(16);
-    *(Quad_12A0F8*)self->p218 = *src;
+    *(Quad16*)self->p218 = *src;
 }
 
 void func_0012A150(PlacedObject* self, f32 scale)
 {
-    Vec4F_12A150 tmp;
+    Vec4U tmp;
     tmp.x = D_00260EB0[0] * scale;
     tmp.y = D_00260EB0[1] * scale;
     tmp.z = D_00260EB0[2];
@@ -3275,7 +3157,7 @@ void func_0012A5B8(PlacedObject* self, f32* out)
     *out = r;
 }
 
-void func_0012A5D0(PlacedObject* self, Vec16_12A5D0* src)
+void func_0012A5D0(PlacedObject* self, Quad16* src)
 {
     EnsureAimAttachment(self);
     ((Sub_12A5D0*)self->f200)->v50 = *src;
@@ -3287,7 +3169,7 @@ void func_0012A610(PlacedObject* self, Quad16* out)
     *out = *src;
 }
 
-void func_0012A630(PlacedObject* self, U64_12A630* src)
+void func_0012A630(PlacedObject* self, U64P* src)
 {
     EnsureAimAttachment(self);
     ((Sub_12A630*)self->f200)->v60 = *src;
@@ -3299,7 +3181,7 @@ void func_0012A678(PlacedObject* self, U64P* out)
     *out = *src;
 }
 
-void func_0012A6A0(PlacedObject* self, Vec16_12A6A0* src)
+void func_0012A6A0(PlacedObject* self, Quad16* src)
 {
     EnsureAimAttachment(self);
     ((Sub_12A6A0*)self->f200)->v70 = *src;
@@ -3311,7 +3193,7 @@ void func_0012A6E0(PlacedObject* self, Quad16* out)
     *out = *src;
 }
 
-void func_0012A700(PlacedObject* self, U64_12A700* src)
+void func_0012A700(PlacedObject* self, U64P* src)
 {
     EnsureAimAttachment(self);
     ((Sub_12A700*)self->f200)->v80 = *src;
@@ -3572,7 +3454,7 @@ void func_0012AEE8(PlacedObject* self, f32* out)
     *out = r;
 }
 
-void func_0012AF00(PlacedObject* self, U64_12AF00* out)
+void func_0012AF00(PlacedObject* self, U64P* out)
 {
     Sub_12AF00* s = (Sub_12AF00*)self->f2AC;
     if (s != 0) {
@@ -3624,28 +3506,28 @@ void func_0012B0B0(PlacedObject* self, s32 a1)
 
 void func_0012B128(PlacedObject* self, s32* out) { *out = self->f288 ? *(s32*)self->f288 : -1; }
 
-void func_0012B140(PlacedObject* self, Vec_12B140* input)
+void func_0012B140(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Vec_12B140*)((u8*)self->f288 + 0x10) = *input;
+    *(Quad16*)((u8*)self->f288 + 0x10) = *input;
 }
 
-void func_0012B180(PlacedObject* self, Quad_12B180* out)
+void func_0012B180(PlacedObject* self, Quad16* out)
 {
     u8* src = self->f288 ? (u8*)self->f288 + 0x10 : (u8*)&D_00248D30;
-    *out = *(Quad_12B180*)src;
+    *out = *(Quad16*)src;
 }
 
-void func_0012B1A0(PlacedObject* self, Vec_12B1A0* input)
+void func_0012B1A0(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Vec_12B1A0*)((u8*)self->f288 + 0x20) = *input;
+    *(Quad16*)((u8*)self->f288 + 0x20) = *input;
 }
 
-void func_0012B1E0(PlacedObject* self, Quad_12B1E0* out)
+void func_0012B1E0(PlacedObject* self, Quad16* out)
 {
     u8* src = self->f288 ? (u8*)self->f288 + 0x20 : (u8*)&D_00248D30;
-    *out = *(Quad_12B1E0*)src;
+    *out = *(Quad16*)src;
 }
 
 void func_0012B200(PlacedObject* self, f32 value)
@@ -5365,26 +5247,26 @@ void func_0012F8C8(IdFilterObject* self)
         self->mode = 2;
         return;
     }
-    Iter_12F8C8 it;
-    Begin_12F8C8::Of(&it, &self->children);
-    PlacedObject* n = Next_12F8C8::Of(&it);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->children);
+    PlacedObject* n = ListWalkNextPlaced::Of(&it);
     if (n == 0 || IsObjectOfKind(n, 0x7E) == 0) {
-        g_activeListFrames = (ListFrame*)it.saved;
+        g_activeListFrames = (ListFrame*)it.prev;
         return;
     }
-    if (Next_12F8C8::Of(&it) != 0) {
-        g_activeListFrames = (ListFrame*)it.saved;
+    if (ListWalkNextPlaced::Of(&it) != 0) {
+        g_activeListFrames = (ListFrame*)it.prev;
         return;
     }
     TransformPointBetweenFrames(self, 0, (u8*)n + 0x40, &self->pos);
     self->mode = 1;
     n->desc->m03(n);
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 void func_0012F9B8(IdFilterObject* self)
 {
-    Quad_12F9B8 loc;
+    Quad4 loc;
     PlacedObject* cur;
     UpdateCollider(self);
     if (self->pendingTarget != 0) {
