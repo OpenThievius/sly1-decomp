@@ -126,7 +126,10 @@ struct Effect {
         Effect* p128;        // 0x128
     };
     u8 pad12C[0x130 - 0x12C];   // 0x12C
-    const T219C_Params* params; // 0x130: kind 16's block
+    union {
+        const T219C_Params* params; // 0x130: kind 16's block
+        f32 f130;           // 0x130: an angle (TakeDelayedEffectSourcePose)
+    };
     union {
         void* p134;         // 0x134: kind 16's owner
         s32 i134;           // 0x134

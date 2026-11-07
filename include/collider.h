@@ -211,7 +211,9 @@ struct Collider : PlacedObject {
     s32 mode470;            // 0x470
     u8 pad474[0x480 - 0x474];
     Contacts03* contacts;   // 0x480: a body's contact table (slots 6, 7)
-    u8 pad484[0x4B0 - 0x484];
+    u8 pad484[0x490 - 0x484];
+    Vec02 v490;             // 0x490: taken into the attached effect's frame by func_001DF520
+    u8 pad4A0[0x4B0 - 0x4A0];
     Attach03* attached;     // 0x4B0
     Contact03* contacts4B4; // 0x4B4: a body's contacts outside its table's rows (func_001BD558)
     s32 f4B8;               // 0x4B8: cleared by func_001B94F0 (on the body) and slot 9
