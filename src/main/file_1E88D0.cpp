@@ -1018,7 +1018,7 @@ void func_001E8EF8(KeyedConeAgent* self)
 void func_001E8FA8(KeyedConeAgent* self)
 {
     if (self->f724 == 8) {
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
     } else {
         UpdateAgentState(self);
     }
@@ -1267,7 +1267,7 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
         D_00272930.vt->m14(&D_00272930);
         D_00272B98.vt->m14(&D_00272B98);
         AcquirePadSelectFlag(g_currentWorld);
-        func_001A7E70();
+        InitPadPatternSetting();
         break;
     case 2:
         ApplyStackTimeScale(self, 1.0f);
@@ -1513,7 +1513,7 @@ void func_001EA118(World* self)
                 if (func_00129D70(obj) != 0) {
                     obj->tries++;
                 } else {
-                    func_00129DF8(obj);
+                    ClearRootTries(obj);
                 }
             }
         }
@@ -1990,7 +1990,7 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
                 TempoAgent* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
-                msg.fn = func_001EB698;
+                msg.fn = ContinueBeatPressColliderRequest;
                 ((s32 (*)(Player*, OwnerMessage*))((GFn_1EB748*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldTimeline(o);
@@ -2117,7 +2117,7 @@ void func_001EC0B8(void)
 s32 func_001EC0D8(TempoAgent* self)
 {
     s32 r[4];
-    func_001B6598(self->fC54, r);
+    GetStateWalkerCurrentKey(self->fC54, r);
     switch (r[0]) {
     case 0x4ED:
     case 0x4F0:
@@ -2176,7 +2176,7 @@ void func_001EC478(TempoAgent* self, void* arg)
             return;
         }
         self->fC94 = 0;
-        func_001B6598(*(void**)((u8*)self + 0xC54), &out);
+        GetStateWalkerCurrentKey(*(void**)((u8*)self + 0xC54), &out);
         switch (out) {
         case 0x4EE:
             sel = 0x4EF;
@@ -2207,7 +2207,7 @@ void func_001EC570(TempoAgent* self, s32 a, s32 b)
     s32 r[3];
     switch (self->f724) {
     case 0xE:
-        func_001B6598(self->fC54, &r[0]);
+        GetStateWalkerCurrentKey(self->fC54, &r[0]);
         switch (r[0]) {
         case 0x4ED:
         case 0x4F0:
@@ -2230,7 +2230,7 @@ void func_001EC570(TempoAgent* self, s32 a, s32 b)
     EnterAgentState(self, a, b);
     switch (self->f724) {
     case 14: {
-        func_001B6598(self->fC54, &r[1]);
+        GetStateWalkerCurrentKey(self->fC54, &r[1]);
         f32 q;
         switch (r[1]) {
         case 0x4EE:
@@ -2252,7 +2252,7 @@ void func_001EC570(TempoAgent* self, s32 a, s32 b)
     case 2:
     case 13: {
         s32 n = 4;
-        func_001B6598(self->fC54, &r[2]);
+        GetStateWalkerCurrentKey(self->fC54, &r[2]);
         if (r[2] < 0x4EF) {
             if (r[2] >= 0x4EC) n = 2;
         }
@@ -2328,7 +2328,7 @@ void func_001ECBC8(TempoAgent* self)
             }
         }
         if (self->fC94 == 1) {
-            func_001B6598(((Dev_1ECBC8*)self->fC54), &code);
+            GetStateWalkerCurrentKey(((Dev_1ECBC8*)self->fC54), &code);
             if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->fC94 = 2;
         }
         self->fC84 = self->fC84 + self->fC88;
@@ -2345,7 +2345,7 @@ void func_001ECBC8(TempoAgent* self)
 void func_001ECDF8(TempoAgent* self)
 {
     s32 code;
-    func_001B6598(self->fC54, &code);
+    GetStateWalkerCurrentKey(self->fC54, &code);
     s32 obj = 0;
     if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) {
         obj = AreMenusAndFadeClear();
@@ -2473,7 +2473,7 @@ void func_001ED318(Timeline* self, Msg_1ED318* msg)
 {
     switch (msg->kind) {
     case 0:
-        func_001EC7A8((Inner_1ED318*)self->found);
+        ScheduleTempoAgentBeatPress((Inner_1ED318*)self->found);
         break;
     case 1: {
         s32* loc = &msg->f0C;
@@ -2606,7 +2606,7 @@ ASM_FUNC(func_001EE090);
 
 void func_001EE290(void* self)
 {
-    func_001EDEF0(self);
+    ComputeBallisticLaunchVelocity(self);
 }
 
 ASM_FUNC(func_001EE2B0);
@@ -2857,7 +2857,7 @@ s32 func_001EEB60(ValueListObject* self, Quad_1EEB60* vec, s32* out)
     if (self != 0 && self->data38 != 0) {
         Quad_1EEB60 q = *vec;
         *out = 0;
-        r = func_001EEA40(self, self->data38, q, out);
+        r = QueryValueTreeMask(self, self->data38, q, out);
 
     } else {
         r = 0x0FFFFFFF;
@@ -3163,7 +3163,7 @@ void func_001EFD10(ScreenFade* self, s32 a1)
             if (self->style == s) thr = 1.5f;
             if (thr < t) {
                 s = 2;
-                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
             } else {
                 r = t / thr;
                 f32 hi = 1.0f;
@@ -3171,7 +3171,7 @@ void func_001EFD10(ScreenFade* self, s32 a1)
                 if (r < lo) r = lo;
                 else if (hi < r) r = hi;
                 self->opacity = r;
-                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
             }
         }
         break;
@@ -3745,7 +3745,7 @@ void func_001F1050(WarpPage* self, u32 next)
                 StartSoundEffect(0x8B, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
-        func_001F0908(self);
+        AnnouncePendingWarpEntry(self);
         t = (Sub_1F1050*)self->f2E8;
         if (t == 0) {
             goto Lz;

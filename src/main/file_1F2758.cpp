@@ -510,14 +510,14 @@ void* func_001F3830(void* self, s32 mode)
 
 void func_001F3850(void* self, f32 x)
 {
-    Scaler_001F3850* s = (Scaler_001F3850*)func_001F3810(self, 1);
+    Scaler_001F3850* s = (Scaler_001F3850*)PeekOscillatorCurrentEntry(self, 1);
     if (x == 0.0f) s->scale = 0.0f;
     else s->scale = 1.0f / x;
 }
 
 void func_001F38A0(void* self, f32* out)
 {
-    Scaler_001F38A0* s = (Scaler_001F38A0*)func_001F3810(self, 1);
+    Scaler_001F38A0* s = (Scaler_001F38A0*)PeekOscillatorCurrentEntry(self, 1);
     f32 v = s->scale;
     if (v == 0.0f) *out = 0.0f;
     else *out = 1.0f / v;
@@ -538,13 +538,13 @@ void func_001F38F0(Buf_1F38F0* buf, f32 x, f32 y, f32 z, f32 w)
 
 void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)func_001F3830(self, 1);
+    u8* p = (u8*)EditOscillatorCurrentEntry(self, 1);
     AppendVector4ToBuffer(p + 0x30, a, b, c, d);
 }
 
 void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)func_001F3830(self, 1);
+    u8* p = (u8*)EditOscillatorCurrentEntry(self, 1);
     AppendVector4ToBuffer(p + 0x80, a, b, c, d);
 }
 
@@ -854,7 +854,7 @@ void func_001F4808(ObjectSubGroup* self)
         it = (Animation*)self->items[i];
         CreateAnimationPlayerWithoutPresetTargets(it, 0, 0, 0, 0.0f, 1.0f);
         next = 0;
-        if (found != 0 || func_0012C9A8(it) != 0) {
+        if (found != 0 || HasAnimationEventKind19(it) != 0) {
             next = 1;
         }
         found = next;
