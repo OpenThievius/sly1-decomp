@@ -1758,7 +1758,43 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     }
 }
 
-INCLUDE_ASM(func_00122CB0);
+// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
+// once.
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* p = (const u128*)&a;
+    const u128* q = (const u128*)&b;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 b0 = q[0], b1 = q[1], b2 = q[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
+    r.r[2] = z;
+    *out = r;
+}
+
+void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
+{
+    Mat02 m;
+    Attachment* p = self;
+    while ((p = p->link.next) != 0) {
+        s8 f = p->mode2;
+        if (f == 0) { p = 0; break; }
+        if (f != -1) break;
+    }
+    if (p != 0) {
+        p->vt->getMatrix(p, &m);
+    } else {
+        GetIdentityMatrix(0, &m);
+    }
+    MulRotation(out, self->m90, m);
+}
 
 f32 GetIdentityPoseIndexedValue(void)
 {
