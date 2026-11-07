@@ -3,7 +3,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
-#include "c49.h"
+#include "box_collider.h"
 #include "object_link.h"
 #include "c6e.h"
 #include "point_object.h"
@@ -222,7 +222,7 @@ Blk05 D_00269C10;
 s32 D_00269C90;
 void* D_00269C98[16];
 
-void func_0018F988(C49* self)
+void func_0018F988(BoxCollider* self)
 {
     InitCollider(self);
     self->flags538 |= (u64)0x8000 << 28;

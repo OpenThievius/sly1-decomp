@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "switched_collider.h"
-#include "c49.h"
+#include "box_collider.h"
 #include "game_clock.h"
 #include "memory_card.h"
 #include "object_link.h"

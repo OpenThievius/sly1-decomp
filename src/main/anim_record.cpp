@@ -20,7 +20,7 @@
 #include "switched_collider.h"
 #include "collider.h"
 #include "state_graph.h"
-#include "c54.h"
+#include "camera_positioned_object.h"
 #include "attachment.h"
 #include "state_walker.h"
 #include "asm_func.h"

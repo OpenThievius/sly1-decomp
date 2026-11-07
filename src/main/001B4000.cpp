@@ -6,7 +6,7 @@
 #include "list_iter.h"
 #include "collider.h"
 #include "state_graph.h"
-#include "c54.h"
+#include "camera_positioned_object.h"
 #include "world.h"
 #include "attachment.h"
 #include "state_walker.h"

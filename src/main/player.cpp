@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "switched_collider.h"
 #include "node_query.h"
-#include "c4a.h"
+#include "gauge_mode_object.h"
 #include "countdown_collider.h"
 #include "entry_queue.h"
 #include "object_link.h"
@@ -1378,8 +1378,8 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
-void func_0017B410(C4A* self, s32 a1);
-s32 func_0017B510(C4A* self, s32 a1);
+void func_0017B410(GaugeModeObject* self, s32 a1);
+s32 func_0017B510(GaugeModeObject* self, s32 a1);
 
 
 struct Msg_17B3A8 {
@@ -1390,7 +1390,7 @@ struct Msg_17B3A8 {
 };
 
 void func_001AC060(void* p);
-void func_0017B598(C4A* self);
+void func_0017B598(GaugeModeObject* self);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
 

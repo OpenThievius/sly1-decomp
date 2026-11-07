@@ -3,7 +3,7 @@
 // the adders of each kind of entry. Its name is ours, after the class.
 #include "common.h"
 #include "switched_collider.h"
-#include "c4a.h"
+#include "gauge_mode_object.h"
 #include "countdown_collider.h"
 #include "entry_queue.h"
 #include "globals.h"

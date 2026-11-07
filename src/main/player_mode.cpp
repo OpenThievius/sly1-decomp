@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c4c.h"
+#include "counted_collider.h"
 #include "switched_collider.h"
 #include "globals.h"
 #include "game_progress.h"
@@ -82,9 +82,9 @@ void* func_001925F0(void);
 
 void func_001D29C8(u32 mode);
 s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table);
-void func_001D32D8(C4C* self, void* v, s32 flag);
-void* func_001D3500(C4C* a0, ContactEvent* a1);
-void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg);
+void func_001D32D8(CountedCollider* self, void* v, s32 flag);
+void* func_001D3500(CountedCollider* a0, ContactEvent* a1);
+void func_001D3678(CountedCollider* self, s32 kind, ObjectMessage* msg);
 
 void func_001D29C8(u32 mode)
 {
@@ -174,26 +174,26 @@ void func_001D31D0(Player* self, s32 value)
     self->f2758 = g_gameClock.time;
 }
 
-void func_001D3290(C4C* self)
+void func_001D3290(CountedCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_countedColliderLinkIds);
     self->desc->m03(self);
 }
 
-void func_001D32D8(C4C* self, void* v, s32 flag)
+void func_001D32D8(CountedCollider* self, void* v, s32 flag)
 {
     if (flag == 0) {
         CountedTouchMessage msg;
         msg.v = v;
         msg.self = self;
         self->desc->m0E(self, 0x17, &msg);
-        self->count = self->count - 1;
-        if (self->count > 0) {
+        self->touchesLeft = self->touchesLeft - 1;
+        if (self->touchesLeft > 0) {
             return;
         }
     }
-    SendEmptyMessage(self->f558);
+    SendEmptyMessage(self->target);
     StartSoundEffect(0x67, 0, 0, (s32)&self->v140, 0, 0, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f);
     TriggerScriptEvent(self, 2, 0, 0);
     self->desc->m03(self);
@@ -201,7 +201,7 @@ void func_001D32D8(C4C* self, void* v, s32 flag)
 
 ASM_FUNC(func_001D3398);
 
-void func_001D3470(C4C* self, f32 t)
+void func_001D3470(CountedCollider* self, f32 t)
 {
     u8 buf[0x30];
 
@@ -212,12 +212,12 @@ void func_001D3470(C4C* self, f32 t)
     }
 }
 
-void func_001D34E0(C4C* self)
+void func_001D34E0(CountedCollider* self)
 {
-    ExtractContactsByPartMode(self, &self->f554);
+    ExtractContactsByPartMode(self, &self->contacts);
 }
 
-void* func_001D3500(C4C* a0, ContactEvent* a1)
+void* func_001D3500(CountedCollider* a0, ContactEvent* a1)
 {
     void* r = HandleObjectEvent(a0);
     if (r != 0 && (a1->flags & 0x20)) {
@@ -229,18 +229,18 @@ void* func_001D3500(C4C* a0, ContactEvent* a1)
             v1 = a2->f18->f50;
         }
         TakeCountedColliderTouch(a0, a1->ref, (v1 ^ (s32)g_player) == 0);
-        FreePooledContactChain(a0->world, a0->f554);
-        a0->f554 = 0;
+        FreePooledContactChain(a0->world, a0->contacts);
+        a0->contacts = 0;
     }
     return r;
 }
 
 ASM_FUNC(func_001D35A8);
 
-void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg)
+void func_001D3678(CountedCollider* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 10) {
-        func_00185D20(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->f554);
+        func_00185D20(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->contacts);
     }
 }

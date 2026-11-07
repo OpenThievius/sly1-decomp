@@ -20,7 +20,7 @@
 #include "timeline.h"
 #include "value_list_object.h"
 #include "c62.h"
-#include "c1f.h"
+#include "attached_set.h"
 #include "v24a0.h"
 #include "screen_fade.h"
 #include "transform_object.h"
@@ -357,8 +357,8 @@ void func_001BA550(Collider* o, Attach03* node);
 void func_001BA528(Collider* o, Attach03* node);
 void func_001DBB90(void* owner, Attach03* list);
 void func_001F0220(void* o, s32 mode);
-void func_0015F9A0(void* a, Set1F* s);
-void func_0015F8B0(void* a, Set1F* s);
+void func_0015F9A0(void* a, AttachedGroup* s);
+void func_0015F8B0(void* a, AttachedGroup* s);
 void func_001F57E0(void* p);
 void func_00123ED0(void* self);
 void func_001EF900(void* self, s32 b);
@@ -397,8 +397,8 @@ void func_00138398(void* src, s32* count, void** out);
 s32 func_00137BE0(void* src);
 s32 func_00137C40(void* src);
 void func_0011EC40(void* a, void* b);
-struct Msg_1EF3D8 { C1F* self; Collider* obj; };
-void func_001EF520(C1F* self);
+struct Msg_1EF3D8 { AttachedSet* self; Collider* obj; };
+void func_001EF520(AttachedSet* self);
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B7968(void* self);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
@@ -442,7 +442,7 @@ struct Link_1EECE0 {
     Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev((Link_1EECE0*)D_0027B314) {}
     ~Link_1EECE0() { D_0027B314 = (ListFrame*)prev; }
 };
-void func_00124A48(C1F* self);
+void func_00124A48(AttachedSet* self);
 void func_001F55A8(void* self);
 struct Mgr_1EF900;
 struct Evt_1EF900 {
@@ -2898,7 +2898,7 @@ s32 func_001EEB60(ValueListObject* self, Quad_1EEB60* vec, s32* out)
 
 ASM_FUNC(func_001EEBB0);
 
-void func_001EEC60(C1F* self)
+void func_001EEC60(AttachedSet* self)
 {
     u64 bits;
     s32 one;
@@ -2913,17 +2913,17 @@ void func_001EEC60(C1F* self)
     self->f364 = 1.0f;
     self->f360 = 1.0f;
     SetColliderAnchors(self, 3, 0, 3, 0);
-    InitTrackedNodes(&self->rec590, self);
-    self->rec590.f4 = 3;
+    InitTrackedNodes(&self->trackedNodes, self);
+    self->trackedNodes.f04 = 3;
 }
 
-void func_001EECE0(C1F* self)
+void func_001EECE0(AttachedSet* self)
 {
     Link_1EECE0 fr((s32*)&self->children);
     g_activeListFrames = (ListFrame*)&fr;
     StartPlacedObject(self);
-    FillTrackedNodes(&self->rec590);
-    self->set554.items = (void**)AllocateFrontMemory(0x80);
+    FillTrackedNodes(&self->trackedNodes);
+    self->group.items = (void**)AllocateFrontMemory(0x80);
     if (self->f278 != 0) {
         self->desc03()->m32(self);
     }
@@ -2964,13 +2964,13 @@ void func_001EEE50(void* owner, Attach03** head)
 
 ASM_FUNC(func_001EEF90);
 
-void func_001EF3A8(C1F* self, Attach03* link)
+void func_001EF3A8(AttachedSet* self, Attach03* link)
 {
     Collider* target = link->target;
     ((VFn_1EF3A8)target->desc03()->m46)(target, self);
 }
 
-void func_001EF3D8(C1F* self, s32 kind, void* msg)
+void func_001EF3D8(AttachedSet* self, s32 kind, void* msg)
 {
     s32 flag = 0;
     if (kind == 2) {
@@ -3023,10 +3023,10 @@ void func_001EF3D8(C1F* self, s32 kind, void* msg)
     HandlePlacedObjectNotification(self, kind, msg);
 }
 
-void func_001EF520(C1F* self)
+void func_001EF520(AttachedSet* self)
 {
     if (self->root == self) {
-        Set1F* s = &self->set554;
+        AttachedGroup* s = &self->group;
         UnregisterObjectGroup(self->world, s);
         s->items[0] = self;
         s->count = 1;
@@ -3045,20 +3045,20 @@ ASM_FUNC(func_001EF5B8);
 
 ASM_FUNC(func_001EF768);
 
-s32 func_001EF808(C1F* self)
+s32 func_001EF808(AttachedSet* self)
 {
-    func_001F57E0(&self->rec590);
+    func_001F57E0(&self->trackedNodes);
     return 1;
 }
 
-void* func_001EF828(C1F* self)
+void* func_001EF828(AttachedSet* self)
 {
-    return &self->rec590;
+    return &self->trackedNodes;
 }
 
-void func_001EF830(C1F* o)
+void func_001EF830(AttachedSet* o)
 {
-    *(s32*)((u8*)&o->rec590 + 0x94) = 0;
+    *(s32*)((u8*)&o->trackedNodes + 0x94) = 0;
 }
 
 void func_001EF838(C62* self)

@@ -6,7 +6,7 @@ extern f32 D_0026185C[];
 #include "list_iter.h"
 #include "object_group.h"
 #include "world.h"
-#include "c48.h"
+#include "gauge_counted_object.h"
 #include "object_link.h"
 #include "attachment.h"
 #include "shapes.h"
@@ -324,7 +324,7 @@ void func_00198530(C0F* self);
 void func_001986E8(C0F* self, s32 code, Req_1986E8* req);
 void func_00198760(C0F* s1, f32 f);
 u32 func_00198858(void);
-void func_00198920(C48* self);
+void func_00198920(GaugeCountedObject* self);
 
 void func_001963D8(ObjectGroup* self)
 {
@@ -807,7 +807,7 @@ u32 func_00198858(void) { return 0; }
 
 ASM_FUNC(func_00198860);
 
-void func_00198920(C48* self)
+void func_00198920(GaugeCountedObject* self)
 {
     ResolveObjectLinks(self, 3, g_gaugeCountedObjectLinks);
     StartPlacedObject(self);

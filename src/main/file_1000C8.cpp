@@ -7,7 +7,7 @@
 #include "placed_object.h"
 #include "collider.h"
 #include "switched_collider.h"
-#include "c1f.h"
+#include "attached_set.h"
 #include "masked_collider.h"
 #include "trigger_zone.h"
 #include "zone_collider.h"
@@ -16,8 +16,8 @@
 #include "contact_tracker.h"
 #include "child_group_object.h"
 #include "target_follower.h"
-#include "c4a.h"
-#include "c4c.h"
+#include "gauge_mode_object.h"
+#include "counted_collider.h"
 #include "lookup_object.h"
 #include "effect_spawner.h"
 #include "c5d.h"
@@ -181,7 +181,7 @@ s32 func_001CAD60(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001CB328(void*, s32);
 void func_001D2830(void*,s32);
 void func_001D31D0(void*,s32);
-void func_001D32D8(C4C* self, s32 a, s32 b);
+void func_001D32D8(CountedCollider* self, s32 a, s32 b);
 void func_001D6CB0(void* obj);
 void func_001DB110(void*,s32);
 void func_001DB1E8(C19* item, s32 a, f32 x, f32 y, s32 b, s32 c);
@@ -335,7 +335,7 @@ ScriptValue* func_00101D38(ScriptValue* ret, Obj_101D38* obj, s32 unused, Script
 ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00102030(ScriptValue* ret, C1F* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args);
@@ -475,8 +475,8 @@ ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
 ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00108728(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108688(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108728(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001087D8(ScriptValue* ret, C1B* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00108878(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00108928(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
@@ -493,7 +493,7 @@ ScriptValue* func_001090C8(ScriptValue* ret, C0D* obj, s32 unused, ScriptValue* 
 ScriptValue* func_001091A8(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00109258(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00109308(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001093B8(ScriptValue* ret, C4C* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001093B8(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args);
 
 ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
@@ -1254,7 +1254,7 @@ ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue*
     return ret;
 }
 
-ScriptValue* func_00102030(ScriptValue* ret, C1F* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3732,7 +3732,7 @@ ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, Script
     return ret;
 }
 
-ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00108688(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3747,7 +3747,7 @@ ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00108728(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00108728(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -4055,7 +4055,7 @@ ScriptValue* func_00109308(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_001093B8(ScriptValue* ret, C4C* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_001093B8(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;

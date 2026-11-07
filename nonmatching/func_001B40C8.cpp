@@ -9,7 +9,7 @@
 #include "list_iter.h"
 #include "collider.h"
 #include "state_graph.h"
-#include "c54.h"
+#include "camera_positioned_object.h"
 #include "world.h"
 #include "attachment.h"
 #include "state_walker.h"
@@ -798,7 +798,7 @@ void func_001B5568(TriangleAnimator* self, void** out) { out[0] = &self->out44; 
 
 void func_00124A48(void* self);
 
-void func_001B5CD8(C54* self)
+void func_001B5CD8(CameraPositionedObject* self)
 {
     func_00124A48(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
@@ -1044,12 +1044,12 @@ void func_001B54D0(TriangleAnimator* self, AnimatorParams* src)
 void func_00124FC0(void* self);
 
 
-void func_001B5D28(C54* self)
+void func_001B5D28(CameraPositionedObject* self)
 {
     func_00124FC0(self);
     Vec02* src = (Vec02*)D_00261990->f40;
     Vec02 q = *src;
-    if (self->f2D0 == 0) {
+    if (self->followHeight == 0) {
         q.z = self->v140.z;
     }
     self->desc02()->m1D(self, &q);

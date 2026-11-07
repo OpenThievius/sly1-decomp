@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "switched_collider.h"
-#include "c4a.h"
+#include "gauge_mode_object.h"
 #include "countdown_collider.h"
 #include "globals.h"
 #include "object_link.h"
@@ -406,7 +406,7 @@ void func_0017AD50(C1B* self)
 
 void func_001B7968(void* self);
 
-void func_0017ADD0(C4A* self)
+void func_0017ADD0(GaugeModeObject* self)
 {
     InitCollider(self);
     self->mode = -1;
@@ -416,26 +416,26 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
-void func_0017B410(C4A* self, s32 a1);
-s32 func_0017B510(C4A* self, s32 a1);
+void func_0017B410(GaugeModeObject* self, s32 a1);
+s32 func_0017B510(GaugeModeObject* self, s32 a1);
 
-void func_0017AE00(C4A* self)
+void func_0017AE00(GaugeModeObject* self)
 {
     StartPlacedObject(self);
     f32 one = 1.0f;
     ResolveObjectLinks(self, 13, g_gaugeHolderLinks);
 
-    func_00139038(self, 12, 4, self->grpA, 0, 0, 0, &self->ptrA);
+    func_00139038(self, 12, 4, self->grpA, 0, 0, 0, &self->mode0Handle);
     self->fA = one;
-    func_001399F8(self->ptrA, 12, 4, self->grpA);
+    func_001399F8(self->mode0Handle, 12, 4, self->grpA);
 
-    func_00139038(self, 12, 4, &self->fB, 0, 0, 0, &self->ptrB);
+    func_00139038(self, 12, 4, &self->fB, 0, 0, 0, &self->mode1Handle);
     self->fB = one;
-    func_001399F8(self->ptrB, 12, 4, &self->fB);
+    func_001399F8(self->mode1Handle, 12, 4, &self->fB);
 
-    func_00139038(self, 12, 5, &self->fC, 0, 0, 0, &self->ptrC);
+    func_00139038(self, 12, 5, &self->fC, 0, 0, 0, &self->loopHandle);
     self->fC = one;
-    func_001399F8(self->ptrC, 12, 5, &self->fC);
+    func_001399F8(self->loopHandle, 12, 5, &self->fC);
 
     SetGaugeModeObjectMode(self, 0);
     PlayGaugeModeObjectLoop(self, 1);
@@ -448,7 +448,7 @@ extern s32 D_00270B54;
 extern s32 D_002717CC;
 s32 func_001E9970(void* self);
 
-void func_0017B308(C4A* self)
+void func_0017B308(GaugeModeObject* self)
 {
     s32 busy = 0;
     s32 mode = self->mode;
@@ -471,10 +471,10 @@ struct Msg_17B3A8 {
 };
 
 void func_001AC060(void* p);
-void func_0017B598(C4A* self);
+void func_0017B598(GaugeModeObject* self);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-s32 func_0017B3A8(C4A* self, Msg_17B3A8* msg)
+s32 func_0017B3A8(GaugeModeObject* self, Msg_17B3A8* msg)
 {
     if (msg->f10 & 0x10) {
         if (msg->f4 == self->f608) {
@@ -505,7 +505,7 @@ extern f32 D_0026185C;
 void func_001DDC38(void* a, void* b);
 s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
-void func_0017B410(C4A* self, s32 mode)
+void func_0017B410(GaugeModeObject* self, s32 mode)
 {
     void* x;
     if (mode == self->mode) {
@@ -514,10 +514,10 @@ void func_0017B410(C4A* self, s32 mode)
     x = 0;
     if (mode != 0) {
         if (mode == 1) {
-            x = self->ptrB;
+            x = self->mode1Handle;
         }
     } else {
-        x = self->ptrA;
+        x = self->mode0Handle;
     }
     if (mode >= 0) {
         if (mode < 2) {
@@ -533,32 +533,32 @@ void func_0017B410(C4A* self, s32 mode)
             SetWorldActiveFollower(self->world, 0);
         }
     }
-    (void)ReplaceAnimationPlayer(x, self, 1, self->f558, 0.0f, 1.0f);
+    (void)ReplaceAnimationPlayer(x, self, 1, self->modePlayer, 0.0f, 1.0f);
     *(s32*)((u8*)self + 0x550) = mode;
-    self->f554 = g_gameTime;
+    self->modeTime = g_gameTime;
 done:
     return;
 }
 
 s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
-s32 func_0017B510(C4A* self, s32 flag)
+s32 func_0017B510(GaugeModeObject* self, s32 flag)
 {
     void* p = 0;
     if (flag != 0) {
-        p = self->ptrC;
+        p = self->loopHandle;
     }
-    return ReplaceAnimationPlayer(p, self, 1, self->f604, 0.0f, 1.0f);
+    return ReplaceAnimationPlayer(p, self, 1, self->loopPlayer, 0.0f, 1.0f);
 }
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_0017B550(C4A* self, s32 index)
+void func_0017B550(GaugeModeObject* self, s32 index)
 {
     if (index == -1) {
-        self->f60C = 0;
+        self->target = 0;
     } else {
-        self->f60C = (void*)FindFirstObjectById(self->world, 0x101, index, self);
+        self->target = (void*)FindFirstObjectById(self->world, 0x101, index, self);
     }
 }
 
@@ -578,9 +578,9 @@ struct Obj_17BC20 {
     s32 f5C;
 };
 
-void func_0017B598(C4A* self)
+void func_0017B598(GaugeModeObject* self)
 {
-    ReplaceAnimationPlayer(self->f60C, self, 1, self->f610, 0.0f, 1.0f);
+    ReplaceAnimationPlayer(self->target, self, 1, self->targetPlayer, 0.0f, 1.0f);
 }
 
 void func_0017B5D0(CountdownCollider* self)

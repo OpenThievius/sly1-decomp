@@ -6,7 +6,7 @@
 #include "list_iter.h"
 #include "collider.h"
 #include "state_graph.h"
-#include "c54.h"
+#include "camera_positioned_object.h"
 #include "world.h"
 #include "attachment.h"
 #include "state_walker.h"
@@ -341,18 +341,18 @@ void func_001B5C40(u8* src, u16* dst)
     dst[i] = 0;
 }
 
-void func_001B5CD8(C54* self)
+void func_001B5CD8(CameraPositionedObject* self)
 {
     StartPlacedObject(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
-void func_001B5D28(C54* self)
+void func_001B5D28(CameraPositionedObject* self)
 {
     UpdatePlacedObject(self);
     Vec02* src = (Vec02*)g_camera->f40;
     Vec02 q = *src;
-    if (self->f2D0 == 0) {
+    if (self->followHeight == 0) {
         q.z = self->v140.z;
     }
     self->desc02()->m1D(self, &q);
