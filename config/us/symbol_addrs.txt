@@ -72,6 +72,10 @@ D_0062A788 = 0x0062A788;
 // each a 4-byte global of its own (an object of 8 bytes or more would sit on 8).
 D_00274B78 = 0x00274B78;
 D_00274B7C = 0x00274B7C;
+// The same in the player's file (file_16F608): after the float at 0x263704 (238689) that
+// func_0016F810 loads, two zero floats no code reads before the vector at 0x263710.
+D_00263708 = 0x00263708;
+D_0026370C = 0x0026370C;
 
 // Constructors (_GLOBAL_$I$) behind the linker's leftovers: retail's constructor list
 // (D_0027B130) names each as func_X + 0x10, after the two 8-byte runs (a store, then a nop) the

@@ -3,7 +3,7 @@
 // between two modes (func_0017B410 sets the mode, takes the camera system's state, and starts
 // the object it keeps for each) and hands out three sound handles it makes when it is loaded.
 // Written for this project from what retail's code does (config/us/classes.tsv;
-// src/main/00178000.cpp).
+// src/main/file_1793C0.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

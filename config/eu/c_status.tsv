@@ -1728,7 +1728,7 @@ func_001781E0	func_00178840	match
 func_00178258	func_001788B8	match	
 func_00178280	func_001788E0	match	
 func_00178598	func_00178BF8	match	
-func_00178D98	func_001793F8	match	
+func_00178D98	func_001793F8	match	rodata
 func_001793C0	func_00179A20	match	
 func_001793F0	func_00179A50	match	version-specific
 func_00179590	func_00179BF0	match	

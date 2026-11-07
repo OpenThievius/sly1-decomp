@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The button codes (kind t262a of config/us/tables.tsv): the nine static records in .data
 // (D_00262A80 .. D_00262C48). Written for this project from what retail's code does
-// (config/us/tables.tsv, src/main/0016C000.cpp); the names are ours (docs/NAMING.md).
+// (config/us/tables.tsv, src/main/file_16E0B8.cpp); the names are ours (docs/NAMING.md).
 //
 // Each record holds a sequence of pad button masks (its data block precedes it in .data), the
 // callback to run when the player has pressed them in order, and the record's place in the list

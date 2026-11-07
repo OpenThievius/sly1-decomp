@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The query func_00177838 (00174000.cpp) takes as its first parameter: what it holds, a result
+// The query func_00177838 (file_16F608.cpp) takes as its first parameter: what it holds, a result
 // and a kind. Its callers build it on their stacks (func_00198760 within a 0x40-byte local).
 // Written for this project from what retail's code does (build/swarm/st3/groups.tsv, g2011).
 #ifndef NODE_QUERY_H
