@@ -2,9 +2,9 @@
 // PAL: D_002701F8.f324 is at 0x5B0 (US 0x324).
 struct Global_177F98_eu { u8 pad0[0x5B0]; void* f5B0; };
 
-void func_00177F98(Player* self, Node_177F98* node)
+void func_00177F98(Player* self, InteractTarget* node)
 {
-    if ((u32)(node->kind - 1) < 2) {
+    if ((u32)(node->mode - 1) < 2) {
         ((Global_177F98_eu*)&g_typedTextCaptionBox)->f5B0 = node;
         PushStackElement(g_elementStack, &g_typedTextCaptionBox);
         return;

@@ -8,9 +8,12 @@
 
 #include "collider.h"
 
-// Three floats func_001A7128 reads as a polynomial in time: x + t * (y + t * z).
+// Three floats func_001A7128 reads as a polynomial in time: x + t * (y + t * z) (Eval; a
+// trail's alpha over a point's age is one too, trail_ribbon.cpp).
 struct TimePolynomial {
     f32 x, y, z;
+
+    f32 Eval(f32 t) { return x + t * (y + t * z); }
 };
 
 struct HitTarget : Collider {

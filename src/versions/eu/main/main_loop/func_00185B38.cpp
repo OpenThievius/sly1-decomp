@@ -3,10 +3,10 @@
 extern s32 D_eu_0026321C;
 void func_00185B38(void)
 {
-    Frame_185B38 fr;
+    ProgressFrame fr;
     u32 i;
     s32 idx;
-    Fn_185B38* tbl;
+    StartupFn* tbl;
 
     fr.w[12] = 0x7F0000;
     fr.w[16] = 0x3F3F3F;
@@ -16,7 +16,7 @@ void func_00185B38(void)
     idx = 0x1D;
     func_00191E70(1);
     func_00193270(&fr);
-    tbl = (Fn_185B38*)g_startupInitializers;
+    tbl = (StartupFn*)g_startupInitializers;
     i = 0;
     do {
         if (D_eu_0026321C != 0) {

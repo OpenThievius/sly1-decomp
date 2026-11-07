@@ -11,6 +11,7 @@
 #include "range_record.h"
 #include "texture_table.h"
 #include "bump_allocator.h"
+#include "buffered_stream.h"
 #define TEST_1B3510(ate, atst, aref, afail, date, datm, zte, ztst) \
     ((u64)(ate) | ((u64)(atst) << 1) | ((u64)(aref) << 4) | ((u64)(afail) << 12) | ((u64)(date) << 14) | \
      ((u64)(datm) << 15) | ((u64)(zte) << 16) | ((u64)(ztst) << 17))
@@ -27,7 +28,8 @@
 
 extern u32 D_00275718;
 void func_00137A60(void* a, s32 b, void* c);
-struct Bits_1B29E0 {
+// A GIF register word, built from a zeroed doubleword.
+struct GifWord {
     u64 bits;
 };
 u64 func_001B2988(TextureTable* obj, s32 p1, s32 p2);
@@ -44,23 +46,14 @@ extern s32 D_00274518;
 void func_00168D68(void* dst, s32 size, s32 align);
 void func_001692B0(s32 a, void* b);
 extern f32 D_0026185C;
-struct Entry_1B2988 { u8 pad[0x18]; u64 tail; };
-struct Cell_1B2988 { u8 pad[0x10]; u64 value; };
 u32* func_0018D500(s32 bytes);
-struct Obj_1B3488;
 extern s32 D_002626CC;
 void func_001B47C0(void);
-void func_00168D78(Obj_1B3488* p);
-void func_001692B0(Obj_1B3488* self, u8* arg);
-void func_001B3510(Obj_1B3488* self);
+void func_00168D78(BumpAllocator* p);
 void func_00169718(void);
-void func_0013B430(Obj_1B3488* mask);
+void func_0013B430(s32 mask);
 // EXACT (us)
 
-struct Ent_1B3040 {
-    s32 type;
-    s32 data;
-};
 extern s32 D_002744F8;
 extern AnimRecord* D_002744FC;
 extern s32 D_0027453C;
@@ -80,14 +73,6 @@ void func_0015E5F0(void);
 void func_001A9F78(void);
 s32 func_00169780(s32 mask);
 s32 func_001693A8(s32 mask);
-struct Ent_1B3510 {
-    s32 type;
-    Quad4* data;
-};
-struct Glob_1B3510 {
-    u8 pad0[0x204];
-    u32 f204;
-};
 void* func_001611B8(PacketWriter* b);
 void func_001529C8(PacketWriter* b, s32 n, Quad4* q);
 void func_001612F8(PacketWriter* b, s32 a, s32 c, s32 d, s32 e, s32 f);
@@ -99,24 +84,18 @@ void func_001528C8(PacketWriter* b);
 void func_00161278(PacketWriter* b, s32 n);
 void func_00161520(PacketWriter* b, f32 x, f32 y, f32 z);
 void func_00161458(PacketWriter* b, u32 c);
-struct Ctx_1B2DF8;
 extern u8 D_0024A220[];
 void* func_001FD8A8(s32 size);
-struct Ent_1B2DF8 {
-    u8 pad00[0x4C];
-    void* p4c;
-    u8 pad50[0x30];
-    s32 v80;
-    u8 pad84[0x04];
-
-    Ent_1B2DF8() { p4c = g_fontMethods; }
+// A font of the level's table (g_fontRecords), built with the font's table in place.
+struct LoadedFont : Font {
+    LoadedFont() { vt = (const FontVt*)g_fontMethods; }
     void* operator new[](__SIZE_TYPE__ size) { return AllocateOrThrow(size); }
 };
 extern s32 D_00262260;
-extern Ent_1B2DF8* D_00262264;
+extern LoadedFont* D_00262264;
 extern s32 D_0026227C;
-s32 func_00137BE0(Ctx_1B2DF8* src);
-void func_0015D8A8(Ent_1B2DF8* e, Ctx_1B2DF8* self);
+s32 func_00137BE0(BufferedStream* src);
+void func_0015D8A8(LoadedFont* e, BufferedStream* self);
 s32 func_0015C1C0(s32 n);
 void func_001B46E0(s32 a, s32 frame);
 void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
@@ -180,22 +159,22 @@ AnimCursor* D_00274544 = 0;
 
 u64 func_001B2988(TextureTable* t, s32 i, s32 j)
 {
-    Entry_1B2988* e = ((Entry_1B2988**)t->entries)[i];
+    ImageRecord* e = ((ImageRecord**)t->entries)[i];
     s32 stride = 1;
     if (t->record->kind == 0) stride = 3;
-    Cell_1B2988* c = ((Cell_1B2988**)t->cells)[i * stride + j];
-    u64 r = e->tail;
-    if (c != 0) r |= c->value;
+    PaletteRecord* c = ((PaletteRecord**)t->cells)[i * stride + j];
+    u64 r = e->f18;
+    if (c != 0) r |= c->f10;
     return r;
 }
 
 void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
 {
-    Bits_1B29E0 a;
-    Bits_1B29E0 b;
-    Bits_1B29E0 c;
-    Bits_1B29E0 d;
-    Bits_1B29E0 e;
+    GifWord a;
+    GifWord b;
+    GifWord c;
+    GifWord d;
+    GifWord e;
     s32 sel = flag ^ 5;
     u64 one = 1;
 
@@ -294,13 +273,13 @@ void func_001B2CF8(void* self)
     }
 }
 
-void func_001B2DF8(Ctx_1B2DF8* self)
+void func_001B2DF8(BufferedStream* self)
 {
     g_fontCount = ReadBufferedU16(self);
-    g_fontRecords = new Ent_1B2DF8[g_fontCount];
+    g_fontRecords = new LoadedFont[g_fontCount];
     for (s32 i = 0; i < g_fontCount; i++) {
         LoadFont(&g_fontRecords[i], self);
-        g_fontRecords[i].v80 = 1 << i;
+        g_fontRecords[i].mask = 1 << i;
     }
     g_defaultFont = GetFontById(0);
 }
@@ -377,9 +356,9 @@ void func_001B3040(void* self)
             rec->entCount = 4;
             break;
         }
-        rec->ents = AllocateZeroedFrontMemory(rec->entCount * 8);
-        Ent_1B3040* arr = (Ent_1B3040*)rec->ents;
-        Ent_1B3040* e;
+        rec->ents = (AnimRecordEntry*)AllocateZeroedFrontMemory(rec->entCount * 8);
+        AnimRecordEntry* arr = rec->ents;
+        AnimRecordEntry* e;
         switch (rec->kind) {
         case 1:
         case 6:
@@ -387,46 +366,46 @@ void func_001B3040(void* self)
         case 8:
         case 10:
             arr[0].type = 8;
-            arr[0].data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             break;
         case 4: {
             s32 n = (rec->flags & 2) ? 3 : 0;
             n += 5;
             e = arr + 1;
             arr[0].type = n;
-            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             e->type = 5;
-            e->data = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
+            e->addr = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
             e = arr + 2;
             e->type = 7;
-            e->data = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
+            e->addr = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
             e = arr + 3;
             e->type = 4;
-            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 6);
+            e->addr = (s32)AllocateZeroedFrontMemory(rec->count << 6);
             break;
         }
         case 2:
         case 3:
             arr[0].type = 6;
-            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             break;
         case 0:
             e = arr + 1;
             arr[0].type = 8;
-            arr[0].data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             e->type = 8;
-            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
+            e->addr = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             e = arr + 2;
             e->type = 8;
-            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
+            e->addr = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             break;
         case 5:
             arr[0].type = 7;
-            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             break;
         case 9:
             arr[0].type = 4;
-            arr[0].data = (s32)AllocateZeroedFrontMemory(0x40);
+            arr[0].addr = (s32)AllocateZeroedFrontMemory(0x40);
             break;
         }
     }
@@ -454,17 +433,17 @@ void func_001B3450(void)
     g_activeImageMask = 0;
 }
 
-void func_001B3488(Obj_1B3488* self)
+void func_001B3488(s32 self)
 {
     FlushCursors();
-    if ((s32)self != g_activeImageMask) {
-        ResetBumpAllocator((Obj_1B3488*)&g_bumpAllocator);
+    if (self != g_activeImageMask) {
+        ResetBumpAllocator(&g_bumpAllocator);
         SendMaskedImagesToGif(self, (u8*)&g_bumpAllocator);
         BuildAnimRecordGifPackets(self);
         FlushMeshQueue();
         UpdateMatchingListedObjects(self);
         D_002626CC = 2;
-        g_activeImageMask = (s32)self;
+        g_activeImageMask = self;
     }
 }
 
@@ -475,7 +454,7 @@ void func_001B3510(s32 mask)
     s32 i;
     s32 j;
     AnimRecord* rec;
-    Ent_1B3510* ents;
+    AnimRecordEntry* ents;
     u64 test;
     u64 sel;
 
@@ -488,7 +467,7 @@ void func_001B3510(s32 mask)
             continue;
         }
         for (j = 0; j < rec->count; j++) {
-            ents = (Ent_1B3510*)rec->ents;
+            ents = rec->ents;
             switch (rec->kind) {
             case 1:
             case 6:
@@ -521,7 +500,7 @@ void func_001B3510(s32 mask)
                     sel = (rec->flags & 1) ? 2 : 1;
                     AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
                 }
-                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                AddGifRegisterWrite(&buf, 0x3D, g_camera->fogColor);
                 SendTextureRegisters(rec->elems, j, 0, rec->kind, &buf);
                 CloseDmaTag(&buf);
                 break;
@@ -534,7 +513,7 @@ void func_001B3510(s32 mask)
                     AddGifRegisterWrite(&buf, 0x47, 0x71001);
                     sel = (rec->flags & 1) ? 2 : 1;
                     AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
-                    AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                    AddGifRegisterWrite(&buf, 0x3D, g_camera->fogColor);
                     SendTextureRegisters(rec->elems, j, 0, rec->kind, &buf);
                 } else {
                     ReserveGifPackedData(&buf, 0x4C, 0, 3, 0x4FF, 0);
@@ -562,7 +541,7 @@ void func_001B3510(s32 mask)
                 AddGifRegisterWrite(&buf, 0x47, 0x75001);
                 sel = (rec->flags & 1) ? 2 : 1;
                 AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
-                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                AddGifRegisterWrite(&buf, 0x3D, g_camera->fogColor);
                 AddGifStEntry(&buf, 0.0f, 0.0f, 1.0f);
                 col[0] = (rec->color[0] + 1) >> 1;
                 col[1] = (rec->color[1] + 1) >> 1;
@@ -614,7 +593,7 @@ void func_001B3510(s32 mask)
                     AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
                 }
                 ents++;
-                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                AddGifRegisterWrite(&buf, 0x3D, g_camera->fogColor);
                 SendTextureRegisters(rec->elems, j, 0, rec->kind, &buf);
                 CloseDmaTag(&buf);
                 ClearPacketBuffer(&buf);

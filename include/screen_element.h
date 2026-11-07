@@ -24,6 +24,8 @@ struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
+// A float that may sit at any address: storing one is a pair of unaligned stores (swl, swr).
+struct __attribute__((packed)) T217D_Float { f32 v; };
 // A colour as four bytes (red, green, blue, alpha), copied as a whole.
 struct T217D_Rgba { u8 c[4]; };
 
@@ -39,7 +41,14 @@ struct T217D_Place {
 
 typedef char check_T217D_Place[sizeof(T217D_Place) == 20 ? 1 : -1];   // func_001AA1F0 steps 20 bytes
 
+// D_0026C3E0: the 37 elements' places and a word after them.
+struct ElementPlaceTable {
+    T217D_Place e[37];
+    s32 end;
+};
+
 struct ScreenElement;
+struct StepSequence;    // include/step_sequence.h
 
 // The 20 slots. Those the base fills are the generic ones; the derived tables replace
 // slots 0, 1, 2, 8, 9, 14, 15, 16 and so on with their own.
@@ -136,8 +145,8 @@ void func_001ABE20(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
-    u8 pad260[0x264 - 0x260];
-    s32 f264;               // 0x264
+    s32 f260;               // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
+    s32 f264;               // 0x264: copied into f270 then
     s32 f268;               // 0x268
     union {
         u8 letter;          // 0x26C: the glyph to show, from 'r'
@@ -175,7 +184,10 @@ struct T217D_3D0 : ScreenElement {
 
 // D_00218420.
 struct T217D_420 : ScreenElement {
-    s32 flag;                   // 0x260
+    union {
+        s32 flag;               // 0x260: nonzero, the element shows (func_001AD718)
+        StepSequence* owner;    // 0x260: the step sequence in state 5 that shows it (func_00150790)
+    };
 };
 
 // D_00218470: an element with an icon table.
@@ -329,7 +341,7 @@ struct T217D_1380 : ScreenElement {
 struct T217D_BF0 : ScreenElement {
     u8 pad260[0x284 - 0x260];
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
-    f32 f288;                   // 0x288: 0.0 at the start
+    f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.

@@ -70,7 +70,7 @@ struct Mat3U {
     f32 m[3][4];            // 0x00
 };
 
-// Four rows of four floats at 4-byte alignment (Mat_188850, Mat_17DE88, Mat_1442C8,
+// Four rows of four floats at 4-byte alignment (Mat_188850, Mat_1442C8,
 // Mat_161F70: all the 4-row views are 4-aligned).
 struct Mat4 {
     f32 m[4][4];            // 0x00

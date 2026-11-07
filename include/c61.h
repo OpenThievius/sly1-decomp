@@ -9,8 +9,12 @@
 #include "placed_object.h"
 
 struct C61 : PlacedObject {
-    void* f2D0;             // 0x2D0: what func_00153328 tests before drawing
-    u8 pad2D4[0x2F0 - 0x2D4];
+    void* f2D0;             // 0x2D0: the range record func_00152E48 builds for; func_00153328 tests it before drawing
+    s32 f2D4;               // 0x2D4: the first DMA packet func_00152E48 builds (func_001533A8 sends it)
+    s32 f2D8;               // 0x2D8: its size
+    s32 f2DC;               // 0x2DC: the second packet
+    s32 f2E0;               // 0x2E0: its size
+    u8 pad2E4[0x2F0 - 0x2E4];
 };
 
 typedef char check_C61[sizeof(C61) == 0x2F0 ? 1 : -1];

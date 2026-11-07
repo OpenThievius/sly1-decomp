@@ -12,12 +12,17 @@
 
 #include "base_object.h"
 
+struct Quad16;
+
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
 struct Sub8C {
     s32 f0;                 // 0x0
     s32 f4;                 // 0x04: nonzero while the record is lent out
     s32 f8;                 // 0x08
-    s32 fC;                 // 0xC
+    union {
+        s32 fC;             // 0xC
+        Quad16* qC;         // 0x0C: two quadwords per entry, allocated by func_001A8208
+    };
     s32 f10;                // 0x10
     void* f14;              // 0x14: the object it was lent to
 };

@@ -5,17 +5,25 @@
 #include "memory_card.h"
 #include "game_progress.h"
 #include "screen_element.h"
+#include "object_link.h"
+#include "message_body.h"
+#include "shapes.h"
 
 // The methods of class 0x0C (0xE50 bytes, an agent): its links and clips, the search for the
 // object it acts on, its states and the notifications it answers.
 
-struct Ent_264910 { s32 a, b, c; };
-struct Ent_264960 { s32 key; f32 f; s32 v; };
+// The objects the gauge agent looks for (D_00264960, copied into fE24): an id, a float and
+// the object found for the id.
+struct GaugeTarget {
+    s32 key;                // 0x00
+    f32 f;                  // 0x04
+    s32 value;              // 0x08: FindFirstObjectById's result
+};
 
-Ent_264910 D_00264910[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
-s32 D_00264928[10] = { 1, 0x437, 0xE0C, 0, 0x440, 0xE18, 0, 0x441, 0xE1C, 0 };
+ObjectLink D_00264910[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
+ObjectLink D_00264928[3] = { { 1, 0x437, 0xE0C }, { 0, 0x440, 0xE18 }, { 0, 0x441, 0xE1C } };
 s32 D_00264950[4] = { 0x446, 0x447, 0x448, 0 };
-Ent_264960 D_00264960[6] = {
+GaugeTarget D_00264960[6] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 },
     { 0x3B, 80.0f, 0 }, { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }
 };
@@ -78,8 +86,6 @@ void func_0018A3B8(GaugeAgent* self)
     ResolveObjectLinks(self, 2, D_00264910);
 }
 
-struct Ent_18A3F0 { s32 key; s32 pad4; s32 value; };
-
 void func_0018A3F0(GaugeAgent* self)
 {
     s32 n;
@@ -94,9 +100,9 @@ void func_0018A3F0(GaugeAgent* self)
     for (n = 0; n < 3; n++)
         self->fE30[n] = ResolveAgentClip(self, D_00264950[n]);
     self->fE20 = 6;
-    self->fE24 = (Ent_18A3F0*)CopyToFrontMemory(0x48, D_00264960);
+    self->fE24 = (GaugeTarget*)CopyToFrontMemory(0x48, D_00264960);
     for (i = 0; i < self->fE20; i++) {
-        Ent_18A3F0* e = ((Ent_18A3F0*)self->fE24) + i;
+        GaugeTarget* e = ((GaugeTarget*)self->fE24) + i;
         e->value = FindFirstObjectById(self->world, 1, e->key, self);
     }
 }
@@ -105,11 +111,12 @@ INCLUDE_ASM(func_0018A510);
 
 ASM_FUNC(func_0018A628);
 
-struct __attribute__((aligned(16))) Cand_18A6C0 { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
+// A 0x70-byte hit func_00141D00 gives (collider_contact.cpp's MeshHit): its score at 0x40.
+struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
 
 s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
 {
-    Cand_18A6C0 buf[2];
+    HitCandidate buf[2];
     s32* table = (s32*)a4;
     s32 best = 0;
     f32 bestScore = 3.4028234663852886e+38f;
@@ -125,12 +132,12 @@ s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
             }
         }
         if (k < r) {
-            Cand_18A6C0* c = &buf[k];
+            HitCandidate* c = &buf[k];
             if (c->score < bestScore) {
                 bestScore = c->score;
                 best = self;
                 if (a5 != 0) {
-                    *(Cand_18A6C0*)a5 = *c;
+                    *(HitCandidate*)a5 = *c;
                 }
             }
         }
@@ -139,9 +146,10 @@ s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
 }
 
 typedef s32 (*VFn_18A830)(BaseObject* self, void* arg);
-struct Rec_18A830 { u8 pad[0x50]; BaseObject* sub; };
+// What func_001DC238 hands its filter (IsGaugeAgentBlocker): the object hit at 0x50.
+struct BlockerQuery { u8 pad[0x50]; BaseObject* sub; };
 
-s32 func_0018A830(void* self, Rec_18A830* rec)
+s32 func_0018A830(void* self, BlockerQuery* rec)
 {
     s32* e = D_002649B0;
     u32 i;
@@ -167,7 +175,7 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     return 1;
 }
 
-typedef s32 (*Cb_18A910)(void* self, Rec_18A830* ctx);
+typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
 void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
 
@@ -186,7 +194,8 @@ s32 func_0018A910(GaugeAgent* self, void* a1, void* a2)
 typedef void* (*FnSelf_18A9A8)(void* self);
 typedef s32 (*FnSub_18A9A8)(void* self);
 
-struct Loc_18A9A8 {
+// func_0018A9A8's locals: a point and the walker's current key.
+struct LineCheckFrame {
     u8 buf[0x10];
     s32 code;
 };
@@ -194,7 +203,7 @@ struct Loc_18A9A8 {
 s32 func_0018A9A8(GaugeAgent* self)
 {
     u8* obj = (u8*)self;
-    Loc_18A9A8 loc;
+    LineCheckFrame loc;
     void* sub;
     s32 code;
 
@@ -339,27 +348,19 @@ void func_0018B2E8(GaugeAgent* self)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_18B340 { s32 w[4]; };
-
-struct Key_18B340 {
-    s32 a;
-    s32 pad0;
-    s32 b;
-};
-
 struct Obj_18B340 {
     u8 pad0[0xF0];
-    Quad_18B340 fF0;
+    Quad16 fF0;
 };
 
-void func_0018B340(GaugeAgent* self, s32 a1, Key_18B340* key)
+void func_0018B340(GaugeAgent* self, s32 a1, MessageBody* key)
 {
-    if (a1 == 0x13 && key->a == (s32)self->f7E0) {
-        switch (key->b) {
+    if (a1 == 0x13 && key->sourceId == (s32)self->f7E0) {
+        switch (key->code) {
         case 0x442:
         case 0x443: {
             Obj_18B340* obj;
-            if (key->b == 0x442) {
+            if (key->code == 0x442) {
                 obj = (Obj_18B340*)self->fE18;
             } else {
                 obj = (Obj_18B340*)self->fE1C;
@@ -369,11 +370,11 @@ void func_0018B340(GaugeAgent* self, s32 a1, Key_18B340* key)
             switch (kind) {
             case 0x43A:
             case 0x43C:
-                obj->fF0 = (*(Quad_18B340*)&self->vE40);
+                obj->fF0 = (*(Quad16*)&self->vE40);
                 *(f32*)((u8*)obj + 0xF8) = self->v140.z + D_00264A34;
                 break;
             case 0x43E:
-                obj->fF0 = (*(Quad_18B340*)&self->vE40);
+                obj->fF0 = (*(Quad16*)&self->vE40);
                 *(f32*)((u8*)obj + 0xF8) = *(f32*)((u8*)obj + 0xF8) + D_00264A38;
                 break;
             }

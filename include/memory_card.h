@@ -14,6 +14,20 @@
 #include "common.h"
 #include "game_progress.h"
 
+// One save file as the card keeps it: the image and its file information (0x5C bytes).
+struct CardSlot {
+    union {
+        GameProgress data;  // 0x0000
+        struct {
+            u8 pad0[0xC];
+            f32 f0C;        // 0x000C: 0 for an empty slot (func_0018C028)
+        };
+    };
+    u8 info[0x5C];          // 0x1A00
+};
+
+typedef char check_CardSlot[sizeof(CardSlot) == 0x1A5C ? 1 : -1];
+
 struct MemoryCard {
     s32 f00;                // 0x00: func_0018D0A0
     void* port;             // 0x04: func_0018C250, func_0018D0A0 (first argument of the card query)
@@ -27,7 +41,7 @@ struct MemoryCard {
     s32 f24;                // 0x24: func_0018D0A0
     s32 freeBlocks;         // 0x28: func_0018C250 (compared with the blocks a save needs), func_0018D0A0
     s32 f2C;                // 0x2C: func_0018D0A0
-    u8 pad30[0x4F44 - 0x30];
+    CardSlot slots[3];      // 0x30: the three save files read from the card (func_0018C420)
     union {
         GameProgress* image;     // 0x4F44: the block func_0018C568 writes (Data_18C568, 0x1A00 bytes)
         u8* p4F44;          // 0x4F44: func_0018C638

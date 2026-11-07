@@ -25,12 +25,18 @@ struct ItemGroup {
 };
 
 struct ItemKeeper : BaseObject {
-    u8 pad34[0x58 - 0x34];
+    u8 pad34[0x50 - 0x34];
+    s32 state;              // 0x50: func_001CBB88 picks the next, 3 stops the updates
+    u8 pad54[0x58 - 0x54];
     ItemGroup owned;          // 0x58: the ones that become its own (their owner is set to it)
     ItemGroup listed;         // 0xE0: the ones it only keeps
-    u8 pad168[0x180 - 0x168];
+    s32 triggerCount;       // 0x168: the state triggers at 0x16C (func_001CBE20 adds one once)
+    s32 triggers[4];        // 0x16C
+    s32 queued;             // 0x17C: an update is queued (func_001CBAA0; func_001CBB20 clears it)
     s32 f180;               // 0x180: -1 from the start
-    u8 pad184[0x190 - 0x184];
+    u8 pad184[0x188 - 0x184];
+    s32 anyFree;            // 0x188: func_001CBB20 sets it, func_001CBB88 reads it
+    u8 pad18C[0x190 - 0x18C];
 };
 
 typedef char check_ItemGroup[sizeof(ItemGroup) == 0x88 ? 1 : -1];

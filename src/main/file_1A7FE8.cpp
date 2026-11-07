@@ -88,8 +88,7 @@ s32 func_001E9970(void);
 
 
 
-struct Tab_26C3E0 { T217D_Place e[37]; s32 end; };
-extern Tab_26C3E0 D_0026C3E0;
+extern ElementPlaceTable D_0026C3E0;
 extern u8 D_00261868[];
 
 
@@ -119,23 +118,15 @@ ObjectPoolEntry* func_001A8718(ObjectPool* table, s32 key);
 
 
 
-struct __attribute__((aligned(16))) Quad_1A94C0 { s32 a, b, c, d; };
-struct Inner_1A94C0 {
-    u8 pad0[0x110];
-    Quad_1A94C0 q110;
-    Quad_1A94C0 q120;
-    Quad_1A94C0 q130;
-    Quad_1A94C0 q140;
-};
-struct Obj_1A94C0 {
+// Where func_001A94C0 takes a position and a matrix from: an object's world frame (f0 or f4), a
+// placed object's m110 and v140 (f8), or its own copy of both.
+struct FrameSource {
     void* f0;
     void* f4;
-    Inner_1A94C0* f8;
+    PlacedObject* f8;
     u8 pad0[4];
-    Quad_1A94C0 q10;
-    Quad_1A94C0 q20;
-    Quad_1A94C0 q30;
-    Quad_1A94C0 q40;
+    Vec02 pos;
+    Vec02 rot[3];
 };
 
 void func_001920B0(void* self, void* arg);
@@ -161,6 +152,7 @@ void func_00137238(void* out, f32 x, f32 y);
 void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
+
 
 
 struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; T217D_Word w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; T217D_Word w30; };
@@ -245,14 +237,9 @@ extern u8 D_0024E879[];
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 void* func_001E2138(void* dst, void* src);
 
-struct Hdr_1A8208 { u8 pad0[4]; s32 f4; s32 f8; Quad16* fC; };
-struct Self_1A8208 {
-    u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
-    s32 f34; ObjectPoolEntry* f38; Hdr_1A8208* f3C;
-};
 
 void* func_0018D500(s32 size);
-PlacedObject* func_0015A418(void* a, s32 b, s32 c, Self_1A8208* d);
+PlacedObject* func_0015A418(void* a, s32 b, s32 c, ObjectPool* d);
 void func_00152438(void* p, s32 a);
 s32 func_001527D8(void* p);
 PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
@@ -264,11 +251,7 @@ PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
 void func_001A8AF8(ObjectPool* self);
 
 
-struct Obj_1A93E8;
-void func_001F5C0C(Obj_1A93E8* p, s32 zero, s32 size);
 
-
-extern void* const D_002486B0[];
 
 
 extern void* const D_002486B0[];
@@ -276,7 +259,10 @@ extern void* const D_002486B0[];
 
 extern void* const D_002486B0[];
 
-extern Tab_26C3E0 D_0026C3E0;
+
+extern void* const D_002486B0[];
+
+extern ElementPlaceTable D_0026C3E0;
 
 
 
@@ -418,26 +404,27 @@ void func_001AB2B8(T217D_E30* self);
 f32 func_0015DFF8(TextReader* loc);
 
 
-struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
-struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
+// An object func_001A88A0 may add to a pool: a class 0x3B with 0x678 clear or a class 0x20
+// with 0x680 set is refused.
+struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 
-s32 func_00182FC8(Key_1A88A0* p);
-s32 func_001300E8(Key_1A88A0* p, s32 kind);
+s32 func_00182FC8(PoolCandidate* p);
+s32 func_001300E8(PoolCandidate* p, s32 kind);
 
-struct Begin_1A88A0 {
-    static void Of(Iter_1A88A0* it, List_1A88A0* list)
+// The list walk (list_iter.h): push a frame, step through the elements, pop it.
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_1A88A0*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 
-struct Next_1A88A0 {
-    static u8* Of(Iter_1A88A0* it)
+struct ListWalkNext {
+    static u8* Of(ListFrame* it)
     {
         u8* obj = *(u8**)it->link;
         it->link = obj + it->offset;
@@ -445,16 +432,16 @@ struct Next_1A88A0 {
     }
 };
 
-struct End_1A88A0 {
-    static void Of(Iter_1A88A0* it)
+struct ListWalkEnd {
+    static void Of(ListFrame* it)
     {
-        g_activeListFrames = (ListFrame*)it->prev;
+        g_activeListFrames = it->prev;
     }
 };
 
 
 // Data defined by this file.
-Tab_26C3E0 D_0026C3E0 = {
+ElementPlaceTable D_0026C3E0 = {
     {
         { 0.0f, 0.0f, -1, -1, -1 },
         { 0.0f, 0.0f, -1, -1, -1 },
@@ -541,11 +528,13 @@ T217D_E30 D_00274118;
 
 
 void func_00182C18(ObjectPool* self);
-struct Buf_1A7FE8 { u8 b[1]; };
-s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
+
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(ObjectPool* self);
 
+
+struct Buf_1A7FE8 { u8 b[1]; };
+s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
 
 void func_001A7FE8(ObjectPool* self)
 {
@@ -602,25 +591,25 @@ void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
     e->flags = ((((e->flags & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
 }
 
-void func_001A8208(Self_1A8208* self)
+void func_001A8208(ObjectPool* self)
 {
     s32 i;
-    if (self->f3C != 0) {
-        if (self->f3C->f4 != 0) {
-            self->f3C->fC = (Quad16*)AllocateFrontMemory(self->f34 << 5);
+    if (self->sub != 0) {
+        if (self->sub->f4 != 0) {
+            self->sub->qC = (Quad16*)AllocateFrontMemory(self->count << 5);
         }
     }
-    for (i = 0; i < self->f34; i++) {
-        ObjectPoolEntry* e = &self->f38[i];
-        PlacedObject* obj = FindFirstObjectById(self->f14, 4, e->id, self);
+    for (i = 0; i < self->count; i++) {
+        ObjectPoolEntry* e = &self->items[i];
+        PlacedObject* obj = FindFirstObjectById(self->world, 4, e->id, self);
         s32 n;
         s32 cnt;
         if (obj == 0) {
             e->count = 0;
             continue;
         }
-        if (self->f3C != 0 && self->f3C->f4 != 0) {
-            s32 x = self->f3C->f8;
+        if (self->sub != 0 && self->sub->f4 != 0) {
+            s32 x = self->sub->f8;
             if (x == 1) goto c1;
             if (x < 2) {
                 if (x == 0) goto c0;
@@ -630,10 +619,10 @@ void func_001A8208(Self_1A8208* self)
             }
             goto done;
         c0:
-            self->f3C->f8 = 1;
-            SetListLinkOffset((u8*)self->f3C + 0x14, 0x18);
+            self->sub->f8 = 1;
+            SetListLinkOffset((u8*)self->sub + 0x14, 0x18);
         c1: {
-                s32 r = CountListItems((u8*)self->f3C + 0x14);
+                s32 r = CountListItems((u8*)self->sub + 0x14);
                 s32 lim = r + 1;
                 s32 m = e->count;
                 s32 q = lim;
@@ -663,8 +652,8 @@ void func_001A8208(Self_1A8208* self)
         obj->desc->m10(obj);
         obj->desc->m15(obj, 0);
         obj->desc->m03(obj);
-        if (self->f3C != 0 && self->f3C->f4 != 0) {
-            Quad16* d = self->f3C->fC + (i << 1);
+        if (self->sub != 0 && self->sub->f4 != 0) {
+            Quad16* d = self->sub->qC + (i << 1);
             d[0] = *(Quad16*)&obj->v190;
             d[1] = *(Quad16*)&obj->v1D0;
         }
@@ -782,19 +771,19 @@ void func_001A87E0(ObjectPool* table, s32 key, s32 value)
 
 s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
-s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
+s32 func_001A88A0(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
 
     if (group != 0 && group->f4 != 0) {
-        List_1A88A0* list;
+        List01* list;
         ObjectPool* skip;
-        Iter_1A88A0 it;
+        ListFrame it;
         u8* obj;
 
         switch (group->f8) {
         case 1:
-            list = (List_1A88A0*)&group->f14;
+            list = (List01*)&group->f14;
             skip = 0;
             break;
         case 2: {
@@ -803,19 +792,19 @@ s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
             if (e->f48 == (s32)key) {
                 return 0;
             }
-            list = (List_1A88A0*)&e->sub->f14;
+            list = (List01*)&e->sub->f14;
             break;
         }
         }
-        Begin_1A88A0::Of(&it, list);
-        for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
+        ListWalkBegin::Of(&it, list);
+        for (obj = ListWalkNext::Of(&it); obj != 0; obj = ListWalkNext::Of(&it)) {
             ObjectPool* e = *(ObjectPool**)obj;
             if (e != skip && e->f48 == (s32)key) {
-                End_1A88A0::Of(&it);
+                ListWalkEnd::Of(&it);
                 return 0;
             }
         }
-        End_1A88A0::Of(&it);
+        ListWalkEnd::Of(&it);
     }
     if (IsObjectAttached(key) != 0) {
         return 0;
@@ -915,7 +904,7 @@ void func_001A93C8(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 !=
 void func_001A93E8(u8* self)
 {
     u8* p = self + 0x60;
-    FillMemory((Obj_1A93E8*)p, 0, 0x80);
+    FillMemory(p, 0, 0x80);
     *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
@@ -935,28 +924,28 @@ void func_001A9498(u8* self)
     FillMemory(self + 0x150, 0, 0x18);
 }
 
-void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
+void func_001A94C0(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
     if (self->f0 != 0) {
         ConvertPositionToWorld(self->f0, a1);
-        a2[0] = self->q20;
-        a2[1] = self->q30;
-        a2[2] = self->q40;
+        a2[0] = self->rot[0];
+        a2[1] = self->rot[1];
+        a2[2] = self->rot[2];
     } else if (self->f4 != 0) {
         GetObjectWorldPosition(self->f4, a1);
         GetObjectWorldRotation(self->f4, a2);
     } else {
         if (self->f8 != 0) {
-            a1[0] = self->f8->q140;
-            Inner_1A94C0* in = self->f8;
-            a2[0] = in->q110;
-            a2[1] = in->q120;
-            a2[2] = in->q130;
+            a1[0] = self->f8->v140;
+            PlacedObject* in = self->f8;
+            a2[0] = in->m110.r[0];
+            a2[1] = in->m110.r[1];
+            a2[2] = in->m110.r[2];
         } else {
-            a1[0] = self->q10;
-            a2[0] = self->q20;
-            a2[1] = self->q30;
-            a2[2] = self->q40;
+            a1[0] = self->pos;
+            a2[0] = self->rot[0];
+            a2[1] = self->rot[1];
+            a2[2] = self->rot[2];
         }
     }
     if (a3 != 0) {

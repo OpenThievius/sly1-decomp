@@ -8,6 +8,7 @@
 #include "game_clock.h"
 #include "pad_record.h"
 #include "game_progress.h"
+#include "screen_element.h"
 #include "asm_func.h"
 
 // The pad and button-code file: the pad records D_00262C70 and D_00262D38, their connection
@@ -59,8 +60,8 @@ PadRecord D_00262D38 = {};
 ButtonCode* D_00262DFC = 0;
 
 extern f32 D_00261868[];
-struct Next_262E00 { f32 time; f32 pad[3]; };
-Next_262E00 D_00262E00 = { 0.0f, { 0.0f, 0.0f, 0.0f } };
+struct ButtonCodeTimer { f32 time; f32 pad[3]; };
+ButtonCodeTimer D_00262E00 = { 0.0f, { 0.0f, 0.0f, 0.0f } };
 
 void func_0016E148(void);
 s32 func_002040E8(void* a);
@@ -423,17 +424,14 @@ LINKER_REMNANT(func_0016EC80);
 
 void func_0016EC88(PadRecord* p) { p->f28 = 0; p->f2C = 0; }
 
-struct Obj_16EC98 { u8 pad0[0x28]; s32 f28; f32 f2C_unused; f32 f30; f32 f34; u8 pad1[8]; f32 f40; f32 f44; f32 f48; u8 pad2[0x5C]; u16 fA8; u16 fAA; };
-
-void func_0016EC20(Obj_16EC98* self, s32 mask);
 extern f32 D_00261868[];
 
-s32 func_0016EC98(Obj_16EC98* self)
+s32 func_0016EC98(PadRecord* self)
 {
     f32 c;
     f32 base;
     if (self->f28 == 0) {
-        u16 fl = self->fAA;
+        u16 fl = self->flags;
         if (fl & 0x8000) {
             ClearPadPressedBits(self, 0x8000);
             self->f28 = -1;
@@ -460,7 +458,7 @@ s32 func_0016EC98(Obj_16EC98* self)
     } else {
         s32 v1 = 0;
         if (self->f28 < 0) {
-            if (self->fA8 & 0x8000) {
+            if (self->keyA8 & 0x8000) {
                 v1 = 1;
             } else if (0.25f <= self->f48) {
                 f32 a = fabsf(self->f40);
@@ -470,7 +468,7 @@ s32 func_0016EC98(Obj_16EC98* self)
                 }
             }
         } else {
-            if (self->fA8 & 0x2000) {
+            if (self->keyA8 & 0x2000) {
                 v1 = 1;
             } else if (0.25f <= self->f48) {
                 f32 a = fabsf(self->f40);
@@ -637,7 +635,7 @@ void func_0016F1F8(void)
     }
 }
 
-struct Advance_16F238 {
+struct ButtonCodeAdvance {
     static void Of(ButtonCode* node)
     {
         do {
@@ -661,7 +659,7 @@ void func_0016F238(PadRecord* self, s32 value)
     if (self != &g_padRecord) return;
     u16 previous = self->keyA8;
     if (id == previous || previous == 0) return;
-    Advance_16F238::Of(head);
+    ButtonCodeAdvance::Of(head);
     GameClock* clock = &g_gameClock;
     D_00262E00.time = clock->elapsed + 1.0f;
 }
@@ -729,17 +727,11 @@ void func_0016F430(s32 flags)
 
 LINKER_REMNANT(func_0016F470);
 
-struct Obj_16F478;
-struct Vt_16F478 { u8 pad0[0x20]; void (*f20)(Obj_16F478* self, char* text); u8 pad1[0x14]; void (*f38)(Obj_16F478* self); };
-struct Obj_16F478 { Vt_16F478* vt; };
-
-extern Obj_16F478 D_0026EC70;
 extern const char D_002483B8[24];
 
 s32 func_001602A0(void);
 void* func_001E2138(char* dst, const u8* src);
 s32 func_001E1FD0(char* dst, const u8* fmt, ...);
-void func_001AA8B8(Obj_16F478* self, f32 v);
 
 void func_0016F478(void)
 {
@@ -756,9 +748,9 @@ void func_0016F478(void)
                     p++;
                 }
                 FormatToString(text, (const u8*)D_0024A848, buf);
-                g_buttonHintElement.vt->f20(&g_buttonHintElement, text);
+                g_buttonHintElement.vt->m08(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
-                g_buttonHintElement.vt->f38(&g_buttonHintElement);
+                g_buttonHintElement.vt->m14(&g_buttonHintElement);
             }
         }
     }

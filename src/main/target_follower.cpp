@@ -210,8 +210,7 @@ void func_0016D788(TargetFollower* self) {
 
 ASM_FUNC(func_0016D828);
 
-struct Slot_2482D8 { u32 w[8]; };
-extern const Slot_2482D8 D_002482D8[7];
+extern const KeyRecord D_002482D8[7];
 
 s32 func_001BE980(void);
 s32 func_001EAA70(void* a, s32 b);

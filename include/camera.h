@@ -40,7 +40,8 @@ struct Camera : BaseObject {
     f32 f1F8;               // 0x1F8
     f32 f1FC;               // 0x1FC
     f32 f200;               // 0x200
-    u8 pad204[0x218 - 0x204];
+    u32 fogColor;           // 0x204: the word func_001B3510 writes to GIF register 0x3D (FOGCOL)
+    u8 pad208[0x218 - 0x208];
     f32 f218;               // 0x218
     s32 f21C;               // 0x21C
     s32 f220;               // 0x220

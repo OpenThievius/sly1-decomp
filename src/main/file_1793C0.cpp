@@ -117,7 +117,6 @@ void func_001793C0(ModeCollider* self)
 }
 
 struct Sub_1793F0 { u8 pad0[0xE0]; void* fE0; };
-struct Packed_1793F0 { f32 v; } __attribute__((packed));
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
@@ -139,23 +138,22 @@ void func_001793F0(ModeCollider* self)
     self->f684 = 1.0f;
     func_001399F8(self->f6C0, 0xC, 5, &self->f684);
     SetModeColliderMode(self, 2);
-    u8* base = (u8*)&D_00270650;
-    ((Packed_1793F0*)(base + 0x288))->v = 0.0f;
-    *(s32*)(base + 0x284) = FindAnimRecord(0x36A);
+    T217D_BF0* base = &D_00270650;
+    ((T217D_Float*)&base->f288)->v = 0.0f;
+    base->icon = FindAnimRecord(0x36A);
 }
 
 ASM_FUNC(func_001794E0);
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
 
-struct Sub_179590;
 extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
 void func_001B9338(ModeCollider* self, f32 t);
 void func_001794E0(ModeCollider* self, Vec02* a, Vec02* b);
-void func_00127E60(Sub_179590* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 void func_001B9058(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
 void func_001B9D10(ModeCollider* self, f32 scale, void* out, void* data);
 
@@ -179,7 +177,7 @@ single:
 path2:
     ComputeModeColliderAnchors(self, &a, &b);
     b = D_00248D30;
-    func_00127E60(((Sub_179590*)self->f668), 0, &a, 0, &b, 0);
+    func_00127E60(self->f668, 0, &a, 0, &b, 0);
     goto tail;
 path3:
     a = *(Vec02*)&self->pos;
@@ -189,14 +187,12 @@ tail:
     func_001B9D10(self, f, (u8*)self + 0x620, D_00263C40);
 }
 
-typedef void (*VFn_179690)(void*);
-
 void func_001BC088(void* self, void* b);
 
 void func_00179690(ModeCollider* self)
 {
     func_001BC088(self, 0);
-    VFn_179690 fn = (VFn_179690)((void**)((void**)self->desc))[0x58 / 4];
+    void (*fn)(BaseObject*) = self->desc->m12;
     if (fn != 0) fn(self);
 }
 
@@ -272,32 +268,9 @@ void func_0017A788(ModeCollider* self, void* s, void* out)
     func_00125C90(self, s, out);
 }
 
-struct Vt_17B9D0
-{
-    u8 pad0[0x28];
-    void (*f28)(void* self, Vec02* a, s32 b, Vec02* c, Vec02* d, s32 e, s32 f);
-};
-
-struct Node_17B9D0
-{
-    u8 pad0[0x18];
-    void* f18;
-    u8 pad1c[0x18];
-    struct { Vt_17B9D0* vt; }* f34;
-    u8 pad38[0x108];
-    Vec02 f140;
-};
-
-struct Self_17B9D0
-{
-    u8 pad0[0x3C];
-    u8* f3C;
-};
-
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 
-struct Ptr_17A9E0;
-s32 func_001DDA80(Ptr_17A9E0* p);
+s32 func_001DDA80(World* world);
 s32 func_0017A9E0(ModeCollider* self, s32 a1)
 {
     if (a1 == 5) goto one;
@@ -305,7 +278,7 @@ s32 func_0017A9E0(ModeCollider* self, s32 a1)
     if (self->f610 == 0) goto one;
     if (self->f610 == 4) goto one;
     if (self->f6D0 != 0) goto one;
-    if (IsPadSelectFlagHeld((Ptr_17A9E0*)self->world) == 0) goto zero;
+    if (IsPadSelectFlagHeld(self->world) == 0) goto zero;
 one:
     return 1;
 zero:
@@ -314,11 +287,8 @@ zero:
 
 // NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
 
-typedef s32 (*VFn_17AA40_A)(void* self, s32 v);
-typedef void (*VFn_17AA40_B)(void* self, void* p);
-typedef void (*VFn_17AA40_C)(void* self, s32 a, void* b);
-
-struct Msg_17AA40 {
+// What func_0017AA40 tells its listeners (kind 0x17): itself and the second word of its argument.
+struct SenderValueMessage {
     void* self;
     s32 v;
 };
@@ -335,7 +305,7 @@ s32 func_0017AA40(ModeCollider* self, s32* arg)
     u8 bufA[16];
     u8 bufB[16];
 
-    if (((VFn_17AA40_A)((void**)self->desc)[79])(self, *arg) != 0) {
+    if (self->desc05()->m4B(self, *arg) != 0) {
         return 0;
     }
     if (HasSpareCount() != 0) {
@@ -347,7 +317,7 @@ s32 func_0017AA40(ModeCollider* self, s32* arg)
         self->f708 = 3.0f;
         ComputeModeColliderAnchors(self, bufA, bufB);
         func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
-        ((VFn_17AA40_B)((void**)self->desc)[36])(self, bufB);
+        self->desc02()->m20(self, (Vec02*)bufB);
     }
     if (HasSpareCount() != 0) {
         SetModeColliderMode(self, 3);
@@ -355,10 +325,10 @@ s32 func_0017AA40(ModeCollider* self, s32* arg)
         SetModeColliderMode(self, 4);
     }
     {
-        Msg_17AA40* m = (Msg_17AA40*)bufA;
+        SenderValueMessage* m = (SenderValueMessage*)bufA;
         m->self = self;
         m->v = arg[1];
-        ((VFn_17AA40_C)((void**)self->desc)[18])(self, 0x17, bufA);
+        self->desc->m0E(self, 0x17, bufA);
     }
     return 1;
 }
@@ -463,21 +433,14 @@ void func_0017B308(GaugeModeObject* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-struct Msg_17B3A8 {
-    u8 pad0[4];
-    s32 f4;
-    u8 pad1[8];
-    u32 f10;
-};
-
 void func_001AC060(void* p);
 void func_0017B598(GaugeModeObject* self);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-s32 func_0017B3A8(GaugeModeObject* self, Msg_17B3A8* msg)
+s32 func_0017B3A8(GaugeModeObject* self, ObjectEvent* msg)
 {
-    if (msg->f10 & 0x10) {
-        if (msg->f4 == self->f608) {
+    if (msg->extraFlags & 0x10) {
+        if (msg->id == self->f608) {
             DecrementGaugeCount(&g_gaugeBarElement);
             PlayGaugeModeObjectTarget(self);
             TriggerScriptEvent(self, 2, 0, 0);
@@ -485,20 +448,6 @@ s32 func_0017B3A8(GaugeModeObject* self, Msg_17B3A8* msg)
     }
     return 1;
 }
-
-typedef void (*Fn_17B410)(void* self);
-
-struct Sys_17B410 {
-    Fn_17B410* vtbl;
-    u8 pad0[0x260 - 4];
-    s32 f260;
-    s32 f264;
-    u8 pad1[0x26C - 0x268];
-    s32 f26C;
-    s32 f270;
-    s32 f274;
-    f32 f278;
-};
 
 extern f32 D_0026185C;
 
@@ -521,15 +470,15 @@ void func_0017B410(GaugeModeObject* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            Sys_17B410* sys = (Sys_17B410*)&g_gaugeBarElement;
-            sys->f278 = 1.0f;
+            T217D_2E0* sys = &g_gaugeBarElement;
+            sys->fillTarget = 1.0f;
             sys->f26C = sys->f260;
             sys->f270 = sys->f264;
-            sys->f274 = 0;
+            sys->fill = 0.0f;
             SetWorldActiveFollower(self->world, self);
         } else if (mode < 4) {
-            Sys_17B410* sys = (Sys_17B410*)&g_gaugeBarElement;
-            sys->vtbl[15](sys);
+            T217D_2E0* sys = &g_gaugeBarElement;
+            sys->vt->m15(sys);
             SetWorldActiveFollower(self->world, 0);
         }
     }
@@ -561,22 +510,6 @@ void func_0017B550(GaugeModeObject* self, s32 index)
         self->target = (void*)FindFirstObjectById(self->world, 0x101, index, self);
     }
 }
-
-typedef void (*VFn_17BC20)(void* self);
-
-struct Comp_17BC20 {
-    VFn_17BC20* vtbl;
-    u8 pad0[0x2D0 - 4];
-    s32 f2D0;
-};
-
-struct Obj_17BC20 {
-    u8 pad0[0x3C];
-    s32 f3C;
-    u8 pad1[0x58 - 0x40];
-    Comp_17BC20* f58;
-    s32 f5C;
-};
 
 void func_0017B598(GaugeModeObject* self)
 {
