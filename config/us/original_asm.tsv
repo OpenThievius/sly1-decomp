@@ -130,6 +130,7 @@ func_0013D0B0	0013D0B0	456	handwritten	VU0 macro instruction
 func_0013D278	0013D278	1448	handwritten	VU0 macro instruction
 func_0013DFD8	0013DFD8	1108	handwritten	VU0 macro instruction
 func_0013E430	0013E430	544	handwritten	VU0 macro instruction
+func_0013E650	0013E650	4	remnant	stripped-function leftover
 func_0013E658	0013E658	108	handwritten	VU0 macro instruction
 func_0013F290	0013F290	1072	handwritten	VU0 macro instruction
 func_0013F8A0	0013F8A0	156	handwritten	VU0 macro instruction

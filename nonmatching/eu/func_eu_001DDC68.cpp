@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 948/944, checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001DDC68.cpp func_eu_001DDC68 --unit src/main/001DC000.cpp
+// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001DDC68.cpp func_eu_001DDC68 --unit src/main/file_1D62E0.cpp
 // Still differs: Level setup; now 948 vs 944 bytes with the list iterator rewritten (cur = next + stride, stride via list pointer); still differs in saved-register roles (self/ctx s1,s2 vs s2,s3) and stack layout (iterator at sp+16 vs retail sp+32).
 // Level object setup: spawns the fixed object pools, initialises the managers, runs the update/draw passes over the object list once and ends the frame.
 struct Vt_eu_1DDC68 { u8 pad0[0x1C]; void (*f1C)(void* self); u8 pad1[0x4C - 0x20]; void (*f4C)(void* self); void (*f50)(void* self); };

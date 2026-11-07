@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x14-byte record at D_00269990 (001E4000.cpp defines it as zeros), read by func_0018B5C0,
-// func_0018B600 (00188000.cpp) and func_001943E8, func_00195958 (file_193210.cpp). Written for
+// The 0x14-byte record at D_00269990 (file_18B580.cpp defines it as zeros), read by func_0018B5C0,
+// func_0018B600 (file_18B580.cpp) and func_001943E8, func_00195958 (file_193210.cpp). Written for
 // this project from what retail's code does (globals.tsv). The size is the label's (0x14).
 //
 // A job that runs on a thread of its own: func_0018B670 stores the job and its argument and
@@ -23,6 +23,6 @@ struct BackgroundJob {
 
 typedef char check_BackgroundJob[sizeof(BackgroundJob) == 0x14 ? 1 : -1];
 
-extern BackgroundJob D_00269990;      // 001E4000.cpp
+extern BackgroundJob D_00269990;      // file_18B580.cpp
 
 #endif

@@ -1363,41 +1363,11 @@ void func_001A7F50(GameProgress* self)
     g_padPatternSetting = 2;
 }
 
-extern f32 D_0024CBC4;
 
 void func_00182C18(ObjectPool* self);
-struct Buf_1A7FE8 { u8 b[1]; };
-s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(ObjectPool* self);
 
-void func_001A7FE8(ObjectPool* self)
-{
-    InitObject(self);
-    u8* s1 = (u8*)self + 0x60;
-    self->id4C = -1;
-    self->id50 = -1;
-    self->id54 = -1;
-    self->id58 = -1;
-    (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
-    const Quad16* src = (const Quad16*)&g_identityMatrix;
-    *(Quad16*)(s1 + 0x20) = src[0];
-    *(Quad16*)(s1 + 0x30) = src[1];
-    *(Quad16*)(s1 + 0x40) = src[2];
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
-    V8C* p = &self->v110;
-    p->a = 0;
-    p->b = 1.0f;
-    p->c = 0;
-    self->f120 = 0;
-    self->f124 = 20000.0f;
-    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
-    f32 d = D_0024CBC4;
-    self->fD8 = 5.0f;
-    self->f168 = 0;
-    self->f144 = d;
-    AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
-}
 
 struct LinkedObject { u8 pad0[0x2D4]; s32 f2D4; };
 extern f32 D_00261858[];
@@ -1893,3 +1863,4 @@ extern const Table_1A4718 D_0024C9D0 = { {
     { 3.0f, 6.0f, 0.0f, 0.0f },
     { 0.0f, 1.0f, 0.0f, 0.0f }
 } };
+
