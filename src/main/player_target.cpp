@@ -6,6 +6,8 @@
 #include "game_clock.h"
 #include "item_keeper.h"
 #include "shapes.h"
+#include "vu0.h"
+#include "globals.h"
 
 // The file's .rodata, in retail's order: the constants and jump tables only its assembly reads.
 extern const f32 D_0024DAA0 = -3.40282347e+38f;
@@ -170,7 +172,67 @@ INCLUDE_ASM(func_001CF158);
 
 INCLUDE_ASM(func_001CFFD0);
 
-INCLUDE_ASM(func_001D0B20);
+// What func_001D0B20 reads: the player's record at +0x23BC (a frame at +0x18 and a mover at
+// +0x34), the angle at +0x23C4 and its flip flag at +0x23C8, and the target (a flag at +0x04,
+// the radius at +0x08, a point at +0x10, a pair of points at +0x20).
+struct TargetMover {
+    struct Vt { u8 pad0[8]; void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); };
+    const Vt* vt;           // 0x00
+    u8 pad04[4];
+    s32 wraps;              // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    const f32* low;         // 0x14
+};
+struct TargetFrameRecord { u8 pad0[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; TargetMover* mover; };
+struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; u8 pad23C0[4]; f32 angle; s32 flip; };
+struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
+
+f32 WrapModulo(f32 x, f32 y);
+void TransformPointBetweenFrames(void* frame, void* player, void* in, void* out);
+s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, void* e, f32 x);
+
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
+{
+    Vec02 pos;
+    Vec02 local;
+    ColliderSpan span;
+    if (t->active == 0) {
+        *(Vec02*)(out + 0x20) = D_00248D30;
+        return;
+    }
+    TargetFrameRecord* rec = self->record;
+    TargetMover* m = rec->mover;
+    void* frame = rec->frame;
+    f32 off = t->point.x;
+    if (self->flip != 0) {
+        off = -off;
+    }
+    f32 limit = m->vt->limit(m);
+    f32 angle;
+    if (m->wraps != 0) {
+        angle = WrapModulo(self->angle + off, limit);
+    } else {
+        angle = ClampBetween(self->angle + off, *m->low, limit);
+    }
+    if (m->vt->place != 0) {
+        m->vt->place(m, angle, &pos, 0);
+    }
+    TransformPointBetweenFrames(frame, self, &pos, &local);
+    if (CollectBoundsSpans(&t->end, &t->point, &local, 1, &span, t->radius) > 0) {
+        Vu0::Q(*(Vec02*)(out + 0x20)) = Vu0::Sub(Vu0::Q(span.q[1]), Vu0::Q(t->point));
+    }
+}
 
 INCLUDE_ASM(func_001D0C78);
 
