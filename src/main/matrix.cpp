@@ -19,24 +19,25 @@ f32 func_00205678(f32 x);
 f32 func_00205778(f32 y, f32 x);
 void func_00188B48(void* a, void* b, Quad16* out);
 void func_00188668(Quad16* out, void* b, Quad16* in);
-void func_00189C28(struct Obj_189350* self, void* table, void* value);
+void func_00189C28(void* self, void* table, void* value);
 void func_0018D608(void);
 void* func_0018D658(s32 size);
 void func_0018D800(void* dst, void* src, s32 count);
 void func_0018D6F0(void);
 s32 func_00189438(s32 n, f32* a, f32* b);
 
-struct __attribute__((aligned(16))) Quad_1884C0 { s32 a, b, c, d; };
-struct Obj_1884C0 {
+// A 4x4 matrix as func_001884C0 writes it: the last word of the first three rows, then the
+// fourth row as one quadword.
+struct HomogeneousMatrix {
     u8 pad0[0xC];  s32 f0C;
     u8 pad1[0xC];  s32 f1C;
     u8 pad2[0xC];  s32 f2C;
-    Quad_1884C0 q30;
+    Quad16 q30;
 };
 // The fourth row of a 4x4 matrix: 0 0 0 1.
-extern const Quad_1884C0 D_0024B260 = { 0, 0, 0, 0x3F800000 };
+extern const Quad16 D_0024B260 = { { 0, 0, 0, 0x3F800000 } };
 
-void func_001884C0(Obj_1884C0* self)
+void func_001884C0(HomogeneousMatrix* self)
 {
     self->f0C = 0;
     self->f1C = 0;
@@ -44,8 +45,7 @@ void func_001884C0(Obj_1884C0* self)
     self->q30 = D_0024B260;
 }
 
-struct Quad_001884E0 { s32 a, b, c, d; } __attribute__((aligned(16)));
-void* func_001884E0(Quad_001884E0* destination, const Quad_001884E0* source)
+void* func_001884E0(Quad16* destination, const Quad16* source)
 {
 	destination[0] = source[0];
 	destination[1] = source[1];
@@ -56,23 +56,13 @@ void* func_001884E0(Quad_001884E0* destination, const Quad_001884E0* source)
 
 ASM_FUNC(func_00188520);
 
-struct Vec4Init_1885E0 {
-    u8 pad0[0x0];
-    f32 f00;
-    u8 pad1[0x10];
-    f32 f14;
-    u8 pad2[0x10];
-    f32 f28;
-    u8 pad3[0x10];
-    f32 f3C;
-};
-void func_001885E0(Vec4Init_1885E0* self)
+void func_001885E0(Mat4* self)
 {
     FillMemory(self, 0, 0x40);
-    self->f3C = 1.0f;
-    self->f28 = 1.0f;
-    self->f14 = 1.0f;
-    self->f00 = 1.0f;
+    self->m[3][3] = 1.0f;
+    self->m[2][2] = 1.0f;
+    self->m[1][1] = 1.0f;
+    self->m[0][0] = 1.0f;
 }
 
 ASM_FUNC(func_00188628);
@@ -85,8 +75,7 @@ ASM_FUNC(func_00188700);
 
 ASM_FUNC(func_00188740);
 
-struct Quad_188770 { f32 f[4]; } __attribute__((aligned(16)));
-void func_00188770(Quad_188770* src, Quad_188770* dst)
+void func_00188770(Quad16* src, Quad16* dst)
 {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -205,24 +194,22 @@ ASM_FUNC(func_00188D28);
 
 LINKER_REMNANT(func_00188FD0);
 
-struct Span_188FD8 { f32 w[11]; };
-struct Out_188FD8 { f32 o[3]; };
-void func_00188FD8(Span_188FD8* self, Out_188FD8* out)
+void func_00188FD8(Mat4* self, Vec3* out)
 {
     f32 k = 1.57069635f;
-    f32 r = Arcsine(-self->w[2]);
-    out->o[1] = r;
+    f32 r = Arcsine(-self->m[0][2]);
+    out->y = r;
     if (r < k) {
         if (-k < r) {
-            out->o[0] = ArctangentOfRatio(self->w[6], self->w[10]);
-            out->o[2] = ArctangentOfRatio(self->w[1], self->w[0]);
+            out->x = ArctangentOfRatio(self->m[1][2], self->m[2][2]);
+            out->z = ArctangentOfRatio(self->m[0][1], self->m[0][0]);
         } else {
-            out->o[0] = 0.0f;
-            out->o[2] = -ArctangentOfRatio(-self->w[4], self->w[8]);
+            out->x = 0.0f;
+            out->z = -ArctangentOfRatio(-self->m[1][0], self->m[2][0]);
         }
     } else {
-        out->o[0] = 0.0f;
-        out->o[2] = ArctangentOfRatio(-self->w[4], self->w[8]);
+        out->x = 0.0f;
+        out->z = ArctangentOfRatio(-self->m[1][0], self->m[2][0]);
     }
 }
 
@@ -243,8 +230,7 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
     out[3] = res[3];
 }
 
-struct Vec3_189230 { f32 x; f32 y; f32 z; };
-void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
+void func_00189230(Vec3* v, f32* a1, f32* a2)
 {
     *a1 = ArctangentOfRatio(v->y, v->x);
     *a2 = ArctangentOfRatio(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
@@ -252,8 +238,7 @@ void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
 
 ASM_FUNC(func_001892A0);
 
-struct Obj_189350;
-void func_00189350(Obj_189350* self, void* value)
+void func_00189350(void* self, void* value)
 {
     BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
@@ -329,12 +314,12 @@ done:
     return ok;
 }
 
-struct __attribute__((aligned(16))) Mat_1897F0 { f32 f[3][4]; };
+struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
 
-extern Mat_1897F0 D_002483D0;
-s32 func_001897F0(Mat_1897F0* in, Mat_1897F0* out)
+extern Matrix3x4 D_002483D0;
+s32 func_001897F0(Matrix3x4* in, Matrix3x4* out)
 {
-    Mat_1897F0 m;
+    Matrix3x4 m;
     s32 i, j, k;
     f32 t;
     s32 ok = 0;
@@ -402,29 +387,17 @@ ASM_FUNC(func_00189C28);
 
 ASM_FUNC(func_00189D38);
 
-struct State_189F58 {
-    f32 f00;
-    u8 pad04[0x10];
-    f32 f14;
-    u8 pad18[8];
-    f32 f20;
-    f32 f24;
-    f32 f28;
-    f32 f2C;
-    u8 pad30[8];
-    f32 f38;
-};
-void func_00189F58(State_189F58* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
+void func_00189F58(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
     FillMemory(self, 0, 0x40);
     f32 value = (e + f) / (e - f);
-    self->f00 = a;
-    self->f20 = c;
-    self->f14 = b;
-    self->f24 = d;
-    self->f28 = value;
-    self->f38 = e * (1.0f - value);
-    self->f2C = 1.0f;
+    self->m[0][0] = a;
+    self->m[2][0] = c;
+    self->m[1][1] = b;
+    self->m[2][1] = d;
+    self->m[2][2] = value;
+    self->m[3][2] = e * (1.0f - value);
+    self->m[2][3] = 1.0f;
 }
 
 ASM_FUNC(func_0018A008);
