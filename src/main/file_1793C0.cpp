@@ -437,8 +437,8 @@ void func_0017AE00(C4A* self)
     self->fC = one;
     func_001399F8(self->ptrC, 12, 5, &self->fC);
 
-    func_0017B410(self, 0);
-    func_0017B510(self, 1);
+    SetGaugeModeObjectMode(self, 0);
+    PlayGaugeModeObjectLoop(self, 1);
 }
 
 ASM_FUNC(func_0017AF38);
@@ -479,7 +479,7 @@ s32 func_0017B3A8(C4A* self, Msg_17B3A8* msg)
     if (msg->f10 & 0x10) {
         if (msg->f4 == self->f608) {
             DecrementGaugeCount(&g_gaugeBarElement);
-            func_0017B598(self);
+            PlayGaugeModeObjectTarget(self);
             TriggerScriptEvent(self, 2, 0, 0);
         }
     }

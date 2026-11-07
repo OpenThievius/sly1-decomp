@@ -3740,7 +3740,7 @@ ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017B598(obj);
+    PlayGaugeModeObjectTarget(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3758,7 +3758,7 @@ ScriptValue* func_00108728(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_0017B550(obj, out);
+    (void)SetGaugeModeObjectTarget(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

@@ -2663,3 +2663,14 @@ func_00177968	CompareKeysAscending	a sort's comparison: 1 when the first record'
 func_00177E20	IsPlayerCameraFree	slot 0x138 of class 0x07: 0 in state 12/0x22, else whether the camera controller at g_camera's +0x454 is not the top one (IsTopCameraController)
 func_001782C0	ComputeTargetArc	original assembly: from a target pair and a time computes the start velocity and the two points LaunchPlayerAtTarget stores (also called by ChooseBestTargetCandidate and four others)
 func_00178598	LaunchPlayerAtTarget	takes a target pair (or the best candidate, ChooseBestTargetCandidate), computes the arc to it (ComputeTargetArc), stores its end time and points in the record at +0x2514, sets the player's velocity and moves it to state 4/0x2C
+func_001796D0	UpdateModeCollider	original assembly: slot 0x54 of class 0x1B
+func_0017A6D0	FinishModeCollider	slot 0x150 of class 0x1B: runs func_00192C58, then func_0017ABE8 with 2
+func_0017ADD0	InitGaugeModeObject	slot 0x10 of class 0x4A: runs InitCollider and sets the mode (+0x550) to -1
+func_0017AE00	StartGaugeModeObject	slot 0x50 of class 0x4A: runs StartPlacedObject, resolves its links (g_gaugeHolderLinks), makes its three sound handles with their volumes at 1, enters mode 0 (SetGaugeModeObjectMode) and starts its loop (PlayGaugeModeObjectLoop)
+func_0017AF38	UpdateGaugeModeObject	original assembly: slot 0x54 of class 0x4A
+func_0017B308	ShowGaugeModeObjectBar	slot 0xC8 of class 0x4A: in modes 0 and 1, while AreMenusAndFadeClear holds and D_00270458 allows, calls g_gaugeBarElement's slot 14, else its slot 15
+func_0017B3A8	HandleGaugeModeObjectEvent	slot 0xC4 of class 0x4A: on an event with flag 0x10 from its +0x608 object, lowers the gauge count (DecrementGaugeCount), plays its target's animation (PlayGaugeModeObjectTarget) and sends script event 2
+func_0017B410	SetGaugeModeObjectMode	sets the mode (+0x550): modes 0 and 1 reset g_gaugeBarElement's blend and take the world's gauge object (func_001DDC38), modes 2 and 3 call the bar's slot 15 and give it up; starts the mode's animation (ReplaceAnimationPlayer) and stamps the game time
+func_0017B510	PlayGaugeModeObjectLoop	with a nonzero flag starts the animation of its handle at +0x600 (ReplaceAnimationPlayer, with +0x604), else stops it
+func_0017B550	SetGaugeModeObjectTarget	stores at +0x60C the object of kind 0x101 with the index (FindFirstObjectById), or 0 for -1
+func_0017B598	PlayGaugeModeObjectTarget	starts the animation of the object at +0x60C (ReplaceAnimationPlayer, with +0x610)
