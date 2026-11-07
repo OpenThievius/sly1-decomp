@@ -2465,7 +2465,37 @@ ASM_FUNC(func_001ED738);
 
 ASM_FUNC(func_001ED780);
 
-INCLUDE_ASM(func_001ED840);
+void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
+{
+    Vec02 w;
+    f32 x = v->x;
+    f32 y = v->y;
+    f32 ax = __builtin_fabsf(x);
+    f32 z = v->z;
+    f32 ay = __builtin_fabsf(y);
+    f32 az = __builtin_fabsf(z);
+    if (ax <= ay) {
+        if (ax <= az) {
+            w.y = z;
+            w.x = 0.0f;
+            w.z = -y;
+        } else {
+            w.x = y;
+            w.z = 0.0f;
+            w.y = -x;
+        }
+    } else if (ay <= az) {
+        w.x = z;
+        w.y = 0.0f;
+        w.z = -x;
+    } else {
+        w.x = y;
+        w.z = 0.0f;
+        w.y = -x;
+    }
+    u128 c = Vu0::Cross(Vu0::Q(*v), Vu0::Q(w));
+    Vu0::Q(*out) = Vu0::DivX(c, Vu0::Length(c));
+}
 
 LINKER_REMNANT(func_001ED900);
 

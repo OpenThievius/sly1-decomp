@@ -55,7 +55,27 @@ void func_001D39E0(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
     }
 }
 ASM_FUNC(func_001D3A38);
-INCLUDE_ASM(func_001D3B58);
+s32 FindNearestSpanObject(void* a, Vec02* from, Vec02* to, s32 count, Collider** list, void* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+
+s32 func_001D3B58(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
+{
+    Vec02 a;
+    Vec02 b;
+    ColliderSpan hit;
+    s32 count;
+    Collider** list;
+    a = *from;
+    b = *to;
+    PushBackMemoryMark();
+    GatherCollidersInBox(self->world, self, &a, &b, 0, 0, &count, &list);
+    s32 found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
+    *ratio = found != 0 ? Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.q[0]), Vu0::Q(a)))) / Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)))) : 1.0f;
+    PopBackMemoryMark();
+    return found != 0;
+}
 
 f32 func_001FD578(u64 v);
 
