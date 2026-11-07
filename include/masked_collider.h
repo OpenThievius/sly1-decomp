@@ -122,7 +122,7 @@ struct Alloc24 {
 };
 
 struct C24 : PlayerFlaggedCollider {
-    u8 pad6C0[4];
+    void* x6C0;             // 0x6C0: the path object it follows (func_00182748)
     void* x6C4;             // 0x6C4: loaded (D_00264230)
     StateWalker* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
     f32 f6CC;               // 0x6CC
@@ -131,7 +131,7 @@ struct C24 : PlayerFlaggedCollider {
     f32 f6D8;               // 0x6D8
     f32 f6DC;               // 0x6DC
     f32 f6E0;               // 0x6E0
-    u8 pad6E4[0x6E8 - 0x6E4];
+    f32 f6E4;               // 0x6E4: the level between 0 and f6DC, raised by f6E0 each second (func_00182548)
     Alloc24* x6E8;          // 0x6E8
     void* x6EC;             // 0x6EC: loaded (D_00264230)
 };
