@@ -709,7 +709,8 @@ struct C18 : SwitchedCollider {
     void* f664;             // 0x664
     u8 pad668[0x67C - 0x668];
     s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720
-    u8 pad680[0x688 - 0x680];
+    s32 f680;               // 0x680: the count g_gaugeAmountCaption shows (func_00197F10)
+    s32 f684;               // 0x684: its limit, one per class 0x48 object (func_00198920)
     f32 f688;               // 0x688
     u8 pad68C[0x690 - 0x68C];
     s32 f690;               // 0x690

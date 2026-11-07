@@ -2519,3 +2519,20 @@ func_001929F8	GetActiveSwitchedColliderData	returns the block at +0x580 of GetAc
 func_00192A70	HandleStepSequenceSkipButtons	unless the camera controller is on top, skips the remaining steps of the running step sequence D_0027051C or sets D_0026F800 to state 1 on buttons 0xC, then clears those buttons with ClearPadPressedBits
 func_001943E8	UpdatePauseMenu	shows or hides the four pause-menu layers by the level key 0x19D8/0x19DC and the page, moves the selection with the pad's vertical or horizontal step, and on buttons 0x810, 0x80 and 0x40 runs CancelPauseMenuPage, SetPauseMenuLayerPage or ActivatePauseMenuSelection
 func_00194278	ExitLevelFromPauseMenu	ActivatePauseMenuSelection calls it: clears the menu's layer page, then starts a screen fade (D_00275B04) or, without the flag, sets the pair controller 0x5F to state 6 (level key 0x106) or calls func_001F4408
+func_00196938	InitGaugeCollider	slot 0 of class 0x18: runs InitSwitchedCollider, sets its defaults (-10, the unit Z vector, a 120-second time, two values from D_0026A718), sets up its two lists and stores itself in D_0026A904
+func_001969C0	LoadGaugeCollider	slot 10 of class 0x18: runs LoadCollider and resolves its one object link g_gaugeColliderLoadLinks
+func_001969F8	StartGaugeCollider	slot 16 of class 0x18: resolves g_gaugeColliderStartLinks, creates its state walkers and its pose source, and gathers the objects of ids 0x305, 0x105 and class 0x44 into its lists
+func_001973D8	ApplyGaugeColliderRatioToEffect	clamps the count at 0x680 over the limit at 0x684 to 0..1 and passes 1 - ratio * 0.8 to func_00151E20 on D_00261EF0, as ApplyGaugeRatioToEffect does for the gauge manager
+func_00197458	EndGaugeColliderTimer	the timer's limit callback that HandleGaugeColliderNotification installs: on flag 1, unless the gauge collider's walker at 0x6B8 is at 0x3F4, sets its target to 0x3F5 and runs ApplyGaugeColliderRatioToEffect
+func_001974D8	HandleGaugeColliderActivation	slot 72 of class 0x18: only runs HandleSwitchedColliderActivation
+func_00197788	UpdateGaugeColliderVisibility	slot 46 of class 0x18: shows g_gaugeAmountCaption, D_0026E4E0 and g_timerElement while its walker is at 0x3F3 and AreMenusAndFadeClear, else hides them
+func_00197F10	HandleGaugeColliderNotification	slot 13 of class 0x18: after HandleSwitchedColliderNotification keeps the kind-10 value at 0x644, and when its walker reaches 0x3F3 points g_gaugeAmountCaption at its count and limit and starts g_timerElement, stopping and hiding them on 0x3F4 and 0x3F5
+func_00198090	StartGaugeAgent	slot 16 of class 0x0F: only runs StartAgent
+func_001982A0	ChooseGaugeAgentState	slot 93 of class 0x0F: in state 2 picks 4 when func_001C96B8 fails, in state 0x10 stays until its value 0xC10 is set, else ChooseAgentState
+func_001984B8	LeaveGaugeAgentState	slot 91 of class 0x0F: leaving state 0x10 releases its node of the active switched collider and sets its height to 0, then runs LeaveAgentState
+func_00198530	EnterGaugeAgentState	slot 92 of class 0x0F: runs EnterAgentState, then func_001C8920 in state 0x10
+func_001986E8	HandleGaugeAgentNotification	slot 13 of class 0x0F: after HandleAgentNotification stores the value of a kind-10 notification about itself at 0xC10 and clears it on kind 11
+func_00198760	UpdateGaugeAgent	slot 17 of class 0x0F: when the active switched collider is a class 0x18 gauge whose object at 0x640 reaches it and a node is found, adds one to its count at 0x67C (up to D_0026A720) and starts its clock 0x698, then runs UpdateAgent
+func_00198920	StartGaugeCountedObject	slot 16 of class 0x48: resolves g_gaugeCountedObjectLinks, runs StartPlacedObject and adds one to the limit at 0x684 of the first class 0x18 object
+D_0026A904	g_gaugeCollider	the one class 0x18 gauge collider: InitGaugeCollider stores itself here and EndGaugeColliderTimer reads its walker at 0x6B8 through it
+D_0026A720	g_gaugeAgentCountLimit	5: the most UpdateGaugeAgent lets the gauge collider's count at 0x67C reach
