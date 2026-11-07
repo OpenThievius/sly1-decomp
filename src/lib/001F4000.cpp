@@ -564,31 +564,6 @@ void func_001F7020(Queue_1F7020* q)
     }
 }
 
-char* func_001F6880(char* s, char* t)
-{
-    int i;
-    if (*s == 0) {
-        if (*t) {
-            return 0;
-        }
-        return s;
-    }
-    while (*s) {
-        i = 0;
-        while (1) {
-            if (t[i] == 0) {
-                return s;
-            }
-            if (t[i] != s[i]) {
-                break;
-            }
-            i++;
-        }
-        s++;
-    }
-    return 0;
-}
-
 struct Item_1F7DB0 { u8 pad00[0x10]; u32 flags; Item_1F7DB0* next; s32 state; };
 struct Owner_1F7DB0 { s32 index; Item_1F7DB0* items; s32 count; };
 s32 func_001F9D60(Owner_1F7DB0*);
