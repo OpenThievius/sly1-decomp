@@ -464,27 +464,27 @@ void func_001B2010(void* self, f32 x);
 
 void func_001B2068(void* self, void* src);
 
-typedef u64 Quad_129EE0 __attribute__((mode(TI)));
-struct Frame_129EE0 { Quad_129EE0 r; Quad_129EE0 a; Quad_129EE0 b; };
+// A quadword moved whole (lq/sq), and the frame of the four scaled-spring setters: the
+// default profile, the argument as a quadword and their product.
+typedef u64 U128 __attribute__((mode(TI)));
+struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
-void func_00118CF0(Quad_129EE0* out, void* src);
-void* func_00118D10(Quad_129EE0* out, void* src);
-Quad_129EE0 func_00118D30(Quad_129EE0 a, Quad_129EE0 b);
-Quad_129EE0 func_00118D20(Quad_129EE0* out, Quad_129EE0 v);
-void func_00129F58(void* self, Quad_129EE0* src);
+void func_00118CF0(U128* out, void* src);
+void* func_00118D10(U128* out, void* src);
+U128 func_00118D30(U128 a, U128 b);
+U128 func_00118D20(U128* out, U128 v);
+void func_00129F58(void* self, U128* src);
 
-struct __attribute__((packed)) Vec4_12A150 { f32 x, y, z, w; };
+// A ramp profile (+0x21C, +0x220) as the setters copy it: four floats at an address they do not
+// trust to be aligned.
+struct __attribute__((packed)) RampProfile { f32 x, y, z, w; };
 
-void func_0012A200(PlacedObject* self, Vec4_12A150* src);
+void func_0012A200(PlacedObject* self, RampProfile* src);
 
 void* func_0018D500(s32 size);
 
 
-struct __attribute__((packed)) Pack4_12A2C0 { f32 a, b, c, d; };
-
-extern void func_0012A320(PlacedObject* self, Pack4_12A2C0* in);
-
-struct __attribute__((packed)) Pack4_12A320 { f32 a, b, c, d; };
+extern void func_0012A320(PlacedObject* self, RampProfile* in);
 
 void* func_0018D500(u32 size);
 
@@ -499,14 +499,7 @@ s32 func_001833F0(void* key, s32 item);
 
 
 
-typedef u64 Quad_129E10 __attribute__((mode(TI)));
-struct Frame_129E10 { Quad_129E10 r; Quad_129E10 a; Quad_129E10 b; };
-
-void func_00118CF0(Quad_129E10* out, void* src);
-void* func_00118D10(Quad_129E10* out, void* src);
-Quad_129E10 func_00118D30(Quad_129E10 a, Quad_129E10 b);
-Quad_129E10 func_00118D20(Quad_129E10* out, Quad_129E10 v);
-void func_00129E88(void* self, Quad_129E10* v);
+void func_00129E88(void* self, U128* v);
 
 
 // Newly matched US functions from the small-function wave.
@@ -558,7 +551,7 @@ s32 func_00137BE0(Stream83* p);
 s32 func_00137CC0(Stream83* p);
 s32 func_00137B90(Stream83* p);
 void func_0012D2A8(Animation* a, Track83* b);
-void func_0012BC38(Animation* a, Stream83* b, s32 c, s32* d, s32* e);
+void func_0012BC38(Animation* a, Stream83* b, s32 c, s32* d, AnimEvent** e);
 void func_0011EC40(Animation* a, Stream83* b);
 PositionCurve* func_00120FB0(s32 cc);
 RotationCurve* func_00121050(s32 cc);
@@ -575,23 +568,9 @@ void func_00137E70(void* a, void* b);
 f32 func_00137DF8(void* a);
 s32 func_00137B90(void* a);
 
-typedef u64 Quad_129FB0 __attribute__((mode(TI)));
-struct Frame_129FB0 { Quad_129FB0 r; Quad_129FB0 a; Quad_129FB0 b; };
+void func_0012A028(PlacedObject* self, U128* src);
 
-void func_00118CF0(Quad_129FB0* out, void* src);
-void* func_00118D10(Quad_129FB0* out, void* src);
-Quad_129FB0 func_00118D30(Quad_129FB0 a, Quad_129FB0 b);
-Quad_129FB0 func_00118D20(Quad_129FB0* out, Quad_129FB0 v);
-void func_0012A028(PlacedObject* self, Quad_129FB0* src);
-
-typedef u64 Quad_12A080 __attribute__((mode(TI)));
-struct Frame_12A080 { Quad_12A080 r; Quad_12A080 a; Quad_12A080 b; };
-
-void func_00118CF0(Quad_12A080* out, void* src);
-void* func_00118D10(Quad_12A080* out, void* src);
-Quad_12A080 func_00118D30(Quad_12A080 a, Quad_12A080 b);
-Quad_12A080 func_00118D20(Quad_12A080* out, Quad_12A080 v);
-void func_0012A0F8(PlacedObject* self, Quad_12A080* src);
+void func_0012A0F8(PlacedObject* self, U128* src);
 
 void func_001299E0(PlacedObject* self, Attachment* src);
 
@@ -611,29 +590,32 @@ extern const Fn_Table D_00219600[];
 void func_001F5C0C(void** p, s32 v, s32 n);
 void func_001226D8(Attachment* n);
 
-struct Rd_12BC38;
-struct Rec_12BC38 { f32 t; s32 kind; s32 w8; s32 wC; };
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
-struct Ev_12BC38 {
-    s16 h0, h2;
-    u8 pad4[0xA];
-    s16 hE, h10;
+// The 0x28-byte record of a kind 0 event (a sound): up to six sound ids, one picked at random
+// each time other than the last (func_0012D5D0), the object it plays on, and its ranges.
+struct SoundChoice {
+    s16 count;
+    s16 ids[6];
+    s16 cur;
+    s16 target;
     u8 pad12[2];
-    s32 w14, w18;
-    f32 f1C, f20, f24;
+    s32 f14;
+    s32 f18;
+    f32 f1C;
+    f32 f20;
+    f32 f24;
 };
-struct Grp_12BC38 { s16 n; s16 h[1]; };
 
-s32 func_00137CC0(Rd_12BC38* r);
+s32 func_00137CC0(Stream83* r);
 void* func_0018D5C0(s32 n);
-void func_00138550(Rd_12BC38* r, void* out);
-s32 func_00137D10(Rd_12BC38* r);
-s32 func_00137D78(Rd_12BC38* r);
-f32 func_00137DF8(Rd_12BC38* r);
-s32 func_00137B90(Rd_12BC38* r);
-s32 func_00137BE0(Rd_12BC38* r);
-void func_00137A60(Rd_12BC38* r, s32 n, void* dst);
-void func_001384A0(Rd_12BC38* r, void* out);
+void func_00138550(Stream83* r, void* out);
+s32 func_00137D10(Stream83* r);
+s32 func_00137D78(Stream83* r);
+f32 func_00137DF8(Stream83* r);
+s32 func_00137B90(Stream83* r);
+s32 func_00137BE0(Stream83* r);
+void func_00137A60(Stream83* r, s32 n, void* dst);
+void func_001384A0(Stream83* r, void* out);
 
 #define F32(x) (*(f32*)&(x))
 #define H0(x) (*(s16*)&(x))
@@ -859,13 +841,9 @@ void func_00152438(List01* self, s32 value);
 
 void func_00128018(void* a, s32 b, void* c, void* d);
 
-struct Item_12E760 { s32 w[4]; };
-struct Vt_12E760 { void* pad[2]; void (*fn8)(void* self, s32 a); };
-struct Elem_12E760 { Vt_12E760* vt; };
-struct Frame_12E760 { s32 f00; s32 f04; s32 f08; s32 f0C; };
 struct Tmp_12E760 { s32 a; s32 b; };
 
-void func_0012D5D0(AnimationPlayer* self, Item_12E760* item, Tmp_12E760* out);
+void func_0012D5D0(AnimationPlayer* self, AnimEvent* item, Tmp_12E760* out);
 void func_0012F760(AnimationPlayer* self, s32 a, AnimationPlayer* b);
 void func_001DBC18(u8* self, void* node);
 void func_0015F9A0(u8* a, u8* s);
@@ -881,61 +859,15 @@ f32 func_001EAFE0(f32 a, f32 b);
 
 void func_001F5B08(Track83* dst, Track83* src, s32 bytes);
 
-struct Item_12E4E0 { f32 t; s32 type; s32 w2; s32 w3; };
-void func_0012D5D0(AnimationPlayer* self, Item_12E4E0* item, s32* out);
 
 // was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ
 
-struct Entry_12D1B0 { s32 f0; s32 type; s32 f8; s32 fC; };
-struct Obj_12D1B0 {
-    u8 pad0[0x14];
-    void* host;
-    u8 pad1[0x5C - 0x18];
-    s32 count;
-    Entry_12D1B0* items;
-};
 
 void* func_0018D658(s32 size);
 
 struct World_12D5D0;
 struct VObj_12D5D0 {
     void** vt;
-};
-struct Msg_12D5D0 {
-    union {
-        f32 f;
-        s32 i;
-    } a0;
-    s32 kind;
-    union {
-        s32 i;
-        f32 f;
-        void* p;
-        struct {
-            s16 lo;
-            s16 hi;
-        } h;
-    } a8;
-    union {
-        s32 i;
-        f32 f;
-        struct {
-            s16 lo;
-            s16 hi;
-        } h;
-    } aC;
-};
-struct Seq_12D5D0 {
-    s16 count;
-    s16 ids[6];
-    s16 cur;
-    s16 target;
-    u8 pad12[2];
-    s32 f14;
-    s32 f18;
-    f32 f1C;
-    f32 f20;
-    f32 f24;
 };
 struct Ent_12D5D0 {
     u8 pad0[4];
@@ -955,7 +887,7 @@ struct Owner_12D5D0 {
     Ent_12D5D0* ents;
     u8 pad40[0x5C - 0x40];
     s32 nmsgs;
-    Msg_12D5D0* msgs;
+    AnimEvent* msgs;
 };
 struct Info_12D5D0 {
     s32 f0;
@@ -1052,40 +984,11 @@ struct Obj_12E968 { u8 pad0[8]; Range_12E968* range; };
 s32 func_001F8DB8(void* p, s32 a, s32 b);
 void func_00140CC8(void* p, s32 n, s32 base);
 
-struct Key_12D4A8 {
-    f32 time;
-    u8 pad[12];
-};
-
-struct Rec_12CBE8 {
-    u32 f0;
-    s32 f4;
-    s32 f8;
-    u32 fC;
-};
-
-struct Obj_12CBE8 {
-    u8 pad0[0x54];
-    s32 f54;
-    Rec_12CBE8* f58;
-    s32 f5C;
-    Rec_12CBE8* f60;
-    s32 f64;
-    Rec_12CBE8* f68;
-};
 
 
 void func_00124A48(PlacedObject* self);
 s32 func_001300E8(void* n, s32 kind);
 
-struct Entry_12E5D0 {
-    f32 key;
-    s32 a4;
-    s32 a8;
-    s32 aC;
-};
-
-void func_0012D5D0(AnimationPlayer* self, Entry_12E5D0* entry, s32* out);
 
 // kept: the bitfields make `n->f10 = n->f11 = 3` store from two registers, as retail does
 struct Node_12C288 {
@@ -1093,7 +996,6 @@ struct Node_12C288 {
     u8 pad1[0x1C - 0x18]; AnimationPlayer* f1C;
     u8 pad2[0x28 - 0x20]; s32 f28;
 };
-struct Item_12C288 { u8 pad[0x10]; };
 
 void func_00152470(u8* list, AnimationPlayer* o);
 void func_00152470(u8* list, Node_12C288* n);
@@ -1104,7 +1006,7 @@ void func_001215C0(Node_12C288* n);
 void func_001299E0(PlacedObject* h, Node_12C288* n);
 void func_0018D6F0(void);
 void func_0015F8B0(World* w, u8* p);
-void func_0012D5D0(AnimationPlayer* o, Item_12C288* item, s32* out);
+void func_0012D5D0(AnimationPlayer* o, AnimEvent* item, s32* out);
 void func_0012F190(AnimationPlayer* o, s32 flag);
 void func_001837E0(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 
@@ -2652,10 +2554,10 @@ void func_00129DF8(PlacedObject* self)
 
 void func_00129E10(void* self, void* src)
 {
-    Frame_129E10 f;
+    ScaledSpringFrame f;
     u8* p = (u8*)D_00260E70;
     StoreFloatAsQuadword(&f.a, src);
-    Quad_129E10 av = f.a;
+    U128 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     SetPositionSpring(self, &f.r);
@@ -2670,10 +2572,10 @@ void func_00129E88(PlacedObject* self, Quad16* value)
 
 void func_00129EE0(void* self, void* src)
 {
-    Frame_129EE0 f;
+    ScaledSpringFrame f;
     u8* p = (u8*)D_00260E80;
     StoreFloatAsQuadword(&f.a, src);
-    Quad_129EE0 av = f.a;
+    U128 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     SetVelocitySpring(self, &f.r);
@@ -2687,10 +2589,10 @@ void func_00129F58(PlacedObject* self, Quad16* src)
 
 void func_00129FB0(PlacedObject* self, void* src)
 {
-    Frame_129FB0 f;
+    ScaledSpringFrame f;
     u8* p = (u8*)D_00260E90;
     StoreFloatAsQuadword(&f.a, src);
-    Quad_129FB0 av = f.a;
+    U128 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     SetRotationSpring(self, &f.r);
@@ -2704,10 +2606,10 @@ void func_0012A028(PlacedObject* self, Quad16* src)
 
 void func_0012A080(PlacedObject* self, void* src)
 {
-    Frame_12A080 f;
+    ScaledSpringFrame f;
     u8* p = (u8*)D_00260EA0;
     StoreFloatAsQuadword(&f.a, src);
-    Quad_12A080 av = f.a;
+    U128 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
     SetSpinSpring(self, &f.r);
@@ -2726,22 +2628,22 @@ void func_0012A150(PlacedObject* self, f32 scale)
     tmp.y = D_00260EB0[1] * scale;
     tmp.z = D_00260EB0[2];
     tmp.w = D_00260EB0[3] * scale;
-    SetPositionRamp(self, (Vec4_12A150*)&tmp);
+    SetPositionRamp(self, (RampProfile*)&tmp);
 }
 
 void func_0012A1A0(PlacedObject* self, f32 scale)
 {
-    Vec4_12A150 tmp = *(Vec4_12A150*)self->p21C;
+    RampProfile tmp = *(RampProfile*)self->p21C;
     tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
     SetPositionRamp(self, &tmp);
 }
 
-void func_0012A200(PlacedObject* self, Vec4_12A150* src)
+void func_0012A200(PlacedObject* self, RampProfile* src)
 {
     if (self->p21C == (u8*)D_00260EB0) {
         self->p21C = (u8*)AllocateFrontMemory(16);
     }
-    *(Vec4_12A150*)self->p21C = *src;
+    *(RampProfile*)self->p21C = *src;
 }
 
 void func_0012A270(void* self, f32 s)
@@ -2757,18 +2659,18 @@ void func_0012A270(void* self, f32 s)
 
 void func_0012A2C0(PlacedObject* self, f32 scale)
 {
-    Pack4_12A2C0 tmp;
-    tmp = *(Pack4_12A2C0*)self->p220;
-    tmp.d = scale * (tmp.a - tmp.b) / tmp.c;
+    RampProfile tmp;
+    tmp = *(RampProfile*)self->p220;
+    tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
     SetRotationRamp(self, &tmp);
 }
 
-void func_0012A320(PlacedObject* self, Pack4_12A320* src)
+void func_0012A320(PlacedObject* self, RampProfile* src)
 {
     if (self->p220 == (u8*)D_00260EC0) {
         self->p220 = (u8*)AllocateFrontMemory(0x10);
     }
-    *(Pack4_12A320*)self->p220 = *src;
+    *(RampProfile*)self->p220 = *src;
 }
 
 void func_0012A390(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
@@ -3549,49 +3451,49 @@ void func_0012B8C8(Animation* self, Stream83* other)
     ReadPropertyRecords(self, other);
 }
 
-void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38** out)
+void func_0012BC38(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
 {
-    Rec_12BC38* e;
+    AnimEvent* e;
     s32 i;
     s32 merged;
     *count = ReadBufferedS8(r);
-    *out = (Rec_12BC38*)AllocateZeroedFrontMemory(*count * 16);
+    *out = (AnimEvent*)AllocateZeroedFrontMemory(*count * 16);
     for (i = 0; i < *count; i++) {
         e = &(*out)[i];
         e->kind = ReadBufferedS8(r);
-        if (flag) e->t = (f32)ReadBufferedS16(r) * 0.016666668f;
+        if (flag) e->a0.f = (f32)ReadBufferedS16(r) * 0.016666668f;
         switch (e->kind) {
         case 44:
         case 51:
-            ReadOptionalBufferedBlock(r, &e->w8);
+            ReadOptionalBufferedBlock(r, &e->a8.i);
             break;
         case 0: {
-            Ev_12BC38 t;
-            Grp_12BC38* g;
+            SoundChoice t;
+            SoundChoice* g;
             s32 j;
             s32 k;
-            Rec_12BC38* q;
+            AnimEvent* q;
             merged = 0;
-            t.h2 = ReadBufferedS16(r);
-            t.h10 = ReadBufferedS16(r);
-            t.w14 = ReadBufferedS32(r);
-            t.w18 = ReadBufferedS32(r);
+            t.ids[0] = ReadBufferedS16(r);
+            t.target = ReadBufferedS16(r);
+            t.f14 = ReadBufferedS32(r);
+            t.f18 = ReadBufferedS32(r);
             t.f24 = ReadBufferedFloat(r);
             t.f1C = ReadBufferedFloat(r);
             t.f20 = ReadBufferedFloat(r);
-            t.h0 = 1;
-            t.hE = 0;
+            t.count = 1;
+            t.cur = 0;
             k = i - 1;
             do {
                 j = k;
                 goto test;
             ins:
-                g->h[g->n++] = t.h2;
+                g->ids[g->count++] = t.ids[0];
                 goto done;
             } while (0);
         test:
             q = &(*out)[j];
-            if (q->t != e->t) goto done;
+            if (q->a0.f != e->a0.f) goto done;
             if (j < 0) goto done;
             if (q->kind != 0) {
                 j--;
@@ -3600,105 +3502,105 @@ void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38*
             *count = *count - 1;
             i = k;
             merged = 1;
-            g = (Grp_12BC38*)q->w8;
-            if (g->n < 6) goto ins;
+            g = (SoundChoice*)q->a8.i;
+            if (g->count < 6) goto ins;
         done:
             if (!merged) {
-                e->w8 = (s32)AllocateFrontMemory(0x28);
-                *(Ev_12BC38*)e->w8 = t;
+                e->a8.i = (s32)AllocateFrontMemory(0x28);
+                *(SoundChoice*)e->a8.i = t;
             }
             break;
         }
         case 4:
         case 7:
-            F32(e->w8) = (f32)ReadBufferedS16(r) * 0.016666668f;
-            F32(e->wC) = ReadBufferedFloat(r);
+            F32(e->a8.i) = (f32)ReadBufferedS16(r) * 0.016666668f;
+            F32(e->aC.i) = ReadBufferedFloat(r);
             break;
         case 19:
         case 20:
-            e->w8 = ReadBufferedS16(r);
-            e->wC = ReadBufferedU8(r);
+            e->a8.i = ReadBufferedS16(r);
+            e->aC.i = ReadBufferedU8(r);
             break;
         case 16:
-            e->w8 = ReadBufferedS16(r);
-            H0(e->wC) = ReadBufferedS8(r);
-            H2(e->wC) = ReadBufferedS8(r);
+            e->a8.i = ReadBufferedS16(r);
+            H0(e->aC.i) = ReadBufferedS8(r);
+            H2(e->aC.i) = ReadBufferedS8(r);
             break;
         case 21:
         case 23:
-            e->w8 = (s32)AllocateZeroedFrontMemory(0xC);
-            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->w8)->w4) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->w8)->w8) = ReadBufferedFloat(r);
+            e->a8.i = (s32)AllocateZeroedFrontMemory(0xC);
+            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->a8.i)->w4) = ReadBufferedFloat(r);
+            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
             break;
         case 25:
         case 26:
-            H0(e->w8) = ReadBufferedS16(r);
-            e->wC = (s32)AllocateZeroedFrontMemory(0x14);
-            ((Sub_12BC38*)e->wC)->w0 = 1;
-            ((Sub_12BC38*)e->wC)->w8 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->wC)->wC = -1;
-            ((Sub_12BC38*)e->wC)->w10 = 0;
-            ((Sub_12BC38*)e->wC)->w4 = (s32)AllocateZeroedFrontMemory(0x20);
-            ReadBufferedStreamBytes(r, 0x20, (void*)((Sub_12BC38*)e->wC)->w4);
+            H0(e->a8.i) = ReadBufferedS16(r);
+            e->aC.i = (s32)AllocateZeroedFrontMemory(0x14);
+            ((Sub_12BC38*)e->aC.i)->w0 = 1;
+            ((Sub_12BC38*)e->aC.i)->w8 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->aC.i)->wC = -1;
+            ((Sub_12BC38*)e->aC.i)->w10 = 0;
+            ((Sub_12BC38*)e->aC.i)->w4 = (s32)AllocateZeroedFrontMemory(0x20);
+            ReadBufferedStreamBytes(r, 0x20, (void*)((Sub_12BC38*)e->aC.i)->w4);
             break;
         case 27:
-            e->w8 = ReadBufferedU8(r);
-            e->wC = ReadBufferedS16(r);
+            e->a8.i = ReadBufferedU8(r);
+            e->aC.i = ReadBufferedS16(r);
             break;
         case 28:
-            e->w8 = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->w8)->w4 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->w8)->w8) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->w8)->wC) = ReadBufferedFloat(r);
+            e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
+            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
+            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
             break;
         case 37:
-            H0(e->w8) = ReadBufferedS16(r);
-            H2(e->w8) = ReadBufferedS16(r);
+            H0(e->a8.i) = ReadBufferedS16(r);
+            H2(e->a8.i) = ReadBufferedS16(r);
             break;
         case 6: case 12: case 13: case 17: case 18: case 22: case 24:
         case 29: case 30: case 31: case 32: case 35: case 36: case 39:
         case 41: case 59:
-            e->w8 = ReadBufferedS16(r);
+            e->a8.i = ReadBufferedS16(r);
             break;
         case 40:
-            e->w8 = ReadBufferedU16(r);
+            e->a8.i = ReadBufferedU16(r);
             break;
         case 38:
         case 45:
         case 47:
-            e->w8 = ReadBufferedS16(r);
-            e->wC = ReadBufferedS16(r);
+            e->a8.i = ReadBufferedS16(r);
+            e->aC.i = ReadBufferedS16(r);
             break;
         case 48:
-            e->w8 = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->w8)->w4 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->w8)->w8 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->w8)->wC) = ReadBufferedFloat(r);
+            e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
+            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->a8.i)->w8 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
             break;
         case 9:
         case 10:
-            e->w8 = ReadBufferedS16(r);
-            F32(e->wC) = ReadBufferedFloat(r);
+            e->a8.i = ReadBufferedS16(r);
+            F32(e->aC.i) = ReadBufferedFloat(r);
             break;
         case 46:
         case 52:
-            H0(e->w8) = ReadBufferedS16(r);
-            H2(e->w8) = ReadBufferedS16(r);
-            H0(e->wC) = ReadBufferedS16(r);
+            H0(e->a8.i) = ReadBufferedS16(r);
+            H2(e->a8.i) = ReadBufferedS16(r);
+            H0(e->aC.i) = ReadBufferedS16(r);
             break;
         case 54:
-            H0(e->w8) = ReadBufferedS16(r);
-            H2(e->w8) = ReadBufferedS16(r);
-            ReadBufferedString(r, &e->wC);
+            H0(e->a8.i) = ReadBufferedS16(r);
+            H2(e->a8.i) = ReadBufferedS16(r);
+            ReadBufferedString(r, &e->aC.i);
             break;
         case 5:
         case 33:
         case 57:
         case 58:
-            F32(e->w8) = ReadBufferedFloat(r);
+            F32(e->a8.i) = ReadBufferedFloat(r);
             break;
         }
     }
@@ -3836,7 +3738,7 @@ void func_0012C288(Animation* self, Animation* alt, s32 npairs, TargetBinding* p
     if (self->f4C != 0) SetAnimationPlayerPadSelect(obj, 1);
     tmp = 0;
     for (s32 m = 0; m < self->startCount; m++) {
-        RunAnimationEvent(obj, &((Item_12C288*)self->startList)[m], &tmp);
+        RunAnimationEvent(obj, &self->startList[m], &tmp);
     }
     ApplyListedPoseSources(obj, flags & 4);
     if (flags & 2) {
@@ -3925,24 +3827,24 @@ INCLUDE_RODATA(D_00249B10);
 
 ASM_FUNC(func_0012C9E8);
 
-Rec_12CBE8* func_0012CBE8(Obj_12CBE8* self, s32 key) {
+AnimEvent* func_0012CBE8(Animation* self, s32 key) {
     s32 i;
-    Rec_12CBE8* p;
-    for (i = 0; i < self->f54; i++) {
-        p = &self->f58[i];
-        if (p->f4 == 0x27 && p->f8 == key) {
+    AnimEvent* p;
+    for (i = 0; i < self->startCount; i++) {
+        p = &self->startList[i];
+        if (p->kind == 0x27 && p->a8.i == key) {
             return p;
         }
     }
-    for (i = 0; i < self->f5C; i++) {
-        p = &self->f60[i];
-        if (p->f4 == 0x27 && p->f8 == key) {
+    for (i = 0; i < self->timedCount; i++) {
+        p = &self->timedList[i];
+        if (p->kind == 0x27 && p->a8.i == key) {
             return p;
         }
     }
-    for (i = 0; i < self->f64; i++) {
-        p = &self->f68[i];
-        if (p->f4 == 0x27 && p->f8 == key) {
+    for (i = 0; i < self->endCount; i++) {
+        p = &self->endList[i];
+        if (p->kind == 0x27 && p->a8.i == key) {
             return p;
         }
     }
@@ -3972,14 +3874,14 @@ void* func_0012CCE8(Gr8B* self, void* key)
 
 ASM_FUNC(func_0012CD78);
 
-void func_0012D1B0(Obj_12D1B0* self, void* ctx, s32* outCount, s32** outArr)
+void func_0012D1B0(Animation* self, void* ctx, s32* outCount, s32** outArr)
 {
     s32 n = 0;
     s32 i;
     u8* p;
-    if (self->count > 0) {
-        i = self->count;
-        p = (u8*)self->items + 4;
+    if (self->timedCount > 0) {
+        i = self->timedCount;
+        p = (u8*)self->timedList + 4;
         do {
             if (*(s32*)p == 0x29) n++;
             p += 16;
@@ -3992,16 +3894,16 @@ void func_0012D1B0(Obj_12D1B0* self, void* ctx, s32* outCount, s32** outArr)
         s32* res = (s32*)AllocateBackMemory(n * 4);
         *outArr = res;
         i = 0;
-        if (i < self->count) {
+        if (i < self->timedCount) {
             s32* out = res;
             do {
-                Entry_12D1B0* e = (Entry_12D1B0*)(i * 16 + (u8*)self->items);
-                if (e->type == 0x29) {
-                    *out = (s32)FindFirstObjectById(self->host, 0x104, e->f8, ctx);
+                AnimEvent* e = (AnimEvent*)(i * 16 + (u8*)self->timedList);
+                if (e->kind == 0x29) {
+                    *out = (s32)FindFirstObjectById(self->world, 0x104, e->a8.i, ctx);
                     out++;
                 }
                 i++;
-            } while (i < self->count);
+            } while (i < self->timedCount);
         }
     }
 }
@@ -4069,9 +3971,9 @@ void func_0012D4A8(AnimationPlayer* self)
     if (self->speed >= 0.0f) {
         i = 0;
         if (n > 0) {
-            Key_12D4A8* keys = (Key_12D4A8*)track->timedList;
+            AnimEvent* keys = track->timedList;
             for (i = 0; i < track->timedCount; i++) {
-                if (keys[i].time >= self->time) {
+                if (keys[i].a0.f >= self->time) {
                     break;
                 }
             }
@@ -4079,8 +3981,8 @@ void func_0012D4A8(AnimationPlayer* self)
         self->f20 = i;
     } else {
         for (i = n - 1; i >= 0; i--) {
-            Key_12D4A8* k = &((Key_12D4A8*)track->timedList)[i];
-            if (k->time <= self->time) {
+            AnimEvent* k = &track->timedList[i];
+            if (k->a0.f <= self->time) {
                 break;
             }
         }
@@ -4101,7 +4003,7 @@ T2195_7C0* func_0012D570(AnimationPlayer* a0, void* a1)
 
 LINKER_REMNANT(func_0012D5C8);
 
-void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
+void func_0012D5D0(AnimationPlayer* self, AnimEvent* msg, s32* out)
 {
     Scratch_12D5D0 u;
     s32 rev = 0;
@@ -4126,7 +4028,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         StopStreamVoice();
         break;
     case 0: {
-#define Q_12D5D0 ((Seq_12D5D0*)msg->a8.p)
+#define Q_12D5D0 ((SoundChoice*)msg->a8.p)
         s32 idx;
         s32 busy;
         s32 id;
@@ -4603,11 +4505,11 @@ void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out)
 {
     f32 limit = self->time + 0.0001f;
     if (sub->timedCount != 0) {
-    while (self->f20 < sub->timedCount && ((Item_12E4E0*)sub->timedList)[self->f20].t < limit) {
-        Item_12E4E0* it = &((Item_12E4E0*)sub->timedList)[self->f20++];
-        switch (it->type) {
+    while (self->f20 < sub->timedCount && sub->timedList[self->f20].a0.f < limit) {
+        AnimEvent* it = &sub->timedList[self->f20++];
+        switch (it->kind) {
         case 8:
-            self->time = it->t;
+            self->time = it->a0.f;
             self->speed = 0;
             *out = 1;
             return;
@@ -4632,8 +4534,8 @@ void func_0012E5D0(AnimationPlayer* self, Animation* list, s32* out)
     if (list->timedCount == 0) return;
     for (;;) {
         if (self->f20 < list->timedCount) {
-            if (((Entry_12E5D0*)list->timedList)[self->f20].key < self->time || (self->time == ((Entry_12E5D0*)list->timedList)[self->f20].key && 0.0f < self->speed)) {
-                Entry_12E5D0* e = &((Entry_12E5D0*)list->timedList)[self->f20];
+            if (list->timedList[self->f20].a0.f < self->time || (self->time == list->timedList[self->f20].a0.f && 0.0f < self->speed)) {
+                AnimEvent* e = &list->timedList[self->f20];
                 self->f20 = self->f20 + 1;
                 RunAnimationEvent(self, e, out);
                 if (*out != 0) return;
@@ -4641,9 +4543,9 @@ void func_0012E5D0(AnimationPlayer* self, Animation* list, s32* out)
             }
         }
         if (self->f20 <= 0) return;
-        if (self->time < ((Entry_12E5D0*)list->timedList)[self->f20 - 1].key || (self->time == ((Entry_12E5D0*)list->timedList)[self->f20 - 1].key && self->speed < 0.0f)) {
+        if (self->time < list->timedList[self->f20 - 1].a0.f || (self->time == list->timedList[self->f20 - 1].a0.f && self->speed < 0.0f)) {
             self->f20 = self->f20 - 1;
-            RunAnimationEvent(self, &((Entry_12E5D0*)list->timedList)[self->f20], out);
+            RunAnimationEvent(self, &list->timedList[self->f20], out);
             if (*out != 0) return;
             continue;
         }
@@ -4659,13 +4561,13 @@ void func_0012E710(void* a0)
 
 void func_0012E760(AnimationPlayer* self)
 {
-    Frame_12E760 fr;
+    WordListFrame fr;
     Tmp_12E760 tmp;
     s32 i = 0;
     Animation* sub = self->anim;
     u8* base = (u8*)sub->world;
     for (i = 0; i < sub->endCount; i++) {
-        Item_12E760* it = (Item_12E760*)((u8*)sub->endList + i * 16);
+        AnimEvent* it = (AnimEvent*)((u8*)sub->endList + i * 16);
         tmp.a = 0;
         RunAnimationEvent(self, it, &tmp);
     }
@@ -4684,21 +4586,21 @@ void func_0012E760(AnimationPlayer* self)
     AppendToList(base + 0x1B7C, self);
     s32 s0 = (s32)self + 0xC;
     s32 e = (s32)self + 0x44;
-    fr.f04 = e;
-    fr.f00 = e;
+    fr.link = e;
+    fr.list = e;
     s32 link = *(s32*)(e + 8);
-    fr.f0C = (s32)g_activeListFrames;
+    fr.prev = (s32)g_activeListFrames;
     g_activeListFrames = (ListFrame*)&fr;
-    fr.f08 = link;
+    fr.offset = link;
     s32 head = *(s32*)e;
-    fr.f04 = head + fr.f08;
+    fr.link = head + fr.offset;
     s32 a = head;
     if (a != 0) {
         do {
-            Elem_12E760* el = (Elem_12E760*)a;
-            el->vt->fn8(el, 7);
-            s32 nx = *(s32*)fr.f04;
-            fr.f04 = nx + fr.f08;
+            Attachment* el = (Attachment*)a;
+            el->vt->release(el, 7);
+            s32 nx = *(s32*)fr.link;
+            fr.link = nx + fr.offset;
             a = nx;
         } while (a != 0);
     }
@@ -4706,7 +4608,7 @@ void func_0012E760(AnimationPlayer* self)
         ClearSoundRecordHandle(&self->f50);
     tmp.b = s0;
     TriggerScriptEvent(sub, 0xB, 1, &tmp.b);
-    g_activeListFrames = (ListFrame*)fr.f0C;
+    g_activeListFrames = (ListFrame*)fr.prev;
 }
 
 void func_0012E928(void* a0, void* a1, void* a2)
