@@ -223,9 +223,10 @@ struct TurningCollider : SwitchedCollider {
     void* f6C0;             // 0x6C0
     f32 f6C4;               // 0x6C4
     f32 f6C8;               // 0x6C8
-    u8 pad6CC[0x6D4 - 0x6CC];
+    f32 f6CC;               // 0x6CC
+    s32 f6D0;               // 0x6D0: the index of the mesh's last vertex (func_001C4FF8)
     s32 f6D4;               // 0x6D4
-    u8 pad6D8[0x6DC - 0x6D8];
+    Vec02* f6D8;            // 0x6D8: the lowest vertex of the mesh copy (func_001C4FF8)
     void* f6DC;             // 0x6DC
     f32 f6E0;               // 0x6E0
     f32 f6E4;               // 0x6E4
@@ -313,7 +314,9 @@ struct Player : TurningCollider {
     u8 pad23E8[0x23F0 - 0x23E8];
     f32 f23F0;              // 0x23F0
     f32 f23F4;              // 0x23F4
-    u8 pad23F8[0x2420 - 0x23F8];
+    u8 pad23F8[0x2410 - 0x23F8];
+    f32 f2410;              // 0x2410: the length along the path (func_001D1A80)
+    u8 pad2414[0x2420 - 0x2414];
     f32 f2420;              // 0x2420
     f32 f2424;              // 0x2424
     u8 pad2428[0x242C - 0x2428];
@@ -326,7 +329,10 @@ struct Player : TurningCollider {
     void* f24A0;            // 0x24A0
     u8 pad24A4[0x24B0 - 0x24A4];
     u8 f24B0[0x10];         // 0x24B0: filled by func_00128018 (func_00172898)
-    u8 pad24C0[0x24F8 - 0x24C0];
+    Vec02 v24C0;            // 0x24C0
+    Vec02 v24D0;            // 0x24D0
+    Vec02 v24E0;            // 0x24E0
+    u8 pad24F0[0x24F8 - 0x24F0];
     PlacedObject* f24F8;    // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
     u8 pad24FC[0x2500 - 0x24FC];
     void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1

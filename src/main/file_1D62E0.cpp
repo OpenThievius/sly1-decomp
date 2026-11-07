@@ -6,6 +6,7 @@
 // two edges with no evidence inside it: it could be several.
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
 #include "child_group_object.h"
@@ -561,7 +562,33 @@ INCLUDE_ASM(func_001D6608);
 
 INCLUDE_ASM(func_001D66A8);
 
-INCLUDE_ASM(func_001D6A18);
+f32 ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
+s32 CollectTreeNodeSpans(void* nodes, void* a, void* b, s32 c, s32 d, void* out);
+
+s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
+{
+    Vec02 moved;
+    Vec02 shift;
+    Vec02 start;
+    Vec02 end;
+    ColliderSpan hit;
+    if (col->f278 != 0) {
+        ComputeOscillatorDisplacement(((void**)col->f278)[3], &self->v140, 50.0f, 0, &moved, 0, 0);
+        Vu0::Q(shift) = Vu0::Sub(Vu0::Q(moved), Vu0::Q(self->v140));
+    } else {
+        shift = D_00248D30;
+    }
+    u128 base = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(shift));
+    Vu0::Q(end) = base;
+    Vu0::Q(start) = base;
+    end.z += D_00275164;
+    start.z += D_00275168;
+    if (CollectTreeNodeSpans(col->tree.nodes, &end, &start, 0, 1, &hit) == 0) {
+        return 0;
+    }
+    Vu0::Q(*out) = Vu0::Add(Vu0::Q(hit.q[0]), Vu0::Q(shift));
+    return 1;
+}
 
 INCLUDE_ASM(func_001D6B18);
 

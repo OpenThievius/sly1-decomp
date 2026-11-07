@@ -29,6 +29,7 @@
 #include "camera.h"
 #include "path_curve_object.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -439,7 +440,38 @@ void ApplyPendingPlayerStateRequest(Player* self)
     }
 }
 
-INCLUDE_ASM(func_00170660);
+void FreePooledContactChain(void* a, Contact03* b);
+void PinPlayerToPath(void* self);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void PinPlayerToTarget(void* self);
+void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
+void AddPlayerObjectContacts(void* self, s32 a, void* b, Vec02* c, s32 d, Vec02* e);
+void func_00170660(Player* self)
+{
+    FreePooledContactChain(self->world, self->contacts4B4);
+    self->contacts4B4 = 0;
+    switch (self->f2220) {
+    case 7:
+        PinPlayerToPath(self);
+        break;
+    case 6:
+        PinPlayerToTarget(self);
+        break;
+    case 8: {
+        Vec02 pos;
+        Mat02 m;
+        Vec02 k;
+        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &pos);
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->v24C0), Vu0::Q(k));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(self->v24D0));
+        BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
+        Vu0::Q(pos) = Vu0::Sub(Vu0::Q(pos), Vu0::Rotate(m, Vu0::Q(self->v24E0)));
+        AddPlayerObjectContacts(self, 7, self->f24A0, &pos, 0, &self->v140);
+        break;
+    }
+    }
+}
 
 extern f32 D_00274AD0[];
 
@@ -470,7 +502,42 @@ INCLUDE_RODATA(jtbl_0024A8F0);
 INCLUDE_RODATA(jtbl_0024A930);
 INCLUDE_ASM(func_00170960);
 
-INCLUDE_ASM(func_00171180);
+struct PoseHolder47;
+struct PoseHolderDesc { u8 pad00[8]; void (*m2)(PoseHolder47* self, Vec02* out, f32 t, s32 a); };
+struct PoseHolder47 { PoseHolderDesc* desc; };
+// The object at 0x2208: a frame at +0x18 and a holder of poses at +0x34.
+struct PoseTarget { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PoseHolder47* holder; };
+s32 GetObjectWorldPosition(void* p, Vec02* out);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+f32 ArctangentOfRatio(f32 a, f32 b);
+
+s32 func_00171180(Player* self)
+{
+    Vec02 pos;
+    Vec02 d1;
+    Vec02 d2;
+    f32 y;
+    f32 x;
+    if (self->f2200 != 0) {
+        GetObjectWorldPosition(self->f2200, &pos);
+        Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
+        y = d1.y;
+        x = d1.x;
+    } else if (self->f2208 != 0) {
+        PoseHolder47* h = ((PoseTarget*)self->f2208)->holder;
+        if (h->desc->m2 != 0) {
+            h->desc->m2(h, &pos, *(f32*)((u8*)self + 0x220C), 0);
+        }
+        TransformPointBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &pos, &d1);
+        Vu0::Q(d2) = Vu0::Sub(Vu0::Q(d1), Vu0::Q(self->v140));
+        y = d2.y;
+        x = d2.x;
+    } else {
+        return 0;
+    }
+    self->f638 = ArctangentOfRatio(y, x);
+    return 1;
+}
 
 INCLUDE_ASM(func_00171238);
 
@@ -914,7 +981,36 @@ void SetPlayerTracked(Player* a, void* b)
     ShowModeLabel(id);
 }
 
-INCLUDE_ASM(func_00173750);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
+
+s32 func_00173750(Player* self, Vec02* offset)
+{
+    s32 count;
+    Collider** list;
+    Vec02 from;
+    Vec02 to;
+    ColliderSpan spans[8];
+    s32 i = 0;
+    PushBackMemoryMark();
+    from = *self->f6D8;
+    Vu0::Q(to) = Vu0::Add(Vu0::Q(*self->f6D8), Vu0::Q(*offset));
+    GatherCollidersInBox(self->world, self, &from, &to, 0, 0, &count, &list);
+    for (; i < count; i++) {
+        s32 n = CollectColliderSpans(list[i], &from, &to, 8, spans);
+        for (s32 j = 0; j < n; j++) {
+            ColliderSpan* p = &spans[j];
+            if (p->time[0] != 0.0f && ((Vec02*)&p->q[2])->z > 0.7f) {
+                PopBackMemoryMark();
+                return 1;
+            }
+        }
+    }
+    PopBackMemoryMark();
+    return 0;
+}
 
 INCLUDE_RODATA(jtbl_0024A9F0);
 INCLUDE_RODATA(jtbl_0024AA10);
@@ -1233,7 +1329,7 @@ void ReplaceAnimationPlayer(void* a, CountdownCollider* b, s32 c, void* d, f32 e
 s32 HandleObjectEvent(void* self, ObjectEvent* msg);
 
 
-void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 

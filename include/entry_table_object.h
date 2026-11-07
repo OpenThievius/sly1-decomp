@@ -15,7 +15,8 @@
 struct EntryTableObject : PlacedObject {
     u8 entries[0x310 - 0x2D0];  // 0x2D0: sixteen 32-bit entries
     s32 entryCount;         // 0x310: how many were found (at most 0x10)
-    u8 pad314[0x31C - 0x314];
+    s32 mode314;            // 0x314: 0 picks the entry nearest to the active collider, 1 a random one (func_0016DE20)
+    u8 pad318[0x31C - 0x318];
     f32 tune31C;            // 0x31C
     f32 tune320;            // 0x320
     f32 tune324;            // 0x324
