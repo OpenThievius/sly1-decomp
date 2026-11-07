@@ -101,7 +101,9 @@ struct AnimationPlayer {
     void* f2C;              // 0x2C: func_0012D5D0
     void* f30;              // 0x30: func_0012D5D0
     AnimationPlayer* next;  // 0x34: the link in World's list at 0x1B64 or 0x1B70 (offset 0x34, func_001D62E0)
-    u8 pad38[0x44 - 0x38]; // 0x38
+    u8 pad38[0x3C - 0x38]; // 0x38
+    AnimationPlayer* animNext; // 0x3C: in its animation's list at Animation::props6C (func_0012C808)
+    u8 pad40[0x44 - 0x40]; // 0x40
     List01 list44;          // 0x44: the attachments that follow it (offset 0x20)
     union {
         s32 f50;            // 0x50: its address goes to func_001BF718 (func_0012E760)
