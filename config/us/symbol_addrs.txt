@@ -179,3 +179,7 @@ D_00250540 = 0x00250540;
 D_0024EB80 = 0x0024EB80;
 D_0024EB88 = 0x0024EB88;
 D_002771C8 = 0x002771C8;
+// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; pause_menu's
+// function the linker stripped, ending file_1419E8's .rodata.
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
+// Named so that file_13CCF8 can hold them (LINKER_REMNANT).

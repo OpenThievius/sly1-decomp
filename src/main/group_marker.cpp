@@ -6,7 +6,7 @@
 // markers (func_0019DF48). No .rodata. Its .data (0x26ABF0 to 0x26B530) is the two projection
 // vectors below, then three uninitialised globals, which GCC writes at the end of the file's
 // .data in the order they are first declared (group_marker.h): D_0026AC10, D_0026AC20 and the
-// group markers D_0026AC30. Named after its first address until what it was is known.
+// group markers D_0026AC30, after which it is named.
 #include "common.h"
 #include "world.h"
 #include "list_iter.h"
@@ -231,8 +231,8 @@ void func_0019D860(void)
 
 void func_0019D930(void)
 {
-    if (!D_00604788) {
-        D_00604788 = 1;
+    if (!g_cameraUploadedThisFrame) {
+        g_cameraUploadedThisFrame = 1;
         func_00144848((void*)g_camera);
     }
 }
@@ -264,7 +264,7 @@ void func_0019DA30(void)
 void func_0019DA60(void)
 {
     UploadProjectionConstants();
-    func_0019D930();
+    UploadCameraOncePerFrame();
     void* self = &g_vifPacketWriter;
     AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
     D_00604780 = 1;
@@ -279,13 +279,13 @@ void func_0019DAD8(void)
     UploadProjectionConstants();
     func_0019D968();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
-    D_00604788 = 0;
+    g_cameraUploadedThisFrame = 0;
 }
 
 void func_0019DB20(void)
 {
     UploadProjectionConstants();
-    func_0019D930();
+    UploadCameraOncePerFrame();
     func_0019D968();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
 }
@@ -293,7 +293,7 @@ void func_0019DB20(void)
 void func_0019DB68(void)
 {
     UploadProjectionConstants();
-    func_0019D930();
+    UploadCameraOncePerFrame();
     func_0019D968();
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00215C60, D_00217348);
 }
@@ -303,7 +303,7 @@ void func_0019DBB0(void)
     V24A0* self = &g_vifPacketWriter;
     AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
     UploadProjectionConstants();
-    func_0019D930();
+    UploadCameraOncePerFrame();
 
     if (D_0026FA68 != 0) {
         s32 v = D_00274520[D_0026FA68->idx2F4];

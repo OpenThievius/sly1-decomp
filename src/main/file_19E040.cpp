@@ -153,8 +153,8 @@ struct Cursor_19E168 {
         link = l;
         at = (u8*)l;
         stride = ((s32*)l)[2];
-        prev = ((Cursor_19E168*)D_0027B314);
-        D_0027B314 = (ListFrame*)this;
+        prev = ((Cursor_19E168*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)this;
     }
     Effect* first() {
         Effect* n = *(Effect**)link;
@@ -166,7 +166,7 @@ struct Cursor_19E168 {
         at = (u8*)n + stride;
         return n;
     }
-    ~Cursor_19E168() { D_0027B314 = (ListFrame*)prev; }
+    ~Cursor_19E168() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void func_0019EBE8(Effect* node);
@@ -252,10 +252,10 @@ struct Frame_19C068 {
         list = l;
         cur = (s32 *)&l->head;
         step = l->offset;
-        prev = ((Frame_19C068*)D_0027B314);
-        D_0027B314 = (ListFrame*)this;
+        prev = ((Frame_19C068*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_19C068() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_19C068() { g_activeListFrames = (ListFrame*)prev; }
     s32 Next()
     {
         s32 n = *cur;
@@ -411,8 +411,8 @@ struct Begin_19E420 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_19E420*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_19E420*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -426,8 +426,8 @@ struct Begin_19E558 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_19E558*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = (Iter_19E558*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -443,7 +443,7 @@ struct Next_19E558 {
 struct End_19E558 {
     static void Of(Iter_19E558* it)
     {
-        D_0027B314 = (ListFrame*)it->prev;
+        g_activeListFrames = (ListFrame*)it->prev;
     }
 };
 
@@ -919,10 +919,10 @@ struct Frame_1A54F8 {
         iter = i;
         cursor = i;
         link = i->offset;
-        prev = (Frame_1A54F8*)D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = (Frame_1A54F8*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_1A54F8() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_1A54F8() { g_activeListFrames = (ListFrame*)prev; }
     void* Next()
     {
         void* n = *(void**)cursor;
@@ -1104,7 +1104,7 @@ struct Curve_1A5760 {
     }
     static void Get(f32& c, const Poly_1A5760* p, f32 t)
     {
-        Clamp(c, Eval(p, t), ((Range_1A5760*)&D_00275C60));
+        Clamp(c, Eval(p, t), ((Range_1A5760*)&g_unitRange));
     }
 };
 
@@ -1319,7 +1319,7 @@ void func_0019E420(EffectOwner* self, f32 t)
         if (node->start >= g_gameClock[1]) {
             continue;
         }
-        func_0019EC20(node);
+        CountEffectUse(node);
         node->vt->m04(node, t);
         ReleaseEffect(node);
     }
@@ -1463,7 +1463,7 @@ Effect* func_0019EA78(s32 kind, EffectOwner* sys)
         o->owner = sys;
         o->vt = r;
         AppendToList(&sys->list558, o);
-        func_0019EC20(o);
+        CountEffectUse(o);
     }
     return o;
 }
@@ -1803,7 +1803,7 @@ void func_001A09C0(Effect* self, f32 f)
 
 void func_001A0A78(Effect* self, f32 arg)
 {
-    func_0019F560(self);
+    UpdateEffect(self);
     f32 d = g_gameTime - self->start;
     d = d - 0.15f;
     if (0.0f <= d && d < arg) {
@@ -2009,7 +2009,7 @@ s32 func_001A25F0(Effect* self, Obj_1A25F0* other, void* a2, void* a3)
 
 void func_001A26B0(Effect* self)
 {
-    func_0019F560(self);
+    UpdateEffect(self);
     s32 h = self->i120;
     if (h != 0) {
         if (IsObjectAttached(h) == 0) {
@@ -2149,7 +2149,7 @@ void func_001A39C8(Effect* self, void* otherv)
 
 void func_001A3A18(Effect* self, f32 scale)
 {
-    func_0019F560(self, scale);
+    UpdateEffect(self, scale);
     if (self->p120 == 0) return;
     f32 t = scale * self->f124;
     f32 v = self->f128 + t;

@@ -7,6 +7,7 @@ extern f32 D_0026185C[];
 #include "object_group.h"
 #include "world.h"
 #include "c48.h"
+#include "object_link.h"
 #include "attachment.h"
 #include "shapes.h"
 #include "globals.h"
@@ -25,8 +26,6 @@ void func_00124A48(ObjectGroup* self);
 
 
 
-struct Rec_26A728 { s32 id; s32 off; s32 flags; };
-struct Tbl_26A728 { s32 f0; Rec_26A728 r[1]; };
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -67,7 +66,7 @@ void func_00151E20(void* self, f32 amount);
 void func_001B6568(void* dev, s32* out);
 void func_001B6598(void* dev, s32* out);
 void func_001B64D8(void* dev, s32 value);
-void func_001973D8(u8* self);
+void func_001973D8(C18* self);
 
 
 
@@ -114,7 +113,6 @@ struct Item_001969F8 { u8 pad[0x24]; void* p24; };
 
 struct Any_001969F8;
 
-struct Tbl_26A738 { s32 f0; Rec_26A728 r[13]; };
 extern u8 D_0021A790[];
 
 void func_00124A48(C18* self);
@@ -195,10 +193,6 @@ void func_0019F9D0(void*, u32);
 
 
 
-struct Found_198920 {
-    u8 pad0[0x684];
-    s32 f684;
-};
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -262,22 +256,22 @@ f32 D_0026A714 = 4000.0f;
 f32 D_0026A718 = 2000.0f;
 f32 D_0026A71C = 4000.0f;
 s32 D_0026A720 = 5;
-Tbl_26A728 D_0026A728 = { 0, { { 0x3D9, 0x610, 0 } } };
-Tbl_26A738 D_0026A738 = { 0x24, {
-    { 0x3DD, 0x640, 0x20 },
-    { 0x3DE, 0x648, 0x0 },
-    { 0x3E7, 0x64C, 0x0 },
-    { 0x3E8, 0x650, 0x0 },
-    { 0x3E9, 0x654, 0x0 },
-    { 0x3EA, 0x658, 0x0 },
-    { 0x3EC, 0x670, 0x4 },
-    { 0x3ED, 0x65C, 0x0 },
-    { 0x3EE, 0x668, 0x0 },
-    { 0x3F0, 0x66C, 0x4 },
-    { 0x3EF, 0x660, 0x24 },
-    { 0x3EB, 0x678, 0x1 },
-    { 0x3F1, 0x6B4, 0x0 },
-} };
+ObjectLink D_0026A728[1] = { { 0, 0x3D9, 0x610 } };
+ObjectLink D_0026A738[13] = {
+    { 0x24, 0x3DD, 0x640 },
+    { 0x20, 0x3DE, 0x648 },
+    { 0x0, 0x3E7, 0x64C },
+    { 0x0, 0x3E8, 0x650 },
+    { 0x0, 0x3E9, 0x654 },
+    { 0x0, 0x3EA, 0x658 },
+    { 0x0, 0x3EC, 0x670 },
+    { 0x4, 0x3ED, 0x65C },
+    { 0x0, 0x3EE, 0x668 },
+    { 0x0, 0x3F0, 0x66C },
+    { 0x4, 0x3EF, 0x660 },
+    { 0x24, 0x3EB, 0x678 },
+    { 0x1, 0x3F1, 0x6B4 },
+};
 f32 D_0026A7D8[6] = { 7.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f };
 Vec4_1963D8 D_0026A7F0 = { 3.0f, -2.0f, -1.0f, 0.0f };
 Vec4_1963D8 D_0026A800 = { 0.25f, 0.0f, 0.0f, 0.0f };
@@ -303,9 +297,9 @@ Vec4_1963D8 D_0026A8C0 = { 1.4f, -0.005f, 0.0f, 0.0f };
 f32 D_0026A8D0[2] = { 0.9f, 1.2f };
 f32 D_0026A8D8 = 2000.0f;
 f32 D_0026A8DC = 1100.0f;
-s32 D_0026A8E0[9] = { 0x0, 0x3E4, 0x558, 0x0, 0x3E5, 0x554, 0x20, 0x3E6, 0x55C };
+ObjectLink D_0026A8E0[3] = { { 0x0, 0x3E4, 0x558 }, { 0x0, 0x3E5, 0x554 }, { 0x20, 0x3E6, 0x55C } };
 // The object func_00196938 registers itself as; filled at run time.
-void* D_0026A904 = 0;
+C18* D_0026A904 = 0;
 
 void func_001963D8(ObjectGroup* self);
 void func_00196410(ObjectGroup* self, LoadStream* rd);
@@ -315,7 +309,7 @@ void func_00196938(C18* self);
 void func_001969C0(C18* self);
 void func_001969F8(C18* self);
 s32 func_00196E48(s32 a0, Obj_196E48* self);
-void func_001973D8(u8* self);
+void func_001973D8(C18* self);
 void func_00197458(s32 unused, s32 flag);
 void func_001974D8(C18* a, void* b);
 void func_00197788(C18* self);
@@ -511,20 +505,20 @@ void func_00196938(C18* self)
     self->f628 = D_0026A718;
     func_00152438(&self->f6A8, 0x568);
     func_00152438(&self->f69C, 0x568);
-    *(C18**)&D_0026A904 = self;
+    g_gaugeCollider = self;
 }
 
 void func_001969C0(C18* self)
 {
     LoadCollider(self);
-    ResolveObjectLinks(self, 1, &g_gaugeColliderLoadLinks);
+    ResolveObjectLinks(self, 1, g_gaugeColliderLoadLinks);
 }
 
 void func_001969F8(C18* self)
 {
     s32 arr[32];
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 0xD, &g_gaugeColliderStartLinks);
+    ResolveObjectLinks(self, 0xD, g_gaugeColliderStartLinks);
     self->f618 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     self->f614 = (StateWalker*)CreateStateWalker((Any_001969F8*)self->f610, self, -1, 1);
 
@@ -561,10 +555,10 @@ ASM_FUNC(func_00196EB0);
 
 ASM_FUNC(func_001971B8);
 
-void func_001973D8(u8* self)
+void func_001973D8(C18* self)
 {
     f32 one = 1.0f;
-    f32 t = (f32)*(s32*)(self + 0x680) / (f32)*(s32*)(self + 0x684);
+    f32 t = (f32)self->f680 / (f32)self->f684;
     f32 c;
     if (t < 0.0f) {
         c = 0.0f;
@@ -580,12 +574,12 @@ void func_00197458(s32 unused, s32 flag)
 {
     s32 out[4];
     if (flag == 1) {
-        if (*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8) != 0) {
-            func_001B6568(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), &out[0]);
-            func_001B6598(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), &out[1]);
+        if (g_gaugeCollider->f6B8 != 0) {
+            func_001B6568(g_gaugeCollider->f6B8, &out[0]);
+            func_001B6598(g_gaugeCollider->f6B8, &out[1]);
             if (out[0] != 0x3F4 && out[1] != 0x3F4) {
-                SetStateWalkerTarget(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), 0x3F5);
-                func_001973D8(*(u8**)&D_0026A904);
+                SetStateWalkerTarget(g_gaugeCollider->f6B8, 0x3F5);
+                ApplyGaugeColliderRatioToEffect(g_gaugeCollider);
             }
         }
     }
@@ -686,11 +680,11 @@ void func_00197F10(C18* self, s32 kind, void* rec)
         func_001B6598(rec, &code);
         if (code == 0x3F3) {
             *(void**)D_0026E744 = (u8*)self + 0x67C;
-            g_gaugeAmountCaption.target = (s32*)((u8*)self + 0x680);
-            g_gaugeAmountCaption.limit = (s32*)((u8*)self + 0x684);
+            g_gaugeAmountCaption.target = &self->f680;
+            g_gaugeAmountCaption.limit = &self->f684;
             SetWorldActiveFollower(self->world, self);
             StartTimer(&g_timerElement, self->f688);
-            SetTimerLimit(&g_timerElement, 0.0f, (void*)func_00197458);
+            SetTimerLimit(&g_timerElement, 0.0f, (void*)EndGaugeColliderTimer);
             StartTimerCounting(&g_timerElement);
         } else {
             if (code < 0x3F3) {
@@ -794,8 +788,8 @@ void func_00198760(C0F* s1, f32 f)
                     t.f04 = s1;
                     if (FindNodeForQuery(&t, 0, 0) != 0) {
                         s32 n = s0->f67C + 1;
-                        if (!(n < D_0026A720)) {
-                            n = D_0026A720;
+                        if (!(n < g_gaugeAgentCountLimit)) {
+                            n = g_gaugeAgentCountLimit;
                         }
                         s0->f67C = n;
                         if (s0->f698 == 3.4028235e+38f) {
@@ -815,9 +809,9 @@ ASM_FUNC(func_00198860);
 
 void func_00198920(C48* self)
 {
-    ResolveObjectLinks(self, 3, (u8*)g_gaugeCountedObjectLinks);
+    ResolveObjectLinks(self, 3, g_gaugeCountedObjectLinks);
     StartPlacedObject(self);
-    Found_198920* p = (Found_198920*)FindFirstObjectByIdGathered(self->world, 5, 0x18, 0);
+    C18* p = (C18*)FindFirstObjectByIdGathered(self->world, 5, 0x18, 0);
     if (p != 0) {
         p->f684 = p->f684 + 1;
     }

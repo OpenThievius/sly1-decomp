@@ -29,9 +29,20 @@ struct V8C {
     s32 c;
 };
 
+// One entry of an object pool: an object found by id and the copies of it func_001A8208 makes.
+struct ObjectPoolEntry {
+    s32 id;                 // 0x00: the id of the object (func_001A8150, func_001A8208)
+    s32 count;              // 0x04: the objects in use; func_001A87E0 caps it at total
+    void** objects;         // 0x08: the object and its copies
+    s32 total;              // 0x0C: the objects func_001A8208 made
+    s32 flags;              // 0x10: 1 keeps a chosen object in the list (func_001A8AF8), 2 enables the entry
+};
+
+typedef char check_ObjectPoolEntry[sizeof(ObjectPoolEntry) == 0x14 ? 1 : -1];
+
 struct ObjectPool : BaseObject {
-    s32 count;              // 0x34: number of 0x14-byte items (func_001A84C8)
-    void* items;            // 0x38
+    s32 count;              // 0x34: the entries of items (func_001A84C8)
+    ObjectPoolEntry* items; // 0x38
     Sub8C* sub;             // 0x3C
     s32 f40;                // 0x40
     s32 f44;                // 0x44

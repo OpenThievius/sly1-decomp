@@ -30,7 +30,7 @@ void func_0018F610(Obj_18F610* self_)
         u32 c = t ^ (c3 >> 8);
         self->crc = c;
         if (n == 0 && c != 0) {
-            D_00269B48 = 1;
+            g_movieChecksumFailed = 1;
         }
     }
 }

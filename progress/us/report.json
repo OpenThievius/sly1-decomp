@@ -22843,7 +22843,7 @@
    }
   },
   {
-   "name": "game/file_18D8E0",
+   "name": "game/movie_player",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "8264",
@@ -23328,7 +23328,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_18D8E0.cpp"
+    "source_path": "src/main/movie_player.cpp"
    }
   },
   {
@@ -24145,7 +24145,7 @@
    }
   },
   {
-   "name": "game/file_193210",
+   "name": "game/pause_menu",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12708",
@@ -24405,7 +24405,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_193210.cpp"
+    "source_path": "src/main/pause_menu.cpp"
    }
   },
   {
@@ -25531,7 +25531,7 @@
    }
   },
   {
-   "name": "game/file_19D410",
+   "name": "game/group_marker",
    "measures": {
     "fuzzy_match_percent": 98.09184993531694,
     "total_code": "3092",
@@ -25701,7 +25701,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_19D410.cpp"
+    "source_path": "src/main/group_marker.cpp"
    }
   },
   {
@@ -27817,7 +27817,7 @@
    }
   },
   {
-   "name": "game/file_1AA268",
+   "name": "game/screen_element",
    "measures": {
     "fuzzy_match_percent": 94.60378160186956,
     "total_code": "18828",
@@ -28617,7 +28617,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1AA268.cpp"
+    "source_path": "src/main/screen_element.cpp"
    }
   },
   {

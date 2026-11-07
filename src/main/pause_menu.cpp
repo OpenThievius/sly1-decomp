@@ -370,37 +370,37 @@ s32 D_00269D08[4] = { 10, 11, 12, 17 };
 s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
 s32 D_00269D40[4] = { 24, 25, 26, 17 };
 Menu_194F80 D_00269D50[33] = {
-    { "Paused", 1.0f, 1.0f, 1, 8, D_0026A238 },
-    { "Game Over. Try again?", 1.0f, 1.0f, 0, 2, D_00269CF8 },
-    { "Really Quit?", 1.0f, 1.0f, 0, 2, D_00269CF8 },
+    { "Paused", 1.0f, 1.0f, 1, 8, g_pauseMenuItems },
+    { "Game Over. Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
+    { "Really Quit?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "There is no Memory Card (PS2) inserted in\nMemory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "The Memory Card (PS2) in Memory Card Slot 1 is unformatted\n\nIf you do not format it then you will not be able to save your progress\n\nDo you want to format?", 0.7f, 1.0f, 0, 2, D_00269CF8 },
+    { "The Memory Card (PS2) in Memory Card Slot 1 is unformatted\n\nIf you do not format it then you will not be able to save your progress\n\nDo you want to format?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nFormatting the Memory Card (PS2) in Memory Card Slot 1\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
     { "An error occurred while formatting the Memory Card (PS2) in Memory Card Slot 1\n\nYou will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "No Sly Cooper Save File on the Memory Card (PS2) inserted in Memory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nIf you do not create a Sly Cooper Save File then you will not be able to save your progress\n\nDo you want to create a Sly Cooper Save File?", 0.7f, 1.0f, 0, 2, D_00269CF8 },
+    { "No Sly Cooper Save File on the Memory Card (PS2) inserted in Memory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nIf you do not create a Sly Cooper Save File then you will not be able to save your progress\n\nDo you want to create a Sly Cooper Save File?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nCreating the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
     { "An error occurred while creating the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
     { "The Memory Card (PS2) inserted in Memory Card Slot 1 does not have enough free space to create a Sly Cooper Save File\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
     { "Save Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
     { "\nSaving...\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
     { "Game Saved", 1.0f, 1.0f, 1, 1, D_00269D00 },
-    { "Do you want to overwrite this game?", 0.7f, 1.0f, 0, 2, D_00269CF8 },
+    { "Do you want to overwrite this game?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "An error occurred while writing to the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
     { "New Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
     { "Load Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
-    { "Do you want to erase this game?", 0.7f, 1.0f, 0, 2, D_00269CF8 },
+    { "Do you want to erase this game?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nErasing...\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
     { "When the following icon appears,\nyour progress is being saved\n\n^15&2a&.^.\n\nWhile this icon is on screen, please\ndo not turn off your system or remove\nthe Memory Card (PS2)\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
     { "The Memory Card (PS2) in Memory Card Slot 1 was removed\n\nAuto-save has been disabled\n\nUse the save game option to manually save your game and re-enable auto-save\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
     { "The disc was removed\n\nPlease insert the Sly Cooper disc to continue playing", 0.8f, 1.0f, 1, 0, 0 },
-    { "Options", 1.0f, 1.0f, 1, 9, D_0026A258 },
+    { "Options", 1.0f, 1.0f, 1, 9, g_optionsMenuItems },
     { "&2T&. : Cancel\n&2+&. : Move\n&2X&. : Accept", 0.8f, 1.0f, 1, 0, 0 },
-    { "Try again?", 1.0f, 1.0f, 0, 2, D_00269CF8 },
-    { "Try again?", 1.0f, 1.0f, 0, 2, D_00269CF8 },
+    { "Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
+    { "Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "CONGRATULATIONS!\n\nYou have beaten the\nMaster Thief Sprint!\n\nReturn to this level at any time\nto hear the Bonus Commentary!", 0.8f, 1.0f, 0, 1, D_00269D00 },
-    { "TIME EXPIRED\n\nWould you like to retry\nthe Master Thief Sprint?\n\n", 0.8f, 1.0f, 0, 2, D_00269CF8 },
-    { "CONGRATULATIONS!\n\nYou beat your best\nMaster Thief Sprint time!\n\nTry Again?", 0.8f, 1.0f, 0, 2, D_00269CF8 },
-    { "You didn't beat your best\nMaster Thief Sprint time\n\nTry again?", 0.8f, 1.0f, 0, 2, D_00269CF8 },
+    { "TIME EXPIRED\n\nWould you like to retry\nthe Master Thief Sprint?\n\n", 0.8f, 1.0f, 0, 2, g_yesNoItems },
+    { "CONGRATULATIONS!\n\nYou beat your best\nMaster Thief Sprint time!\n\nTry Again?", 0.8f, 1.0f, 0, 2, g_yesNoItems },
+    { "You didn't beat your best\nMaster Thief Sprint time\n\nTry again?", 0.8f, 1.0f, 0, 2, g_yesNoItems },
     { "Controls", 1.0f, 0.8f, 1, 4, D_00269D40 },
     { "\nPlease insert a Memory Card (PS2) in Memory Card Slot 1 that contains a Sly Cooper Save File\n", 1.0f, 1.0f, 1, 1, D_00269D00 },
 };
@@ -1300,7 +1300,7 @@ void func_00195958(T217D_6D0* self)
         }
         case 19:
         case 20:
-            func_00194278(self, 1, 1);
+            ExitLevelFromPauseMenu(self, 1, 1);
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -1381,14 +1381,14 @@ void func_00195958(T217D_6D0* self)
             func_00160578(8);
             return;
         }
-        func_00194278(self, 0, 2);
+        ExitLevelFromPauseMenu(self, 0, 2);
         return;
     case 1:
     case 26:
     case 28:
     case 29:
     case 30:
-        func_00194278(self, (u32)sel < 1, 1);
+        ExitLevelFromPauseMenu(self, (u32)sel < 1, 1);
         return;
     case 25: {
         s32 a = self->f280;

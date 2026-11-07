@@ -5,8 +5,8 @@
 // still assembly) and its _GLOBAL_$I$ (func_001AEC90). Its .rodata (0x24CBD0 to 0x24CFBB) is the
 // strings, FLT_MAX literals and jump tables of its functions; its .data (0x2743A0 to 0x2744B8)
 // is the globals below, each defined before the first function that reads it, so that the
-// strings of the name tables land between their neighbours' as in retail. Named after its first
-// address until what it was is known.
+// strings of the name tables land between their neighbours' as in retail. Named after the
+// screen elements (screen_element.h) whose methods it holds.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"

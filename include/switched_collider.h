@@ -271,7 +271,9 @@ struct Player : TurningCollider {
     void* f23B0;            // 0x23B0
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
-    u8 pad23C0[0x23D4 - 0x23C0];
+    u8 pad23C0[0x23CC - 0x23C0];
+    void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
+    u8 pad23D0[0x23D4 - 0x23D0];
     void* f23D4;            // 0x23D4
     u8 pad23D8[0x23E0 - 0x23D8];
     f32 f23E0;              // 0x23E0
@@ -709,7 +711,8 @@ struct C18 : SwitchedCollider {
     void* f664;             // 0x664
     u8 pad668[0x67C - 0x668];
     s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720
-    u8 pad680[0x688 - 0x680];
+    s32 f680;               // 0x680: the count g_gaugeAmountCaption shows (func_00197F10)
+    s32 f684;               // 0x684: its limit, one per class 0x48 object (func_00198920)
     f32 f688;               // 0x688
     u8 pad68C[0x690 - 0x68C];
     s32 f690;               // 0x690

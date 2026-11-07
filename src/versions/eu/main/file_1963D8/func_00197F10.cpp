@@ -24,7 +24,7 @@ void func_00197F10(C18* self, s32 kind, void* rec)
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
             SetWorldActiveFollower(self->world, self);
             StartTimer(&g_timerElement, self->f688);
-            SetTimerLimit(&g_timerElement, 0.0f, (void*)func_00197458);
+            SetTimerLimit(&g_timerElement, 0.0f, (void*)EndGaugeColliderTimer);
             StartTimerCounting(&g_timerElement);
         } else {
             if (code < 0x3F3) {

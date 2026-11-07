@@ -5,7 +5,7 @@
 // Key_160948::Same inline. Written for this project from what retail's code does
 // (build/swarm/st3/groups.tsv, g2307 and g4680).
 //
-// func_0018E410, func_0018F0E8 and func_0018F198 (file_18D8E0.cpp) take one as a parameter;
+// func_0018E410, func_0018F0E8 and func_0018F198 (movie_player.cpp) take one as a parameter;
 // D_00248490 is one (0018C000.cpp defines it), D_00275B04 another (its label is 0x1C bytes: its
 // readers stop at the seventh word), and every entry of D_00247AF0 begins with one (s1600a0.h).
 // The same-key test stays with its views: their forms differ (Key_160948 also tests this).

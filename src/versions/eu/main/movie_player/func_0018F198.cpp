@@ -13,7 +13,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             AdvanceGameClockElapsed(((u8*)g_gameClock));
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
-            if (Same_18F198::Of(key, &D_00248490)) flag = D_00269B4C != 0;
+            if (Same_18F198::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
             u32 m;
             if (self->mode >= 16) m = 0;
             else m = 1u << self->mode;
@@ -32,7 +32,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             if (g_discSectorCheckState != 3) break;
             StepMovieFrame((Obj_18F6E8*)self);
         }
-        if (Same_18F198::Of(key, &D_00248490)) D_00269B4C = 1;
+        if (Same_18F198::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
         FinishMovie((Obj_18F7D0*)self);
         CloseStreamReader(&loc);
     } else {
