@@ -15,6 +15,8 @@ struct Player;
 struct BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
+struct PathCurveObject;   // path_curve_object.h
+struct StateTrigger;      // state_trigger.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
 struct EntryQueue;       // class 0x8F (entry_queue.h)
@@ -79,12 +81,29 @@ struct Ev07 {
 
 // One of class 0x19's four slots at 0x6B0: an object and a position.
 struct Slot19 {
-    void* obj;              // 0x00
+    PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
     u8 pad04[0x10 - 0x04];
     Vec02 v10;              // 0x10
     u8 pad20[0x50 - 0x20];
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
     u8 pad54[0x60 - 0x54];
+};
+
+// A marker on class 0x19's path (sixteen at 0x874): an object (kind 0, func_001DB110) or a
+// point (kind 1, func_001DB1E8). The object markers form a ring through next, numbered in
+// order from the first (0xAF4); their place on the path is the arc length the path's curve
+// gives (PathCurveVt::m10).
+struct PathMarker {
+    s32 kind;               // 0x00: 0 an object, 1 a point
+    void* item;             // 0x04: the object (the point's id for kind 1)
+    u8 pad08[0x0C - 0x08];
+    s32 index;              // 0x0C: one more than the marker before it in the ring
+    f32 pathLength;         // 0x10: the arc length of its place on the path
+    PathMarker* next;       // 0x14
+    f32 x;                  // 0x18: a point's two values
+    f32 y;                  // 0x1C
+    s32 b;                  // 0x20
+    s32 c;                  // 0x24
 };
 
 // An entry of class 0x08's second queue at 0xAC8 (func_001CA720 adds one, func_001CA7C0
@@ -755,13 +774,30 @@ struct PathFollower : SwitchedCollider {
     f32 f614;               // 0x614
     f32 f618;               // 0x618
     f32 f61C;               // 0x61C
-    Vec02 v620;             // 0x620
-    u8 f630[0x40];          // 0x630: 0x40 bytes slot 0 copies from D_00275250
-    f32 f670;               // 0x670
-    f32 f674;               // 0x674
-    f32 f678;               // 0x678
-    u8 pad67C[0x680 - 0x67C];
-    f32 f680;               // 0x680
+    Vec02 v620;             // 0x620: x, y, z the blend's curve over the entry's clock (func_001DB290)
+    union {
+        u8 f630[0x40];      // 0x630: 0x40 bytes slot 0 copies from D_00275250
+        struct {
+            u8 v630[0x10];  // 0x630: the blend's first end (func_001DB290)
+            f32 f640;       // 0x640: its range
+            f32 f644;       // 0x644
+            u8 pad648[0x650 - 0x648];
+            u8 v650[0x10];  // 0x650: the second end
+            f32 f660;       // 0x660: its range
+            f32 f664;       // 0x664
+            u8 pad668[0x670 - 0x668];
+        };
+    };
+    union {
+        struct {
+            f32 f670;       // 0x670
+            f32 f674;       // 0x674
+            f32 f678;       // 0x678
+            u8 pad67C[0x680 - 0x67C];
+        };
+        u8 v670[0x10];      // 0x670: the blend of the two ends
+    };
+    f32 f680;               // 0x680: the blend of the two ranges
     f32 f684;               // 0x684
     u8 pad688[0x694 - 0x688];
     f32 f694;               // 0x694
@@ -770,8 +806,8 @@ struct PathFollower : SwitchedCollider {
     s32 f6A0;               // 0x6A0
     u8 pad6A4[0x6B0 - 0x6A4];
     Slot19 f6B0[4];         // 0x6B0
-    void* f830;             // 0x830
-    f32 f834;               // 0x834
+    PathCurveObject* f830;  // 0x830: the path it follows (func_001DAFB8)
+    f32 f834;               // 0x834: the path's length
     u8 pad838[0x83C - 0x838];
     f32 f83C;               // 0x83C
     f32 f840;               // 0x840
@@ -784,24 +820,24 @@ struct PathFollower : SwitchedCollider {
     f32 f860;               // 0x860
     f32 f864;               // 0x864
     f32 f868;               // 0x868
-    u8 pad86C[0x870 - 0x86C];
+    f32 f86C;               // 0x86C: -10.0 at reset (func_001DB290)
     s32 f870;               // 0x870
-    u8 f874[0x280];         // 0x874
-    void* fAF4;             // 0xAF4
-    void* fAF8;             // 0xAF8
+    PathMarker f874[16];    // 0x874: f870 of them
+    PathMarker* fAF4;       // 0xAF4: the first object marker
+    PathMarker* fAF8;       // 0xAF8: the current one
     u8 padAFC[0xB00 - 0xAFC];
     s32 fB00;               // 0xB00
     s32 fB04;               // 0xB04
     s32 fB08;               // 0xB08
     s32 fB0C;               // 0xB0C
-    u8 padB10[0xB14 - 0xB10];
-    void* fB14;             // 0xB14
+    f32 fB10;               // 0xB10: -10.0 at reset (func_001DB290)
+    BaseObject* fB14;       // 0xB14
     u8 padB18[0xB30 - 0xB18];
     s32 fB30;               // 0xB30
     s32 fB34;               // 0xB34
     f32 fB38;               // 0xB38
     u8 padB3C[0xB44 - 0xB3C];
-    void* fB44;             // 0xB44
+    StateTrigger* fB44;     // 0xB44: the graph its walker (fB48) is made on
     void* fB48;             // 0xB48
     u8 padB4C[0xB78 - 0xB4C];
     void* fB78;             // 0xB78
@@ -920,6 +956,7 @@ struct HitCountCollider : SwitchedCollider {
 
 typedef char check_Part07[sizeof(Part07) == 0x100 ? 1 : -1];
 typedef char check_Ent17[sizeof(Ent17) == 0x2C ? 1 : -1];
+typedef char check_PathMarker[sizeof(PathMarker) == 0x28 ? 1 : -1];
 typedef char check_Slot19[sizeof(Slot19) == 0x60 ? 1 : -1];
 typedef char check_SwitchedCollider[sizeof(SwitchedCollider) == 0x610 ? 1 : -1];
 typedef char check_TurningCollider[sizeof(TurningCollider) == 0x720 ? 1 : -1];

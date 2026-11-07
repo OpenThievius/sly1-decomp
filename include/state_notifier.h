@@ -40,7 +40,8 @@ struct StateNotifier : PlacedObject {
         f32 f320;           // 0x320
         s32 i320;
     };
-    u8 pad324[0x338 - 0x324];
+    u8 pad324[0x334 - 0x324];
+    s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
     s32 f33C;               // 0x33C (unused here)
     s32 armed;               // 0x340
@@ -54,7 +55,10 @@ struct StateNotifier : PlacedObject {
     f32 f354;               // 0x354
     f32 f358;               // 0x358
     u8 pad35C[0x374 - 0x35C];
-    u8 tail374[8];          // 0x374: copied unaligned by func_00146418
+    union {
+        u8 tail374[8];      // 0x374: copied unaligned by func_00146418
+        StateNotifier* next374; // 0x374: the link in the world's list1C54 (func_001DCD28)
+    };
     s32 f37C;               // 0x37C
     StateListener* listener;         // 0x380
     u8 pad384[0x388 - 0x384];
