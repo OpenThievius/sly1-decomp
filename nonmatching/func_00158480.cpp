@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 315/372 (84.7%), checked 2026-11-06
+// BYTES 315/372 (84.7%), checked 2026-11-07
 // NEAR: code: the stores filling the first matrix are ordered differently, the 128-bit third
 //       argument of func_00188628 takes two extra moves (retail: mfc1; por a2,zero,v0, sq in the
 //       call's delay slot), and the second matrix's pointer is rebuilt differently.

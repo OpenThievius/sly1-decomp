@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 225/228 (98.7%), checked 2026-11-06
+// BYTES 225/228 (98.7%), checked 2026-11-07
 /* NEAR: 2 lines differ. Retail sends the list walk's end (t == 0) straight to "return 0" but keeps the null check after the break; with the walk inline here the end goes through that check (beqz target, and its delay slot nop vs move v0,zero). With the walk written in the function body the check is deleted instead (35 lines). */
 #include "common.h"
 

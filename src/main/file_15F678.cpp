@@ -2865,7 +2865,120 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
     }
 }
 
-INCLUDE_ASM(func_001662A8);
+struct Buf_1662A8 { u8 pad[0x30]; };
+struct Q_1662A8 { u64 a; u64 b; };
+struct Cmd_1662A8 {
+    u8 pad0[0x18]; u8* f18; u8 pad1C[0x24 - 0x1C]; s32 f24; u8 pad28[0x38 - 0x28];
+    s32 f38; u8 pad3C[4]; s32 f40; s32 f44; u8 pad48[4]; s32 f4C;
+};
+struct Row_1662A8 { s32 f0, f4, f8, fC, f10; u8 pad14[0x30 - 0x14]; };
+struct Spr_1662A8 { u8 pad0[4]; s32 f4; u8 pad8[0x18 - 8]; s32 f18, f1C; };
+struct Cfg_1662A8 {
+    u8 pad0[0x28]; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 f54; s32 f58; Cmd_1662A8* f5C; s32 f60; Spr_1662A8* f64;
+};
+struct Out_1662A8 { u8 pad0[4]; Row_1662A8* f4; u8 pad8[0x18 - 8]; s32 f18[2]; s32 f20[2]; };
+struct Self_1662A8 { u8 pad[0x40]; s32 f40; };
+
+Buf_1662A8* InitPacketWriter(Buf_1662A8* b);
+void AllocateTempPacketBuffer(Buf_1662A8* b, s32 n);
+void BeginDmaTag(Buf_1662A8* b);
+void WriteVifBaseOffset(Buf_1662A8* b, s32 n, s32 f);
+void CloseDmaTag(Buf_1662A8* b);
+void AddDmaRefTag(Buf_1662A8* b, s32 x, s32 y);
+void AddDmaCallTag(Buf_1662A8* b, s32 x);
+void CopyWordsToWriter(Buf_1662A8* b, s32 a, s32 c, Q_1662A8* q, s32 d);
+void AddDmaReturnTag(Buf_1662A8* b);
+void DetachPacketBufferCopy(Buf_1662A8* b, s32* a1, s32 a2, s32* a3, s32 a4);
+
+void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx)
+{
+    Self_1662A8* self = (Self_1662A8*)selfArg;
+    Cfg_1662A8* cfg = (Cfg_1662A8*)cfgArg;
+    Out_1662A8* out = (Out_1662A8*)outArg;
+    Buf_1662A8 buf;
+    Q_1662A8 q;
+    s32 pass;
+    s32 i, k;
+    s32 n;
+    s32 sz;
+
+    InitPacketWriter(&buf);
+    if (cfg->f28) return;
+    if (!out) return;
+    if (self->f40) return;
+    for (i = 0; i < cfg->f58; i++) {
+        if (cfg->f5C[i].f24) return;
+    }
+    for (k = 0; k < cfg->f60; k++) {
+        if (cfg->f64[k].f4) return;
+    }
+    for (pass = 0; pass < 2; pass++) {
+        s32 total = 0x23C;
+        sz = 0x214;
+        PushBackMemoryMark();
+        AllocateTempPacketBuffer(&buf, 0x1000);
+        n = 0;
+        if (pass == 0) sz = 0x28;
+        s32 co, ro;
+        i = 0;
+        if (i < cfg->f58) {
+        ro = 0; co = 0;
+        do {
+            Cmd_1662A8* c;
+            Row_1662A8* r;
+            s32 prev;
+            c = (Cmd_1662A8*)((u8*)cfg->f5C + co);
+            r = (Row_1662A8*)((u8*)out->f4 + ro);
+            sz = total - sz;
+            if (n++ > 0) {
+                BeginDmaTag(&buf);
+                WriteVifBaseOffset(&buf, sz, 0);
+                CloseDmaTag(&buf);
+            }
+            switch (*c->f18) {
+            case 0:
+                AddDmaRefTag(&buf, c->f38, c->f44);
+                if (cfg->f54) {
+                    AddDmaCallTag(&buf, c->f4C);
+                } else {
+                    AddDmaRefTag(&buf, c->f40, c->f4C);
+                }
+                AddDmaRefTag(&buf, r->f0, r->f4);
+                AddDmaRefTag(&buf, r->fC, r->f10);
+                break;
+            case 1:
+            case 4: case 5: case 6: case 7: case 8: case 9: case 10:
+                if (cfg->f54) {
+                    AddDmaCallTag(&buf, c->f44);
+                } else {
+                    AddDmaRefTag(&buf, c->f38, c->f44);
+                }
+                break;
+            }
+            i++; ro += sizeof(Row_1662A8); co += sizeof(Cmd_1662A8);
+        } while (i < cfg->f58);
+        }
+        for (k = 0; k < cfg->f60; k++) {
+            Spr_1662A8* s = &cfg->f64[k];
+            sz = total - sz;
+            BeginDmaTag(&buf);
+            if (n++ > 0) WriteVifBaseOffset(&buf, sz, 0);
+            q.b = 1;
+            q.a = (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16) | ((u64)D_002623E0.a << 24) | ((u64)1 << 32);
+            CopyWordsToWriter(&buf, 0xC, 1, &q, 0x1A);
+            CloseDmaTag(&buf);
+            AddDmaRefTag(&buf, s->f18, s->f1C);
+        }
+        AddDmaReturnTag(&buf);
+        DetachPacketBufferCopy(&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
+        PopBackMemoryMark();
+        if (n < 2) {
+            out->f18[1] = out->f18[0];
+            out->f20[1] = out->f20[0];
+            return;
+        }
+    }
+}
 
 void FlipVifBaseOffset(void)
 {

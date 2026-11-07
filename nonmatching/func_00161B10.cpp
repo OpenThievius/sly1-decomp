@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 105/108 (97.2%), checked 2026-11-06
+// BYTES 105/108 (97.2%), checked 2026-11-07
 // NEAR: registers only: every instruction lines up; v0 and v1 are swapped in the lw/lbu pair.
 //       Storing fB4, f94, fB0 in that order fixed the store order.
 #include "common.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 497/520 (95.6%), checked 2026-11-06
+// BYTES 497/520 (95.6%), checked 2026-11-07
 #include "common.h"
 // NEAR: 15 lines, FP register numbers only (instruction order and the sqrt.s tail now match retail
 // with Fpu::Sqrt). Retail: d $f4, rt $f2, best $f6, zero copy $f7, nx*nx $f9, ny*ny $f8; ours: d and rt $f1,

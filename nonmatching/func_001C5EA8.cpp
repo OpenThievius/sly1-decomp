@@ -16,7 +16,7 @@ void SetColliderMass(Collider* self, f32 v);
 
 void SetTurningColliderGravityScale(TurningCollider* self, f32 scale)
 {
-    f32 s = Fpu::Max(0.1f, scale);
+    f32 s = (0.1f >? scale);
     SetColliderMass(self, self->mass * self->f700 / s);
     Vec02 k;
     f32 r = s / self->f700;

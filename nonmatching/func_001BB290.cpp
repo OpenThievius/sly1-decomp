@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 223/228 (97.8%), checked 2026-11-06
+// BYTES 223/228 (97.8%), checked 2026-11-07
 #include "common.h"
 // NEAR: both loops, the key and the 0x88/0x18 float tests match; float registers are swapped (retail keeps best in $f2 and -0.7 in $f1, ours the other way round). Global-alloc order from the RTL dumps: bestF (pri 2*7/42) beats the hoisted -0.7 (2*5/62, live length doubled by its REG_EQUIV); retail needs -0.7 first and 0.7 after bestF. Tried j39o03: constants as locals before/after bestF, for-loop with continue, merged ?: test, swapped if arms, bestF > f0, bestF declared first, if+do-while outer, goto outer loop. j40o06: for-loop with key||match nesting and ?:/&&-|| threshold tests, constants as locals inside the outer loop, bestF assigned last, bestF declared first, separate local for the 0x18 value, 0x88 re-read in each arm: all keep bestF (2*7/37) above -0.7 (2*5/52). greg shows no FP preferences, so only the priority order decides; retail needs -0.7 > bestF > 0.7, a window that the two constants (equal refs, lengths 2 apart) leave almost no room for. Looks out of reach of plain C rewording.
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 205/264 (77.7%), checked 2026-11-06
+// BYTES 205/264 (77.7%), checked 2026-11-07
 // NEAR: order: the frame is exact with DeferredRequest* list[0x412]; retail hoists lui
 //       hi(D_0026AC10) and a copy into s4 above the first call, this form hoists D_002622A8's high
 //       half instead.

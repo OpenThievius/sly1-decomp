@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 466/480 (97.1%), checked 2026-11-06
+// BYTES 466/480 (97.1%), checked 2026-11-07
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 /* NEAR (whole file, src/lib/cdvd.c's declarations): 4 lines. The switch matches with case 0
  * written out, and D_00279434 (the read mode) is volatile. Left: the failure path, where retail

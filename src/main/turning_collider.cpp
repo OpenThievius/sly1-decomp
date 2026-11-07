@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "object_link.h"
 #include "attachment.h"
+#include "pad_record.h"
 
 
 // The file's .rodata: the constants only its assembly reads.
@@ -122,7 +123,20 @@ void DrawTurningCollider(void)
     DrawCollider();
 }
 
-INCLUDE_ASM(func_001C49E8);
+void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
+
+void func_001C49E8(TurningCollider* self, PadRecord* pad)
+{
+    D_00274B5C = (D_00274B5C - 0.25f >? 0.0f);
+    if (D_00274B5C < pad->f48) {
+        ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f630);
+    } else {
+        self->f630 = self->f638;
+    }
+    f32 level = pad->f48;
+    self->f634 = level;
+    D_00274B5C = level;
+}
 
 extern f32 g_gameTime[];
 extern s32 D_00605548;
@@ -281,7 +295,6 @@ void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
     }
 }
 
-extern f32 g_unitRange[];
 
 void RecomputeColliderFrame(TurningCollider* self);
 f32 ArctangentOfRatio(f32 a, f32 b);
@@ -292,11 +305,11 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     RecomputeColliderFrame(self);
     f32 t = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 ay = __builtin_fabsf(WrapAngle(self->f638 - t));
-    f32* lim = g_unitRange;
+    ValueRange* lim = &g_unitRange;
     Vec02* p = &self->v6F0;
     f32 v = self->v6F0.x + ay * (p->y + ay * p->z);
-    f32 lo = lim[0];
-    f32 hi = lim[1];
+    f32 lo = lim->lo;
+    f32 hi = lim->hi;
     if (v < lo) {
         v = lo;
     } else if (hi < v) {

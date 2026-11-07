@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 196/380 (51.6%), checked 2026-11-06
+// BYTES 196/380 (51.6%), checked 2026-11-07
 // NEAR: order: the logic is retail's; the float registers are allocated differently (about 70
 //       lines).
 #include "common.h"

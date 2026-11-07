@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 30/40 (75.0%), checked 2026-11-06
+// BYTES 30/40 (75.0%), checked 2026-11-07
 /* NEAR: it matched as C++ in src/lib/001FC000.cpp, but the unwinder's file (src/lib/unwind.c) is C,
  * proved whole. In C the store to the list head (a static scalar) is scheduled before the stores
  * into the new record, in every order of the source tried (tools/permute.py) and with the head
