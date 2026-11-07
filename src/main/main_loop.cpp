@@ -10,21 +10,22 @@
 #include "game_clock.h"
 #include "pad_record.h"
 #include "memory_card.h"
+#include "placed_object.h"
+#include "value_range.h"
+#include "screen_fade.h"
 
 
-struct Obj_184D78 {
-    u8 pad0[0x2C8];
-    u64 bits;
-    s32 f2D0;
-    u8 pad1[0x304 - 0x2D4];
-    s32 f304;
-    s32 f308;
+// The objects func_00184D78 orders: by the words at 0x304 and 0x308, then flag bit 38, then
+// the word at 0x2D0 (a placed object's subclass).
+struct SortKeyedObject : PlacedObject {
+    s32 f2D0;               // 0x2D0
+    u8 pad2D4[0x304 - 0x2D4];
+    s32 f304;               // 0x304
+    s32 f308;               // 0x308
 };
 
 
 
-struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
-struct Vec2_2647A0 { f32 a, b; };
 
 void func_00121338(Attachment* self);
 
@@ -45,17 +46,17 @@ void func_001F6C20(s32 a);
 void func_00202A80(void* a, void* b);
 s32 func_00202C38(void* a, s32 b, s32 c);
 
-struct Flags_185AC8 {
+// The first word of a DMA channel's register block (CHCR), which g_vif1Channel points to.
+struct DmaChannelFlags {
     s32 flags;
 };
 
 
 
-struct Cfg_275F80 { s32 a; s32 mode; };
-struct Flag_269A00 { s32 a; s32 on; };
+// The movie player (movie_player.cpp's MoviePlayer): its word at 4 is nonzero while movies wait.
+struct MovieOnFlag { s32 a; s32 on; };
 
-extern Flag_269A00 D_00269A00;
-extern Cfg_275F80 D_00275F80;
+extern MovieOnFlag D_00269A00;
 extern s32 D_00275AF0;
 extern u8 D_00275BC0[];
 extern s32 D_002622CC;
@@ -81,8 +82,10 @@ void func_0015EC68(void);
 
 
 
-struct Frame_185B38 { s32 w[28]; };
-typedef void (*Fn_185B38)(void);
+// func_00185B38's locals: the load progress record (load_progress.h) and the four colours
+// InitLoadProgress takes, in one frame.
+struct ProgressFrame { s32 w[28]; };
+typedef void (*StartupFn)(void);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -116,7 +119,7 @@ s32 func_00203828(s32 a);
 s32 func_00140D68(s32 a);
 s32 func_001F9A90(void* buf, s32 a, s32 b);
 
-s32 func_00184D78(Obj_184D78** a, Obj_184D78** b);
+s32 func_00184D78(SortKeyedObject** a, SortKeyedObject** b);
 void func_00185358(T2195_790* self);
 void func_001853F0(T2195_790* self, void* obj, Vec02* src);
 s32 func_00185468(T2195_790* a0);
@@ -163,10 +166,10 @@ s32 D_00264264 = 0;
 void* D_00264268[256] = {0};
 s32 D_00264668 = 0;
 LightGroup D_00264670[16] = {};
-Vec4_264770 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
-Vec4_264770 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
-Vec4_264770 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
-Vec2_2647A0 D_002647A0 = { -1.0f, 1.0f };
+Vec02 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec02 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
+Vec02 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
+ValueRange D_002647A0 = { -1.0f, 1.0f };
 const u8* D_002647A8[6] = {
     (const u8*)"sio2man.irx", (const u8*)"padman.irx", (const u8*)"mcman.irx",
     (const u8*)"mcserv.irx", (const u8*)"libsd.irx", (const u8*)"989snd.irx",
@@ -175,10 +178,10 @@ Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (F
 s32 D_00264834;
 s32 D_00264838;
 
-s32 func_00184D78(Obj_184D78** a, Obj_184D78** b)
+s32 func_00184D78(SortKeyedObject** a, SortKeyedObject** b)
 {
-    Obj_184D78* x = *a;
-    Obj_184D78* y = *b;
+    SortKeyedObject* x = *a;
+    SortKeyedObject* y = *b;
     s32 d;
 
     d = x->f304 - y->f304;
@@ -189,7 +192,7 @@ s32 func_00184D78(Obj_184D78** a, Obj_184D78** b)
     if (d != 0) {
         return d;
     }
-    d = ((s32)(x->bits >> 38) & 1) - ((s32)(y->bits >> 38) & 1);
+    d = ((s32)(x->flags >> 38) & 1) - ((s32)(y->flags >> 38) & 1);
     if (d != 0) {
         return d;
     }
@@ -324,20 +327,20 @@ void func_00185A58(void)
 
 void func_00185AC8()
 {
-    Flags_185AC8* p = *(Flags_185AC8**)g_vif1Channel;
+    DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
     StartDmaChain(*(void**)g_vif1Channel, D_00212110);
     WaitDmaChannel(*(void**)g_vif1Channel, 0, 0);
-    (*(Flags_185AC8**)g_vif1Channel)->flags &= ~0x40;
+    (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }
 
 void func_00185B38(void)
 {
-    Frame_185B38 fr;
+    ProgressFrame fr;
     u32 i;
     s32 idx;
-    Fn_185B38* tbl;
+    StartupFn* tbl;
 
     fr.w[12] = 0x7F0000;
     fr.w[16] = 0x3F3F3F;
@@ -347,7 +350,7 @@ void func_00185B38(void)
     idx = 0x1A;
     SetScreenOwner(1);
     BeginLoadProgress(&fr);
-    tbl = (Fn_185B38*)((u8*)g_startupInitializers);
+    tbl = (StartupFn*)((u8*)g_startupInitializers);
     i = 0;
     do {
         if ((s32)i >= 3) {

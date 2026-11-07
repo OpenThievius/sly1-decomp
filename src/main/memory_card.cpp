@@ -914,7 +914,6 @@ s32 func_0018CBF8(void* self, void* b)
     return WriteMemoryCardKeyedFile(self, (s32)b, (void*)g_memoryCardIconKey, (s32)D_0024B3D8);
 }
 
-struct Self_18CC20 { u8 pad[16]; };
 struct Key_18CC20 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
 struct Pair_18CC20 : KeyId {
     s32 Set(Key_18CC20* key)

@@ -187,7 +187,6 @@ struct Out_190E30 {
     u8 pad1[0x98];
 };
 s32 func_001909F0(void* a, s32 b, s32 c, s32 d, Out_190E30* e);
-struct Ent_192B58;
 typedef void (*VFn_192B58)(void* self);
 extern u8* D_002623C0;
 void func_001B93F8(SwitchedCollider* self);

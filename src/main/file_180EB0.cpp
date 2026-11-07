@@ -14,6 +14,7 @@
 #include "script_value.h"
 #include "fpu.h"
 #include "collider.h"
+#include "state_walker.h"
 #include "asm_func.h"
 
 void func_001830D8(void* self);
@@ -35,19 +36,6 @@ f32 func_001EA408(f32 a);
 void func_001C5D58(void* obj);
 
 void func_00175170(void* obj, s32 a, s32 b);
-
-struct Vec_181B20 {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-};
-
-struct Obj_181B20 {
-    void** vtbl;
-    u8 pad0[0x638 - 4];
-    f32 x638;
-};
 
 void func_001BC4D8(void* self, void* sub);
 
@@ -81,29 +69,13 @@ void func_001D73A8(void* self);
 
 void func_001DAE48(void);
 
-struct __attribute__((aligned(16))) Quad_181A58 { s32 q[4]; };
-
-struct Inner_181A58 { u8 pad000[0x140]; Quad_181A58 q140; };
-
-struct Sub_181D28 { u8 pad0[0x24]; s32 f24; };
-
 void func_001DAF08(void* self, s32 code, MessageBody* rec);
 
 void func_0013DDB8(void* self);
 
 void func_00152470(List01* list, BaseObject* item);
 
-typedef s32 (*VFnQ_181BC8)(void* self, s32 a);
-
-typedef void (*VFnP_181BC8)(void* self, void* a);
-
-typedef s32 (*VFnR_181BC8)(void* self, void* a);
-
-typedef void (*VFnV_181BC8)(void* self);
-
-typedef void (*VFnPPP_181BC8)(void* self, s32 a, void* b);
-
-typedef void (*Fn_181BC8)(void);
+typedef void (*LaunchFn)(void);
 
 s32 func_00160C58();
 
@@ -119,22 +91,9 @@ void func_00181B20(void);
 
 extern f32 D_0026185C;
 
-struct Vt_181BC8 { void** vt; };
-
-struct Loc_181BC8 { void* self; s32 val; s32 pad8; Fn_181BC8 fn; };
-
-typedef s32 (*Fn_181448)(ModeWalker*, void*, void*);
-
-struct Vt_181448 { u8 pad0[0x12C]; Fn_181448 f12C; };
-
-struct Slot_181448 { Collider* p; u8 pad[0x3C]; };
-
-struct Node_181448 {
-    ModeWalker* owner;
-    Slot_181448 s[2];
-    u8 pad[0xD0 - 0x84];
-    Node_181448* next;
-};
+// What func_00181BC8 builds on its stack: an owner message (InitOwnerMessage) whose function
+// the player calls (slot 76), then the two words it tells its listeners (kind 0x17).
+struct LaunchMessage { void* self; s32 val; s32 pad8; LaunchFn fn; };
 
 extern f32 D_00261858[];
 
@@ -152,12 +111,6 @@ void func_00129FB0(void* o, f32 v);
 
 s32 func_001DDA80(void* p);
 
-typedef void (*VFn_180F98)(void* self);
-
-struct Vt_180F98 {
-    VFn_180F98* vtbl;
-};
-
 
 void func_001D7440(void* self);
 
@@ -173,7 +126,7 @@ void func_001B64D8(void* p, s32 n);
 
 void func_001B6628(void* p, s32 n);
 
-struct Clamp_181818
+struct ClampHelper
 {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
@@ -261,7 +214,7 @@ void func_00180F98(ModeWalker* self)
     AddMatrixAttachment(self->fBCC, 5, &self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
-    ((Vt_180F98*)self->fBCC)->vtbl[0xBC / 4](self->fBCC);
+    ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
     func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
     SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
@@ -277,15 +230,15 @@ void func_00181448(ModeWalker* self, f32 dt)
     s32 buf[4];
     UpdatePathFollower(self, dt);
     if (self->fC04 != 0) {
-        Node_181448* n = (Node_181448*)self->fC04;
+        Contact03* n = (Contact03*)self->fC04;
         do {
-            s32 j = (n->owner != self);
-            Collider* c = n->s[1 - j].p;
+            s32 j = (n->end[0].body != self);
+            Collider* c = n->end[1 - j].part;
             while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
             if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
                 InitOwnerMessage(buf, 0, c);
                 while (c != 0) {
-                    if (((Vt_181448*)c->desc)->f12C((ModeWalker*)c, n, buf) != 0) break;
+                    if (((s32 (*)(Collider*, Contact03*, void*))c->desc03()->m47)(c, n, buf) != 0) break;
                     c = (Collider*)c->parent;
                 }
                 ((Desc05*)self->desc)->m4C(self, buf);
@@ -327,9 +280,9 @@ void func_00181818(ModeWalker* o, void* a, void* b)
         }
         f32 s = Cosine((g_gameClock[1] - o->fBF4) * 10.0f);
         f32 p = D_00264160.x + t * (D_00264160.y + t * D_00264160.z);
-        f32 x = Clamp_181818::Of(p, g_unitRange[0], g_unitRange[1]);
+        f32 x = ClampHelper::Of(p, g_unitRange[0], g_unitRange[1]);
         f32 q = D_00264170.x + s * (D_00264170.y + s * D_00264170.z);
-        f32 y = Clamp_181818::Of(q, g_unitRange[0], g_unitRange[1]);
+        f32 y = ClampHelper::Of(q, g_unitRange[0], g_unitRange[1]);
         f32 w = x * y;
         f32 u = 1.0f - w;
         c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
@@ -345,9 +298,9 @@ void func_00181818(ModeWalker* o, void* a, void* b)
 
 void func_00181A58(ModeWalker* self, void* outv)
 {
-    Quad_181A58* out = (Quad_181A58*)((u8*)outv + 0x10);
+    Vec02* out = (Vec02*)((u8*)outv + 0x10);
     CapturePathFollowerPose();
-    *out = ((Inner_181A58*)self->fBC0)->q140;
+    *out = ((PlacedObject*)self->fBC0)->v140;
 }
 
 s32 func_00181A98(ModeWalker* self)
@@ -366,29 +319,27 @@ void func_00181AF0(ModeWalker* self)
 
 void func_00181B20(void* unused, void* obj_)
 {
-    Obj_181B20* obj = (Obj_181B20*)obj_;
-    Vec_181B20 first;
-    Vec_181B20 second;
+    Player* obj = (Player*)obj_;
+    Vec02 first;
+    Vec02 second;
 
     func_00128018(unused, 0, &D_00264180, &first);
     func_001BC260(D_00264190, obj, &first, &second);
-    ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
+    obj->desc02()->m20(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
-    obj->x638 = WrapAngle(r + 3.1415927f);
+    obj->f638 = WrapAngle(r + 3.1415927f);
     TurnColliderTowardHeading(obj);
     SetPlayerState(obj, 4, 0x2B);
 }
 
 s32 func_00181BC8(ModeWalker* self, s32* arg)
 {
-    Loc_181BC8 loc;
+    LaunchMessage loc;
     s32 r;
     Player* g;
-    Vt_181BC8* gp;
-    VFnP_181BC8 f;
-    void** vt2;
+    Player* gp;
 
-    if (((VFnQ_181BC8)((void**)self->desc)[79])(self, arg[0])) {
+    if (self->desc05()->m4B(self, arg[0])) {
         return 0;
     }
     if (HasSpareCount()) {
@@ -405,31 +356,31 @@ s32 func_00181BC8(ModeWalker* self, s32* arg)
     SetModeWalkerMode(self, 2);
     goto tail;
 then_block:
-    ((VFnV_181BC8)((Vt_181BC8*)g_player)->vt[6])((void*)g_player);
-    ((VFnP_181BC8)((Vt_181BC8*)g_player)->vt[35])((void*)g_player, self->fBC8);
-    ((VFnV_181BC8)((Vt_181BC8*)self->fBC8)->vt[7])(self->fBC8);
+    g_player->desc->m02(g_player);
+    g_player->desc02()->m1F(g_player, (PlacedObject*)self->fBC8);
+    ((BaseObject*)self->fBC8)->desc->m03((BaseObject*)self->fBC8);
     SetSwitchedColliderEnabled((void*)g_player, 1);
     SetPlayerState((void*)g_player, 2, 2);
     ActivateSwitchedCollider((void*)g_player);
     SetModeWalkerMode(self, 3);
     InitOwnerMessage(&loc, 0, self);
-    gp = (Vt_181BC8*)g_player;
-    gp = (Vt_181BC8*)g_player;
+    gp = g_player;
+    gp = g_player;
     loc.fn = LaunchPlayerFromModeWalker;
-    (void)((VFnR_181BC8)gp->vt[80])(gp, &loc);
+    (void)gp->desc05()->m4C(gp, &loc);
 tail:
     loc.self = self;
     loc.val = arg[1];
-    ((VFnPPP_181BC8)self->desc->m0E)(self, 0x17, &loc);
+    self->desc->m0E(self, 0x17, &loc);
     return 1;
 }
 
 void func_00181D28(ModeWalker* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
-        Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
+        StateWalker* sub = self->fBBC;
         s32 key = rec->sourceId;
-        if (sub != 0 && key == sub->f24) {
+        if (sub != 0 && key == sub->key) {
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {

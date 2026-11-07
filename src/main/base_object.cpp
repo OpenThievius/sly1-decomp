@@ -12,6 +12,7 @@
 #include "object_link.h"
 #include "message_body.h"
 #include "shapes.h"
+#include "script_builtin.h"
 #include "game_progress.h"
 #include "globals.h"
 #include "script_value.h"
@@ -27,7 +28,6 @@ int func_001EAC68(f32 a, f32 b, f32 eps);
 
 void func_001830D8(void* self);
 
-struct Node_1831E8 { void* f0; s32 f4; u8 pad0[8]; void* f10; };
 
 void* func_001DBBD8(void);
 
@@ -109,12 +109,6 @@ void func_00182ED0(void* self);
 
 void func_00152600(u8* table, void* self);
 
-struct Node_183238 {
-    s32 key1;
-    s32 key2;
-    u8 pad8[8];
-    Node_183238* next;
-};
 
 void func_001DBC18(void* a, void* b);
 
@@ -137,25 +131,23 @@ void* func_0011C748(void);
 
 void func_0011EC40(void* a, void* b);
 
-struct Link_1834A0 { s32 a; void* b; Link_1834A0* next; };
+// The script function func_001834A0 calls (the value of a script variable): the scope it was
+// made in, its parameters, its body.
+struct ScriptParam { s32 a; void* name; ScriptParam* next; };
 
-struct Mid_1834A0 { s32 pad0; void* kind; Link_1834A0* head; };
+struct ScriptParams { s32 pad0; void* selfName; ScriptParam* head; };
 
-struct Rec_1834A0 { s32 key; Mid_1834A0* mid; s32 pad8; s32 padC; void* f10; };
-
-struct Slot_1834A0 { s32 flag; s32 value; };
-
-struct Item_1834A0 { s32 pad0; s32 pad4; Item_1834A0* next; };
+struct ScriptMethod { s32 scope; ScriptParams* params; s32 pad8; s32 padC; void* body; };
 
 void func_0011A800(void* d);
 
 s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
 
-void func_0011A328(Slot_1834A0* slot, s32 value);
+void func_0011A328(ScriptScope* slot, s32 value);
 
-void* func_0011A358(ScriptValue* out, Slot_1834A0* owner, void* kind, void* body);
+void* func_0011A358(ScriptValue* out, ScriptScope* owner, void* kind, void* body);
 
-void* func_00119A58(ScriptValue* out, void* list, Slot_1834A0* c);
+void* func_00119A58(ScriptValue* out, void* list, ScriptScope* c);
 
 extern const s32 D_00244EC0[];
 extern s32 D_00244DFC[];
@@ -164,7 +156,7 @@ s32 func_00183668(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list);
+void func_001834A0(BaseObject* self, s32 key, R11B008Node* list);
 
 void func_00184A70(ConeVolume* self);
 
@@ -178,7 +170,7 @@ void func_00127048(ConeVolume*, ConeVolume*);
 
 f32 func_00205210(f32 x);
 
-struct Vec2_1840B8 { f32 x; f32 y; };
+struct LinePoints { f32 x; f32 y; };
 
 void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d);
 
@@ -186,13 +178,7 @@ extern s32 D_002622CC;
 
 extern s32 D_00264260;
 
-struct Quad_001847F0 { u32 w[4]; } __attribute__((aligned(16)));
-
-struct __attribute__((packed)) Packed8_184990 { u64 v; };
-
 void func_00184A70(void* self);
-
-struct __attribute__((aligned(16))) Quad_00184D20 { s32 a, b, c, d; };
 
 void func_001B4600(void* a0, void* a1);
 
@@ -202,7 +188,7 @@ void func_001B4580(void* self);
 
 f32 func_002054F0(f32 a);
 
-struct Clamp_184A70 {
+struct ClampHelper {
     static f32 Of(f32 v, f32 lo, f32 hi)
     {
         if (v < lo)
@@ -213,11 +199,9 @@ struct Clamp_184A70 {
     }
 };
 
-struct Out_1840F0;
-
 f32 func_00205210(f32 value);
 
-void func_00183F40(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1);
+void func_00183F40(f32 a, f32 b, f32 c, f32 d, f32* out0, void* out1);
 
 void func_00182C18(BaseObject* self)
 {
@@ -409,18 +393,18 @@ void func_001830D8(BaseObject* self, BaseObject* src)
     self->alias = src->alias;
 }
 
-void func_001831E8(void* a0, void** head, void* item, s32 count)
+void func_001831E8(World* world, Callback01** head, void* fn, s32 ctx)
 {
-    Node_1831E8* n = (Node_1831E8*)TakeCallRecord();
-    n->f0 = item;
-    n->f4 = count;
-    n->f10 = *head;
+    Callback01* n = (Callback01*)TakeCallRecord();
+    n->fn = (void (*)(void*, s32, void*))fn;
+    n->ctx = (void*)ctx;
+    n->next = *head;
     *head = n;
 }
 
-void func_00183238(void* mgr, Node_183238** link, s32 key1, s32 key2)
+void func_00183238(World* mgr, Callback01** link, s32 key1, s32 key2)
 {
-    Node_183238* node;
+    Callback01* node;
     goto test;
 advance:
     link = &(*link)->next;
@@ -429,7 +413,7 @@ test:
     if (node == 0) {
         return;
     }
-    if (node->key1 != key1 || node->key2 != key2) {
+    if ((s32)node->fn != key1 || (s32)node->ctx != key2) {
         goto advance;
     }
     *link = node->next;
@@ -514,7 +498,7 @@ void func_00183478(void* self, s32* out)
     *out = GetAliasId(self);
 }
 
-void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
+void func_001834A0(BaseObject* self, s32 key, R11B008Node* list)
 {
     ScriptValue q0;
     ScriptValue q1;
@@ -530,25 +514,25 @@ void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
         DestroyScriptValue(&q0, 2);
         return;
     }
-    Rec_1834A0* rec = (Rec_1834A0*)q0.p;
-    Slot_1834A0* slot = (Slot_1834A0*)NewScriptScope();
-    SetScriptScopeParent(slot, rec->key);
+    ScriptMethod* rec = (ScriptMethod*)q0.p;
+    ScriptScope* slot = (ScriptScope*)NewScriptScope();
+    SetScriptScopeParent(slot, rec->scope);
     SetScriptValuePointerB(&q1, self);
-    DefineScriptVariable(&q3, slot, rec->mid->kind, &q1);
+    DefineScriptVariable(&q3, slot, rec->params->selfName, &q1);
     AssignScriptValue(&q2, &q3);
     DestroyScriptValue(&q3, 2);
     if (list != 0) {
-        Item_1834A0* it = list;
-        Link_1834A0* l = rec->mid->head;
+        R11B008Node* it = list;
+        ScriptParam* l = rec->params->head;
         do {
-            DefineScriptVariable(&q3, slot, l->b, it);
+            DefineScriptVariable(&q3, slot, l->name, it);
             AssignScriptValue(&q2, &q3);
             DestroyScriptValue(&q3, 2);
             it = it->next;
             l = l->next;
         } while (it != 0);
     }
-    EvalScriptBody(&q3, rec->f10, slot);
+    EvalScriptBody(&q3, rec->body, slot);
     AssignScriptValue(&q2, &q3);
     DestroyScriptValue(&q3, 2);
     DestroyScriptValue(&q2, 2);
@@ -765,12 +749,12 @@ void func_00183FE0(f32* out, s32* flag, f32 x, f32 y, f32 z, f32 w)
     *out = y - t / x;
 }
 
-void func_001840B8(Vec2_1840B8* self, f32* out0, f32* out1)
+void func_001840B8(LinePoints* self, f32* out0, f32* out1)
 {
     FitLineThroughPoints(out0, out1, self->x, 1.0f, self->y, 0.0f);
 }
 
-void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
+void func_001840F0(f32 a, f32 b, f32 c, f32 d, f32* out0, void* out1)
 {
     f32 x = Cosine(a * 0.0087266471f);
     x = x + x * x * x;
@@ -800,9 +784,9 @@ void func_00184768(ConeVolume* self, s32 flag)
     UpdateConeVolumeBounds(self);
 }
 
-void func_001847F0(ConeVolume* self, Quad_001847F0* src)
+void func_001847F0(ConeVolume* self, Quad16* src)
 {
-    *(Quad_001847F0*)self->color = *src;
+    *(Quad16*)self->color = *src;
     RefreshConeVolumeShape(self);
 }
 
@@ -846,9 +830,9 @@ void func_00184968(ConeVolume* self, s32 v)
     }
 }
 
-void func_00184990(ConeVolume* self, Packed8_184990* src)
+void func_00184990(ConeVolume* self, U64P* src)
 {
-    *(Packed8_184990*)&self->rangeMin = *src;
+    *(U64P*)&self->rangeMin = *src;
     RefreshConeVolumeShape(self);
     UpdateConeVolumeBounds(self);
 }
@@ -878,8 +862,8 @@ void func_00184A38(ConeVolume* self, Quad16* src)
 
 void func_00184A70(ConeVolume* self)
 {
-    f32 a = Clamp_184A70::Of(self->outerAngle, 0.0f, 175.0f);
-    f32 b = Clamp_184A70::Of(self->innerAngle, 0.0f, a);
+    f32 a = ClampHelper::Of(self->outerAngle, 0.0f, 175.0f);
+    f32 b = ClampHelper::Of(self->innerAngle, 0.0f, a);
     f32 r = Tangent(a * 0.00872664712f);
     self->f354 = r;
     self->f350 = r;
@@ -906,7 +890,7 @@ void func_00184D10(ConeVolume* self, f32* out)
 
 void func_00184D20(void* self, void* a1)
 {
-    Quad_00184D20 q;
+    Quad16 q;
     ConvertRgb255ToHsv255(a1, &q);
     SetConeVolumeColor(self, &q);
 }

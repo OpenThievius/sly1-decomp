@@ -4,6 +4,8 @@
 #include "fpu.h"
 #include "collider.h"
 #include "cone_volume.h"
+#include "placed_object.h"
+#include "shapes.h"
 
 // Contacts between colliders: the friction and bounce of a pair of surface kinds, the pooled
 // contact chains, the searches over a collider's edges, and class 0x03's contact method
@@ -110,43 +112,57 @@ void func_001F6C20(s32 a);
 void func_00202A80(void* a, void* b);
 s32 func_00202C38(void* a, s32 b, s32 c);
 
-struct Self_186450 {
-    u8 pad0[0x3AC];
-    u8* base;
-    u8 pad1[0x3B8 - 0x3B0];
-    s32 count;
-    u8* table;
+// An edge of a collision mesh (Mesh03::edges): its two vertex indices first.
+struct MeshEdge {
+    union {
+        struct {
+            s16 x;          // 0x00
+            s16 y;          // 0x02
+        };
+        s16 v[2];           // 0x00
+    };
+    u8 pad04[0x10 - 4];
 };
 
-struct Entry_186450 {
-    s16 x;
-    s16 y;
-    u8 pad0[0x10 - 4];
+// A 0x70-byte hit func_0013DFD8 fills (CollectEdgeContacts, func_00187C28) and GroupEdgesByKey
+// sorts: four quads, two floats, two words, the edge it came from and a link.
+struct MeshHit {
+    Vec02 r0;               // 0x00
+    Vec02 r1;               // 0x10
+    Vec02 r2;               // 0x20
+    Vec02 r3;               // 0x30
+    f32 f40;                // 0x40
+    f32 f44;                // 0x44
+    u8 pad48[0x50 - 0x48];
+    union {
+        s32 i50;            // 0x50
+        void* p50;          // 0x50: the part hit (func_00187C28)
+    };
+    s32 i54;                // 0x54
+    MeshEdge* edge;         // 0x58
+    s32 slot5C;             // 0x5C: which end of the edge is the key (0 or 1)
+    MeshHit* next;          // 0x60
 };
 
-struct Out_186450 {
-    u8 pad0[0x58];
-    Entry_186450* link;
-    u8 pad1[0x70 - 0x5C];
-};
+typedef char check_MeshHit[sizeof(MeshHit) == 0x70 ? 1 : -1];
 
-s32 func_0013DFD8(void* a, u8* b, u8* c, s32 d, s32 e, Out_186450* f);
+s32 func_0013DFD8(void* a, u8* b, u8* c, s32 d, s32 e, MeshHit* f);
 
-s32 func_00186450(s32 unused, Self_186450* self, u8* ctx, s32 cap, Out_186450* out)
+s32 func_00186450(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 {
-    s32 i = self->count;
+    s32 i = self->meshCopy.edgeCount;
     i--;
     s32 total = 0;
     s32 filled = 0;
-    Entry_186450* table = (Entry_186450*)self->table;
-    u8* base = self->base;
+    MeshEdge* table = (MeshEdge*)self->meshCopy.edges;
+    u8* base = (u8*)self->meshCopy.verts;
 
     while (i >= 0) {
-        Entry_186450* e = &table[i];
+        MeshEdge* e = &table[i];
         total += func_0013DFD8(ctx, base + e->x * 16, base + e->y * 16, 0, cap - total, &out[total]);
         if (filled < total) {
             for (; filled < total; filled++)
-                out[filled].link = e;
+                out[filled].edge = e;
         }
         i--;
     }
@@ -155,38 +171,15 @@ s32 func_00186450(s32 unused, Self_186450* self, u8* ctx, s32 cap, Out_186450* o
 
 ASM_FUNC(func_00186568);
 
-struct __attribute__((aligned(16))) Row_1867C8 {
-    f32 v[4];
-};
-
-struct Pair_1867C8 {
-    s16 v[2];
-};
-
-struct Edge_1867C8 {
-    Row_1867C8 r0;
-    Row_1867C8 r1;
-    Row_1867C8 r2;
-    Row_1867C8 r3;
-    f32 f40;
-    f32 f44;
-    u8 pad48[0x50 - 0x48];
-    s32 i50;
-    s32 i54;
-    Pair_1867C8* idx58;
-    s32 slot5C;
-    Edge_1867C8* next;
-};
-
 void func_001F5B08(void* dst, void* src, s32 size);
 
-void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_1867C8** groups, Edge_1867C8** head)
+void func_001867C8(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
 {
-    Edge_1867C8* single = 0;
+    MeshHit* single = 0;
     s32 n = 0;
     s32 i;
     s32 j;
-    Edge_1867C8* e;
+    MeshHit* e;
     *head = 0;
     for (i = 0; i < count; i++) {
         e = &base[i];
@@ -202,7 +195,7 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
             continue;
         }
         if (!e->i54) {
-            Row_1867C8 t;
+            Vec02 t;
             t = e->r0;
             e->r0 = e->r1;
             e->r1 = t;
@@ -220,12 +213,12 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
             e->slot5C = 1;
         }
         for (j = 0; j < n; j++) {
-            if (e->idx58->v[e->slot5C] == keys[j]) {
+            if (e->edge->v[e->slot5C] == keys[j]) {
                 break;
             }
         }
         if (j >= n) {
-            keys[j] = e->idx58->v[e->slot5C];
+            keys[j] = e->edge->v[e->slot5C];
             n++;
         } else {
             e->next = groups[j];
@@ -236,7 +229,7 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
         if (groups[j]->next == 0) {
             e = single;
             while (e) {
-                Pair_1867C8* r = e->idx58;
+                MeshEdge* r = e->edge;
                 if (r->v[0] == keys[j] || r->v[1] == keys[j]) {
                     goto next;
                 }
@@ -255,14 +248,16 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
     *outCount = n;
 }
 
-struct Pair_00186A70 { u8 pad0[4]; s16 k1; s16 k2; };
-struct Grp_00186A70 { u8 pad0[0x58]; Pair_00186A70* pair; u8 pad1[4]; Grp_00186A70* next; };
-struct Item_00186A70 { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
-struct Rec_00186A70 { Rec_00186A70* parent; Grp_00186A70* node; s32 id; };
+// FindGraphPath's graph: links (a pair of node ids at +4 of the record at 0x58, chained at
+// 0x60), nodes of 0x20 bytes with a visited flag (4) at 0x1C, and the search's steps.
+struct PathEdgeEnds { u8 pad0[4]; s16 k1; s16 k2; };
+struct PathEdge { u8 pad0[0x58]; PathEdgeEnds* pair; u8 pad1[4]; PathEdge* next; };
+struct PathVertex { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
+struct PathSearchStep { PathSearchStep* parent; PathEdge* node; s32 id; };
 
-s32 func_00186A70(Item_00186A70* base, s32 key, s32 target, Grp_00186A70* head, Grp_00186A70** out)
+s32 func_00186A70(PathVertex* base, s32 key, s32 target, PathEdge* head, PathEdge** out)
 {
-    Rec_00186A70 recs[64];
+    PathSearchStep recs[64];
     s32 n;
     s32 nrec;
     s32 i;
@@ -271,10 +266,10 @@ s32 func_00186A70(Item_00186A70* base, s32 key, s32 target, Grp_00186A70* head, 
     recs[0].node = 0;
     recs[0].id = key;
     for (i = 0, nrec = 1; i < nrec; i++) {
-        Rec_00186A70* rc = &recs[i];
-        Grp_00186A70* g;
+        PathSearchStep* rc = &recs[i];
+        PathEdge* g;
         for (g = head; g != 0; g = g->next) {
-            Pair_00186A70* p = g->pair;
+            PathEdgeEnds* p = g->pair;
             s32 id;
             if (p->k1 == rc->id) {
                 id = p->k2;
@@ -293,10 +288,10 @@ s32 func_00186A70(Item_00186A70* base, s32 key, s32 target, Grp_00186A70* head, 
                 }
                 goto done;
             }
-            Item_00186A70* it = &base[id];
+            PathVertex* it = &base[id];
             if ((it->flags & 4) == 0) {
                 it->flags |= 4;
-                Rec_00186A70* r = &recs[nrec++];
+                PathSearchStep* r = &recs[nrec++];
                 r->parent = rc;
                 r->node = g;
                 r->id = id;
@@ -317,17 +312,18 @@ ASM_FUNC(func_00186BA8);
 
 ASM_FUNC(func_00187260);
 
-struct Ent_001879C0 { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
+// A 0x30-byte hit CollectMeshHits gives: its point at 0x10, a float, a kind and a part.
+struct MeshHitEntry { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
 
-s32 func_00187260(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, Ent_001879C0* a6);
+s32 func_00187260(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, MeshHitEntry* a6);
 s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
 void func_001879C0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
-    Ent_001879C0 ents[64];
+    MeshHitEntry ents[64];
     s32 n = CollectMeshHits(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
     for (s32 i = n - 1; i >= 0; i--) {
-        Ent_001879C0* e = &ents[i];
+        MeshHitEntry* e = &ents[i];
         CreatePooledContact(e->f, a0, a2, e, (u8*)e + 0x10, e->b, 0, e->c, a6);
     }
 }
@@ -336,8 +332,6 @@ ASM_FUNC(func_00187A88);
 
 ASM_FUNC(func_00187B60);
 
-struct Rec_00187C28 { u8 pad0[0x50]; void* p; u8 pad1[0x1C]; };
-struct Vec_00187C28 { f32 x; f32 y; f32 z; f32 w; };
 
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
@@ -345,18 +339,18 @@ s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5,
 
 s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
 {
-    Rec_00187C28 recs[2];
-    Vec_00187C28 v1;
-    Vec_00187C28 v2;
+    MeshHit recs[2];
+    Vec4U v1;
+    Vec4U v2;
     s32 count = func_0013DFD8(a4, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, 2, recs);
     s32 idx = 0;
     if (count > 0) {
-        idx = (recs[0].p == 0);
+        idx = (recs[0].p50 == 0);
     }
     if (idx >= count) {
         return 0;
     }
-    void* p = recs[idx].p;
+    void* p = recs[idx].p50;
     FindPartSupportPoint(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
     CreatePooledContact(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
     return 1;
@@ -364,7 +358,8 @@ s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
 
 ASM_FUNC(func_00187D08);
 
-struct Loc_00187E88 { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
+// func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
+struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
 s32 func_00187D08(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
 void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
@@ -372,7 +367,7 @@ s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5,
 
 s32 func_00187E88(void* a0, void* a1, void* a2)
 {
-    Loc_00187E88 loc;
+    SphereHitFrame loc;
     if (IntersectSegmentWithSphere((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
         return 0;
     }
