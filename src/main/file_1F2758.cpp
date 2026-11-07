@@ -1010,15 +1010,15 @@ void func_001F56D8(Ctx_1F56D8* ctx, Player* self)
     Frame_1F56D8 f;
     ChooseBestTargetCandidate(self, ctx->s94, (u8*)ctx + 0x98, f.a, &f.f60);
     if (ctx->cnt != 0) {
-        func_001782C0(self, f.a, 0.0f, 0, f.b, 0);
+        ComputeTargetArc(self, f.a, 0.0f, 0, f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
         BuildAxisAngleMatrix((Tab_1F56D8*)&g_unitZVector, f.c, self->f638);
         self->desc02()->m1E(self, (Mat02*)f.c);
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     } else {
-        func_00178598(self, f.a, f.f60);
+        LaunchPlayerAtTarget(self, f.a, f.f60);
     }
 }
 

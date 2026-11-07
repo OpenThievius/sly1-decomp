@@ -377,7 +377,7 @@ void func_00181B20(void* unused, void* obj_)
     f32 r = func_00205778(second.y, second.x);
     obj->x638 = WrapAngle(r + 3.1415927f);
     func_001C5D58(obj);
-    func_00175170(obj, 4, 0x2B);
+    SetPlayerState(obj, 4, 0x2B);
 }
 
 s32 func_00181BC8(C1A* self, s32* arg)
@@ -410,7 +410,7 @@ then_block:
     ((VFnP_181BC8)((Vt_181BC8*)g_player)->vt[35])((void*)g_player, self->fBC8);
     ((VFnV_181BC8)((Vt_181BC8*)self->fBC8)->vt[7])(self->fBC8);
     SetSwitchedColliderEnabled((void*)g_player, 1);
-    func_00175170((void*)g_player, 2, 2);
+    SetPlayerState((void*)g_player, 2, 2);
     ActivateSwitchedCollider((void*)g_player);
     SetModeWalkerMode(self, 3);
     InitOwnerMessage(&loc, 0, self);

@@ -2652,3 +2652,14 @@ func_0016DDE8	StartEntryTableObject	slot 0x50 of class 0x64: runs StartPlacedObj
 func_0016E148	UpdatePadRouting	sets g_padRouting from g_padSelectFlags: 0 with flag 0x80 or 4, 5 with flag 1, 4 with flag 2, else 7 (InitPadSystem, SetPadSelectFlags and ClearPadSelectFlags call it)
 D_00262C68	g_padRouting	the mask of which readers see g_padRecord rather than g_blankPadRecord (bits 1, 2 and 4, tested by the camera, the step sequence and others); UpdatePadRouting sets it
 D_00262C6C	g_padSelectFlags	the flags SetPadSelectFlags sets and ClearPadSelectFlags clears, from which UpdatePadRouting sets g_padRouting
+func_00170410	ComputePlayerSlideRates	slot 0x100 of class 0x07: picks two rates for the player's state (+0x2220) and sub-state (+0x2228) from D_00262E34/38 and D_002637B0 to B8, or zeroes them, and divides the first by +0x700
+func_00171F28	PlacePlayerOnGround	a script built-in's call (func_00105878): finds a point under the player's position lowered by 75 (func_001EDEF0), moves the player there through slot 0x84 and, outside state 4, sets state 2/6 and scales +0x226C
+func_00171FE0	ReleasePlayerToState2	in states 3 and 7 sets +0x224C and moves the player to state 2/2 (SetPlayerState); in state 6 only with sub-state 4 or 5 (HandlePlayerNotification and a script built-in call it)
+func_00172EB8	GetPlayerContactMode	slot 0x164 of class 0x07: 0 in states 3 and 0xD, else 3
+func_00174F50	SelectPlayerStateAnimation	picks the animation node for the player's state and sub-state from its tables at +0x1390, +0x13D4, +0x1418 (falling back through D_00263930) and +0x146C, and starts it (func_001C4D60); SetPlayerState calls it
+func_00175078	SetPlayerPartLayers	sets the word +0x10 of the player's five parts at +0x2500 to +0x2510 to 9 or -1 by bits 1 and 2 of its argument, then calls slot 47 of five of its objects (SetPlayerState calls it)
+func_00175170	SetPlayerState	original assembly: moves the player to a state and sub-state (+0x2220, +0x2228); some forty callers pass the pair, as (2, 2), (4, 0x2C) or (9, 0x1C)
+func_00177968	CompareKeysAscending	a sort's comparison: 1 when the first record's key is greater, else -1 (func_00177990 sorts with it)
+func_00177E20	IsPlayerCameraFree	slot 0x138 of class 0x07: 0 in state 12/0x22, else whether the camera controller at g_camera's +0x454 is not the top one (IsTopCameraController)
+func_001782C0	ComputeTargetArc	original assembly: from a target pair and a time computes the start velocity and the two points LaunchPlayerAtTarget stores (also called by ChooseBestTargetCandidate and four others)
+func_00178598	LaunchPlayerAtTarget	takes a target pair (or the best candidate, ChooseBestTargetCandidate), computes the arc to it (ComputeTargetArc), stores its end time and points in the record at +0x2514, sets the player's velocity and moves it to state 4/0x2C

@@ -2625,7 +2625,7 @@ ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     (void)StoreScriptArgumentsVa(&t, 3, args, kp, vecp, fxp, fyp);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00171F28(obj, &vec, fx, fy);
+    PlacePlayerOnGround(obj, &vec, fx, fy);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2640,7 +2640,7 @@ ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00171FE0(obj);
+    ReleasePlayerToState2(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

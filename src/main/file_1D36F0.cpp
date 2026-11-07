@@ -183,12 +183,12 @@ void func_001D4A98(Player* self) {
                 RunPlayerCallback(self);
             } else {
                 void* o = self->f2B70;
-                func_00175170(self, 2, 2);
+                SetPlayerState(self, 2, 2);
                 s32 r = func_001CF158(self, o);
-                func_00175170(self, 2, r);
+                SetPlayerState(self, 2, r);
             }
         } else {
-            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
+            ComputeTargetArc(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
         }
         break;
     }
@@ -219,7 +219,7 @@ void func_001D4C98(Player* self)
     if ((u32)(self->f2228 - 0x2D) < 5) {
         func_001D5620(self);
     } else {
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     }
 }
 
@@ -253,7 +253,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     if (self->f2220 == 6 && self->f239C == 2) {
         Ev07* tmp = msg;
         TriggerScriptEvent((s32)self->f23B0, 0x13, 1, &tmp);
-        func_00175170(self, 2, 5);
+        SetPlayerState(self, 2, 5);
         return 0;
     }
     self->f26B4 = *msg;
@@ -292,7 +292,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
             } else {
-                func_00175170(self, 4, 0x2B);
+                SetPlayerState(self, 4, 0x2B);
             }
         }
         SetPlayerCallback(self, (s32)func_001D51A0);
@@ -304,7 +304,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
             } else {
-                func_00175170(self, 4, 0x2B);
+                SetPlayerState(self, 4, 0x2B);
             }
         }
         if (400.0f < self->v150.z) {
@@ -331,33 +331,33 @@ s32 func_001D4D08(Player* self, Ev07* msg)
             id = 0x26;
             break;
         }
-        func_00175170(self, 4, id);
+        SetPlayerState(self, 4, id);
         SetPlayerCallback(self, (s32)func_001D5468);
         break;
     }
     case 3:
         if (self->f2730 == 0 || HasSpareCount() != 0) {
-            func_00175170(self, 4, 0x27);
+            SetPlayerState(self, 4, 0x27);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x2F);
+            SetPlayerState(self, 4, 0x2F);
         }
         break;
     case 4:
         self->desc02()->m20(self, (Vec02*)D_00275040);
         if (HasSpareCount() != 0) {
-            func_00175170(self, 4, 0x28);
+            SetPlayerState(self, 4, 0x28);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x31);
+            SetPlayerState(self, 4, 0x31);
         }
         break;
     case 5:
         if (self->f2730 == 0 || HasSpareCount() != 0) {
-            func_00175170(self, 4, 0x29);
+            SetPlayerState(self, 4, 0x29);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x30);
+            SetPlayerState(self, 4, 0x30);
         }
         break;
     }
@@ -387,17 +387,17 @@ void func_001D51A0(Player* self)
         if (HasSpareCount()) {
             func_00192C58(self);
             void* p = self->f2B70;
-            func_00175170(self, 2, 2);
-            func_00175170(self, 2, func_001CF158(self, p));
+            SetPlayerState(self, 2, 2);
+            SetPlayerState(self, 2, func_001CF158(self, p));
         } else {
-            func_00175170(self, 4, 0x2D);
+            SetPlayerState(self, 4, 0x2D);
         }
     } else {
         if (HasSpareCount()) {
-            func_00175170(self, 4, 0x24);
+            SetPlayerState(self, 4, 0x24);
             SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
-            func_00175170(self, 4, 0x2D);
+            SetPlayerState(self, 4, 0x2D);
         }
     }
     if (self->f2220 == 4) {
@@ -425,7 +425,7 @@ void func_001D4C90(void* self, s32 value);
 void func_001D5398(Obj_1D5398* self)
 {
     StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
-    func_00175170(self, 4, 0x2A);
+    SetPlayerState(self, 4, 0x2A);
     SetPlayerCallback(self, (s32)func_001D5418);
 }
 
@@ -442,7 +442,7 @@ void func_001D5418(Obj_D5418* a0)
     if (HasSpareCount(a0)) {
         a0->vtbl[84](a0);
     } else {
-        func_00175170(a0, 4, 0x2D);
+        SetPlayerState(a0, 4, 0x2D);
     }
 }
 
@@ -460,7 +460,7 @@ void func_001D5468(Obj_1D5468* self)
     if (HasSpareCount()) {
         ((VFnA_1D5468)self->vtbl[84])(self);
     } else {
-        func_00175170(self, 4, 0x2D);
+        SetPlayerState(self, 4, 0x2D);
     }
 }
 

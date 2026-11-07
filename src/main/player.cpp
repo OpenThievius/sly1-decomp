@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x16F608 to 0x1793C0: the player, class 0x07 (struct Player in
+// include/switched_collider.h), its methods, its state changes and its target choice. Its name
+// is ours, after the class.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -429,7 +432,7 @@ void func_001705C8(Player* self)
         self->f224C = self->f2264;
     }
     if (self->f2254 & 1) {
-        func_00175170(self, self->f2258, self->f225C);
+        SetPlayerState(self, self->f2258, self->f225C);
     }
     if (self->f2254 & 2) {
         func_001C61E0(self, self->f2260);
@@ -536,7 +539,7 @@ void func_00171F28(Player* self, f32 unusedF12, f32 scale)
     func_001EDEF0(&tmp, a1, &out, self);
     self->desc02()->m20(self, (Vec02*)&out);
     if (self->f2220 != 4) {
-        func_00175170(self, 2, 6);
+        SetPlayerState(self, 2, 6);
         self->f226C = self->f226C * scale;
         if (scale == 0.0f) {
             self->f2498 = 0;
@@ -558,7 +561,7 @@ void func_00171FE0(Player* self)
         return;
     act:
         self->f224C = 1;
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     } else {
         s32 w = self->f239C;
         if (w >= 6) {
@@ -567,7 +570,7 @@ void func_00171FE0(Player* self)
         if (w < 4) {
             return;
         }
-        func_00175170(self, 2, 2);
+        SetPlayerState(self, 2, 2);
     }
 }
 
@@ -958,25 +961,12 @@ ASM_FUNC(func_00174808);
 INCLUDE_RODATA(jtbl_0024AB40);
 ASM_FUNC(func_00174E20);
 
-struct Obj_174F50 {
-    u8 pad0[0x1390];
-    void* f1390[0x11];
-    void* f13D4[0x11];
-    void* f1418[0x15];
-    void* f146C;
-    u8 pad1[0x2220 - 0x1470];
-    s32 state;
-    u8 pad2[4];
-    s32 f2228;
-    u8 pad3[0x239C - 0x222C];
-    s32 f239C;
-};
 
-void func_001C4D60(Obj_174F50* self, void* a1, s32 zero);
+void func_001C4D60(Player* self, void* a1, s32 zero);
 
-void func_00174F50(Obj_174F50* self, void* node)
+void func_00174F50(Player* self, void* node)
 {
-    switch (self->state) {
+    switch (self->f2220) {
     case 6: {
         s32 m = self->f239C;
         if ((m == 0 && self->f2228 == 0x15) || m == 7) {
@@ -1013,7 +1003,7 @@ void func_00174F50(Obj_174F50* self, void* node)
         }
     }
     default:
-        node = self->f1390[self->state];
+        node = self->f1390[self->f2220];
         break;
     case 0xD:
         return;
@@ -1096,7 +1086,7 @@ void func_00175170(void* self, s32 mode, s32 count);
 
 void func_00177800(void* self, s32 flag)
 {
-    func_00175170(self, flag ? 11 : 0, -1);
+    SetPlayerState(self, flag ? 11 : 0, -1);
 }
 
 void func_00177828(Player* self, s32 value)
@@ -1177,10 +1167,10 @@ void func_00177E70(Player* self, s32 mode)
     func_001924C8(self, mode);
     switch (mode) {
     case 0:
-        (void)func_00175170(self, 9, 0x1C);
+        (void)SetPlayerState(self, 9, 0x1C);
         break;
     case 1:
-        (void)func_00175170(self, 9, 0x1D);
+        (void)SetPlayerState(self, 9, 0x1D);
         break;
     }
 }
@@ -1503,7 +1493,7 @@ void func_00178598(Player* self, Pair_178598* s2, f32 f)
         s2 = (Pair_178598*)&fr.p0;
     }
     void* q1 = &fr.q1;
-    func_001782C0(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
+    ComputeTargetArc(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
     ((Sub_178598*)self->f2514)->f18 = g_gameTime[0] + fr.fl;
     ((Sub_178598*)self->f2514)->q20 = fr.q0;
     ((Sub_178598*)self->f2514)->q30 = fr.q2;
@@ -1511,7 +1501,7 @@ void func_00178598(Player* self, Pair_178598* s2, f32 f)
     self->q2B70[0] = *(Vec02*)&s2->q0;
     self->q2B70[1] = *(Vec02*)&s2->q1;
 
-    func_00175170(self, 4, 0x2C);
+    SetPlayerState(self, 4, 0x2C);
 }
 
 INCLUDE_RODATA(D_0024AFA0);
@@ -1659,7 +1649,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
             } else {
                 e->f4 = 0;
             }
-            func_001782C0(self, e, 0.7f, 0, e->f10, 0);
+            ComputeTargetArc(self, e, 0.7f, 0, e->f10, 0);
         }
     }
     func_001F5CD0(buf, cnt, 0x20, func_00178D18);

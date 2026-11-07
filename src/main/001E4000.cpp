@@ -4017,7 +4017,7 @@ extern const u32 D_002476A0[256] = {
 };
 extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
 extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
-// Moved from 0016C000.cpp when the player's file (file_16F608.cpp) took its functions.
+// Moved from 0016C000.cpp when the player's file (player.cpp) took its functions.
 struct Slot_2482D8 { u32 w[8]; };
 extern const Slot_2482D8 D_002482D8[7] = {
     {0x239C1F4B, 0x4F1B6BCE, 0x332880C9, 0xDC1FC810, 0xB3EF7189, 0x239FB500, 0x332882F6, 0x4F1B486E},

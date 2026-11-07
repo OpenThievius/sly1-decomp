@@ -963,7 +963,7 @@ void func_0019AB78(C17* self, s32 msg, s32* rec)
         if (self->f654 != 0 && g_player != 0) {
             ((Vi_19AB78*)g_player)->f23CC = self;
             ((Vi_19AB78*)g_player)->f239C = 7;
-            func_00175170((Vi_19AB78*)g_player, 6, 16);
+            SetPlayerState((Vi_19AB78*)g_player, 6, 16);
         } else {
             s32 k;
             s32 a;

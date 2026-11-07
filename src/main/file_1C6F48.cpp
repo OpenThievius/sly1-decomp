@@ -1476,7 +1476,7 @@ void func_001CAEE0(u8* self, Obj_1CAEE0* other)
 {
     other->vtbl[0x90 / 4](other, self + 0xAB0);
     if (IsObjectOfKind(other, 7) != 0) {
-        func_00175170(other, 4, 0x2B);
+        SetPlayerState(other, 4, 0x2B);
     }
 }
 

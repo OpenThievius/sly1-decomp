@@ -11,7 +11,7 @@
 // length: their definitions (in C, in 001E4000.cpp, the proved files and the window files) keep
 // theirs. A few labels end with one more word after the entries (D_00262718: nine entries and a
 // word; D_00262E40: 151 and a word; D_00275750: nine and a word): the next table's alignment on
-// 8, so file_16F608.cpp defines D_00262E40 with its 151 entries.
+// 8, so player.cpp defines D_00262E40 with its 151 entries.
 #ifndef OBJECT_LINK_H
 #define OBJECT_LINK_H
 
