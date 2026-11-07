@@ -104,7 +104,9 @@ void func_0013CE40(MaskedCollider* self)
 
 extern u8 D_00261420[];
 
-struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
+// A list walk's frame (ListFrame's words) with one more word after it, the flag
+// func_00199C10 reads for each child.
+struct ListFrameWithFlag { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
 s32 func_00141008(FlagTable* t, s32 v);
 s32 func_001300E8(MaskedCollider* n, s32 kind);
 void func_00199C10(MaskedCollider* n, s32* out);
@@ -112,7 +114,7 @@ s32 func_001833F0(MaskedCollider* n, s32 key);
 
 void func_0013CE80(MaskedCollider* self)
 {
-    Frame_13CE80 fr;
+    ListFrameWithFlag fr;
     MaskedCollider* n;
     s32 i;
     Slot20* e;
@@ -467,12 +469,9 @@ LINKER_REMNANT(func_0013E650);
 
 ASM_FUNC(func_0013E658);
 
-struct Self_13E6C8 { u8 pad0[0x10]; s32 f10; };
-struct Base_13E6C8 { u8 pad0[0x10]; s32 f10; };
-
 void* func_0018D500(s32 size);
 
-void func_0013E6C8(Self_13E6C8* self, Tree03* src, Base_13E6C8* base, Tree03* dst)
+void func_0013E6C8(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
 {
     dst->count = src->count;
     dst->count2 = src->count2;
@@ -480,22 +479,21 @@ void func_0013E6C8(Self_13E6C8* self, Tree03* src, Base_13E6C8* base, Tree03* ds
     for (s32 i = 0; i < dst->count; i++) {
         TreeNode03* s = &src->nodes[i];
         TreeNode03* d = &dst->nodes[i];
-        d->face = (void*)(base->f10 + ((s32)s->face - self->f10));
+        d->face = (void*)((s32)base->faces + ((s32)s->face - (s32)self->faces));
         d->back = s->back != 0 ? (TreeNode03*)((s32)dst->nodes + ((s32)s->back - (s32)src->nodes)) : 0;
         d->front = s->front != 0 ? (TreeNode03*)((s32)dst->nodes + ((s32)s->front - (s32)src->nodes)) : 0;
 
     }
 }
 
-struct IntList_13E7C0 { s32 count; void* items[1]; };
 void* func_0015A418(void*, s32, void*, void*);
-bool func_0013E8D8(IntList_13E7C0*, void*);
+bool func_0013E8D8(Pair28*, void*);
 void func_00182ED8(void*);
 
-void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
+void func_0013E7C0(void* self, Pair28* list, void* context)
 {
-    s32 n = list->count;
-    void** items = list->items;
+    s32 n = list->seen.count;
+    void** items = (void**)list->seen.values;
     for (s32 i = 0; i < n; i++) {
         void* object = FindFirstObjectById(self, 0x104, items[i], context);
         if (object) {
@@ -505,14 +503,12 @@ void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
     }
 }
 
-struct Set_0013E868 { s32 count; s32 items[1]; };
-
 s32 func_001833F0(void* key, s32 item);
 
-s32 func_0013E868(Set_0013E868* set, void* key)
+s32 func_0013E868(Queue28* set, void* key)
 {
     s32 i = set->count - 1;
-    s32* base = set->items;
+    s32* base = set->values;
     if (i >= 0) {
         s32* p = (s32*)(i * 4 + (s32)base);
         do {
@@ -526,23 +522,12 @@ s32 func_0013E868(Set_0013E868* set, void* key)
     return 0;
 }
 
-struct QueueWithPrefix {
-	char padding[0x44];
-	s32 count;
-	s32 values[16];
-};
-
-bool func_0013E8D8(QueueWithPrefix* queue, s32 value) {
-	queue->values[queue->count++] = value;
-	return queue->count < 16;
+bool func_0013E8D8(Pair28* pair, s32 value) {
+	pair->queued.values[pair->queued.count++] = value;
+	return pair->queued.count < 16;
 }
 
-struct Queue {
-	s32 count;
-	s32 values[16];
-};
-
-bool func_0013E8F8(Queue* queue, s32 value) {
+bool func_0013E8F8(Queue28* queue, s32 value) {
 	queue->values[queue->count++] = value;
 	return queue->count < 16;
 }
@@ -557,59 +542,48 @@ void func_0013E918(void* self)
     s->f140 = -1;
 }
 
-struct Desc_13E950 {
-    u8 pad0[8];
-    u32 f8;
-};
-
-struct Node_13E950 {
-    Desc_13E950* f0;
-};
-
-struct Iter_13E950 { List01* list; u8* link; s32 offset; Iter_13E950* saved; };
-
-struct Call_13E950;
 
 
-s32 func_0013E868(Call_13E950* set, void* key);
-bool func_0013E8D8(Call_13E950* queue, void* value);
 
-struct Next_13E950 {
-    static Node_13E950* Of(Iter_13E950* it)
+s32 func_0013E868(Queue28* set, void* key);
+bool func_0013E8D8(Pair28* pair, void* value);
+
+struct ListWalkNext {
+    static BaseObject* Of(ListFrame* it)
     {
-        Node_13E950* obj = *(Node_13E950**)it->link;
+        BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
 
-struct Begin_13E950 {
-    static void Of(Iter_13E950* it, List01* list)
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_13E950*)g_activeListFrames);
+        it->prev = (g_activeListFrames);
         g_activeListFrames = (ListFrame*)it;
     }
 };
 
 void func_0013E950(Zone28* self, Collider* a1)
 {
-    Iter_13E950 it;
-    Begin_13E950::Of(&it, &a1->children);
+    ListFrame it;
+    ListWalkBegin::Of(&it, &a1->children);
     self->owner = a1;
-    Node_13E950* node;
-    while ((node = Next_13E950::Of(&it)) != 0) {
-        if (node->f0->f8 & 0x40) {
-            if (IsObjectInIdList((Call_13E950*)((u8*)self + 0x90), node) == 0) {
-                if (IsObjectInIdList((Call_13E950*)((u8*)self + 8), node) == 0) {
-                    AppendToQueuedObjects((Call_13E950*)((u8*)self + 8), node);
+    BaseObject* node;
+    while ((node = ListWalkNext::Of(&it)) != 0) {
+        if (node->desc->flags & 0x40) {
+            if (IsObjectInIdList(&self->pairs[1].seen, node) == 0) {
+                if (IsObjectInIdList(&self->pairs[0].seen, node) == 0) {
+                    AppendToQueuedObjects(&self->pairs[0], node);
                 }
             }
         }
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.prev;
 }
 
 extern u8 D_00261420[];
@@ -692,17 +666,24 @@ void func_0013EB68(void* a, s32 b)
     }
 }
 
-struct Ent_13EC00 { s32 k1; s32 k2; s32 f8; s32 fC; };
+// An entry of Zone28::table14C (func_0013EC00 adds or updates one, func_0013ECB0 applies a
+// list of them): an object's id, a key it answers to (-1 any), and the states to set it to.
+struct ZoneTargetEntry {
+    s32 id;                 // 0x00
+    s32 key;                // 0x04: -1 matches any
+    s32 onState;            // 0x08: when the flag is set
+    s32 offState;           // 0x0C: otherwise
+};
 
-s32 func_0013EC00(Ent_13EC00* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val)
+s32 func_0013EC00(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val)
 {
     for (s32 i = 0; i < *count; i++) {
-        Ent_13EC00* p = &tab[i];
-        if (p->k1 == k1 && (p->k2 == -1 || p->k2 == k2)) {
+        ZoneTargetEntry* p = &tab[i];
+        if (p->id == k1 && (p->key == -1 || p->key == k2)) {
             if (flag != 0) {
-                p->f8 = val;
+                p->onState = val;
             } else {
-                p->fC = val;
+                p->offState = val;
             }
             return 1;
         }
@@ -712,15 +693,15 @@ s32 func_0013EC00(Ent_13EC00* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2
         return 0;
     }
     *count = n + 1;
-    Ent_13EC00* e = (Ent_13EC00*)((n << 4) + (s32)tab);
-    e->k1 = k1;
-    e->k2 = k2;
+    ZoneTargetEntry* e = (ZoneTargetEntry*)((n << 4) + (s32)tab);
+    e->id = k1;
+    e->key = k2;
     if (flag != 0) {
-        e->f8 = val;
-        e->fC = -1;
+        e->onState = val;
+        e->offState = -1;
     } else {
-        e->fC = val;
-        e->f8 = -1;
+        e->offState = val;
+        e->onState = -1;
     }
     return 1;
 }
@@ -729,34 +710,27 @@ s32 func_0015A198(void* self, s32 kind, s32 key, void* arg, s32 flags, void* out
 void* func_00129C20(void* a, s32 b);
 void func_001B64D8(void* a, s32 b);
 
-struct Ent_13ECB0 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-};
-
-s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
+s32 func_0013ECB0(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag)
 {
     s32 count = 0;
     s32 more;
     void* out;
     if (n > 0) {
-        Ent_13ECB0* p = ent;
+        ZoneTargetEntry* p = ent;
         do {
-            s32 r = GatherObjectsByMode(self, 0x304, p->f0, arg, 1, &out);
+            s32 r = GatherObjectsByMode(self, 0x304, p->id, arg, 1, &out);
             if (r != 1) {
                 return r;
             }
-            void* v = FindObjectHandle(out, p->f4);
+            void* v = FindObjectHandle(out, p->key);
             if (v == 0) {
                 count++;
             } else {
                 s32 k;
                 if (flag != 0) {
-                    k = p->f8;
+                    k = p->onState;
                 } else {
-                    k = p->fC;
+                    k = p->offState;
                 }
                 if (k != -1) {
                     SetStateWalkerTarget(v, k);
@@ -776,7 +750,8 @@ void* func_0012C8F8(void* obj, void* other, s32 a2, s32 a3, f32 fa, f32 fb);
 void func_001518B8(void* t);
 void func_001519A8(void* t);
 
-struct Obj_13ED90 { u8 pad[0x40]; s32 key40; s32 flag44; };
+// An object queued in a zone (func_0013ED90): the id of the object it goes to and a flag.
+struct ZoneQueuedObject { u8 pad[0x40]; s32 key40; s32 flag44; };
 
 void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
 {
@@ -785,7 +760,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
         s32* list = self->pairs[mode].queued.values;
         s32 i;
         for (i = 0; i < n; i++) {
-            Obj_13ED90* obj = *(Obj_13ED90**)&list[i];
+            ZoneQueuedObject* obj = *(ZoneQueuedObject**)&list[i];
             void* other;
             s32 dir;
             if (MatchesObjectId(self->owner, obj->key40)) {
@@ -814,7 +789,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
             }
         }
     }
-    SetGatheredWalkerTargets(self->owner->world, self->count148, (Ent_13ECB0*)self->table14C, self->owner, mode == 0);
+    SetGatheredWalkerTargets(self->owner->world, self->count148, (ZoneTargetEntry*)self->table14C, self->owner, mode == 0);
     if (self->f140 != -1 && q == 0) {
         void* t = FindFirstObjectByIdMode4(self->owner->world, self->f140, self->owner);
         if (mode != 0) {
@@ -987,13 +962,9 @@ extern void func_00189150(void*, void*, void*);
 f32 func_00188CE0(void* p);
 f32 func_00205578(f32 x);
 
-struct Loc_13F940 {
-    f32 v[12];
-};
-
 s32 func_0013F940(TriggerZone* s, f32* out)
 {
-    Loc_13F940 loc;
+    Mat3U loc;
     f32 best = 0.0f;
     s32 idx;
     s32 i;

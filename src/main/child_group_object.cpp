@@ -56,19 +56,18 @@ void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other)
     if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
 }
 
-struct List_13B610 { s32 head; s32 pad; s32 off; };
-struct Frame_13B610;
-struct Frame_13B610 {
-    void* base; void* cur; s32 off; Frame_13B610* prev;
-    Frame_13B610(List_13B610* l) {
+struct ScopedListFrame;
+struct ScopedListFrame {
+    void* base; void* cur; s32 off; ScopedListFrame* prev;
+    ScopedListFrame(List01* l) {
         cur = l;
         base = l;
-        Frame_13B610* p = (Frame_13B610*)g_activeListFrames;
-        off = l->off;
+        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        off = l->offset;
         g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~Frame_13B610() { g_activeListFrames = (ListFrame*)prev; }
+    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void func_00124A48(void* self);
@@ -79,7 +78,7 @@ void* func_0018D500(s32 size);
 void func_0013B610(ChildGroupObject* self)
 {
     StartPlacedObject(self);
-    Frame_13B610 f((List_13B610*)&self->children);
+    ScopedListFrame f(&self->children);
     void* n;
     void* t = *(void**)f.base;
     f.cur = (u8*)t + f.off;

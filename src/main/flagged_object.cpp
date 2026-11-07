@@ -144,22 +144,20 @@ void func_001411A8(FlaggedObject* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-struct Frame_141210;
-
-struct Frame_141210 {
+struct ScopedListFrame {
     void* list;
     void* cursor;
     s32 next_off;
-    Frame_141210* prev;
-    Frame_141210(List01* l)
+    ScopedListFrame* prev;
+    ScopedListFrame(List01* l)
     {
         list = l;
         cursor = l;
         next_off = l->offset;
-        prev = (Frame_141210*)g_activeListFrames;
+        prev = (ScopedListFrame*)g_activeListFrames;
         g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_141210() { g_activeListFrames = (ListFrame*)prev; }
+    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void func_001BAC30(Collider* self);
@@ -172,7 +170,7 @@ void func_00141210(FlaggedObject* self)
     LoadCollider(self);
     ResolveObjectLinks(self, 1, g_flaggedObjectLinks);
 
-    Frame_141210 frame(&self->children);
+    ScopedListFrame frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);
     frame.cursor = (void*)((s32)head + frame.next_off);
     void* node = head;
@@ -227,23 +225,21 @@ void func_00141338(FlaggedObject* self)
     }
 }
 
-struct List_141438 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_141438 { List_141438* list; u8* link; s32 offset; Iter_141438* saved; };
-struct Next_141438 {
-    static u8* Of(Iter_141438* it)
+struct ListWalkNext {
+    static u8* Of(ListFrame* it)
     {
         u8* obj = *(u8**)it->link;
         it->link = obj + it->offset;
         return obj;
     }
 };
-struct Begin_141438 {
-    static void Of(Iter_141438* it, List_141438* list)
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_141438*)((void*)g_activeListFrames);
+        it->prev = g_activeListFrames;
         g_activeListFrames = (ListFrame*)it;
     }
 };
@@ -261,10 +257,10 @@ void func_00141438(FlaggedObject* self)
     for (s32 i = 0; i < self->countB; i++)
         ResolveAndStartObject(self->objsB[i]);
     if (self->childId == -1) {
-        Iter_141438 it;
+        ListFrame it;
         u8* obj;
-        Begin_141438::Of(&it, (List_141438*)&self->children);
-        while ((obj = Next_141438::Of(&it)) != 0) {
+        ListWalkBegin::Of(&it, (List01*)&self->children);
+        while ((obj = ListWalkNext::Of(&it)) != 0) {
             if (IsObjectOfKind(obj, 0x74) != 0) {
                 self->childId = GetAliasId(obj);
                 if (self->childId == -1)
@@ -272,7 +268,7 @@ void func_00141438(FlaggedObject* self)
                 self->child = obj;
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
+        g_activeListFrames = (ListFrame*)it.prev;
     } else {
         self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
