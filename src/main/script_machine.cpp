@@ -1513,7 +1513,19 @@ ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* arg
     return ret;
 }
 
-INCLUDE_ASM(func_00116108);
+ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    if (args[1].tag == 0) {
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(D_00248D30)))));
+    } else {
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v)))));
+    }
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

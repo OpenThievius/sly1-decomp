@@ -4,6 +4,7 @@
 // derived from it, with their helpers. Its name is ours, after the state notifiers it
 // holds most of.
 #include "common.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "state_notifier.h"
 #include "world.h"
@@ -226,7 +227,20 @@ void StartScaledOffsetObject(ScaledOffsetObject* self)
     ApplyScaledOffset(self);
 }
 
-INCLUDE_ASM(func_001461A8);
+void ResolveScaledOffsetContact(ScaledOffsetObject* self, Contact03* c, s32 end)
+{
+    Vec02 push;
+    Vu0::Q(push) = Vu0::Cross(Vu0::Q(self->m110.r[1]), Vu0::Q(c->v80));
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(push)));
+    if (!(len < 0.0001f)) {
+        Vec02 w;
+        Vec02* v = &c->end[end].v30;
+        u128 cur = Vu0::Q(*v);
+        Vu0::Q(w) = Vu0::FromFloat(-(self->scale / len));
+        Vu0::Q(push) = Vu0::MulX(Vu0::Q(push), Vu0::Q(w));
+        Vu0::Q(*v) = Vu0::Sub(cur, Vu0::Q(push));
+    }
+}
 
 void SetOffsetScale(ScaledOffsetObject* self, f32 v)
 {
