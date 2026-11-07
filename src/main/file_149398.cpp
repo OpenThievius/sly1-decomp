@@ -21,12 +21,13 @@
 #include "object_link.h"
 #include "scatter_controller.h"
 #include "shapes.h"
+#include "object_pool.h"
+#include "owner_message.h"
 
 s32 func_001300E8(void* node, s32 kind);
 extern s32 D_00275BEC;
 extern f32 D_00261850;
 
-struct Pending_0014BD38 { u8 pad0[0x10]; s32 f10; };
 
 
 
@@ -34,14 +35,18 @@ void func_001C91C8(NumberedAgent* self);
 
 
 void func_0012F6B0(void* handle, f32 scale);
-typedef void (*VFn_0014BDC8)(void* self, void* arg);
+// An agent of the world's list at +0x1CCC (linked at +0xC10), seen as its table of slots:
+// slot 0x50 takes an owner message (func_0014BDC8, func_0014BEF8).
+typedef void (*AgentMessageFn)(void* self, void* arg);
 
-struct Node_0014BDC8 {
-    VFn_0014BDC8* vtbl;
+struct ListedAgentView {
+    AgentMessageFn* vtbl;
     u8 pad0[0xC10 - 4];
-    Node_0014BDC8* next;
+    ListedAgentView* next;
 };
 
+// The 32-byte block func_0014BDC8 builds its owner message in (InitOwnerMessage fills the
+// first 16 bytes; the frame has room for 32).
 struct Scratch_0014BDC8 {
     s32 words[8];
 };
@@ -53,23 +58,12 @@ s32 func_001B9FB0(void* a, void* b);
 void func_001D7098(void* out, s32 mode, ContactAgent* owner);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_001DDA80(void* p);
-typedef void (*VFn_0014BEF8)(void* self, void* arg);
 
-struct Node_0014BEF8 {
-    VFn_0014BEF8* vtbl;
-};
 
-struct Scratch_0014BEF8 {
-    s32 words[4];
-};
-
-s32 func_001C96D8(ContactAgent* self, Node_0014BEF8** slot);
+s32 func_001C96D8(ContactAgent* self, ListedAgentView** slot);
 void func_001D7098(void* out, s32 mode, ContactAgent* owner);
 void func_00149398(CameraController* self, Camera* owner);
 
-struct Tmp_1496C0 {
-    s32 w[4];
-};
 
 void func_00189230(void* a, void* b, void* c);
 s32 func_001493C8(void* out, TargetCameraController* self);
@@ -81,7 +75,8 @@ void func_001B6598(void* dev, s32* out);
 void func_001C74E8(void* self);
 void func_00152470(void* table, void* self);
 
-struct State_0014B678 { f32 a; f32 b; s32 value; };
+// What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
+struct SinCosPair { f32 a; f32 b; s32 value; };
 
 void func_001EAD88(void* a, void* b, f32 value);
 void func_001C7520(void*);
@@ -93,9 +88,6 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f3
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 
-struct Quad_14A7B8 {
-    s32 w[4];
-};
 
 s32 func_001493C8(void* out, TargetCameraController* self);
 void func_00149458(void* out, void* self);
@@ -105,10 +97,6 @@ s32 func_001EAC68(f32 a, f32 b, f32 c);
 void func_00143940(void* self, f32 x);
 void func_00143968(void* self, f32 x);
 
-struct Slot_14BF88 {
-    u8 pad0[0x10];
-    s32 v10;
-};
 
 void func_001C91C8(void* self);
 void func_0014CD70(void* mgr, void* self);
@@ -118,15 +106,17 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_0011D640(s32 a);
 
-struct Sub_149508 {
+// What StartCameraSounds keeps of each sound it starts: the IOP voice at +0x18 it pauses.
+struct CameraSound {
     u8 pad000[0x18];
-    s32 f18;
+    s32 voice;
 };
 
-struct Obj_149508 {
+// The object StartCameraSounds fills (g_camera): two sounds and a flag it sets.
+struct CameraSoundOwner {
     u8 pad000[0x44];
     s32 f44;
-    Sub_149508* f48;
+    CameraSound* f48;
     s32 f4C;
 };
 
@@ -157,24 +147,15 @@ void func_00124FC0(void* self);
 void func_0014C858(void* self);
 void func_0014CBA8(void* self);
 void* func_001925F0(void);
-typedef void (*VFn_14C6E0)(void* self);
+// The active collider seen as its table of slots: slot 81 (func_0014C6E0, func_0014CDC8).
+typedef void (*ColliderSlotFn)(void* self);
 
-struct Obj_14C6E0 { VFn_14C6E0* vtbl; };
+struct ColliderSlots { ColliderSlotFn* vtbl; };
 
 void* func_001E9970(void* zero);
 extern f32 D_0026185C[];
 f32 func_001EAAE0(f32 a, f32 b);
 
-struct Mgr_14CD70 {
-    u8 pad_00[0x43C];
-    f32 f43C;
-    f32 f440;
-    u8 pad_444[0x450 - 0x444];
-    s32 f450;
-    u8 pad_454[0x458 - 0x454];
-    s32 f458;
-    f32 f45C;
-};
 
 void* func_0015A448(void* a, void* b, void* c);
 s32 func_001300E8(void* obj, s32 kind);
@@ -186,17 +167,11 @@ void func_00127378(void* self, s32 kind, void* msg);
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6568(void* dev, s32* out);
 
-struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; BaseObject* f18; u8 pad1[0x190 - 0x1C]; Quad16 q190[4];
- };
 
 void func_00124DF8(void* self, s32 n, void* table);
-Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
+BaseObject* func_0015A480(void* a, s32 kind, void* arg);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
-struct Node_14C138 {
-    u8 pad[0x14];
-    void* f14;
-};
 
 
 extern f32 D_00275C60[];
@@ -208,15 +183,11 @@ void func_001B6DF8(void* a, void* b);
 void func_0014C2F0(GaugeManager* self);
 extern f32 D_0026185C[];
 
-struct Arg_14CDC8 {
-    u8 pad_00[0xC24];
-    s32 fC24;
-};
 
-void func_0014CDC8(GaugeManager* self, Arg_14CDC8* arg);
-typedef s32 (*VFnI_14CDC8)(void* self);
+void func_0014CDC8(GaugeManager* self, NumberedAgent* arg);
+typedef s32 (*ColliderQueryFn)(void* self);
 
-struct Obj_14CDC8 { VFnI_14CDC8* vtbl; };
+struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
 
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001B6568(void* dev, s32* out);
@@ -234,40 +205,10 @@ extern u8 D_00248D30[];
 void func_001B6598(void* p, s32* out);
 void func_001B6568(void* p, s32* out);
 
-struct Slot_14CBA8 {
-    void* p0;
-    void* obj;
-    void* p8;
-    void* pc;
-    s32 flag;
-};
-
-struct Ctl_14CBA8;
-
-struct VT_14CBA8 {
-    u8 pad[0x84];
-    void (*f84)(Ctl_14CBA8* self, f32* v);
-    void (*f88)(Ctl_14CBA8* self, f32* v);
-    void (*f8c)(Ctl_14CBA8* self, f32* v);
-    void (*f90)(Ctl_14CBA8* self, u8* v);
-    void (*f94)(Ctl_14CBA8* self, u8* v);
-};
-
-struct Ctl_14CBA8 {
-    VT_14CBA8* vt;
-    u8 pad[0xC24];
-    Slot_14CBA8* cur;
-};
-
-struct Holder_14CBA8 {
-    u8 pad0[0x48];
-    Ctl_14CBA8* ctl;
-};
-
 extern u8 D_00248D30[];
-void func_001A8AF8(Holder_14CBA8* p);
+void func_001A8AF8(ObjectPool* p);
 s32 func_001EAA70(s32 a, s32 b);
-s32 func_001A8C90(Holder_14CBA8* h, s32 v);
+s32 func_001A8C90(ObjectPool* h, s32 v);
 s32 func_001F3BD8(void* p, f32* out);
 s32 func_001F3C08(void* p, f32* out);
 s32 func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
@@ -276,23 +217,25 @@ f32 func_001EAAE0(f32 a, f32 b);
 
 
 void func_00123ED0(GaugeManager* self);
-typedef void (*Cb_14CF30)(void* self);
+typedef void (*TimerDoneFn)(void* self);
 void func_00127378(GaugeManager* self, s32 kind, void* key);
 void func_001B6598(void* key, s32* out);
 void func_001DDC38(void* sub, GaugeManager* self);
 void func_001AB890(T217D_510* self, f32 v);
-void func_001AB928(T217D_510* self, f32 v, Cb_14CF30 cb);
+void func_001AB928(T217D_510* self, f32 v, TimerDoneFn cb);
 void func_001AB938(T217D_510* self);
 void func_0014C668(void* self);
 
-struct Clq_14C2F0 {
+// The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
+struct Quadratic {
     f32 a;
     f32 b;
     f32 c;
 };
 
-struct Util_14C2F0 {
-    static f32 Eval(Clq_14C2F0* q, f32 t) { return q->a + t * (q->b + t * q->c); }
+// The helpers func_0014C2F0 maps the gauge fraction with: a quadratic, a clamp, a blend.
+struct GaugeCurve {
+    static f32 Eval(Quadratic* q, f32 t) { return q->a + t * (q->b + t * q->c); }
     static f32 Limit(f32 g, f32 lo, f32 hi)
     {
         if (g < lo) return lo;
@@ -302,17 +245,19 @@ struct Util_14C2F0 {
     static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
 };
 
-struct Params_14C2F0 {
+// GaugeManager::o5E0, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
+// limits and the quadratics that pick between them.
+struct BlendedGaugeParams {
     f32 f00;
     f32 f04;
     u8 pad08[8];
-    Clq_14C2F0 q10;
+    Quadratic q10;
     u8 pad1C[4];
     f32 f20;
     f32 f24;
     f32 f28;
     f32 f2C;
-    Clq_14C2F0 q30;
+    Quadratic q30;
     u8 pad3C[4];
     f32 f40;
     f32 f44;
@@ -320,17 +265,17 @@ struct Params_14C2F0 {
     f32 f4C;
     f32 f50;
     u8 pad54[0xC];
-    Clq_14C2F0 q60;
+    Quadratic q60;
     u8 pad6C[4];
     f32 f70;
     f32 f74;
     u8 pad78[8];
-    Clq_14C2F0 q80;
+    Quadratic q80;
     u8 pad8C[4];
     f32 f90;
     f32 f94;
     u8 pad98[8];
-    Clq_14C2F0 qA0;
+    Quadratic qA0;
 };
 
 extern f32 D_00275C60[];
@@ -378,19 +323,18 @@ void func_001493C0(CameraController* self, u8* eye, u8* tail, f32 dt)
 {
 }
 
-struct __attribute__((aligned(16))) Quad_1493C8 { s32 a, b, c, d; };
 
-Quad_1493C8 func_001493C8(TargetCameraController* self)
+Quad16 func_001493C8(TargetCameraController* self)
 {
-    Quad_1493C8 r;
+    Quad16 r;
     if (self->f5C != 0) {
         ConvertPositionToWorld(self->f5C, &r);
     } else {
         if (GetActiveSwitchedCollider() != 0) {
-            r = *(Quad_1493C8*)((u8*)GetActiveSwitchedCollider() + 0x140);
-            *(f32*)&r.c = *(f32*)&r.c + D_00261BF8;
+            r = *(Quad16*)((u8*)GetActiveSwitchedCollider() + 0x140);
+            *(f32*)&r.w[2] = *(f32*)&r.w[2] + D_00261BF8;
         } else {
-            r = *(Quad_1493C8*)(*(u8**)g_camera + 0x40);
+            r = *(Quad16*)(*(u8**)g_camera + 0x40);
         }
     }
     return r;
@@ -398,11 +342,11 @@ Quad_1493C8 func_001493C8(TargetCameraController* self)
 
 ASM_FUNC(func_00149458);
 
-void func_00149508(Obj_149508* self)
+void func_00149508(CameraSoundOwner* self)
 {
     StartSoundEffect(0x71, &self->f48, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     if (self->f48 != 0) {
-        func_0011D640(self->f48->f18);
+        func_0011D640(self->f48->voice);
     }
     StartSoundEffect(0x70, &self->f4C, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     self->f44 = 1;
@@ -450,7 +394,7 @@ void func_00149660(TargetCameraController* self, Camera* owner)
 
 void func_001496C0(TargetCameraController* self)
 {
-    Tmp_1496C0 tmp;
+    Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
     VectorToAngles((u8*)eng + 0x80, (u8*)self + 8, (u8*)self + 0x10);
     f32 d = self->f20;
@@ -476,8 +420,8 @@ ASM_FUNC(func_00149760);
 
 void func_0014A7B8(TargetCameraController* self)
 {
-    Quad_14A7B8 a;
-    Quad_14A7B8 b;
+    Quad4 a;
+    Quad4 b;
     Camera* n;
 
     GetCameraControllerTargetPoint(&a, self);
@@ -720,7 +664,7 @@ void func_0014B608(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C
 
 void func_0014B640(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
 
-void func_0014B678(State_0014B678* self, f32 value)
+void func_0014B678(SinCosPair* self, f32 value)
 {
     ComputeSinCos(&self->b, self, value);
     self->value = 0;
@@ -752,11 +696,11 @@ void func_0014BD38(NumberedAgent* self)
     EnterAgentState(self);
     switch (self->f724) {
     case 0xB:
-        AddToGaugeAmount(D_0027C00C, (Arg_14CDC8*)self);
-        if (((Pending_0014BD38*)self->fC28) != 0) { ((Pending_0014BD38*)self->fC28)->f10 = 0; self->fC28 = 0; }
+        AddToGaugeAmount(D_0027C00C, self);
+        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
         break;
     case 0xC:
-        if (((Pending_0014BD38*)self->fC28) != 0) { ((Pending_0014BD38*)self->fC28)->f10 = 0; self->fC28 = 0; }
+        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
         SetAnimationPlayerSpeed(self->f7E0, D_0027C00C->speed448);
         break;
     }
@@ -766,14 +710,14 @@ s32 func_0014BDC8(ContactAgent* self)
 {
     s32 result = ChooseAgentState(self);
     if (result == 0xB) return result;
-    Node_0014BDC8* n = (Node_0014BDC8*)GetActiveSwitchedCollider();
+    ListedAgentView* n = (ListedAgentView*)GetActiveSwitchedCollider();
     if (n != 0 && IsContactBetweenParts(self, n) != 0) {
         Scratch_0014BDC8 buf;
         InitOwnerMessage(&buf, 0, self);
         result = 0xB;
         n->vtbl[0x50](n, &buf);
     }
-    for (Node_0014BDC8* x = (Node_0014BDC8*)self->world->list1CCC.head; x != 0; x = x->next) {
+    for (ListedAgentView* x = (ListedAgentView*)self->world->list1CCC.head; x != 0; x = x->next) {
         if ((void*)x != (void*)self && IsObjectOfKind(x, 0x12) != 0 && IsContactBetweenParts(self, x) != 0) {
             ChangeAgentState(x, 0xB, 0);
         }
@@ -788,14 +732,14 @@ s32 func_0014BEA8(ContactAgent* self)
     return 1;
 }
 
-s32 func_0014BEF8(ContactAgent* self, Node_0014BEF8** slot)
+s32 func_0014BEF8(ContactAgent* self, ListedAgentView** slot)
 {
     if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
     if (HandleAgentObjectEvent(self, slot) == 0) return 0;
-    Node_0014BEF8* found = (Node_0014BEF8*)GetActiveSwitchedCollider();
-    Node_0014BEF8* n = *slot;
+    ListedAgentView* found = (ListedAgentView*)GetActiveSwitchedCollider();
+    ListedAgentView* n = *slot;
     if (n == found) {
-        Scratch_0014BEF8 buf;
+        OwnerMessage buf;
         InitOwnerMessage(&buf, 0, self);
         n->vtbl[0x50](n, &buf);
     }
@@ -808,14 +752,14 @@ void func_0014BF88(ContactAgent* self)
     switch (self->f724) {
     case 0xB:
         CountDownGaugeContacts((void*)D_0027C00C, self);
-        if (((Slot_14BF88*)self->fC20) != 0) {
-            ((Slot_14BF88*)self->fC20)->v10 = 0;
+        if (((GaugeSlot*)self->fC20) != 0) {
+            ((GaugeSlot*)self->fC20)->taken = 0;
             self->fC20 = 0;
         }
         break;
     case 0xC:
-        if (((Slot_14BF88*)self->fC20) != 0) {
-            ((Slot_14BF88*)self->fC20)->v10 = 0;
+        if (((GaugeSlot*)self->fC20) != 0) {
+            ((GaugeSlot*)self->fC20)->taken = 0;
             self->fC20 = 0;
         }
         SetAnimationPlayerSpeed(self->f7E0, self->fC24);
@@ -856,10 +800,10 @@ void func_0014C138(GaugeManager* self)
     func_001B6DF8(self->device, self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
-        Node_14C138* n = (Node_14C138*)FindFirstObjectByIdMode4(self->world, s->obj, self);
+        BaseObject* n = (BaseObject*)FindFirstObjectByIdMode4(self->world, s->obj, self);
         s->obj = n;
-        s->f8 = FindFirstObjectByIdMode1(n->f14, 0x3F7, n);
-        s->f4 = FindFirstObjectByIdMode1(n->f14, 0x3F6, n);
+        s->f8 = FindFirstObjectByIdMode1(n->world, 0x3F7, n);
+        s->f4 = FindFirstObjectByIdMode1(n->world, 0x3F6, n);
     }
     f32* p = self->poly;
     f32 g = g_currentEntry->dt;
@@ -887,23 +831,23 @@ void func_0014C138(GaugeManager* self)
 
 void func_0014C2F0(GaugeManager* o)
 {
-    f32 t = Util_14C2F0::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
-    Params_14C2F0* p = (Params_14C2F0*)o->o5E0;
+    f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
+    BlendedGaugeParams* p = (BlendedGaugeParams*)o->o5E0;
     f32 s;
 
-    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q30, t), g_unitRange[0], g_unitRange[1]);
-    *(f32*)(o->buf430 + 4) = Util_14C2F0::Lerp(s, p->f20, p->f28);
-    *(f32*)(o->buf430 + 8) = Util_14C2F0::Lerp(s, p->f24, p->f2C);
+    s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q30, t), g_unitRange[0], g_unitRange[1]);
+    *(f32*)(o->buf430 + 4) = GaugeCurve::Lerp(s, p->f20, p->f28);
+    *(f32*)(o->buf430 + 8) = GaugeCurve::Lerp(s, p->f24, p->f2C);
 
-    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q60, t), g_unitRange[0], g_unitRange[1]);
-    *(f32*)(o->buf430 + 0xC) = Util_14C2F0::Lerp(s, p->f44, p->f4C);
-    *(f32*)(o->buf430 + 0x10) = Util_14C2F0::Lerp(s, p->f48, p->f50);
+    s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q60, t), g_unitRange[0], g_unitRange[1]);
+    *(f32*)(o->buf430 + 0xC) = GaugeCurve::Lerp(s, p->f44, p->f4C);
+    *(f32*)(o->buf430 + 0x10) = GaugeCurve::Lerp(s, p->f48, p->f50);
 
-    *(f32*)(o->buf430 + 0x14) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q80, t), g_unitRange[0], g_unitRange[1]), p->f70, p->f74);
+    *(f32*)(o->buf430 + 0x14) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange[0], g_unitRange[1]), p->f70, p->f74);
 
-    *(f32*)(o->buf430 + 0x18) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->qA0, t), g_unitRange[0], g_unitRange[1]), p->f90, p->f94);
+    *(f32*)(o->buf430 + 0x18) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange[0], g_unitRange[1]), p->f90, p->f94);
 
-    o->f44C = (s32)Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q10, t), g_unitRange[0], g_unitRange[1]), p->f00, p->f04);
+    o->f44C = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange[0], g_unitRange[1]), p->f00, p->f04);
 
     if (p->f40 < t && o->f464 == 0) {
         o->f464 = 1;
@@ -952,7 +896,7 @@ void func_0014C6E0(GaugeManager* self)
             ActivateRandomGaugeSlot(self);
         }
         void* p = GetActiveSwitchedCollider();
-        Obj_14C6E0* o = (Obj_14C6E0*)p;
+        ColliderSlots* o = (ColliderSlots*)p;
         o->vtbl[81](p);
     }
 }
@@ -992,42 +936,42 @@ ASM_FUNC(func_0014C858);
 
 void func_0014CBA8(GaugeManager* self)
 {
-    Slot_14CBA8* list[16];
+    GaugeSlot* list[16];
     f32 v0[4];
     f32 v1[12];
     if (self->f454 >= self->f44C) {
         self->f460 = 3.4028235e+38f;
         return;
     }
-    ChooseObjectPoolItem((Holder_14CBA8*)self->f424);
-    if (!((Holder_14CBA8*)self->f424)->ctl) return;
+    ChooseObjectPoolItem((ObjectPool*)self->f424);
+    if (!((ObjectPool*)self->f424)->f48) return;
     s32 n = 0;
     for (s32 i = 0; i < self->slotCount; i++) {
-        Slot_14CBA8* s = (Slot_14CBA8*)&self->slots[i];
-        if (!s->flag && !s->pc) list[n++] = s;
+        GaugeSlot* s = &self->slots[i];
+        if (!s->taken && !s->key) list[n++] = s;
     }
     if (n <= 0) return;
     s32 idx = RandomIntInRange(0, n - 1);
-    Holder_14CBA8* h = (Holder_14CBA8*)self->f424;
-    Ctl_14CBA8* c = h->ctl;
-    Slot_14CBA8* s = list[idx];
+    ObjectPool* h = (ObjectPool*)self->f424;
+    NumberedAgent* c = (NumberedAgent*)h->f48;
+    GaugeSlot* s = list[idx];
     (void)func_001A8C90(h, 0);
-    GetObjectWorldPosition(s->obj, v0);
-    GetObjectWorldRotation(s->obj, v1);
-    c->vt->f84(c, v0);
-    c->vt->f88(c, v1);
-    c->vt->f90(c, D_00248D30);
-    c->vt->f94(c, D_00248D30);
-    CreateAnimationPlayerWithoutPresetTargets(s->p8, s->p0, 0, &s->pc, 0.0f, 1.0f);
-    func_0012F810(s->pc, self);
+    GetObjectWorldPosition(s->f4, v0);
+    GetObjectWorldRotation(s->f4, v1);
+    c->desc02()->m1D(c, (Vec02*)v0);
+    c->desc02()->m1E(c, (Mat02*)v1);
+    c->desc02()->m20(c, (Vec02*)D_00248D30);
+    c->desc02()->m21(c, (Vec02*)D_00248D30);
+    CreateAnimationPlayerWithoutPresetTargets(s->f8, s->obj, 0, &s->key, 0.0f, 1.0f);
+    func_0012F810(s->key, self);
     self->f454 = self->f454 + 1;
     f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
     self->f460 = (*(f32*)&g_gameTime) + r;
-    c->cur = s;
-    s->flag = 1;
+    c->fC28 = s;
+    s->taken = 1;
 }
 
-void func_0014CD70(Mgr_14CD70* self)
+void func_0014CD70(GaugeManager* self)
 {
     if (self->f458 == self->f450) {
         self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
@@ -1035,7 +979,7 @@ void func_0014CD70(Mgr_14CD70* self)
     self->f458 = self->f458 - 1;
 }
 
-void func_0014CDC8(GaugeManager* self, Arg_14CDC8* arg)
+void func_0014CDC8(GaugeManager* self, NumberedAgent* arg)
 {
     s32 hi = self->maxAmount;
     s32 v = self->amount + arg->fC24;
@@ -1054,7 +998,7 @@ void func_0014CDC8(GaugeManager* self, Arg_14CDC8* arg)
         func_001B6598(self->device, &t1);
         func_001B6568(self->device, &t2);
         void* p = GetActiveSwitchedCollider();
-        Obj_14CDC8* o = (Obj_14CDC8*)p;
+        ColliderQuerySlots* o = (ColliderQuerySlots*)p;
         s32 r = o->vtbl[81](p);
         if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
             SetStateWalkerTarget(self->device, 0x3FE);
