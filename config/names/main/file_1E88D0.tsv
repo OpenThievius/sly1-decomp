@@ -4,6 +4,7 @@ func_001E8948	StartKeyedConeAgent	slot 16 of class 0x0B: resolves its links (D_0
 func_001E89F0	FindNearestAgentKey	returns the one of the six key objects at +0xC64 of a class 0x0B agent whose position (+0x140) is nearest a point in x and y
 func_001E8A50	EnterKeyedConeAgentState	slot 92 of class 0x0B, its override of EnterAgentState
 func_001E8D58	ChooseKeyedConeAgentState	slot 89 of class 0x0B: with its count at +0xC5C used up clears the deadline +0xBFC to FLT_MAX; keeps state 10 while +0x7E0 is set (else 8), otherwise asks ChooseAgentState
+func_001E8DB0	IsKeyedConeAgentFree	slot 0x16C of class 0x0B, the slot of IsConeAgentFree and IsGaugeAgentFree: 0 while +0xC40 is set, else whether the count at +0xC5C is nonzero
 func_001E8DD0	IsKeyedConeAgentTargetInRange	slot 93 of class 0x0B: true only in mode 0x2DB with the count at +0xC5C neither 0 nor 5
 func_001E8E08	SteerKeyedConeAgentAlongPath	slot 97 of class 0x0B: outside mode 0x2DA lowers the count at +0xC5C by one (not below 0), then runs SteerAgentAlongPath
 func_001E8E48	RestartKeyedConeAgentClip	slot 96 of class 0x0B: in mode 0x2DA and state 12, when the nearest key (FindNearestAgentKey) has changed, lowers the count at +0xC5C and points that key's state walker at 0x2E0; then runs RestartAgentClip
@@ -17,6 +18,8 @@ func_001E90E8	ResumeElementStackState	calls func_001E96F8 with state 3, which us
 func_001E9108	UpdateElementStack	per-frame step of the element stack: reads the pad record's button flags, advances the state timers (states 4 and 6 ramp the time scale over 0.2 s and 0.5 s), handles pad flags 0x800 and 0x100, then calls vt slot 4 of the top element
 func_001E9498	PushStackElement	appends a screen element to the stack at +0xC (count at +0x2C, at most 8), telling the previous top (vt slot 3, 0) it is no longer on top and the new one (slot 3, 1) that it is, then calls the new element's slot 6; func_0016B580 pushes D_0026F808 and D_0026FD00 through it
 func_001E9570	PopStackElement	removes the top element of the same stack, calls its vt slot 3 with 0 and slot 7, then tells the new top (slot 3, 1) it is on top; func_0016BBA8 pops D_00275BC0 with it
+func_001E9648	DrawAllScreenElements	calls DrawScreenElements; RunMainLoop calls it once a frame
+func_001E9668	QueueScreenElementDraws	calls func_001AA110, which runs slot 10 (the slot QueueArcDraw fills for the arc) of each of the 37 screen elements of D_002486B0 that is shown (+0x250); RunMainLoop calls it before the world draw, as it calls DrawAllScreenElements after
 func_001E9688	ResetElementStack	pops elements until fewer than two remain, sets the saved state to -1 and the count to 1, then calls func_001A7D98 and ResetScreenElements
 func_001E96F8	SetElementStackState	leaves the old state (state 1 hides the elements D_00272930 and D_00272B98 and calls func_001DDA50), stores the new one and the clock time, and per state fades the screen, shows or hides elements or sets the time scale with func_001E98E8
 func_001E98E8	ApplyStackTimeScale	when D_0026185C[0] is positive, passes a blend of its argument toward 1 (factor 0.6) to func_001C06A0 twice, then always calls SetGameClockScale with the argument; SetElementStackState calls it with 1.0 or 0.0
@@ -36,9 +39,12 @@ func_001EA4B8	ApproachValueWithRamp	moves a value toward a target within a time 
 func_001EA620	ApproachValueClampingVelocity	runs ApproachValueWithRamp, then when the object's +0xC limit is positive keeps the new speed within the old speed +- limit times the step
 func_001EA728	ApproachAngleWithRamp	wraps the angle difference with WrapAngle, runs ApproachValueWithRamp on it and wraps the sum with the start angle
 func_001EA798	ApproachAngleClampingVelocity	wraps the angle difference, runs ApproachValueClampingVelocity on it and wraps the sum with the start angle
+func_001EA818	ApproachPointWithRamp	original assembly: moves a point toward a target along the line between them by ApproachValueWithRamp of the distance, writing the new point and, when asked, the velocity; UpdatePlayer, UpdatePanelStick and the player's path and target controls call it
+func_001EA918	ApproachRotationWithRamp	original assembly: turns a rotation toward a target rotation: the axis and angle between them (MultiplyMatrices3x3, MatrixToAxisAngle), ApproachValueWithRamp on the angle and the rotation about the axis (BuildAxisAngleMatrix); ControlModeCollider, ControlModeWalker and UpdatePlayerLinkPose call it
 func_001EAA70	RandomIntInRange	returns a + (random value mod b - a + 1) for a != b, using func_001F6708
 func_001EAAE0	RandomFloatInRange	returns a when a == b, else a + (b - a) times a random 31-bit integer from func_001F6708 scaled by 2^-31
 func_001EAB48	RandomGaussian	draws points in the unit circle by RandomFloatInRange, applies the polar transform with log and square root, scales by deviation, adds mean and clamps to mean +- limit when limit is nonzero
+func_001EAC68	AreFloatsNearlyEqual	returns 1 when the difference of two floats over the larger of 1 and the first's magnitude is below the tolerance; TestScriptNearlyEqual and the range record setters call it
 func_001EACA0	SolveQuadratic	computes the discriminant of a x^2 + b x + c, returns 0 when negative, 1 root when it is below 0.0001 and 2 roots otherwise, written to the array
 func_001EAD30	RemapQuadraticParameter	from quadratic coefficients (x, y, z) computes the coefficients of the same polynomial after the substitution t -> s t + u (z s s, 2 z s u + y s, z u u + y u + x)
 func_001EAD88	ComputeSinCos	reduces the angle by multiples of pi, evaluates a five-term odd polynomial for the sine and takes the cosine as sqrt(1 - sin^2) with the sign of the reduction; callers use both outputs for rotations
@@ -50,14 +56,17 @@ func_001EB050	IsInsideRange	returns 1 when x is strictly between the lo and hi o
 func_001EB080	IsInsideAnyRange	loops over count range records and returns 1 when IsInsideRange holds for one of them
 func_001EB0F8	ClampToRange	returns lo when x is below it, hi when above it, else x
 func_001EB128	CompareFloats	compares the floats two pointers refer to and returns 1, -1 or 0 (a comparison function with qsort's shape)
+func_001EB168	FindLocalMinimum	original assembly: from a start value clamped to the range samples the function (by $f12 with its context) one step below and above, walks toward the lower side and narrows the step until the bracket closes, writing the lowest argument and value; ChoosePlayerTargetByCost passes it the ScoreTarget*At functions
 func_001EB460	InitBeatPressCollider	slot 0 of class 0x1C: runs InitSwitchedCollider and sets the timing window +0x684 between the two values D_00275C70 by the polynomial D_00275C80 of g_currentEntry's dt, clamped to g_unitRange
 func_001EB518	LoadBeatPressCollider	slot 10 of class 0x1C: runs LoadCollider and resolves its link (D_00275C90)
 func_001EB550	CopyPlayerAttachBlock	copies the block at +0x580 and the word at +0x604 of the player g_player into the class 0x1C object (its slot 16 calls it)
 func_001EB598	StartBeatPressCollider	slot 16 of class 0x1C: starts the placed object, resolves its links (D_00275CA0), creates its state walker at 0x4CA and queues CopyPlayerAttachBlock for itself
 func_001EB608	HandleBeatPressColliderActivation	slot 72 of class 0x1C: runs HandleSwitchedColliderActivation; on activation points its walker at 0x4CB and links itself and the class 0x13 tempo agent at +0x68C, on deactivation points it back at 0x4CA
+func_001EB698	ContinueBeatPressColliderRequest	original assembly: the callback JudgeBeatPressInput installs: turns the player toward the collider (ArctangentOfRatio, WrapAngle, TurnColliderTowardHeading) and changes its state (SetPlayerState), as ContinueTintBlendColliderRequest does for class 0x14
 func_001EB748	JudgeBeatPressInput	slot 73 of class 0x1C: holds the player at its anchor, matches a pressed direction (pad bits 0x10..0x80) against the current entry of +0x634 within half the window +0x684 of the tempo agent's beat, plays the hit or miss sounds, and on a missed beat ends the run or the player's hold; then moves to the next entry
 func_001EBC88	IsBeatPressColliderRequestBlocked	slot 75 of class 0x1C: blocked while g_buttonCodeFlags bit 0 is set or the pad select flag is held (IsPadSelectFlagHeld), else while +0x688 is set
 func_001EBCD8	AppendBeatPressEntry	appends an eight-byte (time, direction) entry to the array at +0x634 of a class 0x1C beat-press collider, counted at its +0x630 word, the entries JudgeBeatPressInput works through (func_001EC7A8 calls it)
+func_001EBD08	AcceptBeatPressColliderRequest	slot 0x140 of class 0x1C, the slot AcceptPlayerRequest and AcceptAgentRequest fill: returns 0 and takes no request
 func_001EBD10	GetBeatPressColliderPositionAt	slot 34 of class 0x1C, its override of GetPlacedObjectPositionAt
 func_001EBDD0	GetBeatPressColliderRotationAt	slot 35 of class 0x1C, its override of GetPlacedObjectRotationAt
 func_001EBEB0	InitTempoAgent	slot 0 of class 0x13: runs InitAgent, sets the tempo +0xC5C to 60 beats a minute and the beat length +0xC8C to 1.0, the span +0xC60 to 8 beats (8.0 at +0xC64), allocates its 0x400-byte entry array and stops the staged bank voice
@@ -66,10 +75,14 @@ func_001EBFB0	StartTempoAgent	slot 16 of class 0x13: starts the agent, makes its
 func_001EC098	UnregisterTempoAgent	slot 7 of class 0x13: runs UnregisterSwitchedCollider
 func_001EC0B8	RegisterTempoAgent	slot 6 of class 0x13: runs RegisterSwitchedCollider
 func_001EC0D8	IsTempoAgentTargetInRange	slot 93 of class 0x13: decides by the state its walker is in (func_001B6598): the 0x4ED group while +0xC20 is set, the 0x4EE group by the phase +0xC94 (0 moves it to 1)
+func_001EC188	IsTempoAgentFree	slot 0x16C of class 0x13, the slot of IsConeAgentFree and IsGaugeAgentFree: always 1
+func_001EC190	DrawTempoAgentRing	the deferred draw DrawTempoAgent queues: fills its parameter block once, finds an anim record (FindAnimRecord), scales its colours (ScaleQuadword) and draws the agent's ring of entries with DrawAngleSortedRing
+func_001EC380	ApplyTempoAgentTransform	slot 0xA0 of class 0x13, the slot BlendPlayerPose and ApplyModeColliderTint fill: in state 16 (+0x724) builds its own transform (BuildPlacedObjectTransform) with +0x44 cleared and passes it to the base func_00125C90 instead of the given one
 func_001EC3D8	DrawTempoAgent	slot 37 of class 0x13, its override of DrawAgent
 func_001EC478	LeaveTempoAgentState	slot 91 of class 0x13: runs LeaveAgentState and, leaving state 16, resets the phase +0xC94 and moves its walker from 0x4EE, 0x4F1 or 0x4F4 to the next state
 func_001EC528	DecrementTempoAgentGauge	the script built-in func_00108B48 calls it: lowers the gauge bar's count (DecrementGaugeCount), sets +0xA68 to 2 and snaps the bar's fill to its target
 func_001EC570	EnterTempoAgentState	slot 92 of class 0x13: lowers the gauge bar on states 16 and 11 (11 also marks level 3 done and saves), runs EnterAgentState, then sets the clip rates from the beat length +0xC88 and adds its entry for states 2 and 13 (AddTempoAgentEntry)
+func_001EC7A8	ScheduleTempoAgentBeatPress	RunTimelineEntry's kind 0: stores the entry's direction (+0xC) at +0xC40, its object (+0xC10 by direction) at +0xC20 and the time at +0xC44, and appends a (direction, time) entry, the beat four times the entry's bar plus its beat after +0xC60, to the beat-press collider at +0xC3C (AppendBeatPressEntry)
 func_001EC828	HandleTempoAgentNotification	slot 13 of class 0x13
 func_001ECB18	SyncTempoAgentEntries	queued each frame by UpdateTempoAgent: sets each entry's object rate (+0x18) so that it reaches its next division of the beat count +0xC74 by the next beat time +0xC84
 func_001ECBC8	UpdateTempoAgent	slot 17 of class 0x13: runs UpdateAgent, restarts the beat clock when D_00275DB8 is 2, and on each beat time +0xC84 advances the beat +0xC74, the beat in the bar +0xC78 (four to a bar, +0xC70 counts bars) and the next beat time by the beat length; then runs its timeline and queues SyncTempoAgentEntries
@@ -97,8 +110,16 @@ func_001ED5F8	AppendTimelineKind4Entry	appends a timeline entry of kind 4 with A
 func_001ED618	AppendTimelineKind5Entry	appends a timeline entry of kind 5 with AppendTimelineEntry
 func_001ED650	ComputePolarOffset	takes sin and cos of its angle (ComputeSinCos) and writes cos*scale, sin*scale and z to the output vector
 func_001ED6B0	ComputeDirectionFromAngles	takes the sine and cosine of two angles and writes (cos b cos a, cos b sin a, sin b) times a scale
+func_001ED738	SplitVectorAlongAxis	returns the dot product of a vector with an axis and writes, when asked, its part along the axis and the rest
+func_001ED780	BuildPerpendicularPair	writes the normalised cross product of a vector with a hint (a second hint when the first is parallel) and the normalised cross product of that with the vector: two unit vectors perpendicular to it
+func_001ED840	ComputeUnitPerpendicular	writes a unit vector perpendicular to the given one: crosses it with a vector built by swapping and negating two of its components chosen by their magnitudes; BuildBasisFromXAndYHint and BuildBasisFromXAndZHint use it
+func_001ED908	ComputeAngleBetweenVectors	returns the angle between two vectors (Arccosine of their normalised dot product) and writes the unit axis of their cross product (ComputeUnitPerpendicular when they are parallel), 0 and the unit X axis (g_unitXVector) when one is too short
+func_001EDA80	FindSegmentClosestParams	original assembly: for two segments writes the two parameters of their closest points from cross products of their directions, 0 and 0 when they are parallel
+func_001EDC08	FindClosestPointsOnSegments	original assembly: clamps the parameters of FindSegmentClosestParams to 0..1 and writes the two closest points of the segments; UpdatePlayer and UpdateNumberedAgentGoal call it
 func_001EDDB0	GetVectorAngles	writes the wrapped atan2 of (y, x) and the wrapped atan2 of z against the length of (x, y)
 func_001EDE38	RotateVectorByTwoAngles	takes sines and cosines of two angles and writes the rotated copy of a vector from products of them
+func_001EDEF0	ComputeBallisticLaunchVelocity	original assembly: the velocity that carries an object from one point to another at a launch angle (Sine, Cosine, Tangent, ArctangentOfRatio) under its gravity (+0x350) or the world's (+0x1EE0 of D_00275710); PlacePlayerOnGround and LaunchTargetFollowerAtFollowed call it
+func_001EE2B0	ClampVectorLength	scales a vector down to the given length when it is longer, else copies it; the Step functions of the agents and colliders call it
 func_001EE318	InitPacketWriter	runs func_00152888 on the writer, sets the closing-pad flag +0x10 to 1, installs the vtable D_0024A0E0 and clears +0x1C and +0x20
 func_001EE368	PadPacketToQuadSlot	zero-fills words from the cursor until its word index within the quadword (bits 2 and 3) equals the target
 func_001EE3B8	WriteVifBaseOffset	appends 0x03000000 or a then 0x02000000 or b (the double-buffer base and offset words)
@@ -120,11 +141,14 @@ func_001EE8D0	WriteVifDirectFromWriter	writes a direct packet (WriteVifDirectFro
 func_001EE900	InitValueListObject	slot 4 of class 0x86: runs func_00182C18 and stores itself at the world's +0x1EC4
 func_001EE930	LoadValueList	reads a block, a count and that many s32 values from the stream into valueCount and values, then the base load; slot 10
 func_001EE9D0	ExpandMaskThroughTable	for every set bit i of the 31-bit mask ANDs table[i] (count at +0x3C) into an accumulator starting at all ones, and returns it ORed with the mask; 0 for an empty mask
+func_001EEA40	QueryValueTreeMask	original assembly: walks the value list's plane tree from a node, recursing on both sides near the plane, and ANDs the masks of the leaves it reaches through ExpandMaskThroughTable; QueryValueListMask calls it
 func_001EEB60	QueryValueListMask	asks the world's value list object (+0x1EC4) for the mask at a position (func_001EEA40 over its data +0x38), returning 0x0FFFFFFF when there is none (ComputePlacedObjectWorldFrame, PlaceSpareSoundNotifier, ScatterObjectsAroundCircle)
+func_001EEBB0	LookupValueTreeLeaf	walks the plane tree at +0x38 (normal at 0, offset at +0x10, the two links at +0x14 and +0x18) to the leaf that holds a point and returns its value without bit 31, 0xFFFFFFF without a tree; func_00144270 calls it
 func_001EEC60	InitAttachedSet	slot 0 of class 0x1F: runs InitCollider, sets flag bit 43, +0x584 and +0x588 to 1, both rates to 1.0, its anchors to 3, 0, 3, 0 and sets up its tracked nodes at +0x590 (InitTrackedNodes) with +0x594 at 3
 func_001EECE0	StartAttachedSet	slot 16 of class 0x1F: starts the placed object, fills its tracked nodes (FillTrackedNodes), allocates the 0x80-byte item block of its set and calls its slot 50 (func_001B8540, its parts changed) when +0x278 is set
 func_001EEE50	ReconcileColliderAttachments	walks an attachment list: adds or removes the collider attachment when flag bits 59 and 60 of the target differ, unlinks nodes whose bit 60 is clear, then clears both bits
 func_001EEF90	UpdateAttachedSet	slot 17 of class 0x1F
+func_001EF3A8	ForwardAttachedSetLinkStep	slot 0xDC of class 0x1F, the slot SyncPlayerTarget and IgnoreColliderAttachmentStep fill: calls slot 46 of the link's target with the set
 func_001EF3D8	HandleAttachedSetNotification	slot 13 of class 0x1F: for message kind 2 either detaches every link (when the message object is itself) or the link whose target is the message object, then RebuildAttachedSet, then the base handler func_00127378
 func_001EF520	RebuildAttachedSet	on the root object of class 0x1F, rebuilds the set at +0x554 from the object itself and the target of every attached link and registers it with the world (func_0015F8B0)
 func_001EF768	UpdateAttachedSetBounds	slot 50 of class 0x1F, its override of UpdateColliderBounds
@@ -134,6 +158,7 @@ func_001EF830	ClearAttachedSetTrackedNodes	sets the found count of the tracked-n
 func_001EF838	InitStateResetObject	slot 0 of class 0x62: runs InitPlacedObject and sets the state +0x2D0 and the id +0x2E0 to -1
 func_001EF868	StartStateResetObject	slot 16 of class 0x62: starts the placed object, resolves its link (D_00275E10), sets its state to 0 (SetStateAndNotify) and takes itself out of its parent's list (slot 3)
 func_001EF8C0	AddStateResetEntry	the script built-in func_001063D0 calls it: adds or updates a keyed entry in the table at +0x2E8 of a class 0x62 object, counted at +0x2E4 (UpsertKeyedEntry, capacity 4)
+func_001EF8F8	UpdateStateResetObject	slot 0x54 of class 0x62, its update slot (UpdatePlacedObject for class 0x02): does nothing
 func_001EF900	SetStateAndNotify	sets the state +0x2D0 of a class 0x62 object when it changes: entering or leaving state 2 adds or removes its keyed entries (+0x2E4, +0x2E8) with func_0013ECB0, stamps the clock at +0x2D4 and sends message 0x16 with the old and new state (slot 14)
 func_001EF9C8	HandleStateResetNotification	slot 13 of class 0x62: runs the base handler func_00127378 and for kind 5 with the object's id at +0x2DC resets its state to 0 with SetStateAndNotify
 func_001EFA30	CreateRecord2505C0	allocates 48 zeroed bytes from the front memory and sets their table to D_002505C0
@@ -156,14 +181,18 @@ func_001F0660	StartWarpPage	slot 16 of class 0x67: runs StartPlacedObject, sets 
 func_001F0758	PostLoadWarpPage	slot 15 of class 0x67: runs PostLoadPlacedObject, resolves its links (D_00275FE0, with ResolveObjectLinks), starts each child and gives each of the 11 elements a random phase (0 to 2 pi) and speed (0.5 to 0.7), selection -1
 func_001F0878	SelectWarpPageEntry	writes the element text for entry value (or entry 4 for value 10, or -1 when out of range) and calls SetWarpPageSelectedEntry
 func_001F08F0	SetPendingWarpEntry	stores its second and third arguments into D_00276250 and D_00276654, which func_001F0908 reads and clears
+func_001F0908	AnnouncePendingWarpEntry	when an entry is pending (D_00276250) shows the announcement elements with the saved location's text (SetElementTextFromEntry, SetScreenElementHoldTime), plays its slot's animation (ReplaceAnimationPlayer), starts the page's type-10 objects and clears the pending entry; SetWarpPageMode calls it
 func_001F0AE0	UpdateWarpPage	slot 17 of class 0x67, its override of UpdatePlacedObject
+func_001F0EB8	ApplyWarpPageTransform	slot 0xA0 of class 0x67: builds its transform with the camera's zoom snapped to 1.0 (SnapCameraZoom, BuildPlacedObjectTransform), passes it to the base func_00125C90 and gives the zoom back
 func_001F0F70	HandleWarpPageNotification	runs HandlePlacedObjectNotification, then for kind 5 moves the page on by its mode: mode 1 re-enters mode 1, mode 3 sets the screen fade to mode 2, mode 4 ends the fade and sets mode 0
 func_001F1050	SetWarpPageMode	leaves the current mode (stops the sound, hides or shows the elements, restarts the element animations) and enters the next one (starts the animation, cursor placement and sound), stamping the clock D_00261858[4] at +0x2D4
 func_001F1590	SetWarpCursor	in modes 0 and 4 stores the cursor entry (+0x2DC) and the other argument (+0x2E0) and enters mode 1; in mode 2 stores the cursor and enters mode 3 when the other argument is 3
 func_001F1610	BeginWarpPageClose	enters mode 4 through func_001F1050 when the page is in mode 1 or 2
 func_001F1648	MoveWarpCursor	looks up the neighbour of the cursor entry (+0x2DC) in direction idx in the page's table D_00276608, skips entries whose first word is 0, moves the cursor there with func_001F1590 and plays sound 0x79, or sound 0x7B when none
+func_001F17A0	ProjectWarpEntryToScreen	original assembly: converts a warp entry's position to world space (func_00128018) and projects it to the screen (func_001441C0); DrawWarpMenu calls it
 func_001F18B0	SetWarpPageSelectedEntry	stores a new selected entry at +0x534: copies the entry's placement to +0x550 (or the identity from D_00248D30), clears the entry's float and sets the previous selection's float to 1
 func_001F1960	InitWarpMenu	base set-up, takes the font record (func_0015C1C0) if one exists, sets colour and scale, writes the help text 'Back / Move / Warp' with slot 2, clears current and the 6 node pointers
 func_001F1A08	HandleWarpMenuInput	when the current page is in mode 2 reads the pad (D_00262C70) and moves the page cursor with MoveWarpCursor for the four directions, or on the confirm bit 0x40 starts a screen fade to the chosen entry (func_001F0428) or plays the refusal sound; also eases the menu scale toward 1 or 0.5
 func_001F1C90	SetWarpMenuOpen	opens or closes the menu: on open sets the page cursor to the current entry, scale to 1 and plays its open actions (slot 20, sound mode 7); on close runs slot 21, starts the page close and plays sound mode 3; stores the flag in +open
 func_001F1E38	DrawColoredCircle	emits a triangle fan of n+1 rim points around a centre (angle stepped by 2*pi/n, radius scaled) into the GS packet writer D_00262280, the centre in one colour and the rim in another (alternating with a third when flag 2 is set)
+func_001F20A8	DrawWarpMenu	original assembly: slot 9 of the warp menu's screen element table D_002210F0 (InitWarpMenu is its slot 1): draws the entries' circles and lines (DrawColoredCircle, DrawTriangleGroups) at their screen points (ProjectWarpEntryToScreen) and their texts (DrawFontString)

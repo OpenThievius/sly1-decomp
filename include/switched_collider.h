@@ -12,6 +12,7 @@
 struct SwitchedCollider;
 struct TurningCollider;
 struct Player;
+struct BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
@@ -365,7 +366,7 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BE0 - 0x2BDC];
+    s32 penalizedTargetId;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to the candidate with this id
     void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
     void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
     void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation
@@ -593,7 +594,8 @@ struct TempoAgent : Agent {
     u8 padC24[0xC34 - 0xC24];
     void* fC34;             // 0xC34: the timeline to start when the beat clock restarts
     void* fC38;             // 0xC38: the timeline it runs (EndHeldTimeline)
-    u8 padC3C[0xC48 - 0xC3C];
+    BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
+    u8 padC40[0xC48 - 0xC40];
     void* fC48;             // 0xC48
     u8 padC4C[0xC50 - 0xC4C];
     void* fC50;             // 0xC50

@@ -2,6 +2,8 @@ symbol	name	evidence
 func_001F2758	InitOscillator	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
 func_001F2798	AttachNodeToOwner	puts the context's node at the head of the owner's list at +0x8E0, sets the node's owner, and for every element and listed slot stores the owner's matching item address into the slot's pointers (items at +0x6E0 and +0x7E0)
 func_001F2840	RefreshOscillatorFrames	EvaluateOscillator calls it while the dirty flag +0x8E4 of a class 0x8D object is set: rebuilds the entries' matrices (InitIdentityMatrix, BuildMatrixFromRotationAndTranslation, MultiplyMatrices, InvertMatrix4x4)
+func_001F2EF0	ComputeOscillatorDisplacement	original assembly: sums over a class 0x8D object's 0xD0-byte entries (count +0x38, from +0x50) the displacement each kind-0 entry with a period above the limit gives a point (ComputeSinCos of its phase), recursing into chained oscillators; the gauge, effect and attached-set code and func_001D66A8 call it
+func_001F3140	ComputeOscillatorMaxDisplacement	writes, per axis, the sum over the kind-0 entries of a class 0x8D object of the amplitude sqrt(a*a + b*b) of their two components (+0x20 and +0x40): the largest displacement they can give; UpdateAttachedSetBounds calls it
 func_001F31F8	HashToUnitFloat	mixes an integer with xor-shift and multiply steps, masks it to 31 bits and scales by 2^-31 to a float below 1
 func_001F3250	SampleSmoothNoise	splits the time 2*x*clock+y into integer and fraction, takes HashToUnitFloat of the two neighbouring integers (reshaped by z, mirrored on odd integers) and blends with a smoothstep of the fraction
 func_001F3328	ApplyBiasCurve	returns value / (1 + (1/denominator - 2) * (1 - value))
@@ -10,13 +12,18 @@ func_001F3408	EvaluateOscillator	UpdateAttachments calls it on each chained node
 func_001F36E8	AddOscillatorXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
 func_001F3768	AddOscillatorYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
 func_001F37D8	GetOscillatorCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
+func_001F3810	GetOscillatorEntryForPeriod	returns GetOscillatorCurrentEntry of the object and its mode (1 marks the frames dirty), passing a third word 0 that GetOscillatorCurrentEntry does not read; SetOscillatorEntryPeriod, GetOscillatorEntryPeriod and the script built-ins (func_00109488) use it
+func_001F3830	GetOscillatorEntryForVectors	as GetOscillatorEntryForPeriod with the unread third word 1: returns GetOscillatorCurrentEntry of the object and its mode; AddOscillatorEntryVectorA and B and the script built-ins (func_00109488) use it
 func_001F3850	SetOscillatorEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
 func_001F38A0	GetOscillatorEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetOscillatorEntryPeriod stores
 func_001F38F0	AppendVector4ToBuffer	appends four floats to a buffer of capacity 4 (count at +4) and increments the count
+func_001F3928	AddOscillatorEntryVectorA	appends four floats to the four-vector buffer at +0x30 of the current entry (GetOscillatorEntryForVectors, AppendVector4ToBuffer); the script built-in func_00107180 calls it
+func_001F3990	AddOscillatorEntryVectorB	appends four floats to the four-vector buffer at +0x80 of the current entry (GetOscillatorEntryForVectors, AppendVector4ToBuffer); the script built-in func_00107268 calls it
 func_001F39F8	InitTransformObject	InitObject then copies the identity matrix into the rotation field at +0x40
 func_001F3A40	ReadTransformObject	reads a buffered rotation, a buffered vector and the property records of an object from a stream
 func_001F3A90	ReparentObjectKeepingTransform	converts the object's pos and rot from its old parent's frame to the new one (func_00128018, func_00128150) and calls ReparentObject
 func_001F3AF0	TransformObjectIntoFrame	slot 22 of class 0x73: transforms its position and rotation by the other object's frame with func_00128018 and func_00128150
+func_001F3B48	ConvertPointIntoObjectFrame	converts a point out of its frame (func_00128018), subtracts the object's position (+0x40) and turns it by the transpose of its rotation (+0x50): the point in the object's own frame; func_00141170 calls it
 func_001F3BD8	GetObjectWorldPosition	converts the vector at +0x40 out of the object's parent frame (func_00128018 with frame 0) into the output; used as the position getter by many callers
 func_001F3C08	GetObjectWorldRotation	same for the rotation at +0x50 with func_00128150, into the output
 func_001F3C38	FindArrivalPoint	finds the class 0x74 object with an id (under a parent id) for FindOrActivateSwitchedCollider; failing that, of all class 0x74 objects, the one with the id, else one with +0x94 set while a style 2 screen fade runs, else one with a record
@@ -41,10 +48,12 @@ func_001F4F70	InitContactTracker	slot 0 of class 0x36: runs InitCollider, sets u
 func_001F4FD8	StartContactTracker	slot 16 of class 0x36: runs StartPlacedObject, then FillTrackedNodes on the record at 0x550
 func_001F5008	CollectTouchingObjects	slot 17 of class 0x36: walks the contact table, and for each contact whose near part is a descendant of itself and whose far part is of kind 0x41 adds it to slots (up to 10), then starts func_00177838 for each
 func_001F51A0	CopyContactTracker	slot 9 of class 0x36: runs CopyCollider and points the record's owner at itself
+func_001F51C8	ApplyContactTrackerTransform	slot 0xA0 of class 0x36: only calls the base func_00125C90
 func_001F51E8	RequestContactTrackerLaunch	slot 71 of class 0x36: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
 func_001F5208	GetContactTrackerRecord	returns the record at +0x550 of the contact tracker (the script built-in func_00109488 calls it)
 func_001F5210	ClearTrackedNodes	sets the record's found count to 0
 func_001F5218	InitC37	slot 0 of class 0x37: runs InitContactTracker, sets bit 43 of the flags at +0x538 and sets the collider's anchors to 3, 0, 3, 0
+func_001F5268	UpdateC37	original assembly: slot 0x54 of class 0x37, its update slot: runs UpdateCollider, collects its mesh hits with the active switched collider (GetActiveSwitchedCollider, CollectMeshHits, AddMeshContacts) and offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch)
 func_001F5590	InitTrackedNodes	sets the record's owner, zeroes 0x04 and sets 0x08 to 150.0
 func_001F55A8	FillTrackedNodes	adds the owner's children of id 0x7E or 0x6E to nodes (up to 32), then each object found for the ids in keys through AddTrackedNode
 func_001F56D8	LaunchPlayerAtTrackedNode	the callback OfferTrackedNodeLaunch hands over: picks the best target among the record's nodes (ChooseBestTargetCandidate); with nodes found sets the player on the arc to it and puts it in state 2, else LaunchPlayerAtTarget

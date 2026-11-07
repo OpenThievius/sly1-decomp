@@ -13,6 +13,7 @@
 #include "globals.h"
 #include "game_progress.h"
 #include "level_entry.h"
+#include "pad_record.h"
 
 extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
 extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
@@ -50,7 +51,7 @@ void func_001F5C0C(void* p, s32 zero, s32 size);
 
 // The text style the best time draws with: the static initialiser (func_001E0848) zeroes it,
 // then sets its kind, two sizes given as integers, 0.3 twice and its colour.
-struct Style_1E0848 {
+struct BestTimeTextStyle {
     u8 pad0[4];
     u8 kind;
     u8 pad5[3];
@@ -59,7 +60,7 @@ struct Style_1E0848 {
     f32 f10;
     f32 f14;
     s32 f18;
-    Style_1E0848(s32 a, s32 b)
+    BestTimeTextStyle(s32 a, s32 b)
     {
         func_001F5C0C(this, 0, 0x1C);
         kind = 0x2D;
@@ -69,10 +70,10 @@ struct Style_1E0848 {
         f18 = (s32)0xFF7D4B00;
     }
 };
-Style_1E0848 D_002758E0(2, 1);
+BestTimeTextStyle D_002758E0(2, 1);
 
-struct Buf_1E02C8 { char c[0x40]; };
-Buf_1E02C8 D_00275900 = {};
+struct BestTimeTextBuffer { char c[0x40]; };
+BestTimeTextBuffer D_00275900 = {};
 
 void* func_001DFE80(s32 key)
 {
@@ -146,14 +147,11 @@ void func_001E02C8(void* self, s32 n);
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-struct Glob_1E00B0 { u8 pad[0x230C]; f32 f230C; s32 f2310; void* f2314; };
-struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
-extern Pool_1E00B0 D_00262C70;
 extern f32 D_0026185C;
 extern s32 D_002701C4;
 extern s32 D_002623DC;
 
-void func_0016EC20(Pool_1E00B0* q, s32 n);
+void func_0016EC20(PadRecord* q, s32 n);
 void func_001BE5F8(s32 q);
 void func_001E02C8(T217D_1380* q, s32 n);
 f32 func_00205C78(f32 a, f32 b);
@@ -168,7 +166,7 @@ void func_001E00B0(T217D_1380* self)
     case 1:
     {
         if (self->pressed != 0) {
-        if (g_padRecord.fAA & 4) {
+        if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
             StartLockedStreamVoice((s32)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
@@ -220,7 +218,7 @@ f32 func_00205C78(f32 a, f32 b);
 void func_001AB920(T217D_510* o, f32 v);
 void func_001AB928(T217D_510* o, f32 v, void* fn);
 void func_001AB938(T217D_510* o);
-s32 func_001E1FD0(Buf_1E02C8* dst, const char* fmt, ...);
+s32 func_001E1FD0(BestTimeTextBuffer* dst, const char* fmt, ...);
 void func_0018C7F8(X_1E02C8* x);
 s32 func_001602A0(void);
 void func_001604B8(s32 m);

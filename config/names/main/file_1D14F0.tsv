@@ -1,2 +1,0 @@
-symbol	name	evidence
-func_001D27C0	SetPlayerPadSelectMode	stores a mode at +0x2718 of the player: leaving -1 takes the world's pad-select flag and shows the counted screen element (AcquirePadSelectFlag, ShowCountedScreenElement), going back to -1 releases and hides them; func_00109488 and func_001D1BB0 call it
