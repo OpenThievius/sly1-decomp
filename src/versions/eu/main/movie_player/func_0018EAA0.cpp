@@ -7,7 +7,7 @@ struct Obj_18EAA0_eu {
     s32 fA4;
 };
 
-void func_0018EAA0(Obj_18EAA0* self_)
+void func_0018EAA0(MovieStream* self_)
 {
     Obj_18EAA0_eu* self = (Obj_18EAA0_eu*)self_;
     self->f00 = 0;

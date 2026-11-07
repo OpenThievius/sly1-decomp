@@ -11,7 +11,7 @@ struct Object_18F890_eu {
 };
 void func_00130070(StreamReaderWindow*);
 
-s32 func_0018F890(Object_18F890* self_, s32 wait)
+s32 func_0018F890(MoviePlayer* self_, s32 wait)
 {
     Object_18F890_eu* self = (Object_18F890_eu*)self_;
     s32 count = self->buffer->head - self->buffer->tail;

@@ -7,7 +7,7 @@ struct Obj_18F610_eu {
     s32 remain;
 };
 
-void func_0018F610(Obj_18F610* self_)
+void func_0018F610(MoviePlayer* self_)
 {
     Obj_18F610_eu* self = (Obj_18F610_eu*)self_;
     if (self->remain > 0) {
