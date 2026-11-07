@@ -2486,3 +2486,20 @@ func_001DAE68	HandlePathFollowerActivation	slot of class 0x19: runs HandleSwitch
 func_00100008	EnterProgram	the program's first code (original assembly, entry.cpp): clears .bss from D_0027B300, sets up the main thread and the heap with two system calls, runs func_001F9EA8 and func_001F6C20, calls RunMainLoop with D_0027B380's count and words and leaves through func_001FA078
 func_001000B8	ExitProgram	jumps to func_001FA078 with 0 in a0 whatever it is passed; the C library's abort (func_002014D0) calls it with 1 after raising signal 6
 func_001000C0	EndMainThread	system call 0x23; EnterProgram sets its address up as the main thread's return address
+func_00115D48	GetScriptSquareRoot	builtin: CallScriptMathFunction with index 0, g_scriptMathFunctions[0] being the math library's checked float square root func_00206180
+func_00115D78	GetScriptSine	builtin: CallScriptMathFunction with index 1, the float sine func_00205400
+func_00115DA8	GetScriptCosine	builtin: CallScriptMathFunction with index 2, the float cosine func_00205210
+func_00115DD8	GetScriptTangent	builtin: CallScriptMathFunction with index 3, the float tangent func_002054F0
+func_00115E08	GetScriptArcSine	builtin: CallScriptMathFunction with index 4, the checked float arcsine func_00205678
+func_00115E38	GetScriptArcCosine	builtin: CallScriptMathFunction with index 5, the checked float arccosine func_00205578
+func_00115E68	GetScriptArcTangent	builtin: CallScriptMathFunction with index 6, the float arctangent func_00204F68
+func_00115E98	WrapScriptAngle	builtin: CallScriptMathFunction with index 7, g_scriptMathFunctions[7] being WrapAngle
+func_00116978	GetScriptMatrixTranslation	builtin: copies the quadword at +0x30 of the matrix argument (its fourth row) into a new vector payload and returns it
+func_001169E8	GetScriptMatrixRotation	builtin: copies the matrix argument into a new matrix payload and clears its translation with func_001884C0 (zero w column, fourth row 0 0 0 1)
+func_00117118	ConvertScriptFloatToInt	builtin: returns its float argument cast to an int (truncated toward zero)
+func_00117180	RoundScriptFloatUp	builtin: returns (int)(argument + 1.0), the int above a positive float
+func_00117D78	FindScriptObjectListById	builtin: the list twin of FindScriptObjectById: func_0015A198 on the world with kind 0x104 into a 0x40-entry buffer, returned through MakeScriptRefList
+func_00118580	TransformScriptDirectionBetweenFrames	builtin: calls func_001280C0 (the frame conversion ReparentCollider applies to its anchor vectors) into a vector payload, as TransformScriptPointBetweenFrames does with func_00128018
+func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
+D_00259958	g_scriptBuiltins	the built-ins' table (r119bb0.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
+D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it

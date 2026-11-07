@@ -2912,7 +2912,7 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     AssignScriptValue(&a, &t);
     DestroyScriptValue(&t, 2);
     if (a.tag == 0x1D) {
-        ent = &D_00259958[a.i];
+        ent = &g_scriptBuiltins[a.i];
         n = ent->count;
         last = ent->rest;
     } else if (a.tag == 0x21) {

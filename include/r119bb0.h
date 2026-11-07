@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The script machine's built-in functions (src/main/file_112698.cpp): their shared signature, the
+// The script machine's built-in functions (src/main/script_machine.cpp): their shared signature, the
 // record of their table, the host function a tag 0x21 value points to, and the scope every
 // evaluation runs in. Written for this project from what retail's code does
 // (build/swarm/v2/NOTES.md); the value itself is ScriptValue (r11b008.h).

@@ -607,7 +607,7 @@ R11B008List* func_0011BF30(void)
 
 void func_0011BF70(void)
 {
-    ResetMarkRoots(D_00259F38);
+    ResetMarkRoots(g_markStacks);
     InitEntryPool(&g_valueNodePool, 0xC, 0x2000);
     g_valueNodePool.removeCallback = (void*)DestroyScriptValueNode;
     InitEntryPool(&g_scopePool, 0x1C, 0x190);
@@ -627,5 +627,5 @@ void func_0011C040(void)
     func_0011C1D0(&g_payloadPool);
     func_0011CBB0();
     func_0011C1D0(&D_0025C2D0);
-    func_0011A6B8(D_00259F38);
+    ShutDownMarkRoots(g_markStacks);
 }
