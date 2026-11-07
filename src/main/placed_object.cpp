@@ -2067,9 +2067,9 @@ void func_00124A48(PlacedObject* self)
     }
     StartAttachments(self->sub22C, self);
     if (self->f284 != 0) {
-        if (func_001B1D38(self->f284) == 0) {
-            func_001B1D70(self->f284, self->f2A8);
-            func_001B1DA8(self->f284, self->f2A8 * 0.5f);
+        if (HasRangeRecordRanges(self->f284) == 0) {
+            StoreRangeRecordNear(self->f284, self->f2A8);
+            StoreRangeRecordFar(self->f284, self->f2A8 * 0.5f);
         }
         if ((self->f284)->fB0 != -1) {
             (self->f284)->fB4 = FindFirstObjectByIdMode4(self->world, (self->f284)->fB0, self);
@@ -2077,7 +2077,7 @@ void func_00124A48(PlacedObject* self)
                 BuildTexturePackets((self->f284)->fB4, self->f284);
             }
         }
-        func_001B1B38(self->f284);
+        PrepareRangeRecord(self->f284);
     }
     if (self->f2AC != 0) {
         if (self->f2AC->f00 == -1) {
@@ -2203,7 +2203,7 @@ void func_00124EE8(void* self, f32 f)
     Node_124EE8* node = (Node_124EE8*)head;
     while (node != 0) {
         if ((node->info->flags & 1) != 0) {
-            func_00124EE8(node, saved);
+            UpdateObjectTree(node, saved);
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
@@ -2216,7 +2216,7 @@ void func_00124FC0(PlacedObject* self, f32 f)
 {
     UpdateAttachments(self->sub22C, self, f);
     if (self->f284 != 0) {
-        func_001B2140(self->f284, f);
+        UpdateRangeRecord(self->f284, f);
     }
     if (self->f288 != 0) {
         func_00126AC8(self, f);
@@ -2489,7 +2489,7 @@ void func_001274F8(PlacedObject* self, Vec02* src)
     if (self->f1EC != 0) {
         SettlePoseSourceModes(self->f1EC);
     }
-    if (func_00123DC0(src) == 0) {
+    if (IsVelocityNegligible(src) == 0) {
         ClearRootTries(self);
     }
 }
@@ -2509,7 +2509,7 @@ void func_00127590(PlacedObject* self, Vec02* src)
     if (self->f1F0 != 0) {
         SettlePoseSourceModes(self->f1F0);
     }
-    if (func_00123E00(src) == 0) {
+    if (IsSpinNegligible(src) == 0) {
         ClearRootTries(self);
     }
 }
@@ -2530,8 +2530,8 @@ ASM_FUNC(func_00127678);
 void func_001276C0(PlacedObject* self, PlacedObject* other)
 {
     Locals_1276C0 L;
-    func_00128018(0, self->parent, &other->v140, L.a20);
-    func_00128150(0, self->parent, &other->m110, L.a50);
+    TransformPointBetweenFrames(0, self->parent, &other->v140, L.a20);
+    TransformRotationBetweenFrames(0, self->parent, &other->m110, L.a50);
     func_00128330(other->parent, self->parent, &other->v140, &other->v150, &other->v160, 0, 0, L.a30, L.a40, 0, 0);
     self->desc02()->m1D(self, (Vec02*)L.a20);
     self->desc02()->m1E(self, (Mat02*)L.a50);
@@ -2744,7 +2744,7 @@ void* func_001291D0(PlacedObject* self)
     if (self->f284 == 0) {
         void* o = PopZeroedFreeSlot((u8*)self->world + 0x1BF4);
         self->f284 = (RangeRecord*)o;
-        func_001B1AC8(o);
+        InitRangeRecord(o);
         AppendToList((u8*)self->world + 0x1C00, self->f284);
     }
     return self->f284;
@@ -2766,37 +2766,37 @@ void func_00129228(PlacedObject* self, s32 flag)
 
 void func_00129288(void* self, s32 value)
 {
-    func_001B1CF8(EnsureRangeRecord(self), value);
+    LinkRangeRecord(EnsureRangeRecord(self), value);
 }
 
 void func_001292B8(void* self, f32 x)
 {
-    func_001B1D70(EnsureRangeRecord(self, x), x);
+    StoreRangeRecordNear(EnsureRangeRecord(self, x), x);
 }
 
 void func_001292E8(f32 x)
 {
-    func_001B1DA8(EnsureRangeRecord(x), x);
+    StoreRangeRecordFar(EnsureRangeRecord(x), x);
 }
 
 void func_00129318(f32 x)
 {
-    func_001B1FB0(EnsureRangeRecord(x), x);
+    StoreRangeRecordInner(EnsureRangeRecord(x), x);
 }
 
 void func_00129348(f32 x)
 {
-    func_001B1FE0(EnsureRangeRecord(x), x);
+    StoreRangeRecordOuter(EnsureRangeRecord(x), x);
 }
 
 void func_00129378(f32 x)
 {
-    func_001B2010(EnsureRangeRecord(x), x);
+    ScaleRangeRecordByAngle(EnsureRangeRecord(x), x);
 }
 
 void func_001293A8(void* self, void* src)
 {
-    func_001B2068(EnsureRangeRecord(self), src);
+    StoreRangeRecordVector(EnsureRangeRecord(self), src);
 }
 
 void func_001293D8(void* self, s32 value)
@@ -2807,7 +2807,7 @@ void func_001293D8(void* self, s32 value)
 void* func_00129400(PlacedObject* self)
 {
     if (self->f284 != 0) return self->f284;
-    func_001B1AC8(D_0027B520);
+    InitRangeRecord(D_0027B520);
     return D_0027B520;
 }
 
@@ -3065,14 +3065,14 @@ void func_00129D00(PlacedObject* self, void* v, Node_129D00** out)
 s32 func_00129D70(Actor6C* self)
 {
     Actor6C* n;
-    if (func_00123DC0((u8*)self + 0x150) == 0) return 0;
-    if (func_00123E00((u8*)self + 0x160) != 0) goto body;
+    if (IsVelocityNegligible((u8*)self + 0x150) == 0) return 0;
+    if (IsSpinNegligible((u8*)self + 0x160) != 0) goto body;
     return 0;
 body:
     n = (Actor6C*)self->f34;
     while (n != 0) {
         if ((n->vtable->f8 & 1) != 0) {
-            if (func_00129D70(n) == 0) return 0;
+            if (IsObjectTreeAtRest(n) == 0) return 0;
         }
         n = (Actor6C*)n->f1C;
     }
@@ -3088,11 +3088,11 @@ void func_00129E10(void* self, void* src)
 {
     Frame_129E10 f;
     u8* p = (u8*)D_00260E70;
-    func_00118CF0(&f.a, src);
+    StoreFloatAsQuadword(&f.a, src);
     Quad_129E10 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
-    func_00129E88(self, &f.r);
+    SetPositionSpring(self, &f.r);
 }
 
 void func_00129E88(PlacedObject* self, Vec16_12A5D0* value)
@@ -3106,11 +3106,11 @@ void func_00129EE0(void* self, void* src)
 {
     Frame_129EE0 f;
     u8* p = (u8*)D_00260E80;
-    func_00118CF0(&f.a, src);
+    StoreFloatAsQuadword(&f.a, src);
     Quad_129EE0 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
-    func_00129F58(self, &f.r);
+    SetVelocitySpring(self, &f.r);
 }
 
 void func_00129F58(PlacedObject* self, Quad_129F58* src)
@@ -3123,11 +3123,11 @@ void func_00129FB0(PlacedObject* self, void* src)
 {
     Frame_129FB0 f;
     u8* p = (u8*)D_00260E90;
-    func_00118CF0(&f.a, src);
+    StoreFloatAsQuadword(&f.a, src);
     Quad_129FB0 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
-    func_0012A028(self, &f.r);
+    SetRotationSpring(self, &f.r);
 }
 
 void func_0012A028(PlacedObject* self, Quad_12A028* src)
@@ -3140,11 +3140,11 @@ void func_0012A080(PlacedObject* self, void* src)
 {
     Frame_12A080 f;
     u8* p = (u8*)D_00260EA0;
-    func_00118CF0(&f.a, src);
+    StoreFloatAsQuadword(&f.a, src);
     Quad_12A080 av = f.a;
     CopyQuadword(&f.b, p);
     (void)StoreQuadword(&f.r, ScaleQuadword(av, f.b));
-    func_0012A0F8(self, &f.r);
+    SetSpinSpring(self, &f.r);
 }
 
 void func_0012A0F8(PlacedObject* self, Quad_12A0F8* src)
@@ -3160,14 +3160,14 @@ void func_0012A150(PlacedObject* self, f32 scale)
     tmp.y = D_00260EB0[1] * scale;
     tmp.z = D_00260EB0[2];
     tmp.w = D_00260EB0[3] * scale;
-    func_0012A200(self, (Vec4_12A150*)&tmp);
+    SetPositionRamp(self, (Vec4_12A150*)&tmp);
 }
 
 void func_0012A1A0(PlacedObject* self, f32 scale)
 {
     Vec4_12A150 tmp = *(Vec4_12A150*)self->p21C;
     tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
-    func_0012A200(self, &tmp);
+    SetPositionRamp(self, &tmp);
 }
 
 void func_0012A200(PlacedObject* self, Vec4_12A150* src)
@@ -3186,7 +3186,7 @@ void func_0012A270(void* self, f32 s)
     v[1] = m[1] * s;
     v[2] = m[2];
     v[3] = m[3] * s;
-    func_0012A320(self, v);
+    SetRotationRamp(self, v);
 }
 
 void func_0012A2C0(PlacedObject* self, f32 scale)
@@ -3194,7 +3194,7 @@ void func_0012A2C0(PlacedObject* self, f32 scale)
     Pack4_12A2C0 tmp;
     tmp = *(Pack4_12A2C0*)self->p220;
     tmp.d = scale * (tmp.a - tmp.b) / tmp.c;
-    func_0012A320(self, &tmp);
+    SetRotationRamp(self, &tmp);
 }
 
 void func_0012A320(PlacedObject* self, Pack4_12A320* src)
@@ -3837,8 +3837,8 @@ void func_0012B5B8(PlacedObject* self, void* a1, void* a2)
         } else {
             p->fB0 = p->fB0 & 8;
         }
-        func_00128018(0, a1, (u8*)self + 0x140, (u8*)self + 0x100);
-        func_00128150(0, a2, (u8*)self + 0x110, (u8*)self + 0xD0);
+        TransformPointBetweenFrames(0, a1, (u8*)self + 0x140, (u8*)self + 0x100);
+        TransformRotationBetweenFrames(0, a2, (u8*)self + 0x110, (u8*)self + 0xD0);
     }
 }
 
@@ -4547,7 +4547,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
     }
     switch (msg->kind) {
     case 42:
-        if (func_001BE810() != 0) {
+        if (CheckStreamVoicePending() != 0) {
             self->time = Clamp_12D5D0::Of(msg->a0.f, 0.0f, owner->f34);
             self->f20--;
             *out = 1;
@@ -4603,10 +4603,10 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         }
         break;
     case 2:
-        func_001BED20();
+        RestoreVolumeChannel2();
         break;
     case 3:
-        func_001BECF8();
+        SilenceVolumeChannel2();
         break;
     case 11:
         self->time = Clamp_12D5D0::Of(msg->a0.f, 0.0f, owner->f34);
@@ -4645,9 +4645,9 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         }
         if (msg->aC.f != 0.0f) {
             if (on) {
-                func_00126CB8(t, msg->aC.f);
+                FadeInPlacedObject(t, msg->aC.f);
             } else {
-                func_00126D60(t, msg->aC.f);
+                FadeOutPlacedObject(t, msg->aC.f);
             }
         } else {
             if (on) {
@@ -4767,7 +4767,7 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         if (g != 0 && *(s32*)((u8*)g + 0x2220) == 9 && *(s32*)((u8*)g + 0x2228) == 0x1C && g_currentEntry == g_currentLevelRecord) {
             return;
         }
-        func_001F4408(msg->a8.i, msg->aC.i);
+        BeginLevelExit(msg->a8.i, msg->aC.i);
         break;
     }
     case 33:
@@ -5018,10 +5018,10 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
     }
         break;
     case 57:
-        func_001DDAB8(world, msg->a8.f);
+        SetWorldValueAndTarget(world, msg->a8.f);
         break;
     case 58:
-        func_001DDAC8(world, msg->a8.f);
+        SetWorldValueTarget(world, msg->a8.f);
         break;
     case 59: {
         Collider* t = (Collider*)FindFirstObjectById(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
@@ -5376,7 +5376,7 @@ void func_0012F8C8(IdFilterObject* self)
         g_activeListFrames = (ListFrame*)it.saved;
         return;
     }
-    func_00128018(self, 0, (u8*)n + 0x40, &self->pos);
+    TransformPointBetweenFrames(self, 0, (u8*)n + 0x40, &self->pos);
     self->mode = 1;
     n->desc->m03(n);
     g_activeListFrames = (ListFrame*)it.saved;
@@ -5396,7 +5396,7 @@ void func_0012F9B8(IdFilterObject* self)
             break;
         case 2: {
             PlacedObject* node = self->found;
-            func_00128018(node->parent, 0, &node->link40, &loc);
+            TransformPointBetweenFrames(node->parent, 0, &node->link40, &loc);
             self->pendingTarget->desc02()->m1D(self->pendingTarget, (Vec02*)&loc);
             break;
         }
@@ -5741,7 +5741,7 @@ void func_00130B48(f32 k, Self_130B48* self, u8* a1, u8* a2, u8* a3, s32 count, 
     f32 cur = start;
     s32 i;
     for (i = 0; i < count; i++) {
-        func_00130540(k, self, a1, a2, a3, cur, 1.0f, (s32)(out + i), 0, 0);
+        EvaluateHermiteVectorSegment(k, self, a1, a2, a3, cur, 1.0f, (s32)(out + i), 0, 0);
         cur += step;
     }
 }

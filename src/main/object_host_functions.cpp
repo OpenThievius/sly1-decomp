@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// 0x1000C8 to 0x112698 (.rodata from 0x248D80, .data from 0x2505D8): the script host functions
+// on objects (each a tag 0x21 function taking its object, the argument count and the arguments)
+// and FillObjectPropertyTable (func_00109488), which fills the property records of D_002505D8,
+// this file's .data, with them and the property setters. Named after what it holds.
 #include "common.h"
 #include "asm_func.h"
 #include "script_value.h"
@@ -918,7 +922,7 @@ ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &f0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_00126CB8(obj, f0);
+    (void)FadeInPlacedObject(obj, f0);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -936,7 +940,7 @@ ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &f0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_00126D60(obj, f0);
+    (void)FadeOutPlacedObject(obj, f0);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1100,7 +1104,7 @@ ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, S
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001F4008(obj);
+    PlaceAtArrivalPoint(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1115,7 +1119,7 @@ ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, Sc
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001F4808(obj);
+    StartObjectSubGroupFinish(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1262,7 +1266,7 @@ ScriptValue* func_00102030(ScriptValue* ret, AttachedSet* obj, s32 unused, Scrip
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001EF830(obj);
+    ClearAttachedSetTrackedNodes(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1761,7 +1765,7 @@ ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD690(obj, out));
+    SetScriptValueBool(&q, TestLevelEntryFlag1(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1778,7 +1782,7 @@ ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD6B0(obj, out));
+    SetScriptValueBool(&q, TestLevelEntryFlag2(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1795,7 +1799,7 @@ ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD6D0(obj, out));
+    SetScriptValueBool(&q, TestLevelEntryFlag4(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1812,7 +1816,7 @@ ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD6F0(obj, out));
+    SetScriptValueBool(&q, TestLevelEntryFlag8(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1829,7 +1833,7 @@ ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD710(obj, out));
+    SetScriptValueBool(&q, CheckEntryOneBitRequirement(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1919,7 +1923,7 @@ ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD8E8(obj, out));
+    SetScriptValueBool(&q, IsLevelRecordComplete(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -1936,7 +1940,7 @@ ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_001DD908(obj, out));
+    SetScriptValueBool(&q, IsLevelDone(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -2487,7 +2491,7 @@ ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001C8FD0(obj, o1, o2);
+    ForceAgentState(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2727,7 +2731,7 @@ ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001D6CB0(obj);
+    SwapInPlayerStandIn(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2745,7 +2749,7 @@ ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_001781E0(obj, out);
+    (void)QueuePlayerWalkerActivation(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2763,7 +2767,7 @@ ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_00178258(obj, out);
+    (void)QueuePlayerFirstActivation(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2781,7 +2785,7 @@ ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00178280(obj, out);
+    QueuePlayerSecondActivation(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2911,7 +2915,7 @@ ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = func_001EF8C0(obj, o0, o1, o2, o3);
+    s32 r = AddStateResetEntry(obj, o0, o1, o2, o3);
     (void)r;
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
@@ -3067,7 +3071,7 @@ ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001A93E8(obj);
+    ResetPlacementRecord(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3791,7 +3795,7 @@ ScriptValue* func_00108878(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_001ED018(obj, out);
+    (void)SetTempoAgentPendingTimeline(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3843,7 +3847,7 @@ ScriptValue* func_00108A98(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_001ED0D8(obj, out);
+    (void)RemoveTempoAgentEntry(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3858,7 +3862,7 @@ ScriptValue* func_00108B48(ScriptValue* ret, TempoAgent* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001EC528(obj);
+    DecrementTempoAgentGauge(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

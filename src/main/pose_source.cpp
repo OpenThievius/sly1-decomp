@@ -343,7 +343,7 @@ typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
 void func_0011E560(void)
 {
-    func_00109488();
+    FillObjectPropertyTable();
 }
 
 Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
@@ -355,7 +355,7 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     r->f08 = a3;
     if (index == 0x6C) {
         a1 = r;
-        func_001DB480(r);
+        InitWorldHashLists(r);
     }
     r->f18 = a2;
     r->f14 = a1;
@@ -494,7 +494,7 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
             t[0] = ReadBufferedFloat(r);
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
-            func_00188978(t, (f32*)dst);
+            BuildRotationFromVector(t, (f32*)dst);
             break;
         }
         case 6:
@@ -574,7 +574,7 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
             o = sc.f + 4;
-            func_00188978(t, o);
+            BuildRotationFromVector(t, o);
             ((void (*)(void*, f32*))fn)(tgt, o);
             break;
         }
@@ -967,7 +967,7 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     Scratch_11F9F8 s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
-    func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
+    EvaluateHermiteVectorSegment(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
 
 void func_0011FA88(s32* outCount, VectorKey** outItems, Stream83* src)
@@ -1015,7 +1015,7 @@ void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr)
 
 void func_0011FC20(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
 {
-    func_0011F6B0(self->axis, other, c, &self->base, e, f, p12, p13);
+    EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
         ((Hook_11FC20)other->desc02()->m28)(other, e, f);
 }
@@ -1044,7 +1044,7 @@ void func_0011FED8(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
 {
     Scratch_11FF08 tmp;
-    func_0011F6B0(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
+    EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
     if (p3)
         BuildEulerRotationMatrix(&tmp, p3);
     if (p4)
@@ -1055,7 +1055,7 @@ void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3
 
 void* func_0011FFA8(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
-    return func_0011F6B0(self->axis, a1, a2, &self->base, a3, a4);
+    return EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
 }
 
 void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
@@ -1069,8 +1069,8 @@ void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
     if (loc.count > 0) {
         self->vt->eval(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
         self->vt->eval(self, 0, 0, loc.b, 0, loc.values[loc.count - 1], 1.0f);
-        func_00189150(loc.a, loc.b, loc.c);
-        func_00188D28(loc.c, &loc.first, loc.d);
+        MultiplyMatrices3x3(loc.a, loc.b, loc.c);
+        MatrixToAxisAngle(loc.c, &loc.first, loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     } else {
         result = 1;
@@ -1119,8 +1119,8 @@ void func_001201F0(KeyedRotationCurve* self, Stream83* arg)
         BuildEulerRotationMatrix((u8*)self->keys + 0x10, loc.a);
         u8* tail = (u8*)((self->count << 6) + (s32)self->keys) - 0x30;
         BuildEulerRotationMatrix(tail, loc.b);
-        func_00189150(loc.a, loc.b, loc.c);
-        func_00188D28(loc.c, &loc.first, loc.d);
+        MultiplyMatrices3x3(loc.a, loc.b, loc.c);
+        MatrixToAxisAngle(loc.c, &loc.first, loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     }
     self->closed = result;
@@ -1135,7 +1135,7 @@ void func_001202F0(AxisScaleCurve* self, PlacedObject* second, void* third,
                    Output_001202F0* output, f32 factor)
 {
     Result_001202F0 result;
-    func_0011F6B0(self->axis, second, third, &self->base,
+    EvaluateAxisCurves(self->axis, second, third, &self->base,
                   output ? &result : 0, 0, factor, 1.0f);
     if (output) {
         FillMemory(output, 0, 0x30);

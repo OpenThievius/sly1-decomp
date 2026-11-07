@@ -25,6 +25,7 @@ func_0011F3E8	GetControlPointWeightCurveTimes	gives the key count and, if asked,
 func_0011F478	EvaluateLinearWeightCurve	finds the segment of the kind 2 keys and returns the linear blend of the two values with its slope (zero for a segment shorter than 0.0001)
 func_0011F568	ReadLinearWeightCurve	reads count and (time, value) keys of 8 bytes from the stream, scaling the times by 1/60
 func_0011F620	GetLinearWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F6B0	EvaluateAxisCurves	original assembly: copies the base vector into the output and clears the slope, then for each of the three axis weight curves present calls its evaluate slot into that component; EvaluateAxisPositionCurve, EvaluateAxisRotationCurve, GetAxisRotationCurve and EvaluateAxisScaleCurve call it
 func_0011F798	ReadAxisCurves	reads a presence mask and a base vector, then for each set bit makes a weight curve with func_00121160 and reads it from the stream into the axis slot
 func_0011F850	GatherAxisCurveTimes	asks each of three weight curves for its key times, joins them, sorts with func_001F5CD0 and drops repeated times
 func_0011F9F8	EvaluateVectorKeyCurve	finds the segment among 0x40-byte vector keys with FindCurveSegment and interpolates their vectors with func_00130540
@@ -50,6 +51,8 @@ func_00120388	GetAxisScaleCurveKeyTimes	scale curve kind 0 slot 2: forwards its 
 func_001203A8	EvaluateKeyedScaleCurve	scale curve kind 1 (table D_00219728) slot 0: evaluates its keys with func_0011F9F8 and writes the three results into a cleared 0x30-byte output
 func_00120418	ReadKeyedScaleCurve	scale curve kind 1 slot 1: reads count and keys from the stream with func_0011FA88
 func_00120440	GetKeyedScaleCurveKeyTimes	scale curve kind 1 slot 2: passes its count and keys to func_0011FB98 to fill the key-time count and array
+func_00120470	EvaluateBlendedPositionCurve	original assembly; slot 0 of the position curve kind 2 table D_002196D8: evaluates each target's position curve at its scaled time (FindCyclicRangeIndex for a cyclic range) and sums the results by their weights, as EvaluateValueBlendCurve does for values
+func_00120700	EvaluateBlendedRotationCurve	original assembly; slot 0 of the rotation curve kind 2 table D_00219708: evaluates each target's rotation at its scaled time and mixes them by their weights through BuildEulerRotationMatrix, MultiplyMatrices3x3, MatrixToAxisAngle and BuildAxisAngleMatrix
 func_00120AA8	EvaluateAngleBlendCurve	weight curve kind 3 (table D_00219698) slot 0: evaluates each target curve at its scaled time, mixes the values by their weights as angles (func_001EA408 wraps) and sums the slopes
 func_00120D58	EvaluateValueBlendCurve	weight curve kind 4 (table D_002196A8) slot 0: evaluates each target curve at its scaled time and returns the weight-summed value and slope, using the owner's value at index for missing targets
 func_00120FB0	CreatePositionCurve	allocates 0x30, 0x14 or 0x18 bytes for kind 0, 1 or 2, sets the table D_002196B8, D_002196C8 or D_002196D8 and stores the kind
@@ -68,6 +71,10 @@ func_00121580	GetIdentityMatrix	slot 7 of the base: copies the identity matrix D
 func_001215A8	GetOwnerIndexedValue	slot 8 of the base: returns the owner's value array (+0x274) entry at the index
 func_001215C0	ChoosePoseSourceModes	sets the position and orientation modes from the owner's bytes at 0x2C9 and 0x2CA, or to 2 or 3 by the owner's mode words when those are -1
 func_00121648	ApplyPoseSource	when it is the owner's position or orientation source and the flag or mode 2 asks, gets the position or orientation (slots 4, 5) and gives it to the owner through slots 29, 30, 32, 33
+func_00121760	ComputePositionSpringAcceleration	original assembly: from a placed object's distance to a target position (+0x100) and to a target velocity (+0x150), each scaled by a + b + c (the three floats of the profiles at +0x20C and +0x210, divided by and multiplied by the distance), the second capped by 1/dt; ApplyPoseSourcePosition and func_001CC818 call it
+func_001218C0	ApplyPoseSourcePosition	original assembly: asks the pose source for its position (slot 4) and, by its position mode (byte 0x10), sets the owner's position at +0x100, pulls it with ComputePositionSpringAcceleration or eases it with ApproachValueWithRamp; func_00125440 calls it
+func_00121C48	ComputeRotationSpringAcceleration	original assembly: the rotation twin of ComputePositionSpringAcceleration: the angle between the owner's matrix at +0xD0 and the target (MultiplyMatrices3x3, MatrixToAxisAngle) scaled by the profile at +0x214; ApplyPoseSourceRotation and func_001CC818 call it
+func_00121DE0	ApplyPoseSourceRotation	original assembly: asks the pose source for its rotation (slot 5) and, by its orientation mode (byte 0x11), sets the owner's matrix, pulls it with ComputeRotationSpringAcceleration or eases it, orthonormalising with OrthonormalizeMatrix; func_00125440 calls it
 func_00122488	ApplyPoseSourceIndexedValue	reads the indexed value (slot 8) and, by mode3, stores it in the owner's value array or eases the stored one towards it with func_001EA4B8
 func_00122550	GetPlacedObjectPositionAt	slot 34 of class 0x02: at time 0 returns the position at +0x100 and rate at +0x150, otherwise asks the path object at +0x1EC or returns position + rate * time
 func_001225D0	GetPlacedObjectRotationAt	slot 35 of class 0x02: at time 0 returns the matrix at +0xD0 and rate at +0x160, otherwise asks the path object at +0x1F0 or integrates the rate

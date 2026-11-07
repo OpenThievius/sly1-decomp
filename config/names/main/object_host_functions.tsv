@@ -22,17 +22,22 @@ func_00100EE0	SetScriptElementsScrollScale	builtin: two arguments forwarded to S
 func_00100FA8	SetScriptCrossfadeRatioDeep	builtin: one argument forwarded to SetCrossfadeRatioDeep, empty result
 func_00101058	StartScriptSoundWithParams	builtin: int, three floats and a vector forwarded to StartSoundWithParams, empty result
 func_00101168	StopScriptPlayingSound	builtin without arguments: calls StopPlayingSound on the object, empty result
+func_00101208	FadeInScriptPlacedObject	host function: one float argument (the time) to FadeInPlacedObject on its object, returns the empty result
+func_001012B8	FadeOutScriptPlacedObject	host function: one float argument (the time) to FadeOutPlacedObject on its object, returns the empty result
 func_00101368	FindScriptObjectHandle	builtin: FindObjectHandle(object, int argument) returned as a script pointer
 func_00101418	FindScriptObjectAnimationPlayer	builtin: FindObjectAnimationPlayer(object, int argument) returned as a script pointer
 func_001014C8	FindScriptTrackPlayer	builtin without arguments: FindTrackPlayer(object) returned as a script pointer
 func_00101568	CopyScriptPlacedObjectFrame	builtin: one argument forwarded to slot 31 of class 0x02 (CopyPlacedObjectFrame), with the object argument as the source, empty result
 func_00101620	SetScriptFollowObjects	builtin: two int arguments forwarded to SetFollowObjects, empty result
+func_00101950	PlaceScriptAtArrivalPoint	host function: no arguments, calls PlaceAtArrivalPoint on its object, returns the empty result
+func_001019F0	StartScriptObjectSubGroupFinish	host function: no arguments, calls StartObjectSubGroupFinish on its object, returns the empty result
 func_00101A90	CreateScriptAnimationPlayer	builtin: four arguments to CreateAnimationPlayerReturned, result returned as a script pointer
 func_00101B80	FindOrCreateScriptSeekedAnimationPlayer	builtin: five arguments, the result of FindOrCreateSeekedAnimationPlayer returned as a script pointer
 func_00101D38	SeekScriptAnimationPlayer	builtin: three arguments forwarded to SeekAnimationPlayer, empty result
 func_00101E10	StopScriptAnimationPlayer	builtin without arguments: calls StopAnimationPlayer, empty result
 func_00101EB0	ApplyScriptListedPoseSources	builtin: one argument forwarded to ApplyListedPoseSources, empty result
 func_00101F60	ReleaseScriptPlayerAttachment	builtin: two arguments forwarded to ReleasePlayerAttachment, empty result
+func_00102030	ClearScriptAttachedSetTrackedNodes	host function: no arguments, calls ClearAttachedSetTrackedNodes on its object, returns the empty result
 func_00102178	SetScriptTriggerZoneEntry	builtin: four arguments forwarded to func_00140750 (SetTriggerZoneEntry), empty result
 func_00102268	SetScriptZoneColliderEntry	builtin: four arguments forwarded to func_00140770 (SetZoneColliderEntry), empty result
 func_00102358	ActivateScriptSwitchedColliderUnlessActive	builtin without arguments: calls ActivateSwitchedColliderUnlessActive, empty result
@@ -58,10 +63,17 @@ func_00103260	ScatterScriptRandomObjects	builtin: three arguments forwarded to S
 func_00103350	SetScriptIopChannel2Setting	builtin: two arguments forwarded to SetIopChannel2Setting, empty result
 func_00103420	PushScriptIopChannel2Setting	builtin: two arguments forwarded to PushIopChannel2Setting, empty result
 func_001034F0	PopScriptIopChannel2Setting	builtin without arguments: calls PopIopChannel2Setting, empty result
+func_00103590	TestScriptLevelEntryFlag1	host function: one argument to TestLevelEntryFlag1 on its world, returned as a script bool
+func_00103640	TestScriptLevelEntryFlag2	host function: one argument to TestLevelEntryFlag2 on its world, returned as a script bool
+func_001036F0	TestScriptLevelEntryFlag4	host function: one argument to TestLevelEntryFlag4 on its world, returned as a script bool
+func_001037A0	TestScriptLevelEntryFlag8	host function: one argument to TestLevelEntryFlag8 on its world, returned as a script bool
+func_00103850	CheckScriptEntryOneBitRequirement	host function: one argument to CheckEntryOneBitRequirement, returned as a script bool (CheckScriptEntryTwoBitRequirement's one-bit twin)
 func_00103900	CheckScriptEntryTwoBitRequirement	builtin: one argument to CheckEntryTwoBitRequirement, returned as a script bool
 func_001039B0	CheckScriptEntryThreeBitRequirement	builtin: one argument to CheckEntryThreeBitRequirement, returned as a script bool
 func_00103A60	SetScriptEntrySlotValue	builtin: three arguments forwarded to SetEntrySlotValue, empty result
 func_00103B40	GetScriptEntrySlotValue	builtin: two arguments to GetEntrySlotValue, result returned as a script int
+func_00103C10	IsScriptLevelRecordComplete	host function: one argument to IsLevelRecordComplete, returned as a script bool
+func_00103CC0	IsScriptLevelDone	host function: one argument to IsLevelDone, returned as a script bool
 func_00103D70	RecomputeScriptSaveCompletion	builtin: no arguments, the result of RecomputeSaveCompletion returned as a script int
 func_00103E10	PopScriptActiveSequenceElement	builtin: no arguments, calls PopActiveSequenceElement on the object, empty result
 func_00103EB0	ShowScriptPauseMenuPageWith	builtin: two arguments forwarded to ShowPauseMenuPageWith, empty result
@@ -88,16 +100,22 @@ func_00105020	GetScriptAgentStateClip	builtin wrapper: unpacks one int, returns 
 func_001050D0	AddScriptAgentClipGroup	builtin wrapper: unpacks four ints and passes them to func_001CAD60 (AddAgentClipGroup)
 func_001051C0	AddScriptAgentMeshKey	builtin wrapper: unpacks two values and passes them to func_001CA960 (AddAgentMeshKey)
 func_00105290	AddScriptAgentExtraClip	builtin wrapper: unpacks two values and passes them to func_001CA720 (AddAgentExtraClip)
+func_00105360	ForceScriptAgentState	host function: its arguments to ForceAgentState on its object, returns the empty result
 func_00105430	SetScriptAgentSecondaryClipId	builtin wrapper: unpacks two ints and passes them to func_001CA898 (SetAgentSecondaryClipId)
 func_001055A8	SetScriptAgentMainClip	builtin wrapper: unpacks one value (kind 0x2000) and passes it to func_001CB328 (SetAgentMainClip)
 func_00105728	StartScriptChildGroupDelay	builtin wrapper: unpacks one value and passes it to func_0013BE00 (StartChildGroupDelay)
 func_00105878	PlaceScriptPlayerOnGround	builtin: three arguments forwarded to PlacePlayerOnGround, empty result
 func_00105960	ReleaseScriptPlayerToState2	builtin: no arguments, calls ReleasePlayerToState2 on the object, empty result
 func_00105C10	SeekScriptObjects105Animations	builtin: one argument forwarded to SeekObjects105Animations, empty result
+func_00105CC0	SwapInScriptPlayerStandIn	host function: no arguments, calls SwapInPlayerStandIn on its object, returns the empty result
+func_00105D60	QueueScriptPlayerWalkerActivation	host function: one argument to QueuePlayerWalkerActivation on its object, returns the empty result
+func_00105E10	QueueScriptPlayerFirstActivation	host function: one argument to QueuePlayerFirstActivation on its object, returns the empty result
+func_00105EC0	QueueScriptPlayerSecondActivation	host function: one argument to QueuePlayerSecondActivation on its object, returns the empty result
 func_00106120	ResetScriptCollectedItems	builtin wrapper: no arguments; calls func_00150408 which zeroes the collected count at 0x78C and the flag at 0x7B0
 func_001061C0	CollectScriptItem	builtin wrapper: one value passed to func_00150418, which appends it to the list at 0x790 (max 8) when it is in the list at 0x76C
 func_00106270	AddScriptContactListId	builtin: one argument forwarded to func_0018DD50 (AddContactListId), empty result
 func_00106320	AddScriptContactListKind	builtin: one argument forwarded to func_0018DD78 (AddContactListKind), empty result
+func_001063D0	AddScriptStateResetEntry	host function: its arguments to AddStateResetEntry on its object, returns the empty result
 func_001064C0	SetScriptCurrentTargetFollower	builtin wrapper: no arguments, calls func_0016DCF0 (SetCurrentTargetFollower) on its object
 func_00106560	ClearScriptCurrentTargetFollower	builtin wrapper: no arguments; calls func_0016DD00 which stores 0 in D_002629C8, the current target follower
 func_00106600	AddScriptObjectPoolEntry	builtin wrapper: unpacks four ints and passes them to func_001A8150 (AddObjectPoolEntry)
@@ -105,6 +123,7 @@ func_001066F0	EnableScriptObjectPoolEntry	builtin wrapper: one value to func_001
 func_001067A0	DisableScriptObjectPoolEntry	builtin wrapper: one value to func_001A87A8 (DisableObjectPoolEntry)
 func_00106850	SetScriptObjectPoolEntryCount	builtin wrapper: two ints to func_001A87E0 (SetObjectPoolEntryCount)
 func_00106920	ChooseScriptObjectPoolItem	builtin wrapper: no arguments, calls func_001A8AF8 (ChooseObjectPoolItem)
+func_00106A70	ResetScriptPlacementRecord	host function: calls ResetPlacementRecord on its object, returns the empty result
 func_00106C50	SetScriptStepSequenceModeOne	builtin: no arguments, calls SetStepSequenceModeOne on the object, empty result
 func_00106CF0	SetScriptStepSequenceCameraMode	builtin: no arguments, calls SetStepSequenceCameraMode on the object, empty result
 func_00106D90	AddScriptSequenceExtraTarget	builtin wrapper: two values to func_001519E0 (AddSequenceExtraTarget)
@@ -138,8 +157,11 @@ func_001085E8	StartScriptColorFade	builtin wrapper: no arguments, calls func_001
 func_00108688	PlayScriptGaugeModeObjectTarget	builtin: no arguments, calls PlayGaugeModeObjectTarget on the object, empty result
 func_00108728	SetScriptGaugeModeObjectTarget	builtin: one argument forwarded to SetGaugeModeObjectTarget, empty result
 func_001087D8	PlaceScriptModeColliderAtAnchor	builtin wrapper: no arguments, calls func_0017AD50 (PlaceModeColliderAtAnchor)
+func_00108878	SetScriptTempoAgentPendingTimeline	host function: its argument to SetTempoAgentPendingTimeline on its object, returns the empty result
 func_00108928	EndScriptHeldTimeline	builtin: no arguments, calls EndHeldTimeline on the object, empty result
 func_001089C8	AddScriptC13Entry	builtin: two arguments forwarded to AddC13Entry, empty result
+func_00108A98	RemoveScriptTempoAgentEntry	host function: its argument to RemoveTempoAgentEntry on its object, returns the empty result
+func_00108B48	DecrementScriptTempoAgentGauge	host function: calls DecrementTempoAgentGauge on its object, returns the empty result
 func_00108BE8	AppendScriptTimelineKind0Entry	builtin: three arguments forwarded to AppendTimelineKind0Entry, empty result
 func_00108CC8	AppendScriptTimelineKind1Entry	builtin: three arguments forwarded to AppendTimelineKind1Entry, empty result
 func_00108DA8	AppendScriptTimelineKind2Entry	builtin: two arguments forwarded to AppendTimelineKind2Entry, empty result
@@ -148,3 +170,4 @@ func_00108F38	AppendScriptTimelineKind4Entry	builtin: two arguments forwarded to
 func_00109000	AppendScriptTimelineKind5Entry	builtin: two arguments forwarded to AppendTimelineKind5Entry, empty result
 func_001090C8	SetScriptGaugeBarAgentValues	builtin: three arguments forwarded to func_001A9C58 (SetGaugeBarAgentValues), empty result
 func_001093B8	TakeScriptCountedColliderTouch	builtin: two arguments forwarded to TakeCountedColliderTouch, empty result
+func_00109488	FillObjectPropertyTable	original assembly: fills the 32-byte records of D_002505D8 (the table ReadPropertyRecords and ApplyPropertyRecord index) with each property's kinds and its setter, getter or host function (the script host functions of this file, func_00129170 and others); InitObjectBuiltinTable calls it
