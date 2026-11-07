@@ -10,7 +10,7 @@ src/main/script_machine.cpp	00112698	0011AE78	00248FE0	00259938	-	-
 src/main/file_184D78.cpp	00184D78	00185C18	0024B1E8	00264260	-	-
 src/main/timed_object.cpp	001AECB0	001B1AC8	0024CFC0	002744B8	-	-
 src/main/player_mode.cpp	001D29C8	001D36F0	0024DB20	00274F38	-	-
-src/main/file_1C29E8.cpp	001C29E8	001C3390	-	00274998	-	-
+src/main/trail_ribbon.cpp	001C29E8	001C3390	-	00274998	-	-
 src/main/file_14D0A8.cpp	0014D0A8	0014EE40	00249FBC	-	-	-
 src/main/file_1000C8.cpp	001000C8	00112698	00248D80	002505D8	-	-
 src/main/movie_player.cpp	0018D8E0	0018F988	0024B438	002699B0	-	-

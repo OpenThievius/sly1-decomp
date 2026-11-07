@@ -698,7 +698,7 @@ D_002744F0	002744F0	4	.data	src/main/range_record.cpp
 D_002744F8	002744F8	80	.data	src/main/anim_record.cpp
 D_00274548	00274548	376	.data	src/main/state_walker.cpp
 D_002746C0	002746C0	724	.data	src/main/file_1B7968.cpp
-D_00274998	00274998	24	.data	src/main/file_1C29E8.cpp
+D_00274998	00274998	24	.data	src/main/trail_ribbon.cpp
 D_002749B0	002749B0	288	.data	src/main/file_1C3390.cpp
 D_00274AD0	00274AD0	188	.data	src/main/file_1C4458.cpp
 D_00274B90	00274B90	136	.data	src/main/file_1C5F18.cpp

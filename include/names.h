@@ -274,6 +274,8 @@
 #define g_nextSoundRecordId                        D_0027474C
 #define g_defaultVolumeChannelFactors              D_00274758
 #define g_volumeChannelFactors                     D_00274838
+#define g_trailEdgeTexCoord                        D_00274998
+#define g_trailZeroTexCoord                        D_002749A0
 #define g_turningColliderLinks                     D_00274AD8
 #define g_modeMasks                                D_00274F38
 #define g_modeLabels                               D_00274F58
@@ -2374,6 +2376,8 @@
 #define StartToSprChain                            func_001C2430
 #define StartFromSprChain                          func_001C25B0
 #define ResetTrailRing                             func_001C29E8
+#define AddTrailPoint                              func_001C29F8
+#define QueueTrailRibbonDraw                       func_001C3028
 #define DrawTrailRibbon                            func_001C30E8
 #define InitTurningCollider                        func_001C4458
 #define StartTurningCollider                       func_001C44F0

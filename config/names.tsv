@@ -2782,3 +2782,7 @@ func_001C0760	SilenceVolumeChannel3	sets factor 1 of volume channel 3 to 0.0 whe
 func_001C0AB8	SetLastWorldSoundEntryFromPoint	sets the two values of the world's last sound entry (+0x1D84, count at +0x1D80) to 8000 - 50 y and 8000 - 50 x of the point
 func_001C0B08	SetLastWorldSoundEntryValues	copies an 8-byte pair into the world's last sound entry at its offset 4 (AddWorldSoundEntry appends the entries)
 func_001C0EC0	PlaySoundWithWanderingPitch	when D_002748EC is set, starts sound 0x77 with a pitch of StepBiasedRandomWalk's value over 12
+func_001C29F8	AddTrailPoint	adds a point to an object's trail ring (+0x60): its time from g_gameClock, its alpha, and the ribbon's two edges built from the object's frame and the camera (BuildAxisAngleMatrix); func_001721B0 calls it
+func_001C3028	QueueTrailRibbonDraw	clears a request record and queues DrawTrailRibbon for the object with QueueDeferredRequest
+D_00274998	g_trailEdgeTexCoord	the texture coordinate (0, 1.0) DrawTrailRibbon gives each point's first edge
+D_002749A0	g_trailZeroTexCoord	the zero texture coordinate DrawTrailRibbon gives each point's second edge
