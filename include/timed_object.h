@@ -66,7 +66,9 @@ struct TimedGroupEntry {
 
 struct TimedGroupChild {
     BaseObject* child;             // 0x00
-    u8 pad04[0x24 - 0x04];
+    f32 riseScale;          // 0x04: the scale of the group's ramp (func_001B0360)
+    f32 fallScale;          // 0x08: the same in the falling states 3 and 7
+    u8 pad0C[0x24 - 0x0C];
     s32 count;              // 0x24
     TimedGroupEntry items[5];       // 0x28
 };
