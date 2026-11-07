@@ -1,0 +1,8 @@
+symbol	name	evidence
+func_00142ED0	SetGameClockScale	stores its argument in D_00261850, the factor func_00142F10 scales the step by, and sets running to whether it is above 0
+func_00142F10	AdvanceGameClock	measures the ticks since lastTick, clamps the step to 1/60..1/30 s, scales it by D_00261850*D_00261854 when running, and adds it to time, elapsed and dt
+func_00143030	AdvanceGameClockElapsed	measures the ticks since lastTick and adds that unscaled step to elapsed, leaving time and dt alone
+func_001430B8	SetGameClockTime	stores its argument in the clock's time field
+func_001430C0	SetGameClockRunning	stores its argument at offset 0 of the clock, the running flag; its only caller passes D_00261858
+func_001430C8	ResetGameClockTick	original assembly: stores the CPU's count register (cop0 register 9) in D_00261878, then the 64-bit count from ReadCycleCounter in the clock's last tick (D_00261870, g_gameClock + 0x18)
+func_001430F8	ReadCycleCounter	original assembly: reads the CPU's count register and extends it to 64 bits, counting a wrap in D_0027C000 whenever it is below the last value kept in D_00261878, which it then updates; AdvanceGameClock and AdvanceGameClockElapsed take their ticks from it

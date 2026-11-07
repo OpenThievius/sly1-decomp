@@ -1,0 +1,8 @@
+symbol	name	evidence
+func_0020A190	GetStreamId	turns a stream number into its id through the table g_streamIds (SetStreamCallback calls it)
+func_0020A220	DemultiplexPacks	walks a buffer of packs and hands each packet to its stream's callback (DemultiplexBuffer calls it)
+func_0020A518	DemultiplexBuffer	runs DemultiplexPacks over a whole buffer (FeedMovieDecoder calls it)
+func_0020A538	SetStreamCallback	registers a callback for a stream (InitMoviePlayback calls it)
+func_0020A630	ParsePackHeader	parses a pack header with the bit reader (DemultiplexPacks calls it)
+func_0020A780	ParseSystemHeader	parses a system header with the bit reader (ParsePackHeader calls it)
+func_0020A7F0	ParsePacketHeader	parses a packet header with its table of field lengths (DemultiplexPacks calls it)

@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00209260	ScaleByPowerOfTwo	a float times 2 to the power n (scale_by_power_of_two.c)

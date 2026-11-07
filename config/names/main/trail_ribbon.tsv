@@ -1,0 +1,5 @@
+symbol	name	evidence
+func_001C29E8	ResetTrailRing	stores 0 in the head (+8) and tail (+0xC) words of the ring DrawTrailRibbon walks
+func_001C29F8	AddTrailPoint	adds a point to an object's trail ring (+0x60): its time from g_gameClock, its alpha, and the ribbon's two edges built from the object's frame and the camera (BuildAxisAngleMatrix); func_001721B0 calls it
+func_001C3028	QueueTrailRibbonDraw	clears a request record and queues DrawTrailRibbon for the object with QueueDeferredRequest
+func_001C30E8	DrawTrailRibbon	walks a ring of 0x40 elements from head to tail, fades each by an age polynomial clamped to a range and the object's alpha, and emits two vertices per element as a strip into a vertex batch

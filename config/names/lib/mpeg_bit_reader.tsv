@@ -1,0 +1,8 @@
+symbol	name	evidence
+func_002115C0	InitBitReader	sets the bit reader up over a ring buffer (DemultiplexPacks calls it)
+func_002115F8	PeekBits	returns the next bits of the bit reader's window without consuming them
+func_00211618	AdvanceBits	consumes bits, refilling the 64-bit window a byte at a time and wrapping at the buffer's end
+func_002116B0	ReadBits	returns the next n bits and consumes them
+func_00211700	ReadBit	returns the next bit and consumes it
+func_00211748	SkipBytes	consumes a number of whole bytes
+func_002117A0	GetPositionAhead	returns the buffer position a number of bits ahead of the reader

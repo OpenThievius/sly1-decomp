@@ -1,0 +1,9 @@
+symbol	name	evidence
+func_0013C988	InitRingBuffer	stores its two arguments at +4 (the size, which ResetRingBuffer reads) and +0 (the buffer func_0013C9D0 writes at) and calls func_0013C9B0
+func_0013C9B0	ResetRingBuffer	zeroes the write position 0x08, read position 0x0C, filled count 0x14, counters 0x18 and 0x1C and sets the free count 0x10 to the size at +4
+func_0013C9D0	FillRingBuffer	reads up to n bytes (all free space when n <= 0) through a MemoryReader's read entry into buf + write position, wrapping the position modulo the size and moving the free count to the filled count
+func_0013CAD8	DrainRingBuffer	hands up to n filled bytes from the read position 0x0C to an object's virtual at +0x0C in wrapping chunks, adds each chunk to the free count and to one of two totals by the object's second virtual
+func_0013CC00	FillRingBufferFromMemory	builds a MemoryReader over a block with the vtable D_00249D98 on its stack and passes it to FillRingBuffer
+func_0013CC48	ConsumeSpan	adds n (or all that remains when n is 0) to the start at +0x10 and subtracts it from the remaining count at +0x18; nothing when none remains
+func_0013CC80	ReadMemoryReader	slot 1 of the table D_00249D98: copies min(want, remain) bytes from base+pos to the destination and advances pos and shrinks remain
+func_0013CCE8	ReadNothing	the one virtual of the reader's base class (entry 1 of D_00249D80, where ReadMemoryReader is in the memory reader's table): returns 0, no bytes read

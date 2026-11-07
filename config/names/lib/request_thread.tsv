@@ -1,0 +1,4 @@
+symbol	name	evidence
+func_001F7020	RunRequestThread	the request thread's loop: waits on g_requestSemaphore, takes the next entry of the ring and runs WakeThread, RotateReadyThreads or PauseThread on its argument, or prints the internal-error message
+func_001F70F8	StartRequestThread	once (g_requestThreadId), creates g_requestSemaphore and the thread RunRequestThread on the stack D_00625770, sets its priority and starts it (InitKernelLibrary calls it)
+func_001F71D0	QueueThreadRequest	original assembly: adds a request to the request thread's ring and signals its semaphore from an interrupt (QueueServerRequest and the memory card library's func_00209B10 call it)

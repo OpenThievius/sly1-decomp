@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00205778	ArctangentOfRatio	the checked arctangent of y / x: ArctangentOfRatioKernel's result, or a domain error for two zeros (arctangent_of_ratio.c)

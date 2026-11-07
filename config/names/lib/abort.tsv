@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002014D0	AbortProgram	raises signal 6 and exits with status 1, forever (abort.c; the runtime's terminate hook calls it)

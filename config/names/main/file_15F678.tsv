@@ -1,0 +1,98 @@
+symbol	name	evidence
+func_0015F678	QueueObjectForRegroup	sets bit 39 of the object's flags at +0x2C8 and appends it to the owner's item array unless the bit is already set
+func_0015F6C0	MergeObjectLinkLists	points every element of the other list's owner field at self then splices the other list onto self's with func_00152730
+func_0015F710	DissolveObjectLinkList	takes each node out of the owner's list, resets it to a list of its own and queues it with func_0015F678
+func_0015F7D8	MergeObjectGroupMembers	for the group's items that func_00182FC8 accepts, merges each one's link list (+0x54) into the first accepted item's with func_0015F6C0
+func_0015F8B0	RegisterObjectGroup	for a group of 2 or more, records it in each member's group table (max 4 at +0x6C/+0x70) then merges the members' link lists
+func_0015F930	RemoveValueFromArray	finds value scanning the array from its last entry, shifts the tail down with func_001F5B08 and decrements the count
+func_0015F9A0	UnregisterObjectGroup	removes the group from each member's group table (func_0015F930) and dissolves the first member's link list that still exists
+func_0015FA58	RegroupQueuedObjects	clears bit 39 on each queued object and, for those that head their own link list, re-merges every group they belong to, then empties the queue
+func_0015FB28	VisitObjectTree	calls the class's visit hook (+0x60 of its descriptor) on the object, then recurses into each child whose class flag bit 0 is set
+func_0015FBA0	GetPlacedObjectFrozen	returns bit 38 of the flags, the bit SetPlacedObjectFrozen sets and clears, and stores it in *out
+func_0015FBB8	SetPlacedObjectFrozen	slot 20 of class 0x02: on, saves the vectors at +0x150/+0x160 to +0xA0/+0xB0, zeroes them through slots 32/33 and sets bit 38 of the flags; off, clears the bit and restores them
+func_0015FCD8	SetColliderFrozen	slot 20 of class 0x03: on, saves the anchor modes to 0x90/0x94, clears the anchors, zeroes the vectors at 0x170/0x180, gives back the touched list and calls the base func_0015FBB8(1); off, calls it with 0 and restores the modes
+func_0015FF88	ResolveLookupIds	looks each of the idCount ids up with func_0015A480 and appends the non-null hits to found, then passes found to func_0015F8B0; slot 16
+func_00160050	AddLookupId	stores a value at ids[idCount] and increments idCount
+func_00160070	RunResetGameSession	a menu callback (D_0026482C): runs ResetGameSessionAndFade
+func_001600A0	FindKeyEntry	walks the 46 entries (stride 0x2C) of D_00247AF0 and returns the one whose key has the same words 2 ^ 6 as the argument's, or 0
+func_00160110	FindEntryById	walks the 46 keyed entries of D_00247AF0 and returns the one whose id equals its argument
+func_00160148	GetEntryName	returns the name field (+0x24) of the entry func_00160110 finds, or D_002623D0 when there is none
+func_00160180	LookupEntryById	returns what FindEntryById returns for the id it is given (ResumeAtSavedLevel and three others call it)
+func_001601A0	GetEntryIdByKey	returns the id of the entry func_001600A0 finds, or -1 when there is none
+func_001601D8	GetEntryFlags	returns the flags field (+0x28) of the entry func_00160110 finds, or 0
+func_00160208	CountCategoryFlags	over the entries whose id >> 8 equals the key, counts those with flag bit 2, 4 and 8 into its three out pointers
+func_001602A0	ComputeCompletionMask	starts from bits 1 to 3 and clears each bit some keyed entry's level entry lacks, and bit 1 when one of the five level records lacks flag 0x20 at +0x448 (func_001604B8 and seven others read it)
+func_00160340	MarkProgressStageFlag	sets one of the bits 0x10, 0x40, 0x100, 0x400 and 0x1000 of g_saveData's word 0x19F4 for stages 1 to 5 (func_0016B190 calls it)
+func_001603E8	MarkLevelDone	sets bit 0x20 of the level record n (the bit func_00160B28 and func_001602A0 count) and the matching progress flag bits
+func_001604B8	ApplyCompletionFlags	sets bits of g_saveData's words 0x19F4 and 0x19F8 for modes 2, 4 and 8, the last two only when ComputeCompletionMask has the bit (MarkLevelDone calls it)
+func_00160578	FadeOutAndQueueMovie	starts the fade of D_00247AD0 and, for kind 2 or 4, queues movie 0xD or 0xE followed by 0xF (QueueMovieWithSuccessor)
+func_001605E8	ResetGameProgress	zeroes the 0x1A00-byte progress block, then sets its type 0x12, size, current-level fields and -1 slot before func_001A7E90
+func_00160650	ChecksumGameProgress	adds up every byte of the progress block from +0xC to its end
+func_00160690	SetCurrentLevelEntry	finds the entry by key (func_001601A0), splits it into level (>>8) and entry (&0xFF, 0x78 bytes each), stores both pointers in D_002623C4/C8 and marks both visited
+func_001607D0	AddElapsedTime	adds dx to the progress total at +0xC, the current level's total at +0x444 and the current entry's at +4
+func_00160810	GetLevelEntryByKey	maps key (level<<8 | entry) to the 0x78-byte entry inside the level table of D_002623C0, or 0 for -1
+func_00160850	GetLevelEntryWord	returns the first word of the level entry GetLevelEntryByKey finds, or 0
+func_00160880	ResetGameSession	resets g_saveData (ResetGameProgress), D_00269984, the pair D_002623D8, g_scatterController, g_buttonCodeFlags and g_previousLevelIndex, then the reserve counts (ResetReserveCounts)
+func_001608E0	ResetReserveCounts	sets g_saveData's reserve count 0x19E0 to 5 and its spare count 0x19E4 to 0, and resets the flag table (func_00140D90)
+func_00160918	ResetGameSessionAndFade	runs ResetGameSession and starts the fade of D_00247AB0
+func_00160948	ResumeAtSavedLevel	finds the entry of g_saveData's level key (0x19D8, 0x19DC) and fades to it, or, when the element stack is in state 1 at that level, stops the animation players of object 0x494 and moves the element stack to state 3
+func_00160B28	ComputeCompletionPercent	counts the done bits of every keyed entry and the five level-done bits against their total, returns 0, 100 or the percentage clamped to 1..99
+func_00160C48	SetSpareCount	stores g_saveData's spare count 0x19E4 (UpdateScatterLevelLimits calls it)
+func_00160C58	HasSpareCount	1 when g_saveData's spare count 0x19E4 is above 0 or flag 2 of g_buttonCodeFlags is set
+func_00160CA0	GetIndexedTargetSlot	returns the word of the object for an index from 0x33B to 0x346 (the object plus index times 4 less 0xCD8), else 0 (StartStepSequence and AddSequenceExtraTarget call it)
+func_00160CC8	ClearTwoWords	zeroes eight bytes (ResetGameSession and ResumeAtSavedLevel clear D_002623D8 with it)
+func_00160CE8	ResetCounter	sets a counter's word at +0 to 0 (RunPendingWorldLoad calls it)
+func_00160CF0	IncrementCounter	adds one to a counter's word at +0 and returns it (func_00123888 calls it)
+func_00160D00	ReleaseCounterRef	subtracts one from the reference count at +0 (func_00123888 calls it)
+func_00160D10	MaskWorldBitsBySave	returns g_saveData's word 0x19F0 masked by the current world's bits (seventeen functions test it)
+func_00160D30	GetCurrentLevelBit	maps the current level number (+0x19D8) to a one-bit mask 0x10000000..0x80000000 (0 for levels 0 and 5) and stores it in *out when out is set
+func_00160D98	GetSpareCountLimit	returns 2, the limit PlaceSpareSoundNotifier and CountPickupTowardHundred hold the spare count 0x19E4 to
+func_00160DA0	SpendReserveUnit	lowers g_saveData's reserve count 0x19E0, stops the locked stream voice and starts a screen fade, a fade from the flag table, or the pause menu's page when the count is below 0; then RaiseScatterLevels by 1
+func_00160E80	ClearRecordBody	zeroes the six words from +0x04 to +0x18 of a record (func_001B7968 calls it)
+func_00161028	CollectEntriesForKey	runs a query over src's data and gathers up to maxOut distinct entries whose k0 or k1 equals key into out, returning the count
+func_001611B8	InitGifPacket	runs the base buffer set-up func_00152888, switches on the GIF-mode flag, installs the table D_0024A6F8 and clears the tag fields at 0x1C..0x24
+func_00161200	EndGifPacket	opens a final tag (func_001613C0) when none is open, then calls the table's close entry with flag 1
+func_00161278	CloseGifTag	slot 3 of D_0024A6F8: pads the cursor to 16 bytes and ORs the entry count (f24 / f20) and, when n is set, bit 15 into the open tag's first word
+func_001612E8	CountGifEntry	increments the entry counter at +0x24 of the packet and returns it; every Add* writer below calls it first
+func_001612F8	ReserveGifPackedData	closes any open tag, writes a tag with nloop, nreg and prim, stores the pointer past it in *out and advances the cursor over nloop * nreg quadwords
+func_001613C0	BeginGifTag	closes any open tag then writes a new one: prim a1 at bit 47, register count a2 at bit 60, register list a3, remembering it as the open tag
+func_00161458	AddGifRgbaEntry	adds a packed entry whose four words are the four bytes of value (register 1, RGBAQ)
+func_001614C8	AddGifUvEntry	adds a packed entry of two integers (register 3, UV)
+func_00161520	AddGifStEntry	adds a packed entry of three floats (register 2, ST with Q)
+func_00161588	AddGifXyzEntry	adds a packed entry of two integers and a 64-bit value (register 5, XYZ2)
+func_001615F0	AddGifXyzfEntry	adds a packed entry of three words and a fourth word a4 << 4 (register 4, XYZF2)
+func_00161670	AddGifXyzfNoDrawEntry	like AddGifXyzfEntry but masks the third word to 24 bits and sets bit 15 of the fourth (the drawing-kick-off disable bit)
+func_00161708	AddGifRegisterWrite	adds an address-and-data entry (register 14, A+D): the value a2 first, the register address a1 second
+func_00161768	BeginGifRegListTag	closes any open tag and writes a tag in register-list mode (bit 58) with register count a1, remembering it as the open tag
+func_001617E8	AddGifRegListFloat	adds one 64-bit register-list entry: tag in the low word, the float's bits in the high word
+func_00161860	AddGifUvRegListEntry	counts a register-list entry and writes the 64-bit UV word (u and v << 16) at the writer's cursor (the font's glyph drawing calls it)
+func_001618C0	AddGifXyzfRegListEntry	counts a register-list entry and writes the 64-bit XYZF word (x, y << 16, z in bits 32 to 55, fog in the top byte) at the writer's cursor
+func_00161958	AddGifImageTag	writes a 16-byte tag with the quadword count in the low bits and mode 2 (image) at bit 58
+func_001619C0	InitVertexBatch	clears the current vertex (0x28 bytes at 0xFC) and 0xB0 bytes, sets the 1.0 and flag words, copies 16 bytes in and calls func_00161B80 to empty the vertex list
+func_00161A88	DestroyVertexBatch	does nothing but free the batch with func_0018D778 when flag bit 0 is set (the destructor form func_001D7148 shares)
+func_00161AB0	SetVertexBatchTransform	flushes the vertex batch (FlushVertexBatch), then builds the matrix from rotation and translation into the object and a second one at +0x40, as SelectBatchShape and SetVertexColor are also batch setters
+func_00161B10	SelectVertexBatchLights	for a vertex batch whose description (+0xF8) asks for lights, finds up to 16 of them around its bounds with CollectLightsForSphere into +0xB0..+0xB8 and sets the mode +0x94 to 4, else clears them and sets it to -1
+func_00161B80	ResetVertexBatch	clears the shape word at +0xF8 and vertex count at +0x124 and zeroes the 0x1720-byte vertex list at +0x128
+func_00161BB0	SetVertexBatchMode	flushes the vertex batch (FlushVertexBatch), stores the mode at +0xF8 and sets the vertex colour to white
+func_00161C00	BuildUnlitVertexPacket	writes the batch's vertex positions, texture coordinates, scaled colours and strip tags into the packet D_002622A8 for shapes 1, 6, 7 and 8
+func_00161F70	BuildLitVertexPacket	like the unlit builder but also writes each vertex's three normal components in groups of four, for shape 0
+func_00162508	FlushVertexBatch	when a shape is set and at least 3 vertices are in, copies the batch into the packet and dispatches on the shape (func_00161C00 or func_00161F70); otherwise empties it
+func_00162680	SetVertexPosition	copies a three-float vector into the current vertex's x, y and z at 0xFC
+func_001626A8	SetVertexColor	stores a 32-bit colour into the current vertex at 0x114 (func_00161BB0 and func_001C30E8 pass 0xFFFFFFFF or a colour whose alpha they set)
+func_001626C0	SetVertexTexCoord	copies 8 bytes into the current vertex at 0x118; func_001C30E8 passes a float pair (0,1.0) for one edge and (0,0) for the other
+func_001626D8	AddVertex	stores the current vertex into the list and, when the list is full, flushes and restarts it keeping its last two
+func_00162810	CollectNonNullRefs	allocates capacity words and copies in the non-null ref of each item, leaving the compacted array at refs
+func_00162890	ReadPlacedObjectModel	LoadPlacedObject's reader of the object's model from the level stream: counts, matrices, animation records, mesh strips queued for upload (g_meshQueueCount) and their packets (func_00165AE8, func_00165588)
+func_00163938	WriteStripMeshMscal	writes the VIF MSCAL of the strip mesh's microprogram (0x18C0 or 0x18F8 by mode); BuildStripMeshPacket and BuildLitStripMeshPacket call it
+func_00163990	WriteMorphTargetMscal	writes the VIF MSCAL of the morph target's microprogram (0xFA0 or 0xFD8 by mode); BuildMorphTargetPacket calls it
+func_001639E8	BuildMorphTargetPacket	writes positions, optional weights and, for each of the f40 targets, the difference between the target's vertex (through its index list) and the base position
+func_00163ED8	BuildStripMeshPacket	writes positions with the per-record flag, optional texture coordinates, weights, morph differences, tinted colours and queues each strip (func_001694F8)
+func_00164868	BuildLitStripMeshPacket	the strip-mesh builder that also carries per-vertex normals and their morph differences
+func_00165728	StartAttachments	for each attachment entry runs the object's slot 1 and func_001662A8, then hands every listed node's looked-up object to func_001F2798; PlacedObject's start calls it with the block at +0x22C
+func_00165828	BindAttachmentTargets	looks up the object for each key with func_0015A448 and stores the relative transform between it and the owner (func_00188668) in the element; PostLoadPlacedObject calls it
+func_00165920	CopyAttachmentBlock	copies the 0x58-byte block from the source, reallocates its arrays, re-links the node chain to the new copies and rebuilds the ref list; CopyPlacedObject calls it with both +0x22C blocks
+func_00165FE0	UpdateAttachments	calls slot 2 of each attached element that func_001B4B08 accepts with the frame time, then func_001F3408 on each chained node; UpdatePlacedObject calls it first
+func_001660E8	UpdateAttachmentFrames	slot 43 of class 0x02: for each attachment record multiplies the owner's (or parent's) frame by the attached object's frame and by the record's local matrix into +0x50
+func_001662A8	BuildAttachmentDmaChain	builds in a temporary packet buffer the DMA chain of call and ref tags for an attachment's parts and keeps a copy of it (DetachPacketBufferCopy); StartAttachments calls it
+func_00166658	FlipVifBaseOffset	sets D_00262474 to 0x23C minus itself and writes it as the VIF base offset of g_vifPacketWriter, toggling between two buffer halves
+func_00166690	DrawModelPart	the part drawer DrawPlacedObjectParts runs for each 0x70-byte part: picks the part's lights (CollectLightsForSphere, rechecked when g_lightingChangeFrame moves), transforms it and writes its VIF packets with g_vifPacketWriter

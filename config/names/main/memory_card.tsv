@@ -1,0 +1,43 @@
+symbol	name	evidence
+func_0018B580	InitMemoryCardSystem	calls func_002093F0, InitBackgroundJob(&g_backgroundJob) and InitMemoryCard(&g_memoryCard, 0, 0); listed in the game's init function table D_002647C0
+func_0018B5C0	InitBackgroundJob	creates a semaphore into the record's first word, sets the thread word to -1 (no thread) and the result word to 0x22
+func_0018B600	RunBackgroundJob	the thread's entry: calls the job with the argument, keeps the return value in the result word, sets the thread word to -1 and clears the job and argument
+func_0018B670	StartBackgroundJob	after func_0018B720, stores the job function and its argument in the record, sets the result to 0x20, creates a thread whose entry is func_0018B600 and starts it with the record as argument
+func_0018B720	WaitForBackgroundJob	when a job is running calls func_001F6A50 on its thread, then takes and releases the job's lock (func_001F6B60, func_001F6B40), as RunBackgroundJob holds it while the job runs; StartBackgroundJob calls it first
+func_0018B770	IsBackgroundJobRunning	returns whether the record's thread word is not -1 (func_0018BDC8 and func_001943E8 wait for it to be 0 before starting or reading a job)
+func_0018B780	ConvertMemoryCardDirEntry	clears a 0x5C-byte record, copies the 32-byte name at +0x20, the size at +0x10 and maps attribute bits of the source to a flag word at +0x48 plus created/modified time bytes
+func_0018B910	ClassifyMemoryCardCallResult	maps a card call's return value to 29 (zero), 30 (positive) or 31 (negative)
+func_0018B930	ClassifyMemoryCardSyncResult	maps a card sync return value 0, 1, -1 to 32, 33, 34 and anything else to 31
+func_0018B988	MapMemoryCardErrorCode	big switch from an operation code (1..21) and a card result value to the game's error code (0, 1, 9..26, 31, 35)
+func_0018BC90	SyncMemoryCardResult	calls func_00209B80 for two ints, classifies the first with func_0018B930, stores the second through a2 and for 33 turns it into a game code with func_0018B988
+func_0018BD00	FinishMemoryCardCall	every card operation passes its return value and operation code here: classifies the value with func_0018B910 and, when it is 29, completes it with func_0018BC90
+func_0018BD58	InitMemoryCard	clears the 0x4F50 bytes, sets the state to -1 and the target to 0, resets the display mode with func_0018C178 and stores its two arguments as port and slot
+func_0018BDC8	UpdateMemoryCard	when no job runs, starts func_0018D0A0 as a job once nextPollTime is reached if state equals targetState, otherwise calls func_0018C028; then picks a prompt from the state once displayMode is 1
+func_0018BFA8	CompareMemoryCardEntryTimes	subtracts the time fields (+0x54, +0x52, +0x53, +0x56, +0x57, +0x58) of two ConvertMemoryCardDirEntry records in order and returns the first difference; func_0018C028 uses it to pick the newest slot
+func_0018C028	SetMemoryCardState	stores a new state with the clock time, starting func_0018D0A0 or func_0018C420 as the job that state needs
+func_0018C178	SetMemoryCardDisplayMode	stores a new display mode and the clock time when it differs from the current one, and clears the selected image when the mode is 2
+func_0018C1A8	RunMemoryCardFormatJob	the background job pause page 4's first item starts (ActivatePauseMenuSelection): runs FormatMemoryCard and sets targetState 2 (back to page 4) on failure or 3 (page 7, which creates the save files) on success
+func_0018C1E8	GetKeyedDataSize	builds a key pair from two xored word pairs, returns func_001407A0 of it (0 when the key is empty); func_0018C250 turns the result of D_00248470 into a block count
+func_0018C250	CreateMemoryCardSaveFiles	checks the free blocks against the needed count, makes the save directory, writes the icon and header files and the three "saveN" slot files, then raises the target state to 5
+func_0018C420	LoadMemoryCardSaveSlots	lists the save directory and reads the three slots "saveN" with func_0018CDD8, then raises the target state to 5
+func_0018C568	ApplyMemoryCardImage	copies the card object's image into the live game state D_002623C0 and refreshes it with func_001A7E90; returns 0x2C when there is no image
+func_0018C638	SaveGameToMemoryCardSlot	copies the live game state into the slot record, derives its number from its address within the card object (stride 0x1A5C) and writes "/dir/saveN" with func_0018CFC0
+func_0018C770	WriteSelectedMemoryCardSlot	same file name as func_0018C638, derived from the slot pointer at i4F4C, written with func_0018D028
+func_0018C7F8	StartMemoryCardSave	when the save flag allows, starts the background job SaveGameToMemoryCardSlot, otherwise shows the pause-menu page; called when a level is marked done
+func_0018C888	ListMemoryCardDirectory	rejects counts above 0x12 and names longer than 0x40, calls the card directory read (operation 0xD) into a 0x480-byte buffer and converts every entry (0x40 each) into a 0x5C record with func_0018B780
+func_0018C9C0	CheckMemoryCardFileExists	lists the directory entries matching a name with func_0018C888 (at most 1) and returns 0 when exactly one is found, else 14
+func_0018CA10	WriteMemoryCardSaveHeader	builds a 0x3C4-byte settings block of colours and floats, with the icon name, and writes it as "dir/icon.sys" with func_0018D368
+func_0018CBF8	WriteMemoryCardIcon	writes the keyed data D_00248470 under the name "sly.ico" in the given directory with func_0018CC20
+func_0018CC20	WriteMemoryCardKeyedFile	opens "dir/name" for creation, opens the stream described by a key and copies it to the file in 0x1000-byte pieces; code 0x27 without a key
+func_0018CDD8	ReadMemoryCardSlotFile	reads a save file, requires the directory entry attributes, size 0x1A00, type 18, matching size and checksum (func_00160650), and copies the record out; codes 20, 28, 27, 8 for the failures
+func_0018CFC0	WriteMemoryCardSlotFile	sets the slot record's type to 18 and size to 0x1A00, stores the checksum of func_00160650 and writes 0x1A00 bytes to the file with func_0018D368
+func_0018D028	WriteMemoryCardSlot	initialises the slot record with func_001605E8, writes it with func_0018CFC0 and then checks the file with func_0018C9C0
+func_0018D0A0	PollMemoryCard	queries the card at port and slot with func_00209CB8 into the card words and free blocks, sets targetState from the result and nextPollTime to the clock plus 0.3
+func_0018D168	GetMemoryCardFreeBytes	calls the card info function (operation 1), maps result codes 9 and 10 to 0 and 12 and stores the free block count << 10
+func_0018D1F8	FormatMemoryCard	sends the card server operation 0x10 (func_00209FA8) with only the card's port and slot (+4, +8) and passes the result to FinishMemoryCardCall; RunMemoryCardFormatJob runs it before the save files are created
+func_0018D228	CreateMemoryCardDirectory	calls the card call with operation 0xB (the directory path) and turns result 0x18 into 0
+func_0018D268	OpenMemoryCardFile	card call (operation 2) with a path and flags that returns the file handle through the last argument; func_0018D368 passes 514 to create a file
+func_0018D2B0	CloseMemoryCardFile	card call with operation 3 on a handle
+func_0018D2E8	ReadMemoryCardFile	card call with operation 5 on a handle, a buffer and a size; func_0018CDD8 reads a 0x1A00 slot with it and checks the byte count
+func_0018D328	WriteMemoryCardFile	card call with operation 6 on a handle, data and size; func_0018D368 compares the byte count it returns with the size
+func_0018D368	CreateMemoryCardFile	opens the path for creation, writes version bytes from data, requires the byte count to match (else 7) and closes the file

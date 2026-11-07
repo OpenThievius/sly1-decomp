@@ -1,0 +1,24 @@
+symbol	name	evidence
+func_00180EB0	RegisterListedKeepObject	slot 6 of class 0x72: RegisterObject, then adds itself to the world's list at +0x1C9C
+func_00180EE8	UnregisterListedKeepObject	slot 7 of class 0x72: UnregisterObject, then removes itself from the world's list at +0x1C9C
+func_00180F20	CopyListedKeepObject	slot 9 of class 0x72: saves the kept 8 bytes, runs the base copy func_001830D8 and restores them
+func_00180F68	InitModeWalkerObject	slot 0 of class 0x1A: base init func_001D73A8, then sets the time stamp at 0xBF4 to -10
+func_00180F98	StartModeWalkerObject	slot 16 of class 0x1A: resolves its links, creates the walker (CreateStateWalker) and sets mode 1
+func_00181078	ControlModeWalker	slot 0x134 of class 0x1A, the control slot ControlPlayer and ControlModeCollider fill: reads the pad (ClearPadPressedBits), moves its state walkers (SetStateWalkerTarget, TeleportStateWalker) and steers the walker's frame and the camera (func_00181ED0, BuildAxisAngleMatrix)
+func_00181448	UpdateModeWalkerObject	slot 17 of class 0x1A: after the base update walks the contact list at 0xC04, frees it with FreePooledContactChain and fits a clamped ramp from the clock into two calls on the object at 0xBCC
+func_00181658	RecomputeModeWalker	original assembly: slot 0x58 of class 0x1A
+func_00181780	HandleModeWalkerActivation	slot 0x130 of class 0x1A, the slot HandleSwitchedColliderActivation fills for 0x05: runs HandlePathFollowerActivation, then updates D_00270650 through its slots by the activation
+func_00181818	ApplyModeWalkerTint	slot 36 of class 0x1A: blends the base colour with a fixed one by two clamped ramps while the flag at 0xBF0 is set, passes it to func_00126A48 and runs func_00125C90
+func_00181A58	CaptureModeWalkerTarget	slot 0x124 of class 0x1A: runs func_001DAE48 and copies the position (+0x140) of its object at +0xBC0 to the output's +0x10
+func_00181A98	IsModeWalkerRequestBlocked	slot 0x13C of class 0x1A (as IsModeColliderRequestBlocked for 0x1B): 1 unless its mode +0xBB0 is 1, its accepted flag +0xBF0 is clear and func_001DDA80 does not hold for the world
+func_00181AE0	HasModeWalkerAcceptedRequest	slot 0x144 of class 0x1A: whether +0xBF0 is set
+func_00181AF0	FinishModeWalker	slot 0x150 of class 0x1A: runs func_00192C58, then SetModeWalkerMode with 1
+func_00181B20	LaunchPlayerFromModeWalker	the callback AcceptModeWalkerRequest gives the player: places it from D_00264180 through D_00264190 (func_001BC260), turns it to face the other way and sets state 4/0x2B (SetPlayerState)
+func_00181BC8	AcceptModeWalkerRequest	slot 0x140 of class 0x1A: unless its slot 79 refuses, sets +0xBF0 when HasSpareCount holds; without one and with a player, takes the player over (state 2/2, mode 3, LaunchPlayerFromModeWalker as its callback), else mode 2; then sends itself message 0x17
+func_00181D28	HandleModeWalkerNotification	slot 13 of class 0x1A: on message 0x13 from the walker target's source sets the flag at 0xC00 for 0x15E and clears it for 0x15F, then the base handler
+func_00181D88	ExtractModeWalkerContacts	slot 67 of class 0x1A: ExtractContactsByPartMode on its sub-record at 0xC04
+func_00181DA8	SetModeWalkerMode	changes the mode word at 0xBB0 and drives its walker with SetStateWalkerTarget (0x35E, 0x35F) or TeleportStateWalker (0x361, 0x362)
+func_00182470	InitC24Object	slot 0x10 of class 0x24: runs func_0013DDB8 and sets its numbers (10, 1, 3000, 1000, 0, 0.5)
+func_001824D8	StartC24Object	slot 0x50 of class 0x24: runs func_0013CE40, resolves its links (D_00264230), creates its state walker (0x36E) and a weight curve with a 0xC00-byte buffer
+func_00182548	UpdateC24Object	slot 0x54 of class 0x24 (StartC24Object's class): runs UpdateMaskedCollider, then by the active switched collider and its kind sends its owner an empty message (SendEmptyMessage), triggers a script event and moves its state walker (SetStateWalkerTarget)
+func_00182748	MoveC24Object	slot 0x7C of class 0x24, the per-frame motion slot (func_001BC088 for class 0x03): runs func_00127E60, builds a frame with BuildBasisFromXAndZHint and steps its walker and weight curve (func_00182948)

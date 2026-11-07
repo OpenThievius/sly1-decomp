@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FB618	ConvertS64ToDouble	converts a signed 64-bit integer to a double from its two halves with the software double arithmetic (s64_to_double.c)

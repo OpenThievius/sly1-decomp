@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00209238	IsNotANumber	whether a float is not a number (is_not_a_number.c; every checked function tests its arguments with it)

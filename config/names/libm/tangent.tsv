@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002054F0	Tangent	the tangent of a float, reduced by ReduceByHalfPi to TangentKernel (tangent.c)

@@ -1,0 +1,12 @@
+symbol	name	evidence
+func_00185C18	GetSurfacePairFriction	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceFriction, at least 0, scaled by 0.2 with flag 8 of g_buttonCodeFlags (func_00185D20 reads it)
+func_00185CA0	GetSurfacePairBounce	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceBounce, clamped to 0..1 (func_00185D20 reads it)
+func_00185D20	CreatePooledContact	takes a zeroed contact from the world's pool (+0x1AFC, PopZeroedFreeSlot), fills its two ends with the two objects and their surface kinds (+0x2C8), the point, the normal times the depth, the pair's friction and bounce (GetSurfacePairFriction, GetSurfacePairBounce), and runs func_001860A8 on it
+func_001861E8	FreePooledContactChain	walks a Contact03 chain returning each node to the pool at world+0x1AFC with PushFreeSlot
+func_00186230	MeasurePointToLine	for a point and the line through two points writes the parameter of the point's projection (dot product over the squared length; 0 for points closer than 1e-4) and the distance from the point to it
+func_00186320	MeasurePointToSegment	MeasurePointToLine with the parameter clamped to 0..1, so the distance is to the nearest point of the segment (MeasurePathCurveDistance, UpdatePlayer)
+func_00186450	CollectEdgeContacts	tests each of the collider's edges (pairs of indexes into its points) against the context with func_0013DFD8, appending the hits to the output and pointing each at its edge; returns their count (func_00186BA8 calls it)
+func_001867C8	GroupEdgesByKey	sorts edges by the key their idx58 pair gives, swapping an edge's two halves when needed, and chains edges of the same key into groups
+func_00186A70	FindGraphPath	breadth-first search over groups whose pair holds two ids, from key to target, marking visited items with flag 4; returns the groups along the path in out
+func_00187260	CollectMeshHits	under a back-memory scope tests a shape against a mesh's parts (func_0013E430, func_0013DFD8) and writes up to a maximum of hit records (point, normal, depth, part), returning their count; AddMeshContacts and the notifiers' probes call it
+func_001879C0	AddMeshContacts	collects up to 64 hits of a shape against a mesh (func_00187260, with the collider's +0x3A4) and creates a contact for each (CreatePooledContact), last first; CollidePlayerWithObject and CollideAgentWithObject call it

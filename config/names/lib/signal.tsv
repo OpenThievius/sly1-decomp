@@ -1,0 +1,4 @@
+symbol	name	evidence
+func_00201500	MakeSignalTable	allocates the table of 32 signal handlers at +0x1D4 of a C library state record on first use
+func_00201578	RaiseSignalFor	raises a signal through a state record's handler table: the default sends it to this process, 1 ignores it, else the handler runs after being reset
+func_00201668	RaiseSignal	RaiseSignalFor on g_libraryState (AbortProgram raises 6 with it)

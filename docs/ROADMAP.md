@@ -75,7 +75,7 @@ source files proved, PAL close behind US, and names and types under way.
    each matched function declared for itself; what is left is the script machine's value and
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
-   names as macros over their address names (`config/names.tsv`, `include/names.h`,
+   names as macros over their address names (`config/names/`, `include/names.h`,
    [NAMING.md](NAMING.md)). On 2026-11-06, 2,484 symbols have one, and about a hundred
    types are named, from the base classes (`BaseObject`, `PlacedObject`, `Collider`) to the
    leaf families, shared records and global types; the types whose role the code does not show

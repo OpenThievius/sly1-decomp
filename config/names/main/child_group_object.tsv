@@ -1,0 +1,11 @@
+symbol	name	evidence
+func_0013B4C0	InitChildGroupObject	slot 0 of class 0x3B: after the base set-up stores FLT_MAX in +0x554, 200.0 in +0x55C and +0x560, 800 and 5000 and the vector tuning from D_00261320..D_00261358
+func_0013B598	LoadChildGroupObject	slot 10 of class 0x3B: runs the base step then func_00159478 to find its member at +0x5BC
+func_0013B5C8	CopyChildGroupObject	slot 9 of class 0x3B: runs the base copy and duplicates the 0x24-byte block at +0x680 with func_0018D568
+func_0013B610	StartChildGroupObject	slot 16 of class 0x3B: after the base step walks its children list and stores each class 0x27 child (up to 16) in arr, then allocates 0xC0 bytes at +0x68C when active
+func_0013B708	HandleChildGroupNotification	slot 13 of class 0x3B: after the base handler, message kind 0xA aimed at itself while +0x550 is 0 starts the delay clock
+func_0013B778	UpdateChildGroupObject	original assembly; slot 17 (+0x54) of class 0x3B, the update slot (UpdatePlacedObject, UpdateMaskedCollider)
+func_0013B9D8	RunKeyedChildGroupEntry	slot 58 of class 0x3B: when active finds the entry with the given key in its table at +0x68C and passes it, its data and its value to func_00185D20
+func_0013BBA0	HandleChildGroupObjectEvent	original assembly; slot 45 (+0xC4) of class 0x3B, the event slot (HandleTriggerZoneEvent, HandleFlaggedObjectEvent)
+func_0013BE00	StartChildGroupDelay	stores the clock D_0026185C plus the argument in +0x554 of a class 0x3B object
+func_0013C950	GetChildGroupSoundParams	returns the pointer at the object's sound slot, setting it up with InitSoundParams first when it is 0 (as GetMaskedColliderSoundParams does)

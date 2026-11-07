@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00206A68	ArctangentOfRatioKernel	the unchecked arctangent of y / x in the right quadrant (arctangent_of_ratio_kernel.c)

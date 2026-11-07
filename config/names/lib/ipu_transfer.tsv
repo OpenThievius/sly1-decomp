@@ -1,0 +1,6 @@
+symbol	name	evidence
+func_002117D0	StartIpuOutputTransfer	starts DMA channel 3 (from the IPU) with the DMA suspended while its control register is written
+func_00211838	StartIpuInputTransfer	starts DMA channel 4 (to the IPU) the same way
+func_002118A0	SaveIpuDmaChannels	saves the state of the IPU's two DMA channels (SaveMpegDmaState calls it)
+func_00211988	RestoreIpuDmaChannels	restores the state of the IPU's two DMA channels and restarts them (RestoreMpegDmaState calls it)
+func_00211AD8	SyncIpu	waits while the IPU is busy (mode 0) or tells whether it is (mode 1)

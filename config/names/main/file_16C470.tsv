@@ -1,0 +1,5 @@
+symbol	name	evidence
+func_0016C470	InitC76Object	slot 0x10 of class 0x76: runs its parent's set-up (func_001DFD90), then sets +0x88 to 1, +0xA8 to 8, +0xAC to 9 and +0xB4 to the largest float
+func_0016C4B8	LoadC76Object	slot 0x38 of class 0x76: a tail call to ReadTransformObject
+func_0016C4E8	DrawC35Collider	slot 0xA4 of class 0x35: a tail call to func_001B93D8
+func_0016C508	DrawC52Object	slot 0xA4 of class 0x52: a tail call to func_001261C0, the transform draw DrawC60Object ends with

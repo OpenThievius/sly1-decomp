@@ -14,9 +14,9 @@ declarations and definitions use, what `INCLUDE_ASM` names, and what the linker 
 
 | File | What it is |
 | --- | --- |
-| `config/names.tsv` | the table: one row per named symbol, with the symbol, its name, and the evidence for the name |
-| `include/names.h` | generated from the table by `tools/names.py header`: `#define RegisterButtonCodes func_0016F588` for each row |
-| `tools/names.py` | `header` writes `names.h`; `check` checks the table's rules and that `names.h` agrees with it |
+| `config/names/` | the tables: one row per named symbol, with the symbol, its name, and the evidence for the name. A function's row is in the table of the source file that holds it (`config/names/main/value.tsv` for `src/main/value.cpp`), a global's in `config/names/data.tsv` |
+| `include/names.h` | generated from the tables by `tools/names.py header`: `#define RegisterButtonCodes func_0016F588` for each row |
+| `tools/names.py` | `header` writes `names.h`, moves each row to its table and sorts each table; `check` checks the rules, each row's table, and that `names.h` agrees with the tables |
 
 Function bodies may use the readable name. The preprocessor turns it back into the address name,
 so the objects are byte for byte the same either way. Declarations, prototypes and definitions
@@ -51,7 +51,7 @@ Hungarian name here would look like theirs. `tools/names.py check` rejects a pre
 ## Where a name comes from
 
 A name says what the code is seen to do: what a function changes, what a type holds, how a field
-is read and written. Its row in `config/names.tsv` gives that evidence in a sentence: the
+is read and written. Its row in `config/names/` gives that evidence in a sentence: the
 functions that read and write it, the values it takes, what calls it.
 
 Never take a name from memory of the original game, its prototype, another decompilation or a
@@ -71,7 +71,8 @@ it. It is read from retail's data, never remembered, and it opens no door to any
 ## Workflow
 
 1. Give a family its names: its types and fields in place (they are ours), its functions and
-   globals as rows of `config/names.tsv`, each with its evidence.
+   globals as rows in `config/names/`, each with its evidence. A row may go in any table:
+   `header` moves it to its own.
 2. Run `python3 tools/names.py header`, then use the readable names in the bodies.
 3. Check that nothing changed: `tools/names.py check`, the full build (`MATCH`) and
    `tools/version_check.py` (the same counts), and `tests/check_repository.py`.

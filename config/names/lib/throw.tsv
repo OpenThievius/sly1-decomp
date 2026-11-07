@@ -1,0 +1,5 @@
+symbol	name	evidence
+func_001FD920	AbortOnTerminate	the default terminate hook D_00278048: calls AbortProgram
+func_001FD930	RunTerminateHook	calls the function the terminate hook D_00278048 holds (the exception runtime and HandleAbstractCall call it)
+func_001FDAF0	ThrowToTopHandler	runs the cleanups registered in the top exception handler, then jumps to that handler
+func_001FDC68	PopHandlerAndThrow	pops the top exception handler after running its cleanups, then throws again

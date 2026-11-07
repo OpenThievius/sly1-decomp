@@ -1,0 +1,98 @@
+symbol	name	evidence
+func_0014EE40	InitPooledObject	Slot 0 of class 0x46: runs the base constructor and sets the state to -1.
+func_0014EE70	RemoveFromWorldQueue	Slot 6 of class 0x46: removes the object from the world's list at +0x1C78 (func_00152600) if it is in it.
+func_0014EF00	AddToWorldQueue	Slot 3 of class 0x46: appends the object to the world's list at +0x1C78 (func_00152470) and sets state 0.
+func_0014EF40	CopyPooledObject	slot 9 of class 0x46: saves the 8 bytes at 0x56C, runs CopyCollider, and restores them
+func_0014EF88	LoadPooledObject	slot 10 of class 0x46: runs LoadCollider, then looks for the member group of itself with func_00159478 into 0x58C
+func_0014EFB8	HandlePooledObjectNotification	slot 13 of class 0x46: after the base handler, kind 6 from the watched object clears it and sets state 4 with SetPooledObjectState
+func_0014F020	StartPooledObject	slot 16 of class 0x46: runs StartPlacedObject, then resolves the object link table D_00261CC8 with ResolveObjectLinks
+func_0014F058	UpdatePooledObject	Slot 17 of class 0x46: switches on the state, runs func_0014F270 in state 2 and moves to state 5 after the delay in state 4.
+func_0014F110	SetPooledObjectState	Stores the new state of a class 0x46 object, stamps the clock, clears the taker data when leaving state 2.
+func_0014F168	LaunchObjectFromPooledObject	a callback func_0014F270 passes on: gives the other object, through its slot 0x90, a velocity of the pooled object's horizontal direction (+0x150 with z cleared, normalised) times D_00261CD4 plus D_00261CD8 up, and moves the player (kind 7) to state 4/0x2B
+func_0014F270	UpdateHeldPooledObject	UpdatePooledObject's step in state 2, while an object holds it: finds the touching part (FindContactingPart), plays sounds and pad patterns, counts the holder's children and moves the pooled object on through SetPooledObjectState
+func_0014F740	InitPooledHolder	slot 0 of class 0x23: runs the base initialiser func_0013DDB8 and sets 0x6C0 to -1
+func_0014F770	HandlePooledHolderNotification	slot 13 of class 0x23: kind 0x14 from the state walker at 0x740 in state 0x2B7 either destroys the walker or re-poses the two held objects at 0x734 and 0x738
+func_0014F850	PostLoadPooledHolder	slot 15 of class 0x23: runs PostLoadPlacedObject, then copies each object of items748 found with func_0015A448 that is of kind 0x41 into items76C
+func_0014F900	SyncPooledHolderWithPlayer	copies the player's word at +0x24F8 into the class 0x23 holder's +0x6DC when g_player is set (StartPooledHolder calls it)
+func_0014F920	StartPooledHolder	slot 16 of class 0x23: resolves the link table D_00261CE0, copies four vectors from the object found for 0x6C0, starts its children and creates the state walker at 0x740 in state 0x2B7
+func_0014FA88	UpdatePooledHolder	slot 17 of class 0x23: runs the base update and moves the state walker at 0x740 between its states 0x2B7..0x2BB by f7B0, f78C and the aim step, through SetTakerWalkerState
+func_0014FBE0	TestPooledHolderMayContact	overrides TestCollidersMayContact: returns 1 for a class 0x46 object whose taker is itself, else defers to the base
+func_0014FC38	ReleasePooledHolder	lets go of the taken object at 0x6C8 (slots 15 and 3), sends the walker at 0x740 to 0x2B7 and destroys it, calls slot 2 of the held object at 0x734 with 7 and runs func_0013D278
+func_0014FCE8	SetPooledHolderWalkerState	sets the target state of the walker at 0x740 (unless it is already there), updating the held object's fields at 0x4C and 0x1C for states 0x2B7..0x2B9
+func_0014FDA8	UpdatePooledHolderAim	in state 0x2B8 clears the held object's +0x1C and after the delay +0x6D0 acquires a pooled object (state 0x2BA); otherwise keeps a target among the attached pooled objects (FindFirstAttachedPooledObject), aims at it (AssignAimTarget) and acquires one after the delay (state 0x2BB)
+func_0014FEC0	AcquirePooledObject	returns 1 if already holding one; else takes the head of the world's class 0x46 list at +0x1C78, sets its taker to itself, starts it, places it at the saved vectors, sets its state to 1 and keeps it at 0x6C8
+func_00150298	SelectEarliestPooledObject	unless one is already held at +0x6CC, takes from every item of the list D_00262708 its FindEarliestPooledChild, keeps the one with the smallest state time and sets it to state 5 with SetPooledObjectState
+func_00150338	FindFirstAttachedPooledObject	returns the first of the up to 8 objects at +0x790 that IsObjectAttached and whose state is neither 3 nor 4
+func_001503E0	AddPooledHolderItem	appends an object to the class 0x23 holder's list at +0x748 (count +0x744, at most 8); the script built-in func_00109488 calls it
+func_00150408	ResetCollectedItems	zeroes the holder's collected count +0x78C and its flag +0x7B0 (the script built-in ResetScriptCollectedItems calls it)
+func_00150418	RecordCollectedItem	sets the holder's flag +0x7B0 for an object of kind 7, and appends an object of kind 0x41 that is in its list at +0x76C to the collected list at +0x790 (at most 8); the script built-in CollectScriptItem calls it
+func_001504E0	InitStepSequence	slot 0 of class 0x65: runs the placed-object set-up func_00123ED0, sets a flag bit and sets the two ids at +0x300 and +0x30C to -1
+func_00150528	LoadStepSequence	slot 14 of class 0x65: runs the base loader func_001289C0 then reads the step list with func_00150570 into +0x2DC/+0x2E0
+func_00150570	ReadSequenceSteps	reads a count, allocates count * 0x28 bytes and reads one typed step each (types 0..4 and 7 with their own fields)
+func_001506F0	StartStepSequence	slot 20 of class 0x65: runs the base start func_00124A48, defaults the target id, and looks the target word up in the current level entry (func_00160CA0)
+func_00150750	SetStepSequenceModeOne	sets a step sequence's mode (+0x2D0) to 1, which keeps SetStepSequenceState from counting it in D_00261D38 (script built-in func_00106C50)
+func_00150760	SetStepSequenceCameraMode	sets a step sequence's mode (+0x2D0) to 2, in which SetStepSequenceState's state 3 pushes camera controller 6, takes the pad select flag and lowers volume channel 9 (script built-in func_00106CF0)
+func_00150770	ReadSequenceTarget	copies the word at the sequence's target pointer (+0x304) to *out
+func_00150780	WriteSequenceTarget	stores value in the word at the sequence's target pointer (+0x304)
+func_00150790	SetStepSequenceState	leaves the old state (1, 3, 4 or 5) with its clean-up and enters the new one with its set-up, then stamps the time at +0x2D8
+func_00150AE8	UpdateStepSequence	slot 21 of class 0x65: runs the placed-object update, picks the next state from the current one, the pause and timeout (5 seconds) and runs func_001517C0 in state 3
+func_00150DC0	HandleStepSequenceMessage	switches on the message type: 0..2 and 3 queue speaker, text, timing and wait flags at +0x2E8, 4..6 run actions, 7 passes a value on
+func_001512A8	HandleStepSequenceNotification	slot 0x44 of class 0x65: after HandlePlacedObjectNotification, notification 6 about the object at +0x2F8 clears it
+func_00151300	TestStepWaitConditions	clears each wait bit of +0x2E8 whose condition has been met (speaker done, text done, timer past, input pressed) and returns whether any remain
+func_001516C0	SkipRemainingSteps	moves on through the later steps running only the action kinds 4, 5 and 6, then calls func_001E9570 in mode 2
+func_001517C0	RunStepSequence	repeats: stop while TestStepWaitConditions is pending, otherwise advance to the next step and send it to HandleStepSequenceMessage; when done calls SkipRemainingSteps
+func_00151860	ShowStepSequenceText	passes a value to the object's callback slot, or with no object puts it in g_typedTextCaptionBox and pushes that box on g_elementStack (UpdateStepSequence calls it)
+func_001518B8	ChooseStepSequenceState	unless blocked by globals, picks state 1 or 5 (or the current one) from the target word and extra targets and calls SetStepSequenceState
+func_001519A8	ResetStepSequence	returns to state 0 unless the state is 1 or 3
+func_001519E0	AddSequenceExtraTarget	looks up an entry by name and kind and appends it to the sequence's list of up to 4 extra target words at +0x314
+func_00151A58	GetScatterController	returns the address of g_scatterController (func_00109488 calls it)
+func_00151A68	ClearScatterController	zeroes the 0x24 bytes of a scatter controller (func_00160880 calls it)
+func_00151A88	ResetScatterController	sets the scatter controller's count ranges (4..6, 1..3), picks its table by g_saveData's progress words and g_currentEntry's flag 2, sets the level and draws its two counts from the table's ranges
+func_00151D28	UpdateScatterLevelLimits	with flag 8 of D_00275B00 raises g_saveData's 0x19E4 count (func_00160C48) to the table's value for the level's band, else clamps the level to the table's range; then runs CompleteSoundNotifiers (func_001DCEA0 calls it)
+func_00151E18	NotifyScatterControllerLoaded	does nothing; RunPendingWorldLoad calls it with g_scatterController
+func_00151E20	RaiseScatterLevels	raises g_currentEntry's level (+0x0C, SetScatterLevel) by an amount times the table's rate and its second level (+0x10) by the amount times a rate chosen by g_saveData's 0x19E0 count, clamped to 0..1
+func_00151ED8	RaiseScatterLevelForObject	raises the level by the table's +0x14, or +0x18 when the object's ordinal bit is already set in g_currentEntry's bits at +0x74, and sets that bit, counting it at +0x70
+func_00151FC8	ResetScatterLevels	sets the level and the second level of g_currentEntry to 0 and clears its count +0x70 and its first bit byte (SetSaveNotifierState calls it)
+func_00152010	ScatterObjectsAtPoint	counts down the scatter controller's two counts and scatters objects of kind 0x58 (and one of 0x57 when the second level falls) around a point with ScatterObjectsAroundCircle, redrawing the counts from the table's ranges
+func_00152410	SetScatterLevel	clamps a value to the scatter controller's table range (ClampToRange) and stores it as g_currentEntry's level
+func_00152438	SetListLinkOffset	stores the offset of the link pair in each item in a list's +0x08 (InitActiveSetSolver and many set-ups call it)
+func_00152440	ClearList	zeroes the head and tail words of an intrusive list
+func_00152450	ClearListLinks	zeroes an item's two link words (func_00127048 and func_00158F80 call it)
+func_00152460	GetListLinks	returns the address of an item's link pair: the item plus the list's offset field
+func_00152470	AppendToList	links the item after the list's tail through the pair at item + offset, and makes it the tail
+func_001524D8	PrependToList	links the item in front of the list's head, and makes it the head
+func_00152540	InsertBeforeInList	inserts value before the given item (appending when it is 0, prepending when it is the head)
+func_00152600	RemoveFromList	unlinks the item from its list, repairs the head and tail and moves every live iteration frame (chain D_0027B314) that points at it on to the next item
+func_001526D0	IsInList	true when the item's next link is set or it is the list's tail
+func_00152720	IsListEmpty	returns whether the list's head is 0
+func_00152730	SpliceListToEnd	moves every item of src onto the end of dst through their link pairs and clears src
+func_001527D8	CountListItems	follows the next links from the head and counts the items
+func_00152810	InitDmaChannels	enables DMA with func_002027C8(1), then stores the channel pointer for ids 0, 1, 2, 8, 9 into the VIF0, VIF1, GIF, from-SPR and to-SPR tables; sits in the start-up function table D_002647C0
+func_00152888	InitPacketBuffer	clears the open-tag and mode words, installs the table D_0024A0E0 and clears begin, cur and end
+func_001528C8	ClearPacketBuffer	zeroes begin, end, the open-tag pointer and the cursor
+func_001528E0	RewindPacketBuffer	drops the open tag and moves the cursor back to the buffer's start
+func_001528F0	AllocatePacketBuffer	allocates count * 16 bytes with func_0018D4B0 and sets begin, cur and end
+func_00152938	AllocateQuadwordBuffer	takes count*16 bytes from AllocateFrontMemory and sets the buffer's allocated, current and end pointers to that block
+func_00152980	AllocateTempPacketBuffer	allocates count * 16 bytes with func_0018D658, the call used between func_0018D608 and func_0018D6F0, and sets begin, cur and end
+func_001529C8	UsePacketBufferMemory	sets begin and cur to the given base and end count * 16 bytes past it
+func_001529E0	DetachPacketBuffer	closes the open tag, outputs the quadword count and begin pointer, then clears the buffer
+func_00152A50	DetachPacketBufferCopy	closes the open tag, outputs the count and begin, copies the contents with func_0018D568 into *out and clears the buffer
+func_00152AE0	SubmitPacketBuffer	closes the open tag, starts the DMA channel with the buffer's begin (func_00202A80) and rewinds the cursor
+func_00152B38	BeginDmaTag	closes any open tag, writes a count tag (0x10000000) at the cursor and remembers it as the open tag whose size CloseDmaTag fills in
+func_00152B80	AddDmaRefTag	closes an open tag if there is one, writes a reference tag (0x40000000) with size lo and address hi, then reopens a count tag
+func_00152C18	AddDmaCallTag	same as AddDmaRefTag but writes a call tag (0x50000000) with the address hi
+func_00152CA0	AddDmaReturnTag	closes the open tag and writes a return tag (0x60000000)
+func_00152CE0	AppendPacketQuadwords	copies a number of quadwords to the packet buffer's cursor (+0x0C) and moves the cursor past them (CopyQuadwords)
+func_00152D30	AddDmaEndTag	closes the open tag and writes an end tag (0x70000000) at the buffer's cursor
+func_00152D70	CloseDmaTag	pads the cursor to 16 bytes and ORs the open tag's quadword count (distance from the tag / 16 - 1) into its first word
+func_00152E18	SkipDisplayListWriterSlot	slot 3 of the display-list writer's base table D_0024A0E0: does nothing
+func_00152E28	InitC61Object	slot 0 of class 0x61: runs InitPlacedObject only
+func_00152E48	BuildTexturePackets	for a texture, builds two DMA packets (one clearing/copying through its dimensions, one drawing edge quads) and stores their pointers and sizes at +0x2D4..+0x2E0
+func_00153328	QueuePlacedObjectDraw	builds the placed-object transform and queues func_001533A8 as a deferred request with the object as its argument
+func_001533A8	DrawPlacedObjectParts	deferred draw callback queued by func_00153328: adds DMA ref tags, writes a matrix to VIF, then runs the part drawer func_00166690 for each 0x70-byte part
+func_00153528	InitActiveSetSolver	clears the 0x50-byte solver record, allocates 2n items of 0x60 bytes, makes its four lists and allocates the matrix, factor, right-hand-side and solution arrays
+func_00153608	ResetActiveSetSolver	empties its four lists, clears each 0x60-byte item's two floats and eight bytes and files every item in the free list at +0x30
+func_001536C8	AddActiveSetItem	appends an item to the active-set solver: fills the new column of every existing item's row (+0x44) with the dot product of the item's vector (+0x10) and the row's vector, appends it to the list at +0x30 and counts it (+0x4); func_00154088 and func_001BCD00 call it
+func_00153A50	PivotActiveSet	up to ten rounds: builds the active items' matrix, calls the factor and solve functions, then moves the item that first reaches a bound between the active, at-low, at-high lists
+func_00153EC0	RunActiveSetSolver	moves the pending items of kind 2 into the active list, calls func_00153A50, then repeatedly takes the pending item with the most negative value (below -0.01) and pivots it in until none is left
+func_00154880	SolveActiveSetSystem	builds an active-set solver for n items with InitActiveSetSolver, loads each item's row of n words and its value, runs RunActiveSetSolver and copies the n results out of the item records

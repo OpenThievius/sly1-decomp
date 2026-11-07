@@ -1,0 +1,23 @@
+symbol	name	evidence
+func_00143560	UpdateCameraProjection	derives from the zoom at 0x1C4, the settings at 0x1E0 and the near and far distances at 0x1E4/0x1E8 the values at 0x1F0..0x1EC, builds the matrix at 0xC0 with func_00189F58 and calls func_001434C8 and func_00144540; every setter below calls it
+func_00143648	InitCamera	slot 0 of the 0x6D class: runs the base set-up, stores the zoom, near/far and projection settings at 0x1C0..0x208, copies the frame at 0x80, installs the five controller tables and calls ResetCamera
+func_001437C0	SnapCurrentCameraZoom	calls SnapCameraZoom on g_camera with the float it is given
+func_001437E8	SetCurrentCameraNearDistance	calls SetCameraNearDistance on g_camera with the float it is given
+func_00143810	SetCurrentCameraFarDistance	calls SetCameraFarDistance on g_camera with the float it is given
+func_00143900	SetCameraPosition	calls SetCameraPlacement with only the position argument (the 16 bytes copied to 0x40)
+func_00143920	SetCameraOrientation	calls SetCameraPlacement with only the second argument (the three 16-byte rows copied to 0x80, 0x90, 0xA0)
+func_00143940	SnapCameraZoom	stores its argument as both the zoom at 0x1C4 and the target zoom at 0x1C8, zeroes the rate at 0x1CC and calls UpdateCameraProjection (UpdateCamera calls it to jump to the target)
+func_00143968	SetCameraNearDistance	stores the value at 0x1E4 (default 100, passed to the projection builder before the 20000 at 0x1E8) and updates the projection
+func_00143988	SetCameraFarDistance	stores the value at 0x1E8 (default 20000, the last argument of the projection builder in UpdateCameraProjection) and updates the projection
+func_00143A60	ResetCamera	optionally places the camera from D_00261880/D_00261890, then empties the controller stack (count 0x3D0 = 0), pushes controller ctl454 with func_00145088, clears the pending snap and sets 0x218/0x21C
+func_00143AF0	ClearCameraObjectList	sets the count at 0x340 of the object pointer list at 0x344 to 0
+func_00143AF8	AddCameraObject	appends the item to the pointer list at 0x344 when the count at 0x340 is below 8
+func_00143B20	RemoveCameraObject	finds the value in the list at 0x344, shifts the later entries down with func_0018D800 and decrements the count at 0x340
+func_00143E40	UpdateCamera	runs the top controller on the frame time (calls the target's slot 0x124/4, the controller's slot 4) and eases the zoom at 0x1C4 toward 0x1C8 with func_001EA620, updating the projection
+func_001448C8	SetCameraPlacement	copies a 16-byte position to 0x40 and three 16-byte rows to 0x80/0x90/0xA0 when given, calls func_00144540 and zeroes the five floats at 0x2B0..0x2C0
+func_00145088	PushCameraController	pushes a controller onto the camera's stack at 0x3D4 (count 0x3D0), ordered by key; the stack is walked by UpdateCamera and cleaned by RemoveCameraControllers
+func_001451F0	RemoveCameraControllers	drops the stack entries matching the key, controller, target and argument selected by the flag bits, calls their slot 3, then slot 1 on the old top and slot 0 on the new top
+func_00145810	FindFirstFreeSpan	collects spans of every object with func_0013DFD8, merges them with MergeOverlappingSpans, and returns the first gap in [0,1] wider than thresh through lo/hi
+func_00145FB8	PushCameraStackValue	calls PushStackValue on the camera's controller at 0x460
+func_00145FD8	PopCameraStackValue	returns PopStackValue of the camera's controller at 0x460
+func_00145FF8	PeekCameraStackValue	returns PeekStackValue of the camera's controller at 0x460

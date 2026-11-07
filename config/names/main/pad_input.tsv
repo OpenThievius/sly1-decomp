@@ -1,0 +1,24 @@
+symbol	name	evidence
+func_0016E0B8	InitPadSystem	calls UpdatePadSelection, func_002040E8(0) and InitPadRecord on D_00262C70 with ports 0, 0
+func_0016E0F0	SetPadSelectFlags	ORs its bits into D_00262C6C and runs UpdatePadSelection
+func_0016E118	ClearPadSelectFlags	clears its bits in D_00262C6C and runs UpdatePadSelection
+func_0016E148	UpdatePadRouting	sets g_padRouting from g_padSelectFlags: 0 with flag 0x80 or 4, 5 with flag 1, 4 with flag 2, else 7 (InitPadSystem, SetPadSelectFlags and ClearPadSelectFlags call it)
+func_0016E1A0	InitPadRecord	zero-fills a 0xC4-byte pad record, sets connection state (1, 0), stores two port arguments at +4 and +8, allocates a 0x140-byte buffer aligned to 0x40 and a 0x20-byte one, and sets +0xC0 to 1
+func_0016E238	UpdatePadConnection	per frame polls the pad port (func_00204590) and steps the connection state machine (mode at +0x14, stage at +0x18) through the port query functions, calling PollPadInput in mode 3 and SetPadConnectionState with the result
+func_0016E630	SetPadConnectionState	stores mode and stage in +0x14 and +0x18 and the clock in +0x1C when they change, resets the stick ranges to +-0.75 on entering mode 3 and starts func_001A7B20 when the stage reaches 3
+func_0016E738	ReadAnalogStick	turns a stick's two bytes into x and y from -1 to 1 (2b/255 - 1, y flipped), keeping 0 until the stick has once left the dead zone 0x60..0xA0 or changed (the latch word it is given), and rotates the result by the table D_00262A30; PollPadInput calls it
+func_0016E940	PollPadInput	reads the 0x40-byte pad packet (func_00204510), stores the inverted button word at +0xA8 and the newly pressed and released bits at +0xAA and +0xAC, reads the sticks, falls back to digital values, runs AdvanceButtonCodes and stamps the clock
+func_0016EC20	ClearPadPressedBits	clears the given bits of the newly-pressed word at +0xAA
+func_0016EC38	StartPadRecordPattern	when the record's +0xC0 is set, its stage is at least 3 and its mode is 3, passes +0xBC to StartPadPatternFromTable
+func_0016EC88	ResetPadStepRepeat	clears +0x28 and +0x2C, the repeat state of GetPadHorizontalStep and GetPadVerticalStep
+func_0016EC98	GetPadHorizontalStep	returns -1, 0 or 1 from the pad's left/right bits (0x8000, 0x2000) or a stick x past 0.8, then repeats at a shrinking interval of 0.3333 down to 0.1 s while held; MoveCurrentObjectChoice calls it
+func_0016EED0	GetPadVerticalStep	the same repeating -1/0/1 step as GetPadHorizontalStep for the up/down bits (0x1000, 0x4000) and the stick y at +0x44
+func_0016F108	GetPadButtonAnalog	returns 0 when the button mask D_00262A50[idx] is not held, 1.0 when held on a record of stage below 4, otherwise the pressure byte at +0xAE+idx (at least 1) divided by 255
+func_0016F188	AddButtonCode	links a button-code record into the list D_00262DFC unless it is already in it (func_0016F588 calls it for each of the nine)
+func_0016F1F8	ResetButtonCodes	sets every listed button-code record's position back to 0 (RunCompletedButtonCode calls it after each run)
+func_0016F238	AdvanceButtonCodes	on a pad button change, moves each listed record's position on when the pressed mask is its next one and back to 0 when not
+func_0016F2E0	RunCompletedButtonCode	once the delay AdvanceButtonCodes set has passed, unlinks the records marked for removal, runs the callback of the completed record with the longest sequence, then resets every position
+func_0016F408	ClearButtonCodeFlags	button-code callback: sets D_00262C64 to 0 and calls func_001E5278(0)
+func_0016F430	SetButtonCodeFlags	button-code callback: ORs its argument without bit 0x4000 into D_00262C64 and calls func_001E5278(0) when bit 0x4000 was set
+func_0016F478	ShowPasswordMessage	button-code callback: when two game-state fields have the expected values, decodes the string D_002483B8 by xor 0x23, formats 'The password is: %s' and shows it through slots 8 and 14 of the text object D_0026EC70 for 10 seconds
+func_0016F588	RegisterButtonCodes	adds the nine static button-code records D_00262A80 .. D_00262C48 to the list, one AddButtonCode each

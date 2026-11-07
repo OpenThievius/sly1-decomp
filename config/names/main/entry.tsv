@@ -1,0 +1,4 @@
+symbol	name	evidence
+func_00100008	EnterProgram	the program's first code (original assembly, entry.cpp): clears .bss from D_0027B300, sets up the main thread and the heap with two system calls, runs func_001F9EA8 and func_001F6C20, calls RunMainLoop with D_0027B380's count and words and leaves through func_001FA078
+func_001000B8	ExitProgram	jumps to func_001FA078 with 0 in a0 whatever it is passed; the C library's abort (func_002014D0) calls it with 1 after raising signal 6
+func_001000C0	EndMainThread	system call 0x23; EnterProgram sets its address up as the main thread's return address

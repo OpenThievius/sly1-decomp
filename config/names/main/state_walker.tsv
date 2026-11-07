@@ -1,0 +1,33 @@
+symbol	name	evidence
+func_001B5588	CopyVec3	copies the three floats at +0, +4 and +8 of its second argument into its first
+func_001B55A8	CopyVec2	copies the two floats at +0 and +4 of its second argument into its first
+func_001B5C40	ConvertStringToCharCodes	maps each byte of a string through func_001B5B58, swaps the two bytes of the result into a 16-bit unit and ends the output with 0
+func_001B5CD8	StartCameraPositionedObject	slot 16 (start) of class 0x54: StartPlacedObject, then clears flag bits 40 and 41 and sets bit 40
+func_001B5D28	MoveObjectToCamera	slot 17 (update) of class 0x54: UpdatePlacedObject, then sets its position (slot 29) to the camera's vector at +0x40, keeping its own height unless +0x2D0 is set
+func_001B5D80	BuildFreeList	stores the stride in word 0, then chains count nodes at that stride from the base in word 1 (each node's first word points to the next) and ends the chain with 0; the two pool initialisers call it
+func_001B5DD0	InitSlotPool	rounds the slot size up to 8, allocates size times count bytes with func_0018D500 into word 1 and chains them with BuildFreeList
+func_001B5E30	InitAlignedSlotPool	allocates size times count plus 0x30 bytes, aligns the base up to 0x40 and chains the slots with BuildFreeList
+func_001B5EA0	PopFreeSlot	takes the node at the pool's head (+8), moves the head to its next word and returns the node (0 when empty)
+func_001B5EE0	PopZeroedFreeSlot	PopFreeSlot, then clears the slot with func_001F5C0C over the pool's slot size (+0); func_001B6290 takes its handle this way
+func_001B5F28	PushFreeSlot	puts a non-null item back at the head of the pool (+8) by storing the old head in its first word; func_001B6438 returns the handle to the world's pool with it
+func_001B5F50	LoadStateGraph	slot 10 (load) of class 0x88: reads the graph's state table (keys, FindStateEntryIndexOrZero) and its edges with their vectors from the stream onto front memory
+func_001B61A8	StartStateGraph	slot 16 (start) of class 0x88: StartObject, and when the graph is armed (+0x44) queues SpawnInitialStateWalker on the world
+func_001B61F0	SpawnInitialStateWalker	takes the first non-empty slot at +0x40, looks up the object named by its value at +0x40 with func_0015A448 and creates a walker (func_001B6290) on it with key -1
+func_001B6290	CreateStateWalker	takes a zeroed handle from the world's pool (func_001B5EE0), stores its table D_002198E8, owner and arguments, links it into the world's list and the owner's, sets its index from the key with FindStateEntryIndex, plans its first move with func_001B66A0 and sends event 0x11
+func_001B6388	FindListNodeByKey	walks the owner's list from head and returns the first node whose key equals the argument, else 0
+func_001B63C0	FindStateEntryIndex	scans the 8-byte entries at +0x38 (count at +0x34) for one whose first word equals the key and returns its index, or -1
+func_001B63F8	FindStateEntryIndexOrZero	FindStateEntryIndex with a result below 0 turned into 0
+func_001B6420	GetStateEntryKey	returns the first word of entry index (8 bytes each) of the table at +0x38
+func_001B6438	DestroyStateWalker	frees the handle's object at +0x24 and its entry in the world, removes it from the owner's and the world's lists, returns it to the pool with PushFreeSlot and sends event 0x12
+func_001B64D8	SetStateWalkerTarget	sets the target index (+0x30) from a key (-1 for none); when it changes and the current track allows it (flag 2) drops the running track, and plans a move with func_001B66A0 if none is running
+func_001B6568	GetStateWalkerTargetKey	stores the key of the walker's target state (+0x30) in the graph's state table, or -1 for none
+func_001B6598	GetStateWalkerCurrentKey	stores the key of the walker's current state (+0x28) in the graph's state table, or -1 for none
+func_001B65C8	GetStateWalkerNextKey	stores the key of the state the walker is moving to (+0x2C) in the graph's state table, or -1 for none
+func_001B65F8	SetStateWalkerSpeed	stores the walker's speed at +0x38 and tells the animation player at +0x24 when there is one (SetAnimationPlayerSpeed)
+func_001B6628	TeleportStateWalker	finds the entry index of the key and, unless the walker is already there, notifies the change (func_001B6E28), makes it both its current and target index, clears +0x2C and plans again with func_001B66A0
+func_001B66A0	StartNextStateWalkerEdge	breadth-first numbers the graph's nodes from the current one toward the target over the edge list, picks among the first-step edges by their weights with RandomFloatInRange, steps over edges without a track and starts the chosen edge's track with func_0012C7B0 (ending with callback func_001B6CA8); with no route clears the edge and calls func_001B6D78 with 0x14
+func_001B6C68	CommitStateWalkerArrival	notifies the change from the current to the target index (func_001B6E28), then makes the target the current index and sets the target to -1
+func_001B6CA8	HandleStateWalkerTrackEnd	callback of the edge's track: for message 5 aimed at its own track commits the arrival (func_001B6C68) and plans the next edge (func_001B66A0)
+func_001B6CF0	AdvanceStateWalkerTime	spends a time on the running track: while the time is at least the track's remaining length commits the arrival and plans the next edge, else steps the track by the rest with func_0012F0A0
+func_001B6D78	CallStateWalkerListeners	calls slot 18 of the object at +0x1C, then calls each (function, object) record of the list at +0x3C with the two arguments
+func_001B6E28	NotifyStateWalkerChange	looks up the values of two entry indexes (-1 for a negative one) and sends event 0xE with the walker and both values to the owner (func_001837E0)

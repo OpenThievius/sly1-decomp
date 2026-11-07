@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F6880	FindSubstring	returns the first place in s where t occurs, or 0 (substring.cpp)

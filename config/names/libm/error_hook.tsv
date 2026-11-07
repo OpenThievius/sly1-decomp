@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00208FE8	HandleMathError	the error hook the checked functions call: handles nothing and returns 0 (error_hook.c)

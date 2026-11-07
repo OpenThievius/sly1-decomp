@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00205578	Arccosine	the checked arccosine: ArccosineKernel's result, or a domain error through HandleMathError (arccosine.c)

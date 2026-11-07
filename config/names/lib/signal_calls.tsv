@@ -1,0 +1,3 @@
+symbol	name	evidence
+func_002016A0	SendSignalFor	sends a signal to a process with SignalProcess and keeps the error the call left in the state record
+func_00201700	GetProcessIdFor	GetProcessId for a state record

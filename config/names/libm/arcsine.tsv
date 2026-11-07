@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00205678	Arcsine	the checked arcsine: ArcsineKernel's result, or a domain error through HandleMathError (arcsine.c)

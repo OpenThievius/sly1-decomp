@@ -1,0 +1,80 @@
+symbol	name	evidence
+func_001AA268	SetupScreenElementText	slot 1 of the base element: takes the font from D_0026227C, sets scale 1, colour 0xFF808080 and an empty text
+func_001AA298	UpdateScreenElementSlide	slot 2 of the base element: advances the blend by the slide-in, hold or slide-out time, moves it between its hidden and shown positions, then sets the mode through slot 16
+func_001AA4F0	SetScreenElementText	slot 8 of the element tables: copies the text (or clears it), measures it with the font and sets the element's size
+func_001AA5A0	SubstituteScreenElementGlyphs	rewrites the text so characters missing from the font are taken from fonts 3 or 4 and digits after a slash are wrapped in colour codes
+func_001AA788	SetScreenElementScale	stores the text scale at +0x20C
+func_001AA790	DrawScreenElementText	slot 9 of the base element: builds a draw record from position, size and colour, draws the frame object behind it, then draws the text with the font
+func_001AA898	GetScreenElementSlideInTime	slot 11: returns the slide-in time at +0x240
+func_001AA8A0	GetScreenElementHoldTime	slot 12: returns the hold time at +0x244
+func_001AA8A8	GetScreenElementSlideOutTime	slot 13: returns the slide-out time at +0x248
+func_001AA8B0	SetScreenElementSlideInTime	stores the slide-in time at +0x240
+func_001AA8B8	SetScreenElementHoldTime	stores the hold time at +0x244
+func_001AA8C0	SetScreenElementSlideOutTime	stores the slide-out time at +0x248
+func_001AA8C8	ResetScreenElement	slot 5: calls slot 16 with mode 0
+func_001AA8F0	ShowScreenElement	slot 14: from mode 0 or 3 goes to mode 1 (sliding in), in mode 2 restarts the hold clock
+func_001AA958	HideScreenElement	slot 15: from mode 1 or 2 goes to mode 3 (sliding out)
+func_001AA998	SetScreenElementMode	slot 16: sets the offset into the slide for modes 1 and 3, snaps position and blend for modes 0 and 2, stores the mode and clock, and re-places anchored elements
+func_001AAAC8	AreScreenElementsTogether	slot 18: returns 1 when both are in mode 1 or 2, both in mode 3, or one in mode 3 and the other in mode 2
+func_001AAB20	SetScreenElementSize	stores the width and height when they are not negative, then places the element
+func_001AAB60	PlaceScreenElement	computes the shown position from the placement record (offset from the screen edge or the anchor element) on a 640 by 492.8 screen, the hidden position by the side it slides in from, and moves the element if hidden or shown
+func_001AAEC0	PlaceAnchoredScreenElements	for each of the 37 placement records anchored to the given element, places that element again
+func_001AAF58	SetScreenElementClock	slot 17: switches the clock pointer (default D_00261868) and restarts the mode time when the clock changes
+func_001AAF88	InitCounterCaption	slot 1 of the sixteen caption tables: sets text setup, font 2, shown -1, rate 6000 and by element index the counter it follows (game state fields or its own shown value)
+func_001AB058	UpdateCounterCaption	slot 2 of the caption tables: slides, counts the shown value towards its counter at the rate, runs the done callback once, rebuilds the text and resizes the element
+func_001AB198	DrawCounterCaption	slot 9 of the caption tables: draws the text with its alpha scaled by the screen fade
+func_001AB2B8	FormatCounterCaption	by element index formats the shown value (and limit) with a per-caption format string into the text, then substitutes glyphs
+func_001AB5D8	GetCaptionHoldTime	slot 12 of the caption tables: returns 2.5 while D_00261858 is running, else 0
+func_001AB600	InitTimerElement	slot 1 of the timer table D_00218510: text setup, font 2, last second and tenth -1, no warning time, f290 set, state 0
+func_001AB660	UpdateTimerElement	slot 2 of the timer table: slides, and when its mode is 1 or 2 hides itself after a second in state 0, else steps the timer
+func_001AB710	DrawTimerElement	slot 9 of the timer table: draws the frame, then the glyph T and the time text, in the warning colour once warned
+func_001AB890	StartTimer	clears the callbacks and warning, sets the time to the argument, rate -1 and state 1, steps once and shows the element
+func_001AB920	SetTimerRate	stores the rate (seconds per second) at +0x26C
+func_001AB928	SetTimerLimit	stores the end callback and the limit time
+func_001AB938	StartTimerCounting	sets the timer state to 2
+func_001AB958	StopTimer	sets the f290 flag and the timer state to 0
+func_001AB980	StepTimer	reads the time, plays the tick sounds, advances it by dt times the rate while counting, fires the warning and end callbacks, and rebuilds the minutes:seconds or tenths text
+func_001ABE20	SetTimerState	stores the timer state and the clock time of the change when it differs
+func_001ABE70	InitGauge	slot 1 of the gauge element's table D_002182E0 (whose slot 9 is DrawGauge): SetupScreenElementText, font 4, and the gauge's segment layout chosen by the save's value (g_saveData)
+func_001AC060	DecrementGaugeCount	counts the gauge's 0x270 down by one, rolling it over to 0x264 and decrementing 0x26C, then sets fillTarget from (rows - 1) times 0x264 plus 0x270 over 0x268 and stamps changedAt
+func_001AC0E8	DrawGauge	slot 9 of the gauge element: eases fill toward fillTarget (func_001EA4B8), draws the dark bar and the lit part with a colour interpolated by the time since changedAt (func_0019DDA0) and the letter glyph, shaking it for 0.75 seconds after a change
+func_001AC5C0	InitFramedElement	slot 1 of the plain framed element's table D_00218330: SetupScreenElementText, its font cloned at 1.25 scale and, when font 2 is loaded, the frame D_002743D0 drawn with it
+func_001AC638	SetCaptionTextAndSize	slot 8 of the screen-element table D_00218330: copies the string into the element's text (or clears it), measures it with MeasureText at the element's scale and sets the element's size from it
+func_001AC700	DrawElementWithFadedFrame	slot 9 of the plain framed element: when it has text scales the alpha of the colour and of the frame object by the blend, draws the frame, then the text with the font
+func_001AC888	InitPointerTextCaption	slot 1 of the pointer-text caption's table D_00218380: SetupScreenElementText, its font cloned at 0.9, the colour 0xDF7F7F7F and the frame D_002743F0 with font 2
+func_001AC910	SetElementTextAfterSlideOut	slot 8 of the pointer-text caption: in mode 0 sets the text at once; in modes 1 to 3 when it differs keeps the pointer in 0x264, sets the pending flag and goes to mode 3 through slot 16
+func_001AC990	SetElementModeApplyingPendingText	slot 16 of the pointer-text caption: when a text is pending and the mode is 0, sets the text with func_001AA4F0, clears the wait and changes to mode 1 instead
+func_001AC9E0	AreElementsTogetherOrPending	slot 18 of the pointer-text caption: returns 1 when func_001AAAC8 says so or a text is pending
+func_001ACA30	ShowElementUnlessTextPending	slot 14 of the pointer-text caption: shows it with func_001AA8F0 unless it is in mode 3 with a new text waiting
+func_001ACA68	HideElementOrDropPendingText	slot 15 of the pointer-text caption: in mode 3 with a new text waiting clears the wait, otherwise hides it with func_001AA958
+func_001ACAA8	DrawSlidingGlyphElement	slot 9 of the pointer-text caption: in mode 2 draws normally, in modes 1 and 3 draws the frame and each glyph in turn at a position clamped between its hidden and shown x by the blend, advancing by each glyph's width
+func_001ACDA0	InitCopiedTextCaption	slot 1 of the copied-text caption's table D_002183D0: SetupScreenElementText, font 0 cloned at 1.0, scale 0.8, a slide-out of 0.5 and the frame D_00274410 with font 2
+func_001ACE38	SetElementTextCopiedAfterSlideOut	slot 8 of the copied-text caption: like the pointer-text version but copies the new text into the buffer at 0x264 (or empties it) and sets the pending flag
+func_001ACEE0	FormatFlagGlyphs	writes into the buffer the glyph characters for the bits 2, 4 and 8 of the record's flags that the mask selects (colour code format D_0024CD88), and for bit 8 a time as seconds fraction or minutes:seconds
+func_001AD088	SetElementTextFromPackedEntry	sets the text of the element through slot 8: SetElementTextFromEntry with value >> 8 and the low byte, or the string D_0024CE00 for -1
+func_001AD0D0	SetElementTextFromEntry	builds the text from the entry at index hi * 0x44C + lo * 0x78 of the table behind D_002623C0: the name from func_00160148 followed by the FormatFlagGlyphs string, then sets it through slot 8
+func_001AD1E8	SetElementTextFromIndexedCounts	builds a text from the heading D_00274430[idx] and up to three "n/m" counts of the entry from func_00160208, then sets it through slot 8
+func_001AD320	SetElementModeApplyingCopiedText	slot 16 of the copied-text caption: applies the pending buffer at mode 0 as func_001AC990 does and clears the announce flag when the mode becomes 0
+func_001AD378	ShowElementUnlessCopiedTextPending	slot 14 of the copied-text caption: returns when in mode 3 with a text pending, otherwise shows it with func_001AA8F0
+func_001AD3B0	HideElementOrDropCopiedText	slot 15 of the copied-text caption: in mode 3 with a text pending clears the wait, otherwise hides it with func_001AA958
+func_001AD3F0	DrawMessageElement	slot 9 of the copied-text caption: draws its text with alpha scaled by the blend or, while the announce flag is set, at the lowered position from D_0027240C, with a shade band under it when not announcing
+func_001AD6A8	InitHintGlyphElement	slot 1 of the screen-element table D_00218420: SetupScreenElementText, font 2 cloned at 1.0 and the text "B", with its show flag cleared
+func_001AD718	UpdateHintGlyphElement	slot 2 of the table D_00218420: UpdateScreenElementSlide, then shows itself (slot 14) while its flag is set, the player is not in state 6 and the element stack's top is 3 with fewer than 2 entries, else hides (slot 15)
+func_001AD7B0	DrawHintGlyphElement	slot 9 of the table D_00218420: DrawScreenElementText, then a pulsing "L" of font 1 scaled by a sine of the elapsed time
+func_001AD940	InitLetterboxElement	slot 1 of the screen-element table D_00218560 (whose slot 16 is SetElementModeFollowingFade): SetupScreenElementText and a slide-out of 0.5
+func_001AD970	SetElementModeFollowingFade	slot 16 of D_002721D0's table: while the screen fade is on in mode 1 keeps the old mode for 3 or 0, in fade mode 3 maps modes 1 and 2 to 0 or 2 and then shows the message element D_0026F138, and hides D_0026F138 and D_00273EB0 when the new mode is 0
+func_001ADB00	DrawLetterboxElement	slot 9 of the table D_00218560: draws two black sprites across the screen, at the top and the bottom, each 66.4 times its blend high
+func_001ADC60	InitTitleElement	slot 1 of the screen-element table D_00218470: SetupScreenElementText, its font cloned at D_00274448/D_0027444C, the frame D_00274450 with font 2 and the image record 0x493 sized 366.75 by 165.75, or else the game's title as text
+func_001ADD28	DrawTitleElement	slot 9 of the table D_00218470: draws the image record when it has one, else DrawScreenElementText
+func_001ADF28	InitPromptElement	slot 1 of the prompt element's table D_002184C0 (whose slot 2 is UpdatePromptElement): SetupScreenElementText, its font scaled by D_0027446C, the frame D_00274488, the two flags UpdatePromptElement recomputes, then RebuildPromptText
+func_001ADFF0	RebuildPromptText	for the prompt element: when flagA is set picks one of three strings by flagB (plus a shared line) in a grey colour, otherwise the fourth string in red, then resizes the element to the measured text
+func_001AE130	SetElementModeRebuildingText	slot 16 of the prompt element: when a rebuild is pending and the force argument is 0 clears the wait, runs RebuildPromptText and forces the mode change
+func_001AE178	UpdatePromptElement	slot 2 of the prompt element: while D_00275BF0 is 1 recomputes flagA (D_00262C84 equals 3) and flagB (D_00269988's float is nonzero), rebuilds the text with RebuildPromptText when either changed, then runs the slide update
+func_001AE220	DrawPromptElement	slot 9 of the prompt element's table D_002184C0: draws its text (DrawAlignedText) at its font scale, pulsing by a sine of the elapsed time
+func_001AE3B8	DrawLineSegment	draws a line between two screen points as a GS packet with the colour bytes of rgba (alpha scaled), alpha blend when alpha is below 0xFF; DrawProjectedLine ends with it
+func_001AE510	InitLetterGlyphElement	slot 1 of the screen-element table D_002185B0: SetupScreenElementText, font 2 and the one-letter text "L" for D_00273C50 or "K" for D_002739F0, measured at the scale D_002744A8
+func_001AE5E0	DrawLetterGlyphElement	slot 9 of the table D_002185B0: draws its one-letter glyph at its scale
+func_001AE758	InitCyclingGlyphElement	slot 1 of the screen-element table D_00218600: SetupScreenElementText, slide-in and slide-out of 0.25, no hold, font 1 at the scale D_002744AC and the glyph GetCyclingGlyph returns
+func_001AE7F8	SetElementModeClearingFlag	slot 16 (set mode) of the screen-element table D_00218600: clears the element's flag when the mode is 0, then runs SetScreenElementMode
+func_001AE820	DrawCyclingGlyphElement	draws the cycling-glyph element D_00273EB0 (file_1A7FE8's element drawing calls it last): raised while its flag holds, hiding itself a second into mode 2 once the background job has ended
+func_001AEA08	GetCyclingGlyph	returns the character of the table behind D_002744B0 at index (clock * 5) modulo its length

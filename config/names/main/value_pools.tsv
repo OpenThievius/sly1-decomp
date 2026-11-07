@@ -1,0 +1,34 @@
+symbol	name	evidence
+func_0011C128	InitEntryPool	sets stride to size+8, allocates stride*count bytes, chains every entry into the free list and clears the live list
+func_0011C1D0	ShutDownEntryPool	empty; ShutDownScriptValuePools calls it on each of the five entry pools InitScriptValuePools set up with InitEntryPool
+func_0011C1D8	PopPoolFreeEntry	takes the first entry off the pool's free list (collecting with func_0011AB58 first when empty), pushes it on the used list and returns its payload address
+func_0011C240	TakePoolEntry	takes an entry off the pool's free list (func_0011C1D8) and clears it to the pool's entry size
+func_0011C288	GetPoolEntry	returns mem + index * stride
+func_0011C2A0	MarkPoolLiveEnd	copies the live list head into the live mark
+func_0011C2B0	ClearPoolLiveStates	walks the live list and zeroes each entry's state word at +4
+func_0011C2E8	ReleaseDeadPoolEntries	after the live mark, unlinks entries whose word at +4 is 0 onto the free list, calling the pool's removeCallback on each
+func_0011C3B8	GetPoolEntryPayload	returns the address 8 bytes past a pool entry's header
+func_0011C3C0	GetPoolEntryHeader	returns the address 8 bytes before a payload
+func_0011C3C8	IsPoolEntryUnmarked	returns whether the state word at +4 of a payload's entry header (GetPoolEntryHeader) is 0, the word MarkPoolEntryUsed sets to 1; DrainMarkStacks tests it before marking
+func_0011C3F0	MarkPoolEntryUsed	sets the state word at +4 of the entry header of a payload to 1, the word ReleaseDeadPoolEntries tests
+func_0011C418	CopyKeyedValueChain	copies the key, clones the value with CloneValue and recurses over next, making a new keyed node for each
+func_0011C498	NewKeyedValue	takes a 0x10-byte node from the pool D_0025C290, clears it and sets its value unset
+func_0011C4E8	DestroyKeyedValue	the keyed pool's removeCallback: destroys the node's value with DestroyValue (flags 2)
+func_0011C508	AcquireVectorAPayload	takes a 16-byte block from the pool D_0062C558 (zeroed), running func_0011AB58 first when the pool is empty; the tag 0x16 allocator
+func_0011C580	AddRefVectorAPayload	adds one to the byte count at (addr - pool origin) >> 4 in D_0027B300[0] and returns it
+func_0011C5B0	ReleaseVectorAPayload	subtracts one from that byte count and returns the block to the pool D_0062C558 when it reaches 0
+func_0011C618	AcquireMatrixPayload	takes a 0x40-byte block from the pool D_0062C568, zeroed, collecting first when empty; the tag 0x17 allocator
+func_0011C690	AddRefMatrixPayload	adds one to the count at (addr - pool origin) >> 6 in D_0027B300[1] and returns it
+func_0011C6C0	ReleaseMatrixPayload	subtracts one from that count and returns the block to the pool D_0062C568 at 0
+func_0011C720	FreeMatrixPayload	hands a block straight back to the pool D_0062C568 through func_001B5F28
+func_0011C748	AcquireVectorBPayload	takes a 16-byte block from the pool D_0062C578; the tag 0x18 allocator
+func_0011C7C0	AddRefVectorBPayload	adds one to the count at (addr - pool origin) >> 4 in D_0027B300[2] and returns it
+func_0011C7F0	ReleaseVectorBPayload	subtracts one from that count and returns the block to the pool D_0062C578 at 0
+func_0011C858	AcquirePairPayload	takes an 8-byte block from the pool D_0062C588; the tag 0x19 allocator (two floats)
+func_0011C8D0	AddRefPairPayload	adds one to the count at (addr - pool origin) >> 3 in D_0027B300[3] and returns it
+func_0011C900	ReleasePairPayload	subtracts one from that count and returns the block to the pool D_0062C588 at 0
+func_0011C968	AcquireTriplePayload	takes a 12-byte block from the pool D_0062C598; the tag 0x1A allocator (three floats)
+func_0011C9E0	AddRefTriplePayload	adds one to the count at (addr - pool origin) / 12 in D_0027B310 and returns it
+func_0011CA20	ReleaseTriplePayload	subtracts one from that count and returns the block to the pool D_0062C598 at 0
+func_0011CA90	InitPayloadPools	sets up the five payload pools (entry sizes 0x10, 0x40, 0x10, 0x8, 0xC) with func_001B5DD0 and allocates a count byte for each entry in D_0027B300[0..3] and D_0027B310
+func_0011CBB0	ShutDownPayloadPools	empty; ShutDownScriptValuePools calls it where InitScriptValuePools calls InitPayloadPools

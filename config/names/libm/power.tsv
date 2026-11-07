@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00205C78	Power	the checked power x ** y: PowerKernel's result, or a domain, singularity, overflow or underflow error (power.c)

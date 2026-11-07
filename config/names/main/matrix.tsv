@@ -1,0 +1,35 @@
+symbol	name	evidence
+func_001884C0	ResetMatrixHomogeneous	zeroes the fourth word of a matrix's first three rows and sets its fourth row to D_0024B260 (CopyRotationMatrix and six others call it)
+func_001884E0	CopyRotationMatrix	copies a matrix's first three rows and resets the rest (ResetMatrixHomogeneous); returns the destination
+func_00188520	MultiplyByTransposedMatrix3x3	writes each of the three rows of the second matrix as dot products with the three rows of the first (out = b times a transposed), on VU0; CopyRotationMatrix's neighbour, used by func_00128150 and func_0016C528
+func_001885E0	InitIdentityMatrix	clears 0x40 bytes and sets the four diagonal floats to 1.0
+func_00188628	ScaleMatrix	multiplies all four rows of a matrix by one float into the output
+func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawC60Object multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
+func_00188700	TransformByMatrixWithW	x times row 0 plus y times row 1 plus z times row 2 plus the given w times row 3: a point (w 1) or a direction (w 0) through a matrix (TransformPointArray, DrawPathCurveSegment)
+func_00188740	TransformVector4	multiplies a four-component vector by a 4x4 matrix and returns the result in a register (DrawTriangleGroups, DrawColoredTriangles)
+func_00188770	CopyTransposedMatrix	copies four rows, then swaps m[i][j] with m[j][i] for i < j
+func_00188810	AddMatrices	out[i] = a[i] + b[i] for 16 floats
+func_00188850	BuildAxisAngleMatrix	sine and cosine of an angle, t*axis[i]*axis[j] plus cosine on the diagonal and the cross-product terms: the axis-angle rotation matrix
+func_00188978	BuildRotationFromVector	a rotation about the vector's direction by its length (BuildAxisAngleMatrix), or the identity when it is shorter than 1e-4 (ApplyPropertyRecord)
+func_00188A20	BuildEulerRotationMatrix	takes the sine and cosine of three angles and fills the nine elements of a 3x3 rotation
+func_00188B08	BuildMatrixFromRotationAndTranslation	copies three rows of b with w = 0 and a as the fourth row with w = 1
+func_00188B48	InvertRigidTransform	from a translation and a rotation writes the inverse transform: the transposed rotation and the translation rotated by it and negated, with w 1 (SetVertexBatchTransform, BuildScaleAboutFrame)
+func_00188C10	BuildScaledTransformMatrix	multiplies each rotation row by a scale component, with the position as fourth row and w column 0, 0, 0, 1
+func_00188CE0	GetMatrixRotationCosine	returns half of the matrix's trace less one, clamped to -1..1 (ClampToMagnitude): the cosine of its rotation's angle
+func_00188D28	MatrixToAxisAngle	finds the axis and angle of a rotation matrix from its trace ((m00+m11+m22-1)/2) and its diagonal, giving angle 0 about x when the cosine is above 0.999999 (ReadAxisRotationCurve)
+func_00188FD8	MatrixToEulerAngles	asin of -m[2], and atan2 of other elements for the other two angles, with the singular case at +-1.5707
+func_001890A0	OrthonormalizeMatrix	normalises row 0, makes row 2 the normalised cross product of rows 0 and 1 and row 1 the normalised cross product of rows 2 and 0 (func_00121DE0, func_00125440 and func_001DDE90 call it)
+func_00189150	MultiplyMatrices3x3	writes the product of two 3x3 matrices (rows of 16 bytes) on VU0 (ReadAxisRotationCurve)
+func_001891C0	TransformMatrixByObject	builds a matrix from the object's rotation and translation at +0x30 (func_00188B48), multiplies it with the argument (MultiplyMatrices) and copies the four rows out (TransformPointArray calls it)
+func_00189230	VectorToAngles	atan2(y, x) and atan2(z, sqrt(x*x + y*y)) stored through the two output pointers
+func_001892A0	BuildYawPitchMatrix	multiplies a rotation by the yaw about z with one by the negated pitch about y (BuildAxisAngleMatrix twice) into a 3x3 matrix (GetTargetCameraControllerEyePosition)
+func_00189350	BuildBasisFromX	BuildBasisFromXAndZHint with the unit z vector as the hint
+func_00189438	InvertSquareMatrix	same elimination for n by n floats on a scratch copy taken between PushBackMemoryMark and PopBackMemoryMark; returns 0 when singular
+func_001897F0	InvertMatrix3x3	Gauss-Jordan elimination with row pivoting on a copy, starting from an identity table; returns 0 when a pivot is 0
+func_00189AF0	InvertMatrix4x4	calls InvertSquareMatrix with dimension 4
+func_00189B18	BuildBasisFromXAndYHint	a rotation whose row 0 is the normalised x direction and row 2 the normalised cross product of it with the y hint (func_001ED840 when that is shorter than 1e-4); InvertMatrix4x4's neighbour, used by func_001A2D88
+func_00189C28	BuildBasisFromXAndZHint	a rotation whose row 0 is the normalised x direction and row 1 the normalised cross product of the z hint with it (row 2 from func_001ED840 when that is shorter than 1e-4)
+func_00189F58	BuildProjectionMatrix	clears 0x40 bytes and fills a, b, c, d, (e+f)/(e-f), e*(1-that) and 1.0 at fixed elements from six floats
+func_0018A008	BuildUniformScaleAboutPoint	BuildScaleAboutFrame about a point with no rotation and the same scale on all three axes (DrawC60Object, DrawTriangleGroups)
+func_0018A040	BuildScaleAboutFrame	builds the frame of a translation and a rotation (BuildMatrixFromRotationAndTranslation; the origin and the identity by default), its inverse (InvertRigidTransform) and a diagonal scale, and writes frame times scale times inverse (MultiplyMatrices)
+func_0018A160	BuildRotationBetweenVectors	the rotation that turns the first vector into the second, about their normalised cross product; the identity when either is shorter than 1e-4 (func_0016C528, func_001DDE90)

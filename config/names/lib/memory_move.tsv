@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F5B08	MoveMemory	copies n bytes from src to dst correctly when the two overlap (memory_move.cpp; MoveAnimationTrackToEnd and PushCameraController shift array entries with it)

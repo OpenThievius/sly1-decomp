@@ -1,17 +1,23 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Readable names for address-named symbols (docs/NAMING.md).
 
-    python3 tools/names.py header     # config/names.tsv -> include/names.h
-    python3 tools/names.py check      # the table and the header agree, and every row is well formed
+    python3 tools/names.py header     # config/names/ -> include/names.h, each row in its table
+    python3 tools/names.py check      # the tables and the header agree, and every row is well formed
 
 Every function and global keeps its address name (func_XXXXXXXX, D_XXXXXXXX): the build and every
 tool read the address out of it. A readable name sits on top as a macro in include/names.h,
-generated from config/names.tsv (symbol, name, evidence), as OpenRAC's rac1-decomp keeps its
-names (its docs/NAMES.md). Function bodies may write the readable name; the preprocessor turns it
-back, so the objects are byte for byte the same.
+generated from the tables in config/names/ (symbol, name, evidence), as OpenRAC's rac1-decomp
+keeps its names (its docs/NAMES.md). Function bodies may write the readable name; the preprocessor
+turns it back, so the objects are byte for byte the same.
+
+A function's row is in the table of the source file that holds it (config/us/files.tsv):
+src/main/value.cpp's in config/names/main/value.tsv. A global's row is in config/names/data.tsv.
+`header` moves each row to its table and sorts every table by symbol, so a row may be added to any
+of them first.
 """
 
 import argparse
+import bisect
 import re
 import sys
 from pathlib import Path
@@ -20,7 +26,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
-TABLE = ROOT / "config" / "names.tsv"
+TABLES = ROOT / "config" / "names"
+DATA_TABLE = TABLES / "data.tsv"
+# A function no proved file holds; none should be once every file is proved.
+OTHER_TABLE = TABLES / "other.tsv"
 HEADER = ROOT / "include" / "names.h"
 COLUMNS = ["symbol", "name", "evidence"]
 
@@ -36,28 +45,68 @@ class NameError_(Exception):
     pass
 
 
-def read_table(path=TABLE):
-    """The rows of config/names.tsv, as dicts; none when the table does not exist yet."""
+def _relative(path):
+    path = Path(path)
+    return path.relative_to(ROOT).as_posix() if path.is_absolute() and ROOT in path.parents else str(path)
+
+
+def read_table(path):
+    """The rows of one table, as dicts with the table's path and line; none when it does not exist."""
     if not path.exists():
         return []
+    where = _relative(path)
     lines = path.read_text().splitlines()
     if not lines or lines[0].split("\t") != COLUMNS:
-        raise NameError_("%s: the first line must be %s" % (path.name, "\t".join(COLUMNS)))
+        raise NameError_("%s: the first line must be %s" % (where, "\t".join(COLUMNS)))
     rows = []
     for n, line in enumerate(lines[1:], 2):
         if not line.strip():
             continue
         cells = line.split("\t")
         if len(cells) != len(COLUMNS):
-            raise NameError_("%s:%d: %d columns, not %d" % (path.name, n, len(cells), len(COLUMNS)))
-        rows.append(dict(zip(COLUMNS, cells), line=n))
+            raise NameError_("%s:%d: %d columns, not %d" % (where, n, len(cells), len(COLUMNS)))
+        rows.append(dict(zip(COLUMNS, cells), line=n, table=where))
     return rows
+
+
+def read_tables(top=TABLES):
+    """The rows of every table under config/names/, table by table."""
+    return [r for path in sorted(Path(top).rglob("*.tsv")) for r in read_table(path)]
+
+
+def proved_files():
+    """[(start, end, source path)] of the proved files (config/us/files.tsv), by start address."""
+    path = ROOT / "config" / "us" / "files.tsv"
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l] if path.exists() else []
+    return sorted((int(r[1], 16), int(r[2], 16), r[0]) for r in rows if int(r[2], 16) > int(r[1], 16))
+
+
+def table_for(symbol, files):
+    """The table a symbol's row belongs in, relative to the root: its source file's, or data.tsv."""
+    if not symbol.startswith("func_"):
+        return _relative(DATA_TABLE)
+    addr = int(symbol[5:], 16)
+    i = bisect.bisect_right([f[0] for f in files], addr) - 1
+    if i < 0 or addr >= files[i][1]:
+        return _relative(OTHER_TABLE)
+    source = Path(files[i][2])                          # src/main/value.cpp
+    return _relative(TABLES / source.parent.relative_to("src") / (source.stem + ".tsv"))
+
+
+def table_texts(rows, files):
+    """{table path: text} with every row in its table, each table sorted by symbol."""
+    tables = {}
+    for r in rows:
+        tables.setdefault(table_for(r["symbol"], files), []).append(r)
+    return {path: "\n".join(["\t".join(COLUMNS)] +
+                             ["\t".join(r[c] for c in COLUMNS) for r in sorted(rs, key=lambda r: r["symbol"])]) + "\n"
+            for path, rs in tables.items()}
 
 
 def header_text(rows):
     out = ["// SPDX-License-Identifier: AGPL-3.0-or-later",
            "// Readable names for address-named symbols. Generated by tools/names.py header from",
-           "// config/names.tsv; do not edit. Each is a macro for the symbol the build and every tool",
+           "// config/names/; do not edit. Each is a macro for the symbol the build and every tool",
            "// use (func_XXXXXXXX, D_XXXXXXXX), so code may write either and compiles to the same object.",
            "// Declarations and definitions keep the address name; bodies may use the readable one.",
            "// The names are ours, from what the code does (docs/NAMING.md).",
@@ -89,13 +138,17 @@ def identifiers_in_sources():
     return found
 
 
-def problems(rows, functions=None, idents=None, header=None):
-    """What is wrong with the table, and with names.h against it: a list of messages."""
+def _where(r):
+    return "%s:%d" % (r.get("table", "config/names"), r["line"])
+
+
+def problems(rows, functions=None, idents=None, header=None, files=None):
+    """What is wrong with the tables, and with names.h against them: a list of messages."""
     functions = known_functions() if functions is None else functions
     errs = []
     seen_symbol, seen_name = {}, {}
     for r in rows:
-        where = "config/names.tsv:%d" % r["line"]
+        where = _where(r)
         sym, name = r["symbol"], r["name"]
         if not SYMBOL.match(sym):
             errs.append("%s: %s is not an address name (func_XXXXXXXX or D_XXXXXXXX)" % (where, sym))
@@ -110,17 +163,19 @@ def problems(rows, functions=None, idents=None, header=None):
         if not r["evidence"].strip():
             errs.append("%s: %s has no evidence" % (where, name))
         if sym in seen_symbol:
-            errs.append("%s: %s is named twice (also line %d)" % (where, sym, seen_symbol[sym]))
+            errs.append("%s: %s is named twice (also %s)" % (where, sym, seen_symbol[sym]))
         if name in seen_name:
-            errs.append("%s: %s names two symbols (also line %d)" % (where, name, seen_name[name]))
-        seen_symbol[sym], seen_name[name] = r["line"], r["line"]
+            errs.append("%s: %s names two symbols (also %s)" % (where, name, seen_name[name]))
+        seen_symbol[sym], seen_name[name] = where, where
+        if files is not None and "table" in r and r["table"] != table_for(sym, files):
+            errs.append("%s: %s belongs in %s: run python3 tools/names.py header" % (where, sym, table_for(sym, files)))
     if idents is not None:
         for r in rows:
             other = idents.get(r["name"])
             if other is not None and not _is_use(r, other):
-                errs.append("config/names.tsv:%d: %s is already an identifier in %s" % (r["line"], r["name"], other))
+                errs.append("%s: %s is already an identifier in %s" % (_where(r), r["name"], other))
     if header is not None and header != header_text(rows):
-        errs.append("include/names.h is not what config/names.tsv gives: run python3 tools/names.py header")
+        errs.append("include/names.h is not what config/names/ gives: run python3 tools/names.py header")
     return errs
 
 
@@ -143,18 +198,28 @@ def main(argv=None):
     parser.add_argument("command", choices=("header", "check"))
     args = parser.parse_args(argv)
     try:
-        rows = read_table()
+        rows = read_tables()
     except NameError_ as e:
         print("error: %s" % e)
         return 1
+    files = proved_files()
     if args.command == "header":
+        texts = table_texts(rows, files)
+        for path in sorted(TABLES.rglob("*.tsv")):
+            if _relative(path) not in texts:
+                path.unlink()
+        for rel, text in texts.items():
+            path = ROOT / rel
+            if not path.exists() or path.read_text() != text:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text)
         text = header_text(rows)
         if not HEADER.exists() or HEADER.read_text() != text:
             HEADER.write_text(text)
-        print("wrote include/names.h: %d names" % len(rows))
+        print("wrote include/names.h: %d names in %d tables" % (len(rows), len(texts)))
         return 0
     errs = problems(rows, idents=identifiers_in_sources(),
-                    header=HEADER.read_text() if HEADER.exists() else header_text([]))
+                    header=HEADER.read_text() if HEADER.exists() else header_text([]), files=files)
     for e in errs:
         print("error: " + e)
     if not errs:

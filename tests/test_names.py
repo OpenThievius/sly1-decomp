@@ -46,6 +46,30 @@ class NamesTest(unittest.TestCase):
         self.assertEqual(len(names.problems([row("func_0016F588", "RegisterButtonCodes")], FUNCS, header="")), 1)
 
 
+class TablesTest(unittest.TestCase):
+    """Each function's row is in its source file's table, each global's in data.tsv."""
+
+    FILES = [(0x16F000, 0x170000, "src/main/button.cpp"), (0x204F68, 0x205000, "src/libm/sqrt.c")]
+
+    def test_each_row_goes_to_its_files_table(self):
+        self.assertEqual(names.table_for("func_0016F588", self.FILES), "config/names/main/button.tsv")
+        self.assertEqual(names.table_for("func_00204F68", self.FILES), "config/names/libm/sqrt.tsv")
+        self.assertEqual(names.table_for("D_00262DFC", self.FILES), "config/names/data.tsv")
+        self.assertEqual(names.table_for("func_00100000", self.FILES), "config/names/other.tsv")
+
+    def test_tables_are_sorted_and_a_misplaced_row_is_reported(self):
+        rows = [row("func_0016F588", "RegisterButtonCodes"), row("func_0016F188", "AddButtonCode", line=3)]
+        texts = names.table_texts(rows, self.FILES)
+        self.assertEqual(list(texts), ["config/names/main/button.tsv"])
+        self.assertLess(texts["config/names/main/button.tsv"].index("AddButtonCode"),
+                        texts["config/names/main/button.tsv"].index("RegisterButtonCodes"))
+        placed = [dict(r, table="config/names/main/button.tsv") for r in rows]
+        self.assertEqual(names.problems(placed, FUNCS, files=self.FILES), [])
+        errs = names.problems([dict(rows[0], table="config/names/data.tsv")], FUNCS, files=self.FILES)
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn("belongs in config/names/main/button.tsv", errs[0])
+
+
 class UseOrDefinitionTest(unittest.TestCase):
     """_is_use tells a use of the macro from a source's own identifier of the same name."""
 
@@ -71,12 +95,12 @@ class UseOrDefinitionTest(unittest.TestCase):
 
 
 class CommittedNamesTest(unittest.TestCase):
-    """The committed config/names.tsv and include/names.h, which CI checks without a disc."""
+    """The committed tables in config/names/ and include/names.h, which CI checks without a disc."""
 
-    def test_the_table_is_well_formed_and_the_header_agrees(self):
-        rows = names.read_table()
+    def test_the_tables_are_well_formed_and_the_header_agrees(self):
+        rows = names.read_tables()
         header = names.HEADER.read_text() if names.HEADER.exists() else names.header_text([])
-        self.assertEqual(names.problems(rows, header=header), [])
+        self.assertEqual(names.problems(rows, header=header, files=names.proved_files()), [])
 
 
 if __name__ == "__main__":

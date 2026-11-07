@@ -1,0 +1,19 @@
+symbol	name	evidence
+func_0016AA18	CallFlaggedParts	Slot 16: for kinds 0x515..0x519, calls slot 6 of every one of its nine parts whose flag is set.
+func_0016AB38	SetupCurrentObjectChoices	deferred call set up by BecomeCurrentObject: creates the four paired objects, finds the highest choice whose levels entry allows it, picks the starting choice and calls SetCurrentObjectChoice
+func_0016AED8	BecomeCurrentObject	Slot 16: stores itself in D_0026FCF0 after loading and registers the callback func_0016AB38 with its level.
+func_0016AF80	ShowCurrentObjectCaptions	sets D_0026F138's text to the name string, an empty string or the stored one from the choice's levels flags, and shows or hides D_0026FA90 with its start prompt string
+func_0016B0F8	MoveCurrentObjectChoice	steps the object's choice at +0x2D0 by one in the direction of the stick axis func_0016EC98 returns (wrapping between 0 and the limit at +0x2FC when that is 5), then calls SetCurrentObjectChoice
+func_0016B190	ConfirmCurrentObjectChoice	for a choice not yet taken starts the object's element and sound for it (func_0012C7B0, func_001F0428, func_001E9570) or plays its sound, then calls SetCurrentObjectChoice with 1; func_0016B580 calls it for the confirm buttons 0x140
+func_0016B300	SetCurrentObjectChoice	stores the choice a and the sub-choice b at +0x2D0 and +0x2D4 with the clock at +0x2D8, requests a sound from the table D_00262890 for a choice newly reached, and sends the matching ids from D_00262860 to the object at +0x2E0
+func_0016B4A0	InitSelectionCaption	slot 1 of D_002212E0: SetupScreenElementText, takes a frame from func_0015C1C0(2), clears the node and sound and sets lastAt to -D_00262970
+func_0016B520	RestoreSelectionCaptionCamera	while the selection caption is open, pushes the camera controller of object 0x4FD (FindFirstObjectByIdMode4, PushObjectCameraController); RunPendingWorldLoad calls it
+func_0016B560	UpdateSelectionCaption	slot 2 of D_002212E0: calls UpdateScreenElementSlide
+func_0016B580	HandleSelectionCaptionInput	slot 4 of D_002212E0: per frame with the pad record, releases the held node's handle, shows the captions and answers the pad bits 0x800 (opens the pause menu), 0x140 (ConfirmCurrentObjectChoice) and otherwise MoveCurrentObjectChoice
+func_0016B7A8	SetSelectionCaptionOpen	slot 3 of D_002212E0: on opening sets the node's choice and runs func_0016E0F0 and func_0016EC88, on closing stops the sound handle, runs func_0016E118 and hides both captions
+func_0016B860	DrawSelectionCaption	slot 9 of D_002212E0: draws the frame box and the text with the colour alpha scaled by blend and a scale pulsed by func_00205400 of the clock
+func_0016BA40	InitGridSelector	slot 1 of D_00221330: SetupScreenElementText, clones the font at scale 1.0, measures a 0x5F-wide string at scale 1.3 and sizes the element with SetScreenElementSize
+func_0016BB78	TestGridEntryBit	returns the bit n (0 to 15) of the 16-bit word at +0x19F4 of the game state (0 for n of 16 or more)
+func_0016BBA8	HandleGridSelectorInput	slot of D_00221330 given the pad record: closes on 0x9B0, runs the entry on 0x40, and moves the cursor over the 4 by 4 grid by the stick axes with wrap-around in both directions
+func_0016BDD0	SetGridSelectorOpen	slot 3 of D_00221330: on opening runs func_0016E0F0 and func_0016EC88 and sets the cursor to the highest bit set in the word at +0x19F4; on closing runs func_0016E118
+func_0016BEA0	DrawGridSelector	slot 9 (the draw slot DrawGauge and DrawPauseMenu fill) of the grid selector's method table D_00221330: draws each grid entry's movie title (GetMovieTitle, DrawFontString) with a pulsing scale on the chosen one (Sine, PushFontScale) and the lines between them (DrawLineSegment), testing each entry's bit (TestGridEntryBit)

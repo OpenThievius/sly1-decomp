@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_00208D50	TangentKernel	tan(x + y), or -1 / tan when sign is -1, for a reduced argument in two parts (tangent_kernel.c)

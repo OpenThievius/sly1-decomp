@@ -1,0 +1,18 @@
+symbol	name	evidence
+func_001FA068	SetUpTlb	runs the TLB set-up func_001FA9C0 (ExitProgram calls it)
+func_001FA078	TerminateProgram	runs SetUpTlb, then ExitProgramSyscall with the status (the program's entry, SignalProcess and the TLB set-up call it)
+func_001FA0D8	GetProcessId	returns 1, the only process (GetProcessIdFor calls it)
+func_001FA0E0	SignalProcess	exits the program with the signal as status when the process is 1, else does nothing and returns 0 (SendSignalFor calls it)
+func_001FA140	PrintToDebugConsole	hands a line to CallDebugService with request 0x10 (BufferOutputChar calls it)
+func_001FA190	StoreChannelWord	the command channel's handler of command 1: stores the packet's value in the channel's table of words at its index
+func_001FA1B0	StoreIopChannelAddress	the command channel's handler of command 0: stores the IOP's address of its channel
+func_001FA1C0	GetChannelWord	returns the command channel's word at an index (InitRemoteCalls reads one)
+func_001FA1E8	InitCommandChannel	once (D_002779B8), sets up the command channel's control record, handler table and words, installs its DMA handler func_001FA6B0 and exchanges its addresses with the IOP
+func_001FA468	ShutDownCommandChannel	disables and removes the command channel's DMA handler and clears its flag
+func_001FA4A0	SetCommandHandler	stores a handler and its argument for a command in the channel's system or user table (its top bit chooses)
+func_001FA4D0	ClearCommandHandler	clears a command's handler in the channel's system or user table
+func_001FA4F8	SendCommandPacket	sends a command packet, and optionally a block of data, to the IOP by DMA with StartIopDma, or StartIopDmaFromInterrupt when asked from an interrupt handler
+func_001FA630	SendCommand	sends a command packet with SendCommandPacket outside interrupts (BindRemoteService and CallRemoteService send through it)
+func_001FA670	SendCommandFromInterrupt	sends a command packet with SendCommandPacket from an interrupt handler (AnswerIopCall and AnswerServiceLookup send through it)
+func_001FA6B0	HandleCommandInterrupt	original assembly: the command channel's DMA handler, which runs the handler of each received command and re-arms the receive chain
+func_001FA7D8	WriteBackDataCacheRange	original assembly: writes back and invalidates the data cache lines of a range, 64 bytes at a time (the IOP clients call it before a transfer)

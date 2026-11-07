@@ -1,0 +1,12 @@
+symbol	name	evidence
+func_001C4458	InitTurningCollider	slot 0 of class 0x06: runs InitActor, then sets 0x700 to 1.0, 0x360 from D_00274B20, the vector at 0x6F0 and the 12-byte blocks at 0x704 and 0x710 from tables
+func_001C44F0	StartTurningCollider	slot 16 of class 0x06: calls the base func_00124A48, resolves six object links (func_00124DF8), picks 0x610/0x614 from the fallbacks at 0x620/0x628 and 0x624/0x62C, loads the identity into 0x660
+func_001C49C8	DrawTurningCollider	slot 37 of class 0x06 (the draw slot): only runs DrawCollider; DrawAgent calls it as its base
+func_001C4A80	PlayPhaseCrossingSound	from a phase value and its previous one, when the phase crosses one of two marks in the table and 0.1 seconds have passed, picks a random sound id 0x47 to 0x4A different from the last (D_00605548), plays it at the object with func_001BFCD8 and notes the time
+func_001C4ED0	UpdateTurningCollider	slot 17 of class 0x06: runs UpdateActor then func_001C4C20
+func_001C4FA0	SetTurningColliderRotation	slot 30 of class 0x06: runs SetColliderRotation, stores atan2 of the row's y and x in the headings 0x630 and 0x638 and calls slot 88
+func_001C5118	StepTurningCollider	slot 28 of class 0x06: runs StepCollider then func_001C5148
+func_001C53B0	BuildTurningColliderHeadingMatrix	slot 84 of class 0x06: builds into the matrix at 0x660 the rotation by the heading 0x638 about the axis D_00248D20 (func_00188850)
+func_001C5438	RecomputeTurningColliderFrame	slot 18 of class 0x06: runs RecomputeColliderFrame, then stores in 0x63C the polynomial of the heading difference |0x638 - atan2 of matrix row 0| (coefficients at 0x6F0) clamped to the pair D_00275C60
+func_001C5D58	TurnColliderTowardHeading	turns the rotation vector at +0x160's third angle toward the heading of the object's x axis with ApproachAngleWithRamp and the ramp at +0x6E0, then sets it through slot 33 (0x94)
+func_001C5E50	ScaleTurningColliderRamp	copies the ramp D_00274B80 to +0x6E0 and scales its first two values by the factor and the third by the factor's inverse square root

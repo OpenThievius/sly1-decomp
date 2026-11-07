@@ -1,0 +1,167 @@
+symbol	name	evidence
+func_0019E040	AcquireEffectOwner	takes the first free object from the world's list at +0x1B38 (advancing it through +0x564), stores its flag word at 0x550, runs its slot 2, and with flag 0 caches it at +0x1B3C and returns that one on later calls
+func_0019E0B8	InitEffectOwner	slot 0 of class 0x1E: runs the collider set-up func_001B7968, makes the list at +0x558 (the effect list) with func_00152438 and sets its flag bits
+func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (file_1549C8's spawners call it)
+func_0019E168	ReleaseEffectOwner	slot 11 of class 0x1E: removes every effect of the list at +0x558 with RemoveEffect, pushes itself back on the world's free list at +0x1B38 and clears the cache at +0x1B3C
+func_0019E220	MoveEffectsAndBounds	slot 0x7C of class 0x1E: runs slot 3 (motion) of every started effect of the list at +0x558 and grows the box at +0x420/+0x430 over each effect's two points, then widens it by +0x554
+func_0019E418	KeepEffectOwnerBounds	slot 0xD8 of class 0x1E (the bounds update other classes fill, UpdateColliderBounds): empty, as MoveEffectsAndBounds already keeps the box
+func_0019E420	UpdateEffectOwner	slot 21 of class 0x1E: for each effect on +0x558 that has started runs its slot 4 with the time step, then calls slot 3 when the list is empty (or flag set) and otherwise CollideEffects
+func_0019E558	CollideEffects	for each contact of the owner, tests every effect of +0x558 against the other body's parts with func_00141C90 and calls the effect's slot 7 with each hit that has weight
+func_0019E848	DrawEffects	slot 0xA4 of class 0x1E (the draw slot): runs slot 5 (draw) of every effect of the list at +0x558 whose start time has come
+func_0019E908	GetEffectKindTable	switch on the effect kind returning one of the 27 tables D_00219C20..D_00219F60 (no kind 1), 0 for other kinds; CreateEffect stores the result at +0
+func_0019EA78	CreateEffect	takes a record from the world pool at +0x1B2C (PopFreeSlot), zeroes it, stores kind, owner and the kind's table from GetEffectKindTable, appends it to the owner's list at +0x558 (acquiring an owner when none is given)
+func_0019EB28	InitEffect	slot 0 of eight effect tables and the start of every other kind's set-up: stamps the start time, a life of 1.0, the scale at +0x30, the default curve D_0026B530 at +0x40 and the place at +0x80/+0x90, and grows the owner's radius at +0x2A4 to reach it
+func_0019EBE8	RemoveEffect	takes the effect out of its owner's list at +0x558 (func_00152600) and releases its use with ReleaseEffect
+func_0019EC20	CountEffectUse	adds one to the effect's use count; UpdateEffectOwner calls it before running each started effect's slot 4
+func_0019EC30	ReleaseEffect	decrements the use count at +8; at zero runs slot 2, calls each end hook of the list at +0x118 with kind 0x10 and returns the record to the world pool at +0x1B2C
+func_0019ECE0	EndEffect	the shared slot 6 (end) of 24 effect tables: runs RemoveEffect when its flag is set (func_0019F560 passes whether the target was hit)
+func_0019ED00	ShortenEffectLife	when the argument is below the effect's remaining life (life minus the time since its start) rescales life and start so that it ends in that time
+func_0019ED58	HandleEffectContact	the shared slot 7 (contact) of 23 effect tables: by kind shortens the effect's life (ShortenEffectLife), spawns a brief effect where it touched (SpawnBriefEffectAt)
+func_0019F390	MoveEffect	the shared slot 3 (motion) of 19 effect tables: turns the placement at +0x50 by the spin at +0x100 (damped by +0x110), then moves the place +0x80 by the velocity +0xA0, which the drag +0xB0 and the acceleration +0xC0 change
+func_0019F560	UpdateEffect	the shared slot 4 (every frame) of 19 effect tables: removes the effect once its life has passed, else, unless its owner's 0x550 is 1, calls slot 6 with whether the attached target's tree contains the effect's point (func_0013E658)
+func_0019F620	DrawEffectAt	draws an effect's template object (+0x20) at a place and placement, scaled by the curve at +0x30 and faded by the one at +0x40 over its life; returns 0 when its life is 0, when func_001453B0 rejects it or when its size and fade have both reached 0 (DrawEffect removes it then)
+func_0019F858	DrawEffect	the shared slot 5 (draw) of 13 effect tables: places the effect by the frame at +0x114 when it has one, draws it with DrawEffectAt and removes it when that returns 0
+func_0019F8E8	AddEffectListener	adds to the callback list at +0x118 of an effect, through AddCallbackNode on the world, the listener's function from its first word with the listener as context (StartSwitchedColliderEffect calls it), as AddObjectListener does for objects
+func_0019F918	AddEffectCallback	adds a function and context to the callback list at +0x118 of an effect through AddCallbackNode on the world, as AddObjectCallback does for objects
+func_0019F950	RemoveEffectCallback	removes a function and context from the callback list at +0x118 of an effect through RemoveCallbackNode on the world, as RemoveObjectCallback does for objects
+func_0019F988	InitFallingEffect	slot 0 of the kind-2 effect table D_00219C40: InitEffect, a life of 5.0, the world's template slot 1 and the world's gravity as its acceleration
+func_0019F9D0	EndEffectWithImpact	slot 6 (end) of the kind-2 table: when the flag is set (the place is inside its target), spawns a kind-4 impact effect of size 40 and life 0.75 at the target's surface and removes the effect
+func_0019FA98	InitRisingEffect	slot 0 of the kind-3 table D_00219C60: InitFallingEffect, then scale 0.33, drag -8 and -0.2 times gravity as acceleration, so it rises
+func_0019FB08	MoveDriftingEffect	slot 3 (motion) of the kind-3 table: MoveEffect, then when the effect has almost stopped or at random moves it a random step across its velocity
+func_0019FCE8	EndEffectWithImpactOnExit	slot 6 (end) of the kind-3 table: EndEffectWithImpact with the flag inverted, so it bursts when its place leaves the target
+func_0019FD08	InitImpactEffect	slot 0 of the kind-4 table D_00219C80, the effect SpawnBriefEffectAt and EndEffectWithImpact make where something hits: InitEffect, the size capped at 200 with 0.6 of it as growth and the world's template slot 2
+func_0019FD70	InitGrowingEffect	slot 0 of the kind-5 table D_00219CA0: InitEffect, a life of 3.0, the world's template slot 3 and a growth of 0.6 in its size curve
+func_0019FDC0	InitShrinkingFallEffect	slot 0 of the kind-6 table D_00219CC0: InitEffect, a life of 2.0, the world's gravity as acceleration and -1 as the square term of its size curve
+func_0019FE10	InitDroppingEffect	slot 0 of the kind-7 table D_00219CE0: InitEffect, a life of 0.5 and the world's template slot 6
+func_0019FE50	UpdateDroppingEffect	slot 4 of the kind-7 table: moves its target up to the first attached ancestor, after 0.15 s gives it drag -8 and half the world's gravity, then runs UpdateEffect
+func_0019FF20	DrawDroppingEffect	slot 5 of the kind-7 table: DrawEffect, then once it has moved more than 10 draws a streak from +0x90 to +0x80 with the world's template slot 7 (func_001268B8)
+func_001A0020	EndDroppingEffect	slot 6 (end) of the kind-7 table: removes the effect when the flag is set
+func_001A0040	InitStreakEffect	slot 0 of the kind-8 table D_00219D00: InitEffect, a life of 0.25, the world's template slot 4, the curve D_00275C50 and a streak time of 0.05 at +0x120
+func_001A00A0	DrawStreakEffect	slot 5 of the kind-8 and kind-17 tables: draws a streak (func_001268B8) from the place back along the velocity for the effect's age, up to its streak time at +0x120, and removes the effect when its size or fade reaches 0
+func_001A01B8	InitScaledEffect	slot 0 of the kind-9 table D_00219D20: InitEffect, a life of 0.5, the world's template slot 5 and a size curve of the scale times D_0026B560
+func_001A0258	InitTrailSegment	slot 0 of the kind-10 table D_00219D40 and the start of kind 13's: InitEffect, a life of 0.35, drag -15, the world's template slot 7, the fade D_0026B570 and a size curve of the scale times D_0026B580
+func_001A0318	DetachTrailSegment	slot 2 (release) of the kind-10 and kind-13 tables: sets the segment's anchor mode to 0 (SetTrailSegmentAnchor)
+func_001A0338	SetTrailSegmentAnchor	changes what a trail segment's back end (+0x90) follows, +0x120: 0 its own point, 1 another effect (+0x124, with an end callback), 2 an object's position (+0x128), 3 the next segment; registers and removes OnTrailAnchorEnded on the anchor
+func_001A04A0	SplitTrailSegment	creates a kind-10 segment at the front of a trail segment that has grown too long, hands it the old anchor and the curves, and anchors the old segment to it (mode 3)
+func_001A05D8	MoveTrailSegment	slot 3 (motion) of the kind-10 and kind-13 tables: moves the front by velocity, drag and acceleration and the back with its anchor, drops the anchor when it moves too fast and splits the segment (SplitTrailSegment) when it is longer than 25
+func_001A0758	DrawTrailSegment	slot 5 (draw) of the kind-10 and kind-13 tables: draws a streak (func_001268B8) from the anchor's point to the front, sized and faded by the curves, and removes the segment when off screen or faded out
+func_001A0950	OnTrailAnchorEnded	the end callback SetTrailSegmentAnchor registers on a segment's anchor: kinds 2, 10 and 16 release the anchor (mode 0), kind 3 anchors the segment to the point the anchor passes
+func_001A09C0	InitSpawningEffect	slot 0 of the kind-11 table D_00219D60: InitEffect, a life of 0.25, the world's template slot 8, a size curve of the scale times D_0026B590 and the fade D_0026B5A0
+func_001A0A78	SpawnFollowUpEffect	slot 4 of the kind-11 table: UpdateEffect, then in the frame its age passes 0.15 creates a kind-12 effect at its place
+func_001A0B20	InitFollowUpEffect	slot 0 of the kind-12 table D_00219D80 (the effect kind 11 spawns): InitEffect, a life of 3.0, the world's template slot 9, the fade D_0026B5B0, a growth of a quarter of the size, drag -1 and the acceleration D_0026B5C0
+func_001A0BA0	InitWideTrailSegment	slot 0 of the kind-13 table D_00219DA0: InitTrailSegment, then the world's template slot 10, the fade D_0026B5D0 and the size curve D_0026B5E0
+func_001A0C50	InitShortFallingEffect	slot 0 of the kind-14 table D_00219DC0: InitEffect, a life of 0.5, the world's template slot 1 and the world's gravity as acceleration
+func_001A0C98	InitCameraSpaceEffect	slot 0 of the kind-16 table D_00219E00: InitEffect, its place in camera space at +0x120 (func_001441C0), a random velocity from its parameter block's ranges, the block's life and size curve
+func_001A0D60	MoveCameraSpaceEffect	slot 3 of the kind-16 table: steers the camera-space place at +0x120 to its parameter block's point in the life left (func_00130540) and converts it to the world place +0x80 (func_00144128)
+func_001A0DF0	DrawCameraSpaceEffect	slot 5 of the kind-16 table: converts the camera-space place to the world, turns the placement by the time and draws it with DrawEffectAt
+func_001A0F88	RunEffectEndCallback	slot 4 of the 0x219E00 effect table: once the effect's life has elapsed (life < now - start) it runs RemoveEffect and then calls params->fn60 with its stored owner (+0x134)
+func_001A0FE8	InitEmitterEffect	slot 0 of the kind-15 table D_00219DE0: InitEffect, a life of 2.0 and the fade D_00275C50
+func_001A1030	MoveEmitterEffect	slot 3 of the kind-15 table: moves the place and velocity along fixed quadratic curves of its life fraction
+func_001A11C0	UpdateEmitterEffect	slot 4 of the kind-15 table: spins its placement by the rate at +0xA4 and, each time it faces the camera, creates a kind-16 effect at its offset from the object at +0x120, counting +0x124 down and removing itself at 0
+func_001A1398	DrawEmitterEffect	slot 5 of the kind-15 table: DrawEffectAt with the identity placement
+func_001A1410	InitLongStreakEffect	slot 0 of the kind-17 table D_00219E20: InitStreakEffect, then the world's template slot 16 and a streak time of 0.15
+func_001A1458	InitPhasedEffect	slot 0 of the kind-18 table D_00219E40: InitEffect, the world's template slot 16 and -1 in its phase (+0x120) and +0x128
+func_001A1498	KeepPhasedEffectStill	slot 3 (motion) of the kind-18 table: empty, the effect does not move
+func_001A14A0	AdvanceEffectPhases	slot 4 of the 0x219E40 effect table: advances the value at +0x124 by a polynomial of the life fraction times the time step, and when the life fraction passes 1 moves phase 0 to 1 and 1 to 2 with SetEffectPhase and removes the effect at phase 2
+func_001A15D8	DrawPhasedEffect	slot 5 of the kind-18 table: draws the effect by its phase (+0x120) and the value AdvanceEffectPhases moves (+0x124), with sizes and turns from the curves D_0026B620 to D_0026B690
+func_001A1DF0	SetEffectPhase	switches the effect's phase at +0x120 to 0, 1 or 2, giving each its own table at +0x40 and life (0.25, unlimited, 0.5) and rescaling start so the fraction of life already spent carries over between phases 0 and 2
+func_001A1F18	CompareByFloatKeyAscending	compares the f32 at +0x20 of two records and returns -1 when the first is smaller, else 1 (a sort comparator)
+func_001A22C8	CopyEffectSourceIds	slot 1 of the kind-19 table D_00219E60: copies the source object's words at +0x1DC and +0x1F0 to the effect's +0x120 and +0x124
+func_001A22E0	DrawProjectileEffect	slot 5 of the kind-19 table: places the effect facing along its velocity, turned to the camera (func_00189C28), and draws it with DrawEffectAt
+func_001A2380	AttachHitMarkEffect	creates a kind-20 effect where an effect hit an object, kept on that object (+0x120) at the hit point with a random turn (HandleEffectImpact and HandleTumblingEffectImpact call it)
+func_001A25F0	HandleEffectImpact	slot 7 (contact) of the 0x219E60 effect table: returns 0 when the other object's owner is of a kind in D_0026B6C0, else runs func_001A2380 unless the object is kind 0x1F, then RemoveEffect and returns 1
+func_001A26B0	UpdateEffectUntilDetached	slot 4 of the 0x219E80 effect table: runs the shared update func_0019F560, then calls RemoveEffect when the handle at +0x120 is nonzero and IsObjectAttached on it returns 0
+func_001A26F8	DrawHitMarkEffect	slot 5 of the kind-20 table D_00219E80: converts its place and placement through the object it is on (+0x120) and draws it with DrawEffectAt
+func_001A2770	SetRandomEffectSpin	slot 1 of the kind-21 table D_00219EA0: gives the effect a random spin axis and rate
+func_001A2830	MoveTumblingEffect	slot 3 of the kind-21 table: turns the placement about a fixed axis by D_0026B6D0/D_0026B6E0, sets drag and acceleration from D_0026B6E8/D_0026B6EC, then MoveEffect
+func_001A2A68	HandleTumblingEffectImpact	slot 7 (contact) of the kind-21 table: ignores owners of kinds 0x40 and 6, else leaves a hit mark (AttachHitMarkEffect) turned with the object and removes the effect
+func_001A2B18	IsEffectAimCandidate	the filter AimEffectAtNearestObject passes to FindNearestSpanObject: rejects an object with bit 0x8000<<28 of +0x538 set and the effect's own source (+0x7C)
+func_001A2B48	AimEffectAtNearestObject	slot 1 of the kind-22 table D_00219EC0: finds the nearest object in front of the source (FindNearestSpanObject with IsEffectAimCandidate) and turns the effect's velocity towards it
+func_001A2D30	PlaceEffectAtSource	slot 1 of the kind-23 table D_00219EE0: converts the source's point at +0x20 to the world for the effect's place, clears drag and spin damping and copies the source's +0x1F4 and +0x1F0
+func_001A2D88	DrawStreakedEffect	slot 5 of the kind-23 table: draws a streak from +0x90 to +0x80 with the world's template slot 11 (func_001268B8), then the effect itself with DrawEffectAt
+func_001A2E68	HandleStreakedEffectImpact	slot 7 (contact) of the kind-23 table: looks the hit point up in the other object (FindNodeForQuery) and on a hit throws it with a random turn and removes the effect
+func_001A3008	RandomizeEffectSpin	slot 1 of the kind-24 table D_00219F00: random spin rates in +0x120 and +0x128 from D_0026B6F0 and a random size from D_0026B700
+func_001A3128	HandleEffectContactUnlessKind6	slot 7 (contact) of the kind-24 table: ignores an owner of kind 6, else HandleEffectContact
+func_001A31A0	DrawSpinningEffect	slot 5 of the kind-24 table: turns the placement by the rates of RandomizeEffectSpin and draws it with DrawEffectAt
+func_001A31F0	InitFacingEffect	slot 0 of the kind-25 table D_00219F20: InitEffect, a life of 0.5, the world's template slot 18, the fade D_0026B710 and the size D_0026B720
+func_001A3250	DrawFacingEffect	slot 5 of the kind-25 table: removes the effect when its object is gone, else draws it turned to the camera (func_00189C28) with sizes and turns from the curves D_0026B730 to D_0026B770
+func_001A3598	InitDelayedEffect	slot 0 of the kind-26 table D_00219F40: InitEffect, the fade D_00275C50 and a size curve that runs from the scale to 1
+func_001A3730	MoveDelayedEffect	slot 3 of the kind-26 table: once its start time has come, moves the effect with its object at +0x20 over the life it has left (func_00125750), keeping its last place at +0x90
+func_001A38F0	UpdateDelayedEffect	slot 4 of the kind-26 table: once started runs func_001A35F0 when +0x134 is set, and when its life is over calls slot 6 of the object at +0x20 and removes the effect
+func_001A3990	DrawDelayedEffect	slot 5 of the kind-26 table: DrawEffect once the start time has come
+func_001A39C8	ResolveEffectTarget	slot 1 of the 0x219F60 effect table: stores FindFirstObjectById(world, 0x104, source's id at +0x1F0, source's link at +0x7C) in +0x120 and copies the source's float at +0x1F4 to +0x124
+func_001A3A18	SendEffectMessagesAtRate	slot 4 of the 0x219F60 effect table: runs the shared update, then adds time*rate (+0x124) to the counter at +0x128 and for each whole unit calls slot 31 (message handler) of the object at +0x120 with a 4-word record holding the effect's position
+func_001A3AE0	InitWalkerCollider	slot 0 of class 0x15: runs the base set-up func_001921A8, then sets the state at +0x610 and +0x614 to -1 and the float at +0x628 to 2000.0
+func_001A3B20	LoadWalkerCollider	slot 10 of class 0x15: runs LoadCollider, then ResolveObjectLinks over the two link records of D_0026B778 (offsets 0x640 and 0x650)
+func_001A3B58	StartWalkerCollider	slot 20 of class 0x15: runs StartPlacedObject, and when +0x678 is set resolves the six links of D_0026B790, sets the anchors, creates a state walker for each of the objects at +0x640 and +0x650 (CreateStateWalker) and gathers objects by id into +0x668, otherwise calls slot 7
+func_001A3C40	ControlWalkerCollider	slot 0x134 of class 0x15 (the control slot, as ControlPlayerLinkedCollider): stops its animation player, reads the input (ReadWalkerColliderInput), sets the polar drive at +0x630 and turns the object at +0x64C towards the input's angle
+func_001A3D40	UpdateWalkerCollider	slot 0x54 (update) of class 0x15: UpdateSwitchedCollider, steers by the input, then moves to the states ChooseWalkerColliderState and ChooseWalkerColliderSubState return
+func_001A3F40	ReadWalkerColliderInput	copies the input record's two magnitudes (+0x48, +0x7C) to +0x61C and +0x624 and, above 0.3 and 0.8, their camera-relative angles (func_00144FF8) to +0x618 and +0x620
+func_001A3FE0	ChooseWalkerColliderState	returns the next state of a class 0x15 object from +0x610: 0 goes to 1 when the float at +0x61C is positive, 1 goes to 0 when it is 0, 2 goes to 1 when the word at +0x684 is 0
+func_001A4070	SetWalkerColliderState	stores the state at +0x610: activates or deactivates its effect spawners (+0x66C), moves its state walker (+0x644), starts the animation of states 2 and 3 and switches its looping sound
+func_001A4258	ChooseWalkerColliderSubState	returns the next second state (+0x614) of a class 0x15 object: 0 goes to 1 when the magnitude at +0x624 reaches 0.8, 1 goes back to 0 below it
+func_001A42C8	SetWalkerColliderSubState	stores the second state at +0x614, moves its second state walker (+0x654) and switches the sound held at +0x658
+func_001A43C8	HandleWalkerColliderNotification	slot 0x44 of class 0x15: HandleSwitchedColliderNotification, then on messages 0x295 and 0x296 plays a sound and deactivates the spawner at +0x65C or +0x660, and notes when its animation player ends (code 5)
+func_001A44E8	StepWalkerCollider	slot 0x80 (step) of class 0x15: StepCollider, then func_001B9D10 with a turn by its angle at +0x618 and the table D_0026B7D8
+func_001A4538	ResolveWalkerColliderContact	slot 0x104 of class 0x15 (as ResolvePlayerContact): unless func_00128230, takes the part of its drive at +0x630 along the contact's normal out of the contact's velocity
+func_001A45B8	ComputeWalkerColliderContactValue	slot 0x100 of class 0x15: unless func_00128230, sets the contact's value at +0x94 to 20 when its ratio at +0x88 is above 0.7
+func_001A4718	InitPairController	slot 0 of the 0x5F class: after the base set-up sets the element size of its seven lists, ids to -1, the limit 0x28, copies the pose table D_0024C9D0 into both pose arrays and stores the tuning floats 3000, 2300, 1500 and 1.46
+func_001A4878	AppendPairControllerId	appends its argument to the PairController's ids array and increments idCount
+func_001A48C0	ResolvePairControllerLinks	slot 0x4C of class 0x5F (as ResolveListIds): PostLoadPlacedObject, then finds its objects by id, copies them into its lists and gathers the class-0x44 objects
+func_001A4B30	BlendPairControllerPose	slot 16: steps the blend weight by the frame time, clamps it and mixes poseA and poseB into poseOut
+func_001A4C48	UpdatePairController	slot 17 of the 0x5F class: runs the base update, moves the state to the one func_001A4DC0 chooses, then by state spawns paired objects (func_001A5120 below the limit, func_001A54F8 on a timer) or sets its creator target to state 1
+func_001A4D60	ShowPairControllerElement	slot 0xC8 of class 0x5F (the visibility slot): shows the screen element D_0026D0C8 in state 2 while AreMenusAndFadeClear holds, hides it otherwise
+func_001A4DC0	ChoosePairControllerState	returns the PairController's next state from its link, flags, counts and the target's state and time
+func_001A4EF0	SetPairControllerState	stores the controller's state and time and does the per-state work (messages, sets partners' states 7 and 8)
+func_001A54F8	StartPairedObjects	takes a PairedObject from one list and an attachment from another at random, links them, sets both to state 1 and sets the next time
+func_001A5760	UpdatePairControllerTuning	evaluates six clamped quadratic curves at dt and linearly blends the tuning pairs into +0x62C..+0x648 and the two counts at +0x624 and +0x628, re-arming the spawn timers with func_001EAAE0 when a count grows
+func_001A5B28	RemoveFinishedHitTarget	controller method called when a hit target leaves state 9: counts it done, updates the tuning with progress count/total (func_001A5760), moves it between the controller's lists, releases its partner and re-arms the spawn timer
+func_001A5C38	ReleasePairedAttachment	moves the object's attachment from the list at +0x3AC to the list at +0x3A0, sets the attachment's state to 0 with func_001A76A0 and clears the object's attachment field
+func_001A5DD8	ActivatePairedAttachment	sets the object's attachment to state 1 with func_001A76A0 (SetPairedState calls it on the 5 to 6 transition)
+func_001A5DF8	FinishPairedObjectTransition	controller method for the 6 to 0 transition of a paired object: moves it, its partner and its attachment out of the controller's lists, calls the partner's and its own slot 3, counts the controller's finished objects up, re-arms both spawn timers and plays sound 0x51
+func_001A5F78	RemovePairedObject	controller method for leaving state 9: moves the object, its attachment and its partner out of the controller's lists, releases the attachment, calls the object's slot 3, re-arms the spawn timer and decrements the count at +0x39C
+func_001A6168	LinkPairedObjects	sets obj->partner = node and node->partner = obj, moves the lists' entries and unlinks and re-states the partner each one had before
+func_001A63F8	RandomizePairedObjectOffset	gives a paired object a random polar offset at +0x570, up to the controller's radius at +0x348, and scales its +0x574 by the controller's +0x34C
+func_001A6480	GetPairControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
+func_001A6498	InitPairedObject	slot 0 of the 0x42 class: after the collider set-up sets state -1, the floats at 0x584 and 0x588 to 1.0 and 2.5 and calls func_001B9AE0
+func_001A64F8	LoadPairedObject	slot 10 of the 0x42 class: LoadCollider, then resolves its six object links from D_0026B7E8 and calls func_00159478 on its notify record
+func_001A6540	CopyPairedObject	slot 9 of the 0x42 class: saves the 8-byte field at 0x5B0, runs CopyCollider (func_001BA130) and restores the field
+func_001A6588	StartPairedObject	slot 16 of the 0x42 class: StartPlacedObject, sets state 0 with func_001A6BE0, then calls its own slot 7
+func_001A65C8	UpdatePairedObject	slot 0x54 (update) of class 0x42: UpdateCollider, then SetPairedState until the state is the one ChoosePairedObjectState returns, and per state moves the object (func_001A6788)
+func_001A69F8	ChoosePairedObjectState	returns the next state of a PairedObject from its state at +0x550 (a jump table of 11 cases), linking it to a hit target child (FindHitTargetChild, LinkPairedObjects) where that state calls for it
+func_001A6BE0	SetPairedState	stops the handle and sound started for the old state, runs the leave function of states 1, 5, 6 and 9, stores the new state and its time, and starts the handle or sound of the new state
+func_001A6DE0	HandlePairedHit	slot 31 message handler: on a hit (flag 0x20) it moves a PairedObject in states 1-8 to state 9, sends its notify record a message and plays a sound
+func_001A6F28	FindHitTargetChild	walks the child list at +0x480 and returns the data of the first entry with a nonzero first word whose object is of class 0x43
+func_001A6F88	InitHitTarget	slot 0 of the 0x43 class: after the collider set-up sets state -1, hit limit 8, recover delay and scale polynomial x to 1.0, hit interval 0.2 and clears the polynomial's other terms
+func_001A7008	LoadHitTarget	slot 10 of the 0x43 class: LoadCollider, resolves its object link from D_0026B830 and calls func_00159478 on its notify record
+func_001A7050	CopyHitTarget	slot 9 of the 0x43 class: saves the 8-byte field at 0x5A0, runs CopyCollider and restores it
+func_001A7098	StartHitTarget	slot 16 of the 0x43 class: StartPlacedObject, resolves links from D_0026B840, copies the scaled object's pair at +0x2DC, starts its sound with func_001B6290, sets state 0 with func_001A7480 and calls its own slot 7
+func_001A7128	UpdateHitTarget	slot 17 of the 0x43 class: runs the base step, moves to the state func_001A7420 chooses, then scales the scaled object's pair at +0x2DC/+0x2E0 by a clamped quadratic of the elapsed value, enabling or disabling it with func_00155FA0 and func_00155F90
+func_001A7230	StepHitTarget	slot 0x80 (step) of class 0x43: StepCollider, then with no parent func_001B9D10 with its placement and the table D_0026B850
+func_001A7290	ComputeHitTargetContactValue	slot 0x100 of class 0x43: scales the contact's value at +0x98 by 0.6
+func_001A72B0	ApplyHitTargetHit	on a hit (flag 0x10) after the hit interval it moves the state up one, to 9 at the hit limit where it also messages its notify record
+func_001A7420	ChooseHitTargetState	returns the state a HitTarget should be in: one step lower once the recovery delay has passed since the last change, 0 from 9
+func_001A7480	SetHitTargetState	stores a HitTarget's new state and time, tells its controller when it leaves state 9 and changes the sound it plays by the state
+func_001A7520	InitSoundStateObject	slot 0 of the 0x44 class: after the collider set-up sets state -1
+func_001A7550	LoadSoundStateObject	slot 10 of the 0x44 class: LoadCollider and resolves its object link from D_0026B888
+func_001A7588	CopySoundStateObject	slot 9 of the 0x44 class: saves the 8-byte field keptBytes, runs CopyCollider and restores it
+func_001A75D0	StartSoundStateObject	slot 16 of the 0x44 class: StartPlacedObject, starts its sound with func_001B6290, finds its first child of class 0x7E and sets state 0 with func_001A76A0
+func_001A7648	UpdateSoundStateObject	slot 17 of the 0x44 class: base step then loops func_001A76A0 until the state equals what func_001A7698 returns
+func_001A7698	GetSoundStateObjectState	returns the object's state field
+func_001A76A0	SetSoundStateObjectState	stores a SoundStateObject's new state and time and switches its sound to the one in D_0026B898[state]
+func_001A7708	InitObjectCreator	slot 0 of the 0x45 class: after the collider set-up sets state -1 and calls func_001B9AE0(3,0,3,0)
+func_001A7750	LoadObjectCreator	slot 10 of the 0x45 class: LoadCollider, resolves its object link from D_0026B8A0 and calls func_00159478 on its notify record
+func_001A7798	StartObjectCreator	slot 16 of the 0x45 class: StartPlacedObject, then either calls its own slot 7 or creates an object of class 0x101/0x59 with func_0015A838 and sets state 0 with func_001A7998
+func_001A7800	UpdateObjectCreator	slot 0x54 (update) of class 0x45: UpdateCollider, then SetObjectCreatorState to the state ChooseObjectCreatorState returns
+func_001A7998	SetObjectCreatorState	stops the active handle, stores the new state and time, and in states 1 and 2 messages the notify record or calls slots 25 and 51 of the created object
+func_001A7AA0	ChooseObjectCreatorState	returns the next state of an ObjectCreator from its current one: 1 goes to 2 when the handle's time is up, and bit 1 of the game flags gives 3
+func_001A7B20	RequestPadPattern	enters state 1 when idle (state 0) and state 3 otherwise with func_001A7D98, then stores the two arguments
+func_001A7B88	UpdatePadPattern	per frame: in state 2 counts the delay down and, when it runs out, advances to the next table entry (wrapping at count) and sends its two bytes to func_002049E8, ending in state 3 when the total time is used; in states 3 and 4 keeps sending zeros until the delay ends
+func_001A7CE8	StartPadPatternFromTable	starts the pattern entry index of the 0x104-byte-entry table D_0026B8B0 with func_001A7D18
+func_001A7D18	StartPadPattern	when the object is idle and the entry has a nonzero count, and pad patterns are enabled (func_001A7EE8), stores the entry and its first delay and enters state 2 with func_001A7D98
+func_001A7D98	SetPadPatternState	state change: state 2 sends the entry's first two bytes to func_002049E8 (owner, channel); states 3 and 4 send zeros with func_001A7E40 and set the delay to 4 times D_0026186C; stores the state
+func_001A7E40	StopPadPatternOutput	sends two zero bytes for the owner and channel to func_002049E8
+func_001A7E70	InitPadPatternSetting	sets the pad pattern setting (g_padPatternSetting) to 1 when it is still 0
+func_001A7E90	ApplyPadPatternSetting	writes the setting D_0026C3DC into bit 5 of the context field at +0x19EC: state 2 clears it, state 3 sets it
+func_001A7EE8	IsPadPatternEnabled	maps the setting D_0026C3DC to a flag: 2 gives 1, 0 and 3 give 0, 1 gives the inverse of bit 5 of the context's field at +0x19EC
+func_001A7F50	TogglePadPatternSetting	by D_0026C3DC flips, sets or clears bit 5 of the context field at +0x19EC, then stores 3 in D_0026C3DC when the bit is set and 2 when clear

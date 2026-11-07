@@ -1,0 +1,44 @@
+symbol	name	evidence
+func_00198980	InitObjectSet	slot 0 of the 0x2C class: runs InitCollider (func_001B7968) and sets the word at 0x554 to 1
+func_001989B0	LoadObjectSet	slot 10 of the 0x2C class: runs LoadCollider, func_00159478 on the sub-object at 0x584, then walks the child list and appends each child whose descriptor flag 0x40 is set to the list at 0x574 (count 0x570)
+func_00198A88	PostLoadObjectSet	slot 15 of the 0x2C class: runs PostLoadPlacedObject, then looks each of the n55C keys at 0x560 up with func_0015A448 and appends the hits to the list at 0x574 (count 0x570)
+func_00198B28	StartObjectSet	slot 16 of the 0x2C class: runs StartPlacedObject, calls func_0012C9A8 and func_00182ED8 on every object of the list at 0x574 (setting 0x558 when the first returns nonzero), then calls descriptor slot 7 if slot 76 returns 0
+func_00198BD8	UpdateObjectSet	slot 0x54 (update) of class 0x2C: UpdateCollider, then works with the active switched collider (GetActiveSwitchedCollider) through the hooks D_0026A910 and D_0026A914
+func_00198DA8	CollectObjectSet	slot 73 of class 0x2C: unregisters itself (slot 7), runs func_0012C8F8 on each object of its found list at 0x574 from the last, calls slot 78 and triggers script event 2
+func_00198E58	NotifyObjectSetTarget	slot 74 of class 0x2C: sends a message of kind 1 naming itself to the object at 0x584 through that object's slot 31
+func_00198E98	GetObjectSetActivationState	slot 72 of class 0x2C: returns 0 while it is not attached, else 1 when the word at 0x554 is set and 2 when not
+func_00198ED8	AddObjectSetKey	stores item at keys560[n55C] and increments the count at 0x55C, the key list PostLoadObjectSet resolves
+func_00198EF8	HandleObjectSetNotification	slot 13 of the 0x2C class: runs HandlePlacedObjectNotification, and for kind 5 marks the entry of marks588 whose object matches the message key
+func_00198FB0	TestObjectSetMayContact	slot 56 of class 0x2C: returns 1 for objects of kind 8 or 0x3B, else 0
+func_00199000	LatchObjectSetContact	slot 0x100 of class 0x2C (as LatchContactObject): sets +0x59C when the other object of the contact descends from the object at +0x18 of the active switched collider's data block
+func_00199070	InitFlaggedObjectSet	slot 0 of class 0x2D: runs InitObjectSet, then takes an index of g_flagTable with TakeFlagTableIndex into 0x5A0
+func_001990A8	CopyFlaggedObjectSet	slot 9 of class 0x2D: runs CopyCollider while keeping its own flag-table index at 0x5A0
+func_001990E0	GetFlaggedObjectSetActivationState	slot 72 of class 0x2D: what GetObjectSetActivationState returns, except 0 instead of 1 once its bit of g_flagTable is set
+func_00199138	CollectFlaggedObjectSet	slot 73 of class 0x2D: sets its bit of g_flagTable with SetFlagTableBit, then runs CollectObjectSet
+func_001993F0	InitNumberedItem	slot 0 of the 0x2E class: runs InitObjectSet and stores the world counter at 0x2300, post-incremented, as the item's own number at 0x5A0
+func_00199428	LoadNumberedItem	slot 10 of the 0x2E class: runs LoadObjectSet, installs the table D_0026A948 with func_00124DF8 and looks up to 0x20 objects (ids 0x318..0x337) up with func_0015A418 into a 0x80-byte array at 0x5B0
+func_001994C8	CopyNumberedItem	slot 9 of class 0x2E: runs CopyCollider while keeping its own number at 0x5A0
+func_00199500	StartNumberedItem	slot 16 of the 0x2E class: after StartObjectSet draws random angle and scale values from func_001EAAE0 into 0x5A4..0x5B8, and calls descriptor slot 7 when its bit in the bitmap of D_002623C8 is already set
+func_00199698	UpdateNumberedItem	slot 0x54 (update) of class 0x2E: UpdateObjectSet, then, when its world bits allow (MaskWorldBitsBySave), acts on the active switched collider's data block
+func_00199850	SetNumberedItemFlag	sets the item's bit in the bitmap bits68 of D_002623C8 (and increments count64 when it was clear), then compares count64 with the world's count at 0x2300 to pick a message and starts it with func_0015A418
+func_001999D0	CollectNumberedItem	slot 73 of class 0x2E: creates effect 0x10 at its position (playing sound 0x21 when it is the world's last item), or runs SetNumberedItemFlag when no effect is made, then runs CollectObjectSet
+func_00199B18	FlagNumberedItem	calls descriptor slot 7, sets the item's bit in bits68 of D_002623C8 with count64++ when it was clear, and runs func_0012C8F8 on each object of the list at 0x574 in reverse
+func_00199C10	GetNumberedItemFlag	slot of the 0x2E class: reads bit (number & 7) of byte number / 8 in the bitmap bits68 of D_002623C8 and writes 0 or 1 through its out pointer
+func_00199C58	ApplyNumberedItemPendingImpulse	slot 0xD0 of class 0x2E: a call to ApplyColliderPendingImpulse
+func_00199C78	HandleNumberedItemObjectEvent	runs HandleObjectEvent (func_001BC320) on the event, with extra descriptor calls (slots 25 and 77) when its eventFlags 0x8 and 0x10 are set; returns 1
+func_00199D08	SpinNumberedItemTransform	slot 0xA0 of class 0x2E: turns its transform about Z by the clock (BuildAxisAngleMatrix) before the base slot 0xA0 (func_00125C90)
+func_00199F38	FlagAllNumberedItems	gathers every object of class 0x2E (func_0015A4F0 with 0x105, 0x2E), runs FlagNumberedItem on each from the last, then calls descriptor slot 7 of its sub-object at 0x18 when func_001300E8 says kind 0x20
+func_0019A088	MarkLevelRecordComplete	for a level index (or the current one, 0x19D8, for -1) of the save data, sets bit 0 of each record of its 0x438-byte table and the bits 0x1F of its word at 0x448
+func_0019A0F0	MarkAllLevelRecordsComplete	runs MarkLevelRecordComplete for the six level indices, then requests a world load when the element stack is in mode 2
+func_0019AD30	AddEntryRecordKey	appends item to keys of the 0x2C-byte record at index in the table at 0x658 of the 0x17 class, only while its count is below 4
+func_0019B038	InitObjectGatherer	slot 0 of the 0x41 class: runs the base set-up, sets 0x608 to 0.5 and 0x60C to 1.0, stores func_001EAB48 of the clock and sets 0x664 to -1
+func_0019B0A0	LoadObjectGatherer	slot 10 of the 0x41 class: runs the base load, func_00159478 for its group record, then finds the objects of ids 0x269..0x287 and files each in the low or high array
+func_0019B188	StartObjectGatherer	slot 16 of the 0x41 class: registers its table D_0026ABA0, sets state -1, enters mode 1 with func_0019C1C0 and copies its position (v140) to 0x650
+func_0019B1E0	AddObjectGatherer	slot 6 of the 0x41 class: runs the base step then appends itself to the world list at +0x1C60 (func_00152470)
+func_0019B218	RemoveObjectGatherer	slot 7 of the 0x41 class: runs the base step then removes itself from the world list at +0x1C60 (func_00152600)
+func_0019B250	CopyObjectGatherer	slot 9 of the 0x41 class: keeps the eight bytes at 0x600 across the base copy func_001BA130
+func_0019B298	StepObjectGatherer	slot 0x80 (step) of class 0x41: StepCollider, then outside states 1 and 2 passes its placement to func_001B9D10 with the table D_0026ABB0
+func_0019B378	UpdateObjectGatherer	slot 0x54 (update) of class 0x41: works with the active switched collider, UpdateCollider, and the per-state sounds (StartSoundEffect)
+func_0019BB90	ResolveObjectGathererContact	slot 0x104 of class 0x41 (as ResolvePlayerContact): when the contact is steep enough and its speed at +0x61C is not 0, pushes the contact's velocity along its own direction less the part along the contact's normal
+func_0019BE08	HandleObjectGathererObjectEvent	slot 45 of the 0x41 class: if its state is not 3 it enters state 3 with func_0019C1C0 and sends the message's values to its group object's method 31
+func_0019C068	SetObjectGathererSuspended	with a non-zero flag removes the object from the world's list at +0x1C60 and calls slot 7 of its helper at 0x5FC, otherwise appends it, calls slot 6 and places it; then passes the flag to func_001B7C40 for itself and all its parts

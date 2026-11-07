@@ -1,0 +1,54 @@
+symbol	name	evidence
+func_001F2758	InitOscillator	slot 0 of class 0x8D: runs InitObject, then sets the index at +0x40 and the index at +0x6D0 to -1 and the scale at +0x34 to -1.0
+func_001F2798	AttachNodeToOwner	puts the context's node at the head of the owner's list at +0x8E0, sets the node's owner, and for every element and listed slot stores the owner's matching item address into the slot's pointers (items at +0x6E0 and +0x7E0)
+func_001F2840	RefreshOscillatorFrames	EvaluateOscillator calls it while the dirty flag +0x8E4 of a class 0x8D object is set: rebuilds the entries' matrices (InitIdentityMatrix, BuildMatrixFromRotationAndTranslation, MultiplyMatrices, InvertMatrix4x4)
+func_001F31F8	HashToUnitFloat	mixes an integer with xor-shift and multiply steps, masks it to 31 bits and scales by 2^-31 to a float below 1
+func_001F3250	SampleSmoothNoise	splits the time 2*x*clock+y into integer and fraction, takes HashToUnitFloat of the two neighbouring integers (reshaped by z, mirrored on odd integers) and blends with a smoothstep of the fraction
+func_001F3328	ApplyBiasCurve	returns value / (1 + (1/denominator - 2) * (1 - value))
+func_001F3358	EvaluateNoiseBlend	weight-averages SampleSmoothNoise over the blob's entries, passes the average through ApplyBiasCurve with the blob's scale and returns lo + that * (hi - lo)
+func_001F3408	EvaluateOscillator	UpdateAttachments calls it on each chained node: once per clock time (+0x34 keeps the last), rebuilds the frames when +0x8E4 is set (RefreshOscillatorFrames), then for each 0xD0-byte entry at +0x50 turns kind 0 by the sine and cosine of 2 pi (time * rate + phase) and kind 1 by a noise blend (EvaluateNoiseBlend)
+func_001F36E8	AddOscillatorXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
+func_001F3768	AddOscillatorYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
+func_001F37D8	GetOscillatorCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
+func_001F3850	SetOscillatorEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
+func_001F38A0	GetOscillatorEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetOscillatorEntryPeriod stores
+func_001F38F0	AppendVector4ToBuffer	appends four floats to a buffer of capacity 4 (count at +4) and increments the count
+func_001F39F8	InitTransformObject	InitObject then copies the identity matrix into the rotation field at +0x40
+func_001F3A40	ReadTransformObject	reads a buffered rotation, a buffered vector and the property records of an object from a stream
+func_001F3A90	ReparentObjectKeepingTransform	converts the object's pos and rot from its old parent's frame to the new one (func_00128018, func_00128150) and calls ReparentObject
+func_001F3AF0	TransformObjectIntoFrame	slot 22 of class 0x73: transforms its position and rotation by the other object's frame with func_00128018 and func_00128150
+func_001F3BD8	GetObjectWorldPosition	converts the vector at +0x40 out of the object's parent frame (func_00128018 with frame 0) into the output; used as the position getter by many callers
+func_001F3C08	GetObjectWorldRotation	same for the rotation at +0x50 with func_00128150, into the output
+func_001F3C38	FindArrivalPoint	finds the class 0x74 object with an id (under a parent id) for FindOrActivateSwitchedCollider; failing that, of all class 0x74 objects, the one with the id, else one with +0x94 set while a style 2 screen fade runs, else one with a record
+func_001F3D80	LoadArrivalPoint	slot 10 of class 0x74: reads its rotation and position, its property records, a count of typed records it creates (CreateTypedRecord) and loads, and a list of 16-bit ids
+func_001F3EE0	CopyArrivalPoint	slot 9 of class 0x74: runs CopyObjectData and makes copies of the other's records (CreateObjectCopy) into a new array
+func_001F3F80	StartArrivalPoint	slot 16 of class 0x74: runs StartObject and, for each of its records, calls its slot 21 with +0x18 and starts it (ResolveAndStartObject)
+func_001F4008	PlaceAtArrivalPoint	with a class 0x74 object (the one FindArrivalPoint found, for FindOrActivateSwitchedCollider; also func_00101950 and func_0017BCD0): gives the current switched collider (GetCurrentSwitchedCollider) the point's world rotation and position (GetObjectWorldRotation, GetObjectWorldPosition) and activates it (ActivateSwitchedCollider); with none it moves the camera there
+func_001F4318	FindOrActivateSwitchedCollider	RunPendingWorldLoad's helper: returns func_001F4008 of the object func_001F3C38 finds, else the active switched collider, else activates the current one
+func_001F4378	FindActiveObjectSubGroup	collects up to 64 objects of class 0x7D from the world and returns the first whose field 0x2D0 is nonzero
+func_001F4408	BeginLevelExit	ExitLevelFromPauseMenu, ActivatePauseMenuSelection and RunAnimationEvent call it: in level 5 or a level without its +0x78 flag starts the object fade D_00247AD0, else with a sub-level hands the active object sub-group to StartObjectSubGroupFinish, else starts the screen fade with D_00275B04
+func_001F4500	LoadObjectSubGroup	slot 10 of class 0x7D: reads the stream into the fields at 0x2FC.., then creates count children with func_0011E580 and loads each through slot 10
+func_001F4660	StartObjectSubGroup	slot 16 of class 0x7D: runs StartPlacedObject, runs slots 15 and 16 of each child, and may run slot 3 of the topmost parent
+func_001F4760	SetObjectSubGroupState	sets the group's state 0x2E4 and stamps the clock at 0x2E8; state 5 also sets bit 40 of the flags and calls func_001DDA20
+func_001F4808	StartObjectSubGroupFinish	finishes a best-time run in progress (FinishBestTimeRun) or, for a group that leaves (+0x2D8), runs BeginLevelExit; else sets state 5, starts its animations and sets its end time +0x31C, and raises its script event 2
+func_001F4A30	StartObjectSubGroupFade	picks one of two text/value pairs by a game-state condition and starts a screen fade with StartScreenFade
+func_001F4AE0	UpdateObjectSubGroup	slot 17 of class 0x7D, its override of UpdatePlacedObject; it finishes the group with StartObjectSubGroupFinish
+func_001F4E18	InitLookupObject	slot 0 of class 0x4E: runs InitPlacedObject and sets its id to -1
+func_001F4E48	StartLookupObject	slot 16 of class 0x4E: finds the object with its id in the world and keeps it in 0x2D8 (flag 1) or 0x2D4 (class 0x7E)
+func_001F4ED0	PushObjectCameraController	once (flag at 0x310) pushes a controller for the object on the camera stack with PushCameraController (key 7)
+func_001F4F20	RemoveObjectCameraController	when the flag at 0x310 is set removes the object's camera controller with RemoveCameraControllers and clears the flag
+func_001F4F70	InitContactTracker	slot 0 of class 0x36: runs InitCollider, sets up its record at 0x550, sets 0x4E0 to 1 and the flag bits 36 to 39 to 2
+func_001F4FD8	StartContactTracker	slot 16 of class 0x36: runs StartPlacedObject, then FillTrackedNodes on the record at 0x550
+func_001F5008	CollectTouchingObjects	slot 17 of class 0x36: walks the contact table, and for each contact whose near part is a descendant of itself and whose far part is of kind 0x41 adds it to slots (up to 10), then starts func_00177838 for each
+func_001F51A0	CopyContactTracker	slot 9 of class 0x36: runs CopyCollider and points the record's owner at itself
+func_001F51E8	RequestContactTrackerLaunch	slot 71 of class 0x36: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
+func_001F5208	GetContactTrackerRecord	returns the record at +0x550 of the contact tracker (the script built-in func_00109488 calls it)
+func_001F5210	ClearTrackedNodes	sets the record's found count to 0
+func_001F5218	InitC37	slot 0 of class 0x37: runs InitContactTracker, sets bit 43 of the flags at +0x538 and sets the collider's anchors to 3, 0, 3, 0
+func_001F5590	InitTrackedNodes	sets the record's owner, zeroes 0x04 and sets 0x08 to 150.0
+func_001F55A8	FillTrackedNodes	adds the owner's children of id 0x7E or 0x6E to nodes (up to 32), then each object found for the ids in keys through AddTrackedNode
+func_001F56D8	LaunchPlayerAtTrackedNode	the callback OfferTrackedNodeLaunch hands over: picks the best target among the record's nodes (ChooseBestTargetCandidate); with nodes found sets the player on the arc to it and puts it in state 2, else LaunchPlayerAtTarget
+func_001F57E0	OfferTrackedNodeLaunch	fills the request with the record's word +0x04, the record and LaunchPlayerAtTrackedNode as its callback, and raises script event 2 on the record's owner (RequestAttachedSetLaunch, RequestContactTrackerLaunch)
+func_001F5840	AddTrackedKey	appends an id to keys (up to 32) and counts it
+func_001F5868	AddTrackedNode	appends the object to nodes (up to 32) if it is of kind 0x7E, 0x6E, 0x76, 0x70, 0x71 or 0x81
+func_001F5930	RemoveTrackedNode	removes the entry from nodes by shifting the later ones down and decrements found

@@ -1,0 +1,12 @@
+symbol	name	evidence
+func_00184D78	CompareObjectsForSort	comparator of two object pointers on 0x304, then 0x308, then bit 38 of the flags, then 0x2D0
+func_00184DE8	UploadLightVolumes	sorts the world's cone volumes (its list at +0x1BE8) into g_sortedLights with CompareObjectsForSort, splits them into at most 16 runs in g_lightGroups and sends their shapes to VU0 memory through the VIF0 channel; func_0019DC98 calls it each frame
+func_00185150	CollectLightsForSphere	tests a sphere (a point and a radius) against every light group of g_lightGroups on VU0 (microprograms at 0x60 and 0x168 by the group's kind) and writes the lights that reach it, up to a maximum, with their count and the strongest +0x2D4 mode; SelectVertexBatchLights and DrawModelPart call it
+func_00185358	InitAim	sets the aim record's field 0x20 to -1, 0x40 to 800.0, copies the vectors D_00264770..D_002647A0 and sets 0x44 and 0x48
+func_001853F0	AssignAimTarget	stores the object and a point as the target (hasTarget 1), or clears the target when the object is null or is the active collider
+func_00185468	ResolveAimTarget	returns the aim's target, or the active switched collider when it has none
+func_00185758	RunMainLoop	after startup it loops forever: updates the fade, pad, memory card and menus each frame and runs the world's update and draw
+func_001858F8	LoadIopModules	loads the IOP image ioprp243.img and the six modules named in D_002647A8 one by one
+func_00185A58	SendVif0StartupPacket	a startup initializer (D_00264814, run by RunStartupInitializers): sets bit 0x40 of the VIF0 channel's control word, sends the packet D_00211E10 on it, waits and clears the bit
+func_00185AC8	SendVif1StartupPacket	a startup initializer (D_00264818, run by RunStartupInitializers): sets bit 0x40 of the VIF1 channel's control word, sends the packet D_00212110 on it, waits and clears the bit
+func_00185B38	RunStartupInitializers	calls each of the 29 functions of D_002647C0 in order while updating the progress bar with UpdateLoadProgress

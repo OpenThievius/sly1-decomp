@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F5A58	CopyBytes	copies n bytes from src to dst and returns dst (memory_copy.cpp; UnpackBufferedStream, ReadMemoryReader and the IOP clients copy their buffers with it)

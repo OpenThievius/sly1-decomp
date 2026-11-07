@@ -1,0 +1,25 @@
+symbol	name	evidence
+func_00130F48	InitCurveSpan	copies a 16-byte quadratic (three coefficients) into the span, stores the length n, the middle n/2, a window of half width x*n/2 around it (lo, hi, halfw) and the curve values at lo and at the middle plus y
+func_00131000	EvalCurveSpan	returns the quadratic of the span at x/len outside the window [lo, hi], p at its ends and a linear blend between p and q inside it, peaking at q in the middle
+func_001310F0	InitTextPanel	slot 0 of the T217D_440 element: sets width 640, height 492.8, typing speed 15 and highlight 0x80FFFFFF, then runs InitScreenElement
+func_00131140	ClearTextPanel	sets the panel's text to empty (slot 8), clears +0x2FC, the value and both stick floats and sets +0x314 to 0.4
+func_00131198	SetupTextPanel	original assembly; slot 1 of the text panel's table D_0021A440, the slot of SetupScreenElementText in the other screen elements' tables: calls SetupScreenElementText, measures its strings and builds its curve spans and GIF packets
+func_00135228	DrawTextPanelBlocks	in state 1 draws four quads whose colour fades toward blockA by blockB with the clock, when a button mask from func_00160D30 is held
+func_00135550	SetTextPanelMode	slot 16 of the panel table: when the mode changes from or to 0 hands every object of the world group (0x105, 0x495) func_0012F6B0 with 0.0 or 1.0, then calls SetScreenElementMode
+func_001356C0	SetTextPanelState	changes the panel state at +0x260 (running ClearTextPanel when leaving 0, a sound when leaving 1 and another when entering 1) and stamps the clock in +0x264
+func_001357F0	CompareEntriesByAttachedKey	sort comparator: an entry whose object is not attached sorts first, otherwise ordered by the key field
+func_00135858	CompareEntriesFlaggedLast	sort comparator: an entry whose object has a non-zero GetNumberedItemFlag orders after the other (returns 1 if a is flagged, -1 if b is), else by key
+func_00135E78	ReleasePanelEntries	when the state differs, releases the handle of each of the panel's counted entries (clearing blockB, or with another call when flag is 0), zeroes the counts and blockA and stores the new state at +0x328
+func_00135F48	RefreshPanelEntries	when the button mask from func_00160D10 does not include the flag it releases the entries, else sets state 1 and adds two entries from fields 0x1D44 and 0x1D54 of the world context
+func_00136040	UpdatePanelStick	slot 4 of the panel table: in state 1 clamps the pad axes, eases stickX and stickY toward them 50 times scaled with func_001EA818 and moves +0x314, in state 5 sets stickY to 50; then RefreshPanelEntries
+func_00136238	SetTextPanelOpen	slot 3 of the panel table: opens or closes it, setting palette 0, mode 2 or 0 and restoring or releasing the entries (bank) around it
+func_001363D0	ResetTextPanel	slot 5 of the panel table: runs ResetScreenElement and then func_00150790 on the child with 2
+func_00136408	SetTextPanelText	slot 8 of the panel table: copies the text, lays it out with the font at width 280 (380 in state 4), records the index of each line break in lineBreaks and stamps textSince
+func_00136530	IsTextPanelTextTyped	true when the text is empty or (clock - textSince) * charsPerSecond has reached the text's character count
+func_001365A8	SetTextPanelValuePercent	stores its argument divided by 100 clamped to 0..1 in the value at +0x300
+func_001365F0	GetTextPanelSlideInTime	slot 11 of the panel table: 0 in states 1, 2 and 5, otherwise the base slide-in time
+func_00136648	GetTextPanelSlideOutTime	the twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise GetScreenElementSlideOutTime
+func_001366A0	DrawTextPanel	original assembly; slot 9 of D_0021A440, the draw slot (DrawScreenElementText, DrawPauseMenu): reads and counts the panel's text, pushes its font scale and draws through func_00132500
+func_00136EC8	GetTextPanelCenter	returns the panel's stick position plus (320, 180.4)
+func_00136EF8	ChooseTextPanelState	slot 6 of the panel table: with a child, sets state 2, 3 or 4 by the child's mode at +0x2D0 and calls func_00150790 with 3; without one sets state 1
+func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanelState: with a child it sets the child's step sequence to state 4, without one it puts the panel back in state 0 (SetTextPanelState)

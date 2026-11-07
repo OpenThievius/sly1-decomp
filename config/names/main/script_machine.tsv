@@ -1,0 +1,160 @@
+symbol	name	evidence
+func_00112698	AddScriptValues	built-in (original assembly): sums its arguments by tag, ints and floats with add.s, 16-byte vectors with vadd, matrices element by element, and returns an int, float, vector or matrix
+func_00112968	SubtractScriptValues	built-in (original assembly): the same shape as AddScriptValues with sub.s and vsub: subtracts the later arguments from the first by tag
+func_00112C38	MultiplyScriptValues	built-in (original assembly): multiplies its arguments by tag: numbers with mul.s, a vector by a number (vmulx, func_00118D30), matrices with MultiplyMatrices, into vector, pair or matrix payloads
+func_00113240	DivideScriptValues	built-in (original assembly): divides the first argument by the others by tag with div.s, a vector or matrix by a number through its reciprocal
+func_00113820	TestScriptWordsEqual	builtin: returns a bool value that is args[0].i == args[1].i
+func_00113888	CompareScriptNumbers	converts the two arguments to floats (tag 0x15 as is, others from the int) and returns a bool of <, <=, > or >= by mode 0..3
+func_001139E8	TestScriptLess	builtin: calls func_00113888 with mode 0 (first < second)
+func_00113A18	TestScriptLessOrEqual	builtin: calls func_00113888 with mode 1 (first <= second)
+func_00113A48	TestScriptGreater	builtin: calls func_00113888 with mode 2 (first > second)
+func_00113A78	TestScriptGreaterOrEqual	builtin: calls func_00113888 with mode 3 (first >= second)
+func_00113AA8	TestScriptValuesIdentical	bool of equal tags and, for the word-carrying tags (20, 27..33), equal words; the operator tags compare equal; func_001194A8 (the case form) uses it per key
+func_00113B60	CompareScriptValues	deep equality of two values: same tag, then chains (tag 30) and closure records (31) element by element, hosts (33) by self and fn, plain words by value; func_00113E48 and func_001149F0 call it
+func_00113E48	TestScriptEqual	builtin: returns CompareScriptValues of its two arguments
+func_00113E78	IsScriptBool	builtin: bool of args[0].tag == 0x1B
+func_00113EE0	IsScriptNumber	builtin: bool of tag 0x14 or 0x15 (int or float)
+func_00113F48	IsScriptFloat	builtin: bool of args[0].tag == 0x15
+func_00113FB0	IsScriptInt	builtin: bool of args[0].tag == 0x14
+func_00114018	IsScriptPointer	builtin: bool of args->tag == 0x1C
+func_00114080	IsScriptVector	builtin: bool of args->tag == 0x16 (the pooled vector made from three floats by func_00115440)
+func_001140E8	IsScriptMatrix	builtin: bool of args->tag == 0x17 (the 0x40-byte block func_00115510 builds)
+func_00114150	IsScriptVector4	builtin: bool of args->tag == 0x18 (the vector func_00116EA8 builds from four floats)
+func_001141B8	IsScriptFloatPair	builtin: bool of args->tag == 0x19 (two floats, built by func_001157E0)
+func_00114220	IsScriptFloatTriple	builtin: bool of args->tag == 0x1A (three floats, built by func_001158B8)
+func_00114288	IsScriptList	builtin: bool of tag 0x1E (a chain) or 0 (the empty list)
+func_00114300	IsScriptEmptyList	builtin: bool of args->tag == 0
+func_00114360	IsScriptRef	builtin: bool of args->tag == 0x20 (an object pointer value, as func_00117AF0 builds)
+func_001143C8	IsScriptNullRef	builtin: bool, true only for a tag 0x20 value whose pointer is 0
+func_00114438	IsScriptHostFunction	builtin: bool of args[0].tag == 0x21 (the host-function tag func_00119BB0 calls through)
+func_001144A0	IsScriptFunction	builtin: bool of tag 0x1F (closure record) or 0x1D (table index of a built-in), the two kinds func_00119BB0 calls
+func_00114518	TestScriptNearlyEqual	builtin: converts three int or float arguments to floats, calls func_001EAC68 (compare with epsilon, as the callers use it with 1e-4) and returns the result as a bool
+func_001145C8	IsScriptFalse	builtin: bool, true for a tag 0x1B value whose word is 0
+func_00114638	PrependScriptListItem	builtin: takes a node from the node pool, copies args[0] into it, links it before the chain of args[1] (or nothing for the empty list) and returns it as a chain
+func_001146E0	GetScriptListHead	builtin: assigns the first node's value (args->node) to the result
+func_00114740	GetScriptListTail	builtin: returns the chain after the first node, or the empty list (tag 0) when there is none
+func_001147B8	SetScriptListCell	sets the value of args[0]'s first node (mode 0x23) or replaces its next link with args[1]'s chain or nothing (other mode), returns the empty result
+func_00114858	SetScriptListHead	builtin: calls func_001147B8 with mode 0x23 (overwrite the first node's value)
+func_00114888	SetScriptListTail	builtin: calls func_001147B8 with mode 0x24 (replace the link to the rest of the chain)
+func_001148B8	GetScriptListLength	builtin: counts the nodes of a tag 0x1E chain and returns the int
+func_00114950	GetScriptListItem	builtin: walks the chain of args[0] i times where i is args[1].i and returns that node's value (empty list when out of range)
+func_001149F0	TestScriptListContains	builtin: compares args[0] with each node of the chain of args[1] through func_00113E48 and returns true on the first bool true
+func_00114B80	ReturnScriptArgument	builtin: copies args[0] into the result unchanged
+func_00114D18	MapScriptList	builtin: builds a call expression from args[0] and a placeholder for each element of args[1]'s chain, evaluates it per element with func_0011A080 and collects the results in a new chain
+func_00114F48	FilterScriptList	builtin: same per-element evaluation as func_00114D18 but links only the elements whose result is a true bool into a new chain
+func_001151C0	ForEachScriptListItem	builtin: evaluates args[0] applied to each element of args[1]'s chain for its effect and returns the empty result (tag 0x22)
+func_00115398	EvalScriptArgument	builtin: copies args[0] into a pool node and evaluates it as an expression with func_0011A080 in the caller's scope
+func_00115440	MakeScriptVector	builtin: converts three arguments to floats (func_0011B9A8) into a pooled 16-byte block (func_0011C508) and returns it as tag 0x16
+func_00115510	MakeScriptMatrix	builtin: fills the pooled 0x40-byte block of tag 0x17 from 3 or 4 vectors, or from 9 or 16 floats (3x3 or 4x4 with func_001884C0 on the 9 case)
+func_001156B0	SetScriptVoiceParam	builtin: passes its two int arguments to SetCachedVoiceParam and returns the unit tag
+func_00115710	MakeScriptVector4FromThree	builtin: converts three arguments to floats into a pooled block (func_0011C748) and returns it as tag 0x18
+func_001157E0	MakeScriptFloatPair	builtin: converts two arguments to floats into the pooled block of func_0011C858 and returns it as tag 0x19
+func_001158B8	MakeScriptFloatTriple	builtin: converts three arguments to floats into the pooled block of func_0011C968 and returns it as tag 0x1A
+func_001159B8	GetScriptVectorElement	builtin: indexes a tag 0x16/0x18 vector, a tag 0x17 matrix (a row, or a row and column), or the floats of tags 0x19 and 0x1A by the index chain args[1]
+func_00115B78	SetScriptRandomSeed	builtin: passes its int or float argument to func_001F66F8, which stores the seed at +0x58 of the random state record, and returns the unit tag 0x22
+func_00115C00	GetScriptRandomFloat	builtin: converts two int or float arguments to floats and returns RandomFloatInRange of them
+func_00115CA0	CallScriptMathFunction	converts the argument to a float and calls D_00259938[index] on it, returning the float result; the eight wrappers func_00115D48..func_00115E98 pass index 0..7
+func_00115D48	GetScriptSquareRoot	builtin: CallScriptMathFunction with index 0, g_scriptMathFunctions[0] being the math library's checked float square root func_00206180
+func_00115D78	GetScriptSine	builtin: CallScriptMathFunction with index 1, the float sine func_00205400
+func_00115DA8	GetScriptCosine	builtin: CallScriptMathFunction with index 2, the float cosine func_00205210
+func_00115DD8	GetScriptTangent	builtin: CallScriptMathFunction with index 3, the float tangent func_002054F0
+func_00115E08	GetScriptArcSine	builtin: CallScriptMathFunction with index 4, the checked float arcsine func_00205678
+func_00115E38	GetScriptArcCosine	builtin: CallScriptMathFunction with index 5, the checked float arccosine func_00205578
+func_00115E68	GetScriptArcTangent	builtin: CallScriptMathFunction with index 6, the float arctangent func_00204F68
+func_00115E98	WrapScriptAngle	builtin: CallScriptMathFunction with index 7, g_scriptMathFunctions[7] being WrapAngle
+func_00115EC8	GetScriptAtan2	builtin: converts two arguments to floats and returns func_00205778 (atan2) of them as a script float
+func_00115F70	GetScriptDotProduct	built-in (original assembly): the dot product of its two vector arguments (vmul.xyz, then the three components summed), returned as a float
+func_00115FF8	GetScriptCrossProduct	built-in (original assembly): the cross product of its two vector arguments (vopmula/vopmsub) in a new vector payload
+func_00116080	GetScriptVectorLength	built-in (original assembly): the square root (vsqrt) of the vector argument's dot product with itself, returned as a float
+func_00116108	GetScriptDistance	built-in (original assembly): the length of the difference of its two vector arguments, or of the first from the zero vector D_00248D30 when only one is given
+func_001161F8	GetScriptDistanceSquared	built-in (original assembly): GetScriptDistance without the square root: the squared length of the difference of its vectors
+func_001162D0	NormalizeScriptVector	built-in (original assembly): divides the vector argument by its length into a new vector payload, unless the length is below 0.0001
+func_00116400	ProjectScriptVector	built-in (original assembly): the second vector scaled by its dot product with the first (vmul, vmulx), in a new vector payload
+func_00116490	RemoveScriptVectorComponent	built-in (original assembly): the first vector minus its component along the second (the second scaled by their dot product), in a new vector payload
+func_001166C0	TransposeScriptMatrix	builtin: allocates a matrix payload, fills it with CopyTransposedMatrix of the argument and returns it
+func_00116740	InvertScriptMatrix	builtin: allocates a matrix payload, fills it with InvertMatrix4x4 of the argument and returns it
+func_001167C0	TransformScriptMatrixByObject	built-in: TransformMatrixByObject with the two arguments into a new matrix payload, returned as a script matrix
+func_00116978	GetScriptMatrixTranslation	builtin: copies the quadword at +0x30 of the matrix argument (its fourth row) into a new vector payload and returns it
+func_001169E8	GetScriptMatrixRotation	builtin: copies the matrix argument into a new matrix payload and clears its translation with func_001884C0 (zero w column, fourth row 0 0 0 1)
+func_00116A88	GetScriptMatrixEuler	builtin: returns MatrixToEulerAngles of its matrix argument as a vector
+func_00116BC8	MakeScriptDirectionMatrix	built-in (original assembly): a matrix payload built by func_00189C28 from the difference of its two vector arguments and an up vector (the third argument, else g_unitZVector), reset with ResetMatrixHomogeneous
+func_00116D20	EvalScriptQuadratic	builtin: with a tag 0x1A triple (a, b, c) and a float t returns a + t * (b + t * c)
+func_00116DC8	EvalScriptClampedQuadratic	builtin: evaluates the quadratic of a triple at a float and clamps the result to the low and high of a pair
+func_00116EA8	MakeScriptVector4FromFour	builtin: converts four arguments to floats and passes x, y, z, w to func_001EB018 to fill a pooled block returned as tag 0x18
+func_00116FE8	ClampScriptToRange	builtin: returns ClampToRange(range argument, float argument) as a script float
+func_00117080	TestScriptInsideRange	builtin: returns IsInsideRange(range argument, float argument) as a script bool
+func_00117118	ConvertScriptFloatToInt	builtin: returns its float argument cast to an int (truncated toward zero)
+func_00117180	RoundScriptFloatUp	builtin: returns (int)(argument + 1.0), the int above a positive float
+func_001171F0	RoundScriptFloat	builtin: returns the int (s32)(args->f + 0.5)
+func_00117260	TruncateScriptFloat	builtin: returns the int (s32)args->f
+func_001172C8	GetScriptAbsolute	builtin: the absolute value of an int (tag 20) or a float argument, in the same type
+func_00117360	GetScriptMaximum	builtin: keeps the largest of args[0] and every element of the chain args[1], comparing ints and floats across types
+func_00117478	GetScriptMinimum	builtin: keeps the smallest of args[0] and every element of the chain args[1], comparing ints and floats across types
+func_00117598	GetScriptRemainder	builtin: returns the int args[0].i % args[1].i
+func_00117610	GetScriptClock	builtin: returns the float D_0026185C, the game clock other functions stamp their state changes with
+func_00117910	DispatchScriptObjectProperty	builtin core: switch on kind 0x63..0x66 calling AddObjectProperty, SetExtraObjectProperty, UpdateObjectProperty or GetObjectProperty with the first two int arguments
+func_00117A30	AddScriptObjectProperty	builtin: calls func_00117910 with kind 0x63, which selects AddObjectProperty
+func_00117A60	SetScriptExtraObjectProperty	builtin: calls func_00117910 with kind 0x64, which selects SetExtraObjectProperty
+func_00117A90	UpdateScriptObjectProperty	builtin: calls func_00117910 with kind 0x65, which selects UpdateObjectProperty
+func_00117AC0	GetScriptObjectProperty	builtin: calls func_00117910 with kind 0x66, which selects GetObjectProperty
+func_00117AF0	MakeScriptRefList	builds a chain with one tag 0x20 pointer node per entry of an array of count pointers, or the empty list when count is 0; the object-search built-ins use it
+func_00117BC8	FindScriptObject	builtin: looks an object up by id args[0].i with func_0015A418 on D_00275710 (the same call ResolveObjectLinks uses) and returns it as a tag 0x20 pointer
+func_00117C48	FindScriptObjectList	builtin: fills a 0x40-entry buffer with func_0015A198 on D_00275710 from args[0].i and returns it as a chain of pointers through func_00117AF0
+func_00117D00	FindScriptObjectById	builtin: returns FindFirstObjectById(current world, 0x104, arg0, arg1) as a script pointer
+func_00117D78	FindScriptObjectListById	builtin: the list twin of FindScriptObjectById: func_0015A198 on the world with kind 0x104 into a 0x40-entry buffer, returned through MakeScriptRefList
+func_00117E20	GetScriptControlledObject	builtin: returns func_001925F0() (the controlled object SelectAgentTarget falls back to) as a tag 0x20 pointer
+func_00117E78	GetScriptWorld	builtin: returns D_00275710 as a tag 0x20 pointer
+func_00117ED0	GetScriptTracker	builtin: returns D_00261990 (the tracker SetPlayerTracked registers with) as a tag 0x20 pointer
+func_00117F28	GatherScriptObjectsById	builtin: GatherObjectsById on the current world (0x101 or 0x105 by arg1) into a 0x100 buffer, returned as a script reference list
+func_00118198	SearchScriptObjectHits	walks the chain args[0], tests each object with func_001419E8 and, for id 0x71, collects every hit as (object, vector, vector) triples in a chain, otherwise returns the first hit as (object, vector)
+func_001183B8	CollectScriptObjectHits	builtin: calls func_00118198 with id 0x71 (every hit)
+func_00118458	FindScriptObjectHit	builtin: calls func_00118198 with id 0x72 (the first hit only)
+func_001184F8	TransformScriptPointBetweenFrames	builtin: calls func_00128018 (the position frame conversion ReparentObjectKeepingTransform uses) into a vector payload
+func_00118580	TransformScriptDirectionBetweenFrames	builtin: calls func_001280C0 (the frame conversion ReparentCollider applies to its anchor vectors) into a vector payload, as TransformScriptPointBetweenFrames does with func_00128018
+func_00118608	TransformScriptRotationBetweenFrames	builtin: calls func_00128150 (the rotation frame conversion) into a matrix payload and returns it
+func_00118720	StartScriptEffect	builtin: calls func_001BFCD8 (the effect start SetObjectCyclerHandle uses) with args[0], keeps the handle in a local, returns it as an int and releases it with func_001BF718 when non-zero
+func_001187E8	StopScriptEffect	builtin: calls func_001BF788(args[0].p, 0), the effect stop SetObjectCyclerHandle uses, and returns the empty result
+func_00118850	StartScriptPadRecordPattern	builtin: calls StartPadRecordPattern on the pad record with an int and a float argument and returns an empty value
+func_001188F0	SendScriptPointEventToWorldListener	built-in: an object and a float argument forwarded to SendPointEventToWorldListener, empty result
+func_00118D10	CopyQuadword	copies one 128-bit value from src into out and returns out
+func_00118D20	StoreQuadword	stores a 128-bit value passed by value into out and returns out
+func_00118D30	ScaleQuadword	original assembly: multiplies the 16-byte vector in its second argument by the x of its first (vmulx) and returns the quadword; MultiplyScriptValues calls it
+func_00118D48	EvalScriptVariable	evaluator case for expression tag 28: looks the name expr->i up through the scope chain (func_0011A498 with flag 1) and returns the value
+func_00118DB8	EvalScriptAssign	evaluator form 1: evaluates the value expression, then stores it in the existing variable found through the scope chain (func_0011A400)
+func_00118E80	EvalScriptDefine	evaluator form 2: evaluates the value expression, then adds a new variable at the head of the current scope (func_0011A358)
+func_00118F48	EvalScriptAssert	evaluator form 5: evaluates a condition and, when it is 0, prints the string D_00249200 through func_001E1F10 and calls func_00113730; returns the empty result
+func_00119030	EvalScriptIf	evaluator form 6: evaluates the first expression; when it equals 1 evaluates the second, otherwise the third if present, else returns the empty result
+func_00119128	EvalScriptOr	evaluator form 7: evaluates the expressions in turn and returns the first value that is not a false bool, or false
+func_00119218	EvalScriptAnd	evaluator form 8: starts from true, evaluates the expressions in turn and stops at the first false bool, returning the last value
+func_00119310	EvalScriptCond	evaluator form 9: for each clause evaluates its test (a clause tagged 10 always matches) and on the first non-false runs the rest of the clause, returning its last value
+func_001194A8	EvalScriptCase	evaluator form 11: evaluates a key, then finds the first clause (tag 10 always matches) listing a key that func_00113AA8 calls identical and runs the clause's body
+func_001196C8	EvalScriptLet	evaluator form 12: if the first element is a chain of (name value) pairs, makes a new scope with those names defined (func_0011A358) and parented to the current one, then evaluates the remaining expressions in it
+func_00119878	EvalScriptWhile	evaluator form 13: loops evaluating the first expression and, while it is not a false bool, the second; returns the empty result
+func_00119970	EvalScriptLambda	evaluator form 14: makes a tag 0x1F record holding the scope, the parameter chain, its length and whether a tag 0x13 (rest marker) is present, and the body; func_00119BB0 later calls it
+func_00119A58	EvalScriptBody	evaluates every expression of a chain in a scope and returns the last value; func_00119BB0 runs a closure's body through it
+func_00119AF8	EvalScriptSequence	evaluator form 15: evaluates the expressions after the first in order, returning the last, or the empty result when there are none
+func_00119BB0	EvalScriptCall	evaluator default case: evaluates the function expression, then the arguments (collecting the rest into a chain when the callee takes them), and calls a built-in from D_00259958, a closure (new scope, binds parameters, runs body) or a host function
+func_00119FA0	EvalScriptImportScope	evaluator form 16: finds the scope for an id on D_00275710 with func_001C1390 (creating it with func_001C13E8 when missing) and adds it as a parent of the current scope
+func_0011A080	EvalScriptExpression	the evaluator: copies literal tags, looks up variables (28) and dispatches a chain (30) on its first node's tag to the EvalScript forms, calling func_00119BB0 for any other
+func_0011A328	SetScriptScopeParent	sets the parent list to the one given scope and count to 1
+func_0011A338	AddScriptScopeParent	appends a scope to the parent list and bumps the count
+func_0011A358	DefineScriptVariable	takes a keyed value from the pool (func_0011C498), sets key and value and pushes it at the head of the scope's list
+func_0011A400	AssignScriptVariable	finds the key through the scope chain with func_0011A4D8 (flag 1) and overwrites its value if found
+func_0011A498	LookupScriptVariable	calls func_0011A4D8 and, when found, copies the value into out and returns 1, else 0
+func_0011A4D8	FindScriptVariable	searches the scope's own list for the key, then (with flag) each parent scope not already being searched (busy flag), returning the value slot or 0
+func_0011A5B0	CopyScriptScope	copies the parent count and list and duplicates the keyed-value list with func_0011C418
+func_0011A630	NewScriptScope	takes an entry from the scope pool D_0025C270 and clears its 0x1C bytes
+func_0011A670	ReleaseScriptScope	the empty removeCallback of the scope pool D_0025C270
+func_0011A6A8	ResetMarkRoots	sets both root counts of the collector state D_00259F38 (offsets 0x0 and 0x504) to 0; value.cpp calls it
+func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
+func_0011A6C0	AddUniqueMarkRoot	appends a value to the root list at 0 of D_00259F38 unless already in it; the scope creator passes the new scope to it
+func_0011A708	AddMarkRootList	appends a value to the second root list (count at 0x504) of D_00259F38; callers pass a new keyed-value list from func_0011BF30
+func_0011A728	PushMarkObject	pushes a value on the stack at 0x708 (count at 0x708, items from 0x70C); func_0011A850 pushes marked objects on it
+func_0011A748	PopMarkObject	pops from the stack at 0x708, returning 0 when empty
+func_0011A770	PushMarkChain	pushes a value on the stack at 0xF0C; the tag 0x1E payloads are pushed on it
+func_0011A790	PopMarkChain	pops from the stack at 0xF0C, returning 0 when empty
+func_0011A7B8	PushMarkRecord	pushes a value on the stack at 0x1310; the tag 0x1F payloads are pushed on it
+func_0011A7D8	PopMarkRecord	pops from the stack at 0x1310, returning 0 when empty
+func_0011A800	MarkPoolLiveEnds	calls func_0011C2A0 (MarkPoolLiveEnd) on each of the five pools D_0025C250..D_0025C2D0
+func_0011A850	DrainMarkStacks	pops the three stacks until empty, marking (func_0011C3C8 / func_0011C3F0) what each entry holds and pushing newly found entries back on their stacks
+func_0011AB58	CollectScriptPools	clears the pools' live states (func_0011C2B0), marks everything reachable from the root lists and the object table at D_00275710+0x1EC8, drains the stacks, then releases the unmarked entries (func_0011C2E8)

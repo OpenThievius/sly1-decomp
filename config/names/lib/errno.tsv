@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_002014F0	GetErrorNumberAddress	returns the C library's state record, whose first word is the error number (errno.c)

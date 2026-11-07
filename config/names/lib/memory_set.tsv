@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001F5C0C	FillMemory	sets size bytes at p to value (memory_set.cpp; the compiler clears aggregates with it, config/us/libcalls.tsv, and 138 functions call it)
