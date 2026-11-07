@@ -3783,7 +3783,6 @@ extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
 extern const char D_0024EB78[3][8] = {"....", "....", "all"};
-extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
 extern const char D_0024F5F8[40] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
 extern const char D_0024F620[24] = "Libcdvd bind err N CMD\n";
 extern const char D_0024F658[40] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";
@@ -3795,9 +3794,6 @@ extern const char D_0024F6D8[32] = "Libcdvd bind err CdDiskReady\n";
 extern const char D_0024F6F8[24] = "DiskReady ended\n";
 extern const char D_0024F710[24] = "call cdread cmd\n";
 extern const char D_0024F728[16] = "cdread end\n";
-extern const char D_0024F738[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
-extern const char D_0024F7D0[48] = "libpad: buffer addr is not 64 byte align. %08x\n";
-extern const char D_0024F800[144] = "libpad: pad port is already open [%d][%d]\n\000\000\000\000\000\000ERROR\000\000\000STABLE\000\000EXECCMD\000FINDCTP1\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000DISCONNECT\000\000\000\000\000\000BUSY\000\000\000\000FAILED\000\000COMPLETE";
 extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
 
 // Globals typed by worker dv03, from retail's bytes and their readers.

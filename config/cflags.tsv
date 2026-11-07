@@ -19,7 +19,6 @@ src/lib/soft_float_single.c	-O2 -G0	2.9-ee-991111-01
 src/lib/unwind.c	-O2 -G0	2.9-ee-991111-01
 src/lib/throw.c	-O2 -G0 -fexceptions	2.9-ee-991111-01
 src/lib/00200000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
-src/lib/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/0020C000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/00210000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/double_to_u64.c	-O2 -G0	2.9-ee-991111-01
@@ -87,3 +86,11 @@ src/lib/file_20A190.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20D138.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20ADA0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20C1A0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/abort.c	-O2 -G0	2.9-ee-991111-01
+src/lib/errno.c	-O2 -G0	2.9-ee-991111-01
+src/lib/signal.c	-O2 -G0	2.9-ee-991111-01
+src/lib/signal_calls.c	-O2 -G0	2.9-ee-991111-01
+src/lib/strncpy.c	-O2 -G0	2.9-ee-991111-01
+src/lib/pad.c	-O2 -G0	2.9-ee-991111
+src/lib/graph.c	-O2 -G0	2.9-ee-991111
+src/lib/dma.c	-O2 -G0	2.9-ee-991111

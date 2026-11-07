@@ -146,3 +146,11 @@ src/lib/file_20A190.cpp	0020A190	0020ADA0	00250028	0027AED0	-	-
 src/lib/file_20D138.cpp	0020D138	0020DEE8	-	-	-	-
 src/lib/file_20ADA0.cpp	0020ADA0	0020C1A0	00250070	0027AF70	-	-
 src/lib/file_20C1A0.cpp	0020C1A0	0020D138	00250260	0027B000	-	-
+src/lib/abort.c	002014D0	002014F0	-	-	-	-
+src/lib/errno.c	002014F0	00201500	-	-	-	-
+src/lib/signal.c	00201500	002016A0	-	-	-	-
+src/lib/signal_calls.c	002016A0	00201720	-	-	-	-
+src/lib/strncpy.c	00201720	002018E0	-	-	-	-
+src/lib/pad.c	00203FD0	00204F68	0024F738	0027AE70	0062AA80	-
+src/lib/graph.c	002018E0	00202768	0024F4E0	00279300	-	-
+src/lib/dma.c	00202768	00202D08	0024F548	00279340	-	-

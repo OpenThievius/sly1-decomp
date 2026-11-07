@@ -126,3 +126,24 @@ D_00250008 = 0x00250008;
 // The MPEG library's identification string, which no code reads, inside a coarse label
 // (D_0027AED0): the end of the demultiplexer's stream table and of its file's .data.
 D_0027AF70 = 0x0027AF70;
+// The pad library's file (src/lib/pad.c): its .data starts with its identification string
+// inside the label of the CD library's last buffer (D_0027AE48), holds two tables of state
+// names and a word no code reads, and ends where the memory card library's string begins; its
+// .rodata ends with those tables' strings, which no code reads, before the math library's. Its
+// second message (0x24F758) has no reader either: a stripped function's.
+D_0024F758 = 0x0024F758;
+D_0024F830 = 0x0024F830;
+D_0027AE70 = 0x0027AE70;
+D_0027AE88 = 0x0027AE88;
+D_0027AEA8 = 0x0027AEA8;
+D_0027AEB4 = 0x0027AEB4;
+// The graphics library's identification string (src/lib/graph.c's .data), inside the label of
+// the VIF1 words before it, which no code reads.
+D_00279320 = 0x00279320;
+// The end of the DMA library's .data (src/lib/dma.c): its last settings (D_002793D8, 0x14
+// bytes) end at 0x2793EC; after the padding to 16, 16 zero bytes no code reads, then the CD
+// library's identification string; its .rodata (one message) is followed by the CD library's
+// messages, which no code reads.
+D_002793F0 = 0x002793F0;
+D_00279400 = 0x00279400;
+D_0024F560 = 0x0024F560;
