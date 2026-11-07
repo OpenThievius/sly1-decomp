@@ -26,7 +26,9 @@ struct C62 : PlacedObject {
     s32 id2E0;              // 0x2E0: -1 for none
     s32 f2E4;               // 0x2E4
     u8 f2E8[1];             // 0x2E8
-    u8 pad2E9[0x330 - 0x2E9];
+    u8 pad2E9[0x328 - 0x2E9];
+    void* group;            // 0x328: the record of the ones sharing id2E0 (func_001CB8B8), whose timeouts an agent schedules
+    u8 pad32C[0x330 - 0x32C];
 };
 
 typedef char check_C62[sizeof(C62) == 0x330 ? 1 : -1];

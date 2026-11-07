@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "shapes.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
 #include "globals.h"
 #include "item_keeper.h"
+#include "flag_table.h"
+#include "node_query.h"
 #include "c62.h"
 #include "animation.h"
 #include "attachment.h"
@@ -50,8 +53,7 @@ PaddedQuadratic D_00274D30 = { { 0.800000012f, 1.20000005f, 0.0f } };
 
 extern u8 D_00261420[];
 void func_001C4458(TurningCollider* self);
-struct Tbl_1C6F48;
-s32 func_00140FF8(Tbl_1C6F48* p);
+s32 func_00140FF8(FlagTable* p);
 void func_00192990(Agent* self, s32 a);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
@@ -75,7 +77,7 @@ void func_001C6F48(Agent* self)
     s32 m = -1;
     for (i = 16; i >= 0; i--) F(s32, 0x870 + i * 8) = m;
     f32 one = 1.0f;
-    s32 r = TakeFlagTableIndex((Tbl_1C6F48*)g_flagTable);
+    s32 r = TakeFlagTableIndex((FlagTable*)g_flagTable);
     s32 s1 = 1;
     s32 s0 = -1;
     F(s32, 0xB10) = r;
@@ -154,15 +156,11 @@ void func_001C71E0(Agent* self)
     }
 }
 
-typedef s32 (*VFn_1C7278)(void* self);
-struct Obj_1C7278 { VFn_1C7278* vtbl; };
-
-s32 func_001C7278(Obj_1C7278* self)
+void func_001C7278(Agent* self)
 {
-    return self->vtbl[7](self);
+    self->desc->m03(self);
 }
 
-typedef void (*VFnSelf_1C72A0)(void* self, void* item, s32 flag);
 void func_001C44F0(TurningCollider* self);
 void* func_001CB5B8(void* host);
 void func_001CB648(void* a, void* b);
@@ -191,7 +189,7 @@ void func_001C72A0(Agent* self)
         if (item != 0) {
             self->f6DC = item;
             self->f8F8 = item;
-            ((VFnSelf_1C72A0*)self->desc)[0x38](self, item, 1);
+            self->desc03()->m34(self, item, 1);
             break;
         }
     }
@@ -307,7 +305,6 @@ void func_001C7AE0(Agent* self, f32 x, f32 y)
     }
 }
 
-typedef s32 (*VFn_C7B60)(void* self);
 void func_001C8F20(Agent* self, s32 a1, s32 a2);
 
 void func_001C7B60(Agent* self)
@@ -316,7 +313,7 @@ void func_001C7B60(Agent* self)
     if (self->fB88 != 0) return;
     if (g_player != 0 && g_player->f275C != 0) return;
     for (;;) {
-        s32 v = ((VFn_C7B60*)self->desc)[0x174 / 4](self);
+        s32 v = self->desc08()->m59(self);
         if (v == self->f724) break;
         ChangeAgentState(self, v, 0);
     }
@@ -575,20 +572,18 @@ s32 func_001C84C0(Agent* self)
     return result;
 }
 
-struct Inner_1C84E8 { u8 pad[8]; u32 flags; };
-struct Obj_1C84E8 { Inner_1C84E8* inner; u8 pad0[0x50 - 4]; void* p50; u8 pad1[0x360 - 0x54]; f32 f360; u8 pad2[0x538 - 0x364]; u64 f538; };
 
 s32 func_001300E8(void* node, s32 kind);
 
-s32 func_001C84E8(void* unused, Obj_1C84E8* self)
+s32 func_001C84E8(void* unused, Collider* self)
 {
-    if ((self->f538 & (1ULL << 43)) != 0) {
-        if ((self->inner->flags & 0x80) == 0)
+    if ((self->flags538 & (1ULL << 43)) != 0) {
+        if ((self->desc->flags & 0x80) == 0)
             return 0;
         if (self->f360 == 0.0f)
             return 0;
     }
-    if (IsObjectOfKind(self->p50, 5) != 0 || IsObjectOfKind(self->p50, 0x40) != 0 || IsObjectOfKind(self->p50, 0x41) != 0)
+    if (IsObjectOfKind(self->root, 5) != 0 || IsObjectOfKind(self->root, 0x40) != 0 || IsObjectOfKind(self->root, 0x41) != 0)
         return 0;
     return 1;
 }
@@ -610,26 +605,24 @@ void func_001C8BC0(Agent* self)
     SetAgentFacingAngles(self, x, y);
 }
 
-struct __attribute__((aligned(16))) Quad_1C8C08 { s32 a, b, c, d; };
 struct Tgt_1C8C08;
 typedef void (*TFn_1C8C08)(Tgt_1C8C08* t, Agent* s, f32 x, f32 y, s32 z, void* out, s32 w);
 struct Tgt_1C8C08 { TFn_1C8C08* vtbl; };
 struct Res_1C8C08 { s32 pad0; Tgt_1C8C08* t; };
-typedef s32 (*VFn_1C8C08)(Agent* s);
 void func_001C8418(Agent* self, void* p);
 void func_0012C9E8(f32 c, void* a, Agent* b, void* d, void* e, void* f, s32 g);
 Res_1C8C08* func_0012CCE8(void* a, Agent* b);
 
 void func_001C8C08(Agent* self, s32 flag)
 {
-    Quad_1C8C08 q;
+    Vec02 q;
     switch (self->f724) {
     case 7:
     case 10:
     case 12:
     case 13:
     case 14: {
-        s32 v = ((VFn_1C8C08*)self->desc)[0x198 / 4](self);
+        void* v = self->desc08()->m62(self);
         if (v != 0) func_001C8418(self, (u8*)v + 0x140);
         break;
     }
@@ -649,7 +642,7 @@ void func_001C8C08(Agent* self, s32 flag)
                 }
                 self->f91C = 1.0f;
             } else {
-                q = (*(Quad_1C8C08*)&self->v190);
+                q = self->v190;
             }
             func_001C8418(self, &q);
         }
@@ -662,27 +655,20 @@ void func_001C8C08(Agent* self, s32 flag)
 
 void func_001C8D40(Agent* self, s32* out) { if (self->fA60 && self->f930 >= self->f92C - 2) { *out = 1; return; } *out = 0; }
 
-struct Sub_1C8D78 {
-    u8 pad0[0x8];
-    s32 f8;
-    u8 pad1[0x2D0];
-    void* f2DC;
-};
-
 void func_0012C288(void* self, void* a1, s32 a2, void* a3, s32 a4, void* a5, f32 f0, f32 f1);
-void func_0012F810(void* a0, Sub_1C8D78* a1);
+void func_0012F810(void* a0, C62* a1);
 s32 func_00183458(Agent* a);
 Attachment* func_0012D570(AnimationPlayer* a0, s32 a1);
 
 void func_001C8D78(Agent* self)
 {
-    Sub_1C8D78* sub = ((Sub_1C8D78*)self->fA74);
-    if (sub->f2DC != 0) {
+    C62* sub = ((C62*)self->fA74);
+    if (sub->id2DC != 0) {
         s32 pair[2];
-        pair[0] = sub->f8;
+        pair[0] = sub->id;
         pair[1] = (s32)self;
-        CreateAnimationPlayer(sub->f2DC, self, 1, pair, 1, &self->f754, 0.0f, 1.0f);
-        func_0012F810(self->f754, ((Sub_1C8D78*)self->fA74));
+        CreateAnimationPlayer((void*)sub->id2DC, self, 1, pair, 1, &self->f754, 0.0f, 1.0f);
+        func_0012F810(self->f754, ((C62*)self->fA74));
         Attachment* node = FindPlayerAttachmentByOwner(self->f754, GetEffectiveObjectId(self));
         if ((void*)node == self->f1EC) {
             node->mode0 = 5;
@@ -693,7 +679,6 @@ void func_001C8D78(Agent* self)
     }
 }
 
-typedef s32 (*VFn_1C8E28)(Agent*);
 extern f32 D_00261860;
 s32 func_00128230(Agent* self);
 void func_001C7BE8(Agent* self);
@@ -705,7 +690,7 @@ void func_001C8BC0(Agent* self);
 
 void func_001C8E28(Agent* self)
 {
-    ((VFn_1C8E28*)self->desc)[102](self);
+    self->desc08()->m62(self);
     switch (self->f724) {
     case 0:
     case 16:
@@ -724,7 +709,7 @@ void func_001C8E28(Agent* self)
             f32 y = out[1];
             SetAgentFacingAngles(self, out[0], y);
         }
-        ScheduleItemTimeouts(*(void**)(((u8*)self->fA74) + 0x328));
+        ScheduleItemTimeouts(((C62*)self->fA74)->group);
         break;
     case 4:
     case 5:
@@ -740,9 +725,8 @@ void func_001C8E28(Agent* self)
     }
 }
 
-typedef void (*Method0_1C8F20)(void*, s32, void*);
-typedef void (*Method2_1C8F20)(void*, s32, void*);
-struct Frame_1C8F20 { s32* oldSlot; s32* stateSlot; };
+// What a state change tells the script (event 15): the old state and where the new one is.
+struct StateChangeArgs { s32* oldSlot; s32* stateSlot; };
 extern f32 D_00261858[];
 void func_001837E0(void*, s32, s32, void*);
 
@@ -751,11 +735,11 @@ void func_001C8F20(Agent* self, s32 state, void* context)
     self->f72C &= -2;
     if (self->f724 == state) return;
     s32 old = self->f724;
-    ((Method0_1C8F20)self->desc08()->m5B)(self, state, context);
+    self->desc08()->m5B(self, state, context);
     self->f724 = state;
     self->f728 = g_gameClock[1];
-    ((Method2_1C8F20)self->desc08()->m5C)(self, old, context);
-    Frame_1C8F20 frame;
+    self->desc08()->m5C(self, old, context);
+    StateChangeArgs frame;
     frame.oldSlot = &old;
     frame.stateSlot = &self->f724;
     TriggerScriptEvent(self, 15, 2, &frame);
@@ -832,21 +816,6 @@ void func_001C9008(Agent* self, s32 mode)
     }
 }
 
-struct Sub_1C91C8 {
-    u8 pad0[0x2D0];
-    s32 f2D0;
-};
-struct HookVT_1C91C8;
-struct Hook_1C91C8 {
-    HookVT_1C91C8* vt;
-};
-struct HookVT_1C91C8 {
-    u8 pad0[0x70];
-    void (*f70)(Hook_1C91C8* hook, Agent* owner);
-};
-struct Vec_1C91C8 {
-    s32 v[4];
-};
 
 
 void func_001C4D60(Agent* self, Animation* t, s32 z);
@@ -857,8 +826,8 @@ s32 func_0012C7B0(Animation* t, Agent* self, s32 mode, void* out, f32 x, f32 y);
 void func_0012C288(Animation* t, Agent* self, s32 one, s32* p, s32 mode, void* out, f32 x, f32 y);
 s32 func_00183458(Agent* self);
 Attachment* func_0012D570(AnimationPlayer* t, s32 q);
-void func_00128018(Agent* self, s32 z, u8* p, Vec_1C91C8* out);
-void func_00152010(u8* p, Vec_1C91C8* v, s32 a, s32 b);
+void func_00128018(Agent* self, s32 z, u8* p, Quad4* out);
+void func_00152010(u8* p, Quad4* v, s32 a, s32 b);
 void func_00138F28(s32 p, Agent* self);
 void func_0018D608(void);
 void func_0018D6F0(void);
@@ -899,7 +868,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         }
         break;
     case 3:
-        if (((Sub_1C91C8*)self->fA74)->f2D0 == 2) {
+        if (((C62*)self->fA74)->id2D0 == 2) {
             func_001C8D78(self);
         }
         break;
@@ -917,7 +886,7 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
         }
         break;
     case 11: {
-        Vec_1C91C8 vec;
+        Quad4 vec;
         s32 count;
         BaseObject** list;
         func_00128018(self, 0, self->fB60, &vec);
@@ -935,8 +904,8 @@ void func_001C91C8(Agent* self, s32 evt, Animation* arg)
             PopBackMemoryMark();
         }
         SetFlagTableBit(g_flagTable, self->fB10);
-        if (((Hook_1C91C8*)self->fB54) != 0) {
-            ((Hook_1C91C8*)self->fB54)->vt->f70(((Hook_1C91C8*)self->fB54), self);
+        if (((BaseObject*)self->fB54) != 0) {
+            ((BaseObject*)self->fB54)->desc->m18(((BaseObject*)self->fB54), self);
             self->fB54 = 0;
         }
         if (self->fBD4 != 0) {
@@ -1035,32 +1004,30 @@ s32 func_001C96B8(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)
 
 ASM_FUNC(func_001C96D8);
 
-struct Obj_1C9990 { u8 pad00[8]; s32 flags08; };
-struct __attribute__((aligned(16))) Quad_1C9990 { s32 a, b, c, d; };
-struct Req_1C9990 { s32 kind00; Obj_1C9990** ref04; };
-struct Frame_1C9990 { Obj_1C9990** ref00; Agent* self04; u8 pad08[8]; s32 code10; u8 pad14[0x0C]; Quad_1C9990 q20; s32 tail30[4]; };
+// What slot 76 is asked about: a kind and the object concerned.
+struct Req_1C9990 { s32 kind00; BaseObject* ref04; };
 
 void func_001F5C0C(void* p, s32 v, s32 n);
 s32 func_00177838(void* p, s32 a, s32 b);
 
 s32 func_001C9990(Agent* self, Req_1C9990* req)
 {
-    Frame_1C9990 f;
+    NodeQuery f;
 
     if (self->desc05()->m4B(self, req->kind00) != 0) return 0;
     FillMemory(&f, 0, 0x40);
-    f.ref00 = req->ref04;
-    f.self04 = self;
+    f.p00 = req->ref04;
+    f.hold = self;
     if (req->kind00 == 4) {
-        f.code10 = req->kind00;
-    } else if (f.ref00 == 0) {
-        f.code10 = 2;
-    } else if ((*f.ref00)->flags08 & 0x20) {
-        f.code10 = 0x10;
+        f.kind = req->kind00;
+    } else if (f.p00 == 0) {
+        f.kind = 2;
+    } else if (((BaseObject*)f.p00)->desc->flags & 0x20) {
+        f.kind = 0x10;
     } else {
-        f.code10 = 2;
+        f.kind = 2;
     }
-    f.q20 = (*(Quad_1C9990*)&self->v140);
+    f.pos = self->v140;
     return FindNodeForQuery(&f, 0, 0) != 0;
 }
 
@@ -1096,7 +1063,6 @@ void func_001C9A58(Agent* self) {
 
 ASM_FUNC(func_001C9AF8);
 
-struct Inner_001C9CF8 { u8 pad0[0x8]; void* p8; };
 f32 func_0012CCC0(void* obj, s32 id);
 void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
 
@@ -1104,8 +1070,8 @@ void func_001C9CF8(Agent* self)
 {
     self->fB8C = 0;
     self->fA60 = 0;
-    f32 r = func_0012CCC0(((Inner_001C9CF8*)self->f7E0)->p8, 0x1B1);
-    SeekAnimationPlayer(((Inner_001C9CF8*)self->f7E0), 0, r, 1.0f);
+    f32 r = func_0012CCC0(self->f7E0->anim, 0x1B1);
+    SeekAnimationPlayer(self->f7E0, 0, r, 1.0f);
     self->fBA4 = 0;
 }
 
@@ -1319,13 +1285,6 @@ void func_001CA998(Agent* self, s32 index)
     self->f928 = v;
 }
 
-struct Obj_1CAA08 {
-    void* vtbl;
-};
-
-typedef s32 (*VFnA_1CAA08)(void* self);
-typedef void (*VFnB_1CAA08)(void* self, void* arg);
-
 void* func_001925F0(void);
 
 void* func_001CAA08(Agent* self)
@@ -1340,7 +1299,7 @@ void* func_001CAA08(Agent* self)
     }
     void* v = GetActiveSwitchedCollider();
     if (v != 0 && v == s0) {
-        s32 r = ((VFnA_1CAA08*)((Obj_1CAA08*)s0)->vtbl)[81](s0);
+        s32 r = ((SwitchedCollider*)s0)->desc05()->m4D((SwitchedCollider*)s0);
         s0 = (r == 2) ? 0 : s0;
     }
     void* a0 = self->fB54;
@@ -1348,10 +1307,10 @@ void* func_001CAA08(Agent* self)
         return s0;
     }
     if (a0 != 0) {
-        ((VFnB_1CAA08*)((Obj_1CAA08*)a0)->vtbl)[28](a0, self);
+        ((BaseObject*)a0)->desc->m18((BaseObject*)a0, self);
     }
     if (s0 != 0) {
-        ((VFnB_1CAA08*)((Obj_1CAA08*)s0)->vtbl)[27](s0, self);
+        ((BaseObject*)s0)->desc->m17((BaseObject*)s0, self);
     }
     self->fB54 = s0;
     return s0;
@@ -1378,16 +1337,9 @@ void func_001CAC28(Agent* self, s32 value)
     self->fB50 = (void*)value;
 }
 
-typedef s32 (*VFn_1CAC30)(void* self, void* out);
-
-struct Out_1CAC30 {
-    u8 pad0[0x94];
-    f32 f94;
-    f32 f98;
-};
 
 
-void func_001CAC30(Agent* self, Out_1CAC30* out)
+void func_001CAC30(Agent* self, Contact03* out)
 {
     if (self->fC04 != 0) {
         f32 a = D_00274CF4;
@@ -1395,7 +1347,7 @@ void func_001CAC30(Agent* self, Out_1CAC30* out)
         out->f94 = a;
         out->f98 = b;
     } else {
-        if (((VFn_1CAC30*)self->desc)[90](self, out) != 0) {
+        if (((s32 (*)(Agent*, void*))self->desc06()->m56)(self, out) != 0) {
             f32 t = self->fBE8;
             out->f98 = 0.0f;
             out->f94 = t;
@@ -1458,19 +1410,12 @@ void func_001CAD98(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
     }
 }
 
-struct Obj_1CAEE0;
-typedef void (*VFn_1CAEE0)(void* self, void* arg);
-
-struct Obj_1CAEE0 {
-    VFn_1CAEE0* vtbl;
-};
-
 s32 func_001300E8(void* obj, s32 kind);
 void func_00175170(void* obj, s32 a, s32 b);
 
-void func_001CAEE0(u8* self, Obj_1CAEE0* other)
+void func_001CAEE0(u8* self, PlacedObject* other)
 {
-    other->vtbl[0x90 / 4](other, self + 0xAB0);
+    other->desc02()->m20(other, (Vec02*)(self + 0xAB0));
     if (IsObjectOfKind(other, 7) != 0) {
         SetPlayerState(other, 4, 0x2B);
     }
@@ -1557,52 +1502,44 @@ void func_001CB618(ItemKeeper* self)
     self->f180 = -1;
 }
 
-struct List_1CB648 {
-    u8 pad0[0x58];
-    u32 count;
-    void* items[16];
-};
-
 void func_001CBEE8(void* self, s32 arg);
 
-void func_001CB648(List_1CB648* self, void* value)
+void func_001CB648(ItemKeeper* self, Agent* value)
 {
     u32 n;
 
-    if (self->count == 0) {
+    if (self->owned.count == 0) {
         SetItemKeeperState(self, 0);
     }
-    n = self->count;
+    n = self->owned.count;
     if (n < 0x10) {
-        self->items[n] = value;
-        self->count = n + 1;
+        self->owned.found[n] = value;
+        self->owned.count = n + 1;
     }
 }
 
-void func_001CB6A8(ItemKeeper* self, s32 value) { u32 i = self->owned.wantedCount; if (i < 16) { self->owned.wanted[i] = (FoundItem*)value; self->owned.wantedCount = i + 1; } }
+void func_001CB6A8(ItemKeeper* self, s32 value) { u32 i = self->owned.wantedCount; if (i < 16) { self->owned.wanted[i] = value; self->owned.wantedCount = i + 1; } }
 
-void func_001CB6D0(ItemKeeper* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = (FoundItem*)value; self->listed.wantedCount = i + 1; } }
-
-struct List_1CB6F8 { u8 pad0[0x58]; s32 count; s32 items[16]; };
+void func_001CB6D0(ItemKeeper* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = value; self->listed.wantedCount = i + 1; } }
 
 void func_001CBEE8(void* self, s32 arg);
 void func_0018D800(void* dst, void* src, s32 count);
 
-void func_001CB6F8(List_1CB6F8* self, s32 value)
+void func_001CB6F8(ItemKeeper* self, Agent* value)
 {
     s32 i = 0;
-    if (self->count > 0) {
-        for (; i < self->count; i++) {
-            if (self->items[i] == value) break;
+    if (self->owned.count > 0) {
+        for (; i < self->owned.count; i++) {
+            if (self->owned.found[i] == value) break;
         }
-        if (i >= self->count) return;
-        s32 n = self->count;
+        if (i >= self->owned.count) return;
+        s32 n = self->owned.count;
         if (i < n) {
             s32 m = n - 1;
-            self->count = m;
-            s32* d = &self->items[i];
+            self->owned.count = m;
+            Agent** d = &self->owned.found[i];
             CopyMemory(d, d + 1, (m - i) * 4);
-            if (self->count <= 0) {
+            if (self->owned.count <= 0) {
                 SetItemKeeperState(self, 3);
             }
         }
@@ -1610,23 +1547,23 @@ void func_001CB6F8(List_1CB6F8* self, s32 value)
 }
 
 
-FoundItem* func_0015A448(u32 a, FoundItem* b, ItemKeeper* c);
+Agent* func_0015A448(u32 a, s32 id, ItemKeeper* c);
 
 void func_001CB7A0(ItemKeeper* a0)
 {
     for (s32 i = 0; i < a0->owned.wantedCount; i++) {
-        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->owned.wanted[i], a0);
+        Agent* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->owned.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->owned.count;
             if ((u32)n < 16) {
                 a0->owned.found[n] = r;
                 a0->owned.count = n + 1;
-                r->owner = a0;
+                r->f720 = a0;
             }
         }
     }
     for (s32 i = 0; i < a0->listed.wantedCount; i++) {
-        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->listed.wanted[i], a0);
+        Agent* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->listed.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->listed.count;
             if ((u32)n < 16) {
@@ -1637,24 +1574,15 @@ void func_001CB7A0(ItemKeeper* a0)
     }
 }
 
-struct Node_1CB8B8 {
+// The 48-byte record CreateRecord2505C0 makes for a group of C62 objects: the keeper at +0x2C.
+struct ItemTimeoutGroup {
     u8 pad0[0x2C];
-    void* f2C;
-    u8 pad1[0x2E0 - 0x30];
-    s32 f2E0;
-    u8 pad2[0x328 - 0x2E4];
-    void* f328;
-    u8 pad3[0x750 - 0x32C];
-    void* f750;
+    void* keeper;           // 0x2C
 };
-struct Self_1CB8B8 {
-    u8 pad0[0x58];
+// What GatherAnimationEventObjects hands back for one agent: the objects and their count.
+struct GatheredObjects {
     s32 count;
-    Node_1CB8B8* list[16];
-};
-struct Ent_1CB8B8 {
-    s32 count;
-    Node_1CB8B8** items;
+    C62** items;
 };
 
 void func_0018D608(void);
@@ -1664,38 +1592,38 @@ void func_0012D1B0(void* a, void* b, s32* c, void** d);
 void* func_001EFA30(void);
 void func_001EFA60(void* a, void* b);
 
-void func_001CB8B8(Self_1CB8B8* self)
+void func_001CB8B8(ItemKeeper* self)
 {
-    Ent_1CB8B8* arr;
+    GatheredObjects* arr;
     s32 i;
     s32 j;
     s32 k;
     s32 m;
 
     PushBackMemoryMark();
-    arr = (Ent_1CB8B8*)AllocateZeroedBackMemory(self->count * 8);
-    for (i = 0; i < self->count; i++) {
-        Node_1CB8B8* node = self->list[i];
-        if (node->f750 != 0) {
-            GatherAnimationEventObjects(node->f750, node, &arr[i].count, (void**)&arr[i].items);
+    arr = (GatheredObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
+    for (i = 0; i < self->owned.count; i++) {
+        Agent* agent = self->owned.found[i];
+        if (agent->f750 != 0) {
+            GatherAnimationEventObjects(agent->f750, agent, &arr[i].count, (void**)&arr[i].items);
         }
     }
-    for (i = 0; i < self->count; i++) {
-        Ent_1CB8B8* e = &arr[i];
+    for (i = 0; i < self->owned.count; i++) {
+        GatheredObjects* e = &arr[i];
         for (j = 0; j < e->count; j++) {
-            Node_1CB8B8* node = e->items[j];
-            if (node->f328 == 0) {
-                node->f328 = CreateRecord2505C0();
-                ((Node_1CB8B8*)node->f328)->f2C = self;
-                AppendToSmallList(node->f328, node);
-                if (node->f2E0 != -1) {
-                    for (k = i + 1; k < self->count; k++) {
-                        Ent_1CB8B8* e2 = &arr[k];
+            C62* node = e->items[j];
+            if (node->group == 0) {
+                node->group = CreateRecord2505C0();
+                ((ItemTimeoutGroup*)node->group)->keeper = self;
+                AppendToSmallList(node->group, node);
+                if (node->id2E0 != -1) {
+                    for (k = i + 1; k < self->owned.count; k++) {
+                        GatheredObjects* e2 = &arr[k];
                         for (m = 0; m < e2->count; m++) {
-                            Node_1CB8B8* item = e2->items[m];
-                            if (item->f2E0 == node->f2E0) {
-                                item->f328 = node->f328;
-                                AppendToSmallList(node->f328, item);
+                            C62* item = e2->items[m];
+                            if (item->id2E0 == node->id2E0) {
+                                item->group = node->group;
+                                AppendToSmallList(node->group, item);
                             }
                         }
                     }
@@ -1727,14 +1655,10 @@ void func_001CBAA0(ItemKeeper* a0)
     }
 }
 
-typedef s32 (*VFn_1CBAF8)(void* self);
-struct Item_1CBAF8 { VFn_1CBAF8* vtbl; };
-struct Obj_1CBAF8 { u8 pad0[0x5C]; Item_1CBAF8* f5C; };
-
-s32 func_001CBAF8(Obj_1CBAF8* self)
+void* func_001CBAF8(ItemKeeper* self)
 {
-    Item_1CBAF8* item = self->f5C;
-    return item->vtbl[102](item);
+    Agent* item = self->owned.found[0];
+    return item->desc08()->m62(item);
 }
 
 
@@ -1759,10 +1683,8 @@ void func_001CBB20(ItemKeeper* self)
     }
 }
 
-struct Key_1CBB88;
-s32 func_001300E8(Key_1CBB88* key, s32 kind);
 s32 func_001CBD58(ItemKeeper* self);
-void func_001BFCD8(Key_1CBB88* a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BFCD8(s32 sound, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 
 s32 func_001CBB88(ItemKeeper* self)
@@ -1774,12 +1696,12 @@ s32 func_001CBB88(ItemKeeper* self)
     case 0:
         if (self->anyFree != 0) {
             for (i = 0; i < self->owned.count; i++) {
-                if (IsObjectOfKind((Key_1CBB88*)self->owned.found[i], 9) == 0) {
+                if (IsObjectOfKind(self->owned.found[i], 9) == 0) {
                     break;
                 }
             }
             if (i >= self->owned.count) {
-                StartSoundEffect((Key_1CBB88*)0x3F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x3F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
             state = 2;
         }
@@ -1800,70 +1722,39 @@ s32 func_001CBB88(ItemKeeper* self)
     return state;
 }
 
-struct __attribute__((aligned(16))) Quad_CBCB8 { s32 a, b, c, d; };
-
-typedef s32 (*VFn_CBCB8)(void* self);
-
-struct Item_CBCB8 {
-    VFn_CBCB8* vtbl;
-};
-
-struct Self_CBCB8 {
-    u8 pad0[0x40];
-    Quad_CBCB8 f40;
-    u8 pad1[0x58 - 0x50];
-    s32 count;
-    Item_CBCB8* items[1];
-};
-
-void* func_001CBAF8(Self_CBCB8* self);
-
-s32 func_001CBCB8(Self_CBCB8* self)
+s32 func_001CBCB8(ItemKeeper* self)
 {
     s32 i = 0;
-    Item_CBCB8** p = self->items;
+    Agent** p = self->owned.found;
     for (;;) {
-        if (!(i < self->count)) {
+        if (!(i < self->owned.count)) {
             return 0;
         }
-        Item_CBCB8* it = *p;
-        if (it->vtbl[91](it) != 0) {
+        Agent* it = *p;
+        if (it->desc08()->m57(it) != 0) {
             break;
         }
         p++;
         i++;
     }
-    if (!(i < self->count)) {
+    if (!(i < self->owned.count)) {
         return 0;
     }
     {
-        void* r = GetItemKeeperTarget(self);
+        PlacedObject* r = (PlacedObject*)GetItemKeeperTarget(self);
         if (r != 0) {
-            self->f40 = *(Quad_CBCB8*)((u8*)r + 0x140);
+            self->targetPos = r->v140;
         }
     }
     return 1;
 }
 
-struct Obj_CBD58;
-typedef s32 (*VFn_CBD58)(void* self);
-
-struct Obj_CBD58 {
-    VFn_CBD58* vtbl;
-};
-
-struct Self_CBD58 {
-    u8 pad0[0x58];
-    s32 count;
-    Obj_CBD58* items[1];
-};
-
-s32 func_001CBD58(Self_CBD58* a0)
+s32 func_001CBD58(ItemKeeper* a0)
 {
     s32 result = 1;
-    for (s32 i = 0; i < a0->count; i++) {
-        Obj_CBD58* o = a0->items[i];
-        s32 v = o->vtbl[92](o);
+    for (s32 i = 0; i < a0->owned.count; i++) {
+        Agent* o = a0->owned.found[i];
+        s32 v = o->desc08()->m58(o);
         switch (v) {
         case 1: break;
         case 0: result = 0; break;
@@ -1875,78 +1766,57 @@ s32 func_001CBD58(Self_CBD58* a0)
 
 void func_001CBE20(ItemKeeper* self, s32 value) { for (s32 i = 0; i < self->triggerCount; i++) if (value == self->triggers[i]) return; s32 i = self->triggerCount; if ((u32)i < 4) { s32 next = i + 1; self->triggers[i] = value; self->triggerCount = next; } }
 
-struct Self_1CBE70 { u8 pad[0x168]; s32 count; void* items[1]; };
-
 void func_00123AB0(void* object, s32 mode);
 
-void func_001CBE70(Self_1CBE70* self, s32 mode)
+void func_001CBE70(ItemKeeper* self, s32 mode)
 {
-    for (s32 i = 0; i < self->count; i++) {
-        SetStateTriggerStateFromMessage(self->items[i], mode);
+    for (s32 i = 0; i < self->triggerCount; i++) {
+        SetStateTriggerStateFromMessage((void*)self->triggers[i], mode);
     }
 }
 
-struct Vt_1CBEE8 { u8 pad0[0x16C]; s32 (*fn16C)(void* self); };
-struct Item_1CBEE8 {
-    Vt_1CBEE8* vt;
-    u8 pad4[0xBEC];
-    f32 fBF0;
-    f32 fBF4;
-    f32 fBF8;
-    f32 fBFC;
-    f32 fC00;
-};
-struct Obj_1CBEE8 {
-    u8 pad0[0x50];
-    s32 f50;
-    f32 f54;
-    s32 cnt58;
-    Item_1CBEE8* items[1];
-    u8 pad60[0x124];
-    void* f184;
-};
 
 extern f32 D_00261858[];
 
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001BF0D8(void* p);
 void* func_001BEEF8(s32 kind);
-void func_001CBE70(Obj_1CBEE8* self, s32 a);
-void func_001CC120(Obj_1CBEE8* self);
+void func_001CBE70(ItemKeeper* self, s32 a);
+void func_001CC120(ItemKeeper* self);
 
-void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
+void func_001CBEE8(ItemKeeper* self, s32 ns)
 {
     s32 i;
-    if (self->f50 == ns)
+    if (self->state == ns)
         return;
-    switch (self->f50) {
+    switch (self->state) {
     case 2:
-        RemoveSoundLevelAndRecompute(self->f184);
+        RemoveSoundLevelAndRecompute(self->soundLevel);
         i = 0;
-        self->f184 = 0;
-        if (self->cnt58 > 0) {
-            Item_1CBEE8** p = self->items;
+        self->soundLevel = 0;
+        if (self->owned.count > 0) {
+            Agent** p = self->owned.found;
             do {
-                Item_1CBEE8* it = *p;
+                Agent* it = *p;
                 f32 t = g_gameClock[1];
                 i++;
                 f32 r = RandomFloatInRange(D_00274D18[0], D_00274D18[1]);
                 it->fC00 = g_gameClock[1] + r;
                 p++;
-            } while (i < self->cnt58);
+            } while (i < self->owned.count);
         }
         break;
     case 1: {
         s32 j = 0;
-        if (self->cnt58 > 0) {
-            Item_1CBEE8** p = self->items;
+        if (self->owned.count > 0) {
+            Agent** p = self->owned.found;
             do {
                 f32 t = g_gameClock[1];
                 j++;
                 f32 r = RandomFloatInRange(D_00274D08[0], D_00274D08[1]);
                 (*p)->fBF4 = g_gameClock[1] + r;
                 p++;
-            } while (j < self->cnt58);
+            } while (j < self->owned.count);
         }
         break;
     }
@@ -1954,13 +1824,13 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
     switch (ns) {
     case 2:
         i = 0;
-        self->f184 = PushSoundLevel(0x6B);
+        self->soundLevel = PushSoundLevel(0x6B);
         SetItemKeeperTriggerStates(self, 0);
-        if (self->cnt58 > 0) {
-            Item_1CBEE8** p = self->items;
+        if (self->owned.count > 0) {
+            Agent** p = self->owned.found;
             do {
-                Item_1CBEE8* it = *p;
-                if (it->vt->fn16C(it) != 0) {
+                Agent* it = *p;
+                if (it->desc08()->m57(it) != 0) {
                     it->fBF8 = g_gameClock[1];
                 } else {
                     f32 r = RandomFloatInRange(D_00274D10[0], D_00274D10[1]);
@@ -1968,7 +1838,7 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
                 }
                 i++;
                 p++;
-            } while (i < self->cnt58);
+            } while (i < self->owned.count);
         }
         break;
     case 1:
@@ -1981,8 +1851,8 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
         SetItemKeeperTriggerStates(self, 2);
         break;
     }
-    self->f50 = ns;
-    self->f54 = g_gameClock[1];
+    self->state = ns;
+    self->stateSince = g_gameClock[1];
 }
 
 INCLUDE_RODATA(D_0024DA94);
