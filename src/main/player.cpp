@@ -17,7 +17,7 @@
 #include "base_object.h"
 #include "placed_object.h"
 #include "world.h"
-#include "v24a2.h"
+#include "font.h"
 #include "level_entry.h"
 #include "threshold_range.h"
 #include "scatter_controller.h"

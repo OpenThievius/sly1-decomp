@@ -4,7 +4,7 @@
 #include "placed_object.h"
 #include "switched_collider.h"
 #include "world.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "level_entry.h"
 #include "threshold_range.h"

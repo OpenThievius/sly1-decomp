@@ -21,7 +21,7 @@
 #include "value_list_object.h"
 #include "c62.h"
 #include "c1f.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "screen_fade.h"
 #include "transform_object.h"
 #include "c8d.h"
@@ -351,7 +351,7 @@ void func_001B6598(void* sub, s32* out);
 struct Entry_1ED090 { void* a; s32 b; };
 void func_0012F810(void* a, C13* self);
 s32 func_001EDEF0(void* self);
-s32 func_001EE560(V24A0* s);
+s32 func_001EE560(PacketWriter* s);
 void func_00182C18(BaseObject* self);
 void func_001BA550(Collider* o, Attach03* node);
 void func_001BA528(Collider* o, Attach03* node);
@@ -433,9 +433,9 @@ struct Item_1EFB20 { u8 pad[0x2D0]; s32 kind; f32 lo; f32 hi; s32 sub; s32 tag; 
 struct Owner_1EFB20 { u8 pad[0x180]; s32 link; };
 struct Set_1EFB20 { s32 pad0; s32 count; Item_1EFB20* items[8]; s32 flag; Owner_1EFB20* owner; };
 void func_001AC060(void* p);
-void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag);
+void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 D_0024A0E0[];
-s32 func_00152888(V24A0* self);
+s32 func_00152888(PacketWriter* self);
 struct Link_1EECE0;
 struct Link_1EECE0 {
     s32* a; s32* b; s32 c; Link_1EECE0* prev;
@@ -636,7 +636,7 @@ struct Rec_1F18B0 {
 void func_00128018(Mgr_1F18B0* a0, Obj_1F18B0* a1, void* a2, Loc_1F18B0* a3);
 struct Clr_1F1960 { s32 a, b, c, d, e, f; };
 s32 func_0015C188(s32 n);
-V24A2* func_0015C1C0(s32 n);
+Font* func_0015C1C0(s32 n);
 void func_001F5C0C(Clr_1F1960* p, s32 v, s32 size);
 struct __attribute__((packed)) Ptr_1F0660 { C67* p; };
 extern void func_00124A48(C67* o);
@@ -703,10 +703,10 @@ struct Obj_1F0908 {
 void func_0012C918(Slot_1F0908* s, Obj_1F0908* o, s32 c, void* d, f32 a, f32 b);
 BaseObject* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
 struct Locals_1F1E38 { s32 k; s32 pad[3]; f32 x; f32 y; };
-void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* f, u64 a, u64 b);
-void func_00161458(V24A0* self, u32 value);
-void func_001615F0(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* f, u64 a, u64 b);
+void func_00161458(PacketWriter* self, u32 value);
+void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void func_001E90A8(Ctor_001E90A8* self);
 void func_001E9498(Set_001E9498* self, ScreenElement* node);
 void func_001E96F8(Obj_1E96F8* self, s32 state);
@@ -2641,11 +2641,11 @@ void func_001EE290(void* self)
 
 ASM_FUNC(func_001EE2B0);
 
-V24A0* func_001EE318(V24A0* self)
+PacketWriter* func_001EE318(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
     self->f10 = 1;
-    self->vt = (const V24A0_Vt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)D_0024A0E0;
     self->f1C = 0;
     self->f20 = 0;
     return self;
@@ -2668,7 +2668,7 @@ done:
     s->cursor = p;
 }
 
-void func_001EE3B8(V24A0* s, u32 a, u32 b)
+void func_001EE3B8(PacketWriter* s, u32 a, u32 b)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
@@ -2678,49 +2678,49 @@ void func_001EE3B8(V24A0* s, u32 a, u32 b)
     *q = b | 0x2000000;
 }
 
-void func_001EE3F0(V24A0* s, s32 n)
+void func_001EE3F0(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
     *p = (u32)((n / 8) | 0x14000000);
 }
 
-void func_001EE420(V24A0* s, s32 n)
+void func_001EE420(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
     *p = (u32)((n / 8) | 0x15000000);
 }
 
-void func_001EE450(V24A0* b)
+void func_001EE450(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x11000000;
 }
 
-void func_001EE468(V24A0* b)
+void func_001EE468(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x13000000;
 }
 
-void func_001EE480(V24A0* b)
+void func_001EE480(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x10000000;
 }
 
-void func_001EE498(V24A0* b, u32 x, u32 y)
+void func_001EE498(PacketWriter* b, u32 x, u32 y)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = y | (x << 8) | 0x01000000;
 }
 
-void func_001EE4C0(V24A0* b, u32* src){
+void func_001EE4C0(PacketWriter* b, u32* src){
  u32 *p1,*p2,*p3,*p4,*p5;
  p1=(u32*)b->cur; b->cur = (u8*)(p1 + 1); *p1=0x30000000;
  p2=(u32*)b->cur; b->cur = (u8*)(p2 + 1); *p2=src[0];
@@ -2738,7 +2738,7 @@ void func_001EE528(Packer_1EE528* self, s32 value)
     self->last = value;
 }
 
-s32 func_001EE560(V24A0* self, s32 a, s32 b, s32 c)
+s32 func_001EE560(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     u32 lo = ((u32)b << 16) | 0x6000C000u;
     u32 head = ((u32)a << 24) | lo;
@@ -2752,7 +2752,7 @@ s32 func_001EE560(V24A0* self, s32 a, s32 b, s32 c)
     return D_00275DD0[a] * b;
 }
 
-void func_001EE5C8(V24A0* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
+void func_001EE5C8(PacketWriter* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
 {
     if (size == 0) {
         if (outCursor) *outCursor = 0;
@@ -2804,7 +2804,7 @@ void func_001EE668(void* s, void* a1, s32 size, u32* src, void* a4)
     }
 }
 
-void func_001EE718(V24A0* self, s32 a, s32 b, s32 c, s32 d, s32* out)
+void func_001EE718(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
 {
     if (b != 0) {
         PadPacketToQuadSlot(self, 3);
@@ -2819,7 +2819,7 @@ void func_001EE718(V24A0* self, s32 a, s32 b, s32 c, s32 d, s32* out)
     }
 }
 
-void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
+void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;
@@ -2830,7 +2830,7 @@ void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
     func_00152CE0(self, n, (s32)buf);
 }
 
-void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)
+void func_001EE850(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;
@@ -2841,7 +2841,7 @@ void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)
     AddDmaRefTag(self, a, b);
 }
 
-void func_001EE8D0(V24A0* a0, V24A0* a1) {
+void func_001EE8D0(PacketWriter* a0, PacketWriter* a1) {
     u32 span = a1->curU - (u32)a1->begin;
     func_001EE7D0(a0, span >> 4, (void*)a1->begin, 0);
 }
@@ -3905,7 +3905,7 @@ extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
 void func_001F1960(T217D_0F0* self) {
     SetupScreenElementText(self);
     if (IsFontLoaded(2) != 0) {
-        self->frame = (V24A2**)&D_00276620;
+        self->frame = (Font**)&D_00276620;
         *self->frame = GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);

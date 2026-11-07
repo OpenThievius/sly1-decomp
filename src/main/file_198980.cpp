@@ -25,7 +25,7 @@
 #include "object_message.h"
 #include "object_event.h"
 #include "camera.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "asm_func.h"
 void func_001B7968(void* self);
 void func_001249A8(void* self);

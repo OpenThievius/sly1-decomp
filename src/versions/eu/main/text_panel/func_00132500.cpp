@@ -23,7 +23,7 @@ struct Gfx_eu_132500 {
     }
 };
 
-void func_00132500(Obj_eu_132500* self, V24A0* gs)
+void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;

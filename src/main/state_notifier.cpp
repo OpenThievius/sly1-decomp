@@ -14,7 +14,7 @@
 #include "camera.h"
 #include "effect.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);

@@ -2,7 +2,7 @@
 #include "common.h"
 #include "c6e.h"
 #include "world.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "list_iter.h"
 #include "shapes.h"
 #include "globals.h"
@@ -186,7 +186,7 @@ void func_001B2640(RangeRecord* o)
                     goto done;
                 }
             }
-            V24A0* g = &g_vifPacketWriter;
+            PacketWriter* g = &g_vifPacketWriter;
             u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
             u64 v = (u64)(s64)(o->fC0 | 0x40000000) | hi;
             *(u64*)g->cur = v;

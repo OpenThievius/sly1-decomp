@@ -17,7 +17,7 @@
 #include "camera.h"
 #include "object_gatherer.h"
 #include "switched_collider.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "effect.h"
 #include "globals.h"
 #include "group_marker.h"

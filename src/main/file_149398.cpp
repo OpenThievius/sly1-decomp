@@ -14,7 +14,7 @@
 #include "game_progress.h"
 #include "effect.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "gauge_manager.h"
 #include "pooled_object.h"
 #include "masked_collider.h"
@@ -593,7 +593,7 @@ void func_0014AEA0(T217D_720* self, s32 n, f32 x, f32 y)
     self->place->dx = x;
     self->place->dy = y;
     self->count = n;
-    V24A2* q = self->font;
+    Font* q = self->font;
     SetScreenElementSize(self, self->w, (f32)q->height * q->sy * (f32)n);
     self->vt->m16(self, 2);
 }

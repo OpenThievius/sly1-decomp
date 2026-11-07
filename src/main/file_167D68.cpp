@@ -54,21 +54,21 @@ void func_00152D30(Blob_168AF8* a);
 void func_001529E0(Blob_168AF8* a, s32 x, s32 y);
 void func_00168A48(Blob_168AF8* b);
 
-struct Frame_1692B0 : V24A0 { s32 value; };
+struct Frame_1692B0 : PacketWriter { s32 value; };
 
 extern s32 D_00274514;
 extern s32 D_00274510;
 extern s32 D_00261F1C;
 
-void* func_001611B8(V24A0* f);
-void func_00152980(V24A0* f, s32 size);
-void func_00152B38(V24A0* f);
+void* func_001611B8(PacketWriter* f);
+void func_00152980(PacketWriter* f, s32 size);
+void func_00152B38(PacketWriter* f);
 s32 func_001690C0(void* self, void* arg, Frame_1692B0* f);
-void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* f, s32 a, u64 b);
-void func_00161200(V24A0* f);
-void func_00152D30(V24A0* f);
-void func_001529E0(V24A0* f, s32 a, s32* out);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* f, s32 a, u64 b);
+void func_00161200(PacketWriter* f);
+void func_00152D30(PacketWriter* f);
+void func_001529E0(PacketWriter* f, s32 a, s32* out);
 void func_001686E8(s32 a, s32 b);
 
 struct Ent_1696B8 { s32 a; s32 b; u32 value; s32 d; };
@@ -156,34 +156,34 @@ void func_00168D68(BumpAllocator*,s32,s32);
 void func_00168130(void);
 void func_00201988(s32 a0, s32 a1);
 
-struct Frame_1693A8 : V24A0 { u8 span[0x10]; s32 out; };
+struct Frame_1693A8 : PacketWriter { u8 span[0x10]; s32 out; };
 
 extern s32 D_00274514;
 extern s32 D_00274510;
 
 void func_00168D68(void* p, s32 a, s32 b);
 s32 func_001690C0(void* self, void* arg, Frame_1693A8* f);
-void func_00152A50(V24A0* f, s32 a1, s32 a2, s32* out, s32 a4);
+void func_00152A50(PacketWriter* f, s32 a1, s32 a2, s32* out, s32 a4);
 void func_001B3510(void* self);
 
-struct Frame_168B68 : V24A0 { s32 value; u8 pad[0x3F0]; };
+struct Frame_168B68 : PacketWriter { s32 value; u8 pad[0x3F0]; };
 
 extern s32 D_00261F1C;
 
-void func_001529C8(V24A0* f, s32 n, s32* p);
+void func_001529C8(PacketWriter* f, s32 n, s32* p);
 void func_0019DDA0(f32 x, f32 y, f32 z, f32 w, s32 a, s32 b, s32 c, s32 d, Frame_168B68* e);
-void func_001529E0(V24A0* f, s32 a, s32 b);
+void func_001529E0(PacketWriter* f, s32 a, s32 b);
 void func_001686E8(s32 a, s32* b);
 void func_001683E8(void);
 
 extern s32 D_00274500;
 extern s32 D_00274508;
 s32 func_00168D88(void* self, s32 size);
-void func_00168E78(V24A2_ImgB* e, s32 v);
-void func_00168F48(V24A2_ImgB* e, s32 v, void* ctx);
+void func_00168E78(PaletteRecord* e, s32 v);
+void func_00168F48(PaletteRecord* e, s32 v, void* ctx);
 void func_00152B80(void* self, s32 lo, s32 hi);
-void func_00168FB0(V24A2_ImgA* e, s32 v);
-void func_00169088(V24A2_ImgA* e, s32 v, void* ctx);
+void func_00168FB0(ImageRecord* e, s32 v);
+void func_00169088(ImageRecord* e, s32 v, void* ctx);
 
 struct Bits_168E78 {
     u64 lo : 20;
@@ -359,7 +359,7 @@ struct Dbp_168F48 { s32 v; };
 
 void func_00168D98(Dbp_168F48 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void func_001529C8(V24A0* f, s32 n, V24A0* p);
+void func_001529C8(PacketWriter* f, s32 n, PacketWriter* p);
 
 struct Pm_168130 { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
 struct Fb_168130 { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
@@ -393,18 +393,18 @@ extern s32 D_00274514;
 extern s32 D_00274510;
 
 void func_00168D68(BumpAllocator* p, s32 a, s32 b);
-void* func_001EE318(V24A0* f);
-void func_001EE450(V24A0* f);
-void func_001528E0(V24A0* f);
-void func_001529C8(V24A0* f, s32 n, u8* buf);
+void* func_001EE318(PacketWriter* f);
+void func_001EE450(PacketWriter* f);
+void func_001528E0(PacketWriter* f);
+void func_001529C8(PacketWriter* f, s32 n, u8* buf);
 s32 func_00168D88(BumpAllocator* p, s32 size);
-void func_00168F48(V24A2_ImgB* e, s32 v, V24A0* f);
-void func_00169088(V24A2_ImgA* e, s32 v, V24A0* f);
-void func_001529E0(V24A0* f, s32* o0, s32* o1);
-void func_001EE7D0(V24A0* f, s32 a, s32 b, s32 c);
-void func_001EE850(V24A0* f, s32 a, s32 b, s32 c);
-void func_00152D70(V24A0* f);
-void func_00152A50(V24A0* f, s32 a, s32 b, s32* out, s32 c);
+void func_00168F48(PaletteRecord* e, s32 v, PacketWriter* f);
+void func_00169088(ImageRecord* e, s32 v, PacketWriter* f);
+void func_001529E0(PacketWriter* f, s32* o0, s32* o1);
+void func_001EE7D0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_001EE850(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00152D70(PacketWriter* f);
+void func_00152A50(PacketWriter* f, s32 a, s32 b, s32* out, s32 c);
 void func_001B3510(u32 mask);
 
 // The file's .data, in retail's order (0x262480 to 0x262714): the word func_001682C0 reads,
@@ -617,9 +617,9 @@ void func_001686E8(Self_1686E8* self, void* b)
     AwaitSemaphore(D_002BE464);
 }
 
-void func_00168770(V24A0* self, u8* color, s32 flag)
+void func_00168770(PacketWriter* self, u8* color, s32 flag)
 {
-    V24A0 f;
+    PacketWriter f;
     s32 x;
 
     InitGifPacket(&f);
@@ -761,13 +761,13 @@ void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ct
     AddGifImageTag(ctx, x);
 }
 
-void func_00168E78(V24A2_ImgB* self, u32 a1){
+void func_00168E78(PaletteRecord* self, u32 a1){
  Bits_168E78* bits = (Bits_168E78*)&self->f10;
  bits->f37 = a1;
  bits->f20 = (self->f4 <= 0x10) ? 0x14 : 0x13;
  bits->r51=0; bits->r55=0; bits->r56=0; bits->f61=1;}
 
-void func_00168F48(V24A2_ImgB* e, s32 v, void* ctx)
+void func_00168F48(PaletteRecord* e, s32 v, void* ctx)
 {
     s32 step = (e->f4 > 16) ? 16 : 8;
     s32 n = e->f4 - 1;
@@ -776,7 +776,7 @@ void func_00168F48(V24A2_ImgB* e, s32 v, void* ctx)
     BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
 }
 
-void func_00168FB0(V24A2_ImgA* self, u32 a1)
+void func_00168FB0(ImageRecord* self, u32 a1)
 {
     Bits_168FB0* bits = (Bits_168FB0*)&self->f18;
     bits->f0 = a1;
@@ -787,12 +787,12 @@ void func_00168FB0(V24A2_ImgA* self, u32 a1)
     bits->f34 = 1;
 }
 
-void func_00169088(V24A2_ImgA* d, u32 dbp, void* ctx)
+void func_00169088(ImageRecord* d, u32 dbp, void* ctx)
 {
     BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->f14, ctx);
 }
 
-s32 func_001690C0(s32 mask, BumpAllocator* b, V24A0* c)
+s32 func_001690C0(s32 mask, BumpAllocator* b, PacketWriter* c)
 {
     s32 saved;
 
@@ -802,7 +802,7 @@ s32 func_001690C0(s32 mask, BumpAllocator* b, V24A0* c)
         saved = 0;
     }
     for (s32 i = 0; i < g_imageRecordCountB; i++) {
-        V24A2_ImgB* e = &g_imageRecordsB[i];
+        PaletteRecord* e = &g_imageRecordsB[i];
         if ((e->f0 & mask) == mask) {
             s32 v = AllocateBump(b, e->f6);
             BuildPaletteTexRegister(e, v);
@@ -816,7 +816,7 @@ s32 func_001690C0(s32 mask, BumpAllocator* b, V24A0* c)
         AllocateBump(b, 0x80 - (b->next & 0x7F));
     }
     for (s32 i = 0; i < g_imageRecordCountA; i++) {
-        V24A2_ImgA* e = &g_imageRecordsA[i];
+        ImageRecord* e = &g_imageRecordsA[i];
         if ((e->f4 & mask) == mask) {
             s32 v;
             if (e->f8 == 0 && (b->next & 0x1F) != 0) {
@@ -1015,8 +1015,8 @@ void func_00169718(void)
 s32 func_00169780(u32 mask)
 {
     BumpAllocator span;
-    V24A0 fa;
-    V24A0 fb;
+    PacketWriter fa;
+    PacketWriter fb;
     u8 buf[0xA0];
     s32 o0;
     s32 o1;
@@ -1032,7 +1032,7 @@ s32 func_00169780(u32 mask)
     BeginDmaTag(&fb);
     WriteVifFlush(&fb);
     for (i = 0; i < g_imageRecordCountB; i++) {
-        V24A2_ImgB* e = (V24A2_ImgB*)((*(u8**)&g_imageRecordsB) + i * 0x18);
+        PaletteRecord* e = (PaletteRecord*)((*(u8**)&g_imageRecordsB) + i * 0x18);
         if ((e->f0 & mask) == mask) {
             RewindPacketBuffer(&fa);
             UsePacketBufferMemory(&fa, 0xA, buf);
@@ -1051,7 +1051,7 @@ s32 func_00169780(u32 mask)
     if (g_imageRecordCountA > 0) {
         i = 0;
         do {
-            V24A2_ImgA* e = (V24A2_ImgA*)((*(u8**)&g_imageRecordsA) + i * 0x20);
+            ImageRecord* e = (ImageRecord*)((*(u8**)&g_imageRecordsA) + i * 0x20);
             if ((e->f4 & mask) == mask) {
                 RewindPacketBuffer(&fa);
                 UsePacketBufferMemory(&fa, 0xA, buf);

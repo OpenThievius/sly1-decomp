@@ -2168,9 +2168,9 @@ D_00274738	g_previousSoundLevel	PushSoundLevel and RemoveSoundLevelAndRecompute 
 D_002744F8	g_animRecordCount	func_001B3040 sets it from func_00137BE0 and sizes the record array by it; FindAnimRecord bounds its index by it
 D_002744FC	g_animRecords	the array of 0x28-byte AnimRecords func_001B3040 allocates; FindAnimRecord indexes it
 D_00274500	g_imageRecordCountA	func_001B2CF8 sets it to the count of the 0x20-byte image records of g_imageRecordsA; PlaceMaskedImages loops to it
-D_00274504	g_imageRecordsA	the array of V24A2_ImgA records (0x20 bytes each) func_001B2CF8 allocates; PlaceMaskedImages and LoadFont index it
+D_00274504	g_imageRecordsA	the array of ImageRecord records (0x20 bytes each) func_001B2CF8 allocates; PlaceMaskedImages and LoadFont index it
 D_00274508	g_imageRecordCountB	func_001B2BA8 sets it to the count of the 0x18-byte image records of g_imageRecordsB; PlaceMaskedImages loops to it
-D_0027450C	g_imageRecordsB	the array of V24A2_ImgB records (0x18 bytes each) func_001B2BA8 allocates; PlaceMaskedImages and LoadFont index it
+D_0027450C	g_imageRecordsB	the array of PaletteRecord records (0x18 bytes each) func_001B2BA8 allocates; PlaceMaskedImages and LoadFont index it
 D_0027453C	g_cursorAnimatorCount	func_001B3040 sets it from func_00137BE0 and StepAnimators loops to it
 D_00274540	g_cursorAnimators	the array of CursorAnimator pointers func_001B3040 allocates (count * 4); StepAnimators steps each
 D_0027451C	g_pendingCursors	head of the list of cursors SetCursorFrame and SetCursorCoords chain on; FlushCursors walks it, applies each frame and clears the head

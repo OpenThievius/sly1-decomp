@@ -19,8 +19,8 @@
 
 #include "common.h"
 
-struct V24A2;
-struct C67;     // an object of class 0x67 (include/c67.h)   // the font (include/v24a2.h): a game object with a GCC vtable at +0x4C
+struct Font;
+struct C67;     // an object of class 0x67 (include/c67.h)   // the font (include/font.h): a game object with a GCC vtable at +0x4C
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
@@ -69,7 +69,7 @@ struct T217D_Vt {
 // The base element, 0x260 bytes (the four sub-elements of D_00218720's object are this big).
 struct ScreenElement {
     const T217D_Vt* vt;         // 0x00
-    V24A2* font;                // 0x04: the font object (func_0015C1C0) the text is drawn with
+    Font* font;                // 0x04: the font object (func_0015C1C0) the text is drawn with
     char text[0x200];           // 0x08: the text; its first byte is the element's visible flag
     union {
         u32 color;              // 0x208: 0xFF808080 is "no tint"; the alpha is the top byte
@@ -77,7 +77,7 @@ struct ScreenElement {
         T217D_Rgba rgba;        // 0x208
     };
     f32 scale;                  // 0x20C: text size
-    V24A2** frame;              // 0x210: a cell holding the object drawn behind the text, or 0
+    Font** frame;              // 0x210: a cell holding the object drawn behind the text, or 0
     s32 index;                  // 0x214: position in D_002486B0
     T217D_Place* place;         // 0x218: its record of D_0026C3E0
     f32 x;                      // 0x21C: where it is now

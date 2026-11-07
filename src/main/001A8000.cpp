@@ -5,7 +5,7 @@
 #include "world.h"
 #include "object_pool.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "game_clock.h"
 #include "game_progress.h"
@@ -13,12 +13,12 @@
 #include "globals.h"
 
 // The font object's calls.
-V24A2* func_0015C1C0(s32 k);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
-f32 func_0015C418(V24A2* font, void* text);
-void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(V24A2* font);
-void* func_0015DB28(void* out, void* text, V24A2* font);
+Font* func_0015C1C0(s32 k);
+void func_0015C8B8(Font* font, f32 x, f32 y);
+f32 func_0015C418(Font* font, void* text);
+void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
+void func_0015C900(Font* font);
+void* func_0015DB28(void* out, void* text, Font* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 void func_00182ED0(void* self);

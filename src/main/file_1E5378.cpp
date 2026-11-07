@@ -4,7 +4,7 @@
 #include "asm_func.h"
 #include "fpu.h"
 #include "list_iter.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "screen_element.h"
 #include "message_body.h"
 #include "shapes.h"
@@ -466,10 +466,10 @@ void func_001E6188(T217D_3F0* self)
 void func_001E6268(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
-void func_00161670(V24A0* c, s32 a, s32 b, s32 d, s32 e);
-void func_001615F0(V24A0* c, s32 a, s32 b, s32 d, s32 e);
+void func_00161670(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
+void func_001615F0(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
 
-void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
+void func_001E62A8(T217D_3F0* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->shownY;

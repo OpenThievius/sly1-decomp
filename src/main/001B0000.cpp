@@ -3,8 +3,8 @@
 #include "c6e.h"
 #include "cursor_animator.h"
 #include "world.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "list_iter.h"
 #include "shapes.h"
 #include "globals.h"
@@ -256,17 +256,17 @@ struct Glob_1B3510 {
 
 extern s32 D_002744F8;
 
-void* func_001611B8(V24A0* b);
-void func_001529C8(V24A0* b, s32 n, Quad4* q);
-void func_001612F8(V24A0* b, s32 a, s32 c, s32 d, s32 e, s32 f);
-void func_001613C0(V24A0* b, s32 a, s32 c, u64 d);
-void func_00161708(V24A0* b, s32 reg, u64 v);
-void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, V24A0* b);
-void func_00152D70(V24A0* b);
-void func_001528C8(V24A0* b);
-void func_00161278(V24A0* b, s32 n);
-void func_00161520(V24A0* b, f32 x, f32 y, f32 z);
-void func_00161458(V24A0* b, u32 c);
+void* func_001611B8(PacketWriter* b);
+void func_001529C8(PacketWriter* b, s32 n, Quad4* q);
+void func_001612F8(PacketWriter* b, s32 a, s32 c, s32 d, s32 e, s32 f);
+void func_001613C0(PacketWriter* b, s32 a, s32 c, u64 d);
+void func_00161708(PacketWriter* b, s32 reg, u64 v);
+void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, PacketWriter* b);
+void func_00152D70(PacketWriter* b);
+void func_001528C8(PacketWriter* b);
+void func_00161278(PacketWriter* b, s32 n);
+void func_00161520(PacketWriter* b, f32 x, f32 y, f32 z);
+void func_00161458(PacketWriter* b, u32 c);
 void* func_001B4688(s32 key);
 
 struct Ctx_1B2DF8;

@@ -25,7 +25,7 @@
 #include "script_value.h"
 #include "cone_volume.h"
 #include "redirect_object.h"
-#include "v24a2.h"
+#include "font.h"
 #include "level_entry.h"
 #include "message_body.h"
 

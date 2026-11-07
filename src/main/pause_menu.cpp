@@ -3,8 +3,8 @@
 #include "asm_func.h"
 #include "list_iter.h"
 #include "screen_element.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "shapes.h"
 #include "load_progress.h"
 #include "text_reader.h"
@@ -21,7 +21,7 @@ void func_00193318(State_193288*);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
 s32 func_0015C188(s32 k);
-V24A2* func_0015C1C0(s32 k);
+Font* func_0015C1C0(s32 k);
 
 struct S_193270 { s32 a,b,c,d,e; };
 
@@ -59,17 +59,17 @@ struct Obj_193318 {
     Col_193318 c1;
     Col_193318 c2;
 };
-struct Buf_193318 { u8 bytes[0x400]; V24A0 f; };
+struct Buf_193318 { u8 bytes[0x400]; PacketWriter f; };
 
-void* func_001611B8(V24A0* f);
-void func_001529C8(V24A0* f, s32 n, Buf_193318* b);
-void func_00152B38(V24A0* f);
+void* func_001611B8(PacketWriter* f);
+void func_001529C8(PacketWriter* f, s32 n, Buf_193318* b);
+void func_00152B38(PacketWriter* f);
 f32 func_001EAF28(f32 x);
-void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, V24A0* e, f32 x, f32 y, f32 z, f32 w);
-void func_00161200(V24A0* f);
-void func_00152D30(V24A0* f);
-void func_00152D70(V24A0* f);
-void func_001529E0(V24A0* f, s32 a, s32 b);
+void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, PacketWriter* e, f32 x, f32 y, f32 z, f32 w);
+void func_00161200(PacketWriter* f);
+void func_00152D30(PacketWriter* f);
+void func_00152D70(PacketWriter* f);
+void func_001529E0(PacketWriter* f, s32 a, s32 b);
 void func_00168A48(Buf_193318* b);
 
 void func_001AA8F0(void* self);
@@ -277,11 +277,11 @@ void func_00137248(Layout_137228* out, Quad4* value);
 void func_00137260(Layout_137228* out, s32 flag);
 void func_00137268(Layout_137228* out, s32 flag);
 f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
-void func_0015C8B8(V24A2* font, f32 a, f32 b);
-TextReader* func_0015DB28(TextReader* out, void* str, V24A2* font);
+void func_0015C8B8(Font* font, f32 a, f32 b);
+TextReader* func_0015DB28(TextReader* out, void* str, Font* font);
 void func_0015E318(TextReader* buf, Layout_137228* out, s32 zero, void* data);
 f32 func_0015E1B0(TextReader* buf, f32 w);
-void func_0015C900(V24A2* font);
+void func_0015C900(Font* font);
 f32 func_0015DFF8(TextReader* buf);
 char* func_00193598(s32 index);
 void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba_194F80* c, s32 k);
@@ -623,7 +623,7 @@ void func_00193E58(T217D_6D0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_0026A210;
+        self->frame = (Font**)&D_0026A210;
         *self->frame = GetFontById(2);
     }
     self->page = -1;

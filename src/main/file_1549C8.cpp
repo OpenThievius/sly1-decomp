@@ -20,8 +20,8 @@
 #include "deferred_request.h"
 #include "color_fade.h"
 #include "base_object.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "render_frame.h"
 #include "text_reader.h"
 #include "layout_137228.h"
@@ -530,12 +530,12 @@ struct VEnt_0024A220 { s32 delta; void (*fn)(); };
 struct Vec2_24A210 { f32 x; f32 y; };
 extern const VEnt_0024A220 D_0024A220[22];
 void* func_0018D758(u32);
-void func_0015C9B0(V24A2*, V24A2*);
+void func_0015C9B0(Font*, Font*);
 
 extern s32 D_00262268[];
 extern s32 D_0026227C;
 
-V24A2_Glyph* func_0015DAB8(V24A2* a, s32 b);
+FontGlyph* func_0015DAB8(Font* a, s32 b);
 
 void func_0015DB80(void* self);
 s32 func_0015DBE0(void* self);
@@ -557,16 +557,16 @@ void func_0015EAE0(void* self, void* a, void* b);
 void func_00152D30(void* self);
 void func_001529E0(void* self, void* p, s32 n);
 
-void func_0015C260(V24A2* self, V24A2* dst);
+void func_0015C260(Font* self, Font* dst);
 
-V24A2_Glyph* func_0015DAB8(V24A2* table, s8 key);
+FontGlyph* func_0015DAB8(Font* table, s8 key);
 
 void func_00152D70(void* obj);
 void func_00152B80(void* obj, s32 a, s32 b);
 void func_00152B38(void* obj);
 
-void func_0015C2E8(V24A2* a0, s32 a1, void* a2);
-s32 func_0015CAB8(V24A2* self, void* obj);
+void func_0015C2E8(Font* a0, s32 a1, void* a2);
+s32 func_0015CAB8(Font* self, void* obj);
 void func_001613C0(void* obj, s32 a, s32 b, s32 c);
 void func_00161708(void* obj, s32 tag, s64 value);
 void func_00161768(void* obj, s32 tag, s64 value);
@@ -645,7 +645,7 @@ s32 func_0015DBE0(void* self);
 void func_0015DB80(void* self);
 s32 func_0015DBE0(void* self);
 
-struct Lines_15E068 { s8* start; s8* cur; V24A2* holder; };
+struct Lines_15E068 { s8* start; s8* cur; Font* holder; };
 
 void func_0015DB80(void* self);
 s32 func_0015DBE0(void* self);
@@ -655,13 +655,13 @@ s32 func_0015E068(void* self);
 extern s8 D_00262250[];
 extern s32 D_00262268[];
 
-s32 func_0015C4E8(V24A2* self, u8* s);
+s32 func_0015C4E8(Font* self, u8* s);
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
-struct Frame_15D998 { V24A0 a; u8 buf[0x100]; };
-V24A0* func_001611B8(V24A0* p);
+struct Frame_15D998 { PacketWriter a; u8 buf[0x100]; };
+PacketWriter* func_001611B8(PacketWriter* p);
 s32 func_00168D88(void* self, s32 size);
 void func_00168FB0(void* self, s32 v);
 void func_001529C8(void* self, s32 count, void* base);
@@ -679,11 +679,11 @@ void func_00168D68(void* dst, s32 size, s32 align);
 void func_0015D998(void* item, void* buf);
 
 
-void func_001617E8(V24A0* s, u32 tag, f32 value);
-void func_00161860(V24A0* s, s32 a, s32 b);
-void func_001618C0(V24A0* s, s32 a, s32 b, s32 c, s32 d);
+void func_001617E8(PacketWriter* s, u32 tag, f32 value);
+void func_00161860(PacketWriter* s, s32 a, s32 b);
+void func_001618C0(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
-V24A2_Glyph* func_0015DAB8(V24A2* self, s8 key);
+FontGlyph* func_0015DAB8(Font* self, s8 key);
 
 s32 func_0015E068(void* self, f32 f);
 f32 func_0015E1F0(void* self);
@@ -729,14 +729,14 @@ void* func_0018D500(s32 n);
 extern s32 D_00262258;
 extern s32 D_0026225C;
 
-V24A2_Glyph* func_0015DAB8(V24A2* self, s8 key);
-s32 func_0015CAB8(V24A2* self, V24A0* s);
-void func_001613C0(V24A0* s, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* s, s32 a, u64 b);
-void func_00161768(V24A0* s, s32 a, u64 b);
-void func_001617E8(V24A0* s, u32 tag, f32 value);
-void func_00161860(V24A0* s, s32 a, s32 b);
-void func_001618C0(V24A0* s, s32 a, s32 b, s32 c, s32 d);
+FontGlyph* func_0015DAB8(Font* self, s8 key);
+s32 func_0015CAB8(Font* self, PacketWriter* s);
+void func_001613C0(PacketWriter* s, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* s, s32 a, u64 b);
+void func_00161768(PacketWriter* s, s32 a, u64 b);
+void func_001617E8(PacketWriter* s, u32 tag, f32 value);
+void func_00161860(PacketWriter* s, s32 a, s32 b);
+void func_001618C0(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
@@ -851,12 +851,12 @@ void func_0015DBB8(TextReader* self, Rgba_137248* p);
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
 s32 func_0015C200(s32 id);
-void func_0015C9B0(V24A2* font, V24A2* out);
-void func_0015C900(V24A2* font);
-void func_0015C8B8(V24A2* font, f32 a, f32 b);
+void func_0015C9B0(Font* font, Font* out);
+void func_0015C900(Font* font);
+void func_0015C8B8(Font* font, f32 a, f32 b);
 
 struct Item_15D4E0 {
-    V24A2* f0;
+    Font* f0;
     s8 key;
     u8 p5[3];
     f32 f8;
@@ -867,11 +867,11 @@ struct Item_15D4E0 {
 };
 struct Rect_15D4E0 { f32 x, y, w, h; };
 
-V24A2_Glyph* func_0015DAB8(V24A2* self, s8 key);
-void func_0015C8B8(V24A2* p, f32 a, f32 b);
-void func_0015C900(V24A2* p);
-void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
-                   f32 u0, f32 v0, f32 u1, f32 v1, V24A0* s);
+FontGlyph* func_0015DAB8(Font* self, s8 key);
+void func_0015C8B8(Font* p, f32 a, f32 b);
+void func_0015C900(Font* p);
+void func_0015D338(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+                   f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
 extern void* D_0026231C;
 extern void* D_002623B0;
 extern volatile s32 D_002623B8;
@@ -1925,7 +1925,7 @@ void func_00159CA0(u8* a0)
     Frame_159CA0 f;
     f.value = *(s32*)(a0 + 0x60);
     FillScreenColor(&f, &f.value, 0);
-    V24A0* s = &g_vifPacketWriter;
+    PacketWriter* s = &g_vifPacketWriter;
     BeginDmaTag(s);
     func_001EE7D0(s, 0x2C, &f, 0);
     CloseDmaTag(s);
@@ -2594,7 +2594,7 @@ s32 func_0015C200(s32 a0)
     return 0;
 }
 
-void func_0015C260(V24A2* src, V24A2* dst)
+void func_0015C260(Font* src, Font* dst)
 {
     dst->f00 = src->f00;
     dst->advance = src->advance;
@@ -2608,7 +2608,7 @@ void func_0015C260(V24A2* src, V24A2* dst)
     dst->f40 = src->f40;
 }
 
-void func_0015C2E8(V24A2* unused, Vec4_0015C2E8* v, Obj_0015C2E8* obj)
+void func_0015C2E8(Font* unused, Vec4_0015C2E8* v, Obj_0015C2E8* obj)
 {
     if (v != 0) {
         s32 pw = (s32)(v->x + v->z) - 1;
@@ -2621,7 +2621,7 @@ void func_0015C2E8(V24A2* unused, Vec4_0015C2E8* v, Obj_0015C2E8* obj)
     }
 }
 
-void func_0015C3C0(V24A2* unused, s32 flag, Obj_0015C3C0* obj)
+void func_0015C3C0(Font* unused, s32 flag, Obj_0015C3C0* obj)
 {
     if (flag != 0) {
         BeginGifTag(obj, 0, 1, 0xE);
@@ -2629,7 +2629,7 @@ void func_0015C3C0(V24A2* unused, s32 flag, Obj_0015C3C0* obj)
     }
 }
 
-f32 func_0015C418(V24A2* self, s8* s)
+f32 func_0015C418(Font* self, s8* s)
 {
     f32 acc;
     s8* p;
@@ -2639,20 +2639,20 @@ f32 func_0015C418(V24A2* self, s8* s)
     p = s;
     acc = 0.0f;
     while (*p != 0) {
-        const V24A2_Vt* n = self->vt;
-        acc = acc + n->width((V24A2*)((u8*)self + n->adj3), (s8)(u8)*p++);
+        const FontVt* n = self->vt;
+        acc = acc + n->width((Font*)((u8*)self + n->adj3), (s8)(u8)*p++);
     }
     return acc;
 }
 
-f32 func_0015C4A8(V24A2* self, u8* s)
+f32 func_0015C4A8(Font* self, u8* s)
 {
     f32 a = (f32)self->height * self->sy;
     s32 n = WrapFontString(self, s);
     return a * (f32)n;
 }
 
-s32 func_0015C4E8(V24A2* self, u8* s, f32 w)
+s32 func_0015C4E8(Font* self, u8* s, f32 w)
 {
     s32 count = 1;
     s8* cur = (s8*)s;
@@ -2663,8 +2663,8 @@ s32 func_0015C4E8(V24A2* self, u8* s, f32 w)
             acc = 0.0f;
             count++;
         } else {
-            const V24A2_Vt* t = self->vt;
-            acc += t->width((V24A2*)((u8*)self + t->adj3), c);
+            const FontVt* t = self->vt;
+            acc += t->width((Font*)((u8*)self + t->adj3), c);
         }
         if (w != 0.0f && w < acc) {
             s8* p = cur;
@@ -2695,14 +2695,14 @@ s32 func_0015C4E8(V24A2* self, u8* s, f32 w)
 
 LINKER_REMNANT(func_0015C630);
 
-void func_0015C638(V24A2 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
+void func_0015C638(Font *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
 {
   char *p;
   char *next;
   s32 pending = 1;
   f32 x;
   f32 y;
-  self->vt->begin((V24A2 *) (((u8 *) self) + self->vt->adj4), a3, a4);
+  self->vt->begin((Font *) (((u8 *) self) + self->vt->adj4), a3, a4);
   if (par->f18 == 0)
   {
     y = par->f4;
@@ -2757,7 +2757,7 @@ void func_0015C638(V24A2 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
           x = 0.0f;
           for (q = p; (*q != 0) && (*q != '\n'); q++)
           {
-            x += self->vt->width((V24A2 *) (((u8 *) self) + self->vt->adj3), *q);
+            x += self->vt->width((Font *) (((u8 *) self) + self->vt->adj3), *q);
           }
           if (par->f14 == right)
           {
@@ -2770,36 +2770,36 @@ void func_0015C638(V24A2 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
         }
         pending = 0;
       }
-      x += self->vt->draw(x, y, (V24A2 *) (((u8 *) self) + self->vt->adj6), *p, par->f10, a4);
+      x += self->vt->draw(x, y, (Font *) (((u8 *) self) + self->vt->adj6), *p, par->f10, a4);
     }
   }
 
-  self->vt->end((V24A2 *) (((u8 *) self) + self->vt->adj7), a3, a4);
+  self->vt->end((Font *) (((u8 *) self) + self->vt->adj7), a3, a4);
 }
 
 // Points recorded in order, the first of them scaled into u and v.
-void func_0015C8B8(V24A2* trail, f32 su, f32 sv)
+void func_0015C8B8(Font* trail, f32 su, f32 sv)
 {
-    V24A2_Pt* point = &trail->stack[trail->depth++];
+    FontScale* point = &trail->stack[trail->depth++];
     point->x = trail->sx;
     point->y = trail->sx;
     trail->sx = trail->stack[0].x * su;
     trail->sy = trail->stack[0].y * sv;
 }
 
-void func_0015C900(V24A2* obj) { obj->depth--; V24A2_Pt* item = &obj->stack[obj->depth]; obj->sx = item->x; obj->sy = item->y; }
+void func_0015C900(Font* obj) { obj->depth--; FontScale* item = &obj->stack[obj->depth]; obj->sx = item->x; obj->sy = item->y; }
 
-V24A2* func_0015C930(V24A2* owner, f32 x, f32 y)
+Font* func_0015C930(Font* owner, f32 x, f32 y)
 {
-	V24A2* out = (V24A2*)AllocateObjectMemory(0x88);
-	out->vt = (const V24A2_Vt*)&g_fontMethods;
+	Font* out = (Font*)AllocateObjectMemory(0x88);
+	out->vt = (const FontVt*)&g_fontMethods;
 	CopyFont(owner, out);
 	out->sx *= x;
 	out->sy *= y;
 	return out;
 }
 
-void func_0015C9B0(V24A2* self, V24A2* dst)
+void func_0015C9B0(Font* self, Font* dst)
 {
     CopyFontMetrics(self, dst);
     dst->id = self->id;
@@ -2815,14 +2815,14 @@ void func_0015C9B0(V24A2* self, V24A2* dst)
     dst->mask = self->mask;
 }
 
-s32 func_0015CA38(V24A2* a, s32 b)
+s32 func_0015CA38(Font* a, s32 b)
 {
     return FindFontGlyph(a, (s8)b) != 0;
 }
 
-f32 func_0015CA60(V24A2* self, s8 key)
+f32 func_0015CA60(Font* self, s8 key)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, key);
+    FontGlyph* e = FindFontGlyph(self, key);
     f32 x;
     f32 y;
     if (e == 0) {
@@ -2835,7 +2835,7 @@ f32 func_0015CA60(V24A2* self, s8 key)
     return x * y;
 }
 
-s32 func_0015CAB8(V24A2* self, void* obj)
+s32 func_0015CAB8(Font* self, void* obj)
 {
     s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
@@ -2852,7 +2852,7 @@ s32 func_0015CAB8(V24A2* self, void* obj)
     return r;
 }
 
-void func_0015CB88(V24A2* self, s32 a1, void* obj)
+void func_0015CB88(Font* self, s32 a1, void* obj)
 {
     SetFontClipRect(self, a1, obj);
     s32 ok = AddFontImagesToFrame(self, obj);
@@ -2873,7 +2873,7 @@ void func_0015CB88(V24A2* self, s32 a1, void* obj)
     BeginGifRegListTag(obj, 5, 0x43431);
 }
 
-void func_0015CC80(V24A2* self, void* obj)
+void func_0015CC80(Font* self, void* obj)
 {
     s32 ok = AddFontImagesToFrame(self, obj);
     BeginGifTag(obj, 6, 1, 0xE);
@@ -2885,9 +2885,9 @@ void func_0015CC80(V24A2* self, void* obj)
     BeginGifRegListTag(obj, 5, 0x43431);
 }
 
-f32 func_0015CD18(f32 x, f32 y, V24A2* self, s8 key, u32 color, V24A0* s)
+f32 func_0015CD18(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, key);
+    FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -2910,9 +2910,9 @@ f32 func_0015CD18(f32 x, f32 y, V24A2* self, s8 key, u32 color, V24A0* s)
     return (f32)self->advance * self->sx;
 }
 
-void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
+void func_0015CF70(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, key);
+    FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -2955,13 +2955,13 @@ void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
             AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
             AddGifUvRegListEntry(s, u1, v1);
             AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
-            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
+            self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
         }
     }
 }
 
-void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
-                   f32 u0, f32 v0, f32 u1, f32 v1, V24A0* s)
+void func_0015D338(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+                   f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s)
 {
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
     AddGifRegListFloat(s, color, 0.0f);
@@ -2971,9 +2971,9 @@ void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
     AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
 }
 
-void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)
+void func_0015D4E0(Font* self, Item_15D4E0* item, Rect_15D4E0* r, PacketWriter* s)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, item->key);
+    FontGlyph* e = FindFontGlyph(self, item->key);
     if (e != 0) {
         PushFontScale(item->f0, item->f10, item->f14);
         f32 top = r->y;
@@ -2998,7 +2998,7 @@ void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)
         f32 y2 = top + r->h + item->fC * sy;
         f32 y0 = y1 - (f32)height * sy;
         f32 y3 = y2 + (f32)height * sy;
-        self->vt->begin((V24A2*)((u8*)self + self->vt->adj4), 0, (s32)s);
+        self->vt->begin((Font*)((u8*)self + self->vt->adj4), 0, (s32)s);
         f32 v2 = (f32)v2i;
         f32 u2 = (f32)u2i;
         DrawFontQuad(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
@@ -3011,7 +3011,7 @@ void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)
         DrawFontQuad(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
         DrawFontQuad(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
         PopFontScale(item->f0);
-        self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)s);
+        self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, (s32)s);
     }
 }
 
@@ -3028,21 +3028,21 @@ void func_0015D4E0();
 void func_001FBDF8();
 extern const VEnt_0024A220 D_0024A220[22] = {{0, 0}, {0, func_0015C930}, {0, func_0015CA38}, {0, func_0015CA60}, {0, func_0015CB88}, {0, func_0015CC80}, {0, func_0015CD18}, {0, func_0015C3C0}, {0, func_0015CF70}, {0, func_0015D4E0}, {0, 0}, {0, 0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C2E8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C3C0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, 0}};
 
-void func_0015D8A8(V24A2* obj, void* src)
+void func_0015D8A8(Font* obj, void* src)
 {
     Local_15D8A8 l;
     ReadBufferedStreamBytes(src, 0x10, &l);
     s32 idx = l.b7;
     obj->id = idx;
     g_fonts[idx] = (s32)obj;
-    obj->imgA = (V24A2_ImgA*)((u8*)g_imageRecordsA + l.u0 * 32);
+    obj->imgA = (ImageRecord*)((u8*)g_imageRecordsA + l.u0 * 32);
     void* t;
     if (l.u2 != 0xFFFF) {
         t = (u8*)g_imageRecordsB + l.u2 * 24;
     } else {
         t = 0;
     }
-    obj->imgB = (V24A2_ImgB*)t;
+    obj->imgB = (PaletteRecord*)t;
     s32 n = l.uC;
     s32 A = l.b4, B = l.b5, C = l.b6; f32 F = l.f8;
     obj->f00 = A;
@@ -3051,17 +3051,17 @@ void func_0015D8A8(V24A2* obj, void* src)
     obj->height = C;
     obj->advance = B;
     obj->sy = F;
-    obj->glyphs = (V24A2_Glyph*)AllocateFrontMemory(n << 3);
+    obj->glyphs = (FontGlyph*)AllocateFrontMemory(n << 3);
     ReadBufferedStreamBytes(src, obj->glyphCount << 3, obj->glyphs);
 }
 
-void func_0015D998(V24A2* self, void* arg)
+void func_0015D998(Font* self, void* arg)
 {
     Frame_15D998 f;
     s32 n;
 
     (void)InitGifPacket(&f.a);
-    V24A2_ImgA* q = self->imgA;
+    ImageRecord* q = self->imgA;
     n = AllocateBump(arg, q->f0A);
     BuildImageTexRegister(self->imgA, n);
     self->f60u = self->imgA->f18;
@@ -3082,7 +3082,7 @@ void func_0015D998(V24A2* self, void* arg)
 
 // EXACT: element address written as off + (u32)entries
 
-V24A2_Glyph* func_0015DAB8(V24A2* self, u8 key)
+FontGlyph* func_0015DAB8(Font* self, u8 key)
 {
     s32 lo = 0;
     s32 hi = self->glyphCount - 1;
@@ -3091,7 +3091,7 @@ V24A2_Glyph* func_0015DAB8(V24A2* self, u8 key)
         do {
             s32 mid = (hi + lo) / 2;
             s32 off = mid * 8;
-            V24A2_Glyph* e = (V24A2_Glyph*)(off + (u32)self->glyphs);
+            FontGlyph* e = (FontGlyph*)(off + (u32)self->glyphs);
             s32 d = key - e->key;
 
             if (d == 0) {
@@ -3109,9 +3109,9 @@ V24A2_Glyph* func_0015DAB8(V24A2* self, u8 key)
 
 TextReader* func_0015DB28(TextReader* self, s32 a1, s32 a2)
 {
-    self->inlineFont.vt = (const V24A2_Vt*)&g_fontMethods;
+    self->inlineFont.vt = (const FontVt*)&g_fontMethods;
     self->text = a1;
-    self->defaultFont = (V24A2*)a2;
+    self->defaultFont = (Font*)a2;
     self->inlineFontColorBits = 0xFF808080;
     self->defaultColorBits = 0xFF808080;
     self->baseColorBits = 0xFF808080;
@@ -3144,7 +3144,7 @@ s32 func_0015DBE0(TextReader* self)
 {
     s32 done = 0;
     s32 changed = 1;
-    V24A2* inl = &self->inlineFont;
+    Font* inl = &self->inlineFont;
     do {
         char* p = self->cur;
         switch (*p) {
@@ -3196,11 +3196,11 @@ s32 func_0015DBE0(TextReader* self)
                 self->fontChanged = changed;
                 self->cur += 2;
             } else {
-                V24A2* nf = (V24A2*)FindFontByKeyChar(p[1]);
+                Font* nf = (Font*)FindFontByKeyChar(p[1]);
                 if (nf != 0) {
                     CopyFont(nf, inl);
                     self->cur += 2;
-                    V24A2* d = self->defaultFont;
+                    Font* d = self->defaultFont;
                     f32 ratio = ((f32)d->height * d->sy) / ((f32)inl->height * inl->sy);
                     self->font = inl;
                     u8 al = self->color.a;
@@ -3227,7 +3227,7 @@ s32 func_0015DBE0(TextReader* self)
                 self->cur += 2;
             } else {
                 f32 a = (f32)(p[1] - '0') + (f32)(p[2] - '0') * 0.1f;
-                V24A2* f = self->font;
+                Font* f = self->font;
                 PushFontScale(f, a * f->sx, a * f->sy);
                 self->cur += 3;
             }
@@ -3274,9 +3274,9 @@ f32 func_0015DFF8(TextReader* self)
     RewindTextReader(self);
     s32 item;
     while ((item = ReadTextChar(self)) != 0) {
-        V24A2* holder = self->font;
-        const V24A2_Vt* disp = holder->vt;
-        acc += disp->width((V24A2*)((u8*)holder + disp->adj3), item);
+        Font* holder = self->font;
+        const FontVt* disp = holder->vt;
+        acc += disp->width((Font*)((u8*)holder + disp->adj3), item);
     }
     return acc;
 }
@@ -3295,9 +3295,9 @@ s32 func_0015E068(Lines_15E068* self, f32 limit)
             width = 0.0f;
             lines++;
         } else {
-            V24A2* holder = self->holder;
-            const V24A2_Vt* glyph = holder->vt;
-            width += glyph->width((V24A2*)((u8*)holder + glyph->adj3), c);
+            Font* holder = self->holder;
+            const FontVt* glyph = holder->vt;
+            width += glyph->width((Font*)((u8*)holder + glyph->adj3), c);
         }
         if (limit != 0.0f && limit < width) {
             s8* p = self->cur - 1;
@@ -3326,7 +3326,7 @@ s32 func_0015E068(Lines_15E068* self, f32 limit)
 
 f32 func_0015E1B0(TextReader* self)
 {
-    V24A2* holder = self->defaultFont;
+    Font* holder = self->defaultFont;
     f32 width = (f32)holder->height * holder->sy;
     s32 lines = WrapTextLines(self);
     return width * (f32)lines;
@@ -3499,7 +3499,7 @@ void func_0015EAE0(void* list, s32 value, s32 end)
 void func_0015EB20(void* self, void* p, s32 n)
 {
     Qword_15EB20 mem[8];
-    V24A0 gif;
+    PacketWriter gif;
     void* buf = &gif;
     InitGifPacket(buf);
     UsePacketBufferMemory(buf, 8, mem);

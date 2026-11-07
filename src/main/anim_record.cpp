@@ -3,8 +3,8 @@
 #include "c6e.h"
 #include "cursor_animator.h"
 #include "world.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "list_iter.h"
 #include "shapes.h"
 #include "globals.h"
@@ -88,17 +88,17 @@ struct Glob_1B3510 {
     u8 pad0[0x204];
     u32 f204;
 };
-void* func_001611B8(V24A0* b);
-void func_001529C8(V24A0* b, s32 n, Quad4* q);
-void func_001612F8(V24A0* b, s32 a, s32 c, s32 d, s32 e, s32 f);
-void func_001613C0(V24A0* b, s32 a, s32 c, u64 d);
-void func_00161708(V24A0* b, s32 reg, u64 v);
-void func_001B29E0(TextureTable* e, s32 j, s32 pass, s32 kind, V24A0* b);
-void func_00152D70(V24A0* b);
-void func_001528C8(V24A0* b);
-void func_00161278(V24A0* b, s32 n);
-void func_00161520(V24A0* b, f32 x, f32 y, f32 z);
-void func_00161458(V24A0* b, u32 c);
+void* func_001611B8(PacketWriter* b);
+void func_001529C8(PacketWriter* b, s32 n, Quad4* q);
+void func_001612F8(PacketWriter* b, s32 a, s32 c, s32 d, s32 e, s32 f);
+void func_001613C0(PacketWriter* b, s32 a, s32 c, u64 d);
+void func_00161708(PacketWriter* b, s32 reg, u64 v);
+void func_001B29E0(TextureTable* e, s32 j, s32 pass, s32 kind, PacketWriter* b);
+void func_00152D70(PacketWriter* b);
+void func_001528C8(PacketWriter* b);
+void func_00161278(PacketWriter* b, s32 n);
+void func_00161520(PacketWriter* b, f32 x, f32 y, f32 z);
+void func_00161458(PacketWriter* b, u32 c);
 struct Ctx_1B2DF8;
 extern u8 D_0024A220[];
 void* func_001FD8A8(s32 size);
@@ -165,9 +165,9 @@ s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
 s32 D_002744F8 = 0;
 AnimRecord* D_002744FC = 0;
 s32 D_00274500 = 0;
-V24A2_ImgA* D_00274504 = 0;
+ImageRecord* D_00274504 = 0;
 s32 D_00274508 = 0;
-V24A2_ImgB* D_0027450C = 0;
+PaletteRecord* D_0027450C = 0;
 s32 D_00274510 = 0;
 s32 D_00274514 = 0;
 s32 D_00274518 = 0;
@@ -232,7 +232,7 @@ void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
     AddGifRegisterWrite(ctx, kindC, e.bits);
 }
 
-void func_001B2B50(void* a0, V24A2_ImgB* a1)
+void func_001B2B50(void* a0, PaletteRecord* a1)
 {
     ReadBufferedStreamBytes(a0, 12, a1);
     a1->f8 = D_00275718 + a1->f8;
@@ -244,7 +244,7 @@ void func_001B2BA8(void* self)
     s32 i;
     s32 count = ReadBufferedU16(self);
     g_imageRecordCountB = count;
-    g_imageRecordsB = (V24A2_ImgB*)AllocateZeroedFrontMemory(count * 0x18);
+    g_imageRecordsB = (PaletteRecord*)AllocateZeroedFrontMemory(count * 0x18);
     g_imageSlotsB = 0;
     for (i = 0; i < g_imageRecordCountB; i++) {
         ReadImageRecordB(self, &g_imageRecordsB[i]);
@@ -261,7 +261,7 @@ void func_001B2BA8(void* self)
     }
 }
 
-void func_001B2CA8(void* self, V24A2_ImgA* obj)
+void func_001B2CA8(void* self, ImageRecord* obj)
 {
     ReadBufferedStreamBytes(self, 0x14, obj);
     s32 base = D_00275718;
@@ -277,7 +277,7 @@ void func_001B2CF8(void* self)
     s32 i;
     s32 count = ReadBufferedU16(self);
     g_imageRecordCountA = count;
-    g_imageRecordsA = (V24A2_ImgA*)AllocateZeroedFrontMemory(count * 0x20);
+    g_imageRecordsA = (ImageRecord*)AllocateZeroedFrontMemory(count * 0x20);
     g_imageSlotsA = 0;
     for (i = 0; i < g_imageRecordCountA; i++) {
         ReadImageRecordA(self, &g_imageRecordsA[i]);
@@ -470,7 +470,7 @@ void func_001B3488(Obj_1B3488* self)
 
 void func_001B3510(s32 mask)
 {
-    V24A0 buf;
+    PacketWriter buf;
     u8 col[4];
     s32 i;
     s32 j;

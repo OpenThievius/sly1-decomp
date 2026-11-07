@@ -11,7 +11,7 @@
 #include "redirect_object.h"
 #include "world.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "globals.h"
 #include "game_progress.h"
 #include "level_entry.h"

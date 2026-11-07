@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // 0x14EE40 to 0x1549C8: the methods of classes 0x46, 0x23, 0x65 and 0x61, the threshold
-// tables of ScatterController, the display-list writer (V24A0, with its base vtable D_0024A0E0) and the
+// tables of ScatterController, the display-list writer (PacketWriter, with its base vtable D_0024A0E0) and the
 // active-set solver (func_00153528 to func_00154880). One file between two edges: its .rodata,
 // 0x249FE0 to 0x24A114, is followed by 12 bytes of padding before the next file's.
 #include "common.h"
@@ -20,7 +20,7 @@
 #include "attachment.h"
 #include "camera.h"
 #include "flagged_object.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "globals.h"
 #include "game_progress.h"
 #include "threshold_range.h"
@@ -469,7 +469,7 @@ struct Buffer_00152938 { u8* end; u8* current; u8 pad[4]; u8* allocated; };
 
 extern u8* func_0018D658(u32);
 
-void func_00152D70(V24A0* self);
+void func_00152D70(PacketWriter* self);
 
 void func_00152D70(void* self);
 u32 func_0018D568(u32 size, u32 src);
@@ -530,7 +530,7 @@ void func_00148CE0(void*);
 
 struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
 void func_00152E18();
-void func_001528C8(V24A0* p);
+void func_001528C8(PacketWriter* p);
 
 struct __attribute__((packed)) Blk_150790 { u8 pad0[0x324]; s32 f324; };
 struct Glob_150790 { u8 pad0[0x260]; StepSequence* f260; };
@@ -728,27 +728,27 @@ struct Self_152E48 {
     s32 f2E0;
 };
 
-void* func_001611B8(V24A0* p);
-void* func_001EE318(V24A0* p);
+void* func_001611B8(PacketWriter* p);
+void* func_001EE318(PacketWriter* p);
 void func_0018D608(void);
-void func_00152980(V24A0* p, s32 size);
-void func_001EE480(V24A0* p);
-void func_00169B18(TextureHeader* t, V24A0* p);
-void func_001613C0(V24A0* p, s32 a, s32 b, u64 c);
-void func_00161458(V24A0* p, s32 a);
-void func_00161588(V24A0* p, s32 a, s32 b, u64 c);
-void func_00161708(V24A0* p, s32 a, u64 v);
-void func_00161200(V24A0* p);
-void func_001EE8D0(V24A0* p, V24A0* q);
-void func_001EE3B8(V24A0* p, s32 a, s32 b);
-void func_001EE668(V24A0* p, s32 size, s32 count, void* data, s32 flags);
-void func_001528C8(V24A0* p);
-void func_001529C8(V24A0* p, s32 n, Quad4* q);
-void func_001612F8(V24A0* p, s32 a, s32 b, s32 c, u64 d, s32 e);
-void func_00152A50(V24A0* p, s32* a, s32 b, s32* c, s32 d);
+void func_00152980(PacketWriter* p, s32 size);
+void func_001EE480(PacketWriter* p);
+void func_00169B18(TextureHeader* t, PacketWriter* p);
+void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
+void func_00161458(PacketWriter* p, s32 a);
+void func_00161588(PacketWriter* p, s32 a, s32 b, u64 c);
+void func_00161708(PacketWriter* p, s32 a, u64 v);
+void func_00161200(PacketWriter* p);
+void func_001EE8D0(PacketWriter* p, PacketWriter* q);
+void func_001EE3B8(PacketWriter* p, s32 a, s32 b);
+void func_001EE668(PacketWriter* p, s32 size, s32 count, void* data, s32 flags);
+void func_001528C8(PacketWriter* p);
+void func_001529C8(PacketWriter* p, s32 n, Quad4* q);
+void func_001612F8(PacketWriter* p, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152A50(PacketWriter* p, s32* a, s32 b, s32* c, s32 d);
 void func_0018D6F0(void);
-void func_001614C8(V24A0* p, s32 a, s32 b);
-void func_001EE450(V24A0* p);
+void func_001614C8(PacketWriter* p, s32 a, s32 b);
+void func_001EE450(PacketWriter* p);
 
 struct Sub_1533A8 {
     u8 pad0[0x238];
@@ -2188,16 +2188,16 @@ void func_00152810()
 
 extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
 
-V24A0* func_00152888(V24A0* self)
+PacketWriter* func_00152888(PacketWriter* self)
 {
     self->f10 = 0;
     self->f14 = 0;
-    self->vt = (const V24A0_Vt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)D_0024A0E0;
     ClearPacketBuffer(self);
     return self;
 }
 
-void func_001528C8(V24A0* p)
+void func_001528C8(PacketWriter* p)
 {
 	p->end = 0;
 	p->begin = 0;
@@ -2205,14 +2205,14 @@ void func_001528C8(V24A0* p)
 	p->cur = 0;
 }
 
-void func_001528E0(V24A0* p)
+void func_001528E0(PacketWriter* p)
 {
 	u8* b = p->begin;
 	p->f08 = 0;
 	p->cur = b;
 }
 
-void func_001528F0(V24A0* self, s32 count)
+void func_001528F0(PacketWriter* self, s32 count)
 {
     s32 size = count << 4;
     u8* base = ReservePermanentMemory(size);
@@ -2230,7 +2230,7 @@ void func_00152938(Buffer_00152938* buffer, u32 count)
 	buffer->current = memory;
 }
 
-void func_00152980(V24A0* buffer, u32 count)
+void func_00152980(PacketWriter* buffer, u32 count)
 {
 	u32 bytes = count << 4;
 	u8* memory = AllocateBackMemory(bytes);
@@ -2239,14 +2239,14 @@ void func_00152980(V24A0* buffer, u32 count)
 	buffer->begin = memory;
 }
 
-void func_001529C8(V24A0* self, s32 count, u8* base)
+void func_001529C8(PacketWriter* self, s32 count, u8* base)
 {
     self->begin = base;
     self->cur = base;
     self->end = base + count * 16;
 }
 
-void func_001529E0(V24A0* self, u32* outCount, u8** outBegin)
+void func_001529E0(PacketWriter* self, u32* outCount, u8** outBegin)
 {
     CloseDmaTag(self);
     if (outCount != 0) {
@@ -2258,7 +2258,7 @@ void func_001529E0(V24A0* self, u32* outCount, u8** outBegin)
     ClearPacketBuffer(self);
 }
 
-void func_00152A50(V24A0* self, u32* count, u32* begin, u32* out)
+void func_00152A50(PacketWriter* self, u32* count, u32* begin, u32* out)
 {
     CloseDmaTag(self);
     u32 n = (self->curU - (u32)self->begin) >> 4;
@@ -2274,7 +2274,7 @@ void func_00152A50(V24A0* self, u32* count, u32* begin, u32* out)
     ClearPacketBuffer(self);
 }
 
-void func_00152AE0(V24A0* self, void* dma)
+void func_00152AE0(PacketWriter* self, void* dma)
 {
     CloseDmaTag(self);
     SyncDataCache(0);
@@ -2284,7 +2284,7 @@ void func_00152AE0(V24A0* self, void* dma)
 
 LINKER_REMNANT(func_00152B30);
 
-void func_00152B38(V24A0* self)
+void func_00152B38(PacketWriter* self)
 {
     CloseDmaTag(self);
     u8* q = self->cur;
@@ -2294,7 +2294,7 @@ void func_00152B38(V24A0* self)
     *(u64*)((u8*)self->f08 + 8) = 0;
 }
 
-void func_00152B80(V24A0* self, s32 lo, s32 hi)
+void func_00152B80(PacketWriter* self, s32 lo, s32 hi)
 {
     s32 flag = 0;
     if (self->f08 != 0) {
@@ -2314,7 +2314,7 @@ void func_00152B80(V24A0* self, s32 lo, s32 hi)
     }
 }
 
-void func_00152C18(V24A0* self, s32 hi)
+void func_00152C18(PacketWriter* self, s32 hi)
 {
     s32 flag = 0;
     if (self->f08 != 0) {
@@ -2334,7 +2334,7 @@ void func_00152C18(V24A0* self, s32 hi)
     }
 }
 
-void func_00152CA0(V24A0* self)
+void func_00152CA0(PacketWriter* self)
 {
     CloseDmaTag(self);
     u64* p = (u64*)self->cur;
@@ -2358,7 +2358,7 @@ void func_00152D30(void* self)
     *(u64*)(cursor + 8) = 0;
 }
 
-void func_00152D70(V24A0* self)
+void func_00152D70(PacketWriter* self)
 {
     if (self->f10 != 0) {
         s32 p = self->curS;
@@ -2369,8 +2369,8 @@ void func_00152D70(V24A0* self)
         }
         self->curS = p;
     } else if (self->f14 != 0) {
-        const V24A0_Vt* t = self->vt;
-        t->close((V24A0*)((u8*)self + t->adj1), 0);
+        const PacketWriterVt* t = self->vt;
+        t->close((PacketWriter*)((u8*)self + t->adj1), 0);
     }
     s32* q = self->f08;
     if (q != 0) {
@@ -2390,8 +2390,8 @@ void func_00152E28(C61* self)
 
 void func_00152E48(Self_152E48* self, RangeRecord* a)
 {
-    V24A0 pa;
-    V24A0 pb;
+    PacketWriter pa;
+    PacketWriter pb;
     Vec_152E48 v0;
     Vec_152E48 v1;
     Quad4 q;
