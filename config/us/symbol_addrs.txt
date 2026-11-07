@@ -117,3 +117,12 @@ D_00249D80 = 0x00249D80;
 // 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
 // Named so that file_13CCF8 can hold them (LINKER_REMNANT).
 func_0013E650 = 0x0013E650; // type:func
+// The start of the memory card library's .data inside a coarse label (D_0027AE84): its
+// identification string, which no code reads, after the previous object's table.
+D_0027AEB8 = 0x0027AEB8;
+// The end of the memory card library's .rodata: a message no code reads (that of a function the
+// linker stripped), after the binding's message at D_0024FFE0.
+D_00250008 = 0x00250008;
+// The MPEG library's identification string, which no code reads, inside a coarse label
+// (D_0027AED0): the end of the demultiplexer's stream table and of its file's .data.
+D_0027AF70 = 0x0027AF70;

@@ -3715,7 +3715,7 @@ func_00209210	func_0020A550	match
 func_00209238	func_0020A578	match	
 func_00209260	func_0020A5A0	match	
 func_002093C0	func_0020A700	match	
-func_002093F0	func_0020A8B8	match	
+func_002093F0	func_0020A8B8	match	rodata
 func_002095B0	func_0020AA78	match	version-specific
 func_002096E8	func_0020ABB0	match	
 func_00209720	func_0020ABE8	match	
@@ -3734,7 +3734,7 @@ func_0020A518	func_0020B9E0	match
 func_0020A538	func_0020BA00	match	
 func_0020A630	func_0020BAF8	match	
 func_0020A780	func_0020BC48	match	
-func_0020A7F0	func_0020BCB8	match	
+func_0020A7F0	func_0020BCB8	match	rodata
 func_0020ADA0	func_0020C268	match	
 func_0020AE40	func_0020C308	match	rodata
 func_0020B048	func_0020C510	match	
@@ -3748,7 +3748,7 @@ func_0020B1E0	func_0020C6A8	match
 func_0020B240	func_0020C708	match	
 func_0020B258	func_0020C720	match	
 func_0020B268	func_0020C730	match	
-func_0020B278	func_0020C740	match	
+func_0020B278	func_0020C740	match	rodata
 func_0020B2E8	func_0020C7B0	match	rodata
 func_0020B458	func_0020C920	match	
 func_0020B570	func_0020CA38	match	
@@ -3765,16 +3765,16 @@ func_0020B9D0	func_0020CE98	match
 func_0020B9F0	func_0020CEB8	match	rodata
 func_0020BDC0	func_0020D288	match	
 func_0020BEA0	func_0020D368	match	
-func_0020BF78	func_0020D440	match	
+func_0020BF78	func_0020D440	match	rodata
 func_0020C0A8	func_0020D570	match	
-func_0020C138	func_0020D600	match	
-func_0020C148	func_0020D610	match	
-func_0020C158	func_0020D620	match	
-func_0020C168	func_0020D630	match	
+func_0020C138	func_0020D600	match	rodata
+func_0020C148	func_0020D610	match	rodata
+func_0020C158	func_0020D620	match	rodata
+func_0020C168	func_0020D630	match	rodata
 func_0020C178	func_0020D640	match	
 func_0020C188	func_0020D650	match	
-func_0020C1A0	func_0020D660	match	
-func_0020C3F0	func_0020D8B0	match	
+func_0020C1A0	func_0020D660	match	rodata
+func_0020C3F0	func_0020D8B0	match	rodata
 func_0020DEE8	func_0020F3A8	match	
 func_0020DF10	func_0020F3D0	match	rodata
 func_0020E100	func_0020F5C0	match	

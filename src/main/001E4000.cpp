@@ -3798,7 +3798,6 @@ extern const char D_0024F728[16] = "cdread end\n";
 extern const char D_0024F738[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
 extern const char D_0024F7D0[48] = "libpad: buffer addr is not 64 byte align. %08x\n";
 extern const char D_0024F800[144] = "libpad: pad port is already open [%d][%d]\n\000\000\000\000\000\000ERROR\000\000\000STABLE\000\000EXECCMD\000FINDCTP1\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000DISCONNECT\000\000\000\000\000\000BUSY\000\000\000\000FAILED\000\000COMPLETE";
-extern const char D_002502E8[24] = "intra && skip MB";
 extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
 
 // Globals typed by worker dv03, from retail's bytes and their readers.
@@ -3812,22 +3811,6 @@ extern const u8 D_0026A110[];
 
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
-void func_0020D138();
-void func_0020D248();
-void func_0020D3D0();
-void func_0020D538();
-void func_0020D730();
-void func_0020D880();
-void func_0020DA48();
-void func_0020DBF0();
-void func_0020D1B0();
-void func_0020D300();
-void func_0020D480();
-void func_0020D630();
-void func_0020D7D0();
-void func_0020D960();
-void func_0020DB20();
-void func_0020DD10();
 extern const u8 D_002197B8[];
 extern const u8 D_002198E8[];
 extern const u8 D_002505B8[];
@@ -3874,8 +3857,6 @@ s32 D_00279440 = -1;
 s32 D_00279444 = -1;
 s32 D_00279448 = -1;
 s32 D_0027944C = -1;
-void (*D_0027B000[8])() = { func_0020D138, func_0020D248, func_0020D3D0, func_0020D538, func_0020D730, func_0020D880, func_0020DA48, func_0020DBF0 };
-void (*D_0027B020[8])() = { func_0020D1B0, func_0020D300, func_0020D480, func_0020D630, func_0020D7D0, func_0020D960, func_0020DB20, func_0020DD10 };
 extern const void* const D_00247448[149] = {
     &D_00217410,
     &D_00217418,
