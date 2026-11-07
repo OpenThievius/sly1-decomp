@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 92.63563255825606,
+  "fuzzy_match_percent": 92.70148489869834,
   "total_code": "1117652",
-  "matched_code": "1030276",
-  "matched_code_percent": 92.18218193140619,
+  "matched_code": "1031012",
+  "matched_code_percent": 92.24803427184848,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4831,
-  "matched_functions": 4733,
-  "matched_functions_percent": 97.97143448561374,
+  "matched_functions": 4735,
+  "matched_functions_percent": 98.0128337818257,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -44835,16 +44835,16 @@
   {
    "name": "lib/cdvd",
    "measures": {
-    "fuzzy_match_percent": 48.44668345927792,
+    "fuzzy_match_percent": 63.89588581024349,
     "total_code": "4764",
-    "matched_code": "2308",
-    "matched_code_percent": 48.44668345927792,
+    "matched_code": "3044",
+    "matched_code_percent": 63.89588581024349,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 26,
-    "matched_functions": 21,
-    "matched_functions_percent": 80.76923076923077,
+    "matched_functions": 23,
+    "matched_functions_percent": 88.46153846153847,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -44964,7 +44964,7 @@
     {
      "name": "func_00204400",
      "size": "368",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "952",
      "metadata": {
       "virtual_address": "2114560"
@@ -45000,7 +45000,7 @@
     {
      "name": "func_00204718",
      "size": "368",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1744",
      "metadata": {
       "virtual_address": "2115352"
@@ -48524,16 +48524,16 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 89.01945874952476,
+    "fuzzy_match_percent": 89.65541077662185,
     "total_code": "115732",
-    "matched_code": "103024",
-    "matched_code_percent": 89.01945874952476,
+    "matched_code": "103760",
+    "matched_code_percent": 89.65541077662185,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 635,
-    "matched_functions": 599,
-    "matched_functions_percent": 94.33070866141732,
+    "matched_functions": 601,
+    "matched_functions_percent": 94.64566929133858,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
