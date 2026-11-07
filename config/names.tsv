@@ -2674,3 +2674,16 @@ func_0017B410	SetGaugeModeObjectMode	sets the mode (+0x550): modes 0 and 1 reset
 func_0017B510	PlayGaugeModeObjectLoop	with a nonzero flag starts the animation of its handle at +0x600 (ReplaceAnimationPlayer, with +0x604), else stops it
 func_0017B550	SetGaugeModeObjectTarget	stores at +0x60C the object of kind 0x101 with the index (FindFirstObjectById), or 0 for -1
 func_0017B598	PlayGaugeModeObjectTarget	starts the animation of the object at +0x60C (ReplaceAnimationPlayer, with +0x610)
+func_0017CFC8	AddQueueEntryKind0	adds an entry of kind 0 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107C00 calls it
+func_0017CFF0	AddQueueEntryKind1	adds an entry of kind 1 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107CB0 calls it
+func_0017D018	AddQueueEntryKind10	adds an entry of kind 10 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107D60 calls it
+func_0017D040	AddQueueEntryKind2	adds an entry of kind 2 to the entry queue (AddQueueEntry) with value -1, flag 1, and its argument at the entry's +0x0C; the script built-in func_00107E10 calls it
+func_0017D078	AddQueueEntryKind3	adds an entry of kind 3 to the entry queue (AddQueueEntry) with its argument as the entry's value, flag 1; the script built-in func_00107EC0 calls it
+func_0017D0A0	AddQueueEntryKind4	adds an entry of kind 4 to the entry queue (AddQueueEntry) with its first argument as the value, flag 0, and a float at +0x0C; the script built-in func_00107F70 calls it
+func_0017D0D8	AddQueueEntryKind9	adds an entry of kind 9 to the entry queue (AddQueueEntry) with its two arguments as the value and the flag; the script built-in func_001083C8 calls it
+func_0017D100	AddQueueEntryKind5	adds an entry of kind 5 to the entry queue (AddQueueEntry) with value, flag and two words at +0x0C and +0x10; the script built-in func_00108038 calls it
+func_0017D148	AddQueueEntryKind6	adds an entry of kind 6 to the entry queue (AddQueueEntry) with value, flag and a float at +0x0C; the script built-in func_00108128 calls it
+func_0017D180	AddQueueEntryKind7	adds an entry of kind 7 to the entry queue (AddQueueEntry) with value, flag and a float at +0x0C; the script built-in func_00108208 calls it
+func_0017D1B8	AddQueueEntryKind8	adds an entry of kind 8 to the entry queue (AddQueueEntry) with value, flag and a word at +0x0C; the script built-in func_001082E8 calls it
+func_0017D1E8	AddQueueEntryKind11	adds an entry of kind 11 to the entry queue (AddQueueEntry) with value -1, flag 1, and a float at +0x0C; the script built-in func_00108498 calls it
+func_0017D220	AddQueueEntryKind12	adds an entry of kind 12 to the entry queue (AddQueueEntry) with value -1, flag 0; the script built-in func_00108548 calls it

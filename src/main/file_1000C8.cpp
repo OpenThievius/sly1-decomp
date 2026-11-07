@@ -3486,7 +3486,7 @@ ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017CFC8(obj, out);
+    AddQueueEntryKind0(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3504,7 +3504,7 @@ ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017CFF0(obj, out);
+    AddQueueEntryKind1(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3522,7 +3522,7 @@ ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D018(obj, out);
+    AddQueueEntryKind10(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3540,7 +3540,7 @@ ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_0017D040(obj, out);
+    (void)AddQueueEntryKind2(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3558,7 +3558,7 @@ ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_0017D078(obj, out);
+    (void)AddQueueEntryKind3(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3577,7 +3577,7 @@ ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &a, &b);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D0A0(obj, a, b);
+    AddQueueEntryKind4(obj, a, b);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3598,7 +3598,7 @@ ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 4, args, &kinds, &o1, &o2, &o3, &o4);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D100(obj, o1, o2, o3, o4);
+    AddQueueEntryKind5(obj, o1, o2, o3, o4);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3618,7 +3618,7 @@ ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D148(obj, o1, o3, o2);
+    AddQueueEntryKind6(obj, o1, o3, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3638,7 +3638,7 @@ ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D180(obj, o1, o3, o2);
+    AddQueueEntryKind7(obj, o1, o3, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3658,7 +3658,7 @@ ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D1B8(obj, o0, o1, o2);
+    AddQueueEntryKind8(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3677,7 +3677,7 @@ ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D0D8(obj, o1, o2);
+    AddQueueEntryKind9(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3695,7 +3695,7 @@ ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D1E8(obj, out);
+    AddQueueEntryKind11(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3710,7 +3710,7 @@ ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0017D220(obj);
+    AddQueueEntryKind12(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
