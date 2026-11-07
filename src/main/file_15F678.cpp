@@ -856,6 +856,55 @@ void func_001660A0(PlacedObject* self);
 void func_001660E8(PlacedObject* self, ParentFrame* par);
 void func_00166658(void);
 
+// The 46 names of the keyed entries (keyed_entry.h; D_00247AF0, which this file's functions
+// walk), which begin the file's .rodata, before its functions' own literals.
+extern const char D_0024A2D0[8] = "Splash";
+extern const char D_0024A2D8[16] = "Paris, France";
+extern const char D_0024A2E8[16] = "The Hideout";
+extern const char D_0024A2F8[24] = "A Stealthy Approach";
+extern const char D_0024A310[24] = "Prowling the Grounds";
+extern const char D_0024A328[24] = "High Class Heist";
+extern const char D_0024A340[24] = "Into the Machine";
+extern const char D_0024A358[24] = "A Cunning Disguise";
+extern const char D_0024A370[24] = "The Fire Down Below";
+extern const char D_0024A388[24] = "Treasure in the Depths";
+extern const char D_0024A3A0[24] = "The Gunboat Graveyard";
+extern const char D_0024A3B8[24] = "The Eye of the Storm";
+extern const char D_0024A3D0[16] = "A Rocky Start";
+extern const char D_0024A3E0[16] = "Muggshot's Turf";
+extern const char D_0024A3F0[16] = "Boneyard Casino";
+extern const char D_0024A400[24] = "Murray's Big Gamble";
+extern const char D_0024A418[24] = "At the Dog Track";
+extern const char D_0024A430[16] = "Two to Tango";
+extern const char D_0024A440[24] = "Straight to the Top";
+extern const char D_0024A458[24] = "Back Alley Heist";
+extern const char D_0024A470[16] = "Last Call";
+extern const char D_0024A480[24] = "The Dread Swamp Path";
+extern const char D_0024A498[24] = "The Swamp's Dark Center";
+extern const char D_0024A4B0[24] = "The Lair of the Beast";
+extern const char D_0024A4C8[24] = "A Grave Undertaking";
+extern const char D_0024A4E0[16] = "Piranha Lake";
+extern const char D_0024A4F0[24] = "Descent into Danger";
+extern const char D_0024A508[24] = "A Ghastly Voyage";
+extern const char D_0024A520[24] = "Down Home Cooking";
+extern const char D_0024A538[16] = "A Deadly Dance";
+extern const char D_0024A548[24] = "A Perilous Ascent";
+extern const char D_0024A560[24] = "Inside the Stronghold";
+extern const char D_0024A578[24] = "Flaming Temple of Flame";
+extern const char D_0024A590[16] = "The Unseen Foe";
+extern const char D_0024A5A0[24] = "The King of the Hill";
+extern const char D_0024A5B8[24] = "Rapid Fire Assault";
+extern const char D_0024A5D0[24] = "Duel by the Dragon";
+extern const char D_0024A5E8[24] = "A Desperate Race";
+extern const char D_0024A600[16] = "Flame Fu!";
+extern const char D_0024A610[24] = "A Hazardous Path";
+extern const char D_0024A628[16] = "Burning Rubber";
+extern const char D_0024A638[16] = "A Daring Rescue";
+extern const char D_0024A648[24] = "Bentley Comes Through";
+extern const char D_0024A660[24] = "A Temporary Truce";
+extern const char D_0024A678[16] = "Sinking Peril";
+extern const char D_0024A688[24] = "A Strange Reunion";
+
 void func_0015F678(World* owner, u8* obj)
 {
     u64 flags = *(u64*)(obj + 0x2C8);
