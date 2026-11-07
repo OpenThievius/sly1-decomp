@@ -141,9 +141,13 @@ D_0027AEB4 = 0x0027AEB4;
 // the VIF1 words before it, which no code reads.
 D_00279320 = 0x00279320;
 // The end of the DMA library's .data (src/lib/dma.c): its last settings (D_002793D8, 0x14
-// bytes) end at 0x2793EC; after the padding to 16, 16 zero bytes no code reads, then the CD
-// library's identification string; its .rodata (one message) is followed by the CD library's
-// messages, which no code reads.
-D_002793F0 = 0x002793F0;
+// bytes) end at 0x2793EC; the CD library's .data (src/lib/cdvd.c) starts on 64 bytes, with its
+// identification string at 0x279400. The DMA library's .rodata (one message) is followed by the
+// CD library's: first six messages of functions the linker stripped, which no code reads.
 D_00279400 = 0x00279400;
 D_0024F560 = 0x0024F560;
+D_0024F588 = 0x0024F588;
+D_0024F5A8 = 0x0024F5A8;
+D_0024F5C0 = 0x0024F5C0;
+D_0024F5D0 = 0x0024F5D0;
+D_0024F5E0 = 0x0024F5E0;
