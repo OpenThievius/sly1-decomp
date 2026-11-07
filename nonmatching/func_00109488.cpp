@@ -103,6 +103,18 @@
 // every pseudo of 4 takes s5 for the whole function, where retail holds 4 in s3, then t8, then
 // rebuilds it. Our rebuild registers in the first window are s3, s1 and s6, retail's t9 and t6:
 // reload spilled other hard registers, by a cost summed over the whole function.
+//
+// Spill choice (2026-11-07, build/swarm/g4/spill.py, disp.py): scored by the registers that rebuild
+// a constant inside one entry, per 50 entries, against retail's, and by where 4 lives. Every form
+// with this file's store order keeps all of 4's pseudos in s5 (0 of retail's 60 stores of 4 in
+// retail's register): this file, s5, s8, the f10 split, flags as literals per kind, every parameter
+// order of the merged helper, and the lead's hill-climbed body orders (build/swarm/lead/f109/
+// best13.cpp and best22.cpp, up to 2,370 stores in retail's register). The only forms that move 4
+// out of s5 (up to 16 of 60) are the merges of the big kinds (flags 146, 4242, 2194), which break
+// the windows above and the store order (about 500 entries in order, two fewer spills). The .greg
+// dump shows why it is global: reload spills v1, a1, s1 and t2 hundreds of times and s3 in the
+// first window, where retail rebuilds in t9 and t6, and its spill cost is summed over the whole
+// function. No plausible source change tried steers that choice; this lead is closed.
 
 void func_001000C8();
 void func_00100178();
