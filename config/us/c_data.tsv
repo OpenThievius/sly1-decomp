@@ -762,7 +762,7 @@ D_002758E0	002758E0	96	.data	src/main/file_1DFE80.cpp
 D_00275940	00275940	188	.data	src/main/file_1E08F8.cpp
 D_00275B28	00275B28	56	.data	src/main/file_1E5378.cpp
 D_00275B60	00275B60	2724	.data	src/main/file_1E88D0.cpp
-D_0027697C	0027697C	4	.data.D_0027697C	src/lib/001F8000.cpp
+D_00276970	00276970	16	.data	src/lib/system_calls.cpp
 D_00276980	00276980	1960	.data	src/lib/patch_installer_1.cpp
 D_00277128	00277128	4	.data	src/lib/request_thread.cpp
 D_0027712C	0027712C	8	.data	src/lib/formatted_output.cpp

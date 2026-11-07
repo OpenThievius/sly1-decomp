@@ -64,6 +64,10 @@ D_0024F220 = 0x0024F220;
 // The end of src/lib/type_info.cpp's .rodata (its type name "9type_info"), where the next
 // object's string begins.
 D_0024F330 = 0x0024F330;
+// The start of the kernel library's identification string "PsIIlibkernl2430" (16 bytes, the
+// .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
+// D_0027696C; func_001F9790 reads its last four bytes.
+D_00276970 = 0x00276970;
 // The starts of the math library's files' .rodata (src/libm/file_*.c), each object's literals
 // and tables in one piece, where a coarse label or one an instruction names spans two of them.
 D_0024F8E4 = 0x0024F8E4;

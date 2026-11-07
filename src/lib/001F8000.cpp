@@ -123,7 +123,7 @@ s32 func_001F8BF8(void)
 
 struct Arg_1F9790;
 
-u32 D_0027697C = 0x30333432;
+extern char D_00276970[16];
 extern u8 D_00628E28[];
 extern char D_0024EB80[];
 void* D_002771D0 = D_0024EB80;
@@ -133,7 +133,7 @@ s32 func_001F59C4(struct Arg_1F9790* a, void* b, s32 c);
 s32 func_001F9790(void)
 {
     s32 result = 0;
-    void* second = &D_0027697C;
+    void* second = &D_00276970[12];
     if (func_001F59C4((struct Arg_1F9790*)D_00628E28, second, 4) != 0) {
         if (func_001F59C4((struct Arg_1F9790*)D_00628E28, D_002771D0, 4) != 0) {
             result = func_001F59C4((struct Arg_1F9790*)second, D_002771D0, 4) != 0;
