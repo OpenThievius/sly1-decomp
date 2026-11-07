@@ -45,9 +45,7 @@ s32 func_00182FC8(void* p);
 
 void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
 
-typedef void (*VFn_183058)(void* self, void* arg);
 
-struct Obj_183058 { void* vtbl; };
 
 void func_001243E0(void* self);
 
@@ -374,8 +372,8 @@ LINKER_REMNANT(func_00183050);
 
 void* func_00183058(BaseObject* self, void* a1, s32 a2)
 {
-    Obj_183058* r = (Obj_183058*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
-    ((VFn_183058*)r->vtbl)[12](r, self);
+    BaseObject* r = (BaseObject*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
+    r->desc->m08(r, self);
     return r;
 }
 
@@ -390,7 +388,7 @@ void func_001830D8(BaseObject* self, BaseObject* src)
         R11B008List* p = NewKeyedList();
         CopyKeyedList((R11B008List*)src->f04, p);
         self->f04 = p;
-        AddMarkRootList(D_00259F38, p);
+        AddMarkRootList(g_markStacks, p);
     }
     const Desc01* d = src->desc;
     World* s0 = self->world;
@@ -401,7 +399,7 @@ void func_001830D8(BaseObject* self, BaseObject* src)
     AppendToList(t, self);
     self->id = src->id;
     if (src->f2C != 0) {
-        u8* s1 = D_00259F38;
+        u8* s1 = g_markStacks;
         MarkPoolLiveEnds(s1);
         void* p = NewScriptScope();
         CopyScriptScope(src->f2C, p);
@@ -525,7 +523,7 @@ void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
     InitScriptValue(&q0);
     InitScriptValue(&q1);
     InitScriptValue(&q2);
-    MarkPoolLiveEnds(D_00259F38);
+    MarkPoolLiveEnds(g_markStacks);
     if (LookupScriptVariable(self->f2C, key, 1, &q0) == 0) {
         DestroyScriptValue(&q2, 2);
         DestroyScriptValue(&q1, 2);
@@ -573,8 +571,8 @@ void func_001837E0(BaseObject* self, s32 idx, s32 flag, s32* out)
         DestroyScriptValue(&r, 2);
         goto done;
     }
-    MarkPoolLiveEnds(D_00259F38);
-    if (func_00183668(self, idx, flag, out) == 0) {
+    MarkPoolLiveEnds(g_markStacks);
+    if (SuppressScriptEvent(self, idx, flag, out) == 0) {
         if (flag != 0) {
             BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
             AssignScriptValue(&r, &tmp);
@@ -683,9 +681,9 @@ void func_00183CC8(ConeVolume* self)
     self->q340 = *(const Quad16*)&g_unitYVector;
     self->rangeMin = 200.0f;
     self->rangeMax = 2000.0f;
-    self->f2fc = 240.0f;
-    self->f2f8 = 180.0f;
-    self->f300 = 180.0f;
+    self->secondAngle = 240.0f;
+    self->firstAngle = 180.0f;
+    self->thirdAngle = 180.0f;
     self->outerAngle = 60.0f;
     UpdateConeVolumeTangents(self);
     InitPlacedObject(self);
@@ -695,13 +693,13 @@ void func_00183D88(ConeVolume* self)
 {
     ComputePlacedObjectWorldFrame(self);
     RefreshConeVolumeShape(self);
-    func_00184B58(self);
+    UpdateConeVolumeBounds(self);
 }
 
 void func_00183DC0(ConeVolume* self)
 {
     RemoveFromList((u8*)self->world + 0x1BE8, self);
-    func_001841B0(self);
+    NoteConeVolumeLightingChange(self);
 }
 
 void func_00183DF8(ConeVolume* self)
@@ -774,9 +772,9 @@ void func_001840B8(Vec2_1840B8* self, f32* out0, f32* out1)
 
 void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
 {
-    f32 x = func_00205210(a * 0.0087266471f);
+    f32 x = Cosine(a * 0.0087266471f);
     x = x + x * x * x;
-    f32 y = func_00205210(c * 0.0087266471f);
+    f32 y = Cosine(c * 0.0087266471f);
     y = y + y * y * y;
     FitLineThroughPoints(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
 }
@@ -784,7 +782,7 @@ void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
 void func_001841B0(ConeVolume* self)
 {
     if (self->value == 0) {
-        D_00264260 = D_002622CC;
+        g_lightingChangeFrame = g_frameCount;
     }
 }
 
@@ -799,42 +797,42 @@ void func_00184768(ConeVolume* self, s32 flag)
         self->flags = self->flags & ~(u64)0x30000000000;
     }
     RefreshConeVolumeShape(self);
-    func_00184B58(self);
+    UpdateConeVolumeBounds(self);
 }
 
 void func_001847F0(ConeVolume* self, Quad_001847F0* src)
 {
-    *(Quad_001847F0*)self->f2E0 = *src;
+    *(Quad_001847F0*)self->color = *src;
     RefreshConeVolumeShape(self);
 }
 
 void func_00184818(ConeVolume* self, f32 v)
 {
-    self->f2F0 = v;
+    self->secondLevel = v;
     RefreshConeVolumeShape(self);
 }
 
 void func_00184838(ConeVolume* self, f32 v)
 {
-    self->f2F4 = v;
+    self->thirdLevel = v;
     RefreshConeVolumeShape(self);
 }
 
 void func_00184858(ConeVolume* self, f32 v)
 {
-    self->f2f8 = v;
+    self->firstAngle = v;
     RefreshConeVolumeShape(self);
 }
 
 void func_00184878(ConeVolume* self, f32 v)
 {
-    self->f2fc = v;
+    self->secondAngle = v;
     RefreshConeVolumeShape(self);
 }
 
 void func_00184898(ConeVolume* self, f32 v)
 {
-    self->f300 = v;
+    self->thirdAngle = v;
     RefreshConeVolumeShape(self);
 }
 
@@ -852,7 +850,7 @@ void func_00184990(ConeVolume* self, Packed8_184990* src)
 {
     *(Packed8_184990*)&self->rangeMin = *src;
     RefreshConeVolumeShape(self);
-    func_00184B58(self);
+    UpdateConeVolumeBounds(self);
 }
 
 void func_001849D0(ConeVolume* self, f32 v)
@@ -860,7 +858,7 @@ void func_001849D0(ConeVolume* self, f32 v)
     self->outerAngle = v;
     UpdateConeVolumeTangents(self);
     RefreshConeVolumeShape(self);
-    func_00184B58(self);
+    UpdateConeVolumeBounds(self);
 }
 
 void func_00184A08(ConeVolume* self, f32 v)
@@ -875,17 +873,17 @@ void func_00184A38(ConeVolume* self, Quad16* src)
 {
     self->q340 = *src;
     RefreshConeVolumeShape(self);
-    func_00184B58(self);
+    UpdateConeVolumeBounds(self);
 }
 
 void func_00184A70(ConeVolume* self)
 {
     f32 a = Clamp_184A70::Of(self->outerAngle, 0.0f, 175.0f);
     f32 b = Clamp_184A70::Of(self->innerAngle, 0.0f, a);
-    f32 r = func_002054F0(a * 0.00872664712f);
+    f32 r = Tangent(a * 0.00872664712f);
     self->f354 = r;
     self->f350 = r;
-    f32 q = func_002054F0(b * 0.00872664712f);
+    f32 q = Tangent(b * 0.00872664712f);
     self->f360 = q / self->f350;
     self->f368 = q / self->f354;
     self->f36C = self->f364 = 1.0f;
@@ -897,20 +895,20 @@ ASM_FUNC(func_00184B58);
 
 void func_00184CD0(ConeVolume* self, f32 v)
 {
-    func_00184818(self, v);
-    func_00184838(self, v);
+    SetConeVolumeSecondLevel(self, v);
+    SetConeVolumeThirdLevel(self, v);
 }
 
 void func_00184D10(ConeVolume* self, f32* out)
 {
-    *out = self->f2F0;
+    *out = self->secondLevel;
 }
 
 void func_00184D20(void* self, void* a1)
 {
     Quad_00184D20 q;
     func_001B4600(a1, &q);
-    func_001847F0(self, &q);
+    SetConeVolumeColor(self, &q);
 }
 
 void func_00184D58(u8* self)

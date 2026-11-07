@@ -274,7 +274,7 @@ void* D_00261AD0[28] = {
     (void*)0x3F800000, (void*)0x40400000, 0, 0,
     0, 0, (void*)0x3F800000, 0,
     (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
-    (void*)func_001481A0, 0, 0, 0
+    (void*)CountPickupTowardHundred, 0, 0, 0
 };
 f32 D_00261B40 = 0.05f;
 f32 D_00261B48[2] = { 75.0f, 1e+02f };
@@ -286,7 +286,7 @@ void* D_00261B60[28] = {
     (void*)0x3F800000, (void*)0x40400000, 0, 0,
     0, 0, (void*)0x3F800000, 0,
     (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
-    (void*)(void (*)(void))func_00148F80, 0, 0, 0
+    (void*)(void (*)(void))AddReserveUnitNow, 0, 0, 0
 };
 f32 D_00261BD0[4] = { 0.0f, 0.0f, 200.0f, 0.0f };
 f32 D_00261BE0 = 0.75f;

@@ -168,7 +168,7 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
     Col_180108 col;
     Q_180108 vv, q;
     s32 g;
-    func_0018A008(0, sp, c);
+    BuildUniformScaleAboutPoint(0, sp, c);
     sp[12] = a;
     sp[13] = b;
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
@@ -189,7 +189,7 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
                     s32 j;
                     for (j = 2; j >= 0; j--) {
                         vv.v = self->verts[*idx++];
-                        q.v = func_00188740(sp, vv.v);
+                        q.v = TransformVector4(sp, vv.v);
                         AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
                     }
                 }
@@ -249,7 +249,7 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
     f32 mat[16];
     Obj_180398* o;
 
-    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
+    BuildUniformScaleAboutPoint(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
         Vec_180398 v;
@@ -299,7 +299,7 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
                     for (j = 2; j >= 0; j--, idx++) {
                         Q_180108 p, q;
                         p.v = *(V128_180108*)&self->points[*idx];
-                        q.v = func_00188740(mat, p.v);
+                        q.v = TransformVector4(mat, p.v);
                         AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 492.80002f;
                     }
@@ -309,8 +309,8 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
         if (vis) {
             Q_180108 lo, hi;
             f32 d;
-            lo.v = func_00188740(mat, *(V128_180108*)&self->minX);
-            hi.v = func_00188740(mat, *(V128_180108*)&self->maxX);
+            lo.v = TransformVector4(mat, *(V128_180108*)&self->minX);
+            hi.v = TransformVector4(mat, *(V128_180108*)&self->maxX);
             BeginGifTag(&g_gsPacketWriter, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
             AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&base);
             AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7900, 0, 0);

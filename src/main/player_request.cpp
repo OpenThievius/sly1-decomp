@@ -248,7 +248,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     }
     if (self->f2220 == 6 && self->f239C == 2) {
         Ev07* tmp = msg;
-        TriggerScriptEvent((s32)self->f23B0, 0x13, 1, &tmp);
+        TriggerScriptEvent((s32)self->heldObject, 0x13, 1, &tmp);
         SetPlayerState(self, 2, 5);
         return 0;
     }

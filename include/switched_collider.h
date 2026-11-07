@@ -272,7 +272,7 @@ struct Player : TurningCollider {
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
     u8 pad23A0[0x23B0 - 0x23A0];
-    void* f23B0;            // 0x23B0
+    void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
     u8 pad23C0[0x23CC - 0x23C0];
@@ -298,9 +298,14 @@ struct Player : TurningCollider {
     void* f24A0;            // 0x24A0
     u8 pad24A4[0x24B0 - 0x24A4];
     u8 f24B0[0x10];         // 0x24B0: filled by func_00128018 (func_00172898)
-    u8 pad24C0[0x250C - 0x24C0];
-    s32 f250C;              // 0x250C
-    s32 f2510;              // 0x2510
+    u8 pad24C0[0x24F8 - 0x24C0];
+    PlacedObject* f24F8;    // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
+    u8 pad24FC[0x2500 - 0x24FC];
+    void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
+    void* f2504;            // 0x2504
+    void* f2508;            // 0x2508
+    void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
+    void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
     u8 pad2518[0x2590 - 0x2518];
     s32 f2590;              // 0x2590
@@ -360,9 +365,10 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BE4 - 0x2BDC];
-    void* f2BE4;            // 0x2BE4
-    void* f2BE8;            // 0x2BE8
+    u8 pad2BDC[0x2BE0 - 0x2BDC];
+    void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
+    void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
+    void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation
     u8 pad2BEC[0x2BF0 - 0x2BEC];
 };
 

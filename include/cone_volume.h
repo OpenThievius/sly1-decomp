@@ -19,12 +19,12 @@ struct __attribute__((packed)) ConeVolumeSaved { s32 a; s32 b; };
 struct ConeVolume : PlacedObject {
     s32 mode;               // 0x2D0: 0 at setup
     u8 pad2D4[0x2E0 - 0x2D4];
-    u32 f2E0[4];            // 0x2E0
-    f32 f2F0;               // 0x2F0
-    f32 f2F4;               // 0x2F4
-    f32 f2f8;               // 0x2F8: 180.0 at setup
-    f32 f2fc;               // 0x2FC: 240.0 at setup
-    f32 f300;               // 0x300: 180.0 at setup
+    u32 color[4];           // 0x2E0: hue, saturation, value (+0x2E8 is the first level)
+    f32 secondLevel;        // 0x2F0: paired with secondAngle
+    f32 thirdLevel;         // 0x2F4: paired with 360 less thirdAngle
+    f32 firstAngle;         // 0x2F8: 180.0 at setup
+    f32 secondAngle;        // 0x2FC: 240.0 at setup
+    f32 thirdAngle;         // 0x300: 180.0 at setup
     s32 value;              // 0x304: compared by slot 9
     u8 pad308[0x320 - 0x308];
     Quad16 q320;            // 0x320: D_00248D20 at setup

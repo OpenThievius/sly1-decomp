@@ -709,7 +709,7 @@ struct Lerp_152010
 {
     static s32 Get(s32 lo, s32 hi)
     {
-        f32 s = D_002623C8->dt;
+        f32 s = g_currentEntry->dt;
         if (lo == hi) return hi;
         if (lo < hi) return lo + (s32)(s * ((f32)hi + 0.999f - (f32)lo));
         return hi + (s32)((1.0f - s) * ((f32)lo + 0.999f - (f32)hi));
@@ -886,11 +886,11 @@ void func_0014F058(PooledObject* self, f32 f)
     case 5:
         break;
     case 2:
-        func_0014F270(self, f);
+        UpdateHeldPooledObject(self, f);
         break;
     case 4:
         if (self->delay < g_gameTime[0] - self->stateTime) {
-            if (g_player == 0 || self->parent != *(BaseObject**)((u8*)g_player + 0x23B0))
+            if (g_player == 0 || self->parent != (BaseObject*)g_player->heldObject)
                 SetPooledObjectState(self, 5);
         }
         break;
@@ -922,7 +922,7 @@ ASM_FUNC(func_0014F270);
 
 void func_0014F740(C23* self)
 {
-    func_0013DDB8(self);
+    InitPlayerFlaggedCollider(self);
     self->f6C0 = -1;
 }
 
@@ -972,13 +972,13 @@ void func_0014F850(C23* self)
 void func_0014F900(C23* self)
 {
     if (g_player != 0) {
-        self->f6DC = *(s32*)((u8*)g_player + 0x24F8);
+        self->f6DC = (s32)g_player->f24F8;
     }
 }
 
 void func_0014F920(C23* self)
 {
-    func_0013CE40(self);
+    StartMaskedCollider(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
     ((Held23*)self->p734->f200)->f4C = 1;
     Src_14F920* s2 = FindFirstObjectByIdMode1(self->world, self->f6C0, self);
@@ -1008,7 +1008,7 @@ void func_0014F920(C23* self)
 void func_0014FA88(C23* self)
 {
     s32 st[2];
-    func_0013D068(self);
+    UpdateMaskedCollider(self);
     if (self->hold == 0 && self->f6DC != 0 && self->p740 != 0) {
         func_001B6598(self->p740, &st[0]);
         func_001B6568(self->p740, &st[1]);
@@ -1423,7 +1423,7 @@ void func_00150AE8(StepSequence* self)
             return;
         }
     }
-    func_001F5C0C(q, 0, 8);
+    FillMemory(q, 0, 8);
     s2 = GetActiveSwitchedCollider();
     if (IsTopCameraController(&g_camera->ctl454) != 0) {
         q[1] = 0;
@@ -1843,7 +1843,7 @@ void* func_00151A58(void)
 
 void func_00151A68(void* state)
 {
-	func_001F5C0C(state, 0, 0x24);
+	FillMemory(state, 0, 0x24);
 }
 
 void func_00151A88(G261EF0* self)
@@ -1957,7 +1957,7 @@ void func_00151FC8(G261EF0* object)
 	G27C230* manager = g_currentEntry;
 	manager->f10 = 0.0f;
 	manager->count70 = 0;
-	func_001F5C0C(manager->bits74, 0, 1);
+	FillMemory(manager->bits74, 0, 1);
 }
 
 void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
@@ -2177,13 +2177,13 @@ s32 func_001527D8(List01* list)
 
 void func_00152810()
 {
-	func_002027C8(1);
-	func_002018E8();
-	g_vif0Channel = func_002027A0(0);
-	g_vif1Channel = func_002027A0(1);
-	g_gifChannel = func_002027A0(2);
-	g_fromSprChannel = func_002027A0(8);
-	g_toSprChannel = func_002027A0(9);
+	ResetDmaController(1);
+	ResetGsPaths();
+	g_vif0Channel = GetDmaChannel(0);
+	g_vif1Channel = GetDmaChannel(1);
+	g_gifChannel = GetDmaChannel(2);
+	g_fromSprChannel = GetDmaChannel(8);
+	g_toSprChannel = GetDmaChannel(9);
 }
 
 extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
@@ -2277,8 +2277,8 @@ void func_00152A50(V24A0* self, u32* count, u32* begin, u32* out)
 void func_00152AE0(V24A0* self, void* dma)
 {
     CloseDmaTag(self);
-    func_001F6C20(0);
-    func_00202A80(dma, self->begin);
+    SyncDataCache(0);
+    StartDmaChain(dma, self->begin);
     self->cur = self->begin;
 }
 
@@ -2484,7 +2484,7 @@ void func_00153328(C61* self, s32 unused, void* a2)
     if (self->f2D0 != 0) {
         self->desc02()->m27(self, a2);
         Frame_153328 f;
-        (void)func_001F5C0C(&f, 0, 0x80);
+        (void)FillMemory(&f, 0, 0x80);
         f.fn = (void*)DrawPlacedObjectParts;
         f.f08 = 0;
         BuildPlacedObjectTransform(self, a2, f.out);
@@ -2500,9 +2500,9 @@ void func_001533A8(Self_1533A8* self)
     u8* base = (u8*)&g_vifPacketWriter;
     Sub_1533A8* s1 = self->f60;
     AddDmaRefTag((Gfx_1533A8*)base, s1->f2D4, s1->f2D8);
-    func_001F5C0C(&f, 0, 0x80);
+    FillMemory(&f, 0, 0x80);
     f.f08 = 3;
-    f.fn = (void*)func_00166690;
+    f.fn = (void*)DrawModelPart;
     f.copy = self->copy;
     f.f70 = s1;
     f.f74 = (u8*)s1 + 0x22C;
@@ -2521,7 +2521,7 @@ void func_001533A8(Self_1533A8* self)
         do {
             i++;
             f.f78 = (u8*)s1->f23C + off;
-            func_00166690(&f);
+            DrawModelPart(&f);
             off += 0x70;
         } while (i < s1->f238);
     }
@@ -2530,12 +2530,12 @@ void func_001533A8(Self_1533A8* self)
 
 void func_00153528(ActiveSetSolver* self, s32 count)
 {
-	(void)func_001F5C0C(self, 0, 0x50);
+	(void)FillMemory(self, 0, 0x50);
 	s32 n = count << 1;
 	self->slots = n;
 	s32 size = 0x60 * n;
 	self->items = AllocateBackMemory(size);
-	(void)func_001F5C0C(self->items, 0, size);
+	(void)FillMemory(self->items, 0, size);
 	SetListLinkOffset(&self->active, 0x4C);
 	SetListLinkOffset(&self->atLow, 0x4C);
 	SetListLinkOffset(&self->atHigh, 0x4C);
@@ -2558,7 +2558,7 @@ void func_00153608(Self_153608* self)
     for (i = 0; i < self->count; i++) {
         Elem_153608* e = (Elem_153608*)(self->items + i * 0x60);
         e->f34 = e->f38 = 0.0f;
-        (void)func_001F5C0C(e->f4C, 0, 8);
+        (void)FillMemory(e->f4C, 0, 8);
         AppendToList(self->f30, e);
     }
 }

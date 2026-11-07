@@ -93,7 +93,7 @@ void func_0016CF70(TargetFollower* self)
     ResolveObjectLinks(self, 2, g_targetFollowerResolveLinks);
     self->f554 = CreateStateWalker(self->list550, self, -1, 1);
     self->f570 = (Sub47*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
-    func_001920B0(self->f568, scratch);
+    ConvertPositionToWorld(self->f568, scratch);
     self->f56C = self->v140.z - scratch[2];
     if (self->f578 != -1)
     {
@@ -203,7 +203,7 @@ void func_0016D788(TargetFollower* self) {
     SetColliderAnchors(self, 3, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
     ((VFn_16D788*)self->desc)[37](self, &D_00248D30);
-    func_001920B0(self->f558->f7A4, &v);
+    ConvertPositionToWorld(self->f558->f7A4, &v);
     v.z = v.z + self->f56C;
     ((VFn_16D788*)self->desc)[33](self, &v);
 }
@@ -275,7 +275,7 @@ void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet)
         goto callDAC0;
     }
     if (code == 0x300) {
-        func_0016D828(self);
+        LaunchTargetFollowerAtFollowed(self);
     }
     return;
 call490:

@@ -69,7 +69,7 @@ void func_0016E1A0(PadRecord* self, s32 a, s32 b);
 void func_0016E0B8(void)
 {
     UpdatePadRouting();
-    func_002040E8(0);
+    InitPadLibrary(0);
     InitPadRecord(&g_padRecord, 0, 0);
 }
 
@@ -123,13 +123,13 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n);
 
 void func_0016E1A0(PadRecord* self, s32 a, s32 b)
 {
-    func_001F5C0C(self, 0, 0xC4);
+    FillMemory(self, 0, 0xC4);
     SetPadConnectionState(self, 1, 0);
     self->f04 = a;
     self->f08 = b;
     s32 size = ((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40;
     self->f0C = size;
-    func_002042C8(self->f04, self->f08, size);
+    OpenPadPort(self->f04, self->f08, size);
     self->fBC = ReservePermanentMemory(0x20);
     self->fC0 = 1;
 }
@@ -155,7 +155,7 @@ void func_0016E238(PadRecord* self)
         return;
     }
     s32 ready = 0;
-    s32 r = func_00204590(self->f04, self->f08);
+    s32 r = GetPadSlotState(self->f04, self->f08);
     if (r == 6 || r == 2)
     {
         ready = 1;
@@ -204,7 +204,7 @@ void func_0016E238(PadRecord* self)
             break;
         }
         case 1:
-            mode = (func_00204930(self->f04, self->f08, 1, 3) == 1) ? two : n;
+            mode = (SendPadTwoWordRequest(self->f04, self->f08, 1, 3) == 1) ? two : n;
             break;
         case 2:
         {
@@ -220,24 +220,24 @@ void func_0016E238(PadRecord* self)
                 mode = 3;
                 break;
             }
-            func_001F5C0C(buf, 0xFF, 6);
+            FillMemory(buf, 0xFF, 6);
             for (s32 i = 0; i < count; i++)
             {
                 buf[i] = i;
             }
-            if (func_00204AA8(self->f04, self->f08, buf) == 1)
+            if (SendPadSixByteRequest(self->f04, self->f08, buf) == 1)
             {
                 mode = 2;
             }
             break;
         }
         case 3:
-            if (func_00204CE8(self->f04, self->f08) != mode)
+            if (HasFullPadMask(self->f04, self->f08) != mode)
             {
                 mode = 3;
                 break;
             }
-            if (func_00204D48(self->f04, self->f08) == 1)
+            if (SendFullPadMask(self->f04, self->f08) == 1)
             {
                 mode = two;
             }
@@ -245,7 +245,7 @@ void func_0016E238(PadRecord* self)
         }
         break;
     case 2:
-        switch (func_00204678(self->f04, self->f08))
+        switch (GetPadRequestMode(self->f04, self->f08))
         {
         case 0:
             switch (self->f18)
@@ -351,9 +351,9 @@ s32 func_0016E940(PadRecord* self)
     u16 cur;
 
     u8* b = buf;
-    func_001F5C0C(b, 0, 0x40);
+    FillMemory(b, 0, 0x40);
     res = 1;
-    if (func_00204510(self->f04, self->f08, b) > 0) {
+    if (ReadPadFrame(self->f04, self->f08, b) > 0) {
         old = self->keyA8;
         self->keyA8 = ~((buf[2] << 8) | buf[3]);
         if (self->f10 != 0) {
@@ -367,8 +367,8 @@ s32 func_0016E940(PadRecord* self)
         self->flags = cur & ~old;
         self->hAC = old & ~cur;
         if (self->f18 >= 2) {
-            func_0016E738(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->x50, &self->a54[0].lo);
-            func_0016E738(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->x84, &self->a88[0].lo);
+            ReadAnalogStick(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->x50, &self->a54[0].lo);
+            ReadAnalogStick(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->x84, &self->a88[0].lo);
         } else {
             self->f74 = self->f78 = self->f7C = self->f40 = self->f44 = self->f48 = 0.0f;
         }
@@ -643,7 +643,7 @@ struct Advance_16F238 {
         do {
             s32 index = node->pos;
             if (index < node->length) {
-                if (D_00262C70.keyA8 == node->buttons[index])
+                if (g_padRecord.keyA8 == node->buttons[index])
                     node->pos = index + 1;
                 else
                     node->pos = 0;

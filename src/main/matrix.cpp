@@ -68,7 +68,7 @@ struct Vec4Init_1885E0 {
 };
 void func_001885E0(Vec4Init_1885E0* self)
 {
-    func_001F5C0C(self, 0, 0x40);
+    FillMemory(self, 0, 0x40);
     self->f3C = 1.0f;
     self->f28 = 1.0f;
     self->f14 = 1.0f;
@@ -210,19 +210,19 @@ struct Out_188FD8 { f32 o[3]; };
 void func_00188FD8(Span_188FD8* self, Out_188FD8* out)
 {
     f32 k = 1.57069635f;
-    f32 r = func_00205678(-self->w[2]);
+    f32 r = Arcsine(-self->w[2]);
     out->o[1] = r;
     if (r < k) {
         if (-k < r) {
-            out->o[0] = func_00205778(self->w[6], self->w[10]);
-            out->o[2] = func_00205778(self->w[1], self->w[0]);
+            out->o[0] = ArctangentOfRatio(self->w[6], self->w[10]);
+            out->o[2] = ArctangentOfRatio(self->w[1], self->w[0]);
         } else {
             out->o[0] = 0.0f;
-            out->o[2] = -func_00205778(-self->w[4], self->w[8]);
+            out->o[2] = -ArctangentOfRatio(-self->w[4], self->w[8]);
         }
     } else {
         out->o[0] = 0.0f;
-        out->o[2] = func_00205778(-self->w[4], self->w[8]);
+        out->o[2] = ArctangentOfRatio(-self->w[4], self->w[8]);
     }
 }
 
@@ -235,7 +235,7 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
     Quad16 tmp[4];
     Quad16 res[4];
 
-    func_00188B48(self + 0x30, self, tmp);
+    InvertRigidTransform(self + 0x30, self, tmp);
     MultiplyMatrices(res, arg, tmp);
     out[0] = res[0];
     out[1] = res[1];
@@ -246,8 +246,8 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
 struct Vec3_189230 { f32 x; f32 y; f32 z; };
 void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
 {
-    *a1 = func_00205778(v->y, v->x);
-    *a2 = func_00205778(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
+    *a1 = ArctangentOfRatio(v->y, v->x);
+    *a2 = ArctangentOfRatio(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }
 
 ASM_FUNC(func_001892A0);
@@ -255,7 +255,7 @@ ASM_FUNC(func_001892A0);
 struct Obj_189350;
 void func_00189350(Obj_189350* self, void* value)
 {
-    func_00189C28(self, g_unitZVector, value);
+    BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
 
 ASM_FUNC(func_00189378);
@@ -416,7 +416,7 @@ struct State_189F58 {
 };
 void func_00189F58(State_189F58* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
-    func_001F5C0C(self, 0, 0x40);
+    FillMemory(self, 0, 0x40);
     f32 value = (e + f) / (e - f);
     self->f00 = a;
     self->f20 = c;

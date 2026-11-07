@@ -142,7 +142,7 @@ void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
     TransformMatrixByObject(self, arg, mat);
     if (count > 0) {
         do {
-            func_00188700(mat, dst, &tmp, 1.0f);
+            TransformByMatrixWithW(mat, dst, &tmp, 1.0f);
             *dst = tmp;
             dst++;
             count--;
@@ -207,7 +207,7 @@ f32 func_0014DB78(Obj_14DB78* self)
     f32 o2;
     if (self->src->vt->f4)
         self->src->vt->f4(self->src, &p, 0);
-    func_00186320(&p, self->a, self->b, &o1, &o2);
+    MeasurePointToSegment(&p, self->a, self->b, &o1, &o2);
     return o2;
 }
 
@@ -265,12 +265,12 @@ void func_0014DD28(T2176* self, void* src)
 
 void func_0014DE08(T2176* self, s32 a1, s32 a2)
 {
-    func_0014D280(self->count, self->points, self->times, self->wrap, a1, a2);
+    InterpolatePathCurvePoint(self->count, self->points, self->times, self->wrap, a1, a2);
 }
 
 void func_0014DE40(T2176* self, s32 a1, s32 a2)
 {
-    func_0014D280(self->count, self->points, self->lengths, self->wrap, a1, a2);
+    InterpolatePathCurvePoint(self->count, self->points, self->lengths, self->wrap, a1, a2);
 }
 
 void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
@@ -288,8 +288,8 @@ void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     } else {
         next = idx + 1;
     }
-    func_00188700(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
-    func_00188700(a2, (u8*)self->points + (next << 4), &B, 1.0f);
+    TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
+    TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), &B, 1.0f);
     C = *(Pack4_0014DE78*)a4;
     DrawProjectedLine(&A, &B, &C, a3, a5);
 }
@@ -320,7 +320,7 @@ f32 func_0014E068(T2176* self)
 void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
 {
     Frac_14E090 f;
-    func_0014D3A8(a1, a2, self->count, self->points, a3, a4, &f.idx, &f.t);
+    FindNearestPathCurveSegment(a1, a2, self->count, self->points, a3, a4, &f.idx, &f.t);
     if (out1) {
         *out1 = (1.0f - f.t) * self->lengths[f.idx] + f.t * self->lengths[f.idx + 1];
     }
@@ -334,7 +334,7 @@ void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
     s32 idx = FindPathCurveSegment(t, self->count, self->times, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
-    func_0014D680(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
+    WalkToNearestPathCurveSegment(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
     if (a6) *a6 = (1.0f - fb) * self->lengths[ia] + fb * self->lengths[ia + 1];
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
@@ -344,7 +344,7 @@ void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
     s32 idx = FindPathCurveSegment(t, self->count, self->lengths, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
-    func_0014D680(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
+    WalkToNearestPathCurveSegment(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
     if (a6) *a6 = (1.0f - fb) * self->lengths[ia] + fb * self->lengths[ia + 1];
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
