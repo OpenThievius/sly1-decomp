@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The two 0xC4-byte records D_00262C70 and D_00262D38 (001E4000.cpp defines both as zeros):
+// The two 0xC4-byte records D_00262C70 and D_00262D38 (file_16E0B8.cpp defines both as zeros):
 // one type, read by the functions of 0016C000.cpp (func_0016E1A0, func_0016E238, func_0016E630,
 // func_0016E940, func_0016EC20, func_0016EC38, func_0016EC88, func_0016EED0, func_0016F108,
 // func_0016F238) and by twelve other files. Written for this project from what retail's code
@@ -71,7 +71,7 @@ struct PadRecord {
 
 typedef char check_PadRecord[sizeof(PadRecord) == 0xC4 ? 1 : -1];
 
-extern PadRecord D_00262C70;      // 001E4000.cpp
-extern PadRecord D_00262D38;      // 001E4000.cpp
+extern PadRecord D_00262C70;      // file_16E0B8.cpp
+extern PadRecord D_00262D38;      // file_16E0B8.cpp
 
 #endif
