@@ -56,16 +56,6 @@ s32 func_0020B258(Field_20B258* field) {
 	return field->fc = field->f8;
 }
 
-extern u32* D_0062AD68;
-extern u32* D_0062AD6C;
-extern u32* D_0062AD70;
-void func_00209C60(u32 base) {
-    volatile u32* regs = (volatile u32*)(base | 0x20000000);
-    if (D_0062AD68) *D_0062AD68 = regs[0];
-    if (D_0062AD6C) *D_0062AD6C = regs[1];
-    if (D_0062AD70) *D_0062AD70 = regs[0x24];
-}
-
 struct Obj_20B168 { u8 pad[0x40]; u32* values; };
 
 s32 func_0020B168(Obj_20B168* obj, s32 index, s32 value, s32 second)
@@ -105,172 +95,6 @@ s32 func_0020B9D0(Item_20B9D0* item, s32 x, s32 y)
     item->left = x >> 4;
     item->top = y >> 4;
     return 1;
-}
-
-// NEAR: every instruction matches except the save and restore of s0-s6 and ra, which are sq/lq here and sd/ld in retail (the default compiler saves 16 bytes per register; no C form found that changes it).
-
-struct Rec_2095B0 { s32 f00; s32 f04; s32 f08; u8 pad0C[8]; u8 name[0x400]; };
-struct Handle_2095B0;
-struct Pool_2095B0;
-struct Name_2095B0;
-
-s32 D_0027AECC = -1;
-extern u8 D_0062AD40[];
-extern u8 D_0062AE04[];
-extern u8 D_0062C300[];
-s32 D_0027AEC8 = 0;
-
-s32 func_001F6B70(Handle_2095B0* h);
-void func_001F6B40(Handle_2095B0* h);
-s32 func_001F8290(Pool_2095B0* p, s32 a1, s32 a2, Rec_2095B0* r, s32 size, u8* desc, s32 a6, s32 a7, s32 extra);
-s32 func_00201720(Name_2095B0* dst, const char* src, s32 max);
-
-s32 func_002095B0(s32 a0, s32 a1, const char* a2, s32 a3)
-{
-    if (func_001F6B70((Handle_2095B0*)D_0027AECC) < 0) {
-        return -200;
-    }
-    u8* pool = D_0062AD40;
-    if (*(s32*)(pool + 0x24) == 0) {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
-        return -100;
-    }
-    if (a2 == 0 || *a2 == 0) {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
-        return -210;
-    }
-    u8* name = D_0062AE04;
-    func_00201720((Name_2095B0*)name, a2, 0x3FF);
-    ((s32*)name)[-5] = a0;
-    Rec_2095B0* r = (Rec_2095B0*)(name - 0x14);
-    r->f08 = a3;
-    r->f04 = a1;
-    r->name[0x3FF] = 0;
-    s32 result = func_001F8290((Pool_2095B0*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
-    if (result == 0) {
-        D_0027AEC8 = 2;
-    } else {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
-    }
-    return result;
-}
-
-// NEAR: only the ra save and restore differ (ours sq/lq, retail sd/ld; 0x20 lib region, see docs/TOOLCHAIN.md)
-
-struct Ctx_2096E8;
-extern s32 D_0027AEC8;
-void* func_002095B0(Ctx_2096E8* ctx, s32 a1, void* a2, void* a3);
-
-void* func_002096E8(Ctx_2096E8* ctx, s32 a1, void* a2)
-{
-    void* p = func_002095B0(ctx, a1, a2, (void*)0x40);
-    if (p == 0) {
-        D_0027AEC8 = 0xB;
-    }
-    return p;
-}
-
-// NEAR: retail is library code (0x1F59C4 and up, layout.tsv) built by 2.9-ee-991111: saves are sd (8 bytes), ours sq; the epilogue is ld, ours lq. Beyond the saves, s0/s1 order of the table address and the first slot stores still differ (21 lines in check.py).
-
-struct Dev_00209870 { u8 pad[0x4]; };
-struct Ctl_00209870 { u8 pad[0x24]; s32 busy; };
-struct Slot_00209870 { void* owner; u8 pad0[8]; void* arg2; u8 pad1[8]; void* arg1; void* tab; };
-
-extern u8 D_0062AD40[];
-extern u8 D_0062ADC0[];
-extern u8 D_0062B240[];
-extern u8 D_0062C300[];
-extern s32 D_0027AEC8;
-
-s32 func_001F6B70(Dev_00209870* d);
-void func_001F6B40(Dev_00209870* d);
-void func_001FA7D8(void* a, s32 b);
-s32 func_001F8290(Dev_00209870* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, void* h, void* i);
-void func_002097D8(void);
-
-s32 func_00209870(void* a0, void* a1, void* a2)
-{
-    Ctl_00209870* ctl;
-    Slot_00209870* slot;
-    void* tab;
-    s32 r;
-    if (func_001F6B70((*(Dev_00209870**)&D_0027AECC)) < 0) {
-        return -200;
-    }
-    ctl = (Ctl_00209870*)D_0062AD40;
-    if (ctl->busy == 0) {
-        func_001F6B40((*(Dev_00209870**)&D_0027AECC));
-        return -100;
-    }
-    tab = D_0062B240;
-    slot = (Slot_00209870*)D_0062ADC0;
-    slot->owner = a0;
-    slot->tab = tab;
-    slot->arg1 = a1;
-    slot->arg2 = a2;
-    func_001FA7D8(a1, (s32)a2);
-    func_001FA7D8(tab, 0xC0);
-    r = func_001F8290((Dev_00209870*)ctl, 5, 1, slot, 0x30, D_0062C300, 4,
-                      (void*)((u8*)func_002097D8 + 8), tab);
-    if (r == 0) {
-        D_0027AEC8 = 5;
-    } else {
-        func_001F6B40((*(Dev_00209870**)&D_0027AECC));
-    }
-    return r;
-}
-
-// NEAR: body matches; retail saves and restores its eight $s registers with sd/ld, the 2.9-ee library compiler, where SN GCC 2.95.3 emits sq/lq (only those 18 lines differ).
-
-struct Lock_9E48;
-struct Mgr_9E48;
-struct Rec_9E48 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 name[0x400]; };
-
-s32 func_001F6B70(Lock_9E48* lock);
-void func_001F6B40(Lock_9E48* lock);
-void func_00201720(u8* dst, const char* src, s32 max);
-void func_001FA7D8(s32 a, s32 b);
-s32 func_001F8290(Mgr_9E48* a, s32 b, s32 c, Rec_9E48* d, s32 e, u8* f, s32 g, s32 h, s32 i);
-
-extern s32 D_0027AECC;
-extern u8 D_0062AD40[];
-extern u8 D_0062ADF0[];
-extern u8 D_0062C300[];
-extern s32 D_0027AEC8;
-
-s32 func_00209E48(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
-{
-    s32 status = func_001F6B70((Lock_9E48*)D_0027AECC);
-    if (status < 0) {
-        return -200;
-    }
-    Mgr_9E48* mgr = (Mgr_9E48*)D_0062AD40;
-    if (*(s32*)(D_0062AD40 + 0x24) == 0) {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
-        return -100;
-    }
-    if (name == 0 || *name == 0) {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
-        return -210;
-    }
-    Rec_9E48* rec = (Rec_9E48*)D_0062ADF0;
-    rec->f0 = a0;
-    rec->f4 = a1;
-    rec->f8 = a3;
-    rec->fC = a4;
-    rec->f10 = a5;
-    func_00201720((u8*)rec + 0x14, name, 0x3FF);
-    ((u8*)rec)[0x413] = 0;
-    if (a4 >= 0) {
-        func_001FA7D8(a5, a4 << 6);
-    }
-    s32 r = func_001F8290(mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
-    if (r == 0) {
-        D_0027AEC8 = 0xD;
-    } else {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
-    }
-    return r;
 }
 
 // NEAR: retail saves $ra with sd (Sony 2.9-ee-991111 library code, 0x1F59C4 on); the default compiler saves it with sq. Nothing else differs.
@@ -429,72 +253,6 @@ void func_0020BF78(struct Obj_20BF78 *self)
     self->field128 = (s4 << 12) | (self->field128 & 0xFFF);
     self->field134 += s5 << 18;
     self->field138 += s2 << 10;
-}
-
-struct Hdl_209720 { s32 v; };
-struct Elt_209720 { u8 pad[0x24]; s32 f24; };
-struct Slot_209720 { s32 v; };
-
-extern u8 D_0062AD40[];
-extern u8 D_0062C300[];
-extern s32 D_0027AEC8;
-
-s32 func_001F6B70(Hdl_209720* h);
-s32 func_001F6B40(Hdl_209720* h);
-s32 func_001F8290(Elt_209720* a, s32 b, s32 c, Slot_209720* d, s32 e, void* f, s32 g, s32 h, s32 i);
-
-s32 func_00209720(s32 value)
-{
-    s32 r;
-    Elt_209720* elt;
-    if (func_001F6B70((*(Hdl_209720**)&D_0027AECC)) < 0) {
-        return -200;
-    }
-    elt = (Elt_209720*)D_0062AD40;
-    if (elt->f24 == 0) {
-        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
-        return -100;
-    }
-    (*(Slot_209720*)&D_0062ADC0).v = value;
-    r = func_001F8290(elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
-    if (r == 0) {
-        D_0027AEC8 = 3;
-    } else {
-        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
-    }
-    return r;
-}
-
-struct Pool_209FA8 { u8 pad[0x24]; s32 busy; };
-struct Req_209FA8 { s32 f0; s32 a; s32 b; };
-struct Handle_209FA8 { s32 h; };
-
-extern u8 D_0062C300[];
-
-extern s32 func_001F6B70(Handle_209FA8* h);
-extern void func_001F6B40(Handle_209FA8* h);
-extern s32 func_001F8290(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
-
-s32 func_00209FA8(s32 a, s32 b)
-{
-    s32 r = func_001F6B70((Handle_209FA8*)(*(u32*)&D_0027AECC));
-    s32 res;
-    if (r < 0) {
-        return -200;
-    }
-    if (((Pool_209FA8*)D_0062AD40)->busy == 0) {
-        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
-        return -100;
-    }
-    (*(Req_209FA8*)&D_0062ADC0).b = b;
-    (*(Req_209FA8*)&D_0062ADC0).a = a;
-    res = func_001F8290(((Pool_209FA8*)&D_0062AD40), 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
-    if (res == 0) {
-        (*(u32*)&D_0027AEC8) = 0x10;
-    } else {
-        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
-    }
-    return res;
 }
 
 struct Obj_20B058 { u8 pad[0x40]; u8* state; };
@@ -722,63 +480,6 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
         func_0020B1E0(self);
     }
     return s4;
-}
-
-struct Rec_209CB8 { s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; s32 f1C; };
-struct Handle_209CB8;
-struct Pool_209CB8 { u8 pad[0x24]; s32 f24; };
-struct Blk_209CB8;
-typedef void (*Cb_209CB8)(u32 base);
-
-extern s32 D_0027AECC;
-extern u8 D_0062B240[];
-extern u8 D_0062C300[];
-extern s32 D_0027AEC8;
-
-s32 func_001F6B70(Handle_209CB8* h);
-void func_001F6B40(Handle_209CB8* h);
-s32 func_001FA7D8(Blk_209CB8* p, s32 size);
-s32 func_001F8290(Pool_209CB8* p, s32 a1, s32 a2, Rec_209CB8* r, s32 size, u8* desc, s32 a6, Cb_209CB8 cb, u8* extra);
-void func_00209C60(u32 base);
-
-s32 func_00209CB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
-{
-    if (func_001F6B70((Handle_209CB8*)D_0027AECC) < 0) {
-        return -200;
-    }
-    if ((*(Pool_209CB8*)&D_0062AD40).f24 == 0) {
-        func_001F6B40((Handle_209CB8*)D_0027AECC);
-        return -100;
-    }
-    (*(Rec_209CB8*)&D_0062ADC0).f04 = a0;
-    (*(Rec_209CB8*)&D_0062ADC0).f08 = a1;
-    (*(Rec_209CB8*)&D_0062ADC0).f1C = (s32)D_0062B240;
-    if (a2) {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 1;
-    } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 0;
-    }
-    if (a3) {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 1;
-    } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 0;
-    }
-    if (a4) {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 1;
-    } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 0;
-    }
-    (*(s32*)&D_0062AD68) = a2;
-    (*(s32*)&D_0062AD6C) = a3;
-    (*(s32*)&D_0062AD70) = a4;
-    (void)func_001FA7D8((Blk_209CB8*)D_0062B240, 0xC0);
-    s32 result = func_001F8290(((Pool_209CB8*)&D_0062AD40), 1, 1, ((Rec_209CB8*)&D_0062ADC0), 0x30, D_0062C300, 4, func_00209C60, D_0062B240);
-    if (result == 0) {
-        D_0027AEC8 = 1;
-    } else {
-        func_001F6B40((Handle_209CB8*)D_0027AECC);
-    }
-    return result;
 }
 
 struct Ctx_20B2E8 {
@@ -1032,84 +733,6 @@ s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
     return 1;
 }
 
-struct Req_2093F0 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-};
-struct Sema_2093F0 {
-    u8 pad00[0x24];
-    s32 f24;
-};
-struct Info_2093F0 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-};
-
-extern s32 D_0027AECC;
-extern u8 D_0062ADC0[];
-extern const char D_0024FFA0[];
-extern const char D_0024FFB8[];
-extern const char D_0024FFE0[];
-
-s32 func_001F6B20(Req_2093F0* r);
-s32 func_00209B80(s32 a, s32 b, s32 c);
-s32 func_001F6B60(s32 sema);
-void func_001F7BE8(s32 a);
-s32 func_001F80C0(Sema_2093F0* p, u32 flags, s32 z);
-s32 func_001E1F10(const char* msg);
-s32 func_001F8290(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
-void func_001F6B40(s32 sema);
-
-s32 func_002093F0(void)
-{
-    if (D_0027AECC < 0) {
-        Req_2093F0 req;
-        req.f14 = 0;
-        req.f08 = 1;
-        req.f04 = 1;
-        D_0027AECC = func_001F6B20(&req);
-    }
-    func_00209B80(0, 0, 0);
-    func_001F6B60(D_0027AECC);
-    func_001F7BE8(0);
-    for (;;) {
-        if (func_001F80C0((Sema_2093F0*)D_0062AD40, 0x80000400, 0) < 0) {
-            PrintFormatted(D_0024FFA0);
-            for (;;) {
-            }
-        }
-        if (((Sema_2093F0*)D_0062AD40)->f24 != 0) {
-            break;
-        }
-        for (s32 i = 0x100000; i != 0; i--) {
-        }
-    }
-    s32 r = func_001F8290((Sema_2093F0*)D_0062AD40, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
-    func_001F6B40(D_0027AECC);
-    if (r < 0) {
-        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
-        return r - 100;
-    }
-    if (((Info_2093F0*)D_0062C300)->f4 < 0x20A) {
-        PrintFormatted(D_0024FFB8);
-        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
-        return -0x78;
-    }
-    if (((Info_2093F0*)D_0062C300)->f8 < 0x20E) {
-        PrintFormatted(D_0024FFE0);
-        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
-        return -0x79;
-    }
-    return ((Info_2093F0*)D_0062C300)->f0;
-}
-
 struct Outer_20AE40 {
     s32 f0; s32 f4; s32 f8; s32 pad0C;
     s64 f10; s64 f18; s64 f20; s64 f28; s64 f30; s64 f38;
@@ -1260,41 +883,6 @@ void func_0020B790(struct Obj_0020B790 *self)
     else
         func_00210A80(self, self->f1CC, self->f1DC, n - 1);
     self->f120 = 0;
-}
-
-struct Pkt_2097E0 {
-    s32 n0;
-    s32 n1;
-    u8* dst0;
-    u8* dst1;
-    u8 src0[0x40];
-    u8 src1[0x40];
-};
-
-void func_002097E0(Pkt_2097E0* p) {
-    Pkt_2097E0* q = (Pkt_2097E0*)((u32)p | 0x20000000);
-    if (q->n0) {
-        u8* d = q->dst0;
-        for (s32 i = 0; i < q->n0; i++) {
-            *d++ = q->src0[i];
-        }
-    }
-    if (q->n1) {
-        u8* d = q->dst1;
-        for (s32 i = 0; i < q->n1; i++) {
-            *d++ = q->src1[i];
-        }
-    }
-}
-
-void func_00209B10(void);
-s32 func_001F6A90(void);
-void func_001F69E0(s32 id, void (*cb)(void), s32 ctx);
-void func_001F6AB0(void);
-
-void func_00209B38(u16 id) {
-    func_001F69E0(id, func_00209B10, func_001F6A90());
-    func_001F6AB0();
 }
 
 void func_0020B780(void* s);
@@ -1469,43 +1057,6 @@ void func_0020B810(Dev_20B810* self)
     self->f810 = 0;
 }
 
-struct Obj_209B80;
-struct Q_209B80;
-struct Dev_209B80;
-extern s32 D_0027AEC8;
-extern s32 D_0027AECC;
-extern u8 D_0062AD40[];
-s32 func_001F8480(Q_209B80* q);
-void func_00209B38(Obj_209B80* o);
-s32 func_001F6B40(Dev_209B80* d);
-
-s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
-{
-    s32 ok;
-    if (D_0027AEC8 == 0) {
-        return -1;
-    }
-    ok = func_001F8480((Q_209B80*)D_0062AD40);
-    if (a0 == 0 && ok != 0) {
-        while (func_001F8480((Q_209B80*)D_0062AD40) != 0) {
-            (void)func_00209B38((Obj_209B80*)60);
-        }
-        ok = 0;
-    }
-    ok = (ok == 0);
-    if (a1 != 0) {
-        *a1 = D_0027AEC8;
-    }
-    if (ok != 0) {
-        D_0027AEC8 = 0;
-        if (a2 != 0) {
-            *a2 = (*(s32*)&D_0062C300);
-        }
-        (void)func_001F6B40((Dev_209B80*)D_0027AECC);
-    }
-    return ok;
-}
-
 void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
 {
     u32 mask = 0x0FFFFFFF;
@@ -1526,58 +1077,6 @@ void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6
     *a6 = y2;
     *a7 = u2;
     *p9 = v2;
-}
-
-struct Reg_0020A078 {
-    u8 pad0[0x24];
-    s32 f24;
-};
-
-struct Buf_0020A078 {
-    s32 f0;
-    s32 f4;
-    u8 pad8[0xC];
-    s8 text14[0x400];
-};
-
-s32 func_001F6B70(s32 v);
-void func_001F6B40(s32 v);
-void func_00201720(s8* dst, s8* src, s32 n);
-Buf_0020A078* func_001F8290(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
-
-extern s32 D_0027AECC;
-extern s32 D_0027AEC8;
-
-s32 func_0020A078(s32 a0, s32 a1, s8* a2)
-{
-    Reg_0020A078* reg;
-    Buf_0020A078* buf;
-    Buf_0020A078* res;
-
-    if (func_001F6B70(D_0027AECC) < 0) {
-        return -200;
-    }
-    reg = ((Reg_0020A078*)&D_0062AD40);
-    if (reg->f24 == 0) {
-        func_001F6B40(D_0027AECC);
-        return -100;
-    }
-    if (a2 == 0 || *a2 == 0) {
-        func_001F6B40(D_0027AECC);
-        return -210;
-    }
-    buf = ((Buf_0020A078*)&D_0062ADF0);
-    buf->f0 = a0;
-    buf->f4 = a1;
-    func_00201720(buf->text14, a2, 0x3FF);
-    buf->text14[0x3FF] = 0;
-    res = func_001F8290(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
-    if (res == 0) {
-        D_0027AEC8 = 0x12;
-    } else {
-        func_001F6B40(D_0027AECC);
-    }
-    return (s32)res;
 }
 
 struct Ent_20B458 {
@@ -1647,55 +1146,6 @@ s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
         s0->f4 = s0->f4 + 1;
     }
     return s2;
-}
-
-struct Pool_209990 { u8 pad000[0x24]; s32 f24; };
-struct Obj_209990 { u8 pad000[0x20]; };
-struct Ctx_209990 { s32 f00; u8 p04[8]; s32 f0C; u8 p10[4]; u32 f14; s32 f18; u8 p1C[4]; u8 buf[16]; };
-extern s32 D_0027AEC8;
-extern u8 D_0062C300[];
-
-s32 func_001F6B70(Obj_209990* a);
-void func_001F6B40(Obj_209990* a);
-void func_001F6C20(s32 a);
-s32 func_001F8290(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stk);
-
-s32 func_00209990(s32 self, u32 src, s32 n)
-{
-    s32 r;
-    if (func_001F6B70((*(Obj_209990**)&D_0027AECC)) < 0) {
-        return -200;
-    }
-    if ((*(Pool_209990*)&D_0062AD40).f24 == 0) {
-        func_001F6B40((*(Obj_209990**)&D_0027AECC));
-        return -100;
-    }
-    (*(Ctx_209990*)&D_0062ADC0).f00 = self;
-    if (n < 17) {
-        (*(Ctx_209990*)&D_0062ADC0).f14 = n;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = 0;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = 0;
-    } else {
-        u32 lo = src - 16;
-        s32 off = ((src - 1) & ~0xF) - lo;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = n - off;
-        (*(Ctx_209990*)&D_0062ADC0).f14 = off;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = src + off;
-    }
-    {
-        u32 i;
-        for (i = 0; i < (*(Ctx_209990*)&D_0062ADC0).f14; i++) {
-            (*(Ctx_209990*)&D_0062ADC0).buf[i] = ((u8*)src)[i];
-        }
-    }
-    func_001F6C20(0);
-    r = func_001F8290(((Pool_209990*)&D_0062AD40), 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
-    if (r == 0) {
-        D_0027AEC8 = 6;
-    } else {
-        func_001F6B40((*(Obj_209990**)&D_0027AECC));
-    }
-    return r;
 }
 
 struct Ctx_20A220;
@@ -1862,9 +1312,6 @@ void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
 }
 
 extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
-extern const char D_0024FFA0[24] = "bind error libmc \n";
-extern const char D_0024FFB8[40] = "libmc: too old release of mcserv.irx\n";
-extern const char D_0024FFE0[72] = "libmc: too old release of mcman.irx\n\0\0\0\0sceMcUdCheckNewCard RPC faild\n";
 extern const char D_00250038[56] = "pack_header_field_flag needs to be '0' in PS\n";
 extern const char D_00250070[40] = "The size of work area is too small";
 extern const char D_00250098[32] = "work area size is too small";

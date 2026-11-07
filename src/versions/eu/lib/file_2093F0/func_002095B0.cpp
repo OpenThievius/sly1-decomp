@@ -16,7 +16,7 @@ s32 func_002095B0(s32 a0, s32 a1, const char* a2, s32 a3)
         func_001F6B40((Handle_2095B0*)D_0027AECC);
         return -210;
     }
-    u8* name = D_0062AE04;
+    u8* name = D_0062ADF0 + 0x14;
     func_eu_001F7738((Name_2095B0*)name, a2, 0x3FF);
     ((s32*)name)[-5] = a0;
     Rec_2095B0* r = (Rec_2095B0*)(name - 0x14);

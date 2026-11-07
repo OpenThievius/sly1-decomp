@@ -3715,7 +3715,7 @@ func_00209210	func_0020A550	match
 func_00209238	func_0020A578	match	
 func_00209260	func_0020A5A0	match	
 func_002093C0	func_0020A700	match	
-func_002093F0	func_0020A8B8	match	
+func_002093F0	func_0020A8B8	match	rodata
 func_002095B0	func_0020AA78	match	version-specific
 func_002096E8	func_0020ABB0	match	
 func_00209720	func_0020ABE8	match	
