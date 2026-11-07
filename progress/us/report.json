@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 93.6566882416397,
+  "fuzzy_match_percent": 93.6586659475009,
   "total_code": "1112400",
   "matched_code": "1032412",
   "matched_code_percent": 92.809421071557,
@@ -39390,8 +39390,7 @@
     "complete": true,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/001F4000.cpp"
+    ]
    }
   },
   {
@@ -40374,14 +40373,13 @@
     "complete": false,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/lib/001F4000.cpp"
+    ]
    }
   },
   {
    "name": "lib/001F8000",
    "measures": {
-    "fuzzy_match_percent": 90.58055490790395,
+    "fuzzy_match_percent": 90.70878992772208,
     "total_code": "17156",
     "matched_code": "15080",
     "matched_code_percent": 87.89927722079739,
@@ -40429,7 +40427,7 @@
     {
      "name": "func_001F8290",
      "size": "492",
-     "fuzzy_match_percent": 93.4959349593496,
+     "fuzzy_match_percent": 97.96747967479675,
      "address": "640",
      "metadata": {
       "virtual_address": "2065040"
@@ -45507,7 +45505,7 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 91.82497555524515,
+    "fuzzy_match_percent": 91.84418214834474,
     "total_code": "114544",
     "matched_code": "102236",
     "matched_code_percent": 89.25478418773572,

@@ -252,74 +252,6 @@ s32 func_001FA670(Ctx_1FA670* a, s32 b, s32 c, s32 d, s32 e, s32 f)
 }
 
 
-struct Node_001F8200 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    s32 f20;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-    s32 f30;
-    s32 f34;
-    s32 f38;
-    s32 f3C;
-    Node_001F8200* f40;
-};
-
-struct Ctx_001F8200 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    s32 f20;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-    s32 f30;
-    Node_001F8200* f34;
-};
-
-void func_001F71D0(Node_001F8200* a);
-
-void func_001F8200(Ctx_001F8200* self)
-{
-    Node_001F8200* n = self->f34;
-    Node_001F8200* list = n->f40;
-    if (list->f0C == 0) {
-        list->f0C = (s32)n;
-    } else {
-        ((Node_001F8200*)list->f10)->f3C = (s32)n;
-    }
-    list->f10 = (s32)n;
-    s32 a = self->f14;
-    s32 b = self->f1C;
-    n->f20 = a;
-    n->f1C = b;
-    n->f24 = self->f20;
-    n->f0C = self->f24;
-    n->f28 = self->f28;
-    n->f2C = self->f2C;
-    n->f30 = self->f30;
-    n->f34 = self->f10;
-    if (list->f00 < 0) {
-        return;
-    }
-    if (list->f04 != 0) {
-        return;
-    }
-    func_001F71D0((Node_001F8200*)list->f00);
-}
-
 struct Mgr_1F8538 { s32 v; };
 
 extern u8 D_00628940[];
@@ -430,89 +362,6 @@ void func_001FA4D0(s32 index)
     }
     off += index;
     *(s32*)off = 0;
-}
-
-struct Obj_1F8480 {
-    u8 pad0[0x10];
-    s32 flags;
-    u8 pad1[4];
-    s32 id;
-};
-struct Ref_1F8480 {
-    Obj_1F8480* obj;
-    s32 key;
-};
-
-s32 func_001F8480(Ref_1F8480* self)
-{
-    Obj_1F8480* o = self->obj;
-    if (o != 0 && self->key == o->id) {
-        u32 f = o->flags & 1;
-        if (f != 0) goto yes;
-    }
-    return 0;
-yes:
-    return 1;
-}
-
-struct Node_1F80C0;
-struct Ctx_1F80C0 { Node_1F80C0* f0; s32 f4; s32 f8; s32 pad_c; s32 f10; u8 pad14[0x10]; s32 f24; };
-struct Node_1F80C0 { u8 pad0[0x14]; Node_1F80C0* f14; s32 f18; Ctx_1F80C0* f1C; s32 f20; };
-struct Ring_1F80C0;
-struct Args_1F80C0 { s32 a; s32 b; s32 c; };
-typedef s32 Kind_1F80C0;
-typedef s32 Code_1F80C0;
-
-extern u8 D_00627800[];
-
-Node_1F80C0* func_001F7DB0(Ring_1F80C0* r);
-s32 func_001F6B20(Args_1F80C0* a);
-void func_001F7E58(Node_1F80C0* n);
-s32 func_001FA630(Kind_1F80C0 k, Node_1F80C0* n, s32 sz, s32 a3, s32 a4, s32 a5);
-s32 func_001F6B60(Code_1F80C0 c);
-void func_001F6B30(Code_1F80C0 c);
-
-s32 func_001F80C0(Ctx_1F80C0* self, s32 a1, s32 a2)
-{
-    Args_1F80C0 args;
-    Node_1F80C0* node;
-    s32 r;
-    s32 scratch[4];
-    (void)scratch;
-
-    self->f10 = 0;
-    self->f24 = 0;
-    node = func_001F7DB0((Ring_1F80C0*)D_00627800);
-    if (node == 0) return -1;
-    self->f0 = node;
-    self->f4 = node->f18;
-    node->f20 = a1;
-    node->f14 = node;
-    node->f1C = self;
-    if ((a2 & 1) == 0) {
-        args.c = 0;
-        args.b = 1;
-        r = func_001F6B20(&args);
-        self->f8 = r;
-        if (r < 0) {
-            func_001F7E58(node);
-            return -3;
-        }
-        if (func_001FA630(0x80000009, node, 0x40, 0, 0, 0) == 0) {
-            func_001F7E58(node);
-            func_001F6B30(self->f8);
-            return -2;
-        }
-        func_001F6B60(self->f8);
-        func_001F6B30(self->f8);
-        return 0;
-    }
-    self->f8 = -1;
-    if (func_001FA630(0x80000009, node, 0x40, 0, 0, 0) != 0) {
-        return 0;
-    }
-    func_001F7E58(node);
-    return -2;
 }
 
 struct Obj_1FA4F8 { s32 w0; s32 w4; s32 w8; };
@@ -797,37 +646,6 @@ void func_001FA078(s32 a)
 struct A_1FA190 { u8 p[0x10]; s32 i; s32 v; };
 struct B_1FA190 { u8 p[0x1C]; s32* t; };
 void func_001FA190(A_1FA190* a, B_1FA190* b) { b->t[a->i] = a->v; }
-
-struct Ring_1F8010;
-struct Node_1F8010 { u8 p0[8]; s32 f8; u8 pC[8]; s32 f14; };
-struct Msg_1F8010 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; u32 f20; s32 f24; s32 f28; s32 f2C; };
-struct Src_1F8010 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; s32 f20; };
-struct Ctx_1FA670;
-
-Msg_1F8010* func_001F7E78(Ring_1F8010* r);
-Node_1F8010* func_001F7FC0(s32 key, Ring_1F8010* r);
-s32 func_001FA670(Ctx_1FA670* a, Msg_1F8010* b, s32 c, s32 d, s32 e, s32 f);
-
-void func_001F8010(Src_1F8010* src, Ring_1F8010* ring)
-{
-    Msg_1F8010* m = func_001F7E78(ring);
-    s32 a = src->f14;
-    s32 b = src->f1C;
-    m->f14 = a;
-    m->f1C = b;
-    m->f20 = 0x80000009;
-    Node_1F8010* n = func_001F7FC0(src->f20, ring);
-    if (n == 0) {
-        m->f24 = 0;
-        m->f28 = 0;
-        m->f2C = 0;
-    } else {
-        m->f24 = (s32)n;
-        m->f28 = n->f8;
-        m->f2C = n->f14;
-    }
-    func_001FA670((Ctx_1FA670*)0x80000008, m, 0x40, 0, 0, 0);
-}
 
 struct Msg_1FA1E8;
 
