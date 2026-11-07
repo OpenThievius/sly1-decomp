@@ -244,9 +244,6 @@ void func_001BE1E8(void);
 s32 func_0011E1F8(s32 a);
 void func_001BEAC8(s32 h);
 void func_0011D2A8(s32 a0, s32 a1, void* a2, s32 a3);
-struct Node_1BD888 { void* f0; Node_1BD888* f4; };
-struct Chain_1BD888 { Node_1BD888* head; };
-struct Obj_1BD888 { u8 pad0[0x480]; Chain_1BD888* f480; u8 pad1[0xB4]; u64 f538; };
 void func_0018D800(void* dst, void* src, s32 count);
 s32 func_00152720(void* a);
 void* func_001BED98(void);
@@ -418,8 +415,8 @@ struct Begin_1BEE48 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_1BEE48*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_1BEE48*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 Contact03* func_001B5EC0(u8* p);
@@ -475,8 +472,8 @@ struct Begin_1BDA50 {
         it->list = list;
         it->link = (u8**)list;
         it->offset = list->offset;
-        it->prev = ((Frame_1BDA50*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->prev = ((Frame_1BDA50*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 struct Next_1BDA50 {
@@ -488,7 +485,7 @@ struct Next_1BDA50 {
     }
 };
 struct End_1BDA50 {
-    static void Of(Frame_1BDA50* it) { D_0027B314 = (ListFrame*)it->prev; }
+    static void Of(Frame_1BDA50* it) { g_activeListFrames = (ListFrame*)it->prev; }
 };
 s32 func_001BD558(s32 n, Item_1BDA50** arr, s32 cap, Buf_1BDA50* buf);
 void func_001BCD00(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, s32 v, Buf_1BDA50* buf, f32 f, s32 ex);
@@ -669,8 +666,8 @@ struct Begin_1C0808 {
         it->list = list;
         it->link = (u8**)list;
         it->offset = list->offset;
-        it->prev = (Iter_1C0808*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = (Iter_1C0808*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 struct Next_1C0808 {
@@ -684,7 +681,7 @@ struct Next_1C0808 {
 struct End_1C0808 {
     static void Of(Iter_1C0808* it)
     {
-        D_0027B314 = (ListFrame*)it->prev;
+        g_activeListFrames = (ListFrame*)it->prev;
     }
 };
 struct Tag_1C2430 { u64 lo; u64 hi; };
@@ -751,12 +748,12 @@ f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 Entry_1BB028 D_002746E0[8] = {
     { &D_00248D30, 0 },
     { &D_00248D30, 3 },
-    { &D_00248D00, 2 },
-    { &D_00248D10, 2 },
-    { &D_00248D20, 2 },
-    { &D_00248D20, 1 },
-    { &D_00248D10, 1 },
-    { &D_00248D00, 1 },
+    { &g_unitXVector, 2 },
+    { &g_unitYVector, 2 },
+    { &g_unitZVector, 2 },
+    { &g_unitZVector, 1 },
+    { &g_unitYVector, 1 },
+    { &g_unitXVector, 1 },
 };
 s32 D_00274720 = 0;
 s32 D_00274724 = 0;
@@ -1821,10 +1818,10 @@ void func_001BD790(Collider* obj, s32 mode)
     }
 }
 
-void func_001BD888(s32 n, Obj_1BD888** objs)
+void func_001BD888(s32 n, Collider** objs)
 {
     s32 local[5];
-    Obj_1BD888** sorted;
+    Collider** sorted;
     s32* counts;
     s32 i;
 
@@ -1832,22 +1829,22 @@ void func_001BD888(s32 n, Obj_1BD888** objs)
         return;
     }
     PushBackMemoryMark();
-    sorted = (Obj_1BD888**)AllocateBackMemory(n * 4);
+    sorted = (Collider**)AllocateBackMemory(n * 4);
     counts = (s32*)AllocateBackMemory(n * 4);
     func_001F5C0C(counts, 0, n * 4);
     func_001F5C0C(local, 0, 20);
     for (i = 0; i < n; i++) {
-        Obj_1BD888* o = objs[i];
+        Collider* o = objs[i];
         u32 cnt = 0;
-        Node_1BD888* p = o->f480->head;
+        ContactRow03* p = o->contacts->head;
         while (p != 0) {
-            if (p->f0 != 0 && (o->f538 & 0x0080000000000000ULL) != 0) {
+            if (p->head != 0 && (o->flags538 & 0x0080000000000000ULL) != 0) {
                 cnt++;
                 if (cnt >= 4) {
                     break;
                 }
             }
-            p = p->f4;
+            p = p->next;
         }
         counts[i] = cnt;
         if (cnt < 4) {
@@ -2934,11 +2931,11 @@ void func_001C06A0(s32 row, s32 column, f32 value)
 void func_001C06D8(void)
 {
     CopyMemory(g_volumeChannelFactors, g_defaultVolumeChannelFactors, 0xB0);
-    func_001C05D0(1.0f);
+    SetIopVolumeChannel8(1.0f);
     for (s32 i = 0; i < 4; i++) {
         ApplyVolumeChannelFactors(i);
     }
-    func_001C0760(g_saveData->f19EC & 0x80);
+    SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
     func_001C0790(g_saveData->f19EC & 0x40);
 }
 
@@ -3161,7 +3158,7 @@ void func_001C1190(World* self, BufferedStream* arg) {
     s32 r = NewScriptScope();
     i = 0;
     self->f2C = (void*)r;
-    AddUniqueMarkRoot(D_00259F38, r);
+    AddUniqueMarkRoot(g_markStacks, r);
     self->f1EF8 = n1;
     SetScriptValueTag(&q0, 0);
     DefineScriptVariable(&q1, (s32)self->f2C, self->f1EF8, &q0);
@@ -3186,7 +3183,7 @@ void* func_001C1390(s32 index, World* self)
     } else {
         Entry_1C1390* e = (Entry_1C1390*)((index << 3) + (u32)self->f1EF4);
         void* p = e->value;
-        if (p != 0) AddUniqueMarkRoot(D_00259F38, p);
+        if (p != 0) AddUniqueMarkRoot(g_markStacks, p);
         return p;
     }
 }

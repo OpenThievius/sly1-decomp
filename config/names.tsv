@@ -2770,3 +2770,15 @@ func_001B6568	GetStateWalkerTargetKey	stores the key of the walker's target stat
 func_001B6598	GetStateWalkerCurrentKey	stores the key of the walker's current state (+0x28) in the graph's state table, or -1 for none
 func_001B65C8	GetStateWalkerNextKey	stores the key of the state the walker is moving to (+0x2C) in the graph's state table, or -1 for none
 func_001B65F8	SetStateWalkerSpeed	stores the walker's speed at +0x38 and tells the animation player at +0x24 when there is one (SetAnimationPlayerSpeed)
+func_001B93D8	DrawCollider	slot 37 of class 0x03 (the draw slot): only runs class 0x02's func_001261C0 with its two arguments; DrawTimedGroup and others call it as their base
+func_001BAC28	IgnoreColliderAttachmentStep	slot 51 of class 0x03 (0xDC, called by what the object is attached to with the frame time): does nothing
+func_001BB000	ResetColliderAnchors	runs SetColliderAnchors(self, 3, 0, 3, 0), the anchors SetupSequencedObject also gives
+func_001BE810	CheckStreamVoicePending	0 when the stream voice is locked or absent; 1 while g_streamVoicePending is set; otherwise queues IOP command 0x2E for g_streamVoice and returns 0
+func_001BECF8	SilenceVolumeChannel2	SetVolumeChannelFactor(2, 1, 0.0); RestoreVolumeChannel2 sets it back to 1.0
+func_001BED20	RestoreVolumeChannel2	SetVolumeChannelFactor(2, 1, 1.0), undoing SilenceVolumeChannel2
+func_001C0000	SetVolumeChannel6Factors	sets factors 0, 2 and 3 of volume channel 6 to the value, and factor 1 too when the flag is set
+func_001C05D0	SetIopVolumeChannel8	sends volume channel 8 to the IOP as the value times 1024 (SetIopVolumeChannel)
+func_001C0760	SilenceVolumeChannel3	sets factor 1 of volume channel 3 to 0.0 when the flag is set and to 1.0 otherwise
+func_001C0AB8	SetLastWorldSoundEntryFromPoint	sets the two values of the world's last sound entry (+0x1D84, count at +0x1D80) to 8000 - 50 y and 8000 - 50 x of the point
+func_001C0B08	SetLastWorldSoundEntryValues	copies an 8-byte pair into the world's last sound entry at its offset 4 (AddWorldSoundEntry appends the entries)
+func_001C0EC0	PlaySoundWithWanderingPitch	when D_002748EC is set, starts sound 0x77 with a pitch of StepBiasedRandomWalk's value over 12
