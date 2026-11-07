@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 948/944, checked 2026-11-06
+// SIZE 940/944, checked 2026-11-06
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001DDC68.cpp func_eu_001DDC68 --unit src/main/file_1D62E0.cpp
-// Still differs: Level setup; now 948 vs 944 bytes with the list iterator rewritten (cur = next + stride, stride via list pointer); still differs in saved-register roles (self/ctx s1,s2 vs s2,s3) and stack layout (iterator at sp+16 vs retail sp+32).
+// Still differs: frame now 224 as retail (ListFrame-sized unused local before the iterator; global stores through pointers so the lui bases are hoisted; the word copied through an unaligned read of a packed pad struct). Left: 948 vs 944 bytes, loop counter i in s4 (retail s0), the walk's setup order (retail loads the stride before and the head after the D_eu_00284A94 store, and keeps w's copy as swl/swr from the a3 register), and the epilogue lui order.
 // Level object setup: spawns the fixed object pools, initialises the managers, runs the update/draw passes over the object list once and ends the frame.
 struct Vt_eu_1DDC68 { u8 pad0[0x1C]; void (*f1C)(void* self); u8 pad1[0x4C - 0x20]; void (*f4C)(void* self); void (*f50)(void* self); };
 struct Node_eu_1DDC68 { Vt_eu_1DDC68* vt; u8 pad0[0x18]; Node_eu_1DDC68* next; };
 struct __attribute__((packed)) Word_eu_1DDC68 { s32 v; };
 struct Iter_eu_1DDC68 { u8* list; u8* cur; s32 stride; Iter_eu_1DDC68* prev; };
 struct List_eu_1DDC68 { u8* head; s32 f4; s32 stride; };
+struct __attribute__((packed)) PkW_eu_1DDC68 { u8 pad[0x1D64]; s32 v; };
 struct World_eu_1DDC68 {
     u8 pad0[0x48]; List_eu_1DDC68 list;
     u8 pad1[0x1BE8 - 0x54]; u8 f1BE8[0x1D64 - 0x1BE8];
@@ -60,6 +61,7 @@ void func_001C0B38(void* world);
 void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
 {
     Word_eu_1DDC68 w;
+    Iter_eu_1DDC68 frame;
     Iter_eu_1DDC68 iter;
     Iter_eu_1DDC68* itp;
     s32 i;
@@ -67,11 +69,13 @@ void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
     s32 k;
     func_00151A88(D_eu_002631F0);
     func_0011BF70();
-    D_eu_0027EE84 = func_00137B90(ctx);
+    s32* pm = &D_eu_0027EE84;
+    *pm = func_00137B90(ctx);
     self->f1D70 = func_00137D10(ctx);
     func_001DCCC0(ctx);
     func_eu_001DDA10(ctx);
-    D_eu_00262C90 = func_0011E580(0x6D, self, 0, 4, -1);
+    void** pk = &D_eu_00262C90;
+    *pk = func_0011E580(0x6D, self, 0, 4, -1);
     itp = &iter;
     for (i = 9; i >= 0; i--) {
         Node_eu_1DDC68* n = func_0011E580(0x1E, self, 0, 0xA, -1);
@@ -104,8 +108,9 @@ void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
         func_001DC9A0(self);
     }
     ((u8*)self)[0x1D67] = 0x80;
-    w = self->f1D64;
-    func_00168770(D_eu_002C73A0, &w, 0, w.v);
+    s32 wv = ((PkW_eu_1DDC68*)self)->v;
+    w.v = wv;
+    func_00168770(D_eu_002C73A0, &w, 0, wv);
     self->f1D68 = self->f1D68 * 0.003921569f;
     self->f1D6C = self->f1D6C * 0.003921569f;
     func_001DCD28(self);
@@ -121,8 +126,9 @@ void func_eu_001DDC68(World_eu_1DDC68* self, void* ctx)
     List_eu_1DDC68* lp = &self->list;
     iter.list = (u8*)lp;
     iter.stride = lp->stride;
-    iter.cur = self->list.head + iter.stride;
-    for (Node_eu_1DDC68* n = (Node_eu_1DDC68*)self->list.head; n != 0; n = *(Node_eu_1DDC68**)iter.cur, iter.cur = (u8*)n + iter.stride) {
+    Node_eu_1DDC68* n = (Node_eu_1DDC68*)lp->head;
+    iter.cur = (u8*)n + iter.stride;
+    for (; n != 0; n = *(Node_eu_1DDC68**)iter.cur, iter.cur = (u8*)n + iter.stride) {
         n->vt->f50(n);
     }
     D_eu_00284A94 = iter.prev;
