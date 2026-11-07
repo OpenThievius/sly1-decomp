@@ -1568,7 +1568,37 @@ INCLUDE_RODATA(jtbl_00249990);
 
 INCLUDE_ASM(func_001218C0);
 
-INCLUDE_ASM(func_00121C48);
+void ComputeRotationSpringAcceleration(PlacedObject* self, Mat02* rot, Vec02* spin, Vec02* out, f32 dt)
+{
+    Vec02 force = *(Vec02*)D_00248D30;
+    if (self->p214 != 0) {
+        Mat02 m;
+        Vec02 axis;
+        f32 angle;
+        MultiplyMatrices3x3(&self->rot, rot, &m);
+        MatrixToAxisAngle(&m, &angle, &axis);
+        if (1e-4f < angle) {
+            f32* k = (f32*)self->p214;
+            f32 s = k[2] * angle * angle + k[1] * angle + k[0];
+            Vu0::Q(force) = Vu0::MulX(Vu0::Q(axis), Vu0::Scalar(s));
+        }
+    }
+    if (self->p218 != 0) {
+        Vec02 d;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*spin), Vu0::Q(self->v160));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (1e-4f < len) {
+            f32* k = (f32*)self->p218;
+            f32 s = k[2] * len + k[1] + k[0] / len;
+            f32 limit = 1.0f / dt;
+            if (limit < s) {
+                s = limit;
+            }
+            Vu0::Q(force) = Vu0::MulAddX(Vu0::Q(force), Vu0::Q(d), Vu0::Scalar(s));
+        }
+    }
+    *out = force;
+}
 
 INCLUDE_RODATA(jtbl_002499C0);
 
