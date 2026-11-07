@@ -2505,3 +2505,27 @@ func_00148F80	AddReserveUnitNow	restarts D_0026C6C8 and raises g_saveData's 0x19
 func_00148FF0	SetCountdownNotifierState	slot 0xCC of class 0x57 (overriding SetStateNotifierState): state 0 draws a random time, state 1 creates an effect (CreateEffect), sets a flag-table bit, plays sound 0x69, tells the listener and moves to 2
 func_00149190	UpdateArmedNotifier	slot 0x54 of class 0x5B (original assembly; its Init is InitArmedStateNotifier)
 D_0026EC68	g_deadlineNotifier	StartDeadlineNotifier stores the class 0x5A object here; func_00149398's file reads it
+func_001493B8	SetCameraControllerValue	stores its argument in a camera controller's word at +0x08 (ResetCamera calls it)
+func_001493C0	UpdateIdleCameraController	the every-frame slot (m04) of the base controller table D_00217398: does nothing
+func_00149458	GetTargetCameraControllerEyePoint	original assembly: writes a point that DeactivateTargetCameraController and UpdateTargetCameraController pass to func_00144938 with the target point (GetCameraControllerTargetPoint) after it
+func_00149508	StartCameraSounds	starts sound 0x71 into the camera's record at +0x48 and sound 0x70 into the one at +0x4C, and sets +0x44 to 1 (func_00175170 calls it with g_camera)
+func_00149660	InitTargetCameraController	set-up of the D_002173B0 controller: SetCameraControllerOwner, an empty value stack with 0 pushed (PushStackValue), the rate divisor 10 and the numbers 0.5 and -1
+func_001496C0	ActivateTargetCameraController	slot m00 of D_002173B0 (it has become the top): takes the camera's angles, its zoom (+0x1C8) and near distance (+0x1E4) to give back later, aims at the target point and sets the near distance to 49
+func_00149760	UpdateTargetCameraController	original assembly: the every-frame slot (m04) of D_002173B0
+func_0014A7B8	DeactivateTargetCameraController	slot m01 of D_002173B0 (it has stopped being the top): stops its two sound records, places the camera at the eye and target points and gives back the zoom and the near distance ActivateTargetCameraController kept
+func_0014A888	InitFrameCameraController	set-up of the D_002173C8 controller: SetCameraControllerOwner and the identity frame (g_identityMatrix) at +0x20
+func_0014A8D0	ActivateFrameCameraController	slot m00 of D_002173C8: points the camera (func_00144B70) at +0x370 of the target of the camera stack's first entry
+func_0014A8F8	UpdateFrameCameraController	original assembly: the every-frame slot (m04) of D_002173C8
+func_0014AA90	ActivateValueCameraController	slot m00 of D_002173E0: stores its argument in the controller's word at +0x08
+func_0014AA98	DeactivateValueCameraController	slot m01 of D_002173E0: clears the controller's word at +0x08
+func_0014AAA0	UpdateValueCameraController	original assembly: the every-frame slot (m04) of D_002173E0
+func_0014AC48	SetupItemColumn	slot 1 of the item column table D_00218720: sets up its text (SetupScreenElementText), then each of its four items' slot 1, font scale 0.8 and slide times 1, 1 and 0
+func_0014AD70	UpdateItemColumnSlide	slot 2 of the item column table D_00218720: runs UpdateScreenElementSlide, then slot 2 of each of its items up to its count
+func_0014AF10	ClearItemColumn	calls the item column's slot 16 with mode 0, as ResetScreenElement does (RunAnimationEvent calls it on g_stackedCaptionGroup)
+func_0014AF38	PostItemColumnEntry	original assembly: RunAnimationEvent passes it g_stackedCaptionGroup, two words of its event and a fraction (a byte times 1/256)
+func_0014B678	SetSinCosPair	writes the sine and cosine of its angle into the record's first two floats (ComputeSinCos) and clears the word after them; func_0014B6A8 of class 0x11 calls it
+func_0014BEA8	IsContactAgentFree	slot 0x16C of class 0x12: 0 when func_001DDA80 holds for the world or the agent's state (+0x724) is 0xB or 0x10, else 1
+func_0014C668	FinishGaugeOnTimeout	the callback HandleGaugeManagerNotification gives g_timerElement with SetTimerLimit: on mode 1, unless either tag of the gauge manager's device (func_001B6568, func_001B6598) is 0x3FE, moves the device to state 0x3FF and applies the gauge ratio (ApplyGaugeRatioToEffect)
+func_0014C788	ShowGaugeManagerDisplays	slot 0xC8 of class 0x68: while the device is in state 0x3FD and AreMenusAndFadeClear holds, calls slot 14 of g_gaugeAmountCaption and g_timerElement, else their slot 15
+func_0014C858	RunGaugeTimedEvent	original assembly: UpdateGaugeManager runs it when the timer at +0x45C has passed
+func_0014CD70	CountDownGaugeContacts	when the gauge manager's count +0x458 equals +0x450, sets the timer +0x45C to the game time plus a random time between +0x43C and +0x440; then lowers the count (EnterContactAgentState calls it)

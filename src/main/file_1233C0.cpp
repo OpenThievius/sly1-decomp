@@ -5004,10 +5004,10 @@ void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
         break;
     case 53:
         ((VFnP_12D5D0)g_stackedCaptionGroup.vt[17])(&g_stackedCaptionGroup, 0);
-        func_0014AF10(&g_stackedCaptionGroup);
+        ClearItemColumn(&g_stackedCaptionGroup);
         break;
     case 54:
-        func_0014AF38(&g_stackedCaptionGroup, msg->a8.h.lo, msg->aC.i, (f32)msg->a8.h.hi * 0.00390625f);
+        PostItemColumnEntry(&g_stackedCaptionGroup, msg->a8.h.lo, msg->aC.i, (f32)msg->a8.h.hi * 0.00390625f);
         break;
     case 55:
     {
