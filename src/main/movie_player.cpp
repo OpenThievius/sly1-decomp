@@ -382,7 +382,8 @@ void AddContactListKind(ContactListObject* self, s32 value)
 struct ContactListGlider : ContactListObject {
     f32 speed6F0;           // 0x6F0: the speed of the velocity it keeps (func_0018DDD8)
     f32 rate6F4;            // 0x6F4: how fast it turns to that velocity (func_0018DE70)
-    u8 pad6F8[0x700 - 0x6F8];
+    u8 pad6F8[4];
+    f32 time6FC;
     Vec02 v700;             // 0x700: the velocity it keeps
 };
 

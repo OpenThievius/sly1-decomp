@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "vu0.h"
 #include "screen_element.h"
 #include "switched_collider.h"
 #include "path_curve_object.h"
@@ -470,7 +471,60 @@ void StartC24Object(C24* self)
     self->x6E8->field_c = AllocateFrontMemory(0xC00);
 }
 
-INCLUDE_ASM(func_00182548);
+void UpdateMaskedCollider(C24* self, f32 dt);
+void* GetActiveSwitchedCollider(void);
+s32 IsObjectOfKind(void* obj, s32 kind);
+void GetStateWalkerTargetKey(void* h, s32* out);
+void GetStateWalkerCurrentKey(void* h, s32* out);
+void SendEmptyMessage(void* p);
+void TriggerScriptEvent(void* obj, s32 a, s32 b, s32 c);
+void ClearRootTries(void* self);
+void SetStateWalkerTarget(void* p, s32 n);
+
+void UpdateC24Object(C24* self, f32 dt)
+{
+    SwitchedCollider* target;
+    u8 msg[0x10];
+    s32 key;
+    UpdateMaskedCollider(self, dt);
+    if (self->x6E8 != 0) {
+        target = (SwitchedCollider*)GetActiveSwitchedCollider();
+        if (IsObjectOfKind(target, 0x16) != 0) {
+            target = *(SwitchedCollider**)((u8*)target + 0x620);
+        }
+        f32 v = self->f6E4 + dt * self->f6E0;
+        f32 hi = self->f6DC;
+        if (v < 0.0f) {
+            v = 0.0f;
+        } else if (hi < v) {
+            v = hi;
+        }
+        self->f6E4 = v;
+        GetStateWalkerTargetKey(self->x6C8, &key);
+        if (key == -1) {
+            GetStateWalkerCurrentKey(self->x6C8, &key);
+        }
+        s32 hold = 0;
+        if (key == 0x36F && target != 0 &&
+            Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140)))) < D_0026424C) {
+            hold = 1;
+        } else if (self->f6E4 >= self->f6DC) {
+            hold = 1;
+        }
+        if (hold) {
+            InitOwnerMessage(msg, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 0x505 ? 2 : 0, self);
+            target->desc05()->m4C(target, msg);
+            SendEmptyMessage(self->x6EC);
+            self->desc->m03(self);
+            TriggerScriptEvent(self, 2, 0, 0);
+            return;
+        }
+        if (self->x6C8 != 0 && self->f6DC - self->f6E4 < D_00264248) {
+            SetStateWalkerTarget(self->x6C8, 0x36F);
+        }
+    }
+    ClearRootTries(self);
+}
 
 INCLUDE_ASM(func_00182748);
 

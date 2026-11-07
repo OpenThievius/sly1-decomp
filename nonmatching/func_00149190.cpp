@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 528/520, checked 2026-11-07
-// NEAR: all calls and the vector code match; differs in (1) retail's constant 250000.0f is rebuilt (lui/ori/mtc1) inside the loop where ours keeps it in $f21, (2) FromFloat of D_00261BE0 is lw in retail, lwc1+mfc1 here, (3) the clamp of +0x858 to 99 is `li 98; slt; movz` in retail but slti 100 here. Constants hoisting and the clamp tried in about 15 forms.
+// SIZE 532/520, checked 2026-11-07
 #include "common.h"
 #include "state_notifier.h"
 #include "world.h"
@@ -23,7 +22,11 @@ struct ListenerMessage {
 };
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void* GetActiveSwitchedCollider(void);
-
+// NEAR (2026-11-08, wave 3 retry): FromFloatAt now loads D_00261BE0 with lw as retail does. The
+// other two differences stay: retail rebuilds the 250000.0f (lui/ori/mtc1) inside the loop
+// where ours keeps it in f21 (and its Dot takes vf2 for the 1.0, ours vf3), and the clamp of
+// +0x858 to 99 is li 98 / slt / movz in retail, slti 100 here. Constants hoisting and the clamp
+// tried in about 15 forms.
 s32 GatherObjectsById(void* world, s32 a, s32 b, s32 c, s32 d, PlacedObject** out);
 s32 CollectMeshHits(Vec02* probe, s32 a, s32 b, s32 c, void* d, s32 e, void* out, f32 radius);
 
@@ -57,7 +60,7 @@ void func_00149190(ArmedStateNotifier* self)
                 s32 c = *(s32*)((u8*)o + 0x858) + 1;
                 *(s32*)((u8*)o + 0x858) = (c > 98) ? 99 : c;
             }
-            Vu0::Q(k) = Vu0::FromFloat(D_00261BE0);
+            Vu0::Q(k) = Vu0::FromFloatAt(D_00261BE0);
             Vu0::Q(push) = Vu0::MulX(Vu0::Q(o->v150), Vu0::Q(k));
             push.z = zero >? push.z;
             self->desc02()->m20(self, &push);

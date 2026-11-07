@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 380/384, checked 2026-11-07
-// NEAR: right instructions, stack stores and calls; differs in the VU0 registers (retail loads the matrix rows into vf3/vf6/vf5 and the vector rows via one base pointer (addiu v0,s0,0x110 then 0x10(v0)); ours reads every row from s0 and numbers the registers differently) and in the dead-store pairs, which retail writes row by row right after each product.
 #include "common.h"
 #include "child_group_object.h"
 #include "attachment.h"
 #include "vu0.h"
-
+// NEAR (2026-11-08, wave 3 retry): RotateUntied in MulRows: the instructions are retail's; the
+// VU0 registers and the dead stores differ. Retail loads the rotation's rows into vf3, vf6 and
+// vf5 and the rows of the second matrix one at a time through v0 = s0+0x110 (addiu v0 after the
+// first lqc2), storing each product's pair of dead copies (0x30, 0x60) before the next product;
+// here all rows are loaded first, v0 is not formed and the pairs come after the stores to the
+// object. MulRotation (x, y, z, r), x, y, z inside MulRows (the frame grows to 224) and
+// explicit pairs give other shapes.
 void BuildShortestArcRotation(void* from, void* to, void* out);
 void BuildBasisFromXAndZHint(void* x, void* z, void* out);
 void TransformRotationBetweenFrames(void* a, void* b, void* c, void* d);
@@ -14,9 +19,9 @@ extern const Vec02 g_unitZVector;
 static inline Mat02 MulRows(const Mat02& a, const Mat02& b)
 {
     Mat02 m;
-    Vu0::Q(m.r[0]) = Vu0::Rotate(a, Vu0::Q(b.r[0]));
-    Vu0::Q(m.r[1]) = Vu0::Rotate(a, Vu0::Q(b.r[1]));
-    Vu0::Q(m.r[2]) = Vu0::Rotate(a, Vu0::Q(b.r[2]));
+    Vu0::Q(m.r[0]) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    Vu0::Q(m.r[1]) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
     return m;
 }
 

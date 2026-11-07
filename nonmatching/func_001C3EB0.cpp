@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 192/180, checked 2026-11-07
+// SIZE 184/180, checked 2026-11-07
 #include "common.h"
 #include "placed_object.h"
 #include "globals.h"
 #include "vu0.h"
-// NEAR (2026-11-07, worker vu0-a): retail's normalisation with the unit x fallback
-// (NormalizeOr), scaled by D_00274AB4 and handed to the receiver's slot 32 (SetColliderVelocity).
-// Retail loads the scale (lw, qmtc2 vf4) first and keeps it in vf4 across the test; here it is
-// stored to k and loaded back after the join (lqc2 vf1, 0x20(sp)), the result's pointer is
-// formed before the test (addiu v0,sp,0x10; move a3), and the branch is laid out the other way
-// (bc1t to the join). Kept in a u128 (as in func_0018DDD8) the scale stays in a register but is
-// scheduled after the square root. a0 (the reply's value) is the sending object.
-
+// NEAR (2026-11-08, wave 3 retry): FromFloatAt for the scale, kept in a u128 across the test,
+// and Set for the result's store (it is addressed from sp, not formed before the test): the
+// scale's lw, qmtc2 and sqc2, the result's sqc2 16(sp) and the call are retail's (184 bytes
+// against 180). Left: retail loads the fallback (lq) after the vaddq of the square root and
+// into v0, so the receiver stays in a1; here the lq comes before the square root, into a1, and
+// the receiver is moved to a2.
 extern f32 D_00274AB4;
 
 void func_001C3EB0(s32 c, void* receiver)
@@ -22,8 +20,9 @@ void func_001C3EB0(s32 c, void* receiver)
     Vec02 v;
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(D_00274AB4);
+    u128 s = Vu0::Q(k);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(from->v140));
     d.z = 0.0f;
-    Vu0::Q(v) = Vu0::MulX(Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), Vu0::Q(k));
+    Vu0::Set(v, Vu0::MulX(Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), s));
     to->desc02()->m20(to, &v);
 }

@@ -253,7 +253,41 @@ void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
     return r;
 }
 
-INCLUDE_ASM(func_001D35A8);
+struct FrameSource;
+struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameSource* self, Mat02* out); };
+struct FrameSource { FrameSourceDesc* desc; };
+typedef u64 Qword128 __attribute__((mode(TI)));
+void ComputePlacedObjectWorldFrame(void* self);
+void ComputeColliderWorldFrame(Collider* self);
+void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
+
+void func_001D35A8(CountedCollider* self)
+{
+    if (self->f1F4 != 0) {
+        Mat02 world;
+        Mat02 frame;
+        Mat02 copyA;
+        Mat02 copyB;
+        ComputePlacedObjectWorldFrame(self);
+        FrameSource* src = (FrameSource*)self->f1F4;
+        src->desc->getFrame(src, &frame);
+        u128 r0 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[0]));
+        u128 r1 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[1]));
+        u128 r2 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[2]));
+        Vu0::Q(copyB.r[0]) = r0;
+        Vu0::Q(copyA.r[0]) = r0;
+        Vu0::Q(copyB.r[1]) = r1;
+        Vu0::Q(copyA.r[1]) = r1;
+        Vu0::Q(copyB.r[2]) = r2;
+        Vu0::Q(copyA.r[2]) = r2;
+        Vu0::Q(world.r[0]) = r0;
+        Vu0::Q(world.r[1]) = r1;
+        Vu0::Q(world.r[2]) = r2;
+        TransformMeshToWorld(&self->mesh, &self->meshCopy, *(Qword128*)&self->v140, &world);
+    } else {
+        ComputeColliderWorldFrame(self);
+    }
+}
 
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg)
 {

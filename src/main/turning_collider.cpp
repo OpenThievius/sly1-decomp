@@ -373,7 +373,16 @@ void TurnColliderTowardHeading(TurningCollider* self)
     self->desc02()->m21(self, &q);
 }
 
-INCLUDE_ASM(func_001C5DB8);
+void func_001C5DB8(TurningCollider* self, void* matrix, Vec02* out, f32 limit)
+{
+    f32 turn;
+    f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    f32 angle = ApproachAngleWithRamp((u8*)self + 0x6E0, &turn, r, self->f638, limit);
+    BuildAxisAngleMatrix(&g_unitZVector, angle, matrix);
+    Vec02 k;
+    Vu0::Q(k) = Vu0::FromFloatAt(turn);
+    Vu0::Q(*out) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Q(k));
+}
 
 
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)

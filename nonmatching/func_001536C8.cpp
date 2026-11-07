@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 180/184, checked 2026-11-07
-// NEAR: needs ActiveSetItem to have owner at 0x00, axis (Vec02) at 0x10 and axes (Vec02*) at 0x40, which active_set_solver.h does not have yet (they are local types here). Retail stores the dot product with sw straight from qmfc2 (ToFloat gives mtc1 and swc1), takes the loop count from a reload after the store, and tests the row with a branch-likely.
+// SIZE 176/184, checked 2026-11-07
+// NEAR: retail loads the solver's count afresh in the loop's body for the row's index (lw v1, 4(s0)) and in the delay slot of a beql on the row's test; here the count of the loop's test stays in v1 and is reused. The store is ToBits's qmfc2 + sw, as retail's. A local index, the row read twice, &items[i]: no change.
 #include "common.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
@@ -38,30 +38,14 @@
 void AppendToList(void* list, void* item);
 
 #include "vu0.h"
-void AppendToList(void* list, void* item);
-struct NmItem {
-    void* owner;            // 0x00
-    u8 pad04[0x10 - 0x04];
-    Vec02 axis;             // 0x10
-    u8 pad20[0x40 - 0x20];
-    Vec02* axes;            // 0x40
-    f32* row;               // 0x44
-    u8 pad48[4];
-    NmItem* next;           // 0x4C
-    u8 pad50[0x10];
-};
-void AddActiveSetItem(ActiveSetSolver* self, NmItem* item)
+void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 {
     for (s32 i = 0; i < self->count; i++) {
-        NmItem* e = (NmItem*)(self->items + i * 0x60);
+        ActiveSetItem* e = (ActiveSetItem*)(self->items + i * 0x60);
         f32* row = e->row;
         if (row != 0) {
-            union {
-                f32 f;
-                s32 i;
-            } d;
-            d.f = Vu0::ToFloat(Vu0::Dot(Vu0::Q(item->axis), Vu0::Q(e->axes[*(s32*)((u8*)item->owner + 0xCC)])));
-            ((s32*)row)[self->count] = d.i;
+            u128 d = Vu0::Dot(Vu0::Q(item->axis), Vu0::Q(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
+            ((u32*)row)[self->count] = Vu0::ToBits(d);
         }
     }
     AppendToList(&self->pending, item);

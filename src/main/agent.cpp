@@ -592,7 +592,27 @@ done:
     return s;
 }
 
-INCLUDE_ASM(func_001C8418);
+void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
+
+void func_001C8418(Agent* self, Vec02* p)
+{
+    Vec02 t;
+    self->vA40 = *p;
+    t = self->vA40;
+    if (self->f928 != 0) {
+        SnapPointToOwnerGraph(self->f928, &t, &t);
+    }
+    if (self->fA60 != 0) {
+        u128 d = Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(t));
+        s32 far = D_00274C90 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (far) {
+            self->fA60 = 0;
+        }
+    }
+    if (self->fA60 == 0) {
+        self->vA50 = t;
+    }
+}
 
 s32 HasAgentReachedPathEnd(Agent* self)
 {
@@ -1143,7 +1163,46 @@ s32 AnswerAgentRosterPoll(void)
     return 2;
 }
 
-INCLUDE_ASM(func_001CA468);
+s32 IsInsideRange(void* target, f32 scale);
+s32 HasObjectPoolChoice(void* pool);
+extern f32 g_unitRange[];
+
+static inline f32 Limit(f32 g, f32 lo, f32 hi)
+{
+    if (g < lo) return lo;
+    if (hi < g) return hi;
+    return g;
+}
+
+s32 IsAgentTargetInRange(Agent* self)
+{
+    SwitchedCollider* target = (SwitchedCollider*)self->desc08()->m62(self);
+    if (target == 0) {
+        return 0;
+    }
+    if ((target->desc->flags & 8) != 0) {
+        if (target->desc05()->m4D(target) != 0) {
+            return 0;
+        }
+    }
+    f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140))));
+    if (IsInsideRange(&self->f738, dist) == 0) {
+        return 0;
+    }
+    f32 bearing = __builtin_fabsf(func_001C7A60(self));
+    f32 g = D_00274CE0.c[0] + dist * (D_00274CE0.c[1] + dist * D_00274CE0.c[2]);
+    g = Limit(g, g_unitRange[0], g_unitRange[1]);
+    if (self->f74C < g * bearing) {
+        return 0;
+    }
+    if (g_gameTime[0] < self->f748) {
+        return 0;
+    }
+    if (self->fB0C != 0 && HasObjectPoolChoice(self->fB0C) == 0) {
+        return 0;
+    }
+    return 1;
+}
 
 void DrawTurningCollider(void);
 

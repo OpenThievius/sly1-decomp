@@ -157,7 +157,64 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
     return l.out;
 }
 
-INCLUDE_ASM(func_001CEEC8);
+struct TargetSpanHit {
+    Vec02 point;
+    u8 pad10[0x34];
+    f32 f44;
+    u8 pad48[0x28];
+};
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, BaseObject* self, Vec02* lo, Vec02* hi, void* a, void* b, s32* n0, s32* n1);
+void EvaluateHermiteVectorSegment(f32 t, f32 u, f32 v, void* a, void* b, void* c, void* d, Vec02* out, void* e, void* f);
+s32 FindNearestSpanObject(s32 zero, Vec02* in, void* out, s32 n0, s32 n1, TargetSpanHit* hit);
+
+s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec02* pc, void* pd, Vec02* pe)
+{
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 p;
+    Vec02 q;
+    TargetSpanHit hit;
+    s32 n0;
+    s32 n1;
+    PushBackMemoryMark();
+    if (pe != 0) {
+        Vu0::Q(lo) = Vu0::Min(Vu0::Q(*(Vec02*)pa), Vu0::Min(Vu0::Q(*pc), Vu0::Q(*pe)));
+        Vu0::Q(hi) = Vu0::Max(Vu0::Q(*(Vec02*)pa), Vu0::Max(Vu0::Q(*pc), Vu0::Q(*pe)));
+    } else {
+        lo = *(Vec02*)pa;
+        hi = *pc;
+    }
+    GatherCollidersInBox(self->world, self, &lo, &hi, a1, a2, &n0, &n1);
+    f32 t = 0.0f;
+    for (;;) {
+        EvaluateHermiteVectorSegment(limit, t, 1.0f, pa, pb, pc, pd, &q, 0, 0);
+        if (t != 0.0f) {
+            if (FindNearestSpanObject(0, &p, &q, n0, n1, &hit) != 0) {
+                if (100.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pc))))) {
+                    break;
+                }
+            }
+        }
+        p = q;
+        if (t == limit) {
+            break;
+        }
+        t = limit <? (t + 0.1f);
+    }
+    if (pe != 0) {
+        if (FindNearestSpanObject(0, &p, pe, n0, n1, &hit) != 0) {
+            if (hit.f44 != 1.0f) {
+                if (50.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pe))))) {
+                    t = limit - 1.0f;
+                }
+            }
+        }
+    }
+    PopBackMemoryMark();
+    return t < limit;
+}
 
 f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
 {
@@ -176,15 +233,26 @@ INCLUDE_ASM(func_001CFFD0);
 // +0x34), the angle at +0x23C4 and its flip flag at +0x23C8, and the target (a flag at +0x04,
 // the radius at +0x08, a point at +0x10, a pair of points at +0x20).
 struct TargetMover {
-    struct Vt { u8 pad0[8]; void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); };
+    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); };
     const Vt* vt;           // 0x00
     u8 pad04[4];
     s32 wraps;              // 0x08
     u8 pad0C[0x14 - 0x0C];
     const f32* low;         // 0x14
 };
-struct TargetFrameRecord { u8 pad0[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; TargetMover* mover; };
-struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; u8 pad23C0[4]; f32 angle; s32 flip; };
+// func_001D12F0 reads the record's active flag (+0x40), its limit (+0x44) and scale (+0x48), and
+// the player's float at +0x23C0.
+struct TargetFrameRecord {
+    u8 pad0[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x34 - 0x1C];
+    TargetMover* mover;     // 0x34
+    u8 pad38[0x40 - 0x38];
+    s32 active;             // 0x40
+    f32 limit;              // 0x44
+    f32 scale;              // 0x48
+};
+struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 f23C0; f32 angle; s32 flip; };
 struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
 
 f32 WrapModulo(f32 x, f32 y);
@@ -287,7 +355,45 @@ void ResetPlayerOnOffObject(Player* self)
     SetOnOffObjectForcedState(o, 0);
 }
 
-INCLUDE_ASM(func_001D12F0);
+void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
+void ApproachValueWithRamp(f32 value, f32 target, f32 dt, float* ramp, f32* out);
+void AddColliderForce(Player* self, void* v);
+void func_0016FD70(Player* self);
+
+void func_001D12F0(Player* self)
+{
+    Vec02 dir;
+    Vec02 force;
+    Vec02 k;
+    f32 bounds[2];
+    if (self->f239C == 4) {
+        TargetFrameRecord* rec = ((TargetPlayerView*)self)->record;
+        if (rec->active != 0) {
+            TargetMover* m = rec->mover;
+            if (m->vt->placeAt != 0) {
+                m->vt->placeAt(m, ((TargetPlayerView*)self)->f23C0, 0, &dir);
+            }
+            TransformDirectionBetweenFrames(rec->frame, 0, &dir, &dir);
+            f32 down = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(dir), Vu0::Q(self->gravity)));
+            f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(dir), Vu0::Q(self->v150)));
+            float* ramp = D_00274EF0;
+            ApproachValueWithRamp(along, rec->limit, g_gameClock.dt, ramp, &bounds[0]);
+            ApproachValueWithRamp(along, -rec->limit, g_gameClock.dt, ramp, &bounds[1]);
+            f32 v = rec->scale * down;
+            f32 hi = bounds[0];
+            f32 lo = bounds[1];
+            if (v < lo) {
+                v = lo;
+            } else if (hi < v) {
+                v = hi;
+            }
+            Vu0::Q(k) = Vu0::FromFloat(v - down);
+            Vu0::Q(force) = Vu0::MulX(Vu0::Q(dir), Vu0::Q(k));
+            AddColliderForce(self, &force);
+        }
+    }
+    func_0016FD70(self);
+}
 
 s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 s32 HasNoActiveObject89(Player* self)

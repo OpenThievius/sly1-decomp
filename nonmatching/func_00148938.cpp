@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 396/388, checked 2026-11-07
-// NEAR: right structure and the loop; retail stores the squared distance with sw straight from the qmfc2 register (an integer word) where ToFloat's f32 result goes through mtc1/swc1 (or, via a union, one extra move); also the record pointer q lives in $a1 in retail, $a2 here. The word would need a Vu0 helper that returns the qmfc2 result as an integer.
+// BYTES 351/388 (90.5%), checked 2026-11-07
+// NEAR: the squared distance is now stored as retail does (Vu0::ToBits: qmfc2, then sw). Still differs in the loop's set-up and record pointer: retail fills the delay slot of the list-head test with move s2,v0 (here move a1,s2), and advances q first (addiu a1,v1,8), storing the object and the far distance at -4(a1) and -8(a1), with n++ in the delay slot of the state test; here the stores use the old pointer and q advances late. c = q; q = c + 1, n++ first, q->obj before c, writing through q and advancing it last, and the state test inverted: no closer.
 #include "common.h"
 #include "state_notifier.h"
 #include "world.h"
@@ -13,13 +13,12 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
 s32 CompareFloatsDescending(const f32* first, const f32* second);
 SwitchedCollider* GetActiveSwitchedCollider(void);
-extern const f32 D_00249E90[4];
 
 // A candidate func_00148938 sorts: its squared distance from the point of view, and the object.
 struct Candidate_00148938 {
     union {
         f32 dist;
-        s32 bits;
+        u32 bits;
     };
     StateNotifier* obj;
 };
@@ -54,15 +53,10 @@ s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
             c->obj = p;
             n++;
             if (p->state == 2) {
-                c->dist = D_00249E90[0];
+                c->dist = 3.4028234663852886e+38f;
             } else {
                 u128 d = Vu0::Sub(Vu0::Q(origin), Vu0::Q(p->v140));
-                union {
-                    f32 f;
-                    s32 i;
-                } u;
-                u.f = Vu0::ToFloat(Vu0::Dot(d, d));
-                c->bits = u.i;
+                c->bits = Vu0::ToBits(Vu0::Dot(d, d));
             }
         }
     }
@@ -76,4 +70,3 @@ s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
     PopBackMemoryMark();
     return max;
 }
-

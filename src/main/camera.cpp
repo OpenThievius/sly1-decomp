@@ -270,6 +270,7 @@ void func_00144BE8(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 
 
 void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z);
 void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32* x, f32* y, f32* z);
+void BuildBasisFromX(void* self, void* value);
 
 
 
@@ -345,7 +346,7 @@ INCLUDE_DATA(D_00261900);
 INCLUDE_DATA(D_00261910);
 INCLUDE_DATA(D_00261920);
 INCLUDE_DATA(D_00261924);
-INCLUDE_DATA(D_00261928);
+f32 D_00261928[9] = { 1.0f, 5.0f, 10.0f, 12.0f, 15.0f, 12.0f, 10.0f, 5.0f, 1.0f };
 f32 D_0026194C = 250.0f;
 INCLUDE_DATA(D_00261950);
 RampProfile D_00261958 = { 2500.0f, 0.0f, 0.25f, 0.0f };
@@ -802,7 +803,20 @@ void func_00144128(Frame_00144128* self, f32* a, Vec02* out)
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(self->rot, Vu0::Q(v)), Vu0::Q(self->pos));
 }
 
-INCLUDE_ASM(func_001441C0);
+void func_001441C0(Frame_00144128* self, Vec02* in, f32* out)
+{
+    Vec02 v;
+    Vu0::Q(v) = Vu0::RotateTransposed(self->rot, Vu0::Sub(Vu0::Q(*in), Vu0::Q(self->pos)));
+    out[2] = v.x;
+    out[1] = v.z;
+    out[0] = -v.y;
+    out[0] /= self->scaleY;
+    out[1] /= self->scaleZ;
+    if (1e-4f < v.x) {
+        out[0] /= v.x;
+        out[1] /= v.x;
+    }
+}
 
 void UpdateCameraLocation(Camera* self)
 {
@@ -859,7 +873,21 @@ void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
     out[3] = r[3];
 }
 
-INCLUDE_ASM(func_001443C8);
+// v made unit length: DivX by its Length.
+static inline u128 Unit(u128 v)
+{
+    return Vu0::DivX(v, Vu0::Length(v));
+}
+
+void func_001443C8(Mat02* m, Vec02* out, f32 x, f32 y)
+{
+    f32 nx = -x;
+    f32 ny = -y;
+    Vu0::Q(out[0]) = Vu0::Cross(Vu0::Q(m->r[2]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[1]), Vu0::Scalar(x))));
+    Vu0::Q(out[1]) = Vu0::Cross(Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[1]), Vu0::Scalar(nx))), Vu0::Q(m->r[2]));
+    Vu0::Q(out[2]) = Vu0::Cross(Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(y))), Vu0::Q(m->r[1]));
+    Vu0::Q(out[3]) = Vu0::Cross(Vu0::Q(m->r[1]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(ny))));
+}
 
 INCLUDE_ASM(func_00144540);
 
@@ -896,7 +924,26 @@ void PlaceCameraLookingAt(Camera* self, void* p, s32 q)
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-INCLUDE_ASM(func_00144978);
+void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* y, f32* z)
+{
+    Mat02 m;
+    Vec02 d;
+    Vec02 v;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    BuildBasisFromX(&d, &m);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+    if (len < 1e-4f) {
+        *z = *x = *y = 0.0f;
+    } else {
+        Vu0::Q(v) = Vu0::RotateTransposed(m, Vu0::Q(*in));
+        if (len < 100.0f) {
+            len = 100.0f;
+        }
+        *z = v.x;
+        *x = v.y / len;
+        *y = v.z / len;
+    }
+}
 
 INCLUDE_ASM(func_00144AA0);
 
@@ -984,9 +1031,45 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 
 ASM_FUNC(func_001453B0);
 
-INCLUDE_ASM(func_00145438);
+void func_00145438(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height)
+{
+    Vec02 d;
+    if (b != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
+    } else {
+        d = *a;
+    }
+    if (angle != 0) {
+        *angle = WrapAngle(ArctangentOfRatio(d.y, d.x));
+    }
+    if (dist != 0) {
+        u128 v = Vu0::Q(d);
+        *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(Vu0::DotXY(v, v)));
+    }
+    if (height != 0) {
+        *height = d.z;
+    }
+}
 
-INCLUDE_ASM(func_001454E0);
+void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist)
+{
+    Vec02 d;
+    if (b != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
+    } else {
+        d = *a;
+    }
+    if (heading != 0) {
+        *heading = WrapAngle(ArctangentOfRatio(d.y, d.x));
+    }
+    if (pitch != 0) {
+        u128 v = Vu0::Q(d);
+        *pitch = WrapAngle(ArctangentOfRatio(d.z, Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(v, v)))));
+    }
+    if (dist != 0) {
+        *(u32*)dist = Vu0::ToBits(Vu0::Length(Vu0::Q(d)));
+    }
+}
 
 void RequestCameraSnap(Camera* self, f32* src)
 {
@@ -1057,10 +1140,37 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3
     return 1;
 }
 
-// The file's one .rodata word, the largest float, which the original assembly func_00145950
-// loads.
-extern const f32 D_00249E4C = 3.4028235e+38f;
-INCLUDE_ASM(func_00145950);
+void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
+
+void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
+{
+    Vec02 dir;
+    Vec02 cand;
+    Vec02 best;
+    f32 lo;
+    f32 hi;
+    f32 step = 5.0f / r;
+    f32 nearest = 3.4028234663852886e+38f;
+    best = *origin;
+    for (s32 i = 0; i < 9; i++) {
+        f32 n = D_00261928[i];
+        f32 pitch = (f32)(i - 4) * 0.39269909f;
+        for (s32 j = 0; (f32)j < n; j++) {
+            ComputeDirectionFromAngles(&dir, (f32)j * 3.14159274f / n, pitch, r);
+            Vu0::Q(cand) = Vu0::Add(Vu0::Q(*origin), Vu0::Q(dir));
+            if (FindFirstFreeSpan(count, objs, step + step, origin, &cand, &lo, &hi) != 0) {
+                if (0.0f < lo) {
+                    lo = lo + step;
+                }
+                if (lo < nearest) {
+                    nearest = lo;
+                    Vu0::Q(best) = Vu0::MulXSum(Vu0::Q(*origin), Vu0::Scalar(1.0f - nearest), Vu0::Q(cand), Vu0::Scalar(nearest));
+                }
+            }
+        }
+    }
+    *out = best;
+}
 
 INCLUDE_ASM(func_00145B68);
 
@@ -1107,6 +1217,20 @@ void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) 
 
 void RecordCameraTimestamp(Camera* obj) { obj->f218 = g_gameTime; }
 
-INCLUDE_ASM(func_00146038);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+
+s32 IsSphereInCameraView(Camera* self, Vec02* p, f32 radius, f32 x)
+{
+    Vec02 r;
+    f32 fade;
+    s32 in = 0;
+    u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->f40));
+    u128 ones = Vu0::Ones();
+    Vu0::Q(r) = Vu0::FromFloat(radius);
+    if ((Vu0::PlaneSigns(Vu0::Q(self->planes[0]), Vu0::Q(self->planes[1]), Vu0::Q(self->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {
+        in = ComputeCameraDistanceFade(self, d, &fade, radius, x) != 0;
+    }
+    return in;
+}
 
 

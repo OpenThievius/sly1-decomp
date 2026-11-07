@@ -44,7 +44,7 @@ D_0024B5E0	0024B5E0	4	.rodata	src/main/file_18F988.cpp
 D_0024B660	0024B660	4368	.rodata	src/main/pause_menu.cpp
 D_0024C860	0024C860	12	.rodata	src/main/file_1963D8.cpp
 D_0024C870	0024C870	32	.rodata	src/main/file_198980.cpp
-D_0024C930	0024C930	524	.rodata	src/main/file_19E040.cpp
+D_0024C930	0024C930	584	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
 D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
 D_0024CFC0	0024CFC0	356	.rodata	src/main/timed_object.cpp
@@ -133,7 +133,7 @@ D_00261390	00261390	96	.data	src/main/zone_collider.cpp
 D_002613F0	002613F0	32	.data	src/main/disc_access.cpp
 D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
-D_00261880	00261880	104	.data	src/main/camera.cpp
+D_00261880	00261880	140	.data	src/main/camera.cpp
 D_002619A0	002619A0	568	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	212	.data	src/main/file_149398.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp

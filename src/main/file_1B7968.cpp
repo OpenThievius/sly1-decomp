@@ -341,6 +341,9 @@ Contact03* TakePoolSlot(u8* p);
 void FreePooledContactChain(u8* a, Contact03* b);
 s32 RandomIntInRange(s32 a, s32 b);
 void ComputeSoundAttenuation(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void SetColliderForcedState(u8* node, s32 flag);
 // The list walk of World::list1BAC, element by element.
@@ -708,9 +711,75 @@ ASM_FUNC(func_001B8FE0);
 
 ASM_FUNC(func_001B8FE8);
 
-INCLUDE_ASM(func_001B9058);
+void AddColliderForce(Collider* self, Vec02* force);
 
-INCLUDE_ASM(func_001B91A8);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit)
+{
+    Vec02 acc;
+    Vec02 d;
+    Vec02 k;
+    Vu0::Q(acc) = Vu0::Zero();
+    if (pull != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*target), Vu0::Q(self->pos));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (0.0001f < len) {
+            Vu0::Q(k) = Vu0::FromFloat(pull[2] * len + pull[1] + pull[0] / len);
+            Vu0::Q(acc) = Vu0::MulX(Vu0::Q(d), Vu0::Q(k));
+        }
+    }
+    if (turn != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*aim), Vu0::Q(self->v150));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (0.0001f < len) {
+            f32 amount = turn[2] * len + turn[1] + turn[0] / len;
+            f32 cap = 1.0f / limit;
+            if (cap < amount) {
+                amount = cap;
+            }
+            Vu0::Q(k) = Vu0::FromFloat(amount);
+            Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(acc), Vu0::Q(d), Vu0::Q(k));
+        }
+    }
+    AddColliderForce(self, &acc);
+}
+
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void AddColliderTorque(Collider* self, Vec02* torque);
+
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit)
+{
+    Vec02 acc;
+    Vu0::Q(acc) = Vu0::Zero();
+    if (pull != 0) {
+        Mat02 m;
+        Vec02 axis;
+        Vec02 k;
+        f32 angle;
+        MultiplyMatrices3x3(&self->rot, target, &m);
+        MatrixToAxisAngle(&m, &angle, &axis);
+        if (0.0001f < angle) {
+            Vu0::Q(k) = Vu0::FromFloat(pull[2] * angle * angle + pull[1] * angle + pull[0]);
+            Vu0::Q(acc) = Vu0::MulX(Vu0::Q(axis), Vu0::Q(k));
+        }
+    }
+    if (turn != 0) {
+        Vec02 d;
+        Vec02 k;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*aim), Vu0::Q(self->v160));
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (0.0001f < len) {
+            f32 amount = turn[2] * len + turn[1] + turn[0] / len;
+            f32 cap = 1.0f / limit;
+            if (cap < amount) {
+                amount = cap;
+            }
+            Vu0::Q(k) = Vu0::FromFloat(amount);
+            Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(acc), Vu0::Q(d), Vu0::Q(k));
+        }
+    }
+    AddColliderTorque(self, &acc);
+}
 
 void StepCollider(Collider* self, f32 t)
 {
@@ -822,7 +891,47 @@ void SaveColliderPreviousPosition(Collider* self)
     self->v370 = self->v140;
 }
 
-INCLUDE_ASM(func_001B9690);
+// What slot 13 of a moved collider is told (kind 3): the collider and where it was.
+// The record a collider's position change hands to its event method (event 3). Its frame slot
+// is 0x30 bytes where placed_object.cpp's MoveNotice, the same event's record there, is 0x20:
+// SetColliderPosition writes only who and before, and leaves the third quadword as it is.
+struct ColliderMoveNote {
+    Collider* who;
+    u8 pad04[0xC];
+    Vec02 before;           // 0x10
+    Vec02 q20;              // 0x20: not written by SetColliderPosition
+};
+void RequestCameraSnap(Camera* camera, s32 mode);
+
+void SetColliderPosition(Collider* self, Vec02* pos)
+{
+    ColliderMoveNote note;
+    note.who = self;
+    note.before = self->v140;
+    if ((self->flags538 & ((u64)1 << 45)) != 0) {
+        if (10.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(*pos))))) {
+            Camera* cam = g_camera;
+            cam->f2E0 = 0;
+            RequestCameraSnap(cam, 0);
+        }
+    }
+    self->pos = *pos;
+    if (self->root != 0) {
+        if (self->desc->m12 != 0) {
+            self->desc->m12(self);
+        }
+        DropColliderContacts(self, 1);
+        Collider* root = (Collider*)self->root;
+        Collider* part = (Collider*)root->parts.head;
+        while (part != 0) {
+            if (self == root || self == part || IsObjectDescendantOf(part, self) != 0) {
+                ((Desc03*)part->desc)->m44(part);
+            }
+            part = (Collider*)part->link2E4.next;
+        }
+    }
+    self->desc->m0E(self, 3, &note);
+}
 
 void SetColliderRotation(Collider* self, Mat02* src)
 {
@@ -2489,7 +2598,30 @@ LINKER_REMNANT(func_001BF1E8);
 
 s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
 
-INCLUDE_ASM(func_001BF200);
+void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c)
+{
+    if (pos != 0) {
+        if (b < r) {
+            *volume = *pan = 0.0f;
+            return;
+        }
+        if (c < r) {
+            Camera* cam = g_camera;
+            Vec02 d;
+            f32 range = b - c;
+            f32 away = b - r;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec02*)pos), Vu0::Q(*(Vec02*)((u8*)cam + 0x40)));
+            Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
+            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)((u8*)cam + 0x90))));
+            f32 ratio = away / range;
+            *pan = -across * 0.7f * (1.0f - ratio);
+            *volume = a * ratio;
+            return;
+        }
+    }
+    *volume = a;
+    *pan = 0.0f;
+}
 
 f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
 {
@@ -2520,7 +2652,32 @@ void* GetSoundListenerPosition(void)
     return r;
 }
 
-INCLUDE_ASM(func_001BF428);
+s32 ConvertSpeedToPitchOffset(s32 speed);
+
+void ComputeSoundRecordDoppler(PlayingSound* self)
+{
+    PlacedObject* source = (PlacedObject*)self->object;
+    if (source == 0 || self->f5C <= 0.0001f) {
+        self->pitchOffset = 0;
+        return;
+    }
+    PlacedObject* listener = (PlacedObject*)GetActiveSwitchedCollider();
+    if (listener != 0) {
+        Vec02 rel;
+        Vec02 away;
+        Vec02 sourceVel;
+        Vec02 listenerVel;
+        ComputeObjectMotionInFrame(source, 0, &source->v140, &sourceVel, 0, 0, 0);
+        ComputeObjectMotionInFrame(listener, 0, &listener->v140, &listenerVel, 0, 0, 0);
+        Vu0::Q(rel) = Vu0::Sub(Vu0::Q(sourceVel), Vu0::Q(listenerVel));
+        f32 scale = self->f5C * 3600.0f;
+        Vu0::Q(away) = Vu0::Sub(Vu0::Q(listener->v140), Vu0::Q(source->v140));
+        u128 unit = Vu0::DivX(Vu0::Q(away), Vu0::Length(Vu0::Q(away)));
+        self->pitchOffset = ConvertSpeedToPitchOffset((s32)(Vu0::ToFloat(Vu0::Dot(unit, Vu0::Q(rel))) * scale * 6.24999984e-06f));
+    } else {
+        self->pitchOffset = 0;
+    }
+}
 
 ListenerDistanceFn ChooseSoundListenerFunction(void)
 {

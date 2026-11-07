@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 218/228 (95.6%), checked 2026-11-07
-// NEAR: EvaluateAxisCurves. Only the delay slot of the call through the curve's table differs: retail puts the move of the flags (a2) there and sets f12 and f13 before it; ours sets a2 first and puts the move of the scale (f13) in the slot. Ten forms of the call (locals, the table slot first, the pointers as locals) give the same order.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
 #include "anim_curve.h"
-
+// NEAR (2026-11-08, wave 3 retry): no VU0 helper applies (the function only clears a vector
+// with Zero). Only the delay slot of the call through the curve's table differs: retail puts
+// the move of the flags (a2) there and sets f12 and f13 before it; ours sets a2 first and puts
+// the move of the scale (f13) in the slot. Ten forms of the call give the same order.
 void func_0011F6B0(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
 {
     if (outValues)

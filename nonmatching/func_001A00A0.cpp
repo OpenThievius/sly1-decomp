@@ -9,13 +9,11 @@
 extern f32 g_gameTime;
 void RemoveEffect(Effect* self);
 void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
-// NEAR (2026-11-07, worker vu0-e6): the same code as retail but for the registers of the scalar
-// part and one store: retail keeps the clamp's high bound (lwc1 f5) loaded before the compare and
-// the quotient in f4, and stores the vector local of the scale (sqc2 vf3, 0x10(sp)) in the
-// delay slot of the first compare; here the quotient is in f5 and the store comes before the
-// loads of the quadratic (13 lines differ). Tried: the store after the quadratics, the scale in a
-// u128, ValueRange::Clamp, the two quadratics in the other order.
-
+// NEAR (2026-11-08, wave 3 retry): Vu0::Scalar(-m) in the MulAddX gives the same code as the k
+// local (the lever is not what blocks it). Left: retail keeps the clamp's high bound (lwc1 f5)
+// loaded before the first compare, the quotient in f4, and stores the weight (sqc2 vf3,16(sp))
+// in the delay slot of the first bc1f; here the quotient is in f5, the bound is loaded in that
+// slot and the store comes before the loads of the quadratic.
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
 struct QuadraticCoeffs { f32 a, b, c; };
 

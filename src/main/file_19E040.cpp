@@ -1590,7 +1590,51 @@ void MoveTrailSegment(Effect* self, f32 dt)
     }
 }
 
-INCLUDE_ASM(func_001A0758);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+
+void DrawTrailSegment(Effect* self, Camera* cam)
+{
+    Vec02 r;
+    f32 fade;
+    PlacedObject* o = (PlacedObject*)self->p20;
+    if (o == 0) {
+        RemoveEffect(self);
+        return;
+    }
+    f32 radius = o->f2A8;
+    s32 in = 0;
+    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(cam->f40));
+    u128 ones = Vu0::Ones();
+    Vu0::Q(r) = Vu0::FromFloat(radius);
+    if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {
+        in = ComputeCameraDistanceFade(cam, d, &fade, radius, o->f80) != 0;
+    }
+    if (in == 0) {
+        return;
+    }
+    f32 t = (g_gameTime - self->start) / self->life;
+    f32 a;
+    ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
+    f32 b = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
+    if (0.0001f < a && 0.0001f < b) {
+        void* to;
+        switch (self->i120) {
+        case 1:
+        case 3:
+            to = (u8*)self->p124 + 0x80;
+            break;
+        case 2:
+            to = (u8*)self->p128 + 0x140;
+            break;
+        case 0:
+            to = &self->q90;
+            break;
+        }
+        func_001268B8(self->p20, cam, &self->q80, to, b * 100.0f, a * fade);
+        return;
+    }
+    RemoveEffect(self);
+}
 
 void OnTrailAnchorEnded(void* self, s32 kind, s32 extra)
 {
@@ -2894,9 +2938,30 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
     self->count39C = self->count39C - 1;
 }
 
-INCLUDE_RODATA(D_0024CAF4);
-
-INCLUDE_ASM(func_001A6090);
+s32 PairWithNearestFreeObject(void* self, void* child)
+{
+    ListFrame frame;
+    PairController* c = (PairController*)self;
+    PairedObject* o = (PairedObject*)child;
+    if (IsListEmpty((List01*)c->list368) != 0) {
+        return 0;
+    }
+    f32 best = 3.4028234663852886e+38f;
+    PairedObject* found;
+    for (PairedObject* p = *(PairedObject**)c->list368; p != 0; p = *(PairedObject**)((u8*)p + 0x5A0)) {
+        u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(o->v140));
+        f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (dist < best) {
+            best = dist;
+            found = p;
+        }
+    }
+    o->partner = found;
+    found->partner = o;
+    RemoveFromList(c->list368, found);
+    AppendToList(c->list35C, found);
+    return 1;
+}
 
 void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 {
@@ -2926,13 +2991,55 @@ void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
     }
 }
 
-INCLUDE_RODATA(D_0024CAF8);
+s32 PairWithNearestWaitingObject(void* self, void* child)
+{
+    ListFrame frame;
+    PairController* c = (PairController*)self;
+    PairedObject* o = (PairedObject*)child;
+    f32 best = 3.4028234663852886e+38f;
+    PairedObject* found = 0;
+    for (PairedObject* p = *(PairedObject**)c->list384; p != 0; p = *(PairedObject**)((u8*)p + 0x5B0)) {
+        if (p->partner == 0 && p->state == 2) {
+            u128 d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(p->v140));
+            f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+            if (dist < best) {
+                best = dist;
+                found = p;
+            }
+        }
+    }
+    if (found == 0) {
+        return 0;
+    }
+    o->partner = found;
+    found->partner = o;
+    RemoveFromList(c->list368, o);
+    AppendToList(c->list35C, o);
+    SetPairedState(found, 3);
+    return 1;
+}
 
-INCLUDE_ASM(func_001A6238);
-
-INCLUDE_RODATA(D_0024CAFC);
-
-INCLUDE_ASM(func_001A6328);
+s32 func_001A6328(PairController* self, PairedObject* obj)
+{
+    ListFrame frame;
+    if (IsListEmpty((List01*)self->list3A0) != 0) {
+        return 0;
+    }
+    f32 best = 3.4028234663852886e+38f;
+    PlacedObject* found = 0;
+    for (PlacedObject* p = *(PlacedObject**)self->list3A0; p != 0; p = *(PlacedObject**)((u8*)p + 0x568)) {
+        u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(obj->v140));
+        f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (dist < best) {
+            best = dist;
+            found = p;
+        }
+    }
+    RemoveFromList(self->list3A0, found);
+    AppendToList(self->list3AC, found);
+    obj->attachment = found;
+    return 1;
+}
 
 void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {
@@ -2978,9 +3085,64 @@ void StartPairedObject(PairedObject* self)
     self->desc->m03(self);
 }
 
-INCLUDE_RODATA(jtbl_0024CB00);
+s32 ChoosePairedObjectState(PairedObject* self);
+void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 flag);
+void ConvertPositionToWorld(void* frame, Vec02* out);
 
-INCLUDE_ASM(func_001A65C8);
+// The distance from b to a on the ground (their x and y).
+static inline f32 GroundDistance(u128 a, u128 b)
+{
+    u128 d = Vu0::Sub(a, b);
+    return Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+}
+
+// Each frame: the state the object should be in, then where it steers in it.
+void UpdatePairedObject(PairedObject* self)
+{
+    Vec02 v;
+    UpdateCollider(self);
+    s32 s;
+    for (;;) {
+        s = ChoosePairedObjectState(self);
+        if (s == self->state) {
+            break;
+        }
+        SetPairedState(self, s);
+    }
+    switch (s) {
+    case 1:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        SteerPairedObjectWithinArea(self, &v, 0);
+        break;
+    case 2: {
+        if (self->f580 < g_gameClock[1] || GroundDistance(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x570))) < 50.0f) {
+            RandomizePairedObjectOffset((PairController*)self->controller, self);
+            self->f580 = g_gameClock[1] + RandomFloatInRange(self->f584, self->f588);
+        }
+        SteerPairedObjectWithinArea(self, (Vec02*)((u8*)self + 0x570), 0);
+        break;
+    }
+    case 3:
+        SteerPairedObjectWithinArea(self, &((PlacedObject*)self->partner)->v140, 0);
+        break;
+    case 5:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        SteerPairedObjectWithinArea(self, &v, 1);
+        break;
+    case 6:
+        SteerPairedObjectWithinArea(self, &((PlacedObject*)self->attachment)->v140, 1);
+        break;
+    case 0:
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        break;
+    }
+}
 
 INCLUDE_ASM(func_001A6788);
 

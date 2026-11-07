@@ -1267,7 +1267,49 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
 
 INCLUDE_ASM(func_001575D8);
 
-INCLUDE_ASM(func_001579B0);
+void func_00156718(void* shape, s32 index, s32 count, Vec02* pos, Vec02* axis);
+
+// The frame of the object a spawn record follows (at 0x78): its position, the rotation, and the
+// velocity and spin it moves with.
+struct SpawnFrame {
+    Vec02 pos;              // 0x00
+    Mat02 rot;              // 0x10
+    Vec02 vel;              // 0x40
+    Vec02 spin;             // 0x50
+};
+
+// Makes the count points of a spawn record, their directions and times, in the four arrays out
+// holds (positions, directions, starts, ends), moved to the followed object's frame.
+void func_001579B0(void* a, void* b, s32* out)
+{
+    s32 n = (s32)a;
+    u8* rec = (u8*)b;
+    SpawnRing ring;
+    Vec02 axis;
+    out[0] = (s32)AllocateBackMemory(n * 16);
+    out[1] = (s32)AllocateBackMemory(n * 16);
+    out[2] = (s32)AllocateBackMemory(n * 4);
+    out[3] = (s32)AllocateBackMemory(n * 4);
+    InitSpawnRing(*(s32*)(rec + 0xEC), (SpawnSpan*)(rec + 0xE4), n, &ring);
+    for (s32 i = 0; i < n; i++) {
+        func_00156718(rec + 0x10, i, n, (Vec02*)out[0] + i, &axis);
+        func_00157248((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
+                      (Vec02*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
+        SpawnFrame* o = *(SpawnFrame**)(rec + 0x78);
+        if (o != 0) {
+            Vec02* pos = (Vec02*)(i * 16 + out[0]);
+            Vu0::Q(*pos) = Vu0::Add(Vu0::Rotate(o->rot, Vu0::Q(*pos)), Vu0::Q(o->pos));
+            Vec02* vel = (Vec02*)(i * 16 + out[1]);
+            u128 rel = Vu0::Sub(Vu0::Q(*(Vec02*)(i * 16 + out[0])), Vu0::Q(o->pos));
+            u128 spun = Vu0::Cross(Vu0::Q(o->spin), rel);
+            u128 moved = Vu0::Add(Vu0::Rotate(o->rot, Vu0::Q(*vel)), Vu0::Q(o->vel));
+            Vu0::Q(*vel) = Vu0::Add(moved, spun);
+        }
+        if (out[4] != 0) {
+            ConvertSpawnToAnchorSpace((AnchoredSpawn*)(rec + 0x10), (Vec02*)out[0] + i, (Vec02*)out[1] + i);
+        }
+    }
+}
 
 INCLUDE_RODATA(D_0024A144);
 
@@ -1378,7 +1420,54 @@ void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14
     }
 }
 
-INCLUDE_ASM(func_00158288);
+// One target of a spawn record at 0x24 (0x28 bytes): two ids, the objects they name, and the
+// distance between those objects with the weight made of it.
+struct SpawnLink {
+    s32 ids[2];             // 0x00
+    f32 f08;                // 0x08
+    f32 f0C;                // 0x0C
+    u8 pad10[0x18 - 0x10];
+    PlacedObject* objs[2];  // 0x18
+    f32 distance;           // 0x20
+    f32 weight;             // 0x24
+};
+
+struct SpawnTargetRecord {
+    u8 pad00[0x10];
+    s32 kind;               // 0x10
+    u8 pad14[0x20 - 0x14];
+    s32 count;              // 0x20
+    SpawnLink* links;       // 0x24
+    f32 total;              // 0x28
+    u8 pad2C[0x120 - 0x2C];
+    s32 f120;               // 0x120
+    u8 pad124[0x188 - 0x124];
+    s32 f188;               // 0x188
+    MemberTargetObject* f18C;   // 0x18C
+};
+
+struct SpawnTargetOwner { u8 pad00[0x14]; void* world; };
+
+void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
+{
+    if (rec->f120 == 0 && rec->f188 != -1) {
+        rec->f18C = FindFirstObjectById(owner->world, 0x104, rec->f188, owner);
+    }
+    if (rec->kind == 3) {
+        f32 total = 0.0f;
+        for (s32 i = 0; i < rec->count; i++) {
+            SpawnLink* link = &rec->links[i];
+            for (s32 j = 0; j < 2; j++) {
+                link->objs[j] = (PlacedObject*)FindFirstObjectById(owner->world, 0x104, link->ids[j], owner);
+            }
+            f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(link->objs[0]->v140), Vu0::Q(link->objs[1]->v140))));
+            link->distance = d;
+            link->weight = (link->f08 + link->f0C) * (d * 0.5f);
+            total += link->weight;
+        }
+        rec->total = total;
+    }
+}
 
 ASM_FUNC(func_001583E8);
 

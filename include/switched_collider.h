@@ -59,7 +59,8 @@ struct Part07 {
     u8 pad54[0x60 - 0x54];
     Vec02 v60;              // 0x60: the two points func_001C4790 queries a collider's spans between
     Vec02 v70;              // 0x70
-    u8 pad80[0x90 - 0x80];
+    f32 f80;                // 0x80: the distance func_001C4618 measures between the two points
+    u8 pad84[0x90 - 0x84];
     ColliderSpan span;      // 0x90: the nearest span found (func_001C4790)
 };
 
@@ -451,8 +452,10 @@ struct Agent : TurningCollider {
     s32 f928;               // 0x928
     s32 f92C;               // 0x92C: func_001C84C0 compares it with f930
     s32 f930;               // 0x930
-    u8 pad934[0xA60 - 0x934];
-    s32 fA60;               // 0xA60
+    u8 pad934[0xA40 - 0x934];
+    Vec02 vA40;             // 0xA40: the last point func_001C8418 was given
+    Vec02 vA50;             // 0xA50: that point (after SnapPointToOwnerGraph) while fA60 is clear
+    s32 fA60;               // 0xA60: cleared by func_001C8418 once the point is 40 (D_00274C90) from vA50 on the ground
     u8 padA64[0xA68 - 0xA64];
     s32 fA68;               // 0xA68
     s32 fA6C;               // 0xA6C
@@ -610,7 +613,8 @@ struct SeekingAgent : Agent {
 struct GaugeColliderAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
-    u8 padC18[0xC20 - 0xC18];
+    s32 fC18;               // 0xC18: set within 1100 of the active collider on the ground, cleared past 2000 (func_00198860)
+    u8 padC1C[0xC20 - 0xC1C];
 };
 
 struct WorldListedAgent : Agent {
@@ -835,7 +839,7 @@ struct PathFollower : SwitchedCollider {
     Slot19 f6B0[4];         // 0x6B0
     PathCurveObject* f830;  // 0x830: the path it follows (func_001DAFB8)
     f32 f834;               // 0x834: the path's length
-    u8 pad838[0x83C - 0x838];
+    f32 f838;               // 0x838: the time it samples the path at (func_00181658)
     f32 f83C;               // 0x83C
     f32 f840;               // 0x840
     f32 f844;               // 0x844
@@ -899,7 +903,8 @@ struct ModeWalker : PathFollower {
     u8 padBFC[0xC00 - 0xBFC];
     s32 fC00;               // 0xC00
     void* fC04;             // 0xC04
-    u8 padC08[0xC10 - 0xC08];
+    PlacedObject* fC08;     // 0xC08: the object func_00181658 turns to follow the path's frame
+    u8 padC0C[0xC10 - 0xC0C];
 };
 
 struct ModeCollider : SwitchedCollider {

@@ -473,11 +473,6 @@ f32 GetSplineTimeAtLength(SplinePathCurve* self, f32 t0)
     return (1.0f - u) * self->times[idx] + u * self->times[idx + 1];
 }
 
-// Read only by the assembly func_0014EB10. Defined in C, ahead of func_0014EA48 (which reads no
-// .rodata) so the compiler leaves .rodata before that function: an include would align the label
-// to 8, as its address is, but this file's .rodata starts 4 bytes past a 16-byte boundary.
-extern const f32 D_00249FC8 = 3.4028235e+38f;
-
 void FillSplinePathLengths(SplinePathCurve* self)
 {
     *(s32*)self->lengths = 0;
@@ -491,7 +486,31 @@ void FillSplinePathLengths(SplinePathCurve* self)
     }
 }
 
-INCLUDE_ASM(func_0014EB10);
+void ConstrainVectorByAnchor(void* self, void* a, void* b, s32 c);
+
+void FindSplinePathNearestPoint(SplinePathCurve* self, Vec02* pos, void* anchor, s32 a3, s32 a4, f32* a5, f32* a6)
+{
+    Vec02 d;
+    s32 best = -1;
+    f32 bestDist = 3.4028235e+38f;
+    s32 i = self->count;
+    while (--i >= 0) {
+        f32 dist;
+        if (anchor != 0) {
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(((Vec02*)self->points)[i]));
+            ConstrainVectorByAnchor(anchor, &d, &d, 0);
+            dist = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+        } else {
+            u128 e = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(((Vec02*)self->points)[i]));
+            dist = Vu0::ToFloatMoved(Vu0::Dot(e, e));
+        }
+        if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+        }
+    }
+    FindSplinePathNearestTime(self, (s32)pos, (s32)anchor, a3, a4, a5, a6, self->times[best]);
+}
 
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
