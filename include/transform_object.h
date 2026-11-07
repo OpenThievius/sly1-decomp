@@ -84,12 +84,29 @@ struct HoldingMember : RecordMember {
     u8 padC8[0xD0 - 0xC8];
 };
 
+// The list link at 0x80 of class 0x75 (g_class75List links through it), an unaligned doubleword
+// that a copy keeps.
+struct __attribute__((packed)) Class75Link {
+    s64 v;
+};
+
+// Class 0x75 (0xA0 bytes): a TransformObject on g_class75List with a count and a scale. The
+// placed object's func_0012A970 finds or makes the one of id 0x22A.
+struct Class75Object : TransformObject {
+    Class75Link link;       // 0x80
+    s32 count;              // 0x88: 30 at set-up; func_0012A9C8
+    f32 scale;              // 0x8C: 25.0 at set-up; func_0012AA00
+    void* f90;              // 0x90: func_0012AA28
+    u8 pad94[0xA0 - 0x94];
+};
+
 // Each class ends at its descriptor's size.
 typedef char check_TransformObject[sizeof(TransformObject) == 0x80 ? 1 : -1];
 typedef char check_MemberObject[sizeof(MemberObject) == 0x90 ? 1 : -1];
 typedef char check_MemberGroup[sizeof(MemberGroup) == 0xC0 ? 1 : -1];
 typedef char check_RecordMember[sizeof(RecordMember) == 0xA0 ? 1 : -1];
 typedef char check_HoldingMember[sizeof(HoldingMember) == 0xD0 ? 1 : -1];
+typedef char check_Class75Object[sizeof(Class75Object) == 0xA0 ? 1 : -1];
 typedef char check_Rec79[sizeof(Rec79) == 0x200 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.

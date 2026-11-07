@@ -9,6 +9,8 @@
 #include "placed_object.h"
 #include "state_trigger.h"
 #include "timed_object.h"
+#include "transform_object.h"
+#include "state_walker.h"
 #include "masked_collider.h"
 #include "world.h"
 #include "animation.h"
@@ -100,19 +102,17 @@ extern s32 func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
 
 s32 func_001C1A28(void* a, void* b);
 
-struct Record_001250C8 { u8 pad[8]; s32 value; };
+// An entry of PlacedObject::partStates: its word at +8.
+struct PartState { u8 pad[8]; s32 value; };
 
-struct Object_00126BC0 {
-    u32* vtable;
-    u8 pad0[0x18];
-    Object_00126BC0* next;
-    u8 pad1[0x14];
-    Object_00126BC0* child;
-    u8 pad2[0x200];
-    s32 count;
-    u8* records;
+// One of the 0x70-byte parts at PlacedObject::drawParts: the kind and the value
+// func_00126BC0 gives each.
+struct DrawPart {
+    u8 pad00[0x14];
+    s32 type;               // 0x14
+    u8 pad18[0x6C - 0x18];
+    s32 value;              // 0x6C
 };
-struct Record_00126BC0 { u8 pad0[0x14]; s32 type; u8 pad1[0x54]; s32 value; };
 
 extern void func_00189150(void*, void*, void*);
 extern void func_00188D28(void*, void*, void*);
@@ -233,18 +233,13 @@ void func_00143B20(void* a, PlacedObject* b);
 void func_00129DF8(PlacedObject* self);
 void func_001837E0(PlacedObject* self, s32 a1, s32 a2, s32 a3);
 
-extern void* func_00159BB0();
+extern WorldObjectNode* func_00159BB0();
 extern s32 func_00182FC8(void*);
 
 extern void func_00188FD8(void*, void*);
 
-void* func_00159BB0(void);
-s32 func_00182FC8(void* self);
 
-struct Sub_126C58 {
-    s32 f0;
-    f32 f4;
-};
+s32 func_00182FC8(void* self);
 
 // What slot 29 tells the object's listeners (kind 3): the position before, and the object.
 struct Frame_1273F0 {
@@ -346,21 +341,6 @@ struct ListWalkBegin {
 void* func_00183058(BaseObject* item, World* world, PlacedObject* parent);
 void func_001BB580(PlacedObject* self);
 
-struct Object_124FC0;
-struct Vtable_124FC0 {
-    u8 pad0[0xC];
-    void (*update)(Object_124FC0*, f32);
-};
-struct Object_124FC0 { Vtable_124FC0* vtable; };
-
-struct Next_124FC0 {
-    static Object_124FC0* Of(ListFrame* it)
-    {
-        Object_124FC0* obj = *(Object_124FC0**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
 
 void func_00165FE0(u8* sub, PlacedObject* self, f32 f);
 void func_001B2140(void* p, f32 f);
@@ -435,22 +415,17 @@ void func_0012A3E8(void* self, s32 flag);
 
 void* func_00185468(void* p);
 
-struct Ctx_12AA28 { u8 pad[0x90]; void* field; };
-
-Ctx_12AA28* func_0012A970(void* self);
+Class75Object* func_0012A970(void* self);
 
 void func_0012ABA8(void* self, f32 f);
 
 
 void func_001BF7F8(void* p);
 
-struct Entry_12B0B0 { s32 w[16]; } __attribute__((aligned(16)));
-
-extern Entry_12B0B0 D_00260F00[4];
+extern ColorRecord D_00260F00[4];
 
 void func_0012B040(void* self);
 
-struct Obj_12B2E8 { u8 pad[0xC]; u32 value; };
 
 void* func_0015A868(void* a0, s32 a1);
 
@@ -518,20 +493,11 @@ void func_001BF8E8(void* p);
 
 RangeRecord* func_00129400(void* self);
 
-struct Node_129C20 {
-    u8 pad0[0x10];
-    Node_129C20* f10;
-    u8 pad1[4];
-    void* f18;
-    void* f1C;
-};
-
 s32 func_001833F0(void* key, s32 item);
 
 
 
 
-struct Inner_0012B238 { u8 pad[0x30]; f32 value; };
 
 typedef u64 Quad_129E10 __attribute__((mode(TI)));
 struct Frame_129E10 { Quad_129E10 r; Quad_129E10 a; Quad_129E10 b; };
@@ -546,7 +512,6 @@ void func_00129E88(void* self, Quad_129E10* v);
 // Newly matched US functions from the small-function wave.
 extern void func_0012A430(void*, s32);
 extern void func_001BE4D8(void*);
-struct Node_129B98 { u8 pad0[8]; void* item; void* owner; u8 pad2[0x34 - 0x10]; Node_129B98* next; };
 extern s32 func_001833F0(void*, s32);
 extern void func_001296E0(void*);
 extern void func_00129A58(void*);
@@ -557,13 +522,11 @@ extern void func_0012B040(void*);
 
 f32 func_00205778(f32 a, f32 b);
 
-struct Sub_0012AA00 { u8 pad[0x8C]; f32 value; };
-
 void func_001B5388(void* part, f32 a, f32 b);
 
 void func_00159A00(void* part, f32 value);
 
-extern Entry_12B0B0 D_00261000[2];
+extern ColorRecord D_00261000[2];
 
 void func_001BF788(void* ptr, s32 value);
 
@@ -676,10 +639,12 @@ void func_001384A0(Rd_12BC38* r, void* out);
 #define H0(x) (*(s16*)&(x))
 #define H2(x) (*((s16*)&(x) + 1))
 
-struct Entry_12B2F8 { s32 key; s32 val; };
-struct St_12B2F8 {
-    u8 pad0[0x13]; s8 f13; u8 pad14[0x24]; void* f38; s32 f3C;
-    s32 Set(s32 v) { s32 o = f13; f13 = v; return o != v; }
+// An entry of the table at PlacedObject::f2BC (f2B8 of them): a key and the values it selects.
+struct KeyedValues { s32 key; f32* values; };
+
+// Sets an attachment's mode3 and tells whether it changed.
+struct SetMode3 {
+    static s32 Of(Attachment* a, s32 v) { s32 o = a->mode3; a->mode3 = v; return o != v; }
 };
 extern const Fn_Table D_002195B0[];
 
@@ -740,14 +705,14 @@ struct NextAttachment {
     }
 };
 
-Entry_12B0B0 D_00260F00[4] = {
+ColorRecord D_00260F00[4] = {
     { { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x433E0000, 0x42E60000, 0x00000000, 0x42F00000, 0x433E0000, 0x42700000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x437F0000, 0x437F0000, 0x00000000, 0x42F00000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000003, 0x00000000, 0x00000000, 0x00000000, 0x43700000, 0x437F0000, 0x437F0000, 0x00000000, 0x43700000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
 };
 
-Entry_12B0B0 D_00261000[2] = {
+ColorRecord D_00261000[2] = {
     { { 0x00000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
     { { 0x00000005, 0x00000000, 0x00000000, 0x00000000, 0x43960000, 0x437F0000, 0x437F0000, 0x00000000, 0x43960000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
 };
@@ -1824,10 +1789,10 @@ void func_00124FC0(PlacedObject* self, f32 f)
     }
     ListFrame it;
     ListWalkBegin::Of(&it, &self->list1E0);
-    Object_124FC0* obj;
-    while ((obj = Next_124FC0::Of(&it)) != 0) {
-        if (obj->vtable->update != 0) {
-            obj->vtable->update(obj, f);
+    Attachment* obj;
+    while ((obj = NextAttachment::Of(&it)) != 0) {
+        if (obj->vt->update != 0) {
+            obj->vt->update(obj, f);
         }
     }
     g_activeListFrames = (ListFrame*)it.prev;
@@ -1838,8 +1803,8 @@ void func_00124FC0(PlacedObject* self, f32 f)
 
 void func_001250C8(PlacedObject* records)
 {
-    for (s32 i = 0; i < *(s32*)(records->sub22C + 0xC); i++) {
-        Record_001250C8* record = (Record_001250C8*)(*(u8**)(records->sub22C + 0x14) + i * 0x28);
+    for (s32 i = 0; i < records->drawPartCount; i++) {
+        PartState* record = (PartState*)((u8*)records->partStates + i * 0x28);
         record->value = -1;
     }
 }
@@ -1931,19 +1896,19 @@ void func_00126AB0(PlacedObject* state, u32 value)
 
 ASM_FUNC(func_00126AC8);
 
-void func_00126BC0(Object_00126BC0* object, s32 value)
+void func_00126BC0(PlacedObject* object, s32 value)
 {
     ListFrame frame;
-    for (s32 i = 0; i < object->count; i++) {
-        Record_00126BC0* record = (Record_00126BC0*)(object->records + i * 0x70);
+    for (s32 i = 0; i < object->drawPartCount; i++) {
+        DrawPart* record = (DrawPart*)((u8*)object->drawParts + i * 0x70);
         record->type = 2;
         record->value = value;
     }
-    Object_00126BC0* child = object->child;
+    PlacedObject* child = (PlacedObject*)object->children.head;
     while (child != 0) {
-        if ((child->vtable[2] & 1) != 0)
+        if ((child->desc->flags & 1) != 0)
             SetObjectTreeRecordsValue(child, value);
-        child = child->next;
+        child = (PlacedObject*)child->next;
     }
 }
 
@@ -1952,9 +1917,9 @@ void func_00126C58(PlacedObject* self)
     if (self->f298 == 0) {
         self->f298 = AddObjectNodeToWorld();
         if (IsObjectAttached(self) != 0) {
-            ((Sub_126C58*)self->f298)->f4 = 1.0f;
+            self->f298->level = 1.0f;
         } else {
-            ((Sub_126C58*)self->f298)->f4 = 0.0f;
+            self->f298->level = 0.0f;
         }
     }
 }
@@ -2030,7 +1995,7 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
 
     }
     if (src->f288) {
-        self->f288 = CopyToFrontMemory(0x40, src->f288);
+        self->f288 = (ColorRecord*)CopyToFrontMemory(0x40, src->f288);
     }
     if (self->flags & (1ULL << 36)) {
         if (IsObjectAttached(self)) {
@@ -2606,31 +2571,31 @@ void func_00129A58(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
-Node_129B98* func_00129B98(PlacedObject* self, s32 key)
+AnimationPlayer* func_00129B98(PlacedObject* self, s32 key)
 {
     ListFrame frame;
-    Node_129B98* node = (Node_129B98*)self->world->f1B64;
+    AnimationPlayer* node = (AnimationPlayer*)self->world->f1B64;
     while (node != 0) {
-        if (node->owner == self) {
+        if (node->fC == self) {
             if (key == -1) return node;
-            if (MatchesObjectId(node->item, key) != 0) return node;
+            if (MatchesObjectId(node->anim, key) != 0) return node;
         }
         node = node->next;
     }
     return 0;
 }
 
-Node_129C20* func_00129C20(PlacedObject* self, s32 key)
+StateWalker* func_00129C20(PlacedObject* self, s32 key)
 {
     ListFrame frame;
-    Node_129C20* n = (Node_129C20*)self->world->list1B94.head;
+    StateWalker* n = (StateWalker*)self->world->list1B94.head;
 
     while (n != 0) {
-        if (n->f1C == self) {
+        if (n->f1C == (s32)self) {
             if (key == -1) return n;
-            if (MatchesObjectId(n->f18, key) != 0) return n;
+            if (MatchesObjectId(n->owner, key) != 0) return n;
         }
-        n = n->f10;
+        n = n->worldNext;
     }
     return 0;
 }
@@ -3000,32 +2965,32 @@ void func_0012A8D8(PlacedObject* self, s32 a1, f32 x, f32 y)
     self->desc02()->m2B(self);
 }
 
-void* func_0012A970(PlacedObject* self)
+Class75Object* func_0012A970(PlacedObject* self)
 {
     void* r = FindFirstObjectById(self->world, 0x102, 0x22A, self);
     if (r != 0) {
-        return r;
+        return (Class75Object*)r;
     }
-    return CreateTypedRecord(0x75, (s32)self->world, self, 0x22A, -1);
+    return (Class75Object*)CreateTypedRecord(0x75, (s32)self->world, self, 0x22A, -1);
 }
 
 void func_0012A9C8(PlacedObject* self, s32 value)
 {
-    PlacedObject* o = (PlacedObject*)func_0012A970(self);
+    Class75Object* o = func_0012A970(self);
     if (value != -1) {
-        o->f88 = value;
+        o->count = value;
     }
 }
 
 void func_0012AA00(void* self, f32 value)
 {
-    ((Sub_0012AA00*)func_0012A970(self))->value = value;
+    func_0012A970(self)->scale = value;
 }
 
 void func_0012AA28(void* self, void* value)
 {
-    Ctx_12AA28* ctx = func_0012A970(self);
-    ctx->field = value;
+    Class75Object* ctx = func_0012A970(self);
+    ctx->f90 = value;
 }
 
 void func_0012AA50(PlacedObject* self, f32 a, f32 b)
@@ -3208,18 +3173,18 @@ void func_0012B040(void* ptr)
 {
     PlacedObject* self = (PlacedObject*)ptr;
     if (!self->f288) {
-        self->f288 = (Entry_12B0B0*)AllocateFrontMemory(64);
-        *(Entry_12B0B0*)self->f288 = g_defaultColorRecord[0];
-        ((Entry_12B0B0*)self->f288)->w[0] = -1;
+        self->f288 = (ColorRecord*)AllocateFrontMemory(64);
+        *self->f288 = g_defaultColorRecord[0];
+        self->f288->preset = -1;
     }
 }
 
 void func_0012B0B0(PlacedObject* self, s32 a1)
 {
     EnsureColorRecord(self);
-    ((Entry_12B0B0*)self->f288)->w[0] = a1;
-    Entry_12B0B0* e = (Entry_12B0B0*)self->f288;
-    s32 k = e->w[0];
+    self->f288->preset = a1;
+    ColorRecord* e = self->f288;
+    s32 k = e->preset;
     if (k != -1) *e = g_colorPresets[k];
 }
 
@@ -3252,14 +3217,14 @@ void func_0012B1E0(PlacedObject* self, Quad16* out)
 void func_0012B200(PlacedObject* self, f32 value)
 {
     EnsureColorRecord(self);
-    ((Inner_0012B238*)self->f288)->value = value;
+    self->f288->factor = value;
 }
 
 void func_0012B238(PlacedObject* self, f32* out)
 {
     f32 v = 0.0f;
-    Inner_0012B238* p = (Inner_0012B238*)self->f288;
-    if (p != 0) v = p->value;
+    ColorRecord* p = self->f288;
+    if (p != 0) v = p->factor;
     *out = v;
 }
 
@@ -3322,36 +3287,36 @@ void func_0012B2D8(PlacedObject* self, s32* out)
     *out = self->f2B4;
 }
 
-s32 func_0012B2E8(PlacedObject* self, Obj_12B2E8* a1)
+s32 func_0012B2E8(PlacedObject* self, BaseObject* a1)
 {
-    return a1->value != 0;
+    return a1->f0C != 0;
 }
 
 void func_0012B2F8(PlacedObject* self, s32 key)
 {
     s32 callVt = 0;
     s32 i;
-    St_12B2F8* st;
+    T2195_5B0* st;
 
     if (key == -1) {
-        st = (St_12B2F8*)self->f2C0;
+        st = self->f2C0;
         if (st != 0) {
-            callVt = st->Set(-1);
+            callVt = SetMode3::Of(st, -1);
         }
     } else {
         for (i = 0; i < self->f2B8; i++) {
-            if (((Entry_12B2F8*)self->f2BC)[i].key == key) {
+            if (((KeyedValues*)self->f2BC)[i].key == key) {
                 break;
             }
         }
         if (i < self->f2B8) {
             if (self->f2C0 == 0) {
-                self->f2C0 = (St_12B2F8*)CreatePoseSource(self->world, self, ((u8*)D_002195B0));
+                self->f2C0 = (T2195_5B0*)CreatePoseSource(self->world, self, ((u8*)D_002195B0));
                 InsertAttachment(self, self->f2C0);
             }
-            callVt = ((St_12B2F8*)self->f2C0)->Set(3);
-            ((St_12B2F8*)self->f2C0)->f38 = (u8*)self + 0x26C;
-            ((St_12B2F8*)self->f2C0)->f3C = ((Entry_12B2F8*)self->f2BC)[i].val;
+            callVt = SetMode3::Of(self->f2C0, 3);
+            self->f2C0->count = &self->f26C;
+            self->f2C0->values = ((KeyedValues*)self->f2BC)[i].values;
         }
     }
     if (callVt != 0) {

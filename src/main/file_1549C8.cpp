@@ -221,14 +221,6 @@ void func_001B4AD0(CursorAnimator* self);
 AnimRecord* func_001B4688(s32 key);
 void func_00159770(CrossfadeAnimator* self, s32 mode);
 
-// A node of the world's pool at +0x1C18, in its list at +0x1C30 or +0x1C24 by the owner's
-// +0x294 (AddObjectNodeToWorld): the object and a level its rate moves (StepObjectLevelRamp).
-struct WorldObjectNode {
-    PlacedObject* owner;    // 0x00
-    f32 level;              // 0x04
-    f32 rate;               // 0x08
-};
-
 s32 func_00182FC8(void* obj);
 void func_00159C28(WorldObjectNode* self);
 extern PackedFloatPair D_00262180;

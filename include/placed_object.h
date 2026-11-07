@@ -16,6 +16,7 @@ struct Attachment;   // an attachment (t2195.h): a record of the world's pool at
 struct Rec2195_224;     // the 0xC0-byte record at +0x224 (t2195.h)
 struct T2195_790;       // the aim attachment at +0x200 (attachment.h)
 struct T2195_600;       // the own-value attachment at +0x204 (attachment.h)
+struct T2195_5B0;       // the value-pointer attachment at +0x2C0 (attachment.h)
 struct RangeRecord;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
 struct SoundRecord;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
 struct Animation;           // class 0x83 (animation.h)
@@ -62,6 +63,29 @@ struct AnimationStart {
     s32 mode;               // 0x08: 0: value is a time, 1: a fraction of the length, 2: the time at the position
     f32 value;              // 0x0C
     f32 speedScale;         // 0x10: 1.0 at set-up; the player's scale of its speed (func_0012C288)
+};
+
+// A node of the world's pool at +0x1C18, in its list at +0x1C30 or +0x1C24 by the owner's
+// +0x294 (AddObjectNodeToWorld): the object and a level its rate moves (StepObjectLevelRamp).
+struct WorldObjectNode {
+    PlacedObject* owner;    // 0x00
+    f32 level;              // 0x04
+    f32 rate;               // 0x08
+};
+
+// The 0x40-byte colour record at +0x288 (func_0012B040 makes it from D_00261000[0]); the presets
+// D_00260F00 are records of this shape, given as words.
+struct __attribute__((aligned(16))) ColorRecord {
+    union {
+        s32 w[16];          // 0x00: the record as its presets give it
+        struct {
+            s32 preset;     // 0x00: the preset's index, -1 when none (func_0012B0B0)
+            u8 pad04[0x10 - 0x04];
+            Vec02 c10;      // 0x10: a colour (func_0012B140)
+            Vec02 c20;      // 0x20: a second one (func_0012B1A0)
+            f32 factor;     // 0x30: 2.0 in the presets (func_0012B200)
+        };
+    };
 };
 
 // Class 0x02's descriptor: the root's slots, then twenty more (slot n at 0x10 + 4n).
@@ -143,6 +167,7 @@ struct PlacedObject : BaseObject {
             u8 pad22C[0x238 - 0x22C];
             s32 drawPartCount;      // 0x238: the parts func_001533A8 draws
             void* drawParts;        // 0x23C: drawPartCount parts of 0x70 bytes
+            void* partStates;       // 0x240: drawPartCount entries of 0x28 bytes (func_001250C8 clears their +8 to -1)
         };
     };
     s32 f26C;               // 0x26C: the number of f1F8 entries
@@ -152,11 +177,11 @@ struct PlacedObject : BaseObject {
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
     RangeRecord* f284;          // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
-    void* f288;             // 0x288: a 0x40-byte record
+    ColorRecord* f288;      // 0x288: a 0x40-byte record
     f32 f28C;               // 0x28C
     f32 f290;               // 0x290
     s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
-    void* f298;             // 0x298
+    WorldObjectNode* f298;  // 0x298: its node in the world's list (func_00126C58)
     s32 f29C;               // 0x29C
     AnimationStart* f2A0;   // 0x2A0
     u8 pad2A4[0x2A8 - 0x2A4];
@@ -167,7 +192,7 @@ struct PlacedObject : BaseObject {
     u8 pad2B5[0x2B8 - 0x2B5];
     s32 f2B8;               // 0x2B8
     void* f2BC;             // 0x2BC
-    void* f2C0;             // 0x2C0
+    T2195_5B0* f2C0;        // 0x2C0: the attachment func_0012B2F8 points at the values of a key of f2BC
     Key02* keys;            // 0x2C4: slot 16 resolves each and empties the list
     union {
         u64 flags;          // 0x2C8
@@ -193,6 +218,7 @@ struct PlacedObject : BaseObject {
 };
 
 typedef char check_PlacedObject[sizeof(PlacedObject) == 0x2D0 ? 1 : -1];
+typedef char check_ColorRecord[sizeof(ColorRecord) == 0x40 ? 1 : -1];
 typedef char check_Desc02[sizeof(Desc02) == 0xD0 ? 1 : -1];
 
 #endif

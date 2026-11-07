@@ -27,7 +27,7 @@ struct T2195_Vt {
     void (*init)(Attachment* self, PlacedObject* owner);                              // 0x00: set up for an owner
     void (*copy)(Attachment* self, Attachment* src);                              // 0x04: copy src's record, keeping the owner and the link
     void (*release)(Attachment* self, s32 flags);                            // 0x08: out of the owner's list, back to the pool
-    void* m3;                                                           // 0x0C
+    void (*update)(Attachment* self, f32 dt);                           // 0x0C: every frame, when set (func_00124FC0)
     void (*getPos)(Attachment* self, f32 t, Vec02* pos, Vec02* vec);         // 0x10
     void (*getRot)(Attachment* self, f32 t, Mat02* rot, Vec02* vec);         // 0x14
     void (*getValue)(Attachment* self, f32* value, f32* slope);              // 0x18
@@ -100,7 +100,8 @@ struct AnimationPlayer {
     Attachment* driven;          // 0x28
     void* f2C;              // 0x2C: func_0012D5D0
     void* f30;              // 0x30: func_0012D5D0
-    u8 pad34[0x44 - 0x34]; // 0x34
+    AnimationPlayer* next;  // 0x34: the link in World's list at 0x1B64 or 0x1B70 (offset 0x34, func_001D62E0)
+    u8 pad38[0x44 - 0x38]; // 0x38
     List01 list44;          // 0x44: the attachments that follow it (offset 0x20)
     union {
         s32 f50;            // 0x50: its address goes to func_001BF718 (func_0012E760)

@@ -7,19 +7,6 @@
 #include "globals.h"
 #include "transform_object.h"
 
-// The list link at 0x80 (g_class75List links through it), an unaligned doubleword that a copy
-// keeps.
-struct __attribute__((packed)) Class75Link {
-    s64 v;
-};
-
-// Class 0x75 (0xA0 bytes): a TransformObject on g_class75List with a count and a scale.
-struct Class75Object : TransformObject {
-    Class75Link link;       // 0x80
-    s32 count;              // 0x88
-    f32 scale;              // 0x8C
-};
-
 u8 D_002758D0[16] = {0};
 
 

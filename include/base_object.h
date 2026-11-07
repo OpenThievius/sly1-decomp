@@ -80,7 +80,8 @@ struct BaseObject {
     const Desc01* desc;     // 0x00
     void* f04;              // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9
     s32 id;                 // 0x08: the object's id (func_001833F0)
-    u8 pad0C[0x14 - 0x0C];
+    u32 f0C;                // 0x0C: class 0x02's slot 45 tests it of the other object (func_0012B2E8)
+    u8 pad10[0x14 - 0x10];
     World* world;             // 0x14
     BaseObject* parent;            // 0x18
     BaseObject* next;              // 0x1C: the link in the parent's list of children (PlacedObject::children)
