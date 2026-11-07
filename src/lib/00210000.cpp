@@ -18,17 +18,6 @@ done:
     return result;
 }
 
-struct Stream_2117A0 { u8 pad[8]; u32 position; u8 pad2[0x18]; u32 limit; u32 span; };
-
-u32 func_002117A0(Stream_2117A0* stream, s32 amount)
-{
-    u32 position = stream->position + (amount >> 3);
-    if (position >= stream->limit) {
-        position -= stream->span;
-    }
-    return position;
-}
-
 // NEAR: retail saves s0 and ra with 8-byte sd/ld, the default compiler with 16-byte sq/lq. Otherwise identical
 
 struct Node_210160 {
@@ -82,22 +71,6 @@ void func_00210160(struct Node_210160* self, s32 count, s32 flag)
     if (self->f0F8 == 1) {
         self->f0F8 = 2;
     }
-}
-
-// NEAR: body matches; the only difference is the prologue and epilogue, where retail saves s0, s1 and ra with sd/ld (8 bytes) as Sony's library code does, and SN GCC emits sq/lq.
-
-struct Self_211700 { s64 bits; u8 pad0[0x8]; s32 f10; };
-struct Peek_211700 { s64 bits; };
-struct Bits_211700 { s64 bits; };
-
-s64 func_002115F8(Peek_211700* p, s32 n);
-void func_00211618(Bits_211700* p, s32 n);
-
-s64 func_00211700(Self_211700* self)
-{
-    s64 r = func_002115F8((Peek_211700*)self, 1);
-    func_00211618((Bits_211700*)self, 1);
-    return r;
 }
 
 extern const char D_002504B8[];
@@ -211,49 +184,6 @@ void func_00210D90(u32 a, s32 b)
     *(volatile u32*)0x1000B020 = b >> 4;
     *(volatile u32*)0x1000B000 = 0x100;
     func_001F9DA8();
-}
-
-struct Str_2115C0 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
-void func_00211618(Str_2115C0* self, s32 n);
-
-void func_002115C0(Str_2115C0* self, u32 buf, u32 a, u32 b)
-{
-    self->f8 = buf;
-    self->fC = buf;
-    self->w0 = 0;
-    self->f10 = 0;
-    self->w18 = 0;
-    self->f20 = a;
-    self->f24 = a + b;
-    self->f28 = b;
-    func_00211618(self, 0);
-}
-
-struct Str_211748 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
-void func_00211618(Str_211748* self, s32 n);
-
-void func_00211748(Str_211748* self, s32 bytes)
-{
-    self->w0 = 0;
-    self->f10 = 0;
-    self->w18 += bytes << 3;
-    self->fC = self->f8 + (s32)(self->w18 >> 3);
-    if (self->fC >= self->f24) {
-        self->fC -= self->f28;
-    }
-    func_00211618(self, 0);
-}
-
-struct Bits_2116B0 { u64 bits; };
-
-s64 func_002115F8(Bits_2116B0* self, s32 n);
-void func_00211618(Bits_2116B0* self, s32 n);
-
-s64 func_002116B0(Bits_2116B0* self, s32 n)
-{
-    s64 r = func_002115F8(self, n);
-    func_00211618(self, n);
-    return r;
 }
 
 struct Blk_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; s32 f28; u8 p2C[0xC]; u64 f38; };

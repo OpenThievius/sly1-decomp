@@ -86,6 +86,7 @@ src/lib/file_20A190.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20D138.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20ADA0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_20C1A0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_2115C0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_2117D0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_211B40.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/abort.c	-O2 -G0	2.9-ee-991111-01
