@@ -19,10 +19,19 @@ func_00190740	GetSeekingAgentStateKind	slot 77 of class 0x0E: returns 1 in state
 func_00190770	HandleSeekingAgentNotification	slot 13 of class 0x0E: runs HandleAgentNotification, then for code 0x13 from its own object 0x7E0 with value 0x53A calls func_00160DA0
 func_001907E0	GetNeighbourFace	returns the neighbour word unchanged when its low bit is clear (a face, as LoadPointGraph stores it) and 0 when the bit is set (a triangle)
 func_001907F0	GetNeighbourTriangle	returns the neighbour word with the low bit cleared when it is set (a triangle, as LoadPointGraph stores it) and 0 otherwise
+func_00190810	FindPointGraphTriangle	walks the point graph's face tree from a face: by the side of each face's plane (normal +0x0, distance +0x10) the point lies on, follows the front (+0x18) or back (+0x14) neighbour until one is a triangle (GetNeighbourTriangle), which it returns, or 0
+func_001908C0	FindPointGraphTriangleWithin	the face-tree walk of FindPointGraphTriangle with a margin of 1: a point within 1 of a face's plane searches both sides (recursing into the front), returning the first triangle found or 0; SnapPointToPointGraph and func_00191290 call it
 func_001909B0	ClassifyAgainstUnitRange	returns 0 for a value above 1.0, 1 for one below -1.0 and 2 for one inside
 func_00190E30	IsPointPathShortcutBlocked	returns 0 only when func_001909F0 (mode 2) finds the whole span from 0 to 1 between two points of the graph clear; SimplifyPointPath keeps a point where this returns 1
+func_00190EA8	GetPointGraphItemIndex	returns the index of a 32-byte item from its address: its offset from the array's base over 32 (func_00190EB8 calls it)
+func_00190EB8	SearchPointGraph	under a back-memory scope searches the point graph from the start point to the goal through each point's links (+0x10 count, +0x14 array), keeping per point (GetPointGraphItemIndex) the best distance so far and the horizontal distance to the goal, and writes the points of the path found; FindPointGraphPath calls it
 func_00191128	SimplifyPointPath	copies the first and last of an array of points and each point func_00190E30 keeps between them into a new array, recurses while the count shrinks and is 3 or more, and copies the result back with its count
+func_00191290	FindPointGraphPath	finds the triangles of the start and end points (FindPointGraphTriangle, or SnapPointToPointGraph then FindPointGraphTriangleWithin), returns at once when they share one, else links both points to their triangle's corners by distance, searches the graph (SearchPointGraph, at most 0x80 points) and simplifies the result (SimplifyPointPath); FindOwnerGraphPath calls it
+func_00191570	SnapPointToPointGraph	returns at once when the point lies in a triangle of the graph (FindPointGraphTriangleWithin from the root +0x20); else finds the graph's edge (+0x10, count +0xC) nearest the point (MeasurePointToSegment) and writes the nearest point of it
 func_001916D0	LoadPointGraph	reads the point count, link and triangle records, per-point link lists and the faces with their neighbours from the level stream into the graph; slot 10
+func_001919F8	MeasurePointGraphEdges	stores in each 12-byte edge of the graph (+0x10, count +0x8) the horizontal distance between its two points; LoadPointGraph calls it
+func_00191A68	FindOwnerGraphPath	FindPointGraphPath on the point graph the object holds; BuildAgentPath calls it
+func_00191A88	SnapPointToOwnerGraph	SnapPointToPointGraph on the point graph the object holds; BuildAgentPath, UpdateGaugeColliderAgentGoal and func_001C8418 call it
 func_00191E70	SetScreenOwner	stores which activity draws to the screen in g_screenOwner, syncing the data cache (SyncDataCache) when it changes: the startup loading screen (1), BeginRenderFrame (3) and PlayMovie (4)
 func_00191EB0	ClearScreenOwner	sets g_screenOwner back to 0; the startup loading screen, DrainRenderFrames (after BeginRenderFrame's 3) and PlayMovie call it when they finish
 func_00191EC0	SetTargetVectorListLinkOffset	gives the list D_00269BA8 its link offset 0x38 with func_00152438
@@ -41,9 +50,15 @@ func_001921A8	InitSwitchedCollider	slot 0 of class 0x05: runs InitCollider, stor
 func_001921E8	CopySwitchedCollider	slot 9 of class 0x05: runs CopyCollider and, if not yet on (0x550), sets it and switches on through func_00192990
 func_00192230	HandleSwitchedColliderNotification	slot 13 of class 0x05: after the base func_00127378, kind 0xB hands the object at 0x574 to func_001BF788 and kind 0x10 clears the matching entry of the list at 0x5AC
 func_001922E8	HandleSwitchedColliderActivation	table offset 0x130 of class 5, the call ActivateSwitchedColliderIndex makes with 1 or 0: for 1 copies v140 to v560 and calls func_00145088; for 0 calls func_001451F0 for each of 1 to 6
+func_00192380	CaptureSwitchedColliderPose	slot 69 (+0x124) of class 0x05, the slot CaptureModeWalkerTarget fills: CaptureColliderPose, then, unless +0x554 is set or the camera has a record at +0x224, eases the output's +0x18 from +0x568 towards the height +0x148 (ApproachValueWithRamp)
+func_00192410	IsSwitchedColliderCameraFree	slot 74 (+0x138) of class 0x05, the slot IsPlayerCameraFree fills for 0x07: returns 1
 func_00192418	ActivateSwitchedColliderUnlessActive	calls ActivateSwitchedCollider for the object unless it is already the one GetActiveSwitchedCollider returns
 func_00192450	IsSwitchedColliderRequestBlocked	class 5 at table offset 0x13C, where IsAgentRequestBlocked sits in class 8: returns 1 when D_00262C64 bit 0 is set or func_001DDA80 of the world is nonzero, else 0
+func_00192488	AcceptSwitchedColliderRequest	slot 76 (+0x140) of class 0x05, the slot AcceptModeColliderRequest and AcceptModeWalkerRequest fill: returns 0
+func_00192490	HasSwitchedColliderAcceptedRequest	slot 77 (+0x144) of class 0x05, the slot HasModeColliderAcceptedRequest and HasModeWalkerAcceptedRequest fill: returns 0
+func_00192498	StoreSwitchedColliderAccepted	stores through the pointer what the collider's slot 77 (HasSwitchedColliderAcceptedRequest and its overrides) returns
 func_001924C8	StartSwitchedColliderEffect	slot 78 of class 0x05: for mode 0 creates effect 0x1A at the other object's position, keeps it at 0x5AC, sets its range from clip 0x13F and its gravity, then calls slot 0x4F with 1; for mode 1 calls slot 0x4F with 2
+func_001925C0	SetSwitchedColliderMode	slot 79 (+0x14C) of class 0x05: stores a new mode at +0x600 and, entering mode 1 or 3, clears the vector at +0x5E0
 func_001925F0	GetActiveSwitchedCollider	returns the entry of D_00269C98 at the active index D_00269BCC, or 0 when the index is negative
 func_00192620	GetCurrentSwitchedCollider	returns the active collider, else the object at D_00262E10 when its f550 is nonzero, else the first entry of the array D_00269C98
 func_00192688	FindSwitchedColliderIndex	returns the index of the key in the D_00269C98 array of D_00269C90 entries, or -1
@@ -55,6 +70,9 @@ func_00192880	ActivateSwitchedColliderIndex	makes index the active one of D_0026
 func_00192990	SetSwitchedColliderEnabled	stores value in f550 and adds the collider to the list when it is nonzero, removes it when it is zero
 func_001929D0	ActivateSwitchedCollider	calls ActivateSwitchedColliderIndex with the index FindSwitchedColliderIndex gives for the object
 func_001929F8	GetActiveSwitchedColliderData	returns the block at +0x580 of GetActiveSwitchedCollider's object, or the default block D_00604700 when none is active
+func_00192A28	GetSwitchedColliderInteractFlags	slot 81 (+0x154) of class 0x05, the slot GetPlayerInteractFlags fills for 0x07: sets both flags of the output to 1
 func_00192A38	ShowTypedTextCaptionBox	stores a word in the dialogue caption box's child and pushes the box onto the element stack
 func_00192A70	HandleStepSequenceSkipButtons	unless the camera controller is on top, skips the remaining steps of the running step sequence D_0027051C or sets D_0026F800 to state 1 on buttons 0xC, then clears those buttons with ClearPadPressedBits
 func_00192B58	UpdateSwitchedCollider	slot 17 of class 0x05: runs the base update, then of the three objects at 0x588 starts (slot 6) the one picked by the clamped counter at D_002623C0+0x19E4 and stops (slot 7) the others
+func_00192C58	FinishSwitchedCollider	slot 80 (+0x150) of class 0x05, the slot FinishModeCollider and FinishModeWalker run first: unless bit 2 of g_buttonCodeFlags is set lowers the save's count at +0x19E4 (not below 0); then places its object +0x604 at +0x584's position with its rotation made upright (RotateMatrixUpright, slots 29 to 33) and starts the animation 0x18C on it (CreateAnimationPlayerWithoutPresetTargets), or without one spawns its effect at that position (SpawnEffectsAt)
+func_001930B0	GetSwitchedColliderTarget	slot 83 (+0x15C) of class 0x05, the slot GetPlayerLinkedColliderTarget fills: returns the collider itself

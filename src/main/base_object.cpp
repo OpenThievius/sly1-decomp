@@ -907,11 +907,11 @@ void func_00184D10(ConeVolume* self, f32* out)
 void func_00184D20(void* self, void* a1)
 {
     Quad_00184D20 q;
-    func_001B4600(a1, &q);
+    ConvertRgb255ToHsv255(a1, &q);
     SetConeVolumeColor(self, &q);
 }
 
 void func_00184D58(u8* self)
 {
-    func_001B4580(self + 736);
+    ConvertHsv255ToRgb255(self + 736);
 }

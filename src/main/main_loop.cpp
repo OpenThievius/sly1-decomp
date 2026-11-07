@@ -269,7 +269,7 @@ void func_00185758(s32 a, s32 b)
                 g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
             RunWorldFrameLists(g_currentWorld, g_camera);
             func_001E9668(g_elementStack);
-            func_0019DC98(g_currentWorld, g_camera);
+            SubmitDeferredRequests(g_currentWorld, g_camera);
             func_001E9648(g_elementStack);
             SubmitRenderFrame();
         }
@@ -345,8 +345,8 @@ void func_00185B38(void)
     fr.w[24] = 0x3F;
     (void)InitLoadProgress(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
     idx = 0x1A;
-    func_00191E70(1);
-    func_00193270(&fr);
+    SetScreenOwner(1);
+    BeginLoadProgress(&fr);
     tbl = (Fn_185B38*)((u8*)g_startupInitializers);
     i = 0;
     do {
@@ -358,6 +358,6 @@ void func_00185B38(void)
         idx--;
     } while (i < 0x1D);
     UpdateLoadProgress(&fr, 0);
-    func_00193300(&fr);
-    func_00191EB0(1);
+    EndLoadProgress(&fr);
+    ClearScreenOwner(1);
 }

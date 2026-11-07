@@ -747,7 +747,7 @@ void func_00194278(void* a0, s32 a1, s32 a2)
         r.f10 = 0x10;
         StartScreenFade(g_screenFade, &r, a2);
     } else {
-        func_001F4408(0, a2);
+        BeginLevelExit(0, a2);
     }
 }
 
@@ -808,7 +808,7 @@ void func_001943E8(T217D_6D0* self)
         break;
     }
     if (self->sound != 0) {
-        if (func_001BE810() != 0) {
+        if (CheckStreamVoicePending() != 0) {
             PollIopCommands();
         }
         self->sound = HasStreamVoice();
@@ -1058,7 +1058,7 @@ void func_00194E60(T217D_6D0* self, s32 v)
 
     if (self->mode == v) return;
     if (self->mode == 0 && self->page == 0) {
-        func_001936A0(self);
+        BuildPauseMenuPage(self);
     }
     if (v == 0) {
         if (self->queued != 0) {
@@ -1068,7 +1068,7 @@ void func_00194E60(T217D_6D0* self, s32 v)
             self->queuedPage = -1;
         } else {
             if (self->page == 0) {
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
             }
         }
     }
@@ -1255,7 +1255,7 @@ void func_00195928(T217D_6D0* self, s32 v)
 {
     if (self->page != v) {
         self->page = v;
-        if (v != -1) func_001936A0(self, v);
+        if (v != -1) BuildPauseMenuPage(self, v);
     }
 }
 
@@ -1287,7 +1287,7 @@ void func_00195958(T217D_6D0* self)
             void* s2 = (void*)func_00193660();
             void* s0 = GetActiveSwitchedCollider();
             if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
-                func_001B6598(s2, &v);
+                GetStateWalkerCurrentKey(s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
                         RecordPathFollowerProgress(s0);
@@ -1304,7 +1304,7 @@ void func_00195958(T217D_6D0* self)
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
-            func_001F4408(1, 2);
+            BeginLevelExit(1, 2);
             return;
         case 22:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -1340,18 +1340,18 @@ void func_00195958(T217D_6D0* self)
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
         case 15: {
             GameProgress* g = g_saveData;
             g->u19EC ^= 0x80;
-            func_001C0760(g->u19EC & 0x80);
+            SilenceVolumeChannel3(g->u19EC & 0x80);
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
@@ -1363,7 +1363,7 @@ void func_00195958(T217D_6D0* self)
             {
                 s32 keep;
                 keep = self->cursor;
-                func_001936A0(self);
+                BuildPauseMenuPage(self);
                 self->cursor = keep;
             }
             return;
@@ -1421,21 +1421,21 @@ void func_00195958(T217D_6D0* self)
         case 0x18: {
             g_saveData->u19EC ^= 0x200;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }
         case 0x19: {
             g_saveData->u19EC ^= 0x400;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }
         case 0x1A: {
             g_saveData->u19EC ^= 0x800;
             s32 keep = self->cursor;
-            func_001936A0(self);
+            BuildPauseMenuPage(self);
             self->cursor = keep;
             return;
         }
@@ -1449,7 +1449,7 @@ void func_00195958(T217D_6D0* self)
         return;
     case 4:
         if (sel == 0) {
-            StartBackgroundJob(&g_backgroundJob, (void*)func_0018C1A8, &g_memoryCard);
+            StartBackgroundJob(&g_backgroundJob, (void*)RunMemoryCardFormatJob, &g_memoryCard);
             SetPauseMenuLayerPage(self, 1, 5);
             return;
         }

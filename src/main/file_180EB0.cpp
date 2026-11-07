@@ -250,13 +250,13 @@ void func_00180F20(ListedKeepObject* self)
 
 void func_00180F68(ModeWalker* self)
 {
-    func_001D73A8(self);
+    InitPathFollower(self);
     self->fBF4 = -10.0f;
 }
 
 void func_00180F98(ModeWalker* self)
 {
-    func_001D7440(self);
+    StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
     self->fBBC = (StateWalker*)CreateStateWalker(self->fBB8, self, -1, 0);
     AddMatrixAttachment(self->fBCC, 5, &self->fBD0);
@@ -347,13 +347,13 @@ void func_00181818(ModeWalker* o, void* a, void* b)
 void func_00181A58(ModeWalker* self, void* outv)
 {
     Quad_181A58* out = (Quad_181A58*)((u8*)outv + 0x10);
-    func_001DAE48();
+    CapturePathFollowerPose();
     *out = ((Inner_181A58*)self->fBC0)->q140;
 }
 
 s32 func_00181A98(ModeWalker* self)
 {
-    if (self->fBB0 != 1 || self->fBF0 != 0 || func_001DDA80(self->world) != 0) return 1;
+    if (self->fBB0 != 1 || self->fBF0 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
@@ -361,7 +361,7 @@ s32 func_00181AE0(ModeWalker* p) { return p->fBF0 != 0; }
 
 void func_00181AF0(ModeWalker* self)
 {
-    func_00192C58(self);
+    FinishSwitchedCollider(self);
     SetModeWalkerMode(self, 1);
 }
 
@@ -376,7 +376,7 @@ void func_00181B20(void* unused, void* obj_)
     ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
     obj->x638 = WrapAngle(r + 3.1415927f);
-    func_001C5D58(obj);
+    TurnColliderTowardHeading(obj);
     SetPlayerState(obj, 4, 0x2B);
 }
 

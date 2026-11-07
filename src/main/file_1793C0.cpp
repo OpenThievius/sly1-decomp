@@ -138,7 +138,7 @@ void func_001793F0(ModeCollider* self)
     func_00139038(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
     self->f684 = 1.0f;
     func_001399F8(self->f6C0, 0xC, 5, &self->f684);
-    func_0017ABE8(self, 2);
+    SetModeColliderMode(self, 2);
     u8* base = (u8*)&D_00270650;
     ((Packed_1793F0*)(base + 0x288))->v = 0.0f;
     *(s32*)(base + 0x284) = FindAnimRecord(0x36A);
@@ -177,7 +177,7 @@ single:
     StepCollider(self, f);
     return;
 path2:
-    func_001794E0(self, &a, &b);
+    ComputeModeColliderAnchors(self, &a, &b);
     b = D_00248D30;
     func_00127E60(((Sub_179590*)self->f668), 0, &a, 0, &b, 0);
     goto tail;
@@ -209,8 +209,8 @@ void func_0017ABE8(void* self, s32 a1);
 
 void func_0017A6D0(ModeCollider* self)
 {
-    func_00192C58(self);
-    func_0017ABE8(self, 2);
+    FinishSwitchedCollider(self);
+    SetModeColliderMode(self, 2);
 }
 
 ASM_FUNC(func_0017A700);
@@ -305,7 +305,7 @@ s32 func_0017A9E0(ModeCollider* self, s32 a1)
     if (self->f610 == 0) goto one;
     if (self->f610 == 4) goto one;
     if (self->f6D0 != 0) goto one;
-    if (func_001DDA80((Ptr_17A9E0*)self->world) == 0) goto zero;
+    if (IsPadSelectFlagHeld((Ptr_17A9E0*)self->world) == 0) goto zero;
 one:
     return 1;
 zero:
@@ -345,14 +345,14 @@ s32 func_0017AA40(ModeCollider* self, s32* arg)
     if (self->f6D0 != 0) {
         self->f704 = 0;
         self->f708 = 3.0f;
-        func_001794E0(self, bufA, bufB);
+        ComputeModeColliderAnchors(self, bufA, bufB);
         func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
         ((VFn_17AA40_B)((void**)self->desc)[36])(self, bufB);
     }
     if (HasSpareCount() != 0) {
-        func_0017ABE8(self, 3);
+        SetModeColliderMode(self, 3);
     } else {
-        func_0017ABE8(self, 4);
+        SetModeColliderMode(self, 4);
     }
     {
         Msg_17AA40* m = (Msg_17AA40*)bufA;
@@ -398,7 +398,7 @@ void func_0017AD50(ModeCollider* self)
 {
     u8 bufA[16];
     u8 bufB[16];
-    func_001794E0(self, bufA, bufB);
+    ComputeModeColliderAnchors(self, bufA, bufB);
     func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
     self->desc02()->m1D(self, (Vec02*)bufA);
     self->desc02()->m20(self, (Vec02*)bufB);

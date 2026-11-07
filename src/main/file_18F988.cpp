@@ -353,7 +353,7 @@ s32 func_001903F0(SeekingAgent* self, s32 a1)
     if (g_buttonCodeFlags & 1) {
         return 1;
     }
-    if (func_001DDA80(self->world) == 0) {
+    if (IsPadSelectFlagHeld(self->world) == 0) {
         return IsAgentRequestBlocked(self, a1);
     }
     return 1;
@@ -658,19 +658,19 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
             f->neighbourB = (void*)((u32)(m->tris + a * 12) | 1);
         }
     }
-    func_001919F8(m);
+    MeasurePointGraphEdges(m);
 }
 
 ASM_FUNC(func_001919F8);
 
 void func_00191A68(Owner_191A68* self)
 {
-    func_00191290(&self->part);
+    FindPointGraphPath(&self->part);
 }
 
 void func_00191A88(Owner_191A88* self)
 {
-    func_00191570(&self->part);
+    SnapPointToPointGraph(&self->part);
 }
 
 void func_00191AA8(Obj_191AA8* self)
@@ -856,7 +856,7 @@ void func_00192418(void* self)
 
 s32 func_00192450(SwitchedCollider* self)
 {
-    if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1;
+    if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1;
     return 0;
 }
 
@@ -1093,7 +1093,7 @@ void func_00192C58(SwitchedCollider* self)
         Scratch_192C58 tmp;
         s1->desc->m02(s1);
         s1->desc->m15(s1, 0);
-        func_00189378(((u8*)self->f584) + 0x110, 0, &tmp);
+        RotateMatrixUpright(((u8*)self->f584) + 0x110, 0, &tmp);
         s1->desc02()->m1D(s1, (Vec02*)(((u8*)self->f584) + 0x140));
         s1->desc02()->m1E(s1, (Mat02*)&tmp);
         s1->desc02()->m20(s1, (Vec02*)&D_00248D30);

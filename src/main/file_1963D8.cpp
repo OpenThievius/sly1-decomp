@@ -575,8 +575,8 @@ void func_00197458(s32 unused, s32 flag)
     s32 out[4];
     if (flag == 1) {
         if (g_gaugeCollider->f6B8 != 0) {
-            func_001B6568(g_gaugeCollider->f6B8, &out[0]);
-            func_001B6598(g_gaugeCollider->f6B8, &out[1]);
+            GetStateWalkerTargetKey(g_gaugeCollider->f6B8, &out[0]);
+            GetStateWalkerCurrentKey(g_gaugeCollider->f6B8, &out[1]);
             if (out[0] != 0x3F4 && out[1] != 0x3F4) {
                 SetStateWalkerTarget(g_gaugeCollider->f6B8, 0x3F5);
                 ApplyGaugeColliderRatioToEffect(g_gaugeCollider);
@@ -595,7 +595,7 @@ ASM_FUNC(func_001974F8);
 void func_00197788(GaugeCollider* self)
 {
     s32 v;
-    func_001B6598(self->f6B8, &v);
+    GetStateWalkerCurrentKey(self->f6B8, &v);
     void* p = 0;
     if (v == 0x3F3) p = AreMenusAndFadeClear(0);
     if (p != 0) {
@@ -677,7 +677,7 @@ void func_00197F10(GaugeCollider* self, s32 kind, void* rec)
         if (rec != self->f6B8) {
             return;
         }
-        func_001B6598(rec, &code);
+        GetStateWalkerCurrentKey(rec, &code);
         if (code == 0x3F3) {
             *(void**)D_0026E744 = (u8*)self + 0x67C;
             g_gaugeAmountCaption.target = &self->f680;

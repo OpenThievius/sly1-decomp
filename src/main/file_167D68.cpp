@@ -845,7 +845,7 @@ void func_001692B0(void* self, void* arg)
     }
     InitGifPacket(&f);
     PushBackMemoryMark();
-    AllocateTempPacketBuffer(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
+    AllocateTempPacketBuffer(&f, ((g_imageSlotsB * 2 + g_imageSlotsB + g_imageSlotsA) * 8) | 4);
     BeginDmaTag(&f);
     if (PlaceMaskedImages(self, arg, &f) != 0) {
         BeginGifTag(&f, 0, 1, 0xE);
@@ -867,7 +867,7 @@ s32 func_001693A8(void* self)
     f.out = 0;
     InitBumpAllocator(f.span, 0x1400, 0x1E00);
     PushBackMemoryMark();
-    AllocateTempPacketBuffer(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
+    AllocateTempPacketBuffer(&f, ((g_imageSlotsB * 2 + g_imageSlotsB + g_imageSlotsA) * 8) | 4);
     BeginDmaTag(&f);
     if (PlaceMaskedImages(self, f.span, &f) != 0) {
         BeginGifTag(&f, 0, 1, 0xE);
@@ -1028,7 +1028,7 @@ s32 func_00169780(u32 mask)
     res = 0;
     InitPacketWriter(&fb);
     PushBackMemoryMark();
-    AllocateTempPacketBuffer(&fb, (D_00274514 * 2 + D_00274514 + D_00274510) * 10 + 4);
+    AllocateTempPacketBuffer(&fb, (g_imageSlotsB * 2 + g_imageSlotsB + g_imageSlotsA) * 10 + 4);
     BeginDmaTag(&fb);
     WriteVifFlush(&fb);
     for (i = 0; i < g_imageRecordCountB; i++) {
@@ -1041,8 +1041,8 @@ s32 func_00169780(u32 mask)
             StartPaletteUpload(e, n, &fa);
             *(u64*)(fa.curS - 0x10) |= 0x8000;
             DetachPacketBuffer(&fa, &o0, &o1);
-            func_001EE7D0(&fb, o0, o1, 0);
-            func_001EE850(&fb, e->fC, e->f8, 0);
+            WriteVifDirect(&fb, o0, o1, 0);
+            WriteVifDirectRef(&fb, e->fC, e->f8, 0);
             if (e->f0 & 0x40000000) {
                 e->f0 = 0x40000000;
             }
@@ -1060,8 +1060,8 @@ s32 func_00169780(u32 mask)
                 StartImageUpload(e, n, &fa);
                 *(u64*)(fa.curS - 0x10) |= 0x8000;
                 DetachPacketBuffer(&fa, &o0, &o1);
-                func_001EE7D0(&fb, o0, o1, 0);
-                func_001EE850(&fb, e->f14, e->f10, 0);
+                WriteVifDirect(&fb, o0, o1, 0);
+                WriteVifDirectRef(&fb, e->f14, e->f10, 0);
                 if (e->f4 & 0x40000000) {
                     e->f4 = 0x40000000;
                 }
@@ -1076,7 +1076,7 @@ s32 func_00169780(u32 mask)
         AddGifRegisterWrite(&fa, 0x3F, 0);
         EndGifPacket(&fa);
         DetachPacketBuffer(&fa, &o0, &o1);
-        func_001EE7D0(&fb, o0, o1, 0);
+        WriteVifDirect(&fb, o0, o1, 0);
         WriteVifFlush(&fb);
         CloseDmaTag(&fb);
         *(u64*)fb.curS = 0x60000000;
@@ -1290,7 +1290,7 @@ void func_0016A580(ListedCollisionPart* self, f32 t)
     if (self->f550 != 0) {
         return;
     }
-    func_00189378((Mat02*)((u8*)self + 0xD0), 0, &buf);
+    RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, &buf);
     func_001B91A8(self, &buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
 }
 
@@ -1311,8 +1311,8 @@ void func_0016A5F0(Obj_16A5F0* self, s32 v)
         self->vtbl[36](self, (void*)&D_00248D30);
         self->vtbl[37](self, (void*)&D_00248D30);
         SetColliderAnchors(self, 3, 0, 3, 0);
-        func_00189378((u8*)g_player + 0x110, 0, f.a);
-        func_00189378((u8*)self + 0x110, f.c, f.b);
+        RotateMatrixUpright((u8*)g_player + 0x110, 0, f.a);
+        RotateMatrixUpright((u8*)self + 0x110, f.c, f.b);
         MatrixToAxisAngle(f.c, f.e, f.d);
         MultiplyMatrices3x3(f.a, f.b, self->f224);
         TriggerScriptEvent(self, 2, 0, 0);

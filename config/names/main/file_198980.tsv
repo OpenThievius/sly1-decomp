@@ -15,6 +15,13 @@ func_00199070	InitFlaggedObjectSet	slot 0 of class 0x2D: runs InitObjectSet, the
 func_001990A8	CopyFlaggedObjectSet	slot 9 of class 0x2D: runs CopyCollider while keeping its own flag-table index at 0x5A0
 func_001990E0	GetFlaggedObjectSetActivationState	slot 72 of class 0x2D: what GetObjectSetActivationState returns, except 0 instead of 1 once its bit of g_flagTable is set
 func_00199138	CollectFlaggedObjectSet	slot 73 of class 0x2D: sets its bit of g_flagTable with SetFlagTableBit, then runs CollectObjectSet
+func_00199170	LoadC5CObject	slot 10 (+0x38) of class 0x5C: LoadPlacedObject, then resolves the one table D_0026A918 (ResolveObjectLinks)
+func_001991A8	StartC5CObject	slot 16 (+0x50) of class 0x5C: StartPlacedObject, then resolves the table D_0026A928 (ResolveObjectLinks)
+func_001991E0	LoadC5DObject	slot 10 (+0x38) of class 0x5D: LoadPlacedObject, then resolves the table D_0026A938 (ResolveObjectLinks)
+func_00199218	StartC5DObject	slot 16 (+0x50) of class 0x5D: StartPlacedObject, gathers the objects of its id list with those found in the level (GatherObjectsById, FindFirstObjectById), and gives each and itself a state walker (CreateStateWalker, SetStateWalkerTarget)
+func_00199380	SetC5DObjectMaskBit	sets the mask at +0x2D0 to the single bit after the given one
+func_00199398	AddC5DObjectId	appends an id to the array at +0x2E0 while its count at +0x2DC is below 8
+func_001993C0	QueueWalkerActivationOnPlayer	QueuePlayerWalkerActivation on g_player when there is one; the script built-in func_00106FA0 calls it
 func_001993F0	InitNumberedItem	slot 0 of the 0x2E class: runs InitObjectSet and stores the world counter at 0x2300, post-incremented, as the item's own number at 0x5A0
 func_00199428	LoadNumberedItem	slot 10 of the 0x2E class: runs LoadObjectSet, installs the table D_0026A948 with func_00124DF8 and looks up to 0x20 objects (ids 0x318..0x337) up with func_0015A418 into a 0x80-byte array at 0x5B0
 func_001994C8	CopyNumberedItem	slot 9 of class 0x2E: runs CopyCollider while keeping its own number at 0x5A0
@@ -28,9 +35,21 @@ func_00199C58	ApplyNumberedItemPendingImpulse	slot 0xD0 of class 0x2E: a call to
 func_00199C78	HandleNumberedItemObjectEvent	runs HandleObjectEvent (func_001BC320) on the event, with extra descriptor calls (slots 25 and 77) when its eventFlags 0x8 and 0x10 are set; returns 1
 func_00199D08	SpinNumberedItemTransform	slot 0xA0 of class 0x2E: turns its transform about Z by the clock (BuildAxisAngleMatrix) before the base slot 0xA0 (func_00125C90)
 func_00199F38	FlagAllNumberedItems	gathers every object of class 0x2E (func_0015A4F0 with 0x105, 0x2E), runs FlagNumberedItem on each from the last, then calls descriptor slot 7 of its sub-object at 0x18 when func_001300E8 says kind 0x20
+func_00199FF0	SetSavedWorldBits	the button code D_00262BD0's callback: stores its value (0xF000FFFF) in g_saveData's world bits at +0x19F0
+func_0019A000	CompletesWorldBits	returns 1 when adding the given bits to g_saveData's world bits (+0x19F0) sets every bit of 0xF000FFFF, 0 when they are already all set or bit 2 of ComputeCompletionMask is; func_0019AB78 and func_001CDFB8 call it
 func_0019A088	MarkLevelRecordComplete	for a level index (or the current one, 0x19D8, for -1) of the save data, sets bit 0 of each record of its 0x438-byte table and the bits 0x1F of its word at 0x448
 func_0019A0F0	MarkAllLevelRecordsComplete	runs MarkLevelRecordComplete for the six level indices, then requests a world load when the element stack is in mode 2
+func_0019A148	InitC17Collider	slot 0 (+0x10) of class 0x17: InitSwitchedCollider, then sets the ids at +0x64C and +0x644 to -1
+func_0019A178	StartC17Marker	finds the marker object by its id (kind 0x101, 0x37A), starts it (ResolveAndStartObject) and gives it a state walker (CreateStateWalker); StartC17Collider calls it for its three 12-byte markers at +0x61C
+func_0019A1E0	StartC17Collider	slot 16 (+0x50) of class 0x17: resolves its links (D_0026AA50), starts its three markers (StartC17Marker), creates its state walker, finds the objects of its six reaction lists and picks one of each at random, and chooses its world bit from the save's world bits and the level records
+func_0019A520	HandleC17ColliderActivation	slot 0x130 of class 0x17, the slot HandleSwitchedColliderActivation fills for 0x05: on activation moves its walker to 0x385 and lists the objects 0x39A or 0x39B and +0x648 at +0x7DC; on release moves it to 0x384, empties the list and, with completion bit 2, queues movie 4 (FadeOutAndQueueMovie)
+func_0019AB78	HandleC17ColliderNotification	slot 13 (+0x44) of class 0x17: after HandleSwitchedColliderNotification, on message 12 from its object +0x650 either sends the player to state 6/16 or picks a reaction by the share of items collected in the level (CompletesWorldBits for all of them) and runs its next object (ChooseStepSequenceState)
 func_0019AD30	AddEntryRecordKey	appends item to keys of the 0x2C-byte record at index in the table at 0x658 of the 0x17 class, only while its count is below 4
+func_0019AF00	InitC71Object	slot 0 (+0x10) of class 0x71: InitObject, then sets the target id to -1 and +0x4C to the largest float
+func_0019AF38	RegisterC71Object	slot 6 (+0x28) of class 0x71: RegisterObject, then appends itself to the world's list at +0x1C90
+func_0019AF70	UnregisterC71Object	slot 7 (+0x2C) of class 0x71: UnregisterObject, then removes itself from the world's list at +0x1C90
+func_0019AFA8	StartC71Object	slot 16 (+0x50) of class 0x71: StartObject, then finds its target by its id (FindFirstObjectById)
+func_0019AFF0	CopyC71Object	slot 9 (+0x34) of class 0x71: keeps its own bits across the base copy CopyObjectData
 func_0019B038	InitObjectGatherer	slot 0 of the 0x41 class: runs the base set-up, sets 0x608 to 0.5 and 0x60C to 1.0, stores func_001EAB48 of the clock and sets 0x664 to -1
 func_0019B0A0	LoadObjectGatherer	slot 10 of the 0x41 class: runs the base load, func_00159478 for its group record, then finds the objects of ids 0x269..0x287 and files each in the low or high array
 func_0019B188	StartObjectGatherer	slot 16 of the 0x41 class: registers its table D_0026ABA0, sets state -1, enters mode 1 with func_0019C1C0 and copies its position (v140) to 0x650
@@ -39,6 +58,14 @@ func_0019B218	RemoveObjectGatherer	slot 7 of the 0x41 class: runs the base step 
 func_0019B250	CopyObjectGatherer	slot 9 of the 0x41 class: keeps the eight bytes at 0x600 across the base copy func_001BA130
 func_0019B298	StepObjectGatherer	slot 0x80 (step) of class 0x41: StepCollider, then outside states 1 and 2 passes its placement to func_001B9D10 with the table D_0026ABB0
 func_0019B378	UpdateObjectGatherer	slot 0x54 (update) of class 0x41: works with the active switched collider, UpdateCollider, and the per-state sounds (StartSoundEffect)
+func_0019BB10	ComputeObjectGathererContactValues	slot 60 (+0x100) of class 0x41, the slot ComputeGaugeColliderContactValue fills for 0x18: for a contact whose normal points up (z above 0.7) sets its +0x94 to 3 in mode 1 or 5 otherwise and its +0x98 to 0.1
 func_0019BB90	ResolveObjectGathererContact	slot 0x104 of class 0x41 (as ResolvePlayerContact): when the contact is steep enough and its speed at +0x61C is not 0, pushes the contact's velocity along its own direction less the part along the contact's normal
 func_0019BE08	HandleObjectGathererObjectEvent	slot 45 of the 0x41 class: if its state is not 3 it enters state 3 with func_0019C1C0 and sends the message's values to its group object's method 31
 func_0019C068	SetObjectGathererSuspended	with a non-zero flag removes the object from the world's list at +0x1C60 and calls slot 7 of its helper at 0x5FC, otherwise appends it, calls slot 6 and places it; then passes the flag to func_001B7C40 for itself and all its parts
+func_0019C3D0	RegisterC7CObject	slot 6 (+0x28) of class 0x7C: RegisterObject, then appends itself to the world's list at +0x1C6C
+func_0019C408	UnregisterC7CObject	slot 7 (+0x2C) of class 0x7C: UnregisterObject, then removes itself from the world's list at +0x1C6C
+func_0019C440	InitC8BObject	slot 0 (+0x10) of class 0x8B: InitObject, then sets its two ids at +0x34 and +0x38 to -1
+func_0019C470	LoadC8BObject	slot 10 (+0x38) of class 0x8B: reads its counts, values and records from the level stream (ReadBufferedS16, ReadBufferedS8, ReadBufferedFloat) into front memory, then its property records (ReadPropertyRecords)
+func_0019C728	StartC8BObject	slot 16 (+0x50) of class 0x8B: StartObject, then finds its objects by id (FindFirstObjectByIdMode4, FindFirstObjectByIdMode1) and sets up their links and blend records
+func_0019CE28	SetC8BObjectVector	stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00105F70 calls it
+func_0019CE38	SetC8BObjectVectorFlagged	sets +0x80 to 1 and stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00106048 calls it
