@@ -1,6 +1,7 @@
 symbol	name	evidence
 func_001B5588	CopyVec3	copies the three floats at +0, +4 and +8 of its second argument into its first
 func_001B55A8	CopyVec2	copies the two floats at +0 and +4 of its second argument into its first
+func_001B5B58	MapCharToCode	maps one byte of a string to a 16-bit character code by its range (the punctuation from 0x20 up first); ConvertStringToCharCodes calls it for each byte
 func_001B5C40	ConvertStringToCharCodes	maps each byte of a string through func_001B5B58, swaps the two bytes of the result into a 16-bit unit and ends the output with 0
 func_001B5CD8	StartCameraPositionedObject	slot 16 (start) of class 0x54: StartPlacedObject, then clears flag bits 40 and 41 and sets bit 40
 func_001B5D28	MoveObjectToCamera	slot 17 (update) of class 0x54: UpdatePlacedObject, then sets its position (slot 29) to the camera's vector at +0x40, keeping its own height unless +0x2D0 is set
@@ -8,6 +9,7 @@ func_001B5D80	BuildFreeList	stores the stride in word 0, then chains count nodes
 func_001B5DD0	InitSlotPool	rounds the slot size up to 8, allocates size times count bytes with func_0018D500 into word 1 and chains them with BuildFreeList
 func_001B5E30	InitAlignedSlotPool	allocates size times count plus 0x30 bytes, aligns the base up to 0x40 and chains the slots with BuildFreeList
 func_001B5EA0	PopFreeSlot	takes the node at the pool's head (+8), moves the head to its next word and returns the node (0 when empty)
+func_001B5EC0	TakePoolSlot	PopFreeSlot on a pool: the node allocators of contact rows, attach and call records and touch nodes (PushContactRow, TakeAttachRecord, TakeCallRecord, AllocateTouchNode) and CopyPlacedObject call it
 func_001B5EE0	PopZeroedFreeSlot	PopFreeSlot, then clears the slot with func_001F5C0C over the pool's slot size (+0); func_001B6290 takes its handle this way
 func_001B5F28	PushFreeSlot	puts a non-null item back at the head of the pool (+8) by storing the old head in its first word; func_001B6438 returns the handle to the world's pool with it
 func_001B5F50	LoadStateGraph	slot 10 (load) of class 0x88: reads the graph's state table (keys, FindStateEntryIndexOrZero) and its edges with their vectors from the stream onto front memory
@@ -30,4 +32,18 @@ func_001B6C68	CommitStateWalkerArrival	notifies the change from the current to t
 func_001B6CA8	HandleStateWalkerTrackEnd	callback of the edge's track: for message 5 aimed at its own track commits the arrival (func_001B6C68) and plans the next edge (func_001B66A0)
 func_001B6CF0	AdvanceStateWalkerTime	spends a time on the running track: while the time is at least the track's remaining length commits the arrival and plans the next edge, else steps the track by the rest with func_0012F0A0
 func_001B6D78	CallStateWalkerListeners	calls slot 18 of the object at +0x1C, then calls each (function, object) record of the list at +0x3C with the two arguments
+func_001B6DF8	AddStateWalkerListener	adds a (function, object) record to the state walker's listener list at +0x3C (AddCallbackNode on its holder's world), the list CallStateWalkerListeners calls; BlendParamSets, StartGaugeCollider and StartTempoAgent call it
 func_001B6E28	NotifyStateWalkerChange	looks up the values of two entry indexes (-1 for a negative one) and sends event 0xE with the walker and both values to the owner (func_001837E0)
+func_001B6EC8	InitCompanionAgent	slot 0 of class 0x09: InitAgent, then its ranges 0xC18..0xC24 (300, 2000), the id 0xC28 and the companion id 0xC10 set to -1 and the 17 look entries cleared to -1
+func_001B6F50	ResolveCompanionAgentObjects	looks the 17 per-state look ids at 0xC38 up into their objects, keeps of the objects of key 0x60 the one matching the id at 0xC10 as its companion (0xC14) and calls slot 7 of the others, then attaches a pose source (CreatePoseSource) to the companion at 0xC34
+func_001B70B0	SetCompanionAgentLookId	stores the id of the object to look at in state index (the 8-byte entries at 0xC38) after IsAgentSlotIndex; the script built-in func_00105658 calls it
+func_001B7100	AddCompanionAgentExcludedId	script built-in: appends an id to the list at 0xCD8 (count 0xCD4, at most 4) that StartCompanionAgent resolves and IsCompanionAgentBlocker leaves out
+func_001B7128	StartCompanionAgent	slot 16 (start) of class 0x09: StartAgent, ResolveCompanionAgentObjects, then looks the id 0xC28 up into 0xC2C and each excluded id (0xCD8) into its object
+func_001B71C8	IsCompanionAgentBlocker	the filter func_001B7280 passes to its query: refuses an object with bit 43 of +0x538, one whose root is of kind 5 or 0x4C, and one under an excluded object (IsObjectDescendantOf); accepts the rest
+func_001B7608	UpdateCompanionAgent	slot 17 (update) of class 0x09: UpdateAgent, then AimCompanionAgentPose
+func_001B7638	AimCompanionAgentPose	by the roster state (GetAgentRosterState) points the companion's pose source (0xC34) at the state's look object (0xC30), the agent's target (slot 98, SelectAgentTarget) or the agent itself, and sets the companion's rate +0x2F0 to 1.0, 1.3 or 0.1
+func_001B7790	EnterCompanionAgentState	slot 92 of class 0x09: EnterAgentState, then clears the count 0xCC4 in state 6, releases the companion (slot 7) and its sound level in state 0xB, and takes the state's look object into 0xC30
+func_001B7818	IsCompanionAgentTargetInRange	slot 0x184 of class 0x09: IsAgentTargetInRange and then its slot 0x16C (func_001B7280)
+func_001B7860	AnswerCompanionAgentRosterPoll	slot 0x170 of class 0x09 (AnswerAgentRosterPoll's slot): 1 in state 0xB, in state 6 with a count at 0xCC4 2 after five seconds in the state and 1 before, else 0
+func_001B78C0	HandleCompanionAgentNotification	slot 13 of class 0x09: HandleAgentNotification, then counts at 0xCC4 each notification 7 about its animation player 0x7E0
+func_001B7920	SetCompanionAgentFrozen	slot 20 of class 0x09: SetColliderFrozen, and when freezing releases the sound level at 0xCC0

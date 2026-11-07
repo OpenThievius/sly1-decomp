@@ -142,7 +142,7 @@ void func_001C71E0(Agent* self)
         self->f928 = FindFirstObjectByIdMode4((s32)self->world, self->f924, self);
     }
     if (self->fB4C != -1) {
-        func_001CAB10(self);
+        PickAgentSecondaryTarget(self);
     }
     v = self->fAF8;
     if (v != 0) {
@@ -183,9 +183,9 @@ void func_001C72A0(Agent* self)
     StartTurningCollider(self);
     ResolveObjectLinks(self, 2, (u8*)D_00274C30);
     if (self->f720 == 0) {
-        void* t = func_001CB5B8(self->world);
+        void* t = CreateItemKeeper(self->world);
         self->f720 = t;
-        func_001CB648(t, self);
+        AddItemKeeperMember(t, self);
     }
     ResolveAgentClips(self);
     for (s32 i = 0; i < 17; i++) {
@@ -255,7 +255,7 @@ void func_001C74E8(Agent* self)
 {
     RegisterSwitchedCollider(self);
     if (self->f720 != 0) {
-        func_001CB648(self->f720, self);
+        AddItemKeeperMember(self->f720, self);
     }
 }
 
@@ -276,7 +276,7 @@ void func_001C7520(Agent* self)
         self->f754 = 0;
     }
     if (self->f720 != 0) {
-        func_001CB6F8(self->f720, self);
+        RemoveItemKeeperMember(self->f720, self);
     }
     self->f72C = 0;
     self->fA60 = 0;
@@ -335,7 +335,7 @@ s32 func_001C84C0(Agent* self);
 s32 func_001C8010(Agent* self)
 {
     s32 s = self->f724;
-    s32 m = func_001C96B8(self);
+    s32 m = GetAgentRosterState(self);
 
     if (self->fBFC < g_gameClock[1]) {
         if (self->f724 != 0xB && self->f724 != 0x10) {
@@ -1424,7 +1424,7 @@ struct Obj_1CAD40 { u8 pad0[0x720]; void* f720; };
 
 void func_001CAD40(Obj_1CAD40* self, s32 value)
 {
-    func_001CBE20(self->f720, value);
+    AddItemKeeperStateTrigger(self->f720, value);
 }
 
 void func_001CAD60(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self->f7E4 < 8) { Group08* e = &self->f7E8[self->f7E4]; self->f7E4++; e->ids[0] = a; e->ids[1] = b; e->ids[2] = c; e->ids[3] = d; } }
@@ -1499,7 +1499,7 @@ void func_001CB328(Agent* self, void* value)
         self->f754 = 0;
     }
     self->f750 = value;
-    if (func_001C96B8(self) == 0) {
+    if (GetAgentRosterState(self) == 0) {
         self->f730 = 0;
         self->f72C = self->f72C | 1;
     }
@@ -1576,7 +1576,7 @@ void func_001CB648(List_1CB648* self, void* value)
     u32 n;
 
     if (self->count == 0) {
-        func_001CBEE8(self, 0);
+        SetItemKeeperState(self, 0);
     }
     n = self->count;
     if (n < 0x10) {
@@ -1609,7 +1609,7 @@ void func_001CB6F8(List_1CB6F8* self, s32 value)
             s32* d = &self->items[i];
             CopyMemory(d, d + 1, (m - i) * 4);
             if (self->count <= 0) {
-                func_001CBEE8(self, 3);
+                SetItemKeeperState(self, 3);
             }
         }
     }
@@ -1730,7 +1730,7 @@ void func_001CBAA0(Obj_1CBAA0* a0)
         s32 one = 1;
         void* owner = *(void**)&g_currentWorld;
         self->f17C = one;
-        AppendQueuedCall(owner, (void*)(void (*)(void*))func_001CBB20, self, -1, 0);
+        AppendQueuedCall(owner, (void*)(void (*)(void*))UpdateItemKeeper, self, -1, 0);
     }
 }
 
@@ -1756,13 +1756,13 @@ void func_001CBB20(Obj_1CBB20* self)
 
     self->f17C = 0;
     if (self->f50 != 3) {
-        self->f188 = func_001CBCB8(self);
+        self->f188 = IsAnyItemKeeperMemberFree(self);
         for (;;) {
-            v = func_001CBB88(self);
+            v = ChooseItemKeeperState(self);
             if (v == self->f50) {
                 break;
             }
-            func_001CBEE8(self, v);
+            SetItemKeeperState(self, v);
         }
     }
 }
@@ -1805,7 +1805,7 @@ s32 func_001CBB88(Obj_1CBB88* self)
     case 1:
         if (self->f188 != 0) {
             state = 2;
-        } else if (func_001CBD58(self) != 0) {
+        } else if (PollItemKeeperMembers(self) != 0) {
             state = 0;
         }
         break;
@@ -1855,7 +1855,7 @@ s32 func_001CBCB8(Self_CBCB8* self)
         return 0;
     }
     {
-        void* r = func_001CBAF8(self);
+        void* r = GetItemKeeperTarget(self);
         if (r != 0) {
             self->f40 = *(Quad_CBCB8*)((u8*)r + 0x140);
         }
@@ -1974,7 +1974,7 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
     case 2:
         i = 0;
         self->f184 = PushSoundLevel(0x6B);
-        func_001CBE70(self, 0);
+        SetItemKeeperTriggerStates(self, 0);
         if (self->cnt58 > 0) {
             Item_1CBEE8** p = self->items;
             do {
@@ -1994,10 +1994,10 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
         func_001CC120(self);
         break;
     case 0:
-        func_001CBE70(self, 1);
+        SetItemKeeperTriggerStates(self, 1);
         break;
     case 3:
-        func_001CBE70(self, 2);
+        SetItemKeeperTriggerStates(self, 2);
         break;
     }
     self->f50 = ns;

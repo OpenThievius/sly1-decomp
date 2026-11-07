@@ -1652,7 +1652,7 @@ void func_001BC4D8(Collider* self, Contact03** out)
                     if (e) {
                         switch (e->f4E0) {
                         case 1: {
-                            Contact03* c = func_001B5EC0((u8*)self->world + 0x1AFC);
+                            Contact03* c = TakePoolSlot((u8*)self->world + 0x1AFC);
                             *c = *n;
                             c->next = *out;
                             *out = c;

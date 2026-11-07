@@ -333,7 +333,7 @@ void func_001B5C40(u8* src, u16* dst)
     s32 n = GetStringLength(src);
     s32 i;
     for (i = 0; i < n; i++) {
-        u32 r = func_001B5B58(src[i]);
+        u32 r = MapCharToCode(src[i]);
         u32 lo = (r & 0xFF) << 8;
         u32 hi = (r >> 8) & 0xFF;
         dst[i] = (u16)(hi | lo);
@@ -966,7 +966,7 @@ void func_001B7100(C09* self, s32 value)
 void func_001B7128(C09* self)
 {
     StartAgent(self);
-    func_001B6F50(self);
+    ResolveCompanionAgentObjects(self);
     if (self->fC28 != -1) {
         self->fC2C = FindFirstObjectByIdMode4(self->world, self->fC28, self);
     }
@@ -1005,7 +1005,7 @@ ASM_FUNC(func_001B7280);
 void func_001B7608(C09* self)
 {
     UpdateAgent(self);
-    func_001B7638(self);
+    AimCompanionAgentPose(self);
 }
 
 void func_001B7638(C09 *self) {
@@ -1018,7 +1018,7 @@ void func_001B7638(C09 *self) {
         return;
     }
     t = (struct Target_1B7638 *)self->fC34;
-    r = func_001C96B8(self);
+    r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
