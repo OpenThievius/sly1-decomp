@@ -16,7 +16,7 @@ struct StateWalker {
     void* owner;            // 0x18: func_001B6290's first argument; func_001B6568, func_001B6628
     s32 f1C;                // 0x1C: the second
     s32 f20;                // 0x20: the fourth
-    u8 pad24[0x28 - 0x24];
+    s32 key;                // 0x24: the id a message's source is compared with (func_00181D28)
     s32 f28;                // 0x28: func_001B6628
     s32 f2C;                // 0x2C: -1 at set-up; func_001B6628
     s32 index;              // 0x30: func_001B6568, func_001B6628

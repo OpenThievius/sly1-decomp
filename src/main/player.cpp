@@ -27,13 +27,16 @@
 #include "game_progress.h"
 #include "bump_allocator.h"
 #include "camera.h"
+#include "path_curve_object.h"
 #include "asm_func.h"
 
 extern f32 D_00261860[];
 extern f32 D_0026185C[];
 
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
-struct Params_2638A0 { f32 f0; f32 f4; f32 f8; f32 fC; s32 f10; s32 f14; };
+// The ramp ApproachValueWithRamp turns the player's spin angle (0x2434) back to zero with
+// (func_001727B0); the two ids are those of the spin's links (0x16F, 0x170).
+struct SpinRampParams { f32 f0; f32 f4; f32 f8; f32 fC; s32 f10; s32 f14; };
 
 // size: pointer, word accesses only
 Player* D_00262E10 = 0;
@@ -290,7 +293,7 @@ f32 D_00263884 = -50.0f;
 f32 D_00263888[3] = { 5.0f, 0.0f, 0.100000001f };
 f32 D_00263894 = 0.349999994f;
 f32 D_00263898 = 0.0f;
-Params_2638A0 D_002638A0 = { 50.0f, 0.0f, 0.25f, 0.0f, 0x16F, 0x170 };
+SpinRampParams D_002638A0 = { 50.0f, 0.0f, 0.25f, 0.0f, 0x16F, 0x170 };
 f32 D_002638B8 = 75.0f;
 f32 D_002638BC = -325.0f;
 f32 D_002638C0 = -50.0f;
@@ -488,8 +491,6 @@ ASM_FUNC(func_001719E8);
 
 ASM_FUNC(func_00171C80);
 
-struct Loc_171DD8 { u8 pad0[8]; f32 f8; };
-
 s32 func_00171180(void* self);
 s32 func_00171C80(void* self, void* p, void* part);
 void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
@@ -501,12 +502,12 @@ void func_001B6628(void* p, s32 n);
 
 void func_00171DD8(Player* self)
 {
-    Loc_171DD8 loc;
+    Vec3 loc;
     if (AimPlayerAtTarget(self) == 0) {
         if (self->f690 != 0) {
             func_001278A8((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
-            loc.f8 = ClampToMagnitude(loc.f8, 10.0f);
-            self->f638 = self->f638 + loc.f8 * g_frameDt[0];
+            loc.z = ClampToMagnitude(loc.z, 10.0f);
+            self->f638 = self->f638 + loc.z * g_frameDt[0];
         }
     }
     if (self->f250C == 0) return;
@@ -524,20 +525,16 @@ void func_00171DD8(Player* self)
     self->f118C = 1;
 }
 
-struct Vec4_171F28 {
-    f32 x, y, z, w;
-} __attribute__((aligned(16)));
-
 s32 func_001EDEF0(void* a0, void* a1, void* a2, void* a3);
 
 void func_00171F28(Player* self, f32 unusedF12, f32 scale)
 {
-    Vec4_171F28 tmp = *(Vec4_171F28*)((u8*)self + 0x140);
+    Vec02 tmp = self->v140;
     tmp.z = tmp.z - 75.0f;
-    Vec4_171F28 out;
+    Vec02 out;
     void* a1;
     func_001EDEF0(&tmp, a1, &out, self);
-    self->desc02()->m20(self, (Vec02*)&out);
+    self->desc02()->m20(self, &out);
     if (self->f2220 != 4) {
         SetPlayerState(self, 2, 6);
         self->f226C = self->f226C * scale;
@@ -607,15 +604,6 @@ clear:
     self->f1190.f50 = 0;
 }
 
-struct Aux_1725E0
-{
-    u8 pad0[0x2C8];
-    u64 f2C8;
-};
-struct VtObj_1725E0
-{
-    void** vt;
-};
 void func_001C4848(Player* s, void* a, void* b, void* c);
 void func_00125B70(Player* s, void* c, f32* out);
 void func_00172078(Player* s, f32* buf, f32 t);
@@ -638,16 +626,16 @@ void func_001725E0(Player* self, void* a, void* b)
     }
     if (self->f2434 != 0.0f || self->f2430 != 0.0f)
     {
-        ((Aux_1725E0*)self->f61C)->f2C8 &= ~(1ULL << 32);
+        ((PlacedObject*)self->f61C)->flags &= ~(1ULL << 32);
         BuildPlacedObjectTransform(self, b, out);
         out[16] *= 0.25f;
         for (i = 0; i < 4; i++)
         {
             OrientPlayerSpinPart(self, buf, (f32)i * 0.25f);
-            BuildMatrixFromRotationAndTranslation((u8*)((Aux_1725E0*)self->f61C) + 0x140, buf, out);
-            ((void (*)(void*, void*, f32*))((VtObj_1725E0*)((Aux_1725E0*)self->f61C))->vt[0xA0 / 4])(((Aux_1725E0*)self->f61C), a, out);
+            BuildMatrixFromRotationAndTranslation(&((PlacedObject*)self->f61C)->v140, buf, out);
+            ((PlacedObject*)self->f61C)->desc02()->m24((PlacedObject*)self->f61C, a, out);
         }
-        ((Aux_1725E0*)self->f61C)->f2C8 |= 0x100000000UL;
+        ((PlacedObject*)self->f61C)->flags |= 0x100000000UL;
     }
     if (self->f2220 == 3)
     {
@@ -689,12 +677,16 @@ void func_001727B0(Player* self)
 
 // EXACT: callee func_001300E8 declared with a third parameter and called with k, which puts k in a2
 
-struct Aux_172898 { u8 pad0[0x50]; void* f50; u8 pad1[0x554 - 0x54]; Contact03* f554; };
+// The object the player hands contacts to (Player::f2750): it keeps them in a chain at 0x554.
+struct ContactChainOwner {
+    u8 pad0[0x554];
+    Contact03* chain;       // 0x554
+};
 
 void func_001BC4D8(Player* a, void* b);
 s32 func_001300E8(void* key, s32 kind, s32 extra);
 void func_001C57C8(Player* a);
-void func_00128018(Aux_172898* a, s32 b, void* c, void* d);
+void func_00128018(void* a, s32 b, void* c, void* d);
 void func_001861E8(void* a, Contact03* b);
 
 void func_00172898(Player* self)
@@ -721,10 +713,10 @@ void func_00172898(Player* self)
                         } else {
                             slot = &n->next;
                         }
-                    } else if ((void*)n->end[1 - k].body == ((Aux_172898*)self->f2750) && ((s32 (*)(Player*, Contact03*))self->desc06()->m56)(self, n)) {
+                    } else if ((void*)n->end[1 - k].body == ((ContactChainOwner*)self->f2750) && ((s32 (*)(Player*, Contact03*))self->desc06()->m56)(self, n)) {
                         *slot = n->next;
-                        n->next = ((Aux_172898*)self->f2750)->f554;
-                        ((Aux_172898*)self->f2750)->f554 = n;
+                        n->next = ((ContactChainOwner*)self->f2750)->chain;
+                        ((ContactChainOwner*)self->f2750)->chain = n;
                     } else {
                         slot = &n->next;
                     }
@@ -739,9 +731,9 @@ void func_00172898(Player* self)
     if (self->f2220 == 8) {
         self->f690 = 1;
         self->f694 = g_gameTime[0];
-        func_00128018(((Aux_172898*)self->f24A0), 0, self->f24B0, &self->v6A0);
+        func_00128018(self->f24A0, 0, self->f24B0, &self->v6A0);
         self->v6B0 = g_unitZVector;
-        self->f6C0 = ((Aux_172898*)self->f24A0);
+        self->f6C0 = self->f24A0;
         row = self->contacts->head;
         if (row) {
             do {
@@ -753,7 +745,7 @@ void func_00172898(Player* self)
                         if (n->kind == 0xB) {
                             slot = &n->next;
                         } else {
-                            if ((void*)n->end[1 - k].body == ((Aux_172898*)self->f24A0)->f50) {
+                            if ((void*)n->end[1 - k].body == ((PlacedObject*)self->f24A0)->root) {
                                 *slot = n->next;
                                 n->next = head;
                                 head = n;
@@ -783,35 +775,23 @@ void func_00172AE0(Player* self)
 // EXACT: declaring D_00261860 as an array (extern f32 D_00261860[], passed as D_00261860[0]) moved the float load into the jal delay slot.
 
 
-struct __attribute__((aligned(16))) Quad_172B08 {
-    s32 a, b, c, d;
-};
-
-struct Inner_172B08 {
-    u8 pad0[0x140];
-    Quad_172B08 q140;
-};
-
-typedef void (*VFn_172B08)(void* self);
-
 void func_001BC088(void* self, void* b, f32 x);
 
 void func_00172B08(Player* self)
 {
-    *(Quad_172B08*)&self->v21D0[1] = ((Inner_172B08*)self->f23D4)->q140;
+    self->v21D0[1] = ((PlacedObject*)self->f23D4)->v140;
     self->f21CC = 0;
     func_001BC088(self, 0, g_frameDt[0]);
     if (self->f223C == 0) {
-        *(Quad_172B08*)&self->v21D0[0] = *(Quad_172B08*)&self->v140;
-        *(Quad_172B08*)&self->v21D0[2] = ((Inner_172B08*)self->f23D4)->q140;
+        self->v21D0[0] = self->v140;
+        self->v21D0[2] = ((PlacedObject*)self->f23D4)->v140;
         self->f21CC = 3;
-        ((VFn_172B08)((void**)self->desc)[0xD8 / 4])(self);
+        self->desc03()->m32(self);
     } else {
         self->f21CC = 0;
     }
 }
 
-struct __attribute__((aligned(16))) Quad_172B88 { s32 a, b, c, d; };
 void func_001B8540(void* self);
 void func_001B8420(void* self, void* p, f32 f);
 
@@ -820,7 +800,7 @@ void func_00172B88(Player* self)
     s32 i = 0;
     UpdateColliderBounds(self);
     if (self->f21CC > 0) {
-        Quad_172B88* p = (Quad_172B88*)self->v21D0;
+        Vec02* p = self->v21D0;
         do {
             func_001B8420(self, p, self->f2420);
             i++;
@@ -1073,54 +1053,38 @@ void func_00177828(Player* self, s32 value)
     self->f4B8 = 0;
 }
 
-struct Node_177838;
-struct VT_177838 {
-    u32 pad0;
-    u32 pad4;
-    u32 flags;
-    u8 pad[0xB8];
-    s32 (*f_c4)(Node_177838* self, void* q);
-};
-struct Node_177838 {
-    VT_177838* vt;
-    u8 pad4[0x14];
-    Node_177838* next;
-    u8 pad1c[0x294];
-    u8 b2B0;
-    u8 b2B1;
-    u8 b2B2;
-    u8 b2B3;
-    u8 b2B4;
-};
-struct Head_177838 { u32 pad0; u32 pad4; u32 flags; };
-Node_177838* func_00177838(NodeQuery* q, s32 n, Node_177838** list) {
-    Node_177838* node;
-    if (((Node_177838*)q->hold)->vt->flags & 1) {
-        node = (Node_177838*)q->hold;
+PlacedObject* func_00177838(NodeQuery* q, s32 n, PlacedObject** list) {
+    PlacedObject* node;
+    if (((PlacedObject*)q->hold)->desc->flags & 1) {
+        node = (PlacedObject*)q->hold;
     } else {
-        node = ((Node_177838*)q->hold)->next;
+        node = (PlacedObject*)((PlacedObject*)q->hold)->parent;
     }
-    for (; node != 0; node = node->next) {
+    for (; node != 0; node = (PlacedObject*)node->parent) {
         s32 i;
         for (i = 0; i < n; i++) {
             if (node == list[i]) return 0;
         }
         switch (q->kind) {
-        case 2: q->out = node->b2B0; break;
-        case 8: q->out = node->b2B1; break;
-        case 4: q->out = node->b2B2; break;
-        case 16: q->out = node->b2B3; break;
-        case 32: q->out = node->b2B4; break;
+        case 2: q->out = node->tint[0]; break;
+        case 8: q->out = node->tint[1]; break;
+        case 4: q->out = node->tint[2]; break;
+        case 16: q->out = node->tint[3]; break;
+        case 32: q->out = node->f2B4; break;
         default: q->out = 0; break;
         }
-        if (node->vt->f_c4(node, q)) return node;
+        if (node->desc02()->m2D(node, q)) return node;
     }
     return node;
 }
 
-struct Keyed_177968 { u8 pad0[0x14]; f32 key; };
+// An element CompareKeysAscending orders: a float key at 0x14.
+struct FloatKeyedItem {
+    u8 pad0[0x14];
+    f32 key;                // 0x14
+};
 
-s32 func_00177968(Keyed_177968* a, Keyed_177968* b)
+s32 func_00177968(FloatKeyedItem* a, FloatKeyedItem* b)
 {
     s32 r = -1;
     if (a->key > b->key) r = 1;
@@ -1153,10 +1117,15 @@ void func_00177E70(Player* self, s32 mode)
     }
 }
 
-struct Other_177EE0 { u8 pad0[0x2D0]; s32 f2D0; };
+// The objects the player is told about (GetPlayerInteractFlags, ReceivePlayerNode and the two
+// activation queues): each reads only the word at 0x2D0, a mode (1 and 2 are captions).
+struct InteractTarget {
+    u8 pad0[0x2D0];
+    s32 mode;               // 0x2D0
+};
 extern s32 D_00275BC4;
 
-void func_00177EE0(Player* self, Other_177EE0* other, s32* out)
+void func_00177EE0(Player* self, InteractTarget* other, s32* out)
 {
     s32 v;
     switch (self->f2220) {
@@ -1173,12 +1142,12 @@ void func_00177EE0(Player* self, Other_177EE0* other, s32* out)
     case 15:
     case 16:
         out[0] = 1;
-        out[1] = other->f2D0 == 1;
+        out[1] = other->mode == 1;
         break;
     case 3:
     case 6:
     case 7:
-        v = other->f2D0 == 1;
+        v = other->mode == 1;
     both:
         out[0] = v;
         out[1] = v;
@@ -1190,7 +1159,7 @@ void func_00177EE0(Player* self, Other_177EE0* other, s32* out)
     case 4:
     case 9:
         out[0] = 0;
-        out[1] = other->f2D0 == 1;
+        out[1] = other->mode == 1;
         break;
     case 11:
         out[0] = 0;
@@ -1203,16 +1172,11 @@ void func_00177EE0(Player* self, Other_177EE0* other, s32* out)
 
 extern u8 D_00275BC0[];
 
-struct Node_177F98 {
-    u8 pad0[0x2D0];
-    s32 kind;
-};
-
 void func_001E9498(void* a, void* b);
 
-void func_00177F98(Player* self, Node_177F98* node)
+void func_00177F98(Player* self, InteractTarget* node)
 {
-    if ((u32)(node->kind - 1) < 2) {
+    if ((u32)(node->mode - 1) < 2) {
         g_typedTextCaptionBox.child = node;
         PushStackElement(g_elementStack, &g_typedTextCaptionBox);
         return;
@@ -1239,8 +1203,6 @@ void func_00178008(Player* self)
 void func_001921A8(void* self);
 
 
-struct Sub_1793F0 { u8 pad0[0xE0]; void* fE0; };
-struct Packed_1793F0 { f32 v; } __attribute__((packed));
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
@@ -1265,14 +1227,7 @@ ASM_FUNC(func_00178068);
 
 // NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
 
-typedef s32 (*VFn_17AA40_A)(void* self, s32 v);
-typedef void (*VFn_17AA40_B)(void* self, void* p);
-typedef void (*VFn_17AA40_C)(void* self, s32 a, void* b);
 
-struct Msg_17AA40 {
-    void* self;
-    s32 v;
-};
 
 s32 func_00160C58(void);
 void func_001794E0(void* self, void* a, void* b);
@@ -1291,44 +1246,20 @@ void func_0012C918(void* a, CountdownCollider* b, s32 c, void* d, f32 e, f32 f);
 s32 func_001BC320(void* self, ObjectEvent* msg);
 
 
-struct Vt_17B9D0
-{
-    u8 pad0[0x28];
-    void (*f28)(void* self, Vec02* a, s32 b, Vec02* c, Vec02* d, s32 e, s32 f);
-};
-
-struct Node_17B9D0
-{
-    u8 pad0[0x18];
-    void* f18;
-    u8 pad1c[0x18];
-    struct { Vt_17B9D0* vt; }* f34;
-    u8 pad38[0x108];
-    Vec02 f140;
-};
-
-struct Self_17B9D0
-{
-    u8 pad0[0x3C];
-    u8* f3C;
-};
-
-s32 func_001300E8(Node_17B9D0* n, s32 kind);
 void func_00128018(void* a, void* b, void* c, Vec02* d);
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 
-struct Ptr_17A9E0;
-s32 func_001DDA80(Ptr_17A9E0* p);
 
-struct Pair_1781E0 { s32 a, b; };
+// A walker's current and target keys (GetStateWalkerCurrentKey, GetStateWalkerTargetKey).
+struct WalkerKeys { s32 a, b; };
 
 void func_001B6598(void* ptr, s32* out);
 void func_001B6568(void* ptr, s32* out);
 
 void func_001781E0(Player* self, u8* other)
 {
-    Pair_1781E0 r;
+    WalkerKeys r;
     if (self->f2220 != 9) {
         GetStateWalkerCurrentKey(*(void**)(other + 0x2D8), &r.a);
         GetStateWalkerTargetKey(*(void**)(other + 0x2D8), &r.b);
@@ -1344,21 +1275,8 @@ void func_001B7968(void* self);
 s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 
-typedef void (*VFn_17BC20)(void* self);
 
-struct Comp_17BC20 {
-    VFn_17BC20* vtbl;
-    u8 pad0[0x2D0 - 4];
-    s32 f2D0;
-};
 
-struct Obj_17BC20 {
-    u8 pad0[0x3C];
-    s32 f3C;
-    u8 pad1[0x58 - 0x40];
-    Comp_17BC20* f58;
-    s32 f5C;
-};
 
 s32 func_00182FC8(void* p);
 
@@ -1382,12 +1300,6 @@ void func_0017B410(GaugeModeObject* self, s32 a1);
 s32 func_0017B510(GaugeModeObject* self, s32 a1);
 
 
-struct Msg_17B3A8 {
-    u8 pad0[4];
-    s32 f4;
-    u8 pad1[8];
-    u32 f10;
-};
 
 void func_001AC060(void* p);
 void func_0017B598(GaugeModeObject* self);
@@ -1397,20 +1309,16 @@ void func_001837E0(void* self, s32 a, s32 b, s32 c);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
 
-struct Item_178258 { u8 pad[0x2D0]; s32 link; };
-
-void func_00178258(Player* a0, Item_178258* a1)
+void func_00178258(Player* a0, InteractTarget* a1)
 {
-    if (a0->f2220 != 9 && a1->link == 0) {
+    if (a0->f2220 != 9 && a1->mode == 0) {
         a0->firstActivation = a1;
     }
 }
 
-struct Item_178280 { u8 pad[0x2D0]; s32 link; };
-
-void func_00178280(Player* a0, Item_178280* a1)
+void func_00178280(Player* a0, InteractTarget* a1)
 {
-    if (a0->f2220 != 9 && a1->link == 0) {
+    if (a0->f2220 != 9 && a1->mode == 0) {
         a0->secondActivation = a1;
     }
 }
@@ -1419,7 +1327,6 @@ ASM_FUNC(func_001782A8);
 
 ASM_FUNC(func_001782C0);
 
-typedef void (*VFn_179690)(void*);
 
 void func_001BC088(void* self, void* b);
 
@@ -1431,29 +1338,29 @@ void func_0017ABE8(void* self, s32 a1);
 void func_00192230(void* self, s32 kind, MessageBody* rec);
 
 
-struct __attribute__((aligned(16))) Quad_178598 {
-    s32 a, b, c, d;
+// A target the player may aim at: two quads (ScoreTargetCandidate's hit, ChooseBestTargetCandidate's
+// result, the pair the player keeps at 0x2B70).
+struct TargetHit {
+    Vec02 q0;               // 0x00
+    Vec02 q1;               // 0x10
 };
-
-struct Pair_178598 {
-    Quad_178598 q0;
-    Quad_178598 q1;
-};
-
-struct Sub_178598 {
+// The record the player keeps at 0x2514 for a jump at a target: when it lands and the two ends
+// of its arc (func_00178598).
+struct TargetLaunch {
     u8 pad0[0x18];
-    f32 f18;
+    f32 landTime;           // 0x18: the game time it lands
     u8 pad1[0x20 - 0x1C];
-    Quad_178598 q20;
-    Quad_178598 q30;
+    Vec02 q20;              // 0x20
+    Vec02 q30;              // 0x30
 };
 
-struct Frame_178598 {
-    Quad_178598 q0;
-    Quad_178598 q1;
-    Quad_178598 q2;
-    Quad_178598 p0;
-    Quad_178598 p1;
+// func_00178598's locals: the arc's three points, the chosen target and its time.
+struct TargetArcFrame {
+    Vec02 q0;
+    Vec02 q1;
+    Vec02 q2;
+    Vec02 p0;
+    Vec02 p1;
     f32 fl;
 };
 
@@ -1462,22 +1369,22 @@ void func_001782C0(void* self, void* s2, f32 f, void* a2, void* a3, void* a4);
 void func_00175170(void* self, s32 a, s32 b);
 
 
-void func_00178598(Player* self, Pair_178598* s2, f32 f)
+void func_00178598(Player* self, TargetHit* s2, f32 f)
 {
-    Frame_178598 fr;
+    TargetArcFrame fr;
     fr.fl = f;
     if (s2 == 0) {
         ChooseBestTargetCandidate(self, 0, 0, &fr.p0, &fr.fl);
-        s2 = (Pair_178598*)&fr.p0;
+        s2 = (TargetHit*)&fr.p0;
     }
     void* q1 = &fr.q1;
     ComputeTargetArc(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
-    ((Sub_178598*)self->f2514)->f18 = g_gameTime[0] + fr.fl;
-    ((Sub_178598*)self->f2514)->q20 = fr.q0;
-    ((Sub_178598*)self->f2514)->q30 = fr.q2;
+    ((TargetLaunch*)self->f2514)->landTime = g_gameTime[0] + fr.fl;
+    ((TargetLaunch*)self->f2514)->q20 = fr.q0;
+    ((TargetLaunch*)self->f2514)->q30 = fr.q2;
     self->desc02()->m20(self, (Vec02*)q1);
-    self->q2B70[0] = *(Vec02*)&s2->q0;
-    self->q2B70[1] = *(Vec02*)&s2->q1;
+    self->q2B70[0] = s2->q0;
+    self->q2B70[1] = s2->q1;
 
     SetPlayerState(self, 4, 0x2C);
 }
@@ -1489,19 +1396,7 @@ ASM_FUNC(func_001788F0);
 
 ASM_FUNC(func_00178D18);
 
-typedef void (*Fn_17B410)(void* self);
 
-struct Sys_17B410 {
-    Fn_17B410* vtbl;
-    u8 pad0[0x260 - 4];
-    s32 f260;
-    s32 f264;
-    u8 pad1[0x26C - 0x268];
-    s32 f26C;
-    s32 f270;
-    s32 f274;
-    f32 f278;
-};
 
 
 void func_001DDC38(void* a, void* b);
@@ -1540,72 +1435,45 @@ void func_00125C90(ModeCollider* o, void* s, void* out);
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
 
-struct Sub_179590;
 extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
 void func_001B9338(ModeCollider* self, f32 t);
 void func_001794E0(ModeCollider* self, Vec02* a, Vec02* b);
-void func_00127E60(Sub_179590* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 void func_001B9058(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
 void func_001B9D10(ModeCollider* self, f32 scale, void* out, void* data);
 
 
-struct Q_178D98 {
-    u8 b[16];
-} __attribute__((aligned(16)));
-struct Hit_178D98 {
-    Q_178D98 q0;
-    Q_178D98 q1;
-};
-struct Node_178D98;
-struct Vt_178D98;
-struct Sub_178D98 {
-    Vt_178D98* vt;
-};
-struct Vt_178D98 {
-    u8 pad00[0x28];
-    void (*f28)(Sub_178D98* self, Q_178D98* a, s32 b, s32 c, s32 d, s32 e, f32* out);
-};
-struct Node_178D98 {
-    u8 pad00[0x18];
-    void* f18;
-    u8 pad1C[0x34 - 0x1C];
-    Sub_178D98* f34;
-};
-struct Entry_178D98 {
-    Node_178D98* node;
-    f32 f4;
+// A 0x20-byte candidate: an object, its distance along its curve (class 0x6E) and the point
+// ComputeTargetArc gives. The player keeps f2768 of them at 0x2770.
+struct TargetCandidate {
+    BaseObject* node;       // 0x00
+    f32 f4;                 // 0x04
     u8 pad08[8];
-    u8 f10[16];
-};
-struct Slot_178D98 {
-    Node_178D98* node;
-    u8 pad04[0x1C];
+    u8 f10[16];             // 0x10
 };
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void func_0018D608(void);
-Entry_178D98* func_0018D6A8(s32 size);
+TargetCandidate* func_0018D6A8(s32 size);
 void func_0018D6F0(void);
-s32 func_00182FC8(Node_178D98* p);
-s32 func_001300E8(Node_178D98* n, s32 kind);
-void func_00128018(void* a, void* b, Q_178D98* c, Q_178D98* d);
-void func_001782C0(Player* self, Entry_178D98* e, f32 f, void* a2, void* a3, void* a4);
-s32 func_00178D18(Entry_178D98* a, Entry_178D98* b);
-void func_001F5CD0(Entry_178D98* base, s32 n, s32 size, s32 (*cmp)(Entry_178D98*, Entry_178D98*));
-f32 func_001788F0(Player* self, void* e, s32 v, void* a3, Hit_178D98* a4, f32* a5);
+s32 func_001300E8(BaseObject* n, s32 kind);
+void func_00128018(void* a, void* b, Vec02* c, Vec02* d);
+void func_001782C0(Player* self, TargetCandidate* e, f32 f, void* a2, void* a3, void* a4);
+s32 func_00178D18(TargetCandidate* a, TargetCandidate* b);
+void func_001F5CD0(TargetCandidate* base, s32 n, s32 size, s32 (*cmp)(TargetCandidate*, TargetCandidate*));
+f32 func_001788F0(Player* self, void* e, s32 v, void* a3, TargetHit* a4, f32* a5);
 void func_001F5C0C(void* dst, s32 value, s32 size);
 
-void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f32* outf)
+void func_00178D98(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf)
 {
     u8 scratch[0x80];
-    Hit_178D98 hit;
-    Q_178D98 tmp;
+    TargetHit hit;
+    Vec02 tmp;
     f32 dist;
     f32 r;
     s32 v;
-    Entry_178D98* buf;
+    TargetCandidate* buf;
     f32 best;
     s32 cnt = 0;
 
@@ -1613,16 +1481,16 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
     PushBackMemoryMark();
     buf = AllocateZeroedBackMemory(n << 5);
     for (s32 i = 0; i < n; i++) {
-        Node_178D98* node = items[i];
+        BaseObject* node = items[i];
         if (IsObjectAttached(node) != 0) {
-            Entry_178D98* e = buf + cnt;
+            TargetCandidate* e = buf + cnt;
             cnt = cnt + 1;
             e->node = node;
             if (IsObjectOfKind(node, 0x6E) != 0) {
-                func_00128018(0, node->f18, (Q_178D98*)&self->v140, &tmp);
-                Sub_178D98* s = node->f34;
-                if (s->vt->f28 != 0) {
-                    s->vt->f28(s, &tmp, 0, 0, 0, 0, &e->f4);
+                func_00128018(0, node->parent, &self->v140, &tmp);
+                PathCurve* s = ((PathCurveObject*)node)->curve;
+                if (s->vt->m10 != 0) {
+                    s->vt->m10(s, &tmp, 0, 0, 0, 0, &e->f4);
                 }
             } else {
                 e->f4 = 0;
@@ -1645,7 +1513,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
     if (best <= 1000.0f)
         goto done;
     for (s32 i = 0; i < self->f2768; i++) {
-        Slot_178D98* q = &((Slot_178D98*)self->f2770)[i];
+        TargetCandidate* q = &((TargetCandidate*)self->f2770)[i];
         if (q->node == 0 || IsObjectAttached(q->node) != 0) {
             r = ScoreTargetCandidate(self, q, v, scratch, &hit, &dist);
             if (r < best) {
@@ -1660,7 +1528,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
     if (best == 3.40282347e+38f) {
         FillMemory(out, 0, 0x20);
         *(s32*)out = 0;
-        out->q1 = *(Q_178D98*)&self->v140;
+        out->q1 = self->v140;
         ((f32*)out)[6] -= 75.0f;
         *outf = 0.75f;
     }

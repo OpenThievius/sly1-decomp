@@ -20,7 +20,7 @@ void func_0016F478(void)
                 FormatToString(text, (const u8*)D_0024A848, buf);
                 func_eu_001AB238(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
-                g_buttonHintElement.vt->f38(&g_buttonHintElement);
+                g_buttonHintElement.vt->m14(&g_buttonHintElement);
             }
         }
     }

@@ -17,6 +17,7 @@ struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
+struct EntryQueue;       // class 0x8F (entry_queue.h)
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
 struct Blk05 {
@@ -109,7 +110,7 @@ struct Desc05 : Desc03 {
     void (*m50)(SwitchedCollider* self);                         // 0x150: slot 80 (func_00192C58)
     void* m51;                                      // 0x154: slot 81 (func_00192A28)
     void* m52;                                      // 0x158: slot 82 (func_00192A38)
-    void* m53;                                      // 0x15C: slot 83 (func_001930B0)
+    SwitchedCollider* (*m53)(SwitchedCollider* self);           // 0x15C: slot 83 (func_001930B0): the collider it stands for, or 0
 };
 
 // Class 0x06's descriptor (also 0x07's and 0x14's): four more slots.
@@ -337,7 +338,9 @@ struct Player : TurningCollider {
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
-    u8 pad2734[0x2750 - 0x2734];
+    u8 pad2734[0x2740 - 0x2734];
+    EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
+    u8 pad2744[0x2750 - 0x2744];
     void* f2750;            // 0x2750
     u8 pad2754[0x2758 - 0x2754];
     f32 f2758;              // 0x2758

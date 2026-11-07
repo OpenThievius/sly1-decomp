@@ -12,7 +12,7 @@ struct NodeQuery {
         s32 f00;            // 0x00: func_00177838
         void* p00;          // 0x00: func_00198760
     };
-    void* hold;             // 0x04: func_00177838 (Node_177838), func_00198760
+    void* hold;             // 0x04: func_00177838 (a PlacedObject), func_00198760
     s32 f08;                // 0x08
     s32 out;                // 0x0C: func_00177838
     s32 kind;               // 0x10: func_00177838

@@ -40,7 +40,6 @@ struct Obj_0019F8E8 { u8 pad[0x44]; s32 value; };
 void func_001831E8(void* world, void* list, void* a, void* b);
 void func_00183238(void* world, void* list, void* a, void* b);
 
-struct Buf_19DF48 { u8 raw[0x30]; };
 
 typedef void (*Fn_19DF48)(void);
 
@@ -70,9 +69,7 @@ extern f32 D_00261858[];
 
 void func_0019EB28(Effect* self);
 
-struct __attribute__((aligned(16))) Vec_19D2A8 { s32 a, b, c, d; };
 
-struct Frame_19D2A8 { Vec_19D2A8 q0; Vec_19D2A8 q1; s32 w20; s32 w24; };
 
 extern f32 D_0026185C;
 
@@ -97,14 +94,7 @@ struct ColorFade;
 
 typedef void (*VFn_19D6C0)(ColorFade* self, void* arg, s32 z);
 
-struct Frame_19D6C0 {
-    s32 list;
-    s32 cursor;
-    s32 link;
-    s32 prev;
-};
 
-struct Slot_2622D8 { u8 pad00[0x1C]; s32 r1C; };
 
 struct Scratch_19F9D0 { Quad219C head; u8 rest[0x700 - 16]; };
 
@@ -112,33 +102,14 @@ s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 
-struct Ctx_19DBB0 { u8 pad0[0x2F4]; s32 idx2F4; };
 
 extern Camera* D_00261990;
 
-struct __attribute__((aligned(16))) Vec_19D338 { s32 a, b, c, d; };
 
-struct Frame_19D338 {
-    Vec_19D338 q0;
-    Vec_19D338 q1;
-    Vec_19D338 q2;
-    Vec_19D338 q3;
-    s32 w40;
-    s32 w44;
-    s32 w48;
-    s32 w4C;
-};
 
 typedef s32 (*Slot_19D338)(void* self, void* a1, s32 a2, void* a3, s32 a4, s32 a5, f32 f, void* a6);
 
-struct Obj_19D338 { Slot_19D338* vtbl; };
 
-struct Src_19D338 {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1[0x34 - 0x1C];
-    Obj_19D338* f34;
-};
 
 s32 func_00128018(void* a, s32 b, void* c, void* d);
 
@@ -173,7 +144,6 @@ void func_0019EBE8(Effect* node);
 
 void func_001B7B78(Collider* self);
 
-struct Stream_19C470;
 
 void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
 
@@ -240,33 +210,8 @@ typedef void (*VFn_19C068)(void *self);
 
 typedef void (*VFn2_19C068)(void *self, void *x);
 
-struct Frame_19C068;
 
-struct Frame_19C068 {
-    List01 *list;
-    s32 *cur;
-    s32 step;
-    Frame_19C068 *prev;
-    Frame_19C068(List01 *l)
-    {
-        list = l;
-        cur = (s32 *)&l->head;
-        step = l->offset;
-        prev = ((Frame_19C068*)g_activeListFrames);
-        g_activeListFrames = (ListFrame*)this;
-    }
-    ~Frame_19C068() { g_activeListFrames = (ListFrame*)prev; }
-    s32 Next()
-    {
-        s32 n = *cur;
-        cur = (s32 *)(n + step);
-        return n;
-    }
-};
 
-struct Ob_19C068 {
-    VFn_19C068 *vtbl;
-};
 
 void func_00152600(List01 *a, ObjectGatherer *b);
 
@@ -461,7 +406,6 @@ s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, Hit_19E5
 
 u32 func_00152720(List01* p);
 
-struct Pkt_19DDA0;
 
 void func_0019F560(Effect* self);
 

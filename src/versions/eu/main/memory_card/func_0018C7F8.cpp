@@ -11,8 +11,8 @@ void func_0018C7F8(MemoryCard* self)
         } else {
             StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
             u8* obj = (u8*)&D_00273EB0;
-            ((Pk_18C7F8*)(obj + 0x570))->v = 0;
-            ((Obj_18C7F8*)obj)->vtbl[14](obj);
+            ((T217D_Word*)(obj + 0x570))->v = 0;
+            ((ScreenElement*)obj)->vt->m14((ScreenElement*)obj);
         }
     }
 }
