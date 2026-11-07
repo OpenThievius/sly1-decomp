@@ -12,6 +12,7 @@
 #define COLLIDER_H
 
 #include "placed_object.h"
+#include "shapes.h"
 
 struct Collider;
 
@@ -213,6 +214,18 @@ struct Collider : PlacedObject {
 };
 
 typedef char check_Collider[sizeof(Collider) == 0x550 ? 1 : -1];
+
+// A span a collider query writes (func_0013DFD8 collects them from a tree, func_001429F8 merges
+// the overlapping ones, func_00145810 looks for a gap between them): entry and exit points
+// (q[0..1]), their normals (q[2..3]), the two times and a kind.
+struct ColliderSpan {
+    Quad16 q[4];            // 0x00
+    f32 time[2];            // 0x40: entry, exit
+    s32 f48;                // 0x48
+    u8 pad4C[0x70 - 0x4C];
+};
+
+typedef char check_ColliderSpan[sizeof(ColliderSpan) == 0x70 ? 1 : -1];
 typedef char check_Desc03[sizeof(Desc03) == 0x130 ? 1 : -1];
 typedef char check_Mesh03[sizeof(Mesh03) == 0x24 ? 1 : -1];
 typedef char check_Contact03[sizeof(Contact03) == 0xE0 ? 1 : -1];

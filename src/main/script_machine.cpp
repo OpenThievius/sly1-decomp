@@ -4,6 +4,7 @@
 #include "world.h"
 #include "globals.h"
 #include "shapes.h"
+#include "collider.h"
 #include "script_value.h"
 #include "script_builtin.h"
 #include "queued_call.h"
@@ -140,11 +141,7 @@ extern s32 D_00259DE8;
 s32 func_0011C3C8(MarkEntry* e);
 void func_0011C3F0(MarkEntry* e);
 
-// What func_001419E8 fills in for func_00118198: 16-byte vectors, the first two read.
-struct Hit_118198 {
-    Quad16 q[7];            // 0x00
-};
-s32 func_001419E8(Quad16* z, s32 a, s32 b, s32 c, void** d, Hit_118198* e);
+s32 func_001419E8(Quad16* z, s32 a, s32 b, s32 c, void** d, ColliderSpan* e);
 
 // This file's functions. The built-ins (ScriptBuiltinFn) and their helpers:
 ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -1301,11 +1298,11 @@ ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 
 // The payloads func_001159B8 reads: a 16-byte vector (tags 0x16, 0x18) and the four rows of the
 // 0x40-byte block (tag 0x17), 16-aligned (a row is copied with lq/sq).
-struct __attribute__((aligned(16))) Arr_1159B8 {
+struct __attribute__((aligned(16))) ScriptVectorRow {
     f32 v[4];               // 0x00
 };
-struct Mat_1159B8 {
-    Arr_1159B8 row[4];      // 0x00
+struct ScriptMatrixPayload {
+    ScriptVectorRow row[4];      // 0x00
 };
 
 ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
@@ -1315,24 +1312,24 @@ ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     R11B008Node* indexNode = args[1].node;
     switch (args[0].tag) {
     case 0x16:
-        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[indexNode->i]);
+        SetScriptValueFloat(&q, ((ScriptVectorRow*)args[0].v)->v[indexNode->i]);
         break;
     case 0x17: {
         s32 i = indexNode->i;
-        Arr_1159B8* v;
+        ScriptVectorRow* v;
         if (count == 2) {
-            v = (Arr_1159B8*)AcquireVectorAPayload();
-            *v = ((Arr_1159B8*)args[0].v)[i];
+            v = (ScriptVectorRow*)AcquireVectorAPayload();
+            *v = ((ScriptVectorRow*)args[0].v)[i];
             SetScriptValueVectorA(&q, (f32*)v);
         } else {
             indexNode = indexNode->next;
-            v = &((Mat_1159B8*)args[0].v)->row[i];
+            v = &((ScriptMatrixPayload*)args[0].v)->row[i];
             SetScriptValueFloat(&q, v->v[indexNode->i]);
         }
         break;
     }
     case 0x18:
-        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[indexNode->i]);
+        SetScriptValueFloat(&q, ((ScriptVectorRow*)args[0].v)->v[indexNode->i]);
         break;
     case 0x19:
         SetScriptValueFloat(&q, indexNode->i == 0 ? args[0].v[0] : args[0].v[1]);
@@ -1633,14 +1630,14 @@ ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
 ASM_FUNC(func_00116BC8);
 
 // What func_00189378 fills in for func_00188B08: 0x30 bytes.
-struct Vec_116C80 {
+struct UprightBasis {
     u8 bytes[0x30];         // 0x00
 };
 
 ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
-    Vec_116C80 v;
+    UprightBasis v;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
     func_00189378(args[0].p, 0, &v);
@@ -2222,7 +2219,7 @@ struct RetValue : ScriptValue {
 RetValue func_00118198(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     RetValue l0;
-    Hit_118198 hit;
+    ColliderSpan hit;
     void* slot;
     if (args[0].tag == 0) {
         AssignScriptValue(&l0, args);

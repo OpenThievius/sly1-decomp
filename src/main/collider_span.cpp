@@ -2,31 +2,20 @@
 #include "common.h"
 #include "asm_func.h"
 #include "collider.h"
-
-struct __attribute__((aligned(16))) Quad_1429F8 { s32 a, b, c, d; };
-
-// A span a collider query writes: entry and exit points (q[0..1]), their normals (q[2..3]),
-// the two times and a kind.
-struct Span_1429F8 {
-    Quad_1429F8 q[4];
-    f32 time[2];
-    s32 f48;
-    u8 pad0[0x70 - 0x4C];
-};
-
+#include "shapes.h"
 
 s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
-s32 func_001429F8(s32 count, Span_1429F8* spans);
+s32 func_001429F8(s32 count, ColliderSpan* spans);
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
 s32 func_00142B78(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
 s32 func_00142170(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
 
-Collider* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Collider** list, Span_1429F8* out)
+Collider* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out)
 {
     f32 bestKey = 3.4028235e+38f;
     Collider* best = 0;
-    Span_1429F8 buf[2];
+    ColliderSpan buf[2];
     for (s32 i = 0; i < count; i++) {
         Collider* obj = list[i];
         s32 n = CollectColliderSpans(obj, a1, a2, 2, (s32)buf);
@@ -59,7 +48,7 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5
                 s32 r = CollectColliderSpans(e, a0, a1, a4 - result, a5 + result * 0x70);
                 if (r != 0) {
                     if (result != 0) {
-                        r = MergeOverlappingSpans(result + r, (Span_1429F8*)a5);
+                        r = MergeOverlappingSpans(result + r, (ColliderSpan*)a5);
                     }
                     result = r;
                 }
@@ -114,37 +103,35 @@ ASM_FUNC(func_00142278);
 
 LINKER_REMNANT(func_00142990);
 
-struct Key_142998 { f32 f; s32 i; };
+struct SpanEvent {
+    f32 time;
+    s32 end;
+    u8 pad0[8];
+    Quad16 q10;
+    Quad16 q20;
+};
 
-s32 func_00142998(Key_142998* a, Key_142998* b)
+s32 func_00142998(SpanEvent* a, SpanEvent* b)
 {
-    f32 d = a->f - b->f;
+    f32 d = a->time - b->time;
     if (d < -0.0001f)
         return -1;
     if (0.0001f < d)
         return 1;
-    return a->i - b->i;
+    return a->end - b->end;
 }
 
-struct Event_1429F8 {
-    f32 time;
-    s32 end;
-    u8 pad0[8];
-    Quad_1429F8 q10;
-    Quad_1429F8 q20;
-};
-
 void func_0018D608(void);
-Event_1429F8* func_0018D658(s32 size);
+SpanEvent* func_0018D658(s32 size);
 void func_0018D6F0(void);
-void func_001F5CD0(Event_1429F8* base, s32 n, s32 size, s32 (*cmp)(Key_142998*, Key_142998*));
+void func_001F5CD0(SpanEvent* base, s32 n, s32 size, s32 (*cmp)(SpanEvent*, SpanEvent*));
 
-s32 func_001429F8(s32 count, Span_1429F8* spans)
+s32 func_001429F8(s32 count, ColliderSpan* spans)
 {
-    Event_1429F8* mem;
-    Event_1429F8* rec;
-    Event_1429F8* end;
-    Span_1429F8* dst;
+    SpanEvent* mem;
+    SpanEvent* rec;
+    SpanEvent* end;
+    ColliderSpan* dst;
     s32 i;
     s32 j;
     s32 depth;
