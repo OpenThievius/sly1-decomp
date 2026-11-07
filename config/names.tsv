@@ -2927,3 +2927,11 @@ func_00211988	RestoreIpuDmaChannels	restores the state of the IPU's two DMA chan
 func_00211AD8	SyncIpu	waits while the IPU is busy (mode 0) or tells whether it is (mode 1)
 func_00211B40	StartIpuInputForReset	the IPU initialisation's own copy of StartIpuInputTransfer, for channel 4
 func_00211BA8	ResetIpu	resets the IPU and loads its default quantiser matrices and colour table (InitMpegLibrary calls it)
+func_0020C1A0	PrepareMacroblockPrediction	for macroblock n, checks its motion type (reporting "Invalid modion type -- ignored" outside 1 to 3), computes its motion vectors and prediction and waits for the IPU's output DMA channel before marking the buffer
+func_0020C3F0	ComputeMotionVectors	works out a macroblock's motion vectors from its position and flags and fetches its prediction through PredictMacroblock (PrepareMacroblockPrediction calls it)
+func_0020CAF8	PredictMacroblock	runs the hand-written prediction routines of mpeg_motion_compensation.cpp through the two tables D_0027B000 and D_0027B020, by kind of motion, whole or half pixel
+func_0020CF18	AddMacroblockResiduals	adds the prediction to the decoded residual through the hand-written routines func_0020DE28 and func_0020DE88 (DecodeAllMacroblocks calls it)
+func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the decoder's callback of kind 1 while its input runs dry, refreshes the bit window and reports "Error code detected(BDEC)" and resets the IPU on an error
+func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
+func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
+func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks

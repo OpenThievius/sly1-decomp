@@ -177,12 +177,12 @@ s32 func_0020E3B8(Ctx_20E3B8* c)
     n = c->f12C * c->f130;
     if (c->f174 != 3) n = n >> 1;
     do {
-        r = func_0020E5F0(c, n);
+        r = DecodeSliceMacroblocks(c, n);
     } while (r == 1 || r == 3);
     WaitIpuCommandDone(c);
-    if (func_0020DF10(c) == 0) r = 2;
+    if (WaitIpuDecodeDone(c) == 0) r = 2;
     while ((*(volatile u32*)0x1000D400 >> 8) & 1) {}
-    if (r == 0) func_0020CF18(c, c->f810 == 0);
+    if (r == 0) AddMacroblockResiduals(c, c->f810 == 0);
     if ((u32)(r - 1) < 2) ReportMpegError(c, "= Skip to the next picture =");
     res = (r == 0);
     return res;
@@ -285,7 +285,7 @@ s32 func_0020E5F0(Ctx_20E5F0* c, s32 n)
     for (;;) {
         if (!(i < n)) return 0;
         *(s32*)((u8*)c + c->f810 * 0x140 + 0x6CC) = 0;
-        if (func_0020DF10(c) == 0) return 2;
+        if (WaitIpuDecodeDone(c) == 0) return 2;
         if (j == 0) {
             if (PeekIpuBits(c, 0x17) == 0) {
                 c->f11c = 0;
@@ -316,11 +316,11 @@ s32 func_0020E5F0(Ctx_20E5F0* c, s32 n)
                 return 2;
             }
         }
-        if (func_0020C1A0(c, i, j, a, b, &e, &f, &g) == 0) {
+        if (PrepareMacroblockPrediction(c, i, j, a, b, &e, &f, &g) == 0) {
             c->f11c = 0;
             return 2;
         }
-        if (i != 0) func_0020CF18(c, c->f810 ^ 1);
+        if (i != 0) AddMacroblockResiduals(c, c->f810 ^ 1);
         i = i + 1;
         c->f810 = c->f810 ^ 1;
         j = j - 1;
@@ -1248,7 +1248,7 @@ s32 func_00210090(Obj_210090* self)
         ReportMpegError(self, (u8*)"unknown picture sutructure");
         break;
     }
-    v = func_0020E3B8(self);
+    v = DecodeAllMacroblocks(self);
     if (v != 0) {
         s1->f28 = 1;
     }

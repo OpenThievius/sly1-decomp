@@ -436,7 +436,7 @@ struct Ent_ops_20B458 {
         s32 t = func_002101F0(e, 0);
         s8 r = 0;
         if (t != 0) {
-            r = func_00210090(e) != 0;
+            r = DecodePictureData(e) != 0;
         }
         return r;
     }
@@ -540,7 +540,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     }
     if (func_002101F0(s0, 0) != 0) {
         if (s3 != 0) {
-            (void)func_00210090(s0);
+            (void)DecodePictureData(s0);
         }
     }
     s1 = 1;
@@ -562,7 +562,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     s4 = 0;
     if (u != 0) {
         if (s3 != 0) {
-            s4 = (func_00210090(s0) != 0) ? s1 : 0;
+            s4 = (DecodePictureData(s0) != 0) ? s1 : 0;
         }
     }
     func_00210160(s0, s0->f118, s0->f4);

@@ -2906,7 +2906,14 @@
 #define RejectTemporalScalableExtension            func_0020C168
 #define SaveMpegDmaState                           func_0020C178
 #define RestoreMpegDmaState                        func_0020C188
+#define PrepareMacroblockPrediction                func_0020C1A0
+#define ComputeMotionVectors                       func_0020C3F0
+#define PredictMacroblock                          func_0020CAF8
+#define AddMacroblockResiduals                     func_0020CF18
 #define SetIpuMpeg1Mode                            func_0020DEE8
+#define WaitIpuDecodeDone                          func_0020DF10
+#define DecodeAllMacroblocks                       func_0020E3B8
+#define DecodeSliceMacroblocks                     func_0020E5F0
 #define SendIpuCommand                             func_0020F0C0
 #define WaitIpuCommandDone                         func_0020F0F0
 #define DecodeIpuVariableLength                    func_0020F248
@@ -2918,6 +2925,7 @@
 #define ReadPictureHeader                          func_0020F900
 #define ReadExtensionsAndUserData                  func_0020F9C8
 #define ReadGroupOfPicturesHeader                  func_0020FDA0
+#define DecodePictureData                          func_00210090
 #define ConvertPictureColours                      func_00211348
 #define InitBitReader                              func_002115C0
 #define PeekBits                                   func_002115F8
