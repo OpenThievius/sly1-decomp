@@ -3,6 +3,10 @@
 // NEAR: order: 25 of 27 instructions line up; s2 and s3 (self and the loop counter) are swapped.
 //       Eight source variants did not move them.
 // In the context of its file, src/main/file_1E88D0.cpp.
+// The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
+// file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
+// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
+// zero-initialised D_00276654 last. Named after its first address until what it was is known.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -28,6 +32,8 @@
 #include "camera.h"
 #include "game_progress.h"
 #include "item_keeper.h"
+#include "attachment.h"
+#include "animation.h"
 #include "ramp_profile.h"
 #include "asm_func.h"
 
@@ -39,7 +45,6 @@ void func_00124DF8(void* self, s32 a, void* p);
 void* func_001B6290(void* a, void* self, s32 b, s32 c);
 void func_001DBCC8(void* a, void* cb, void* ctx, s32 b, s32 c);
 void func_001EB550(BeatPressCollider* self);
-struct Inner_1EB608 { u8 pad[0xC3C]; void* c3C; };
 void func_001922E8(void* self);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
 void func_001B64D8(void* a, s32 b);
@@ -121,21 +126,8 @@ extern void func_001E98E8(ElementStack* o, f32 v);
 extern void func_001E96F8(ElementStack* o, s32 mode);
 extern void func_001409E0(void);
 extern void func_001A9FD0(void);
-struct Item_1EB748 { s32 type; s32 a; f32 b; s32 c; };
-struct List_1EB748 { u8 pad[0x34]; s32 n; Item_1EB748* items; s32 cur; };
-struct Grid_1EB748 {
-    u8 pad0[0xC38];
-    List_1EB748* list;
-    u8 pad1[0xC70 - 0xC3C];
-    s32 row;
-    u8 pad2[0xC7C - 0xC74];
-    f32 base;
-    u8 pad3[0xC88 - 0xC80];
-    f32 scale;
-};
 typedef s32 (*BeatPressSlotFn)(BeatPressCollider* self, void* arg);
 typedef void (*PlayerSlotFn)(Player* g, void* arg);
-struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 s32 func_001F3BD8(void* a, Vec4U* out);
 s32 func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -153,7 +145,7 @@ extern u32 D_006256D8;
 extern u8 D_00148D7C[];
 extern u32 D_002476A0[];
 struct Crc32 {
-    static u32 Step(u32 h, u8 b) { return D_002476A0[(h ^ b) & 0xFF] ^ (h >> 8); }
+    static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
 };
 void func_001921A8(BeatPressCollider* self);
 f32 func_001EAAE0(f32 lo, f32 hi);
@@ -172,61 +164,54 @@ struct ListedObjectVt {
     void (*update)(ListedObject*, s32, f32);
 };
 struct ListedObject { ListedObjectVt* vtbl; };
-struct Iter_1E9EE8 { List01* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
-struct Begin_1E9EE8 {
-    static void Of(Iter_1E9EE8* it, List01* list)
+struct BeginNodeWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        Iter_1E9EE8* prev = (Iter_1E9EE8*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        ListFrame* prev = g_activeListFrames;
+        g_activeListFrames = it;
         it->prev = prev;
     }
 };
-struct Next_1E9EE8 {
-    static ListedObject* Of(Iter_1E9EE8* it)
+struct NextNode {
+    static ListedObject* Of(ListFrame* it)
     {
         ListedObject* obj = *(ListedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct End_1E9EE8 {
-    static void Of(Iter_1E9EE8* it) { D_0027B314 = (ListFrame*)it->prev; }
+struct EndNodeWalk {
+    static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
 };
 void func_00124EE8(ListedObject* n, f32 dt);
 void func_0012EBD8(ListedObject* n, f32 dt);
 void func_00159AD0(ListedObject* n, f32 dt);
 void func_001DBE48(World* self);
-struct Iter_1E9C78 {
-    List01* list;
-    u8** link;
-    s32 offset;
-    Iter_1E9C78* prev;
-};
-struct Begin_1E9C78 {
-    static void Of(Iter_1E9C78* it, List01* list)
+struct BeginByteWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
-        it->link = (u8**)list;
+        it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_1E9C78*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
-struct Next_1E9C78 {
-    static u8* Of(Iter_1E9C78* it)
+struct NextByte {
+    static u8* Of(ListFrame* it)
     {
-        u8* obj = *it->link;
-        it->link = (u8**)(obj + it->offset);
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
         return obj;
     }
 };
-struct End_1E9C78 {
-    static void Of(Iter_1E9C78* it)
+struct EndByteWalk {
+    static void Of(ListFrame* it)
     {
-        D_0027B314 = (ListFrame*)it->prev;
+        g_activeListFrames = it->prev;
     }
 };
 void func_001E9B30(void);
@@ -237,23 +222,22 @@ void func_0012EBD8(u8* n, f32 dt);
 void func_00159AD0(u8* n, f32 dt);
 void func_00159588(World* self);
 void func_001C0070(void);
-struct Iter_1EA118 { ActorList6C* list; u8* link; s32 offset; Iter_1EA118* saved; };
-struct Next_1EA118 {
-    static Actor6C* Of(Iter_1EA118* it)
+struct NextActor {
+    static Actor6C* Of(ListFrame* it)
     {
         Actor6C* obj = *(Actor6C**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct Begin_1EA118 {
-    static void Of(Iter_1EA118* it, ActorList6C* list)
+struct BeginActorWalk {
+    static void Of(ListFrame* it, ActorList6C* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_1EA118*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 void func_001E9EE8(World* self, f32 t);
@@ -271,19 +255,14 @@ void func_0012E710(Actor6C* n);
 void func_00143E40(Camera* a, s32 b, f32 t);
 void func_001EA0A8(World* self, f32 t);
 void func_00182C58(void);
-struct Inner_1ED1D8 { u8 pad[0xC70]; s32 c70; };
-struct Obj_1ED1D8 { u8 pad0[0x3C]; s32 f3C; Inner_1ED1D8* f40; s32 f44; };
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-struct Inner_1ED210 { u8 pad[0xC3C]; s32 c3C; };
 void func_001ED318(Timeline* self, s32* p);
-struct Item_1ED558 { s32 kind; s32 p; f32 f8; s32 fC; };
-Item_1ED558* func_001ED4C8(void* self, s32 kind, s32 p);
+Entry90* func_001ED4C8(void* self, s32 kind, s32 p);
 // What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
 void func_001EAD88(f32* a, f32* b);
 void func_00192820(void);
 void func_001B6598(void* sub, s32* out);
-struct Entry_1ED090 { void* a; s32 b; };
 void func_0012F810(void* a, TempoAgent* self);
 s32 func_001EDEF0(void* self);
 s32 func_001EE560(PacketWriter* s);
@@ -328,16 +307,13 @@ extern s32 D_00275AF0;
 s32 func_001F00F0(ScreenFade* self, s32 a1, s32 a2);
 void func_001F0220(ScreenFade* self, s32 state);
 void func_001C0000(s32 flag, f32 x);
-struct Dev_1ECBC8;
-typedef void (*Cb_1ECBC8)(void);
-typedef s32 Id_1ECBC8;
+typedef void (*TempoCallFn)(void);
 void func_001C7CB8(TempoAgent* self);
 void func_001ED1D8(Timeline* sub);
 void func_001ED278(Timeline* sub);
-void func_001B6598(Dev_1ECBC8* dev, s32* out);
-void func_001C0C68(Id_1ECBC8 a, Dev_1ECBC8* b);
-s32 func_001C0C50(Id_1ECBC8 a);
-void* func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, TempoAgent* self, s32 a3, s32 a4);
+void func_001C0C68(s32 a, void* b);
+s32 func_001C0C50(s32 a);
+void* func_001DBCC8(World* world, TempoCallFn cb, TempoAgent* self, s32 a3, s32 a4);
 void func_001ECB18(void);
 void func_001C9008(void* self, void* arg);
 void func_00152CE0(void* self, s32 index, s32 count);
@@ -354,8 +330,8 @@ s32 func_00152888(PacketWriter* self);
 // The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
 struct ChildWalkFrame {
     s32* a; s32* b; s32 c; ChildWalkFrame* prev;
-    ChildWalkFrame(s32* p) : a(p), b(p), c(p[2]), prev((ChildWalkFrame*)D_0027B314) {}
-    ~ChildWalkFrame() { D_0027B314 = (ListFrame*)prev; }
+    ChildWalkFrame(s32* p) : a(p), b(p), c(p[2]), prev((ChildWalkFrame*)g_activeListFrames) {}
+    ~ChildWalkFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 void func_00124A48(AttachedSet* self);
 void func_001F55A8(void* self);
@@ -367,42 +343,20 @@ struct StateChangeMsg {
 };
 s32 func_0013ECB0(World* mgr, s32 a, void* b, C62* self, s32 c);
 void func_001B6598(s32 sub, s32* out);
-struct Chain_1ED318 {
-    u8 pad[0x680];
-    s32 f680;
-    s32 pad2;
-    s32 f688;
-};
-struct Inner_1ED318 {
-    u8 pad[0xC3C];
-    Chain_1ED318* fC3C;
-    u8 pad2[0xC4C - 0xC40];
-    s32 fC4C;
-};
-struct Msg_1ED318 {
-    s32 kind;
-    s32 pad[2];
-    s32 f0C;
-};
-void func_001EC7A8(Inner_1ED318* p);
+void func_001EC7A8(TempoAgent* p);
 void func_001837E0(void* self, s32 a, s32 b, s32* c);
 void func_0016EC88(void* p);
 void func_001BFCD8(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-struct Entry_1ED4C8 { s32 f00; s32 f04; f32 f08; s32 pad0C; };
 extern u8 D_00625760[];
-s32 func_001F5C0C(Entry_1ED4C8* dst, s32 value, s32 size);
+s32 func_001F5C0C(Entry90* dst, s32 value, s32 size);
 // The dead "li v0,2" after the func_001ED090 call is the compare constant of an
 // "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
 // reload, deletes the branch and leaves the constant load.
-struct Inner_1EC570 { u8 pad[0x34]; f32 f34; };
-struct Sub_1EC570 { u8 pad0[0x8]; Inner_1EC570* inner; u8 pad1[8]; f32 f14; f32 f18; };
 void func_001C91C8(TempoAgent* self, s32 a, s32 b);
 void func_001603E8(s32 n);
 void func_0018C7F8(void* p);
 f32 func_00205778(f32 a, f32 b);
-struct Entry_1ED0D8 { s32 key; s32 val; };
-void func_0018D800(Entry_1ED0D8* dst, Entry_1ED0D8* src, s32 bytes);
-struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
+void func_0018D800(TempoPlayerEntry* dst, TempoPlayerEntry* src, s32 bytes);
 void func_001ED318(Timeline* self, Entry90* e);
 void* func_001F5B08(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
@@ -410,26 +364,8 @@ void* func_001F5B08(void* dst, void* src, s32 size);
 struct MoveItemsDown {
     static void Of(C62** dst, C62** src, s32 n)
     {
-        func_001F5B08(dst, src, n);
+        MoveMemory(dst, src, n);
     }
-};
-struct Sub_1ECB18 { u8 pad0[0x34]; f32 f34; };
-struct Obj_1ECB18 {
-    u8 pad0[8];
-    Sub_1ECB18* f8;
-    u8 pad0C[8];
-    f32 f14;
-    f32 f18;
-};
-struct Ent_1ECB18 { Obj_1ECB18* f0; s32 f4; };
-struct Self_1ECB18 {
-    u8 pad0[0xC68];
-    s32 fC68;
-    Ent_1ECB18* fC6C;
-    u8 pad1[4];
-    s32 fC74;
-    u8 pad2[0xC];
-    f32 fC84;
 };
 void func_001DDAD0(World* x);
 struct SameAsFixedKey {
@@ -475,7 +411,6 @@ IdentityKey* func_00160180(s32 k);
 void func_001F0428(IdentityKey* v, s32 m, s32 n);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 f32 func_001EA4B8(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
-struct Anim_1F1C90 { u8 pad[0x34]; f32 f34; };
 void func_001AA060(void* self);
 s32 func_001F0490(void* o, s32 n, s32* a, s32* b);
 void func_001F1590(void* self, s32 a1, s32 a2);
@@ -518,7 +453,7 @@ struct WarpTextStyle {
     s32 f18;
     WarpTextStyle(s32 a, s32 b)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         kind = 0x3D;
         f8 = a;
         fC = b;
@@ -531,43 +466,34 @@ s32 func_0015C188(s32 n);
 Font* func_0015C1C0(s32 n);
 void func_001F5C0C(void* p, s32 v, s32 size);
 extern void func_00124A48(WarpPage* o);
-struct Rec_1F1050 { s32 f0; f32 f4; s32 f8; };
-struct Sub_1F1050 {
-    void (**vtbl)(Sub_1F1050*);
-    u8 pad04[0x30];
-    f32 f34;
-    u8 pad38[0x298 - 0x38];
-    Rec_1F1050* f298;
-};
 s32 func_001F0580(WarpPage* o, s32 n);
 void func_001F0878(WarpPage* o, s32 n);
 void func_001F0908(WarpPage* o);
 void func_001F18B0(WarpPage* o, s32 n);
 void func_001BF788(void* p, s32 n);
-void func_00159C28(Rec_1F1050* r);
-void func_00126C58(Sub_1F1050* o);
-void func_0012C918(Sub_1F1050* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
+void func_00159C28(WorldObjectNode* r);
+void func_00126C58(PlacedObject* o);
+void func_0012C918(Animation* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
 void func_001BFCD8(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-struct Iter_1F0758 { List01* list; u8* link; s32 offset; Iter_1F0758* saved; };
 void func_001249A8(WarpPage* self);
 void func_00124DF8(WarpPage* self, s32 n, void* table);
 void func_00182ED8(BaseObject* node);
-struct Next_1F0758 {
-    static BaseObject* Of(Iter_1F0758* it)
+struct NextPageNode {
+    static BaseObject* Of(ListFrame* it)
     {
         BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
-struct Begin_1F0758 {
-    static void Of(Iter_1F0758* it, List01* list)
+struct BeginPageWalk {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_1F0758*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
     }
 };
 HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
@@ -575,21 +501,7 @@ extern s32 (*D_00276608[6])[4];
 // The sounds MoveWarpCursor plays: the cursor moved, or it could not.
 enum WarpCursorSound { WARP_SOUND_MOVE = 0x79, WARP_SOUND_REFUSE = 0x7B };
 void func_001BFCD8(WarpCursorSound a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-struct Ent_1F0908 { s32 a; s32 type; s32 id; s32 d; };
-struct Tbl_1F0908 { u8 pad0[0x54]; s32 count; Ent_1F0908* ents; };
-struct Slot_1F0908 { u8 pad0[0x34]; f32 f34; };
-struct SlotRef_1F0908 { Slot_1F0908* s; u8 pad[0x30]; };
-struct Obj_1F0908 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad18[0x2E8 - 0x18];
-    Tbl_1F0908* tbl;
-    u8 pad2EC[4];
-    u8 f2F0[8];
-    SlotRef_1F0908 slots[1];
-};
-void func_0012C918(Slot_1F0908* s, Obj_1F0908* o, s32 c, void* d, f32 a, f32 b);
-BaseObject* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
+BaseObject* func_0015A418(void* o, s32 a, s32 b, WarpPage* c);
 // A point of the fan func_001F1E38 draws: its colour and, at 0x10, its position.
 struct FanPoint { s32 k; s32 pad[3]; f32 x; f32 y; };
 void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
@@ -601,11 +513,10 @@ void func_001E9498(ElementStack* self, ScreenElement* node);
 void func_001E96F8(ElementStack* self, s32 state);
 void func_001E98E8(float x);
 f32 func_001EA4B8(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-void func_001ED090(TempoAgent* self, void* a, s32 b);
-void func_001ED1D8(Obj_1ED1D8* self);
+void func_001ED090(TempoAgent* self, AnimationPlayer* a, s32 b);
+void func_001ED1D8(Timeline* self);
 void func_001ED210(Timeline* self);
 void func_001ED278(Timeline* self);
-void func_001ED318(Timeline* self, Msg_1ED318* msg);
 void func_001EF900(C62* self, s32 state);
 s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2);
 void func_001F1050(WarpPage* self, u32 next);
@@ -808,7 +719,7 @@ s32 D_00276654;
 
 void func_001E88D0(KeyedConeAgent* self)
 {
-    func_00167D68(self);
+    InitConeAgent(self);
     self->fC58 = 0x2D8;
     self->fC14 = 30000.0f;
     self->fC10 = 30000000.0f;
@@ -824,7 +735,7 @@ extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 void func_001E8948(KeyedConeAgent* self)
 {
     ResolveObjectLinks(self, 8, D_00275B60);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     if (self->fC50 != 0) {
         self->fC54 = CreateStateWalker(self->fC50, 0, 0x2D7, 0);
     }
@@ -832,7 +743,7 @@ void func_001E8948(KeyedConeAgent* self)
     for (u32 i = 0; i < 4; i++) {
         self->fC80[i] = TakeFlagTableIndex(g_flagTable);
     }
-    func_00167E08(self);
+    StartConeAgent(self);
 }
 
 ASM_FUNC(func_001E89F0);
@@ -885,7 +796,7 @@ void func_001E8E08(KeyedConeAgent* a0)
 void func_001E8E48(KeyedConeAgent* self)
 {
     if (self->fC58 == 0x2DA && self->f724 == 0xC && func_001BB290(self, 0, 0) != 0) {
-        s32 s = func_001E89F0(self, (u8*)self + 0x140);
+        s32 s = FindNearestAgentKey(self, (u8*)self + 0x140);
         if (s != self->fC7C) {
             s32 n = self->fC5C - 1;
             if (!(0 < n)) n = 0;
@@ -926,7 +837,7 @@ void func_001E8EF8(KeyedConeAgent* self)
 void func_001E8FA8(KeyedConeAgent* self)
 {
     if (self->f724 == 8) {
-        func_001C8BC0(self);
+        FaceAgentTowardGoalPoint(self);
     } else {
         UpdateAgentState(self);
     }
@@ -983,13 +894,13 @@ void func_001E9108(ElementStack* obj)
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
-    if (D_00262C68 & 4) {
+    if (g_padRouting & 4) {
         s2 = &g_padRecord;
     } else {
         s2 = &g_blankPadRecord;
     }
     s5 = 0;
-    if (D_00262C6C & 0x80) {
+    if (g_padSelectFlags & 0x80) {
         if (0.1f < g_gameClock.time) {
             ClearPadSelectFlags(0x80);
         }
@@ -1004,7 +915,7 @@ void func_001E9108(ElementStack* obj)
             }
         }
         if (a2) {
-            func_001F4808(FindActiveObjectSubGroup());
+            StartObjectSubGroupFinish(FindActiveObjectSubGroup());
         }
         break;
     }
@@ -1020,7 +931,7 @@ void func_001E9108(ElementStack* obj)
             } else {
                 ResetGameProgress(g_saveData);
             }
-            func_00160948();
+            ResumeAtSavedLevel();
             s1 = obj->state;
         } else if (v & 0x100) {
             ClearPadPressedBits(s2, 0x100);
@@ -1030,7 +941,7 @@ void func_001E9108(ElementStack* obj)
         break;
     }
     case 3: {
-        if (D_00262C6C & 2) break;
+        if (g_padSelectFlags & 2) break;
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
@@ -1175,7 +1086,7 @@ void func_001E96F8(ElementStack* self, s32 state)
         D_00272930.vt->m14(&D_00272930);
         D_00272B98.vt->m14(&D_00272B98);
         AcquirePadSelectFlag(g_currentWorld);
-        func_001A7E70();
+        InitPadPatternSetting();
         break;
     case 2:
         ApplyStackTimeScale(self, 1.0f);
@@ -1211,7 +1122,7 @@ void func_001E98E8(float x)
 s32 func_001E9970(void)
 {
     if (g_screenFade.mode != 0) goto fail;
-    if (func_001DDA80((World*)g_currentWorld) != 0) goto fail;
+    if (IsPadSelectFlagHeld((World*)g_currentWorld) != 0) goto fail;
     if (g_pauseMenuElement.open != 0 && g_pauseMenuElement.page != 0) goto fail;
     if (g_mapScreenList.open != 0) goto fail;
     if (g_mapScreenList.mode != 0) goto fail;
@@ -1306,7 +1217,7 @@ void func_001E9C78(World* self, f32 dt)
         const Desc05* vt = h->desc05();
         if (vt->m49 != 0) {
             PadRecord* a;
-            if ((*(s32*)&D_00262C68) & 2)
+            if ((*(s32*)&g_padRouting) & 2)
                 a = &g_padRecord;
             else
                 a = &g_blankPadRecord;
@@ -1315,28 +1226,28 @@ void func_001E9C78(World* self, f32 dt)
     }
     func_0015FF58(self);
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->list60);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->list60);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             func_00124EE8(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->f1B64);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1B64);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             func_0012EBD8(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     {
-        Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, (List01*)&self->f1C24);
-        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+        ListFrame it;
+        BeginByteWalk::Of(&it, (List01*)&self->f1C24);
+        for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             StepObjectLevelRamp(n, dt);
         }
-        End_1E9C78::Of(&it);
+        EndByteWalk::Of(&it);
     }
     DispatchDelayedMessages(self);
     UpdateSoundEmitters();
@@ -1368,19 +1279,19 @@ void func_001E9E30(World* self)
 void func_001E9EE8(World* self, f32 dt)
 {
     if (dt == 0.0f) return;
-    Iter_1E9EE8 it;
-    Begin_1E9EE8::Of(&it, &self->list78);
-    for (ListedObject* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00124EE8(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, (List01*)&self->f1B70);
-    for (ListedObject* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_0012EBD8(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, (List01*)&self->f1C30);
-    for (ListedObject* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) StepObjectLevelRamp(obj, dt);
-    End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, &self->list78);
-    for (ListedObject* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) obj->vtbl->update(obj, 0, dt);
-    End_1E9EE8::Of(&it);
+    ListFrame it;
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_00124EE8(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
+    EndNodeWalk::Of(&it);
+    BeginNodeWalk::Of(&it, &self->list78);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    EndNodeWalk::Of(&it);
     RunQueuedCalls(self);
 }
 
@@ -1398,7 +1309,7 @@ void func_001EA0A8(World* self, f32 x)
 
 void func_001EA118(World* self)
 {
-    Iter_1EA118 it;
+    ListFrame it;
     GameClock* clock = &g_gameClock;
     UpdateWorldStepLists(self, clock->step);
     if (clock->dt != 0.0f) {
@@ -1406,44 +1317,44 @@ void func_001EA118(World* self)
         UpdateUnflaggedParts(self);
         func_00138C00(self, 0);
         ProcessColliderGroups(self, 1, clock->dt);
-        Begin_1EA118::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->vtable->update != 0) {
                 obj->vtable->update(obj, clock->dt);
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
+        g_activeListFrames = it.prev;
         func_00138C00(self, 1);
         ProcessColliderGroups(self, 6, g_gameClock.dt);
-        Begin_1EA118::Of(&it, &self->list60);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        BeginActorWalk::Of(&it, &self->list60);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->tries < 2) {
                 if (func_00129D70(obj) != 0) {
                     obj->tries++;
                 } else {
-                    func_00129DF8(obj);
+                    ClearRootTries(obj);
                 }
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
-        Begin_1EA118::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        g_activeListFrames = it.prev;
+        BeginActorWalk::Of(&it, &self->list6C);
+        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             obj->vtable->post(obj);
             if (obj->flags & 0x8000000000000000ULL) {
                 UpdateTouchingParts(obj);
             }
         }
-        g_activeListFrames = (ListFrame*)it.saved;
-        func_001DBEC8(self, g_gameClock.dt);
+        g_activeListFrames = it.prev;
+        RunDueDelayedScriptCalls(self, g_gameClock.dt);
         RunQueuedCalls(self);
         StepAnimators(g_gameClock.dt);
     }
-    func_001DDC40(self);
-    Begin_1EA118::Of(&it, &self->list1B7C);
-    for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+    NotifyWorldActiveFollower(self);
+    BeginActorWalk::Of(&it, &self->list1B7C);
+    for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
         ReleaseWorldListEntry(obj);
     }
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
     UpdateCamera(g_camera, 1, g_gameClock.dt);
     StepWorldValueTowardTarget(self, g_gameClock.step);
 }
@@ -1566,7 +1477,7 @@ s32 func_001EAA70(s32 a, s32 b)
     if (a == b) {
         return a;
     }
-    s32 r = (s32)(u32)func_001F6708();
+    s32 r = (s32)(u32)NextRandom();
     s32 span = b - a + 1;
     r = r % 0x95675;
     r = r % span;
@@ -1577,7 +1488,7 @@ f32 func_001EAAE0(f32 a, f32 b)
 {
     f32 r;
     if (a != b) {
-        s32 n = func_001F6708();
+        s32 n = NextRandom();
         r = a + (b - a) * (f32)n * 0.0000000004656613f;
     } else {
         r = a;
@@ -1595,7 +1506,7 @@ f32 func_001EAB48(f32 mean, f32 deviation, f32 limit)
         y = RandomFloatInRange(-1.0f, 1.0f);
         r = x * x + y * y;
     } while (r > 1.0f || r == 0.0f);
-    f32 v = mean + deviation * y * Fpu::Sqrt(func_002059E0(r) * -2.0f / r);
+    f32 v = mean + deviation * y * Fpu::Sqrt(Logarithm(r) * -2.0f / r);
     if (limit != 0.0f) {
         f32 lo = mean - limit;
         f32 hi = mean + limit;
@@ -1713,7 +1624,7 @@ f32 func_001EAF28(f32 x)
 
 f32 func_001EAFE0(f32 x, f32 y)
 {
-    f32 r = func_002058A0(x);
+    f32 r = FloatRemainder(x);
     if (r < 0.0f) {
         r += y;
     }
@@ -1815,16 +1726,16 @@ void func_001EB598(BeatPressCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 4, D_00275CA0);
     self->f614 = CreateStateWalker(self->f610, self, 0x4CA, 1);
-    AppendQueuedCall(self->world, (void*)func_001EB550, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
 void func_001EB608(BeatPressCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self);
-    Inner_1EB608* r = (Inner_1EB608*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+    TempoAgent* r = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
     if (p != 0) {
         SetStateWalkerTarget(self->f614, 0x4CB);
-        r->c3C = self;
+        r->fC3C = self;
         self->f68C = r;
     } else {
         SetStateWalkerTarget(self->f614, 0x4CA);
@@ -1834,7 +1745,7 @@ void func_001EB608(BeatPressCollider* self, void* p)
 
 ASM_FUNC(func_001EB698);
 
-void func_001EB748(BeatPressCollider* self, In_1EB748* in)
+void func_001EB748(BeatPressCollider* self, PadRecord* in)
 {
     if (self->f67C != 0 && g_player != 0) {
         Vec4U pos;
@@ -1847,7 +1758,7 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
         ((BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
     }
     if (self->f680 != 0) {
-        u32 f = in->fAA;
+        u32 f = in->flags;
         if (f & 0xF0) {
             s32 dir;
             s32 ok;
@@ -1865,8 +1776,8 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
             if (self->f62C < self->f630) {
                 Ent1C* e = &self->f634[self->f62C];
                 if (e->dir == dir) {
-                    Grid_1EB748* g = ((Grid_1EB748*)self->f68C);
-                    at = (f32)g->row * 4.0f + g->base;
+                    TempoAgent* g = ((TempoAgent*)self->f68C);
+                    at = (f32)g->fC70 * 4.0f + g->fC7C;
                     if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
                         ok = 1;
                     }
@@ -1882,8 +1793,8 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
     }
     if (self->f62C < self->f630) {
         Ent1C* e = &self->f634[self->f62C];
-        Grid_1EB748* g = ((Grid_1EB748*)self->f68C);
-        f32 at = (f32)g->row * 4.0f + g->base;
+        TempoAgent* g = ((TempoAgent*)self->f68C);
+        f32 at = (f32)g->fC70 * 4.0f + g->fC7C;
         f32 win = self->f684;
         if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
             SetStateWalkerTarget(self->f614, D_00275CD8[self->f678]);
@@ -1893,21 +1804,21 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (func_00160C58() == 0 && ((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && ((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
                 TempoAgent* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
-                msg.fn = func_001EB698;
+                msg.fn = ContinueBeatPressColliderRequest;
                 ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
-                func_001ED020(o);
+                EndHeldTimeline(o);
                 o->fBFC = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
             }
             if (((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
-                List_1EB748* l;
+                Timeline* l;
                 ((void (*)(BeatPressCollider*))((BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
                 Player* gl = g_player;
                 self->f688 = 1;
@@ -1915,19 +1826,19 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
                 f32 v = g_gameTime[0];
                 *(f32*)((u8*)gl + 0x26CC) = v;
                 gl->f26C8 = v;
-                l = ((Grid_1EB748*)self->f68C)->list;
+                l = ((TempoAgent*)self->f68C)->fC38;
                 *(f32*)((u8*)gl + 0x26D0) = 2.0f;
                 if (l != 0) {
-                    s32 j = l->cur;
-                    while (j < l->n) {
-                        Item_1EB748* p = &l->items[j];
-                        if (p->type == 3) break;
+                    s32 j = l->index;
+                    while (j < l->f34) {
+                        Entry90* p = &((Entry90*)l->buffer)[j];
+                        if (p->f0 == 3) break;
                         j++;
                     }
-                    if (j < l->n) {
-                        Item_1EB748* it = &l->items[j];
-                        Grid_1EB748* gg = ((Grid_1EB748*)self->f68C);
-                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->a * 4.0f + it->b - ((f32)gg->row * 4.0f + gg->base)) * gg->scale;
+                    if (j < l->f34) {
+                        Entry90* it = &((Entry90*)l->buffer)[j];
+                        TempoAgent* gg = ((TempoAgent*)self->f68C);
+                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->f4 * 4.0f + it->f8 - ((f32)gg->fC70 * 4.0f + gg->fC7C)) * gg->fC88;
                     }
                 }
             }
@@ -1949,7 +1860,7 @@ void func_001EB748(BeatPressCollider* self, In_1EB748* in)
 s32 func_001EBC88(BeatPressCollider* self)
 {
     if (g_buttonCodeFlags & 1) return 1;
-    if (func_001DDA80(self->world) == 0) return self->f688 != 0;
+    if (IsPadSelectFlagHeld(self->world) == 0) return self->f688 != 0;
     return 1;
 }
 
@@ -1990,20 +1901,18 @@ void func_001EBEB0(TempoAgent* self)
 s32 func_001CA758(void* self, s32 id);
 void func_001C7140(void* self);
 
-struct Obj_1EBF40 { u8 pad[0xC10]; s32 fC10[4]; };
-
-void func_001EBF40(Obj_1EBF40* self)
+void func_001EBF40(TempoAgent* self)
 {
-    func_001C7140(self);
+    LoadAgent(self);
     for (s32 i = 0; i < 4; i++) {
-        self->fC10[i] = func_001CA758(self, D_00275CF8[i]);
+        self->fC10[i] = ResolveAgentClip(self, D_00275CF8[i]);
     }
 }
 
 void func_001EBFB0(TempoAgent* self)
 {
     StartAgent(self);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 5, D_00275D08);
     void* r = CreateStateWalker(self->fC50, 0, -1, 0);
     self->fC54 = r;
@@ -2036,7 +1945,7 @@ void func_001EC0B8(void)
 s32 func_001EC0D8(TempoAgent* self)
 {
     s32 r[4];
-    func_001B6598(self->fC54, r);
+    GetStateWalkerCurrentKey(self->fC54, r);
     switch (r[0]) {
     case 0x4ED:
     case 0x4F0:
@@ -2095,7 +2004,7 @@ void func_001EC478(TempoAgent* self, void* arg)
             return;
         }
         self->fC94 = 0;
-        func_001B6598(*(void**)((u8*)self + 0xC54), &out);
+        GetStateWalkerCurrentKey(*(void**)((u8*)self + 0xC54), &out);
         switch (out) {
         case 0x4EE:
             sel = 0x4EF;
@@ -2126,7 +2035,7 @@ void func_001EC570(TempoAgent* self, s32 a, s32 b)
     s32 r[3];
     switch (self->f724) {
     case 0xE:
-        func_001B6598(self->fC54, &r[0]);
+        GetStateWalkerCurrentKey(self->fC54, &r[0]);
         switch (r[0]) {
         case 0x4ED:
         case 0x4F0:
@@ -2149,35 +2058,35 @@ void func_001EC570(TempoAgent* self, s32 a, s32 b)
     EnterAgentState(self, a, b);
     switch (self->f724) {
     case 14: {
-        func_001B6598(self->fC54, &r[1]);
+        GetStateWalkerCurrentKey(self->fC54, &r[1]);
         f32 q;
         switch (r[1]) {
         case 0x4EE:
             q = 0.083333336f;
-            ((Sub_1EC570*)self->f7E0)->f18 = ((Sub_1EC570*)self->f7E0)->inner->f34 / (self->fC88 + self->fC88);
+            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 + self->fC88);
             break;
         case 0x4F1:
         case 0x4F4:
         case 0x4F7:
             q = 0.083333336f;
-            ((Sub_1EC570*)self->f7E0)->f18 = ((Sub_1EC570*)self->f7E0)->inner->f34 / (self->fC88 * 4.0f);
+            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 * 4.0f);
             break;
         default:
             return;
         }
-        ((Sub_1EC570*)self->f7E0)->f14 = q;
+        ((AnimationPlayer*)self->f7E0)->time = q;
         break;
     }
     case 2:
     case 13: {
         s32 n = 4;
-        func_001B6598(self->fC54, &r[2]);
+        GetStateWalkerCurrentKey(self->fC54, &r[2]);
         if (r[2] < 0x4EF) {
             if (r[2] >= 0x4EC) n = 2;
         }
-        func_001ED090(self, ((Sub_1EC570*)self->f7E0), n);
-        if (n == 2) ((Sub_1EC570*)self->f7E0)->f14 = ((Sub_1EC570*)self->f7E0)->inner->f34 * (self->fC7C / (f32)n);
-        else ((Sub_1EC570*)self->f7E0)->f14 = ((Sub_1EC570*)self->f7E0)->inner->f34 * (self->fC7C / (f32)n);
+        AddTempoAgentEntry(self, ((AnimationPlayer*)self->f7E0), n);
+        if (n == 2) ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
+        else ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
         break;
     }
     case 11:
@@ -2192,18 +2101,18 @@ INCLUDE_ASM(func_001EC7A8);
 INCLUDE_RODATA(jtbl_0024E740);
 ASM_FUNC(func_001EC828);
 
-void func_001ECB18(Self_1ECB18* self)
+void func_001ECB18(TempoAgent* self)
 {
     f32 den = self->fC84 - (*(f32*)&g_gameTime);
     for (s32 k = 0; k < self->fC68; k++) {
-        Ent_1ECB18* e = &self->fC6C[k];
-        Obj_1ECB18* o = e->f0;
-        f32 len = o->f8->f34;
-        f32 start = o->f14;
-        f32 t = len / (f32)e->f4 * (f32)((self->fC74 + 1) % e->f4);
+        TempoPlayerEntry* e = &self->fC6C[k];
+        AnimationPlayer* o = e->player;
+        f32 len = o->anim->length;
+        f32 start = o->time;
+        f32 t = len / (f32)e->beats * (f32)((self->fC74 + 1) % e->beats);
         if (t <= start)
             t += len;
-        o->f18 = (t - start) / den;
+        o->speed = (t - start) / den;
     }
 
 }
@@ -2228,7 +2137,7 @@ void func_001ECBC8(TempoAgent* self)
         if (sub != 0) {
             self->fC34 = 0;
             self->fC38 = sub;
-            func_001ED1D8(sub);
+            RestartTimeline(sub);
         }
         D_00275DB8 = 0;
     }
@@ -2247,7 +2156,7 @@ void func_001ECBC8(TempoAgent* self)
             }
         }
         if (self->fC94 == 1) {
-            func_001B6598(((Dev_1ECBC8*)self->fC54), &code);
+            GetStateWalkerCurrentKey(self->fC54, &code);
             if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->fC94 = 2;
         }
         self->fC84 = self->fC84 + self->fC88;
@@ -2258,13 +2167,13 @@ void func_001ECBC8(TempoAgent* self)
         RefreshCachedVoiceParam(1, 0);
         if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
     }
-    AppendQueuedCall(((Dev_1ECBC8*)self->world), func_001ECB18, self, 0, 0);
+    AppendQueuedCall(self->world, SyncTempoAgentEntries, self, 0, 0);
 }
 
 void func_001ECDF8(TempoAgent* self)
 {
     s32 code;
-    func_001B6598(self->fC54, &code);
+    GetStateWalkerCurrentKey(self->fC54, &code);
     s32 obj = 0;
     if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) {
         obj = AreMenusAndFadeClear();
@@ -2303,7 +2212,7 @@ void func_001ED018(TempoAgent* self, s32 value)
 
 void func_001ED020(TempoAgent* self)
 {
-    func_001ED210(self->fC38);
+    EndTimeline(self->fC38);
     self->fC38 = 0;
 }
 
@@ -2319,27 +2228,27 @@ void func_001ED070(TempoAgent* self, s32 v)
     self->fC64 = self->fC88 * (f32)v;
 }
 
-void func_001ED090(TempoAgent* self, void* a, s32 b)
+void func_001ED090(TempoAgent* self, AnimationPlayer* a, s32 b)
 {
-    Entry_1ED090* e = &((Entry_1ED090*)self->fC6C)[self->fC68++];
-    e->b = b;
-    e->a = a;
+    TempoPlayerEntry* e = &self->fC6C[self->fC68++];
+    e->beats = b;
+    e->player = a;
     func_0012F810(a, self);
 }
 
-void func_001ED0D8(TempoAgent* self, s32 key)
+void func_001ED0D8(TempoAgent* self, AnimationPlayer* key)
 {
     s32 i = 0;
     if (self->fC68 > 0) {
-        Entry_1ED0D8* p = (Entry_1ED0D8*)self->fC6C;
-        while (p->key != key) {
+        TempoPlayerEntry* p = self->fC6C;
+        while (p->player != key) {
             i++;
             if (i >= self->fC68)
                 return;
             p++;
         }
         if (i < self->fC68) {
-            Entry_1ED0D8* e = (Entry_1ED0D8*)self->fC6C + i;
+            TempoPlayerEntry* e = self->fC6C + i;
             CopyMemory(e, e + 1, (self->fC68 - i - 1) * 8);
             self->fC68 = self->fC68 - 1;
         }
@@ -2358,10 +2267,10 @@ void func_001ED198(Timeline* self)
     self->found = FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
 }
 
-void func_001ED1D8(Obj_1ED1D8* self)
+void func_001ED1D8(Timeline* self)
 {
-    self->f3C = 0;
-    self->f44 = self->f40->c70;
+    self->index = 0;
+    self->f44 = ((TempoAgent*)self->found)->fC70;
     TriggerScriptEvent(self, 0x1A, 0, 0);
 }
 
@@ -2371,7 +2280,7 @@ void func_001ED210(Timeline* self)
     TriggerScriptEvent(self, 0x1C, 0, 0);
     n = 5;
     RunTimelineEntry(self, &n);
-    if (((Inner_1ED210*)self->found)->c3C) {
+    if (((TempoAgent*)self->found)->fC3C) {
         n = 3;
         RunTimelineEntry(self, &n);
     }
@@ -2381,42 +2290,42 @@ void func_001ED278(Timeline* self)
 {
     Entry90* e;
     s32 v;
-    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((Inner_1ED278*)self->found)->fC70 < v))) {
-        if (v == ((Inner_1ED278*)self->found)->fC70 && ((Inner_1ED278*)self->found)->fC7C < e->f8) return;
+    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((TempoAgent*)self->found)->fC70 < v))) {
+        if (v == ((TempoAgent*)self->found)->fC70 && ((TempoAgent*)self->found)->fC7C < e->f8) return;
         RunTimelineEntry(self, e);
         self->index++;
     }
 }
 
-void func_001ED318(Timeline* self, Msg_1ED318* msg)
+void func_001ED318(Timeline* self, Entry90* msg)
 {
-    switch (msg->kind) {
+    switch (msg->f0) {
     case 0:
-        func_001EC7A8((Inner_1ED318*)self->found);
+        ScheduleTempoAgentBeatPress((TempoAgent*)self->found);
         break;
     case 1: {
-        s32* loc = &msg->f0C;
+        s32* loc = &msg->fC;
         TriggerScriptEvent(self, 0x1B, 1, (s32*)&loc);
         break;
     }
     case 2:
-        ((Inner_1ED318*)self->found)->fC3C->f680 = 1;
+        ((TempoAgent*)self->found)->fC3C->f680 = 1;
         D_00273C50.vt->m16(&D_00273C50, 2);
         ResetPadStepRepeat(&g_padRecord);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
         break;
     case 3:
-        ((Inner_1ED318*)self->found)->fC3C->f680 = 0;
-        ((Inner_1ED318*)self->found)->fC3C->f688 = 0;
+        ((TempoAgent*)self->found)->fC3C->f680 = 0;
+        ((TempoAgent*)self->found)->fC3C->f688 = 0;
         D_00273C50.vt->m16(&D_00273C50, 0);
         break;
     case 4:
-        ((Inner_1ED318*)self->found)->fC4C = 1;
+        ((TempoAgent*)self->found)->fC4C = 1;
         D_002739F0.vt->m16(&D_002739F0, 2);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, -0.25f, 0.0f, 0, 0);
         break;
     case 5:
-        ((Inner_1ED318*)self->found)->fC4C = 0;
+        ((TempoAgent*)self->found)->fC4C = 0;
         D_002739F0.vt->m16(&D_002739F0, 0);
         break;
     }
@@ -2425,12 +2334,12 @@ void func_001ED318(Timeline* self, Msg_1ED318* msg)
 void* func_001ED4C8(Timeline* self, s32 a, s32 b, f32 c)
 {
     if (self->f34 >= 0xC0) return D_00625760;
-    Entry_1ED4C8* e = (Entry_1ED4C8*)((u8*)self->buffer + self->f34 * 16);
+    Entry90* e = (Entry90*)((u8*)self->buffer + self->f34 * 16);
     self->f34 = self->f34 + 1;
-    (void)func_001F5C0C(e, 0, 16);
-    e->f00 = a;
-    e->f04 = b;
-    e->f08 = c;
+    (void)FillMemory(e, 0, 16);
+    e->f0 = a;
+    e->f4 = b;
+    e->f8 = c;
     return e;
 }
 
@@ -2502,10 +2411,10 @@ ASM_FUNC(func_001EDC08);
 void func_001EDDB0(Vec3* v, f32* a1, f32* a2)
 {
     if (a1)
-        *a1 = WrapAngle(func_00205778(v->y, v->x));
+        *a1 = WrapAngle(ArctangentOfRatio(v->y, v->x));
     if (a2) {
         f32 r = Fpu::Sqrt(v->x * v->x + v->y * v->y);
-        *a2 = WrapAngle(func_00205778(v->z, r));
+        *a2 = WrapAngle(ArctangentOfRatio(v->z, r));
     }
 }
 
@@ -2525,7 +2434,7 @@ ASM_FUNC(func_001EE090);
 
 void func_001EE290(void* self)
 {
-    func_001EDEF0(self);
+    ComputeBallisticLaunchVelocity(self);
 }
 
 ASM_FUNC(func_001EE2B0);
@@ -2668,7 +2577,7 @@ void func_001EE668(void* s, void* a1, s32 size, u32* src, void* a4)
     s32 i;
     u32* dst;
 
-    func_001EE5C8(s, a1, size, a4, &outSize, &outCursor);
+    ReserveVifUnpack(s, a1, size, a4, &outSize, &outCursor);
     dst = (u32*)outCursor;
     n = (outSize + 3) >> 2;
     rem = n & 3;
@@ -2720,7 +2629,7 @@ void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag)
     self->cur = (u8*)(p + 1);
     w = w | 0x50000000u;
     *p = (u32)n | w;
-    func_00152CE0(self, n, (s32)buf);
+    AppendPacketQuadwords(self, n, (s32)buf);
 }
 
 void func_001EE850(PacketWriter* self, s32 a, s32 b, s32 c)
@@ -2736,7 +2645,7 @@ void func_001EE850(PacketWriter* self, s32 a, s32 b, s32 c)
 
 void func_001EE8D0(PacketWriter* a0, PacketWriter* a1) {
     u32 span = a1->curU - (u32)a1->begin;
-    func_001EE7D0(a0, span >> 4, (void*)a1->begin, 0);
+    WriteVifDirect(a0, span >> 4, (void*)a1->begin, 0);
 }
 
 void func_001EE900(ValueListObject* self)
@@ -2780,7 +2689,7 @@ s32 func_001EEB60(ValueListObject* self, Bits128* vec, s32* out)
     if (self != 0 && self->data38 != 0) {
         Bits128 q = *vec;
         *out = 0;
-        r = func_001EEA40(self, self->data38, q, out);
+        r = QueryValueTreeMask(self, self->data38, q, out);
 
     } else {
         r = 0x0FFFFFFF;
@@ -2940,7 +2849,7 @@ ASM_FUNC(func_001EF768);
 
 s32 func_001EF808(AttachedSet* self)
 {
-    func_001F57E0(&self->trackedNodes);
+    OfferTrackedNodeLaunch(&self->trackedNodes);
     return 1;
 }
 
@@ -2951,7 +2860,7 @@ void* func_001EF828(AttachedSet* self)
 
 void func_001EF830(AttachedSet* o)
 {
-    *(s32*)((u8*)&o->trackedNodes + 0x94) = 0;
+    o->trackedNodes.found = 0;
 }
 
 void func_001EF838(C62* self)
@@ -2965,7 +2874,7 @@ void func_001EF868(C62* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, D_00275E10);
-    func_001EF900(self, 0);
+    SetStateAndNotify(self, 0);
     self->desc->m03(self);
 }
 
@@ -3001,7 +2910,7 @@ void func_001EF9C8(C62* self, s32 kind, Msg62* msg)
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 5) {
         if (msg->id == self->id2DC) {
-            func_001EF900(self, 0);
+            SetStateAndNotify(self, 0);
         }
     }
 }
@@ -3037,7 +2946,7 @@ void func_001EFB20(C62Group* s)
         }
         if (i >= s->count) {
             for (i = 0; i < s->count; i++) {
-                func_001EF900(s->items[i], 2);
+                SetStateAndNotify(s->items[i], 2);
             }
             s->owner->f180 = -1;
         }
@@ -3049,7 +2958,7 @@ void func_001EFB20(C62Group* s)
         if (it->id2DC != 0) continue;
         f32 d = g_gameClock.time - it->f2D4;
         if (it->f2D8 < d) {
-            func_001EF900(it, 0);
+            SetStateAndNotify(it, 0);
         }
     }
 }
@@ -3086,7 +2995,7 @@ void func_001EFD10(ScreenFade* self, s32 a1)
             if (self->style == s) thr = 1.5f;
             if (thr < t) {
                 s = 2;
-                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
             } else {
                 r = t / thr;
                 f32 hi = 1.0f;
@@ -3094,7 +3003,7 @@ void func_001EFD10(ScreenFade* self, s32 a1)
                 if (r < lo) r = lo;
                 else if (hi < r) r = hi;
                 self->opacity = r;
-                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
+                SetVolumeChannel6Factors(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
             }
         }
         break;
@@ -3155,7 +3064,7 @@ void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
     if (dst->mode == 0) {
         if (D_0027051C != 0) {
             if (*(s32*)((u8*)D_0027051C + 0x2D0) != 2) {
-                func_001DDAD0(g_currentWorld);
+                PopActiveSequenceElement(g_currentWorld);
             }
         }
         if (args->key == 0 || SameAsFixedKey::Of(args->key)) {
@@ -3187,7 +3096,7 @@ void func_001F00C0(ScreenFade* dst, FadeRequestBlock* src, s32 last)
 
 s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
 {
-    if (func_001DDA80(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
+    if (IsPadSelectFlagHeld(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
         ClearPadPressedBits(o, 0x800);
         *(FadeRequestBlock*)&self->active = *(FadeRequestBlock*)&self->queued;
         self->style = self->queuedStyle;
@@ -3430,16 +3339,16 @@ void func_001F0660(WarpPage* o) {
 
 void func_001F0758(WarpPage* self)
 {
-    Iter_1F0758 it;
+    ListFrame it;
     BaseObject* node;
     WarpEntry* el;
     s32 i;
 
     PostLoadPlacedObject(self);
     ResolveObjectLinks(self, 0x34, D_00275FE0);
-    Begin_1F0758::Of(&it, &self->children);
-    while ((node = Next_1F0758::Of(&it)) != 0) {
-        func_00182ED8(node);
+    BeginPageWalk::Of(&it, &self->children);
+    while ((node = NextPageNode::Of(&it)) != 0) {
+        ResolveAndStartObject(node);
     }
     el = self->entries;
     for (i = 0; i < 11; i++) {
@@ -3451,7 +3360,7 @@ void func_001F0758(WarpPage* self)
         el++;
     }
     self->selected = -1;
-    g_activeListFrames = (ListFrame*)it.saved;
+    g_activeListFrames = it.prev;
 }
 
 void func_001F0878(WarpPage* self, s32 value)
@@ -3473,7 +3382,7 @@ void func_001F08F0(s32 unused, s32 a, s32 b)
     D_00276654 = b;
 }
 
-void func_001F0908(Obj_1F0908* self)
+void func_001F0908(WarpPage* self)
 {
     if (D_00276250 == -1) return;
     SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
@@ -3485,17 +3394,17 @@ void func_001F0908(Obj_1F0908* self)
     e->announce = 1;
     SetScreenElementHoldTime(e, 0.0f);
     e->vt->m16(e, 2);
-    Slot_1F0908* sl = self->slots[D_00276250].s;
+    Animation* sl = self->entries[D_00276250].f00;
     if (sl != 0) {
         f32 f = 0.0f;
-        if (D_00276654 == 0) f = sl->f34;
-        ReplaceAnimationPlayer(sl, self, 0, self->f2F0, f, 0.0f);
+        if (D_00276654 == 0) f = sl->length;
+        ReplaceAnimationPlayer(sl, self, 0, &self->f2F0, f, 0.0f);
     }
-    if (self->tbl != 0) {
-        for (s32 i = 0; i < self->tbl->count; i++) {
-            Ent_1F0908* en = &self->tbl->ents[i];
-            if (en->type == 10) {
-                BaseObject* n = FindFirstObjectById(self->f14, 0x104, en->id, self);
+    if (self->f2E8 != 0) {
+        for (s32 i = 0; i < self->f2E8->startCount; i++) {
+            AnimEvent* en = &self->f2E8->startList[i];
+            if (en->kind == 10) {
+                BaseObject* n = FindFirstObjectById(self->world, 0x104, en->a8.i, self);
                 if (n != 0) n->desc->m02(n);
             }
         }
@@ -3549,7 +3458,7 @@ L_four:
 void func_001F1050(WarpPage* self, u32 next)
 {
     s32 i;
-    Sub_1F1050* t;
+    Animation* t;
     s32 cur = self->mode;
     if (cur == (s32)next) {
         return;
@@ -3593,19 +3502,19 @@ void func_001F1050(WarpPage* self, u32 next)
         *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
         for (s32 j = 0; j <= 10; j++) {
             WarpEntry* s = &self->entries[j];
-            Sub_1F1050* a = (Sub_1F1050*)s->f04;
-            Sub_1F1050* b = (Sub_1F1050*)s->f0C;
+            PlacedObject* a = (PlacedObject*)s->f04;
+            PlacedObject* b = (PlacedObject*)s->f0C;
             if (a) {
-                a->vtbl[6](a);
+                a->desc->m02(a);
                 EnsureObjectWorldNode(a);
-                a->f298->f8 = 0;
-                a->f298->f4 = s->f08;
+                a->f298->rate = 0;
+                a->f298->level = s->f08;
             }
             if (b) {
-                b->vtbl[6](b);
+                b->desc->m02(b);
                 EnsureObjectWorldNode(b);
-                b->f298->f8 = 0;
-                b->f298->f4 = s->f10;
+                b->f298->rate = 0;
+                b->f298->level = s->f10;
             }
         }
         break;
@@ -3615,23 +3524,23 @@ void func_001F1050(WarpPage* self, u32 next)
     case 1: {
         if (self->f2E0 == 3) {
             s32 ne = self->cursor != 1;
-            Sub_1F1050* a;
+            Animation* a;
             s32 off;
             if (ne) {
                 off = self->cursor * 52;
             } else {
                 off = GetCurrentWarpEntry() * 52;
             }
-            a = *(Sub_1F1050**)((u8*)self + off + 0x2F8);
+            a = *(Animation**)((u8*)self + off + 0x2F8);
             if (a) {
                 f32 fa = 0;
                 if (ne) {
-                    fa = a->f34;
+                    fa = a->length;
                 }
                 ReplaceAnimationPlayer(a, self, 0, &self->f2F0, fa, 0.0f);
             }
         } else {
-            Sub_1F1050* a = (Sub_1F1050*)self->entries[1].f00;
+            Animation* a = self->entries[1].f00;
             if (a) {
                 ReplaceAnimationPlayer(a, self, 0, &self->f2F0, 0.0f, 0.0f);
             }
@@ -3655,7 +3564,7 @@ void func_001F1050(WarpPage* self, u32 next)
             }
         }
         self->f2D8 = self->cursor;
-        t = (Sub_1F1050*)self->f2E4;
+        t = self->f2E4;
         if (t != 0) {
             goto L146C;
         }
@@ -3668,8 +3577,8 @@ void func_001F1050(WarpPage* self, u32 next)
                 StartSoundEffect(0x8B, &self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
-        func_001F0908(self);
-        t = (Sub_1F1050*)self->f2E8;
+        AnnouncePendingWarpEntry(self);
+        t = self->f2E8;
         if (t == 0) {
             goto Lz;
         }
@@ -3691,19 +3600,19 @@ void func_001F1050(WarpPage* self, u32 next)
         break;
     case 0:
         for (i = 0; i < 11; i++) {
-            Sub_1F1050* a = (Sub_1F1050*)self->entries[i].f04;
-            Sub_1F1050* b = (Sub_1F1050*)self->entries[i].f0C;
+            PlacedObject* a = (PlacedObject*)self->entries[i].f04;
+            PlacedObject* b = (PlacedObject*)self->entries[i].f0C;
             if (a) {
                 if (a->f298) {
                     RemoveObjectNodeFromWorld(a->f298);
                 }
-                a->vtbl[7](a);
+                a->desc->m03(a);
             }
             if (b) {
                 if (b->f298) {
                     RemoveObjectNodeFromWorld(b->f298);
                 }
-                b->vtbl[7](b);
+                b->desc->m03(b);
             }
         }
         break;
@@ -3806,7 +3715,7 @@ void func_001F1960(T217D_0F0* self) {
     self->color = 0xDF7F7F7F;
     self->vt->m08(self, D_0024E808);
     self->current = 0;
-    func_001F5C0C(self->nodes, 0, 0x18);
+    FillMemory(self->nodes, 0, 0x18);
 }
 
 void func_001F1A08(T217D_0F0* self, PadRecord* t)
@@ -3844,7 +3753,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
         ClearPadPressedBits(&g_padRecord, 0x40);
         if (self->current->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                IdentityKey* v = func_00160180((loc[0] << 8) | loc[1]);
+                IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
                 PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
@@ -3876,9 +3785,9 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
         SetWarpCursor(self->current, r, 2);
         self->scaleTarget = 1.0f;
         self->scale = 1.0f;
-        Anim_1F1C90* an = (Anim_1F1C90*)self->current->f2E4;
+        Animation* an = self->current->f2E4;
         if (an != 0) {
-            SetScreenElementSlideInTime(self, an->f34);
+            SetScreenElementSlideInTime(self, an->length);
         }
         GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
@@ -3892,9 +3801,9 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
         self->vt->m15(self);
         if (self->current->f560 == 0) {
             BeginWarpPageClose(self->current);
-            Anim_1F1C90* an = (Anim_1F1C90*)self->current->f2E8;
+            Animation* an = self->current->f2E8;
             if (an != 0) {
-                SetScreenElementSlideOutTime(self, an->f34);
+                SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
             SetElementStackState(g_elementStack, 3);

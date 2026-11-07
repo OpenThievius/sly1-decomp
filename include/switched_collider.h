@@ -625,7 +625,7 @@ struct TempoPlayerEntry {
 // 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeBeatPressInput).
 struct TempoAgent : Agent {
-    u8 padC10[0xC20 - 0xC10];
+    s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
     u8 padC24[0xC34 - 0xC24];
     Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
