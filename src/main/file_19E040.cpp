@@ -1590,7 +1590,51 @@ void MoveTrailSegment(Effect* self, f32 dt)
     }
 }
 
-INCLUDE_ASM(func_001A0758);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+
+void DrawTrailSegment(Effect* self, Camera* cam)
+{
+    Vec02 r;
+    f32 fade;
+    PlacedObject* o = (PlacedObject*)self->p20;
+    if (o == 0) {
+        RemoveEffect(self);
+        return;
+    }
+    f32 radius = o->f2A8;
+    s32 in = 0;
+    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(cam->f40));
+    u128 ones = Vu0::Ones();
+    Vu0::Q(r) = Vu0::FromFloat(radius);
+    if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {
+        in = ComputeCameraDistanceFade(cam, d, &fade, radius, o->f80) != 0;
+    }
+    if (in == 0) {
+        return;
+    }
+    f32 t = (g_gameTime - self->start) / self->life;
+    f32 a;
+    ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
+    f32 b = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
+    if (0.0001f < a && 0.0001f < b) {
+        void* to;
+        switch (self->i120) {
+        case 1:
+        case 3:
+            to = (u8*)self->p124 + 0x80;
+            break;
+        case 2:
+            to = (u8*)self->p128 + 0x140;
+            break;
+        case 0:
+            to = &self->q90;
+            break;
+        }
+        func_001268B8(self->p20, cam, &self->q80, to, b * 100.0f, a * fade);
+        return;
+    }
+    RemoveEffect(self);
+}
 
 void OnTrailAnchorEnded(void* self, s32 kind, s32 extra)
 {

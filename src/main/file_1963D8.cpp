@@ -12,6 +12,7 @@ extern f32 g_gameTime[];
 #include "attachment.h"
 #include "shapes.h"
 #include "globals.h"
+#include "game_progress.h"
 #include "screen_element.h"
 #include "sound_state_object.h"
 
@@ -723,7 +724,58 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
     return r;
 }
 
-INCLUDE_ASM(func_00198318);
+void UpdateAgentGoal(Agent* self);
+void func_001C8418(Agent* self, Vec02* p);
+void func_00191C78(s32 graph, Vec02* out);
+void func_00191AC8(s32 graph, Vec02* from, Vec02* step, f32 t);
+void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
+
+// The agent's next goal by state: 800 on from the active collider, away on the ground (12
+// and 13); a random point of its graph at least D_0026A890 away (4); its own place on the
+// graph (16); the agent's own choice otherwise. States 4 and 16 only when asked.
+void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
+{
+    Vec02 d;
+    Vec02 t;
+    Vec02 k;
+    switch (self->f724) {
+    case 12:
+    case 13: {
+        SwitchedCollider* c = (SwitchedCollider*)GetActiveSwitchedCollider();
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->v140));
+        d.z = 0.0f;
+        Vu0::Q(k) = Vu0::FromFloat(800.0f);
+        u128 v = Vu0::Q(d);
+        Vu0::Q(d) = Vu0::MulX(Vu0::DivX(v, Vu0::Length(v)), Vu0::Q(k));
+        func_00191AC8(self->f928, &self->v140, &d, 1.0f);
+        Vu0::Q(t) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(d));
+        func_001C8418(self, &t);
+        break;
+    }
+    case 4:
+        if (pick == 0) {
+            break;
+        }
+        s32 far;
+        do {
+            func_00191C78(self->f928, &d);
+            u128 e = Vu0::Sub(Vu0::Q(d), Vu0::Q(self->v140));
+            far = D_0026A890.x < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
+        } while (far == 0);
+        func_001C8418(self, &d);
+        break;
+    case 16:
+        if (pick == 0) {
+            break;
+        }
+        SnapPointToOwnerGraph(self->f928, &self->v140, &d);
+        func_001C8418(self, &d);
+        break;
+    default:
+        UpdateAgentGoal(self);
+        break;
+    }
+}
 
 void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, void* arg)
 {
@@ -745,7 +797,40 @@ void EnterGaugeColliderAgentState(GaugeColliderAgent* self)
     }
 }
 
-INCLUDE_ASM(func_00198570);
+void UpdateAgentState(Agent* self);
+void SetAnimationPlayerSpeed(AnimationPlayer* p, f32 speed);
+extern G27C230* g_currentEntry;
+
+// In state 12, the animation runs at a speed that grows with the distance on the ground from
+// the active collider (a quadratic, clamped), both blended by the entry's dt.
+void UpdateGaugeColliderAgentState(GaugeColliderAgent* self)
+{
+    f32 q[3];
+    f32 r[2];
+    UpdateAgentState(self);
+    if (self->f724 != 12) {
+        return;
+    }
+    for (s32 i = 0; i < 3; i++) {
+        q[i] = g_currentEntry->dt * ((f32*)&D_0026A8C0)[i] + (1.0f - g_currentEntry->dt) * ((f32*)&D_0026A8A0)[i];
+    }
+    for (s32 i = 0; i < 2; i++) {
+        r[i] = g_currentEntry->dt * D_0026A8D0[i] + (1.0f - g_currentEntry->dt) * ((f32*)&D_0026A8B0)[i];
+    }
+    u128 p = Vu0::Q(self->v140);
+    SwitchedCollider* c = (SwitchedCollider*)GetActiveSwitchedCollider();
+    u128 d = Vu0::Sub(p, Vu0::Q(c->v140));
+    f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+    f32 v = q[0] + dist * (q[1] + dist * q[2]);
+    f32 lo = r[0];
+    f32 hi = r[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    SetAnimationPlayerSpeed(self->f7E0, v);
+}
 
 void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
 {

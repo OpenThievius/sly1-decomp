@@ -18,7 +18,8 @@
 struct Camera : BaseObject {
     u8 pad34[0x40 - 0x34];
     s32 f40[4];             // 0x40
-    u8 pad50[0x80 - 0x50];
+    f32 planes[3][4];       // 0x50: the rows of a 3x4 matrix whose columns are the normals of
+                            //       four planes through f40 (func_00146038)
     union {
         s32 f80[4];         // 0x80
         f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
