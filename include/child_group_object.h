@@ -30,7 +30,7 @@ struct Entry3B {
 struct ChildGroupObject : Collider {
     s32 f550;               // 0x550: 0 at set-up; a message of kind 10 starts the clock while it is 0
     f32 f554;               // 0x554: FLT_MAX at set-up; the clock plus a delay (func_0013BE00)
-    u8 pad558[0x55C - 0x558];
+    f32 f558;               // 0x558: a speed: slower than it, or once the clock passes f554, slot 17 settles it (func_0013BF68)
     f32 f55C;               // 0x55C: 200.0
     f32 f560;               // 0x560: 200.0
     u8 pad564[0x568 - 0x564];

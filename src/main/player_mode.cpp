@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "counted_collider.h"
 #include "switched_collider.h"
@@ -199,7 +200,23 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
     self->desc->m03(self);
 }
 
-INCLUDE_ASM(func_001D3398);
+void UpdateCollider(Collider* self);
+
+void UpdateCountedCollider(CountedCollider* self)
+{
+    UpdateCollider(self);
+    if (g_player != 0 && 2000.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(g_player->v140))))) {
+        TakeCountedColliderTouch(self, g_player, 1);
+    } else if (self->parent == 0) {
+        Contact03* c = (Contact03*)self->contacts;
+        if (c != 0) {
+            s32 i = self->root == c->end[0].body;
+            TakeCountedColliderTouch(self, c->end[i].part, 0);
+        }
+    }
+    FreePooledContactChain(self->world, self->contacts);
+    self->contacts = 0;
+}
 
 void StepCountedCollider(CountedCollider* self, f32 t)
 {

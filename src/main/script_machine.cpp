@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "world.h"
 #include "globals.h"
@@ -1481,7 +1482,15 @@ INCLUDE_ASM(func_00115F70);
 
 INCLUDE_ASM(func_00115FF8);
 
-INCLUDE_ASM(func_00116080);
+ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Q(*args->v))));
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 INCLUDE_ASM(func_00116108);
 

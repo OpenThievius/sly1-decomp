@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "child_group_object.h"
 #include "attachment.h"
 #include "shapes.h"
@@ -377,6 +378,20 @@ void AddContactListKind(ContactListObject* self, s32 value)
     }
 }
 
+// Class 0x3D, a contact-list object without gravity that keeps a velocity of its own.
+struct ContactListGlider : ContactListObject {
+    f32 speed6F0;           // 0x6F0: the speed of the velocity it keeps (func_0018DDD8)
+    f32 rate6F4;            // 0x6F4: how fast it turns to that velocity (func_0018DE70)
+    u8 pad6F8[0x700 - 0x6F8];
+    Vec02 v700;             // 0x700: the velocity it keeps
+};
+
+typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1];
+
+void StepCollider(Collider* self, f32 t);
+void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
+void AddColliderForce(void* a, void* b);
+
 void InitContactListObjectWithoutGravity(ContactListObject* self)
 {
     InitContactListObject(self);
@@ -385,7 +400,16 @@ void InitContactListObjectWithoutGravity(ContactListObject* self)
 
 INCLUDE_ASM(func_0018DDD8);
 
-INCLUDE_ASM(func_0018DE70);
+void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
+{
+    Vec02 accel;
+    Vec02 t;
+    StepCollider(self, dt);
+    Vu0::Q(t) = Vu0::FromFloat(dt);
+    Vu0::Q(accel) = Vu0::DivX(Vu0::Sub(Vu0::Q(self->v700), Vu0::Q(self->v150)), Vu0::Q(t));
+    ClampVectorLength(&accel, &accel, self->rate6F4);
+    AddColliderForce(self, &accel);
+}
 
 INCLUDE_ASM(func_0018DEE8);
 

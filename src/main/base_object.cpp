@@ -18,6 +18,7 @@
 #include "script_value.h"
 #include "fpu.h"
 #include "collider.h"
+#include "vu0.h"
 #include "asm_func.h"
 
 void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
@@ -820,7 +821,21 @@ void SetConeVolumeThirdAngle(ConeVolume* self, f32 v)
     RefreshConeVolumeShape(self);
 }
 
-INCLUDE_ASM(func_001848B8);
+void SetConeVolumeDirection(ConeVolume* self, Quad16* dir)
+{
+    self->q310 = *dir;
+    u128 v = Vu0::Q(*dir);
+    f32 len = Vu0::ToFloat(Vu0::Length(v));
+    if (0.0001f < len) {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f / len);
+        Vu0::Q(self->q320) = Vu0::MulX(v, Vu0::Q(k));
+    } else {
+        self->q320 = *(const Quad16*)&g_unitZVector;
+    }
+    RefreshConeVolumeShape(self);
+    UpdateConeVolumeBounds(self);
+}
 
 void SetConeVolumeValue(ConeVolume* self, s32 v)
 {
