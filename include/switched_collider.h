@@ -835,7 +835,7 @@ struct PathFollower : SwitchedCollider {
     Slot19 f6B0[4];         // 0x6B0
     PathCurveObject* f830;  // 0x830: the path it follows (func_001DAFB8)
     f32 f834;               // 0x834: the path's length
-    u8 pad838[0x83C - 0x838];
+    f32 f838;               // 0x838: the time it samples the path at (func_00181658)
     f32 f83C;               // 0x83C
     f32 f840;               // 0x840
     f32 f844;               // 0x844
@@ -899,7 +899,8 @@ struct ModeWalker : PathFollower {
     u8 padBFC[0xC00 - 0xBFC];
     s32 fC00;               // 0xC00
     void* fC04;             // 0xC04
-    u8 padC08[0xC10 - 0xC08];
+    PlacedObject* fC08;     // 0xC08: the object func_00181658 turns to follow the path's frame
+    u8 padC0C[0xC10 - 0xC0C];
 };
 
 struct ModeCollider : SwitchedCollider {

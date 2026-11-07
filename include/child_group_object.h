@@ -65,7 +65,11 @@ struct ChildGroupObject : Collider {
 // The movie player's object (movie_player.cpp): the lists of objects it asks about (slot 56),
 // the movie's data (+0x6B4) and a flag.
 struct ContactListObject : ChildGroupObject {
-    u8 pad690[0x6B4 - 0x690];
+    u8 pad690[4];
+    PlacedObject* f694;     // 0x694
+    u8 pad698[0x6A0 - 0x698];
+    Vec02 v6A0;             // 0x6A0
+    u8 pad6B0[0x6B4 - 0x6B0];
     void* f6B4;             // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
     s32 count6BC;           // 0x6BC: the objects of items6C0
