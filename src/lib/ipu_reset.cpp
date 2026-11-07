@@ -44,7 +44,7 @@ void func_00211B40(u32 value)
 
 void func_00211BA8(void)
 {
-    func_00211B40(1);
+    StartIpuInputForReset(1);
     *(volatile u32*)0x10002010 = 0x40000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }

@@ -50,12 +50,12 @@ f32 func_00206298(f32 x)
         t = (g_one + x) * 0.5f;
         num = t * (g_numT1 + t * (g_numT2 + t * (g_numT3 + t * (g_numT4 + t * (g_numT5 + t * g_numT6)))));
         den = g_one + t * (g_denT1 + t * (g_denT2 + t * (g_denT3 + t * g_denT4)));
-        root = func_00208068(t);
+        root = SquareRootKernel(t);
         ratio = num / den;
         return g_pi - 2.0f * (root + (ratio * root - g_halfPiTail));
     } else {
         t = (g_one - x) * 0.5f;
-        root = func_00208068(t);
+        root = SquareRootKernel(t);
         head = root;
         FLOAT_TO_BITS(headBits, head);
         BITS_TO_FLOAT(head, headBits & 0xfffff000);

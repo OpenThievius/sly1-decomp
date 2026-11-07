@@ -72,7 +72,7 @@ void func_00202768(u8* p, s32 n)
 DmaChannel* func_002027A0(u32 index)
 {
     if (index < 10)
-        return D_00279340[index];
+        return g_dmaChannels[index];
     return 0;
 }
 
@@ -84,8 +84,8 @@ s32 func_002027C8(s32 mode)
     u32 m;
 
     for (i = 0; i < 10; i++) {
-        if (D_00279380[i] != 0) {
-            DmaChannel* p = D_00279340[i];
+        if (g_dmaChannelsToReset[i] != 0) {
+            DmaChannel* p = g_dmaChannels[i];
             p->chcr = 0;
             p->tadr = 0;
             p->madr = 0;
@@ -97,8 +97,8 @@ s32 func_002027C8(s32 mode)
     *(volatile u32*)0x1000E010 = 0xFF1F;
     m = *(volatile u32*)0x1000E010 & 0xFF1F0000;
     *(u32*)0x1000E010 = m;
-    func_00202768((u8*)&settings, 0x14);
-    func_002028A8(&settings);
+    ClearBytes((u8*)&settings, 0x14);
+    SetDmaSettings(&settings);
     if (mode == 1) {
         volatile u32* p = (volatile u32*)0x1000E000;
         *p |= 1;
@@ -135,7 +135,7 @@ s32 func_002028A8(DmaSettings* c)
     *(volatile u32*)0x1000E030 = w30;
     *(volatile u32*)0x1000E050 = w50;
     *(volatile u32*)0x1000E040 = w40;
-    D_002793D8 = *c;
+    g_dmaSettings = *c;
     return 0;
 }
 

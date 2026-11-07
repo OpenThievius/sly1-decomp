@@ -82,10 +82,10 @@ void func_001F7420(double value)
     } else if (func_001FD308(value, 1.0) >= 0) {
         while (func_001FD308(value, 1.0) >= 0) {
             exp10++;
-            value = func_001FD088(value, 10.0);
+            value = DivideDoubles(value, 10.0);
         }
     }
-    s32 digits = func_001F7390(func_001FB528(func_001FCDE0(value, 1000000.0)));
+    s32 digits = func_001F7390(ConvertDoubleToU64(func_001FCDE0(value, 1000000.0)));
     PrintToOutputHook("0.%d", digits);
     if (exp10 >= 0)
         PrintToOutputHook("e+%d", exp10);

@@ -36,7 +36,7 @@ struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 
 
 void func_002118A0(Out_002118A0* out)
 {
-    func_00211838(1);
+    StartIpuInputTransfer(1);
     volatile u32* a = (volatile u32*)0x1000B410;
     out->w00 = *a;
     out->w04 = *(volatile u32*)0x1000B430;
@@ -44,7 +44,7 @@ void func_002118A0(Out_002118A0* out)
     out->w0C = *(volatile u32*)0x1000B400;
     while ((*(volatile u32*)0x10002010 & 0xF0) != 0) {
     }
-    func_002117D0(0);
+    StartIpuOutputTransfer(0);
     out->w10 = *(volatile u32*)0x1000B010;
     out->w14 = *(volatile u32*)0x1000B020;
     out->w18 = *(volatile u32*)0x1000B000;
@@ -74,7 +74,7 @@ void func_00211988(Ctx_211988* s0)
         if (s0->f14 != 0) {
             *(volatile u32*)0x1000B010 = s0->f10;
             *(volatile u32*)0x1000B020 = s0->f14;
-            func_002117D0(s0->f18 | 0x100);
+            StartIpuOutputTransfer(s0->f18 | 0x100);
         }
     }
     while (*(volatile s32*)0x10002010 < 0) {
@@ -93,7 +93,7 @@ void func_00211988(Ctx_211988* s0)
     *(volatile u32*)0x1000B410 = s1;
     *(volatile u32*)0x1000B430 = s0->f4;
     *(volatile u32*)0x1000B420 = s2;
-    func_00211838(s0->fC | 0x100);
+    StartIpuInputTransfer(s0->fC | 0x100);
 }
 
 u32 func_00211AD8(s32 mode)

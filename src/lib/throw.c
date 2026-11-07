@@ -75,7 +75,7 @@ Node_001FD990* func_001FD990(void)
 {
     Node_001FD990* p = (Node_001FD990*)func_0018D740(0x18);
     if (p == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
     (void)FillMemory(p, 0, 0x18);
     p->f4 = (u8*)p + 0x10;
@@ -156,12 +156,12 @@ void func_001FDAF0(void)
             }
             *chain = (void**)frame[0];
         } else {
-            func_001FD930();
+            RunTerminateHook();
         }
     }
 
     if (ctx->active == 0 || (*chain)[0] == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
 
     buf = &(*chain)[2];
@@ -191,12 +191,12 @@ void func_001FDC68(void)
             }
             *chain = (void**)frame[0];
         } else {
-            func_001FD930();
+            RunTerminateHook();
         }
     }
 
     *chain = (void**)(*chain)[0];
-    func_001FDAF0();
+    ThrowToTopHandler();
 }
 
 /* The active exception, asked whether it matches a runtime type through its matcher. */
@@ -368,7 +368,7 @@ typedef struct Pc_1FE198 Pc_1FE198;
 
 Frame_1FE198* func_001FE100(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
 {
-    Frame_1FE198* s0 = (Frame_1FE198*)func_001FFC80(a0, (UnwindFrame*)a2);
+    Frame_1FE198* s0 = (Frame_1FE198*)FindFrameUnwindState(a0, (UnwindFrame*)a2);
     u16 idx;
     if (s0 == 0) {
         return 0;
@@ -475,7 +475,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         }
     }
     if (res == 0) {
-        func_001FD930();
+        RunTerminateHook();
     }
     obj->f0 = res;
     if (pc == startPc) {
@@ -517,13 +517,13 @@ void func_001FE4C8(void)
     s32 offset;
 
     if (ctx->f8 == 0)
-        func_001FD930();
+        RunTerminateHook();
 
     __builtin_unwind_init();
 here:
-    cur = func_001FFC80(&&here, cur);
+    cur = FindFrameUnwindState(&&here, cur);
     if (cur == 0)
-        func_001FD930();
+        RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
     handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
@@ -542,14 +542,14 @@ void func_001FE6A8(void* index)
     s32 offset;
 
     if (ctx->f8 == 0)
-        func_001FD930();
+        RunTerminateHook();
     ctx->fC = (s32)index;
 
     __builtin_unwind_init();
 here:
-    cur = func_001FFC80(&&here, cur);
+    cur = FindFrameUnwindState(&&here, cur);
     if (cur == 0)
-        func_001FD930();
+        RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
     handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);

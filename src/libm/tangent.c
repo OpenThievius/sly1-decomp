@@ -17,11 +17,11 @@ f32 func_002054F0(f32 x)
     FLOAT_TO_BITS(magnitude, x);
     magnitude &= 0x7FFFFFFF;
     if (magnitude <= 0x3F490FDA) {
-        return func_00208D50(x, 0.0f, 1);
+        return TangentKernel(x, 0.0f, 1);
     }
     if (magnitude > 0x7F7FFFFF) {
         return x - x;
     }
-    quadrant = func_00207C88(x, parts);
-    return func_00208D50(parts[0], parts[1], 1 - ((quadrant & 1) << 1));
+    quadrant = ReduceByHalfPi(x, parts);
+    return TangentKernel(parts[0], parts[1], 1 - ((quadrant & 1) << 1));
 }

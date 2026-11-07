@@ -39,7 +39,7 @@ f32 func_00204F68(f32 x)
         }
         anchor = -1;
     } else {
-        x = func_002052F8(x);
+        x = AbsoluteValue(x);
         if (magnitude < 0x3F980000) {
             if (magnitude < 0x3F300000) {
                 anchor = 0;

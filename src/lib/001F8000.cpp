@@ -24,6 +24,6 @@ void* D_0027B130[21] = {
     func_001460E0, func_0015F658, func_00167D48, func_0016C450,
     func_00180E90, func_0018F968, func_001931F0, func_001963B8,
     func_001AEC90, func_001C29C8, func_001E08D8, func_001E5358,
-    func_001E88B0, func_001F2738, func_00211DE0, 0,
+    func_001E88B0, func_001F2738, RegisterProgramFrameInfo, 0,
     (void*)3
 };

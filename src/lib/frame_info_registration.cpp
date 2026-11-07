@@ -18,10 +18,10 @@ void func_001FFC08(u8* begin);
 
 void func_00211DE0(void)
 {
-    func_001FFBE0(D_0027B198, D_0062C540);
+    RegisterFrameInfo(D_0027B198, D_0062C540);
 }
 
 void func_00211DF8(void)
 {
-    func_001FFC08(D_0027B198);
+    DeregisterFrameInfo(D_0027B198);
 }

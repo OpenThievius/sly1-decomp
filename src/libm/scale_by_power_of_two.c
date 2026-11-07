@@ -29,15 +29,15 @@ f32 func_00209260(f32 x, s32 n)
     if (exponent == 0xFF) return x + x;
     exponent = exponent + n;
     if (exponent > 0xFE) {
-        return func_002093C0(g_tenTo30, x) * g_tenTo30;
+        return CopySign(g_tenTo30, x) * g_tenTo30;
     }
     if (exponent > 0) {
         BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));
         return x;
     }
     if (exponent < -24) {
-        if (n > 50000) return func_002093C0(g_tenTo30, x) * g_tenTo30;
-        return func_002093C0(g_tenToMinus30, x) * g_tenToMinus30;
+        if (n > 50000) return CopySign(g_tenTo30, x) * g_tenTo30;
+        return CopySign(g_tenToMinus30, x) * g_tenToMinus30;
     }
     exponent += 25;
     BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));

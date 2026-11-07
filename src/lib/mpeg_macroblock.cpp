@@ -83,7 +83,7 @@ s32 func_0020C1A0(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code)
         d->chan[d->f810].f10 = 0;
     } else {
         if ((u32)(code - 1) >= 3) {
-            func_0020B940(d, "Invalid modion type -- ignored(%d)", code);
+            ReportMpegErrorFormat(d, "Invalid modion type -- ignored(%d)", code);
             d->f11C = 1;
             return 0;
         }
@@ -174,7 +174,7 @@ void func_0020C3F0(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* v
                 func_0020CAF8(self, self->f1B8, 1, 1, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
                 func_0020CAF8(self, self->f1B8, 0, 1, 0, 8, x, y, dual[2], dual[3], other, 1);
             } else {
-                func_0020B940(self, "(a) invalid motion_type(%d)-0", type);
+                ReportMpegErrorFormat(self, "(a) invalid motion_type(%d)-0", type);
             }
         } else {
             bottom = self->f174 == 2;
@@ -206,7 +206,7 @@ void func_0020C3F0(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* v
                 func_0020CAF8(self, refs[other][!bottom], 0, 0, 0, 16, x, y, dual[0], dual[1],
                               0, 1);
             } else {
-                func_0020B940(self, "(b) invalid motion_type(%d)-1", type);
+                ReportMpegErrorFormat(self, "(b) invalid motion_type(%d)-1", type);
             }
         }
         average = 1;
@@ -232,7 +232,7 @@ void func_0020C3F0(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* v
             func_0020CAF8(self, sel[3] ? self->f1D8[1] : self->f1C8[1], 0, 0, 8, 8, x, y,
                           vec[6], vec[7], 0, average);
         } else {
-            func_0020B940(self, "(c) invalid motion_type(%d)-2", type);
+            ReportMpegErrorFormat(self, "(c) invalid motion_type(%d)-2", type);
         }
     }
 }

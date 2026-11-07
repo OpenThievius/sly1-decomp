@@ -40,7 +40,7 @@ void func_002115C0(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
     self->bufStart = a;
     self->bufEnd = a + b;
     self->bufSize = b;
-    func_00211618(self, 0);
+    AdvanceBits(self, 0);
 }
 
 INCLUDE_ASM(func_002115F8);
@@ -49,15 +49,15 @@ INCLUDE_ASM(func_00211618);
 
 s64 func_002116B0(BitReader_2115C0* self, s32 n)
 {
-    s64 r = func_002115F8(self, n);
-    func_00211618(self, n);
+    s64 r = PeekBits(self, n);
+    AdvanceBits(self, n);
     return r;
 }
 
 s64 func_00211700(BitReader_2115C0* self)
 {
-    s64 r = func_002115F8(self, 1);
-    func_00211618(self, 1);
+    s64 r = PeekBits(self, 1);
+    AdvanceBits(self, 1);
     return r;
 }
 
@@ -70,7 +70,7 @@ void func_00211748(BitReader_2115C0* self, s32 bytes)
     if (self->next >= self->bufEnd) {
         self->next -= self->bufSize;
     }
-    func_00211618(self, 0);
+    AdvanceBits(self, 0);
 }
 
 u32 func_002117A0(BitReader_2115C0* stream, s32 amount)

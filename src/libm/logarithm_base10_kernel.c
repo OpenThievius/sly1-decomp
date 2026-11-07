@@ -38,5 +38,5 @@ f32 func_002072C8(f32 x)
     bits = (bits & 0x007FFFFF) | ((127 - neg) << 23);
     exponentF = (f32)(exponent + neg);
     BITS_TO_FLOAT(x, bits);
-    return (exponentF * g_log10Of2Tail + func_00206FA0(x) * g_invLn10) + exponentF * g_log10Of2Head;
+    return (exponentF * g_log10Of2Tail + LogarithmKernel(x) * g_invLn10) + exponentF * g_log10Of2Head;
 }

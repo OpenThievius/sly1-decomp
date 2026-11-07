@@ -2722,3 +2722,208 @@ func_002016A0	SendSignalFor	sends a signal to a process with SignalProcess and k
 func_00201700	GetProcessIdFor	GetProcessId for a state record
 func_00201720	CopyStringBounded	original assembly: copies a string of at most n bytes, 16 bytes at a time with the 128-bit instructions (strncpy.c; SendModuleLoadRequest copies the module's name with it)
 D_0027B328	g_systemCallError	the error number SignalProcess's call leaves; SendSignalFor clears it before the call and copies it into the state record after
+func_001FB528	ConvertDoubleToU64	converts a double to an unsigned 64-bit integer with the software double arithmetic (double_to_u64.c; FormatExponent calls it)
+func_001FB618	ConvertS64ToDouble	converts a signed 64-bit integer to a double from its two halves with the software double arithmetic (s64_to_double.c)
+func_001FB6B0	ConvertS64ToFloat	converts a signed 64-bit integer to a float, rounded once (s64_to_float.c; AdvanceGameClock calls it)
+func_001FC910	PackDouble	packs a double taken apart (kind, sign, exponent, fraction) back into its 64 bits, rounding and handling NaN, zero, infinity and denormals (soft_float.c)
+func_001FCA40	UnpackDouble	takes a double's 64 bits apart into kind, sign, unbiased exponent and fraction (every operation of soft_float.c starts with it)
+func_001FCAE0	AddUnpackedDoubles	adds two unpacked doubles, aligning their exponents and handling the special kinds (the double add and subtract call it)
+func_001FD088	DivideDoubles	unpacks two doubles, divides them and packs the result (FormatExponent calls it)
+func_001FD1F0	CompareUnpackedDoubles	compares two unpacked doubles by kind, sign, exponent and fraction (the double comparison calls it)
+func_001FD410	ConvertDoubleToS32	converts a double to a signed 32-bit integer, 0 for NaN and zero, saturating at the limits
+func_001FD4A8	ConvertDoubleToU32	converts a double to an unsigned 32-bit integer, 0 for negative values and NaN, 0xFFFFFFFF above the range
+func_001FD548	PackDoubleFromParts	packs a double from a kind, sign, exponent and fraction passed as loose arguments (fptodp, func_001FD868, calls it)
+func_001FD5D0	PackFloat	packs a float taken apart (kind, sign, exponent, fraction) back into its 32 bits (soft_float_single.c)
+func_001FD6E0	UnpackFloat	takes a float's 32 bits apart into kind, sign, unbiased exponent and fraction (soft_float_single.c)
+func_001FD7A0	ConvertFloatToU32	converts a float to an unsigned 32-bit integer (CancelPauseMenuPage calls it)
+func_001FD838	PackFloatFromParts	packs a float from a kind, sign, exponent and fraction passed as loose arguments (the double to float conversion calls it)
+func_001FD8A8	AllocateOrThrow	the C++ runtime's allocation: takes memory from the game's allocator func_0018D758 and throws bad_alloc when there is none (allocate.cpp; LoadFonts calls it)
+func_001FD920	AbortOnTerminate	the default terminate hook D_00278048: calls AbortProgram
+func_001FD930	RunTerminateHook	calls the function the terminate hook D_00278048 holds (the exception runtime and HandleAbstractCall call it)
+func_001FBDF8	HandleAbstractCall	jumps to RunTerminateHook; retail's method table D_0024A220 holds it in the slots a class leaves unimplemented (abstract_call.c)
+func_001FDAF0	ThrowToTopHandler	runs the cleanups registered in the top exception handler, then jumps to that handler
+func_001FDC68	PopHandlerAndThrow	pops the top exception handler after running its cleanups, then throws again
+func_001FF048	ReadUnsignedLeb128	reads an unsigned number of 7-bit groups (the top bit marks a continuation) from the unwind tables and returns the position after it
+func_001FF090	ReadSignedLeb128	reads a signed number of 7-bit groups, extending the sign from bit 6 of the last byte, and returns the position after it
+func_001FFBE0	RegisterFrameInfo	original assembly: adds an object's frame information to the runtime's list D_0062A7B8 (RegisterProgramFrameInfo calls it at startup)
+func_001FFC08	DeregisterFrameInfo	removes an object's frame information from the runtime's list D_0062A7B8, freeing its sorted table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit)
+func_001FFC80	FindFrameUnwindState	finds the frame description of a code address and runs its unwind instructions into a state record (the throw and rethrow entries call it)
+func_00211DE0	RegisterProgramFrameInfo	registers the program's frame information D_0027B198 with the runtime (RegisterFrameInfo); the last entry of the constructor list D_0027B130
+func_00211DF8	ReleaseProgramFrameInfo	takes the program's frame information D_0027B198 back from the runtime (DeregisterFrameInfo); the last entry of the destructor list D_0027B180
+func_002018E8	ResetGsPaths	original assembly: resets the paths to the GS, driving VU0 and VIF1 with macro instructions (InitDmaChannels calls it)
+func_00201988	WaitGsPaths	original assembly: waits until the paths to the GS are idle (FlipDisplayFrame calls it)
+func_00201A18	ResetGs	in mode 0 resets the GS, records the interlacing, video mode, field mode and GS version in g_gsParams, removes its handler and sets the video mode; mode 1 only resets, mode 5 only records and sets (InitDisplay calls it)
+func_00201BA8	GetGsParams	returns g_gsParams
+func_00201BB8	WriteDisplayRegisters	writes a display environment's words to the GS's privileged registers (0x12000000 on), by the layout of the GS version in g_gsParams
+func_00201C78	SendDrawEnvironment	waits for DMA channel 2 to finish and sends a drawing environment's packet through it
+func_00201D60	SetUpDoubleBuffer	defines the two display and drawing environments of a double buffer for a pixel format, width and height, with an optional clear (InitDisplay calls it)
+func_00201FF8	SwapDoubleBuffer	writes the display registers of one half of a double buffer and sends the other half's drawing environment (FlipDisplayFrame calls it)
+func_00202058	SwapGsInterruptMask	reads the GS interrupt mask, writes a new one and returns the old
+func_00202098	SetFieldDrawOffset	sets a drawing environment's offset from its centre, half a line lower on the odd field (FlipDisplayFrame calls it)
+func_00202120	GetGsInterruptMask	returns the GS interrupt mask (ReadGsInterruptMask)
+func_00202140	DefineDisplayEnvironment	fills a display environment for a pixel format and size, printing its message for an unsupported display mode (SetUpDoubleBuffer calls it)
+func_002023B0	CountFrameBufferPages	returns the GS pages a frame buffer of a pixel format and size takes, doubled when g_gsParams says interlaced frame mode
+func_00202478	DefineDrawEnvironment	original assembly: fills a drawing environment for a pixel format, size and offset (SetUpDoubleBuffer calls it)
+func_00202660	DefineClearPacket	original assembly: fills the packet that clears a rectangle (SetUpDoubleBuffer calls it when asked to clear)
+D_00279330	g_gsParams	the GS parameters ResetGs records: interlacing, video mode, field mode and GS version (GetGsParams returns it)
+func_00202768	ClearBytes	sets n bytes to 0 (ResetDmaController clears its settings with it)
+func_002027A0	GetDmaChannel	returns the register block of one of the ten DMA channels from g_dmaChannels, or 0 past the tenth
+func_002027C8	ResetDmaController	clears the channels g_dmaChannelsToReset marks, masks and clears the controller's interrupts, sets its settings to zero and enables it when asked; returns whether it was enabled (InitDmaChannels calls it)
+func_002028A8	SetDmaSettings	writes the controller's release, FIFO, stall and drain settings and its ring and hold words, and keeps them in g_dmaSettings
+func_00202A80	StartDmaChain	waits for a channel to finish, then starts it in chain mode from a tag address (SubmitPacketBuffer calls it)
+func_00202B68	StartDmaChainToMemory	waits for a channel to finish, then starts it in chain mode towards memory (StartFromSprChain calls it)
+func_00202C38	WaitDmaChannel	waits until a channel's transfer ends, or tests it, with a timeout (RunRenderThread calls it)
+D_00279340	g_dmaChannels	the register blocks of the EE's ten DMA channels (0x10008000 to 0x1000D400) GetDmaChannel returns
+D_00279380	g_dmaChannelsToReset	which channels ResetDmaController clears
+D_002793D8	g_dmaSettings	the controller's last settings SetDmaSettings wrote
+func_00202D08	WakeDiscWaiter	original assembly: the alarm handler of WaitDiscTicks, which signals its semaphore
+func_00202D30	WaitDiscTicks	creates a semaphore, arms an alarm (ScheduleAlarm) of a number of ticks whose handler signals it and waits on it
+func_00202DA0	EndDiscCommand	the end of a command, from the remote call's end callback in the interrupt: records its status and releases the command's semaphore and the callback's
+func_00202E50	CopyDiscReadTail	the read's end callback: copies the two unaligned pieces the IOP left in uncached memory to where they go
+func_00202EF0	CreateDiscSemaphores	creates the semaphores of the two disc clients' commands and of the callback, once
+func_00202F88	DeleteDiscSemaphores	signals the callback's semaphore if one is pending, deletes the three semaphores and clears the command 0x80000012's handler
+func_00203010	RunDiscCallback	the handler of the command 0x80000012: runs the disc callback with its argument unless it is being installed
+func_00203050	InstallDiscCallbackHandler	installs RunDiscCallback as the handler of the command 0x80000012
+func_002030C0	BeginDiscNCommand	takes the semaphore of the first disc client's commands for a command, and binds the client to the service 0x80000595 once, printing "Ncmd fail sema" when busy
+func_002032C8	SyncDiscNCommand	waits for the first disc client's command to end (mode 0) or tells whether it is still running (mode 1), printing "N cmd wait" (SyncDiscRead forwards to it)
+func_00203368	SyncDiscSCommand	the same for the second disc client's commands, printing "S cmd wait"
+func_002033D8	BeginDiscSCommand	takes the semaphore of the second disc client's commands, and binds the client to the service 0x80000593 once, printing "Scmd fail sema" when busy
+func_00203548	InitDiscLibrary	original assembly: binds the disc library to the IOP and initialises it, printing its "CD_Init" message on a bind error (LoadIopModules calls it)
+func_00203828	WaitDiscReady	original assembly: waits until the drive reports ready, with its "DiskReady" messages (LoadIopModules and EnsureSoundBankLoaded call it)
+func_00203AE8	GetDiscReadPosition	returns the word the IOP keeps in D_0027A5C0, read through its uncached address (RefillBufferedStreamFromSectors calls it)
+func_00203B18	ReadDiscSectors	original assembly: starts a read of a count of sectors into a buffer with the first client ("call cdread cmd"); StartDiscRead forwards to it
+func_00203CF8	GetDiscStatus	the second client's command 3, returning its word (func_00140968 polls it)
+func_00203D90	GetDiscError	the second client's command 4, returning the drive's error word (GetDiscReadError forwards to it)
+func_00203E28	StopDiscRead	the second client's command 0x16 (CloseBufferedStream calls it to finish a pending sector read)
+func_00203EE0	CheckDiscChanged	the second client's command 5 with one word, returning a word through out (StepDiscSectorCheck calls it with 2 and shows its page when the word is set)
+D_0027A5D0	g_discNClient	the first disc client, bound to the service 0x80000595 by BeginDiscNCommand
+D_0027AE48	g_discSClient	the second disc client, bound to the service 0x80000593 by BeginDiscSCommand
+D_00279428	g_discNSemaphore	the semaphore of the first disc client's commands (BeginDiscNCommand takes it, EndDiscCommand releases it)
+D_0027942C	g_discSSemaphore	the semaphore of the second disc client's commands (BeginDiscSCommand takes it)
+func_00203FD0	SendPadDma	original assembly: sends a pad slot's DMA words to the IOP, printing its message when the transfer cannot start (SetPadActuatorBytes calls it)
+func_002040E8	InitPadLibrary	binds the two pad clients to the services 0x80000100 and 0x80000101, retrying until bound, and initialises the module (InitPadSystem calls it)
+func_002042C8	OpenPadPort	original assembly: opens a port's slot on a 64-byte aligned buffer of two frames, printing its messages on a bad buffer or a slot already open (InitPadRecord calls it)
+func_002044B0	GetNewerPadFrame	refreshes a slot's two frames from memory and returns the one with the higher count
+func_00204510	ReadPadFrame	copies the newer frame of an open slot into data and returns its size (PollPadInput calls it)
+func_00204590	GetPadSlotState	returns the state of an open slot's newer frame (5 for a stable slot with a request running), or 0x63 when closed (UpdatePadConnection polls it)
+func_00204610	SetPadRequestMode	sets the request mode of an open slot's newer frame (2 while a request runs)
+func_00204678	GetPadRequestMode	returns the request mode of an open slot's newer frame (UpdatePadConnection reads it)
+func_00204930	SendPadTwoWordRequest	sends the pad module command 6 with two words for a slot and marks the request running on success (UpdatePadConnection calls it)
+func_002049E8	SetPadActuatorBytes	original assembly: stores the bytes for a slot's actuators and sends them (UpdatePadPattern and StopPadPatternOutput call it)
+func_00204AA8	SendPadSixByteRequest	sends the pad module command 8 with six bytes for a slot and marks the request running on success (UpdatePadConnection calls it)
+func_00204C38	SendPadMaskRequest	sends the pad module command 10 with a mask for a slot and marks the request running on success
+func_00204CE8	HasFullPadMask	tells whether an open slot's button mask (func_00204B80) is 0x3FFFF (UpdatePadConnection calls it)
+func_00204D48	SendFullPadMask	sends SendPadMaskRequest with the mask 0xFFF for an open slot (UpdatePadConnection calls it)
+func_00204EC8	RefreshPadFrames	original assembly: invalidates the data cache over a slot's frames so they are read from memory (GetNewerPadFrame calls it)
+D_0062AA80	g_padClients	the two remote call clients InitPadLibrary binds to the pad module
+D_0062AAD0	g_padSlots	each port's four slots: the buffer of their two frames, their DMA words and whether they are open
+D_0062ACC0	g_padRequest	the 64-byte aligned request buffer the pad commands send and receive through
+func_00204F68	Arctangent	the arctangent of a float (arctangent.c)
+func_00205210	Cosine	the cosine of a float, reduced by ReduceByHalfPi to CosineKernel or SineKernel (cosine.c)
+func_002052F8	AbsoluteValue	a float with its sign bit cleared (absolute_value.c)
+func_00205318	RoundDown	a float rounded down to an integer (round_down.c)
+func_00205400	Sine	the sine of a float, reduced by ReduceByHalfPi to SineKernel or CosineKernel (sine.c)
+func_002054F0	Tangent	the tangent of a float, reduced by ReduceByHalfPi to TangentKernel (tangent.c)
+func_00205578	Arccosine	the checked arccosine: ArccosineKernel's result, or a domain error through HandleMathError (arccosine.c)
+func_00205678	Arcsine	the checked arcsine: ArcsineKernel's result, or a domain error through HandleMathError (arcsine.c)
+func_00205778	ArctangentOfRatio	the checked arctangent of y / x: ArctangentOfRatioKernel's result, or a domain error for two zeros (arctangent_of_ratio.c)
+func_002058A0	FloatRemainder	the checked remainder of x / y: FloatRemainderKernel's result, or a domain error for a zero divisor (float_remainder.c)
+func_002059E0	Logarithm	the checked natural logarithm: LogarithmKernel's result, or a singularity at zero or a domain error below it (logarithm.c)
+func_00205B28	LogarithmBase10	the checked base-10 logarithm: LogarithmBase10Kernel's result, or a singularity or domain error (logarithm_base10.c)
+func_00205C78	Power	the checked power x ** y: PowerKernel's result, or a domain, singularity, overflow or underflow error (power.c)
+func_00206180	SquareRoot	the checked square root: SquareRootKernel's result, or a domain error below zero (square_root.c)
+func_00206298	ArccosineKernel	the unchecked arccosine of a float (arccosine_kernel.c)
+func_002066C8	ArcsineKernel	the unchecked arcsine of a float (arcsine_kernel.c)
+func_00206A68	ArctangentOfRatioKernel	the unchecked arctangent of y / x in the right quadrant (arctangent_of_ratio_kernel.c)
+func_00206D50	FloatRemainderKernel	the unchecked remainder of x / y with the sign of x (float_remainder_kernel.c)
+func_00206FA0	LogarithmKernel	the unchecked natural logarithm of a float (logarithm_kernel.c)
+func_002072C8	LogarithmBase10Kernel	the unchecked base-10 logarithm of a float (logarithm_base10_kernel.c)
+func_002073F8	PowerKernel	the unchecked power x ** y of floats (power_kernel.c)
+func_00207C88	ReduceByHalfPi	reduces a float argument by pi / 2 into a quadrant and a remainder in two floats (reduce_by_half_pi.c)
+func_00208068	SquareRootKernel	the unchecked square root of a float, bit by bit (square_root_kernel.c)
+func_002081A0	CosineKernel	cos(x + y) for a reduced argument in two parts (cosine_kernel.c)
+func_002082F8	ReduceLargeByHalfPi	reduces a large float argument by pi / 2 on the table of the digits of 2 / pi (reduce_large_by_half_pi.c)
+func_00208C48	SineKernel	sin(x + y) for a reduced argument in two parts (sine_kernel.c)
+func_00208D50	TangentKernel	tan(x + y), or -1 / tan when sign is -1, for a reduced argument in two parts (tangent_kernel.c)
+func_00208FE8	HandleMathError	the error hook the checked functions call: handles nothing and returns 0 (error_hook.c)
+func_00209010	RoundToInteger	a double rounded to an integer in the current rounding direction, with the software double arithmetic (round_to_integer.c)
+func_00209210	IsFinite	whether a float is finite (is_finite.c)
+func_00209238	IsNotANumber	whether a float is not a number (is_not_a_number.c; every checked function tests its arguments with it)
+func_00209260	ScaleByPowerOfTwo	a float times 2 to the power n (scale_by_power_of_two.c)
+func_002093C0	CopySign	a float with the magnitude of x and the sign of y (copy_sign.c)
+D_0024FF70	g_mathInfinity	a double's positive infinity, which the checked functions return as an error's result (infinity.c)
+D_0024FF78	g_mathErrorMode	the math library's error mode, 1; the checked functions return the kernel's result unchanged when it is -1 (error_mode.c)
+func_002093F0	InitMemoryCardClient	binds the memory card client to the IOP's server and checks the server's version, printing its messages (InitMemoryCardSystem calls it)
+func_002095B0	OpenCardFile	sends the card server a request (operation 2) with a port, slot, path and flags and records it in flight (OpenMemoryCardFile calls it)
+func_002096E8	MakeCardDirectory	OpenCardFile with the directory flag (CreateMemoryCardDirectory calls it)
+func_00209720	CloseCardFile	sends the card server the close request (operation 3) for a handle (CloseMemoryCardFile calls it)
+func_002097E0	CopyCardDirectoryReply	the completion handler that copies the server's results out of uncached memory into the caller's buffers
+func_00209870	ReadCardFile	sends the card server a read request (operation 5) of a size into a buffer for a handle (ReadMemoryCardFile calls it)
+func_00209990	WriteCardFile	sends the card server a write request (operation 6) of data for a handle (WriteMemoryCardFile calls it)
+func_00209B10	WakeCardWaiter	original assembly: the alarm handler of WaitCardTicks, which wakes the waiting thread through QueueThreadRequest
+func_00209B38	WaitCardTicks	arms an alarm of a number of ticks that wakes the current thread and sleeps until it does
+func_00209B80	SyncCardRequest	waits for the request in flight to end (or tests it), returns its operation and result and releases the request semaphore (SyncMemoryCardResult calls it)
+func_00209C60	CopyCardInfoReply	the completion handler that copies the card information's words out of uncached memory to where GetCardInfo was asked to put them
+func_00209CB8	GetCardInfo	sends the card server the information request (operation 1) for a port and slot with three pointers for its results (PollMemoryCard and GetMemoryCardFreeBytes call it)
+func_00209E48	ReadCardDirectory	sends the card server the directory request (operation 0xD) for a path into a table of entries (ListMemoryCardDirectory and LoadMemoryCardSaveSlots call it)
+D_0027AEC8	g_cardRequestInFlight	the operation of the card request in flight, 0 when none (each request sets it, SyncCardRequest clears it)
+D_0027AECC	g_cardSemaphore	the semaphore that keeps one card request at a time (SyncCardRequest releases it)
+D_0062AD40	g_cardClient	the remote call client InitMemoryCardClient binds to the memory card server
+func_0020A190	GetStreamId	turns a stream number into its id through the table g_streamIds (SetStreamCallback calls it)
+func_0020A220	DemultiplexPacks	walks a buffer of packs and hands each packet to its stream's callback (DemultiplexBuffer calls it)
+func_0020A518	DemultiplexBuffer	runs DemultiplexPacks over a whole buffer (FeedMovieDecoder calls it)
+func_0020A538	SetStreamCallback	registers a callback for a stream (InitMoviePlayback calls it)
+func_0020A630	ParsePackHeader	parses a pack header with the bit reader (DemultiplexPacks calls it)
+func_0020A780	ParseSystemHeader	parses a system header with the bit reader (ParsePackHeader calls it)
+func_0020A7F0	ParsePacketHeader	parses a packet header with its table of field lengths (DemultiplexPacks calls it)
+D_0027AED0	g_streamIds	the table of stream ids GetStreamId reads
+func_0020ADA0	InitMpegLibrary	the MPEG library's initialisation: resets the IPU (ResetIpu) (InitMoviePlayback calls it)
+func_0020AE40	CreateMpegDecoder	sets up a decoder in a work area, reporting "The size of work area is too small" when it is, with its ring buffer and DMA hooks (InitMoviePlayback calls it)
+func_0020B048	DeleteMpegDecoder	returns 1 (FinishMovie calls it)
+func_0020B058	DecodeMpegPicture	sets the output address and size of a decoder and runs its picture loop (StepMovieFrame calls it)
+func_0020B0B0	GetMpegDecoderStatus	returns the first word of a decoder's state (PlayMovie reads it)
+func_0020B0C0	ResetMpegDecoder	clears a decoder's state words and its pictures' bookkeeping (FinishMovie and CreateMpegDecoder call it)
+func_0020B110	ReleaseMpegPictures	clears the word at +0x28 of each of the decoder's six picture pointers that is set
+func_0020B168	SetMpegCallback	stores a callback and its argument in a decoder's table at an index and returns the old one (InitMoviePlayback calls it)
+func_0020B190	RunMpegCallback	runs the decoder's callback for the kind a message names, with its argument
+func_0020B1E0	RunMpegStallCallback	runs the decoder's callback of kind 1; the IPU waits call it each time the IPU stays busy too long
+func_0020B240	InitMpegRing	sets a ring buffer's start, size, read and write positions
+func_0020B278	AllocateFromMpegRing	takes an aligned block of a size from a decoder's ring buffer, reporting an error when it does not fit
+func_0020B2E8	RunMpegPictureLoop	the decoder's picture loop: parses headers and decodes pictures until a picture is out or the stream ends (DecodeMpegPicture calls it)
+func_0020B930	PrintMpegError	prints a message after "[MPEG ERROR]"
+func_0020B940	ReportMpegErrorFormat	formats a message into a buffer and reports it with ReportMpegError
+func_0020B978	ReportMpegError	hands a message to the decoder's callback of kind 0, or prints it with PrintMpegError when there is none
+func_0020B9F0	ReadSequenceHeader	reads a sequence header and its extensions (ParseMpegHeaders calls it on the start code 0x1B3)
+func_0020C138	RejectSequenceScalableExtension	reports "_sequenceScalableExtension() is not implemented"
+func_0020C148	RejectUnknownExtension	reports "Unknown Extension"
+func_0020C158	RejectSpatialScalableExtension	reports "_pictureSpatialScalableExtension is not supported"
+func_0020C168	RejectTemporalScalableExtension	reports "_pictureTemporalScalableExtension is not supported"
+func_0020C178	SaveMpegDmaState	saves the IPU's two DMA channels before a picture (SaveIpuDmaChannels); a decoder's hook
+func_0020C188	RestoreMpegDmaState	restores the IPU's two DMA channels after a picture (RestoreIpuDmaChannels); a decoder's hook
+func_0020DEE8	SetIpuMpeg1Mode	sets or clears bit 23 of the IPU's control register 0x10002010, the MPEG-1 mode, as the sequence header says
+func_0020F0C0	SendIpuCommand	writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the bit window (D_0027B040)
+func_0020F0F0	WaitIpuCommandDone	waits while the IPU is busy, running the stall callback every 5000 polls
+func_0020F248	DecodeIpuVariableLength	waits for the IPU, then sends it a variable-length decode command of a table and reads the decoded value
+func_0020F3C0	PeekIpuBits	returns the next n bits of the IPU's bit stream without consuming them
+func_0020F4C8	SkipIpuBits	sends the IPU a command that consumes n bits and refreshes the bit window
+func_0020F5B8	ReadIpuBits	returns the next n bits of the IPU's bit stream and consumes them
+func_0020F708	FindNextStartCode	aligns the IPU's bit stream to a byte and skips to the next start code prefix 0x000001
+func_0020F7F0	ParseMpegHeaders	reads start codes and their headers: a sequence header (0x1B3), a group of pictures (0x1B8), a picture (0x100), until the sequence's end (0x1B7)
+func_0020F900	ReadPictureHeader	reads a picture header: its temporal reference, coding type, delay and the forward and backward codes of P and B pictures
+func_0020F9C8	ReadExtensionsAndUserData	reads the extensions and user data after a header, dispatching each extension through the table D_00250430
+func_0020FDA0	ReadGroupOfPicturesHeader	reads a group of pictures header: its time code, closed and broken flags
+func_00211348	ConvertPictureColours	converts a decoded picture's colours with the IPU by DMA, through interrupt handlers for large pictures
+func_002115C0	InitBitReader	sets the bit reader up over a ring buffer (DemultiplexPacks calls it)
+func_002115F8	PeekBits	returns the next bits of the bit reader's window without consuming them
+func_00211618	AdvanceBits	consumes bits, refilling the 64-bit window a byte at a time and wrapping at the buffer's end
+func_002116B0	ReadBits	returns the next n bits and consumes them
+func_00211700	ReadBit	returns the next bit and consumes it
+func_00211748	SkipBytes	consumes a number of whole bytes
+func_002117A0	GetPositionAhead	returns the buffer position a number of bits ahead of the reader
+func_002117D0	StartIpuOutputTransfer	starts DMA channel 3 (from the IPU) with the DMA suspended while its control register is written
+func_00211838	StartIpuInputTransfer	starts DMA channel 4 (to the IPU) the same way
+func_002118A0	SaveIpuDmaChannels	saves the state of the IPU's two DMA channels (SaveMpegDmaState calls it)
+func_00211988	RestoreIpuDmaChannels	restores the state of the IPU's two DMA channels and restarts them (RestoreMpegDmaState calls it)
+func_00211AD8	SyncIpu	waits while the IPU is busy (mode 0) or tells whether it is (mode 1)
+func_00211B40	StartIpuInputForReset	the IPU initialisation's own copy of StartIpuInputTransfer, for channel 4
+func_00211BA8	ResetIpu	resets the IPU and loads its default quantiser matrices and colour table (InitMpegLibrary calls it)

@@ -95,7 +95,7 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
     ok = 1;
     i = 0;
     table = prog->f44;
-    func_002115C0(&bits, a1, a3, a4);
+    InitBitReader(&bits, a1, a3, a4);
     s = &bits;
     result = 0;
     for (; handler == 0 && i < prog->f48; i++) {
@@ -105,13 +105,13 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
         }
     }
     for (;;) {
-        if (func_002115F8(s, 0x20) == 0x1BA) {
-            func_0020A630(s, r);
+        if (PeekBits(s, 0x20) == 0x1BA) {
+            ParsePackHeader(s, r);
         }
         kind = KIND_6_20A220;
-        while (func_002115F8(s, 0x18) == 1 && func_002115F8(s, 0x20) != 0x1BA &&
-               func_002115F8(s, 0x20) != 0x1B9 && s->f18 < count * 8 && ok != 0) {
-            (void)func_0020A7F0(prog, s, &r->f18);
+        while (PeekBits(s, 0x18) == 1 && PeekBits(s, 0x20) != 0x1BA &&
+               PeekBits(s, 0x20) != 0x1B9 && s->f18 < count * 8 && ok != 0) {
+            (void)ParsePacketHeader(prog, s, &r->f18);
             if (s->f18 > count * 8) {
                 continue;
             }
@@ -119,8 +119,8 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
                 Ent_20A220* e = &table[i];
                 if (e->f0 == (r->f18 & e->f8)) {
                     args.f0 = kind;
-                    args.f4 = func_002117A0(s, r->f40);
-                    args.f8 = func_002117A0(s, r->f38);
+                    args.f4 = GetPositionAhead(s, r->f40);
+                    args.f8 = GetPositionAhead(s, r->f38);
                     args.f10 = r->f28;
                     args.fC = r->f3C;
                     args.f18 = r->f30;
@@ -130,8 +130,8 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
             }
             if (i == prog->f48 && handler != 0) {
                 args.f0 = kind;
-                args.f4 = func_002117A0(s, r->f40);
-                args.f8 = func_002117A0(s, r->f38);
+                args.f4 = GetPositionAhead(s, r->f40);
+                args.f8 = GetPositionAhead(s, r->f38);
                 args.f10 = r->f28;
                 args.fC = r->f3C;
                 args.f18 = r->f30;
@@ -141,7 +141,7 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
                 result = (s32)(s->f18 >> 3);
             }
         }
-        if (s->f18 > count * 8 || func_002115F8(s, 0x20) != 0x1BA) {
+        if (s->f18 > count * 8 || PeekBits(s, 0x20) != 0x1BA) {
             break;
         }
     }
@@ -150,7 +150,7 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
 
 s32 func_0020A518(Ctx_20A220* ctx, s32 a, s32 b)
 {
-    return func_0020A220(ctx, a, b, 0, -1);
+    return DemultiplexPacks(ctx, a, b, 0, -1);
 }
 
 struct Ent_20A538 { u64 key; u64 data; s32 value; s32 extra; };
@@ -177,7 +177,7 @@ s32 func_0020A538(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
     s32 result = 0;
     struct Ctx_20A538* ctx = self->ctx;
     struct Ent_20A538* ents = ctx->ents;
-    u64 k = func_0020A190(idx, key);
+    u64 k = GetStreamId(idx, key);
     s32 count = ctx->count;
     s32 i;
     for (i = 0; i < count; i++) {
@@ -192,7 +192,7 @@ s32 func_0020A538(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
         e->key = k;
         e->extra = a4;
         e->value = a3;
-        e->data = D_0027AED0[idx].b;
+        e->data = g_streamIds[idx].b;
     }
     return result;
 }
@@ -209,24 +209,24 @@ s32 func_0020A630(Reader_0020A630* r, Out_0020A630* o)
 {
     u32 i; u32 n; u32 a; u32 b; u32 c;
     i = 0;
-    (void)func_002116B0(r, 0x22);
-    a = func_002116B0(r, 3);
-    func_00211700(r);
-    b = func_002116B0(r, 0xF);
-    func_00211700(r);
-    c = func_002116B0(r, 0xF);
-    func_00211700(r);
-    o->w0 = func_002116B0(r, 9);
-    (void)func_002116B0(r, 0x1E);
-    n = func_002116B0(r, 3);
+    (void)ReadBits(r, 0x22);
+    a = ReadBits(r, 3);
+    ReadBit(r);
+    b = ReadBits(r, 0xF);
+    ReadBit(r);
+    c = ReadBits(r, 0xF);
+    ReadBit(r);
+    o->w0 = ReadBits(r, 9);
+    (void)ReadBits(r, 0x1E);
+    n = ReadBits(r, 3);
     o->w8 = (a >> 2) & 1;
     o->w4 = (a << 30) | (b << 15) | c;
     for (i = 0; i < n; i++) {
-        (void)func_002116B0(r, 8);
+        (void)ReadBits(r, 8);
     }
-    if (func_002115F8(r, 0x20) == 0x1BB) {
+    if (PeekBits(r, 0x20) == 0x1BB) {
         o->wC = 1;
-        func_0020A780(r, o);
+        ParseSystemHeader(r, o);
     } else {
         o->wC = 0;
     }
@@ -240,10 +240,10 @@ s32 func_002115F8(Obj_0020A780* self, s32 n);
 
 s32 func_0020A780(Obj_0020A780* self)
 {
-    func_002116B0(self, 0x38);
-    func_002116B0(self, 0x28);
-    while (func_002115F8(self, 1) == 1) {
-        func_002116B0(self, 0x18);
+    ReadBits(self, 0x38);
+    ReadBits(self, 0x28);
+    while (PeekBits(self, 1) == 1) {
+        ReadBits(self, 0x18);
     }
     return 1;
 }
@@ -296,100 +296,100 @@ s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
 
     hdr->at = bs->pos;
     tbl = D_00250028;
-    func_002116B0(bs, 0x18);
-    hdr->id = (u64)func_002116B0(bs, 8) << 32;
-    hdr->len = func_002116B0(bs, 16);
+    ReadBits(bs, 0x18);
+    hdr->id = (u64)ReadBits(bs, 8) << 32;
+    hdr->len = ReadBits(bs, 16);
     hdr->dts = -1;
     hdr->pts = -1;
     if (hdr->id != (u64)0xBC << 32 && hdr->id != (u64)0xBE << 32 && hdr->id != (u64)0xBF << 32
         && hdr->id != (u64)0xF0 << 32 && hdr->id != (u64)0xF1 << 32 && hdr->id != (u64)0xFF << 32
         && hdr->id != (u64)0xF2 << 32 && hdr->id != (u64)0xF8 << 32)
     {
-        func_002116B0(bs, 2);
-        hdr->scramble = func_002116B0(bs, 2);
-        func_002116B0(bs, 4);
-        flags = func_002116B0(bs, 2);
-        escr = func_002116B0(bs, 1);
-        opt = func_002116B0(bs, 4);
-        ext = func_002116B0(bs, 1);
-        hdrlen = func_002116B0(bs, 8);
+        ReadBits(bs, 2);
+        hdr->scramble = ReadBits(bs, 2);
+        ReadBits(bs, 4);
+        flags = ReadBits(bs, 2);
+        escr = ReadBits(bs, 1);
+        opt = ReadBits(bs, 4);
+        ext = ReadBits(bs, 1);
+        hdrlen = ReadBits(bs, 8);
         start = bs->pos;
         if (flags & 2)
         {
             u32 a, b, c;
-            func_002116B0(bs, 4);
-            a = func_002116B0(bs, 3);
-            func_00211700(bs);
-            b = func_002116B0(bs, 15);
-            func_00211700(bs);
-            c = func_002116B0(bs, 15);
-            func_00211700(bs);
+            ReadBits(bs, 4);
+            a = ReadBits(bs, 3);
+            ReadBit(bs);
+            b = ReadBits(bs, 15);
+            ReadBit(bs);
+            c = ReadBits(bs, 15);
+            ReadBit(bs);
             hdr->pts = ((u64)((a >> 2) & 1) << 32) | (u32)((a << 30) | (b << 15) | c);
         }
         if (flags == 3)
         {
             u32 a, b, c;
-            func_002116B0(bs, 4);
-            a = func_002116B0(bs, 3);
-            func_00211700(bs);
-            b = func_002116B0(bs, 15);
-            func_00211700(bs);
-            c = func_002116B0(bs, 15);
-            func_00211700(bs);
+            ReadBits(bs, 4);
+            a = ReadBits(bs, 3);
+            ReadBit(bs);
+            b = ReadBits(bs, 15);
+            ReadBit(bs);
+            c = ReadBits(bs, 15);
+            ReadBit(bs);
             hdr->dts = ((u64)((a >> 2) & 1) << 32) | (u32)((a << 30) | (b << 15) | c);
         }
         if (escr == 1)
         {
-            func_002116B0(bs, 0x30);
+            ReadBits(bs, 0x30);
         }
         if (opt != 0)
         {
-            func_002116B0(bs, tbl.bits[opt]);
+            ReadBits(bs, tbl.bits[opt]);
         }
         if (ext == 1)
         {
-            s32 priv = func_002116B0(bs, 1);
-            s32 pack = func_002116B0(bs, 1);
-            s32 seq = func_002116B0(bs, 1);
-            s32 pstd = func_002116B0(bs, 1);
+            s32 priv = ReadBits(bs, 1);
+            s32 pack = ReadBits(bs, 1);
+            s32 seq = ReadBits(bs, 1);
+            s32 pstd = ReadBits(bs, 1);
             s32 ext2;
-            func_002116B0(bs, 3);
-            ext2 = func_002116B0(bs, 1);
+            ReadBits(bs, 3);
+            ext2 = ReadBits(bs, 1);
             if (priv == 1)
             {
-                func_002116B0(bs, 0x30);
-                func_002116B0(bs, 0x30);
-                func_002116B0(bs, 0x20);
+                ReadBits(bs, 0x30);
+                ReadBits(bs, 0x30);
+                ReadBits(bs, 0x20);
             }
             if (pack == 1)
             {
-                func_0020B978(ctx, "pack_header_field_flag needs to be '0' in PS\n");
+                ReportMpegError(ctx, "pack_header_field_flag needs to be '0' in PS\n");
                 return 0;
             }
             if (seq == 1)
             {
-                func_002116B0(bs, 0x10);
+                ReadBits(bs, 0x10);
             }
             if (pstd == 1)
             {
-                func_002116B0(bs, 0x10);
+                ReadBits(bs, 0x10);
             }
             if (ext2 == 1)
             {
                 u32 i;
                 u32 count;
-                func_00211700(bs);
-                count = func_002116B0(bs, 7);
+                ReadBit(bs);
+                count = ReadBits(bs, 7);
                 for (i = 0; i < count; i++)
                 {
-                    func_002116B0(bs, 8);
+                    ReadBits(bs, 8);
                 }
             }
         }
         skip = hdrlen - (s32)((bs->pos - start) >> 3);
         if (skip != 0)
         {
-            func_00211748(bs, skip);
+            SkipBytes(bs, skip);
         }
         rest = hdr->len - hdrlen;
         n = rest - 3;
@@ -397,12 +397,12 @@ s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
         hdr->start = bs->pos;
         if (hdr->id == (u64)0xBD << 32)
         {
-            hdr->id |= func_002116B0(bs, 32);
+            hdr->id |= ReadBits(bs, 32);
             n = rest - 7;
         }
         if (n != 0)
         {
-            func_00211748(bs, n);
+            SkipBytes(bs, n);
         }
     } else {
     if (hdr->id == (u64)0xBC << 32 || hdr->id == (u64)0xBF << 32 || hdr->id == (u64)0xF0 << 32
@@ -412,19 +412,19 @@ s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
         s32 m = hdr->len;
         if (hdr->id == (u64)0xBF << 32)
         {
-            hdr->id |= func_002116B0(bs, 32);
+            hdr->id |= ReadBits(bs, 32);
             m -= 4;
         }
         if (m != 0)
         {
-            func_00211748(bs, m);
+            SkipBytes(bs, m);
         }
     }
     else if (hdr->id == (u64)0xBE << 32)
     {
         if (hdr->len != 0)
         {
-            func_00211748(bs, hdr->len);
+            SkipBytes(bs, hdr->len);
         }
     }
     }
