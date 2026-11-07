@@ -64,9 +64,10 @@ struct ObjectCycler : Collider {
     f32 nextAdvanceTime;               // 0x668: state 6: the clock value at which the index advances next
     f32 f66C;               // 0x66C: the clock when func_0015C0A0 last looked
     FloatRange p670;            // 0x670: D_002621C0
-    u8 pad678[0x680 - 0x678];
+    BaseObject* receiver678; // 0x678: told (message 6) when the clock passes f680
+    BaseObject* source67C;  // 0x67C: whose point the message gives, when set
     f32 f680;               // 0x680
-    u8 pad684[0x688 - 0x684];
+    f32 f684;               // 0x684: a distance (func_0015BFC0 compares the active collider's point with it)
     f32 nextCheckTime;               // 0x688: mode 1: the clock value of the next func_0015BD48 check
     s32 indexStep;               // 0x68C: 1 at set-up, then 1 or -1: how far each step moves the index
     s32 f690;               // 0x690: -1 at set-up

@@ -29,7 +29,8 @@ struct PointObject : BaseObject {
 // resolved after loading (slot 15) into an object whose 0x398 it clears.
 struct TargetPoint : PointObject {
     KeptBits keep;          // 0x50
-    u8 pad58[0x60 - 0x58];
+    s32 mode58;             // 0x58: 0 or 1: how far the placement stands off (func_0016A240)
+    f32 radius5C;           // 0x5C: the radius of the circle round the point
     s32 targetId;           // 0x60: -1 for none (-1 at setup)
     void* target;           // 0x64: the object targetId names
     s32 f68;                // 0x68: 1 at setup
