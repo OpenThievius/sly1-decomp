@@ -3292,7 +3292,7 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         }
         case 4: {
             void* r = AcquireMatrixPayload();
-            func_001884E0(r, p);
+            CopyRotationMatrix(r, p);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
@@ -3358,7 +3358,7 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         case 4: {
             void* r = AcquireMatrixPayload();
             fn(p, r);
-            func_001884C0(r);
+            ResetMatrixHomogeneous(r);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }

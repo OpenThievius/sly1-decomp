@@ -2507,7 +2507,7 @@ void func_001533A8(Self_1533A8* self)
     f.f70 = s1;
     f.f74 = (u8*)s1 + 0x22C;
     i = 0;
-    func_00188668(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
+    MultiplyMatrices(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];

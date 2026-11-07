@@ -139,7 +139,7 @@ void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
     Quad16 mat[4];
     Quad16 tmp;
 
-    func_001891C0(self, arg, mat);
+    TransformMatrixByObject(self, arg, mat);
     if (count > 0) {
         do {
             func_00188700(mat, dst, &tmp, 1.0f);

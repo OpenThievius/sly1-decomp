@@ -2828,7 +2828,7 @@ void func_00165828(Obj_165828* self, PlacedObject* ctx)
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);
             func_00188B48(&e->p0->sub140, &e->p0->sub110, &f.b);
-            func_00188668(&f.m, &f.b, &f.a);
+            MultiplyMatrices(&f.m, &f.b, &f.a);
             e->m = f.m;
         }
     }
@@ -2935,12 +2935,12 @@ void func_001660E8(PlacedObject* self, Par_1660E8* par)
                 Link_1660E8* t = el->obj->link;
                 if (t != 0 && (t->flags & 0x80) && t->a4 != 0) {
                     c = t->m60;
-                    e = func_00188668(b, &c);
+                    e = MultiplyMatrices(b, &c);
                 } else {
                     BuildMatrixFromRotationAndTranslation(el->obj->sub140, el->obj->sub110, &c);
-                    e = func_00188668(a, &c);
+                    e = MultiplyMatrices(a, &c);
                 }
-                el->m50 = func_00188668(e, &el->q10);
+                el->m50 = MultiplyMatrices(e, &el->q10);
             }
         }
     }

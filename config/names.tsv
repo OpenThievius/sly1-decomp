@@ -2716,3 +2716,8 @@ func_00185CA0	GetSurfacePairBounce	for a pair of surface kinds, the sum of their
 func_00186450	CollectEdgeContacts	tests each of the collider's edges (pairs of indexes into its points) against the context with func_0013DFD8, appending the hits to the output and pointing each at its edge; returns their count (func_00186BA8 calls it)
 D_00264840	g_surfaceFriction	thirteen weight and value pairs, one per surface kind, that GetSurfacePairFriction combines
 D_002648A8	g_surfaceBounce	thirteen weight and value pairs, one per surface kind, that GetSurfacePairBounce combines
+func_001884C0	ResetMatrixHomogeneous	zeroes the fourth word of a matrix's first three rows and sets its fourth row to D_0024B260 (CopyRotationMatrix and six others call it)
+func_001884E0	CopyRotationMatrix	copies a matrix's first three rows and resets the rest (ResetMatrixHomogeneous); returns the destination
+func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawC60Object multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
+func_00188CE0	GetMatrixRotationCosine	returns half of the matrix's trace less one, clamped to -1..1 (ClampToMagnitude): the cosine of its rotation's angle
+func_001891C0	TransformMatrixByObject	builds a matrix from the object's rotation and translation at +0x30 (func_00188B48), multiplies it with the argument (MultiplyMatrices) and copies the four rows out (TransformPointArray calls it)

@@ -493,7 +493,7 @@ void func_0018DB20(C3C* self, void* in1, void* in2)
             }
             BuildPlacedObjectTransform(self, in2, &f.blkA0);
             BuildMatrixFromRotationAndTranslation(&f, &f.tbl30, &f.q60);
-            func_00188668(&f.blkF0, &f.blkA0, &f.q60);
+            MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             func_00125C90(self, in1, &f.blkA0);
         }

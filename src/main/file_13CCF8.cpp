@@ -1004,7 +1004,7 @@ s32 func_0013F940(TriggerZone* s, f32* out)
     for (i = s->count7E0 - 1; i >= 0; i--) {
         Entry28* e = (Entry28*)((u8*)s + 0x7F0 + i * 0x30);
         func_00189150(&s->rot, e, &loc);
-        f32 t = func_00188CE0(&loc);
+        f32 t = GetMatrixRotationCosine(&loc);
         if (best < t) {
             best = t;
             idx = i;

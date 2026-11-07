@@ -702,7 +702,7 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
         pa++;
     } while (n >= 0);
     InvertMatrix4x4(&m, &v);
-    func_00188668(r, c, &v);
+    MultiplyMatrices(r, c, &v);
     out[0] = r[0];
     out[1] = r[1];
     out[2] = r[2];
