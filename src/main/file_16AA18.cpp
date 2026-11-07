@@ -4,7 +4,7 @@
 #include "switched_collider.h"
 #include "state_trigger.h"
 #include "listed_collision_part.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "point_object.h"
 #include "current_placed_object.h"
 #include "part_holder_object.h"

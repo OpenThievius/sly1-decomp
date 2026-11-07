@@ -5,7 +5,7 @@
 #include "switched_collider.h"
 #include "c49.h"
 #include "object_link.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "point_object.h"
 #include "point_graph_object.h"
 #include "world.h"
@@ -705,40 +705,40 @@ void func_00191EE8(void)
     ClearList(&g_targetVectors.list);
 }
 
-void func_00191F08(C70* self)
+void func_00191F08(TargetVector* self)
 {
     InitObject(self);
-    self->q40 = *(Quad70*)&g_unitXVector;
+    self->q40 = *(TargetVectorQuad*)&g_unitXVector;
     self->f54 = 9;
     self->f50 = 8;
     self->f58 = -1;
     self->f5C = 3.40282347e+38f;
-    self->id64 = -1;
+    self->targetId = -1;
 }
 
-void func_00191F68(C70* self)
+void func_00191F68(TargetVector* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetVectors.list, self);
 }
 
-void func_00191FA0(C70* self)
+void func_00191FA0(TargetVector* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetVectors.list, self);
 }
 
-void func_00191FD8(C70* self)
+void func_00191FD8(TargetVector* self)
 {
     StartObject(self);
-    if (self->id64 != -1) {
-        self->found68 = FindFirstObjectById(self->world, 4, self->id64, self);
+    if (self->targetId != -1) {
+        self->target = FindFirstObjectById(self->world, 4, self->targetId, self);
     }
 }
 
-void func_00192020(C70* self)
+void func_00192020(TargetVector* self)
 {
-    Keep6E tmp;
+    PathCurveKeptBits tmp;
     tmp = self->keep;
     CopyObjectData(self);
     self->keep = tmp;

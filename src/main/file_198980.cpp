@@ -11,7 +11,7 @@
 #include "switched_collider.h"
 #include "object_set.h"
 #include "object_gatherer.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "c5c.h"
 #include "c5d.h"
 #include "effect_owner.h"
@@ -1073,7 +1073,7 @@ void func_0019AD68(C17* self)
 void func_0019AF00(C71* self)
 {
     InitObject(self);
-    self->id54 = -1;
+    self->targetId = -1;
     self->f4C = 3.4028235e+38f;
 }
 
@@ -1092,13 +1092,13 @@ void func_0019AF70(C71* obj)
 void func_0019AFA8(C71* obj)
 {
     StartObject(obj);
-    if (obj->id54 != -1)
-        obj->found58 = (s32)FindFirstObjectById(obj->world, 4, obj->id54, obj);
+    if (obj->targetId != -1)
+        obj->target = (s32)FindFirstObjectById(obj->world, 4, obj->targetId, obj);
 }
 
 void func_0019AFF0(C71* self)
 {
-    Keep6E tmp;
+    PathCurveKeptBits tmp;
 
     tmp = self->keep;
     CopyObjectData(self);

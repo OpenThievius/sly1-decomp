@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "world.h"
 #include "v24a0.h"
 #include "list_iter.h"
@@ -219,7 +219,7 @@ void func_001B2790(World* self, void* a1, s32 max, s32* outCount, RangeRecord** 
     *outCount = count;
 }
 
-void func_001B2840(C6E* self, void* obj)
+void func_001B2840(PathCurveObject* self, void* obj)
 {
     T2176* p = CreatePathCurve(ReadBufferedU8(obj));
     self->curve = p;
@@ -230,7 +230,7 @@ void func_001B2840(C6E* self, void* obj)
     ReadPropertyRecords(self, obj);
 }
 
-void func_001B28A8(C6E* self, BaseObject* other)
+void func_001B28A8(PathCurveObject* self, BaseObject* other)
 {
     Mat4A a;
     Mat4A b;
