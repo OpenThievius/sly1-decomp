@@ -273,6 +273,7 @@
 #define g_backMarks                                D_002C2A38
 #define g_movieDecodeThreadStack                   D_002C2B00
 #define g_deferredRequests                         D_005E4700
+#define g_cameraUploadedThisFrame                  D_00604788
 #define g_soundBankHandles                         D_00604790
 #define g_soundBankLoaded                          D_006047B0
 #define g_soundEntryAvailable                      D_006047D0
@@ -1822,6 +1823,7 @@
 #define BucketDeferredRequests                     func_0019D4B0
 #define RunWorldFrameLists                         func_0019D6C0
 #define UploadProjectionConstants                  func_0019D860
+#define UploadCameraOncePerFrame                   func_0019D930
 #define WriteColoredSpritePacket                   func_0019DDA0
 #define InitGroupMarkers                           func_0019DF48
 #define AcquireEffectOwner                         func_0019E040

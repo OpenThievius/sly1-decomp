@@ -2548,3 +2548,5 @@ func_001994C8	CopyNumberedItem	slot 9 of class 0x2E: runs CopyCollider while kee
 func_001999D0	CollectNumberedItem	slot 73 of class 0x2E: creates effect 0x10 at its position (playing sound 0x21 when it is the world's last item), or runs SetNumberedItemFlag when no effect is made, then runs CollectObjectSet
 func_0019A088	MarkLevelRecordComplete	for a level index (or the current one, 0x19D8, for -1) of the save data, sets bit 0 of each record of its 0x438-byte table and the bits 0x1F of its word at 0x448
 func_0019A0F0	MarkAllLevelRecordsComplete	runs MarkLevelRecordComplete for the six level indices, then requests a world load when the element stack is in mode 2
+func_0019D930	UploadCameraOncePerFrame	unless D_00604788 is set, sets it and runs func_00144848 on g_camera; the group set-ups call it, and func_0019DAD8 clears the flag
+D_00604788	g_cameraUploadedThisFrame	set by UploadCameraOncePerFrame when it runs func_00144848 on the camera and cleared by func_0019DAD8, so the camera goes up once between clears
