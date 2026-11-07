@@ -1487,8 +1487,8 @@ void func_00139B70(s32 idx, void* arg);
 
 void func_00139C38(void)
 {
-    func_00139B70(1, &D_00261314);
-    func_00139B70(2, &D_00261318);
+    BuildAlphaStatePacket(1, &g_alphaStatePacket1);
+    BuildAlphaStatePacket(2, &g_alphaStatePacket2);
 }
 
 struct Obj_139C70 { u8 pad0[0x14]; u8* ctx; u8 pad1[0x320 - 0x18]; s32 mode; };

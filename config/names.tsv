@@ -3480,3 +3480,31 @@ func_001093B8	TakeScriptCountedColliderTouch	builtin: two arguments forwarded to
 func_00100EE0	SetScriptElementsScrollScale	builtin: two arguments forwarded to SetElementsScrollScale, empty result
 func_00100FA8	SetScriptCrossfadeRatioDeep	builtin: one argument forwarded to SetCrossfadeRatioDeep, empty result
 func_00101B80	FindOrCreateScriptSeekedAnimationPlayer	builtin: five arguments, the result of FindOrCreateSeekedAnimationPlayer returned as a script pointer
+func_00131198	SetupTextPanel	original assembly; slot 1 of the text panel's table D_0021A440, the slot of SetupScreenElementText in the other screen elements' tables: calls SetupScreenElementText, measures its strings and builds its curve spans and GIF packets
+func_001366A0	DrawTextPanel	original assembly; slot 9 of D_0021A440, the draw slot (DrawScreenElementText, DrawPauseMenu): reads and counts the panel's text, pushes its font scale and draws through func_00132500
+func_00139B70	BuildAlphaStatePacket	builds a GIF packet that writes GS register 0x47 (TEST_1) with 0x7180B and register 0x42 (ALPHA_1) from its index, detached into the word it is given
+func_00139C38	InitAlphaStatePackets	entry 23 of the startup table D_002647C0: builds the packets of g_alphaStatePacket1 and g_alphaStatePacket2 with BuildAlphaStatePacket (indices 1 and 2)
+D_00261314	g_alphaStatePacket1	the packet InitAlphaStatePackets builds with BuildAlphaStatePacket for index 1
+D_00261318	g_alphaStatePacket2	the packet InitAlphaStatePackets builds with BuildAlphaStatePacket for index 2
+func_0013B778	UpdateChildGroupObject	original assembly; slot 17 (+0x54) of class 0x3B, the update slot (UpdatePlacedObject, UpdateMaskedCollider)
+func_0013BBA0	HandleChildGroupObjectEvent	original assembly; slot 45 (+0xC4) of class 0x3B, the event slot (HandleTriggerZoneEvent, HandleFlaggedObjectEvent)
+func_0013D868	AddMaskedColliderKeyKind0	appends (key, kind 0) to the at most 16 slots of a masked collider counted at +0x550
+func_0013D8B0	AddMaskedColliderKeyKind1	appends (key, kind 1) to the at most 16 slots of a masked collider counted at +0x550
+func_0013D900	AddMaskedColliderKeyKind2	appends (key, kind 2) to the at most 16 slots of a masked collider counted at +0x550
+func_0013D950	AddMaskedColliderKeyKind3	appends (key, kind 3) to the at most 16 slots of a masked collider counted at +0x550
+func_0013DEE8	LatchAcceptedSwitchedCollider	slot 60 (+0x100) of class 0x26: LatchContactObject, then, unless held, keeps the other contact at +0x6D4 when it is of kind 5 and IsObjectAccepted
+func_0013DF68	UpdateLatchedSwitchCollider	slot 17 (+0x54) of class 0x26: UpdateMaskedCollider, then sends an owner message to the switched collider latched at +0x6D4 through its slot 76 when it is still GetActiveSwitchedCollider, and clears it
+func_00140238	SetZoneColliderMode	passes its zone record (+0x5C0) and the mode on to SetZoneMode; StartZoneCollider calls it with 0
+func_001405D0	AppendZoneFirstQueue	appends a value to the first queue (+0x08) of a zone record (AppendToObjectQueue)
+func_001405F0	AppendTriggerZoneFirstQueue	AppendZoneFirstQueue on the zone record at +0x554 of a trigger zone
+func_00140618	AppendZoneColliderFirstQueue	AppendZoneFirstQueue on the zone record at +0x5C0 of a zone collider
+func_00140640	AppendZoneSecondQueue	appends a value to the second queue (+0x90) of a zone record (AppendToObjectQueue)
+func_00140660	AppendTriggerZoneSecondQueue	AppendZoneSecondQueue on the zone record of a trigger zone
+func_00140688	AppendZoneColliderSecondQueue	AppendZoneSecondQueue on the zone record at +0x5C0 of a zone collider
+func_00140750	SetTriggerZoneEntry	SetZoneEntry on the zone record at +0x554 of a trigger zone, its four arguments passed through
+func_00140770	SetZoneColliderEntry	SetZoneEntry on the zone record at +0x5C0 of a zone collider, its four arguments passed through
+func_00141690	UpdateFlaggedObject	original assembly; slot 17 (+0x54) of class 0x38, the flagged object's class (InitFlaggedObject at slot 0), the update slot
+D_002613F0	g_discStatus	-1 at start; func_00140968 stores GetDiscStatus's result in it when it changes and tests it against 0x14, as func_001409A8 does
+D_00261630	g_flagTableSaved	the second label of the flag table g_flagTable, from its +0x210: the snapshot SaveFlagTableSnapshot keeps (+0x220) and its saved fade words
+func_00102178	SetScriptTriggerZoneEntry	builtin: four arguments forwarded to func_00140750 (SetTriggerZoneEntry), empty result
+func_00102268	SetScriptZoneColliderEntry	builtin: four arguments forwarded to func_00140770 (SetZoneColliderEntry), empty result

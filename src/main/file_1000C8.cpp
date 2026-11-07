@@ -1298,7 +1298,7 @@ ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, Scrip
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = func_00140750(obj, o0, o1, o2, o3);
+    s32 r = SetTriggerZoneEntry(obj, o0, o1, o2, o3);
     (void)r;
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
@@ -1320,7 +1320,7 @@ ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = func_00140770(obj, o0, o1, o2, o3);
+    s32 r = SetZoneColliderEntry(obj, o0, o1, o2, o3);
     (void)r;
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);

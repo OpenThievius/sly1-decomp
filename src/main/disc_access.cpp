@@ -116,7 +116,7 @@ INCLUDE_ASM(func_00140968);
 
 void func_001409A8(void)
 {
-    if (D_002613F0 == 0x14) {
+    if (g_discStatus == 0x14) {
         func_00203A20(2);
     }
 }

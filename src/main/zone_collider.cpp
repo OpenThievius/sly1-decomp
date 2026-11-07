@@ -1198,7 +1198,7 @@ void func_00140140(ZoneCollider* self)
 {
     StartPlacedObject(self);
     StartZoneRecord(&self->zone);
-    func_00140238(self, 0);
+    SetZoneColliderMode(self, 0);
     for (s32 i = 0; i < self->countIds; i++) {
         void* p = FindFirstObjectByIdMode4(self->world, self->ids[i], self);
         if (p != 0) {
@@ -1275,14 +1275,14 @@ void func_001405D0(void* a, void* b, s32 c)
 
 void func_001405F0(u8* self, s32 value)
 {
-    func_001405D0(self + 0x554, self, value);
+    AppendZoneFirstQueue(self + 0x554, self, value);
 }
 
 void func_001405D0(void* a, void* b, int c);
 
 void func_00140618(void* self, int value)
 {
-    func_001405D0((u8*)self + 0x5C0, self, value);
+    AppendZoneFirstQueue((u8*)self + 0x5C0, self, value);
 }
 
 bool func_0013E8F8(void* a, int b);
@@ -1296,7 +1296,7 @@ void func_00140640(void* self, void* unused, int value);
 
 void func_00140660(TriggerZone* self, int value)
 {
-    func_00140640(&self->zone, self, value);
+    AppendZoneSecondQueue(&self->zone, self, value);
 }
 
 void func_0013EB30(void* p);
@@ -1304,7 +1304,7 @@ void func_00140640(void* a, void* b, void* c);
 
 void func_00140688(void* self, void* b)
 {
-    func_00140640((u8*)self + 0x5C0, self, b);
+    AppendZoneSecondQueue((u8*)self + 0x5C0, self, b);
 }
 
 void func_001406B0(TriggerZone* list, s32 value)
