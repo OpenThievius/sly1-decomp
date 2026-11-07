@@ -5,23 +5,23 @@
 #include "common.h"
 #include "float_bits.h"
 
-s32 func_00207C88(f32 x, f32* y);
-f32 func_00208D50(f32 x, f32 y, s32 k);
+s32 func_00207C88(f32 x, f32* parts);
+f32 func_00208D50(f32 x, f32 y, s32 sign);
 
 f32 func_002054F0(f32 x)
 {
-    f32 y[2];
-    s32 ix;
-    s32 n;
+    f32 parts[2];
+    s32 magnitude;
+    s32 quadrant;
 
-    FLOAT_TO_BITS(ix, x);
-    ix &= 0x7FFFFFFF;
-    if (ix <= 0x3F490FDA) {
+    FLOAT_TO_BITS(magnitude, x);
+    magnitude &= 0x7FFFFFFF;
+    if (magnitude <= 0x3F490FDA) {
         return func_00208D50(x, 0.0f, 1);
     }
-    if (ix > 0x7F7FFFFF) {
+    if (magnitude > 0x7F7FFFFF) {
         return x - x;
     }
-    n = func_00207C88(x, y);
-    return func_00208D50(y[0], y[1], 1 - ((n & 1) << 1));
+    quadrant = func_00207C88(x, parts);
+    return func_00208D50(parts[0], parts[1], 1 - ((quadrant & 1) << 1));
 }

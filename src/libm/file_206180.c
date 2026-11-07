@@ -10,16 +10,16 @@ f32 func_00208068(f32 x);
 f32 func_00206180(f32 x)
 {
     MathError e;
-    f32 z = func_00208068(x);
+    f32 value = func_00208068(x);
 
     if (D_0024FF78 == -1 || func_00209238(x)) {
-        return z;
+        return value;
     }
     if (x < 0.0f) {
-        e.type = 1;
-        e.name = "sqrtf";
-        e.err = 0;
-        e.arg1 = e.arg2 = (double)x;
+        e.kind = 1;
+        e.function = "sqrtf";
+        e.errorCode = 0;
+        e.firstArg = e.secondArg = (double)x;
         if (D_0024FF78 == 0) {
             e.result = 0.0;
         } else {
@@ -28,10 +28,10 @@ f32 func_00206180(f32 x)
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

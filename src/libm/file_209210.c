@@ -6,8 +6,8 @@
 #include "float_bits.h"
 s32 func_00209210(f32 x)
 {
-    s32 ix;
+    s32 bits;
 
-    FLOAT_TO_BITS(ix, x);
-    return (u32)((ix & 0x7FFFFFFF) + 0x80800000) >> 31;
+    FLOAT_TO_BITS(bits, x);
+    return (u32)((bits & 0x7FFFFFFF) + 0x80800000) >> 31;
 }

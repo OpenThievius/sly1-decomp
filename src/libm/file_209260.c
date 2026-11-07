@@ -4,42 +4,42 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 scale_up = 3.355443200e+07f;
-static const f32 scale_down = 2.9802322388e-08f;
-static const f32 huge = 1.0e30f;
-static const f32 tiny = 1.0e-30f;
+static const f32 g_scaleUp = 3.355443200e+07f;
+static const f32 g_scaleDown = 2.9802322388e-08f;
+static const f32 g_tenTo30 = 1.0e30f;
+static const f32 g_tenToMinus30 = 1.0e-30f;
 
 f32 func_002093C0(f32 x, f32 y);
 
 f32 func_00209260(f32 x, s32 n)
 {
-    s32 ix, hx, k;
+    s32 rawBits, bits, exponent;
 
-    FLOAT_TO_BITS(ix, x);
-    hx = ix;
-    k = (hx & 0x7F800000) >> 23;
-    if (k == 0) {
-        if ((hx & 0x7FFFFFFF) == 0) return x;
-        x *= scale_up;
-        FLOAT_TO_BITS(ix, x);
-        hx = ix;
-        k = ((hx & 0x7F800000) >> 23) - 25;
-        if (n < -50000) return tiny * x;
+    FLOAT_TO_BITS(rawBits, x);
+    bits = rawBits;
+    exponent = (bits & 0x7F800000) >> 23;
+    if (exponent == 0) {
+        if ((bits & 0x7FFFFFFF) == 0) return x;
+        x *= g_scaleUp;
+        FLOAT_TO_BITS(rawBits, x);
+        bits = rawBits;
+        exponent = ((bits & 0x7F800000) >> 23) - 25;
+        if (n < -50000) return g_tenToMinus30 * x;
     }
-    if (k == 0xFF) return x + x;
-    k = k + n;
-    if (k > 0xFE) {
-        return func_002093C0(huge, x) * huge;
+    if (exponent == 0xFF) return x + x;
+    exponent = exponent + n;
+    if (exponent > 0xFE) {
+        return func_002093C0(g_tenTo30, x) * g_tenTo30;
     }
-    if (k > 0) {
-        BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
+    if (exponent > 0) {
+        BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));
         return x;
     }
-    if (k < -24) {
-        if (n > 50000) return func_002093C0(huge, x) * huge;
-        return func_002093C0(tiny, x) * tiny;
+    if (exponent < -24) {
+        if (n > 50000) return func_002093C0(g_tenTo30, x) * g_tenTo30;
+        return func_002093C0(g_tenToMinus30, x) * g_tenToMinus30;
     }
-    k += 25;
-    BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
-    return x * scale_down;
+    exponent += 25;
+    BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));
+    return x * g_scaleDown;
 }

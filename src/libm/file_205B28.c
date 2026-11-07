@@ -10,37 +10,37 @@ f32 func_002072C8(f32 x);
 f32 func_00205B28(f32 x)
 {
     MathError e;
-    f32 z = func_002072C8(x);
+    f32 value = func_002072C8(x);
 
     if (D_0024FF78 == -1 || func_00209238(x)) {
-        return z;
+        return value;
     }
     if (x <= 0.0f) {
-        e.err = 0;
-        e.name = "log10f";
-        e.arg1 = e.arg2 = (double)x;
+        e.errorCode = 0;
+        e.function = "log10f";
+        e.firstArg = e.secondArg = (double)x;
         if (D_0024FF78 == 0) {
             e.result = -3.40282346638528859812e+38;
         } else {
             e.result = -D_0024FF70;
         }
         if (x == 0.0f) {
-            e.type = 2;
+            e.kind = 2;
             if (D_0024FF78 == 2) {
                 *func_002014F0() = 0x22;
             } else if (!func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
         } else {
-            e.type = 1;
+            e.kind = 1;
             if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

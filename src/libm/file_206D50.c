@@ -4,65 +4,65 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 one = 1.0f;
-static const f32 zero[] = { 0.0f, -0.0f };
+static const f32 g_one = 1.0f;
+static const f32 g_signedZeros[] = { 0.0f, -0.0f };
 
 f32 func_00206D50(f32 x, f32 y)
 {
-    s32 hx, hy, sx, ix, iy, i, j;
-    u32 n;
-    f32 t;
+    s32 xBits, yBits, sign, xExp, yExp, diff, probe;
+    u32 shift;
+    f32 product;
 
-    FLOAT_TO_BITS(hx, x);
-    FLOAT_TO_BITS(hy, y);
-    sx = hx & 0x80000000;
-    hy &= 0x7FFFFFFF;
-    hx ^= sx;
-    if (hy == 0 || hx > 0x7F7FFFFF || hy > 0x7F800000) {
-        t = x * y;
-        return t / t;
+    FLOAT_TO_BITS(xBits, x);
+    FLOAT_TO_BITS(yBits, y);
+    sign = xBits & 0x80000000;
+    yBits &= 0x7FFFFFFF;
+    xBits ^= sign;
+    if (yBits == 0 || xBits > 0x7F7FFFFF || yBits > 0x7F800000) {
+        product = x * y;
+        return product / product;
     }
-    if (hx < hy) return x;
-    if (hx == hy) return zero[(u32)sx >> 31];
-    if (hx < 0x00800000) {
-        ix = -126;
-        for (j = hx << 8; j > 0; j <<= 1) ix -= 1;
+    if (xBits < yBits) return x;
+    if (xBits == yBits) return g_signedZeros[(u32)sign >> 31];
+    if (xBits < 0x00800000) {
+        xExp = -126;
+        for (probe = xBits << 8; probe > 0; probe <<= 1) xExp -= 1;
     } else {
-        ix = (hx >> 23) - 127;
+        xExp = (xBits >> 23) - 127;
     }
-    if (hy < 0x00800000) {
-        iy = -126;
-        for (j = hy << 8; j >= 0; j <<= 1) iy -= 1;
+    if (yBits < 0x00800000) {
+        yExp = -126;
+        for (probe = yBits << 8; probe >= 0; probe <<= 1) yExp -= 1;
     } else {
-        iy = (hy >> 23) - 127;
+        yExp = (yBits >> 23) - 127;
     }
-    if (ix >= -126) hx = (hx & 0x007FFFFF) | 0x00800000;
-    else { n = -126 - ix; hx = hx << n; }
-    if (iy >= -126) hy = (hy & 0x007FFFFF) | 0x00800000;
-    else { n = -126 - iy; hy = hy << n; }
-    n = ix - iy;
-    while (n-- > 0) {
-        i = hx - hy;
-        if (i < 0) hx = hx + hx;
+    if (xExp >= -126) xBits = (xBits & 0x007FFFFF) | 0x00800000;
+    else { shift = -126 - xExp; xBits = xBits << shift; }
+    if (yExp >= -126) yBits = (yBits & 0x007FFFFF) | 0x00800000;
+    else { shift = -126 - yExp; yBits = yBits << shift; }
+    shift = xExp - yExp;
+    while (shift-- > 0) {
+        diff = xBits - yBits;
+        if (diff < 0) xBits = xBits + xBits;
         else {
-            if (i == 0) return zero[(u32)sx >> 31];
-            hx = i + i;
+            if (diff == 0) return g_signedZeros[(u32)sign >> 31];
+            xBits = diff + diff;
         }
     }
-    i = hx - hy;
-    if (i >= 0) hx = i;
-    if (hx == 0) return zero[(u32)sx >> 31];
-    while (hx < 0x00800000) {
-        hx = hx + hx;
-        iy -= 1;
+    diff = xBits - yBits;
+    if (diff >= 0) xBits = diff;
+    if (xBits == 0) return g_signedZeros[(u32)sign >> 31];
+    while (xBits < 0x00800000) {
+        xBits = xBits + xBits;
+        yExp -= 1;
     }
-    if (iy >= -126) {
-        hx = (hx - 0x00800000) | ((iy + 127) << 23);
-        BITS_TO_FLOAT(x, hx | sx);
+    if (yExp >= -126) {
+        xBits = (xBits - 0x00800000) | ((yExp + 127) << 23);
+        BITS_TO_FLOAT(x, xBits | sign);
     } else {
-        n = -126 - iy;
-        hx = hx >> n;
-        BITS_TO_FLOAT(x, hx | sx);
+        shift = -126 - yExp;
+        xBits = xBits >> shift;
+        BITS_TO_FLOAT(x, xBits | sign);
     }
     return x;
 }

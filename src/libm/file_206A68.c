@@ -4,92 +4,92 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 tiny = 1.0e-30f;
-static const f32 zero = 0.0f;
-static const f32 quarter_pi = 7.8539818525e-01f;
-static const f32 half_pi = 1.5707963705e+00f;
-static const f32 pi = 3.1415925026e+00f;
-static const f32 pi_lo = 1.5099578832e-07f;
+static const f32 g_tenToMinus30 = 1.0e-30f;
+static const f32 g_zero = 0.0f;
+static const f32 g_quarterPi = 7.8539818525e-01f;
+static const f32 g_halfPi = 1.5707963705e+00f;
+static const f32 g_pi = 3.1415925026e+00f;
+static const f32 g_piTail = 1.5099578832e-07f;
 
 f32 func_00204F68(f32 x);
 f32 func_002052F8(f32 x);
 
 f32 func_00206A68(f32 y, f32 x)
 {
-    s32 hx, hy, ix, iy, m, k, iz;
-    f32 z;
+    s32 xBits, yBits, xMag, yMag, quadrantCase, exponentGap, angleBits;
+    f32 angle;
 
-    FLOAT_TO_BITS(hx, x);
-    ix = hx & 0x7FFFFFFF;
-    FLOAT_TO_BITS(hy, y);
-    iy = hy & 0x7FFFFFFF;
-    if (ix > 0x7F800000 || iy > 0x7F800000) {
+    FLOAT_TO_BITS(xBits, x);
+    xMag = xBits & 0x7FFFFFFF;
+    FLOAT_TO_BITS(yBits, y);
+    yMag = yBits & 0x7FFFFFFF;
+    if (xMag > 0x7F800000 || yMag > 0x7F800000) {
         return x + y;
     }
-    if (hx == 0x3F800000) {
+    if (xBits == 0x3F800000) {
         return func_00204F68(y);
     }
-    m = ((u32)hy >> 31) | ((hx >> 30) & 2);
-    if (iy == 0) {
-        switch (m) {
+    quadrantCase = ((u32)yBits >> 31) | ((xBits >> 30) & 2);
+    if (yMag == 0) {
+        switch (quadrantCase) {
         case 0:
         case 1:
             return y;
         case 2:
-            return pi + tiny;
+            return g_pi + g_tenToMinus30;
         case 3:
-            return -pi - tiny;
+            return -g_pi - g_tenToMinus30;
         }
     }
-    if (ix == 0) {
-        return hy < 0 ? -half_pi - tiny : half_pi + tiny;
+    if (xMag == 0) {
+        return yBits < 0 ? -g_halfPi - g_tenToMinus30 : g_halfPi + g_tenToMinus30;
     }
-    if (ix == 0x7F800000) {
-        if (iy == ix) {
-            switch (m) {
+    if (xMag == 0x7F800000) {
+        if (yMag == xMag) {
+            switch (quadrantCase) {
             case 0:
-                return quarter_pi + tiny;
+                return g_quarterPi + g_tenToMinus30;
             case 1:
-                return -quarter_pi - tiny;
+                return -g_quarterPi - g_tenToMinus30;
             case 2:
-                return 3.0f * quarter_pi + tiny;
+                return 3.0f * g_quarterPi + g_tenToMinus30;
             case 3:
-                return -3.0f * quarter_pi - tiny;
+                return -3.0f * g_quarterPi - g_tenToMinus30;
             }
         } else {
-            switch (m) {
+            switch (quadrantCase) {
             case 0:
-                return zero;
+                return g_zero;
             case 1:
-                return -zero;
+                return -g_zero;
             case 2:
-                return pi + tiny;
+                return g_pi + g_tenToMinus30;
             case 3:
-                return -pi - tiny;
+                return -g_pi - g_tenToMinus30;
             }
         }
     }
-    if (iy == 0x7F800000) {
-        return hy < 0 ? -half_pi - tiny : half_pi + tiny;
+    if (yMag == 0x7F800000) {
+        return yBits < 0 ? -g_halfPi - g_tenToMinus30 : g_halfPi + g_tenToMinus30;
     }
-    k = (iy - ix) >> 23;
-    if (k > 60) {
-        z = half_pi + 0.5f * pi_lo;
-    } else if (hx < 0 && k < -60) {
-        z = 0.0f;
+    exponentGap = (yMag - xMag) >> 23;
+    if (exponentGap > 60) {
+        angle = g_halfPi + 0.5f * g_piTail;
+    } else if (xBits < 0 && exponentGap < -60) {
+        angle = 0.0f;
     } else {
-        z = func_00204F68(func_002052F8(y / x));
+        angle = func_00204F68(func_002052F8(y / x));
     }
-    switch (m) {
+    switch (quadrantCase) {
     case 0:
-        return z;
+        return angle;
     case 1:
-        FLOAT_TO_BITS(iz, z);
-        BITS_TO_FLOAT(z, iz ^ 0x80000000);
-        return z;
+        FLOAT_TO_BITS(angleBits, angle);
+        BITS_TO_FLOAT(angle, angleBits ^ 0x80000000);
+        return angle;
     case 2:
-        return pi - (z - pi_lo);
+        return g_pi - (angle - g_piTail);
     default:
-        return (z - pi_lo) - pi;
+        return (angle - g_piTail) - g_pi;
     }
 }

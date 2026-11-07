@@ -7,10 +7,10 @@
 
 f32 func_002052F8(f32 x)
 {
-    s32 hx;
+    s32 bits;
 
-    FLOAT_TO_BITS(hx, x);
-    hx &= 0x7FFFFFFF;
-    BITS_TO_FLOAT(x, hx);
+    FLOAT_TO_BITS(bits, x);
+    bits &= 0x7FFFFFFF;
+    BITS_TO_FLOAT(x, bits);
     return x;
 }

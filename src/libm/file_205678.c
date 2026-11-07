@@ -11,24 +11,24 @@ f32 func_002052F8(f32 x);
 f32 func_00205678(f32 x)
 {
     MathError e;
-    f32 z = func_002066C8(x);
+    f32 value = func_002066C8(x);
 
     if (D_0024FF78 == -1 || func_00209238(x)) {
-        return z;
+        return value;
     }
     if (func_002052F8(x) > 1.0f) {
-        e.type = 1;
-        e.name = "asinf";
-        e.err = 0;
-        e.arg1 = e.arg2 = (double)x;
+        e.kind = 1;
+        e.function = "asinf";
+        e.errorCode = 0;
+        e.firstArg = e.secondArg = (double)x;
         e.result = 0.0;
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

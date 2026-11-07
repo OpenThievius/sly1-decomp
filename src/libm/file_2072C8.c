@@ -4,39 +4,39 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 scale_up = 3.3554432000e+07f;
-static const f32 inv_ln10 = 4.3429449201e-01f;
-static const f32 log10_2_high = 3.0102920532e-01f;
-static const f32 log10_2_low = 7.9034151668e-07f;
-static const f32 zero = 0.0f;
+static const f32 g_scaleUp = 3.3554432000e+07f;
+static const f32 g_invLn10 = 4.3429449201e-01f;
+static const f32 g_log10Of2Head = 3.0102920532e-01f;
+static const f32 g_log10Of2Tail = 7.9034151668e-07f;
+static const f32 g_zero = 0.0f;
 
 f32 func_00206FA0(f32 x);
 
 f32 func_002072C8(f32 x)
 {
-    s32 ix, k, neg;
-    f32 dk;
+    s32 bits, exponent, neg;
+    f32 exponentF;
 
-    FLOAT_TO_BITS(ix, x);
-    k = 0;
-    if (ix < 0x00800000) {
-        if ((ix & 0x7FFFFFFF) == 0) {
-            return -scale_up / zero;
+    FLOAT_TO_BITS(bits, x);
+    exponent = 0;
+    if (bits < 0x00800000) {
+        if ((bits & 0x7FFFFFFF) == 0) {
+            return -g_scaleUp / g_zero;
         }
-        if (ix < 0) {
-            return (x - x) / zero;
+        if (bits < 0) {
+            return (x - x) / g_zero;
         }
-        k -= 25;
-        x *= scale_up;
-        FLOAT_TO_BITS(ix, x);
+        exponent -= 25;
+        x *= g_scaleUp;
+        FLOAT_TO_BITS(bits, x);
     }
-    if (ix >= 0x7F800000) {
+    if (bits >= 0x7F800000) {
         return x + x;
     }
-    k += (ix >> 23) - 127;
-    neg = (u32)k >> 31;
-    ix = (ix & 0x007FFFFF) | ((127 - neg) << 23);
-    dk = (f32)(k + neg);
-    BITS_TO_FLOAT(x, ix);
-    return (dk * log10_2_low + func_00206FA0(x) * inv_ln10) + dk * log10_2_high;
+    exponent += (bits >> 23) - 127;
+    neg = (u32)exponent >> 31;
+    bits = (bits & 0x007FFFFF) | ((127 - neg) << 23);
+    exponentF = (f32)(exponent + neg);
+    BITS_TO_FLOAT(x, bits);
+    return (exponentF * g_log10Of2Tail + func_00206FA0(x) * g_invLn10) + exponentF * g_log10Of2Head;
 }

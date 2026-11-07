@@ -5,36 +5,36 @@
 #include "common.h"
 #include "float_bits.h"
 
-static const f32 bases[] = { 1.0f, 1.5f };
-static const f32 log2_base_high[] = { 0.0f, 5.84960938e-01f };
-static const f32 log2_base_low[] = { 0.0f, 1.56322085e-06f };
-static const f32 zero = 0.0f;
-static const f32 one = 1.0f;
-static const f32 two = 2.0f;
-static const f32 scale24 = 16777216.0f;
-static const f32 huge = 1.0e30f;
-static const f32 tiny = 1.0e-30f;
-static const f32 log_c1 = 6.0000002384e-01f;
-static const f32 log_c2 = 4.2857143283e-01f;
-static const f32 log_c3 = 3.3333334327e-01f;
-static const f32 log_c4 = 2.7272811532e-01f;
-static const f32 log_c5 = 2.3066075146e-01f;
-static const f32 log_c6 = 2.0697501302e-01f;
-static const f32 exp_c1 = 1.6666667163e-01f;
-static const f32 exp_c2 = -2.7777778450e-03f;
-static const f32 exp_c3 = 6.6137559770e-05f;
-static const f32 exp_c4 = -1.6533901999e-06f;
-static const f32 exp_c5 = 4.1381369442e-08f;
-static const f32 ln2 = 6.9314718246e-01f;
-static const f32 ln2_high = 6.93145752e-01f;
-static const f32 ln2_low = 1.42860654e-06f;
-static const f32 overflow_margin = 4.2995665694e-08f;
-static const f32 two_over_3ln2 = 9.6179670095e-01f;
-static const f32 two_over_3ln2_high = 9.6179199219e-01f;
-static const f32 two_over_3ln2_low = 4.7017383622e-06f;
-static const f32 inv_ln2 = 1.4426950216e+00f;
-static const f32 inv_ln2_high = 1.4426879883e+00f;
-static const f32 inv_ln2_low = 7.0526075433e-06f;
+static const f32 g_bases[] = { 1.0f, 1.5f };
+static const f32 g_log2BaseHead[] = { 0.0f, 5.84960938e-01f };
+static const f32 g_log2BaseTail[] = { 0.0f, 1.56322085e-06f };
+static const f32 g_zero = 0.0f;
+static const f32 g_one = 1.0f;
+static const f32 g_two = 2.0f;
+static const f32 g_subnormalScale = 16777216.0f;
+static const f32 g_tenTo30 = 1.0e30f;
+static const f32 g_tenToMinus30 = 1.0e-30f;
+static const f32 g_logS4 = 6.0000002384e-01f;
+static const f32 g_logS6 = 4.2857143283e-01f;
+static const f32 g_logS8 = 3.3333334327e-01f;
+static const f32 g_logS10 = 2.7272811532e-01f;
+static const f32 g_logS12 = 2.3066075146e-01f;
+static const f32 g_logS14 = 2.0697501302e-01f;
+static const f32 g_expZ2 = 1.6666667163e-01f;
+static const f32 g_expZ4 = -2.7777778450e-03f;
+static const f32 g_expZ6 = 6.6137559770e-05f;
+static const f32 g_expZ8 = -1.6533901999e-06f;
+static const f32 g_expZ10 = 4.1381369442e-08f;
+static const f32 g_ln2 = 6.9314718246e-01f;
+static const f32 g_ln2Head = 6.93145752e-01f;
+static const f32 g_ln2Tail = 1.42860654e-06f;
+static const f32 g_overflowMargin = 4.2995665694e-08f;
+static const f32 g_twoOver3Ln2 = 9.6179670095e-01f;
+static const f32 g_twoOver3Ln2Head = 9.6179199219e-01f;
+static const f32 g_twoOver3Ln2Tail = 4.7017383622e-06f;
+static const f32 g_invLn2 = 1.4426950216e+00f;
+static const f32 g_invLn2Head = 1.4426879883e+00f;
+static const f32 g_invLn2Tail = 7.0526075433e-06f;
 
 f32 func_002052F8(f32 x);
 f32 func_00208068(f32 x);
@@ -42,210 +42,210 @@ f32 func_00209260(f32 x, s32 n);
 
 f32 func_002073F8(f32 x, f32 y)
 {
-    f32 z, ax, z_h, z_l, p_h, p_l;
-    f32 y1, t1, t2, r, s, t, u, v, w;
-    f32 s2, s_h, s_l, t_h, t_l;
-    s32 i, j, k, yisint, n;
-    s32 hx, hy, ix, iy, is;
+    f32 value, absX, logHead, logTail, prodHead, prodTail;
+    f32 yHead, log2Head, log2Tail, poly, factor, tmp, partA, partB, corr;
+    f32 factor2, factorHead, factorTail, tmpHead, tmpTail;
+    s32 mag, word, slot, yIntKind, n;
+    s32 xBits, yBits, xMag, yMag, chopBits;
 
-    FLOAT_TO_BITS(hx, x);
-    FLOAT_TO_BITS(hy, y);
-    ix = hx & 0x7fffffff;
-    iy = hy & 0x7fffffff;
+    FLOAT_TO_BITS(xBits, x);
+    FLOAT_TO_BITS(yBits, y);
+    xMag = xBits & 0x7fffffff;
+    yMag = yBits & 0x7fffffff;
 
-    if (iy == 0) {
-        return one;
+    if (yMag == 0) {
+        return g_one;
     }
-    if (ix > 0x7f800000 || iy > 0x7f800000) {
+    if (xMag > 0x7f800000 || yMag > 0x7f800000) {
         return x + y;
     }
 
-    yisint = 0;
-    if (hx < 0) {
-        if (iy > 0x4b7fffff) {
-            yisint = 2;
-        } else if (iy > 0x3f7fffff) {
-            k = (iy >> 23) - 0x7f;
-            j = iy >> (23 - k);
-            if ((j << (23 - k)) == iy) {
-                yisint = 2 - (j & 1);
+    yIntKind = 0;
+    if (xBits < 0) {
+        if (yMag > 0x4b7fffff) {
+            yIntKind = 2;
+        } else if (yMag > 0x3f7fffff) {
+            slot = (yMag >> 23) - 0x7f;
+            word = yMag >> (23 - slot);
+            if ((word << (23 - slot)) == yMag) {
+                yIntKind = 2 - (word & 1);
             }
         }
     }
 
-    if (iy == 0x7f800000) {
-        if (ix == 0x3f800000) {
+    if (yMag == 0x7f800000) {
+        if (xMag == 0x3f800000) {
             return y - y;
-        } else if (ix > 0x3f800000) {
-            return (hy >= 0) ? y : zero;
+        } else if (xMag > 0x3f800000) {
+            return (yBits >= 0) ? y : g_zero;
         } else {
-            return (hy < 0) ? -y : zero;
+            return (yBits < 0) ? -y : g_zero;
         }
     }
-    if (iy == 0x3f800000) {
-        if (hy < 0) {
-            return one / x;
+    if (yMag == 0x3f800000) {
+        if (yBits < 0) {
+            return g_one / x;
         }
         return x;
     }
-    if (hy == 0x40000000) {
+    if (yBits == 0x40000000) {
         return x * x;
     }
-    if (hy == 0x3f000000 && hx >= 0) {
+    if (yBits == 0x3f000000 && xBits >= 0) {
         return func_00208068(x);
     }
 
-    ax = func_002052F8(x);
-    if (ix == 0x7f800000 || ix == 0 || ix == 0x3f800000) {
-        z = ax;
-        if (hy < 0) {
-            z = one / z;
+    absX = func_002052F8(x);
+    if (xMag == 0x7f800000 || xMag == 0 || xMag == 0x3f800000) {
+        value = absX;
+        if (yBits < 0) {
+            value = g_one / value;
         }
-        if (hx < 0) {
-            if (((ix - 0x3f800000) | yisint) == 0) {
-                z = (z - z) / (z - z);
-            } else if (yisint == 1) {
-                z = -z;
+        if (xBits < 0) {
+            if (((xMag - 0x3f800000) | yIntKind) == 0) {
+                value = (value - value) / (value - value);
+            } else if (yIntKind == 1) {
+                value = -value;
             }
         }
-        return z;
+        return value;
     }
 
-    if (((((u32)hx >> 31) - 1) | yisint) == 0) {
+    if (((((u32)xBits >> 31) - 1) | yIntKind) == 0) {
         return (x - x) / (x - x);
     }
 
-    if (iy > 0x4d000000) {
-        if (ix < 0x3f7ffff8) {
-            return (hy < 0) ? huge * huge : tiny * tiny;
+    if (yMag > 0x4d000000) {
+        if (xMag < 0x3f7ffff8) {
+            return (yBits < 0) ? g_tenTo30 * g_tenTo30 : g_tenToMinus30 * g_tenToMinus30;
         }
-        if (ix > 0x3f800007) {
-            return (hy > 0) ? huge * huge : tiny * tiny;
+        if (xMag > 0x3f800007) {
+            return (yBits > 0) ? g_tenTo30 * g_tenTo30 : g_tenToMinus30 * g_tenToMinus30;
         }
-        t = x - one;
-        w = (t * t) * (0.5f - t * (0.333333343f - t * 0.25f));
-        u = inv_ln2_high * t;
-        v = t * inv_ln2_low - w * inv_ln2;
-        t1 = u + v;
-        FLOAT_TO_BITS(is, t1);
-        is &= 0xfffff000;
-        BITS_TO_FLOAT(t1, is);
-        t2 = v - (t1 - u);
+        tmp = x - g_one;
+        corr = (tmp * tmp) * (0.5f - tmp * (0.333333343f - tmp * 0.25f));
+        partA = g_invLn2Head * tmp;
+        partB = tmp * g_invLn2Tail - corr * g_invLn2;
+        log2Head = partA + partB;
+        FLOAT_TO_BITS(chopBits, log2Head);
+        chopBits &= 0xfffff000;
+        BITS_TO_FLOAT(log2Head, chopBits);
+        log2Tail = partB - (log2Head - partA);
     } else {
         n = 0;
-        if (ix < 0x800000) {
-            ax *= scale24;
+        if (xMag < 0x800000) {
+            absX *= g_subnormalScale;
             n -= 24;
-            FLOAT_TO_BITS(ix, ax);
+            FLOAT_TO_BITS(xMag, absX);
         }
-        n += (ix >> 23) - 0x7f;
-        j = ix & 0x7fffff;
-        ix = j | 0x3f800000;
-        if (j <= 0x1cc471) {
-            k = 0;
-        } else if (j < 0x5db3d7) {
-            k = 1;
+        n += (xMag >> 23) - 0x7f;
+        word = xMag & 0x7fffff;
+        xMag = word | 0x3f800000;
+        if (word <= 0x1cc471) {
+            slot = 0;
+        } else if (word < 0x5db3d7) {
+            slot = 1;
         } else {
-            k = 0;
+            slot = 0;
             n += 1;
-            ix -= 0x800000;
+            xMag -= 0x800000;
         }
-        BITS_TO_FLOAT(ax, ix);
+        BITS_TO_FLOAT(absX, xMag);
 
-        u = ax - bases[k];
-        v = one / (ax + bases[k]);
-        s = u * v;
-        s_h = s;
-        FLOAT_TO_BITS(is, s_h);
-        is &= 0xfffff000;
-        BITS_TO_FLOAT(s_h, is);
-        is = ((ix >> 1) | 0x20000000) + 0x40000 + (k << 21);
-        BITS_TO_FLOAT(t_h, is);
-        t_l = ax - (t_h - bases[k]);
-        s_l = v * ((u - s_h * t_h) - s_h * t_l);
-        s2 = s * s;
-        r = s2 * s2 * (log_c1 + s2 * (log_c2 + s2 * (log_c3 + s2 * (log_c4 + s2 * (log_c5 + s2 * log_c6)))));
-        r += s_l * (s_h + s);
-        s2 = s_h * s_h;
-        t_h = 3.0f + s2 + r;
-        FLOAT_TO_BITS(is, t_h);
-        is &= 0xfffff000;
-        BITS_TO_FLOAT(t_h, is);
-        t_l = r - ((t_h - 3.0f) - s2);
-        u = s_h * t_h;
-        v = s_l * t_h + t_l * s;
-        p_h = u + v;
-        FLOAT_TO_BITS(is, p_h);
-        is &= 0xfffff000;
-        BITS_TO_FLOAT(p_h, is);
-        p_l = v - (p_h - u);
-        z_h = two_over_3ln2_high * p_h;
-        z_l = two_over_3ln2_low * p_h + p_l * two_over_3ln2 + log2_base_low[k];
-        t = (f32)n;
-        t1 = ((z_h + z_l) + log2_base_high[k]) + t;
-        FLOAT_TO_BITS(is, t1);
-        is &= 0xfffff000;
-        BITS_TO_FLOAT(t1, is);
-        t2 = z_l - (((t1 - t) - log2_base_high[k]) - z_h);
+        partA = absX - g_bases[slot];
+        partB = g_one / (absX + g_bases[slot]);
+        factor = partA * partB;
+        factorHead = factor;
+        FLOAT_TO_BITS(chopBits, factorHead);
+        chopBits &= 0xfffff000;
+        BITS_TO_FLOAT(factorHead, chopBits);
+        chopBits = ((xMag >> 1) | 0x20000000) + 0x40000 + (slot << 21);
+        BITS_TO_FLOAT(tmpHead, chopBits);
+        tmpTail = absX - (tmpHead - g_bases[slot]);
+        factorTail = partB * ((partA - factorHead * tmpHead) - factorHead * tmpTail);
+        factor2 = factor * factor;
+        poly = factor2 * factor2 * (g_logS4 + factor2 * (g_logS6 + factor2 * (g_logS8 + factor2 * (g_logS10 + factor2 * (g_logS12 + factor2 * g_logS14)))));
+        poly += factorTail * (factorHead + factor);
+        factor2 = factorHead * factorHead;
+        tmpHead = 3.0f + factor2 + poly;
+        FLOAT_TO_BITS(chopBits, tmpHead);
+        chopBits &= 0xfffff000;
+        BITS_TO_FLOAT(tmpHead, chopBits);
+        tmpTail = poly - ((tmpHead - 3.0f) - factor2);
+        partA = factorHead * tmpHead;
+        partB = factorTail * tmpHead + tmpTail * factor;
+        prodHead = partA + partB;
+        FLOAT_TO_BITS(chopBits, prodHead);
+        chopBits &= 0xfffff000;
+        BITS_TO_FLOAT(prodHead, chopBits);
+        prodTail = partB - (prodHead - partA);
+        logHead = g_twoOver3Ln2Head * prodHead;
+        logTail = g_twoOver3Ln2Tail * prodHead + prodTail * g_twoOver3Ln2 + g_log2BaseTail[slot];
+        tmp = (f32)n;
+        log2Head = ((logHead + logTail) + g_log2BaseHead[slot]) + tmp;
+        FLOAT_TO_BITS(chopBits, log2Head);
+        chopBits &= 0xfffff000;
+        BITS_TO_FLOAT(log2Head, chopBits);
+        log2Tail = logTail - (((log2Head - tmp) - g_log2BaseHead[slot]) - logHead);
     }
 
-    s = one;
-    if (((((u32)hx >> 31) - 1) | (yisint - 1)) == 0) {
-        s = -one;
+    factor = g_one;
+    if (((((u32)xBits >> 31) - 1) | (yIntKind - 1)) == 0) {
+        factor = -g_one;
     }
 
-    FLOAT_TO_BITS(is, y);
-    is &= 0xfffff000;
-    BITS_TO_FLOAT(y1, is);
-    p_l = (y - y1) * t1 + y * t2;
-    p_h = y1 * t1;
-    z = p_l + p_h;
-    FLOAT_TO_BITS(j, z);
-    if (j > 0x43000000) {
-        return s * huge * huge;
-    } else if (j == 0x43000000) {
-        if (p_l + overflow_margin > z - p_h) {
-            return s * huge * huge;
+    FLOAT_TO_BITS(chopBits, y);
+    chopBits &= 0xfffff000;
+    BITS_TO_FLOAT(yHead, chopBits);
+    prodTail = (y - yHead) * log2Head + y * log2Tail;
+    prodHead = yHead * log2Head;
+    value = prodTail + prodHead;
+    FLOAT_TO_BITS(word, value);
+    if (word > 0x43000000) {
+        return factor * g_tenTo30 * g_tenTo30;
+    } else if (word == 0x43000000) {
+        if (prodTail + g_overflowMargin > value - prodHead) {
+            return factor * g_tenTo30 * g_tenTo30;
         }
-    } else if ((j & 0x7fffffff) > 0x43160000) {
-        return s * tiny * tiny;
-    } else if ((u32)j == 0xc3160000) {
-        if (p_l <= z - p_h) {
-            return s * tiny * tiny;
+    } else if ((word & 0x7fffffff) > 0x43160000) {
+        return factor * g_tenToMinus30 * g_tenToMinus30;
+    } else if ((u32)word == 0xc3160000) {
+        if (prodTail <= value - prodHead) {
+            return factor * g_tenToMinus30 * g_tenToMinus30;
         }
     }
 
-    i = j & 0x7fffffff;
-    k = (i >> 23) - 0x7f;
+    mag = word & 0x7fffffff;
+    slot = (mag >> 23) - 0x7f;
     n = 0;
-    if (i > 0x3f000000) {
-        n = j + (0x800000 >> (k + 1));
-        k = ((n & 0x7fffffff) >> 23) - 0x7f;
-        BITS_TO_FLOAT(t, n & ~(0x7fffff >> k));
-        n = ((n & 0x7fffff) | 0x800000) >> (23 - k);
-        if (j < 0) {
+    if (mag > 0x3f000000) {
+        n = word + (0x800000 >> (slot + 1));
+        slot = ((n & 0x7fffffff) >> 23) - 0x7f;
+        BITS_TO_FLOAT(tmp, n & ~(0x7fffff >> slot));
+        n = ((n & 0x7fffff) | 0x800000) >> (23 - slot);
+        if (word < 0) {
             n = -n;
         }
-        p_h -= t;
+        prodHead -= tmp;
     }
-    t = p_l + p_h;
-    FLOAT_TO_BITS(is, t);
-    is &= 0xfffff000;
-    BITS_TO_FLOAT(t, is);
-    u = t * ln2_high;
-    v = (p_l - (t - p_h)) * ln2 + t * ln2_low;
-    z = u + v;
-    w = v - (z - u);
-    t = z * z;
-    t1 = z - t * (exp_c1 + t * (exp_c2 + t * (exp_c3 + t * (exp_c4 + t * exp_c5))));
-    r = (z * t1) / (t1 - two) - (w + z * w);
-    z = one - (r - z);
-    FLOAT_TO_BITS(j, z);
-    j += n << 23;
-    if ((j >> 23) <= 0) {
-        z = func_00209260(z, n);
+    tmp = prodTail + prodHead;
+    FLOAT_TO_BITS(chopBits, tmp);
+    chopBits &= 0xfffff000;
+    BITS_TO_FLOAT(tmp, chopBits);
+    partA = tmp * g_ln2Head;
+    partB = (prodTail - (tmp - prodHead)) * g_ln2 + tmp * g_ln2Tail;
+    value = partA + partB;
+    corr = partB - (value - partA);
+    tmp = value * value;
+    log2Head = value - tmp * (g_expZ2 + tmp * (g_expZ4 + tmp * (g_expZ6 + tmp * (g_expZ8 + tmp * g_expZ10))));
+    poly = (value * log2Head) / (log2Head - g_two) - (corr + value * corr);
+    value = g_one - (poly - value);
+    FLOAT_TO_BITS(word, value);
+    word += n << 23;
+    if ((word >> 23) <= 0) {
+        value = func_00209260(value, n);
     } else {
-        BITS_TO_FLOAT(z, j);
+        BITS_TO_FLOAT(value, word);
     }
-    return s * z;
+    return factor * value;
 }
