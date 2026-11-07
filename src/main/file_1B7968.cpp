@@ -892,11 +892,14 @@ void SaveColliderPreviousPosition(Collider* self)
 }
 
 // What slot 13 of a moved collider is told (kind 3): the collider and where it was.
+// The record a collider's position change hands to its event method (event 3). Its frame slot
+// is 0x30 bytes where placed_object.cpp's MoveNotice, the same event's record there, is 0x20:
+// SetColliderPosition writes only who and before, and leaves the third quadword as it is.
 struct ColliderMoveNote {
     Collider* who;
     u8 pad04[0xC];
-    Vec02 before;
-    u8 pad20[0x10];
+    Vec02 before;           // 0x10
+    Vec02 q20;              // 0x20: not written by SetColliderPosition
 };
 void RequestCameraSnap(Camera* camera, s32 mode);
 
