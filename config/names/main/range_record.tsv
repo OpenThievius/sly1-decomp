@@ -14,6 +14,7 @@ func_001B1FE0	StoreRangeRecordOuter	stores +0x44, then UpdateRangeRecordBounds a
 func_001B2010	ScaleRangeRecordByAngle	sets the ranges +0x04 and +0x08 to +0x40 and +0x44 times the tangent (func_002054F0) of half the angle given in degrees (SetRangeRecordInnerAndOuter)
 func_001B2068	StoreRangeRecordVector	copies a 16-byte vector to +0x30 and drops the packet (SetRangeRecordVector)
 func_001B2090	RangeRecordMatchesKinds	1 when the record's link is shown under the camera's mask at 0x21C (or has bit 0x10000000) and is of kind 2 with bit 1 asked or kind 3 with bit 2 asked
+func_001B2118	IsRangeRecordBodyCandidate	the filter UpdateRangeRecord passes when it gathers bodies: accepts a collider with face starts (+0x410) whose bit 43 of +0x538 is clear
 func_001B2140	UpdateRangeRecord	UpdatePlacedObject's per-frame call for the record: gathers bodies from the world on back memory (func_001DC4D0) through func_001B2118 and RangeRecordMatchesKinds and builds the packet with BuildRangeRecordPacket
 func_001B2358	BuildRangeRecordPacket	writes the record's VIF packet with the camera's packet writer (InitPacketWriter, SubmitMeshQueueEntry, WriteVifMscal, WriteVifFlushE) and keeps it in +0xC0
 func_001B2640	QueueRangeRecordPacket	when the link is shown under the camera's mask, builds the packet if +0xC0 is empty and writes a reference to it into g_vifPacketWriter

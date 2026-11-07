@@ -1872,7 +1872,7 @@ void func_001BDA50(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, f32 f, s32 ex)
     Frame_1BDA50 it;
     s32 v = CollectGroupItems(n, arr, 0x40, &buf);
     if (v < 0x40 || n < 2) {
-        func_001BCD00(ctx, n, arr, v, &buf, f, ex);
+        SolveColliderGroupContacts(ctx, n, arr, v, &buf, f, ex);
         return;
     }
     SortCollidersByContactCount(n, arr);

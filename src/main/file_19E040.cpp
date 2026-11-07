@@ -2059,7 +2059,7 @@ void func_001A38F0(Effect* self)
 {
     if (self->start <= g_gameClock[1]) {
         if (self->i134 != 0) {
-            func_001A35F0(self);
+            TakeDelayedEffectSourcePose(self);
         }
     }
     f32 span = g_gameClock[1] - self->start;
@@ -2474,7 +2474,7 @@ ASM_FUNC(func_001A48C0);
 void func_001A4B30(PairController* self)
 {
     StartPlacedObject(self);
-    if (self->id64C != func_001A4898()) {
+    if (self->id64C != GetCurrentEntryVariant()) {
         self->desc->m03(self);
     } else {
         BlendMotion* k = &self->kin;
@@ -2520,7 +2520,7 @@ void func_001A4C48(PairController* self)
     case 2:
         if (self->count3BC < self->limit3B8) {
             if (self->f634 < g_gameClock[1]) {
-                func_001A5120(self);
+                SpawnPairedObject(self);
             }
         }
         if (self->f640 < g_gameClock[1]) {
@@ -2763,7 +2763,7 @@ void func_001A5B28(PairController* self, HitTarget* obj)
     }
     AppendToList(self->list374, obj);
     if (obj->partner != 0) {
-        if (func_001A6090(self, obj->partner) != 0) {
+        if (PairWithNearestFreeObject(self, obj->partner) != 0) {
             SetPairedState(obj->partner, 3);
         } else {
             ((HitTarget*)obj->partner)->partner = 0;
@@ -2862,11 +2862,11 @@ void func_001A5F78(PairController* self, PairedObject* obj)
     PairedObject* child = (PairedObject*)obj->partner;
     if (child != 0) {
         if (child->parent == obj) {
-            func_001A5D50(self, obj);
+            DetachPairedPartner(self, obj);
         }
         RemoveFromList(self->list35C, child);
         AppendToList(self->list368, child);
-        if (func_001A6238(self, child) == 0) {
+        if (PairWithNearestWaitingObject(self, child) == 0) {
             child->partner = 0;
         }
     }
@@ -2901,12 +2901,12 @@ void func_001A6168(u8* self, PairedObject* obj, PairedObject* node)
         RemoveFromList(self + 0x35C, cur);
         AppendToList(self + 0x368, cur);
         cur->partner = 0;
-        func_001A6238(self, cur);
+        PairWithNearestWaitingObject(self, cur);
     }
     if (s2 != 0) {
         s2->partner = 0;
         SetPairedState(s2, 2);
-        if (func_001A6090(self, s2) != 0) {
+        if (PairWithNearestFreeObject(self, s2) != 0) {
             SetPairedState(s2, 3);
         }
     }
@@ -3019,7 +3019,7 @@ void func_001A6BE0(PairedObject* self, s32 mode)
         h = self->f58C;
         break;
     case 4:
-        func_001A5C90(self->controller, self);
+        AttachPairedPartner(self->controller, self);
         w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f594;
         break;

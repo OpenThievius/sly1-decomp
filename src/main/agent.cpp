@@ -236,7 +236,7 @@ s32 func_001C7468(Agent* self, Collider* obj)
         return 1;
     }
     if (self->fB0C != 0) {
-        if (func_001A8820(self->fB0C, obj) != 0) {
+        if (IsObjectInPool(self->fB0C, obj) != 0) {
             return 1;
         }
     }
@@ -1133,7 +1133,7 @@ s32 func_001C9D50(Agent* self, s32 key, Collider* other)
         goto ret1;
     if (!self->fB0C)
         goto ret0;
-    if (!func_001A8820(self->fB0C, other))
+    if (!IsObjectInPool(self->fB0C, other))
         goto ret0;
 ret1:
     return 1;
