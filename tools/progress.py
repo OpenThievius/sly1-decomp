@@ -22,9 +22,10 @@ there is nothing to match, and the build keeps its bytes from the disassembly. T
 matches are counted apart (exact_c() and the README table), as OpenRAC does. A PAL function
 is original assembly when its US counterpart (config/eu/map.tsv) is.
 
-Units follow that layout. Code units are the source files: one per 16 KiB
-window of game code (game/<window>, src/main/) and of the libraries
-(lib/<window>, src/lib/); a unit is complete when every function in it is.
+Units follow that layout. Code units are the source files: each proved file of
+config/us/files.tsv (game/file_16F608, lib/cdvd...), and a 16 KiB window
+(game/<window>, lib/<window>) for code no proved file holds yet; PAL's functions
+take their US counterpart's file. A unit is complete when every function in it is.
 Data units are the sections with bytes (data/<section>): they measure data,
 which comes from the disassembly until C can place it (docs/ROADMAP.md).
 Each unit is in one category, game, lib or data, and every category has its
@@ -169,12 +170,53 @@ def finish(m):
 CATEGORIES = {"game": "Game code", "lib": "Libraries", "data": "Data"}
 
 
+def proved_files():
+    """[(start, end, path)] of the proved source files (config/us/files.tsv), by start address."""
+    path = ROOT / "config" / "us" / "files.tsv"
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l] if path.exists() else []
+    return sorted((int(r[1], 16), int(r[2], 16), r[0]) for r in rows if int(r[2], 16) > int(r[1], 16))
+
+
+def unit_of(key):
+    """A function's unit: (start, source path) of the proved file that holds it, else its 16 KiB window
+    (start, None). PAL's functions take their US counterpart's file (config/eu/map.tsv); one only
+    PAL has takes the file of the closest paired function before it."""
+    files = proved_files()
+    starts = [f[0] for f in files]
+    import bisect
+
+    def by_us(addr):
+        i = bisect.bisect_right(starts, addr) - 1
+        if i >= 0 and files[i][0] <= addr < files[i][1]:
+            return files[i][0], files[i][2]
+        return None
+
+    if key == versions.primary():
+        return lambda name, addr: by_us(addr) or (todo.window_of(addr), None)
+    pair = {}
+    for line in (ROOT / "config" / key / "map.tsv").read_text().splitlines()[1:]:
+        eu_name, eu_addr, _s, _us_name, us_addr, _how = line.split("\t")
+        if us_addr != "-":
+            pair[int(eu_addr, 16)] = int(us_addr, 16)
+    paired = sorted(pair)
+
+    def lookup(name, addr):
+        us = pair.get(addr)
+        if us is None:
+            i = bisect.bisect_right(paired, addr) - 1
+            us = pair[paired[i]] if i >= 0 else None
+        found = by_us(us) if us is not None else None
+        return found or (todo.window_of(addr), None)
+    return lookup
+
+
 def report(key):
     funcs = functions(key)
     done = finished(key)
     linked = key == versions.primary()
     near = fuzzy(key)
     globals_ = c_data(key)
+    unit = unit_of(key)
     units = []
     for kind, name, start, end, category, folder in todo.layout(key):
         if kind == "data":
@@ -184,22 +226,28 @@ def report(key):
             units.append((category, m.pop("_fuzzy_code"), {"name": "data/%s" % name, "measures": m,
                                      "metadata": {"complete": False, "progress_categories": [category]}}))
             continue
-        windows = {}
+        # A unit is a proved source file (config/us/files.tsv); code no file holds yet keeps its
+        # 16 KiB window.
+        groups = {}
         for f in funcs:
             if start <= f[1] < end:
-                windows.setdefault(todo.window_of(f[1]), []).append(f)
-        for window in sorted(windows):
-            members = windows[window]
+                groups.setdefault(unit(f[0], f[1]), []).append(f)
+        for ustart, source in sorted(groups, key=lambda g: (g[0], g[1] or "")):
+            members = groups[(ustart, source)]
             m = measures(members, done, linked, near=near)
             close = m.pop("_fuzzy_code")
             complete = linked and all(n in done for n, _, _ in members)
             m["total_units"], m["complete_units"] = 1, 1 if complete else 0
             meta = {"complete": complete, "progress_categories": [category]}
-            source = "%s/%08X.cpp" % (folder, window)
+            if source is None:
+                source = "%s/%08X.cpp" % (folder, ustart)
+                label = "%s/%08X" % (name, ustart)
+            else:
+                label = "%s/%s" % (name, Path(source).stem)
             if (ROOT / source).exists():
                 meta["source_path"] = source
             units.append((category, close, {
-                "name": "%s/%08X" % (name, window),
+                "name": label,
                 "measures": m,
                 "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else near.get(n, 0.0),
                                "address": str(a - members[0][1]), "metadata": {"virtual_address": str(a)}}

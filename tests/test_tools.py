@@ -393,6 +393,18 @@ class ProgressCountTest(unittest.TestCase):
         self.assertTrue(pal)
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
+    def test_units_are_the_proved_files(self):
+        files = progress.proved_files()
+        self.assertTrue(files)
+        start, end, path = files[0]
+        unit = progress.unit_of("us")
+        self.assertEqual(unit("f", start), (start, path))
+        self.assertEqual(unit("f", end - 4)[1], path if files[1][0] != end - 4 else files[1][2])
+        # Code no proved file holds keeps its 16 KiB window.
+        self.assertEqual(unit("f", 0x00300000), (0x00300000, None))
+        # PAL's entry point is US's: it takes the same file.
+        self.assertEqual(progress.unit_of("eu")("f", 0x00100000)[1], unit("f", 0x00100000)[1])
+
 
 class EpilogueTailTest(unittest.TestCase):
     """A lone `jr $ra` that frees stack is the end of a stripped function, not a whole one."""
