@@ -56,8 +56,8 @@ recompute:
         value = terms[j - 1] + sum;
     }
 
-    value = func_00209260(value, chunkExp);
-    value -= 8.0f * func_00205318(value * 0.125f);
+    value = ScaleByPowerOfTwo(value, chunkExp);
+    value -= 8.0f * RoundDown(value * 0.125f);
     quadrant = (s32)value;
     value -= (f32)quadrant;
     roundState = 0;
@@ -99,7 +99,7 @@ recompute:
         if (roundState == 2) {
             value = g_one - value;
             if (carry != 0) {
-                value -= func_00209260(g_one, chunkExp);
+                value -= ScaleByPowerOfTwo(g_one, chunkExp);
             }
         }
     }
@@ -132,7 +132,7 @@ recompute:
             chunkExp -= 8;
         }
     } else {
-        value = func_00209260(value, -chunkExp);
+        value = ScaleByPowerOfTwo(value, -chunkExp);
         if (value >= g_digitBase) {
             sum = (f32)(s32)(g_invDigitBase * value);
             chunks[lastTerm] = (s32)(value - g_digitBase * sum);
@@ -144,7 +144,7 @@ recompute:
         }
     }
 
-    sum = func_00209260(g_one, chunkExp);
+    sum = ScaleByPowerOfTwo(g_one, chunkExp);
     for (i = lastTerm; i >= 0; i--) {
         terms[i] = sum * (f32)chunks[i];
         sum *= g_invDigitBase;

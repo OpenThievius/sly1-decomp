@@ -92,10 +92,10 @@ f32 func_002073F8(f32 x, f32 y)
         return x * x;
     }
     if (yBits == 0x3f000000 && xBits >= 0) {
-        return func_00208068(x);
+        return SquareRootKernel(x);
     }
 
-    absX = func_002052F8(x);
+    absX = AbsoluteValue(x);
     if (xMag == 0x7f800000 || xMag == 0 || xMag == 0x3f800000) {
         value = absX;
         if (yBits < 0) {
@@ -243,7 +243,7 @@ f32 func_002073F8(f32 x, f32 y)
     FLOAT_TO_BITS(word, value);
     word += n << 23;
     if ((word >> 23) <= 0) {
-        value = func_00209260(value, n);
+        value = ScaleByPowerOfTwo(value, n);
     } else {
         BITS_TO_FLOAT(value, word);
     }

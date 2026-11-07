@@ -49,11 +49,11 @@ f32 func_002066C8(f32 x)
         scratch = num / den;
         return x + x * scratch;
     }
-    scratch = g_one - func_002052F8(x);
+    scratch = g_one - AbsoluteValue(x);
     arg = scratch * 0.5f;
     num = arg * (g_numT1 + arg * (g_numT2 + arg * (g_numT3 + arg * (g_numT4 + arg * (g_numT5 + arg * g_numT6)))));
     den = g_one + arg * (g_denT1 + arg * (g_denT2 + arg * (g_denT3 + arg * g_denT4)));
-    root = func_00208068(arg);
+    root = SquareRootKernel(arg);
     if (magnitude >= 0x3F79999A) {
         scratch = num / den;
         arg = g_halfPiHead - (2.0f * (root + root * scratch) - g_halfPiTail);

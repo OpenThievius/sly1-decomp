@@ -21,20 +21,20 @@ f32 func_00205210(f32 x)
     magnitude = magnitude & 0x7fffffff;
 
     if (magnitude <= 0x3F490FD8) {
-        return func_002081A0(x, 0.0f);
+        return CosineKernel(x, 0.0f);
     }
     if (magnitude > 0x7F7FFFFF) {
         return x - x;
     }
-    quadrant = func_00207C88(x, parts);
+    quadrant = ReduceByHalfPi(x, parts);
     switch (quadrant & 3) {
     case 0:
-        return func_002081A0(parts[0], parts[1]);
+        return CosineKernel(parts[0], parts[1]);
     case 1:
-        return -func_00208C48(1, parts[0], parts[1]);
+        return -SineKernel(1, parts[0], parts[1]);
     case 2:
-        return -func_002081A0(parts[0], parts[1]);
+        return -CosineKernel(parts[0], parts[1]);
     default:
-        return func_00208C48(1, parts[0], parts[1]);
+        return SineKernel(1, parts[0], parts[1]);
     }
 }

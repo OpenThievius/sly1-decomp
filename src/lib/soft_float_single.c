@@ -118,7 +118,7 @@ u32 func_001FD7A0(f32 value)
     f32 in = value;
     Packed p;
 
-    func_001FD6E0((u32*)&in, &p);
+    UnpackFloat((u32*)&in, &p);
     if ((p.kind ^ 2) == 0) {
         return 0;
     }
@@ -151,13 +151,13 @@ f32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3)
     args.sign = a1;
     args.exp = a2;
     args.mant = a3;
-    return func_001FD5D0(&args);
+    return PackFloat(&args);
 }
 
 u64 func_001FD868(f32 x)
 {
     Packed v;
 
-    func_001FD6E0((u32*)&x, &v);
-    return func_001FD548(v.kind, v.sign, v.exp, (u64)v.mant << 30);
+    UnpackFloat((u32*)&x, &v);
+    return PackDoubleFromParts(v.kind, v.sign, v.exp, (u64)v.mant << 30);
 }

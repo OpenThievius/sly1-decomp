@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The IPU library's initialisation, from 0x211B40 to 0x211DE0, built whole (config/us/files.tsv):
-// the start of the transfer to the IPU (func_00211B40, a copy of src/lib/file_2117D0.cpp's
+// the start of the transfer to the IPU (func_00211B40, a copy of src/lib/ipu_transfer.cpp's
 // func_00211838 for channel 4, so a helper each file has of its own) and the reset of the IPU
 // with its default quantiser matrices and colour table (func_00211BA8, which the MPEG library's
 // initialisation calls). Its .data is the library's identification string, the matrices and the
 // table. Its start is chosen: the two copies of the helper put a boundary at 0x211AD8 or here, and
 // the helper opening the file, as func_002117D0 opens the file before, puts it here. Its end is
-// the frame-information object at 0x211DE0. Named after its first address. Written for this
+// the frame-information object at 0x211DE0. Written for this
 // project from retail's code.
 #include "common.h"
 
@@ -35,16 +35,16 @@ s32 func_001F9DA8(void);
 
 void func_00211B40(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B400 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 void func_00211BA8(void)
 {
-    func_00211B40(1);
+    StartIpuInputForReset(1);
     *(volatile u32*)0x10002010 = 0x40000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }

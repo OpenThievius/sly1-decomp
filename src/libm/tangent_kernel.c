@@ -27,7 +27,7 @@ f32 func_00208D50(f32 x, f32 y, s32 sign)
     if (magnitude <= 0x317FFFFF) {
         if ((s32)x == 0) {
             if ((magnitude | (sign + 1)) == 0) {
-                return g_one / func_002052F8(x);
+                return g_one / AbsoluteValue(x);
             }
             if (sign != 1) {
                 return -g_one / x;

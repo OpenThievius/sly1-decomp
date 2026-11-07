@@ -86,15 +86,15 @@ void func_001FA7D8(void* data, s32 size);
 
 void func_001FA068(void)
 {
-    func_001FA9C0();
+    SetUpTlbForMemory();
 }
 
 LINKER_REMNANT(func_001FA070);
 
 void func_001FA078(s32 status)
 {
-    func_001FA068();
-    func_001F6920(status);
+    SetUpTlb();
+    ExitProgramSyscall(status);
 }
 
 void func_001FA0A0(void)
@@ -112,7 +112,7 @@ s32 func_001FA0D8(void)
 s32 func_001FA0E0(s32 mode, s32 status)
 {
     if (mode == 1) {
-        func_001FA078(status);
+        ExitProgram(status);
     }
     return 0;
 }
@@ -122,7 +122,7 @@ LINKER_REMNANT(func_001FA108);
 void func_001FA140(s32 value)
 {
     s32 local = value;
-    func_001F6D10(0x10, &local);
+    CallDebugService(0x10, &local);
 }
 
 LINKER_REMNANT(func_001FA168);
@@ -151,9 +151,9 @@ s32 func_001FA630(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 cou
 void func_001FA1E8(void)
 {
     s32 i;
-    func_001F9D60();
+    DisableInterrupts();
     if (D_002779B8[0] != 0) {
-        func_001F9DA8();
+        EnableInterrupts();
         return;
     }
     D_002779B8[0] = 1;
@@ -172,40 +172,40 @@ void func_001FA1E8(void)
     for (i = 0; i < 32; i++) {
         D_006294C0[i] = 0;
     }
-    D_006293C0[0].handler = (Handler_1FA068)func_001FA1B0;
-    D_006293C0[1].handler = func_001FA190;
+    D_006293C0[0].handler = (Handler_1FA068)StoreIopChannelAddress;
+    D_006293C0[1].handler = StoreChannelWord;
     D_006293C0[0].arg = &D_00629398;
     D_006293C0[1].arg = &D_00629398;
-    func_001F9DA8();
-    func_001F6C20(0);
+    EnableInterrupts();
+    SyncDataCache(0);
     if ((*(volatile u32*)0x1000E010 & 0x20) != 0) {
         *(volatile u32*)0x1000E010 = 0x20;
     }
     if ((*(volatile u32*)0x1000C000 & 0x100) == 0) {
-        func_001F6CC0();
+        ArmIopDmaChain();
     }
-    D_00629394 = func_001F6970(5, (void*)func_001FA6B0, 0);
-    func_001F6E78(5);
-    D_00629398.iop = func_001F6CF0(0x80000000);
+    D_00629394 = AddDmaHandler(5, (void*)HandleCommandInterrupt, 0);
+    EnableDmaInterrupt(5);
+    D_00629398.iop = ReadIopRegister(0x80000000);
     if (D_00629398.iop != 0) {
         D_00629380.buffer = D_006292C0;
-        func_001FA630(0x80000000, &D_00629380, 0x14, 0, 0, 0);
+        SendCommand(0x80000000, &D_00629380, 0x14, 0, 0, 0);
         return;
     }
-    while ((func_001F6CF0(4) & 0x20000) == 0) {
+    while ((ReadIopRegister(4) & 0x20000) == 0) {
     }
-    D_00629398.iop = func_001F6CF0(2);
-    func_001F6CE0(0x80000000, D_00629398.iop);
-    func_001F6CE0(0x80000001, (u32)&D_00629398);
+    D_00629398.iop = ReadIopRegister(2);
+    WriteIopRegister(0x80000000, D_00629398.iop);
+    WriteIopRegister(0x80000001, (u32)&D_00629398);
     D_00629380.buffer = D_006292C0;
     D_00629380.opt = 0;
-    func_001FA630(0x80000002, &D_00629380, 0x14, 0, 0, 0);
+    SendCommand(0x80000002, &D_00629380, 0x14, 0, 0, 0);
 }
 
 void func_001FA468(void)
 {
-    (void)func_001F6E10(5);
-    (void)func_001F6990(5, D_00629394);
+    (void)DisableDmaInterrupt(5);
+    (void)RemoveDmaHandler(5, D_00629394);
     D_002779B8[0] = 0;
 }
 
@@ -255,7 +255,7 @@ s32 func_001FA4F8(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* data, 
         recs[0].w8 = count;
         recs[0].wC = 0;
         if (flags & 4) {
-            func_001FA7D8(data, count);
+            WriteBackDataCacheRange(data, count);
         }
     } else {
         obj->w4 = 0;
@@ -267,24 +267,24 @@ s32 func_001FA4F8(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* data, 
     obj->w8 = cmd;
     ((u8*)obj)[0] = (u8)size;
     recs[n].wC = 0x44;
-    func_001FA7D8(obj, size);
+    WriteBackDataCacheRange(obj, size);
     n++;
     if (flags & 1) {
-        result = func_001F6CB0(recs, n);
+        result = StartIopDmaFromInterrupt(recs, n);
     } else {
-        result = func_001F6CA0(recs, n);
+        result = StartIopDma(recs, n);
     }
     return result;
 }
 
 s32 func_001FA630(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
-    return func_001FA4F8(cmd, 0, (Header_1FA4F8*)packet, size, data, addr, count);
+    return SendCommandPacket(cmd, 0, (Header_1FA4F8*)packet, size, data, addr, count);
 }
 
 s32 func_001FA670(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
-    return func_001FA4F8(cmd, 1, (Header_1FA4F8*)packet, size, data, addr, count);
+    return SendCommandPacket(cmd, 1, (Header_1FA4F8*)packet, size, data, addr, count);
 }
 
 ASM_FUNC(func_001FA6B0);

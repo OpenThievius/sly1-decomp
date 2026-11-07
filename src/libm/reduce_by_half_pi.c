@@ -88,7 +88,7 @@ s32 func_00207C88(f32 x, f32* parts)
         }
     }
     if (magnitude <= 0x43490F80) {
-        absX = func_002052F8(x);
+        absX = AbsoluteValue(x);
         quadrant = (s32)(absX * g_invHalfPi + g_half);
         quadrantF = (f32)quadrant;
         rem = absX - quadrantF * g_halfPiHead1;
@@ -140,7 +140,7 @@ s32 func_00207C88(f32 x, f32* parts)
     while (digits[digitCount - 1] == g_zero) {
         digitCount--;
     }
-    quadrant = func_002082F8(digits, parts, exponent, digitCount, 2, g_digits2OverPi);
+    quadrant = ReduceLargeByHalfPi(digits, parts, exponent, digitCount, 2, g_digits2OverPi);
     if (bits < 0) {
         parts[0] = -parts[0];
         parts[1] = -parts[1];

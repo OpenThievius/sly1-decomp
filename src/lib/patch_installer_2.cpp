@@ -40,11 +40,11 @@ s32 func_001F9F50(void)
 {
     Word_1F9F50 a;
     Word_1F9F50 b;
-    func_001F6BA0(&a);
+    ReadSystemConfig(&a);
     b.value = (a.value & 0xFFFF1FFF) | 0x2000;
-    func_001F6B90(&b);
-    func_001F6BA0(&b);
-    func_001F6B90(&a);
+    WriteSystemConfig(&b);
+    ReadSystemConfig(&b);
+    WriteSystemConfig(&a);
     return ((b.value >> 13) & 7) == 0;
 }
 
@@ -125,11 +125,11 @@ void func_001F9FB8(void)
 {
     Slot_1F9FB8* q;
     u32 i;
-    if (func_001F9F50() != 0) {
+    if (IsSecondKernelPatchNeeded() != 0) {
         func_001F9EE8(D_00277998[0].key, D_00277998[0].value);
         func_001F9EF8(0x80074000, D_002771F0, 0x7A8);
-        func_001F6C20(0);
-        func_001F6C20(2);
+        SyncDataCache(0);
+        SyncDataCache(2);
         func_001F9EE8(D_00277998[1].key, D_00277998[1].value);
         q = &D_00277998[2];
         i = 2;

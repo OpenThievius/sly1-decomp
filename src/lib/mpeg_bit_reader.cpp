@@ -4,10 +4,10 @@
 // (func_002115F8), the advance that refills the 64-bit window a byte at a time, wrapping at the
 // buffer's end (func_00211618), the read of n bits and of one bit (func_002116B0,
 // func_00211700), the skip of whole bytes (func_00211748) and the position a number of bits
-// ahead (func_002117A0). The demultiplexer (src/lib/file_20A190.cpp) is its only user; it reads
+// ahead (func_002117A0). The demultiplexer (src/lib/mpeg_demultiplexer.cpp) is its only user; it reads
 // no IPU register and has no data. Both edges are chosen: the MPEG library's DMA code before it
 // never calls it and the IPU library's transfers after it start at 0x2117D0, but no data or
-// padding decides either edge. Named after its first address. Written for this project from
+// padding decides either edge. Written for this project from
 // retail's code.
 #include "common.h"
 #include "asm_func.h"
@@ -40,7 +40,7 @@ void func_002115C0(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
     self->bufStart = a;
     self->bufEnd = a + b;
     self->bufSize = b;
-    func_00211618(self, 0);
+    AdvanceBits(self, 0);
 }
 
 INCLUDE_ASM(func_002115F8);
@@ -49,15 +49,15 @@ INCLUDE_ASM(func_00211618);
 
 s64 func_002116B0(BitReader_2115C0* self, s32 n)
 {
-    s64 r = func_002115F8(self, n);
-    func_00211618(self, n);
+    s64 r = PeekBits(self, n);
+    AdvanceBits(self, n);
     return r;
 }
 
 s64 func_00211700(BitReader_2115C0* self)
 {
-    s64 r = func_002115F8(self, 1);
-    func_00211618(self, 1);
+    s64 r = PeekBits(self, 1);
+    AdvanceBits(self, 1);
     return r;
 }
 
@@ -70,7 +70,7 @@ void func_00211748(BitReader_2115C0* self, s32 bytes)
     if (self->next >= self->bufEnd) {
         self->next -= self->bufSize;
     }
-    func_00211618(self, 0);
+    AdvanceBits(self, 0);
 }
 
 u32 func_002117A0(BitReader_2115C0* stream, s32 amount)

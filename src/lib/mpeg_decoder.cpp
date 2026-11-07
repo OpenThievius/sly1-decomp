@@ -7,7 +7,7 @@
 // stop and restart around a picture (func_0020C178, func_0020C188). One file between two edges,
 // with no evidence of a boundary inside it; it could be several. Its .rodata is its messages and
 // the jump table of func_0020B2E8, its .data the library's identification string and the default
-// quantiser matrices. Named after its first address. Written for this project from retail's code.
+// quantiser matrices. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
 
@@ -23,15 +23,15 @@ s32 func_001F9DA8(void);
 void func_00211BA8(void);
 
 void func_0020ADA0(void) {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 &= 0xFFFFFEFF;
     *(volatile u32*)0x1000B400 &= 0xFFFFFEFF;
     *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
     *(volatile u32*)0x1000B020 = 0;
     *(volatile u32*)0x1000B420 = 0;
-    func_00211BA8();
+    ResetIpu();
 }
 
 struct Outer_20AE40 {
@@ -76,17 +76,17 @@ void func_0020C188(void);
 
 s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
 {
-    func_001F5C0C(mem, 0, size);
+    FillMemory(mem, 0, size);
     Inner_20AE40* in = (Inner_20AE40*)(((u32)(mem + 3) >> 2) << 2);
     s32 diff = (s32)in - mem;
     u32 rest = size - diff;
     if (rest < 0x10C0) {
-        func_0020B978(in, "The size of work area is too small");
+        ReportMpegError(in, "The size of work area is too small");
         return 0;
     }
     out->f40 = (s32)in;
     rest -= 0x10C0;
-    func_0020B240(&in->ring, (u8*)in + 0x10C0, rest);
+    InitMpegRing(&in->ring, (u8*)in + 0x10C0, rest);
     out->f0 = 0;
     out->f4 = 0;
     out->f8 = 0;
@@ -117,9 +117,9 @@ s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
     in->f34 = 0;
     in->f3C = 0;
     in->fF0 = -1;
-    in->f1C = (s32)func_0020C178;
-    in->f24 = (s32)func_0020C188;
-    s32 r278 = func_0020B278(in, &in->ring, 0x600, 8);
+    in->f1C = (s32)SaveMpegDmaState;
+    in->f24 = (s32)RestoreMpegDmaState;
+    s32 r278 = AllocateFromMpegRing(in, &in->ring, 0x600, 8);
     in->f48 = 0;
     in->fFC = 0;
     in->f100 = 0;
@@ -137,8 +137,8 @@ s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
     in->f44 = r278;
     in->fB0 = 1;
     func_0020B810(in);
-    func_0020B0C0(out);
-    func_0020B110(out);
+    ResetMpegDecoder(out);
+    ReleaseMpegPictures(out);
     in->planes[0][0] = &in->plane[0];
     in->planes[0][1] = &in->plane[1];
     in->planes[0][3] = &in->plane[2];
@@ -180,7 +180,7 @@ s32 func_0020B058(Obj_20B058* obj, u32 a1, s32 a2)
     *(s32*)(st + 0xE4) = a2;
     *(s32*)(st + 0xE0) = 0;
     *(s32*)(st + 0xDC) = 0;
-    return func_0020B2E8(obj);
+    return RunMpegPictureLoop(obj);
 }
 
 LINKER_REMNANT(func_0020B0A0);
@@ -279,7 +279,7 @@ s32 func_0020B1E0(Q_0020B1E0* q)
 {
     s32 flag[8];
     flag[0] = 1;
-    return func_0020B190(q, flag);
+    return RunMpegCallback(q, flag);
 }
 
 LINKER_REMNANT(func_0020B208);
@@ -333,7 +333,7 @@ s32 func_0020B278(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 al
         pool->f08 = end;
         return base;
     }
-    (void)func_0020B978(owner, "work area size is too small");
+    (void)ReportMpegError(owner, "work area size is too small");
     return 0;
 }
 
@@ -365,14 +365,14 @@ s32 func_0020B2E8(Self_20B2E8* self)
     Ctx_20B2E8* c = self->ctx;
     c->f0 = 0;
     if ((c->fD8 & 0x3F) != 0) {
-        func_0020B940(c, (s32)"image buffer needs to be aligned to 64byte boundary(0x%08x)", c->fD8);
+        ReportMpegErrorFormat(c, (s32)"image buffer needs to be aligned to 64byte boundary(0x%08x)", c->fD8);
         return -1;
     }
     c->f820 = 0;
     for (;;) {
         if (s2 != -1) {
             do {
-                s3 = func_0020F7F0(c);
+                s3 = ParseMpegHeaders(c);
                 if (s3 == 0) break;
                 if (c->f174 == c->fD4) break;
             } while (c->f848 != 0);
@@ -436,7 +436,7 @@ struct Ent_ops_20B458 {
         s32 t = func_002101F0(e, 0);
         s8 r = 0;
         if (t != 0) {
-            r = func_00210090(e) != 0;
+            r = DecodePictureData(e) != 0;
         }
         return r;
     }
@@ -457,7 +457,7 @@ s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
     } else {
         s2 = func_002101F0(s0, 0);
         s3 = 1;
-        (void)func_0020B1E0(s1);
+        (void)RunMpegStallCallback(s1);
     }
     func_00210160(s0, s0->f118, s0->f4);
     if (s0->f174 == 3) {
@@ -540,12 +540,12 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     }
     if (func_002101F0(s0, 0) != 0) {
         if (s3 != 0) {
-            (void)func_00210090(s0);
+            (void)DecodePictureData(s0);
         }
     }
     s1 = 1;
     s0->f120 = s1;
-    if (func_0020F7F0(s0) == 0) {
+    if (ParseMpegHeaders(s0) == 0) {
         (void)func_0020B718(self);
         s0->f0 = s1;
         return 0;
@@ -562,7 +562,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     s4 = 0;
     if (u != 0) {
         if (s3 != 0) {
-            s4 = (func_00210090(s0) != 0) ? s1 : 0;
+            s4 = (DecodePictureData(s0) != 0) ? s1 : 0;
         }
     }
     func_00210160(s0, s0->f118, s0->f4);
@@ -571,7 +571,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     s0->f118 = s0->f118 + 1;
     s0->f4 = s0->f4 + 1;
     if (s3 == 0) {
-        func_0020B1E0(self);
+        RunMpegStallCallback(self);
     }
     return s4;
 }
@@ -615,7 +615,7 @@ void func_0020DEE8(s32 a);
 struct S_20B780 { u8 pad[0x848]; s32 f; };
 void func_0020B780(S_20B780* s) {
     s->f = 0;
-    func_0020DEE8(1);
+    SetIpuMpeg1Mode(1);
 }
 
 struct Obj_0020B790 {
@@ -641,7 +641,7 @@ void func_0020B790(struct Obj_0020B790 *self)
 {
     s32 n = self->f118;
     if (self->f120 != 0)
-        func_0020B978(self, "the second field is missing");
+        ReportMpegError(self, "the second field is missing");
     else if (self->f174 == 3)
         func_00210970(self, self->f1BC, n - 1);
     else
@@ -665,7 +665,7 @@ void func_0020DEE8(s32 a);
 void func_0020B810(Dev_20B810* self)
 {
     u8* spr = (u8*)0x70000000;
-    func_0020DEE8(1);
+    SetIpuMpeg1Mode(1);
     self->f590 = spr;
     self->f594 = spr + 0x1800;
     self->f6D0 = spr + 0x1B00;
@@ -687,18 +687,18 @@ struct Chan_20B870 {
 void func_0020B870(Chan_20B870* c) {
     c->f818 = 1;
     c->f1B0 = 0;
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 = 0;
     *(volatile u32*)0x1000B400 = 0;
     *(volatile u32*)0x1000D400 = 0;
     *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
     *(volatile u32*)0x1000B020 = 0;
     *(volatile u32*)0x1000B420 = 0;
     *(volatile u32*)0x1000D420 = 0;
     *(volatile u32*)0x10002010 = 0x40000000;
-    func_00211AD8(0, 0);
+    SyncIpu(0, 0);
 }
 
 s32 func_001E1F10(const char* fmt, s32 msg);
@@ -716,7 +716,7 @@ void func_0020B940(Ctx_0020B940* self, const char* fmt)
 {
     char buf[0x100];
     FormatToString((Buf_0020B940*)buf, fmt);
-    func_0020B978(self, buf);
+    ReportMpegError(self, buf);
 }
 
 struct Self_20B978 {
@@ -744,9 +744,9 @@ s32 func_0020B978(Self_20B978* self, s32 value)
     if (self->f858 != 0 && self != 0 && self->f0C != 0) {
         pair.a = 0;
         pair.b = value;
-        return func_0020B190((Sub_20B978*)self->f858, &pair);
+        return RunMpegCallback((Sub_20B978*)self->f858, &pair);
     }
-    return func_0020B930((Arg_20B978*)value);
+    return PrintMpegError((Arg_20B978*)value);
 }
 
 struct Item_20B9D0 { u8 pad[4]; s32 x; s32 y; s32 left; s32 top; };
@@ -786,32 +786,32 @@ void func_0020BB18(void* p);
 
 void func_0020B9F0(Dec_20B9F0* d) {
     d->fD4 = 0;
-    u32 v = func_0020F5B8(d, 0x20);
+    u32 v = ReadIpuBits(d, 0x20);
     d->f124 = v >> 20;
     d->f128 = (v >> 8) & 0xFFF;
     if (d->f128 > 0xAF0) {
-        func_0020B978(d, "vertical size > 2800");
+        ReportMpegError(d, "vertical size > 2800");
     }
-    v = func_0020F5B8(d, 0x1E);
+    v = ReadIpuBits(d, 0x1E);
     d->f134 = v >> 12;
     d->f138 = (v >> 1) & 0x3FF;
-    d->f840 = func_0020F5B8(d, 1);
+    d->f840 = ReadIpuBits(d, 1);
     if (d->f840) {
-        func_0020F0F0(d);
-        func_0020F0C0(d, 0x50000000);
-        func_0020F0F0(d);
+        WaitIpuCommandDone(d);
+        SendIpuCommand(d, 0x50000000);
+        WaitIpuCommandDone(d);
     } else {
         func_0020BEA0(d, 0x50000000, D_0027AF80);
     }
-    d->f844 = func_0020F5B8(d, 1);
+    d->f844 = ReadIpuBits(d, 1);
     if (d->f844) {
-        func_0020F0F0(d);
-        func_0020F0C0(d, 0x58000000);
-        func_0020F0F0(d);
+        WaitIpuCommandDone(d);
+        SendIpuCommand(d, 0x58000000);
+        WaitIpuCommandDone(d);
     } else {
         func_0020BEA0(d, 0x58000000, D_0027AFC0);
     }
-    func_0020F9C8(d);
+    ReadExtensionsAndUserData(d);
     func_0020BB18(d->f858);
 }
 
@@ -853,19 +853,19 @@ void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
     Req_20BEA0 req;
     req.mode = 2;
 
-    func_0020B190((Handle_20BEA0*)obj->field858, &req);
-    func_0020F0F0(obj);
+    RunMpegCallback((Handle_20BEA0*)obj->field858, &req);
+    WaitIpuCommandDone(obj);
     *(volatile u32*)0x10002000 = 0;
-    func_0020F0F0(obj);
-    (void)func_001F9D60();
+    WaitIpuCommandDone(obj);
+    (void)DisableInterrupts();
     *(volatile u32*)0x1000B410 = mask & 0x0FFFFFFF;
     *(volatile u32*)0x1000B420 = 4;
     *(volatile u32*)0x1000B400 = 0x101;
-    (void)func_001F9DA8();
-    func_0020F0C0(obj, value);
-    func_0020F0F0(obj);
+    (void)EnableInterrupts();
+    SendIpuCommand(obj, value);
+    WaitIpuCommandDone(obj);
     req.mode = 3;
-    func_0020B190((Handle_20BEA0*)obj->field858, &req);
+    RunMpegCallback((Handle_20BEA0*)obj->field858, &req);
 }
 
 struct Obj_20BF78 {
@@ -894,20 +894,20 @@ void func_0020BF78(struct Obj_20BF78 *self)
     u32 s5;
 
     self->field848 = 1;
-    func_0020DEE8(0);
-    s2 = func_0020F5B8(self, 0x1C);
+    SetIpuMpeg1Mode(0);
+    s2 = ReadIpuBits(self, 0x1C);
     s5 = (s2 >> 1) & 0xFFF;
     self->field140 = (s2 >> 17) & 3;
     s4 = (s2 >> 13) & 3;
     s3 = (s2 >> 15) & 3;
     if (self->field140 != 1) {
-        func_0020B978(self, "_chroma_format needs to be 1: 420");
+        ReportMpegError(self, "_chroma_format needs to be 1: 420");
     }
     self->field13C = (s2 >> 19) & 1;
     s0 = s2 >> 20;
-    s2 = func_0020F5B8(self, 0x10) >> 8;
+    s2 = ReadIpuBits(self, 0x10) >> 8;
     if (s0 != 0x48 && s0 != 0x58 && s0 != 0x44) {
-        func_0020B978(self, "Unsupported profile/level");
+        ReportMpegError(self, "Unsupported profile/level");
     }
     self->field124 = (s3 << 12) | (self->field124 & 0xFFF);
     self->field128 = (s4 << 12) | (self->field128 & 0xFFF);
@@ -928,15 +928,15 @@ struct Node_20C0A8 {
 
 void func_0020C0A8(struct Node_20C0A8* self)
 {
-    func_0020F5B8(self, 3);
-    if (func_0020F5B8(self, 1) != 0) {
-        func_0020F5B8(self, 8);
-        func_0020F5B8(self, 8);
-        self->f144 = func_0020F5B8(self, 8);
+    ReadIpuBits(self, 3);
+    if (ReadIpuBits(self, 1) != 0) {
+        ReadIpuBits(self, 8);
+        ReadIpuBits(self, 8);
+        self->f144 = ReadIpuBits(self, 8);
     }
-    self->f148 = func_0020F5B8(self, 0xE);
-    func_0020F5B8(self, 1);
-    self->f14C = func_0020F5B8(self, 0xE);
+    self->f148 = ReadIpuBits(self, 0xE);
+    ReadIpuBits(self, 1);
+    self->f14C = ReadIpuBits(self, 0xE);
 }
 
 struct Obj_0020C138;
@@ -944,7 +944,7 @@ void func_0020B978(Obj_0020C138* self, const void* table);
 
 void func_0020C138(Obj_0020C138* self)
 {
-    func_0020B978(self, "_sequenceScalableExtension() is not implemented");
+    ReportMpegError(self, "_sequenceScalableExtension() is not implemented");
 }
 
 struct Obj_0020C148;
@@ -952,7 +952,7 @@ void func_0020B978(Obj_0020C148* self, const void* table);
 
 void func_0020C148(Obj_0020C148* self)
 {
-    func_0020B978(self, "Unknown Extension");
+    ReportMpegError(self, "Unknown Extension");
 }
 
 struct Obj_0020C158;
@@ -960,7 +960,7 @@ void func_0020B978(Obj_0020C158* self, const void* table);
 
 void func_0020C158(Obj_0020C158* self)
 {
-    func_0020B978(self, "_pictureSpatialScalableExtension is not supported");
+    ReportMpegError(self, "_pictureSpatialScalableExtension is not supported");
 }
 
 struct Obj_0020C168;
@@ -968,7 +968,7 @@ void func_0020B978(Obj_0020C168* self, const void* table);
 
 void func_0020C168(Obj_0020C168* self)
 {
-    func_0020B978(self, "_pictureTemporalScalableExtension is not supported");
+    ReportMpegError(self, "_pictureTemporalScalableExtension is not supported");
 }
 
 struct Out_002118A0;
@@ -977,7 +977,7 @@ void func_002118A0(Out_002118A0* out);
 
 void func_0020C178(Obj_0020C178* self)
 {
-    func_002118A0((Out_002118A0*)((u8*)self->f40 + 0x4C));
+    SaveIpuDmaChannels((Out_002118A0*)((u8*)self->f40 + 0x4C));
 }
 
 struct Ctx_211988;
@@ -986,5 +986,5 @@ void func_00211988(Ctx_211988* s0);
 
 void func_0020C188(Obj_0020C188* self)
 {
-    func_00211988((Ctx_211988*)(self->f40 + 0x4C));
+    RestoreIpuDmaChannels((Ctx_211988*)(self->f40 + 0x4C));
 }

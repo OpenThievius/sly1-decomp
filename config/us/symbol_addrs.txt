@@ -68,7 +68,7 @@ D_0024F330 = 0x0024F330;
 // .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
 // D_0027696C; func_001F9790 reads its last four bytes.
 D_00276970 = 0x00276970;
-// The end of the 32 words D_006294C0 of src/lib/file_1FA068.cpp (func_001FA1E8 clears 32, and
+// The end of the 32 words D_006294C0 of src/lib/command_channel.cpp (func_001FA1E8 clears 32, and
 // func_001FA1C0 reads them), inside splat's 0x1080-byte label: the 0x1000 bytes after them, which
 // no code reads, belong to that object or the next.
 D_00629540 = 0x00629540;
@@ -165,14 +165,14 @@ D_0024F5E0 = 0x0024F5E0;
 D_002793F0 = 0x002793F0;
 // The end of the MPEG library's .data inside a coarse label (D_0027B068): its last table (16
 // words) ends at 0x27B0A8, then 8 zero bytes of padding to the IPU library's .data, which starts
-// on 16 with its identification string (src/lib/file_211B40.cpp), which no code reads.
+// on 16 with its identification string (src/lib/ipu_reset.cpp), which no code reads.
 D_0027B0A8 = 0x0027B0A8;
 D_0027B0B0 = 0x0027B0B0;
 // The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
 // zeros after it, to 0x250580, are the padding before .data.
 D_00250540 = 0x00250540;
-// The kernel library's objects from 0x1F84D8 (src/lib/file_1F84D8.cpp, src/lib/file_1F9690.cpp,
-// src/lib/file_1F9AD8.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
+// The kernel library's objects from 0x1F84D8 (src/lib/iop_file_client.cpp, src/lib/iop_module_loader.cpp,
+// src/lib/iop_reset.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
 // second object, and the string "all" (0x24EB88), which no code reads, inside splat's label
 // D_0024EB78; and the first object's last word, the pointer to its "...." (0x2771C8), inside
 // D_002771C4.

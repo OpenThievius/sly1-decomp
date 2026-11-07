@@ -4,11 +4,11 @@
 // channel 4), each with the DMA suspended while its control register is written, the saving of
 // both channels' state (func_002118A0) and its restoring (func_00211988), which the MPEG library
 // calls around a picture, and the wait for the IPU (func_00211AD8). No data. Its end is chosen:
-// src/lib/file_211B40.cpp has its own copy of func_00211838, so the boundary is at 0x211AD8 or
+// src/lib/ipu_reset.cpp has its own copy of func_00211838, so the boundary is at 0x211AD8 or
 // 0x211B40; this file ends at the second, with each file's helpers first. Its start is chosen
 // too: the MPEG library's bit reader before it (func_002115C0 to func_002117A0) is called only
 // by the MPEG library and uses no IPU register, so its own file ends here; the data can't
-// decide. Named after its first address. Written for this project from retail's code.
+// decide. Written for this project from retail's code.
 #include "common.h"
 
 s32 func_001F9D60(void);
@@ -16,27 +16,27 @@ s32 func_001F9DA8(void);
 
 void func_002117D0(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 void func_00211838(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B400 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };
 
 void func_002118A0(Out_002118A0* out)
 {
-    func_00211838(1);
+    StartIpuInputTransfer(1);
     volatile u32* a = (volatile u32*)0x1000B410;
     out->w00 = *a;
     out->w04 = *(volatile u32*)0x1000B430;
@@ -44,7 +44,7 @@ void func_002118A0(Out_002118A0* out)
     out->w0C = *(volatile u32*)0x1000B400;
     while ((*(volatile u32*)0x10002010 & 0xF0) != 0) {
     }
-    func_002117D0(0);
+    StartIpuOutputTransfer(0);
     out->w10 = *(volatile u32*)0x1000B010;
     out->w14 = *(volatile u32*)0x1000B020;
     out->w18 = *(volatile u32*)0x1000B000;
@@ -74,7 +74,7 @@ void func_00211988(Ctx_211988* s0)
         if (s0->f14 != 0) {
             *(volatile u32*)0x1000B010 = s0->f10;
             *(volatile u32*)0x1000B020 = s0->f14;
-            func_002117D0(s0->f18 | 0x100);
+            StartIpuOutputTransfer(s0->f18 | 0x100);
         }
     }
     while (*(volatile s32*)0x10002010 < 0) {
@@ -93,7 +93,7 @@ void func_00211988(Ctx_211988* s0)
     *(volatile u32*)0x1000B410 = s1;
     *(volatile u32*)0x1000B430 = s0->f4;
     *(volatile u32*)0x1000B420 = s2;
-    func_00211838(s0->fC | 0x100);
+    StartIpuInputTransfer(s0->fC | 0x100);
 }
 
 u32 func_00211AD8(s32 mode)

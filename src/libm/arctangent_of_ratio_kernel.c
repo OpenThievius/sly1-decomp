@@ -27,7 +27,7 @@ f32 func_00206A68(f32 y, f32 x)
         return x + y;
     }
     if (xBits == 0x3F800000) {
-        return func_00204F68(y);
+        return Arctangent(y);
     }
     quadrantCase = ((u32)yBits >> 31) | ((xBits >> 30) & 2);
     if (yMag == 0) {
@@ -78,7 +78,7 @@ f32 func_00206A68(f32 y, f32 x)
     } else if (xBits < 0 && exponentGap < -60) {
         angle = 0.0f;
     } else {
-        angle = func_00204F68(func_002052F8(y / x));
+        angle = Arctangent(AbsoluteValue(y / x));
     }
     switch (quadrantCase) {
     case 0:

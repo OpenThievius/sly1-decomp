@@ -102,7 +102,7 @@ struct Slot_1F6F48 {
 };
 
 Slot_1F6F48 D_002770E8[8] = {
-    { 0x5A, (void*)func_001F6F00 },
+    { 0x5A, (void*)CopyKernelWords },
     { 0x5B, (void*)0x80076000 },
     { 0xFC, 0 },
     { 0xFE, 0 },
@@ -125,8 +125,8 @@ void func_001F6F48(void)
     func_001F6EE0(D_002770E8[0].key, (s32)D_002770E8[0].value);
     func_001F6EF0(0x80076000, D_00276980, 0x740);
     func_001F6EF0(0x82000, D_002770C0, 0x28);
-    func_001F6C20(0);
-    func_001F6C20(2);
+    SyncDataCache(0);
+    SyncDataCache(2);
     func_001F6EE0(D_002770E8[1].key, (s32)D_002770E8[1].value);
     for (u32 i = 2; i < 8; i++) {
         func_001F6EE0(D_002770E8[i].key, func_001F6F38(D_002770E8[i].key));

@@ -48,12 +48,12 @@ s32 func_00201578(struct LibcState* state, s32 sig)
         return -1;
     }
     if (state->handlers == 0) {
-        if (func_00201500(state) != 0)
+        if (MakeSignalTable(state) != 0)
             return -1;
     }
     switch (state->handlers[sig]) {
     case 0:
-        return func_002016A0(state, func_00201700(state), sig);
+        return SendSignalFor(state, GetProcessIdFor(state), sig);
     case 1:
         break;
     case -1:
@@ -71,7 +71,7 @@ s32 func_00201578(struct LibcState* state, s32 sig)
 
 s32 func_00201668(s32 sig)
 {
-    return func_00201578(D_0027696C, sig);
+    return RaiseSignalFor(D_0027696C, sig);
 }
 
 LINKER_REMNANT(func_00201690);

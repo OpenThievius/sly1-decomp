@@ -9,12 +9,13 @@
 // handlers; func_001F80C0 and func_001F8290 open a client and send its request; func_001F8480
 // checks that a client's packet is still its own. The leftover func_001F84C0 ends the object.
 #include "common.h"
+#include "remote_call_client.h"
+#include "semaphore_params.h"
 #include "asm_func.h"
 
-struct Client_1F7BE8;
 
 // A packet of the command channel: the channel's header, then the request.
-struct Packet_1F7BE8 {
+struct RemoteCallPacket {
     u32 head[4];
     u32 flags;
     u32 self;
@@ -28,22 +29,6 @@ struct Packet_1F7BE8 {
     s32 f34;
     s32 f38;
     s32 f3C;
-};
-
-typedef void (*Callback_1F7BE8)(s32 arg);
-
-// What a caller opens: its packet, the packet's id, the semaphore it waits on, the results.
-struct Client_1F7BE8 {
-    Packet_1F7BE8* packet;
-    s32 id;
-    s32 sema;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    Callback_1F7BE8 callback;
-    s32 callback_arg;
-    s32 f24;
 };
 
 // An IOP-side list the command 0x80000009 searches: groups of entries, each entry keyed by its
@@ -71,13 +56,13 @@ struct Group_1F7FC0 {
 // The client's state: the next packet id, the pool of request packets, the reply ring.
 struct Pools_1F7BE8 {
     s32 next_id;
-    Packet_1F7BE8* packets;
+    RemoteCallPacket* packets;
     s32 packet_count;
     s32 fC;
     s32 f10;
-    Packet_1F7BE8* replies;
+    RemoteCallPacket* replies;
     s32 reply_count;
-    Packet_1F7BE8* f1C;
+    RemoteCallPacket* f1C;
     s32 f20;
     s32 cursor;
     Group_1F7FC0* groups;
@@ -86,16 +71,6 @@ struct Pools_1F7BE8 {
     s32 f34;
     s32 f38;
     s32 f3C;
-};
-
-// The kernel's semaphore parameters (func_001F6B20 creates one).
-struct SemaParams_1F80C0 {
-    s32 count;
-    s32 max_count;
-    s32 init_count;
-    s32 wait_threads;
-    u32 attr;
-    u32 option;
 };
 
 s32 D_00277134 = 0;
@@ -108,7 +83,7 @@ static Pools_1F7BE8 D_00627800;
 s32 func_001F9D60(void);
 void func_001F9DA8(void);
 void func_001FA468(void);
-s32 func_001F6B20(SemaParams_1F80C0* params);
+s32 func_001F6B20(SemaphoreParams* params);
 void func_001F6B30(s32 sema);
 void func_001F6B50(s32 sema);
 s32 func_001F6B60(s32 sema);
@@ -120,16 +95,16 @@ INCLUDE_ASM(func_001F7BE8);
 
 void func_001F7D88(void)
 {
-    func_001FA468();
-    D_00277134 = 0;
+    ShutDownCommandChannel();
+    g_remoteCallsReady = 0;
 }
 
-Packet_1F7BE8* func_001F7DB0(Pools_1F7BE8* self)
+RemoteCallPacket* func_001F7DB0(Pools_1F7BE8* self)
 {
-    func_001F9D60();
+    DisableInterrupts();
     s32 count = self->packet_count;
     s32 index = 0;
-    Packet_1F7BE8* item = self->packets;
+    RemoteCallPacket* item = self->packets;
     if (count > 0) {
         do {
             if ((item->flags & 1) == 0) {
@@ -143,71 +118,71 @@ Packet_1F7BE8* func_001F7DB0(Pools_1F7BE8* self)
                 }
                 item->self = (u32)item;
                 item->id = id;
-                func_001F9DA8();
+                EnableInterrupts();
                 return item;
             }
             index++;
             item++;
         } while (index < count);
     }
-    func_001F9DA8();
+    EnableInterrupts();
     return 0;
 }
 
-void func_001F7E58(Packet_1F7BE8* packet)
+void func_001F7E58(RemoteCallPacket* packet)
 {
     packet->id = 0;
     packet->flags &= ~1u;
 }
 
-Packet_1F7BE8* func_001F7E78(Pools_1F7BE8* r)
+RemoteCallPacket* func_001F7E78(Pools_1F7BE8* r)
 {
     s32 index = r->cursor % r->reply_count;
     s32 off = index << 6;
     r->cursor = index + 1;
-    return (Packet_1F7BE8*)((u8*)r->replies + off);
+    return (RemoteCallPacket*)((u8*)r->replies + off);
 }
 
-void func_001F7EA8(Packet_1F7BE8* reply)
+void func_001F7EA8(RemoteCallPacket* reply)
 {
-    Client_1F7BE8* s0;
+    RemoteCallClient* s0;
     u32 cmd = reply->cmd;
     if (cmd == 0x8000000A) goto call_path;
     if (cmd > 0x8000000A) {
-        s0 = (Client_1F7BE8*)reply->client;
+        s0 = (RemoteCallClient*)reply->client;
         goto after;
     }
     if (cmd == 0x80000009) goto set_fields;
-    s0 = (Client_1F7BE8*)reply->client;
+    s0 = (RemoteCallClient*)reply->client;
     goto after;
 call_path:
-    s0 = (Client_1F7BE8*)reply->client;
+    s0 = (RemoteCallClient*)reply->client;
     if (s0->callback != 0) {
-        s0->callback(s0->callback_arg);
-        s0 = (Client_1F7BE8*)reply->client;
+        s0->callback(s0->callbackArg);
+        s0 = (RemoteCallClient*)reply->client;
     }
     goto after;
 set_fields:
-    s0 = (Client_1F7BE8*)reply->client;
-    s0->f24 = reply->f24;
+    s0 = (RemoteCallClient*)reply->client;
+    s0->server = reply->f24;
     s0->f14 = reply->f28;
     s0->f18 = reply->f2C;
 after:
     s32 sema = s0->sema;
-    if (sema >= 0) func_001F6B50(sema);
-    func_001F7E58(s0->packet);
+    if (sema >= 0) PostSemaphoreFromInterrupt(sema);
+    FreeRequestPacket(s0->packet);
     s0->packet = 0;
 }
 
-void func_001F7F60(Packet_1F7BE8* src, Pools_1F7BE8* pools)
+void func_001F7F60(RemoteCallPacket* src, Pools_1F7BE8* pools)
 {
-    Packet_1F7BE8* m = func_001F7E78(pools);
+    RemoteCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
     m->client = b;
     m->cmd = 0x8000000C;
-    func_001FA670(0x80000008, m, 0x40, src->cmd, src->f24, src->f28);
+    SendCommandFromInterrupt(0x80000008, m, 0x40, src->cmd, src->f24, src->f28);
 }
 
 Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
@@ -224,15 +199,15 @@ Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
     return 0;
 }
 
-void func_001F8010(Packet_1F7BE8* src, Pools_1F7BE8* pools)
+void func_001F8010(RemoteCallPacket* src, Pools_1F7BE8* pools)
 {
-    Packet_1F7BE8* m = func_001F7E78(pools);
+    RemoteCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
     m->client = b;
     m->cmd = 0x80000009;
-    Entry_1F7FC0* n = func_001F7FC0(src->cmd, pools);
+    Entry_1F7FC0* n = FindRemoteService(src->cmd, pools);
     if (n == 0) {
         m->f24 = 0;
         m->f28 = 0;
@@ -242,18 +217,18 @@ void func_001F8010(Packet_1F7BE8* src, Pools_1F7BE8* pools)
         m->f28 = n->f8;
         m->f2C = n->f14;
     }
-    func_001FA670(0x80000008, m, 0x40, 0, 0, 0);
+    SendCommandFromInterrupt(0x80000008, m, 0x40, 0, 0, 0);
 }
 
-s32 func_001F80C0(Client_1F7BE8* self, u32 cmd, s32 mode)
+s32 func_001F80C0(RemoteCallClient* self, u32 cmd, s32 mode)
 {
-    SemaParams_1F80C0 params;
-    Packet_1F7BE8* packet;
+    SemaphoreParams params;
+    RemoteCallPacket* packet;
     s32 sema;
 
     self->f10 = 0;
-    self->f24 = 0;
-    packet = func_001F7DB0(&D_00627800);
+    self->server = 0;
+    packet = TakeRequestPacket(&g_remoteCallState);
     if (packet == 0) return -1;
     self->packet = packet;
     self->id = packet->id;
@@ -261,28 +236,28 @@ s32 func_001F80C0(Client_1F7BE8* self, u32 cmd, s32 mode)
     packet->self = (u32)packet;
     packet->client = (u32)self;
     if ((mode & 1) == 0) {
-        params.init_count = 0;
-        params.max_count = 1;
-        sema = func_001F6B20(&params);
+        params.initCount = 0;
+        params.maxCount = 1;
+        sema = NewSemaphore(&params);
         self->sema = sema;
         if (sema < 0) {
-            func_001F7E58(packet);
+            FreeRequestPacket(packet);
             return -3;
         }
-        if (func_001FA630(0x80000009, packet, 0x40, 0, 0, 0) == 0) {
-            func_001F7E58(packet);
-            func_001F6B30(self->sema);
+        if (SendCommand(0x80000009, packet, 0x40, 0, 0, 0) == 0) {
+            FreeRequestPacket(packet);
+            FreeSemaphore(self->sema);
             return -2;
         }
-        func_001F6B60(self->sema);
-        func_001F6B30(self->sema);
+        AwaitSemaphore(self->sema);
+        FreeSemaphore(self->sema);
         return 0;
     }
     self->sema = -1;
-    if (func_001FA630(0x80000009, packet, 0x40, 0, 0, 0) != 0) {
+    if (SendCommand(0x80000009, packet, 0x40, 0, 0, 0) != 0) {
         return 0;
     }
-    func_001F7E58(packet);
+    FreeRequestPacket(packet);
     return -2;
 }
 
@@ -351,14 +326,14 @@ void func_001F8200(Ctx_001F8200* self)
     if (list->f04 != 0) {
         return;
     }
-    func_001F71D0((void*)list->f00);
+    QueueThreadRequest((void*)list->f00);
 }
 
 INCLUDE_ASM(func_001F8290);
 
-s32 func_001F8480(Client_1F7BE8* self)
+s32 func_001F8480(RemoteCallClient* self)
 {
-    Packet_1F7BE8* p = self->packet;
+    RemoteCallPacket* p = self->packet;
     if (p != 0 && self->id == p->id) {
         u32 f = p->flags & 1;
         if (f != 0) goto yes;

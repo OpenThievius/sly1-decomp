@@ -2118,7 +2118,7 @@ D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in 
 D_006056D0	g_renderThreadStack	func_001E2398 passes it as the stack (size 0x20000) in the record that creates the render thread stored in g_mainAndRenderThreads.
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
 D_002C2B00	g_movieDecodeThreadStack	CreateMovieDecodeThread passes it as the stack (size 0x1000) of the thread it creates.
-D_0027696C	g_randomState	func_001F6708 advances the seed at +0x58 of the record it points to with state * 0x41C64E6D + 0x3039 and returns it masked to 31 bits.
+D_0027696C	g_libraryState	the C library's state record: its first word is the error number (GetErrorNumberAddress returns it), +0x58 the random seed SeedRandom and NextRandom use, +0x1D4 the signal table MakeSignalTable allocates
 D_006256D0	g_memoryChecksumCursor	StepMemoryChecksum starts it at 0x100004 and advances it a word at a time as the next address to sum.
 D_006256D4	g_memoryChecksumRemaining	StepMemoryChecksum loads it with the byte count, subtracts 4 per word summed and finishes when it reaches 0.
 D_006256D8	g_memoryChecksumValue	StepMemoryChecksum starts it at 0xFFFFFFFF and keeps the running CRC in it; a nonzero value at the end sets D_00275C34.
@@ -2968,3 +2968,369 @@ func_0018B720	WaitForBackgroundJob	when a job is running calls func_001F6A50 on 
 func_0018D4F8	CheckAllocationSize	takes a size and does nothing; AllocateFrontMemory and AllocateBackMemory call it before they move their cursors
 func_0018D758	AllocateObjectMemory	returns AllocateZeroedFrontMemory of its size: the allocation the libraries and CloneFont call for a new object
 func_0018D778	FreeObjectMemory	does nothing: the release a deleting destructor calls (some dozen callers, as func_00137290's flag-1 path), since front memory is only freed by a reset
+func_001F59C4	CompareMemory	compares n bytes at a and b and returns their difference or 0 (memory_compare.cpp; AreScriptValuesEqual and func_001F9790 compare words with it)
+func_001F5A58	CopyBytes	copies n bytes from src to dst and returns dst (memory_copy.cpp; UnpackBufferedStream, ReadMemoryReader and the IOP clients copy their buffers with it)
+func_001F5B08	MoveMemory	copies n bytes from src to dst correctly when the two overlap (memory_move.cpp; MoveAnimationTrackToEnd and PushCameraController shift array entries with it)
+func_001F5C0C	FillMemory	sets size bytes at p to value (memory_set.cpp; the compiler clears aggregates with it, config/us/libcalls.tsv, and 138 functions call it)
+func_001F5CD0	SortElements	sorts n elements of a given size in place with a three-way-partition quicksort and the caller's comparison (sort.cpp; GatherAxisCurveTimes and MergeOverlappingSpans sort with it)
+func_001F66F8	SeedRandom	stores its argument as the seed at +0x58 of g_libraryState's record (SetScriptRandomSeed calls it)
+func_001F6708	NextRandom	advances the seed at +0x58 of g_libraryState's record by state * 0x41C64E6D + 0x3039 and returns its low 31 bits (RandomIntInRange and RandomFloatInRange call it)
+func_001F6738	CompareStrings	compares two NUL-terminated strings byte by byte and returns their difference or 0 (string_compare.cpp; type_info's comparison and SetElementTextAfterSlideOut call it)
+func_001F6880	FindSubstring	returns the first place in s where t occurs, or 0 (substring.cpp)
+func_001F6910	SetVideoModeSyscall	system call stub 0x02; the graphics library's GS reset func_00201A18 calls it with the interlacing, video mode and field mode it keeps
+func_001F6920	ExitProgramSyscall	system call stub 0x04; ExitProgram calls it with the exit status after the TLB set-up
+func_001F6950	AddInterruptHandler	system call stub 0x10, which installs a handler for an interrupt cause and returns its id; InitDisplay and InitRenderFrames install their handlers with it before EnableInterruptCause
+func_001F6960	RemoveInterruptHandler	system call stub 0x11; the GS reset func_00201A18 removes a handler by cause and id with it before DisableInterruptCause
+func_001F6970	AddDmaHandler	system call stub 0x12 with a cause, handler and argument; InitCommandChannel installs its DMA-channel 5 handler func_001FA6B0 with it
+func_001F6980	AddDmaHandlerAlt	system call stub 0x12 again, a second entry the library keeps for the same call; the MPEG library's colour-conversion set-ups (func_00211090, func_00211348) install their channel 3 and 4 handlers with it
+func_001F6990	RemoveDmaHandler	system call stub 0x13; ShutDownCommandChannel removes its DMA-channel 5 handler with it
+func_001F69A0	EnableInterruptCauseSyscall	system call stub 0x14; only the wrapper EnableInterruptCause calls it
+func_001F69B0	DisableInterruptCauseSyscall	system call stub 0x15; only the wrapper DisableInterruptCause calls it
+func_001F69C0	EnableDmaInterruptSyscall	system call stub 0x16; only the wrapper EnableDmaInterrupt calls it
+func_001F69D0	DisableDmaInterruptSyscall	system call stub 0x17; only the wrapper DisableDmaInterrupt calls it
+func_001F69E0	ScheduleAlarm	system call stub 0xFC, which arms a timed callback; the CD/DVD library's wait func_00202D30 and the memory card library's wait func_00209B38 call it with a delay and a handler that wakes them
+func_001F6A10	MakeThread	system call stub 0x20; StartBackgroundJob, CreateRenderThread and StartRequestThread pass it a record of entry point, stack, stack size and priority and keep the id it returns
+func_001F6A20	RunThread	system call stub 0x22; the same callers start the thread they made with it, passing its argument
+func_001F6A30	EndOwnThread	system call stub 0x24; RunBackgroundJob ends its own thread with it when the job is done
+func_001F6A50	SetThreadPriority	system call stub 0x29; CreateRenderThread and StartRequestThread change a thread's priority with it
+func_001F6A70	RotateReadyThreads	system call stub 0x2B; RunRequestThread carries out a request of kind 1 with it
+func_001F6A90	GetCurrentThreadId	system call stub 0x2F; EnterRecursiveLock compares its result with the lock's last owner
+func_001F6AA0	QueryThreadStatus	system call stub 0x30; the CD/DVD library's func_002030C0 and func_002033D8 read their thread's status into a record with it
+func_001F6AB0	SleepCurrentThread	system call stub 0x32; the memory card library's wait func_00209B38 sleeps on it until its alarm wakes it
+func_001F6AC0	WakeThread	system call stub 0x33; RunRequestThread carries out a request of kind 0 with it
+func_001F6AD0	WakeThreadFromInterrupt	system call stub -0x34, the interrupt-time form of 0x33; QueueThreadRequest calls it
+func_001F6AF0	PauseThread	system call stub 0x37; RunRequestThread carries out a request of kind 2 with it
+func_001F6B20	NewSemaphore	system call stub 0x40; CreateLockSemaphore and every IOP client pass it a record of count, maximum and initial count and keep the id it returns
+func_001F6B30	FreeSemaphore	system call stub 0x41; BindRemoteService and the file client delete the semaphores they made for one request with it
+func_001F6B40	PostSemaphore	system call stub 0x42; LeaveRecursiveLock and SubmitRenderFrame signal a semaphore with it
+func_001F6B50	PostSemaphoreFromInterrupt	system call stub -0x43, the interrupt-time form of 0x42; the reply handlers HandleRemoteCallReply and HandleFileReply wake their waiter with it
+func_001F6B60	AwaitSemaphore	system call stub 0x44; BeginRenderFrame, EnterRecursiveLock and RunRequestThread wait on a semaphore with it
+func_001F6B70	TrySemaphore	system call stub 0x45; the CD/DVD and memory card libraries take their command semaphores with it without waiting
+func_001F6B90	WriteSystemConfig	system call stub 0x4A; func_001F9F50 writes back the kernel word it read with ReadSystemConfig
+func_001F6BA0	ReadSystemConfig	system call stub 0x4B; func_001F9F50 reads a kernel word with it and checks a field
+func_001F6C20	SyncDataCache	system call stub 0x64; the IOP clients, PollIopCommands and PlayStagedBank call it with 0 before handing buffers to DMA, and the first patch installer with 0 and 2 after copying code
+func_001F6C40	StopIopDma	system call stub 0x6B; SendIopReset calls it before it sends the reset command
+func_001F6C60	ReadGsInterruptMask	system call stub 0x70; the graphics library's func_00202058 and func_00202120 read the GS interrupt mask with it
+func_001F6C70	WriteGsInterruptMask	system call stub 0x71; the GS reset func_00201A18 and func_00202058 write the GS interrupt mask with it
+func_001F6C90	GetIopDmaStatus	system call stub 0x76; WriteIopRingBlock and the pad library poll a transfer's id with it until it finishes
+func_001F6CA0	StartIopDma	system call stub 0x77; WriteIopRingBlock, SendIopReset, the pad library and SendCommandPacket pass it a list of transfers to the IOP and keep the id it returns
+func_001F6CB0	StartIopDmaFromInterrupt	system call stub -0x77, the interrupt-time form of 0x77; SendCommandPacket calls it when asked from an interrupt handler
+func_001F6CC0	ArmIopDmaChain	system call stub 0x78; InitCommandChannel calls it once it has set the receive buffers up
+func_001F6CD0	ArmIopDmaChainFromInterrupt	system call stub -0x78; the command channel's interrupt handler func_001FA6B0 re-arms the receive chain with it
+func_001F6CE0	WriteIopRegister	system call stub 0x79; InitCommandChannel and SendIopReset write a register shared with the IOP (0x80000000, 0x80000001, ...) with it
+func_001F6CF0	ReadIopRegister	system call stub 0x7A; InitCommandChannel, SendIopReset and IsIopResetDone read a register shared with the IOP with it
+func_001F6D10	CallDebugService	system call stub 0x7C; PrintToDebugConsole passes it request 0x10 and a pointer to the line
+func_001F6D20	QueryMemorySize	system call stub 0x7F; the TLB set-up func_001FA9C0 compares its result with 0x2000000
+func_001F6D40	DisableInterruptCause	runs DisableInterruptCauseSyscall (0x15) on a cause, between DisableInterrupts and EnableInterrupts when the status register's bit 16 is set; the GS reset func_00201A18 calls it
+func_001F6DA8	EnableInterruptCause	runs EnableInterruptCauseSyscall (0x14) on a cause the same way; InitDisplay and InitRenderFrames call it after AddInterruptHandler
+func_001F6E10	DisableDmaInterrupt	runs DisableDmaInterruptSyscall (0x17) on a channel the same way; ShutDownCommandChannel and the colour conversion's set-ups call it
+func_001F6E78	EnableDmaInterrupt	runs EnableDmaInterruptSyscall (0x16) on a channel the same way; InitCommandChannel and the colour conversion's set-ups call it
+func_001F6F00	CopyKernelWords	copies bytes / 4 words from src to dst and returns 0; the first patch installer installs it as system call 0x5A and copies its code into the kernel through it
+func_001F6F48	InstallFirstKernelPatch	unless bit 8 of the hardware word at 0x10001810 is set, copies D_00276980 to 0x80076000 and D_002770C0 to 0x82000, syncs the caches and sets the system calls D_002770E8 lists (InitKernelLibrary calls it)
+func_001F7020	RunRequestThread	the request thread's loop: waits on g_requestSemaphore, takes the next entry of the ring and runs WakeThread, RotateReadyThreads or PauseThread on its argument, or prints the internal-error message
+func_001F70F8	StartRequestThread	once (g_requestThreadId), creates g_requestSemaphore and the thread RunRequestThread on the stack D_00625770, sets its priority and starts it (InitKernelLibrary calls it)
+func_001F71D0	QueueThreadRequest	original assembly: adds a request to the request thread's ring and signals its semaphore from an interrupt (QueueServerRequest and the memory card library's func_00209B10 call it)
+D_00625B70	g_requestSemaphore	the semaphore StartRequestThread creates, RunRequestThread waits on and QueueThreadRequest signals
+D_00625B78	g_requestRing	the ring of 0x200 two-byte requests (kind, argument) with its head and tail that RunRequestThread consumes
+D_00277128	g_requestThreadId	the request thread's id; StartRequestThread returns early when it is already positive
+func_001F7270	WriteSerialChar	original assembly: waits on the status word at 0x1000F130 and writes a character to the serial port at 0x1000F180 (WriteConsoleChar calls it)
+func_001F72A8	BufferOutputChar	gathers characters in g_outputLine and hands the line to PrintToDebugConsole at a newline or when it is full (PrintBuffered's output)
+func_001F7358	WriteConsoleChar	writes a character to the serial port with WriteSerialChar, a newline as a carriage return and a line feed; g_outputHook's default
+func_001F7420	FormatExponent	writes a double through the output hook in the form 0.ddddddde+n (the formatter's %e and %f)
+func_001F7588	FormatOutput	the small formatter of %c %d %u %o %x %s %e %f with l, h and a zero-padded width, writing each character through its character function (PrintToOutputHook and PrintBuffered call it)
+func_001F7B50	PrintToOutputHook	formats its arguments through FormatOutput to g_outputHook (RunRequestThread and the TLB set-up print with it)
+func_001F7B88	PrintBuffered	formats its arguments through FormatOutput to BufferOutputChar (FlushOutputBuffer, ResetIop and the CD/DVD library print with it)
+D_00625F80	g_outputLine	the 0x80-byte line BufferOutputChar gathers characters in before it hands it to PrintToDebugConsole
+D_0027712C	g_outputLineLength	the number of characters BufferOutputChar has in g_outputLine
+D_00277130	g_outputHook	the character function PrintToOutputHook formats to: WriteConsoleChar by default
+func_001F7BE8	InitRemoteCalls	once (g_remoteCallsReady), sets up the remote call state g_remoteCallState with its three pools of 0x40-byte packets and installs the handlers of the commands 0x80000008 to 0x8000000C (InitIopCommandChannels, LoadIopModules and the IOP clients call it)
+func_001F7D88	ShutDownRemoteCalls	shuts the command channel down (ShutDownCommandChannel) and clears g_remoteCallsReady (ResetIop calls it)
+func_001F7DB0	TakeRequestPacket	with interrupts disabled, marks the first free packet of the pool in use, gives it the next id and returns it, or 0 when none is free
+func_001F7E58	FreeRequestPacket	clears a packet's id and its in-use bit
+func_001F7E78	NextReplyPacket	returns the next packet of the reply ring, wrapping at its count
+func_001F7EA8	HandleRemoteCallReply	the handler of the IOP's replies: runs the client's callback for 0x8000000A, copies the found service for 0x80000009, signals the waiting client's semaphore and frees its packet
+func_001F7F60	AnswerIopCall	answers an IOP call with a 0x8000000C packet from the reply ring through SendCommandFromInterrupt
+func_001F7FC0	FindRemoteService	walks the groups of services in g_remoteCallState and returns the entry whose first word is the key, or 0
+func_001F8010	AnswerServiceLookup	answers a 0x80000009 lookup with the entry FindRemoteService finds (or zeros) through SendCommandFromInterrupt
+func_001F80C0	BindRemoteService	takes a request packet for the client, sends the bind command 0x80000009 for a service id and, unless asked not to wait, waits for the reply on a semaphore of its own (InitIopCommandChannels and every IOP client bind with it)
+func_001F8200	QueueServerRequest	appends an incoming request to its server's list and, when the server's thread is idle, wakes it with QueueThreadRequest
+func_001F8290	CallRemoteService	sends a bound client's request (command, send buffer, receive buffer, callback) and, unless asked not to, waits for the reply (SendIopCommandAndWait, the sound bank loads and every IOP client call it)
+func_001F8480	IsRemoteCallPending	returns 1 while the client's packet still has its id and its in-use bit (IsIopReplyReady and the sound bank loads poll it)
+D_00277134	g_remoteCallsReady	set once InitRemoteCalls has run, cleared by ShutDownRemoteCalls
+D_00627800	g_remoteCallState	the remote call state: the next packet id, the request pool, the reply ring and the list of services (InitRemoteCalls sets it up)
+func_001F84D8	CreateFileTableLock	creates the two semaphores that guard the file client's handle table and its replies (OpenFileClient and FindFileHandle call it)
+func_001F8538	FindFileHandle	returns the entry of the file client's table of 32 open handles for a handle, or 0
+func_001F85A8	HandleFileReply	the file client's reply handler: copies the reply out of the reply buffer's uncached address and frees the waiter's slot in g_semaphoreSlots
+func_001F8968	CreateFileRequestLock	creates the semaphore that keeps one file request at a time (LockFileRequests calls it first)
+func_001F89B8	LockFileRequests	waits on the file client's request semaphore, creating it first when needed
+func_001F89E8	UnlockFileRequests	signals the file client's request semaphore
+func_001F8A28	OpenFileClient	once, installs HandleFileReply and func_001F89F8 for the commands 0x80000011 and 0x80000013, binds the client to the IOP's file service, clears the handle table and hands the reply buffer over
+func_001F8BF8	ForgetFileClient	clears the file client's opened flag and its binding (LoadIopModules calls it before it resets the IOP)
+func_001F8C38	CloseFile	sends the close request for a handle and waits for its reply (CloseStreamReader and CloseBufferedStream call it)
+func_001F8DB8	ReadFile	sends a read request for a handle into a buffer and waits for its reply (StartChunkRead and RefillBufferedStreamFromFile call it)
+func_001F9028	WriteFile	sends a write request of a buffer to a handle and waits for its reply (FlushOutputBuffer calls it)
+func_001F92E8	ControlFile	sends request 5 with a mode and a block of data for a handle, answering modes 1 to 3 from the client's own state (PollChunkRead asks whether a read finished with it)
+D_002771B8	g_fileClientOpen	set by OpenFileClient, cleared by ForgetFileClient; the file requests open the client when it is 0
+D_00628B40	g_fileClient	the remote call client OpenFileClient binds to the IOP's file service, which the file requests call
+func_001F9690	BindModuleLoader	binds g_moduleLoaderClient to the IOP's service 0x80000006 once, retrying until it is bound, and keeps the service's version word in g_moduleLoaderVersion
+func_001F9790	IsModuleLoaderMismatched	tells whether g_moduleLoaderVersion, the library's own version (the end of its identification string D_00276970) and the string D_002771D0 points to all differ
+func_001F9820	ForgetModuleLoader	sets g_moduleLoaderBound back to -1 and clears the version word (LoadIopModules calls it)
+func_001F9868	SendModuleLoadRequest	sends the module loader a file name of up to 0xFB characters and up to 0xFC bytes of arguments with a command, and returns the reply's size and word
+func_001F9A90	LoadIopModuleFile	sends a module load request (command 0) for a file name and its arguments; LoadIopModules loads each name of g_iopModuleNames with it
+D_002771CC	g_moduleLoaderBound	-1 until BindModuleLoader has bound the module loader's client, 0 after
+D_00628E00	g_moduleLoaderClient	the remote call client BindModuleLoader binds to the IOP's service 0x80000006
+D_00628E28	g_moduleLoaderVersion	the module loader's version word that BindModuleLoader keeps and IsModuleLoaderMismatched compares
+D_00628C00	g_moduleLoaderBuffer	the 64-byte aligned buffer SendModuleLoadRequest sends and receives through
+func_001F9AD8	SendIopReset	sends the IOP the reset command 0x80000003 with its argument in a packet by DMA and waits for the IOP to come back
+func_001F9C18	IsIopResetDone	tells whether the IOP has come back from a reset, from a register shared with it (LoadIopModules polls it)
+func_001F9C50	ResetIop	resets the IOP with "rom0:UDNL " followed by an argument of up to 69 characters after shutting the remote calls down (LoadIopModules resets it with the IOP image)
+func_001F9D60	DisableInterrupts	original assembly: clears the status register's interrupt enable and returns whether it was set (the wrappers and the IOP clients bracket their critical sections with it)
+func_001F9DA8	EnableInterrupts	original assembly: sets the status register's interrupt enable again
+func_001F9DC0	CreateLibrarySemaphores	creates the two semaphores D_002771E4 and D_002771E8 (InitKernelLibrary calls it first)
+func_001F9E08	FindKernelWord	returns the address of the first word equal to a value from 0x80000000 on
+func_001F9E50	InstallKernelWordSearch	installs FindKernelWord as the system call D_002771D8 names (0x83)
+func_001F9EA8	InitKernelLibrary	runs the kernel library's set-ups: its semaphores, InstallKernelWordSearch, the three kernel patch installers and StartRequestThread (the program's entry func_00100008 calls it)
+func_001F9F50	IsSecondKernelPatchNeeded	writes the system configuration word back with bits 13 to 15 set to 1 (WriteSystemConfig), reads it again (ReadSystemConfig), restores the original and returns whether the field came back 0 (InstallSecondKernelPatch's test)
+func_001F9FB8	InstallSecondKernelPatch	when IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls D_00277998 lists (InitKernelLibrary calls it)
+func_001FA068	SetUpTlb	runs the TLB set-up func_001FA9C0 (ExitProgram calls it)
+func_001FA078	ExitProgram	runs SetUpTlb, then ExitProgramSyscall with the status (the program's entry, SignalProcess and the TLB set-up call it)
+func_001FA0D8	GetProcessId	returns 1, the only process (GetProcessIdFor calls it)
+func_001FA0E0	SignalProcess	exits the program with the signal as status when the process is 1, else does nothing and returns 0 (SendSignalFor calls it)
+func_001FA140	PrintToDebugConsole	hands a line to CallDebugService with request 0x10 (BufferOutputChar calls it)
+func_001FA190	StoreChannelWord	the command channel's handler of command 1: stores the packet's value in the channel's table of words at its index
+func_001FA1B0	StoreIopChannelAddress	the command channel's handler of command 0: stores the IOP's address of its channel
+func_001FA1C0	GetChannelWord	returns the command channel's word at an index (InitRemoteCalls reads one)
+func_001FA1E8	InitCommandChannel	once (D_002779B8), sets up the command channel's control record, handler table and words, installs its DMA handler func_001FA6B0 and exchanges its addresses with the IOP
+func_001FA468	ShutDownCommandChannel	disables and removes the command channel's DMA handler and clears its flag
+func_001FA4A0	SetCommandHandler	stores a handler and its argument for a command in the channel's system or user table (its top bit chooses)
+func_001FA4D0	ClearCommandHandler	clears a command's handler in the channel's system or user table
+func_001FA4F8	SendCommandPacket	sends a command packet, and optionally a block of data, to the IOP by DMA with StartIopDma, or StartIopDmaFromInterrupt when asked from an interrupt handler
+func_001FA630	SendCommand	sends a command packet with SendCommandPacket outside interrupts (BindRemoteService and CallRemoteService send through it)
+func_001FA670	SendCommandFromInterrupt	sends a command packet with SendCommandPacket from an interrupt handler (AnswerIopCall and AnswerServiceLookup send through it)
+func_001FA6B0	HandleCommandInterrupt	original assembly: the command channel's DMA handler, which runs the handler of each received command and re-arms the receive chain
+func_001FA7D8	WriteBackDataCacheRange	original assembly: writes back and invalidates the data cache lines of a range, 64 bytes at a time (the IOP clients call it before a transfer)
+func_001FA8F8	InstallThirdKernelPatch	copies D_002779C0 to 0x80075000 and sets the system calls D_00277D30 lists (InitKernelLibrary calls it)
+func_001FA9C0	SetUpTlbForMemory	sets the TLB up through func_001FAA00 when QueryMemorySize reports 0x2000000, and calls the system call stub func_001F6D30 otherwise
+func_001FAE18	RunConstructorsOnce	runs the walk func_001FAD68 over the constructor list D_0027B130 the first time (RunMainLoop calls it)
+func_002014D0	AbortProgram	raises signal 6 and exits with status 1, forever (abort.c; the runtime's terminate hook calls it)
+func_002014F0	GetErrorNumberAddress	returns the C library's state record, whose first word is the error number (errno.c)
+func_00201500	MakeSignalTable	allocates the table of 32 signal handlers at +0x1D4 of a C library state record on first use
+func_00201578	RaiseSignalFor	raises a signal through a state record's handler table: the default sends it to this process, 1 ignores it, else the handler runs after being reset
+func_00201668	RaiseSignal	RaiseSignalFor on g_libraryState (AbortProgram raises 6 with it)
+func_002016A0	SendSignalFor	sends a signal to a process with SignalProcess and keeps the error the call left in the state record
+func_00201700	GetProcessIdFor	GetProcessId for a state record
+func_00201720	CopyStringBounded	original assembly: copies a string of at most n bytes, 16 bytes at a time with the 128-bit instructions (strncpy.c; SendModuleLoadRequest copies the module's name with it)
+D_0027B328	g_systemCallError	the error number SignalProcess's call leaves; SendSignalFor clears it before the call and copies it into the state record after
+func_001FB528	ConvertDoubleToU64	converts a double to an unsigned 64-bit integer with the software double arithmetic (double_to_u64.c; FormatExponent calls it)
+func_001FB618	ConvertS64ToDouble	converts a signed 64-bit integer to a double from its two halves with the software double arithmetic (s64_to_double.c)
+func_001FB6B0	ConvertS64ToFloat	converts a signed 64-bit integer to a float, rounded once (s64_to_float.c; AdvanceGameClock calls it)
+func_001FC910	PackDouble	packs a double taken apart (kind, sign, exponent, fraction) back into its 64 bits, rounding and handling NaN, zero, infinity and denormals (soft_float.c)
+func_001FCA40	UnpackDouble	takes a double's 64 bits apart into kind, sign, unbiased exponent and fraction (every operation of soft_float.c starts with it)
+func_001FCAE0	AddUnpackedDoubles	adds two unpacked doubles, aligning their exponents and handling the special kinds (the double add and subtract call it)
+func_001FD088	DivideDoubles	unpacks two doubles, divides them and packs the result (FormatExponent calls it)
+func_001FD1F0	CompareUnpackedDoubles	compares two unpacked doubles by kind, sign, exponent and fraction (the double comparison calls it)
+func_001FD410	ConvertDoubleToS32	converts a double to a signed 32-bit integer, 0 for NaN and zero, saturating at the limits
+func_001FD4A8	ConvertDoubleToU32	converts a double to an unsigned 32-bit integer, 0 for negative values and NaN, 0xFFFFFFFF above the range
+func_001FD548	PackDoubleFromParts	packs a double from a kind, sign, exponent and fraction passed as loose arguments (fptodp, func_001FD868, calls it)
+func_001FD5D0	PackFloat	packs a float taken apart (kind, sign, exponent, fraction) back into its 32 bits (soft_float_single.c)
+func_001FD6E0	UnpackFloat	takes a float's 32 bits apart into kind, sign, unbiased exponent and fraction (soft_float_single.c)
+func_001FD7A0	ConvertFloatToU32	converts a float to an unsigned 32-bit integer (CancelPauseMenuPage calls it)
+func_001FD838	PackFloatFromParts	packs a float from a kind, sign, exponent and fraction passed as loose arguments (the double to float conversion calls it)
+func_001FD8A8	AllocateOrThrow	the C++ runtime's allocation: takes memory from the game's allocator func_0018D758 and throws bad_alloc when there is none (allocate.cpp; LoadFonts calls it)
+func_001FD920	AbortOnTerminate	the default terminate hook D_00278048: calls AbortProgram
+func_001FD930	RunTerminateHook	calls the function the terminate hook D_00278048 holds (the exception runtime and HandleAbstractCall call it)
+func_001FBDF8	HandleAbstractCall	jumps to RunTerminateHook; retail's method table D_0024A220 holds it in the slots a class leaves unimplemented (abstract_call.c)
+func_001FDAF0	ThrowToTopHandler	runs the cleanups registered in the top exception handler, then jumps to that handler
+func_001FDC68	PopHandlerAndThrow	pops the top exception handler after running its cleanups, then throws again
+func_001FF048	ReadUnsignedLeb128	reads an unsigned number of 7-bit groups (the top bit marks a continuation) from the unwind tables and returns the position after it
+func_001FF090	ReadSignedLeb128	reads a signed number of 7-bit groups, extending the sign from bit 6 of the last byte, and returns the position after it
+func_001FFBE0	RegisterFrameInfo	original assembly: adds an object's frame information to the runtime's list D_0062A7B8 (RegisterProgramFrameInfo calls it at startup)
+func_001FFC08	DeregisterFrameInfo	removes an object's frame information from the runtime's list D_0062A7B8, freeing its sorted table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit)
+func_001FFC80	FindFrameUnwindState	finds the frame description of a code address and runs its unwind instructions into a state record (the throw and rethrow entries call it)
+func_00211DE0	RegisterProgramFrameInfo	registers the program's frame information D_0027B198 with the runtime (RegisterFrameInfo); the last entry of the constructor list D_0027B130
+func_00211DF8	ReleaseProgramFrameInfo	takes the program's frame information D_0027B198 back from the runtime (DeregisterFrameInfo); the last entry of the destructor list D_0027B180
+func_002018E8	ResetGsPaths	original assembly: resets the paths to the GS, driving VU0 and VIF1 with macro instructions (InitDmaChannels calls it)
+func_00201988	WaitGsPaths	original assembly: waits until the paths to the GS are idle (FlipDisplayFrame calls it)
+func_00201A18	ResetGs	in mode 0 resets the GS, records the interlacing, video mode, field mode and GS version in g_gsParams, removes its handler and sets the video mode; mode 1 only resets, mode 5 only records and sets (InitDisplay calls it)
+func_00201BA8	GetGsParams	returns g_gsParams
+func_00201BB8	WriteDisplayRegisters	writes a display environment's words to the GS's privileged registers (0x12000000 on), by the layout of the GS version in g_gsParams
+func_00201C78	SendDrawEnvironment	waits for DMA channel 2 to finish and sends a drawing environment's packet through it
+func_00201D60	SetUpDoubleBuffer	defines the two display and drawing environments of a double buffer for a pixel format, width and height, with an optional clear (InitDisplay calls it)
+func_00201FF8	SwapDoubleBuffer	writes the display registers of one half of a double buffer and sends the other half's drawing environment (FlipDisplayFrame calls it)
+func_00202058	SwapGsInterruptMask	reads the GS interrupt mask, writes a new one and returns the old
+func_00202098	SetFieldDrawOffset	sets a drawing environment's offset from its centre, half a line lower on the odd field (FlipDisplayFrame calls it)
+func_00202120	GetGsInterruptMask	returns the GS interrupt mask (ReadGsInterruptMask)
+func_00202140	DefineDisplayEnvironment	fills a display environment for a pixel format and size, printing its message for an unsupported display mode (SetUpDoubleBuffer calls it)
+func_002023B0	CountFrameBufferPages	returns the GS pages a frame buffer of a pixel format and size takes, doubled when g_gsParams says interlaced frame mode
+func_00202478	DefineDrawEnvironment	original assembly: fills a drawing environment for a pixel format, size and offset (SetUpDoubleBuffer calls it)
+func_00202660	DefineClearPacket	original assembly: fills the packet that clears a rectangle (SetUpDoubleBuffer calls it when asked to clear)
+D_00279330	g_gsParams	the GS parameters ResetGs records: interlacing, video mode, field mode and GS version (GetGsParams returns it)
+func_00202768	ClearBytes	sets n bytes to 0 (ResetDmaController clears its settings with it)
+func_002027A0	GetDmaChannel	returns the register block of one of the ten DMA channels from g_dmaChannels, or 0 past the tenth
+func_002027C8	ResetDmaController	clears the channels g_dmaChannelsToReset marks, masks and clears the controller's interrupts, sets its settings to zero and enables it when asked; returns whether it was enabled (InitDmaChannels calls it)
+func_002028A8	SetDmaSettings	writes the controller's release, FIFO, stall and drain settings and its ring and hold words, and keeps them in g_dmaSettings
+func_00202A80	StartDmaChain	waits for a channel to finish, then starts it in chain mode from a tag address (SubmitPacketBuffer calls it)
+func_00202B68	StartDmaChainToMemory	waits for a channel to finish, then starts it in chain mode towards memory (StartFromSprChain calls it)
+func_00202C38	WaitDmaChannel	waits until a channel's transfer ends, or tests it, with a timeout (RunRenderThread calls it)
+D_00279340	g_dmaChannels	the register blocks of the EE's ten DMA channels (0x10008000 to 0x1000D400) GetDmaChannel returns
+D_00279380	g_dmaChannelsToReset	which channels ResetDmaController clears
+D_002793D8	g_dmaSettings	the controller's last settings SetDmaSettings wrote
+func_00202D08	WakeDiscWaiter	original assembly: the alarm handler of WaitDiscTicks, which signals its semaphore
+func_00202D30	WaitDiscTicks	creates a semaphore, arms an alarm (ScheduleAlarm) of a number of ticks whose handler signals it and waits on it
+func_00202DA0	EndDiscCommand	the end of a command, from the remote call's end callback in the interrupt: records its status and releases the command's semaphore and the callback's
+func_00202E50	CopyDiscReadTail	the read's end callback: copies the two unaligned pieces the IOP left in uncached memory to where they go
+func_00202EF0	CreateDiscSemaphores	creates the semaphores of the two disc clients' commands and of the callback, once
+func_00202F88	DeleteDiscSemaphores	signals the callback's semaphore if one is pending, deletes the three semaphores and clears the command 0x80000012's handler
+func_00203010	RunDiscCallback	the handler of the command 0x80000012: runs the disc callback with its argument unless it is being installed
+func_00203050	InstallDiscCallbackHandler	installs RunDiscCallback as the handler of the command 0x80000012
+func_002030C0	BeginDiscNCommand	takes the semaphore of the first disc client's commands for a command, and binds the client to the service 0x80000595 once, printing "Ncmd fail sema" when busy
+func_002032C8	SyncDiscNCommand	waits for the first disc client's command to end (mode 0) or tells whether it is still running (mode 1), printing "N cmd wait" (SyncDiscRead forwards to it)
+func_00203368	SyncDiscSCommand	the same for the second disc client's commands, printing "S cmd wait"
+func_002033D8	BeginDiscSCommand	takes the semaphore of the second disc client's commands, and binds the client to the service 0x80000593 once, printing "Scmd fail sema" when busy
+func_00203548	InitDiscLibrary	original assembly: binds the disc library to the IOP and initialises it, printing its "CD_Init" message on a bind error (LoadIopModules calls it)
+func_00203828	WaitDiscReady	original assembly: waits until the drive reports ready, with its "DiskReady" messages (LoadIopModules and EnsureSoundBankLoaded call it)
+func_00203AE8	GetDiscReadPosition	returns the word the IOP keeps in D_0027A5C0, read through its uncached address (RefillBufferedStreamFromSectors calls it)
+func_00203B18	ReadDiscSectors	original assembly: starts a read of a count of sectors into a buffer with the first client ("call cdread cmd"); StartDiscRead forwards to it
+func_00203CF8	GetDiscStatus	the second client's command 3, returning its word (func_00140968 polls it)
+func_00203D90	GetDiscError	the second client's command 4, returning the drive's error word (GetDiscReadError forwards to it)
+func_00203E28	StopDiscRead	the second client's command 0x16 (CloseBufferedStream calls it to finish a pending sector read)
+func_00203EE0	CheckDiscChanged	the second client's command 5 with one word, returning a word through out (StepDiscSectorCheck calls it with 2 and shows its page when the word is set)
+D_0027A5D0	g_discNClient	the first disc client, bound to the service 0x80000595 by BeginDiscNCommand
+D_0027AE48	g_discSClient	the second disc client, bound to the service 0x80000593 by BeginDiscSCommand
+D_00279428	g_discNSemaphore	the semaphore of the first disc client's commands (BeginDiscNCommand takes it, EndDiscCommand releases it)
+D_0027942C	g_discSSemaphore	the semaphore of the second disc client's commands (BeginDiscSCommand takes it)
+func_00203FD0	SendPadDma	original assembly: sends a pad slot's DMA words to the IOP, printing its message when the transfer cannot start (SetPadActuatorBytes calls it)
+func_002040E8	InitPadLibrary	binds the two pad clients to the services 0x80000100 and 0x80000101, retrying until bound, and initialises the module (InitPadSystem calls it)
+func_002042C8	OpenPadPort	original assembly: opens a port's slot on a 64-byte aligned buffer of two frames, printing its messages on a bad buffer or a slot already open (InitPadRecord calls it)
+func_002044B0	GetNewerPadFrame	refreshes a slot's two frames from memory and returns the one with the higher count
+func_00204510	ReadPadFrame	copies the newer frame of an open slot into data and returns its size (PollPadInput calls it)
+func_00204590	GetPadSlotState	returns the state of an open slot's newer frame (5 for a stable slot with a request running), or 0x63 when closed (UpdatePadConnection polls it)
+func_00204610	SetPadRequestMode	sets the request mode of an open slot's newer frame (2 while a request runs)
+func_00204678	GetPadRequestMode	returns the request mode of an open slot's newer frame (UpdatePadConnection reads it)
+func_00204930	SendPadTwoWordRequest	sends the pad module command 6 with two words for a slot and marks the request running on success (UpdatePadConnection calls it)
+func_002049E8	SetPadActuatorBytes	original assembly: stores the bytes for a slot's actuators and sends them (UpdatePadPattern and StopPadPatternOutput call it)
+func_00204AA8	SendPadSixByteRequest	sends the pad module command 8 with six bytes for a slot and marks the request running on success (UpdatePadConnection calls it)
+func_00204C38	SendPadMaskRequest	sends the pad module command 10 with a mask for a slot and marks the request running on success
+func_00204CE8	HasFullPadMask	tells whether an open slot's button mask (func_00204B80) is 0x3FFFF (UpdatePadConnection calls it)
+func_00204D48	SendFullPadMask	sends SendPadMaskRequest with the mask 0xFFF for an open slot (UpdatePadConnection calls it)
+func_00204EC8	RefreshPadFrames	original assembly: invalidates the data cache over a slot's frames so they are read from memory (GetNewerPadFrame calls it)
+D_0062AA80	g_padClients	the two remote call clients InitPadLibrary binds to the pad module
+D_0062AAD0	g_padSlots	each port's four slots: the buffer of their two frames, their DMA words and whether they are open
+D_0062ACC0	g_padRequest	the 64-byte aligned request buffer the pad commands send and receive through
+func_00204F68	Arctangent	the arctangent of a float (arctangent.c)
+func_00205210	Cosine	the cosine of a float, reduced by ReduceByHalfPi to CosineKernel or SineKernel (cosine.c)
+func_002052F8	AbsoluteValue	a float with its sign bit cleared (absolute_value.c)
+func_00205318	RoundDown	a float rounded down to an integer (round_down.c)
+func_00205400	Sine	the sine of a float, reduced by ReduceByHalfPi to SineKernel or CosineKernel (sine.c)
+func_002054F0	Tangent	the tangent of a float, reduced by ReduceByHalfPi to TangentKernel (tangent.c)
+func_00205578	Arccosine	the checked arccosine: ArccosineKernel's result, or a domain error through HandleMathError (arccosine.c)
+func_00205678	Arcsine	the checked arcsine: ArcsineKernel's result, or a domain error through HandleMathError (arcsine.c)
+func_00205778	ArctangentOfRatio	the checked arctangent of y / x: ArctangentOfRatioKernel's result, or a domain error for two zeros (arctangent_of_ratio.c)
+func_002058A0	FloatRemainder	the checked remainder of x / y: FloatRemainderKernel's result, or a domain error for a zero divisor (float_remainder.c)
+func_002059E0	Logarithm	the checked natural logarithm: LogarithmKernel's result, or a singularity at zero or a domain error below it (logarithm.c)
+func_00205B28	LogarithmBase10	the checked base-10 logarithm: LogarithmBase10Kernel's result, or a singularity or domain error (logarithm_base10.c)
+func_00205C78	Power	the checked power x ** y: PowerKernel's result, or a domain, singularity, overflow or underflow error (power.c)
+func_00206180	SquareRoot	the checked square root: SquareRootKernel's result, or a domain error below zero (square_root.c)
+func_00206298	ArccosineKernel	the unchecked arccosine of a float (arccosine_kernel.c)
+func_002066C8	ArcsineKernel	the unchecked arcsine of a float (arcsine_kernel.c)
+func_00206A68	ArctangentOfRatioKernel	the unchecked arctangent of y / x in the right quadrant (arctangent_of_ratio_kernel.c)
+func_00206D50	FloatRemainderKernel	the unchecked remainder of x / y with the sign of x (float_remainder_kernel.c)
+func_00206FA0	LogarithmKernel	the unchecked natural logarithm of a float (logarithm_kernel.c)
+func_002072C8	LogarithmBase10Kernel	the unchecked base-10 logarithm of a float (logarithm_base10_kernel.c)
+func_002073F8	PowerKernel	the unchecked power x ** y of floats (power_kernel.c)
+func_00207C88	ReduceByHalfPi	reduces a float argument by pi / 2 into a quadrant and a remainder in two floats (reduce_by_half_pi.c)
+func_00208068	SquareRootKernel	the unchecked square root of a float, bit by bit (square_root_kernel.c)
+func_002081A0	CosineKernel	cos(x + y) for a reduced argument in two parts (cosine_kernel.c)
+func_002082F8	ReduceLargeByHalfPi	reduces a large float argument by pi / 2 on the table of the digits of 2 / pi (reduce_large_by_half_pi.c)
+func_00208C48	SineKernel	sin(x + y) for a reduced argument in two parts (sine_kernel.c)
+func_00208D50	TangentKernel	tan(x + y), or -1 / tan when sign is -1, for a reduced argument in two parts (tangent_kernel.c)
+func_00208FE8	HandleMathError	the error hook the checked functions call: handles nothing and returns 0 (error_hook.c)
+func_00209010	RoundToInteger	a double rounded to an integer in the current rounding direction, with the software double arithmetic (round_to_integer.c)
+func_00209210	IsFinite	whether a float is finite (is_finite.c)
+func_00209238	IsNotANumber	whether a float is not a number (is_not_a_number.c; every checked function tests its arguments with it)
+func_00209260	ScaleByPowerOfTwo	a float times 2 to the power n (scale_by_power_of_two.c)
+func_002093C0	CopySign	a float with the magnitude of x and the sign of y (copy_sign.c)
+D_0024FF70	g_mathInfinity	a double's positive infinity, which the checked functions return as an error's result (infinity.c)
+D_0024FF78	g_mathErrorMode	the math library's error mode, 1; the checked functions return the kernel's result unchanged when it is -1 (error_mode.c)
+func_002093F0	InitMemoryCardClient	binds the memory card client to the IOP's server and checks the server's version, printing its messages (InitMemoryCardSystem calls it)
+func_002095B0	OpenCardFile	sends the card server a request (operation 2) with a port, slot, path and flags and records it in flight (OpenMemoryCardFile calls it)
+func_002096E8	MakeCardDirectory	OpenCardFile with the directory flag (CreateMemoryCardDirectory calls it)
+func_00209720	CloseCardFile	sends the card server the close request (operation 3) for a handle (CloseMemoryCardFile calls it)
+func_002097E0	CopyCardDirectoryReply	the completion handler that copies the server's results out of uncached memory into the caller's buffers
+func_00209870	ReadCardFile	sends the card server a read request (operation 5) of a size into a buffer for a handle (ReadMemoryCardFile calls it)
+func_00209990	WriteCardFile	sends the card server a write request (operation 6) of data for a handle (WriteMemoryCardFile calls it)
+func_00209B10	WakeCardWaiter	original assembly: the alarm handler of WaitCardTicks, which wakes the waiting thread through QueueThreadRequest
+func_00209B38	WaitCardTicks	arms an alarm of a number of ticks that wakes the current thread and sleeps until it does
+func_00209B80	SyncCardRequest	waits for the request in flight to end (or tests it), returns its operation and result and releases the request semaphore (SyncMemoryCardResult calls it)
+func_00209C60	CopyCardInfoReply	the completion handler that copies the card information's words out of uncached memory to where GetCardInfo was asked to put them
+func_00209CB8	GetCardInfo	sends the card server the information request (operation 1) for a port and slot with three pointers for its results (PollMemoryCard and GetMemoryCardFreeBytes call it)
+func_00209E48	ReadCardDirectory	sends the card server the directory request (operation 0xD) for a path into a table of entries (ListMemoryCardDirectory and LoadMemoryCardSaveSlots call it)
+D_0027AEC8	g_cardRequestInFlight	the operation of the card request in flight, 0 when none (each request sets it, SyncCardRequest clears it)
+D_0027AECC	g_cardSemaphore	the semaphore that keeps one card request at a time (SyncCardRequest releases it)
+D_0062AD40	g_cardClient	the remote call client InitMemoryCardClient binds to the memory card server
+func_0020A190	GetStreamId	turns a stream number into its id through the table g_streamIds (SetStreamCallback calls it)
+func_0020A220	DemultiplexPacks	walks a buffer of packs and hands each packet to its stream's callback (DemultiplexBuffer calls it)
+func_0020A518	DemultiplexBuffer	runs DemultiplexPacks over a whole buffer (FeedMovieDecoder calls it)
+func_0020A538	SetStreamCallback	registers a callback for a stream (InitMoviePlayback calls it)
+func_0020A630	ParsePackHeader	parses a pack header with the bit reader (DemultiplexPacks calls it)
+func_0020A780	ParseSystemHeader	parses a system header with the bit reader (ParsePackHeader calls it)
+func_0020A7F0	ParsePacketHeader	parses a packet header with its table of field lengths (DemultiplexPacks calls it)
+D_0027AED0	g_streamIds	the table of stream ids GetStreamId reads
+func_0020ADA0	InitMpegLibrary	the MPEG library's initialisation: resets the IPU (ResetIpu) (InitMoviePlayback calls it)
+func_0020AE40	CreateMpegDecoder	sets up a decoder in a work area, reporting "The size of work area is too small" when it is, with its ring buffer and DMA hooks (InitMoviePlayback calls it)
+func_0020B048	DeleteMpegDecoder	returns 1 (FinishMovie calls it)
+func_0020B058	DecodeMpegPicture	sets the output address and size of a decoder and runs its picture loop (StepMovieFrame calls it)
+func_0020B0B0	GetMpegDecoderStatus	returns the first word of a decoder's state (PlayMovie reads it)
+func_0020B0C0	ResetMpegDecoder	clears a decoder's state words and its pictures' bookkeeping (FinishMovie and CreateMpegDecoder call it)
+func_0020B110	ReleaseMpegPictures	clears the word at +0x28 of each of the decoder's six picture pointers that is set
+func_0020B168	SetMpegCallback	stores a callback and its argument in a decoder's table at an index and returns the old one (InitMoviePlayback calls it)
+func_0020B190	RunMpegCallback	runs the decoder's callback for the kind a message names, with its argument
+func_0020B1E0	RunMpegStallCallback	runs the decoder's callback of kind 1; the IPU waits call it each time the IPU stays busy too long
+func_0020B240	InitMpegRing	sets a ring buffer's start, size, read and write positions
+func_0020B278	AllocateFromMpegRing	takes an aligned block of a size from a decoder's ring buffer, reporting an error when it does not fit
+func_0020B2E8	RunMpegPictureLoop	the decoder's picture loop: parses headers and decodes pictures until a picture is out or the stream ends (DecodeMpegPicture calls it)
+func_0020B930	PrintMpegError	prints a message after "[MPEG ERROR]"
+func_0020B940	ReportMpegErrorFormat	formats a message into a buffer and reports it with ReportMpegError
+func_0020B978	ReportMpegError	hands a message to the decoder's callback of kind 0, or prints it with PrintMpegError when there is none
+func_0020B9F0	ReadSequenceHeader	reads a sequence header and its extensions (ParseMpegHeaders calls it on the start code 0x1B3)
+func_0020C138	RejectSequenceScalableExtension	reports "_sequenceScalableExtension() is not implemented"
+func_0020C148	RejectUnknownExtension	reports "Unknown Extension"
+func_0020C158	RejectSpatialScalableExtension	reports "_pictureSpatialScalableExtension is not supported"
+func_0020C168	RejectTemporalScalableExtension	reports "_pictureTemporalScalableExtension is not supported"
+func_0020C178	SaveMpegDmaState	saves the IPU's two DMA channels before a picture (SaveIpuDmaChannels); a decoder's hook
+func_0020C188	RestoreMpegDmaState	restores the IPU's two DMA channels after a picture (RestoreIpuDmaChannels); a decoder's hook
+func_0020DEE8	SetIpuMpeg1Mode	sets or clears bit 23 of the IPU's control register 0x10002010, the MPEG-1 mode, as the sequence header says
+func_0020F0C0	SendIpuCommand	writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the bit window (D_0027B040)
+func_0020F0F0	WaitIpuCommandDone	waits while the IPU is busy, running the stall callback every 5000 polls
+func_0020F248	DecodeIpuVariableLength	waits for the IPU, then sends it a variable-length decode command of a table and reads the decoded value
+func_0020F3C0	PeekIpuBits	returns the next n bits of the IPU's bit stream without consuming them
+func_0020F4C8	SkipIpuBits	sends the IPU a command that consumes n bits and refreshes the bit window
+func_0020F5B8	ReadIpuBits	returns the next n bits of the IPU's bit stream and consumes them
+func_0020F708	FindNextStartCode	aligns the IPU's bit stream to a byte and skips to the next start code prefix 0x000001
+func_0020F7F0	ParseMpegHeaders	reads start codes and their headers: a sequence header (0x1B3), a group of pictures (0x1B8), a picture (0x100), until the sequence's end (0x1B7)
+func_0020F900	ReadPictureHeader	reads a picture header: its temporal reference, coding type, delay and the forward and backward codes of P and B pictures
+func_0020F9C8	ReadExtensionsAndUserData	reads the extensions and user data after a header, dispatching each extension through the table D_00250430
+func_0020FDA0	ReadGroupOfPicturesHeader	reads a group of pictures header: its time code, closed and broken flags
+func_00211348	ConvertPictureColours	converts a decoded picture's colours with the IPU by DMA, through interrupt handlers for large pictures
+func_002115C0	InitBitReader	sets the bit reader up over a ring buffer (DemultiplexPacks calls it)
+func_002115F8	PeekBits	returns the next bits of the bit reader's window without consuming them
+func_00211618	AdvanceBits	consumes bits, refilling the 64-bit window a byte at a time and wrapping at the buffer's end
+func_002116B0	ReadBits	returns the next n bits and consumes them
+func_00211700	ReadBit	returns the next bit and consumes it
+func_00211748	SkipBytes	consumes a number of whole bytes
+func_002117A0	GetPositionAhead	returns the buffer position a number of bits ahead of the reader
+func_002117D0	StartIpuOutputTransfer	starts DMA channel 3 (from the IPU) with the DMA suspended while its control register is written
+func_00211838	StartIpuInputTransfer	starts DMA channel 4 (to the IPU) the same way
+func_002118A0	SaveIpuDmaChannels	saves the state of the IPU's two DMA channels (SaveMpegDmaState calls it)
+func_00211988	RestoreIpuDmaChannels	restores the state of the IPU's two DMA channels and restarts them (RestoreMpegDmaState calls it)
+func_00211AD8	SyncIpu	waits while the IPU is busy (mode 0) or tells whether it is (mode 1)
+func_00211B40	StartIpuInputForReset	the IPU initialisation's own copy of StartIpuInputTransfer, for channel 4
+func_00211BA8	ResetIpu	resets the IPU and loads its default quantiser matrices and colour table (InitMpegLibrary calls it)
+func_0020C1A0	PrepareMacroblockPrediction	for macroblock n, checks its motion type (reporting "Invalid modion type -- ignored" outside 1 to 3), computes its motion vectors and prediction and waits for the IPU's output DMA channel before marking the buffer
+func_0020C3F0	ComputeMotionVectors	works out a macroblock's motion vectors from its position and flags and fetches its prediction through PredictMacroblock (PrepareMacroblockPrediction calls it)
+func_0020CAF8	PredictMacroblock	runs the hand-written prediction routines of mpeg_motion_compensation.cpp through the two tables D_0027B000 and D_0027B020, by kind of motion, whole or half pixel
+func_0020CF18	AddMacroblockResiduals	adds the prediction to the decoded residual through the hand-written routines func_0020DE28 and func_0020DE88 (DecodeAllMacroblocks calls it)
+func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the decoder's callback of kind 1 while its input runs dry, refreshes the bit window and reports "Error code detected(BDEC)" and resets the IPU on an error
+func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
+func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
+func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks

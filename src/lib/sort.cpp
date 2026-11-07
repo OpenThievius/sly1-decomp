@@ -128,7 +128,7 @@ again:
     }
     BLOCKSWAP_1F5CD0(pb, pn - r, r);
     if ((u32)(r = pb - pa) > size) {
-        func_001F5CD0(base, r / size, size, compare);
+        SortElements(base, r / size, size, compare);
     }
     if ((u32)(r = pd - pc) > size) {
         base = pn - r;
