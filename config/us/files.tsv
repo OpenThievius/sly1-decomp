@@ -93,3 +93,4 @@ src/main/file_19E040.cpp	0019E040	001A7FE8	0024C930	0026B530	-	-
 src/main/file_100000.cpp	00100000	001000C8	-	-	-	-
 src/lib/memory_compare.cpp	001F59C4	001F5A58	-	-	-	-
 src/lib/memory_copy.cpp	001F5A58	001F5B08	-	-	-	-
+src/lib/memory_move.cpp	001F5B08	001F5C0C	-	-	-	-
