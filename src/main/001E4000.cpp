@@ -4685,4 +4685,4 @@ void* D_002505C0[6];
 
 
 // Outside src/main/file_146100.cpp's and src/main/file_149398.cpp's data; read by func_00148718.
-void* D_0026EC68;
+extern void* D_0026EC68;
