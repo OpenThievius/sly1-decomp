@@ -500,12 +500,12 @@ void* func_001F37D8(C8D* obj, s32 value)
 
 void* func_001F3810(Obj_1F3810* self, s32 mode)
 {
-    return func_001F37D8(self, mode, 0);
+    return GetC8DCurrentEntry(self, mode, 0);
 }
 
 void* func_001F3830(void* self, s32 mode)
 {
-    return func_001F37D8(self, mode, 1);
+    return GetC8DCurrentEntry(self, mode, 1);
 }
 
 void func_001F3850(void* self, f32 x)
@@ -834,7 +834,7 @@ void func_001F4808(ObjectSubGroup* self)
     if (g_timerCaption.state == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
             || ((*(Glob_1F4808**)&g_saveData)->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
-        func_001E0828(&g_timerCaption);
+        FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
         goto tail;
     }

@@ -9,7 +9,7 @@ void func_001DB838(s32 a0)
         D_00262C6C = 0;
         func_0016E148();
         ClearCameraObjectList(g_camera);
-        func_001DFD70();
+        ClearClass75List();
         ClearPointObjectList();
         ClearTargetVectorList();
         ClearObjectLists();

@@ -13,7 +13,7 @@ void func_001F4808(ObjectSubGroup* self)
     if (((Gl_eu_1F4808*)&g_timerCaption)->f570 == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
             || ((*(Glob_1F4808**)&g_saveData)->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
-        func_001E0828(&g_timerCaption);
+        FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
         goto tail;
     }

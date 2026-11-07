@@ -18,8 +18,8 @@ s32 D_00274FA8[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
 s32 D_00274FB8[2] = {48, 64};
 
-struct Entry_274FC0 { s32 id; f32 v; s32 z; };
-Entry_274FC0 D_00274FC0[8] = {
+struct PlayerTableEntry { s32 id; f32 v; s32 object; };
+PlayerTableEntry D_00274FC0[8] = {
     { 0x35, 30.0f, 0 }, { 0x36, 30.0f, 0 }, { 0x37, 30.0f, 0 }, { 0x3A, 30.0f, 0 },
     { 0x50, 60.0f, 0 }, { 0x58, 30.0f, 0 }, { 0x170, 30.0f, 0 }, { 0, 0.0f, 0 }
 };
@@ -134,7 +134,6 @@ ASM_FUNC(func_001D4348);
 ASM_FUNC(func_001D4698);
 
 
-struct Item_1D4848 { s32 f0; u8 pad4[4]; s32 f8; };
 
 u8* func_0018D568(s32 size, void* src);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
@@ -142,10 +141,10 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001D4848(Player* self)
 {
     self->f26A8 = 7;
-    self->f26AC = CopyToFrontMemory(0x54, D_00274FC0);
+    self->f26AC = CopyToFrontMemory(0x54, g_playerObjectTable);
     for (s32 i = 0; i < self->f26A8; i++) {
-        Item_1D4848* it = (Item_1D4848*)self->f26AC + i;
-        it->f8 = FindFirstObjectById(self->world, 1, it->f0, self);
+        PlayerTableEntry* it = (PlayerTableEntry*)self->f26AC + i;
+        it->object = FindFirstObjectById(self->world, 1, it->id, self);
     }
 }
 
@@ -217,23 +216,20 @@ void func_001D4C98(Player* self)
         return;
     }
     if ((u32)(self->f2228 - 0x2D) < 5) {
-        func_001D5620(self);
+        EndPlayerRequestState(self);
     } else {
         func_00175170(self, 2, 2);
     }
 }
 
-struct Obj_1D5398;
-struct Obj_D5418;
-struct Obj_1D5468;
 void func_001D51A0(Player* self);
-void func_001D5398(Obj_1D5398* self);
-void func_001D5418(Obj_D5418* a0);
-void func_001D5468(Obj_1D5468* self);
+void func_001D5398(Player* self);
+void func_001D5418(Player* self);
+void func_001D5468(Player* self);
 void func_001D6608(void);
 
-typedef void (*Cb_1D4D08)(s32 data, Player* self);
-struct Msg_1D4D08 { Player* self; s32 v; };
+typedef void (*PlayerRequestFn)(s32 data, Player* self);
+struct PlayerRequestMessage { Player* self; s32 v; };
 
 void func_001837E0(s32 target, s32 a, s32 b, Ev07** c);
 void func_00175170(Player* self, s32 a, s32 b);
@@ -287,7 +283,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     case 0:
         StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         {
-            Cb_1D4D08 fn = (Cb_1D4D08)self->f26B4.fn;
+            PlayerRequestFn fn = (PlayerRequestFn)self->f26B4.fn;
             if (fn != 0) {
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
@@ -295,11 +291,11 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 func_00175170(self, 4, 0x2B);
             }
         }
-        SetPlayerCallback(self, (s32)func_001D51A0);
+        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind0);
         break;
     case 6:
         {
-            Cb_1D4D08 fn = (Cb_1D4D08)self->f26B4.fn;
+            PlayerRequestFn fn = (PlayerRequestFn)self->f26B4.fn;
             if (fn != 0) {
                 self->f26B4.fn = 0;
                 fn(self->f26B4.data, self);
@@ -310,7 +306,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         if (400.0f < self->v150.z) {
             StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
-        SetPlayerCallback(self, (s32)func_001D5398);
+        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind6);
         break;
     case 1:
     case 2: {
@@ -332,7 +328,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
             break;
         }
         func_00175170(self, 4, id);
-        SetPlayerCallback(self, (s32)func_001D5468);
+        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind1Or2);
         break;
     }
     case 3:
@@ -362,7 +358,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         break;
     }
     if (self->f2730 != 0) {
-        Msg_1D4D08 m;
+        PlayerRequestMessage m;
         m.self = self;
         m.v = msg->arg;
         self->desc->m0E(self, 0x17, &m);
@@ -415,57 +411,37 @@ void func_001D51A0(Player* self)
     }
 }
 
-typedef void (*VFnA_1D5398)(void* self);
-struct Obj_1D5398 { VFnA_1D5398* vtbl; };
-
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void func_00175170(void* self, s32 mode, s32 count);
-void func_001D4C90(void* self, s32 value);
 
-void func_001D5398(Obj_1D5398* self)
+void func_001D5398(Player* self)
 {
     StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
     func_00175170(self, 4, 0x2A);
-    SetPlayerCallback(self, (s32)func_001D5418);
+    SetPlayerCallback(self, (s32)ContinuePlayerSubState2A);
 }
 
-typedef void (*VFn_D5418)(void* self);
-struct Obj_D5418 {
-    VFn_D5418* vtbl;
-};
-
-s32 func_00160C58(void* a);
-void func_00175170(void* a, s32 b, s32 c);
-
-void func_001D5418(Obj_D5418* a0)
+void func_001D5418(Player* self)
 {
-    if (func_00160C58(a0)) {
-        a0->vtbl[84](a0);
-    } else {
-        func_00175170(a0, 4, 0x2D);
-    }
-}
-
-typedef void (*VFnA_1D5468)(void* self);
-typedef void (*VFnB_1D5468)(void* self, void* arg);
-struct Obj_1D5468 { void** vtbl; };
-
-s32 func_00160C58();
-void func_00175170(void* self, s32 mode, s32 count);
-
-void func_001D5468(Obj_1D5468* self)
-{
-    ((VFnB_1D5468)self->vtbl[36])(self, (u8*)self + 0x2BB0);
-    ((VFnB_1D5468)self->vtbl[37])(self, (u8*)self + 0x2BC0);
     if (func_00160C58()) {
-        ((VFnA_1D5468)self->vtbl[84])(self);
+        self->desc05()->m50(self);
     } else {
         func_00175170(self, 4, 0x2D);
     }
 }
 
-struct Key_1D54E0;
-s32 func_001DDA80(Key_1D54E0* k);
+void func_001D5468(Player* self)
+{
+    self->desc02()->m20(self, &self->v2BB0);
+    self->desc02()->m21(self, &self->v2BC0);
+    if (func_00160C58()) {
+        self->desc05()->m50(self);
+    } else {
+        func_00175170(self, 4, 0x2D);
+    }
+}
+
+struct PlayerWorld;
+s32 func_001DDA80(PlayerWorld* k);
 extern u32 D_00262C64;
 
 s32 func_001D54E0(Player* self, s32 n)
@@ -502,7 +478,7 @@ s32 func_001D54E0(Player* self, s32 n)
         default: {
             s32 r = 0;
             if (self->f2220 == 11) goto set;
-            if (func_001DDA80((Key_1D54E0*)self->world) != 0) {
+            if (func_001DDA80((PlayerWorld*)self->world) != 0) {
 set:
                 r = 1;
             }
@@ -519,7 +495,7 @@ set:
     if (v == 11) goto one;
     if (self->f26C4 != 0) goto one;
     if ((g_buttonCodeFlags & 1) != 0) goto one;
-    if (func_001DDA80((Key_1D54E0*)self->world) != 0) goto one;
+    if (func_001DDA80((PlayerWorld*)self->world) != 0) goto one;
     goto zero;
 one:
     return 1;
@@ -536,8 +512,8 @@ void func_001D5620(void* self)
     func_00160DA0();
 }
 
-struct Obj_001D5650 { u8 pad[0x10]; f32 value; };
-s32 func_001D5650(Obj_001D5650* a, Obj_001D5650* b) { if (a->value < b->value) return -1; return 1; }
+struct SortedTarget { u8 pad[0x10]; f32 key; };
+s32 func_001D5650(SortedTarget* a, SortedTarget* b) { if (a->key < b->key) return -1; return 1; }
 
 
 INCLUDE_RODATA(D_0024DC88);

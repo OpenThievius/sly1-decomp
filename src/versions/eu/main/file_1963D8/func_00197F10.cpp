@@ -22,7 +22,7 @@ void func_00197F10(C18* self, s32 kind, void* rec)
             tbl = (u8*)&g_gaugeAmountCaption;
             *(void**)(tbl + 0x574) = (u8*)self + 0x680;
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
-            func_001DDC38(self->world, self);
+            SetWorldActiveFollower(self->world, self);
             StartTimer(&g_timerElement, self->f688);
             SetTimerLimit(&g_timerElement, 0.0f, (void*)func_00197458);
             StartTimerCounting(&g_timerElement);
@@ -35,7 +35,7 @@ void func_00197F10(C18* self, s32 kind, void* rec)
                 g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
                 D_0026E4E0.vt->m15(&D_0026E4E0);
                 g_timerElement.vt->m15(&g_timerElement);
-                func_001DDC38(self->world, 0);
+                SetWorldActiveFollower(self->world, 0);
             }
         }
         return;

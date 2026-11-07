@@ -1691,7 +1691,7 @@ void func_001CB8B8(Self_1CB8B8* self)
         for (j = 0; j < e->count; j++) {
             Node_1CB8B8* node = e->items[j];
             if (node->f328 == 0) {
-                node->f328 = func_001EFA30();
+                node->f328 = CreateRecord2505C0();
                 ((Node_1CB8B8*)node->f328)->f2C = self;
                 AppendToSmallList(node->f328, node);
                 if (node->f2E0 != -1) {

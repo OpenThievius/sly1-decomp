@@ -36,7 +36,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         f32 one = 1.0f;
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         func_00160C48(0);
-        func_001DDAD0(g_currentWorld);
+        PopActiveSequenceElement(g_currentWorld);
         StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
         SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
         SetTimerLimit(&g_timerElement, zero, 0);

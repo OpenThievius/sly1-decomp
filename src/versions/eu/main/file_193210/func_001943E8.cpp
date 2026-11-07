@@ -169,15 +169,15 @@ void func_001943E8(Self_1943E8_eu* self)
             if ((u32)(id - 10) < 3) {
                 Ent_1943E8* e = &((Ent_1943E8*)&D_eu_00255538)[id];
                 if (self->f570 == 16) {
-                    if (e->fC != 0.0f) { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(157)); } else { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(158)); }
+                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(157)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
                 } else if (self->f570 == 17) {
-                    if (e->fC != 0.0f) { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(159)); } else { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(158)); }
+                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(159)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
                 } else {
-                    if (e->fC != 0.0f) { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(160)); } else { D_0026EC70.vt->m08(&D_0026EC70, func_eu_001DDAB0(161)); }
+                    if (e->fC != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(160)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(161)); }
                 }
-                D_0026EC70.vt->m14(&D_0026EC70);
+                g_buttonHintElement.vt->m14(&g_buttonHintElement);
             } else {
-                D_0026EC70.vt->m15(&D_0026EC70);
+                g_buttonHintElement.vt->m15(&g_buttonHintElement);
             }
         }
         break;

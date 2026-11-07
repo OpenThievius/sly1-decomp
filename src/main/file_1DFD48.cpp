@@ -13,7 +13,7 @@ void func_00152438(void* p, s32 n);
 
 void func_001DFD48()
 {
-    func_00152438(D_002758D0, 0x80);
+    func_00152438(g_class75List, 0x80);
 }
 
 
@@ -21,7 +21,7 @@ void func_00152440(void* p);
 
 void func_001DFD70()
 {
-    ClearList(D_002758D0);
+    ClearList(g_class75List);
 }
 
 struct Obj_001DFD90 { u8 pad[0x88]; s32 count; f32 scale; };
@@ -42,7 +42,7 @@ void func_00152470(void* table, void* self);
 void func_001DFDC8(void* self)
 {
     RegisterObject(self);
-    AppendToList(D_002758D0, self);
+    AppendToList(g_class75List, self);
 }
 
 void func_00182ED0(void* self);
@@ -51,7 +51,7 @@ void func_00152600(void* table, void* self);
 void func_001DFE00(void* self)
 {
     UnregisterObject(self);
-    RemoveFromList(D_002758D0, self);
+    RemoveFromList(g_class75List, self);
 }
 
 struct __attribute__((packed)) Pk8_001DFE38 {

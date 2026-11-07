@@ -28,7 +28,7 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
         if (a < 18) {
             if (a > 15) {
             call:
-                D_0026EC70.vt->m15(&D_0026EC70);
+                g_buttonHintElement.vt->m15(&g_buttonHintElement);
             }
         }
     }
@@ -36,7 +36,7 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        T217D_330* o = &D_0026EC70;
+        T217D_330* o = &g_buttonHintElement;
         SetScreenElementHoldTime(o, 0.0f);
         SetScreenElementScale(o, 0.6f);
         break;

@@ -753,9 +753,9 @@ void func_0016F478(void)
                     p++;
                 }
                 FormatToString(text, (const u8*)D_0024A848, buf);
-                D_0026EC70.vt->f20(&D_0026EC70, text);
-                SetScreenElementHoldTime(&D_0026EC70, 10.0f);
-                D_0026EC70.vt->f38(&D_0026EC70);
+                g_buttonHintElement.vt->f20(&g_buttonHintElement, text);
+                SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
+                g_buttonHintElement.vt->f38(&g_buttonHintElement);
             }
         }
     }

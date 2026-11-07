@@ -1090,7 +1090,7 @@ void func_001D9C98(C19* self, f32 t)
         func_001D8BD0(self);
     }
     func_001D9678(self, t);
-    func_001D8D90(self);
+    SteerPathFollower(self);
     func_001D8E40(self);
     func_001D9488(self, local);
     func_001D9AC8(self);
@@ -1210,7 +1210,7 @@ void func_001DAE68(C19* self, void* v)
         a->limit = (s32*)((u8*)self + 0xB04);
         b->target = (s32*)((u8*)self + 0xB08);
         b->limit = (s32*)((u8*)self + 0xB0C);
-        func_001DDC38(*(void**)((u8*)self + 0x14), self);
+        SetWorldActiveFollower(*(void**)((u8*)self + 0x14), self);
     } else {
         if (self->fB34 == 2) {
             SetPathFollowerMode(self, 0);
@@ -1451,7 +1451,7 @@ void func_001DB838(s32 a0)
         D_00262C6C = 0;
         func_0016E148();
         ClearCameraObjectList(g_camera);
-        func_001DFD70();
+        ClearClass75List();
         ClearPointObjectList();
         ClearTargetVectorList();
         ClearObjectLists();

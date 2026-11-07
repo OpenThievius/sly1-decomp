@@ -36,7 +36,7 @@ void func_001A4EF0(PairController* self, s32 state)
     case 2: {
         ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = &self->f3C4;
         ((Tab_1A4EF0_eu*)&D_0026D0C8)->f578 = &self->limit3B8;
-        func_001DDC38(self->world, self);
+        SetWorldActiveFollower(self->world, self);
         break;
     }
     case 5:
@@ -67,7 +67,7 @@ void func_001A4EF0(PairController* self, s32 state)
         break;
     case 6:
         func_001A4070(P(self, 0x354), 3);
-        D_0026EC70.vt->m15(&D_0026EC70);
+        g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }
 }

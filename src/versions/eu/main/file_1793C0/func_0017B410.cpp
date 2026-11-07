@@ -23,11 +23,11 @@ void func_0017B410(C4A* self, s32 mode)
             sys->f57C = sys->f570;
             sys->f580 = sys->f574;
             sys->f584 = 0;
-            func_001DDC38(self->world, self);
+            SetWorldActiveFollower(self->world, self);
         } else if (mode < 4) {
             Sys_17B410_eu* sys = (Sys_17B410_eu*)&g_gaugeBarElement;
             sys->vtbl[15](sys);
-            func_001DDC38(self->world, 0);
+            SetWorldActiveFollower(self->world, 0);
         }
     }
     (void)ReplaceAnimationPlayer(x, self, 1, self->f558, 0.0f, 1.0f);

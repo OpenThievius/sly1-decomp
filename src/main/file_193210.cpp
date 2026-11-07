@@ -650,7 +650,7 @@ void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
         if (a < 18) {
             if (a > 15) {
             call:
-                D_0026EC70.vt->m15(&D_0026EC70);
+                g_buttonHintElement.vt->m15(&g_buttonHintElement);
             }
         }
     }
@@ -658,7 +658,7 @@ void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        T217D_330* o = &D_0026EC70;
+        T217D_330* o = &g_buttonHintElement;
         SetScreenElementHoldTime(o, 0.0f);
         SetScreenElementScale(o, 0.6f);
         break;
@@ -901,26 +901,26 @@ void func_001943E8(T217D_6D0* self)
                 Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[id];
                 if (self->page == 16) {
                     if (e->fC != 0.0f) {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2S&. : Erase Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2S&. : Erase Game");
                     } else {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : New Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : New Game");
                     }
                 } else if (self->page == 17) {
                     if (e->fC != 0.0f) {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Load Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Load Game");
                     } else {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : New Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : New Game");
                     }
                 } else {
                     if (e->fC != 0.0f) {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Overwrite Game\n&2S&. : Erase Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Overwrite Game\n&2S&. : Erase Game");
                     } else {
-                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Save Game");
+                        g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2X&. : Save Game");
                     }
                 }
-                D_0026EC70.vt->m14(&D_0026EC70);
+                g_buttonHintElement.vt->m14(&g_buttonHintElement);
             } else {
-                D_0026EC70.vt->m15(&D_0026EC70);
+                g_buttonHintElement.vt->m15(&g_buttonHintElement);
             }
         }
         break;
@@ -1290,7 +1290,7 @@ void func_00195958(T217D_6D0* self)
                 func_001B6598(s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
-                        func_001D9338(s0);
+                        RecordPathFollowerProgress(s0);
                         TeleportStateWalker(s2, 0x42E);
                     }
                 }

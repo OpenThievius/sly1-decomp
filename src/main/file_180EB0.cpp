@@ -441,7 +441,7 @@ void func_00181D28(C1A* self, s32 code, MessageBody* rec)
             }
         }
     }
-    func_001DAF08(self, code, rec);
+    HandlePathFollowerNotification(self, code, rec);
 }
 
 void func_00181D88(C1A* self)
