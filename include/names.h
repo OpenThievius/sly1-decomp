@@ -1922,6 +1922,13 @@
 #define ChooseObjectPoolItem                       func_001A8AF8
 #define HasObjectPoolChoice                        func_001A8C50
 #define ClearObjectPoolChoice                      func_001A93C8
+#define StartGaugeBarAgent                         func_001A98F8
+#define UpdateGaugeBarAgentGoal                    func_001A9960
+#define UpdateGaugeBarAgentState                   func_001A99B8
+#define EnterGaugeBarAgentState                    func_001A99F8
+#define UpdateGaugeBarAgent                        func_001A9A40
+#define UpdateGaugeBarAgentVisibility              func_001A9A98
+#define SetGaugeBarAgentValues                     func_001A9C58
 #define InstallScreenElements                      func_001A9C68
 #define InitScreenElements                         func_001A9F78
 #define UpdateScreenElements                       func_001A9FD0

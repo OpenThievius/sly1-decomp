@@ -2556,3 +2556,10 @@ func_0019F560	UpdateEffect	the shared slot 4 (every frame) of 19 effect tables: 
 func_0019F8E8	AddEffectListener	adds to the callback list at +0x118 of an effect, through AddCallbackNode on the world, the listener's function from its first word with the listener as context (StartSwitchedColliderEffect calls it), as AddObjectListener does for objects
 func_0019F918	AddEffectCallback	adds a function and context to the callback list at +0x118 of an effect through AddCallbackNode on the world, as AddObjectCallback does for objects
 func_0019F950	RemoveEffectCallback	removes a function and context from the callback list at +0x118 of an effect through RemoveCallbackNode on the world, as RemoveObjectCallback does for objects
+func_001A98F8	StartGaugeBarAgent	slot 16 of class 0x0D: runs StartAgent, then registers itself with its world through func_001DDC38
+func_001A9960	UpdateGaugeBarAgentGoal	slot 94 of class 0x0D: runs UpdateAgentGoal and in state 0x10 heads for the position (+0x140) of the object its slot 102 returns
+func_001A99B8	UpdateGaugeBarAgentState	slot 90 of class 0x0D: runs UpdateAgentState, then func_001C8BC0 in state 0x10
+func_001A99F8	EnterGaugeBarAgentState	slot 92 of class 0x0D: runs EnterAgentState and on state 0xB marks level part 4 done (MarkLevelDone) and starts a memory card save
+func_001A9A40	UpdateGaugeBarAgent	slot 17 of class 0x0D: runs UpdateAgent, then stops and clears the animation player at 0xC20 once its value at +0x18 is 0
+func_001A9A98	UpdateGaugeBarAgentVisibility	slot 46 of class 0x0D: shows g_gaugeBarElement while AreMenusAndFadeClear, else hides it
+func_001A9C58	SetGaugeBarAgentValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent

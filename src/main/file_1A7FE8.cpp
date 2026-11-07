@@ -110,17 +110,13 @@ void func_001F5C0C(void* p, s32 value, s32 size);
 void func_001A93C8(void* self);
 
 
-struct Entry_1A8718 { s32 key; s32 pad[3]; s32 flags; };
 
-Entry_1A8718* func_001A8718(ObjectPool* table, s32 key);
-
-
-struct Row_1A8820 { s32 unk0; s32 itemCount; void** items; u8 pad[8]; };
+ObjectPoolEntry* func_001A8718(ObjectPool* table, s32 key);
 
 
-struct Entry_1A87E0 { s32 pad0; s32 f4; s32 pad1; s32 fC; };
 
-Entry_1A87E0* func_001A8718(void* table, s32 key);
+
+
 
 
 struct __attribute__((aligned(16))) Quad_1A94C0 { s32 a, b, c, d; };
@@ -250,10 +246,9 @@ s32 func_001E1FD0(char* dst, const char* fmt, ...);
 void* func_001E2138(void* dst, void* src);
 
 struct Hdr_1A8208 { u8 pad0[4]; s32 f4; s32 f8; Quad16* fC; };
-struct Ent_1A8208 { s32 f0; s32 f4; void** f8; s32 fC; s32 f10; };
 struct Self_1A8208 {
     u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
-    s32 f34; Ent_1A8208* f38; Hdr_1A8208* f3C;
+    s32 f34; ObjectPoolEntry* f38; Hdr_1A8208* f3C;
 };
 
 void* func_0018D500(s32 size);
@@ -263,10 +258,7 @@ s32 func_001527D8(void* p);
 PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
 
 
-struct Tab_1A87A8;
-struct Ent_1A87A8 { s32 pad[4]; s32 flags; };
 
-Ent_1A87A8* func_001A8718(Tab_1A87A8* table, s32 key);
 
 
 void func_001A8AF8(ObjectPool* self);
@@ -296,7 +288,6 @@ void func_001AE820(u8* a);
 
 
 
-struct Entry_1A8150 { s32 f0; s32 f4; u8 pad[8]; s32 f10; };
 
 void* func_0018D5C0(u32 n);
 
@@ -306,19 +297,11 @@ extern s32 D_002751D4;
 
 // EXACT: dst built as i*4 + (u32)items
 
-struct Rec_1A8AF8 { s32 f0; s32 count; s32* items; s32 f0C; s32 flags; };
 void func_001A89E8(ObjectPool* self);
 s32 func_001A88A0(ObjectPool* self, s32 item);
 void func_001F5B08(s32* dst, s32* src, s32 size);
 
 
-struct Rec_001A89E8 {
-    s32 f00;
-    s32 f04;
-    s32* f08;
-    s32 f0C;
-    s32 f10;
-};
 
 s32 func_001A88A0(ObjectPool* self, s32 item);
 
@@ -448,8 +431,8 @@ struct Begin_1A88A0 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (Iter_1A88A0*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->prev = (Iter_1A88A0*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -465,7 +448,7 @@ struct Next_1A88A0 {
 struct End_1A88A0 {
     static void Of(Iter_1A88A0* it)
     {
-        D_0027B314 = (ListFrame*)it->prev;
+        g_activeListFrames = (ListFrame*)it->prev;
     }
 };
 
@@ -611,12 +594,12 @@ void* func_001A8110(ObjectPool* self)
 void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
-        self->items = AllocateZeroedFrontMemory(0x50);
+        self->items = (ObjectPoolEntry*)AllocateZeroedFrontMemory(0x50);
     }
-    Entry_1A8150* e = &((Entry_1A8150*)self->items)[self->count++];
-    e->f0 = a1;
-    e->f4 = a2;
-    e->f10 = ((((e->f10 & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
+    ObjectPoolEntry* e = &self->items[self->count++];
+    e->id = a1;
+    e->count = a2;
+    e->flags = ((((e->flags & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
 }
 
 void func_001A8208(Self_1A8208* self)
@@ -628,12 +611,12 @@ void func_001A8208(Self_1A8208* self)
         }
     }
     for (i = 0; i < self->f34; i++) {
-        Ent_1A8208* e = &self->f38[i];
-        PlacedObject* obj = FindFirstObjectById(self->f14, 4, e->f0, self);
+        ObjectPoolEntry* e = &self->f38[i];
+        PlacedObject* obj = FindFirstObjectById(self->f14, 4, e->id, self);
         s32 n;
         s32 cnt;
         if (obj == 0) {
-            e->f4 = 0;
+            e->count = 0;
             continue;
         }
         if (self->f3C != 0 && self->f3C->f4 != 0) {
@@ -652,24 +635,24 @@ void func_001A8208(Self_1A8208* self)
         c1: {
                 s32 r = CountListItems((u8*)self->f3C + 0x14);
                 s32 lim = r + 1;
-                s32 m = e->f4;
+                s32 m = e->count;
                 s32 q = lim;
                 if (q < m) q = m;
                 n = q;
                 cnt = n - r - 1;
             }
         } else {
-            n = e->f4;
+            n = e->count;
             cnt = n - 1;
         }
     done:
-        if (n != 0) e->f8 = (void**)AllocateFrontMemory(n << 2);
-        e->f8[e->fC++] = obj;
+        if (n != 0) e->objects = (void**)AllocateFrontMemory(n << 2);
+        e->objects[e->total++] = obj;
         if (cnt > 0) {
             s32 k = cnt;
             do {
                 PlacedObject* o2 = CreateObjectCopy(obj, obj->world, obj->parent);
-                e->f8[e->fC++] = o2;
+                e->objects[e->total++] = o2;
                 if (o2->desc->m0F != 0) o2->desc->m0F(o2);
                 o2->desc->m10(o2);
                 o2->desc->m15(o2, 0);
@@ -705,7 +688,7 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
         self->sub->f14 = other;
         AppendToList((u8*)other->sub + 0x14, self->sub);
     } else {
-        self->items = CopyToFrontMemory(other->count * 0x14, other->items);
+        self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
     }
 }
 
@@ -760,44 +743,44 @@ void func_001A86F8(ObjectPool* self, s32 flag)
     }
 }
 
-Entry_1A8718* func_001A8718(ObjectPool* self, s32 key)
+ObjectPoolEntry* func_001A8718(ObjectPool* self, s32 key)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
-        if (((Entry_1A8718*)self->items)[i].key == key) break;
+        if (self->items[i].id == key) break;
     }
-    if (i < self->count) return &((Entry_1A8718*)self->items)[i];
+    if (i < self->count) return &self->items[i];
     return 0;
 }
 
 void func_001A8778(ObjectPool* table, s32 key)
 {
-    Entry_1A8718* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e) {
         e->flags |= 2;
     }
 }
 
-void func_001A87A8(Tab_1A87A8* table, s32 key)
+void func_001A87A8(ObjectPool* table, s32 key)
 {
-    Ent_1A87A8* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
         e->flags &= ~2;
     }
 }
 
-void func_001A87E0(void* table, s32 key, s32 value)
+void func_001A87E0(ObjectPool* table, s32 key, s32 value)
 {
-    Entry_1A87E0* e = FindObjectPoolEntry(table, key);
+    ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
-        if (value >= e->fC) {
-            value = e->fC;
+        if (value >= e->total) {
+            value = e->total;
         }
-        e->f4 = value;
+        e->count = value;
     }
 }
 
-s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->items+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
+s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
 s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
 {
@@ -861,10 +844,10 @@ void func_001A89E8(ObjectPool* self)
         return;
     }
     do {
-        Rec_001A89E8* rec = &((Rec_001A89E8*)self->items)[pos];
-        if ((rec->f10 & 2) != 0) {
-            for (k = 0; k < rec->f04; k++) {
-                if (IsObjectPoolItemFree(self, rec->f08[k]) != 0) {
+        ObjectPoolEntry* rec = &self->items[pos];
+        if ((rec->flags & 2) != 0) {
+            for (k = 0; k < rec->count; k++) {
+                if (IsObjectPoolItemFree(self, (s32)rec->objects[k]) != 0) {
                     goto found;
                 }
             }
@@ -886,21 +869,21 @@ void func_001A8AF8(ObjectPool* self)
         if (self->f40 == 0) {
             AdvanceObjectPoolEntry(self);
         }
-        Rec_1A8AF8* rec = &((Rec_1A8AF8*)self->items)[self->f44];
+        ObjectPoolEntry* rec = &self->items[self->f44];
 
         if (rec->flags & 2) {
             s32 i = 0;
             if (rec->count > 0) {
                 do {
-                    if (IsObjectPoolItemFree(self, rec->items[i]) != 0) {
-                        s4 = rec->items[i];
+                    if (IsObjectPoolItemFree(self, (s32)rec->objects[i]) != 0) {
+                        s4 = (s32)rec->objects[i];
                         if (self->sub != 0 && self->sub->f4 != 0) {
                             s5 = self->sub->fC + (self->f44 << 5);
                         }
                         if (rec->flags & 1) {
                         } else {
                             rec->count = rec->count - 1;
-                            s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->items);
+                            s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->objects);
                             func_001F5B08(p, p + 1, (rec->count - i) * 4);
                         }
                         break;
@@ -955,7 +938,7 @@ void func_001A9498(u8* self)
 void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
 {
     if (self->f0 != 0) {
-        func_001920B0(self->f0, a1);
+        ConvertPositionToWorld(self->f0, a1);
         a2[0] = self->q20;
         a2[1] = self->q30;
         a2[2] = self->q40;
