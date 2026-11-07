@@ -184,8 +184,12 @@ What retail shows, and what the compiler does:
   a's register when a dies there and b's when a lives on. A value loaded in
   another basic block cannot be tied (func_00157B88's spin, read before the
   branch that picks the arm, leaves the result to the arm).
-- **vmove is the compiler's.** A vmove.xyzw is a copy the allocator makes
-  (a value kept across a loop, func_001CAB10), not a helper.
+- **vmove.xyzw is a copy, sometimes the C's.** A plain `u128 b = a;` survives
+  only when the copy is made in one basic block and read in a later one
+  (func_0014BB08's two vmoves match that way); within one block CSE folds it
+  away, and retail's vmove there (func_00141D88, func_00141F48) is reproduced
+  only by an asm copy helper, which is still to add (Vu0::Copy). The allocator
+  also makes vmoves of its own for a value kept across a loop (func_001CAB10).
 - **Address registers of Q.** Q returns a reference, so `Q(v) = x` stores
   through an address register; when the local is also passed by address
   after a call, CSE keeps that address in a callee-saved register, where
@@ -261,8 +265,12 @@ velocity and spin setters). The Q-register forms have helpers (Sqrt, DivX,
 Length, NormalizeOr), so do the matrix forms (Transform, Transform4, RotateRows
 and RotateUntied, RotateTransposed, MulTransposed), the weighted sums (MulXSum,
 MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
-(PlaneSigns, Ones), the cross product, Min and Max. vmove.xyzw is the compiler's
-own copy. The assembler takes `vsqrt` (the disassembler prints it as a `.word`).
+(PlaneSigns, Ones), the cross product, Min and Max. Still without a helper:
+the vmove.xyzw copy within a block (Vu0::Copy), the float splat to four lanes
+(mfc1, pextlw, pextlw, qmtc2), a vector built from three floats in GPRs (mfc1,
+pextlw, pcpyld, qmtc2), a float stored as a quadword (mfc1 once, then sq of the
+GPR per use, func_00191AC8), and a vector's lanes read from a GPR copy (prot3w,
+pextuw after qmfc2 or lq). The assembler takes `vsqrt` (the disassembler prints it as a `.word`).
 
 ## Getting the compiler
 
