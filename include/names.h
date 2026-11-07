@@ -177,6 +177,8 @@
 #define g_countdownTable                           D_00263E08
 #define g_timeoutFired                             D_00263E30
 #define g_pointObjects                             D_00264088
+#define g_triangleGroupGrey                        D_00264098
+#define g_triangleGroupBlue                        D_002640A0
 #define g_coloredTriangleSet                       D_002640A4
 #define g_modeWalkerLinks                          D_002640B0
 #define g_iopModuleNames                           D_002647A8
@@ -1715,6 +1717,8 @@
 #define ClearPointObjectList                       func_0017FD70
 #define RegisterPointObject                        func_0017FD90
 #define UnregisterPointObject                      func_0017FDC8
+#define CopyPointObject                            func_0017FE00
+#define StartPointObject                           func_0017FE48
 #define InitColoredTriangles                       func_0017FE90
 #define LoadColoredTriangles                       func_0017FEC0
 #define DrawTriangleGroups                         func_00180108

@@ -2687,3 +2687,7 @@ func_0017D180	AddQueueEntryKind7	adds an entry of kind 7 to the entry queue (Add
 func_0017D1B8	AddQueueEntryKind8	adds an entry of kind 8 to the entry queue (AddQueueEntry) with value, flag and a word at +0x0C; the script built-in func_001082E8 calls it
 func_0017D1E8	AddQueueEntryKind11	adds an entry of kind 11 to the entry queue (AddQueueEntry) with value -1, flag 1, and a float at +0x0C; the script built-in func_00108498 calls it
 func_0017D220	AddQueueEntryKind12	adds an entry of kind 12 to the entry queue (AddQueueEntry) with value -1, flag 0; the script built-in func_00108548 calls it
+func_0017FE00	CopyPointObject	slot 0x34 of class 0x80: runs CopyObjectData, keeping its own kept bits
+func_0017FE48	StartPointObject	slot 0x50 of class 0x80: runs StartObject and, when its target id is set, finds the object of kind 0x104 with that id (FindFirstObjectById)
+D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleGroups gives the groups of kinds 3 and 4
+D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups

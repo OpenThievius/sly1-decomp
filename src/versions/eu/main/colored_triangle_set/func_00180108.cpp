@@ -16,7 +16,7 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
         Group_180108* grp = &self->groups[g];
         if (grp->n > 0) {
             BeginGifTag(&g_gsPacketWriter, 0, 1, 1);
-            col = *(Col_180108*)((u32)(g - 3) < 2 ? &D_00264098 : &D_002640A0);
+            col = *(Col_180108*)((u32)(g - 3) < 2 ? &g_triangleGroupGrey : &g_triangleGroupBlue);
             col.a = (u8)(s32)((f32)col.a * d);
             AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
             BeginGifTag(&g_gsPacketWriter, (s8)col.a >= 0 ? 0x43 : 0x83, 1, 4);

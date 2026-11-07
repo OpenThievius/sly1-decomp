@@ -677,7 +677,7 @@ D_00262E10	00262E10	3248	.data	src/main/player.cpp
 D_00263AC0	00263AC0	884	.data	src/main/file_1793C0.cpp
 D_00263E34	00263E34	20	.data	src/main/entry_queue.cpp
 D_00263E50	00263E50	580	.data	src/main/file_17D248.cpp
-D_00264098	00264098	16	.data	src/main/file_17FE00.cpp
+D_00264098	00264098	16	.data	src/main/colored_triangle_set.cpp
 D_002640B0	002640B0	432	.data	src/main/file_180EB0.cpp
 D_00264260	00264260	1500	.data	src/main/file_184D78.cpp
 D_00264840	00264840	208	.data	src/main/file_185C18.cpp
