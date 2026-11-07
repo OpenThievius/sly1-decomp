@@ -33,6 +33,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -169,6 +170,7 @@ def main(argv=None):
     parser.add_argument("--limit", type=int, default=5040)
     parser.add_argument("--write", metavar="OUT", help="save the best candidate here")
     args = parser.parse_args(argv)
+    args.func = symbols.canonical(args.func)    # either name (tools/symbols.py)
     key = "eu" if args.unit and args.version == "us" else args.version
     lines = Path(args.file).read_text().rstrip("\n").split("\n")
     runs = groups(lines, args.auto, function_lines(lines, args.func) if args.auto else None)

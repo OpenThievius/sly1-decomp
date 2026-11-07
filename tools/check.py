@@ -4,7 +4,8 @@
     python3 tools/check.py FILE.cpp FUNC [FUNC ...] [--version us|eu] [--diff]
 
 FUNC is the function's name in config/<version>/functions.tsv or
-config/us/symbol_addrs.txt (func_0011A338, or the name we gave it). The file
+config/us/symbol_addrs.txt (func_0011A338, or the name we gave it), or its readable name from
+config/names/ (the definition may be written either way: tools/symbols.py). The file
 is compiled with its flags (config/cflags.tsv), the function is found in the
 object (its C++ mangled name starts with FUNC), and every relocation in it is
 resolved to the address it has in the version: calls and data by name, a
@@ -40,6 +41,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
 import rodata  # noqa: E402
+import symbols  # noqa: E402
 import version_src  # noqa: E402
 import versions  # noqa: E402
 
@@ -216,6 +218,7 @@ def retail_image(key):
 
 def target_of(key, name):
     """(address, size) of FUNC in the version."""
+    name = symbols.canonical(name)
     m = VERSION_NAME.match(name)
     if m:
         # A function only that version has (tools/version_src.py): its address is in its name.
@@ -227,11 +230,11 @@ def target_of(key, name):
             raise KeyError("config/%s/functions.tsv has no function at 0x%X" % (key, addr))
         return addr, size
     us = load_functions("us")
-    symbols = load_symbols("us")
+    syms = load_symbols("us")
     if name in us:
         addr, size, _ = us[name]
-    elif name in symbols:
-        addr = symbols[name]
+    elif name in syms:
+        addr = syms[name]
         size = next((s for a, s, _ in us.values() if a == addr), None)
     else:
         raise KeyError("%s is not in config/us/functions.tsv or config/us/symbol_addrs.txt" % name)
@@ -291,6 +294,7 @@ def s16(x):
 
 def check_function(obj, name, key, resolver, image):
     """A result dict: status EXACT / DIFFER / ERROR, the words, notes."""
+    name = symbols.canonical(name)      # the readable name of a function works as its address name
     code_sections = {sec["index"] for sec in obj.sections if sec["name"].startswith(".text")}
     funcs = [s for s in obj.symbols if s["type"] == elf.STT_FUNC and s["shndx"] in code_sections]
     found = [s for s in funcs if s["name"] == name or base_name(s["name"]) == name]
@@ -459,6 +463,7 @@ def main(argv=None):
     parser.add_argument("--unit", metavar="SHARED.cpp",
                         help="FILE is a version's own definition of FUNC, kept elsewhere: build it in SHARED's unit")
     args = parser.parse_args(argv)
+    args.funcs = [symbols.canonical(f) for f in args.funcs]     # either name (tools/symbols.py)
 
     own = version_src.version_of(args.src)
     if args.unit:

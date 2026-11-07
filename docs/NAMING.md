@@ -16,15 +16,40 @@ declarations and definitions use, what `INCLUDE_ASM` names, and what the linker 
 | --- | --- |
 | `config/names/` | the tables: one row per named symbol, with the symbol, its name, and the evidence for the name. A function's row is in the table of the source file that holds it (`config/names/main/value.tsv` for `src/main/value.cpp`), a global's in `config/names/data.tsv` |
 | `include/names.h` | generated from the tables by `tools/names.py header`: `#define RegisterButtonCodes func_0016F588` for each row |
-| `tools/names.py` | `header` writes `names.h`, moves each row to its table and sorts each table; `check` checks the rules, each row's table, and that `names.h` agrees with the tables |
+| `tools/names.py` | `header` writes `names.h`, moves each row to its table and sorts each table; `check` checks the rules, each row's table, and that `names.h` agrees with the tables; `apply` writes the readable names in declarations and definitions |
+| `tools/symbols.py` | the shared helper: a name to its address name and back, for the tools that read source text |
 
-Function bodies may use the readable name. The preprocessor turns it back into the address name,
-so the objects are byte for byte the same either way. Declarations, prototypes and definitions
-keep the address name for now, because the tools find definitions by it. A later step will let
-definitions take the readable name too, through a layer that maps it back for the tools. This
+Function bodies, declarations, prototypes and definitions may all use the readable name. The
+preprocessor turns it back into the address name, so the objects are byte for byte the same either
+way. A source may mix the two while a family is being named. The tools find a symbol under either
+name: `tools/symbols.py` reads the tables once and maps a name to its address name and back
+(`canonical`, `readable`, `normalize`, `find_definition`). `tools/check.py`, `permute.py`,
+`permuter_setup.py`, `permute_night.py` and `regdiff.py` take either name as FUNC, and `todo.py`,
+`decls.py`, `version_check.py` and `version_src.py` read a definition written either way. This
 scheme follows OpenRAC's rac1-decomp (its `docs/NAMES.md`) without its sources of names: it reads
 names from symbol files and another decompilation of its game, which this project never does.
 Every name here is a name we gave.
+
+Three things keep the address name always. The markers `INCLUDE_ASM`, `ASM_FUNC`, `LINKER_REMNANT`,
+`LINKER_REMNANT_AFTER_INIT`, `INCLUDE_RODATA` and `INCLUDE_DATA` name the disassembly file they
+include, and the build checks them against `config/us/original_asm.tsv`. Comments that cite an
+address on purpose stay as they are. File names (`src/versions/eu/.../func_00142F10.cpp`,
+`nonmatching/func_X.cpp`) stay address names too, and so do the names only PAL has
+(`func_eu_XXXXXXXX`), which have no row.
+
+### Writing the readable name everywhere
+
+`python3 tools/names.py apply [--dry-run] [FILE ...]` rewrites the address name of every named
+symbol to its readable name in `src/`, `nonmatching/` and `include/` (or in the files given):
+definitions, prototypes, extern declarations, bodies, function-pointer initialisers and `#define`
+bodies. It leaves markers, comments, string literals, `#include` and `#undef` lines and `names.h`
+alone. It changes a file only from the first `#include` that brings in `names.h` (usually
+`common.h`), since a readable name used before that would declare a new function; the files and
+the names it kept are in its report. A name that the file also uses as another identifier (a field
+read through `.` or `->`, or a type, field, local or parameter declared with it) is reported and
+left alone in that file, because the macro would rewrite that identifier too. Running it again
+changes nothing. After it, run the full build (`MATCH`), `tools/version_check.py` and
+`tools/names.py check`.
 
 ## Types, fields and locals
 
@@ -73,6 +98,7 @@ it. It is read from retail's data, never remembered, and it opens no door to any
 1. Give a family its names: its types and fields in place (they are ours), its functions and
    globals as rows in `config/names/`, each with its evidence. A row may go in any table:
    `header` moves it to its own.
-2. Run `python3 tools/names.py header`, then use the readable names in the bodies.
+2. Run `python3 tools/names.py header`, then use the readable names (in bodies, or everywhere with
+   `python3 tools/names.py apply`).
 3. Check that nothing changed: `tools/names.py check`, the full build (`MATCH`) and
    `tools/version_check.py` (the same counts), and `tests/check_repository.py`.

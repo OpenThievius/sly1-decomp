@@ -33,6 +33,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import symbols  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -152,6 +153,7 @@ def main(argv=None):
     parser.add_argument("file")
     parser.add_argument("func")
     args = parser.parse_args(argv)
+    args.func = symbols.canonical(args.func)    # either name (tools/symbols.py)
     dest = OUT / args.func
     dest.mkdir(parents=True, exist_ok=True)
     target(args.func, dest)
