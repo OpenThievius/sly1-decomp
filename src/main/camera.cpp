@@ -48,13 +48,6 @@ void func_001ED650(void* self, f32 x, f32 y, f32 z);
 
 
 
-struct Scaler_001434C8 {
-    u8 pad0[0x1F8];
-    f32 f1F8;
-    f32 f1FC;
-    f32 f200;
-};
-
 void func_00183FE0(f32* a, f32* b, f32 x, f32 y, f32 z, f32 w);
 
 
@@ -278,9 +271,8 @@ void func_00188668(void* out, void* b, void* in);
 
 
 
-struct Ctx_144938;
 
-void func_00144BE8(Ctx_144938* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+void func_00144BE8(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
 
 
 
@@ -308,7 +300,7 @@ extern f32 D_0026185C;
 
 void func_00143140(void);
 void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3);
-void func_001434C8(Scaler_001434C8* self, f32* out, f32 p);
+void func_001434C8(Camera* self, f32* out, f32 p);
 void func_001437C0(void);
 void func_001437E8(void);
 void func_00143810(void);
@@ -337,7 +329,7 @@ void func_00144270(Camera* self);
 void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out);
 void func_00144848(u8* self);
 void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b);
-void func_00144938(Ctx_144938* self, void* p, s32 q);
+void func_00144938(Camera* self, void* p, s32 q);
 void func_00144B70(Camera* self, Vec_144B70* arg);
 void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out);
 void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3);
@@ -394,7 +386,7 @@ ASM_FUNC(func_001433E0);
 
 ASM_FUNC(func_00143418);
 
-void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
+void func_001434C8(Camera* self, f32* out, f32 p)
 {
     f32 one = 1.0f;
     f32 scale = 4080.0f;
@@ -741,7 +733,7 @@ void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b)
     self->f2B8 = zero;
 }
 
-void func_00144938(Ctx_144938* self, void* p, s32 q)
+void func_00144938(Camera* self, void* p, s32 q)
 {
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }

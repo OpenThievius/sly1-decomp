@@ -9,13 +9,13 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
 
     if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
         ArmIopReplyBuffer((&D_0025C3C0), 1);
-        while (func_001F8480(D_0027B4C8) != 0) {
+        while (func_001F8480(&g_iopCommandRpc) != 0) {
             if (D_0025C3B8 == 0)
                 PrintFormatted("989snd.c: RPC collision!\n");
             PollIopCommands();
             func_001F6C20(0);
         }
-        func_001F8290(D_0027B4C8, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
+        func_001F8290(&g_iopCommandRpc, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
         return;
     }
 
@@ -28,7 +28,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     }
 
     for (;; i++) {
-        if (*D_0025C360[g_iopBufferIndex] != 0x100 && D_0025C368[g_iopBufferIndex] >= size)
+        if (*g_iopCommandBuffers[g_iopBufferIndex] != 0x100 && g_iopCommandSpace[g_iopBufferIndex] >= size)
             break;
         if (D_0025C384 != 0) {
             D_0025C384 = 0;
@@ -36,7 +36,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
         }
         PollIopCommands();
         if (i == 1 && D_0025C3B8 == 0)
-            PrintFormatted("snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n", g_iopBufferIndex, *D_0025C360[g_iopBufferIndex]);
+            PrintFormatted("snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n", g_iopBufferIndex, *g_iopCommandBuffers[g_iopBufferIndex]);
     }
     if (i != 0 && D_0025C3B8 == 0)
         PrintFormatted("snd_SendIOPCommandNoWait: continuing (%d).\n", i);
@@ -44,7 +44,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
         D_0025C384 = 1;
 
     {
-        s16* p = (s16*)(((u8*)D_0025C360[g_iopBufferIndex]) - (D_0025C368[g_iopBufferIndex] - 0x1000));
+        s16* p = (s16*)(((u8*)g_iopCommandBuffers[g_iopBufferIndex]) - (g_iopCommandSpace[g_iopBufferIndex] - 0x1000));
         s32 j;
         *p = cmd;
         p++;
@@ -55,9 +55,9 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     }
     {
         s32 k = g_iopBufferIndex;
-        D_0025C368[k] -= size;
-        *(s32*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16) = arg;
-        *(u64*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16 + 8) = val;
+        g_iopCommandSpace[k] -= size;
+        *(s32*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
+        *(u64*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16 + 8) = val;
     }
     CommitQueuedIopCommand();
 }

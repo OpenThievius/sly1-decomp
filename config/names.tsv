@@ -2569,3 +2569,61 @@ func_001F3AF0	TransformObjectIntoFrame	slot 22 of class 0x73: transforms its pos
 func_001F4318	FindOrActivateSwitchedCollider	RunPendingWorldLoad's helper: returns func_001F4008 of the object func_001F3C38 finds, else the active switched collider, else activates the current one
 func_001F5208	GetContactTrackerRecord	returns the record at +0x550 of the contact tracker (the script built-in func_00109488 calls it)
 func_001F5218	InitC37	slot 0 of class 0x37: runs InitContactTracker, sets bit 43 of the flags at +0x538 and sets the collider's anchors to 3, 0, 3, 0
+func_00100008	EnterProgram	the program's first code (original assembly, entry.cpp): clears .bss from D_0027B300, sets up the main thread and the heap with two system calls, runs func_001F9EA8 and func_001F6C20, calls RunMainLoop with D_0027B380's count and words and leaves through func_001FA078
+func_001000B8	ExitProgram	jumps to func_001FA078 with 0 in a0 whatever it is passed; the C library's abort (func_002014D0) calls it with 1 after raising signal 6
+func_001000C0	EndMainThread	system call 0x23; EnterProgram sets its address up as the main thread's return address
+func_00115D48	GetScriptSquareRoot	builtin: CallScriptMathFunction with index 0, g_scriptMathFunctions[0] being the math library's checked float square root func_00206180
+func_00115D78	GetScriptSine	builtin: CallScriptMathFunction with index 1, the float sine func_00205400
+func_00115DA8	GetScriptCosine	builtin: CallScriptMathFunction with index 2, the float cosine func_00205210
+func_00115DD8	GetScriptTangent	builtin: CallScriptMathFunction with index 3, the float tangent func_002054F0
+func_00115E08	GetScriptArcSine	builtin: CallScriptMathFunction with index 4, the checked float arcsine func_00205678
+func_00115E38	GetScriptArcCosine	builtin: CallScriptMathFunction with index 5, the checked float arccosine func_00205578
+func_00115E68	GetScriptArcTangent	builtin: CallScriptMathFunction with index 6, the float arctangent func_00204F68
+func_00115E98	WrapScriptAngle	builtin: CallScriptMathFunction with index 7, g_scriptMathFunctions[7] being WrapAngle
+func_00116978	GetScriptMatrixTranslation	builtin: copies the quadword at +0x30 of the matrix argument (its fourth row) into a new vector payload and returns it
+func_001169E8	GetScriptMatrixRotation	builtin: copies the matrix argument into a new matrix payload and clears its translation with func_001884C0 (zero w column, fourth row 0 0 0 1)
+func_00117118	ConvertScriptFloatToInt	builtin: returns its float argument cast to an int (truncated toward zero)
+func_00117180	RoundScriptFloatUp	builtin: returns (int)(argument + 1.0), the int above a positive float
+func_00117D78	FindScriptObjectListById	builtin: the list twin of FindScriptObjectById: func_0015A198 on the world with kind 0x104 into a 0x40-entry buffer, returned through MakeScriptRefList
+func_00118580	TransformScriptDirectionBetweenFrames	builtin: calls func_001280C0 (the frame conversion ReparentCollider applies to its anchor vectors) into a vector payload, as TransformScriptPointBetweenFrames does with func_00128018
+func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
+D_00259958	g_scriptBuiltins	the built-ins' table (r119bb0.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
+D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it
+D_0025C2D0	g_propertyRefPool	the fifth pool of value.cpp, 0x80 entries of 12 bytes (InitScriptValuePools): TakeZeroedPoolEntry takes from it, and func_001C15D8 fills one with an object and two words of a property's descriptor for a script value
+func_0011C1D0	ShutDownEntryPool	empty; ShutDownScriptValuePools calls it on each of the five entry pools InitScriptValuePools set up with InitEntryPool
+func_0011C3C8	IsPoolEntryUnmarked	returns whether the state word at +4 of a payload's entry header (GetPoolEntryHeader) is 0, the word MarkPoolEntryUsed sets to 1; DrainMarkStacks tests it before marking
+func_0011CBB0	ShutDownPayloadPools	empty; ShutDownScriptValuePools calls it where InitScriptValuePools calls InitPayloadPools
+D_0025C2F0	g_vectorAPayloadCapacity	256: the slot count InitPayloadPools gives the tag 0x16 vector pool (g_vectorAPayloadPool) and its reference counts
+D_0025C2F4	g_matrixPayloadCapacity	256: the slot count InitPayloadPools gives the tag 0x17 matrix pool and its reference counts
+D_0025C2F8	g_vectorBPayloadCapacity	64: the slot count InitPayloadPools gives the tag 0x18 vector pool and its reference counts
+D_0025C2FC	g_pairPayloadCapacity	64: the slot count InitPayloadPools gives the tag 0x19 pair pool and its reference counts
+D_0025C300	g_triplePayloadCapacity	32 (the first word of a 0x40-byte label): the slot count InitPayloadPools gives the tag 0x1A triple pool and its reference counts
+D_0027B310	g_triplePayloadRefCounts	the triple pool's reference count bytes (InitPayloadPools allocates one per slot); AddRefTriplePayload and ReleaseTriplePayload index it by (address - pool origin) / 12
+func_0011D6A8	SuspendIopVoices	queues command 0x16 with a voice mask; func_0018E940 passes 0xFFFFFFFF before it saves the volume channels and syncs the disc, and func_0018EAA0 undoes it with ResumeIopVoices
+func_0011D6D8	ResumeIopVoices	queues command 0x17 with a voice mask; func_0018EAA0 passes 0xFFFFFFFF last, after restoring the volume channels SuspendIopVoices' caller saved
+func_0011E460	ResetIopRing	sends command 0x3D and waits; func_0018EA48 calls it when its ring is active, then marks it and resets its two ring buffers
+D_0025C344	g_iopReplyWordCount	the word count of the armed reply buffer: ArmIopReplyBuffer stores it beside g_iopReplyBuffer and IsIopReplyReady reads the word after that many
+D_0025C360	g_iopCommandBuffers	the two command buffers (D_0025C540, D_0025D540) InitIopCommandChannels points at their storage; word 0 is the command count CommitQueuedIopCommand raises and PollIopCommands walks
+D_0025C368	g_iopCommandSpace	the bytes left in each of the two command buffers, 0xFFC when emptied (InitIopCommandChannels, FlushIopCommandBuffer)
+D_0025C370	g_iopCallbackTables	the two callback tables, one 16-byte entry (function, argument) per queued command, which PollIopCommands calls with the matching reply word
+D_0025C378	g_iopReplyTables	the two reply word tables (D_00260540, D_00260980) PollIopCommands hands to each queued command's callback
+D_0027B4C8	g_iopCommandRpc	the first RPC channel InitIopCommandChannels binds (id 0x123456); SendIopCommandAndWait and FlushIopCommandBuffer call over it
+D_0027B4F0	g_iopBankLoadRpc	the second RPC channel InitIopCommandChannels binds (id 0x123457); LoadSoundBankAtLocation and StartSoundBankLoad send command 3 over it
+func_00136648	GetTextPanelSlideOutTime	the twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise GetScreenElementSlideOutTime
+func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanelState: with a child it sets the child's step sequence to state 4, without one it puts the panel back in state 0 (SetTextPanelState)
+func_0013C950	GetChildGroupSoundParams	returns the pointer at the object's sound slot, setting it up with InitSoundParams first when it is 0 (as GetMaskedColliderSoundParams does)
+func_0013CCE8	ReadNothing	the one virtual of the reader's base class (entry 1 of D_00249D80, where ReadMemoryReader is in the memory reader's table): returns 0, no bytes read
+D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
+func_0013CE40	StartMaskedCollider	slot 16 of class 0x20: runs StartPlacedObject and queues func_0013CE80 on the world with AppendQueuedCall
+func_0013D068	UpdateMaskedCollider	slot 17 of class 0x20: runs UpdateCollider, then when the flag at 0x678 is set clears it and calls the object's slot at 0x48 of its table
+func_0013DAF0	GetMaskedColliderSoundParams	returns the pointer at 0x6B4, setting it up with InitSoundParams first when it is 0
+func_0013DDB8	InitPlayerFlaggedCollider	slot 0 of class 0x21 (the parent of 0x22, 0x23 and 0x24): runs InitMaskedCollider, sets the accept mask to 5 (the player, bit 0, and flagged objects, bit 2, as IsObjectAccepted tests them) and 0x698 to -1
+D_0027B800	g_discCheckSectorBuffer	the sector buffer StepDiscSectorCheck reads the checked sector into (StartDiscRead, one sector) and runs the CRC-32 over (0x800 bytes) to compare with the expected value
+func_001419A0	AppendFlaggedObjectIdB	appends an id to idsB of a class 0x38 object (count at 0x578), the ids ResolveListIds looks up into objsB
+func_001419C0	AppendFlaggedObjectIdA	appends an id to idsA of a class 0x38 object (count at 0x550), the ids ResolveListIds looks up into objsA
+func_001430C8	ResetGameClockTick	original assembly: stores the CPU's count register (cop0 register 9) in D_00261878, then the 64-bit count from ReadCycleCounter in the clock's last tick (D_00261870, g_gameClock + 0x18)
+func_001430F8	ReadCycleCounter	original assembly: reads the CPU's count register and extends it to 64 bits, counting a wrap in D_0027C000 whenever it is below the last value kept in D_00261878, which it then updates; AdvanceGameClock and AdvanceGameClockElapsed take their ticks from it
+D_00261878	g_lastCycleCount	the CPU count register's last value: ResetGameClockTick sets it and ReadCycleCounter compares the new count against it to count wraps, then stores the new count
+func_001437C0	SnapCurrentCameraZoom	calls SnapCameraZoom on g_camera with the float it is given
+func_001437E8	SetCurrentCameraNearDistance	calls SetCameraNearDistance on g_camera with the float it is given
+func_00143810	SetCurrentCameraFarDistance	calls SetCameraFarDistance on g_camera with the float it is given

@@ -14,8 +14,6 @@ struct Span_1429F8 {
     u8 pad0[0x70 - 0x4C];
 };
 
-struct Obj_1419E8;
-struct __attribute__((aligned(16))) Rec_1419E8 { u8 pad[0x40]; f32 key; u8 rest[0x2C]; };
 
 s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
 s32 func_001429F8(s32 count, Span_1429F8* spans);
@@ -24,20 +22,20 @@ s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
 s32 func_00142B78(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
 s32 func_00142170(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
 
-Obj_1419E8* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Obj_1419E8** list, Rec_1419E8* out)
+Collider* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Collider** list, Span_1429F8* out)
 {
     f32 bestKey = 3.4028235e+38f;
-    Obj_1419E8* best = 0;
-    Rec_1419E8 buf[2];
+    Collider* best = 0;
+    Span_1429F8 buf[2];
     for (s32 i = 0; i < count; i++) {
-        Obj_1419E8* obj = list[i];
-        s32 n = CollectColliderSpans((Collider*)obj, a1, a2, 2, (s32)buf);
+        Collider* obj = list[i];
+        s32 n = CollectColliderSpans(obj, a1, a2, 2, (s32)buf);
         s32 idx = 0;
-        if (n > 0 && buf[0].key == 0.0f) {
+        if (n > 0 && buf[0].time[0] == 0.0f) {
             if (flags & 1) idx = 1;
         }
-        if (idx < n && buf[idx].key < bestKey) {
-            bestKey = buf[idx].key;
+        if (idx < n && buf[idx].time[0] < bestKey) {
+            bestKey = buf[idx].time[0];
             best = obj;
             if (out != 0) {
                 *out = buf[idx];
@@ -47,19 +45,18 @@ Obj_1419E8* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Obj_1419E8**
     return best;
 }
 
-struct Entry_141B48 { u8 pad[0x538]; u64 bits; };
 
-s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s32 a5)
+s32 func_00141B48(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5)
 {
     s32 result = 0;
     if (count > 0) {
         const u64 mask = 0xC000ULL << 28;
-        Entry_141B48** p = list;
+        Collider** p = list;
         s32 n = count;
         do {
-            Entry_141B48* e = *p;
-            if ((e->bits & mask) == 0) {
-                s32 r = CollectColliderSpans((Collider*)e, a0, a1, a4 - result, a5 + result * 0x70);
+            Collider* e = *p;
+            if ((e->flags538 & mask) == 0) {
+                s32 r = CollectColliderSpans(e, a0, a1, a4 - result, a5 + result * 0x70);
                 if (r != 0) {
                     if (result != 0) {
                         r = MergeOverlappingSpans(result + r, (Span_1429F8*)a5);
@@ -85,40 +82,24 @@ s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
     return 0;
 }
 
-struct Self_141C90 {
-    u8 pad0[0x3CC];
-    f32 f3CC;
-    u8 pad1[0x538 - 0x3D0];
-    u64 f538;
-};
-
-s32 func_00141C90(Self_141C90* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
+s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
 {
     if (a1 != 0) {
         return func_0013DFD8(a1, a2, a3, 0, a4, a5);
     }
-    if (self->f538 & ((u64)0x8000 << 25)) {
-        return func_00141F48((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->f3CC);
+    if (self->flags538 & ((u64)0x8000 << 25)) {
+        return func_00141F48((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->radius3CC);
     }
     return 0;
 }
 
-struct Self_141D00 {
-    u8 pad0[0x3CC];
-    f32 f3CC;
-    u8 pad1[0x3F8 - 0x3D0];
-    s32 f3F8;
-    u8 pad2[0x538 - 0x3FC];
-    u64 f538;
-};
-
-s32 func_00141D00(Self_141D00* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
+s32 func_00141D00(Collider* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
 {
-    if (self->f3F8 != 0) {
+    if (self->tree.nodes != 0) {
         return func_00142B78((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
     }
-    if (self->f538 & ((u64)0x8000 << 25)) {
-        return func_00142170((u8*)self + 0x140, p1, p2, p3, p4, self->f3CC, x);
+    if (self->flags538 & ((u64)0x8000 << 25)) {
+        return func_00142170((u8*)self + 0x140, p1, p2, p3, p4, self->radius3CC, x);
     }
     return 0;
 }

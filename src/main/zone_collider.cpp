@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "flag_table.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "timed_state_object.h"
@@ -14,7 +15,7 @@
 
 // The file's .data, in retail's order: two boxes (the corners 0 and the size -1e8 or 1e8) and
 // the records that point at them, which func_0013E430 reads, then the disc code's sector check
-// state (file_140790 uses it; its own .data must start 8-aligned).
+// state (disc_access.cpp uses it; its own .data must start 8-aligned).
 f32 D_00261390[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
 f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
 f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
@@ -24,7 +25,7 @@ void func_001837E0(void* obj, s32 kind, s32 a, s32 b);
 
 extern u8 D_00261420[];
 void func_001B7968(void* self);
-void* func_00140FF8(void* p);
+void* func_00140FF8(FlagTable* p);
 
 void func_0013CCF8(MaskedCollider* self)
 {
@@ -39,7 +40,7 @@ void func_0013CCF8(MaskedCollider* self)
     o->tint[2] = 16;
     o->tint[1] = 16;
     o->tint[0] = 16;
-    o->id688 = (s32)TakeFlagTableIndex(g_flagTable);
+    o->id688 = (s32)TakeFlagTableIndex((FlagTable*)g_flagTable);
     o->f614 = -1;
 }
 
@@ -104,7 +105,7 @@ void func_0013CE40(MaskedCollider* self)
 extern u8 D_00261420[];
 
 struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
-s32 func_00141008(Frame_13CE80* t, s32 v);
+s32 func_00141008(FlagTable* t, s32 v);
 s32 func_001300E8(MaskedCollider* n, s32 kind);
 void func_00199C10(MaskedCollider* n, s32* out);
 s32 func_001833F0(MaskedCollider* n, s32 key);
@@ -115,7 +116,7 @@ void func_0013CE80(MaskedCollider* self)
     MaskedCollider* n;
     s32 i;
     Slot20* e;
-    if (TestFlagTableBit((Frame_13CE80*)g_flagTable, self->id688)) self->f678 = 1;
+    if (TestFlagTableBit((FlagTable*)g_flagTable, self->id688)) self->f678 = 1;
     s32 l = (s32)&self->children;
     fr.cursor = l;
     fr.list = l;
@@ -186,16 +187,16 @@ ASM_FUNC(func_0013D278);
 
 extern u8 D_00261420[];
 
-void func_00141040(void* table, s32 v);
-void func_001410A0(void* table, s32 v);
+void func_00141040(FlagTable* table, s32 v);
+void func_001410A0(FlagTable* table, s32 v);
 
 void func_0013D820(MaskedCollider* self, s32 v)
 {
     self->hold = v;
     if (v != 0) {
-        SetFlagTableBit(g_flagTable, self->id688);
+        SetFlagTableBit((FlagTable*)g_flagTable, self->id688);
     } else {
-        ClearFlagTableBit(g_flagTable, self->id688);
+        ClearFlagTableBit((FlagTable*)g_flagTable, self->id688);
     }
 }
 
@@ -445,7 +446,7 @@ void func_001D7098(void* out, void* a1, void* self);
 void func_0013DF68(C26* self)
 {
     s32 local[4];
-    func_0013D068(self);
+    UpdateMaskedCollider(self);
     if (self->sel6D4 != 0) {
         if (self->sel6D4 != GetActiveSwitchedCollider()) {
             self->sel6D4 = 0;
@@ -547,12 +548,12 @@ bool func_0013E8F8(Queue* queue, s32 value) {
 }
 
 extern u8 D_00261420[];
-void* func_00140FF8(void* p);
+void* func_00140FF8(FlagTable* p);
 
 void func_0013E918(void* self)
 {
     Zone28* s = (Zone28*)self;
-    s->id120 = (s32)TakeFlagTableIndex(g_flagTable);
+    s->id120 = (s32)TakeFlagTableIndex((FlagTable*)g_flagTable);
     s->f140 = -1;
 }
 
@@ -614,7 +615,7 @@ void func_0013E950(Zone28* self, Collider* a1)
 extern u8 D_00261420[];
 
 void func_0013E7C0(void* a, void* b, void* c);
-s32 func_00141008(void* table, s32 v);
+s32 func_00141008(FlagTable* table, s32 v);
 void* func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
 void func_0013EAE0(void* self, s32 mode);
 
@@ -633,7 +634,7 @@ void func_0013EA38(Zone28* self)
         p++;
     } while (--n >= 0);
     if (self->f11C != 0) {
-        if (TestFlagTableBit(g_flagTable, self->id120)) {
+        if (TestFlagTableBit((FlagTable*)g_flagTable, self->id120)) {
             AppendQueuedCall(target, (void*)func_0013EAE0, self, 0, 0);
         }
     }
@@ -827,14 +828,13 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
 }
 
 enum Kind_13EF50 { kind_13EF50_2 = 2 };
-struct Tab_13EF50 { u8 pad[1]; };
 
 extern u8 D_00261420[];
 
 void func_001BFCD8(Kind_13EF50 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_0013ED90(Zone28* self, s32 mode, void* p, void* q);
 void func_0013EB68(Zone28* self, s32 k);
-void func_00141040(Tab_13EF50* t, s32 v);
+void func_00141040(FlagTable* t, s32 v);
 
 void func_0013EF50(Zone28* self, void* p, void* q)
 {
@@ -853,7 +853,7 @@ void func_0013EF50(Zone28* self, void* p, void* q)
         SetZoneMode(self, 2);
     }
     if (self->f11C != 0) {
-        SetFlagTableBit((Tab_13EF50*)g_flagTable, self->id120);
+        SetFlagTableBit((FlagTable*)g_flagTable, self->id120);
     }
     self->owner->desc->m0E(self->owner, 0xC, self);
 }

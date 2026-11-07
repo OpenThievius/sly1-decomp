@@ -2,7 +2,7 @@
 // PAL runs at 50 Hz: the frame step is clamped to 1/50 to 1/25 of a second.
 void func_00142F10(GameClock* self)
 {
-    s64 now = func_001430F8();
+    s64 now = ReadCycleCounter();
     s64 delta = now - self->lastTick;
     u64 half = (u64)delta >> 1;
     f32 t;

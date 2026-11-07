@@ -36,7 +36,7 @@ void func_0011A6A8(void* p);
 void func_0011A6B8(void* p);
 void func_0011A670(void);
 
-// The pooled payloads (0011C000.cpp): each tag's allocator, reference and release.
+// The pooled payloads (value_pools.cpp): each tag's allocator, reference and release.
 void* func_0011C508(void);
 void* func_0011C618(void);
 void* func_0011C748(void);
@@ -53,7 +53,7 @@ void func_0011C7F0(void* p);
 void func_0011C900(void* p);
 void func_0011CA20(void* p);
 
-// The stream reader (00134000.cpp).
+// The stream reader (file_137290.cpp).
 s32 func_00137B90(BufferedStream* r);
 s32 func_00137BE0(BufferedStream* r);
 s32 func_00137D78(BufferedStream* r);
@@ -64,7 +64,7 @@ extern s32 D_00275714;
 
 void* func_0011AE78(void)
 {
-    void* p = TakePoolEntry(&D_0025C2D0);
+    void* p = TakePoolEntry(&g_propertyRefPool);
     func_001F5C0C(p, 0, 12);
     return p;
 }
@@ -607,7 +607,7 @@ R11B008List* func_0011BF30(void)
 
 void func_0011BF70(void)
 {
-    ResetMarkRoots(D_00259F38);
+    ResetMarkRoots(g_markStacks);
     InitEntryPool(&g_valueNodePool, 0xC, 0x2000);
     g_valueNodePool.removeCallback = (void*)DestroyScriptValueNode;
     InitEntryPool(&g_scopePool, 0x1C, 0x190);
@@ -616,16 +616,16 @@ void func_0011BF70(void)
     g_keyedValuePool.removeCallback = (void*)DestroyKeyedValue;
     InitEntryPool(&g_payloadPool, 0x14, 0x800);
     InitPayloadPools();
-    InitEntryPool(&D_0025C2D0, 0xC, 0x80);
+    InitEntryPool(&g_propertyRefPool, 0xC, 0x80);
 }
 
 void func_0011C040(void)
 {
-    func_0011C1D0(&g_valueNodePool);
-    func_0011C1D0(&g_scopePool);
-    func_0011C1D0(&g_keyedValuePool);
-    func_0011C1D0(&g_payloadPool);
-    func_0011CBB0();
-    func_0011C1D0(&D_0025C2D0);
-    func_0011A6B8(D_00259F38);
+    ShutDownEntryPool(&g_valueNodePool);
+    ShutDownEntryPool(&g_scopePool);
+    ShutDownEntryPool(&g_keyedValuePool);
+    ShutDownEntryPool(&g_payloadPool);
+    ShutDownPayloadPools();
+    ShutDownEntryPool(&g_propertyRefPool);
+    ShutDownMarkRoots(g_markStacks);
 }

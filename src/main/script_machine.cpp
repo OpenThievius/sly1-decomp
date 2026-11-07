@@ -2912,7 +2912,7 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     AssignScriptValue(&a, &t);
     DestroyScriptValue(&t, 2);
     if (a.tag == 0x1D) {
-        ent = &D_00259958[a.i];
+        ent = &g_scriptBuiltins[a.i];
         n = ent->count;
         last = ent->rest;
     } else if (a.tag == 0x21) {
@@ -3260,7 +3260,7 @@ void func_0011A800(void)
     MarkPoolLiveEnd(g_scopePool);
     MarkPoolLiveEnd(g_keyedValuePool);
     MarkPoolLiveEnd(g_payloadPool);
-    MarkPoolLiveEnd(D_0025C2D0);
+    MarkPoolLiveEnd(g_propertyRefPool);
 }
 
 void func_0011A850(Stk_11A850* self)
@@ -3279,14 +3279,14 @@ void func_0011A850(Stk_11A850* self)
                     switch (ev->f0) {
                     case 0x1E:
                         obj = ev->f4;
-                        if (func_0011C3C8(obj)) {
+                        if (IsPoolEntryUnmarked(obj)) {
                             MarkPoolEntryUsed(obj);
                             PushMarkChain(self, obj);
                         }
                         break;
                     case 0x1F:
                         other = ev->f4;
-                        if (func_0011C3C8(other)) {
+                        if (IsPoolEntryUnmarked(other)) {
                             MarkPoolEntryUsed(other);
                             PushMarkRecord(self, other);
                         }
@@ -3303,7 +3303,7 @@ void func_0011A850(Stk_11A850* self)
                 Obj_11A850** p = &group->f4;
                 do {
                     obj = *p;
-                    if (func_0011C3C8(obj)) {
+                    if (IsPoolEntryUnmarked(obj)) {
                         MarkPoolEntryUsed(obj);
                         PushMarkObject(self, obj);
                     }
@@ -3323,12 +3323,12 @@ void func_0011A850(Stk_11A850* self)
                 } while (obj);
             }
             obj = b->f10;
-            if (func_0011C3C8(obj)) {
+            if (IsPoolEntryUnmarked(obj)) {
                 MarkPoolEntryUsed(obj);
                 PushMarkChain(self, obj);
             }
             group = b->f0;
-            if (func_0011C3C8(group)) {
+            if (IsPoolEntryUnmarked(group)) {
                 MarkPoolEntryUsed(group);
                 PushMarkObject(self, group);
             }
@@ -3340,14 +3340,14 @@ void func_0011A850(Stk_11A850* self)
         switch (obj->f0) {
         case 0x1E:
             other = obj->f4;
-            if (func_0011C3C8(other)) {
+            if (IsPoolEntryUnmarked(other)) {
                 MarkPoolEntryUsed(other);
                 PushMarkChain(self, other);
             }
             break;
         case 0x1F:
             other = obj->f4;
-            if (func_0011C3C8(other)) {
+            if (IsPoolEntryUnmarked(other)) {
                 MarkPoolEntryUsed(other);
                 PushMarkRecord(self, other);
             }
@@ -3358,7 +3358,7 @@ void func_0011A850(Stk_11A850* self)
         }
         obj = obj->f8;
         if (obj) {
-            if (func_0011C3C8(obj)) {
+            if (IsPoolEntryUnmarked(obj)) {
                 MarkPoolEntryUsed(obj);
                 PushMarkChain(self, obj);
             }
@@ -3371,14 +3371,14 @@ void func_0011AB58(World_11AB58* w) {
     ClearPoolLiveStates(g_scopePool);
     ClearPoolLiveStates(g_keyedValuePool);
     ClearPoolLiveStates(g_payloadPool);
-    ClearPoolLiveStates(D_0025C2D0);
+    ClearPoolLiveStates(g_propertyRefPool);
     s32 i = w->count;
     *(s32*)((u8*)w + 0x708) = 0;
     *(s32*)((u8*)w + 0xF0C) = 0;
     *(s32*)((u8*)w + 0x1310) = 0;
     for (i--; i >= 0; i--) {
         Ent_11AB58* e = w->ents[i];
-        if (func_0011C3C8(e)) {
+        if (IsPoolEntryUnmarked(e)) {
             MarkPoolEntryUsed(e);
             PushMarkObject(w, e);
         }
@@ -3392,7 +3392,7 @@ void func_0011AB58(World_11AB58* w) {
             switch (sp->tag) {
             case 0x1E: {
                 Ent_11AB58* e = (Ent_11AB58*)sp->p;
-                if (func_0011C3C8(e)) {
+                if (IsPoolEntryUnmarked(e)) {
                     MarkPoolEntryUsed(e);
                     PushMarkChain(w, e);
                 }
@@ -3400,7 +3400,7 @@ void func_0011AB58(World_11AB58* w) {
             }
             case 0x1F: {
                 Ent_11AB58* e = (Ent_11AB58*)sp->p;
-                if (func_0011C3C8(e)) {
+                if (IsPoolEntryUnmarked(e)) {
                     MarkPoolEntryUsed(e);
                     PushMarkRecord(w, e);
                 }
@@ -3416,7 +3416,7 @@ void func_0011AB58(World_11AB58* w) {
     for (S1DBBD8* it = (S1DBBD8*)g_currentWorld->f1EC8; it; it = it->next) {
         if ((void*)it->fn == (void*)RunScriptEventHandler) {
             Ent_11AB58* e = (Ent_11AB58*)it->p0C;
-            if (e && func_0011C3C8(e)) {
+            if (e && IsPoolEntryUnmarked(e)) {
                 MarkPoolEntryUsed(e);
                 PushMarkChain(w, e);
             }
@@ -3427,5 +3427,5 @@ void func_0011AB58(World_11AB58* w) {
     ReleaseDeadPoolEntries(g_scopePool);
     ReleaseDeadPoolEntries(g_keyedValuePool);
     ReleaseDeadPoolEntries(g_payloadPool);
-    ReleaseDeadPoolEntries(D_0025C2D0);
+    ReleaseDeadPoolEntries(g_propertyRefPool);
 }

@@ -15,7 +15,7 @@
 #include "globals.h"
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
-// the .data starts right after file_130F48's; 0x26131C is padding before class 0x3B's).
+// the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
 s32 D_00261314 = 0;
 s32 D_00261318 = 0;
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 2125/2224 (95.5%), checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py build/swarm/palA/func_001316E8.cpp func_001316E8 --version eu --unit src/main/file_130F48.cpp
+// NEAR (only in PAL): python3 tools/check.py build/swarm/palA/func_001316E8.cpp func_001316E8 --version eu --unit src/main/text_panel.cpp
 // Still differs: registers and spill slots only (about 33 lines of ~560): PAL keeps &L (sp+0x240) and
 // &col (sp+0x260) in spill slots 0x2B0/0x2B4 with self in s6, prev/next strings in s7/s8; ours puts &L in s6,
 // self in s7 and spills &sNext.
@@ -19,7 +19,7 @@ struct Str_eu_1316E8 {
 
 void func_eu_0015DD18(Str_eu_1316E8* out, const char* text, V24A2* font, s32 zero);
 f32 func_eu_0015E438(Str_eu_1316E8* str);
-void func_eu_0015E7E0(Str_eu_1316E8* str, Layout_137228* layout, s32 zero, Gs_132500* gs);
+void func_eu_0015E7E0(Str_eu_1316E8* str, Layout_137228* layout, s32 zero, V24A0* gs);
 void func_eu_001374E0(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_1316E8 {
@@ -34,7 +34,7 @@ struct Gfx_eu_1316E8 {
     }
 };
 
-void func_001316E8(Obj_eu_1316E8* self, Gs_132500* gs)
+void func_001316E8(Obj_eu_1316E8* self, V24A0* gs)
 {
     Str_eu_1316E8 sCur;
     Str_eu_1316E8 sPrev;

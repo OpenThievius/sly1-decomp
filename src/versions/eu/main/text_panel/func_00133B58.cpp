@@ -6,7 +6,7 @@ struct Self_133B58_eu
     f32 phase;
 };
 
-void func_00133B58(Self_133B58_eu* self, Gs_133B58* gs)
+void func_00133B58(Self_133B58_eu* self, V24A0* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;

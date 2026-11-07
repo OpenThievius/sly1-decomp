@@ -66,13 +66,22 @@ volatile Packet_0011CBB8 D_00260DC0 = { 0 };
 Rpc_260E00 D_00260E00 = { 0 };
 s32 D_00260E40[8] = { 0 };
 
-extern u8 D_0027B4C8[];
-extern u8 D_0027B4F0[];
-s32 func_001E1F10(const char* fmt, ...);
+// An RPC client of the IOP: InitIopCommandChannels binds the two (func_001F80C0) and waits for
+// the word at 0x24, which the bind fills in once the IOP's server answers; func_001F8480 tells
+// whether a call is still in progress and func_001F8290 makes one.
+struct IopRpcClient {
+    u8 pad00[0x24];         // 0x00
+    s32 server;             // 0x24: 0 until the bind has reached the IOP's server
+};
 
-struct Rpc_0011CBB8 { u8 pad[0x24]; s32 f24; };
+extern IopRpcClient D_0027B4C8;
+extern IopRpcClient D_0027B4F0;
+s32 func_001E1F10(const char* fmt, ...);
+s32 func_001F8480(IopRpcClient* client);
+s32 func_001F8290(IopRpcClient* client, s32 id, s32 mode, void* send, s32 sendSize, void* receive, s32 receiveSize, s32 a7, s32 a8);
+
 void func_001F7BE8(s32 mode);
-s32 func_001F80C0(Rpc_0011CBB8* rpc, u32 id, s32 mode);
+s32 func_001F80C0(IopRpcClient* rpc, u32 id, s32 mode);
 s32 func_0011D968(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
@@ -86,32 +95,32 @@ void func_0011CBB8(void)
 {
     s32 n;
 
-    D_0025C360[0] = (s32*)D_0025C540;
-    D_0025C360[1] = (s32*)D_0025D540;
-    D_0025C378[0] = D_00260540;
-    D_0025C378[1] = D_00260980;
-    D_0025C370[0] = D_0025E540;
-    D_0025C370[1] = D_0025F540;
+    g_iopCommandBuffers[0] = (s32*)D_0025C540;
+    g_iopCommandBuffers[1] = (s32*)D_0025D540;
+    g_iopReplyTables[0] = D_00260540;
+    g_iopReplyTables[1] = D_00260980;
+    g_iopCallbackTables[0] = D_0025E540;
+    g_iopCallbackTables[1] = D_0025F540;
     func_001F7BE8(0);
     do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4C8, 0x123456, 0) >= 0, 0x6E);
+        ASSERT_0011CBB8(func_001F80C0(&g_iopCommandRpc, 0x123456, 0) >= 0, 0x6E);
         for (n = 10000; --n != -1;) {
         }
-    } while (((Rpc_0011CBB8*)D_0027B4C8)->f24 == 0);
+    } while (g_iopCommandRpc.server == 0);
     D_0025C388.busy = 0;
     D_0025C390.fn = 0;
     D_0025C390.arg = 0;
     g_iopChannel2Result.result = 0;
     do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0x83);
+        ASSERT_0011CBB8(func_001F80C0(&g_iopBankLoadRpc, 0x123457, 0) >= 0, 0x83);
         for (n = 10000; --n != -1;) {
         }
-    } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
+    } while (g_iopBankLoadRpc.server == 0);
     g_iopSharedPacket.f00 = 0;
     D_0025C540[0] = 0;
     D_0025D540[0] = 0;
-    D_0025C368[0] = 0xFFC;
-    D_0025C368[1] = 0xFFC;
+    g_iopCommandSpace[0] = 0xFFC;
+    g_iopCommandSpace[1] = 0xFFC;
     g_iopSharedPacket.f10 = 0;
     n = (s32)&g_iopSharedPacket;
     SendIopCommandAndWait(0, 4, &n);
@@ -140,13 +149,13 @@ s32 func_0011CE30(void)
         } else {
             idx = g_iopBufferIndex != 1;
             i = 0;
-            if (D_0025C360[idx][0] > 0) {
+            if (g_iopCommandBuffers[idx][0] > 0) {
                 do {
-                    Entry_11CE30* e = (Entry_11CE30*)(i * 16 + (s32)D_0025C370[idx]);
+                    Entry_11CE30* e = (Entry_11CE30*)(i * 16 + (s32)g_iopCallbackTables[idx]);
                     if (e->fn != 0)
-                        ((Cb_11CE30)e->fn)(D_0025C378[idx][i + 1], e->arg);
+                        ((Cb_11CE30)e->fn)(g_iopReplyTables[idx][i + 1], e->arg);
                     i++;
-                } while (i < D_0025C360[idx][0]);
+                } while (i < g_iopCommandBuffers[idx][0]);
             }
         }
     }
@@ -166,7 +175,7 @@ s32 func_0011CE30(void)
         }
     }
     if (g_iopReplyBuffer == 0) {
-        s32* p = D_0025C360[g_iopBufferIndex];
+        s32* p = g_iopCommandBuffers[g_iopBufferIndex];
         if (p[0] != 0 && D_0025C384 == 0)
             FlushIopCommandBuffer();
     }
@@ -187,11 +196,7 @@ s32 func_0011CE30(void)
 
 LINKER_REMNANT(func_0011D060);
 
-extern u8 D_0027B4C8[];
-struct Arg_0011D078;
-void func_001F6C20(Arg_0011D078* a);
-s32 func_001F8480(Arg_0011D078* a);
-s32 func_001E1F10(Arg_0011D078* a);
+void func_001F6C20(s32 a);
 
 s32 func_0011D078(void)
 {
@@ -201,23 +206,23 @@ s32 func_0011D078(void)
     if (g_iopReplyBuffer == 0) {
         return 1;
     }
-    if (func_001F8480((Arg_0011D078*)D_0027B4C8) != 0) {
+    if (func_001F8480(&g_iopCommandRpc) != 0) {
         return 0;
     }
     table = (u32*)g_iopReplyBuffer;
     if (table[0] == 0xFFFFFFFF) {
-        if (table[D_0025C344 + 1] == table[0]) {
+        if (table[g_iopReplyWordCount + 1] == table[0]) {
             g_iopReplyBuffer = 0;
             return 1;
         }
     }
-    PrintFormatted((Arg_0011D078*)D_00249460);
+    PrintFormatted(D_00249460);
     return 0;
 }
 
 void func_0011D110(s32* ptr, s32 count)
 {
-    D_0025C344 = count;
+    g_iopReplyWordCount = count;
     g_iopReplyBuffer = ptr;
     ptr[count + 1] = 0;
     ptr[0] = 0;
@@ -225,12 +230,7 @@ void func_0011D110(s32* ptr, s32 count)
 
 LINKER_REMNANT(func_0011D138);
 
-struct Ptr_11D140 { s32 field0; };
-extern u8 D_0027B4F0[];
-s32 func_001E1F10(struct Ptr_11D140 *fmt, ...);
 s32 func_0011CE30(void);
-s32 func_001F8480(struct Ptr_11D140 *p);
-s32 func_001F8290(struct Ptr_11D140 *a, s32 b, s32 c, s32 *d, s32 e, s32 *f, s32 g, s32 h, s32 i);
 
 s32 func_0011D140(s32 a0, s32 a1)
 {
@@ -241,12 +241,12 @@ s32 func_0011D140(s32 a0, s32 a1)
 
     D_0025C348 = 0;
     if (D_0025C388.busy != 0) {
-        PrintFormatted((struct Ptr_11D140 *)D_00249570);
+        PrintFormatted(D_00249570);
         return 0;
     }
     v = SyncDiscRead(1);
     if (v == 1) {
-        PrintFormatted((struct Ptr_11D140 *)D_002495A0);
+        PrintFormatted(D_002495A0);
         return 0;
     }
     s32* p = &g_iopChannel2Result.result;
@@ -254,15 +254,15 @@ s32 func_0011D140(s32 a0, s32 a1)
     *p = (s32)m;
     g_iopChannel2Args[1] = a1;
     g_iopChannel2Args[0] = a0;
-    while (func_001F8480((struct Ptr_11D140 *)D_0027B4F0)) {
-        PrintFormatted((struct Ptr_11D140 *)D_002494E8);
+    while (func_001F8480(&g_iopBankLoadRpc)) {
+        PrintFormatted(D_002494E8);
         PollIopCommands();
         func_001F6C20(0);
     }
-    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
+    w = func_001F8290(&g_iopBankLoadRpc, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
     v1 = g_iopChannel2Result.result;
     if (w < 0) {
-        PrintFormatted((struct Ptr_11D140 *)D_002495C0);
+        PrintFormatted(D_002495C0);
         D_0025C348 = 0x106;
         return 0;
     }
@@ -274,23 +274,19 @@ s32 func_0011D140(s32 a0, s32 a1)
     return g_iopChannel2Result.result;
 }
 
-struct Ctx_0011D2A8;
 struct Pair_11D2A8 { s32 a; s32 b; };
 struct Args_11D2A8 { s32 a; s32 pad; s64 c; };
-s32 func_001E1F10(Ctx_0011D2A8* p);
-s32 func_001F8480(Ctx_0011D2A8* p);
 void func_001F6C20(s32 a);
-s32 func_001F8290(Ctx_0011D2A8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5, s32 a6, s32 a7, s32 a8);
 
 void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
 {
     D_0025C348 = 0;
     if (D_0025C388.busy != 0) {
-        PrintFormatted((Ctx_0011D2A8*)D_00249570);
+        PrintFormatted(D_00249570);
         return;
     }
     if (SyncDiscRead(1) == 1) {
-        PrintFormatted((Ctx_0011D2A8*)D_002495A0);
+        PrintFormatted(D_002495A0);
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
@@ -298,13 +294,13 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
     (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
     (*(Args_11D2A8*)&D_0025C390).a = a2;
     (*(Args_11D2A8*)&D_0025C390).c = a3;
-    while (func_001F8480((Ctx_0011D2A8*)D_0027B4F0)) {
-        PrintFormatted((Ctx_0011D2A8*)D_002494E8);
+    while (func_001F8480(&g_iopBankLoadRpc)) {
+        PrintFormatted(D_002494E8);
         PollIopCommands();
         func_001F6C20(0);
     }
     D_0025C388.busy = 1;
-    func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
+    func_001F8290(&g_iopBankLoadRpc, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
 }
 
 LINKER_REMNANT(func_0011D3E8);
@@ -541,9 +537,6 @@ void func_0011D928(s32 a)
 LINKER_REMNANT(func_0011D958);
 
 void func_0011D110(void* p, s32 n);
-s32 func_001F8480(void* p);
-s32 func_001E1F10(void* self, ...);
-s32 func_001F8290(void* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
 
 s32 func_0011D968(s32 id, s32 size, void* data)
 {
@@ -556,26 +549,25 @@ s32 func_0011D968(s32 id, s32 size, void* data)
         func_001F6C20(0);
     }
     ArmIopReplyBuffer(&D_0025C3C0, 1);
-    while (func_001F8480(D_0027B4C8)) {
-        PrintFormatted((void*)D_002494E8);
+    while (func_001F8480(&g_iopCommandRpc)) {
+        PrintFormatted(D_002494E8);
         PollIopCommands();
         func_001F6C20(0);
     }
     if (size)
-        func_001F8290(D_0027B4C8, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
+        func_001F8290(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
     else
-        func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
+        func_001F8290(&g_iopCommandRpc, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
     while (!IsIopReplyReady()) {
     }
     r = D_0025C3C0.result;
-    if (*D_0025C360[g_iopBufferIndex] != 0 && D_0025C384 == 0)
+    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && D_0025C384 == 0)
         FlushIopCommandBuffer();
     return r;
 }
 
 void func_0011D110(void* ptr, s32 count);
 s32 func_001E1F10(const char* fmt, ...);
-s32 func_001F8290(void* a, s32 b, s32 c, s32 d, s32 e, void* f, s32 g, s32 h, s32 i);
 void func_0011DDD8(void);
 
 void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
@@ -585,12 +577,12 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
 
     if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
         ArmIopReplyBuffer((&D_0025C3C0), 1);
-        while (func_001F8480(D_0027B4C8) != 0) {
-            PrintFormatted((void*)D_002494E8);
+        while (func_001F8480(&g_iopCommandRpc) != 0) {
+            PrintFormatted(D_002494E8);
             PollIopCommands();
             func_001F6C20(0);
         }
-        func_001F8290(D_0027B4C8, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
+        func_001F8290(&g_iopCommandRpc, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
         return;
     }
 
@@ -603,7 +595,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     }
 
     for (;; i++) {
-        if (*D_0025C360[g_iopBufferIndex] != 0x100 && D_0025C368[g_iopBufferIndex] >= size)
+        if (*g_iopCommandBuffers[g_iopBufferIndex] != 0x100 && g_iopCommandSpace[g_iopBufferIndex] >= size)
             break;
         if (D_0025C384 != 0) {
             D_0025C384 = 0;
@@ -611,15 +603,15 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
         }
         PollIopCommands();
         if (i == 1)
-            PrintFormatted((void*)D_002497D8, g_iopBufferIndex, *D_0025C360[g_iopBufferIndex]);
+            PrintFormatted(D_002497D8, g_iopBufferIndex, *g_iopCommandBuffers[g_iopBufferIndex]);
     }
     if (i != 0)
-        PrintFormatted((void*)D_00249838, i);
+        PrintFormatted(D_00249838, i);
     if (flag != 0)
         D_0025C384 = 1;
 
     {
-        s16* p = (s16*)(((u8*)D_0025C360[g_iopBufferIndex]) - (D_0025C368[g_iopBufferIndex] - 0x1000));
+        s16* p = (s16*)(((u8*)g_iopCommandBuffers[g_iopBufferIndex]) - (g_iopCommandSpace[g_iopBufferIndex] - 0x1000));
         s32 j;
         *p = cmd;
         p++;
@@ -630,41 +622,36 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     }
     {
         s32 k = g_iopBufferIndex;
-        D_0025C368[k] -= size;
-        *(s32*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16) = arg;
-        *(u64*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16 + 8) = val;
+        g_iopCommandSpace[k] -= size;
+        *(s32*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
+        *(u64*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16 + 8) = val;
     }
     CommitQueuedIopCommand();
 }
 
 void func_0011DDD8()
 {
-    s32* p = D_0025C360[g_iopBufferIndex];
+    s32* p = g_iopCommandBuffers[g_iopBufferIndex];
     p[0]++;
     PollIopCommands();
 }
 
-struct Sync_11DE18;
-struct Cfg_11DE18;
 void func_0011D110(s32* ptr, s32 count);
-s32 func_001F8480(Sync_11DE18* p);
-s32 func_001E1F10(Cfg_11DE18* p);
-s32 func_001F8290(Sync_11DE18* a0, s32 a1, s32 a2, s32* a3, s32 a4, s32* a5, s32 a6, s32 a7, s32 a8);
 
 void func_0011DE18(void)
 {
-    ArmIopReplyBuffer(D_0025C378[g_iopBufferIndex], *D_0025C360[g_iopBufferIndex]);
-    while (func_001F8480((Sync_11DE18*)D_0027B4C8)) {
-        PrintFormatted((Cfg_11DE18*)D_002494E8);
+    ArmIopReplyBuffer(g_iopReplyTables[g_iopBufferIndex], *g_iopCommandBuffers[g_iopBufferIndex]);
+    while (func_001F8480(&g_iopCommandRpc)) {
+        PrintFormatted(D_002494E8);
         func_001F6C20(0);
     }
-    (void)func_001F8290((Sync_11DE18*)D_0027B4C8, 0x4D, 1, D_0025C360[g_iopBufferIndex],
-                  0x1000 - D_0025C368[g_iopBufferIndex], D_0025C378[g_iopBufferIndex],
-                  *D_0025C360[g_iopBufferIndex] * 4 + 8, 0, 0);
+    (void)func_001F8290(&g_iopCommandRpc, 0x4D, 1, g_iopCommandBuffers[g_iopBufferIndex],
+                  0x1000 - g_iopCommandSpace[g_iopBufferIndex], g_iopReplyTables[g_iopBufferIndex],
+                  *g_iopCommandBuffers[g_iopBufferIndex] * 4 + 8, 0, 0);
     s32 n = (g_iopBufferIndex ^ 1) != 0;
     g_iopBufferIndex = n;
-    *D_0025C360[n] = 0;
-    D_0025C368[n] = 0xFFC;
+    *g_iopCommandBuffers[n] = 0;
+    g_iopCommandSpace[n] = 0xFFC;
 }
 
 s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d)
@@ -740,7 +727,7 @@ s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
 
 s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
 {
-    void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
+    void QueueIopCommand(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
     if (g_iopDiscAccess == 0) {
         return func_00203B18(a0, a1, a2, a3);
     }

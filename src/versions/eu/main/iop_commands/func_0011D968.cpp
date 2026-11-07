@@ -13,20 +13,20 @@ s32 func_0011D968(s32 id, s32 size, void* data)
         func_001F6C20(0);
     }
     ArmIopReplyBuffer(&D_0025C3C0, 1);
-    while (func_001F8480(D_0027B4C8)) {
+    while (func_001F8480(&g_iopCommandRpc)) {
         if (D_eu_0025D6B8 == 0)
-            PrintFormatted((void*)D_002494E8);
+            PrintFormatted(D_002494E8);
         PollIopCommands();
         func_001F6C20(0);
     }
     if (size)
-        func_001F8290(D_0027B4C8, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
+        func_001F8290(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
     else
-        func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
+        func_001F8290(&g_iopCommandRpc, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
     while (!IsIopReplyReady()) {
     }
     r = D_0025C3C0.result;
-    if (*D_0025C360[g_iopBufferIndex] != 0 && D_0025C384 == 0)
+    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && D_0025C384 == 0)
         FlushIopCommandBuffer();
     return r;
 }

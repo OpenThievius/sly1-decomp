@@ -51,7 +51,7 @@ func_001B5F50 = 0x001B5F50; // type:func
 func_001B9940 = 0x001B9940; // type:func
 
 // Data labels no instruction names: the start of a proved file's .rodata, reached only through a
-// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; file_193210's
+// pointer table in its .data (text_panel.cpp's compass strings, pointed to by D_00261128; file_193210's
 // menu strings, pointed to by its menu table D_00269D50).
 D_00249CA0 = 0x00249CA0;
 D_0024B660 = 0x0024B660;
@@ -116,14 +116,14 @@ D_00276658 = 0x00276658;
 // S1EB050); the second has no reader, so the disassembly has no label for it.
 D_00275C68 = 0x00275C68;
 // A second FLT_MAX after func_001419E8's (D_00249E44) that no code loads: the constant of a
-// function the linker stripped, ending file_1419E8's .rodata.
+// function the linker stripped, ending collider_span.cpp's .rodata.
 D_00249E48 = 0x00249E48;
-// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): ring_buffer.cpp's
 // .rodata starts with it, after class 0x3B's FLT_MAX at D_00249D78.
 D_00249D80 = 0x00249D80;
 // Two nops after func_0013E430's return, 8 bytes that no alignment explains (functions are
 // 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
-// Named so that file_13CCF8 can hold them (LINKER_REMNANT).
+// Named so that zone_collider.cpp can hold them (LINKER_REMNANT).
 func_0013E650 = 0x0013E650; // type:func
 // The start of the memory card library's .data inside a coarse label (D_0027AE84): its
 // identification string, which no code reads, after the previous object's table.

@@ -19,7 +19,7 @@
  },
  "units": [
   {
-   "name": "game/file_100000",
+   "name": "game/entry",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "192",
@@ -81,7 +81,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_100000.cpp"
+    "source_path": "src/main/entry.cpp"
    }
   },
   {
@@ -1933,7 +1933,7 @@
    }
   },
   {
-   "name": "game/file_112698",
+   "name": "game/script_machine",
    "measures": {
     "fuzzy_match_percent": 96.35095874491574,
     "total_code": "34420",
@@ -3579,7 +3579,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_112698.cpp"
+    "source_path": "src/main/script_machine.cpp"
    }
   },
   {
@@ -3991,7 +3991,7 @@
    }
   },
   {
-   "name": "game/file_11C128",
+   "name": "game/value_pools",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "2612",
@@ -4341,11 +4341,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_11C128.cpp"
+    "source_path": "src/main/value_pools.cpp"
    }
   },
   {
-   "name": "game/file_11CBB8",
+   "name": "game/iop_commands",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6656",
@@ -5037,11 +5037,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_11CBB8.cpp"
+    "source_path": "src/main/iop_commands.cpp"
    }
   },
   {
-   "name": "game/file_11E560",
+   "name": "game/pose_source",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "19864",
@@ -6030,11 +6030,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_11E560.cpp"
+    "source_path": "src/main/pose_source.cpp"
    }
   },
   {
-   "name": "game/file_1233C0",
+   "name": "game/placed_object",
    "measures": {
     "fuzzy_match_percent": 98.65593329979156,
     "total_code": "55652",
@@ -8841,11 +8841,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1233C0.cpp"
+    "source_path": "src/main/placed_object.cpp"
    }
   },
   {
-   "name": "game/file_130F48",
+   "name": "game/text_panel",
    "measures": {
     "fuzzy_match_percent": 93.84837151316815,
     "total_code": "25668",
@@ -9276,7 +9276,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_130F48.cpp"
+    "source_path": "src/main/text_panel.cpp"
    }
   },
   {
@@ -9976,7 +9976,7 @@
    }
   },
   {
-   "name": "game/file_13B4C0",
+   "name": "game/child_group_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "5284",
@@ -10137,11 +10137,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_13B4C0.cpp"
+    "source_path": "src/main/child_group_object.cpp"
    }
   },
   {
-   "name": "game/file_13C988",
+   "name": "game/ring_buffer",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "868",
@@ -10248,11 +10248,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_13C988.cpp"
+    "source_path": "src/main/ring_buffer.cpp"
    }
   },
   {
-   "name": "game/file_13CCF8",
+   "name": "game/zone_collider",
    "measures": {
     "fuzzy_match_percent": 98.75742841707185,
     "total_code": "14808",
@@ -11034,11 +11034,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_13CCF8.cpp"
+    "source_path": "src/main/zone_collider.cpp"
    }
   },
   {
-   "name": "game/file_140790",
+   "name": "game/disc_access",
    "measures": {
     "fuzzy_match_percent": 95.76719576719577,
     "total_code": "1512",
@@ -11172,11 +11172,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_140790.cpp"
+    "source_path": "src/main/disc_access.cpp"
    }
   },
   {
-   "name": "game/file_140D90",
+   "name": "game/flagged_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "3116",
@@ -11391,11 +11391,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_140D90.cpp"
+    "source_path": "src/main/flagged_object.cpp"
    }
   },
   {
-   "name": "game/file_1419E8",
+   "name": "game/collider_span",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "5316",
@@ -11547,11 +11547,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1419E8.cpp"
+    "source_path": "src/main/collider_span.cpp"
    }
   },
   {
-   "name": "game/file_142ED0",
+   "name": "game/game_clock",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "612",
@@ -11640,11 +11640,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_142ED0.cpp"
+    "source_path": "src/main/game_clock.cpp"
    }
   },
   {
-   "name": "game/file_143140",
+   "name": "game/camera",
    "measures": {
     "fuzzy_match_percent": 97.04907161803713,
     "total_code": "12064",
@@ -12336,7 +12336,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_143140.cpp"
+    "source_path": "src/main/camera.cpp"
    }
   },
   {

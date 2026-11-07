@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x6D (descriptor D_00221520, 0x590 bytes), a direct child of 0x01. Written for this
 // project from what retail's code does (config/us/classes.tsv). Only the span func_00143648
-// sets up is declared; its other users (file_143140.cpp) still reach the rest by offset.
+// sets up is declared; its other users (camera.cpp) still reach the rest by offset.
 #ifndef CAMERA_H
 #define CAMERA_H
 
