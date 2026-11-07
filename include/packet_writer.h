@@ -42,6 +42,7 @@ struct PacketWriter {
         u32* f1C;           // 0x1C: the open packet's header word (func_00161278)
         u8* block;          // (func_001613C0)
         u64* last;          // (func_00161768)
+        s32 mask;           // the VIF writer (D_0024A0E0): the mask func_001EE528 set, which func_001EE560 marks its unpacks with
     };
     u32 f20;                // 0x20: the packet's element count (func_00161278's divisor)
     u32 f24;                // 0x24: the words written

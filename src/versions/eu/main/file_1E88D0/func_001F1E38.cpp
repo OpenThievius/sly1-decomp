@@ -2,7 +2,7 @@
 // PAL's own definition: draws a ring of vertices around a centre, in PAL's screen scale.
 void func_001F1E38(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c2, s32 flags)
 {
-    Locals_1F1E38 loc;
+    FanPoint loc;
     s32 i;
     f32 step = 6.2831855f / (f32)n;
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);

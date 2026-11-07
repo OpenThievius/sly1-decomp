@@ -30,13 +30,12 @@
 #include "item_keeper.h"
 #include "attachment.h"
 #include "animation.h"
+#include "ramp_profile.h"
 #include "asm_func.h"
 
 void func_001C9AF8(void);
 void func_001E90A8(void* p);
 void func_001AA110(void);
-struct __attribute__((packed)) Entry8_1EBCD8 { u8 b[8]; };
-struct List_1EBCD8 { u8 pad[0x630]; s32 count; Entry8_1EBCD8 items[1]; };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a, void* p);
 void* func_001B6290(void* a, void* self, s32 b, s32 c);
@@ -47,10 +46,6 @@ s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
 void func_001B64D8(void* a, s32 b);
 extern s32 D_00262C64;
 s32 func_001DDA80(void* p);
-struct Probe_001E9038 {
-    u8 pad0[0x50];
-    s32 key;
-};
 s32 func_001C7468(void* self, void* probe);
 void func_001E96F8(void* self, s32 mode);
 s32 func_001BE5E8(void);
@@ -64,13 +59,11 @@ void func_001C06A0(int a, int b, float t);
 void func_00142ED0(float x);
 void func_001BAC30(void* self);
 f32 func_001EAFE0(f32 x, f32 y);
-struct Vec3_1EAD30 { f32 x; f32 y; f32 z; };
 s32 func_001BB290(void* a, s32 b, s32 c);
 s32 func_001E89F0(void* a, void* b);
 void* func_00129C20(s32 a, s32 b);
 void func_001C9CF8(void* a);
-typedef void* (*VFn_1E8EF8)(void* self);
-struct Buf_1E8EF8 { s32 v[4]; };
+typedef void* (*TargetObjectFn)(void* self);
 void func_001C8418(KeyedConeAgent* self, void* p);
 void func_001C8C08(KeyedConeAgent* self);
 s32 func_001F3BD8(void* self, void* arg);
@@ -89,21 +82,20 @@ void func_001BEA78(void);
 void func_001E9570(void* g);
 void func_001A7D98(void* self, s32 mode);
 void func_001AA0C0(void);
-struct Obj_1EA620 { u8 pad[0xC]; f32 f0C; };
 f32 func_001EA4B8(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 func_001EA408(f32 a);
 f32 func_001EA620(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
 s32 func_001F6708(void);
-struct Coeffs_1EA4B8 { f32 p0; f32 p1; f32 p2; };
 s32 func_001EACA0(f32* roots, f32 a, f32 b, f32 c);
 void func_00167D68(void* self);
-struct Entry_1EBFB0 { s32 a; s32 b; s32 c; };
 void func_001C72A0(void* self);
 void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6DF8(void* a, void* self);
 void* func_0018D568(s32 size, void* name);
 s32 func_0015A418(void* a, s32 b, s32 c, void* self);
-struct Entry_275D48 { s32 id; f32 v; s32 z; };
+// An object the tempo agent finds by id at its start (func_001EBFB0 copies D_00275D48 to
+// 0xC9C and fills each obj).
+struct TempoObjectRef { s32 id; f32 f04; s32 obj; };
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
 s32 func_001C8010(KeyedConeAgent* self);
 extern s32 D_00274738;
@@ -130,8 +122,8 @@ extern void func_001E98E8(ElementStack* o, f32 v);
 extern void func_001E96F8(ElementStack* o, s32 mode);
 extern void func_001409E0(void);
 extern void func_001A9FD0(void);
-typedef s32 (*Fn_1EB748)(BeatPressCollider* self, void* arg);
-typedef void (*GFn_1EB748)(Player* g, void* arg);
+typedef s32 (*BeatPressSlotFn)(BeatPressCollider* self, void* arg);
+typedef void (*PlayerSlotFn)(Player* g, void* arg);
 s32 func_001F3BD8(void* a, Vec4U* out);
 s32 func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -148,24 +140,24 @@ extern s32 D_006256D4;
 extern u32 D_006256D8;
 extern u8 D_00148D7C[];
 extern u32 D_002476A0[];
-struct Crc_1E9B30 {
+struct Crc32 {
     static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
 };
 void func_001921A8(BeatPressCollider* self);
 f32 func_001EAAE0(f32 lo, f32 hi);
 f32 func_002059E0(f32 x);
 s32 func_001DDA80(World* p);
-union Bits_1EAE78 {
+union DoubleBits {
     double d;
     u64 u;
 };
 double func_001FCD20(double a, double b);
-struct Node_1E9EE8;
-struct Vtbl_1E9EE8 {
+struct ListedObject;
+struct ListedObjectVt {
     u8 pad0[0x7C];
-    void (*update)(Node_1E9EE8*, s32, f32);
+    void (*update)(ListedObject*, s32, f32);
 };
-struct Node_1E9EE8 { Vtbl_1E9EE8* vtbl; };
+struct ListedObject { ListedObjectVt* vtbl; };
 struct BeginNodeWalk {
     static void Of(ListFrame* it, List01* list)
     {
@@ -178,9 +170,9 @@ struct BeginNodeWalk {
     }
 };
 struct NextNode {
-    static Node_1E9EE8* Of(ListFrame* it)
+    static ListedObject* Of(ListFrame* it)
     {
-        Node_1E9EE8* obj = *(Node_1E9EE8**)it->link;
+        ListedObject* obj = *(ListedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -188,9 +180,9 @@ struct NextNode {
 struct EndNodeWalk {
     static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
 };
-void func_00124EE8(Node_1E9EE8* n, f32 dt);
-void func_0012EBD8(Node_1E9EE8* n, f32 dt);
-void func_00159AD0(Node_1E9EE8* n, f32 dt);
+void func_00124EE8(ListedObject* n, f32 dt);
+void func_0012EBD8(ListedObject* n, f32 dt);
+void func_00159AD0(ListedObject* n, f32 dt);
 void func_001DBE48(World* self);
 struct BeginByteWalk {
     static void Of(ListFrame* it, List01* list)
@@ -216,16 +208,8 @@ struct EndByteWalk {
         g_activeListFrames = it->prev;
     }
 };
-struct Holder_1E9C78;
-struct Vt_1E9C78 {
-    u8 pad0[0x134];
-    void (*fn134)(Holder_1E9C78* self, f32 dt, u8* arg);
-};
-struct Holder_1E9C78 {
-    Vt_1E9C78* vt;
-};
 void func_001E9B30(void);
-Holder_1E9C78* func_001925F0(void);
+SwitchedCollider* func_001925F0(void);
 void func_0015FF58(World* self);
 void func_00124EE8(u8* n, f32 dt);
 void func_0012EBD8(u8* n, f32 dt);
@@ -268,8 +252,7 @@ void func_00182C58(void);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_001ED318(Timeline* self, s32* p);
 Entry90* func_001ED4C8(void* self, s32 kind, s32 p);
-struct Out_1ED650 { f32 x; f32 y; f32 z; };
-struct Pair_1ED650 { f32 a; f32 b; };
+struct SinCos { f32 sine; f32 cosine; };
 void func_001EAD88(f32* a, f32* b);
 void func_00192820(void);
 void func_001B6598(void* sub, s32* out);
@@ -287,31 +270,18 @@ void func_001F57E0(void* p);
 void func_00123ED0(void* self);
 void func_001EF900(void* self, s32 b);
 s32 func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
-struct Cursor_1EE368 { u8 pad[0xC]; u32* cursor; };
 void* func_001DBCC8(s32 a, void* b, void* c, s32 d, s32 e);
 void func_00192850(void);
-struct Packer_1EE528 {
-    u8 pad0[0xC]; u32* cursor; u8 pad1[0xC]; s32 last;
-    void push(u32 word)
-    {
-        u32* p = cursor;
-        cursor = p + 1;
-        *p = word;
-    }
-};
 void func_001ED210(void* p);
-struct Angles_1EDE38 { f32 unused; f32 first; f32 second; };
-struct Vec3_1EDE38 { f32 x; f32 y; f32 z; };
 void func_001EAD88(f32 angle, f32* a, f32* b);
-typedef u64 Quad_1EEB60 __attribute__((mode(TI)));
-s32 func_001EEA40(void* self, void* node, Quad_1EEB60 q, s32* out);
-typedef void (*VFn_1EF3A8)(void* self, void* arg);
+typedef u64 Bits128 __attribute__((mode(TI)));
+s32 func_001EEA40(void* self, void* node, Bits128 q, s32* out);
+typedef void (*AttachNotifyFn)(void* self, void* arg);
 void func_00125B70(void* obj, void* c, void* out);
 void func_00125C90(void* obj, void* s, void* out);
 void func_001C8418(void* self, void* p);
 void func_001C8C08(void* self);
 void func_00182C18(void* self);
-struct Out_1ED6B0 { f32 x; f32 y; f32 z; };
 void func_001EE368(void* s, s32 target);
 s32 func_001EE560(void* self, s32 a, s32 b, s32 c);
 void func_00152B80(void* obj, s32 a, s32 b);
@@ -319,7 +289,7 @@ void func_00138398(void* src, s32* count, void** out);
 s32 func_00137BE0(void* src);
 s32 func_00137C40(void* src);
 void func_0011EC40(void* a, void* b);
-struct Msg_1EF3D8 { AttachedSet* self; Collider* obj; };
+struct DetachMsg { AttachedSet* self; Collider* obj; };
 void func_001EF520(AttachedSet* self);
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B7968(void* self);
@@ -342,7 +312,6 @@ void func_00152CE0(void* self, s32 index, s32 count);
 extern void* D_002505C0[6];
 void* func_0018D5C0(u32 n);
 void func_001EE5C8(void* s, void* a1, s32 size, void* a3, s32* outSize, u8** outCursor);
-struct Mask_1EE9D0 { u8 pad[0x3C]; s32 count; s32* table; };
 extern s32 D_002640A4;
 void func_00180398(s32 a, f32 v);
 void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, void* e, f32 f, f32 g, f32 h, f32 i);
@@ -350,21 +319,19 @@ void func_001AC060(void* p);
 void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 D_0024A0E0[];
 s32 func_00152888(PacketWriter* self);
-struct Link_1EECE0;
-struct Link_1EECE0 {
-    s32* a; s32* b; s32 c; Link_1EECE0* prev;
-    Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev((Link_1EECE0*)g_activeListFrames) {}
-    ~Link_1EECE0() { g_activeListFrames = (ListFrame*)prev; }
+struct ChildWalkFrame {
+    s32* a; s32* b; s32 c; ChildWalkFrame* prev;
+    ChildWalkFrame(s32* p) : a(p), b(p), c(p[2]), prev((ChildWalkFrame*)g_activeListFrames) {}
+    ~ChildWalkFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 void func_00124A48(AttachedSet* self);
 void func_001F55A8(void* self);
-struct Mgr_1EF900;
-struct Evt_1EF900 {
+struct StateChangeMsg {
     void* self;
     s32 old;
     s32 cur;
 };
-s32 func_0013ECB0(Mgr_1EF900* mgr, s32 a, void* b, C62* self, s32 c);
+s32 func_0013ECB0(World* mgr, s32 a, void* b, C62* self, s32 c);
 void func_001B6598(s32 sub, s32* out);
 void func_001EC7A8(TempoAgent* p);
 void func_001837E0(void* self, s32 a, s32 b, s32* c);
@@ -378,21 +345,20 @@ s32 func_001F5C0C(Entry90* dst, s32 value, s32 size);
 void func_001C91C8(TempoAgent* self, s32 a, s32 b);
 void func_001603E8(s32 n);
 void func_0018C7F8(void* p);
-struct Vec3_1EDDB0 { f32 x; f32 y; f32 z; };
 f32 func_00205778(f32 a, f32 b);
 void func_0018D800(TempoPlayerEntry* dst, TempoPlayerEntry* src, s32 bytes);
 void func_001ED318(Timeline* self, Entry90* e);
 void* func_001F5B08(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
-struct Shift_1EFA88 {
+struct MoveItemsDown {
     static void Of(C62** dst, C62** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
 };
 void func_001DDAD0(World* x);
-struct Match_1EFFA0 {
+struct IsSessionKey {
     static s32 Of(IdentityKey* t)
     {
         IdentityKey* p;
@@ -408,7 +374,8 @@ struct Match_1EFFA0 {
 };
 void func_00143940(void* p, f32 v);
 void func_00188B08(void* a, void* b, void* out);
-struct Src_1F00C0 {
+// A FadeRequest moved as a 16-byte unaligned block and its last word.
+struct FadeRequestBlock {
     QuadP pair;
     s32 mid;
 };
@@ -417,29 +384,23 @@ s32 func_00128018(void* a, s32 b, void* c, s32 d);
 void func_001AD0D0(T217D_3D0* self, s32 a, s32 b);
 void func_001F18B0(void* self, s32 value);
 extern s32 D_00276654;
-struct Msg_1F0428 { s32 kind; void* obj; void* value; u8 pad; s32 last; };
 void func_001EFFA0(void* dst, void* args, s32 count);
 void func_001F1050(void* self, u32 mode);
 void* func_0018D500(int size);
 void func_00182C58(void* self);
 void func_00182ED8(void* a);
 // The pad (include/c73.h's neighbours): its buttons at +0xAA, its direction timers at +0x30 .. 0x3C.
-struct Pool_1F1A08;
-struct Q3_1F1A08;
-struct Val_1F1A08;
-typedef s32 Key_1F1A08;
-typedef s32 Id_1F1A08;
 s32 func_001F0490(WarpPage* o, s32 n, s32* a, s32* b);
 s32 func_0016EC98(PadRecord* t);
 s32 func_0016EED0(PadRecord* t);
 void func_001F1648(WarpPage* o, s32 n);
-void func_0016EC20(Pool_1F1A08* p, s32 n);
+void func_0016EC20(PadRecord* p, s32 n);
 s32 func_001F0468(void);
 void func_001E9570(ElementStack* q);
-Val_1F1A08* func_00160180(Key_1F1A08 k);
-void func_001F0428(Val_1F1A08* v, s32 m, s32 n);
-void func_001BFCD8(Id_1F1A08 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-f32 func_001EA4B8(Q3_1F1A08* p, s32 a1, f32 f12, f32 f13, f32 f14);
+IdentityKey* func_00160180(s32 k);
+void func_001F0428(IdentityKey* v, s32 m, s32 n);
+void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+f32 func_001EA4B8(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
 void func_001AA060(void* self);
 s32 func_001F0490(void* o, s32 n, s32* a, s32* b);
 void func_001F1590(void* self, s32 a1, s32 a2);
@@ -449,8 +410,7 @@ void func_001AA8C0(void* self, f32 v);
 void func_001BED48(void);
 void func_001BED70(void);
 s32 func_0016E0F0(s32 bits);
-struct Obj_1F0580 { u8 pad[0x2F4]; s32 mode; };
-struct Same_1F00F0 {
+struct SameSessionKey {
     static s32 Of(IdentityKey* t, IdentityKey* o)
     {
         if (t == o) {
@@ -462,21 +422,17 @@ struct Same_1F00F0 {
         return ((o->signedWords[2] ^ o->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
-struct Blk20_1F00F0 {
-    QuadP p;
-    s32 w;
-};
 extern void* D_0026FA68;
 extern s32 D_002623CC;
 void func_001E4E80(void* a, s32 b, s32 c, s32 d, s32 e);
 s32 func_001601A0(s32 a);
 void func_001DDB58(void* a);
 void func_00168B68(f32 t);
-struct Cfg_1F2688;
-s32 func_001F5C0C(Cfg_1F2688* p, s32 zero, s32 size);
+struct WarpTextStyle;
+s32 func_001F5C0C(WarpTextStyle* p, s32 zero, s32 size);
 // The text style the warp menu draws with: the static initialiser (func_001F2688) zeroes it, then
 // sets its kind, two sizes given as integers, 0.3 twice and its colour.
-struct Cfg_1F2688 {
+struct WarpTextStyle {
     u8 pad0[4];
     u8 kind;
     u8 pad5[3];
@@ -485,7 +441,7 @@ struct Cfg_1F2688 {
     f32 f10;
     f32 f14;
     s32 f18;
-    Cfg_1F2688(s32 a, s32 b)
+    WarpTextStyle(s32 a, s32 b)
     {
         FillMemory(this, 0, 0x1C);
         kind = 0x3D;
@@ -496,20 +452,9 @@ struct Cfg_1F2688 {
     }
 };
 extern f32 D_00276650;
-struct Mgr_1F18B0;
-struct Loc_1F18B0;
-struct Obj_1F18B0;
-struct Rec_1F18B0 {
-    u8 pad00[0x18];
-    Mgr_1F18B0* f18;
-    u8 pad1C[0x24];
-};
-void func_00128018(Mgr_1F18B0* a0, Obj_1F18B0* a1, void* a2, Loc_1F18B0* a3);
-struct Clr_1F1960 { s32 a, b, c, d, e, f; };
 s32 func_0015C188(s32 n);
 Font* func_0015C1C0(s32 n);
-void func_001F5C0C(Clr_1F1960* p, s32 v, s32 size);
-struct __attribute__((packed)) Ptr_1F0660 { WarpPage* p; };
+void func_001F5C0C(void* p, s32 v, s32 size);
 extern void func_00124A48(WarpPage* o);
 s32 func_001F0580(WarpPage* o, s32 n);
 void func_001F0878(WarpPage* o, s32 n);
@@ -520,14 +465,13 @@ void func_00159C28(WorldObjectNode* r);
 void func_00126C58(PlacedObject* o);
 void func_0012C918(Animation* a, WarpPage* b, s32 c, void* d, f32 e, f32 f);
 void func_001BFCD8(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-struct Node_1F0758;
 void func_001249A8(WarpPage* self);
 void func_00124DF8(WarpPage* self, s32 n, void* table);
-void func_00182ED8(Node_1F0758* node);
+void func_00182ED8(BaseObject* node);
 struct NextPageNode {
-    static Node_1F0758* Of(ListFrame* it)
+    static BaseObject* Of(ListFrame* it)
     {
-        Node_1F0758* obj = *(Node_1F0758**)it->link;
+        BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -543,14 +487,13 @@ struct BeginPageWalk {
     }
 };
 HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
-struct Ent_1F1648 { s32 f0; u8 rest[0x30]; };
-struct Obj_1F1648 { u8 pad0[0x2DC]; s32 f2DC; u8 pad1[0x2F4 - 0x2E0]; s32 f2F4; u8 pad2[0x314 - 0x2F8]; Ent_1F1648 ents[1]; };
 extern s32 (*D_00276608[6])[4];
-void func_001F1590(Obj_1F1648* self, s32 e, s32 n);
-enum Sound_1F1648 { SOUND_1F1648_OK = 0x79, SOUND_1F1648_FAIL = 0x7B };
-void func_001BFCD8(Sound_1F1648 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+// The sounds MoveWarpCursor plays: the cursor moved, or it could not.
+enum WarpCursorSound { WARP_SOUND_MOVE = 0x79, WARP_SOUND_REFUSE = 0x7B };
+void func_001BFCD8(WarpCursorSound a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 BaseObject* func_0015A418(void* o, s32 a, s32 b, WarpPage* c);
-struct Locals_1F1E38 { s32 k; s32 pad[3]; f32 x; f32 y; };
+// A point of the fan func_001F1E38 draws: its colour and, at 0x10, its position.
+struct FanPoint { s32 k; s32 pad[3]; f32 x; f32 y; };
 void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
 void func_00161708(PacketWriter* f, u64 a, u64 b);
 void func_00161458(PacketWriter* self, u32 value);
@@ -559,7 +502,7 @@ void func_001E90A8(ElementStack* self);
 void func_001E9498(ElementStack* self, ScreenElement* node);
 void func_001E96F8(ElementStack* self, s32 state);
 void func_001E98E8(float x);
-f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z);
+f32 func_001EA4B8(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void func_001ED090(TempoAgent* self, AnimationPlayer* a, s32 b);
 void func_001ED1D8(Timeline* self);
 void func_001ED210(Timeline* self);
@@ -568,7 +511,7 @@ void func_001EF900(C62* self, s32 state);
 s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2);
 void func_001F1050(WarpPage* self, u32 next);
 void func_001F1590(WarpPage* self, s32 a1, s32 a2);
-void func_001F18B0(Obj_1F18B0* self, s32 idx);
+void func_001F18B0(WarpPage* self, s32 idx);
 
 ObjectLink D_00275B60[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
@@ -605,7 +548,7 @@ ObjectLink D_00275D08[5] = {
     { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
     { 0, 0x4EA, 0xC30 }
 };
-Entry_275D48 D_00275D48[9] = {
+TempoObjectRef D_00275D48[9] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 }, { 0x3B, 80.0f, 0 },
     { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
     { 0x54, 80.0f, 0 }
@@ -750,7 +693,7 @@ s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s3
 #ifndef VERSION_EU
 // PAL has no style here (its func_001F1960 draws without one): its static initialiser only
 // sets D_00276650.
-Cfg_1F2688 D_00276620(2, 1);
+WarpTextStyle D_00276620(2, 1);
 #endif
 INCLUDE_DATA(D_0027663C);
 #ifdef VERSION_EU
@@ -860,7 +803,7 @@ void func_001E8E48(KeyedConeAgent* self)
 
 void func_001E8EF8(KeyedConeAgent* self)
 {
-    Buf_1E8EF8 loc;
+    Vec4U loc;
     switch (self->f724) {
     case 4:
         if (self->fC40 != 0) {
@@ -871,7 +814,7 @@ void func_001E8EF8(KeyedConeAgent* self)
         }
         break;
     case 8: {
-        void* r = ((VFn_1E8EF8*)self->desc)[102](self);
+        void* r = ((TargetObjectFn*)self->desc)[102](self);
         if (r != 0) func_001C8418(self, (u8*)r + 0x140);
         break;
     }
@@ -899,9 +842,9 @@ void func_001E8FE8(void)
     }
 }
 
-s32 func_001E9038(KeyedConeAgent* self, Probe_001E9038* probe)
+s32 func_001E9038(KeyedConeAgent* self, Collider* probe)
 {
-    s32 key = probe->key;
+    PlacedObject* key = probe->root;
     u32 i = 0;
     s32 result;
     do {
@@ -1243,10 +1186,10 @@ void func_001E9B30(void) {
         u32 w = *p;
         cnt -= 4;
         p++;
-        h = Crc_1E9B30::Step(h, w);
-        h = Crc_1E9B30::Step(h, w >> 8);
-        h = Crc_1E9B30::Step(h, w >> 16);
-        h = Crc_1E9B30::Step(h, w >> 24);
+        h = Crc32::Step(h, w);
+        h = Crc32::Step(h, w >> 8);
+        h = Crc32::Step(h, w >> 16);
+        h = Crc32::Step(h, w >> 24);
     }
     g_memoryChecksumCursor = p;
     g_memoryChecksumValue = h;
@@ -1259,16 +1202,16 @@ void func_001E9B30(void) {
 void func_001E9C78(World* self, f32 dt)
 {
     StepMemoryChecksum();
-    Holder_1E9C78* h = GetActiveSwitchedCollider();
+    SwitchedCollider* h = GetActiveSwitchedCollider();
     if (h != 0) {
-        Vt_1E9C78* vt = h->vt;
-        if (vt->fn134 != 0) {
-            u8* a;
+        const Desc05* vt = h->desc05();
+        if (vt->m49 != 0) {
+            PadRecord* a;
             if ((*(s32*)&g_padRouting) & 2)
-                a = (u8*)&g_padRecord;
+                a = &g_padRecord;
             else
-                a = ((u8*)&g_blankPadRecord);
-            vt->fn134(h, dt, a);
+                a = &g_blankPadRecord;
+            vt->m49(h, dt, a);
         }
     }
     func_0015FF58(self);
@@ -1328,16 +1271,16 @@ void func_001E9EE8(World* self, f32 dt)
     if (dt == 0.0f) return;
     ListFrame it;
     BeginNodeWalk::Of(&it, &self->list78);
-    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_00124EE8(obj, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_00124EE8(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
-    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
-    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, &self->list78);
-    for (Node_1E9EE8* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) obj->vtbl->update(obj, 0, dt);
     EndNodeWalk::Of(&it);
     RunQueuedCalls(self);
 }
@@ -1429,7 +1372,7 @@ f32 func_001EA480(f32 a, f32 b)
     return r;
 }
 
-f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z)
+f32 func_001EA4B8(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
 {
     f32 roots[4];
     s32 flip = 0;
@@ -1443,24 +1386,24 @@ f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z)
         flip = 1;
         d = -d;
     }
-    half = (k->p1 + k->p0) * k->p2 * 0.5f;
+    half = (k->endSpeed + k->maxSpeed) * k->rampTime * 0.5f;
     if (half <= d) {
-        f32 u = (d - half) / k->p0;
+        f32 u = (d - half) / k->maxSpeed;
         if (c <= u) {
-            res = d - k->p0 * c;
-            t = -k->p0;
+            res = d - k->maxSpeed * c;
+            t = -k->maxSpeed;
             goto tail;
         }
         c = c - u;
         d = half;
     }
-    SolveQuadratic(roots, (k->p0 - k->p1) / (k->p2 + k->p2), k->p1, -d);
+    SolveQuadratic(roots, (k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d);
     r = roots[0] - c;
     if (0.0f < r) {
-        res = (k->p0 - k->p1) * r * r / (k->p2 + k->p2) + k->p1 * r;
-        t = -(k->p1 + (k->p0 - k->p1) * r / k->p2);
+        res = (k->maxSpeed - k->endSpeed) * r * r / (k->rampTime + k->rampTime) + k->endSpeed * r;
+        t = -(k->endSpeed + (k->maxSpeed - k->endSpeed) * r / k->rampTime);
     } else {
-        t = -k->p1;
+        t = -k->endSpeed;
         res = 0.0f;
     }
 tail:
@@ -1480,10 +1423,10 @@ tail:
 
 f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* self, f32* out)
 {
-    Obj_1EA620* o = (Obj_1EA620*)self;
+    RampProfile* o = (RampProfile*)self;
     f32 tmp;
     f32 res = ApproachValueWithRamp(a, c, d, self, &tmp);
-    f32 k = o->f0C;
+    f32 k = o->maxAccel;
     if (0.0f < k) {
         f32 hi = b + k * d;
         f32 lo = b - k * d;
@@ -1586,7 +1529,7 @@ s32 func_001EACA0(f32* roots, f32 a, f32 b, f32 c)
     return 2;
 }
 
-void func_001EAD30(Vec3_1EAD30* in, Vec3_1EAD30* out, f32 s, f32 t)
+void func_001EAD30(Vec3* in, Vec3* out, f32 s, f32 t)
 {
     out->z = in->z * s * s;
     out->y = (in->z + in->z) * s * t + in->y * s;
@@ -1625,7 +1568,7 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
 
 double func_001EAE78(double x)
 {
-    Bits_1EAE78 v;
+    DoubleBits v;
     v.d = x;
     s32 e = ((u16)(v.u >> 52) & 0x7FF) - 0x3FF;
     if (e < 0) {
@@ -1799,10 +1742,10 @@ void func_001EB748(BeatPressCollider* self, PadRecord* in)
         Mat3U mat;
         GetObjectWorldPosition(self->f67C, &pos);
         GetObjectWorldRotation(self->f67C, &mat);
-        ((GFn_1EB748*)g_player->desc)[0x84 / 4](g_player, &pos);
-        ((GFn_1EB748*)g_player->desc)[0x88 / 4](g_player, &mat);
-        ((Fn_1EB748*)self->desc)[0x84 / 4](self, &pos);
-        ((Fn_1EB748*)self->desc)[0x88 / 4](self, &mat);
+        ((PlayerSlotFn*)g_player->desc)[0x84 / 4](g_player, &pos);
+        ((PlayerSlotFn*)g_player->desc)[0x88 / 4](g_player, &mat);
+        ((BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
+        ((BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
     }
     if (self->f680 != 0) {
         u32 f = in->flags;
@@ -1851,22 +1794,22 @@ void func_001EB748(BeatPressCollider* self, PadRecord* in)
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (HasSpareCount() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && ((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
                 TempoAgent* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
                 msg.fn = ContinueBeatPressColliderRequest;
-                ((s32 (*)(Player*, OwnerMessage*))((GFn_1EB748*)g_player->desc)[0x140 / 4])(g_player, &msg);
+                ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldTimeline(o);
                 o->fBFC = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
             }
-            if (((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
                 Timeline* l;
-                ((void (*)(BeatPressCollider*))((Fn_1EB748*)self->desc)[0x150 / 4])(self);
+                ((void (*)(BeatPressCollider*))((BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
                 Player* gl = g_player;
                 self->f688 = 1;
                 gl->f26C4 = 1;
@@ -1911,11 +1854,11 @@ s32 func_001EBC88(BeatPressCollider* self)
     return 1;
 }
 
-void func_001EBCD8(List_1EBCD8* list, const Entry8_1EBCD8* src)
+void func_001EBCD8(BeatPressCollider* list, const U64P* src)
 {
-    s32 n = list->count;
-    list->count = n + 1;
-    Entry8_1EBCD8* dst = (Entry8_1EBCD8*)((u8*)list + (n * 8 + 0x634));
+    s32 n = list->f630;
+    list->f630 = n + 1;
+    U64P* dst = (U64P*)((u8*)list + (n * 8 + 0x634));
     *dst = *src;
 }
 
@@ -1961,8 +1904,8 @@ void func_001EBFB0(TempoAgent* self)
     if (self->fC98 > 0) {
         s32 off = 0;
         do {
-            Entry_1EBFB0* e = (Entry_1EBFB0*)((u8*)self->fC9C + off);
-            e->c = FindFirstObjectById(self->world, 1, e->a, self);
+            TempoObjectRef* e = (TempoObjectRef*)((u8*)self->fC9C + off);
+            e->obj = FindFirstObjectById(self->world, 1, e->id, self);
             i++;
             off += 12;
         } while (i < self->fC98);
@@ -2413,16 +2356,16 @@ void func_001ED618(void* self, s32 p)
 
 ASM_FUNC(func_001ED638);
 
-void func_001ED650(Out_1ED650* out, f32 unused, f32 scale, f32 z)
+void func_001ED650(Vec3* out, f32 unused, f32 scale, f32 z)
 {
-    Pair_1ED650 p;
-    ComputeSinCos(&p.a, &p.b);
-    out->x = p.b * scale;
-    out->y = p.a * scale;
+    SinCos p;
+    ComputeSinCos(&p.sine, &p.cosine);
+    out->x = p.cosine * scale;
+    out->y = p.sine * scale;
     out->z = z;
 }
 
-void func_001ED6B0(Out_1ED6B0* out, f32 first, f32 second, f32 scale)
+void func_001ED6B0(Vec3* out, f32 first, f32 second, f32 scale)
 {
     f32 t[4];
     ComputeSinCos(first, &t[0], &t[1]);
@@ -2446,7 +2389,7 @@ ASM_FUNC(func_001EDA80);
 
 ASM_FUNC(func_001EDC08);
 
-void func_001EDDB0(Vec3_1EDDB0* v, f32* a1, f32* a2)
+void func_001EDDB0(Vec3* v, f32* a1, f32* a2)
 {
     if (a1)
         *a1 = WrapAngle(ArctangentOfRatio(v->y, v->x));
@@ -2456,11 +2399,11 @@ void func_001EDDB0(Vec3_1EDDB0* v, f32* a1, f32* a2)
     }
 }
 
-void func_001EDE38(Angles_1EDE38* in, Vec3_1EDE38* b, Vec3_1EDE38* out)
+void func_001EDE38(Vec3* in, Vec3* b, Vec3* out)
 {
     f32 t[4];
-    ComputeSinCos(in->first, &t[0], &t[1]);
-    ComputeSinCos(in->second, &t[2], &t[3]);
+    ComputeSinCos(in->y, &t[0], &t[1]);
+    ComputeSinCos(in->z, &t[2], &t[3]);
     out->x = t[1] * t[3] * b->x - t[2] * b->y;
     out->y = t[1] * t[2] * b->x + t[3] * b->y;
     out->z = -t[0] * b->x + b->z;
@@ -2489,9 +2432,9 @@ PacketWriter* func_001EE318(PacketWriter* self)
 
 LINKER_REMNANT(func_001EE360);
 
-void func_001EE368(Cursor_1EE368* s, s32 target)
+void func_001EE368(PacketWriter* s, s32 target)
 {
-    u32 raw = (u32)s->cursor;
+    u32 raw = s->curU;
     s32 idx = (s32)((raw & 0xC) >> 2);
     u32* p = (u32*)raw;
     if (idx == target) goto done;
@@ -2501,7 +2444,7 @@ void func_001EE368(Cursor_1EE368* s, s32 target)
         p++;
     } while (idx != target);
 done:
-    s->cursor = p;
+    s->cur = (u8*)p;
 }
 
 void func_001EE3B8(PacketWriter* s, u32 a, u32 b)
@@ -2565,13 +2508,17 @@ void func_001EE4C0(PacketWriter* b, u32* src){
  p5=(u32*)b->cur; b->cur = (u8*)(p5 + 1); *p5=src[3];
 }
 
-void func_001EE528(Packer_1EE528* self, s32 value)
+void func_001EE528(PacketWriter* self, s32 value)
 {
     if (value != 0) {
-        self->push(0x20000000);
-        self->push((u32)value);
+        u32* p = (u32*)self->cur;
+        self->cur = (u8*)(p + 1);
+        *p = 0x20000000;
+        u32* q = (u32*)self->cur;
+        self->cur = (u8*)(q + 1);
+        *q = (u32)value;
     }
-    self->last = value;
+    self->mask = value;
 }
 
 s32 func_001EE560(PacketWriter* self, s32 a, s32 b, s32 c)
@@ -2703,25 +2650,25 @@ void func_001EE930(ValueListObject* self, void* src)
     ReadPropertyRecords(self, src);
 }
 
-s32 func_001EE9D0(Mask_1EE9D0* self, s32 bits)
+s32 func_001EE9D0(ValueListObject* self, s32 bits)
 {
     s32 acc;
     bits &= 0x7FFFFFFF;
     if (bits == 0) return 0;
     acc = -1;
-    for (s32 i = 0; i < self->count; i++) {
-        if ((bits >> i) & 1) acc &= self->table[i];
+    for (s32 i = 0; i < self->valueCount; i++) {
+        if ((bits >> i) & 1) acc &= self->values[i];
     }
     return acc | bits;
 }
 
 ASM_FUNC(func_001EEA40);
 
-s32 func_001EEB60(ValueListObject* self, Quad_1EEB60* vec, s32* out)
+s32 func_001EEB60(ValueListObject* self, Bits128* vec, s32* out)
 {
     s32 r;
     if (self != 0 && self->data38 != 0) {
-        Quad_1EEB60 q = *vec;
+        Bits128 q = *vec;
         *out = 0;
         r = QueryValueTreeMask(self, self->data38, q, out);
 
@@ -2755,7 +2702,7 @@ void func_001EEC60(AttachedSet* self)
 
 void func_001EECE0(AttachedSet* self)
 {
-    Link_1EECE0 fr((s32*)&self->children);
+    ChildWalkFrame fr((s32*)&self->children);
     g_activeListFrames = (ListFrame*)&fr;
     StartPlacedObject(self);
     FillTrackedNodes(&self->trackedNodes);
@@ -2803,7 +2750,7 @@ ASM_FUNC(func_001EEF90);
 void func_001EF3A8(AttachedSet* self, Attach03* link)
 {
     Collider* target = link->target;
-    ((VFn_1EF3A8)target->desc03()->m46)(target, self);
+    ((AttachNotifyFn)target->desc03()->m46)(target, self);
 }
 
 void func_001EF3D8(AttachedSet* self, s32 kind, void* msg)
@@ -2841,7 +2788,7 @@ void func_001EF3D8(AttachedSet* self, s32 kind, void* msg)
                     }
                 }
             }
-            Msg_1EF3D8 m;
+            DetachMsg m;
             m.self = self;
             m.obj = n->target;
             if (n != 0) {
@@ -2924,12 +2871,12 @@ void func_001EF900(C62* self, s32 state)
     if (self->id2D0 != state) {
         if (state != 0) {
             if (state == 2)
-                func_0013ECB0((Mgr_1EF900*)g_currentWorld, self->f2E4, self->f2E8, self, 1);
+                func_0013ECB0((World*)g_currentWorld, self->f2E4, self->f2E8, self, 1);
         } else {
             if (self->id2D0 == 2)
-                func_0013ECB0((Mgr_1EF900*)g_currentWorld, self->f2E4, self->f2E8, self, 0);
+                func_0013ECB0((World*)g_currentWorld, self->f2E4, self->f2E8, self, 0);
         }
-        Evt_1EF900 evt;
+        StateChangeMsg evt;
         evt.old = self->id2D0;
         evt.self = self;
         evt.cur = state;
@@ -2965,7 +2912,7 @@ void func_001EFA88(C62Group* self, C62* value)
         if (self->items[i] == value) break;
     }
     if (i < self->count) {
-        Shift_1EFA88::Of(&self->items[i], &self->items[i + 1], (self->count - i) * 4 - 4);
+        MoveItemsDown::Of(&self->items[i], &self->items[i + 1], (self->count - i) * 4 - 4);
         self->count--;
     }
 }
@@ -3101,7 +3048,7 @@ void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
                 PopActiveSequenceElement(g_currentWorld);
             }
         }
-        if (args->key == 0 || Match_1EFFA0::Of(args->key)) {
+        if (args->key == 0 || IsSessionKey::Of(args->key)) {
             args->flags |= 8;
         } else {
             args->flags &= ~8;
@@ -3117,7 +3064,7 @@ void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
 }
 
 
-void func_001F00C0(ScreenFade* dst, Src_1F00C0* src, s32 last)
+void func_001F00C0(ScreenFade* dst, FadeRequestBlock* src, s32 last)
 {
     s32 mid = src->mid;
     u64 lo = src->pair.lo;
@@ -3132,11 +3079,11 @@ s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
 {
     if (IsPadSelectFlagHeld(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
         ClearPadPressedBits(o, 0x800);
-        *(Blk20_1F00F0*)&self->active = *(Blk20_1F00F0*)&self->queued;
+        *(FadeRequestBlock*)&self->active = *(FadeRequestBlock*)&self->queued;
         self->style = self->queuedStyle;
         FadeRequest* rr = &self->active;
         IdentityKey* kk = rr->key;
-        if (kk == 0 || Same_1F00F0::Of(kk, &D_00275B04)) {
+        if (kk == 0 || SameSessionKey::Of(kk, &D_00275B04)) {
             rr->flags |= 8;
         } else {
             rr->flags &= ~8;
@@ -3256,13 +3203,13 @@ L0410:
     return;
 }
 
-void func_001F0428(void* obj, void* value, s32 count)
+void func_001F0428(IdentityKey* obj, s32 value, s32 count)
 {
-    Msg_1F0428 m;
+    FadeRequest m;
     m.kind = 1;
-    m.obj = obj;
-    m.value = value;
-    m.last = 0;
+    m.key = obj;
+    m.f08 = value;
+    m.flags = 0;
     StartScreenFade(&g_screenFade, &m, count);
 }
 
@@ -3327,7 +3274,7 @@ s32 func_001F0580(void* self, s32 code)
     }
     r = IsWarpEntryAvailable(self, code, 0, 0);
     if (r == 0) {
-        switch (((Obj_1F0580*)self)->mode) {
+        switch (((WarpPage*)self)->slot) {
         case 1:
             if (code >= 2) {
                 if (code < 6) {
@@ -3358,7 +3305,7 @@ void func_001F0660(WarpPage* o) {
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->f19D8) {
         u8* t = (u8*)&g_mapScreenList;
-        ((Ptr_1F0660*)(t + 0x260))->p = o;
+        ((U32P*)(t + 0x260))->v = (u32)o;
     }
     switch (o->id) {
     case 0x1C7: o->slot = 1; break;
@@ -3374,7 +3321,7 @@ void func_001F0660(WarpPage* o) {
 void func_001F0758(WarpPage* self)
 {
     ListFrame it;
-    Node_1F0758* node;
+    BaseObject* node;
     WarpEntry* el;
     s32 i;
 
@@ -3695,35 +3642,35 @@ void func_001F1610(WarpPage* self)
     }
 }
 
-void func_001F1648(Obj_1F1648* self, s32 idx)
+void func_001F1648(WarpPage* self, s32 idx)
 {
-    s32 (*table)[4] = D_00276608[self->f2F4];
+    s32 (*table)[4] = D_00276608[self->slot];
     if (table == 0) {
-        StartSoundEffect(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(WARP_SOUND_REFUSE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
-    s32 e = table[self->f2DC][idx];
-    while (e != -1 && self->ents[e].f0 == 0) {
+    s32 e = table[self->cursor][idx];
+    while (e != -1 && self->entries[e].reachable == 0) {
         e = table[e][idx];
     }
-    if (e != -1 && self->ents[e].f0 != 0) {
+    if (e != -1 && self->entries[e].reachable != 0) {
         SetWarpCursor(self, e, 2);
-        StartSoundEffect(SOUND_1F1648_OK, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(WARP_SOUND_MOVE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     } else {
-        StartSoundEffect(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(WARP_SOUND_REFUSE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
 }
 
 ASM_FUNC(func_001F17A0);
 
-void func_001F18B0(Obj_1F18B0* self, s32 idx) {
+void func_001F18B0(WarpPage* self, s32 idx) {
     u8* base = (u8*)self;
     if (*(s32*)(base + 0x534) == idx) {
         return;
     }
-    Rec_1F18B0* r = *(Rec_1F18B0**)(base + idx * 0x34 + 0x30C);
+    BaseObject* r = *(BaseObject**)(base + idx * 0x34 + 0x30C);
     if (r != 0) {
-        func_00128018(r->f18, self, (u8*)r + 0x40, (Loc_1F18B0*)(base + 0x550));
+        func_00128018(r->parent, self, (u8*)r + 0x40, (Quad16*)(base + 0x550));
     } else {
         *(Quad16*)(base + 0x550) = *(Quad16*)&D_00248D30;
     }
@@ -3749,7 +3696,7 @@ void func_001F1960(T217D_0F0* self) {
     self->color = 0xDF7F7F7F;
     self->vt->m08(self, D_0024E808);
     self->current = 0;
-    FillMemory((Clr_1F1960*)self->nodes, 0, 0x18);
+    FillMemory(self->nodes, 0, 0x18);
 }
 
 void func_001F1A08(T217D_0F0* self, PadRecord* t)
@@ -3764,7 +3711,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     if (self->current->f560 != 0) return;
     if ((t->flags & 0x910) != 0 || t->f14 == 1) {
         PopStackElement((ElementStack*)g_elementStack);
-        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x910);
+        ClearPadPressedBits(&g_padRecord, 0x910);
         return;
     }
     if (self->mode != self->current->mode) return;
@@ -3784,10 +3731,10 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     } else if (s2 > 0) {
         MoveWarpCursor(self->current, 3);
     } else if ((t->flags & 0x40) != 0) {
-        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
+        ClearPadPressedBits(&g_padRecord, 0x40);
         if (self->current->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
-                Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
+                IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
                 PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
@@ -3804,7 +3751,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     } else {
         self->scaleTarget = D_00275FC0;
     }
-    self->scale = ApproachValueWithRamp((Q3_1F1A08*)D_00276278, 0, self->scale, self->scaleTarget, g_gameClock.step);
+    self->scale = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->scale, self->scaleTarget, g_gameClock.step);
 }
 
 void func_001F1C90(T217D_0F0* self, s32 a1)
@@ -3852,7 +3799,7 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
 
 void func_001F1E38(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c2, s32 flags)
 {
-    Locals_1F1E38 loc;
+    FanPoint loc;
     s32 i;
     f32 step = 6.2831855f / (f32)n;
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);

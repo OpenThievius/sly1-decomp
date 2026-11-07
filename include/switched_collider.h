@@ -22,6 +22,7 @@ struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
 struct EntryQueue;       // class 0x8F (entry_queue.h)
 struct Timeline;         // class 0x90 (timeline.h)
+struct PadRecord;        // pad_record.h
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
 struct Blk05 {
@@ -125,7 +126,7 @@ struct __attribute__((packed)) Pack10 {
 // Class 0x05's descriptor: 0x03's slots, then twelve more (slot n at 0x10 + 4n).
 struct Desc05 : Desc03 {
     void (*m48)(SwitchedCollider* self, s32 mode);               // 0x130: slot 72 (func_001922E8)
-    void* m49;                                      // 0x134: slot 73
+    void (*m49)(SwitchedCollider* self, f32 dt, PadRecord* pad);   // 0x134: slot 73: the pad each frame while it is the active one (func_001E9C78)
     s32 (*m4A)(SwitchedCollider* self);                          // 0x138: slot 74 (func_00192410)
     s32 (*m4B)(SwitchedCollider* self, s32 a);                   // 0x13C: slot 75 (func_00192450, class 0x08: func_001C9A48)
     s32 (*m4C)(SwitchedCollider* self, void* arg);               // 0x140: slot 76 (func_00192488, class 0x08: func_001C9990)
@@ -539,7 +540,7 @@ struct KeyedConeAgent : ConeAgent {
     s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
     s32 fC5C;               // 0xC5C: the count it lowers (ChooseKeyedConeAgentState stops at 0)
     void* fC60;             // 0xC60
-    s32 fC64[6];            // 0xC64: keys slot 56 answers for itself (func_001E9038)
+    PlacedObject* fC64[6];  // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
     s32 fC7C;               // 0xC7C
     void* fC80[4];          // 0xC80
     s32 fC90;               // 0xC90
