@@ -3528,8 +3528,8 @@ func_00106270	AddScriptContactListId	builtin: one argument forwarded to func_001
 func_00106320	AddScriptContactListKind	builtin: one argument forwarded to func_0018DD78 (AddContactListKind), empty result
 func_00106C50	SetScriptStepSequenceModeOne	builtin: no arguments, calls SetStepSequenceModeOne on the object, empty result
 func_00106CF0	SetScriptStepSequenceCameraMode	builtin: no arguments, calls SetStepSequenceCameraMode on the object, empty result
-func_00107040	AddScriptC8DXEntry	builtin: no arguments, calls AddC8DXEntry on the object, empty result
-func_001070E0	AddScriptC8DYZEntry	builtin: no arguments, calls AddC8DYZEntry on the object, empty result
+func_00107040	AddScriptOscillatorXEntry	builtin: no arguments, calls AddOscillatorXEntry on the object, empty result
+func_001070E0	AddScriptOscillatorYZEntry	builtin: no arguments, calls AddOscillatorYZEntry on the object, empty result
 func_00107350	AdvanceScriptGaugeAgentPhase	builtin: no arguments, calls AdvanceGaugeAgentPhase on the object, empty result
 func_001074C0	AddScriptPathFollowerEntry	builtin: one argument forwarded to AddPathFollowerEntry, empty result
 func_00107570	AddScriptPathFollowerActiveEntry	builtin: five arguments forwarded to AddPathFollowerActiveEntry, empty result

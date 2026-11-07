@@ -536,8 +536,8 @@
 #define AddScriptSequenceExtraTarget               func_00106D90
 #define ChooseScriptStepSequenceState              func_00106E60
 #define ResetScriptStepSequence                    func_00106F00
-#define AddScriptC8DXEntry                         func_00107040
-#define AddScriptC8DYZEntry                        func_001070E0
+#define AddScriptOscillatorXEntry                  func_00107040
+#define AddScriptOscillatorYZEntry                 func_001070E0
 #define AdvanceScriptGaugeAgentPhase               func_00107350
 #define AddScriptEntryRecordKey                    func_001073F0
 #define AddScriptPathFollowerEntry                 func_001074C0
