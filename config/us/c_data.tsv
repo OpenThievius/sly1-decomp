@@ -487,9 +487,6 @@ D_0024E600	0024E600	356	.rodata	src/main/file_1E88D0.cpp
 D_0024E840	0024E840	0	.rodata	src/main/file_1F2758.cpp
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
-D_0024E9C8	0024E9C8	8	.rodata.D_0024E9C8	src/main/001E4000.cpp
-D_0024E9D0	0024E9D0	8	.rodata.D_0024E9D0	src/main/001E4000.cpp
-D_0024E9D8	0024E9D8	8	.rodata.D_0024E9D8	src/main/001E4000.cpp
 D_0024EB10	0024EB10	109	.rodata	src/lib/iop_file_client.cpp
 D_0024EB80	0024EB80	12	.rodata	src/lib/iop_module_loader.cpp
 D_0024EB90	0024EB90	160	.rodata	src/lib/iop_reset.cpp
@@ -541,7 +538,6 @@ D_00250028	00250028	62	.rodata	src/lib/mpeg_demultiplexer.cpp
 D_00250070	00250070	491	.rodata	src/lib/mpeg_decoder.cpp
 D_00250260	00250260	153	.rodata	src/lib/mpeg_macroblock.cpp
 D_00250300	00250300	571	.rodata	src/lib/mpeg_ipu_decode.cpp
-D_002504F8	002504F8	48	.rodata.D_002504F8	src/main/001E4000.cpp
 D_002505C0	002505C0	24	.data.D_002505C0	src/main/001E4000.cpp
 D_002505D8	002505D8	37728	.data	src/main/object_host_functions.cpp
 D_00259938	00259938	9016	.data	src/main/script_machine.cpp

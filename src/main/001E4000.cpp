@@ -3528,11 +3528,6 @@ extern const SoundEntry D_00245020[771] = {
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 
-extern const double D_0024E9C8 = 0.1;
-extern const double D_0024E9D0 = 0.1;
-extern const double D_0024E9D8 = 1000000.0;
-extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
-
 // Globals typed by worker dv05, from retail's bytes and their readers.
 extern const u8 D_002197B8[];
 extern const u8 D_002198E8[];
