@@ -1,12 +1,12 @@
 symbol	name	evidence
-func_0011CBB8	InitIopCommandChannels	binds the two RPC channels D_0027B4C8 and D_0027B4F0, points the command buffers D_0025C360/D_0025C370/D_0025C378 at their storage, clears the bookkeeping and sends command 0 with the address of D_00260DC0 (001BC000's start-up calls it first)
+func_0011CBB8	InitIopCommandChannels	binds the two RPC channels D_0027B4C8 and D_0027B4F0, points the command buffers D_0025C360/D_0025C370/D_0025C378 at their storage, clears the bookkeeping and sends command 0 with the address of D_00260DC0 (file_1B7968.cpp's start-up calls it first)
 func_0011CE30	PollIopCommands	runs the pending reply callbacks (queued entries, the single bank-load callback), sends the buffered commands when idle and returns 1 while a reply or bank load is still outstanding (callers loop on it until 0)
 func_0011D078	IsIopReplyReady	polls the RPC, then returns 1 when no reply buffer is armed or when the armed buffer's first word and the word after its count are both 0xFFFFFFFF (clearing the buffer), else 0
 func_0011D110	ArmIopReplyBuffer	stores the reply buffer pointer in D_0025C340 and its word count in D_0025C344 and zeroes the first word and the word after the count, which IsIopReplyReady then waits to see filled
-func_0011D140	LoadSoundBankAtLocation	fails with a message while another load is pending, otherwise sends command 3 with a location word and waits for the reply word, which 001BC000 keeps as the bank handle
-func_0011D2A8	StartSoundBankLoad	the asynchronous twin of LoadSoundBankAtLocation: stores the callback and its argument in D_0025C390, sets D_0025C388.busy and sends command 3; PollIopCommands calls the callback with the reply (001BC000 passes func_001BEAC8)
+func_0011D140	LoadSoundBankAtLocation	fails with a message while another load is pending, otherwise sends command 3 with a location word and waits for the reply word, which file_1B7968.cpp keeps as the bank handle
+func_0011D2A8	StartSoundBankLoad	the asynchronous twin of LoadSoundBankAtLocation: stores the callback and its argument in D_0025C390, sets D_0025C388.busy and sends command 3; PollIopCommands calls the callback with the reply (file_1B7968.cpp passes func_001BEAC8)
 func_0011D420	NotifyIopBanksChanged	queues IOP command 8 without data; EnsureSoundBankLoaded calls it after it loads a bank with LoadSoundBankAtLocation and after it clears an unloaded bank's handle, StoreStagedBankHandle when a staged bank's handle arrives
-func_0011D450	UnloadSoundBank	sends command 6 with a bank handle; 001BC000 calls it with the bank handle after stopping the voice started from that bank
+func_0011D450	UnloadSoundBank	sends command 6 with a bank handle; file_1B7968.cpp calls it with the bank handle after stopping the voice started from that bank
 func_0011D480	SetIopVolumeChannel	sends command 9 with a channel number and a value; callers pass values scaled by 1024 (the master channel 8 from func_001C05D0, channels 0 to 3 from func_001C0600)
 func_0011D4B8	GetIopVolumeChannel	sends command 10 with a channel number and returns the reply; func_0018E940 saves channels 2 and 8 with it and func_0018EAA0 restores them with SetIopVolumeChannel
 func_0011D4E0	SetIopSoundOptionFlag	queues IOP command 11 with one word; its only caller func_001C0790 passes whether the save data's option bit 0x40 (g_saveData->f19EC) is set (ResetVolumeChannelFactors, ResumeAtSavedLevel, ActivatePauseMenuSelection)
@@ -16,8 +16,8 @@ func_0011D640	PauseIopVoice	queues IOP command 0x13 with a voice handle; the tex
 func_0011D670	ResumeIopVoice	queues IOP command 0x14 with a voice handle: the counterpart of PauseIopVoice, called by the same panels and menus (func_001BEA50, func_001BED70) when they close
 func_0011D6A8	SuspendIopVoices	queues command 0x16 with a voice mask; func_0018E940 passes 0xFFFFFFFF before it saves the volume channels and syncs the disc, and func_0018EAA0 undoes it with ResumeIopVoices
 func_0011D6D8	ResumeIopVoices	queues command 0x17 with a voice mask; func_0018EAA0 passes 0xFFFFFFFF last, after restoring the volume channels SuspendIopVoices' caller saved
-func_0011D708	IsVoiceBusy	sends command 0x19 with a voice handle and returns the reply, which 001BC000 loops on after StopSoundVoice until it reads 0
-func_0011D730	RequestVoiceCallback	queues command 0x19 with a voice handle plus a callback function and a 64-bit argument for PollIopCommands to call (001C0000 passes func_001BFFC8 and a record address)
+func_0011D708	IsVoiceBusy	sends command 0x19 with a voice handle and returns the reply, which file_1B7968.cpp loops on after StopSoundVoice until it reads 0
+func_0011D730	RequestVoiceCallback	queues command 0x19 with a voice handle plus a callback function and a 64-bit argument for PollIopCommands to call (file_1B7968.cpp passes func_001BFFC8 and a record address)
 func_0011D760	TestSoundInBank	sends IOP command 0x1A with a bank handle and a sound's argument and returns the reply; EnsureSoundBankLoaded marks each of the bank's sound entries available when it is nonzero
 func_0011D798	SetVoiceVolumePan	sends command 0x1B with a voice handle and two words; ApplySoundRecordVolumePan passes the record's volume times 1024 and a pan angle, and the stream voice reset passes 0, 0
 func_0011D7D8	GetSoundPitchBase	sends command 0x1C with a bank handle and a sound index and returns the reply, which func_001BF7F8 adds to its scaled pitch term
@@ -30,16 +30,16 @@ func_0011D968	SendIopCommandAndWait	copies the argument bytes into D_0025C400, w
 func_0011DB00	QueueIopCommand	appends a command (id, length, bytes, plus a callback word and a 64-bit argument) to the current command buffer, polling and waiting while the buffer is full (it prints a buffer-full message); a zero-length command with nothing queued is sent at once
 func_0011DDD8	CommitQueuedIopCommand	adds one to the command count of the current buffer D_0025C360[D_0025C380] and polls with PollIopCommands (the last step of QueueIopCommand)
 func_0011DE18	FlushIopCommandBuffer	sends the current command buffer as command 0x4D together with its callback table, then switches D_0025C380 to the other buffer and empties it
-func_0011DF58	EnableIopDiscAccess	sends command 0x2A with four words (001BC000 passes 1, 0x2000, 1, 1 at start-up) and keeps the reply in D_0025C34C, which StartDiscRead, SyncDiscRead and GetDiscReadError test to choose the IOP path
+func_0011DF58	EnableIopDiscAccess	sends command 0x2A with four words (file_1B7968.cpp passes 1, 0x2000, 1, 1 at start-up) and keeps the reply in D_0025C34C, which StartDiscRead, SyncDiscRead and GetDiscReadError test to choose the IOP path
 func_0011E010	StopAllIopSounds	queues IOP command 0x34 without data; StopAllSoundsAndWait and StartMovieStream call it before waiting on command 0x36
 func_0011E048	StartStreamedVoice	packs seven words (location, two packed halfword pairs and three flags) and sends command 0x2C, returning the voice handle; func_001BE728 and func_001BE5F8 keep it in D_0027472C
 func_0011E0B0	QueryIopStreamVoice	queues IOP command 0x2E with one word; CheckStreamVoicePending sends it for g_streamVoice while no reply is pending
 func_0011E0E0	RequestStreamCallback	queues command 0x4F with a stream handle plus a callback function and 64-bit argument (func_001BE5F8 passes func_001BE5D8 and the handle)
 func_0011E110	WaitForIopSoundStop	sends IOP command 0x36 with one word and waits; StopAllSoundsAndWait and StartMovieStream pass 1 after StopAllIopSounds and draining PollIopCommands, before SyncDiscRead
-func_0011E138	StartDiscRead	with D_0025C34C zero it forwards to func_00203B18, otherwise it checks the drive is idle, sets busy in the shared packet and sends command 0x38 with three words; 00140000's read loops call it and repeat until it returns 1
+func_0011E138	StartDiscRead	with D_0025C34C zero it forwards to func_00203B18, otherwise it checks the drive is idle, sets busy in the shared packet and sends command 0x38 with three words; disc_access.cpp's read loops call it and repeat until it returns 1
 func_0011E1F8	SyncDiscRead	with D_0025C34C zero it forwards to func_002032C8, otherwise it polls until the shared packet's busy word clears (argument 1 only tests and returns 1 when still busy); callers loop it after StartDiscRead
 func_0011E2A0	CloseDiscStream	without IOP disc access calls StopDiscRead, else queues IOP command 0x37 and returns 1; CloseBufferedStream calls it
-func_0011E2E8	GetDiscReadError	with D_0025C34C zero it forwards to func_00203D90, otherwise returns the word at +0x10 of the shared packet D_00260DC0; 00134000 and 00140000 read it after SyncDiscRead as the read's error
+func_0011E2E8	GetDiscReadError	with D_0025C34C zero it forwards to func_00203D90, otherwise returns the word at +0x10 of the shared packet D_00260DC0; file_137290.cpp and disc_access.cpp read it after SyncDiscRead as the read's error
 func_0011E328	SetIopChannelValue	sends command 0xE with a channel number and a value; PushIopChannel2Setting, PopIopChannel2Setting and SetIopChannel2Setting call it for channel 2 with a table entry
 func_0011E360	SetIopChannelValuePair	sends command 0xF with a channel number and two words; the channel 2 setting functions pass the same value twice
 func_0011E428	OpenIopRing	sends command 0x3B with five words (movie_player passes 0x6000, 0x400, 0, 2, 2) and returns the reply, which becomes the ring address handed to func_0018E678

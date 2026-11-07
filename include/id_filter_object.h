@@ -5,7 +5,7 @@
 // it takes the placement of a child object (func_0012F8C8, slot 16) or finds an object by id,
 // and slot 17 (func_0012F9B8) hands that placement on to an object it keeps at +0x5A0. Written
 // for this project from what retail's code does (config/us/classes.tsv;
-// src/main/0012C000.cpp).
+// src/main/placed_object.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset. The class adds no slot to 0x03's descriptor.

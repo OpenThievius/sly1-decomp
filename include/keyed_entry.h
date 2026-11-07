@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// An entry of the table D_00247AF0 (00160000.cpp defines its 46 entries): a key, an id, a name
+// An entry of the table D_00247AF0 (global_tables.cpp defines its 46 entries): a key, an id, a name
 // and flags. func_001600A0 returns the entry whose key is the same as its argument's (stride
 // 0x2C, 46 entries: it stops at D_00247AF0 + 0x7E8), func_00160110 the one with an id,
 // func_001601A0 and func_00160208 read the id and the flags (func_00160208 counts the flags
@@ -14,7 +14,7 @@ struct KeyedEntry {
     IdentityKey key;            // 0x00: func_001600A0 compares its words 2 and 6
     s32 id;                 // 0x20: func_001601A0, func_00160208
     union {
-        const char* name;   // 0x24: 00160000.cpp's initialisers
+        const char* name;   // 0x24: global_tables.cpp's initialisers
         s32 i24;            // 0x24: Ent_1600A0 (as a word)
     };
     union {
@@ -25,6 +25,6 @@ struct KeyedEntry {
 
 typedef char check_KeyedEntry[sizeof(KeyedEntry) == 0x2C ? 1 : -1];
 
-extern const KeyedEntry g_keyedEntries[];   // 00160000.cpp: 46 entries
+extern const KeyedEntry g_keyedEntries[];   // global_tables.cpp: 46 entries
 
 #endif

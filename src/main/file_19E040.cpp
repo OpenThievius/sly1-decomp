@@ -2,7 +2,7 @@
 // The source file from 0x19E040 to 0x1A7FE8, built whole (config/us/files.tsv): one file between
 // two exact edges, which could be several. It holds the effect owner (class 0x1E) and the effects
 // it runs (func_0019EA78 creates one; func_0019E908 picks its kind's table of functions, the 27
-// tables at 0x219C20 in src/main/0019C000.cpp), with their VU0 helpers; then class 0x15, the pair
+// tables at 0x219C20 in src/main/class_descriptors.cpp), with their VU0 helpers; then class 0x15, the pair
 // controller (class 0x5F) and the paired objects (class 0x42), classes 0x43, 0x44 and 0x45 and
 // the pad pattern player. Its .rodata (0x24C930 to 0x24CBC4) is the FLT_MAX constants of the VU0
 // functions and of func_001A1DF0 and func_001A54F8 (literals in their code), the jump tables, the
@@ -140,7 +140,7 @@ void UnregisterCollider(Collider* self);
 
 void ComputeGridBlendWeights(f32 x, f32 y, f32 z, C8B* o, void* p);
 
-// An entry of the effect kinds' tables of functions (src/main/0019C000.cpp).
+// An entry of the effect kinds' tables of functions (src/main/class_descriptors.cpp).
 typedef void (*Fn_Table)();
 
 extern const Fn_Table g_basicEffectMethods[];

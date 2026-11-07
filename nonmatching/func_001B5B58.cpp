@@ -2,7 +2,7 @@
 // BYTES 215/232 (92.7%), checked 2026-11-07
 // NEAR: registers only: every instruction lines up once the last test is `if (base == 0)` and the
 //       table is read through a pointer local; temporaries differ in the two table paths. The
-//       tables are SjisCharEntry in 001E4000.cpp.
+//       tables are SjisCharEntry in state_walker.cpp.
 #include "common.h"
 #include "script_value.h"
 #include "cursor_animator.h"

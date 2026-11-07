@@ -280,7 +280,7 @@ void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
 s32 IsObjectTreeAtRest(Collider* n);
 void ClearRootTries(Collider* n);
 void QueryIopStreamVoice(s32 a0);
-// A row of g_soundEntries (001E4000.cpp defines it): the bank a sound is in, -1 for none, and
+// A row of g_soundEntries (global_tables.cpp defines it): the bank a sound is in, -1 for none, and
 // its index in that bank.
 struct SoundEntry { s32 bank; s32 index; };
 extern SoundEntry g_soundEntries[];

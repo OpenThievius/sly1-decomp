@@ -2,7 +2,7 @@
 // Class 0x40 (descriptor D_0021C598, 0x6A0 bytes), a part with collision that moves between
 // states (slot 20 and 45 set one, slot 17 steps it) and shows one of up to sixteen objects (or one
 // of eight, in mode 1) at a time. Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/00158000.cpp).
+// (config/us/classes.tsv; src/main/file_1549C8.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

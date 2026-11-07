@@ -3,8 +3,8 @@
 // load method 0x1289C0 reads is the common block of docs/DISC.md ("Objects"). Written for this
 // project from what retail's code does (config/us/classes.tsv).
 //
-// The fields are the ones the class's own methods (src/main/00120000.cpp, 00124000.cpp,
-// 00128000.cpp, file_15F678.cpp) and the families under it read. Records only the class points
+// The fields are the ones the class's own methods (src/main/pose_source.cpp,
+// placed_object.cpp, file_15F678.cpp) and the families under it read. Records only the class points
 // to, which its readers see in different shapes, stay `void*` until their own types exist.
 #ifndef PLACED_OBJECT_H
 #define PLACED_OBJECT_H

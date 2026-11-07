@@ -3,7 +3,7 @@
 // class descriptor every object points to. Written for this project from what retail's code
 // does (config/us/classes.tsv, docs/DISC.md "Objects").
 //
-// The fields are the ones the class's own methods (src/main/00180000.cpp, 0011C000.cpp) and its
+// The fields are the ones the class's own methods (src/main/base_object.cpp, pose_source.cpp) and its
 // subclasses read; 0x0C, 0x10 and 0x24 stay padding until a reader names them.
 #ifndef BASE_OBJECT_H
 #define BASE_OBJECT_H

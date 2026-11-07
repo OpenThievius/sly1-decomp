@@ -17,6 +17,6 @@ struct LevelEntry {
 
 typedef char check_LevelEntry[sizeof(LevelEntry) == 0x2C ? 1 : -1];
 
-extern const LevelEntry g_levelEntries[33];    // 001E4000.cpp
+extern const LevelEntry g_levelEntries[33];    // global_tables.cpp
 
 #endif

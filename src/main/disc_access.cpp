@@ -13,7 +13,7 @@ s32 g_discStatus = -1;
 s32 g_lastDiscReadResult = 0;
 s32 g_discReadErrors[6] = { 0, 0, 0, 0, 0, 0 };
 
-// In another stretch of .rodata (00140000.cpp defines them): the read mode, the checked sector
+// In another stretch of .rodata (global_tables.cpp defines them): the read mode, the checked sector
 // and its CRC-32.
 extern const u32 D_00247AA0;
 extern const u32 D_00247AA4;
