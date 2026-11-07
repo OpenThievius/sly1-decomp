@@ -187,7 +187,7 @@ extern void* const D_002486B0[];
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-// The screen elements' methods, in src/main/file_1AA268.cpp.
+// The screen elements' methods, in src/main/screen_element.cpp.
 void func_001AA268(ScreenElement* self);
 void func_001AA298(ScreenElement* self);
 void func_001AAF88(T217D_E30* self);

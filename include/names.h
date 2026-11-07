@@ -1974,6 +1974,7 @@
 #define SetTimerState                              func_001ABE20
 #define DecrementGaugeCount                        func_001AC060
 #define DrawGauge                                  func_001AC0E8
+#define SetCaptionTextAndSize                      func_001AC638
 #define DrawElementWithFadedFrame                  func_001AC700
 #define SetElementTextAfterSlideOut                func_001AC910
 #define SetElementModeApplyingPendingText          func_001AC990
@@ -1995,6 +1996,7 @@
 #define SetElementModeRebuildingText               func_001AE130
 #define UpdatePromptElement                        func_001AE178
 #define DrawLineSegment                            func_001AE3B8
+#define SetElementModeClearingFlag                 func_001AE7F8
 #define GetCyclingGlyph                            func_001AEA08
 #define InitTimedObject                            func_001AECB0
 #define SetTimedObjectTarget                       func_001AECE0

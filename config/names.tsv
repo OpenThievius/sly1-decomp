@@ -2563,3 +2563,5 @@ func_001A99F8	EnterGaugeBarAgentState	slot 92 of class 0x0D: runs EnterAgentStat
 func_001A9A40	UpdateGaugeBarAgent	slot 17 of class 0x0D: runs UpdateAgent, then stops and clears the animation player at 0xC20 once its value at +0x18 is 0
 func_001A9A98	UpdateGaugeBarAgentVisibility	slot 46 of class 0x0D: shows g_gaugeBarElement while AreMenusAndFadeClear, else hides it
 func_001A9C58	SetGaugeBarAgentValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent
+func_001AC638	SetCaptionTextAndSize	slot 8 of the screen-element table D_00218330: copies the string into the element's text (or clears it), measures it with MeasureText at the element's scale and sets the element's size from it
+func_001AE7F8	SetElementModeClearingFlag	slot 16 (set mode) of the screen-element table D_00218600: clears the element's flag when the mode is 0, then runs SetScreenElementMode
