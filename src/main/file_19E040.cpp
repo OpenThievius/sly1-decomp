@@ -703,25 +703,6 @@ int func_001A7EE8(void* a);
 
 void func_001A7D98(void* self, int mode);
 
-struct Self_1A5F78 {
-    u8 pad0[0x35C];
-    u8 a35C[0xC];
-    u8 a368[0xC];
-    u8 a374[0xC];
-    s32 a380;
-    u8 a384[0xC];
-    u8 a390[0xC];
-    s32 a39C;
-    u8 a3A0[0xC];
-    u8 a3AC[0x14];
-    u8 pad1[0x628 - 0x3C0];
-    s32 a628;
-    u8 pad2[0x638 - 0x62C];
-    f32 a638;
-    f32 a63C;
-    f32 a640;
-};
-
 void func_00152600(void* a, void* b);
 
 void func_00152470(void* a, void* b);
@@ -790,27 +771,7 @@ void func_00152600(u8* a, void* b);
 
 void func_00152470(u8* a, void* b);
 
-struct Self_1A5B28 {
-    u8 pad0[0x35C];
-    u8 a35C[0x368 - 0x35C];
-    u8 a368[0x374 - 0x368];
-    u8 a374[0x380 - 0x374];
-    s32 i380;
-    u8 pad1[0x3B8 - 0x384];
-    s32 i3B8;
-    u8 pad2[0x3C4 - 0x3BC];
-    s32 i3C4;
-    u8 pad3[0x624 - 0x3C8];
-    s32 i624;
-    u8 pad4[0x62C - 0x628];
-    f32 f62C;
-    f32 f630;
-    f32 f634;
-};
-
 void func_001ED650(void* self, f32 x, f32 y, f32 z);
-
-struct Self_1A63F8 { u8 pad[0x348]; f32 f348; f32 f34C; };
 
 s32 func_001A7420(HitTarget* self);
 
@@ -831,29 +792,6 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 void func_00155FA0(void* self);
 
 struct Rec_1A43C8 { u8 pad[8]; s32 kind; };
-
-struct Self_1A5DF8 {
-    u8 pad0[0x35C];
-    u8 a35C[0x374 - 0x35C];
-    u8 a374[0x380 - 0x374];
-    s32 i380;
-    u8 pad1[0x384 - 0x384];
-    u8 a384[0x390 - 0x384];
-    u8 a390[0x39C - 0x390];
-    s32 i39C;
-    u8 a3A0[0x3AC - 0x3A0];
-    u8 a3AC[0x3C0 - 0x3AC];
-    s32 i3C0;
-    u8 pad2[0x624 - 0x3C4];
-    s32 i624;
-    s32 i628;
-    f32 f62C;
-    f32 f630;
-    f32 f634;
-    f32 f638;
-    f32 f63C;
-    f32 f640;
-};
 
 struct __attribute__((aligned(16))) Quad_1A72B0 { s32 a; s32 b; f32 f; s32 d; };
 
@@ -2732,7 +2670,7 @@ ASM_FUNC(func_001A5120);
 
 void func_001A54F8(PairController* self)
 {
-    if (*(s32*)(self->list390 + 0xC) >= self->f628) {
+    if (self->count39C >= self->f628) {
         self->f640 = 3.4028234663852886e+38f;
     } else {
         Node_1A54F8* owner = *(Node_1A54F8**)(self->list390);
@@ -2753,7 +2691,7 @@ void func_001A54F8(PairController* self)
             RemoveFromList(self->list390, owner);
             AppendToList(self->list384, owner);
             *(void**)((u8*)owner + 0x560) = node;
-            (*(s32*)(self->list390 + 0xC))++;
+            (self->count39C)++;
             ((void (*)(void*))owner->vtbl[0x18 / 4])(owner);
             ((void (*)(void*, void*))owner->vtbl[0x84 / 4])(owner, node + 0x140);
             ((void (*)(void*, void*))owner->vtbl[0x88 / 4])(owner, node + 0x110);
@@ -2812,18 +2750,18 @@ void func_001A5760(PairController* self, f32 dt)
 #undef I
 #undef P
 
-void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
+void func_001A5B28(PairController* self, HitTarget* obj)
 {
-    s32 n = self->i3C4 + 1;
-    f32 x = (f32)self->i3B8;
-    self->i3C4 = n;
+    s32 n = self->f3C4 + 1;
+    f32 x = (f32)self->limit3B8;
+    self->f3C4 = n;
     UpdatePairControllerTuning(self, (f32)n / x);
     if (obj->partner != 0) {
-        RemoveFromList(self->a35C, obj);
+        RemoveFromList(self->list35C, obj);
     } else {
-        RemoveFromList(self->a368, obj);
+        RemoveFromList(self->list368, obj);
     }
-    AppendToList(self->a374, obj);
+    AppendToList(self->list374, obj);
     if (obj->partner != 0) {
         if (func_001A6090(self, obj->partner) != 0) {
             SetPairedState(obj->partner, 3);
@@ -2834,11 +2772,11 @@ void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
     }
     obj->partner = 0;
     obj->desc->m03(obj);
-    if (self->i380 == self->i624) {
+    if (self->count380 == self->limit624) {
         f32 t = RandomFloatInRange(self->f62C, self->f630);
         self->f634 = g_gameClock[1] + t;
     }
-    self->i380 = self->i380 - 1;
+    self->count380 = self->count380 - 1;
 }
 
 void func_001A5C38(u8* self, PairedObject* obj)
@@ -2877,15 +2815,15 @@ void func_001A5DD8(void* unused, PairedObject* obj)
     SetSoundStateObjectState(obj->attachment, 1);
 }
 
-void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
+void func_001A5DF8(PairController* self, PairedObject* obj)
 {
-    self->i3C0 = self->i3C0 + 1;
-    RemoveFromList(self->a35C, obj->partner);
-    AppendToList(self->a374, obj->partner);
-    RemoveFromList(self->a384, obj);
-    AppendToList(self->a390, obj);
-    RemoveFromList(self->a3AC, obj->attachment);
-    AppendToList(self->a3A0, obj->attachment);
+    self->f3C0 = self->f3C0 + 1;
+    RemoveFromList(self->list35C, obj->partner);
+    AppendToList(self->list374, obj->partner);
+    RemoveFromList(self->list384, obj);
+    AppendToList(self->list390, obj);
+    RemoveFromList(self->list3AC, obj->attachment);
+    AppendToList(self->list3A0, obj->attachment);
     {
         PairedObject* p = (PairedObject*)obj->partner;
         p->desc->m15(p, 0);
@@ -2899,26 +2837,26 @@ void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
     obj->attachment = 0;
     ((PairedObject*)obj->partner)->partner = 0;
     obj->partner = 0;
-    if (self->i380 == self->i624) {
+    if (self->count380 == self->limit624) {
         f32 t = RandomFloatInRange(self->f62C, self->f630);
         self->f634 = g_gameClock[1] + t;
     }
-    self->i380 = self->i380 - 1;
-    if (self->i39C == self->i628) {
+    self->count380 = self->count380 - 1;
+    if (self->count39C == self->f628) {
         f32 t2 = RandomFloatInRange(self->f638, self->f63C);
         self->f640 = g_gameClock[1] + t2;
     }
-    self->i39C = self->i39C - 1;
+    self->count39C = self->count39C - 1;
     StartSoundEffect(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
+void func_001A5F78(PairController* self, PairedObject* obj)
 {
-    RemoveFromList(self->a384, obj);
-    AppendToList(self->a390, obj);
+    RemoveFromList(self->list384, obj);
+    AppendToList(self->list390, obj);
     if (obj->attachment != 0) {
-        RemoveFromList(self->a3AC, obj->attachment);
-        AppendToList(self->a3A0, obj->attachment);
+        RemoveFromList(self->list3AC, obj->attachment);
+        AppendToList(self->list3A0, obj->attachment);
         SetSoundStateObjectState(obj->attachment, 0);
     }
     PairedObject* child = (PairedObject*)obj->partner;
@@ -2926,8 +2864,8 @@ void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
         if (child->parent == obj) {
             func_001A5D50(self, obj);
         }
-        RemoveFromList(self->a35C, child);
-        AppendToList(self->a368, child);
+        RemoveFromList(self->list35C, child);
+        AppendToList(self->list368, child);
         if (func_001A6238(self, child) == 0) {
             child->partner = 0;
         }
@@ -2935,11 +2873,11 @@ void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
     obj->attachment = 0;
     obj->partner = 0;
     obj->desc->m03(obj);
-    if (self->a39C == self->a628) {
-        f32 r = RandomFloatInRange(self->a638, self->a63C);
-        self->a640 = g_gameClock[1] + r;
+    if (self->count39C == self->f628) {
+        f32 r = RandomFloatInRange(self->f638, self->f63C);
+        self->f640 = g_gameClock[1] + r;
     }
-    self->a39C = self->a39C - 1;
+    self->count39C = self->count39C - 1;
 }
 
 INCLUDE_RODATA(D_0024CAF4);
@@ -2982,12 +2920,12 @@ INCLUDE_RODATA(D_0024CAFC);
 
 ASM_FUNC(func_001A6328);
 
-void func_001A63F8(Self_1A63F8* self, PairedObject* b)
+void func_001A63F8(PairController* self, PairedObject* b)
 {
     f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
-    f32 r1 = RandomFloatInRange(0.0f, self->f348);
+    f32 r1 = RandomFloatInRange(0.0f, self->tune348);
     ComputePolarOffset((u8*)b + 0x570, r0, r1, 0.0f);
-    b->f574 = b->f574 * self->f34C;
+    b->f574 = b->f574 * self->tune34C;
 }
 
 void* func_001A6480(void* self)
