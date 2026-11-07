@@ -15,7 +15,7 @@
 // One of the page's eleven entries; PostLoadWarpPage clears two values and draws a phase and a
 // speed at random from a range.
 struct WarpEntry {
-    void* f00;              // 0x00
+    Animation* f00;         // 0x00: the animation SetWarpPageMode plays when the page opens on it
     void* f04;              // 0x04: an object func_001F1050 starts with weight f08
     f32 f08;                // 0x08
     void* f0C;              // 0x0C: another, with weight f10
@@ -38,8 +38,8 @@ struct WarpPage : PlacedObject {
     s32 f2D8;               // 0x2D8: SetWarpPageMode (cursor, or -1)
     s32 cursor;             // 0x2DC: the entry under the cursor
     s32 f2E0;               // 0x2E0
-    void* f2E4;             // 0x2E4
-    void* f2E8;             // 0x2E8
+    Animation* f2E4;        // 0x2E4: the animation of the page opening (SetWarpPageMode)
+    Animation* f2E8;        // 0x2E8: the one of it closing; its start events of kind 10 name objects func_001F0908 restarts
     s32 f2EC;               // 0x2EC
     void* f2F0;             // 0x2F0: its address goes to func_0012C918 (func_001F1050)
     s32 slot;               // 0x2F4: 1..5 by id, else the value in the global block at +0x19D8

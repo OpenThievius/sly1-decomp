@@ -354,13 +354,12 @@ extern s32 D_00275AF0;
 s32 func_001F00F0(ScreenFade* self, s32 a1, s32 a2);
 void func_001F0220(ScreenFade* self, s32 state);
 void func_001C0000(s32 flag, f32 x);
-struct Sub_1ECBC8;
 struct Dev_1ECBC8;
 typedef void (*Cb_1ECBC8)(void);
 typedef s32 Id_1ECBC8;
 void func_001C7CB8(TempoAgent* self);
-void func_001ED1D8(Sub_1ECBC8* sub);
-void func_001ED278(Sub_1ECBC8* sub);
+void func_001ED1D8(Timeline* sub);
+void func_001ED278(Timeline* sub);
 void func_001B6598(Dev_1ECBC8* dev, s32* out);
 void func_001C0C68(Id_1ECBC8 a, Dev_1ECBC8* b);
 s32 func_001C0C50(Id_1ECBC8 a);
@@ -2262,7 +2261,7 @@ void func_001ECB18(Self_1ECB18* self)
 
 void func_001ECBC8(TempoAgent* self)
 {
-    Sub_1ECBC8* sub;
+    Timeline* sub;
     s32 code;
 
     UpdateAgent(self);
@@ -2271,7 +2270,7 @@ void func_001ECBC8(TempoAgent* self)
             self->fC88 = self->fC8C;
             self->fC64 = self->fC8C * (f32)self->fC60;
         }
-        sub = ((Sub_1ECBC8*)self->fC34);
+        sub = self->fC34;
         self->fC84 = g_gameClock.time + self->fC88;
         self->fC80 = g_gameClock.time;
         self->fC70 = 0;
@@ -2305,7 +2304,7 @@ void func_001ECBC8(TempoAgent* self)
         self->fC84 = self->fC84 + self->fC88;
     }
     self->fC7C = (f32)self->fC78 + (g_gameClock.time - self->fC80) / self->fC88;
-    if (((Sub_1ECBC8*)self->fC38) != 0) RunTimelineEntries(((Sub_1ECBC8*)self->fC38));
+    if (self->fC38 != 0) RunTimelineEntries(self->fC38);
     if (D_00275DB8 == 1) {
         RefreshCachedVoiceParam(1, 0);
         if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
@@ -2350,7 +2349,7 @@ ASM_FUNC(func_001ECF10);
 
 void func_001ED018(TempoAgent* self, s32 value)
 {
-    self->fC34 = (void*)value;
+    self->fC34 = (Timeline*)value;
 }
 
 void func_001ED020(TempoAgent* self)
