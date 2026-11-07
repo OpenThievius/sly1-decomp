@@ -3331,7 +3331,7 @@
 #define SetCachedVoiceParamBuiltin                 func_001DBAC0
 #define GetCachedVoiceParamBuiltin                 func_001DBAE0
 #define RefreshCachedVoiceParamBuiltin             func_001DBB00
-#define HasRoomForWorldBody                        func_001DBB20
+#define IsWorldBodyLimitReached                    func_001DBB20
 #define TakeAttachRecord                           func_001DBB50
 #define ReleaseAttachRecords                       func_001DBB90
 #define TakeCallRecord                             func_001DBBD8
@@ -3345,6 +3345,8 @@
 #define FreeTouchNodes                             func_001DC108
 #define PushCloneBatch                             func_001DC150
 #define PopSpawnedClone                            func_001DC208
+#define GatherCollidersInBox                       func_001DC238
+#define GatherCollidersInSphere                    func_001DC4D0
 #define UnlinkContactTable                         func_001DC710
 #define InitContactTables                          func_001DC740
 #define PushContactTable                           func_001DC7B0
@@ -3725,8 +3727,8 @@
 #define AddOscillatorXEntry                        func_001F36E8
 #define AddOscillatorYZEntry                       func_001F3768
 #define GetOscillatorCurrentEntry                  func_001F37D8
-#define PeekOscillatorCurrentEntry                 func_001F3810
-#define EditOscillatorCurrentEntry                 func_001F3830
+#define GetOscillatorEntryForPeriod                func_001F3810
+#define GetOscillatorEntryForVectors               func_001F3830
 #define SetOscillatorEntryPeriod                   func_001F3850
 #define GetOscillatorEntryPeriod                   func_001F38A0
 #define AppendVector4ToBuffer                      func_001F38F0

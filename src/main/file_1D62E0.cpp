@@ -130,7 +130,6 @@ void func_00137A60(void* self, s32 size, s32 obj);
 
 struct Entry_001DB1E8 { s32 active; s32 a; u8 pad[0x10]; f32 x; f32 y; s32 b; s32 c; };
 
-struct Link_001DBB20 { u32 pad[2]; u32 flags; };
 
 typedef void (*VFn_1DB0C8)(void* self, void* a, s32 b, void* c, s32 d, void* e, s32 f);
 struct Inner_1DB0C8 { VFn_1DB0C8* vtbl; };
@@ -362,8 +361,9 @@ s32 func_00160850(void* obj);
 
 s32 func_00160850(void* obj);
 
-struct Slot_1DD7E8 { s32 key; s32 value; };
-struct Slots_1DD7E8 { u8 pad[0x44]; Slot_1DD7E8 slots[4]; };
+// The four key/value slots after offset 0x44 of a level entry (SetEntrySlotValue, GetEntrySlotValue).
+struct EntrySlot { s32 key; s32 value; };
+struct EntrySlotTable { u8 pad[0x44]; EntrySlot slots[4]; };
 
 void* func_00160810(void* obj);
 
@@ -416,8 +416,6 @@ struct __attribute__((packed)) Pair_1DC150 { s32 n; void* buf; };
 void* func_0018D500(s32 size);
 void* func_00183058(void* a, void* b, void* c);
 
-struct Slot_DD888 { s32 key; s32 value; };
-struct Slots_DD888 { u8 pad[0x44]; Slot_DD888 slots[4]; };
 
 void* func_00160810(void* obj);
 
@@ -440,7 +438,6 @@ extern u8 D_00274738[];
 void func_001C06A0(s32 a, s32 b, f32 x);
 void func_0011D928(s32 a);
 
-struct Node_DC740 { u8 pad[8]; Node_DC740* next; Node_DC740* prev; };
 
 void* func_0018D5C0(u32 n);
 
@@ -1518,7 +1515,7 @@ void* func_001DBB00(void* unused, void* a1, void* a2)
     return RefreshCachedVoiceParam(a1, a2);
 }
 
-s32 func_001DBB20(World* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count38 >= 0xF7 && value == 0; }
+s32 func_001DBB20(World* self, BaseObject* obj, u32 value) { return (obj->desc->flags & 2) && self->count38 >= 0xF7 && value == 0; }
 
 void* func_001DBB50(u8* self)
 {
@@ -1772,7 +1769,7 @@ void func_001DC740(World* self)
     self->tables = (Contacts03*)mem;
     self->freeTables = (Contacts03*)mem;
     for (s32 i = 0; i < 0x100; i++) {
-        Node_DC740* n = (Node_DC740*)((u8*)self->tables + (i << 4));
+        Contacts03* n = (Contacts03*)((u8*)self->tables + (i << 4));
         n->prev = (i < 1) ? 0 : n - 1;
         n->next = (i > 0xFE) ? 0 : n + 1;
     }
@@ -2111,11 +2108,11 @@ s32 func_001DD7A0(void* self, void* obj)
 
 void func_001DD7E8(void* self, void* obj, s32 key, s32 value)
 {
-    Slots_1DD7E8* t = (Slots_1DD7E8*)GetLevelEntryByKey(obj);
+    EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t) {
-        Slot_1DD7E8* found = 0;
+        EntrySlot* found = 0;
         for (u32 i = 0; i < 4; i++) {
-            Slot_1DD7E8* p = &t->slots[i];
+            EntrySlot* p = &t->slots[i];
             if (found == 0 && p->key == 0) {
                 found = p;
                 continue;
@@ -2134,9 +2131,9 @@ void func_001DD7E8(void* self, void* obj, s32 key, s32 value)
 
 s32 func_001DD888(void* self, void* obj, s32 key)
 {
-    Slots_DD888* t = (Slots_DD888*)GetLevelEntryByKey(obj);
+    EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t != 0) {
-        Slot_DD888* p = t->slots;
+        EntrySlot* p = t->slots;
         for (u32 i = 0; i < 4; i++) {
             if (p->key == key) {
                 return p->value;

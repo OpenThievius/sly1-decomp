@@ -12,13 +12,13 @@ func_001F3408	EvaluateOscillator	UpdateAttachments calls it on each chained node
 func_001F36E8	AddOscillatorXEntry	the script built-in func_00107040 calls it: appends a 0xD0-byte entry at +0x50 of a class 0x8D object (count at +0x38, current index at +0x6D0) with the unit X vector, reusing the pending index at +0x40 or taking the next from +0x3C
 func_001F3768	AddOscillatorYZEntry	the script built-in func_001070E0 calls it: appends a 0xD0-byte entry of kind 1 at +0x50 of a class 0x8D object with the unit Y and Z vectors and both its weights at 0.5, counting it at +0x38 and +0x3C
 func_001F37D8	GetOscillatorCurrentEntry	returns the 0xD0-byte entry at the index +0x6D0 of a class 0x8D object, or 0 when it has none, setting +0x8E4 when the mode is 1
-func_001F3810	PeekOscillatorCurrentEntry	returns GetOscillatorCurrentEntry of the object without marking its frames dirty; SetOscillatorEntryPeriod and GetOscillatorEntryPeriod read through it
-func_001F3830	EditOscillatorCurrentEntry	returns GetOscillatorCurrentEntry of the object and marks its frames dirty (+0x8E4); AddOscillatorEntryVectorA and B write through it
+func_001F3810	GetOscillatorEntryForPeriod	returns GetOscillatorCurrentEntry of the object and its mode (1 marks the frames dirty), passing a third word 0 that GetOscillatorCurrentEntry does not read; SetOscillatorEntryPeriod, GetOscillatorEntryPeriod and the script built-ins (func_00109488) use it
+func_001F3830	GetOscillatorEntryForVectors	as GetOscillatorEntryForPeriod with the unread third word 1: returns GetOscillatorCurrentEntry of the object and its mode; AddOscillatorEntryVectorA and B and the script built-ins (func_00109488) use it
 func_001F3850	SetOscillatorEntryPeriod	stores the reciprocal of the value (0 for 0) as the current entry's scale (the script built-in func_00109488 calls it)
 func_001F38A0	GetOscillatorEntryPeriod	returns the reciprocal of the current entry's scale (0 for 0), the value SetOscillatorEntryPeriod stores
 func_001F38F0	AppendVector4ToBuffer	appends four floats to a buffer of capacity 4 (count at +4) and increments the count
-func_001F3928	AddOscillatorEntryVectorA	appends four floats to the four-vector buffer at +0x30 of the current entry (EditOscillatorCurrentEntry, AppendVector4ToBuffer); the script built-in func_00107180 calls it
-func_001F3990	AddOscillatorEntryVectorB	appends four floats to the four-vector buffer at +0x80 of the current entry (EditOscillatorCurrentEntry, AppendVector4ToBuffer); the script built-in func_00107268 calls it
+func_001F3928	AddOscillatorEntryVectorA	appends four floats to the four-vector buffer at +0x30 of the current entry (GetOscillatorEntryForVectors, AppendVector4ToBuffer); the script built-in func_00107180 calls it
+func_001F3990	AddOscillatorEntryVectorB	appends four floats to the four-vector buffer at +0x80 of the current entry (GetOscillatorEntryForVectors, AppendVector4ToBuffer); the script built-in func_00107268 calls it
 func_001F39F8	InitTransformObject	InitObject then copies the identity matrix into the rotation field at +0x40
 func_001F3A40	ReadTransformObject	reads a buffered rotation, a buffered vector and the property records of an object from a stream
 func_001F3A90	ReparentObjectKeepingTransform	converts the object's pos and rot from its old parent's frame to the new one (func_00128018, func_00128150) and calls ReparentObject

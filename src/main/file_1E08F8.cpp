@@ -142,7 +142,6 @@ void func_0011EC40(void* a, void* b);
 
 
 struct Sub_1E30A0 { u8 pad[0x438]; f32 f438; f32 f43C; };
-struct Glob_1E30A0 { u8 pad[0x1C8]; f32 f1C8; };
 
 
 
@@ -189,10 +188,6 @@ struct Loc_1E2870 {
 struct Pq_1E2870 {
     u8 pad0[0x2220];
     s32 f2220;
-};
-struct Glob_1E2870 {
-    u8 pad0[0x224];
-    s32 f224;
 };
 
 
@@ -1467,7 +1462,7 @@ void func_001E2870(OnOffObject* self) {
         st = self->f398;
     }
     if (self->f384 == 0 && p == (u8*)g_player && ((Pq_1E2870*)p)->f2220 == 2 &&
-        ((Glob_1E2870*)g_camera)->f224 == 0) {
+        g_camera->f224 == 0) {
         if (self->f398 == -1) {
             return;
         }
@@ -1509,7 +1504,7 @@ void func_001E30A0(OnOffCameraController* self)
     Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
     if (s != 0) {
         if (s->f438 != 0.0f) {
-            Glob_1E30A0* g = (Glob_1E30A0*)g_camera;
+            Camera* g = g_camera;
             g->f1C8 = s->f43C;
         }
     }
