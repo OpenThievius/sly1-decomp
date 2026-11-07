@@ -9,7 +9,8 @@
 
 void func_001DFD90(void* self);
 
-struct Obj_16C470 {
+// An object of class 0x76 (0xC0 bytes, under 0x75): the fields its set-up writes.
+struct C76 {
     u8 pad0[0x88];
     s32 f88;
     u8 pad8C[0xA8 - 0x8C];
@@ -21,7 +22,7 @@ struct Obj_16C470 {
 
 void func_0016C470(void* a0)
 {
-    Obj_16C470* self = (Obj_16C470*)a0;
+    C76* self = (C76*)a0;
     InitClass75Object(a0);
     self->f88 = 1;
     self->fA8 = 8;
