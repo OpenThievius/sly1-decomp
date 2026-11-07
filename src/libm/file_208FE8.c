@@ -7,7 +7,7 @@ s32 func_00208FE8(MathError* e)
 {
     s32 n = 0;
 
-    if (e->arg1 != e->arg1) {
+    if (e->first_arg != e->first_arg) {
         return 0;
     }
     return n;

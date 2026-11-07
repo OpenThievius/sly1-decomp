@@ -4,50 +4,50 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 one = 1.0f;
-static const f32 tiny = 1.0e-30f;
+static const f32 one_f = 1.0f;
+static const f32 ten_to_minus_30 = 1.0e-30f;
 
 f32 func_00208068(f32 x)
 {
-    s32 hx, ix, i, s, r, t, m;
-    f32 res;
+    s32 bits, exponent, i, twice_root, root, trial, bit;
+    f32 result;
 
-    FLOAT_TO_BITS(hx, x);
-    if ((hx & 0x7F800000) == 0x7F800000)
+    FLOAT_TO_BITS(bits, x);
+    if ((bits & 0x7F800000) == 0x7F800000)
         return x * x + x;
-    if (hx <= 0) {
-        if ((hx & 0x7FFFFFFF) == 0)
+    if (bits <= 0) {
+        if ((bits & 0x7FFFFFFF) == 0)
             return x;
-        if (hx < 0)
+        if (bits < 0)
             return (x - x) / (x - x);
     }
-    ix = hx >> 23;
-    if (ix == 0) {
-        for (i = 0; (hx & 0x800000) == 0; i++)
-            hx <<= 1;
-        ix -= i - 1;
+    exponent = bits >> 23;
+    if (exponent == 0) {
+        for (i = 0; (bits & 0x800000) == 0; i++)
+            bits <<= 1;
+        exponent -= i - 1;
     }
-    ix -= 127;
-    hx = (hx & 0x7FFFFF) | 0x800000;
-    hx <<= ix & 1;
-    hx <<= 1;
-    ix >>= 1;
-    s = 0;
-    r = 0;
-    m = 0x1000000;
-    while (m != 0) {
-        t = s + m;
-        if (t <= hx) {
-            s = t + m;
-            hx -= t;
-            r += m;
+    exponent -= 127;
+    bits = (bits & 0x7FFFFF) | 0x800000;
+    bits <<= exponent & 1;
+    bits <<= 1;
+    exponent >>= 1;
+    twice_root = 0;
+    root = 0;
+    bit = 0x1000000;
+    while (bit != 0) {
+        trial = twice_root + bit;
+        if (trial <= bits) {
+            twice_root = trial + bit;
+            bits -= trial;
+            root += bit;
         }
-        hx <<= 1;
-        m = (u32)m >> 1;
+        bits <<= 1;
+        bit = (u32)bit >> 1;
     }
-    if (hx != 0)
-        r += r & 1;
-    hx = (r >> 1) + 0x3F000000;
-    BITS_TO_FLOAT(res, hx + (ix << 23));
-    return res;
+    if (bits != 0)
+        root += root & 1;
+    bits = (root >> 1) + 0x3F000000;
+    BITS_TO_FLOAT(result, bits + (exponent << 23));
+    return result;
 }

@@ -11,12 +11,12 @@
  * singularity, 3 an overflow, 4 an underflow), the function's name, both arguments, the result
  * to return, and an error code to store when it is not zero. */
 typedef struct MathError {
-    s32 type;
-    const char* name;
-    double arg1;
-    double arg2;
+    s32 kind;
+    const char* function;
+    double first_arg;
+    double second_arg;
     double result;
-    s32 err;
+    s32 error_code;
 } MathError;
 
 extern const s32 D_0024FF78;    /* the error mode: -1 none, 0, 1, 2 (only the error code) */

@@ -10,25 +10,25 @@ f32 func_00206A68(f32 y, f32 x);
 f32 func_00205778(f32 y, f32 x)
 {
     MathError e;
-    f32 z = func_00206A68(y, x);
+    f32 value = func_00206A68(y, x);
 
     if (D_0024FF78 == -1 || func_00209238(x) || func_00209238(y)) {
-        return z;
+        return value;
     }
     if (x == 0.0f && y == 0.0f) {
-        e.arg1 = (double)y;
-        e.arg2 = (double)x;
-        e.type = 1;
-        e.name = "atan2f";
+        e.first_arg = (double)y;
+        e.second_arg = (double)x;
+        e.kind = 1;
+        e.function = "atan2f";
         e.result = 0.0;
-        e.err = 0;
+        e.error_code = 0;
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.error_code != 0) {
+            *func_002014F0() = e.error_code;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

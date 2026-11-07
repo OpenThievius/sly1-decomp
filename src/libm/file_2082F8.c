@@ -13,195 +13,195 @@ static const f32 half_pi_parts[] = {
     8.3009228831e-20f, 3.2756352257e-22f, 6.3331015649e-25f,
 };
 
-static const f32 zero = 0.0f;
-static const f32 one = 1.0f;
-static const f32 f256 = 2.5600000000e+02f;
-static const f32 f1_256 = 3.9062500000e-03f;
+static const f32 zero_f = 0.0f;
+static const f32 one_f = 1.0f;
+static const f32 digit_base = 2.5600000000e+02f;
+static const f32 inv_digit_base = 3.9062500000e-03f;
 
 f32 func_00209260(f32 x, s32 n);
 f32 func_00205318(f32 x);
 
-s32 func_002082F8(f32* x, f32* y, s32 e0, s32 nx, s32 prec, const s32* table)
+s32 func_002082F8(f32* digits, f32* parts, s32 exponent, s32 digit_count, s32 precision, const s32* two_over_pi)
 {
-    s32 jz, jx, jv, jk, carry, n, iq[20], i, j, k, m, q0, ih;
-    f32 z, fw, f[20], fq[20], q[20];
+    s32 last_term, last_digit, first_index, term_count, carry, quadrant, chunks[20], i, j, k, limit, chunk_exp, round_state;
+    f32 value, sum, table_digits[20], products[20], terms[20];
 
-    jv = (e0 - 3) / 8;
-    if (jv < 0) {
-        jv = 0;
+    first_index = (exponent - 3) / 8;
+    if (first_index < 0) {
+        first_index = 0;
     }
-    q0 = e0 - 8 * (jv + 1);
+    chunk_exp = exponent - 8 * (first_index + 1);
 
-    jk = terms_for_precision[prec];
+    term_count = terms_for_precision[precision];
 
-    jx = nx - 1;
-    j = jv - jx;
-    m = jx + jk;
-    for (i = 0; i <= m; i++, j++) {
-        f[i] = (j < 0) ? zero : (f32)table[j];
+    last_digit = digit_count - 1;
+    j = first_index - last_digit;
+    limit = last_digit + term_count;
+    for (i = 0; i <= limit; i++, j++) {
+        table_digits[i] = (j < 0) ? zero_f : (f32)two_over_pi[j];
     }
 
-    for (i = 0; i <= jk; i++) {
-        for (j = 0, fw = zero; j <= jx; j++) {
-            fw += x[j] * f[jx + i - j];
+    for (i = 0; i <= term_count; i++) {
+        for (j = 0, sum = zero_f; j <= last_digit; j++) {
+            sum += digits[j] * table_digits[last_digit + i - j];
         }
-        q[i] = fw;
+        terms[i] = sum;
     }
 
-    jz = jk;
+    last_term = term_count;
 recompute:
-    for (i = 0, j = jz, z = q[jz]; j > 0; i++, j--) {
-        fw = (f32)(s32)(f1_256 * z);
-        iq[i] = (s32)(z - f256 * fw);
-        z = q[j - 1] + fw;
+    for (i = 0, j = last_term, value = terms[last_term]; j > 0; i++, j--) {
+        sum = (f32)(s32)(inv_digit_base * value);
+        chunks[i] = (s32)(value - digit_base * sum);
+        value = terms[j - 1] + sum;
     }
 
-    z = func_00209260(z, q0);
-    z -= 8.0f * func_00205318(z * 0.125f);
-    n = (s32)z;
-    z -= (f32)n;
-    ih = 0;
-    if (q0 > 0) {
-        i = iq[jz - 1] >> (8 - q0);
-        n += i;
-        iq[jz - 1] -= i << (8 - q0);
-        ih = iq[jz - 1] >> (7 - q0);
-    } else if (q0 == 0) {
-        ih = iq[jz - 1] >> 8;
-    } else if (z >= 0.5f) {
-        ih = 2;
+    value = func_00209260(value, chunk_exp);
+    value -= 8.0f * func_00205318(value * 0.125f);
+    quadrant = (s32)value;
+    value -= (f32)quadrant;
+    round_state = 0;
+    if (chunk_exp > 0) {
+        i = chunks[last_term - 1] >> (8 - chunk_exp);
+        quadrant += i;
+        chunks[last_term - 1] -= i << (8 - chunk_exp);
+        round_state = chunks[last_term - 1] >> (7 - chunk_exp);
+    } else if (chunk_exp == 0) {
+        round_state = chunks[last_term - 1] >> 8;
+    } else if (value >= 0.5f) {
+        round_state = 2;
     }
 
-    if (ih > 0) {
-        n += 1;
+    if (round_state > 0) {
+        quadrant += 1;
         carry = 0;
-        for (i = 0; i < jz; i++) {
-            j = iq[i];
+        for (i = 0; i < last_term; i++) {
+            j = chunks[i];
             if (carry == 0) {
                 if (j != 0) {
                     carry = 1;
-                    iq[i] = 0x100 - j;
+                    chunks[i] = 0x100 - j;
                 }
             } else {
-                iq[i] = 0xFF - j;
+                chunks[i] = 0xFF - j;
             }
         }
-        if (q0 > 0) {
-            switch (q0) {
+        if (chunk_exp > 0) {
+            switch (chunk_exp) {
             case 1:
-                iq[jz - 1] &= 0x7F;
+                chunks[last_term - 1] &= 0x7F;
                 break;
             case 2:
-                iq[jz - 1] &= 0x3F;
+                chunks[last_term - 1] &= 0x3F;
                 break;
             }
         }
-        if (ih == 2) {
-            z = one - z;
+        if (round_state == 2) {
+            value = one_f - value;
             if (carry != 0) {
-                z -= func_00209260(one, q0);
+                value -= func_00209260(one_f, chunk_exp);
             }
         }
     }
 
-    if (z == zero) {
+    if (value == zero_f) {
         j = 0;
-        for (i = jz - 1; i >= jk; i--) {
-            j |= iq[i];
+        for (i = last_term - 1; i >= term_count; i--) {
+            j |= chunks[i];
         }
         if (j == 0) {
-            for (k = 1; iq[jk - k] == 0; k++) {
+            for (k = 1; chunks[term_count - k] == 0; k++) {
             }
-            for (i = jz + 1; i <= jz + k; i++) {
-                f[jx + i] = (f32)table[jv + i];
-                for (j = 0, fw = zero; j <= jx; j++) {
-                    fw += x[j] * f[jx + i - j];
+            for (i = last_term + 1; i <= last_term + k; i++) {
+                table_digits[last_digit + i] = (f32)two_over_pi[first_index + i];
+                for (j = 0, sum = zero_f; j <= last_digit; j++) {
+                    sum += digits[j] * table_digits[last_digit + i - j];
                 }
-                q[i] = fw;
+                terms[i] = sum;
             }
-            jz += k;
+            last_term += k;
             goto recompute;
         }
     }
 
-    if (z == zero) {
-        jz -= 1;
-        q0 -= 8;
-        while (iq[jz] == 0) {
-            jz--;
-            q0 -= 8;
+    if (value == zero_f) {
+        last_term -= 1;
+        chunk_exp -= 8;
+        while (chunks[last_term] == 0) {
+            last_term--;
+            chunk_exp -= 8;
         }
     } else {
-        z = func_00209260(z, -q0);
-        if (z >= f256) {
-            fw = (f32)(s32)(f1_256 * z);
-            iq[jz] = (s32)(z - f256 * fw);
-            jz += 1;
-            q0 += 8;
-            iq[jz] = (s32)fw;
+        value = func_00209260(value, -chunk_exp);
+        if (value >= digit_base) {
+            sum = (f32)(s32)(inv_digit_base * value);
+            chunks[last_term] = (s32)(value - digit_base * sum);
+            last_term += 1;
+            chunk_exp += 8;
+            chunks[last_term] = (s32)sum;
         } else {
-            iq[jz] = (s32)z;
+            chunks[last_term] = (s32)value;
         }
     }
 
-    fw = func_00209260(one, q0);
-    for (i = jz; i >= 0; i--) {
-        q[i] = fw * (f32)iq[i];
-        fw *= f1_256;
+    sum = func_00209260(one_f, chunk_exp);
+    for (i = last_term; i >= 0; i--) {
+        terms[i] = sum * (f32)chunks[i];
+        sum *= inv_digit_base;
     }
 
-    for (i = jz; i >= 0; i--) {
-        for (fw = zero, k = 0; k <= jk && k <= jz - i; k++) {
-            fw += half_pi_parts[k] * q[i + k];
+    for (i = last_term; i >= 0; i--) {
+        for (sum = zero_f, k = 0; k <= term_count && k <= last_term - i; k++) {
+            sum += half_pi_parts[k] * terms[i + k];
         }
-        fq[jz - i] = fw;
+        products[last_term - i] = sum;
     }
 
-    switch (prec) {
+    switch (precision) {
     case 0:
-        fw = zero;
-        for (i = jz; i >= 0; i--) {
-            fw += fq[i];
+        sum = zero_f;
+        for (i = last_term; i >= 0; i--) {
+            sum += products[i];
         }
-        y[0] = (ih == 0) ? fw : -fw;
+        parts[0] = (round_state == 0) ? sum : -sum;
         break;
     case 1:
     case 2:
-        fw = zero;
-        for (i = jz; i >= 0; i--) {
-            fw += fq[i];
+        sum = zero_f;
+        for (i = last_term; i >= 0; i--) {
+            sum += products[i];
         }
-        y[0] = (ih == 0) ? fw : -fw;
-        fw = fq[0] - fw;
-        for (i = 1; i <= jz; i++) {
-            fw += fq[i];
+        parts[0] = (round_state == 0) ? sum : -sum;
+        sum = products[0] - sum;
+        for (i = 1; i <= last_term; i++) {
+            sum += products[i];
         }
-        y[1] = (ih == 0) ? fw : -fw;
+        parts[1] = (round_state == 0) ? sum : -sum;
         break;
     case 3:
-        for (i = jz; i > 0; i--) {
-            fw = fq[i - 1] + fq[i];
-            fq[i] += fq[i - 1] - fw;
-            fq[i - 1] = fw;
+        for (i = last_term; i > 0; i--) {
+            sum = products[i - 1] + products[i];
+            products[i] += products[i - 1] - sum;
+            products[i - 1] = sum;
         }
-        for (i = jz; i > 1; i--) {
-            fw = fq[i - 1] + fq[i];
-            fq[i] += fq[i - 1] - fw;
-            fq[i - 1] = fw;
+        for (i = last_term; i > 1; i--) {
+            sum = products[i - 1] + products[i];
+            products[i] += products[i - 1] - sum;
+            products[i - 1] = sum;
         }
-        for (fw = zero, i = jz; i >= 2; i--) {
-            fw += fq[i];
+        for (sum = zero_f, i = last_term; i >= 2; i--) {
+            sum += products[i];
         }
-        if (ih == 0) {
-            y[0] = fq[0];
-            y[1] = fq[1];
-            y[2] = fw;
+        if (round_state == 0) {
+            parts[0] = products[0];
+            parts[1] = products[1];
+            parts[2] = sum;
         } else {
-            y[0] = -fq[0];
-            y[1] = -fq[1];
-            y[2] = -fw;
+            parts[0] = -products[0];
+            parts[1] = -products[1];
+            parts[2] = -sum;
         }
         break;
     }
-    return n & 7;
+    return quadrant & 7;
 }

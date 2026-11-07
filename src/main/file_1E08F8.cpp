@@ -1398,9 +1398,9 @@ void func_001E2648(OnOffObject* self, void* a1)
     if (idx != -1) {
         Arr63* o = (Arr63*)CreatePathCurve(idx);
         self->obj = o;
-        void** ovt = *(void***)o;
-        if (ovt[0] != 0) {
-            ((void (*)(void*, void*))ovt[0])(o, a1);
+        void** curve_table = *(void***)o;
+        if (curve_table[0] != 0) {
+            ((void (*)(void*, void*))curve_table[0])(o, a1);
         }
         Arr63* p = self->obj;
         self->f3F0 = p->data[p->count - 1];

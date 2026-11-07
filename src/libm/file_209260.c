@@ -6,40 +6,40 @@
 #include "float_bits.h"
 static const f32 scale_up = 3.355443200e+07f;
 static const f32 scale_down = 2.9802322388e-08f;
-static const f32 huge = 1.0e30f;
-static const f32 tiny = 1.0e-30f;
+static const f32 ten_to_30 = 1.0e30f;
+static const f32 ten_to_minus_30 = 1.0e-30f;
 
 f32 func_002093C0(f32 x, f32 y);
 
 f32 func_00209260(f32 x, s32 n)
 {
-    s32 ix, hx, k;
+    s32 raw_bits, bits, exponent;
 
-    FLOAT_TO_BITS(ix, x);
-    hx = ix;
-    k = (hx & 0x7F800000) >> 23;
-    if (k == 0) {
-        if ((hx & 0x7FFFFFFF) == 0) return x;
+    FLOAT_TO_BITS(raw_bits, x);
+    bits = raw_bits;
+    exponent = (bits & 0x7F800000) >> 23;
+    if (exponent == 0) {
+        if ((bits & 0x7FFFFFFF) == 0) return x;
         x *= scale_up;
-        FLOAT_TO_BITS(ix, x);
-        hx = ix;
-        k = ((hx & 0x7F800000) >> 23) - 25;
-        if (n < -50000) return tiny * x;
+        FLOAT_TO_BITS(raw_bits, x);
+        bits = raw_bits;
+        exponent = ((bits & 0x7F800000) >> 23) - 25;
+        if (n < -50000) return ten_to_minus_30 * x;
     }
-    if (k == 0xFF) return x + x;
-    k = k + n;
-    if (k > 0xFE) {
-        return func_002093C0(huge, x) * huge;
+    if (exponent == 0xFF) return x + x;
+    exponent = exponent + n;
+    if (exponent > 0xFE) {
+        return func_002093C0(ten_to_30, x) * ten_to_30;
     }
-    if (k > 0) {
-        BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
+    if (exponent > 0) {
+        BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));
         return x;
     }
-    if (k < -24) {
-        if (n > 50000) return func_002093C0(huge, x) * huge;
-        return func_002093C0(tiny, x) * tiny;
+    if (exponent < -24) {
+        if (n > 50000) return func_002093C0(ten_to_30, x) * ten_to_30;
+        return func_002093C0(ten_to_minus_30, x) * ten_to_minus_30;
     }
-    k += 25;
-    BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
+    exponent += 25;
+    BITS_TO_FLOAT(x, (bits & 0x807FFFFF) | (exponent << 23));
     return x * scale_down;
 }

@@ -4,31 +4,31 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 one = 1.0f;
-static const f32 c1 = 4.1666667908e-02f;
-static const f32 c2 = -1.3888889225e-03f;
-static const f32 c3 = 2.4801587642e-05f;
-static const f32 c4 = -2.7557314297e-07f;
-static const f32 c5 = 2.0875723372e-09f;
-static const f32 c6 = -1.1359647598e-11f;
+static const f32 one_f = 1.0f;
+static const f32 cos_x4 = 4.1666667908e-02f;
+static const f32 cos_x6 = -1.3888889225e-03f;
+static const f32 cos_x8 = 2.4801587642e-05f;
+static const f32 cos_x10 = -2.7557314297e-07f;
+static const f32 cos_x12 = 2.0875723372e-09f;
+static const f32 cos_x14 = -1.1359647598e-11f;
 
 f32 func_002081A0(f32 x, f32 y)
 {
-    s32 hx, ix;
-    f32 z, r, v, qs;
+    s32 bits, magnitude;
+    f32 x2, poly, x2_poly, quarter;
 
-    FLOAT_TO_BITS(hx, x);
-    ix = hx & 0x7FFFFFFF;
-    if (ix <= 0x31FFFFFF && (s32)x == 0)
-        return one;
-    z = x * x;
-    r = z * (z * (z * (z * (z * c6 + c5) + c4) + c3) + c2) + c1;
-    v = z * r;
-    if (ix <= 0x3E999999)
-        return one - (0.5f * z - (z * v - x * y));
-    if (ix > 0x3F480000)
-        qs = 0.28125f;
+    FLOAT_TO_BITS(bits, x);
+    magnitude = bits & 0x7FFFFFFF;
+    if (magnitude <= 0x31FFFFFF && (s32)x == 0)
+        return one_f;
+    x2 = x * x;
+    poly = x2 * (x2 * (x2 * (x2 * (x2 * cos_x14 + cos_x12) + cos_x10) + cos_x8) + cos_x6) + cos_x4;
+    x2_poly = x2 * poly;
+    if (magnitude <= 0x3E999999)
+        return one_f - (0.5f * x2 - (x2 * x2_poly - x * y));
+    if (magnitude > 0x3F480000)
+        quarter = 0.28125f;
     else
-        BITS_TO_FLOAT(qs, ix - 0x01000000);
-    return (one - qs) - ((0.5f * z - qs) - (z * v - x * y));
+        BITS_TO_FLOAT(quarter, magnitude - 0x01000000);
+    return (one_f - quarter) - ((0.5f * x2 - quarter) - (x2 * x2_poly - x * y));
 }

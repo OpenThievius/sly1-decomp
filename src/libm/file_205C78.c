@@ -9,56 +9,56 @@ f32 func_002073F8(f32 x, f32 y);
 
 f32 func_00205C78(f32 x, f32 y)
 {
-    f32 z = func_002073F8(x, y);
+    f32 value = func_002073F8(x, y);
     MathError e;
 
     if (D_0024FF78 == -1 || func_00209238(y)) {
-        return z;
+        return value;
     }
     if (func_00209238(x)) {
         if (y == 0.0f) {
-            e.type = 1;
-            e.name = "powf";
-            e.err = 0;
-            e.arg1 = (double)x;
-            e.arg2 = (double)y;
+            e.kind = 1;
+            e.function = "powf";
+            e.error_code = 0;
+            e.first_arg = (double)x;
+            e.second_arg = (double)y;
             e.result = (double)x;
             if (D_0024FF78 == 2) {
                 e.result = 1.0;
             } else if (!func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.err != 0) {
-                *func_002014F0() = e.err;
+            if (e.error_code != 0) {
+                *func_002014F0() = e.error_code;
             }
             return (f32)e.result;
         }
-        return z;
+        return value;
     }
     if (x == 0.0f) {
         if (y == 0.0f) {
-            e.type = 1;
-            e.name = "powf";
-            e.err = 0;
-            e.arg1 = (double)x;
-            e.arg2 = (double)y;
+            e.kind = 1;
+            e.function = "powf";
+            e.error_code = 0;
+            e.first_arg = (double)x;
+            e.second_arg = (double)y;
             e.result = 0.0;
             if (D_0024FF78 != 0) {
                 e.result = 1.0;
             } else if (!func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.err != 0) {
-                *func_002014F0() = e.err;
+            if (e.error_code != 0) {
+                *func_002014F0() = e.error_code;
             }
             return (f32)e.result;
         }
         if (func_00209210(y) && y < 0.0f) {
-            e.type = 1;
-            e.name = "powf";
-            e.err = 0;
-            e.arg1 = (double)x;
-            e.arg2 = (double)y;
+            e.kind = 1;
+            e.function = "powf";
+            e.error_code = 0;
+            e.first_arg = (double)x;
+            e.second_arg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 0.0;
             } else {
@@ -67,20 +67,20 @@ f32 func_00205C78(f32 x, f32 y)
             if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.err != 0) {
-                *func_002014F0() = e.err;
+            if (e.error_code != 0) {
+                *func_002014F0() = e.error_code;
             }
             return (f32)e.result;
         }
-        return z;
+        return value;
     }
-    if (!func_00209210(z) && func_00209210(x) && func_00209210(y)) {
-        if (func_00209238(z)) {
-            e.type = 1;
-            e.name = "powf";
-            e.err = 0;
-            e.arg1 = (double)x;
-            e.arg2 = (double)y;
+    if (!func_00209210(value) && func_00209210(x) && func_00209210(y)) {
+        if (func_00209238(value)) {
+            e.kind = 1;
+            e.function = "powf";
+            e.error_code = 0;
+            e.first_arg = (double)x;
+            e.second_arg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 0.0;
             } else {
@@ -90,11 +90,11 @@ f32 func_00205C78(f32 x, f32 y)
                 *func_002014F0() = 0x21;
             }
         } else {
-            e.type = 3;
-            e.name = "powf";
-            e.err = 0;
-            e.arg1 = (double)x;
-            e.arg2 = (double)y;
+            e.kind = 3;
+            e.function = "powf";
+            e.error_code = 0;
+            e.first_arg = (double)x;
+            e.second_arg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 3.40282346638528859812e+38;
                 y *= 0.5;
@@ -112,25 +112,25 @@ f32 func_00205C78(f32 x, f32 y)
                 *func_002014F0() = 0x22;
             }
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.error_code != 0) {
+            *func_002014F0() = e.error_code;
         }
         return (f32)e.result;
     }
-    if (z == 0.0f && func_00209210(x) && func_00209210(y)) {
-        e.type = 4;
-        e.name = "powf";
-        e.err = 0;
-        e.arg1 = (double)x;
-        e.arg2 = (double)y;
+    if (value == 0.0f && func_00209210(x) && func_00209210(y)) {
+        e.kind = 4;
+        e.function = "powf";
+        e.error_code = 0;
+        e.first_arg = (double)x;
+        e.second_arg = (double)y;
         e.result = 0.0;
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x22;
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.error_code != 0) {
+            *func_002014F0() = e.error_code;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

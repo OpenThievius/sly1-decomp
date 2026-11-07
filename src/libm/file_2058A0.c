@@ -10,17 +10,17 @@ f32 func_00206D50(f32 x, f32 y);
 f32 func_002058A0(f32 x, f32 y)
 {
     MathError e;
-    f32 z = func_00206D50(x, y);
+    f32 value = func_00206D50(x, y);
 
     if (D_0024FF78 == -1 || func_00209238(y) || func_00209238(x)) {
-        return z;
+        return value;
     }
     if (y == 0.0f) {
-        e.type = 1;
-        e.name = "fmodf";
-        e.err = 0;
-        e.arg1 = (double)x;
-        e.arg2 = (double)y;
+        e.kind = 1;
+        e.function = "fmodf";
+        e.error_code = 0;
+        e.first_arg = (double)x;
+        e.second_arg = (double)y;
         if (D_0024FF78 == 0) {
             e.result = (double)x;
         } else {
@@ -29,10 +29,10 @@ f32 func_002058A0(f32 x, f32 y)
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.err != 0) {
-            *func_002014F0() = e.err;
+        if (e.error_code != 0) {
+            *func_002014F0() = e.error_code;
         }
         return (f32)e.result;
     }
-    return z;
+    return value;
 }

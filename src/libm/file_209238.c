@@ -6,10 +6,10 @@
 #include "float_bits.h"
 s32 func_00209238(f32 x)
 {
-    s32 ix;
+    s32 bits;
 
-    FLOAT_TO_BITS(ix, x);
-    ix &= 0x7FFFFFFF;
-    ix = 0x7F800000 - ix;
-    return (u32)ix >> 31;
+    FLOAT_TO_BITS(bits, x);
+    bits &= 0x7FFFFFFF;
+    bits = 0x7F800000 - bits;
+    return (u32)bits >> 31;
 }

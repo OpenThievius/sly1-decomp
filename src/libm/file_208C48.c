@@ -4,27 +4,27 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 half = 0.5f;
-static const f32 s1 = -1.6666667163e-01f;
-static const f32 s2 = 8.3333337680e-03f;
-static const f32 s3 = -1.9841270114e-04f;
-static const f32 s4 = 2.7557314297e-06f;
-static const f32 s5 = -2.5050759689e-08f;
-static const f32 s6 = 1.5896910177e-10f;
+static const f32 half_f = 0.5f;
+static const f32 sin_x3 = -1.6666667163e-01f;
+static const f32 sin_x5 = 8.3333337680e-03f;
+static const f32 sin_x7 = -1.9841270114e-04f;
+static const f32 sin_x9 = 2.7557314297e-06f;
+static const f32 sin_x11 = -2.5050759689e-08f;
+static const f32 sin_x13 = 1.5896910177e-10f;
 
-f32 func_00208C48(s32 iy, f32 x, f32 y)
+f32 func_00208C48(s32 has_tail, f32 x, f32 y)
 {
-    s32 hx, ix;
-    f32 z, v, r;
+    s32 bits, magnitude;
+    f32 x2, x3, poly;
 
-    FLOAT_TO_BITS(hx, x);
-    ix = hx & 0x7FFFFFFF;
-    if (ix <= 0x31FFFFFF && (s32)x == 0)
+    FLOAT_TO_BITS(bits, x);
+    magnitude = bits & 0x7FFFFFFF;
+    if (magnitude <= 0x31FFFFFF && (s32)x == 0)
         return x;
-    z = x * x;
-    v = z * x;
-    r = z * (z * (z * (z * s6 + s5) + s4) + s3) + s2;
-    if (iy == 0)
-        return x + v * (z * r + s1);
-    return x - ((z * (y * half - v * r) - y) - v * s1);
+    x2 = x * x;
+    x3 = x2 * x;
+    poly = x2 * (x2 * (x2 * (x2 * sin_x13 + sin_x11) + sin_x9) + sin_x7) + sin_x5;
+    if (has_tail == 0)
+        return x + x3 * (x2 * poly + sin_x3);
+    return x - ((x2 * (y * half_f - x3 * poly) - y) - x3 * sin_x3);
 }
