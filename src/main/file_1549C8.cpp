@@ -2791,7 +2791,7 @@ void func_0015C900(V24A2* obj) { obj->depth--; V24A2_Pt* item = &obj->stack[obj-
 
 V24A2* func_0015C930(V24A2* owner, f32 x, f32 y)
 {
-	V24A2* out = (V24A2*)func_0018D758(0x88);
+	V24A2* out = (V24A2*)AllocateObjectMemory(0x88);
 	out->vt = (const V24A2_Vt*)&g_fontMethods;
 	CopyFont(owner, out);
 	out->sx *= x;

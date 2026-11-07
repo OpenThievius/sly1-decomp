@@ -1894,6 +1894,7 @@
 #define ClearKeyId                                 func_0018D410
 #define InitHeap                                   func_0018D430
 #define ReservePermanentMemory                     func_0018D4B0
+#define CheckAllocationSize                        func_0018D4F8
 #define AllocateFrontMemory                        func_0018D500
 #define ResetFrontMemory                           func_0018D550
 #define CopyToFrontMemory                          func_0018D568
@@ -1902,6 +1903,8 @@
 #define AllocateBackMemory                         func_0018D658
 #define AllocateZeroedBackMemory                   func_0018D6A8
 #define PopBackMemoryMark                          func_0018D6F0
+#define AllocateObjectMemory                       func_0018D758
+#define FreeObjectMemory                           func_0018D778
 #define CopyQuadwords                              func_0018D780
 #define CopyMemory                                 func_0018D800
 #define FindKeyIndex                               func_0018E410

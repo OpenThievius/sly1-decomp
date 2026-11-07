@@ -2739,3 +2739,6 @@ func_0018B2E8	LeaveGaugeAgentState	slot 0x17C of class 0x0C: runs LeaveAgentStat
 func_0018B340	HandleGaugeAgentNotification	slot 0x44 of class 0x0C: on notification 0x13 from its +0x7E0 object, codes 0x442 and 0x443 place one of its two objects and start it, 0x444 and 0x445 set and clear +0xE2C; then HandleAgentNotification
 func_0018B460	GetGaugeAgentLevelFactor	writes a factor from g_currentEntry's level: 1.3 times it less 0.3, clamped to 0..1, with the walker in state 0x43A or 0x43C, else its square
 func_0018B720	WaitForBackgroundJob	when a job is running calls func_001F6A50 on its thread, then takes and releases the job's lock (func_001F6B60, func_001F6B40), as RunBackgroundJob holds it while the job runs; StartBackgroundJob calls it first
+func_0018D4F8	CheckAllocationSize	takes a size and does nothing; AllocateFrontMemory and AllocateBackMemory call it before they move their cursors
+func_0018D758	AllocateObjectMemory	returns AllocateZeroedFrontMemory of its size: the allocation the libraries and CloneFont call for a new object
+func_0018D778	FreeObjectMemory	does nothing: the release a deleting destructor calls (some dozen callers, as func_00137290's flag-1 path), since front memory is only freed by a reset

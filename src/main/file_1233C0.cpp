@@ -5471,7 +5471,7 @@ StreamReader* func_0012FCF0(StreamReader* obj, s32 value)
 void func_0012FD30(void* self, s32 flags)
 {
     CloseStreamReader((StreamReader*)self);
-    if (flags & 1) func_0018D778(self);
+    if (flags & 1) FreeObjectMemory(self);
 }
 
 s32 func_0012FD78(void* self, KeyId* pair)

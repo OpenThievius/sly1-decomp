@@ -11,5 +11,5 @@ void* func_0018D758(u32 size);
 
 void* func_001FD8A8(u32 size) throw(bad_alloc)
 {
-    return func_0018D758(size);
+    return AllocateObjectMemory(size);
 }

@@ -1939,7 +1939,7 @@ void func_00161A88(void* self, s32 flag)
 {
     (void)self;
     if (flag & 1) {
-        func_0018D778();
+        FreeObjectMemory();
     }
 }
 

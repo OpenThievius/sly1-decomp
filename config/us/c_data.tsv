@@ -683,7 +683,7 @@ D_00264260	00264260	1500	.data	src/main/main_loop.cpp
 D_00264840	00264840	208	.data	src/main/collider_contact.cpp
 D_00264910	00264910	300	.data	src/main/gauge_agent.cpp
 D_00264A40	00264A40	20324	.data	src/main/memory_card.cpp
-D_002699A4	002699A4	8	.data	src/main/file_18D410.cpp
+D_002699A4	002699A4	8	.data	src/main/heap.cpp
 D_002699B0	002699B0	416	.data	src/main/file_18D8E0.cpp
 D_00269B50	00269B50	392	.data	src/main/file_18F988.cpp
 D_00269CD8	00269CD8	2616	.data	src/main/file_193210.cpp

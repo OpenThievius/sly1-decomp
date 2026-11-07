@@ -55,7 +55,7 @@ extern void func_00137A60(void*, s32, void*);
 void func_001372E0(void* self, s32 flags)
 {
     CloseBufferedStream(self);
-    if (flags & 1) func_0018D778(self);
+    if (flags & 1) FreeObjectMemory(self);
 }
 
 struct Ring_00137328 {

@@ -755,7 +755,7 @@ Obj_001D7120* func_001D7120(Obj_001D7120* self, s32 a, s32 b) { self->a = a; sel
 void func_001D7148(OutputBuffer* a0, s32 a1)
 {
     FlushOutputBuffer(a0, a1);
-    if (a1 & 1) func_0018D778(a0);
+    if (a1 & 1) FreeObjectMemory(a0);
 }
 
 s32 func_001D7190(OutputBuffer* self, void* src, s32 size)
