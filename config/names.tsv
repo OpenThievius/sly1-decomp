@@ -2745,3 +2745,20 @@ func_001B2358	BuildRangeRecordPacket	writes the record's VIF packet with the cam
 func_001B2640	QueueRangeRecordPacket	when the link is shown under the camera's mask, builds the packet if +0xC0 is empty and writes a reference to it into g_vifPacketWriter
 func_001B26F8	RangeRecordReachesSphere	tests the record's bounding sphere (+0x50, +0x60) against a point and radius under the camera's mask; the part drawer func_00166690 and CollectRangeRecordsInReach call it
 func_001B2790	CollectRangeRecordsInReach	walks the world's list at +0x1C00 and stores up to max records that RangeRecordReachesSphere accepts, with their count
+func_001B2B50	ReadImageRecordB	reads a 12-byte image record from the stream, rebases its word at 8 by D_00275718 and stores its size in quadwords at +0xC; LoadImageRecordsB calls it for each record
+func_001B2BA8	LoadImageRecordsB	reads the count of the second image records, allocates g_imageRecordsB (0x18 bytes each) and reads each with ReadImageRecordB, then keeps in g_imageSlotsB the larger of those with bit 0x10000000 and the rest
+func_001B2CA8	ReadImageRecordA	reads a 0x14-byte image record from the stream, keeps its size in quadwords at +0x14 and rebases its offset at +0x10 by D_00275718; LoadImageRecordsA calls it for each record
+func_001B2CF8	LoadImageRecordsA	reads the count of the first image records, allocates g_imageRecordsA (0x20 bytes each) and reads each with ReadImageRecordA, then keeps in g_imageSlotsA the larger of those with bit 0x10000000 and the rest
+func_001B2F00	ReadTextureTable	reads a record's 0x14-byte texture table: six bytes, then entryCount indexes into g_imageRecordsA and cellCount indexes into g_imageRecordsB (0xFFFF for none), each table on front memory
+func_001B3450	SendResidentImages	sends the images of mask 0x10000000 to the GIF from a bump allocator at 0x1E00 and forgets the active image mask (g_activeImageMask = 0)
+func_001B40C8	ResetScreenResources	clears every count and table LoadScreenResources fills (image records, fonts, anim records, cursor animators, the pending cursors and the per-mask uploads)
+func_001B4188	ConvertRgbToHsv	takes the largest and smallest of three colour components (max.s, min.s) and computes hue, saturation and value from them in place
+func_001B4330	ConvertHsvToRgb	splits the hue into six sectors (a jump table) and computes three colour components from hue, saturation and value in place
+func_001B4580	ConvertHsv255ToRgb255	scales the second and third components of a 0..255 colour by 1/255, runs ConvertHsvToRgb and scales the result by 255
+func_001B4600	ConvertRgb255ToHsv255	scales a 0..255 colour by 1/255, runs ConvertRgbToHsv and scales saturation and value back by 255
+D_00274510	g_imageSlotsA	the larger of the counts of first image records with and without bit 0x10000000 (LoadImageRecordsA); the image senders func_001692B0, func_001693A8 and func_00169780 read it
+D_00274514	g_imageSlotsB	the larger of the counts of second image records with and without bit 0x10000000 (LoadImageRecordsB); the image senders func_001692B0, func_001693A8 and func_00169780 read it
+D_00274518	g_activeImageMask	the image mask SwitchActiveImageMask last sent; it sends again only for another mask, and SendResidentImages clears it
+D_00274520	g_maskImageUploads	six results of UploadImagesByMask, one per mask bit 0 to 5 with 0x40000000, kept by LoadScreenResources
+D_00274538	g_maskedImagesPacket	what BuildMaskedImagesPacket returns for mask 0x20000000 at the end of LoadScreenResources
+D_00274544	g_lastPendingCursor	the first cursor SetCursorFrame or SetCursorCoords put in the pending list, so the list's last; a cursor is pushed only when its next link is empty and it is not this one
