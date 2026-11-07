@@ -627,7 +627,7 @@ class DecodedListingTest(unittest.TestCase):
 
 class DefinitionTest(unittest.TestCase):
     def names(self, text):
-        return [m.group(1) for m in todo.DEFINITION.finditer(text)]
+        return [m.group(1) for m in todo.definitions(text)]
 
     def test_definitions_and_declarations(self):
         text = ("s32 func_00100008(void* a, s32 b);\n"
