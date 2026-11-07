@@ -544,20 +544,6 @@ void TurnColliderTowardRotation(void* self, f32 scale, void* out, void* data);
 void AddColliderForce(void* self, Vec02* force);
 extern const Vec02 D_00248D20;
 
-static inline f32 ClampToRange(const ValueRange* range, f32 v)
-{
-    f32 lo = range->lo;
-    f32 hi = range->hi;
-    f32 r;
-    if (v < lo) {
-        r = lo;
-    } else if (hi < v) {
-        r = hi;
-    } else {
-        r = v;
-    }
-    return r;
-}
 
 void func_00196B78(GaugeCollider* self, f32 dt)
 {
@@ -595,9 +581,9 @@ void func_00196B78(GaugeCollider* self, f32 dt)
     c = MultiplyByTransposedMatrix3x3(u, c);
     Vec02 force;
     f32 turn = __builtin_fabsf(WrapAngle(ArctangentOfRatio(v.r[0].y, v.r[0].x) - self->f618));
-    f32 k1 = ClampToRange(&g_unitRange, D_0026A7F0.x + turn * (D_0026A7F0.y + turn * D_0026A7F0.z));
+    f32 k1 = g_unitRange.Limit(D_0026A7F0.x + turn * (D_0026A7F0.y + turn * D_0026A7F0.z));
     f32 phase = (g_gameTime[0] - self->f61C) / D_0026A800.x;
-    f32 k2 = ClampToRange(&g_unitRange, D_0026A810.x + phase * (D_0026A810.y + phase * D_0026A810.z));
+    f32 k2 = g_unitRange.Limit(D_0026A810.x + phase * (D_0026A810.y + phase * D_0026A810.z));
     Vu0::Q(force) = Vu0::MulX(Vu0::Q(c.r[0]), Vu0::Scalar(k1 * k2 * self->f620));
     AddColliderForce(self, &force);
     Vec02 drag;
