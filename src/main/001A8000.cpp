@@ -79,8 +79,7 @@ s32 func_001E9970(void);
 
 
 
-struct Tab_26C3E0 { T217D_Place e[37]; s32 end; };
-extern Tab_26C3E0 D_0026C3E0;
+extern ElementPlaceTable D_0026C3E0;
 extern u8 D_00261868[];
 
 
@@ -276,7 +275,7 @@ extern void* const D_002486B0[];
 
 extern void* const D_002486B0[];
 
-extern Tab_26C3E0 D_0026C3E0;
+extern ElementPlaceTable D_0026C3E0;
 
 
 
@@ -462,12 +461,12 @@ void func_001AB2B8(T217D_E30* self);
 f32 func_0015DFF8(TextReader* loc);
 
 
-struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
+struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
 
-s32 func_00182FC8(Key_1A88A0* p);
-s32 func_001300E8(Key_1A88A0* p, s32 kind);
+s32 func_00182FC8(PoolCandidate* p);
+s32 func_001300E8(PoolCandidate* p, s32 kind);
 
 struct Begin_1A88A0 {
     static void Of(Iter_1A88A0* it, List_1A88A0* list)
@@ -538,5 +537,5 @@ extern void* const D_002486B0[38] = {
     (void*)&D_00274118,
     0,
 };
-extern Tab_26C3E0 D_0026C3E0;
+extern ElementPlaceTable D_0026C3E0;
 

@@ -39,6 +39,12 @@ struct T217D_Place {
 
 typedef char check_T217D_Place[sizeof(T217D_Place) == 20 ? 1 : -1];   // func_001AA1F0 steps 20 bytes
 
+// D_0026C3E0: the 37 elements' places and a word after them.
+struct ElementPlaceTable {
+    T217D_Place e[37];
+    s32 end;
+};
+
 struct ScreenElement;
 
 // The 20 slots. Those the base fills are the generic ones; the derived tables replace
