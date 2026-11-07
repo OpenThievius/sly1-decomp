@@ -1577,6 +1577,10 @@
 #define TestGridEntryBit                           func_0016BB78
 #define HandleGridSelectorInput                    func_0016BBA8
 #define SetGridSelectorOpen                        func_0016BDD0
+#define InitC76Object                              func_0016C470
+#define LoadC76Object                              func_0016C4B8
+#define DrawC35Collider                            func_0016C4E8
+#define DrawC52Object                              func_0016C508
 #define InitTargetFollower                         func_0016CE00
 #define LoadTargetFollowerRecords                  func_0016CE80
 #define ResolveTargetFollowerLinks                 func_0016CF70

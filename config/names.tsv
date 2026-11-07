@@ -2587,7 +2587,7 @@ func_001587C0	SendMemberObjectMessage	slot 0x7C of class 0x77: does nothing (0x7
 func_00158A10	ResolveGroupMembers	slot 0x4C of class 0x78: calls the resolve slot (15) of each of its members
 func_00158D38	SendRecordMemberMessage	slot 0x7C of class 0x79: does nothing
 func_0015A198	GatherObjectsByMode	unmatched yet: collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
-func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and a dozen others call it)
+func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and some thirty others call it)
 func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object
 func_0015A8B8	InitC60Object	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
 func_0015A918	LoadC60Object	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
@@ -2617,7 +2617,7 @@ func_00160CC8	ClearTwoWords	zeroes eight bytes (ResetGameSession and ResumeAtSav
 func_00160CE8	ResetCounter	sets a counter's word at +0 to 0 (RunPendingWorldLoad calls it)
 func_00160CF0	IncrementCounter	adds one to a counter's word at +0 and returns it (func_00123888 calls it)
 func_00160D00	ReleaseCounterRef	subtracts one from the reference count at +0 (func_00123888 calls it)
-func_00160D10	MaskWorldBitsBySave	returns g_saveData's word 0x19F0 masked by the current world's bits (some fifteen functions test it)
+func_00160D10	MaskWorldBitsBySave	returns g_saveData's word 0x19F0 masked by the current world's bits (seventeen functions test it)
 func_00160D98	GetSpareCountLimit	returns 2, the limit PlaceSpareSoundNotifier and CountPickupTowardHundred hold the spare count 0x19E4 to
 func_00160DA0	SpendReserveUnit	lowers g_saveData's reserve count 0x19E0, stops the locked stream voice and starts a screen fade, a fade from the flag table, or the pause menu's page when the count is below 0; then RaiseScatterLevels by 1
 func_00160E80	ClearRecordBody	zeroes the six words from +0x04 to +0x18 of a record (func_001B7968 calls it)
@@ -2639,3 +2639,7 @@ func_00169FC0	FindTargetCurveLengthNearCollider	projects the active switched col
 func_0016A5F0	SetPooledObjectPlayerHold	sets a pooled object's hold state +0x550: leaving 1 reparents it to nothing and sends script event 3; entering 1 reparents it to g_player, anchors it and sends script event 2; stamps the game time at +0x554 (func_00175170 calls it)
 func_0016A758	CountHeldPooledChildren	counts the objects of kind 0x46 in a list at +0x34 whose state +0x550 is 3 or 4 (func_0014F270 calls it)
 func_0016B520	RestoreSelectionCaptionCamera	while the selection caption is open, pushes the camera controller of object 0x4FD (FindFirstObjectByIdMode4, PushObjectCameraController); RunPendingWorldLoad calls it
+func_0016C470	InitC76Object	slot 0x10 of class 0x76: runs its parent's set-up (func_001DFD90), then sets +0x88 to 1, +0xA8 to 8, +0xAC to 9 and +0xB4 to the largest float
+func_0016C4B8	LoadC76Object	slot 0x38 of class 0x76: a tail call to ReadTransformObject
+func_0016C4E8	DrawC35Collider	slot 0xA4 of class 0x35: a tail call to func_001B93D8
+func_0016C508	DrawC52Object	slot 0xA4 of class 0x52: a tail call to func_001261C0, the transform draw DrawC60Object ends with
