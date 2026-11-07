@@ -1517,8 +1517,9 @@ f32 RandomGaussian(f32 mean, f32 deviation, f32 limit)
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
 {
-    f32 diff = __builtin_fabsf(a - b);
-    return diff / Fpu::Max(1.0f, __builtin_fabsf(a)) < tolerance;
+    f32 scale = 1.0f;
+    scale = scale >? __builtin_fabsf(a);
+    return __builtin_fabsf(a - b) / scale < tolerance;
 }
 
 s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)

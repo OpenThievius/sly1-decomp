@@ -13,7 +13,7 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
   a literal links through tools/rodata.py, a jump table does not yet)
 - jtbl: has a jump table;  vu: uses the vector unit (VU0 macro mode, COP2)
 - float: uses the FPU;  mmi: uses 128-bit multimedia instructions
-- nonc: max.s, min.s
+- nonc: an instruction with no plain C form (none at present)
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function.
@@ -38,13 +38,11 @@ What stops a function from being matched, the blocker column:
   that never returns is a whole function, not a fragment
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C. por and pref are not
   counted: the compiler emits them (COMPILER_EMITS)
-- nonc: max.s, min.s: no plain C form with the files' flags. Every function that holds one is C
-  with inline assembly (inline, below): it is written with include/fpu.h's Fpu::Max and
-  Fpu::Min, as a bare sqrt.s is with Fpu::Sqrt (AGENTS.md); `break 0, 7` after a division is the
-  compiler's divide-by-zero trap, plain C, not system code
+- nonc: an instruction with no plain C form under the files' flags (none left: max.s and min.s
+  are g++'s `>?` and `<?` operators, a bare sqrt.s is include/fpu.h's Fpu::Sqrt, AGENTS.md;
+  `break 0, 7` after a division is the compiler's divide-by-zero trap, plain C, not system code)
 - helper: C with inline assembly (config/us/original_asm.tsv, kind inline) that needs a shared
-  helper header for its VU0, MMI or system instructions (AGENTS.md); a function of that kind
-  without them (max.s, min.s) has the blocker of plain C
+  helper header for its VU0, MMI or system instructions (AGENTS.md)
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
@@ -122,8 +120,9 @@ VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
 DIVIDE_TRAP = "0, 7"  # `break 0, 7` after a division: the compiler's divide-by-zero trap, plain C
 # No plain C form with the files' flags. (A bare sqrt.s is written with include/fpu.h's Fpu::Sqrt:
-# __builtin_sqrtf adds a NaN check and a call to sqrtf that retail never has.)
-NONC = {"max.s", "min.s"}
+# __builtin_sqrtf adds a NaN check and a call to sqrtf that retail never has. max.s and min.s
+# are g++'s minimum and maximum operators, `a <? b` and `a >? b`: plain C++.)
+NONC = set()
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
 # Multimedia instructions the compiler is known to emit: six functions that contain one are
 # matched in C (por is the 128-bit |, which also moves a 128-bit value between registers), so

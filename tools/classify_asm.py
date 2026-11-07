@@ -18,9 +18,8 @@ Three kinds, over game code and Sony's libraries; a function matched in C is C a
   "handwritten" mark; or, in game code, a tail jump to another function, which SN GCC 2.95.3
   never writes (OpenRAC finds the same: a tail jump means not SN 2.95.3).
 - inline: C with inline assembly. The instruction that would make it hand-written sits in code
-  the compiler shaped (GCC's own stack frame around it), or is max.s or min.s, which only such
-  C holds in this game: the original developers wrote C that called small inline-assembly
-  helpers, the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. It is C to
+  the compiler shaped (GCC's own stack frame around it): the original developers wrote C that
+  called small inline-assembly helpers, the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. It is C to
   match with shared helpers (AGENTS.md), not finished: tools/progress.py does not count it.
 - remnant: a run of words the linker left of a stripped function. It starts on an
   8-byte boundary, has no jump or branch in it, nothing refers to it (no instruction
@@ -65,7 +64,9 @@ COMPILER_EMITS = todo.COMPILER_EMITS
 # function matched in C holds one, and neither compiler emits them from plain C (docs/
 # ASM_CLASSIFICATION.md, "Kernel and system code"). sqrt.s is not here: __builtin_sqrtf gives it.
 SYSTEM = {"syscall", "eret", "ei", "di", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "mtsa", "mfsa",
-          "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1", "max.s", "min.s"}
+          "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1"}
+# max.s and min.s are not here: g++'s minimum and maximum operators (`a <? b`, `a >? b`) emit them
+# from plain C++ under the files' own flags (func_001EAC68 is word for word one).
 # The reasons handwritten() gives that inline() may find in compiled code (not the tail jump, the
 # toolchain's .S members, or stores scheduled before the frame).
 INLINE_REASONS = ("VU0 macro instruction", "128-bit MMI instruction", "marked handwritten by the disassembler",
@@ -158,11 +159,8 @@ def inline(why, lines):
     """Why a function the rules above call hand-written is C with inline assembly, or None. Its
     special instruction sits in code the compiler shaped: inside GCC's own stack frame (the
     VU0, MMI and system instructions of a function that also calls, saves and schedules as
-    compiled code does), or it is max.s or min.s, which only such C holds in this game (no
-    hand-written routine has one), the way retail's bare sqrt.s comes from include/fpu.h's
-    Fpu::Sqrt. A frameless leaf stays hand-written: its shape does not tell."""
-    if why.startswith("kernel or system instruction") and ("max.s" in why or "min.s" in why):
-        return "C with inline assembly: %s" % why.split("(", 1)[1].rstrip(")") + " in compiled code"
+    compiled code does), the way retail's bare sqrt.s comes from include/fpu.h's Fpu::Sqrt. A
+    frameless leaf stays hand-written: its shape does not tell."""
     if why.startswith(INLINE_REASONS) and compiled_frame(lines):
         return "C with inline assembly: %s in the compiler's frame" % why
     return None

@@ -95,20 +95,21 @@ written in C, as retail's bare `sqrt.s` is (include/fpu.h's `Fpu::Sqrt`, AGENTS.
 - A function the rules above would call hand-written for a VU0, MMI or system instruction, or the
   disassembler's mark, is `inline` when it has the compiler's frame. A frameless leaf stays
   hand-written: its shape does not tell.
-- `max.s` and `min.s` are `inline` wherever they are: no hand-written routine of the game holds
-  one, and C with a one-line helper builds them (func_001EAC68 is its C and an inline `max.s`, word
-  for word). `-ffast-math` also emits them, but it changes the bytes of functions already matched
-  in 11 of the 18 files that hold them, so retail was not built with it.
+- `max.s` and `min.s` are not evidence at all. g++ 2.95's GNU minimum and maximum operators
+  (`a <? b`, `a >? b`) emit them as ordinary instructions under the files' own flags, which the
+  scheduler moves and puts in branch delay slots as retail's are; func_001EAC68 is word for word
+  `scale = scale >? __builtin_fabsf(a)`. (`-ffast-math` also emits them from `?:`, but it changes
+  the bytes of functions already matched in 11 of the 18 files that hold them, so retail was not
+  built with it.) A function whose only special instructions are these is plain C.
 - The toolchain's `.S` members, a game-code tail jump and stores scheduled before the frame stay
   hand-written.
 
-On 2026-11-07: 579 functions in US (565 of game code, 14 of the libraries, 366,176 bytes), and
-three of PAL's own functions. They are C to match, not finished: `tools/progress.py` leaves them
-out of the count, their files include them with `INCLUDE_ASM` (not `ASM_FUNC`), and
-`tools/todo.py` lists them with the tag `inline`. They are written with shared inline-assembly
-helpers, as AGENTS.md allows: include/fpu.h's `Fpu::Max` and `Fpu::Min` for `max.s` and `min.s`
-(their blocker is that of plain C), and headers still to write for the VU0, MMI and system
-sequences (blocker `helper`). `tools/version_src.py todo` lists PAL's own three.
+On 2026-11-07: 547 functions in US (533 of game code, 14 of the libraries), and one of PAL's
+own. They are C to match, not finished: `tools/progress.py` leaves them out of the count, their
+files include them with `INCLUDE_ASM` (not `ASM_FUNC`), and `tools/todo.py` lists them with the
+tag `inline` and the blocker `helper` until the shared helper headers for their VU0, MMI and
+system sequences exist (AGENTS.md). `tools/version_src.py todo` lists PAL's own one. The 31
+functions whose only special instructions were `max.s` and `min.s` are plain C.
 
 ### remnant
 

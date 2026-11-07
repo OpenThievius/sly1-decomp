@@ -71,8 +71,6 @@ func_00125C90	00125C90	1324	inline	C with inline assembly: VU0 macro instruction
 func_00126270	00126270	1604	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001268B8	001268B8	396	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00126AC8	00126AC8	244	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_00126CB8	00126CB8	168	inline	C with inline assembly: max.s in compiled code
-func_00126D60	00126D60	132	inline	C with inline assembly: min.s in compiled code
 func_00126DE8	00126DE8	400	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00127468	00127468	12	remnant	stripped-function leftover
 func_00127628	00127628	76	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -85,7 +83,6 @@ func_001280C0	001280C0	144	inline	C with inline assembly: VU0 macro instruction 
 func_00128150	00128150	224	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00128330	00128330	616	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00128598	00128598	852	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001289C0	001289C0	592	inline	C with inline assembly: min.s in compiled code
 func_00128E88	00128E88	328	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00128FD0	00128FD0	228	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001290B8	001290B8	40	handwritten	VU0 macro instruction
@@ -100,14 +97,12 @@ func_0012FB68	0012FB68	328	inline	C with inline assembly: VU0 macro instruction 
 func_0012FD98	0012FD98	4	remnant	stripped-function leftover
 func_00130540	00130540	516	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00130748	00130748	1024	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_00131198	00131198	1356	inline	C with inline assembly: max.s in compiled code
 func_00134AA0	00134AA0	164	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00134B48	00134B48	1756	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001358D0	001358D0	1360	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00135E20	00135E20	12	remnant	stripped-function leftover
 func_00135E40	00135E40	4	remnant	stripped-function leftover
 func_00135E70	00135E70	4	remnant	stripped-function leftover
-func_001366A0	001366A0	2088	inline	C with inline assembly: max.s, min.s in compiled code
 func_00137CB8	00137CB8	4	remnant	stripped-function leftover
 func_00137DF0	00137DF0	4	remnant	stripped-function leftover
 func_00137FB0	00137FB0	708	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -152,7 +147,6 @@ func_00143180	00143180	136	inline	C with inline assembly: VU0 macro instruction 
 func_00143208	00143208	472	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001433E0	001433E0	56	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00143418	00143418	172	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_00143560	00143560	228	inline	C with inline assembly: max.s in compiled code
 func_00143BE0	00143BE0	604	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00144008	00144008	284	handwritten	VU0 macro instruction
 func_00144128	00144128	152	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -186,7 +180,6 @@ func_00149458	00149458	176	inline	C with inline assembly: VU0 macro instruction 
 func_00149760	00149760	4184	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0014A8F8	0014A8F8	404	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0014AAA0	0014AAA0	304	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_0014AF38	0014AF38	388	inline	C with inline assembly: max.s in compiled code
 func_0014B6A8	0014B6A8	1120	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0014BB08	0014BB08	480	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0014C858	0014C858	848	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -212,7 +205,6 @@ func_00153780	00153780	716	inline	C with inline assembly: VU0 macro instruction 
 func_00154088	00154088	744	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00154370	00154370	1292	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00154C80	00154C80	604	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_00155270	00155270	1032	inline	C with inline assembly: max.s in compiled code
 func_00155868	00155868	580	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00155AB0	00155AB0	1140	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00156288	00156288	1084	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -238,7 +230,6 @@ func_0015BD48	0015BD48	420	inline	C with inline assembly: VU0 macro instruction 
 func_0015BEF0	0015BEF0	204	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0015BFC0	0015BFC0	152	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0015C630	0015C630	4	remnant	stripped-function leftover
-func_0015E1F0	0015E1F0	156	inline	C with inline assembly: max.s in compiled code
 func_0015E678	0015E678	44	remnant	stripped-function leftover
 func_0015E6A8	0015E6A8	356	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_0015FCD8	0015FCD8	156	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -252,7 +243,6 @@ func_00161760	00161760	4	remnant	stripped-function leftover
 func_00161858	00161858	4	remnant	stripped-function leftover
 func_00161950	00161950	4	remnant	stripped-function leftover
 func_001626A0	001626A0	4	remnant	stripped-function leftover
-func_00162890	00162890	4264	inline	C with inline assembly: min.s in compiled code
 func_00167F10	00167F10	544	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001682C0	001682C0	244	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_00168698	00168698	80	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
@@ -318,10 +308,6 @@ func_0017E3C8	0017E3C8	772	inline	C with inline assembly: VU0 macro instruction 
 func_0017E710	0017E710	1496	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017ECE8	0017ECE8	812	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017F018	0017F018	2728	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_0017FAC0	0017FAC0	180	inline	C with inline assembly: max.s in compiled code
-func_0017FB78	0017FB78	204	inline	C with inline assembly: max.s in compiled code
-func_0017FC48	0017FC48	128	inline	C with inline assembly: max.s in compiled code
-func_0017FCC8	0017FCC8	128	inline	C with inline assembly: max.s in compiled code
 func_00181078	00181078	972	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00181658	00181658	292	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00181780	00181780	152	inline	C with inline assembly: 128-bit MMI instruction in the compiler's frame
@@ -397,7 +383,6 @@ func_00191C78	00191C78	500	inline	C with inline assembly: VU0 macro instruction 
 func_001925C0	001925C0	48	handwritten	VU0 macro instruction
 func_00192988	00192988	4	remnant	stripped-function leftover
 func_00192DD0	00192DD0	736	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001936A0	001936A0	1972	inline	C with inline assembly: max.s in compiled code
 func_001963A8	001963A8	12	remnant	stripped-function leftover
 func_00196B78	00196B78	716	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00196EB0	00196EB0	776	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -430,7 +415,6 @@ func_0019F390	0019F390	460	inline	C with inline assembly: VU0 macro instruction 
 func_0019F620	0019F620	564	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0019FA98	0019FA98	108	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0019FB08	0019FB08	480	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_0019FD08	0019FD08	100	inline	C with inline assembly: min.s in compiled code
 func_0019FE50	0019FE50	204	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0019FF20	0019FF20	252	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A00A0	001A00A0	276	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -438,7 +422,6 @@ func_001A0338	001A0338	356	inline	C with inline assembly: VU0 macro instruction 
 func_001A05D8	001A05D8	380	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A0758	001A0758	500	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A0C98	001A0C98	196	inline	C with inline assembly: 128-bit MMI instruction in the compiler's frame
-func_001A0D60	001A0D60	144	inline	C with inline assembly: max.s in compiled code
 func_001A0DF0	001A0DF0	404	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A1028	001A1028	4	remnant	stripped-function leftover
 func_001A1030	001A1030	396	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -462,7 +445,6 @@ func_001A3730	001A3730	444	inline	C with inline assembly: VU0 macro instruction 
 func_001A3AC8	001A3AC8	20	handwritten	VU0 macro instruction
 func_001A3D40	001A3D40	512	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A4538	001A4538	124	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001A48C0	001A48C0	620	inline	C with inline assembly: max.s in compiled code
 func_001A5120	001A5120	984	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A6090	001A6090	216	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A6238	001A6238	236	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -476,8 +458,6 @@ func_001A95D0	001A95D0	500	inline	C with inline assembly: VU0 macro instruction 
 func_001A9868	001A9868	144	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001A9AE8	001A9AE8	368	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001AA890	001AA890	4	remnant	stripped-function leftover
-func_001AE220	001AE220	404	inline	C with inline assembly: min.s in compiled code
-func_001AE5E0	001AE5E0	372	inline	C with inline assembly: max.s in compiled code
 func_001AEC80	001AEC80	12	remnant	stripped-function leftover
 func_001AF108	001AF108	688	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001AF820	001AF820	728	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -534,7 +514,6 @@ func_001BB0C8	001BB0C8	108	inline	C with inline assembly: VU0 macro instruction 
 func_001BBC38	001BBC38	640	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BBEB8	001BBEB8	460	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BC0E0	001BC0E0	384	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001BC260	001BC260	192	inline	C with inline assembly: max.s in compiled code
 func_001BC368	001BC368	364	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BC670	001BC670	160	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BC7F8	001BC7F8	44	handwritten	VU0 macro instruction
@@ -552,14 +531,12 @@ func_001C0F30	001C0F30	192	inline	C with inline assembly: 128-bit MMI instructio
 func_001C27A8	001C27A8	4	remnant	stripped-function leftover
 func_001C29F8	001C29F8	1580	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C3028	001C3028	192	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001C39A0	001C39A0	416	inline	C with inline assembly: max.s in compiled code
 func_001C3B40	001C3B40	192	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C3C98	001C3C98	144	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C3EB0	001C3EB0	180	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C41A0	001C41A0	692	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C4618	001C4618	376	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C4848	001C4848	380	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001C49E8	001C49E8	152	inline	C with inline assembly: max.s in compiled code
 func_001C4C20	001C4C20	320	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C4D60	001C4D60	364	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001C4FF8	001C4FF8	288	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -605,7 +582,6 @@ func_001CEEC8	001CEEC8	624	inline	C with inline assembly: VU0 macro instruction 
 func_001CF158	001CF158	3704	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001CFFD0	001CFFD0	2896	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D0B20	001D0B20	340	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D0C78	001D0C78	676	inline	C with inline assembly: max.s in compiled code
 func_001D0F20	001D0F20	736	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D12F0	001D12F0	388	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D1630	001D1630	1100	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -620,14 +596,12 @@ func_001D36F0	001D36F0	752	inline	C with inline assembly: VU0 macro instruction 
 func_001D39E0	001D39E0	88	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D3A38	001D3A38	288	handwritten	VU0 macro instruction
 func_001D3B58	001D3B58	268	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D3E00	001D3E00	668	inline	C with inline assembly: min.s in compiled code
 func_001D4148	001D4148	512	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D4348	001D4348	848	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D4698	001D4698	432	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D48E8	001D48E8	432	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D5678	001D5678	2348	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D62E0	001D62E0	760	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D6608	001D6608	160	inline	C with inline assembly: max.s in compiled code
 func_001D66A8	001D66A8	876	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D6A18	001D6A18	256	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D6B18	001D6B18	404	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -639,7 +613,6 @@ func_001D8BD0	001D8BD0	444	inline	C with inline assembly: VU0 macro instruction 
 func_001D8E40	001D8E40	1196	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D9678	001D9678	1104	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D9AC8	001D9AC8	464	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D9D78	001D9D78	1012	inline	C with inline assembly: min.s in compiled code
 func_001DA320	001DA320	956	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001DA6E0	001DA6E0	252	handwritten	VU0 macro instruction
 func_001DA7E0	001DA7E0	568	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
@@ -675,16 +648,12 @@ func_001E4578	001E4578	776	inline	C with inline assembly: VU0 macro instruction 
 func_001E4888	001E4888	956	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001E4DC0	001E4DC0	120	handwritten	VU0 macro instruction
 func_001E5938	001E5938	832	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001E6600	001E6600	1564	inline	C with inline assembly: max.s, min.s in compiled code
 func_001E7C60	001E7C60	1144	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001E80D8	001E80D8	772	inline	C with inline assembly: max.s, min.s in compiled code
-func_001E83E0	001E83E0	764	inline	C with inline assembly: max.s, min.s in compiled code
 func_001E89F0	001E89F0	96	handwritten	VU0 macro instruction
 func_001E8A50	001E8A50	772	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EA720	001EA720	4	remnant	stripped-function leftover
 func_001EA818	001EA818	256	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EA918	001EA918	340	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001EB168	001EB168	748	inline	C with inline assembly: max.s, min.s in compiled code
 func_001EB458	001EB458	4	remnant	stripped-function leftover
 func_001EB698	001EB698	172	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EBD10	001EBD10	188	inline	C with inline assembly: VU0 macro instruction in the compiler's frame

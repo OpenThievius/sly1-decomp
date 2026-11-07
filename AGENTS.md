@@ -82,9 +82,10 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   printed.
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
   The exception is the inline-assembly helpers the original developers' C called, for the
-  instructions the compiler cannot emit. Retail's bare `sqrt.s`, `max.s` and `min.s` behave as
-  such helpers, which no C form reproduces (docs/TOOLCHAIN.md): include/fpu.h's `Fpu::Sqrt`,
-  `Fpu::Max` and `Fpu::Min`. The functions config/us/original_asm.tsv classifies `inline`
+  instructions the compiler cannot emit. Retail's bare `sqrt.s` behaves as such a helper, which
+  no C form reproduces (docs/TOOLCHAIN.md): include/fpu.h's `Fpu::Sqrt`. (`max.s` and `min.s` are
+  not: they are g++'s own minimum and maximum operators, `a >? b` and `a <? b`, plain C++ of this
+  compiler.) The functions config/us/original_asm.tsv classifies `inline`
   (docs/ASM_CLASSIFICATION.md: compiled C around VU0, MMI or system instructions) are matched
   with helpers of the same kind. A helper is one instruction, or one short sequence, that the
   compiler cannot emit and that recurs across retail's functions; it lives in a shared header

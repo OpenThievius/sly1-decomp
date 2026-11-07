@@ -303,10 +303,11 @@ class ClassifyAsmTest(unittest.TestCase):
         unfreed = body[:-1] + ["nop"]  # a frame the function never frees is not the compiler's
         self.assertEqual(self.classify([("f", 0x100000, "code", unfreed)])["f"][0], "handwritten")
 
-    def test_max_and_min_are_c_with_inline_assembly_even_in_a_leaf(self):
+    def test_max_and_min_are_plain_c(self):
+        # g++'s `>?` and `<?` operators emit them; a system call stub stays hand-written
         got = self.classify([("f", 0x100000, "code", ["max.s $f0, $f0, $f12", "jr $ra", "nop"]),
                              ("s", 0x100010, "code", ["addiu $v1, $zero, 0x3C", "syscall", "jr $ra", "nop"])])
-        self.assertEqual(got["f"][0], "inline")
+        self.assertNotIn("f", got)
         self.assertEqual(got["s"][0], "handwritten")
 
     def test_the_disassemblers_mark_counts(self):
@@ -339,7 +340,7 @@ class SystemEvidenceTest(unittest.TestCase):
 
     def test_a_kernel_instruction_is_original_assembly(self):
         self.assertIn("syscall", classify_asm.handwritten(["addiu", "syscall", "jr", "nop"], "code"))
-        self.assertIn("max.s", classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
+        self.assertIsNone(classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
 
     def test_a_tail_jump_in_game_code_is_original_assembly(self):
         lines = ["j          func_001FA078", "daddu     $a0, $zero, $zero", "nop"]
@@ -373,7 +374,7 @@ class SystemEvidenceTest(unittest.TestCase):
         self.assertIn("system", todo.tags_of(["break 1023, 1023", "jr $ra"], "code"))
         # A bare sqrt.s is written with include/fpu.h's Fpu::Sqrt; max.s still has no C form.
         self.assertNotIn("nonc", todo.tags_of(["sqrt.s $f0, $f12", "c.eq.s $f2, $f4", "jr $ra"], "code"))
-        self.assertIn("nonc", todo.tags_of(["max.s $f0, $f12, $f13", "jr $ra"], "code"))
+        self.assertNotIn("nonc", todo.tags_of(["max.s $f0, $f12, $f13", "jr $ra"], "code"))  # g++ >?
 
 
 class OriginalAsmTableTest(unittest.TestCase):

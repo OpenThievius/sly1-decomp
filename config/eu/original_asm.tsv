@@ -4,8 +4,6 @@ func_0011E0C0	0011E0C0	12	remnant	stripped-function leftover
 func_0011E650	0011E650	4	remnant	stripped-function leftover
 func_00138840	00138840	12	remnant	stripped-function leftover
 func_0013E730	0013E730	544	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_0015E4A8	0015E4A8	824	inline	C with inline assembly: max.s in compiled code
 func_00160710	00160710	4	remnant	stripped-function leftover
 func_001607F8	001607F8	4	remnant	stripped-function leftover
-func_001AEF48	001AEF48	432	inline	C with inline assembly: min.s in compiled code
 func_001E6350	001E6350	4	remnant	stripped-function leftover
