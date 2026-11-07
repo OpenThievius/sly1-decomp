@@ -3783,7 +3783,6 @@ extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
 extern const char D_0024EB78[3][8] = {"....", "....", "all"};
-extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
 extern const char D_0024F5F8[40] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
 extern const char D_0024F620[24] = "Libcdvd bind err N CMD\n";
 extern const char D_0024F658[40] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";

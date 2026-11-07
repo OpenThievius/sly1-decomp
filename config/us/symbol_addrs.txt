@@ -114,3 +114,6 @@ D_0027AE88 = 0x0027AE88;
 D_0027AEA8 = 0x0027AEA8;
 D_0027AEB4 = 0x0027AEB4;
 D_0027AEB8 = 0x0027AEB8;
+// The graphics library's identification string (src/lib/graph.c's .data), inside the label of
+// the VIF1 words before it, which no code reads.
+D_00279320 = 0x00279320;

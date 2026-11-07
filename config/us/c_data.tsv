@@ -555,8 +555,7 @@ D_0024F110	0024F110	204	.rodata	src/lib/unwind.c
 D_0024F1E0	0024F1E0	59	.rodata	src/lib/new_handler.cpp
 D_0024F220	0024F220	267	.rodata	src/lib/type_info.cpp
 D_0024F330	0024F330	430	.rodata	src/lib/type_info_kinds.cpp
-D_0024F4E0	0024F4E0	48	.rodata.D_0024F4E0	src/lib/00200000.cpp
-D_0024F510	0024F510	56	.rodata.D_0024F510	src/main/001E4000.cpp
+D_0024F4E0	0024F4E0	98	.rodata	src/lib/graph.c
 D_0024F548	0024F548	176	.rodata.D_0024F548	src/lib/00200000.cpp
 D_0024F5F8	0024F5F8	40	.rodata.D_0024F5F8	src/main/001E4000.cpp
 D_0024F620	0024F620	24	.rodata.D_0024F620	src/main/001E4000.cpp
@@ -798,7 +797,7 @@ D_00278640	00278640	916	.data	src/lib/exception.cpp
 D_002789D8	002789D8	164	.data	src/lib/new_handler.cpp
 D_00278A7C	00278A7C	900	.data	src/lib/type_info.cpp
 D_00278E00	00278E00	1280	.data	src/lib/type_info_kinds.cpp
-D_00279330	00279330	16	.data.D_00279330	src/lib/00200000.cpp
+D_00279300	00279300	64	.data	src/lib/graph.c
 D_00279340	00279340	64	.data.D_00279340	src/lib/00200000.cpp
 D_00279380	00279380	40	.data.D_00279380	src/lib/00200000.cpp
 D_002793A8	002793A8	16	.data.D_002793A8	src/lib/00200000.cpp

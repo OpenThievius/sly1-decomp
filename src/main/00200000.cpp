@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-u32 func_00201BA8();
 u32 func_002027A0(u32);
 extern u32 D_00279340[];
-extern u8 D_00279330[];
-u32 func_00201BA8() { return (u32)D_00279330; }
 u32 func_002027A0(u32 index) { if (index >= 10) return 0; return D_00279340[index]; }
 extern s32 D_00279454;
 extern u32 D_0027A5C0[];

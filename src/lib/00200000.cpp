@@ -284,12 +284,6 @@ struct Ctx_202058;
 void* func_001F6C60(Ctx_202058* self);
 void func_001F6C70(Ctx_202058* self);
 
-void* func_00202058(Ctx_202058* self)
-{
-    void* r = func_001F6C60(self);
-    func_001F6C70(self);
-    return r;
-}
 
 // NEAR: retail saves s0, s1 and ra with 8-byte sd/ld; the default 2.95.3 build saves 16-byte sq/lq, so the prologue, epilogue and the 0x50 frame's store order differ (default compiler cannot make sd saves here)
 
@@ -464,10 +458,6 @@ s32 func_00200080(void);
 struct Cfg_00202120;
 s32 func_001F6C60(Cfg_00202120* c);
 
-s32 func_00202120(Cfg_00202120* c)
-{
-    return func_001F6C60(c);
-}
 
 void func_00202768(u8* p, s32 n)
 {
@@ -486,22 +476,6 @@ void func_00202768(u8* p, s32 n)
 // NEAR: all body instructions match; SN emits sq/lq saves where retail uses sd/ld (and reports 192 vs 188 bytes).
 void* func_00201BA8(void*);
 
-void func_00201BB8(void* self)
-{
-    s16 kind = *(s16*)((u8*)func_00201BA8(self) + 6);
-    if (kind == 1) {
-        *(volatile u64*)0x12000000 = *(u64*)self;
-        *(volatile u64*)0x12000070 = *(u64*)((u8*)self + 0x10);
-        *(volatile u64*)0x12000080 = *(u64*)((u8*)self + 0x18);
-        *(volatile u64*)0x120000C0 = *(u64*)((u8*)self + 0x20);
-    } else {
-        *(volatile u64*)0x12000000 = *(u64*)self;
-        *(volatile u64*)0x12000020 = *(u64*)((u8*)self + 8);
-        *(volatile u64*)0x12000090 = *(u64*)((u8*)self + 0x10);
-        *(volatile u64*)0x120000A0 = *(u64*)((u8*)self + 0x18);
-        *(volatile u64*)0x120000E0 = *(u64*)((u8*)self + 0x20);
-    }
-}
 
 struct Obj_200080 { void* f0; void* f4; };
 u8* func_0018D778(struct Obj_200080* self);
@@ -543,19 +517,6 @@ struct Obj_201FF8 {
 void func_00201BB8(Elem_201FF8* p);
 s32 func_00201C78(Elem_201FF8* p);
 
-s32 func_00201FF8(Obj_201FF8* self, s32 flag)
-{
-    u8* base = (u8*)self;
-    s32 idx = flag & 1;
-    s32 r;
-    (void)func_00201BB8((Elem_201FF8*)(base + idx * 0x28));
-    if (idx != 0) {
-        r = func_00201C78((Elem_201FF8*)(base + 0x140));
-    } else {
-        r = func_00201C78((Elem_201FF8*)(base + 0x50));
-    }
-    return r;
-}
 
 extern s32 D_00279424;
 extern s32 D_0027943C;
@@ -583,42 +544,8 @@ extern const char D_0024F4E0[48];
 struct Fmt_201C78 { s32 field0; };
 s32 func_001E1F10(struct Fmt_201C78 *fmt, ...);
 
-s32 func_00201C78(void *self) {
-    u32 n = 0;
-    if (*(volatile u32 *)0x1000A000 & 0x100) {
-        do {
-            if (n++ > 0x1000000) {
-                PrintFormatted((struct Fmt_201C78 *)(u8*)D_0024F4E0);
-                return -1;
-            }
-        } while (*(volatile u32 *)0x1000A000 & 0x100);
-    }
-    *(volatile u32 *)0x1000A020 = (s32)(*(s64 *)self & 0x7FFF) + 1;
-    if (((u32)self & 0x70000000) == 0x70000000) {
-        *(volatile u32 *)0x1000A010 = ((u32)self & 0x0FFFFFFF) | 0x80000000;
-    } else {
-        *(volatile u32 *)0x1000A010 = (u32)self & 0x0FFFFFFF;
-    }
-    *(volatile u32 *)0x1000A000 = 0x101;
-    return 0;
-}
 
 u64* func_00201BA8();
-s32 func_002023B0(s16 px, s16 py, s16 pz)
-{
-    u64* bits = func_00201BA8();
-    s32 yS = (py + 63) / 64;
-    s32 c;
-    if (px & 2) {
-        c = (pz + 63) / 64;
-    } else {
-        c = (pz + 31) / 32;
-    }
-    if ((*bits & 0x0000FFFF0000FFFFULL) == 1) {
-        return ((yS * c) << 16) >> 16;
-    }
-    return ((yS * c) << 17) >> 16;
-}
 
 typedef int V128_201D60 __attribute__((mode(TI)));
 
@@ -651,37 +578,6 @@ void func_00202140(void* p, s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_00202478(void* p, s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_00202660(void* p, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
 
-void func_00201D60(Obj_201D60* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
-{
-    u8* base = (u8*)self;
-    u64* mode = func_00201BA8();
-    func_00202140(self, a1, w, h, 0, 0);
-    func_00202140(base + 0x28, a1, w, h, 0, 0);
-    func_00202478(base + 0x60, a1, w, h, a4, a5);
-    func_00202478(base + 0x150, a1, w, h, a4, a5);
-    if (flag) {
-        s32 y = 0x800 - (w >> 1);
-        s32 z = 0x800 - (h >> 1);
-        func_00202660(base + 0xE0, a4, y, z, w, h, 0, 0, 0, 0, 0);
-        func_00202660(base + 0x1D0, a4, y, z, w, h, 0, 0, 0, 0, 0);
-    }
-    *(V128_201D60*)&self->tag50 = 0;
-    *(V128_201D60*)&self->tag140 = 0;
-    self->tag50.count = flag ? 14 : 8;
-    self->tag50.last = 1;
-    self->tag50.words = 1;
-    self->tag50.kind = 14;
-    self->tag140.count = flag ? 14 : 8;
-    self->tag140.last = 1;
-    self->tag140.words = 1;
-    self->tag140.kind = 14;
-    s32 r = func_002023B0(a1, w, h);
-    if ((*mode & 0xFFFF0000FFFFULL) == 0x100000001ULL || *(s16*)mode == 0) {
-        s16 half = r >> 1;
-        self->f38.value = half;
-        self->f60.value = r >> 1;
-    }
-}
 
 struct Q_203230;
 struct Dev_203230;
@@ -755,44 +651,6 @@ void func_001F6D40(s32 n);
 void func_001F6960(s32 n, s32 ptr);
 void func_001F6910(s32 a, s32 b, s32 c);
 
-void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
-{
-    Rec_201A18* p;
-    u16 ext;
-
-    switch (mode) {
-    case 0:
-        p = (Rec_201A18*)(u32)func_00201BA8();
-        *(volatile u64*)0x12001000 = 0x200;
-        p->x = x;
-        ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
-        p->y = y;
-        p->ext = ext;
-        func_001F6C70(0xFF00);
-        p->flag = (flag != 0);
-        if (p->f8 != 0) {
-            func_001F6D40(2);
-            func_001F6960(2, p->fC);
-            p->f8 = 0;
-            p->fC = 0;
-        }
-        func_001F6910(x & 1, (u8)y, flag & 1);
-        return;
-    case 1:
-        *(volatile u64*)0x12001000 = 0x100;
-        return;
-    case 5:
-        p = (Rec_201A18*)(u32)func_00201BA8();
-        p->flag = (flag != 0);
-        p->x = x;
-        p->y = y;
-        p->ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
-        func_001F6910(x & 1, (u8)y, flag & 1);
-        return;
-    default:
-        return;
-    }
-}
 
 struct Buf_2027C8 { u8 bytes[0x14]; };
 struct Slot_2027C8 { s32 w00; u8 pad04[0x0C]; s32 w10; u8 pad14[0x1C]; s32 w30; u8 pad34[0x0C]; s32 w40; u8 pad44[0x0C]; s32 w50; u8 pad54[0x2C]; s32 w80; };
@@ -1072,25 +930,6 @@ void func_00202F88(void) {
 
 struct Obj_202098 { u8 pad0[0x20]; u64 out; u8 pad1[0x8]; u64 in; };
 
-void func_00202098(struct Obj_202098* self, s16 a1, s16 a2, s16 a3)
-{
-    u64 v = self->in;
-    s64 y = (u64)((s32)((v >> 48) & 0x7FF) + 1) >> 1;
-    s64 b2 = a2;
-    s64 b1 = a1;
-    s64 x = (u64)((s32)((v >> 16) & 0x7FF) + 1) >> 1;
-    b2 -= y;
-    b1 -= x;
-    s64 t = b2 << 4;
-    u64 lo = b1 << 4;
-    u64 hi;
-    if (a3 != 0) {
-        hi = (u64)(t + 8) << 32;
-    } else {
-        hi = (u64)t << 32;
-    }
-    self->out = lo | hi;
-}
 
 extern u8 D_0027AE48[];
 extern u8 D_0027A600[];
@@ -1241,12 +1080,10 @@ template <void* (*TF)(void)> struct Cast_200778
 };
 
 // Data of this file: type-name strings, class tables and the runtime's zero-initialised objects.
-extern const char D_0024F4E0[48] = "sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n";
 extern const char D_0024F638[16] = "N cmd wait\n";
 extern const char D_0024F648[16] = "S cmd wait\n";
 struct Strs_24F548 { char s0[24]; char s1[40]; char s2[32]; char s3[24]; char s4[16]; char s5[16]; char s6[24]; };
 extern const Strs_24F548 D_0024F548 = { "libdma: sync timeout\n", "sceCdCbfunc= %d sceCdCbfunc_num= %d\n", "Libcdvd bind err CdSearchFile\n", "ee call cmd search %s\n", "search name %s\n", "search size %d\n", "search loc lbn %d\n" };
-u16 D_00279330[8] = { 1, 2, 1, 3, 0, 0, 0, 0 };
 Tbl_279340 D_00279340 = { { (Slot_2027C8*)0x10008000, (Slot_2027C8*)0x10009000, (Slot_2027C8*)0x1000A000, (Slot_2027C8*)0x1000B000, (Slot_2027C8*)0x1000B400, (Slot_2027C8*)0x1000C000, (Slot_2027C8*)0x1000C400, (Slot_2027C8*)0x1000C800, (Slot_2027C8*)0x1000D000, (Slot_2027C8*)0x1000D400 }, { 0 }, { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'd', 'm', 'a', ' ', ' ', '2', '4', '0', '0' } };
 u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
 u8 D_002793B8[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
