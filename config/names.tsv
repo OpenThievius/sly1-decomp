@@ -2483,3 +2483,25 @@ func_001DAFB8	SetPathFollowerPath	stores the path object at +0x830, queries its 
 func_001D8578	UpdatePathFollowerPace	moves the value at +0x85C toward the target at +0x860 and, once the time at +0x864 has passed, picks a new target from a clamped polynomial of lap and entry index plus a random offset and a random next time
 func_001D9C98	UpdatePathFollower	slot of class 0x19: runs the base update func_00192B58, then per mode (+0xB34) UpdateFollowerPace and the rest of the per-frame follower functions, and records the time at +0x850 when the third row's z exceeds 0.5
 func_001DAE68	HandlePathFollowerActivation	slot of class 0x19: runs HandleSwitchedColliderActivation, then on activation points the global element targets at its +0xB00..+0xB0C fields, and on deactivation in mode 2 resets the mode to 0
+func_00146D10	IsEligibleNotifierTarget	returns 0 when the object's flag bit 43 (+0x538) is set or the object at +0x50 is of kind 5, 0x27, 0x3B, 0x40 or 0x2E, else 1; func_00146DB0 calls it for the state notifier's update
+func_00147ED0	CompleteTimeRangeNotifier	calls the class 0x58 object's slot 51 (its SetState, 0xCC) with state 2; HandleTimeRangeNotifierNotification queues it
+func_00148038	PlaceSpareSoundNotifier	gathers one object of kind 0x56 (GatherObjectsOfKind): with none raises g_saveData's 0x19E4 count up to func_00160D98's limit, else sets its state to 4 and places it on the camera's view with D_00261AB0's offset; func_001481A0 sets it as a fade's done callback
+func_00148178	AddReserveUnit	raises g_saveData's 0x19E0 count by one, at most 99; func_001481A0 sets it as a fade's done callback
+func_001481A0	CountPickupTowardHundred	an effect's callback (D_00261B30): raises g_saveData's 0x19E8 count and at 100 resets it, queueing PlaceSpareSoundNotifier while 0x19E4 is below its limit or else AddReserveUnit while 0x19E0 is below 99
+func_00148400	InitSoundNotifier	slot 0x10 of class 0x56 (its SetState is SetSoundNotifierState): runs InitStateNotifier, then sets its movement numbers (0.35, 300, 0.75, 0.5, 60)
+func_00148510	InitSaveNotifier	slot 0x10 of class 0x59: runs InitStateNotifier, sets its movement numbers and starts in state 2 when g_currentEntry's flag 2 is set
+func_00148598	SetSaveNotifierState	slot 0xCC of class 0x59 (overriding SetStateNotifierState): on state 1 sets g_currentEntry's flag 2, triggers script event 2, starts a memory-card save (StartMemoryCardSave) and moves to state 2
+func_00148698	InitDeadlineNotifier	slot 0x10 of class 0x5A: runs InitStateNotifier, sets its movement numbers and starts in state 2 when D_0026EC60's word is 0
+func_00148718	StartDeadlineNotifier	slot 0x50 of class 0x5A: runs StartStateNotifier and stores the object in g_deadlineNotifier
+func_00148748	CompleteDeadlineNotifier	calls the class 0x5A object's slot 51 (its SetState, 0xCC) with state 2; HandleDeadlineNotifierNotification queues it
+func_00148770	HandleDeadlineNotifierNotification	slot 0x44 of class 0x5A: after HandlePlacedObjectNotification, on notification 0x14 from its +0x2E8 object with code 0x263 tells the world's +0x1D60 object and queues CompleteDeadlineNotifier
+func_00148888	SetDeadlineNotifierState	slot 0xCC of class 0x5A (overriding SetStateNotifierState): on state 1 sets the timer caption's best-time state (SetBestTimeState), tells the listener and moves to state 2
+func_00148938	GatherObjectsOfKind	original assembly: fills an array with up to n objects of the given kind from the world's list and returns their count (PlaceSpareSoundNotifier and ScatterObjectsAroundCircle call it)
+func_00148CE0	CompleteSoundNotifiers	sets state 2 on every object of kind 0x56 in the world's list at +0x1C54, unless g_saveData's 0x19D8/0x19DC pair is 3/8 or the 0x19E4 count is below its limit with D_0026EC58 under 2
+func_00148D90	InitCountdownNotifier	slot 0x10 of class 0x57 (its update is CountDownNotifierTimer): runs InitStateNotifier, sets its movement numbers and its timer limits 4 and 6
+func_00148E18	CompleteCountdownNotifier	calls the class 0x57 object's slot 51 (its SetState, 0xCC) with state 2; HandleCountdownNotifierNotification queues it
+func_00148E40	HandleCountdownNotifierNotification	slot 0x44 of class 0x57: after HandlePlacedObjectNotification, on notification 0x14 from its +0x2E8 object with code 0x263 tells the world's +0x1D60 object and queues CompleteCountdownNotifier
+func_00148F80	AddReserveUnitNow	restarts D_0026C6C8 and raises g_saveData's 0x19E0 count by one, at most 99; SetCountdownNotifierState calls it when no effect can be created (D_00261BC0 holds it as a callback)
+func_00148FF0	SetCountdownNotifierState	slot 0xCC of class 0x57 (overriding SetStateNotifierState): state 0 draws a random time, state 1 creates an effect (CreateEffect), sets a flag-table bit, plays sound 0x69, tells the listener and moves to 2
+func_00149190	UpdateArmedNotifier	slot 0x54 of class 0x5B (original assembly; its Init is InitArmedStateNotifier)
+D_0026EC68	g_deadlineNotifier	StartDeadlineNotifier stores the class 0x5A object here; func_00149398's file reads it

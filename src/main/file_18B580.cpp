@@ -136,7 +136,7 @@ void func_0018B670(BackgroundJob* job, void* fn, void* arg)
     job->arg = arg;
     job->result = 0x20;
     func_001F5C0C(&param, 0, 0x30);
-    param.entry = func_0018B600;
+    param.entry = RunBackgroundJob;
     param.stack = D_002BEA10;
     param.stackSize = 0x4000;
     param.gp = D_002832F0;

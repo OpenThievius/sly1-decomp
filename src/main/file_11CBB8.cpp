@@ -740,7 +740,7 @@ s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
 
 s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
 {
-    void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
+    void QueueIopCommand(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
     if (g_iopDiscAccess == 0) {
         return func_00203B18(a0, a1, a2, a3);
     }

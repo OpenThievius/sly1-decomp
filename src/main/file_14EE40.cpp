@@ -453,10 +453,6 @@ f32 func_001EB0F8(void*, f32);
 
 extern f32 func_001EB0F8(void*, f32);
 
-struct Obj_152438 { u8 pad[8]; void* link; };
-
-struct Pair_00152440 { u32 first, second; };
-
 struct Pair_00152450 { u32 first, second; };
 
 void func_001524D8(List01*, u32);
@@ -512,7 +508,7 @@ struct Link_00152600 { s32 f0; s32 f4; };
 void* func_00152460(void* a, void* b);
 
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
-void func_00152438(Obj_152438* self, void* value);
+void func_00152438(List01* self, s32 offset);
 
 struct Gl_0026E9F8 { u8 pad0[0x260]; s32 f260; u8 pad1[0x8]; s32 f26C; };
 
@@ -1905,7 +1901,7 @@ void func_00151D28(Self_151D28* self)
         f32 v = ClampToRange((u8*)self->field_1C + 8, g_currentEntry->dt);
         func_00152410(self, v);
     }
-    func_00148CE0(g_currentWorld);
+    CompleteSoundNotifiers(g_currentWorld);
 }
 
 void func_00151E18(void* self)
@@ -2027,15 +2023,15 @@ void func_00152410(G261EF0* object, f32 unused)
 	g_currentEntry->dt = value;
 }
 
-void func_00152438(Obj_152438* self, void* value)
+void func_00152438(List01* self, s32 offset)
 {
-    self->link = value;
+    self->offset = offset;
 }
 
-void func_00152440(Pair_00152440* p)
+void func_00152440(List01* p)
 {
-	p->second = 0;
-	p->first = 0;
+	p->tail = 0;
+	p->head = 0;
 }
 
 void func_00152450(Pair_00152450* p)
@@ -2540,10 +2536,10 @@ void func_00153528(ActiveSetSolver* self, s32 count)
 	s32 size = 0x60 * n;
 	self->items = AllocateBackMemory(size);
 	(void)func_001F5C0C(self->items, 0, size);
-	func_00152438((Obj_152438*)&self->active, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->atLow, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->atHigh, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->pending, (void*)0x4C);
+	func_00152438(&self->active, 0x4C);
+	func_00152438(&self->atLow, 0x4C);
+	func_00152438(&self->atHigh, 0x4C);
+	func_00152438(&self->pending, 0x4C);
 	s32 sq = (n * n) << 2;
 	self->matrix = (f32*)AllocateBackMemory(sq);
 	self->factor = (f32*)AllocateBackMemory(sq);

@@ -102,7 +102,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
     self->f570 = n;
     self->f574 = *self->f568;
     if (n == 2) {
-        func_00148CE0(g_currentWorld);
+        CompleteSoundNotifiers(g_currentWorld);
     }
     self->f578 = (self->f570 != 0);
 }

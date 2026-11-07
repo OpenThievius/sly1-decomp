@@ -437,7 +437,7 @@ D_00249E18	00249E18	36	.rodata	src/main/file_140790.cpp
 D_00249E3C	00249E3C	8	.rodata	src/main/file_140D90.cpp
 D_00249E44	00249E44	8	.rodata	src/main/file_1419E8.cpp
 D_00249E4C	00249E4C	4	.rodata.D_00249E4C	src/main/001E4000.cpp
-D_00249E50	00249E50	0	.rodata	src/main/file_146100.cpp
+D_00249E50	00249E50	0	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	184	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	20	.rodata	src/main/file_14D0A8.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
@@ -604,7 +604,7 @@ D_002613F0	002613F0	32	.data	src/main/file_140790.cpp
 D_00261410	00261410	1088	.data	src/main/file_140D90.cpp
 D_00261850	00261850	48	.data	src/main/file_142ED0.cpp
 D_00261880	00261880	76	.data	src/main/file_143140.cpp
-D_002619A0	002619A0	568	.data	src/main/file_146100.cpp
+D_002619A0	002619A0	568	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	212	.data	src/main/file_149398.cpp
 D_00261CC8	00261CC8	12	.data.D_00261CC8	src/main/0014C000.cpp
 D_00261CD4	00261CD4	4	.data.D_00261CD4	src/main/001E4000.cpp

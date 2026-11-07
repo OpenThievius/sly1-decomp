@@ -313,7 +313,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
     self->state = n;
     self->stateSince = *self->clock;
     if (n == 2) {
-        func_00148CE0(g_currentWorld);
+        CompleteSoundNotifiers(g_currentWorld);
     }
     self->active = (self->state != 0);
 }
