@@ -41,7 +41,7 @@ void func_001C4458(TurningCollider* self)
     InitSwitchedCollider(self);
     self->f700 = 1.0f;
     self->f360 = D_00274B20;
-    func_001C5E50(self, 1.0f);
+    ScaleTurningColliderRamp(self, 1.0f);
     (*(Quad_1C4458*)&self->v6F0) = D_00274B30;
     *(Blk12_1C4458*)((u8*)self + 0x710) = *(Blk12_1C4458*)D_00274B40;
     *(Blk12_1C4458*)((u8*)self + 0x704) = *(Blk12_1C4458*)D_00274B50;
@@ -122,7 +122,7 @@ void func_001B93D8(void);
 
 void func_001C49C8(void)
 {
-    func_001B93D8();
+    DrawCollider();
 }
 
 ASM_FUNC(func_001C49E8);
@@ -153,7 +153,7 @@ void func_001C4A80(Player* self, f32* p, f32 f) {
     }
     D_00605548 = idx;
     StartSoundEffect(idx, 0, 0, (u8*)&self->v140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
-    func_001C0EC0();
+    PlaySoundWithWanderingPitch();
 }
 
 ASM_FUNC(func_001C4C20);

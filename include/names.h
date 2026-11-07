@@ -2381,12 +2381,15 @@
 #define DrawTrailRibbon                            func_001C30E8
 #define InitTurningCollider                        func_001C4458
 #define StartTurningCollider                       func_001C44F0
+#define DrawTurningCollider                        func_001C49C8
 #define PlayPhaseCrossingSound                     func_001C4A80
 #define UpdateTurningCollider                      func_001C4ED0
 #define SetTurningColliderRotation                 func_001C4FA0
 #define StepTurningCollider                        func_001C5118
 #define BuildTurningColliderHeadingMatrix          func_001C53B0
 #define RecomputeTurningColliderFrame              func_001C5438
+#define TurnColliderTowardHeading                  func_001C5D58
+#define ScaleTurningColliderRamp                   func_001C5E50
 #define InitAgent                                  func_001C6F48
 #define LoadAgent                                  func_001C7140
 #define CopyAgent                                  func_001C7188

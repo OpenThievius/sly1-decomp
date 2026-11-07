@@ -2786,3 +2786,6 @@ func_001C29F8	AddTrailPoint	adds a point to an object's trail ring (+0x60): its 
 func_001C3028	QueueTrailRibbonDraw	clears a request record and queues DrawTrailRibbon for the object with QueueDeferredRequest
 D_00274998	g_trailEdgeTexCoord	the texture coordinate (0, 1.0) DrawTrailRibbon gives each point's first edge
 D_002749A0	g_trailZeroTexCoord	the zero texture coordinate DrawTrailRibbon gives each point's second edge
+func_001C49C8	DrawTurningCollider	slot 37 of class 0x06 (the draw slot): only runs DrawCollider; DrawAgent calls it as its base
+func_001C5D58	TurnColliderTowardHeading	turns the rotation vector at +0x160's third angle toward the heading of the object's x axis with ApproachAngleWithRamp and the ramp at +0x6E0, then sets it through slot 33 (0x94)
+func_001C5E50	ScaleTurningColliderRamp	copies the ramp D_00274B80 to +0x6E0 and scales its first two values by the factor and the third by the factor's inverse square root
