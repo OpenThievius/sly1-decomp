@@ -23,8 +23,6 @@ src/lib/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/00208000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/0020C000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/00210000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
-src/libm/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111-01
-src/libm/00208000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111-01
 src/lib/double_to_u64.c	-O2 -G0	2.9-ee-991111-01
 src/lib/s64_to_double.c	-O2 -G0	2.9-ee-991111-01
 src/lib/s64_to_float.c	-O2 -G0	2.9-ee-991111-01
@@ -35,3 +33,38 @@ src/lib/type_info.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info_kinds.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/allocate.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/exception.cpp	-O2 -G0	2.9-ee-991111-01
+src/libm/file_204F68.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205210.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2052F8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205318.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205400.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2054F0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205578.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205678.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205778.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2058A0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2059E0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205B28.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_206180.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_205C78.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_206298.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2066C8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_206A68.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_206D50.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_206FA0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2072C8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2073F8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_207C88.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_208068.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2081A0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_208C48.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2082F8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_208D50.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_208FE8.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_209010.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_209210.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_209238.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_209260.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_2093C0.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_24FF70.c	-O2 -G0	2.9-ee-991111-01
+src/libm/file_24FF78.c	-O2 -G0	2.9-ee-991111-01

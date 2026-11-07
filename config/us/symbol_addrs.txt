@@ -64,6 +64,21 @@ D_0024F220 = 0x0024F220;
 // The end of src/lib/type_info.cpp's .rodata (its type name "9type_info"), where the next
 // object's string begins.
 D_0024F330 = 0x0024F330;
+// The starts of the math library's files' .rodata (src/libm/file_*.c), each object's literals
+// and tables in one piece, where a coarse label or one an instruction names spans two of them.
+D_0024F8E4 = 0x0024F8E4;
+D_0024F8E8 = 0x0024F8E8;
+D_0024F968 = 0x0024F968;
+D_0024F9A0 = 0x0024F9A0;
+D_0024F9DC = 0x0024F9DC;
+D_0024F9F8 = 0x0024F9F8;
+D_0024FA08 = 0x0024FA08;
+D_0024FA38 = 0x0024FA38;
+D_0024FE98 = 0x0024FE98;
+D_0024FEA0 = 0x0024FEA0;
+D_0024FF0C = 0x0024FF0C;
+D_0024FF28 = 0x0024FF28;
+D_0024FF90 = 0x0024FF90;
 // The end of soft_float.c's .bss inside a coarse label: the double routines' NaN result
 // (D_0062A770, 0x18 bytes, the unpacked double type) is followed by 0x10 bytes no code reads.
 D_0062A788 = 0x0062A788;
