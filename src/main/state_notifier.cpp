@@ -14,7 +14,7 @@
 #include "camera.h"
 #include "effect.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
@@ -426,7 +426,7 @@ INCLUDE_RODATA(jtbl_00249E70);
 
 ASM_FUNC(func_00147AB0);
 
-void func_00147E40(C58* self)
+void func_00147E40(TimeRangeNotifier* self)
 {
     InitStateNotifier(self);
     f32 k = 50.0f;
@@ -445,7 +445,7 @@ void func_00147ED0(Obj_147ED0* self)
     ((void (*)(void*, s32))self->vtbl[51])(self, 2);
 }
 
-void func_00147EF8(C58* self, s32 kind, void* target)
+void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target)
 {
     Args_147EF8 args;
     s32 code;
@@ -464,7 +464,7 @@ void func_00147EF8(C58* self, s32 kind, void* target)
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteTimeRangeNotifier, self, 0, 0);
 }
 
-void func_00147FB0(C58* self)
+void func_00147FB0(TimeRangeNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
@@ -543,9 +543,9 @@ void func_001481A0(void* self)
     }
 }
 
-void func_00148298(C58* self, s32 mode)
+void func_00148298(TimeRangeNotifier* self, s32 mode)
 {
-    C58* s = self;
+    TimeRangeNotifier* s = self;
     if (s->state != mode) {
         switch (mode) {
         case 0:
@@ -582,9 +582,9 @@ void func_00148298(C58* self, s32 mode)
     }
 }
 
-void func_00148400(C56* self)
+void func_00148400(SoundNotifier* self)
 {
-    C56* o = self;
+    SoundNotifier* o = self;
     InitStateNotifier(o);
     f32 k60 = 60.0f;
     f32 k300 = 300.0f;
@@ -600,7 +600,7 @@ void func_00148400(C56* self)
     o->f350 = k60;
 }
 
-void func_00148470(C56* self, s32 mode)
+void func_00148470(SoundNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
@@ -611,9 +611,9 @@ void func_00148470(C56* self, s32 mode)
     SetStateNotifierState(self, mode);
 }
 
-void func_00148510(C59* self)
+void func_00148510(SaveNotifier* self)
 {
-    C59* o = self;
+    SaveNotifier* o = self;
     InitStateNotifier(o);
     f32 k35 = 35.0f;
     f32 k06 = 0.6f;
@@ -631,7 +631,7 @@ void func_00148510(C59* self)
     }
 }
 
-void func_00148598(C59* self, s32 mode)
+void func_00148598(SaveNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
@@ -655,7 +655,7 @@ void func_00148598(C59* self, s32 mode)
     SetStateNotifierState(self, mode);
 }
 
-void func_00148698(C5A* self)
+void func_00148698(DeadlineNotifier* self)
 {
     InitStateNotifier(self);
     self->f34C = 60.0f;
@@ -670,7 +670,7 @@ void func_00148698(C5A* self)
     }
 }
 
-void func_00148718(C5A* self)
+void func_00148718(DeadlineNotifier* self)
 {
     StartStateNotifier(self);
     g_deadlineNotifier = self;
@@ -681,7 +681,7 @@ void func_00148748(Dispatch_148748* self)
     self->vtbl[51](self, 2);
 }
 
-void func_00148770(C5A* self, s32 kind, void* msg)
+void func_00148770(DeadlineNotifier* self, s32 kind, void* msg)
 {
     Frame_148770 fr;
     HandlePlacedObjectNotification(self, kind, msg);
@@ -698,14 +698,14 @@ void func_00148770(C5A* self, s32 kind, void* msg)
     AppendQueuedCall(self->world, (void*)CompleteDeadlineNotifier, self, 0, 0);
 }
 
-void func_00148828(C5A* self)
+void func_00148828(DeadlineNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
     if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
 }
 
-void func_00148888(C5A* self, s32 mode)
+void func_00148888(DeadlineNotifier* self, s32 mode)
 {
     Msg_148888 msg;
     if (self->state == mode) return;
@@ -793,7 +793,7 @@ void func_00148CE0(World* self)
     } while (p != 0);
 }
 
-void func_00148D90(C57* self)
+void func_00148D90(CountdownNotifier* self)
 {
     InitStateNotifier(self);
     f32 k = 50.0f;
@@ -812,7 +812,7 @@ void func_00148E18(Obj_148E18* self)
     self->vtbl[51](self, 2);
 }
 
-void func_00148E40(C57* self, s32 kind, void* msg)
+void func_00148E40(CountdownNotifier* self, s32 kind, void* msg)
 {
     Frame_148E40 fr;
     HandlePlacedObjectNotification(self, kind, msg);
@@ -829,7 +829,7 @@ void func_00148E40(C57* self, s32 kind, void* msg)
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteCountdownNotifier, self, 0, 0);
 }
 
-void func_00148EF8(C57* self)
+void func_00148EF8(CountdownNotifier* self)
 {
     UpdateStateNotifier(self);
     if (self->state != 0) return;
@@ -857,7 +857,7 @@ void func_00148F80(void)
     }
 }
 
-void func_00148FF0(C57* self, s32 mode)
+void func_00148FF0(CountdownNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 0) goto zero_case;
@@ -900,7 +900,7 @@ call_tail:
     SetStateNotifierState(self, mode);
 }
 
-void func_00149168(C5B* self)
+void func_00149168(ArmedStateNotifier* self)
 {
     InitStateNotifier(self);
     self->armed = 0;

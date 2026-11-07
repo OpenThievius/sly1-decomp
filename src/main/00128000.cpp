@@ -316,10 +316,10 @@ s32 func_00137B90(Stream83* p);
 void func_0012D2A8(Animation* a, Track83* b);
 void func_0012BC38(Animation* a, Stream83* b, s32 c, s32* d, s32* e);
 void func_0011EC40(Animation* a, Stream83* b);
-T2196_Pos* func_00120FB0(s32 cc);
-T2196_Rot* func_00121050(s32 cc);
-T2196_Scale* func_001210F0(s32 cc);
-T2196_Weight* func_00121160(s32 cc);
+PositionCurve* func_00120FB0(s32 cc);
+RotationCurve* func_00121050(s32 cc);
+ScaleCurve* func_001210F0(s32 cc);
+WeightCurve* func_00121160(s32 cc);
 
 struct Sub_12B5B8 {
     u8 pad0[0x60];

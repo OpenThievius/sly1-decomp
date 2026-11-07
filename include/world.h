@@ -15,7 +15,7 @@
 struct C17;
 struct EffectOwner;
 struct Contacts03;
-struct S1DBBD8;     // an entry of the callback list at 0x1EC8 (s1dbbd8.h)
+struct QueuedCall;     // an entry of the callback list at 0x1EC8 (queued_call.h)
 
 struct Actor6C;
 
@@ -67,7 +67,7 @@ struct World : BaseObject {
     Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
     Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
-    Pool6C pool1B14;        // 0x1B14: the 0x14-byte S1DBBD8 entries (func_001DBBD8, func_001DBC18)
+    Pool6C pool1B14;        // 0x1B14: the 0x14-byte QueuedCall entries (func_001DBBD8, func_001DBC18)
     Pool6C pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
     Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
     EffectOwner* f1B38;             // 0x1B38
@@ -140,8 +140,8 @@ struct World : BaseObject {
     s32 f1D80;              // 0x1D80
     u8 f1D84[0x140];        // 0x1D84
     void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
-    S1DBBD8* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
-    S1DBBD8* f1ECC;         // 0x1ECC: its last
+    QueuedCall* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
+    QueuedCall* f1ECC;         // 0x1ECC: its last
     u8 pad1ED0[0x1ED4 - 0x1ED0];
     void* buf1ED4;          // 0x1ED4: 0x1000 bytes
     u8 pad1ED8[0x1EE0 - 0x1ED8];

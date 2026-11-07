@@ -107,14 +107,14 @@ void func_0016CF70(TargetFollower* self)
 }
 
 void* func_0015A448(void* obj, void* id, void* owner);
-void func_0016D3F0(TargetFollower* self, C2A* x);
+void func_0016D3F0(TargetFollower* self, FollowableObject* x);
 void func_0016D788(TargetFollower* self);
 void func_0016DAC0(TargetFollower* self, s32 mode);
 
 void func_0016D040(TargetFollower* self, void* x)
 {
     self->f578 = (s32)x;
-    C2A* p = (C2A*)FindFirstObjectByIdMode4(self->world, x, self);
+    FollowableObject* p = (FollowableObject*)FindFirstObjectByIdMode4(self->world, x, self);
     if (p != 0) {
         SetFollowedObject(self, p);
         PlaceTargetFollowerOnFollowed(self);
@@ -162,7 +162,7 @@ void func_001A8AF8(void* p);
 Obj_1BF0D8* func_001BEEF8(s32 kind);
 void func_001BF0D8(Obj_1BF0D8* p);
 
-void func_0016D3F0(TargetFollower* self, C2A* x)
+void func_0016D3F0(TargetFollower* self, FollowableObject* x)
 {
     if (x == self->f558) {
         return;
@@ -344,7 +344,7 @@ void func_0016DDE8(EntryTableObject* self)
 INCLUDE_RODATA(D_0024A844);
 ASM_FUNC(func_0016DE20);
 
-void func_0016DF30(C2A* self)
+void func_0016DF30(FollowableObject* self)
 {
     InitZoneCollider(self);
     self->zone.duration = 0;
@@ -356,7 +356,7 @@ void func_001249A8(void* self);
 s32 func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
 s32 func_0015A838(void* a0, s32 a1, s32 a2, void* a3);
 
-void func_0016DF68(C2A* self)
+void func_0016DF68(FollowableObject* self)
 {
     PostLoadPlacedObject(self);
     if (self->id7A0 != -1) {
@@ -374,7 +374,7 @@ s32 func_001526D0(void* a, void* b);
 void func_00152470(void* list, void* item);
 void func_00152600(void* table, void* self);
 
-void func_0016DFE0(C2A* self, s32 kind)
+void func_0016DFE0(FollowableObject* self, s32 kind)
 {
     HandlePlacedObjectNotification(self, kind);
     switch (kind)

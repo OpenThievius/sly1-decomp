@@ -40,7 +40,7 @@ struct ObjectCycler : Collider {
     s32 altCount;           // 0x5AC: how many in altObjects
     PlacedObject* altObjects[8];        // 0x5B0: mode 1 only: found by kind 0x24D + i
     PlacedObject* obj5D0;            // 0x5D0
-    C77* group;             // 0x5D4: a 0x77 or 0x78 found by func_00159478 (kept by slot 10)
+    MemberObject* group;             // 0x5D4: a 0x77 or 0x78 found by func_00159478 (kept by slot 10)
     u8 pad5D8[0x5DC - 0x5D8];
     PackedFloatPair f5DC;              // 0x5DC: kept across the copy by slot 9
     void* handle;           // 0x5E4: made by func_001BFCD8 in mode 0, given back with func_001BF788

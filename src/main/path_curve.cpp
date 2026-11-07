@@ -3,7 +3,7 @@
 // with the method tables D_002176D0 and D_00217708), and the segment-length and lookup helpers.
 #include "common.h"
 #include "asm_func.h"
-#include "t2176.h"
+#include "path_curve.h"
 #include "shapes.h"
 
 struct __attribute__((aligned(16))) Vec_14DB78 { f32 v[4]; };
@@ -19,7 +19,7 @@ struct Obj_14DB78 {
     Vec_14DB78* b;
 };
 
-struct Ctx_14DBD0 { T2176* self; s32 a1; s32 a2; s32 pad; };
+struct Ctx_14DBD0 { PathCurve* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
 
 struct __attribute__((aligned(16))) Quad_0014DE78 { s32 v[4]; };
@@ -28,7 +28,7 @@ struct Frac_14E090 { s32 idx; f32 t; };
 typedef f32 (*Fn_14E6A8)(void* self);
 typedef void (*Fn2_14E6A8)(void* self, f32 t, s32 a1, void* a2);
 
-struct Ctx_14EC70 { T2176* self; s32 a1; s32 a2; s32 pad; };
+struct Ctx_14EC70 { PathCurve* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
 
 typedef f32 (*Slot6_14ED98)(void* self);
@@ -59,38 +59,38 @@ void func_0014D280(s32 count, void* points, f32* times, s32 wrap, s32 a4, s32 a5
 void func_0014D3A8(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
 void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 void func_0014D938(s32 count, Quad16* dst, void* arg, void* self);
-T2176* func_0014D9A8(s32 kind);
+PathCurve* func_0014D9A8(s32 kind);
 f32 func_0014DA18(void);
 f32 func_0014DA28(void);
-s32 func_0014DA38(T2176* self, f32 t, f32* a, f32* b);
-s32 func_0014DA68(T2176* self, f32 t, f32* a1, f32* a2);
+s32 func_0014DA38(PathCurve* self, f32 t, f32* a, f32* b);
+s32 func_0014DA68(PathCurve* self, f32 t, f32* a1, f32* a2);
 void func_0014DA98(void);
-f32 func_0014DB40(T2176* obj);
-f32 func_0014DB58(T2176* obj);
+f32 func_0014DB40(PathCurve* obj);
+f32 func_0014DB58(PathCurve* obj);
 void func_0014DB70(void);
 f32 func_0014DB78(Obj_14DB78* self);
-void func_0014DBD0(T2176* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
-f32 func_0014DD00(T2176* self);
-void func_0014DD28(T2176* self, void* src);
-void func_0014DE08(T2176* self, s32 a1, s32 a2);
-void func_0014DE40(T2176* self, s32 a1, s32 a2);
-void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5);
-void func_0014DF68(T2176* self, void* a, void* b);
-f32 func_0014DF98(T2176* self, f32 t);
-f32 func_0014E000(T2176* self, f32 t);
-f32 func_0014E068(T2176* self);
-void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1);
-void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
-void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
-void func_0014E3D0(T2176_708* self, void* src);
-void func_0014E500(T2176_708* obj);
-void func_0014E510(T2176_708* self, s32 i);
-void func_0014E6A8(T2176_708* self, s32 a1, void* a2);
-f32 func_0014E910(T2176_708* self, f32 t);
-f32 func_0014E990(T2176_708* self, f32 t);
-void func_0014EA48(T2176_708* self);
-void func_0014EC70(T2176_708* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
-void func_0014ED98(T2176_708* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
+void func_0014DBD0(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
+f32 func_0014DD00(PathCurve* self);
+void func_0014DD28(PathCurve* self, void* src);
+void func_0014DE08(PathCurve* self, s32 a1, s32 a2);
+void func_0014DE40(PathCurve* self, s32 a1, s32 a2);
+void func_0014DE78(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5);
+void func_0014DF68(PathCurve* self, void* a, void* b);
+f32 func_0014DF98(PathCurve* self, f32 t);
+f32 func_0014E000(PathCurve* self, f32 t);
+f32 func_0014E068(PathCurve* self);
+void func_0014E090(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1);
+void func_0014E170(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
+void func_0014E2A0(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
+void func_0014E3D0(SplinePathCurve* self, void* src);
+void func_0014E500(SplinePathCurve* obj);
+void func_0014E510(SplinePathCurve* self, s32 i);
+void func_0014E6A8(SplinePathCurve* self, s32 a1, void* a2);
+f32 func_0014E910(SplinePathCurve* self, f32 t);
+f32 func_0014E990(SplinePathCurve* self, f32 t);
+void func_0014EA48(SplinePathCurve* self);
+void func_0014EC70(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
+void func_0014ED98(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
 ASM_FUNC(func_0014D0A8);
 
@@ -150,17 +150,17 @@ void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
     }
 }
 
-T2176* func_0014D9A8(s32 kind)
+PathCurve* func_0014D9A8(s32 kind)
 {
-    T2176* p;
+    PathCurve* p;
     switch (kind) {
     case 0:
-        p = (T2176*)AllocateZeroedFrontMemory(0x1C);
-        p->vt = (const T2176_Vt*)((u8*)g_pathCurveKind0Methods);
+        p = (PathCurve*)AllocateZeroedFrontMemory(0x1C);
+        p->vt = (const PathCurveVt*)((u8*)g_pathCurveKind0Methods);
         break;
     case 1:
-        p = (T2176*)AllocateZeroedFrontMemory(0x1D0);
-        p->vt = (const T2176_Vt*)((u8*)g_pathCurveKind1Methods);
+        p = (PathCurve*)AllocateZeroedFrontMemory(0x1D0);
+        p->vt = (const PathCurveVt*)((u8*)g_pathCurveKind1Methods);
         break;
     default:
         p = 0;
@@ -182,21 +182,21 @@ f32 func_0014DA28(void)
     return 0.0f;
 }
 
-s32 func_0014DA38(T2176* self, f32 t, f32* a, f32* b)
+s32 func_0014DA38(PathCurve* self, f32 t, f32* a, f32* b)
 {
     return FindPathCurveSegment(t, self->count, self->times, self->wrap, a, b);
 }
 
-s32 func_0014DA68(T2176* self, f32 t, f32* a1, f32* a2)
+s32 func_0014DA68(PathCurve* self, f32 t, f32* a1, f32* a2)
 {
     return FindPathCurveSegment(t, self->count, self->lengths, self->wrap, a1, a2);
 }
 
 ASM_FUNC(func_0014DA98);
 
-f32 func_0014DB40(T2176* obj) { u32 address = obj->count * 4 + (u32)obj->times; return *(f32*)(address - 4); }
+f32 func_0014DB40(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->times; return *(f32*)(address - 4); }
 
-f32 func_0014DB58(T2176* obj) { u32 address = obj->count * 4 + (u32)obj->lengths; return *(f32*)(address - 4); }
+f32 func_0014DB58(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->lengths; return *(f32*)(address - 4); }
 
 LINKER_REMNANT(func_0014DB70);
 
@@ -211,7 +211,7 @@ f32 func_0014DB78(Obj_14DB78* self)
     return o2;
 }
 
-void func_0014DBD0(T2176* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+void func_0014DBD0(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
     Ctx_14DBD0 ctx;
     Out_14DBD0 out;
@@ -228,7 +228,7 @@ void func_0014DBD0(T2176* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(T2176*, s32, s32, f32))fn)(self, a3, a4, out.f);
+            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.f);
         }
     }
     if (a5 != 0) {
@@ -241,13 +241,13 @@ void func_0014DBD0(T2176* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6
 
 LINKER_REMNANT(func_0014DCF8);
 
-f32 func_0014DD00(T2176* self)
+f32 func_0014DD00(PathCurve* self)
 {
     f32* p = self->times;
     f32 b = p[1]; f32 a = p[0]; return (b - a) * 0.1f;
 }
 
-void func_0014DD28(T2176* self, void* src)
+void func_0014DD28(PathCurve* self, void* src)
 {
     self->wrap = ReadBufferedU8(src);
     s32 n = ReadBufferedU8(src);
@@ -259,21 +259,21 @@ void func_0014DD28(T2176* self, void* src)
         self->times[i] = ReadBufferedFloat(src);
         ReadBufferedVector3(src, (u8*)self->points + i * 16);
     }
-    f32 (*fn)(T2176*) = self->vt->m09;
+    f32 (*fn)(PathCurve*) = self->vt->m09;
     if (fn) fn(self);
 }
 
-void func_0014DE08(T2176* self, s32 a1, s32 a2)
+void func_0014DE08(PathCurve* self, s32 a1, s32 a2)
 {
     InterpolatePathCurvePoint(self->count, self->points, self->times, self->wrap, a1, a2);
 }
 
-void func_0014DE40(T2176* self, s32 a1, s32 a2)
+void func_0014DE40(PathCurve* self, s32 a1, s32 a2)
 {
     InterpolatePathCurvePoint(self->count, self->points, self->lengths, self->wrap, a1, a2);
 }
 
-void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
+void func_0014DE78(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
 {
     Quad_0014DE78 A;
     Quad_0014DE78 B;
@@ -294,9 +294,9 @@ void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     DrawProjectedLine(&A, &B, &C, a3, a5);
 }
 
-void func_0014DF68(T2176* self,void* a,void* b) { TransformPointArray(self->count,(Quad16*)self->points,a,b); }
+void func_0014DF68(PathCurve* self,void* a,void* b) { TransformPointArray(self->count,(Quad16*)self->points,a,b); }
 
-f32 func_0014DF98(T2176* self, f32 t0)
+f32 func_0014DF98(PathCurve* self, f32 t0)
 {
     f32 a, b;
     s32 i = FindPathCurveSegmentByTime(self, t0, &a, &b);
@@ -304,7 +304,7 @@ f32 func_0014DF98(T2176* self, f32 t0)
     return (1.0f - t) * self->lengths[i] + t * self->lengths[i + 1];
 }
 
-f32 func_0014E000(T2176* self, f32 t0)
+f32 func_0014E000(PathCurve* self, f32 t0)
 {
     f32 lo, hi;
     s32 idx = FindPathCurveSegmentByLength(self, t0, &lo, &hi);
@@ -312,12 +312,12 @@ f32 func_0014E000(T2176* self, f32 t0)
     return (1.0f - t) * self->times[idx] + t * self->times[idx + 1];
 }
 
-f32 func_0014E068(T2176* self)
+f32 func_0014E068(PathCurve* self)
 {
     return AccumulateSegmentLengths(self->count, self->points, self->lengths);
 }
 
-void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
+void func_0014E090(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
 {
     Frac_14E090 f;
     FindNearestPathCurveSegment(a1, a2, self->count, self->points, a3, a4, &f.idx, &f.t);
@@ -329,7 +329,7 @@ void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out
     }
 }
 
-void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
+void func_0014E170(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
     s32 idx = FindPathCurveSegment(t, self->count, self->times, self->wrap, 0, 0);
     s32 ia;
@@ -339,7 +339,7 @@ void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
 
-void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
+void func_0014E2A0(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
     s32 idx = FindPathCurveSegment(t, self->count, self->lengths, self->wrap, 0, 0);
     s32 ia;
@@ -349,7 +349,7 @@ void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
 
-void func_0014E3D0(T2176_708* self, void* src)
+void func_0014E3D0(SplinePathCurve* self, void* src)
 {
     self->wrap = ReadBufferedU8(src);
     s32 n = ReadBufferedU8(src);
@@ -365,14 +365,14 @@ void func_0014E3D0(T2176_708* self, void* src)
         ReadBufferedVector3(src, (u8*)self->inTan + i * 16);
         ReadBufferedVector3(src, (u8*)self->outTan + i * 16);
     }
-    f32 (*fn)(T2176*) = self->vt->m09;
+    f32 (*fn)(PathCurve*) = self->vt->m09;
     if (fn) fn(self);
     ResetSplineSegmentCache(self);
 }
 
-void func_0014E500(T2176_708* obj) { obj->idx1C0 = -1; }
+void func_0014E500(SplinePathCurve* obj) { obj->idx1C0 = -1; }
 
-void func_0014E510(T2176_708* self, s32 i)
+void func_0014E510(SplinePathCurve* self, s32 i)
 {
     if (i != self->idx1C0) {
         f32 d = self->times[i + 1] - self->times[i];
@@ -386,7 +386,7 @@ void func_0014E510(T2176_708* self, s32 i)
 
 ASM_FUNC(func_0014E5B8);
 
-void func_0014E6A8(T2176_708* self, s32 a1, void* a2)
+void func_0014E6A8(SplinePathCurve* self, s32 a1, void* a2)
 {
     f32 t = ((Fn_14E6A8)self->vt->m06)(self);
     Fn2_14E6A8 fn = (Fn2_14E6A8)self->vt->m01;
@@ -399,7 +399,7 @@ ASM_FUNC(func_0014E710);
 
 ASM_FUNC(func_0014E828);
 
-f32 func_0014E910(T2176_708* self, f32 t0)
+f32 func_0014E910(SplinePathCurve* self, f32 t0)
 {
     f32 a, b;
     s32 i = FindPathCurveSegmentByTime(self, t0, &a, &b);
@@ -409,7 +409,7 @@ f32 func_0014E910(T2176_708* self, f32 t0)
     return r + self->lengths[i];
 }
 
-f32 func_0014E990(T2176_708* self, f32 t0)
+f32 func_0014E990(SplinePathCurve* self, f32 t0)
 {
     f32 lo, a, b;
     s32 idx = FindPathCurveSegmentByLength(self, t0, &lo, 0);
@@ -425,7 +425,7 @@ f32 func_0014E990(T2176_708* self, f32 t0)
 // to 8, as its address is, but this file's .rodata starts 4 bytes past a 16-byte boundary.
 extern const f32 D_00249FC8 = 3.4028235e+38f;
 
-void func_0014EA48(T2176_708* self)
+void func_0014EA48(SplinePathCurve* self)
 {
     *(s32*)self->lengths = 0;
     s32 m = self->count - 1;
@@ -440,7 +440,7 @@ void func_0014EA48(T2176_708* self)
 
 ASM_FUNC(func_0014EB10);
 
-void func_0014EC70(T2176_708* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+void func_0014EC70(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
     Ctx_14EC70 ctx;
     Out_14EC70 out;
@@ -457,7 +457,7 @@ void func_0014EC70(T2176_708* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(T2176*, s32, s32, f32))fn)(self, a3, a4, out.f);
+            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.f);
         }
     }
     if (a5 != 0) {
@@ -468,7 +468,7 @@ void func_0014EC70(T2176_708* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32
     }
 }
 
-void func_0014ED98(T2176_708* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6)
+void func_0014ED98(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6)
 {
     s32 q4 = p4;
     s32 q3 = p3;

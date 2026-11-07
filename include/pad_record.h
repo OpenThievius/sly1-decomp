@@ -10,7 +10,7 @@
 #define PAD_RECORD_H
 
 #include "common.h"
-#include "s1eb050.h"
+#include "value_range.h"
 
 struct PadRecord {
     u8 pad00[0x04];
@@ -42,7 +42,7 @@ struct PadRecord {
         s32 f50;            // 0x50: func_0016E1A0
         f32 x50;            // 0x50: func_0016E940
     };
-    S1EB050 a54[4];         // 0x54: func_0016E1A0 (Pair_16E1A0); func_0016E940 reads a54[0].lo
+    ValueRange a54[4];         // 0x54: func_0016E1A0 (Pair_16E1A0); func_0016E940 reads a54[0].lo
     f32 f74;                // 0x74: func_0016E940
     f32 f78;                // 0x78: func_00132500, func_0016E940
     f32 f7C;                // 0x7C: func_00151300, func_0016E940
@@ -53,7 +53,7 @@ struct PadRecord {
         s32 f84;            // 0x84: func_0016E1A0
         f32 x84;            // 0x84: func_0016E940
     };
-    S1EB050 a88[4];         // 0x88: func_0016E1A0; func_0016E940 reads a88[0].lo
+    ValueRange a88[4];         // 0x88: func_0016E1A0; func_0016E940 reads a88[0].lo
     union {
         s16 fA8;            // 0xA8: func_0016E1A0
         u16 keyA8;          // 0xA8: func_0016E940, func_0016EED0, func_0016F108, func_0016F238

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "globals.h"
 #include "shapes.h"
 #include "vertex_batch.h"
-#include "s1eb050.h"
+#include "value_range.h"
 #include "game_clock.h"
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.
@@ -51,7 +51,7 @@ struct TrailOwner {
 struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
 
 void* func_001619C0(VertexBatch* b);
-void func_00152B38(V24A0* g);
+void func_00152B38(PacketWriter* g);
 void func_00161AB0(VertexBatch* b, u8* a, u8* c);
 void func_00161BB0(VertexBatch* b, s32 v);
 void func_00161B10(VertexBatch* b, u8* a, f32 f);
@@ -60,7 +60,7 @@ void func_001626A8(VertexBatch* b, Rgba4* c);
 void func_00162680(VertexBatch* b, void* v);
 void func_001626D8(VertexBatch* b, s32 z);
 void func_00162508(VertexBatch* b);
-void func_00152D70(V24A0* g);
+void func_00152D70(PacketWriter* g);
 void func_00161A88(VertexBatch* b, s32 f);
 
 u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };

@@ -290,7 +290,7 @@ void* func_001925F0(void);
 s32 func_001833F0(void* msg, void* item);
 s32 func_001300E8(void* msg, void* item);
 
-s32 func_0013DB28(MaskedCollider* self, C19* msg)
+s32 func_0013DB28(MaskedCollider* self, PathFollower* msg)
 {
 
 
@@ -385,14 +385,14 @@ void func_0013DD78(TimedStateObject* self, s32 state)
 
 void func_0013CCF8(MaskedCollider* self);
 
-void func_0013DDB8(C21* self)
+void func_0013DDB8(PlayerFlaggedCollider* self)
 {
     InitMaskedCollider(self);
     self->mask = 5;
     self->f698 = -1;
 }
 
-void func_0013DDF0(C25* self)
+void func_0013DDF0(MassScalingCollider* self)
 {
     InitMaskedCollider(self);
     self->mask = 1;
@@ -402,9 +402,9 @@ void func_0013DDF0(C25* self)
 }
 
 s32 func_0013DB28(MaskedCollider* self, s32 value);
-void func_001BB058(C25* self, s32 sel);
-void func_001BB0C8(C25* self, s32 sel);
-void func_0013DE38(C25* self, u8* table, s32 index)
+void func_001BB058(MassScalingCollider* self, s32 sel);
+void func_001BB0C8(MassScalingCollider* self, s32 sel);
+void func_0013DE38(MassScalingCollider* self, u8* table, s32 index)
 {
     s32 value;
     s32 one;
@@ -421,11 +421,11 @@ void func_0013DE38(C25* self, u8* table, s32 index)
     self->mass = self->mass * self->scale;
 }
 
-void func_0013DE38(C25* self, u8* table, s32 index);
+void func_0013DE38(MassScalingCollider* self, u8* table, s32 index);
 s32 func_0013DB28(MaskedCollider* self, s32 value);
 s32 func_001300E8(void* node, s32 kind);
 
-void func_0013DEE8(C26* self, u8* table, s32 index)
+void func_0013DEE8(LatchedSwitchCollider* self, u8* table, s32 index)
 {
     s32 value;
 
@@ -443,7 +443,7 @@ void func_0013D068(MaskedCollider* self);
 void* func_001925F0(void);
 void func_001D7098(void* out, void* a1, void* self);
 
-void func_0013DF68(C26* self)
+void func_0013DF68(LatchedSwitchCollider* self)
 {
     s32 local[4];
     UpdateMaskedCollider(self);

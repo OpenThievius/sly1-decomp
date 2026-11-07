@@ -9,7 +9,7 @@
 // (func_eu_0015E438) and drawn (func_eu_0015E7E0).
 struct Obj_eu_1316E8 {
     u8 pad0[0x59C];
-    V24A2* font;
+    Font* font;
     f32 f5A0;
 };
 
@@ -17,9 +17,9 @@ struct Str_eu_1316E8 {
     u8 bytes[0xC0];
 };
 
-void func_eu_0015DD18(Str_eu_1316E8* out, const char* text, V24A2* font, s32 zero);
+void func_eu_0015DD18(Str_eu_1316E8* out, const char* text, Font* font, s32 zero);
 f32 func_eu_0015E438(Str_eu_1316E8* str);
-void func_eu_0015E7E0(Str_eu_1316E8* str, Layout_137228* layout, s32 zero, V24A0* gs);
+void func_eu_0015E7E0(Str_eu_1316E8* str, Layout_137228* layout, s32 zero, PacketWriter* gs);
 void func_eu_001374E0(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_1316E8 {
@@ -34,7 +34,7 @@ struct Gfx_eu_1316E8 {
     }
 };
 
-void func_001316E8(Obj_eu_1316E8* self, V24A0* gs)
+void func_001316E8(Obj_eu_1316E8* self, PacketWriter* gs)
 {
     Str_eu_1316E8 sCur;
     Str_eu_1316E8 sPrev;

@@ -17,15 +17,15 @@
 #include "shapes.h"
 #include "globals.h"
 #include "world.h"
-#include "s1dbbd8.h"
+#include "queued_call.h"
 #include "effect.h"
 #include "game_progress.h"
 #include "buffered_stream.h"
-#include "s1eb050.h"
+#include "value_range.h"
 #include "script_value.h"
 #include "cone_volume.h"
 #include "redirect_object.h"
-#include "v24a2.h"
+#include "font.h"
 #include "level_entry.h"
 #include "message_body.h"
 
@@ -50,7 +50,7 @@ void func_001921A8(void* self);
 void func_0018D800(void* dst, void* src, u32 size);
 void func_001DB290(void* self);
 
-void func_0013B708(C3F* self, s32 kind, ObjectMessage* ref);
+void func_0013B708(StandIn* self, s32 kind, ObjectMessage* ref);
 
 void func_001F5C0C(OwnerMessage* p, s32 zero, s32 size);
 
@@ -76,16 +76,16 @@ struct Slot_1D7440 {
 struct Vt_1D7440 { u8 pad[0x6C]; void (*fn6C)(void* o, void* arg); };
 struct Ent_1D7440 { Vt_1D7440* vt; };
 
-void func_00124A48(C19* self);
-void func_00124DF8(C19* self, s32 n, void* table);
+void func_00124A48(PathFollower* self);
+void func_00124DF8(PathFollower* self, s32 n, void* table);
 f32 func_00205778(f32 a, f32 b);
-StateTrigger* func_001B6290(Snd_1D7440* a, C19* self, s32 b, s32 c);
+StateTrigger* func_001B6290(Snd_1D7440* a, PathFollower* self, s32 b, s32 c);
 void func_001B64D8(StateTrigger* a, s32 b);
-void func_001BFCD8(s32 id, void* a1, C19* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BFCD8(s32 id, void* a1, PathFollower* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 f32 func_001EAAE0(f32 a, f32 b);
-void* func_0015A418(World* host, s32 a1, s32 a2, C19* ctx);
+void* func_0015A418(World* host, s32 a1, s32 a2, PathFollower* ctx);
 s32 func_0015A198(World* host, s32 a1, s32 a2, s32 a3, s32 a4, Ent_1D7440** out);
-void func_001DB290(C19* self);
+void func_001DB290(PathFollower* self);
 
 void func_001B9F30(void);
 
@@ -222,16 +222,16 @@ extern f32 D_0026185C;
 void* func_001925F0(void);
 void func_001929D0(void* self);
 
-void func_00192B58(C19* self, f32 t);
-void func_001D8578(C19* self);
-void func_001D87C8(C19* self, s32* out);
-void func_001D8BD0(C19* self);
-void func_001D9678(C19* self, f32 t);
-void func_001D8D90(C19* self);
-void func_001D8E40(C19* self);
-void func_001D9488(C19* self, s32 v);
-void func_001D9AC8(C19* self);
-void func_00129DF8(C19* self);
+void func_00192B58(PathFollower* self, f32 t);
+void func_001D8578(PathFollower* self);
+void func_001D87C8(PathFollower* self, s32* out);
+void func_001D8BD0(PathFollower* self);
+void func_001D9678(PathFollower* self, f32 t);
+void func_001D8D90(PathFollower* self);
+void func_001D8E40(PathFollower* self);
+void func_001D9488(PathFollower* self, s32 v);
+void func_001D9AC8(PathFollower* self);
+void func_00129DF8(PathFollower* self);
 
 extern f32 D_0026185C;
 
@@ -240,7 +240,7 @@ extern u8 D_00261EF0[];
 
 void func_00151E20(void* msg, f32 value);
 
-s32 func_001EB080(s32 count, S1EB050* spans, f32 x);
+s32 func_001EB080(s32 count, ValueRange* spans, f32 x);
 
 struct Sub_1DB4C8 { u8 b; };
 
@@ -597,7 +597,7 @@ f32 D_00275490[4] = { 0.05f, 0.0f, 0.25f, 0.0f };
 f32 D_002754A0[4] = { 1.5f, 2.5f, 0.0f, 0.0f };
 f32 D_002754B0[4] = { 1000.0f, -0.5f, 0.0f, 0.0f };
 f32 D_002754C0[2] = { 0.0f, 625.0f };
-S1EB050 D_002754C8 = { -1300.0f, 1300.0f };
+ValueRange D_002754C8 = { -1300.0f, 1300.0f };
 f32 D_002754D0[3] = { 1125.0f, 0.0f, 0.100000001f };
 f32 D_002754DC = 750.0f;
 f32 D_002754E0[2] = { 1.0f, 0.0f };
@@ -677,7 +677,7 @@ ASM_FUNC(func_001D6B18);
 
 void func_001D6CB0(Player* self)
 {
-    C3F* obj = (C3F*)self->f1518;
+    StandIn* obj = (StandIn*)self->f1518;
     if (obj != 0) {
         Node_1D6CB0* s0 = 0;
         u32 i = 0;
@@ -702,7 +702,7 @@ void func_001D6CB0(Player* self)
     }
 }
 
-s32 func_001D6DA0(C3F* self, s32 value)
+s32 func_001D6DA0(StandIn* self, s32 value)
 {
     if (value == (s32)g_player) {
         return 1;
@@ -712,17 +712,17 @@ s32 func_001D6DA0(C3F* self, s32 value)
 
 ASM_FUNC(func_001D6DD8);
 
-void func_001D7018(C3F* self)
+void func_001D7018(StandIn* self)
 {
     func_0013BA70(self);
     self->f694 = 0;
 }
 
-void func_001D7040(C3F* self, s32 kind, ObjectMessage* ref)
+void func_001D7040(StandIn* self, s32 kind, ObjectMessage* ref)
 {
     HandleChildGroupNotification(self, kind, ref);
     if (kind == 10 && ref->target == self) {
-        ((C3F*)ref->target)->f694 = 0;
+        ((StandIn*)ref->target)->f694 = 0;
     }
 }
 
@@ -819,7 +819,7 @@ void func_001D72C8(OutputBuffer* self)
     self->pending = 0;
 }
 
-void func_001D73A8(C19* self)
+void func_001D73A8(PathFollower* self)
 {
     InitSwitchedCollider(self);
     self->f614 = 50.0f;
@@ -833,7 +833,7 @@ void func_001D73A8(C19* self)
     ResetPathFollower(self);
 }
 
-void func_001D7440(C19* self)
+void func_001D7440(PathFollower* self)
 {
     Ent_1D7440* buf[16];
     s32 id0;
@@ -903,7 +903,7 @@ void func_001D7440(C19* self)
 
 ASM_FUNC(func_001D7778);
 
-f32 func_001D8470(s32 count, S1EB050* spans, f32 x)
+f32 func_001D8470(s32 count, ValueRange* spans, f32 x)
 {
     if (IsInsideAnyRange(count, spans, x) == 0) {
         return x;
@@ -911,7 +911,7 @@ f32 func_001D8470(s32 count, S1EB050* spans, f32 x)
     f32 bestDist = 3.4028234663852886e+38f;
     f32 best = bestDist;
     if (count > 0) {
-        S1EB050* s = spans;
+        ValueRange* s = spans;
         s32 n = count;
         do {
             f32 d = __builtin_fabsf(x - s->lo);
@@ -935,7 +935,7 @@ f32 func_001D8470(s32 count, S1EB050* spans, f32 x)
     return best;
 }
 
-void func_001D8578(C19* self)
+void func_001D8578(PathFollower* self)
 {
     if (self != GetActiveSwitchedCollider()) {
         self->f85C = ApproachValueWithRamp((u8*)D_00275490, 0, self->f85C, self->f860, g_gameClock[2]);
@@ -979,7 +979,7 @@ f32 func_001D86F8(f32 x, f32 lim, f32 base)
     return d;
 }
 
-s32 func_001D8740(C19* self, C19* other)
+s32 func_001D8740(PathFollower* self, PathFollower* other)
 {
     s32 d = self->fB00 - other->fB00;
     if (d > 0) return 1;
@@ -995,7 +995,7 @@ ASM_FUNC(func_001D87C8);
 
 ASM_FUNC(func_001D8BD0);
 
-void func_001D8D90(C19* self)
+void func_001D8D90(PathFollower* self)
 {
     f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 b = WrapAngle(self->f694 - a);
@@ -1014,7 +1014,7 @@ void func_001D8D90(C19* self)
 
 ASM_FUNC(func_001D8E40);
 
-void func_001D92F0(C19* self)
+void func_001D92F0(PathFollower* self)
 {
     self->f854 = g_gameTime;
     self->f858 = self->f858 - 1;
@@ -1024,7 +1024,7 @@ void func_001D92F0(C19* self)
     }
 }
 
-void func_001D9338(C19* self)
+void func_001D9338(PathFollower* self)
 {
     f32 lo = 0.0f;
     f32 hi = 1.0f;
@@ -1065,7 +1065,7 @@ ASM_FUNC(func_001D9678);
 
 ASM_FUNC(func_001D9AC8);
 
-void func_001D9C98(C19* self, f32 t)
+void func_001D9C98(PathFollower* self, f32 t)
 {
     s32 local = 0;
     UpdateSwitchedCollider(self, t);
@@ -1095,7 +1095,7 @@ void func_001D9C98(C19* self, f32 t)
 
 ASM_FUNC(func_001D9D78);
 
-void func_001DA170(C19* self)
+void func_001DA170(PathFollower* self)
 {
     s32 a = 0;
     s32 b = 0;
@@ -1139,7 +1139,7 @@ void func_001DA170(C19* self)
     }
 }
 
-void func_001DA310(C19* self) { self->f6A0++; }
+void func_001DA310(PathFollower* self) { self->f6A0++; }
 
 ASM_FUNC(func_001DA320);
 
@@ -1149,7 +1149,7 @@ ASM_FUNC(func_001DA7E0);
 
 ASM_FUNC(func_001DAA18);
 
-void func_001DAC20(C19* self)
+void func_001DAC20(PathFollower* self)
 {
     u32 i;
     Quad_001DAC20 q;
@@ -1166,7 +1166,7 @@ void func_001DAC20(C19* self)
     }
 }
 
-void func_001DACB0(C19* self, void* a, void* b)
+void func_001DACB0(PathFollower* self, void* a, void* b)
 {
     if (((Target_1DACB0*)self->fB78) != 0) {
         SetAgentMainClip(((Target_1DACB0*)self->fB78), 0);
@@ -1179,7 +1179,7 @@ void func_001DACB0(C19* self, void* a, void* b)
 
 ASM_FUNC(func_001DAD28);
 
-void func_001DAE18(C19* self)
+void func_001DAE18(PathFollower* self)
 {
     RecomputeColliderFrame(self);
     func_001DAD28(self);
@@ -1190,7 +1190,7 @@ void func_001DAE48(void)
     CaptureColliderPose();
 }
 
-void func_001DAE68(C19* self, void* v)
+void func_001DAE68(PathFollower* self, void* v)
 {
     HandleSwitchedColliderActivation(self, v);
     if (v != 0) {
@@ -1209,7 +1209,7 @@ void func_001DAE68(C19* self, void* v)
     }
 }
 
-void func_001DAF08(C19* self, s32 code, Rec_1DAF08* rec)
+void func_001DAF08(PathFollower* self, s32 code, Rec_1DAF08* rec)
 {
     HandleSwitchedColliderNotification(self, code, rec);
     if (code == 0xE && rec->kind == 0x426) {
@@ -1228,7 +1228,7 @@ void func_001DAF08(C19* self, s32 code, Rec_1DAF08* rec)
     }
 }
 
-void func_001DAFB8(C19* self, Arg_1DAFB8* arg)
+void func_001DAFB8(PathFollower* self, Arg_1DAFB8* arg)
 {
     self->f830 = arg;
     Obj_1DAFB8* o = arg->obj;
@@ -1259,7 +1259,7 @@ void func_001DB0C8(u8* self, Outer_1DB0C8* obj)
     }
 }
 
-void func_001DB110(C19* self, void* item)
+void func_001DB110(PathFollower* self, void* item)
 {
     if (item == 0) {
         return;
@@ -1292,9 +1292,9 @@ void func_001DB110(C19* self, void* item)
     }
 }
 
-void func_001DB1E8(C19* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (a && (u32)self->f870 < 16) { Entry_001DB1E8* e = &((Entry_001DB1E8*)self->f874)[self->f870]; self->f870++; e->a = a; e->active = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
+void func_001DB1E8(PathFollower* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (a && (u32)self->f870 < 16) { Entry_001DB1E8* e = &((Entry_001DB1E8*)self->f874)[self->f870]; self->f870++; e->a = a; e->active = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
-void func_001DB238(C19* self, s32 mode)
+void func_001DB238(PathFollower* self, s32 mode)
 {
     if (mode != self->fB34) {
         *(s32*)((u8*)self + 0xB34) = mode;
@@ -1554,11 +1554,11 @@ void func_001DBC18(u8* self, T219CHook* node)
     }
 }
 
-S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d);
+QueuedCall* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001DBC60(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-    S1DBBD8* n = self->f1EC8;
+    QueuedCall* n = self->f1EC8;
     if (n != 0) {
         do {
             if (n->k0 == a1 && n->k1 == a2 && n->k2 == a3 && n->k3 == a4) {
@@ -1570,9 +1570,9 @@ void func_001DBC60(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
     AppendQueuedCall(self, a1, a2, a3, a4);
 }
 
-S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
+QueuedCall* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
 {
-    S1DBBD8* e = (S1DBBD8*)TakeCallRecord(self);
+    QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
     e->k0 = a;
     e->k1 = b;
     e->k2 = c;
@@ -1585,10 +1585,10 @@ S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
 
 void func_001DBD40(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 {
-    S1DBBD8* prev = 0;
-    S1DBBD8* removed = 0;
-    S1DBBD8* cur = self->f1EC8;
-    S1DBBD8* next;
+    QueuedCall* prev = 0;
+    QueuedCall* removed = 0;
+    QueuedCall* cur = self->f1EC8;
+    QueuedCall* next;
     s32 bit;
 
     if (cur != 0) {
@@ -1637,7 +1637,7 @@ void func_001DBD40(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 void func_001DBE48(World* self)
 {
     while (self->f1EC8 != 0) {
-        S1DBBD8* node = self->f1EC8;
+        QueuedCall* node = self->f1EC8;
         if (node == self->f1ECC) self->f1ECC = 0;
         self->f1EC8 = node->next;
         node->next = 0;

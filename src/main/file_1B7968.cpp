@@ -3103,25 +3103,25 @@ void func_001C1030(IdLinkedObject* self, s32 v)
     self->linkId = v;
 }
 
-void func_001C10A8(C81* self)
+void func_001C10A8(ListedPointObject* self)
 {
     InitObject(self);
     self->f58 = 3.4028235e38f;
 }
 
-void func_001C10D8(C81* self)
+void func_001C10D8(ListedPointObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C84, self);
 }
 
-void func_001C1110(C81* self)
+void func_001C1110(ListedPointObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C84, self);
 }
 
-void func_001C1148(C81* self)
+void func_001C1148(ListedPointObject* self)
 {
     KeptBits saved;
     saved = self->keep;
