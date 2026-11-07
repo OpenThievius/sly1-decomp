@@ -3734,7 +3734,7 @@ func_0020A518	func_0020B9E0	match
 func_0020A538	func_0020BA00	match	
 func_0020A630	func_0020BAF8	match	
 func_0020A780	func_0020BC48	match	
-func_0020A7F0	func_0020BCB8	match	
+func_0020A7F0	func_0020BCB8	match	rodata
 func_0020ADA0	func_0020C268	match	
 func_0020AE40	func_0020C308	match	rodata
 func_0020B048	func_0020C510	match	
