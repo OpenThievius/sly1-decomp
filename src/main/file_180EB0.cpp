@@ -2,7 +2,7 @@
 #include "common.h"
 #include "screen_element.h"
 #include "switched_collider.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "cone_volume.h"
 #include "world.h"
 #include "masked_collider.h"
@@ -229,21 +229,21 @@ f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
 f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
-void func_00180EB0(C72* self)
+void func_00180EB0(ListedKeepObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C9C, self);
 }
 
-void func_00180EE8(C72* self)
+void func_00180EE8(ListedKeepObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C9C, self);
 }
 
-void func_00180F20(C72* self)
+void func_00180F20(ListedKeepObject* self)
 {
-    Keep6E saved = self->keep;
+    PathCurveKeptBits saved = self->keep;
     CopyObjectData(self);
     self->keep = saved;
 }

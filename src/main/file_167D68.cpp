@@ -2,7 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "listed_collision_part.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "point_object.h"
 #include "list_iter.h"
 #include "attachment.h"
@@ -1118,39 +1118,39 @@ void func_00169CA0()
     ClearList(&g_partList);
 }
 
-void func_00169CD8(C6F* self)
+void func_00169CD8(TargetCurve* self)
 {
     InitObject(self);
-    self->id44 = -1;
+    self->targetId = -1;
     self->f4C = 1;
     self->f50 = 3;
     self->f58 = 3.4028235e+38f;
 }
 
-void func_00169D20(C6F* self)
+void func_00169D20(TargetCurve* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetCurveList, self);
 }
 
-void func_00169D58(C6F* self)
+void func_00169D58(TargetCurve* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetCurveList, self);
 }
 
-void func_00169D90(C6F* self)
+void func_00169D90(TargetCurve* self)
 {
-    if (self->id44 != -1) {
-        Res_0015A448* r = (Res_0015A448*)FindFirstObjectByIdMode4(self->world, self->id44, self->parent);
-        self->found48 = r;
+    if (self->targetId != -1) {
+        Res_0015A448* r = (Res_0015A448*)FindFirstObjectByIdMode4(self->world, self->targetId, self->parent);
+        self->target = r;
         r->f398 = 0;
     }
 }
 
-void func_00169DD8(C6F* self)
+void func_00169DD8(TargetCurve* self)
 {
-    Keep6E saved = self->keep;
+    PathCurveKeptBits saved = self->keep;
     CopyObjectData(self);
     self->keep = saved;
 }

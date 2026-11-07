@@ -1071,10 +1071,10 @@ func_00169718	FlushMeshQueue	runs SubmitMeshQueueEntry over each of the D_002626
 func_001696B8	RemapMeshQueueValues	for entries from idx on, a value in [take, take+lo) is moved to give plus its offset from take
 func_00169C58	SetObjectListLinkOffsets	gives the three lists D_002626E8, D_002626F8 and D_00262708 their link offsets 0x38, 0x50 and 0x558 with func_00152438
 func_00169CA0	ClearObjectLists	zeroes the head and tail of the three lists D_002626E8, D_002626F8 and D_00262708 with func_00152440
-func_00169CD8	InitTargetCurve	class 0x6F slot 0: InitObject, then id44 = -1, f4C = 1, f50 = 3 and the largest float (the class carries an object id it resolves later)
+func_00169CD8	InitTargetCurve	class 0x6F slot 0: InitObject, then targetId = -1, f4C = 1, f50 = 3 and the largest float (the class carries an object id it resolves later)
 func_00169D20	RegisterTargetCurve	class 0x6F slot 6: RegisterObject, then appends the object to the list D_002626E8
 func_00169D58	UnregisterTargetCurve	class 0x6F slot 7: UnregisterObject, then removes it from the list D_002626E8
-func_00169D90	PostLoadTargetCurve	class 0x6F at table offset 0x4C: when id44 is not -1 finds that object with func_0015A448, stores it in found48 and clears its 0x398 word
+func_00169D90	PostLoadTargetCurve	class 0x6F at table offset 0x4C: when targetId is not -1 finds that object with func_0015A448, stores it in target and clears its 0x398 word
 func_00169DD8	CopyTargetCurve	class 0x6F slot 9: saves the 8 bytes at +0x38, calls CopyObjectData and restores them
 func_0016A100	InitTargetPoint	class 0x7F slot 0: InitObject, then targetId = -1, f68 = 1 and f70 = the largest float
 func_0016A140	RegisterTargetPoint	class 0x7F slot 6: RegisterObject, then appends the object to the list D_002626F8
@@ -1117,10 +1117,10 @@ func_001909B0	ClassifyAgainstUnitRange	returns 0 for a value above 1.0, 1 for on
 func_00191128	SimplifyPointPath	copies the first and last of an array of points and each point func_00190E30 keeps between them into a new array, recurses while the count shrinks and is 3 or more, and copies the result back with its count
 func_00191EC0	SetTargetVectorListLinkOffset	gives the list D_00269BA8 its link offset 0x38 with func_00152438
 func_00191EE8	ClearTargetVectorList	zeroes the head and tail of the list D_00269BA8 with func_00152440
-func_00191F08	InitTargetVector	class 0x70 slot 0: InitObject, then copies the quad at D_00248D00, sets f50 = 8, f54 = 9, f58 = -1, f5C and id64 = -1
+func_00191F08	InitTargetVector	class 0x70 slot 0: InitObject, then copies the quad at D_00248D00, sets f50 = 8, f54 = 9, f58 = -1, f5C and targetId = -1
 func_00191F68	RegisterTargetVector	class 0x70 slot 6: RegisterObject, then appends the object to the list D_00269BA8
 func_00191FA0	UnregisterTargetVector	class 0x70 slot 7: UnregisterObject, then removes it from the list D_00269BA8
-func_00191FD8	StartTargetVector	class 0x70 at table offset 0x50: StartObject, then when id64 is not -1 stores in found68 what func_0015A418 finds for it
+func_00191FD8	StartTargetVector	class 0x70 at table offset 0x50: StartObject, then when targetId is not -1 stores in target what func_0015A418 finds for it
 func_00192020	CopyTargetVector	class 0x70 slot 9: saves the 8 bytes at +0x38, calls CopyObjectData and restores them
 func_001920E0	ReparentPointObject	class 0x7E at table offset 0x64: converts the position (&pos) against the parent and the new value with func_00128018, then calls ReparentObject
 D_00269C98	g_switchedColliders	the 16-entry array of SwitchedColliders: AddToSwitchedColliderList appends, RemoveFromSwitchedColliderList shifts, GetActiveSwitchedCollider indexes it, no other file uses it

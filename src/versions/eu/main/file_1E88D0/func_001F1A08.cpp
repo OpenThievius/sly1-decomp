@@ -4,7 +4,7 @@ struct Obj_1F1A08_eu {
     u8 pad0[0x560];
     s32 f560;
     u8 pad1[0x570 - 0x564];
-    C67* f570;
+    WarpPage* f570;
     u8 pad2[0x58C - 0x574];
     f32 f58C;
     f32 f590;
@@ -27,7 +27,7 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     }
     if (self->f560 != self->f570->mode) return;
 
-    s3 = IsWarpEntryAvailable(self->f570, self->f570->f2DC, &loc[0], &loc[1]);
+    s3 = IsWarpEntryAvailable(self->f570, self->f570->cursor, &loc[0], &loc[1]);
     s2 = GetPadHorizontalStep(t);
     v1 = GetPadVerticalStep(t);
     t->f30 = g_gameClock.elapsed + t->f34;
@@ -43,7 +43,7 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
         MoveWarpCursor(self->f570, 3);
     } else if ((t->flags & 0x40) != 0) {
         ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
-        if (self->f570->f2DC != GetCurrentWarpEntry()) {
+        if (self->f570->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
                 Val_1F1A08* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->f570->f560 = 1;

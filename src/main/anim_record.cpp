@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "cursor_animator.h"
 #include "world.h"
 #include "v24a0.h"

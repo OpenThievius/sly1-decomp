@@ -31,7 +31,7 @@
 #include "state_graph.h"
 #include "c8b.h"
 #include "object_pool.h"
-#include "c8d.h"
+#include "oscillator.h"
 #include "entry_queue.h"
 #include "timeline.h"
 
@@ -445,10 +445,10 @@ ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, Scri
 ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107180(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
-ScriptValue* func_00107268(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107040(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001070E0(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_00107350(ScriptValue* ret, C0C* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args);
 ScriptValue* func_001074C0(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args);
@@ -3198,7 +3198,7 @@ ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00107040(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3213,7 +3213,7 @@ ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_001070E0(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3228,7 +3228,7 @@ ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107180(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -3249,7 +3249,7 @@ ScriptValue* func_00107180(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* 
     return ret;
 }
 
-ScriptValue* func_00107268(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
+ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;

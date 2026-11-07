@@ -5,7 +5,7 @@
 #include "common.h"
 #include "screen_element.h"
 #include "switched_collider.h"
-#include "c6e.h"
+#include "path_curve_object.h"
 #include "cone_volume.h"
 #include "world.h"
 #include "masked_collider.h"

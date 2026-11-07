@@ -19,8 +19,8 @@
 
 #include "common.h"
 
-struct V24A2;
-struct C67;     // an object of class 0x67 (include/c67.h)   // the font (include/v24a2.h): a game object with a GCC vtable at +0x4C
+struct V24A2;       // the font (include/v24a2.h): a game object with a GCC vtable at +0x4C
+struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
@@ -298,8 +298,8 @@ struct T217D_6D0 : ScreenElement {
 
 // The map screen's list (D_002210F0, D_0026F808): it holds the objects of kind 0x67 by slot.
 struct T217D_0F0 : ScreenElement {
-    C67* current;               // 0x260: the object it shows
-    C67* nodes[6];              // 0x264: the objects of kind 0x67, by their slot (func_001F0660 enters them)
+    WarpPage* current;          // 0x260: the object it shows
+    WarpPage* nodes[6];         // 0x264: the warp pages, by their slot (StartWarpPage enters them)
     f32 scale;                  // 0x27C: eased toward `scaleTarget` (func_001F1A08)
     f32 scaleTarget;            // 0x280
 };
