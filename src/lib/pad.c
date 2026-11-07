@@ -7,13 +7,8 @@
  * words and the request buffer. C, built by the cc1 of 2.9-ee-991111 (config/cflags.tsv,
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
+#include "remote_call_client.h"
 #include "asm_func.h"
-
-/* A remote call client: the server it is bound to at +0x24. */
-typedef struct RpcClient {
-    u8 pad00[0x24];
-    void* server;
-} RpcClient;
 
 /* A port's slot: the buffer of its two frames, its DMA words, whether it is open. */
 typedef struct PadSlot {
@@ -80,7 +75,7 @@ char D_0027AE70[16] = "PsIIlibpad  2410";
 s32 D_0027AE80 = 0;
 s32 D_0027AE84 = 1;
 
-static RpcClient D_0062AA80[2] __attribute__((aligned(64)));
+static RemoteCallClient D_0062AA80[2] __attribute__((aligned(64)));
 static PadSlot D_0062AAD0[2][4];
 static u32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
 static u8 D_0062ACC0[0x80] __attribute__((aligned(64)));
@@ -88,8 +83,8 @@ static u8 D_0062ACC0[0x80] __attribute__((aligned(64)));
 s32 func_001E1F10(const char* format, ...);
 void* func_001F5A58(void* dst, const void* src, s32 size);
 void* func_001F5C0C(void* dst, s32 value, s32 size);
-s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
-s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 func_001F80C0(RemoteCallClient* client, u32 server, s32 mode);
+s32 func_001F8290(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void* end, void* end_arg);
 s32 func_00203FD0(s32 port, s32 slot);
 s32 func_00204228(s32 mode);

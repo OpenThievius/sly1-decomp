@@ -12,26 +12,13 @@
 // slot in g_semaphoreSlots. Its .data ends with the pointer D_002771C8 to its string "....",
 // which no code reads.
 #include "common.h"
+#include "remote_call_client.h"
+#include "semaphore_params.h"
 #include "asm_func.h"
 
 #define UNCACHED_1F84D8(p) ((void*)((u32)(p) | 0x20000000))
 
 // The kernel's semaphore parameters (func_001F6B20 creates one).
-struct SemaParams_1F84D8 {
-    s32 count;
-    s32 max_count;
-    s32 init_count;
-    s32 wait_threads;
-    u32 attr;
-    u32 option;
-};
-
-// A client of the command channel (src/lib/remote_call.cpp): 0x24 is set once it is bound.
-struct Client_1F84D8 {
-    s32 pad[9];
-    s32 bound;
-};
-
 // An open handle of the table D_00628940: the IOP's handle and whether it is in use.
 struct Handle_1F84D8 {
     s32 id;
@@ -88,7 +75,7 @@ static s32 D_00628B68;
 static u8 D_00628B80[0x40] __attribute__((aligned(64)));
 static Callback_1F84D8 D_00628BC0 __attribute__((aligned(64)));
 
-s32 func_001F6B20(SemaParams_1F84D8* params);
+s32 func_001F6B20(SemaphoreParams* params);
 void func_001F6B30(s32 sema);
 s32 func_001F6B40(s32 sema);
 void func_001F6B50(s32 sema);
@@ -96,8 +83,8 @@ s32 func_001F6B60(s32 sema);
 void* func_001F5A58(void* dst, const void* src, s32 n);
 void func_001F5C0C(void* p, s32 value, s32 size);
 s32 func_001F7BE8(s32 a);
-s32 func_001F80C0(Client_1F84D8* client, u32 cmd, s32 mode);
-s32 func_001F8290(Client_1F84D8* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size, s32 a7, s32 a8);
+s32 func_001F80C0(RemoteCallClient* client, u32 cmd, s32 mode);
+s32 func_001F8290(RemoteCallClient* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size, s32 a7, s32 a8);
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
 void func_001FA4A0(u32 cmd, void* handler, void* arg);
@@ -107,10 +94,10 @@ void func_001F89F8();
 void func_001F84D8(void)
 {
     if (D_002771C0 == -1) {
-        SemaParams_1F84D8 b;
-        b.init_count = 1;
+        SemaphoreParams b;
+        b.initCount = 1;
         b.option = 0;
-        b.max_count = 1;
+        b.maxCount = 1;
         D_002771C0 = NewSemaphore(&b);
         D_002771C4 = NewSemaphore(&b);
     }
@@ -223,9 +210,9 @@ void func_001F85A8(void) {
 void func_001F8968(void)
 {
     if (D_002771BC == -1) {
-        SemaParams_1F84D8 d;
-        d.init_count = 1;
-        d.max_count = 1;
+        SemaphoreParams d;
+        d.initCount = 1;
+        d.maxCount = 1;
         d.option = 0;
         D_002771BC = NewSemaphore(&d);
     }
@@ -245,7 +232,7 @@ ASM_FUNC(func_001F89F8);
 s32 func_001F8A28(void)
 {
     s32 i;
-    Client_1F84D8* q;
+    RemoteCallClient* q;
     Callback_1F84D8* g = &D_00628BC0;
     (s32)InitRemoteCalls(0);
     D_00628BC0.func = 0;
@@ -255,9 +242,9 @@ s32 func_001F8A28(void)
     SetCommandHandler(0x80000013, (void*)&func_001F89F8, (void*)g);
     (s32)EnableInterrupts();
     for (;;) {
-        q = (Client_1F84D8*)g_fileClient;
+        q = (RemoteCallClient*)g_fileClient;
         if (BindRemoteService(q, 0x80000001, 0) < 0) return -1;
-        if (q->bound != 0) break;
+        if (q->server != 0) break;
         for (i = 0x100000; i != -1; ) i--;
     }
     CreateFileTableLock();
@@ -265,7 +252,7 @@ s32 func_001F8A28(void)
     for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
     PostSemaphore(D_002771C0);
     D_00627840 = D_00628500;
-    if (CallRemoteService((Client_1F84D8*)g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
     *(Word_1F85A8*)&D_00628B68 = *(Word_1F85A8*)UNCACHED_1F84D8(D_006284C0);
     g_fileClientOpen = 1;
     return 0;
@@ -292,7 +279,7 @@ s32 func_001F8C38(s32 a0)
     s32 h;
     s32 out;
     s32 v;
-    SemaParams_1F84D8 ctor;
+    SemaphoreParams ctor;
     u8* q;
 
     p = (Handle_1F84D8*)FindFileHandle(a0);
@@ -306,15 +293,15 @@ s32 func_001F8C38(s32 a0)
     }
     g->id = p->id;
     g->index = ((s32)p - (s32)D_00628940) >> 4;
-    ctor.max_count = 1;
-    ctor.init_count = 0;
+    ctor.maxCount = 1;
+    ctor.initCount = 0;
     ctor.option = 0;
     h = NewSemaphore(&ctor);
     g->sema = h;
     g->result = (s32)&out;
     g->result_size = 4;
     q = D_006284C0;
-    v = CallRemoteService((Client_1F84D8*)g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
+    v = CallRemoteService((RemoteCallClient*)g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
     if (v >= 0) {
         p->used = 0;
     } else {
@@ -382,7 +369,7 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
     }
     g->id = ent->id;
     g->mode = mode;
-    SemaParams_1F84D8 r;
+    SemaphoreParams r;
     s32 sp30;
     if (out == 0) {
         g->size = 0;
@@ -390,15 +377,15 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
         g->size = 0x400;
         g->blk = *(Block_1F92E8*)out;
     }
-    r.max_count = 1;
-    r.init_count = 0;
+    r.maxCount = 1;
+    r.initCount = 0;
     r.option = 0;
     s32 h = NewSemaphore(&r);
     g->sema = h;
     g->result = (s32)&sp30;
     g->result_size = 4;
     WriteBackDataCacheRange(D_00627880, 0x420);
-    if (CallRemoteService((Client_1F84D8*)g_fileClient, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;

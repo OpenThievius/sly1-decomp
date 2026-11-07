@@ -8,6 +8,7 @@
 // of data in the buffer D_00628C00, and returns the reply's size and its word; func_001F9A90
 // sends one with the command 0.
 #include "common.h"
+#include "remote_call_client.h"
 #include "asm_func.h"
 
 struct Blob_1F9868 { u8 b[0xFC]; };
@@ -33,26 +34,20 @@ s32 func_001F9690(void);
 
 struct __attribute__((packed)) Word_1F9690 { u32 v; };
 
-// A client of the command channel (src/lib/remote_call.cpp): 0x24 is set once it is bound.
-struct Client_1F9690 {
-    s32 pad[9];
-    s32 bound;
-};
-
-s32 func_001F80C0(Client_1F9690* client, u32 cmd, s32 mode);
+s32 func_001F80C0(RemoteCallClient* client, u32 cmd, s32 mode);
 
 s32 func_001F9690(void)
 {
     s32 i;
-    Client_1F9690* c;
+    RemoteCallClient* c;
 
     if (g_moduleLoaderBound < 0) {
         for (;;) {
-            c = (Client_1F9690*)g_moduleLoaderClient;
+            c = (RemoteCallClient*)g_moduleLoaderClient;
             if (BindRemoteService(c, 0x80000006, 0) < 0) {
                 return -1;
             }
-            if (c->bound != 0) {
+            if (c->server != 0) {
                 g_moduleLoaderBound = 0;
                 if (CallRemoteService(g_moduleLoaderClient, 0xFF, 0, 0, 0, &g_moduleLoaderBuffer, 4, 0, 0) < 0) {
                     return 0xFFFEFFFF;

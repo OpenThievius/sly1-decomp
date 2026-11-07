@@ -10,23 +10,9 @@
  * 2.9-ee-991111 (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
  * code. */
 #include "common.h"
+#include "remote_call_client.h"
+#include "semaphore_params.h"
 #include "asm_func.h"
-
-/* A remote call client: the server it is bound to at +0x24. */
-typedef struct RpcClient {
-    u8 pad00[0x24];
-    void* server;
-} RpcClient;
-
-/* The parameters of a new semaphore. */
-typedef struct SemaParam {
-    s32 count;
-    s32 max;
-    s32 init;
-    s32 waiting;
-    u32 attr;
-    u32 option;
-} SemaParam;
 
 /* What the read's end callback receives, in uncached memory: two byte counts, where each
  * goes and the bytes. */
@@ -65,10 +51,10 @@ u8 D_00279480[128] __attribute__((aligned(64))) = { 0 };
 u8 D_00279500[0x1000] __attribute__((aligned(64))) = { 0 };
 u8 D_0027A500[192] __attribute__((aligned(64))) = { 0 };
 u32 D_0027A5C0[4] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027A5D0 = { { 0 } };
+RemoteCallClient D_0027A5D0 = { 0 };
 u8 D_0027A600[1088] __attribute__((aligned(64))) = { 0 };
 u32 D_0027AA40[0x102] __attribute__((aligned(64))) = { 0 };
-RpcClient D_0027AE48 = { { 0 } };
+RemoteCallClient D_0027AE48 = { 0 };
 
 static s32 D_0062A7C0;
 static void (*D_0062A7C4)(s32);
@@ -76,15 +62,15 @@ static void (*D_0062A7C4)(s32);
 static s32 D_0062A7C8[2];
 static s32 D_0062A7D0;
 static u8 D_0062A7D8[0x210];
-static RpcClient D_0062A9E8;
-static RpcClient D_0062AA10;
+static RemoteCallClient D_0062A9E8;
+static RemoteCallClient D_0062AA10;
 static s32 D_0062AA40[4] __attribute__((aligned(64)));
-static RpcClient D_0062AA50;
+static RemoteCallClient D_0062AA50;
 
 s32 func_001F69E0(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
 s32 func_001F6A90(void);
 s32 func_001F6AA0(s32 thread, void* status);
-s32 func_001F6B20(SemaParam* param);
+s32 func_001F6B20(SemaphoreParams* param);
 s32 func_001F6B30(s32 sema);
 s32 func_001F6B40(s32 sema);
 s32 func_001F6B50(s32 sema);
@@ -92,10 +78,10 @@ s32 func_001F6B60(s32 sema);
 s32 func_001F6B70(s32 sema);
 s32 func_001F7B88(const char* format, ...);
 void func_001F7BE8(s32 mode);
-s32 func_001F80C0(RpcClient* client, u32 server, s32 mode);
-s32 func_001F8290(RpcClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
+s32 func_001F80C0(RemoteCallClient* client, u32 server, s32 mode);
+s32 func_001F8290(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void (*end)(void*), void* end_arg);
-s32 func_001F8480(RpcClient* client);
+s32 func_001F8480(RemoteCallClient* client);
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
 s32 func_001FA4A0(s32 cause, void (*handler)(void), s32 next);
@@ -116,11 +102,11 @@ ASM_FUNC(func_00202D08);
 
 void func_00202D30(u16 ticks)
 {
-    SemaParam param;
+    SemaphoreParams param;
     s32 sema;
 
-    param.max = 1;
-    param.init = 0;
+    param.maxCount = 1;
+    param.initCount = 0;
     param.option = 0;
     sema = NewSemaphore(&param);
     ScheduleAlarm(ticks, WakeDiscWaiter, sema);
@@ -176,15 +162,15 @@ void func_00202E50(ReadTail* tail)
 /* Creates the semaphores of the two clients' commands and of the callback, once. */
 void func_00202EF0(void)
 {
-    SemaParam param;
+    SemaphoreParams param;
 
     if (*(volatile s32*)&g_discNSemaphore == -1 || *(volatile s32*)&g_discSSemaphore == -1) {
         param.option = 0;
-        param.init = 1;
-        param.max = 1;
+        param.initCount = 1;
+        param.maxCount = 1;
         *(volatile s32*)&D_00279428 = func_001F6B20(&param);
         *(volatile s32*)&D_0027942C = func_001F6B20(&param);
-        param.init = 0;
+        param.initCount = 0;
         *(volatile s32*)&D_00279420 = func_001F6B20(&param);
         D_00279430 = 0;
     }
