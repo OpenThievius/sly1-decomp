@@ -276,39 +276,6 @@ extern u8 D_0062C678[];
 extern const char D_0024F4C8[24];
 extern u8 D_0027B320[];
 
-// NEAR: EXACT only with SLY1_COMPILER=2.9-ee-991111 (Sony's release, saves in 8 bytes, as in the libraries); the default 2.9.3 build saves with sq/lq and differs (docs/TOOLCHAIN.md, lib compiler row not supported by tools/compile.py).
-
-struct Arg_2016A0;
-
-struct Out_2016A0 {
-    s32 f0;
-};
-
-s32 func_001FA0E0(Arg_2016A0* a, void* b);
-
-extern s32 D_0027B328;
-
-s32 func_002016A0(Out_2016A0* self, Arg_2016A0* a1, void* a2)
-{
-    s32 r;
-    D_0027B328 = 0;
-    r = func_001FA0E0(a1, a2);
-    if (r == -1) {
-        if (D_0027B328 != 0) {
-            self->f0 = D_0027B328;
-        }
-    }
-    return r;
-}
-
-// NEAR: retail saves and reloads $ra as sd/ld (8 bytes); 2.95.3 emits sq/lq (16 bytes). Nothing else differs.
-
-s32 func_001FA0D8(void);
-
-s32 func_00201700(void)
-{
-    return func_001FA0D8();
-}
 
 // NEAR: exact only with the Sony 2.9-ee-991111 compiler (retail saves ra with sd/ld); the default SN GCC 2.95.3 saves it with sq/lq and differs.
 
@@ -566,28 +533,6 @@ s32 func_00200080(Callee_201280* self, s32 flag);
 struct Obj_002014B0 { void* f0; void* f4; };
 s32 func_00200080(struct Obj_002014B0* self, s32 flag);
 
-struct Obj_201500 { u8 pad[0x1D4]; s32 buf; };
-s32 func_0018D748(Obj_201500* o, s32 size);
-s32 func_00201500(Obj_201500* o)
-{
-    if (o->buf == 0) {
-        s32 r = func_0018D748(o, 0x80);
-        o->buf = r;
-        if (r == 0) return -1;
-        s32* p = (s32*)r + 31;
-        for (s32 i = 31; i >= 0; i--) *p-- = 0;
-    }
-    return 0;
-}
-
-struct Ctx_201668;
-s32 func_00201578(Ctx_201668* ctx, s32 value);
-extern s32 D_0027696C;
-
-s32 func_00201668(s32 value)
-{
-    return func_00201578((Ctx_201668*)g_randomState, value);
-}
 
 struct Elem_201FF8;
 
@@ -1096,16 +1041,6 @@ void func_00203010(void) {
     }
 }
 
-s32 func_00201668(s32 value);
-void func_001000B8(s32 value);
-
-void func_002014D0(void)
-{
-    for (;;) {
-        func_00201668(6);
-        func_001000B8(1);
-    }
-}
 
 extern s32 D_00279414;
 extern s32 D_00279454;
@@ -1179,49 +1114,6 @@ s32 func_00203E28(void)
     return r;
 }
 
-struct Obj_00201578 {
-    s32 err;
-    u8 pad4[0x1D0];
-    s32* table;
-};
-
-typedef void (*Fn_00201578)(u32 index);
-
-s32 func_00201500(Obj_00201578* self);
-u32 func_00201700(Obj_00201578* self);
-s32 func_002016A0(Obj_00201578* self, u32 entry, u32 index);
-
-s32 func_00201578(Obj_00201578* self, u32 index)
-{
-    s32 ret = 0;
-    Fn_00201578 fn;
-
-    if (index >= 0x20) {
-        self->err = 0x16;
-        return -1;
-    }
-    if (self->table == 0) {
-        if (func_00201500(self) != 0) {
-            return -1;
-        }
-    }
-    switch (self->table[index]) {
-    case 0:
-        return func_002016A0(self, func_00201700(self), index);
-    case 1:
-        break;
-    case -1:
-        self->err = 0x16;
-        ret = 1;
-        break;
-    default:
-        fn = (Fn_00201578)self->table[index];
-        self->table[index] = 0;
-        fn(index);
-        break;
-    }
-    return ret;
-}
 
 typedef s32 Q_00203EE0;
 

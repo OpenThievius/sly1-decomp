@@ -35,3 +35,8 @@ src/lib/type_info.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info_kinds.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/allocate.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/exception.cpp	-O2 -G0	2.9-ee-991111-01
+src/lib/abort.c	-O2 -G0	2.9-ee-991111-01
+src/lib/errno.c	-O2 -G0	2.9-ee-991111-01
+src/lib/signal.c	-O2 -G0	2.9-ee-991111-01
+src/lib/signal_calls.c	-O2 -G0	2.9-ee-991111-01
+src/lib/strncpy.c	-O2 -G0	2.9-ee-991111-01
