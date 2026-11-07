@@ -127,6 +127,8 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f3
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_001E02C8(T217D_1380* self, s32 n);
 
+// The message a state notifier sends its listener's slot 31 when it fires (func_00148298,
+// func_00148888): the new state and the sender, in a 0x50-byte record built on the stack.
 struct Msg_148888 {
     s32 value;
     void* owner;
@@ -231,11 +233,6 @@ s32 func_00148938(World* self, s32 a1, s32 a2, void** out);
 s32 func_00160D98(void);
 void func_00144128(Ctx_148038* a, void* b, void* c);
 s32 func_001EEB60(Ctx_148038* self, f32 x, void* vec, void* out);
-
-struct Locals_148298 {
-    s32 args[2];
-    s32 scratch[16];
-};
 
 extern void* D_00261AD0[28];
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
@@ -572,10 +569,10 @@ void func_00148298(C58* self, s32 mode)
                 f32 z = 0.0f;
                 StartSoundEffect(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
                 if (s->listener != 0) {
-                    Locals_148298 l;
-                    l.args[0] = 1;
-                    l.args[1] = (s32)self;
-                    s->listener->vtbl[31](s->listener, l.args);
+                    Msg_148888 msg;
+                    msg.value = 1;
+                    msg.owner = self;
+                    s->listener->vtbl[31](s->listener, &msg);
                 }
                 mode = 2;
             break;
