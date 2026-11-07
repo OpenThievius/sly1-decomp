@@ -221,6 +221,7 @@ def whole_placements(obj, w, rel, src, resolver, starts):
         sec = obj.section("." + kind)
         if sec is not None and sec["size"]:
             data.append((w[kind], sec["size"], rel, "." + kind, "D_%08X" % w[kind]))
+            ALIGNS[w[kind]] = sec["align"]  # the padding before it, up to its alignment
     sec = obj.section(".gcc_except_table")
     if sec is not None and sec["size"]:
         data.append((w["except"], sec["size"], rel, ".gcc_except_table", "D_%08X" % w["except"]))
