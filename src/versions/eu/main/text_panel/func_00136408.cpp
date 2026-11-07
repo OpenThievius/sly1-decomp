@@ -2,7 +2,7 @@
 // PAL: 16-bit text (func_eu_001E3018/001E3050), fields at 0x408/0x570/0x578, line breaks laid out by func_eu_0015E4A8, no line-start scan.
 struct Entry_00136408_eu {
     u8 pad0[4];
-    V24A2* f04;
+    Font* f04;
     u16 name08[0x200];
     u8 list408[0x168];
     s32 f570;
@@ -12,7 +12,7 @@ struct Entry_00136408_eu {
 
 s32 func_eu_001E3018(const char* s);
 s32 func_eu_001E3050(void* dst, const char* src);
-void* func_eu_0015DCB8(void* buf, void* name, V24A2* v, s32 zero);  // returns buf
+void* func_eu_0015DCB8(void* buf, void* name, Font* v, s32 zero);  // returns buf
 void func_eu_0015E4A8(void* buf, void* list, f32 lim);
 
 void func_00136408(Entry_00136408_eu* self, const char* name)

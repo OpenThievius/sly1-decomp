@@ -16,8 +16,8 @@
 #include "step_sequence.h"
 #include "world.h"
 #include "camera.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 
 // The world: 28 views in 15 files agree with class 0x6C (c6c.h), and every one of them reaches
 // it through this pointer. 001E4000.cpp defines it (= 0).
@@ -43,16 +43,16 @@ extern const Vec02 D_00248D10;  // 0 1 0 0
 extern const Vec02 D_00248D20;  // 0 0 1 0
 extern const Vec02 D_00248D30;  // 0 0 0 0
 
-// The two packet streams (V24A0, v24a0.h): 20 views of D_002622A8 in 6 files, 6 of D_00262280 in
+// The two packet streams (PacketWriter, packet_writer.h): 20 views of D_002622A8 in 6 files, 6 of D_00262280 in
 // 4. Their labels are 0x24 and 0x28 bytes: the stream's last words are not used here.
-extern V24A0 D_002622A8;
-extern V24A0 D_00262280;
+extern PacketWriter D_002622A8;
+extern PacketWriter D_00262280;
 
 // The image records func_001B2BA8 and func_001B2CF8 allocate (func_0018D5C0: count * 0x18 and
 // count * 0x20) and func_001690C0, func_00169780, func_001B2B50, func_001B2CA8 read: the 24- and
-// 32-byte records of v24a2.h. 001E4000.cpp defines both pointers.
-extern V24A2_ImgA* D_00274504;
-extern V24A2_ImgB* D_0027450C;
+// 32-byte records of font.h. 001E4000.cpp defines both pointers.
+extern ImageRecord* D_00274504;
+extern PaletteRecord* D_0027450C;
 
 // List heads (List01, c01.h), defined in 001E4000.cpp (D_002626E8, D_002626F8 and D_00262708
 // in file_167D68.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next

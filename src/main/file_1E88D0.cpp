@@ -21,7 +21,7 @@
 #include "value_list_object.h"
 #include "c62.h"
 #include "attached_set.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "screen_fade.h"
 #include "transform_object.h"
 #include "oscillator.h"
@@ -38,7 +38,7 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a, void* p);
 void* func_001B6290(void* a, void* self, s32 b, s32 c);
 void func_001DBCC8(void* a, void* cb, void* ctx, s32 b, s32 c);
-void func_001EB550(C1C* self);
+void func_001EB550(BeatPressCollider* self);
 struct Inner_1EB608 { u8 pad[0xC3C]; void* c3C; };
 void func_001922E8(void* self);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
@@ -68,7 +68,7 @@ struct Set_001E9498 {
 s32 func_001BE5E8(void);
 void func_001BEA28(void);
 f32 func_002058A0(f32 v);
-s32 func_001EB050(S1EB050* span, f32 x);
+s32 func_001EB050(ValueRange* span, f32 x);
 typedef void (*VFn3_1E9570)(void* self, int arg);
 typedef void (*VFn7_1E9570)(void* self);
 struct VTable_1E9570 {
@@ -97,11 +97,11 @@ void* func_00129C20(s32 a, s32 b);
 void func_001C9CF8(void* a);
 typedef void* (*VFn_1E8EF8)(void* self);
 struct Buf_1E8EF8 { s32 v[4]; };
-void func_001C8418(C0B* self, void* p);
-void func_001C8C08(C0B* self);
+void func_001C8418(KeyedConeAgent* self, void* p);
+void func_001C8C08(KeyedConeAgent* self);
 s32 func_001F3BD8(void* self, void* arg);
-void func_001C8BC0(C0B* self);
-void func_001C8E28(C0B* self);
+void func_001C8BC0(KeyedConeAgent* self);
+void func_001C8E28(KeyedConeAgent* self);
 extern u8 D_00261420[];
 void func_001DDC38(void* sub, void* self);
 void* func_00140FF8(void* p);
@@ -138,7 +138,7 @@ void* func_0018D568(s32 size, void* name);
 s32 func_0015A418(void* a, s32 b, s32 c, void* self);
 struct Entry_275D48 { s32 id; f32 v; s32 z; };
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
-s32 func_001C8010(C0B* self);
+s32 func_001C8010(KeyedConeAgent* self);
 struct Obj_1E96F8 { u8 pad0[4]; s32 f4; f32 f8; u8 pad1[0x24]; s32 f30; };
 extern s32 D_00274738;
 extern f32 D_00261868[];
@@ -182,7 +182,7 @@ extern void func_001409E0(void);
 extern void func_001A9FD0(void);
 struct Item_1EB748 { s32 type; s32 a; f32 b; s32 c; };
 struct List_1EB748 { u8 pad[0x34]; s32 n; Item_1EB748* items; s32 cur; };
-typedef s32 (*Fn_1EB748)(C1C* self, void* arg);
+typedef s32 (*Fn_1EB748)(BeatPressCollider* self, void* arg);
 typedef void (*GFn_1EB748)(Player* g, void* arg);
 struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 s32 func_001F3BD8(void* a, Vec4U* out);
@@ -190,9 +190,9 @@ s32 func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 s32 func_00160C58(void);
 void func_001929D0(Player* g);
-void func_001D7098(OwnerMessage* out, s32 mode, C1C* self);
+void func_001D7098(OwnerMessage* out, s32 mode, BeatPressCollider* self);
 void func_001EB698(void);
-void func_001ED020(C13* o);
+void func_001ED020(TempoAgent* o);
 void func_001C0C08(s32 a, s32 b);
 void func_0017CE20(void* a, Player* g);
 extern s32 D_00275C34;
@@ -204,7 +204,7 @@ extern u32 D_002476A0[];
 struct Crc_1E9B30 {
     static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
 };
-void func_001921A8(C1C* self);
+void func_001921A8(BeatPressCollider* self);
 f32 func_001EAAE0(f32 lo, f32 hi);
 f32 func_002059E0(f32 x);
 s32 func_001DDA80(World* p);
@@ -339,9 +339,9 @@ void func_001EAD88(f32* a, f32* b);
 void func_00192820(void);
 void func_001B6598(void* sub, s32* out);
 struct Entry_1ED090 { void* a; s32 b; };
-void func_0012F810(void* a, C13* self);
+void func_0012F810(void* a, TempoAgent* self);
 s32 func_001EDEF0(void* self);
-s32 func_001EE560(V24A0* s);
+s32 func_001EE560(PacketWriter* s);
 void func_00182C18(BaseObject* self);
 void func_001BA550(Collider* o, Attach03* node);
 void func_001BA528(Collider* o, Attach03* node);
@@ -401,13 +401,13 @@ struct Sub_1ECBC8;
 struct Dev_1ECBC8;
 typedef void (*Cb_1ECBC8)(void);
 typedef s32 Id_1ECBC8;
-void func_001C7CB8(C13* self);
+void func_001C7CB8(TempoAgent* self);
 void func_001ED1D8(Sub_1ECBC8* sub);
 void func_001ED278(Sub_1ECBC8* sub);
 void func_001B6598(Dev_1ECBC8* dev, s32* out);
 void func_001C0C68(Id_1ECBC8 a, Dev_1ECBC8* b);
 s32 func_001C0C50(Id_1ECBC8 a);
-void* func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, C13* self, s32 a3, s32 a4);
+void* func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, TempoAgent* self, s32 a3, s32 a4);
 void func_001ECB18(void);
 void func_001C9008(void* self, void* arg);
 void func_00152CE0(void* self, s32 index, s32 count);
@@ -423,9 +423,9 @@ struct Item_1EFB20 { u8 pad[0x2D0]; s32 kind; f32 lo; f32 hi; s32 sub; s32 tag; 
 struct Owner_1EFB20 { u8 pad[0x180]; s32 link; };
 struct Set_1EFB20 { s32 pad0; s32 count; Item_1EFB20* items[8]; s32 flag; Owner_1EFB20* owner; };
 void func_001AC060(void* p);
-void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag);
+void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 D_0024A0E0[];
-s32 func_00152888(V24A0* self);
+s32 func_00152888(PacketWriter* self);
 struct Link_1EECE0;
 struct Link_1EECE0 {
     s32* a; s32* b; s32 c; Link_1EECE0* prev;
@@ -471,7 +471,7 @@ s32 func_001F5C0C(Entry_1ED4C8* dst, s32 value, s32 size);
 // reload, deletes the branch and leaves the constant load.
 struct Inner_1EC570 { u8 pad[0x34]; f32 f34; };
 struct Sub_1EC570 { u8 pad0[0x8]; Inner_1EC570* inner; u8 pad1[8]; f32 f14; f32 f18; };
-void func_001C91C8(C13* self, s32 a, s32 b);
+void func_001C91C8(TempoAgent* self, s32 a, s32 b);
 void func_001603E8(s32 n);
 void func_0018C7F8(void* p);
 struct Vec3_1EDDB0 { f32 x; f32 y; f32 z; };
@@ -617,7 +617,7 @@ struct Rec_1F18B0 {
 void func_00128018(Mgr_1F18B0* a0, Obj_1F18B0* a1, void* a2, Loc_1F18B0* a3);
 struct Clr_1F1960 { s32 a, b, c, d, e, f; };
 s32 func_0015C188(s32 n);
-V24A2* func_0015C1C0(s32 n);
+Font* func_0015C1C0(s32 n);
 void func_001F5C0C(Clr_1F1960* p, s32 v, s32 size);
 struct __attribute__((packed)) Ptr_1F0660 { WarpPage* p; };
 extern void func_00124A48(WarpPage* o);
@@ -661,7 +661,7 @@ struct Begin_1F0758 {
         g_activeListFrames = (ListFrame*)it;
     }
 };
-C7A* func_0015A418(World* host, s32 kind, s32 id, C7A* ctx);
+HoldingMember* func_0015A418(World* host, s32 kind, s32 id, HoldingMember* ctx);
 struct Ent_1F1648 { s32 f0; u8 rest[0x30]; };
 struct Obj_1F1648 { u8 pad0[0x2DC]; s32 f2DC; u8 pad1[0x2F4 - 0x2E0]; s32 f2F4; u8 pad2[0x314 - 0x2F8]; Ent_1F1648 ents[1]; };
 extern s32 (*D_00276608[6])[4];
@@ -684,16 +684,16 @@ struct Obj_1F0908 {
 void func_0012C918(Slot_1F0908* s, Obj_1F0908* o, s32 c, void* d, f32 a, f32 b);
 BaseObject* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
 struct Locals_1F1E38 { s32 k; s32 pad[3]; f32 x; f32 y; };
-void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* f, u64 a, u64 b);
-void func_00161458(V24A0* self, u32 value);
-void func_001615F0(V24A0* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* f, u64 a, u64 b);
+void func_00161458(PacketWriter* self, u32 value);
+void func_001615F0(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void func_001E90A8(Ctor_001E90A8* self);
 void func_001E9498(Set_001E9498* self, ScreenElement* node);
 void func_001E96F8(Obj_1E96F8* self, s32 state);
 void func_001E98E8(float x);
 f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z);
-void func_001ED090(C13* self, void* a, s32 b);
+void func_001ED090(TempoAgent* self, void* a, s32 b);
 void func_001ED1D8(Obj_1ED1D8* self);
 void func_001ED210(Timeline* self);
 void func_001ED278(Timeline* self);
@@ -722,8 +722,8 @@ INCLUDE_DATA(D_00275C34);
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 D_00275C40 = {0};
 f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
-S1EB050 D_00275C60 = { 0.0f, 1.0f };
-S1EB050 D_00275C68 = { -1.0f, 1.0f };
+ValueRange D_00275C60 = { 0.0f, 1.0f };
+ValueRange D_00275C68 = { -1.0f, 1.0f };
 f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
 f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
@@ -898,7 +898,7 @@ f32 D_00276650 = D_00276648 * 0.75f;
 s32 D_00276654;
 
 
-void func_001E88D0(C0B* self)
+void func_001E88D0(KeyedConeAgent* self)
 {
     InitConeAgent(self);
     self->fC58 = 0x2D8;
@@ -913,7 +913,7 @@ void func_001E88D0(C0B* self)
 // The file's first read-only data, for func_001E89F0.
 extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 
-void func_001E8948(C0B* self)
+void func_001E8948(KeyedConeAgent* self)
 {
     ResolveObjectLinks(self, 8, D_00275B60);
     SetWorldActiveFollower(self->world, self);
@@ -933,7 +933,7 @@ INCLUDE_RODATA(jtbl_0024E610);
 INCLUDE_RODATA(jtbl_0024E650);
 ASM_FUNC(func_001E8A50);
 
-s32 func_001E8D58(C0B* self)
+s32 func_001E8D58(KeyedConeAgent* self)
 {
     s32 a1;
     if (self->fC5C <= 0) {
@@ -948,13 +948,13 @@ s32 func_001E8D58(C0B* self)
     return a1;
 }
 
-s32 func_001E8DB0(C0B* a0)
+s32 func_001E8DB0(KeyedConeAgent* a0)
 {
     if (a0->fC40 != 0) return 0;
     return a0->fC5C != 0;
 }
 
-s32 func_001E8DD0(C0B* a0)
+s32 func_001E8DD0(KeyedConeAgent* a0)
 {
     if (a0->fC58 != 0x2DB) return 0;
     {
@@ -964,7 +964,7 @@ s32 func_001E8DD0(C0B* a0)
     }
 }
 
-void func_001E8E08(C0B* a0)
+void func_001E8E08(KeyedConeAgent* a0)
 {
     if (a0->fC58 != 0x2DA) {
         s32 v = a0->fC5C - 1;
@@ -974,7 +974,7 @@ void func_001E8E08(C0B* a0)
     SteerAgentAlongPath();
 }
 
-void func_001E8E48(C0B* self)
+void func_001E8E48(KeyedConeAgent* self)
 {
     if (self->fC58 == 0x2DA && self->f724 == 0xC && func_001BB290(self, 0, 0) != 0) {
         s32 s = FindNearestAgentKey(self, (u8*)self + 0x140);
@@ -992,7 +992,7 @@ void func_001E8E48(C0B* self)
     RestartAgentClip(self);
 }
 
-void func_001E8EF8(C0B* self)
+void func_001E8EF8(KeyedConeAgent* self)
 {
     Buf_1E8EF8 loc;
     switch (self->f724) {
@@ -1015,7 +1015,7 @@ void func_001E8EF8(C0B* self)
     }
 }
 
-void func_001E8FA8(C0B* self)
+void func_001E8FA8(KeyedConeAgent* self)
 {
     if (self->f724 == 8) {
         func_001C8BC0(self);
@@ -1033,7 +1033,7 @@ void func_001E8FE8(void)
     }
 }
 
-s32 func_001E9038(C0B* self, Probe_001E9038* probe)
+s32 func_001E9038(KeyedConeAgent* self, Probe_001E9038* probe)
 {
     s32 key = probe->key;
     u32 i = 0;
@@ -1823,7 +1823,7 @@ void func_001EB018(f32* a0, f32 x, f32 y, f32 z, f32 w)
     a0[1] = q - r;
 }
 
-s32 func_001EB050(S1EB050* span, f32 x)
+s32 func_001EB050(ValueRange* span, f32 x)
 {
     s32 inside = 0;
     if (span->lo < x) {
@@ -1834,7 +1834,7 @@ s32 func_001EB050(S1EB050* span, f32 x)
     return inside;
 }
 
-s32 func_001EB080(s32 count, S1EB050* spans, f32 x)
+s32 func_001EB080(s32 count, ValueRange* spans, f32 x)
 {
     for (s32 i = 0; i < count; i++) {
         if (IsInsideRange(&spans[i], x)) {
@@ -1844,7 +1844,7 @@ s32 func_001EB080(s32 count, S1EB050* spans, f32 x)
     return 0;
 }
 
-f32 func_001EB0F8(S1EB050* span, f32 x)
+f32 func_001EB0F8(ValueRange* span, f32 x)
 {
     if (x < span->lo) {
         return span->lo;
@@ -1872,7 +1872,7 @@ ASM_FUNC(func_001EB168);
 
 LINKER_REMNANT(func_001EB458);
 
-void func_001EB460(C1C* self)
+void func_001EB460(BeatPressCollider* self)
 {
     InitSwitchedCollider(self);
     f32 t = g_currentEntry->dt;
@@ -1890,19 +1890,19 @@ void func_001EB460(C1C* self)
     self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
 }
 
-void func_001EB518(C1C* self)
+void func_001EB518(BeatPressCollider* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, D_00275C90);
 }
 
-void func_001EB550(C1C* a0)
+void func_001EB550(BeatPressCollider* a0)
 {
     a0->blk580 = g_player->blk580;
     a0->f604 = g_player->f604;
 }
 
-void func_001EB598(C1C* self)
+void func_001EB598(BeatPressCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 4, D_00275CA0);
@@ -1910,7 +1910,7 @@ void func_001EB598(C1C* self)
     AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
-void func_001EB608(C1C* self, void* p)
+void func_001EB608(BeatPressCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self);
     Inner_1EB608* r = (Inner_1EB608*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
@@ -1926,7 +1926,7 @@ void func_001EB608(C1C* self, void* p)
 
 ASM_FUNC(func_001EB698);
 
-void func_001EB748(C1C* self, In_1EB748* in)
+void func_001EB748(BeatPressCollider* self, In_1EB748* in)
 {
     if (self->f67C != 0 && g_player != 0) {
         Vec4U pos;
@@ -1957,7 +1957,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
             if (self->f62C < self->f630) {
                 Ent1C* e = &self->f634[self->f62C];
                 if (e->dir == dir) {
-                    C13* g = ((C13*)self->f68C);
+                    TempoAgent* g = ((TempoAgent*)self->f68C);
                     at = (f32)g->fC70 * 4.0f + g->fC7C;
                     if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
                         ok = 1;
@@ -1974,7 +1974,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
     }
     if (self->f62C < self->f630) {
         Ent1C* e = &self->f634[self->f62C];
-        C13* g = ((C13*)self->f68C);
+        TempoAgent* g = ((TempoAgent*)self->f68C);
         f32 at = (f32)g->fC70 * 4.0f + g->fC7C;
         f32 win = self->f684;
         if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
@@ -1987,12 +1987,12 @@ void func_001EB748(C1C* self, In_1EB748* in)
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
             if (HasSpareCount() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
-                C13* o;
+                TempoAgent* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
                 msg.fn = func_001EB698;
                 ((s32 (*)(Player*, OwnerMessage*))((GFn_1EB748*)g_player->desc)[0x140 / 4])(g_player, &msg);
-                o = (C13*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+                o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldTimeline(o);
                 o->fBFC = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
@@ -2000,14 +2000,14 @@ void func_001EB748(C1C* self, In_1EB748* in)
             }
             if (((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 List_1EB748* l;
-                ((void (*)(C1C*))((Fn_1EB748*)self->desc)[0x150 / 4])(self);
+                ((void (*)(BeatPressCollider*))((Fn_1EB748*)self->desc)[0x150 / 4])(self);
                 Player* gl = g_player;
                 self->f688 = 1;
                 gl->f26C4 = 1;
                 f32 v = g_gameTime[0];
                 *(f32*)((u8*)gl + 0x26CC) = v;
                 gl->f26C8 = v;
-                l = ((List_1EB748*)((C13*)self->f68C)->fC38);
+                l = ((List_1EB748*)((TempoAgent*)self->f68C)->fC38);
                 *(f32*)((u8*)gl + 0x26D0) = 2.0f;
                 if (l != 0) {
                     s32 j = l->cur;
@@ -2018,7 +2018,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
                     }
                     if (j < l->n) {
                         Item_1EB748* it = &l->items[j];
-                        C13* gg = ((C13*)self->f68C);
+                        TempoAgent* gg = ((TempoAgent*)self->f68C);
                         *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->a * 4.0f + it->b - ((f32)gg->fC70 * 4.0f + gg->fC7C)) * gg->fC88;
                     }
                 }
@@ -2038,7 +2038,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
     }
 }
 
-s32 func_001EBC88(C1C* self)
+s32 func_001EBC88(BeatPressCollider* self)
 {
     if (g_buttonCodeFlags & 1) return 1;
     if (IsPadSelectFlagHeld(self->world) == 0) return self->f688 != 0;
@@ -2062,7 +2062,7 @@ ASM_FUNC(func_001EBD10);
 
 ASM_FUNC(func_001EBDD0);
 
-void func_001EBEB0(C13* self)
+void func_001EBEB0(TempoAgent* self)
 {
     InitAgent(self);
     *(s32*)((u8*)self + 0xC5C) = 0x3C;
@@ -2081,7 +2081,7 @@ void func_001EBEB0(C13* self)
 
 INCLUDE_ASM(func_001EBF40);
 
-void func_001EBFB0(C13* self)
+void func_001EBFB0(TempoAgent* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
@@ -2114,7 +2114,7 @@ void func_001EC0B8(void)
     RegisterSwitchedCollider();
 }
 
-s32 func_001EC0D8(C13* self)
+s32 func_001EC0D8(TempoAgent* self)
 {
     s32 r[4];
     func_001B6598(self->fC54, r);
@@ -2151,7 +2151,7 @@ s32 func_001EC188(void)
 
 INCLUDE_ASM(func_001EC190);
 
-void func_001EC380(C13* self, void* s, void* c)
+void func_001EC380(TempoAgent* self, void* s, void* c)
 {
     u8 tmp[0x50];
     void* out = c;
@@ -2165,7 +2165,7 @@ void func_001EC380(C13* self, void* s, void* c)
 
 ASM_FUNC(func_001EC3D8);
 
-void func_001EC478(C13* self, void* arg)
+void func_001EC478(TempoAgent* self, void* arg)
 {
     s32 out;
     s32 sel;
@@ -2194,7 +2194,7 @@ void func_001EC478(C13* self, void* arg)
     }
 }
 
-void func_001EC528(C13* self)
+void func_001EC528(TempoAgent* self)
 {
     T217D_2E0* g = &g_gaugeBarElement;
     DecrementGaugeCount((u8*)&g_gaugeBarElement);
@@ -2202,7 +2202,7 @@ void func_001EC528(C13* self)
     g->fill = g->fillTarget;
 }
 
-void func_001EC570(C13* self, s32 a, s32 b)
+void func_001EC570(TempoAgent* self, s32 a, s32 b)
 {
     s32 r[3];
     switch (self->f724) {
@@ -2273,7 +2273,7 @@ INCLUDE_ASM(func_001EC7A8);
 INCLUDE_RODATA(jtbl_0024E740);
 ASM_FUNC(func_001EC828);
 
-void func_001ECB18(C13* self)
+void func_001ECB18(TempoAgent* self)
 {
     f32 den = self->fC84 - (*(f32*)&g_gameTime);
     for (s32 k = 0; k < self->fC68; k++) {
@@ -2289,7 +2289,7 @@ void func_001ECB18(C13* self)
 
 }
 
-void func_001ECBC8(C13* self)
+void func_001ECBC8(TempoAgent* self)
 {
     Sub_1ECBC8* sub;
     s32 code;
@@ -2342,7 +2342,7 @@ void func_001ECBC8(C13* self)
     AppendQueuedCall(((Dev_1ECBC8*)self->world), SyncTempoAgentEntries, self, 0, 0);
 }
 
-void func_001ECDF8(C13* self)
+void func_001ECDF8(TempoAgent* self)
 {
     s32 code;
     func_001B6598(self->fC54, &code);
@@ -2354,7 +2354,7 @@ void func_001ECDF8(C13* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void func_001ECE98(C13* self)
+void func_001ECE98(TempoAgent* self)
 {
     s32 loc[4];
     s32 v = self->f724;
@@ -2377,30 +2377,30 @@ tail:
 INCLUDE_RODATA(jtbl_0024E780);
 ASM_FUNC(func_001ECF10);
 
-void func_001ED018(C13* self, s32 value)
+void func_001ED018(TempoAgent* self, s32 value)
 {
     self->fC34 = (void*)value;
 }
 
-void func_001ED020(C13* self)
+void func_001ED020(TempoAgent* self)
 {
     EndTimeline(self->fC38);
     self->fC38 = 0;
 }
 
-void func_001ED050(C13* self, s32 v)
+void func_001ED050(TempoAgent* self, s32 v)
 {
     self->fC5C = v;
     self->fC8C = 60.0f / (f32)v;
 }
 
-void func_001ED070(C13* self, s32 v)
+void func_001ED070(TempoAgent* self, s32 v)
 {
     self->fC60 = v;
     self->fC64 = self->fC88 * (f32)v;
 }
 
-void func_001ED090(C13* self, void* a, s32 b)
+void func_001ED090(TempoAgent* self, void* a, s32 b)
 {
     Entry_1ED090* e = &((Entry_1ED090*)self->fC6C)[self->fC68++];
     e->b = b;
@@ -2408,7 +2408,7 @@ void func_001ED090(C13* self, void* a, s32 b)
     func_0012F810(a, self);
 }
 
-void func_001ED0D8(C13* self, s32 key)
+void func_001ED0D8(TempoAgent* self, s32 key)
 {
     s32 i = 0;
     if (self->fC68 > 0) {
@@ -2611,11 +2611,11 @@ void func_001EE290(void* self)
 
 ASM_FUNC(func_001EE2B0);
 
-V24A0* func_001EE318(V24A0* self)
+PacketWriter* func_001EE318(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
     self->f10 = 1;
-    self->vt = (const V24A0_Vt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)D_0024A0E0;
     self->f1C = 0;
     self->f20 = 0;
     return self;
@@ -2638,7 +2638,7 @@ done:
     s->cursor = p;
 }
 
-void func_001EE3B8(V24A0* s, u32 a, u32 b)
+void func_001EE3B8(PacketWriter* s, u32 a, u32 b)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
@@ -2648,49 +2648,49 @@ void func_001EE3B8(V24A0* s, u32 a, u32 b)
     *q = b | 0x2000000;
 }
 
-void func_001EE3F0(V24A0* s, s32 n)
+void func_001EE3F0(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
     *p = (u32)((n / 8) | 0x14000000);
 }
 
-void func_001EE420(V24A0* s, s32 n)
+void func_001EE420(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
     *p = (u32)((n / 8) | 0x15000000);
 }
 
-void func_001EE450(V24A0* b)
+void func_001EE450(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x11000000;
 }
 
-void func_001EE468(V24A0* b)
+void func_001EE468(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x13000000;
 }
 
-void func_001EE480(V24A0* b)
+void func_001EE480(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = 0x10000000;
 }
 
-void func_001EE498(V24A0* b, u32 x, u32 y)
+void func_001EE498(PacketWriter* b, u32 x, u32 y)
 {
     u32* p = (u32*)b->cur;
     b->cur = (u8*)(p + 1);
     *p = y | (x << 8) | 0x01000000;
 }
 
-void func_001EE4C0(V24A0* b, u32* src){
+void func_001EE4C0(PacketWriter* b, u32* src){
  u32 *p1,*p2,*p3,*p4,*p5;
  p1=(u32*)b->cur; b->cur = (u8*)(p1 + 1); *p1=0x30000000;
  p2=(u32*)b->cur; b->cur = (u8*)(p2 + 1); *p2=src[0];
@@ -2708,7 +2708,7 @@ void func_001EE528(Packer_1EE528* self, s32 value)
     self->last = value;
 }
 
-s32 func_001EE560(V24A0* self, s32 a, s32 b, s32 c)
+s32 func_001EE560(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     u32 lo = ((u32)b << 16) | 0x6000C000u;
     u32 head = ((u32)a << 24) | lo;
@@ -2722,7 +2722,7 @@ s32 func_001EE560(V24A0* self, s32 a, s32 b, s32 c)
     return D_00275DD0[a] * b;
 }
 
-void func_001EE5C8(V24A0* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
+void func_001EE5C8(PacketWriter* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
 {
     if (size == 0) {
         if (outCursor) *outCursor = 0;
@@ -2774,7 +2774,7 @@ void func_001EE668(void* s, void* a1, s32 size, u32* src, void* a4)
     }
 }
 
-void func_001EE718(V24A0* self, s32 a, s32 b, s32 c, s32 d, s32* out)
+void func_001EE718(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
 {
     if (b != 0) {
         PadPacketToQuadSlot(self, 3);
@@ -2789,7 +2789,7 @@ void func_001EE718(V24A0* self, s32 a, s32 b, s32 c, s32 d, s32* out)
     }
 }
 
-void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
+void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;
@@ -2800,7 +2800,7 @@ void func_001EE7D0(V24A0* self, s32 n, void* buf, s32 flag)
     AppendPacketQuadwords(self, n, (s32)buf);
 }
 
-void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)
+void func_001EE850(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;
@@ -2811,7 +2811,7 @@ void func_001EE850(V24A0* self, s32 a, s32 b, s32 c)
     AddDmaRefTag(self, a, b);
 }
 
-void func_001EE8D0(V24A0* a0, V24A0* a1) {
+void func_001EE8D0(PacketWriter* a0, PacketWriter* a1) {
     u32 span = a1->curU - (u32)a1->begin;
     WriteVifDirect(a0, span >> 4, (void*)a1->begin, 0);
 }
@@ -3875,7 +3875,7 @@ extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
 void func_001F1960(T217D_0F0* self) {
     SetupScreenElementText(self);
     if (IsFontLoaded(2) != 0) {
-        self->frame = (V24A2**)&D_00276620;
+        self->frame = (Font**)&D_00276620;
         *self->frame = GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);

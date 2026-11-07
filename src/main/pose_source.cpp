@@ -13,7 +13,7 @@
 #include "animation.h"
 #include "attachment.h"
 
-#include "t2196.h"
+#include "anim_curve.h"
 
 #include "world.h"
 
@@ -25,7 +25,7 @@
 
 void* func_0018D658(s32 size);
 
-void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
+void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 void func_00109488(void);
 
@@ -38,11 +38,11 @@ s32 func_00137D10(void* p);
 // The owner's slot 44 (Desc02::m28) is told what was asked.
 typedef void (*Hook_11FC20)(PlacedObject* self, s32 a, s32 b);
 
-void func_0011F6B0(T2196_Weight** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
+void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
 
 void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
-void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr);
+void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
 s32 func_00137BE0(void* src);
 
@@ -58,7 +58,7 @@ s32 func_00137B90(void* src);
 
 void func_00137E70(void* src, void* dst);
 
-T2196_Weight* func_00121160(s32 index);
+WeightCurve* func_00121160(s32 index);
 
 struct Scratch_11F9F8 { f32 diff; f32 delta; u8* ptr; };
 
@@ -71,7 +71,7 @@ typedef void (*Method_11FF08)(PlacedObject* self, void* a, void* b);
 
 struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
 
-void func_0011F6B0(T2196_Weight** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
+void func_0011F6B0(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
 
 void func_00188A20(void* a, void* b);
 
@@ -89,7 +89,7 @@ struct Locals_11FFD8 {
     f32 first;
 };
 
-extern void func_0011F798(T2196_Weight**, Vec02*, Stream83*);
+extern void func_0011F798(WeightCurve**, Vec02*, Stream83*);
 
 extern void func_00189150(void*, void*, void*);
 
@@ -209,19 +209,19 @@ extern u8 func_001EB128[];
 
 struct Buffer_00120130 { u8 bytes[0x20]; };
 typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
-extern void func_0011F9F8(s32, Key2196_Vec*, s32, void*, void*);
+extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
 
-extern void func_0011F9F8(s32, Key2196_Vec*);
-extern void func_0011FB98(s32, Key2196_Vec*, s32*, f32**);
+extern void func_0011F9F8(s32, VectorKey*);
+extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
 struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
-extern void func_0011F6B0(T2196_Weight**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
+extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_0011F798(T2196_Weight** a, Vec02* b, Stream83* c);
+void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
 
 struct Result_001203A8 {
     f32 first;
@@ -235,9 +235,9 @@ struct Output_001203A8 {
     u8 pad18[0x10];
     f32 third;
 };
-extern void func_0011F9F8(s32, Key2196_Vec*, void*, f32*, s32, f32, f32);
+extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
-extern void func_0011FA88(s32*, Key2196_Vec**, Stream83*);
+extern void func_0011FA88(s32*, VectorKey**, Stream83*);
 
 extern void* func_001B5EE0(void*);
 
@@ -290,9 +290,9 @@ extern void func_00121568(Attachment* self, f32* a1, f32* a2);
 extern void func_00121580(Attachment* self, Mat02* a1);
 
 // The position curves' tables, defined at the end of this file.
-extern const T2196_PosVt D_002196B8;
-extern const T2196_PosVt D_002196C8;
-extern const T2196_PosVt D_002196D8;
+extern const PositionCurveVt D_002196B8;
+extern const PositionCurveVt D_002196C8;
+extern const PositionCurveVt D_002196D8;
 
 extern u8 D_00248D30[];
 void func_00152600(void* a, void* b);
@@ -303,15 +303,15 @@ void func_001B5F28(void* a, void* b);
 
 extern u8 D_002483D0[];
 
-s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
+s32 func_00139970(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
 f32 func_001EA408(f32 a);
 
-extern const T2196_RotVt D_002196E8;
-extern const T2196_RotVt D_002196F8;
-extern const T2196_RotVt D_00219708;
+extern const RotationCurveVt D_002196E8;
+extern const RotationCurveVt D_002196F8;
+extern const RotationCurveVt D_00219708;
 
-extern const T2196_ScaleVt D_00219718;
-extern const T2196_ScaleVt D_00219728;
+extern const ScaleCurveVt D_00219718;
+extern const ScaleCurveVt D_00219728;
 void* func_0018D5C0(u32 n);
 
 extern u8 D_00219560[];
@@ -332,12 +332,12 @@ void func_0011F478();
 void func_0011F568();
 void func_0011F620();
 void func_0011EFB0();
-extern const T2196_WeightVt D_00219668;
-extern const T2196_WeightVt D_00219678;
-extern const T2196_WeightVt D_00219688;
-extern const T2196_WeightVt D_00219698;
-extern const T2196_WeightVt D_002196A8;
-void* func_0018D5C0(T2196_Weight* n);
+extern const WeightCurveVt D_00219668;
+extern const WeightCurveVt D_00219678;
+extern const WeightCurveVt D_00219688;
+extern const WeightCurveVt D_00219698;
+extern const WeightCurveVt D_002196A8;
+void* func_0018D5C0(WeightCurve* n);
 
 typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
@@ -708,7 +708,7 @@ void func_0011EF40(void)
 {
 }
 
-void func_0011EF48(T2196_Pos* unused, s32* a, s32* b)
+void func_0011EF48(PositionCurve* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0) {
@@ -724,7 +724,7 @@ void func_0011EF68(void)
 {
 }
 
-void func_0011EF70(T2196_Rot* self, s32* first, s32* second)
+void func_0011EF70(RotationCurve* self, s32* first, s32* second)
 {
     *first = 0;
     if (second != 0) {
@@ -736,7 +736,7 @@ void func_0011EF88()
 {
 }
 
-void func_0011EF90(T2196_Scale* a0, s32* a1, s32* a2)
+void func_0011EF90(ScaleCurve* a0, s32* a1, s32* a2)
 {
     *a1 = 0;
     if (a2 != 0) {
@@ -748,19 +748,19 @@ void func_0011EFA8()
 {
 }
 
-void func_0011EFB0(T2196_Weight* unused, s32* a, s32* b)
+void func_0011EFB0(WeightCurve* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0)
         *b = 0;
 }
 
-void func_0011EFC8(T2196_668* self, Stream83* src)
+void func_0011EFC8(TangentWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
-    self->keys = (Key2196_668*)AllocateFrontMemory(0x18 * self->count);
+    self->keys = (TangentWeightKey*)AllocateFrontMemory(0x18 * self->count);
     for (s32 i = 0; i < self->count; i++) {
-        Key2196_668* e = self->keys + i;
+        TangentWeightKey* e = self->keys + i;
         e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
         e->value = ReadBufferedFloat(src);
         e->c = ReadBufferedS8(src);
@@ -770,25 +770,25 @@ void func_0011EFC8(T2196_668* self, Stream83* src)
     }
 }
 
-void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F0C8(TangentWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
     u8* p;
     FindCurveSegment(key, flags, 0x18, self->count, (u8*)self->keys, &diff, &delta, &p);
-    if (((Key2196_668*)p)->kind == 5) {
+    if (((TangentWeightKey*)p)->kind == 5) {
         if (outF != 0) {
-            *outF = ((Key2196_668*)p)->value;
+            *outF = ((TangentWeightKey*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
         }
         return;
     }
-    EvaluateHermiteSegment(delta, diff, scale, ((Key2196_668*)p)->value, ((Key2196_668*)p)->f, ((Key2196_668*)p + 1)->value, ((Key2196_668*)p + 1)->d, outF, outI, 0);
+    EvaluateHermiteSegment(delta, diff, scale, ((TangentWeightKey*)p)->value, ((TangentWeightKey*)p)->f, ((TangentWeightKey*)p + 1)->value, ((TangentWeightKey*)p + 1)->d, outF, outI, 0);
 }
 
-void func_0011F180(T2196_668* src, s32* outCount, f32** outValues)
+void func_0011F180(TangentWeightCurve* src, s32* outCount, f32** outValues)
 {
     *outCount = src->count;
     if (outValues != 0)
@@ -801,12 +801,12 @@ void func_0011F180(T2196_668* src, s32* outCount, f32** outValues)
     }
 }
 
-void func_0011F210(T2196_678* self, Stream83* src)
+void func_0011F210(ControlPointWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
-    self->keys = (Key2196_678*)AllocateFrontMemory(0x20 * self->count);
+    self->keys = (ControlPointWeightKey*)AllocateFrontMemory(0x20 * self->count);
     for (s32 i = 0; i < self->count; i++) {
-        Key2196_678* e = self->keys + i;
+        ControlPointWeightKey* e = self->keys + i;
         e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
         e->value = ReadBufferedFloat(src);
         e->c = ReadBufferedS8(src);
@@ -820,25 +820,25 @@ void func_0011F210(T2196_678* self, Stream83* src)
     }
 }
 
-void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F320(ControlPointWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
     u8* p;
     FindCurveSegment(key, flags, 0x20, self->count, (u8*)self->keys, &diff, &delta, &p);
-    if (((Key2196_678*)p)->kind == 5) {
+    if (((ControlPointWeightKey*)p)->kind == 5) {
         if (outF != 0) {
-            *outF = ((Key2196_678*)p)->value;
+            *outF = ((ControlPointWeightKey*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
         }
         return;
     }
-    SolveBezierSegment(delta, diff, scale, ((Key2196_678*)p)->value, ((Key2196_678*)p)->g, ((Key2196_678*)p)->h, ((Key2196_678*)p + 1)->value, ((Key2196_678*)p + 1)->d, ((Key2196_678*)p + 1)->e, outF, outI, 0);
+    SolveBezierSegment(delta, diff, scale, ((ControlPointWeightKey*)p)->value, ((ControlPointWeightKey*)p)->g, ((ControlPointWeightKey*)p)->h, ((ControlPointWeightKey*)p + 1)->value, ((ControlPointWeightKey*)p + 1)->d, ((ControlPointWeightKey*)p + 1)->e, outF, outI, 0);
 }
 
-void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
+void func_0011F3E8(ControlPointWeightCurve* self, s32* outCount, f32** outArr)
 {
     s32 n = self->count;
     *outCount = n;
@@ -855,7 +855,7 @@ void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
     }
 }
 
-void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F478(LinearWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
@@ -863,7 +863,7 @@ void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI,
     FindCurveSegment(key, flags, 8, self->count, (u8*)self->keys, &diff, &delta, &p);
     if (delta < 0.0001f) {
         if (outF != 0) {
-            *outF = ((Key2196_688*)p)->value;
+            *outF = ((LinearWeightKey*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
@@ -872,25 +872,25 @@ void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI,
     }
     if (outF != 0) {
         f32 t = diff / delta;
-        *outF = (1.0f - t) * ((Key2196_688*)p)->value + t * ((Key2196_688*)p + 1)->value;
+        *outF = (1.0f - t) * ((LinearWeightKey*)p)->value + t * ((LinearWeightKey*)p + 1)->value;
     }
     if (outI != 0) {
-        *outI = scale * (((Key2196_688*)p + 1)->value - ((Key2196_688*)p)->value) / delta;
+        *outI = scale * (((LinearWeightKey*)p + 1)->value - ((LinearWeightKey*)p)->value) / delta;
     }
 }
 
-void func_0011F568(T2196_688* self, Stream83* src)
+void func_0011F568(LinearWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16(src);
-    self->keys = (Key2196_688*)AllocateFrontMemory(self->count << 3);
+    self->keys = (LinearWeightKey*)AllocateFrontMemory(self->count << 3);
     for (s32 i = 0; i < self->count; i++) {
-        Key2196_688* e = self->keys + i;
+        LinearWeightKey* e = self->keys + i;
         e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
         e->value = ReadBufferedFloat(src);
     }
 }
 
-void func_0011F620(T2196_688* self, s32* count, f32** out)
+void func_0011F620(LinearWeightCurve* self, s32* count, f32** out)
 {
     s32 n = self->count;
     *count = n;
@@ -904,18 +904,18 @@ void func_0011F620(T2196_688* self, s32* count, f32** out)
 
 ASM_FUNC(func_0011F6B0);
 
-void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
+void func_0011F798(WeightCurve** out, Vec02* dst, Stream83* src)
 {
     s32 mask = ReadBufferedU8(src);
-    T2196_Weight** slot = out;
+    WeightCurve** slot = out;
     ReadBufferedVector3(src, dst);
     s32 i = 2;
     do {
         s32 bit = mask & 1;
         mask >>= 1;
         if (bit) {
-            T2196_Weight* o = CreateWeightCurve(ReadBufferedU8(src));
-            void (*fn)(T2196_Weight*, Stream83*) = o->vt->read;
+            WeightCurve* o = CreateWeightCurve(ReadBufferedU8(src));
+            void (*fn)(WeightCurve*, Stream83*) = o->vt->read;
             if (fn)
                 fn(o, src);
             *slot = o;
@@ -925,7 +925,7 @@ void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
     } while (i >= 0);
 }
 
-void func_0011F850(T2196_Weight** objs, s32* outCount, f32** outArr)
+void func_0011F850(WeightCurve** objs, s32* outCount, f32** outArr)
 {
     s32 counts[3];
     f32* ptrs[3];
@@ -970,15 +970,15 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
 
-void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
+void func_0011FA88(s32* outCount, VectorKey** outItems, Stream83* src)
 {
     s32 count = ReadBufferedU16(src);
-    Key2196_Vec* items = (Key2196_Vec*)AllocateFrontMemory(count << 6);
+    VectorKey* items = (VectorKey*)AllocateFrontMemory(count << 6);
     if (count > 0) {
         u8* p2 = (u8*)&items->v2;
         u8* p1 = (u8*)&items->v1;
         u8* p0 = (u8*)&items->v0;
-        Key2196_Vec* it = items;
+        VectorKey* it = items;
         s32 left = count;
         do {
             left--;
@@ -996,14 +996,14 @@ void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
     *outItems = items;
 }
 
-void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr)
+void func_0011FB98(s32 count, VectorKey* src, s32* outCount, f32** outArr)
 {
     *outCount = count;
     if (outArr) {
         *outArr = (f32*)AllocateBackMemory(count * 4);
         s32 i = 0;
         if (*outCount > 0) {
-            Key2196_Vec* p = src;
+            VectorKey* p = src;
             do {
                 (*outArr)[i] = p->time;
                 p++;
@@ -1013,7 +1013,7 @@ void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr)
     }
 }
 
-void func_0011FC20(T2196_6B8* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+void func_0011FC20(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
 {
     EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
@@ -1022,12 +1022,12 @@ void func_0011FC20(T2196_6B8* self, PlacedObject* other, s32 c, s32 e, s32 f, f3
 
 ASM_FUNC(func_0011FC90);
 
-void func_0011FDB8(T2196_6B8* self, s32* outCount, f32** outTimes)
+void func_0011FDB8(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_0011FDD8(T2196_6C8* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+void func_0011FDD8(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
 {
     EvaluateVectorKeyCurve(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
@@ -1036,12 +1036,12 @@ void func_0011FDD8(T2196_6C8* self, PlacedObject* other, s32 a2, s32 a3, s32 a4,
 
 ASM_FUNC(func_0011FE40);
 
-void func_0011FED8(T2196_6C8* self, s32* outCount, f32** outArr)
+void func_0011FED8(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 {
     GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
-void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* p4)
+void func_0011FF08(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
 {
     Scratch_11FF08 tmp;
     EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
@@ -1053,12 +1053,12 @@ void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* 
         ((Method_11FF08)other->desc02()->m29)(other, p3, p4);
 }
 
-void* func_0011FFA8(T2196_6E8* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void* func_0011FFA8(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     return EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
 }
 
-void func_0011FFD8(T2196_6E8* self, Stream83* arg)
+void func_0011FFD8(AxisRotationCurve* self, Stream83* arg)
 {
     Locals_11FFD8 loc;
     s32 result;
@@ -1079,12 +1079,12 @@ void func_0011FFD8(T2196_6E8* self, Stream83* arg)
     PopBackMemoryMark();
 }
 
-void func_00120110(T2196_6E8* self, s32* outCount, f32** outTimes)
+void func_00120110(AxisRotationCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_00120130(T2196_6F8* self, PlacedObject* parent, s32 mode,
+void func_00120130(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
                    void* output, void* state)
 {
     Buffer_00120130 buffer;
@@ -1102,12 +1102,12 @@ void func_00120130(T2196_6F8* self, PlacedObject* parent, s32 mode,
     }
 }
 
-void func_001201D0(T2196_6F8* self)
+void func_001201D0(KeyedRotationCurve* self)
 {
 	EvaluateVectorKeyCurve(self->count, self->keys);
 }
 
-void func_001201F0(T2196_6F8* self, Stream83* arg)
+void func_001201F0(KeyedRotationCurve* self, Stream83* arg)
 {
     Locals_001201F0 loc;
     s32 result;
@@ -1126,12 +1126,12 @@ void func_001201F0(T2196_6F8* self, Stream83* arg)
     self->closed = result;
 }
 
-void func_001202C0(T2196_6F8* self, s32* outCount, f32** outTimes)
+void func_001202C0(KeyedRotationCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-void func_001202F0(T2196_718* self, PlacedObject* second, void* third,
+void func_001202F0(AxisScaleCurve* self, PlacedObject* second, void* third,
                    Output_001202F0* output, f32 factor)
 {
     Result_001202F0 result;
@@ -1145,17 +1145,17 @@ void func_001202F0(T2196_718* self, PlacedObject* second, void* third,
     }
 }
 
-void func_00120360(T2196_718* self, Stream83* p)
+void func_00120360(AxisScaleCurve* self, Stream83* p)
 {
     ReadAxisCurves(self->axis, &self->base, p);
 }
 
-void func_00120388(T2196_718* self, s32* outCount, f32** outTimes)
+void func_00120388(AxisScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
+void func_001203A8(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
                    Output_001203A8* output, f32 factor)
 {
     Result_001203A8 result;
@@ -1169,12 +1169,12 @@ void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
     }
 }
 
-void func_00120418(T2196_728* self, Stream83* stream)
+void func_00120418(KeyedScaleCurve* self, Stream83* stream)
 {
 	ReadVectorKeys(&self->count, &self->keys, stream);
 }
 
-void func_00120440(T2196_728* self, s32* outCount, f32** outTimes)
+void func_00120440(KeyedScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
@@ -1183,7 +1183,7 @@ ASM_FUNC(func_00120470);
 
 ASM_FUNC(func_00120700);
 
-void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void func_00120AA8(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 v0 = sum1;
@@ -1204,8 +1204,8 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         x1 = 0.0f;
         p1 = 0;
     }
-    BlendSeq2196* seq = o->seq;
-    BlendCfg2196* cfg = o->cfg;
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
     f32 w = 0.0f;
     f32 t;
     s32 idx;
@@ -1216,10 +1216,10 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         t = x2 / seq->pairs[idx].b;
     }
     for (s32 i = 0; i < cfg->count; i++) {
-        BlendRec2196* e = (BlendRec2196*)(cfg->base + i * cfg->stride);
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
         if (e->weight == 0.0f)
             continue;
-        T2196_Weight* tg = o->targets[i];
+        WeightCurve* tg = o->targets[i];
         if (!tg) {
             if (cam) {
                 f32 r = WrapAngle(((Rec2195_224*)cam->f224)->f90 - v0);
@@ -1232,7 +1232,7 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
                 b = s / cfg->length;
                 a = t * s;
             } else {
-                Pair2196* q = (Pair2196*)((u8*)e + seq->stride + idx * 8);
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;
                 if (e->sub->length < a)
@@ -1257,7 +1257,7 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         *out1 = sum1;
 }
 
-void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void func_00120D58(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 sum0 = sum1;
@@ -1278,8 +1278,8 @@ void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         x1 = 0.0f;
         p1 = 0;
     }
-    BlendSeq2196* seq = o->seq;
-    BlendCfg2196* cfg = o->cfg;
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
     f32 t;
     s32 idx;
     if (!seq) {
@@ -1289,11 +1289,11 @@ void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         t = x2 / seq->pairs[idx].b;
     }
     for (s32 i = 0; i < cfg->count; i++) {
-        BlendRec2196* e = (BlendRec2196*)(cfg->base + i * cfg->stride);
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
         f32 zero = 0.0f;
         if (e->weight == zero)
             continue;
-        T2196_Weight* tg = o->targets[i];
+        WeightCurve* tg = o->targets[i];
         if (!tg) {
             if (cam)
                 sum0 += e->weight * (*(f32**)((u8*)cam + 0x274))[o->index];
@@ -1304,7 +1304,7 @@ void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
                 b = s / cfg->length;
                 a = t * s;
             } else {
-                Pair2196* q = (Pair2196*)((u8*)e + seq->stride + idx * 8);
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;
                 if (e->sub->length < a)
@@ -1322,20 +1322,20 @@ void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         *out1 = sum1;
 }
 
-T2196_Pos* func_00120FB0(s32 kind)
+PositionCurve* func_00120FB0(s32 kind)
 {
-    T2196_Pos* p;
+    PositionCurve* p;
     switch (kind) {
     case 0:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x30);
+        p = (PositionCurve*)AllocateZeroedFrontMemory(0x30);
         p->vt = &g_positionCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x14);
+        p = (PositionCurve*)AllocateZeroedFrontMemory(0x14);
         p->vt = &g_positionCurveKind1Methods;
         break;
     case 2:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x18);
+        p = (PositionCurve*)AllocateZeroedFrontMemory(0x18);
         p->vt = &g_positionCurveKind2Methods;
         break;
     default:
@@ -1348,19 +1348,19 @@ T2196_Pos* func_00120FB0(s32 kind)
     return p;
 }
 
-T2196_Rot* func_00121050(s32 kind) {
-    T2196_Rot* p;
+RotationCurve* func_00121050(s32 kind) {
+    RotationCurve* p;
     switch (kind) {
     case 0:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x30);
+        p = (RotationCurve*)AllocateZeroedFrontMemory(0x30);
         p->vt = &g_rotationCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x14);
+        p = (RotationCurve*)AllocateZeroedFrontMemory(0x14);
         p->vt = &g_rotationCurveKind1Methods;
         break;
     case 2:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x1C);
+        p = (RotationCurve*)AllocateZeroedFrontMemory(0x1C);
         p->vt = &g_rotationCurveKind2Methods;
         break;
     default:
@@ -1373,16 +1373,16 @@ T2196_Rot* func_00121050(s32 kind) {
     return p;
 }
 
-T2196_Scale* func_001210F0(s32 kind)
+ScaleCurve* func_001210F0(s32 kind)
 {
-    T2196_Scale* p;
+    ScaleCurve* p;
     switch (kind) {
     case 0:
-        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x30);
+        p = (ScaleCurve*)AllocateZeroedFrontMemory(0x30);
         p->vt = &g_scaleCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x10);
+        p = (ScaleCurve*)AllocateZeroedFrontMemory(0x10);
         p->vt = &g_scaleCurveKind1Methods;
         break;
     default:
@@ -1395,28 +1395,28 @@ T2196_Scale* func_001210F0(s32 kind)
     return p;
 }
 
-T2196_Weight* func_00121160(u32 kind)
+WeightCurve* func_00121160(u32 kind)
 {
-    T2196_Weight* o;
+    WeightCurve* o;
     switch (kind) {
     case 0:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
         o->vt = &g_weightCurveKind0Methods;
         break;
     case 1:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
         o->vt = &g_weightCurveKind1Methods;
         break;
     case 3:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x14);
+        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x14);
         o->vt = &g_weightCurveKind3Methods;
         break;
     case 4:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x18);
+        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x18);
         o->vt = &g_weightCurveKind4Methods;
         break;
     case 2:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
         o->vt = &g_weightCurveKind2Methods;
         break;
     default:
@@ -1862,7 +1862,7 @@ void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
     PlacedObject* f4 = self->owner;
     AnimationPlayer* player = self->player;
     Track83* e = &player->anim->tracks[self->index];
-    T2196_Weight* target = e->weight;
+    WeightCurve* target = e->weight;
     if (target) {
         target->vt->eval(target, f4, 0, saved, a2, player->time, player->speed);
     } else {
@@ -1876,7 +1876,7 @@ void func_001232E8(T2195_7C0* self, Mat02* a1)
     PlacedObject* f4 = self->owner;
     AnimationPlayer* player = self->player;
     Track83* e = &player->anim->tracks[self->index];
-    T2196_Scale* target = e->scale;
+    ScaleCurve* target = e->scale;
     if (target) {
         target->vt->eval(target, f4, 0, saved, player->time);
     } else {
@@ -1888,8 +1888,8 @@ f32 func_00123358(T2195_7C0* self, s32 index)
 {
     AnimationPlayer* track = self->player;
     Track83* row = &track->anim->tracks[self->index];
-    T2196_Weight** values = row->morph;
-    T2196_Weight* object = values[index];
+    WeightCurve** values = row->morph;
+    WeightCurve* object = values[index];
     f32 result;
     object->vt->eval(object, self->owner, 0, &result, 0, track->time, track->speed);
     return result;

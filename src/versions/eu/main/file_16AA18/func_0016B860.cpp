@@ -60,7 +60,7 @@ void func_0016B860(Obj_16B860_eu* self)
         if (h != 0) {
             slot = *(Pk4_16B860*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_16B860::Draw((V24A2**)self->f520, &out, &g_gsPacketWriter);
+            Hd_16B860::Draw((Font**)self->f520, &out, &g_gsPacketWriter);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
         f32 r = func_00205400(g_elapsedTime * 10.0f);

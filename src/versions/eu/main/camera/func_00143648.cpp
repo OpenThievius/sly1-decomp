@@ -27,15 +27,15 @@ void func_00143648(Camera* self)
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(g_identityMatrix + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(g_identityMatrix + 0x20);
     UpdateCameraProjection(self);
-    self->ctl454.vt = (const Vt2173*)D_00217398;
+    self->ctl454.vt = (const CameraControllerVt*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);
-    self->ctl460.vt = (const Vt2173*)D_002173B0;
+    self->ctl460.vt = (const CameraControllerVt*)D_002173B0;
     InitTargetCameraController(&self->ctl460, self);
-    self->ctl4C0.vt = (const Vt2173*)D_002173C8;
+    self->ctl4C0.vt = (const CameraControllerVt*)D_002173C8;
     InitFrameCameraController(&self->ctl4C0, self);
-    self->ctl510.vt = (const Vt2173*)D_002173E0;
+    self->ctl510.vt = (const CameraControllerVt*)D_002173E0;
     SetCameraControllerOwner(&self->ctl510, self);
-    self->ctl520.vt = (const Vt2173*)D_002173F8;
+    self->ctl520.vt = (const CameraControllerVt*)D_002173F8;
     SetCameraControllerOwner(&self->ctl520, self);
     ResetCamera(self, 1);
 }

@@ -416,13 +416,13 @@ void func_0018F6E8(Obj_18F6E8* self);
 void func_0018F7D0(Obj_18F7D0* self);
 s32 func_0018F890(Object_18F890* self, s32 wait);
 
-void func_0018D8E0(C3C* self)
+void func_0018D8E0(ContactListObject* self)
 {
     InitChildGroupObject(self);
     self->ready = 1;
 }
 
-void func_0018D910(C3C* self)
+void func_0018D910(ContactListObject* self)
 {
     u64 mask = (u64)(s64)-0x301;
     u64 set = 0x8000;
@@ -436,7 +436,7 @@ void func_0018D910(C3C* self)
     self->flags = (self->flags & mask) | set;
 }
 
-void func_0018D978(C3C* self)
+void func_0018D978(ContactListObject* self)
 {
     UnregisterCollider(self);
     void* p = self->f6B4;
@@ -446,7 +446,7 @@ void func_0018D978(C3C* self)
     }
 }
 
-void func_0018D9B8(C3C* self, void* b, f32 x)
+void func_0018D9B8(ContactListObject* self, void* b, f32 x)
 {
     if (self->ready != 0) {
         func_00189350(&self->v150, &self->rot);
@@ -462,7 +462,7 @@ void func_0018D9B8(C3C* self, void* b, f32 x)
 
 ASM_FUNC(func_0018DA40);
 
-void func_0018DB20(C3C* self, void* in1, void* in2)
+void func_0018DB20(ContactListObject* self, void* in1, void* in2)
 {
     Frame_18DB20 f;
 
@@ -490,7 +490,7 @@ void func_0018DB20(C3C* self, void* in1, void* in2)
     }
 }
 
-s32 func_0018DC88(C3C* self, void* key)
+s32 func_0018DC88(ContactListObject* self, void* key)
 {
     if (key == self->f6E4) {
         return 1;
@@ -508,7 +508,7 @@ s32 func_0018DC88(C3C* self, void* key)
     return TestCollidersMayContact(self, key);
 }
 
-void func_0018DD50(C3C* self, void* item)
+void func_0018DD50(ContactListObject* self, void* item)
 {
     u32 n = self->count6BC;
     if (n < 4) {
@@ -517,7 +517,7 @@ void func_0018DD50(C3C* self, void* item)
     }
 }
 
-void func_0018DD78(C3C* self, s32 value)
+void func_0018DD78(ContactListObject* self, s32 value)
 {
     s32 n = self->count6D0;
     if ((u32)n < 4) {
@@ -526,7 +526,7 @@ void func_0018DD78(C3C* self, s32 value)
     }
 }
 
-void func_0018DDA0(C3C* self)
+void func_0018DDA0(ContactListObject* self)
 {
     InitContactListObject(self);
     self->gravity = D_00248D30;

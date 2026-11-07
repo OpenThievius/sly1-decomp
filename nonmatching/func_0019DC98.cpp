@@ -4,7 +4,7 @@
 //       hi(D_0026AC10) and a copy into s4 above the first call, this form hoists D_002622A8's high
 //       half instead.
 #include "common.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "globals.h"
 #include "deferred_request.h"
 

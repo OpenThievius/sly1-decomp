@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The record func_00193210(rec, a, b, c, d) fills and returns (pause_menu.cpp): five words, then
+// The loading progress record: InitLoadProgress (func_00193210(rec, a, b, c, d)) fills it, and
+// RunPendingWorldLoad (func_001E4EA8) keeps one in a 0x28-byte local and gives it to the
+// buffered stream it loads the world from as the stream's owner. The record func_00193210 fills and returns (pause_menu.cpp): five words, then
 // four words it stores one by one with swl/swr (its arguments 1 to 4 are such words too).
 // func_001E4EA8 keeps one in a 0x28-byte local. Written for this project from what retail's code
 // does (build/swarm/st3/groups.tsv, g4869 and g4870).
-#ifndef S193210_H
-#define S193210_H
+#ifndef LOAD_PROGRESS_H
+#define LOAD_PROGRESS_H
 
 #include "shapes.h"
 
-struct S193210 {
+struct LoadProgress {
     s32 f00;                // 0x00
     s32 f04;                // 0x04
     s32 f08;                // 0x08
