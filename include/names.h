@@ -84,6 +84,12 @@
 #define g_scopePool                                D_0025C270
 #define g_keyedValuePool                           D_0025C290
 #define g_payloadPool                              D_0025C2B0
+#define g_propertyRefPool                          D_0025C2D0
+#define g_vectorAPayloadCapacity                   D_0025C2F0
+#define g_matrixPayloadCapacity                    D_0025C2F4
+#define g_vectorBPayloadCapacity                   D_0025C2F8
+#define g_pairPayloadCapacity                      D_0025C2FC
+#define g_triplePayloadCapacity                    D_0025C300
 #define g_iopReplyBuffer                           D_0025C340
 #define g_iopDiscAccess                            D_0025C34C
 #define g_iopBufferIndex                           D_0025C380
@@ -260,6 +266,7 @@
 #define g_randomState                              D_0027696C
 #define g_semaphoreSlots                           D_00277138
 #define g_payloadRefCounts                         D_0027B300
+#define g_triplePayloadRefCounts                   D_0027B310
 #define g_activeListFrames                         D_0027B314
 #define g_permanentCursor                          D_002C2A14
 #define g_frontResetMark                           D_002C2A18
@@ -550,6 +557,7 @@
 #define InitScriptValuePools                       func_0011BF70
 #define ShutDownScriptValuePools                   func_0011C040
 #define InitEntryPool                              func_0011C128
+#define ShutDownEntryPool                          func_0011C1D0
 #define PopPoolFreeEntry                           func_0011C1D8
 #define TakePoolEntry                              func_0011C240
 #define GetPoolEntry                               func_0011C288
@@ -558,6 +566,7 @@
 #define ReleaseDeadPoolEntries                     func_0011C2E8
 #define GetPoolEntryPayload                        func_0011C3B8
 #define GetPoolEntryHeader                         func_0011C3C0
+#define IsPoolEntryUnmarked                        func_0011C3C8
 #define MarkPoolEntryUsed                          func_0011C3F0
 #define CopyKeyedValueChain                        func_0011C418
 #define NewKeyedValue                              func_0011C498
@@ -579,6 +588,7 @@
 #define AddRefTriplePayload                        func_0011C9E0
 #define ReleaseTriplePayload                       func_0011CA20
 #define InitPayloadPools                           func_0011CA90
+#define ShutDownPayloadPools                       func_0011CBB0
 #define InitIopCommandChannels                     func_0011CBB8
 #define PollIopCommands                            func_0011CE30
 #define IsIopReplyReady                            func_0011D078

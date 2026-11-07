@@ -592,7 +592,7 @@ D_002505C0	002505C0	24	.data.D_002505C0	src/main/001E4000.cpp
 D_002505D8	002505D8	37728	.data	src/main/file_1000C8.cpp
 D_00259938	00259938	9016	.data	src/main/script_machine.cpp
 D_0025C250	0025C250	160	.data	src/main/value.cpp
-D_0025C2F0	0025C2F0	80	.data	src/main/file_11C128.cpp
+D_0025C2F0	0025C2F0	80	.data	src/main/value_pools.cpp
 D_0025C340	0025C340	19232	.data	src/main/file_11CBB8.cpp
 D_00260E60	00260E60	16	.data	src/main/file_11E560.cpp
 D_00260E70	00260E70	544	.data	src/main/file_1233C0.cpp

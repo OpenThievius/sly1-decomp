@@ -46,22 +46,28 @@ void func_0011C1D0(void* p)
 {
 }
 
-struct Link_11C1D8 { struct Link_11C1D8* next; };
-struct Pool_11C1D8 { u8 pad0[0xC]; Link_11C1D8* free; Link_11C1D8* used; };
+// The header of every entry of an entry pool, 8 bytes before the entry's payload: the link of the
+// free or live list, and the state word the collector marks (MarkPoolEntryUsed) and the sweep tests
+// (ReleaseDeadPoolEntries).
+struct PoolEntryHeader {
+    PoolEntryHeader* next;  // 0x00: the next entry of the free or live list
+    s32 state;              // 0x04: 1 once marked, 0 when cleared (ClearPoolLiveStates)
+};
+
 extern u8 D_00259F38[];
 void func_0011AB58(void* p);
 void* func_0011C3B8(void* base);
 
-void* func_0011C1D8(Pool_11C1D8* self)
+void* func_0011C1D8(EntryPool* self)
 {
-    if (self->free == 0) {
-        CollectScriptPools(D_00259F38);
+    if (self->freeList == 0) {
+        CollectScriptPools(g_markStacks);
     }
-    Link_11C1D8* n = self->free;
+    PoolEntryHeader* n = (PoolEntryHeader*)self->freeList;
     if (n != 0) {
-        self->free = n->next;
-        n->next = self->used;
-        self->used = n;
+        self->freeList = n->next;
+        n->next = (PoolEntryHeader*)self->liveHead;
+        self->liveHead = n;
         return GetPoolEntryPayload(n);
     }
     return 0;
@@ -71,10 +77,6 @@ void* func_0011C1D8(Pool_11C1D8* self)
 extern void* func_0011C1D8(void*);
 
 
-struct Node_0011C2A0 {
-    Node_0011C2A0* next;
-    s32 state;
-};
 
 void* func_0011C240(void* self)
 {
@@ -96,7 +98,7 @@ void func_0011C2A0(EntryPool* self)
 
 void func_0011C2B0(EntryPool* self)
 {
-    Node_0011C2A0* node = (Node_0011C2A0*)self->liveHead;
+    PoolEntryHeader* node = (PoolEntryHeader*)self->liveHead;
     if (node == 0) return;
     do {
         node->state = 0;
@@ -104,18 +106,12 @@ void func_0011C2B0(EntryPool* self)
     } while (node != 0);
 }
 
-struct Node_11C2E8;
 typedef void (*Cb_11C2E8)(void* p);
-
-struct Node_11C2E8 {
-    Node_11C2E8* next;
-    s32 f4;
-};
 
 void func_0011C2E8(EntryPool* self)
 {
-    Node_11C2E8* prev = (Node_11C2E8*)&self->liveHead;
-    Node_11C2E8* cur = (Node_11C2E8*)self->liveHead;
+    PoolEntryHeader* prev = (PoolEntryHeader*)&self->liveHead;
+    PoolEntryHeader* cur = (PoolEntryHeader*)self->liveHead;
     if (cur != 0 && cur != self->liveMark) {
         prev = cur;
         for (;;) {
@@ -126,14 +122,14 @@ void func_0011C2E8(EntryPool* self)
             prev = cur;
         }
     }
-    Node_11C2E8* s2 = prev;
+    PoolEntryHeader* s2 = prev;
     cur = s2->next;
     while (cur != 0) {
-        if (cur->f4 != 0) {
+        if (cur->state != 0) {
             prev = cur;
         } else {
             prev->next = cur->next;
-            cur->next = (Node_11C2E8*)self->freeList;
+            cur->next = (PoolEntryHeader*)self->freeList;
             self->freeList = cur;
             if (self->removeCallback != 0) {
                 ((Cb_11C2E8)self->removeCallback)(GetPoolEntryPayload(cur));
@@ -144,33 +140,26 @@ void func_0011C2E8(EntryPool* self)
     self->liveMark = s2->next;
 }
 
-struct Entry_11C3B8 { u8 pad[8]; };
-
-Entry_11C3B8* func_0011C3B8(u8* base)
+void* func_0011C3B8(u8* base)
 {
-    return (Entry_11C3B8*)(base + 8);
+    return base + 8;
 }
 
-struct Entry_11C3C0 { u8 pad[8]; };
-
-Entry_11C3C0* func_0011C3C0(u8* base)
+PoolEntryHeader* func_0011C3C0(u8* base)
 {
-    return (Entry_11C3C0*)(base - 8);
+    return (PoolEntryHeader*)(base - 8);
 }
 
-struct Cell_11C3C8 { s32 pad0; s32 value; };
-Cell_11C3C8* func_0011C3C0(void);
+PoolEntryHeader* func_0011C3C0(void);
 
 s32 func_0011C3C8(void)
 {
-    return GetPoolEntryHeader()->value == 0;
+    return GetPoolEntryHeader()->state == 0;
 }
-
-struct Link_11C3C0 { s32 pad0; s32 value; };
 
 void func_0011C3F0(u8* base)
 {
-    ((Link_11C3C0*)GetPoolEntryHeader(base))->value = 1;
+    GetPoolEntryHeader(base)->state = 1;
 }
 
 extern s32 D_0025C268;
@@ -220,7 +209,7 @@ void* func_0011C508(void)
     if (p != 0) {
         func_001F5C0C(p, 0, g_vectorAPayloadPool);
     } else {
-        CollectScriptPools(D_00259F38);
+        CollectScriptPools(g_markStacks);
         p = PopZeroedFreeSlot(&g_vectorAPayloadPool);
     }
     return p;
@@ -264,7 +253,7 @@ void* func_0011C618(void)
     if (s0 != 0) {
         func_001F5C0C(s0, 0, *(u32*)g_matrixPayloadPool);
     } else {
-        CollectScriptPools(D_00259F38);
+        CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_matrixPayloadPool);
     }
     return s0;
@@ -305,7 +294,7 @@ void* func_0011C748(void)
     if (s0 != 0) {
         func_001F5C0C(s0, 0, *(u32*)g_vectorBPayloadPool);
     } else {
-        CollectScriptPools(D_00259F38);
+        CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_vectorBPayloadPool);
     }
     return s0;
@@ -343,7 +332,7 @@ void* func_0011C858(void)
     if (s0 != 0) {
         func_001F5C0C(s0, 0, *(u32*)g_pairPayloadPool);
     } else {
-        CollectScriptPools(D_00259F38);
+        CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_pairPayloadPool);
     }
     return s0;
@@ -386,7 +375,7 @@ Pool_11C968* func_0011C968(void)
     if (p) {
         func_001F5C0C(p, 0, g_triplePayloadPool[0]);
     } else {
-        CollectScriptPools(D_00259F38);
+        CollectScriptPools(g_markStacks);
         p = PopZeroedFreeSlot(g_triplePayloadPool);
     }
     return p;
@@ -398,7 +387,7 @@ extern u8* D_0027B310;
 s32 func_0011C9E0(u32 offset)
 {
     u32 n = 12;
-    u8* p = D_0027B310 + (offset - D_0062C59C) / n;
+    u8* p = g_triplePayloadRefCounts + (offset - D_0062C59C) / n;
     s32 v = *p + 1;
     *p = v;
     return v;
@@ -415,7 +404,7 @@ void func_0011CA20(u8* p)
 {
     Table_0011CA20* t = (Table_0011CA20*)((u8*)&g_triplePayloadPool);
     u32 index = ((u32)p - t->origin) / 12;
-    u8* cell = D_0027B310 + index;
+    u8* cell = g_triplePayloadRefCounts + index;
     *cell = (u8)(*cell - 1);
     if (*cell != 0) {
         return;
@@ -439,11 +428,11 @@ struct Init_11CA90 {
 
 void func_0011CA90(void)
 {
-    Init_11CA90::Load(((u8*)&g_vectorAPayloadPool), 0x10, &D_0025C2F0, &g_payloadRefCounts[0]);
-    Init_11CA90::Load(g_matrixPayloadPool, 0x40, &D_0025C2F4, &D_0027B304);
-    Init_11CA90::Load(g_vectorBPayloadPool, 0x10, &D_0025C2F8, &D_0027B308);
-    Init_11CA90::Load(g_pairPayloadPool, 0x08, &D_0025C2FC, &D_0027B30C);
-    Init_11CA90::Load(((u8*)&g_triplePayloadPool), 0x0C, D_0025C300, &D_0027B310);
+    Init_11CA90::Load(((u8*)&g_vectorAPayloadPool), 0x10, &g_vectorAPayloadCapacity, &g_payloadRefCounts[0]);
+    Init_11CA90::Load(g_matrixPayloadPool, 0x40, &g_matrixPayloadCapacity, &D_0027B304);
+    Init_11CA90::Load(g_vectorBPayloadPool, 0x10, &g_vectorBPayloadCapacity, &D_0027B308);
+    Init_11CA90::Load(g_pairPayloadPool, 0x08, &g_pairPayloadCapacity, &D_0027B30C);
+    Init_11CA90::Load(((u8*)&g_triplePayloadPool), 0x0C, g_triplePayloadCapacity, &g_triplePayloadRefCounts);
 }
 
 void func_0011CBB0(void)

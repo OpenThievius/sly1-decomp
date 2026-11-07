@@ -2503,3 +2503,13 @@ func_00118580	TransformScriptDirectionBetweenFrames	builtin: calls func_001280C0
 func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
 D_00259958	g_scriptBuiltins	the built-ins' table (r119bb0.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
 D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it
+D_0025C2D0	g_propertyRefPool	the fifth pool of value.cpp, 0x80 entries of 12 bytes (InitScriptValuePools): TakeZeroedPoolEntry takes from it, and func_001C15D8 fills one with an object and two words of a property's descriptor for a script value
+func_0011C1D0	ShutDownEntryPool	empty; ShutDownScriptValuePools calls it on each of the five entry pools InitScriptValuePools set up with InitEntryPool
+func_0011C3C8	IsPoolEntryUnmarked	returns whether the state word at +4 of a payload's entry header (GetPoolEntryHeader) is 0, the word MarkPoolEntryUsed sets to 1; DrainMarkStacks tests it before marking
+func_0011CBB0	ShutDownPayloadPools	empty; ShutDownScriptValuePools calls it where InitScriptValuePools calls InitPayloadPools
+D_0025C2F0	g_vectorAPayloadCapacity	256: the slot count InitPayloadPools gives the tag 0x16 vector pool (g_vectorAPayloadPool) and its reference counts
+D_0025C2F4	g_matrixPayloadCapacity	256: the slot count InitPayloadPools gives the tag 0x17 matrix pool and its reference counts
+D_0025C2F8	g_vectorBPayloadCapacity	64: the slot count InitPayloadPools gives the tag 0x18 vector pool and its reference counts
+D_0025C2FC	g_pairPayloadCapacity	64: the slot count InitPayloadPools gives the tag 0x19 pair pool and its reference counts
+D_0025C300	g_triplePayloadCapacity	32 (the first word of a 0x40-byte label): the slot count InitPayloadPools gives the tag 0x1A triple pool and its reference counts
+D_0027B310	g_triplePayloadRefCounts	the triple pool's reference count bytes (InitPayloadPools allocates one per slot); AddRefTriplePayload and ReleaseTriplePayload index it by (address - pool origin) / 12
