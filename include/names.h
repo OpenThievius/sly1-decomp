@@ -183,6 +183,8 @@
 #define g_modeWalkerLinks                          D_002640B0
 #define g_iopModuleNames                           D_002647A8
 #define g_startupInitializers                      D_002647C0
+#define g_surfaceFriction                          D_00264840
+#define g_surfaceBounce                            D_002648A8
 #define g_memoryCard                               D_00264A40
 #define g_backgroundJob                            D_00269990
 #define g_heapStart                                D_002699A4
@@ -1808,7 +1810,10 @@
 #define SendVif0StartupPacket                      func_00185A58
 #define SendVif1StartupPacket                      func_00185AC8
 #define RunStartupInitializers                     func_00185B38
+#define GetSurfacePairFriction                     func_00185C18
+#define GetSurfacePairBounce                       func_00185CA0
 #define FreePooledContactChain                     func_001861E8
+#define CollectEdgeContacts                        func_00186450
 #define GroupEdgesByKey                            func_001867C8
 #define FindGraphPath                              func_00186A70
 #define InitIdentityMatrix                         func_001885E0

@@ -2711,3 +2711,8 @@ func_00183C38	SetExtraObjectPropertyVectorA	copies a vector into a payload of th
 func_001841D0	RefreshConeVolumeShape	original assembly: recomputes a cone volume after any of its settings changes (SetConeVolumeMode, SetConeVolumeRange and every setter after them call it)
 func_00185A58	SendVif0StartupPacket	a startup initializer (D_00264814, run by RunStartupInitializers): sets bit 0x40 of the VIF0 channel's control word, sends the packet D_00211E10 on it, waits and clears the bit
 func_00185AC8	SendVif1StartupPacket	a startup initializer (D_00264818, run by RunStartupInitializers): sets bit 0x40 of the VIF1 channel's control word, sends the packet D_00212110 on it, waits and clears the bit
+func_00185C18	GetSurfacePairFriction	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceFriction, at least 0, scaled by 0.2 with flag 8 of g_buttonCodeFlags (func_00185D20 reads it)
+func_00185CA0	GetSurfacePairBounce	for a pair of surface kinds, the sum of their values over the sum of their weights in g_surfaceBounce, clamped to 0..1 (func_00185D20 reads it)
+func_00186450	CollectEdgeContacts	tests each of the collider's edges (pairs of indexes into its points) against the context with func_0013DFD8, appending the hits to the output and pointing each at its edge; returns their count (func_00186BA8 calls it)
+D_00264840	g_surfaceFriction	thirteen weight and value pairs, one per surface kind, that GetSurfacePairFriction combines
+D_002648A8	g_surfaceBounce	thirteen weight and value pairs, one per surface kind, that GetSurfacePairBounce combines
