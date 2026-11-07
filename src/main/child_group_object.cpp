@@ -156,7 +156,69 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s3
     }
 }
 
-INCLUDE_ASM(func_0013BA70);
+// What func_0013BA70 is given: the two sides of a contact, 0x40 bytes each (the object at +4),
+// and a vector after them.
+struct ContactSide {
+    u8 pad0[4];
+    Collider* obj;          // 0x04
+    u8 pad8[0x40 - 8];
+};
+
+struct ContactPair {
+    ContactSide side[2];    // 0x00
+    Vec02 v80;              // 0x80
+};
+
+Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* GetActiveSwitchedCollider(void);
+s32 IsObjectDescendantOf(void* a, void* b);
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* dir);
+
+void func_0013BA70(ChildGroupObject* self, ContactPair* pair, s32 which)
+{
+    Vec02 pos;
+    ColliderSpan span;
+    Vec02 dir;
+    Vec02 k;
+
+    if (self->flag60C != 0) {
+        return;
+    }
+    pos = self->v140;
+    ContactSide* side = &pair->side[1 - which];
+    Collider* obj = side->obj;
+    switch (self->f550) {
+    case 1:
+        return;
+    case 2: {
+        Collider* other = GetActiveSwitchedCollider();
+        if (other == 0) {
+            return;
+        }
+        if (IsObjectDescendantOf(obj, other) != 0) {
+            break;
+        }
+        return;
+    }
+    case 0:
+        if (FindNearestSpanObject(0, (u8*)self + 0x370, &self->v140, 1, &side->obj, &span) != 0) {
+            pos = *(Vec02*)&span.q[0];
+        }
+        break;
+    default:
+        return;
+    }
+    u128 r;
+    if (which == 0) {
+        r = Vu0::Q(pair->v80);
+    } else {
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        r = Vu0::MulX(Vu0::Q(pair->v80), Vu0::Q(k));
+    }
+    Vu0::Q(dir) = r;
+    RecordChildGroupPose(self, obj, &pos, &dir);
+    StartChildGroupDelay(self, 0.0f);
+}
 
 s32 HandleObjectEvent(Collider* self, ObjectEvent* ev);
 void RecordChildGroupPose(ChildGroupObject* self, s32 a, s32 b, Vec02* dir);
@@ -174,7 +236,6 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 }
 
 INCLUDE_ASM(func_0013BC80);
-
 extern f32 g_gameTime;
 
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta)

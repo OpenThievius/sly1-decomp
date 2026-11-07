@@ -14,6 +14,7 @@
 #include "globals.h"
 #include "pad_record.h"
 #include "effect.h"
+#include "vu0.h"
 void InitCollider(void* self);
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void InitAgent(void* self);
@@ -472,9 +473,70 @@ s32 GetNeighbourTriangle(s32 value)
     return 0;
 }
 
-INCLUDE_ASM(func_00190810);
+// A node of the binary tree over the point graph's triangles: a plane (normal and offset) and
+// the two sides. A side with its low bit set is a triangle (GetNeighbourTriangle), otherwise
+// another node.
+struct PlaneNode {
+    Vec02 normal;           // 0x00
+    f32 offset;             // 0x10
+    s32 below;              // 0x14
+    s32 above;              // 0x18
+};
 
-INCLUDE_ASM(func_001908C0);
+s32 func_00190810(PlaneNode* node, Vec02* p)
+{
+    while (node != 0) {
+        f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
+        if (d > 1e-4f) {
+            s32 t = GetNeighbourTriangle(node->above);
+            if (t != 0) {
+                return t;
+            }
+            node = (PlaneNode*)node->above;
+        } else {
+            s32 t = GetNeighbourTriangle(node->below);
+            if (t != 0) {
+                return t;
+            }
+            node = (PlaneNode*)node->below;
+        }
+    }
+    return 0;
+}
+
+s32 func_001908C0(PlaneNode* node, Vec02* p)
+{
+    while (node != 0) {
+        f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
+        if (!(d < -1.0f)) {
+            s32 t;
+            if (d > 1.0f) {
+                t = GetNeighbourTriangle(node->above);
+                if (t != 0) {
+                    return t;
+                }
+                node = (PlaneNode*)node->above;
+                continue;
+            }
+            t = GetNeighbourTriangle(node->above);
+            if (t != 0) {
+                return t;
+            }
+            t = func_001908C0((PlaneNode*)node->above, p);
+            if (t != 0) {
+                return t;
+            }
+        }
+        {
+            s32 t = GetNeighbourTriangle(node->below);
+            if (t != 0) {
+                return t;
+            }
+            node = (PlaneNode*)node->below;
+        }
+    }
+    return 0;
+}
 
 s32 ClassifyAgainstUnitRange(f32 value)
 {
