@@ -100,3 +100,6 @@ src/lib/file_1FAC00.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_1F7BE8.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/system_calls.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/file_1FA068.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_1F84D8.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_1F9690.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/file_1F9AD8.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111

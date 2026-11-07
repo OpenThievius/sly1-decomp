@@ -171,3 +171,11 @@ D_0027B0B0 = 0x0027B0B0;
 // The end of the MPEG library's .rodata: its last message (D_00250528) ends at 0x25053B; the
 // zeros after it, to 0x250580, are the padding before .data.
 D_00250540 = 0x00250540;
+// The kernel library's objects from 0x1F84D8 (src/lib/file_1F84D8.cpp, src/lib/file_1F9690.cpp,
+// src/lib/file_1F9AD8.cpp): the second "...." string (0x24EB80), read through D_002771D0 by the
+// second object, and the string "all" (0x24EB88), which no code reads, inside splat's label
+// D_0024EB78; and the first object's last word, the pointer to its "...." (0x2771C8), inside
+// D_002771C4.
+D_0024EB80 = 0x0024EB80;
+D_0024EB88 = 0x0024EB88;
+D_002771C8 = 0x002771C8;

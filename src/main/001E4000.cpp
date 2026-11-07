@@ -3782,7 +3782,6 @@ void func_00200680();
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
-extern const char D_0024EB78[3][8] = {"....", "....", "all"};
 extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
 
 // Globals typed by worker dv03, from retail's bytes and their readers.
@@ -3831,8 +3830,6 @@ extern const char D_0024E0C8[];
 extern const char D_0024E0F8[];
 extern const char D_0024E118[];
 extern const u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
-volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-s32 D_002771CC = -1;
 extern const void* const D_00247448[149] = {
     &D_00217410,
     &D_00217418,
@@ -4076,8 +4073,6 @@ s32 D_002623CC = -1;
 // size: s32 compared with 1/2 in 00148000 and 00194000
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 // size: s32 state compared/assigned in 001EC000
-// size: s32 flag set/cleared in 001F8000
-s32 D_002771B8 = 0;
 
 // Globals typed by worker dz05, from retail's bytes and their readers.
 // size: lw at offset 0 only, a 4-byte scalar of its own label
