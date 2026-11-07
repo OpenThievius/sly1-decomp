@@ -758,7 +758,42 @@ INCLUDE_RODATA(D_00249EF0);
 
 INCLUDE_ASM(func_0014B6A8);
 
-INCLUDE_ASM(func_0014BB08);
+extern const Vec02 g_unitXVector;
+
+s32 IsNumberedAgentFree(NumberedAgent* self)
+{
+    if (IsPadSelectFlagHeld(self->world) != 0) {
+        return 0;
+    }
+    switch (self->f724) {
+    case 4:
+    case 0xB:
+    case 0x10:
+        return 0;
+    }
+    PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
+    if (target == 0) {
+        return 0;
+    }
+    u128 gap = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
+    u128 gap2 = gap;
+    f32 dist = Vu0::ToFloat(Vu0::Length(gap));
+    if (self->fC20 != 0) {
+        if (D_00261C98 < dist) {
+            self->fC20 = 0;
+        }
+        return self->fC20;
+    }
+    if (dist < D_00261C94) {
+        u128 facing = Vu0::NormalizeOr(Vu0::Q(target->v150), Vu0::Q(g_unitXVector));
+        u128 facing2 = facing;
+        u128 toward = Vu0::NormalizeOr(gap2, Vu0::Q(g_unitXVector));
+        if (0.3f < Vu0::ToFloat(Vu0::Dot(facing2, toward))) {
+            self->fC20 = 1;
+        }
+    }
+    return self->fC20;
+}
 
 s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
 {

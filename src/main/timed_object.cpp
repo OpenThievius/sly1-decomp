@@ -10,6 +10,8 @@
 #include "object_link.h"
 #include "state_trigger.h"
 #include "owner_message.h"
+#include "vu0.h"
+#include "path_curve.h"
 
 void InitCollider(Collider* self);
 void UpdateCollider(Collider* self);
@@ -215,7 +217,102 @@ void LoadTimedGroup(TimedGroup* self)
     ResolveObjectLinks(self, 2, g_timedGroupLinks);
 }
 
-INCLUDE_ASM(func_001AF108);
+// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
+// (list_iter.h) and each step reads the next item through the link.
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+
+template <class T> struct NextInList {
+    static T* Of(ListFrame* it)
+    {
+        T* obj = *(T**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+void PostLoadPlacedObject(PlacedObject* self);
+void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
+void SetEffectSpawnerActiveForever(BaseObject* obj);
+void QueryValueListMask(void* owner, f32 radius, void* pos, void* out);
+
+// The curve object at 0x34 of a path curve object.
+struct GroupCurveObject {
+    u8 pad00[0x34];
+    PathCurve* curve;       // 0x34
+};
+
+// Collects the path curves and the 0x50 objects among the group's children, and widens the
+// reach (f2A8) of the group and of its parents to cover them.
+void PostLoadTimedGroup(TimedGroup* self)
+{
+    ListFrame frame;
+    Vec02 point;
+    PostLoadPlacedObject(self);
+    BeginListWalk::Of(&frame, &self->children);
+    BaseObject* node;
+    while ((node = NextInList<BaseObject>::Of(&frame)) != 0) {
+        if (IsObjectOfKind(node, 0x6E) != 0) {
+            if ((u32)self->groupCount < 16) {
+                PathCurve* curve = ((GroupCurveObject*)node)->curve;
+                if (curve->kind == 0) {
+                    s32 n = self->groupCount;
+                    self->groupCount = n + 1;
+                    TimedGroupChild* g = (TimedGroupChild*)((u8*)self + n * 0x50 + 0x5E0);
+                    g->child = node;
+                    g->riseScale = curve->lengths[curve->count - 1];
+                    s32* widest = (s32*)((u8*)self + 0xAE0);
+                    s32 w = *widest;
+                    if (!(curve->count < w)) {
+                        w = curve->count;
+                    }
+                    *widest = w;
+                    for (s32 i = 0; i < curve->count; i++) {
+                        TransformPointBetweenFrames(self, 0, (u8*)curve->points + i * 16, &point);
+                        f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(point))));
+                        if (self->f2A8 < d) {
+                            self->f2A8 = d;
+                        }
+                    }
+                }
+            }
+        } else if (IsObjectOfKind(node, 0x50) != 0) {
+            if ((u32)self->groups[0].count < 4) {
+                TimedGroupEntry* e = &self->groups[0].items[self->groups[0].count++];
+                e->obj = node;
+                e->value = node->id == 0x289;
+                SetEffectSpawnerActiveForever(node);
+            }
+        }
+    }
+    if ((self->flags & 0x3000000) != 0x2000000) {
+        QueryValueListMask(*(void**)((u8*)self->world + 0x1EC4), self->f2A8, &self->v140, (u8*)self + 0x88);
+    }
+    PlacedObject* o = self;
+    if (o->parent != 0) {
+        do {
+            f32 reach = Vu0::ToFloat(Vu0::Length(Vu0::Q(o->pos))) + o->f2A8;
+            PlacedObject* up = (PlacedObject*)o->parent;
+            if (reach <= up->f2A8) {
+                break;
+            }
+            up->f2A8 = reach;
+            if ((up->flags & 0x3000000) != 0x2000000) {
+                QueryValueListMask(*(void**)((u8*)up->world + 0x1EC4), reach, &up->v140, (u8*)up + 0x88);
+            }
+            o = (PlacedObject*)o->parent;
+        } while (o->parent != 0);
+    }
+    g_activeListFrames = frame.prev;
+}
 
 void CloneTimedGroupEntries(TimedGroup* self)
 {
@@ -613,7 +710,62 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
     return ((s32)t ^ 1) & 1;
 }
 
-INCLUDE_ASM(func_001B0C68);
+s32 IsPointInsideCollider(Collider* self, Vec02* p);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(TimedObject*, Collider*), TimedObject* self, s32* n, Collider*** list);
+s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+extern const Vec02 g_unitXVector;
+
+// Slot 72 of class 0x32: picks the state from the player's place (inside the object or not, and
+// which way it faces by the mode), writing 2 or 6 into state when nothing stands between.
+void ChooseSequencedObjectState(TimedObject* self, s32* state)
+{
+    Vec02 delta;
+    Collider** list;
+    s32 count;
+    if (g_player == 0) {
+        return;
+    }
+    if (((s32 (*)(Player*, s32))((void**)g_player->desc)[79])(g_player, 2) != 0) {
+        return;
+    }
+    Player* pl = g_player;
+    if (IsPointInsideCollider(self, &pl->v140) == 0) {
+        return;
+    }
+    if (pl == g_player && pl->f2220 == 6) {
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(pl->v140), Vu0::Q(self->v140));
+        delta.z = 0.0f;
+        Vu0::Q(delta) = Vu0::NormalizeOr(Vu0::Q(delta), Vu0::Q(g_unitXVector));
+        switch (g_player->f239C) {
+        case 3:
+            return;
+        case 0:
+            if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(delta), Vu0::Q(g_player->m110.r[0])))) {
+                return;
+            }
+            break;
+        case 1:
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(delta), Vu0::Q(g_player->m110.r[0]))) < 0.0f) {
+                return;
+            }
+            break;
+        case 2:
+            if (g_player->f2228 == 0x10) {
+                return;
+            }
+            break;
+        }
+    }
+    PushBackMemoryMark();
+    Vec02* at = &pl->v140;
+    GatherCollidersInBox(self->world, 0, at, &self->root->v140, IsSequencedObjectCandidate, self, &count, &list);
+    if (FindNearestSpanObject(1, &self->v140, at, count, list, 0) == 0) {
+        *state = self->f554 == 0 ? 2 : 6;
+    }
+    PopBackMemoryMark();
+}
 
 void SetSequencedObjectMode(SequencedObject* self, s32 value)
 {
