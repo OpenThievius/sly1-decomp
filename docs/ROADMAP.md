@@ -55,11 +55,13 @@ of code in a proved source file, PAL close behind US, and names and types well u
    building it whole, as the original was, and linking each of its sections in one piece
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
    On 2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
-   game code, 93 of the libraries, the math library and the toolchain's runtime). Many are one
-   file between two exact edges that could be several; each commit says which. What is left is
-   splitting those when evidence appears, and placing the data the 16 KiB windows still define
-   in their files: the 21 window files left (19 of game code, 2 of the libraries) hold no code,
-   but 538 of the 767 globals defined in C (205,348 bytes of 422,765) are still in them.
+   game code, 93 of the libraries, the math library and the toolchain's runtime), and the data
+   the 16 KiB windows defined is in its files too: in the proved files that read it, and in three
+   files of data only that open .rodata (`class_descriptors.cpp`, `property_registry.cpp`,
+   `global_tables.cpp`; the build proves their place, not where one ends and the next begins).
+   The one window file left, `src/lib/001F8000.cpp`, holds the constructor list the linker
+   builds. Many proved files are one file between two exact edges that could be several; each
+   commit says which. What is left is splitting those when evidence appears.
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
@@ -88,15 +90,17 @@ of code in a proved source file, PAL close behind US, and names and types well u
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
    names as macros over their address names (`config/names/`, `include/names.h`,
-   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-07, 4,559 symbols have one;
-   367 game functions do not yet (255 of them original assembly, mostly VU0 routines and
-   linker leftovers, and 112 in C whose role the code does not show yet). Eight class headers
+   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-07, 4,660 symbols have one;
+   266 game functions do not yet (255 of them original assembly, mostly VU0 routines and
+   linker leftovers, and 11 in C whose role the code does not show yet). Eight class headers
    keep their ids, and of the views matched functions declared for themselves (`Obj_XXXXXX`,
    `Sub_XXXXXX`, 2,018 of them in game code that morning) 18 are left in game code, each for a
    stated reason (a declaration retail's code needs, data only assembly reads) or a role still
-   unclear; the rest are their shared types or local types named by role. The libraries' 221
-   views (in 23 files) are not named yet: Sony's library code was outside this pass. Function
-   bodies use the readable names; declarations and definitions still use the address names.
+   unclear; the rest are their shared types or local types named by role. The libraries' 176
+   views (in 22 files) are not named yet: Sony's library code was outside this pass. The
+   sources use the readable names everywhere, in definitions and declarations too
+   (`tools/names.py apply`); the markers, comments and the tools' tables keep the address
+   names, and `tools/symbols.py` maps one to the other.
 7. **The disc's data**, each format from the code that reads it ([DISC.md](DISC.md)). How the
    game finds its data is described, and a level's textures, objects, geometry, collision,
    animations and events, and PAL's data. Next are the fields not yet named and the sound
