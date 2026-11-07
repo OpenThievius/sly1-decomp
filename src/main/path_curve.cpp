@@ -142,7 +142,7 @@ void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
     TransformMatrixByObject(self, arg, mat);
     if (count > 0) {
         do {
-            func_00188700(mat, dst, &tmp, 1.0f);
+            TransformByMatrixWithW(mat, dst, &tmp, 1.0f);
             *dst = tmp;
             dst++;
             count--;
@@ -207,7 +207,7 @@ f32 func_0014DB78(Obj_14DB78* self)
     f32 o2;
     if (self->src->vt->f4)
         self->src->vt->f4(self->src, &p, 0);
-    func_00186320(&p, self->a, self->b, &o1, &o2);
+    MeasurePointToSegment(&p, self->a, self->b, &o1, &o2);
     return o2;
 }
 
@@ -288,8 +288,8 @@ void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     } else {
         next = idx + 1;
     }
-    func_00188700(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
-    func_00188700(a2, (u8*)self->points + (next << 4), &B, 1.0f);
+    TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
+    TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), &B, 1.0f);
     C = *(Pack4_0014DE78*)a4;
     DrawProjectedLine(&A, &B, &C, a3, a5);
 }

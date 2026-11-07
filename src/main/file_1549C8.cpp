@@ -2227,7 +2227,7 @@ void func_0015A960(C60* self)
 void func_0015A9A8(C60* self, void* arg1, void* arg2)
 {
     Frame_15A9A8 f;
-    func_0018A008(0, &f.q0, self->f2EC);
+    BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
     BuildPlacedObjectTransform(self, arg2, f.m40);
     MultiplyMatrices(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];

@@ -325,10 +325,10 @@ s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5,
 void func_001879C0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
     Ent_001879C0 ents[64];
-    s32 n = func_00187260(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
+    s32 n = CollectMeshHits(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
     for (s32 i = n - 1; i >= 0; i--) {
         Ent_001879C0* e = &ents[i];
-        func_00185D20(e->f, a0, a2, e, (u8*)e + 0x10, e->b, 0, e->c, a6);
+        CreatePooledContact(e->f, a0, a2, e, (u8*)e + 0x10, e->b, 0, e->c, a6);
     }
 }
 
@@ -358,7 +358,7 @@ s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
     }
     void* p = recs[idx].p;
     func_00187B60(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
-    func_00185D20(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
+    CreatePooledContact(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
     return 1;
 }
 
@@ -377,7 +377,7 @@ s32 func_00187E88(void* a0, void* a1, void* a2)
         return 0;
     }
     func_00187B60(a0, loc.b, loc.a, &loc.fb, loc.fa);
-    func_00185D20(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
+    CreatePooledContact(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
     return 1;
 }
 

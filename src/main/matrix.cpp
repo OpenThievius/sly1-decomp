@@ -235,7 +235,7 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
     Quad16 tmp[4];
     Quad16 res[4];
 
-    func_00188B48(self + 0x30, self, tmp);
+    InvertRigidTransform(self + 0x30, self, tmp);
     MultiplyMatrices(res, arg, tmp);
     out[0] = res[0];
     out[1] = res[1];
@@ -255,7 +255,7 @@ ASM_FUNC(func_001892A0);
 struct Obj_189350;
 void func_00189350(Obj_189350* self, void* value)
 {
-    func_00189C28(self, g_unitZVector, value);
+    BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
 
 ASM_FUNC(func_00189378);

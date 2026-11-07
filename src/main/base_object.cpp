@@ -45,9 +45,7 @@ s32 func_00182FC8(void* p);
 
 void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
 
-typedef void (*VFn_183058)(void* self, void* arg);
 
-struct Obj_183058 { void* vtbl; };
 
 void func_001243E0(void* self);
 
@@ -374,8 +372,8 @@ LINKER_REMNANT(func_00183050);
 
 void* func_00183058(BaseObject* self, void* a1, s32 a2)
 {
-    Obj_183058* r = (Obj_183058*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
-    ((VFn_183058*)r->vtbl)[12](r, self);
+    BaseObject* r = (BaseObject*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
+    r->desc->m08(r, self);
     return r;
 }
 
@@ -574,7 +572,7 @@ void func_001837E0(BaseObject* self, s32 idx, s32 flag, s32* out)
         goto done;
     }
     MarkPoolLiveEnds(g_markStacks);
-    if (func_00183668(self, idx, flag, out) == 0) {
+    if (SuppressScriptEvent(self, idx, flag, out) == 0) {
         if (flag != 0) {
             BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
             AssignScriptValue(&r, &tmp);

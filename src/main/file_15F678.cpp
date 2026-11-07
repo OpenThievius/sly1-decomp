@@ -1947,7 +1947,7 @@ void func_00161AB0(u8* self, void* a1, void* a2)
 {
     FlushVertexBatch(self);
     BuildMatrixFromRotationAndTranslation(a1, a2, self);
-    func_00188B48(a1, a2, self + 0x40);
+    InvertRigidTransform(a1, a2, self + 0x40);
 }
 
 INCLUDE_ASM(func_00161B10);
@@ -2827,7 +2827,7 @@ void func_00165828(Obj_165828* self, PlacedObject* ctx)
         e->p0 = r;
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);
-            func_00188B48(&e->p0->sub140, &e->p0->sub110, &f.b);
+            InvertRigidTransform(&e->p0->sub140, &e->p0->sub110, &f.b);
             MultiplyMatrices(&f.m, &f.b, &f.a);
             e->m = f.m;
         }
@@ -2922,9 +2922,9 @@ void func_001660E8(PlacedObject* self, Par_1660E8* par)
     List_1660E8* l = (List_1660E8*)self->sub22C;
 
     if (l->count > 0) {
-        func_00188B48(&self->v140, &self->m110, &a);
+        InvertRigidTransform(&self->v140, &self->m110, &a);
         if (par != 0) {
-            func_00188B48((u8*)par + 0x30, par, &b);
+            InvertRigidTransform((u8*)par + 0x30, par, &b);
         } else {
             b = a;
         }

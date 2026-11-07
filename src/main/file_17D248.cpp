@@ -101,8 +101,8 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
     func_001ED780(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
+        TransformByMatrixWithW((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
+        TransformByMatrixWithW((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
         Node_17DE88* n = self->f480->head;
         while (n) {
             Collider* a = n->fC;

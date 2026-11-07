@@ -1276,7 +1276,7 @@ void func_0016A500(ListedCollisionPart* self)
 
 s32 func_0016A548(Collider* a0, Collider* a1)
 {
-    if ((void*)a1 == g_player && (void*)a0 == ((Player*)a1)->f23B0) {
+    if ((void*)a1 == g_player && (void*)a0 == ((Player*)a1)->heldObject) {
         return 1;
     }
     return TestCollidersMayContact(a0, a1);
@@ -1313,8 +1313,8 @@ void func_0016A5F0(Obj_16A5F0* self, s32 v)
         SetColliderAnchors(self, 3, 0, 3, 0);
         func_00189378((u8*)g_player + 0x110, 0, f.a);
         func_00189378((u8*)self + 0x110, f.c, f.b);
-        func_00188D28(f.c, f.e, f.d);
-        func_00189150(f.a, f.b, self->f224);
+        MatrixToAxisAngle(f.c, f.e, f.d);
+        MultiplyMatrices3x3(f.a, f.b, self->f224);
         TriggerScriptEvent(self, 2, 0, 0);
     }
     self->f550 = v;

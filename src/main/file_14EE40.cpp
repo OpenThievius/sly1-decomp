@@ -890,7 +890,7 @@ void func_0014F058(PooledObject* self, f32 f)
         break;
     case 4:
         if (self->delay < g_gameTime[0] - self->stateTime) {
-            if (g_player == 0 || self->parent != *(BaseObject**)((u8*)g_player + 0x23B0))
+            if (g_player == 0 || self->parent != (BaseObject*)g_player->heldObject)
                 SetPooledObjectState(self, 5);
         }
         break;
@@ -972,7 +972,7 @@ void func_0014F850(C23* self)
 void func_0014F900(C23* self)
 {
     if (g_player != 0) {
-        self->f6DC = *(s32*)((u8*)g_player + 0x24F8);
+        self->f6DC = (s32)g_player->f24F8;
     }
 }
 

@@ -185,14 +185,14 @@ s32 func_0017C428(EntryQueue* self, void* item);
 void func_0017C660(EntryQueue* self)
 {
     if (self->f40 < 0 && self->f34 > 0)
-        func_0017BCD0(self);
+        StartNextQueueEntry(self);
     while (self->f40 < self->f34) {
         Entry_17C660* entry = &((Entry_17C660*)self->buffer)[self->f40];
-        if (entry->state == 0 && !func_0017C428(self, entry))
+        if (entry->state == 0 && !CheckQueueEntryDone(self, entry))
             break;
-        func_0017BCD0(self);
+        StartNextQueueEntry(self);
     }
-    if (self->f48 && func_0017C428(self, self->f48))
+    if (self->f48 && CheckQueueEntryDone(self, self->f48))
         self->f48 = 0;
 }
 
