@@ -252,10 +252,10 @@ s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
     return 1;
 }
 
-void func_0015FCD8(C09* self, void* p);
+void func_0015FCD8(CompanionAgent* self, void* p);
 void func_001BF048(void* p);
 
-void func_001B7920(C09* self, void* p)
+void func_001B7920(CompanionAgent* self, void* p)
 {
     func_0015FCD8(self, p);
     if (p != 0) {
@@ -783,7 +783,7 @@ void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
 }
 
 
-void func_001B7100(C09* self, s32 value)
+void func_001B7100(CompanionAgent* self, s32 value)
 {
     s32 n = self->fCD4;
     if ((u32)n < 4) {
@@ -883,7 +883,7 @@ void func_001B6F50(void* self);
 s32 func_0015A448(void* host, s32 id, void* ctx);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001B7128(C09* self)
+void func_001B7128(CompanionAgent* self)
 {
     func_001C72A0(self);
     func_001B6F50(self);
@@ -904,7 +904,7 @@ void func_001B7128(C09* self)
 void func_001C7CB8(void* self);
 void func_001B7638(void* self);
 
-void func_001B7608(C09* self)
+void func_001B7608(CompanionAgent* self)
 {
     func_001C7CB8(self);
     func_001B7638(self);
@@ -915,7 +915,7 @@ struct Sub_1B7790 { VFn_1B7790* vtbl; };
 void func_001C91C8(void* self);
 void func_001BF048(void* p);
 
-void func_001B7790(C09* self)
+void func_001B7790(CompanionAgent* self)
 {
     func_001C91C8(self);
     switch (self->f724) {
@@ -939,7 +939,7 @@ typedef s32 (*VFn_1B7818)(void* self);
 
 s32 func_001CA468(void* self);
 
-s32 func_001B7818(C09* self)
+s32 func_001B7818(CompanionAgent* self)
 {
     if (func_001CA468(self) == 0) {
         return 0;
@@ -949,7 +949,7 @@ s32 func_001B7818(C09* self)
 
 void func_001C9DE0(void* self, s32 code, void* req);
 
-void func_001B78C0(C09* self, s32 code, void* req)
+void func_001B78C0(CompanionAgent* self, s32 code, void* req)
 {
     func_001C9DE0(self, code, req);
     if (code == 7) {
@@ -1059,7 +1059,7 @@ void func_001B5D28(CameraPositionedObject* self)
 void func_001C6F48(void* self);
 
 struct Ent_1B6EC8 { s32 v; s32 pad; };
-void func_001B6EC8(C09* self)
+void func_001B6EC8(CompanionAgent* self)
 {
     func_001C6F48(self);
     self->fC20 = 2000.0f;
@@ -1087,7 +1087,7 @@ void func_001B5398(CircleAnimator* p, AnimatorParams* s)
 
 extern f32 D_0026185C;
 
-s32 func_001B7860(C09* self)
+s32 func_001B7860(CompanionAgent* self)
 {
     s32 r;
     if (self->f724 == 11) {
@@ -1469,8 +1469,8 @@ typedef void (*VFn_1B6F50)(void* self);
 struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
 struct Ent_1B6F50 { s32 key; void* val; };
 extern u8 D_0021A790[];
-void* func_0015A448(Hdr_1B6F50* obj, s32 id, C09* flags);
-s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, C09* a3, s32 a4, void* a5);
+void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
+s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
 s32 func_001833F0(Elem_1B6F50* a, s32 b);
 void func_0018D608(void);
 void func_0018D6F0(void);
@@ -1478,7 +1478,7 @@ void* func_0018D658(u32 bytes);
 void* func_00121228(Hdr_1B6F50* root, s32 value, void* table);
 void func_001299E0(Hdr_1B6F50* self, void* src);
 
-void func_001B6F50(C09* self)
+void func_001B6F50(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
@@ -1544,10 +1544,10 @@ struct Target_1B7638 {
 };
 
 
-s32 func_001C96B8(C09 *self);
-s32 func_001CB578(C09 *self);
+s32 func_001C96B8(CompanionAgent *self);
+s32 func_001CB578(CompanionAgent *self);
 
-void func_001B7638(C09 *self) {
+void func_001B7638(CompanionAgent *self) {
     struct Target_1B7638 *t;
     s32 r;
     s32 res;

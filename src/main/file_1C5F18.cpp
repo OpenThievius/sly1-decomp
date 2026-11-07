@@ -153,7 +153,7 @@ void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
     if (s->f2220 == 0) {
         k = 3.1500001f;
     }
-    func_001C6AA8(s, 2, D_00274BE0, &fr.n, &fr, 0.150000006f, k);
+    FindNearestClass75Ahead(s, 2, D_00274BE0, &fr.n, &fr, 0.150000006f, k);
     f32 t;
     if (fr.n != 0) {
         f32 v = (fr.z - -50.0f) * 0.0090909088f;
@@ -208,7 +208,7 @@ void func_001C5D58(Obj_1C6E58* self);
 void func_001C6E58(Obj_1C6E58* self)
 {
     Tmp_1C6E58 t;
-    func_001C6AA8(self, 8, D_00274BF0, &t.out, t.pair, 0.25f, 1.0f);
+    FindNearestClass75Ahead(self, 8, D_00274BF0, &t.out, t.pair, 0.25f, 1.0f);
     self->f2204 = 0;
     self->f2200 = t.out;
     self->f2208 = 0;
@@ -242,7 +242,7 @@ void func_001C5D58(Obj_1C6ED0* self);
 void func_001C6ED0(Obj_1C6ED0* self)
 {
     Tmp_1C6ED0 t;
-    func_001C6AA8(self, 4, D_00274C00, &t.out, t.pair, 0.25f, 3.15f);
+    FindNearestClass75Ahead(self, 4, D_00274C00, &t.out, t.pair, 0.25f, 3.15f);
     self->f2204 = 0;
     self->f2200 = t.out;
     self->f2208 = 0;

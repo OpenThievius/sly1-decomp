@@ -204,7 +204,7 @@ void func_001C5148(void* self);
 void func_001C5118(TurningCollider* self)
 {
     StepCollider(self);
-    func_001C5148(self);
+    ApplyTurningColliderDrive(self);
 }
 
 ASM_FUNC(func_001C5148);
@@ -265,7 +265,7 @@ void func_001C53A8(void);
 
 void func_001C5388(void)
 {
-    func_001C53A8();
+    ClampColliderContactLimit();
 }
 
 void func_001C53A8(void)
@@ -285,7 +285,7 @@ void func_001C54D0(TurningCollider* self, void* b, s32 c);
 void func_001C53E0(TurningCollider* self, void* b, s32 c)
 {
     if (((VFn_1C53E0*)self->desc)[90](self)) {
-        func_001C54D0(self, b, c);
+        ResolveTurningColliderGroundContact(self, b, c);
     }
 }
 
@@ -321,7 +321,7 @@ void func_001C5C10(void* a, s32 b, s32 c, s32 d);
 
 void func_001C5BF0(TurningCollider* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
 {
-    func_001C5C10(a0, a1, a4, a5);
+    AddTurningColliderProbeContact(a0, a1, a4, a5);
 }
 
 ASM_FUNC(func_001C5C10);

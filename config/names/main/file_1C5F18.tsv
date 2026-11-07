@@ -1,0 +1,3 @@
+symbol	name	evidence
+func_001C6890	UpdatePlayerAimTarget	drops the target at 0x2200 once it is no longer attached (IsObjectAttached), resetting the mode with func_001C61E0(-1) when 0x223C is 0; then with mode 0 aims at the target (func_0019D2A8) or at the point 0x2208 (func_0019D338); UpdatePlayer calls it
+func_001C6AA8	FindNearestClass75Ahead	walks g_class75List for objects whose flags (+0x88) share the mask, measures the player's point ahead (its position plus its velocity times the lead time, plus the offset turned by its heading 0x638) against each one's segment (MeasurePointToSegment) and returns the nearest within the range with its offset; func_001C6D00, func_001C6E58 and func_001C6ED0 call it with masks 2, 8 and 4

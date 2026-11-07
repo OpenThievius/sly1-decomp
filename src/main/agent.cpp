@@ -11,7 +11,7 @@
 
 extern f32 D_0026185C[];
 
-// A quadratic in t (c[0] + t * (c[1] + t * c[2])) on 16 bytes, as in file_1C3390: the file's
+// A quadratic in t (c[0] + t * (c[1] + t * c[2])) on 16 bytes, as in hit_count_collider: the file's
 // .data starts on 16 (0x274C18 to 0x274C20 is padding after the previous file's), and 0x274C54
 // to 0x274C5F is the quadratic's own.
 void* func_001CA758(Agent* self, void* arg);
@@ -220,7 +220,7 @@ void func_001C72A0(Agent* self)
     } else {
         self->fB0C = FindFirstObjectByIdGathered(self->world, 0x101, 0x8C, self);
     }
-    func_001C5EA8(self, self->f700);
+    SetTurningColliderGravityScale(self, self->f700);
     ChangeAgentState(self, 0, 0);
     if (TestFlagTableBit(g_flagTable, self->fB10)) {
         AppendQueuedCall(self->world, (void*)func_001C7278, self, 0, 0);
@@ -1438,7 +1438,7 @@ void func_00186BA8(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
 void func_001CAD98(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     if (a0->fC04 == 0) {
-        func_001C5C10(a0, a1, a4, a5);
+        AddTurningColliderProbeContact(a0, a1, a4, a5);
     }
     if (a1 != a0->desc08()->m62(a0)) {
         if (a1->parent != 0) {

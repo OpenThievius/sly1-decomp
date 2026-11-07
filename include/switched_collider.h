@@ -467,7 +467,7 @@ struct Agent : TurningCollider {
     const Desc08* desc08() const { return (const Desc08*)desc; }
 };
 
-struct C09 : Agent {
+struct CompanionAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
     f32 fC18;               // 0xC18
@@ -873,7 +873,7 @@ struct BeatPressCollider : SwitchedCollider {
     void* f68C;             // 0x68C
 };
 
-struct C1D : SwitchedCollider {
+struct HitCountCollider : SwitchedCollider {
     s32 f610;               // 0x610
     f32 f614;               // 0x614
     u8 pad618[0x62C - 0x618];
@@ -913,7 +913,7 @@ typedef char check_SwitchedCollider[sizeof(SwitchedCollider) == 0x610 ? 1 : -1];
 typedef char check_TurningCollider[sizeof(TurningCollider) == 0x720 ? 1 : -1];
 typedef char check_Player[sizeof(Player) == 0x2BF0 ? 1 : -1];
 typedef char check_Agent[sizeof(Agent) == 0xC10 ? 1 : -1];
-typedef char check_C09[sizeof(C09) == 0xD00 ? 1 : -1];
+typedef char check_C09[sizeof(CompanionAgent) == 0xD00 ? 1 : -1];
 typedef char check_ConeAgent[sizeof(ConeAgent) == 0xC50 ? 1 : -1];
 typedef char check_KeyedConeAgent[sizeof(KeyedConeAgent) == 0xCA0 ? 1 : -1];
 typedef char check_GaugeAgent[sizeof(GaugeAgent) == 0xE50 ? 1 : -1];
@@ -933,7 +933,7 @@ typedef char check_PathFollower[sizeof(PathFollower) == 0xBB0 ? 1 : -1];
 typedef char check_ModeWalker[sizeof(ModeWalker) == 0xC10 ? 1 : -1];
 typedef char check_ModeCollider[sizeof(ModeCollider) == 0x710 ? 1 : -1];
 typedef char check_BeatPressCollider[sizeof(BeatPressCollider) == 0x690 ? 1 : -1];
-typedef char check_C1D[sizeof(C1D) == 0x760 ? 1 : -1];
+typedef char check_C1D[sizeof(HitCountCollider) == 0x760 ? 1 : -1];
 typedef char check_Desc05[sizeof(Desc05) == 0x160 ? 1 : -1];
 typedef char check_Desc06[sizeof(Desc06) == 0x170 ? 1 : -1];
 typedef char check_Desc08[sizeof(Desc08) == 0x1A0 ? 1 : -1];
