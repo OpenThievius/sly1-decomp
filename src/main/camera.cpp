@@ -854,7 +854,7 @@ s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, 
     f32 f2;
     f32 f1;
     for (i = 0; i < count; i++) {
-        total += func_0013DFD8(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
+        total += CollectTreeNodeSpans(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
     }
     total = MergeOverlappingSpans(total, recs);
     j = 0;

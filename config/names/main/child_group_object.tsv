@@ -6,6 +6,8 @@ func_0013B610	StartChildGroupObject	slot 16 of class 0x3B: after the base step w
 func_0013B708	HandleChildGroupNotification	slot 13 of class 0x3B: after the base handler, message kind 0xA aimed at itself while +0x550 is 0 starts the delay clock
 func_0013B778	UpdateChildGroupObject	original assembly; slot 17 (+0x54) of class 0x3B, the update slot (UpdatePlacedObject, UpdateMaskedCollider)
 func_0013B9D8	RunKeyedChildGroupEntry	slot 58 of class 0x3B: when active finds the entry with the given key in its table at +0x68C and passes it, its data and its value to func_00185D20
+func_0013BA70	HandleChildGroupObjectContact	class 0x3B's slot at 0x100 (inherited by three classes, StopStandIn calls it as its base), the contact slot of LatchContactObject and the Compute...ContactValue methods; it calls RecordChildGroupPose
 func_0013BBA0	HandleChildGroupObjectEvent	original assembly; slot 45 (+0xC4) of class 0x3B, the event slot (HandleTriggerZoneEvent, HandleFlaggedObjectEvent)
+func_0013BC80	RecordChildGroupPose	stores its argument at 0x670, copies the position at 0x140 to 0x610 and the frame at 0x150/0x160 to 0x650/0x660, and recomputes 0x620..0x640; the contact and event handlers and func_0013BF68 call it
 func_0013BE00	StartChildGroupDelay	stores the clock D_0026185C plus the argument in +0x554 of a class 0x3B object
 func_0013C950	GetChildGroupSoundParams	returns the pointer at the object's sound slot, setting it up with InitSoundParams first when it is 0 (as GetMaskedColliderSoundParams does)

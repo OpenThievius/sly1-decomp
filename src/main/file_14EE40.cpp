@@ -933,7 +933,7 @@ void func_0014F770(PooledHolder* self, s32 kind, void* msg)
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0x14) {
         if (msg == self->p740) {
-            func_001B6568(msg, &result);
+            GetStateWalkerTargetKey(msg, &result);
             if (result == 0x2B7) {
                 if (self->hold != 0) {
                     DestroyStateWalker(self->p740);
@@ -1010,8 +1010,8 @@ void func_0014FA88(PooledHolder* self)
     s32 st[2];
     UpdateMaskedCollider(self);
     if (self->hold == 0 && self->f6DC != 0 && self->p740 != 0) {
-        func_001B6598(self->p740, &st[0]);
-        func_001B6568(self->p740, &st[1]);
+        GetStateWalkerCurrentKey(self->p740, &st[0]);
+        GetStateWalkerTargetKey(self->p740, &st[1]);
         if (st[1] == -1) st[1] = st[0];
         if (st[0] == st[1]) {
             switch (st[0]) {
@@ -1066,7 +1066,7 @@ void func_0014FC38(PooledHolder* self)
     }
     if (self->p740 != 0) {
         TeleportStateWalker(self->p740, 0x2B7);
-        func_001B6598(self->p740, &status);
+        GetStateWalkerCurrentKey(self->p740, &status);
         if (status == 0x2B7) {
             DestroyStateWalker(self->p740);
             self->p740 = 0;
@@ -1076,16 +1076,16 @@ void func_0014FC38(PooledHolder* self)
         Held23* o = (Held23*)self->p734->f200;
         ((VFn2_0014FC38)o->vtbl[2])(o, 7);
     }
-    func_0013D278(self);
+    HandleMaskedColliderActivation(self);
 }
 
 void func_0014FCE8(PooledHolder* self, s32 code)
 {
     s32 r;
 
-    func_001B6568(self->p740, &r);
+    GetStateWalkerTargetKey(self->p740, &r);
     if (r == -1) {
-        func_001B6598(self->p740, &r);
+        GetStateWalkerCurrentKey(self->p740, &r);
     }
     if (code == r) {
         return;
@@ -1374,7 +1374,7 @@ void func_00150790(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 4);
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
             AcquirePadSelectFlag(g_currentWorld);
-            func_001365A0(&g_typedTextCaptionBox, 0);
+            SetTextPanelSubject(&g_typedTextCaptionBox, 0);
             if (self->f330 != 0) {
                 f32 f = 0.6f;
                 SetVolumeChannelFactor(9, 0, f);
@@ -1612,7 +1612,7 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
         }
         if (msg->f20 != -1) {
             s32 r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
-            func_001365A0(&g_typedTextCaptionBox, r);
+            SetTextPanelSubject(&g_typedTextCaptionBox, r);
         }
         if (msg->f24 != -1) {
             g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
@@ -1667,7 +1667,7 @@ s32 func_00151300(StepSequence* self)
         if (((Hld_151300*)&D_00271558)->f270 == self->f2F4 && ((Hld_151300*)&D_00271558)->f268 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
-        if (func_001BE810() == 0) flags &= 0xFFFFFFFE;
+        if (CheckStreamVoicePending() == 0) flags &= 0xFFFFFFFE;
     }
     if (flags & 8) {
         if (HasStreamVoice() == 0) flags &= 0xFFFFFFF7;
