@@ -60,20 +60,21 @@ struct TargetFollower : Collider {
     void* f568;             // 0x568: loaded (id 0x2F7)
     f32 f56C;               // 0x56C: the object's z less that of f568
     Sub47* f570;            // 0x570: the kind-0x8C child (slot 16)
-    u8 pad574[0x578 - 0x574];
+    f32 f574;               // 0x574: a time (func_0016DAC0, mode 1)
     s32 f578;               // 0x578: -1 at set-up
     s32 f57C;               // 0x57C: loaded (id 0x2F8)
     s32 f580;               // 0x580: loaded (id 0x2F9)
     s32 f584;               // 0x584: loaded (id 0x2FA)
     s32 f588;               // 0x588: loaded (id 0x2FB)
     s32 f58C;               // 0x58C: loaded (id 0x2FC)
-    u8 pad590[0x594 - 0x590];
+    void* f590;             // 0x590: the object it looks at (func_0016DAC0, mode 3)
     void* f594;             // 0x594: func_0011E580(0x73, ...)
     s32 f598;               // 0x598: -1 at set-up
-    u8 pad59C[0x5A0 - 0x59C];
+    f32 f59C;               // 0x59C: the clock's time when the mode changed (func_0016DAC0)
     f32 f5A0;               // 0x5A0: read by slot 28 (func_00188850)
     f32 f5A4;               // 0x5A4: slot 10 reads it from f550's entry
-    u8 pad5A8[0x5B0 - 0x5A8];
+    f32 f5A8;               // 0x5A8: FLT_MAX in mode 0
+    f32 f5AC;               // 0x5AC
     union {
         u8 sub5B0[0x28];    // 0x5B0: handed whole to func_001B9D10 by slot 28
         struct {

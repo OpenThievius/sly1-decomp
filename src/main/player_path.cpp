@@ -107,4 +107,51 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
     }
 }
 
-INCLUDE_ASM(func_001D2830);
+// The path object (+0x2208): a frame at +0x18 and a holder at +0x34 whose descriptor has the
+// two methods the player calls (slot 2 at +8 and slot 10 at +0x28).
+struct PathHolder;
+struct PathHolderDesc {
+    u8 pad00[8];
+    void (*m2)(PathHolder* self, Vec02* out, f32 t, s32 a);
+    u8 pad0C[0x28 - 0x0C];
+    void (*m10)(PathHolder* self, Vec02* in, s32 a, s32 b, s32 c, s32 d, f32* out);
+};
+struct PathHolder { PathHolderDesc* desc; };
+struct PathObject { const Desc01* desc; u8 pad04[0x14]; void* frame; u8 pad1C[0x34 - 0x1C]; PathHolder* holder; };
+
+void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
+void SetPlayerState(void* self, s32 mode, s32 count);
+
+void func_001D2830(Player* self, PathObject* path)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Vec02 local;
+    Vec02 world;
+    if ((PathObject*)self->f2208 != path) {
+        if (self->f2220 == 7) {
+            TriggerScriptEvent((void*)self->f2208, 3, 0, 0);
+            ((PathObject*)self->f2208)->desc->m18((BaseObject*)self->f2208, self);
+            TriggerScriptEvent(path, 2, 0, 0);
+            path->desc->m17((BaseObject*)path, self);
+        }
+        self->f2208 = (s32)path;
+        self->f2204 = 0;
+        self->f2200 = 0;
+        TransformPointBetweenFrames(0, path->frame, &self->v140, &pos);
+        if (path->holder->desc->m10 != 0) {
+            path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, (f32*)((u8*)self + 0x220C));
+        }
+    }
+    func_001D1630(self, path, &rot, *(f32*)((u8*)self + 0x220C));
+    self->desc02()->m1E(self, &rot);
+    if (path->holder->desc->m2 != 0) {
+        path->holder->desc->m2(path->holder, &pos, *(f32*)((u8*)self + 0x220C), 0);
+    }
+    TransformPointBetweenFrames(path->frame, self, &pos, &local);
+    Vu0::Q(local) = Vu0::Sub(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x23E0)));
+    TransformPointBetweenFrames(self, 0, &local, &world);
+    self->desc02()->m1D(self, &world);
+    SetPlayerState(self, 7, 0x17);
+}

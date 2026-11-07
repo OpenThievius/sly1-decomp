@@ -7,6 +7,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "list_iter.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
 #include "child_group_object.h"

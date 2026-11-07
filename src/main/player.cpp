@@ -352,6 +352,7 @@ INCLUDE_ASM(func_0016FD70);
 INCLUDE_RODATA(jtbl_0024A870);
 INCLUDE_ASM(func_001701B0);
 
+
 void ComputePlayerSlideRates(Player* self, Contact03* out)
 {
     f32 a;
@@ -543,10 +544,50 @@ INCLUDE_ASM(func_00171238);
 
 INCLUDE_ASM(func_001719E8);
 
-INCLUDE_ASM(func_00171C80);
+// The record of a probe the player keeps for each of its two parts (+0x1190, +0x1290) and the
+// block of the part it fills (func_00171C80).
+struct ProbeRecord { u8 pad00[4]; void* f04; u8 pad08[8]; Vec02 v10; u8 pad20[0x10]; Vec02 v30; Vec02 v40; };
+struct ProbeResult { u8 pad00[0x20]; Vec02 v20; };
+s32 FindNearestSpanObject(void* a, Vec02* from, Vec02* to, s32 count, Collider** list, void* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+
+
+s32 func_00171C80(Player* self, void* record, void* part)
+{
+    ProbeRecord* p = (ProbeRecord*)record;
+    ProbeResult* result = (ProbeResult*)part;
+    if (p->f04 == 0) {
+        return 1;
+    }
+    PushBackMemoryMark();
+    ColliderSpan span;
+    Vec02 from;
+    Vec02 to;
+    Vec02 world;
+    s32 count;
+    Collider** list;
+    TransformPointBetweenFrames(self, 0, &p->v30, &from);
+    TransformPointBetweenFrames(self, 0, &p->v40, &to);
+    GatherCollidersInBox(self->world, self->root, &from, &to, 0, 0, &count, &list);
+    s32 found = FindNearestSpanObject(0, &from, &to, count, list, &span);
+    PopBackMemoryMark();
+    if (found != 0) {
+        Vu0::Q(span.q[0]) = Vu0::Sub(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector));
+        TransformPointBetweenFrames(0, (s32)self, &span, &world);
+        Vu0::Q(result->v20) = Vu0::Sub(Vu0::Q(world), Vu0::Q(p->v10));
+        return 1;
+    }
+    result->v20 = D_00248D30;
+    if (self->f690 != 0 && p->v40.z < -85.0f) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 AimPlayerAtTarget(void* self);
-s32 func_00171C80(void* self, void* p, void* part);
+
 void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
 void ComputeObjectMotionInFrame(s32 a, s32 b, void* c, s32 d, void* e, s32 f, s32 g);
 f32 ClampToMagnitude(f32 a, f32 b);
@@ -1306,7 +1347,67 @@ void RegisterPlayer(Player* self)
     RegisterSwitchedCollider(self);
 }
 
-INCLUDE_ASM(func_00178068);
+// An object the player was queued to (+0x2BE0): a walker handle at +0x2D8, and the list of the
+// objects at +0x304 (count at +0x300) whose own walkers it sets.
+struct WalkerListObject;
+struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D4 - 0x150]; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
+void GetStateWalkerCurrentKey(void* p, s32* out);
+void GetStateWalkerTargetKey(void* p, s32* out);
+void SetStateWalkerTarget(void* p, s32 key);
+
+void func_00178068(Player* self)
+{
+    s32 state = self->f2220;
+    if (state < 0) {
+        return;
+    }
+    if (state >= 2 && state != 5) {
+        return;
+    }
+    PlacedObject* a = (PlacedObject*)self->firstActivation;
+    if (a != 0) {
+        self->firstActivation = 0;
+    } else {
+        a = (PlacedObject*)self->secondActivation;
+        if (a == 0) {
+            goto walker;
+        }
+        self->secondActivation = 0;
+    }
+    if (*(s32*)((u8*)a + 0x2D0) == 0) {
+        a->desc02()->m2F(a, 1);
+    }
+    return;
+walker:
+    {
+        WalkerHost* host = (WalkerHost*)self->walkerActivation;
+        if (host == 0) {
+            return;
+        }
+        self->walkerActivation = 0;
+        s32 cur;
+        s32 target;
+        GetStateWalkerCurrentKey(host->f2D8, &cur);
+        GetStateWalkerTargetKey(host->f2D8, &target);
+        if (cur != 0x22E) {
+            return;
+        }
+        if (target != cur && target != -1) {
+            return;
+        }
+        if (g_currentLevelRecord->f438 > 0) {
+            g_player->f26D4 = host;
+            SetPlayerState(g_player, 9, 0x1E);
+            return;
+        }
+        for (s32 i = 0; i < host->count; i++) {
+            SetStateWalkerTarget(host->list[i]->f2D4, 0x231);
+        }
+        Vec02 d;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(host->v140), Vu0::Q(g_player->v140));
+        g_player->f638 = ArctangentOfRatio(d.y, d.x);
+    }
+}
 
 // NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
 

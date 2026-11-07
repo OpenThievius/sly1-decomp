@@ -85,11 +85,15 @@ struct Ev07 {
 // One of class 0x19's four slots at 0x6B0: an object and a position.
 struct Slot19 {
     PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
-    u8 pad04[0x10 - 0x04];
+    PlacedObject* obj2;     // 0x04: the object a second link gives (func_001DA7E0 places it with this one)
+    u8 pad08[0x0C - 0x08];
+    s32 f0C;                // 0x0C: compared with PathFollower::f6A0 (func_001DA7E0)
     Vec02 v10;              // 0x10
-    u8 pad20[0x50 - 0x20];
+    Vec02 v20;              // 0x20
+    u8 pad30[0x50 - 0x30];
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
-    u8 pad54[0x60 - 0x54];
+    f32 f54;                // 0x54: an angle f50 advances by the clock's step (func_001DA7E0)
+    u8 pad58[0x60 - 0x58];
 };
 
 // A marker on class 0x19's path (sixteen at 0x874): an object (kind 0, func_001DB110) or a
@@ -300,7 +304,9 @@ struct Player : TurningCollider {
     void* f22AC;            // 0x22AC
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
-    u8 pad23A0[0x23B0 - 0x23A0];
+    void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8)
+    f32 f23A4;              // 0x23A4
+    u8 pad23A8[0x23B0 - 0x23A8];
     void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
@@ -354,7 +360,7 @@ struct Player : TurningCollider {
     s32 f2684;              // 0x2684
     f32 f2688;              // 0x2688
     s32 f268C;              // 0x268C
-    u8 pad2690[0x26A0 - 0x2690];
+    Vec02 v2690;            // 0x2690
     s32 f26A0;              // 0x26A0
     u8 pad26A4[0x26A8 - 0x26A4];
     s32 f26A8;              // 0x26A8
@@ -366,7 +372,9 @@ struct Player : TurningCollider {
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
-    u8 pad26CC[0x2718 - 0x26CC];
+    u8 pad26CC[0x26D4 - 0x26CC];
+    void* f26D4;            // 0x26D4: the object that sent the player to state 9 (func_00178068)
+    u8 pad26D8[0x2718 - 0x26D8];
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
