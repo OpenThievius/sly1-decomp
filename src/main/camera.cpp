@@ -69,7 +69,7 @@ void func_00143988(void* self);
 
 
 void func_00144938(void* self, void* a, void* b);
-void func_001493B8(T2173* p, s32 zero);
+void func_001493B8(CameraController* p, s32 zero);
 void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
 
 
@@ -150,9 +150,9 @@ struct __attribute__((aligned(16))) Quad_00143648 {
 
 void func_00182C18(BaseObject* self);
 void func_00143560(Camera* self);
-void func_00149398(T2173* self, Camera* owner);
-void func_00149660(T2173_3B0* self, Camera* owner);
-void func_0014A888(T2173_3C8* self, Camera* owner);
+void func_00149398(CameraController* self, Camera* owner);
+void func_00149660(TargetCameraController* self, Camera* owner);
+void func_0014A888(FrameCameraController* self, Camera* owner);
 void func_00143A60(Camera* self, s32 a1);
 
 extern u8 D_002483D0[];
@@ -209,13 +209,13 @@ extern f32 D_0026185C;
 struct State_00145DD8 { u8 pad[0x538]; s32 value; };
 
 
-void func_001495E8(T2173_3B0* self, s32 value);
+void func_001495E8(TargetCameraController* self, s32 value);
 
 
-s32 func_00149610(T2173_3B0* self);
+s32 func_00149610(TargetCameraController* self);
 
 
-s32 func_00149638(T2173_3B0* self);
+s32 func_00149638(TargetCameraController* self);
 
 
 void func_00144008(void* self);
@@ -323,7 +323,7 @@ void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b);
 void func_00144938(Camera* self, void* p, s32 q);
 void func_00144B70(Camera* self, Vec_144B70* arg);
 void func_00144FF8(Camera* self, PadRecord* p, s32 mode, f32* out);
-void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3);
+void func_001451F0(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3);
 void func_001455C0(Camera* self, f32* src);
 void func_001455E0(Camera* self);
 void func_001455F0(void* p);
@@ -419,15 +419,15 @@ void func_00143648(Camera* self)
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(g_identityMatrix + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(g_identityMatrix + 0x20);
     UpdateCameraProjection(self);
-    self->ctl454.vt = (const Vt2173*)D_00217398;
+    self->ctl454.vt = (const CameraControllerVt*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);
-    self->ctl460.vt = (const Vt2173*)D_002173B0;
+    self->ctl460.vt = (const CameraControllerVt*)D_002173B0;
     InitTargetCameraController(&self->ctl460, self);
-    self->ctl4C0.vt = (const Vt2173*)D_002173C8;
+    self->ctl4C0.vt = (const CameraControllerVt*)D_002173C8;
     InitFrameCameraController(&self->ctl4C0, self);
-    self->ctl510.vt = (const Vt2173*)D_002173E0;
+    self->ctl510.vt = (const CameraControllerVt*)D_002173E0;
     SetCameraControllerOwner(&self->ctl510, self);
-    self->ctl520.vt = (const Vt2173*)D_002173F8;
+    self->ctl520.vt = (const CameraControllerVt*)D_002173F8;
     SetCameraControllerOwner(&self->ctl520, self);
     ResetCamera(self, 1);
 }
@@ -587,8 +587,8 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
         self->f228 = 0;
     }
     if (self->stackCount > 0) {
-        T2173* n = self->stack[0].ctl;
-        T2173* prev = 0;
+        CameraController* n = self->stack[0].ctl;
+        CameraController* prev = 0;
         void* last = 0;
         if (n != 0) {
             do {
@@ -608,7 +608,7 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                 } else {
                     x = 0;
                 }
-                const Vt2173* vt = n->vt;
+                const CameraControllerVt* vt = n->vt;
                 if (vt->m04 != 0) {
                     PadRecord* t = (g_padRouting & 1) ? &g_padRecord : &g_blankPadRecord;
                     vt->m04(n, x, (u8*)t, dt);
@@ -774,13 +774,13 @@ LINKER_REMNANT(func_00145080);
 
 INCLUDE_ASM(func_00145088);
 
-void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
+void func_001451F0(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3)
 {
     s32 s5 = 0;
-    T2173* s4 = 0;
+    CameraController* s4 = 0;
     s32 i = 0;
-    T2173Entry* w = self->stack;
-    T2173Entry* r = w;
+    CameraControllerEntry* w = self->stack;
+    CameraControllerEntry* r = w;
     for (; i < self->stackCount; i++, r++) {
         if ((!(flags & 1) || k0 == r->key) && (!(flags & 2) || k1 == r->ctl) &&
             (!(flags & 4) || k2 == (s32)r->target) && (!(flags & 8) || k3 == r->arg)) {
@@ -788,8 +788,8 @@ void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
                 s5 = r->arg;
                 s4 = r->ctl;
             }
-            T2173* o = r->ctl;
-            Fn2173 fn = o->vt->m03;
+            CameraController* o = r->ctl;
+            CameraControllerFn fn = o->vt->m03;
             if (fn != 0) {
                 fn(o, r->arg);
             }
@@ -800,14 +800,14 @@ void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
     }
     self->stackCount = w - self->stack;
     if (s4 != 0) {
-        Fn2173 fn = s4->vt->m01;
+        CameraControllerFn fn = s4->vt->m01;
         if (fn != 0) {
             fn(s4, s5);
         }
         if (self->stackCount > 0) {
             self->f364 = g_gameTime;
-            T2173* o = self->stack[0].ctl;
-            Fn2173 fn2 = o->vt->m00;
+            CameraController* o = self->stack[0].ctl;
+            CameraControllerFn fn2 = o->vt->m00;
             if (fn2 != 0) {
                 fn2(o, self->stack[0].arg);
             }

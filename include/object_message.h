@@ -14,7 +14,7 @@ struct ObjectMessage {
         s32 kind;           // 0x00: func_0013B708, func_0013DCA8, func_001D3678
         void* p0;           // 0x00: func_001D7040
     };
-    void* target;           // 0x04: an object (ChildGroupObject in func_0013B708, TimedStateObject in func_0013DCA8, C3F in func_001D7040)
+    void* target;           // 0x04: an object (ChildGroupObject in func_0013B708, TimedStateObject in func_0013DCA8, StandIn in func_001D7040)
     s32 key;                // 0x08: func_00198EF8
 };
 

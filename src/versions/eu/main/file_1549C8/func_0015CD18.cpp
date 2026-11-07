@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: key is an unsigned 16-bit glyph, 576-line screen (468.6 limit, 0.5454 scale, 1920 offset)
-V24A2_Glyph* func_0015DAB8(V24A2* self, u16 key);
+FontGlyph* func_0015DAB8(Font* self, u16 key);
 
-f32 func_0015CD18(f32 x, f32 y, V24A2* self, u16 key, u32 color, V24A0* s)
+f32 func_0015CD18(f32 x, f32 y, Font* self, u16 key, u32 color, PacketWriter* s)
 {
-    V24A2_Glyph* e = FindFontGlyph(self, key);
+    FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;

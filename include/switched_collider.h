@@ -486,7 +486,7 @@ struct C09 : Agent {
     Slot08 fCD8[5];         // 0xCD8: fCD4 of them, resolved by slot 16 (func_001B7128)
 };
 
-struct C0A : Agent {
+struct ConeAgent : Agent {
     f32 fC10;               // 0xC10
     f32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
@@ -504,7 +504,7 @@ struct C0A : Agent {
 
 // 0x0B, the keyed cone agent: a cone agent that counts down (+0xC5C) as it moves between its six
 // key objects (FindNearestAgentKey).
-struct C0B : C0A {
+struct KeyedConeAgent : ConeAgent {
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
@@ -517,7 +517,7 @@ struct C0B : C0A {
     u8 padC94[0xCA0 - 0xC94];
 };
 
-struct C0C : Agent {
+struct GaugeAgent : Agent {
     s32 fC10;               // 0xC10
     u8 padC14[0xE00 - 0xC14];
     s32 fE00;               // 0xE00
@@ -536,7 +536,7 @@ struct C0C : Agent {
     Vec02 vE40;             // 0xE40
 };
 
-struct C0D : Agent {
+struct GaugeBarAgent : Agent {
     u8 padC10[0xC14 - 0xC10];
     s32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
@@ -546,7 +546,7 @@ struct C0D : Agent {
     u8 padC28[0xC30 - 0xC28];
 };
 
-struct C0E : Agent {
+struct SeekingAgent : Agent {
     s32 fC10;               // 0xC10: the number of fC14
     void* fC14[4];          // 0xC14: objects
     void* fC24;             // 0xC24: an object whose position slot 89 takes (func_001F3BD8)
@@ -561,25 +561,25 @@ struct C0E : Agent {
     u8 padC48[0xC50 - 0xC48];
 };
 
-struct C0F : Agent {
+struct GaugeColliderAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
     u8 padC18[0xC20 - 0xC18];
 };
 
-struct C10 : Agent {
+struct WorldListedAgent : Agent {
     Pack10 fC10;            // 0xC10
     u8 padC18[0xC20 - 0xC18];
 };
 
-struct C11 : C10 {
+struct NumberedAgent : WorldListedAgent {
     s32 fC20;               // 0xC20
     s32 fC24;               // 0xC24
     void* fC28;             // 0xC28
     s32 fC2C;               // 0xC2C
 };
 
-struct C12 : C10 {
+struct ContactAgent : WorldListedAgent {
     void* fC20;             // 0xC20
     f32 fC24;               // 0xC24
     u8 padC28[0xC30 - 0xC28];
@@ -587,7 +587,7 @@ struct C12 : C10 {
 
 // 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeBeatPressInput).
-struct C13 : Agent {
+struct TempoAgent : Agent {
     u8 padC10[0xC20 - 0xC10];
     s32 fC20;               // 0xC20
     u8 padC24[0xC34 - 0xC24];
@@ -618,7 +618,7 @@ struct C13 : Agent {
     void* fC9C;             // 0xC9C
 };
 
-struct C14 : TurningCollider {
+struct TintBlendCollider : TurningCollider {
     s32 f720;               // 0x720: the mode func_001DFBE0 sets
     f32 f724;               // 0x724: the clock when it last changed (func_001DFBE0)
     s32 f728;               // 0x728
@@ -637,7 +637,7 @@ struct C14 : TurningCollider {
     StateWalker* f75C;          // 0x75C: a handle (func_001B64D8, func_001B6628 take it)
 };
 
-struct C15 : SwitchedCollider {
+struct WalkerCollider : SwitchedCollider {
     s32 f610;               // 0x610
     s32 f614;               // 0x614
     f32 f618;               // 0x618
@@ -666,7 +666,7 @@ struct C15 : SwitchedCollider {
     u8 pad68C[0x690 - 0x68C];
 };
 
-struct C16 : SwitchedCollider {
+struct PlayerLinkedCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
     void* f618;             // 0x618
@@ -707,7 +707,7 @@ struct C17 : SwitchedCollider {
     u8 pad7E0[0x800 - 0x7E0];
 };
 
-struct C18 : SwitchedCollider {
+struct GaugeCollider : SwitchedCollider {
     void* f610;             // 0x610
     StateWalker* f614;          // 0x614: a handle (func_001B6290)
     f32 f618;               // 0x618
@@ -739,7 +739,7 @@ struct C18 : SwitchedCollider {
     u8 pad6BC[0x6C0 - 0x6BC];
 };
 
-struct C19 : SwitchedCollider {
+struct PathFollower : SwitchedCollider {
     f32 f610;               // 0x610
     f32 f614;               // 0x614
     f32 f618;               // 0x618
@@ -805,7 +805,7 @@ struct C19 : SwitchedCollider {
     u8 padB9C[0xBB0 - 0xB9C];
 };
 
-struct C1A : C19 {
+struct ModeWalker : PathFollower {
     s32 fBB0;               // 0xBB0
     f32 fBB4;               // 0xBB4
     void* fBB8;             // 0xBB8
@@ -825,7 +825,7 @@ struct C1A : C19 {
     u8 padC08[0xC10 - 0xC08];
 };
 
-struct C1B : SwitchedCollider {
+struct ModeCollider : SwitchedCollider {
     s32 f610;               // 0x610
     u8 pad614[0x618 - 0x614];
     s32 f618;               // 0x618
@@ -856,7 +856,7 @@ struct C1B : SwitchedCollider {
     s32 f70C;               // 0x70C
 };
 
-struct C1C : SwitchedCollider {
+struct BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
     u8 pad618[0x628 - 0x618];
@@ -914,25 +914,25 @@ typedef char check_TurningCollider[sizeof(TurningCollider) == 0x720 ? 1 : -1];
 typedef char check_Player[sizeof(Player) == 0x2BF0 ? 1 : -1];
 typedef char check_Agent[sizeof(Agent) == 0xC10 ? 1 : -1];
 typedef char check_C09[sizeof(C09) == 0xD00 ? 1 : -1];
-typedef char check_C0A[sizeof(C0A) == 0xC50 ? 1 : -1];
-typedef char check_C0B[sizeof(C0B) == 0xCA0 ? 1 : -1];
-typedef char check_C0C[sizeof(C0C) == 0xE50 ? 1 : -1];
-typedef char check_C0D[sizeof(C0D) == 0xC30 ? 1 : -1];
-typedef char check_C0E[sizeof(C0E) == 0xC50 ? 1 : -1];
-typedef char check_C0F[sizeof(C0F) == 0xC20 ? 1 : -1];
-typedef char check_C10[sizeof(C10) == 0xC20 ? 1 : -1];
-typedef char check_C11[sizeof(C11) == 0xC30 ? 1 : -1];
-typedef char check_C12[sizeof(C12) == 0xC30 ? 1 : -1];
-typedef char check_C13[sizeof(C13) == 0xCA0 ? 1 : -1];
-typedef char check_C14[sizeof(C14) == 0x760 ? 1 : -1];
-typedef char check_C15[sizeof(C15) == 0x690 ? 1 : -1];
-typedef char check_C16[sizeof(C16) == 0x660 ? 1 : -1];
+typedef char check_ConeAgent[sizeof(ConeAgent) == 0xC50 ? 1 : -1];
+typedef char check_KeyedConeAgent[sizeof(KeyedConeAgent) == 0xCA0 ? 1 : -1];
+typedef char check_GaugeAgent[sizeof(GaugeAgent) == 0xE50 ? 1 : -1];
+typedef char check_GaugeBarAgent[sizeof(GaugeBarAgent) == 0xC30 ? 1 : -1];
+typedef char check_SeekingAgent[sizeof(SeekingAgent) == 0xC50 ? 1 : -1];
+typedef char check_GaugeColliderAgent[sizeof(GaugeColliderAgent) == 0xC20 ? 1 : -1];
+typedef char check_WorldListedAgent[sizeof(WorldListedAgent) == 0xC20 ? 1 : -1];
+typedef char check_NumberedAgent[sizeof(NumberedAgent) == 0xC30 ? 1 : -1];
+typedef char check_ContactAgent[sizeof(ContactAgent) == 0xC30 ? 1 : -1];
+typedef char check_TempoAgent[sizeof(TempoAgent) == 0xCA0 ? 1 : -1];
+typedef char check_TintBlendCollider[sizeof(TintBlendCollider) == 0x760 ? 1 : -1];
+typedef char check_WalkerCollider[sizeof(WalkerCollider) == 0x690 ? 1 : -1];
+typedef char check_PlayerLinkedCollider[sizeof(PlayerLinkedCollider) == 0x660 ? 1 : -1];
 typedef char check_C17[sizeof(C17) == 0x800 ? 1 : -1];
-typedef char check_C18[sizeof(C18) == 0x6C0 ? 1 : -1];
-typedef char check_C19[sizeof(C19) == 0xBB0 ? 1 : -1];
-typedef char check_C1A[sizeof(C1A) == 0xC10 ? 1 : -1];
-typedef char check_C1B[sizeof(C1B) == 0x710 ? 1 : -1];
-typedef char check_C1C[sizeof(C1C) == 0x690 ? 1 : -1];
+typedef char check_GaugeCollider[sizeof(GaugeCollider) == 0x6C0 ? 1 : -1];
+typedef char check_PathFollower[sizeof(PathFollower) == 0xBB0 ? 1 : -1];
+typedef char check_ModeWalker[sizeof(ModeWalker) == 0xC10 ? 1 : -1];
+typedef char check_ModeCollider[sizeof(ModeCollider) == 0x710 ? 1 : -1];
+typedef char check_BeatPressCollider[sizeof(BeatPressCollider) == 0x690 ? 1 : -1];
 typedef char check_C1D[sizeof(C1D) == 0x760 ? 1 : -1];
 typedef char check_Desc05[sizeof(Desc05) == 0x160 ? 1 : -1];
 typedef char check_Desc06[sizeof(Desc06) == 0x170 ? 1 : -1];

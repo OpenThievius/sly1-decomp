@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The text reader func_0015DB28(reader, text, font) sets up (0015C000.cpp): the text, the
-// cursor in it, the current font and the default one, an inline font (V24A2, v24a2.h) the
+// cursor in it, the current font and the default one, an inline font (Font, font.h) the
 // text's font codes change, and four colours (0xFF808080 at set-up). func_0015DBE0 reads
 // the next character, acting on the codes in the text (~ colour, & font, ^ scale);
 // func_0015DB80, func_0015DBB8, func_0015DFF8, func_0015E1B0, func_0015E290 and func_0015E318
@@ -9,13 +9,13 @@
 // (build/swarm/st3/groups.tsv, g1818 and g1822).
 //
 // No code shows its size: the callers' frames give it 0xB0 bytes, which is what its fields
-// come to (V24A2 is 0x88 bytes).
+// come to (Font is 0x88 bytes).
 #ifndef TEXT_READER_H
 #define TEXT_READER_H
 
 #include "common.h"
 #include "shapes.h"
-#include "v24a2.h"
+#include "font.h"
 
 struct TextReader {
     union {
@@ -23,9 +23,9 @@ struct TextReader {
         u32 u00;            // 0x00
     };
     char* cur;              // 0x04: func_0015DBE0
-    V24A2* font;            // 0x08: func_0015DBE0, func_0015DFF8, func_0015E318
-    V24A2* defaultFont;      // 0x0C: the third argument; func_0015DBE0, func_0015E1B0, func_0015E290
-    V24A2 inlineFont;        // 0x10: func_0015DBE0, func_0015E318; func_0015DB28 sets its word 0x4C
+    Font* font;            // 0x08: func_0015DBE0, func_0015DFF8, func_0015E318
+    Font* defaultFont;      // 0x0C: the third argument; func_0015DBE0, func_0015E1B0, func_0015E290
+    Font inlineFont;        // 0x10: func_0015DBE0, func_0015E318; func_0015DB28 sets its word 0x4C
     s32 fontChanged;        // 0x98: func_0015DB80, func_0015DBE0, func_0015E318
     union {
         u32 colorBits;      // 0x9C: the colour characters are drawn in (func_0015DB28, func_0015DBE0)

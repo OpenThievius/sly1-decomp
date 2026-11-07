@@ -13,13 +13,13 @@
 #include "world.h"
 #include "object_pool.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "game_clock.h"
 #include "game_progress.h"
 #include "text_reader.h"
 #include "globals.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "screen_fade.h"
 #include "layout_137228.h"
 #include "texture_table.h"
@@ -41,12 +41,12 @@ struct Obj_2743D0 {
 };
 
 // The font object's calls.
-V24A2* func_0015C1C0(s32 k);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
-f32 func_0015C418(V24A2* font, void* text);
-void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(V24A2* font);
-void* func_0015DB28(void* out, void* text, V24A2* font);
+Font* func_0015C1C0(s32 k);
+void func_0015C8B8(Font* font, f32 x, f32 y);
+f32 func_0015C418(Font* font, void* text);
+void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
+void func_0015C900(Font* font);
+void* func_0015DB28(void* out, void* text, Font* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 void func_001F3C08(void* a, f32* out);
@@ -431,10 +431,10 @@ struct Out_1AD3F0 : Layout_137228 {
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
-void func_001613C0(V24A0* f, s32 a, s32 b, u64 c);
-void func_00161708(V24A0* f, u64 a, u64 b);
-void func_00161458(V24A0* f, u32 v);
-void func_001615F0(V24A0* f, s32 a, s32 b, s32 c, s32 d);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, u64 c);
+void func_00161708(PacketWriter* f, u64 a, u64 b);
+void func_00161458(PacketWriter* f, u32 v);
+void func_001615F0(PacketWriter* f, s32 a, s32 b, s32 c, s32 d);
 struct Out_1ACAA8 : Layout_137228 {
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
@@ -444,10 +444,10 @@ struct Out_1ACAA8 : Layout_137228 {
 };
 
 struct Font_1ACAA8 {
-    static f32 Advance(V24A2* f, s32 ch) { return f->vt->width((V24A2*)((u8*)f + f->vt->adj3), ch); }
-    static void Begin(V24A2* f, s32 a, void* d) { f->vt->begin((V24A2*)((u8*)f + f->vt->adj4), a, (s32)d); }
-    static void Glyph(V24A2* f, s32 ch, s32 color, void* d, f32 x, f32 y) { f->vt->draw(x, y, (V24A2*)((u8*)f + f->vt->adj6), ch, color, (s32)d); }
-    static void End(V24A2* f, s32 a, void* d) { f->vt->end((V24A2*)((u8*)f + f->vt->adj7), a, (s32)d); }
+    static f32 Advance(Font* f, s32 ch) { return f->vt->width((Font*)((u8*)f + f->vt->adj3), ch); }
+    static void Begin(Font* f, s32 a, void* d) { f->vt->begin((Font*)((u8*)f + f->vt->adj4), a, (s32)d); }
+    static void Glyph(Font* f, s32 ch, s32 color, void* d, f32 x, f32 y) { f->vt->draw(x, y, (Font*)((u8*)f + f->vt->adj6), ch, color, (s32)d); }
+    static void End(Font* f, s32 a, void* d) { f->vt->end((Font*)((u8*)f + f->vt->adj7), a, (s32)d); }
 };
 
 struct Clamp_1ACAA8 {
@@ -465,7 +465,7 @@ extern Q3_1AC0E8 D_002743C0;
 
 f32 func_001EA4B8(Q3_1AC0E8* p, s32 a1, f32 f12, f32 f13, f32 f14);
 void func_00137248(Layout_137228* out, Quad4* value);
-void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, V24A0* d);
+void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* d);
 f32 func_00205400(f32 x);
 
 struct Lerp_1AC0E8 {
@@ -495,7 +495,7 @@ void func_001AA268(ScreenElement* self)
 {
     s32 value = g_defaultFont;
     u32 flags = 0xFF808080;
-    self->font = (V24A2*)value;
+    self->font = (Font*)value;
     self->scale = 1.0f;
     self->color = flags;
     self->text[0] = 0;
@@ -1273,7 +1273,7 @@ void func_001AB980(T217D_510* self, f32 dt)
         FormatToStringBounded(self->text, 0x200, "%c%d%c%s%d", 0x54, hi, sep, (lo < 10 && !tenths) ? "0" : "", lo);
         PushFontScale(self->font, self->scale, self->scale);
         f32 w = MeasureFontString(self->font, self->text);
-        V24A2* f = self->font;
+        Font* f = self->font;
         SetScreenElementSize(self, w, (f32)f->height * f->sy);
         PopFontScale(self->font);
     }
@@ -1402,13 +1402,13 @@ Obj_2743D0 D_002743D0 = {0};
 
 void func_001AC5C0(T217D_330* self)
 {
-    const V24A2_Vt* vt;
+    const FontVt* vt;
 
     SetupScreenElementText(self);
     vt = self->font->vt;
-    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), 1.25f, 1.25f);
+    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 1.25f, 1.25f);
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_002743D0;
+        self->frame = (Font**)&D_002743D0;
         *self->frame = GetFontById(2);
     }
 }
@@ -1470,14 +1470,14 @@ Obj_2743D0 D_002743F0 = {0};
 
 void func_001AC888(T217D_380* self)
 {
-    const V24A2_Vt* vt;
+    const FontVt* vt;
 
     SetupScreenElementText(self);
     vt = self->font->vt;
-    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), 0.9f, 0.9f);
+    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 0.9f, 0.9f);
     self->color = 0xDF7F7F7Fu;
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_002743F0;
+        self->frame = (Font**)&D_002743F0;
         *self->frame = GetFontById(2);
     }
 }
@@ -1577,9 +1577,9 @@ void func_001ACAA8(T217D_380* self)
         out.Color(grey);
         out.FlagA(0);
         out.FlagB(0);
-        V24A2* o = *self->frame;
+        Font* o = *self->frame;
         if (o != 0) {
-            o->vt->drawBox((V24A2*)((u8*)o + o->vt->adj9), self->frame, &out, &g_gsPacketWriter);
+            o->vt->drawBox((Font*)((u8*)o + o->vt->adj9), self->frame, &out, &g_gsPacketWriter);
         }
     }
     Font_1ACAA8::Begin(self->font, 0, &g_gsPacketWriter);
@@ -1600,17 +1600,17 @@ Obj_2743D0 D_00274410 = {0};
 
 void func_001ACDA0(T217D_3D0* self)
 {
-    V24A2* o;
-    const V24A2_Vt* vt;
+    Font* o;
+    const FontVt* vt;
 
     SetupScreenElementText(self);
     o = GetFontById(0);
     vt = o->vt;
-    self->font = vt->clone((V24A2*)((u8*)o + vt->adj1), 1.0f, 1.0f);
+    self->font = vt->clone((Font*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->scale = 0.8f;
     self->outTime = 0.5f;
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_00274410;
+        self->frame = (Font**)&D_00274410;
         *self->frame = GetFontById(2);
     }
 }
@@ -1795,7 +1795,7 @@ void func_001AD3F0(T217D_3D0* self)
     out.FlagB(0);
     if (self->announce == 0) {
         T217D_0F0* g2 = &g_mapScreenList;
-        V24A0* s = &g_gsPacketWriter;
+        PacketWriter* s = &g_gsPacketWriter;
         f32 sc = scale;
         f32 y;
         if (g2->open != 0 && g2->current != 0 && ((Inner_1AD3F0*)g2->current)->f2D0 == 2) {
@@ -1821,13 +1821,13 @@ void func_001AD3F0(T217D_3D0* self)
 
 void func_001AD6A8(T217D_420* self)
 {
-    V24A2* o;
-    const V24A2_Vt* vt;
+    Font* o;
+    const FontVt* vt;
 
     SetupScreenElementText(self);
     o = GetFontById(2);
     vt = o->vt;
-    self->font = vt->clone((V24A2*)((u8*)o + vt->adj1), 1.0f, 1.0f);
+    self->font = vt->clone((Font*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->vt->m08(self, "B");
     self->flag = 0;
 }
@@ -1857,7 +1857,7 @@ void func_001AD7B0(T217D_420* self)
     DrawScreenElementText(self);
     f32 half = 0.5f;
     f32 sc = Cosine(WrapAngle(g_elapsedTime * 8.0f)) * half + half;
-    V24A2* h = GetFontById(1);
+    Font* h = GetFontById(1);
     f32 s2 = sc * 0.1f + half;
     PushFontScale(h, s2, s2);
     f32 w = MeasureFontString(h, (void*)"L");
@@ -1943,10 +1943,10 @@ Obj_2743D0 D_00274450 = {0};
 void func_001ADC60(T217D_470* self)
 {
     SetupScreenElementText(self);
-    V24A2* in = self->font;
-    self->font = in->vt->clone((V24A2*)((u8*)in + in->vt->adj1), D_00274448, D_0027444C);
+    Font* in = self->font;
+    self->font = in->vt->clone((Font*)((u8*)in + in->vt->adj1), D_00274448, D_0027444C);
     if (GetFontById(2) != 0) {
-        self->frame = (V24A2**)&D_00274450;
+        self->frame = (Font**)&D_00274450;
         *self->frame = GetFontById(2);
     }
     self->icon = FindAnimRecord(0x493);
@@ -1990,13 +1990,13 @@ Obj_2743D0 D_00274488 = {0};
 
 void func_001ADF28(T217D_4C0* self)
 {
-    const V24A2_Vt* vt;
+    const FontVt* vt;
 
     SetupScreenElementText(self);
     vt = self->font->vt;
-    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470.a);
+    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470.a);
     if (GetFontById(2)) {
-        self->frame = (V24A2**)&D_00274488;
+        self->frame = (Font**)&D_00274488;
         *self->frame = GetFontById(2);
     }
     s32 a1 = 0;
@@ -2098,7 +2098,7 @@ void func_001AE510(T217D_5B0* self)
     }
     PushFontScale(self->font, D_002744A8, D_002744A8);
     self->w = MeasureFontString(self->font, self->text);
-    V24A2* in = self->font;
+    Font* in = self->font;
     self->h = (f32)in->height * in->sy;
     PopFontScale(self->font);
 }
@@ -2117,7 +2117,7 @@ void func_001AE758(T217D_600* self)
     SetScreenElementSlideInTime(self, k);
     SetScreenElementSlideOutTime(self, k);
     SetScreenElementHoldTime(self, 0.0f);
-    V24A2* r = GetFontById(1);
+    Font* r = GetFontById(1);
     f32 g = D_002744AC;
     self->font = r;
     SetScreenElementScale(self, g);
