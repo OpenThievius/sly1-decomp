@@ -416,7 +416,7 @@ then_block:
     InitOwnerMessage(&loc, 0, self);
     gp = (Vt_181BC8*)g_player;
     gp = (Vt_181BC8*)g_player;
-    loc.fn = func_00181B20;
+    loc.fn = LaunchPlayerFromModeWalker;
     (void)((VFnR_181BC8)gp->vt[80])(gp, &loc);
 tail:
     loc.self = self;

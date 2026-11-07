@@ -2691,3 +2691,12 @@ func_0017FE00	CopyPointObject	slot 0x34 of class 0x80: runs CopyObjectData, keep
 func_0017FE48	StartPointObject	slot 0x50 of class 0x80: runs StartObject and, when its target id is set, finds the object of kind 0x104 with that id (FindFirstObjectById)
 D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleGroups gives the groups of kinds 3 and 4
 D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups
+func_00181658	RecomputeModeWalker	original assembly: slot 0x58 of class 0x1A
+func_00181A58	CaptureModeWalkerTarget	slot 0x124 of class 0x1A: runs func_001DAE48 and copies the position (+0x140) of its object at +0xBC0 to the output's +0x10
+func_00181A98	IsModeWalkerRequestBlocked	slot 0x13C of class 0x1A (as IsModeColliderRequestBlocked for 0x1B): 1 unless its mode +0xBB0 is 1, its accepted flag +0xBF0 is clear and func_001DDA80 does not hold for the world
+func_00181AE0	HasModeWalkerAcceptedRequest	slot 0x144 of class 0x1A: whether +0xBF0 is set
+func_00181AF0	FinishModeWalker	slot 0x150 of class 0x1A: runs func_00192C58, then SetModeWalkerMode with 1
+func_00181B20	LaunchPlayerFromModeWalker	the callback AcceptModeWalkerRequest gives the player: places it from D_00264180 through D_00264190 (func_001BC260), turns it to face the other way and sets state 4/0x2B (SetPlayerState)
+func_00181BC8	AcceptModeWalkerRequest	slot 0x140 of class 0x1A: unless its slot 79 refuses, sets +0xBF0 when HasSpareCount holds; without one and with a player, takes the player over (state 2/2, mode 3, LaunchPlayerFromModeWalker as its callback), else mode 2; then sends itself message 0x17
+func_00182470	InitC24Object	slot 0x10 of class 0x24: runs func_0013DDB8 and sets its numbers (10, 1, 3000, 1000, 0, 0.5)
+func_001824D8	StartC24Object	slot 0x50 of class 0x24: runs func_0013CE40, resolves its links (D_00264230), creates its state walker (0x36E) and a weight curve with a 0xC00-byte buffer
