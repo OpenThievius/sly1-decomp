@@ -341,7 +341,7 @@ struct Style_196330 {
     u32 f18;
     Style_196330(s32 size)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
         f8 = size;
         f14 = f10 = 0.6f;
@@ -874,14 +874,14 @@ void func_001943E8(T217D_6D0* self)
         D_0026A704 = v;
         {
             Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
-            s32 h = func_001FD7A0(D_0026A700);
+            s32 h = ConvertFloatToU32(D_0026A700);
             Reg_1943E8 ra = gs->f40;
             RegA_1943E8 rb = gs->f18;
             ra.lo = h;
             rb.lo = h;
             gs->f40 = ra;
             gs->f18 = rb;
-            s32 w = func_001FD7A0(v);
+            s32 w = ConvertFloatToU32(v);
             ra.mid = w & ~1;
             rb.mid = w & 0x7FE;
             gs->f40 = ra;
@@ -934,7 +934,7 @@ void func_001943E8(T217D_6D0* self)
         if (D_00264A58.v[0] != 1) {
             CancelPauseMenuPage(self);
         }
-        it = func_001F6880(row->f0, "&2");
+        it = FindSubstring(row->f0, "&2");
         if (it != 0) {
             it->f2 = GetCyclingGlyph();
         }
@@ -978,7 +978,7 @@ void func_001943E8(T217D_6D0* self)
             if (p->result == 0) {
                 SetPauseMenuLayerPage(self, 1, -1);
                 if (self->stage == 2) {
-                    func_00194398();
+                    StartPauseMenuExitFade();
                 }
             } else {
                 SetPauseMenuLayerPage(self, 0, 0x17);
@@ -1120,7 +1120,7 @@ void func_00194F80(T217D_6D0* self)
         cy = self->shownY * s + y0 * (1.0f - s); 
         h = hh * s; 
     }
-    pulse = func_00205400(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
+    pulse = Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
     menu = &((Menu_194F80*)&g_pauseMenuPages)[self->page];
     fade = 1.0f;
     if (self->page == 0 && D_00275BEC == 2) {
@@ -1409,7 +1409,7 @@ void func_00195958(T217D_6D0* self)
                     StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, b);
                 }
             } else {
-                func_00194398();
+                StartPauseMenuExitFade();
             }
             SetPauseMenuLayerPage(self, 0, -1);
             return;
@@ -1577,14 +1577,14 @@ void func_001961C0(T217D_6D0* self)
         break;
     case 24: {
         Gs_1961C0* g = &D_00262490;
-        s32 v = func_001FD7A0(D_0026A708);
+        s32 v = ConvertFloatToU32(D_0026A708);
         Reg_1961C0 a = g->f40;
         RegA_1961C0 b = g->f18;
         a.lo = v;
         b.lo = v;
         g->f40 = a;
         g->f18 = b;
-        s32 w = func_001FD7A0(D_0026A70C);
+        s32 w = ConvertFloatToU32(D_0026A70C);
         a.mid = w;
         b.mid = w;
         g->f40 = a;

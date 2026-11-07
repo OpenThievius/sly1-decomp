@@ -519,7 +519,7 @@ void func_001969F8(C18* self)
     s32 arr[32];
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0xD, g_gaugeColliderStartLinks);
-    self->f618 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    self->f618 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->f614 = (StateWalker*)CreateStateWalker((Any_001969F8*)self->f610, self, -1, 1);
 
     self->f664 = CreatePoseSource(self->world, self->f65C, (const T2195_Vt*)D_0021A790);
