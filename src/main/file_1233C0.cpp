@@ -1922,11 +1922,9 @@ void func_00124050(PlacedObject* self)
 
 void func_001240F8(PlacedObject* self)
 {
-    f32 v0[4];
-    f32 v1[4];
-    f32 v2[4];
-    s32 scratch[8];
-    (void)scratch;
+    Vec02 v0;
+    Vec02 v1;
+    Mat02 rot;
     RegisterObject(self);
     World* ctx = self->world;
     if (!self->parent) {
@@ -1952,15 +1950,14 @@ void func_001240F8(PlacedObject* self)
         }
     }
     if (self->f1EC) {
-        self->f1EC->vt->getPos(self->f1EC, 0.0f, (Vec02*)v0, (Vec02*)v1);
-        self->desc02()->m1D(self, (Vec02*)v0);
-        self->desc02()->m20(self, (Vec02*)v1);
+        self->f1EC->vt->getPos(self->f1EC, 0.0f, &v0, &v1);
+        self->desc02()->m1D(self, &v0);
+        self->desc02()->m20(self, &v1);
     }
     if (self->f1F0) {
-        self->f1F0->vt->getRot(self->f1F0, 0.0f, (Mat02*)v2, (Vec02*)v0);
-
-        self->desc02()->m1E(self, (Mat02*)v2);
-        self->desc02()->m21(self, (Vec02*)v0);
+        self->f1F0->vt->getRot(self->f1F0, 0.0f, &rot, &v0);
+        self->desc02()->m1E(self, &rot);
+        self->desc02()->m21(self, &v0);
     }
     if (self->flags & 0x1000000000ULL) AddCameraObject((PlacedObject*)g_camera, self);
     if (self->f284) AppendToList(&self->world->list1C00, self->f284);
