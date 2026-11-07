@@ -15,6 +15,7 @@
 #include "effect.h"
 #include "screen_element.h"
 #include "font.h"
+#include "flag_table.h"
 
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
@@ -24,10 +25,6 @@ extern u8 D_00261420[];
 void func_00124A48(void* a);
 void* func_0015A838(void* a, s32 b, s32 c, void* d);
 s32 func_00141008(void* a, s32 b);
-
-struct Obj_147ED0 {
-    void** vtbl;
-};
 
 extern s32 D_00270458;
 extern f32 D_00261860;
@@ -43,21 +40,35 @@ void func_001B6598(void* sub, s32* out);
 void* func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
 void func_00147ED0(void* self);
 
-struct Args_147EF8 { s32 flag; void* self; };
+// What a notifier tells the world's object (World::f1D60, its slot 27) or its listener (slot 31)
+// when it fires: the state and itself.
+struct StateMessage {
+    s32 state;              // 0x00
+    void* sender;           // 0x04
+};
 
-struct Obj_146D10 {
-    u8 pad0[0x50];
-    void* list;
-    u8 pad1[0x538 - 0x54];
-    u64 flags;
+// The frame of a notifier's message handler (func_00147EF8, func_00148770, func_00148E40): the
+// message it sends, and the code func_001B6598 gives it at 0x50.
+struct NotifyFrame {
+    StateMessage note;      // 0x00
+    u8 pad08[0x50 - 0x08];
+    s32 code;               // 0x50
+    u8 pad54[0x60 - 0x54];
+};
+
+// The 0x50-byte message a notifier sends its listener's slot 31 (func_00148298, func_00148888,
+// func_00148FF0): the new state and the sender.
+struct ListenerMessage {
+    s32 state;              // 0x00
+    void* sender;           // 0x04
+    u8 pad08[0x50 - 0x08];
 };
 
 s32 func_001300E8(void* node, s32 kind);
 extern u8 D_00261420[];
-struct Ptr_146340;
 void func_00123ED0(StateNotifier* self);
 void func_00152470(List01* list, StateNotifier* item);
-s32 func_00140FF8(Ptr_146340* p);
+s32 func_00140FF8(FlagTable* p);
 
 struct __attribute__((packed)) PSys_1481A0 {
     u8 pad0[0x26C];
@@ -77,27 +88,8 @@ struct Node_148CE0 {
 
 extern s32 D_0026EC58;
 s32 func_001300E8(void* node, s32 kind);
-typedef void (*VFn_148E18)(void* self, s32 arg);
-
-struct Obj_148E18 {
-    VFn_148E18* vtbl;
-};
-
-typedef void (*VFn_0014BDC8)(void* self, void* arg);
-
-struct Node_0014BDC8 {
-    VFn_0014BDC8* vtbl;
-    u8 pad0[0xC10 - 4];
-    Node_0014BDC8* next;
-};
-
-Node_0014BDC8* func_001925F0(void);
-typedef void (*VFn_148598)(void* self);
+SwitchedCollider* func_001925F0(void);
 typedef void (*VFn3_148598)(void* self, s32 a, void* b);
-
-struct VObj_148598 {
-    VFn_148598* vtbl;
-};
 
 struct VObj3_148598 {
     VFn3_148598* vtbl;
@@ -110,17 +102,9 @@ void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_00151FC8(void* p);
 void func_0018C7F8(void* p);
 extern void* D_0026EC68;
-typedef void (*VFn_148748)(void* self, s32 arg);
-
-struct Dispatch_148748 { VFn_148748* vtbl; };
-
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
-
-struct Note_148770 { s32 flag; void* owner; };
-
-struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
 
 extern f32 D_0026185C;
 void func_00152470(void* table, void* self);
@@ -128,30 +112,13 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f3
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_001E02C8(T217D_1380* self, s32 n);
 
-// The message a state notifier sends its listener's slot 31 when it fires (func_00148298,
-// func_00148888): the new state and the sender, in a 0x50-byte record built on the stack.
-struct Msg_148888 {
-    s32 value;
-    void* owner;
-    u8 pad0[0x50 - 8];
-};
-
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
 void func_00148E18(void* self);
 
-struct Note_148E40 { s32 flag; void* owner; };
-
-struct Frame_148E40 { Note_148E40 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
-
 extern s32 D_00270458;
 extern f32 D_00261860;
-
-struct Msg_148FF0 {
-    s32 kind;
-    void* owner;
-};
 
 extern void* D_00261B60[28];
 extern u8 D_00261420[];
@@ -161,15 +128,8 @@ void func_00141040(void* table, s32 v);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00148F80(void* self);
 
-struct Frame_148FF0 {
-    Msg_148FF0 msg;
-    u8 pad008[0x50 - 0x008];
-};
-
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern u8 D_0026EC60[];
-
-struct __attribute__((aligned(16))) Quad_1493C8 { s32 a, b, c, d; };
 
 extern u8 D_00261990[];
 extern u8 D_002483D0[];
@@ -342,7 +302,7 @@ void func_00146340(StateNotifier* self)
     self->state = self->f2DC = -1;
     InitPlacedObject(self);
     AppendToList(&self->world->list1C54, self);
-    s32 v = TakeFlagTableIndex((Ptr_146340*)g_flagTable);
+    s32 v = TakeFlagTableIndex((FlagTable*)g_flagTable);
     self->f37C = v;
     self->tint[2] = 0x10;
     self->tint[1] = 0x10;
@@ -387,16 +347,16 @@ void func_00146470(StateNotifier* self)
 
 ASM_FUNC(func_00146518);
 
-s32 func_00146D10(void* unused, Obj_146D10* self)
+s32 func_00146D10(void* unused, Collider* self)
 {
     u64 bit = 0x8000;
     bit <<= 28;
-    if (self->flags & bit) {
+    if (self->flags538 & bit) {
         return 0;
     }
-    if (IsObjectOfKind(self->list, 5) != 0 || IsObjectOfKind(self->list, 0x27) != 0 ||
-        IsObjectOfKind(self->list, 0x3B) != 0 || IsObjectOfKind(self->list, 0x40) != 0 ||
-        IsObjectOfKind(self->list, 0x2E) != 0) {
+    if (IsObjectOfKind(self->root, 5) != 0 || IsObjectOfKind(self->root, 0x27) != 0 ||
+        IsObjectOfKind(self->root, 0x3B) != 0 || IsObjectOfKind(self->root, 0x40) != 0 ||
+        IsObjectOfKind(self->root, 0x2E) != 0) {
         return 0;
     }
     return 1;
@@ -440,26 +400,24 @@ void func_00147E40(TimeRangeNotifier* self)
     self->timeMax = 10.0f;
 }
 
-void func_00147ED0(Obj_147ED0* self)
+void func_00147ED0(TimeRangeNotifier* self)
 {
-    ((void (*)(void*, s32))self->vtbl[51])(self, 2);
+    self->desc02()->m2F(self, 2);
 }
 
 void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target)
 {
-    Args_147EF8 args;
-    s32 code;
-    u8 pad[0x40];
+    NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, target);
     if (kind != 0x14) return;
     if (target != self->f2E8) return;
-    func_001B6598(target, &code);
-    if (code != 0x263) return;
+    func_001B6598(target, &fr.code);
+    if (fr.code != 0x263) return;
     BaseObject* obj = self->world->f1D60;
     if (obj != 0) {
-        args.flag = 1;
-        args.self = self;
-        obj->desc->m1B(obj, &args);
+        fr.note.state = 1;
+        fr.note.sender = self;
+        obj->desc->m1B(obj, &fr.note);
     }
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteTimeRangeNotifier, self, 0, 0);
 }
@@ -570,9 +528,9 @@ void func_00148298(TimeRangeNotifier* self, s32 mode)
                 f32 z = 0.0f;
                 StartSoundEffect(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
                 if (s->listener != 0) {
-                    Msg_148888 msg;
-                    msg.value = 1;
-                    msg.owner = self;
+                    ListenerMessage msg;
+                    msg.state = 1;
+                    msg.sender = self;
                     s->listener->vtbl[31](s->listener, &msg);
                 }
                 mode = 2;
@@ -676,14 +634,14 @@ void func_00148718(DeadlineNotifier* self)
     g_deadlineNotifier = self;
 }
 
-void func_00148748(Dispatch_148748* self)
+void func_00148748(DeadlineNotifier* self)
 {
-    self->vtbl[51](self, 2);
+    self->desc02()->m2F(self, 2);
 }
 
 void func_00148770(DeadlineNotifier* self, s32 kind, void* msg)
 {
-    Frame_148770 fr;
+    NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
@@ -691,8 +649,8 @@ void func_00148770(DeadlineNotifier* self, s32 kind, void* msg)
     if (fr.code != 0x263) return;
     BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
-        fr.note.flag = 1;
-        fr.note.owner = self;
+        fr.note.state = 1;
+        fr.note.sender = self;
         dev->desc->m1B(dev, &fr.note);
     }
     AppendQueuedCall(self->world, (void*)CompleteDeadlineNotifier, self, 0, 0);
@@ -707,14 +665,14 @@ void func_00148828(DeadlineNotifier* self)
 
 void func_00148888(DeadlineNotifier* self, s32 mode)
 {
-    Msg_148888 msg;
+    ListenerMessage msg;
     if (self->state == mode) return;
     if (mode == 1) {
         SetBestTimeState(&g_timerCaption, 2);
         StateListener* dev = self->listener;
         if (dev != 0) {
-            msg.value = mode;
-            msg.owner = self;
+            msg.state = mode;
+            msg.sender = self;
             dev->vtbl[31](dev, &msg);
         }
         mode = 2;
@@ -807,14 +765,14 @@ void func_00148D90(CountdownNotifier* self)
     self->timeMax = 6.0f;
 }
 
-void func_00148E18(Obj_148E18* self)
+void func_00148E18(CountdownNotifier* self)
 {
-    self->vtbl[51](self, 2);
+    self->desc02()->m2F(self, 2);
 }
 
 void func_00148E40(CountdownNotifier* self, s32 kind, void* msg)
 {
-    Frame_148E40 fr;
+    NotifyFrame fr;
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
@@ -822,8 +780,8 @@ void func_00148E40(CountdownNotifier* self, s32 kind, void* msg)
     if (fr.code != 0x263) return;
     BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
-        fr.note.flag = 1;
-        fr.note.owner = self;
+        fr.note.state = 1;
+        fr.note.sender = self;
         dev->desc->m1B(dev, &fr.note);
     }
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteCountdownNotifier, self, 0, 0);
@@ -888,10 +846,10 @@ one_case:
         SetFlagTableBit(g_flagTable, self->f37C);
         StartSoundEffect(0x69, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         if (self->listener != 0) {
-            Frame_148FF0 fr;
-            fr.msg.kind = 1;
-            fr.msg.owner = self;
-            self->listener->vtbl[31](self->listener, &fr.msg);
+            ListenerMessage fr;
+            fr.state = 1;
+            fr.sender = self;
+            self->listener->vtbl[31](self->listener, &fr);
         }
         mode = 2;
     }

@@ -10,8 +10,7 @@ void func_00148598(SaveNotifier* self, s32 mode)
             fl->flags = bits | 2;
             g_currentLevelRecord->f438++;
         }
-        VObj_148598* vo = (VObj_148598*)&D_0026CBC8;
-        vo->vtbl[14](vo);
+        D_0026CBC8.vt->m14(&D_0026CBC8);
         void* r = (void*)GetActiveSwitchedCollider();
         if (r != 0) {
             ((VObj3_148598*)r)->vtbl[82](r, 0, self);
