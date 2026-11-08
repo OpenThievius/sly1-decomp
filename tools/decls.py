@@ -126,8 +126,9 @@ def result_uses(path=None):
     return out
 
 
-def problems(uses=None):
-    """[(file, line, name, declared, evidence)] of the declarations the evidence contradicts."""
+def problems(uses=None, near_misses=False):
+    """[(file, line, name, declared, evidence)] of the declarations the evidence contradicts; with
+    near_misses, the declarations in nonmatching/ too (a wrong return type there moves registers)."""
     uses = result_uses() if uses is None else uses
     decls, defined = [], {}
     for path in source_files():
@@ -135,6 +136,12 @@ def problems(uses=None):
             if definition and "versions" not in path.parts:
                 defined.setdefault(name, kind)
             decls.append((path, line, name, kind, definition))
+    if near_misses:
+        # A near miss's declarations of the functions it calls (its own definition is the attempt).
+        for path in sorted((ROOT / "nonmatching").rglob("*.cpp")):
+            for name, kind, line, definition in signatures(path.read_text()):
+                if not definition:
+                    decls.append((path, line, name, kind, definition))
     out = []
     for path, line, name, kind, definition in decls:
         evidence = []
@@ -154,8 +161,9 @@ def problems(uses=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--names", action="store_true", help="only the functions, one per line")
+    parser.add_argument("--near-misses", action="store_true", help="also the declarations in nonmatching/")
     args = parser.parse_args(argv)
-    rows = problems()
+    rows = problems(near_misses=args.near_misses)
     if args.names:
         for name in sorted({r[2] for r in rows}):
             print(name)
