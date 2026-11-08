@@ -1467,7 +1467,34 @@ f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self
     return WrapAngle(f12 + r);
 }
 
-INCLUDE_ASM(func_001EA818);
+// from moved towards to by the ramp's step over the distance between them (limit the ramp's
+// third value), the velocity stored to vel when it is given; to itself, and a zero velocity,
+// when the two are nearer than 1e-4. The vectors are Vu0::Vec values: each inline call copies
+// the difference into a pseudo of its own, so retail's difference lives in the frame across the
+// call and its copy in vf3 is caller-saved, and the limit comes before the ramp in the prototype
+// as the other callers have it: retail moves it to $f14 first.
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel)
+{
+    f32 step;
+    Vu0::Vec f;
+    Vu0::Vec t;
+    f.q = from;
+    t.q = to;
+    Vu0::Vec d;
+    d = Vu0::Sub(t, f);
+    f32 len = Vu0::ToFloat(Vu0::Length(d));
+    if (0.0001f < len) {
+        f32 travel = ApproachValueWithRamp(0.0f, len, limit, ramp, &step);
+        if (vel != 0) {
+            *(Vu0::Vec*)vel = Vu0::MulX(d, Vu0::Vec::Scalar(step / len));
+        }
+        return Vu0::MulAddX(f, d, Vu0::Vec::Scalar(travel / len)).q;
+    }
+    if (vel != 0) {
+        *vel = D_00248D30;
+    }
+    return to;
+}
 
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, f32* angle, f32* axis);
