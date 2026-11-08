@@ -657,6 +657,19 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   the rotation family (func_00172078, func_001A3730): a candidate for
   include/mul_rotation.h.
 
+- **A store at the local's own address.** Vu0::Q and Vu0::Set both take the
+  local by reference; after inlining, its address can sit in a pseudo that CSE
+  reuses for a later `&v` passed to a call, costing a saved register and 16
+  bytes of frame. `*(u128*)&v = x` at the use addresses the frame directly, as
+  retail's fresh `addiu a1, sp, n` shows (four functions of the size pass).
+- **A matrix's rows read as a struct alias the stack temporaries.**
+  `*(const Vu0::Vec*)&m.r[i]` makes stores to stack temporaries alias the rows,
+  which brings back retail's reloads of the rows after each product (the
+  scalar-against-struct rule of "Reloads and stores").
+- **Block-local variables per switch case.** A function-scope variable shared
+  across cases ties each case to one register; retail's per-case registers come
+  from variables local to each case.
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it

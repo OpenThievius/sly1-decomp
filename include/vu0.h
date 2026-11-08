@@ -56,7 +56,11 @@ struct Vu0 {
     // v = x, stored where v is. Q(v) = x stores through the address Q returns, held in a
     // register; when the local is also passed by address after a call, CSE keeps that address
     // in a callee-saved register, where retail forms it again (addiu a1, sp, n) for the call.
-    // Set's store is addressed from the frame and leaves nothing to keep (func_001BC828).
+    // Set's store is addressed from the frame and leaves nothing to keep in func_001BC828, but
+    // Set takes v by reference too: after inlining, the address can sit in a pseudo CSE reuses for
+    // a later &v passed to a call (a saved register, 16 more bytes of frame). Writing
+    // `*(u128*)&v = x` at the use addresses the frame directly and gives retail's fresh addiu
+    // (func_00126DE8, func_0015BD48, func_0015AF50, func_00189D38).
     template <class T> static void Set(T& v, u128 x) { *(u128*)&v = x; }
 
     // (0, 0, 0, 0): vsub.xyzw r, vf0, vf0.
