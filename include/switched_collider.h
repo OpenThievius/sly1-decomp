@@ -898,15 +898,16 @@ struct ModeWalker : PathFollower {
     void* fBB8;             // 0xBB8
     StateWalker* fBBC;          // 0xBBC: a handle (func_001B6290)
     void* fBC0;             // 0xBC0
-    u8 padBC4[0xBC8 - 0xBC4];
+    void* fBC4;             // 0xBC4: turned to the camera's side (func_00181078)
     void* fBC8;             // 0xBC8
     void* fBCC;             // 0xBCC
     void* fBD0;             // 0xBD0
-    u8 padBD4[0xBF0 - 0xBD4];
+    u8 padBD4[0xBE0 - 0xBD4];
+    Vec02 vBE0;             // 0xBE0
     s32 fBF0;               // 0xBF0
     f32 fBF4;               // 0xBF4
     f32 fBF8;               // 0xBF8
-    u8 padBFC[0xC00 - 0xBFC];
+    f32 fBFC;               // 0xBFC: the clock when the button was pressed (func_00181078)
     s32 fC00;               // 0xC00
     void* fC04;             // 0xC04
     PlacedObject* fC08;     // 0xC08: the object func_00181658 turns to follow the path's frame
