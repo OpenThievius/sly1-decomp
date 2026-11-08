@@ -19,7 +19,7 @@ struct FlagTable {
     s32 nextIndex;          // 0x004: the last index TakeFlagTableIndex gave out (RestoreFlagTableSnapshot clears it)
     FlagBits live;          // 0x008: the flags (TestFlagTableBit reads bit n at 0xC + n / 8)
     s32 changed;            // 0x20C: set when a bit changes; SaveFlagTableSnapshot and RestoreFlagTableSnapshot clear it
-    u8 pad210[0x10];        // 0x210
+    f32 point[4] __attribute__((aligned(16)));  // 0x210: where the last flag was raised (func_00141690), FLT_MAX when cleared
     FlagBits saved;         // 0x220: the snapshot
     s32 fadeA;              // 0x424: the two words SaveFlagTableSnapshot keeps for StartScreenFadeFromFlagTable
     s32 fadeB;              // 0x428

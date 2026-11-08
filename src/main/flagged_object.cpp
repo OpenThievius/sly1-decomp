@@ -8,6 +8,7 @@
 #include "object_event.h"
 #include "screen_fade.h"
 #include "flag_table.h"
+#include "vu0.h"
 
 // The file's .rodata: the FLT_MAX constants of its two assembly functions.
 extern const f32 D_00249E3C = 3.4028235e+38f;
@@ -298,7 +299,43 @@ void CopyFlaggedObject(FlaggedObject* self)
     }
 }
 
-INCLUDE_ASM(func_00141690);
+extern s32 D_0026EC58;
+void UpdateCollider(Collider* self);
+PlacedObject* GetActiveSwitchedCollider();
+void GetObjectWorldPosition(void* obj, f32* out);
+void RaiseObjectFlag(FlaggedObject* self);
+
+void UpdateFlaggedObject(FlaggedObject* self)
+{
+    UpdateCollider(self);
+    if (D_0026EC58 >= 2) {
+        self->desc->m03(self);
+        return;
+    }
+    PlacedObject* player = GetActiveSwitchedCollider();
+    if (player == 0) {
+        return;
+    }
+    FlagTable* table = (FlagTable*)g_flagTable;
+    if (TestFlagTableBit(table, self->flagIndex)) {
+        if (table->changed == 0) {
+            return;
+        }
+        u128 d = Vu0::Sub(Vu0::Q(table->point), Vu0::Q(player->v140));
+        if (Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) < 1000.0f) {
+            return;
+        }
+        Vu0::Q(table->point) = Vu0::FromFloats(D_00249E40, D_00249E40, D_00249E40);
+    }
+    for (s32 i = 0; i < self->countB; i++) {
+        void* obj = self->objsB[i];
+        if (TestPointAgainstObjectShape((ObjectGatherer*)obj, &player->v140)) {
+            GetObjectWorldPosition(obj, (f32*)g_flagTableSaved);
+            RaiseObjectFlag(self);
+            break;
+        }
+    }
+}
 
 extern u8 g_padRecord[];
 

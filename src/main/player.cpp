@@ -419,6 +419,7 @@ void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
 
 void SetPlayerState(void* self, s32 mode, s32 count);
 void func_001C61E0(void* self, s32 arg);
+void func_00128598(void* self, s32 a, s32 b, f32* heading, s32 c, f32* speed, f32 dt, f32 h);
 void RunPlayerCallback(void* self);
 
 void ApplyPendingPlayerStateRequest(Player* self)
@@ -1082,8 +1083,44 @@ INCLUDE_ASM(func_00173888);
 INCLUDE_RODATA(jtbl_0024AB00);
 INCLUDE_ASM(func_00174808);
 
-INCLUDE_RODATA(jtbl_0024AB40);
-INCLUDE_ASM(func_00174E20);
+void func_00174E20(Player* self)
+{
+    switch (self->f2220) {
+    case 3:
+        SetPlayerState(self, 2, 2);
+        break;
+    case 0xD:
+        SetPlayerState(self, 0xD, 0x38);
+        break;
+    }
+    s32 state = self->f2220;
+    func_001C61E0(self, -1);
+    switch (state) {
+    case 2:
+    case 3:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+        break;
+    case 4:
+    case 12:
+        Vu0::Q(self->v640) = Vu0::Zero();
+        break;
+    default: {
+        f32 heading;
+        f32 speed;
+        state = 0;
+        func_00128598(self, 0, 0, &heading, 0, &speed, g_frameDt[0], self->f638);
+        if (speed > 0.0f) {
+            state = 1;
+        }
+        self->f638 = heading;
+        Vu0::Q(self->v640) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
+        SetPlayerState(self, state, -1);
+    }
+    }
+}
 
 
 void func_001C4D60(Player* self, void* a1, s32 zero);

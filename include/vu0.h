@@ -152,6 +152,73 @@ struct Vu0 {
         return r;
     }
 
+    // The y of a vector in a GPR as a float: prot3w r, a (the words turned to y, z, x, w).
+    // The vector goes in as "r", so the qmfc2 (or lq) that brings it to a GPR is the
+    // compiler's, made once and shared with the reads of the other lanes (ToFloatMoved reads
+    // x). The float comes out of the GPR ("=r"): the mtc1 to an FPR is the compiler's, a
+    // reload whose GPR is one the values live there leave free (func_001B9940, whose a0 an
+    // f32 or u128 pseudo of the caller's would take as v0).
+    static f32 ToFloatY(u128 a)
+    {
+        f32 r;
+        __asm__("prot3w %0, %1" : "=r"(r) : "r"(a));
+        return r;
+    }
+
+    // The z of a vector in a GPR as a float: pextuw r, $zero, a (z, 0, w, 0), as ToFloatY.
+    static f32 ToFloatZ(u128 a)
+    {
+        f32 r;
+        __asm__("pextuw %0, $0, %1" : "=r"(r) : "r"(a));
+        return r;
+    }
+
+    // Three rows of a 3x3 matrix, as a value (Transpose returns one).
+    struct __attribute__((aligned(16))) Rows {
+        u128 r[3];
+    };
+
+    // The transpose of a 3x3 matrix (any 16-aligned object whose first three quadwords are
+    // the rows), its rows' w zero, built in GPRs as the 4x4 transpose with a zero fourth row:
+    // the rows loaded with lq (the compiler's), then pextlw/pextuw of rows 0 and 1 and of row
+    // 2 with $zero, then pcpyld/pcpyud of those into the three columns. The two steps are two
+    // sequences, as retail schedules other code between them (func_00188B48's -1.0); the
+    // result is returned in a local of its own, stored to the stack as retail's is.
+    template <class M> static Rows Transpose(const M& m)
+    {
+        const u128* p = (const u128*)&m;
+        u128 r0 = p[0], r1 = p[1], r2 = p[2];
+        u128 lo01, hi01, lo2, hi2;
+        __asm__("pextlw %0, %5, %4\n\tpextuw %1, %5, %4\n\tpextlw %2, $0, %6\n\tpextuw %3, $0, %6"
+                : "=&r"(lo01), "=&r"(hi01), "=&r"(lo2), "=&r"(hi2) : "r"(r0), "r"(r1), "r"(r2));
+        u128 c0, c1, c2;
+        __asm__("pcpyld %0, %4, %3\n\tpcpyud %1, %3, %4\n\tpcpyld %2, %6, %5"
+                : "=&r"(c0), "=&r"(c1), "=&r"(c2) : "r"(lo01), "r"(lo2), "r"(hi01), "r"(hi2));
+        Rows t;
+        t.r[0] = c0;
+        t.r[1] = c1;
+        t.r[2] = c2;
+        return t;
+    }
+
+    // The vector (x, y, z) of three floats in FPRs, built in a GPR: mfc1 r, x; mfc1 t, y;
+    // pextlw r, t, r (x and y interleaved); mfc1 t, z; pcpyld r, t, r (z after them). Its w
+    // is z's sign extension. One sequence: retail never schedules anything inside it, and the
+    // three floats die together (separate mfc1s are hoisted and change the FPRs the floats
+    // take, func_00144AA0). The result is "=r": the compiler stores it with sq where it goes
+    // straight to memory (func_00141690, func_00174E20) and moves it to VU0 with qmtc2 where
+    // it is used there (func_00144AA0, func_001BFBF8). It is held in a 16-byte local of the
+    // helper's, stored to the stack though nothing reads it back, as Scalar's.
+    static u128 FromFloats(f32 x, f32 y, f32 z)
+    {
+        Slot t;
+        u128 r, w;
+        __asm__("mfc1 %0, %2\n\tmfc1 %1, %3\n\tpextlw %0, %1, %0\n\tmfc1 %1, %4\n\tpcpyld %0, %1, %0"
+                : "=&r"(r), "=&r"(w) : "f"(x), "f"(y), "f"(z));
+        Q(t) = r;
+        return Q(t);
+    }
+
     // a * s.x: vmulx.xyzw.
     static u128 MulX(u128 a, u128 s)
     {

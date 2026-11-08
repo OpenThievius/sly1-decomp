@@ -28,6 +28,8 @@
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
+f32 Cosine(f32 a);
+f32 Sine(f32 a);
 f32 ArctangentOfRatio(f32 a, f32 b);
 extern f32 g_gameTime[];
 s32 IsObjectDescendantOf(Collider* e, void* b);
@@ -73,6 +75,8 @@ s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
 void* AllocateBackMemory(s32 size);
 void RecomputePlacedObjectFrame(Collider* self);
 void ClearRootObjectStateBits(void* a, void* b, s32 c);
+void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
+void SetPlacedObjectSpin(PlacedObject* self, Vec02* v);
 void UpdateWorldContacts(World* w, s32 arg);
 void MarkSweepAxesUnsorted(void* a);
 void DropColliderContacts(Collider* self, s32 value);
@@ -969,9 +973,37 @@ void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
 
 LINKER_REMNANT(func_001B9938);
 
-INCLUDE_ASM(func_001B9940);
+void SetColliderVelocity(Collider* self, Vec02* v)
+{
+    SetPlacedObjectVelocity(self, v);
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*v), Vu0::Q(self->v150));
+    s32 small = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(d))) < 2.0f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(d))) < 2.0f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(d))) < 2.0f) {
+        small = 1;
+    }
+    if (!small) {
+        ClearRootObjectStateBits(self->world, self, 2);
+    }
+}
 
-INCLUDE_ASM(func_001B99F0);
+void SetColliderSpin(Collider* self, Vec02* v)
+{
+    SetPlacedObjectSpin(self, v);
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*v), Vu0::Q(self->v160));
+    s32 small = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(d))) < 0.02f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(d))) < 0.02f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(d))) < 0.02f) {
+        small = 1;
+    }
+    if (!small) {
+        ClearRootObjectStateBits(self->world, self, 2);
+    }
+}
 
 LINKER_REMNANT(func_001B9AA8);
 
@@ -2841,7 +2873,17 @@ void StartSoundRecordVoice(PlayingSound* self, s32 idx)
     }
 }
 
-INCLUDE_ASM(func_001BFBF8);
+void ScheduleAmbientSoundRecord(PlayingSound* self)
+{
+    self->nextTime = g_gameTime[0] + RandomFloatInRange(self->interval.value, (&self->interval.value)[1]);
+    if (self->object == 0) {
+        f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
+        f32 r = RandomFloatInRange(self->f80.value, (&self->f80.value)[1]);
+        u128 off = Vu0::FromFloats(Cosine(angle) * r, Sine(angle) * r, 0.0f);
+        Vu0::Q(self->position) = off;
+        Vu0::Q(self->position) = Vu0::Add(off, Vu0::Q(*(Vec02*)GetSoundListenerPosition()));
+    }
+}
 
 void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, s32 p5) {
