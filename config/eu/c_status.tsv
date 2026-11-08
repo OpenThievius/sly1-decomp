@@ -3712,6 +3712,7 @@ func_001F0758	func_001F17E0	match
 func_001F0878	func_001F1900	match	
 func_001F08F0	func_001F1978	match	
 func_001F0908	func_001F1990	match	version-specific
+func_001F0AE0	func_001F1B68	match	
 func_001F0EB8	func_001F1F40	match	version-specific
 func_001F0F70	func_001F1FF8	match	
 func_001F1050	func_001F20D8	match	rodata

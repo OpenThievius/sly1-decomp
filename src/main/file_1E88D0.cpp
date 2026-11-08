@@ -4068,7 +4068,105 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     D_00276250 = -1;
 }
 
-INCLUDE_ASM(func_001F0AE0);
+void UpdatePlacedObject(void* self, f32 dt);
+void StopAnimationPlayer(s32 player);
+
+// Every frame: by mode, closes the page's animations (0), moves the highlight to the cursor's
+// entry (2) or plays the opening of the chosen one (3); then eases every entry's values.
+void UpdateWarpPage(WarpPage* self, f32 dt)
+{
+    UpdatePlacedObject(self, dt);
+    switch (self->mode) {
+    case 0:
+        if (self->f2EC != 0) {
+            StopAnimationPlayer(self->f2EC);
+            self->f2EC = 0;
+        }
+        if (self->f2F0 != 0) {
+            StopAnimationPlayer((s32)self->f2F0);
+            self->f2F0 = 0;
+        }
+        if (self->f2EC == 0 && self->f2F0 == 0) {
+            self->desc->m03(self);
+        }
+        break;
+    case 2:
+        if (self->f2D8 != self->cursor) {
+            SelectWarpPageEntry(self, self->cursor);
+            if (IsWarpEntryAvailable(self, self->f2D8, 0, 0) != 0) {
+                self->entries[self->f2D8].f10 = 0.0f;
+            }
+            if (IsWarpEntryAvailable(self, self->cursor, 0, 0) != 0) {
+                self->entries[self->cursor].f10 = 1.0f;
+            }
+            self->entries[9].f10 = self->entries[1].f10;
+            self->f2D8 = self->cursor;
+        }
+        *(u128*)&self->q540 = ApproachPointWithRamp(*(u128*)&self->q540, *(u128*)&self->q550, g_gameClock.step,
+                                                     (RampProfile*)D_00276258, 0);
+        break;
+    case 3:
+        if (self->f2D8 != self->cursor) {
+            if (self->f560 == 0) {
+                SelectWarpPageEntry(self, self->cursor);
+                SetScreenElementHoldTime(&D_0026F138, 0.0f);
+                D_0026F138.vt->m14(&D_0026F138);
+            }
+            // Read as a 64-bit value: GCSE then does not take this read for the later
+            // `target = self->cursor`, which retail loads again (docs/TOOLCHAIN.md, "GCSE").
+            s64 cursor = self->cursor;
+            s32 back = 0;
+            if (cursor != 1 || self->f560 != 0) {
+                back = 1;
+            }
+            s32 target;
+            if (back != 0) {
+                target = self->cursor;
+            } else {
+                target = GetCurrentWarpEntry();
+            }
+            Animation* anim = self->entries[target].f00;
+            if (D_00275BF0[0] != 2) {
+                self->entries[GetCurrentWarpEntry()].f10 = 0.0f;
+                self->entries[self->cursor].f10 = 1.0f;
+                self->entries[self->cursor].f08 = 1.0f;
+                self->entries[9].f10 = self->entries[1].f10;
+            }
+            if (anim != 0) {
+                f32 start = 0.0f;
+                if (back != 0) {
+                    start = anim->length;
+                }
+                f32 rate = 1.0f;
+                if (back != 0) {
+                    rate = -1.0f;
+                }
+                ReplaceAnimationPlayer(anim, self, 1, &self->f2F0, start, rate);
+                SetPendingWarpEntry((s32)self, target, back);
+            }
+            self->f560 = 0;
+            self->f2D8 = self->cursor;
+        }
+        break;
+    }
+    if (self->mode != 0) {
+        for (s32 i = 0; i < 11; i++) {
+            WarpEntry* e = &self->entries[i];
+            e->f24 = ApproachValueWithRamp(e->f24, e->f28, g_gameClock.step, D_00276268, 0);
+            e->phase = WrapAngle(e->phase + e->speed * g_gameClock.step);
+            PlacedObject* a = (PlacedObject*)e->f04;
+            PlacedObject* b = (PlacedObject*)e->f0C;
+            if (a != 0) {
+                a->f298->level = ApproachValueWithRamp(a->f298->level, e->f08, dt,
+                                                       self->f2E0 == 2 ? D_00276278 : D_00276288, 0);
+            }
+            if (b != 0) {
+                b->f298->level = ApproachValueWithRamp(b->f298->level, e->f10, dt,
+                                                       self->f2E0 == 2 ? D_00276278 : D_00276288, 0);
+            }
+        }
+    }
+}
 
 void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
 {
