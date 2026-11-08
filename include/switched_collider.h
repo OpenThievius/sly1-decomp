@@ -365,7 +365,8 @@ struct Player : TurningCollider {
     Vec02 v24C0;            // 0x24C0
     Vec02 v24D0;            // 0x24D0
     Vec02 v24E0;            // 0x24E0
-    u8 pad24F0[0x24F8 - 0x24F0];
+    s32 f24F0;              // 0x24F0: handed to func_0017E088 with f24F4 (UpdatePlayer)
+    s32 f24F4;              // 0x24F4
     PlacedObject* f24F8;    // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
     u8 pad24FC[0x2500 - 0x24FC];
     void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
