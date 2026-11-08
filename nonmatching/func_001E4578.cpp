@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 780/776, checked 2026-11-07
-// NEAR: wave 4 e3. 776 bytes; ours is 780. The logic is retail's end to end (pad flag, the guards, the camera-to-target basis by Cross and
-//       NormalizeOr, the five rotated offsets with Min and Max (hi is the Max of the new lo, as retail has it), the box query, the five
-//       project/unproject/span probes, the snap). Differences: (1) ours keeps the camera in s2 and the game clock's high half in s8
-//       (hoisted out of the probe loop by the store in its body), retail has the camera in s3, the loop counter in s2 and the clock's
-//       address formed at each use, with the store block of the 'span reaches 1.0' case outside the loop; (2) the three globals
-//       D_00275970, D_00275974, D_00275978 and D_00275AA0 are INCLUDE_DATA in the file (this near miss declares them extern; landing it needs
-//       them defined in C: 0.5f, 2.0f, two zero words, and the five vectors (0,0,0), (0,-50,0), (0,50,0), (0,0,75), (0,0,-50)). ~6 compiles.
+// BYTES 763/776 (98.3%), checked 2026-11-07
+// NEAR: wave 4 e3. 776 bytes, same size; 7 of 194 words differ, and only in which callee-saved registers hold the addresses of hi, count and list
+//       (ours s0, s1, s5; retail s5, s0, s1: the address of hi is allocated last in retail). Everything else is retail's: pad flag, guards,
+//       the camera-to-target basis by Cross and NormalizeOr, the five rotated offsets with Min and Max (hi is the Max of the new lo, as retail has it),
+//       the box query, the five project/unproject/span probes (the counter is one variable for both loops, unsigned), the snap.
+//       The globals D_00275970, D_00275974, D_00275978 and D_00275AA0 are INCLUDE_DATA in the file; this near miss declares them extern, and
+//       landing it needs them defined in C (0.5f, 2.0f, two zero words, and the five vectors (0,0,0), (0,-50,0), (0,50,0), (0,0,75), (0,0,-50)).
+//       ~14 compiles (pointer locals in three orders, local orders).
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"
@@ -32,8 +32,8 @@ extern f32 D_00275970;
 extern f32 D_00275974;
 extern s32 D_00275978;
 extern Vec02 D_00275AA0[5];
-extern f32 D_0026185C;
 extern f32 g_gameClock[];
+extern f32 D_0026185C;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void ProjectPointToCamera(Camera* cam, Vec02* in, Vec02* out);
@@ -52,6 +52,7 @@ void func_001E4578(CameraController* self)
     s32 count;
     Collider** list;
     f32 spanEnd;
+    s32 i;
     Camera* cam = (Camera*)self->owner;
     Collider* target = (Collider*)cam->stack[0].target;
     if (g_padSelectFlags & 2) {
@@ -67,13 +68,12 @@ void func_001E4578(CameraController* self)
     if (g_gameClock[1] - *(f32*)((u8*)self + 0x60) < D_00275970) {
         return;
     }
-    lo = *(Vec02*)cam->f40;
-    hi = *(Vec02*)cam->f40;
+    lo = hi = *(Vec02*)cam->f40;
     Vu0::Q(basis.r[2]) = Vu0::Q(g_unitZVector);
     u128 side = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Sub(Vu0::Q(target->v140), Vu0::Q(*(Vec02*)cam->f40))), Vu0::Q(g_unitXVector));
     Vu0::Q(basis.r[1]) = side;
     Vu0::Q(basis.r[0]) = Vu0::Cross(Vu0::Q(basis.r[2]), side);
-    for (s32 i = 0; i < 5; i++) {
+    for (i = 0; (u32)i < 5; i++) {
         u128 p = Vu0::Add(Vu0::Q(target->v140), Vu0::Rotate(basis, Vu0::Q(D_00275AA0[i])));
         Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), p);
         Vu0::Q(hi) = Vu0::Max(Vu0::Q(lo), p);
@@ -82,7 +82,7 @@ void func_001E4578(CameraController* self)
     PushBackMemoryMark();
     f32 one = 1.0f;
     GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, (void*)HasColliderSecondTree, 0, &count, &list);
-    for (s32 i = 0; i < 5; i++) {
+    for (i = 0; (u32)i < 5; i++) {
         ProjectPointToCamera(cam, &pts[i], &tmp);
         tmp.z = cam->f1E4;
         UnprojectCameraPoint(cam, &tmp, &tmp);
