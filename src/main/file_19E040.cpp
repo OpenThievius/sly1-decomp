@@ -3713,9 +3713,76 @@ void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
     SetPlacedObjectSpinFromFloats(self, 0.0f, 0.0f, w);
 }
 
-INCLUDE_RODATA(jtbl_0024CB30);
+void* FindHitTargetChild(Collider* self);
 
-INCLUDE_ASM(func_001A69F8);
+// The state the paired object should be in: free (1) until it reaches its attachment and a
+// free partner takes it (3) or none (2); while paired (2, 3) until a hit target child links
+// it (4); then back to an attachment (5) and close in on it (6, then 0); 9 ends in 10.
+s32 ChoosePairedObjectState(PairedObject* self)
+{
+    Vec02 v;
+    s32 s = self->state;
+    switch (s) {
+    case 1: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+            break;
+        }
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(v), Vu0::Q(self->v140)) < 10.0f) {
+            s = 2;
+            if (PairWithNearestFreeObject(self->controller, self) != 0) {
+                s = 3;
+            }
+        }
+        break;
+    }
+    case 2:
+    case 3: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+        }
+        break;
+    }
+    case 4: {
+        u8* p = (u8*)self->activeHandle;
+        if (p != 0 && *(f32*)(p + 0x14) < *(f32*)((u8*)self->f594 + 0x34)) {
+            s = 4;
+            break;
+        }
+        if (func_001A6328((PairController*)self->controller, self) != 0) {
+            s = 5;
+        } else {
+            s = 2;
+        }
+        break;
+    }
+    case 5:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(v)) < 10.0f) {
+            s = 6;
+        }
+        break;
+    case 6:
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(((PlacedObject*)self->attachment)->v140)) < 10.0f) {
+            s = 0;
+        }
+        break;
+    case 0:
+    case 7:
+    case 8:
+    case 10:
+        break;
+    case 9:
+        s = 10;
+        break;
+    }
+    return s;
+}
 
 void SetPairedState(PairedObject* self, s32 mode)
 {
