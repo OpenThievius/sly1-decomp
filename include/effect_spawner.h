@@ -51,7 +51,11 @@ struct EffectSpawner : PlacedObject {
     s32 f2D8;               // 0x2D8: -1 at setup
     f32 f2DC;               // 0x2DC: 10.0 at setup
     f32 f2E0;               // 0x2E0: 10.0 at setup
-    u8 pad2E4[0x2F8 - 0x2E4];
+    u8 pad2E4[0x2E8 - 0x2E4];
+    f32 f2E8;               // 0x2E8: chance of turning active after a burst (func_00155AB0)
+    f32 f2EC;               // 0x2EC: shortest active time (func_00155AB0)
+    f32 f2F0;               // 0x2F0: longest active time (func_00155AB0)
+    f32 f2F4;               // 0x2F4: the count it keeps alive in mode 1 (func_00155AB0)
     union {
         s64 key2F8;         // 0x2F8: the two ids, tested together against -1
         s32 id2F8[2];       // 0x2F8, 0x2FC
@@ -62,9 +66,13 @@ struct EffectSpawner : PlacedObject {
     s32 id30C;              // 0x30C
     s32 f310;               // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438
-    u8 pad324[0x338 - 0x324];
+    u8 pad324[0x328 - 0x324];
+    f32 f328;               // 0x328: the rate, redrawn between f2DC and f2E0 (func_00155AB0)
+    f32 f32C;               // 0x32C: the period of the redraw (func_00155AB0)
+    f32 f330;               // 0x330: the clock time of the next redraw (func_00155AB0)
+    f32 f334;               // 0x334: the rate's scale (func_00155AB0)
     f32 margin;             // 0x338: half the side of the box around the target its points wrap in (func_00155868)
-    u8 pad33C[0x340 - 0x33C];
+    f32 f33C;               // 0x33C: the fraction of a spawn carried to the next frame (func_00155AB0)
     f32 f340;               // 0x340: -1.0 at setup
     BaseObject* held344;           // 0x344: objects it must let go of when told (slot 13)
     BaseObject* held348;           // 0x348
