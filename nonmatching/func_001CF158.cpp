@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 3578/3704 (96.6%), checked 2026-11-08
+// BYTES 3637/3704 (98.2%), checked 2026-11-08
 // NEAR (2026-11-08, night-large5): ChoosePlayerTargetByCost (func_001CF158, 3704 bytes): the six
 // candidate loops (objects, paths, class 0x75, target vectors, points, curves), the checksum
 // check, the switch on the best kind and the record update follow retail at the same size; the

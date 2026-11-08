@@ -329,7 +329,7 @@ extern f32 D_00261A10[4];
 extern f32 D_00261A20[12];
 void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
 extern u8 g_unitXVector[];
-extern u8 g_unitZVector[];
+extern const Vec02 g_unitZVector;
 void* GetActiveSwitchedColliderData(void);
 void BuildBasisFromX(Vec02* v, Mat02* out);
 void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle);
@@ -521,7 +521,7 @@ void func_00146518(StateNotifier* self, f32 dt, s32 quiet)
         Mat02 r;
         Vu0::Q(v) = Vu0::Sub(Vu0::Q((*(Camera**)g_camera)->f40), Vu0::Q(self->pos));
         v.z = 0.0f;
-        BuildBasisFromXAndZHint(&v, (Vec02*)g_unitZVector, &face);
+        BuildBasisFromXAndZHint(&v, (Vec02*)&g_unitZVector, &face);
         NotifierAnim* an = ((NotifierHost*)self->f2E8)->anim;
         NotifierSource* src = an->desc->sources->pos;
         if (src != 0) {

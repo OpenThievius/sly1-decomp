@@ -11,6 +11,9 @@
 // in s4, and s7 is not saved). The floats first in the prototype give retail's s5 and s6.
 // Tried: the declaration order of the float locals, the floats' places in the prototype, a
 // named 0.5, a do-while bracketing loop, a struct of the position and direction.
+// Also tried (night-close10): t as a copy of a renamed parameter, and the first call given the
+// parameter with t assigned after (both change the allocation, 278 lines). func_001C9DE0's
+// 0x1AC curve call shows the same a2-before-$f13 order against retail.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
