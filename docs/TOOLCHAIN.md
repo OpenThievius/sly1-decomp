@@ -694,6 +694,22 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   across cases ties each case to one register; retail's per-case registers come
   from variables local to each case.
 
+- **A global assigned a call's converted result forms its address first.**
+  When the global's type differs from the call's return type (a conversion
+  around the call), its address is formed before the call, so the high part
+  crosses the call and sched1 hoists it into the prologue: retail's early
+  `lui sN` for stores of call results (LoadWorld, func_001DCEA0).
+- **A constant as a Vec value can be hoisted.** `Vec::FromFloat(c)` becomes a
+  pseudo that loop.c can move into a saved GPR, where `Vu0::FromFloat(c)`
+  folds the constant into the asm (func_00157B88).
+- **One Vec value stored twice gives the compiler's vmove** between two VU0
+  registers (func_001CAB10).
+- **Open: store order set in sched2.** In ResetScreenResources (func_001B40C8)
+  and three like it, sched1 keeps the source order and sched2 reorders the
+  stores by register anti-dependences, so the high-part registers local-alloc
+  picks decide the final order; retail's choice of those registers is still
+  unexplained.
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it
