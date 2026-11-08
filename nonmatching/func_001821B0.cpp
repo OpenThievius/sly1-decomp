@@ -60,8 +60,8 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
     col.a = (u8)(s32)(self->f288 * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {
-        f32 sx = self->f270 * 320.0f + 320.0f;
-        f32 sy = self->f274 * -246.400009f + 246.400009f;
+        f32 sx = self->aim[0] * 320.0f + 320.0f;
+        f32 sy = self->aim[1] * -246.400009f + 246.400009f;
         Vu0::Q(p) = Vu0::Rotate(m, Vu0::Q(D_002641F0[i * 4]));
         p.x = p.x + sx;
         p.y = p.y + sy;
