@@ -494,7 +494,7 @@ extern f32 g_elapsedTime;
 extern Rgba4 D_002610D8;
 extern Rgba4 D_002610E0;
 
-void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, s32 a3);
+void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
 void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
 
@@ -581,7 +581,7 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 extern u8 g_gsPacketWriter[];
 
 s32 IsArcDrawAllowed(void);
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void BeginGifTag(void* p, s32 a, s32 b, u64 regs);
 void AddGifRegisterWrite(void* p, s32 a, u64 b);
 void WriteArcPointVertices(void* self, void* p);
 void WriteArcTickVertices(void* self, void* p);
@@ -832,7 +832,69 @@ INCLUDE_ASM(func_001E7C60);
 
 INCLUDE_ASM(func_001E80D8);
 
-INCLUDE_ASM(func_001E83E0);
+// The deferred request QueueArcDraw queues: the arc at 0x60.
+struct ArcDrawRequest {
+    u8 pad00[0x60];
+    T217D_3F0* arc;         // 0x60
+};
+
+extern PacketWriter g_vifPacketWriter;
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+PacketWriter* InitGifPacket(PacketWriter* p);
+void AllocateTempPacketBuffer(PacketWriter* p, s32 count);
+void EndGifPacket(PacketWriter* p);
+void BeginDmaTag(PacketWriter* p);
+void CloseDmaTag(PacketWriter* p);
+void WriteVifFlushE(PacketWriter* p);
+void WriteVifDirectFromWriter(PacketWriter* p, PacketWriter* src);
+
+void DrawArcTickPacket(ArcDrawRequest* request)
+{
+    PacketWriter buf;
+    s32 first, last;
+    T217D_3F0* self = request->arc;
+    GetArcVisibleRange(self, &first, &last);
+    if (first == last) {
+        return;
+    }
+    PushBackMemoryMark();
+    InitGifPacket(&buf);
+    AllocateTempPacketBuffer(&buf, 0x200);
+    f32 zero = 0.0f;
+    f32 right = 640.0f;
+    f32 bottom = 492.80002f;
+    f32 x0 = zero >? self->x;
+    f32 y0 = zero >? self->y;
+    f32 x1 = right <? self->x + self->w;
+    f32 y1 = bottom <? self->y + self->h;
+    BeginGifTag(&buf, 6, 3, 0x44E);
+    AddGifRegisterWrite(&buf, 0x47, 0x32001);
+    s32 ax = GIF_SCREEN_X(x0);
+    s32 ay = GIF_SCREEN_Y(y0);
+    AddGifXyzfEntry(&buf, ax, ay, 0, 0);
+    s32 bx = GIF_SCREEN_X(x1);
+    s32 by = GIF_SCREEN_Y(y1);
+    AddGifXyzfEntry(&buf, bx, by, 0, 0);
+    BeginGifTag(&buf, 6, 3, 0x44E);
+    AddGifRegisterWrite(&buf, 0x47, 0x3E001);
+    AddGifXyzfEntry(&buf, ax, ay, 0xFFFFFF0, 0);
+    AddGifXyzfEntry(&buf, bx, by, 0xFFFFFF0, 0);
+    BeginGifTag(&buf, 0x46, 5, 0x441EE);
+    AddGifRegisterWrite(&buf, 0x47, 0x31001);
+    AddGifRegisterWrite(&buf, 0x42, 0x5A);
+    AddGifRgbaEntry(&buf, 0x80000000);
+    AddGifXyzfEntry(&buf, ax, ay, 0, 0);
+    AddGifXyzfEntry(&buf, bx, by, 0, 0);
+    BeginGifTag(&buf, 0, 1, 0xE);
+    AddGifRegisterWrite(&buf, 0x40, 0xDF0000027F0000ULL);
+    EndGifPacket(&buf);
+    BeginDmaTag(&g_vifPacketWriter);
+    WriteVifFlushE(&g_vifPacketWriter);
+    WriteVifDirectFromWriter(&g_vifPacketWriter, &buf);
+    CloseDmaTag(&g_vifPacketWriter);
+    PopBackMemoryMark();
+}
 
 void SetArcSpecialObject(T217D_3F0* self, void* a1);
 
