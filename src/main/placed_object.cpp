@@ -2569,7 +2569,54 @@ void CreateTrackAttachment(BaseObject* item)
 
 INCLUDE_RODATA(D_00249A1C);
 
-INCLUDE_ASM(func_001289C0);
+extern const f32 D_00249A1C;
+void LoadFollowRecord(PlacedObject* self, void* a1);
+void ReadPlacedObjectModel(void* record, void* stream, PlacedObject* owner);
+void ReadSlotObjects(World* world, PlacedObject* self, void* stream);
+struct BakedRow {
+    s32 id;
+    f32* values;
+};
+
+void func_001289C0(PlacedObject* self, void* r)
+{
+    ReadBufferedRotation3(r, &self->rot);
+    ReadBufferedVector3(r, &self->pos);
+    self->bits24 = ReadBufferedU8(r);
+    self->bits26 = ReadBufferedU8(r);
+    self->bits28 = ReadBufferedU8(r);
+    self->f88 = ReadBufferedU32(r);
+    self->f80 = ReadBufferedFloat(r);
+    self->f84 = ReadBufferedFloat(r);
+    self->f2A4 = ReadBufferedFloat(r);
+    self->f2A8 = ReadBufferedFloat(r);
+    if (self->f80 == D_00249A1C) {
+        self->f80 = 10000000000.0f;
+    }
+    if (self->f84 == D_00249A1C) {
+        f32 m = self->f80;
+        f32 c = 2000.0f;
+        self->f84 = c <? m;
+    }
+    ReadPropertyRecords((Animation*)self, (Stream83*)r);
+    ReadPlacedObjectModel(self->sub22C, r, self);
+    LoadFollowRecord(self, r);
+    if (self->desc->m12 != 0) {
+        self->desc->m12(self);
+    }
+    self->f2B8 = ReadBufferedU8(r);
+    BakedRow* rows = (BakedRow*)AllocateFrontMemory(self->f2B8 << 3);
+    self->f2BC = rows;
+    for (s32 i = 0; i < self->f2B8; i++) {
+        BakedRow* row = &((BakedRow*)self->f2BC)[i];
+        row->id = ReadBufferedS16(r);
+        row->values = (f32*)AllocateFrontMemory(self->f26C << 2);
+        for (s32 j = 0; j < self->f26C; j++) {
+            row->values[j] = ReadBufferedFloat(r);
+        }
+    }
+    ReadSlotObjects(self->world, self, r);
+}
 
 void LoadFollowRecord(PlacedObject* self, void* a1)
 {
