@@ -9,6 +9,9 @@
 #include "vu0.h"
 #include "globals.h"
 #include "game_progress.h"
+#include "pad_record.h"
+#include "ramp_profile.h"
+#include "fpu.h"
 
 struct __attribute__((aligned(16))) OnOffDefaultsBlock { f32 f[36]; };
 
@@ -256,7 +259,6 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
 extern const f32 D_0024DAD0 = -3.40282347e+38f;
 INCLUDE_RODATA(D_0024DAD4);
 INCLUDE_RODATA(jtbl_0024DAE0);
-INCLUDE_RODATA(jtbl_0024DB00);
 
 INCLUDE_ASM(func_001CE590);
 
@@ -431,18 +433,16 @@ f32 AddRepeatTargetPenalty(Player* self, s32 id, f32 a, f32 b)
 
 INCLUDE_ASM(func_001CF158);
 
-INCLUDE_ASM(func_001CFFD0);
-
 // What func_001D0B20 reads: the player's record at +0x23BC (a frame at +0x18 and a mover at
 // +0x34), the angle at +0x23C4 and its flip flag at +0x23C8, and the target (a flag at +0x04,
 // the radius at +0x08, a point at +0x10, a pair of points at +0x20).
 struct TargetMover {
-    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); u8 pad24[0x2C - 0x24]; void (*track)(TargetMover* self, f32 angle, void* pos, s32 zero, void* dir, void* up, f32* angleOut, f32* limitOut); };
+    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); u8 pad24[0x28 - 0x24]; void (*nearest)(TargetMover* self, void* pos, s32 a, void* b, void* dir, void* c, f32* t); void (*track)(TargetMover* self, f32 angle, void* pos, s32 zero, void* dir, void* up, f32* angleOut, f32* limitOut); };
     const Vt* vt;           // 0x00
     u8 pad04[4];
     s32 wraps;              // 0x08
     s32 count;              // 0x0C
-    u8 pad10[0x14 - 0x10];
+    const f32* ends;        // 0x10: the angles the mover's pieces end at (func_001CFFD0 reads the last)
     const f32* low;         // 0x14: the angles the mover's pieces start at
 };
 // func_001D12F0 reads the record's active flag (+0x40), its limit (+0x44) and scale (+0x48), and
@@ -456,13 +456,25 @@ struct TargetFrameRecord {
     s32 active;             // 0x40
     f32 limit;              // 0x44
     f32 scale;              // 0x48
+    u8 pad4C[0x50 - 0x4C];
+    u32 sides;              // 0x50: bits 0 and 1, the sides func_001CFFD0 may leave it by
+    u8 pad54[0x58 - 0x54];
+    TargetFrameRecord* facing;  // 0x58: a record whose direction func_001CFFD0 faces instead
 };
-struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 f23C0; f32 angle; s32 flip; };
-struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
 
-f32 WrapModulo(f32 x, f32 y);
-void TransformPointBetweenFrames(void* frame, void* player, void* in, void* out);
-s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, void* e, f32 x);
+// The phase clip a player's sub-states 0x11 and 0x14 advance (+0x2230): its clip, whose length
+// is at +0x34, the time and the speed.
+struct PhaseClip {
+    u8 pad00[0x34];
+    f32 length;             // 0x34
+};
+struct PhasePlayer {
+    u8 pad00[8];
+    PhaseClip* clip;        // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+};
 
 static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 {
@@ -474,6 +486,290 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
     }
     return v;
 }
+
+void FindTargetCurveLengthNearCollider(void* curve, f32* length, Vec02* pos, f32* heading);
+void PlaceTargetPointNearCollider(void* point, Vec02* pos, f32* heading);
+void FindRingPointTowardCollider(void* part, Vec02* pos, f32* heading);
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 dt, RampProfile* ramp, Vec02* vel);
+void ComputePolarOffset(Vec02* out, f32 heading, f32 distance, f32 z);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+f32 ArctangentOfRatio(f32 y, f32 x);
+f32 WrapAngle(f32 a);
+void SetPlayerOnOffPhase(Player* self, s32 n);
+void SetPlayerBlendWeights(f32 angle, f32 t, Player* self, void* records, s32 n);
+s32 AimPlayerAtTarget(void* self);
+void SetPlayerState(Player* self, s32 a, s32 b);
+void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
+extern f32 g_frameDt;
+
+// v made unit length, or fallback when shorter than 0.0001 (as player_path.cpp's).
+static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
+{
+    u128 len = Vu0::Length(v.q);
+    Vu0::Vec r;
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        r = fallback;
+    } else {
+        r.q = Vu0::DivX(v.q, len);
+    }
+    return r;
+}
+
+// The player's control on a target (sub-state at +0x239C): on a curve, point or part (0, 1) it
+// eases toward the target's point and turns about it, on a record (4) it follows the record's
+// mover, and every case ends in SetPlayerState. The locals are the function's own and shared
+// between the cases, as retail's frame shows (0x00 to 0x90, then the four floats): b and i also
+// serve as ramp profiles, k as the stack slot of the scale vectors, stored after their products.
+void ControlPlayerOnTarget(Player* self, PadRecord* pad)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 c;
+    Vec02 d;
+    Vec02 e;
+    Vec02 f;
+    Vec02 k;
+    Vec02 h;
+    Vec02 i;
+    Vec02 j;
+    f32 heading;
+    f32 lo;
+    f32 hi;
+    f32 end;
+    s32 mode = self->f2220;
+    s32 sub = self->f2228;
+    switch (self->f239C) {
+    case 0:
+    case 1: {
+        if (self->f23A0 != 0) {
+            FindTargetCurveLengthNearCollider(self->f23A0, &self->f23A4, &a, &heading);
+        } else if (self->f23A8 != 0) {
+            PlaceTargetPointNearCollider(self->f23A8, &a, &heading);
+        } else {
+            FindRingPointTowardCollider(self->heldObject, &a, &heading);
+        }
+        f32 speed;
+        if (self->f239C == 0) {
+            speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xAB0)))) *
+                    ((PhasePlayer*)self->watched2230)->speed;
+        } else {
+            speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xB80)))) *
+                    ((PhasePlayer*)self->watched2230)->speed;
+        }
+        a.z = self->pos.z;
+        b.x = speed;
+        b.y = 0.0f;
+        b.z = D_00274E48;
+        ApproachPointWithRamp(Vu0::Q(self->pos), Vu0::Q(a), g_gameClock.dt, (RampProfile*)&b, &c);
+        f32 turn;
+        if (self->f239C == 0) {
+            turn = heading + 1.57079637f;
+        } else {
+            turn = heading - 1.57079637f;
+        }
+        ComputePolarOffset(&d, turn, 1.0f, 0.0f);
+        ComputePolarOffset(&e, self->f630, 1.0f, 0.0f);
+        f32 cosine = D_00274E50 * Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(e)));
+        f32 side;
+        side = ClampBetween(cosine, -1.0f, 1.0f);
+        side = side * self->f634;
+        if (__builtin_fabsf(side) < 0.2f) {
+            side = 0.0f;
+        }
+        f32 v = side * speed;
+        v = Fpu::Sqrt(speed * speed - Vu0::ToFloat(Vu0::Dot(Vu0::Q(c), Vu0::Q(c)))) <? v;
+        f32 t;
+        if (self->f23A0 != 0 && ((TargetFrameRecord*)self->f23A0)->mover->wraps == 0) {
+            ApproachValueWithRamp(self->f23A4, 30.0f, g_gameClock.dt, (RampProfile*)&b, &lo);
+            TargetMover* m = ((TargetFrameRecord*)self->f23A0)->mover;
+            ApproachValueWithRamp(self->f23A4, m->low[m->count - 1] - 30.0f, g_gameClock.dt, (RampProfile*)&b, &hi);
+            t = ClampBetween(v, lo, hi);
+        } else {
+            t = v;
+        }
+        Vu0::Vec s = Vu0::Vec::FromFloat(t);
+        Vu0::Q(f) = Vu0::MulX(Vu0::Q(d), s.q);
+        u128 vel = Vu0::Q(c);
+        u128 local = Vu0::RotateTransposed(self->m660, Vu0::Add(vel, Vu0::Q(f)));
+        *(Vu0::Vec*)&k = s;
+        Vu0::Vec n = Vu0::Vec::FromFloat(-1.0f);
+        u128 drive = Vu0::MulX(local, n.q);
+        *(Vu0::Vec*)&k = n;
+        *(Vu0::Vec*)&self->v640 = *(Vu0::Vec*)&drive;
+        if (D_00274E4C < Vu0::ToFloat(Vu0::Length(drive))) {
+            sub = 0x11;
+            if (self->f239C == 0) {
+                if (45.0f < Vu0::ToFloat(Vu0::Length(vel))) {
+                    SetPlayerOnOffPhase(self, 0);
+                } else if (20.0f < self->v640.y) {
+                    SetPlayerOnOffPhase(self, 2);
+                } else if (self->v640.y < -20.0f) {
+                    SetPlayerOnOffPhase(self, 1);
+                }
+            }
+        } else {
+            sub = 0x10;
+            if (v < -D_00274E4C && (((TargetFrameRecord*)self->f23A0)->sides & 1)) {
+                sub = self->f239C == 0 ? 0x13 : 0x12;
+            } else if (D_00274E4C < v && (((TargetFrameRecord*)self->f23A0)->sides & 2)) {
+                sub = self->f239C == 0 ? 0x12 : 0x13;
+            }
+            if (self->f239C == 0) {
+                SetPlayerOnOffPhase(self, 3);
+            }
+        }
+        self->f638 = heading;
+        if (self->f2228 == 0x15) {
+            f32 off = __builtin_fabsf(WrapAngle(ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x) - self->f638));
+            if (D_00274E54 < off) {
+                sub = 0x15;
+            }
+        }
+        break;
+    }
+    case 2:
+        if (self->f2228 == 0x10 || self->f2228 == 0x14) {
+            if (0.0f < self->f634) {
+                sub = 0x14;
+                SetPlayerBlendWeights(self->f630, self->f634, self, (u8*)self + 0xC40, *(s32*)((u8*)self + 0xE20));
+            } else {
+                Vu0::Q(self->v640) = Vu0::Zero();
+                sub = 0x10;
+            }
+        }
+        break;
+    case 3:
+        if (MaskWorldBitsBySave() & 0x2000) {
+            if (0.0f < self->f634) {
+                sub = 0x14;
+                SetPlayerBlendWeights(self->f630, self->f634 * D_00274E58, self, (u8*)self + 0x720, self->f900);
+            } else {
+                Vu0::Q(self->v640) = Vu0::Zero();
+                sub = 0x10;
+            }
+        } else {
+            Vu0::Q(self->v640) = Vu0::Zero();
+            sub = 0x10;
+        }
+        break;
+    case 5:
+        self->f638 = self->f630;
+        Vu0::Q(self->v640) = Vu0::Zero();
+        break;
+    case 4: {
+        TargetFrameRecord* rec = (TargetFrameRecord*)self->f23BC;
+        void* frame = rec->frame;
+        TargetMover* m = rec->mover;
+        TransformPointBetweenFrames(0, frame, (void*)self->f6D4, &a);
+        if (m->vt->track != 0) {
+            m->vt->track(m, self->f23C0, &a, 0, &b, &c, &self->f23C0, &self->f23C4);
+        }
+        TransformPointBetweenFrames(frame, 0, &b, &d);
+        TransformDirectionBetweenFrames(frame, 0, &c, &e);
+        if (rec->active != 0 && m->wraps == 0) {
+            if (self->f23C0 <= 0.0f || m->ends[m->count - 1] <= self->f23C0) {
+                mode = 2;
+                sub = 2;
+                break;
+            }
+        }
+        e.z = 0.0f;
+        *(Vu0::Vec*)&e = NormalizeOrElse(Vu0::Vec::Of(e), Vu0::Vec::Of(g_unitXVector));
+        f32 angle = ArctangentOfRatio(e.y, e.x);
+        ComputePolarOffset(&h, self->f630, 1.0f, 0.0f);
+        if (rec->facing == 0) {
+            f = e;
+        } else {
+            void* frame2 = rec->facing->frame;
+            TransformPointBetweenFrames(0, frame2, (void*)self->f6D4, &i);
+            TargetMover* m2 = rec->facing->mover;
+            if (m2->vt->nearest != 0) {
+                m2->vt->nearest(m2, &i, 0, 0, &j, 0, 0);
+            }
+            TransformDirectionBetweenFrames(frame2, 0, &j, &f);
+        }
+        f.z = 0.0f;
+        *(Vu0::Vec*)&f = NormalizeOrElse(Vu0::Vec::Of(f), Vu0::Vec::Of(g_unitXVector));
+        f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(h), Vu0::Q(f)));
+        switch (self->f241C) {
+        case 0:
+            if (self->f634 < 0.25f) {
+                self->f241C = -1;
+            } else if (along < -0.7f) {
+                self->f241C = 1;
+            }
+            break;
+        case 1:
+            if (self->f634 < 0.25f) {
+                self->f241C = -1;
+            } else if (0.7f < along) {
+                self->f241C = 0;
+            }
+            break;
+        case -1:
+            if (0.35f < pad->f48) {
+                if (0.0f <= along) {
+                    self->f241C = 0;
+                } else {
+                    self->f241C = 1;
+                }
+            }
+            break;
+        }
+        switch (self->f241C) {
+        case 0:
+            self->f23C8 = 0;
+            break;
+        case 1:
+            self->f23C8 = 1;
+            break;
+        }
+        if (rec->active != 0) {
+            along = 0.0f;
+        } else {
+            i.y = -*(f32*)((u8*)self + 0xE40);
+            i.x = -*(f32*)((u8*)self + 0xE90);
+            i.z = D_00274E5C;
+            if (m->wraps != 0) {
+                end = i.x;
+            } else if (self->f23C8 != 0) {
+                ApproachValueWithRamp(self->f23C4, D_00274E04, g_frameDt, (RampProfile*)&i, &end);
+                end = -end;
+            } else {
+                ApproachValueWithRamp(self->f23C4, m->vt->limit(m) - D_00274E04, g_frameDt, (RampProfile*)&i, &end);
+            }
+            f32 r = (end - i.y) / (i.x - i.y);
+            along = ClampBetween(self->f634, 0.0f, r);
+        }
+        if (self->f23C8 != 0) {
+            angle = WrapAngle(angle + 3.14159274f);
+        }
+        if (0.0f < along) {
+            sub = 0x14;
+            SetPlayerBlendWeights(angle, along, self, (u8*)self + 0xE30, *(s32*)((u8*)self + 0x1010));
+        } else {
+            Vu0::Q(self->v640) = Vu0::Zero();
+            self->f638 = angle;
+            sub = 0x10;
+        }
+        break;
+    }
+    case 6:
+        AimPlayerAtTarget(self);
+    default:
+        Vu0::Q(self->v640) = Vu0::Zero();
+        break;
+    }
+    SetPlayerState(self, mode, sub);
+}
+
+struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 f23C0; f32 angle; s32 flip; };
+struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
+
+f32 WrapModulo(f32 x, f32 y);
+void TransformPointBetweenFrames(void* frame, void* player, void* in, void* out);
+s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, void* e, f32 x);
+
 
 void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
 {
@@ -507,19 +803,6 @@ void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
     }
 }
 
-// The phase clip a player's sub-states 0x11 and 0x14 advance (+0x2230): its clip, whose length
-// is at +0x34, the time and the speed.
-struct PhaseClip {
-    u8 pad00[0x34];
-    f32 length;             // 0x34
-};
-struct PhasePlayer {
-    u8 pad00[8];
-    PhaseClip* clip;        // 0x08
-    u8 pad0C[0x14 - 0x0C];
-    f32 time;               // 0x14
-    f32 speed;              // 0x18
-};
 
 extern f32 D_00274B64;
 void UpdateEightEntryBlendWeights(Player* self, void* slots, s32 n);
