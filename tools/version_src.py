@@ -140,6 +140,29 @@ def only_here(key):
     return out
 
 
+def own_files(key):
+    """{version's own name: the shared files that may hold it} of every function only the version
+    has, the libraries' too: the file of the closest function before it that both versions have,
+    or, for one at a file's start, the file of the next such function."""
+    import todo
+    rows = sorted((l.split("\t") for l in (ROOT / "config" / key / "map.tsv").read_text().splitlines()[1:]),
+                  key=lambda r: int(r[1], 16))
+    code = [(r[2], r[3]) for r in todo.layout(key) if r[0] == "code"]
+    out, before, waiting = {}, None, []
+    for name, addr, size, us_name, us_addr, how in rows:
+        a = int(addr, 16)
+        if us_name != "-":
+            after = ROOT / todo.source_of(int(us_addr, 16))
+            for own in waiting:
+                out[own].add(after)
+            waiting, before = [], int(us_addr, 16)
+        elif before is not None and any(s <= a < e for s, e in code):
+            own = "func_%s_%08X" % (key, a)
+            out[own] = {ROOT / todo.source_of(before)}
+            waiting.append(own)
+    return out
+
+
 def unit(shared, key, trying=None):
     """The translation unit the version builds for a shared file: written under build/<version>/versions/.
 
