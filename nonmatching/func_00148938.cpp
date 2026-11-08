@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 351/388 (90.5%), checked 2026-11-07
+// BYTES 353/388 (91.0%), checked 2026-11-08
+// NIGHT-DECLS (2026-11-08): SortElements declared void as defined (func_001F5CD0): 351 -> 353 bytes. Still differs as above.
 // NEAR: the squared distance is now stored as retail does (Vu0::ToBits: qmfc2, then sw). Still differs in the loop's set-up and record pointer: retail fills the delay slot of the list-head test with move s2,v0 (here move a1,s2), and advances q first (addiu a1,v1,8), storing the object and the far distance at -4(a1) and -8(a1), with n++ in the delay slot of the state test; here the stores use the old pointer and q advances late. c = q; q = c + 1, n++ first, q->obj before c, writing through q and advancing it last, and the state test inverted: no closer.
 #include "common.h"
 #include "state_notifier.h"
@@ -24,7 +25,7 @@ struct Candidate_00148938 {
 };
 
 s32 CountListItems(List01* list);
-s32 SortElements(void* base, s32 count, s32 size, void* cmp);
+void SortElements(void* base, s32 count, s32 size, void* cmp);
 
 s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
 {
