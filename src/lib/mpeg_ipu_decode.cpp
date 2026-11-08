@@ -517,7 +517,29 @@ s32 func_0020E8A0(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* 
     return 1;
 }
 
-INCLUDE_ASM(func_0020ED48);
+struct Node_20EF70 { s32 f00; s32 f04; };
+
+void func_0020ED48(Node_20EF70* n, s32 rsize, s32 code, s32 residual, s32 half)
+{
+    s32 f = 16 << rsize;
+    s32 v = n->f00;
+    if (half) {
+        v >>= 1;
+    }
+    if (code > 0) {
+        v += ((code - 1) << rsize) + residual + 1;
+        if (v >= f) {
+            v -= f * 2;
+        }
+    } else if (code < 0) {
+        v -= ((-code - 1) << rsize) + residual + 1;
+        if (v < -f) {
+            v += f * 2;
+        }
+    }
+    n->f00 = half ? v << 1 : v;
+}
+
 
 struct Ctx_20EDD0;
 s32 ReadIpuBits(Ctx_20EDD0* c, s32 n);
@@ -553,12 +575,10 @@ void func_0020EDD0(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 mode, s3
 }
 
 struct Self_20EF70 { s32 f00; };
-struct Node_20EF70 { s32 f00; s32 f04; };
 
 s32 DecodeIpuVariableLength(Self_20EF70* self, s32 mode);
 s32 ReadIpuBits(Self_20EF70* self, s32 x);
 s32 func_0020E100(Self_20EF70* self);
-void func_0020ED48(Node_20EF70* n, s32 a, s32 b, s32 c, s32 d);
 
 void func_0020EF70(Self_20EF70* self, Node_20EF70* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7)
 {
@@ -1477,7 +1497,77 @@ s32 func_002104A8(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
     return flag;
 }
 
-INCLUDE_ASM(func_00210548);
+struct Pic_210548 {
+    u32 f0;
+    u8 p4[8];
+    s32 fC;
+    s32 f10;
+};
+
+struct Ctx_210548 {
+    u8 p0[0xD8];
+    u32 fD8;
+    u8 pDC[4];
+    s32 fE0;
+    s32 fE4;
+    u8 pE8[0x174 - 0xE8];
+    s32 f174;
+};
+
+void func_00210548(Ctx_210548* c, Pic_210548* pic)
+{
+    s32 passes;
+    u32 src = pic->f0 & 0x0FFFFFFF;
+    u32 dst = c->fD8 & 0x0FFFFFFF;
+    s32 srcStride;
+    s32 dstStride;
+    s32 qwc;
+    s32 pass;
+    s32 i;
+    u32 to;
+
+    if (c->f174 == 3 || c->fE0 == 0) {
+        srcStride = pic->f10 * 0x180;
+        qwc = srcStride >> 4;
+        if (c->fE0 != 0)
+            dstStride = (c->fE0 >> 4) * 0x180;
+        else
+            dstStride = srcStride;
+        passes = 1;
+    } else {
+        dstStride = (c->fE0 >> 4) * 0xC0;
+        srcStride = (pic->f10 >> 1) * 0x180;
+        passes = 2;
+        qwc = srcStride >> 4;
+    }
+    for (pass = 0; pass < passes; pass++) {
+        to = dst;
+        for (i = 0; i < pic->fC; i++) {
+            DisableInterrupts();
+            *(volatile u32*)0x1000D480 = 0;
+            *(volatile u32*)0x1000D410 = src;
+            *(volatile u32*)0x1000D420 = qwc;
+            *(volatile u32*)0x1000D400 = 0x101;
+            EnableInterrupts();
+            while (*(volatile u32*)0x1000D400 & 0x100) {
+            }
+            DisableInterrupts();
+            *(volatile u32*)0x1000D080 = 0;
+            *(volatile u32*)0x1000D010 = to;
+            *(volatile u32*)0x1000D020 = qwc;
+            *(volatile u32*)0x1000D000 = 0x100;
+            EnableInterrupts();
+            while (*(volatile u32*)0x1000D000 & 0x100) {
+            }
+            while (*(volatile u32*)0x1000D020 != 0) {
+            }
+            to += dstStride;
+            src += srcStride;
+        }
+        dst += c->fE4 * 0xC0;
+    }
+}
+
 
 struct Object_2107B8 { u8 pad1[8]; s32 mode; u8 pad2[0xA0]; s32 fieldAC; u8 pad3[0x68]; s32 field118; u8 pad4[0x704]; s32 field820; };
 
@@ -1586,7 +1676,7 @@ struct Ctx_210A80 {
 void func_002107E0(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
 s32 func_002104A8(Ctx_210A80* c, Src_210A80* s);
 void ConvertPictureColours(Ctx_210A80* c, Src_210A80* s);
-s32 func_00210548(Ctx_210A80* c, Src_210A80* s);
+void func_00210548(Ctx_210A80* c, Src_210A80* s);
 s32 func_002107B8(Ctx_210A80* c);
 
 void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)

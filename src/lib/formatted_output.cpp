@@ -19,7 +19,13 @@ struct Buf_1F72A8;
 static u8 g_outputLine[0x80];
 s32 g_outputLineLength = 0;
 
-INCLUDE_ASM(func_001F7270);
+s32 WriteSerialChar(s32 c)
+{
+    while (*(volatile u32*)0x1000F130 & 0x8000) {
+    }
+    *(volatile u8*)0x1000F180 = c;
+    return c;
+}
 
 void PrintToDebugConsole(Buf_1F72A8* b);
 
@@ -42,8 +48,6 @@ void BufferOutputChar(s32 c)
     g_outputLineLength = pos + 1;
     g_outputLine[pos] = (u8)c;
 }
-
-void WriteSerialChar(s32 c);
 
 void WriteConsoleChar(s32 c)
 {

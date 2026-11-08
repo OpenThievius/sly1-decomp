@@ -55,6 +55,13 @@ What else was measured:
   func_00210E00, func_00211348). tools/volatile_slots.py writes out what that
   assembler did for every file built with 2.9-ee-991111, after OpenRAC's
   rac1-decomp: every library function matched before stays EXACT with it.
+  The same assembler filled a return's slot (`j $31` in reorder mode) with the one real
+  instruction before it, where ours leaves a nop (2026-11-08): a volatile store
+  (func_001F7270's write to the serial port) or the `dsra $r,$r,32` that ends the
+  compiler's two-instruction 64-to-32-bit truncation, which the compiler never puts in a slot
+  itself (func_002115F8, func_001F7390). A load or a macro (`li`) stays, as retail leaves a
+  volatile load and a `li` before a call (func_00202DA0, func_001F9AD8); tools/volatile_slots.py
+  does this too.
 - **`-fno-exceptions`.** Without it every file gets C++ exception frame records
   in `.data`; retail has only four such records, all in library code.
 - **`-fno-rtti`.** Retail's game vtables (the method tables of its C++ classes)

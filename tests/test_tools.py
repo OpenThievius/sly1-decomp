@@ -930,6 +930,19 @@ class VolatileSlotTest(unittest.TestCase):
         apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(apart), apart)
 
+    def test_a_shift_or_store_before_a_return_moves_into_its_slot(self):
+        asm = "\tdsll\t$2,$2,32\n\tdsra\t$2,$2,32\n\tj\t$31"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out, ["\tdsll\t$2,$2,32", "\t.set\tnoreorder", "\tj\t$31", "\tdsra\t$2,$2,32",
+                               "\t.set\treorder"])
+        store = "\t#.set\tvolatile\n\tsb\t$4,0($3)\n\t#.set\tnovolatile\n\tj\t$31"
+        self.assertEqual(volatile_slots.fill(store).split("\n")[2:5], ["\t.set\tnoreorder", "\tj\t$31", "\tsb\t$4,0($3)"])
+
+    def test_a_load_a_macro_or_a_label_before_a_return_stays(self):
+        for asm in ("\tlw\t$2,0($4)\n\tj\t$31", "\tli\t$2,0x80000000\n\tj\t$31",
+                    "\taddu\t$2,$2,$3\n$L5:\n\tj\t$31", "\tmove\t$31,$2\n\tj\t$31"):
+            self.assertEqual(volatile_slots.fill(asm), asm)
+
 
 class AsmFuncTest(unittest.TestCase):
     @staticmethod
