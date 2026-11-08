@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 888/904, checked 2026-11-08
-// NEAR (night-size4): the target's 0x690 flag is read from the target (it was read from self), the zero returns that retail sends straight to the epilogue are joined with || (bnez with move v0,zero in the slot), and the flag test is `(x & 1) == 0` (retail's andi, bnezl). Still differs: self in s1 and the table in s2 (retail s2 and s1), the return after func_001CB3D0 (retail bnez to the epilogue, ours beqzl), the switch's compare tree and the ternary for pos (retail movn). Was: the frame (0x100), the calls and both VU0 loops are retail's. Differences: the early
-//       returns (retail jumps straight to the epilogue with the value in each delay slot; ours
-//       shares a block), the corner count: retail keeps the 4 as a register it loads twice (`li v0, 4;
-//       sll a0, v0, 4` and `blez v0`) where ours folds it, the flag test `(x & 1) == 0` (retail
-//       andi, bnel; ours xori, beqz), the switch's range tests, and the registers ($s2 for the object
-//       in retail, $s1 here). About 20 compiles.
+// SIZE 896/904, checked 2026-11-08
+// NEAR (2026-11-08, night-sizex2): 896 bytes for retail's 904 (was 888). The corner count set in
+// each arm of the table's switch (n = 4 at a join is no constant to CSE, so the allocation and
+// the loop take it from a register as retail does) and a third `case 3: break;` for the
+// switch's tree (retail's compares are bltz, slti 2, then 2) gave 8 bytes and about half the
+// differing words. Still differs: self in s3 and the table in s2 here (retail s2 and s1, with
+// the table copied to s3 and the count put in s1 before the loop: `move s3, s1; li s1, 4`, and
+// the count loaded again as `li v0, 4` for the allocation's size and the loop's first test),
+// the return after func_001CB3D0 (retail bnez to the epilogue, ours beqzl) and the compare
+// tree's order (default, the bltz, first in retail).
+// Before (night-size4): the target's 0x690 flag is read from the target, the zero returns that
+// retail sends straight to the epilogue are joined with || (bnez with move v0,zero in the slot),
+// and the flag test is `(x & 1) == 0` (retail's andi, bnezl).
 #include "common.h"
 #include "switched_collider.h"
 #include "collider.h"
@@ -81,20 +87,24 @@ s32 func_001B7280(CompanionAgent* self)
     }
     if (F(s32, 0xCD0) & 2) return 1;
     f32* table;
+    s32 n;
     switch (v) {
     case 0:
     case 1:
         table = D_00274660;
+        n = 4;
         break;
     case 2:
         table = D_00274620;
+        n = 4;
+        break;
+    case 3:
         break;
     }
     Vec02* pos = F(PlacedObject*, 0x734) != 0 ? &F(PlacedObject*, 0x734)->v140 : &self->v140;
     PushBackMemoryMark();
     Vec02 lo = *pos;
     Vec02 hi = *pos;
-    s32 n = 4;
     Vec02* buf = (Vec02*)AllocateBackMemory(n << 4);
     Collider*** listp;
     s32 count;

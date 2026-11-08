@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1448/1436, checked 2026-11-08
-// NEAR: the gauge loop's constants. Retail keeps 1, 9, 60, 320 and the screen mapping's 1728,
-// 16, 0.4545 and 1936 in f23..f31 and loads 1/9, 1/15, 55, 0.5 and 372.8 inside the loop; ours
-// (90 insns at the loop pass) also moves 55 and 372.8 out (life 5 and 4), so the FPR and GPR
-// assignment shifts (one callee-saved GPR fewer: frame 0x140 against 0x150; retail keeps the
-// %hi of g_camera and both colours in s3..s5). The state-1 labels follow retail's calls.
-// Tried: 1, 9, 60, 320 as named locals; x1, y1 after the colour choice.
+// BYTES 670/1436 (46.7%), checked 2026-11-08
+// NEAR (2026-11-08, night-sizex2): the same size as retail now (was 1448). The gauge loop's
+// constants: retail keeps 1, 9, 60, 320 and the screen mapping's 1728, 16, 0.4545 and 1936 in
+// f23..f31 and loads 1/9, 1/15, 55, 0.5 and 372.8 inside the loop. The loop pass (-dL) showed
+// why ours moved 55 and 372.8 out: each was one pseudo used twice (life 5 and 4), which loop.c
+// moves at 90 insns; one float temporary assigned 55 and then 372.8 is set twice in the loop,
+// so neither is a movable and both stay, as retail's. The colour as a pointer chosen by an if
+// (D_002610D8, else D_002610E0) and copied gives retail's bc1t over the second address. Still
+// differs: retail also keeps the high halves of both colours' addresses in s4 and s3 (loop.c
+// moved them; here only &D_002610D8 is kept, whole, in a saved register), so its frame is 16
+// bytes larger and the saved registers and FPRs of the rest are numbered
+// differently; the ternary, an if/else of pointers and a struct copy in each arm were tried.
 #include "common.h"
 #include "screen_element.h"
 #include "packet_writer.h"
@@ -67,11 +72,17 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     for (s32 i = 0; i < 8; i++) {
         f32 lo = (f32)i * (1.0f / 9.0f);
         f32 hi = lo + 1.0f / 15.0f;
-        f32 x0 = (one - lo) * 55.0f - inset;
-        f32 x1 = ((one - hi) * 55.0f + one) - inset;
-        f32 y0 = 372.800018f - lo * height;
-        f32 y1 = 372.800018f - hi * height;
-        PanelColor c = ((lo + hi) * 0.5f <= g_camera->f478) ? D_002610D8 : D_002610E0;
+        f32 k = 55.0f;
+        f32 x0 = (one - lo) * k - inset;
+        f32 x1 = ((one - hi) * k + one) - inset;
+        k = 372.800018f;
+        f32 y0 = k - lo * height;
+        f32 y1 = k - hi * height;
+        const PanelColor* src = &D_002610D8;
+        if (!((lo + hi) * 0.5f <= g_camera->f478)) {
+            src = &D_002610E0;
+        }
+        PanelColor c = *src;
         AddGifRgbaEntry(gs, *(u32*)&c);
         s32 sy0 = CenterFrameMath::ScreenY(y0);
         AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(center - x0), sy0, 0, 0);

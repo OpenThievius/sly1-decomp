@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1060/1072, checked 2026-11-08
-// BYTES 0/0, checked 2026-11-07
-// NEAR (2026-11-07, worker night-large1): the trigger zone's start: the walk of its children
-// (quads for state 0, rotations for state 1) and the axes of each state, retail's code to the end
-// of the walk and through state 0. The switch's compare tree is retail's with an empty case 2
-// (cases 0, 1 alone test 0 first). In state 1 retail forms the last rotation's address and copies
-// it (move a0, a1) before the row's address, and stores the 100.0 weight twice (once more after
-// the first MulAddX); here CSE drops the second store whatever the order of the three products
-// (four orders tried), and the registers of the rest follow.
+// BYTES 1052/1072 (98.1%), checked 2026-11-08
+// NEAR (2026-11-08, night-sizex2): the same size as retail now (was 1060), 14 words differ. The
+// trigger zone's start: the walk of its children (quads for state 0, rotations for state 1) and
+// the axes of each state. In state 1 retail forms the last rotation's address and copies it
+// (move a0, a1) before the row's address: the row's address taken through an inline accessor
+// (RowOf), whose parameter is a register of its own, gives the copy in each of the three arms;
+// with it the 100.0 weight is stored twice as retail's. Still differs, VU0 registers only: from
+// the up vector's product on, retail's vf1 and vf2 are swapped (up, last and the difference in
+// vf2, side and the sum in vf1); the products as Vec values, the rows read first, the products
+// stored in other orders and the difference kept in a register change nothing.
 #include "common.h"
 #include "flag_table.h"
 #include "asm_func.h"
@@ -55,6 +56,11 @@ void CopyMemory(void* dst, void* src, s32 n);
 extern const Vec02 g_unitXVector;
 extern const Vec02 g_unitYVector;
 extern const Vec02 g_unitZVector;
+
+static inline Vec02* RowOf(Mat02* m, s32 i)
+{
+    return &m->r[i];
+}
 
 void func_0013F290(TriggerZone* self)
 {
@@ -114,19 +120,19 @@ void func_0013F290(TriggerZone* self)
             rows.r[0] = ((Mat02*)self->entries)->r[2];
             side = &((Mat02*)self->entries)->r[1];
             up = &g_unitYVector;
-            last = &((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[1];
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 1);
             rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[2];
         } else if (0.9f < dir.y) {
             rows.r[0] = ((Mat02*)self->entries)->r[0];
             side = &((Mat02*)self->entries)->r[2];
             up = &g_unitZVector;
-            last = &((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[2];
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 2);
             rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[0];
         } else {
             rows.r[0] = ((Mat02*)self->entries)->r[1];
             side = &((Mat02*)self->entries)->r[0];
             up = &g_unitXVector;
-            last = &((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[0];
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 0);
             rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[1];
         }
         if (self->parent != 0) {

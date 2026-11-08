@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 344/356, checked 2026-11-08
-// NEAR (2026-11-08, night-gamec): the move: retail computes i*16 + self once and copies it for the source (move a1,a0), and copies the count from v1 to a0 before the scan; the rest is register choice
+// SIZE 352/356, checked 2026-11-08
+// NEAR (2026-11-08, night-sizex2): 352 bytes for retail's 356 (was 344): the scan through an entry pointer (e++) gives retail's loop body. Still differs: retail copies the count from v1 to a0 before the scan and computes i*16 + self once and copies it for the source (move a1,a0); an n variable, the entry's address as a variable, an inline taking it, and while forms were tried. Before (night-gamec): the move: retail computes i*16 + self once and copies it for the source (move a1,a0), and copies the count from v1 to a0 before the scan; the rest is register choice
 // In the context of its file, src/main/camera.cpp: its declarations before the function, bodies cut.
 #include "common.h"
 #include "shapes.h"
@@ -385,8 +385,9 @@ void MoveMemory(void* dst, void* src, s32 bytes);
 void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, s32 arg)
 {
     s32 i;
-    for (i = 0; i < self->stackCount; i++) {
-        if (self->stack[i].key < key) {
+    CameraControllerEntry* e = self->stack;
+    for (i = 0; i < self->stackCount; i++, e++) {
+        if (e->key < key) {
             break;
         }
     }
