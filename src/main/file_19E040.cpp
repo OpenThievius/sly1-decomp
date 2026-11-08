@@ -216,7 +216,7 @@ void AppendToList(List01 *a, ObjectGatherer *b);
 
 void EndEffect();
 
-void HandleEffectContact();
+s32 HandleEffectContact();
 
 void MoveEffect();
 

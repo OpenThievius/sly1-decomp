@@ -26,7 +26,7 @@ typedef int V128_158480 __attribute__((mode(TI)));
 void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
 void BuildAxisAngleMatrix(void* axis, Mat4* mat, f32 angle);
 void MultiplyMatrices(void* out, void* b, void* in);
-void ScaleMatrix(void* out, void* in, V128_158480 q);
+void* ScaleMatrix(void* out, void* in, V128_158480 q);
 void AddMatrices(f32* a, f32* b, f32* out);
 
 void TurnMatrixBySpin(Obj_158480* self, f32* out, f32 f)

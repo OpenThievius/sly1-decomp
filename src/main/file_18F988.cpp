@@ -93,7 +93,7 @@ void ActivateSwitchedCollider(void* value);
 // The point-graph query FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
 struct GraphQuery { u8 data[4]; };
 struct GraphQueryOwner { u8 head[0x34]; GraphQuery part; };
-void FindPointGraphPath(GraphQuery* part);
+s32 FindPointGraphPath(GraphQuery* part);
 void SnapPointToPointGraph(GraphQuery* part);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);

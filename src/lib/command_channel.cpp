@@ -81,7 +81,7 @@ s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 s32 StartIopDmaFromInterrupt(Transfer_1FA4F8* transfers, s32 n);
 s32 StartIopDma(Transfer_1FA4F8* transfers, s32 n);
-void HandleCommandInterrupt(void);
+s32 HandleCommandInterrupt(void);
 void WriteBackDataCacheRange(void* data, s32 size);
 
 void SetUpTlb(void)

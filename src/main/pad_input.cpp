@@ -119,7 +119,7 @@ void UpdatePadRouting()
 
 void* FillMemory(void* p, s32 value, s32 size);
 void* ReservePermanentMemory(s32 size);
-void OpenPadPort(s32 a, s32 b, s32 c);
+s32 OpenPadPort(s32 a, s32 b, s32 c);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
 void InitPadRecord(PadRecord* self, s32 a, s32 b)

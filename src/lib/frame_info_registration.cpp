@@ -14,7 +14,7 @@ extern u8 D_0027B198[];
 static u8 D_0062C540[0x18];
 
 void RegisterFrameInfo(u8* begin, u8* object);
-void DeregisterFrameInfo(u8* begin);
+void* DeregisterFrameInfo(u8* begin);
 
 void RegisterProgramFrameInfo(void)
 {

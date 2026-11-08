@@ -53,7 +53,7 @@ extern s32 D_0027A600;
 
 void CreateDiscSemaphores(void);
 void DeleteDiscSemaphores(void);
-void InstallDiscCallbackHandler(void);
+s32 InstallDiscCallbackHandler(void);
 extern "C" s32 GetCurrentThreadId(void);
 extern "C" int PrintBuffered(const char* fmt, ...);
 s32 SyncDiscSCommand(s32 a);

@@ -283,7 +283,7 @@ typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1
 void StepCollider(Collider* self, f32 t);
 void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
-void func_00141D88(const Vec02* a0, void* a1, void* a2, s32 a3, ColliderSpan* out, f32 radius);
+s32 func_00141D88(const Vec02* a0, void* a1, void* a2, s32 a3, ColliderSpan* out, f32 radius);
 void LaunchContactListObject(ContactListObject* self);
 extern f32 g_gameTime;
 

@@ -62,7 +62,7 @@ void FreeObjectMemory(OutputBuffer* a0);
 
 void CopyMemory(void* dst, void* src, s32 bytes);
 s32 PrintBuffered(void* a, void* b);
-void WriteFile(s32 a, void* b, s32 n);
+s32 WriteFile(s32 a, void* b, s32 n);
 
 void CopyMemory(void* dst, void* src, s32 count);
 void FlushOutputBuffer(OutputBuffer* self);
