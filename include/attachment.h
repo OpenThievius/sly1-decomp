@@ -84,7 +84,7 @@ struct Rec2195_224 {
             s32 f98;            // 0x98: 0 with flag 0x20 (func_00128C10); bit 2 set or cleared by func_001C4578 when fB0 has 0x20
         };
     };
-    u8 padA0[0xA4 - 0xA0];  // 0xA0
+    s32 fA0;                // 0xA0: set, the owner's transform is unscaled by its parent's (func_00125C90)
     s32 fA4;                // 0xA4: whether q60 is set (func_001261C0)
     u8 padA8[0xB0 - 0xA8];  // 0xA8
     s32 fB0;                // 0xB0: the flags; bit 0x20 gives the value at +0x8C
