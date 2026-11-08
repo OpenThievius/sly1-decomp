@@ -193,7 +193,6 @@ func_0017ABE8	0017ABE8	360	inline	C with inline assembly: 128-bit MMI instructio
 func_0017AF38	0017AF38	972	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017BCD0	0017BCD0	1880	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017C428	0017C428	568	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_0017C718	0017C718	1680	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017D248	0017D248	912	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017D5D8	0017D5D8	1796	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017E088	0017E088	828	inline	C with inline assembly: VU0 macro instruction in the compiler's frame

@@ -19,6 +19,8 @@
 #include "on_off_object.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "pad_record.h"
+#include "camera.h"
 
 // The entry queue (class 0x8F): its set-up, the functions that start, advance, bind and fill it,
 // and the script commands that add entries. Its .rodata (0x24B000-0x24B054) is the jump tables
@@ -190,7 +192,163 @@ void AdvanceEntryQueue(EntryQueue* self)
         self->f48 = 0;
 }
 
-INCLUDE_ASM(func_0017C718);
+void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
+s32 ChoosePlayerTargetByCost(Player* self, void* target);
+void SetPlayerState(Player* self, s32 a, s32 b);
+f32 WrapAngle(f32 a);
+void ProjectPointToCamera(Camera* self, Vec02* in, Vec02* out);
+extern f32 g_gameTime;
+extern f32 D_00274F14;
+
+struct TrackShape_17C718;
+struct TrackShapeDesc_17C718 {
+    void* m0;
+    void (*m1)(TrackShape_17C718* self, f32 t, Vec02* pos, Vec02* dir);   // 0x04
+    void (*m2)(TrackShape_17C718* self, f32 t, Vec02* pos, s32 a);        // 0x08
+    u8 pad0C[0x1C - 0x0C];
+    f32 (*m7)(TrackShape_17C718* self);                                   // 0x1C: the length
+    f32 (*m8)(TrackShape_17C718* self);                                   // 0x20: the length
+};
+struct TrackShape_17C718 { TrackShapeDesc_17C718* desc; u8 pad04[4]; s32 looped; };
+struct TrackRecord_17C718 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; TrackShape_17C718* shape; };
+
+void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 c;
+    Vec02 d;
+    Vec02 dir;
+    f32 heading;
+    QueueEntry* e = (QueueEntry*)self->f48;
+    Player* p = (Player*)self->f3C;
+    if (e == 0) {
+        p->f634 = 0.0f;
+        if (p->f2220 == 6) {
+            pad->keyA8 |= 0x20;
+        }
+        return;
+    }
+    {
+        BaseObject* o = (BaseObject*)FindFirstObjectById(p->world, 0x104, e->id, self->f4C);
+        switch (e->kind) {
+        case 4:
+            if (o != 0) {
+                GetNodeAnchorAndHeading(self, o, 0, &heading);
+                p->f630 = p->f638 = heading;
+            }
+            p->f634 = 0.0f;
+            if (p->f2220 == 6) {
+                pad->keyA8 |= 0x20;
+            }
+            return;
+        case 5:
+            if (p->f2220 == 2 && o != 0) {
+                if ((p->f2228 == 2 && D_00263E40 < g_gameTime - p->f222C) || (p->f2228 == 3 && D_00263E44 < g_gameTime - p->f222C)) {
+                    if (IsObjectOfKind(o, 0x81) || IsObjectOfKind(o, 0x71) || IsObjectOfKind(o, 0x6F) || IsObjectOfKind(o, 0x7F) || IsObjectOfKind(o, 0x70) || IsObjectOfKind(o, 0x76)) {
+                        SetPlayerState(p, 2, ChoosePlayerTargetByCost(p, o));
+                    }
+                }
+            }
+            if (e->value == 2 && p->f2228 == 2 && p->f2498 != 0) {
+                SetPlayerState(p, 2, 3);
+            }
+            p->f634 = 0.0f;
+            return;
+        case 6:
+            if (o != 0) {
+                if (p->f2220 == 6 && p->f239C == 4) {
+                    TrackRecord_17C718* r = (TrackRecord_17C718*)p->f23BC;
+                    TrackShape_17C718* s = r->shape;
+                    void* frame = r->frame;
+                    if (s->desc->m1 != 0) {
+                        s->desc->m1(s, p->f23C0, &a, &b);
+                    }
+                    TransformPointBetweenFrames(frame, 0, &a, &c);
+                    TransformDirectionBetweenFrames(frame, 0, &b, &d);
+                    d.z = 0.0f;
+                    Vu0::Set(d, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)));
+                    s32 flip = 0;
+                    p->f630 = ArctangentOfRatio(d.y, d.x);
+                    s = ((TrackRecord_17C718*)p->f23BC)->shape;
+                    if (s->looped != 0) {
+                        f32 fwd;
+                        f32 back;
+                        if (self->f60 < p->f23C0) {
+                            fwd = p->f23C0 - self->f60;
+                            back = s->desc->m7(s) + self->f60 - p->f23C0;
+                        } else {
+                            back = self->f60 - p->f23C0;
+                            fwd = s->desc->m7(s) + p->f23C0 - self->f60;
+                        }
+                        if (fwd < back) {
+                            flip = 1;
+                        }
+                    } else if (self->f60 < p->f23C0) {
+                        flip = 1;
+                    }
+                    if (flip) {
+                        p->f630 = WrapAngle(p->f630 + 3.14159274f);
+                    }
+                } else {
+                    GetNodeAnchorAndHeading(self, o, &a, 0);
+                    Vu0::Q(b) = Vu0::Sub(Vu0::Q(a), Vu0::Q(p->v140));
+                    p->f630 = ArctangentOfRatio(b.y, b.x);
+                }
+            }
+            p->f634 = __builtin_fabsf(e->valueF);
+            if (p->f2220 == 6 && p->f239C < 2 && p->f239C >= 0) {
+                pad->keyA8 |= 0x20;
+            }
+            return;
+        case 7: {
+            TrackShape_17C718* s = ((TrackRecord_17C718*)p->f2208)->shape;
+            if (s->desc->m2 != 0) {
+                s->desc->m2(s, p->f2410 + D_00274F14, &a, 0);
+                s = ((TrackRecord_17C718*)p->f2208)->shape;
+                if (s->desc->m2 != 0) {
+                    s->desc->m2(s, p->f2410 - D_00274F14, &b, 0);
+                }
+            }
+            TransformPointBetweenFrames(((TrackRecord_17C718*)p->f2208)->frame, 0, &a, &a);
+            TransformPointBetweenFrames(((TrackRecord_17C718*)p->f2208)->frame, 0, &b, &b);
+            ProjectPointToCamera(g_camera, &a, &c);
+            ProjectPointToCamera(g_camera, &b, &d);
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(c), Vu0::Q(d));
+            dir.z = 0.0f;
+            Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitYVector)));
+            s32 flip = 0;
+            p->f630 = ArctangentOfRatio(dir.y, dir.x);
+            pad->f40 = dir.x;
+            pad->f44 = dir.y;
+            s = ((TrackRecord_17C718*)p->f2208)->shape;
+            if (s->looped != 0) {
+                f32 fwd;
+                f32 back;
+                if (self->f64 < p->f2410) {
+                    fwd = p->f2410 - self->f64;
+                    back = s->desc->m8(s) + self->f64 - p->f2410;
+                } else {
+                    back = self->f64 - p->f2410;
+                    fwd = s->desc->m8(s) + p->f2410 - self->f64;
+                }
+                if (fwd < back) {
+                    flip = 1;
+                }
+            } else if (self->f64 < p->f2410) {
+                flip = 1;
+            }
+            if (flip) {
+                p->f630 = WrapAngle(p->f630 + 3.14159274f);
+                pad->f40 = -pad->f40;
+                pad->f44 = -pad->f44;
+            }
+            p->f634 = 1.0f;
+            return;
+        }
+        }
+    }
+}
 
 void AdvanceEntryQueue(EntryQueue* self);
 

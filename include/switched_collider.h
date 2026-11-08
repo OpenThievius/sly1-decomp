@@ -334,7 +334,8 @@ struct Player : TurningCollider {
     void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
-    u8 pad23C0[0x23CC - 0x23C0];
+    f32 f23C0;              // 0x23C0: the place along the record at 0x23BC (DrivePlayerFromEntryQueue)
+    u8 pad23C4[0x23CC - 0x23C4];
     void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
     u8 pad23D0[0x23D4 - 0x23D0];
     void* f23D4;            // 0x23D4
