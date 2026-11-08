@@ -911,7 +911,8 @@ struct PathEmitter {
     s32 f18;                // 0x18
 };
 struct PathEmitters {
-    u8 pad00[0x1C];
+    u8 pad00[0x18];
+    f32 f18;                // 0x18: the grip a path follower using them has in place of its f868 (func_001D7778)
     f32 f1C;                // 0x1C: the most pace a path follower using them may have (func_001D9D78)
     PathEmitter* f20;       // 0x20
     PathEmitter* f24;       // 0x24
@@ -1037,15 +1038,18 @@ struct ModeCollider : SwitchedCollider {
     s32 f610;               // 0x610: the mode (SetModeColliderMode)
     f32 f614;               // 0x614: the clock when the mode was set
     s32 f618;               // 0x618
-    u8 pad61C[0x650 - 0x61C];
+    f32 f61C;               // 0x61C: the angle about z of the matrix at 0x620 outside modes 2 to 4 (func_00179A68)
+    Mat02 m620;             // 0x620: the collider's matrix (func_00179A68)
     void* f650;             // 0x650
     void* f654;             // 0x654
     void* f658;             // 0x658
     u8 pad65C[0x660 - 0x65C];
     void* f660;             // 0x660
-    u8 pad664[0x668 - 0x664];
+    PlacedObject* f664;     // 0x664: the object whose position func_00179A68 takes into 0x660's frame
     void* f668;             // 0x668
-    u8 pad66C[0x680 - 0x66C];
+    u8 pad66C[0x674 - 0x66C];
+    PlacedObject* f674[2];  // 0x674: the two objects func_00179A68 turns toward the aimed point
+    PlacedObject* f67C;     // 0x67C: a third, turned by its own attachment's frame (func_00179A68)
     s32 f680;               // 0x680
     f32 f684;               // 0x684
     u8 pad688[0x690 - 0x688];
@@ -1064,12 +1068,17 @@ struct ModeCollider : SwitchedCollider {
     s32 f6D0;               // 0x6D0
     f32 f6D4;               // 0x6D4
     f32 f6D8;               // 0x6D8
-    u8 pad6DC[0x6E0 - 0x6DC];
+    f32 f6DC;               // 0x6DC: the clock when the 0x40 button was last pressed (func_00179A68)
     s32 f6E0;               // 0x6E0
     void* f6E4;             // 0x6E4
     void* f6E8;             // 0x6E8
-    u8 pad6EC[0x704 - 0x6EC];
-    s32 f704;               // 0x704
+    f32 f6EC;               // 0x6EC: the aim's two values, eased by their speeds (func_00179A68)
+    f32 f6F0;               // 0x6F0
+    f32 f6F4;               // 0x6F4: their speeds
+    f32 f6F8;               // 0x6F8
+    f32 f6FC;               // 0x6FC: the pose's two values, eased by f704 and f708 (func_00179A68)
+    f32 f700;               // 0x700
+    f32 f704;               // 0x704
     f32 f708;               // 0x708
     s32 f70C;               // 0x70C
 };

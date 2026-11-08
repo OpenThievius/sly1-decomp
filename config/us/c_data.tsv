@@ -56,7 +56,7 @@ D_0024D560	0024D560	40	.rodata	src/main/hit_count_collider.cpp
 D_0024D588	0024D588	16	.rodata	src/main/turning_collider.cpp
 D_0024D5A0	0024D5A0	168	.rodata	src/main/file_1C5F18.cpp
 D_0024D650	0024D650	468	.rodata	src/main/agent.cpp
-D_0024DAA0	0024DAA0	52	.rodata	src/main/player_target.cpp
+D_0024DAA0	0024DAA0	80	.rodata	src/main/player_target.cpp
 D_0024DB20	0024DB20	168	.rodata	src/main/player_mode.cpp
 D_0024DBD0	0024DBD0	184	.rodata	src/main/player_request.cpp
 D_0024DC90	0024DC90	24	.rodata	src/main/file_1D62E0.cpp
