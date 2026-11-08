@@ -223,6 +223,11 @@ struct Vu0 {
     // r may be t (func_0019E220) or another GPR (func_0019F620). The result is "=r": stored
     // with sq where it goes straight to a vector local, moved to VU0 with qmtc2 where it is
     // used there. It has no local of its own: retail stores it once, where the C put it.
+    // Known imperfection: the first pextlw overwrites the input's register without declaring
+    // it. Declaring it (a second output tied to the input) forbids the result from taking that
+    // register, which func_0019E220 needs. It is safe because the GPR copy is one the compiler
+    // makes for this asm alone (an f32 lives in an FPR), and dies here; a float that reaches a
+    // GPR by other means must not be passed through Splat.
     static u128 Splat(f32 f)
     {
         u128 r;
