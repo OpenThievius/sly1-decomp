@@ -72,9 +72,13 @@ struct TriggerZone : Collider {
             u8 pad7C0[0x7E0 - 0x7C0];
             s32 count7E0;   // 0x7E0: state 1's entries
             u8 pad7E4[0x7F0 - 0x7E4];
-            Entry28 entries[3];     // 0x7F0
+            Entry28 entries[2];     // 0x7F0: rotations (func_0013F290 reads the last one's rows)
         };
     };
+    Vec02 v850;             // 0x850: state 1: the up axis picked by the zone's facing, times 100 (func_0013F290)
+    Vec02 v860;             // 0x860: state 0: the unit line through the quads; state 1: a row of the last
+                            //        rotation (func_0013F290); negated so that it faces away from v870
+    Vec02 v870;             // 0x870: state 0: -v860; state 1: the next row (func_0013F290)
     s32 id880;              // 0x880: compared with the world's object at +0x2204 (func_0013FD20)
     u8 pad884[0x890 - 0x884];
 };
