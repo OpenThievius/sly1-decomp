@@ -2,6 +2,7 @@
 // BYTES 196/380 (51.6%), checked 2026-11-07
 // NEAR: order: the logic is retail's; the float registers are allocated differently (about 70
 //       lines).
+// Tried (order-class pass 2): the products re-associated four ways (z*(ny*xa), xa*ny*z, ny*xa*z, z*xa*ny): 94 to 98 words, worse than 70.
 #include "common.h"
 
 void ComputeGridBlendWeights(void* self, f32* out, f32 x, f32 y, f32 z)
