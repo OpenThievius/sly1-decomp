@@ -306,11 +306,16 @@ struct Player : TurningCollider {
     s32 f225C;              // 0x225C
     s32 f2260;              // 0x2260
     s32 f2264;              // 0x2264
-    u8 pad2268[0x226C - 0x2268];
+    s32 f2268;              // 0x2268: set, the steer keeps its direction (func_0017D5D8)
     f32 f226C;              // 0x226C
-    u8 pad2270[0x2284 - 0x2270];
+    s32 f2270;              // 0x2270
+    f32 f2274;              // 0x2274
+    f32 f2278;              // 0x2278
+    f32 f227C;              // 0x227C
+    u8 pad2280[0x2284 - 0x2280];
     f32 f2284;              // 0x2284
-    u8 pad2288[0x22A0 - 0x2288];
+    u8 pad2288[0x2290 - 0x2288];
+    Vec02 v2290;            // 0x2290: the steer direction func_0017D5D8 keeps
     f32 f22A0;              // 0x22A0: the time the stick last pushed along or against the link (func_001CD0C8)
     s32 f22A4;              // 0x22A4: the link state to go back to, -1 for none (func_001CD0C8)
     s32 f22A8;              // 0x22A8: set when the link's heading is turned round (func_001CD0C8)
@@ -330,9 +335,10 @@ struct Player : TurningCollider {
     void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8); its +0x54 set keeps an agent from facing the player (func_001CB3D0)
     f32 f23A4;              // 0x23A4
     void* f23A8;            // 0x23A8: its +0x6C set does the same (func_001CB3D0)
-    u8 pad23AC[0x23B0 - 0x23AC];
+    f32 f23AC;              // 0x23AC: the place on the point at 0x23A8 (func_0017F018)
     void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
-    u8 pad23B4[0x23BC - 0x23B4];
+    void* f23B4;            // 0x23B4: the point object the player leaps to (func_0017D5D8)
+    void* f23B8;            // 0x23B8
     void* f23BC;            // 0x23BC
     f32 f23C0;              // 0x23C0: the place along the record at 0x23BC (DrivePlayerFromEntryQueue)
     u8 pad23C4[0x23CC - 0x23C4];
@@ -380,7 +386,9 @@ struct Player : TurningCollider {
     s32 f2590;              // 0x2590
     u8 pad2594[0x25AC - 0x2594];
     s32 f25AC;              // 0x25AC
-    u8 pad25B0[0x25D8 - 0x25B0];
+    u8 pad25B0[0x25C8 - 0x25B0];
+    void* f25C8;            // 0x25C8: the animation whose marker 0x1BB func_0017F018 reads
+    u8 pad25CC[0x25D8 - 0x25CC];
     void* f25D8[5];         // 0x25D8
     u8 pad25EC[0x2674 - 0x25EC];
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
