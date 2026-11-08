@@ -1452,6 +1452,7 @@ func_00158E48	func_00159100	match
 func_00158F10	func_001591C8	match	
 func_00158F80	func_00159238	match	
 func_00159068	func_00159320	match	
+func_001590A0	func_00159358	match	rodata
 func_00159478	func_00159730	match	
 func_00159588	func_00159840	match	
 func_00159680	func_00159938	match	
