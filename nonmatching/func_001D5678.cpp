@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 2324/2348, checked 2026-11-08
 // NEAR (2026-11-08): DrawAngleSortedRing (func_001D5678), first attempt: the points around the
 // anchors projected into camera space, the lowest first, their angles about it and the sort,
 // the hull (a Graham scan against the z axis), the bounds' centre, the points where the hull

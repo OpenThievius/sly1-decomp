@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1408/1416, checked 2026-11-08
 // NEAR (2026-11-08): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
 // where the segment between the two objects at Rec2195_224::p64 and p60 crosses the animator's
 // triangle strip, the strip's coordinates there, offset, clamped and eased into the cursor.
