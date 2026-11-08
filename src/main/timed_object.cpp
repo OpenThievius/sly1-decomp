@@ -455,7 +455,89 @@ void SetStaggeredColliderFrozen(TimedGroup* self, void* p)
     g_groupStaggerDirty = 1;
 }
 
-INCLUDE_ASM(func_001AF820);
+struct DrawPoints {
+    u8 pad0[0xC];
+    s32 count;
+    u8 pad10[0x18 - 0x10];
+    Vec02* points;
+};
+
+void DrawCollider(TimedGroup* self, void* a1, void* a2);
+void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+Vec02* AllocateBackMemory(s32 size);
+f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c);
+
+void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
+{
+    DrawCollider(self, a1, a2);
+    s32 st = self->state;
+    if (st == 8 || st < 0) return;
+    void* fp;
+    if (st < 4) {
+        fp = *(void**)((u8*)self + 0xAE4);
+    } else if (st < 8) {
+        fp = *(void**)((u8*)self + 0xAE8);
+    } else {
+        return;
+    }
+    if (fp == 0) {
+        fp = (void*)self->world->f1D14;
+        if (fp == 0) return;
+    }
+    s32 i = 0;
+    PushBackMemoryMark();
+    Vec02* buf = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
+    while (i < self->groupCount) {
+        TimedGroupChild* g = &self->groups[i];
+        f32 acc = 0.0f;
+        DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
+        s32 n = src->count;
+        f32 total = ComputeTimedGroupRamp(self, g);
+        if (*(s32*)((u8*)g + 0xC) != 0) {
+            s32 lim = *(s32*)((u8*)g + 0x20) + 2;
+            if (lim < n) n = lim;
+        }
+        s32 next = i + 1;
+        s32 k;
+        for (k = 0; k < n; k++) {
+            TransformPointBetweenFrames(self, (void*)0, &src->points[k], &buf[k]);
+        }
+        if (*(s32*)((u8*)g + 0xC) != 0) {
+            buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
+        }
+        s32 last = n - 1;
+        for (k = 0; k < last; k++) {
+            u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
+            f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::Dot(d, d)));
+            f32 rest = total - acc;
+            if (rest < len) {
+                f32 t = rest / len;
+                u128 ws = Vu0::Scalar(1.0f - t);
+                u128 p0 = Vu0::Q(buf[k]);
+                u128 wt = Vu0::Scalar(t);
+                u128 p1 = Vu0::Q(buf[k + 1]);
+                Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
+            }
+            func_001268B8(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
+            acc += len;
+            if (total < acc) break;
+        }
+        switch (self->state) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+        case 6:
+            g->fallScale = acc;
+            break;
+        }
+        i = next;
+    }
+    PopBackMemoryMark();
+}
 
 s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 {
