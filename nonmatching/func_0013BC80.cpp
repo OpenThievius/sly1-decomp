@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 380/384, checked 2026-11-07
+// NEAR: (2026-11-08, night-size3) the size is retail's now: b's rows read as a struct (*(const
+// Vu0::Vec*)&b.r[i]) make the stack stores alias them, so retail's reloads of rows 1 and 2 through
+// v0 = s0+0x110 after each product come back. Still differs: the VU0 registers (retail gives a's
+// rows vf3, vf6, vf5 and b's row 0 vf4, here vf2, vf6, vf4 and vf5) and the order of the dead
+// copies (retail stores each product to 0x30 then 0x60 before the next load; here 0x60 at once and
+// 0x30 after the stores to the object). MulRotation's x, y, z form, Vec stores into m and a Mat02*
+// out were tried.
 #include "common.h"
 #include "child_group_object.h"
 #include "attachment.h"
@@ -19,9 +26,9 @@ extern const Vec02 g_unitZVector;
 static inline Mat02 MulRows(const Mat02& a, const Mat02& b)
 {
     Mat02 m;
-    Vu0::Q(m.r[0]) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
-    Vu0::Q(m.r[1]) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
-    Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    Vu0::Q(m.r[0]) = Vu0::RotateUntied(a, (*(const Vu0::Vec*)&b.r[0]).q);
+    Vu0::Q(m.r[1]) = Vu0::RotateUntied(a, (*(const Vu0::Vec*)&b.r[1]).q);
+    Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, (*(const Vu0::Vec*)&b.r[2]).q);
     return m;
 }
 

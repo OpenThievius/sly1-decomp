@@ -646,6 +646,7 @@ func_00126AC8	func_00126BE8	match
 func_00126BC0	func_00126CE0	match	
 func_00126C58	func_00126D78	match	
 func_00126D60	func_00126E80	match	
+func_00126DE8	func_00126F08	match	
 func_00126F78	func_00127098	match	
 func_00127048	func_00127168	match	
 func_00127378	func_00127498	match	
@@ -1516,10 +1517,12 @@ func_0015AC08	func_0015AEC0	match
 func_0015AD80	func_0015B038	match	
 func_0015AE38	func_0015B0F0	match	
 func_0015AEB0	func_0015B168	match	
+func_0015AF50	func_0015B208	match	rodata
 func_0015B128	func_0015B3E0	match	rodata
 func_0015B4D0	func_0015B788	match	
 func_0015B720	func_0015B9D8	match	
 func_0015B7B8	func_0015BA70	match	rodata
+func_0015BD48	func_0015C000	match	
 func_0015BEF0	func_0015C1A8	match	
 func_0015C058	func_0015C310	match	
 func_0015C0A0	func_0015C358	match	
@@ -1916,6 +1919,7 @@ func_0017D248	func_0017D8A8	match	rodata
 func_0017DCE0	func_0017E340	match	
 func_0017DE88	func_0017E4E8	match	
 func_0017E6D0	func_0017ED30	match	
+func_0017F018	func_0017F678	match	rodata
 func_0017FAC0	func_00180120	match	
 func_0017FC48	func_001802A8	match	
 func_0017FCC8	func_00180328	match	
@@ -2073,6 +2077,7 @@ func_001897F0	func_00189E58	match
 func_00189AF0	func_0018A158	match	
 func_00189B18	func_0018A180	match	
 func_00189C28	func_0018A290	match	
+func_00189D38	func_0018A3A0	match	
 func_00189F58	func_0018A5C0	match	
 func_0018A008	func_0018A670	match	
 func_0018A388	func_0018A9F0	match	
@@ -3534,6 +3539,7 @@ func_001EA4B8	func_001EB530	match
 func_001EA620	func_001EB698	match	
 func_001EA728	func_001EB7A0	match	
 func_001EA798	func_001EB810	match	
+func_001EA818	func_001EB890	match	
 func_001EA918	func_001EB990	match	
 func_001EAA70	func_001EBAE8	match	
 func_001EAAE0	func_001EBB58	match	
@@ -3603,6 +3609,7 @@ func_001ED840	func_001EE8B8	match
 func_001ED908	func_001EE980	match	
 func_001EDDB0	func_001EEE28	match	
 func_001EDE38	func_001EEEB0	match	
+func_001EDEF0	func_001EEF68	match	
 func_001EE290	func_001EF308	match	
 func_001EE2B0	func_001EF328	match	
 func_001EE318	func_001EF390	match	

@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 1120/1108, checked 2026-11-08
 // BYTES 0/0, checked 2026-11-08
-// NEAR (2026-11-08, worker night-large1): CollectTreeNodeSpans, the walk of a segment through a
-// mesh's BSP tree (a stack of 32 entries) that writes a span for each run behind a face, retail's
-// control flow and stores. loop.c moves the zero vector's address (lui, addiu: life 2, savings 2)
-// out of the walk's loop (142 insns at the pass), where retail builds it in the branch; the spare
-// register it takes adds a 16-byte spill to the frame, and the registers and the weights' mfc1
-// order follow. Vec values for the lerps and dots leave it.
+// NEAR (2026-11-08, worker night-large1; night-size3): CollectTreeNodeSpans, the walk of a
+// segment through a mesh's BSP tree (a stack of 32 entries) that writes a span for each run behind
+// a face, retail's control flow and stores. (night-size3) The end point's fallback is a pointer
+// chosen then read (src = top->face, or the zero vector), retail's lq through v0 after the lui and
+// addiu in the branch, which loop.c no longer hoists: 4 bytes long now (1112 against 1108, from
+// 1120). Still differs: retail loads the 1.0 into f0 for top->t and copies it to f21 (one) after
+// the saves, the saved registers of groups and max (s3, s2 here swapped) and the 16-byte spill
+// and the weights' mfc1 order that follow. Vec values for the lerps and dots, and top->t as the
+// literal, change nothing.
 #include "common.h"
 #include "flag_table.h"
 #include "asm_func.h"
@@ -62,11 +65,11 @@ s32 func_0013DFD8(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, Co
                     (groups == 0 || span->group == groups[cur.solid - root])) {
                     Vu0::Q(span->q[1]) = Vu0::MulXSum(Vu0::Vec::Of(*a), Vu0::Vec::Scalar(1.0f - top->t), Vu0::Vec::Of(*b), Vu0::Vec::Scalar(top->t)).q;
                     span->face54 = top->face;
-                    if (top->face != 0) {
-                        span->q[3] = *(Quad16*)top->face;
-                    } else {
-                        span->q[3] = *(Quad16*)D_00248D30;
+                    Quad16* src = (Quad16*)top->face;
+                    if (src == 0) {
+                        src = (Quad16*)D_00248D30;
                     }
+                    span->q[3] = *src;
                     span->time[1] = top->t;
                 } else {
                     if (next - spans >= max) {

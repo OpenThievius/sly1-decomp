@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 292/288, checked 2026-11-08
-// NEAR: every call, store and copy is retail's; the registers differ. Retail keeps &inverse in
-// s0 and computes &scaling (sp+0x80) afresh for FillMemory and the first product; ours keeps
-// &scaling in a saved register across FillMemory (one move more) and gives pos and rot s0/s1
-// where retail has s1/s2. Tried: an array for inverse, pointer locals for pos and rot, a Vec4U
-// scale, a pointer local for inverse, sizeof in FillMemory.
+// NEAR: (2026-11-08, night-size3) the size and every register are retail's now: the clear through
+// an inline function (ClearMatrix, FillMemory of its argument) forms &scaling again for FillMemory
+// and the first product, as retail does, where a direct FillMemory(&scaling, ...) kept it in a
+// saved register. Still differs: the copy step = product before the second product: retail loads
+// rows 2, 3, 0, 1 (v1, v0, t0, a3) and stores rows 2, 3, 0 with row 1 in the call's delay slot;
+// here row 2, 0, 1, 3, row 3 in the slot. Row-by-row copies in all 24 orders, the copy inside the
+// call's argument and the product's return value tried; tools/permute.py --auto found nothing.
 #include "common.h"
 #include "shapes.h"
 
@@ -15,6 +17,12 @@ void* FillMemory(void* p, s32 v, s32 n);
 void InvertRigidTransform(void* a, void* b, Quad16* out);
 Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in);
 void BuildMatrixFromRotationAndTranslation(Quad16* a, Quad16* b, Quad16* dst);
+
+// A matrix of zeros.
+static inline void ClearMatrix(Mat4A* m)
+{
+    FillMemory(m, 0, sizeof(*m));
+}
 
 // The transform that scales by scale along the axes of the frame of rotation rot at pos (the
 // origin and identity when they are null): back into the frame, scaled, out again.
@@ -32,7 +40,7 @@ void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out)
         rot = (Quad16*)&g_identityMatrix;
     BuildMatrixFromRotationAndTranslation(pos, rot, (Quad16*)&frame);
     InvertRigidTransform(pos, rot, (Quad16*)&inverse);
-    FillMemory(&scaling, 0, 0x40);
+    ClearMatrix(&scaling);
     scaling.m[0][0] = scale[0];
     scaling.m[1][1] = scale[1];
     scaling.m[2][2] = scale[2];

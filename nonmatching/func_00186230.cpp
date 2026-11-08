@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 244/240, checked 2026-11-07
-// NEAR: StoreX stores the result as retail does (night-lever2). Still differs, scheduling only: retail puts the sqc2 of the edge vector after the c.lt.s (before the bc1f; ours before the mtc1) and the mfc1 of 1.0 after the div.s. Writing the store of the edge before the dot product or after it changes nothing.
-// In the context of its file, src/main/collider_contact.cpp.
+// NEAR: StoreX stores the result as retail does (night-lever2). (night-size3) The squared length
+// is read with ToFloatMoved: retail's mtc1 follows its qmfc2 and the edge's sqc2 moves after the
+// c.lt.s, as there; the size is retail's. Still differs, VU0 registers only: retail loads p early
+// (vf2, before the qmfc2) and keeps a in vf3 and the dot's 1.0 in vf4, here a in vf2, the 1.0 in
+// vf3 and p in vf1; the final square root in vf1 (here vf2), and the mfc1 of 1.0 comes after the
+// div.s in retail. The three head statements in all six orders and Vec values tried.
 #include "common.h"
 #include "asm_func.h"
 #include "fpu.h"
@@ -129,7 +133,7 @@ void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
     Vec02 e;
     Vec02 w;
     u128 ev = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 len2 = Vu0::ToFloat(Vu0::Dot(ev, ev));
+    f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(ev, ev));
     Vu0::Q(w) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
     Vu0::Q(e) = ev;
     u128 d;

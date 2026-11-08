@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 724/732, checked 2026-11-07
-// NEAR: 732 bytes, the frame, the calls and every VU0 sequence are retail's. The registers of the
-//       two three-step loops are not: retail holds the first temporary node's address in $s0 and
-//       walks the link records with $a1 and a counter in $a3 (the second loop counts $t0 down),
-//       ours uses $a3 for the records and $t1 for the counter, and loads the vertex count straight
-//       into the register of the result (retail: movz of a copy). About 30 compiles (pointers or
-//       indices for the walks, the node as a pointer variable, the minimum written both ways).
+// NEAR: (2026-11-08, night-size3) the size is retail's now: the start node's fields are written as
+// node1's own (retail's sw 48(sp), 52(sp) and its links reloaded from 52(sp)), and the corner's
+// count is read once (corner->links[corner->count++] = l). Still differs, registers only: retail
+// keeps a copy of &node1 in t3 for the search, walks the first loop's links with a1 and its
+// counter in a3 (here a3 and t1) and the second's counter in t0 (here a1), and forms the path's
+// count with a copy of maxOut and movz (move s0,s7; movz s0,v1), where every form of the minimum
+// here (if, ternary both ways, an inline function) gives movn into the count's register. Earlier:
+// about 30 compiles (pointers or indices for the walks, the node as a pointer variable, the
+// minimum written both ways).
 #include "common.h"
 #include "point_graph_object.h"
 #include "placed_object.h"
@@ -69,9 +72,9 @@ s32 func_00191290(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec0
     PathLink links2[3];
     s32 count;
     PathNode* n1 = &node1;
-    n1->pos = a;
-    n1->count = 3;
-    n1->links = (PathLink**)AllocateBackMemory(12);
+    node1.pos = a;
+    node1.count = 3;
+    node1.links = (PathLink**)AllocateBackMemory(12);
     PathNode** tp = tri0;
     PathLink* l = links1;
     for (s32 i = 0; i < 3; i++) {
@@ -80,7 +83,7 @@ s32 func_00191290(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec0
         l->b = c;
         u128 d = Vu0::Sub(Vu0::Q(n1->pos), Vu0::Q(c->pos));
         *(u32*)&l->length = Vu0::ToBits(Vu0::Sqrt(Vu0::DotXY(d, d)));
-        n1->links[i] = l;
+        node1.links[i] = l;
         tp++;
         l++;
     }
@@ -95,8 +98,7 @@ s32 func_00191290(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec0
         l->b = &node2;
         u128 d = Vu0::Sub(Vu0::Q(corner->pos), Vu0::Q(node2.pos));
         *(u32*)&l->length = Vu0::ToBits(Vu0::Sqrt(Vu0::DotXY(d, d)));
-        corner->links[corner->count] = l;
-        corner->count++;
+        corner->links[corner->count++] = l;
         tp++;
         l++;
     }

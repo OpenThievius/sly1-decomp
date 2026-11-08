@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 724/728, checked 2026-11-07
-// NEAR: the control flow, the calls and every VU0 sequence are retail's; the registers are not.
-//       Retail keeps the group list's link in $s8 and the last segment in $s7 (ours the other way
-//       round), and the weights' stores and the two row loads of the blend come in the order
-//       store, load, store, load. About 60 compiles (the weights and rows as temporaries, the
-//       state test as nested ifs or one condition, the width as a ternary or a variable).
+// NEAR: (2026-11-08, night-size3) fixed: the end point is stored to buf[f20 + 1], not buf[f20]
+// (retail's sq at 16(v0)); the call's two 1.0s are one constant (w = a2 ? a2->f40 : 1.0f written
+// in the call, retail's mov.s f12,f13 in the branch's delay slot); the state test is a switch of
+// cases 0-2 and 4-6, retail's compare tree (slti 3, 7, 4) with the store twice. Still differs: the
+// saved registers (retail: self s4, the child's points s5, fp s8, last s7, the copy loop's index
+// s2, count s1 and pointer s0; here s5, s4, s7, s8, s0, s2, s1), and one reload of the next index
+// (lw s0,24(sp)) in the state test's first delay slot, 4 bytes; with the test as one condition (st
+// >= 0 && st != 3 && st < 7) the size is retail's but the tree is not. Earlier: about 60 compiles
+// (the weights and rows as temporaries, the state test as nested ifs or one condition, the width
+// as a ternary or a variable).
 #include "common.h"
 #include "timed_object.h"
 #include "world.h"
@@ -62,7 +67,7 @@ void func_001AF820(TimedGroup* self, void* a1, void* a2)
             TransformPointBetweenFrames(self, 0, &src->points[k], &buf[k]);
         }
         if (*(s32*)((u8*)g + 0xC) != 0) {
-            buf[*(s32*)((u8*)g + 0x20)] = *(Vec02*)((u8*)g + 0x10);
+            buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
         }
         for (s32 k = 0; k < last; k++) {
             u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
@@ -76,15 +81,21 @@ void func_001AF820(TimedGroup* self, void* a1, void* a2)
                 u128 p1 = Vu0::Q(buf[k + 1]);
                 Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
             }
-            f32 w = 1.0f;
-            if (a2 != 0) w = *(f32*)((u8*)a2 + 0x40);
-            func_001268B8(fp, a1, &buf[k], &buf[k + 1], 1.0f, w);
+            func_001268B8(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
             acc += len;
             if (total < acc) break;
         }
         i = next;
-        st = self->state;
-        if (st >= 0 && st != 3 && st < 7) g->fallScale = acc;
+        switch (self->state) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+        case 6:
+            g->fallScale = acc;
+            break;
+        }
     }
     PopBackMemoryMark();
 }
