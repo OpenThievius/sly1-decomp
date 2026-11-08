@@ -223,7 +223,8 @@ struct TurningCollider : SwitchedCollider {
         void* f640;         // 0x640
         Vec02 v640;         // 0x640: class 0x14 sets it from D_00248D30 (func_001DFBE0)
     };
-    u8 pad650[0x660 - 0x650];
+    f32 f650;               // 0x650: the camera's height for the player (func_00172EE0)
+    u8 pad654[0x660 - 0x654];
     Mat02 m660;             // 0x660: the identity at set-up (slot 16); slot 84 hands it on
 
     s32 f690;               // 0x690
@@ -333,7 +334,8 @@ struct Player : TurningCollider {
     f32 f23F4;              // 0x23F4
     u8 pad23F8[0x2410 - 0x23F8];
     f32 f2410;              // 0x2410: the length along the path (func_001D1A80)
-    u8 pad2414[0x2420 - 0x2414];
+    f32 f2414;              // 0x2414: the speed along it (func_00172EE0 scales the path's direction by it)
+    u8 pad2418[0x2420 - 0x2418];
     f32 f2420;              // 0x2420
     f32 f2424;              // 0x2424
     u8 pad2428[0x242C - 0x2428];
@@ -359,7 +361,9 @@ struct Player : TurningCollider {
     void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
     void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
-    u8 pad2518[0x2590 - 0x2518];
+    u8 pad2518[0x2530 - 0x2518];
+    Vec02 v2530;            // 0x2530: an offset of the pose eased to zero (func_00172EE0)
+    u8 pad2540[0x2590 - 0x2540];
     s32 f2590;              // 0x2590
     u8 pad2594[0x25AC - 0x2594];
     s32 f25AC;              // 0x25AC
@@ -368,7 +372,8 @@ struct Player : TurningCollider {
     u8 pad25EC[0x2674 - 0x25EC];
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
     OnOffObject* f2678;             // 0x2678: the record func_001D1260 fills
-    u8 pad267C[0x2684 - 0x267C];
+    u8 pad267C[0x2680 - 0x267C];
+    f32 f2680;              // 0x2680: the last time the pose was stamped (func_00172EE0)
     s32 f2684;              // 0x2684
     f32 f2688;              // 0x2688
     s32 f268C;              // 0x268C
