@@ -2847,14 +2847,106 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
     return 1;
 }
 
-INCLUDE_RODATA(jtbl_0024A1D0);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
+void func_00130C58(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
+void SetPlacedObjectVelocityFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
+void ScatterObjectsAtPoint(void* scatter, Vec02* at, s32 a, s32 b);
+void RotateMatrixUpright(Mat02* m, s32 zero, Mat02* out);
+extern u8 D_00261EF0[];
+void StartSoundEffect(s32 a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-INCLUDE_RODATA(jtbl_0024A1F0);
+void func_0015B7B8(ObjectCycler* self, s32 state)
+{
+    if (self->state == state) {
+        return;
+    }
+    switch (self->state) {
+    case 0:
+    case 3:
+    case 5:
+        self->b2C8 = 0;
+        break;
+    case 2:
+        self->desc->m02(self);
+        break;
+    case 6:
+        SetColliderAnchors(self, 0, 0, 0, 0);
+        self->index = 0;
+        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        break;
+    }
+    (*(PlacedObject**)((u8*)self + 0x5D8))->f88 = 14;
+    self->stateEnd = g_gameClock[1];
+    switch (state) {
+    case 0:
+    case 3:
+    case 5: {
+        self->b2C8 = 11;
+        if (state != 5) {
+            f32 a = RandomFloatInRange(-3.14159274f, 3.14159274f);
+            f32 b = RandomFloatInRange(self->p610.a, self->p610.b);
+            ComputePolarOffset(&self->v5F0, a, b, RandomFloatInRange(self->p618.a, self->p618.b));
+            Vu0::Q(self->v5F0) = Vu0::Add(Vu0::Q(self->v5F0), Vu0::Q(self->v190));
+        }
+        if (state == 5) {
+            u128 d = Vu0::Sub(Vu0::Q(self->v5F0), Vu0::Q(self->pos));
+            Vu0::Q(self->v600) = Vu0::MulX(Vu0::DivX(d, Vu0::Length(d)), Vu0::Scalar(50.0f));
+        } else {
+            f32 a = RandomFloatInRange(-3.14159274f, 3.14159274f);
+            f32 b = RandomFloatInRange(self->p620.a, self->p620.b);
+            ComputePolarOffset(&self->v600, a, b, RandomFloatInRange(self->p628.a, self->p628.b));
+        }
+        f32 m[3][4];
+        f32 t;
+        f32* p = &self->pos.x;
+        f32* q = &self->v150.x;
+        f32* r = &self->v5F0.x;
+        f32* s = &self->v600.x;
+        for (s32 i = 0; i < 3; i++) {
+            m[i][0] = p[i];
+            m[i][1] = q[i];
+            m[i][2] = r[i];
+            m[i][3] = s[i];
+        }
+        func_00130C58(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
+        t = (f32)((s32)(t * 60.0f) + 1) * 0.0166666675f;
+        self->stateEnd += t;
+        if (self->state == 6 && state == 0) {
+            SetPlacedObjectVelocityFromFloats(self, self->v600.x, self->v600.y, 400.0f);
+            self->nextCheckTime = g_gameClock[1] + RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
+        }
+        break;
+    }
+    case 1:
+        StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        ScatterObjectsAtPoint(D_00261EF0, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
+        self->stateEnd += 2.0f;
+        break;
+    case 2:
+        self->desc->m03(self);
+        self->state = state;
+        self->stateStart = g_gameClock[1];
+        return;
+    case 6: {
+        Mat02 m;
+        RotateMatrixUpright(&self->m110, 0, &m);
+        self->desc02()->m1E(self, &m);
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        SetColliderAnchors(self, 3, 0, 3, 0);
+        self->index = 0;
+        self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);
+        self->f66C = g_gameClock[1];
+        self->stateEnd += RandomFloatInRange(self->p650.a, self->p650.b);
+        break;
+    }
+    }
+    self->state = state;
+    self->stateStart = g_gameClock[1];
+}
 
-extern const FloatPair2 D_0024A210 = {0.0f, 4.73242188f};
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
-
-INCLUDE_ASM(func_0015B7B8);
 
 INCLUDE_ASM(func_0015BC78);
 

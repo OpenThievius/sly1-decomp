@@ -48,6 +48,30 @@ void CreatePlayerTwoEntryBlend(Player* self)
     self->f23E0 = avg;
 }
 
+// The path object (+0x2208): a frame at +0x18, a holder at +0x34 whose descriptor has the
+// methods the player calls (slots 1, 2, 8 and 10), and an offset at +0x40 (func_001D1630).
+struct PathHolder;
+struct PathHolderDesc {
+    u8 pad00[4];
+    void (*m1)(PathHolder* self, Vec02* pos, f32 t, Vec02* tangent);  // 0x04
+    void (*m2)(PathHolder* self, Vec02* out, f32 t, s32 a);           // 0x08
+    u8 pad0C[0x20 - 0x0C];
+    f32 (*m8)(PathHolder* self);                                      // 0x20: the length
+    u8 pad24[0x28 - 0x24];
+    void (*m10)(PathHolder* self, Vec02* in, s32 a, s32 b, s32 c, s32 d, f32* out);
+};
+struct PathHolder {
+    PathHolderDesc* desc;
+    u8 pad04[4];
+    s32 closed;             // 0x08: set, a length wraps around the path (func_001D1630)
+    u8 pad0C[4];
+    f32* start;             // 0x10: the length the path starts at (func_001D1630)
+    f32* first;             // 0x14: the smallest length it takes (func_001D1630)
+};
+struct PathObject { const Desc01* desc; u8 pad04[0x14]; void* frame; u8 pad1C[0x34 - 0x1C]; PathHolder* holder; u8 pad38[0x40 - 0x38]; Vec02 v40; };
+
+void func_001D1630(Player* self, PathObject* path, Mat02* out, f32 length);
+
 INCLUDE_ASM(func_001D1630);
 
 // What the player watches while it follows the path (+0x2230) in states 0x17 and 0x1B: a record
@@ -55,7 +79,6 @@ INCLUDE_ASM(func_001D1630);
 struct PathWatch { u8 pad00[8]; struct PathWatchTarget* target; u8 pad0C[8]; f32 f14; };
 struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 
-void func_001D1630(Player* self, void* path, Mat02* out, f32 length);
 void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, const Vec02* zero, Mat02* out, s32 d, s32 e);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, Vec02* angle, Vec02* axis);
@@ -68,7 +91,7 @@ void func_001D1A80(Player* self)
     Vec02 axis;
     Vec02 k;
     Vec02 angle;
-    func_001D1630(self, (void*)self->f2208, &placed, self->f2410);
+    func_001D1630(self, (PathObject*)self->f2208, &placed, self->f2410);
     if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
         PathWatch* w = (PathWatch*)self->watched2230;
         f32 dt = g_gameClock.dt;
@@ -106,18 +129,6 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
         }
     }
 }
-
-// The path object (+0x2208): a frame at +0x18 and a holder at +0x34 whose descriptor has the
-// two methods the player calls (slot 2 at +8 and slot 10 at +0x28).
-struct PathHolder;
-struct PathHolderDesc {
-    u8 pad00[8];
-    void (*m2)(PathHolder* self, Vec02* out, f32 t, s32 a);
-    u8 pad0C[0x28 - 0x0C];
-    void (*m10)(PathHolder* self, Vec02* in, s32 a, s32 b, s32 c, s32 d, f32* out);
-};
-struct PathHolder { PathHolderDesc* desc; };
-struct PathObject { const Desc01* desc; u8 pad04[0x14]; void* frame; u8 pad1C[0x34 - 0x1C]; PathHolder* holder; };
 
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);

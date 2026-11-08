@@ -224,7 +224,8 @@ struct TurningCollider : SwitchedCollider {
         void* f640;         // 0x640
         Vec02 v640;         // 0x640: class 0x14 sets it from D_00248D30 (func_001DFBE0)
     };
-    u8 pad650[0x660 - 0x650];
+    f32 f650;               // 0x650: the camera's height for the player (func_00172EE0)
+    u8 pad654[0x660 - 0x654];
     Mat02 m660;             // 0x660: the identity at set-up (slot 16); slot 84 hands it on
 
     s32 f690;               // 0x690
@@ -288,7 +289,8 @@ struct Player : TurningCollider {
     void* f2200;            // 0x2200
     s32 f2204;              // 0x2204
     s32 f2208;              // 0x2208
-    u8 pad220C[0x2220 - 0x220C];
+    u8 pad220C[0x221C - 0x220C];
+    s32 f221C;              // 0x221C: set, the path's frame is turned about (func_001D1630)
     s32 f2220;              // 0x2220
     f32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
@@ -297,7 +299,8 @@ struct Player : TurningCollider {
     void* f2234;            // 0x2234
     u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C
-    u8 pad2240[0x2248 - 0x2240];
+    f32 f2240;              // 0x2240: a time, compared with the clock while f223C is 4..7 (func_001CAF38)
+    u8 pad2244[0x2248 - 0x2244];
     s32 f2248;              // 0x2248
     s32 f224C;              // 0x224C
     s32 f2250;              // 0x2250
@@ -333,7 +336,8 @@ struct Player : TurningCollider {
     f32 f23F4;              // 0x23F4
     u8 pad23F8[0x2410 - 0x23F8];
     f32 f2410;              // 0x2410: the length along the path (func_001D1A80)
-    u8 pad2414[0x2420 - 0x2414];
+    f32 f2414;              // 0x2414: the speed along it (func_00172EE0 scales the path's direction by it)
+    u8 pad2418[0x2420 - 0x2418];
     f32 f2420;              // 0x2420
     f32 f2424;              // 0x2424
     u8 pad2428[0x242C - 0x2428];
@@ -361,7 +365,9 @@ struct Player : TurningCollider {
     void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
     void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
-    u8 pad2518[0x2590 - 0x2518];
+    u8 pad2518[0x2530 - 0x2518];
+    Vec02 v2530;            // 0x2530: an offset of the pose eased to zero (func_00172EE0)
+    u8 pad2540[0x2590 - 0x2540];
     s32 f2590;              // 0x2590
     u8 pad2594[0x25AC - 0x2594];
     s32 f25AC;              // 0x25AC
@@ -370,7 +376,8 @@ struct Player : TurningCollider {
     u8 pad25EC[0x2674 - 0x25EC];
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
     OnOffObject* f2678;             // 0x2678: the record func_001D1260 fills
-    u8 pad267C[0x2684 - 0x267C];
+    u8 pad267C[0x2680 - 0x267C];
+    f32 f2680;              // 0x2680: the last time the pose was stamped (func_00172EE0)
     s32 f2684;              // 0x2684
     f32 f2688;              // 0x2688
     s32 f268C;              // 0x268C
@@ -399,7 +406,9 @@ struct Player : TurningCollider {
     s32 f2730;              // 0x2730
     u8 pad2734[0x2740 - 0x2734];
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
-    u8 pad2744[0x2750 - 0x2744];
+    s32 f2744;              // 0x2744: mode 2's slow-down held (func_001D2BB8)
+    f32 f2748;              // 0x2748: mode 4's speed-up, 1 while held, eased back to 0 (func_001D2BB8)
+    u8 pad274C[0x2750 - 0x274C];
     void* f2750;            // 0x2750
     u8 pad2754[0x2758 - 0x2754];
     f32 f2758;              // 0x2758
@@ -479,7 +488,11 @@ struct Agent : TurningCollider {
     void* fA74;             // 0xA74
     s32 fA78;               // 0xA78: the number of fA7C entries (func_001CA960)
     Elem08 fA7C[4];         // 0xA7C
-    u8 padAAC[0xAC4 - 0xAAC];
+    Contact03* fAAC;        // 0xAAC: the contacts CollideAgentWithObject gathers; func_001CAF38 handles
+                            // and frees them
+    Vec02 vAB0;             // 0xAB0: the velocity func_001CAF38 launches an object with
+                            // (LaunchObjectWithAgentVelocity hands it on)
+    s32 fAC0;               // 0xAC0: func_001CAF38 lets the player's contacts be while it is set
     s32 fAC4;               // 0xAC4: the number of fAC8 entries (func_001CA720)
     Pend08 fAC8[4];         // 0xAC8
     s32 fAF8;               // 0xAF8

@@ -17,11 +17,11 @@ D_00249E18	00249E18	36	.rodata	src/main/disc_access.cpp
 D_00249E3C	00249E3C	8	.rodata	src/main/flagged_object.cpp
 D_00249E44	00249E44	8	.rodata	src/main/collider_span.cpp
 D_00249E4C	00249E4C	4	.rodata	src/main/camera.cpp
-D_00249E50	00249E50	32	.rodata	src/main/state_notifier.cpp
+D_00249E50	00249E50	64	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	184	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	20	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
-D_0024A120	0024A120	304	.rodata	src/main/file_1549C8.cpp
+D_0024A120	0024A120	368	.rodata	src/main/file_1549C8.cpp
 D_0024A2D0	0024A2D0	1136	.rodata	src/main/file_15F678.cpp
 D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
 D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
@@ -57,7 +57,7 @@ D_0024D588	0024D588	16	.rodata	src/main/turning_collider.cpp
 D_0024D5A0	0024D5A0	56	.rodata	src/main/file_1C5F18.cpp
 D_0024D650	0024D650	468	.rodata	src/main/agent.cpp
 D_0024DAA0	0024DAA0	20	.rodata	src/main/player_target.cpp
-D_0024DB20	0024DB20	112	.rodata	src/main/player_mode.cpp
+D_0024DB20	0024DB20	168	.rodata	src/main/player_mode.cpp
 D_0024DBD0	0024DBD0	184	.rodata	src/main/player_request.cpp
 D_0024DC90	0024DC90	24	.rodata	src/main/file_1D62E0.cpp
 D_0024DCA8	0024DCA8	4	.rodata	src/main/tint_blend_collider.cpp

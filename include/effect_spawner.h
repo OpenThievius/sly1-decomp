@@ -84,7 +84,7 @@ struct EffectSpawner : PlacedObject {
     f32 f330;               // 0x330
     f32 f334;               // 0x334: 1.0, or the volume of the record's box scaled
     f32 margin;             // 0x338: half the side of the box around the target its points wrap in (func_00155868)
-    u8 pad33C[0x340 - 0x33C];
+    f32 f33C;               // 0x33C: the fraction of a spawn carried to the next frame (func_00155AB0)
     f32 f340;               // 0x340: -1.0 at setup
     BaseObject* held344;           // 0x344: objects it must let go of when told (slot 13)
     BaseObject* held348;           // 0x348

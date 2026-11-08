@@ -3083,7 +3083,7 @@ void UpdateAttachedSet(AttachedSet* self)
         if (CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans) <= 0) {
             continue;
         }
-        if (spans[0].f50 == 0) {
+        if (spans[0].face50 == 0) {
             continue;
         }
         f32 speed = c->v150.z;
