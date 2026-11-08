@@ -661,8 +661,64 @@ LINKER_REMNANT(func_001B4180);
 
 ASM_FUNC(func_001B4188);
 
-INCLUDE_RODATA(jtbl_0024D200);
-INCLUDE_ASM(func_001B4330);
+f32 RoundDown(f32 x);
+
+// A value clamped to [lo, hi], as an inline function of its own: each clamp of ConvertHsvToRgb
+// sets its 0 and 1 again.
+static inline f32 ClampTo(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+void ConvertHsvToRgb(Quad_001B4580* hsv, Quad_001B4580* rgb)
+{
+    f32 h;
+    if (0.0f <= hsv->v[0]) {
+        h = ClampTo(hsv->v[0], 0.0f, 360.0f);
+    } else {
+        h = -1.0f;
+    }
+    f32 s = ClampTo(hsv->v[1], 0.0f, 1.0f);
+    f32 v = ClampTo(hsv->v[2], 0.0f, 1.0f);
+    if (s == 0.0f) {
+        Vu0::Q(*rgb) = Vu0::FromFloats(v, v, v);
+        return;
+    }
+    if (h == 360.0f) h = 0.0f;
+    h *= 0.016666668f;
+    s32 i = (s32)RoundDown(h);
+    f32 f = h - (f32)i;
+    f32 p = v * (1.0f - s);
+    f32 q = v * (1.0f - s * f);
+    f32 t = v * (1.0f - s * (1.0f - f));
+    switch (i) {
+    case 0:
+    case 6:
+        Vu0::Q(*rgb) = Vu0::FromFloats(v, t, p);
+        break;
+    case 1:
+        Vu0::Q(*rgb) = Vu0::FromFloats(q, v, p);
+        break;
+    case 2:
+        Vu0::Q(*rgb) = Vu0::FromFloats(p, v, t);
+        break;
+    case 3:
+        Vu0::Q(*rgb) = Vu0::FromFloats(p, q, v);
+        break;
+    case 4:
+        Vu0::Q(*rgb) = Vu0::FromFloats(t, p, v);
+        break;
+    case 5:
+        Vu0::Q(*rgb) = Vu0::FromFloats(v, p, q);
+        break;
+    }
+}
 
 void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
 {
