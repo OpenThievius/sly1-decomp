@@ -14,9 +14,6 @@
 
 // The file's .rodata: the constants only its assembly reads.
 extern const f32 D_0024D588 = 3.40282347e+38f;
-extern const f32 D_0024D58C = 3.40282347e+38f;
-extern const f32 D_0024D590 = 3.40282347e+38f;
-extern const f32 D_0024D594 = 3.40282347e+38f;
 
 // The file's .data, in retail's order.
 f32 D_00274AD0[2] = { 1.0f, -1.0f };
@@ -117,7 +114,39 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
     }
 }
 
-INCLUDE_ASM(func_001C4848);
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+void TransformDirectionBetweenFrames(void* from, void* to, void* in, void* out);
+void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
+
+void func_001C4848(s32 a0, PlacedObject* other, PlacedObject* self, Part07* rec)
+{
+    Vec02 dir;
+    Vec02 pos;
+    Vec02 vel;
+    if (rec->f50 != 0) {
+        rec->f50 = 0;
+        if (rec->span.time[0] != 3.40282347e+38f) {
+            u128 k = Vu0::FromFloatAt(rec->f80);
+            Vu0::Set(vel, k);
+            Vu0::Q(dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(rec->v60), Vu0::Q(rec->v70)), k);
+            Vu0::Q(pos) = Vu0::Add(Vu0::Add(Vu0::Q(self->v140), Vu0::Sub(Vu0::Q(rec->span.q[0]), Vu0::Q(rec->v60))), Vu0::Q(dir));
+            TransformPointBetweenFrames(0, self->parent, &pos, &pos);
+            self->desc02()->m1D(self, &pos);
+            ComputeObjectMotionInFrame(self, 0, &other->v140, &vel, 0, 0, 0);
+            f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(vel), Vu0::Q(rec->span.q[2])));
+            if (d < 0.0f) {
+                TransformDirectionBetweenFrames(0, self->parent, &rec->span.q[2], &dir);
+                const Desc02* ds = self->desc02();
+                Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(dir), Vu0::Scalar(-d));
+                ds->m20(self, &vel);
+            }
+        }
+    }
+}
+
+// The rest of the file's .rodata, after the literal of func_001C4848.
+extern const f32 D_0024D590 = 3.40282347e+38f;
+extern const f32 D_0024D594 = 3.40282347e+38f;
 
 void DrawCollider(void);
 

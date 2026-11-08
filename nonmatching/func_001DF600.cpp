@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 243/256 (94.9%), checked 2026-11-07
+// Tried night-close3, 8 compiles: &d formed after the lq in retail (move a0,sp between the lq and the sq); the reference to Q(d) declared before or after the copy, no reference, Vu0::Set, one expression, p=&d: all give ours or worse.
 // NEAR: identical but for the register that holds the address of the direction vector: retail forms it (move a0,sp) right after the lq of the velocity and keeps it in a0, ours puts it in a2 or v1 and the high half of D_00275898 takes a0 (the sqc2 of the scaled direction then addresses 0(a2)). Tried p = &d, a reference to Q(d), Q(*p), the float read early.
 #include "common.h"
 #include "switched_collider.h"

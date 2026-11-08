@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 84/92 (91.3%), checked 2026-11-07
+// Tried night-close3, 6 compiles: the two dots in named floats, the vector in a value stored with Vu0::Set, the store after the first dot: the same two words.
 #include "common.h"
 #include "placed_object.h"
 #include "vu0.h"

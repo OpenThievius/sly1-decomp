@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 355/376 (94.4%), checked 2026-11-07
+// Tried night-close3, 4 compiles: 15.0 as a named local, Vu0::Set for the two stores: same 7 differing words.
 // NEAR: scheduling only: the normalisation with its length reused for the distance (a hand-written NormalizeOr whose fallback is a struct copy and whose address is formed before the test), the weights and the stores are right; retail loads the 15.0 constant (lui, mtc1) before the second qmfc2 of the length, and stores the 0xD0 float, then 0x70, 0x50, 0x60 where ours comes out in another order (all 24 orders of the four stores tried with tools/permute.py: best 11 bytes differ).
 // In the context of its file, src/main/turning_collider.cpp.
 #include "common.h"

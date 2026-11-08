@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 463/508 (91.1%), checked 2026-11-07
+// BYTES 463/508 (91.1%), checked 2026-11-08
+// Tried night-close3, 2 compiles: step computed after the call, t before bestT: no change or worse.
 // NEAR: 121 of 127 words; the registers differ: the object (a1) and the entry from func_0012CCE8 are in s1 and s0, retail has s0 and s1, and the step and best-time floats are in f23 and f24, retail f24 and f23. Orders of the declarations were tried.
 #include "common.h"
 #include "asm_func.h"

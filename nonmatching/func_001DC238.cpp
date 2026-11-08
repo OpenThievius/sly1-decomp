@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 595/660 (90.2%), checked 2026-11-07
+// Tried night-close3, 2 compiles: the allocation size read before the frame (which helped func_001DC4D0) or before the list setup: no change.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"

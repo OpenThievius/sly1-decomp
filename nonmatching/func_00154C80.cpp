@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 561/604 (92.9%), checked 2026-11-07
+// BYTES 561/604 (92.9%), checked 2026-11-08
+// Tried night-close3, 2 compiles: the third loop with its own counter, all three counters declared in their loops: the same 22 differing words.
 // NEAR: registers only: the same instructions, with the vertex counter in s0 where retail has s1 and the triangle record in s1 where retail has s2.
 #include "common.h"
 #include "globals.h"
