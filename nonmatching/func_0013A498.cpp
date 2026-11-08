@@ -2,6 +2,9 @@
 // SIZE 392/384, checked 2026-11-08
 // NEAR: the loop body, the helper calls (qmtc2, lqc2 x9, vcallms 0x10 twice, cfc2.i, sqc2 x4) and the stack layout are retail's; the scale is a u128 parameter (retail passes the float in a GPR with a 128-bit por) read with ToFloatMoved. Left: register allocation. Retail keeps the kept count in a0 (saved around WrapAngle's call) and the position/extra pointers in s7/s6, the index in s8; ours puts the kept count in a callee-saved register and one pointer in a caller-saved one, and the prologue order differs (retail's qmtc2 first, j = -1 before the saves).
 // Still differs (2026-11-08, vcallms worker): declaring j and kept before the loads, after them, or one each way moves the allocation but never gives retail's (kept in a2 also folds the loop test into slt).
+// Why (2026-11-08, tools/regalloc.py): the s0/s1 swap is r184 (i's offset, 12 refs over 38 insns,
+// priority 0.947) placed before r141 (j's, 6 over 13, 0.923); r141 goes first with a life of 12 or
+// 7 refs. Reading items[j] for the wrap instead of items[i] (all three ways) adds 6 differences.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
