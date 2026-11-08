@@ -7,7 +7,11 @@
 // increment and test (i++, code *= 10, i < 3) before the body, entered by a jump, and loads
 // &t and &c afresh each time (frame 0x80); ours tests at the bottom and keeps &t in a saved
 // register (s6 more, frame 0x90). Also retail keeps the target key in a1 and copies it to s0.
-// Tried: for, for(;;) with a break, do-while, a goto loop.
+// Tried: for, for(;;) with a break, do-while, a goto loop. Found (night-sizex1): as a goto loop
+// entered at the body (goto check; next: code *= 10; i++; m++; if (i >= 3) { the completion test }
+// check: the two keys, goto next on a match) the layout is retail's (increment and test, the
+// completion, the body, then queue), but without loop notes nothing hoists retail's -1 and 100
+// into s5 and s4 (301 lines differ against 264).
 #include "common.h"
 #include "switched_collider.h"
 #include "globals.h"

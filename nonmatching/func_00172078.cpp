@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 304/308, checked 2026-11-08
-// NEAR (2026-11-08, night-size1): now 304 bytes for retail's 308 (was 320), the right frame. Each product is an inline writing its rows straight into a Mat02 of the caller (c, then a, declared in the order retail's frame shows) and to three vector locals both products share (0xA0), and the axis is copied in each arm of the test (cross-jumping leaves retail's shared lq/sq). Still differs: the missing instruction is retail's `addiu v1, v0, 208` (below); the first product's rows 1 and 2 take vf6/vf5 where retail has vf5/vf6 and its y and z stores come before the rows' (retail stores them last); the second product reads f61C's rows at 224/240(v0), where retail forms v1 = v0 + 208 and reads 16(v1), 32(v1) (reading b through a pointer gives that but keeps m's address in s0 for the first product). Tried: the vector stores as struct copies after or before the row's, a pointer-selected axis.
+// BYTES 240/308 (77.9%), checked 2026-11-08
+// NEAR (2026-11-08, night-sizex1): 308 bytes, retail's size and frame now: the second product reads f61C's rows by index through a pointer (MulRotationIntoIndexed, q[i]), which gives retail's `addiu v1, v0, 208` and 16(v1), 32(v1). Still differs (32 lines): the first product's rows 1 and 2 take vf6/vf5 where retail has vf5/vf6, which the second product's registers follow, and the order of the dead stores of x, y, z against the rows (retail stores the first product's y and z last). Tried the chained stores in the other order, separate statements, *(u128*)& stores, both products indexed (320 bytes).
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -49,6 +49,22 @@ static inline void MulRotationInto(Mat02* out, const Mat02& a, const Mat02& b)
     Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
 }
 
+// The same with b's rows read by index through a pointer to them.
+static inline void MulRotationIntoIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const u128* q = (const u128*)&b;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::Q(out->r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    Vu0::Q(y) = Vu0::Q(out->r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+}
+
 void func_00172078(Player* self, Mat02* out, f32 t)
 {
     Vec02 axis;
@@ -62,6 +78,6 @@ void func_00172078(Player* self, Mat02* out, f32 t)
     Mat02 a;
     Mat02 c;
     MulRotationInto(&c, self->rot, m);
-    MulRotationInto(&a, c, ((PlacedObject*)self->f61C)->rot);
+    MulRotationIntoIndexed(&a, c, ((PlacedObject*)self->f61C)->rot);
     *out = a;
 }
