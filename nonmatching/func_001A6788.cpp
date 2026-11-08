@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 620/624 (99.4%), checked 2026-11-07
+// BYTES 622/624 (99.7%), checked 2026-11-07
 // NEAR: one instruction: retail's min.s f1, f0, f1 (the speed, then maxSpeed, into maxSpeed's register); `maxSpeed <? speed` gives min.s f1, f1, f0 and `speed <? maxSpeed` (also with <?=, a local, the division apart) puts the division and the min in f2. Everything else is retail's: the FromFloats velocity, the Normalized struct copy at 0xC0, the turn clamp.
 // In the context of its file, src/main/file_19E040.cpp.
 #include "common.h"

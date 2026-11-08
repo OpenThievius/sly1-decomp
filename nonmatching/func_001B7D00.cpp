@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 550/628 (87.6%), checked 2026-11-07
 // BYTES 0/628, checked 2026-11-07
 // NEAR: the lane tests (ToFloatY, ToFloatZ), the move, the child walk and the frame are retail's; in the rotation retail reads the placement's rows 1 and 2 through a pointer (addiu v0, s0, 0xD0) after storing each product row to the stack, where here all three rows are loaded first and the product rows stored after, so the VU0 registers and the order of the stores differ. Tried MulRotation, MulRotationRows and MulRotationRowsX, the matrix through a pointer local, the result stored through it.
 // In the context of its file, src/main/file_1B7968.cpp.

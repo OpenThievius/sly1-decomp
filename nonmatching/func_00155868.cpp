@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 572/580, checked 2026-11-07
 // BYTES 0/580, checked 2026-11-07
 // NEAR: the wrap loop over the owned records' points is retail's instruction for instruction; in the head retail keeps the first Splat's GPR value (v0) live into the no-target arm, storing hi with sq from it and copying it to VU0 again (qmtc2 vf3) for the MulX, where here hi and the MulX take the VU0 copy made for size's store; the GPRs of the head differ with it. Tried the splat as a u128, a struct copy, a second Splat, the arms swapped, Set.
 // In the context of its file, src/main/file_1549C8.cpp.
