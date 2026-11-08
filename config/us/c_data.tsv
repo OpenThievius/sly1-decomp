@@ -28,7 +28,7 @@ D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
 D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp
 D_0024A7F0	0024A7F0	68	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
-D_0024A860	0024A860	296	.rodata	src/main/player.cpp
+D_0024A860	0024A860	600	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
 D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	48	.rodata	src/main/file_17D248.cpp
