@@ -29,19 +29,24 @@ struct ContactObject {
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
 struct StateNotifier : PlacedObject {
     s32 state;              // 0x2D0
-    u8 pad2D4[0x2D8 - 0x2D4];
+    f32 f2D4;               // 0x2D4: the time the state began (func_00147428)
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
     f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
     u8 pad2E4[0x2E8 - 0x2E4];
     void* f2E8;             // 0x2E8: the object whose message ends it (func_00147EF8)
     void* f2EC;             // 0x2EC
-    u8 pad2F0[0x320 - 0x2F0];
+    u8 pad2F0[0x300 - 0x2F0];
+    Vec02 v300;             // 0x300: state 0 waits for its length to pass 100, state 3 for its z under 25 (func_00147428)
+    u8 pad310[0x320 - 0x310];
     union {
         f32 f320;           // 0x320
         s32 i320;
     };
-    u8 pad324[0x334 - 0x324];
+    PlacedObject* f324;     // 0x324: where the splash goes when it crosses the camera's plane facing away
+    PlacedObject* f328;     // 0x328: and facing it (func_00147428)
+    s32 f32C;               // 0x32C: which side of the camera's plane it was last frame
+    f32 f330;               // 0x330: the time of the last splash
     s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
     s32 f33C;               // 0x33C (unused here)
@@ -62,9 +67,9 @@ struct StateNotifier : PlacedObject {
     };
     s32 f37C;               // 0x37C
     StateListener* listener;         // 0x380
-    u8 pad384[0x388 - 0x384];
+    StateListener* f384;    // 0x384: told the whole units f38C counts in state 7 (func_00147428)
     f32 f388;               // 0x388
-    u8 pad38C[0x390 - 0x38C];
+    f32 f38C;               // 0x38C: f388 per second, added up in state 7
 };
 
 struct SoundNotifier : StateNotifier {};

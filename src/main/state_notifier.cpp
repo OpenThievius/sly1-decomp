@@ -346,9 +346,123 @@ s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
     return 1;
 }
 
-INCLUDE_RODATA(jtbl_00249E50);
 
-INCLUDE_ASM(func_00147428);
+extern f32 D_00261A54;
+extern f32 g_gameClock[];
+extern Player* g_player;
+void UpdatePlacedObject(StateNotifier* self, f32 dt);
+void TransformDirectionBetweenFrames(void* to, void* from, void* in, void* out);
+void func_00146DB0(StateNotifier* self);
+void func_001471B0(StateNotifier* self);
+void CompleteSoundNotifiers(World* self);
+void* GetActiveSwitchedColliderData(void);
+extern World* g_currentWorld;
+
+void func_00147428(StateNotifier* self, f32 dt)
+{
+    s32 below = 1;
+    Vec02 d;
+    UpdatePlacedObject(self, dt);
+    TransformDirectionBetweenFrames(self, 0, D_00261A60, &d);
+    if (!(Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f90))) < 0.0f)) {
+        below = 0;
+    }
+    if (below != self->f32C) {
+        if (RandomFloatInRange(0.0f, 1.0f) < self->f320 && D_00261A54 < g_gameClock[1] - self->f330) {
+            PlacedObject* at;
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f80))) < 0.0f) {
+                at = self->f324;
+            } else {
+                at = self->f328;
+            }
+            if (at != 0) {
+                Effect* e = CreateEffect(0x19, 0);
+                if (e != 0) {
+                    f32 one = 1.0f;
+                    self->f330 = g_gameClock[1];
+                    ((void (*)(Effect*, void*, s32, f32))e->vt->m00)(e, (u8*)at + 0x40, 0, one);
+                    e->p120 = self;
+                    e->life = 1.5f / (one >? __builtin_fabsf(self->v160.z));
+                }
+            }
+        }
+        self->f32C = below;
+    }
+    if (self->state == 7 && self->f384 != 0) {
+        self->f38C = self->f38C + dt * self->f388;
+        if (1.0f <= self->f38C) {
+            ListenerMessage msg;
+            *(s32*)(msg.pad08 + 0x38) = (s32)self->f38C;
+            msg.state = 0x81;
+            msg.sender = self;
+            self->f384->vtbl[31](self->f384, &msg);
+            self->f38C = self->f38C - (f32)(s32)self->f38C;
+        }
+    }
+    switch (self->state) {
+    case 0:
+        if (10000.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v300), Vu0::Q(self->v300)))) {
+            func_00146DB0(self);
+        }
+        func_001471B0(self);
+        break;
+    case 3:
+        if (D_002619EC < g_gameClock[1] - self->f2D4) {
+            self->desc02()->m2F(self, 2);
+            break;
+        }
+        if (self->f33C != 0 && self->v300.z < 25.0f) {
+            self->f33C = 0;
+            self->desc02()->m2F(self, 0);
+            break;
+        }
+        func_00146DB0(self);
+        if (!(1.0f < g_gameClock[1] - self->f2D4)) {
+            break;
+        }
+        ((BaseObject*)self->f2EC)->desc->m02((BaseObject*)self->f2EC);
+    case 6:
+        func_001471B0(self);
+        break;
+    case 4:
+        if (*(s32*)GetActiveSwitchedColliderData() == 0) {
+            self->desc02()->m2F(self, 3);
+        } else if (*(s32*)((u8*)self + 0x370) != 0) {
+            self->desc02()->m2F(self, 5);
+        }
+        break;
+    case 5: {
+        s32* active = (s32*)GetActiveSwitchedColliderData();
+        if (*active != 0) {
+            GameProgress* g = g_saveData;
+            if (g->f19E4 < GetSpareCountLimit()) {
+                goto spare;
+            }
+        }
+        {
+            PlacedObject* o = (PlacedObject*)active[6];
+            Vec02 v;
+            Vu0::Q(v) = Vu0::Add(Vu0::Vec::Of(o->v150), Vu0::Rotate(o->rot, Vu0::Vec::Of(D_00261A70))).q;
+            self->desc02()->m20(self, &v);
+            self->desc02()->m2F(self, 3);
+        }
+        break;
+    spare:
+        if (D_002619E8 < g_gameTime - self->f2D4) {
+            g_saveData->f19E4++;
+            self->desc02()->m2F(self, 2);
+            CompleteSoundNotifiers(g_currentWorld);
+        }
+        break;
+    }
+    case 7:
+        if (g_player->f2424 <= g_gameTime) {
+            self->desc02()->m2F(self, 1);
+        }
+        break;
+    }
+    ClearRootTries(self);
+}
 
 INCLUDE_ASM(func_001478F0);
 

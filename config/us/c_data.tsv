@@ -17,7 +17,7 @@ D_00249E18	00249E18	36	.rodata	src/main/disc_access.cpp
 D_00249E3C	00249E3C	8	.rodata	src/main/flagged_object.cpp
 D_00249E44	00249E44	8	.rodata	src/main/collider_span.cpp
 D_00249E4C	00249E4C	4	.rodata	src/main/camera.cpp
-D_00249E50	00249E50	32	.rodata	src/main/state_notifier.cpp
+D_00249E50	00249E50	64	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	184	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	20	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
