@@ -270,7 +270,10 @@ struct Player : TurningCollider {
     u8 pad904[0xA10 - 0x904];
     s32 fA10;               // 0xA10
     s32 fA14;               // 0xA14: -1, 0 or 1: which three of the blend slots take the weights (func_001D4348)
-    u8 padA18[0x103C - 0xA18];
+    u8 padA18[0x1018 - 0xA18];
+    void* f1018;            // 0x1018: the animation of aim state 10 (func_001C61E0)
+    void* f101C;            // 0x101C: that of aim state 11
+    u8 pad1020[0x103C - 0x1020];
     union {
         u8 f103C[0x20];     // 0x103C
         PlayerBlendEntry blend103C[2];  // 0x103C: the two entries of the path blend (ControlPlayerOnPath)
@@ -278,7 +281,17 @@ struct Player : TurningCollider {
     void* f105C;            // 0x105C: the blend item BuildCombinedBlendAnimation makes of blend103C
     u8 pad1060[0x1064 - 0x1060];
     void* f1064;            // 0x1064
-    u8 pad1068[0x1188 - 0x1068];
+    u8 pad1068[0x106C - 0x1068];
+    f32 f106C;              // 0x106C: the three weights func_00171238 gives SetBlendItemWeights, 0xC apart
+    u8 pad1070[0x1078 - 0x1070];
+    f32 f1078;              // 0x1078
+    u8 pad107C[0x1084 - 0x107C];
+    f32 f1084;              // 0x1084
+    u8 pad1088[0x1090 - 0x1088];
+    void* f1090;            // 0x1090: the blend those weights go to
+    f32 f1094;              // 0x1094: eased toward the side the path turns to (func_00171238)
+    f32 f1098;              // 0x1098: its rate
+    u8 pad109C[0x1188 - 0x109C];
     void* f1188;            // 0x1188
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
@@ -301,7 +314,10 @@ struct Player : TurningCollider {
     void* f2200;            // 0x2200
     s32 f2204;              // 0x2204
     s32 f2208;              // 0x2208
-    u8 pad220C[0x221C - 0x220C];
+    u8 pad220C[0x2210 - 0x220C];
+    s32 f2210;              // 0x2210: cleared by aim state 0 (func_001C61E0)
+    s32 f2214;              // 0x2214: the same
+    u8 pad2218[0x221C - 0x2218];
     s32 f221C;              // 0x221C: set, the path's frame is turned about (func_001D1630)
     s32 f2220;              // 0x2220
     f32 f2224;              // 0x2224
@@ -312,7 +328,7 @@ struct Player : TurningCollider {
     u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C
     f32 f2240;              // 0x2240: a time, compared with the clock while f223C is 4..7 (func_001CAF38)
-    u8 pad2244[0x2248 - 0x2244];
+    void* f2244;            // 0x2244: the aim's animation player (func_001C61E0 replaces it)
     s32 f2248;              // 0x2248
     s32 f224C;              // 0x224C
     s32 f2250;              // 0x2250
@@ -335,7 +351,8 @@ struct Player : TurningCollider {
     s32 f22A4;              // 0x22A4: the link state to go back to, -1 for none (func_001CD0C8)
     s32 f22A8;              // 0x22A8: set when the link's heading is turned round (func_001CD0C8)
     void* f22AC;            // 0x22AC
-    u8 pad22B0[0x2360 - 0x22B0];
+    Vec02 v22B0;            // 0x22B0: the link's acceleration (func_001CC818, or SolvePlayerLinkSystem)
+    u8 pad22C0[0x2360 - 0x22C0];
     f32 f2360;              // 0x2360: the three weights func_001CD0C8 gives SetBlendItemWeights, 0xC apart
     u8 pad2364[0x236C - 0x2364];
     f32 f236C;              // 0x236C
@@ -356,11 +373,13 @@ struct Player : TurningCollider {
     void* f23B8;            // 0x23B8
     void* f23BC;            // 0x23BC
     f32 f23C0;              // 0x23C0: the place along the record at 0x23BC (DrivePlayerFromEntryQueue)
-    u8 pad23C4[0x23CC - 0x23C4];
+    f32 f23C4;              // 0x23C4: added to f23C0 with the speed along the record (func_00171238)
+    s32 f23C8;              // 0x23C8: set, the turn is the other way (func_00171238)
     void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
-    u8 pad23D0[0x23D4 - 0x23D0];
+    void* f23D0;            // 0x23D0: an object whose slots 6, 7 and 35 the aim states 2 and 11 swap with f23D8 (func_001C61E0)
     void* f23D4;            // 0x23D4
-    u8 pad23D8[0x23E0 - 0x23D8];
+    void* f23D8;            // 0x23D8: the other of the pair
+    u8 pad23DC[0x23E0 - 0x23DC];
     f32 f23E0;              // 0x23E0
     f32 f23E4;              // 0x23E4
     u8 pad23E8[0x23F0 - 0x23E8];
@@ -400,17 +419,24 @@ struct Player : TurningCollider {
     void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
     void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
-    u8 pad2518[0x2530 - 0x2518];
+    void* f2518;            // 0x2518
+    u8 pad251C[0x2530 - 0x251C];
     Vec02 v2530;            // 0x2530: an offset of the pose eased to zero (func_00172EE0)
-    u8 pad2540[0x2590 - 0x2540];
+    u8 f2540[0x18];         // 0x2540: the blend set up for aim state 4 (func_001C6D00), with its animation
+    void* f2558;            // 0x2558
+    u8 f255C[0x18];         // 0x255C: state 5's
+    void* f2574;            // 0x2574
+    u8 f2578[0x18];         // 0x2578: state 6's
     s32 f2590;              // 0x2590
-    u8 pad2594[0x25AC - 0x2594];
+    u8 f2594[0x18];         // 0x2594: state 7's
     s32 f25AC;              // 0x25AC
-    u8 pad25B0[0x25C8 - 0x25B0];
+    void* f25B0;            // 0x25B0: the animation of aim state 8 (func_001C61E0)
+    void* f25B4;            // 0x25B4: that of aim state 9
+    u8 pad25B8[0x25C8 - 0x25B8];
     void* f25C8;            // 0x25C8: the animation whose markers state 8 reads (func_0017D248) and whose marker 0x1BB func_0017F018 reads
     u8 pad25CC[0x25D8 - 0x25CC];
     void* f25D8[5];         // 0x25D8
-    s32 f25EC;              // 0x25EC: the number of f25F0 entries (func_00177990 adds up to 32)
+    s32 f25EC;              // 0x25EC: the number of f25F0 entries (func_00177990 adds up to 32); cleared by aim states 3 to 7 (func_001C61E0)
     PlacedObject* f25F0[32]; // 0x25F0: the nodes func_00177990 found, which FindNodeForQuery skips
     Contact03* f2670;       // 0x2670: contacts func_00177990 reads, then gives back to the world's pool
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678

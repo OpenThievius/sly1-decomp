@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 531/592 (89.7%), checked 2026-11-07
+// SIZE 600/592, checked 2026-11-08
 #include "transform_object.h"
 #include "warp_page.h"
 #include "oscillator.h"

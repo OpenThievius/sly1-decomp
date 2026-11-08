@@ -25,7 +25,9 @@
 //   writes (Dot's 1.0) is a second output.
 // - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
 //   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
-//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat. The word is the
+//   operand itself, which reload loads for the qmtc2: into the register of an address that dies
+//   there (lw s0,0(s0)), or a reload register (docs/TOOLCHAIN.md, "Reloads and stores").
 // - A value retail handles in GPRs (a vector moved there with qmfc2 or lq, floats with mfc1, the
 //   MMI pextlw, pextuw, pcpyld, pcpyud, prot3w, then sq or qmtc2) goes in and out as "r": the
 //   compiler makes the moves and the stores, and the helper holds only the MMI instructions
@@ -109,10 +111,14 @@ struct Vu0 {
 
     // A float in memory into the x of a VU0 register: qmtc2 of its bits, which the compiler
     // loads with lw (FromFloat's operand would be loaded into an FPR and moved with mfc1).
+    // "rV": the memory reference stays the asm's operand until reload ('V' admits memory
+    // before it), and reload, finding it offsettable, loads it into a GPR for "r"; a plain "r"
+    // loads it into a pseudo of its own, which local allocation never gives the dying address's
+    // register.
     static u128 FromFloatAt(const f32& f)
     {
         u128 r;
-        __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(*(const u32*)&f));
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(*(const u32*)&f));
         return r;
     }
 
@@ -445,6 +451,19 @@ struct Vu0 {
         return out;
     }
 
+    // Transform with the rows as values the caller loads where they are: retail reads a local
+    // matrix's rows from the frame where Transform's reference keeps the matrix's address in a
+    // register once a call has taken it (func_001F2840's inverse and its vertex loop).
+    static u128 TransformRows(u128 r0, u128 r1, u128 r2, u128 r3, u128 v, f32 w)
+    {
+        u128 s = Scalar(w);
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %5x\n\tvmadday.xyz ACC, %2, %5y\n\tvmaddaz.xyz ACC, %3, %5z\n\t"
+                "vmaddx.xyz %0, %4, %6x"
+                : "=j"(out) : "j"(r0), "j"(r1), "j"(r2), "j"(r3), "j"(v), "j"(s));
+        return out;
+    }
+
     // The vector v through a 4x4 matrix whose rows are m0, m1, m2, m3: the rows weighted by
     // v's x, y, z and w: vmulax.xyzw, vmadday.xyzw, vmaddaz.xyzw, vmaddw.xyzw. The rows are
     // values the caller loads once: a product of matrices stores each row of the result
@@ -650,6 +669,20 @@ struct Vu0 {
     {
         Vec r;
         r.q = Length(a.q);
+        return r;
+    }
+
+    static Vec DotXY(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = DotXY(a.q, b.q);
+        return r;
+    }
+
+    static Vec Sqrt(Vec a)
+    {
+        Vec r;
+        r.q = Sqrt(a.q);
         return r;
     }
 

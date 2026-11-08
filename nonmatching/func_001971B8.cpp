@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 515/540 (95.4%), checked 2026-11-07
+// BYTES 532/540 (98.5%), checked 2026-11-08
+// Still differs (2026-11-08, night-lwx): with FromFloatAt as "rV" the weight's lw s0,%lo(D_0026A828)(s0) is retail's; left: the loop preheader's lui s6 comes before move s2,sp (retail after). list through a pointer local, *(list + i) and o declared first leave it.
 // NEAR: The gauge collider's best-target search (seven instructions differ, all the order of the prologue's lui/addiu and the register of one load). The loop, the frame, every call and the VU0 code are retail's. Retail loads the weight float with `lw s0,%lo(D_0026A828)(s0)` (the result in the register of the address, which then dies) and ours with `lw v0,...(s0)`; the same trait as func_00145E68's last weight. The weight is ScalarAt (Vu0::Scalar for a float in memory), which gives retail's shared slot at 0x170.
 #include "common.h"
 #include "switched_collider.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 451/548 (82.3%), checked 2026-11-08
+// BYTES 532/548 (97.1%), checked 2026-11-08
 // NEAR: registers match; the schedule differs: retail loads the player link source (lw v0,0x2204) and forms the address of the position (move v1,sp) first after the call, ours does it after the Dot.
 #include "common.h"
 #include "asm_func.h"

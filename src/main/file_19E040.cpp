@@ -2240,7 +2240,15 @@ s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void*
     return HandleEffectContact(a0, a1, a2, a3);
 }
 
-INCLUDE_ASM(func_001A31A0);
+// A spinning effect drawn at its centre moved along D_00248D20 by its weight f120.
+void DrawSpinningEffect(Effect* self, void* a1)
+{
+    Vec02 pos;
+    Vec02 k;
+    Vu0::Q(k) = Vu0::FromFloatAt(self->f120);
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(D_00248D20), Vu0::Q(k));
+    DrawEffectAt(self, a1, &pos, self->rot50);
+}
 
 void InitFacingEffect(Effect* self)
 {

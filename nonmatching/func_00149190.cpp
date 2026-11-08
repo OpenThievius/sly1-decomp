@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 532/520, checked 2026-11-07
+// SIZE 544/520, checked 2026-11-08
 #include "common.h"
 #include "state_notifier.h"
 #include "world.h"

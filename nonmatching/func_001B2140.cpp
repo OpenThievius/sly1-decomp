@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 494/536 (92.2%), checked 2026-11-07
+// BYTES 500/536 (93.3%), checked 2026-11-08
 // NEAR: identical in the loop (the whole walk of the body's faces matches) and in the frame; the first block differs: retail makes the weight of f44 first in vf4 (qmtc2 after the lw of 0x44) and the segment end b (vmaddx vf5, stored at 0x10) before the start a (vf1), stores the 0x20 weight slot twice around them, and re-reads the count at 0xA0 after the stores (lw v0,0xA0 / blez); ours computes a first, keeps the count in a0 across the stores. Something makes retail's stores alias the stack count. The weights are FromFloatAt in a 16-byte local (the lw form of Vu0::Scalar). Tried a struct for count and list, and the order of a and b.
 #include "common.h"
 #include "range_record.h"
