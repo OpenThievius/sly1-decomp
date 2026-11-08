@@ -310,6 +310,47 @@ definition or retail's callers. A call to a function that returns a value sets `
 declaration moves the caller's registers around the call even where the value is ignored
 (func_0018F448 and func_00211348 matched once func_0020A538 and func_0020B190 were declared `s32`).
 
+Before guessing at a register difference, ask the compiler why: `python3 tools/regalloc.py FILE
+FUNC` compiles the attempt with the allocators' dumps (`-dl -dg`, `-dp` and `-g` for the line
+notes, kept in `build/regalloc/FUNC/`), aligns our instructions with retail's as regdiff.py does,
+and for each register that differs prints the value behind it:
+
+```
+value r139: ours $t1 -> retail $t2 (2)  [at 211644 21169C]
+  r139 (4 refs over 24 insns, set 2 times, temporary, several blocks)
+  born insn 153, line 16 `do {`
+  dies insn 123, line 31 `self->w18 = n + self->w18;`
+  got $t1 from global-alloc: 5 of 6 in its order
+  $t2 was free when r139 was placed: it took $t1 first
+  in retail, $t1 holds r141 over 23 insns of this life (...); r141 is $t2 in ours, ...
+```
+
+- **A value** is a pseudo register of the `.lreg` dump (`r139`), found through the insn each of
+  our instructions comes from. "born" and "dies" are its first set and last use, with the source
+  line (`vu0.h:859` for a line of a header's inline function).
+- **Who placed it**: local-alloc (a value used in one basic block; it goes first, by priority
+  `floor_log2(refs) * refs / span`, its span counted in its block's insns in sched1's order, ties
+  to the one born first), global-alloc (in the order `.greg` prints; ties to the lower pseudo
+  number, the value the RTL made first), or none (reload gives it a register insn by insn).
+- **What took retail's register**: a value placed before it and live over part of its life
+  ("taken by"), a hard register in use (an argument, a return value, a call's), or nothing
+  ("free"): then it took ours first, and the tool looks for what retail keeps in our register
+  ("in retail, $t1 holds r141"). That value is the one to fix first: `Likely levers` names where
+  each chain starts.
+- **Swaps** (two values whose registers retail exchanges) end with what flips the allocator's
+  order: a shorter life or more refs for one, a longer life for the other, or the other born
+  first. For local values it prints the block's order of their sets and uses: sched1's order,
+  which can differ from the final code's.
+- **A call crossed**: a value crossing a call takes a saved register unless caller-saves keeps
+  it in a caller-saved one; a value with no register lists who holds each register it could take.
+
+The dump does not always say why: a register free over the whole life but not chosen is the
+allocator's order or its own lifetimes (local-alloc's are one insn longer at each end with
+scheduling), and the tool says so rather than guess. Its priorities are the dump's measure, a
+guide to which edit could flip an order, not the compiler's numbers (docs/TOOLCHAIN.md,
+"Constants in one very long block"). Use it after `tools/decls.py` and before the permuter: a
+lever it names (a value kept too long, set too early, tied by a copy) is an edit to try by hand.
+
 For a register-allocation or scheduling tie that no reordering moves, use decomp-permuter
 (https://github.com/simonlindholm/decomp-permuter, MIT). It is never committed: fetch it once into
 `tools/ext/`, which is gitignored, with its own Python environment:
