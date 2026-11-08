@@ -2819,7 +2819,71 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
     return 1;
 }
 
-INCLUDE_ASM(func_001EE090);
+// The launch velocity that throws an object from `from` to `to` at the given speed under the
+// gravity of rec (the world's when null), into out: straight at the target when there is almost
+// no gravity; else 0 when the speed cannot reach it.
+s32 func_001EE090(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec)
+{
+    Vec02 d;
+    u8* g;
+    if (rec != 0) {
+        g = rec + 0x350;
+    } else {
+        g = (u8*)g_currentWorld + 0x1EE0;
+    }
+    f32 grav = *(f32*)(g + 8);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
+    if (__builtin_fabsf(grav) < 1.0f) {
+        u128 k = Vu0::Scalar(speed);
+        u128 n = Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30));
+        Vu0::Q(*out) = Vu0::MulX(n, k);
+        return 1;
+    }
+    f32 zero = 0.0f;
+    f32 h = d.z;
+    f32 sp2 = speed * speed;
+    d.z = zero;
+    f32 up = h >? zero;
+    f32 gu = grav * up;
+    u128 lv = Vu0::Length(Vu0::Q(d));
+    f32 up2 = up * up;
+    f32 half = grav * 0.25f;
+    f32 dist = Vu0::ToFloatMoved(lv);
+    f32 b = gu + sp2;
+    f32 dd = dist * dist;
+    {
+        Vec02 flat;
+        Vu0::Q(flat) = Vu0::Q(d);
+        Vu0::Q(d) = Vu0::DivX(Vu0::Q(flat), lv);
+    }
+    f32 c = grav * half;
+    f32 disc = (-b) * (-b) - c * ((dd + up2) * 4.0f);
+    if (disc < zero) {
+        return 0;
+    }
+    disc = Fpu::Sqrt(disc);
+    f32 den = c + c;
+    f32 n2 = b + disc;
+    f32 n1 = b - disc;
+    f32 t1 = n1 / den;
+    f32 t2 = n2 / den;
+    f32 t;
+    if (zero < t1) {
+        t = t1;
+    } else {
+        if (!(zero < t2)) {
+            return 0;
+        }
+        t = t2;
+    }
+    t = Fpu::Sqrt(t);
+    Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(dist / t));
+    f32 z = (up - grav * (t * 0.5f) * t) / t;
+    out->x = d.x;
+    out->y = d.y;
+    out->z = z;
+    return 1;
+}
 
 void ForwardBallisticLaunchVelocity(void* self)
 {
