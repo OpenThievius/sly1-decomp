@@ -31,12 +31,15 @@
 #include "vu0.h"
 #include "asm_func.h"
 #include "vu0.h"
-// NEAR (2026-11-08, worker vu0w4-e1): the switch, its three tables of cases, the vector sequence and
-// the calls are retail's, in retail's order (cases 1, 16, 11, 10 and 14). Differing: the
-// registers of the loop counter and the chosen state (retail: counter s0, state s2, self s1), the
-// delay slots around the first call and the length test (retail: bc1t with li 8 in the slot and li 5
-// after, here bc1tl), and the store in case 16 that retail shares for the modes 0x2D9 to 0x2DB
-// through v0 (a shared tail; written with a `goto` it moved self to s2).
+// NEAR (2026-11-08, worker vu0w4-e1; night-size3): the switch, its three tables of cases, the
+// vector sequence and the calls are retail's, in retail's order (cases 1, 16, 11, 10 and 14), and
+// (night-size3) the parameters' saved registers and case 1's head are now too: the mode's value is
+// one variable stored once after the arms, the arms flipped (retail branches to the 0x2DA arm).
+// Differing: the registers of the loop counter and the chosen state (retail: counter s0, state s2),
+// the delay slots of the length test (retail: beql with li 5, then bc1t with li 8 in the slot and
+// li 5 after; here beq with li 8 and bc1tl), and the store in case 16 that retail shares for the
+// modes 0x2D9 to 0x2DB through v0, the compare's 0x2DA (here case 0x2DA stores the switch value v1
+// on its own, 8 bytes; a shared tail written with a `goto` moved self to s2).
 extern float g_gameTime[];
 extern u8 g_flagTable[];
 void* FindObjectHandle(s32 a, s32 b);
@@ -95,16 +98,18 @@ void func_001E8A50(KeyedConeAgent* self, s32 a, s32 b)
                 i++;
             } while (i < 6);
         }
-        if (self->fC58 == 0x2DA) {
-            self->fC5C = 5;
-        } else {
+        s32 v;
+        if (self->fC58 != 0x2DA) {
             u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(self->v190));
-            s32 v = 5;
-            if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d))) < 300.0f) {
+            if (!(Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d))) < 300.0f)) {
+                v = 5;
+            } else {
                 v = 8;
             }
-            self->fC5C = v;
+        } else {
+            v = 5;
         }
+        self->fC5C = v;
         self->fC7C = 0;
         break;
     case 16:
