@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 759/904 (84.0%), checked 2026-11-07
+// BYTES 787/904 (87.1%), checked 2026-11-08
 #include "common.h"
 #include "asm_func.h"
 #include "property_descriptor.h"
@@ -16,9 +16,10 @@
 #include "entry_pool.h"
 #include "buffered_stream.h"
 #include "script_value.h"
+// Night-close4 (2026-11-08): float parameters at retail's position in the prototypes (ApproachValueWithRamp(f32, f32, f32, void*, s32), ComputePositionSpringAcceleration(self, dt, a, b, out)) give retail's argument setup order in both calls; 46 lines differ down to 39. Left: case 1's order of loads against the scalars, case 3's vector registers.
 // NEAR (2026-11-08, wave 4): ApplyPoseSourcePosition (func_001218C0): 90.7% of the instructions; the frame, the chain of cases and their operations are retail's. Left: case 1 (retail loads the owner's velocity and C before the scalars and moves dt to f12 before a3), the unit vector of case 3 (retail adds the vsub result in vf3 and goes through vf1 for the length, mine uses vf1 and vf2; building the direction through one variable made it worse), the argument order of the ramp call (floats first) and a few vector registers. The jump table is the C switch's own (the INCLUDE_RODATA line goes). The ramp's profile is read through the owner's table pointer three times as retail does; the clock through the global (a pointer local does not give retail's lui/addiu pair).
-extern f32 ApproachValueWithRamp(void*, s32, f32, f32, f32);
-void ComputePositionSpringAcceleration(PlacedObject* self, Vec02* a, Vec02* b, Vec02* out, f32 dt);
+extern f32 ApproachValueWithRamp(f32, f32, f32, void*, s32);
+void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out);
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 zero, Vec02* rest);
 void EvaluateHermiteVectorSegment(void* a, void* b, void* c, void* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
 extern const Vec02 D_00248D00;
@@ -49,7 +50,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         break;
     case 1: {
         Vec02 C;
-        ComputePositionSpringAcceleration(owner, &A, &B, &C, dt);
+        ComputePositionSpringAcceleration(owner, dt, &A, &B, &C);
         Vu0::Q(C) = Vu0::Add(Vu0::Q(C), Vu0::Q(owner->v170));
         Vu0::Q(owner->pos) = Vu0::MulAddX2(Vu0::Q(owner->pos), Vu0::Q(owner->v150), Vu0::Scalar(dt), Vu0::Q(C), Vu0::Scalar(dt * (dt * 0.5f)));
         Vu0::Q(owner->v150) = Vu0::MulAddX(Vu0::Q(owner->v150), Vu0::Q(C), Vu0::Scalar(dt));
@@ -78,7 +79,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         prof.x = ((f32*)owner->p21C)[0] + r;
         prof.y = ((f32*)owner->p21C)[1] + r;
         prof.z = ((f32*)owner->p21C)[2];
-        f32 reach = ApproachValueWithRamp(&prof, (s32)&E, 0.0f, dist, dt);
+        f32 reach = ApproachValueWithRamp(0.0f, dist, dt, &prof, (s32)&E);
         if (self->mode0 == 6) {
             f32 end = self->f18;
             f32 lim;
