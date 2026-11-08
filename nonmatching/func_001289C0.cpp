@@ -33,7 +33,7 @@ void func_001289C0(PlacedObject* self, void* r)
     self->f88 = ReadBufferedU32(r);
     self->f80 = ReadBufferedFloat(r);
     self->f84 = ReadBufferedFloat(r);
-    *(f32*)&self->pad2A4 = ReadBufferedFloat(r);
+    self->f2A4 = ReadBufferedFloat(r);
     self->f2A8 = ReadBufferedFloat(r);
     if (self->f80 == D_00249A1C) {
         self->f80 = 10000000000.0f;

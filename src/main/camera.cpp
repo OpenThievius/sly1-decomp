@@ -945,7 +945,17 @@ void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* 
     }
 }
 
-INCLUDE_ASM(func_00144AA0);
+void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z)
+{
+    Mat02 m;
+    Vec02 d;
+    Vec02 v;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    BuildBasisFromX(&d, &m);
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
+    Vu0::Q(v) = Vu0::FromFloats(z, len * x, len * y);
+    Vu0::Q(*out) = Vu0::RotateUntied(m, Vu0::Q(v));
+}
 
 void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {

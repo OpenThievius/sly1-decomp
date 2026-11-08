@@ -189,7 +189,7 @@ struct PlacedObject : BaseObject {
                             // the script builtin func_00117880 sets it
     };
     AnimationStart* f2A0;   // 0x2A0
-    u8 pad2A4[0x2A8 - 0x2A4];
+    f32 f2A4;               // 0x2A4: a radius (func_0019E220 sets it with radius3CC, radius3D0 and f2A8)
     f32 f2A8;               // 0x2A8
     SoundRecord* f2AC;          // 0x2AC: a 0x24-byte record
     u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340

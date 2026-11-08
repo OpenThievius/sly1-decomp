@@ -406,8 +406,53 @@ void AddHitCountColliderId(HitCountCollider* self, s32 value)
     self->f698 = n + 1;
 }
 
-// The constant only the assembly function after it loads, in the file's .rodata after the
-// jump table of func_001C3FC8.
-extern const f32 D_0024D584 = 3.40282347e+38f;
+s32 IsObjectAttached(void* p);
+void ConvertPositionToWorld(void* obj, Vec02* out);
+void FadeInPlacedObject(PlacedObject* self, f32 t);
+s32 IsObjectOfKind(void* obj, s32 kind);
+f32 RandomFloatInRange(f32 a, f32 b);
 
-INCLUDE_ASM(func_001C41A0);
+void func_001C41A0(HitCountCollider* self, PlacedObject* obj)
+{
+    s32 i;
+    for (i = 0; i < self->f71C; i++) {
+        if (self->f720[i] == obj) {
+            break;
+        }
+    }
+    s32 n = i + 1;
+    if (!IsObjectAttached(obj)) {
+        Vec02 p;
+        Vec02 best;
+        best = D_00248D30;
+        f32 bestDist = 0.0f;
+        for (s32 j = 0; j < self->f698; j++) {
+            ConvertPositionToWorld((void*)self->f69C[j], &p);
+            f32 nearest = 3.40282347e+38f;
+            for (s32 k = 0; k < self->f71C; k++) {
+                PlacedObject* o = (PlacedObject*)self->f720[k];
+                if (IsObjectAttached(o)) {
+                    u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(o->pos));
+                    nearest = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) <? nearest;
+                }
+            }
+            if (bestDist < nearest) {
+                bestDist = nearest;
+                best = p;
+            }
+        }
+        FadeInPlacedObject(obj, 1.0f);
+        best.z = obj->pos.z;
+        obj->desc02()->m1D(obj, &best);
+        if (IsObjectOfKind(obj, 0x21)) {
+            Vec02 vel;
+            Vec02 spin;
+            ComputePolarOffset(&vel, RandomFloatInRange(-3.1415927f, 3.1415927f), RandomFloatInRange(D_00274AB8[0], D_00274AB8[1]), 0.0f);
+            obj->desc02()->m20(obj, &vel);
+            Vu0::Set(spin, Vu0::FromFloats(0.0f, 0.0f, RandomFloatInRange(D_00274AC0.c[0], D_00274AC0.c[1])));
+            obj->desc02()->m21(obj, &spin);
+        }
+    }
+    self->f720[i] = obj;
+    self->f71C = n >? self->f71C;
+}

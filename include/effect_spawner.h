@@ -62,7 +62,9 @@ struct EffectSpawner : PlacedObject {
     s32 id30C;              // 0x30C
     s32 f310;               // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438
-    u8 pad324[0x340 - 0x324];
+    u8 pad324[0x338 - 0x324];
+    f32 margin;             // 0x338: half the side of the box around the target its points wrap in (func_00155868)
+    u8 pad33C[0x340 - 0x33C];
     f32 f340;               // 0x340: -1.0 at setup
     BaseObject* held344;           // 0x344: objects it must let go of when told (slot 13)
     BaseObject* held348;           // 0x348

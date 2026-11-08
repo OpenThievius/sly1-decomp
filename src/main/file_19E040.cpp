@@ -1012,11 +1012,36 @@ void ReleaseEffectOwner(EffectOwner* self)
     UnregisterCollider(self);
 }
 
-INCLUDE_RODATA(D_0024C930);
-
-INCLUDE_RODATA(D_0024C934);
-
-INCLUDE_ASM(func_0019E220);
+void MoveEffectsAndBounds(EffectOwner* self, f32 dt)
+{
+    ListWalk walk(&self->list558);
+    self->boundsMin.x = self->boundsMin.y = self->boundsMin.z = 3.4028235e+38f;
+    self->boundsMax.x = self->boundsMax.y = self->boundsMax.z = -3.4028235e+38f;
+    Effect* e = (Effect*)walk.First();
+    while (e != 0) {
+        if (e->start <= g_gameClock[1]) {
+            e->vt->m03(e, dt);
+        }
+        Vu0::Q(self->boundsMin) = Vu0::Min(Vu0::Q(self->boundsMin), Vu0::Min(Vu0::Q(e->q80), Vu0::Q(e->q90)));
+        Vu0::Q(self->boundsMax) = Vu0::Max(Vu0::Q(self->boundsMax), Vu0::Max(Vu0::Q(e->q80), Vu0::Q(e->q90)));
+        e = (Effect*)walk.Next();
+    }
+    if (self->f554 != 0.0f) {
+        Vec02 m;
+        Vu0::Q(m) = Vu0::Splat(self->f554);
+        Vu0::Q(self->boundsMin) = Vu0::Sub(Vu0::Q(self->boundsMin), Vu0::Q(m));
+        Vu0::Q(self->boundsMax) = Vu0::Add(Vu0::Q(self->boundsMax), Vu0::Q(m));
+    }
+    Vec02 center;
+    const Desc02* d = self->desc02();
+    Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(self->boundsMin), Vu0::Scalar(0.5f), Vu0::Q(self->boundsMax), Vu0::Scalar(0.5f));
+    d->m1D(self, &center);
+    f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(center), Vu0::Q(self->boundsMax))));
+    self->radius3D0 = r;
+    self->radius3CC = r;
+    self->f2A8 = r;
+    self->f2A4 = r;
+}
 
 void KeepEffectOwnerBounds(void) {}
 
@@ -1263,7 +1288,59 @@ void UpdateEffect(Effect* self)
     self->vt->m06(self, flag);
 }
 
-INCLUDE_ASM(func_0019F620);
+void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
+void func_00125BF0(PlacedObject* self, Camera* cam, void* m);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+
+// What an effect hands its object's draw method (slot 38): the placement, then the alpha and a
+// scale.
+struct EffectDraw {
+    f32 m[4][4];            // 0x00
+    f32 alpha;              // 0x40
+    f32 f44;                // 0x44: 1.0
+};
+
+s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
+{
+    PlacedObject* o = (PlacedObject*)self->p20;
+    if (o == 0) {
+        return 1;
+    }
+    if (self->life <= 0.0f) {
+        return 0;
+    }
+    f32 t = (g_gameTime - self->start) / self->life;
+    f32 a;
+    ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
+    f32 b = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
+    f32 radius = o->f2A8 * b;
+    f32 fade;
+    u128 d = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(cam->f40));
+    u128 ones = Vu0::Ones();
+    if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0) != 0) {
+        return 1;
+    }
+    if (ComputeCameraDistanceFade(cam, d, &fade, radius, o->f80) == 0) {
+        return 0;
+    }
+    if (a < 0.0001f && b < 0.0001f) {
+        return 1;
+    }
+    EffectDraw draw;
+    Vec02 scale;
+    Vu0::Q(scale) = Vu0::Splat(b);
+    BuildScaledTransformMatrix(&pos->x, rot, &scale.x, draw.m);
+    draw.alpha = a * fade;
+    draw.f44 = 1.0f;
+    o->desc02()->m26(o, cam, &draw);
+    f32 keep = o->f28C;
+    if (0.0f < keep) {
+        o->f28C = keep * b;
+        func_00125BF0(o, cam, &draw);
+        o->f28C = keep;
+    }
+    return 1;
+}
 
 void DrawEffect(Effect* self, void* a1)
 {
@@ -1341,7 +1418,38 @@ void InitRisingEffect(Effect* self)
     self->fB0 = -8.0f;
 }
 
-INCLUDE_ASM(func_0019FB08);
+void MoveEffect(Effect* self, f32 dt);
+void ComputeSinCos(f32 angle, f32* s, f32* c);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void MoveDriftingEffect(Effect* self, f32 dt)
+{
+    MoveEffect(self, dt);
+    f32 r = RandomFloatInRange(0.0f, 1.0f);
+    s32 drift = 0;
+    s32 still = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->qA0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->qA0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->qA0))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still && r < 0.3f) {
+        drift = 1;
+    }
+    if (drift) {
+        Vec02 dir;
+        Vec02 side[2];
+        Vec02 push;
+        f32 s;
+        f32 c;
+        Vu0::Q(dir) = Vu0::Q(self->qA0);
+        Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
+        BuildPerpendicularPair(&dir, side, &g_unitXVector, &g_unitZVector);
+        f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
+        ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
+        Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
+        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(push), Vu0::Scalar(dt));
+    }
+}
 
 void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 {

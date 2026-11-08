@@ -26,6 +26,11 @@
 // - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
 //   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
 //   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+// - A value retail handles in GPRs (a vector moved there with qmfc2 or lq, floats with mfc1, the
+//   MMI pextlw, pextuw, pcpyld, pcpyud, prot3w, then sq or qmtc2) goes in and out as "r": the
+//   compiler makes the moves and the stores, and the helper holds only the MMI instructions
+//   (ToFloatY, ToFloatZ, Splat, FromFloats, Transpose). A float out of a GPR is "=r", so its
+//   mtc1 is a reload in whatever GPR is free there, as retail's is.
 // - Length and NormalizeOr are C over the helpers, not sequences of their own: NormalizeOr's
 //   test is compiled code, and its fallback is an argument because retail loads it before the
 //   test (lq, then qmtc2 on the fallback's path).
@@ -65,6 +70,16 @@ struct Vu0 {
     {
         u128 r;
         __asm__("vmaxw.xyzw %0, vf0, vf0w" : "=j"(r));
+        return r;
+    }
+
+    // A copy of a in another VU0 register: vmove.xyzw. A plain `u128 b = a;` is a copy only
+    // across basic blocks; within one CSE folds it away, and retail's vmove there (a value
+    // kept whole while a copy of it is used up) is this one.
+    static u128 Copy(u128 a)
+    {
+        u128 r;
+        __asm__("vmove.xyzw %0, %1" : "=j"(r) : "j"(a));
         return r;
     }
 
@@ -150,6 +165,87 @@ struct Vu0 {
         u32 r;
         __asm__("qmfc2 %0, %1" : "=r"(r) : "j"(a));
         return r;
+    }
+
+    // The y of a vector in a GPR as a float: prot3w r, a (the words turned to y, z, x, w).
+    // The vector goes in as "r", so the qmfc2 (or lq) that brings it to a GPR is the
+    // compiler's, made once and shared with the reads of the other lanes (ToFloatMoved reads
+    // x). The float comes out of the GPR ("=r"): the mtc1 to an FPR is the compiler's, a
+    // reload whose GPR is one the values live there leave free (func_001B9940, whose a0 an
+    // f32 or u128 pseudo of the caller's would take as v0).
+    static f32 ToFloatY(u128 a)
+    {
+        f32 r;
+        __asm__("prot3w %0, %1" : "=r"(r) : "r"(a));
+        return r;
+    }
+
+    // The z of a vector in a GPR as a float: pextuw r, $zero, a (z, 0, w, 0), as ToFloatY.
+    static f32 ToFloatZ(u128 a)
+    {
+        f32 r;
+        __asm__("pextuw %0, $0, %1" : "=r"(r) : "r"(a));
+        return r;
+    }
+
+    // Three rows of a 3x3 matrix, as a value (Transpose returns one).
+    struct __attribute__((aligned(16))) Rows {
+        u128 r[3];
+    };
+
+    // The transpose of a 3x3 matrix (any 16-aligned object whose first three quadwords are
+    // the rows), its rows' w zero, built in GPRs as the 4x4 transpose with a zero fourth row:
+    // the rows loaded with lq (the compiler's), then pextlw/pextuw of rows 0 and 1 and of row
+    // 2 with $zero, then pcpyld/pcpyud of those into the three columns. The two steps are two
+    // sequences, as retail schedules other code between them (func_00188B48's -1.0); the
+    // result is returned in a local of its own, stored to the stack as retail's is.
+    template <class M> static Rows Transpose(const M& m)
+    {
+        const u128* p = (const u128*)&m;
+        u128 r0 = p[0], r1 = p[1], r2 = p[2];
+        u128 lo01, hi01, lo2, hi2;
+        __asm__("pextlw %0, %5, %4\n\tpextuw %1, %5, %4\n\tpextlw %2, $0, %6\n\tpextuw %3, $0, %6"
+                : "=&r"(lo01), "=&r"(hi01), "=&r"(lo2), "=&r"(hi2) : "r"(r0), "r"(r1), "r"(r2));
+        u128 c0, c1, c2;
+        __asm__("pcpyld %0, %4, %3\n\tpcpyud %1, %3, %4\n\tpcpyld %2, %6, %5"
+                : "=&r"(c0), "=&r"(c1), "=&r"(c2) : "r"(lo01), "r"(lo2), "r"(hi01), "r"(hi2));
+        Rows t;
+        t.r[0] = c0;
+        t.r[1] = c1;
+        t.r[2] = c2;
+        return t;
+    }
+
+    // A float in all four fields, built in a GPR: pextlw t, t, t (the float twice in the low
+    // doubleword), pextlw r, t, t (four times), where t is the GPR the float came in: the mfc1
+    // that brings it there is the compiler's ("r"), which retail schedules apart, and the
+    // first pextlw turns that copy in place (retail's ten sites all do; the copy dies there).
+    // r may be t (func_0019E220) or another GPR (func_0019F620). The result is "=r": stored
+    // with sq where it goes straight to a vector local, moved to VU0 with qmtc2 where it is
+    // used there. It has no local of its own: retail stores it once, where the C put it.
+    static u128 Splat(f32 f)
+    {
+        u128 r;
+        __asm__("pextlw %1, %1, %1\n\tpextlw %0, %1, %1" : "=r"(r) : "r"(f));
+        return r;
+    }
+
+    // The vector (x, y, z) of three floats in FPRs, built in a GPR: mfc1 r, x; mfc1 t, y;
+    // pextlw r, t, r (x and y interleaved); mfc1 t, z; pcpyld r, t, r (z after them). Its w
+    // is z's sign extension. One sequence: retail never schedules anything inside it, and the
+    // three floats die together (separate mfc1s are hoisted and change the FPRs the floats
+    // take, func_00144AA0). The result is "=r": the compiler stores it with sq where it goes
+    // straight to memory (func_00141690, func_00174E20) and moves it to VU0 with qmtc2 where
+    // it is used there (func_00144AA0, func_001BFBF8). It is held in a 16-byte local of the
+    // helper's, stored to the stack though nothing reads it back, as Scalar's.
+    static u128 FromFloats(f32 x, f32 y, f32 z)
+    {
+        Slot t;
+        u128 r, w;
+        __asm__("mfc1 %0, %2\n\tmfc1 %1, %3\n\tpextlw %0, %1, %0\n\tmfc1 %1, %4\n\tpcpyld %0, %1, %0"
+                : "=&r"(r), "=&r"(w) : "f"(x), "f"(y), "f"(z));
+        Q(t) = r;
+        return Q(t);
     }
 
     // a * s.x: vmulx.xyzw.
