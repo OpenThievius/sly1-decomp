@@ -645,6 +645,18 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   called with the constant first gives retail's constant-first operand and
   result register (func_00141F48, func_0017FB78).
 
+- **A two-node switch needs a third case for retail's tree.** With two case
+  nodes the tree stays lopsided, the lowest as its root; retail's range-rooted
+  tree needs a third node, an extra `case N: break;`, whose test jump.c then
+  removes (func_001733B8).
+- **A struct-typed store keeps a frame-held pointer from being reloaded**, by
+  the scalar-against-struct rule of "Reloads and stores" (func_00185D20's
+  second end, stored as `*(Vu0::Vec*)&...`).
+- **A rotation product writing straight into the caller's rows**, through an
+  inline with shared vector locals and no matrix local, gives retail's frame in
+  the rotation family (func_00172078, func_001A3730): a candidate for
+  include/mul_rotation.h.
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it
