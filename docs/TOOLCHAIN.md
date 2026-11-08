@@ -61,7 +61,11 @@ What else was measured:
   compiler's two-instruction 64-to-32-bit truncation, which the compiler never puts in a slot
   itself (func_002115F8, func_001F7390). A load or a macro (`li`) stays, as retail leaves a
   volatile load and a `li` before a call (func_00202DA0, func_001F9AD8); tools/volatile_slots.py
-  does this too.
+  does this too. A volatile load right before a reorder-mode `jal` went into its slot as well
+  (func_00203B18's semaphore, 2026-11-08), except where the load follows a label or the slot of a
+  branch (an instruction emitted under noreorder): both of func_00202DA0's stay before their
+  calls, as GNU as never swaps a branch with an instruction after a label or after a noreorder
+  one.
 - **`-fno-exceptions`.** Without it every file gets C++ exception frame records
   in `.data`; retail has only four such records, all in library code.
 - **`-fno-rtti`.** Retail's game vtables (the method tables of its C++ classes)

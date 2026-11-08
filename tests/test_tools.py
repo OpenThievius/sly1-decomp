@@ -930,6 +930,18 @@ class VolatileSlotTest(unittest.TestCase):
         apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(apart), apart)
 
+    def test_a_volatile_load_before_a_call_moves_unless_after_a_label_or_noreorder(self):
+        asm = "\tsw\t$0,0($16)\n\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[3:7], ["\t.set\tnoreorder", "\tjal\tf", "\tlw\t$4,0($2)", "\t.set\treorder"])
+        label = "\tsw\t$0,0($16)\n$L3:\n\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(label), label)
+        slot = ("\t.set\tnoreorder\n\tbeq\t$2,$0,$L4\n\tlui\t$2,0x28\n\t.set\treorder\n"
+                "\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf")
+        self.assertEqual(volatile_slots.fill(slot), slot)
+        plain = "\tsw\t$0,0($16)\n\tlw\t$4,0($2)\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(plain), plain)
+
     def test_a_shift_or_store_before_a_return_moves_into_its_slot(self):
         asm = "\tdsll\t$2,$2,32\n\tdsra\t$2,$2,32\n\tj\t$31"
         out = volatile_slots.fill(asm).split("\n")
