@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1272/1264, checked 2026-11-08
 // NEAR: everything but the matrix arms is retail's (the three switches, the payload copies, the
 // Scalar of the vector, the StoreFloatAsQuadword/CopyQuadword/ScaleQuadword chain); the matrix
 // arms take the new Vu0::ScalarInGpr (mfc1, por a2, sq to the slot, as retail) and retail's

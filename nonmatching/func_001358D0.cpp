@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1356/1360 (99.7%), checked 2026-11-08
 // NEAR: all but the first ArctangentOfRatio's arguments are retail's, registers and frame
 // included: retail loads d.y into $f12 before the jal and d.x into $f13 in its delay slot, ours
 // the other way round (two words). The same call matches elsewhere (agent.cpp's func_001C7A60,
