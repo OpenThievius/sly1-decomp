@@ -437,12 +437,13 @@ INCLUDE_ASM(func_001CFFD0);
 // +0x34), the angle at +0x23C4 and its flip flag at +0x23C8, and the target (a flag at +0x04,
 // the radius at +0x08, a point at +0x10, a pair of points at +0x20).
 struct TargetMover {
-    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); };
+    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); u8 pad24[0x2C - 0x24]; void (*track)(TargetMover* self, f32 angle, void* pos, s32 zero, void* dir, void* up, f32* angleOut, f32* limitOut); };
     const Vt* vt;           // 0x00
     u8 pad04[4];
     s32 wraps;              // 0x08
-    u8 pad0C[0x14 - 0x0C];
-    const f32* low;         // 0x14
+    s32 count;              // 0x0C
+    u8 pad10[0x14 - 0x10];
+    const f32* low;         // 0x14: the angles the mover's pieces start at
 };
 // func_001D12F0 reads the record's active flag (+0x40), its limit (+0x44) and scale (+0x48), and
 // the player's float at +0x23C0.
@@ -595,7 +596,79 @@ void UpdatePlayerTargetPhase(Player* self)
     }
 }
 
-INCLUDE_ASM(func_001D0F20);
+// What func_001D0F20 reads besides the record: the anchor at +0x23B8, the angle at +0x23C0
+// and the limit at +0x23C4 the mover's track call writes back.
+struct ContactPlayerView {
+    u8 pad0[0x23B8];
+    void* anchor;           // 0x23B8
+    TargetFrameRecord* record;  // 0x23BC
+    f32 angle;              // 0x23C0
+    f32 limit;              // 0x23C4
+};
+
+void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
+void AddPlayerObjectContacts(void* self, s32 code, void* a, void* b, void* c, void* d);
+
+void func_001D0F20(Player* self)
+{
+    Vec02 pos;
+    Vec02 local;
+    Vec02 dir0;
+    Vec02 world;
+    Vec02 dir;
+    Vec02 k;
+    ContactPlayerView* p = (ContactPlayerView*)self;
+    s32 code;
+    switch (self->f239C) {
+    case 5:
+        ConvertPositionToWorld(p->anchor, &pos);
+        AddPlayerObjectContacts(self, 0x23, p->anchor, &pos, 0, (void*)self->f6D4);
+        break;
+    case 4: {
+        TargetFrameRecord* rec = p->record;
+        void* frame = rec->frame;
+        TargetMover* m = rec->mover;
+        TransformPointBetweenFrames(0, frame, (void*)self->f6D4, &pos);
+        if (m->vt->track != 0) {
+            m->vt->track(m, p->angle, &pos, 0, &local, &dir0, &p->angle, &p->limit);
+        }
+        TransformPointBetweenFrames(frame, 0, &local, &world);
+        TransformDirectionBetweenFrames(frame, 0, &dir0, &dir);
+        code = 0x22;
+        if (p->record->active == 0 && m->wraps == 0) {
+            f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(dir)));
+            f32 side = -Vu0::ToFloat(Vu0::Dot(Vu0::Rotate(self->rot, Vu0::Q(self->v640)), Vu0::Q(dir)));
+            if (along < -2.0f || side < 2.0f) {
+                f32 lim = m->low[0] + D_00274E04;
+                if (p->limit < lim) {
+                    if (m->vt->place != 0) {
+                        m->vt->place(m, lim, &local, 0);
+                    }
+                    TransformPointBetweenFrames(frame, 0, &local, &world);
+                    code = 0x2A;
+                    goto call;
+                }
+            }
+            if (2.0f < along || -2.0f < side) {
+                f32 lim = m->low[m->count - 1] - D_00274E04;
+                if (lim < p->limit) {
+                    if (m->vt->place != 0) {
+                        m->vt->place(m, lim, &local, 0);
+                    }
+                    TransformPointBetweenFrames(frame, 0, &local, &world);
+                    Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+                    Vu0::Q(dir) = Vu0::MulX(Vu0::Q(dir), Vu0::Q(k));
+                    code = 0x2A;
+                    goto call;
+                }
+            }
+        }
+    call:
+        AddPlayerObjectContacts(self, code, p->record, &world, &dir, (void*)self->f6D4);
+        break;
+    }
+    }
+}
 
 void FreePooledContactChain(void* a, s32 b);
 
