@@ -471,7 +471,7 @@ void SkipBufferedBlock(void* self);
 s32 NewScriptScope(void);
 void AddUniqueMarkRoot(u8* a, s32 b);
 void* DefineScriptVariable(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
-extern s32 D_00275714;
+extern u32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
 void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b);

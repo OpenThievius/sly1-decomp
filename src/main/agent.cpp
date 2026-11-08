@@ -1518,9 +1518,43 @@ void SetAgentSecondaryTarget(Agent* self, s32 value)
 
 }
 
-extern const f32 D_0024DA90 = 3.40282347e+38f;
+s32 GatherObjectsByMode(World* host, s32 a1, s32 a2, s32 a3, s32 a4, PlacedObject** out);
 
-INCLUDE_ASM(func_001CAB10);
+void func_001CAB10(Agent* self)
+{
+    PlacedObject* found[0x20];
+    Vec02 vel;
+    Vec02 here;
+    Vec02 there;
+    Vec02 lead;
+    s32 n = GatherObjectsByMode(self->world, 5, self->fB4C, 0, 0x20, found);
+    PlacedObject* pick = 0;
+    f32 best = 3.40282347e+38f;
+    vel = self->v150;
+    vel.z = 0.0f;
+    Vu0::Vec k;
+    k.q = Vu0::FromFloatAt(D_00274CF0);
+    *(Vu0::Vec*)&lead = k;
+    Vu0::Q(here) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(vel), Vu0::Q(lead));
+    for (s32 i = 0; i < n; i++) {
+        PlacedObject* obj = found[i];
+        vel = obj->v150;
+        vel.z = 0.0f;
+        Vu0::Q(there) = Vu0::MulAddX(Vu0::Q(obj->pos), Vu0::Q(vel), k.q);
+        *(Vu0::Vec*)&lead = k;
+        u128 delta = Vu0::Sub(Vu0::Q(here), Vu0::Q(there));
+        f32 d = Vu0::ToFloat(Vu0::Dot(delta, delta));
+        if (obj == self->fB48) {
+            d *= 0.5f;
+        }
+        if (d < best) {
+            best = d;
+            pick = obj;
+        }
+    }
+    self->fB48 = pick;
+    self->fB40 = 1;
+}
 
 void SetAgentPrimaryTarget(Agent* self, s32 value)
 {
