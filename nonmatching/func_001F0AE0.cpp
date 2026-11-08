@@ -6,6 +6,19 @@
 // (b; lw s3). The file built with -fno-gcse gives EXACT, but 26 other functions of the file need
 // GCSE, so something in the original between the two reads kills memory (a store or an
 // out-parameter): not found. Tried: `back` as one expression, target as a ternary.
+// 2026-11-08 (-dG dump, worker g4): the whole effect is one PRE substitution. Expression 7 (the
+// cursor, mem/s 732(self)) is loaded in the join (bb23: back's compare) and again by
+// `target = self->cursor` (insn 297, bb27); PRE calls 297 redundant and replaces it with a copy of
+// the join's load (insn 747 reg 264), so the join's value lives on, takes a1 (the first compare's
+// register) and reorg's redundant_insn then drops the join's load from the f560 != 0 path. With
+// no PRE the join's load is short-lived, takes v1 and stays in the bnezl's delay slot, as in
+// retail. Nothing between the two loads in retail stores or calls (no stack locals in the frame
+// either), so no kill is visible in the bytes. Also tried, all unchanged or worse: back as
+// `f560 != 0 || cursor != 1` (8 words differ but the order of the tests is wrong), `?:` forms,
+// nested ifs, back set inside the if/else that picks target, target preset then overwritten,
+// if (back == 0) first, the join's or the target's cursor read as a byte-offset scalar
+// (*(s32*)((u8*)self + 0x2DC) is still mem/s), a local copy of cursor. Open: why retail's PRE
+// does not take 297 (an alias-set or in-struct difference is not it: gcse compares neither flag).
 #include "common.h"
 #include "warp_page.h"
 #include "screen_element.h"
