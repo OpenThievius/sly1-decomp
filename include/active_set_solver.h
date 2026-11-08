@@ -26,7 +26,7 @@ struct ActiveSetItem {
     f32 rate;               // 0x3C: how fast val changes with the active items' step
     u8 (*axes)[16];         // 0x40: vectors of 16 bytes, one per owner index (func_001536C8)
     f32* row;               // 0x44: the item's row of the matrix; 0 until func_00153780 builds it
-    u8 pad48[4];
+    ActiveSetItem* twin;    // 0x48: the item the contact's other end made (func_00154088)
     ActiveSetItem* next;    // 0x4C: the list link (func_00153608 clears it and the word after)
     u8 pad50[0x60 - 0x50];
 };
