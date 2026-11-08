@@ -507,8 +507,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
         if (*(s32*)((u8*)g + 0xC) != 0) {
             buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
         }
-        s32 last = n - 1;
-        for (k = 0; k < last; k++) {
+        for (k = 0; k < n - 1; k++) {
             u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
             f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::Dot(d, d)));
             f32 rest = total - acc;
@@ -556,8 +555,129 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 
 }
 
-INCLUDE_RODATA(jtbl_0024CFF0);
-INCLUDE_ASM(func_001AFBB0);
+s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+void GatherCollidersInSphere(World* world, f32 radius, s32 zero, Vec02* at, s32 (*filter)(TimedObject*, Collider*), TimedObject* self, s32* n, Collider*** list);
+void* GetOwnSpawnRecord(BaseObject* obj, s32 mode);
+void SetEffectSpawnerInactive(BaseObject* obj);
+void InitOwnerMessage(OwnerMessage* out, s32 a, TimedObject* self);
+
+// Slot 72 of class 0x31: walks each group's points (its child's curve, in the world) in pieces,
+// looks for the nearest object across each piece that is in view (the player first when the
+// group follows it, else those near the piece's middle), and when one is reached within the
+// group's ramp, keeps where and tells it, or the player, of the new state; the group's spawners
+// are then moved to the place or let run.
+void ChooseTimedGroupState(TimedGroup* self, s32* state)
+{
+    ColliderSpan span;
+    Vec02 p0;
+    Vec02 p1;
+    Vec02 mid;
+    if (g_gameTime[0] < self->fAFC) {
+        return;
+    }
+    s32 i = 0;
+    self->fAFC = g_gameTime[0] + 0.033333335f;
+    PushBackMemoryMark();
+    Vec02* pts = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
+    while (i < self->groupCount) {
+        TimedGroupChild* g = &self->groups[i];
+        f32 acc = 0.0f;
+        s32 k;
+        s32 next = i + 1;
+        s32 active = 0;
+        f32 total = ComputeTimedGroupRamp(self, g);
+        DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
+        s32 n = src->count;
+        *(Collider**)((u8*)g + 0xC) = 0;
+        for (k = 0; k < n; k++) {
+            TransformPointBetweenFrames(self, (void*)0, &src->points[k], &pts[k]);
+        }
+        for (k = 0; k < n - 1; k++) {
+            s32 look = 1;
+            Collider* hit = 0;
+            Vu0::Q(p0) = Vu0::Q(pts[k]);
+            Vu0::Q(p1) = Vu0::Q(pts[k + 1]);
+            Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(p0), Vu0::Scalar(0.5f), Vu0::Q(p1), Vu0::Scalar(0.5f));
+            f32 len = Vu0::Distance(p0, p1);
+            f32 radius = len * 0.5f;
+            if (self->fB00 != 0) {
+                Camera* cam = g_camera;
+                u128 ones = Vu0::Ones();
+                u128 v = Vu0::Sub(Vu0::Q(mid), Vu0::Q(cam->f40));
+                u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), v, ones, Vu0::Scalar(radius)) ^ 0xF0;
+                look = signs == 0;
+                if (look && g_player != 0 && *(s32*)((u8*)self + 0x5D0) == 1) {
+                    if (g_player->f2220 != 6 || g_player->f239C != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
+                        hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, 1, (Collider**)&g_player, &span);
+                        look = 0;
+                    }
+                }
+            }
+            if (look) {
+                s32 count;
+                Collider** list;
+                PushBackMemoryMark();
+                GatherCollidersInSphere(self->world, radius, 0, &mid, IsTimedGroupCandidate, self, &count, &list);
+                hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, count, list, &span);
+                PopBackMemoryMark();
+            }
+            if (hit != 0) {
+                s32 near = acc + Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(p0), Vu0::Vec::Of(span.q[0])))) < total;
+                if (near) {
+                    Vu0::Q(*(Quad16*)((u8*)g + 0x10)) = Vu0::Q(span.q[0]);
+                    *(s32*)((u8*)g + 0x20) = k;
+                    *(Collider**)((u8*)g + 0xC) = hit;
+                    if (*state < 8) {
+                        active = *state >= 4;
+                    }
+                    if (IsObjectInAcceptLists(self, hit) != 0) {
+                        switch (*state) {
+                        case 1:
+                            *state = 2;
+                            break;
+                        case 5:
+                            *state = 6;
+                        case 4:
+                        case 6:
+                        case 7:
+                            if (*state == 6 && hit == (Collider*)g_player) {
+                                OwnerMessage buf;
+                                InitOwnerMessage(&buf, 2, self);
+                                if (g_player->desc06()->m4C(g_player, &buf) != 0) {
+                                    StopTrackPlayer(self);
+                                }
+                            }
+                            break;
+                        }
+                        self->desc30()->m4D(self, *state);
+                    }
+                    break;
+                }
+            }
+            acc += len;
+            if (total < acc) {
+                break;
+            }
+        }
+        for (s32 j = 0; j < g->count; j++) {
+            TimedGroupEntry* e = &g->items[j];
+            Collider* h;
+            u64 m = 0x8000;
+            m <<= 41;
+            if (active && (h = *(Collider**)((u8*)g + 0xC)) != 0 && ((h->flags538 & m) != 0 || e->value == 0)) {
+                Quad16* rec = (Quad16*)GetOwnSpawnRecord(e->obj, 1);
+                rec[6] = span.q[2];
+                TransformPointBetweenFrames((void*)0, self, &span.q[0], &p0);
+                ((void (*)(BaseObject*, Vec02*))((void**)e->obj->desc)[33])(e->obj, &p0);
+                SetEffectSpawnerInactive(e->obj);
+            } else {
+                SetEffectSpawnerActiveForever(e->obj);
+            }
+        }
+        i = next;
+    }
+    PopBackMemoryMark();
+}
 
 void SetTimedGroupMode(TimedGroup* self, s32 flag)
 {
