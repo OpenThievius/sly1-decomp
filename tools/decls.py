@@ -34,7 +34,8 @@ NAME = r"func_(?:[a-z]+_)?[0-9A-Fa-f]{8}"
 # A file-scope declaration or definition: a return type, the name (perhaps Class::), the arguments.
 SIGNATURE = re.compile(r"^(?P<ret>[A-Za-z_][\w \t\*&:<>,]*?)(?P<sep>[ \t\*&]+)(?:\w+::)?(?P<name>%s)\s*\((?P<args>[^;{}()]*(?:\([^()]*\)[^;{}()]*)*)\)\s*(?:const\s*)?(?P<end>;|\{|$)" % NAME, re.M)
 QUALIFIERS = {"static", "inline", "extern", "virtual", "const", "volatile"}
-FLOATS = {"f32", "f64", "float", "double"}
+# The R5900 FPU is single precision: a double (f64) comes back in $v0/$v1, like an integer.
+FLOATS = {"f32", "float"}
 
 # Instructions whose first operand is read, not written.
 READS_FIRST = re.compile(r"^(s[bhwdq]|swc1|sdc1|sqc2|swl|swr|sdl|sdr|b\w*|j|jr|jalr|mult\w*|div\w*|mt\w+|teq|tne|c\.\w+|madd\w*|msub\w*)$")
