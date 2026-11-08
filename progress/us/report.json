@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 86.04189140596908,
+  "fuzzy_match_percent": 86.42008270406329,
   "total_code": "1112400",
   "matched_code": "858912",
   "matched_code_percent": 77.21251348435814,
@@ -17926,7 +17926,7 @@
   {
    "name": "game/file_15F678",
    "measures": {
-    "fuzzy_match_percent": 65.65524076017256,
+    "fuzzy_match_percent": 77.91768683688936,
     "total_code": "34308",
     "matched_code": "22420",
     "matched_code_percent": 65.34918969336597,
@@ -18879,7 +18879,7 @@
     {
      "name": "func_00162890",
      "size": "4264",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 98.66322701688556,
      "address": "12824",
      "metadata": {
       "virtual_address": "1452176",
@@ -52590,7 +52590,7 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 84.78257383830933,
+    "fuzzy_match_percent": 85.20417775711125,
     "total_code": "997856",
     "matched_code": "751956",
     "matched_code_percent": 75.35716576339672,

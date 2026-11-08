@@ -6,7 +6,11 @@
 // $f0 (tools/regalloc.py); in retail the load comes after the add. Reading the bound inside the
 // else arm (an explicit if/else-if, or a ClampToRange(v, const f32*) inline) gives $f0 but moves the
 // bound's address (addiu v0,s5,%lo) from the block's start into the branch's delay slot (2 insns
-// off). Found on the way (all in this attempt): ApproachValueWithRamp takes its floats first
+// off). Also tried (2026-11-08, large-179A68b), none better: a const f32* b = D_00263C90 read as
+// b[0]/b[1] (address moves, 2+ insns off); a named sum with lo/hi locals loaded before the ifs
+// (same 3 diffs); the unclamped sum stored before the test, the bound read in the arm (hi gets $f0
+// but stores and branch layout change, ~9 insns off); f700 statement before f6FC (worse).
+// Found on the way (all in this attempt): ApproachValueWithRamp takes its floats first
 // (value, target, dt, profile, speed out); ApproachRotationWithRamp takes dt fourth; one loop index
 // at function scope (its final value 2 is the constant of the second mode test, li s2,2); the mode
 // range as a switch (case 2, 3, 4) where && folds into a range test; the 3 address spill slots'
