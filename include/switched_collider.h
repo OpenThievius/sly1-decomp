@@ -1078,7 +1078,7 @@ struct ModeCollider : SwitchedCollider {
     f32 f6F8;               // 0x6F8
     f32 f6FC;               // 0x6FC: the pose's two values, eased by f704 and f708 (func_00179A68)
     f32 f700;               // 0x700
-    s32 f704;               // 0x704
+    f32 f704;               // 0x704
     f32 f708;               // 0x708
     s32 f70C;               // 0x70C
 };

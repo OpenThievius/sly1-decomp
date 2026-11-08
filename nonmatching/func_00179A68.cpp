@@ -215,9 +215,9 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
             prof.maxSpeed *= s;
             prof.endSpeed *= s;
         }
-        *(f32*)&self->f704 = ApproachValueWithRamp(*(f32*)&self->f704, tx, dt, &prof, 0);
+        self->f704 = ApproachValueWithRamp(self->f704, tx, dt, &prof, 0);
         self->f708 = ApproachValueWithRamp(self->f708, ty, dt, &prof, 0);
-        self->f6FC = ClampInPlace(self->f6FC + dt * *(f32*)&self->f704, D_00263C90[0], D_00263C90[1]);
+        self->f6FC = ClampInPlace(self->f6FC + dt * self->f704, D_00263C90[0], D_00263C90[1]);
         self->f700 = ClampInPlace(self->f700 + dt * self->f708, D_00263C90[0], D_00263C90[1]);
 
         Mat02 pitch;

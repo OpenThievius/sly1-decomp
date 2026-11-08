@@ -263,7 +263,7 @@ void UpdateModeCollider(ModeCollider* self)
     wy = d.z * -0.0033333334f;
     f32 k = D_00263C4C;
     f32 m = 1.0f - k;
-    wx = k * wx + m * *(f32*)&self->f704;
+    wx = k * wx + m * self->f704;
     wy = k * wy + m * self->f708;
     TransformPointBetweenFrames(0, self->f668, (u8*)self->f660 + 0x140, &tmp);
     if (tmp.x < 0.0f) {
@@ -407,7 +407,7 @@ s32 AcceptModeColliderRequest(ModeCollider* self, s32* arg)
         self->f6D4 = *(f32*)&g_gameTime;
     }
     if (self->f6D0 != 0) {
-        self->f704 = 0;
+        self->f704 = 0.0f;
         self->f708 = 3.0f;
         ComputeModeColliderAnchors(self, bufA, bufB);
         func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
