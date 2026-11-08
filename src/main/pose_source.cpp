@@ -1171,9 +1171,172 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-INCLUDE_ASM(func_00120470);
+void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
+{
+    Vec02 x0;
+    Vec02 x1;
+    Vec02 k;
+    f32 x2;
+    Vec02* p1;
+    if (out0)
+        Vu0::Q(*out0) = Vu0::Zero();
+    if (out1)
+        Vu0::Q(*out1) = Vu0::Zero();
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
+    f32 t;
+    s32 idx;
+    if (!seq) {
+        t = dt / cfg->length;
+    } else {
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
+        t = x2 / seq->pairs[idx].b;
+    }
+    for (s32 i = 0; i < cfg->count; i++) {
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
+        Vec02* p0 = out0 ? &x0 : 0;
+        f32 wt = e->weight;
+        if (wt == 0.0f)
+            continue;
+        PositionCurve* tg = o->targets[i];
+        if (!tg) {
+            if (out0) {
+                u128 w = Vu0::FromFloat(wt);
+                u128 acc = Vu0::Q(*out0);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec02*)D_00248D30), w);
+            }
+        } else {
+            f32 a, b;
+            if (!seq) {
+                f32 s = e->sub->length;
+                b = s / cfg->length;
+                a = t * s;
+            } else {
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
+                b = q->b;
+                a = q->a + t * b;
+                if (e->sub->length < a)
+                    a -= e->sub->length;
+                b = b / seq->pairs[idx].b;
+            }
+            tg->vt->eval(tg, cam, c, a, b * scale, p0, out1 ? &x1 : 0);
+            if (out0) {
+                u128 w = Vu0::FromFloatAt(e->weight);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out0) = Vu0::MulAddX(Vu0::Q(*out0), Vu0::Q(x0), w);
+            }
+            if (out1) {
+                u128 w = Vu0::FromFloatAt(e->weight);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out1) = Vu0::MulAddX(Vu0::Q(*out1), Vu0::Q(x1), w);
+            }
+        }
+    }
+    if (cam && cam->desc02()->m28)
+        cam->desc02()->m28(cam, out0, out1);
+}
 
-INCLUDE_ASM(func_00120700);
+// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
+// once.
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* p = (const u128*)&a;
+    const u128* q = (const u128*)&b;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 b0 = q[0], b1 = q[1], b2 = q[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
+    r.r[2] = z;
+    *out = r;
+}
+
+void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
+
+void func_00120700(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
+{
+    Vec02 x0;
+    Vec02 acc0;
+    Vec02 x1;
+    Vec02 acc1;
+    f32 x2;
+    if (out0)
+        Vu0::Q(acc0) = Vu0::Zero();
+    if (out1)
+        Vu0::Q(acc1) = Vu0::Zero();
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
+    f32 t;
+    s32 idx;
+    if (!seq) {
+        t = dt / cfg->length;
+    } else {
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
+        t = x2 / seq->pairs[idx].b;
+    }
+    f32 w = 0.0f;
+    for (s32 i = 0; i < cfg->count; i++) {
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
+        if (e->weight == 0.0f)
+            continue;
+        RotationCurve* tg = o->targets[i];
+        if (!tg) {
+            if (!out0)
+                continue;
+            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec02*)D_00248D30));
+        } else {
+            f32 a, b;
+            if (!seq) {
+                f32 s = e->sub->length;
+                b = s / cfg->length;
+                a = t * s;
+            } else {
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
+                b = q->b;
+                a = q->a + t * b;
+                if (e->sub->length < a)
+                    a -= e->sub->length;
+                b = b / seq->pairs[idx].b;
+            }
+            tg->vt->get(tg, cam, c, out0 ? &x0 : 0, out1 ? &x1 : 0, a, b * scale);
+            if (out1)
+                Vu0::Q(acc1) = Vu0::MulAddX(Vu0::Q(acc1), Vu0::Q(x1), Vu0::ScalarAt(e->weight));
+        }
+        if (!out0)
+            continue;
+        if (o->f18) {
+            if (w == 0.0f) {
+                BuildEulerRotationMatrix(&x0, out0);
+            } else {
+                Vec02 axis;
+                Mat02 rotA;
+                Mat02 prod;
+                f32 angle;
+                BuildEulerRotationMatrix(&x0, &rotA);
+                MultiplyMatrices3x3(&rotA, out0, &prod);
+                MatrixToAxisAngle(&prod, &angle, &axis);
+                BuildAxisAngleMatrix(&axis, angle * w / (w + e->weight), &prod);
+                MulRotation(out0, prod, rotA);
+            }
+            w += e->weight;
+        } else {
+            Vu0::Q(acc0) = Vu0::MulAddX(Vu0::Q(acc0), Vu0::Q(x0), Vu0::ScalarAt(e->weight));
+        }
+    }
+    if (out0 && !o->f18)
+        BuildEulerRotationMatrix(&acc0, out0);
+    if (out1)
+        RotateVectorByTwoAngles(&acc0, &acc1, out1);
+    if (cam)
+        ((KeyedRotationToldFn)cam->desc02()->m29)(cam, out0, out1);
+}
 
 void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
@@ -1844,27 +2007,6 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     } else {
         GetOwnerValue(self, a1, a2);
     }
-}
-
-// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
-// once.
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
-{
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    const u128* p = (const u128*)&a;
-    const u128* q = (const u128*)&b;
-    u128 a0 = p[0], a1 = p[1], a2 = p[2];
-    u128 b0 = q[0], b1 = q[1], b2 = q[2];
-    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
-    r.r[0] = x;
-    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
-    r.r[1] = y;
-    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
-    r.r[2] = z;
-    *out = r;
 }
 
 void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)

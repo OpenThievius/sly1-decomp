@@ -306,7 +306,50 @@ void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
     SetBlendItemWeights(*gr, 0x20, 8, slots);
 }
 INCLUDE_ASM(func_001D4348);
-INCLUDE_ASM(func_001D4698);
+static inline f32 MinF(f32 a, f32 b) { return b <? a; }
+static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
+void ComputePolarOffset(Vec02* out, f32 angle, f32 radius, f32 z);
+
+// The velocity of a heading and speed, from six axes of the basis: forward (y) by the
+// heading's length ahead, and right or left by its side (x), the set picked by the walk mode.
+void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, f32 heading, f32 speed)
+{
+    Vec02 h;
+    ComputePolarOffset(&h, heading - self->f638, speed, 0.0f);
+    f32 m;
+    if (10.0f < h.y) {
+        if (self->fA14 == 0) {
+            h.y = 0.0f;
+            m = 0.0f;
+        } else {
+            m = 1.0f;
+        }
+    } else if (h.y < -10.0f) {
+        if (self->fA14 == 1) {
+            h.y = 0.0f;
+            m = 1.0f;
+        } else {
+            m = 0.0f;
+        }
+    } else if (self->fA14 == -1) {
+        m = 0.0f;
+    } else {
+        m = (f32)self->fA14;
+    }
+    if (m == 1.0f) {
+        u128 s = Vu0::Scalar(h.y);
+        u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
+        u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
+        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[3]), s, Vu0::Q(basis[7]), t, Vu0::Q(basis[11]), u);
+    } else {
+        u128 s = Vu0::Scalar(-h.y);
+        u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
+        u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
+        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[1]), s, Vu0::Q(basis[5]), t, Vu0::Q(basis[9]), u);
+    }
+    self->v640.z = 0.0f;
+    Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), Vu0::ScalarAt(*(f32*)((u8*)self->watched2230 + 0x18)));
+}
 
 
 
