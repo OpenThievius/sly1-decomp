@@ -1260,7 +1260,44 @@ INCLUDE_RODATA(D_0024C9B0);
 
 INCLUDE_ASM(func_0019ED58);
 
-INCLUDE_ASM(func_0019F390);
+s32 IsSpinNegligible(void* a);
+s32 IsVelocityNegligible(void* a);
+s32 IsAccelerationNegligible(void* a);
+void TurnMatrixBySpin(void* spin, f32 dt, void* out);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+// The four rows func_0019F390 builds a turn in and TurnMatrixBySpin fills.
+struct EffectFrame {
+    Vec02 r[4];
+};
+
+// An effect's spin and motion over dt: the spin dragged and, when it is not negligible, turned
+// into a rotation the placement (rot50) is multiplied by; then the velocity carried through the
+// spin's frame and the position moved along it.
+void func_0019F390(Effect* self, f32 dt)
+{
+    EffectFrame frame;
+
+    if (IsSpinNegligible(&self->v100) == 0) {
+        f32 len;
+        Mat02 res;
+        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->f110 * dt + 1.0f));
+        len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v100)));
+        if (0.0001f < len) {
+            Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(1.0f / len));
+            BuildAxisAngleMatrix(&frame.r[0], (Mat02*)&frame.r[1], len * dt);
+            MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rot50);
+            *(Mat02*)self->rot50 = res;
+        }
+    }
+    self->q90 = self->q80;
+    if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
+        TurnMatrixBySpin((u8*)self + 0xB0, dt, &frame);
+        u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
+        Vu0::Q(self->qA0) = nv;
+        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), nv, Vu0::Scalar(dt));
+    }
+}
 
 void UpdateEffect(Effect* self)
 {
