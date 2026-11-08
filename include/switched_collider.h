@@ -862,7 +862,8 @@ struct PathFollower : SwitchedCollider {
     f32 f83C;               // 0x83C
     f32 f840;               // 0x840
     f32 f844;               // 0x844
-    u8 pad848[0x850 - 0x848];
+    PathCurveObject* f848;  // 0x848: the curve it keeps its side offset on (func_001D87C8)
+    f32 f84C;               // 0x84C: the time on f848 found nearest (func_001D87C8)
     f32 f850;               // 0x850
     f32 f854;               // 0x854
     s32 f858;               // 0x858
@@ -904,7 +905,9 @@ struct PathFollower : SwitchedCollider {
     f32 fB90;               // 0xB90
     f32 fB94;               // 0xB94
     f32 fB98;               // 0xB98
-    u8 padB9C[0xBB0 - 0xB9C];
+    f32 fB9C;               // 0xB9C: the input UpdatePathFollowerSound's curves weigh (func_001D9678)
+    f32 fBA0;               // 0xBA0: the speed it ramps towards the forward speed's share (func_001D9678)
+    u8 padBA4[0xBB0 - 0xBA4];
 };
 
 struct ModeWalker : PathFollower {

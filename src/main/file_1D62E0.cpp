@@ -1080,7 +1080,67 @@ void RecordPathFollowerProgress(PathFollower* self)
 
 INCLUDE_ASM(func_001D9488);
 
-INCLUDE_ASM(func_001D9678);
+struct PlayingSound;
+void SetSoundRecordPitch(PlayingSound* self, f32 x);
+void SetSoundRecordVolume(PlayingSound* self, f32 x);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+extern const Vec02 g_unitXVector;
+
+void UpdatePathFollowerSound(PathFollower* self, f32 dt)
+{
+    typedef Vu0::Vec Vec;
+    if (*(PlayingSound**)self->fB84 == 0) {
+        return;
+    }
+    f32 t = self->f698 / D_00275524;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    if (t < lo) {
+        t = lo;
+    } else if (hi < t) {
+        t = hi;
+    }
+    self->fBA0 = ApproachValueWithRamp(D_00275518, 0, self->fBA0, t, dt);
+    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / D_00275524;
+    f32 lo1 = 0.0f;
+    f32 hi1 = 1.0f;
+    f32 share;
+    if (fwd < lo1) {
+        share = lo1;
+    } else if (hi1 < fwd) {
+        share = hi1;
+    } else {
+        share = fwd;
+    }
+    f32 mix = ((ValueRange*)D_002755A0)->Limit(((QuadraticCurve*)D_00275590)->Eval(self->fB9C));
+    mix = (1.0f - mix) * share + mix * D_002755A8 * self->fBA0;
+    SetSoundRecordPitch(*(PlayingSound**)self->fB84, ((QuadraticCurve*)&D_00275530)->Eval(mix) + self->fB94);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB84,
+                         ((ValueRange*)D_00275550)->Clamp(((QuadraticCurve*)D_00275540)->Eval(mix)));
+    SetSoundRecordPitch(*(PlayingSound**)self->fB80, ((QuadraticCurve*)D_00275560)->Eval(mix) + self->fB90);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB80,
+                         ((ValueRange*)D_00275580)->Clamp(((QuadraticCurve*)D_00275570)->Eval(mix)));
+    Vec02 local;
+    Vec02 drift;
+    TransformDirectionBetweenFrames(0, self, &self->v150, &local);
+    Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->f698)).q;
+    drift.x = drift.x * D_002755F8;
+    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / D_002755AC;
+    f32 lo2 = 0.0f;
+    f32 hi2 = 1.0f;
+    f32 slide;
+    if (d < lo2) {
+        slide = lo2;
+    } else if (hi2 < d) {
+        slide = hi2;
+    } else {
+        slide = d;
+    }
+    slide = slide * ((ValueRange*)D_002755F0)->Clamp(((QuadraticCurve*)D_002755E0)->Eval(self->fB9C));
+    SetSoundRecordPitch(*(PlayingSound**)self->fB7C, ((QuadraticCurve*)D_002755B0)->Eval(slide) + self->fB8C);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB7C,
+                         ((ValueRange*)D_002755D0)->Clamp(((QuadraticCurve*)D_002755C0)->Eval(slide)));
+}
 
 INCLUDE_ASM(func_001D9AC8);
 
