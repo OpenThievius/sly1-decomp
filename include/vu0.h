@@ -301,6 +301,15 @@ struct Vu0 {
         return Q(t);
     }
 
+    // The same mfc1 with no slot: the value stays in a register of its own (func_00191AC8
+    // holds it in a saved GPR across its loop and copies it to the stack per use).
+    static u128 ScalarInGprReg(f32 f)
+    {
+        u128 r;
+        __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
+        return r;
+    }
+
     // a * s.x: vmulx.xyzw.
     static u128 MulX(u128 a, u128 s)
     {
@@ -837,6 +846,69 @@ struct Vu0 {
     template <class T> static f32 Distance(const T& a, const T& b)
     {
         return ToFloat(Length(Sub(Vec::Of(a), Vec::Of(b))));
+    }
+
+    // The interface of a VU0 microprogram: the game's microprograms read and write fixed
+    // registers, which the compiler (it allocates $vf1..$vf15) cannot pick. One instruction
+    // each, volatile with a memory clobber so that they keep their order with each other and
+    // with the loads and stores around them. Used by func_0013A498 and func_00185150.
+
+    // A quadword from memory into $vfN (N 16..31): lqc2.
+    template <int N> static void LoadVf(const void* p)
+    {
+        __asm__ volatile("lqc2 $vf%1, %0" : : "m"(*(const u128*)p), "i"(N) : "memory");
+    }
+
+    // $vfN (N 16..31) to memory: sqc2.
+    template <int N> static void StoreVf(void* p)
+    {
+        __asm__ volatile("sqc2 $vf%1, %0" : "=m"(*(u128*)p) : "i"(N) : "memory");
+    }
+
+    // A GPR's word (a vector or float in a GPR, as a caller passes it) into $vfN (N 16..31):
+    // qmtc2.ni (the .ni form does not wait for the microprogram).
+    template <int N> static void MoveToVf(u128 bits)
+    {
+        __asm__ volatile("qmtc2.ni %0, $vf%1" : : "r"(bits), "i"(N) : "memory");
+    }
+
+    // Start the microprogram at address N: vcallms.
+    template <int N> static void CallMs()
+    {
+        __asm__ volatile("vcallms %0" : : "i"(N) : "memory");
+    }
+
+    // A GPR into the integer register $viN (N 1..15): ctc2.ni, or ctc2.i (the interlocked
+    // form, which first waits for the microprogram) from MoveToViWait.
+    template <int N> static void MoveToVi(u32 v)
+    {
+        __asm__ volatile("ctc2.ni %0, $vi%1" : : "r"(v), "i"(N) : "memory");
+    }
+    template <int N> static void MoveToViWait(u32 v)
+    {
+        __asm__ volatile("ctc2.i %0, $vi%1" : : "r"(v), "i"(N) : "memory");
+    }
+
+    // $viN (N 0..15) into a GPR: cfc2.ni, or cfc2.i (interlocked: it stalls until the
+    // microprogram has ended) from ReadViWait. ReadViWait<0> reads zero: the game's wait.
+    template <int N> static u32 ReadVi()
+    {
+        u32 r;
+        __asm__ volatile("cfc2.ni %0, $vi%1" : "=r"(r) : "i"(N) : "memory");
+        return r;
+    }
+    template <int N> static u32 ReadViWait()
+    {
+        u32 r;
+        __asm__ volatile("cfc2.i %0, $vi%1" : "=r"(r) : "i"(N) : "memory");
+        return r;
+    }
+
+    // The VU0 no-operation, a vnop (upper and lower nop) the game puts between a register
+    // write and the use the microprogram will make of it.
+    static void VuNop()
+    {
+        __asm__ volatile("vnop" : : : "memory");
     }
 };
 
