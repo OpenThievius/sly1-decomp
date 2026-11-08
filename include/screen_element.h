@@ -349,7 +349,10 @@ struct T217D_1380 : ScreenElement {
 
 // D_00220BF0 (D_00270650).
 struct T217D_BF0 : ScreenElement {
-    u8 pad260[0x284 - 0x260];
+    u8 pad260[0x270 - 0x260];
+    f32 f270;                   // 0x270: the sprite's place, as a fraction of the screen (func_001821B0)
+    f32 f274;                   // 0x274
+    u8 pad278[0x284 - 0x278];
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
     f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
