@@ -12,9 +12,6 @@
 #include "vu0.h"
 
 
-// The file's .rodata: the constants only its assembly reads.
-extern const f32 D_0024D588 = 3.40282347e+38f;
-
 // The file's .data, in retail's order.
 f32 D_00274AD0[2] = { 1.0f, -1.0f };
 ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
@@ -131,7 +128,7 @@ void func_001C4618(s32 a0, PlacedObject* self, s32 a2, PlacedObject* obj, Follow
         Vu0::Q(out->v70) = tip;
         out->f50 = 1;
         Vu0::Q(out->v60) = base;
-        out->fD0 = D_0024D588;
+        out->fD0 = 3.40282347e+38f;
     }
 }
 
