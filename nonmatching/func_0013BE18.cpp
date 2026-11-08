@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 282/332 (84.9%), checked 2026-11-07
+// BYTES 282/332 (84.9%), checked 2026-11-08
+// Wave 4 (night-lever1, 4 compiles): D_00261364 defined in C (f32 [3] = {800, 0, 0}), Vu0::Set for r, the weights as named locals: unchanged or worse (the weights stay in a1/v1; the call-argument moves are scheduled ahead of the weights).
 // NEAR: the same call tree as func_0014F168 and the same remainder: the two weights load into a1 and v1 (retail v1 and a0, the registers of their lui), the moves of the call arguments are scheduled before the vector work here and after it (and the last weight store) in retail. D_00261364 is INCLUDE_DATA in src (f32 D_00261364[3] = { 800, 0, 0 }); WeightAt is FromFloatAt in a 16-byte local.
 #include "common.h"
 #include "child_group_object.h"

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 312/376 (83.0%), checked 2026-11-07
+// BYTES 312/376 (83.0%), checked 2026-11-08
+// Wave 4 (night-lever1, 2 compiles): the rim as a value used by the Sub straight from FromFloats' GPR (qmtc2) while the apex is reloaded with lqc2: unchanged (the registers still swap, the Sub result takes the rim's vf1 where retail's takes the apex's vf2).
 // BYTES 0/376, checked 2026-11-07
 // NEAR: the VU0 registers of the apex and the rim swap (retail loads the apex into vf2 and moves the rim to vf1; here the reverse), and retail stores the rim's GPR copy to its local and to FromFloats' slot after the square root where here they come first. Every instruction is retail's otherwise: the two FromFloats vectors, the axis scaled by the Scalar half range, the local reused for the difference and the offset. Tried the rim as a u128 stored after the difference, the apex read into a value first, ToFloat.
 // In the context of its file, src/main/base_object.cpp.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 456/460, checked 2026-11-07
+// SIZE 456/460, checked 2026-11-08
+// Wave 4 (night-lever1, 4 compiles): D_0026A914 as f32 in the file (it was s32 there), `Vec02* pd = &d;` before the Sub with the last store through *pd makes retail's early `move a1,sp` appear, but then retail's lw/lui order and registers (v1 for the slot loads, `move a1,zero` before `move a0,s1`) still differ; the one-instruction size gap remains.
 // NEAR: the tests, the reach compare (ToFloatMoved), NormalizeOr and the MulAddX2 of the base, the direction and g_unitZVector with their two ScalarAts are retail's, registers included. Still differs: retail is one instruction longer, forming d's address in a1 before the normalisation and storing the sum through it (here sqc2 to 0(sp)); the arguments of slot 21 (a1 before a0) and the registers of the slot loads for slots 36 and 77. Set for the first store and d through a pointer: no change.
 #include "common.h"
 #include "switched_collider.h"

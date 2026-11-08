@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 156/152, checked 2026-11-07
+// SIZE 156/152, checked 2026-11-08
+// Wave 4 (night-lever1, 6 compiles): Vec::ScalarAt, Vec::Of, FromFloatAt into a Vec with and without the k store, the speed ahead of or inside the MulX call: the lw stays after the maddz (retail: lw first, qmtc2 vf4 after the maddz so the speed lives across Dot's vf2); Vec::ScalarAt puts the speed in vf1 and the sqrt in vf4; the inline MulX argument order evaluates the speed last.
 #include "common.h"
 #include "child_group_object.h"
 #include "globals.h"
