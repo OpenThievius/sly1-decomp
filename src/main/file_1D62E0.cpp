@@ -542,7 +542,7 @@ ClipPlane D_002756B0[6] = {
     { 0.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f, 1.0f }
 };
 World* g_currentWorld = 0;
-s32 D_00275714 = 0;
+u32 D_00275714 = 0;
 s32 D_00275718 = 0;
 s32 D_0027571C = 0;
 s32 D_00275720 = 0;
@@ -2410,7 +2410,113 @@ void SpawnListedObjectCopies(World* self)
     }
 }
 
-INCLUDE_ASM(func_001DCEA0);
+void ResetScatterController(void* scatter);
+void InitScriptValuePools(void);
+s32 ReadBufferedU8(BufferedStream* s);
+s32 ReadBufferedS16(BufferedStream* s);
+void SkipBufferedBlocks(BufferedStream* s);
+void LoadScriptEntryTable(World* self, BufferedStream* s);
+void ReadPropertyRecords(void* self, BufferedStream* s);
+void ReadOptionalBufferedBlock(BufferedStream* s, void* out);
+void ReadBufferedString(BufferedStream* s, void* out);
+void LoadScreenResources(BufferedStream* s);
+void ReadSlotObjects(World* self, BaseObject* parent, BufferedStream* s);
+void ReadBufferedBlockBody(BufferedStream* s);
+void EnsureSoundBankLoaded(s32 bank);
+void SilenceVolumeChannel2(void);
+void RequestStagedBank(s32 bank);
+void SendResidentImages(void);
+s32 IsListEmpty(List01* list);
+void CreateConeVolumes(World* self);
+extern u8 D_002BDC20[];
+void FillScreenColor(void* screen, Rgba4* color, s32 a);
+void SpawnListedObjectCopies(World* self);
+void RunQueuedCalls(World* self);
+void UpdateScatterLevelLimits(void* scatter);
+void ResumeElementStackState(void* stack);
+void UpdateCameraLocation(Camera* camera);
+void UpdateWorldContacts(World* self, s32 a);
+void PlayStagedBank(s32 bank);
+void StartWorldSoundEntries(World* self);
+
+void LoadWorld(World* self, BufferedStream* s)
+{
+    Rgba4 color;
+    ListFrame walk;
+    ListFrame frame;
+    s32 i;
+    ResetScatterController(g_scatterController);
+    InitScriptValuePools();
+    D_00275714 = ReadBufferedU8(s);
+    self->f1D70 = ReadBufferedS16(s);
+    SkipBufferedBlocks(s);
+    g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
+    for (i = 0; i < 10; i++) {
+        BaseObject* o = (BaseObject*)CreateTypedRecord(0x1E, self, 0, 0xA, -1);
+        o->desc->m03(o);
+    }
+    for (i = 0; i < 0x28; i++) {
+        BaseObject* o = (BaseObject*)CreateTypedRecord(0x4D, self, 0, 0xB, -1);
+        o->desc->m03(o);
+    }
+    LoadScriptEntryTable(self, s);
+    ReadPropertyRecords(self, s);
+    ReadOptionalBufferedBlock(s, &self->f2310);
+    ReadBufferedString(s, &self->f2314);
+    ReadOptionalBufferedBlock(s, &self->f1D74);
+    LoadScreenResources(s);
+    ReadSlotObjects(self, 0, s);
+    ReadBufferedBlockBody(s);
+    if (self->f1D70 >= 0) {
+        EnsureSoundBankLoaded(self->f1D70);
+    }
+    if (self->f1D78 == 0) {
+        SilenceVolumeChannel2();
+    }
+    RequestStagedBank(self->f1D74);
+    SendResidentImages();
+    if (IsListEmpty(&self->list1BE8) != 0) {
+        CreateConeVolumes(self);
+    }
+    self->f1D67 = 0x80;
+    color = self->color1D64;
+    FillScreenColor(D_002BDC20, &color, 0);
+    self->f1D68 *= 0.003921569f;
+    self->f1D6C *= 0.003921569f;
+    SpawnListedObjectCopies(self);
+    RunQueuedCalls(self);
+    for (BaseObject* o = (BaseObject*)self->list48.head; o != 0; o = o->next) {
+        if (o->desc->m0F != 0) {
+            o->desc->m0F(o);
+        }
+    }
+    RunQueuedCalls(self);
+    List01* list = &self->list48;
+    frame.list = list;
+    frame.offset = list->offset;
+    frame.prev = g_activeListFrames;
+    g_activeListFrames = &frame;
+    BaseObject* head = *(BaseObject**)frame.list;
+    frame.link = (u8*)head + frame.offset;
+    BaseObject* h = head;
+    while (h != 0) {
+        h->desc->m10(h);
+        BaseObject* nx = *(BaseObject**)frame.link;
+        frame.link = (u8*)nx + frame.offset;
+        h = nx;
+    }
+    g_activeListFrames = frame.prev;
+    RunQueuedCalls(self);
+    UpdateScatterLevelLimits(g_scatterController);
+    ResumeElementStackState(g_elementStack);
+    if (g_mapScreenList.current == 0 && g_saveData->f19D8 != 0) {
+        AllocateZeroedFrontMemory(0x80000);
+    }
+    UpdateCameraLocation(g_camera);
+    UpdateWorldContacts(self, 0);
+    PlayStagedBank(self->f1D74);
+    StartWorldSoundEntries(self);
+}
 
 s32 ClipSegmentToPlanes(ClipPoint* pts)
 {

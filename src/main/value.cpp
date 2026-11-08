@@ -60,7 +60,7 @@ s32 ReadBufferedS32(BufferedStream* r);
 f32 ReadBufferedFloat(BufferedStream* r);
 s32 ReadBufferedU32(BufferedStream* r);
 
-extern s32 D_00275714;
+extern u32 D_00275714;
 
 void* TakeZeroedPoolEntry(void)
 {
