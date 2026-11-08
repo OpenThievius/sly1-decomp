@@ -31,6 +31,8 @@
 #include "path_curve_object.h"
 #include "asm_func.h"
 #include "owner_message.h"
+#include "transform_object.h"
+#include "list_iter.h"
 #include "vu0.h"
 #include "ramp_profile.h"
 #include "animation.h"
@@ -1919,7 +1921,149 @@ s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
     return r;
 }
 
-INCLUDE_ASM(func_00177990);
+extern List01 g_class75List;
+s32 MaskWorldBitsBySave(void);
+s32 IsObjectAttached(void* p);
+// A hit CollectMeshHits gives (0x30 bytes).
+struct MeshHit {
+    u8 pad00[0x30];
+};
+s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshHit* out);
+void HeapSortRecords(void* base, s32 count, s32 size, s32 (*compare)(FloatKeyedItem* a, FloatKeyedItem* b));
+void func_001C61E0(Player* self, s32 n);
+void FillMemory(void* dst, s32 value, s32 size);
+
+// The player's grabs of the frame. The state picks the object it reaches with (one of the five
+// at 0x25D8) and the kinds of hold it takes (2, 4 or 8). Each class 0x75 object of those kinds
+// whose position is on the object's mesh, and each contact of this frame between the object and
+// another, makes a query (up to 64), nearest along the object's first axis first; the first whose
+// node the player has not taken yet is taken (up to 32): its kind 2 drops the player's state,
+// kind 1 ends the grab (the object's slot 3, or state 13 in state 0x37). The frame's contacts
+// go back to the world's pool.
+void func_00177990(Player* self)
+{
+    NodeQuery recs[64];
+    ListFrame frame;
+    Vec02 pos;
+    Vec02 motion;
+    MeshHit hit;
+    NodeQuery* rec;
+    Collider* target;
+    s32 mask;
+    s32 n;
+    s32 i;
+
+    if (self->f2220 == 4) {
+        goto done;
+    }
+    if (self->f2228 == 7) {
+        target = (Collider*)self->f25D8[1];
+        mask = 4;
+    } else if (self->f223C == 4 || self->f223C == 6 || self->f223C == 5 || self->f223C == 7) {
+        target = (Collider*)self->f25D8[0];
+        mask = 2;
+    } else if (self->f2220 == 10) {
+        target = (Collider*)self->f25D8[2];
+        mask = 8;
+    } else if (self->f2228 == 8) {
+        target = (Collider*)self->f25D8[3];
+        mask = 4;
+    } else if (self->f2228 == 0x37 && (MaskWorldBitsBySave() & 0x400)) {
+        target = (Collider*)self->f25D8[4];
+        mask = 8;
+    } else {
+        goto done;
+    }
+    n = 0;
+    if (IsObjectAttached(target)) {
+        f32 scale = 1000.0f;
+        Class75Object* o;
+        for (o = (Class75Object*)g_class75List.head; o != 0; o = *(Class75Object**)&o->link) {
+            if (o->f90 == 0) {
+                continue;
+            }
+            if (!(o->count & mask)) {
+                continue;
+            }
+            GetObjectWorldPosition(o, &pos);
+            if (CollectMeshHits(o->scale, &pos, target->tree.count2, target->tree.nodes, 0, &target->meshCopy, 1, &hit) <= 0) {
+                continue;
+            }
+            if (n >= sizeof(recs) / sizeof(recs[0])) {
+                break;
+            }
+            rec = &recs[n];
+            FillMemory(rec, 0, 0x40);
+            n++;
+            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&rec->dir, 0, 0, 0);
+            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&motion, 0, 0, 0);
+            rec->p00 = self;
+            rec->hold = o;
+            rec->pos = pos;
+            rec->kind = mask;
+            rec->weight = self->mass * scale;
+            Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(pos)));
+        }
+    }
+    if (n == 0 && self->f2670 == 0) {
+        return;
+    }
+    for (Contact03* c = self->f2670; c != 0; c = c->next) {
+        s32 e = (Collider*)self != c->end[0].body;
+        if (c->end[e].part != target) {
+            continue;
+        }
+        if (n >= sizeof(recs) / sizeof(recs[0])) {
+            break;
+        }
+        rec = &recs[n];
+        FillMemory(rec, 0, 0x40);
+        n++;
+        rec->p00 = self;
+        rec->hold = c->end[1 - e].part;
+        rec->pos = c->end[1 - e].v10;
+        rec->kind = mask;
+        rec->weight = self->mass * 1000.0f;
+        ComputeObjectMotionInFrame((s32)c->end[e].part, 0, &rec->pos, (s32)&rec->dir, 0, 0, 0);
+        Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(rec->pos)));
+    }
+    HeapSortRecords(recs, n, 0x40, CompareKeysAscending);
+    for (i = 0; i < n; i++) {
+        rec = &recs[i];
+        PlacedObject* node = FindNodeForQuery(rec, self->f25EC, self->f25F0);
+        if (node == 0) {
+            continue;
+        }
+        if (rec->out & 2) {
+            if (mask & 2) {
+                if (self->f223C == 6 || self->f223C == 4) {
+                    SetPlayerState(self, 0, -1);
+                    func_001C61E0(self, 8);
+                } else {
+                    SetPlayerState(self, 0, -1);
+                    func_001C61E0(self, 9);
+                }
+            } else if (mask & 4) {
+                SetPlayerState(self, 0, -1);
+                func_001C61E0(self, 8);
+            }
+        }
+        if (rec->out & 1) {
+            if (self->f2228 == 0x37) {
+                SetPlayerState(self, 0xD, 0x38);
+            } else {
+                target->desc->m03(target);
+            }
+            goto done;
+        }
+        if ((u32)self->f25EC < 32) {
+            self->f25F0[self->f25EC++] = node;
+        }
+    }
+done:
+    FreePooledContactChain(self->world, self->f2670);
+    self->f2670 = 0;
+}
 
 s32 IsTopCameraController(u8* p);
 

@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 644/624, checked 2026-11-08
-/* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): the start
- * matches up to the video mode test: the interlace value is read as a u16 before the store to
- * pmode (retail's lh for the smode2 test and lhu for the later (s16) compare: the store may
- * alias, so CSE keeps both loads), and dx's offset is added in 64 bits (daddiu: the product
- * cast to u64 first). Left: the four display computations come out 5 instructions longer;
- * retail cross-jumps the two interlaced tails (from the field test) and the two progressive
- * ones, and computes dy's term first, then magh, the products, magh - 1 and dx. Tried: five
- * orders of the OR tree in the macro. */
+// BYTES 440/624 (70.5%), checked 2026-11-08
+/* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): the size is
+ * retail's with the display macro's terms in the order dy, magh, dh, dw, dx (the best of all
+ * 120 orders, each with the field test either way round; 2026-11-08, night-untouched), and the
+ * start matches up to the video mode test: the interlace value is read as a u16 before the
+ * store to pmode (retail's lh for the smode2 test and lhu for the later (s16) compare: the store
+ * may alias, so CSE keeps both loads), and dx's offset is added in 64 bits (daddiu: the product
+ * cast to u64 first). Left, in each display computation: retail computes dy's term into its own
+ * register before the division and ORs it in last, and its interlaced arms test the field last
+ * (beqz, the 2h - 1 arm falling through) and share the tail after it across the two modes;
+ * here dy's term is ORed in first and the field test is bnez. Tried: explicit OR trees of the
+ * shape retail's code shows ((magh | dw) | (dx | dh)) | dy, the field test as (h or 2h) - 1. */
 #include "common.h"
 
 typedef struct GsParam {
@@ -33,7 +36,7 @@ extern const char D_0024F510[];
 
 /* The display register of a mode: position, magnification, size. */
 #define GS_DISPLAY(dx, dy, magh, dw, dh) \
-    ((u64)(dx) | ((u64)(dy) << 12) | ((u64)(magh) << 23) | ((u64)(dw) << 32) | ((u64)(dh) << 44))
+    (((u64)(dy) << 12) | ((u64)(magh) << 23) | ((u64)(dh) << 44) | ((u64)(dw) << 32) | (u64)(dx))
 
 
 void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy)

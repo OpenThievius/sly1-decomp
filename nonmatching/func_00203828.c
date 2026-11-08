@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 475/504 (94.2%), checked 2026-11-07
+// BYTES 474/504 (94.0%), checked 2026-11-08
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
-/* NEAR (src/lib/cdvd.c's declarations; built as C by 2.9-ee-991111): 22 lines in its unit,
- * every one a register. The code is retail's instruction for instruction (the bind loop and its padded delay
- * loops, the shared failure path, the uncached read of the reply), but global allocation gives
- * the high halves other saved registers: retail has s1 for D_00279444, s2 mode, s3 D_0027942C,
- * s4 D_0062AA50, s5 D_0062AA10, s6 D_00279410, s7 D_0027A600; ours s7, s2, s3, s1, s4, s5, s6.
- * With `while (D_00279444 < 0)` instead of `if` (25 lines; the loop-depth weight of its references lifts
- * D_00279444 to s1, and D_0062AA50 and D_0027A600 follow) D_0062AA10's
- * references weigh too much and D_0027942C's too little (cc1 -dg: allocno priorities). The
- * failure's -1 or 6 comes out as `li v1,6; li v0,-1; movn` where retail has `li v1,-1;
- * li v0,6; movz`, with ?:, if/else or a local alike. */
+/* NEAR (src/lib/cdvd.c's declarations; built as C by 2.9-ee-991111): only registers differ
+ * (tools/regdiff.py: order). The code is retail's (the bind loop and its padded delay loops, the
+ * shared failure path, the uncached read of the reply); the failure's value is `mode != 8 ? 6 :
+ * -1` (retail's li 6, movz -1) and the reply's word a variable of its own (retail's s0, apart
+ * from the reply's address in s1), both found 2026-11-08 (night-untouched). Left: the saved
+ * registers of the high halves. Retail's order is D_00279444 (s1), mode (s2), D_0027942C (s3),
+ * D_0062AA50 (s4), D_0062AA10 (s5), D_00279410 (s6), D_0027A600 (s7); with the bind under
+ * `while (D_00279444 < 0)` ours is D_0062AA10, D_00279444, mode, D_0062AA50, D_00279410,
+ * D_0027942C, D_0027A600 (the loop weights D_0062AA10's references); with `if`, D_00279444 comes
+ * last. */
 #include "common.h"
 
 typedef struct RpcClient {
@@ -77,6 +77,7 @@ s32 WaitDiscReady(s32 mode)
 {
     s32 i;
     s32 r;
+    s32 v;
 
     if (D_00279410 > 0) {
         PrintBuffered("DiskReady 0\n");
@@ -87,10 +88,10 @@ s32 WaitDiscReady(s32 mode)
     }
     if (SyncDiscSCommand(1)) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);
-        return mode == 8 ? -1 : 6;
+        return mode != 8 ? 6 : -1;
     }
     InitRemoteCalls(0);
-    if (D_00279444 < 0) {
+    while (D_00279444 < 0) {
         while (1) {
             if (BindRemoteService(&D_0062AA10, 0x8000059A, 0) < 0) {
                 if (D_00279410 > 0) {
@@ -112,12 +113,12 @@ s32 WaitDiscReady(s32 mode)
     r = (s32)D_0027A600;
     if (CallRemoteService(&D_0062AA10, 0, 0, D_0062AA50, 4, (void*)r, 4, 0, 0) < 0) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);
-        return mode == 8 ? -1 : 6;
+        return mode != 8 ? 6 : -1;
     }
     if (D_00279410 > 0) {
         PrintBuffered("DiskReady ended\n");
     }
-    r = *(s32*)((u32)r | 0x20000000);
+    v = *(s32*)((u32)r | 0x20000000);
     PostSemaphore(g_discSSemaphore);
-    return r;
+    return v;
 }

@@ -18,9 +18,11 @@ The same assembler filled the slot of a return (`j $31`) left empty in reorder m
 instruction before it, where that is one real instruction: a volatile store (func_001F7270's
 write to the serial port), or the second half of a two-instruction pattern the compiler never
 puts in a slot itself, the `dsra $r,$r,32` of a 64-to-32-bit truncation (func_002115F8,
-func_001F7390). Our assembler leaves every reorder-mode slot empty. A load or an assembler macro
-(`li`, `la`, `dli`) is left where it is, as retail leaves a volatile load and a `li` before a
-call (func_00202DA0, func_001F9AD8).
+func_001F7390). Our assembler leaves every reorder-mode slot empty. A volatile load right before a
+reorder-mode `jal` goes into its slot too (func_00203B18's semaphore), unless a label comes
+before it or the instruction before it was emitted under noreorder (a branch's slot): there that
+assembler did not swap, and retail keeps both of func_00202DA0's volatile loads before their
+calls. An assembler macro (`li`, `la`, `dli`) is left where it is (func_001F9AD8).
 
     python3 tools/volatile_slots.py IN.s [OUT.s]    (rewrites IN.s in place without OUT.s)
 """
@@ -28,6 +30,7 @@ import re
 import sys
 
 STORE = re.compile(r"^\s*(sb|sh|sw|sd)\s+(\$\w+),\s*(.+?)\s*$")
+LOAD = re.compile(r"^\s*(lb|lbu|lh|lhu|lw|lwu|ld)\s+(\$\w+),\s*(-?\w*\(?.*?\(\$\w+\))\s*$")
 BASED = re.compile(r"^(.*)\((\$\w+)\)$")
 JAL = re.compile(r"^\s*jal\s+\S+\s*$")
 RETURN = re.compile(r"^\s*j\s+\$(31|ra)\s*$")
@@ -59,6 +62,8 @@ def fill(asm):
     reorder = True
     volatile = False
     store = None  # index in `out` of the last volatile store, while nothing but comments follows it
+    load = None  # the same for a volatile load the assembler may swap with a `jal`
+    after_reorder = False  # whether the last instruction was emitted in reorder mode, no label since
     last = None  # index in `out` of the last instruction, while nothing but comments follows it
     for line in lines:
         s = line.strip()
@@ -85,6 +90,12 @@ def fill(asm):
                 out.append("\t.set\treorder")
                 store = None
                 continue
+        if reorder and load is not None and JAL.match(line):
+            prev = out.pop(load)
+            out += ["\t.set\tnoreorder", line, prev, "\t.set\treorder"]
+            load = last = None
+            after_reorder = False
+            continue
         if reorder and last is not None and RETURN.match(line) and movable(out[last]):
             prev = out.pop(last)
             out.append("\t.set\tnoreorder")
@@ -99,9 +110,13 @@ def fill(asm):
             continue
         if is_code(line):
             store = len(out) if (volatile and reorder and STORE.match(line)) else None
+            load = len(out) if (volatile and reorder and after_reorder and LOAD.match(line)) else None
             last = len(out) if reorder else None
+            after_reorder = reorder
         elif s and not s.startswith("#"):
             last = None  # a label or a directive: nothing moves across it
+            if s.endswith(":"):
+                after_reorder = False
         out.append(line)
     return "\n".join(out)
 

@@ -5095,7 +5095,133 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-INCLUDE_ASM(func_0012EBD8);
+f32 GetMatrixRotationCosine(void* p);
+f32 Arccosine(f32 x);
+
+// One frame of an animation player. While an attachment that follows it belongs to an object
+// with flag bit 38 set (and the world's f2358 is clear) the player only stops its sound. The time
+// advances by dt times the speed, weighted by how near the driven attachment's object is to its
+// track's position and orientation (the two falloff ranges), after the delay at +0x10 has used
+// up its part of dt; the events up to the new time run, the loop mode is applied (mode 0 ends the
+// player, mode 1 loops it), and the events run again. A looping player puts the followers whose
+// curves do not close back at their tracks' start.
+void func_0012EBD8(AnimationPlayer* self, f32 dt)
+{
+    ListFrame frame;
+    Animation* anim = self->anim;
+    T2195_7C0* n;
+    f32 weight;
+    s32 stop;
+    s32 looped;
+    s32 ended;
+    s32 i;
+
+    if (anim->world->f2358 == 0) {
+        for (n = (T2195_7C0*)self->list44.head; n != 0; n = (T2195_7C0*)n->w20.lo) {
+            if (n->owner->flags & ((u64)0x8000 << 23)) {
+                StopSoundRecord(self->f50, 0);
+                return;
+            }
+        }
+    }
+    if (__builtin_fabsf(self->speed) < 0.0001f) {
+        return;
+    }
+    weight = 1.0f;
+    if (self->driven != 0) {
+        RangeFalloffOwner* near = (RangeFalloffOwner*)self->f2C;
+        if (near != 0) {
+            n = (T2195_7C0*)self->driven;
+            Vec02 pos;
+            Vec02 d;
+            f32 w;
+            n->vt->getPos(n, 0.0f, &pos, 0);
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(n->owner->pos), Vu0::Q(pos));
+            if (n->mode0 == 5) {
+                d.z = 0.0f;
+            }
+            w = GetRangeFalloffScale(near, Vu0::ToFloat(Vu0::Length(Vu0::Q(d))));
+            if (w < weight) {
+                weight = w;
+            }
+        }
+        RangeFalloffOwner* turn = (RangeFalloffOwner*)self->f30;
+        if (turn != 0) {
+            n = (T2195_7C0*)self->driven;
+            Mat02 rot;
+            Mat02 rel;
+            f32 w;
+            n->vt->getRot(n, 0.0f, &rot, 0);
+            MultiplyMatrices3x3(&n->owner->rot, &rot, &rel);
+            w = GetRangeFalloffScale(turn, Arccosine(GetMatrixRotationCosine(&rel)));
+            if (w < weight) {
+                weight = w;
+            }
+        }
+        weight = ClampRange::Of(weight, 0.0f, 1.0f);
+        if (weight < 0.0001f) {
+            return;
+        }
+    }
+    if (0.0f < self->f10) {
+        f32 left = self->f10 - dt;
+        self->f10 = left;
+        if (left <= 0.0f) {
+            dt = -left;
+            self->f10 = 0.0f;
+        } else {
+            dt = 0.0f;
+        }
+    }
+    self->time = self->time + dt * self->speed * weight;
+    stop = 0;
+    looped = 0;
+    ended = 0;
+    RunAnimationEventsToTime(self, anim, &stop);
+    if (stop != 0) {
+        return;
+    }
+    if (ApplyAnimationLoopMode(self, &self->time, &self->speed) != 0) {
+        switch (anim->f44) {
+        case 0:
+            ended = 1;
+            break;
+        case 1:
+            looped = 1;
+            self->f20 = self->speed <= 0.0f ? anim->timedCount : 0;
+            break;
+        }
+    }
+    RunAnimationEventsToTime(self, anim, &stop);
+    if (stop != 0) {
+        return;
+    }
+    for (i = 0; i < self->f5C; i++) {
+        ClearRootTries(((PlacedObject**)self->f60)[i]);
+    }
+    if (looped != 0) {
+        for (n = (T2195_7C0*)self->list44.head; n != 0; n = (T2195_7C0*)n->w20.lo) {
+            Track83* track = &anim->tracks[n->index];
+            if (track->pos != 0 && ((VectorKeyPositionCurve*)track->pos)->closed == 0 && (Attachment*)n == n->owner->f1EC) {
+                Vec02 pos;
+                Vec02 vec;
+                n->vt->getPos(n, 0.0f, &pos, &vec);
+                n->owner->desc02()->m1D(n->owner, &pos);
+                n->owner->desc02()->m20(n->owner, &vec);
+            }
+            if (track->rot != 0 && ((KeyedRotationCurve*)track->rot)->closed == 0 && (Attachment*)n == n->owner->f1F0) {
+                Mat02 rot;
+                Vec02 vec;
+                n->vt->getRot(n, 0.0f, &rot, &vec);
+                n->owner->desc02()->m1E(n->owner, &rot);
+                n->owner->desc02()->m21(n->owner, &vec);
+            }
+        }
+    }
+    if (ended != 0 || looped != 0) {
+        NotifyAnimationPlayerCallbacks(self, ended != 0 ? 5 : 7, self);
+    }
+}
 
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {

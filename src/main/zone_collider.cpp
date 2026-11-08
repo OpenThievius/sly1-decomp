@@ -186,7 +186,153 @@ void UpdateMaskedCollider(MaskedCollider* self)
 
 INCLUDE_ASM(func_0013D0B0);
 
-INCLUDE_ASM(func_0013D278);
+// The larger of two floats, b first in max.s (retail's operand order, as file_19E040.cpp's).
+static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
+s32 IsWorldBodyLimitReached(void* world, MaskedCollider* node, s32 match);
+f32 RandomFloatInRange(f32 a, f32 b);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void RotateMatrixUpright(void* sub, s32 zero, void* out);
+void SendPointEventToWorldListener(Vec02* point, f32 radius);
+s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void ScatterObjectsAtPoint(void* scatter, Vec02* point, s32 a, s32 b);
+void StartSoundEffect(s32 sound, void* a1, s32 a2, void* pos, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void SetFlagTableBit(FlagTable* table, s32 v);
+extern u8 g_scatterController[];
+extern u8 D_00248D30[];
+
+// The sound a released zone plays (the block at 0x6B4, func_0013DAF0).
+struct ZoneSound {
+    s32 sound;              // 0x00
+    f32 f4;                 // 0x04
+    f32 f8;                 // 0x08
+    f32 fC;                 // 0x0C
+};
+
+// Slot 72: the zone lets go, once. Each queued object it found is put back into the world
+// (kinds 2 and 3 at rest, the others with a random push and spin, upright for classes 0x2E and
+// 0x55) and told so (message 15); unless its flag was already set, the zone tells the object at
+// 0x618 or the world's listener of its radius, scatters at its point and plays its sound. It
+// leaves its parent's list unless kept, marks itself done in the flag table, tells itself
+// (message 14) and its script (event 0x16 if it was done before, 2 if not).
+void func_0013D278(MaskedCollider* self)
+{
+    s32 wasSet;
+    s32 i;
+
+    if (self->hold != 0) {
+        return;
+    }
+    wasSet = TestFlagTableBit((FlagTable*)g_flagTable, self->id688) != 0;
+    if (self->quiet == 0) {
+        for (i = 0; i < self->count550; i++) {
+            Slot20* e = &self->slots[i];
+            MaskedCollider* node;
+            ObjectMessage msg;
+            if (e->kind == 0) {
+                continue;
+            }
+            node = (MaskedCollider*)e->node;
+            if (node == 0) {
+                continue;
+            }
+            if (IsWorldBodyLimitReached(self->world, node, MatchesObjectId(node, self->key638)) != 0) {
+                continue;
+            }
+            if ((node->desc->flags & 1) && !((u32)(e->kind - 2) < 2)) {
+                Vec02 v;
+                Vec02 w;
+                f32 x = RandomFloatInRange(-self->spread, self->spread);
+                f32 y = RandomFloatInRange(-self->spread, self->spread);
+                f32 z = RandomFloatInRange(-self->spread, self->spread);
+                u128 push = Vu0::FromFloats(x, y, z);
+                Vu0::Set(v, push);
+                f32 s = RandomFloatInRange(self->f628, self->f62C);
+                Vu0::Set(v, Vu0::MulAddX(push, Vu0::Q(node->pos), Vu0::Scalar(s)));
+                node->desc02()->m20(node, &v);
+                x = RandomFloatInRange(-self->spin, self->spin);
+                y = RandomFloatInRange(-self->spin, self->spin);
+                z = RandomFloatInRange(-self->spin, self->spin);
+                Vu0::Q(w) = Vu0::FromFloats(x, y, z);
+                node->desc02()->m21(node, &w);
+                if (node->desc->flags & 2) {
+                    SetColliderAnchors(node, 0, 0, 0, 0);
+                }
+            }
+            if (e->kind == 4 || e->kind == 2) {
+                node->desc->m02(node);
+            }
+            if (!((u32)(e->kind - 2) < 2) && (node->desc->flags & 2)) {
+                node->desc->m15(node, 0);
+            } else {
+                node->desc->m15(node, self->parent);
+            }
+            if (node->desc->flags & 1) {
+                if ((u32)(e->kind - 2) < 2) {
+                    node->desc02()->m20(node, (Vec02*)D_00248D30);
+                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                } else if (IsObjectOfKind(node, 0x2E) || IsObjectOfKind(node, 0x55)) {
+                    Mat02 m;
+                    RotateMatrixUpright(&node->rot, 0, &m);
+                    node->desc02()->m1E(node, &m);
+                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                    if (IsObjectOfKind(node, 0x2E)) {
+                        SetColliderAnchors(node, 0, 0, 3, 0);
+                    } else if (IsObjectOfKind(node, 0x59)) {
+                        node->desc02()->m2F(node, 1);
+                    } else {
+                        node->desc02()->m2F(node, 3);
+                    }
+                }
+            }
+            msg.p0 = self;
+            msg.target = node;
+            node->desc->m0E(node, 15, &msg);
+        }
+        if (!wasSet) {
+            Vec02 point;
+            SlotMessage release;
+            f32 radius;
+            BaseObject* other;
+            switch (self->radiusKind) {
+            case 0:
+                radius = MaxF(self->f2A4, self->radius3CC);
+                break;
+            case 1:
+                radius = MaxF(self->f2A8, self->radius3D0);
+                break;
+            }
+            other = (BaseObject*)self->f618;
+            if (other != 0) {
+                release.kind = 9;
+                release.owner = self;
+                release.f30 = self->f620;
+                release.f34 = radius;
+                other->desc->m1B(other, &release);
+            } else {
+                SendPointEventToWorldListener(&self->v140, radius);
+            }
+            TransformPointBetweenFrames(self, 0, &self->point6A0, &point);
+            ScatterObjectsAtPoint(g_scatterController, &point, self->f698, self->scatter6B0);
+            ZoneSound* sound = (ZoneSound*)self->f6B4;
+            if (sound != 0) {
+                StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->f4, sound->f8, sound->fC, 0.0f, 0.0f, 0, 0);
+            } else {
+                StartSoundEffect(0x2A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        }
+        if (self->keep == 0) {
+            self->desc->m03(self);
+        }
+    }
+    self->hold = 1;
+    SetFlagTableBit((FlagTable*)g_flagTable, self->id688);
+    self->desc->m0E(self, 14, self);
+    if (wasSet) {
+        TriggerScriptEvent(self, 0x16, 0, 0);
+    } else {
+        TriggerScriptEvent(self, 2, 0, 0);
+    }
+}
 
 extern u8 g_flagTable[];
 
