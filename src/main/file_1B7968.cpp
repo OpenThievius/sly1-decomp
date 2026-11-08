@@ -761,7 +761,14 @@ void NotifyContactHandlers(Collider* self)
     }
 }
 
-INCLUDE_ASM(func_001B8B30);
+f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
+{
+    Vec02 ap;
+    Vec02 ab;
+    Vu0::Q(ap) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
+    Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ap), Vu0::Q(ab))) / Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
+}
 
 INCLUDE_RODATA(jtbl_0024D280);
 INCLUDE_ASM(func_001B8B90);
