@@ -325,8 +325,9 @@ def check_function(obj, name, key, resolver, image):
                 named = [s for s in obj.symbols if s["shndx"] == rsym["shndx"] and s["name"]]
                 base = resolver.address(named[0]["name"]) if named else None
                 return None if base is None else base - named[0]["value"] + addend_bits
-            if secname == ".text":
-                # The file's included assembly (include/asm_func.h): the function at that offset.
+            if secname in (".text", ".data"):
+                # The file's included assembly (include/asm_func.h): the function or the data label
+                # (INCLUDE_DATA) at that offset.
                 named = [s for s in obj.symbols if s["shndx"] == rsym["shndx"] and s["name"]
                          and s["value"] <= addend_bits and resolver.address(s["name"]) is not None]
                 if named:
