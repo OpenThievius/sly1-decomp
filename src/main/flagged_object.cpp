@@ -10,9 +10,9 @@
 #include "flag_table.h"
 #include "vu0.h"
 
-// The file's .rodata: the FLT_MAX constants of its two assembly functions.
+// The file's .rodata: the FLT_MAX constant of its assembly function, then the literal of
+// UpdateFlaggedObject (func_00141690).
 extern const f32 D_00249E3C = 3.4028235e+38f;
-extern const f32 D_00249E40 = 3.4028235e+38f;
 
 // The file's .data, in retail's order: the loader's link table of class 0x38, then the flag
 // table (its bitmap and the snapshot func_00140E10 saves, 0x430 bytes in two labels).
@@ -325,7 +325,7 @@ void UpdateFlaggedObject(FlaggedObject* self)
         if (Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) < 1000.0f) {
             return;
         }
-        Vu0::Q(table->point) = Vu0::FromFloats(D_00249E40, D_00249E40, D_00249E40);
+        Vu0::Q(table->point) = Vu0::FromFloats(3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f);
     }
     for (s32 i = 0; i < self->countB; i++) {
         void* obj = self->objsB[i];
