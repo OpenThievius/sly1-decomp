@@ -647,11 +647,12 @@ struct TempoPlayerEntry {
 struct TempoAgent : Agent {
     s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
-    u8 padC24[0xC34 - 0xC24];
+    void* fC24[4];          // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
     Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
     Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldTimeline)
     BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
-    u8 padC40[0xC48 - 0xC40];
+    s32 fC40;               // 0xC40: which of fC24 is in use
+    f32 fC44;               // 0xC44
     void* fC48;             // 0xC48
     s32 fC4C;               // 0xC4C: set and cleared by timeline entries of kinds 4 and 5 (func_001ED318)
     void* fC50;             // 0xC50
@@ -952,7 +953,7 @@ struct ModeCollider : SwitchedCollider {
 struct BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
-    u8 pad618[0x628 - 0x618];
+    void* f618[4];          // 0x618: the objects func_001EC828 places the tempo agent's timelines by
     void* f628;             // 0x628
     s32 f62C;               // 0x62C
     s32 f630;               // 0x630
