@@ -31,6 +31,7 @@
 #include "path_curve_object.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "ramp_profile.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -256,9 +257,9 @@ f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dv02, from retail's bytes and their readers.
 f32 D_00263720[4] = { 1.0f, -4.0f, 0.0f, 0.0f };
-f32 D_00263730[4] = { 10.0f, 0.0f, 0.5f, 50.0f };
-f32 D_00263740[4] = { 40.0f, 0.0f, 0.25f, 200.0f };
-f32 D_00263750[4] = { 15.0f, 0.0f, 0.25f, 100.0f };
+RampProfile D_00263730 = { 10.0f, 0.0f, 0.5f, 50.0f };
+RampProfile D_00263740 = { 40.0f, 0.0f, 0.25f, 200.0f };
+RampProfile D_00263750 = { 15.0f, 0.0f, 0.25f, 100.0f };
 f32 D_00263760[4] = { -0.200000003f, 0.00200000009f, 0.0f, 0.0f };
 f32 D_00263770[4] = { 0.200000003f, 0.0f, 0.800000012f, 0.0f };
 f32 D_00263780[4] = { 40.0f, 0.0f, 0.100000001f, 0.0f };
