@@ -27,7 +27,11 @@ struct Camera : BaseObject {
     s32 f90[4];             // 0x90
     s32 fA0[4];             // 0xA0
     f32 fB0;                // 0xB0: scales a spawner's range (func_00155AB0)
-    u8 padB4[0x1C0 - 0xB4];
+    u8 padB4[0xC0 - 0xB4];
+    f32 fC0;                // 0xC0: sent to VU1 with a listed object's draw (func_0013AD80)
+    u8 padC4[0xD4 - 0xC4];
+    f32 fD4;                // 0xD4: and this
+    u8 padD8[0x1C0 - 0xD8];
     f32 f1C0;               // 0x1C0
     f32 f1C4;               // 0x1C4
     f32 f1C8;               // 0x1C8

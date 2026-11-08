@@ -445,6 +445,19 @@ struct Vu0 {
         return out;
     }
 
+    // Transform with the rows as values the caller loads where they are: retail reads a local
+    // matrix's rows from the frame where Transform's reference keeps the matrix's address in a
+    // register once a call has taken it (func_001F2840's inverse and its vertex loop).
+    static u128 TransformRows(u128 r0, u128 r1, u128 r2, u128 r3, u128 v, f32 w)
+    {
+        u128 s = Scalar(w);
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %5x\n\tvmadday.xyz ACC, %2, %5y\n\tvmaddaz.xyz ACC, %3, %5z\n\t"
+                "vmaddx.xyz %0, %4, %6x"
+                : "=j"(out) : "j"(r0), "j"(r1), "j"(r2), "j"(r3), "j"(v), "j"(s));
+        return out;
+    }
+
     // The vector v through a 4x4 matrix whose rows are m0, m1, m2, m3: the rows weighted by
     // v's x, y, z and w: vmulax.xyzw, vmadday.xyzw, vmaddaz.xyzw, vmaddw.xyzw. The rows are
     // values the caller loads once: a product of matrices stores each row of the result

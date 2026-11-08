@@ -71,8 +71,13 @@ struct ColliderSpan {
     f32 time[2];            // 0x40: entry, exit
     s32 f48;                // 0x48
     s32 group;              // 0x4C: the collider's group the span is in, negative for none (func_00143BE0)
-    void* face50;           // 0x50: the face crossed at the entry (func_0013DFD8)
-    void* face54;           // 0x54: and at the exit, which a following span must share to extend it
+    union {
+        struct {
+            void* face50;   // 0x50: the face crossed at the entry (func_0013DFD8)
+            void* face54;   // 0x54: and at the exit, which a following span must share to extend it
+        };
+        f32 param[2];       // 0x50: the entry and exit along the second segment of a span between two (func_00142278)
+    };
     u8 pad58[0x70 - 0x58];
 };
 

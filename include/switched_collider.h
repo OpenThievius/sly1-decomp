@@ -281,7 +281,17 @@ struct Player : TurningCollider {
     void* f105C;            // 0x105C: the blend item BuildCombinedBlendAnimation makes of blend103C
     u8 pad1060[0x1064 - 0x1060];
     void* f1064;            // 0x1064
-    u8 pad1068[0x1188 - 0x1068];
+    u8 pad1068[0x106C - 0x1068];
+    f32 f106C;              // 0x106C: the three weights func_00171238 gives SetBlendItemWeights, 0xC apart
+    u8 pad1070[0x1078 - 0x1070];
+    f32 f1078;              // 0x1078
+    u8 pad107C[0x1084 - 0x107C];
+    f32 f1084;              // 0x1084
+    u8 pad1088[0x1090 - 0x1088];
+    void* f1090;            // 0x1090: the blend those weights go to
+    f32 f1094;              // 0x1094: eased toward the side the path turns to (func_00171238)
+    f32 f1098;              // 0x1098: its rate
+    u8 pad109C[0x1188 - 0x109C];
     void* f1188;            // 0x1188
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
@@ -363,7 +373,8 @@ struct Player : TurningCollider {
     void* f23B8;            // 0x23B8
     void* f23BC;            // 0x23BC
     f32 f23C0;              // 0x23C0: the place along the record at 0x23BC (DrivePlayerFromEntryQueue)
-    u8 pad23C4[0x23CC - 0x23C4];
+    f32 f23C4;              // 0x23C4: added to f23C0 with the speed along the record (func_00171238)
+    s32 f23C8;              // 0x23C8: set, the turn is the other way (func_00171238)
     void* f23CC;            // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
     void* f23D0;            // 0x23D0: an object whose slots 6, 7 and 35 the aim states 2 and 11 swap with f23D8 (func_001C61E0)
     void* f23D4;            // 0x23D4
@@ -408,7 +419,8 @@ struct Player : TurningCollider {
     void* f250C;            // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
     void* f2510;            // 0x2510: the same with f1290
     void* f2514;            // 0x2514
-    u8 pad2518[0x2530 - 0x2518];
+    void* f2518;            // 0x2518
+    u8 pad251C[0x2530 - 0x251C];
     Vec02 v2530;            // 0x2530: an offset of the pose eased to zero (func_00172EE0)
     u8 f2540[0x18];         // 0x2540: the blend set up for aim state 4 (func_001C6D00), with its animation
     void* f2558;            // 0x2558
