@@ -35,7 +35,8 @@ struct Camera : BaseObject {
         f32 f1CC;           // 0x1CC
     };
     f32 f1D0;               // 0x1D0
-    u8 pad1D4[0x1E4 - 0x1D4];
+    u8 pad1D4[0x1E0 - 0x1D4];
+    f32 f1E0;               // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
     f32 f1E4;               // 0x1E4
     f32 f1E8;               // 0x1E8
     u8 pad1EC[0x1F0 - 0x1EC];
