@@ -1543,7 +1543,35 @@ ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* 
     return ret;
 }
 
-INCLUDE_ASM(func_001162D0);
+ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    InitScriptValue(&obj);
+    Vec02* out = (Vec02*)AcquireVectorAPayload();
+    u128 a = Vu0::Q(*(Vec02*)args[0].v);
+    Vu0::Q(*out) = a;
+    if (args[1].tag == 0) {
+        Vec02* fb = (Vec02*)&D_00248D30;
+        u128 len = Vu0::Length(a);
+        if (Vu0::ToFloatMoved(len) < 0.0001f) {
+            *out = *fb;
+        } else {
+            Vu0::Q(*out) = Vu0::DivX(a, len);
+        }
+    } else {
+        Vec02* fb = (Vec02*)args[1].node->v;
+        u128 len = Vu0::Length(a);
+        if (Vu0::ToFloatMoved(len) < 0.0001f) {
+            *out = *fb;
+        } else {
+            Vu0::Q(*out) = Vu0::DivX(a, len);
+        }
+    }
+    SetScriptValueVectorA(&obj, (f32*)out);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 ScriptValue* ProjectScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

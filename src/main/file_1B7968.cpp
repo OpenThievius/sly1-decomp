@@ -25,6 +25,7 @@
 #include "shapes.h"
 #include "property_descriptor.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -219,7 +220,7 @@ void FreeSoundRecord(PlayingSound* self);
 void* FillMemory(PlayingSound* p, s32 v, s32 n);
 void FadeOutSoundVoice(s32 voice, s32 a, s32 b, s32 c);
 void ApplySoundRecordVolumePan(PlayingSound* self);
-void func_001BBEB8(Collider* self);
+void func_001BBEB8(Collider* self, f32 dt);
 void MovePlacedObject(Collider* self, f32 x, void* b);
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
@@ -364,7 +365,6 @@ void MarkSoundRecordIfIdMatches(void);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void StopSoundRecord(PlayingSound* self, s32 n);
 void EnsureKeyedList(void* p);
-void ConstructScratchpadTransfers(s32 a, s32 b);
 s32 SetIopSoundOptionFlag(s32 flag);
 extern U64P D_00274820;
 extern U64P D_00274828;
@@ -405,6 +405,10 @@ typedef void (*PropertyGetter)(void* obj, void* out);
 void WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
+// The tags of the two transfers' chains (8 each, read uncached).
+extern DmaTag D_00605440[8];
+extern DmaTag D_006054C0[8];
+
 // One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
 // func_001C2430 sends up to 8 blocks into the scratchpad by a DMA chain, func_001C25B0 sends
 // them back to memory.
@@ -416,6 +420,20 @@ struct SprTransfer {
     s32 count;              // 0x48: the number of blocks
     s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
 };
+
+void* FillMemory(SprTransfer* p, s32 v, s32 n);
+
+// Transfer i's record, cleared, with its tags read uncached (0x20000000) and its first tag's
+// scratchpad address: the static initialiser (func_001C27B0) builds the two in a temporary and
+// copies each into D_002748F0.
+static inline SprTransfer MakeSprTransfer(s32 i)
+{
+    SprTransfer t;
+    FillMemory(&t, 0, 0x50);
+    t.tags = (DmaTag*)((u32)(i != 0 ? D_006054C0 : D_00605440) | 0x20000000);
+    t.base = 0x70000000 + i * 0x2000;
+    return t;
+}
 // The registers of the scratchpad DMA channels (g_fromSprChannel, g_toSprChannel) the code sets.
 struct SprDmaChannel {
     s32 chcr;               // 0x00: its control register (bit 6 cleared or set)
@@ -453,7 +471,7 @@ void SkipBufferedBlock(void* self);
 s32 NewScriptScope(void);
 void AddUniqueMarkRoot(u8* a, s32 b);
 void* DefineScriptVariable(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
-extern s32 D_00275714;
+extern u32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
 void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b);
@@ -508,7 +526,6 @@ ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, S
 ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 void StartToSprChain(s32 size, ...);
 void StartFromSprChain(s32 first, ...);
-void ConstructScratchpadTransfersAtStartup();
 
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 extern const s32 g_soundEntryForcedAvailable[772];
@@ -548,7 +565,7 @@ s32 D_00274830 = 0;
 f32 g_volumeChannelFactors[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
 s32 D_002748EC = 0;
-SprTransfer D_002748F0[2] = { { 0 } };
+SprTransfer D_002748F0[2] = { MakeSprTransfer(0), MakeSprTransfer(1) };
 s32 D_00274990 = 0;
 
 void InitCollider(Collider* self)
@@ -679,7 +696,63 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
     ListWalk::End(&it);
 }
 
-INCLUDE_ASM(func_001B8148);
+void BuildRotationFromVector(Vec02* v, Mat02* mat);
+extern f32 g_frameDt[];
+
+void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
+{
+    s32 still = 0;
+    s32 moved = flag;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->v490))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still) {
+        Vu0::Q(self->v150) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(self->v490));
+        Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v490), Vu0::Scalar(g_frameDt[0] * 0.5f));
+        if (self->f1EC != 0) {
+            SettlePoseSourceModes(self->f1EC);
+        }
+        Vu0::Q(self->v490) = Vu0::Zero();
+        moved = 1;
+    }
+    s32 spinStill = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->spin4A0))) < 0.0001f) {
+        spinStill = 1;
+    }
+    if (!spinStill) {
+        Vec02 delta;
+        Mat02 turn;
+        *(Vu0::Vec*)&self->v160 = Vu0::Add(Vu0::Vec::Of(self->v160), Vu0::Vec::Of(self->spin4A0));
+        Vu0::Q(delta) = Vu0::MulX(Vu0::Q(self->spin4A0), Vu0::Scalar(g_frameDt[0] * 0.5f));
+        BuildRotationFromVector(&delta, &turn);
+        MulRotationIntoRot(self, turn, self->rot);
+        if (self->f1F0 != 0) {
+            SettlePoseSourceModes(self->f1F0);
+        }
+        Vu0::Q(self->spin4A0) = Vu0::Zero();
+        moved = 1;
+    }
+    ListFrame it;
+    ListWalk::Begin(&it, &self->children);
+    PlacedObject* c;
+    while ((c = (PlacedObject*)ListWalk::Next(&it)) != 0) {
+        if (c->desc->flags & 2) {
+            ((Collider*)c)->desc03()->m31((Collider*)c, moved);
+        }
+    }
+    if (moved != 0) {
+        if (flag == 0) {
+            if (self->desc->m12 != 0) {
+                self->desc->m12(self);
+            }
+        }
+    }
+    ListWalk::End(&it);
+}
 
 ASM_FUNC(func_001B8420);
 
@@ -745,7 +818,14 @@ void NotifyContactHandlers(Collider* self)
     }
 }
 
-INCLUDE_ASM(func_001B8B30);
+f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
+{
+    Vec02 ap;
+    Vec02 ab;
+    Vu0::Q(ap) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
+    Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ap), Vu0::Q(ab))) / Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
+}
 
 INCLUDE_RODATA(jtbl_0024D280);
 INCLUDE_ASM(func_001B8B90);
@@ -1685,17 +1765,95 @@ s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
 
 INCLUDE_ASM(func_001BBC38);
 
-INCLUDE_ASM(func_001BBEB8);
+struct MeshMotion {
+    Vec02* velocity;
+    Vec02* accel;
+    struct Tri { s32 i[3]; } *tris;
+};
+
+struct MeshFace {
+    Vec02 normal;
+    f32 dist;
+    u8 pad14[0xA];
+    u16 ref;
+};
+
+void func_001BBEB8(Collider* self, f32 dt)
+{
+    Vec02 a, b;
+    Vec02* pts = (Vec02*)self->mesh.verts;
+    Vec02* vel = ((MeshMotion*)self->hook)->velocity;
+    Vec02* acc = ((MeshMotion*)self->hook)->accel;
+    f32 big = 0.0f;
+    for (s32 i = 0; i < self->mesh.vertCount; i++) {
+        u128 p = Vu0::Q(pts[i]);
+        u128 s = Vu0::Scalar(dt);
+        u128 v = Vu0::Q(vel[i]);
+        u128 t = Vu0::Scalar(dt * (dt * 0.5f));
+        u128 c = Vu0::Q(acc[i]);
+        Vu0::Q(pts[i]) = Vu0::MulAddX2(p, v, s, c, t);
+        u128 v2 = Vu0::Q(vel[i]);
+        u128 s2 = Vu0::Scalar(dt);
+        u128 c2 = Vu0::Q(acc[i]);
+        Vu0::Q(vel[i]) = Vu0::MulAddX(v2, c2, s2);
+        f32 len = Vu0::ToFloat(Vu0::Dot(Vu0::Q(pts[i]), Vu0::Q(pts[i])));
+        if (big < len) {
+            big = len;
+        }
+    }
+    self->radius3CC = Fpu::Sqrt(big);
+    MeshFace* face = (MeshFace*)self->mesh.faces;
+    MeshMotion::Tri* tri = ((MeshMotion*)self->hook)->tris;
+    for (s32 i = 0; i < self->mesh.faceCount; i++) {
+        MeshFace* f = &face[i];
+        Vu0::Q(a) = Vu0::Sub(Vu0::Q(pts[tri[i].i[1]]), Vu0::Q(pts[tri[i].i[0]]));
+        Vu0::Q(b) = Vu0::Sub(Vu0::Q(pts[tri[i].i[2]]), Vu0::Q(pts[tri[i].i[0]]));
+        u128 n = Vu0::Cross(Vu0::Q(a), Vu0::Q(b));
+        Vu0::Q(f->normal) = n;
+        n = Vu0::DivX(Vu0::Q(f->normal), Vu0::Sqrt(Vu0::Dot(Vu0::Q(f->normal), Vu0::Q(f->normal))));
+        Vu0::Q(f->normal) = n;
+        *(u32*)&f->dist = Vu0::ToBits(Vu0::Dot(Vu0::Q(f->normal), Vu0::Q(pts[f->ref])));
+    }
+}
 
 void MoveCollider(Collider* self, void* b, f32 x)
 {
     if (self->hook != 0) {
-        func_001BBEB8(self);
+        func_001BBEB8(self, x);
     }
     MovePlacedObject(self, x, b);
 }
 
-INCLUDE_ASM(func_001BC0E0);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
+void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
+void FreePooledContactChain(void* pool, Contact03* head);
+
+void func_001BC0E0(void* a0, f32 value, void* a1, void* a2)
+{
+    Collider* self = (Collider*)a0;
+    Vec02* origin = (Vec02*)a1;
+    Vec02* target = (Vec02*)a2;
+    Vec02 vel;
+    Vec02 dir;
+    Contact03* contact;
+    Collider* group[1];
+    ComputeObjectMotionInFrame(self, 0, origin, &vel, 0, 0, 0);
+    Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(*target), Vu0::Q(vel)), Vu0::Q(g_unitZVector)));
+    f32 zero = 0.0f;
+    contact = 0;
+    CreatePooledContact(zero, self, 0, origin, &dir, 0xC, 0, 0, &contact);
+    *(Vec02*)((u8*)&contact->end[1] + 0x30) = *target;
+    contact->f98 = zero;
+    contact->f94 = 1.0f;
+    *(f32*)&contact->fA0 = value;
+    NotifyContactEnds(self->world, 1, &contact);
+    group[0] = (Collider*)self->root;
+    SolveColliderGroupContacts(self->world, 1, group, 1, &contact, zero, 2);
+    FreePooledContactChain(self->world, contact);
+}
+
 
 void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
 {
@@ -3316,7 +3474,20 @@ void PlaySoundWithWanderingPitch(void)
     }
 }
 
-INCLUDE_ASM(func_001C0F30);
+void InitIdLinkedObject(IdLinkedObject* self)
+{
+    InitPlacedObject(self);
+    self->color = 0x80808080;
+    self->f2D4 = 0.5f;
+    self->f2D8 = 400.0f;
+    self->f2DC = 0.5f;
+    self->f2E0 = 0.5f;
+    self->f320 = 0.3f;
+    self->f324 = 0.5f;
+    Vu0::Q(self->v2F0) = Vu0::FromFloats(0.0f, 0.0f, 50.0f);
+    Vu0::Q(self->v300) = Vu0::FromFloats(100.0f, 80.0f, 50.0f);
+    self->linkId = -1;
+}
 
 void StartIdLinkedObject(IdLinkedObject* self)
 {
@@ -3917,9 +4088,3 @@ void StartFromSprChain(s32 first, ...) {
 
 LINKER_REMNANT(func_001C27A8);
 
-INCLUDE_ASM(func_001C27B0);
-
-void ConstructScratchpadTransfersAtStartup()
-{
-    ConstructScratchpadTransfers(1, 0xFFFF);
-}

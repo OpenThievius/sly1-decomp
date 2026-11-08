@@ -47,7 +47,10 @@ struct Gr8B {
     void* f6C;              // 0x6C
     u8 pad70[0x78 - 0x70];
     s32 f78;                // 0x78
-    u8 pad7C[0xB8 - 0x7C];
+    f32 f7C;                // 0x7C: a scale of the poses (func_0012CD78, with f98)
+    u8 pad80[0x98 - 0x80];
+    f32 f98;                // 0x98
+    u8 pad9C[0xB8 - 0x9C];
     void* fB8;              // 0xB8
     s32 fBC;                // 0xBC
     In8B* pC0;              // 0xC0

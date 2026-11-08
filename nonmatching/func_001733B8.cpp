@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 836/844, checked 2026-11-07
-// NEAR: same code in the same blocks, 4 bytes longer: retail dispatches on the mode at +0x2684 with slti 3, then bgtzl to the first block and beql to the second (a case tree with the range 1..2 as its root, which GCC builds as 'beqz, bltz' with the single case 0 as root in ours; switch, case ranges and nested ifs tried), and numbers the float registers of the tail differently (the length in f0, the player's +0x23A4 in f4).
+// BYTES 783/844 (92.8%), checked 2026-11-08
+// NEAR (2026-11-08, night-size1): the same size now, 29 words differ, all float registers of the tail. Retail's compare tree for the mode (slti 3, bgtzl, beql: the range 1..2 as its root) is a third case node: `case 3: break;`, which balance_case_nodes needs to split the list (two nodes stay lopsided with case 0 first) and whose test jump.c then drops; the pushed object's point is a local (Vec02 point, at 0(sp)), not `out`; the steer's amount reads the rate field in place (its product takes the rate's f1); the clamps are an inline ClampBetween and the reach MinF(span, 300.0f). Still differs: retail keeps len (the call's f0 less 30) in f0 and the player's +0x23A4 in f4, ours len in f4 and +0x23A4 in f3, which renumbers the tail's floats; and the second clamp's arm (the positive force) branches as bc1f/b where retail's matches the first arm's. Tried: +0x23A4 read first, len assigned in two statements, the square and the scale as two statements.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -49,6 +49,20 @@ struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHold
 struct PushRecord { u8 pad00[0x30]; f32 f30; s32 f34; };
 f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
 
+// The smaller of two floats (min.s; through an inline function the result takes b's register).
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
+
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
 void func_001733B8(Player* self, PushRecord* out)
 {
     out->f30 = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
@@ -82,22 +96,20 @@ void func_001733B8(Player* self, PushRecord* out)
                     limit = bottom >? limit;
                 }
             }
+            Vec02 point;
             PushHolder* holder = ((PushObject*)self->f23A0)->holder;
             if (holder->desc->m2 != 0) {
-                holder->desc->m2(holder, (Vec02*)out, limit, 0);
+                holder->desc->m2(holder, &point, limit, 0);
             }
-            TransformPointBetweenFrames(((PushObject*)self->f23A0)->frame, 0, out, &self->v2690);
+            TransformPointBetweenFrames(((PushObject*)self->f23A0)->frame, 0, &point, &self->v2690);
             self->v2690.z = self->v2690.z + 125.0f;
         } else {
             Vec02 k;
-            f32 rate = *(f32*)&self->f26A0;
             if (self->f2684 == 1) {
-                f32 amount = rate * (rate * 125.0f);
-                Vu0::Q(k) = Vu0::FromFloat(amount);
+                Vu0::Q(k) = Vu0::FromFloat(*(f32*)&self->f26A0 * (*(f32*)&self->f26A0 * 125.0f));
                 Vu0::Q(self->v2690) = Vu0::Add(Vu0::Q(self->v140), Vu0::MulX(Vu0::Q(self->m110.r[1]), Vu0::Q(k)));
             } else {
-                f32 amount = rate * (rate * 125.0f);
-                Vu0::Q(k) = Vu0::FromFloat(amount);
+                Vu0::Q(k) = Vu0::FromFloat(*(f32*)&self->f26A0 * (*(f32*)&self->f26A0 * 125.0f));
                 Vu0::Q(self->v2690) = Vu0::Sub(Vu0::Q(self->v140), Vu0::MulX(Vu0::Q(self->m110.r[1]), Vu0::Q(k)));
             }
             self->v2690.z = self->v2690.z + 50.0f;
@@ -107,6 +119,7 @@ void func_001733B8(Player* self, PushRecord* out)
     case 0:
         self->v2690 = self->v140;
         self->v2690.z = self->v2690.z + 50.0f;
+        break;    case 3:
         break;
     }
     if (self->f23A0 == 0) {
@@ -119,17 +132,17 @@ void func_001733B8(Player* self, PushRecord* out)
     f32 base = 30.0f;
     f32 len = h->desc->length(h) - base;
     f32 span = (len - base) * 0.5f;
-    f32 reach = span <? 300.0f;
+    f32 reach = MinF(span, 300.0f);
     f32 lowEdge = reach + base;
     f32 at = self->f23A4;
     f32 force;
     if (at < lowEdge) {
         f32 t = (lowEdge - at) / reach;
-        f32 w = t < 0.0f ? 0.0f : (1.0f < t ? 1.0f : t);
+        f32 w = ClampBetween(t, 0.0f, 1.0f);
         force = -w * w * 150.0f;
     } else if (len - reach < at) {
         f32 t = (at - (len - reach)) / reach;
-        f32 w = t < 0.0f ? 0.0f : (1.0f < t ? 1.0f : t);
+        f32 w = ClampBetween(t, 0.0f, 1.0f);
         force = w * w * 150.0f;
     } else {
         force = 0.0f;

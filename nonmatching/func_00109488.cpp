@@ -700,7 +700,6 @@ void AddTrackedKey();
 void AddTrackedNode();
 void RemoveTrackedNode();
 
-typedef void (*PropFn)();
 struct PropertyDescriptor { s32 f0; s32 flags; union { f32 f; s32 i; } f8; s32 fC; s32 f10; s32 f14; s32 f18; s32 f1C; };
 extern PropertyDescriptor D_002505D8[1179];
 

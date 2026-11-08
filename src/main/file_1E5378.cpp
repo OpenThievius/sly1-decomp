@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "state_walker.h"
 #include "object_pool.h"
+#include "vu0.h"
 extern u8* g_player;
 extern u8* g_currentWorld;
 
@@ -232,7 +233,94 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
     return 1;
 }
 
-INCLUDE_ASM(func_001E5938);
+struct SpanHit {
+    Vec02 point;
+    u8 pad10[0x60];
+};
+
+s32 HasObjectPoolChoice(void* pool);
+void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
+void UnprojectCameraPoint(void* camera, void* in, void* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* lo, Vec02* hi, s32 (*filter)(PlayerLinkedCollider*, Collider*), PlayerLinkedCollider* owner, s32* n, Collider*** list);
+u8* FindNearestSpanObject(s32 zero, Vec02* lo, Vec02* hi, s32 n, Collider** list, SpanHit* out);
+void TransformPointBetweenFrames(s32 zero, void* to, void* point, void* out);
+s32 IsObjectOfKind(void* obj, s32 kind);
+void PopBackMemoryMark(void);
+void GetPlacementRecordTransform(void* place, Vec02* a, Vec02* b, void* c);
+f32 ArctangentOfRatio(f32 y, f32 x);
+
+void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
+{
+    if (HasObjectPoolChoice(self->f618) != 0) {
+        ObjectPool* pool = self->f618;
+        u8* place = (u8*)pool + 0x60;
+        u8* e0 = (u8*)pool + 0xE0;
+        u8* ang = (u8*)pool + 0x150;
+        f32 cx;
+        f32 cy;
+        Vec02 a;
+        Vec02 b;
+        Vec02 lo;
+        Vec02 hi;
+        Collider** list;
+        s32 n;
+
+        GetTextPanelCenter(&g_typedTextCaptionBox, &cx, &cy);
+        Vu0::Set(a, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 10.0f));
+        Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 80000.0f));
+        UnprojectCameraPoint(g_camera, &a, &lo);
+        UnprojectCameraPoint(g_camera, &b, &hi);
+        Vec02 pos;
+        SpanHit hit;
+        PushBackMemoryMark();
+        GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
+        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, &hit);
+        if (found != 0 && *(s32*)(found + 8) != 1) {
+            *(u8**)e0 = found;
+            TransformPointBetweenFrames(0, found, &hit, &pool->fF0);
+            pos = hit.point;
+            if (IsObjectOfKind(*(void**)(found + 0x50), 0xE) != 0 || IsObjectOfKind(*(void**)(found + 0x50), 7) != 0) {
+                g_typedTextCaptionBox.palette = 2;
+            } else if (IsObjectOfKind(*(void**)(found + 0x50), 8) != 0) {
+                g_typedTextCaptionBox.palette = 1;
+            } else {
+                u8* c = found;
+                while (c != 0) {
+                    s32 i;
+                    for (i = 0; i < self->f638; i++) {
+                        if (((u8**)self->f63C)[i] == c) {
+                            break;
+                        }
+                    }
+                    if (i < self->f638) {
+                        break;
+                    }
+                    c = *(u8**)(c + 0x18);
+                }
+                if (c != 0) {
+                    g_typedTextCaptionBox.palette = 1;
+                } else {
+                    g_typedTextCaptionBox.palette = 0;
+                }
+            }
+        } else {
+            *(u8**)e0 = 0;
+            *(Vec02*)(e0 + 0x10) = hi;
+            g_typedTextCaptionBox.palette = 0;
+            pos = hi;
+        }
+        PopBackMemoryMark();
+        Vec02 c0;
+        Mat02 rot;
+        Vec02 d;
+        GetPlacementRecordTransform(place, &c0, rot.r, 0);
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
+        *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
+        *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));
+    }
+}
 
 void GetStateWalkerCurrentKey(void* dev, s32* out);
 void GetStateWalkerTargetKey(void* dev, s32* out);
@@ -487,16 +575,9 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
     }
 }
 
-INCLUDE_ASM(func_001E6600);
-
-
-extern f32 g_elapsedTime;
-extern Rgba4 D_002610D8;
-extern Rgba4 D_002610E0;
-
-void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, s32 a3);
+extern u8 D_00275B50[8];
+void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
-void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
 
 struct ColorLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -509,6 +590,79 @@ struct ColorLerp {
 
 #define GIF_SCREEN_X(x) ((s32)(((x) + 1728.0f) * 16.0f))
 #define GIF_SCREEN_Y(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
+
+// The arc's points: a quad from the edge to each point, coloured from its own colour toward
+// grey by its level, then sparkles scattered at random over each point's span, more the
+// brighter it is.
+void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
+{
+    s32 first, last;
+    GetArcVisibleRange(self, &first, &last);
+    if (first == last) {
+        return;
+    }
+    f32 x0 = self->x + self->edgeFrom;
+    f32 y0 = self->y + 62.7f;
+    f32 xe = self->x + self->edgeTo;
+    BeginGifTag(buf, 0x44, 5, 0x44441);
+    for (s32 i = first; i < last; i++) {
+        T217D_3F0_Pt* p = &self->pts[i];
+        f32 xa = x0 + p->x * 62.7f;
+        f32 xb = x0 + p->nextX * 62.7f;
+        f32 ya = y0 + p->y * 62.7f;
+        f32 yb = y0 + p->nextY * 62.7f;
+        Rgba4 c;
+        {
+            Rgba4 a = *(Rgba4*)&p->colorB;
+            Rgba4 b = *(Rgba4*)D_00275B50;
+            f32 t = p->level;
+            Rgba4 m;
+            m.r = ColorLerp::Of(a.r, b.r, t);
+            m.g = ColorLerp::Of(a.g, b.g, t);
+            m.b = ColorLerp::Of(a.b, b.b, t);
+            m.a = ColorLerp::Of(a.a, b.a, t);
+            c = m;
+        }
+        AddGifRgbaEntry(buf, *(u32*)&c);
+        s32 sx = GIF_SCREEN_X(xe);
+        s32 sya = GIF_SCREEN_Y(ya);
+        AddGifXyzfEntry(buf, sx, sya, 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xa), sya, 0, 0);
+        s32 syb = GIF_SCREEN_Y(yb);
+        AddGifXyzfEntry(buf, sx, syb, 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xb), syb, 0, 0);
+    }
+    BeginGifTag(buf, 0, 1, 1);
+    AddGifRgbaEntry(buf, 0x80000000);
+    BeginGifTag(buf, 0, 1, 4);
+    for (s32 i = first; i < last; i++) {
+        T217D_3F0_Pt* p = &self->pts[i];
+        s32 n = (s32)(p->level * 3.999f) + 2;
+        if (n != 0) {
+            f32 xa = x0 + p->x * 62.7f;
+            f32 xb = x0 + p->nextX * 62.7f;
+            f32 lo = xb <? (xe < xa ? xe : xa);
+            f32 hi = xb >? (xa < xe ? xe : xa);
+            f32 ya = y0 + p->y * 62.7f;
+            f32 yb = y0 + p->nextY * 62.7f;
+            for (s32 j = 0; j < n; j++) {
+                f32 x = RandomFloatInRange(lo, hi);
+                f32 y = RandomFloatInRange(ya, yb);
+                AddGifXyzfEntry(buf, GIF_SCREEN_X(x), GIF_SCREEN_Y(y), 0, 0);
+            }
+        }
+    }
+}
+
+
+extern f32 g_elapsedTime;
+extern Rgba4 D_002610D8;
+extern Rgba4 D_002610E0;
+
+void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
+void AddGifRgbaEntry(PacketWriter* b, u32 c);
+void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
+
 
 struct FadeClamp {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -581,7 +735,7 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 extern u8 g_gsPacketWriter[];
 
 s32 IsArcDrawAllowed(void);
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void BeginGifTag(void* p, s32 a, s32 b, u64 regs);
 void AddGifRegisterWrite(void* p, s32 a, u64 b);
 void WriteArcPointVertices(void* self, void* p);
 void WriteArcTickVertices(void* self, void* p);
@@ -830,9 +984,128 @@ void UpdateArc(T217D_3F0* self)
 
 INCLUDE_ASM(func_001E7C60);
 
-INCLUDE_ASM(func_001E80D8);
+// The deferred request QueueArcDraw queues: the arc at 0x60.
+struct ArcDrawRequest {
+    u8 pad00[0x60];
+    T217D_3F0* arc;         // 0x60
+};
 
-INCLUDE_ASM(func_001E83E0);
+extern PacketWriter g_vifPacketWriter;
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+PacketWriter* InitGifPacket(PacketWriter* p);
+void AllocateTempPacketBuffer(PacketWriter* p, s32 count);
+void EndGifPacket(PacketWriter* p);
+void BeginDmaTag(PacketWriter* p);
+void CloseDmaTag(PacketWriter* p);
+void WriteVifFlushE(PacketWriter* p);
+void WriteVifDirectFromWriter(PacketWriter* p, PacketWriter* src);
+
+void SnapCameraZoom(Camera* camera, f32 zoom);
+void WriteCameraMatricesPacket(Camera* camera);
+void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* buf, s32 a);
+
+void DrawArcOutlinePacket(ArcDrawRequest* request)
+{
+    PacketWriter buf;
+    s32 first, last;
+    T217D_3F0* self = request->arc;
+    GetArcVisibleRange(self, &first, &last);
+    if (first == last) {
+        return;
+    }
+    if (D_00270458 != 4) {
+        if (AreFloatsNearlyEqual(g_camera->f1C4, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
+            f32 zoom = g_camera->f1C4;
+            f32 f1C8 = g_camera->f1C8;
+            SnapCameraZoom(g_camera, *(f32*)((u8*)self->current + 0x2D4));
+            WriteCameraMatricesPacket(g_camera);
+            SnapCameraZoom(g_camera, zoom);
+            g_camera->f1C8 = f1C8;
+        }
+    }
+    PushBackMemoryMark();
+    InitGifPacket(&buf);
+    AllocateTempPacketBuffer(&buf, 0x100);
+    f32 zero = 0.0f;
+    f32 right = 640.0f;
+    f32 bottom = 492.80002f;
+    f32 x0 = zero >? self->x;
+    f32 y0 = zero >? self->y;
+    f32 x1 = right <? self->x + self->w;
+    f32 y1 = bottom <? self->y + self->h;
+    BeginGifTag(&buf, 0, 1, 0xE);
+    s32 px = (s32)x0;
+    s32 pw = (s32)x1 - 1;
+    y0 *= 0.45454547f;
+    y1 *= 0.45454547f;
+    s32 py = (s32)y0;
+    s32 pz = (s32)y1 - 1;
+    AddGifRegisterWrite(&buf, 0x40, (u64)px | ((u64)pw << 16) | ((u64)py << 32) | ((u64)pz << 48));
+    BeginGifTag(&buf, 6, 5, 0x441EE);
+    AddGifRegisterWrite(&buf, 0x47, 0x30000);
+    AddGifRegisterWrite(&buf, 0x42, 0x5A);
+    AddGifRgbaEntry(&buf, 0);
+    AddGifXyzfEntry(&buf, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 + 1936.0f) * 16.0f), 0xFFFFFF0, 0);
+    AddGifXyzfEntry(&buf, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 + 1936.0f) * 16.0f), 0xFFFFFF0, 0);
+    BeginGifTag(&buf, 0, 1, 0xE);
+    AddGifRegisterWrite(&buf, 0x47, 0x32001);
+    BeginGifTag(&buf, 4, 1, 4);
+    WriteArcOutlineVertices(self, &buf, 0);
+    EndGifPacket(&buf);
+    BeginDmaTag(&g_vifPacketWriter);
+    WriteVifFlushE(&g_vifPacketWriter);
+    WriteVifDirectFromWriter(&g_vifPacketWriter, &buf);
+    CloseDmaTag(&g_vifPacketWriter);
+    PopBackMemoryMark();
+}
+
+void DrawArcTickPacket(ArcDrawRequest* request)
+{
+    PacketWriter buf;
+    s32 first, last;
+    T217D_3F0* self = request->arc;
+    GetArcVisibleRange(self, &first, &last);
+    if (first == last) {
+        return;
+    }
+    PushBackMemoryMark();
+    InitGifPacket(&buf);
+    AllocateTempPacketBuffer(&buf, 0x200);
+    f32 zero = 0.0f;
+    f32 right = 640.0f;
+    f32 bottom = 492.80002f;
+    f32 x0 = zero >? self->x;
+    f32 y0 = zero >? self->y;
+    f32 x1 = right <? self->x + self->w;
+    f32 y1 = bottom <? self->y + self->h;
+    BeginGifTag(&buf, 6, 3, 0x44E);
+    AddGifRegisterWrite(&buf, 0x47, 0x32001);
+    s32 ax = GIF_SCREEN_X(x0);
+    s32 ay = GIF_SCREEN_Y(y0);
+    AddGifXyzfEntry(&buf, ax, ay, 0, 0);
+    s32 bx = GIF_SCREEN_X(x1);
+    s32 by = GIF_SCREEN_Y(y1);
+    AddGifXyzfEntry(&buf, bx, by, 0, 0);
+    BeginGifTag(&buf, 6, 3, 0x44E);
+    AddGifRegisterWrite(&buf, 0x47, 0x3E001);
+    AddGifXyzfEntry(&buf, ax, ay, 0xFFFFFF0, 0);
+    AddGifXyzfEntry(&buf, bx, by, 0xFFFFFF0, 0);
+    BeginGifTag(&buf, 0x46, 5, 0x441EE);
+    AddGifRegisterWrite(&buf, 0x47, 0x31001);
+    AddGifRegisterWrite(&buf, 0x42, 0x5A);
+    AddGifRgbaEntry(&buf, 0x80000000);
+    AddGifXyzfEntry(&buf, ax, ay, 0, 0);
+    AddGifXyzfEntry(&buf, bx, by, 0, 0);
+    BeginGifTag(&buf, 0, 1, 0xE);
+    AddGifRegisterWrite(&buf, 0x40, 0xDF0000027F0000ULL);
+    EndGifPacket(&buf);
+    BeginDmaTag(&g_vifPacketWriter);
+    WriteVifFlushE(&g_vifPacketWriter);
+    WriteVifDirectFromWriter(&g_vifPacketWriter, &buf);
+    CloseDmaTag(&g_vifPacketWriter);
+    PopBackMemoryMark();
+}
 
 void SetArcSpecialObject(T217D_3F0* self, void* a1);
 

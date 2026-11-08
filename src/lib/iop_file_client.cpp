@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // An object of the kernel library from 0x1F84D8 to 0x1F9690, built whole (config/us/files.tsv):
 // the client of the IOP's file service over the command channel. func_001F8A28 opens it once
-// (the flag D_002771B8): the reply handler func_001F85A8 and the original assembly func_001F89F8
+// (the flag D_002771B8): the reply handler func_001F85A8 and the command handler func_001F89F8
 // are set for the commands 0x80000011 and 0x80000013, the client D_00628B40 is bound to the
 // service, the table of 32 open handles D_00628940 is cleared and the reply buffer D_00628500 is
 // handed over. func_001F84D8 and func_001F8968 create the two semaphores (D_002771C0 and
@@ -15,6 +15,7 @@
 #include "remote_call_client.h"
 #include "semaphore_params.h"
 #include "asm_func.h"
+#include "system.h"
 
 #define UNCACHED_1F84D8(p) ((void*)((u32)(p) | 0x20000000))
 
@@ -89,7 +90,12 @@ s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 void SetCommandHandler(u32 cmd, void* handler, void* arg);
 void WriteBackDataCacheRange(void* data, s32 size);
-void func_001F89F8();
+// What the command handler func_001F89F8 is given with a command: a function and its argument.
+struct FileCommandCall {
+    void (*fn)(void* arg);  // 0x00: run when set
+    void* arg;              // 0x04
+};
+void func_001F89F8(void* packet, FileCommandCall* call);
 
 void CreateFileTableLock(void)
 {
@@ -227,7 +233,14 @@ s32 LockFileRequests(s32 unused)
 
 void UnlockFileRequests() { PostSemaphore(D_002771BC); }
 
-INCLUDE_ASM(func_001F89F8);
+// The handler of command 0x80000013: runs the call it is given, if any, and ends the handler.
+void func_001F89F8(void* packet, FileCommandCall* call)
+{
+    if (call->fn != 0) {
+        call->fn(call->arg);
+    }
+    SyncAndEnableInterrupts();
+}
 
 s32 OpenFileClient(void)
 {

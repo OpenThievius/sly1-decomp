@@ -30,7 +30,13 @@
 #include "camera.h"
 #include "path_curve_object.h"
 #include "asm_func.h"
+#include "owner_message.h"
+#include "transform_object.h"
+#include "list_iter.h"
 #include "vu0.h"
+#include "ramp_profile.h"
+#include "animation.h"
+#include "anim_curve.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -256,9 +262,9 @@ f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dv02, from retail's bytes and their readers.
 f32 D_00263720[4] = { 1.0f, -4.0f, 0.0f, 0.0f };
-f32 D_00263730[4] = { 10.0f, 0.0f, 0.5f, 50.0f };
-f32 D_00263740[4] = { 40.0f, 0.0f, 0.25f, 200.0f };
-f32 D_00263750[4] = { 15.0f, 0.0f, 0.25f, 100.0f };
+RampProfile D_00263730 = { 10.0f, 0.0f, 0.5f, 50.0f };
+RampProfile D_00263740 = { 40.0f, 0.0f, 0.25f, 200.0f };
+RampProfile D_00263750 = { 15.0f, 0.0f, 0.25f, 100.0f };
 f32 D_00263760[4] = { -0.200000003f, 0.00200000009f, 0.0f, 0.0f };
 f32 D_00263770[4] = { 0.200000003f, 0.0f, 0.800000012f, 0.0f };
 f32 D_00263780[4] = { 40.0f, 0.0f, 0.100000001f, 0.0f };
@@ -329,8 +335,31 @@ f32 D_00263A90[4] = { 200.0f, 200.0f, 200.0f, 0.0f };
 f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(D_0024A860);
-INCLUDE_ASM(func_0016F608);
+void InitTurningCollider(void* self);
+
+void InitPlayer(Player* self)
+{
+    InitTurningCollider(self);
+    self->f2220 = -1;
+    self->f223C = -1;
+    self->f2228 = -1;
+    self->f224C = -1;
+    self->f2440[0] = *(Vec4U*)D_002636A0;
+    self->f2440[1] = *(Vec4U*)D_002636B0;
+    self->f2440[2] = *(Vec4U*)D_002636C0;
+    self->f2440[3] = *(Vec4U*)D_002636D0;
+    self->f2440[4] = *(Vec4U*)D_002636E0;
+    self->f2420 = 15.0f;
+    Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, -1750.0f);
+    self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
+    self->v24E0 = *(Vec02*)D_002636F0;
+    self->f21C0 = 1;
+    self->f2718 = -1;
+    self->f2728 = 1.0f;
+    self->f2724 = 1.0f;
+    self->f2758 = -3.4028235e+38f;
+    self->f26D0 = 2.0f;
+}
 
 void LoadCollider(void* self);
 void ResolveObjectLinks(void* self, s32 id, void* table);
@@ -346,7 +375,136 @@ void LoadPlayer(Player* self)
     g_player = self;
 }
 
-INCLUDE_ASM(func_0016F810);
+void StartTurningCollider(TurningCollider* self);
+void CreateSixEntryBlend(void* self, void* a, void* b);
+void CreatePlayerTwoEntryBlend(Player* self);
+void CreateEightEntryBlend(void* self, void* a, void* b);
+void CreateThreeEntryBlend(void* self, void* a, void* b);
+u8* CreatePoseSource(World* root, void* value, u8* table);
+void InsertAttachment(void* a, void* b);
+void AddMatrixAttachment(void* a, s32 b, void* c);
+s32 FindAnimRecord(s32 key);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void BuildTexturePackets(void* a, RangeRecord* b);
+void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void ResetPlayerOnOffObject(Player* self);
+void ResolvePlayerTableObjects(Player* self);
+void SetTurningColliderGravityScale(void* self, f32 v);
+void SetColliderMass(Collider* self, f32 m);
+void* AllocateZeroedFrontMemory(s32 bytes);
+void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+extern u8 D_0021A9A8[];
+extern u8 D_00219588[];
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void SetPlayerState(Player* self, s32 a, s32 b);
+
+#define PS(T, o) (*(T*)((u8*)self + (o)))
+
+void func_0016F810(Player* self)
+{
+    StartTurningCollider(self);
+    ResolveObjectLinks(self, 27, D_00263558);
+    CreateSixEntryBlend(self, (u8*)self + 0x720, (u8*)self + 0x900);
+    CreatePlayerTwoEntryBlend(self);
+    CreateEightEntryBlend(self, (u8*)self + 0xA20, (u8*)self + 0xB20);
+    CreateEightEntryBlend(self, (u8*)self + 0xB30, (u8*)self + 0xC30);
+    CreateSixEntryBlend(self, (u8*)self + 0xC40, (u8*)self + 0xE20);
+    CreateThreeEntryBlend(self, (u8*)self + 0x2360, (u8*)self + 0x2384);
+    CreateSixEntryBlend(self, (u8*)self + 0xE30, (u8*)self + 0x1010);
+    self->f598 = self;
+    self->f5F0 = PS(void*, 0x110C);
+    u8* a = CreatePoseSource(self->world, self->f24F8, D_0021A9A8);
+    *(s8*)(a + 0x10) = 9;
+    *(s8*)(a + 0x11) = 9;
+    *(s32*)(a + 0x14) = 3;
+    *(s32*)(a + 0x1C) = 2;
+    InsertAttachment(self->f24F8, a);
+    PS(u8*, 0x24FC) = a;
+    AddMatrixAttachment(self->f24F8, 5, &self->f2500);
+    AddMatrixAttachment(self->f618, 5, &self->f2504);
+    AddMatrixAttachment(self->f61C, 5, &self->f2508);
+    AddMatrixAttachment(self->f610, 7, &self->f250C);
+    AddMatrixAttachment(self->f614, 7, &self->f2510);
+    PS(u8*, 0x2518) = CreatePoseSource(self->world, self->f24F8, D_00219588);
+    *(s32*)(PS(u8*, 0x2518) + 0x14) = 1;
+    InsertAttachment(self->f24F8, PS(u8*, 0x2518));
+    PS(void*, 0x1520) = PS(void*, 0x23D0);
+    PS(s32, 0x1524) = FindAnimRecord(0x15A);
+    PS(f32, 0x1530) = 0.5f;
+    PS(Vec02, 0x1560) = *(Vec02*)D_00263710;
+    PS(Vec02, 0x1570) = *(Vec02*)D_00263720;
+    PS(s32, 0x1538) = 2;
+    TransformPointBetweenFrames(0, PS(s32, 0x23D0), (u8*)self->f23D4 + 0x140, (u8*)self + 0x1540);
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(PS(Vec02, 0x1540))));
+    Vu0::Q(PS(Vec02, 0x1540)) = Vu0::MulX(Vu0::Q(PS(Vec02, 0x1540)), Vu0::Scalar((len + self->f2420) / len));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2540, 0, 0, 0, (void**)((u8*)self + 0x2558));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x255C, 0, 0, 0, (void**)((u8*)self + 0x2574));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2578, 0, 0, 0, (void**)((u8*)self + 0x2590));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2594, 0, 0, 0, (void**)((u8*)self + 0x25AC));
+    BaseObject* o = PS(BaseObject*, 0x243C);
+    if (o != 0) {
+        o->desc->m02(o);
+        BuildTexturePackets(PS(void*, 0x243C), self->f284);
+    }
+    self->f2678 = (OnOffObject*)CreateTypedRecord(0x63, self->world, 0, 0x316, -1);
+    ResetPlayerOnOffObject(self);
+    CreateEightEntryBlend(self, (u8*)self + 0x910, (u8*)self + 0xA10);
+    ResolvePlayerTableObjects(self);
+    ((void (*)(Player*, void*, s32))((void**)self->desc)[0xE0 / 4])(self, self->f1390[0], 1);
+    SetPlayerState(self, 0, -1);
+    self->f650 = self->v140.z - 75.0f;
+    SetTurningColliderGravityScale(self, D_00263700);
+    SetColliderMass(self, D_00263704);
+    Collider* c = (Collider*)self->f25D8[0];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[2];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[1];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[3];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[4];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+        if (((PlacedObject*)self->f25D8[4])->f224 == 0) {
+            ((PlacedObject*)self->f25D8[4])->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
+        }
+        *(s32*)((u8*)((PlacedObject*)self->f25D8[4])->f224 + 0xB0) |= 8;
+        *(s32*)((u8*)((PlacedObject*)self->f25D8[4])->f224 + 0x60) = 0;
+    }
+    if (self->f1390[8] == 0) {
+        self->f1390[8] = self->f1390[2];
+    }
+    self->f2514 = CreatePoseSource(self->world, self, D_00219588);
+    InsertAttachment(self, self->f2514);
+    PS(u8*, 0x251C) = CreatePoseSource(self->world, self->f61C, D_00219588);
+    *(s32*)(PS(u8*, 0x251C) + 0x14) = 5;
+    InsertAttachment(self->f61C, PS(u8*, 0x251C));
+    PS(u8*, 0x2520) = CreatePoseSource(self->world, PS(void*, 0x23D0), D_00219588);
+    *(s32*)(PS(u8*, 0x2520) + 0x14) = 5;
+    InsertAttachment(PS(void*, 0x23D0), PS(u8*, 0x2520));
+    self->flags &= ~(u64)0x0C000000;
+    self->flags &= ~(u64)0x30000000;
+    BuildCombinedBlendAnimation(self, 12, 3, (u8*)self + 0x106C, 0, 0, 0, (void**)((u8*)self + 0x1090));
+    PS(f32, 0x1078) = 1.0f;
+    if (PS(void*, 0x1090) != 0) {
+        SetBlendItemWeights(PS(void*, 0x1090), 12, 3, (u8*)self + 0x106C);
+    }
+    void* q = PS(void*, 0x2490);
+    if (q != 0) {
+        *(s32*)((u8*)q + 0x2F0) = 2;
+    }
+}
+
+#undef PS
 
 INCLUDE_ASM(func_0016FD70);
 
@@ -519,10 +677,308 @@ void func_00170820(Player* self, Contact03* c, s32 idx)
     }
 }
 
-INCLUDE_RODATA(jtbl_0024A8A0);
-INCLUDE_RODATA(jtbl_0024A8F0);
-INCLUDE_RODATA(jtbl_0024A930);
-INCLUDE_ASM(func_00170960);
+// An object the player was queued to (+0x2BE0, +0x26D4): its walker at +0x2D4, a walker handle at
+// +0x2D8, and the list of the objects at +0x304 (count at +0x300) whose own walkers it sets.
+struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D0 - 0x150]; s32 f2D0; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
+// What HandlePlayerNotification is handed: the sender first; then an object or a time; then an
+// event code.
+struct PlayerNotification {
+    void* source;           // 0x00
+    union {
+        void* obj;          // 0x04
+        f32 time;           // 0x04
+    };
+    s32 code;               // 0x08
+};
+// The animation player the notifications of kind 0x13 come from.
+struct PlayerNoticePlayer {
+    u8 pad00[0x08];
+    Animation* anim;        // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+};
+// An effect CreateEffect hands back: its set-up slot, then the times and objects it follows.
+struct PlayerNoticeEffect;
+struct PlayerNoticeEffectVt {
+    void (*m00)(PlayerNoticeEffect* self, void* pos, f32 scale, s32 flags);
+};
+struct PlayerNoticeEffect {
+    const PlayerNoticeEffectVt* vt; // 0x00
+    u8 pad04[0x18 - 0x04];
+    f32 start;              // 0x18
+    f32 life;               // 0x1C
+    void* p20;              // 0x20
+    u8 pad24[0xC0 - 0x24];
+    Vec02 vC0;              // 0xC0
+    u8 padD0[0x134 - 0xD0];
+    void* p134;             // 0x134
+};
+PlayerNoticeEffect* CreateEffect(s32 a, s32 b);
+void AddEffectListener(void* obj, void* arg);
+f32 GetAnimationMarkerTime(Animation* anim, s32 key);
+f32* FindAnimationMarkerEvent(Animation* anim, s32 key);
+void SetStateWalkerTarget(void* p, s32 key);
+void ReleasePlayerToState2(Player* self);
+void HandleSwitchedColliderNotification(void* self, s32 kind, void* rec);
+extern f32 D_002637CC;
+extern s32 D_002637D0;
+extern s32 D_002637D4;
+extern f32 g_gameClock[];
+
+static inline s32 MinOfCounts(s32 a, s32 b)
+{
+    return a < b ? a : b;
+}
+
+#define PS(T, o) (*(T*)((u8*)self + (o)))
+void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
+{
+    HandleSwitchedColliderNotification(self, kind, msg);
+    switch (kind) {
+    case 5:
+        if ((void*)msg == PS(void*, 0x2244)) {
+            self->f2254 |= 2;
+            if (self->f223C == 10) {
+                self->f2260 = 2;
+            } else {
+                self->f2260 = -1;
+            }
+        } else if ((void*)msg == self->watched2230) {
+            switch (self->f2220) {
+            case 7:
+                if (self->f2228 == 0x1B || self->f2228 == 0x17) {
+                    self->f2258 = 7;
+                    self->f225C = 0x18;
+                    self->f2254 |= 1;
+                }
+                break;
+            case 2:
+                if (self->f2228 != 7) {
+                    if (self->f2228 != 8) {
+                        break;
+                    }
+                }
+                self->f2258 = 2;
+                self->f225C = 2;
+                self->f2254 |= 1;
+                break;
+            case 0xC:
+                if (self->f2228 == 0x21) {
+                    self->f2258 = 0xC;
+                    self->f225C = 0x22;
+                    self->f2254 |= 1;
+                    break;
+                }
+                if (self->f2228 != 0x23) {
+                    break;
+                }
+            case 9:
+            case 0xA:
+            case 0xE:
+            case 0xF:
+            case 0x10:
+                self->f225C = -1;
+                self->f2258 = 0;
+                self->f2254 |= 1;
+                break;
+            case 4:
+                self->f2254 |= 0x10;
+                break;
+            }
+        }
+        break;
+    case 7:
+        if ((void*)msg == self->watched2230) {
+            switch (self->f2220) {
+            case 5:
+            case 6:
+                self->fA14 = -1;
+                break;
+            }
+        }
+        break;
+    case 0x13: {
+        PlayerNoticePlayer* src = (PlayerNoticePlayer*)msg->source;
+        if (src != (void*)self->watched2230 && src != PS(void*, 0x2244)) {
+            void* other = self->f2234;
+            if (other == 0 || src != *(void**)((u8*)other + 0x24)) {
+                break;
+            }
+        }
+        switch (msg->code) {
+        case 0x138: {
+            Vec02 v;
+            Track83* track = src->anim->f9C;
+            if (track == 0) {
+                break;
+            }
+            PositionCurve* c = track->pos;
+            c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+            Vu0::Q(v) = Vu0::Rotate(self->m660, Vu0::Q(v));
+            self->desc02()->m20(self, &v);
+            if (src == (void*)self->watched2230) {
+                Vec02 w;
+                u128 s = Vu0::FromFloat(-1.0f);
+                Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(v), s);
+                Vu0::Q(w) = s;
+            }
+            break;
+        }
+        case 0x13C:
+            if (self->f2228 == 8) {
+                self->f242C = (f32)D_002637D4;
+            } else {
+                self->f242C = (f32)D_002637D0;
+            }
+            break;
+        case 0x13D:
+            self->f242C = 0;
+            break;
+        case 0x13A:
+            self->f554 = 1;
+            break;
+        case 0x13B:
+            Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(self->pos));
+            self->f554 = 0;
+            self->v2530.z = 0.0f;
+            break;
+        case 0x13E: {
+            f32 left = GetAnimationMarkerTime(((PlayerNoticePlayer*)self->watched2230)->anim, 0x140) - msg->time;
+            self->f5D0 = 0;
+            s32 most = g_currentLevelRecord->f438;
+            s32 count = ((WalkerHost*)self->f26D4)->count;
+            s32 n = MinOfCounts(count, most);
+            for (s32 i = 0; i < n; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                PlayerNoticeEffect* fx = CreateEffect(0x1A, 0);
+                self->f5AC[self->f5D0++] = fx;
+                if (fx != 0) {
+                    f32 nearest = 300.0f;
+                    fx->vt->m00(fx, (u8*)self->f59C + 0x140, D_002637CC, 0);
+                    AddEffectListener(fx, self);
+                    PlacedObject* to = (PlacedObject*)h->f2D8;
+                    f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(((PlacedObject*)self->f59C)->v140))));
+                    fx->p20 = to;
+                    d = nearest >? d;
+                    fx->life = left <? (d * 0.00055555557f);
+                    fx->vC0 = g_currentWorld->gravity;
+                    fx->p134 = (void*)self->f59C;
+                }
+            }
+            break;
+        }
+        case 0x140: {
+            s32 i;
+            for (i = 0; i < ((WalkerHost*)self->f26D4)->count; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                s32 most = g_currentLevelRecord->f438;
+                if (i < most) {
+                    if (!(most < ((WalkerHost*)self->f26D4)->count)) {
+                        SetStateWalkerTarget(h->f2D4, 0x22F);
+                    } else {
+                        SetStateWalkerTarget(h->f2D4, 0x230);
+                    }
+                } else {
+                    SetStateWalkerTarget(h->f2D4, 0x231);
+                }
+            }
+            if (!(g_currentLevelRecord->f438 < ((WalkerHost*)self->f26D4)->count)) {
+                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x22F);
+                g_currentLevelRecord->f448 |= ((WalkerHost*)self->f26D4)->f2D0;
+            } else {
+                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x230);
+            }
+            f32* e = FindAnimationMarkerEvent(((PlayerNoticePlayer*)self->watched2230)->anim, 0x13F);
+            if (e == 0) {
+                break;
+            }
+            f32 left = e[0] - ((PlayerNoticePlayer*)self->watched2230)->time;
+            self->f5D0 = 0;
+            s32 most = g_currentLevelRecord->f438;
+            s32 count = ((WalkerHost*)self->f26D4)->count;
+            s32 n = MinOfCounts(count, most);
+            for (i = 0; i < n; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                PlayerNoticeEffect* fx = CreateEffect(0x1A, 0);
+                self->f5AC[self->f5D0++] = fx;
+                if (fx != 0) {
+                    f32 nearest = 300.0f;
+                    fx->vt->m00(fx, (u8*)h->f2D8 + 0x140, 1.0f / D_002637CC, 0);
+                    AddEffectListener(fx, self);
+                    f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)h->f2D8)->v140), Vu0::Q(((PlacedObject*)self->f59C)->v140))));
+                    fx->p20 = (void*)self->f59C;
+                    d = nearest >? d;
+                    f32 life = left <? (d * 0.0016666667f);
+                    fx->life = life;
+                    fx->vC0 = g_currentWorld->gravity;
+                    fx->p134 = h->f2D8;
+                    fx->start = g_gameClock[1] + (left - life);
+                }
+            }
+            break;
+        }
+        case 0x15E:
+            PS(s32, 0x2738) = 1;
+            break;
+        case 0x15F:
+            PS(s32, 0x2738) = 0;
+            break;
+        case 0x144:
+            self->f2254 |= 0x10;
+            break;
+        case 0x143:
+            self->f2248 = 1;
+            break;
+        }
+        break;
+    }
+    case 0xA:
+        if (msg->obj == self) {
+            self->f2438 = (Collider*)msg->source;
+            for (u32 k = 0; k < 8; k++) {
+                self->f26D8[k].time = 0;
+            }
+        }
+        break;
+    case 0xB:
+        if (msg->obj == self && msg->source == self->f2438) {
+            self->f2438 = 0;
+        }
+        break;
+    case 2: {
+        void* held;
+        switch (self->f2220) {
+        case 3:
+            held = (void*)self->f2204;
+            goto check;
+        case 7:
+            held = (void*)self->f2208;
+            goto check;
+        case 6:
+            if (self->f239C == 4) {
+                goto pushed;
+            }
+            if (self->f239C != 5) {
+                break;
+            }
+            held = PS(void*, 0x23B8);
+        check:
+            if (held == (void*)msg) {
+                ReleasePlayerToState2(self);
+            }
+            break;
+        pushed:
+            if (self->f23BC == (void*)msg) {
+                ReleasePlayerToState2(self);
+            }
+            break;
+        }
+        break;
+    }
+    }
+}
+#undef PS
 
 struct PoseHolder47;
 struct PoseHolderDesc { u8 pad00[8]; void (*m2)(PoseHolder47* self, Vec02* out, f32 t, s32 a); };
@@ -1025,8 +1481,194 @@ s32 GetPlayerContactMode(Player* self)
     return 3;
 }
 
-INCLUDE_RODATA(jtbl_0024A9D0);
-INCLUDE_ASM(func_00172EE0);
+extern f32 D_002638B8;
+extern f32 D_002638BC;
+extern f32 D_002638C0;
+extern f32 D_002638C4;
+extern f32 D_002638C8[2];
+extern f32 D_002638D0[4];
+extern f32 D_002638E0[4];
+extern f32 D_002638F0[4];
+
+void CaptureSwitchedColliderPose(Player* self, u8* out, f32 dt);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
+u128 ApproachPointWithRamp(u128 a, u128 b, f32 dt, f32* ramp, s32 zero);
+void func_001733B8(Player* self, u8* out);
+void GetObjectWorldPosition(s32 obj, Vec02* out);
+extern f32 g_unitRange[];
+typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
+
+// The pose a collider's slot captures each frame (CaptureSwitchedColliderPose fills pos).
+struct ColliderPose {
+    s32 flags;              // 0x00: bit 0 set in the player's grounded states
+    u8 pad04[0x10 - 0x04];
+    Vec02 pos;              // 0x10: where the camera looks
+    Vec02 dir;              // 0x20: the path's direction times the speed along it
+    u8 pad30[0x34 - 0x30];
+    f32 f34;                // 0x34: a weight, scaled down by the spin or cleared
+    f32 f38;                // 0x38: the time it was last stamped
+    s32 f3C;                // 0x3C
+};
+#define PL(T, o) (*(T*)((u8*)self + (o)))
+
+void func_00172EE0(Player* self, ColliderPose* pose, f32 dt)
+{
+    u8* out = (u8*)pose;
+    Vec02 last = self->v560;
+    CaptureSwitchedColliderPose(self, out, dt);
+    if (self->f554 == 0) {
+        if (self->f2220 == 7) {
+            Vec02 pos;
+            Vec02 dir;
+            PoseHolder47* h = ((PoseTarget*)self->f2208)->holder;
+            PoseAtFn fn = (PoseAtFn)h->desc->m2;
+            if (fn != 0) {
+                fn(h, &pos, &dir, self->f2410);
+            }
+            TransformPointBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &pos, &pos);
+            Vu0::Q(pose->pos) = Vu0::Q(pos);
+            TransformDirectionBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &dir, &dir);
+            u128 d = Vu0::Q(dir);
+            d = Vu0::NormalizeOr(d, Vu0::Q(D_00248D30));
+            Vu0::Q(pose->dir) = Vu0::MulX(d, Vu0::ScalarAt(self->f2414));
+            Vu0::Q(dir) = d;
+            self->f650 = pose->pos.z - 125.0f;
+        } else {
+            if (self->f2220 == 3) {
+                Vec02 pos;
+                GetObjectWorldPosition(self->f2204, &pos);
+                self->f650 = pos.z + D_002638C8[0];
+            } else if (self->f690 != 0) {
+                self->f650 = self->v6A0.z;
+            } else if (g_camera->f224 != 0) {
+                self->f650 = self->v140.z - 75.0f;
+            }
+            f32 h = self->f650;
+            f32 lo = self->pos.z + D_002638C4;
+            f32 hi = self->pos.z + D_002638C0;
+            f32 r;
+            if (h < lo) {
+                r = lo;
+            } else if (hi < h) {
+                r = hi;
+            } else {
+                r = h;
+            }
+            self->f650 = r;
+            f32 z = r + 125.0f;
+            if (g_camera->f224 != 0) {
+                pose->pos.z = z;
+            } else {
+                f32 v = ApproachValueWithRamp(last.z, z, g_gameClock[2], D_002638F0, 0);
+                pose->pos.z = v;
+                f32 zlo = self->pos.z + D_002638BC;
+                f32 zhi = self->pos.z + D_002638B8;
+                f32 w;
+                if (v < zlo) {
+                    w = zlo;
+                } else if (zhi < v) {
+                    w = zhi;
+                } else {
+                    w = v;
+                }
+                pose->pos.z = w;
+            }
+        }
+        if (self->f2220 == 6 && self->f239C == 0) {
+            func_001733B8(self, out);
+        }
+        u128 d = ApproachPointWithRamp(Vu0::Q(self->v2530), Vu0::Q(D_00248D30), dt, D_002638E0, 0);
+        Vu0::Q(self->v2530) = d;
+        Vu0::Q(pose->pos) = Vu0::Add(Vu0::Q(pose->pos), d);
+    }
+    switch (self->f2220) {
+    case 2:
+        if (self->f2498 != 0) {
+            pose->flags |= 1;
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+        pose->flags |= 1;
+        break;
+    case 6:
+        switch (self->f239C) {
+        case 0:
+        case 1:
+            pose->f3C = 1;
+            break;
+        case 2:
+        case 4:
+        case 5:
+            break;
+        default:
+            pose->flags |= 1;
+            break;
+        }
+        break;
+    }
+    s32 stamp = 1;
+    switch (self->f2220) {
+    case 0:
+        stamp = 0;
+        break;
+    case 6:
+        if (self->f2228 == 16) {
+            stamp = 0;
+        }
+        break;
+    case 7:
+        if (self->f2228 == 24) {
+            stamp = 0;
+        }
+        break;
+    }
+    if (stamp != 0) {
+        self->f2680 = g_gameTime[0];
+    }
+    pose->f38 = self->f2680;
+    switch (self->f2220) {
+    case 0: {
+        f32 a = __builtin_fabsf(self->v160.z);
+        f32 k = D_002638D0[0] + a * (D_002638D0[1] + a * D_002638D0[2]);
+        f32* range = g_unitRange;
+        f32 lo = range[0];
+        f32 hi = range[1];
+        f32 r;
+        if (k < lo) {
+            r = lo;
+        } else if (hi < k) {
+            r = hi;
+        } else {
+            r = k;
+        }
+        k = r;
+        pose->f34 = pose->f34 * k;
+        break;
+    }
+    case 4:
+        switch (self->f2228) {
+        case 41:
+        case 45:
+        case 46:
+        case 47:
+        case 48:
+        case 49:
+            pose->f34 = 0.0f;
+        }
+        break;
+    case 7:
+    case 13:
+        pose->f34 = 0.0f;
+        break;
+    }
+    self->v560 = pose->pos;
+}
+
+#undef POSE
+#undef PL
 
 INCLUDE_ASM(func_001733B8);
 
@@ -1080,8 +1722,201 @@ INCLUDE_RODATA(jtbl_0024AA60);
 INCLUDE_RODATA(jtbl_0024AAB0);
 INCLUDE_ASM(func_00173888);
 
-INCLUDE_RODATA(jtbl_0024AB00);
-INCLUDE_ASM(func_00174808);
+void UpdateTurningCollider(Player* self, f32 dt);
+s32 HasAnimationDrivenAttachment(void* ctx);
+void func_00174E20(Player* self);
+void UpdateSixEntryBlendWeights(Player* self, void* blend, s32 n, void* msg);
+f32 WrapModulo(f32 x, f32 y);
+void PlayPhaseCrossingSound(Player* self, void* p, f32 f);
+void UpdateEightEntryBlendWeights(Player* self, void* blend, s32 n);
+void func_0017F018(Player* self);
+void UpdatePlayerTargetPhase(Player* self);
+u128 ApproachPointWithRamp(u128 cur, u128 target, f32 dt, const f32* params, s32 flag);
+s32 func_0017E088(Player* self, void* frame, Vec02* pos, s32 a, s32 b, Vec02* out);
+void UpdatePlayerRequestSubState(Player* self);
+void UpdatePlayerAimTarget(Player* self);
+void ReleaseFarPlayerLinks(Player* self);
+void func_001D66A8(Player* self);
+void ClearRootTries(void* self);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
+void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* out, f32* d, Vec02* out2);
+void InitOwnerMessage(void* out, s32 mode, void* owner);
+void func_00171238(Player* self);
+void func_001790B8(Player* self);
+void RunPlayerQueuedActivations(Player* self);
+extern f32 D_00274B64;
+
+struct PhaseObject_174808 { u8 pad00[0x34]; f32 f34; };
+struct PhaseMessage_174808 { u8 pad00[8]; PhaseObject_174808* f8; u8 pad0C[0x14 - 0xC]; f32 f14; f32 f18; };
+struct PathShape_174808;
+struct PathShapeDesc_174808 { u8 pad00[0x30]; void (*m30)(PathShape_174808* self, Vec02* at, f32 t, s32 a, Vec02* out, s32 b, s32 c, s32 d); };
+struct PathShape_174808 { PathShapeDesc_174808* desc; };
+struct PathTarget_174808 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PathShape_174808* shape; };
+struct LinkTarget_174808 { u8 pad00[0x8C]; f32 radius; };
+struct ContactBody_174808;
+struct ContactBodyDesc_174808 {
+    u8 pad00[0x12C];
+    s32 (*m12C)(ContactBody_174808* self, Contact03* c, OwnerMessage* msg);
+    u8 pad130[0x140 - 0x130];
+    void (*m140)(ContactBody_174808* self, OwnerMessage* msg);
+    u8 pad144[0x160 - 0x144];
+    void (*m160)(ContactBody_174808* self);
+};
+struct ContactBody_174808 {
+    ContactBodyDesc_174808* desc;
+    u8 pad04[0x18 - 0x04];
+    ContactBody_174808* parent;     // 0x18
+    u8 pad1C[0x4E0 - 0x1C];
+    s32 f4E0;                       // 0x4E0
+};
+
+// Which end of the contact the object is: 0 when it is end 0's body, else 1.
+static inline s32 ContactEndOf(Contact03* c, void* obj)
+{
+    return c->end[0].body != obj;
+}
+
+void UpdatePlayer(Player* self, f32 dt)
+{
+    UpdateTurningCollider(self, dt);
+    ApplyPendingPlayerStateRequest(self);
+    if (HasAnimationDrivenAttachment(self) != 0) {
+        func_00174E20(self);
+    }
+    if (self->f26C4 != 0 && self->f2220 != 4 && self->f26D0 < g_gameTime[0] - self->f26CC) {
+        self->f26C4 = 0;
+    }
+    switch (self->f2220) {
+    case 1:
+        UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
+        {
+            f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
+            PlayPhaseCrossingSound(self, &self->f2440[0], phase);
+        }
+        break;
+    case 5:
+        UpdateEightEntryBlendWeights(self, (u8*)self + 0x910, self->fA10);
+        {
+            f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
+            PlayPhaseCrossingSound(self, &self->f2440[1], phase);
+        }
+        break;
+    case 2:
+        func_0017F018(self);
+        break;
+    case 0:
+        UpdatePlayerState0(self);
+        break;
+    case 6:
+        UpdatePlayerTargetPhase(self);
+        break;
+    case 8: {
+        Vec02 local;
+        Vu0::Q(self->v24D0) = ApproachPointWithRamp(Vu0::Q(self->v24D0), Vu0::Q(D_00248D30), dt, D_00263918, 0);
+        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &local);
+        if (func_0017E088(self, self->f24A0, &local, self->f24F0, self->f24F4, &self->v24C0) == 0) {
+            SetPlayerState(self, 2, 2);
+            break;
+        }
+        self->f638 = ArctangentOfRatio(-self->v24C0.y, -self->v24C0.x);
+        break;
+    }
+    case 9: {
+        Vec02 local;
+        if (self->f26D4 != 0) {
+            Vu0::Q(local) = Vu0::Sub(Vu0::Q(((Player*)self->f26D4)->v140), Vu0::Q(g_player->v140));
+        } else {
+            Vu0::Q(local) = Vu0::Sub(Vu0::Q(g_camera->f40), Vu0::Q(g_player->v140));
+        }
+        self->f638 = ArctangentOfRatio(local.y, local.x);
+        break;
+    }
+    case 4:
+        UpdatePlayerRequestSubState(self);
+        break;
+    case 12:
+        self->f638 = *(f32*)&g_camera->ctl460.value;
+        break;
+    case 13:
+        if (self->f2228 == 0x38) {
+            if (D_00263924 < self->rot.r[2].z) {
+                s32 slow = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v160), Vu0::Q(self->v160)))) < D_00263928[0];
+                if (slow) {
+                    SetPlayerState(self, 2, 2);
+                }
+            }
+        } else if (self->f2228 == 0x36) {
+            if (self->f690 != 0) {
+                SetPlayerState(self, 0xD, 0x37);
+            }
+        }
+        break;
+    }
+    UpdatePlayerAimTarget(self);
+    ((ContactBody_174808*)self)->desc->m160((ContactBody_174808*)self);
+    ReleaseFarPlayerLinks(self);
+    func_001D66A8(self);
+    ClearRootTries(self);
+    if (self->f223C == 0) {
+        Vec02 local;
+        Vec02 pts[3];
+        Vec02 dirs[3];
+        Vec02 closest;
+        f32 t;
+        f32 dist;
+        f32 gap;
+        if (self->f2204 != 0) {
+            GetObjectWorldPosition((void*)self->f2204, &local);
+            for (s32 i = 1; i < self->f21CC; i++) {
+                MeasurePointToSegment(&local, &self->v21D0[i - 1], &self->v21D0[i], &t, &dist);
+                if (dist < ((LinkTarget_174808*)self->f2200)->radius + self->f2420) {
+                    SetPlayerState(self, 3, 0x33);
+                    break;
+                }
+            }
+        } else if (self->f2208 != 0) {
+            s32 i;
+            for (i = 0; i < self->f21CC; i++) {
+                TransformPointBetweenFrames(0, (s32)((PathTarget_174808*)self->f2208)->frame, &self->v21D0[i], &pts[i]);
+                PathShape_174808* s = ((PathTarget_174808*)self->f2208)->shape;
+                if (s->desc->m30 != 0) {
+                    s->desc->m30(s, &pts[i], *(f32*)((u8*)self + 0x220C), 0, &dirs[i], 0, 0, 0);
+                }
+            }
+            for (i = 1; i < self->f21CC; i++) {
+                FindClosestPointsOnSegments(&pts[i - 1], &pts[i], &dirs[i - 1], &dirs[i], &local, &gap, &closest);
+                if (gap < self->f2420) {
+                    SetPlayerState(self, 7, 0x17);
+                    break;
+                }
+            }
+        }
+    }
+    if (*(Contact03**)self->f151C != 0) {
+        for (Contact03* c = *(Contact03**)self->f151C; c != 0; c = c->next) {
+            ContactBody_174808* o = (ContactBody_174808*)c->end[1 - ContactEndOf(c, self)].part;
+            while (o != 0 && o->f4E0 == 0) {
+                o = o->parent;
+            }
+            if (o != 0 && (o->f4E0 == 1 || o->f4E0 == 4)) {
+                OwnerMessage msg;
+                InitOwnerMessage(&msg, 0, o);
+                for (; o != 0; o = o->parent) {
+                    if (o->desc->m12C(o, c, &msg) != 0) {
+                        break;
+                    }
+                }
+                ((ContactBody_174808*)self)->desc->m140((ContactBody_174808*)self, &msg);
+            }
+        }
+        FreePooledContactChain(self->world, *(Contact03**)self->f151C);
+        *(Contact03**)self->f151C = 0;
+    }
+    UpdatePlayerSpin(self);
+    func_00171238(self);
+    func_001790B8(self);
+    RunPlayerQueuedActivations(self);
+}
 
 void func_00174E20(Player* self)
 {
@@ -1272,7 +2107,149 @@ s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
     return r;
 }
 
-INCLUDE_ASM(func_00177990);
+extern List01 g_class75List;
+s32 MaskWorldBitsBySave(void);
+s32 IsObjectAttached(void* p);
+// A hit CollectMeshHits gives (0x30 bytes).
+struct MeshHit {
+    u8 pad00[0x30];
+};
+s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshHit* out);
+void HeapSortRecords(void* base, s32 count, s32 size, s32 (*compare)(FloatKeyedItem* a, FloatKeyedItem* b));
+void func_001C61E0(Player* self, s32 n);
+void FillMemory(void* dst, s32 value, s32 size);
+
+// The player's grabs of the frame. The state picks the object it reaches with (one of the five
+// at 0x25D8) and the kinds of hold it takes (2, 4 or 8). Each class 0x75 object of those kinds
+// whose position is on the object's mesh, and each contact of this frame between the object and
+// another, makes a query (up to 64), nearest along the object's first axis first; the first whose
+// node the player has not taken yet is taken (up to 32): its kind 2 drops the player's state,
+// kind 1 ends the grab (the object's slot 3, or state 13 in state 0x37). The frame's contacts
+// go back to the world's pool.
+void func_00177990(Player* self)
+{
+    NodeQuery recs[64];
+    ListFrame frame;
+    Vec02 pos;
+    Vec02 motion;
+    MeshHit hit;
+    NodeQuery* rec;
+    Collider* target;
+    s32 mask;
+    s32 n;
+    s32 i;
+
+    if (self->f2220 == 4) {
+        goto done;
+    }
+    if (self->f2228 == 7) {
+        target = (Collider*)self->f25D8[1];
+        mask = 4;
+    } else if (self->f223C == 4 || self->f223C == 6 || self->f223C == 5 || self->f223C == 7) {
+        target = (Collider*)self->f25D8[0];
+        mask = 2;
+    } else if (self->f2220 == 10) {
+        target = (Collider*)self->f25D8[2];
+        mask = 8;
+    } else if (self->f2228 == 8) {
+        target = (Collider*)self->f25D8[3];
+        mask = 4;
+    } else if (self->f2228 == 0x37 && (MaskWorldBitsBySave() & 0x400)) {
+        target = (Collider*)self->f25D8[4];
+        mask = 8;
+    } else {
+        goto done;
+    }
+    n = 0;
+    if (IsObjectAttached(target)) {
+        f32 scale = 1000.0f;
+        Class75Object* o;
+        for (o = (Class75Object*)g_class75List.head; o != 0; o = *(Class75Object**)&o->link) {
+            if (o->f90 == 0) {
+                continue;
+            }
+            if (!(o->count & mask)) {
+                continue;
+            }
+            GetObjectWorldPosition(o, &pos);
+            if (CollectMeshHits(o->scale, &pos, target->tree.count2, target->tree.nodes, 0, &target->meshCopy, 1, &hit) <= 0) {
+                continue;
+            }
+            if (n >= sizeof(recs) / sizeof(recs[0])) {
+                break;
+            }
+            rec = &recs[n];
+            FillMemory(rec, 0, 0x40);
+            n++;
+            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&rec->dir, 0, 0, 0);
+            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&motion, 0, 0, 0);
+            rec->p00 = self;
+            rec->hold = o;
+            rec->pos = pos;
+            rec->kind = mask;
+            rec->weight = self->mass * scale;
+            Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(pos)));
+        }
+    }
+    if (n == 0 && self->f2670 == 0) {
+        return;
+    }
+    for (Contact03* c = self->f2670; c != 0; c = c->next) {
+        s32 e = (Collider*)self != c->end[0].body;
+        if (c->end[e].part != target) {
+            continue;
+        }
+        if (n >= sizeof(recs) / sizeof(recs[0])) {
+            break;
+        }
+        rec = &recs[n];
+        FillMemory(rec, 0, 0x40);
+        n++;
+        rec->p00 = self;
+        rec->hold = c->end[1 - e].part;
+        rec->pos = c->end[1 - e].v10;
+        rec->kind = mask;
+        rec->weight = self->mass * 1000.0f;
+        ComputeObjectMotionInFrame((s32)c->end[e].part, 0, &rec->pos, (s32)&rec->dir, 0, 0, 0);
+        Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(rec->pos)));
+    }
+    HeapSortRecords(recs, n, 0x40, CompareKeysAscending);
+    for (i = 0; i < n; i++) {
+        rec = &recs[i];
+        PlacedObject* node = FindNodeForQuery(rec, self->f25EC, self->f25F0);
+        if (node == 0) {
+            continue;
+        }
+        if (rec->out & 2) {
+            if (mask & 2) {
+                if (self->f223C == 6 || self->f223C == 4) {
+                    SetPlayerState(self, 0, -1);
+                    func_001C61E0(self, 8);
+                } else {
+                    SetPlayerState(self, 0, -1);
+                    func_001C61E0(self, 9);
+                }
+            } else if (mask & 4) {
+                SetPlayerState(self, 0, -1);
+                func_001C61E0(self, 8);
+            }
+        }
+        if (rec->out & 1) {
+            if (self->f2228 == 0x37) {
+                SetPlayerState(self, 0xD, 0x38);
+            } else {
+                target->desc->m03(target);
+            }
+            goto done;
+        }
+        if ((u32)self->f25EC < 32) {
+            self->f25F0[self->f25EC++] = node;
+        }
+    }
+done:
+    FreePooledContactChain(self->world, self->f2670);
+    self->f2670 = 0;
+}
 
 s32 IsTopCameraController(u8* p);
 
@@ -1407,7 +2384,6 @@ void RegisterPlayer(Player* self)
 // An object the player was queued to (+0x2BE0): a walker handle at +0x2D8, and the list of the
 // objects at +0x304 (count at +0x300) whose own walkers it sets.
 struct WalkerListObject;
-struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D4 - 0x150]; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
 void GetStateWalkerCurrentKey(void* p, s32* out);
 void GetStateWalkerTargetKey(void* p, s32* out);
 void SetStateWalkerTarget(void* p, s32 key);
@@ -1582,7 +2558,10 @@ void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
 // A target the player may aim at: two quads (ScoreTargetCandidate's hit, ChooseBestTargetCandidate's
 // result, the pair the player keeps at 0x2B70).
 struct TargetHit {
-    Vec02 q0;               // 0x00
+    union {
+        Vec02 q0;           // 0x00
+        void* obj;          // 0x00: the object aimed at, none for a point on the ground (func_001788F0)
+    };
     Vec02 q1;               // 0x10
 };
 // The record the player keeps at 0x2514 for a jump at a target: when it lands and the two ends
@@ -1671,7 +2650,90 @@ void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider**
     *out = bestTime;
 }
 
-INCLUDE_ASM(func_001788F0);
+extern f32 D_00263A10[32];
+extern f32 D_00263A90[4];
+extern f32 D_00263AA0[4];
+extern f32 D_00263AB0[4];
+
+f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider** objs, TargetHit* out, f32* outTime)
+{
+    typedef Vu0::Vec Vec;
+    f32 t = 0.7f;
+    PushBackMemoryMark();
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 q;
+    ComputeTargetArc(self, cand, t, 0, &q, 0);
+    f32 score = 0.0f;
+    Vu0::Q(hi) = Vu0::Max(Vec::Of(self->v140), Vec::Of(q)).q;
+    Vu0::Q(lo) = Vu0::Min(Vec::Of(self->v140), Vec::Of(q)).q;
+    hi.z = hi.z + 200.0f;
+    Vu0::Q(lo) = Vu0::Sub(Vec::Of(lo), Vec::Of(D_00263A90)).q;
+    Vu0::Q(hi) = Vu0::Add(Vec::Of(hi), Vec::Of(D_00263A90)).q;
+    s32 count;
+    Collider** list;
+    GatherCollidersInBox(self->world, self, &lo, &hi, 0, 0, &count, &list);
+    TargetHit hit = *cand;
+    if (cand->obj == 0) {
+        Vec02 p;
+        Vec02 r;
+        ColliderSpan span;
+        p = r = q;
+        p.z = p.z + 125.0f;
+        r.z = r.z - 175.0f;
+        if (FindNearestSpanObject(0, &p, &r, count, list, &span) == 0 || span.time[0] == score ||
+            ((Vec02*)&span.q[2])->z < t) {
+            f32 penalty = 2000.0f;
+            score = penalty >? score;
+            hit.q1 = q;
+        } else {
+            hit.q1 = *(Vec02*)&span.q[0];
+        }
+        p = r = hit.q1;
+        p.z = p.z + 180.0f;
+        r.z = r.z + 5.0f;
+        if (FindNearestSpanObject(0, &p, &r, count, list, &span)) {
+            f32 penalty = 2000.0f;
+            score = penalty >? score;
+        }
+        for (u32 i = 0; i < 8; i++) {
+            Vu0::Q(p) = Vu0::Q(r) = Vu0::Add(Vec::Of(hit.q1), Vec::Of(((Vec02*)D_00263A10)[i])).q;
+            p.z = p.z + 50.0f;
+            r.z = r.z - 30.0f;
+            if (FindNearestSpanObject(0, &p, &r, count, list, &span) == 0) {
+                f32 penalty = 1500.0f;
+                score = penalty >? score;
+                break;
+            }
+        }
+    }
+    for (s32 j = 0; j < n; j++) {
+        TurningCollider* o = objs[j];
+        Vec02 at;
+        if (o->mesh.verts != 0) {
+            f32 d = -o->f6CC - ((Vec02*)o->mesh.verts)[o->f6D0].z;
+            Vu0::Q(at) = Vu0::MulAddX(Vec::Of(hit.q1), Vec::Of(g_unitZVector), Vec::Scalar(d)).q;
+        } else {
+            at = hit.q1;
+        }
+        f32 dist = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vec::Of(o->v140), Vec::Of(at))).q) - o->radius3D0;
+        f32 x = D_00263AA0[0] + dist * (D_00263AA0[1] + dist * D_00263AA0[2]);
+        f32 l = D_00263AB0[0];
+        f32 h = D_00263AB0[1];
+        if (x < l) {
+            x = l;
+        } else if (h < x) {
+            x = h;
+        }
+        score = x >? score;
+    }
+    f32 time;
+    ChooseTargetArcTime(self, &hit, count, list, &time);
+    PopBackMemoryMark();
+    *out = hit;
+    *outTime = time;
+    return score;
+}
 
 ASM_FUNC(func_00178D18);
 

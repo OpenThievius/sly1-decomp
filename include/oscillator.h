@@ -6,6 +6,12 @@
 #define OSCILLATOR_H
 
 #include "base_object.h"
+#include "placed_object.h"
+
+// Four rows an oscillator entry writes (EvaluateOscillator): a kind-1 entry the three of a matrix.
+struct OscillatorFrame {
+    Vec02 r[4];
+};
 
 // 0x8D: a set of 0xD0-byte entries (at +0x50) that EvaluateOscillator turns by a sine (kind 0)
 // or a noise blend (kind 1) of the clock, once per clock time. Scripts add entries
@@ -18,7 +24,10 @@ struct Oscillator : BaseObject {
     s32 pendingId;          // 0x40: the id the next X entry takes as its pair (-1 for none)
     u8 pad44[0x6D0 - 0x44];
     s32 currentEntry;       // 0x6D0: the index of the current entry (-1 for none)
-    u8 pad6D4[0x8E4 - 0x6D4];
+    u8 pad6D4[0x6E0 - 0x6D4];
+    OscillatorFrame framesA[4]; // 0x6E0: the rows EvaluateOscillator writes (an entry's frame, rows from its row)
+    OscillatorFrame framesB[4]; // 0x7E0: their xy for the second set
+    u8 pad8E0[0x8E4 - 0x8E0];
     s32 framesDirty;        // 0x8E4: set when an entry changed (RefreshOscillatorFrames)
     u8 pad8E8[0x8F0 - 0x8E8];
 };

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 351/388 (90.5%), checked 2026-11-07
-// NEAR: the squared distance is now stored as retail does (Vu0::ToBits: qmfc2, then sw). Still differs in the loop's set-up and record pointer: retail fills the delay slot of the list-head test with move s2,v0 (here move a1,s2), and advances q first (addiu a1,v1,8), storing the object and the far distance at -4(a1) and -8(a1), with n++ in the delay slot of the state test; here the stores use the old pointer and q advances late. c = q; q = c + 1, n++ first, q->obj before c, writing through q and advancing it last, and the state test inverted: no closer.
+// BYTES 369/388 (95.1%), checked 2026-11-08
+// NIGHT-DECLS (2026-11-08): SortElements declared void as defined (func_001F5CD0): 351 -> 353 bytes. Still differs as above.
+// Tried night-close8, 8 compiles: q advanced first and the record written through q[-1]: 11 differing words down to 6. Retail sets the record pointer with move v1,a1 then addiu a1,v1,8 and stores the object and the far distance at -4(a1) and -8(a1) but the squared distance at 0(v1); here loop.c makes q a giv biased by -0x8000 (addiu a1,s2,-32768, stores at 32764(v1), 32760(v1), 32760(a1)). StoreX for the distance, c kept for some stores, n++ in each arm: further.
+// NEAR: the record pointer: addiu a1,s2,-32768 for move a1,s2 before the loop and the three stores at offsets biased by 0x8000; the rest is retail's.
 #include "common.h"
 #include "state_notifier.h"
 #include "world.h"
@@ -24,7 +26,7 @@ struct Candidate_00148938 {
 };
 
 s32 CountListItems(List01* list);
-s32 SortElements(void* base, s32 count, s32 size, void* cmp);
+void SortElements(void* base, s32 count, s32 size, void* cmp);
 
 s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
 {
@@ -49,14 +51,14 @@ s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
     q = recs;
     for (StateNotifier* p = (StateNotifier*)self->list1C54.head; p != 0; p = p->next374) {
         if (p->f338 != 0 && ((Desc01*)p->desc)->id == kind) {
-            Candidate_00148938* c = q++;
-            c->obj = p;
+            q++;
+            q[-1].obj = p;
             n++;
             if (p->state == 2) {
-                c->dist = 3.4028234663852886e+38f;
+                q[-1].dist = 3.4028234663852886e+38f;
             } else {
                 u128 d = Vu0::Sub(Vu0::Q(origin), Vu0::Q(p->v140));
-                c->bits = Vu0::ToBits(Vu0::Dot(d, d));
+                q[-1].bits = Vu0::ToBits(Vu0::Dot(d, d));
             }
         }
     }

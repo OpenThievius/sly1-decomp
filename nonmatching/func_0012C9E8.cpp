@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 463/508 (91.1%), checked 2026-11-07
-// NEAR: 121 of 127 words; the registers differ: the object (a1) and the entry from func_0012CCE8 are in s1 and s0, retail has s0 and s1, and the step and best-time floats are in f23 and f24, retail f24 and f23. Orders of the declarations were tried.
+// BYTES 480/508 (94.5%), checked 2026-11-08
+// Tried night-close3, 2 compiles: step computed after the call, t before bestT: no change or worse.
+// Tried night-close8, 9 compiles: func_0012F210 declared (e, o, p, limit, big, t, a, b, c) and the sampler (obj, from, t, one, ...), as retail sets $f14 after a2 and a1 before $f12: 24 differing words down to 20. bestT and t declared first: no change.
+// NEAR: registers only: the object (a1) and the entry from func_0012CCE8 are in s1 and s0, retail has s0 and s1, and the step and best-time floats are in f23 and f24, retail f24 and f23 (step computed straight into its register by max.s in retail).
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -46,7 +48,7 @@ typedef void (*Fn_Table)();
 void* FindEntryByObjectId(void);
 
 struct PathSampler {
-    void (*sample)(void* obj, f32 t, f32 one, void* from, s32 a, Vec02* out, s32 b);
+    void (*sample)(void* obj, void* from, f32 t, f32 one, s32 a, Vec02* out, s32 b);
 };
 
 struct PathEntry {
@@ -56,7 +58,7 @@ struct PathEntry {
 
 extern f32 D_00249B10[];
 PathEntry* FindEntryByObjectId(void* self);
-void func_0012F210(PathEntry* e, PlacedObject* o, Vec02* p, s32* a, Vec02* b, Vec02* c, f32 limit, f32 big, f32 t);
+void func_0012F210(PathEntry* e, PlacedObject* o, Vec02* p, f32 limit, f32 big, f32 t, s32* a, Vec02* b, Vec02* c);
 
 void func_0012C9E8(void* self, PlacedObject* o, Vec02* p, s32* a, Vec02* b, Vec02* c, f32 start)
 {
@@ -76,14 +78,14 @@ void func_0012C9E8(void* self, PlacedObject* o, Vec02* p, s32* a, Vec02* b, Vec0
         }
         return;
     }
-    (*e->obj)->sample(e->obj, start, 1.0f, o, 0, &sampled, 0);
+    (*e->obj)->sample(e->obj, o, start, 1.0f, 0, &sampled, 0);
     f32 bestT = start;
     f32 t = 0.0f;
     u128 diff = Vu0::Sub(Vu0::Q(sampled), Vu0::Q(*p));
     f32 best = Vu0::ToFloat(Vu0::Dot(diff, diff));
     if (t < limit) {
         do {
-            (*e->obj)->sample(e->obj, t, 1.0f, o, 0, &sampled, 0);
+            (*e->obj)->sample(e->obj, o, t, 1.0f, 0, &sampled, 0);
             u128 d2 = Vu0::Sub(Vu0::Q(sampled), Vu0::Q(*p));
             f32 dist = Vu0::ToFloat(Vu0::Dot(d2, d2));
             if (dist < best) {
@@ -93,5 +95,5 @@ void func_0012C9E8(void* self, PlacedObject* o, Vec02* p, s32* a, Vec02* b, Vec0
             t = limit <? t + step;
         } while (t < limit);
     }
-    func_0012F210(e, o, p, a, b, c, *(f32*)((u8*)self + 0x34), D_00249B10[0], bestT);
+    func_0012F210(e, o, p, *(f32*)((u8*)self + 0x34), D_00249B10[0], bestT, a, b, c);
 }

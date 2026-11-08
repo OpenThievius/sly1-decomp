@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 715/728 (98.2%), checked 2026-11-07
+// BYTES 720/728 (98.9%), checked 2026-11-08
 // NEAR: wave 4 e3. 728 bytes, same size; 11 words differ: the two weights of the tail (dt and -0.5 dt) take vf4 and vf5
 //       in the other order (retail dt in vf5), the scheduling of their stores (retail leaves dt's second store for the delay
 //       slot of the first null test) and the temporary of the hi of D_002639E0 (v1, retail v0). The branches, the frame
 //       (the path frame is a Mat02 at 0x40, which the tail's weights reuse) and the registers of the pointers are retail's.
 //       ~15 compiles.
+// Night-close2 (2026-11-08): one expression for v, a named Scalar(dt), -0.5f * dt and FromFloat for the last weight leave the same 11 words (FromFloat 31).
+// Still differs (2026-11-08, night-close5): the tail's stores in retail's order (p, v1, then a's sum written last, permute.py), which puts dt's second store in the null test's delay slot; left: dt takes vf4 and -0.5 dt vf5 (retail the other way), and D_002639E0's hi in v1 (retail v0). A Vec tail, a named half weight and one expression for v change nothing or worse.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -106,10 +108,9 @@ void func_001782C0(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02
     u128 g = Vu0::Q(self->gravity);
     u128 v = Vu0::DivX(Vu0::Sub(end, Vu0::Q(self->v140)), Vu0::Scalar(dt));
     v = Vu0::MulAddX(v, g, Vu0::Scalar(dt * -0.5f));
-    u128 w = Vu0::MulAddX(v, g, Vu0::Scalar(dt));
     Vu0::Q(p) = end;
-    Vu0::Q(a) = w;
     Vu0::Q(v1) = v;
+    Vu0::Q(a) = Vu0::MulAddX(v, g, Vu0::Scalar(dt));
     if (vel != 0) {
         Vu0::Q(*vel) = v;
     }

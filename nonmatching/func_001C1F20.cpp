@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 628/640 (98.1%), checked 2026-11-07
+// BYTES 628/640 (98.1%), checked 2026-11-08
 // Near match: the code is the same as retail except which variable gets s3 and which gets s4
 // (target and setter swapped). GCC gives the saved register to the variable with the higher
 // allocation priority (uses weighted by live length); here the setter wins by a small margin.
 // An empty do { } while (0) on the else arm changes that priority and matches EXACT, but it is
 // an artificial barrier (AGENTS.md), so it is not kept here. Not linked.
+// Still differs (2026-11-08, night-close6): setter computed before target gives retail's s3/s4 but moves the code (18 lines); target declared first, either as an if, case 0..11 apart, the conversions calling the setter in their arms: not closer.
 #include "common.h"
 
 struct Quad_001C1F20 {

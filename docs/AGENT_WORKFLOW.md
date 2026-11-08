@@ -212,6 +212,24 @@ Measured on this compiler; add to this list when you learn something.
   (`_GLOBAL_$I$*` for whichever the constructor is); `tools/compile.py` renames them, and they
   are checked and counted like any function of the file. The object's own `.ctors` entry is
   discarded: retail's list comes from the disassembly.
+- **A function-local static.** `static T x;` inside a function, where `T` has a constructor, is
+  built on first use: GCC 2.95 tests a guard word, runs the constructor and sets the guard.
+  Retail shows it as a `.data` word (the guard, tested and set to 1) and a `.bss` record that
+  the function alone uses, filled in that branch. The compiler names them itself, the variable
+  `x.N` and the guard `_$tmp_K.N` (in its own section `.data._$tmp_K` with
+  `-fdata-sections`), and writes both out just ahead of the function's code;
+  `config/us/statics.tsv` (file, function, variable, object, guard; `-` for no guard) gives
+  them retail's labels, read from the function's `%hi`/`%lo` pairs, and `tools/compile.py`
+  renames them as it does `config/us/generated.tsv`'s functions, so that `tools/check.py`
+  resolves them and a split file places them like any `D_XXXXXXXX` global or static. A row is
+  written once the labels are known, matched or not: a function still in assembly is skipped,
+  and in `src/` one defined without the static is an error. In a whole file the guard is
+  emitted with its function, after every global defined above it, so retail's `.data` order
+  shows where the function sits among the file's data; and the file's `.bss` column in
+  `config/us/files.tsv` gives the records' start. The parameter blocks of
+  `DrawPlayerMarkerRing1` and its kin (func_001D5FA8, func_001D60B0, func_001D61C8, whose
+  three guards end player_request.cpp's `.data`, and func_0018A510) are the known cases; they
+  land together, once their stores match.
 - **A real source file.** A 16 KiB window is our cut, not the original's. Where retail shows one
   of the original files (a static initialiser ends a file; data used together sits together, in
   code order), its functions move to a file of their own, `src/main/<name>.cpp`, in retail's
@@ -304,6 +322,26 @@ assembled as `target.o`, the C as `base.c`, a `compile.sh` through `tools/compil
 function's own compiler) and prints the command that runs the permuter on it. A score of 0 is a
 lead: copy the candidate back and check it with `tools/check.py`. Its C must still follow every
 rule here (plain C++, no barriers).
+
+Unattended, `python3 tools/permute_night.py FUNC ...` runs near misses one after another and keeps
+each zero, spliced back into its near miss and checked, in `build/permute_night/FUNC/`
+(`EXACT_*.cpp` when check.py agrees); `--recheck FUNC` splices and checks again what a run kept.
+Pick its targets with `python3 tools/regdiff.py --all`: those that differ only in `registers` or
+`order` are the permuter's. What the first VU0 night (2026-11-07) showed:
+
+- **Most zeros are tricks.** Of 77 zeros on one near miss, 75 were EXACT, every one by taking a
+  parameter's address (`p = &self`) or reusing one variable for two values. Read each diff; when a
+  zero points at a real change, write that change plainly and check it: func_001D6608 matched as
+  the store common to both branches written once after them, where the permuter's zero wrote it
+  twice.
+- **What the setup must carry through the permuter's C parser:** u128's `mode(TI)` (else every VU0
+  helper's `j` operand is impossible) and g++'s `<?` and `>?` (rewritten as permuter_max and
+  permuter_min calls and back); both are done by permuter_setup.py and permuter_compile.py. A near
+  miss must be one function with its declarations: a whole-file copy, or a member function
+  defined outside its class, stops the setup.
+- **Probe before a long run.** A target whose base.c does not parse fails in seconds with no base
+  score and wastes nothing, but a run of 20-minute slots needs every target to reach a base score
+  first: start each for a few seconds and read `base score =` in its run.log.
 
 The lead keeps the closest attempt per function in `nonmatching/` (PAL's own definitions in
 `nonmatching/eu/`): `python3 tools/nonmatching.py stage 'build/swarm/*/func_*.cpp'` adds every

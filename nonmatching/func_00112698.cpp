@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 702/716 (98.0%), checked 2026-11-07
+// BYTES 702/716 (98.0%), checked 2026-11-08
 // NEAR: the scalar, vector and matrix bodies are retail's (registers included); left: the order of the first loads and of move s1,zero (retail loads args[1].tag and args[0].tag before it, it fills the branch delay slot) and, with it, the order of the prologue saves of ra and s1.
+// Still differs (2026-11-08, night-close1): sched2 issues n = 0 with the call whenever args[0].tag is read before the if (n = 0 first or last, if/else, ?:, the test in a local); with args[0].tag read after the if, move s1,zero goes into beqz's delay slot as retail's, but that load then follows the branch.
+// Still differs (2026-11-08, night-close6): the test inverted, args[1].tag in a local read first, n = 0 then the if, n from an inline function (before or after the tag): the same five lines or more.
 #include "common.h"
 #include "script_value.h"
 #include "shapes.h"

@@ -29,22 +29,27 @@ struct ContactObject {
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
 struct StateNotifier : PlacedObject {
     s32 state;              // 0x2D0
-    u8 pad2D4[0x2D8 - 0x2D4];
+    f32 stateSince;         // 0x2D4: the clock when the state was set
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
     f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
     u8 pad2E4[0x2E8 - 0x2E4];
     void* f2E8;             // 0x2E8: the object whose message ends it (func_00147EF8)
     void* f2EC;             // 0x2EC
-    u8 pad2F0[0x320 - 0x2F0];
+    Vec02 v2F0;             // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
+    Vec02 v300;             // 0x300: its motion, split along the push (func_00146DB0)
+    Vec02 v310;             // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)
     union {
         f32 f320;           // 0x320
         s32 i320;
     };
-    u8 pad324[0x334 - 0x324];
+    PlacedObject* f324;     // 0x324: where the splash goes when it crosses the camera's plane facing away
+    PlacedObject* f328;     // 0x328: and facing it (func_00147428)
+    s32 f32C;               // 0x32C: which side of the camera's plane it was last frame
+    f32 f330;               // 0x330: the time of the last splash
     s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
-    s32 f33C;               // 0x33C (unused here)
+    s32 f33C;               // 0x33C: set once it has landed on a slope (func_00146DB0)
     s32 armed;               // 0x340
     f32 f344;               // 0x344
     union {
@@ -55,16 +60,18 @@ struct StateNotifier : PlacedObject {
     f32 f350;               // 0x350
     f32 f354;               // 0x354
     f32 f358;               // 0x358
-    u8 pad35C[0x374 - 0x35C];
+    f32 f35C;               // 0x35C: an angle about v360, eased to 0 in state 4 (func_00146518)
+    Vec02 v360;             // 0x360: its axis (func_001478F0)
+    s32 f370;               // 0x370: set once state 4 has come to rest (func_00146518)
     union {
         u8 tail374[8];      // 0x374: copied unaligned by func_00146418
         StateNotifier* next374; // 0x374: the link in the world's list1C54 (func_001DCD28)
     };
     s32 f37C;               // 0x37C
     StateListener* listener;         // 0x380
-    u8 pad384[0x388 - 0x384];
+    StateListener* f384;    // 0x384: told the whole units f38C counts in state 7 (func_00147428)
     f32 f388;               // 0x388
-    u8 pad38C[0x390 - 0x38C];
+    f32 f38C;               // 0x38C: f388 per second, added up in state 7
 };
 
 struct SoundNotifier : StateNotifier {};

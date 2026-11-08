@@ -7,6 +7,7 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
+#include "game_clock.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -1471,7 +1472,31 @@ void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
     self->desc->m02(self);
 }
 
-INCLUDE_ASM(func_00124868);
+void ReframePlacedObject(PlacedObject* self, BaseObject* frame)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Vec02 vel;
+    Vec02 spin;
+    Vec02 velDir;
+    Vec02 spinDir;
+    Vec02 sums[2];
+    TransformPointBetweenFrames(frame, 0, &self->pos, &pos);
+    self->desc02()->m1D(self, &pos);
+    TransformRotationBetweenFrames(frame, 0, &self->rot, &rot);
+    self->desc02()->m1E(self, &rot);
+    ComputeObjectMotionInFrame(frame->parent, 0, &pos, &vel, &spin, 0, 0);
+    TransformDirectionBetweenFrames(frame, 0, &self->v150, &velDir);
+    TransformDirectionBetweenFrames(frame, 0, &self->v160, &spinDir);
+    Vu0::Set(sums[0], Vu0::Add(Vu0::Q(vel), Vu0::Q(velDir)));
+    Vu0::Set(sums[1], Vu0::Add(Vu0::Q(spin), Vu0::Q(spinDir)));
+    self->desc02()->m20(self, &sums[0]);
+    self->desc02()->m21(self, &sums[1]);
+    self->v190 = self->pos;
+    self->m1A0.r[0] = self->rot.r[0];
+    self->m1A0.r[1] = self->rot.r[1];
+    self->m1A0.r[2] = self->rot.r[2];
+}
 
 void PostLoadPlacedObject(PlacedObject* self)
 {
@@ -1705,7 +1730,64 @@ void BeginPlacedObjectMove(PlacedObject* self)
     (void)self;
 }
 
-INCLUDE_ASM(func_00125440);
+void ApplyPoseSourcePosition(Attachment* a);
+void ApplyPoseSourceRotation(Attachment* a);
+s32 IsAccelerationNegligible(void* a);
+s32 IsSpinAccelerationNegligible(void* a);
+void BuildRotationFromVector(Vec02* in, Mat02* out);
+void OrthonormalizeMatrix(Mat02* m);
+
+void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
+{
+    Attachment* pa = self->f1EC;
+    Attachment* ra = self->f1F0;
+    s32 moved = flag;
+    if (pa == 0 || pa->mode0 == 5 || ra == 0 || ra->mode1 == 5) {
+        Vu0::Q(self->v180) = Vu0::Q(self->v170) = Vu0::Zero();
+        ((void (*)(PlacedObject*, f32))self->desc02()->m1C)(self, g_frameDt);
+    }
+    if (pa != 0 && pa->mode0 != 5) {
+        ApplyPoseSourcePosition(pa);
+        moved = 1;
+    } else if (IsVelocityNegligible(&self->v150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
+        moved = 1;
+        GameClock* clk = &g_gameClock;
+        Vu0::Q(self->pos) = Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(clk->dt), Vu0::Q(self->v170), Vu0::Scalar(clk->dt * (clk->dt * 0.5f)));
+        Vu0::Q(self->v150) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(self->v170), Vu0::ScalarAt(clk->dt));
+    }
+    if (ra != 0 && ra->mode1 != 5) {
+        ApplyPoseSourceRotation(ra);
+        moved = 1;
+    } else if (IsSpinNegligible(&self->v160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
+        GameClock* clk = &g_gameClock;
+        Vec02 prev;
+        Vec02 w;
+        Mat02 rot;
+        Vu0::Q(prev) = Vu0::Q(self->v160);
+        Vu0::Q(self->v160) = Vu0::MulAddX(Vu0::Q(self->v160), Vu0::Q(self->v180), Vu0::ScalarAt(clk->dt));
+        moved = 1;
+        Vu0::Q(w) = Vu0::MulXSum(Vu0::Q(prev), Vu0::Scalar(clk->dt * 0.5f), Vu0::Q(self->v160), Vu0::Scalar(clk->dt * 0.5f));
+        BuildRotationFromVector(&w, &rot);
+        MulRotationIntoRot(self, rot, self->rot);
+        OrthonormalizeMatrix(&self->rot);
+    }
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->children);
+    BaseObject* obj;
+    while ((obj = ListWalkNext::Of(&it)) != 0) {
+        if ((obj->desc->flags & 1) != 0) {
+            ((void (*)(BaseObject*, f32, s32))obj->desc->m1B)(obj, dt, moved);
+        }
+    }
+    if (moved != 0) {
+        if (flag == 0) {
+            if (self->desc->m12 != 0) {
+                self->desc->m12(self);
+            }
+        }
+    }
+    g_activeListFrames = (ListFrame*)it.prev;
+}
 
 typedef void (*PositionAtFn)(PlacedObject* self, f32 t, Vec02* pos, Vec02* vel);
 typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat02* rot, Vec02* spin);
@@ -1807,7 +1889,18 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
     }
 }
 
-INCLUDE_ASM(func_00125BF0);
+void func_00125BF0(PlacedObject* self, void* a, Quad16* src)
+{
+    Quad16 scale;
+    ScaledTransform t;
+    Vu0::Q(scale) = Vu0::FromFloats(self->f28C, self->f28C, self->f290);
+    BuildPlacedObjectTransform(self, src, &t);
+    BuildScaledTransformMatrix((Vec02*)&t.q[3], (Mat02*)&g_identityMatrix, (u8*)&scale, &t);
+    PlacedObject* hook = (PlacedObject*)self->world->slot1CE8[17];
+    if (hook != 0) {
+        hook->desc02()->m26(hook, a, &t);
+    }
+}
 
 INCLUDE_ASM(func_00125C90);
 
@@ -1837,7 +1930,37 @@ INCLUDE_RODATA(jtbl_00249A00);
 
 INCLUDE_ASM(func_00126270);
 
-INCLUDE_ASM(func_001268B8);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+
+void func_001268B8(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy)
+{
+    Mat02 m;
+    Vec02 e;
+    ScaledTransform out;
+    const Vec02* fallback = &D_00248D30;
+    Vu0::Q(m.r[2]) = Vu0::Sub(Vu0::Q(*q), Vu0::Q(*p));
+    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*(Vec02*)((u8*)b + 0x40)));
+    u128 c = Vu0::Cross(Vu0::Q(e), Vu0::Q(m.r[2]));
+    Vu0::Q(m.r[1]) = c;
+    u128 len = Vu0::Length(c);
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        m.r[1] = *fallback;
+    } else {
+        Vu0::Q(m.r[1]) = Vu0::DivX(c, len);
+    }
+    f32 minLen = 0.01f;
+    if (minLen < Vu0::ToFloatMoved(len)) {
+        u128 c2 = Vu0::Cross(Vu0::Q(m.r[1]), Vu0::Q(m.r[2]));
+        Vu0::Q(m.r[0]) = c2;
+        Vu0::Q(m.r[0]) = Vu0::DivX(c2, Vu0::Length(c2));
+        Vu0::Q(m.r[1]) = Vu0::MulX(Vu0::Q(m.r[1]), Vu0::Scalar(sx));
+        Vu0::Q(m.r[2]) = Vu0::MulX(Vu0::Q(m.r[2]), Vu0::Scalar(minLen));
+        BuildMatrixFromRotationAndTranslation(p, &m, &out);
+        out.f44 = sy;
+        out.f40 = sy;
+        self->desc02()->m26(self, b, &out);
+    }
+}
 
 void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 {
@@ -1922,7 +2045,36 @@ void func_00126D60(Collider* self, f32 time)
     }
 }
 
-INCLUDE_ASM(func_00126DE8);
+void BuildShortestArcRotation(void* from, void* to, void* out);
+void MultiplyMatrices(void* out, void* a, void* b);
+
+// k, the vector the second rotation starts from, is written as a quadword at its own address:
+// a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
+// for the later &k, where retail forms it again for the call.
+void func_00126DE8(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m)
+{
+    Vec02 a;
+    Mat02 rot;
+    Mat4A t;
+    Mat4A local;
+    Vec02 k;
+    Mat4A r;
+    *(u128*)&k = Vu0::FromFloat(-1.0f);
+    Vu0::Q(a) = Vu0::MulX(Vu0::Q(cam->f80), *(u128*)&k);
+    BuildShortestArcRotation(m, &a, &rot);
+    local = *m;
+    local.m[3][0] -= pos[0];
+    local.m[3][1] -= pos[1];
+    local.m[3][2] -= pos[2];
+    BuildMatrixFromRotationAndTranslation((void*)&D_00248D30, &rot, &t);
+    MultiplyMatrices(&r, &t, &local);
+    *m = r;
+    *(u128*)&k = Vu0::Sub(Vu0::Q(r.m[2]), Vu0::MulX(Vu0::Q(a), Vu0::Dot(Vu0::Q(r.m[2]), Vu0::Q(a))));
+    BuildShortestArcRotation(&k, &cam->fA0, &rot);
+    BuildMatrixFromRotationAndTranslation(pos, &rot, &t);
+    MultiplyMatrices(&r, &t, m);
+    *m = r;
+}
 
 void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 {
@@ -2417,7 +2569,54 @@ void CreateTrackAttachment(BaseObject* item)
 
 INCLUDE_RODATA(D_00249A1C);
 
-INCLUDE_ASM(func_001289C0);
+extern const f32 D_00249A1C;
+void LoadFollowRecord(PlacedObject* self, void* a1);
+void ReadPlacedObjectModel(void* record, void* stream, PlacedObject* owner);
+void ReadSlotObjects(World* world, PlacedObject* self, void* stream);
+struct BakedRow {
+    s32 id;
+    f32* values;
+};
+
+void func_001289C0(PlacedObject* self, void* r)
+{
+    ReadBufferedRotation3(r, &self->rot);
+    ReadBufferedVector3(r, &self->pos);
+    self->bits24 = ReadBufferedU8(r);
+    self->bits26 = ReadBufferedU8(r);
+    self->bits28 = ReadBufferedU8(r);
+    self->f88 = ReadBufferedU32(r);
+    self->f80 = ReadBufferedFloat(r);
+    self->f84 = ReadBufferedFloat(r);
+    self->f2A4 = ReadBufferedFloat(r);
+    self->f2A8 = ReadBufferedFloat(r);
+    if (self->f80 == D_00249A1C) {
+        self->f80 = 10000000000.0f;
+    }
+    if (self->f84 == D_00249A1C) {
+        f32 m = self->f80;
+        f32 c = 2000.0f;
+        self->f84 = c <? m;
+    }
+    ReadPropertyRecords((Animation*)self, (Stream83*)r);
+    ReadPlacedObjectModel(self->sub22C, r, self);
+    LoadFollowRecord(self, r);
+    if (self->desc->m12 != 0) {
+        self->desc->m12(self);
+    }
+    self->f2B8 = ReadBufferedU8(r);
+    BakedRow* rows = (BakedRow*)AllocateFrontMemory(self->f2B8 << 3);
+    self->f2BC = rows;
+    for (s32 i = 0; i < self->f2B8; i++) {
+        BakedRow* row = &((BakedRow*)self->f2BC)[i];
+        row->id = ReadBufferedS16(r);
+        row->values = (f32*)AllocateFrontMemory(self->f26C << 2);
+        for (s32 j = 0; j < self->f26C; j++) {
+            row->values[j] = ReadBufferedFloat(r);
+        }
+    }
+    ReadSlotObjects(self->world, self, r);
+}
 
 void LoadFollowRecord(PlacedObject* self, void* a1)
 {
@@ -4668,7 +4867,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         Track83* e = &owner->tracks[n->index];
         PlacedObject* o = n->owner;
         if (msg->kind == 35) {
-            e->pos->vt->eval(e->pos, o, 0, &u.v[0], &u.v[1], msg->a0.f, self->speed);
+            e->pos->vt->eval(e->pos, o, 0, msg->a0.f, self->speed, &u.v[0], &u.v[1]);
             o->desc02()->m1D(o, (Vec02*)&u.v[0]);
             o->desc02()->m20(o, (Vec02*)&u.v[1]);
         } else {
@@ -5054,7 +5253,133 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-INCLUDE_ASM(func_0012EBD8);
+f32 GetMatrixRotationCosine(void* p);
+f32 Arccosine(f32 x);
+
+// One frame of an animation player. While an attachment that follows it belongs to an object
+// with flag bit 38 set (and the world's f2358 is clear) the player only stops its sound. The time
+// advances by dt times the speed, weighted by how near the driven attachment's object is to its
+// track's position and orientation (the two falloff ranges), after the delay at +0x10 has used
+// up its part of dt; the events up to the new time run, the loop mode is applied (mode 0 ends the
+// player, mode 1 loops it), and the events run again. A looping player puts the followers whose
+// curves do not close back at their tracks' start.
+void func_0012EBD8(AnimationPlayer* self, f32 dt)
+{
+    ListFrame frame;
+    Animation* anim = self->anim;
+    T2195_7C0* n;
+    f32 weight;
+    s32 stop;
+    s32 looped;
+    s32 ended;
+    s32 i;
+
+    if (anim->world->f2358 == 0) {
+        for (n = (T2195_7C0*)self->list44.head; n != 0; n = (T2195_7C0*)n->w20.lo) {
+            if (n->owner->flags & ((u64)0x8000 << 23)) {
+                StopSoundRecord(self->f50, 0);
+                return;
+            }
+        }
+    }
+    if (__builtin_fabsf(self->speed) < 0.0001f) {
+        return;
+    }
+    weight = 1.0f;
+    if (self->driven != 0) {
+        RangeFalloffOwner* near = (RangeFalloffOwner*)self->f2C;
+        if (near != 0) {
+            n = (T2195_7C0*)self->driven;
+            Vec02 pos;
+            Vec02 d;
+            f32 w;
+            n->vt->getPos(n, 0.0f, &pos, 0);
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(n->owner->pos), Vu0::Q(pos));
+            if (n->mode0 == 5) {
+                d.z = 0.0f;
+            }
+            w = GetRangeFalloffScale(near, Vu0::ToFloat(Vu0::Length(Vu0::Q(d))));
+            if (w < weight) {
+                weight = w;
+            }
+        }
+        RangeFalloffOwner* turn = (RangeFalloffOwner*)self->f30;
+        if (turn != 0) {
+            n = (T2195_7C0*)self->driven;
+            Mat02 rot;
+            Mat02 rel;
+            f32 w;
+            n->vt->getRot(n, 0.0f, &rot, 0);
+            MultiplyMatrices3x3(&n->owner->rot, &rot, &rel);
+            w = GetRangeFalloffScale(turn, Arccosine(GetMatrixRotationCosine(&rel)));
+            if (w < weight) {
+                weight = w;
+            }
+        }
+        weight = ClampRange::Of(weight, 0.0f, 1.0f);
+        if (weight < 0.0001f) {
+            return;
+        }
+    }
+    if (0.0f < self->f10) {
+        f32 left = self->f10 - dt;
+        self->f10 = left;
+        if (left <= 0.0f) {
+            dt = -left;
+            self->f10 = 0.0f;
+        } else {
+            dt = 0.0f;
+        }
+    }
+    self->time = self->time + dt * self->speed * weight;
+    stop = 0;
+    looped = 0;
+    ended = 0;
+    RunAnimationEventsToTime(self, anim, &stop);
+    if (stop != 0) {
+        return;
+    }
+    if (ApplyAnimationLoopMode(self, &self->time, &self->speed) != 0) {
+        switch (anim->f44) {
+        case 0:
+            ended = 1;
+            break;
+        case 1:
+            looped = 1;
+            self->f20 = self->speed <= 0.0f ? anim->timedCount : 0;
+            break;
+        }
+    }
+    RunAnimationEventsToTime(self, anim, &stop);
+    if (stop != 0) {
+        return;
+    }
+    for (i = 0; i < self->f5C; i++) {
+        ClearRootTries(((PlacedObject**)self->f60)[i]);
+    }
+    if (looped != 0) {
+        for (n = (T2195_7C0*)self->list44.head; n != 0; n = (T2195_7C0*)n->w20.lo) {
+            Track83* track = &anim->tracks[n->index];
+            if (track->pos != 0 && ((VectorKeyPositionCurve*)track->pos)->closed == 0 && (Attachment*)n == n->owner->f1EC) {
+                Vec02 pos;
+                Vec02 vec;
+                n->vt->getPos(n, 0.0f, &pos, &vec);
+                n->owner->desc02()->m1D(n->owner, &pos);
+                n->owner->desc02()->m20(n->owner, &vec);
+            }
+            if (track->rot != 0 && ((KeyedRotationCurve*)track->rot)->closed == 0 && (Attachment*)n == n->owner->f1F0) {
+                Mat02 rot;
+                Vec02 vec;
+                n->vt->getRot(n, 0.0f, &rot, &vec);
+                n->owner->desc02()->m1E(n->owner, &rot);
+                n->owner->desc02()->m21(n->owner, &vec);
+            }
+        }
+    }
+    if (ended != 0 || looped != 0) {
+        NotifyAnimationPlayerCallbacks(self, ended != 0 ? 5 : 7, self);
+    }
+}
 
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {
@@ -5262,7 +5587,40 @@ tail:
     return hit ^ 1;
 }
 
-INCLUDE_ASM(func_0012FB68);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
+
+void func_0012FB68(IdFilterObject* self, u8* table, s32 which)
+{
+    Vec02 loc;
+    u8* arg;
+    TriggerScriptEvent(self, 2, 0, 0);
+    arg = table + ((1 - which) << 6) + 4;
+    TriggerScriptEvent(self, 0x1D, 1, (void**)&arg);
+    if (self->mode != 0) {
+        if (self->pendingTarget == 0) {
+            if (self->placedTarget != 0) {
+                s32 close;
+                switch (self->mode) {
+                case 1:
+                    *(Quad16*)&loc = *(Quad16*)&self->pos;
+                    break;
+                case 2: {
+                    PlacedObject* node = self->found;
+                    TransformPointBetweenFrames(node->parent, 0, &node->link40, &loc);
+                    break;
+                }
+                }
+                f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(self->placedTarget->v140), Vu0::Q(loc))));
+                close = d <= *(f32*)((u8*)self->placedTarget + 0x3D0) * 2.0f;
+                if (close) {
+                    return;
+                }
+            }
+            self->pendingTarget = *(PlacedObject**)(table + ((1 - which) << 6));
+        }
+    }
+}
 
 void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 {

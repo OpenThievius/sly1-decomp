@@ -45,8 +45,8 @@ struct ObjectCycler : Collider {
     PackedFloatPair f5DC;              // 0x5DC: kept across the copy by slot 9
     void* handle;           // 0x5E4: made by func_001BFCD8 in mode 0, given back with func_001BF788
     u8 pad5E8[0x5F0 - 0x5E8];
-    Vec02 v5F0;             // 0x5F0
-    u8 pad600[0x610 - 0x600];
+    Vec02 v5F0;             // 0x5F0: where states 0, 3 and 5 send it (func_0015B7B8)
+    Vec02 v600;             // 0x600: and its velocity there (func_0015B7B8)
     FloatRange p610;            // 0x610: set up from D_00262180
     FloatRange p618;            // 0x618: D_00262188
     FloatRange p620;            // 0x620: D_00262190

@@ -14,6 +14,7 @@
 #include "animation.h"
 #include "attachment.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 
 #include "anim_curve.h"
 
@@ -855,7 +856,18 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
     }
 }
 
-INCLUDE_ASM(func_0011F6B0);
+void func_0011F6B0(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
+{
+    if (outValues)
+        *(Vec02*)outValues = *base;
+    if (outSlopes)
+        Vu0::Q(*(Vec02*)outSlopes) = Vu0::Zero();
+    for (s32 i = 0; i < 3; i++) {
+        WeightCurve* curve = axis[i];
+        if (curve)
+            curve->vt->eval(curve, other, key, scale, flags, outValues ? outValues + i : 0, outSlopes ? outSlopes + i : 0);
+    }
+}
 
 void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
@@ -973,7 +985,26 @@ void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32
         ((VectorCurveToldFn)other->desc02()->m28)(other, e, f);
 }
 
-INCLUDE_ASM(func_0011FC90);
+void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
+{
+    Vec02 v[2];
+    s32 count;
+    f32* values;
+    s32 result;
+
+    ReadAxisCurves(self->axis, &self->base, arg);
+    PushBackMemoryMark();
+    self->vt->times(self, &count, &values);
+    if (count != 0) {
+        self->vt->eval(self, 0, 0, values[0], 1.0f, &v[0], 0);
+        self->vt->eval(self, 0, 0, values[count - 1], 1.0f, &v[1], 0);
+        result = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(v[0]), Vu0::Q(v[1])))) < 1.0f;
+    } else {
+        result = 1;
+    }
+    *(s32*)((u8*)self + 8) = result;
+    PopBackMemoryMark();
+}
 
 void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
@@ -1141,9 +1172,172 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-INCLUDE_ASM(func_00120470);
+void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
+{
+    Vec02 x0;
+    Vec02 x1;
+    Vec02 k;
+    f32 x2;
+    Vec02* p1;
+    if (out0)
+        Vu0::Q(*out0) = Vu0::Zero();
+    if (out1)
+        Vu0::Q(*out1) = Vu0::Zero();
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
+    f32 t;
+    s32 idx;
+    if (!seq) {
+        t = dt / cfg->length;
+    } else {
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
+        t = x2 / seq->pairs[idx].b;
+    }
+    for (s32 i = 0; i < cfg->count; i++) {
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
+        Vec02* p0 = out0 ? &x0 : 0;
+        f32 wt = e->weight;
+        if (wt == 0.0f)
+            continue;
+        PositionCurve* tg = o->targets[i];
+        if (!tg) {
+            if (out0) {
+                u128 w = Vu0::FromFloat(wt);
+                u128 acc = Vu0::Q(*out0);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec02*)D_00248D30), w);
+            }
+        } else {
+            f32 a, b;
+            if (!seq) {
+                f32 s = e->sub->length;
+                b = s / cfg->length;
+                a = t * s;
+            } else {
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
+                b = q->b;
+                a = q->a + t * b;
+                if (e->sub->length < a)
+                    a -= e->sub->length;
+                b = b / seq->pairs[idx].b;
+            }
+            tg->vt->eval(tg, cam, c, a, b * scale, p0, out1 ? &x1 : 0);
+            if (out0) {
+                u128 w = Vu0::FromFloatAt(e->weight);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out0) = Vu0::MulAddX(Vu0::Q(*out0), Vu0::Q(x0), w);
+            }
+            if (out1) {
+                u128 w = Vu0::FromFloatAt(e->weight);
+                Vu0::Q(k) = w;
+                Vu0::Q(*out1) = Vu0::MulAddX(Vu0::Q(*out1), Vu0::Q(x1), w);
+            }
+        }
+    }
+    if (cam && cam->desc02()->m28)
+        cam->desc02()->m28(cam, out0, out1);
+}
 
-INCLUDE_ASM(func_00120700);
+// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
+// once (mul_rotation.h has the forms that read b's rows one by one).
+static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* p = (const u128*)&a;
+    const u128* q = (const u128*)&b;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 b0 = q[0], b1 = q[1], b2 = q[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
+    r.r[2] = z;
+    *out = r;
+}
+
+void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
+
+void func_00120700(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
+{
+    Vec02 x0;
+    Vec02 acc0;
+    Vec02 x1;
+    Vec02 acc1;
+    f32 x2;
+    if (out0)
+        Vu0::Q(acc0) = Vu0::Zero();
+    if (out1)
+        Vu0::Q(acc1) = Vu0::Zero();
+    BlendSequence* seq = o->seq;
+    BlendConfig* cfg = o->cfg;
+    f32 t;
+    s32 idx;
+    if (!seq) {
+        t = dt / cfg->length;
+    } else {
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
+        t = x2 / seq->pairs[idx].b;
+    }
+    f32 w = 0.0f;
+    for (s32 i = 0; i < cfg->count; i++) {
+        BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
+        if (e->weight == 0.0f)
+            continue;
+        RotationCurve* tg = o->targets[i];
+        if (!tg) {
+            if (!out0)
+                continue;
+            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec02*)D_00248D30));
+        } else {
+            f32 a, b;
+            if (!seq) {
+                f32 s = e->sub->length;
+                b = s / cfg->length;
+                a = t * s;
+            } else {
+                BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
+                b = q->b;
+                a = q->a + t * b;
+                if (e->sub->length < a)
+                    a -= e->sub->length;
+                b = b / seq->pairs[idx].b;
+            }
+            tg->vt->get(tg, cam, c, out0 ? &x0 : 0, out1 ? &x1 : 0, a, b * scale);
+            if (out1)
+                Vu0::Q(acc1) = Vu0::MulAddX(Vu0::Q(acc1), Vu0::Q(x1), Vu0::ScalarAt(e->weight));
+        }
+        if (!out0)
+            continue;
+        if (o->f18) {
+            if (w == 0.0f) {
+                BuildEulerRotationMatrix(&x0, out0);
+            } else {
+                Vec02 axis;
+                Mat02 rotA;
+                Mat02 prod;
+                f32 angle;
+                BuildEulerRotationMatrix(&x0, &rotA);
+                MultiplyMatrices3x3(&rotA, out0, &prod);
+                MatrixToAxisAngle(&prod, &angle, &axis);
+                BuildAxisAngleMatrix(&axis, angle * w / (w + e->weight), &prod);
+                MulRotationRowsOnce(out0, prod, rotA);
+            }
+            w += e->weight;
+        } else {
+            Vu0::Q(acc0) = Vu0::MulAddX(Vu0::Q(acc0), Vu0::Q(x0), Vu0::ScalarAt(e->weight));
+        }
+    }
+    if (out0 && !o->f18)
+        BuildEulerRotationMatrix(&acc0, out0);
+    if (out1)
+        RotateVectorByTwoAngles(&acc0, &acc1, out1);
+    if (cam)
+        ((KeyedRotationToldFn)cam->desc02()->m29)(cam, out0, out1);
+}
 
 void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
@@ -1201,7 +1395,7 @@ void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
+            tg->vt->eval(tg, cam, a, b * scale, c, p0, p1);
             if (w == 0.0f) {
                 v0 = x0;
             } else {
@@ -1273,7 +1467,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
+            tg->vt->eval(tg, cam, a, b * scale, c, p0, p1);
             sum0 += e->weight * x0;
             sum1 += e->weight * x1;
         }
@@ -1637,7 +1831,26 @@ void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec
     }
 }
 
-INCLUDE_ASM(func_001225D0);
+void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec)
+{
+    Vec02 d;
+    Mat02 m;
+    Vec02 k;
+    Attachment* source = self->f1F0;
+    if (t == 0.0f) {
+        *rot = self->rot;
+        *vec = self->v160;
+    } else if (source) {
+        source->vt->getRot(source, t, rot, vec);
+    } else {
+        u128 w = Vu0::Q(self->v160);
+        Vu0::Q(k) = Vu0::FromFloat(t);
+        Vu0::Q(*vec) = w;
+        Vu0::Q(d) = Vu0::MulX(w, Vu0::Q(k));
+        BuildRotationFromVector((f32*)&d, (f32*)&m);
+        MulRotationRowsIndexed(rot, m, self->rot);
+    }
+}
 
 void SettlePoseSourceModes(Attachment* self)
 {
@@ -1816,27 +2029,6 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     }
 }
 
-// The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
-// once.
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
-{
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    const u128* p = (const u128*)&a;
-    const u128* q = (const u128*)&b;
-    u128 a0 = p[0], a1 = p[1], a2 = p[2];
-    u128 b0 = q[0], b1 = q[1], b2 = q[2];
-    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, b0);
-    r.r[0] = x;
-    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, b1);
-    r.r[1] = y;
-    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, b2);
-    r.r[2] = z;
-    *out = r;
-}
-
 void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
 {
     Mat02 m;
@@ -1851,7 +2043,7 @@ void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
     } else {
         GetIdentityMatrix(0, &m);
     }
-    MulRotation(out, self->m90, m);
+    MulRotationRowsOnce(out, self->m90, m);
 }
 
 f32 GetIdentityPoseIndexedValue(void)
@@ -1866,7 +2058,30 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
     self->f20 = 0.25f;
 }
 
-INCLUDE_ASM(func_00122DE0);
+void BuildBasisFromXAndZHint(void* x, void* hint, void* out);
+
+void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
+{
+    Vec02 dir;
+    Vec02 vel;
+    Vec02* pd = &dir;
+    PlacedObject* owner = self->owner;
+    Attachment* source = owner->f1EC;
+    Vu0::Vec g;
+    if ((owner->desc->flags & 2) != 0) {
+        g = Vu0::MulX(Vu0::Vec::Of(((Collider*)owner)->gravity), Vu0::Vec::Scalar(-1.0f));
+    } else {
+        g = Vu0::MulX(Vu0::Vec::Of(owner->world->gravity), Vu0::Vec::Scalar(-1.0f));
+    }
+    Vu0::Q(*pd) = g.q;
+    if (source != 0 && self->f20 != 0.0f && self->f1C != 0.0f) {
+        source->vt->getPos(source, self->f20, 0, &vel);
+        u128 w1 = Vu0::ScalarAt(self->f1C);
+        Vu0::Q(dir) = Vu0::MulAddX(Vu0::Q(dir), Vu0::DivX(Vu0::Sub(Vu0::Q(vel), Vu0::Q(owner->v150)), Vu0::ScalarAt(self->f20)), w1);
+    }
+    BuildBasisFromXAndZHint(&owner->v150, &dir, out);
+    *vec = *(Vec02*)D_00248D30;
+}
 
 void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 {
@@ -1908,7 +2123,7 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
                 tmp[0] = tmp[0] + d * track->speed;
             }
         }
-        e->pos->vt->eval(e->pos, self->owner, 0, a1, a2, tmp[0], track->speed);
+        e->pos->vt->eval(e->pos, self->owner, 0, tmp[0], track->speed, a1, a2);
         return;
     }
     GetOwnerPosition(self, a1, a2);
@@ -1950,7 +2165,7 @@ void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
     Track83* e = &player->anim->tracks[self->index];
     WeightCurve* target = e->weight;
     if (target) {
-        target->vt->eval(target, f4, 0, saved, a2, player->time, player->speed);
+        target->vt->eval(target, f4, player->time, player->speed, 0, saved, a2);
     } else {
         GetOwnerValue(self, saved, a2);
     }
@@ -1977,6 +2192,6 @@ f32 GetTrackIndexedValue(T2195_7C0* self, s32 index)
     WeightCurve** values = row->morph;
     WeightCurve* object = values[index];
     f32 result;
-    object->vt->eval(object, self->owner, 0, &result, 0, track->time, track->speed);
+    object->vt->eval(object, self->owner, track->time, track->speed, 0, &result, 0);
     return result;
 }

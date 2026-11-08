@@ -57,7 +57,7 @@ func_001EB080	IsInsideAnyRange	loops over count range records and returns 1 when
 func_001EB0F8	ClampToRange	returns lo when x is below it, hi when above it, else x
 func_001EB128	CompareFloats	compares the floats two pointers refer to and returns 1, -1 or 0 (a comparison function with qsort's shape)
 func_001EB160	IgnoreStackLocal	an empty function; func_00127B20 calls it with the address of a 16-byte local of its frame
-func_001EB168	FindLocalMinimum	original assembly: from a start value clamped to the range samples the function (by $f12 with its context) one step below and above, walks toward the lower side and narrows the step until the bracket closes, writing the lowest argument and value; ChoosePlayerTargetByCost passes it the ScoreTarget*At functions
+func_001EB168	FindLocalMinimum	from a start value clamped to the range samples the function (by $f12 with its context) one step below and above, walks toward the lower side and narrows the step until the bracket closes, writing the lowest argument and value; ChoosePlayerTargetByCost passes it the ScoreTarget*At functions
 func_001EB460	InitBeatPressCollider	slot 0 of class 0x1C: runs InitSwitchedCollider and sets the timing window +0x684 between the two values D_00275C70 by the polynomial D_00275C80 of g_currentEntry's dt, clamped to g_unitRange
 func_001EB518	LoadBeatPressCollider	slot 10 of class 0x1C: runs LoadCollider and resolves its link (D_00275C90)
 func_001EB550	CopyPlayerAttachBlock	copies the block at +0x580 and the word at +0x604 of the player g_player into the class 0x1C object (its slot 16 calls it)

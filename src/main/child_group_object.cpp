@@ -7,6 +7,8 @@
 #include "vu0.h"
 #include "object_event.h"
 #include "globals.h"
+#include "transform_object.h"
+#include "attachment.h"
 
 // The file's .data, in retail's order: class 0x3B's set-up values, then the constants of its
 // assembly functions.
@@ -138,7 +140,59 @@ void UpdateChildGroupObject(ChildGroupObject* self)
     }
 }
 
-INCLUDE_ASM(func_0013B828);
+extern List01 g_class75List;
+void SetContactPairFlags(World* w, s32 a, s32 b, u8 set, u8 clr);
+s32 IsObjectAttached(void* p);
+s32 GetObjectWorldPosition(void* self, Vec02* out);
+s32 CollectBoundsSpans(Vec02* a, void* b, void* c, s32 d, ColliderSpan* e, f32 x);
+
+void func_0013B828(ChildGroupObject* self)
+{
+    ListFrame frame;
+    Vec02 tmp;
+    ColliderSpan span;
+
+    for (s32 i = 0; i < self->entryCount; i++) {
+        PlacedObject* o = (PlacedObject*)self->entries[i].key;
+        if (o->root != 0) {
+            SetContactPairFlags(self->world, (s32)self->contacts, (s32)((Collider*)o->root)->contacts, 0, 0x40);
+        }
+    }
+    self->entryCount = 0;
+    for (Class75Object* n = (Class75Object*)g_class75List.head; n != 0; n = *(Class75Object**)&n->link) {
+        if (n->f90 == 0) {
+            continue;
+        }
+        if ((n->count & 0x10) == 0) {
+            continue;
+        }
+        PlacedObject* a = (PlacedObject*)n;
+        while (a != 0 && (a->desc->flags & 2) == 0) {
+            a = (PlacedObject*)a->parent;
+        }
+        if (a == 0) {
+            continue;
+        }
+        if (IsObjectAttached(a) == 0) {
+            continue;
+        }
+        GetObjectWorldPosition(n, &tmp);
+        if (CollectBoundsSpans(&tmp, (u8*)self + 0x370, &self->v140, 1, &span, n->scale) == 0) {
+            continue;
+        }
+        SetContactPairFlags(self->world, (s32)self->contacts, (s32)((Collider*)a->root)->contacts, 0x40, 0);
+        Entry3B* e = &self->entries[self->entryCount++];
+        e->key = (s32)a;
+        u128 point = Vu0::Q(span.q[0]);
+        Vu0::Q(*(Vec02*)((u8*)e + 0x00)) = point;
+        u128 dir = Vu0::Q(span.q[2]);
+        Vu0::StoreX(*(u32*)&e->value, Vu0::Dot(point, dir));
+        Vu0::Q(*(Vec02*)((u8*)e + 0x10)) = dir;
+        if (self->entryCount >= 4) {
+            return;
+        }
+    }
+}
 
 s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
@@ -235,7 +289,69 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
     return handled;
 }
 
-INCLUDE_ASM(func_0013BC80);
+void BuildShortestArcRotation(void* from, void* to, void* out);
+void BuildBasisFromXAndZHint(void* x, void* z, void* out);
+void TransformRotationBetweenFrames(void* a, void* b, void* c, void* d);
+
+// The product of the turn a and the object's matrix b into the pose at +0x620: b's rows read by
+// index, each result stored to its vector local and to the matrix local, the last in the other
+// order, then the matrix written through the object.
+static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02& b)
+{
+    const u128* q = (const u128*)&b;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 m;
+    Vu0::Q(m.r[0]) = Vu0::Q(x) = Vu0::RotateUntied(a, q[0]);
+    Vu0::Q(m.r[1]) = Vu0::Q(y) = Vu0::RotateUntied(a, q[1]);
+    Vu0::Q(z) = Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, q[2]);
+    *(Mat02*)((u8*)o + 0x620) = m;
+}
+
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z)
+{
+    Mat02 a;
+
+    if ((*(s32*)((u8*)self + 0x60C)) != 0) {
+        return;
+    }
+    (*(Collider**)((u8*)self + 0x670)) = obj;
+    (*(s32*)((u8*)self + 0x60C)) = 1;
+    if (pos != 0) {
+        (*(Vec02*)((u8*)self + 0x610)) = *pos;
+    } else {
+        (*(Vec02*)((u8*)self + 0x610)) = self->v140;
+    }
+    (*(Vec02*)((u8*)self + 0x650)) = self->v150;
+    (*(Vec02*)((u8*)self + 0x660)) = self->v160;
+    switch ((*(s32*)((u8*)self + 0x608))) {
+    case 0: {
+        BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec02*)&g_unitZVector, &a);
+        MulPoseRows(self, a, self->m110);
+        Rec2195_224* rec = self->f224;
+        void* frame;
+        if (rec != 0) {
+            if ((rec->fB0 & 8) != 0) {
+                frame = rec->p60;
+            } else {
+                frame = self->parent;
+            }
+        } else {
+            frame = self->parent;
+        }
+        TransformRotationBetweenFrames(0, frame, (Mat02*)((u8*)self + 0x620), (Mat02*)((u8*)self + 0x620));
+        break;
+    }
+    case 1:
+        BuildBasisFromXAndZHint((Vec02*)((u8*)self + 0x650), (void*)&g_unitZVector, (Mat02*)((u8*)self + 0x620));
+        break;
+    case 2:
+        (*(Mat02*)((u8*)self + 0x620)) = self->rot;
+        break;
+    }
+}
+
 extern f32 g_gameTime;
 
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta)

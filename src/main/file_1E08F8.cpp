@@ -5,6 +5,7 @@
 #include "collider.h"
 #include "world.h"
 #include "camera_controller.h"
+#include "camera.h"
 #include "globals.h"
 #include "buffered_stream.h"
 #include "key_id.h"
@@ -458,7 +459,8 @@ INCLUDE_DATA(D_00275970);
 INCLUDE_DATA(D_00275974);
 INCLUDE_DATA(D_00275978);
 f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
-INCLUDE_DATA(D_002759C0);
+f32 D_002759C0[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,
+                        1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 0, 0 };
 f32 D_00275A10[4] = { 0, 0.5f, 0, 0 };
 f32 D_00275A20[2] = { 0, 3.4028235e38f };
 INCLUDE_DATA(D_00275A28);
@@ -1313,7 +1315,34 @@ void CreateRenderThread(void)
 
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
-INCLUDE_ASM(func_001E2438);
+struct CameraPlacement { Vec02 q[5]; };
+void PlaceOnOffCameraFrame(OnOffObject* object, Vec02* eye, Vec02* x, Vec02* dir);
+void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out);
+// The orbit's polynomial block: three rows of four floats, cleared before the blend fills them.
+struct OrbitPoly {
+    f32 f[12];
+    void Clear() { FillMemory(this, 0, (s32)sizeof(*this)); }
+};
+
+void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object)
+{
+    f32 t = *(f32*)((u8*)block + 0x60);
+    Vu0::Q(*out) = Vu0::MulXSum(Vu0::Q(eye->q[1]), Vu0::Scalar(1.0f - t), Vu0::Q(eye->q[4]), Vu0::Scalar(t));
+    if (object != 0) {
+        Vec02 x;
+        OrbitPoly poly;
+        Vec02 dir;
+        poly.Clear();
+        poly.f[1] = *(f32*)((u8*)block + 0x70);
+        poly.f[5] = *(f32*)((u8*)block + 0x74);
+        poly.f[9] = *(f32*)((u8*)block + 0x78);
+        s32 saved = object->f380;
+        object->f380 = 0;
+        PlaceOnOffCameraFrame(object, out, &x, &dir);
+        PlaceOnOffCameraOrbit(object->angle3A0, 0.0f, object, (f32*)&x, poly.f, D_002759C0, 1, out);
+        object->f380 = saved;
+    }
+}
 
 void InitOnOffObject(OnOffObject* self)
 {
@@ -1554,10 +1583,93 @@ void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32
 }
 
 // The five quadwords func_00143418 gives for a camera and its target: the placement.
-struct CameraPlacement { Vec02 q[5]; };
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 
-INCLUDE_ASM(func_001E2E68);
+struct OnOffCameraView {
+    u8 pad00[0x0C];
+    f32 f0C;
+    f32 f10;
+    f32 f14;
+    u8 pad18[0x20 - 0x18];
+    s32 f20;
+    s32 active24;
+    s32 f28;
+    u8 pad2C[0x30 - 0x2C];
+    f32 f30;
+    u8 pad34[0x40 - 0x34];
+    f32 f40;
+    u8 pad44[0x50 - 0x44];
+    Vec02 v50;
+    f32 f60;
+};
+struct OnOffEventObject { u8 pad[0x434]; s32 f434; f32 f438; f32 f43C; };
+typedef void (*OnOffPoseFn)(Arr63* obj, Vec02* out, s32 a, s32 b, s32 c, s32 d, f32* angle);
+void ConvertOffsetToCylindrical(void* camera, Vec02* point, f32* a, f32* b, f32* c);
+void ComputePolarOffset(Vec02* out, f32 a, f32 b, f32 c);
+void RequestCameraSnap(Camera* camera, s32 mode);
+void func_00145610(Camera* camera, Vec02* point, f32 a, f32 b);
+void* GetOnOffObjectBlock(void* self);
+void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye);
+void func_00143418(Camera* camera, s32 target, CameraPlacement* out, f32 t);
+
+void TransformPointBetweenFrames(void* a0, OnOffObject* a1, void* a2, FacePoint* a3);
+extern f32 g_gameClock[];
+void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
+
+void func_001E2E68(OnOffCameraController* self, OnOffObject* object)
+{
+    OnOffCameraView* view = (OnOffCameraView*)self;
+    CameraPlacement place;
+    Vec02 blended;
+    Vec02 here;
+    Vec02 sum;
+    Vec02 polar;
+    Camera* cam = self->owner;
+    self->active24 = 1;
+    self->ptr = object;
+    s32 target = *(s32*)((u8*)cam + 0x3DC);
+    void* block = GetOnOffObjectBlock(object);
+    func_00143418(cam, target, &place, 0.0f);
+    BlendOnOffCameraPoint(block, &place, &blended, 0);
+    if (object != 0) {
+        if (object->obj != 0) {
+            TransformPointBetweenFrames(0, object, &blended, (FacePoint*)&here);
+            OnOffPoseFn fn = *(OnOffPoseFn*)(*(u8**)object->obj + 0x28);
+            if (fn != 0) {
+                fn(object->obj, &here, 0, 0, 0, 0, &object->angle3A0);
+            }
+        } else if (object->f38C != 0) {
+            func_001E30E8(self, &place);
+        }
+        BlendOnOffCameraPoint(block, &place, &blended, object);
+    }
+    Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(*(Vec02*)((u8*)g_camera + 0x270)));
+    ConvertOffsetToCylindrical((u8*)cam + 0x40, &sum, &view->f0C, &view->f10, &view->f14);
+    f32 reach = Fpu::Sqrt(view->f10 * view->f10 + view->f14 * view->f14);
+    f32 scale = (reach - *(f32*)((u8*)cam + 0x1E4)) / reach;
+    f32 lateral = view->f10 * scale;
+    f32 radial = view->f14 * scale;
+    view->f14 = radial;
+    view->f10 = lateral;
+    ComputePolarOffset(&polar, view->f0C, lateral, radial);
+    Vu0::Q(view->v50) = Vu0::Add(Vu0::Q(sum), Vu0::Q(polar));
+    view->f20 = 0;
+    if (object != 0 && ((OnOffEventObject*)object)->f434 != 0) {
+        RequestCameraSnap(cam, 0);
+    }
+    view->f60 = g_gameClock[1];
+    view->f40 = g_gameClock[1];
+    view->f30 = g_gameClock[1] - 10.0f;
+    view->f28 = 0;
+    if (object != 0) {
+        f32 fov = ((OnOffEventObject*)object)->f438;
+        if (fov != 0.0f) {
+            ((OnOffEventObject*)object)->f43C = g_camera->f1C8;
+            g_camera->f1C8 = fov;
+        }
+    }
+    func_00145610(cam, &sum, *(f32*)((u8*)block + 0x58), *(f32*)((u8*)block + 0x5C));
+}
 
 void DeactivateOnOffCameraController(OnOffCameraController* self)
 {

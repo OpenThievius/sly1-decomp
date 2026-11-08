@@ -25,7 +25,9 @@
 //   writes (Dot's 1.0) is a second output.
 // - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
 //   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
-//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat. The word is the
+//   operand itself, which reload loads for the qmtc2: into the register of an address that dies
+//   there (lw s0,0(s0)), or a reload register (docs/TOOLCHAIN.md, "Reloads and stores").
 // - A value retail handles in GPRs (a vector moved there with qmfc2 or lq, floats with mfc1, the
 //   MMI pextlw, pextuw, pcpyld, pcpyud, prot3w, then sq or qmtc2) goes in and out as "r": the
 //   compiler makes the moves and the stores, and the helper holds only the MMI instructions
@@ -54,7 +56,11 @@ struct Vu0 {
     // v = x, stored where v is. Q(v) = x stores through the address Q returns, held in a
     // register; when the local is also passed by address after a call, CSE keeps that address
     // in a callee-saved register, where retail forms it again (addiu a1, sp, n) for the call.
-    // Set's store is addressed from the frame and leaves nothing to keep (func_001BC828).
+    // Set's store is addressed from the frame and leaves nothing to keep in func_001BC828, but
+    // Set takes v by reference too: after inlining, the address can sit in a pseudo CSE reuses for
+    // a later &v passed to a call (a saved register, 16 more bytes of frame). Writing
+    // `*(u128*)&v = x` at the use addresses the frame directly and gives retail's fresh addiu
+    // (func_00126DE8, func_0015BD48, func_0015AF50, func_00189D38).
     template <class T> static void Set(T& v, u128 x) { *(u128*)&v = x; }
 
     // (0, 0, 0, 0): vsub.xyzw r, vf0, vf0.
@@ -109,10 +115,14 @@ struct Vu0 {
 
     // A float in memory into the x of a VU0 register: qmtc2 of its bits, which the compiler
     // loads with lw (FromFloat's operand would be loaded into an FPR and moved with mfc1).
+    // "rV": the memory reference stays the asm's operand until reload ('V' admits memory
+    // before it), and reload, finding it offsettable, loads it into a GPR for "r"; a plain "r"
+    // loads it into a pseudo of its own, which local allocation never gives the dying address's
+    // register.
     static u128 FromFloatAt(const f32& f)
     {
         u128 r;
-        __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(*(const u32*)&f));
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(*(const u32*)&f));
         return r;
     }
 
@@ -158,6 +168,18 @@ struct Vu0 {
         return r;
     }
 
+    // The x of a VU0 register as a float, qmfc2 and mtc1 in one sequence through a GPR of the
+    // compiler's choosing: retail's mtc1 follows the qmfc2 at once even where the scheduler
+    // has a store ready for the slot between them, which ToFloat's separate mtc1 lets it take
+    // (func_00187A88: the difference's sqc2 after the squared distance's mtc1).
+    static f32 ToFloatNow(u128 a)
+    {
+        f32 r;
+        u32 t;
+        __asm__("qmfc2 %1, %2\n\tmtc1 %1, %0" : "=f"(r), "=r"(t) : "j"(a));
+        return r;
+    }
+
     // The x of a VU0 register as the bits of a float: qmfc2 into a GPR, which retail stores
     // with sw straight to memory (ToFloat's f32 goes on to an FPR: mtc1, then swc1).
     static u32 ToBits(u128 a)
@@ -165,6 +187,17 @@ struct Vu0 {
         u32 r;
         __asm__("qmfc2 %0, %1" : "=r"(r) : "j"(a));
         return r;
+    }
+
+    // The x of a VU0 register stored to a word in memory (a float, or its bits): sw of the low word of the vector in
+    // a GPR. The vector goes in as "r", so the qmfc2 that brings it there is the compiler's: a
+    // reload, whose GPR is taken after every pseudo has its register (func_001DAA18's length
+    // loop: a1 after the loop's v0, v1 and a0), where ToBits' result is a pseudo of its own that
+    // the local allocator gives the first free one (v0). The store is the helper's: the low
+    // word of a 128-bit GPR as a u32 is a truncation, which the compiler sign-extends first.
+    template <class T> static void StoreX(T& dst, u128 a)
+    {
+        __asm__("sw %1, %0" : "=m"(dst) : "r"(a));
     }
 
     // The y of a vector in a GPR as a float: prot3w r, a (the words turned to y, z, x, w).
@@ -270,13 +303,16 @@ struct Vu0 {
     }
 
     // a + b * s.x + c * t.x: vadda.xyzw ACC, a, vf0 (a into ACC, as MulAddX); vmaddax.xyzw
-    // ACC, b, s.x; vmaddx.xyzw. The weights are Scalars (or ScalarAts). Listed c first: where
-    // all die there, retail's result takes c's register (func_00198BD8).
+    // ACC, b, s.x; vmaddx.xyzw. The weights are Scalars (or ScalarAts). The inputs in their own
+    // order: the result takes the first that is local to the block and dies there, a's where a
+    // is loaded for the sum (func_001BBEB8, func_0017E3C8), c's where a and b come from earlier
+    // blocks (func_00198BD8). A tie to a ("+j") doubles a's references and swaps a's and b's
+    // registers; where they still differ, look at the allocation around it (docs/TOOLCHAIN.md).
     static u128 MulAddX2(u128 a, u128 b, u128 s, u128 c, u128 t)
     {
         u128 r;
-        __asm__("vadda.xyzw ACC, %2, vf0\n\tvmaddax.xyzw ACC, %3, %4x\n\tvmaddx.xyzw %0, %1, %5x"
-                : "=j"(r) : "j"(c), "j"(a), "j"(b), "j"(s), "j"(t));
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddx.xyzw %0, %4, %5x"
+                : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t));
         return r;
     }
 
@@ -326,11 +362,41 @@ struct Vu0 {
         return Sqrt(Dot(v, v));
     }
 
-    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001.
+    // Dot of one vector with itself, the vector a single input: vmul.xyz r, v, v. Given as one
+    // operand, v takes another register than Dot(v, v) gives it, and the 1.0 the other way
+    // round: retail's vf3 for v and vf2 for 1.0 in func_001EF768.
+    static u128 SelfDot(u128 v)
+    {
+        u128 r, one;
+        __asm__("vmul.xyz %0, %2, %2\n\tvaddw.x %1, vf0, vf0w\n\tvadday.x ACC, %0, %0y\n\tvmaddz.x %0, %1, %0z"
+                : "=j"(r), "=j"(one) : "j"(v));
+        return r;
+    }
+
+    // The length of v's xyz through SelfDot: v a single input to the dot (func_001EF768).
+    static u128 SelfLength(u128 v)
+    {
+        return Sqrt(SelfDot(v));
+    }
+
+    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001. The
+    // length's test reads it through ToFloatMoved: retail's mtc1 follows the qmfc2 at once, which
+    // the compiler's own qmfc2 gives and ToFloat's does not (func_00189B18, func_00189C28).
     static u128 NormalizeOr(u128 v, u128 fallback)
     {
         u128 len = Length(v);
-        if (ToFloat(len) < 0.0001f) {
+        if (ToFloatMoved(len) < 0.0001f) {
+            return fallback;
+        }
+        return DivX(v, len);
+    }
+
+    // NormalizeOr with the length's qmfc2 the compiler's (ToFloatMoved): sched2 then puts the
+    // fallback's lq before the mtc1 of the test, where retail has it (func_001C96D8).
+    static u128 NormalizeOrMoved(u128 v, u128 fallback)
+    {
+        u128 len = Length(v);
+        if (ToFloatMoved(len) < 0.0001f) {
             return fallback;
         }
         return DivX(v, len);
@@ -403,6 +469,19 @@ struct Vu0 {
         __asm__("vmulax.xyz ACC, %1, %5x\n\tvmadday.xyz ACC, %2, %5y\n\tvmaddaz.xyz ACC, %3, %5z\n\t"
                 "vmaddx.xyz %0, %4, %6x"
                 : "=j"(out) : "j"(r[0]), "j"(r[1]), "j"(r[2]), "j"(r[3]), "j"(v), "j"(s));
+        return out;
+    }
+
+    // Transform with the rows as values the caller loads where they are: retail reads a local
+    // matrix's rows from the frame where Transform's reference keeps the matrix's address in a
+    // register once a call has taken it (func_001F2840's inverse and its vertex loop).
+    static u128 TransformRows(u128 r0, u128 r1, u128 r2, u128 r3, u128 v, f32 w)
+    {
+        u128 s = Scalar(w);
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %5x\n\tvmadday.xyz ACC, %2, %5y\n\tvmaddaz.xyz ACC, %3, %5z\n\t"
+                "vmaddx.xyz %0, %4, %6x"
+                : "=j"(out) : "j"(r0), "j"(r1), "j"(r2), "j"(r3), "j"(v), "j"(s));
         return out;
     }
 
@@ -522,6 +601,220 @@ struct Vu0 {
     {
         const u128* r = (const u128*)&m;
         return RotateRows(r[0], r[1], r[2], v);
+    }
+    // A vector as a value of its own type: one u128 in a struct, passed and returned by value.
+    // GCC keeps the struct in a 128-bit register, as it does a u128, and the code comes out the
+    // same; but each inline call that takes or returns one copies it from pseudo to pseudo (movti),
+    // copies CSE does not fold and only the register allocator removes. loop.c counts them, so a
+    // loop over vectors in this form is as big to it as retail's were: big enough that it leaves
+    // the loop's constants and its index multiplication where they are (docs/TOOLCHAIN.md,
+    // "Loops"). In a condition a Vec temporary makes the front end compute the condition as a
+    // value (the temporary's cleanup point) where retail branches on it: Distance keeps its Vecs
+    // in an inline function of its own.
+    struct Vec {
+        u128 q;
+
+        // A 16-aligned, 16-byte object in memory, as a value (lqc2).
+        template <class T> static Vec Of(const T& v)
+        {
+            Vec r;
+            r.q = *(const u128*)&v;
+            return r;
+        }
+
+        static Vec Scalar(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::Scalar(f);
+            return r;
+        }
+
+        static Vec ScalarAt(const f32& f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarAt(f);
+            return r;
+        }
+
+        static Vec Zero()
+        {
+            Vec r;
+            r.q = Vu0::Zero();
+            return r;
+        }
+
+        static Vec FromFloat(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::FromFloat(f);
+            return r;
+        }
+    };
+
+    static Vec Sub(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Sub(a.q, b.q);
+        return r;
+    }
+
+    static Vec Add(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Add(a.q, b.q);
+        return r;
+    }
+
+    static Vec DivX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = DivX(a.q, s.q);
+        return r;
+    }
+
+    static Vec MulX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = MulX(a.q, s.q);
+        return r;
+    }
+
+    static Vec Dot(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Dot(a.q, b.q);
+        return r;
+    }
+
+    static Vec Length(Vec a)
+    {
+        Vec r;
+        r.q = Length(a.q);
+        return r;
+    }
+
+    static Vec DotXY(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = DotXY(a.q, b.q);
+        return r;
+    }
+
+    static Vec Sqrt(Vec a)
+    {
+        Vec r;
+        r.q = Sqrt(a.q);
+        return r;
+    }
+
+
+    static Vec Min(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Min(a.q, b.q);
+        return r;
+    }
+
+    static Vec Max(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Max(a.q, b.q);
+        return r;
+    }
+
+    static Vec Cross(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Cross(a.q, b.q);
+        return r;
+    }
+
+
+    static Vec MulAddX(Vec a, Vec b, Vec s)
+    {
+        Vec r;
+        r.q = MulAddX(a.q, b.q, s.q);
+        return r;
+    }
+
+    static Vec NormalizeOr(Vec v, Vec fallback)
+    {
+        Vec r;
+        r.q = NormalizeOr(v.q, fallback.q);
+        return r;
+    }
+
+    static Vec MulXSum(Vec a, Vec s, Vec b, Vec t)
+    {
+        Vec r;
+        r.q = MulXSum(a.q, s.q, b.q, t.q);
+        return r;
+    }
+
+    static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
+    {
+        Vec r;
+        r.q = MulXSum3(a.q, s.q, b.q, t.q, c.q, u.q);
+        return r;
+    }
+
+    template <class M> static Vec Rotate(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = Rotate(m, v.q);
+        return r;
+    }
+
+    static Vec MulAddX2(Vec a, Vec b, Vec s, Vec c, Vec t)
+    {
+        Vec r;
+        r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    template <class M> static Vec RotateUntied(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateUntied(m, v.q);
+        return r;
+    }
+
+
+    template <class M> static Vec RotateTransposed(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateTransposed(m, v.q);
+        return r;
+    }
+
+    static f32 ToFloatMoved(Vec a)
+    {
+        return ToFloatMoved(a.q);
+    }
+
+    static f32 ToFloatY(Vec a)
+    {
+        return ToFloatY(a.q);
+    }
+
+    static f32 ToFloatZ(Vec a)
+    {
+        return ToFloatZ(a.q);
+    }
+
+
+
+
+
+    static f32 ToFloat(Vec a)
+    {
+        return ToFloat(a.q);
+    }
+
+    // The distance between two points in memory: the Length of their difference, as a float.
+    template <class T> static f32 Distance(const T& a, const T& b)
+    {
+        return ToFloat(Length(Sub(Vec::Of(a), Vec::Of(b))));
     }
 };
 

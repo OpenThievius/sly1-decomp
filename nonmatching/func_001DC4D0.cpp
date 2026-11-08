@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 520/576 (90.3%), checked 2026-11-07
-// NEAR: the same instructions, size and branches; differs in three places: skip and the result cursor are in s1/s2 the other way round (retail gives the object to skip s1 and the cursor s2), the count pointer is spilled at sp+0x20 (retail: sp+0x24, so a 4-byte slot at +0x20 is taken in retail), and the walk frame's push to g_activeListFrames is scheduled before the arguments of AllocateBackMemory in ours and in its delay slot in retail.
+// BYTES 552/576 (95.8%), checked 2026-11-08
+// NEAR: the size of the allocation read before the walk's frame is built (this brings the push of the frame into the call's delay slot, as retail's): still differs: skip and the result cursor in s1/s2 the other way round (retail gives the object to skip s1 and the cursor s2), and the count pointer spilled at sp+0x20 (retail: sp+0x24, so a 4-byte slot at +0x20 is taken in retail). Tried: no goto, the cursor declared before the walk.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -57,8 +57,9 @@ void* AllocateBackMemory(s32 size);
 
 void func_001DC4D0(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
 {
+    s32 size = *(s32*)((u8*)world + 0x34) * 4;
     SphereWalker walk((List01*)((u8*)world + 0x6C));
-    Collider** cursor = (Collider**)AllocateBackMemory(*(s32*)((u8*)world + 0x34) * 4);
+    Collider** cursor = (Collider**)AllocateBackMemory(size);
     *out = cursor;
     if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
         goto done;

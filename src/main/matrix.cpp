@@ -230,7 +230,57 @@ void GetMatrixRotationCosine(f32* p)
 	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
 
-INCLUDE_ASM(func_00188D28);
+f32 Arccosine(f32 x);
+
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
+{
+    f32 (*e)[4] = (f32 (*)[4])m;
+    f32* v = &axis->x;
+    f32 c = (e[0][0] + e[1][1] + e[2][2] - 1.0f) * 0.5f;
+    if (0.999999f < c) {
+        *angle = 0.0f;
+        Vu0::Q(*axis) = Vu0::FromFloats(1.0f, *angle, *angle);
+        return;
+    }
+    f32 rem = 1.0f;
+    f32 k = rem - c;
+    s32 i;
+    for (i = 0; i < 2; i++) {
+        f32 d = (e[i][i] - c) / k;
+        f32 a = __builtin_fabsf(d);
+        if (rem < a) a = rem;
+        else if (a < 0.0f) a = 0.0f;
+        v[i] = Fpu::Sqrt(a);
+        rem -= a;
+    }
+    v[2] = Fpu::Sqrt(rem);
+    if (c < -0.9999f) {
+        *angle = 3.1415927f;
+        f32 x = v[0];
+        f32 y = v[1];
+        f32 z = v[2];
+        if (x > y) {
+            if (x > z) {
+                if (e[0][1] < 0.0f) v[1] = -y;
+                if (e[0][2] < 0.0f) v[2] = -v[2];
+            } else {
+                if (e[2][0] < 0.0f) v[0] = -x;
+                if (e[2][1] < 0.0f) v[1] = -v[1];
+            }
+        } else if (y > z) {
+            if (e[1][0] < 0.0f) v[0] = -x;
+            if (e[1][2] < 0.0f) v[2] = -v[2];
+        } else {
+            if (e[2][0] < 0.0f) v[0] = -x;
+            if (e[2][1] < 0.0f) v[1] = -v[1];
+        }
+    } else {
+        *angle = Arccosine(c);
+        if (e[1][0] > e[0][1]) v[2] = -v[2];
+        if (e[2][0] < e[0][2]) v[1] = -v[1];
+        if (e[2][1] > e[1][2]) v[0] = -v[0];
+    }
+}
 
 LINKER_REMNANT(func_00188FD0);
 
@@ -472,11 +522,70 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
 }
 
-INCLUDE_ASM(func_00189B18);
+extern const Vec02 g_unitXVector;
+void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
 
-INCLUDE_ASM(func_00189C28);
+void func_00189B18(Vec02* x, Vec02* hint, Mat02* out)
+{
+    Vec02 c;
+    out->r[0] = *x;
+    Vu0::Q(out->r[0]) = Vu0::NormalizeOr(Vu0::Q(out->r[0]), Vu0::Q(g_unitXVector));
+    u128 cr = Vu0::Cross(Vu0::Q(out->r[0]), Vu0::Q(*hint));
+    Vu0::Q(out->r[2]) = cr;
+    Vu0::Q(c) = cr;
+    u128 len = Vu0::Length(cr);
+    Vu0::Q(out->r[2]) = Vu0::DivX(cr, len);
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        ComputeUnitPerpendicular(&out->r[0], &out->r[2]);
+    }
+    Vu0::Q(out->r[1]) = Vu0::Cross(Vu0::Q(out->r[2]), Vu0::Q(out->r[0]));
+}
 
-INCLUDE_ASM(func_00189D38);
+void func_00189C28(Vec02* x, Vec02* hint, Mat02* out)
+{
+    Vec02 c;
+    out->r[0] = *x;
+    Vu0::Q(out->r[0]) = Vu0::NormalizeOrMoved(Vu0::Q(out->r[0]), Vu0::Q(g_unitXVector));
+    u128 cr = Vu0::Cross(Vu0::Q(*hint), Vu0::Q(out->r[0]));
+    Vu0::Q(out->r[1]) = cr;
+    Vu0::Q(c) = cr;
+    u128 len = Vu0::Length(cr);
+    Vu0::Q(out->r[1]) = Vu0::DivX(cr, len);
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        ComputeUnitPerpendicular(&out->r[0], &out->r[1]);
+    }
+    Vu0::Q(out->r[2]) = Vu0::Cross(Vu0::Q(out->r[0]), Vu0::Q(out->r[1]));
+}
+
+// The rotation that turns the direction of from into that of to: about their cross product, by
+// the angle whose cosine is their dot (both made unit, or +z when too short). When the two are
+// parallel the axis is x cross from, or y cross from. The axis is written at its own address
+// (*(u128*)&axis): through Vu0::Q or Set its address would stay in a saved register for the last
+// call, where retail forms it again. Its length is a float the compiler keeps in the GPR of its
+// qmfc2, which the divide's Scalar moves back with qmtc2.
+void BuildShortestArcRotation(void* fromp, void* top, void* outp)
+{
+    Vec02 a = *(Vec02*)fromp;
+    Vec02 b = *(Vec02*)top;
+    Vec02 axis;
+    Vu0::Q(a) = Vu0::NormalizeOr(Vu0::Q(a), Vu0::Q(*(Vec02*)g_unitZVector));
+    u128 bn = Vu0::NormalizeOr(Vu0::Q(b), Vu0::Q(*(Vec02*)g_unitZVector));
+    Vu0::Set(b, bn);
+    *(u128*)&axis = Vu0::Cross(Vu0::Q(a), bn);
+    f32 len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+    if (len < 0.0001f) {
+        *(u128*)&axis = Vu0::Cross(Vu0::Q(g_unitXVector), Vu0::Q(a));
+        len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+        if (len < 0.0001f) {
+            *(u128*)&axis = Vu0::Cross(Vu0::Q(*(Vec02*)g_unitYVector), Vu0::Q(a));
+            len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+        }
+    }
+    u128 cosine = Vu0::Dot(Vu0::Q(a), Vu0::Q(b));
+    *(u128*)&axis = Vu0::DivX(*(u128*)&axis, Vu0::Scalar(len));
+    f32 angle = Arccosine(Vu0::ToFloatMoved(cosine));
+    BuildAxisAngleMatrix(&axis.x, (Mat4*)outp, angle);
+}
 
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
@@ -491,7 +600,14 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-INCLUDE_ASM(func_0018A008);
+void BuildScaleAboutFrame(void* point, void* frame, Quad16* scale, void* out);
+
+void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
+{
+    Quad16 scale;
+    Vu0::Q(scale) = Vu0::Splat(s);
+    BuildScaleAboutFrame(point, 0, &scale, out);
+}
 
 INCLUDE_ASM(func_0018A040);
 

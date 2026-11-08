@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 976/972, checked 2026-11-07
+// SIZE 976/972, checked 2026-11-08
 #include "common.h"
 #include "switched_collider.h"
 #include "gauge_mode_object.h"
@@ -13,7 +13,7 @@
 #include "screen_element.h"
 #include "placed_object.h"
 #include "asm_func.h"
-// NEAR (2026-11-08, worker vu0w4-e1): the frame, the calls, the two RotateTransposed sequences, the
+// NEAR (2026-11-08, night-sizex1): mode 0's two maxima as MaxF(0.0f, c) (an inline returning a >? b: retail's constant-first max.s into the right register) and mode 1's MaxF(1.0f, |a0| + |b0|) (100 lines from 118). Still 4 bytes long: in mode 1 retail's first clamp leaves its result in f1 and b in f3, so the second clamp's zero (f1) forces the result's store before it and its bc1t/bc1f take the r = lo and r = v moves in their slots; here b is f1 and the result f3, the store goes into the clamp's delay slot and costs a b. The early-return clamp compiles the same. Earlier: (2026-11-08, worker vu0w4-e1): the frame, the calls, the two RotateTransposed sequences, the
 // three weight groups and the clamps' branch layouts are retail's (tools/regdiff.py: code 94.7%, only
 // the float registers and the order of a few float operations differ). Open: retail numbers the
 // mode-0 clamp's registers one higher (the quotient in f1, the bounds in f4 and f0, the result in f2),
@@ -35,6 +35,7 @@ extern f32 D_00263DFC;
 extern f32 D_00263E00;
 extern f32 D_00263AC0;
 
+static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 static inline f32 ClampTo(f32 v, f32 lo, f32 hi)
 {
     f32 r;
@@ -66,8 +67,8 @@ void func_0017AF38(GaugeModeObject* self)
         Vu0::Q(local2) = Vu0::RotateTransposed(rot, Vu0::Q(vel));
         if (self->mode == 0) {
             f32 c = ClampTo(local2.x / D_00263DF8, -1.0f, 1.0f);
-            f32 a = c >? 0.0f;
-            f32 b = -c >? 0.0f;
+            f32 a = MaxF(0.0f, c);
+            f32 b = MaxF(0.0f, -c);
             f32 rest = 1.0f - a - b;
             f32 k = 1.0f - D_00263AC0;
             self->wA[3].w = D_00263AC0;
@@ -78,7 +79,7 @@ void func_0017AF38(GaugeModeObject* self)
         } else {
             f32 a0 = ClampTo(local2.x / D_00263DFC, 0.0f, 1.0f);
             f32 b0 = ClampTo(local2.y / D_00263E00, -1.0f, 1.0f);
-            f32 s = 1.0f / (1.0f >? (__builtin_fabsf(a0) + __builtin_fabsf(b0)));
+            f32 s = 1.0f / MaxF(1.0f, __builtin_fabsf(a0) + __builtin_fabsf(b0));
             s = s * (1.0f - D_00263AC0);
             f32 b = b0 * s;
             f32 a = a0 * s;

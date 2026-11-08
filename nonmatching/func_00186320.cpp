@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 308/300, checked 2026-11-07
-// NEAR: structure and vector code match; retail ends with qmfc2 v0 and sw v0,0(a4) (ToBits) where ToFloat gives mtc1 and swc1, issues mtc1 f1 before the vsub and sqc2 of the edge after the compare, and divides into f1 (the length's register: div.s f1,f0,f1, clamped value in f1) where ours divides into f0.
+// BYTES 270/300 (90.0%), checked 2026-11-08
+// NEAR: night-size4: StoreX for the distance (retail's qmfc2 and sw) and ToFloatMoved for len2 (the mtc1 before the vsub, the sqc2 in the branch's slot) give retail's size and order. Still differs in registers only: retail keeps a in vf3 and e in vf5 (ours vf2 and vf4), divides r into len2's f1 (ours the dot's f0, which moves the 1.0's and the stores' registers), and the square root into vf1 (ours vf2). A Vec sum and r divided in its own statement: no better.
 // In the context of its file, src/main/collider_contact.cpp.
 #include "common.h"
 #include "asm_func.h"
@@ -131,7 +131,7 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
     Vec02 e;
     Vec02 d;
     Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 len2 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
+    f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
     u128 sum;
     if (len2 < 0.0001f) {
@@ -151,7 +151,7 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
         }
         sum = Vu0::Dot(Vu0::Q(d), Vu0::Q(d));
     }
-    *dist = Vu0::ToFloat(Vu0::Sqrt(sum));
+    Vu0::StoreX(*dist, Vu0::Sqrt(sum));
 }
 
 extern s32 g_vif0Channel;

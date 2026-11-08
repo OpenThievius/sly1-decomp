@@ -224,7 +224,7 @@ void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, 
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
 // func_0019B378.
 f32 D_0026A910 = 100.0f;
-s32 D_0026A914 = 0;
+f32 D_0026A914 = 0.0f;
 ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
 ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
 ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
@@ -305,7 +305,56 @@ void StartObjectSet(ObjectSet* self)
     }
 }
 
-INCLUDE_ASM(func_00198BD8);
+void UpdateCollider(void* self);
+void* GetActiveSwitchedCollider();
+
+// The part of the active collider's block at 0x580 that UpdateObjectSet reads.
+struct ActiveReach {
+    s32 on;                 // 0x00
+    u8 pad04[0x14 - 0x04];
+    f32 reach;              // 0x14
+    PlacedObject* target;   // 0x18
+};
+
+// Each frame while the active collider is near: the set moves to a point 100 out from its
+// target, on the ground away from the set.
+void UpdateObjectSet(ObjectSet* self)
+{
+    Vec02 d;
+    UpdateCollider(self);
+    s32 held = self->f59C;
+    self->f59C = 0;
+    SwitchedCollider* a = (SwitchedCollider*)GetActiveSwitchedCollider();
+    if (a == 0) {
+        return;
+    }
+    if (((SlotTest*)self->desc)[76](self) != 1) {
+        return;
+    }
+    ActiveReach* r = (ActiveReach*)&a->f580;
+    if (r->on == 0) {
+        return;
+    }
+    if (r->target == 0) {
+        return;
+    }
+    if (held == 0) {
+        f32 reach = r->reach + self->f550;
+        u128 e = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
+        s32 far = reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(e, e));
+        if (far) {
+            return;
+        }
+    }
+    self->desc->m15(self, 0);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
+    d.z = 0.0f;
+    u128 base = Vu0::Q(r->target->v150);
+    u128 out = Vu0::ScalarAt(D_0026A910);
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(D_0026A914));
+    self->desc02()->m20(self, &d);
+    ((SlotFn*)self->desc)[77](self);
+}
 
 void CollectObjectSet(ObjectSet* self)
 {
@@ -669,7 +718,81 @@ s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
     return 1;
 }
 
-INCLUDE_ASM(func_00199D08);
+struct SpinFrame4 {
+    Vec02 r[4];
+};
+
+struct SpinKeyframe {
+    u8 pad00[0x40];
+    u8 from[0x10];          // 0x40
+    u8 to[0x10];            // 0x50
+};
+
+void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
+void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
+void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
+void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
+void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in);
+void func_00125C90(NumberedItem* self, void* a, SpinFrame4* m);
+
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* rows = (const u128*)&a;
+    u128 a0 = rows[0];
+    u128 a1 = rows[1];
+    u128 a2 = rows[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    *out = r;
+}
+
+// Turns the item by its spin and builds its transform for the frame, with the keyframe its
+// phase picks in the ring of its objects.
+void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
+{
+    Mat02 axis;
+    Mat02 turned;
+    SpinFrame4 base;
+    Vec02 unused;
+    if (self->flags & ((u64)0x8000 << 17)) {
+        return;
+    }
+    self->f5B8 = self->f5B8 + self->f5B4 * g_gameClock[2];
+    BuildAxisAngleMatrix(&g_unitZVector, self->f5B8, &axis);
+    MulRotation(&turned, *(const Mat02*)((u8*)self + 0x110), axis);
+    if (self->parent != 0) {
+        RotateMatrixUpright(&turned, 0, &turned);
+    }
+    BuildPlacedObjectTransform(self, a2, &base);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &turned, &base);
+    if (self->n5AC > 0) {
+        SpinFrame4 key;
+        SpinFrame4 product;
+        self->f5A4 = self->f5A4 + g_gameClock[2];
+        while (self->f5A8 + self->f5A8 <= self->f5A4) {
+            self->f5A4 = self->f5A4 - (self->f5A8 + self->f5A8);
+        }
+        s32 index = (s32)((f32)self->n5AC * self->f5A4 / self->f5A8);
+        if (index >= self->n5AC) {
+            s32 twice = self->n5AC * 2;
+            s32 m = index + 1;
+            index = twice - m;
+        }
+        SpinKeyframe* k = ((SpinKeyframe**)self->f5B0)[index];
+        BuildMatrixFromRotationAndTranslation(k->from, k->to, &key);
+        MultiplyMatrices(&product, &base, &key);
+        base = product;
+    }
+    func_00125C90(self, a1, &base);
+}
 
 void FlagAllNumberedItems(void)
 {
@@ -1091,7 +1214,36 @@ void CopyObjectGatherer(ObjectGatherer* self)
     self->q600 = tmp;
 }
 
-INCLUDE_ASM(func_0019B298);
+void StepCollider(Collider* self, f32 t);
+void SteerColliderTowardRotation(Collider* self, void* a, s32 b, void* table, s32 c, f32 t);
+void TurnColliderTowardRotation(Collider* self, f32 scale, void* basis, void* data);
+void BuildBasisFromX(void* self, void* value);
+
+void StepObjectGatherer(ObjectGatherer* self, f32 dt)
+{
+    Vec02 delta;
+    Mat02 basis;
+    Vec02 target;
+    StepCollider(self, dt);
+    switch (self->state) {
+    case 1:
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
+        delta.z = 0.0f;
+        BuildBasisFromX(&delta, &basis);
+        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        break;
+    case 2:
+        TransformPointBetweenFrames(*(void**)((u8*)self->f660 + 0x18), 0, (u8*)self->f660 + 0x40, &target);
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+        delta.z = 0.0f;
+        BuildBasisFromX(&delta, &basis);
+        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        break;
+    default:
+        SteerColliderTowardRotation(self, 0, 0, (void*)&D_00248D30, (s32)self->p214, dt);
+        break;
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024C8D0);
 INCLUDE_RODATA(jtbl_0024C8F0);
@@ -1165,7 +1317,77 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
     return 1;
 }
 
-INCLUDE_ASM(func_0019BE80);
+void* GetActiveSwitchedCollider();
+void MeasurePointToSegment(void* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+
+// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
+// (list_iter.h) and each step reads the next item through the link.
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+
+template <class T> struct NextInList {
+    static T* Of(ListFrame* it)
+    {
+        T* obj = *(T**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct GatherCandidate {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 pos;              // 0x40
+};
+
+// Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
+// the segment to it, and keeps it in f660.
+void func_0019BE80(ObjectGatherer* self)
+{
+    ListFrame frame;
+    Vec02 point;
+    f32 t;
+    f32 dist;
+    f32 bestDist;
+    f32 bestT;
+    f32 bestLen;
+    GatherCandidate* best;
+    if (GetActiveSwitchedCollider() == 0) {
+        return;
+    }
+    best = 0;
+    bestDist = 0.0f;
+    BeginListWalk::Of(&frame, &self->world->list1C6C);
+    GatherCandidate* node;
+    while ((node = NextInList<GatherCandidate>::Of(&frame)) != 0) {
+        TransformPointBetweenFrames(node->frame, 0, &node->pos, (Quad4*)&point);
+        f32 reach = *(f32*)((u8*)self + 0x624);
+        f32 reach2 = reach * reach;
+        u128 off = Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140));
+        s32 far = reach2 < Vu0::ToFloatMoved(Vu0::Dot(off, off));
+        if (!far) {
+            MeasurePointToSegment((u8*)GetActiveSwitchedCollider() + 0x140, &self->v140, &point, &t, &dist);
+            f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))));
+            if (bestDist < dist || (t < 0.0001f && bestT < 0.0001f && len < bestLen)) {
+                bestT = t;
+                bestDist = dist;
+                best = node;
+                bestLen = len;
+            }
+        }
+    }
+    self->f660 = best;
+    g_activeListFrames = frame.prev;
+}
 
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
@@ -1468,7 +1690,61 @@ u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
     }
 }
 
-INCLUDE_ASM(func_0019D0E0);
+// Bisects the segment from self's point at 0x90 to *from for the last place func_0019CF68 accepts
+// (ten halvings); the point, what it returned there and the distance from *from, into the
+// outputs that are not 0.
+void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
+{
+    u8* self = (u8*)a;
+    Vec02* from = (Vec02*)b;
+    Vec02* out = (Vec02*)c;
+    s32* hit = (s32*)d;
+    f32* dist = (f32*)e;
+    Vec02 point;
+    Vec02 best;
+    s32 first = (s32)func_0019CF68((C8B*)self, 0, from);
+    s32 found;
+    if (first != 0) {
+        if (out != 0) {
+            *out = *from;
+        }
+        if (hit != 0) {
+            *hit = first;
+        }
+        if (dist != 0) {
+            *dist = 0.0f;
+        }
+        return;
+    }
+    found = 0;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    for (s32 i = 9; i >= 0; i--) {
+        f32 t = (lo + hi) * 0.5f;
+        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)(self + 0x90)), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
+        s32 r = (s32)func_0019CF68((C8B*)self, 0, &point);
+        if (r != 0) {
+            found = r;
+            lo = t;
+            best = point;
+        } else {
+            hi = t;
+        }
+    }
+    if (found == 0) {
+        best = *(Vec02*)(self + 0x70);
+        found = (s32)func_0019CF68((C8B*)self, 0, &best);
+    }
+    if (out != 0) {
+        *out = best;
+    }
+    if (hit != 0) {
+        *hit = found;
+    }
+    if (dist != 0) {
+        Vu0::StoreX(*dist, Vu0::Length(Vu0::Sub(Vu0::Q(*from), Vu0::Q(best))));
+    }
+}
 
 void TrackAimTargetObject(Player* self, void* x, void* y)
 {

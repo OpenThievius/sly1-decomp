@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 259/292 (88.7%), checked 2026-11-07
+// BYTES 259/292 (88.7%), checked 2026-11-08
 #include "common.h"
 
 // NEAR: every instruction and offset matches; the allocation of the loop variables differs (retail: self in s5, key in s6, the base in s2, i+1 in s3; ours: key in s2, self in s6, base in s3)
+// Tried (2026-11-08, night-close9): the entries as 12-byte struct pointers give retail's self in s5 but fold the first count to bytes; written to keep the division, the allocation returns to this one.
 
 void MoveMemory(void* dst, void* src, s32 bytes);
 

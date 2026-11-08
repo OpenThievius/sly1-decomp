@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 482/492 (98.0%), checked 2026-11-07
+// BYTES 482/492 (98.0%), checked 2026-11-08
 // NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: retail loads the
 //       packet's id first and stores the client's fields in the order argument, packet, id,
 //       callback, and tests mode & 2 into $a0; ours stores the callback before loading the id,
 //       and the test lands in $v1. Tried: every order of the client's four stores and of the
 //       packet's last three, the callback argument as void* (worse), the tails rearranged until
 //       retail's branches matched.
+// permute.py --auto (2026-11-08, night-orders): 5 runs of 7/2/4/2/2 lines (5070 orders): best 10 bytes differ, as it stands.
 #include "common.h"
 
 struct Client_1F7BE8;

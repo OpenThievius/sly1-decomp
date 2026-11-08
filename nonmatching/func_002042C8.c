@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 480/484, checked 2026-11-07
-/* NEAR: the pad library's slot opener (src/lib/pad.c, where it is INCLUDE_ASM). All but the
- * tail matches; retail stores the first DMA word right after marking the slot open and before
- * the other fields, and loads the reply's result last; here the compiler sinks that store to
- * the end. Tried: a slot pointer, indexed stores, a local for the DMA words, the stores through
- * the slot's field (about ten compiles). */
+// BYTES 454/484 (93.8%), checked 2026-11-08
+/* NEAR: the pad library's slot opener (src/lib/pad.c, where it is INCLUDE_ASM). The size is
+ * retail's and all but the tail matches: with the slot's stores in this order (tools/permute.py's
+ * best of the seven lines) only their order and registers differ. Retail stores open, the first
+ * DMA word, f0C, f08, the buffer and the DMA words' address, in the order of the C in the
+ * earlier attempt, which put the DMA word's store last and took 4 more bytes. Tried: a slot
+ * pointer, indexed stores, a local for the DMA words, the word stored through the array. */
 #include "common.h"
 
 /* A remote call client: the server it is bound to at +0x24. */
@@ -93,12 +94,12 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
     request->arg10 = (s32)buffer;
     if (CallRemoteService(g_padClients, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
-    g_padSlots[port][slot].open = 1;
     dma = D_0062ABC0[port][slot];
-    dma[0] = 0;
-    g_padSlots[port][slot].f0C = 0;
+    g_padSlots[port][slot].open = 1;
     g_padSlots[port][slot].f08 = request->arg14;
     g_padSlots[port][slot].buffer = buffer;
+    g_padSlots[port][slot].f0C = 0;
     g_padSlots[port][slot].dma = dma;
+    dma[0] = 0;
     return request->result;
 }

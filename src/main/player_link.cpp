@@ -103,7 +103,154 @@ void SyncPlayerTarget(Player* self)
     AddColliderTorque(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
 }
 
-INCLUDE_ASM(func_001CD0C8);
+void GetLinkedObjectHeading(Player* self, f32* out);
+f32 WrapAngle(f32 a);
+void ComputeCameraRelativeStickHeading(Camera* self, void* pad, s32 mode, f32* out);
+f32 ArctangentOfRatio(f32 y, f32 x);
+void SetPlayerState(Player* self, s32 a, s32 b);
+void PlacePlayerOnLinkedObject(Player* self);
+void ClearRootTries(void* self);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
+f32 ClampToMagnitude(f32 a, f32 b);
+extern f32 g_gameTime;
+extern f32 g_gameClock[];
+
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+struct LinkBlend_1CD0C8 { u8 pad0[0x34]; f32 f34; };
+struct LinkRoot_1CD0C8 { s32 pad0; void* root; };
+struct LinkMessage_1CD0C8 { u8 pad0[0x14]; f32 f14; f32 f18; };
+
+void ControlPlayerOnLinkedObject(Player* self, void* pad)
+{
+    Vec02 pos;
+    Vec02 dir;
+    Vec02 local;
+    Mat02 m;
+    f32 stick;
+    s32 toward = 0;
+    s32 away = 0;
+    GetLinkedObjectHeading(self, &self->f638);
+    if (self->f22A8 != 0) {
+        self->f638 = WrapAngle(self->f638 + 3.14159274f);
+    }
+    ComputeCameraRelativeStickHeading(g_camera, pad, 0, &stick);
+    f32 diff = WrapAngle(stick - self->f638);
+    if (0.3f < self->f634) {
+        f32 ad = __builtin_fabsf(diff);
+        if (ad < 1.04719758f) {
+            toward = 1;
+            self->f22A0 = g_gameTime;
+        } else if (2.09439516f < ad) {
+            away = 1;
+            self->f22A0 = g_gameTime;
+        }
+    } else {
+        self->f22A4 = -1;
+    }
+    GetObjectWorldPosition((void*)self->f2204, &pos);
+    Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140)), Vu0::Q(g_unitZVector)));
+    BuildAxisAngleMatrix(&g_unitZVector, self->f638, &m);
+    Vu0::Q(local) = Vu0::RotateTransposed(m, Vu0::Q(dir));
+    f32 angle = WrapAngle(ArctangentOfRatio(local.z, local.x) - 1.57079637f);
+    s32 state = self->f2228;
+    switch (state) {
+    case 0x32:
+        if (away) {
+            state = 0x34;
+        } else if (toward) {
+            if (D_00274D94 < g_gameTime - self->f222C) {
+                self->f22A4 = state;
+                state = 0x33;
+            }
+        } else if (D_00274D9C < g_gameTime - self->f22A0) {
+            state = 0x33;
+        }
+        break;
+    case 0x34:
+        if (toward) {
+            state = 0x32;
+        } else if (away) {
+            if (D_00274D98 < g_gameTime - self->f222C) {
+                self->f22A4 = state;
+                state = 0x33;
+            }
+        } else if (D_00274D9C < g_gameTime - self->f22A0) {
+            state = 0x33;
+        }
+        break;
+    case 0x33:
+        if (toward && self->f22A4 != 0x32) {
+            self->f22A4 = -1;
+            state = 0x32;
+        } else if (away && self->f22A4 != 0x34) {
+            self->f22A4 = -1;
+            state = 0x34;
+        } else if (__builtin_fabsf(angle) < D_00274DA0) {
+            s32 slow = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < D_00274DA8;
+            if (slow) {
+                state = 0x35;
+            }
+        }
+        break;
+    case 0x35:
+        if (toward && self->f22A4 != 0x32) {
+            self->f22A4 = -1;
+            state = 0x32;
+        } else if (away && self->f22A4 != 0x34) {
+            self->f22A4 = -1;
+            state = 0x34;
+        } else if (__builtin_fabsf(angle) > D_00274DA4) {
+            s32 fast = D_00274DAC < Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150)));
+            if (fast) {
+                state = 0x33;
+            }
+        }
+        break;
+    }
+    SetPlayerState(self, 3, state);
+    PlacePlayerOnLinkedObject(self);
+    if (self->f22AC != 0) {
+        ClearRootTries(((LinkRoot_1CD0C8*)self->f22AC)->root);
+    }
+    f32 w0;
+    f32 w1;
+    if (self->f2228 == 0x35) {
+        return;
+    }
+    switch (self->f2228) {
+    case 0x32:
+        w0 = w1 = 1.0f;
+        break;
+    case 0x34:
+        w0 = 1.0f;
+        w1 = 0.0f;
+        break;
+    case 0x33:
+        w0 = 0.0f;
+        w1 = (0.5f < self->f2388) ? 1.0f : 0.0f;
+        break;
+    }
+    self->f238C = ApproachValueWithRamp(self->f238C, w0, g_gameClock[2], D_00274DB0, 0);
+    f32 b = ApproachValueWithRamp(self->f2388, w1, g_gameClock[2], D_00274DC0, 0);
+    self->f2388 = b;
+    f32 a = self->f238C;
+    self->f2360 = a * b;
+    self->f236C = a * (1.0f - b);
+    self->f2378 = 1.0f - a;
+    SetBlendItemWeights(self->f2384, 0xC, 3, &self->f2360);
+    f32 c = ClampBetween(angle / D_00274DCC, -1.0f, 1.0f);
+    ((LinkMessage_1CD0C8*)self->watched2230)->f18 = ClampToMagnitude((((LinkBlend_1CD0C8*)self->f2384)->f34 * (c + 1.0f) * 0.5f - ((LinkMessage_1CD0C8*)self->watched2230)->f14) / g_gameClock[2], D_00274DD0);
+}
 
 void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
 

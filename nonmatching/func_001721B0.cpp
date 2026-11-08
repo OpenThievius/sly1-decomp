@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 678/892 (76.0%), checked 2026-11-07
-// NEAR: wave 4 e3. 892 bytes, same size and frame (0x190); regdiff 'code' 93.7% (209 of 223 words). The player's ramp-up of the cling and spin weights
+// SIZE 888/892, checked 2026-11-08
+// NEAR (night-low1, 2026-11-08): two of the three open points fixed, one instruction short now
+//       (888 of 892 bytes): the spin part's rows read as m90.r[i] (no pointer to m90, so &m90 is
+//       formed afresh for the call, addiu a1, sp, 144, and the rows load from the frame, as
+//       retail's), and the trail flag a switch (case 3, 4, 7: flag = 1; default: 0), which
+//       gives retail's compare tree with li v0, 7 and bne. Still differs: retail forms t1 =
+//       obj + 0xD0 (addiu t1, v1, 208) and loads the product's base rows 1 and 2 through it
+//       (row 0 at 208(v1)); ours folds every row into v1 offsets (the base passed inline or
+//       through a later local: the same); and the 0.0 for the two compares is f12 in retail
+//       (f2 here).
+// Before: wave 4 e3. 892 bytes, same size and frame (0x190); regdiff 'code' 93.7% (209 of 223 words). The player's ramp-up of the cling and spin weights
 //       (blend by the time since f2224, then the ramp of both toward their targets), the transform with the two weights written into it, the trail point (position through the
 //       spin part's frame, the product of the two rotations, the flag set on the parent) and the plain trail point by state, then the two early exits and the placement.
 //       The scalar part is retail's to the byte. Open: (1) retail keeps the constant 0.0 for the two compares in f12 (shared with the else arm's 0.0 argument; a shared local
@@ -87,24 +96,25 @@ void func_001721B0(Player* self, void* a, void* b)
         OrientPlayerSpinPart(self, &m90);
         u8* obj = *(u8**)((u8*)self + 0x23D0);
         Mat02* b3 = (Mat02*)(obj + 0xD0);
-        const u128* rows = (const u128*)&m90;
-        u128 r0 = rows[0];
-        u128 r1 = rows[1];
-        u128 r2 = rows[2];
+        u128 r0 = Vu0::Q(m90.r[0]);
+        u128 r1 = Vu0::Q(m90.r[1]);
+        u128 r2 = Vu0::Q(m90.r[2]);
         Vu0::Q(pos) = Vu0::RotateRows(r0, r1, r2, Vu0::Q(*(Vec02*)(obj + 0x100)));
         Vu0::Q(pos) = Vu0::Add(Vu0::Q(((Collider*)self->f61C)->v140), Vu0::Q(pos));
         MulRotationRows(&turned, m90, *b3);
         AddTrailPoint((u8*)self + 0x1520, &pos, &turned, 0, self->f2430, g_gameClock[2]);
         ((Collider*)self->f61C)->flags |= (0x8000ULL << 17);
     } else {
-        s32 flag = 0;
-        s32 st = self->f2220;
-        if (st >= 3) {
-            if (st < 5) {
-                flag = 1;
-            } else if (st == 7) {
-                flag = 1;
-            }
+        s32 flag;
+        switch (self->f2220) {
+        case 3:
+        case 4:
+        case 7:
+            flag = 1;
+            break;
+        default:
+            flag = 0;
+            break;
         }
         AddTrailPoint((u8*)self + 0x1520, 0, 0, flag, 0.0f, g_gameClock[2]);
     }

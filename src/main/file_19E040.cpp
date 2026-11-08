@@ -43,6 +43,7 @@
 #include "message_body.h"
 #include "asm_func.h"
 #include "mul_rotation.h"
+#include "ramp_profile.h"
 
 void AddCallbackNode(void* world, void* list, void* a, void* b);
 void RemoveCallbackNode(void* world, void* list, void* a, void* b);
@@ -1259,7 +1260,44 @@ INCLUDE_RODATA(D_0024C9B0);
 
 INCLUDE_ASM(func_0019ED58);
 
-INCLUDE_ASM(func_0019F390);
+s32 IsSpinNegligible(void* a);
+s32 IsVelocityNegligible(void* a);
+s32 IsAccelerationNegligible(void* a);
+void TurnMatrixBySpin(void* spin, f32 dt, void* out);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+// The four rows func_0019F390 builds a turn in and TurnMatrixBySpin fills.
+struct EffectFrame {
+    Vec02 r[4];
+};
+
+// An effect's spin and motion over dt: the spin dragged and, when it is not negligible, turned
+// into a rotation the placement (rot50) is multiplied by; then the velocity carried through the
+// spin's frame and the position moved along it.
+void func_0019F390(Effect* self, f32 dt)
+{
+    EffectFrame frame;
+
+    if (IsSpinNegligible(&self->v100) == 0) {
+        f32 len;
+        Mat02 res;
+        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->f110 * dt + 1.0f));
+        len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v100)));
+        if (0.0001f < len) {
+            Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(1.0f / len));
+            BuildAxisAngleMatrix(&frame.r[0], (Mat02*)&frame.r[1], len * dt);
+            MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rot50);
+            *(Mat02*)self->rot50 = res;
+        }
+    }
+    self->q90 = self->q80;
+    if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
+        TurnMatrixBySpin((u8*)self + 0xB0, dt, &frame);
+        u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
+        Vu0::Q(self->qA0) = nv;
+        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), nv, Vu0::Scalar(dt));
+    }
+}
 
 void UpdateEffect(Effect* self)
 {
@@ -1858,7 +1896,37 @@ void func_001A0D60(Effect* self, f32 f)
 }
 
 
-INCLUDE_ASM(func_001A0DF0);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+
+// Draws the effect at its point seen from the camera, turned by the part of the camera's turn the
+// effect's age gives (twice its age times pi about the axis of its parameters, +0x40).
+void DrawCameraSpaceEffect(Effect* self, Camera* cam)
+{
+    Vec02 point;
+    Mat02 view;
+    Mat02 a;
+    Mat02 b;
+    Mat02 out;
+    Vec02 axis;
+    f32 angle;
+    f32 t;
+    Mat02 r2;
+    Mat02 r1;
+    Mat02* c = (Mat02*)self->rot50;
+
+    func_00144128(cam, &self->f120, &point);
+    MultiplyMatrices3x3(c, (Mat02*)&cam->g80, &view);
+    MatrixToAxisAngle(&view, &angle, &axis);
+    t = (g_gameTime - self->start) / self->life;
+    BuildAxisAngleMatrix(&axis, &a, angle * t);
+    BuildAxisAngleMatrix((Vec02*)((u8*)self->params + 0x40), &b, (t + t) * 3.14159274f);
+    MulRotationRowsInto(&r1, a, b);
+    MulRotationRowsIntoIndexed(&r2, r1, *c);
+    out = r2;
+    DrawEffectAt(self, cam, &point, (f32 (*)[4])&out);
+}
 
 void RunEffectEndCallback(Effect* self)
 {
@@ -1879,7 +1947,39 @@ LINKER_REMNANT(func_001A1028);
 
 INCLUDE_ASM(func_001A1030);
 
-INCLUDE_ASM(func_001A11C0);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+void UpdateEmitterEffect(Effect* self, f32 dt)
+{
+    Mat02 axisRot;
+    Mat02 m;
+    BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)((u8*)self + 0xA4) * dt);
+    MulRotationRowsIndexed(&m, axisRot, *(Mat02*)self->rot50);
+    s32 fire = 0;
+    Vec02* cam = (Vec02*)&g_camera->g80;
+    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot50[0]), Vu0::Q(*cam))) &&
+        Vu0::ToFloat(Vu0::Dot(Vu0::Q(m.r[0]), Vu0::Q(*cam))) <= 0.0f && 0.5f < g_gameTime - self->start) {
+        fire = 1;
+    }
+    if (fire) {
+        Vec02 pos;
+        u128 r = Vu0::Rotate(m, Vu0::Q(self->q80));
+        Vu0::Set(pos, r);
+        Vu0::Set(pos, Vu0::Add(r, Vu0::Q(((PlacedObject*)self->p120)->v140)));
+        Effect* e = CreateEffect(0x10, 0);
+        if (e != 0) {
+            e->vt->m00(e, &pos, 1.0f, 0);
+            e->life = 0.25f;
+        }
+        if (--self->i124 <= 0) {
+            RemoveEffect(self);
+            return;
+        }
+    }
+    self->rot50[0] = m.r[0];
+    self->rot50[1] = m.r[1];
+    self->rot50[2] = m.r[2];
+}
 
 
 void DrawEmitterEffect(Effect* self, void* a1)
@@ -2104,7 +2204,17 @@ void DrawHitMarkEffect(Effect* self, void* a1)
     DrawEffectAt(self, a1, scratch, scratch + 0x10);
 }
 
-INCLUDE_ASM(func_001A2770);
+void BuildBasisFromX(void* x, void* out);
+
+void SetRandomEffectSpin(Effect* self)
+{
+    Quad16 axis;
+    f32 x = RandomFloatInRange(-1.0f, 1.0f);
+    f32 y = RandomFloatInRange(-1.0f, 1.0f);
+    f32 z = RandomFloatInRange(0.1f, 0.9f) + 0.1f;
+    Vu0::Q(axis) = Vu0::FromFloats(x, y, z);
+    BuildBasisFromX(&axis, self->rot50);
+}
 
 INCLUDE_ASM(func_001A2830);
 
@@ -2141,7 +2251,56 @@ s32 IsEffectAimCandidate(Rec50* self, Collider* other)
     return other != self->target;
 }
 
-INCLUDE_ASM(func_001A2B48);
+typedef int Quadword128 __attribute__((mode(TI)));
+void StoreFloatAsQuadword(void* out, f32 f);
+void* CopyQuadword(void* out, void* in);
+Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
+void* StoreQuadword(void* dst, Quadword128 v);
+s32 IsEffectAimCandidate(Rec50* self, Collider* other);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
+Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
+void BuildBasisFromX(void* x, void* out);
+extern const Vec02 D_00248D20;
+
+void func_001A2B48(Effect* self, Rec50* src)
+{
+    f32* poly = (f32*)((u8*)src + 0x1C0);
+    f32 speed = self->m30[0];
+    f32 peak = poly[0];
+    f32 a = peak;
+    f32 b = poly[1];
+    f32 c = poly[2];
+    peak = (a + b + c) >? peak;
+    if (0.0001f < __builtin_fabsf(c)) {
+        f32 t = -b / (c + c);
+        peak = (a + t * (b + t * c)) >? peak;
+    }
+    Vec02 end;
+    ColliderSpan span;
+    s32 n;
+    Collider** list;
+    Quadword128 tq;
+    Quadword128 uq;
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
+    f32 reach = speed * peak;
+    Vec02* from = (Vec02*)&self->q80;
+    Vu0::Q(self->qA0) = Vu0::NormalizeOr(Vu0::Q(self->qA0), Vu0::Q(D_00248D20));
+    Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(*from), Vu0::Q(self->qA0), Vu0::Scalar(reach * 100.0f));
+    PushBackMemoryMark();
+    GatherCollidersInBox(g_currentWorld, 0, from, &end, (s32 (*)(void*, Collider*))IsEffectAimCandidate, (s32)src, &n, &list);
+    if (FindNearestSpanObject(1, from, &end, n, list, &span) != 0) {
+        speed = speed * span.time[0];
+    }
+    PopBackMemoryMark();
+    StoreFloatAsQuadword(&tq, speed);
+    Quadword128 tv = tq;
+    CopyQuadword(&uq, poly);
+    StoreQuadword(&self->q30, ScaleQuadword(tv, uq));
+    BuildBasisFromX(&self->qA0, self->rot50);
+    Vu0::Q(self->qA0) = Vu0::Zero();
+}
 
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
@@ -2157,7 +2316,21 @@ INCLUDE_ASM(func_001A2D88);
 
 INCLUDE_ASM(func_001A2E68);
 
-INCLUDE_ASM(func_001A3008);
+void RandomizeEffectSpin(Effect* self, Rec50* src)
+{
+    self->life *= RandomFloatInRange(D_0026B6F0[0], D_0026B6F0[1]);
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
+    f32 t;
+    self->f120 = *(f32*)((u8*)src + 0x1F0);
+    self->f124 = *(f32*)((u8*)src + 0x1F4);
+    self->f128 = *(f32*)((u8*)src + 0x1F8);
+    ClampedQuadratic::Get(t, (const QuadraticCoeffs*)D_0026B700, len);
+    f32 s = t * 10.0f;
+    f32* p = (f32*)((u8*)self + 0x100);
+    for (s32 i = 2; i >= 0; i--) {
+        *p++ = RandomFloatInRange(-s, s);
+    }
+}
 
 s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 {
@@ -2167,7 +2340,15 @@ s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void*
     return HandleEffectContact(a0, a1, a2, a3);
 }
 
-INCLUDE_ASM(func_001A31A0);
+// A spinning effect drawn at its centre moved along D_00248D20 by its weight f120.
+void DrawSpinningEffect(Effect* self, void* a1)
+{
+    Vec02 pos;
+    Vec02 k;
+    Vu0::Q(k) = Vu0::FromFloatAt(self->f120);
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(D_00248D20), Vu0::Q(k));
+    DrawEffectAt(self, a1, &pos, self->rot50);
+}
 
 void InitFacingEffect(Effect* self)
 {
@@ -2222,7 +2403,56 @@ void TakeDelayedEffectSourcePose(Effect* self)
     self->p134 = 0;
 }
 
-INCLUDE_ASM(func_001A3730);
+// The product a b with MulRotationRowsX's locals, its rows stored to out as quadwords.
+static inline void MulRows(Vec02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    Vu0::Q(out[0]) = Vu0::Q(r.r[0]);
+    Vu0::Q(out[1]) = Vu0::Q(r.r[1]);
+    Vu0::Q(out[2]) = Vu0::Q(r.r[2]);
+}
+
+// An effect homing on its object's frame at the end of its life (once started): its position
+// and velocity steered there through func_00130540 over the time left, and its placement the
+// object's rotation then, turned about f120 by f130 times the share of its life left.
+void func_001A3730(Effect* self, f32 f)
+{
+    Vec02 pos;
+    Vec02 v10;
+    Vec02 v20;
+    Vec02 v30;
+    Mat02 rot;
+    Mat02 turn;
+    f32 t;
+
+    if (!(g_gameClock[1] < self->start)) {
+        self->q90 = self->q80;
+        t = self->start + self->life - g_gameClock[1];
+        t = f >? t;
+        ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, t);
+        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80));
+        u128 w1 = Vu0::Scalar(1.5f / t);
+        u128 w2 = Vu0::Scalar(-0.5f);
+        u128 w3 = Vu0::Scalar(0.25f);
+        u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
+        Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
+        func_00130540(&self->q80, &self->qA0, (const T219C_Params*)&pos, (const f32*)&v10, &v20, &v30, 0, t, f, 1.0f);
+        BuildAxisAngleMatrix((Vec02*)&self->f120, &turn, self->f130 * t / self->life);
+        self->q80 = *(Quad219C*)&v20;
+        self->qA0 = *(Quad219C*)&v30;
+        MulRows(self->rot50, turn, rot);
+    }
+}
 
 void UpdateDelayedEffect(Effect* self)
 {
@@ -2331,7 +2561,65 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
-INCLUDE_ASM(func_001A3D40);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 z, Vec02* out);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+void UpdateSwitchedCollider(void* self);
+s32 ChooseWalkerColliderState(WalkerCollider* self);
+s32 ChooseWalkerColliderSubState(WalkerCollider* self);
+
+// Vu0::NormalizeOr that also gives the length it found.
+static inline u128 NormalizeOrLength(u128 v, u128 fallback, f32& length)
+{
+    u128 len = Vu0::Length(v);
+    length = Vu0::ToFloat(len);
+    if (length < 0.0001f) {
+        return fallback;
+    }
+    return Vu0::DivX(v, len);
+}
+
+void UpdateWalkerCollider(WalkerCollider* self)
+{
+    UpdateSwitchedCollider(self);
+    if (HasAnimationDrivenAttachment(self) != 0) {
+        Vec02 pos;
+        Vec02 vel;
+        Vec02 diff;
+        Vec02 dir;
+        Vec02 split;
+        RampProfile ramp;
+        f32 out;
+        self->f1EC->vt->getPos(self->f1EC, 0.0f, &pos, &vel);
+        if (self->f610 == 3) {
+            u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
+            Vu0::Q(diff) = d;
+            Vu0::Q(dir) = d;
+            f32 l;
+            Vu0::Set(dir, NormalizeOrLength(d, Vu0::Q(g_unitXVector), l));
+            f32 along = SplitVectorAlongAxis(&vel, &dir, 0, &split);
+            f32* lim = (f32*)self->p21C;
+            ramp.maxSpeed = lim[0] + along;
+            ramp.endSpeed = lim[1] + along;
+            ramp.rampTime = lim[2];
+            f32 res = ApproachValueWithRamp(0.0f, l, g_frameDt, &ramp, &out);
+            u128 w = Vu0::Scalar(res);
+            Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), w);
+            Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::ScalarAt(out));
+        }
+        self->desc02()->m1D(self, &pos);
+        self->desc02()->m20(self, &vel);
+        self->f618 = ArctangentOfRatio(vel.y, vel.x);
+    }
+    s32 v;
+    while ((v = ChooseWalkerColliderState(self)) != self->f610) {
+        SetWalkerColliderState(self, v);
+    }
+    s32 w;
+    while ((w = ChooseWalkerColliderSubState(self)) != self->f614) {
+        SetWalkerColliderSubState(self, w);
+    }
+    ClearRootTries(self);
+}
 
 void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
@@ -2516,7 +2804,39 @@ void StepWalkerCollider(WalkerCollider* self)
     TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 
-INCLUDE_ASM(func_001A4538);
+s32 HasAnimationDrivenAttachment(void* ctx);
+
+// What func_001A4538 moves: a walker's point (+0x630), and a contact record's normal (+0x80)
+// with its entries of 0x40 bytes, each with a point at +0x30.
+struct Walker_001A4538 {
+    u8 pad0[0x630];
+    Vec02 point;            // 0x630
+};
+
+struct ContactEntry_001A4538 {
+    u8 pad0[0x30];
+    Vec02 point;            // 0x30
+};
+
+union Contact_001A4538 {
+    ContactEntry_001A4538 entries[1];   // 0x00
+    struct {
+        u8 pad0[0x80];
+        Vec02 normal;       // 0x80
+    };
+};
+
+void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i)
+{
+    if (HasAnimationDrivenAttachment(self) == 0) {
+        Vec02* p = &c->entries[i].point;
+        Vec02 d;
+        Vu0::Vec e = Vu0::Vec::Of(*p);
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->point),
+                             Vu0::MulX(Vu0::Q(c->normal), Vu0::Dot(Vu0::Q(self->point), Vu0::Q(c->normal))));
+        Vu0::Q(*p) = Vu0::Sub(e.q, Vu0::Q(d));
+    }
+}
 
 void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 {
@@ -2637,7 +2957,75 @@ s32 GetCurrentEntryVariant(void)
     return 2;
 }
 
-INCLUDE_ASM(func_001A48C0);
+// The larger of two floats (max.s; through an inline function, b >? a reads a first and gives
+// the result b's register, as retail's pose counts are).
+static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
+
+struct Controlled558 {
+    u8 pad[0x558];
+    void* controller;
+};
+
+struct Controlled678 {
+    u8 pad[0x678];
+    void* controller;
+};
+
+void PostLoadPlacedObject(void* self);
+void* FindFirstObjectByIdMode4(World* w, s32 id, void* self);
+s32 GatherObjectsByMode(World* w, s32 a, s32 id, void* self, s32 mode, void** out);
+void* CreateObjectCopy(void* obj, World* w, s32 n);
+
+void func_001A48C0(PairController* self)
+{
+    PostLoadPlacedObject(self);
+    if (self->id64C == GetCurrentEntryVariant()) {
+        u8* s = (u8*)self;
+        void* first = FindFirstObjectByIdMode4(g_currentWorld, self->id2D8, self);
+        self->f354 = first;
+        ((Controlled678*)first)->controller = self;
+        PairedObject* a = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D0, self);
+        a->controller = self;
+        PairedObject* b = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D4, self);
+        b->controller = self;
+        if (self->id2DC != -1) {
+            self->target = (ObjectCreator*)FindFirstObjectByIdMode4(g_currentWorld, self->id2DC, self);
+            ((HitTarget*)self->target)->controller = self;
+        }
+        s32 i;
+        for (i = 0; (f32)i < MaxF(self->poseA[1], self->poseB[1]); i++) {
+            void* o;
+            if (i == 0) {
+                o = a;
+            } else {
+                o = CreateObjectCopy(a, g_currentWorld, *(s32*)((u8*)a + 0x18));
+            }
+            AppendToList(s + 0x374, o);
+        }
+        for (i = 0; (f32)i < MaxF(self->poseA[9], self->poseB[9]); i++) {
+            void* o;
+            if (i == 0) {
+                o = b;
+            } else {
+                o = CreateObjectCopy(b, g_currentWorld, *(s32*)((u8*)b + 0x18));
+            }
+            AppendToList(s + 0x390, o);
+        }
+        for (i = 0; i < self->idCount; i++) {
+            void* found[4];
+            s32 n = GatherObjectsByMode(g_currentWorld, 0x104, self->ids[i], self, 2, found);
+            void* hit = 0;
+            for (s32 k = 0; k < n; k++) {
+                if (IsObjectOfKind(found[k], 0x44) != 0) {
+                    hit = found[k];
+                    break;
+                }
+            }
+            ((Controlled558*)hit)->controller = self;
+            AppendToList(s + 0x3A0, hit);
+        }
+    }
+}
 
 void BlendPairControllerPose(PairController* self)
 {
@@ -2834,7 +3222,94 @@ void SetPairControllerState(PairController* self, s32 state)
 
 INCLUDE_RODATA(D_0024CAEC);
 
-INCLUDE_ASM(func_001A5120);
+extern const f32 D_0024CAEC;
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void* GetActiveSwitchedCollider(void);
+extern const Vec02 D_00248D20;
+
+// Whether the spot is within reach of n: the xy distance to its position is less than the two radii.
+static inline s32 IsNearSpot(const Vec02& pos, PairedObject* n, PairedObject* o)
+{
+    s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < o->radius3D0 + n->radius3D0;
+    return near;
+}
+
+static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* o)
+{
+    s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < n->radius3D0 + o->radius3D0;
+    return near;
+}
+
+void func_001A5120(PairController* self)
+{
+    Vec02 pos;
+    Vec02 spare;
+    Mat02 turn;
+    PairedObject* o;
+    PairedObject* n;
+    PairedObject* m;
+    PairedObject* other;
+    s32 i;
+
+    if (self->count380 >= self->limit624) {
+        self->f634 = D_0024CAEC;
+        return;
+    }
+    o = *(PairedObject**)self->list374;
+    for (i = 0; i < 8; i++) {
+        f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
+        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, *(f32*)((u8*)self + 0x344));
+        other = (PairedObject*)GetActiveSwitchedCollider();
+        ComputePolarOffset((void*)&pos, angle, radius, 0.0f);
+        pos.y = pos.y * self->tune34C;
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(*(Vec02*)((u8*)self + 0x330)), Vu0::Q(pos));
+        if (other != 0 && IsNearSpot(pos, other, o)) {
+            continue;
+        }
+        for (n = *(PairedObject**)self->list384; n != 0; n = *(PairedObject**)((u8*)n + 0x5B0)) {
+            if (IsNearSpotOf(pos, n, o)) {
+                break;
+            }
+        }
+        if (n != 0) {
+            continue;
+        }
+        for (m = *(PairedObject**)self->list35C; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+            if (m->parent == 0 && IsNearSpot(pos, m, o)) {
+                break;
+            }
+        }
+        if (m != 0) {
+            continue;
+        }
+        for (m = *(PairedObject**)self->list368; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+            if (m != o && IsNearSpot(pos, m, o)) {
+                break;
+            }
+        }
+        if (m == 0) {
+            break;
+        }
+    }
+    if (i < 8) {
+        self->count3BC++;
+        self->count380++;
+        o->desc->m02(o);
+        pos.z = self->tune350;
+        o->desc02()->m1D(o, &pos);
+        f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
+        BuildAxisAngleMatrix(&D_00248D20, &turn, spin);
+        o->desc02()->m1E(o, &turn);
+        o->desc02()->m20(o, (Vec02*)&D_00248D30);
+        o->desc02()->m21(o, (Vec02*)&D_00248D30);
+        SetColliderAnchors(o, 2, (s32)&D_00248D20, 3, 0);
+        SetHitTargetState(o, 0);
+        RemoveFromList(self->list374, o);
+        AppendToList(self->list368, o);
+        PairWithNearestWaitingObject(self, o);
+        self->f634 = g_gameTime + RandomFloatInRange(self->f62C, self->f630);
+    }
+}
 
 void StartPairedObjects(PairController* self)
 {
@@ -3254,11 +3729,146 @@ void UpdatePairedObject(PairedObject* self)
     }
 }
 
-INCLUDE_ASM(func_001A6788);
+// The ground a paired object keeps to (its controller): a circle around center.
+struct PairArea {
+    u8 pad000[0x330];
+    Vec02 center;           // 0x330
+    f32 radius;             // 0x340
+};
 
-INCLUDE_RODATA(jtbl_0024CB30);
+// v made unit length (no test for zero; func_001A6788).
+static inline u128 Normalized(Vec02 v)
+{
+    return Vu0::DivX(Vu0::Q(v), Vu0::Length(Vu0::Q(v)));
+}
 
-INCLUDE_ASM(func_001A69F8);
+// The smaller of two floats (min.s; through an inline function the result takes b's register).
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
+
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
+f32 WrapAngle(f32 a);
+void SetPlacedObjectLocalVelocity(PlacedObject* self, Vec02* v);
+void SetPlacedObjectSpinFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
+
+void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
+{
+    Vec02 from;
+    Vec02 to;
+    Vec02 delta;
+    from = self->v140;
+    from.z = 0.0f;
+    to = *goal;
+    to.z = 0.0f;
+    PairArea* area = (PairArea*)self->controller;
+    if (0.0001f < area->radius) {
+        ColliderSpan span;
+        if (CollectBoundsSpans(&area->center, &from, &to, area->radius, 1, &span)) {
+            Vec02 mid;
+            Vec02 dir;
+            Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(span.q[0]), Vu0::Scalar(0.5f), Vu0::Q(span.q[1]), Vu0::Scalar(0.5f));
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(mid), Vu0::Q(((PairArea*)self->controller)->center));
+            Vu0::Q(dir) = Normalized(dir);
+            Vu0::Q(to) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(((PairArea*)self->controller)->radius * 1.5f));
+        }
+    }
+    Vu0::Q(delta) = Vu0::Sub(Vu0::Q(to), Vu0::Q(from));
+    f32 bearing = ArctangentOfRatio(delta.y, delta.x);
+    f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
+    if (backwards) {
+        heading = WrapAngle(heading + 3.1415927f);
+    }
+    f32 turn = WrapAngle(bearing - heading);
+    if (0.05235988f < __builtin_fabsf(turn)) {
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+    } else {
+        f32 speed = MinF(Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(delta))) / g_gameClock[2], self->maxSpeed);
+        if (backwards) {
+            speed = -speed;
+        }
+        Vec02 v;
+        Vu0::Q(v) = Vu0::FromFloats(speed, 0.0f, 0.0f);
+        SetPlacedObjectLocalVelocity(self, &v);
+    }
+    f32 w = turn / g_gameClock[2];
+    f32 lo = -self->maxTurn;
+    if (w < lo) {
+        w = lo;
+    } else if (self->maxTurn < w) {
+        w = self->maxTurn;
+    }
+    SetPlacedObjectSpinFromFloats(self, 0.0f, 0.0f, w);
+}
+
+void* FindHitTargetChild(Collider* self);
+
+// The state the paired object should be in: free (1) until it reaches its attachment and a
+// free partner takes it (3) or none (2); while paired (2, 3) until a hit target child links
+// it (4); then back to an attachment (5) and close in on it (6, then 0); 9 ends in 10.
+s32 ChoosePairedObjectState(PairedObject* self)
+{
+    Vec02 v;
+    s32 s = self->state;
+    switch (s) {
+    case 1: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+            break;
+        }
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(v), Vu0::Q(self->v140)) < 10.0f) {
+            s = 2;
+            if (PairWithNearestFreeObject(self->controller, self) != 0) {
+                s = 3;
+            }
+        }
+        break;
+    }
+    case 2:
+    case 3: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+        }
+        break;
+    }
+    case 4: {
+        u8* p = (u8*)self->activeHandle;
+        if (p != 0 && *(f32*)(p + 0x14) < *(f32*)((u8*)self->f594 + 0x34)) {
+            s = 4;
+            break;
+        }
+        if (func_001A6328((PairController*)self->controller, self) != 0) {
+            s = 5;
+        } else {
+            s = 2;
+        }
+        break;
+    }
+    case 5:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(v)) < 10.0f) {
+            s = 6;
+        }
+        break;
+    case 6:
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(((PlacedObject*)self->attachment)->v140)) < 10.0f) {
+            s = 0;
+        }
+        break;
+    case 0:
+    case 7:
+    case 8:
+    case 10:
+        break;
+    case 9:
+        s = 10;
+        break;
+    }
+    return s;
+}
 
 void SetPairedState(PairedObject* self, s32 mode)
 {

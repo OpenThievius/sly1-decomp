@@ -239,7 +239,57 @@ void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type,
 
 INCLUDE_ASM(func_0020CAF8);
 
-// The message of func_0020CF18, which is not matched yet.
-extern const char D_002502E8[] = "intra && skip MB";
+// A block of a macroblock's channel, handed to its routine.
+struct Blk_20CF18 {
+    u8 pad00[0x1C];
+};
 
-INCLUDE_ASM(func_0020CF18);
+// One channel of the decoder, 0x140 bytes from +0x590: each block's two routines and the
+// blocks, then the predicted picture, the block count and the macroblock's flags.
+struct Chan_20CF18 {
+    s32 f00;
+    s32 f04;
+    u8 pad08[0x28 - 0x08];
+    void (*first[4])(Blk_20CF18* b);
+    void (*second[4])(Blk_20CF18* b);
+    Blk_20CF18 blkA[4];
+    Blk_20CF18 blkB[4];
+    s32 f128;
+    s32 count;
+    s32 intra;
+    u8 pad134[0x138 - 0x134];
+    s32 coded;
+    s32 skip;
+};
+
+struct Dev_20CF18 {
+    u8 pad000[0x590];
+    Chan_20CF18 chan[2];
+    u8 pad810[0x81C - 0x810];
+    s32 f81C;
+};
+
+void ReportMpegError(Dev_20CF18* d, const char* msg);
+void func_0020DE88(s32 a, s32 b);
+void func_0020DE28(s32 a, s32 b, s32 c);
+
+void AddMacroblockResiduals(Dev_20CF18* d, s32 n)
+{
+    s32 i;
+
+    if (d->chan[n].coded != 0) {
+        for (i = 0; i < d->chan[n].count; i++) {
+            d->chan[n].first[i](&d->chan[n].blkA[i]);
+            d->chan[n].second[i](&d->chan[n].blkB[i]);
+        }
+    }
+    if (d->chan[n].intra != 0 && d->chan[n].skip != 0)
+        ReportMpegError(d, "intra && skip MB");
+    if (d->chan[n].intra != 0) {
+        func_0020DE88(d->chan[n].f128, d->chan[n].f04);
+    } else if (d->chan[n].skip != 0) {
+        func_0020DE88(d->chan[n].f128, d->f81C);
+    } else {
+        func_0020DE28(d->chan[n].f128, d->f81C, d->chan[n].f04);
+    }
+}

@@ -1973,7 +1973,37 @@ void UpdatePromptElement(T217D_4C0* self)
     UpdateScreenElementSlide(self);
 }
 
-INCLUDE_ASM(func_001AE220);
+extern f32 D_00272B6C;
+
+void DrawPromptElement(T217D_4C0* self)
+{
+    LayoutBuilder out;
+    T217D_Word tmp;
+    T217D_Word slot;
+    u8 loc[0xB0];
+
+    f32 s = Sine(g_elapsedTime * 3.0f);
+    tmp = self->colorWord;
+    ((u8*)&tmp)[3] = (u8)(s32)((s * 0.5f + 0.5f) * 255.0f);
+    f32 t = D_00272B6C <? self->blend;
+    f32 u = 1.0f - t;
+    f32 w = self->w;
+    f32 h = self->h;
+    s32 held = tmp.v;
+    out.Pos(u * self->hiddenX + t * self->shownX, u * self->hiddenY + t * self->shownY);
+    out.Size(w, h);
+    slot.v = held;
+    out.Color(&slot.v);
+    out.FlagA(2);
+    out.FlagB(0);
+    if (self->frame != 0) {
+        StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
+    }
+    PushFontScale(self->font, self->scale, self->scale);
+    InitTextReader(loc, &self->text[0], self->font);
+    DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+    PopFontScale(self->font);
+}
 
 void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
 {

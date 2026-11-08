@@ -7,6 +7,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "pad_record.h"
 #include "deferred_request.h"
 #include "list_iter.h"
 #include "switched_collider.h"
@@ -33,6 +34,7 @@
 #include "message_body.h"
 #include "path_curve_object.h"
 #include "state_notifier.h"
+#include "fpu.h"
 
 extern f32 g_gameClock[];
 
@@ -540,7 +542,7 @@ ClipPlane D_002756B0[6] = {
     { 0.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f, 1.0f }
 };
 World* g_currentWorld = 0;
-s32 D_00275714 = 0;
+u32 D_00275714 = 0;
 s32 D_00275718 = 0;
 s32 D_0027571C = 0;
 s32 D_00275720 = 0;
@@ -639,11 +641,131 @@ s32 GetPlayerRequestPhase(Player* self)
     return 2;
 }
 
-INCLUDE_ASM(func_001D6608);
+void FinishSwitchedCollider(Player* self);
+void SetPlayerState(Player* self, s32 a, s32 b);
 
-INCLUDE_ASM(func_001D66A8);
+void FinishPlayerRequest(Player* self)
+{
+    if (self->f2730 != 0) {
+        FinishSwitchedCollider(self);
+        self->f2730 = 0;
+    }
+    if (self->f26B4.fn != 0) {
+        s32 fn = self->f26B4.fn;
+        self->f26B4.fn = 0;
+        ((void (*)(s32, Player*))fn)(self->f26B4.data, self);
+    } else {
+        Vec02 v = self->v150;
+        v.z = D_00275160 >? v.z;
+        const Desc02* d = self->desc02();
+        d->m20(self, &v);
+        SetPlayerState(self, 2, 6);
+    }
+    self->f226C = 0.0f;
+    self->f2498 = 0;
+}
 
-f32 ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
+struct HitMessage {
+    s32 kind;               // 0x00
+    u8 pad04[0x20 - 0x04];
+    Vec02 v20;              // 0x20
+    f32 f30;                // 0x30
+    u8 pad34[0x38 - 0x34];
+    Collider* f38;          // 0x38
+    u8 pad3C[0x50 - 0x3C];
+};
+
+void ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
+s32 IsObjectOfKind(void* node, s32 kind);
+s32 func_0013E658(void* a, s32 b);
+s32 func_001D6A18(Player* self, Collider* col, Vec02* out);
+void TransformPointAtTime(void* frame, s32 a, void* point, s32 b, s32 c, s32 d, f32 t);
+typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
+typedef void (*HitFn)(Collider* self, HitMessage* msg);
+
+void func_001D66A8(Player* self)
+{
+    u32 i;
+    if (self->f2438 != 0 && *(s32*)((u8*)self->f2438 + 0x58C) != 0) {
+        Vec02 p;
+        Vec02 moved;
+        p = self->v140;
+        p.z = p.z + D_0027516C;
+        if (self->f2228 == 0x27 || self->f2228 == 0x2F) {
+            p.z = p.z - 10.0f;
+        }
+        if (self->f2438->f278 != 0) {
+            ComputeOscillatorDisplacement(((void**)self->f2438->f278)[3], &p, 50.0f, 0, &moved, 0, 0);
+            u128 s2 = Vu0::Scalar(2.0f);
+            u128 s1 = Vu0::Scalar(-1.0f);
+            Vu0::Q(p) = Vu0::MulXSum(Vu0::Q(p), s2, Vu0::Q(moved), s1);
+        }
+        i = func_0013E658(&p, (s32)self->f2438->tree.nodes) != 0;
+    } else {
+        i = 0;
+    }
+    if (i != 0 && (self->v150.z < 0.0f || !(self->f2220 == 2 || self->f2228 == 0x2C || self->f2228 == 0x2B))) {
+        OwnerMessage msg;
+        InitOwnerMessage(&msg, 3, self->f2438);
+        if (((MessageHandlerFn)self->f2438->desc03()->m47)(self->f2438, 0, &msg) != 0) {
+            self->desc05()->m4C(self, (void*)&msg);
+        }
+    }
+    Vec02 out;
+    if (i == 0 || func_001D6A18(self, self->f2438, &out) == 0) {
+        return;
+    }
+    f32 fresh = 0.05f;
+    for (i = 0; i < 8; i++) {
+        HitStamp* rec = &self->f26D8[i];
+        Collider* obj = rec->obj;
+        if (obj == 0) {
+            continue;
+        }
+        if (g_gameClock[1] - rec->time < fresh) {
+            continue;
+        }
+        Collider* list[8];
+        s32 count;
+        if (IsObjectOfKind(obj, 0x78) != 0) {
+            CopyMemory(list, (u8*)obj + 0x94, 0x20);
+            count = *(s32*)((u8*)obj + 0x90);
+        } else {
+            list[0] = obj;
+            count = 1;
+        }
+        for (s32 j = 0; j < count; j++) {
+            Collider* o = list[j];
+            Vec02 lo;
+            Vec02 hi;
+            s32 hit = 0;
+            GetObjectWorldPosition(o, &lo);
+            hi = *(Vec02*)((u8*)o + 0x40);
+            TransformPointAtTime(*(void**)((u8*)obj + 0x18), 0, &hi, 0, 0, 0, g_gameClock[2]);
+            if (out.z <= lo.z) {
+                if (hi.z <= out.z) {
+                    hit = 1;
+                }
+            } else if (out.z <= hi.z) {
+                hit = 1;
+            }
+            if (hit != 0) {
+                HitMessage m;
+                m.v20 = lo;
+                m.v20.z = out.z;
+                m.kind = 4;
+                u8* e = *(u8**)((u8*)o + 0x90);
+                if (*(s32*)(e + 0x120) == 1 && *(s32*)(e + 0x1B0) == 2) {
+                    m.kind = 0x24;
+                    m.f38 = self->f2438;
+                }
+                ((HitFn*)o->desc)[31](o, &m);
+                rec->time = g_gameClock[1];
+            }
+        }
+    }
+}
+
 s32 CollectTreeNodeSpans(void* nodes, void* a, void* b, s32 c, s32 d, void* out);
 
 s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
@@ -671,7 +793,44 @@ s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
     return 1;
 }
 
-INCLUDE_ASM(func_001D6B18);
+void func_001BA5B0(Player* self, void* other, f32 t);
+void func_001EED68(void* obj, Vec02* p, Vec02* out1, Vec02* out2);
+f32 ApproachValueClampingVelocity(void* table, f32* out, f32 a, f32 b, f32 c, f32 d);
+void AddColliderForce(void* a, void* b);
+
+void func_001D6B18(Player* self, Collider* other, f32 t)
+{
+    switch (self->f2228) {
+    case 6:
+    case 0x2B:
+        if (self->v150.z < 0.0f) {
+            func_001BA5B0(self, other, t);
+        }
+        return;
+    case 0x27:
+    case 0x2F: {
+        Vec02 point;
+        Vec02 local;
+        Vec02 q2;
+        Vec02 q3;
+        Vec02 force;
+        Vec02 k;
+        f32 next;
+        if (func_001D6A18(self, other, &point) == 0) {
+            return;
+        }
+        Vu0::Q(local) = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+        func_001EED68(other, &point, &q2, &q3);
+        Vu0::Q(k) = Vu0::FromFloatAt(D_00275170[0]);
+        Vu0::Set(force, Vu0::MulX(Vu0::Sub(Vu0::Add(Vu0::Q(self->v150), Vu0::Q(local)), Vu0::Q(q2)), Vu0::Q(k)));
+        ApproachValueClampingVelocity(D_00275178, &next, self->v140.z + D_0027516C, self->v150.z - q2.z, point.z, t);
+        force.z = (next - self->v150.z) / t - self->gravity.z >? force.z;
+        AddColliderForce(self, &force);
+        return;
+    }
+    }
+    func_001BA5B0(self, other, t);
+}
 
 void SwapInPlayerStandIn(Player* self)
 {
@@ -990,7 +1149,47 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
 
 INCLUDE_ASM(func_001D87C8);
 
-INCLUDE_ASM(func_001D8BD0);
+f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
+
+void ComputePathFollowerHeadingTarget(PathFollower* self)
+{
+    Vec02 pos;
+    Vec02 tangent;
+    Vec02 side;
+    Vec02 w;
+    Vec02 ahead;
+    if (self->f830 != 0) {
+        PathCurve* o = self->f830->curve;
+        if (o->vt->m02 != 0) {
+            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->f83C + D_002751D0, &pos, &tangent);
+        }
+        u128 base = Vu0::Q(pos);
+        u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
+        u128 k = Vu0::FromFloatAt(self->f844);
+        Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
+        Vu0::Set(ahead, k);
+        u128 p2 = Vu0::MulAddX(base, Vu0::Q(side), k);
+        Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(*(Vec02*)((u8*)self + 0x100)));
+        Vu0::Q(pos) = p2;
+        self->f694 = ArctangentOfRatio(w.y, w.x);
+        o = self->f830->curve;
+        if (o->vt->m02 != 0) {
+            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->f83C + D_002751D0 + D_002754DC, 0, &ahead);
+        }
+        f32 turn = ComputeAngleBetweenVectors(&tangent, &ahead, 0);
+        self->f698 = self->f85C * self->f618;
+        u8* limit = *(u8**)((u8*)self + 0xAFC);
+        if (limit != 0) {
+            self->f698 = *(f32*)(limit + 0x1C) <? self->f698;
+        }
+        if (0.0f < turn) {
+            f32 v = Fpu::Sqrt(D_002754E0[0] * (D_002754DC / turn) * self->f868 * -*(f32*)((u8*)self + 0x358));
+            if (v < self->f698) {
+                self->f698 = v;
+            }
+        }
+    }
+}
 
 void SteerPathFollower(PathFollower* self)
 {
@@ -1058,7 +1257,67 @@ void RecordPathFollowerProgress(PathFollower* self)
 
 INCLUDE_ASM(func_001D9488);
 
-INCLUDE_ASM(func_001D9678);
+struct PlayingSound;
+void SetSoundRecordPitch(PlayingSound* self, f32 x);
+void SetSoundRecordVolume(PlayingSound* self, f32 x);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+extern const Vec02 g_unitXVector;
+
+void UpdatePathFollowerSound(PathFollower* self, f32 dt)
+{
+    typedef Vu0::Vec Vec;
+    if (*(PlayingSound**)self->fB84 == 0) {
+        return;
+    }
+    f32 t = self->f698 / D_00275524;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    if (t < lo) {
+        t = lo;
+    } else if (hi < t) {
+        t = hi;
+    }
+    self->fBA0 = ApproachValueWithRamp(D_00275518, 0, self->fBA0, t, dt);
+    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / D_00275524;
+    f32 lo1 = 0.0f;
+    f32 hi1 = 1.0f;
+    f32 share;
+    if (fwd < lo1) {
+        share = lo1;
+    } else if (hi1 < fwd) {
+        share = hi1;
+    } else {
+        share = fwd;
+    }
+    f32 mix = ((ValueRange*)D_002755A0)->Limit(((QuadraticCurve*)D_00275590)->Eval(self->fB9C));
+    mix = (1.0f - mix) * share + mix * D_002755A8 * self->fBA0;
+    SetSoundRecordPitch(*(PlayingSound**)self->fB84, ((QuadraticCurve*)&D_00275530)->Eval(mix) + self->fB94);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB84,
+                         ((ValueRange*)D_00275550)->Clamp(((QuadraticCurve*)D_00275540)->Eval(mix)));
+    SetSoundRecordPitch(*(PlayingSound**)self->fB80, ((QuadraticCurve*)D_00275560)->Eval(mix) + self->fB90);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB80,
+                         ((ValueRange*)D_00275580)->Clamp(((QuadraticCurve*)D_00275570)->Eval(mix)));
+    Vec02 local;
+    Vec02 drift;
+    TransformDirectionBetweenFrames(0, self, &self->v150, &local);
+    Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->f698)).q;
+    drift.x = drift.x * D_002755F8;
+    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / D_002755AC;
+    f32 lo2 = 0.0f;
+    f32 hi2 = 1.0f;
+    f32 slide;
+    if (d < lo2) {
+        slide = lo2;
+    } else if (hi2 < d) {
+        slide = hi2;
+    } else {
+        slide = d;
+    }
+    slide = slide * ((ValueRange*)D_002755F0)->Clamp(((QuadraticCurve*)D_002755E0)->Eval(self->fB9C));
+    SetSoundRecordPitch(*(PlayingSound**)self->fB7C, ((QuadraticCurve*)D_002755B0)->Eval(slide) + self->fB8C);
+    SetSoundRecordVolume(*(PlayingSound**)self->fB7C,
+                         ((ValueRange*)D_002755D0)->Clamp(((QuadraticCurve*)D_002755C0)->Eval(slide)));
+}
 
 INCLUDE_ASM(func_001D9AC8);
 
@@ -1090,7 +1349,112 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     }
 }
 
-INCLUDE_ASM(func_001D9D78);
+void ComputeCameraRelativeStickHeading(Camera* camera, PadRecord* pad, s32 flag, f32* out);
+void ClearPadPressedBits(PadRecord* pad, s32 bits);
+void HandleStepSequenceSkipButtons(PathFollower* self, PadRecord* pad);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other);
+void CountDownPathFollowerLap(PathFollower* self);
+extern s32 g_movieChecksumFailed;
+extern float D_002751DC;
+extern s32 D_002751D4;
+
+// The pad's control of a path follower: its heading from the stick, its pace in mode 2 and the
+// button 0x80, then by kind the race places (0) or the end of the round (1).
+void ControlPathFollower(PathFollower* self, PadRecord* pad)
+{
+    if (self->fB34 != 1) {
+        if (0.0f < pad->f48) {
+            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f694);
+        } else {
+            self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+        }
+    }
+    if (self->fB34 == 2) {
+        self->f698 = self->f618 * pad->f48;
+        if (g_movieChecksumFailed != 0) {
+            self->f698 = self->f698 * 0.4f;
+        }
+        if ((pad->flags & 0x80) != 0) {
+            ClearPadPressedBits(pad, 0x80);
+            switch (self->fB30) {
+            case 0:
+                if (self->f858 > 0 && D_002751DC < g_gameTime - self->f854) {
+                    CountDownPathFollowerLap(self);
+                    StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
+                } else {
+                    StartSoundEffect(0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                }
+                break;
+            case 1:
+                if (self->fB44 != 0) {
+                    SetStateWalkerTarget((StateTrigger*)self->fB48, 0x485);
+                    self->pushedCount = 0;
+                }
+                break;
+            case 2:         // a kind with nothing to do: retail's compare tree has it
+                break;
+            }
+        }
+    }
+    HandleStepSequenceSkipButtons(self, pad);
+    if (self->fAFC != 0) {
+        self->f698 = self->fAFC->f1C <? self->f698;
+    }
+    switch (self->fB30) {
+    case 0: {
+        WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
+        if (r != 0) {
+            void* dev = r->f48;
+            s32 code;
+            GetStateWalkerTargetKey(dev, &code);
+            if (code == -1) {
+                GetStateWalkerCurrentKey(dev, &code);
+            }
+            if (code < 0x431) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
+                    PathFollower* found[16];
+                    s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
+                    s32 place = 1;
+                    for (s32 i = 0; i < n; i++) {
+                        if (self != found[i] && IsPathFollowerAhead(found[i], self) != 0) {
+                            place++;
+                        }
+                    }
+                    if (place != self->fB08 || n != self->fB0C) {
+                        self->fB08 = place;
+                        self->fB0C = n;
+                        self->fB10 = g_gameClock[1];
+                    }
+                }
+            }
+        }
+        break;
+    }
+    case 1: {
+        WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
+        if (r != 0) {
+            void* dev = r->f48;
+            s32 code;
+            GetStateWalkerTargetKey(dev, &code);
+            if (code == -1) {
+                GetStateWalkerCurrentKey(dev, &code);
+            }
+            if (code == 0x42F) {
+                if (D_00272430.own >= D_002751D4) {
+                    SetStateWalkerTarget((StateTrigger*)dev, 0x432);
+                } else if (D_002726B0.own >= D_002751D4) {
+                    SetStateWalkerTarget((StateTrigger*)dev, 0x431);
+                    RaiseScatterLevels(g_scatterController, 1.0f);
+                }
+            }
+        }
+        break;
+    }
+    case 2:             // as above
+        break;
+    }
+}
 
 void UpdatePathFollowerScreenElements(PathFollower* self)
 {
@@ -1142,9 +1506,105 @@ INCLUDE_ASM(func_001DA320);
 
 ASM_FUNC(func_001DA6E0);
 
-INCLUDE_ASM(func_001DA7E0);
+typedef u64 Quad_1DA7E0 __attribute__((mode(TI)));
+void UpdateAttachmentFrames(void* self);
+Quad_1DA7E0 ApproachPointWithRamp(Quad_1DA7E0 a, Quad_1DA7E0 b, void* ramp, s32 c, f32 dt);
 
-INCLUDE_ASM(func_001DAA18);
+static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    out->r[0] = r.r[0];
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    out->r[1] = r.r[1];
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    out->r[2] = r.r[2];
+}
+
+void func_001DA7E0(PathFollower* self)
+{
+    u32 i = 0;
+    UpdateAttachmentFrames(self);
+    for (; i < 4; i++) {
+        Slot19* s = &self->f6B0[i];
+        Mat02 world;
+        Mat02 tilt;
+        Mat02 turn;
+        s->f54 += s->f50 * g_gameClock[2];
+        if (s->f0C == self->f6A0) {
+            TransformPointBetweenFrames(0, self, &s->v20, &s->v10);
+            s->v10.z = s->v10.z + (((s32)i < 2) ? self->f610 : self->f614);
+        } else {
+            *(Quad_1DA7E0*)&s->v10 = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->v10, *(Quad_1DA7E0*)&s->obj->v190, D_00275620, 0, g_gameClock[2]);
+        }
+        if ((s32)i < 2) {
+            BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->f69C);
+        } else {
+            tilt = g_identityMatrix;
+        }
+        BuildAxisAngleMatrix(&g_unitYVector, &turn, s->f54);
+        MulMatInto(&world, tilt, turn);
+        if (s->obj2 != 0) {
+            Vec02 moved;
+            TransformPointBetweenFrames(s->obj->parent, s->obj2->parent, &s->v10, &moved);
+            s->obj2->desc02()->m1D(s->obj2, &moved);
+        }
+        s->obj->desc02()->m1D(s->obj, &s->v10);
+        s->obj->desc02()->m1E(s->obj, &world);
+    }
+}
+
+struct DrawScale {
+    u8 pad00[0x40];
+    f32 f40;
+};
+
+void DrawCollider(Collider* self, void* a, void* m);
+void BuildPlacedObjectTransform(void* obj, void* c, void* out);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void BuildMatrixFromRotationAndTranslation(void* pos, void* rot, void* out);
+void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+
+void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
+{
+    DrawCollider(self, a, b);
+    if (self->f690 != 0) {
+        f32 len[3];
+        DrawTransform m;
+        Vec02 pos;
+        Mat02 rot;
+        for (s32 i = 0; i < 3; i++) {
+            Vu0::StoreX(len[i], Vu0::Length(Vu0::Q(self->m110.r[i])));
+        }
+        BuildPlacedObjectTransform(self, b, &m);
+        RotateMatrixUpright(&self->m110, 0, &rot);
+        f32 sx = len[2] >? len[0];
+        f32 sy = len[2] >? len[1];
+        Vu0::Q(rot.r[0]) = Vu0::MulX(Vu0::Q(rot.r[0]), Vu0::Scalar(sx));
+        Vu0::Q(rot.r[1]) = Vu0::MulX(Vu0::Q(rot.r[1]), Vu0::Scalar(sy));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->v140), Vu0::Rotate(rot, Vu0::Q(self->f690->pos)));
+        BuildMatrixFromRotationAndTranslation(&pos, &rot, &m);
+        self->f690->desc02()->m26(self->f690, a, &m);
+    }
+    if (self->fB28 != 0 || self->fB2C != 0) {
+        Vec02 q[4];
+        for (s32 i = 0; i < 4; i++) {
+            TransformPointBetweenFrames(self, 0, &self->f6B0[i].v10, &q[i]);
+        }
+        if (self->fB28 != 0) {
+            func_001268B8(self->fB28, a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
+        }
+        if (self->fB2C != 0) {
+            func_001268B8(self->fB2C, a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
+        }
+    }
+}
 
 void UpdatePathFollowerBounds(PathFollower* self)
 {
@@ -1174,7 +1634,22 @@ void StartPathFollowerEffect(PathFollower* self, void* a, void* b)
     }
 }
 
-INCLUDE_ASM(func_001DAD28);
+void FindPathFollowerPathPosition(PathFollower* self)
+{
+    if (self->f830 != 0) {
+        Vec02 p;
+        Vec02 tangent;
+        Vec02 side;
+        PathCurve* o = self->f830->curve;
+        if (o->vt->m11) {
+            o->vt->m11(o, *(f32*)((u8*)self + 0x838), (u8*)self + 0x100, 0, (f32*)&p, (f32*)&tangent, (f32*)((u8*)self + 0x838), 0);
+        }
+        u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
+        Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
+        self->f83C = self->f830->curve->vt->m05(self->f830->curve, *(f32*)((u8*)self + 0x838));
+        Vu0::StoreX(self->f840, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
+    }
+}
 
 void RecomputePathFollowerFrame(PathFollower* self)
 {
@@ -1498,7 +1973,10 @@ void ReadBufferedBlockBody(BufferedStream* self)
     }
 }
 
-INCLUDE_ASM(func_001DBA90);
+void SetWorldGravityZ(World* self, f32 z)
+{
+    Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, z);
+}
 
 void SetCachedVoiceParamBuiltin(void* self, void* a, void* b)
 {
@@ -1932,7 +2410,113 @@ void SpawnListedObjectCopies(World* self)
     }
 }
 
-INCLUDE_ASM(func_001DCEA0);
+void ResetScatterController(void* scatter);
+void InitScriptValuePools(void);
+s32 ReadBufferedU8(BufferedStream* s);
+s32 ReadBufferedS16(BufferedStream* s);
+void SkipBufferedBlocks(BufferedStream* s);
+void LoadScriptEntryTable(World* self, BufferedStream* s);
+void ReadPropertyRecords(void* self, BufferedStream* s);
+void ReadOptionalBufferedBlock(BufferedStream* s, void* out);
+void ReadBufferedString(BufferedStream* s, void* out);
+void LoadScreenResources(BufferedStream* s);
+void ReadSlotObjects(World* self, BaseObject* parent, BufferedStream* s);
+void ReadBufferedBlockBody(BufferedStream* s);
+void EnsureSoundBankLoaded(s32 bank);
+void SilenceVolumeChannel2(void);
+void RequestStagedBank(s32 bank);
+void SendResidentImages(void);
+s32 IsListEmpty(List01* list);
+void CreateConeVolumes(World* self);
+extern u8 D_002BDC20[];
+void FillScreenColor(void* screen, Rgba4* color, s32 a);
+void SpawnListedObjectCopies(World* self);
+void RunQueuedCalls(World* self);
+void UpdateScatterLevelLimits(void* scatter);
+void ResumeElementStackState(void* stack);
+void UpdateCameraLocation(Camera* camera);
+void UpdateWorldContacts(World* self, s32 a);
+void PlayStagedBank(s32 bank);
+void StartWorldSoundEntries(World* self);
+
+void LoadWorld(World* self, BufferedStream* s)
+{
+    Rgba4 color;
+    ListFrame walk;
+    ListFrame frame;
+    s32 i;
+    ResetScatterController(g_scatterController);
+    InitScriptValuePools();
+    D_00275714 = ReadBufferedU8(s);
+    self->f1D70 = ReadBufferedS16(s);
+    SkipBufferedBlocks(s);
+    g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
+    for (i = 0; i < 10; i++) {
+        BaseObject* o = (BaseObject*)CreateTypedRecord(0x1E, self, 0, 0xA, -1);
+        o->desc->m03(o);
+    }
+    for (i = 0; i < 0x28; i++) {
+        BaseObject* o = (BaseObject*)CreateTypedRecord(0x4D, self, 0, 0xB, -1);
+        o->desc->m03(o);
+    }
+    LoadScriptEntryTable(self, s);
+    ReadPropertyRecords(self, s);
+    ReadOptionalBufferedBlock(s, &self->f2310);
+    ReadBufferedString(s, &self->f2314);
+    ReadOptionalBufferedBlock(s, &self->f1D74);
+    LoadScreenResources(s);
+    ReadSlotObjects(self, 0, s);
+    ReadBufferedBlockBody(s);
+    if (self->f1D70 >= 0) {
+        EnsureSoundBankLoaded(self->f1D70);
+    }
+    if (self->f1D78 == 0) {
+        SilenceVolumeChannel2();
+    }
+    RequestStagedBank(self->f1D74);
+    SendResidentImages();
+    if (IsListEmpty(&self->list1BE8) != 0) {
+        CreateConeVolumes(self);
+    }
+    self->f1D67 = 0x80;
+    color = self->color1D64;
+    FillScreenColor(D_002BDC20, &color, 0);
+    self->f1D68 *= 0.003921569f;
+    self->f1D6C *= 0.003921569f;
+    SpawnListedObjectCopies(self);
+    RunQueuedCalls(self);
+    for (BaseObject* o = (BaseObject*)self->list48.head; o != 0; o = o->next) {
+        if (o->desc->m0F != 0) {
+            o->desc->m0F(o);
+        }
+    }
+    RunQueuedCalls(self);
+    List01* list = &self->list48;
+    frame.list = list;
+    frame.offset = list->offset;
+    frame.prev = g_activeListFrames;
+    g_activeListFrames = &frame;
+    BaseObject* head = *(BaseObject**)frame.list;
+    frame.link = (u8*)head + frame.offset;
+    BaseObject* h = head;
+    while (h != 0) {
+        h->desc->m10(h);
+        BaseObject* nx = *(BaseObject**)frame.link;
+        frame.link = (u8*)nx + frame.offset;
+        h = nx;
+    }
+    g_activeListFrames = frame.prev;
+    RunQueuedCalls(self);
+    UpdateScatterLevelLimits(g_scatterController);
+    ResumeElementStackState(g_elementStack);
+    if (g_mapScreenList.current == 0 && g_saveData->f19D8 != 0) {
+        AllocateZeroedFrontMemory(0x80000);
+    }
+    UpdateCameraLocation(g_camera);
+    UpdateWorldContacts(self, 0);
+    PlayStagedBank(self->f1D74);
+    StartWorldSoundEntries(self);
+}
 
 s32 ClipSegmentToPlanes(ClipPoint* pts)
 {

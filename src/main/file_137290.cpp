@@ -17,6 +17,9 @@
 #include "attachment.h"
 #include "cursor_animator.h"
 #include "texture_table.h"
+#include "vu0.h"
+#include "placed_object.h"
+#include "collider.h"
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
 // the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
@@ -591,7 +594,97 @@ void ReadBufferedMatrix4(void* self, u8* p)
     *(f32*)(c + 0xC) = 1.0f;
 }
 
-INCLUDE_ASM(func_00137FB0);
+s32 ReadBufferedU16(BufferedStream* self);
+s32 ReadBufferedU8(void* self);
+f32 ReadBufferedFloat(void* self);
+void ReadBufferedVector3(void* src, void* dst);
+void* AllocateFrontMemory(s32 size);
+void* AllocateZeroedFrontMemory(s32 size);
+
+struct MeshEdge03 {
+    u16 a;
+    u16 b;
+    s16 face;
+    s16 other;
+    MeshEdge03* next;
+    MeshEdge03* link;
+};
+
+struct MeshFace03 {
+    Vec02 normal;
+    u32 offset;
+    MeshEdge03* first;
+    MeshEdge03* edges;
+    u16 pad1C;
+    u16 vert;
+};
+
+s32 ReadBufferedU8(void* self);
+f32 ReadBufferedFloat(void* self);
+void* AllocateFrontMemory(s32 size);
+void* AllocateZeroedFrontMemory(s32 size);
+
+void func_00137FB0(BufferedStream* in, Mesh03* mesh)
+{
+    s32 i = 0;
+    mesh->radius = ReadBufferedFloat(in);
+    s32 n = ReadBufferedU16(in);
+    mesh->vertCount = n;
+    mesh->verts = AllocateFrontMemory(n << 4);
+    while (i < mesh->vertCount) {
+        ReadBufferedVector3(in, (u8*)mesh->verts + (i << 4));
+        i++;
+    }
+    s32 face = 0;
+    s32 fc = ReadBufferedU16(in);
+    mesh->faceCount = fc;
+    mesh->faces = AllocateZeroedFrontMemory(fc << 5);
+    mesh->points = AllocateFrontMemory(mesh->faceCount << 4);
+    mesh->words = AllocateFrontMemory(mesh->faceCount << 2);
+    s32 ec = ReadBufferedU16(in);
+    mesh->edgeCount = ec;
+    void* edges = AllocateZeroedFrontMemory(ec << 4);
+    mesh->edges = edges;
+    MeshEdge03* nextEdge = (MeshEdge03*)edges;
+    while (face < mesh->faceCount) {
+        MeshFace03* f = (MeshFace03*)((u8*)mesh->faces + (face << 5));
+        s32 k = 0;
+        s32 idx[3];
+        idx[0] = ReadBufferedU16(in);
+        idx[1] = ReadBufferedU16(in);
+        idx[2] = ReadBufferedU16(in);
+        Vec02 e1;
+        Vec02 e2;
+        Vu0::Q(e1) = Vu0::Sub(Vu0::Q(((Vec02*)mesh->verts)[idx[1]]), Vu0::Q(((Vec02*)mesh->verts)[idx[0]]));
+        Vu0::Q(e2) = Vu0::Sub(Vu0::Q(((Vec02*)mesh->verts)[idx[2]]), Vu0::Q(((Vec02*)mesh->verts)[idx[0]]));
+        u128 nrm = Vu0::Cross(Vu0::Q(e1), Vu0::Q(e2));
+        u128 unit = Vu0::DivX(nrm, Vu0::Length(nrm));
+        Vu0::Q(f->normal) = unit;
+        f->vert = idx[0];
+        Vu0::StoreX(f->offset, Vu0::Dot(unit, Vu0::Q(((Vec02*)mesh->verts)[f->vert])));
+        ((f32*)mesh->words)[face] = ReadBufferedFloat(in);
+        ReadBufferedVector3(in, (u8*)mesh->points + (face << 4));
+        s32 cnt = ReadBufferedU8(in);
+        while (k < cnt) {
+            MeshEdge03* e = nextEdge;
+            nextEdge = e + 1;
+            e->a = ReadBufferedU16(in);
+            e->b = ReadBufferedU16(in);
+            e->face = face;
+            e->other = ReadBufferedU16(in);
+            if (k == 0) {
+                f->first = e;
+            } else {
+                e[-1].next = e;
+            }
+            MeshFace03* g = (MeshFace03*)((u8*)mesh->faces + (e->other << 5));
+            k++;
+            e->link = g->edges;
+            g->edges = e;
+        }
+        face++;
+    }
+}
 
 
 s32 ReadBufferedU16(void* self);
@@ -1503,10 +1596,10 @@ void AssignAnimRecord(WorldListedObject* self, void* x)
     if (r == 0) {
         self->flagRecord = (AnimRecord*)g_animRecords;
     }
-    if (self->colorTaken == 0) {
-        self->colorTaken = 1;
+    if (self->colorCount == 0) {
+        self->colorCount = 1;
         s32 i = 0;
-        u8* dst = self->color;
+        u8* dst = self->color[0];
         do {
             u8* src = (u8*)self->flagRecord + i;
             dst[i] = (u8)((src[4] + 1) >> 1);

@@ -27,6 +27,7 @@ import version_src  # noqa: E402
 import versions  # noqa: E402
 import asm_func  # noqa: E402
 import volatile_slots  # noqa: E402
+import short_loops  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
 
@@ -473,6 +474,12 @@ class PermuterTest(unittest.TestCase):
         self.assertIn("#define Fpu__Sqrt Fpu::Sqrt", compiled)
         self.assertNotIn("permuter_alias_", compiled)
 
+    def test_nested_scopes_become_one_alias(self):
+        body = "void func_00100030(Vec v)\n{\n    v = Vu0::Vec::Of(v);\n}"
+        plain, aliases = permuter_setup.plain_calls(body, set())
+        self.assertIn("v = Vu0__Vec__Of(v);", plain)
+        self.assertEqual(aliases, [("Vu0__Vec__Of", "Vu0::Vec::Of")])
+
     def test_only_the_function_keeps_its_body(self):
         text = permuter_compile.only_definition(self.UNIT, "func_00100010")
         self.assertIn("void func_00100000(Obj* o)\n;", text)
@@ -818,6 +825,45 @@ class GeneratedNameTest(unittest.TestCase):
             compile.rename_generated(self.ASM, {"_GLOBAL_$D$*": "func_00100000"})
 
 
+class StaticNamesTest(unittest.TestCase):
+    # What GCC 2.95 writes for `static Cfg cfg;` (a constructor) inside func_001D5FA8, with
+    # -fdata-sections: the variable in .bss, its guard in a section of its own, then the code.
+    ASM = ("\t.end\tfunc_001D5678__Fv\n"
+           "\t.section\t.bss\ncfg.6:\n\t.align\t3\n\t.space\t128\n\t.previous\n"
+           "\t.section .data._$tmp_0,\"aw\",@progbits\n\t.align\t2\n"
+           "\t.type\t _$tmp_0.7,@object\n\t.size\t _$tmp_0.7,4\n_$tmp_0.7:\n\t.space\t4\n"
+           "\t.section .text.func_001D5FA8__FPv,\"ax\",@progbits\n"
+           "\t.ent\tfunc_001D5FA8__FPv\nfunc_001D5FA8__FPv:\n"
+           "\tlui\t$20,%hi(_$tmp_0.7) # high\n\tlui\t$18,%hi(cfg.6) # high\n"
+           "\tlw\t$2,%lo(_$tmp_0.7)($20)\n\taddiu\t$16,$18,%lo(cfg.6) # low\n"
+           "\t.end\tfunc_001D5FA8__FPv\n")
+    ROW = [("func_001D5FA8", "cfg", "D_00605550", "D_00275130")]
+
+    def test_the_static_and_its_guard_take_retails_labels(self):
+        got = compile.rename_statics(self.ASM, self.ROW)
+        self.assertIn("D_00605550:\n", got)
+        self.assertIn("%lo(D_00605550)", got)
+        self.assertIn(".section .data.D_00275130,", got)
+        self.assertIn("%lo(D_00275130)($20)", got)
+        self.assertNotIn("cfg.6", got)
+        self.assertNotIn("_$tmp_0", got)
+
+    def test_a_function_still_in_assembly_is_skipped(self):
+        self.assertEqual(compile.rename_statics(self.ASM, [("func_001D60B0", "cfg", "D_006055D0", "-")]),
+                         self.ASM)
+
+    def test_a_static_the_compiler_did_not_make_is_an_error_in_src(self):
+        with self.assertRaises(compile.CompileError):
+            compile.rename_statics(self.ASM, [("func_001D5FA8", "ring", "D_00605550", None)])
+        self.assertEqual(compile.rename_statics(self.ASM, [("func_001D5FA8", "ring", "D_00605550", None)],
+                                                strict=False), self.ASM)
+
+    def test_a_static_without_a_guard_keeps_the_temporaries(self):
+        got = compile.rename_statics(self.ASM, [("func_001D5FA8", "cfg", "D_00605550", None)])
+        self.assertIn("_$tmp_0.7", got)
+        self.assertNotIn("cfg.6", got)
+
+
 class BssPlacementTest(unittest.TestCase):
     def obj(self, symbols):
         class Obj:
@@ -929,6 +975,75 @@ class VolatileSlotTest(unittest.TestCase):
         self.assertEqual(volatile_slots.fill(plain), plain)
         apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(apart), apart)
+
+    def test_a_volatile_load_before_a_call_moves_unless_after_a_label_or_noreorder(self):
+        asm = "\tsw\t$0,0($16)\n\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[3:7], ["\t.set\tnoreorder", "\tjal\tf", "\tlw\t$4,0($2)", "\t.set\treorder"])
+        label = "\tsw\t$0,0($16)\n$L3:\n\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(label), label)
+        slot = ("\t.set\tnoreorder\n\tbeq\t$2,$0,$L4\n\tlui\t$2,0x28\n\t.set\treorder\n"
+                "\t#.set\tvolatile\n\tlw\t$4,0($2)\n\t#.set\tnovolatile\n\tjal\tf")
+        self.assertEqual(volatile_slots.fill(slot), slot)
+        plain = "\tsw\t$0,0($16)\n\tlw\t$4,0($2)\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(plain), plain)
+
+    def test_a_shift_or_store_before_a_return_moves_into_its_slot(self):
+        asm = "\tdsll\t$2,$2,32\n\tdsra\t$2,$2,32\n\tj\t$31"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out, ["\tdsll\t$2,$2,32", "\t.set\tnoreorder", "\tj\t$31", "\tdsra\t$2,$2,32",
+                               "\t.set\treorder"])
+        store = "\t#.set\tvolatile\n\tsb\t$4,0($3)\n\t#.set\tnovolatile\n\tj\t$31"
+        self.assertEqual(volatile_slots.fill(store).split("\n")[2:5], ["\t.set\tnoreorder", "\tj\t$31", "\tsb\t$4,0($3)"])
+
+    def test_a_load_a_macro_or_a_label_before_a_return_stays(self):
+        for asm in ("\tlw\t$2,0($4)\n\tj\t$31", "\tli\t$2,0x80000000\n\tj\t$31",
+                    "\taddu\t$2,$2,$3\n$L5:\n\tj\t$31", "\tmove\t$31,$2\n\tj\t$31"):
+            self.assertEqual(volatile_slots.fill(asm), asm)
+
+
+class ShortLoopTest(unittest.TestCase):
+    LOOP = ("\tmove\t$2,$4\n$L5:\n\tlq\t$6,0($2)\n\taddu\t$2,$2,16\n\t.set\tnoreorder\n\t.set\tnomacro\n"
+            "\tbne\t$2,$5,$L5\n\tsq\t$6,0($3)\n\t.set\tmacro\n\t.set\treorder\n")
+
+    def test_a_backward_branch_aims_at_a_forward_alias_and_takes_its_padding(self):
+        out = short_loops.rewrite(self.LOOP, {0: 3}).split("\n")
+        self.assertEqual(out[6:11], ["\tnop", "\tnop", "\tnop", "\tbne\t$2,$5,$LSL0", "$LSL0 = $L5"])
+        self.assertEqual(short_loops.rewrite(self.LOOP).split("\n")[6:8], ["\tbne\t$2,$5,$LSL0", "$LSL0 = $L5"])
+
+    def test_a_forward_branch_or_a_reorder_one_stays(self):
+        for asm in ("\t.set\tnoreorder\n\tbeq\t$2,$0,$L7\n\tnop\n\t.set\treorder\n$L7:\n",
+                    "$L7:\n\taddu\t$2,$2,1\n\tbne\t$2,$3,$L7\n"):
+            self.assertEqual(short_loops.rewrite(asm), asm)
+
+    def test_the_oracle_holds_each_loop_on_its_own_without_loops_that_jump(self):
+        oracle = short_loops.oracle(self.LOOP).split("\n")
+        self.assertEqual(oracle[:5], ['\t.section .text.short_loop_0,"ax",@progbits', "\t.set\treorder",
+                                      "\t.set\tmacro", "\t.set\tat", "$L5_0:"])
+        self.assertIn("__short_loop_0:", oracle)
+        self.assertIn("\tbne\t$2,$5,$L5_0", oracle)
+        call = self.LOOP.replace("\tlq\t$6,0($2)", "\tjal\tf")
+        self.assertIsNone(short_loops.oracle(call))
+        self.assertIn("$LSL0", short_loops.rewrite(call))
+
+    def test_padding_counts_the_words_before_the_branch(self):
+        code = struct.pack("<6I", 0x24420010, 0, 0, 0x1445FFFC, 0, 0)  # addiu, nop, nop, bne, nop
+        strtab = b"\0__short_loop_0\0"
+        names = b"\0.text.short_loop_0\0.symtab\0.strtab\0"
+        symtab = bytes(16) + struct.pack("<IIIBBH", 1, 4, 0, 0, 0, 1)
+        body = code + symtab + strtab + names
+        offsets = [52, 52 + len(code), 52 + len(code) + len(symtab), 52 + len(code) + len(symtab) + len(strtab)]
+        shoff = 52 + len(body)
+        head = bytearray(52)
+        head[:4] = b"\x7fELF"
+        struct.pack_into("<I", head, 0x20, shoff)
+        struct.pack_into("<HHH", head, 0x2E, 40, 5, 4)
+        sections = [bytes(40),
+                    struct.pack("<IIIIIIIIII", 1, 1, 6, 0, offsets[0], len(code), 0, 0, 4, 0),
+                    struct.pack("<IIIIIIIIII", 21, 2, 0, 0, offsets[1], len(symtab), 3, 1, 4, 16),
+                    struct.pack("<IIIIIIIIII", 29, 3, 0, 0, offsets[2], len(strtab), 0, 0, 1, 0),
+                    struct.pack("<IIIIIIIIII", 0, 3, 0, 0, offsets[3], len(names), 0, 0, 1, 0)]
+        self.assertEqual(short_loops.padding(bytes(head) + body + b"".join(sections)), {0: 2})
 
 
 class AsmFuncTest(unittest.TestCase):

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 154/172 (89.5%), checked 2026-11-07
+// Tried night-close8: none past the ~12 earlier variants; the swap of self and out (s2/s1) is the allocator's priority.
 // NEAR: same code and branches as retail; self and out swap saved registers (retail keeps out in $s1 and the camera in $s2). About 12 variants of the copy and the call (pointer locals, order of the branches) tried.
 #include "common.h"
 #include "shapes.h"

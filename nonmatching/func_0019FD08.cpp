@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 92/100 (92.0%), checked 2026-11-07
+// Tried night-close8: MinF(200.0f, limit) and MinF(c, limit), the float parameter first: the same two prologue words.
 // NEAR: 2 lines differ: retail saves $f20 (swc1) before `move s0, a0`, ours after. ~20 compiles (order of the stores, locals for the world,
 //       the slot and the product).
 #include "common.h"

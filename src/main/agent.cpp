@@ -2,6 +2,7 @@
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "object_message.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -352,7 +353,120 @@ void func_001C7BE8(Agent* self)
     SetAgentFacingAngles(self, out[0], y);
 }
 
-INCLUDE_ASM(func_001C7CB8);
+void UpdateTurningCollider(Collider* self);
+s32 FindColliderFloorContact(Agent* self, s32 a, s32* out);
+void func_001CAF38(Agent* self);
+void ClearRootTries(Agent* self);
+void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
+extern f32 D_00274AD0[];
+extern const Vec02 D_00248D30;
+s32 IsObjectAttached(Collider* a);
+void QueueItemKeeperUpdate(ItemKeeper* a0);
+void SetAgentPrimaryTarget(Agent* self, s32 value);
+void ApplyPendingAgentChanges(Agent* self);
+
+struct AgentBody {
+    u8 pad00[0x80];
+    Vec02 v80;              // 0x80
+};
+
+struct AgentLinks {
+    u8 pad00[0x50];
+    s32 state;              // 0x50
+    u8 pad54[0x58 - 0x54];
+    s32 count;              // 0x58
+    Agent* found[16];       // 0x5C
+};
+
+static inline void MulRotationInto(Agent* self, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    self->m660 = r;
+}
+
+void UpdateAgent(Agent* self)
+{
+    Vec02 push;
+    Mat02 spin;
+    Mat02 arc;
+    s32 kind;
+    UpdateTurningCollider(self);
+    if (*(s32*)((u8*)self + 0xB44) != 0) {
+        PickAgentSecondaryTarget(self);
+    }
+    void* held = self->fB50;
+    if (held == 0) {
+        if (((AgentLinks*)self->f720)->state != 2) {
+            Player* target = (Player*)self->desc08()->m62(self);
+            if (target != 0 && target == g_player) {
+                if (target->f2750 != 0 && IsObjectAttached((Collider*)target->f2750) != 0) {
+                    SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                    if (self->desc08()->m57(self) == 0) {
+                        SetAgentPrimaryTarget(self, 0);
+                    } else {
+                        for (s32 i = 0; i < ((AgentLinks*)self->f720)->count; i++) {
+                            if (((AgentLinks*)self->f720)->found[i] != self) {
+                                SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (IsObjectAttached((Collider*)held) == 0 || ((AgentLinks*)self->f720)->state != 2) {
+        SetAgentPrimaryTarget(self, 0);
+    }
+    if (self->fB8C != 0 && FindColliderFloorContact(self, 0, 0) != 0) {
+        ((void (*)(Agent*))((void**)self->desc)[100])(self);
+    }
+    ApplyPendingAgentChanges(self);
+    SettleAgentState(self);
+    AnimationPlayer* player = self->f7E0;
+    if (player != 0 && player->anim->f9C != 0) {
+        PositionCurve* curve = player->anim->f9C->pos;
+        if (curve != 0) {
+            curve->vt->eval(curve, self, 0, player->time, player->speed, 0, &self->v640);
+            u128 neg = Vu0::FromFloat(-1.0f);
+            Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), neg);
+            Vu0::Q(push) = neg;
+        } else {
+            self->v640 = D_00248D30;
+        }
+    } else {
+        self->v640 = D_00248D30;
+    }
+    self->desc08()->m5E(self, 0);
+    ((void (*)(Agent*))self->desc08()->m5A)(self);
+    if (self->f720 != 0) {
+        QueueItemKeeperUpdate((ItemKeeper*)self->f720);
+    }
+    func_001CAF38(self);
+    if (*(s32*)((u8*)self + 0xC08) != 0) {
+        AgentBody* floor = (AgentBody*)FindColliderFloorContact(self, 0, &kind);
+        if (floor != 0) {
+            Vec02 scale;
+            u128 k = Vu0::FromFloatAt(D_00274AD0[kind]);
+            Vu0::Q(push) = Vu0::MulX(Vu0::Q(floor->v80), k);
+            Vu0::Q(scale) = k;
+        } else {
+            push = g_unitZVector;
+        }
+        BuildAxisAngleMatrix((void*)&g_unitZVector, self->f638, &spin);
+        BuildShortestArcRotation(&g_unitZVector, &push, &arc);
+        MulRotationInto(self, arc, spin);
+    }
+    ClearRootTries(self);
+    self->fB14 = 0;
+}
 
 extern f32 g_gameClock[];
 s32 GetAgentRosterState(Agent* self);
@@ -1049,7 +1163,77 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
 
 s32 GetAgentRosterState(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)self->f720 + 0x50); }
 
-INCLUDE_ASM(func_001C96D8);
+#include "object_message.h"
+
+struct AgentHit {
+    PlacedObject* obj;      // 0x00: what was hit
+    u8 pad04[0x0C - 0x04];
+    s32 flags;              // 0x0C
+    s32 mask;               // 0x10
+    u8 pad14[0x28 - 0x14];
+    f32 height;             // 0x28
+    u8 pad2C[0x30 - 0x2C];
+    Vec02 push;             // 0x30
+};
+
+struct AgentNotice {
+    Agent* self;
+    PlacedObject* obj;
+};
+
+s32 HandleObjectEvent(Agent* self, AgentHit* ev);
+void TurnColliderTowardHeading(Agent* self);
+void ChangeAgentState(Agent* self, s32 state, void* arg);
+extern const Vec02 g_unitXVector;
+
+s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
+{
+    SlotMessage msg;
+    if (self->fBD8 != 0) {
+        return 1;
+    }
+    if (self->fB0C != 0 && (ev->obj->desc->flags & 2) != 0 && IsObjectInPool(self->fB0C, (Collider*)ev->obj) != 0) {
+        return 1;
+    }
+    s32 handled = HandleObjectEvent(self, ev);
+    if (handled == 0 || (ev->flags & 0x20) == 0) {
+        return handled;
+    }
+    void* key = 0;
+    s32 i = self->fAC4;
+    while (--i >= 0) {
+        Pend08* r = &self->fAC8[i];
+        if (r->f00 & ev->mask) {
+            key = r->obj;
+            break;
+        }
+    }
+    if (*(s32*)((u8*)self + 0xBDC) != 0) {
+        if (0.0001f < Vu0::ToFloat(Vu0::Length(Vu0::Q(ev->push)))) {
+            self->fB7C = 0;
+            f32 heading = ArctangentOfRatio(-ev->push.y, -ev->push.x);
+            f32 turn = WrapAngle(heading - self->f638);
+            SetAgentFacingAngles(self, WrapAngle(self->f638 + turn * *(f32*)&self->fBD0), self->fB24);
+            TurnColliderTowardHeading(self);
+        }
+    }
+    ChangeAgentState(self, self->fA68 > 0 ? 16 : 11, key);
+    if (self->fB00 != 0) {
+        msg.kind = 6;
+        Vu0::Q(msg.vb) = Vu0::Q(self->v140);
+        msg.vb.z = ev->height;
+        if (ev->obj != 0 && (ev->obj->desc->flags & 1) != 0) {
+            Vu0::Q(msg.va) = Vu0::DivX(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(ev->obj->v140)), Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(ev->obj->v140))));
+        } else {
+            Vu0::Set(msg.va, Vu0::NormalizeOrMoved(Vu0::Q(ev->push), Vu0::Q(g_unitXVector)));
+        }
+        ((BaseObject*)self->fB00)->desc->m1B((BaseObject*)self->fB00, &msg);
+    }
+    ((AgentNotice*)&msg)->self = self;
+    ((AgentNotice*)&msg)->obj = ev->obj;
+    self->desc->m0E(self, 0x17, &msg);
+    return handled;
+}
 
 // What slot 76 is asked about: a kind and the object concerned.
 struct AgentRequest { s32 kind00; BaseObject* ref04; };
@@ -1108,7 +1292,42 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
 }
 
-INCLUDE_ASM(func_001C9AF8);
+f32 ClampToRange(void* range, f32 x);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
+
+void func_001C9AF8(Agent* self)
+{
+    s32 last = self->f92C - 1;
+    s32 n = self->f930;
+    n = (n < last) ? n : last;
+    Vec02 target;
+    Vu0::Q(target) = Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (n << 4)));
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+    f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    f32 t = ClampToRange((u8*)self + 0xB9C, dist / __builtin_fabsf(F(f32, 0xB94)));
+    f32 time = t * F(f32, 0xB98);
+    Vec02 vel;
+    Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time * -0.5f));
+    self->desc02()->m20(self, &vel);
+    F(f32, 0xBA4) = g_gameTime[0] + time;
+    f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    F(Vec02, 0xBB0) = target;
+    u128 pos = Vu0::MulAddX(Vu0::Q(vel), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time));
+    Vu0::Q(F(Vec02, 0xBC0)) = pos;
+    if (1.0f < speed) {
+        f32 ang = ArctangentOfRatio(d.y, d.x);
+        if (F(f32, 0xB94) < 0.0f) ang += 3.14159265f;
+        SetAgentFacingAngles(self, ang, 0.0f);
+        Vec02 w;
+        u128 s = Vu0::FromFloat(-1.0f);
+        u128 r = Vu0::RotateTransposed(F(Mat02, 0x660), Vu0::MulX(Vu0::Q(vel), s));
+        Vu0::Q(w) = s;
+        Vu0::Q(F(Vec02, 0x640)) = r;
+    } else {
+        F(Vec02, 0x640) = D_00248D30;
+    }
+}
 
 f32 GetAnimationMarkerTime(void* obj, s32 id);
 void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
@@ -1412,9 +1631,43 @@ void SetAgentSecondaryTarget(Agent* self, s32 value)
 
 }
 
-extern const f32 D_0024DA90 = 3.40282347e+38f;
+s32 GatherObjectsByMode(World* host, s32 a1, s32 a2, s32 a3, s32 a4, PlacedObject** out);
 
-INCLUDE_ASM(func_001CAB10);
+void func_001CAB10(Agent* self)
+{
+    PlacedObject* found[0x20];
+    Vec02 vel;
+    Vec02 here;
+    Vec02 there;
+    Vec02 lead;
+    s32 n = GatherObjectsByMode(self->world, 5, self->fB4C, 0, 0x20, found);
+    PlacedObject* pick = 0;
+    f32 best = 3.40282347e+38f;
+    vel = self->v150;
+    vel.z = 0.0f;
+    Vu0::Vec k;
+    k.q = Vu0::FromFloatAt(D_00274CF0);
+    *(Vu0::Vec*)&lead = k;
+    Vu0::Q(here) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(vel), Vu0::Q(lead));
+    for (s32 i = 0; i < n; i++) {
+        PlacedObject* obj = found[i];
+        vel = obj->v150;
+        vel.z = 0.0f;
+        Vu0::Q(there) = Vu0::MulAddX(Vu0::Q(obj->pos), Vu0::Q(vel), k.q);
+        *(Vu0::Vec*)&lead = k;
+        u128 delta = Vu0::Sub(Vu0::Q(here), Vu0::Q(there));
+        f32 d = Vu0::ToFloat(Vu0::Dot(delta, delta));
+        if (obj == self->fB48) {
+            d *= 0.5f;
+        }
+        if (d < best) {
+            best = d;
+            pick = obj;
+        }
+    }
+    self->fB48 = pick;
+    self->fB40 = 1;
+}
 
 void SetAgentPrimaryTarget(Agent* self, s32 value)
 {
@@ -1542,7 +1795,69 @@ s32 IsAgentFree(void)
     return 0;
 }
 
-INCLUDE_ASM(func_001CB3D0);
+// What func_001CB3D0 reads of the player's f23A0 and f23A8: a word that, set, ends the test.
+struct Blocker_23A0 {
+    u8 pad00[0x54];
+    s32 f54;                // 0x54
+};
+struct Blocker_23A8 {
+    u8 pad00[0x6C];
+    s32 f6C;                // 0x6C
+};
+
+s32 MaskWorldBitsBySave(void);
+s32 IsObjectOfKind(void* obj, s32 kind);
+
+s32 func_001CB3D0(Agent* self)
+{
+    Player* t = (Player*)self->desc08()->m62(self);
+    if (IsObjectOfKind(t, 7) == 0) {
+        return 0;
+    }
+    if (t->f2220 != 6) {
+        return 0;
+    }
+    Vec02 d;
+    // The difference is kept, and a copy of it stored and used up in case 0 (vmove).
+    u128 diff = Vu0::Sub(Vu0::Q(t->v140), Vu0::Q(self->v140));
+    u128 dv = Vu0::Copy(diff);
+    Vu0::Q(d) = dv;
+    switch (t->f239C) {
+    case 3:
+        if (MaskWorldBitsBySave() & 0x12000) {
+            return 1;
+        }
+        break;
+    case 0:
+        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+            return 0;
+        }
+        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+            return 0;
+        }
+        if (Vu0::ToFloat(Vu0::Dot(dv, Vu0::Q(t->m110.r[0]))) > 0.0f) {
+            return 1;
+        }
+        break;
+    case 1:
+        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+            return 0;
+        }
+        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+            return 0;
+        }
+        if (Vu0::ToFloat(Vu0::Dot(diff, Vu0::Q(t->m110.r[0]))) < 0.0f) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (t->f2228 == 0x10) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 
 s32 IsAgentFacingBlocked(Agent* self)

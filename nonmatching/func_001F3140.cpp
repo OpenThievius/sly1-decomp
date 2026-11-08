@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 159/184 (86.4%), checked 2026-11-07
+// Tried night-close8: the inner counter, the index or the entry pointer declared at the top: no change; the row written through (&span.x)[k]: worse.
 #include "common.h"
 #include "fpu.h"
 #include "globals.h"

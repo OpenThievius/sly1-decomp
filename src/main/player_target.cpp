@@ -8,14 +8,7 @@
 #include "shapes.h"
 #include "vu0.h"
 #include "globals.h"
-
-// The file's .rodata, in retail's order: the constants and jump tables only its assembly reads.
-extern const f32 D_0024DAA0 = -3.40282347e+38f;
-INCLUDE_RODATA(jtbl_0024DAB0);
-extern const f32 D_0024DAD0 = -3.40282347e+38f;
-INCLUDE_RODATA(D_0024DAD4);
-INCLUDE_RODATA(jtbl_0024DAE0);
-INCLUDE_RODATA(jtbl_0024DB00);
+#include "game_progress.h"
 
 struct __attribute__((aligned(16))) OnOffDefaultsBlock { f32 f[36]; };
 
@@ -52,7 +45,218 @@ OnOffDefaultsBlock g_onOffObjectDefaults = {
 };
 float D_00274EF0[3] = {2500.0f, 0.0f, 1.0f};
 
-INCLUDE_ASM(func_001CDFB8);
+struct TargetShape_1CDFB8;
+typedef void (*TargetShapeFn_1CDFB8)(TargetShape_1CDFB8* self, Vec02* at, s32 a, Vec02* out, s32 b, s32 c, f32* t);
+struct TargetShape_1CDFB8 { TargetShapeFn_1CDFB8* vtbl; };
+struct TargetCurve_1CDFB8 : BaseObject {
+    TargetShape_1CDFB8* shape;      // 0x34
+    TargetCurve_1CDFB8* next;       // 0x38
+    u8 pad3C[0x40 - 0x3C];
+    s32 mode40;                     // 0x40
+};
+struct TargetPoint_1CDFB8 : BaseObject {
+    u8 pad34[0x50 - 0x34];
+    TargetPoint_1CDFB8* next;       // 0x50
+    u8 pad54[0x58 - 0x54];
+    s32 mode58;                     // 0x58
+    f32 radius5C;                   // 0x5C
+};
+struct Part_1CDFB8 {
+    u8 pad0[0x140];
+    Vec02 pos;                      // 0x140
+    u8 pad150[0x558 - 0x150];
+    Part_1CDFB8* next;              // 0x558
+    u8 pad55C[0x560 - 0x55C];
+    f32 radius;                     // 0x560
+};
+struct Class75_1CDFB8 : BaseObject {
+    u8 pad34[0x80 - 0x34];
+    Class75_1CDFB8* next;           // 0x80
+    u8 pad84[0x88 - 0x84];
+    u32 flags88;                    // 0x88
+};
+struct C17_1CDFB8 { u8 pad0[0x618]; void* f618; u8 pad61C[0x760 - 0x61C]; s32 f760; };
+struct World_1CDFB8 { u8 pad0[0x1CE4]; C17_1CDFB8* f1CE4; u8 pad1CE8[0x2300 - 0x1CE8]; s32 count2300; };
+struct Chooser_1CDFB8 {
+    u8 pad0[0x14];
+    World_1CDFB8* world;            // 0x14
+    u8 pad18[0x140 - 0x18];
+    Vec02 pos;                      // 0x140
+    u8 pad150[0x2200 - 0x150];
+    void* f2200;                    // 0x2200
+    void* f2204;                    // 0x2204
+    void* f2208;                    // 0x2208
+    f32 f220C;                      // 0x220C
+    void* f2210;                    // 0x2210
+    u8 pad2214[0x23A0 - 0x2214];
+    void* f23A0;                    // 0x23A0
+    f32 f23A4;                      // 0x23A4
+    void* f23A8;                    // 0x23A8
+    u8 pad23AC[0x23B0 - 0x23AC];
+    void* f23B0;                    // 0x23B0
+    u8 pad23B4[0x23CC - 0x23B4];
+    void* f23CC;                    // 0x23CC
+};
+extern List01 g_class75List;
+void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
+void ConvertPositionToWorld(void* obj, Vec02* out);
+s32 IsObjectOfKind(void* obj, s32 kind);
+s32 GetObjectWorldPosition(void* obj, Vec02* out);
+s32 CompletesWorldBits(s32 bits);
+void func_001C61E0(Chooser_1CDFB8* self, s32 mode);
+void UpdatePlayerAimTarget(Chooser_1CDFB8* self);
+s32 MaskWorldBitsBySave(void);
+
+s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
+{
+    Vec02 a;
+    Vec02 b;
+    f32 curveT;
+    f32 vectorT;
+    s32 kind = -1;
+    f32 best = target != 0 ? -3.40282347e+38f : D_00274E00;
+    Class75_1CDFB8* obj;
+    TargetCurve_1CDFB8* curve;
+    Part_1CDFB8* part;
+    TargetPoint_1CDFB8* point;
+    TargetCurve_1CDFB8* vector;
+    C17_1CDFB8* c17;
+    f32 curveU;
+    f32 vectorU;
+    f32 dist;
+
+    for (TargetCurve_1CDFB8* c = (TargetCurve_1CDFB8*)g_targetCurveList.head; c != 0; c = c->next) {
+        TransformPointBetweenFrames(0, c->parent, &self->pos, &a);
+        TargetShape_1CDFB8* s = c->shape;
+        if (s->vtbl[10] != 0) {
+            s->vtbl[10](s, &a, 0, &b, 0, 0, &curveT);
+        }
+        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b))));
+        if (d < best || c == target) {
+            curveU = curveT;
+            best = best <? d;
+            curve = c;
+            kind = 0;
+        }
+    }
+    for (TargetPoint_1CDFB8* p = (TargetPoint_1CDFB8*)g_targetPointList.head; p != 0; p = p->next) {
+        ConvertPositionToWorld(p, &a);
+        dist = Vu0::Distance(a, self->pos);
+        dist = __builtin_fabsf(dist - p->radius5C);
+        if (dist < best || p == target) {
+            best = best <? dist;
+            point = p;
+            kind = 1;
+        }
+    }
+    for (Part_1CDFB8* q = (Part_1CDFB8*)g_partList.head; q != 0; q = q->next) {
+        dist = Vu0::Distance(q->pos, self->pos);
+        dist = __builtin_fabsf(dist - q->radius);
+        if (dist < best || q == target) {
+            part = q;
+            best = best <? dist;
+            kind = 2;
+        }
+    }
+    for (Class75_1CDFB8* o = (Class75_1CDFB8*)g_class75List.head; o != 0; o = o->next) {
+        if (o != self->f2210 && (o->flags88 & 1) && (target == 0 || o == target) && IsObjectOfKind(o, 0x76) != 0) {
+            GetObjectWorldPosition(o, &a);
+            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(self->pos)))) - D_00274E08;
+            if (d < (best <? 0.0f) || o == target) {
+                best = best <? d;
+                obj = o;
+                kind = 6;
+            }
+        }
+    }
+    for (TargetCurve_1CDFB8* v = (TargetCurve_1CDFB8*)g_targetVectors.list.head; v != 0; v = v->next) {
+        TransformPointBetweenFrames(0, v->parent, &self->pos, &a);
+        TargetShape_1CDFB8* s = v->shape;
+        if (s->vtbl[10] != 0) {
+            s->vtbl[10](s, &a, 0, &b, 0, 0, &vectorT);
+        }
+        TransformPointBetweenFrames(v->parent, 0, &b, &b);
+        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(b), Vu0::Q(self->pos)))) - D_00274E08;
+        if (d < (best <? 0.0f) || v == target) {
+            d = best <? d;
+            vectorU = vectorT;
+            vector = v;
+            best = d;
+            kind = 7;
+        }
+    }
+    World_1CDFB8* w = self->world;
+    s32 n = g_currentEntry->count64;
+    C17_1CDFB8* c = w->f1CE4;
+    if (c != 0 && n >= w->count2300 && CompletesWorldBits(c->f760) == 0) {
+        GetObjectWorldPosition(self->world->f1CE4->f618, &a);
+        dist = Vu0::Distance(a, self->pos);
+        if (dist < D_00274E18 || self->world->f1CE4 == target) {
+            kind = 5;
+            c17 = self->world->f1CE4;
+        }
+    }
+    s32 r;
+    switch (kind) {
+    case 0:
+        *out = curve->mode40;
+        r = 0x15;
+        self->f23A0 = curve;
+        self->f23A4 = curveU;
+        break;
+    case 1:
+        *out = point->mode58;
+        r = 0x15;
+        self->f23A8 = point;
+        break;
+    case 2:
+        *out = 1;
+        r = 0x15;
+        self->f23B0 = part;
+        break;
+    case 6:
+        self->f2204 = obj;
+        self->f2200 = obj;
+        self->f2208 = 0;
+        func_001C61E0(self, 0);
+        UpdatePlayerAimTarget(self);
+        *out = 6;
+        r = 0x10;
+        break;
+    case 7:
+        self->f2208 = vector;
+        self->f220C = vectorU;
+        self->f2204 = 0;
+        self->f2200 = 0;
+        func_001C61E0(self, 0);
+        UpdatePlayerAimTarget(self);
+        *out = 6;
+        r = 0x10;
+        break;
+    case 5:
+        *out = 7;
+        r = 0x10;
+        self->f23CC = c17;
+        break;
+    default:
+        if (MaskWorldBitsBySave() & 0x12000) {
+            *out = 3;
+            r = 0x10;
+        } else {
+            *out = -1;
+            r = -1;
+        }
+        break;
+    }
+    return r;
+}
+
+// The rest of the file's .rodata, in retail's order after func_001CDFB8's literal and jump
+// table: the constants and jump tables only its assembly reads.
+extern const f32 D_0024DAD0 = -3.40282347e+38f;
+INCLUDE_RODATA(D_0024DAD4);
+INCLUDE_RODATA(jtbl_0024DAE0);
+INCLUDE_RODATA(jtbl_0024DB00);
 
 INCLUDE_ASM(func_001CE590);
 
@@ -233,12 +437,13 @@ INCLUDE_ASM(func_001CFFD0);
 // +0x34), the angle at +0x23C4 and its flip flag at +0x23C8, and the target (a flag at +0x04,
 // the radius at +0x08, a point at +0x10, a pair of points at +0x20).
 struct TargetMover {
-    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); };
+    struct Vt { u8 pad0[4]; void (*placeAt)(TargetMover* self, f32 angle, s32 flag, void* out); void (*place)(TargetMover* self, f32 angle, void* out, s32 flag); u8 pad0C[0x20 - 0x0C]; f32 (*limit)(TargetMover* self); u8 pad24[0x2C - 0x24]; void (*track)(TargetMover* self, f32 angle, void* pos, s32 zero, void* dir, void* up, f32* angleOut, f32* limitOut); };
     const Vt* vt;           // 0x00
     u8 pad04[4];
     s32 wraps;              // 0x08
-    u8 pad0C[0x14 - 0x0C];
-    const f32* low;         // 0x14
+    s32 count;              // 0x0C
+    u8 pad10[0x14 - 0x10];
+    const f32* low;         // 0x14: the angles the mover's pieces start at
 };
 // func_001D12F0 reads the record's active flag (+0x40), its limit (+0x44) and scale (+0x48), and
 // the player's float at +0x23C0.
@@ -302,9 +507,168 @@ void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
     }
 }
 
-INCLUDE_ASM(func_001D0C78);
+// The phase clip a player's sub-states 0x11 and 0x14 advance (+0x2230): its clip, whose length
+// is at +0x34, the time and the speed.
+struct PhaseClip {
+    u8 pad00[0x34];
+    f32 length;             // 0x34
+};
+struct PhasePlayer {
+    u8 pad00[8];
+    PhaseClip* clip;        // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+};
 
-INCLUDE_ASM(func_001D0F20);
+extern f32 D_00274B64;
+void UpdateEightEntryBlendWeights(Player* self, void* slots, s32 n);
+void UpdateSixEntryBlendWeights(Player* self, void* slots, s32 n, void* phase);
+void PlayPhaseCrossingSound(Player* self, void* sounds, f32 t);
+void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+
+void UpdatePlayerTargetPhase(Player* self)
+{
+    switch (self->f2228) {
+    case 0x11: {
+        void* slots;
+        s32 n;
+        void* sounds;
+        switch (self->f239C) {
+        case 0:
+            slots = (u8*)self + 0xA20;
+            n = *(s32*)((u8*)self + 0xB20);
+            sounds = (u8*)self + 0x2470;
+            break;
+        case 1:
+            slots = (u8*)self + 0xB30;
+            n = *(s32*)((u8*)self + 0xC30);
+            sounds = (u8*)self + 0x2480;
+            break;
+        case 3:
+            slots = (u8*)self + 0x910;
+            n = self->fA10;
+            sounds = (u8*)self + 0x2450;
+            break;
+        }
+        UpdateEightEntryBlendWeights(self, slots, n);
+        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        if (self->f2674 == (s32)self->f2678) {
+            s32 m = self->f2684;
+            if (m < 3) {
+                if (m > 0) {
+                    if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA20);
+                }
+            }
+        }
+        PlayPhaseCrossingSound(self, sounds, t);
+        break;
+    }
+    case 0x14: {
+        switch (self->f239C) {
+        case 4:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xE30, *(s32*)((u8*)self + 0x1010), self->watched2230);
+            break;
+        case 2:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xC40, *(s32*)((u8*)self + 0xE20), self->watched2230);
+            break;
+        case 3:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
+            break;
+        }
+        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        PlayPhaseCrossingSound(self, (u8*)self + 0x2440, t);
+        break;
+    }
+    case 0x10:
+        if (self->f239C == 4) {
+            f32 k = 5.0f;
+            u8* p1 = (u8*)self + 0x1190;
+            func_001719E8(self, (s32)self->f628, (s32)self->f620, self->f250C, k, p1);
+            u8* p2 = (u8*)self + 0x1290;
+            func_001719E8(self, (s32)self->f62C, (s32)self->f624, self->f2510, k, p2);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->f250C);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->f2510);
+        }
+        break;
+    }
+}
+
+// What func_001D0F20 reads besides the record: the anchor at +0x23B8, the angle at +0x23C0
+// and the limit at +0x23C4 the mover's track call writes back.
+struct ContactPlayerView {
+    u8 pad0[0x23B8];
+    void* anchor;           // 0x23B8
+    TargetFrameRecord* record;  // 0x23BC
+    f32 angle;              // 0x23C0
+    f32 limit;              // 0x23C4
+};
+
+void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
+void AddPlayerObjectContacts(void* self, s32 code, void* a, void* b, void* c, void* d);
+
+void func_001D0F20(Player* self)
+{
+    Vec02 pos;
+    Vec02 local;
+    Vec02 dir0;
+    Vec02 world;
+    Vec02 dir;
+    Vec02 k;
+    ContactPlayerView* p = (ContactPlayerView*)self;
+    s32 code;
+    switch (self->f239C) {
+    case 5:
+        ConvertPositionToWorld(p->anchor, &pos);
+        AddPlayerObjectContacts(self, 0x23, p->anchor, &pos, 0, (void*)self->f6D4);
+        break;
+    case 4: {
+        TargetFrameRecord* rec = p->record;
+        void* frame = rec->frame;
+        TargetMover* m = rec->mover;
+        TransformPointBetweenFrames(0, frame, (void*)self->f6D4, &pos);
+        if (m->vt->track != 0) {
+            m->vt->track(m, p->angle, &pos, 0, &local, &dir0, &p->angle, &p->limit);
+        }
+        TransformPointBetweenFrames(frame, 0, &local, &world);
+        TransformDirectionBetweenFrames(frame, 0, &dir0, &dir);
+        code = 0x22;
+        if (p->record->active == 0 && m->wraps == 0) {
+            f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(dir)));
+            f32 side = -Vu0::ToFloat(Vu0::Dot(Vu0::Rotate(self->rot, Vu0::Q(self->v640)), Vu0::Q(dir)));
+            if (along < -2.0f || side < 2.0f) {
+                f32 lim = m->low[0] + D_00274E04;
+                if (p->limit < lim) {
+                    if (m->vt->place != 0) {
+                        m->vt->place(m, lim, &local, 0);
+                    }
+                    TransformPointBetweenFrames(frame, 0, &local, &world);
+                    code = 0x2A;
+                    goto call;
+                }
+            }
+            if (2.0f < along || -2.0f < side) {
+                f32 lim = m->low[m->count - 1] - D_00274E04;
+                if (lim < p->limit) {
+                    if (m->vt->place != 0) {
+                        m->vt->place(m, lim, &local, 0);
+                    }
+                    TransformPointBetweenFrames(frame, 0, &local, &world);
+                    Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+                    Vu0::Q(dir) = Vu0::MulX(Vu0::Q(dir), Vu0::Q(k));
+                    code = 0x2A;
+                    goto call;
+                }
+            }
+        }
+    call:
+        AddPlayerObjectContacts(self, code, p->record, &world, &dir, (void*)self->f6D4);
+        break;
+    }
+    }
+}
 
 void FreePooledContactChain(void* a, s32 b);
 

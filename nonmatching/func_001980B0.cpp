@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 432/492 (87.8%), checked 2026-11-07
+// BYTES 432/492 (87.8%), checked 2026-11-08
 // NEAR: StepGaugeColliderAgent. All the calls and the control flow are retail's. Differs only in the vector registers of the first sequence: retail stores the -1 weight (vf6) after the vmulx, so the result takes the vector's register (vf3, tied through Rotate to the vmulax rows) and dt is vf7; ours stores the weight before the multiply, so the result takes the weight's register. Tried the weights as locals, as separate statements, and Vu0::Set for the stores; the order of the stores did not move.
+// Tried (2026-11-08, night-close9): Scalar(-1.0f) inline, Vec values, RotateUntied (RotateRows is far worse): no change; retail loads the rows before the MulX.
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"

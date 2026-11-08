@@ -7,6 +7,7 @@
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
+#include "system.h"
 #include "effect_owner.h"
 #include "effect.h"
 #include "shapes.h"
@@ -827,7 +828,58 @@ void InitEffectSpawner(EffectSpawner* self)
     SetListLinkOffset(self->list314,0x320);
 }
 
-INCLUDE_ASM(func_00154C80);
+f32 ReadBufferedFloat(void* stream);
+void ReadBufferedVector3(void* stream, Vec02* out);
+
+struct MeshTriangle {
+    s32 corner[3];          // 0x00
+    f32 area;               // 0x0C
+};
+struct MeshData {
+    s32 vertexCount;        // 0x00
+    Vec02* vertices;        // 0x04
+    s32 triangleCount;      // 0x08
+    MeshTriangle* triangles;    // 0x0C
+    Vec02* normals;         // 0x10
+    f32 totalArea;          // 0x14
+    u8 pad18[0x20 - 0x18];
+    Vec02 extent;           // 0x20
+};
+
+void func_00154C80(void* p, void* other)
+{
+    MeshData* m = (MeshData*)p;
+    s32 i;
+    m->vertexCount = (s32)ReadBufferedU16(other);
+    m->vertices = (Vec02*)AllocateFrontMemory(m->vertexCount << 4);
+    m->normals = (Vec02*)AllocateZeroedFrontMemory(m->vertexCount << 4);
+    for (i = 0; i < m->vertexCount; i++) {
+        ReadBufferedVector3(other, &m->vertices[i]);
+    }
+    m->triangleCount = (s32)ReadBufferedU16(other);
+    m->triangles = (MeshTriangle*)AllocateFrontMemory(m->triangleCount << 4);
+    m->totalArea = 0.0f;
+    for (s32 k = 0; k < m->triangleCount; k++) {
+        MeshTriangle* t = &m->triangles[k];
+        for (i = 0; i < 3; i++) {
+            t->corner[i] = (s32)ReadBufferedU16(other);
+        }
+        t->area = ReadBufferedFloat(other);
+        m->totalArea = m->totalArea + t->area;
+        u128 first = Vu0::Q(m->vertices[t->corner[0]]);
+        u128 e1 = Vu0::Sub(Vu0::Q(m->vertices[t->corner[1]]), first);
+        u128 e2 = Vu0::Sub(Vu0::Q(m->vertices[t->corner[2]]), first);
+        u128 n = Vu0::Cross(e1, e2);
+        for (i = 0; i < 3; i++) {
+            Vec02* v = &m->normals[t->corner[i]];
+            Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), n);
+        }
+    }
+    ReadBufferedVector3(other, &m->extent);
+    for (i = 0; i < m->vertexCount; i++) {
+        Vu0::Q(m->normals[i]) = Vu0::NormalizeOr(Vu0::Q(m->normals[i]), Vu0::Q(g_unitZVector));
+    }
+}
 
 void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src)
 {
@@ -914,9 +966,92 @@ tail:
     ResolveSpawnRecordTargets(self->rec, self);
 }
 
-extern const f32 D_0024A120 = 3.4028235e+38f;
+void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
+void InheritFlaggedAncestorValue(EffectSpawner* self);
 
-INCLUDE_ASM(func_00155270);
+// Start: the record's flag, the mode and its first delay, the margin and rate from the record's
+// box, then the copy the object named by f310 is made of it when there is none.
+void StartEffectSpawner(EffectSpawner* self)
+{
+    StartPlacedObject(self);
+    if (self->rec->f1B0 != -1)
+        self->rec->f120 = 1;
+    if (self->f2D4 == -1) {
+        if (self->chance != 0.0f || self->continuous != 0)
+            self->f2D4 = 3;
+        else if (self->f2F4 != 0.0f)
+            self->f2D4 = 1;
+        else
+            self->f2D4 = 0;
+    }
+    switch (self->f2D4) {
+    case 2:
+        self->f330 = 3.4028235e+38f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        if (self->continuous != 0)
+            SetEffectSpawnerActiveForever(self);
+        else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
+            SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+        break;
+    case 3:
+        self->f330 = 3.4028235e+38f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
+        if (self->continuous != 0)
+            SetEffectSpawnerActiveForever(self);
+        else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
+            SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+        break;
+    case 0:
+    case 1:
+        self->f330 = 1.0f;
+        self->f32C = 1.0f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        break;
+    }
+    self->f334 = 1.0f;
+    Rec50* rec = self->rec;
+    if (rec->kind == 1) {
+        f32* box = (f32*)((u8*)rec + 0x20);
+        if (self->id2F8[0] != -1) {
+            f32 dx = __builtin_fabsf(box[4] - box[0]);
+            f32 dy = __builtin_fabsf(box[5] - box[1]);
+            f32 dz = __builtin_fabsf(box[6] - box[2]);
+            f32 m = dy < dx ? (dz >? dx) : (dz >? dy);
+            self->margin = m * 0.5f;
+        }
+        if (self->f2E4 != 0) {
+            if (self->f2F4 != 0.0f)
+                self->f334 = (box[4] - box[0]) * (box[5] - box[1]) * (box[6] - box[2]) * 1e-6f;
+            else
+                self->f334 = (box[5] - box[1]) * (box[6] - box[2]) * 1e-4f;
+        }
+    }
+    if (self->f310 != -1) {
+        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1((u8*)self->world, self->f310, (ObjectCycler*)0);
+        if (copy == 0) {
+            copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->f310, -1);
+            copy->rec = (Rec50*)AllocateFrontMemory(0x200);
+            *copy->rec = *self->rec;
+            copy->rec->target = 0;
+            copy->f2D4 = self->f2D4;
+            copy->f2D8 = self->f2D8;
+            copy->delay = self->delay;
+            copy->f2E4 = self->f2E4;
+            copy->chance = self->chance;
+            copy->active = self->active;
+            copy->f2F4 = self->f2F4;
+            copy->continuous = self->continuous;
+            copy->flags = ((copy->flags | (1ULL << 32)) & ~(3ULL << 40)) | (1ULL << 40);
+            copy->rot = copy->m110 = self->rot;
+            if (copy->desc->m0F != 0)
+                copy->desc->m0F(copy);
+        }
+        self->f34C = 0;
+        AppendToList(copy->list314, self);
+        InheritFlaggedAncestorValue(self);
+    }
+}
 
 void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 {
@@ -969,7 +1104,160 @@ void AddSpawnRangeEntry(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
 
 INCLUDE_ASM(func_00155868);
 
-INCLUDE_ASM(func_00155AB0);
+void RandomizeEffectSpawnerDelay(EffectSpawner* self);
+void UpdatePlacedObject(void* self, f32 dt);
+s32 CountListItems(void* list);
+void func_00155868(EffectSpawner* self);
+void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
+s32 IsEffectSpawnerActive(EffectSpawner* self);
+void SpawnEffectsFromRecord(s32 count, Rec50* rec, SpawnFlags* p);
+
+void func_00155AB0(EffectSpawner* self, f32 dt)
+{
+    ListFrame frame;
+
+    if (self->f34C != 0) {
+        RandomizeEffectSpawnerDelay(self);
+    }
+    UpdatePlacedObject(self, dt);
+    if (self->f310 != -1) {
+        return;
+    }
+    if (!IsListEmpty((List01*)self->list314)) {
+        PlacedObject* o = *(PlacedObject**)self->list314;
+        Camera* cam;
+        s32 near;
+        f32 r;
+        u128 d;
+        if (o == 0) {
+            return;
+        }
+        do {
+            if (!(o->flags & ((u64)0x8000 << 23)) && IsObjectAttached(o)) {
+                if (o->parent == 0) {
+                    goto spawn;
+                }
+                cam = g_camera;
+                near = 1;
+                r = o->f80 * cam->fB0;
+                d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(cam->f40));
+                if (!(r * r > Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
+                    near = 0;
+                }
+                if (near) {
+                    goto spawn;
+                }
+            }
+            o = *(PlacedObject**)((u8*)o + 0x320);
+        } while (o != 0);
+        return;
+    } else {
+        if (self->parent != 0) {
+            Camera* cam = g_camera;
+            f32 r = self->f80 * cam->fB0;
+            s32 far = 1;
+            if (!(r * r < Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)),
+                                                 Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)))))) {
+                far = 0;
+            }
+            if (far) {
+                return;
+            }
+        }
+    }
+spawn:
+    if (IsEffectSpawnerActive(self)) {
+        return;
+    }
+    s32 n = 0;
+    switch (self->f2D4) {
+    case 3: {
+        f32 acc = self->f33C + self->f328 * self->f334 * dt;
+        n = (s32)acc;
+        self->f33C = acc - (f32)n;
+        if (1.0f < (f32)n) {
+            if (self->f2D8 >= 0) {
+                if (!(n < self->f2D8)) {
+                    n = self->f2D8;
+                }
+                self->f2D8 -= n;
+            }
+            if (self->continuous != 0) {
+                SetEffectSpawnerActiveForever(self);
+                self->f328 = RandomFloatInRange(self->f2DC, self->f2E0) * 60.0f;
+            } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
+                SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+                self->f328 = RandomFloatInRange(self->f2DC, self->f2E0) * 60.0f;
+            }
+        }
+        break;
+    }
+    case 2:
+        n = (s32)self->f328;
+        if (self->f2D8 >= 0) {
+            if (!(n < self->f2D8)) {
+                n = self->f2D8;
+            }
+            self->f2D8 -= n;
+        }
+        if (self->continuous != 0) {
+            SetEffectSpawnerActiveForever(self);
+        } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
+            SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+        }
+        self->f328 = RandomFloatInRange(self->f2DC, self->f2E0);
+        break;
+    case 0: {
+        f32 acc = self->f33C + self->f328 * self->f334 * dt;
+        n = (s32)acc;
+        self->f33C = acc - (f32)n;
+        if (n == 0) {
+            goto timer;
+        }
+        if (self->f2D8 >= 0) {
+            if (!(n < self->f2D8)) {
+                n = self->f2D8;
+            }
+            self->f2D8 -= n;
+        }
+        break;
+    }
+    case 1: {
+        n = (s32)(self->f2F4 * self->f334);
+        s32 have;
+        BaseObject* held;
+        if (self->rec->f120 == 0) {
+            held = self->held348;
+            have = held != 0 ? *(s32*)((u8*)held + 0x620) : 0;
+        } else {
+            held = self->held344;
+            have = held != 0 ? CountListItems((u8*)held + 0x558) : 0;
+        }
+        s32 left = n - have;
+        n = 0; if (left > n) { n = left; }
+        break;
+    }
+    }
+    if (n != 0) {
+        SpawnFlags p;
+        p.z = (s32)&self->held348;
+        p.b = (s32)&self->held344;
+        p.c = (s32)self;
+        void* prev = self->rec->target;
+        if (self->id2F8[0] == -1) {
+            self->rec->target = self;
+        }
+        SpawnEffectsFromRecord(n, self->rec, &p);
+        self->rec->target = prev;
+    }
+timer:
+    if (self->f330 <= g_gameClock[1]) {
+        self->f328 = RandomFloatInRange(self->f2DC, self->f2E0);
+        self->f330 = g_gameClock[1] + self->f32C;
+    }
+    func_00155868(self);
+}
 
 void InheritFlaggedAncestorValue(EffectSpawner* self)
 {
@@ -1276,6 +1564,7 @@ struct SpawnFrame {
     Mat02 rot;              // 0x10
     Vec02 vel;              // 0x40
     Vec02 spin;             // 0x50
+    SpawnFrame() { FillMemory(this, 0, sizeof(*this)); }
 };
 
 // Makes the count points of a spawn record, their directions and times, in the four arrays out
@@ -1311,9 +1600,61 @@ void func_001579B0(void* a, void* b, s32* out)
     }
 }
 
-INCLUDE_RODATA(D_0024A144);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
+void ComputeChainedWorldFrame(void* a, void* frame, void* out);
+void ComputeObjectFrameAtTime(void* self, void* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
-INCLUDE_ASM(func_00157B88);
+void func_00157B88(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
+{
+    SpawnFrame frame;
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Vec02 tmp;
+    Rec50* r = AT(Rec50*, owner, 0x18C);
+    Rec50* sub = AT(Rec50*, r, 0x90);
+    void* saved = sub->target;
+    if (AT(s32, r, 0x94) == -1) {
+        sub->target = AT(void*, r, 0x18);
+    }
+    if (AT(Rec50*, r, 0x90)->target == AT(void*, r, 0x18)) {
+        ComputeChainedWorldFrame(r, &frame.pos, &frame.rot);
+        AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = &frame;
+    }
+    second->flag = 0;
+    func_001579B0((void*)n, AT(Rec50*, r, 0x90), second->out);
+    AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = 0;
+    f32 last = 3.40282347e+38f;
+    for (s32 i = 0; i < n; i++) {
+        if (AT(Rec50*, r, 0x90)->target != 0) {
+            f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
+            if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
+                last = t;
+                ComputeObjectFrameAtTime(AT(Rec50*, r, 0x90)->target, 0, last, &P, &M, &V, &W);
+            }
+            Vec02* p = (Vec02*)(i * 16 + second->out[0]);
+            Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
+            Vu0::Q(*p) = Vu0::Add(Vu0::Q(P), *(u128*)&tmp);
+            s32 kind = AT(s32, AT(Rec50*, r, 0x90), 0x80);
+            if (kind != 3) {
+                Vec02* v = (Vec02*)(i * 16 + second->out[1]);
+                Vu0::Q(*v) = Vu0::Rotate(M, Vu0::Q(*v));
+                if (kind != 2) {
+                    u128 moved = Vu0::Add(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), Vu0::Q(V));
+                    u128 spin = Vu0::Q(W);
+                    Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = Vu0::Add(moved,
+                        Vu0::Cross(spin, Vu0::Q(kind == 1 ? *(Vec02*)(second->out[0] + i * 16) : tmp)));
+                }
+            }
+        }
+        Vu0::Vec neg = Vu0::Vec::FromFloat(-1.0f);
+        u128 r = Vu0::MulX(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), neg.q);
+        *(Vu0::Vec*)&tmp = neg;
+        Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = r;
+    }
+    AT(Rec50*, r, 0x90)->target = saved;
+}
 
 void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
 {
@@ -2585,9 +2926,54 @@ void StartObjectCycler(ObjectCycler* self)
     self->f64C = self->radius3CC + self->radius3CC;
 }
 
-INCLUDE_RODATA(jtbl_0024A190);
+extern f32 D_002621F8[6];
+extern f32 D_00262210[4];
+extern f32 D_00262220[4];
+void EvaluateHermiteVectorSegment(f32 t, f32 dt, f32 scale, Vec02* p0, Vec02* v0, Vec02* p1, void* v1, Vec02* outPos, Vec02* outVel, s32 zero);
+void ClampVectorLength(Vec02* out, Vec02* in, f32 limit);
+void AddColliderForce(Collider* self, Vec02* force);
+void BuildBasisFromXAndZHint(Vec02* x, Vec02* zHint, Mat02* out);
+void ApproachRotationWithRamp(Mat02* current, Mat02* target, const f32* ramp, f32 dt, s32 zero, Vec02* out);
+void SteerColliderTowardPosition(Collider* self, void* a, void* b, const Vec02* zero, const f32* ramp, f32 dt);
+void SteerColliderTowardRotation(Collider* self, void* a, void* b, const Vec02* zero, const f32* ramp, f32 dt);
+void StepCollider(Collider* self, f32 dt);
 
-INCLUDE_ASM(func_0015AF50);
+// k, the ramp's output, is read and written at its own address (*(u128*)&k): through Vu0::Q
+// its address stays in a saved register, where retail forms it again for each call.
+void func_0015AF50(ObjectCycler* self, f32 dt)
+{
+    switch (self->state) {
+    case 0:
+    case 3:
+    case 5: {
+        Vec02 pos;
+        Vec02 vel;
+        Vec02 accel;
+        Vec02 k;
+        Mat02 basis;
+        f32 t = self->stateEnd + dt - g_gameClock[1];
+        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, (u8*)self + 0x600, &pos, &vel, 0);
+        Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
+        *(u128*)&k = Vu0::FromFloat(1.0f / dt);
+        Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);
+        ClampVectorLength(&accel, &accel, 3000.0f);
+        AddColliderForce(self, &accel);
+        Vu0::Q(accel) = Vu0::Sub(Vu0::Q(accel), Vu0::Q(self->gravity));
+        BuildBasisFromXAndZHint(&vel, &accel, &basis);
+        ApproachRotationWithRamp(&self->rot, &basis, D_002621F8, dt, 0, &k);
+        self->desc02()->m21(self, &k);
+        break;
+    }
+    case 1:
+        AddColliderForce(self, &self->gravity);
+        SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_00262210, dt);
+        SteerColliderTowardRotation(self, 0, 0, &D_00248D30, D_00262220, dt);
+        break;
+    case 6:
+        StepCollider(self, dt);
+        break;
+    }
+}
 
 void UpdateObjectCycler(ObjectCycler* self)
 {
@@ -2763,18 +3149,158 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
     return 1;
 }
 
-INCLUDE_RODATA(jtbl_0024A1D0);
+void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
+void func_00130C58(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
+void SetPlacedObjectVelocityFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
+void ScatterObjectsAtPoint(void* scatter, Vec02* at, s32 a, s32 b);
+void RotateMatrixUpright(Mat02* m, s32 zero, Mat02* out);
+extern u8 D_00261EF0[];
+void StartSoundEffect(s32 a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-INCLUDE_RODATA(jtbl_0024A1F0);
+void func_0015B7B8(ObjectCycler* self, s32 state)
+{
+    if (self->state == state) {
+        return;
+    }
+    switch (self->state) {
+    case 0:
+    case 3:
+    case 5:
+        self->b2C8 = 0;
+        break;
+    case 2:
+        self->desc->m02(self);
+        break;
+    case 6:
+        SetColliderAnchors(self, 0, 0, 0, 0);
+        self->index = 0;
+        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        break;
+    }
+    (*(PlacedObject**)((u8*)self + 0x5D8))->f88 = 14;
+    self->stateEnd = g_gameClock[1];
+    switch (state) {
+    case 0:
+    case 3:
+    case 5: {
+        self->b2C8 = 11;
+        if (state != 5) {
+            f32 a = RandomFloatInRange(-3.14159274f, 3.14159274f);
+            f32 b = RandomFloatInRange(self->p610.a, self->p610.b);
+            ComputePolarOffset(&self->v5F0, a, b, RandomFloatInRange(self->p618.a, self->p618.b));
+            Vu0::Q(self->v5F0) = Vu0::Add(Vu0::Q(self->v5F0), Vu0::Q(self->v190));
+        }
+        if (state == 5) {
+            u128 d = Vu0::Sub(Vu0::Q(self->v5F0), Vu0::Q(self->pos));
+            Vu0::Q(self->v600) = Vu0::MulX(Vu0::DivX(d, Vu0::Length(d)), Vu0::Scalar(50.0f));
+        } else {
+            f32 a = RandomFloatInRange(-3.14159274f, 3.14159274f);
+            f32 b = RandomFloatInRange(self->p620.a, self->p620.b);
+            ComputePolarOffset(&self->v600, a, b, RandomFloatInRange(self->p628.a, self->p628.b));
+        }
+        f32 m[3][4];
+        f32 t;
+        f32* p = &self->pos.x;
+        f32* q = &self->v150.x;
+        f32* r = &self->v5F0.x;
+        f32* s = &self->v600.x;
+        for (s32 i = 0; i < 3; i++) {
+            m[i][0] = p[i];
+            m[i][1] = q[i];
+            m[i][2] = r[i];
+            m[i][3] = s[i];
+        }
+        func_00130C58(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
+        t = (f32)((s32)(t * 60.0f) + 1) * 0.0166666675f;
+        self->stateEnd += t;
+        if (self->state == 6 && state == 0) {
+            SetPlacedObjectVelocityFromFloats(self, self->v600.x, self->v600.y, 400.0f);
+            self->nextCheckTime = g_gameClock[1] + RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
+        }
+        break;
+    }
+    case 1:
+        StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        ScatterObjectsAtPoint(D_00261EF0, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
+        self->stateEnd += 2.0f;
+        break;
+    case 2:
+        self->desc->m03(self);
+        self->state = state;
+        self->stateStart = g_gameClock[1];
+        return;
+    case 6: {
+        Mat02 m;
+        RotateMatrixUpright(&self->m110, 0, &m);
+        self->desc02()->m1E(self, &m);
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        SetColliderAnchors(self, 3, 0, 3, 0);
+        self->index = 0;
+        self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);
+        self->f66C = g_gameClock[1];
+        self->stateEnd += RandomFloatInRange(self->p650.a, self->p650.b);
+        break;
+    }
+    }
+    self->state = state;
+    self->stateStart = g_gameClock[1];
+}
 
-extern const FloatPair2 D_0024A210 = {0.0f, 4.73242188f};
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
-
-INCLUDE_ASM(func_0015B7B8);
 
 INCLUDE_ASM(func_0015BC78);
 
-INCLUDE_ASM(func_0015BD48);
+struct ListedFrameItem {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x34 - 0x1C];
+    BaseObject* item;       // 0x34
+    ListedFrameItem* next;  // 0x38
+};
+typedef void (*ItemPointFn)(BaseObject* self, Vec02* in, s32 a, Vec02* out, s32 b, s32 c, s32 d);
+
+// nearest is read at its own address (*(u128*)&nearest): through Vu0::Q the address stays in
+// a pseudo that CSE keeps in a saved register across the walk, where retail forms it again.
+s32 func_0015BD48(ObjectCycler* self, Quadword128* out)
+{
+    ListFrame frame;
+    Vec02 hit;
+    f32 best = D_0024A218[0];
+    for (ListedFrameItem* n = (ListedFrameItem*)self->world->list1C9C.head; n != 0; n = n->next) {
+        Vec02 from;
+        Vec02 nearest;
+        TransformPointBetweenFrames(0, n->frame, &self->v140, &from);
+        ItemPointFn fn = (ItemPointFn)((void**)n->item->desc)[10];
+        if (fn != 0) {
+            fn(n->item, &from, 0, &nearest, 0, 0, 0);
+        }
+        f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(from), *(u128*)&nearest)));
+        if (d < best) {
+            best = d;
+            TransformPointBetweenFrames(n->frame, 0, &nearest, &hit);
+        }
+    }
+    if (best < D_0024A218[0]) {
+        ColliderSpan span;
+        Vec02 below;
+        s32 count;
+        s32 list;
+        PushBackMemoryMark();
+        GatherCollidersInSphere((s32)self->world, (s32)self, &hit, 0, 0, &count, &list, 500.0f);
+        below = hit;
+        below.z = below.z - 500.0f;
+        s32 r = FindNearestSpanObject(0, &hit, &below, count, list, (s32)&span);
+        PopBackMemoryMark();
+        if (r != 0) {
+            *out = *(Quadword128*)&span;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
 
 s32 func_0015BEF0(ObjectCycler* self)
 {
@@ -3606,7 +4132,26 @@ f32 MeasureTextHeight(TextReader* self)
     return width * (f32)lines;
 }
 
-INCLUDE_ASM(func_0015E1F0);
+f32 func_0015E1F0(TextReader* self)
+{
+    f32 best = 0.0f;
+    s32 newline = 10;
+    func_0015DB80(self);
+    f32 width = best;
+    s32 c;
+    while ((c = func_0015DBE0(self)) != 0) {
+        if (c == newline) {
+            best = (width >? best);
+            width = 0.0f;
+        } else {
+            Font* holder = self->font;
+            const FontVt* glyph = holder->vt;
+            width += glyph->width((Font*)((u8*)holder + glyph->adj3), c);
+        }
+    }
+    best = (width >? best);
+    return best;
+}
 
 void MeasureText(void* self, f32 f, f32* out1, f32* out2)
 {
@@ -3699,7 +4244,64 @@ void UploadAllFontImages(void)
 
 LINKER_REMNANT(func_0015E678);
 
-INCLUDE_ASM(func_0015E6A8);
+// A frame's colour record, as func_0015E6A8 reads it: 64-byte entries whose quadwords at +0x10
+// and +0x20 hold colours as four words, a run of colour quadwords, and where the packed colours go.
+struct ColorEntry_15E6A8 {
+    u8 pad00[0x10];
+    Quad16 c10;             // 0x10
+    Quad16 c20;             // 0x20
+    u8 pad30[0x40 - 0x30];
+};
+
+struct ColorOut_15E6A8 {
+    u8 pad00[0x08];
+    u32* out08;             // 0x08: the packed c10 of each entry
+    u8 pad0C[0x14 - 0x0C];
+    u32* out14;             // 0x14: the packed c20, then two words on, the packed run
+};
+
+struct ColorRecord_15E6A8 {
+    ColorEntry_15E6A8* begin;   // 0x00
+    ColorEntry_15E6A8* end;     // 0x04
+    Quad16* run;                // 0x08: one quadword for each entry
+    ColorOut_15E6A8* out;       // 0x0C
+};
+
+// A colour as four words, packed into one: each word a byte, the first lowest.
+static inline u32 PackColor(Quad16 c)
+{
+    return c.w[0] | c.w[1] << 8 | c.w[2] << 16 | c.w[3] << 24;
+}
+
+// The interrupt handler that packs the colours of the frame's record (g_drawFrameData) and moves
+// on to the next record, then lets the VIF1 go on (FBRST's STC) and ends the handler.
+s32 func_0015E6A8(s32 cause)
+{
+    ColorRecord_15E6A8* r = (ColorRecord_15E6A8*)g_drawFrameData;
+    ColorEntry_15E6A8* begin = r->begin;
+    ColorEntry_15E6A8* end = r->end;
+    ColorOut_15E6A8* o = r->out;
+    ColorEntry_15E6A8* e;
+    u32* out = o->out08;
+    for (e = begin; e < end; e++) {
+        *out++ = PackColor(e->c10);
+    }
+    out = o->out14;
+    for (e = begin; e < end; e++) {
+        *out++ = PackColor(e->c20);
+    }
+    s32 n = end - begin;
+    out += 2;
+    Quad16* run = ((ColorRecord_15E6A8*)g_drawFrameData)->run;
+    Quad16* qend = run + n;
+    for (Quad16* q = run; q < qend; q++) {
+        *out++ = PackColor(*q);
+    }
+    g_drawFrameData += 0x10;
+    *(volatile u32*)0x10003C10 = 8;
+    SyncAndEnableInterrupts();
+    return -1;
+}
 
 void InitRenderFrames(void)
 {

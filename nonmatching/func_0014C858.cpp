@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 661/848 (77.9%), checked 2026-11-07
+// BYTES 769/848 (90.7%), checked 2026-11-08
+// NIGHT-LOW2 (2026-11-08): the pass and made counters are s32 (retail's slti), the slot of the search loop is a variable of its own (cand: one variable across the loop and the pick kept the slot table's base in s3), made is declared before the rotation pointer, and the wait's low bound is read as self->f43C (loaded before the f458 store, as retail's). Still differs: the prologue's order (retail forms posp in v1 first and stores it last), the length's qmfc2 (v1 in retail), the 20 of the pick's index product and the end's constant 1 and clock address (v0/v1 swapped).
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -46,10 +47,10 @@ void func_0014C858(GaugeManager* self)
     f32 screen[2];
     Vec02 rot[3];
     Vec02* posp = &pos;
+    s32 made = 0;
     Vec02* rotp = &rot[0];
     f32* wait = &self->f43C;
-    u32 made = 0;
-    u32 pass;
+    s32 pass;
     s32 best;
     s32 i;
     f32 bestDist;
@@ -71,13 +72,13 @@ void func_0014C858(GaugeManager* self)
         pass = 0;
         do {
             for (i = 0; i < self->slotCount; i++) {
-                slot = &self->slots[i];
-                if (slot->taken != 0 || slot->key != 0) {
+                GaugeSlot* cand = &self->slots[i];
+                if (cand->taken != 0 || cand->key != 0) {
                     continue;
                 }
-                GetObjectWorldPosition(slot->f4, (f32*)&pos);
+                GetObjectWorldPosition(cand->f4, (f32*)&pos);
                 if (pass == 0) {
-                    ProjectPointToCamera(*(void**)g_camera, (u8*)slot->obj + 0x140, screen);
+                    ProjectPointToCamera(*(void**)g_camera, (u8*)cand->obj + 0x140, screen);
                     if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
                         continue;
                     }
@@ -116,10 +117,9 @@ void func_0014C858(GaugeManager* self)
         made++;
         AddAnimationPlayerRecordCallback(slot->key, self);
         self->f458 = self->f458 + 1;
-        self->f45C = g_gameClock[1] + RandomFloatInRange(wait[0], wait[1]);
+        self->f45C = g_gameClock[1] + RandomFloatInRange(self->f43C, wait[1]);
         agent->fC20 = slot;
         slot->taken = 1;
         agent->fC24 = *(f32*)(self->buf430 + 0x14);
     } while (made < 2);
 }
-

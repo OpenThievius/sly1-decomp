@@ -76,7 +76,93 @@ f32 GetSurfacePairBounce(SurfacePair* p)
     return r;
 }
 
-INCLUDE_ASM(func_00185D20);
+// A pooled contact as func_00185D20 fills it: two ends of 0x40 bytes (the body and the part, a
+// surface number, the point and its two transforms), the normal, then the numbers.
+struct PooledEnd {
+    Collider* body;         // 0x00
+    Collider* part;         // 0x04
+    s32 surface;            // 0x08
+    u8 pad0C[4];
+    Vec02 v10;              // 0x10
+    Vec02 v20;              // 0x20
+    Vec02 v30;              // 0x30
+};
+struct PooledContact {
+    PooledEnd end[2];       // 0x00
+    Vec02 v80;              // 0x80
+    f32 f90;                // 0x90
+    f32 f94;                // 0x94
+    f32 f98;                // 0x98
+    s32 kind;               // 0x9C
+    s32 fA0;                // 0xA0
+    s32 fA4;                // 0xA4
+    u8 padA8[0xD0 - 0xA8];
+    PooledContact* next;    // 0xD0
+};
+
+void* PopZeroedFreeSlot(void* pool);
+void TransformPointBetweenFrames(void* frame, void* part, void* in, void* out);
+Collider* FindHandlerForSlot(Collider* node, s32 offset);
+void func_001860A8(void* a0, s32 n, Contact03** list);
+
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7)
+{
+    s32 surfaces[2];
+    Vec02 k;
+    PooledContact* c;
+    s32 e;
+    Collider* part;
+    c = (PooledContact*)PopZeroedFreeSlot((u8*)((BaseObject*)a0)->world + 0x1AFC);
+    c->f90 = f;
+    c->v80 = *(Vec02*)a3;
+    PooledEnd* end = c->end;
+    for (e = 0; e < 2; e++) {
+        part = (e != 0) ? (Collider*)a1 : (Collider*)a0;
+        end->part = part;
+        if (part != 0) {
+            end->body = *(Collider**)((u8*)part + 0x50);
+        } else {
+            Vu0::Q(end->v30) = Vu0::Zero();
+            end->body = 0;
+        }
+        end++;
+    }
+    c->end[0].v10 = *(Vec02*)a2;
+    Vu0::Q(k) = Vu0::FromFloat(-f);
+    *(Vu0::Vec*)&c->end[1].v10 = Vu0::MulAddX(Vu0::Vec::Of(*(Vec02*)a2), Vu0::Vec::Of(*(Vec02*)a3), Vu0::Vec::Of(k));
+    c->kind = a4;
+    for (e = 0; e < 2; e++) {
+        PooledEnd* pe = &c->end[e];
+        part = pe->part;
+        if (part == 0) {
+            pe->v20 = pe->v10;
+            surfaces[e] = 0;
+            pe->surface = 0;
+        } else {
+            TransformPointBetweenFrames(0, part, &pe->v10, &pe->v20);
+            s32 surface = *(s8*)((u8*)part + 0x2C8);
+            surfaces[e] = surface;
+            pe->surface = surface;
+        }
+    }
+    c->f94 = GetSurfacePairFriction((SurfacePair*)surfaces);
+    c->f98 = GetSurfacePairBounce((SurfacePair*)surfaces);
+    c->fA0 = a5;
+    c->fA4 = a6;
+    for (e = 0; e < 2; e++) {
+        Collider* obj = FindHandlerForSlot(c->end[e].part, 0x100);
+        if (obj != 0) {
+            void (*fn)(Collider*, PooledContact*, s32) = (void (*)(Collider*, PooledContact*, s32))((s32*)obj->desc)[0x100 / 4];
+            if (fn != 0) {
+                fn(obj, c, e);
+            }
+        }
+    }
+    func_001860A8(((BaseObject*)a0)->world, 1, (Contact03**)&c);
+    c->next = *(PooledContact**)a7;
+    *(PooledContact**)a7 = c;
+    return (s32)c;
+}
 
 INCLUDE_ASM(func_00185F48);
 
@@ -354,7 +440,34 @@ void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5,
     }
 }
 
-INCLUDE_ASM(func_00187A88);
+void func_00187A88(Collider* self, Collider* other, void* a2)
+{
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(other->v140));
+    f32 rs = self->radius3CC;
+    f32 dist2 = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+    f32 sum = rs + other->radius3CC;
+    if (dist2 < 0.0001f) {
+        return;
+    }
+    if (sum * sum < dist2) {
+        return;
+    }
+    f32 dist = Fpu::Sqrt(dist2);
+    Vec02 point;
+    Vec02 n;
+    {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(1.0f / dist);
+        Vu0::Q(n) = Vu0::MulX(Vu0::Q(d), Vu0::Q(k));
+    }
+    {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(-rs);
+        Vu0::Q(point) = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(n), Vu0::Q(k));
+    }
+    CreatePooledContact(dist - sum, self, other, &point, &n, 7, 0, 0, a2);
+}
 
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 {

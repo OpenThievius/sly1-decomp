@@ -115,7 +115,91 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-INCLUDE_ASM(func_001D3E00);
+u64 func_001FD868(f32 x);
+s32 FindObjectAlongSegment(void* p, void* a, void* b, void* out);
+
+struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
+struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
+
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+
+void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j, void* out);
+void SetBlendItemWeights(Gr8B* obj, s32 a1, s32 a2, void* a3);
+void SumBlendEntryVectors(s32 a0, void* a1, s32 a2, void* a3);
+
+void func_001D3E00(TurningCollider* p, void* e, Gr8B* g, void* a3)
+{
+    f32 t;
+    f32 lo;
+    f32 hi;
+    Vec02 va;
+    Vec02 vb;
+    Vec02 vd;
+    Vec02 vc;
+    if (W(e, 0x54) == 0) {
+        t = 0.0f;
+    } else {
+        f32 zero = 0.0f;
+        f32 one = 1.0f;
+        f32 d0 = F(p, 0x640) - F(e, 0x10);
+        f32 d1 = F(p, 0x640) - F(e, 0x60);
+        f32 n = F(e, 0x34) * d0;
+        t = n / (n - F(e, 0x84) * d1);
+        if (t < zero) {
+            t = zero;
+        } else if (one < t) {
+            t = one;
+        }
+    }
+    if (W(e, 0xA4) == 0) {
+        lo = 0.0f;
+        hi = lo;
+    } else {
+        BlendSpans* sp = (BlendSpans*)g->pC0;
+        f32 now = F(a3, 0x14);
+        f32 x = sp->a->t - now;
+        if (x <= 0.0f) {
+            x += g->f34;
+        }
+        f32 q = x / sp->a->len;
+        f32 y = sp->b->t - now;
+        if (y <= 0.0f) {
+            y += g->f34;
+        }
+        f32 r = y / sp->a->len;
+        hi = q;
+        lo = (r <? q);
+        InterpolateBlendEntryPosition(p, e, lo, t, 2, 3, &va);
+        InterpolateBlendEntryPosition(p, e, lo, t, 0, 1, &vb);
+        if (FindObjectAlongSegment(p, &va, &vb, &vc)) {
+            lo = 0.0f;
+            hi = 1.0f - vc.x;
+        } else if (W(e, 0x144) != 0) {
+            InterpolateBlendEntryPosition(p, e, lo, t, 4, 5, &vd);
+            if (FindObjectAlongSegment(p, &vb, &vd, &vc)) {
+                lo = vc.x;
+                hi = 0.0f;
+            } else {
+                lo = 1.0f;
+                hi = 0.0f;
+            }
+        } else {
+            lo = 0.0f;
+            hi = lo;
+        }
+    }
+    u64 hv = func_001FD868(hi);
+    u64 lv = func_001FD868(lo);
+    u64 tv = func_001FD868(t);
+    if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
+        SetBlendItemWeights(g, 0x50, 6, e);
+        SumBlendEntryVectors(6, e, (s32)g->pC0->p8, (u8*)p + 0x640);
+    }
+}
+
+#undef F
+#undef W
 
 // The six blend records func_001D40A0 hands to func_001399F8 (0x50 bytes each): the weight
 // of each at its start; the second record's word at +4 says whether it blends at all.
@@ -222,7 +306,50 @@ void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
     SetBlendItemWeights(*gr, 0x20, 8, slots);
 }
 INCLUDE_ASM(func_001D4348);
-INCLUDE_ASM(func_001D4698);
+static inline f32 MinF(f32 a, f32 b) { return b <? a; }
+static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
+void ComputePolarOffset(Vec02* out, f32 angle, f32 radius, f32 z);
+
+// The velocity of a heading and speed, from six axes of the basis: forward (y) by the
+// heading's length ahead, and right or left by its side (x), the set picked by the walk mode.
+void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, f32 heading, f32 speed)
+{
+    Vec02 h;
+    ComputePolarOffset(&h, heading - self->f638, speed, 0.0f);
+    f32 m;
+    if (10.0f < h.y) {
+        if (self->fA14 == 0) {
+            h.y = 0.0f;
+            m = 0.0f;
+        } else {
+            m = 1.0f;
+        }
+    } else if (h.y < -10.0f) {
+        if (self->fA14 == 1) {
+            h.y = 0.0f;
+            m = 1.0f;
+        } else {
+            m = 0.0f;
+        }
+    } else if (self->fA14 == -1) {
+        m = 0.0f;
+    } else {
+        m = (f32)self->fA14;
+    }
+    if (m == 1.0f) {
+        u128 s = Vu0::Scalar(h.y);
+        u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
+        u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
+        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[3]), s, Vu0::Q(basis[7]), t, Vu0::Q(basis[11]), u);
+    } else {
+        u128 s = Vu0::Scalar(-h.y);
+        u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
+        u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
+        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[1]), s, Vu0::Q(basis[5]), t, Vu0::Q(basis[9]), u);
+    }
+    self->v640.z = 0.0f;
+    Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), Vu0::ScalarAt(*(f32*)((u8*)self->watched2230 + 0x18)));
+}
 
 
 

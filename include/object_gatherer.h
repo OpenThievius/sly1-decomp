@@ -37,7 +37,13 @@ struct ObjectGatherer : Collider {
     f32 f608;               // 0x608: 0.5 at set-up
     f32 f60C;               // 0x60C: 1.0 at set-up
     f32 f610;               // 0x610
-    u8 pad614[0x640 - 0x614];
+    f32 f614;               // 0x614: the speed of state 1 (UpdateObjectGatherer)
+    f32 f618;               // 0x618: the speed of state 2
+    f32 f61C;               // 0x61C: the speed set each update
+    f32 f620;               // 0x620: the weight of the upward push
+    f32 f624;               // 0x624: how near another gatherer is sent to state 2
+    u8 pad628[0x630 - 0x628];
+    Vec02 v630;             // 0x630: the direction it heads in
     Vec02 v640;             // 0x640: the point mode 1 picks
     Vec02 v650;             // 0x650: v140, copied by slot 16
     void* f660;             // 0x660

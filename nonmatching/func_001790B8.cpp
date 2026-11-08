@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 768/772 (99.5%), checked 2026-11-07
+// BYTES 768/772 (99.5%), checked 2026-11-08
 // NEAR: wave 4 e3. 772 bytes, same size; four words differ: the restore of the history entry moved to the front
 //       loads its two quadwords into v0, v1 (retail v1, v0) and so stores them with the registers swapped. The switch, the
 //       frame, the jump table and the history search are retail's. ~12 compiles (struct copy, two quadword copies in either
 //       order, Vu0::Q copies).
+// Night-close2 (2026-11-08): the restore as two u128 copies, in either order or loaded before MoveMemory, gives the same swap (or callee-saved registers); func_001A2E68 has the same pattern.
+// Still differs (2026-11-08, night-close6): tmp declared in the restore block (copy-initialised or assigned), with case 0's two vectors as locals of their own: the same swap.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"

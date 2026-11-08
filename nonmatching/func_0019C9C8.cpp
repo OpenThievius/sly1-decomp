@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 568/580, checked 2026-11-07
-// NEAR: the four corner weights and the blend loops are right but the register allocation and the loop forms differ (the corner index modulo is strength-reduced in retail, the weight array is addressed through two registers).
+// SIZE 576/580, checked 2026-11-08
+// NEAR (2026-11-08, night-sizex1): 580 bytes, retail's size now: the corner index written (i + j + 1) % 4 in the inner loop gives retail's two givs (i + 1 and the modulo's i + 4) and the reversed counter. Still differs (100 lines): the registers, one lower in retail from the start (self t3, corner t2, i t0 reused for i * 4), and the VU0 registers that follow. Earlier: the four corner weights and the blend loops are right but the register allocation and the loop forms differ (the corner index modulo is strength-reduced in retail, the weight array is addressed through two registers).
 #include "common.h"
 #include "switched_collider.h"
 #include "object_set.h"
@@ -242,9 +242,8 @@ void func_0019C9C8(void* a, s32 b, void* c)
     f32 weight[4];
     f32* block = (f32*)(self + 0xE4);
     for (s32 i = 0; i < 4; i++) {
-        s32 v = i + 1;
-        for (s32 j = 0; j < 3; j++, v++) {
-            tri[j] = corner[v % 4];
+        for (s32 j = 0; j < 3; j++) {
+            tri[j] = corner[(i + j + 1) % 4];
         }
         Vec02* points = *(Vec02**)(self + 0xA8);
         Vu0::Q(side1) = Vu0::Sub(Vu0::Q(points[tri[1]]), Vu0::Q(points[tri[0]]));

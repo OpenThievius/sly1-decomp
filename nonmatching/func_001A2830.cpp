@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 576/568, checked 2026-11-07
+// BYTES 186/568 (32.7%), checked 2026-11-08
+// NIGHT-LOW2 (2026-11-08): Vu0::Set for the normalised vector's store (Q(along) = ... keeps &along in s2 across the call) gives retail's 208-byte frame, but the function comes out 20 bytes short (548), so it is not kept here.
+// Night-moved (2026-11-08): NormalizeOrMoved gives the size (568); left: the frame (224 here, 208 in retail) and the order of the first reads; ToFloatMoved did not apply.
 #include "common.h"
 #include "vu0.h"
 #include "effect.h"
@@ -60,7 +62,7 @@ void func_001A2830(Effect* self, f32 dt)
         Vec02 across;
         SplitVectorAlongAxis((Vec02*)&self->qA0, b, &along, &across);
         f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(along)));
-        Vu0::Q(along) = Vu0::NormalizeOr(Vu0::Q(along), Vu0::Q(g_unitXVector));
+        Vu0::Q(along) = Vu0::NormalizeOrMoved(Vu0::Q(along), Vu0::Q(g_unitXVector));
         Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Q(along), Vu0::Scalar(D_0026B6EC + (D_0026B6E8 * dt + 1.0f) * (len - D_0026B6EC)),
                                          Vu0::Q(across), Vu0::Scalar(saved * dt + 1.0f));
     }

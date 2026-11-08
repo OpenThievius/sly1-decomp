@@ -10,9 +10,8 @@
 #include "flag_table.h"
 #include "vu0.h"
 
-// The file's .rodata: the FLT_MAX constant of its assembly function, then the literal of
+// The file's .rodata: the FLT_MAX literal of ResetFlagTable (func_00140D90), then the literal of
 // UpdateFlaggedObject (func_00141690).
-extern const f32 D_00249E3C = 3.4028235e+38f;
 
 // The file's .data, in retail's order: the loader's link table of class 0x38, then the flag
 // table (its bitmap and the snapshot func_00140E10 saves, 0x430 bytes in two labels).
@@ -20,7 +19,20 @@ u32 g_flaggedObjectLinks[4] = { 2, 0x545, 0x5A8, 0 };
 u8 g_flagTable[528] = {0};
 u8 g_flagTableSaved[544] = {0};
 
-INCLUDE_ASM(func_00140D90);
+void* FillMemory(void* p, s32 v, s32 n);
+
+void ResetFlagTable(FlagTable* r)
+{
+    r->nextIndex = 0;
+    r->live.count = 0;
+    FillMemory(r->live.bits, 0, sizeof(r->live.bits));
+    r->changed = 0;
+    Vu0::Q(r->point) = Vu0::FromFloats(3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f);
+    FillMemory(&r->saved, 0, 0x20C);
+    r->hasFade = 0;
+    r->fadeA = -1;
+    r->fadeB = -1;
+}
 
 void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
 {

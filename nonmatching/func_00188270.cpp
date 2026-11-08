@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 560/592 (94.6%), checked 2026-11-07
+// BYTES 560/592 (94.6%), checked 2026-11-08
 #include "common.h"
-// NEAR: 2-3 instruction scheduling diffs: retail moves a2 to s5 right after sq ra, and loads fr.x into a1 (not v0) for the func_0013E430 call
+// NEAR: the prologue only: retail moves a2 to s5 right after sq ra and puts the store of fr.res in the bc1f delay slot; ours stores fr.res first and moves a2 in the slot. Night-close7: func_0013E430 declared (node, p, eps, out), as its definition now is, gives the call retail's a1 and $f12. Tried: the store after the loads or in each arm, the compare flipped, the loads swapped, permute.py --auto.
 
 struct Item_188270 {
     s32 a, b, c;
@@ -49,7 +49,7 @@ struct Frame_188270 {
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
-s32 func_0013E430(Item_188270* node, f32 f, void* p, Item_188270** out);
+s32 func_0013E430(Item_188270* node, void* p, f32 f, Item_188270** out);
 
 s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
 {
@@ -86,7 +86,7 @@ s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
                 continue;
             }
             fr.cur = buf;
-            if (func_0013E430(h, fr.x->f3D4, fr.x->blob, &fr.cur) != 2) {
+            if (func_0013E430(h, fr.x->blob, fr.x->f3D4, &fr.cur) != 2) {
                 continue;
             }
             idx = fr.cur - buf;

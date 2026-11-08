@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 334/376 (88.8%), checked 2026-11-07
+// Tried night-close8: n->key in a named local for both tests, for the tag test only, the tag test as an else-if: no closer (59, 34, 34 differing words).
 // Near match: the same instructions and block layout as retail; only registers differ.
 // Retail reloads n->key for the tag test through a copy ($v1), which GCC CSE does not do here
 // because CSE follows the key-test branch into the tag test. An empty do { } while (0) after the

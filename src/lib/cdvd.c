@@ -13,6 +13,7 @@
 #include "remote_call_client.h"
 #include "semaphore_params.h"
 #include "asm_func.h"
+#include "system.h"
 
 /* What the read's end callback receives, in uncached memory: two byte counts, where each
  * goes and the bytes. */
@@ -37,7 +38,7 @@ s32 D_00279424 = 0;
 s32 g_discNSemaphore = -1;
 s32 g_discSSemaphore = -1;
 volatile s32 D_00279430 = 0;
-u32 D_00279434 = 0;
+volatile u32 D_00279434 = 0;
 s32 D_00279438 = -1;
 s32 D_0027943C = -1;
 s32 D_00279440 = -1;
@@ -98,7 +99,12 @@ s32 SyncDiscNCommand(s32 mode);
 s32 SyncDiscSCommand(s32 mode);
 s32 BeginDiscSCommand(s32 command);
 
-INCLUDE_ASM(func_00202D08);
+/* The alarm handler of WaitDiscTicks: posts the waiter's semaphore and ends the handler. */
+void WakeDiscWaiter(s32 id, u16 time, s32 sema)
+{
+    PostSemaphoreFromInterrupt(sema);
+    SyncAndEnableInterrupts();
+}
 
 void WaitDiscTicks(u16 ticks)
 {
@@ -393,11 +399,82 @@ s32 GetDiscReadPosition(void)
     return 0;
 }
 
-INCLUDE_ASM(func_00203B18);
+/* A read's request: where and how many sectors, the buffer, the read mode's three bytes, and
+ * where the IOP puts the tail and the result. */
+typedef struct ReadRequest {
+    s32 lsn;
+    s32 sectors;
+    void* buffer;
+    u8 tries;
+    u8 speed;
+    u8 pattern;
+    u8 pad0F;
+    u8* tail;
+    u32* result;
+} ReadRequest;
 
-/* The messages of func_00203B18, defined here while it is assembly. */
-const char D_0024F710[] = "call cdread cmd\n";
-const char D_0024F728[] = "cdread end\n";
+/* The read mode: tries, speed and the sector pattern (2048, 2328 or 2340 bytes). */
+typedef struct ReadMode {
+    u8 tries;
+    u8 speed;
+    u8 pattern;
+} ReadMode;
+
+/* Starts a read of sectors into a buffer, the buffer and the request written back from the
+ * data cache first; the end callback copies the tail. */
+s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
+{
+    ReadRequest* r = (ReadRequest*)D_00279500;
+    s32 size;
+
+    if (!(D_00279434 & 1)) {
+        if (func_00203230() == 6)
+            return 0;
+    }
+    if (BeginDiscNCommand(4) == 0)
+        return 0;
+    r->lsn = lsn;
+    r->sectors = sectors;
+    r->buffer = buffer;
+    r->tries = mode->tries;
+    r->speed = mode->speed;
+    r->pattern = mode->pattern;
+    r->tail = D_0027A500;
+    r->result = D_0027A5C0;
+    switch (mode->pattern) {
+    case 1:
+        size = sectors * 0x918;
+        break;
+    case 0:
+        size = sectors << 11;
+        break;
+    case 2:
+        size = sectors * 0x924;
+        break;
+    default:
+        size = sectors << 11;
+        break;
+    }
+    D_0027A5C0[0] = 0;
+    if (!(D_00279434 & 2))
+        WriteBackDataCacheRange(buffer, size);
+    WriteBackDataCacheRange(D_0027A500, 0x90);
+    WriteBackDataCacheRange(r, 0x18);
+    WriteBackDataCacheRange(D_0027A5C0, 4);
+    if (D_00279410 > 0)
+        PrintBuffered("call cdread cmd\n");
+    D_00279454 = 1;
+    D_00279430 = 1;
+    if (CallRemoteService(&g_discNClient, 1, 1, r, 0x18, 0, 0, (void (*)(void*))CopyDiscReadTail, D_0027A500) < 0) {
+        D_00279454 = 0;
+        D_00279430 = 0;
+        PostSemaphore(*(volatile s32*)&g_discNSemaphore);
+        return 0;
+    }
+    if (D_00279410 > 0)
+        PrintBuffered("cdread end\n");
+    return 1;
+}
 
 s32 GetDiscStatus(void)
 {

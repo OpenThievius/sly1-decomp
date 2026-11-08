@@ -26,7 +26,12 @@ struct Camera : BaseObject {
     };
     s32 f90[4];             // 0x90
     s32 fA0[4];             // 0xA0
-    u8 padB0[0x1C0 - 0xB0];
+    f32 fB0;                // 0xB0: scales a spawner's range (func_00155AB0)
+    u8 padB4[0xC0 - 0xB4];
+    f32 fC0;                // 0xC0: sent to VU1 with a listed object's draw (func_0013AD80)
+    u8 padC4[0xD4 - 0xC4];
+    f32 fD4;                // 0xD4: and this
+    u8 padD8[0x1C0 - 0xD8];
     f32 f1C0;               // 0x1C0
     f32 f1C4;               // 0x1C4
     f32 f1C8;               // 0x1C8
@@ -35,7 +40,8 @@ struct Camera : BaseObject {
         f32 f1CC;           // 0x1CC
     };
     f32 f1D0;               // 0x1D0
-    u8 pad1D4[0x1E4 - 0x1D4];
+    u8 pad1D4[0x1E0 - 0x1D4];
+    f32 f1E0;               // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
     f32 f1E4;               // 0x1E4
     f32 f1E8;               // 0x1E8
     u8 pad1EC[0x1F0 - 0x1EC];

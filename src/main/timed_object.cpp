@@ -455,7 +455,89 @@ void SetStaggeredColliderFrozen(TimedGroup* self, void* p)
     g_groupStaggerDirty = 1;
 }
 
-INCLUDE_ASM(func_001AF820);
+struct DrawPoints {
+    u8 pad0[0xC];
+    s32 count;
+    u8 pad10[0x18 - 0x10];
+    Vec02* points;
+};
+
+void DrawCollider(TimedGroup* self, void* a1, void* a2);
+void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+Vec02* AllocateBackMemory(s32 size);
+f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c);
+
+void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
+{
+    DrawCollider(self, a1, a2);
+    s32 st = self->state;
+    if (st == 8 || st < 0) return;
+    void* fp;
+    if (st < 4) {
+        fp = *(void**)((u8*)self + 0xAE4);
+    } else if (st < 8) {
+        fp = *(void**)((u8*)self + 0xAE8);
+    } else {
+        return;
+    }
+    if (fp == 0) {
+        fp = (void*)self->world->f1D14;
+        if (fp == 0) return;
+    }
+    s32 i = 0;
+    PushBackMemoryMark();
+    Vec02* buf = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
+    while (i < self->groupCount) {
+        TimedGroupChild* g = &self->groups[i];
+        f32 acc = 0.0f;
+        DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
+        s32 n = src->count;
+        f32 total = ComputeTimedGroupRamp(self, g);
+        if (*(s32*)((u8*)g + 0xC) != 0) {
+            s32 lim = *(s32*)((u8*)g + 0x20) + 2;
+            if (lim < n) n = lim;
+        }
+        s32 next = i + 1;
+        s32 k;
+        for (k = 0; k < n; k++) {
+            TransformPointBetweenFrames(self, (void*)0, &src->points[k], &buf[k]);
+        }
+        if (*(s32*)((u8*)g + 0xC) != 0) {
+            buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
+        }
+        s32 last = n - 1;
+        for (k = 0; k < last; k++) {
+            u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
+            f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::Dot(d, d)));
+            f32 rest = total - acc;
+            if (rest < len) {
+                f32 t = rest / len;
+                u128 ws = Vu0::Scalar(1.0f - t);
+                u128 p0 = Vu0::Q(buf[k]);
+                u128 wt = Vu0::Scalar(t);
+                u128 p1 = Vu0::Q(buf[k + 1]);
+                Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
+            }
+            func_001268B8(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
+            acc += len;
+            if (total < acc) break;
+        }
+        switch (self->state) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+        case 6:
+            g->fallScale = acc;
+            break;
+        }
+        i = next;
+    }
+    PopBackMemoryMark();
+}
 
 s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 {
@@ -696,8 +778,123 @@ tail:
     self->desc30()->m4D(self, st);
 }
 
-INCLUDE_RODATA(jtbl_0024D070);
-INCLUDE_ASM(func_001B0838);
+struct SequencedTransform {
+    Quad16 rows[4];
+    f32 f40;
+    f32 f44;
+    u8 pad48[8];
+};
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, SequencedTransform* dst);
+void BuildScaledTransformMatrix(Vec02* pos, Mat02* rot, Vec02* scale, SequencedTransform* out);
+void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+
+static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+void func_001B0838(SequencedObject* self, void* a1, Quad16* a2)
+{
+    Vec02 scale;
+    SequencedTransform tmp;
+    Collider* tgt;
+    if (self->state != 8) {
+        BuildPlacedObjectTransform(self, a2, &tmp);
+        switch (self->state) {
+        case 0:
+        case 4: {
+            f32 t;
+            if (self->f5B8 == 0.0f) {
+                t = 1.0f;
+            } else {
+                t = (g_gameTime[0] - self->f55C) / self->f5B8;
+                t = ClampRange(t, 0.0f, 1.0f);
+            }
+            Vu0::Q(scale) = Vu0::Splat(t);
+            scale.x = 1.0f;
+            break;
+        }
+        case 3:
+        case 7: {
+            f32 t;
+            if (self->f5BC == 0.0f) {
+                t = 0.0f;
+            } else {
+                t = 1.0f - (g_gameTime[0] - self->f55C) / self->f5BC;
+                t = ClampRange(t, 0.0f, 1.0f);
+            }
+            Vu0::Q(scale) = Vu0::Splat(t);
+            scale.x = 1.0f;
+            break;
+        }
+        case 1:
+        case 2:
+        case 5:
+            Vu0::Q(scale) = Vu0::Splat(1.0f);
+            break;
+        case 6: {
+            f32 r;
+            scale.x = 1.0f;
+            switch (self->state5D8) {
+            case 0:
+                if (self->f5E0 == 0.0f) {
+                    r = 0.1f;
+                } else {
+                    r = 1.0f - (g_gameTime[0] - self->f5DC) / self->f5E0;
+                    if (r < 0.1f) {
+                        r = 0.1f;
+                        scale.z = scale.y = r;
+                        break;
+                    }
+                    r = ClampRange(r, 0.1f, 1.0f);
+                }
+                scale.z = scale.y = r;
+                break;
+            case 1:
+                if (g_player != 0 && self->f5D4 != 0) {
+                    f32 w;
+                    if (self->f5E4 == 0.0f) {
+                        w = 1.0f;
+                    } else {
+                        w = ClampRange((g_gameTime[0] - self->f5DC) / self->f5E4, 0.0f, 1.0f);
+                    }
+                    Vec02 blend;
+                    Vu0::Q(blend) = Vu0::MulXSum(Vu0::Q(self->v140), Vu0::Scalar(1.0f - w), Vu0::Q(((Collider*)g_player)->v140), Vu0::Scalar(w));
+                    func_001268B8((void*)self->f5D4, a1, &blend, &((Collider*)g_player)->v140, 10.0f, tmp.f40);
+                }
+                r = 0.1f;
+                scale.z = scale.y = r;
+                break;
+            case 2:
+                if (self->f5E8 == 0.0f) {
+                    r = 1.0f;
+                } else {
+                    r = (g_gameTime[0] - self->f5DC) / self->f5E8;
+                    r = ClampRange(r, 0.1f, 1.0f);
+                }
+                scale.z = scale.y = r;
+                break;
+            }
+            break;
+        }
+        }
+        if (self->state >= 0) {
+            if (self->state < 4) {
+                tgt = self;
+            } else if (self->state < 8) {
+                tgt = self->f5D0;
+            }
+        }
+        BuildScaledTransformMatrix(&self->v140, &self->m110, &scale, &tmp);
+        tgt->desc02()->m26(tgt, a1, &tmp);
+    }
+}
 
 s32 TestSequencedObjectMayContact() { return 1; }
 

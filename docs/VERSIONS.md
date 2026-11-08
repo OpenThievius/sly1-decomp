@@ -77,6 +77,15 @@ sits among: the file of the closest function before it that both versions have. 
 definition to replace, it is added at the end of that file's unit. `c_status.tsv` has a row for
 it under that name, noted `only in PAL`.
 
+Two gaps of the tools, found on 2026-11-08. `version_src.py todo` lists game code only, so the
+library functions only PAL has are found from `config/eu/map.tsv`. And a function whose closest
+shared function lies in a `.c` file (PAL's four routines after libm's copy_sign.c, 0x20A730 to
+0x20A870) cannot be built in that file's unit: they are defined in the unit of the library file
+whose code they belong with (src/lib/memory_card_client.cpp, the "rom0:ROMVER" reader), which
+builds and checks them the same way. A function only PAL has whose bytes are one of US's
+original-assembly functions (func_001F7738, US func_00201720's routine linked a second time) is
+classified as that by tools/classify_asm.py, as US's is.
+
     python3 tools/version_src.py todo      # the functions only PAL has, not yet defined: size, tags, file
     python3 tools/check.py src/versions/eu/main/00134000/func_eu_001374E0.cpp func_eu_001374E0
 

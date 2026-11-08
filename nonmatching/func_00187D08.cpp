@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 356/384 (92.7%), checked 2026-11-07
+// BYTES 356/384 (92.7%), checked 2026-11-08
 // NEAR: scheduling only (IntersectSegmentWithSphere): every instruction is right, including sqrt.s through Fpu::Sqrt, the weights as Scalars and the three outputs; retail issues the sub.s of the constant term before the qmfc2 of the second dot product and loads the 0.0 constant (mtc1 zero,f4) after the two mtc1 of the discriminant's terms, with the store of the edge vector before the mtc1 of the third; ours moves those. Tried the terms in separate statements, the stores of the two locals before the test, and three forms of the discriminant test.
+// Tried (2026-11-08, night-close9): ToFloatMoved or ToFloatNow for the dot products (any of them), cc before bb, the dots as Vu0::Vec values: the sub.s and the 0.0 stay where they are or get worse.
 // In the context of its file, src/main/collider_contact.cpp.
 #include "common.h"
 #include "asm_func.h"

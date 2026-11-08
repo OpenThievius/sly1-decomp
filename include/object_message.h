@@ -37,8 +37,8 @@ struct SlotMessage {
         Quad16 qb;          // 0x20
         Vec02 vb;           // 0x20
     };
-    f32 f30;                // 0x30: func_0012D5D0 (event 48, with flags 0x18)
-    u8 pad34[0x38 - 0x34];
+    f32 f30;                // 0x30: func_0012D5D0 (event 48, with flags 0x18); a zone's f620 (kind 9, func_0013D278)
+    f32 f34;                // 0x34: the zone's radius (kind 9, func_0013D278)
     void* f38;              // 0x38: func_0012D5D0 (event 48, flag 0x20)
     u8 pad3C[0x50 - 0x3C];
 };

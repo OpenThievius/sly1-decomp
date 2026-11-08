@@ -15,7 +15,9 @@ own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
 -ffunction-sections and -fdata-sections, so that the build can place each
 function and each global it defines at its address (tools/build.py). The
 functions the compiler makes for a file (a static initialiser, the constructor
-that calls it) take retail's names from config/us/generated.tsv.
+that calls it) take retail's names from config/us/generated.tsv, and a
+function's local static variables (and the guard of one with a constructor)
+take retail's labels from config/us/statics.tsv.
 
 A `.c` file is C, built by the release's cc1 (cc1.exe, or a Linux build's cc1) with the
 driver's C predefines: the toolchain's own runtime (libgcc, compiled from C) has C that only
@@ -44,6 +46,7 @@ import asm_func  # noqa: E402
 import toolchain  # noqa: E402
 import versions  # noqa: E402
 import volatile_slots  # noqa: E402
+import short_loops  # noqa: E402
 
 ROOT = versions.ROOT
 CFLAGS = ROOT / "config" / "cflags.tsv"
@@ -93,6 +96,56 @@ def rename_generated(asm, names, strict=True):
                 continue
             raise CompileError("config/us/generated.tsv names %s, which the compiler did not make" % sym)
         asm = pattern.sub(func, asm)
+    return asm
+
+
+def static_names(source):
+    """[(function, variable, object label, guard label or None)] of the function-local statics
+    config/us/statics.tsv gives `source` (file, function, variable, object, guard)."""
+    path = ROOT / "config" / "us" / "statics.tsv"
+    if not path.exists():
+        return []
+    rel = os.path.relpath(source, ROOT)
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l and not l.startswith("#")]
+    return [(func, var, obj, None if guard == "-" else guard) for f, func, var, obj, guard in rows if f == rel]
+
+
+STATIC_GUARD = re.compile(r"^(_\$tmp_\d+)\.(\d+):", re.M)
+
+
+def rename_statics(asm, rows, strict=True):
+    """The assembly with each function-local static under its retail label. GCC 2.95 gives a
+    function's `static` variable a local symbol of its name and a label number (`cfg.6`, in .bss
+    or .data), and the guard of one with a constructor (tested, and set once it is built) a
+    temporary (`_$tmp_0.7`, in .data, its own section .data._$tmp_0 with -fdata-sections). Both
+    are written out ahead of the function's code, the guard after its variable: a row names the
+    function, the variable and the labels retail has for them (config/us/statics.tsv), and both
+    are looked for between the previous function's end and this one's start. Not strict, a
+    function the file does not define in C (still INCLUDE_ASM, or a near miss's other functions)
+    is skipped; one defined without the static is an error, except outside src/ (a near miss
+    may try another form)."""
+    for func, var, obj, guard in rows:
+        ent = re.search(r"^\s*\.ent\s+%s(?:__\w*)?\s*$" % re.escape(func), asm, re.M)
+        if ent is None:
+            continue  # not matched yet: its assembly holds retail's labels already
+        ends = [m.end() for m in re.finditer(r"^\s*\.end\s+\S+\s*$", asm[:ent.start()], re.M)]
+        chunk = asm[ends[-1] if ends else 0:ent.start()]
+        label = re.search(r"^(%s\.\d+):" % re.escape(var), chunk, re.M)
+        if label is None:
+            if not strict:
+                continue  # a near miss may write it another way
+            raise CompileError("config/us/statics.tsv names %s's static %s, which the compiler did not make"
+                               % (func, var))
+        names = [(label.group(1), obj)]
+        if guard:
+            tmp = STATIC_GUARD.search(chunk, label.end())
+            if tmp is None:
+                raise CompileError("config/us/statics.tsv gives %s's static %s a guard, which the compiler "
+                                   "did not make (no constructor?)" % (func, var))
+            # Its section (.data._$tmp_N, -fdata-sections) takes the label too.
+            names += [(tmp.group(0)[:-1], guard), (".data." + tmp.group(1), ".data." + guard)]
+        for old, new in names:
+            asm = re.sub(r"(?<![\w$.])%s(?![\w$.])" % re.escape(old), new, asm)
     return asm
 
 
@@ -312,16 +365,31 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             s.write_text(asm)
         names = generated_names(source)
         if names:
-            asm = rename_generated(asm, names, strict=(ROOT / "nonmatching") not in src.parents)
+            asm = rename_generated(asm, names, strict=(ROOT / "src") in Path(src).resolve().parents)
+        statics = static_names(source)
+        if statics:
+            asm = rename_statics(asm, statics, strict=(ROOT / "src") in Path(src).resolve().parents)
         if release == "2.9-ee-991111":
             # The assembler that built Sony's libraries put a volatile store into the slot of
             # the call after it; ours leaves the slot empty (tools/volatile_slots.py).
             asm = volatile_slots.fill(asm)
-        if names or release == "2.9-ee-991111":
-            s.write_text(asm)
+        as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()
+        # Ours pads a short loop wrongly where its fragment list breaks near the loop's label, the
+        # original never did (tools/short_loops.py). Each loop is assembled
+        # on its own first, and the text then carries the padding it got there.
+        loops = short_loops.oracle(asm)
+        pads = {}
+        if loops:
+            probe = Path(tmp) / "loops.s"
+            probe.write_text(loops)
+            proc = run_step(run + [str(ee_as)] + as_flags + [str(probe), "-o", str(probe.with_suffix(".o"))], cwd=ROOT)
+            if proc.returncode:
+                raise CompileError("short loops: " + proc.stderr.strip())
+            pads = short_loops.padding(probe.with_suffix(".o").read_bytes())
+        asm = short_loops.rewrite(asm, pads)
+        s.write_text(asm)
         if keep_asm:
             Path(keep_asm).write_text(asm)
-        as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()
         proc = run_step(run + [str(ee_as)] + as_flags + [str(s), "-o", str(Path(tmp) / "unit.o")], cwd=ROOT)
         if not proc.returncode:
             # ee-as (1999) leaves local symbols after the symbol table's sh_info, which modern ld

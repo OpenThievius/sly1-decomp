@@ -31,6 +31,7 @@
 #include "attachment.h"
 #include "animation.h"
 #include "ramp_profile.h"
+#include "mul_rotation.h"
 #include "vu0.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -1466,9 +1467,62 @@ f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self
     return WrapAngle(f12 + r);
 }
 
-INCLUDE_ASM(func_001EA818);
+// from moved towards to by the ramp's step over the distance between them (limit the ramp's
+// third value), the velocity stored to vel when it is given; to itself, and a zero velocity,
+// when the two are nearer than 1e-4. The vectors are Vu0::Vec values: each inline call copies
+// the difference into a pseudo of its own, so retail's difference lives in the frame across the
+// call and its copy in vf3 is caller-saved, and the limit comes before the ramp in the prototype
+// as the other callers have it: retail moves it to $f14 first.
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel)
+{
+    f32 step;
+    Vu0::Vec f;
+    Vu0::Vec t;
+    f.q = from;
+    t.q = to;
+    Vu0::Vec d;
+    d = Vu0::Sub(t, f);
+    f32 len = Vu0::ToFloat(Vu0::Length(d));
+    if (0.0001f < len) {
+        f32 travel = ApproachValueWithRamp(0.0f, len, limit, ramp, &step);
+        if (vel != 0) {
+            *(Vu0::Vec*)vel = Vu0::MulX(d, Vu0::Vec::Scalar(step / len));
+        }
+        return Vu0::MulAddX(f, d, Vu0::Vec::Scalar(travel / len)).q;
+    }
+    if (vel != 0) {
+        *vel = D_00248D30;
+    }
+    return to;
+}
 
-INCLUDE_ASM(func_001EA918);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, f32* axis);
+void BuildAxisAngleMatrix(Vec02* axis, Mat02* out, f32 angle);
+
+void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit)
+{
+    Mat02 rel;
+    Mat02 built;
+    Vec02 axis;
+    f32 angle;
+    f32 step;
+    MultiplyMatrices3x3(from, to, &rel);
+    MatrixToAxisAngle(&rel, &angle, (f32*)&axis);
+    f32 a = angle;
+    f32 travel = ApproachValueWithRamp(0.0f, a, limit, ramp, &step);
+    if (outRot != 0) {
+        if (travel == angle) {
+            *outRot = *to;
+        } else {
+            BuildAxisAngleMatrix(&axis, &built, travel);
+            MulRotationRowsX(outRot, built, *from);
+        }
+    }
+    if (outSpin != 0) {
+        Vu0::Q(*outSpin) = Vu0::MulX(Vu0::Q(axis), Vu0::ScalarAt(step));
+    }
+}
 
 s32 RandomIntInRange(s32 a, s32 b)
 {
@@ -1690,7 +1744,69 @@ void IgnoreStackLocal(void)
 {
 }
 
-INCLUDE_ASM(func_001EB168);
+// A sample FindLocalMinimum keeps: an argument and the function's value there.
+struct MinimumSample {
+    f32 x;
+    f32 y;
+};
+
+typedef f32 (*MinimumFn)(void* ctx, f32 x);
+
+void FindLocalMinimum(f32 x, f32 step, f32 lo, f32 hi, MinimumFn fn, void* ctx, f32* outX, f32* outY)
+{
+    // The bracket's low end, the midpoint below the middle, the middle, the midpoint above it
+    // and the high end.
+    MinimumSample s[5];
+    x = x < lo ? lo : (hi < x ? hi : x);
+    s[0].x = lo >? x - step;
+    s[0].y = fn(ctx, s[0].x);
+    s[2].x = x;
+    s[2].y = fn(ctx, s[2].x);
+    s[4].x = hi <? x + step;
+    s[4].y = fn(ctx, s[4].x);
+    for (;;) {
+        if (s[0].y < s[2].y) {
+            s[4] = s[2];
+            s[2] = s[0];
+            s[0].x = lo >? s[2].x + s[2].x - s[4].x;
+            s[0].y = fn(ctx, s[0].x);
+        } else if (s[4].y < s[2].y) {
+            s[0] = s[2];
+            s[2] = s[4];
+            s[4].x = hi <? s[2].x + s[2].x - s[0].x;
+            s[4].y = fn(ctx, s[4].x);
+        } else {
+            break;
+        }
+    }
+    for (s32 i = 9; i >= 0; i--) {
+        s[1].x = (s[0].x + s[2].x) * 0.5f;
+        s[1].y = fn(ctx, s[1].x);
+        s[3].x = (s[2].x + s[4].x) * 0.5f;
+        s[3].y = fn(ctx, s[3].x);
+        if (s[1].y < s[2].y) {
+            if (s[1].y < s[3].y) {
+                s[4] = s[2];
+                s[2] = s[1];
+            } else {
+                s[0] = s[2];
+                s[2] = s[3];
+            }
+        } else if (s[2].y <= s[3].y) {
+            s[0] = s[1];
+            s[4] = s[3];
+        } else {
+            s[0] = s[2];
+            s[2] = s[3];
+        }
+    }
+    if (outX != 0) {
+        *outX = s[2].x;
+    }
+    if (outY != 0) {
+        *outY = s[2].y;
+    }
+}
 
 LINKER_REMNANT(func_001EB458);
 
@@ -1880,13 +1996,14 @@ s32 AcceptBeatPressColliderRequest(void)
     return 0;
 }
 
-// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18) and
-// a point in its frame (+0x40).
+// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18), a
+// point in its frame (+0x40) and the rotation func_001EBDD0 turns the object's by (+0x50).
 struct FramePoint_001EBD10 {
     u8 pad0[0x18];
     void* object;           // 0x18
     u8 pad1C[0x40 - 0x1C];
     Vec02 point;            // 0x40
+    Mat02 m50;              // 0x50
 };
 
 void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
@@ -1907,7 +2024,21 @@ void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
     Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
 }
 
-INCLUDE_ASM(func_001EBDD0);
+void GetPlacedObjectRotationAt(void* self, f32 t, Mat02* rot, Vec02* spin);
+
+void func_001EBDD0(BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
+{
+    if (self->f67C == 0) {
+        GetPlacedObjectRotationAt(self, t, rot, spin);
+        return;
+    }
+    Mat02 m;
+    Vec02 w;
+    ComputeObjectFrameAtTime(((FramePoint_001EBD10*)self->f67C)->object, 0, 0, &m, 0, &w, t);
+    FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->f67C;
+    MulRotationRowsIndexed(rot, m, f->m50);
+    *spin = w;
+}
 
 void InitTempoAgent(TempoAgent* self)
 {
@@ -2117,8 +2248,106 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
 
 INCLUDE_ASM(func_001EC7A8);
 
-INCLUDE_RODATA(jtbl_0024E740);
-INCLUDE_ASM(func_001EC828);
+void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key);
+
+struct TempoNoticeRec {
+    void* object;           // 0x00
+    u8 pad04[4];
+    s32 id;                 // 0x08
+};
+
+struct TempoLineSub {
+    u8 pad00[0x78];
+    f32 f78;                // 0x78
+};
+
+struct TempoLine {
+    u8 pad00[0x48];
+    u8* rec;                // 0x48
+    u8 pad4C[0x60 - 0x4C];
+    TempoLineSub sub;       // 0x60
+    u8 padDC[0xF0 - 0xDC];
+    Vec02 vF0;              // 0xF0
+};
+
+void ChooseObjectPoolItem(void* timeline);
+void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
+void func_001A8C90(void* timeline, s32 a);
+void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
+void SetCachedVoiceParam(s32 a, s32 b);
+s32 GetCachedVoiceParam(s32 a);
+
+void func_001EC828(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
+{
+    Vec02 a;
+    Mat02 b;
+    Mat02 rot;
+    Vec02 p;
+    s32 key;
+    s32 voice;
+
+    switch (kind) {
+    case 0x13:
+        if (rec->object == self->f7E0 && rec->id == 0x1A5) {
+            TempoLine* line = (TempoLine*)self->fC24[self->fC40];
+            ChooseObjectPoolItem(line);
+            TempoLineSub* sub = &line->sub;
+            f32 half = self->fC88 * 0.5f;
+            f32 t = self->fC64 + self->fC44 - g_gameTime[0] + ((f32*)self->fC3C)[0x684 / 4] * half;
+            u8* r = line->rec;
+            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((BeatPressCollider*)self->fC3C)->f618[self->fC40];
+            GetPlacementRecordTransform(sub, &a, &b, 0);
+            ComputeObjectFrameAtTime(fp->object, 0, &p, &rot, 0, 0, t);
+            Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
+            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
+            *(f32*)(r + 0x690) = d;
+            *(f32*)(r + 0x6F0) = d;
+            sub->f78 = t * 1.25f;
+            func_001A8C90(line, 1);
+            return;
+        }
+        break;
+    case 6: {
+        s32 i;
+        for (i = 0; i < self->fC68; i++) {
+            if ((void*)self->fC6C[i].player == (void*)rec) {
+                break;
+            }
+        }
+        if (i < self->fC68) {
+            RemoveTempoAgentEntry(self, (AnimationPlayer*)rec);
+        }
+        break;
+    }
+    case 0x14:
+        if ((void*)rec == self->fC54) {
+            GetStateWalkerCurrentKey(rec, &key);
+            switch (key) {
+            case 0x4EC: voice = 0; break;
+            case 0x4ED: voice = 1; break;
+            case 0x4EE: voice = 2; break;
+            case 0x4EF: voice = 3; break;
+            case 0x4F0: voice = 4; break;
+            case 0x4F1:
+            case 0x4F2: voice = 5; break;
+            case 0x4F3: voice = 6; break;
+            case 0x4F4:
+            case 0x4F5: voice = 7; break;
+            case 0x4F6: voice = 8; break;
+            case 0x4F7: voice = 9; break;
+            case 0x4F8: voice = 10; break;
+            }
+            if (voice != GetCachedVoiceParam(0)) {
+                D_00275DBC = voice;
+                D_00275DB8 = 1;
+                SetCachedVoiceParam(0, voice);
+            }
+        }
+        break;
+    }
+done:
+    HandleAgentNotification(self, kind, rec);
+}
 
 void SyncTempoAgentEntries(TempoAgent* self)
 {
@@ -2499,7 +2728,31 @@ void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
 
 LINKER_REMNANT(func_001ED900);
 
-INCLUDE_ASM(func_001ED908);
+void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
+f32 Arccosine(f32 x);
+
+f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
+{
+    u128 va = Vu0::Length(Vu0::Q(*a));
+    u128 vb = Vu0::Length(Vu0::Q(*b));
+    f32 la = Vu0::ToFloatMoved(va);
+    f32 lb = Vu0::ToFloat(vb);
+    if (la < 0.0001f || lb < 0.0001f) {
+        *axis = g_unitXVector;
+        return 0.0f;
+    }
+    if (axis != 0) {
+        u128 c = Vu0::Cross(Vu0::Q(*a), Vu0::Q(*b));
+        Vu0::Q(*axis) = c;
+        f32 len = Vu0::ToFloat(Vu0::Length(c));
+        if (1e-8f < len) {
+            Vu0::Q(*axis) = Vu0::MulX(c, Vu0::Scalar(1.0f / len));
+        } else {
+            ComputeUnitPerpendicular(a, axis);
+        }
+    }
+    return Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / (la * lb));
+}
 
 INCLUDE_ASM(func_001EDA80);
 
@@ -2525,9 +2778,112 @@ void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
     out->z = -t[0] * b->x + b->z;
 }
 
-INCLUDE_ASM(func_001EDEF0);
+f32 Sine(f32 x);
+f32 Cosine(f32 x);
+f32 Tangent(f32 x);
 
-INCLUDE_ASM(func_001EE090);
+// The launch velocity from from to to under the gravity at 0x358 of rec (the world's when null),
+// its angle above the straight line by angle's sine of the way to vertical. The speed's product
+// is a variable of its own: retail moves the square root into q's register before it.
+s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle)
+{
+    Vec02 d;
+    f32 h;
+    f32 s = Sine(angle);
+    u8* g;
+    if (rec != 0) {
+        g = rec + 0x350;
+    } else {
+        g = (u8*)g_currentWorld + 0x1EE0;
+    }
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
+    h = d.z;
+    d.z = 0.0f;
+    f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+    f32 a = ArctangentOfRatio(h, dist);
+    if (a < 0.0f) {
+        a = 0.0f;
+    }
+    f32 theta = a + (1.5707964f - a) * s;
+    f32 e = h - dist * Tangent(theta);
+    f32 q = *(f32*)(g + 8) / (e + e);
+    if (q <= 0.0f) {
+        return 0;
+    }
+    q = Fpu::Sqrt(q);
+    f32 v = dist * q;
+    q = v / Cosine(theta);
+    *out = d;
+    out->z = dist * Tangent(theta);
+    Vu0::Q(*out) = Vu0::MulX(Vu0::DivX(Vu0::Q(*out), Vu0::Length(Vu0::Q(*out))), Vu0::Scalar(q));
+    return 1;
+}
+
+// The launch velocity that throws an object from `from` to `to` at the given speed under the
+// gravity of rec (the world's when null), into out: straight at the target when there is almost
+// no gravity; else 0 when the speed cannot reach it.
+s32 func_001EE090(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec)
+{
+    Vec02 d;
+    u8* g;
+    if (rec != 0) {
+        g = rec + 0x350;
+    } else {
+        g = (u8*)g_currentWorld + 0x1EE0;
+    }
+    f32 grav = *(f32*)(g + 8);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
+    if (__builtin_fabsf(grav) < 1.0f) {
+        u128 k = Vu0::Scalar(speed);
+        u128 n = Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30));
+        Vu0::Q(*out) = Vu0::MulX(n, k);
+        return 1;
+    }
+    f32 zero = 0.0f;
+    f32 h = d.z;
+    f32 sp2 = speed * speed;
+    d.z = zero;
+    f32 up = h >? zero;
+    f32 gu = grav * up;
+    u128 lv = Vu0::Length(Vu0::Q(d));
+    f32 up2 = up * up;
+    f32 half = grav * 0.25f;
+    f32 dist = Vu0::ToFloatMoved(lv);
+    f32 b = gu + sp2;
+    f32 dd = dist * dist;
+    {
+        Vec02 flat;
+        Vu0::Q(flat) = Vu0::Q(d);
+        Vu0::Q(d) = Vu0::DivX(Vu0::Q(flat), lv);
+    }
+    f32 c = grav * half;
+    f32 disc = (-b) * (-b) - c * ((dd + up2) * 4.0f);
+    if (disc < zero) {
+        return 0;
+    }
+    disc = Fpu::Sqrt(disc);
+    f32 den = c + c;
+    f32 n2 = b + disc;
+    f32 n1 = b - disc;
+    f32 t1 = n1 / den;
+    f32 t2 = n2 / den;
+    f32 t;
+    if (zero < t1) {
+        t = t1;
+    } else {
+        if (!(zero < t2)) {
+            return 0;
+        }
+        t = t2;
+    }
+    t = Fpu::Sqrt(t);
+    Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(dist / t));
+    f32 z = (up - grav * (t * 0.5f) * t) / t;
+    out->x = d.x;
+    out->y = d.y;
+    out->z = z;
+    return 1;
+}
 
 void ForwardBallisticLaunchVelocity(void* self)
 {
@@ -2897,7 +3253,109 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
     ReleaseAttachRecords(owner, removed);
 }
 
-INCLUDE_ASM(func_001EEF90);
+void UpdateCollider(void* self);
+Attach03* TakeAttachRecord(void* world);
+f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+void StartSoundEffect(s32 a0, s32 a1, Collider* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void BroadcastPointEvent(void* self, void* obj, f32 x);
+
+void UpdateAttachedSet(AttachedSet* self)
+{
+    s32 changed = 0;
+    UpdateCollider(self);
+    if (self->tree.nodes == 0) {
+        return;
+    }
+    World* world = self->world;
+    Attach03* link;
+    Collider* c;
+    for (link = self->links; link != 0; link = link->nextOwn) {
+        link->target->flags538 |= 1ULL << 59;
+    }
+    for (ContactRow03* r = ((Collider*)self->root)->contacts->head; r != 0; r = r->next) {
+        c = r->other;
+        if (c->f360 < 0.0001f) {
+            continue;
+        }
+        if (c->flags538 & ((1ULL << 54) | (1ULL << 42))) {
+            continue;
+        }
+        if (func_001EF5B8(self, (TurningCollider*)c, 0, 0) == 0.0f) {
+            continue;
+        }
+        c->flags538 |= 1ULL << 60;
+        if (self->f278 != 0) {
+            ClearRootTries((Actor6C*)(void*)c);
+        }
+        if (c->flags538 & (1ULL << 59)) {
+            continue;
+        }
+        link = TakeAttachRecord(world);
+        link->owner = self;
+        link->target = c;
+        link->nextOwn = self->links;
+        self->links = link;
+        if (self->f580 == 0) {
+            continue;
+        }
+        if (!(c->v150.z < -100.0f)) {
+            continue;
+        }
+        Vec02 from;
+        Vec02 to;
+        ColliderSpan spans[16];
+        Vec02 off;
+        if (self->f278 != 0) {
+            Vec02 d;
+            ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), &c->v140, 0, &d, 0, 0);
+            Vu0::Q(off) = Vu0::Sub(Vu0::Vec::Of(d), Vu0::Vec::Of(c->v140)).q;
+        } else {
+            off = D_00248D30;
+        }
+        Vu0::Q(from) = Vu0::Sub(Vu0::Vec::Of(c->v370), Vu0::Vec::Of(off)).q;
+        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(c->v140), Vu0::Vec::Of(off)).q;
+        f32 h;
+        if (c == g_player) {
+            h = -75.0f;
+        } else {
+            h = c->boundsMin.z - c->v140.z;
+        }
+        from.z = from.z + h;
+        to.z = to.z + h;
+        if (CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans) <= 0) {
+            continue;
+        }
+        if (spans[0].face50 == 0) {
+            continue;
+        }
+        f32 speed = c->v150.z;
+        f32 six = 6.0f;
+        f32 strength = (-speed <? six) * 0.16666667f;
+        f32 size = ((c->boundsMax.x - c->boundsMin.x) + (c->boundsMax.y - c->boundsMin.y)) * 0.5f;
+        if (speed < 0.0f) {
+            StartSoundEffect(0x22, 0, c, 0, 10.0f, 1.0f, strength, 0.0f, 0.0f, 0, 0);
+            Vu0::Q(spans[0].q[0]) = Vu0::Add(Vu0::Vec::Of(spans[0].q[0]), Vu0::Vec::Of(off)).q;
+            BroadcastPointEvent(&spans[0], self, size * strength);
+        }
+    }
+    for (link = self->links; link != 0; link = link->nextOwn) {
+        c = link->target;
+        u64 f = c->flags538;
+        if (((f >> 59) & 1) != ((f >> 60) & 1)) {
+            c->onSet = (f >> 60) & 1;
+            DetachMsg m;
+            m.self = self;
+            m.obj = c;
+            c->desc->m0E(c, (c->flags538 & (1ULL << 59)) ? 11 : 10, &m);
+            changed = 1;
+        }
+    }
+    ReconcileColliderAttachments(world, &self->links);
+    if (changed) {
+        RebuildAttachedSet(self);
+    }
+}
 
 void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
 {
@@ -3018,7 +3476,32 @@ f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hit
     return spans[0].time[1] - spans[0].time[0];
 }
 
-INCLUDE_ASM(func_001EF768);
+struct SwingRecord {
+    u8 pad00[0x0C];
+    Oscillator* osc;        // 0x0C
+};
+
+void UpdateColliderBounds(Collider* self);
+void ComputeOscillatorMaxDisplacement(Oscillator* osc, Vec02* out);
+
+// Grows the box and both radii by the oscillator's largest swing.
+void UpdateAttachedSetBounds(AttachedSet* self)
+{
+    UpdateColliderBounds(self);
+    SwingRecord* r = (SwingRecord*)self->f278;
+    if (r != 0 && r->osc != 0) {
+        Vec02 d;
+        ComputeOscillatorMaxDisplacement(r->osc, &d);
+        u128 v = Vu0::Q(d);
+        f32 len = Vu0::ToFloatMoved(Vu0::SelfLength(v));
+        u128 lo = Vu0::Q(self->boundsMin);
+        u128 hi = Vu0::Q(self->boundsMax);
+        Vu0::Q(self->boundsMax) = Vu0::Add(hi, v);
+        Vu0::Q(self->boundsMin) = Vu0::Sub(lo, v);
+        self->radius3D0 += len;
+        self->radius3D4 += len;
+    }
+}
 
 s32 RequestAttachedSetLaunch(AttachedSet* self)
 {
@@ -4041,9 +4524,152 @@ void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s3
     }
 }
 
-INCLUDE_RODATA(D_0024E830);
-INCLUDE_RODATA(D_0024E838);
-INCLUDE_ASM(func_001F20A8);
+void DrawTriangleGroups(void* self, f32 a, f32 b, f32 c, f32 d);
+f32 Sine(f32 x);
+u32 GetEntryFlags(u32 packed);
+void PushFontScale(Font* font, f32 x, f32 y);
+void DrawFontString(Font* font, const void* text, void* out, s32 zero, void* d);
+void PopFontScale(Font* font);
+extern f32 D_00276648;
+// Three floats; the first sizes the warp map's level labels.
+extern f32 D_0027663C[];
+
+// A colour of the warp map, one byte per channel, passed to DrawColoredCircle.
+struct WarpColor {
+    u8 r, g, b, a;
+    WarpColor() {}
+    void SetAlpha(s32 a_) { a = a_; }
+    WarpColor(u8 r_, u8 g_, u8 b_, u8 a_)
+    {
+        r = r_;
+        g = g_;
+        b = b_;
+        a = a_;
+    }
+};
+
+// The text layout DrawFontString reads (Layout_137228's fields), filled through its setters.
+struct WarpLabelLayout;
+void SetTextLayoutPosition(WarpLabelLayout* self, f32 x, f32 y);
+void SetTextLayoutSize(WarpLabelLayout* self, f32 x, f32 y);
+void SetTextLayoutColor(WarpLabelLayout* self, s32* c);
+void SetTextLayoutHorizontalAlign(WarpLabelLayout* self, s32 f);
+void SetTextLayoutVerticalAlign(WarpLabelLayout* self, s32 f);
+#ifdef VERSION_EU
+void func_eu_001374E0(WarpLabelLayout* self, s32 f);  // only PAL has this setter
+#endif
+struct WarpLabelLayout {
+    f32 x, y;
+    f32 w, h;
+    s32 color;
+    s32 f14;
+    void* f18;
+    void Pos(f32 x_, f32 y_) { SetTextLayoutPosition(this, x_, y_); }
+    void Size(f32 x_, f32 y_) { SetTextLayoutSize(this, x_, y_); }
+    void Color(s32* c) { SetTextLayoutColor(this, c); }
+    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
+    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+#ifdef VERSION_EU
+    void FlagC(s32 f) { func_eu_001374E0(this, f); }
+#endif
+};
+
+
+void func_001F20A8(T217D_0F0* self)
+{
+    if (self->current == 0) {
+        return;
+    }
+    f32 one = 1.0f;
+    Camera* cam = g_camera;
+    f32 keep1 = cam->f1C4;
+    f32 keep2 = cam->f1C8;
+    SnapCameraZoom(cam, one);
+    if (g_coloredTriangleSet != 0) {
+        Vec02 v;
+        f32 out[2];
+        WarpColor inner;
+        WarpColor outer;
+        f32 b2 = self->blend * self->blend;
+        Vu0::Q(v) = Vu0::Q(self->current->q540);
+        Camera* g = g_camera;
+        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        ProjectPointToCamera(g, &v, out);
+        out[0] = out[0] * 320.0f + 320.0f;
+        out[1] = out[1] * -246.40001f + 246.40001f;
+        inner.r = 0;
+        inner.g = 0;
+        inner.b = 0;
+        inner.a = (u8)(s32)(b2 * 145.0f);
+        outer.r = 0;
+        outer.g = 0;
+        outer.b = 0;
+        outer.a = 0;
+        DrawColoredCircle(out[0], out[1], 40.0f, WrapAngle(g_gameClock.elapsed), 12, (s32*)&inner, (s32*)&outer, 2);
+        f32 s = Sine(g_gameClock.elapsed * 10.0f);
+        DrawTriangleGroups((void*)g_coloredTriangleSet, out[0], out[1], s * 0.2f + one, b2);
+    }
+    for (s32 i = 0; i < 11; i++) {
+        WarpEntry* e = &self->current->entries[i];
+        if (e->reachable == 0) {
+            continue;
+        }
+        WarpColor c0, c1, c2;
+        if (e->f20 != 0) {
+            c0 = WarpColor(0x9F, 0xFF, 0xE8, 0x4B);
+            c1 = WarpColor(0x5C, 0xFF, 0xB6, 0);
+            c2 = WarpColor(0x19, 0xFF, 0x64, 0);
+        } else {
+            c0 = WarpColor(0xE8, 0xE8, 0xE8, 0x4B);
+            c1 = WarpColor(0xB6, 0xB6, 0xB6, 0);
+            c2 = WarpColor(0x4B, 0x4B, 0x4B, 0);
+        }
+        f32 pos[2];
+        ProjectWarpEntryToScreen(self->current, i, 0, pos);
+        f32 size = e->f24 * self->blend;
+        if (AreFloatsNearlyEqual(size, 1.0f, 0.0001f) && i < 9) {
+            s32 slot = self->current->slot;
+            if ((GetEntryFlags((slot << 8) | i) & 2)
+                && !(*(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10) & 2)) {
+                size = Sine(g_gameClock.elapsed * 20.0f) * 0.2f + 0.8f;
+            }
+        }
+        WarpColor a = c0;
+        WarpColor b = c1;
+        DrawColoredCircle(pos[0], pos[1], size * D_00276648, e->phase, 14, (s32*)&a, (s32*)&b, 3);
+        b = c0;
+        a = c1;
+        DrawColoredCircle(pos[0], pos[1], size * D_00276650, -e->phase, 10, (s32*)&b, (s32*)&a, 3);
+        if (i < 9) {
+            s32 slot = self->current->slot;
+            if (GetEntryFlags((slot << 8) | i) & 2) {
+                f32 scale = e->f24;
+                s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
+                Font* font = GetFontById(3);
+                f32 k = D_0027663C[0] * scale;
+                PushFontScale(font, k, k);
+                WarpLabelLayout L;
+                f32 x = pos[0];
+                f32 y = pos[1];
+                b = *(WarpColor*)&self->rgba;
+                b.SetAlpha(0xFF);
+                s32 held = *(s32*)&b;
+                L.Pos(x, y);
+                L.Size(0.0f, 0.0f);
+                T217D_Word tmp;
+                tmp.v = held;
+                L.Color(&tmp.v);
+                L.FlagA(1);
+                L.FlagB(1);
+                DrawFontString(font, (flags & 2) ? "k" : "l", &L, 0, &g_gsPacketWriter);
+                PopFontScale(font);
+            }
+        }
+    }
+    SnapCameraZoom(g_camera, keep1);
+    g_camera->f1C8 = keep2;
+}
 
 // The style above (D_00276620) and D_00276650 are built by the static initialiser GCC writes
 // here (func_001F2688), and its _GLOBAL_$I$ (func_001F2738) follows the 12 bytes the linker left

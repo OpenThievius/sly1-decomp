@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 740/752, checked 2026-11-07
+// SIZE 748/752, checked 2026-11-08
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -15,13 +15,17 @@
 #include "game_clock.h"
 #include "c8b.h"
 #include "vu0.h"
-// NEAR (2026-11-08, worker vu0w4-e1; tools/regdiff.py: code 70.7%): the structure is retail's, as is
-// the vector sequence. Not retail's yet: the loop. Retail keeps 1.0 in $f20 across the six mover calls
-// (swc1 $f0,0($s3); mov.s $f20,$f0) and recomputes the item's address from the index each time
-// (`li v0,80`; `mult v1,s4,v0`; `addu s1,v1,s3`), the C here materialises the 1.0 at each call and
-// strength-reduces the address. Tried: the 1.0 stored first, read back, chained, an unsigned
-// index, a byte pointer with the multiplication, `continue`. (func_001D4148, the same family, steps by
-// 0x20 and has none of this.) NOTE: tools/check.py reports EXACT for this body while the stub
+// NEAR (2026-11-08, night-size1): 748 bytes for retail's 752 (was 740); the vector statements as Vu0::Vec
+// values make the loop big enough that loop.c keeps the item's address as retail's `li v0,80;
+// mult` (the u128 form reduced it). Still differs: retail keeps 1.0 in $f20 across the four mover
+// calls (swc1 $f0,0($s3); mov.s $f20,$f0; frame 0x100 with f20's save), where ours loads it at
+// each call; and retail divides by o->f34 as a ScalarAt (lw s0,52(s0), its slot at 0x20 shared
+// with a20 and a30 declared after it in the loop body). Those two together (a20, a30 in the body,
+// Vec::ScalarAt) give retail's division exactly but 8 bytes more (a20's address kept in s6).
+// Tried for the 1.0: an inline MoverPoseAt passing it, the literal at each call, and before:
+// stored first, read back, chained, an unsigned index, a byte pointer, `continue`.
+// NOTE: tools/check.py reports EXACT for this body while the stub INCLUDE_ASM(func_001D36F0) is
+// in the file, because it then compares the stub's own bytes.
 // INCLUDE_ASM(func_001D36F0) is in the file, because it then compares the stub's own bytes.
 extern s32 D_00274FA0[2];
 extern s32 D_00274FA8[2];
@@ -91,13 +95,13 @@ void func_001D36F0(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
             (*m->vtbl)((Mover8B*)m, self, 0.0f, one, 0, &a0, 0);
             m = o->holder->mover;
             (*m->vtbl)((Mover8B*)m, self, o->f34, one, 0, &a10, 0);
-            Vu0::Q(it->v10) = Vu0::DivX(Vu0::Sub(Vu0::Q(a0), Vu0::Q(a10)), Vu0::FromFloatAt(o->f34));
+            *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::FromFloat(o->f34));
             m = (SlotMover*)FindEntryByObjectId(it->object, self->f610)->mover;
             (*m->vtbl)((Mover8B*)m, self->f610, it->f30, one, 0, &a20, 0);
             m = (SlotMover*)FindEntryByObjectId(it->object, self->f614)->mover;
             (*m->vtbl)((Mover8B*)m, self->f614, it->f40, one, 0, &a30, 0);
-            u128 h = Vu0::FromFloat(0.5f);
-            Vu0::Q(it->v20) = Vu0::MulXSum(Vu0::Q(a20), h, Vu0::Q(a30), h);
+            Vu0::Vec h = Vu0::Vec::FromFloat(0.5f);
+            *(Vu0::Vec*)&it->v20 = Vu0::MulXSum(Vu0::Vec::Of(a20), h, Vu0::Vec::Of(a30), h);
         }
     }
     BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (BlendSlot*)items, 2, (s32)D_00274FB8, (s32)D_00274FB0, &blend);

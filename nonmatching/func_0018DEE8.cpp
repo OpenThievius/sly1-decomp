@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 324/344 (94.2%), checked 2026-11-07
-// NEAR (2026-11-08, vu0w3-e1): registers and two orders only: retail keeps the speed in $f1 (here $f3) and the hit's time in $f3 with 0.25 in $f1 (here $f1 and $f2), and subtracts before it moves the 1.5 into the VU. The rest matches (frame, calls, the Scalar slot).
+// BYTES 336/344 (97.7%), checked 2026-11-08
+// NEAR (2026-11-08, night-close7): all but two instructions: retail subtracts (vsub) before it moves the 1.5 into the VU (mfc1); ours the other way round. The time stored in each arm (now + 1/m), the clamp's 0.25 as a variable before x and the hit's time read first give every register. Tried for the vsub: the difference, the scalar or d named first, Vec values.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -295,22 +295,20 @@ void LaunchTimedContactListObject(ContactListGlider* self)
     Vec02 pos;
     ColliderSpan hit;
     LaunchContactListObject(self);
-    f32 time;
     f32 speed = self->speed6F0;
     if (0.0f < speed) {
-        time = g_gameTime + speed;
+        self->time6FC = g_gameTime + speed;
     } else {
         ComputeObjectFrameAtTime(self->f694, 0, &pos, &rot, 0, 0, D_002699BC);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->v6A0)), Vu0::Q(pos));
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
-        u128 diff = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
-        Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), diff, Vu0::Scalar(1.5f));
+        Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
         func_00141D88(&D_00248D30, &d, &e, 1, &hit, self->rate6F4);
-        f32 ht = hit.time[1];
-        f32 m = ht >? 0.25f;
-        time = g_gameTime + 1.0f / m;
+        f32 x = hit.time[1];
+        f32 m = 0.25f;
+        m = m >? x;
+        self->time6FC = g_gameTime + 1.0f / m;
     }
-    self->time6FC = time;
 }
 

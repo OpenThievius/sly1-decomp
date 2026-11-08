@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 888/904, checked 2026-11-07
-// NEAR: the frame (0x100), the calls and both VU0 loops are retail's. Differences: the early
-//       returns (retail jumps straight to the epilogue with the value in each delay slot; ours
-//       shares a block), the corner count: retail keeps the 4 as a register it loads twice (`li v0, 4;
-//       sll a0, v0, 4` and `blez v0`) where ours folds it, the flag test `(x & 1) == 0` (retail
-//       andi, bnel; ours xori, beqz), the switch's range tests, and the registers ($s2 for the object
-//       in retail, $s1 here). About 20 compiles.
+// SIZE 896/904, checked 2026-11-08
+// NEAR (2026-11-08, night-sizex2): 896 bytes for retail's 904 (was 888). The corner count set in
+// each arm of the table's switch (n = 4 at a join is no constant to CSE, so the allocation and
+// the loop take it from a register as retail does) and a third `case 3: break;` for the
+// switch's tree (retail's compares are bltz, slti 2, then 2) gave 8 bytes and about half the
+// differing words. Still differs: self in s3 and the table in s2 here (retail s2 and s1, with
+// the table copied to s3 and the count put in s1 before the loop: `move s3, s1; li s1, 4`, and
+// the count loaded again as `li v0, 4` for the allocation's size and the loop's first test),
+// the return after func_001CB3D0 (retail bnez to the epilogue, ours beqzl) and the compare
+// tree's order (default, the bltz, first in retail).
+// Before (night-size4): the target's 0x690 flag is read from the target, the zero returns that
+// retail sends straight to the epilogue are joined with || (bnez with move v0,zero in the slot),
+// and the flag test is `(x & 1) == 0` (retail's andi, bnezl).
 #include "common.h"
 #include "switched_collider.h"
 #include "collider.h"
@@ -35,17 +41,14 @@ s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** l
 
 s32 func_001B7280(CompanionAgent* self)
 {
-    if (IsPadSelectFlagHeld(self->world) != 0) return 0;
-    if (F(s32, 0xCCC) != 0) return 0;
+    if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
     if (F(s32, 0xCC8) != 0) return 1;
     PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
     if (target == 0) return 0;
-    if (self->fC14 == 0) return 0;
-    if (self->f724 == 0xB) return 0;
-    if (self->f724 == 0x10) return 0;
+    if (self->fC14 == 0 || self->f724 == 0xB || self->f724 == 0x10) return 0;
     Vec02 a;
     if (IsObjectOfKind(target, 6) != 0) {
-        if (F(s32, 0x690) != 0) {
+        if (*(s32*)((u8*)target + 0x690) != 0) {
             a = *(Vec02*)((u8*)target + 0x6A0);
         } else {
             a = target->v140;
@@ -77,27 +80,31 @@ s32 func_001B7280(CompanionAgent* self)
         if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
     }
     s32 v = GetAgentRosterState(self);
-    if (!(F(s32, 0xCD0) & 1)) {
+    if ((F(s32, 0xCD0) & 1) == 0) {
         if (v != 2) {
             if (func_001CB3D0(self) != 0) return 0;
         }
     }
     if (F(s32, 0xCD0) & 2) return 1;
     f32* table;
+    s32 n;
     switch (v) {
     case 0:
     case 1:
         table = D_00274660;
+        n = 4;
         break;
     case 2:
         table = D_00274620;
+        n = 4;
+        break;
+    case 3:
         break;
     }
     Vec02* pos = F(PlacedObject*, 0x734) != 0 ? &F(PlacedObject*, 0x734)->v140 : &self->v140;
     PushBackMemoryMark();
     Vec02 lo = *pos;
     Vec02 hi = *pos;
-    s32 n = 4;
     Vec02* buf = (Vec02*)AllocateBackMemory(n << 4);
     Collider*** listp;
     s32 count;

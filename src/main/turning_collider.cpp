@@ -12,12 +12,6 @@
 #include "vu0.h"
 
 
-// The file's .rodata: the constants only its assembly reads.
-extern const f32 D_0024D588 = 3.40282347e+38f;
-extern const f32 D_0024D58C = 3.40282347e+38f;
-extern const f32 D_0024D590 = 3.40282347e+38f;
-extern const f32 D_0024D594 = 3.40282347e+38f;
-
 // The file's .data, in retail's order.
 f32 D_00274AD0[2] = { 1.0f, -1.0f };
 ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
@@ -96,7 +90,47 @@ void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
     }
 }
 
-INCLUDE_ASM(func_001C4618);
+struct FollowProbe {
+    u8 pad00[0x50];
+    s32 f50;
+    u8 pad54[0x60 - 0x54];
+    Vec02 v60;
+    Vec02 v70;
+    f32 f80;
+    u8 pad84[0xD0 - 0x84];
+    f32 fD0;
+};
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+
+void func_001C4618(s32 a0, PlacedObject* self, s32 a2, PlacedObject* obj, FollowProbe* out, f32 radius)
+{
+    Vec02 pos;
+    Vec02 dir;
+    out->f50 = 0;
+    Rec2195_224* rec = obj->f224;
+    if (rec != 0 && (rec->fB0 & 0x20) != 0) {
+        TransformPointBetweenFrames(obj, 0, (u8*)rec + 0x60, &pos);
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->f224->f80)->v140));
+        u128 len = Vu0::Length(Vu0::Q(dir));
+        const Vec02* fallback = &g_unitXVector;
+        if (Vu0::ToFloat(len) < 0.0001f) {
+            dir = *fallback;
+        } else {
+            Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), len);
+        }
+        f32 dist = Vu0::ToFloatMoved(len) - 15.0f;
+        out->f80 = dist;
+        if (dist < 0.0001f) {
+            return;
+        }
+        u128 base = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(g_unitZVector), Vu0::Scalar(-radius));
+        u128 tip = Vu0::MulAddX(base, Vu0::Q(dir), Vu0::Scalar(-dist));
+        Vu0::Q(out->v70) = tip;
+        out->f50 = 1;
+        Vu0::Q(out->v60) = base;
+        out->fD0 = 3.40282347e+38f;
+    }
+}
 
 s32 CollectColliderSpansInTree(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
 
@@ -117,7 +151,36 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
     }
 }
 
-INCLUDE_ASM(func_001C4848);
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+void TransformDirectionBetweenFrames(void* from, void* to, void* in, void* out);
+void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
+
+void func_001C4848(s32 a0, PlacedObject* other, PlacedObject* self, Part07* rec)
+{
+    Vec02 dir;
+    Vec02 pos;
+    Vec02 vel;
+    if (rec->f50 != 0) {
+        rec->f50 = 0;
+        if (rec->span.time[0] != 3.40282347e+38f) {
+            u128 k = Vu0::FromFloatAt(rec->f80);
+            Vu0::Set(vel, k);
+            Vu0::Q(dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(rec->v60), Vu0::Q(rec->v70)), k);
+            Vu0::Q(pos) = Vu0::Add(Vu0::Add(Vu0::Q(self->v140), Vu0::Sub(Vu0::Q(rec->span.q[0]), Vu0::Q(rec->v60))), Vu0::Q(dir));
+            TransformPointBetweenFrames(0, self->parent, &pos, &pos);
+            self->desc02()->m1D(self, &pos);
+            ComputeObjectMotionInFrame(self, 0, &other->v140, &vel, 0, 0, 0);
+            f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(vel), Vu0::Q(rec->span.q[2])));
+            if (d < 0.0f) {
+                TransformDirectionBetweenFrames(0, self->parent, &rec->span.q[2], &dir);
+                const Desc02* ds = self->desc02();
+                Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(dir), Vu0::Scalar(-d));
+                ds->m20(self, &vel);
+            }
+        }
+    }
+}
+
 
 void DrawCollider(void);
 
@@ -208,7 +271,39 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
     self->desc06()->m54(self);
 }
 
-INCLUDE_ASM(func_001C4FF8);
+void CopyColliderMeshesInFrame(void* self);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4* out);
+void TransformByMatrixWithW(Mat4* m, Vec02* in, void* out, f32 w);
+
+void func_001C4FF8(TurningCollider* self)
+{
+    Mat4 world;
+    Vec02 k;
+    s32 lowest = -1;
+    s32 i = 0;
+    CopyColliderMeshesInFrame(self);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &self->m110, &world);
+    f32 lowZ = 3.40282347e+38f;
+    for (; i < self->mesh.vertCount; i++) {
+        Vec02* v = (Vec02*)self->mesh.verts + i;
+        if (i == self->mesh.vertCount - 1) {
+            Vu0::Vec low = Vu0::Vec::Of(((Vec02*)self->mesh.verts)[lowest]);
+            Vu0::Q(k) = Vu0::FromFloat(-self->f6CC);
+            Vu0::Q(*v) = Vu0::MulAddX(low, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::Of(k)).q;
+            self->f6D0 = i;
+            Vec02* dst = (Vec02*)self->meshCopy.verts + i;
+            self->f6D4 = (s32)dst;
+            TransformByMatrixWithW(&world, v, dst, 1.0f);
+        } else if (v->z < lowZ) {
+            lowZ = v->z;
+            lowest = i;
+            self->f6D8 = ((Vec02*)self->meshCopy.verts + i);
+        }
+    }
+}
+
+// The rest of the file's .rodata, after the literal of func_001C4FF8.
+extern const f32 D_0024D594 = 3.40282347e+38f;
 
 void StepCollider(void* self);
 void ApplyTurningColliderDrive(TurningCollider* self);

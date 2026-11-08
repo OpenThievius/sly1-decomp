@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 397/540 (73.5%), checked 2026-11-07
+// BYTES 411/540 (76.1%), checked 2026-11-08
+// NIGHT-DECLS (2026-11-08): ComputeObjectFrameAtTime declared void as defined (func_00125750): 397 -> 411 bytes; the stack address of the next call moves with it. Still differs as above.
 // NEAR: GetAimRotation. The calls, the frame and the VU0 part are retail's. The two clamps differ: retail keeps the yaw in f3 (the polynomial's sum is added into f3, compared with the low limit in f4, the high limit loaded in the delay slot) and stores it once after the clamp; the pitch is clamped in f13/f3 as a separate result. Ours with the yaw as a local gives f4/f5 registers; with the yaw in the angles array it stores it in each arm of the clamp. The pitch through an inline ClampAim is right.
 #include "common.h"
 #include "asm_func.h"
@@ -11,7 +12,7 @@
 
 s32 ResolveAimTarget(T2195_790* a0);
 
-s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void GetVectorAngles(Vec02* v, f32* yaw, f32* pitch);
 void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
