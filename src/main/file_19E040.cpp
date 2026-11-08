@@ -2104,7 +2104,17 @@ void DrawHitMarkEffect(Effect* self, void* a1)
     DrawEffectAt(self, a1, scratch, scratch + 0x10);
 }
 
-INCLUDE_ASM(func_001A2770);
+void BuildBasisFromX(void* x, void* out);
+
+void SetRandomEffectSpin(Effect* self)
+{
+    Quad16 axis;
+    f32 x = RandomFloatInRange(-1.0f, 1.0f);
+    f32 y = RandomFloatInRange(-1.0f, 1.0f);
+    f32 z = RandomFloatInRange(0.1f, 0.9f) + 0.1f;
+    Vu0::Q(axis) = Vu0::FromFloats(x, y, z);
+    BuildBasisFromX(&axis, self->rot50);
+}
 
 INCLUDE_ASM(func_001A2830);
 

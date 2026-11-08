@@ -329,8 +329,31 @@ f32 D_00263A90[4] = { 200.0f, 200.0f, 200.0f, 0.0f };
 f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(D_0024A860);
-INCLUDE_ASM(func_0016F608);
+void InitTurningCollider(void* self);
+
+void InitPlayer(Player* self)
+{
+    InitTurningCollider(self);
+    self->f2220 = -1;
+    self->f223C = -1;
+    self->f2228 = -1;
+    self->f224C = -1;
+    self->f2440[0] = *(Vec4U*)D_002636A0;
+    self->f2440[1] = *(Vec4U*)D_002636B0;
+    self->f2440[2] = *(Vec4U*)D_002636C0;
+    self->f2440[3] = *(Vec4U*)D_002636D0;
+    self->f2440[4] = *(Vec4U*)D_002636E0;
+    self->f2420 = 15.0f;
+    Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, -1750.0f);
+    self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
+    self->v24E0 = *(Vec02*)D_002636F0;
+    self->f21C0 = 1;
+    self->f2718 = -1;
+    self->f2728 = 1.0f;
+    self->f2724 = 1.0f;
+    self->f2758 = -3.4028235e+38f;
+    self->f26D0 = 2.0f;
+}
 
 void LoadCollider(void* self);
 void ResolveObjectLinks(void* self, s32 id, void* table);

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 #include "listed_collision_part.h"
 #include "pooled_object.h"
 #include "path_curve_object.h"
@@ -477,7 +478,40 @@ void ApplyFieldDisplayOffset(void)
     ((GsPrivRegs*)0x12000000)->pmode = pm;
 }
 
-INCLUDE_ASM(func_001682C0);
+void PostSemaphoreFromInterrupt(s32 sema);
+void WriteDisplayRegisters(void* self);
+
+// The vertical blank start handler: wakes a waiter of the next blank, then by the display's
+// mode puts the field offset or the next frame's display registers; then ends the handler.
+s32 HandleVblankStart(s32 cause)
+{
+    if (D_002BE46C != 0) {
+        D_002BE46C = 0;
+        PostSemaphoreFromInterrupt(D_002BE460);
+    }
+    switch (D_002626CC) {
+    case 1:
+        if (D_002BE470 == 0) {
+            D_00262484 = D_00262480;
+            ApplyFieldDisplayOffset();
+        }
+        break;
+    case 2:
+        if (D_002BE470 == 0) {
+            ApplyFieldDisplayOffset();
+        }
+        break;
+    case 3: {
+        s32 n = g_displayFrameCounter + 1;
+        D_002BE474 = 1;
+        g_displayFrameCounter = n;
+        WriteDisplayRegisters(D_00262490 + (n & 1) * 0x28);
+        break;
+    }
+    }
+    SyncAndEnableInterrupts();
+    return 0;
+}
 
 void SignalDisplaySync(void) {
     D_002BE46C = 1;
@@ -571,7 +605,19 @@ void ResetDisplayBuffers(void)
     SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
 }
 
-INCLUDE_ASM(func_00168698);
+void PostSemaphoreFromInterrupt(s32 sema);
+
+// The GS FINISH interrupt handler: when SendGsPacketAndWait is waiting and the CSR shows FINISH,
+// clears the wait and posts its semaphore; then ends the handler.
+s32 HandleGsFinish(s32 cause)
+{
+    if (D_002BE468 != 0 && (*(volatile u64*)0x12001000 & 2)) {
+        D_002BE468 = 0;
+        PostSemaphoreFromInterrupt(D_002BE464);
+    }
+    SyncAndEnableInterrupts();
+    return -1;
+}
 
 void SendGsPacketAndWait(s32 channel, void* b)
 {

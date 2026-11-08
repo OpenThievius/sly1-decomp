@@ -1579,7 +1579,10 @@ void ReadBufferedBlockBody(BufferedStream* self)
     }
 }
 
-INCLUDE_ASM(func_001DBA90);
+void SetWorldGravityZ(World* self, f32 z)
+{
+    Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, z);
+}
 
 void SetCachedVoiceParamBuiltin(void* self, void* a, void* b)
 {

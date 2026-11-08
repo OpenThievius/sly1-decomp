@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 #include "game_clock.h"
 
 // The file's .data, in retail's order: the two scale factors, the clock, and the tick count
-// the assembly func_001430C8 and func_001430F8 keep.
+// func_001430C8 and the assembly func_001430F8 keep.
 f32 g_timeScale = 1.0f;
 f32 g_stepScale = 1.0f;
 GameClock g_gameClock = { 0 };
@@ -87,6 +88,11 @@ void SetGameClockRunning(GameClock* clock, s32 running)
     clock->running = running;
 }
 
-INCLUDE_ASM(func_001430C8);
+// Starts the tick count over: the cycle counter now, and the clock's last tick.
+void ResetGameClockTick(void)
+{
+    g_lastCycleCount = ReadCop0Count();
+    g_gameClock.lastTick = ReadCycleCounter();
+}
 
 ASM_FUNC(func_001430F8);

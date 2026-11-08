@@ -340,7 +340,9 @@ struct Player : TurningCollider {
     f32 f2430;              // 0x2430
     f32 f2434;              // 0x2434
     Collider* f2438;        // 0x2438: the object it is aimed at (func_001D66A8)
-    u8 pad243C[0x2498 - 0x243C];
+    u8 pad243C[0x2440 - 0x243C];
+    Vec4U f2440[5];         // 0x2440: D_002636A0 to D_002636E0 at set-up, copied whole (InitPlayer)
+    u8 pad2490[0x2498 - 0x2490];
     s32 f2498;              // 0x2498
     u8 pad249C[0x24A0 - 0x249C];
     void* f24A0;            // 0x24A0
@@ -389,7 +391,10 @@ struct Player : TurningCollider {
     HitStamp f26D8[8];      // 0x26D8: the objects func_001D66A8 hit and when
 
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
-    u8 pad271C[0x2730 - 0x271C];
+    u8 pad271C[0x2724 - 0x271C];
+    f32 f2724;              // 0x2724: 1.0 at set-up (InitPlayer)
+    f32 f2728;              // 0x2728: 1.0 at set-up
+    u8 pad272C[0x2730 - 0x272C];
     s32 f2730;              // 0x2730
     u8 pad2734[0x2740 - 0x2734];
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
@@ -930,8 +935,8 @@ struct ModeWalker : PathFollower {
 };
 
 struct ModeCollider : SwitchedCollider {
-    s32 f610;               // 0x610
-    u8 pad614[0x618 - 0x614];
+    s32 f610;               // 0x610: the mode (SetModeColliderMode)
+    f32 f614;               // 0x614: the clock when the mode was set
     s32 f618;               // 0x618
     u8 pad61C[0x650 - 0x61C];
     void* f650;             // 0x650
@@ -953,8 +958,10 @@ struct ModeCollider : SwitchedCollider {
     u8 pad6AC[0x6B4 - 0x6AC];
     f32 f6B4;               // 0x6B4
     u8 pad6B8[0x6C0 - 0x6B8];
-    void* f6C0;             // 0x6C0
-    u8 pad6C4[0x6D0 - 0x6C4];
+    void* f6C0;             // 0x6C0: the animations of modes 2, 1, 3 and 4 (SetModeColliderMode)
+    void* f6C4;             // 0x6C4
+    void* f6C8;             // 0x6C8
+    void* f6CC;             // 0x6CC
     s32 f6D0;               // 0x6D0
     f32 f6D4;               // 0x6D4
     f32 f6D8;               // 0x6D8

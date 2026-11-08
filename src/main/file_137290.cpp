@@ -1596,10 +1596,10 @@ void AssignAnimRecord(WorldListedObject* self, void* x)
     if (r == 0) {
         self->flagRecord = (AnimRecord*)g_animRecords;
     }
-    if (self->colorTaken == 0) {
-        self->colorTaken = 1;
+    if (self->colorCount == 0) {
+        self->colorCount = 1;
         s32 i = 0;
-        u8* dst = self->color;
+        u8* dst = self->color[0];
         do {
             u8* src = (u8*)self->flagRecord + i;
             dst[i] = (u8)((src[4] + 1) >> 1);

@@ -10,6 +10,7 @@
 #define WORLD_LISTED_OBJECT_H
 
 #include "placed_object.h"
+#include "shapes.h"
 
 struct AnimRecord;      // cursor_animator.h
 
@@ -31,16 +32,29 @@ struct OffsetList {
 
 struct WorldListedObject : PlacedObject {
     void* source;                // 0x2D0: the object a copy was taken from (func_0013A418)
-    u8 pad2D4[0x320 - 0x2D4];
-    s32 mode;               // 0x320: 2 gives each owned record an extra record (func_00139C70)
-    u8 pad324[0x380 - 0x324];
+    u8 pad2D4[0x2E0 - 0x2D4];
+    u8 curve2E0[0x10];      // 0x2E0: remapped from the source's +0x140 (func_0013A128)
+    u8 curve2F0[0x10];      // 0x2F0: remapped from the source's +0x110
+    union {
+        Quad16 q300;        // 0x300: zeroed, then the source's +0x150 or a rate in f304 (func_0013A128)
+        struct {
+            f32 f300;
+            f32 f304;
+        };
+    };
+    u8 curve310[0x10];      // 0x310: remapped from the source's +0x160
+    s32 mode;               // 0x320: 2 gives each owned record an extra record (func_00139C70); 1 when the source is still
+    u8 pad324[0x330 - 0x324];
+    u8 block330[0x50];      // 0x330: zeroed, then filled from the source by func_001583E8 unless mode is set
     AnimRecord* flagRecord;           // 0x380: its anim record (func_00139F80); func_0013A3A0 and func_0013B430 test its mask
     s32 regCount;           // 0x384: a power of two up to 16 (func_0013A008)
     u8 pad388[0x390 - 0x388];
     TextureRegWrite regs[32]; // 0x390: one for each texture entry, the first ones doubled to fill regCount
-    s32 colorTaken;         // 0x590: set once the colour is taken from the record (func_00139F80)
-    u8 color[4];            // 0x594: the record's bytes 4..7 halved
-    u8 pad598[0x620 - 0x598];
+    s32 colorCount;         // 0x590: the colours in color: the source's (func_0013A128), or 1 taken from the record (func_00139F80)
+    u8 color[32][4];        // 0x594: halved bytes: the source's colours last first, or the record's bytes 4..7
+    s32 f614;               // 0x614: copied from the source's +0x184 (func_0013A128)
+    s32 f618;               // 0x618: from the source's +0x190
+    f32 f61C;               // 0x61C: from the source's +0x194
     s32 f620;               // 0x620: cleared by func_00139D68
     OffsetList members;               // 0x624
     WorldListedObject* next;          // 0x630: in World::list1CB4 (func_0013B430)

@@ -11,6 +11,7 @@
 #include "screen_element.h"
 #include "placed_object.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 // Classes 0x1B, 0x4A and 0x4B (the countdown). Its .rodata is func_0017ABE8's FLT_MAX literal
 // at 0x24AFF4; its .data runs from 0x263AC0 to 0x263E34, in retail's order.
@@ -201,6 +202,7 @@ INCLUDE_ASM(func_001796D0);
 INCLUDE_ASM(func_00179A68);
 
 void FinishSwitchedCollider(void* self);
+void HandleSwitchedColliderActivation(void* a, s32 b);
 void SetModeColliderMode(void* self, s32 a1);
 
 void FinishModeCollider(ModeCollider* self)
@@ -209,7 +211,16 @@ void FinishModeCollider(ModeCollider* self)
     SetModeColliderMode(self, 2);
 }
 
-INCLUDE_ASM(func_0017A700);
+void HandleModeColliderActivation(ModeCollider* self, s32 active)
+{
+    HandleSwitchedColliderActivation(self, active);
+    if (active) {
+        Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+    } else {
+        D_00270650.vt->m16(&D_00270650, 0);
+        self->f6D0 = 0;
+    }
+}
 extern f32 g_unitRange[];
 extern Rgba4 D_002623E0;
 

@@ -127,9 +127,44 @@ void StoreRangeRecordFar(RangeRecord* o, f32 v)
     InvalidateRangeRecordPacket(o);
 }
 
-INCLUDE_ASM(func_001B1DE0);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
+void UpdateRangeRecordBounds(RangeRecord* self);
 
-INCLUDE_ASM(func_001B1EC8);
+// Two floats within 1e-4 of each other, as an inline function of its own: retail sets the
+// tolerance again before each of a vector's three tests, where the constant written at each call
+// is shared by CSE in one saved register (func_001B1DE0, func_001B1EC8).
+static inline s32 IsNearlyEqual(f32 a, f32 b)
+{
+    return AreFloatsNearlyEqual(a, b, 0.0001f);
+}
+
+void SetRangeRecordPosition(RangeRecord* self, Vec02* v)
+{
+    u128 a = Vu0::Q(self->v10);
+    u128 b = Vu0::Q(*v);
+    s32 same = IsNearlyEqual(Vu0::ToFloatMoved(a), Vu0::ToFloatMoved(b))
+        && IsNearlyEqual(Vu0::ToFloatY(a), Vu0::ToFloatY(b))
+        && IsNearlyEqual(Vu0::ToFloatZ(a), Vu0::ToFloatZ(b));
+    if (!same) {
+        self->v10 = *v;
+        UpdateRangeRecordBounds(self);
+        InvalidateRangeRecordPacket(self);
+    }
+}
+
+void SetRangeRecordDirection(RangeRecord* self, Vec02* v)
+{
+    u128 a = Vu0::Q(self->v20);
+    u128 b = Vu0::Q(*v);
+    s32 same = IsNearlyEqual(Vu0::ToFloatMoved(a), Vu0::ToFloatMoved(b))
+        && IsNearlyEqual(Vu0::ToFloatY(a), Vu0::ToFloatY(b))
+        && IsNearlyEqual(Vu0::ToFloatZ(a), Vu0::ToFloatZ(b));
+    if (!same) {
+        self->v20 = *v;
+        UpdateRangeRecordBounds(self);
+        InvalidateRangeRecordPacket(self);
+    }
+}
 
 void StoreRangeRecordInner(RangeRecord* o, f32 v)
 {

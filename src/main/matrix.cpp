@@ -230,7 +230,57 @@ void GetMatrixRotationCosine(f32* p)
 	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
 
-INCLUDE_ASM(func_00188D28);
+f32 Arccosine(f32 x);
+
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
+{
+    f32 (*e)[4] = (f32 (*)[4])m;
+    f32* v = &axis->x;
+    f32 c = (e[0][0] + e[1][1] + e[2][2] - 1.0f) * 0.5f;
+    if (0.999999f < c) {
+        *angle = 0.0f;
+        Vu0::Q(*axis) = Vu0::FromFloats(1.0f, *angle, *angle);
+        return;
+    }
+    f32 rem = 1.0f;
+    f32 k = rem - c;
+    s32 i;
+    for (i = 0; i < 2; i++) {
+        f32 d = (e[i][i] - c) / k;
+        f32 a = __builtin_fabsf(d);
+        if (rem < a) a = rem;
+        else if (a < 0.0f) a = 0.0f;
+        v[i] = Fpu::Sqrt(a);
+        rem -= a;
+    }
+    v[2] = Fpu::Sqrt(rem);
+    if (c < -0.9999f) {
+        *angle = 3.1415927f;
+        f32 x = v[0];
+        f32 y = v[1];
+        f32 z = v[2];
+        if (x > y) {
+            if (x > z) {
+                if (e[0][1] < 0.0f) v[1] = -y;
+                if (e[0][2] < 0.0f) v[2] = -v[2];
+            } else {
+                if (e[2][0] < 0.0f) v[0] = -x;
+                if (e[2][1] < 0.0f) v[1] = -v[1];
+            }
+        } else if (y > z) {
+            if (e[1][0] < 0.0f) v[0] = -x;
+            if (e[1][2] < 0.0f) v[2] = -v[2];
+        } else {
+            if (e[2][0] < 0.0f) v[0] = -x;
+            if (e[2][1] < 0.0f) v[1] = -v[1];
+        }
+    } else {
+        *angle = Arccosine(c);
+        if (e[1][0] > e[0][1]) v[2] = -v[2];
+        if (e[2][0] < e[0][2]) v[1] = -v[1];
+        if (e[2][1] > e[1][2]) v[0] = -v[0];
+    }
+}
 
 LINKER_REMNANT(func_00188FD0);
 
@@ -491,7 +541,14 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-INCLUDE_ASM(func_0018A008);
+void BuildScaleAboutFrame(void* point, void* frame, Quad16* scale, void* out);
+
+void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
+{
+    Quad16 scale;
+    Vu0::Q(scale) = Vu0::Splat(s);
+    BuildScaleAboutFrame(point, 0, &scale, out);
+}
 
 INCLUDE_ASM(func_0018A040);
 

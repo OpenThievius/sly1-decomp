@@ -312,7 +312,29 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     self->f1F0 = (Attachment*)s0;
 }
 
-INCLUDE_ASM(func_0018DA40);
+s32 CreateAnimationPlayerWithoutPresetTargets(Animation* t, void* self, s32 mode, void* out, f32 x, f32 y);
+
+void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
+{
+    self->f694 = a;
+    self->v6A0 = *v;
+    if (self->f6B0 != 0) {
+        CreateAnimationPlayerWithoutPresetTargets(self->f6B0, self, 0, &self->f6B4, 0.0f, 1.0f);
+    }
+    if (self->ready != 0) {
+        s32 still = 0;
+        if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v150))) < 0.0001f
+            && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->v150))) < 0.0001f
+            && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->v150))) < 0.0001f) {
+            still = 1;
+        }
+        if (!still) {
+            Mat02 m;
+            BuildBasisFromX(&self->v150, &m);
+            self->desc02()->m1E(self, &m);
+        }
+    }
+}
 
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 {

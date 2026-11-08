@@ -3,10 +3,12 @@
 // (config/us/files.tsv): 68 stubs of four instructions each (the call number into $v1, syscall,
 // return), func_001F6900 to func_001F6D30, and four wrappers, func_001F6D40 to func_001F6E78,
 // which call a stub between func_001F9D60 and func_001F9DA8 when the status register's bit 16
-// is set; all original assembly (config/us/original_asm.tsv). Its .data is the library's
+// is set. The stubs are original assembly (config/us/original_asm.tsv); the wrappers are C around
+// the system helpers (include/system.h). Its .data is the library's
 // identification string, which func_001F9790 compares with the IOP's.
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 ASM_FUNC(func_001F6900);
 
@@ -144,12 +146,71 @@ ASM_FUNC(func_001F6D20);
 
 ASM_FUNC(func_001F6D30);
 
-INCLUDE_ASM(func_001F6D40);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+s32 DisableInterruptCauseSyscall(s32 n);
+s32 EnableInterruptCauseSyscall(s32 n);
+s32 DisableDmaInterruptSyscall(s32 n);
+s32 EnableDmaInterruptSyscall(s32 n);
 
-INCLUDE_ASM(func_001F6DA8);
+s32 DisableInterruptCause(s32 n)
+{
+    u32 enabled = ReadCop0Status();
+    enabled &= 0x10000;
+    if (enabled) {
+        DisableInterrupts();
+    }
+    s32 r = DisableInterruptCauseSyscall(n);
+    Sync();
+    if (enabled) {
+        EnableInterrupts();
+    }
+    return r;
+}
 
-INCLUDE_ASM(func_001F6E10);
+s32 EnableInterruptCause(s32 n)
+{
+    u32 enabled = ReadCop0Status();
+    enabled &= 0x10000;
+    if (enabled) {
+        DisableInterrupts();
+    }
+    s32 r = EnableInterruptCauseSyscall(n);
+    Sync();
+    if (enabled) {
+        EnableInterrupts();
+    }
+    return r;
+}
 
-INCLUDE_ASM(func_001F6E78);
+s32 DisableDmaInterrupt(s32 n)
+{
+    u32 enabled = ReadCop0Status();
+    enabled &= 0x10000;
+    if (enabled) {
+        DisableInterrupts();
+    }
+    s32 r = DisableDmaInterruptSyscall(n);
+    Sync();
+    if (enabled) {
+        EnableInterrupts();
+    }
+    return r;
+}
+
+s32 EnableDmaInterrupt(s32 n)
+{
+    u32 enabled = ReadCop0Status();
+    enabled &= 0x10000;
+    if (enabled) {
+        DisableInterrupts();
+    }
+    s32 r = EnableDmaInterruptSyscall(n);
+    Sync();
+    if (enabled) {
+        EnableInterrupts();
+    }
+    return r;
+}
 
 char D_00276970[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'k', 'e', 'r', 'n', 'l', '2', '4', '3', '0' };
