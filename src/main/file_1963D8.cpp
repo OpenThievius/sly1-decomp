@@ -15,6 +15,9 @@ extern f32 g_gameTime[];
 #include "game_progress.h"
 #include "screen_element.h"
 #include "sound_state_object.h"
+#include "pad_record.h"
+#include "mul_rotation.h"
+#include "value_range.h"
 
 
 
@@ -531,7 +534,64 @@ void StartGaugeCollider(GaugeCollider* self)
     AddStateWalkerListener(self->f6B8, self);
 }
 
-INCLUDE_ASM(func_00196B78);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildShortestArcRotation(const Vec02* from, void* to, Mat02* out);
+void RotateMatrixUpright(void* sub, void* a, void* out);
+Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
+f32 WrapAngle(f32 a);
+void StepCollider(void* self, f32 t);
+void TurnColliderTowardRotation(void* self, f32 scale, void* out, void* data);
+void AddColliderForce(void* self, Vec02* force);
+extern const Vec02 D_00248D20;
+
+
+void func_00196B78(GaugeCollider* self, f32 dt)
+{
+    Mat02 b;
+    Mat02 a;
+
+    StepCollider(self, dt);
+    BuildAxisAngleMatrix(&D_00248D20, &b, self->f618);
+    BuildShortestArcRotation(&D_00248D20, &self->v630, &a);
+    {
+        u128 a0 = Vu0::Q(a.r[0]);
+        u128 a1 = Vu0::Q(a.r[1]);
+        u128 a2 = Vu0::Q(a.r[2]);
+        Vec02 x;
+        Vec02 y;
+        Vec02 z;
+        Mat02 r;
+        u128 p0 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+        Vu0::Set(r.r[0], p0);
+        Vu0::Set(x, p0);
+        u128 p1 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+        Vu0::Set(r.r[1], p1);
+        Vu0::Set(y, p1);
+        u128 p2 = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+        Vu0::Set(r.r[2], p2);
+        Vu0::Set(z, p2);
+        b = r;
+    }
+    TurnColliderTowardRotation(self, dt, &b, D_0026A7D8);
+    Mat02 u;
+    Mat02 v;
+    Mat02 c;
+    RotateMatrixUpright(&self->rot, &u, &v);
+    BuildAxisAngleMatrix(&D_00248D20, &c, self->f618);
+    c = MultiplyByTransposedMatrix3x3(u, c);
+    Vec02 force;
+    f32 turn = __builtin_fabsf(WrapAngle(ArctangentOfRatio(v.r[0].y, v.r[0].x) - self->f618));
+    f32 k1 = g_unitRange.Limit(D_0026A7F0.x + turn * (D_0026A7F0.y + turn * D_0026A7F0.z));
+    f32 phase = (g_gameTime[0] - self->f61C) / D_0026A800.x;
+    f32 k2 = g_unitRange.Limit(D_0026A810.x + phase * (D_0026A810.y + phase * D_0026A810.z));
+    Vu0::Q(force) = Vu0::MulX(Vu0::Q(c.r[0]), Vu0::Scalar(k1 * k2 * self->f620));
+    AddColliderForce(self, &force);
+    Vec02 drag;
+    drag = self->v150;
+    drag.z = 0.0f;
+    Vu0::Q(force) = Vu0::MulX(Vu0::Q(drag), Vu0::Scalar(-self->f624 / (self->f628 * self->f628) * k2 * Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(drag)))));
+    AddColliderForce(self, &force);
+}
 
 s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
 {
@@ -580,7 +640,109 @@ void HandleGaugeColliderActivation(GaugeCollider* a, void* b)
     HandleSwitchedColliderActivation(a, b);
 }
 
-INCLUDE_ASM(func_001974F8);
+struct GaugeNodeRec {
+    u8 pad00[0x18];
+    s32 f18;                // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Quad16 q40;             // 0x40
+};
+
+struct GaugeHeld {
+    u8 pad00[0x550];
+    s32 f550;               // 0x550
+    GaugeNodeRec* f554;     // 0x554
+    BaseObject* f558;       // 0x558
+    s32 f55C;               // 0x55C
+};
+
+struct GaugeCarrierRec {
+    u8 pad00[0x18C];
+    void* f18C;             // 0x18C
+};
+
+struct GaugeCarrier : BaseObject {
+    u8 pad34[0x2D0 - 0x34];
+    GaugeCarrierRec* rec;   // 0x2D0
+};
+
+void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
+void ConvertPositionToWorld(void* obj, Vec02* out);
+GaugeHeld* func_001971B8(GaugeCollider* self);
+extern f32 g_gameTime[];
+extern f32 D_0026A834;
+
+void func_001974F8(GaugeCollider* self, PadRecord* pad)
+{
+    s32 cur;
+    s32 tgt;
+    s32 cur2;
+    s32 tgt2;
+    s32 cur3;
+    Vec02 pos;
+    Vec02 delta;
+
+    if (0.0f < pad->f48) {
+        ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f618);
+    }
+    self->f620 = pad->f48 * self->f624;
+    if (pad->flags & 0xC0) {
+        GetStateWalkerCurrentKey(self->f614, &cur);
+        GetStateWalkerTargetKey(self->f614, &tgt);
+        if (cur == 0x3DB && tgt == cur) {
+            if (self->f67C > 0) {
+                self->f674 = 0;
+                ((GaugeCarrier*)self->f668)->rec->f18C = self->f678;
+                SetStateWalkerTarget(self->f614, 0x3DC);
+                self->f67C--;
+                self->f68C = g_gameTime[0];
+            }
+        }
+    }
+    GaugeHeld* held = (GaugeHeld*)self->f674;
+    if (held != 0 && self->f68C + D_0026A834 < g_gameTime[0]) {
+        held->f550 = 1;
+        BaseObject* o = ((GaugeHeld*)self->f674)->f558;
+        o->desc->m02(o);
+        BaseObject* c = (BaseObject*)self->f668;
+        c->desc->m03(c);
+        self->f680++;
+        if (self->f680 >= self->f684) {
+            if (self->f6B8 == 0) {
+                self->f674 = 0;
+                goto settled;
+            }
+            GetStateWalkerCurrentKey(self->f6B8, &cur2);
+            GetStateWalkerTargetKey(self->f6B8, &tgt2);
+            if (cur2 != 0x3F5 && tgt2 != 0x3F5) {
+                SetStateWalkerTarget(self->f6B8, 0x3F4);
+            }
+            StopTimer(&g_timerElement);
+        }
+        self->f674 = 0;
+    }
+settled:
+    if (IsObjectAttached(self->f668) != 0) {
+        if (self->f674 == 0) {
+            self->f674 = func_001971B8(self);
+            if (self->f674 != 0) {
+                GaugeHeld* h = (GaugeHeld*)self->f674;
+                ConvertPositionToWorld(h->f554, &pos);
+                Vu0::Q(delta) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
+                self->f618 = ArctangentOfRatio(delta.y, delta.x);
+                ((T2195_790*)self->f664)->target = (void*)((GaugeHeld*)self->f674)->f554->f18;
+                ((T2195_790*)self->f664)->point = *(Vec02*)&((GaugeHeld*)self->f674)->f554->q40;
+                ((GaugeCarrier*)self->f668)->rec->f18C = (void*)((GaugeHeld*)self->f674)->f55C;
+            }
+        }
+    } else {
+        ((T2195_790*)self->f664)->target = self->f660;
+        *(Quad16*)&((T2195_790*)self->f664)->point = *(Quad16*)&D_00248D30;
+    }
+    GetStateWalkerCurrentKey(self->f6B8, &cur3);
+    if (cur3 == 0x3F3) {
+        PlaceObjectAtRandomNode(self);
+    }
+}
 
 void UpdateGaugeColliderVisibility(GaugeCollider* self)
 {

@@ -42,6 +42,7 @@
 #include "attachment.h"
 #include "message_body.h"
 #include "asm_func.h"
+#include "mul_rotation.h"
 
 void AddCallbackNode(void* world, void* list, void* a, void* b);
 void RemoveCallbackNode(void* world, void* list, void* a, void* b);
@@ -1998,6 +1999,7 @@ void DrawHitMarkEffect(Effect* self, void* a1)
 INCLUDE_ASM(func_001A2770);
 
 INCLUDE_ASM(func_001A2830);
+
 
 s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
 {

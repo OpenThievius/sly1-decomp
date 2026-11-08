@@ -25,6 +25,22 @@ struct ValueRange {
             v = h;
         return v;
     }
+
+    // The same clamp with its result in a variable of its own and both ends loaded before the
+    // compare (func_00196B78, func_001A2830): a different code from Clamp's, which changes v.
+    f32 Limit(f32 v) const
+    {
+        f32 l = lo;
+        f32 h = hi;
+        f32 r;
+        if (v < l)
+            r = l;
+        else if (h < v)
+            r = h;
+        else
+            r = v;
+        return r;
+    }
 };
 
 typedef char check_ValueRange[sizeof(ValueRange) == 8 ? 1 : -1];
