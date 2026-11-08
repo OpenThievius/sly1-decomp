@@ -607,6 +607,20 @@ struct Vu0 {
         return r;
     }
 
+    static Vec Min(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Min(a.q, b.q);
+        return r;
+    }
+
+    static Vec Max(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Max(a.q, b.q);
+        return r;
+    }
+
     static Vec Cross(Vec a, Vec b)
     {
         Vec r;
