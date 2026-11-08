@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 416/428, checked 2026-11-08
-// NEAR: the retail scale k is made by mfc1 + a 128-bit store from the GPR (daddu v0,s6; sq v0,0x130(sp)) and read back with lqc2, once per iteration; no plain C form gives it (a union, a cast, FromFloat all give swc1+lq or qmtc2+sqc2): it needs a helper that stores a float's bits as a quadword (func_00118CF0's StoreFloatAsQuadword inline). With FromFloat in its place the rest differs only in registers and the saved registers.
+// SIZE 432/428, checked 2026-11-08
+// NEAR (2026-11-08, quadword-float): the float is made once before the loop with Vu0::ScalarInGprReg (mfc1 into a register, no slot, added next to ScalarInGpr) and stored per iteration (Q(k) = w); the mfc1 and the per-use copy and store come out, but the value is not kept in a saved GPR (our s6 holds &rot): the compiler spills it and reads k from memory twice, and hoists &rot and &s into s6/s7 where retail takes sp offsets per use. Moving Q(k) = w before BuildAxisAngleMatrix, or through a Slot, is worse. Still differs: register allocation (w in s6, 10 saved registers in retail), frame 528 vs 512.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -211,9 +211,10 @@ void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
     Vec02 pcopy;
     f32 best = -1.0f;
     s32 i = 0;
+    u128 w = Vu0::ScalarInGprReg(scale);
     do {
         BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
-        Vu0::Q(k) = Vu0::FromFloat(scale);
+        Vu0::Q(k) = w;
         Vu0::Q(s.r[0]) = Vu0::MulX(Vu0::Q(m.r[0]), Vu0::Q(k));
         Vu0::Q(s.r[1]) = Vu0::MulX(Vu0::Q(m.r[1]), Vu0::Q(k));
         Vu0::Q(s.r[2]) = Vu0::MulX(Vu0::Q(m.r[2]), Vu0::Q(k));

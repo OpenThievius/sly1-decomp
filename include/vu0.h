@@ -301,6 +301,15 @@ struct Vu0 {
         return Q(t);
     }
 
+    // The same mfc1 with no slot: the value stays in a register of its own (func_00191AC8
+    // holds it in a saved GPR across its loop and copies it to the stack per use).
+    static u128 ScalarInGprReg(f32 f)
+    {
+        u128 r;
+        __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
+        return r;
+    }
+
     // a * s.x: vmulx.xyzw.
     static u128 MulX(u128 a, u128 s)
     {
