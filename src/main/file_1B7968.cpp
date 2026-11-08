@@ -126,7 +126,7 @@ f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
 void ReadBufferedVector3(BufferedStream* in, Vec02* p);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 void func_001BBC38(Collider* self);
 s32 InvertMatrix3x3(Mat02* in, Mat02* out);

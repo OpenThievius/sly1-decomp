@@ -81,7 +81,7 @@ static u8 D_00627000[0x800];
 static Pools_1F7BE8 g_remoteCallState;
 
 s32 DisableInterrupts(void);
-void EnableInterrupts(void);
+s32 EnableInterrupts(void);
 void ShutDownCommandChannel(void);
 s32 NewSemaphore(SemaphoreParams* params);
 void FreeSemaphore(s32 sema);

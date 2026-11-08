@@ -824,7 +824,7 @@ void TriggerScriptEvent(Animation* self, s32 a, s32 b, s32* c);
 f32 FloatRemainder(f32 a, f32 b);
 f32 WrapModulo(f32 a, f32 b);
 
-void MoveMemory(Track83* dst, Track83* src, s32 bytes);
+void* MoveMemory(Track83* dst, Track83* src, s32 bytes);
 
 
 // was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ

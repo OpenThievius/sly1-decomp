@@ -80,7 +80,7 @@ void DisableInterruptCause(s32 cause);
 GsParam* GetGsParams(void);
 void DefineDisplayEnvironment(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
 s32 DefineDrawEnvironment(void* env, s16 psm, s16 w, s16 h, s16 ztest, s16 zpsm);
-void DefineClearPacket(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
+s32 DefineClearPacket(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
 s32 CountFrameBufferPages(s16 psm, s16 w, s16 h);
 
 LINKER_REMNANT(func_002018E0);

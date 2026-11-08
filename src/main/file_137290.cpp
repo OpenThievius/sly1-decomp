@@ -304,7 +304,7 @@ void ResetTextPointToHalf(void* p);
 
 
 void RefillBufferedStream(BufferedStream* d);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 
 void UnpackBufferedStream(BufferedStream* d)
 {

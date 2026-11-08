@@ -1289,7 +1289,7 @@ void LoadTriggerZone(TriggerZone* self)
 }
 
 s32 MatchesObjectId(void* a, s32 n);
-void MoveMemory(void* end, void* begin, s32 bytes);
+void* MoveMemory(void* end, void* begin, s32 bytes);
 
 void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 {

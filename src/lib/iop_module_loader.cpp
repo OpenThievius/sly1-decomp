@@ -29,7 +29,7 @@ s32 CompareMemory(const void* a, const void* b, s32 n);
 void* CopyBytes(void* dst, const void* src, s32 n);
 void* FillMemory(void* p, s32 value, s32 size);
 s32 CallRemoteService(u8* a, s32 b, s32 c, Buf_1F9868* d, s32 e, Buf_1F9868* f, s32 g, s32 h, s32 i);
-void CopyStringBounded(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
+void* CopyStringBounded(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
 s32 BindModuleLoader(void);
 
 struct __attribute__((packed)) Word_1F9690 { u32 v; };
