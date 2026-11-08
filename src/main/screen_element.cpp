@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The source file from 0x1AA268 to 0x1AECB0, built whole (config/us/files.tsv): the screen
 // elements' shared methods (func_001AA268 sets one up) and those of the screen elements built
-// on them, up to the static initialiser that builds this file's text styles (func_001AEA70,
-// still assembly) and its _GLOBAL_$I$ (func_001AEC90). Its .rodata (0x24CBD0 to 0x24CFBB) is the
+// on them, up to the static initialiser that builds this file's text styles (func_001AEA70)
+// and its _GLOBAL_$I$ (func_001AEC90). Its .rodata (0x24CBD0 to 0x24CFBB) is the
 // strings, FLT_MAX literals and jump tables of its functions; its .data (0x2743A0 to 0x2744B8)
 // is the globals below, each defined before the first function that reads it, so that the
 // strings of the name tables land between their neighbours' as in retail. Named after the
@@ -2176,10 +2176,51 @@ Letter_1AEA08 GetCyclingGlyph(void)
 }
 
 // The static initialiser GCC writes for this file's text styles (three empty array
-// constructions, then the five styles), still assembly; then the 16 bytes the linker left of two
-// layout setters, and the file's _GLOBAL_$I$, written as a function until the styles are built by
-// constructors here.
-INCLUDE_ASM(func_001AEA70);
+// constructions, then the five styles), written as a function with the loops and stores it
+// compiles to, as its _GLOBAL_$I$ below is, until the styles are built by constructors here; then
+// the 16 bytes the linker left of two layout setters.
+void ConstructScreenTextStyles(s32 initialize, s32 priority)
+{
+    if (priority == 0xFFFF && initialize) {
+        s32 i;
+        for (i = 0x38; i != -1; i--) {
+        }
+        for (i = 0x38; i != -1; i--) {
+        }
+        for (i = 3; i != -1; i--) {
+        }
+        FillMemory(&D_002743D0, 0, 0x1C);
+        D_002743D0.f04 = 0x2D;
+        D_002743D0.f08 = 2.0f;
+        D_002743D0.f0C = 1.0f;
+        D_002743D0.f14 = D_002743D0.f10 = 0.3f;
+        D_002743D0.f18 = 0xFF7D4B00;
+        FillMemory(&D_002743F0, 0, 0x1C);
+        D_002743F0.f04 = 0x2D;
+        D_002743F0.f08 = 2.0f;
+        D_002743F0.f0C = -4.0f;
+        D_002743F0.f14 = D_002743F0.f10 = 0.3f;
+        D_002743F0.f18 = 0xFF7D4B00;
+        FillMemory(&D_00274410, 0, 0x1C);
+        D_00274410.f04 = 0x3D;
+        D_00274410.f08 = 2.0f;
+        D_00274410.f0C = -4.0f;
+        D_00274410.f14 = D_00274410.f10 = 0.3f;
+        D_00274410.f18 = 0xFF7D4B00;
+        FillMemory(&D_00274450, 0, 0x1C);
+        D_00274450.f04 = 0x2D;
+        D_00274450.f08 = 2.0f;
+        D_00274450.f0C = -4.0f;
+        D_00274450.f14 = D_00274450.f10 = 0.3f;
+        D_00274450.f18 = 0xFF7D4B00;
+        FillMemory(&D_00274488, 0, 0x1C);
+        D_00274488.f04 = 0x2D;
+        D_00274488.f08 = 2.0f;
+        D_00274488.f0C = -4.0f;
+        D_00274488.f14 = D_00274488.f10 = 0.3f;
+        D_00274488.f18 = 0xFF7D4B00;
+    }
+}
 
 LINKER_REMNANT(func_001AEC80);
 
