@@ -12,6 +12,7 @@
 #include "object_message.h"
 #include "world.h"
 #include "object_event.h"
+#include "vu0.h"
 
 // The file's .data, in retail's order: two boxes (the corners 0 and the size -1e8 or 1e8) and
 // the records that point at them, which func_0013E430 reads, then the disc code's sector check
@@ -1202,7 +1203,102 @@ void SetZoneColliderMode(ZoneCollider* self, s32 flag)
     SetZoneMode(&self->zone);
 }
 
-INCLUDE_ASM(func_00140258);
+// An object the zone watches (ZoneCollider's objs): its class, and the two places its position is.
+struct ZoneTarget {
+    const Desc01* desc;     // 0x00
+    u8 pad04[0x40 - 0x04];
+    Vec02 v40;              // 0x40
+    u8 pad50[0x140 - 0x50];
+    Vec02 v140;             // 0x140
+};
+
+void SetZoneColliderMode(ZoneCollider* self, s32 flag);
+void ConvertPositionToWorld(ZoneTarget* obj, Vec02* out);
+void GetObjectWorldPosition(ZoneTarget* obj, Vec02* out);
+s32 func_0013E658(Vec02* pos, TreeNode03* nodes);
+s32 IsObjectAttached(ZoneTarget* obj);
+void CopyMemory(void* dst, void* src, s32 size);
+
+void func_00140258(ZoneCollider* self)
+{
+    ZoneTarget* found[8];
+    Vec02 pos;
+    ZoneTarget* obj;
+    UpdateCollider(self);
+    switch (self->zone.mode) {
+    case 2:
+        if (0.0f <= self->zone.duration && self->zone.duration < g_gameTime - self->zone.stamp) {
+            if (self->f78C != 0) {
+                SetZoneColliderMode(self, 1);
+            } else {
+                SetZoneColliderMode(self, 0);
+            }
+        }
+        return;
+    case 0:
+    case 1:
+        break;
+    case 3:
+    default:
+        return;
+    }
+    s32 n = 0;
+    s32 hit = 0;
+    if (self->f5BC != 0) {
+        obj = (ZoneTarget*)GetActiveSwitchedCollider();
+        if (obj != 0) {
+            self->objs[0] = (s32)obj;
+            self->countObjs = 1;
+        } else {
+            self->countObjs = 0;
+        }
+    }
+    for (s32 i = 0; i < self->countObjs; i++) {
+        obj = (ZoneTarget*)self->objs[i];
+        if (obj->desc->flags & 1) {
+            pos = obj->v140;
+        } else if (IsObjectOfKind((Collider*)obj, 0x6D)) {
+            pos = obj->v40;
+        } else if (IsObjectOfKind((Collider*)obj, 0x7E)) {
+            ConvertPositionToWorld(obj, &pos);
+        } else if (IsObjectOfKind((Collider*)obj, 0x73)) {
+            GetObjectWorldPosition(obj, &pos);
+        }
+        s32 inside = 0;
+        if (((self->flags538 & 0x10000000000ULL) && Vu0::Distance(pos, self->v140) < self->radius3CC)
+            || (self->tree.nodes != 0 && func_0013E658(&pos, self->tree.nodes) != 0)) {
+            inside = 1;
+        }
+        if (inside) {
+            hit = 1;
+            if (self->f790 == 0) {
+                break;
+            }
+            if (IsObjectAttached(obj) != 0) {
+                found[n++] = obj;
+            }
+        }
+    }
+    if (self->f790 != 0) {
+        s32 changed = 0;
+        if (self->countInside != n) {
+            changed = 1;
+        } else {
+            for (s32 i = 0; i < n; i++) {
+                if (found[i] != self->inside[i]) {
+                    changed = 1;
+                    break;
+                }
+            }
+        }
+        if (changed) {
+            self->countInside = n;
+            CopyMemory(self->inside, found, n * 4);
+            TriggerScriptEvent(self, 0xC, 0, 0);
+        }
+    }
+    SetZoneColliderMode(self, hit);
+}
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"

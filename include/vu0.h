@@ -523,6 +523,100 @@ struct Vu0 {
         const u128* r = (const u128*)&m;
         return RotateRows(r[0], r[1], r[2], v);
     }
+    // A vector as a value of its own type: one u128 in a struct, passed and returned by value.
+    // GCC keeps the struct in a 128-bit register, as it does a u128, and the code comes out the
+    // same; but each inline call that takes or returns one copies it from pseudo to pseudo (movti),
+    // copies CSE does not fold and only the register allocator removes. loop.c counts them, so a
+    // loop over vectors in this form is as big to it as retail's were: big enough that it leaves
+    // the loop's constants and its index multiplication where they are (docs/TOOLCHAIN.md,
+    // "Loops"). In a condition a Vec temporary makes the front end compute the condition as a
+    // value (the temporary's cleanup point) where retail branches on it: Distance keeps its Vecs
+    // in an inline function of its own.
+    struct Vec {
+        u128 q;
+
+        // A 16-aligned, 16-byte object in memory, as a value (lqc2).
+        template <class T> static Vec Of(const T& v)
+        {
+            Vec r;
+            r.q = *(const u128*)&v;
+            return r;
+        }
+
+        static Vec Scalar(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::Scalar(f);
+            return r;
+        }
+
+        static Vec ScalarAt(const f32& f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarAt(f);
+            return r;
+        }
+
+        static Vec FromFloat(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::FromFloat(f);
+            return r;
+        }
+    };
+
+    static Vec Sub(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Sub(a.q, b.q);
+        return r;
+    }
+
+    static Vec Dot(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Dot(a.q, b.q);
+        return r;
+    }
+
+    static Vec Length(Vec a)
+    {
+        Vec r;
+        r.q = Length(a.q);
+        return r;
+    }
+
+    static Vec MulXSum(Vec a, Vec s, Vec b, Vec t)
+    {
+        Vec r;
+        r.q = MulXSum(a.q, s.q, b.q, t.q);
+        return r;
+    }
+
+    template <class M> static Vec Rotate(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = Rotate(m, v.q);
+        return r;
+    }
+
+    static Vec MulAddX2(Vec a, Vec b, Vec s, Vec c, Vec t)
+    {
+        Vec r;
+        r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    static f32 ToFloat(Vec a)
+    {
+        return ToFloat(a.q);
+    }
+
+    // The distance between two points in memory: the Length of their difference, as a float.
+    template <class T> static f32 Distance(const T& a, const T& b)
+    {
+        return ToFloat(Length(Sub(Vec::Of(a), Vec::Of(b))));
+    }
 };
 
 #endif
