@@ -289,9 +289,10 @@ struct T217D_440 : ScreenElement {
     f32 stickX;                 // 0x304: the smoothed pad direction (func_00136040)
     f32 stickY;                 // 0x308
     f32 spin;                   // 0x30C: moves by the pad's stick (func_00132500)
-    u8 pad310[0x314 - 0x310];
+    Font* smallFont;            // 0x310: a copy of the font at 0.7 by 0.8 (SetupTextPanel)
     f32 f314;                   // 0x314
-    u8 pad318[0x320 - 0x318];
+    void* bands;                // 0x318: the GS packet of the bands behind the panel (SetupTextPanel)
+    s32 bandsSize;              // 0x31C
     s32 palette;                // 0x320: 0 .. 2, the colour pair func_00132500 picks
     void* child;                // 0x324: the game object the box follows (its kind at +0x2D0, its state at +0x2D4)
     s32 bankState;              // 0x328: which glyph bank is loaded (func_00135E78), 1 lists the two counters (func_00135F48)

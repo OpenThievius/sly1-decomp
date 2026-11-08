@@ -17,6 +17,7 @@
 #include "strip_mesh.h"
 #include "vertex_batch.h"
 #include "shapes.h"
+#include "word_copy.h"
 
 
 void RegroupQueuedObjects(void* self);
@@ -422,30 +423,6 @@ s32 WriteVifUnpackHeader(PacketWriter* s, s32 a, s32 b, s32 c);
 void ResetVertexBatch(FlushedVertexBatch* self);
 void BuildUnlitVertexPacket(FlushedVertexBatch* self);
 void BuildLitVertexPacket(FlushedVertexBatch* self);
-
-struct WordCopy {
-    static void Words(s32* dst, s32* src, s32 n)
-    {
-        s32 rem = n & 3;
-        s32 bulk = n - rem;
-        s32 i;
-        for (i = 0; i < rem; i++) {
-            *dst++ = *src++;
-        }
-        for (i = 0; i < bulk; i += 4) {
-            s32 a = src[0];
-            s32 b = src[1];
-            s32 c = src[2];
-            s32 d = src[3];
-            dst[0] = a;
-            dst[1] = b;
-            dst[2] = c;
-            dst[3] = d;
-            src += 4;
-            dst += 4;
-        }
-    }
-};
 
 struct __attribute__((packed)) BatchVertexWords {
     u64 q0;

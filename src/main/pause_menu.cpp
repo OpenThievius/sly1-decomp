@@ -570,11 +570,242 @@ s32 FindObject42CStateWalker(void)
     return v;
 }
 
-// The jump tables of func_001936A0.
-INCLUDE_RODATA(jtbl_0024C430);
-INCLUDE_RODATA(jtbl_0024C480);
-INCLUDE_RODATA(jtbl_0024C4D0);
-INCLUDE_ASM(func_001936A0);
+extern s32 D_0026FA68;
+extern s32 D_0026EC58;
+extern s32 D_00269984;
+void CopyString(char* dst, const char* src);
+s32 IsPadPatternEnabled(GameProgress* g);
+void OpenKeyRecord(void* rec);
+void SetScreenElementSize(void* self, f32 w, f32 h);
+void MeasureText(TextReader* buf, f32 w, f32* outW, f32* outH);
+
+// Builds the page on view: the items of the main and options pages as the game's state allows,
+// the labels that depend on the state, the row first highlighted, and the box's size.
+void BuildPauseMenuPage(T217D_6D0* self)
+{
+    s32 page = self->page;
+    MenuPage* row = &g_pauseMenuPages[page];
+    switch (page) {
+    case 0:
+        row->count = 0;
+        for (u32 i = 0; i < 8; i++) {
+            s32 item = D_00269CD8[i];
+            s32 show = 1;
+            switch (item) {
+            case 4:
+                if (D_0026FA68 == 0) {
+                    show = 0;
+                }
+                break;
+            case 5:             // shown always: retail's table sends it to case 20's `show = 1`
+                show = 1;
+                break;
+            case 18: {
+                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                if (key != 0x204 && key != 0x407) {
+                    show = 0;
+                    break;
+                }
+                show = 0;
+                s32 walker = FindObject42CStateWalker();
+                if (walker != 0) {
+                    s32 code;
+                    GetStateWalkerCurrentKey((void*)walker, &code);
+                    if (code < 0x431) {
+                        show = code >= 0x42F;
+                    }
+                }
+                break;
+            }
+            case 19:
+                show = D_0026EC58 == 2;
+                break;
+            case 20: {
+                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                show = 0;
+                if (key == 0x304 || key == 0x307 || key == 0x502) {
+                    show = 1;
+                }
+                break;
+            }
+            case 21:
+                if (g_saveData->f19D8 == 0) {
+                    show = 0;
+                } else if (g_saveData->f19D8 == 5 || g_saveData->f19DC == 1 ||
+                           (g_saveData->f19DC == 0 && (*(s32*)(g_currentLevelRecord->bits74 + 4) & 1) == 0)) {
+                    item = 0x16;
+                }
+                break;
+            }
+            if (show != 0) {
+                row->items[row->count++] = item;
+            }
+        }
+        break;
+    case 0x17:
+        row->count = 0;
+        for (u32 i = 0; i < 9; i++) {
+            s32 item = D_00269D18[i];
+            s32 show = 1;
+            switch (item) {
+            case 6:
+                show = ((ElementStack*)g_elementStack)->resumeState == 1;
+                break;
+            case 7:             // shown always: retail's compare tree tests it
+                break;
+            case 8:
+                show = ((ElementStack*)g_elementStack)->resumeState != 1;
+                break;
+            }
+            if (show != 0) {
+                row->items[row->count++] = item;
+            }
+        }
+        break;
+    }
+    for (s32 i = 0; i < 27; i++) {
+        char* dst = g_menuChoiceLabels[i];
+        ChoiceLabels* cl = &D_0026A138[i];
+        switch (i) {
+        case 9:
+            if (D_00269984 != 0) {
+                CopyString(dst, cl->labels[1]);
+            } else {
+                CopyString(dst, cl->labels[0]);
+            }
+            break;
+        case 13: {
+            char** l = cl->labels;
+            CopyString(dst, *(IsPadPatternEnabled(g_saveData) ? l : l + 1));
+            break;
+        }
+        case 15:
+        {
+            char** l = cl->labels;
+            CopyString(dst, *((g_saveData->f19EC & 0x80) ? l + 1 : l));
+            break;
+        }
+        case 16:
+        {
+            char** l = cl->labels;
+            CopyString(dst, *((g_saveData->f19EC & 0x40) ? l + 1 : l));
+            break;
+        }
+        case 24:
+        {
+            char** l = cl->labels;
+            CopyString(dst, *((g_saveData->f19EC & 0x200) ? l + 1 : l));
+            break;
+        }
+        case 25:
+        {
+            char** l = cl->labels;
+            CopyString(dst, *((g_saveData->f19EC & 0x400) ? l + 1 : l));
+            break;
+        }
+        case 26:
+        {
+            char** l = cl->labels;
+            CopyString(dst, *((g_saveData->f19EC & 0x800) ? l + 1 : l));
+            break;
+        }
+        case 10:
+        case 11:
+        case 12: {
+            s32 k = i - 10;
+            CardSlot* slot = &g_memoryCard.slots[k];
+            if (slot->f0C != 0.0f) {
+                FormatGameSummary(&slot->data, dst);
+            } else {
+                if (page < 0x12) {
+                    if (page >= 0x10) {
+                        FormatToString(dst, D_0026A0D8);
+                        break;
+                    }
+                }
+                FormatToString(dst, D_0026A0DC);
+            }
+            break;
+        }
+        }
+    }
+    switch (page) {
+    case 16:
+        // The first empty slot. The slots read as a CardSlot pointer: as an array the base folds
+        // with the field's offset, where retail keeps the base in a register.
+        for (self->cursor = 0; self->cursor < 3 && ((CardSlot*)g_memoryCard.slots)[self->cursor].f0C != 0.0f;
+             self->cursor++) {
+        }
+        break;
+    case 11:
+    case 17:
+        if (g_memoryCard.f4F44 != 0) {
+            self->cursor = (CardSlot*)g_memoryCard.f4F44 - g_memoryCard.slots;
+            break;
+        }
+        self->cursor = 0;
+        break;
+    case 20:
+        if (HasStreamVoice() == 0) {
+            OpenKeyRecord(D_0026A118);
+            self->sound = HasStreamVoice();
+        }
+        break;
+    case 2:
+    case 4:
+    case 7:
+    case 14:
+    case 18:
+        self->cursor = 1;
+        break;
+    default:
+        self->cursor = 0;
+        break;
+    }
+    f32 width = 0.0f;
+    f32 items = width;
+    f32 height = width;
+    TextReader tr;
+    if (row->title != 0) {
+        PushFontScale(self->font, row->titleScale, row->titleScale);
+        InitTextReader(&tr, row->title, self->font);
+        f32 tw, th;
+        MeasureText(&tr, 500.0f, &tw, &th);
+        PopFontScale(self->font);
+        height = th;
+        width = tw >? width;
+    }
+    PushFontScale(self->font, row->itemScale, row->itemScale);
+    if (row->vertical != 0) {
+        height += (f32)self->font->height * self->font->sy * (f32)row->count;
+    } else {
+        height += (f32)self->font->height * self->font->sy;
+    }
+    for (s32 i = 0; i < row->count && row->items[i] != -1; i++) {
+        ChoiceLabels* cl = &D_0026A138[row->items[i]];
+        f32 w = 0.0f;
+        if (cl->count != 0) {
+            for (s32 j = 0; j < cl->count; j++) {
+                InitTextReader(&tr, cl->labels[j], self->font);
+                w = SumTextWidth(&tr) >? w;
+            }
+        } else {
+            InitTextReader(&tr, GetMenuChoiceLabel(row->items[i]), self->font);
+            w = SumTextWidth(&tr);
+        }
+        if (row->vertical != 0) {
+            items = items >? w;
+        } else {
+            if (i != 0) {
+                items += (f32)self->font->advance * self->font->sx * 2.0f;
+            }
+            items += w;
+        }
+    }
+    PopFontScale(self->font);
+    width = items >? width;
+    SetScreenElementSize(self, width + 10.0f, height);
+}
 
 void InitPauseMenu(T217D_6D0* self)
 {
