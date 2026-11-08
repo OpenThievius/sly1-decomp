@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 123/156 (78.8%), checked 2026-11-07
+// BYTES 123/156 (78.8%), checked 2026-11-08
+// permute.py --auto (2026-11-08, night-orders): 2 runs of 2/7 lines (5042 orders): best 23 bytes differ (33 as it stands), none EXACT.
 #include "common.h"
 #include "attached_set.h"
 #include "oscillator.h"

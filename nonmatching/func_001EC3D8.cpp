@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 140/156 (89.7%), checked 2026-11-07
+// BYTES 140/156 (89.7%), checked 2026-11-08
 // NEAR: same instructions; the compiler loads the callback address into v0 and the group 13 into v1, retail the reverse, and the four stores to the request come out in another order (retail: group at 8, object at 0x60, float at 4, callback at 0). All 24 orders of the stores and a local float for the dot product were tried.
+// permute.py --auto (2026-11-08, night-orders): 1 run of 7 lines (5040 orders): best 6 bytes differ (16 as it stands), by storing the group, object, float, callback in that order after the others; not EXACT.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"

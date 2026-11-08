@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 136/148 (91.9%), checked 2026-11-07
+// BYTES 136/148 (91.9%), checked 2026-11-08
 // NEAR: the gauge agent's draw method. Everything matches except the order of the last stores before the call that queues the request: retail stores the object (0x60), then the float (0x04), moves the request's address into a0, and puts the callback store (0x00) in the call's delay slot; ours moves a0 first, stores the callback and the float, and leaves the object's store in the slot. All 24 orders of the four stores, with the float in a local or not, give ours.
+// permute.py --auto (2026-11-08, night-orders): 1 run of 6 lines (720 orders): best 10 bytes differ (12 as it stands), none EXACT.
 #include "common.h"
 #include "switched_collider.h"
 #include "deferred_request.h"

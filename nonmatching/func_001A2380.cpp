@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 588/624 (94.2%), checked 2026-11-07
+// BYTES 588/624 (94.2%), checked 2026-11-08
 // NEAR (2026-11-08, vu0w3-e1): same size, frame and registers; only the scheduling of the stores into the new effect (i20, life, m30[2], p120) and of the address of the unit-Z vector (lui/addiu) differs by one slot (all 24 orders of the four stores give the same 10 differing words). The rotation product is MulRotation written out with the three row copies assigned one by one (a block copy of the 48 bytes makes the compiler form the destination address in a register); the 0.0 is one f32 local, kept in $f21.
+// permute.py --auto (2026-11-08, night-orders): 3 runs of 7/7/3 lines (10086 orders): best 36 bytes differ, as it stands.
 #include "common.h"
 #include "vu0.h"
 #include "effect.h"

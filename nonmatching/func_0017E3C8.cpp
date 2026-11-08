@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 701/772 (90.8%), checked 2026-11-07
+// BYTES 701/772 (90.8%), checked 2026-11-08
 // NEAR: the same size as retail now, the VU0 registers retail's (MulAddX2 in its own order gives the result a's register, vf2).
 //       Fixed on the way: the parent walk is one while from the part itself (so the mask 0xF000 << 24 is held in s7), the
 //       probe is tested against other->tree.nodes (0x3F8), the end tested for bit 2 is end[1 - side], the cases are written
@@ -7,6 +7,7 @@
 //       schedule before the MulAddX2 (retail loads tmp after the start point and forms %hi(D_00264024) in v1, here a0) and
 //       the register of *outEnd's reload (retail v1, here a0). Named arguments in every order and the three stores of the
 //       new nearest in every order: no closer.
+// permute.py --auto (2026-11-08, night-orders): 3 runs of 3/2/3 lines (14 orders): best 71 bytes differ, as it stands.
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"

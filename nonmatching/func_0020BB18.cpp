@@ -9,6 +9,7 @@
 //       spills of the plane addresses are one instruction apart. Tried: the stores and the size
 //       in every order, the planes' addresses in locals, the size as w * h * 0x180 (other
 //       multiply order), (w * 0x180) * h. Written for this project from retail's code.
+// permute.py --auto (2026-11-08, night-orders): 4 runs of 6/4/7/7 lines (10824 orders): best 180 bytes differ (348 as it stands), none EXACT.
 #include "common.h"
 
 struct Pool_0020B278 {
