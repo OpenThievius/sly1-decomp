@@ -182,7 +182,7 @@ D_00275140	00275140	1516	.data	src/main/file_1D62E0.cpp
 D_00275730	00275730	416	.data	src/main/tint_blend_collider.cpp
 D_002758D0	002758D0	16	.data	src/main/file_1DFD48.cpp
 D_002758E0	002758E0	96	.data	src/main/commentary_best_time.cpp
-D_00275940	00275940	188	.data	src/main/file_1E08F8.cpp
+D_00275940	00275940	268	.data	src/main/file_1E08F8.cpp
 D_00275B28	00275B28	56	.data	src/main/file_1E5378.cpp
 D_00275B60	00275B60	2724	.data	src/main/file_1E88D0.cpp
 D_00276970	00276970	16	.data	src/lib/system_calls.cpp

@@ -14,6 +14,7 @@
 #include "animation.h"
 #include "attachment.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 
 #include "anim_curve.h"
 
@@ -1238,8 +1239,8 @@ void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0,
 }
 
 // The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
-// once.
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+// once (mul_rotation.h has the forms that read b's rows one by one).
+static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& b)
 {
     Mat02 r;
     Vec02 x;
@@ -1323,7 +1324,7 @@ void func_00120700(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0,
                 MultiplyMatrices3x3(&rotA, out0, &prod);
                 MatrixToAxisAngle(&prod, &angle, &axis);
                 BuildAxisAngleMatrix(&axis, angle * w / (w + e->weight), &prod);
-                MulRotation(out0, prod, rotA);
+                MulRotationRowsOnce(out0, prod, rotA);
             }
             w += e->weight;
         } else {
@@ -1830,7 +1831,26 @@ void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec
     }
 }
 
-INCLUDE_ASM(func_001225D0);
+void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec)
+{
+    Vec02 d;
+    Mat02 m;
+    Vec02 k;
+    Attachment* source = self->f1F0;
+    if (t == 0.0f) {
+        *rot = self->rot;
+        *vec = self->v160;
+    } else if (source) {
+        source->vt->getRot(source, t, rot, vec);
+    } else {
+        u128 w = Vu0::Q(self->v160);
+        Vu0::Q(k) = Vu0::FromFloat(t);
+        Vu0::Q(*vec) = w;
+        Vu0::Q(d) = Vu0::MulX(w, Vu0::Q(k));
+        BuildRotationFromVector((f32*)&d, (f32*)&m);
+        MulRotationRowsIndexed(rot, m, self->rot);
+    }
+}
 
 void SettlePoseSourceModes(Attachment* self)
 {
@@ -2023,7 +2043,7 @@ void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
     } else {
         GetIdentityMatrix(0, &m);
     }
-    MulRotation(out, self->m90, m);
+    MulRotationRowsOnce(out, self->m90, m);
 }
 
 f32 GetIdentityPoseIndexedValue(void)

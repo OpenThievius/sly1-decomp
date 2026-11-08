@@ -1969,13 +1969,14 @@ s32 AcceptBeatPressColliderRequest(void)
     return 0;
 }
 
-// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18) and
-// a point in its frame (+0x40).
+// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18), a
+// point in its frame (+0x40) and the rotation func_001EBDD0 turns the object's by (+0x50).
 struct FramePoint_001EBD10 {
     u8 pad0[0x18];
     void* object;           // 0x18
     u8 pad1C[0x40 - 0x1C];
     Vec02 point;            // 0x40
+    Mat02 m50;              // 0x50
 };
 
 void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
@@ -1996,7 +1997,21 @@ void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
     Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
 }
 
-INCLUDE_ASM(func_001EBDD0);
+void GetPlacedObjectRotationAt(void* self, f32 t, Mat02* rot, Vec02* spin);
+
+void func_001EBDD0(BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
+{
+    if (self->f67C == 0) {
+        GetPlacedObjectRotationAt(self, t, rot, spin);
+        return;
+    }
+    Mat02 m;
+    Vec02 w;
+    ComputeObjectFrameAtTime(((FramePoint_001EBD10*)self->f67C)->object, 0, 0, &m, 0, &w, t);
+    FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->f67C;
+    MulRotationRowsIndexed(rot, m, f->m50);
+    *spin = w;
+}
 
 void InitTempoAgent(TempoAgent* self)
 {
