@@ -291,7 +291,7 @@ struct Player : TurningCollider {
     void* f1090;            // 0x1090: the blend those weights go to
     f32 f1094;              // 0x1094: eased toward the side the path turns to (func_00171238)
     f32 f1098;              // 0x1098: its rate
-    u8 pad109C[0x1188 - 0x109C];
+    void* f109C[59];        // 0x109C: the animation of each sub-state (+0x2228), by its number (SetPlayerState)
     void* f1188;            // 0x1188
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
