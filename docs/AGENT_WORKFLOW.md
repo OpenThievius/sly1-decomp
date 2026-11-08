@@ -212,6 +212,24 @@ Measured on this compiler; add to this list when you learn something.
   (`_GLOBAL_$I$*` for whichever the constructor is); `tools/compile.py` renames them, and they
   are checked and counted like any function of the file. The object's own `.ctors` entry is
   discarded: retail's list comes from the disassembly.
+- **A function-local static.** `static T x;` inside a function, where `T` has a constructor, is
+  built on first use: GCC 2.95 tests a guard word, runs the constructor and sets the guard.
+  Retail shows it as a `.data` word (the guard, tested and set to 1) and a `.bss` record that
+  the function alone uses, filled in that branch. The compiler names them itself, the variable
+  `x.N` and the guard `_$tmp_K.N` (in its own section `.data._$tmp_K` with
+  `-fdata-sections`), and writes both out just ahead of the function's code;
+  `config/us/statics.tsv` (file, function, variable, object, guard; `-` for no guard) gives
+  them retail's labels, read from the function's `%hi`/`%lo` pairs, and `tools/compile.py`
+  renames them as it does `config/us/generated.tsv`'s functions, so that `tools/check.py`
+  resolves them and a split file places them like any `D_XXXXXXXX` global or static. A row is
+  written once the labels are known, matched or not: a function still in assembly is skipped,
+  and in `src/` one defined without the static is an error. In a whole file the guard is
+  emitted with its function, after every global defined above it, so retail's `.data` order
+  shows where the function sits among the file's data; and the file's `.bss` column in
+  `config/us/files.tsv` gives the records' start. The parameter blocks of
+  `DrawPlayerMarkerRing1` and its kin (func_001D5FA8, func_001D60B0, func_001D61C8, whose
+  three guards end player_request.cpp's `.data`, and func_0018A510) are the known cases; they
+  land together, once their stores match.
 - **A real source file.** A 16 KiB window is our cut, not the original's. Where retail shows one
   of the original files (a static initialiser ends a file; data used together sits together, in
   code order), its functions move to a file of their own, `src/main/<name>.cpp`, in retail's

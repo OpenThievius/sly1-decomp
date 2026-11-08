@@ -819,6 +819,45 @@ class GeneratedNameTest(unittest.TestCase):
             compile.rename_generated(self.ASM, {"_GLOBAL_$D$*": "func_00100000"})
 
 
+class StaticNamesTest(unittest.TestCase):
+    # What GCC 2.95 writes for `static Cfg cfg;` (a constructor) inside func_001D5FA8, with
+    # -fdata-sections: the variable in .bss, its guard in a section of its own, then the code.
+    ASM = ("\t.end\tfunc_001D5678__Fv\n"
+           "\t.section\t.bss\ncfg.6:\n\t.align\t3\n\t.space\t128\n\t.previous\n"
+           "\t.section .data._$tmp_0,\"aw\",@progbits\n\t.align\t2\n"
+           "\t.type\t _$tmp_0.7,@object\n\t.size\t _$tmp_0.7,4\n_$tmp_0.7:\n\t.space\t4\n"
+           "\t.section .text.func_001D5FA8__FPv,\"ax\",@progbits\n"
+           "\t.ent\tfunc_001D5FA8__FPv\nfunc_001D5FA8__FPv:\n"
+           "\tlui\t$20,%hi(_$tmp_0.7) # high\n\tlui\t$18,%hi(cfg.6) # high\n"
+           "\tlw\t$2,%lo(_$tmp_0.7)($20)\n\taddiu\t$16,$18,%lo(cfg.6) # low\n"
+           "\t.end\tfunc_001D5FA8__FPv\n")
+    ROW = [("func_001D5FA8", "cfg", "D_00605550", "D_00275130")]
+
+    def test_the_static_and_its_guard_take_retails_labels(self):
+        got = compile.rename_statics(self.ASM, self.ROW)
+        self.assertIn("D_00605550:\n", got)
+        self.assertIn("%lo(D_00605550)", got)
+        self.assertIn(".section .data.D_00275130,", got)
+        self.assertIn("%lo(D_00275130)($20)", got)
+        self.assertNotIn("cfg.6", got)
+        self.assertNotIn("_$tmp_0", got)
+
+    def test_a_function_still_in_assembly_is_skipped(self):
+        self.assertEqual(compile.rename_statics(self.ASM, [("func_001D60B0", "cfg", "D_006055D0", "-")]),
+                         self.ASM)
+
+    def test_a_static_the_compiler_did_not_make_is_an_error_in_src(self):
+        with self.assertRaises(compile.CompileError):
+            compile.rename_statics(self.ASM, [("func_001D5FA8", "ring", "D_00605550", None)])
+        self.assertEqual(compile.rename_statics(self.ASM, [("func_001D5FA8", "ring", "D_00605550", None)],
+                                                strict=False), self.ASM)
+
+    def test_a_static_without_a_guard_keeps_the_temporaries(self):
+        got = compile.rename_statics(self.ASM, [("func_001D5FA8", "cfg", "D_00605550", None)])
+        self.assertIn("_$tmp_0.7", got)
+        self.assertNotIn("cfg.6", got)
+
+
 class BssPlacementTest(unittest.TestCase):
     def obj(self, symbols):
         class Obj:
