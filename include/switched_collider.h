@@ -93,11 +93,12 @@ struct Ev07 {
 struct Slot19 {
     PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
     PlacedObject* obj2;     // 0x04: the object a second link gives (func_001DA7E0 places it with this one)
-    u8 pad08[0x0C - 0x08];
+    PlacedObject* obj8;     // 0x08: the object its start is taken from (func_001DA320)
     s32 f0C;                // 0x0C: compared with PathFollower::f6A0 (func_001DA7E0)
     Vec02 v10;              // 0x10
     Vec02 v20;              // 0x20
-    u8 pad30[0x50 - 0x30];
+    Vec02 v30;              // 0x30
+    Vec02 v40;              // 0x40
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
     f32 f54;                // 0x54: an angle f50 advances by the clock's step (func_001DA7E0)
     u8 pad58[0x60 - 0x58];
@@ -885,7 +886,7 @@ struct PathFollower : SwitchedCollider {
     u8 padB3C[0xB44 - 0xB3C];
     StateTrigger* fB44;     // 0xB44: the graph its walker (fB48) is made on
     void* fB48;             // 0xB48
-    u8 padB4C[0xB50 - 0xB4C];
+    void* fB4C;             // 0xB4C: the mesh object func_001DA320 tests the other against
     s32 pushedCount;        // 0xB50: the objects in pushed (func_001D9AC8)
     Collider* pushed[8];    // 0xB54: the objects its contacts pushed, each once (func_001D9AC8)
     Contact03* contacts;    // 0xB74: the contacts to process, given back to the world's pool (func_001D9AC8)
