@@ -628,6 +628,23 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   shared or entered sideways** (func_001C61E0's states 1 and 2 sharing one
   call and falling into case 0, state 3 jumping into cases 4 to 7).
 
+- **A variable for each live range.** One variable reused across separate
+  live ranges (two loops, three calls) is one pseudo for global allocation and
+  loses the argument-register preference; a variable for each range gives
+  retail's a0/a1 (func_001A3D40, func_001CE800). Where retail keeps one value
+  in one register across the ranges, the reverse holds: one variable.
+- **An inline clamp loads its bounds before each test** (ClampBetween with early
+  returns), which keeps a preceding store out of the branch's delay slot
+  (func_001796D0, func_001B4330).
+- **A product inside an inline function is not CSE'd** with the caller's
+  identical product: retail's second multiply (func_0013F1D8).
+- **One nested expression forms the destination first.** `Q(d) = F(..., G(Q(d)),
+  ...)` forms d's address before G's test, as retail's early `move a1, sp`
+  (func_00198BD8).
+- **MinF/MaxF with the constant first.** `a >? b` / `b <? a` in an inline
+  called with the constant first gives retail's constant-first operand and
+  result register (func_00141F48, func_0017FB78).
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it
