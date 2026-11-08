@@ -8,14 +8,7 @@
 #include "shapes.h"
 #include "vu0.h"
 #include "globals.h"
-
-// The file's .rodata, in retail's order: the constants and jump tables only its assembly reads.
-extern const f32 D_0024DAA0 = -3.40282347e+38f;
-INCLUDE_RODATA(jtbl_0024DAB0);
-extern const f32 D_0024DAD0 = -3.40282347e+38f;
-INCLUDE_RODATA(D_0024DAD4);
-INCLUDE_RODATA(jtbl_0024DAE0);
-INCLUDE_RODATA(jtbl_0024DB00);
+#include "game_progress.h"
 
 struct __attribute__((aligned(16))) OnOffDefaultsBlock { f32 f[36]; };
 
@@ -52,7 +45,218 @@ OnOffDefaultsBlock g_onOffObjectDefaults = {
 };
 float D_00274EF0[3] = {2500.0f, 0.0f, 1.0f};
 
-INCLUDE_ASM(func_001CDFB8);
+struct TargetShape_1CDFB8;
+typedef void (*TargetShapeFn_1CDFB8)(TargetShape_1CDFB8* self, Vec02* at, s32 a, Vec02* out, s32 b, s32 c, f32* t);
+struct TargetShape_1CDFB8 { TargetShapeFn_1CDFB8* vtbl; };
+struct TargetCurve_1CDFB8 : BaseObject {
+    TargetShape_1CDFB8* shape;      // 0x34
+    TargetCurve_1CDFB8* next;       // 0x38
+    u8 pad3C[0x40 - 0x3C];
+    s32 mode40;                     // 0x40
+};
+struct TargetPoint_1CDFB8 : BaseObject {
+    u8 pad34[0x50 - 0x34];
+    TargetPoint_1CDFB8* next;       // 0x50
+    u8 pad54[0x58 - 0x54];
+    s32 mode58;                     // 0x58
+    f32 radius5C;                   // 0x5C
+};
+struct Part_1CDFB8 {
+    u8 pad0[0x140];
+    Vec02 pos;                      // 0x140
+    u8 pad150[0x558 - 0x150];
+    Part_1CDFB8* next;              // 0x558
+    u8 pad55C[0x560 - 0x55C];
+    f32 radius;                     // 0x560
+};
+struct Class75_1CDFB8 : BaseObject {
+    u8 pad34[0x80 - 0x34];
+    Class75_1CDFB8* next;           // 0x80
+    u8 pad84[0x88 - 0x84];
+    u32 flags88;                    // 0x88
+};
+struct C17_1CDFB8 { u8 pad0[0x618]; void* f618; u8 pad61C[0x760 - 0x61C]; s32 f760; };
+struct World_1CDFB8 { u8 pad0[0x1CE4]; C17_1CDFB8* f1CE4; u8 pad1CE8[0x2300 - 0x1CE8]; s32 count2300; };
+struct Chooser_1CDFB8 {
+    u8 pad0[0x14];
+    World_1CDFB8* world;            // 0x14
+    u8 pad18[0x140 - 0x18];
+    Vec02 pos;                      // 0x140
+    u8 pad150[0x2200 - 0x150];
+    void* f2200;                    // 0x2200
+    void* f2204;                    // 0x2204
+    void* f2208;                    // 0x2208
+    f32 f220C;                      // 0x220C
+    void* f2210;                    // 0x2210
+    u8 pad2214[0x23A0 - 0x2214];
+    void* f23A0;                    // 0x23A0
+    f32 f23A4;                      // 0x23A4
+    void* f23A8;                    // 0x23A8
+    u8 pad23AC[0x23B0 - 0x23AC];
+    void* f23B0;                    // 0x23B0
+    u8 pad23B4[0x23CC - 0x23B4];
+    void* f23CC;                    // 0x23CC
+};
+extern List01 g_class75List;
+void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
+void ConvertPositionToWorld(void* obj, Vec02* out);
+s32 IsObjectOfKind(void* obj, s32 kind);
+s32 GetObjectWorldPosition(void* obj, Vec02* out);
+s32 CompletesWorldBits(s32 bits);
+void func_001C61E0(Chooser_1CDFB8* self, s32 mode);
+void UpdatePlayerAimTarget(Chooser_1CDFB8* self);
+s32 MaskWorldBitsBySave(void);
+
+s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
+{
+    Vec02 a;
+    Vec02 b;
+    f32 curveT;
+    f32 vectorT;
+    s32 kind = -1;
+    f32 best = target != 0 ? -3.40282347e+38f : D_00274E00;
+    Class75_1CDFB8* obj;
+    TargetCurve_1CDFB8* curve;
+    Part_1CDFB8* part;
+    TargetPoint_1CDFB8* point;
+    TargetCurve_1CDFB8* vector;
+    C17_1CDFB8* c17;
+    f32 curveU;
+    f32 vectorU;
+    f32 dist;
+
+    for (TargetCurve_1CDFB8* c = (TargetCurve_1CDFB8*)g_targetCurveList.head; c != 0; c = c->next) {
+        TransformPointBetweenFrames(0, c->parent, &self->pos, &a);
+        TargetShape_1CDFB8* s = c->shape;
+        if (s->vtbl[10] != 0) {
+            s->vtbl[10](s, &a, 0, &b, 0, 0, &curveT);
+        }
+        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b))));
+        if (d < best || c == target) {
+            curveU = curveT;
+            best = best <? d;
+            curve = c;
+            kind = 0;
+        }
+    }
+    for (TargetPoint_1CDFB8* p = (TargetPoint_1CDFB8*)g_targetPointList.head; p != 0; p = p->next) {
+        ConvertPositionToWorld(p, &a);
+        dist = Vu0::Distance(a, self->pos);
+        dist = __builtin_fabsf(dist - p->radius5C);
+        if (dist < best || p == target) {
+            best = best <? dist;
+            point = p;
+            kind = 1;
+        }
+    }
+    for (Part_1CDFB8* q = (Part_1CDFB8*)g_partList.head; q != 0; q = q->next) {
+        dist = Vu0::Distance(q->pos, self->pos);
+        dist = __builtin_fabsf(dist - q->radius);
+        if (dist < best || q == target) {
+            part = q;
+            best = best <? dist;
+            kind = 2;
+        }
+    }
+    for (Class75_1CDFB8* o = (Class75_1CDFB8*)g_class75List.head; o != 0; o = o->next) {
+        if (o != self->f2210 && (o->flags88 & 1) && (target == 0 || o == target) && IsObjectOfKind(o, 0x76) != 0) {
+            GetObjectWorldPosition(o, &a);
+            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(self->pos)))) - D_00274E08;
+            if (d < (best <? 0.0f) || o == target) {
+                best = best <? d;
+                obj = o;
+                kind = 6;
+            }
+        }
+    }
+    for (TargetCurve_1CDFB8* v = (TargetCurve_1CDFB8*)g_targetVectors.list.head; v != 0; v = v->next) {
+        TransformPointBetweenFrames(0, v->parent, &self->pos, &a);
+        TargetShape_1CDFB8* s = v->shape;
+        if (s->vtbl[10] != 0) {
+            s->vtbl[10](s, &a, 0, &b, 0, 0, &vectorT);
+        }
+        TransformPointBetweenFrames(v->parent, 0, &b, &b);
+        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(b), Vu0::Q(self->pos)))) - D_00274E08;
+        if (d < (best <? 0.0f) || v == target) {
+            d = best <? d;
+            vectorU = vectorT;
+            vector = v;
+            best = d;
+            kind = 7;
+        }
+    }
+    World_1CDFB8* w = self->world;
+    s32 n = g_currentEntry->count64;
+    C17_1CDFB8* c = w->f1CE4;
+    if (c != 0 && n >= w->count2300 && CompletesWorldBits(c->f760) == 0) {
+        GetObjectWorldPosition(self->world->f1CE4->f618, &a);
+        dist = Vu0::Distance(a, self->pos);
+        if (dist < D_00274E18 || self->world->f1CE4 == target) {
+            kind = 5;
+            c17 = self->world->f1CE4;
+        }
+    }
+    s32 r;
+    switch (kind) {
+    case 0:
+        *out = curve->mode40;
+        r = 0x15;
+        self->f23A0 = curve;
+        self->f23A4 = curveU;
+        break;
+    case 1:
+        *out = point->mode58;
+        r = 0x15;
+        self->f23A8 = point;
+        break;
+    case 2:
+        *out = 1;
+        r = 0x15;
+        self->f23B0 = part;
+        break;
+    case 6:
+        self->f2204 = obj;
+        self->f2200 = obj;
+        self->f2208 = 0;
+        func_001C61E0(self, 0);
+        UpdatePlayerAimTarget(self);
+        *out = 6;
+        r = 0x10;
+        break;
+    case 7:
+        self->f2208 = vector;
+        self->f220C = vectorU;
+        self->f2204 = 0;
+        self->f2200 = 0;
+        func_001C61E0(self, 0);
+        UpdatePlayerAimTarget(self);
+        *out = 6;
+        r = 0x10;
+        break;
+    case 5:
+        *out = 7;
+        r = 0x10;
+        self->f23CC = c17;
+        break;
+    default:
+        if (MaskWorldBitsBySave() & 0x12000) {
+            *out = 3;
+            r = 0x10;
+        } else {
+            *out = -1;
+            r = -1;
+        }
+        break;
+    }
+    return r;
+}
+
+// The rest of the file's .rodata, in retail's order after func_001CDFB8's literal and jump
+// table: the constants and jump tables only its assembly reads.
+extern const f32 D_0024DAD0 = -3.40282347e+38f;
+INCLUDE_RODATA(D_0024DAD4);
+INCLUDE_RODATA(jtbl_0024DAE0);
+INCLUDE_RODATA(jtbl_0024DB00);
 
 INCLUDE_ASM(func_001CE590);
 
