@@ -44,6 +44,7 @@ import asm_func  # noqa: E402
 import toolchain  # noqa: E402
 import versions  # noqa: E402
 import volatile_slots  # noqa: E402
+import short_loops  # noqa: E402
 
 ROOT = versions.ROOT
 CFLAGS = ROOT / "config" / "cflags.tsv"
@@ -317,11 +318,23 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             # The assembler that built Sony's libraries put a volatile store into the slot of
             # the call after it; ours leaves the slot empty (tools/volatile_slots.py).
             asm = volatile_slots.fill(asm)
-        if names or release == "2.9-ee-991111":
-            s.write_text(asm)
+        as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()
+        # Ours pads a short loop wrongly where its fragment list breaks near the loop's label, the
+        # original never did (tools/short_loops.py). Each loop is assembled
+        # on its own first, and the text then carries the padding it got there.
+        loops = short_loops.oracle(asm)
+        pads = {}
+        if loops:
+            probe = Path(tmp) / "loops.s"
+            probe.write_text(loops)
+            proc = run_step(run + [str(ee_as)] + as_flags + [str(probe), "-o", str(probe.with_suffix(".o"))], cwd=ROOT)
+            if proc.returncode:
+                raise CompileError("short loops: " + proc.stderr.strip())
+            pads = short_loops.padding(probe.with_suffix(".o").read_bytes())
+        asm = short_loops.rewrite(asm, pads)
+        s.write_text(asm)
         if keep_asm:
             Path(keep_asm).write_text(asm)
-        as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()
         proc = run_step(run + [str(ee_as)] + as_flags + [str(s), "-o", str(Path(tmp) / "unit.o")], cwd=ROOT)
         if not proc.returncode:
             # ee-as (1999) leaves local symbols after the symbol table's sh_info, which modern ld

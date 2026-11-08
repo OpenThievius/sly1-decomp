@@ -44,6 +44,27 @@ What else was measured:
     added. tools/check.py prints every zero word (`objdump
     -z`): without it a run of nops collapsed into `...` and the padding
     seemed missing from both columns.
+  - **but it miscounts where its fragment list breaks**, and the original did not
+    (2026-11-08). Its code fragments sit on an obstack whose chunks hold about 3992 bytes of
+    straight code; when the chunk runs out within the five instructions after a loop's label,
+    it counts only the instructions in the label's own fragment and pads any loop there,
+    five instructions or ten, with up to five nops (a sweep of a 5-instruction `bne` loop behind
+    0 to 3000 filler instructions: nops at 994 to 998, 1992 to 1996, 2990 to 2994 only). Any
+    directive before it that ends a fragment (`.p2align`, even with nothing to pad) moves the
+    breaks, so a function's C can be EXACT alone and still move its file: func_001BC0E0
+    (StartSoundEffect's 16-byte copy loop got five nops, func_001BFFC8 landed 0x18 late) and
+    func_001579B0 (three in func_00158F80's). Retail has none of this: in its .text no
+    backward branch with no other branch or jump in its loop has two nops or more before it
+    unless its loop is short, and no short loop has more than its count needs. A loop holding
+    an FPU operation (`neg.s`) is not padded at all (func_00153A50's 4-instruction list walk at
+    0x153B18), and a call or another branch in the loop also stops it, so the rule is the
+    assembler's own and not ours to restate. tools/short_loops.py keeps the assembler as the
+    judge without its miscount: each loop of compiled code is first assembled alone, in a
+    section of its own (a fresh fragment list), and the nops it gets there go into the text
+    before its branch; the branch itself aims at a forward alias of its label (`$LSLk = $Ln`
+    after it), which the assembler cannot measure, so it adds none of its own. Applied to
+    every compiled file in tools/compile.py; both builds match with it, and with it
+    func_001BC0E0 is linked.
 
   Then GNU objcopy rewrites the object's symbol table in the order modern ld
   wants, without touching code.
@@ -213,13 +234,11 @@ What retail shows, and what the compiler does:
   on a float gives lwc1 and mfc1. A FromFloat that passes the float's bits (a
   union) gives the lw but moves func_001BC828's computed float from v0 to v1,
   so the header keeps the float form; those three are near misses.
-- **A loop's alignment reaches later functions.** func_001579B0's C is
-  retail's bytes, but in the whole file's build the assembler then adds its
-  short-loop nops to func_00158F80's copy loop, 12 bytes on. The cause is the
-  `.p2align 3` cc1plus emits before the first function's loop label (no
-  padding there): without it, or without the function's `.align 3`, the later
-  loop assembles as retail's. tools/check.py, which builds each function in
-  its own section, does not see it; only the full build does.
+- **A loop's alignment reaches later functions.** func_001579B0's C first broke its file's
+  build: the assembler padded func_00158F80's copy loop with three nops, 12 bytes on. It was
+  the assembler's fragment breaks, which a `.p2align` anywhere before moves (the short-loop
+  padding of "The assembler matters"); tools/short_loops.py removes the effect.
+
 - **The time argument.** In EABI a float argument goes in $f12 wherever it
   is in the list, but its place sets the order of evaluation: retail's mov.s
   before the pointer arguments of func_00125750's calls of the position and
@@ -423,10 +442,10 @@ What retail shows, and what the compiler does:
   an int bit-field read into a local (placed_object.h's bits24, func_00125138); `== 2` on the
   field itself folds into a mask compare. (5) A float constant used across calls that retail
   holds in a saved FPR from a join block on is a local assigned in that block (func_001BC0E0);
-  assigned at the top, the constant is propagated into each use. (6) Not yet reproduced: with
-  func_001BC0E0's C (EXACT alone), the `.p2align 2` before its normalisation's divide label makes
-  the assembler pad StartSoundEffect's short copy loop with five nops in the whole file's build
-  (file_1B7968.cpp); deleting that directive alone from the unit's assembly places the file.
+  assigned at the top, the constant is propagated into each use. (6) With func_001BC0E0's C
+  (EXACT alone), our assembler padded StartSoundEffect's copy loop with five nops in the whole
+  file's build; the cause was its fragment breaks, not the code, and tools/short_loops.py now
+  pads short loops as the original did (see "The assembler matters"): file_1B7968.cpp places.
 
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
