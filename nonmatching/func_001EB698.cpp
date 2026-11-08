@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 155/172 (90.1%), checked 2026-11-08
+// Tried night-close8: the method or the table read into a local before the sum, the sum stored through a Vec, the vector as a u128 local: the table load still follows the stores (update_equiv_regs or sched moves it to the call).
 // Still differs (2026-11-08, night-lwx): with FromFloatAt as "rV" both weights' lui/lw are retail's; left: retail loads the table (lw v1,0(s0)) before the vmulax and calls through v0, storing vf4's slot in the jalr's delay slot; here the table is loaded after the stores, into v0.
 // NEAR: registers and order: retail loads weight t=D_00275CD4 with lw into vf4 first (FromFloatAt, stored in a Scalar-like slot after the arithmetic: needs a ScalarAt helper), s in vf2 and b in vf3; here s and b swap registers and the first lui pair differs.
 // In the context of its file, src/main/file_1E88D0.cpp.

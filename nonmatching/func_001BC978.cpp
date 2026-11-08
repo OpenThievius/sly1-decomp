@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 798/900 (88.7%), checked 2026-11-08
+// Tried night-close8: the offset read into a Vec local before the flag (no change), RotateUntied for the inertia (worse, 64).
 #include "common.h"
 #include "collider.h"
 #include "globals.h"
