@@ -1468,7 +1468,61 @@ u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
     }
 }
 
-INCLUDE_ASM(func_0019D0E0);
+// Bisects the segment from self's point at 0x90 to *from for the last place func_0019CF68 accepts
+// (ten halvings); the point, what it returned there and the distance from *from, into the
+// outputs that are not 0.
+void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
+{
+    u8* self = (u8*)a;
+    Vec02* from = (Vec02*)b;
+    Vec02* out = (Vec02*)c;
+    s32* hit = (s32*)d;
+    f32* dist = (f32*)e;
+    Vec02 point;
+    Vec02 best;
+    s32 first = (s32)func_0019CF68((C8B*)self, 0, from);
+    s32 found;
+    if (first != 0) {
+        if (out != 0) {
+            *out = *from;
+        }
+        if (hit != 0) {
+            *hit = first;
+        }
+        if (dist != 0) {
+            *dist = 0.0f;
+        }
+        return;
+    }
+    found = 0;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    for (s32 i = 9; i >= 0; i--) {
+        f32 t = (lo + hi) * 0.5f;
+        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)(self + 0x90)), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
+        s32 r = (s32)func_0019CF68((C8B*)self, 0, &point);
+        if (r != 0) {
+            found = r;
+            lo = t;
+            best = point;
+        } else {
+            hi = t;
+        }
+    }
+    if (found == 0) {
+        best = *(Vec02*)(self + 0x70);
+        found = (s32)func_0019CF68((C8B*)self, 0, &best);
+    }
+    if (out != 0) {
+        *out = best;
+    }
+    if (hit != 0) {
+        *hit = found;
+    }
+    if (dist != 0) {
+        Vu0::StoreX(*dist, Vu0::Length(Vu0::Sub(Vu0::Q(*from), Vu0::Q(best))));
+    }
+}
 
 void TrackAimTargetObject(Player* self, void* x, void* y)
 {

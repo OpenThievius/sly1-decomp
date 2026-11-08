@@ -1240,7 +1240,22 @@ void StartPathFollowerEffect(PathFollower* self, void* a, void* b)
     }
 }
 
-INCLUDE_ASM(func_001DAD28);
+void FindPathFollowerPathPosition(PathFollower* self)
+{
+    if (self->f830 != 0) {
+        Vec02 p;
+        Vec02 tangent;
+        Vec02 side;
+        PathCurve* o = self->f830->curve;
+        if (o->vt->m11) {
+            o->vt->m11(o, *(f32*)((u8*)self + 0x838), (u8*)self + 0x100, 0, (f32*)&p, (f32*)&tangent, (f32*)((u8*)self + 0x838), 0);
+        }
+        u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
+        Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
+        self->f83C = self->f830->curve->vt->m05(self->f830->curve, *(f32*)((u8*)self + 0x838));
+        Vu0::StoreX(self->f840, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
+    }
+}
 
 void RecomputePathFollowerFrame(PathFollower* self)
 {
