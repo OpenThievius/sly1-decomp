@@ -38,7 +38,7 @@ struct StateNotifier : PlacedObject {
     void* f2EC;             // 0x2EC
     Vec02 v2F0;             // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
     Vec02 v300;             // 0x300: its motion, split along the push (func_00146DB0)
-    u8 pad310[0x320 - 0x310];
+    Vec02 v310;             // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)
     union {
         f32 f320;           // 0x320
         s32 i320;
@@ -60,7 +60,9 @@ struct StateNotifier : PlacedObject {
     f32 f350;               // 0x350
     f32 f354;               // 0x354
     f32 f358;               // 0x358
-    u8 pad35C[0x374 - 0x35C];
+    f32 f35C;               // 0x35C: an angle about v360, eased to 0 in state 4 (func_00146518)
+    Vec02 v360;             // 0x360: its axis (func_001478F0)
+    s32 f370;               // 0x370: set once state 4 has come to rest (func_00146518)
     union {
         u8 tail374[8];      // 0x374: copied unaligned by func_00146418
         StateNotifier* next374; // 0x374: the link in the world's list1C54 (func_001DCD28)
