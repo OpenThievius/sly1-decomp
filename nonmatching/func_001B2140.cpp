@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 500/536 (93.3%), checked 2026-11-08
-// NEAR: identical in the loop (the whole walk of the body's faces matches) and in the frame; the first block differs: retail makes the weight of f44 first in vf4 (qmtc2 after the lw of 0x44) and the segment end b (vmaddx vf5, stored at 0x10) before the start a (vf1), stores the 0x20 weight slot twice around them, and re-reads the count at 0xA0 after the stores (lw v0,0xA0 / blez); ours computes a first, keeps the count in a0 across the stores. Something makes retail's stores alias the stack count. The weights are FromFloatAt in a 16-byte local (the lw form of Vu0::Scalar). Tried a struct for count and list, and the order of a and b.
+// BYTES 520/536 (97.0%), checked 2026-11-08
+// NEAR (2026-11-08, night-close9): with night's FromFloatAt the weights are ScalarAt written inline in the two MulAddX, a's first; the order, the registers and the stores of the first block are retail's. Left: retail reloads the count at 0xA0 after the weight slot's second store (lw v0 / blez) and so loads the weights with lw v0; ours keeps the count in v0 and takes v1. Tried a struct for count and list (moves the frame), Set for a and b.
 #include "common.h"
 #include "range_record.h"
 #include "collider.h"
@@ -35,14 +35,6 @@ typedef s32 (*RangeBodyFilter)(void*, Collider*);
 void GatherCollidersInSphere(f32 radius, World* world, s32 a, Vec02* centre, RangeBodyFilter filter, s32 b, s32* count, Collider*** list);
 s32 CollectTreeNodeSpans(void* tree, Vec02* from, Vec02* to, s32 a, s32 b, MeshHit* hit);
 
-// A float read from memory as a weight: stored in a slot of its own that the next weight shares.
-static inline u128 WeightAt(const f32& f)
-{
-    Vu0::Slot t;
-    Vu0::Q(t) = Vu0::FromFloatAt(f);
-    return Vu0::Q(t);
-}
-
 s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits);
 s32 IsRangeRecordBodyCandidate(void* unused, Collider* o);
 
@@ -55,10 +47,8 @@ void func_001B2140(RangeRecord* self)
     PushBackMemoryMark();
     GatherCollidersInSphere(self->f60, g_currentWorld, 0, &self->v50, IsRangeRecordBodyCandidate, 0, &count, &list);
     if (count != 0) {
-        u128 w40 = WeightAt(self->f40);
-        u128 w44 = WeightAt(self->f44);
-        Vu0::Q(b) = Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(self->v20), w44);
-        Vu0::Q(a) = Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(self->v20), w40);
+        Vu0::Q(a) = Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(self->v20), Vu0::ScalarAt(self->f40));
+        Vu0::Q(b) = Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(self->v20), Vu0::ScalarAt(self->f44));
         MeshHit hit;
         for (s32 i = 0; i < count; i++) {
             Collider* obj = list[i];

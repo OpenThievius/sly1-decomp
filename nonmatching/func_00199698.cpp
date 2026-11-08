@@ -2,6 +2,7 @@
 // BYTES 392/440 (89.1%), checked 2026-11-08
 // Night-moved (2026-11-08): ToFloatMoved on the reach test and NormalizeOrMoved give the size (440) and the mul.s before the vector sequence; left: one instruction, retail forms target + 320 (a2) after the compare and ours before the lqc2 (a local pointer for self + 320, the target pointer as a local, &data->f18->v140: no change).
 // NEAR: all registers match; the schedule differs: retail loads D_0026A968 and squares it (mul.s) before the vector sequence, and fills the nop after c.lt.s of the normalisation test with the vsub; the compiler puts mul.s after the Dot and leaves the nop. Different statement orders, a named range, permute.py --auto did not change it.
+// Tried (2026-11-08, night-close9): the squared distance through an inline function of references: &target->v140 is still formed before the test.
 #include "common.h"
 #include "switched_collider.h"
 #include "object_set.h"

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 714/772 (92.5%), checked 2026-11-08
 // NEAR: the same size as retail now, the VU0 registers retail's (MulAddX2 in its own order gives the result a's register, vf2).
+// Tried (2026-11-08, night-close9): after night's FromFloatAt the weight's lw is into its own register, but a0 where retail has v1 (retail loads it before the start point); the weights named first, all inline, or as Vec values: no closer.
 //       Fixed on the way: the parent walk is one while from the part itself (so the mask 0xF000 << 24 is held in s7), the
 //       probe is tested against other->tree.nodes (0x3F8), the end tested for bit 2 is end[1 - side], the cases are written
 //       1, 3, 2, best is set after the early return and the nearest test reads end[1 - side].v10.z. Still differs: the
