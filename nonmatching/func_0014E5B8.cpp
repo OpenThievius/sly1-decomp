@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 222/240 (92.5%), checked 2026-11-08
+// BYTES 232/240 (96.7%), checked 2026-11-08
 // Tried night-close3, 3 compiles: the tangent pointers in other orders and passed inline: worse (12 words).
+// Night-moved (2026-11-08): NormalizeOrMoved puts the unit vector lq before the mtc1/c.lt as retail has it; left: two words, retail adds a3 before loading a1 (outTan); the four tangent pointers in all 24 orders and inline expressions did not move it.
 // NEAR (2026-11-08, vu0w3-e1): all but two scheduling orders: retail adds a3 (inTan + off + 16) before loading a1 (outTan), and loads the unit vector's lq before the mtc1/c.lt of the length test (here in the bc1f delay slot). Tried typed pointers, locals in several orders, the fallback as a local.
 #include "common.h"
 #include "asm_func.h"
@@ -99,15 +100,15 @@ void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
     s32 i = FindPathCurveSegmentByTime(self, t, &a, &b);
     s32 off = i * 16;
     s32 next = off + 16;
-    u8* p0 = (u8*)self->points + off;
-    u8* t0 = (u8*)self->outTan + off;
-    u8* p1 = (u8*)self->points + next;
-    u8* t1 = (u8*)self->inTan + next;
+        u8* p0 = (u8*)self->points + off;
+        u8* t0 = (u8*)self->outTan + off;
+        u8* p1 = (u8*)self->points + next;
+        u8* t1 = (u8*)self->inTan + next;
     EvaluateHermiteVectorSegment(p0, t0, p1, t1, a1, a2, 0, b, a, 1.0f);
     if (a2) {
         u128 v = Vu0::Q(*a2);
         u128 fb = Vu0::Q(g_unitXVector);
-        Vu0::Q(*a2) = Vu0::NormalizeOr(v, fb);
+        Vu0::Q(*a2) = Vu0::NormalizeOrMoved(v, fb);
     }
 }
 

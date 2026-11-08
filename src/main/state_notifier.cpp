@@ -334,7 +334,58 @@ s32 IsEligibleNotifierTarget(void* unused, Collider* self)
 
 INCLUDE_ASM(func_00146DB0);
 
-INCLUDE_ASM(func_001471B0);
+struct ActiveNotifierData {
+    s32 f00;
+    u8 pad04[0x14 - 0x04];
+    f32 f14;
+    PlacedObject* f18;
+};
+
+void* GetActiveSwitchedColliderData(void);
+s32 MaskWorldBitsBySave(void);
+void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
+s32 CollectMeshHits(f32 f0, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6);
+
+void func_001471B0(StateNotifier* self)
+{
+    Vec02 hit[3];
+    Vec02 p0;
+    Vec02 p1;
+    if (self->armed != 0) {
+        ActiveNotifierData* d = (ActiveNotifierData*)GetActiveSwitchedColliderData();
+        if (d->f00 != 0 && d->f18 != 0) {
+            Vec02* pos = &self->v140;
+            f32 r = D_00261A50;
+            u128 diff = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(d->f18->v140));
+            f32 sq = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
+            if (!(r * r < sq)) {
+                f32 reach = d->f14;
+                if (sq < reach * reach) {
+                    self->desc02()->m2F(self, 1);
+                    return;
+                }
+                if ((MaskWorldBitsBySave() & 0x20) != 0 && IsObjectOfKind(self, 0x58) != 0) {
+                    ComputeObjectMotionInFrame(d->f18, 0, &d->f18->v140, &p0, 0, 0, 0);
+                    ComputeObjectMotionInFrame(self, 0, pos, &p1, 0, 0, 0);
+                    u128 dd = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(d->f18->v140));
+                    u128 fb = *(const u128*)&D_00248D30;
+                    u128 rel = Vu0::Sub(Vu0::Q(p1), Vu0::Q(p0));
+                    u128 dir = Vu0::NormalizeOrMoved(dd, fb);
+                    if (-50.0f < Vu0::ToFloat(Vu0::Dot(rel, dir))) {
+                        self->desc02()->m2F(self, 1);
+                        return;
+                    }
+                }
+                PlacedObject* o = d->f18;
+                if ((o->desc->flags & 2) != 0 && *(void**)((u8*)o + 0x3F8) != 0) {
+                    if (CollectMeshHits(self->f350, pos, *(void**)((u8*)o + 0x3F0), *(void**)((u8*)o + 0x3F8), 0, (u8*)o + 0x3A4, 1, hit) != 0) {
+                        self->desc02()->m2F(self, 1);
+                    }
+                }
+            }
+        }
+    }
+}
 
 s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 {

@@ -2907,7 +2907,94 @@ void SetPairControllerState(PairController* self, s32 state)
 
 INCLUDE_RODATA(D_0024CAEC);
 
-INCLUDE_ASM(func_001A5120);
+extern const f32 D_0024CAEC;
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void* GetActiveSwitchedCollider(void);
+extern const Vec02 D_00248D20;
+
+// Whether the spot is within reach of n: the xy distance to its position is less than the two radii.
+static inline s32 IsNearSpot(const Vec02& pos, PairedObject* n, PairedObject* o)
+{
+    s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < o->radius3D0 + n->radius3D0;
+    return near;
+}
+
+static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* o)
+{
+    s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < n->radius3D0 + o->radius3D0;
+    return near;
+}
+
+void func_001A5120(PairController* self)
+{
+    Vec02 pos;
+    Vec02 spare;
+    Mat02 turn;
+    PairedObject* o;
+    PairedObject* n;
+    PairedObject* m;
+    PairedObject* other;
+    s32 i;
+
+    if (self->count380 >= self->limit624) {
+        self->f634 = D_0024CAEC;
+        return;
+    }
+    o = *(PairedObject**)self->list374;
+    for (i = 0; i < 8; i++) {
+        f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
+        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, *(f32*)((u8*)self + 0x344));
+        other = (PairedObject*)GetActiveSwitchedCollider();
+        ComputePolarOffset((void*)&pos, angle, radius, 0.0f);
+        pos.y = pos.y * self->tune34C;
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(*(Vec02*)((u8*)self + 0x330)), Vu0::Q(pos));
+        if (other != 0 && IsNearSpot(pos, other, o)) {
+            continue;
+        }
+        for (n = *(PairedObject**)self->list384; n != 0; n = *(PairedObject**)((u8*)n + 0x5B0)) {
+            if (IsNearSpotOf(pos, n, o)) {
+                break;
+            }
+        }
+        if (n != 0) {
+            continue;
+        }
+        for (m = *(PairedObject**)self->list35C; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+            if (m->parent == 0 && IsNearSpot(pos, m, o)) {
+                break;
+            }
+        }
+        if (m != 0) {
+            continue;
+        }
+        for (m = *(PairedObject**)self->list368; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+            if (m != o && IsNearSpot(pos, m, o)) {
+                break;
+            }
+        }
+        if (m == 0) {
+            break;
+        }
+    }
+    if (i < 8) {
+        self->count3BC++;
+        self->count380++;
+        o->desc->m02(o);
+        pos.z = self->tune350;
+        o->desc02()->m1D(o, &pos);
+        f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
+        BuildAxisAngleMatrix(&D_00248D20, &turn, spin);
+        o->desc02()->m1E(o, &turn);
+        o->desc02()->m20(o, (Vec02*)&D_00248D30);
+        o->desc02()->m21(o, (Vec02*)&D_00248D30);
+        SetColliderAnchors(o, 2, (s32)&D_00248D20, 3, 0);
+        SetHitTargetState(o, 0);
+        RemoveFromList(self->list374, o);
+        AppendToList(self->list368, o);
+        PairWithNearestWaitingObject(self, o);
+        self->f634 = g_gameTime + RandomFloatInRange(self->f62C, self->f630);
+    }
+}
 
 void StartPairedObjects(PairController* self)
 {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 501/552 (90.8%), checked 2026-11-07
+// BYTES 520/552 (94.2%), checked 2026-11-08
+// Night-moved (2026-11-08): la and cosv read with ToFloatMoved fix the top (c.lt before the second qmfc2); left: the loop counter move t0,zero before the qmfc2 of the cross length (sinv with ToFloatMoved spills lc to a GPR early: worse).
 // NEAR: scheduling at the top only: retail issues c.lt.s f3,f1 (the first length against 1e-4) before the qmfc2 of the second length (as in func_001ED908), mul.s f2 of the two lengths before the lqc2 of b, and move t0,zero (the loop counter) before the qmfc2 of the cross product's length; every later instruction matches (the cross product's raw store, the unit X fallback address in a pointer, the 3x3 loops written as BuildAxisAngleMatrix's, the sine terms in a local).
 // In the context of its file, src/main/matrix.cpp.
 #include "common.h"
@@ -455,8 +456,8 @@ extern const Vec02 g_unitXVector;
 void func_0018A160(Vec02* a, Vec02* b, f32* m)
 {
     Vec02 axis;
-    f32 la = Vu0::ToFloat(Vu0::Length(Vu0::Q(*a)));
-    f32 lb = Vu0::ToFloat(Vu0::Length(Vu0::Q(*b)));
+    f32 la = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*a)));
+    f32 lb = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*b)));
     if (la < 0.0001f || lb < 0.0001f) {
         *(Matrix3x4*)m = g_identityMatrix;
         return;
@@ -465,14 +466,14 @@ void func_0018A160(Vec02* a, Vec02* b, f32* m)
     u128 lc = Vu0::Length(c);
     const Vec02* fallback = &g_unitXVector;
     Vu0::Q(axis) = c;
-    if (Vu0::ToFloat(lc) < 0.0001f) {
+    if (Vu0::ToFloatMoved(lc) < 0.0001f) {
         axis = *fallback;
     } else {
         Vu0::Q(axis) = Vu0::DivX(c, lc);
     }
     f32 prod = la * lb;
     f32 sinv = Vu0::ToFloat(lc) / prod;
-    f32 cosv = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / prod;
+    f32 cosv = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / prod;
     f32 (*mm)[4] = (f32 (*)[4])m;
     f32 t = 1.0f - cosv;
     s32 i;

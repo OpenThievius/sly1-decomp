@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 113/156 (72.4%), checked 2026-11-07
+// BYTES 137/156 (87.8%), checked 2026-11-08
 #include "common.h"
 #include "attachment.h"
 #include "placed_object.h"
@@ -7,6 +7,7 @@
 s32 ResolveAimTarget(T2195_790* a0);
 void ClearRootTries(PlacedObject* o);
 void SortAttachments(PlacedObject* o);
+// Night-moved (2026-11-08): ToFloatMoved on the compare puts the range product and the loads as retail has them; left: retail fills the bc1f delay slot with the else branch's move a0,s1 (taken from its target) after a nop, ours has bc1f, nop (the negated form, a far flag and a swapped branch order were worse).
 // NEAR (2026-11-07, worker vu0-e6): retail keeps the owner and the new key in one register (s1)
 // and schedules the product of the range with itself between the vsub and the vmul.xyz; this
 // reuses the owner's variable for the key to get the s1 (a plain local key goes to v1) but the
@@ -18,7 +19,7 @@ void func_00185498(T2195_790* self)
     PlacedObject* target = (PlacedObject*)ResolveAimTarget(self);
     if (target != 0) {
         u128 d = Vu0::Sub(Vu0::Q(((PlacedObject*)o)->v140), Vu0::Q(target->v140));
-        if (self->f40 * self->f40 < Vu0::ToFloat(Vu0::Dot(d, d))) {
+        if (self->f40 * self->f40 < Vu0::ToFloatMoved(Vu0::Dot(d, d))) {
             o = self->f48;
         } else {
             ClearRootTries((PlacedObject*)o);

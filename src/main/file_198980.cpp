@@ -1239,7 +1239,77 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
     return 1;
 }
 
-INCLUDE_ASM(func_0019BE80);
+void* GetActiveSwitchedCollider();
+void MeasurePointToSegment(void* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+
+// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
+// (list_iter.h) and each step reads the next item through the link.
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+
+template <class T> struct NextInList {
+    static T* Of(ListFrame* it)
+    {
+        T* obj = *(T**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct GatherCandidate {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 pos;              // 0x40
+};
+
+// Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
+// the segment to it, and keeps it in f660.
+void func_0019BE80(ObjectGatherer* self)
+{
+    ListFrame frame;
+    Vec02 point;
+    f32 t;
+    f32 dist;
+    f32 bestDist;
+    f32 bestT;
+    f32 bestLen;
+    GatherCandidate* best;
+    if (GetActiveSwitchedCollider() == 0) {
+        return;
+    }
+    best = 0;
+    bestDist = 0.0f;
+    BeginListWalk::Of(&frame, &self->world->list1C6C);
+    GatherCandidate* node;
+    while ((node = NextInList<GatherCandidate>::Of(&frame)) != 0) {
+        TransformPointBetweenFrames(node->frame, 0, &node->pos, (Quad4*)&point);
+        f32 reach = *(f32*)((u8*)self + 0x624);
+        f32 reach2 = reach * reach;
+        u128 off = Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140));
+        s32 far = reach2 < Vu0::ToFloatMoved(Vu0::Dot(off, off));
+        if (!far) {
+            MeasurePointToSegment((u8*)GetActiveSwitchedCollider() + 0x140, &self->v140, &point, &t, &dist);
+            f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))));
+            if (bestDist < dist || (t < 0.0001f && bestT < 0.0001f && len < bestLen)) {
+                bestT = t;
+                bestDist = dist;
+                best = node;
+                bestLen = len;
+            }
+        }
+    }
+    self->f660 = best;
+    g_activeListFrames = frame.prev;
+}
 
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
