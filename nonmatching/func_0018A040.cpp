@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 292/288, checked 2026-11-08
+// BYTES 276/288 (95.8%), checked 2026-11-08
 // NEAR: (2026-11-08, night-size3) the size and every register are retail's now: the clear through
 // an inline function (ClearMatrix, FillMemory of its argument) forms &scaling again for FillMemory
 // and the first product, as retail does, where a direct FillMemory(&scaling, ...) kept it in a

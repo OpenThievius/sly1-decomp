@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 244/240, checked 2026-11-07
+// BYTES 217/240 (90.4%), checked 2026-11-08
 // NEAR: StoreX stores the result as retail does (night-lever2). (night-size3) The squared length
 // is read with ToFloatMoved: retail's mtc1 follows its qmfc2 and the edge's sqc2 moves after the
 // c.lt.s, as there; the size is retail's. Still differs, VU0 registers only: retail loads p early
