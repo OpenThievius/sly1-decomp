@@ -325,6 +325,13 @@ def check_function(obj, name, key, resolver, image):
                 named = [s for s in obj.symbols if s["shndx"] == rsym["shndx"] and s["name"]]
                 base = resolver.address(named[0]["name"]) if named else None
                 return None if base is None else base - named[0]["value"] + addend_bits
+            if secname == ".text":
+                # The file's included assembly (include/asm_func.h): the function at that offset.
+                named = [s for s in obj.symbols if s["shndx"] == rsym["shndx"] and s["name"]
+                         and s["value"] <= addend_bits and resolver.address(s["name"]) is not None]
+                if named:
+                    near = max(named, key=lambda s: s["value"])
+                    return resolver.address(near["name"]) + addend_bits - near["value"]
             return None
         t = resolver.address(rsym["name"])
         return None if t is None else t + addend_bits
