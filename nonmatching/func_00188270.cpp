@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 560/592 (94.6%), checked 2026-11-08
 #include "common.h"
-// NEAR: the prologue only: retail moves a2 to s5 right after sq ra and puts the store of fr.res in the bc1f delay slot; ours stores fr.res first and moves a2 in the slot. Night-close7: func_0013E430 declared (node, p, eps, out), as its definition now is, gives the call retail's a1 and $f12. Tried: the store after the loads or in each arm, the compare flipped, the loads swapped, permute.py --auto.
+// NEAR: only the call to func_0013E430: retail stores fr.cur (sw s2) before the lwc1 of eps and has x in a1 (addiu a1,a1,992 last, in the jal slot); ours loads eps first and stores in the slot, or (store first) keeps x in v0. Fixed by reading both pair loads into f32 locals before fr.res = 0 (prologue now matches). Tried: eps local before/after the store, x local, pointer to fr.cur, p local.
 
 struct Item_188270 {
     s32 a, b, c;
@@ -54,10 +54,12 @@ s32 func_0013E430(Item_188270* node, void* p, f32 f, Item_188270** out);
 s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
 {
     Frame_188270 fr;
-    fr.res = 0;
     Obj_188270* pa = pair->a;
     Obj_188270* pb = pair->b;
-    if (pa->f3D0 > pb->f3D0) {
+    f32 da = pa->f3D0;
+    f32 db = pb->f3D0;
+    fr.res = 0;
+    if (da > db) {
         fr.x = pb;
         fr.y = pa;
     } else {
