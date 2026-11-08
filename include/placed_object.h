@@ -205,7 +205,8 @@ struct PlacedObject : BaseObject {
             u8 b2C8;        // 0x2C8
             s8 b2C9;        // 0x2C9: -1 at set-up
             s8 b2CA;        // 0x2CA: -1 at set-up
-            u64 bits24 : 2; // set-up: 1 with a parent, 2 without
+            u32 bits24 : 2; // set-up: 1 with a parent, 2 without (an int field: func_00125138 reads it as
+                            // ld, then dsll 8, dsra32 and andi 3, the 32-bit extraction)
             u64 bits26 : 2; // set-up: 0 with a parent, 2 without
             u64 bits28 : 2; // func_00196410
             u64 bits30 : 2; // a pose follow state (func_00128598): 1 once the object is close and slow

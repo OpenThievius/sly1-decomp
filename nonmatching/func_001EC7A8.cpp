@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 124/128, checked 2026-11-08
-// NEAR (2026-11-08, night-gamec): retail has a dead li v0,1 before the index shift and one more temporary, so its registers and load order differ; stores and arithmetic are retail's
+// BYTES 74/128 (57.8%), checked 2026-11-08
+// NEAR (2026-11-08, night-size2): the same size as retail now: its dead `li v0,1` is the compare of an `if (dir == 1)` whose arms (the state and clip stores, the clip read before) compile alike, which jump2 cross-jumps and deletes, as the file's other dead compare (5 compiles). Still differs: registers and the order of the loads (retail: e in t1, self in a3, dir in t0, the clip in v1, the clock's high half in a2 at the top); arms over more or fewer of the statements were further off.
 // In the context of its file, src/main/file_1E88D0.cpp: its declarations before the function, bodies cut.
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
@@ -892,8 +892,13 @@ void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e)
 {
     s32 dir = e->fC;
     Ent1C entry;
+    s32 clip = self->fC10[dir];
     self->fC40 = dir;
-    self->fC20 = self->fC10[dir];
+    if (dir == 1) {
+        self->fC20 = clip;
+    } else {
+        self->fC20 = clip;
+    }
     self->fC44 = g_gameTime[0];
     entry.dir = dir;
     entry.t = (f32)e->f4 * 4.0f + e->f8 + (f32)self->fC60;
