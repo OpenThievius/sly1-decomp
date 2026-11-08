@@ -614,6 +614,13 @@ struct Vu0 {
         return r;
     }
 
+    static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
+    {
+        Vec r;
+        r.q = MulXSum3(a.q, s.q, b.q, t.q, c.q, u.q);
+        return r;
+    }
+
     template <class M> static Vec Rotate(const M& m, Vec v)
     {
         Vec r;
