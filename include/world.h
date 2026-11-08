@@ -144,15 +144,20 @@ struct World : BaseObject {
             BaseObject* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
         };
     };
-    u8 f1D64;               // 0x1D64
-    u8 f1D65;
-    u8 f1D66;
-    u8 pad1D67;
+    union {
+        struct {
+            u8 f1D64;       // 0x1D64
+            u8 f1D65;
+            u8 f1D66;
+            u8 f1D67;       // 0x1D67: 0x80 at load (func_001DCEA0)
+        };
+        Rgba4 color1D64;    // 0x1D64: the colour the screen is filled with at load
+    };
     f32 f1D68;              // 0x1D68
     f32 f1D6C;              // 0x1D6C
     s32 f1D70;              // 0x1D70: -1
     s32 f1D74;              // 0x1D74
-    u8 pad1D78[0x1D7C - 0x1D78];
+    s32 f1D78;              // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
     f32 f1D7C;              // 0x1D7C
     s32 soundCount;         // 0x1D80: the number of soundEntries (func_001C0A50)
     WorldSoundEntry soundEntries[16];  // 0x1D84: the level's sounds, started by func_001C0B38
