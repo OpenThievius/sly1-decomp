@@ -1417,7 +1417,38 @@ void InitRisingEffect(Effect* self)
     self->fB0 = -8.0f;
 }
 
-INCLUDE_ASM(func_0019FB08);
+void MoveEffect(Effect* self, f32 dt);
+void ComputeSinCos(f32 angle, f32* s, f32* c);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void MoveDriftingEffect(Effect* self, f32 dt)
+{
+    MoveEffect(self, dt);
+    f32 r = RandomFloatInRange(0.0f, 1.0f);
+    s32 drift = 0;
+    s32 still = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->qA0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->qA0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->qA0))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still && r < 0.3f) {
+        drift = 1;
+    }
+    if (drift) {
+        Vec02 dir;
+        Vec02 side[2];
+        Vec02 push;
+        f32 s;
+        f32 c;
+        Vu0::Q(dir) = Vu0::Q(self->qA0);
+        Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
+        BuildPerpendicularPair(&dir, side, &g_unitXVector, &g_unitZVector);
+        f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
+        ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
+        Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
+        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(push), Vu0::Scalar(dt));
+    }
+}
 
 void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 {

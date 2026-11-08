@@ -151,8 +151,8 @@ struct Touch03 {
 // 60 to 66 are empty in 0x03; func_001BB4A0 looks for the nearest object with slot 60, 61,
 // 62 or 65 set.
 struct Desc03 : Desc02 {
-    void* m30;                                      // 0xD0: func_001B7F78
-    void* m31;                                      // 0xD4: func_001B8148
+    void (*m30)(Collider* self, s32 moved);         // 0xD0: apply the pending impulse (func_001B7F78)
+    void (*m31)(Collider* self, s32 moved);         // 0xD4: apply it over half a step (func_001B8148)
     void (*m32)(Collider* self);                         // 0xD8: a body's parts changed (func_001B8540)
     void (*m33)(Collider* self, Attach03* node, f32 dt); // 0xDC: called by what it is attached to (func_001BAC28)
     void (*m34)(Collider* self, void* src, s32 flag);    // 0xE0: take src's meshes (func_001BC368)
@@ -218,8 +218,10 @@ struct Collider : PlacedObject {
     u8 pad474[0x480 - 0x474];
     Contacts03* contacts;   // 0x480: a body's contact table (slots 6, 7)
     u8 pad484[0x490 - 0x484];
-    Vec02 v490;             // 0x490: taken into the attached effect's frame by func_001DF520
-    u8 pad4A0[0x4B0 - 0x4A0];
+    Vec02 v490;             // 0x490: taken into the attached effect's frame by func_001DF520; a move
+                            // ApplyColliderPendingMove (func_001B7D00) adds to the position
+    Vec02 spin4A0;          // 0x4A0: a rotation (axis times angle) ApplyColliderPendingMove applies
+
     Attach03* attached;     // 0x4B0
     Contact03* contacts4B4; // 0x4B4: a body's contacts outside its table's rows (func_001BD558)
     s32 f4B8;               // 0x4B8: cleared by func_001B94F0 (on the body) and slot 9
