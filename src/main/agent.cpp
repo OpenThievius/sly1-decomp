@@ -353,7 +353,120 @@ void func_001C7BE8(Agent* self)
     SetAgentFacingAngles(self, out[0], y);
 }
 
-INCLUDE_ASM(func_001C7CB8);
+void UpdateTurningCollider(Collider* self);
+s32 FindColliderFloorContact(Agent* self, s32 a, s32* out);
+void func_001CAF38(Agent* self);
+void ClearRootTries(Agent* self);
+void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
+extern f32 D_00274AD0[];
+extern const Vec02 D_00248D30;
+s32 IsObjectAttached(Collider* a);
+void QueueItemKeeperUpdate(ItemKeeper* a0);
+void SetAgentPrimaryTarget(Agent* self, s32 value);
+void ApplyPendingAgentChanges(Agent* self);
+
+struct AgentBody {
+    u8 pad00[0x80];
+    Vec02 v80;              // 0x80
+};
+
+struct AgentLinks {
+    u8 pad00[0x50];
+    s32 state;              // 0x50
+    u8 pad54[0x58 - 0x54];
+    s32 count;              // 0x58
+    Agent* found[16];       // 0x5C
+};
+
+static inline void MulRotationInto(Agent* self, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    self->m660 = r;
+}
+
+void UpdateAgent(Agent* self)
+{
+    Vec02 push;
+    Mat02 spin;
+    Mat02 arc;
+    s32 kind;
+    UpdateTurningCollider(self);
+    if (*(s32*)((u8*)self + 0xB44) != 0) {
+        PickAgentSecondaryTarget(self);
+    }
+    void* held = self->fB50;
+    if (held == 0) {
+        if (((AgentLinks*)self->f720)->state != 2) {
+            Player* target = (Player*)self->desc08()->m62(self);
+            if (target != 0 && target == g_player) {
+                if (target->f2750 != 0 && IsObjectAttached((Collider*)target->f2750) != 0) {
+                    SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                    if (self->desc08()->m57(self) == 0) {
+                        SetAgentPrimaryTarget(self, 0);
+                    } else {
+                        for (s32 i = 0; i < ((AgentLinks*)self->f720)->count; i++) {
+                            if (((AgentLinks*)self->f720)->found[i] != self) {
+                                SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (IsObjectAttached((Collider*)held) == 0 || ((AgentLinks*)self->f720)->state != 2) {
+        SetAgentPrimaryTarget(self, 0);
+    }
+    if (self->fB8C != 0 && FindColliderFloorContact(self, 0, 0) != 0) {
+        ((void (*)(Agent*))((void**)self->desc)[100])(self);
+    }
+    ApplyPendingAgentChanges(self);
+    SettleAgentState(self);
+    AnimationPlayer* player = self->f7E0;
+    if (player != 0 && player->anim->f9C != 0) {
+        PositionCurve* curve = player->anim->f9C->pos;
+        if (curve != 0) {
+            curve->vt->eval(curve, self, 0, player->time, player->speed, 0, &self->v640);
+            u128 neg = Vu0::FromFloat(-1.0f);
+            Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), neg);
+            Vu0::Q(push) = neg;
+        } else {
+            self->v640 = D_00248D30;
+        }
+    } else {
+        self->v640 = D_00248D30;
+    }
+    self->desc08()->m5E(self, 0);
+    ((void (*)(Agent*))self->desc08()->m5A)(self);
+    if (self->f720 != 0) {
+        QueueItemKeeperUpdate((ItemKeeper*)self->f720);
+    }
+    func_001CAF38(self);
+    if (*(s32*)((u8*)self + 0xC08) != 0) {
+        AgentBody* floor = (AgentBody*)FindColliderFloorContact(self, 0, &kind);
+        if (floor != 0) {
+            Vec02 scale;
+            u128 k = Vu0::FromFloatAt(D_00274AD0[kind]);
+            Vu0::Q(push) = Vu0::MulX(Vu0::Q(floor->v80), k);
+            Vu0::Q(scale) = k;
+        } else {
+            push = g_unitZVector;
+        }
+        BuildAxisAngleMatrix((void*)&g_unitZVector, self->f638, &spin);
+        BuildShortestArcRotation(&g_unitZVector, &push, &arc);
+        MulRotationInto(self, arc, spin);
+    }
+    ClearRootTries(self);
+    self->fB14 = 0;
+}
 
 extern f32 g_gameClock[];
 s32 GetAgentRosterState(Agent* self);
