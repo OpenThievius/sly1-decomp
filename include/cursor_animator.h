@@ -191,17 +191,29 @@ struct CircleAnimator : CursorAnimator {
     f32 centerV;            // 0x38
 };
 
-// Type 8 (D_0021E418, 0x50): a triangle of coordinates (a corner and two edges).
+// A point of the triangle strip a type 8 animator follows (0x10 bytes; func_001B55C0).
+struct StripPoint {
+    f32 x, y, z;            // 0x00
+    u32 flags;              // 0x0C: 0x8000, no triangle ends at this point
+};
+// The texture coordinates of a point of the strip (0xC bytes; func_001B55C0 reads u and v).
+struct StripCoord {
+    f32 u, v;               // 0x00
+    u8 pad08[0x0C - 0x08];
+};
+
+// Type 8 (D_0021E418, 0x50): the coordinates of the point where a segment between two objects
+// crosses a triangle strip (slot 4, func_001B55C0), offset and clamped.
 struct TriangleAnimator : CursorAnimator {
-    f32 u0;                 // 0x2C
+    f32 u0;                 // 0x2C: subtracted from 1 - u
     f32 v0;                 // 0x30
-    f32 du1;                // 0x34
-    f32 du2;                // 0x38
-    f32 dv1;                // 0x3C
-    f32 dv2;                // 0x40
-    f32 out44;              // 0x44: slot 6 returns the addresses of these three
-    f32 out48;              // 0x48
-    f32 out4C;              // 0x4C
+    f32 uMin;               // 0x34
+    f32 uMax;               // 0x38
+    f32 vMin;               // 0x3C
+    f32 vMax;               // 0x40
+    s32 count;              // 0x44: the strip's points; slot 6 returns the addresses of these three
+    StripCoord* coords;     // 0x48
+    StripPoint* points;     // 0x4C
 };
 
 // Type 5 (D_0021E438, 0x78): fades between two records (frames in, frames out) with a mode.

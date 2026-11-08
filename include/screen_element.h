@@ -265,6 +265,13 @@ struct T217D_3F0 : ScreenElement {
     f32 size;                   // 0xC70: 0 to 1, how much of the outline is drawn (func_001E6268)
 };
 
+// A marker the caption box keeps for an object CollectPanelEntriesOfClass (func_001358D0) found:
+// the object and the effect drawn at it (the handle of the slot after it below).
+struct T217D_440_Marker {
+    void* obj;                  // 0x00
+    void* effect;               // 0x04
+};
+
 // A slot of the glyph bank D_0021A440 keeps at its end: a handle and one more word.
 struct T217D_440_Slot {
     void* handle;               // 0x00: what func_0019EBE8 / func_001A1DF0 take
@@ -301,8 +308,13 @@ struct T217D_440 : ScreenElement {
     f32 blockB[4];              // 0x340
     s32 countA;                 // 0x350
     s32 count;                  // 0x354: the entries below
-    u8 pad358[0x35C - 0x358];
-    T217D_440_Slot entries[31]; // 0x35C: `count` of them; 31 fill the object to D_00270650 (0x458 bytes)
+    union {
+        struct {
+            u8 pad358[0x35C - 0x358];
+            T217D_440_Slot entries[31]; // 0x35C: `count` of them; 31 fill the object to D_00270650 (0x458 bytes)
+        };
+        T217D_440_Marker markers[31];   // 0x358: the same `count`, read as each object and its effect (func_001358D0)
+    };
 };
 
 // The pause menu (D_002186D0, D_0026FF68): three layers each ask for a screen, the lowest answer

@@ -18,8 +18,12 @@ struct __attribute__((packed)) ConeVolumeSaved { s32 a; s32 b; };
 
 struct ConeVolume : PlacedObject {
     s32 mode;               // 0x2D0: 0 at setup
-    u8 pad2D4[0x2E0 - 0x2D4];
-    u32 color[4];           // 0x2E0: hue, saturation, value (+0x2E8 is the first level)
+    s32 shape;              // 0x2D4: 2 with a first level and angle, 1 with a second, else 0 (RefreshConeVolumeShape)
+    u8 pad2D8[0x2E0 - 0x2D8];
+    union {
+        u32 color[4];       // 0x2E0: as words (SetConeVolumeColor)
+        Vec02 hsv;          // 0x2E0: hue, saturation and value, 0 to 255 (ConvertHsv255ToRgb255); the value is the first level
+    };
     f32 secondLevel;        // 0x2F0: paired with secondAngle
     f32 thirdLevel;         // 0x2F4: paired with 360 less thirdAngle
     f32 firstAngle;         // 0x2F8: 180.0 at setup
@@ -42,13 +46,17 @@ struct ConeVolume : PlacedObject {
     f32 f364;               // 0x364
     f32 f368;               // 0x368
     f32 f36C;               // 0x36C
-    u8 pad370[0x3D0 - 0x370];
+    Vec02 planes[6];        // 0x370: the four sides (func_001443C8), the far and the near plane, each with its distance in w
     s32 mask;               // 0x3D0: the value lists' mask where it is (QueryValueListMask; all 28 bits in mode 0)
     u8 pad3D4[0x3E0 - 0x3D4];
-    Quad16 axis;            // 0x3E0: the cone's axis, scaled by half the range to its middle (func_00184B58)
-    u8 pad3F0[0x410 - 0x3F0];
+    union {
+        Quad16 axis;        // 0x3E0: the cone's axis, scaled by half the range to its middle (func_00184B58)
+        Mat02 basis;        // 0x3E0: the frame RefreshConeVolumeShape builds from the direction and the up hint
+    };
     ConeVolumeSaved saved;  // 0x410: kept through a copy
-    u8 pad418[0x620 - 0x418];
+    u32 packetSize;         // 0x418: DetachPacketBuffer's count for the packet below
+    u8 pad41C[0x420 - 0x41C];
+    Quad16 packet[0x20];    // 0x420: the VIF packet RefreshConeVolumeShape writes
 };
 
 typedef char check_ConeVolume[sizeof(ConeVolume) == 0x620 ? 1 : -1];

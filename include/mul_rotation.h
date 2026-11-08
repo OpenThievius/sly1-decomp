@@ -133,6 +133,26 @@ template <class O> static inline void MulRotationIntoRot(O* o, const Mat02& a, c
     o->rot = r;
 }
 
+// MulRotationIntoRot with the matrix local declared first, as MulRotationIntoRotMatFirst, and
+// each row's two stores as one chained assignment (MulRotationRowsX): ApplyPoseSourceRotation's
+// spring and ramp products.
+template <class O> static inline void MulRotationIntoRotX(O* o, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const u128* q = (const u128*)&b;
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+    o->rot = r;
+}
+
 // The product with a's rows as values, written straight into out's rows (no matrix local), each
 // result row stored to its vector local and to out's row: the first product of func_001A0DF0
 // (DrawCameraSpaceEffect), whose frame has no third matrix for it.
@@ -165,6 +185,29 @@ static inline void MulRotationRowsIntoIndexed(Mat02* out, const Mat02& a, const 
     Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
     Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
     Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, q[2]);
+}
+
+// MulRotationIntoRot with the matrix local declared before the row locals, so its rows sit
+// below them in the frame, and every row stored to its local and then to the matrix
+// (ApplyPoseSourceRotation's eased product: retail copies the rows from the lower block).
+template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const u128* q = (const u128*)&b;
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, q[2]);
+    r.r[2] = z;
+    o->rot = r;
 }
 
 #endif
