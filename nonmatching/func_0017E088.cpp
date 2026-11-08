@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BROKEN, checked 2026-11-07
+// SIZE 824/828, checked 2026-11-07
 // NEAR: wave 4 e3. 828 bytes, same size; about 40 of 207 words differ, all in the edge-group case (kind 2): its running sum is
 //       in vf2/vf3 where retail has vf3/vf4 and the final normalisation loads the sum twice (vf4 for the length, vf2 in the
 //       delay slot of the test), where ours loads it once and, with the DivX hoisted above the test, uses bc1fl. Kinds 1 and 3
@@ -15,6 +15,13 @@
 #include "fpu.h"
 #include "vu0.h"
 
+struct MeshEdge {
+    s16 vertA;
+    s16 vertB;
+    s16 faceA;
+    s16 faceB;
+};
+s32 func_0017DCE0(void* unused, Collider* c, MeshEdge* e, Vec02* out);
 struct EdgeNode : MeshEdge {
     EdgeNode* next8;
     EdgeNode* nextC;
