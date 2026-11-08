@@ -18,6 +18,7 @@ extern f32 g_gameTime[];
 #include "pad_record.h"
 #include "mul_rotation.h"
 #include "value_range.h"
+#include "attached_set.h"
 
 
 
@@ -812,7 +813,86 @@ void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
     out->f94 = D_0026A840;
 }
 
-INCLUDE_ASM(func_00197A88);
+f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+void func_001EED68(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
+void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
+f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void func_00156288(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
+void StopSoundRecord(void* self, s32 n);
+
+void func_00197A88(GaugeCollider* self, AttachedSet* set, f32 dt)
+{
+    Vec02 at;
+    Vec02 atVel;
+    Vec02 v;
+    Vec02 w;
+    Vec02 point;
+    Vec02 normal;
+    Vec02 gains;
+    f32 depth = func_001EF5B8(set, (TurningCollider*)self, &point, &normal);
+    if (set->f278 != 0) {
+        Vec02 pair[2];
+        Vec02 n;
+        n = normal;
+        BuildPerpendicularPair(&n, pair, &g_unitXVector, &g_unitZVector);
+        ComputeOscillatorDisplacement(50.0f, *(void**)(set->f278 + 0xC), &point, pair, 0, pair, 0);
+        Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
+    }
+    f32 push = self->f360 * set->f360;
+    f32 hold = self->f364 * set->f364;
+    if (push != 0.0f) {
+        Vu0::Q(v) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-push * depth));
+        ConstrainColliderVector(self, &self->v440, &v, &v, 0);
+        AddColliderForce(self, &v);
+    }
+    if (hold != 0.0f) {
+        Vec02 along;
+        Vec02 rest;
+        Vec02 aim;
+        Vec02 aim2;
+        Vec02 spinAlong;
+        Vec02 spinRest;
+        Vec02 aim3;
+        Vec02 aim4;
+        s32 i;
+        func_001EED68(set, &self->v140, &at, &atVel);
+        Vu0::Q(v) = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v150));
+        SplitVectorAlongAxis(&v, &normal, &along, &rest);
+        f32 k = D_0026A844 + depth;
+        for (i = 0; i < 3; i++) {
+            (&gains.x)[i] = (&D_0026A850.x)[i] * k * hold;
+        }
+        Vu0::Q(aim) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(along));
+        SteerColliderTowardPosition(self, 0, 0, &aim, &gains.x, dt);
+        for (i = 0; i < 3; i++) {
+            (&gains.x)[i] = (&D_0026A850.x)[i] * depth * hold;
+        }
+        Vu0::Q(aim2) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(rest));
+        SteerColliderTowardPosition(self, 0, 0, &aim2, &gains.x, dt);
+        Vu0::Q(w) = Vu0::Sub(Vu0::Q(D_00248D30), Vu0::Q(self->v160));
+        SplitVectorAlongAxis(&w, &normal, &spinAlong, &spinRest);
+        for (i = 0; i < 3; i++) {
+            (&gains.x)[i] = (&D_0026A860.x)[i] * depth * hold;
+        }
+        Vu0::Q(aim3) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinAlong));
+        SteerColliderTowardRotation(self, 0, 0, &aim3, &gains.x, dt);
+        for (i = 0; i < 3; i++) {
+            (&gains.x)[i] = (&D_0026A860.x)[i] * hold;
+        }
+        Vu0::Q(aim4) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinRest));
+        SteerColliderTowardRotation(self, 0, 0, &aim4, &gains.x, dt);
+    }
+    if (0.0f < depth && depth < 1.0f && 0.9f < normal.z) {
+        func_00156288(self, (u8*)set, (Quad16*)&at, dt, (Quad16*)&point, 0.1f,
+                      ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f);
+    } else {
+        StopSoundRecord(self->f574, 0);
+    }
+}
 
 void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
 {
