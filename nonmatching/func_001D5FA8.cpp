@@ -1,45 +1,37 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 203/260 (78.1%), checked 2026-11-08
-// NEAR: order: frame, calls and constants are retail's; the float constants get other registers
-//       (retail: -100.0 in f0, 1.0 in f1, reused for four stores), so the stores interleave
-//       differently. Night-low1 (2026-11-08): the guard and the zero fill are what GCC makes of
-//       a function-local static with an inline constructor (FillMemory(this, 0, 0x80), then the
-//       fields): `static Cfg cfg;` compiles to the same test, call and stores, in the same
-//       order as here, but its symbol has no retail address in the build. The stores through a
-//       pointer or by byte offset: unchanged. Retail's stores are in the source's order, with
-//       75.0 loaded after the 0x48 store into -100.0's f0; ours are scheduled out of order.
+// BYTES 204/260 (78.5%), checked 2026-11-08
+// NEAR: order: frame, calls, constants and addresses are retail's; the constants get other
+//       registers and the stores another order. Retail keeps the stores in the constructor's
+//       order and loads 75.0 only after -100.0's last store (into its f0), as if the stores
+//       depended on each other; here they are independent and scheduled out of order (the
+//       explicit-guard form with D_ globals gives the same). As a probe only, the stores made
+//       volatile come out in retail's order with 75.0 loaded late (17 words differ, against 21):
+//       retail's stores behave as dependent on each other, which plain stores through one
+//       base register never are; what original form makes them so is still open. The record
+//       and its guard are a function-local static with an inline constructor (FillMemory, then
+//       the fields), at retail's labels through config/us/statics.tsv; it lands only with
+//       func_001D60B0 and func_001D61C8 in the same form, since the three guards close the
+//       file's .data in function order (docs/AGENT_WORKFLOW.md, "A function-local static").
 #include "common.h"
 
-struct Cfg_1D5FA8 {
-    u8 pad0[4]; f32 f4; f32 f8; u8 pad1[0x1C]; s32 i28; u8 pad2[8]; f32 f34; u8 pad3[8]; f32 f40; f32 f44; u32 i48; u8 pad4[4]; f32 f50; f32 f54; u8 pad5[8]; f32 f60; f32 f64; u32 i68; u8 pad6[4]; s32 i70; s32 i74;
-};
-struct Host_1D5FA8 { u8 pad[0x60]; u8* inner; };
-extern s32 D_00275130;
-extern Cfg_1D5FA8 D_00605550;
-extern u8 D_00275070[];
 void FillMemory(void* p, s32 zero, s32 size);
 s32 FindAnimRecord(s32 id);
 void DrawAngleSortedRing(void* a, s32 b, void* c, s32 d, s32 e, void* f, void* g);
-
+extern u8 D_00275070[];
+struct Cfg_1D5FA8 {
+    u8 pad0[4]; f32 f4; f32 f8; u8 pad1[0x1C]; s32 i28; u8 pad2[8]; f32 f34; u8 pad3[8]; f32 f40; f32 f44; u32 i48; u8 pad4[4]; f32 f50; f32 f54; u8 pad5[8]; f32 f60; f32 f64; u32 i68; u8 pad6[4]; s32 i70; s32 i74; u8 pad7[8];
+    Cfg_1D5FA8() {
+        FillMemory(this, 0, 0x80);
+        f44 = -100.0f; f4 = 5.0f; f40 = 0.5f; f8 = 1.0f; i28 = 0; f34 = 1.0f;
+        i48 = 0xFFFFFFFF; i68 = 0xFFFFFFFF; f50 = 75.0f; f60 = 1.0f; f54 = 1.0f;
+    }
+};
+struct Host_1D5FA8 { u8 pad[0x60]; u8* inner; };
 void DrawPlayerMarkerRing1(Host_1D5FA8* self)
 {
     u8* inner = self->inner;
-    if (D_00275130 == 0) {
-        FillMemory(&D_00605550, 0, 0x80);
-        D_00605550.f44 = -100.0f;
-        D_00605550.f4 = 5.0f;
-        D_00605550.f40 = 0.5f;
-        D_00605550.f8 = 1.0f;
-        D_00605550.i28 = 0;
-        D_00605550.f34 = 1.0f;
-        D_00605550.i48 = 0xFFFFFFFF;
-        D_00605550.i68 = 0xFFFFFFFF;
-        D_00275130 = 1;
-        D_00605550.f50 = 75.0f;
-        D_00605550.f60 = 1.0f;
-        D_00605550.f54 = 1.0f;
-    }
-    D_00605550.i70 = 0;
-    D_00605550.i74 = FindAnimRecord(0x15C);
-    DrawAngleSortedRing(inner + 0x140, 7, D_00275070, *(s32*)(inner + 0x26A8), *(s32*)(inner + 0x26AC), &D_00605550, self);
+    static Cfg_1D5FA8 cfg;
+    cfg.i70 = 0;
+    cfg.i74 = FindAnimRecord(0x15C);
+    DrawAngleSortedRing(inner + 0x140, 7, D_00275070, *(s32*)(inner + 0x26A8), *(s32*)(inner + 0x26AC), &cfg, self);
 }
