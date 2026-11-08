@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// BYTES 1074/1196 (89.8%), checked 2026-11-08
 // NEAR (2026-11-08, worker night-large2): the lap timer, the four wheels' two emitters, the
 // random tilt and the product (MulRotation), the spawn record and the leftover counts are
 // retail's; 49 lines differ. Retail hoists %hi(D_00275510) into fp and forms &m (sp+0x80) at

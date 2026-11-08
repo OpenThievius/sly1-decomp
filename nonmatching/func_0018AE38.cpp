@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// BYTES 1171/1196 (97.9%), checked 2026-11-08
 // NEAR (2026-11-08, worker night-large2): both states are retail's but for the two clip-range
 // calls (13 lines): retail keeps the entry's mover in v0, the animation in v1 and the
 // sequence in a0 (its count loaded into a0 in the call's delay slot), ours puts the mover in

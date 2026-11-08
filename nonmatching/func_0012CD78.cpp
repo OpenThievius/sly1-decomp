@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// SIZE 1068/1080, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large2): the chain walk, the fill of the slots past the
 // chain, the pose calls and the accumulation are retail's instructions; the frame is 0x30
 // bigger. Retail's rotated vectors (0x130, 0x140, 0x150, and the spin's at 0x130 again) share

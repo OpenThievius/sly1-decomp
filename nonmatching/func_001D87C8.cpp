@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-07
+// BYTES 963/1032 (93.3%), checked 2026-11-08
 // NEAR (2026-11-07, worker night-large2): the gather loop, the spans, the curve calls, the
 // ramp and the closing search are retail's; 25 lines differ. The side vector's VU0 block is
 // scheduled otherwise: retail loads the position (lqc2 vf3) right after the Length's dot and

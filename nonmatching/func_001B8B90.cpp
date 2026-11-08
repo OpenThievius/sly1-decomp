@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// SIZE 1092/1100, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large2): the two kind switches (the end-1 one through
 // jtbl_0024D280), the edge weight, the clamps and the blend are retail's; the face case's
 // loop is not. Retail keeps &idx[i], &idx[i + 1] and &idx[(i + 2) % 3] in s1, s0, s3 and i * 4

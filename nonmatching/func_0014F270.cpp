@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// BYTES 1224/1232 (99.4%), checked 2026-11-08
 // NEAR (2026-11-08, worker night-large2): all but eight lines: in the following branch retail
 // keeps the fallback of the direction's normalisation (D_00248D30, lq) in v0 and the speed's
 // weight bits in v1 (so the length's qmfc2 takes v1), ours the other way round. Found: the
