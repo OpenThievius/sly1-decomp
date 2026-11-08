@@ -12,6 +12,7 @@
 // variable assigned in place (d = NormalizeOr(d, ...)) gives retail's GPR fallback and keeps the
 // input's register; the pose as a struct and f650, f2414, v2530, f2680 as Player members order
 // the loads around their stores as retail does.
+// Still differs (2026-11-08, night-close6): the weight as a u128 before the MulX, the height or 125.0 in a local, Set for both stores, NormalizeOr through ToFloatNow: the same nine lines.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"

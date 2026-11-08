@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 164/168 (97.6%), checked 2026-11-07
+// BYTES 164/168 (97.6%), checked 2026-11-08
 // NEAR: right instructions and registers; differs only in the delay slot of the branch to the join. Retail puts max.s in the delay slot of `b` (an ordinary insn the scheduler can move there); the inline-asm Fpu::Max cannot be placed in a delay slot, so ours puts the join's swc1 there and duplicates it.
+// Still differs (2026-11-08, night-close6): named locals for 0.0001, the level, 1.0, the difference; zero at function scope; the max through an inline MaxF in either order: the level and 0.0001 keep f2 and f1.
 #include "common.h"
 #include "fpu.h"
 #include "placed_object.h"

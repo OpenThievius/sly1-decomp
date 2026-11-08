@@ -329,7 +329,11 @@ What retail shows, and what the compiler does:
   constant of `c >? x` second, so retail's `max.s f1, f21, f1` (the constant first,
   the result in x's register) comes from a float variable holding it, and the value
   assigned before (`score = x - r; score = eps >? score`, func_00181ED0).
-  func_001A6788's `min.s f1, f0, f1` (two values) is still a near miss.
+  Between two values, retail's operand order and result register come from an inline
+  function: func_001A6788's `min.s f1, f0, f1` (the speed, then the maximum, into the
+  maximum's register) is `MinF(speed, max)` returning `a <? b`, and func_001A48C0's pose counts
+  (poseA loaded first, `max.s` with poseB first, into poseB's register) are `MaxF(a, b)`
+  returning `b >? a`; neither order of a bare `<?` or `>?` gives them (night-close6, 2026-11-08).
 - **A literal is the function's own.** A float a function reads from .rodata (FLT_MAX)
   is the literal its C writes, emitted after the function's earlier literals: a
   defined `extern const` there is folded into a second copy, which in a whole file
@@ -342,14 +346,20 @@ What retail shows, and what the compiler does:
   first come first in the frame.
 - **The copy within a block.** Vu0::Copy (vmove.xyzw) gives retail's vmove in
   func_00141D88's loop (the length taken of the copy, the division of the original),
-  but no function that has it matches yet: in func_00141D88 retail's store and length
-  use the copy where NormalizeOr's one vector is used for both.
+  but in func_00141D88 retail's store and length use the copy where NormalizeOr's one
+  vector is used for both. func_001CB3D0 matches with it: the difference kept, its Copy
+  stored and dotted in case 0, the original dotted in case 1 (retail's vmove vf3, vf2).
+- **A constant hoisted out of a loop in retail's order.** loop.c moves a loop's constants in
+  the order it finds them; where retail's order differs (func_001821B0: 1728.0 before 16.0),
+  the one that comes first is a named local inside the loop body.
 
 - **A length compared is ToFloatMoved.** Where retail's `mtc1` of a length (or a squared
   distance) comes straight after its `qmfc2`, before an unrelated store or load that ours puts
   between them, the qmfc2 is the compiler's: ToFloatMoved, and NormalizeOrMoved for the
   normalisation with a fallback (func_001C96D8, func_00189C28, func_001ED908, func_0012FB68,
-  func_001A9AE8, 2026-11-08). In func_00187A88 it gives the order but moves the VU0 registers.
+  func_001A9AE8, 2026-11-08). In func_00187A88 it gives the order but moves the VU0 registers;
+  there both moves are one sequence, Vu0::ToFloatNow (qmfc2 and mtc1 through a GPR the
+  compiler picks), which keeps the stack store sched2 would otherwise put between them out.
 - **A float's place in a prototype.** The curves' slot 0 takes its floats before the out
   pointers (PositionCurveEval after the mode, WeightCurveEval right after the owner): their
   callers set $f12 and $f13 before those argument registers (func_0011FC90, func_0011F6B0,

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 268/272 (98.5%), checked 2026-11-07
+// BYTES 268/272 (98.5%), checked 2026-11-08
 // NEAR: registers only: four lines differ, all register numbers; the 24 orders of the four stores
 //       were tried.
+// Still differs (2026-11-08, night-close6): the index inline, signed, the entry in a local, the table through a pointer, p assigned apart, c->f858 read at each use: the same four registers.
 #include "common.h"
 struct Blk_210970 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; };
 struct Src_210970 { u8 p0[0x28]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; s32 f4C; s32 f50; s32 f54; s32 f58; s32 f5C; s32 f60; };

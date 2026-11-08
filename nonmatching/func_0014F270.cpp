@@ -10,6 +10,7 @@
 // state as a switch over 0..5. Tried: the weight inline, before the height, as a Vec, Scalar;
 // the fallback or the difference first; u128 helpers; ComputeObjectFrameAtTime returning a value.
 // In the context of its file, src/main/file_14EE40.cpp.
+// Still differs (2026-11-08, night-close6): the normalised direction in a Vec before the weight (fallback in v0 then, but the weight's lw moves after the branch), the weight as a Vec, the fallback through a pointer, NormalizeOr through ToFloatNow: not closer.
 #include "common.h"
 #include "owner_message.h"
 #include "vu0.h"
