@@ -818,6 +818,23 @@ reload.c and reload1.c read):
   as retail has it, and retail's exact count of `li 4`; in this file's form it
   loses t8 to the 18 born at entry 235, whose life overlaps its last 35
   insns, and t9 to the 4242 born at entry 169.
+- **A pseudo local-alloc could place is not always placed, and placed is not
+  kept.** Its priorities and lifetimes are in its own numbering, and with
+  INSN_SCHEDULING it retries a qty with a lifetime one insn longer at each
+  end. A register that a model built from the `.lreg` lengths shows as free
+  can therefore still be refused. After local-alloc, global-alloc's
+  eviction and reload's spills can take the register back. Only the final
+  code says whether a constant kept its register.
+- **The constants are coupled.** In searches on func_00109488
+  (build/swarm/big-109488/dsearch.py), Set10 merges on a few calls kept 8
+  of the 10 window landmarks once Set8m calls were unmerged to make up the
+  count. Each Set10 merge takes two insns from the `.jump` count and each
+  unmerge adds one, and the landmarks before entry 553 allow a net -1 to +7.
+  With the window-2 4 placed, `li 4` went from 1 to 24-40 (retail has 24).
+  But func_00155778 then went from +7 to +16, 0x880 to +8 and 6 to +7. The
+  distance in per-value build counts (the sum over values of
+  |ours - retail| builds) was 107 at best, against 89-90 for the near miss
+  that keeps 4 in s5. Freeing one constant's register re-permutes the rest.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at

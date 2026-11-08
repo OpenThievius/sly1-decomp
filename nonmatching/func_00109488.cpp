@@ -41,6 +41,20 @@
 // the merges and splits that change where pseudos are born and die between entries 79 and 237, plus
 // compensating merges elsewhere, scored from the .lreg dump (build/swarm/big-109488/blk.py lists the
 // higher-priority pseudos that take each register over a pseudo's life).
+// That search, run unattended (2026-11-08, build/swarm/big-109488/search.py and dsearch.py, about
+// 700 compiles). Its moves were merges of equal arguments and splits of single fields, per call;
+// Set10's fC = f14 = f18 merge per call; and Set8m calls unmerged back to Set8. It scored the CSE
+// window landmarks, the final `li 4` count and the per-value build-count distance to retail (l1.py:
+// the sum of |ours - retail| builds per constant, 90 for this file). The landmarks hold (8 of 10)
+// with the window-2 4 placed: Set10 merged on about 13-18 calls between 182 and 1034, and 16-18
+// Set8m calls unmerged to restore the count before entry 553. That gives 24-40 `li 4` (retail 24),
+// but other values overshoot (func_00155778 +16, 0x880 +8, 6 +7). The best such form is 9,398
+// instructions, 1,296 exact, distance 107 (build/swarm/big-109488/s/d4_best_107_1296.cpp). Without
+// the 4 placed, the climb stays at 89-93, as this file. A pseudo the .lreg model shows as free is
+// not always placed (local-alloc's own lifetimes, one insn longer at each end), and one local-alloc
+// places can be lost in global-alloc or reload, so the score has to come from the final code. This
+// file stays the best. The next attempt needs moves that change several long-lived constants
+// together; no single-constant objective found a descent.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
