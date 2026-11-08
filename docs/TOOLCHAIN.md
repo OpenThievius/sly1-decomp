@@ -658,6 +658,38 @@ func_00140258, func_001F2EF0, func_001F3408):
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
 
+## GCSE
+
+What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
+func_001F0AE0):
+
+- **PRE is lazy code motion on blocks, with no cost test.** Every pseudo set whose source is
+  not a register or constant is an expression, a load included (hash_scan_set). An occurrence
+  is deleted when it comes before any kill in its block (ANTLOC) and is neither "latest" nor
+  "isolated" there (lcm.c); the value then comes from a copy made where the expression was
+  last computed, and that pseudo lives across the blocks between. A store or a call that is
+  not `const` kills every memory expression: there is no alias analysis, and the alias set,
+  which expr_equiv_p does compare, is 0 for every MEM, since the files' flags do not include
+  `-fstrict-aliasing`. In this release `latein` is `delayin` for every block but the last
+  (compute_latein only computes the intersection over successors for the last block).
+- **One read as 64 bits is another expression.** A field read into an `s64` (`s64 cursor =
+  self->cursor;`) is `(sign_extend:DI (mem:SI ...))`, which gcse hashes as a different
+  expression from `(mem:SI ...)`. Its `lw` is the same instruction, and the comparison of the
+  64-bit register the same `bne`, but that read no longer makes a later `self->cursor` in
+  another block redundant: the kill before it (a call on one path) makes the later load the
+  earliest place, and it stays a load. func_001F0AE0 reads its cursor once for a test and
+  again for the selected entry; retail loads it twice (`lw v1` in a `bnezl` delay slot, then
+  `b; lw s3`), which only the `s64` read gives (with `s32`, PRE substitutes the second load
+  with the first, which keeps the value in a1). `(s64)self->cursor != 1` is not enough: the
+  front end shortens the comparison back to 32 bits.
+- **Diagnosing it.** cc1plus given `-dG` writes `unit.ii.gcse`: the blocks with their
+  predecessors and successors, the expression table (`Index N`), and one line per PRE deletion
+  (`PRE: redundant insn I (expression N) in bb B, reaching reg is R`) and per copy it inserts.
+  A load that retail repeats and ours takes from a register is one of these lines.
+- **Ruled out for that load** (func_001F0AE0): about 25 statement shapes of the test and the
+  selection, byte-offset reads, a local copy, a reference-returning inline accessor (cse
+  folds the address back to `self + 732`), and a `long` cast in the comparison.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,

@@ -31,6 +31,7 @@ assembler are the Windows ones of the same release.
 """
 
 import argparse
+import difflib
 import os
 import platform
 import re
@@ -303,6 +304,24 @@ def place_remnants(asm):
     return asm[:at] + moved + asm[at:]
 
 
+INSN_MARK = re.compile(r"[ \t]+#[ \t]+\d+[ \t]+\S+[ \t]+\[length = \d+\]$", re.M)
+
+
+def restore_marks(asm, marked):
+    """The -dp marks of `marked` put back on the lines of `asm` (the same text, the marks taken off
+    and then moved or rewritten by the steps of compile_file) that are unchanged: a line those
+    steps moved goes without its mark."""
+    old = marked.split("\n")
+    plain = [INSN_MARK.sub("", line) for line in old]
+    new = asm.split("\n")
+    out = list(new)
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, plain, new, autojunk=False).get_opcodes():
+        if tag == "equal":
+            for k in range(i2 - i1):
+                out[j1 + k] = old[i1 + k]
+    return "\n".join(out)
+
+
 def implementation_marker(ii):
     """Name the preprocessed unit's main file as the compiler is given it. cc1plus of 2.9-ee-991111
     takes a line marker that names the source for an included file, and then refuses
@@ -316,12 +335,14 @@ def implementation_marker(ii):
         ii.write_text(text)
 
 
-def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
+def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False, keep_dumps=None):
     """Compile `src` to the object `out`. Returns the cc1plus assembly text.
 
     source: the file whose config/cflags.tsv row applies (a version's unit takes its shared file's).
     whole: compile it as the original was, without -ffunction-sections and -fdata-sections (a
     whole file of config/us/files.tsv, linked as one object).
+    keep_dumps: a folder to copy the compiler's RTL dumps into (unit.ii.lreg and the others the
+    flags ask for with -d, tools/regalloc.py), with the final assembly as unit.s.
     """
     src = Path(src).resolve()
     source = Path(source).resolve() if source else src
@@ -359,6 +380,9 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             if name == "cpp" and "#pragma implementation" in text:
                 implementation_marker(ii)
         asm = s.read_text()
+        # -dp (tools/regalloc.py) marks each instruction with its insn; the steps below read
+        # instruction lines without comments, so the marks come off first and go back after them.
+        marked, asm = asm, INSN_MARK.sub("", asm)
         placed = place_remnants(asm)
         if placed != asm:
             asm = placed
@@ -387,9 +411,16 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
                 raise CompileError("short loops: " + proc.stderr.strip())
             pads = short_loops.padding(probe.with_suffix(".o").read_bytes())
         asm = short_loops.rewrite(asm, pads)
+        if marked != asm and INSN_MARK.search(marked):
+            asm = restore_marks(asm, marked)
         s.write_text(asm)
         if keep_asm:
             Path(keep_asm).write_text(asm)
+        if keep_dumps:
+            Path(keep_dumps).mkdir(parents=True, exist_ok=True)
+            for dump in Path(tmp).glob("unit.ii.*"):
+                shutil.copyfile(dump, Path(keep_dumps) / dump.name)
+            Path(keep_dumps, "unit.s").write_text(asm)
         proc = run_step(run + [str(ee_as)] + as_flags + [str(s), "-o", str(Path(tmp) / "unit.o")], cwd=ROOT)
         if not proc.returncode:
             # ee-as (1999) leaves local symbols after the symbol table's sh_info, which modern ld

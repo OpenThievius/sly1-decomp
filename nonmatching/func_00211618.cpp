@@ -2,6 +2,10 @@
 // BYTES 148/152 (97.4%), checked 2026-11-08
 // Still differs (2026-11-08, night-close5): `w18 + n` (6 lines), (s64) casts, a while loop, an early return (31) and permute.py --auto leave n in t2.
 #include "common.h"
+// Why (2026-11-08, tools/regalloc.py): n's extension (r141) and the w18 load (r139) are both set
+// on each exit path and have the same global priority (4 refs over 24 insns); global-alloc breaks the
+// tie to the lower pseudo, w18's. s64/u64 locals for n or w18 at the end, w18 read at the top, a s64
+// parameter, `+ (u32)n` keep the order or change the code.
 // NEAR: only the t1/t2 registers of n and w18 swap (4 lines differ); dead-end tries: s64/u64 temp, += n
 
 struct Str_211618 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };

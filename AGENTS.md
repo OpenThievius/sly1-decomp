@@ -64,6 +64,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/permuter_setup.py FILE FUNC` | sets a near miss up for decomp-permuter (fetched into the gitignored `tools/ext/`, never committed) |
 | `python3 tools/permute_night.py FUNC ...` | decomp-permuter on near misses one after another, unattended, with the barrier-making rewrites off; keeps each zero, spliced back and checked, in `build/permute_night/` |
 | `python3 tools/regdiff.py FILE FUNC` (or `--all`) | whether an attempt differs from retail only in its registers (`registers`), in instruction order too (`order`), or in its code (`code`) |
+| `python3 tools/regalloc.py FILE FUNC [--version eu]` | for each register that differs from retail's, the value (pseudo) that holds it, where it is born and dies, which allocator placed it, what took retail's register and the likely lever, from the compiler's `.lreg`/`.greg` dumps |
 | `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller) |
 | `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |

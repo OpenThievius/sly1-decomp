@@ -2,6 +2,10 @@
 // BYTES 164/168 (97.6%), checked 2026-11-08
 // NEAR: right instructions and registers; differs only in the delay slot of the branch to the join. Retail puts max.s in the delay slot of `b` (an ordinary insn the scheduler can move there); the inline-asm Fpu::Max cannot be placed in a delay slot, so ours puts the join's swc1 there and duplicates it.
 // Still differs (2026-11-08, night-close6): named locals for 0.0001, the level, 1.0, the difference; zero at function scope; the max through an inline MaxF in either order: the level and 0.0001 keep f2 and f1.
+// Why (2026-11-08, tools/regalloc.py): local-alloc places 0.0001 (r129) before the level (r126):
+// in sched1's order the level's load is set two insns before its sub and the constant's mtc1 one
+// before its add, so the constant's span is shorter. Retail's sched1 must issue the constant before
+// the load. `0.0001f + (1.0f - level)`, an eps local, a level local: the same order.
 #include "common.h"
 #include "fpu.h"
 #include "placed_object.h"

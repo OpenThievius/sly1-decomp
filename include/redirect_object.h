@@ -16,7 +16,7 @@
 // length and the object.
 struct RedirectStep {
     Vec02 pos;              // 0x00: the object's v140
-    u8 pad10[0x10];
+    Vec02 vel;              // 0x10: its velocity (func_001278A8; func_001DDE90 integrates it)
     Vec02 below;            // 0x20
     f32 length;             // 0x30
     PlacedObject* node;     // 0x34
@@ -28,11 +28,18 @@ struct RedirectObject : PlacedObject {
     s32 chainCount;         // 0x2D4: the redirect objects in the chain below it (func_001DDD18)
     RedirectStep* steps;    // 0x2D8: chainCount + 1 records, one per object of the chain
     s32 targetIsSelf;       // 0x2DC
-    u8 pad2E0[0x310 - 0x2E0];
+    f32 bendStiffness;      // 0x2E0: func_001DDE90 turns a bent step back by it times the angle
+    f32 drag;               // 0x2E4: func_001DDE90 takes -drag * h (at most 1) of the velocity off
+    f32 relDrag;            // 0x2E8: the same for the velocity relative to the step before
+    f32 maxBend;            // 0x2EC: the angle a step may bend from the one before
+    s32 iterations;         // 0x2F0: the substeps func_001DDE90 divides the frame into
+    u8 pad2F4[0x300 - 0x2F4];
+    Vec02 gravity;          // 0x300: added to every free step's velocity each frame
     s32 f310;               // 0x310
     u8 pad314[0x320 - 0x314];
     Quad16 q320;            // 0x320: set from D_00275730 by func_001DDCE0
-    u8 pad330[0x340 - 0x330];
+    s32 frameStamp;         // 0x330: the frame count of the last update (func_001DDE90)
+    u8 pad334[0x340 - 0x334];
 };
 
 typedef char check_RedirectObject[sizeof(RedirectObject) == 0x340 ? 1 : -1];
