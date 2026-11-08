@@ -632,6 +632,42 @@ struct Vu0 {
         return r;
     }
 
+    template <class M> static Vec RotateUntied(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateUntied(m, v.q);
+        return r;
+    }
+
+    static Vec Add(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Add(a.q, b.q);
+        return r;
+    }
+
+    template <class M> static Vec RotateTransposed(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateTransposed(m, v.q);
+        return r;
+    }
+
+    static f32 ToFloatMoved(Vec a)
+    {
+        return ToFloatMoved(a.q);
+    }
+
+    static f32 ToFloatY(Vec a)
+    {
+        return ToFloatY(a.q);
+    }
+
+    static f32 ToFloatZ(Vec a)
+    {
+        return ToFloatZ(a.q);
+    }
+
     static Vec Cross(Vec a, Vec b)
     {
         Vec r;

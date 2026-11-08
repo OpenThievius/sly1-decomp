@@ -194,7 +194,9 @@ struct PositionCurveKind2 : PositionCurve {
 // Slot 0 evaluates the matrix (slot 1 of kind 0 gives the orientation), slot 3 gives the key
 // times (kind 0 and 1), and slot 2 reads the curve from the stream.
 typedef void (*RotationCurveEval)(RotationCurve* self, PlacedObject* owner, s32 mode, void* outRot, void* outVec, f32 key, f32 scale);
-typedef void* (*RotationCurveGet)(RotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4);
+// Slot 1 gives the angles (and the state vector) of the same evaluation, without the matrix:
+// the kind 2 blend (func_00120700) mixes its targets' angles by it.
+typedef void (*RotationCurveGet)(RotationCurve* self, PlacedObject* owner, s32 mode, void* outAngles, void* outVec, f32 key, f32 scale);
 typedef void (*RotationCurveRead)(RotationCurve* self, Stream83* stream);
 typedef void (*RotationCurveTimes)(RotationCurve* self, s32* outCount, f32** outTimes);
 struct RotationCurveVt {
@@ -226,9 +228,13 @@ struct KeyedRotationCurve : RotationCurve {
     VectorKey* keys;          // 0x10
 };
 
-// Kind 2 (D_00219708, 0x1C bytes): nothing read yet.
+// Kind 2 (D_00219708, 0x1C bytes): a blend, as the position curves' kind 2 (func_00120700).
 struct RotationCurveKind2 : RotationCurve {
-    u8 pad08[0x1C - 0x08]; // 0x08
+    s32 f8;                 // 0x08
+    BlendConfig* cfg;       // 0x0C: the records it mixes
+    BlendSequence* seq;     // 0x10: the time map, or 0
+    RotationCurve** targets; // 0x14: one for each record of cfg
+    s32 f18;                // 0x18: 0 mixes the angles, otherwise the rotations are multiplied
 };
 
 // ---------------------------------------------------------------------------------------------

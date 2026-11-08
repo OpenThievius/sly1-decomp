@@ -6,6 +6,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | Function | Version | Match | Checked |
 |---|---|---:|---|
 | [func_001A6788](func_001A6788.cpp) | us | 99.7% | 2026-11-07 |
+| [func_00120700](func_00120700.cpp) | us | 99.6% | 2026-11-08 |
 | [func_001D66A8](func_001D66A8.cpp) | us | 99.5% | 2026-11-07 |
 | [func_0016AB38](eu/func_0016AB38.cpp) | eu | 99.5% | 2026-11-07 |
 | [func_001790B8](func_001790B8.cpp) | us | 99.5% | 2026-11-07 |
@@ -13,6 +14,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_eu_0015DF58](eu/func_eu_0015DF58.cpp) | eu | 99.3% | 2026-11-07 |
 | [func_001821B0](func_001821B0.cpp) | us | 99.1% | 2026-11-07 |
 | [func_00199D08](func_00199D08.cpp) | us | 99.1% | 2026-11-07 |
+| [func_0018E040](func_0018E040.cpp) | us | 99.1% | 2026-11-08 |
 | [func_001A2E68](func_001A2E68.cpp) | us | 99.0% | 2026-11-07 |
 | [func_00196EB0](func_00196EB0.cpp) | us | 99.0% | 2026-11-07 |
 | [func_001FF658](func_001FF658.c) | us | 98.7% | 2026-11-07 |
@@ -106,6 +108,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_0015BC78](func_0015BC78.cpp) | us | 88.9% | 2026-11-07 |
 | [func_00183668](func_00183668.cpp) | us | 88.8% | 2026-11-07 |
 | [func_001388A0](func_001388A0.cpp) | us | 88.7% | 2026-11-07 |
+| [func_001BC978](func_001BC978.cpp) | us | 88.7% | 2026-11-08 |
 | [func_001F3408](func_001F3408.cpp) | us | 88.5% | 2026-11-07 |
 | [func_001980B0](func_001980B0.cpp) | us | 87.8% | 2026-11-07 |
 | [func_001B7D00](func_001B7D00.cpp) | us | 87.6% | 2026-11-07 |
@@ -158,6 +161,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001719E8](func_001719E8.cpp) | us | 68.0% | 2026-11-07 |
 | [func_0015BFC0](func_0015BFC0.cpp) | us | 65.8% | 2026-11-07 |
 | [func_001A7800](func_001A7800.cpp) | us | 65.2% | 2026-11-07 |
+| [func_001CC490](func_001CC490.cpp) | us | 64.2% | 2026-11-08 |
 | [func_00122DE0](func_00122DE0.cpp) | us | 61.1% | 2026-11-07 |
 | [func_001C4C20](func_001C4C20.cpp) | us | 56.9% | 2026-11-07 |
 | [func_eu_001DDA10](eu/func_eu_001DDA10.cpp) | eu | 53.8% | 2026-11-07 |
