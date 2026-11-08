@@ -2572,7 +2572,11 @@ ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, Sc
 
 INCLUDE_ASM(func_00118988);
 
-INCLUDE_ASM(func_00118CF0);
+Quad_118D20* func_00118CF0(Quad_118D20* out, f32 f)
+{
+    *out = (Quad_118D20)Vu0::ScalarInGpr(f);
+    return out;
+}
 
 Quad_118D10* CopyQuadword(Quad_118D10* out, void* src)
 {
