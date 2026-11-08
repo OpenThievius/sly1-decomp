@@ -458,6 +458,20 @@ MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
 (ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits, StoreX). The assembler takes
 `vsqrt` (the disassembler prints it as a `.word`).
 
+### A microprogram's interface (vcallms)
+
+func_0013A498 and func_00185150 start VU0 microprograms with `vcallms`, which reads fixed
+registers ($vf21..$vf31, $vi2..$vi4) that the compiler, allocating only $vf1..$vf15, cannot
+pick. include/vu0.h has one-instruction helpers on named registers, as templates on the
+register number (the assembler takes `$vf%1` from an "i" operand): LoadVf<N> (lqc2),
+StoreVf<N> (sqc2), MoveToVf<N> (qmtc2.ni), MoveToVi<N>/MoveToViWait<N> (ctc2.ni/.i),
+ReadVi<N>/ReadViWait<N> (cfc2.ni/.i; ReadViWait<0> is the game's wait), CallMs<addr> (vcallms)
+and VuNop (vnop). All are volatile with a "memory" clobber, so they keep their order with each
+other and with the loads and stores around them. The C around them sets and reads the registers in
+retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u128 parameter
+(MoveToVf takes it, ToFloatMoved reads it). Neither function matches yet (nonmatching/): the
+bodies are retail's apart from register allocation.
+
 ## The MMI and system helpers
 
 The 37 `inline` functions whose special instructions are MMI or system ones, not VU0
