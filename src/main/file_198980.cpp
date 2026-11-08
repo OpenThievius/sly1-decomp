@@ -1214,7 +1214,36 @@ void CopyObjectGatherer(ObjectGatherer* self)
     self->q600 = tmp;
 }
 
-INCLUDE_ASM(func_0019B298);
+void StepCollider(Collider* self, f32 t);
+void SteerColliderTowardRotation(Collider* self, void* a, s32 b, void* table, s32 c, f32 t);
+void TurnColliderTowardRotation(Collider* self, f32 scale, void* basis, void* data);
+void BuildBasisFromX(void* self, void* value);
+
+void StepObjectGatherer(ObjectGatherer* self, f32 dt)
+{
+    Vec02 delta;
+    Mat02 basis;
+    Vec02 target;
+    StepCollider(self, dt);
+    switch (self->state) {
+    case 1:
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
+        delta.z = 0.0f;
+        BuildBasisFromX(&delta, &basis);
+        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        break;
+    case 2:
+        TransformPointBetweenFrames(*(void**)((u8*)self->f660 + 0x18), 0, (u8*)self->f660 + 0x40, &target);
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+        delta.z = 0.0f;
+        BuildBasisFromX(&delta, &basis);
+        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        break;
+    default:
+        SteerColliderTowardRotation(self, 0, 0, (void*)&D_00248D30, (s32)self->p214, dt);
+        break;
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024C8D0);
 INCLUDE_RODATA(jtbl_0024C8F0);

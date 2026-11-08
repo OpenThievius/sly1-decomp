@@ -4,7 +4,10 @@
 //       retail keeps the bits and the mantissa in $a1 and the exponent in $a2, ours the other
 //       way round. Tried: a double parameter read through a union or *(u64*)&, the exponent's
 //       bias in the same statement or its own, the negated exponent in a new local or written
-//       0 - e, the mantissa in its own local, the two shifts' arms swapped. Written for this
+//       0 - e, the mantissa in its own local, the two shifts' arms swapped. Night-low1
+//       (2026-11-08): the exponent declared first, the bits read with *(u64*)&a, the union's
+//       word used throughout with no mantissa local, the exponent and its bias in one
+//       initialiser: the same swap (or worse). Written for this
 //       project from retail's code.
 #include "common.h"
 

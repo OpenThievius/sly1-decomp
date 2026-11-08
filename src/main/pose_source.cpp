@@ -2058,7 +2058,30 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
     self->f20 = 0.25f;
 }
 
-INCLUDE_ASM(func_00122DE0);
+void BuildBasisFromXAndZHint(void* x, void* hint, void* out);
+
+void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
+{
+    Vec02 dir;
+    Vec02 vel;
+    Vec02* pd = &dir;
+    PlacedObject* owner = self->owner;
+    Attachment* source = owner->f1EC;
+    Vu0::Vec g;
+    if ((owner->desc->flags & 2) != 0) {
+        g = Vu0::MulX(Vu0::Vec::Of(((Collider*)owner)->gravity), Vu0::Vec::Scalar(-1.0f));
+    } else {
+        g = Vu0::MulX(Vu0::Vec::Of(owner->world->gravity), Vu0::Vec::Scalar(-1.0f));
+    }
+    Vu0::Q(*pd) = g.q;
+    if (source != 0 && self->f20 != 0.0f && self->f1C != 0.0f) {
+        source->vt->getPos(source, self->f20, 0, &vel);
+        u128 w1 = Vu0::ScalarAt(self->f1C);
+        Vu0::Q(dir) = Vu0::MulAddX(Vu0::Q(dir), Vu0::DivX(Vu0::Sub(Vu0::Q(vel), Vu0::Q(owner->v150)), Vu0::ScalarAt(self->f20)), w1);
+    }
+    BuildBasisFromXAndZHint(&owner->v150, &dir, out);
+    *vec = *(Vec02*)D_00248D30;
+}
 
 void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 {

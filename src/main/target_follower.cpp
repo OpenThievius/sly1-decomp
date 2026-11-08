@@ -181,8 +181,92 @@ void func_0016D128(TargetFollower* self)
     }
 }
 
-INCLUDE_RODATA(jtbl_0024A810);
-INCLUDE_ASM(func_0016D1E0);
+extern f32 g_gameTime;
+s32 HasObjectPoolChoice(void* p);
+typedef s32 (*VFnRet_16D1E0)(void* self);
+void* ChooseEntryTableObject(void* x);
+
+s32 ChooseTargetFollowerMode(TargetFollower* self)
+{
+    FollowableObject* next;
+    Collider* c;
+    s32 mode = self->f598;
+    switch (mode) {
+    case 2:
+    case 4: {
+        next = (FollowableObject*)self->list55C.tail;
+        if (next != self->f558) {
+            if (next == 0) {
+                mode = 4;
+            } else if (self->f558 != 0 && next->f7A4 == self->f558->f7A4) {
+                mode = 4;
+                if (next->f7AC != 0) {
+                    mode = 2;
+                }
+            } else {
+                Vec02 v;
+                ConvertPositionToWorld(next->f7A4, (f32*)&v);
+                u128 d = Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v140));
+                f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+                if (len < 5.0f) {
+                    mode = 4;
+                    if (next->f7AC != 0) {
+                        mode = 2;
+                    }
+                } else {
+                    mode = 0;
+                }
+            }
+            SetFollowedObject(self, next);
+        }
+        next = (FollowableObject*)GetActiveSwitchedCollider();
+        c = (Collider*)next;
+        if (c != 0 && c == (Collider*)g_player) {
+            if (((VFnRet_16D1E0*)c->desc)[81](c) == 0) {
+                if (mode == 4 && self->f558 != 0) {
+                    if (self->f558->f7AC != 0) {
+                        mode = 2;
+                    }
+                }
+            } else if (mode == 2) {
+                mode = 4;
+            }
+        }
+        if (c != 0 && mode == 2 && self->f574 < g_gameTime) {
+            if (self->f570 == 0) {
+                goto end;
+            }
+            if (HasObjectPoolChoice(self->f570) != 0) {
+                void* t = ChooseEntryTableObject(self->f558->f7AC);
+                if (t != 0) {
+                    self->f590 = t;
+                    mode = 3;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+    case 1:
+        if (self->f5AC <= g_gameTime) {
+            mode = 4;
+            if (self->f558->f7AC != 0) {
+                mode = 2;
+            }
+        }
+        break;
+    case 0:
+        if (self->f5A8 <= g_gameTime) {
+            mode = 1;
+        }
+        break;
+    case 3:
+    default:
+        break;
+    }
+    return mode;
+end:;
+}
 
 extern s32 g_padSelectFlags;
 

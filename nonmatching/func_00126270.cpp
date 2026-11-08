@@ -1,12 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 991/1604 (61.8%), checked 2026-11-08
+// BYTES 1588/1604 (99.0%), checked 2026-11-08
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
 #include "camera.h"
 #include "game_clock.h"
 #include "globals.h"
-// NEAR (2026-11-08, night-large4): the part loop of slot 0x26's draw, the two view tests, the fade
+// NEAR (night-low1, 2026-11-08): same size now, four words off. The normalisation written out on
+// one variable (u128 v = Rotate(...); v = fallback or DivX(v, len); Set(n, v)) with the fallback
+// read first into its own value gives retail's lq v0 and qmtc2 into the rotated vector's vf4 in
+// the fallback's delay slot; rec.kind stored before rec.block.f44 puts the f44 store in bc1t's
+// slot. Still differs: the cubic's first coefficient load (lwc1 c[3]) comes before abs.s of the
+// view term and c[0]'s load before the first mul.s (retail: abs.s first, c[0] after the
+// mul). Tried: fabs in the call, a pointer to the cubic, Eval as statements or with c[0] in a
+// local, permute.py on the fallback's line: no change.
+// Before (2026-11-08, night-large4): the part loop of slot 0x26's draw, the two view tests, the fade
 // calls, the facing cubic, the state's ease and the request's copies are retail's code (registers
 // included: the transform's address hoisted into s6, rows 1 and 2 through it from an in-block
 // pointer, the state through a chained assignment). Left: NormalizeOr's fallback. Retail loads
@@ -160,7 +168,15 @@ void func_00126270(PlacedObject* self, Camera* cam, Quad16* src)
         if (part->fade != 0) {
             Vec02 n;
             ScaledTransform* m = &rec.block;
-            Vu0::Set(n, Vu0::NormalizeOr(Vu0::Rotate(*m, Vu0::Q(part->fade->axis)), Vu0::Q(D_00248D30)));
+            u128 fb = Vu0::Q(D_00248D30);
+            u128 v = Vu0::Rotate(*m, Vu0::Q(part->fade->axis));
+            u128 len = Vu0::Length(v);
+            if (Vu0::ToFloatMoved(len) < 0.0001f) {
+                v = fb;
+            } else {
+                v = Vu0::DivX(v, len);
+            }
+            Vu0::Set(n, v);
             f32 t = __builtin_fabsf(Vu0::ToFloat(Vu0::Dot(Vu0::Q(n), Vu0::Q(g_camera->f80))));
             rec.block.f40 = rec.block.f40 * ClampToRange(g_unitRange, part->fade->cubic.Eval(t));
         }
@@ -183,8 +199,8 @@ void func_00126270(PlacedObject* self, Camera* cam, Quad16* src)
         } else {
             rec.dist = Vu0::ToFloat(Vu0::Dot(d, d));
         }
-        rec.block.f44 = rec.block.f44 * rec.block.f40;
         rec.kind = part->kind;
+        rec.block.f44 = rec.block.f44 * rec.block.f40;
         s32 kind = rec.kind;
         if (rec.block.f40 != 1.0f) {
             switch (kind) {

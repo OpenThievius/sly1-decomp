@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 203/260 (78.1%), checked 2026-11-07
+// BYTES 203/260 (78.1%), checked 2026-11-08
 // NEAR: order: frame, calls and constants are retail's; the float constants get other registers
 //       (retail: -100.0 in f0, 1.0 in f1, reused for four stores), so the stores interleave
-//       differently.
+//       differently. Night-low1 (2026-11-08): the guard and the zero fill are what GCC makes of
+//       a function-local static with an inline constructor (FillMemory(this, 0, 0x80), then the
+//       fields): `static Cfg cfg;` compiles to the same test, call and stores, in the same
+//       order as here, but its symbol has no retail address in the build. The stores through a
+//       pointer or by byte offset: unchanged. Retail's stores are in the source's order, with
+//       75.0 loaded after the 0x48 store into -100.0's f0; ours are scheduled out of order.
 #include "common.h"
 
 struct Cfg_1D5FA8 {

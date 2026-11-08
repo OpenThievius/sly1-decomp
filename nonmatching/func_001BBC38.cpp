@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 539/640 (84.2%), checked 2026-11-07
+// BYTES 570/640 (89.1%), checked 2026-11-08
 #include "common.h"
 #include "sound_record.h"
 #include "script_value.h"
@@ -26,12 +26,13 @@
 #include "shapes.h"
 #include "property_descriptor.h"
 #include "vu0.h"
-// NEAR (2026-11-07, worker vu0-c): the VU0 part (the face's two edges, their cross product and
-// its dot with the face normal) is retail's; the edge-to-triangle loops differ in registers
-// (retail keeps the edge index in a0 and the edge in a6, here a3 and t3), one bnez that is a
-// bnezl here, and the operand order of tri + count. Tried: counts[f] read in place of a pointer
-// to it (closer), the triangle as pointer arithmetic.
-
+// NEAR (night-low1, 2026-11-08): a variable for each outer loop (the edges' i, the faces' i)
+// gives retail's a0/t6 and a1/t4 for the edge and side counters (68 differing words to 45).
+// Still differs: the face index f takes v0 (retail a2, shared with the vertex v), the triangle
+// pointer a0 and the count pointer t0 (retail t0 and a3); the search index m shares k's a1
+// (retail i's a0), so the bnez after the search is a bnezl here; tri + count's operand order.
+// Tried: the vertex read in place in the search (worse), a pointer to counts[f] (worse), nested
+// ifs for the two bounds (same).
 // The triangles a collider's hook keeps (Collider::hook, 0xC bytes): two vectors per vertex and
 // three vertex indices per face, wound to face along the face's normal (func_001BBC38).
 struct MeshHook {
@@ -74,8 +75,7 @@ void func_001BBC38(Collider* self)
     h->f4 = (Vec02*)AllocateZeroedFrontMemory(self->meshCopy.vertCount * 16);
     h->tris = (s32*)AllocateZeroedFrontMemory(self->meshCopy.faceCount * 12);
     s32* counts = (s32*)AllocateZeroedBackMemory(self->meshCopy.faceCount * 4);
-    s32 i;
-    for (i = 0; i < self->meshCopy.edgeCount; i++) {
+    for (s32 i = 0; i < self->meshCopy.edgeCount; i++) {
         MeshEdge* e = &((MeshEdge*)self->meshCopy.edges)[i];
         for (s32 j = 0; j < 2; j++) {
             s32 f = e->faces[j];
@@ -96,7 +96,7 @@ void func_001BBC38(Collider* self)
         }
     }
     Vec02* verts = (Vec02*)self->mesh.verts;
-    for (i = 0; i < self->meshCopy.faceCount; i++) {
+    for (s32 i = 0; i < self->meshCopy.faceCount; i++) {
         s32* t = &h->tris[i * 3];
         Vu0::Q(e1) = Vu0::Sub(Vu0::Q(verts[t[1]]), Vu0::Q(verts[t[0]]));
         Vu0::Q(e2) = Vu0::Sub(Vu0::Q(verts[t[2]]), Vu0::Q(verts[t[0]]));

@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 266/408 (65.2%), checked 2026-11-07
-// NEAR (2026-11-08, vu0w3-e1): structure and frame right (the Scalar slot at 0x30, the ramp at 0x10, the early d stored at sp+0); registers and orders differ: retail keeps the unit-X address in $v0 and the anchor's target in $v1 (here the reverse), stores the ramp's three words after the sqrt rather than before the second Length, and keeps the created object in $a2 across the Scalar for the first slot call.
+// BYTES 347/408 (85.0%), checked 2026-11-08
+// NEAR (night-low1, 2026-11-08): the direction set through an inline taking the fallback by
+// reference (retail's unit-X address formed before the difference, its lq in the fallback arm,
+// the length's mtc1 at once: ToFloatMoved), the speed's length before the ramp's stores, and the
+// ramp written through a pointer that is also the call's argument (retail's addiu a1, sp, 16;
+// move a0, a1): 47 differing lines to 25. Still differs: the ramp's endSpeed and rampTime stores
+// go through the pointer (retail: endSpeed at 20(sp), rampTime at 8(a1)), the dt load and the
+// created object's load are scheduled otherwise (retail keeps the object in a2 for the slot
+// call). Tried: the object read before the velocity's MulX (same).
+// Before (2026-11-08, vu0w3-e1): structure and frame right (the Scalar slot at 0x30, the ramp at 0x10, the early d stored at sp+0); registers and orders differ: retail keeps the unit-X address in $v0 and the anchor's target in $v1 (here the reverse), stores the ramp's three words after the sqrt rather than before the second Length, and keeps the created object in $a2 across the Scalar for the first slot call.
 #include "common.h"
 #include "ramp_profile.h"
 #include "vu0.h"
@@ -14,6 +22,18 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
 void BuildBasisFromX(void* a, void* b);
 s32 ChooseObjectCreatorState(ObjectCreator* self);
 
+// dir = d made unit length, or fallback when d is shorter than 0.0001.
+static inline void SetDirectionOr(Vec02& dir, u128 d, const Vec02& fallback)
+{
+    Vu0::Q(dir) = d;
+    u128 len = Vu0::Length(d);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        dir = fallback;
+    } else {
+        Vu0::Q(dir) = Vu0::DivX(d, len);
+    }
+}
+
 void UpdateObjectCreator(ObjectCreator* self)
 {
     Vec02 dir;
@@ -26,20 +46,13 @@ void UpdateObjectCreator(ObjectCreator* self)
     }
     if (v == 2) {
         PlacedObject* anchor = (PlacedObject*)self->createsObject;
-        u128 fb = *(const u128*)&g_unitXVector;
-        u128 d = Vu0::Sub(Vu0::Q(((PlacedObject*)*(void**)((u8*)anchor + 0x354))->v140), Vu0::Q(((PlacedObject*)self->created)->v140));
-        Vu0::Q(dir) = d;
-        u128 dlen = Vu0::Length(d);
-        if (Vu0::ToFloat(dlen) < 0.0001f) {
-            *(u128*)&dir = fb;
-        } else {
-            Vu0::Q(dir) = Vu0::DivX(d, dlen);
-        }
-        ramp.maxSpeed = 3000.0f;
-        ramp.endSpeed = 0.0f;
-        ramp.rampTime = 0.2f;
+        SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)*(void**)((u8*)anchor + 0x354))->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
         f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
-        f32 speed = ApproachValueWithRamp(len, ramp.maxSpeed, g_frameDt, &ramp, 0);
+        RampProfile* p = &ramp;
+        p->maxSpeed = 3000.0f;
+        p->endSpeed = 0.0f;
+        p->rampTime = 0.2f;
+        f32 speed = ApproachValueWithRamp(len, 3000.0f, g_frameDt, p, 0);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(speed));
         PlacedObject* o = (PlacedObject*)self->created;
         o->desc02()->m20(o, &vel);
