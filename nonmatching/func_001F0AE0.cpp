@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0, checked 2026-11-08
+// SIZE 976/984, checked 2026-11-08
 // NEAR: one block of case 3. GCSE (PRE) takes the join's load of the cursor (for `back`) as
 // available to `target = self->cursor` and to the f560 != 0 path, so ours keeps the cursor in a1
 // (bnez/move s3,a1) where retail loads it again on the f560 path (bnezl delay) and for target

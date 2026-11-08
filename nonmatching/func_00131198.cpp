@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0, checked 2026-11-08
+// BYTES 1255/1356 (92.6%), checked 2026-11-08
 // NEAR: scheduling only, before the GIF packet: ours places the 0.171875 of InitCurveSpan (f20)
 // above the SetTextPanelState call, with each loop constant one call earlier, and the
 // `state = -1` store before `move a0`; retail starts them after the call (sw state in its delay

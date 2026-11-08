@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0, checked 2026-11-08
+// SIZE 1448/1436, checked 2026-11-08
 // NEAR: the gauge loop's constants. Retail keeps 1, 9, 60, 320 and the screen mapping's 1728,
 // 16, 0.4545 and 1936 in f23..f31 and loads 1/9, 1/15, 55, 0.5 and 372.8 inside the loop; ours
 // (90 insns at the loop pass) also moves 55 and 372.8 out (life 5 and 4), so the FPR and GPR

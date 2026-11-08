@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0, checked 2026-11-08
+// SIZE 1308/1268, checked 2026-11-08
 // NEAR: the C is 1308 bytes against retail's 1268, one callee-saved register more (frame 0x100,
 // retail 0xE0). Retail's strip search is not rotated (`b` into its test, everything reloaded each
 // time: loop.c leaves it alone); ours is rotated with a pre-test and keeps mesh->strips. Retail
