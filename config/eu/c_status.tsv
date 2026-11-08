@@ -3030,6 +3030,7 @@ func_001C25B0	func_001C32A8	match
 func_001C27B0	func_001C34A8	match	
 func_001C29C8	func_001C36C0	match	
 func_001C29E8	func_001C36E0	match	
+func_001C29F8	func_001C36F0	match	
 func_001C3028	func_001C3D20	match	
 func_001C30E8	func_001C3DE0	match	
 func_001C3390	func_001C4088	match	
