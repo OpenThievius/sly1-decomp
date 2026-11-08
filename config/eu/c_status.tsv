@@ -1803,7 +1803,7 @@ func_001705C8	func_00170C18	match
 func_00170660	func_00170CB0	match	
 func_00170790	func_00170DE0	match	
 func_00170820	func_00170E70	match	
-func_00170960	func_00170FB0	differs	the .rodata literal at +0x10 is not retail's constant at 0x24CCE0
+func_00170960	func_00170FB0	match	version-specific, rodata
 func_00171180	func_001717E0	match	
 func_00171C80	func_001722E0	match	
 func_00171DD8	func_00172438	match	
@@ -1930,7 +1930,7 @@ func_00181D28	func_00182388	match
 func_00181D88	func_001823E8	match	
 func_00181DA8	func_00182408	match	rodata
 func_00181ED0	func_00182530	match	version-specific, rodata
-func_001821B0	func_00182810	differs	
+func_001821B0	func_00182810	match	version-specific
 func_00182470	func_00182AD0	match	
 func_001824D8	func_00182B38	match	
 func_00182548	func_00182BA8	match	
@@ -3637,7 +3637,7 @@ func_001F1960	func_001F29E8	match	version-specific
 func_001F1A08	func_001F2A50	match	version-specific
 func_001F1C90	func_001F2CD8	match	version-specific
 func_001F1E38	func_001F2E80	match	version-specific
-func_001F20A8	func_001F30F0	error	a reference to D_00276648, which has no address in this version
+func_001F20A8	func_001F30F0	match	version-specific
 func_001F2688	func_001F36E0	match	
 func_001F2738	func_001F3728	match	
 func_001F2758	func_001F3748	match	
