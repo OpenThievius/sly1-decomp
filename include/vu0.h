@@ -632,6 +632,34 @@ struct Vu0 {
         return r;
     }
 
+    static Vec Cross(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Cross(a.q, b.q);
+        return r;
+    }
+
+    static Vec MulX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = MulX(a.q, s.q);
+        return r;
+    }
+
+    static Vec DivX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = DivX(a.q, s.q);
+        return r;
+    }
+
+    static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
+    {
+        Vec r;
+        r.q = MulXSum3(a.q, s.q, b.q, t.q, c.q, u.q);
+        return r;
+    }
+
     static f32 ToFloat(Vec a)
     {
         return ToFloat(a.q);

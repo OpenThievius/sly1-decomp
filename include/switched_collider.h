@@ -309,7 +309,9 @@ struct Player : TurningCollider {
     f32 f226C;              // 0x226C
     u8 pad2270[0x2284 - 0x2270];
     f32 f2284;              // 0x2284
-    u8 pad2288[0x22AC - 0x2288];
+    u8 pad2288[0x2290 - 0x2288];
+    Vec02 v2290;            // 0x2290
+    u8 pad22A0[0x22AC - 0x22A0];
     void* f22AC;            // 0x22AC
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
@@ -364,7 +366,9 @@ struct Player : TurningCollider {
     s32 f2590;              // 0x2590
     u8 pad2594[0x25AC - 0x2594];
     s32 f25AC;              // 0x25AC
-    u8 pad25B0[0x25D8 - 0x25B0];
+    u8 pad25B0[0x25C8 - 0x25B0];
+    void* f25C8;            // 0x25C8: the animation whose markers state 8 reads (func_0017D248)
+    u8 pad25CC[0x25D8 - 0x25CC];
     void* f25D8[5];         // 0x25D8
     u8 pad25EC[0x2674 - 0x25EC];
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
