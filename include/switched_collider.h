@@ -288,7 +288,8 @@ struct Player : TurningCollider {
     void* f2200;            // 0x2200
     s32 f2204;              // 0x2204
     s32 f2208;              // 0x2208
-    u8 pad220C[0x2220 - 0x220C];
+    u8 pad220C[0x221C - 0x220C];
+    s32 f221C;              // 0x221C: set, the path's frame is turned about (func_001D1630)
     s32 f2220;              // 0x2220
     f32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
