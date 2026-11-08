@@ -6,6 +6,10 @@
 //       the switch are retail's. About 40 compiles (for(;;) with the test at the top gives retail's
 //       jump to the else arm; Set/Q stores, a struct holding the u128, a pointer to the local, a
 //       helper reading the operand from memory: all forwarded).
+//       Not func_001590A0's reload (a store to a struct member, docs/TOOLCHAIN.md): no store lies
+//       between this sqc2 and lqc2, and a struct temporary copied in, a union, a 12-byte
+//       16-aligned struct and a pointer to the local all forward as well; only a store the
+//       compiler cannot see (an asm sqc2, not allowed) gives the reload, scheduled otherwise.
 #include "common.h"
 #include "switched_collider.h"
 #include "globals.h"

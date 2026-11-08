@@ -313,6 +313,36 @@ MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
 (ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits). The assembler takes
 `vsqrt` (the disassembler prints it as a `.word`).
 
+## Reloads and stores
+
+When retail reads a word again that the compiler could have kept, or keeps one
+the compiler reads again, the cause is in how each memory reference is written
+(2026-11-07, func_001590A0):
+
+- **A store to a stack struct's member makes the compiler reload.** GCC 2.95
+  (without `-fstrict-aliasing`) marks each memory reference as a structure's
+  (`a.f`, `p->f`, an aggregate) or a scalar's (`*(T*)((u8*)&a + o)` of a
+  scalar T, which is not a member access), and assumes that a scalar reference
+  at a fixed address (the frame plus a constant) never overlaps a structure's
+  through a varying pointer (alias.c, `fixed_scalar_and_varying_struct_p`). So a
+  store into a stack record through a byte offset leaves CSE free to keep
+  `m->flags` in a register, and a store to `rec.field` does not: the compiler
+  reads `m->flags` again after it. func_001590A0 reloads the message's flags
+  (`lw v0, 0(s2)`) before every test after a store into its copy of the
+  0x200-byte record: one store rewritten as a member access brought that
+  reload back, and the record as a struct written member by member gave every
+  one. The same rule reloads a field read twice around a member store
+  (`rec.f1D4 = m->scale; rec.f1D0 = m->scale;` reads it twice, retail's
+  `rec.f1D4 = rec.f1D0 = m->scale` once). It is not a call or a pointer: the
+  offset store was through a pointer as well. It does not reach a value stored
+  and loaded back with nothing between (func_001C8920's `sqc2`/`lqc2`): with no
+  store between them, CSE forwards the stored value whatever the type.
+- **An inline function's argument goes straight into the call's register.**
+  `FillMemory(&frame, 0, 0x60)` puts `&frame` in a pseudo the later uses share
+  (`move a0, s0`, s0 set before the call); called from an inline member
+  (`frame.Clear()`, `FillMemory(this, 0, sizeof(*this))`) the address is
+  computed into a0 and again into s0 after the call, as retail's func_001590A0.
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it

@@ -1748,9 +1748,169 @@ s32 GetOrCreateSoundParams(void* self)
     return o->fA0;
 }
 
-INCLUDE_RODATA(jtbl_0024A150);
+// The 0x200-byte spawn record (Rec79) as func_001590A0 changes its copy: the copy is written
+// field by field, so each store is a structure member's and the message's flags word is read
+// again after it (docs/TOOLCHAIN.md, "A store to a stack struct's member").
+struct __attribute__((aligned(16))) SpawnRecordView {
+    u8 pad00[0x10];
+    s32 kind;               // 0x10: where the sound plays (the switch below)
+    u8 pad14[0x20 - 0x14];
+    union {
+        Quad16 q20;         // 0x20: a point (kind 0), the first end (kind 1)
+        Vec02 v20;
+        u8* p20;            // 0x20: an object whose point at +0x18 is used (kind 2)
+    };
+    Vec02 v30;              // 0x30: the second end (kind 1)
+    Vec02 v40;              // 0x40: kind 4's point
+    u8 pad50[0x60 - 0x50];
+    Quad16 q60;             // 0x60
+    u8 pad70[0x78 - 0x70];
+    void* frame;            // 0x78: a frame the point is placed in
+    s32 target;             // 0x7C: the object whose frame the point is in
+    u8 pad80[0xA0 - 0x80];
+    f32 fA0;                // 0xA0
+    f32 fA4;                // 0xA4
+    u8 padA8[0x120 - 0xA8];
+    s32 f120;               // 0x120
+    u8 pad124[0x140 - 0x124];
+    Quad16 q140;            // 0x140
+    u8 pad150[0x1D0 - 0x150];
+    f32 f1D0;               // 0x1D0
+    f32 f1D4;               // 0x1D4
+    u8 pad1D8[0x1E0 - 0x1D8];
+    s32 f1E0;               // 0x1E0
+    u8 pad1E4[0x200 - 0x1E4];
+};
 
-INCLUDE_ASM(func_001590A0);
+// The message func_001590A0 takes (a DelayedMessageBody): its flags say which fields to use.
+struct SpawnMessage {
+    s32 flags;              // 0x00
+    s32 target;             // 0x04: flag 1
+    u8 pad08[0x10 - 0x08];
+    Quad16 q10;             // 0x10: flag 2
+    Quad16 q20;             // 0x20: flag 4
+    f32 scale;              // 0x30: flags 8 and 0x10
+    f32 percent;            // 0x34: flag 8, when scale is 0
+    s32 f38;                // 0x38: flag 0x20
+    void* frame;            // 0x3C: flag 0x40
+    s32 count;              // 0x40: flag 0x80
+};
+
+// The chained world frame func_00158630 writes: a position and the rotation after it.
+struct __attribute__((aligned(16))) ChainFrame {
+    u8 b[0x60];
+    void Clear() { FillMemory(this, 0, sizeof(*this)); }
+};
+
+void StoreFloatAsQuadword(void* out, f32 f);
+void* CopyQuadword(void* out, void* in);
+Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
+void* StoreQuadword(void* dst, Quadword128 v);
+f32 ClampToRange(void* range, f32 x);
+void ComputeChainedWorldFrame(void* a, void* frame, void* out);
+void SpawnEffectsFromRecord(s32 count, void* rec, void* chain);
+void TransformPointBetweenFrames(void* from, s32 to, Vec02* point, Vec02* out);
+extern f32 D_00262178[2];
+extern const Vec02 D_00248D30;
+
+void func_001590A0(void* self, void* body)
+{
+    SpawnMessage* m = (SpawnMessage*)body;
+    SpawnRecordView rec;
+    ChainFrame frame;
+    void* chain[3];
+    Vec02 v;
+    Vec02 half;
+    Vec02 qa;
+    Vec02 qb;
+    rec = *AT(SpawnRecordView*, self, 0x90);
+
+    s32 count;
+    if (m->flags & 0x80) {
+        count = m->count;
+    } else {
+        count = (s32)RandomFloatInRange(AT(f32, self, 0xA4), AT(f32, self, 0xA8));
+    }
+    if (m->flags & 1) rec.target = m->target;
+    if (m->flags & 2) rec.q60 = m->q10;
+    if (m->flags & 4) {
+        rec.kind = 0;
+        rec.q20 = m->q20;
+    } else if (m->flags & 0x40) {
+        rec.frame = m->frame;
+        rec.target = AT(s32, self, 0x18);
+    } else {
+        frame.Clear();
+        ComputeChainedWorldFrame(self, &frame, (u8*)&frame + 0x10);
+        rec.frame = &frame;
+        if (!(m->flags & 1)) rec.target = AT(s32, self, 0x18);
+    }
+    if (m->flags & 8) {
+        if (rec.f120 == 0) {
+            f32 t = m->scale;
+            f32 s;
+            if (t == 0.0f) s = m->percent * 0.01f;
+            else s = t;
+            if (s < 1.0f) count = (s32)((f32)count * s);
+            else count = (s32)((f32)count / s);
+            s32 least = (s32)AT(f32, self, 0xA8) / 2;
+            count = least < count ? count : least;
+            f32 r = ClampToRange(D_00262178, s);
+            rec.fA0 = rec.fA0 * r;
+            rec.fA4 = rec.fA4 * r;
+            f32 lowest = 0.5f;
+            s = lowest >? s;
+            Quad16* q = &rec.q140;
+            StoreFloatAsQuadword(&qa, s);
+            Quadword128 q0 = *(Quadword128*)&qa;
+            CopyQuadword(&qb, q);
+            StoreQuadword(q, ScaleQuadword(q0, *(Quadword128*)&qb));
+        }
+    }
+    if (rec.f120 == 1) {
+        if (m->flags & 0x10) {
+            rec.f1D4 = rec.f1D0 = m->scale;
+        }
+        if (m->flags & 0x20) rec.f1E0 = m->f38;
+    }
+    void* cp;
+    if (AT(s32, self, 0xBC) != 0) {
+        chain[0] = (u8*)self + 0xC4;
+        chain[1] = (u8*)self + 0xC0;
+        chain[2] = self;
+        cp = chain;
+    } else {
+        cp = 0;
+    }
+    SpawnEffectsFromRecord(count, &rec, cp);
+    if (AT(s32, self, 0xA0) != 0) {
+        switch (rec.kind) {
+        case 0:
+            v = rec.v20;
+            break;
+        case 1:
+            Vu0::Q(half) = Vu0::FromFloat(0.5f);
+            Vu0::Q(v) = Vu0::MulXSum(Vu0::Q(rec.v20), Vu0::Q(half), Vu0::Q(rec.v30), Vu0::Q(half));
+            break;
+        case 2:
+            v = *AT(Vec02*, rec.p20, 0x18);
+            break;
+        case 3:
+            v = D_00248D30;
+            break;
+        case 4:
+            v = rec.v40;
+            break;
+        }
+        if (rec.frame != 0) {
+            u8* fr = (u8*)rec.frame;
+            Vu0::Q(v) = Vu0::Add(Vu0::Rotate(AT(Mat02, fr, 0x10), Vu0::Q(v)), Vu0::Q(AT(Vec02, fr, 0)));
+        }
+        TransformPointBetweenFrames((void*)rec.target, 0, &v, &v);
+        u8* snd = AT(u8*, self, 0xA0);
+        StartSoundEffect(AT(s32, snd, 0), 0, 0, (s32)&v, AT(f32, snd, 4), AT(f32, snd, 8), AT(f32, snd, 0xC), AT(f32, snd, 0x10), 0.0f, 0, 0);
+    }
+}
 
 void FindOrBuildMemberGroup(void** out, void* self)
 {
