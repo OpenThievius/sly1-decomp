@@ -96,8 +96,8 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   place a helper names a fixed register: the compiler allocates only $vf1 to $vf15, and retail
   calls its microprograms (`vcallms`) through $vf16 to $vf31 and the control registers $vi0 to
   $vi15. There a helper is still one instruction (a load into, or a store from, one named
-  register, a read or write of one control register, or `vcallms` itself), named for the
-  register it touches, in include/vu0.h. The C around it sets and reads those registers in
+  register, a read or write of one control register, `vcallms` itself, or the `vnop` retail
+  issues before it), named for the register it touches, in include/vu0.h. The C around it sets and reads those registers in
   retail's order. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
