@@ -15,16 +15,26 @@ struct __attribute__((packed)) Keep46 {
 struct PooledObject : Collider {
     s32 state;              // 0x550: func_0014F110 (-1 at set-up, 0 on entering the world)
     f32 stateTime;          // 0x554: the clock when the state changed (D_0026185C)
-    PooledObject* next;              // 0x558: the next in the list at D_00262708 (func_00150298)
-    u8 pad55C[0x564 - 0x55C];
+    union {
+        PooledObject* next;          // 0x558: the next in the list at D_00262708 (func_00150298)
+        f32 holdSpeed;               // 0x558: held, the speed it follows its holder at (func_0014F270)
+    };
+    u8 pad55C[0x560 - 0x55C];
+    f32 f560;               // 0x560: handed to SendPointEventToWorldListener when it lands (func_0014F270)
     f32 f564;               // 0x564: handed to func_00126D60 when the state becomes 5
     f32 delay;              // 0x568: slot 17 waits this long in state 4
     Keep46 keep56C;         // 0x56C: kept by slot 9
     void* f574;             // 0x574: not read here
     void* watched;        // 0x578: the object whose message (kind 6) clears it (slot 13)
-    s32 f57C;               // 0x57C: zeroed when the state leaves 2
+    union {
+        s32 f57C;           // 0x57C: zeroed when the state leaves 2
+        Collider* holder;   // 0x57C: in state 2, the object it follows (func_0014F270)
+    };
     s32 f580;               // 0x580
-    s32 f584;               // 0x584
+    union {
+        s32 f584;           // 0x584
+        f32 holdHeight;     // 0x584: in state 2, its height above the holder (func_0014F270)
+    };
     void* taker;          // 0x588: the class 0x23 object that took it (func_0014FEC0; func_0014FBE0)
     void* member58C;        // 0x58C: the group or member func_00159478 finds (slot 10)
 };

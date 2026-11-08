@@ -1605,7 +1605,10 @@ void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
 // A target the player may aim at: two quads (ScoreTargetCandidate's hit, ChooseBestTargetCandidate's
 // result, the pair the player keeps at 0x2B70).
 struct TargetHit {
-    Vec02 q0;               // 0x00
+    union {
+        Vec02 q0;           // 0x00
+        void* obj;          // 0x00: the object aimed at, none for a point on the ground (func_001788F0)
+    };
     Vec02 q1;               // 0x10
 };
 // The record the player keeps at 0x2514 for a jump at a target: when it lands and the two ends
@@ -1694,7 +1697,90 @@ void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider**
     *out = bestTime;
 }
 
-INCLUDE_ASM(func_001788F0);
+extern f32 D_00263A10[32];
+extern f32 D_00263A90[4];
+extern f32 D_00263AA0[4];
+extern f32 D_00263AB0[4];
+
+f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider** objs, TargetHit* out, f32* outTime)
+{
+    typedef Vu0::Vec Vec;
+    f32 t = 0.7f;
+    PushBackMemoryMark();
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 q;
+    ComputeTargetArc(self, cand, t, 0, &q, 0);
+    f32 score = 0.0f;
+    Vu0::Q(hi) = Vu0::Max(Vec::Of(self->v140), Vec::Of(q)).q;
+    Vu0::Q(lo) = Vu0::Min(Vec::Of(self->v140), Vec::Of(q)).q;
+    hi.z = hi.z + 200.0f;
+    Vu0::Q(lo) = Vu0::Sub(Vec::Of(lo), Vec::Of(D_00263A90)).q;
+    Vu0::Q(hi) = Vu0::Add(Vec::Of(hi), Vec::Of(D_00263A90)).q;
+    s32 count;
+    Collider** list;
+    GatherCollidersInBox(self->world, self, &lo, &hi, 0, 0, &count, &list);
+    TargetHit hit = *cand;
+    if (cand->obj == 0) {
+        Vec02 p;
+        Vec02 r;
+        ColliderSpan span;
+        p = r = q;
+        p.z = p.z + 125.0f;
+        r.z = r.z - 175.0f;
+        if (FindNearestSpanObject(0, &p, &r, count, list, &span) == 0 || span.time[0] == score ||
+            ((Vec02*)&span.q[2])->z < t) {
+            f32 penalty = 2000.0f;
+            score = penalty >? score;
+            hit.q1 = q;
+        } else {
+            hit.q1 = *(Vec02*)&span.q[0];
+        }
+        p = r = hit.q1;
+        p.z = p.z + 180.0f;
+        r.z = r.z + 5.0f;
+        if (FindNearestSpanObject(0, &p, &r, count, list, &span)) {
+            f32 penalty = 2000.0f;
+            score = penalty >? score;
+        }
+        for (u32 i = 0; i < 8; i++) {
+            Vu0::Q(p) = Vu0::Q(r) = Vu0::Add(Vec::Of(hit.q1), Vec::Of(((Vec02*)D_00263A10)[i])).q;
+            p.z = p.z + 50.0f;
+            r.z = r.z - 30.0f;
+            if (FindNearestSpanObject(0, &p, &r, count, list, &span) == 0) {
+                f32 penalty = 1500.0f;
+                score = penalty >? score;
+                break;
+            }
+        }
+    }
+    for (s32 j = 0; j < n; j++) {
+        TurningCollider* o = objs[j];
+        Vec02 at;
+        if (o->mesh.verts != 0) {
+            f32 d = -o->f6CC - ((Vec02*)o->mesh.verts)[o->f6D0].z;
+            Vu0::Q(at) = Vu0::MulAddX(Vec::Of(hit.q1), Vec::Of(g_unitZVector), Vec::Scalar(d)).q;
+        } else {
+            at = hit.q1;
+        }
+        f32 dist = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vec::Of(o->v140), Vec::Of(at))).q) - o->radius3D0;
+        f32 x = D_00263AA0[0] + dist * (D_00263AA0[1] + dist * D_00263AA0[2]);
+        f32 l = D_00263AB0[0];
+        f32 h = D_00263AB0[1];
+        if (x < l) {
+            x = l;
+        } else if (h < x) {
+            x = h;
+        }
+        score = x >? score;
+    }
+    f32 time;
+    ChooseTargetArcTime(self, &hit, count, list, &time);
+    PopBackMemoryMark();
+    *out = hit;
+    *outTime = time;
+    return score;
+}
 
 ASM_FUNC(func_00178D18);
 

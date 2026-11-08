@@ -584,6 +584,13 @@ struct Vu0 {
             return r;
         }
 
+        static Vec Zero()
+        {
+            Vec r;
+            r.q = Vu0::Zero();
+            return r;
+        }
+
         static Vec FromFloat(f32 f)
         {
             Vec r;
@@ -613,10 +620,66 @@ struct Vu0 {
         return r;
     }
 
+    static Vec Add(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Add(a.q, b.q);
+        return r;
+    }
+
+    static Vec Min(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Min(a.q, b.q);
+        return r;
+    }
+
+    static Vec Max(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Max(a.q, b.q);
+        return r;
+    }
+
+    static Vec Cross(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Cross(a.q, b.q);
+        return r;
+    }
+
+    static Vec DivX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = DivX(a.q, s.q);
+        return r;
+    }
+
+    static Vec MulAddX(Vec a, Vec b, Vec s)
+    {
+        Vec r;
+        r.q = MulAddX(a.q, b.q, s.q);
+        return r;
+    }
+
+    static Vec NormalizeOr(Vec v, Vec fallback)
+    {
+        Vec r;
+        r.q = NormalizeOr(v.q, fallback.q);
+        return r;
+    }
+
     static Vec MulXSum(Vec a, Vec s, Vec b, Vec t)
     {
         Vec r;
         r.q = MulXSum(a.q, s.q, b.q, t.q);
+        return r;
+    }
+
+    static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
+    {
+        Vec r;
+        r.q = MulXSum3(a.q, s.q, b.q, t.q, c.q, u.q);
         return r;
     }
 
@@ -631,6 +694,13 @@ struct Vu0 {
     {
         Vec r;
         r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    template <class M> static Vec RotateUntied(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateUntied(m, v.q);
         return r;
     }
 

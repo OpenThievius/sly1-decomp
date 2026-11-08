@@ -2948,7 +2948,109 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
     ReleaseAttachRecords(owner, removed);
 }
 
-INCLUDE_ASM(func_001EEF90);
+void UpdateCollider(void* self);
+Attach03* TakeAttachRecord(void* world);
+f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+void StartSoundEffect(s32 a0, s32 a1, Collider* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void BroadcastPointEvent(void* self, void* obj, f32 x);
+
+void UpdateAttachedSet(AttachedSet* self)
+{
+    s32 changed = 0;
+    UpdateCollider(self);
+    if (self->tree.nodes == 0) {
+        return;
+    }
+    World* world = self->world;
+    Attach03* link;
+    Collider* c;
+    for (link = self->links; link != 0; link = link->nextOwn) {
+        link->target->flags538 |= 1ULL << 59;
+    }
+    for (ContactRow03* r = ((Collider*)self->root)->contacts->head; r != 0; r = r->next) {
+        c = r->other;
+        if (c->f360 < 0.0001f) {
+            continue;
+        }
+        if (c->flags538 & ((1ULL << 54) | (1ULL << 42))) {
+            continue;
+        }
+        if (func_001EF5B8(self, (TurningCollider*)c, 0, 0) == 0.0f) {
+            continue;
+        }
+        c->flags538 |= 1ULL << 60;
+        if (self->f278 != 0) {
+            ClearRootTries((Actor6C*)(void*)c);
+        }
+        if (c->flags538 & (1ULL << 59)) {
+            continue;
+        }
+        link = TakeAttachRecord(world);
+        link->owner = self;
+        link->target = c;
+        link->nextOwn = self->links;
+        self->links = link;
+        if (self->f580 == 0) {
+            continue;
+        }
+        if (!(c->v150.z < -100.0f)) {
+            continue;
+        }
+        Vec02 from;
+        Vec02 to;
+        ColliderSpan spans[16];
+        Vec02 off;
+        if (self->f278 != 0) {
+            Vec02 d;
+            ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), &c->v140, 0, &d, 0, 0);
+            Vu0::Q(off) = Vu0::Sub(Vu0::Vec::Of(d), Vu0::Vec::Of(c->v140)).q;
+        } else {
+            off = D_00248D30;
+        }
+        Vu0::Q(from) = Vu0::Sub(Vu0::Vec::Of(c->v370), Vu0::Vec::Of(off)).q;
+        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(c->v140), Vu0::Vec::Of(off)).q;
+        f32 h;
+        if (c == g_player) {
+            h = -75.0f;
+        } else {
+            h = c->boundsMin.z - c->v140.z;
+        }
+        from.z = from.z + h;
+        to.z = to.z + h;
+        if (CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans) <= 0) {
+            continue;
+        }
+        if (spans[0].f50 == 0) {
+            continue;
+        }
+        f32 speed = c->v150.z;
+        f32 six = 6.0f;
+        f32 strength = (-speed <? six) * 0.16666667f;
+        f32 size = ((c->boundsMax.x - c->boundsMin.x) + (c->boundsMax.y - c->boundsMin.y)) * 0.5f;
+        if (speed < 0.0f) {
+            StartSoundEffect(0x22, 0, c, 0, 10.0f, 1.0f, strength, 0.0f, 0.0f, 0, 0);
+            Vu0::Q(spans[0].q[0]) = Vu0::Add(Vu0::Vec::Of(spans[0].q[0]), Vu0::Vec::Of(off)).q;
+            BroadcastPointEvent(&spans[0], self, size * strength);
+        }
+    }
+    for (link = self->links; link != 0; link = link->nextOwn) {
+        c = link->target;
+        u64 f = c->flags538;
+        if (((f >> 59) & 1) != ((f >> 60) & 1)) {
+            c->onSet = (f >> 60) & 1;
+            DetachMsg m;
+            m.self = self;
+            m.obj = c;
+            c->desc->m0E(c, (c->flags538 & (1ULL << 59)) ? 11 : 10, &m);
+            changed = 1;
+        }
+    }
+    ReconcileColliderAttachments(world, &self->links);
+    if (changed) {
+        RebuildAttachedSet(self);
+    }
+}
 
 void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
 {

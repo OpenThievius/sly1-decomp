@@ -186,7 +186,6 @@ func_00175170	00175170	9860	inline	C with inline assembly: VU0 macro instruction
 func_00177990	00177990	1164	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001782A8	001782A8	20	handwritten	VU0 macro instruction
 func_001782C0	001782C0	728	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001788F0	001788F0	1064	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00178D18	00178D18	128	handwritten	VU0 macro instruction
 func_001790B8	001790B8	772	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001794E0	001794E0	176	handwritten	128-bit MMI instruction
@@ -389,7 +388,6 @@ func_001D7778	001D7778	3316	inline	C with inline assembly: VU0 macro instruction
 func_001D87C8	001D87C8	1032	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D8BD0	001D8BD0	444	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D8E40	001D8E40	1196	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D9678	001D9678	1104	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D9AC8	001D9AC8	464	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001DA320	001DA320	956	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001DA6E0	001DA6E0	252	handwritten	VU0 macro instruction
@@ -437,7 +435,6 @@ func_001EE090	001EE090	512	inline	C with inline assembly: VU0 macro instruction 
 func_001EE360	001EE360	4	remnant	stripped-function leftover
 func_001EEA40	001EEA40	284	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EEBB0	001EEBB0	172	handwritten	VU0 macro instruction
-func_001EEF90	001EEF90	1044	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EF768	001EF768	156	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
 func_001F0218	001F0218	4	remnant	stripped-function leftover
