@@ -915,9 +915,92 @@ tail:
     ResolveSpawnRecordTargets(self->rec, self);
 }
 
-extern const f32 D_0024A120 = 3.4028235e+38f;
+void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
+void InheritFlaggedAncestorValue(EffectSpawner* self);
 
-INCLUDE_ASM(func_00155270);
+// Start: the record's flag, the mode and its first delay, the margin and rate from the record's
+// box, then the copy the object named by f310 is made of it when there is none.
+void StartEffectSpawner(EffectSpawner* self)
+{
+    StartPlacedObject(self);
+    if (self->rec->f1B0 != -1)
+        self->rec->f120 = 1;
+    if (self->f2D4 == -1) {
+        if (self->chance != 0.0f || self->continuous != 0)
+            self->f2D4 = 3;
+        else if (self->f2F4 != 0.0f)
+            self->f2D4 = 1;
+        else
+            self->f2D4 = 0;
+    }
+    switch (self->f2D4) {
+    case 2:
+        self->f330 = 3.4028235e+38f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        if (self->continuous != 0)
+            SetEffectSpawnerActiveForever(self);
+        else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
+            SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+        break;
+    case 3:
+        self->f330 = 3.4028235e+38f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
+        if (self->continuous != 0)
+            SetEffectSpawnerActiveForever(self);
+        else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
+            SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
+        break;
+    case 0:
+    case 1:
+        self->f330 = 1.0f;
+        self->f32C = 1.0f;
+        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        break;
+    }
+    self->f334 = 1.0f;
+    Rec50* rec = self->rec;
+    if (rec->kind == 1) {
+        f32* box = (f32*)((u8*)rec + 0x20);
+        if (self->id2F8[0] != -1) {
+            f32 dx = __builtin_fabsf(box[4] - box[0]);
+            f32 dy = __builtin_fabsf(box[5] - box[1]);
+            f32 dz = __builtin_fabsf(box[6] - box[2]);
+            f32 m = dy < dx ? (dz >? dx) : (dz >? dy);
+            self->margin = m * 0.5f;
+        }
+        if (self->f2E4 != 0) {
+            if (self->f2F4 != 0.0f)
+                self->f334 = (box[4] - box[0]) * (box[5] - box[1]) * (box[6] - box[2]) * 1e-6f;
+            else
+                self->f334 = (box[5] - box[1]) * (box[6] - box[2]) * 1e-4f;
+        }
+    }
+    if (self->f310 != -1) {
+        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1((u8*)self->world, self->f310, (ObjectCycler*)0);
+        if (copy == 0) {
+            copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->f310, -1);
+            copy->rec = (Rec50*)AllocateFrontMemory(0x200);
+            *copy->rec = *self->rec;
+            copy->rec->target = 0;
+            copy->f2D4 = self->f2D4;
+            copy->f2D8 = self->f2D8;
+            copy->delay = self->delay;
+            copy->f2E4 = self->f2E4;
+            copy->chance = self->chance;
+            copy->active = self->active;
+            copy->f2F4 = self->f2F4;
+            copy->continuous = self->continuous;
+            copy->flags = ((copy->flags | (1ULL << 32)) & ~(3ULL << 40)) | (1ULL << 40);
+            copy->rot = copy->m110 = self->rot;
+            if (copy->desc->m0F != 0)
+                copy->desc->m0F(copy);
+        }
+        self->f34C = 0;
+        AppendToList(copy->list314, self);
+        InheritFlaggedAncestorValue(self);
+    }
+}
 
 void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 {

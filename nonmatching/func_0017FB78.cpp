@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 196/204, checked 2026-11-07
-// NEAR: every instruction is right but the tail and the case registers. Retail reloads out->z from memory after the store (lwc1 8(a1)) and has a dead `li v1,3` in the tail; it multiplies into $f0 while sqrt.s writes $f1, ours reuses $f1 and keeps z in a register. No form of the tail found reproduces the reload.
+// SIZE 196/204, checked 2026-11-08
+// NEAR: every instruction is right but the tail and the case registers. Retail reloads out->z from memory after the store (lwc1 8(a1)) and has a dead `li v1,3` in the tail; it multiplies into $f0 while sqrt.s writes $f1, ours reuses $f1 and keeps z in a register. No form of the tail found reproduces the reload. Found 2026-11-08: the dead `li v1,3` is what jump2 leaves of a compare with 3 whose two arms cross-jumping merged after reload: `if (self->f224C != 3) out->z = out->z >? v150.z; else (the same)` gives it, with an extra lw of f224C (a mem load is not deleted) and still no reload; with the mode in a local, the whole test vanishes before reload.
 #include "common.h"
 #include "fpu.h"
 #include "switched_collider.h"
