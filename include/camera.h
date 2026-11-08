@@ -73,7 +73,8 @@ struct Camera : BaseObject {
     s32 f340;               // 0x340
     void* f344[8];          // 0x344
     f32 f364;               // 0x364
-    u8 pad368[0x3D0 - 0x368];
+    u8 pad368[0x3A0 - 0x368];
+    Mat02 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by
     s32 stackCount;         // 0x3D0: how many entries are in use
     CameraControllerEntry stack[8];    // 0x3D4: the first is in action
     CameraController ctl454;           // 0x454: D_00217398
