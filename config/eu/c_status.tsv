@@ -1929,7 +1929,7 @@ func_00181D28	func_00182388	match
 func_00181D88	func_001823E8	match	
 func_00181DA8	func_00182408	match	rodata
 func_00181ED0	func_00182530	match	version-specific, rodata
-func_001821B0	func_00182810	differs	
+func_001821B0	func_00182810	match	version-specific
 func_00182470	func_00182AD0	match	
 func_001824D8	func_00182B38	match	
 func_00182548	func_00182BA8	match	
