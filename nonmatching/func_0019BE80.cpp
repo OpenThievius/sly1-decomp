@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 456/488 (93.4%), checked 2026-11-07
+// Tried night-close3, 3 compiles: the reach squared inline, the difference vector computed first, the square before it: the same 10 differing words.
 // NEAR: the walk, the registers and the vector part match; the schedule differs: retail loads the reach (0x624) and squares it before the first vector loads, ours does it after the Dot.
 #include "common.h"
 #include "switched_collider.h"

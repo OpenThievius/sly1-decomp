@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 483/512 (94.3%), checked 2026-11-07
-// NEAR (2026-11-08, vu0w3-e1): same size, same code: 4 words of offsets and 2 schedule swaps. The Scalar's slot is at 0x70 and the weight curve's two output floats at 0x80 in retail; here the floats come first (declared before, as the call needs them) and the slot after at 0x80 (toy compiles: a Scalar's slot is freed after its statement and a later local reuses it, so no declaration order gives retail's). Also retail loads 0x6C0(self) after the vmulx, and sets a1 = 1 after the f12 move.
+// BYTES 0/0 (0.0%), checked 2026-11-08
+// NEAR: same size, same code, offsets now retail's (the weight curve's two floats are f32 locals whose addresses are taken, so they come last in the frame). Two schedule swaps remain: retail loads 0x6C0(self) before the vmulx and stores the weight (Set(t, w)) in the delay slot of the call, and sets a1 = 1 after the f12 move. Tried: ScalarAt, t declared later (frame +16), the target loaded early, statements swapped.
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"
@@ -213,14 +213,14 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         Vec02 vel;
         Vec02 t;
         Mat02 basis;
-        f32 out[2];
-        ((WeightCurveFn)(*(void***)self->x6E8)[0])(self->x6E8, self, 0, &out[0], &out[1], self->f6E4, self->f6E0);
+        f32 o0, o1;
+        ((WeightCurveFn)(*(void***)self->x6E8)[0])(self->x6E8, self, 0, &o0, &o1, self->f6E4, self->f6E0);
         PathCurve* curve = ((PathCurveObject*)self->x6C0)->curve;
         CurveSampleFn sample = (CurveSampleFn)curve->vt->m02;
         if (sample) {
-            sample(curve, out[0], &pos, &dir);
+            sample(curve, o0, &pos, &dir);
         }
-        u128 w = Vu0::FromFloatAt(out[1]);
+        u128 w = Vu0::FromFloatAt(o1);
         Vu0::Set(t, w);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
         func_00127E60(*(void**)((u8*)self->x6C0 + 0x18), 0, &pos, 0, &vel, 0);

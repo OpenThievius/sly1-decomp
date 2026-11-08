@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 222/240 (92.5%), checked 2026-11-07
+// BYTES 222/240 (92.5%), checked 2026-11-08
+// Tried night-close3, 3 compiles: the tangent pointers in other orders and passed inline: worse (12 words).
 // NEAR (2026-11-08, vu0w3-e1): all but two scheduling orders: retail adds a3 (inTan + off + 16) before loading a1 (outTan), and loads the unit vector's lq before the mtc1/c.lt of the length test (here in the bc1f delay slot). Tried typed pointers, locals in several orders, the fallback as a local.
 #include "common.h"
 #include "asm_func.h"

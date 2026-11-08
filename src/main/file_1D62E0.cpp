@@ -1164,7 +1164,59 @@ INCLUDE_ASM(func_001DA320);
 
 ASM_FUNC(func_001DA6E0);
 
-INCLUDE_ASM(func_001DA7E0);
+typedef u64 Quad_1DA7E0 __attribute__((mode(TI)));
+void UpdateAttachmentFrames(void* self);
+Quad_1DA7E0 ApproachPointWithRamp(Quad_1DA7E0 a, Quad_1DA7E0 b, void* ramp, s32 c, f32 dt);
+
+static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    out->r[0] = r.r[0];
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    out->r[1] = r.r[1];
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    out->r[2] = r.r[2];
+}
+
+void func_001DA7E0(PathFollower* self)
+{
+    u32 i = 0;
+    UpdateAttachmentFrames(self);
+    for (; i < 4; i++) {
+        Slot19* s = &self->f6B0[i];
+        Mat02 world;
+        Mat02 tilt;
+        Mat02 turn;
+        s->f54 += s->f50 * g_gameClock[2];
+        if (s->f0C == self->f6A0) {
+            TransformPointBetweenFrames(0, self, &s->v20, &s->v10);
+            s->v10.z = s->v10.z + (((s32)i < 2) ? self->f610 : self->f614);
+        } else {
+            *(Quad_1DA7E0*)&s->v10 = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->v10, *(Quad_1DA7E0*)&s->obj->v190, D_00275620, 0, g_gameClock[2]);
+        }
+        if ((s32)i < 2) {
+            BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->f69C);
+        } else {
+            tilt = g_identityMatrix;
+        }
+        BuildAxisAngleMatrix(&g_unitYVector, &turn, s->f54);
+        MulMatInto(&world, tilt, turn);
+        if (s->obj2 != 0) {
+            Vec02 moved;
+            TransformPointBetweenFrames(s->obj->parent, s->obj2->parent, &s->v10, &moved);
+            s->obj2->desc02()->m1D(s->obj2, &moved);
+        }
+        s->obj->desc02()->m1D(s->obj, &s->v10);
+        s->obj->desc02()->m1E(s->obj, &world);
+    }
+}
 
 struct DrawScale {
     u8 pad00[0x40];

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 921/984 (93.6%), checked 2026-11-07
+// Tried night-close3, 1 compile: the reach in a local and the difference in a value: 22 words differ (was 18).
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"
