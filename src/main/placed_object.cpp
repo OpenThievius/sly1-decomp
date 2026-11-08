@@ -1807,7 +1807,18 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
     }
 }
 
-INCLUDE_ASM(func_00125BF0);
+void func_00125BF0(PlacedObject* self, void* a, Quad16* src)
+{
+    Quad16 scale;
+    ScaledTransform t;
+    Vu0::Q(scale) = Vu0::FromFloats(self->f28C, self->f28C, self->f290);
+    BuildPlacedObjectTransform(self, src, &t);
+    BuildScaledTransformMatrix((Vec02*)&t.q[3], (Mat02*)&g_identityMatrix, (u8*)&scale, &t);
+    PlacedObject* hook = (PlacedObject*)self->world->slot1CE8[17];
+    if (hook != 0) {
+        hook->desc02()->m26(hook, a, &t);
+    }
+}
 
 INCLUDE_ASM(func_00125C90);
 

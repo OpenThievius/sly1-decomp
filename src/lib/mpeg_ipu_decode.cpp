@@ -15,6 +15,7 @@
 // several. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 u32 SetIpuMpeg1Mode(u32 value)
 {
@@ -1635,13 +1636,53 @@ void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
 
 }
 
-// The buffer of the hand-written func_00210C38, which only it reads.
+// The DMA chain func_00210C38 builds, which only it reads.
 static u8 D_0062C340[0x200];
-
-INCLUDE_ASM(func_00210C38);
 
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
+
+// One of the decoder's two pictures, 0x140 bytes from +0x590 (the one in use at +0x810).
+struct Pic_210C38 {
+    u32 f00;                // 0x00: the address the chain's transfer starts from
+    u8 pad04[0x08 - 0x04];
+    u32 a[4];               // 0x08: the source of each block's first transfer
+    u32 b[4];               // 0x18: the source of each block's second
+    u8 pad28[0x12C - 0x28];
+    s32 count;              // 0x12C: the blocks
+    u8 pad130[0x140 - 0x130];
+};
+
+struct Dec_210C38 {
+    u8 pad000[0x590];
+    Pic_210C38 pics[2];     // 0x590
+    u8 pad810[0x810 - 0x810];
+    s32 current;            // 0x810
+};
+
+// Builds the DMA chain of the current picture's blocks in uncached memory (two REF tags a
+// block, the last REFE) and starts it on channel 9 (to the scratchpad): its address, its tag
+// and the channel's control word, with interrupts disabled.
+void func_00210C38(Dec_210C38* self)
+{
+    u64* tag = (u64*)(((u32)D_0062C340 & 0x0FFFFFFF) | 0x20000000);
+    s32 n = self->pics[self->current].count;
+    for (s32 i = 0; i < n; i++) {
+        u64 first = (u64)(self->pics[self->current].a[i] & 0x0FFFFFFF) << 32;
+        u64 second = (u64)(self->pics[self->current].b[i] & 0x0FFFFFFF) << 32;
+        u64 id = (i == n - 1) ? 0 : 3;
+        tag[0] = first | 0x30000030;
+        tag[2] = second | (id << 28) | 0x30;
+        tag += 4;
+    }
+    DisableInterrupts();
+    Sync();
+    *(volatile u32*)0x1000D480 = self->pics[self->current].f00;
+    *(volatile u32*)0x1000D430 = (u32)D_0062C340;
+    *(volatile u32*)0x1000D420 = 0;
+    *(volatile u32*)0x1000D400 = 0x105;
+    EnableInterrupts();
+}
 
 void func_00210D90(u32 a, s32 b)
 {

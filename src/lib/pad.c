@@ -9,6 +9,7 @@
 #include "common.h"
 #include "remote_call_client.h"
 #include "asm_func.h"
+#include "system.h"
 
 /* A port's slot: the buffer of its two frames, its DMA words, whether it is open. */
 typedef struct PadSlot {
@@ -305,7 +306,22 @@ s32 func_00204DB8(void)
 }
 
 ASM_FUNC(func_00204E20);
-INCLUDE_ASM(func_00204EC8);
+s32 DisableInterrupts(void);
+s32 EnableInterrupts(void);
+void func_00204E20(u32 start, u32 end);
+
+/* The data cache written back over a range, its ends rounded down to whole lines, with
+ * interrupts disabled around it when they are enabled. */
+void RefreshPadFrames(void* start, void* end)
+{
+    u32 enabled = ReadCop0Status();
+    enabled &= 0x10000;
+    if (enabled)
+        DisableInterrupts();
+    func_00204E20((u32)start & ~0x3F, (u32)end & ~0x3F);
+    if (enabled)
+        EnableInterrupts();
+}
 LINKER_REMNANT(func_00204F48);
 
 /* The names of a slot's states and of a command's results, which no function left in retail

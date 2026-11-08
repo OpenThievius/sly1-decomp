@@ -12,6 +12,7 @@
 // this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 // The library's identification string, 16 characters without a terminator.
 char D_0027AEB8[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
@@ -309,11 +310,17 @@ s32 WriteCardFile(s32 self, u32 src, s32 n)
     return r;
 }
 
-INCLUDE_ASM(func_00209B10);
+void QueueThreadRequest(s32 thread);
 
-void WakeCardWaiter(void);
+// The alarm handler of WaitCardTicks: wakes the waiting thread and ends the handler.
+void WakeCardWaiter(s32 id, u16 time, s32 thread)
+{
+    QueueThreadRequest(thread);
+    SyncAndEnableInterrupts();
+}
+
 s32 GetCurrentThreadId(void);
-void ScheduleAlarm(s32 id, void (*cb)(void), s32 ctx);
+void ScheduleAlarm(s32 id, void (*cb)(s32 id, u16 time, s32 thread), s32 ctx);
 void SleepCurrentThread(void);
 
 void WaitCardTicks(u16 id)

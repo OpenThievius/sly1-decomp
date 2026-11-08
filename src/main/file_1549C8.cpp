@@ -7,6 +7,7 @@
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
+#include "system.h"
 #include "effect_owner.h"
 #include "effect.h"
 #include "shapes.h"
@@ -3699,7 +3700,64 @@ void UploadAllFontImages(void)
 
 LINKER_REMNANT(func_0015E678);
 
-INCLUDE_ASM(func_0015E6A8);
+// A frame's colour record, as func_0015E6A8 reads it: 64-byte entries whose quadwords at +0x10
+// and +0x20 hold colours as four words, a run of colour quadwords, and where the packed colours go.
+struct ColorEntry_15E6A8 {
+    u8 pad00[0x10];
+    Quad16 c10;             // 0x10
+    Quad16 c20;             // 0x20
+    u8 pad30[0x40 - 0x30];
+};
+
+struct ColorOut_15E6A8 {
+    u8 pad00[0x08];
+    u32* out08;             // 0x08: the packed c10 of each entry
+    u8 pad0C[0x14 - 0x0C];
+    u32* out14;             // 0x14: the packed c20, then two words on, the packed run
+};
+
+struct ColorRecord_15E6A8 {
+    ColorEntry_15E6A8* begin;   // 0x00
+    ColorEntry_15E6A8* end;     // 0x04
+    Quad16* run;                // 0x08: one quadword for each entry
+    ColorOut_15E6A8* out;       // 0x0C
+};
+
+// A colour as four words, packed into one: each word a byte, the first lowest.
+static inline u32 PackColor(Quad16 c)
+{
+    return c.w[0] | c.w[1] << 8 | c.w[2] << 16 | c.w[3] << 24;
+}
+
+// The interrupt handler that packs the colours of the frame's record (g_drawFrameData) and moves
+// on to the next record, then lets the VIF1 go on (FBRST's STC) and ends the handler.
+s32 func_0015E6A8(s32 cause)
+{
+    ColorRecord_15E6A8* r = (ColorRecord_15E6A8*)g_drawFrameData;
+    ColorEntry_15E6A8* begin = r->begin;
+    ColorEntry_15E6A8* end = r->end;
+    ColorOut_15E6A8* o = r->out;
+    ColorEntry_15E6A8* e;
+    u32* out = o->out08;
+    for (e = begin; e < end; e++) {
+        *out++ = PackColor(e->c10);
+    }
+    out = o->out14;
+    for (e = begin; e < end; e++) {
+        *out++ = PackColor(e->c20);
+    }
+    s32 n = end - begin;
+    out += 2;
+    Quad16* run = ((ColorRecord_15E6A8*)g_drawFrameData)->run;
+    Quad16* qend = run + n;
+    for (Quad16* q = run; q < qend; q++) {
+        *out++ = PackColor(*q);
+    }
+    g_drawFrameData += 0x10;
+    *(volatile u32*)0x10003C10 = 8;
+    SyncAndEnableInterrupts();
+    return -1;
+}
 
 void InitRenderFrames(void)
 {

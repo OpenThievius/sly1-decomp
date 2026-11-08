@@ -13,6 +13,7 @@
 #include "remote_call_client.h"
 #include "semaphore_params.h"
 #include "asm_func.h"
+#include "system.h"
 
 /* What the read's end callback receives, in uncached memory: two byte counts, where each
  * goes and the bytes. */
@@ -98,7 +99,12 @@ s32 SyncDiscNCommand(s32 mode);
 s32 SyncDiscSCommand(s32 mode);
 s32 BeginDiscSCommand(s32 command);
 
-INCLUDE_ASM(func_00202D08);
+/* The alarm handler of WaitDiscTicks: posts the waiter's semaphore and ends the handler. */
+void WakeDiscWaiter(s32 id, u16 time, s32 sema)
+{
+    PostSemaphoreFromInterrupt(sema);
+    SyncAndEnableInterrupts();
+}
 
 void WaitDiscTicks(u16 ticks)
 {

@@ -267,7 +267,20 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 
 INCLUDE_ASM(func_00181658);
 
-INCLUDE_ASM(func_00181780);
+void HandlePathFollowerActivation(void* self, s32 active);
+
+void HandleModeWalkerActivation(ModeWalker* self, s32 active)
+{
+    HandlePathFollowerActivation(self, active);
+    if (active) {
+        T217D_BF0* e = &D_00270650;
+        e->vt->m16(e, 2);
+        Vu0::Q(e->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+    } else {
+        D_00270650.vt->m16(&D_00270650, 0);
+        self->fBF0 = 0;
+    }
+}
 
 void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 {

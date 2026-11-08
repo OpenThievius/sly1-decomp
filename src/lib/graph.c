@@ -9,6 +9,7 @@
  * code. */
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 /* The GS parameters: interlacing, the video mode, the field or frame mode, the GS version. */
 typedef struct GsParam {
@@ -78,7 +79,7 @@ s32 WriteGsInterruptMask(u64 mask);
 void DisableInterruptCause(s32 cause);
 GsParam* GetGsParams(void);
 void DefineDisplayEnvironment(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
-void DefineDrawEnvironment(void* env, s32 psm, s32 w, s32 h, s32 dx, s32 dy);
+s32 DefineDrawEnvironment(void* env, s16 psm, s16 w, s16 h, s16 ztest, s16 zpsm);
 void DefineClearPacket(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
 s32 CountFrameBufferPages(s16 psm, s16 w, s16 h);
 
@@ -273,5 +274,67 @@ s32 CountFrameBufferPages(s16 px, s16 py, s16 pz)
     return ((yS * c) << 17) >> 16;
 }
 
-INCLUDE_ASM(func_00202478);
+/* A GS register of one bit at bit 0 (PRMODECONT's AC, COLCLAMP's CLAMP, DTHE's DTHE). */
+typedef struct GsBit0 {
+    u64 on : 1;
+    u64 pad : 63;
+} GsBit0;
+
+/* The drawing environment: eight GS registers, each its data then its address. */
+typedef struct GsDrawEnv {
+    u64 frame;
+    u64 frameAddr;
+    u64 zbuf;
+    u64 zbufAddr;
+    u64 xyoffset;
+    u64 xyoffsetAddr;
+    u64 scissor;
+    u64 scissorAddr;
+    GsBit0 prmodecont;
+    u64 prmodecontAddr;
+    GsBit0 colclamp;
+    u64 colclampAddr;
+    GsBit0 dthe;
+    u64 dtheAddr;
+    u64 test;
+    u64 testAddr;
+} GsDrawEnv;
+
+/* The drawing environment of a w by h frame buffer of format psm with a z buffer of format zpsm
+ * (none written when ztest is 0), centred at the GS's 2048, 2048: the registers' values and
+ * addresses (FRAME_1 to TEST_1); returns the count of registers, 8. */
+s32 DefineDrawEnvironment(void* p, s16 psm, s16 w, s16 h, s16 ztest, s16 zpsm)
+{
+    GsDrawEnv* env = (GsDrawEnv*)p;
+    env->frameAddr = 0x4C;
+    env->frame = ((u64)(((w + 63) >> 6) & 0x3F) << 16) | ((u64)(psm & 0xF) << 24);
+    env->zbufAddr = 0x4E;
+    if (ztest == 0) {
+        env->zbuf = (u64)(s16)CountFrameBufferPages(psm, w, h) | ((u64)(zpsm & 0xF) << 24) | ((u64)1 << 32);
+    } else {
+        env->zbuf = (u64)(s16)CountFrameBufferPages(psm, w, h) | ((u64)(zpsm & 0xF) << 24);
+    }
+    env->xyoffsetAddr = 0x18;
+    env->xyoffset = (((u64)2048 - (w >> 1)) << 4) | ((((u64)2048 - (h >> 1)) << 4) << 32);
+    env->scissorAddr = 0x40;
+    env->scissor = ((u64)(w - 1) << 16) | ((u64)(h - 1) << 48);
+    env->prmodecontAddr = 0x1A;
+    env->prmodecont.on = 1;
+    env->colclampAddr = 0x46;
+    env->colclamp.on = 1;
+    env->dtheAddr = 0x45;
+    if (psm & 2) {
+        env->dthe.on = 1;
+    } else {
+        env->dthe.on = 0;
+    }
+    env->testAddr = 0x47;
+    if (ztest != 0) {
+        env->test = ((u64)(ztest & 3) << 17) | 0x10000;
+    } else {
+        env->test = 0x30000;
+    }
+    Sync();
+    return 8;
+}
 ASM_FUNC(func_00202660);

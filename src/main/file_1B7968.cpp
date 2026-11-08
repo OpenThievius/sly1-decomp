@@ -3365,7 +3365,20 @@ void PlaySoundWithWanderingPitch(void)
     }
 }
 
-INCLUDE_ASM(func_001C0F30);
+void InitIdLinkedObject(IdLinkedObject* self)
+{
+    InitPlacedObject(self);
+    self->color = 0x80808080;
+    self->f2D4 = 0.5f;
+    self->f2D8 = 400.0f;
+    self->f2DC = 0.5f;
+    self->f2E0 = 0.5f;
+    self->f320 = 0.3f;
+    self->f324 = 0.5f;
+    Vu0::Q(self->v2F0) = Vu0::FromFloats(0.0f, 0.0f, 50.0f);
+    Vu0::Q(self->v300) = Vu0::FromFloats(100.0f, 80.0f, 50.0f);
+    self->linkId = -1;
+}
 
 void StartIdLinkedObject(IdLinkedObject* self)
 {

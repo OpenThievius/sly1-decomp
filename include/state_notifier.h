@@ -29,7 +29,7 @@ struct ContactObject {
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
 struct StateNotifier : PlacedObject {
     s32 state;              // 0x2D0
-    u8 pad2D4[0x2D8 - 0x2D4];
+    f32 stateSince;         // 0x2D4: the clock when the state was set
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
     f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
