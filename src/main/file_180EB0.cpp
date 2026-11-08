@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "vu0.h"
+#include "list_iter.h"
 #include "screen_element.h"
 #include "switched_collider.h"
 #include "path_curve_object.h"
@@ -648,7 +649,75 @@ void UpdateC24Object(C24* self, f32 dt)
     ClearRootTries(self);
 }
 
-INCLUDE_ASM(func_00182748);
+typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
+typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec02* pos, Vec02* dir);
+typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
+void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void BuildBasisFromXAndZHint(void* a, void* b, void* c);
+void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
+
+struct ScopedListFrame {
+    void* list;
+    void* cursor;
+    s32 next_off;
+    ScopedListFrame* prev;
+    ScopedListFrame(List01* l)
+    {
+        list = l;
+        cursor = l;
+        next_off = l->offset;
+        prev = (ScopedListFrame*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
+    }
+    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+};
+
+void MoveC24Object(C24* self, s32 a1, f32 dt)
+{
+    if (self->x6E8 != 0) {
+        Vec02 pos;
+        Vec02 dir;
+        Vec02 vel;
+        Vec02 t;
+        Mat02 basis;
+        f32 o0, o1;
+        ((WeightCurveFn)(*(void***)self->x6E8)[0])(self->x6E8, self, 0, &o0, &o1, self->f6E4, self->f6E0);
+        PathCurve* curve = ((PathCurveObject*)self->x6C0)->curve;
+        CurveSampleDirFn sample = (CurveSampleDirFn)curve->vt->m02;
+        if (sample) {
+            sample(curve, o0, &pos, &dir);
+        }
+        u128 w = Vu0::FromFloatAt(o1);
+        Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
+        void* o = *(void**)((u8*)self->x6C0 + 0x18);
+        Vu0::Set(t, w);
+        func_00127E60(o, 0, &pos, 0, &vel, 0);
+        Vu0::Set(t, Vu0::MulXSum(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f),
+                                 Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150)), Vu0::Scalar(1.0f / dt)));
+        BuildBasisFromXAndZHint(&vel, &t, &basis);
+        self->pos = pos;
+        self->v150 = vel;
+        ApproachRotationWithRamp(dt, &self->rot, &basis, D_00264250, &self->rot, &self->v160);
+    }
+    ScopedListFrame frame(&self->children);
+    void* head = *(void**)((u8*)self + 0x34);
+    frame.cursor = (void*)((s32)head + frame.next_off);
+    BaseObject* n = (BaseObject*)head;
+    while (n != 0) {
+        if (n->desc->flags & 1) {
+            ((ChildStepFn)n->desc->m1B)(n, dt, 1);
+        }
+        void* next = *(void**)frame.cursor;
+        frame.cursor = (void*)((s32)next + frame.next_off);
+        n = (BaseObject*)next;
+    }
+    if (a1 == 0) {
+        void (*fn)(BaseObject*) = self->desc->m12;
+        if (fn != 0) {
+            fn(self);
+        }
+    }
+}
 
 struct CurveEntry {
     f32 a;                  // 0x00
