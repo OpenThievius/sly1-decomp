@@ -215,6 +215,10 @@ struct PlacedObject : BaseObject {
             u64 mark : 4;   // bits 42..45: a level func_00159F48 compares, a mark func_0015A4F0 numbers
         };
         struct {
+            u64 : 35;
+            u64 onSet : 1;  // bit 35: Collider::flags538 bit 60, copied when it changes (func_001EEF90)
+        };
+        struct {
             u32 flagsLo;    // 0x2C8
             u32 flagsHi;    // 0x2CC: bits 32 up, read as a word (func_001AFAF8, func_001B0BE0)
         };

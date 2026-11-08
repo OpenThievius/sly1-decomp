@@ -71,7 +71,8 @@ struct ColliderSpan {
     f32 time[2];            // 0x40: entry, exit
     s32 f48;                // 0x48
     s32 group;              // 0x4C: the collider's group the span is in, negative for none (func_00143BE0)
-    u8 pad50[0x70 - 0x50];
+    void* f50;              // 0x50: tested nonzero before a landing is told (func_001EEF90)
+    u8 pad54[0x70 - 0x54];
 };
 
 // A contact between two bodies (0xE0 bytes, the world's pool at +0x1AFC: func_001DB4C8 sets it
