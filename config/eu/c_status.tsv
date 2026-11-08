@@ -3037,6 +3037,7 @@ func_001C25B0	func_001C32A8	match
 func_001C27B0	func_001C34A8	match	
 func_001C29C8	func_001C36C0	match	
 func_001C29E8	func_001C36E0	match	
+func_001C29F8	func_001C36F0	match	
 func_001C3028	func_001C3D20	match	
 func_001C30E8	func_001C3DE0	match	
 func_001C3390	func_001C4088	match	
@@ -3082,6 +3083,7 @@ func_001C5DB8	func_001C6AB0	match
 func_001C5E50	func_001C6B48	match	
 func_001C5EA8	func_001C6BA0	match	
 func_001C5F18	func_001C6C10	match	
+func_001C61E0	func_001C6ED8	match	rodata
 func_001C6890	func_001C7588	match	
 func_001C6928	func_001C7620	match	rodata
 func_001C6AA8	func_001C77A0	match	

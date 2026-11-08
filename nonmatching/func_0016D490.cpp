@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 678/756 (89.7%), checked 2026-11-07
+// BYTES 713/756 (94.3%), checked 2026-11-08
 // NEAR: the frame, the three branches, the calls and the weights are retail's; left: the allocation (retail keeps the follower in s3 and &b in s4; here the other way round, which moves every later register), the branch that follows tune->f328 (retail loads tune->f324 in its delay slot) and the order of the weights' stack stores. Needs nothing from the headers.
 #include "common.h"
 #include "switched_collider.h"

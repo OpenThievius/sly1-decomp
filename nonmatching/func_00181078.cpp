@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 936/972 (96.3%), checked 2026-11-08
+// BYTES 917/972 (94.3%), checked 2026-11-08
+// Still differs (2026-11-08, night-lwx): with FromFloatAt as "rV" (the qmtc2's operand loaded by reload) sched1 puts the weight's qmtc2 before the three lqc2 of the rotation, where retail has it after the vmaddz (17 words; 13 with the old "r"); moving the FromFloatAt after RotateRows or next to its uses changes nothing.
 // NEAR: all the calls and the control flow are retail's, the frame included (k is one 16-byte local the weight and the axis share); left: the order of the three row loads of the rotation (retail r0, r1, r2; here r2 first), the weight in vf5 (retail keeps it alive over the rows; here it takes the free vf2) and the temps of the call after it. Needs ModeWalker::fBC4, vBE0 and fBFC (include/switched_collider.h).
 // Night-close2 (2026-11-08): RotateUntied, the weight as ScalarAt with k declared later (k's address then stays in s1: 34 words) and the store of k after d leave 13 words.
 #include "common.h"

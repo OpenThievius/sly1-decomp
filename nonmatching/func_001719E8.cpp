@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 449/660 (68.0%), checked 2026-11-07
+// BYTES 451/660 (68.3%), checked 2026-11-08
 // NEAR: wave 4 e3. 660 bytes, same size; every instruction is there and the VU0 sequences match; the order of the
 //       scheduling differs: the two weight stores and qmtc2s of the unit-Z steps come early (retail: after the first length),
 //       the load of the body before the second call and the delay slot of the second jal (retail fills it with a0, ours a1).

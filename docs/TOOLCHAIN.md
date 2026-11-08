@@ -134,7 +134,9 @@ What retail shows, and what the compiler does:
   qmtc2, and so does a raw asm with the field as its operand. Retail loads
   such a float with lw (97 qmtc2 in retail take a register lw just loaded,
   against 35 lwc1 and mfc1, those with other uses of the float):
-  FromFloatAt passes the float's bits, which the compiler loads with lw.
+  FromFloatAt passes the float's bits, which the compiler loads with lw:
+  as the qmtc2's own operand ("rV"), which reload loads into the register of
+  an address that dies there, as retail does ("Reloads and stores").
 - **A normalisation with a fallback.** Retail's "the unit vector, or this
   one when shorter than 1e-4" loads the fallback before the test (lq, then
   qmtc2 on the fallback's path), and the result's address, when it is a
@@ -506,17 +508,39 @@ the compiler reads again, the cause is in how each memory reference is written
   (`move a0, s0`, s0 set before the call); called from an inline member
   (`frame.Clear()`, `FillMemory(this, 0, sizeof(*this))`) the address is
   computed into a0 and again into s0 after the call, as retail's func_001590A0.
-- **Open: a load into its own dying address register.** Retail loads a word
-  into the register that held its address (`lw s0, 0(s0)`, or `lui v1;
-  lw v1, %lo(D)(v1)`) in about eleven unmatched functions, before a qmtc2
-  or a call (func_00120700, func_001971B8, func_001DF600, func_001D4698).
-  Local allocation never gives a load's result the register of an address
-  that dies there; global allocation can, since it frees a dying input
-  before the output is set, as a toy with the value used across blocks
-  shows, and as the matched ResetButtonCodes does where its pointer lives
-  across a loop. So retail's form likely means one of the two values
-  crossed a basic block or was left to reload. No plain C form for it in
-  these functions has been found yet (2026-11-08).
+- **A word loaded for a qmtc2 is the qmtc2's own operand, loaded by reload.**
+  Retail loads a word into the register that held its address (`lw s0, 0(s0)`,
+  `lui v1; lw v1, %lo(D)(v1)`) before a qmtc2 in about 25 functions, and where the
+  address lives on, into a register no allocation explains (`lw a0, 0(s0)` with
+  v0 free) (2026-11-08, func_00120700, func_001D4698, func_001DF600). Both are
+  reload's: push_reload (reload.c) gives an input reload the register of a REG
+  that dies in the insn and is mentioned only in that operand, and otherwise
+  allocate_reload_reg (reload1.c) takes the spill registers round-robin from the
+  last one used. So the qmtc2's operand was the memory reference itself when
+  reload ran. Nothing else gives either register: local allocation tries each
+  quantity first with a lifetime one insn longer at each end (INSN_SCHEDULING,
+  block_alloc), so a load's result never takes the register of the address
+  that dies at the load, and ties a result only to a REG operand (a MEM's
+  address only under 'p'); global allocation frees a dying input before the
+  output is set (a word loaded before an if and used after it takes its
+  address's register), but func_001EB698 is one basic block; and no pseudo is
+  spilled where nothing else wants the registers. A plain "r" never leaves the
+  memory reference there: expand_asm_operands copies an operand that fails its
+  constraint into a pseudo, combine and update_equiv_regs put one back only if
+  check_asm_operands accepts it ("r" takes no MEM), an inline function's
+  argument is copied into a register (process_reg_param), and combine turns
+  `(subreg (mem))` into a narrower MEM. A constraint that admits memory before
+  reload and not in it does: "rV" ('V', non-offsettable memory, takes any MEM in
+  asm_operand_ok; reload finds the reference offsettable and loads it into a GPR
+  for 'r'), as "<r" and ">r" do (but those form a global's address with addiu
+  and load at 0, where "rV" keeps retail's `lw X, %lo(D)(X)`). Every plain
+  letter tried (r d y b e t; m o g X R) and "r,m" with `!` or `?` gives v0 or
+  prints the MEM. Vu0::FromFloatAt passes the float's bits as "rV": the five
+  functions that matched with "r" still do, and func_00120700, func_00120470,
+  func_0013D0B0, func_0014F270, func_00150008, func_00172EE0, func_0018E040,
+  func_001A31A0, func_001D8BD0, func_001D4698 and func_001DF600 match with it
+  (and func_001DF520, whose callee takes the caller's own a1). What the
+  original wrote is not known; this reproduces what it compiled to.
 
 ## Loops
 
@@ -572,6 +596,37 @@ func_00140258, func_001F2EF0, func_001F3408):
 - **Not yet reproduced.** After ComputeSinCos both oscillator functions move the cosine into its
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
+
+## Shapes of large functions
+
+What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
+func_00146518, func_001CC818, func_0019ED58, func_00134B48):
+
+- **An object's matrix is written through the object.** `MulRotation(&self->rot,
+  ...)` makes the destination a pointer pseudo that PRE carries to the end of
+  the function and spills; retail stores the rows through the object's own
+  pointer (`o->rot = r` in a function taking the object).
+- **A product's rows as values, in retail's load order.** Loading b's rows as
+  values in the order retail's registers show (b0, b2, b1) gives its
+  registers.
+- **A struct-typed vector store lets loads pass it.** `*(Vu0::Vec*)&p = v` is a
+  struct store, so a later load of a float global may be scheduled before it,
+  as retail's is; a u128 store through `Q()` keeps the two in order.
+- **The game clock through inline accessors.** Accessors taking the clock's
+  address (`ClockDt(const LinkClock*)`) give retail's form: the high part in a
+  saved register and `addiu sX, sY, %lo` per use; a plain field read folds the
+  offset into the address and costs a saved register.
+- **Normalising in place.** An inline that normalises a vector in place,
+  taking the fallback by reference, loads the fallback's address before the
+  difference, as retail does.
+- **A vector's three floats in a loop.** Two pointers indexed by i (`cur[i]`,
+  `vel[i]`) give retail's induction variables; separately incremented
+  pointers do not.
+- **A list's head read through the walk's frame.** `*(T**)frame.list` keeps the
+  read after the frame push; `self->children.head` is scheduled before it.
+- **Case blocks in retail's order, with labels and gotos where its blocks are
+  shared or entered sideways** (func_001C61E0's states 1 and 2 sharing one
+  call and falling into case 0, state 3 jumping into cases 4 to 7).
 
 ## Getting the compiler
 

@@ -354,7 +354,23 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
     }
 }
 
-INCLUDE_ASM(func_001DF520);
+void ApplyColliderPendingImpulse(Collider* self, s32 moved);
+
+// The pending impulse of a tint-blend collider: its frame vector, taken into the attached
+// effect's frame and scaled by D_00275890, comes off the effect's v150; then the collider's
+// own step, with the flag passed through.
+void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
+{
+    Vec02 local;
+    Vec02 k;
+    u128 s = Vu0::FromFloatAt(D_00275890);
+    PlacedObject* effect = (PlacedObject*)self->f748;
+    Vu0::Q(local) = Vu0::RotateTransposed(((PlacedObject*)effect->parent)->m110, Vu0::Q(self->v490));
+    u128 v = Vu0::Q(effect->v150);
+    Vu0::Q(k) = s;
+    Vu0::Q(effect->v150) = Vu0::Sub(v, Vu0::MulX(Vu0::Q(local), s));
+    ApplyColliderPendingImpulse(self, moved);
+}
 
 s32 IsPadSelectFlagHeld(void* p);
 
@@ -364,7 +380,28 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
     return 0;
 }
 
-INCLUDE_ASM(func_001DF600);
+extern f32 D_00275894;
+extern f32 D_00275898;
+void TurnColliderTowardHeading(TintBlendCollider* self);
+void SetPlayerState(TintBlendCollider* self, s32 a, s32 b);
+f32 WrapAngle(f32 a);
+
+void func_001DF600(TintBlendCollider* self, TintBlendCollider* other)
+{
+    Vec02 d = self->v150;
+    d.z = 0.0f;
+    u128& q = Vu0::Q(d);
+    Vec02 k;
+    u128 n = Vu0::NormalizeOr(q, Vu0::Q(g_unitXVector));
+    Vu0::Q(k) = Vu0::FromFloatAt(D_00275894);
+    f32 z = D_00275898;
+    q = Vu0::MulX(n, Vu0::Q(k));
+    d.z = z;
+    other->desc02()->m20(other, &d);
+    other->f638 = WrapAngle(ArctangentOfRatio(d.y, d.x) + 3.1415927f);
+    TurnColliderTowardHeading(other);
+    SetPlayerState(other, 4, 0x2B);
+}
 
 INCLUDE_ASM(func_001DF700);
 
