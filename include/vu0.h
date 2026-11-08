@@ -586,6 +586,13 @@ struct Vu0 {
         return r;
     }
 
+    static Vec MulX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = MulX(a.q, s.q);
+        return r;
+    }
+
     static Vec Dot(Vec a, Vec b)
     {
         Vec r;

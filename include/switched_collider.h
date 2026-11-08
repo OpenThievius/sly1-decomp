@@ -296,7 +296,8 @@ struct Player : TurningCollider {
     void* f2234;            // 0x2234
     u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C
-    u8 pad2240[0x2248 - 0x2240];
+    f32 f2240;              // 0x2240: a time, compared with the clock while f223C is 4..7 (func_001CAF38)
+    u8 pad2244[0x2248 - 0x2244];
     s32 f2248;              // 0x2248
     s32 f224C;              // 0x224C
     s32 f2250;              // 0x2250
@@ -473,7 +474,11 @@ struct Agent : TurningCollider {
     void* fA74;             // 0xA74
     s32 fA78;               // 0xA78: the number of fA7C entries (func_001CA960)
     Elem08 fA7C[4];         // 0xA7C
-    u8 padAAC[0xAC4 - 0xAAC];
+    Contact03* fAAC;        // 0xAAC: the contacts CollideAgentWithObject gathers; func_001CAF38 handles
+                            // and frees them
+    Vec02 vAB0;             // 0xAB0: the velocity func_001CAF38 launches an object with
+                            // (LaunchObjectWithAgentVelocity hands it on)
+    s32 fAC0;               // 0xAC0: func_001CAF38 lets the player's contacts be while it is set
     s32 fAC4;               // 0xAC4: the number of fAC8 entries (func_001CA720)
     Pend08 fAC8[4];         // 0xAC8
     s32 fAF8;               // 0xAF8
