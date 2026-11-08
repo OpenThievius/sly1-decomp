@@ -1717,7 +1717,69 @@ void IgnoreStackLocal(void)
 {
 }
 
-INCLUDE_ASM(func_001EB168);
+// A sample FindLocalMinimum keeps: an argument and the function's value there.
+struct MinimumSample {
+    f32 x;
+    f32 y;
+};
+
+typedef f32 (*MinimumFn)(void* ctx, f32 x);
+
+void FindLocalMinimum(f32 x, f32 step, f32 lo, f32 hi, MinimumFn fn, void* ctx, f32* outX, f32* outY)
+{
+    // The bracket's low end, the midpoint below the middle, the middle, the midpoint above it
+    // and the high end.
+    MinimumSample s[5];
+    x = x < lo ? lo : (hi < x ? hi : x);
+    s[0].x = lo >? x - step;
+    s[0].y = fn(ctx, s[0].x);
+    s[2].x = x;
+    s[2].y = fn(ctx, s[2].x);
+    s[4].x = hi <? x + step;
+    s[4].y = fn(ctx, s[4].x);
+    for (;;) {
+        if (s[0].y < s[2].y) {
+            s[4] = s[2];
+            s[2] = s[0];
+            s[0].x = lo >? s[2].x + s[2].x - s[4].x;
+            s[0].y = fn(ctx, s[0].x);
+        } else if (s[4].y < s[2].y) {
+            s[0] = s[2];
+            s[2] = s[4];
+            s[4].x = hi <? s[2].x + s[2].x - s[0].x;
+            s[4].y = fn(ctx, s[4].x);
+        } else {
+            break;
+        }
+    }
+    for (s32 i = 9; i >= 0; i--) {
+        s[1].x = (s[0].x + s[2].x) * 0.5f;
+        s[1].y = fn(ctx, s[1].x);
+        s[3].x = (s[2].x + s[4].x) * 0.5f;
+        s[3].y = fn(ctx, s[3].x);
+        if (s[1].y < s[2].y) {
+            if (s[1].y < s[3].y) {
+                s[4] = s[2];
+                s[2] = s[1];
+            } else {
+                s[0] = s[2];
+                s[2] = s[3];
+            }
+        } else if (s[2].y <= s[3].y) {
+            s[0] = s[1];
+            s[4] = s[3];
+        } else {
+            s[0] = s[2];
+            s[2] = s[3];
+        }
+    }
+    if (outX != 0) {
+        *outX = s[2].x;
+    }
+    if (outY != 0) {
+        *outY = s[2].y;
+    }
+}
 
 LINKER_REMNANT(func_001EB458);
 

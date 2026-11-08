@@ -238,7 +238,59 @@ void PushFreeSlot(Pool6C* list, Attachment* item)
 
 LINKER_REMNANT(func_001B5F48);
 
-INCLUDE_ASM(func_001B5F50);
+void SetListLinkOffset(List01* self, s32 value);
+s32 ReadBufferedU8(BufferedStream* s);
+s32 ReadBufferedS8(BufferedStream* s);
+s32 ReadBufferedS16(BufferedStream* s);
+s32 ReadBufferedS32(BufferedStream* s);
+f32 ReadBufferedFloat(BufferedStream* s);
+void ReadPropertyRecords(void* self, BufferedStream* s);
+BaseObject* CreateTypedRecord(s32 kind, World* world, BaseObject* parent, s32 b, s32 c);
+void ResolveAndStartObject(BaseObject* o);
+
+void LoadStateGraph(StateGraph* self, BufferedStream* s)
+{
+    s32 i;
+    s32 j;
+    SetListLinkOffset(&self->walkers, 8);
+    self->f34 = ReadBufferedU8(s);
+    self->f38 = (StateEntry*)AllocateFrontMemory(self->f34 * sizeof(StateEntry));
+    for (i = 0; i < self->f34; i++) {
+        StateEntry* e = &self->f38[i];
+        e->key = ReadBufferedS16(s);
+        e->extra = ReadBufferedS16(s);
+    }
+    for (i = 0; i < self->f34; i++) {
+        StateEntry* e = &self->f38[i];
+        if (e->extra != -1) {
+            e->extra = FindStateEntryIndexOrZero(self, e->extra);
+        }
+    }
+    self->edgeCount = ReadBufferedU8(s);
+    self->edges = (StateEdge*)AllocateFrontMemory(self->edgeCount * sizeof(StateEdge));
+    for (j = 0; j < self->edgeCount; j++) {
+        StateEdge* e = &self->edges[j];
+        e->anim = (Animation*)ReadBufferedS8(s);
+        e->a = FindStateEntryIndexOrZero(self, ReadBufferedS16(s));
+        e->b = FindStateEntryIndexOrZero(self, ReadBufferedS16(s));
+        e->flags = ReadBufferedS32(s);
+        e->weight = ReadBufferedFloat(s);
+    }
+    ReadPropertyRecords(self, s);
+    ReadBufferedS16(s);
+    for (j = 0; j < self->edgeCount; j++) {
+        StateEdge* e = &self->edges[j];
+        if (e->anim != 0) {
+            s32 kind = ReadBufferedS16(s);
+            s32 b = ReadBufferedS16(s);
+            s32 c = ReadBufferedS16(s);
+            BaseObject* o = CreateTypedRecord(kind, self->world, self->parent, b, c);
+            e->anim = (Animation*)o;
+            o->desc->m0A(o, s);
+            ResolveAndStartObject(o);
+        }
+    }
+}
 
 void StartStateGraph(StateGraph* self)
 {

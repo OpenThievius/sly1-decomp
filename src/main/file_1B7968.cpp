@@ -364,7 +364,6 @@ void MarkSoundRecordIfIdMatches(void);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void StopSoundRecord(PlayingSound* self, s32 n);
 void EnsureKeyedList(void* p);
-void ConstructScratchpadTransfers(s32 a, s32 b);
 s32 SetIopSoundOptionFlag(s32 flag);
 extern U64P D_00274820;
 extern U64P D_00274828;
@@ -405,6 +404,10 @@ typedef void (*PropertyGetter)(void* obj, void* out);
 void WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
+// The tags of the two transfers' chains (8 each, read uncached).
+extern DmaTag D_00605440[8];
+extern DmaTag D_006054C0[8];
+
 // One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
 // func_001C2430 sends up to 8 blocks into the scratchpad by a DMA chain, func_001C25B0 sends
 // them back to memory.
@@ -416,6 +419,20 @@ struct SprTransfer {
     s32 count;              // 0x48: the number of blocks
     s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
 };
+
+void* FillMemory(SprTransfer* p, s32 v, s32 n);
+
+// Transfer i's record, cleared, with its tags read uncached (0x20000000) and its first tag's
+// scratchpad address: the static initialiser (func_001C27B0) builds the two in a temporary and
+// copies each into D_002748F0.
+static inline SprTransfer MakeSprTransfer(s32 i)
+{
+    SprTransfer t;
+    FillMemory(&t, 0, 0x50);
+    t.tags = (DmaTag*)((u32)(i != 0 ? D_006054C0 : D_00605440) | 0x20000000);
+    t.base = 0x70000000 + i * 0x2000;
+    return t;
+}
 // The registers of the scratchpad DMA channels (g_fromSprChannel, g_toSprChannel) the code sets.
 struct SprDmaChannel {
     s32 chcr;               // 0x00: its control register (bit 6 cleared or set)
@@ -508,7 +525,6 @@ ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, S
 ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 void StartToSprChain(s32 size, ...);
 void StartFromSprChain(s32 first, ...);
-void ConstructScratchpadTransfersAtStartup();
 
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 extern const s32 g_soundEntryForcedAvailable[772];
@@ -548,7 +564,7 @@ s32 D_00274830 = 0;
 f32 g_volumeChannelFactors[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
 s32 D_002748EC = 0;
-SprTransfer D_002748F0[2] = { { 0 } };
+SprTransfer D_002748F0[2] = { MakeSprTransfer(0), MakeSprTransfer(1) };
 s32 D_00274990 = 0;
 
 void InitCollider(Collider* self)
@@ -3979,9 +3995,3 @@ void StartFromSprChain(s32 first, ...) {
 
 LINKER_REMNANT(func_001C27A8);
 
-INCLUDE_ASM(func_001C27B0);
-
-void ConstructScratchpadTransfersAtStartup()
-{
-    ConstructScratchpadTransfers(1, 0xFFFF);
-}
