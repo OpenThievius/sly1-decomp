@@ -2151,7 +2151,56 @@ s32 IsEffectAimCandidate(Rec50* self, Collider* other)
     return other != self->target;
 }
 
-INCLUDE_ASM(func_001A2B48);
+typedef int Quadword128 __attribute__((mode(TI)));
+void StoreFloatAsQuadword(void* out, f32 f);
+void* CopyQuadword(void* out, void* in);
+Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
+void* StoreQuadword(void* dst, Quadword128 v);
+s32 IsEffectAimCandidate(Rec50* self, Collider* other);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
+Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
+void BuildBasisFromX(void* x, void* out);
+extern const Vec02 D_00248D20;
+
+void func_001A2B48(Effect* self, Rec50* src)
+{
+    f32* poly = (f32*)((u8*)src + 0x1C0);
+    f32 speed = self->m30[0];
+    f32 peak = poly[0];
+    f32 a = peak;
+    f32 b = poly[1];
+    f32 c = poly[2];
+    peak = (a + b + c) >? peak;
+    if (0.0001f < __builtin_fabsf(c)) {
+        f32 t = -b / (c + c);
+        peak = (a + t * (b + t * c)) >? peak;
+    }
+    Vec02 end;
+    ColliderSpan span;
+    s32 n;
+    Collider** list;
+    Quadword128 tq;
+    Quadword128 uq;
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
+    f32 reach = speed * peak;
+    Vec02* from = (Vec02*)&self->q80;
+    Vu0::Q(self->qA0) = Vu0::NormalizeOrMoved(Vu0::Q(self->qA0), Vu0::Q(D_00248D20));
+    Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(*from), Vu0::Q(self->qA0), Vu0::Scalar(reach * 100.0f));
+    PushBackMemoryMark();
+    GatherCollidersInBox(g_currentWorld, 0, from, &end, (s32 (*)(void*, Collider*))IsEffectAimCandidate, (s32)src, &n, &list);
+    if (FindNearestSpanObject(1, from, &end, n, list, &span) != 0) {
+        speed = speed * span.time[0];
+    }
+    PopBackMemoryMark();
+    StoreFloatAsQuadword(&tq, speed);
+    Quadword128 tv = tq;
+    CopyQuadword(&uq, poly);
+    StoreQuadword(&self->q30, ScaleQuadword(tv, uq));
+    BuildBasisFromX(&self->qA0, self->rot50);
+    Vu0::Q(self->qA0) = Vu0::Zero();
+}
 
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
