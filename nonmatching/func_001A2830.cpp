@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 186/568 (32.7%), checked 2026-11-08
+// NIGHT-LOW2 (2026-11-08): Vu0::Set for the normalised vector's store (Q(along) = ... keeps &along in s2 across the call) gives retail's 208-byte frame, but the function comes out 20 bytes short (548), so it is not kept here.
 // Night-moved (2026-11-08): NormalizeOrMoved gives the size (568); left: the frame (224 here, 208 in retail) and the order of the first reads; ToFloatMoved did not apply.
 #include "common.h"
 #include "vu0.h"
