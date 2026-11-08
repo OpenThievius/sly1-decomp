@@ -43,6 +43,7 @@
 #include "message_body.h"
 #include "asm_func.h"
 #include "mul_rotation.h"
+#include "ramp_profile.h"
 
 void AddCallbackNode(void* world, void* list, void* a, void* b);
 void RemoveCallbackNode(void* world, void* list, void* a, void* b);
@@ -2412,7 +2413,65 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
-INCLUDE_ASM(func_001A3D40);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 z, Vec02* out);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+void UpdateSwitchedCollider(void* self);
+s32 ChooseWalkerColliderState(WalkerCollider* self);
+s32 ChooseWalkerColliderSubState(WalkerCollider* self);
+
+// Vu0::NormalizeOr that also gives the length it found.
+static inline u128 NormalizeOrLength(u128 v, u128 fallback, f32& length)
+{
+    u128 len = Vu0::Length(v);
+    length = Vu0::ToFloat(len);
+    if (length < 0.0001f) {
+        return fallback;
+    }
+    return Vu0::DivX(v, len);
+}
+
+void UpdateWalkerCollider(WalkerCollider* self)
+{
+    UpdateSwitchedCollider(self);
+    if (HasAnimationDrivenAttachment(self) != 0) {
+        Vec02 pos;
+        Vec02 vel;
+        Vec02 diff;
+        Vec02 dir;
+        Vec02 split;
+        RampProfile ramp;
+        f32 out;
+        self->f1EC->vt->getPos(self->f1EC, 0.0f, &pos, &vel);
+        if (self->f610 == 3) {
+            u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
+            Vu0::Q(diff) = d;
+            Vu0::Q(dir) = d;
+            f32 l;
+            Vu0::Set(dir, NormalizeOrLength(d, Vu0::Q(g_unitXVector), l));
+            f32 along = SplitVectorAlongAxis(&vel, &dir, 0, &split);
+            f32* lim = (f32*)self->p21C;
+            ramp.maxSpeed = lim[0] + along;
+            ramp.endSpeed = lim[1] + along;
+            ramp.rampTime = lim[2];
+            f32 res = ApproachValueWithRamp(0.0f, l, g_frameDt, &ramp, &out);
+            u128 w = Vu0::Scalar(res);
+            Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), w);
+            Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::ScalarAt(out));
+        }
+        self->desc02()->m1D(self, &pos);
+        self->desc02()->m20(self, &vel);
+        self->f618 = ArctangentOfRatio(vel.y, vel.x);
+    }
+    s32 v;
+    while ((v = ChooseWalkerColliderState(self)) != self->f610) {
+        SetWalkerColliderState(self, v);
+    }
+    s32 w;
+    while ((w = ChooseWalkerColliderSubState(self)) != self->f614) {
+        SetWalkerColliderSubState(self, w);
+    }
+    ClearRootTries(self);
+}
 
 void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
