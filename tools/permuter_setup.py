@@ -159,6 +159,32 @@ def min_max_calls(text):
         text = text[:i] + lead + "%s(%s, %s)" % (name, left, right) + text[j:]
 
 
+def min_max_operators(text):
+    """The inverse of min_max_calls: permuter_max(a, b) and permuter_min(a, b) as g++'s
+    (a >? b) and (a <? b) again, for a candidate copied back into its near miss."""
+    while True:
+        m = re.search(r"\bpermuter_(max|min)\s*\(", text)
+        if not m:
+            return text
+        depth, comma, j = 0, None, m.end()
+        while j < len(text):
+            c = text[j]
+            if c in "([":
+                depth += 1
+            elif c in ")]":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif c == "," and depth == 0 and comma is None:
+                comma = j
+            j += 1
+        if comma is None or j >= len(text):
+            return text
+        op = ">?" if m.group(1) == "max" else "<?"
+        a, b = text[m.end():comma].strip(), text[comma + 1:j].strip()
+        text = text[:m.start()] + "(%s %s %s)" % (a, op, b) + text[j + 1:]
+
+
 def isolate(text, func):
     """The unit with everything the permuter's C parser cannot read, or need, inside PERM_IGNORE:
     all but FUNC's definition and plain C typedefs. Our C++ (classes with bases and methods,
