@@ -5,6 +5,7 @@
 // holds most of.
 #include "common.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #include "asm_func.h"
 #include "state_notifier.h"
 #include "world.h"
@@ -351,9 +352,134 @@ INCLUDE_ASM(func_00147428);
 
 INCLUDE_ASM(func_001478F0);
 
-INCLUDE_RODATA(jtbl_00249E70);
 
-INCLUDE_ASM(func_00147AB0);
+#define CAMERA_AT(T, p, off) (*(T*)((u8*)(p) + (off)))
+extern f32 D_0026185C;
+extern u8 g_unitXVector[];
+void* GetActiveSwitchedColliderData(void);
+void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height);
+void BuildBasisFromX(Vec02* v, Mat02* out);
+void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* axis, f32* angle);
+void* CreateStateWalker(void* a, void* owner, s32 id, s32 z);
+void DestroyStateWalker(void* h);
+void SetStateWalkerTarget(void* h, s32 id);
+void AdvanceStateWalkerTime(void* h, f32 t);
+// The camera's state setter: keeps the eye and target offsets when the old state is one of -1, 2,
+// 4 and 5, sets the vectors of the new state, tells the object at 0x2EC (add to or remove from
+// its parent's list) and starts or stops the state walker of the state's event (0x260 to 0x263,
+// or the one saved at 0x2DC in state 0).
+void func_00147AB0(Camera* self, s32 state)
+{
+    s32 event = -1;
+    if (CAMERA_AT(s32, self, 0x2D0) == state) {
+        return;
+    }
+    void* active = GetActiveSwitchedColliderData();
+    if (state != 0 && state != 6) {
+        self->desc->m15(self, 0);
+    }
+    switch (CAMERA_AT(s32, self, 0x2D0)) {
+    case -1:
+    case 2:
+    case 4:
+    case 5:
+        CAMERA_AT(Vec02, self, 0x2F0) = *(Vec02*)((u8*)self + 0x100);
+        CAMERA_AT(Vec02, self, 0x300) = *(Vec02*)((u8*)self + 0x150);
+        break;
+    default:
+        break;
+    }
+    if ((u32)state < 8) {
+        switch (state) {
+        case 0: {
+            s32 saved = CAMERA_AT(s32, self, 0x2DC);
+            CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_00248D30;
+            event = 0x261;
+            if (saved != -1) {
+                event = saved;
+            }
+            break;
+        }
+        case 7:
+            event = 0x262;
+            CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_00248D30;
+            break;
+        case 3:
+            event = 0x260;
+            CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_002619F0;
+            break;
+        case 2:
+            if (CAMERA_AT(s32, self, 0x334) == 0) {
+                CAMERA_AT(s32, self, 0x338) = 1;
+            }
+            self->desc->m03(self);
+            break;
+        case 4: {
+            Vec02 dir;
+            Mat02 m10;
+            Mat02 m40;
+            ConvertOffsetToCylindrical((Vec02*)((u8*)self + 0x140), (Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140), (f32*)((u8*)self + 0x2F0), (f32*)((u8*)self + 0x2F4), (f32*)((u8*)self + 0x2F8));
+            CAMERA_AT(Vec02, self, 0x300) = *(Vec02*)D_00261AA0;
+            CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_00248D30;
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140)), Vu0::Q(*(Vec02*)((u8*)self + 0x140)));
+            dir.z = dir.z * D_002619E0;
+            BuildBasisFromX(&dir, &m10);
+            BuildAxisAngleMatrix((f32*)g_unitXVector, (Mat4*)&m40, -2.5f);
+            MulRotationRowsX(&m10, m10, m40);
+            MultiplyMatrices3x3(&m10, (Mat02*)((u8*)self + 0x110), &m40);
+            MatrixToAxisAngle(&m40, (f32*)((u8*)self + 0x35C), (f32*)((u8*)self + 0x360));
+            CAMERA_AT(s32, self, 0x370) = 0;
+            break;
+        }
+        case 5:
+            Vu0::Q(CAMERA_AT(Vec02, self, 0x2F0)) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x140)), Vu0::Q(*(Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140)));
+            CAMERA_AT(Vec02, self, 0x300) = CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_00248D30;
+            break;
+        case 6:
+            event = 0x263;
+            CAMERA_AT(Vec02, self, 0x310) = *(Vec02*)D_00248D30;
+            break;
+        default:
+            break;
+        }
+    }
+    if (state == 0 || state == 6) {
+        BaseObject* obj = CAMERA_AT(BaseObject*, self, 0x2EC);
+        if (obj != 0) {
+            obj->desc->m02(obj);
+        } else {
+            obj->desc->m03(0);
+        }
+    } else {
+        BaseObject* obj = CAMERA_AT(BaseObject*, self, 0x2EC);
+        if (obj != 0) {
+            obj->desc->m03(obj);
+        }
+    }
+    CAMERA_AT(s32, self, 0x2D0) = state;
+    CAMERA_AT(f32, self, 0x2D4) = D_0026185C;
+    if (event != -1) {
+        void* h = CAMERA_AT(void*, self, 0x2E8);
+        if (h == 0) {
+            void* made = CreateStateWalker(CAMERA_AT(void*, self, 0x2E4), self, event, 0);
+            CAMERA_AT(void*, self, 0x2E8) = made;
+            if (0.0f < CAMERA_AT(f32, self, 0x2E0)) {
+                AdvanceStateWalkerTime(made, CAMERA_AT(f32, self, 0x2E0));
+            }
+        } else {
+            SetStateWalkerTarget(h, event);
+        }
+    } else {
+        void* h = CAMERA_AT(void*, self, 0x2E8);
+        if (h != 0) {
+            DestroyStateWalker(h);
+            CAMERA_AT(void*, self, 0x2E8) = 0;
+        }
+    }
+}
+
 
 void InitTimeRangeNotifier(TimeRangeNotifier* self)
 {

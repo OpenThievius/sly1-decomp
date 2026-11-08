@@ -7,6 +7,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "deferred_request.h"
 #include "list_iter.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
@@ -546,7 +547,86 @@ s32 D_00275720 = 0;
 s32 D_00275724 = 0;
 s32 D_00275728 = 0;
 
-INCLUDE_ASM(func_001D62E0);
+struct RingSource {
+    u8 pad00[0x40];
+    Vec02 v40;              // 0x40
+    u8 pad50[0x30];
+    Vec02 v80;              // 0x80
+};
+
+typedef void (*RingDrawFn)(void* request);
+void DrawPlayerMarkerRing1(void* request);
+void DrawPlayerMarkerRing2(void* request);
+void DrawPlayerMarkerRing3(void* request);
+s32 MaskWorldBitsBySave(void);
+void QueueDeferredRequest(DeferredRequest* src);
+void SetObjectTreeRecordValue(void* obj, u32 value);
+f32 Cosine(f32 x);
+extern Rgba4 D_002623E0[];
+
+struct RingClamp {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo) {
+            return lo;
+        }
+        if (hi < x) {
+            return hi;
+        }
+        return x;
+    }
+};
+
+void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
+{
+    s32 state = self->f2228;
+    if (state >= 0x25 && (state < 0x27 || (state == 0x37 && (MaskWorldBitsBySave() & 0x400) != 0))) {
+        DeferredRequest f;
+        (void)FillMemory(&f, 0, 0x80);
+        f.f04 = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(a->v40)), Vu0::Q(a->v80)));
+        f.group = 0xD;
+        f.arg = self;
+        switch (self->f2228) {
+        case 0x37:
+            f.callback = (void*)DrawPlayerMarkerRing3;
+            break;
+        case 0x25:
+            f.callback = (void*)DrawPlayerMarkerRing1;
+            break;
+        case 0x26:
+            f.callback = (void*)DrawPlayerMarkerRing2;
+            break;
+        }
+        QueueDeferredRequest(&f);
+    }
+    {
+        Rgba4 c;
+        u8 from[4];
+        *(u32*)from = 0x800000A0;
+        if (self->f26C4 != 0) {
+            f32 t;
+            if (self->f2220 != 4) {
+                t = (g_gameClock[1] - self->f26CC) / self->f26D0;
+            } else {
+                t = 0.0f;
+            }
+            f32 s = Cosine((g_gameClock[1] - self->f26C8) * 10.0f);
+            f32 p = D_00275140[0] + t * (D_00275140[1] + t * D_00275140[2]);
+            f32 x = RingClamp::Of(p, g_unitRange.lo, g_unitRange.hi);
+            f32 q = D_00275150[0] + s * (D_00275150[1] + s * D_00275150[2]);
+            f32 y = RingClamp::Of(q, g_unitRange.lo, g_unitRange.hi);
+            f32 w = x * y;
+            f32 u = 1.0f - w;
+            c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
+            c.g = (u8)(u * D_002623E0[0].g + w * from[1]);
+            c.b = (u8)(u * D_002623E0[0].b + w * from[2]);
+            c.a = D_002623E0[0].a;
+        } else {
+            c = D_002623E0[0];
+        }
+        SetObjectTreeRecordValue(self, *(u32*)&c);
+    }
+}
 
 s32 GetPlayerRequestPhase(Player* self)
 {

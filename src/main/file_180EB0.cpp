@@ -17,6 +17,8 @@
 #include "collider.h"
 #include "state_walker.h"
 #include "asm_func.h"
+#include "transform_object.h"
+#include "ramp_profile.h"
 
 void CopyObjectData(void* self);
 
@@ -444,8 +446,58 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
     self->fBB4 = g_gameClock[1];
 }
 
-INCLUDE_RODATA(D_0024B16C);
-INCLUDE_ASM(func_00181ED0);
+extern u8 g_class75List[];
+void GetObjectWorldPosition(void* obj, Vec02* out);
+void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
+
+// A pad record's stick (PadRecord's 0x40 and 0x44: pad_record.h's ranges clash with this file's
+// view of g_unitRange).
+struct PadStick {
+    u8 pad00[0x40];
+    f32 x;                  // 0x40
+    f32 y;                  // 0x44
+};
+
+void func_00181ED0(T217D_BF0* self, PadStick* pad)
+{
+    Vec02 p;
+    Vec02 best;
+    f32 bestScore = 3.40282347e+38f;
+    Vu0::Q(best) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+    Class75Object* chosen = 0;
+    for (Class75Object* o = *(Class75Object**)g_class75List; o != 0; o = *(Class75Object**)&o->link) {
+        GetObjectWorldPosition(o, &p);
+        ProjectPointToCamera(g_camera, &p, &p);
+        if (p.z < 100.0f) {
+            continue;
+        }
+        f32 r = o->scale / (p.z * *(f32*)((u8*)g_camera + 0x1F0));
+        u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(self->aim));
+        f32 eps = 0.0001f;
+        f32 score = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) - r;
+        score = eps >? score;
+        if (o == self->target) {
+            score *= 0.5f;
+        }
+        if (score < bestScore || (score == bestScore && p.z < best.z)) {
+            Vu0::Q(best) = Vu0::Q(p);
+            bestScore = score;
+            chosen = o;
+        }
+    }
+    self->rateX = ApproachValueWithRamp(self->rateX, pad->x, g_gameClock[2], D_00264198, 0);
+    f32 y = pad->y;
+    if (g_saveData->f19EC & 0x400) {
+        y = -y;
+    }
+    self->rateY = ApproachValueWithRamp(self->rateY, y, g_gameClock[2], D_00264198, 0);
+    self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * D_002641A4, -1.0f, 1.0f);
+    self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * D_002641A4, -1.0f, 1.0f);
+    f32 far = 1000.0f;
+    self->aim[2] = ApproachValueWithRamp(self->aim[2], far >? best.z, g_gameClock[2], D_002641A8, 0);
+    self->target = chosen;
+}
 
 INCLUDE_ASM(func_001821B0);
 
@@ -528,4 +580,72 @@ void UpdateC24Object(C24* self, f32 dt)
 
 INCLUDE_ASM(func_00182748);
 
-INCLUDE_ASM(func_00182948);
+struct CurveEntry {
+    f32 a;                  // 0x00
+    f32 b;                  // 0x04
+    s32 k;                  // 0x08
+    f32 c;                  // 0x0C
+    s32 k2;                 // 0x10
+    f32 d;                  // 0x14
+};
+
+typedef void (*CurveSampleFn)(PathCurve* self, s32 zero, Vec02* out, f32 t);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(s32 bytes);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+
+void func_00182948(C24* self, PathCurveObject* path, f32 speed)
+{
+    Vec02 p0;
+    Vec02 p1;
+    f32 out;
+    s32 i;
+    PushBackMemoryMark();
+    self->x6C0 = path;
+    self->f6DC = speed;
+    PathCurve* curve = path->curve;
+    f32 total = curve->vt->m08(curve);
+    s32 n = curve->count;
+    CurveEntry* entries = (CurveEntry*)self->x6E8->field_c;
+    self->x6E8->field8 = n;
+    f32* lens = (f32*)AllocateBackMemory(n << 2);
+    for (i = 0; i < n; i++) {
+        if (curve->vt->m02 != 0) {
+            ((CurveSampleFn)curve->vt->m02)(curve, 0, &p0, curve->lengths[i] - 0.5f);
+            if (curve->vt->m02 != 0) {
+                ((CurveSampleFn)curve->vt->m02)(curve, 0, &p1, curve->lengths[i] + 0.5f);
+            }
+        }
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(p0), Vu0::Q(p1))));
+        lens[i] = Fpu::Sqrt(self->f6D8 / len);
+        ApproachValueWithRamp(curve->lengths[i], total + 100.0f, 0.0f, (RampProfile*)&self->f6CC, &out);
+        lens[i] = out <? lens[i];
+    }
+    CurveEntry* e;
+    for (i = 0; i < n; i++) {
+        e = &entries[i];
+        e->b = curve->lengths[i];
+        if (i == 0) {
+            e->a = 0.0f;
+        } else {
+            e->a = e[-1].a + (e->b - e[-1].b) * 2.0f / (lens[i] + lens[i - 1]);
+        }
+        e->k = 4;
+        e->c = lens[i];
+    }
+    f32 scale = speed / e->a;
+    for (i = 0; i < n; i++) {
+        e = &entries[i];
+        e->a = e->a * scale;
+        e->c = e->c / scale;
+    }
+    for (i = 0; i < n; i++) {
+        e = &entries[i];
+        e->k2 = 4;
+        e->d = e->c;
+    }
+    self->f6E4 = 0.0f;
+    TeleportStateWalker(self->x6C8, 0x36E);
+    PopBackMemoryMark();
+}

@@ -42,7 +42,11 @@ struct ConeVolume : PlacedObject {
     f32 f364;               // 0x364
     f32 f368;               // 0x368
     f32 f36C;               // 0x36C
-    u8 pad370[0x410 - 0x370];
+    u8 pad370[0x3D0 - 0x370];
+    s32 mask;               // 0x3D0: the value lists' mask where it is (QueryValueListMask; all 28 bits in mode 0)
+    u8 pad3D4[0x3E0 - 0x3D4];
+    Quad16 axis;            // 0x3E0: the cone's axis, scaled by half the range to its middle (func_00184B58)
+    u8 pad3F0[0x410 - 0x3F0];
     ConeVolumeSaved saved;  // 0x410: kept through a copy
     u8 pad418[0x620 - 0x418];
 };

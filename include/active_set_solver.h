@@ -17,7 +17,7 @@ struct ActiveSetItem {
     void* owner;            // 0x00: its object, whose word at 0xCC picks the row of `axes` (func_001536C8)
     u8 pad04[0x10 - 0x04];
     f32 axis[4];            // 0x10: the item's direction, dotted with each item's axes (func_001536C8)
-    u8 pad20[0x28 - 0x20];
+    f32* rows[2];           // 0x20: one array of rows for each end of owner (func_00153780)
     s32 kind;               // 0x28: 2 enters the active list at once (func_00153EC0)
     s32 bounded;            // 0x2C: nonzero, x stops at `limit` (func_00153A50)
     f32 limit;              // 0x30
@@ -26,7 +26,7 @@ struct ActiveSetItem {
     f32 rate;               // 0x3C: how fast val changes with the active items' step
     u8 (*axes)[16];         // 0x40: vectors of 16 bytes, one per owner index (func_001536C8)
     f32* row;               // 0x44: the item's row of the matrix; 0 until func_00153780 builds it
-    u8 pad48[4];
+    ActiveSetItem* twin;    // 0x48: the item the contact's other end made (func_00154088)
     ActiveSetItem* next;    // 0x4C: the list link (func_00153608 clears it and the word after)
     u8 pad50[0x60 - 0x50];
 };

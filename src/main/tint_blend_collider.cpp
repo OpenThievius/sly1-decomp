@@ -4,6 +4,7 @@
 // previous file's, and ends at 0x2758D0, where file_1DFD48.cpp's starts; its .rodata is the one
 // float func_001DFBE0 reads (0x24DCA8).
 #include "common.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
@@ -69,7 +70,62 @@ void InitRedirectObject(RedirectObject* self)
     self->q320 = D_00275730;
 }
 
-INCLUDE_ASM(func_001DDD18);
+void StartPlacedObject(void* self);
+s32 IsObjectOfKind(void* node, s32 kind);
+void* AllocateZeroedFrontMemory(s32 bytes);
+void TransformPointBetweenFrames(void* node, s32 frame, Vec02* in, Vec02* out);
+
+void StartRedirectObject(RedirectObject* self)
+{
+    PlacedObject* p;
+    BaseObject* c;
+    RedirectStep* step;
+
+    StartPlacedObject(self);
+    if (self->parent != 0 && IsObjectOfKind(self->parent, 0x5E) != 0) {
+        return;
+    }
+    p = self;
+    if (self != 0) {
+        do {
+            self->chainCount++;
+            c = (BaseObject*)p->children.head;
+            while (c != 0 && IsObjectOfKind(c, 0x5E) == 0) {
+                c = c->next;
+            }
+            p = (PlacedObject*)c;
+        } while (c != 0);
+    }
+    if (self->chainCount < 2 && self->f310 == 0) {
+        self->chainCount = 0;
+        return;
+    }
+    self->chainCount++;
+    self->steps = (RedirectStep*)AllocateZeroedFrontMemory(self->chainCount << 6);
+    step = self->steps;
+    p = self;
+    if (self != 0) {
+        do {
+            ((RedirectObject*)p)->target = self;
+            step->node = p;
+            step->pos = p->v140;
+            *(u32*)&step->length = Vu0::ToBits(Vu0::Length(Vu0::Q(p->pos)));
+            c = (BaseObject*)p->children.head;
+            while (c != 0 && IsObjectOfKind(c, 0x5E) == 0) {
+                c = c->next;
+            }
+            p = (PlacedObject*)c;
+            if (c != 0) {
+                step->below = p->pos;
+            } else {
+                step->below = *(Vec02*)&self->q320;
+            }
+            step++;
+        } while (c != 0);
+    }
+    TransformPointBetweenFrames(step[-1].node, 0, &step[-1].below, &step->pos);
+    step->length = step[-1].length;
+}
 
 INCLUDE_ASM(func_001DDE90);
 

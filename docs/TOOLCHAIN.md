@@ -256,21 +256,62 @@ What retail shows, and what the compiler does:
   (func_00198BD8). A weight read from memory is ScalarAt: FromFloatAt into
   Scalar's slot, the lw retail has (func_00198BD8's two, func_001D4698's speed).
 
-The sequences still without a helper, by how often retail has them (runs of
-VU0 instructions in the `inline` functions): a vector built from three floats in
-GPRs (pextlw, pcpyld, qmtc2; func_00144AA0, func_001BFBF8, func_00141690), a
-float splat to all four lanes (mfc1, pextlw, pextlw, qmtc2; func_00155868), and
-a vector's y and z read from a GPR copy (qmfc2, prot3w, pextuw; file_1B7968's
-velocity and spin setters). The Q-register forms have helpers (Sqrt, DivX,
-Length, NormalizeOr), so do the matrix forms (Transform, Transform4, RotateRows
-and RotateUntied, RotateTransposed, MulTransposed), the weighted sums (MulXSum,
+- **Through the GPRs, "r" operands.** Where retail handles a vector or floats in
+  GPRs (qmfc2 or lq, mfc1, the MMI pextlw/pextuw/pcpyld/pcpyud/prot3w, sq or qmtc2),
+  the helper holds only the MMI instructions and takes and gives "r" operands: the
+  compiler makes the moves, keeps one GPR copy for several reads, stores with sq
+  where the value goes straight to memory and moves it to VU0 with qmtc2 where it is
+  used there (wave 4, func_00141690 and func_00174E20 against func_00144AA0).
+- **A float out of a GPR is a reload.** ToFloatY (prot3w) and ToFloatZ (pextuw
+  r, $zero, a) give their float as "=r", so the mtc1 to an FPR is a reload, put in a
+  GPR the values live there leave free: func_001B9940's a0, where an f32 or u128
+  result of the caller's (local-alloc'd before the values across the branches) takes
+  v0. x is ToFloatMoved of the same GPR copy. The lane tests of retail's zero checks
+  (SetColliderVelocity, SetColliderSpin, MoveDriftingEffect,
+  ApplyColliderPendingImpulse) are a boolean set with `li 1; bc1tl`, as before.
+- **Three floats are one sequence.** FromFloats is mfc1 x3 with pextlw and pcpyld in
+  one asm, the floats as "f" operands: separate mfc1s are hoisted by sched1 and change
+  the FPRs the floats take (func_00144AA0). Its result has a slot of its own (two
+  stores in retail: the caller's local and the slot; func_00184B58, func_001C41A0).
+  Its w is z's sign extension.
+- **The splat turns its input in place.** All ten of retail's splats are `pextlw t,
+  t, t; pextlw r, t, t` right after the compiler's mfc1 into t, r being t or another
+  GPR: Splat's first pextlw writes its "r" input's register (the float's GPR copy,
+  which dies there). It has no slot: retail stores it once, where the C put it.
+- **The 3x3 transpose is two sequences.** func_00188B48 (near miss) does
+  pextlw/pextuw of rows 0, 1 and of row 2 with $zero, then pcpyld/pcpyud/pcpyld; retail
+  schedules the -1.0's lui/mtc1 between the two, and one asm per instruction is
+  scheduled otherwise. Vu0::Transpose holds the two.
+- **A constant moves to the second operand of min.s and max.s.** fold puts the
+  constant of `c >? x` second, so retail's `max.s f1, f21, f1` (the constant first,
+  the result in x's register) comes from a float variable holding it, and the value
+  assigned before (`score = x - r; score = eps >? score`, func_00181ED0).
+  func_001A6788's `min.s f1, f0, f1` (two values) is still a near miss.
+- **A literal is the function's own.** A float a function reads from .rodata (FLT_MAX)
+  is the literal its C writes, emitted after the function's earlier literals: a
+  defined `extern const` there is folded into a second copy, which in a whole file
+  grows its .rodata past the next file's (the link failed on func_00141690). The
+  definition or INCLUDE_RODATA line goes when the function becomes C (func_00141690,
+  func_0019E220, func_001C41A0, func_00181ED0).
+- **Inline locals and later locals share slots.** A local declared after a block or an
+  inline function call ended reuses its slot (func_0019F620's scale over the view
+  test's Scalar, func_001DF700's message over its direction), where locals declared
+  first come first in the frame.
+- **The copy within a block.** Vu0::Copy (vmove.xyzw) gives retail's vmove in
+  func_00141D88's loop (the length taken of the copy, the division of the original),
+  but no function that has it matches yet: in func_00141D88 retail's store and length
+  use the copy where NormalizeOr's one vector is used for both.
+
+The sequences still without a helper: a float stored as a quadword (func_00191AC8,
+func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
+read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved
+GPR, without the copy). The rest have helpers: the Q-register forms (Sqrt, DivX,
+Length, NormalizeOr), the matrix forms (Transform, Transform4, RotateRows and
+RotateUntied, RotateTransposed, MulTransposed, Transpose), the weighted sums (MulXSum,
 MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
-(PlaneSigns, Ones), the cross product, Min and Max. Still without a helper:
-the vmove.xyzw copy within a block (Vu0::Copy), the float splat to four lanes
-(mfc1, pextlw, pextlw, qmtc2), a vector built from three floats in GPRs (mfc1,
-pextlw, pcpyld, qmtc2), a float stored as a quadword (mfc1 once, then sq of the
-GPR per use, func_00191AC8), and a vector's lanes read from a GPR copy (prot3w,
-pextuw after qmfc2 or lq). The assembler takes `vsqrt` (the disassembler prints it as a `.word`).
+(PlaneSigns, Ones), the cross product, Min and Max, the copy (Copy), and the GPR forms
+(ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits). The assembler takes
+`vsqrt` (the disassembler prints it as a `.word`).
 
 ## Getting the compiler
 

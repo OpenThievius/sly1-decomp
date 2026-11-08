@@ -14,7 +14,9 @@ struct PairedObject : Collider {
     void* controller;  // 0x558: the object func_001A6BE0 hands to the state's functions
     void* partner;  // 0x55C: an object (func_001A6DE0 tells its slot 31 when it is hit)
     void* attachment;  // 0x560
-    u8 pad564[0x574 - 0x564];
+    f32 maxSpeed;  // 0x564: the fastest it steers (func_001A6788)
+    f32 maxTurn;  // 0x568: the fastest it turns, in radians a second (func_001A6788)
+    u8 pad56C[0x574 - 0x56C];
     f32 f574;  // 0x574
     u8 pad578[0x580 - 0x578];
     f32 f580;  // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)

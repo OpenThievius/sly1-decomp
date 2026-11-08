@@ -59,7 +59,7 @@ struct GaugeManager : PlacedObject {
     f32 f2D8;               // 0x2D8: 90.0 at setup
     s32 slotCount;          // 0x2DC: slots in use
     GaugeSlot slots[16];       // 0x2E0
-    u8 pad420[0x424 - 0x420];
+    void* f420;             // 0x420: a pool of agents (func_0014C858 takes the next one)
     void* f424;             // 0x424
     void* f428;             // 0x428
     void* device;           // 0x42C: the device object (func_001B6290 makes it)

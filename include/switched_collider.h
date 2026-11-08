@@ -11,6 +11,12 @@
 
 struct SwitchedCollider;
 struct TurningCollider;
+// An object the player hit and the clock when (Player::f26D8).
+struct HitStamp {
+    Collider* obj;          // 0x00
+    f32 time;               // 0x04
+};
+
 struct Player;
 struct ObjectMessage;    // object_message.h
 struct BeatPressCollider;
@@ -87,11 +93,12 @@ struct Ev07 {
 struct Slot19 {
     PlacedObject* obj;      // 0x00: linked by id (D_002752A0); its position is copied to v10 at start
     PlacedObject* obj2;     // 0x04: the object a second link gives (func_001DA7E0 places it with this one)
-    u8 pad08[0x0C - 0x08];
+    PlacedObject* obj8;     // 0x08: the object its start is taken from (func_001DA320)
     s32 f0C;                // 0x0C: compared with PathFollower::f6A0 (func_001DA7E0)
     Vec02 v10;              // 0x10
     Vec02 v20;              // 0x20
-    u8 pad30[0x50 - 0x30];
+    Vec02 v30;              // 0x30
+    Vec02 v40;              // 0x40
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
     f32 f54;                // 0x54: an angle f50 advances by the clock's step (func_001DA7E0)
     u8 pad58[0x60 - 0x58];
@@ -282,7 +289,7 @@ struct Player : TurningCollider {
     s32 f2208;              // 0x2208
     u8 pad220C[0x2220 - 0x220C];
     s32 f2220;              // 0x2220
-    s32 f2224;              // 0x2224
+    f32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
     f32 f222C;              // 0x222C
     ObjectMessage* watched2230; // 0x2230: the message whose object set it lets go of (func_00198EF8)
@@ -332,7 +339,8 @@ struct Player : TurningCollider {
     f32 f242C;              // 0x242C
     f32 f2430;              // 0x2430
     f32 f2434;              // 0x2434
-    u8 pad2438[0x2498 - 0x2438];
+    Collider* f2438;        // 0x2438: the object it is aimed at (func_001D66A8)
+    u8 pad243C[0x2498 - 0x243C];
     s32 f2498;              // 0x2498
     u8 pad249C[0x24A0 - 0x249C];
     void* f24A0;            // 0x24A0
@@ -375,9 +383,11 @@ struct Player : TurningCollider {
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
-    u8 pad26CC[0x26D4 - 0x26CC];
+    f32 f26CC;              // 0x26CC
+    f32 f26D0;              // 0x26D0
     void* f26D4;            // 0x26D4: the object that sent the player to state 9 (func_00178068)
-    u8 pad26D8[0x2718 - 0x26D8];
+    HitStamp f26D8[8];      // 0x26D8: the objects func_001D66A8 hit and when
+
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
@@ -546,7 +556,10 @@ struct ConeAgent : Agent {
     f32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
     s32 fC34;               // 0xC34
-    u8 padC38[0xC40 - 0xC38];
+    union {
+        s32 fC38;           // 0xC38: set when the target was found free (func_00167F10)
+        s64 fC38q;          // 0xC38: the same, tested as a doubleword
+    };
     s32 fC40;               // 0xC40
     u8 padC44[0xC50 - 0xC44];
 };
@@ -586,7 +599,7 @@ struct GaugeAgent : Agent {
 };
 
 struct GaugeBarAgent : Agent {
-    u8 padC10[0xC14 - 0xC10];
+    s32 fC10;               // 0xC10
     s32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
     s32 fC1C;               // 0xC1C
@@ -647,11 +660,12 @@ struct TempoPlayerEntry {
 struct TempoAgent : Agent {
     s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
-    u8 padC24[0xC34 - 0xC24];
+    void* fC24[4];          // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
     Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
     Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldTimeline)
     BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
-    u8 padC40[0xC48 - 0xC40];
+    s32 fC40;               // 0xC40: which of fC24 is in use
+    f32 fC44;               // 0xC44
     void* fC48;             // 0xC48
     s32 fC4C;               // 0xC4C: set and cleared by timeline entries of kinds 4 and 5 (func_001ED318)
     void* fC50;             // 0xC50
@@ -773,23 +787,27 @@ struct GaugeCollider : SwitchedCollider {
     StateWalker* f614;          // 0x614: a handle (func_001B6290)
     f32 f618;               // 0x618
     f32 f61C;               // 0x61C
-    u8 pad620[0x624 - 0x620];
+    f32 f620;               // 0x620: the stick's push times f624 (func_001974F8)
     f32 f624;               // 0x624
     f32 f628;               // 0x628
     u8 pad62C[0x630 - 0x62C];
     Vec02 v630;             // 0x630
     void* f640;             // 0x640: an object func_00198760 tests and hands on
     s32 f644;               // 0x644
-    u8 pad648[0x65C - 0x648];
+    u8 pad648[0x64C - 0x648];
+    void* f64C[4];          // 0x64C: the four objects whose floor func_00196EB0 samples
     void* f65C;             // 0x65C
     void* f660;             // 0x660
     void* f664;             // 0x664
-    u8 pad668[0x67C - 0x668];
+    void* f668;             // 0x668: its record at +0x2D0 takes the held object's value (func_001974F8)
+    u8 pad66C[0x674 - 0x66C];
+    void* f674;             // 0x674: the object being carried (func_001974F8)
+    void* f678;             // 0x678
     s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720
     s32 f680;               // 0x680: the count g_gaugeAmountCaption shows (func_00197F10)
     s32 f684;               // 0x684: its limit, one per class 0x48 object (func_00198920)
     f32 f688;               // 0x688
-    u8 pad68C[0x690 - 0x68C];
+    f32 f68C;               // 0x68C: the clock when the carried object was picked (func_001974F8)
     s32 f690;               // 0x690
     void* f694;             // 0x694: f690 entries
     f32 f698;               // 0x698: the time of the next transfer (func_00197848, func_00198760)
@@ -830,7 +848,8 @@ struct PathFollower : SwitchedCollider {
     };
     f32 f680;               // 0x680: the blend of the two ranges
     f32 f684;               // 0x684
-    u8 pad688[0x694 - 0x688];
+    u8 pad688[0x690 - 0x688];
+    PlacedObject* f690;     // 0x690: drawn with this one's scale (func_001DAA18)
     f32 f694;               // 0x694
     f32 f698;               // 0x698: divided by f610 or f614 into the slots (func_001D8D90); 0 in func_001D9C98
     f32 f69C;               // 0x69C: eased by func_001D8D90
@@ -863,14 +882,16 @@ struct PathFollower : SwitchedCollider {
     s32 fB0C;               // 0xB0C
     f32 fB10;               // 0xB10: -10.0 at reset (func_001DB290)
     BaseObject* fB14;       // 0xB14
-    u8 padB18[0xB30 - 0xB18];
+    u8 padB18[0xB28 - 0xB18];
+    void* fB28;             // 0xB28: func_001DAA18 draws a quad for each of these two
+    void* fB2C;             // 0xB2C
     s32 fB30;               // 0xB30
     s32 fB34;               // 0xB34
     f32 fB38;               // 0xB38
     u8 padB3C[0xB44 - 0xB3C];
     StateTrigger* fB44;     // 0xB44: the graph its walker (fB48) is made on
     void* fB48;             // 0xB48
-    u8 padB4C[0xB50 - 0xB4C];
+    void* fB4C;             // 0xB4C: the mesh object func_001DA320 tests the other against
     s32 pushedCount;        // 0xB50: the objects in pushed (func_001D9AC8)
     Collider* pushed[8];    // 0xB54: the objects its contacts pushed, each once (func_001D9AC8)
     Contact03* contacts;    // 0xB74: the contacts to process, given back to the world's pool (func_001D9AC8)
@@ -892,15 +913,16 @@ struct ModeWalker : PathFollower {
     void* fBB8;             // 0xBB8
     StateWalker* fBBC;          // 0xBBC: a handle (func_001B6290)
     void* fBC0;             // 0xBC0
-    u8 padBC4[0xBC8 - 0xBC4];
+    void* fBC4;             // 0xBC4: turned to the camera's side (func_00181078)
     void* fBC8;             // 0xBC8
     void* fBCC;             // 0xBCC
     void* fBD0;             // 0xBD0
-    u8 padBD4[0xBF0 - 0xBD4];
+    u8 padBD4[0xBE0 - 0xBD4];
+    Vec02 vBE0;             // 0xBE0
     s32 fBF0;               // 0xBF0
     f32 fBF4;               // 0xBF4
     f32 fBF8;               // 0xBF8
-    u8 padBFC[0xC00 - 0xBFC];
+    f32 fBFC;               // 0xBFC: the clock when the button was pressed (func_00181078)
     s32 fC00;               // 0xC00
     void* fC04;             // 0xC04
     PlacedObject* fC08;     // 0xC08: the object func_00181658 turns to follow the path's frame
@@ -949,7 +971,7 @@ struct ModeCollider : SwitchedCollider {
 struct BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
-    u8 pad618[0x628 - 0x618];
+    void* f618[4];          // 0x618: the objects func_001EC828 places the tempo agent's timelines by
     void* f628;             // 0x628
     s32 f62C;               // 0x62C
     s32 f630;               // 0x630
