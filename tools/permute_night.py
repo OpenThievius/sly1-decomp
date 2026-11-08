@@ -58,7 +58,12 @@ def splice(near_miss, candidate, func):
         cs, ce = version_src.definition_span(cand, func)
     except version_src.VersionSourceError:
         return None
-    return text[:s] + cand[cs:ce] + text[e:]
+    import permuter_compile
+    import permuter_setup
+    body = permuter_setup.min_max_operators(cand[cs:ce])
+    for alias, real in permuter_compile.ALIAS.findall(cand):
+        body = re.sub(r"\b%s\b" % re.escape(alias), real, body)     # Fpu__Sqrt -> Fpu::Sqrt
+    return text[:s] + body + text[e:]
 
 
 def run_one(func, minutes, jobs, log, python):
@@ -112,13 +117,44 @@ def run_one(func, minutes, jobs, log, python):
     return "%4.0fs  %s" % (time.time() - t0, note)
 
 
+def recheck(func):
+    """Splice each zero kept in build/permute_night/FUNC into the near miss and check it again."""
+    keep = OUT / func
+    near_miss = ROOT / "nonmatching" / ("%s.cpp" % func)
+    zeros = sorted(glob.glob(str(keep / "output-0-*")))
+    zeros = [z for z in zeros if os.path.isdir(z)]
+    exact = 0
+    for z in zeros:
+        name = os.path.basename(z)
+        spliced = splice(near_miss, os.path.join(z, "source.c"), func)
+        if spliced is None:
+            continue
+        for old in (keep / (name + ".cpp"), keep / ("EXACT_" + name + ".cpp")):
+            if old.exists():
+                old.unlink()
+        path = keep / (name + ".cpp")
+        path.write_text(spliced)
+        res = subprocess.run([sys.executable, str(ROOT / "tools" / "check.py"), str(path), func],
+                             capture_output=True, text=True, cwd=ROOT).stdout
+        if res.startswith("EXACT"):
+            exact += 1
+            path.rename(keep / ("EXACT_" + name + ".cpp"))
+    return "%d zero(s), %d EXACT by check.py" % (len(zeros), exact)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("funcs", nargs="+", metavar="FUNC")
     parser.add_argument("--minutes", type=float, default=28)
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 4)
+    parser.add_argument("--recheck", action="store_true",
+                        help="only splice and check again the zeros already kept for each FUNC")
     args = parser.parse_args(argv)
     args.funcs = [symbols.canonical(f) for f in args.funcs]     # either name (tools/symbols.py)
+    if args.recheck:
+        for func in args.funcs:
+            print("%s: %s" % (func, recheck(func)))
+        return 0
     missing = [f for f in args.funcs if not (ROOT / "nonmatching" / ("%s.cpp" % f)).exists()]
     if missing:
         parser.error("no near miss in nonmatching/ for %s" % ", ".join(missing))

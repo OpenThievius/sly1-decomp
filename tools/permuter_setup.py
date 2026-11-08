@@ -105,6 +105,86 @@ def plain_calls(body, tags):
     return head + brace + rest, sorted(aliases.items())
 
 
+# What ends an operand of g++'s <? and >?, which bind looser than + and - and tighter than the
+# comparisons: anything of lower precedence, at the operand's own parenthesis depth.
+STOP = re.compile(r"&&|\|\||<<=|>>=|<<|>>|==|!=|<=|>=|[-+*/%&|^]?=|[<>?:,;{}&|^]|\breturn\b")
+
+
+def min_max_calls(text):
+    """g++'s `a >? b` and `a <? b` as permuter_max(a, b) and permuter_min(a, b), which the
+    permuter's C parser reads; permuter_compile.py defines them as the operators again."""
+    while True:
+        m = re.search(r"([<>])\?", text)
+        if not m:
+            return text
+        name = "permuter_max" if m.group(1) == ">" else "permuter_min"
+        # The left operand: back to an unmatched ( or a lower-precedence token at depth 0.
+        i, depth = m.start(), 0
+        while i > 0:
+            c = text[i - 1]
+            if c in ")]":
+                depth += 1
+            elif c in "([":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif depth == 0:
+                if re.search(r"\breturn\s$", text[max(0, i - 8):i]):
+                    break
+                t = STOP.search(text, i - 3 if i >= 3 else 0, i)
+                if t and t.end() == i and not text[t.start():i].endswith("->") \
+                        and not (c == ">" and text[i - 2:i] == "->"):
+                    break
+            i -= 1
+        # The right operand: on to an unmatched ) or a lower-precedence token at depth 0.
+        j, depth = m.end(), 0
+        while j < len(text):
+            c = text[j]
+            if c in "([":
+                depth += 1
+            elif c in ")]":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif depth == 0:
+                if text.startswith("->", j):
+                    j += 2
+                    continue
+                t = STOP.match(text, j)
+                if t:
+                    break
+            j += 1
+        left, right = text[i:m.start()].strip(), text[m.end():j].strip()
+        lead = text[i:m.start()][:len(text[i:m.start()]) - len(text[i:m.start()].lstrip())]
+        text = text[:i] + lead + "%s(%s, %s)" % (name, left, right) + text[j:]
+
+
+def min_max_operators(text):
+    """The inverse of min_max_calls: permuter_max(a, b) and permuter_min(a, b) as g++'s
+    (a >? b) and (a <? b) again, for a candidate copied back into its near miss."""
+    while True:
+        m = re.search(r"\bpermuter_(max|min)\s*\(", text)
+        if not m:
+            return text
+        depth, comma, j = 0, None, m.end()
+        while j < len(text):
+            c = text[j]
+            if c in "([":
+                depth += 1
+            elif c in ")]":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif c == "," and depth == 0 and comma is None:
+                comma = j
+            j += 1
+        if comma is None or j >= len(text):
+            return text
+        op = ">?" if m.group(1) == "max" else "<?"
+        a, b = text[m.end():comma].strip(), text[comma + 1:j].strip()
+        text = text[:m.start()] + "(%s %s %s)" % (a, op, b) + text[j + 1:]
+
+
 def isolate(text, func):
     """The unit with everything the permuter's C parser cannot read, or need, inside PERM_IGNORE:
     all but FUNC's definition and plain C typedefs. Our C++ (classes with bases and methods,
@@ -116,7 +196,7 @@ def isolate(text, func):
         if not stripped:
             out.append(item)
         elif re.search(r"\b%s\s*\(" % func, stripped) and stripped.endswith("}"):
-            body, aliases = plain_calls(item, tags)
+            body, aliases = plain_calls(min_max_calls(item), tags)
             if aliases:
                 # The permuter preprocesses its input, so a #define would undo the alias before
                 # it parses; permuter_compile.py turns these strings back into #defines.
@@ -124,6 +204,18 @@ def isolate(text, func):
                                                          for i, (a, b) in enumerate(aliases)))
             out.append(body)
         elif C_TYPEDEF.match(stripped) and "class" not in stripped:
+            if "__attribute__" in stripped:
+                # The permuter's parser drops attributes, so u128 (mode(TI)) would reach the
+                # compiler as a 32-bit int, and every VU0 helper's "j" operand would be
+                # impossible: its parser gets the plain typedef, and permuter_compile.py puts
+                # the original back.
+                name = re.search(r"(\w+)\s*__attribute__", stripped)
+                if name:
+                    plain = re.sub(r"\s*__attribute__\s*\(\((?:[^()]|\([^()]*\))*\)\)", "", stripped)
+                    out.append("\nPERM_IGNORE(static const char permuter_typedef_%s[] = \"%s\";)\n"
+                               % (name.group(1), stripped.replace('"', '\\"')))
+                    out.append("\n" + plain + "\n")
+                    continue
             out.append(item)
         else:
             out.append("\nPERM_IGNORE(%s)\n" % stripped)
