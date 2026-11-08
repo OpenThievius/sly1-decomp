@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 140/156 (89.7%), checked 2026-11-07
-// NEAR: same instructions; the compiler loads the callback address into v0 and the group 13 into v1, retail the reverse, and the four stores to the request come out in another order (retail: group at 8, object at 0x60, float at 4, callback at 0). All 24 orders of the stores and a local float for the dot product were tried.
+// NEAR: same instructions and registers (stores written group, object, float, callback); only the schedule of `move a0,sp` against `swc1 $f0,4(sp)` differs (retail puts the move after the swc1). Tried the float as a local or inline, other store orders, a pointer local for &r.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -61,10 +61,10 @@ void DrawTempoAgent(TempoAgent* self, Camera* cam)
         DeferredRequest r;
         FillMemory(&r, 0, 0x80);
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)), Vu0::Q(cam->f80)));
-        r.callback = (void*)DrawTempoAgentRing;
-        r.f04 = d;
         r.group = 0xD;
         r.arg = self;
+        r.f04 = d;
+        r.callback = (void*)DrawTempoAgentRing;
         QueueDeferredRequest(&r);
     }
 }
