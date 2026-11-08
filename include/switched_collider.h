@@ -394,7 +394,9 @@ struct Player : TurningCollider {
     s32 f2730;              // 0x2730
     u8 pad2734[0x2740 - 0x2734];
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
-    u8 pad2744[0x2750 - 0x2744];
+    s32 f2744;              // 0x2744: mode 2's slow-down held (func_001D2BB8)
+    f32 f2748;              // 0x2748: mode 4's speed-up, 1 while held, eased back to 0 (func_001D2BB8)
+    u8 pad274C[0x2750 - 0x274C];
     void* f2750;            // 0x2750
     u8 pad2754[0x2758 - 0x2754];
     f32 f2758;              // 0x2758
