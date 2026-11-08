@@ -1859,7 +1859,37 @@ void func_001A0D60(Effect* self, f32 f)
 }
 
 
-INCLUDE_ASM(func_001A0DF0);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+
+// Draws the effect at its point seen from the camera, turned by the part of the camera's turn the
+// effect's age gives (twice its age times pi about the axis of its parameters, +0x40).
+void DrawCameraSpaceEffect(Effect* self, Camera* cam)
+{
+    Vec02 point;
+    Mat02 view;
+    Mat02 a;
+    Mat02 b;
+    Mat02 out;
+    Vec02 axis;
+    f32 angle;
+    f32 t;
+    Mat02 r2;
+    Mat02 r1;
+    Mat02* c = (Mat02*)self->rot50;
+
+    func_00144128(cam, &self->f120, &point);
+    MultiplyMatrices3x3(c, (Mat02*)&cam->g80, &view);
+    MatrixToAxisAngle(&view, &angle, &axis);
+    t = (g_gameTime - self->start) / self->life;
+    BuildAxisAngleMatrix(&axis, &a, angle * t);
+    BuildAxisAngleMatrix((Vec02*)((u8*)self->params + 0x40), &b, (t + t) * 3.14159274f);
+    MulRotationRowsInto(&r1, a, b);
+    MulRotationRowsIntoIndexed(&r2, r1, *c);
+    out = r2;
+    DrawEffectAt(self, cam, &point, (f32 (*)[4])&out);
+}
 
 void RunEffectEndCallback(Effect* self)
 {
@@ -3683,9 +3713,76 @@ void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
     SetPlacedObjectSpinFromFloats(self, 0.0f, 0.0f, w);
 }
 
-INCLUDE_RODATA(jtbl_0024CB30);
+void* FindHitTargetChild(Collider* self);
 
-INCLUDE_ASM(func_001A69F8);
+// The state the paired object should be in: free (1) until it reaches its attachment and a
+// free partner takes it (3) or none (2); while paired (2, 3) until a hit target child links
+// it (4); then back to an attachment (5) and close in on it (6, then 0); 9 ends in 10.
+s32 ChoosePairedObjectState(PairedObject* self)
+{
+    Vec02 v;
+    s32 s = self->state;
+    switch (s) {
+    case 1: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+            break;
+        }
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(v), Vu0::Q(self->v140)) < 10.0f) {
+            s = 2;
+            if (PairWithNearestFreeObject(self->controller, self) != 0) {
+                s = 3;
+            }
+        }
+        break;
+    }
+    case 2:
+    case 3: {
+        void* h = FindHitTargetChild(self);
+        if (h != 0) {
+            LinkPairedObjects((u8*)self->controller, self, (PairedObject*)h);
+            s = 4;
+        }
+        break;
+    }
+    case 4: {
+        u8* p = (u8*)self->activeHandle;
+        if (p != 0 && *(f32*)(p + 0x14) < *(f32*)((u8*)self->f594 + 0x34)) {
+            s = 4;
+            break;
+        }
+        if (func_001A6328((PairController*)self->controller, self) != 0) {
+            s = 5;
+        } else {
+            s = 2;
+        }
+        break;
+    }
+    case 5:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(v)) < 10.0f) {
+            s = 6;
+        }
+        break;
+    case 6:
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(((PlacedObject*)self->attachment)->v140)) < 10.0f) {
+            s = 0;
+        }
+        break;
+    case 0:
+    case 7:
+    case 8:
+    case 10:
+        break;
+    case 9:
+        s = 10;
+        break;
+    }
+    return s;
+}
 
 void SetPairedState(PairedObject* self, s32 mode)
 {

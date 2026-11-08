@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 824/828, checked 2026-11-07
+// BYTES 801/828 (96.7%), checked 2026-11-08
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -39,7 +39,7 @@
 #include "world.h"
 #include "object_cycler.h"
 #include "paired_object.h"
-// NEAR (2026-11-08, wave 4): 92.8% of the instructions: the frame (480), the chain walk, the fill loop, the rotations and the dead stores are retail's. Left: the chain's object is kept in v1 where retail has a0 (and the vector registers differ with it), retail reads the rows of the object's own rotation through v0 = o + 0xD0 (addiu v0, a0, 0xD0 once) and stores the product's rows to the matrix before the copy at 0xA0 and z, where here they come after, and the (i < n) test goes to v1 (v0 here). The product is written out with the function's x, y, z (the same slots serve the position block's temporaries) and a local r; MulRotationRows gives them slots of its own (frame 528).
+// NEAR (2026-11-08, night-sizex1): 18 lines from retail. The rotation's rows of the chain's object read by index through a pointer (const u128* q = &o->rot; q[i]) give retail's addiu v0, a0, 0xD0 and its loads; the last row's two stores chained (z = r.r[2] = ...) and N = r before M = r give retail's store order. Still differs: the chain's object is kept in v0 where retail has a0 (q then takes v0), which moves the VU0 registers of the first rotation (retail: o->pos vf2, M's rows vf6, vf5, vf3). Tried: no local for the object (840 bytes), q formed at the top of the body.
 void IgnoreStackLocal(Vec02* p);
 
 void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
@@ -100,18 +100,17 @@ void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat
             Vu0::Q(x) = Vu0::Rotate(M, Vu0::Q(o->v160));
             Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Q(x));
         }
-        const Mat02& q = o->rot;
+        const u128* q = (const u128*)&o->rot;
         u128 a0 = Vu0::Q(M.r[0]);
         u128 a1 = Vu0::Q(M.r[1]);
         u128 a2 = Vu0::Q(M.r[2]);
-        Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(q.r[0]));
+        Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
         r.r[0] = x;
-        Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(q.r[1]));
+        Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
         r.r[1] = y;
-        Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(q.r[2]));
-        r.r[2] = z;
+        Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+        N = r;
         M = r;
-        N = M;
         if (i < n) {
             if (pos != 0) {
                 pos[i] = P;

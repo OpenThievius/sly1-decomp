@@ -44,7 +44,7 @@ D_0024B5E0	0024B5E0	64	.rodata	src/main/file_18F988.cpp
 D_0024B660	0024B660	4608	.rodata	src/main/pause_menu.cpp
 D_0024C860	0024C860	12	.rodata	src/main/file_1963D8.cpp
 D_0024C870	0024C870	32	.rodata	src/main/file_198980.cpp
-D_0024C930	0024C930	600	.rodata	src/main/file_19E040.cpp
+D_0024C930	0024C930	648	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
 D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
 D_0024CFC0	0024CFC0	388	.rodata	src/main/timed_object.cpp
