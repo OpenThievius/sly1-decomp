@@ -53,8 +53,10 @@
 // the 4 placed, the climb stays at 89-93, as this file. A pseudo the .lreg model shows as free is
 // not always placed (local-alloc's own lifetimes, one insn longer at each end), and one local-alloc
 // places can be lost in global-alloc or reload, so the score has to come from the final code. This
-// file stays the best. The next attempt needs moves that change several long-lived constants
-// together; no single-constant objective found a descent.
+// file stays the best. With all moves together, a climb on the distance alone (gsearch.py, 90
+// compiles) went from 90 to 86. It got there only by piling up 50 coincidental per-call edits, and
+// exact fell to 2,527, so the gain is noise. The next attempt needs moves that change several
+// long-lived constants together; no single-constant objective found a descent.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
