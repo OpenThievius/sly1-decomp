@@ -615,7 +615,117 @@ s32 ClassifyAgainstUnitRange(f32 value)
     return 2;
 }
 
-INCLUDE_ASM(func_001909F0);
+// An entry of the tree walk of func_001909F0: a node still to test (0 once a side ends), the
+// node whose triangle the part reached (0 when it left the tree) and where along the segment the
+// part starts. A part that reached a triangle becomes a span.
+struct SegmentWalkEntry {
+    PlaneNode* node;
+    s32 leaf;
+    f32 t;
+};
+
+// The point at t along the segment from a to b.
+struct SegmentPoint {
+    static u128 At(const Vec02& a, const Vec02& b, f32 t)
+    {
+        return Vu0::MulXSum(Vu0::Q(a), Vu0::Scalar(1.0f - t), Vu0::Q(b), Vu0::Scalar(t));
+    }
+};
+
+s32 func_001909F0(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
+{
+    SegmentWalkEntry cur;
+    SegmentWalkEntry stack[32];
+    SegmentWalkEntry* top;
+    ColliderSpan* span;
+    ColliderSpan* last;
+
+    span = spans;
+    last = 0;
+    top = stack;
+    cur.node = root;
+    cur.leaf = 0;
+    cur.t = 0.0f;
+    top->node = 0;
+    top->leaf = 0;
+    top->t = 1.0f;
+    for (;;) {
+        while (cur.node == 0) {
+            if (cur.leaf != 0) {
+                if (last != 0 && cur.t == last->time[1]) {
+                    Vu0::Q(last->q[1]) = SegmentPoint::At(*a, *b, top->t);
+                    last->time[1] = top->t;
+                } else {
+                    if (span - spans >= max) {
+                        return max;
+                    }
+                    last = span++;
+                    last->f48 = 3;
+                    Vu0::Q(last->q[0]) = SegmentPoint::At(*a, *b, cur.t);
+                    Vu0::Q(last->q[1]) = SegmentPoint::At(*a, *b, top->t);
+                    last->time[0] = cur.t;
+                    last->time[1] = top->t;
+                }
+            }
+            if (top <= stack) {
+                return span - spans;
+            }
+            cur = *top;
+            top--;
+        }
+        f32 d0 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*a), Vu0::Q(cur.node->normal))) - cur.node->offset;
+        f32 d1 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*b), Vu0::Q(cur.node->normal))) - cur.node->offset;
+        s32 c0 = ClassifyAgainstUnitRange(d0);
+        s32 c1 = ClassifyAgainstUnitRange(d1);
+        if ((c0 == 1 && c1 != 0) || (c1 == 1 && c0 != 0)) {
+            cur.leaf = (s32)cur.node;
+            cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+        } else if ((c0 == 0 && c1 != 1) || (c1 == 0 && c0 != 1)) {
+            if (GetNeighbourTriangle(cur.node->above) != 0) {
+                cur.leaf = (s32)cur.node;
+                cur.node = 0;
+            } else {
+                cur.node = (PlaneNode*)cur.node->above;
+                cur.leaf = 0;
+            }
+        } else if (c0 == 2 && c1 == 2) {
+            cur.leaf = (s32)cur.node;
+            cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+        } else {
+            f32 cut = d0 / (d0 - d1);
+            f32 e0 = d1 * cur.t + (1.0f - cur.t) * d0;
+            f32 e1 = d1 * top->t + (1.0f - top->t) * d0;
+            if (cur.t < cut && cut < top->t) {
+                top++;
+                top->t = cut;
+                if (e0 <= 0.0f) {
+                    if (GetNeighbourTriangle(cur.node->above) != 0) {
+                        top->leaf = (s32)cur.node;
+                        top->node = 0;
+                    } else {
+                        top->node = (PlaneNode*)cur.node->above;
+                        top->leaf = 0;
+                    }
+                } else {
+                    top->leaf = (s32)cur.node;
+                    top->node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+                }
+            }
+            if (e0 < 0.0f || (e0 == 0.0f && e1 <= 0.0f)) {
+                cur.leaf = (s32)cur.node;
+                cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+            } else {
+                if (GetNeighbourTriangle(cur.node->above) != 0) {
+                    cur.leaf = (s32)cur.node;
+                    cur.node = 0;
+                } else {
+                    cur.node = (PlaneNode*)cur.node->above;
+                    cur.leaf = 0;
+                }
+            }
+        }
+    }
+}
 
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
