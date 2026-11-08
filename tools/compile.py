@@ -312,7 +312,7 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             s.write_text(asm)
         names = generated_names(source)
         if names:
-            asm = rename_generated(asm, names, strict=(ROOT / "nonmatching") not in src.parents)
+            asm = rename_generated(asm, names, strict=(ROOT / "src") in Path(src).resolve().parents)
         if release == "2.9-ee-991111":
             # The assembler that built Sony's libraries put a volatile store into the slot of
             # the call after it; ours leaves the slot empty (tools/volatile_slots.py).
