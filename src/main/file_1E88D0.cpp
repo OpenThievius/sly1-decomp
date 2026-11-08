@@ -31,6 +31,7 @@
 #include "attachment.h"
 #include "animation.h"
 #include "ramp_profile.h"
+#include "mul_rotation.h"
 #include "vu0.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -1468,7 +1469,33 @@ f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self
 
 INCLUDE_ASM(func_001EA818);
 
-INCLUDE_ASM(func_001EA918);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, f32* axis);
+void BuildAxisAngleMatrix(Vec02* axis, Mat02* out, f32 angle);
+
+void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit)
+{
+    Mat02 rel;
+    Mat02 built;
+    Vec02 axis;
+    f32 angle;
+    f32 step;
+    MultiplyMatrices3x3(from, to, &rel);
+    MatrixToAxisAngle(&rel, &angle, (f32*)&axis);
+    f32 a = angle;
+    f32 travel = ApproachValueWithRamp(0.0f, a, limit, ramp, &step);
+    if (outRot != 0) {
+        if (travel == angle) {
+            *outRot = *to;
+        } else {
+            BuildAxisAngleMatrix(&axis, &built, travel);
+            MulRotationRowsX(outRot, built, *from);
+        }
+    }
+    if (outSpin != 0) {
+        Vu0::Q(*outSpin) = Vu0::MulX(Vu0::Q(axis), Vu0::ScalarAt(step));
+    }
+}
 
 s32 RandomIntInRange(s32 a, s32 b)
 {
