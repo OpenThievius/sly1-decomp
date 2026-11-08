@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 1027/1120 (91.7%), checked 2026-11-08
+// Tried night-close8: the 3.0 weight named before the sum, onA/onB/d declared before it: no closer (40 and 42 differing words).
 // NEAR (2026-11-08, worker night-large2): the state switch, the frame test, the sixteen
 // headings, the wall, target and neighbour terms and the turn are retail's; 40 lines differ.
 // The wall fraction takes f22 where retail's is f26 (allocated after the inner loop's 0.5,
