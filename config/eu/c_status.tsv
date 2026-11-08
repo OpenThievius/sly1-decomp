@@ -1883,6 +1883,7 @@ func_001793F0	func_00179A50	match	version-specific
 func_00179590	func_00179BF0	match	
 func_00179690	func_00179CF0	match	
 func_001796D0	func_00179D30	match	
+func_00179A68	func_0017A0C8	match	version-specific
 func_0017A6D0	func_0017AD30	match	
 func_0017A700	func_0017AD60	match	version-specific
 func_0017A788	func_0017ADE8	match	
