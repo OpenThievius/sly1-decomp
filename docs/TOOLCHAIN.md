@@ -388,6 +388,20 @@ What retail shows, and what the compiler does:
   before a qmtc2, which eleven unmatched functions have and no C form here gives
   (func_00120700, func_00120470, func_00122DE0 and eight more).
 
+- **Untouched pass (night-untouched, 2026-11-08).** (1) A failure path that two tests share,
+  written once with a goto, lets CSE follow the first test's skip into the code after it and keep
+  an index product there; written twice (cross-jumping merges the copies after allocation), the
+  index is computed afresh as retail does (func_00203FD0's slot offset). (2) One variable for a
+  list node and for an attachment read elsewhere in the function gives retail's single saved
+  register for both (func_0012EBD8); one record pointer shared by three loops likewise
+  (func_00177990). (3) `n < sizeof(recs) / sizeof(recs[0])` is retail's sltiu bound of a signed
+  count. (4) Both stores to a vector local through Vu0::Set keep its address out of loop.c's
+  invariants, so a call forms it afresh (addiu) instead of taking a matrix local's hoisted copy
+  at the same offset (func_0013D278). (5) A helper that reads its vector through a pointer twice
+  gives retail's reload after a Scalar store for a buffer entry and its vmove copy for a stack
+  local (func_00154370's AddLimited). (6) The runtime's swap macro (do-while) is what its heap
+  sort's loops need; a plain block of the same statements is not (func_001FF1E0).
+
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
 read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved
