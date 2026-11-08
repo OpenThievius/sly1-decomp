@@ -775,6 +775,52 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   makes them, and volatile alone does not give retail's registers. The
   return types above do not change them.
 
+  What is now settled (2026-11-08, worked on func_001D5FA8, dumped with
+  `-dS -fsched-verbose-5`):
+  - **sched2 and the allocators are not the difference; sched1 is.** Built
+    with `-fno-schedule-insns` (a probe only: player_request.cpp needs
+    sched1, 16 of its 21 matched functions differ without it), an
+    explicit-guard copy of the function whose locals put the insns in this
+    order compiles to retail's sequence but for two registers (-1 and the
+    guard's 1 swap v0 and v1): the constants 5.0, 1.0, 0.5 and -100.0
+    loaded first, then the stores f44, f4, f40, f8, i28, f34, i48, the load
+    of 75.0, i68, the guard, f50, f60, f54. That order is what retail's
+    sched1 put out, and local-alloc then gives retail's f0/f1/f2/f3/f0.
+  - **What sched2 does with it.** After reload the record's base is s0,
+    which is set twice in the function, so alias analysis knows no base for
+    it, and a store through a `%lo` address (the guard; a field at offset 0
+    such as func_001D60B0's i0, stored as `sw v1,%lo(cfg)(s2)`) conflicts
+    with every store through s0: those stores are barriers in sched2, and
+    the stores between two of them keep sched1's order. A store whose
+    register a later constant reuses is pulled first (f44 before 75.0 takes
+    f0; f4, f24 and f44 in func_001D60B0; f20 before -1.0 in
+    func_001930B8), so the "source order" the near misses are written in is
+    partly sched2's, not the original's.
+  - **Why sched1 does not give that order here.** Pre-reload the stores are
+    independent (one pseudo base with a REG_EQUIV of the symbol) and every
+    constant load outranks every store (priority 4 against 2), so all five
+    float constants are loaded first (75.0 cannot then share -100.0's
+    register), and the stores come out by `INSN_REG_WEIGHT` (+1 for any
+    SET, -1 per REG_DEAD or REG_UNUSED note) before insn order: the store
+    where the base or a constant dies, and the guard store (two deaths),
+    go first. A full chain of dependent stores (the volatile probe) gives
+    the stores' order and the late 75.0, but interleaves the first loads
+    with the first stores, so local-alloc reuses f0 for 1.0 where retail
+    has four registers live. Retail's order needs the first stores not
+    ahead of the loads and the later ones chained: no plain C form found
+    gives that.
+  - **Ruled out besides the above:** an inline setter per field (through a
+    pointer), a constructor taking the values as parameters, memset
+    declared and called instead of FillMemory, an aggregate initialiser
+    (store_constructor clears with memset and stores the fields, but
+    through a temporary that is then copied), a label between the stores
+    (jump deletes it before sched1), `-g`, one local reused for -100.0 and
+    75.0 (it shares the register but the stores still sort by weight), the
+    record's fields mixed between `p->f` and its static's name (CSE gives
+    them one base), and the constants set before the FillMemory call (CSE
+    and the scheduler give the same code). func_001F7BE8 is a libkernel
+    function built by 2.9-ee-991111 and was not taken further.
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it

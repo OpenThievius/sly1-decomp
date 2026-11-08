@@ -5,6 +5,7 @@
 //       the record and its guard are a function-local static with an inline constructor
 //       (FillMemory, then the fields), at retail's labels through config/us/statics.tsv.
 //       Landing it also needs D_002BE490 (0xB0) split at 0x2BE510: the static is 0x80 bytes.
+// See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);
