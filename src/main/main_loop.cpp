@@ -14,6 +14,8 @@
 #include "value_range.h"
 #include "screen_fade.h"
 #include "movie_player.h"
+#include "word_copy.h"
+#include "list_iter.h"
 
 
 // The objects func_00184D78 orders: by the words at 0x304 and 0x308, then flag bit 38, then
@@ -156,7 +158,7 @@ void InitGlobalElementStack();
 // A run of lights of one kind in g_sortedLights, as UploadLightVolumes groups them for
 // CollectLightsForSphere: the first light, the count, the flag bits a caller can mask out and
 // the kind that picks the VU0 test.
-struct LightGroup { void* lights; s32 count; s32 flags; s16 kind; s16 fE; };
+struct LightGroup { void** lights; s32 count; s32 flags; u16 kind; s16 fE; };
 
 s32 g_lightingChangeFrame = 0;
 s32 g_lightCount = 0;
@@ -196,7 +198,120 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
     return x->f2D0 - y->f2D0;
 }
 
-INCLUDE_ASM(func_00184DE8);
+// A light (class 0x51) as UploadLightVolumes reads it: the sort keys, its direction, the word
+// it sends with it, the 0x60 bytes it sends for a volume, and its link in the world's list.
+struct LightVector { f32 x, y, z, w; };
+struct LightVolume { f32 w[24]; };
+struct LightObject : SortKeyedObject {
+    u8 pad310[0x334 - 0x310];
+    f32 f334;               // 0x334
+    u8 pad338[0x370 - 0x338];
+    LightVolume volume;     // 0x370
+    u8 pad3D0[0x410 - 0x3D0];
+    LightObject* next;      // 0x410
+};
+
+void HeapSortRecords(void* base, s32 count, s32 size, s32 (*cmp)(SortKeyedObject**, SortKeyedObject**));
+void* InitPacketWriter(PacketWriter* p);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void AllocateTempPacketBuffer(PacketWriter* p, s32 n);
+void BeginDmaTag(PacketWriter* p);
+void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void AddDmaEndTag(PacketWriter* p);
+void SubmitPacketBuffer(PacketWriter* p, s32 dma);
+s32 WaitDmaChannel(s32 dma, s32 b, s32 c);
+
+// Sorts the world's lights, groups the runs of one kind and flags (at most 16 to a group) and
+// sends each light's direction or volume to VU0 in one unpack.
+void UploadLightVolumes(World* world)
+{
+    ListFrame frame;        // the list walk's frame: retail's 16 unused bytes under the writer
+    PacketWriter pw;
+    LightVector dir;
+    s32 base;
+    u8* out;
+    s32 count = 0;
+    s32 slots = 0;
+    LightGroup* group = 0;
+    LightObject* l;
+    for (l = (LightObject*)world->list1BE8.head;
+         l != 0 && count < sizeof(g_sortedLights) / sizeof(g_sortedLights[0]); l = l->next) {
+        g_sortedLights[count++] = l;
+    }
+    HeapSortRecords(g_sortedLights, count, 4, CompareObjectsForSort);
+    g_lightGroupCount = 0;
+    g_lightCount = 0;
+    s32 i;
+    for (i = 0; i < count; i++) {
+        l = (LightObject*)g_sortedLights[i];
+        s32 kind = l->f2D0;
+        if (kind == 3) {
+            kind = 2;
+        }
+        s32 flags = 0;
+        if (l->f304 == 0) {
+            flags |= 1;
+        }
+        if (l->f308 != 0) {
+            flags |= 2;
+        }
+        if ((l->flags & (1ULL << 38)) != 0) {
+            flags |= 4;
+        }
+        if (group != 0 && group->count < 16 && group->kind == kind && group->flags == flags) {
+            group->count++;
+        } else {
+            if (g_lightGroupCount >= sizeof(g_lightGroups) / sizeof(g_lightGroups[0])) {
+                break;
+            }
+            group = &g_lightGroups[g_lightGroupCount++];
+            group->flags = flags;
+            group->count = 1;
+            group->kind = kind;
+            group->lights = &g_sortedLights[i];
+            group->fE = slots;
+            if (l->f304 != 0) {
+                g_lightCount = 1;
+            }
+        }
+        switch (kind) {
+        case 1:
+            slots += 1;
+            break;
+        case 2:
+            slots += 6;
+            break;
+        }
+    }
+    InitPacketWriter(&pw);
+    PushBackMemoryMark();
+    AllocateTempPacketBuffer(&pw, 0x102);
+    BeginDmaTag(&pw);
+    ReserveVifUnpack(&pw, 0xC, slots, 0, &base, &out);
+    for (i = 0; i < count; i++) {
+        l = (LightObject*)g_sortedLights[i];
+        switch (l->f2D0) {
+        case 1:
+            dir.x = -l->v140.x;
+            dir.y = -l->v140.y;
+            dir.z = -l->v140.z;
+            dir.w = l->f334;
+            WordCopy::Words(out, &dir, sizeof(dir) / 4);
+            out += sizeof(LightVector);
+            break;
+        case 2:
+        case 3:
+            WordCopy::Words(out, &l->volume, sizeof(l->volume) / 4);
+            out += sizeof(LightVolume);
+            break;
+        }
+    }
+    AddDmaEndTag(&pw);
+    SubmitPacketBuffer(&pw, g_vif0Channel);
+    WaitDmaChannel(g_vif0Channel, 0, 0);
+    PopBackMemoryMark();
+}
 
 INCLUDE_ASM(func_00185150);
 
