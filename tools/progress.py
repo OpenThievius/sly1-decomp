@@ -43,6 +43,28 @@ import nonmatching  # noqa: E402
 import todo  # noqa: E402
 import version_check  # noqa: E402
 import versions  # noqa: E402
+import symbols  # noqa: E402
+
+
+def us_counterparts():
+    """PAL's functions by name, each to its US counterpart's (config/eu/map.tsv)."""
+    out = {}
+    for line in (ROOT / "config" / "eu" / "map.tsv").read_text().splitlines()[1:]:
+        eu_name, _, _, us_name, _, _ = line.split("\t")
+        if us_name != "-":
+            out[eu_name] = us_name
+    return out
+
+
+def function_metadata(name, address, counterparts=None):
+    """A function's metadata in the report: its address, and the readable name config/names/ gives
+    it (docs/NAMING.md; a PAL function takes its US counterpart's) as the name to show. The
+    function keeps its address name as its identity."""
+    meta = {"virtual_address": str(address)}
+    shown = symbols.readable((counterparts or {}).get(name, name))
+    if shown and not shown.startswith("func_"):
+        meta["demangled_name"] = shown
+    return meta
 
 ROOT = versions.ROOT
 README = ROOT / "README.md"
@@ -228,6 +250,7 @@ def report(key):
     near = fuzzy(key)
     globals_ = c_data(key)
     unit = unit_of(key)
+    counterparts = us_counterparts() if key == "eu" else None
     units = []
     for kind, name, start, end, category, folder in todo.layout(key):
         if kind == "data":
@@ -261,7 +284,7 @@ def report(key):
                 "name": label,
                 "measures": m,
                 "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else near.get(n, 0.0),
-                               "address": str(a - members[0][1]), "metadata": {"virtual_address": str(a)}}
+                               "address": str(a - members[0][1]), "metadata": function_metadata(n, a, counterparts)}
                               for n, a, s in members],
                 "metadata": meta,
             }))
