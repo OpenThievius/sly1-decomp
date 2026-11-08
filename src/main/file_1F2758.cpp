@@ -7,6 +7,7 @@
 #include "warp_page.h"
 #include "oscillator.h"
 #include "camera.h"
+#include "game_clock.h"
 #include "list_iter.h"
 #include "screen_element.h"
 #include "shapes.h"
@@ -923,8 +924,104 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
     StartScreenFade(&g_screenFade, &m, self->f318);
 }
 
-INCLUDE_RODATA(jtbl_0024E860);
-INCLUDE_ASM(func_001F4AE0);
+extern s32 D_0026FA64;
+extern s32 D_002701C4;
+extern s32 D_0026F388;
+extern T217D_3D0 D_0026F138;
+extern T217D_440 g_typedTextCaptionBox;
+void UpdatePlacedObject(PlacedObject* self);
+void SetScreenElementHoldTime(void* e, f32 t);
+s32 GetEntryIdByKey(s32 key);
+void SetElementTextFromPackedEntry(void* e, s32 entry);
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+s32 IsPointInsideFaceTree(s32 tree, void* p);
+void StartObjectSubGroupFinish(ObjectSubGroup* self);
+
+void UpdateObjectSubGroup(ObjectSubGroup* self)
+{
+    Vec02 local;
+    Vec02 radius;
+    UpdatePlacedObject(self);
+    switch (self->f2E4) {
+    case 5: {
+        f32 t = self->f31C;
+        f32 zero = 0.0f;
+        if (zero < t) {
+            if (t < g_gameClock.time) {
+                StartObjectSubGroupFade(self);
+                self->f31C = zero;
+            }
+        }
+        return;
+    }
+    case 4:
+        if (D_0026FA64 == 0) {
+            if (D_002701C4 != 0 || g_typedTextCaptionBox.state == 1 || g_typedTextCaptionBox.state == 2
+                || (g_typedTextCaptionBox.state == 3 && g_typedTextCaptionBox.text[0] != 0)) {
+                D_0026F138.vt->m15(&D_0026F138);
+            } else {
+                SetScreenElementHoldTime(&D_0026F138, 0.0f);
+                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->f2FC));
+                D_0026F138.announce = 0;
+                D_0026F138.vt->m14(&D_0026F138);
+            }
+        }
+    case 0:
+    case 1:
+    case 3:
+        break;
+    default:
+        return;
+    }
+    Collider* player = (Collider*)GetActiveSwitchedCollider();
+    if (player == 0) {
+        return;
+    }
+    TransformPointBetweenFrames(0, self, &player->v140, &local);
+    s32 inside = IsPointInsideFaceTree(self->f2F8, &local);
+    s32 near = 0;
+    if (inside == 0 && self->f2DC != 0 && __builtin_fabsf(local.z) < 300.0f) {
+        if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(local), Vu0::Q(local)))) <= 1000.0f) {
+            near = 1;
+        }
+    }
+    switch (self->f2E4) {
+    case 3:
+        if (inside != 0) {
+            StartObjectSubGroupFinish(self);
+        } else if (near != 0) {
+            if (D_0026F388 == 0) {
+                Camera* c = g_camera;
+                u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->f40));
+                u128 ones = Vu0::Ones();
+                Vu0::Q(radius) = Vu0::FromFloat(100.0f);
+                if ((Vu0::PlaneSigns(Vu0::Q(c->planes[0]), Vu0::Q(c->planes[1]), Vu0::Q(c->planes[2]), d, ones, Vu0::Q(radius)) ^ 0xF0) == 0) {
+                    SetObjectSubGroupState(self, 4);
+                }
+            }
+        }
+        break;
+    case 4:
+        if (inside != 0) {
+            StartObjectSubGroupFinish(self);
+        } else if (near == 0) {
+            SetObjectSubGroupState(self, 3);
+        }
+        break;
+    case 1:
+        if (inside != 0) {
+            SetObjectSubGroupState(self, 0);
+        } else if (self->f320 < g_gameClock.time - self->f2E8) {
+            SetObjectSubGroupState(self, 3);
+        }
+        break;
+    case 0:
+        if (inside == 0) {
+            SetObjectSubGroupState(self, 1);
+        }
+        break;
+    }
+}
 
 void InitLookupObject(LookupObject* self) { InitPlacedObject(self); self->id = -1; }
 

@@ -516,7 +516,6 @@ func_001F2840	001F2840	1712	inline	C with inline assembly: VU0 macro instruction
 func_001F2EF0	001F2EF0	592	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001F3140	001F3140	184	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001F3408	001F3408	736	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001F4AE0	001F4AE0	824	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001F5268	001F5268	808	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001F59C4	001F59C4	148	handwritten	assembled from a .S source (the toolchain's libc.a)
 func_001F5A58	001F5A58	176	handwritten	assembled from a .S source (the toolchain's libc.a)

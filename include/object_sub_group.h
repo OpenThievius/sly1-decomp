@@ -16,7 +16,7 @@ struct ObjectSubGroup : PlacedObject {
     s32 f2D0;               // 0x2D0: FindActiveObjectSubGroup returns the first group with it set
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
     s32 f2D8;               // 0x2D8
-    u8 pad2DC[0x2E0 - 0x2DC];
+    s32 f2DC;               // 0x2DC: tested before the player counts as near (func_001F4AE0)
     s32 f2E0;               // 0x2E0
     s32 f2E4;               // 0x2E4: cleared by the load
     f32 f2E8;               // 0x2E8
@@ -33,7 +33,7 @@ struct ObjectSubGroup : PlacedObject {
     BaseObject** items;            // 0x314: the children, each created by func_0011E580
     s32 f318;               // 0x318
     f32 f31C;               // 0x31C
-    u8 pad320[0x324 - 0x320];
+    f32 f320;               // 0x320: the time the player must have been in range of f2E8 (func_001F4AE0)
     f32 f324;               // 0x324
     u8 pad328[0x330 - 0x328];
 };
