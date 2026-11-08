@@ -44,11 +44,14 @@ struct MaskedCollider : Collider {
     Slot20 slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
     s32 f614;               // 0x614: a key for func_0015A418, -1 at set-up
     s32 f618;               // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
-    u8 pad61C[0x624 - 0x61C];
+    s32 radiusKind;         // 0x61C: which radius slot 72 sends (0 radius3CC or f2A4, 1 radius3D0 or f2A8)
+    f32 f620;               // 0x620: sent to f618 with the radius (slot 72)
     f32 f624;               // 0x624: 1.0 at set-up
     f32 f628;               // 0x628: 0.8 at set-up
     f32 f62C;               // 0x62C: 1.2 at set-up
-    u8 pad630[0x63C - 0x630];
+    f32 spread;             // 0x630: the random speed slot 72 gives each released object
+    f32 spin;               // 0x634: the random spin it gives them
+    s32 key638;             // 0x638: the id key slot 72 checks each with (func_001833F0)
     s32 mask;               // 0x63C: which objects func_0013DB28 accepts: 0 any, bit 0 the player, bit 1 those in the lists, bit 2 those flagged 0x20
     s32 count640;           // 0x640
     void* list644[4];       // 0x644: func_0013DA48 appends (sets bit 1 of mask)
@@ -57,14 +60,16 @@ struct MaskedCollider : Collider {
     s32 count668;           // 0x668
     void* list66C[3];       // 0x66C: func_0013DAB8 appends
     s32 f678;               // 0x678: busy; slot 17 clears it and calls slot 72
-    u8 pad67C[0x680 - 0x67C];
+    s32 keep;               // 0x67C: set, slot 72 leaves it in its parent's list
     s32 hold;               // 0x680: func_0013D820 (an id of the table at D_00261420 is kept at 0x688)
-    u8 pad684[0x688 - 0x684];
+    s32 quiet;              // 0x684: set, slot 72 only marks it done
     s32 id688;              // 0x688: func_00140FF8 at set-up; slot 9 keeps it
     s32 f68C;               // 0x68C: 1 at set-up
     u8 pad690[0x698 - 0x690];
     s32 f698;               // 0x698: -1 in class 0x21
-    u8 pad69C[0x6B4 - 0x69C];
+    u8 pad69C[0x6A0 - 0x69C];
+    Vec02 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
+    s32 scatter6B0;         // 0x6B0: what it scatters (func_00152010)
     void* f6B4;             // 0x6B4: a block of 0x24 bytes (slot 9 copies it; func_0013DAF0 makes it)
     u8 pad6B8[0x6C0 - 0x6B8];
 
