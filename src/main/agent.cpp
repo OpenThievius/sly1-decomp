@@ -1648,7 +1648,69 @@ s32 IsAgentFree(void)
     return 0;
 }
 
-INCLUDE_ASM(func_001CB3D0);
+// What func_001CB3D0 reads of the player's f23A0 and f23A8: a word that, set, ends the test.
+struct Blocker_23A0 {
+    u8 pad00[0x54];
+    s32 f54;                // 0x54
+};
+struct Blocker_23A8 {
+    u8 pad00[0x6C];
+    s32 f6C;                // 0x6C
+};
+
+s32 MaskWorldBitsBySave(void);
+s32 IsObjectOfKind(void* obj, s32 kind);
+
+s32 func_001CB3D0(Agent* self)
+{
+    Player* t = (Player*)self->desc08()->m62(self);
+    if (IsObjectOfKind(t, 7) == 0) {
+        return 0;
+    }
+    if (t->f2220 != 6) {
+        return 0;
+    }
+    Vec02 d;
+    // The difference is kept, and a copy of it stored and used up in case 0 (vmove).
+    u128 diff = Vu0::Sub(Vu0::Q(t->v140), Vu0::Q(self->v140));
+    u128 dv = Vu0::Copy(diff);
+    Vu0::Q(d) = dv;
+    switch (t->f239C) {
+    case 3:
+        if (MaskWorldBitsBySave() & 0x12000) {
+            return 1;
+        }
+        break;
+    case 0:
+        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+            return 0;
+        }
+        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+            return 0;
+        }
+        if (Vu0::ToFloat(Vu0::Dot(dv, Vu0::Q(t->m110.r[0]))) > 0.0f) {
+            return 1;
+        }
+        break;
+    case 1:
+        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+            return 0;
+        }
+        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+            return 0;
+        }
+        if (Vu0::ToFloat(Vu0::Dot(diff, Vu0::Q(t->m110.r[0]))) < 0.0f) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (t->f2228 == 0x10) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 
 s32 IsAgentFacingBlocked(Agent* self)

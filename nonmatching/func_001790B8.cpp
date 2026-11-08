@@ -5,6 +5,7 @@
 //       frame, the jump table and the history search are retail's. ~12 compiles (struct copy, two quadword copies in either
 //       order, Vu0::Q copies).
 // Night-close2 (2026-11-08): the restore as two u128 copies, in either order or loaded before MoveMemory, gives the same swap (or callee-saved registers); func_001A2E68 has the same pattern.
+// Still differs (2026-11-08, night-close6): tmp declared in the restore block (copy-initialised or assigned), with case 0's two vectors as locals of their own: the same swap.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"

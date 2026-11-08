@@ -2742,7 +2742,75 @@ s32 GetCurrentEntryVariant(void)
     return 2;
 }
 
-INCLUDE_ASM(func_001A48C0);
+// The larger of two floats (max.s; through an inline function, b >? a reads a first and gives
+// the result b's register, as retail's pose counts are).
+static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
+
+struct Controlled558 {
+    u8 pad[0x558];
+    void* controller;
+};
+
+struct Controlled678 {
+    u8 pad[0x678];
+    void* controller;
+};
+
+void PostLoadPlacedObject(void* self);
+void* FindFirstObjectByIdMode4(World* w, s32 id, void* self);
+s32 GatherObjectsByMode(World* w, s32 a, s32 id, void* self, s32 mode, void** out);
+void* CreateObjectCopy(void* obj, World* w, s32 n);
+
+void func_001A48C0(PairController* self)
+{
+    PostLoadPlacedObject(self);
+    if (self->id64C == GetCurrentEntryVariant()) {
+        u8* s = (u8*)self;
+        void* first = FindFirstObjectByIdMode4(g_currentWorld, self->id2D8, self);
+        self->f354 = first;
+        ((Controlled678*)first)->controller = self;
+        PairedObject* a = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D0, self);
+        a->controller = self;
+        PairedObject* b = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D4, self);
+        b->controller = self;
+        if (self->id2DC != -1) {
+            self->target = (ObjectCreator*)FindFirstObjectByIdMode4(g_currentWorld, self->id2DC, self);
+            ((HitTarget*)self->target)->controller = self;
+        }
+        s32 i;
+        for (i = 0; (f32)i < MaxF(self->poseA[1], self->poseB[1]); i++) {
+            void* o;
+            if (i == 0) {
+                o = a;
+            } else {
+                o = CreateObjectCopy(a, g_currentWorld, *(s32*)((u8*)a + 0x18));
+            }
+            AppendToList(s + 0x374, o);
+        }
+        for (i = 0; (f32)i < MaxF(self->poseA[9], self->poseB[9]); i++) {
+            void* o;
+            if (i == 0) {
+                o = b;
+            } else {
+                o = CreateObjectCopy(b, g_currentWorld, *(s32*)((u8*)b + 0x18));
+            }
+            AppendToList(s + 0x390, o);
+        }
+        for (i = 0; i < self->idCount; i++) {
+            void* found[4];
+            s32 n = GatherObjectsByMode(g_currentWorld, 0x104, self->ids[i], self, 2, found);
+            void* hit = 0;
+            for (s32 k = 0; k < n; k++) {
+                if (IsObjectOfKind(found[k], 0x44) != 0) {
+                    hit = found[k];
+                    break;
+                }
+            }
+            ((Controlled558*)hit)->controller = self;
+            AppendToList(s + 0x3A0, hit);
+        }
+    }
+}
 
 void BlendPairControllerPose(PairController* self)
 {
@@ -3446,7 +3514,75 @@ void UpdatePairedObject(PairedObject* self)
     }
 }
 
-INCLUDE_ASM(func_001A6788);
+// The ground a paired object keeps to (its controller): a circle around center.
+struct PairArea {
+    u8 pad000[0x330];
+    Vec02 center;           // 0x330
+    f32 radius;             // 0x340
+};
+
+// v made unit length (no test for zero; func_001A6788).
+static inline u128 Normalized(Vec02 v)
+{
+    return Vu0::DivX(Vu0::Q(v), Vu0::Length(Vu0::Q(v)));
+}
+
+// The smaller of two floats (min.s; through an inline function the result takes b's register).
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
+
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
+f32 WrapAngle(f32 a);
+void SetPlacedObjectLocalVelocity(PlacedObject* self, Vec02* v);
+void SetPlacedObjectSpinFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
+
+void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
+{
+    Vec02 from;
+    Vec02 to;
+    Vec02 delta;
+    from = self->v140;
+    from.z = 0.0f;
+    to = *goal;
+    to.z = 0.0f;
+    PairArea* area = (PairArea*)self->controller;
+    if (0.0001f < area->radius) {
+        ColliderSpan span;
+        if (CollectBoundsSpans(&area->center, &from, &to, area->radius, 1, &span)) {
+            Vec02 mid;
+            Vec02 dir;
+            Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(span.q[0]), Vu0::Scalar(0.5f), Vu0::Q(span.q[1]), Vu0::Scalar(0.5f));
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(mid), Vu0::Q(((PairArea*)self->controller)->center));
+            Vu0::Q(dir) = Normalized(dir);
+            Vu0::Q(to) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(((PairArea*)self->controller)->radius * 1.5f));
+        }
+    }
+    Vu0::Q(delta) = Vu0::Sub(Vu0::Q(to), Vu0::Q(from));
+    f32 bearing = ArctangentOfRatio(delta.y, delta.x);
+    f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
+    if (backwards) {
+        heading = WrapAngle(heading + 3.1415927f);
+    }
+    f32 turn = WrapAngle(bearing - heading);
+    if (0.05235988f < __builtin_fabsf(turn)) {
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+    } else {
+        f32 speed = MinF(Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(delta))) / g_gameClock[2], self->maxSpeed);
+        if (backwards) {
+            speed = -speed;
+        }
+        Vec02 v;
+        Vu0::Q(v) = Vu0::FromFloats(speed, 0.0f, 0.0f);
+        SetPlacedObjectLocalVelocity(self, &v);
+    }
+    f32 w = turn / g_gameClock[2];
+    f32 lo = -self->maxTurn;
+    if (w < lo) {
+        w = lo;
+    } else if (self->maxTurn < w) {
+        w = self->maxTurn;
+    }
+    SetPlacedObjectSpinFromFloats(self, 0.0f, 0.0f, w);
+}
 
 INCLUDE_RODATA(jtbl_0024CB30);
 
