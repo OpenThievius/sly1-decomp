@@ -614,6 +614,20 @@ struct Vu0 {
         return r;
     }
 
+    static Vec MulAddX(Vec a, Vec b, Vec s)
+    {
+        Vec r;
+        r.q = MulAddX(a.q, b.q, s.q);
+        return r;
+    }
+
+    static Vec NormalizeOr(Vec v, Vec fallback)
+    {
+        Vec r;
+        r.q = NormalizeOr(v.q, fallback.q);
+        return r;
+    }
+
     static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
     {
         Vec r;
