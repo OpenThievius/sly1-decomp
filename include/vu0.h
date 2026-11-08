@@ -158,6 +158,18 @@ struct Vu0 {
         return r;
     }
 
+    // The x of a VU0 register as a float, qmfc2 and mtc1 in one sequence through a GPR of the
+    // compiler's choosing: retail's mtc1 follows the qmfc2 at once even where the scheduler
+    // has a store ready for the slot between them, which ToFloat's separate mtc1 lets it take
+    // (func_00187A88: the difference's sqc2 after the squared distance's mtc1).
+    static f32 ToFloatNow(u128 a)
+    {
+        f32 r;
+        u32 t;
+        __asm__("qmfc2 %1, %2\n\tmtc1 %1, %0" : "=f"(r), "=r"(t) : "j"(a));
+        return r;
+    }
+
     // The x of a VU0 register as the bits of a float: qmfc2 into a GPR, which retail stores
     // with sw straight to memory (ToFloat's f32 goes on to an FPR: mtc1, then swc1).
     static u32 ToBits(u128 a)

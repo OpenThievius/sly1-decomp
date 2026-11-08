@@ -354,7 +354,34 @@ void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5,
     }
 }
 
-INCLUDE_ASM(func_00187A88);
+void func_00187A88(Collider* self, Collider* other, void* a2)
+{
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(other->v140));
+    f32 rs = self->radius3CC;
+    f32 dist2 = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+    f32 sum = rs + other->radius3CC;
+    if (dist2 < 0.0001f) {
+        return;
+    }
+    if (sum * sum < dist2) {
+        return;
+    }
+    f32 dist = Fpu::Sqrt(dist2);
+    Vec02 point;
+    Vec02 n;
+    {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(1.0f / dist);
+        Vu0::Q(n) = Vu0::MulX(Vu0::Q(d), Vu0::Q(k));
+    }
+    {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(-rs);
+        Vu0::Q(point) = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(n), Vu0::Q(k));
+    }
+    CreatePooledContact(dist - sum, self, other, &point, &n, 7, 0, 0, a2);
+}
 
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 {
