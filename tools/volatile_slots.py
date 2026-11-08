@@ -45,6 +45,24 @@ def is_code(line):
     return bool(s) and not s.startswith(("#", ".")) and not s.endswith(":")
 
 
+def pair(op, reg, addr, jump):
+    """The assembler's own `lui $at` pair for a store to a symbol or constant, around `jump` (the
+    instruction whose slot the store fills). For a constant address the high half is written out
+    with the carry of a negative low half (`sw $3,0x1000b000` is `lui $at,0x1001` and
+    `sw $3,-20480($at)`): this toolchain's assembler takes `%hi` of a bare constant without
+    that carry, so the symbolic form would come out with `lui $at,0x1000` (func_00210F18)."""
+    try:
+        value = int(addr, 0)
+    except ValueError:
+        value = None
+    if value is None:
+        hi, lo = "%%hi(%s)" % addr, "%%lo(%s)" % addr
+    else:
+        lo = ((value & 0xFFFF) ^ 0x8000) - 0x8000
+        hi, lo = str(((value - lo) >> 16) & 0xFFFF), str(lo)
+    return ["\tlui\t$1,%s" % hi, jump, "\t%s\t%s,%s($1)" % (op, reg, lo)]
+
+
 def movable(line):
     """Whether the assembler would move this instruction into the slot of the return after it."""
     m = STORE.match(line)
@@ -86,7 +104,7 @@ def fill(asm):
                     out += [line, "\t%s\t%s,%s" % (op, reg, addr)]
                 else:
                     # a store to a symbol or constant: the assembler's own $at pair
-                    out += ["\tlui\t$1,%%hi(%s)" % addr, line, "\t%s\t%s,%%lo(%s)($1)" % (op, reg, addr)]
+                    out += pair(op, reg, addr, line)
                 out.append("\t.set\treorder")
                 store = None
                 continue
@@ -102,7 +120,7 @@ def fill(asm):
             m = STORE.match(prev)
             if m and not BASED.match(m.group(3)):
                 op, reg, addr = m.groups()
-                out += ["\tlui\t$1,%%hi(%s)" % addr, line, "\t%s\t%s,%%lo(%s)($1)" % (op, reg, addr)]
+                out += pair(op, reg, addr, line)
             else:
                 out += [line, prev]
             out.append("\t.set\treorder")

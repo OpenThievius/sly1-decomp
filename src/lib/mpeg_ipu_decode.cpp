@@ -1806,7 +1806,47 @@ void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
     while (*(volatile s32*)0x10002010 < 0) { }
 }
 
-INCLUDE_ASM(func_00210F18);
+// The record of a decode's input transfer in chunks of 0x3FF quadwords (func_00211090 fills it).
+struct Xfer_211090 {
+    volatile s32 done;      // 0x00: the chunks done
+    s32 error;              // 0x04: set when the IPU was still busy
+    s32 size;               // 0x08: the quadwords left
+    s32 addr;               // 0x0C: the next chunk's address
+    s32 total;              // 0x10: the chunks in all
+};
+
+// The DMA handler of the IPU's input channel: after each chunk, starts the next one (the last
+// with what is left), or marks an error when the channel was still busy; then ends the handler.
+s32 func_00210F18(s32 channel, void* arg)
+{
+    Xfer_211090* x = (Xfer_211090*)arg;
+    *(volatile u32*)0x1000E010 = 8;
+    x->done++;
+    if (*(volatile u32*)0x1000B020 != 0 || (*(volatile u32*)0x1000B000 & 0x100)) {
+        x->error = 1;
+        return 0;
+    }
+    s32 last = x->total - 1;
+    if (x->done < last) {
+        DisableInterrupts();
+        *(volatile u32*)0x1000B010 = x->addr;
+        *(volatile u32*)0x1000B020 = 0xFFC0;
+        *(volatile u32*)0x1000B000 = 0x100;
+        EnableInterrupts();
+        *(volatile u32*)0x10002000 = 0x700003FF;
+        x->addr = (x->addr + 0xFFC00) & 0xFFFFFFF;
+    } else if (x->done == last) {
+        x->size = x->size - x->done * 0x3FF;
+        DisableInterrupts();
+        *(volatile u32*)0x1000B010 = x->addr;
+        *(volatile u32*)0x1000B020 = x->size << 6;
+        *(volatile u32*)0x1000B000 = 0x100;
+        EnableInterrupts();
+        *(volatile u32*)0x10002000 = x->size | 0x70000000;
+    }
+    SyncAndEnableInterrupts();
+    return 0;
+}
 
 struct Queue_211090;
 struct Self_211090 {
@@ -1817,14 +1857,6 @@ struct Self_211090 {
 struct Msg_211090 {
     s32 cmd;
     s32 pad04[7];
-};
-
-struct Xfer_211090 {
-    volatile s32 done;
-    s32 error;
-    s32 size;
-    s32 addr;
-    s32 total;
 };
 
 s32 AddDmaHandlerAlt(s32 channel, s32 (*handler)(s32, void*), s32 next, void* arg);

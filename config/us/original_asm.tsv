@@ -416,7 +416,6 @@ func_001F6D30	001F6D30	16	handwritten	marked handwritten by the disassembler
 func_001F6EE0	001F6EE0	16	handwritten	marked handwritten by the disassembler
 func_001F6EF0	001F6EF0	16	handwritten	marked handwritten by the disassembler
 func_001F6F38	001F6F38	16	handwritten	marked handwritten by the disassembler
-func_001F71D0	001F71D0	148	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_001F7268	001F7268	4	remnant	stripped-function leftover
 func_001F84C0	001F84C0	20	remnant	stripped-function leftover
 func_001F8BF0	001F8BF0	4	remnant	stripped-function leftover
@@ -444,7 +443,6 @@ func_001FA890	001FA890	16	handwritten	marked handwritten by the disassembler
 func_001FA8D8	001FA8D8	16	handwritten	marked handwritten by the disassembler
 func_001FA8E8	001FA8E8	16	handwritten	marked handwritten by the disassembler
 func_001FA9B0	001FA9B0	16	handwritten	marked handwritten by the disassembler
-func_001FAA00	001FAA00	500	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_001FAC00	001FAC00	536	handwritten	128-bit MMI instruction
 func_001FD770	001FD770	44	remnant	stripped-function leftover
 func_00201570	00201570	4	remnant	stripped-function leftover
@@ -494,4 +492,3 @@ func_0020DBF0	0020DBF0	288	handwritten	128-bit MMI instruction
 func_0020DD10	0020DD10	276	handwritten	128-bit MMI instruction
 func_0020DE28	0020DE28	92	handwritten	128-bit MMI instruction
 func_0020DE88	0020DE88	96	handwritten	128-bit MMI instruction
-func_00210F18	00210F18	372	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame

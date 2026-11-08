@@ -526,9 +526,13 @@ shared helpers.
   DefineDrawEnvironment writes each register's address before its value, as retail stores them.
 - **The assembler and a macro in a delay slot.** A store to a constant address whose low half is
   negative (`sw $3,0x1000b000`, a macro of lui and sw) that the assembler moves into a `jal`'s
-  delay slot assembles here with the lui's carry lost (`lui at, 0x1000`, where retail has
-  0x1001; the same store outside a delay slot is right). func_00210F18 differs from retail in
-  those two words only (nonmatching/).
+  delay slot came out with the lui's carry lost (`lui at, 0x1000`, where retail has 0x1001; the
+  same store outside a delay slot was right). The build corrects it: tools/volatile_slots.py, which
+  already writes the `lui $at` / `jal` / `sw` of a volatile store into the call's slot, writes a
+  constant address's high half itself, with the carry (`lui $1,4097`, `sw $3,-20480($1)`), instead
+  of `%hi`/`%lo` of the bare constant, which this assembler takes without the carry. A symbol
+  keeps `%hi`/`%lo`. Only the stores that tool moves into a slot are affected (func_00210F18, now
+  matched).
 - **Left as they are.** func_001F71D0 is the only function with an inline `syscall` (`li $3,
   -0x2F; syscall`, its result moved from $v0), so it has no helper (a sequence one function
   alone has). func_001FAA00 keeps its loop counter in $t9 across calls, which the compiler never

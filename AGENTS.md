@@ -97,8 +97,14 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   calls its microprograms (`vcallms`) through $vf16 to $vf31 and the control registers $vi0 to
   $vi15. There a helper is still one instruction (a load into, or a store from, one named
   register, a read or write of one control register, `vcallms` itself, or the `vnop` retail
-  issues before it), named for the register it touches, in include/vu0.h. The C around it sets and reads those registers in
-  retail's order. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  issues before it), named for the register it touches, in include/vu0.h. The C around it sets
+  and reads those registers in retail's order. Two library functions, proved compiled C by
+  experiment (docs/ASM_CLASSIFICATION.md, "Two kernel-library functions examined"), keep the
+  original's own forms: func_001FAA00 declares its counter `register s32 i __asm__("$25")`, the
+  one register variable allowed, because retail holds it in a caller-saved register across
+  calls, which nothing else gives; and the two system sequences only they issue, `SetTlbWired`
+  and `CurrentThreadIdFromInterrupt` (include/system.h), are helpers although each occurs in one
+  function. No other function may do either. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
