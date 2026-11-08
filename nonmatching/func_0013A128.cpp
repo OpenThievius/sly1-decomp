@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 620/632 (98.1%), checked 2026-11-08
+// BYTES 622/632 (98.4%), checked 2026-11-08
 #include "common.h"
 #include "vu0.h"
 #include "world_listed_object.h"
@@ -7,9 +7,13 @@
 // addu a0, t0, v0 here and addu a0, v0, t0 in retail (the base and the index swapped, in every
 // form of the address tried); the second RemapQuadraticParameter call sets $f13 before a0, where
 // retail sets a0 first; and the last test of mode loads it into v0 where retail uses v1.
+// Still differs (2026-11-08, night-close5): FillMemory declared returning its pointer (as its
+// other callers have it) gives the last test's v1; left: the colour's addu operands and the
+// second call's $f13 before a0 (permute.py --auto, a function-scope base, `color[k]`, `out +=`
+// and `k * 4 + base` change nothing or lose the hoisted base).
 
 void AssignAnimRecord(WorldListedObject* self, void* x);
-void FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* block, s32 value, u32 size);
 
 // The part of the record from +0x120 that func_0013A128 reads through one pointer.
 struct LookSourceTail {

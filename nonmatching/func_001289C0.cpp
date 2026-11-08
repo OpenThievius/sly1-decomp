@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 581/592 (98.1%), checked 2026-11-07
+// BYTES 581/592 (98.1%), checked 2026-11-08
 // NEAR: every instruction and register matches except the last min: retail loads self->f80 into $f1 before the lui/mtc1 of 2000.0 into $f0; ours schedules the constant first (or, with the operands the other way round, swaps the two registers). Tried: operand order, a local for either operand, `cap = 2000.0f; cap = cap <? ...`.
+// Still differs (2026-11-08, night-close5): an inline min helper (both `<?` and if forms) leaves the constant's lui/mtc1 first.
 #include "common.h"
 #include "placed_object.h"
 #include "world.h"

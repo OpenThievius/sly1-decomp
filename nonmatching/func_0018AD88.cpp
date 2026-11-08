@@ -2,6 +2,7 @@
 // BYTES 173/176 (98.3%), checked 2026-11-08
 // NEAR (2026-11-08, night-gamec): three instructions: retail loads the state into v1 and 4 into v0, this the other way round; a case sharing the default gives retail's registers but adds a beqz
 // In the context of its file, src/main/gauge_agent.cpp: its declarations before the function, bodies cut.
+// Still differs (2026-11-08, night-close5): an if/else, `4 == state`, a state local and the default first leave state in v0 and 4 in v1.
 #include "common.h"
 #include "object_pool.h"
 #include "asm_func.h"

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 340/348 (97.7%), checked 2026-11-08
+// Still differs (2026-11-08, night-close5): the endpoints read inline (Q, Vec::Of or through Vec02**) or as Vec struct members leave [1] loaded first or swap the registers.
 #include "common.h"
 #include "point_graph_object.h"
 #include "placed_object.h"

@@ -2,6 +2,7 @@
 // BYTES 316/324 (97.5%), checked 2026-11-08
 // NEAR: identical but for two instructions in the kind-1 call: retail sets f12 with neg.s before the call and fills the delay slot with move t2,a2 (the a6 argument); ours puts neg.s in the delay slot and move t2,a2 before the call. Every form of the negation tried (-d, d = -d, in the argument) schedules the same.
 // Still differs (2026-11-08, night-close1): the float last or before a7 in the prototype, -ToFloat(...) in the initialiser and ToFloatMoved (which moves the VU0 registers) leave neg.s in the delay slot too.
+// Still differs (2026-11-08, night-close5): a named from, the negation inline and CreatePooledContact void leave neg.s in the slot; ToFloatMoved gives retail's order (the asm mtc1's latency lets neg.s issue sooner) but renumbers the VU0 registers of both cases.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

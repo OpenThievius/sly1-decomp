@@ -9,6 +9,7 @@
 // Tried: the mover or the animation as named locals, the chain written twice, the floats-first
 // prototype of FindCyclicRangeIndex (pose_source.cpp's).
 // In the context of its file, src/main/gauge_agent.cpp.
+// Still differs (2026-11-08, night-close5): FindCyclicRangeIndex with its floats first (pose_source.cpp's order) gives 14 lines, the sequence's f34 through g 62.
 #include "common.h"
 #include "vu0.h"
 #include "switched_collider.h"
