@@ -1014,6 +1014,14 @@ class VolatileSlotTest(unittest.TestCase):
         out = volatile_slots.fill(asm).split("\n")
         self.assertEqual(out[3:6], ["\tlui\t$1,%hi(D_00100000)", "\tjal\tf", "\tsw\t$3,%lo(D_00100000)($1)"])
 
+    def test_a_store_to_a_constant_carries_a_negative_low_half_into_the_lui(self):
+        asm = "\t#.set\tvolatile\n\tsw\t$3,268480512\n\t#.set\tnovolatile\n\tjal\tf"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[3:6], ["\tlui\t$1,4097", "\tjal\tf", "\tsw\t$3,-20480($1)"])
+        asm = "\t#.set\tvolatile\n\tsw\t$3,268464128\n\t#.set\tnovolatile\n\tjal\tf"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[3:6], ["\tlui\t$1,4096", "\tjal\tf", "\tsw\t$3,28672($1)"])
+
     def test_a_plain_store_or_a_store_before_other_code_stays(self):
         plain = "\tsw\t$3,0($2)\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(plain), plain)
