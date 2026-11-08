@@ -4,12 +4,13 @@
 // carries out the requests of the ring D_00625B78 (the system calls 0x33, 0x2B and 0x37 on
 // their argument, a message for any other kind); the set-up func_001F70F8, which creates the
 // semaphore and the thread on the stack D_00625770 and starts it once; and func_001F71D0
-// (original assembly, compiled with an inline system call: config/us/original_asm.tsv), which
+// (C with the kernel's interrupt-time thread-id call: docs/ASM_CLASSIFICATION.md), which
 // queues a request and signals the semaphore, with the word the linker left after it. Its
 // .rodata is the message, its .data the thread id D_00277128 and its .bss the stack, the
 // semaphore id and the ring, 0x625770 to 0x625F80.
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 struct Entry_1F7020 { u8 kind; u8 arg; };
 struct Queue_1F7020 { u32 head; u32 tail; Entry_1F7020 e[0x200]; };
@@ -92,6 +93,27 @@ s32 StartRequestThread(void)
     return g_requestThreadId;
 }
 
-INCLUDE_ASM(func_001F71D0);
+s32 WakeThreadFromInterrupt(s32 tid);
+s32 PostSemaphoreFromInterrupt(s32 h);
+
+// From an interrupt handler: wakes thread tid unless it is the current one; for the current
+// one, queues an empty request carrying its id and signals the request semaphore. Returns the
+// wake's result, -1 when there is no request thread, or the id.
+s32 func_001F71D0(s32 tid)
+{
+    s32 self = CurrentThreadIdFromInterrupt();
+    if (self != tid) {
+        return WakeThreadFromInterrupt(tid);
+    }
+    if ((u32)self >= 0x100 || g_requestThreadId == 0) {
+        return -1;
+    }
+    u32 t = g_requestRing.tail & 0x1FF;
+    g_requestRing.tail = t + 1;
+    g_requestRing.e[t].kind = 0;
+    g_requestRing.e[t].arg = self;
+    PostSemaphoreFromInterrupt(g_requestSemaphore);
+    return self;
+}
 
 LINKER_REMNANT(func_001F7268);

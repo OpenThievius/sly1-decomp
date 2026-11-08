@@ -50,4 +50,25 @@ static __inline__ u64 ReadCop0Count(void)
     return r;
 }
 
+// mtc0 n, $6; sync.p: sets the TLB's Wired register (COP0 $6), the number of entries a random
+// replacement never overwrites, and waits for the pipeline. Only the TLB set-up func_001FAA00
+// uses it, once with 0 and once with the count it wrote; it is one of the two system sequences
+// AGENTS.md lets a helper hold although it occurs in one function only (docs/ASM_CLASSIFICATION.md,
+// "Two kernel-library functions examined").
+static __inline__ void SetTlbWired(u32 n)
+{
+    __asm__ volatile("mtc0 %z0, $6\n\tsync.p" : : "dJ"(n));
+}
+
+// li $3, -0x2F; syscall: the kernel's call for the current thread's id from an interrupt
+// handler (the negative number is the interrupt-context form). Its result is in $v0, which the
+// caller keeps from there (func_001F71D0 copies it with daddu), so the value is bound to $2.
+// The other of the two one-function system sequences (see SetTlbWired).
+static __inline__ s32 CurrentThreadIdFromInterrupt(void)
+{
+    register s32 r __asm__("$2");
+    __asm__ volatile("li $3, -0x2F\n\tsyscall" : "=r"(r) : : "$3");
+    return r;
+}
+
 #endif

@@ -270,6 +270,11 @@ entry and func_001FA7D8's unscheduled `sync; cache; sync` with a hand-placed `no
 are VU0/MMI leaves, `.S` members of libc.a, a tail jump and one `sync` routine. None of the 169
 sets up a stack frame in its first four instructions, as these two do.
 
+Decision (2026-11-08, the maintainer): both are matched as the C they were, with the original's
+own forms allowed for these two functions only (AGENTS.md, "Plain C++"): func_001FAA00's
+register variable in $t9, and the two system sequences as helpers in include/system.h
+(`SetTlbWired`, `CurrentThreadIdFromInterrupt`). They are out of the table.
+
 ## What is not classified
 
 - **Multimedia instructions the compiler emits** (`por`, `pref`): 9 functions hold only those;
