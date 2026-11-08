@@ -2589,7 +2589,39 @@ void StepWalkerCollider(WalkerCollider* self)
     TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 
-INCLUDE_ASM(func_001A4538);
+s32 HasAnimationDrivenAttachment(void* ctx);
+
+// What func_001A4538 moves: a walker's point (+0x630), and a contact record's normal (+0x80)
+// with its entries of 0x40 bytes, each with a point at +0x30.
+struct Walker_001A4538 {
+    u8 pad0[0x630];
+    Vec02 point;            // 0x630
+};
+
+struct ContactEntry_001A4538 {
+    u8 pad0[0x30];
+    Vec02 point;            // 0x30
+};
+
+union Contact_001A4538 {
+    ContactEntry_001A4538 entries[1];   // 0x00
+    struct {
+        u8 pad0[0x80];
+        Vec02 normal;       // 0x80
+    };
+};
+
+void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i)
+{
+    if (HasAnimationDrivenAttachment(self) == 0) {
+        Vec02* p = &c->entries[i].point;
+        Vec02 d;
+        Vu0::Vec e = Vu0::Vec::Of(*p);
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->point),
+                             Vu0::MulX(Vu0::Q(c->normal), Vu0::Dot(Vu0::Q(self->point), Vu0::Q(c->normal))));
+        Vu0::Q(*p) = Vu0::Sub(e.q, Vu0::Q(d));
+    }
+}
 
 void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 {
