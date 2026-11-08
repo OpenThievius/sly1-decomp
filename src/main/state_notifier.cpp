@@ -18,6 +18,7 @@
 #include "screen_element.h"
 #include "font.h"
 #include "flag_table.h"
+#include "deferred_request.h"
 
 void func_0012AA28(void* a, s32 b);
 void LoadPlacedObject(void* a, void* b);
@@ -515,7 +516,58 @@ void func_00147428(StateNotifier* self, f32 dt)
     ClearRootTries(self);
 }
 
-INCLUDE_ASM(func_001478F0);
+// States 4 and 5 scale the drawn object by a curve of the time in the state: each arm evaluates
+// it and splats it itself, so cross-jumping leaves only the arms' own loads in them.
+void BuildScaledTransformMatrix(const void* pos, const void* rot, void* scale, void* out);
+void BuildPlacedObjectTransform(PlacedObject* self, void* src, void* dst);
+Mat4A MultiplyMatrices(const void* a, const void* b);
+void func_00125C90(PlacedObject* self, void* a, void* m);
+
+void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
+{
+    if (self->flags & (1ULL << 32)) return;
+    s32 state = self->state;
+    switch (state) {
+    case 4:
+    case 5: {
+        DrawTransform t;
+        Quad16 scale;
+        Mat4A s;
+        f32 k;
+        if (state == 4) {
+            f32 v = (D_0026185C - self->stateSince) / D_002619E4;
+            f32 lo = 0.0f;
+            f32 hi = 1.0f;
+            f32 x;
+            if (v < lo) x = lo;
+            else if (hi < v) x = hi;
+            else x = v;
+            f32* c = D_00261A80;
+            k = c[0];
+            k += x * (c[1] + x * c[2]);
+            Vu0::Q(scale) = Vu0::Splat(k);
+            } else {
+            f32 v = (D_0026185C - self->stateSince) / D_002619E8;
+            f32 lo = 0.0f;
+            f32 hi = 1.0f;
+            f32 x;
+            if (v < lo) x = lo;
+            else if (hi < v) x = hi;
+            else x = v;
+            f32* c = D_00261A90;
+            k = c[0];
+            k += x * (c[1] + x * c[2]);
+            Vu0::Q(scale) = Vu0::Splat(k);
+            }
+        BuildScaledTransformMatrix(D_00248D30, g_identityMatrix, &scale, &s);
+        BuildPlacedObjectTransform(self, m, &t);
+        *(Mat4A*)&t = MultiplyMatrices(&t, &s);
+        m = &t;
+        break;
+    }
+    }
+    func_00125C90(self, a, m);
+}
 
 
 #define CAMERA_AT(T, p, off) (*(T*)((u8*)(p) + (off)))

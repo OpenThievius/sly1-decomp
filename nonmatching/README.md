@@ -6,31 +6,25 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | Function | Version | Match | Checked |
 |---|---|---:|---|
 | [func_00150008](func_00150008.cpp) | us | 99.7% | 2026-11-08 |
-| [func_001A6788](func_001A6788.cpp) | us | 99.7% | 2026-11-08 |
-| [func_00155AB0](func_00155AB0.cpp) | us | 99.6% | 2026-11-08 |
 | [func_001CAF38](func_001CAF38.cpp) | us | 99.6% | 2026-11-08 |
 | [func_00120700](func_00120700.cpp) | us | 99.6% | 2026-11-08 |
+| [func_001D4698](func_001D4698.cpp) | us | 99.5% | 2026-11-08 |
 | [func_0016AB38](eu/func_0016AB38.cpp) | eu | 99.5% | 2026-11-08 |
 | [func_001790B8](func_001790B8.cpp) | us | 99.5% | 2026-11-08 |
 | [func_00210F18](func_00210F18.cpp) | us | 99.5% | 2026-11-08 |
 | [func_0014F270](func_0014F270.cpp) | us | 99.4% | 2026-11-08 |
-| [func_001B0838](func_001B0838.cpp) | us | 99.4% | 2026-11-08 |
-| [func_001CB3D0](func_001CB3D0.cpp) | us | 99.3% | 2026-11-08 |
 | [func_eu_0015DF58](eu/func_eu_0015DF58.cpp) | eu | 99.3% | 2026-11-08 |
-| [func_001D0C78](func_001D0C78.cpp) | us | 99.3% | 2026-11-08 |
-| [func_001821B0](func_001821B0.cpp) | us | 99.1% | 2026-11-08 |
 | [func_0018E040](func_0018E040.cpp) | us | 99.1% | 2026-11-08 |
 | [func_001A2E68](func_001A2E68.cpp) | us | 99.0% | 2026-11-08 |
+| [func_001782C0](func_001782C0.cpp) | us | 98.6% | 2026-11-08 |
 | [func_00210970](func_00210970.cpp) | us | 98.5% | 2026-11-08 |
-| [func_001D3E00](func_001D3E00.cpp) | us | 98.5% | 2026-11-08 |
+| [func_0013A128](func_0013A128.cpp) | us | 98.4% | 2026-11-08 |
 | [func_001E4578](func_001E4578.cpp) | us | 98.3% | 2026-11-08 |
 | [func_0018AD88](func_0018AD88.cpp) | us | 98.3% | 2026-11-08 |
 | [func_00203548](func_00203548.cpp) | us | 98.2% | 2026-11-08 |
-| [func_001782C0](func_001782C0.cpp) | us | 98.2% | 2026-11-08 |
 | [func_00120470](func_00120470.cpp) | us | 98.2% | 2026-11-08 |
 | [func_001289C0](func_001289C0.cpp) | us | 98.1% | 2026-11-08 |
 | [func_001C1F20](func_001C1F20.cpp) | us | 98.1% | 2026-11-08 |
-| [func_0013A128](func_0013A128.cpp) | us | 98.1% | 2026-11-08 |
 | [func_00112698](func_00112698.cpp) | us | 98.0% | 2026-11-08 |
 | [func_00112968](func_00112968.cpp) | us | 98.0% | 2026-11-08 |
 | [func_001F8290](func_001F8290.cpp) | us | 98.0% | 2026-11-08 |
@@ -38,31 +32,25 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_0018AE38](func_0018AE38.cpp) | us | 97.9% | 2026-11-08 |
 | [func_001BB290](func_001BB290.cpp) | us | 97.8% | 2026-11-08 |
 | [func_00191570](func_00191570.cpp) | us | 97.7% | 2026-11-08 |
+| [func_0018DEE8](func_0018DEE8.cpp) | us | 97.7% | 2026-11-08 |
 | [func_00126CB8](func_00126CB8.cpp) | us | 97.6% | 2026-11-08 |
 | [func_001C5C10](func_001C5C10.cpp) | us | 97.5% | 2026-11-08 |
 | [func_001C9DE0](func_001C9DE0.cpp) | us | 97.5% | 2026-11-08 |
-| [func_001A48C0](func_001A48C0.cpp) | us | 97.4% | 2026-11-08 |
 | [func_00211618](func_00211618.cpp) | us | 97.4% | 2026-11-08 |
 | [func_00172EE0](func_00172EE0.cpp) | us | 97.3% | 2026-11-08 |
 | [func_001C75B0](func_001C75B0.cpp) | us | 97.2% | 2026-11-08 |
 | [func_00161B10](func_00161B10.cpp) | us | 97.2% | 2026-11-08 |
-| [func_00187A88](func_00187A88.cpp) | us | 97.2% | 2026-11-08 |
 | [func_00203B18](func_00203B18.c) | us | 97.1% | 2026-11-08 |
 | [func_001549C8](func_001549C8.cpp) | us | 96.7% | 2026-11-08 |
-| [func_0014E5B8](func_0014E5B8.cpp) | us | 96.7% | 2026-11-08 |
-| [func_001478F0](func_001478F0.cpp) | us | 96.4% | 2026-11-08 |
 | [func_00181078](func_00181078.cpp) | us | 96.3% | 2026-11-08 |
 | [func_001EC3D8](func_001EC3D8.cpp) | us | 96.2% | 2026-11-08 |
+| [func_001BA5B0](func_001BA5B0.cpp) | us | 95.8% | 2026-11-08 |
 | [func_001DC4D0](func_001DC4D0.cpp) | us | 95.8% | 2026-11-08 |
 | [func_001389D0](func_001389D0.cpp) | us | 95.8% | 2026-11-08 |
-| [func_0013E430](func_0013E430.cpp) | us | 95.6% | 2026-11-08 |
 | [func_0016E738](func_0016E738.cpp) | us | 95.6% | 2026-11-08 |
 | [func_001316E8](eu/func_001316E8.cpp) | eu | 95.5% | 2026-11-08 |
-| [func_00182748](func_00182748.cpp) | us | 95.5% | 2026-11-08 |
 | [func_001971B8](func_001971B8.cpp) | us | 95.4% | 2026-11-08 |
-| [func_0018DEE8](func_0018DEE8.cpp) | us | 95.3% | 2026-11-08 |
 | [func_001DF600](func_001DF600.cpp) | us | 94.9% | 2026-11-08 |
-| [func_001D4698](func_001D4698.cpp) | us | 94.7% | 2026-11-08 |
 | [func_00188270](func_00188270.cpp) | us | 94.6% | 2026-11-08 |
 | [func_0014D280](func_0014D280.cpp) | us | 94.5% | 2026-11-08 |
 | [func_0017ABE8](func_0017ABE8.cpp) | us | 94.4% | 2026-11-08 |
@@ -83,6 +71,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_00145B68](func_00145B68.cpp) | us | 92.8% | 2026-11-08 |
 | [func_00187D08](func_00187D08.cpp) | us | 92.7% | 2026-11-08 |
 | [func_001B5B58](func_001B5B58.cpp) | us | 92.7% | 2026-11-08 |
+| [func_00131198](func_00131198.cpp) | us | 92.6% | 2026-11-08 |
 | [func_eu_0015C5C0](eu/func_eu_0015C5C0.cpp) | eu | 92.5% | 2026-11-08 |
 | [func_0014F168](func_0014F168.cpp) | us | 92.3% | 2026-11-08 |
 | [func_001B2140](func_001B2140.cpp) | us | 92.2% | 2026-11-08 |
@@ -163,6 +152,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001B40C8](func_001B40C8.cpp) | us | 68.5% | 2026-11-08 |
 | [func_001A2D88](func_001A2D88.cpp) | us | 68.3% | 2026-11-08 |
 | [func_001719E8](func_001719E8.cpp) | us | 68.0% | 2026-11-08 |
+| [func_0019B378](func_0019B378.cpp) | us | 66.3% | 2026-11-08 |
 | [func_0015BFC0](func_0015BFC0.cpp) | us | 65.8% | 2026-11-08 |
 | [func_001A7800](func_001A7800.cpp) | us | 65.2% | 2026-11-08 |
 | [func_001CC490](func_001CC490.cpp) | us | 64.2% | 2026-11-08 |
@@ -197,6 +187,8 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_00128598](func_00128598.cpp) | us | size differs | 2026-11-08 |
 | [func_0012CD78](func_0012CD78.cpp) | us | size differs | 2026-11-08 |
 | [func_00130C58](func_00130C58.cpp) | us | size differs | 2026-11-08 |
+| [func_00131F60](func_00131F60.cpp) | us | size differs | 2026-11-08 |
+| [func_001366A0](func_001366A0.cpp) | us | size differs | 2026-11-08 |
 | [func_0013A618](func_0013A618.cpp) | us | size differs | 2026-11-08 |
 | [func_0013A940](func_0013A940.cpp) | us | size differs | 2026-11-08 |
 | [func_0013BC80](func_0013BC80.cpp) | us | size differs | 2026-11-08 |
@@ -220,6 +212,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_0015BD48](func_0015BD48.cpp) | us | size differs | 2026-11-08 |
 | [func_0015F320](func_0015F320.cpp) | us | size differs | 2026-11-08 |
 | [func_0015FD78](func_0015FD78.cpp) | us | size differs | 2026-11-08 |
+| [func_00165AE8](func_00165AE8.cpp) | us | size differs | 2026-11-08 |
 | [func_00166690](func_00166690.cpp) | us | size differs | 2026-11-08 |
 | [func_0016BEA0](func_0016BEA0.cpp) | us | size differs | 2026-11-08 |
 | [func_0016FD70](func_0016FD70.cpp) | us | size differs | 2026-11-08 |
@@ -228,7 +221,9 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001733B8](func_001733B8.cpp) | us | size differs | 2026-11-08 |
 | [func_001796D0](func_001796D0.cpp) | us | size differs | 2026-11-08 |
 | [func_0017AF38](func_0017AF38.cpp) | us | size differs | 2026-11-08 |
+| [func_0017D5D8](func_0017D5D8.cpp) | us | size differs | 2026-11-08 |
 | [func_0017E088](func_0017E088.cpp) | us | size differs | 2026-11-08 |
+| [func_0017F018](func_0017F018.cpp) | us | size differs | 2026-11-08 |
 | [func_0017FB78](func_0017FB78.cpp) | us | size differs | 2026-11-08 |
 | [func_00181658](func_00181658.cpp) | us | size differs | 2026-11-08 |
 | [func_00185D20](func_00185D20.cpp) | us | size differs | 2026-11-08 |
@@ -254,6 +249,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001A3730](func_001A3730.cpp) | us | size differs | 2026-11-08 |
 | [func_001A3D40](func_001A3D40.cpp) | us | size differs | 2026-11-08 |
 | [func_001A69F8](func_001A69F8.cpp) | us | size differs | 2026-11-08 |
+| [func_001A8C90](func_001A8C90.cpp) | us | size differs | 2026-11-08 |
 | [func_001ABE70](func_001ABE70.cpp) | us | size differs | 2026-11-08 |
 | [func_001AF820](func_001AF820.cpp) | us | size differs | 2026-11-08 |
 | [func_001B4330](func_001B4330.cpp) | us | size differs | 2026-11-08 |
@@ -262,6 +258,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001B8B90](func_001B8B90.cpp) | us | size differs | 2026-11-08 |
 | [func_001B9D10](func_001B9D10.cpp) | us | size differs | 2026-11-08 |
 | [func_001BC0E0](func_001BC0E0.cpp) | us | size differs | 2026-11-08 |
+| [func_001BCD00](func_001BCD00.cpp) | us | size differs | 2026-11-08 |
 | [func_001C3C98](func_001C3C98.cpp) | us | size differs | 2026-11-08 |
 | [func_001C3EB0](func_001C3EB0.cpp) | us | size differs | 2026-11-08 |
 | [func_001C4FF8](func_001C4FF8.cpp) | us | size differs | 2026-11-08 |
@@ -280,6 +277,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001D9488](func_001D9488.cpp) | us | size differs | 2026-11-08 |
 | [func_001D9AC8](func_001D9AC8.cpp) | us | size differs | 2026-11-08 |
 | [func_001DA320](func_001DA320.cpp) | us | size differs | 2026-11-08 |
+| [func_001DEBE8](func_001DEBE8.cpp) | us | size differs | 2026-11-08 |
 | [func_001E2438](func_001E2438.cpp) | us | size differs | 2026-11-08 |
 | [func_001E4C48](func_001E4C48.cpp) | us | size differs | 2026-11-08 |
 | [func_001E8A50](func_001E8A50.cpp) | us | size differs | 2026-11-08 |
@@ -292,6 +290,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001EDEF0](func_001EDEF0.cpp) | us | size differs | 2026-11-08 |
 | [func_001EE090](func_001EE090.cpp) | us | size differs | 2026-11-08 |
 | [func_001EEA40](func_001EEA40.cpp) | us | size differs | 2026-11-08 |
+| [func_001F0AE0](func_001F0AE0.cpp) | us | size differs | 2026-11-08 |
 | [func_001F5268](func_001F5268.cpp) | us | size differs | 2026-11-08 |
 | [func_001F8DB8](func_001F8DB8.cpp) | us | size differs | 2026-11-08 |
 | [func_001F9028](func_001F9028.cpp) | us | size differs | 2026-11-08 |

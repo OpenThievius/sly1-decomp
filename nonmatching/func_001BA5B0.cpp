@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1577/1656 (95.2%), checked 2026-11-08
+// BYTES 1587/1656 (95.8%), checked 2026-11-08
 // NEAR (2026-11-08, night-large3): the whole function is right but for registers in two places:
 // the six step addresses kept in s1, s4..s7, fp are hoisted before the first gain loop with
 // &spin (sp+0x30) and &spinAlong (sp+0xB0) in s5 and s4, where retail has s4 and s5; and in the
 // rotation of the three rows by the shortest arc, retail's rows take vf2, vf6, vf5 and the third
 // row's vector vf3 (ours: vf3, vf5, vf4, and vf2), which moves the stores of the rotated rows.
 // Tried: RotateUntied (gives retail's ties; Rotate does not), the rows as values (RotateRows),
-// Vec::Of for the vectors: no change.
+// Vec::Of for the vectors: no change. Night-close7: func_00156288 declared with its floats after
+// the two pointers (retail sets a0 and a1 before $f12) fixes the last call's argument order.
 #include "common.h"
 #include "sound_record.h"
 #include "script_value.h"
@@ -49,7 +50,7 @@ void SteerColliderTowardPosition(Collider* self, s32 a, s32 b, Vec02* target, f3
 void SteerColliderTowardRotation(Collider* self, s32 a, s32 b, Vec02* target, f32* gains, f32 dt);
 void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
 f32 Arccosine(f32 x);
-void func_00156288(f32 dt, f32 a, f32 b, Collider* self, AttachedSet* other, Vec02* hit, Vec02* point);
+void func_00156288(Collider* self, AttachedSet* other, f32 dt, f32 a, f32 b, Vec02* hit, Vec02* point);
 void StopSoundRecord(void* self, s32 n);
 
 struct Oscillated_1BA5B0 { u8 pad00[0xC]; void* oscillator; };
@@ -150,7 +151,7 @@ void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
         AddColliderTorque(self, &torque);
     }
     if (0.0f < depth && depth < 1.0f && 0.9f < normal.z) {
-        func_00156288(dt, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f, self, other, &hit, &point);
+        func_00156288(self, other, dt, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f, &hit, &point);
     } else if (self->desc->flags & 8) {
         StopSoundRecord(((SoundOwner_1BA5B0*)self)->sound, 0);
     }

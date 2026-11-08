@@ -406,7 +406,25 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
     }
 }
 
-INCLUDE_ASM(func_0014E5B8);
+// The Hermite evaluation (func_00130540) with its three floats first: retail sets $f12 and
+// $f13 among the pointer arguments, which the floats' place in the list decides.
+extern const Vec02 g_unitXVector;
+void EvaluateHermiteVectorSegment(f32 u, f32 v, f32 w, void* p0, void* t0, void* p1, void* t1, void* a4, void* a5, s32 a6);
+
+void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
+{
+    f32 a;
+    f32 b;
+    s32 i = FindPathCurveSegmentByTime(self, t, &a, &b);
+    s32 off = i * 16;
+    s32 next = off + 16;
+    EvaluateHermiteVectorSegment(b, a, 1.0f, (u8*)self->points + off, (u8*)self->outTan + off, (u8*)self->points + next, (u8*)self->inTan + next, a1, a2, 0);
+    if (a2) {
+        u128 v = Vu0::Q(*a2);
+        u128 fb = Vu0::Q(g_unitXVector);
+        Vu0::Q(*a2) = Vu0::NormalizeOrMoved(v, fb);
+    }
+}
 
 void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
 {
