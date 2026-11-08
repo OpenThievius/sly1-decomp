@@ -2206,8 +2206,106 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
 
 INCLUDE_ASM(func_001EC7A8);
 
-INCLUDE_RODATA(jtbl_0024E740);
-INCLUDE_ASM(func_001EC828);
+void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key);
+
+struct TempoNoticeRec {
+    void* object;           // 0x00
+    u8 pad04[4];
+    s32 id;                 // 0x08
+};
+
+struct TempoLineSub {
+    u8 pad00[0x78];
+    f32 f78;                // 0x78
+};
+
+struct TempoLine {
+    u8 pad00[0x48];
+    u8* rec;                // 0x48
+    u8 pad4C[0x60 - 0x4C];
+    TempoLineSub sub;       // 0x60
+    u8 padDC[0xF0 - 0xDC];
+    Vec02 vF0;              // 0xF0
+};
+
+void ChooseObjectPoolItem(void* timeline);
+void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
+void func_001A8C90(void* timeline, s32 a);
+void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
+void SetCachedVoiceParam(s32 a, s32 b);
+s32 GetCachedVoiceParam(s32 a);
+
+void func_001EC828(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
+{
+    Vec02 a;
+    Mat02 b;
+    Mat02 rot;
+    Vec02 p;
+    s32 key;
+    s32 voice;
+
+    switch (kind) {
+    case 0x13:
+        if (rec->object == self->f7E0 && rec->id == 0x1A5) {
+            TempoLine* line = (TempoLine*)self->fC24[self->fC40];
+            ChooseObjectPoolItem(line);
+            TempoLineSub* sub = &line->sub;
+            f32 half = self->fC88 * 0.5f;
+            f32 t = self->fC64 + self->fC44 - g_gameTime[0] + ((f32*)self->fC3C)[0x684 / 4] * half;
+            u8* r = line->rec;
+            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((BeatPressCollider*)self->fC3C)->f618[self->fC40];
+            GetPlacementRecordTransform(sub, &a, &b, 0);
+            ComputeObjectFrameAtTime(fp->object, 0, &p, &rot, 0, 0, t);
+            Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
+            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
+            *(f32*)(r + 0x690) = d;
+            *(f32*)(r + 0x6F0) = d;
+            sub->f78 = t * 1.25f;
+            func_001A8C90(line, 1);
+            return;
+        }
+        break;
+    case 6: {
+        s32 i;
+        for (i = 0; i < self->fC68; i++) {
+            if ((void*)self->fC6C[i].player == (void*)rec) {
+                break;
+            }
+        }
+        if (i < self->fC68) {
+            RemoveTempoAgentEntry(self, (AnimationPlayer*)rec);
+        }
+        break;
+    }
+    case 0x14:
+        if ((void*)rec == self->fC54) {
+            GetStateWalkerCurrentKey(rec, &key);
+            switch (key) {
+            case 0x4EC: voice = 0; break;
+            case 0x4ED: voice = 1; break;
+            case 0x4EE: voice = 2; break;
+            case 0x4EF: voice = 3; break;
+            case 0x4F0: voice = 4; break;
+            case 0x4F1:
+            case 0x4F2: voice = 5; break;
+            case 0x4F3: voice = 6; break;
+            case 0x4F4:
+            case 0x4F5: voice = 7; break;
+            case 0x4F6: voice = 8; break;
+            case 0x4F7: voice = 9; break;
+            case 0x4F8: voice = 10; break;
+            }
+            if (voice != GetCachedVoiceParam(0)) {
+                D_00275DBC = voice;
+                D_00275DB8 = 1;
+                SetCachedVoiceParam(0, voice);
+            }
+        }
+        break;
+    }
+done:
+    HandleAgentNotification(self, kind, rec);
+}
 
 void SyncTempoAgentEntries(TempoAgent* self)
 {
