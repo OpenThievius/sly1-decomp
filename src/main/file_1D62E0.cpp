@@ -7,6 +7,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "pad_record.h"
 #include "deferred_request.h"
 #include "list_iter.h"
 #include "switched_collider.h"
@@ -1270,7 +1271,112 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     }
 }
 
-INCLUDE_ASM(func_001D9D78);
+void ComputeCameraRelativeStickHeading(Camera* camera, PadRecord* pad, s32 flag, f32* out);
+void ClearPadPressedBits(PadRecord* pad, s32 bits);
+void HandleStepSequenceSkipButtons(PathFollower* self, PadRecord* pad);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other);
+void CountDownPathFollowerLap(PathFollower* self);
+extern s32 g_movieChecksumFailed;
+extern float D_002751DC;
+extern s32 D_002751D4;
+
+// The pad's control of a path follower: its heading from the stick, its pace in mode 2 and the
+// button 0x80, then by kind the race places (0) or the end of the round (1).
+void ControlPathFollower(PathFollower* self, PadRecord* pad)
+{
+    if (self->fB34 != 1) {
+        if (0.0f < pad->f48) {
+            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f694);
+        } else {
+            self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+        }
+    }
+    if (self->fB34 == 2) {
+        self->f698 = self->f618 * pad->f48;
+        if (g_movieChecksumFailed != 0) {
+            self->f698 = self->f698 * 0.4f;
+        }
+        if ((pad->flags & 0x80) != 0) {
+            ClearPadPressedBits(pad, 0x80);
+            switch (self->fB30) {
+            case 0:
+                if (self->f858 > 0 && D_002751DC < g_gameTime - self->f854) {
+                    CountDownPathFollowerLap(self);
+                    StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
+                } else {
+                    StartSoundEffect(0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                }
+                break;
+            case 1:
+                if (self->fB44 != 0) {
+                    SetStateWalkerTarget((StateTrigger*)self->fB48, 0x485);
+                    self->pushedCount = 0;
+                }
+                break;
+            case 2:         // a kind with nothing to do: retail's compare tree has it
+                break;
+            }
+        }
+    }
+    HandleStepSequenceSkipButtons(self, pad);
+    if (self->fAFC != 0) {
+        self->f698 = self->fAFC->f1C <? self->f698;
+    }
+    switch (self->fB30) {
+    case 0: {
+        WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
+        if (r != 0) {
+            void* dev = r->f48;
+            s32 code;
+            GetStateWalkerTargetKey(dev, &code);
+            if (code == -1) {
+                GetStateWalkerCurrentKey(dev, &code);
+            }
+            if (code < 0x431) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
+                    PathFollower* found[16];
+                    s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
+                    s32 place = 1;
+                    for (s32 i = 0; i < n; i++) {
+                        if (self != found[i] && IsPathFollowerAhead(found[i], self) != 0) {
+                            place++;
+                        }
+                    }
+                    if (place != self->fB08 || n != self->fB0C) {
+                        self->fB08 = place;
+                        self->fB0C = n;
+                        self->fB10 = g_gameClock[1];
+                    }
+                }
+            }
+        }
+        break;
+    }
+    case 1: {
+        WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
+        if (r != 0) {
+            void* dev = r->f48;
+            s32 code;
+            GetStateWalkerTargetKey(dev, &code);
+            if (code == -1) {
+                GetStateWalkerCurrentKey(dev, &code);
+            }
+            if (code == 0x42F) {
+                if (D_00272430.own >= D_002751D4) {
+                    SetStateWalkerTarget((StateTrigger*)dev, 0x432);
+                } else if (D_002726B0.own >= D_002751D4) {
+                    SetStateWalkerTarget((StateTrigger*)dev, 0x431);
+                    RaiseScatterLevels(g_scatterController, 1.0f);
+                }
+            }
+        }
+        break;
+    }
+    case 2:             // as above
+        break;
+    }
+}
 
 void UpdatePathFollowerScreenElements(PathFollower* self)
 {
