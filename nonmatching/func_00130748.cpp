@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 967/1024 (94.4%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): the rotation's Hermite step (two rotations and their
 // spins, at t of dur, into a rotation and a spin), all its code in retail's order, 31 instructions

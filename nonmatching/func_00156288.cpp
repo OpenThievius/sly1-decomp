@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1015/1084 (93.6%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): an effect spawner's splash (its sound by distance, the
 // effect, and a burst through SpawnEffectsAt at 500 and beyond), retail's code up to the burst's

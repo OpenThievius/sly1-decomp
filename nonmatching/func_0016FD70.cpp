@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1064/1088, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): the player's upright torque: the ramp profile blended
 // by the ground speed and scaled by 0x634 (D_00263740 alone off the ground), the tilt and the
 // heading to the goal matrix 0x660, the two speeds ApproachValueClampingVelocity gives, the

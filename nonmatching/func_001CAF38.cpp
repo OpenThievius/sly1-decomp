@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1004/1008 (99.6%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): all but two instructions: in the query branch retail
 // loads the agent's position into v1 and forms &c->end[j] in v0; here the two registers are swapped

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1060/1072, checked 2026-11-08
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): the trigger zone's start: the walk of its children
 // (quads for state 0, rotations for state 1) and the axes of each state, retail's code to the end

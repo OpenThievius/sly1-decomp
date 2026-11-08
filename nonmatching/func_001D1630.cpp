@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1088/1100, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): the player's frame on its path at a length: the path's
 // start direction, then lengths stepped out on both sides until the direction there turns less
 // than 0.9 away from it, the shortest-arc rotation of the path's offset, and the frame built

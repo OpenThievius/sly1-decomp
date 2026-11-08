@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1120/1108, checked 2026-11-08
 // BYTES 0/0, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): CollectTreeNodeSpans, the walk of a segment through a
 // mesh's BSP tree (a stack of 32 entries) that writes a span for each run behind a face, retail's

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1207/1240 (97.3%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): CapturePlayerPose, the player's camera pose (the path's
 // point and direction in state 7, the eased height otherwise, the eased offset, then the pose's

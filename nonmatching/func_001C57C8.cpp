@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1068/1060, checked 2026-11-08
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): the turning collider's ground contacts: the highest
 // contact that holds it up (slot 86) becomes the pivot (f690, v6A0, v6B0), then its own contacts

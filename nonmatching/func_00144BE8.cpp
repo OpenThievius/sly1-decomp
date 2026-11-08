@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 944/1036 (91.1%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): the camera's placement toward a target with its angles
 // blended by springs (flags bit 0), retail's code in every block but the blend's: there the

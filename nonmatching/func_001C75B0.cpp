@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1163/1196 (97.2%), checked 2026-11-08
 // BYTES 0/0, checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): the agent's step (an animation's motion, the turn toward
 // its heading, a spline to a time, or the turning collider's step), all but 11 lines retail's. In

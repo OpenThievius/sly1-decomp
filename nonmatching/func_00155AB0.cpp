@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1136/1140 (99.6%), checked 2026-11-08
 // NEAR (2026-11-08, worker night-large1): an effect spawner's update (the delay, the check that
 // it or one of its listed objects is near the camera, then the count each mode spawns, the burst
 // and the rate's redraw), retail's code but for one pair of loads: in mode 3 the bounds of the
