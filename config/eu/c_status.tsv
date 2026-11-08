@@ -3133,6 +3133,7 @@ func_001D5468	func_001D6150	match
 func_001D54E0	func_001D61C8	match	rodata
 func_001D5620	func_001D6308	match	
 func_001D5650	func_001D6338	match	
+func_001D62E0	func_001D6FC8	match	
 func_001D65D8	func_001D72C0	match	
 func_001D6A18	func_001D7700	match	
 func_001D6CB0	func_001D7998	match	
