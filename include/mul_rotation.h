@@ -133,4 +133,38 @@ template <class O> static inline void MulRotationIntoRot(O* o, const Mat02& a, c
     o->rot = r;
 }
 
+// The product with a's rows as values, written straight into out's rows (no matrix local), each
+// result row stored to its vector local and to out's row: the first product of func_001A0DF0
+// (DrawCameraSpaceEffect), whose frame has no third matrix for it.
+static inline void MulRotationRowsInto(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::Q(out->r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    Vu0::Q(y) = Vu0::Q(out->r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+}
+
+// MulRotationRowsInto with b's rows read by index (MulRotationRowsIndexed) and each row stored
+// to its vector local before out's row (func_001A0DF0's second product).
+static inline void MulRotationRowsIntoIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const u128* q = (const u128*)&b;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, q[2]);
+}
+
 #endif

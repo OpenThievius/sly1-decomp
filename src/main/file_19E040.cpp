@@ -1859,7 +1859,37 @@ void func_001A0D60(Effect* self, f32 f)
 }
 
 
-INCLUDE_ASM(func_001A0DF0);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+
+// Draws the effect at its point seen from the camera, turned by the part of the camera's turn the
+// effect's age gives (twice its age times pi about the axis of its parameters, +0x40).
+void DrawCameraSpaceEffect(Effect* self, Camera* cam)
+{
+    Vec02 point;
+    Mat02 view;
+    Mat02 a;
+    Mat02 b;
+    Mat02 out;
+    Vec02 axis;
+    f32 angle;
+    f32 t;
+    Mat02 r2;
+    Mat02 r1;
+    Mat02* c = (Mat02*)self->rot50;
+
+    func_00144128(cam, &self->f120, &point);
+    MultiplyMatrices3x3(c, (Mat02*)&cam->g80, &view);
+    MatrixToAxisAngle(&view, &angle, &axis);
+    t = (g_gameTime - self->start) / self->life;
+    BuildAxisAngleMatrix(&axis, &a, angle * t);
+    BuildAxisAngleMatrix((Vec02*)((u8*)self->params + 0x40), &b, (t + t) * 3.14159274f);
+    MulRotationRowsInto(&r1, a, b);
+    MulRotationRowsIntoIndexed(&r2, r1, *c);
+    out = r2;
+    DrawEffectAt(self, cam, &point, (f32 (*)[4])&out);
+}
 
 void RunEffectEndCallback(Effect* self)
 {
