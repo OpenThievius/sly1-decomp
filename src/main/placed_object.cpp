@@ -1963,7 +1963,36 @@ void func_00126D60(Collider* self, f32 time)
     }
 }
 
-INCLUDE_ASM(func_00126DE8);
+void BuildShortestArcRotation(void* from, void* to, void* out);
+void MultiplyMatrices(void* out, void* a, void* b);
+
+// k, the vector the second rotation starts from, is written as a quadword at its own address:
+// a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
+// for the later &k, where retail forms it again for the call.
+void func_00126DE8(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m)
+{
+    Vec02 a;
+    Mat02 rot;
+    Mat4A t;
+    Mat4A local;
+    Vec02 k;
+    Mat4A r;
+    *(u128*)&k = Vu0::FromFloat(-1.0f);
+    Vu0::Q(a) = Vu0::MulX(Vu0::Q(cam->f80), *(u128*)&k);
+    BuildShortestArcRotation(m, &a, &rot);
+    local = *m;
+    local.m[3][0] -= pos[0];
+    local.m[3][1] -= pos[1];
+    local.m[3][2] -= pos[2];
+    BuildMatrixFromRotationAndTranslation((void*)&D_00248D30, &rot, &t);
+    MultiplyMatrices(&r, &t, &local);
+    *m = r;
+    *(u128*)&k = Vu0::Sub(Vu0::Q(r.m[2]), Vu0::MulX(Vu0::Q(a), Vu0::Dot(Vu0::Q(r.m[2]), Vu0::Q(a))));
+    BuildShortestArcRotation(&k, &cam->fA0, &rot);
+    BuildMatrixFromRotationAndTranslation(pos, &rot, &t);
+    MultiplyMatrices(&r, &t, m);
+    *m = r;
+}
 
 void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 {
