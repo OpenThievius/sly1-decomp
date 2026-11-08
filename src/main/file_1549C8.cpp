@@ -3690,7 +3690,26 @@ f32 MeasureTextHeight(TextReader* self)
     return width * (f32)lines;
 }
 
-INCLUDE_ASM(func_0015E1F0);
+f32 func_0015E1F0(TextReader* self)
+{
+    f32 best = 0.0f;
+    s32 newline = 10;
+    func_0015DB80(self);
+    f32 width = best;
+    s32 c;
+    while ((c = func_0015DBE0(self)) != 0) {
+        if (c == newline) {
+            best = (width >? best);
+            width = 0.0f;
+        } else {
+            Font* holder = self->font;
+            const FontVt* glyph = holder->vt;
+            width += glyph->width((Font*)((u8*)holder + glyph->adj3), c);
+        }
+    }
+    best = (width >? best);
+    return best;
+}
 
 void MeasureText(void* self, f32 f, f32* out1, f32* out2)
 {
