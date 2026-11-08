@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1661/1916 (86.7%), checked 2026-11-08
+// BYTES 1695/1916 (88.5%), checked 2026-11-08
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"

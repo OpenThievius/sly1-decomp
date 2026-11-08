@@ -145,7 +145,36 @@ INCLUDE_ASM(func_001B55C0);
 
 LINKER_REMNANT(func_001B5B48);
 
-INCLUDE_ASM(func_001B5B58);
+u16 MapCharToCode(u8 ch)
+{
+    s32 base = 0;
+    s32 idx;
+    if (ch >= 0x20 && ch < 0x30) {
+        base = 1;
+    } else if (ch >= 0x30 && ch < 0x3A) {
+        idx = 0;
+    } else if (ch >= 0x3A && ch < 0x41) {
+        base = 0xB;
+    } else if (ch >= 0x41 && ch < 0x5B) {
+        idx = 1;
+    } else if (ch >= 0x5B && ch < 0x61) {
+        base = 0x25;
+    } else if (ch >= 0x61 && ch < 0x7B) {
+        idx = 2;
+    } else if (ch >= 0x7B && ch < 0x7F) {
+        base = 0x3F;
+    } else {
+        return 0;
+    }
+    u16 code;
+    if (base != 0) {
+        SjisCharEntry* e = &D_00274588[ch - (base + 0x1F)];
+        code = e->code;
+    } else {
+        code = D_00274610[idx].code + ch - D_00274610[idx].id;
+    }
+    return code;
+}
 
 void ConvertStringToCharCodes(u8* src, u16* dst)
 {

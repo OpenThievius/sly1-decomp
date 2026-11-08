@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 609/696 (87.5%), checked 2026-11-07
+// Tried night-close8: the link initialised before a plain walk loop (no change), after it (far worse).
 // NEAR: registers: the contact list and axis pointers are s5, s6 and s7 in retail, s7, s5 and s6 here; the search of the contact row and the stores match.
 #include "common.h"
 #include "asm_func.h"

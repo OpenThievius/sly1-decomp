@@ -1182,7 +1182,61 @@ void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
     *out = best;
 }
 
-INCLUDE_ASM(func_00145B68);
+struct MeshHit {
+    u8 pad0[0x10];
+    Vec02 point;
+    u8 pad20[0x10];
+};
+
+typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
+s32 CollectMeshHits(void* a0, f32 r, s32 a1, TreeNode03* a2, s32 a3, void* a4, s32 a5, MeshHit* a6);
+void* AllocateBackMemory(s32 size);
+void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
+void ClampVectorLength(Vec02* in, Vec02* out, f32 limit);
+
+void func_00145B68(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out)
+{
+    MeshHit hits[64];
+    Vec02 sum;
+    s32 total = 0;
+    s32 i;
+    s32 j;
+    f32* p;
+    for (s32 k = 0; k < count; k++) {
+        Collider* c = objs[k];
+        if (c->tree2.nodes != 0) {
+            total += CollectMeshHits(a4, r, c->tree2.count2, c->tree2.nodes, 0, &c->mesh2Copy, 0x40 - total, &hits[total]);
+        }
+    }
+    if (total == 0) {
+        *out = *origin;
+        return;
+    }
+    PushBackMemoryMark();
+    f32* dots = (f32*)AllocateBackMemory(total * total * 4);
+    f32* rhs = (f32*)AllocateBackMemory(total * 4);
+    f32* weights = (f32*)AllocateBackMemory(total * 4);
+    p = dots;
+    for (i = 0; i < total; i++) {
+        for (j = 0; j < total; j++) {
+            Vu0::StoreX(*p, Vu0::Dot(Vu0::Q(hits[i].point), Vu0::Q(hits[j].point)));
+            p++;
+        }
+    }
+    p = rhs;
+    for (i = 0; i < total; i++) {
+        *p++ = fn(ctx, a4, origin, &hits[i]);
+    }
+    SolveActiveSetSystem(total, (u8*)dots, rhs, weights);
+    sum = D_00248D30;
+    p = weights;
+    for (i = 0; i < total; i++) {
+        Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(hits[i].point), Vu0::Scalar(*p++));
+    }
+    ClampVectorLength(&sum, &sum, limit);
+    PopBackMemoryMark();
+    Vu0::Q(*out) = Vu0::Add(Vu0::Q(*origin), Vu0::Q(sum));
+}
 
 s32 HasColliderSecondTree(void* unused, Collider* other)
 {

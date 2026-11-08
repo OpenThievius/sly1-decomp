@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 137/156 (87.8%), checked 2026-11-08
+// Tried night-close8: ToFloat and ToFloatNow for the compare, the tail written in each arm, the tail as an early return: reorg still leaves bc1f's slot empty (the target's move a0,s1 stays in the jal's slot).
 #include "common.h"
 #include "attachment.h"
 #include "placed_object.h"

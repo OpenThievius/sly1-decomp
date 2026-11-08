@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 185/208 (88.9%), checked 2026-11-07
+// BYTES 185/208 (88.9%), checked 2026-11-08
 // NEAR: the object cycler's timed message (message 6, the point and the negated velocity). Everything matches except where the receiver (f678) is loaded: retail loads it into a2 after the 1.0 constant and before the vmulx, and calls through a2 with `move a0, a2` in the delay slot; ours loads it into a0 after the stores and calls through a0. A local for the receiver (before the vector work, at the top, before the clock test) moves the load but never into a2.
+// Tried (2026-11-08, night-close9): a local for the receiver, an inline sender, Vu0::Set for both stores, the zero store as a member: the receiver's load stays after the stores.
 #include "common.h"
 #include "object_cycler.h"
 #include "globals.h"

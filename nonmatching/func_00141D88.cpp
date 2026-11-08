@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 403/444 (90.8%), checked 2026-11-08
+// Tried night-close8: the head's vectors as Vu0::Vec values, named and inline: the same 20 words (the Dot's 1.0 register, vf5 in all three of retail's dots, is the open one).
 // Night-moved (2026-11-08): c, hb and ha read with ToFloatMoved put the head in retail instruction order (sub.s before the second qmfc2, sqc2 after the mul.s); left: only the VU0 registers (retail a=vf4, dots vf3, ones vf5; ours a=vf3, ones vf4, dots vf5). Reordering the three dots or the two subs did not change them.
 // NEAR: Vu0::Copy gives retail's vmove (the copy for the length and the first store, the division by the original; NormalizeOfCopy below is NormalizeOr with the length of the copy), and the loop is retail's. Still differs: the head's scheduling only (retail puts sub.s before the qmfc2 of the second dot and the sqc2 of the stack vector after the mul.s; reordering the three dots changes nothing).
 #include "common.h"

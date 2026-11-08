@@ -9,6 +9,8 @@
 #include "object_link.h"
 #include "message_body.h"
 #include "shapes.h"
+#include "deferred_request.h"
+#include "vu0.h"
 
 // The methods of class 0x0C (0xE50 bytes, an agent): its links and clips, the search for the
 // object it acts on, its states and the notifications it answers.
@@ -110,7 +112,32 @@ void StartGaugeAgent(GaugeAgent* self)
 
 INCLUDE_ASM(func_0018A510);
 
-INCLUDE_ASM(func_0018A628);
+// The record an agent's draw method is given: the point and the weights it measures against.
+struct AgentDrawArgs {
+    u8 pad00[0x40];
+    Vec02 point;            // 0x40
+    u8 pad50[0x80 - 0x50];
+    Vec02 weights;          // 0x80
+};
+
+void DrawAgent(Agent* self, AgentDrawArgs* args);
+void QueueDeferredRequest(DeferredRequest* request);
+void* FillMemory(void* p, s32 value, s32 size);
+void func_0018A510();
+
+void func_0018A628(GaugeAgent* self, AgentDrawArgs* args)
+{
+    DrawAgent(self, args);
+    if (self->fE2C) {
+        DeferredRequest request;
+        FillMemory(&request, 0, 0x80);
+        request.group = 0xD;
+        request.f04 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(args->point)), Vu0::Q(args->weights)));
+        request.arg = self;
+        request.callback = (void*)func_0018A510;
+        QueueDeferredRequest(&request);
+    }
+}
 
 // A 0x70-byte hit func_00141D00 gives (collider_contact.cpp's MeshHit): its score at 0x40.
 struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 249/276 (90.2%), checked 2026-11-07
+// BYTES 252/276 (91.3%), checked 2026-11-08
 // Tried night-close3, 2 compiles: Clamp loading hi before lo, Clamp assigning v then c: no change or worse.
 #include "common.h"
 #include "effect.h"
@@ -10,7 +10,10 @@
 extern f32 g_gameTime;
 void RemoveEffect(Effect* self);
 void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
-// NEAR (2026-11-08, wave 3 retry): Vu0::Scalar(-m) in the MulAddX gives the same code as the k
+// NEAR (2026-11-08, night-close9): the clamp written c = v first, then the two tests reading the bounds, gives retail's
+// quotient register (f4); left: retail loads the high bound before the first compare and stores the weight in the
+// first bc1f's delay slot; ours loads the bound after it (also with ValueRange::Limit or Clamp, or the bound named).
+// Earlier (wave 3 retry): Vu0::Scalar(-m) in the MulAddX gives the same code as the k
 // local (the lever is not what blocks it). Left: retail keeps the clamp's high bound (lwc1 f5)
 // loaded before the first compare, the quotient in f4, and stores the weight (sqc2 vf3,16(sp))
 // in the delay slot of the first bc1f; here the quotient is in f5, the bound is loaded in that
@@ -26,14 +29,11 @@ struct ClampedQuadratic {
     }
     static void Clamp(f32& c, f32 v, const ValueRange* r)
     {
-        f32 lo = r->lo;
-        f32 hi = r->hi;
-        if (v < lo) {
-            c = lo;
-        } else if (hi < v) {
-            c = hi;
-        } else {
-            c = v;
+        c = v;
+        if (v < r->lo) {
+            c = r->lo;
+        } else if (r->hi < v) {
+            c = r->hi;
         }
     }
     static void Get(f32& c, const QuadraticCoeffs* p, f32 t)

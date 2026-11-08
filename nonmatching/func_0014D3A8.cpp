@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 661/724 (91.3%), checked 2026-11-08
 // NEAR: every register, the frame (0x110) and the branches are retail's; only the two dead stores of the segment vector differ in place, as in func_0014D680: the copy at 0x30 comes before the vdiv where retail's follows the vmulq, and the unit vector at 0x20 before the compare where retail's is in the bc1f delay slot. Found: the copy's block scope makes the Scalar of the point blend share its slot (0x30); the loop on an index (pts[i]) gives retail's s0 pointer / s1 index; the literal 3.4028234663852886e+38f is retail's bound (the checker's rodata message is only the instruction offset); the tail is NormalizeCopy (length of the vmove copy, DivX of the original). Written with Vu0::Vec for the segment (Vec::Of, Length, DivX on .q) the copy's store is dropped altogether.
+// Tried (2026-11-08, night-close9): the copy and the unit vector's stores moved after the dot in the C: the scheduler puts them back.
 // In the context of its file, src/main/path_curve.cpp.
 #include "common.h"
 #include "vu0.h"
