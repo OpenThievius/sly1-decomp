@@ -404,6 +404,30 @@ What retail shows, and what the compiler does:
   local (func_00154370's AddLimited). (6) The runtime's swap macro (do-while) is what its heap
   sort's loops need; a plain block of the same statements is not (func_001FF1E0).
 
+- **Size pass (night-size2, 2026-11-08).** (1) A product's second matrix read by index through a
+  pointer to its rows (`const u128* q = (const u128*)&b; ... q[1]`) keeps that pointer a register of
+  its own: retail's `lqc2 0xD0(s0); addiu v0, s0, 0xD0; lqc2 0x10(v0); lqc2 0x20(v0)`, each row
+  after the stores of the row before. Through `Vu0::Q(b.r[i])` the row's address is the
+  reference parameter of an inline function, a pseudo whose `(plus p 16)` CSE folds into the
+  object's offset (`fold_rtx`); an address written in the load itself stays as it is
+  (`find_best_addr` keeps an equal-cost address), and only the first row, `(mem p)`, takes the
+  object's offset. mul_rotation.h's MulRotationRowsIndexed, MulRotationRowsXIndexed and
+  MulRotationIntoRot (the result written through the object, `o->rot = r`, where a `Mat02*` to
+  the matrix stores through a register of its own) matched func_001225D0, func_001EBDD0,
+  func_001A11C0, func_00125440 and func_001B8148; seventeen retail functions have the pattern.
+  (2) A vector added in place and then scaled (func_001B8148's spin) is read again from memory
+  for the scale when the sum is a struct store (`*(Vu0::Vec*)&v = Vu0::Add(...)`); a `Q()` store
+  keeps the first read. (3) A struct whose inline member clears it (`Clear()` calling FillMemory
+  on `this`) gives retail's address formed again at each use, where `= {}` or a plain array keeps
+  it in a saved register (func_001E2438). (4) A field read as ld then `dsll 8; dsra32; andi 3` is
+  an int bit-field read into a local (placed_object.h's bits24, func_00125138); `== 2` on the
+  field itself folds into a mask compare. (5) A float constant used across calls that retail
+  holds in a saved FPR from a join block on is a local assigned in that block (func_001BC0E0);
+  assigned at the top, the constant is propagated into each use. (6) Not yet reproduced: with
+  func_001BC0E0's C (EXACT alone), the `.p2align 2` before its normalisation's divide label makes
+  the assembler pad StartSoundEffect's short copy loop with five nops in the whole file's build
+  (file_1B7968.cpp); deleting that directive alone from the unit's assembly places the file.
+
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
 read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved

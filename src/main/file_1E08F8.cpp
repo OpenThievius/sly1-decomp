@@ -459,7 +459,8 @@ INCLUDE_DATA(D_00275970);
 INCLUDE_DATA(D_00275974);
 INCLUDE_DATA(D_00275978);
 f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
-INCLUDE_DATA(D_002759C0);
+f32 D_002759C0[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,
+                        1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 0, 0 };
 f32 D_00275A10[4] = { 0, 0.5f, 0, 0 };
 f32 D_00275A20[2] = { 0, 3.4028235e38f };
 INCLUDE_DATA(D_00275A28);
@@ -1314,7 +1315,34 @@ void CreateRenderThread(void)
 
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
-INCLUDE_ASM(func_001E2438);
+struct CameraPlacement { Vec02 q[5]; };
+void PlaceOnOffCameraFrame(OnOffObject* object, Vec02* eye, Vec02* x, Vec02* dir);
+void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out);
+// The orbit's polynomial block: three rows of four floats, cleared before the blend fills them.
+struct OrbitPoly {
+    f32 f[12];
+    void Clear() { FillMemory(this, 0, (s32)sizeof(*this)); }
+};
+
+void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object)
+{
+    f32 t = *(f32*)((u8*)block + 0x60);
+    Vu0::Q(*out) = Vu0::MulXSum(Vu0::Q(eye->q[1]), Vu0::Scalar(1.0f - t), Vu0::Q(eye->q[4]), Vu0::Scalar(t));
+    if (object != 0) {
+        Vec02 x;
+        OrbitPoly poly;
+        Vec02 dir;
+        poly.Clear();
+        poly.f[1] = *(f32*)((u8*)block + 0x70);
+        poly.f[5] = *(f32*)((u8*)block + 0x74);
+        poly.f[9] = *(f32*)((u8*)block + 0x78);
+        s32 saved = object->f380;
+        object->f380 = 0;
+        PlaceOnOffCameraFrame(object, out, &x, &dir);
+        PlaceOnOffCameraOrbit(object->angle3A0, 0.0f, object, (f32*)&x, poly.f, D_002759C0, 1, out);
+        object->f380 = saved;
+    }
+}
 
 void InitOnOffObject(OnOffObject* self)
 {
@@ -1555,7 +1583,6 @@ void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32
 }
 
 // The five quadwords func_00143418 gives for a camera and its target: the placement.
-struct CameraPlacement { Vec02 q[5]; };
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 
 struct OnOffCameraView {

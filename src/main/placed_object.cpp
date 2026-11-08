@@ -7,6 +7,7 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
+#include "game_clock.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -1471,7 +1472,31 @@ void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
     self->desc->m02(self);
 }
 
-INCLUDE_ASM(func_00124868);
+void ReframePlacedObject(PlacedObject* self, BaseObject* frame)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Vec02 vel;
+    Vec02 spin;
+    Vec02 velDir;
+    Vec02 spinDir;
+    Vec02 sums[2];
+    TransformPointBetweenFrames(frame, 0, &self->pos, &pos);
+    self->desc02()->m1D(self, &pos);
+    TransformRotationBetweenFrames(frame, 0, &self->rot, &rot);
+    self->desc02()->m1E(self, &rot);
+    ComputeObjectMotionInFrame(frame->parent, 0, &pos, &vel, &spin, 0, 0);
+    TransformDirectionBetweenFrames(frame, 0, &self->v150, &velDir);
+    TransformDirectionBetweenFrames(frame, 0, &self->v160, &spinDir);
+    Vu0::Set(sums[0], Vu0::Add(Vu0::Q(vel), Vu0::Q(velDir)));
+    Vu0::Set(sums[1], Vu0::Add(Vu0::Q(spin), Vu0::Q(spinDir)));
+    self->desc02()->m20(self, &sums[0]);
+    self->desc02()->m21(self, &sums[1]);
+    self->v190 = self->pos;
+    self->m1A0.r[0] = self->rot.r[0];
+    self->m1A0.r[1] = self->rot.r[1];
+    self->m1A0.r[2] = self->rot.r[2];
+}
 
 void PostLoadPlacedObject(PlacedObject* self)
 {
@@ -1705,7 +1730,64 @@ void BeginPlacedObjectMove(PlacedObject* self)
     (void)self;
 }
 
-INCLUDE_ASM(func_00125440);
+void ApplyPoseSourcePosition(Attachment* a);
+void ApplyPoseSourceRotation(Attachment* a);
+s32 IsAccelerationNegligible(void* a);
+s32 IsSpinAccelerationNegligible(void* a);
+void BuildRotationFromVector(Vec02* in, Mat02* out);
+void OrthonormalizeMatrix(Mat02* m);
+
+void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
+{
+    Attachment* pa = self->f1EC;
+    Attachment* ra = self->f1F0;
+    s32 moved = flag;
+    if (pa == 0 || pa->mode0 == 5 || ra == 0 || ra->mode1 == 5) {
+        Vu0::Q(self->v180) = Vu0::Q(self->v170) = Vu0::Zero();
+        ((void (*)(PlacedObject*, f32))self->desc02()->m1C)(self, g_frameDt);
+    }
+    if (pa != 0 && pa->mode0 != 5) {
+        ApplyPoseSourcePosition(pa);
+        moved = 1;
+    } else if (IsVelocityNegligible(&self->v150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
+        moved = 1;
+        GameClock* clk = &g_gameClock;
+        Vu0::Q(self->pos) = Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(clk->dt), Vu0::Q(self->v170), Vu0::Scalar(clk->dt * (clk->dt * 0.5f)));
+        Vu0::Q(self->v150) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(self->v170), Vu0::ScalarAt(clk->dt));
+    }
+    if (ra != 0 && ra->mode1 != 5) {
+        ApplyPoseSourceRotation(ra);
+        moved = 1;
+    } else if (IsSpinNegligible(&self->v160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
+        GameClock* clk = &g_gameClock;
+        Vec02 prev;
+        Vec02 w;
+        Mat02 rot;
+        Vu0::Q(prev) = Vu0::Q(self->v160);
+        Vu0::Q(self->v160) = Vu0::MulAddX(Vu0::Q(self->v160), Vu0::Q(self->v180), Vu0::ScalarAt(clk->dt));
+        moved = 1;
+        Vu0::Q(w) = Vu0::MulXSum(Vu0::Q(prev), Vu0::Scalar(clk->dt * 0.5f), Vu0::Q(self->v160), Vu0::Scalar(clk->dt * 0.5f));
+        BuildRotationFromVector(&w, &rot);
+        MulRotationIntoRot(self, rot, self->rot);
+        OrthonormalizeMatrix(&self->rot);
+    }
+    ListFrame it;
+    ListWalkBegin::Of(&it, &self->children);
+    BaseObject* obj;
+    while ((obj = ListWalkNext::Of(&it)) != 0) {
+        if ((obj->desc->flags & 1) != 0) {
+            ((void (*)(BaseObject*, f32, s32))obj->desc->m1B)(obj, dt, moved);
+        }
+    }
+    if (moved != 0) {
+        if (flag == 0) {
+            if (self->desc->m12 != 0) {
+                self->desc->m12(self);
+            }
+        }
+    }
+    g_activeListFrames = (ListFrame*)it.prev;
+}
 
 typedef void (*PositionAtFn)(PlacedObject* self, f32 t, Vec02* pos, Vec02* vel);
 typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat02* rot, Vec02* spin);

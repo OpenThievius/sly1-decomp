@@ -25,6 +25,7 @@
 #include "shapes.h"
 #include "property_descriptor.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -695,7 +696,63 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
     ListWalk::End(&it);
 }
 
-INCLUDE_ASM(func_001B8148);
+void BuildRotationFromVector(Vec02* v, Mat02* mat);
+extern f32 g_frameDt[];
+
+void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
+{
+    s32 still = 0;
+    s32 moved = flag;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->v490))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still) {
+        Vu0::Q(self->v150) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(self->v490));
+        Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v490), Vu0::Scalar(g_frameDt[0] * 0.5f));
+        if (self->f1EC != 0) {
+            SettlePoseSourceModes(self->f1EC);
+        }
+        Vu0::Q(self->v490) = Vu0::Zero();
+        moved = 1;
+    }
+    s32 spinStill = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->spin4A0))) < 0.0001f) {
+        spinStill = 1;
+    }
+    if (!spinStill) {
+        Vec02 delta;
+        Mat02 turn;
+        *(Vu0::Vec*)&self->v160 = Vu0::Add(Vu0::Vec::Of(self->v160), Vu0::Vec::Of(self->spin4A0));
+        Vu0::Q(delta) = Vu0::MulX(Vu0::Q(self->spin4A0), Vu0::Scalar(g_frameDt[0] * 0.5f));
+        BuildRotationFromVector(&delta, &turn);
+        MulRotationIntoRot(self, turn, self->rot);
+        if (self->f1F0 != 0) {
+            SettlePoseSourceModes(self->f1F0);
+        }
+        Vu0::Q(self->spin4A0) = Vu0::Zero();
+        moved = 1;
+    }
+    ListFrame it;
+    ListWalk::Begin(&it, &self->children);
+    PlacedObject* c;
+    while ((c = (PlacedObject*)ListWalk::Next(&it)) != 0) {
+        if (c->desc->flags & 2) {
+            ((Collider*)c)->desc03()->m31((Collider*)c, moved);
+        }
+    }
+    if (moved != 0) {
+        if (flag == 0) {
+            if (self->desc->m12 != 0) {
+                self->desc->m12(self);
+            }
+        }
+    }
+    ListWalk::End(&it);
+}
 
 ASM_FUNC(func_001B8420);
 

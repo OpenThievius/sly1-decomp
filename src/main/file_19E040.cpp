@@ -1880,7 +1880,39 @@ LINKER_REMNANT(func_001A1028);
 
 INCLUDE_ASM(func_001A1030);
 
-INCLUDE_ASM(func_001A11C0);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+void UpdateEmitterEffect(Effect* self, f32 dt)
+{
+    Mat02 axisRot;
+    Mat02 m;
+    BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)((u8*)self + 0xA4) * dt);
+    MulRotationRowsIndexed(&m, axisRot, *(Mat02*)self->rot50);
+    s32 fire = 0;
+    Vec02* cam = (Vec02*)&g_camera->g80;
+    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot50[0]), Vu0::Q(*cam))) &&
+        Vu0::ToFloat(Vu0::Dot(Vu0::Q(m.r[0]), Vu0::Q(*cam))) <= 0.0f && 0.5f < g_gameTime - self->start) {
+        fire = 1;
+    }
+    if (fire) {
+        Vec02 pos;
+        u128 r = Vu0::Rotate(m, Vu0::Q(self->q80));
+        Vu0::Set(pos, r);
+        Vu0::Set(pos, Vu0::Add(r, Vu0::Q(((PlacedObject*)self->p120)->v140)));
+        Effect* e = CreateEffect(0x10, 0);
+        if (e != 0) {
+            e->vt->m00(e, &pos, 1.0f, 0);
+            e->life = 0.25f;
+        }
+        if (--self->i124 <= 0) {
+            RemoveEffect(self);
+            return;
+        }
+    }
+    self->rot50[0] = m.r[0];
+    self->rot50[1] = m.r[1];
+    self->rot50[2] = m.r[2];
+}
 
 
 void DrawEmitterEffect(Effect* self, void* a1)
