@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 2522/2532 (99.6%), checked 2026-11-08
 // NEAR: every block is retail's, registers included; left: two pairs of instructions in another order: retail fills GatherCollidersInSphere's delay slot with the &list argument (here the pos copy after the call goes there), and stores the scatter loop's FromFloats vector to its local before its slot (here the slot first).
+// Tried (night-close10): Set, a u128 copy, a chained store and Vec forms for the scatter vector
+// (Vec makes the loop big enough that loop.c keeps the index product: 4 bytes longer); pos set
+// before the sphere gather or after the other three pointers. The sched2 dump shows the two
+// sqc2 independent after the qmtc2 reload, the slot's first in insn order (FromFloats stores its
+// slot before the caller's local); retail's order needs the local's store first.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"

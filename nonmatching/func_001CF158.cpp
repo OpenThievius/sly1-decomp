@@ -5,10 +5,15 @@
 // check, the switch on the best kind and the record update follow retail at the same size; the
 // cost contexts go to FindLocalMinimum through pointers (retail hoists and spills those
 // addresses), the extremes are literals (retail's D_0024DAD0 and D_0024DAD4 are this function's).
-// Left, 43 of 926 instructions: which %hi parts loop.c hoists in the point and curve loops
-// (retail the two extremes and ScoreTargetCurveAt's, ours ScoreTargetPointAt's and D_00274E20's)
-// and the scheduling around the two distance tests (retail sets the flag and squares the limit
-// before the dot).
+// Found (night-close10): the squared distance read through ToFloatMoved and the plain distance
+// as u128 helpers through ToFloatMoved (the Vec copies kept the vector loop at 162 insns at the
+// second loop pass, two over loop.c's 160, so the limit's and D_00274E20's %hi stayed in it);
+// the point loop's scorer named first in the body (`void* fn`), so loop.c hoists its %hi in the
+// first pass and the extremes' %hi parts take s7 and s8 as retail's do. Left, 19 lines: in the
+// vector loop the 50.0 (mov.s $f14) is set before a0 and a1, retail after; in the curve loop
+// retail's s8 holds ScoreTargetCurveAt's %hi, ours D_00274E20's (all three of the function's,
+// D_00274E10's and D_00274E20's %hi are moved in the second pass, the last one found, with the
+// shortest life, gets the register; a named fn local in that loop does not change it).
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
@@ -150,12 +155,12 @@ void StartSoundEffect(s32 sound, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f
 static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
 {
     Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b));
-    return Vu0::ToFloat(Vu0::Dot(d, d));
+    return Vu0::ToFloatMoved(Vu0::Dot(d, d));
 }
 
 static inline f32 Distance(const Vec02& a, const Vec02& b)
 {
-    return Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b))));
+    return Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b))));
 }
 
 s32 func_001CF158(Chooser* self, TargetCand* keep)
@@ -384,6 +389,7 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
             continue;
         }
         CostContext* c = &ctx;
+        void* fn = (void*)ScoreTargetPointAt;
         Vu0::Set(d, Vu0::Sub(Vu0::Vec::Of(self->v140), Vu0::Vec::Of(at)).q);
         ctx.v = self->v150;
         ctx.self = self;
@@ -391,7 +397,7 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         f32 lo = -3.40282347e+38f;
         f32 hi = 3.40282347e+38f;
         FindLocalMinimum(ArctangentOfRatio(d.y, d.x) * o->f5C, D_00274E40, lo, hi,
-                         (void*)ScoreTargetPointAt, c, &tPoint, &cost);
+                         fn, c, &tPoint, &cost);
         cost = cost * D_00274E10;
         if (o != keep) {
             if (cost >= D_00274E20) {

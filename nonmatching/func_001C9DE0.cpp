@@ -18,6 +18,12 @@
 // a2 in 0x1AC's first curve call. Levers that gave the rest: the -1.0 weight as a u128 stored to
 // its slot after the rotation (as func_001C9AF8), the colliders' ternaries with the sender's
 // first, the item keeper's test as if/else with state = 2 in the else.
+// Found (night-close10): global.c's priority picks the order; ours allocates the animation
+// (13 refs over 84 insns) before the player (4 refs over 34 insns), retail the player first,
+// so retail's player had more references or the animation a longer life in its RTL. Loading the
+// animation after the test (or no animation variable) moves the load out of the bne's delay
+// slot (8 bytes longer); f32 zero set earlier, the curve's time in a local, a literal 0.0f, the
+// test written self->f7E0 != player or through msg->source again change nothing.
 #define F(T, o) (*(T*)((u8*)self + (o)))
 extern f32 g_gameClock[];
 f32 RandomFloatInRange(f32 a, f32 b);
