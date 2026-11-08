@@ -392,7 +392,68 @@ void DrawConeAgent(void)
     DrawAgent();
 }
 
-INCLUDE_ASM(func_00167F10);
+s32 IsPadSelectFlagHeld(void* p);
+typedef s32 (*SlotFnRet)(void* self);
+s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
+f32 ComputeAgentTargetBearing(void* self);
+s32 func_001CB3D0(void* self);
+
+s32 IsConeAgentFree(ConeAgent* self)
+{
+    if (IsPadSelectFlagHeld(self->world) != 0) {
+        return 0;
+    }
+    if (self->f724 == 0x10) {
+        return 0;
+    }
+    if (self->f724 == 0xB) {
+        return 0;
+    }
+    Collider* target = (Collider*)self->desc08()->m62(self);
+    s32 inside;
+    if (self->fC40 != 0 || target == 0) {
+        inside = 1;
+    } else if (IsObjectOfKind(target, 5) != 0 && ((SlotFnRet*)target->desc)[81](target) == 2) {
+        inside = 1;
+    } else if (self->fC1C != 0) {
+        inside = TestPointAgainstObjectShape((void*)self->fC1C, &target->v140) == 0;
+    } else if (__builtin_fabsf(target->v140.z - self->v190.z) > self->fC14) {
+        inside = 1;
+    } else {
+        u128 d = Vu0::Sub(Vu0::Q(target->v140), Vu0::Q(self->v190));
+        f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        inside = self->fC10 < len;
+    }
+    if (inside != 0) {
+        self->fC38 = 0;
+        return 0;
+    }
+    if (self->fC38q != 0) {
+        return 1;
+    }
+    if (self->fC34 == 0 || TestPointAgainstObjectShape((void*)self->fC34, &target->v140) == 0) {
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
+        f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (!(len < self->fC24)) {
+            return 0;
+        }
+        f32 limit;
+        if (len < self->fC20) {
+            limit = self->fC2C;
+        } else {
+            f32 t = (len - self->fC20) / (self->fC24 - self->fC20);
+            limit = t * self->fC28 + (1.0f - t) * self->fC2C;
+        }
+        if (!(__builtin_fabsf(ComputeAgentTargetBearing(self)) <= limit)) {
+            return 0;
+        }
+    }
+    if (func_001CB3D0(self) != 0) {
+        return 0;
+    }
+    self->fC38 = 1;
+    return 1;
+}
 
 void ApplyFieldDisplayOffset(void)
 {
