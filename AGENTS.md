@@ -92,7 +92,13 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   compiler cannot emit and that recurs across retail's functions; it lives in a shared header
   in `include/`, written once for every function that needs it, and is named for what it does.
   A function never holds inline assembly of its own, and a helper never reproduces one
-  function's code: that would be assembly written as C. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  function's code: that would be assembly written as C. A VU0 microprogram's interface is the one
+  place a helper names a fixed register: the compiler allocates only $vf1 to $vf15, and retail
+  calls its microprograms (`vcallms`) through $vf16 to $vf31 and the control registers $vi1 to
+  $vi15. There a helper is still one instruction (a load into, or a store from, one named
+  register, a read or write of one control register, or `vcallms` itself), named for the
+  register it touches, in include/vu0.h. The C around it sets and reads those registers in
+  retail's order. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
