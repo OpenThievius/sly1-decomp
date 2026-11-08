@@ -4,6 +4,7 @@
 
 // NEAR: every instruction and offset matches; the allocation of the loop variables differs (retail: self in s5, key in s6, the base in s2, i+1 in s3; ours: key in s2, self in s6, base in s3)
 // Tried (2026-11-08, night-close9): the entries as 12-byte struct pointers give retail's self in s5 but fold the first count to bytes; written to keep the division, the allocation returns to this one.
+// Tried (order-class pass 2): declaration order of the locals, do/while over i, the first count in a local: 17 words, unchanged.
 
 void* MoveMemory(void* dst, void* src, s32 bytes);
 

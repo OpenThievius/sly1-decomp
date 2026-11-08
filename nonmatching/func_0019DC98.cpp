@@ -5,6 +5,7 @@
 //       half instead. Night-low1 (2026-11-08): a pointer to g_nextDeferredRequest taken before
 //       the first call keeps the full address in s4 (addiu s4, v0, lo) instead of the high half,
 //       further.
+// Tried (order-class pass): a pointer to the struct or to its field taken before UploadLightVolumes (also used for the final store), the end pointer as a local: 18 to 20 words.
 #include "common.h"
 #include "packet_writer.h"
 #include "globals.h"

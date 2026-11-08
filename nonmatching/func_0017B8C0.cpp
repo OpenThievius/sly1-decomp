@@ -4,6 +4,7 @@
 // Tried night-close8, 6 compiles and tools/permute.py --auto: the 1.0 as a named float local gives retail's -1.0 register and the 1.0's mtc1 next to it, 12 differing words down to 9 (permute.py's order). Both constants named, the 4 named, the local before t: no closer.
 // NEAR: retail forms the table's address (lui v0) before the 1.0's lui and stores in source order (f270 first after f27C); here the 1.0 is loaded first and sched2 orders the eight stores otherwise.
 // Before: NEAR: the switch on state gives retail branch layout; the float constants and field stores in the state-1 block are scheduled in a different order
+// Tried (order-class pass): table pointer in an inner block, the 1.0 declared after the -1.0 store, the 1.0 written inline: 9 to 12 words, never fewer.
 
 struct Obj_17B8C0 {
     u8 pad0[0x14];
