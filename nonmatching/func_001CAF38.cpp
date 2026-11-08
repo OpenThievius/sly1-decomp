@@ -5,6 +5,7 @@
 // loads the agent's position into v1 and forms &c->end[j] in v0; here the two registers are swapped
 // (lq v0 / addu v1). The orders of the query's three stores (tools/permute.py), the position
 // stored after the set-up, a Vec copy and a member Init all leave it.
+// Still differs (2026-11-08, night-close6): the end's part through a local or a pointer to the end, the other end written c->end[1 - j], the query cleared inline in the caller (frame grows), pos through a Vec02 local: the same swap.
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"

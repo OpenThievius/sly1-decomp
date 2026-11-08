@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0 (0.0%), checked 2026-11-08
+// BYTES 489/512 (95.5%), checked 2026-11-08
 // NEAR: same size, same code, offsets now retail's (the weight curve's two floats are f32 locals whose addresses are taken, so they come last in the frame). Two schedule swaps remain: retail loads 0x6C0(self) before the vmulx and stores the weight (Set(t, w)) in the delay slot of the call, and sets a1 = 1 after the f12 move. Tried: ScalarAt, t declared later (frame +16), the target loaded early, statements swapped.
 #include "common.h"
 #include "vu0.h"

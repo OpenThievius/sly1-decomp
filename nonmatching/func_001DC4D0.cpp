@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0 (0.0%), checked 2026-11-08
+// BYTES 552/576 (95.8%), checked 2026-11-08
 // NEAR: the size of the allocation read before the walk's frame is built (this brings the push of the frame into the call's delay slot, as retail's): still differs: skip and the result cursor in s1/s2 the other way round (retail gives the object to skip s1 and the cursor s2), and the count pointer spilled at sp+0x20 (retail: sp+0x24, so a 4-byte slot at +0x20 is taken in retail). Tried: no goto, the cursor declared before the walk.
 #include "common.h"
 #include "asm_func.h"
