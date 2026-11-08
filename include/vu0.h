@@ -600,6 +600,41 @@ struct Vu0 {
         return r;
     }
 
+    static Vec Add(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Add(a.q, b.q);
+        return r;
+    }
+
+    static Vec Cross(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = Cross(a.q, b.q);
+        return r;
+    }
+
+    static Vec DivX(Vec a, Vec s)
+    {
+        Vec r;
+        r.q = DivX(a.q, s.q);
+        return r;
+    }
+
+    static Vec MulAddX(Vec a, Vec b, Vec s)
+    {
+        Vec r;
+        r.q = MulAddX(a.q, b.q, s.q);
+        return r;
+    }
+
+    static Vec NormalizeOr(Vec v, Vec fallback)
+    {
+        Vec r;
+        r.q = NormalizeOr(v.q, fallback.q);
+        return r;
+    }
+
     static Vec MulXSum(Vec a, Vec s, Vec b, Vec t)
     {
         Vec r;
