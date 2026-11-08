@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// SIZE 976/972, checked 2026-11-07
 #include "common.h"
 #include "switched_collider.h"
 #include "gauge_mode_object.h"

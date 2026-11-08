@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// BYTES 768/776 (99.0%), checked 2026-11-07
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"

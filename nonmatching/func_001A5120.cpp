@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 0/0, checked 2026-11-08
+// BYTES 921/984 (93.6%), checked 2026-11-07
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"
