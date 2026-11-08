@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 605/680 (89.0%), checked 2026-11-08
-// Night-moved (2026-11-08): NormalizeOrMoved loads the unit-Z fallback with lq before the length mtc1 as retail does; left: the callee-saved register assignment (s1/s2, s7/s8, s4) and the dot operands vf1/vf2 order.
-// NEAR (2026-11-08, vu0w3-e1): same size and frame; 7 instructions of 170 differ in order and the rest in registers: retail keeps the frame addresses in s1 (sp+0x20), s2 (sp+0x10), s3, s5 and the link in s7 with &f23E0 in s8 (here s1/s2 and s7/s8 swapped), and loads the unit-Z fallback with lq before the length's mtc1 where here it is in the delay slot of the compare.
+// Tried night-close8, 12 compiles: the else arm's row as the link it already holds (row = (ContactRow03*)link: retail's move s4,s7), the normalised direction stored with Vu0::Set (from the frame, not through s1), and the three dots read with ToFloatMoved: 37 differing words down to 13, the callee-saved registers now retail's. Row initialised before the if: far worse; the last dot of Vec values: no change.
+// NEAR: the prologue's order (retail saves s0 and ra and moves a0 before s8 and s7), the else arm's move s4,s7 before the addiu of sp+0x10 in retail, and the last dot's VU0 registers (retail loads delta into vf2 and dir into vf1, ours the other way).
+// Before, night-moved (2026-11-08): NormalizeOrMoved loads the unit-Z fallback with lq before the length mtc1 as retail does; left: the callee-saved register assignment (s1/s2, s7/s8, s4) and the dot operands vf1/vf2 order.
+// Before (2026-11-08, vu0w3-e1): same size and frame; 7 instructions of 170 differ in order and the rest in registers: retail keeps the frame addresses in s1 (sp+0x20), s2 (sp+0x10), s3, s5 and the link in s7 with &f23E0 in s8 (here s1/s2 and s7/s8 swapped), and loads the unit-Z fallback with lq before the length's mtc1 where here it is in the delay slot of the compare.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -66,7 +68,7 @@ void func_001D2518(Player* self)
         row = r;
         link = row->link;
     } else {
-        row = (ContactRow03*)&self->contacts4B4;
+        row = (ContactRow03*)link;
     }
     PathSampleFn sample = (PathSampleFn)((PinnedPath*)self->f2208)->f34->vt->m02;
     if (sample) {
@@ -74,13 +76,13 @@ void func_001D2518(Player* self)
     }
     TransformPointBetweenFrames(((PinnedPath*)self->f2208)->f18, 0, &pos, &pos);
     TransformDirectionBetweenFrames(((PinnedPath*)self->f2208)->f18, 0, &dir, &dir);
-    Vu0::Q(dir) = Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector);
+    Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, &self->f23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(pos));
-    CreatePooledContact(Vu0::ToFloat(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))), self, path->f18, &local, &perp[0], 0xB, 0, 0, row);
-    CreatePooledContact(Vu0::ToFloat(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))), self, path->f18, &local, &perp[1], 0xB, 0, 0, row);
-    CreatePooledContact(Vu0::ToFloat(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))), self, path->f18, &local, &dir, 0xB, 0, 0, row);
+    CreatePooledContact(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))), self, path->f18, &local, &perp[0], 0xB, 0, 0, row);
+    CreatePooledContact(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))), self, path->f18, &local, &perp[1], 0xB, 0, 0, row);
+    CreatePooledContact(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))), self, path->f18, &local, &dir, 0xB, 0, 0, row);
     *link = (Contact03*)row->head;
 }
 

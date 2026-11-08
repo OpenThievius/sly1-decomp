@@ -21,7 +21,9 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "common.h"
-// NEAR (2026-11-07, night-loop): the loop now as retail's: its vectors as Vu0::Vec values (one u128 in a struct, passed and returned by value), whose register copies make the loop big enough (94 real insns at the loop pass, the limit with a call is 80) that loop.c leaves 0, 1.0, 2pi and the index multiplication (li 0xD0; mult) inside it, as retail does (docs/TOOLCHAIN.md, "Loops"); the frame (weight slot 0, sin and cos at 0x10/0x14 as two locals), the c, s, c weight stores and the recursion's arguments match. Still differs: the scheduling around the call, 19 lines: retail loads e->f68 before the dot's qmfc2 and multiplies dot*scale before clock*f68 (ours the other way, and a1's addiu earlier), and after the call loads cos (lw) before sin (lwc1), mfc1 into v0 where ours uses v1.
+// Tried night-close8, 7 compiles: the dot read with ToFloatMoved puts the phase's head in retail's order (e->f68 loaded before the qmfc2, dot*scale first, a1's addiu and the weight stores where retail has them): 19 differing words down to 6. ToFloatNow, the weights named first, sn and cs declared the other way: no closer.
+// NEAR: after ComputeSinCos only: retail loads cos (lw) before sin (lwc1) and moves cos into its VU0 register before the lqc2 of v40, and sin's mfc1 then takes v0; ours loads sin first, the qmtc2 of cos after the lqc2, and the mfc1 into v1.
+// Before (2026-11-07, night-loop): the loop now as retail's: its vectors as Vu0::Vec values (one u128 in a struct, passed and returned by value), whose register copies make the loop big enough (94 real insns at the loop pass, the limit with a call is 80) that loop.c leaves 0, 1.0, 2pi and the index multiplication (li 0xD0; mult) inside it, as retail does (docs/TOOLCHAIN.md, "Loops"); the frame (weight slot 0, sin and cos at 0x10/0x14 as two locals), the c, s, c weight stores and the recursion's arguments match. Still differs: the scheduling around the call, 19 lines: retail loads e->f68 before the dot's qmfc2 and multiplies dot*scale before clock*f68 (ours the other way, and a1's addiu earlier), and after the call loads cos (lw) before sin (lwc1), mfc1 into v0 where ours uses v1.
 struct OscillatorSweepEntry {
     s32 kind;               // 0x00: 0 for an axis entry
     u8 pad04[0x10 - 0x04];
@@ -55,7 +57,7 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
         if (period < time) {
             continue;
         }
-        f32 phase = Vu0::ToFloat(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock[1] * e->f68 + e->f6C;
+        f32 phase = Vu0::ToFloatMoved(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock[1] * e->f68 + e->f6C;
         f32 sn, cs;
         ComputeSinCos(phase * 6.2831855f, &sn, &cs);
         pos = Vu0::MulAddX2(pos, Vu0::Vec::Of(e->v20), Vu0::Vec::ScalarAt(cs), Vu0::Vec::Of(e->v40), Vu0::Vec::Scalar(sn));

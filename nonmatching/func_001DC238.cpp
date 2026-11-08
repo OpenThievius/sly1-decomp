@@ -45,19 +45,24 @@ static inline Collider* NextListedCollider(ListFrame* it)
     return c;
 }
 
+// Starts a walk of a list: the frame's list, link and offset, pushed on the active frames.
+static inline void StartListWalk(ListFrame* it, ActorList6C* l)
+{
+    it->list = l;
+    it->link = (u8*)l;
+    it->offset = l->offset;
+    it->prev = g_activeListFrames;
+    g_activeListFrames = it;
+}
+
 void func_001DC238(World* self, Collider* exclude, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* n, Collider*** out)
 {
     ListFrame frame;
     Vec02 lo;
     Vec02 hi;
-    ActorList6C* l = &self->list6C;
-    frame.list = l;
-    frame.link = (u8*)l;
-    frame.offset = l->offset;
-    frame.prev = g_activeListFrames;
-    g_activeListFrames = &frame;
-    Collider** p = (Collider**)AllocateBackMemory(self->count34 * 4);
-    *out = p;
+    StartListWalk(&frame, &self->list6C);
+    *out = (Collider**)AllocateBackMemory(self->count34 * 4);
+    Collider** p = *out;
     if (exclude == 0 || (!(exclude->flags538 & (1ULL << 43)) && !(((Collider*)exclude->root)->flags538 & (1ULL << 42)))) {
         Vu0::Q(lo) = Vu0::Min(Vu0::Q(*a), Vu0::Q(*b));
         Vu0::Q(hi) = Vu0::Max(Vu0::Q(*a), Vu0::Q(*b));
