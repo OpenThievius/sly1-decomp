@@ -781,7 +781,8 @@ struct GaugeCollider : SwitchedCollider {
     Vec02 v630;             // 0x630
     void* f640;             // 0x640: an object func_00198760 tests and hands on
     s32 f644;               // 0x644
-    u8 pad648[0x65C - 0x648];
+    u8 pad648[0x64C - 0x648];
+    void* f64C[4];          // 0x64C: the four objects whose floor func_00196EB0 samples
     void* f65C;             // 0x65C
     void* f660;             // 0x660
     void* f664;             // 0x664
