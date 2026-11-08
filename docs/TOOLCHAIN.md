@@ -401,6 +401,15 @@ func_00140258, func_001F2EF0, func_001F3408):
   func_001F3408's is 194. A Vec temporary in a condition makes the front end compute the
   condition as a value (its cleanup point) where retail branches: func_00140258's distance test
   is Vu0::Distance, an inline function that keeps the Vecs inside it.
+- **Vu0::Vec is the convention for new VU0 code** (decided 2026-11-08). The
+  original held its vectors as values of a struct type passed through inline
+  functions, as the loops show: a function matched from now on writes its
+  vector values
+  as Vu0::Vec, and uses the u128 helpers only where retail's code shows the
+  difference (a loop under loop.c's limit, a register a Vec copy moves). The
+  functions already matched with u128 values are rewritten to Vec only where
+  each still matches, function by function, never as a sweep that changes
+  bytes.
 - **A loop entered in the middle is not a loop to loop.c.** func_00140258's comparison of its
   found objects with the old list (`for` with a `break`, whose first test jump.c duplicates
   ahead of the loop) is "ignored due to multiple entry points": nothing in it is moved or
