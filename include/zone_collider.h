@@ -18,7 +18,7 @@ struct ZoneCollider : Collider {
     void* inside[8];        // 0x59C: func_00140550 hands each to a script list
     s32 f5BC;               // 0x5BC: set to 1 when there are no ids
     Zone28 zone;            // 0x5C0: its helpers take the record's address (func_0013E918, 0013E950, 0013EA38, 0013EB68)
-    u8 pad78C[0x790 - 0x78C];
+    s32 f78C;               // 0x78C: func_00140258's next mode when a timed mode 2 runs out (1 if set, else 0)
     s32 f790;               // 0x790: tested by slot 10 (then zone.f13C = 1)
     u8 pad794[0x7A0 - 0x794];
 };
