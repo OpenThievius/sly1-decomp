@@ -573,6 +573,37 @@ func_00140258, func_001F2EF0, func_001F3408):
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
 
+## Shapes of large functions
+
+What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
+func_00146518, func_001CC818, func_0019ED58, func_00134B48):
+
+- **An object's matrix is written through the object.** `MulRotation(&self->rot,
+  ...)` makes the destination a pointer pseudo that PRE carries to the end of
+  the function and spills; retail stores the rows through the object's own
+  pointer (`o->rot = r` in a function taking the object).
+- **A product's rows as values, in retail's load order.** Loading b's rows as
+  values in the order retail's registers show (b0, b2, b1) gives its
+  registers.
+- **A struct-typed vector store lets loads pass it.** `*(Vu0::Vec*)&p = v` is a
+  struct store, so a later load of a float global may be scheduled before it,
+  as retail's is; a u128 store through `Q()` keeps the two in order.
+- **The game clock through inline accessors.** Accessors taking the clock's
+  address (`ClockDt(const LinkClock*)`) give retail's form: the high part in a
+  saved register and `addiu sX, sY, %lo` per use; a plain field read folds the
+  offset into the address and costs a saved register.
+- **Normalising in place.** An inline that normalises a vector in place,
+  taking the fallback by reference, loads the fallback's address before the
+  difference, as retail does.
+- **A vector's three floats in a loop.** Two pointers indexed by i (`cur[i]`,
+  `vel[i]`) give retail's induction variables; separately incremented
+  pointers do not.
+- **A list's head read through the walk's frame.** `*(T**)frame.list` keeps the
+  read after the frame push; `self->children.head` is scheduled before it.
+- **Case blocks in retail's order, with labels and gotos where its blocks are
+  shared or entered sideways** (func_001C61E0's states 1 and 2 sharing one
+  call and falling into case 0, state 3 jumping into cases 4 to 7).
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it
