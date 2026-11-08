@@ -30,14 +30,15 @@ struct EntryQueue : BaseObject {
     void* buffer;           // 0x38
     void* f3C;              // 0x3C: the player it drives (func_0017CE20 binds it)
     s32 f40;                // 0x40
-    s32 f44;                // 0x44
+    f32 f44;                // 0x44: a kind 4 entry is done once its value is below minus this
     void* f48;              // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
     s32 f4C;                // 0x4C
     void* f50;              // 0x50
     void* f54;              // 0x54: the object func_0017BB78 aims the player at
     OnOffObject* f58;       // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)
     s32 f5C;                // 0x5C: f58 was not attached, so it was put in its parent's list
-    u8 pad60[0x68 - 0x60];
+    u8 pad60[0x64 - 0x60];
+    f32 f64;                // 0x64: a kind 7 entry waits for the player's f2410 to come within 15 of this
     s32 flag68;             // 0x68
 };
 
