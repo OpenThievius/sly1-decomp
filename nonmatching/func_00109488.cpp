@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 37352/37392, checked 2026-11-07
+// SIZE 37352/37392, checked 2026-11-08
 #include "common.h"
 // NEAR (2026-11-07, kind-130 merge, worker match-00109488-b): 9,338 instructions against retail's
 // 9,348 (li -25, lui +7, addiu +7, move +1), as before. 2,990 instructions match exactly (2,842
@@ -34,6 +34,13 @@
 // pseudo 2083 gets no register. Reload's registers are s1, s3 and s6 here (about 270 sets each),
 // t9 and s1 then s4, s8, t8 and s2 in retail: order_regs_for_reload takes, per insn, the
 // registers holding no live pseudo first, so they name where the long pseudos sit.
+// Checked on that measure (build/swarm/big-109488/pperm.py): 47 random parameter orders of one
+// helper each (call sites rewritten). All keep one `li 4`. 36 compile to this file's bytes, and the
+// rest lose the store order (Set14, Set5, Set0, Set1). Next: a search whose objective is the
+// window-2 4 placed (a `li 4` count near retail's 24) with the CSE window landmarks held. Moves:
+// the merges and splits that change where pseudos are born and die between entries 79 and 237, plus
+// compensating merges elsewhere, scored from the .lreg dump (build/swarm/big-109488/blk.py lists the
+// higher-priority pseudos that take each register over a pseudo's life).
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
