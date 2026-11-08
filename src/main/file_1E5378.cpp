@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "state_walker.h"
 #include "object_pool.h"
+#include "vu0.h"
 extern u8* g_player;
 extern u8* g_currentWorld;
 
@@ -232,7 +233,94 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
     return 1;
 }
 
-INCLUDE_ASM(func_001E5938);
+struct SpanHit {
+    Vec02 point;
+    u8 pad10[0x60];
+};
+
+s32 HasObjectPoolChoice(void* pool);
+void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
+void UnprojectCameraPoint(void* camera, void* in, void* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* lo, Vec02* hi, s32 (*filter)(PlayerLinkedCollider*, Collider*), PlayerLinkedCollider* owner, s32* n, Collider*** list);
+u8* FindNearestSpanObject(s32 zero, Vec02* lo, Vec02* hi, s32 n, Collider** list, SpanHit* out);
+void TransformPointBetweenFrames(s32 zero, void* to, void* point, void* out);
+s32 IsObjectOfKind(void* obj, s32 kind);
+void PopBackMemoryMark(void);
+void GetPlacementRecordTransform(void* place, Vec02* a, Vec02* b, void* c);
+f32 ArctangentOfRatio(f32 y, f32 x);
+
+void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
+{
+    if (HasObjectPoolChoice(self->f618) != 0) {
+        ObjectPool* pool = self->f618;
+        u8* place = (u8*)pool + 0x60;
+        u8* e0 = (u8*)pool + 0xE0;
+        u8* ang = (u8*)pool + 0x150;
+        f32 cx;
+        f32 cy;
+        Vec02 a;
+        Vec02 b;
+        Vec02 lo;
+        Vec02 hi;
+        Collider** list;
+        s32 n;
+
+        GetTextPanelCenter(&g_typedTextCaptionBox, &cx, &cy);
+        Vu0::Set(a, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 10.0f));
+        Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 80000.0f));
+        UnprojectCameraPoint(g_camera, &a, &lo);
+        UnprojectCameraPoint(g_camera, &b, &hi);
+        Vec02 pos;
+        SpanHit hit;
+        PushBackMemoryMark();
+        GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
+        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, &hit);
+        if (found != 0 && *(s32*)(found + 8) != 1) {
+            *(u8**)e0 = found;
+            TransformPointBetweenFrames(0, found, &hit, &pool->fF0);
+            pos = hit.point;
+            if (IsObjectOfKind(*(void**)(found + 0x50), 0xE) != 0 || IsObjectOfKind(*(void**)(found + 0x50), 7) != 0) {
+                g_typedTextCaptionBox.palette = 2;
+            } else if (IsObjectOfKind(*(void**)(found + 0x50), 8) != 0) {
+                g_typedTextCaptionBox.palette = 1;
+            } else {
+                u8* c = found;
+                while (c != 0) {
+                    s32 i;
+                    for (i = 0; i < self->f638; i++) {
+                        if (((u8**)self->f63C)[i] == c) {
+                            break;
+                        }
+                    }
+                    if (i < self->f638) {
+                        break;
+                    }
+                    c = *(u8**)(c + 0x18);
+                }
+                if (c != 0) {
+                    g_typedTextCaptionBox.palette = 1;
+                } else {
+                    g_typedTextCaptionBox.palette = 0;
+                }
+            }
+        } else {
+            *(u8**)e0 = 0;
+            *(Vec02*)(e0 + 0x10) = hi;
+            g_typedTextCaptionBox.palette = 0;
+            pos = hi;
+        }
+        PopBackMemoryMark();
+        Vec02 c0;
+        Mat02 rot;
+        Vec02 d;
+        GetPlacementRecordTransform(place, &c0, rot.r, 0);
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
+        *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
+        *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));
+    }
+}
 
 void GetStateWalkerCurrentKey(void* dev, s32* out);
 void GetStateWalkerTargetKey(void* dev, s32* out);

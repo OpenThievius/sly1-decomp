@@ -75,8 +75,107 @@ f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 // size: list head of three words, link offset at +8 (0x50)
 List01 g_pointObjects = {0};
 
-INCLUDE_RODATA(jtbl_0024B060);
-INCLUDE_ASM(func_0017D248);
+extern f32 g_gameClock[];
+void TurnColliderTowardRotation(void* self, Mat02* rot, void* data, f32 scale);
+void ComputePolarOffset(Vec02* out, f32 heading, f32 distance, f32 z);
+void SteerColliderTowardPosition(void* self, s32 a, s32 b, Vec02* pos, void* params, f32 dt);
+f32 GetAnimationMarkerTime(void* obj, s32 id);
+void AddColliderForce(void* target, Vec02* force);
+void BuildBasisFromX(Vec02* x, Mat02* out);
+
+void func_0017D248(Player* self)
+{
+    Vec02 a;
+    Vec02 b;
+    TurnColliderTowardRotation(self, &self->m660, &self->f6E0, g_gameClock[2]);
+    switch (self->f2228) {
+    case 6:
+        if (0.0001f < self->f634) {
+            ComputePolarOffset(&a, self->f630, self->f634 * self->f226C, 0.0f);
+            Vu0::Q(b) = Vu0::Add(Vu0::Q(self->v2290), Vu0::Q(a));
+            b.z = self->v150.z;
+            SteerColliderTowardPosition(self, 0, 0, &b, D_00263E90, g_gameClock[2]);
+        }
+        break;
+    case 8: {
+        f32 t0 = GetAnimationMarkerTime(self->f25C8, 0x1BA);
+        f32 t1 = GetAnimationMarkerTime(self->f25C8, 0x1BB);
+        if (*(f32*)((u8*)self->watched2230 + 0x14) < t1) {
+            Vu0::Q(a) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f));
+            AddColliderForce(self, &a);
+        }
+        if (*(f32*)((u8*)self->watched2230 + 0x14) < t0) {
+            b = D_00248D30;
+        } else {
+            Vu0::Q(b) = Vu0::FromFloats(0.0f, 0.0f, self->v150.z);
+        }
+        SteerColliderTowardPosition(self, 0, 0, &b, D_00263EA0, g_gameClock[2]);
+        break;
+    }
+    case 4:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+        break;
+    default: {
+        if (self->entryQueue != 0) {
+            break;
+        }
+        Vec02 c;
+        Mat02 m;
+        Vec02 r;
+        a = self->v150;
+        a.z = 0.0f;
+        const u128& fb = Vu0::Q(g_unitXVector);
+        Vu0::Vec v = Vu0::Vec::Of(a);
+        Vu0::Vec l = Vu0::Length(v);
+        if (Vu0::ToFloat(l) < 0.0001f) {
+            Vu0::Set(a, fb);
+        } else {
+            Vu0::Set(a, Vu0::DivX(v, l).q);
+        }
+        f32 len = Vu0::ToFloat(l);
+        BuildBasisFromX(&a, &m);
+        Vu0::Q(b) = Vu0::RotateTransposed(m, Vu0::Q(self->v2290));
+        f32 s;
+        f32 u;
+        f32 x;
+        if (self->f2228 == 0) {
+            if (b.x < len) {
+                s = D_00263E68;
+            } else {
+                s = D_00263E64;
+            }
+            u = D_00263E6C;
+            x = b.x;
+        } else {
+            if (b.x < len) {
+                s = D_00263E5C;
+            } else {
+                s = D_00263E58;
+            }
+            u = D_00263E60;
+            x = b.x;
+        }
+        c.z = 0.0f;
+        c.y = u * b.y;
+        c.x = s * (x - len);
+        if (self->f2228 != 6) {
+            f32 speed = self->f700;
+            if (self->v150.z < D_00263E78 * Fpu::Sqrt(speed)) {
+                c.z = (D_00263E78 * Fpu::Sqrt(speed) - self->v150.z) * D_00263E7C;
+            }
+        }
+        Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(c));
+        AddColliderForce(self, &r);
+        break;
+    }
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024B090);
 INCLUDE_ASM(func_0017D5D8);

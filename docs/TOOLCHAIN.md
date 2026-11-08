@@ -355,6 +355,25 @@ What retail shows, and what the compiler does:
   callers set $f12 and $f13 before those argument registers (func_0011FC90, func_0011F6B0,
   func_001A95D0's time third), and every matched caller keeps its bytes.
 
+- **Wave 6 findings (night-vumid2, 2026-11-08).** (1) A float read from a vector's lane for a
+  compare and then again after the arms (func_0017D248's `b.x`) is `x = b.x` written *after* the
+  arm's other statements in each arm: assigned first, the allocator gives it f1 where retail has
+  f0. (2) The idiom `lq v0,0(sp); qmtc2 v0,vf3` of a vector stored by pieces and then normalised
+  (func_0017D248, func_001E31F0) is the vector as a `Vu0::Vec` value (`Vec::Of(a)`, Length, DivX,
+  ToFloat); a plain u128 or Q(a) read gives lqc2. The normalisation's length survives the if in
+  a VU0 register only with ToFloat (the compiler's own qmfc2 of ToFloatMoved is shared and the
+  length is moved back with qmtc2). (3) A loop of `Vec` values (func_001BC978, func_001CC490) is big
+  enough for loop.c to leave its row address and list index alone; the same loop of u128 values
+  gets them reduced to induction variables. (4) A walk's `GliderListFrame`-style
+  frame shares the slot of a vector declared in the first arm of the function (declare that
+  vector inside the arm), and the outputs of a call declared after the weights' statement share
+  the weights' slot. (5) A callee that takes a float and a flag is declared float first when
+  retail sets $f12 before the flag. (6) The rotation curves' slot 1 is the angles of the same
+  evaluation (the kind 2 blend calls it), not a second evaluation: RotationCurveGet.
+  Still open: the `lw X,0(X)` (the weight's bits loaded into the dying pointer's register)
+  before a qmtc2, which eleven unmatched functions have and no C form here gives
+  (func_00120700, func_00120470, func_00122DE0 and eight more).
+
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
 read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved
