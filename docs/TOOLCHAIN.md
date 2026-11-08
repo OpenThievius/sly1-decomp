@@ -488,6 +488,17 @@ the compiler reads again, the cause is in how each memory reference is written
   (`move a0, s0`, s0 set before the call); called from an inline member
   (`frame.Clear()`, `FillMemory(this, 0, sizeof(*this))`) the address is
   computed into a0 and again into s0 after the call, as retail's func_001590A0.
+- **Open: a load into its own dying address register.** Retail loads a word
+  into the register that held its address (`lw s0, 0(s0)`, or `lui v1;
+  lw v1, %lo(D)(v1)`) in about eleven unmatched functions, before a qmtc2
+  or a call (func_00120700, func_001971B8, func_001DF600, func_001D4698).
+  Local allocation never gives a load's result the register of an address
+  that dies there; global allocation can, since it frees a dying input
+  before the output is set, as a toy with the value used across blocks
+  shows, and as the matched ResetButtonCodes does where its pointer lives
+  across a loop. So retail's form likely means one of the two values
+  crossed a basic block or was left to reload. No plain C form for it in
+  these functions has been found yet (2026-11-08).
 
 ## Loops
 
