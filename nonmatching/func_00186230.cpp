@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 248/240, checked 2026-11-07
-// NEAR: structure matches; retail stores the result with qmfc2.ni v0 and sw v0,0(a4) (ToBits; ToFloat gives mtc1 and swc1), and its scheduling differs: sqc2 of the edge vector is after c.lt.s (before the bc1f), the 1.0 mfc1 after div.s.
+// SIZE 244/240, checked 2026-11-07
+// NEAR: StoreX stores the result as retail does (night-lever2). Still differs, scheduling only: retail puts the sqc2 of the edge vector after the c.lt.s (before the bc1f; ours before the mtc1) and the mfc1 of 1.0 after the div.s. Writing the store of the edge before the dot product or after it changes nothing.
 // In the context of its file, src/main/collider_contact.cpp.
 #include "common.h"
 #include "asm_func.h"
@@ -142,7 +142,7 @@ void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
         u128 r = Vu0::Sub(Vu0::Q(*p), q);
         d = Vu0::Dot(r, r);
     }
-    *dist = Vu0::ToFloat(Vu0::Sqrt(d));
+    Vu0::StoreX(*dist, Vu0::Sqrt(d));
 }
 
 INCLUDE_ASM(func_00186320);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 424/420, checked 2026-11-07
+// BYTES 417/420 (99.3%), checked 2026-11-07
+// NEAR (night-lever2): Vu0::Copy of the difference gives retail's vmove and the dots' registers, but the copy takes the difference's own register (vmove vf2,vf2) where retail's copy is vf3 and the dots use the original vf2 (stored copy, dots on the original: the sub's operands swap registers instead).
 #include "common.h"
 #include "shapes.h"
 #include "asm_func.h"
@@ -43,7 +44,8 @@ s32 func_001CB3D0(Agent* self)
         return 0;
     }
     Vec02 d;
-    Vu0::Q(d) = Vu0::Sub(Vu0::Q(t->v140), Vu0::Q(self->v140));
+    u128 dv = Vu0::Copy(Vu0::Sub(Vu0::Q(t->v140), Vu0::Q(self->v140)));
+    Vu0::Q(d) = dv;
     switch (t->f239C) {
     case 3:
         if (MaskWorldBitsBySave() & 0x12000) {
@@ -57,7 +59,7 @@ s32 func_001CB3D0(Agent* self)
         if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
             return 0;
         }
-        if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(t->m110.r[0]))) > 0.0f) {
+        if (Vu0::ToFloat(Vu0::Dot(dv, Vu0::Q(t->m110.r[0]))) > 0.0f) {
             return 1;
         }
         break;
@@ -68,7 +70,7 @@ s32 func_001CB3D0(Agent* self)
         if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
             return 0;
         }
-        if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(t->m110.r[0]))) < 0.0f) {
+        if (Vu0::ToFloat(Vu0::Dot(dv, Vu0::Q(t->m110.r[0]))) < 0.0f) {
             return 1;
         }
         break;

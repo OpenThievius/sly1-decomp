@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 321/392 (81.9%), checked 2026-11-07
-// NEAR: same code with ToFloat where retail ends with qmfc2 and sw of the dot product to the distance (ToBits), plus: retail loads b into vf1 and d into vf2 (ours the reverse), stores the two zero floats in the other order, loads its zero (mtc1 zero,f0) after the cross products, and keeps the normalised vector in a register copied by the compiler's own vmove (ours writes the divide straight into the register).
+// SIZE 388/392, checked 2026-11-07
+// NEAR: StoreX for the distance and the stores of the two zeros in retail's order are in (night-lever2). Still differs: retail loads b into vf1 and d into vf2 (ours the reverse), loads its zero (mtc1 zero,f0) before the divides, and the normalised vector is a vmove into n's register (ours writes the divide straight into a register; Vu0::Copy of the result gives vmove vf1,vf1).
 // In the context of its file, src/main/file_1E88D0.cpp.
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
@@ -19,8 +19,8 @@ void func_001EDA80(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist,
     f32 len2 = Vu0::ToFloat(Vu0::Dot(n, n));
     if (len2 < 0.0001f) {
         f32 z = 0.0f;
-        out2[0] = z;
         out2[1] = z;
+        out2[0] = z;
         n = u;
     } else {
         u128 c1 = Vu0::Cross(u, w);
@@ -34,6 +34,6 @@ void func_001EDA80(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist,
         }
     }
     u128 nn = Vu0::NormalizeOr(n, Vu0::Q(g_unitZVector));
-    *dist = Vu0::ToFloat(Vu0::Dot(nn, u));
+    Vu0::StoreX(*dist, Vu0::Dot(nn, u));
     Vu0::Q(*normal) = nn;
 }
