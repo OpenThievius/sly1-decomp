@@ -6,6 +6,7 @@
 // slot), as if a block began there. The fonts, the compass loop and both band loops match (the
 // x scale computed before EvalCurveSpan, the rest after it; one `step` local for both loops).
 // Tried: state and child stores swapped, `step` declared earlier, t initialised in the for.
+// Tried (order-class pass): step declared just before the loops, the child store after SetTextPanelState, the two stores swapped: 26 words or worse.
 #include "common.h"
 #include "screen_element.h"
 #include "packet_writer.h"

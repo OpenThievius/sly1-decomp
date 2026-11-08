@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 560/592 (94.6%), checked 2026-11-08
+// BYTES 585/592 (98.8%), checked 2026-11-08
 #include "common.h"
 // NEAR: only the call to func_0013E430: retail stores fr.cur (sw s2) before the lwc1 of eps and has x in a1 (addiu a1,a1,992 last, in the jal slot); ours loads eps first and stores in the slot, or (store first) keeps x in v0. Fixed by reading both pair loads into f32 locals before fr.res = 0 (prologue now matches). Tried: eps local before/after the store, x local, pointer to fr.cur, p local.
 

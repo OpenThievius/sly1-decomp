@@ -26,6 +26,7 @@
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
 // the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
+// Tried (order-class pass): list base as local before the count, product operand order, count as a local before the base, count*2-1 written three ways, the axis loop as a while/for-scope variant: still the same 8 words.
 s32 g_alphaStatePacket1 = 0;
 s32 g_alphaStatePacket2 = 0;
 
