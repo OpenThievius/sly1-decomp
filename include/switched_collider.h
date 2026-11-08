@@ -310,9 +310,22 @@ struct Player : TurningCollider {
     f32 f226C;              // 0x226C
     u8 pad2270[0x2284 - 0x2270];
     f32 f2284;              // 0x2284
-    u8 pad2288[0x22AC - 0x2288];
+    u8 pad2288[0x22A0 - 0x2288];
+    f32 f22A0;              // 0x22A0: the time the stick last pushed along or against the link (func_001CD0C8)
+    s32 f22A4;              // 0x22A4: the link state to go back to, -1 for none (func_001CD0C8)
+    s32 f22A8;              // 0x22A8: set when the link's heading is turned round (func_001CD0C8)
     void* f22AC;            // 0x22AC
-    u8 pad22B0[0x239C - 0x22B0];
+    u8 pad22B0[0x2360 - 0x22B0];
+    f32 f2360;              // 0x2360: the three weights func_001CD0C8 gives SetBlendItemWeights, 0xC apart
+    u8 pad2364[0x236C - 0x2364];
+    f32 f236C;              // 0x236C
+    u8 pad2370[0x2378 - 0x2370];
+    f32 f2378;              // 0x2378
+    u8 pad237C[0x2384 - 0x237C];
+    void* f2384;            // 0x2384: the blend those weights go to
+    f32 f2388;              // 0x2388: ramped to 0 or 1 by the link state (func_001CD0C8)
+    f32 f238C;              // 0x238C: the same
+    u8 pad2390[0x239C - 0x2390];
     s32 f239C;              // 0x239C
     void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8); its +0x54 set keeps an agent from facing the player (func_001CB3D0)
     f32 f23A4;              // 0x23A4
