@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 37352/37392, checked 2026-11-07
+// SIZE 37352/37392, checked 2026-11-08
 #include "common.h"
 // NEAR (2026-11-07, kind-130 merge, worker match-00109488-b): 9,338 instructions against retail's
 // 9,348 (li -25, lui +7, addiu +7, move +1), as before. 2,990 instructions match exactly (2,842
@@ -17,6 +17,46 @@
 // here, 4,541 before). Also found: Set16 (flags 4226, also kind 130) merged, with Set4 unmerged,
 // gives retail's exact instruction count and opcode counts (9,348, no opcode off). But it puts the
 // 553 window 13 insns early and matches only 1,183 exactly.
+//
+// Why 4 is rebuilt or not (2026-11-08, worker big-109488; docs/TOOLCHAIN.md, "Constants in one
+// very long block"; scripts in build/swarm/big-109488/). The function has no call, so no callee's
+// return type is involved. Reload looks for a reloaded constant only in the hard register of the
+// nearest earlier insn that sets one to it (find_equiv_reg), and gives up if that register has
+// changed since. Retail's window-2 pseudo of 4 (set at entry 79, stored at 142-237; ours is pseudo
+// 951, born and used at the same entries) has t8; t8 is reused after 237, so every later 4 is
+// rebuilt. Ours never places 951: local-alloc finds every register taken somewhere in its life by
+// a pseudo of higher priority (t8 by the 18 born at entry 235 for entries 656-750, overlapping 951's
+// last 35 insns; t9 by the 4242 born at entry 169), and global-alloc fails too, so the only hard
+// register ever set to 4 is s5 (pseudo 118, which evicted s5's local pseudos in global-alloc's
+// "poorly used" rule and so keeps it alone), and every 4 is stored from s5. Merging Set10 (one
+// argument for fC, f14 and f18) gives 951 t8 in local-alloc and retail's 24 `li 4` exactly, but
+// moves the windows (9,425 instructions, 1,190 exact). func_00155778 (+7) is the same kind of loss:
+// pseudo 2083 gets no register. Reload's registers are s1, s3 and s6 here (about 270 sets each),
+// t9 and s1 then s4, s8, t8 and s2 in retail: order_regs_for_reload takes, per insn, the
+// registers holding no live pseudo first, so they name where the long pseudos sit.
+// Checked on that measure (build/swarm/big-109488/pperm.py): 47 random parameter orders of one
+// helper each (call sites rewritten). All keep one `li 4`. 36 compile to this file's bytes, and the
+// rest lose the store order (Set14, Set5, Set0, Set1). Next: a search whose objective is the
+// window-2 4 placed (a `li 4` count near retail's 24) with the CSE window landmarks held. Moves:
+// the merges and splits that change where pseudos are born and die between entries 79 and 237, plus
+// compensating merges elsewhere, scored from the .lreg dump (build/swarm/big-109488/blk.py lists the
+// higher-priority pseudos that take each register over a pseudo's life).
+// That search, run unattended (2026-11-08, build/swarm/big-109488/search.py and dsearch.py, about
+// 700 compiles). Its moves were merges of equal arguments and splits of single fields, per call;
+// Set10's fC = f14 = f18 merge per call; and Set8m calls unmerged back to Set8. It scored the CSE
+// window landmarks, the final `li 4` count and the per-value build-count distance to retail (l1.py:
+// the sum of |ours - retail| builds per constant, 90 for this file). The landmarks hold (8 of 10)
+// with the window-2 4 placed: Set10 merged on about 13-18 calls between 182 and 1034, and 16-18
+// Set8m calls unmerged to restore the count before entry 553. That gives 24-40 `li 4` (retail 24),
+// but other values overshoot (func_00155778 +16, 0x880 +8, 6 +7). The best such form is 9,398
+// instructions, 1,296 exact, distance 107 (build/swarm/big-109488/s/d4_best_107_1296.cpp). Without
+// the 4 placed, the climb stays at 89-93, as this file. A pseudo the .lreg model shows as free is
+// not always placed (local-alloc's own lifetimes, one insn longer at each end), and one local-alloc
+// places can be lost in global-alloc or reload, so the score has to come from the final code. This
+// file stays the best. With all moves together, a climb on the distance alone (gsearch.py, 90
+// compiles) went from 90 to 86. It got there only by piling up 50 coincidental per-call edits, and
+// exact fell to 2,527, so the gain is noise. The next attempt needs moves that change several
+// long-lived constants together; no single-constant objective found a descent.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
