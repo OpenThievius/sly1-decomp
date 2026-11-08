@@ -33,6 +33,8 @@
 #include "owner_message.h"
 #include "vu0.h"
 #include "ramp_profile.h"
+#include "animation.h"
+#include "anim_curve.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -673,10 +675,308 @@ void func_00170820(Player* self, Contact03* c, s32 idx)
     }
 }
 
-INCLUDE_RODATA(jtbl_0024A8A0);
-INCLUDE_RODATA(jtbl_0024A8F0);
-INCLUDE_RODATA(jtbl_0024A930);
-INCLUDE_ASM(func_00170960);
+// An object the player was queued to (+0x2BE0, +0x26D4): its walker at +0x2D4, a walker handle at
+// +0x2D8, and the list of the objects at +0x304 (count at +0x300) whose own walkers it sets.
+struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D0 - 0x150]; s32 f2D0; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
+// What HandlePlayerNotification is handed: the sender first; then an object or a time; then an
+// event code.
+struct PlayerNotification {
+    void* source;           // 0x00
+    union {
+        void* obj;          // 0x04
+        f32 time;           // 0x04
+    };
+    s32 code;               // 0x08
+};
+// The animation player the notifications of kind 0x13 come from.
+struct PlayerNoticePlayer {
+    u8 pad00[0x08];
+    Animation* anim;        // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+};
+// An effect CreateEffect hands back: its set-up slot, then the times and objects it follows.
+struct PlayerNoticeEffect;
+struct PlayerNoticeEffectVt {
+    void (*m00)(PlayerNoticeEffect* self, void* pos, f32 scale, s32 flags);
+};
+struct PlayerNoticeEffect {
+    const PlayerNoticeEffectVt* vt; // 0x00
+    u8 pad04[0x18 - 0x04];
+    f32 start;              // 0x18
+    f32 life;               // 0x1C
+    void* p20;              // 0x20
+    u8 pad24[0xC0 - 0x24];
+    Vec02 vC0;              // 0xC0
+    u8 padD0[0x134 - 0xD0];
+    void* p134;             // 0x134
+};
+PlayerNoticeEffect* CreateEffect(s32 a, s32 b);
+void AddEffectListener(void* obj, void* arg);
+f32 GetAnimationMarkerTime(Animation* anim, s32 key);
+f32* FindAnimationMarkerEvent(Animation* anim, s32 key);
+void SetStateWalkerTarget(void* p, s32 key);
+void ReleasePlayerToState2(Player* self);
+void HandleSwitchedColliderNotification(void* self, s32 kind, void* rec);
+extern f32 D_002637CC;
+extern s32 D_002637D0;
+extern s32 D_002637D4;
+extern f32 g_gameClock[];
+
+static inline s32 MinOfCounts(s32 a, s32 b)
+{
+    return a < b ? a : b;
+}
+
+#define PS(T, o) (*(T*)((u8*)self + (o)))
+void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
+{
+    HandleSwitchedColliderNotification(self, kind, msg);
+    switch (kind) {
+    case 5:
+        if ((void*)msg == PS(void*, 0x2244)) {
+            self->f2254 |= 2;
+            if (self->f223C == 10) {
+                self->f2260 = 2;
+            } else {
+                self->f2260 = -1;
+            }
+        } else if ((void*)msg == self->watched2230) {
+            switch (self->f2220) {
+            case 7:
+                if (self->f2228 == 0x1B || self->f2228 == 0x17) {
+                    self->f2258 = 7;
+                    self->f225C = 0x18;
+                    self->f2254 |= 1;
+                }
+                break;
+            case 2:
+                if (self->f2228 != 7) {
+                    if (self->f2228 != 8) {
+                        break;
+                    }
+                }
+                self->f2258 = 2;
+                self->f225C = 2;
+                self->f2254 |= 1;
+                break;
+            case 0xC:
+                if (self->f2228 == 0x21) {
+                    self->f2258 = 0xC;
+                    self->f225C = 0x22;
+                    self->f2254 |= 1;
+                    break;
+                }
+                if (self->f2228 != 0x23) {
+                    break;
+                }
+            case 9:
+            case 0xA:
+            case 0xE:
+            case 0xF:
+            case 0x10:
+                self->f225C = -1;
+                self->f2258 = 0;
+                self->f2254 |= 1;
+                break;
+            case 4:
+                self->f2254 |= 0x10;
+                break;
+            }
+        }
+        break;
+    case 7:
+        if ((void*)msg == self->watched2230) {
+            switch (self->f2220) {
+            case 5:
+            case 6:
+                self->fA14 = -1;
+                break;
+            }
+        }
+        break;
+    case 0x13: {
+        PlayerNoticePlayer* src = (PlayerNoticePlayer*)msg->source;
+        if (src != (void*)self->watched2230 && src != PS(void*, 0x2244)) {
+            void* other = self->f2234;
+            if (other == 0 || src != *(void**)((u8*)other + 0x24)) {
+                break;
+            }
+        }
+        switch (msg->code) {
+        case 0x138: {
+            Vec02 v;
+            Track83* track = src->anim->f9C;
+            if (track == 0) {
+                break;
+            }
+            PositionCurve* c = track->pos;
+            c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+            Vu0::Q(v) = Vu0::Rotate(self->m660, Vu0::Q(v));
+            self->desc02()->m20(self, &v);
+            if (src == (void*)self->watched2230) {
+                Vec02 w;
+                u128 s = Vu0::FromFloat(-1.0f);
+                Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(v), s);
+                Vu0::Q(w) = s;
+            }
+            break;
+        }
+        case 0x13C:
+            if (self->f2228 == 8) {
+                self->f242C = (f32)D_002637D4;
+            } else {
+                self->f242C = (f32)D_002637D0;
+            }
+            break;
+        case 0x13D:
+            self->f242C = 0;
+            break;
+        case 0x13A:
+            self->f554 = 1;
+            break;
+        case 0x13B:
+            Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(self->pos));
+            self->f554 = 0;
+            self->v2530.z = 0.0f;
+            break;
+        case 0x13E: {
+            f32 left = GetAnimationMarkerTime(((PlayerNoticePlayer*)self->watched2230)->anim, 0x140) - msg->time;
+            self->f5D0 = 0;
+            s32 most = g_currentLevelRecord->f438;
+            s32 count = ((WalkerHost*)self->f26D4)->count;
+            s32 n = MinOfCounts(count, most);
+            for (s32 i = 0; i < n; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                PlayerNoticeEffect* fx = CreateEffect(0x1A, 0);
+                self->f5AC[self->f5D0++] = fx;
+                if (fx != 0) {
+                    f32 nearest = 300.0f;
+                    fx->vt->m00(fx, (u8*)self->f59C + 0x140, D_002637CC, 0);
+                    AddEffectListener(fx, self);
+                    PlacedObject* to = (PlacedObject*)h->f2D8;
+                    f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(((PlacedObject*)self->f59C)->v140))));
+                    fx->p20 = to;
+                    d = nearest >? d;
+                    fx->life = left <? (d * 0.00055555557f);
+                    fx->vC0 = g_currentWorld->gravity;
+                    fx->p134 = (void*)self->f59C;
+                }
+            }
+            break;
+        }
+        case 0x140: {
+            s32 i;
+            for (i = 0; i < ((WalkerHost*)self->f26D4)->count; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                s32 most = g_currentLevelRecord->f438;
+                if (i < most) {
+                    if (!(most < ((WalkerHost*)self->f26D4)->count)) {
+                        SetStateWalkerTarget(h->f2D4, 0x22F);
+                    } else {
+                        SetStateWalkerTarget(h->f2D4, 0x230);
+                    }
+                } else {
+                    SetStateWalkerTarget(h->f2D4, 0x231);
+                }
+            }
+            if (!(g_currentLevelRecord->f438 < ((WalkerHost*)self->f26D4)->count)) {
+                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x22F);
+                g_currentLevelRecord->f448 |= ((WalkerHost*)self->f26D4)->f2D0;
+            } else {
+                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x230);
+            }
+            f32* e = FindAnimationMarkerEvent(((PlayerNoticePlayer*)self->watched2230)->anim, 0x13F);
+            if (e == 0) {
+                break;
+            }
+            f32 left = e[0] - ((PlayerNoticePlayer*)self->watched2230)->time;
+            self->f5D0 = 0;
+            s32 most = g_currentLevelRecord->f438;
+            s32 count = ((WalkerHost*)self->f26D4)->count;
+            s32 n = MinOfCounts(count, most);
+            for (i = 0; i < n; i++) {
+                WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
+                PlayerNoticeEffect* fx = CreateEffect(0x1A, 0);
+                self->f5AC[self->f5D0++] = fx;
+                if (fx != 0) {
+                    f32 nearest = 300.0f;
+                    fx->vt->m00(fx, (u8*)h->f2D8 + 0x140, 1.0f / D_002637CC, 0);
+                    AddEffectListener(fx, self);
+                    f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)h->f2D8)->v140), Vu0::Q(((PlacedObject*)self->f59C)->v140))));
+                    fx->p20 = (void*)self->f59C;
+                    d = nearest >? d;
+                    f32 life = left <? (d * 0.0016666667f);
+                    fx->life = life;
+                    fx->vC0 = g_currentWorld->gravity;
+                    fx->p134 = h->f2D8;
+                    fx->start = g_gameClock[1] + (left - life);
+                }
+            }
+            break;
+        }
+        case 0x15E:
+            PS(s32, 0x2738) = 1;
+            break;
+        case 0x15F:
+            PS(s32, 0x2738) = 0;
+            break;
+        case 0x144:
+            self->f2254 |= 0x10;
+            break;
+        case 0x143:
+            self->f2248 = 1;
+            break;
+        }
+        break;
+    }
+    case 0xA:
+        if (msg->obj == self) {
+            self->f2438 = (Collider*)msg->source;
+            for (u32 k = 0; k < 8; k++) {
+                self->f26D8[k].time = 0;
+            }
+        }
+        break;
+    case 0xB:
+        if (msg->obj == self && msg->source == self->f2438) {
+            self->f2438 = 0;
+        }
+        break;
+    case 2: {
+        void* held;
+        switch (self->f2220) {
+        case 3:
+            held = (void*)self->f2204;
+            goto check;
+        case 7:
+            held = (void*)self->f2208;
+            goto check;
+        case 6:
+            if (self->f239C == 4) {
+                goto pushed;
+            }
+            if (self->f239C != 5) {
+                break;
+            }
+            held = PS(void*, 0x23B8);
+        check:
+            if (held == (void*)msg) {
+                ReleasePlayerToState2(self);
+            }
+            break;
+        pushed:
+            if (self->f23BC == (void*)msg) {
+                ReleasePlayerToState2(self);
+            }
+            break;
+        }
+        break;
+    }
+    }
+}
+#undef PS
 
 struct PoseHolder47;
 struct PoseHolderDesc { u8 pad00[8]; void (*m2)(PoseHolder47* self, Vec02* out, f32 t, s32 a); };
@@ -1754,7 +2054,6 @@ void RegisterPlayer(Player* self)
 // An object the player was queued to (+0x2BE0): a walker handle at +0x2D8, and the list of the
 // objects at +0x304 (count at +0x300) whose own walkers it sets.
 struct WalkerListObject;
-struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D4 - 0x150]; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
 void GetStateWalkerCurrentKey(void* p, s32* out);
 void GetStateWalkerTargetKey(void* p, s32* out);
 void SetStateWalkerTarget(void* p, s32 key);

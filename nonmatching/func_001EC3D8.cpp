@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 140/156 (89.7%), checked 2026-11-07
+// BYTES 150/156 (96.2%), checked 2026-11-08
 // NEAR: same instructions and registers (stores written group, object, float, callback); only the schedule of `move a0,sp` against `swc1 $f0,4(sp)` differs (retail puts the move after the swc1). Tried the float as a local or inline, other store orders, a pointer local for &r.
 #include "common.h"
 #include "switched_collider.h"

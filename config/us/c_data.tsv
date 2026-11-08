@@ -28,7 +28,7 @@ D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
 D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp
 D_0024A7F0	0024A7F0	68	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
-D_0024A860	0024A860	296	.rodata	src/main/player.cpp
+D_0024A860	0024A860	600	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
 D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	48	.rodata	src/main/file_17D248.cpp
@@ -63,7 +63,7 @@ D_0024DC90	0024DC90	24	.rodata	src/main/file_1D62E0.cpp
 D_0024DCA8	0024DCA8	4	.rodata	src/main/tint_blend_collider.cpp
 D_0024DCB0	0024DCB0	1287	.rodata	src/main/commentary_best_time.cpp
 D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
-D_0024E600	0024E600	404	.rodata	src/main/file_1E88D0.cpp
+D_0024E600	0024E600	414	.rodata	src/main/file_1E88D0.cpp
 D_0024E840	0024E840	24	.rodata	src/main/file_1F2758.cpp
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
