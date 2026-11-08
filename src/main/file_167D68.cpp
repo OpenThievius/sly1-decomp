@@ -1443,4 +1443,18 @@ void* FindEarliestPooledChild(PlacedObject* self)
     return best;
 }
 
-INCLUDE_ASM(func_0016A910);
+void func_0016A910(PlacedObject* self, Vec02* out, f32* angleOut)
+{
+    Vec02 d;
+    PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
+    u128 p = Vu0::Q(self->v140);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), p);
+    d.z = 0.0f;
+    if (out) {
+        u128 k = Vu0::Scalar(*(f32*)((u8*)self + 0x560) + 70.0f);
+        Vu0::Q(*out) = Vu0::MulAddX(p, Vu0::NormalizeOrMoved(Vu0::Q(d), Vu0::Q(g_unitXVector)), k);
+    }
+    if (angleOut) {
+        *angleOut = WrapAngle(ArctangentOfRatio(d.y, d.x) + 3.14159274f);
+    }
+}
