@@ -639,7 +639,29 @@ s32 GetPlayerRequestPhase(Player* self)
     return 2;
 }
 
-INCLUDE_ASM(func_001D6608);
+void FinishSwitchedCollider(Player* self);
+void SetPlayerState(Player* self, s32 a, s32 b);
+
+void FinishPlayerRequest(Player* self)
+{
+    if (self->f2730 != 0) {
+        FinishSwitchedCollider(self);
+        self->f2730 = 0;
+    }
+    if (self->f26B4.fn != 0) {
+        s32 fn = self->f26B4.fn;
+        self->f26B4.fn = 0;
+        ((void (*)(s32, Player*))fn)(self->f26B4.data, self);
+    } else {
+        Vec02 v = self->v150;
+        v.z = D_00275160 >? v.z;
+        const Desc02* d = self->desc02();
+        d->m20(self, &v);
+        SetPlayerState(self, 2, 6);
+    }
+    self->f226C = 0.0f;
+    self->f2498 = 0;
+}
 
 INCLUDE_ASM(func_001D66A8);
 
