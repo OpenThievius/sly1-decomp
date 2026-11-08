@@ -336,7 +336,71 @@ void AttachNodeToOwner(NodeOwner* self, s32 unused, NodeAttachment* ctx)
 INCLUDE_RODATA(jtbl_0024E840);
 INCLUDE_ASM(func_001F2840);
 
-INCLUDE_ASM(func_001F2EF0);
+struct OscillatorSweepEntry {
+    s32 kind;               // 0x00: 0 for an axis entry
+    u8 pad04[0x10 - 0x04];
+    Vec02 v10;              // 0x10: the axis
+    Vec02 v20;              // 0x20
+    u8 pad30[0x40 - 0x30];
+    Vec02 v40;              // 0x40
+    u8 pad50[0x64 - 0x50];
+    f32 scale;              // 0x64
+    f32 f68;                // 0x68
+    f32 f6C;                // 0x6C
+    u8 pad70[0xD0 - 0x70];
+};
+
+void ComputeSinCos(f32 x, f32* sinOut, f32* cosOut);
+
+// A weight already in a VU0 register, stored to a slot of its own as Scalar's is.
+static inline Vu0::Vec WeightOf(u128 w)
+{
+    Vu0::Slot t;
+    Vu0::Q(t) = w;
+    Vu0::Vec r;
+    r.q = Vu0::Q(t);
+    return r;
+}
+
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB)
+{
+    Vu0::Vec pos = Vu0::Vec::Of(*in);
+    Vu0::Vec other = Vu0::Vec::Of(D_00248D30);
+    Vu0::Vec base = pos;
+    for (s32 i = 0; i < self->entryCount; i++) {
+        OscillatorSweepEntry* e = (OscillatorSweepEntry*)((u8*)self + 0x50) + i;
+        if (e->kind != 0) {
+            continue;
+        }
+        f32 period = e->scale == 0.0f ? 0.0f : 1.0f / e->scale;
+        f32 scale = e->scale;
+        if (period < time) {
+            continue;
+        }
+        f32 phase = Vu0::ToFloatMoved(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock.time * e->f68 + e->f6C;
+        f32 sn, cs;
+        ComputeSinCos(phase * 6.2831855f, &sn, &cs);
+        u128 c = Vu0::FromFloatAt(cs);
+        pos = Vu0::MulAddX2(pos, Vu0::Vec::Of(e->v20), WeightOf(c), Vu0::Vec::Of(e->v40), Vu0::Vec::Scalar(sn));
+        if (outB != 0) {
+            other = Vu0::MulAddX2(other, Vu0::Vec::Of(e->v20), Vu0::Vec::FromFloat(-sn), Vu0::Vec::Of(e->v40), WeightOf(c));
+        }
+    }
+    if (outA != 0) {
+        Vu0::Q(*outA) = pos.q;
+    }
+    if (outB != 0) {
+        Vu0::Q(*outB) = other.q;
+    }
+    if (deltas != 0 && outDeltas != 0) {
+        for (s32 k = 0; k < 3; k++) {
+            Vec02 t;
+            Vu0::Set(t, Vu0::Add(Vu0::Q(*in), Vu0::Q(deltas[k])));
+            ComputeOscillatorDisplacement(self, time, &t, 0, &t, 0, 0);
+            Vu0::Q(outDeltas[k]) = Vu0::Sub(Vu0::Q(t), pos.q);
+        }
+    }
+}
 
 INCLUDE_ASM(func_001F3140);
 
