@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 463/508 (91.1%), checked 2026-11-08
+// BYTES 480/508 (94.5%), checked 2026-11-08
 // Tried night-close3, 2 compiles: step computed after the call, t before bestT: no change or worse.
 // Tried night-close8, 9 compiles: func_0012F210 declared (e, o, p, limit, big, t, a, b, c) and the sampler (obj, from, t, one, ...), as retail sets $f14 after a2 and a1 before $f12: 24 differing words down to 20. bestT and t declared first: no change.
 // NEAR: registers only: the object (a1) and the entry from func_0012CCE8 are in s1 and s0, retail has s0 and s1, and the step and best-time floats are in f23 and f24, retail f24 and f23 (step computed straight into its register by max.s in retail).

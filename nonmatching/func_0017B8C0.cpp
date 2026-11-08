@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 185/212 (87.3%), checked 2026-11-07
+// BYTES 189/212 (89.2%), checked 2026-11-08
 #include "common.h"
 // Tried night-close8, 6 compiles and tools/permute.py --auto: the 1.0 as a named float local gives retail's -1.0 register and the 1.0's mtc1 next to it, 12 differing words down to 9 (permute.py's order). Both constants named, the 4 named, the local before t: no closer.
 // NEAR: retail forms the table's address (lui v0) before the 1.0's lui and stores in source order (f270 first after f27C); here the 1.0 is loaded first and sched2 orders the eight stores otherwise.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 602/692 (87.0%), checked 2026-11-08
+// BYTES 645/692 (93.2%), checked 2026-11-08
 // Tried night-close8, 10 compiles: the segment's length read with ToFloatMoved sinks the two dead stores where retail has them (after the dot, and into the bc1f delay slot): 30 differing words down to 16. ToFloatMoved for the dot or the tail's length: no change; the tail's normalisation written out with the store between the length and the test: far worse.
 // NEAR: the prologue's addiu s2,sp,16 (retail interleaves it with the saves, here after them) and the tail's store of the copy (retail after the dot of the copy, here before it).
 // Before: NEAR: same instructions, frame (0xE0) and branches as retail; only the schedule of three groups differs: the two dead stores of the segment vector (e0 at 0x20, the unit vector at 0x0) come before the vdiv / before the compare where retail sinks them after the dot product and into the bc1f delay slot, and the prologue's addiu s2,sp,16 comes after the callee-saved saves where retail interleaves it. The tail (outDir normalised with the vmove copy stored first) matches. Found: d in the loop body shares its slot with the Scalar of the point blend (e outside the loop); outDir's length from a Vu0::Copy, its DivX from the original. permute.py --auto: 48 bytes differ at best.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 605/680 (89.0%), checked 2026-11-08
+// BYTES 648/680 (95.3%), checked 2026-11-08
 // Tried night-close8, 12 compiles: the else arm's row as the link it already holds (row = (ContactRow03*)link: retail's move s4,s7), the normalised direction stored with Vu0::Set (from the frame, not through s1), and the three dots read with ToFloatMoved: 37 differing words down to 13, the callee-saved registers now retail's. Row initialised before the if: far worse; the last dot of Vec values: no change.
 // NEAR: the prologue's order (retail saves s0 and ra and moves a0 before s8 and s7), the else arm's move s4,s7 before the addiu of sp+0x10 in retail, and the last dot's VU0 registers (retail loads delta into vf2 and dir into vf1, ours the other way).
 // Before, night-moved (2026-11-08): NormalizeOrMoved loads the unit-Z fallback with lq before the length mtc1 as retail does; left: the callee-saved register assignment (s1/s2, s7/s8, s4) and the dot operands vf1/vf2 order.

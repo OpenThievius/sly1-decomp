@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 353/388 (91.0%), checked 2026-11-08
+// BYTES 369/388 (95.1%), checked 2026-11-08
 // NIGHT-DECLS (2026-11-08): SortElements declared void as defined (func_001F5CD0): 351 -> 353 bytes. Still differs as above.
 // Tried night-close8, 8 compiles: q advanced first and the record written through q[-1]: 11 differing words down to 6. Retail sets the record pointer with move v1,a1 then addiu a1,v1,8 and stores the object and the far distance at -4(a1) and -8(a1) but the squared distance at 0(v1); here loop.c makes q a giv biased by -0x8000 (addiu a1,s2,-32768, stores at 32764(v1), 32760(v1), 32760(a1)). StoreX for the distance, c kept for some stores, n++ in each arm: further.
 // NEAR: the record pointer: addiu a1,s2,-32768 for move a1,s2 before the loop and the three stores at offsets biased by 0x8000; the rest is retail's.
