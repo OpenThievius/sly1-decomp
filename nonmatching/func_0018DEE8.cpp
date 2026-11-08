@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0 (0.0%), checked 2026-11-08
+// BYTES 328/344 (95.3%), checked 2026-11-08
 // NEAR: registers and two orders only: retail keeps the speed in $f1, the hit's time in $f3 with 0.25 in $f1 and 1.0 in $f2, and subtracts before it moves the 1.5 into the VU. 1/m + now (retail's order of the sum) and 0.25 >? m are in. Tried: named 0.25/1.0 locals, speed read twice, diff inline.
 #include "common.h"
 #include "asm_func.h"
