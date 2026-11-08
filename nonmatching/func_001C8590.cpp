@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 920/908, checked 2026-11-07
+// SIZE 920/908, checked 2026-11-08
 // NEAR: the frame (0x1A0, with the ColliderSpan at 0x50 and the count and list at 0xD0), the calls,
-//       the min.s (the `<?` operator) and every VU0 sequence are retail's. Retail keeps the high half
-//       of the clock's address in $fp from before the first branch (gcse hoists the lui; ours loads
-//       it twice), the loop test as a materialised boolean (`li 1; bc1fl; move 0`), and holds the
-//       address of the up vector in $s6 where ours has $s1. About 25 compiles (the clock through a
-//       pointer, the test as an inline function, the order of the locals).
+//       the min.s (the `<?` operator), the loop's materialised test and every VU0 sequence are
+//       retail's. Still differs: retail keeps the high half of the clock's address in $fp from
+//       before the first branch (gcse hoists the lui into the beqz's slot) and forms the time's
+//       address from it at both reads; ours loads it twice, and $fp then holds the filter's high
+//       half (retail's s7), which renumbers the saved registers of the loop (the up vector's in s6
+//       for ours s1). 2026-11-08, night-size1: the time read through an inline ClockTime(g_gameClock)
+//       gives retail's first block (addiu v1 from the high part, the loads in order); 6 words
+//       closer. Before: about 25 compiles (the clock through a pointer, the test as an inline
+//       function, the order of the locals).
 #include "common.h"
 #include "switched_collider.h"
 #include "globals.h"
@@ -27,11 +31,13 @@ static inline s32 IsNearPoint(u128 a, u128 b, f32 reach)
     return Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(a, b), Vu0::Sub(a, b)))) < reach;
 }
 
+// The game clock's time (its second word), read through the clock's address.
+static inline f32 ClockTime(const f32* clock) { return clock[1]; }
+
 void func_001C8590(Agent* self)
 {
-    f32* now = g_gameClock;
     if (F(s32, 0xA60) != 0) {
-        if (!(D_00274C98[0] < now[1] - F(f32, 0xA64))) return;
+        if (!(D_00274C98[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
     }
     s32 ok;
     if (F(s32, 0xB90) != 0) {
@@ -94,5 +100,5 @@ void func_001C8590(Agent* self)
     }
     F(s32, 0x930) = 0;
     F(s32, 0xA60) = ok;
-    F(f32, 0xA64) = now[1];
+    F(f32, 0xA64) = ClockTime(g_gameClock);
 }
