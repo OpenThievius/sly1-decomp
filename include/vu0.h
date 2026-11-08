@@ -641,12 +641,6 @@ struct Vu0 {
         return r;
     }
 
-    static Vec Add(Vec a, Vec b)
-    {
-        Vec r;
-        r.q = Add(a.q, b.q);
-        return r;
-    }
 
     static Vec Min(Vec a, Vec b)
     {
@@ -669,12 +663,6 @@ struct Vu0 {
         return r;
     }
 
-    static Vec DivX(Vec a, Vec s)
-    {
-        Vec r;
-        r.q = DivX(a.q, s.q);
-        return r;
-    }
 
     static Vec MulAddX(Vec a, Vec b, Vec s)
     {
