@@ -9,11 +9,13 @@
 #include "list_iter.h"
 #include "vu0.h"
 #include "transform_object.h"
+#include "c8b.h"
+#include "game_clock.h"
 
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, f32 t, s32 e, s32 f);
 void GetObjectWorldPosition(void* p, Vec02* out);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
@@ -29,10 +31,6 @@ struct ChildPoseSource : Attachment {
 };
 
 struct Rec_274BA0 { s32 a[12]; f32 b; };
-
-// The file's .rodata: the jump tables of its assembly (func_001C6928's own follows them).
-INCLUDE_RODATA(jtbl_0024D5A0);
-INCLUDE_RODATA(jtbl_0024D5D0);
 
 // The file's .data, in retail's order.
 f32 D_00274B90 = 0.06666667f;
@@ -80,7 +78,271 @@ void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
 
 INCLUDE_ASM(func_001C6028);
 
-INCLUDE_ASM(func_001C61E0);
+// An item of an animation player's list (func_001C61E0): two byte states and a time.
+struct AimPlayerItem {
+    u8 pad0[0x10];
+    s8 state10;             // 0x10
+    s8 state11;             // 0x11
+    u8 pad12[0x18 - 0x12];
+    f32 time;               // 0x18
+    u8 pad1C[0x20 - 0x1C];
+    AimPlayerItem* next;    // 0x20
+};
+
+// The animation player the aim keeps at Player+0x2244.
+struct AimPlayer {
+    u8 pad0[8];
+    Gr8B* anim;             // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+    f32 rate;               // 0x1C
+    u8 pad20[0x44 - 0x20];
+    AimPlayerItem* items;   // 0x44
+};
+
+struct AimSlotObject;
+typedef void (*AimSlotFn)(AimSlotObject* self, ...);
+struct AimSlotObject { AimSlotFn* vt; };
+
+struct AimSoundSource { u8 pad0[0xAC]; s32 fAC; };
+struct AimSoundPoint { u8 pad0[0x54]; s32 f54; };
+struct AimTarget { u8 pad0[0x3E4]; Gr8B* f3E4; };
+
+void StartSoundEffect(s32 id, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void TeleportStateWalker(void* p, s32 n);
+s32 FindStateEntryIndex(void* p, s32 n);
+void SetPlayerClass75AheadBlend(Player* self, void* blend, void* anim);
+void ReplaceAnimationPlayer(void* anim, Player* self, s32 c, void* slot, f32 start, f32 speed);
+extern f32 D_00274B90;
+extern f32 D_00274B94;
+extern f32 D_00274B98;
+extern s32 D_00274C10;
+extern s32 D_00274C14;
+
+void func_001C61E0(Player* self, s32 state)
+{
+    s32 old = self->f223C;
+    if (old == state) {
+        return;
+    }
+    s32 chained = 0;
+    if (state != -1 && old != -1) {
+        chained = state == D_00274BA0.a[old];
+    }
+    AimSlotObject* hold = (AimSlotObject*)self->f25D8[0];
+    if (hold != 0 && chained == 0) {
+        hold->vt[7](hold);
+    }
+    s32 id;
+    self->f2254 &= ~2;
+    switch (self->f223C) {
+    case 1:
+        id = ((AimSoundSource*)self->f2204)->fAC;
+        goto play;
+    case 2:
+        id = ((AimSoundPoint*)self->f2208)->f54;
+    play:
+        StartSoundEffect(id, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    case 0:
+        self->f4B8 = 0;
+        break;
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        if (self->f2220 == 0) {
+            TeleportStateWalker(self->f2234, 0x146);
+        }
+        break;
+    case -1:
+        break;
+    }
+    f32 start = 0.0f;
+    void* anim = 0;
+    f32 speed = 1.0f;
+    f32 delay = 0.0f;
+    s32 sound = -1;
+    switch (state) {
+    case -1:
+        self->f2200 = 0;
+        self->f2204 = 0;
+        self->f2208 = 0;
+        break;
+    case 1:
+        self->f4B8 = 0;
+        break;
+    case 2:
+        self->f4B8 = 0;
+        break;
+    case 10:
+        self->f4B8 = 0;
+        anim = self->f1018;
+        break;
+    case 11:
+        self->f4B8 = 0;
+        anim = self->f101C;
+        break;
+    case 0: {
+        Gr8B* g = ((AimTarget*)self->f21C4)->f3E4;
+        anim = g;
+        sound = 13;
+        speed = 0.0f;
+        start = g->pC0->p8->f8;
+        self->f4B8 = 0;
+        self->f2210 = 0;
+        self->f2214 = 0;
+        self->f2424 = g_gameClock.time + 0.1f;
+        break;
+    }
+    case 3: {
+        Vec02 v;
+        self->f25EC = 0;
+        self->f21C8 = -1.0f;
+        TransformPointBetweenFrames(0, self, (u8*)self->f23D4 + 0x140, &v);
+        Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
+        Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(*(Vec02*)((u8*)self->f61C + 0x100)), h).q;
+        if (self->f2220 == 0) {
+            if (D_00274C10 != 0) {
+                state = 6;
+                goto aim6;
+            }
+            if (D_00274C14 != 0) {
+                state = 7;
+                goto aim7;
+            }
+            if (v.y < 0.0f) {
+                state = 6;
+                goto aim6;
+            }
+            state = 7;
+            goto aim7;
+        } else {
+            if (D_00274C10 != 0) {
+                state = 4;
+                goto aim4;
+            }
+            if (D_00274C14 != 0) {
+                state = 5;
+                goto aim5;
+            }
+            if (v.y < 0.0f) {
+                state = 4;
+                goto aim4;
+            }
+            state = 5;
+            goto aim5;
+        }
+    }
+    case 4:
+    aim4:
+        self->f25EC = 0;
+        SetPlayerClass75AheadBlend(self, self->f2540, self->f2558);
+        sound = 11;
+        delay = D_00274B90;
+        anim = self->f2558;
+        self->f2424 = g_gameClock.time + D_00274B94;
+        break;
+    case 5:
+    aim5:
+        self->f25EC = 0;
+        SetPlayerClass75AheadBlend(self, self->f255C, self->f2574);
+        sound = 11;
+        delay = D_00274B90;
+        anim = self->f2574;
+        self->f2424 = g_gameClock.time + D_00274B98;
+        break;
+    case 6:
+    aim6:
+        self->f25EC = 0;
+        SetPlayerClass75AheadBlend(self, self->f2578, (void*)self->f2590);
+        sound = 11;
+        delay = D_00274B90;
+        anim = (void*)self->f2590;
+        if (FindStateEntryIndex(self->f1188, 0x14F) >= 0) {
+            TeleportStateWalker(self->f2234, 0x14F);
+        }
+        self->f2424 = g_gameClock.time + D_00274B94;
+        break;
+    case 7:
+    aim7:
+        self->f25EC = 0;
+        SetPlayerClass75AheadBlend(self, self->f2594, (void*)self->f25AC);
+        sound = 11;
+        delay = D_00274B90;
+        anim = (void*)self->f25AC;
+        if (FindStateEntryIndex(self->f1188, 0x14F) >= 0) {
+            TeleportStateWalker(self->f2234, 0x14F);
+        }
+        self->f2424 = g_gameClock.time + D_00274B98;
+        break;
+    case 8:
+        anim = self->f25B0;
+        break;
+    case 9:
+        anim = self->f25B4;
+        break;
+    }
+    if (chained != 0) {
+        f32 s = ((AimPlayer*)self->f2244)->speed;
+        start = ((AimPlayer*)self->f2244)->time;
+        if (s == 0.0f) {
+            if (start == 0.0f) {
+                speed = -1.0f;
+            } else if (start == ((AimPlayer*)self->f2244)->anim->f34) {
+                speed = 1.0f;
+            }
+        } else {
+            speed = s;
+        }
+        sound = -1;
+        speed /= ((AimPlayer*)self->f2244)->rate;
+    } else {
+        self->f2248 = 0;
+    }
+    s32 wasPair = self->f223C == 11 || self->f223C == 2;
+    s32 isPair = state == 11 || state == 2;
+    if (wasPair != isPair) {
+        if (state == 11 || state == 2) {
+            AimSlotObject* a = (AimSlotObject*)self->f23D8;
+            a->vt[6](a);
+            a = (AimSlotObject*)self->f23D8;
+            a->vt[35](a, self->f23D0);
+            a = (AimSlotObject*)self->f23D0;
+            a->vt[7](a);
+        } else {
+            AimSlotObject* a = (AimSlotObject*)self->f23D0;
+            a->vt[6](a);
+            a = (AimSlotObject*)self->f23D0;
+            a->vt[35](a, self->f23D8);
+            a = (AimSlotObject*)self->f23D8;
+            a->vt[7](a);
+        }
+    }
+    self->f223C = state;
+    self->f2240 = g_gameClock.time;
+    self->f21CC = 0;
+    ReplaceAnimationPlayer(anim, self, 1, &self->f2244, start, speed);
+    if (delay != 0.0f) {
+        AimPlayerItem* it = ((AimPlayer*)self->f2244)->items;
+        if (it != 0) {
+            do {
+                if (it->state10 == 3) {
+                    it->state10 = 6;
+                    it->time = g_gameClock.time + delay;
+                }
+                if (it->state11 == 3) {
+                    it->state11 = 6;
+                    it->time = g_gameClock.time + delay;
+                }
+                it = it->next;
+            } while (it != 0);
+        }
+    }
+    if (sound != -1) {
+        StartSoundEffect(sound, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    }
+}
 
 s32 IsObjectAttached(void* p);
 void func_001C61E0(Player* self, s32 mode);
