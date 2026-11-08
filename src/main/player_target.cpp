@@ -506,7 +506,94 @@ void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
     }
 }
 
-INCLUDE_ASM(func_001D0C78);
+// The phase clip a player's sub-states 0x11 and 0x14 advance (+0x2230): its clip, whose length
+// is at +0x34, the time and the speed.
+struct PhaseClip {
+    u8 pad00[0x34];
+    f32 length;             // 0x34
+};
+struct PhasePlayer {
+    u8 pad00[8];
+    PhaseClip* clip;        // 0x08
+    u8 pad0C[0x14 - 0x0C];
+    f32 time;               // 0x14
+    f32 speed;              // 0x18
+};
+
+extern f32 D_00274B64;
+void UpdateEightEntryBlendWeights(Player* self, void* slots, s32 n);
+void UpdateSixEntryBlendWeights(Player* self, void* slots, s32 n, void* phase);
+void PlayPhaseCrossingSound(Player* self, void* sounds, f32 t);
+void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+
+void UpdatePlayerTargetPhase(Player* self)
+{
+    switch (self->f2228) {
+    case 0x11: {
+        void* slots;
+        s32 n;
+        void* sounds;
+        switch (self->f239C) {
+        case 0:
+            slots = (u8*)self + 0xA20;
+            n = *(s32*)((u8*)self + 0xB20);
+            sounds = (u8*)self + 0x2470;
+            break;
+        case 1:
+            slots = (u8*)self + 0xB30;
+            n = *(s32*)((u8*)self + 0xC30);
+            sounds = (u8*)self + 0x2480;
+            break;
+        case 3:
+            slots = (u8*)self + 0x910;
+            n = self->fA10;
+            sounds = (u8*)self + 0x2450;
+            break;
+        }
+        UpdateEightEntryBlendWeights(self, slots, n);
+        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        if (self->f2674 == (s32)self->f2678) {
+            s32 m = self->f2684;
+            if (m < 3) {
+                if (m > 0) {
+                    if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA20);
+                }
+            }
+        }
+        PlayPhaseCrossingSound(self, sounds, t);
+        break;
+    }
+    case 0x14: {
+        switch (self->f239C) {
+        case 4:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xE30, *(s32*)((u8*)self + 0x1010), self->watched2230);
+            break;
+        case 2:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xC40, *(s32*)((u8*)self + 0xE20), self->watched2230);
+            break;
+        case 3:
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
+            break;
+        }
+        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        PlayPhaseCrossingSound(self, (u8*)self + 0x2440, t);
+        break;
+    }
+    case 0x10:
+        if (self->f239C == 4) {
+            f32 k = 5.0f;
+            u8* p1 = (u8*)self + 0x1190;
+            func_001719E8(self, (s32)self->f628, (s32)self->f620, self->f250C, k, p1);
+            u8* p2 = (u8*)self + 0x1290;
+            func_001719E8(self, (s32)self->f62C, (s32)self->f624, self->f2510, k, p2);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->f250C);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->f2510);
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(func_001D0F20);
 
