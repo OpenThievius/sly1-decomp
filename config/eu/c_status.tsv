@@ -550,6 +550,8 @@ func_00120388	func_001204A8	match
 func_001203A8	func_001204C8	match	
 func_00120418	func_00120538	match	
 func_00120440	func_00120560	match	
+func_00120470	func_00120590	match	
+func_00120700	func_00120820	match	
 func_00120AA8	func_00120BC8	match	
 func_00120D58	func_00120E78	match	
 func_00120FB0	func_001210D0	match	
@@ -1002,6 +1004,7 @@ func_0013CDE8	func_0013D0E8	match
 func_0013CE40	func_0013D140	match	
 func_0013CE80	func_0013D180	match	rodata
 func_0013D068	func_0013D368	match	
+func_0013D0B0	func_0013D3B0	match	
 func_0013D278	func_0013D578	match	
 func_0013D820	func_0013DB20	match	
 func_0013D868	func_0013DB68	match	
@@ -1193,6 +1196,7 @@ func_001463C0	func_001466C0	match
 func_00146418	func_00146718	match	
 func_00146470	func_00146770	match	
 func_00146D10	func_00147010	match	
+func_00146DB0	func_001470B0	match	
 func_001471B0	func_001474B0	match	
 func_001473E0	func_001476E0	match	
 func_00147428	func_00147728	match	rodata
@@ -1327,6 +1331,7 @@ func_0014EFB8	func_0014F268	match
 func_0014F020	func_0014F2D0	match	
 func_0014F058	func_0014F308	match	rodata
 func_0014F110	func_0014F3C0	match	
+func_0014F270	func_0014F520	match	
 func_0014F740	func_0014F9F0	match	
 func_0014F770	func_0014FA20	match	
 func_0014F850	func_0014FB00	match	
@@ -1338,6 +1343,7 @@ func_0014FC38	func_0014FEE8	match
 func_0014FCE8	func_0014FF98	match	
 func_0014FDA8	func_00150058	match	
 func_0014FEC0	func_00150170	match	
+func_00150008	func_001502B8	match	
 func_00150298	func_00150548	match	rodata
 func_00150338	func_001505E8	match	
 func_001503E0	func_00150690	match	
@@ -1762,6 +1768,7 @@ func_0016D040	func_0016D688	match
 func_0016D0C0	func_0016D708	match	
 func_0016D128	func_0016D770	match	rodata
 func_0016D3F0	func_0016DA38	match	
+func_0016D490	func_0016DAD8	match	
 func_0016D788	func_0016DDD0	match	
 func_0016D828	func_0016DE70	match	
 func_0016D928	func_0016DF70	match	version-specific
@@ -1824,6 +1831,7 @@ func_00172B88	func_001731E8	match
 func_00172BF8	func_00173258	match	
 func_00172CF0	func_00173350	match	
 func_00172EB8	func_00173518	match	
+func_00172EE0	func_00173540	match	rodata
 func_00173708	func_00173D68	match	
 func_00173750	func_00173DB0	match	
 func_00174808	func_00174E68	match	rodata
@@ -2064,6 +2072,7 @@ func_0018A008	func_0018A670	match
 func_0018A388	func_0018A9F0	match	
 func_0018A3B8	func_0018AA20	match	
 func_0018A3F0	func_0018AA58	match	
+func_0018A628	func_0018AC90	match	
 func_0018A6C0	func_0018AD28	match	rodata
 func_0018A830	func_0018AE98	match	
 func_0018A910	func_0018AF78	match	
@@ -2149,6 +2158,7 @@ func_0018DD50	func_0018E3E0	match
 func_0018DD78	func_0018E408	match	
 func_0018DDA0	func_0018E430	match	
 func_0018DE70	func_0018E500	match	
+func_0018E040	func_0018E6D0	match	
 func_0018E410	func_0018EAA0	match	
 func_0018E480	func_0018EB10	match	version-specific
 func_0018E4C0	func_0018EB50	match	
@@ -2476,6 +2486,7 @@ func_001A2B48	func_001A3890	match
 func_001A2D30	func_001A3A78	match	
 func_001A3008	func_001A3D50	match	
 func_001A3128	func_001A3E70	match	
+func_001A31A0	func_001A3EE8	match	
 func_001A31F0	func_001A3F38	match	
 func_001A3598	func_001A42E0	match	
 func_001A35F0	func_001A4338	match	
@@ -3192,6 +3203,7 @@ func_001CEEC8	func_001CFBC0	match
 func_001CF138	func_001CFE30	match	
 func_001D0B20	func_001D1800	match	
 func_001D0C78	func_001D1958	match	
+func_001D0F20	func_001D1C00	match	
 func_001D1200	func_001D1EE0	match	
 func_001D1260	func_001D1F40	match	
 func_001D12F0	func_001D1FD0	match	
@@ -3219,6 +3231,7 @@ func_001D3C68	func_001D4950	match
 func_001D3E00	func_001D4AE8	match	
 func_001D40A0	func_001D4D88	match	
 func_001D4148	func_001D4E30	match	rodata
+func_001D4698	func_001D5380	match	
 func_001D4848	func_001D5530	match	
 func_001D48E8	func_001D55D0	match	rodata
 func_001D4A98	func_001D5780	match	
@@ -3253,6 +3266,7 @@ func_001D8470	func_001D9158	match	rodata
 func_001D8578	func_001D9260	match	
 func_001D86F8	func_001D93E0	match	
 func_001D8740	func_001D9428	match	
+func_001D8BD0	func_001D98B8	match	
 func_001D8D90	func_001D9A78	match	
 func_001D92F0	func_001D9FD8	match	
 func_001D9338	func_001DA020	match	
@@ -3358,7 +3372,9 @@ func_001DEB30	func_001DF960	match
 func_001DEBB8	func_001DF9E8	match	
 func_001DF290	func_001E00C0	match	
 func_001DF2C8	func_001E00F8	match	
+func_001DF520	func_001E0350	match	
 func_001DF5A0	func_001E03D0	match	
+func_001DF600	func_001E0430	match	
 func_001DFA10	func_001E0840	match	
 func_001DFA40	func_001E0870	match	
 func_001DFB08	func_001E0938	match	
