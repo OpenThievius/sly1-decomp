@@ -32,7 +32,7 @@ extern World* g_currentWorld;
 f32 RandomFloatInRange(f32 a, f32 b);
 void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void FillMemory(void* p, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, u32 size);
 // The record a wheel's emitter (PathEmitter's slot at 0x7C) takes: flags, the spawn data and
 // how many to spawn.
 struct WheelEmit {

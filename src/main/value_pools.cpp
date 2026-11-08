@@ -14,7 +14,7 @@ s32 g_vectorBPayloadCapacity = 64;
 s32 g_pairPayloadCapacity = 64;
 s32 g_triplePayloadCapacity[16] = { 32 };
 
-void FillMemory(void* dst, s32 value, u32 size);
+void* FillMemory(void* dst, s32 value, u32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
 void* AllocateFrontMemory(s32 bytes);
@@ -182,7 +182,7 @@ void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
 }
 
 void* TakePoolEntry(void* pool);
-void FillMemory(void* dst, s32 value, u32 size);
+void* FillMemory(void* dst, s32 value, u32 size);
 
 R11B008Key* NewKeyedValue(void)
 {
@@ -245,7 +245,7 @@ LINKER_REMNANT(func_0011C610);
 void ShutDownEntryPool(void* p);
 void ShutDownPayloadPools(void);
 extern u8 g_matrixPayloadPool[];
-void FillMemory(void* p, s32 zero, u32 count);
+void* FillMemory(void* p, s32 zero, u32 count);
 
 void* AcquireMatrixPayload(void)
 {
@@ -365,7 +365,7 @@ LINKER_REMNANT(func_0011C960);
 extern s32 g_triplePayloadPool[];
 struct TriplePayloadSlot;
 TriplePayloadSlot* PopFreeSlot(s32* pool);
-void FillMemory(TriplePayloadSlot* p, s32 zero, s32 size);
+void* FillMemory(TriplePayloadSlot* p, s32 zero, s32 size);
 void CollectScriptPools(u8* p);
 TriplePayloadSlot* PopZeroedFreeSlot(s32* pool);
 

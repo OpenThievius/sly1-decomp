@@ -6,6 +6,7 @@
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
 // list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
 // zero-initialised D_00276654 last. Named after its first address until what it was is known.
+// Tried (order-class pass 2): the fC60 float read first, the empty if kept, entry stores first, entry stores after the load of the clock: 21 to 31 words, baseline 19.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -465,7 +466,7 @@ struct WarpTextStyle {
 extern f32 D_00276650;
 s32 IsFontLoaded(s32 n);
 Font* GetFontById(s32 n);
-void FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 v, s32 size);
 extern void StartPlacedObject(WarpPage* o);
 s32 IsWarpEntryReachable(WarpPage* o, s32 n);
 void SelectWarpPageEntry(WarpPage* o, s32 n);

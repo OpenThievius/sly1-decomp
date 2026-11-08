@@ -4,7 +4,7 @@
  * retail's and all but the tail matches: with the slot's stores in this order (tools/permute.py's
  * best of the seven lines) only their order and registers differ. Retail stores open, the first
  * DMA word, f0C, f08, the buffer and the DMA words' address, in the order of the C in the
- * earlier attempt, which put the DMA word's store last and took 4 more bytes. Tried: a slot
+ * earlier attempt, which put the DMA word's store last and took 4 more bytes. Order-class pass: tools hill-climb of the stores (open, f08, buffer, dma, dma[0]=0, f0C) is 9 words against 13; retail stores open, dma[0], f0C, f08, buffer, dma, but that written order is worse (34). Tried: a slot
  * pointer, indexed stores, a local for the DMA words, the word stored through the array. */
 #include "common.h"
 
@@ -98,8 +98,8 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
     g_padSlots[port][slot].open = 1;
     g_padSlots[port][slot].f08 = request->arg14;
     g_padSlots[port][slot].buffer = buffer;
-    g_padSlots[port][slot].f0C = 0;
     g_padSlots[port][slot].dma = dma;
     dma[0] = 0;
+    g_padSlots[port][slot].f0C = 0;
     return request->result;
 }

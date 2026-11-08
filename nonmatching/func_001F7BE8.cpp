@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 355/412 (86.2%), checked 2026-11-07
+// BYTES 355/412 (86.2%), checked 2026-11-08
 #include "common.h"
 // NEAR: body and calls right, tail call right; only the scheduling/register choice of the 10 stores to D_00627800 (s2/s0 setup order) differs
 
@@ -23,7 +23,7 @@ extern Ctl_1F7BE8 g_remoteCallState;
 extern s32 g_remoteCallsReady;
 
 s32 DisableInterrupts(void);
-void EnableInterrupts(void);
+s32 EnableInterrupts(void);
 void InitCommandChannel(void);
 s32 GetChannelWord(s32 index);
 void SetCommandHandler(u32 index, void (*fn)(void), void* arg);

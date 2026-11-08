@@ -462,7 +462,7 @@ struct UnlitVertexBatch {
 struct UnlitUnpackHeader { u16 f0; u16 f2; u8 pad[4]; u16 f8[4]; u16 f10; u8 pad3[6]; };
 struct CopiedGifTags { u32 w[8]; };
 
-void FillMemory(UnlitUnpackHeader* p, s32 v, s32 n);
+void* FillMemory(UnlitUnpackHeader* p, s32 v, s32 n);
 extern u8 D_00001A50[];
 extern u8 D_000002F8[];
 void CopyMemory(CopiedGifTags* dst, u8* src, s32 n);

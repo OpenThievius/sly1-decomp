@@ -186,7 +186,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void FillMemory(void*, s32, s32);
+extern void* FillMemory(void*, s32, s32);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 

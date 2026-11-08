@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 98/108 (90.7%), checked 2026-11-07
+// BYTES 98/108 (90.7%), checked 2026-11-08
 // NEAR: order: 25 of 27 instructions line up; s2 and s3 (self and the loop counter) are swapped.
 //       Eight source variants did not move them.
 // In the context of its file, src/main/file_1E88D0.cpp.
@@ -7,6 +7,7 @@
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
 // list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
 // zero-initialised D_00276654 last. Named after its first address until what it was is known.
+// Tried (order-class pass): a local for the out pointer, a do/while, pointer walks over both arrays, i declared outside, a result local: s2/s3 stay swapped.
 #include "common.h"
 #include "switched_collider.h"
 

@@ -26,6 +26,7 @@
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
 // the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
+// Tried (order-class pass): list base as local before the count, product operand order, count as a local before the base, count*2-1 written three ways, the axis loop as a while/for-scope variant: still the same 8 words.
 s32 g_alphaStatePacket1 = 0;
 s32 g_alphaStatePacket2 = 0;
 
@@ -142,7 +143,7 @@ s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void ResetTextPointToHalf(void* p);
 
 void RefillBufferedStream(BufferedStream* d);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 
 void UnpackBufferedStream(BufferedStream* d);
 
@@ -175,7 +176,7 @@ s32 ReadBufferedS8(BufferedStream* self);
 
 void RemoveEffect(void* handle);
 void SetEffectPhase(void* handle, s32 mode);
-void FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* block, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(void* self, s32 count, void* out);
 
@@ -333,7 +334,7 @@ void AddColliderToSweepAxes(World* self, void* arg);
 
 void MarkSweepAxesUnsorted(World* a0);
 
-void MoveMemory(void* dst, void* src, s32 bytes);
+void* MoveMemory(void* dst, void* src, s32 bytes);
 
 // An entry of one of the three sweep axes (0x200 of them each in buf1AD8): a body's start (0)
 // or end (1) on the axis and the bound it reads.

@@ -66,7 +66,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void FillMemory(void*, s32, s32);
+extern void* FillMemory(void*, s32, s32);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
@@ -594,7 +594,7 @@ extern const Fn_Table D_00219600[];
 
 
 
-void FillMemory(void** p, s32 v, s32 n);
+void* FillMemory(void** p, s32 v, s32 n);
 void SettlePoseSourceModes(Attachment* n);
 
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
@@ -824,7 +824,7 @@ void TriggerScriptEvent(Animation* self, s32 a, s32 b, s32* c);
 f32 FloatRemainder(f32 a, f32 b);
 f32 WrapModulo(f32 a, f32 b);
 
-void MoveMemory(Track83* dst, Track83* src, s32 bytes);
+void* MoveMemory(Track83* dst, Track83* src, s32 bytes);
 
 
 // was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ

@@ -12,9 +12,10 @@
 //       the fields), at retail's labels through config/us/statics.tsv; it lands only with
 //       func_001D60B0 and func_001D61C8 in the same form, since the three guards close the
 //       file's .data in function order (docs/AGENT_WORKFLOW.md, "A function-local static").
+// Tried (order-class pass): the constructor with a member-initialiser list (65 words), stores through a local pointer (21, the same), the pointer FillMemory returns (64).
 #include "common.h"
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 s32 FindAnimRecord(s32 id);
 void DrawAngleSortedRing(void* a, s32 b, void* c, s32 d, s32 e, void* f, void* g);
 extern u8 D_00275070[];

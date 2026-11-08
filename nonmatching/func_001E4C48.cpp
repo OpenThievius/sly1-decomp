@@ -26,7 +26,7 @@ void* InitStringOutputBuffer(u8* buf, char* dst, s32 cap);
 s32 FormatToOutputBuffer(u8* buf, s32 a, s32 b);
 void DestroyOutputBuffer(u8* buf, s32 n);
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 s32 NewSemaphore(void* self);
 
 s32 PrintFormattedVa(void* self, void* ap);
@@ -94,7 +94,7 @@ void ReadPropertyRecords(void* a, void* b);
 // What an on-off camera controller points to: while f438 is set, its f43C is the camera's f1C8.
 struct CameraFovSource { u8 pad[0x438]; f32 f438; f32 f43C; };
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 extern u8 D_00275940[0x18];
 
@@ -169,7 +169,7 @@ s32 WriteIntegerDigits(char* buf, s32 len, u64 value, u32 radix);
 s32 AppendToOutputBuffer(OutputBuffer* sink, const char* p, s32 n);
 void UppercaseString(char* p);
 
-void FillMemory(FormatSpec* dst, s32 value, s32 size);
+void* FillMemory(FormatSpec* dst, s32 value, s32 size);
 s32 ParseSignedDecimal(s8* s, s32* out);
 extern u8 g_charClassFlags[];
 
@@ -243,7 +243,7 @@ extern f32 g_gameClock[];
 
 struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 
 // The eight scrambled words that locate a level's data on the disc: the key of the sector
 // range is w[0] ^ w[5] and w[1] ^ w[7]; two blocks are the same level when w[2] ^ w[6] agree.

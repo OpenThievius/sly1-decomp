@@ -1,4 +1,5 @@
 us_name	eu_name	status	note
+InitAgentContactQuery	-	absent	
 func_001000C8	func_001000C8	match	
 func_00100178	func_00100178	match	
 func_00100218	func_00100218	match	
@@ -1874,6 +1875,7 @@ func_00178598	func_00178BF8	match
 func_00178678	func_00178CD8	match	
 func_001788F0	func_00178F50	match	
 func_00178D98	func_001793F8	match	rodata
+func_001790B8	func_00179718	match	rodata
 func_001793C0	func_00179A20	match	
 func_001793F0	func_00179A50	match	version-specific
 func_00179590	func_00179BF0	match	
@@ -2511,6 +2513,7 @@ func_001A2A68	func_001A37B0	match
 func_001A2B18	func_001A3860	match	
 func_001A2B48	func_001A3890	match	
 func_001A2D30	func_001A3A78	match	
+func_001A2E68	func_001A3BB0	match	
 func_001A3008	func_001A3D50	match	
 func_001A3128	func_001A3E70	match	
 func_001A31A0	func_001A3EE8	match	
@@ -2814,6 +2817,7 @@ func_001B3040	func_001B3D30	match	rodata
 func_001B3450	func_001B4140	match	
 func_001B3488	func_001B4178	match	
 func_001B3510	func_001B4200	match	rodata
+func_001B40C8	func_001B4DB8	match	
 func_001B4330	func_001B5020	match	rodata
 func_001B4580	func_001B5270	match	
 func_001B4600	func_001B52F0	match	
@@ -3201,6 +3205,7 @@ func_001CAD40	func_001CBA38	match
 func_001CAD60	func_001CBA58	match	
 func_001CAD98	func_001CBA90	match	
 func_001CAEE0	func_001CBBD8	match	
+func_001CAF38	func_001CBC30	match	
 func_001CB328	func_001CC020	match	
 func_001CB3C0	func_001CC0B8	match	
 func_001CB3C8	func_001CC0C0	match	

@@ -117,7 +117,7 @@ void UpdatePadRouting()
     g_padRouting = 7;
 }
 
-void FillMemory(void* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void* ReservePermanentMemory(s32 size);
 void OpenPadPort(s32 a, s32 b, s32 c);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
@@ -139,7 +139,7 @@ s32 GetPadSlotState(s32 a, s32 b);
 s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
 s32 SendPadTwoWordRequest(s32 a, s32 b, s32 c, s32 d);
 s32 func_002046D0(s32 a, s32 b, s32 c, s32 d);
-void FillMemory(u8* p, s32 value, s32 size);
+void* FillMemory(u8* p, s32 value, s32 size);
 s32 SendPadSixByteRequest(s32 a, s32 b, u8* buf);
 s32 HasFullPadMask(s32 a, s32 b);
 s32 SendFullPadMask(s32 a, s32 b);
@@ -338,7 +338,7 @@ void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 
 INCLUDE_ASM(func_0016E738);
 
-void FillMemory(u8* p, s32 a, s32 b);
+void* FillMemory(u8* p, s32 a, s32 b);
 s32 ReadPadFrame(s32 a, s32 b, u8* c);
 void CopyMemory(u8* dst, u8* src, s32 n);
 void ReadAnalogStick(PadRecord* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);

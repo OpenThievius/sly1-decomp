@@ -283,7 +283,7 @@ extern s32 D_002751D4;
 
 void AdvanceObjectPoolEntry(ObjectPool* self);
 s32 IsObjectPoolItemFree(ObjectPool* self, s32 item);
-void MoveMemory(s32* dst, s32* src, s32 size);
+void* MoveMemory(s32* dst, s32* src, s32 size);
 
 
 

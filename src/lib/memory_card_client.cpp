@@ -428,7 +428,7 @@ struct Rec_9E48 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 name[0x400]; };
 
 s32 TrySemaphore(Lock_9E48* lock);
 void PostSemaphore(Lock_9E48* lock);
-void CopyStringBounded(u8* dst, const char* src, s32 max);
+void* CopyStringBounded(u8* dst, const char* src, s32 max);
 void WriteBackDataCacheRange(s32 a, s32 b);
 s32 CallRemoteService(Mgr_9E48* a, s32 b, s32 c, Rec_9E48* d, s32 e, u8* f, s32 g, s32 h, s32 i);
 
@@ -514,7 +514,7 @@ struct Buf_0020A078 {
 };
 
 s32 TrySemaphore(s32 v);
-void CopyStringBounded(s8* dst, s8* src, s32 n);
+void* CopyStringBounded(s8* dst, s8* src, s32 n);
 Buf_0020A078* CallRemoteService(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
 
 s32 func_0020A078(s32 a0, s32 a1, s8* a2)

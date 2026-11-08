@@ -723,11 +723,57 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   folds the constant into the asm (func_00157B88).
 - **One Vec value stored twice gives the compiler's vmove** between two VU0
   registers (func_001CAB10).
-- **Open: store order set in sched2.** In ResetScreenResources (func_001B40C8)
-  and three like it, sched1 keeps the source order and sched2 reorders the
-  stores by register anti-dependences, so the high-part registers local-alloc
-  picks decide the final order; retail's choice of those registers is still
-  unexplained.
+- **Stores of constants to globals: source order picks the registers, the
+  callee's return type the order.** With `-G0` every store to a global is a
+  `lui` of its own high part and a `sw` (ResetScreenResources, func_001B40C8).
+  sched1 hoists all the `lui`s of a run of such stores, in source order, and
+  keeps the stores in source order. local-alloc then gives the high parts
+  their registers in the order of its priority (local-alloc.c `QTY_CMP_PRI`:
+  references over lifetime, the shorter lifetime first, ties by birth order),
+  each the lowest free register of v0, v1, a0... (those of a call's arguments
+  are taken while live). So the first store of the run gets v0, the second v1
+  and so on: retail's registers name its source order (v0 first), which for
+  func_001B40C8 is the order of the globals in .data. sched2 then issues the
+  independent `lui`s and stores by priority, then by how many later insns
+  depend on each (`rank_for_schedule`: more first), then by sched1's order. A
+  register a later call clobbers adds the call and what follows it to its
+  `lui`'s dependents, unless the call *sets* the register: a call declared to
+  return a value sets v0, which cuts v0's `lui` off from everything after the
+  call and sends it (and its store) last, into the call's delay slot. That is
+  why ResetScreenResources needs FillMemory (func_001F5C0C, memset, which
+  returns its pointer in v0) declared `void*`: declared `void`, the store of
+  v0's global came first. A `void` declaration of a value-returning callee
+  changes the caller's schedule even where nothing reads the value, as it
+  changes its registers (docs/AGENT_WORKFLOW.md, `tools/decls.py`). To read
+  retail's order: list the stores by the register of their `lui` (v0, v1, a2...,
+  skipping the argument registers of the call that follows) and write them in
+  that order; then fix the callee's return type for the delay slot. Dumped
+  with `-dS -dR -dl -fsched-verbose-5` (the `sched2` dump lists each insn's
+  priority and dependents). func_00203548 (libcdvd) has the same shape, but
+  the 2.9-ee-991111 compiler interleaves its stores with the call's arguments
+  so that lifetime, not order, decides two of its registers, and the function
+  is blocked by its volatiles anyway.
+- **The memory and string routines return their pointer.** The same return
+  value matters after any call: FillMemory (memset), CopyBytes (memcpy),
+  MoveMemory (memmove) and CopyStringBounded are original assembly that
+  returns the destination in v0, and EnableInterrupts, WaitGsPaths and
+  DefineClearPacket return a value too. Declared `void`, a value loaded right
+  after the call takes v0 where retail's takes v1 (func_001A2E68,
+  func_001CAF38 after FillMemory, func_001790B8 after MoveMemory: all three
+  matched once declared `void*`). Every declaration in src/ now says so.
+  `tools/decls.py` cannot see it, since no caller reads the value and the
+  callees have no C: an original-assembly function that writes v0 in its
+  return's delay slot is the evidence.
+- **Open: constructor stores kept in source order.** In func_001D5FA8,
+  func_001D61C8, func_001D60B0, func_0018A510 and func_001930B8 (a static
+  record built by FillMemory and an inline constructor), retail keeps the
+  field stores in source order and loads each constant late enough to reuse
+  a register (75.0 into -100.0's f0), as if each store depended on the one
+  before. Stores through one base register at different offsets never
+  depend on each other (alias.c, `memrefs_conflict_p`); only volatile, a
+  different base pseudo or a mix of `this->f` and the global's own name
+  makes them, and volatile alone does not give retail's registers. The
+  return types above do not change them.
 
 ## Getting the compiler
 

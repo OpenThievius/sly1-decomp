@@ -116,7 +116,7 @@ void ConsumeSpan(RingBuffer* p, s32 n)
     p->held -= n;
 }
 
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 
 s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst)
 {

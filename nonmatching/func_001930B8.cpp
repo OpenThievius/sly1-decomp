@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 236/312 (75.6%), checked 2026-11-07
+// BYTES 241/312 (77.2%), checked 2026-11-08
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 #include "common.h"
@@ -14,7 +14,7 @@ extern u8 D_00248D30[];
 extern u8 g_unitZVector[];
 extern Cfg_1930B8 D_00604700;
 extern Cfg_1930B8 D_00269C10;
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 void ConstructSwitchedColliderDefaults(s32 a0, s32 a1)
 {

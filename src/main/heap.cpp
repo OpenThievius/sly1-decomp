@@ -21,7 +21,7 @@ extern u8 g_heapLock[];
 extern s32 g_backMarkIndex;
 extern u8 g_backMarks[];
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 void InitRecursiveLock(void* self);
 void EnterRecursiveLock(void* obj);
 void LeaveRecursiveLock(void* obj);

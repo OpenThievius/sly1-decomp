@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 376/348, checked 2026-11-07
+// SIZE 376/348, checked 2026-11-08
 // NEAR: the loops and the two ways of building the point are right but the code is larger (364-376 against 348 bytes): retail keeps two induction pairs (s2/s3 for the kind 7 and 9 arm, s4/s5 copies of them for the end-0 arm) and loads the constants 7 and 9 inside the arms, where ours hoists them into registers and recomputes the end-0 addresses from the end pointer; it also tests kind < 7 then kind < 4 as two signed compares, which a range test merges. Nested ifs, a ternary and an unsigned range tried.
 // In the context of its file, src/main/collider_contact.cpp.
 // Loop effect (2026-11-08, loop sweep): loop.c moves the constants 7 and 9 because the arms' loop is 76/69 insns at its two passes. With both MulAddX written on Vu0::Vec values (a Vec::MulAddX over Vec::Of, Vec::Scalar, as locals) the loop is 92/87, the constants stay in the arms like retail's, and the function is 364 bytes; retail's end-0 arm still keeps its own pair of induction registers (s4/s5, incremented with s2/s3), which ours folds to c+32/c+16 once e is known 0.
@@ -229,7 +229,7 @@ s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* o
 
 INCLUDE_ASM(func_00186568);
 
-void MoveMemory(void* dst, void* src, s32 size);
+void* MoveMemory(void* dst, void* src, s32 size);
 
 void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
 {

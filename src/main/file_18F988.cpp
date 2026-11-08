@@ -27,7 +27,7 @@ s32 IsObjectAttached();
 s32 FindSwitchedColliderIndex(SwitchedCollider* value);
 s32 FindSwitchedColliderIndex(void* value);
 void ActivateSwitchedColliderIndex(s32 index);
-void MoveMemory(void* dst, void* src, s32 size);
+void* MoveMemory(void* dst, void* src, s32 size);
 void RegisterCollider(void* self);
 void AddToSwitchedColliderList(void* self);
 void UnregisterCollider(void* self);

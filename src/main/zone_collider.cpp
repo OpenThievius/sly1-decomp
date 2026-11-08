@@ -698,7 +698,7 @@ struct TreeWalkEntry {
     TreeFace* face;         // 0x0C: the face crossed at t
 };
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 
 // The spans of the segment a-b behind the faces of the tree at root, at most max of them, into
 // spans: each run of the segment behind one solid node (of the group groups gives it, when given),
@@ -1289,7 +1289,7 @@ void LoadTriggerZone(TriggerZone* self)
 }
 
 s32 MatchesObjectId(void* a, s32 n);
-void MoveMemory(void* end, void* begin, s32 bytes);
+void* MoveMemory(void* end, void* begin, s32 bytes);
 
 void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 {

@@ -48,7 +48,7 @@ extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel"
 extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
 extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 // The text style the best time draws with: the static initialiser (func_001E0848) zeroes it,
 // then sets its kind, two sizes given as integers, 0.3 twice and its colour.
@@ -147,7 +147,7 @@ void InitCommentaryPromptElement(T217D_1380* self)
 
 void SetBestTimeState(void* self, s32 n);
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 extern f32 g_gameTime;
 extern s32 D_002701C4;

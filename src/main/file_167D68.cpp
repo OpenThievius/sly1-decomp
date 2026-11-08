@@ -157,7 +157,7 @@ s32 WaitDmaChannel(s32 a, s32 b, s32 c);
 void InitBumpAllocator(BumpAllocator*,s32,s32);
 
 void ApplyFieldDisplayOffset(void);
-void WaitGsPaths(s32 a0, s32 a1);
+s32 WaitGsPaths(s32 a0, s32 a1);
 
 struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
 
