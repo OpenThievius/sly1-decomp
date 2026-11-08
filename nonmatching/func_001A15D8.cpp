@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 0/0 (0.0%), checked 2026-11-08
+// BYTES 1769/2072 (85.4%), checked 2026-11-08
 // NEAR (2026-11-08): DrawPhasedEffect (func_001A15D8): retail's size, frame and loops; regdiff: order, 95.2% of the instructions. What got there: the two inner loops start straight after their test (a statement between the test and the do lets GCSE hoist every address and product out of them, which retail does not), the fraction computed before the turn in the second (a float subtraction after the turn's branch may trap, so loop.c leaves pos - rest inside), t reused as the fraction, one point pointer for all three loops (loop 2's pointer in s0), the search index apart from the loop counter, the q30 curve evaluated before the c clamp, and the u128 forms of the sums and the product (the Vec forms make the inner loops too big for loop.c to move the 0.0 and 1.0). Still differs: loop 1's float temporaries ($f6/$f7, $f3/$f5 swapped) and the first clamp's hi load (retail in bc1f's delay slot, here before it); the first inner loop's product computes rows 0, 1, 2 where retail computes 0, 2, 1 (vf registers follow); the order of two preheader insns (lui s7 / addiu s2). Needs the Camera::rot3A0, Effect::i12C and Effect::points fields this branch adds.
 // In the context of its file, src/main/file_19E040.cpp.
 #include "common.h"
