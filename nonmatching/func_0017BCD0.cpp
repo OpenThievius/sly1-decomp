@@ -115,7 +115,7 @@ void StartNextQueueEntry(EntryQueue* self)
             if (d->vt->m0A == 0) {
                 break;
             }
-            d->vt->m0A(d, &pos, 0, 0, 0, &self->pad60, 0);
+            d->vt->m0A(d, &pos, 0, 0, 0, &self->f60, 0);
         }
         goto done;
     }
