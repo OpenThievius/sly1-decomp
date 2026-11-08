@@ -35,7 +35,7 @@ struct GifWord {
 };
 u64 GetTextureRegisterBits(TextureTable* obj, s32 p1, s32 p2);
 void AddGifRegisterWrite(void* ctx, s32 kind, u64 value);
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 extern s32 g_imageRecordCountB;
 extern s32 g_imageSlotsB;
 u16 ReadBufferedU16(void* self);
@@ -122,7 +122,7 @@ s32 GetAnimatorSize(s32 type);
 void* AllocateZeroedFrontMemory(s32 size);
 void* GetAnimatorMethods(s32 type);
 void ReadBufferedStreamBytes(void* owner, s32 key, void* out);
-void FillMemory(void* p, int zero, s32 count);
+void* FillMemory(void* p, int zero, s32 count);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 void ConvertHsvToRgb(Quad_001B4580* p);
 f32 WrapAngle(f32 a);
@@ -655,7 +655,30 @@ void BuildAnimRecordGifPackets(s32 mask)
     }
 }
 
-INCLUDE_ASM(func_001B40C8);
+extern s32 g_fonts[5];
+void InitMeshQueue(void);
+// Clears the level's screen resources: its record tables, fonts, animators and image masks.
+void ResetScreenResources(void)
+{
+    g_animRecordCount = 0;
+    g_animRecords = 0;
+    g_imageRecordCountA = 0;
+    g_imageRecordsA = 0;
+    g_imageRecordCountB = 0;
+    g_imageRecordsB = 0;
+    g_defaultFont = 0;
+    g_fontCount = 0;
+    g_fontRecords = 0;
+    FillMemory(g_fonts, 0, 0x14);
+    g_activeImageMask = 0;
+    g_cursorAnimatorCount = 0;
+    g_cursorAnimators = 0;
+    g_pendingCursors = 0;
+    g_lastPendingCursor = 0;
+    FillMemory(g_maskImageUploads, 0, 0x18);
+    g_maskedImagesPacket = 0;
+    InitMeshQueue();
+}
 
 LINKER_REMNANT(func_001B4180);
 

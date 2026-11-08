@@ -44,6 +44,7 @@
 #include "asm_func.h"
 #include "mul_rotation.h"
 #include "ramp_profile.h"
+#include "node_query.h"
 
 void AddCallbackNode(void* world, void* list, void* a, void* b);
 void RemoveCallbackNode(void* world, void* list, void* a, void* b);
@@ -56,7 +57,7 @@ void SetListLinkOffset(void* p, s32 n);
 
 void* PopFreeSlot(void* p);
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 const Vt219C* GetEffectKindTable(u32 n);
 
@@ -2314,7 +2315,38 @@ void PlaceEffectAtSource(Effect* dst, void* a1)
 
 INCLUDE_ASM(func_001A2D88);
 
-INCLUDE_ASM(func_001A2E68);
+s32 FindNodeForQuery(void* p, s32 a, s32 b);
+
+s32 HandleStreakedEffectImpact(Effect* self, void* hold, Vec02* where, Vec02* dir)
+{
+    if (self->i124 != 0) {
+        NodeQuery q;
+        FillMemory(&q, 0, 0x40);
+        q.pos = *where;
+        q.dir = *(Vec02*)&self->qA0;
+        q.hold = hold;
+        q.p00 = self->owner;
+        q.kind = 0x10;
+        if (FindNodeForQuery(&q, 0, 0) != 0) {
+            goto remove;
+        }
+    }
+    if (self->i120 != 0) {
+        Mat02 basis;
+        Vec02 v;
+        *(Vec02*)&self->q80 = *where;
+        BuildBasisFromX(dir, &basis);
+        Vu0::Q(v) = Vu0::RotateTransposed(basis, Vu0::Q(self->qA0));
+        v.x *= RandomFloatInRange(-0.95f, -0.85f);
+        v.y += RandomFloatInRange(-400.0f, 400.0f);
+        v.z += RandomFloatInRange(-400.0f, 400.0f);
+        Vu0::Q(self->qA0) = Vu0::Rotate(basis, Vu0::Q(v));
+        return 1;
+    }
+remove:
+    RemoveEffect(self);
+    return 1;
+}
 
 void RandomizeEffectSpin(Effect* self, Rec50* src)
 {
