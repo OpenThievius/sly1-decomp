@@ -8,6 +8,9 @@
 // and addiu a1, sp, 0x60 afresh (two words per arm, and the branch offsets after them). Tried:
 // an out pointer, a value return into r, a temporary bound to a reference of an inline copy, an
 // inline function returning the scaled matrix (that drops the CopyBytes: its copy is lq/sq).
+// Still differs (2026-11-08, with Multiply): `*(T*)&c = ScaleMatrix(...)` gives retail's fresh
+// hidden address for the call, but then no CopyBytes; a matrix class whose operator= calls
+// CopyBytes, or the returned temporary's address, keep it in s0 as before (func_00112C38's notes).
 #include "common.h"
 #include "script_value.h"
 #include "vu0.h"
