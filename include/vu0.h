@@ -167,6 +167,17 @@ struct Vu0 {
         return r;
     }
 
+    // The x of a VU0 register stored to a word in memory (a float, or its bits): sw of the low word of the vector in
+    // a GPR. The vector goes in as "r", so the qmfc2 that brings it there is the compiler's: a
+    // reload, whose GPR is taken after every pseudo has its register (func_001DAA18's length
+    // loop: a1 after the loop's v0, v1 and a0), where ToBits' result is a pseudo of its own that
+    // the local allocator gives the first free one (v0). The store is the helper's: the low
+    // word of a 128-bit GPR as a u32 is a truncation, which the compiler sign-extends first.
+    template <class T> static void StoreX(T& dst, u128 a)
+    {
+        __asm__("sw %1, %0" : "=m"(dst) : "r"(a));
+    }
+
     // The y of a vector in a GPR as a float: prot3w r, a (the words turned to y, z, x, w).
     // The vector goes in as "r", so the qmfc2 (or lq) that brings it to a GPR is the
     // compiler's, made once and shared with the reads of the other lanes (ToFloatMoved reads
@@ -270,13 +281,16 @@ struct Vu0 {
     }
 
     // a + b * s.x + c * t.x: vadda.xyzw ACC, a, vf0 (a into ACC, as MulAddX); vmaddax.xyzw
-    // ACC, b, s.x; vmaddx.xyzw. The weights are Scalars (or ScalarAts). Listed c first: where
-    // all die there, retail's result takes c's register (func_00198BD8).
+    // ACC, b, s.x; vmaddx.xyzw. The weights are Scalars (or ScalarAts). The inputs in their own
+    // order: the result takes the first that is local to the block and dies there, a's where a
+    // is loaded for the sum (func_001BBEB8, func_0017E3C8), c's where a and b come from earlier
+    // blocks (func_00198BD8). A tie to a ("+j") doubles a's references and swaps a's and b's
+    // registers; where they still differ, look at the allocation around it (docs/TOOLCHAIN.md).
     static u128 MulAddX2(u128 a, u128 b, u128 s, u128 c, u128 t)
     {
         u128 r;
-        __asm__("vadda.xyzw ACC, %2, vf0\n\tvmaddax.xyzw ACC, %3, %4x\n\tvmaddx.xyzw %0, %1, %5x"
-                : "=j"(r) : "j"(c), "j"(a), "j"(b), "j"(s), "j"(t));
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddx.xyzw %0, %4, %5x"
+                : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t));
         return r;
     }
 
