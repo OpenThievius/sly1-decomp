@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 210/216 (97.2%), checked 2026-11-07
+// BYTES 210/216 (97.2%), checked 2026-11-08
 #include "common.h"
 #include "collider.h"
 #include "fpu.h"
@@ -10,6 +10,7 @@ s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s
 // after the mtc1 of the squared distance, here before it. The frame, the registers and every
 // other instruction are retail's. Tried: the difference in a u128 local stored after the dot,
 // the radii loaded first, the store after the sum.
+// Night-close2 (2026-11-08): ToFloatMoved for the squared distance gives retail's order (mtc1 before the sqc2) but then the difference takes vf2 and the dot vf3 (retail vf3, vf1): 8 words; the Vec forms and the difference as a u128 local do not change it.
 
 void func_00187A88(Collider* self, Collider* other, void* a2)
 {

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 715/728 (98.2%), checked 2026-11-07
+// BYTES 715/728 (98.2%), checked 2026-11-08
 // NEAR: wave 4 e3. 728 bytes, same size; 11 words differ: the two weights of the tail (dt and -0.5 dt) take vf4 and vf5
 //       in the other order (retail dt in vf5), the scheduling of their stores (retail leaves dt's second store for the delay
 //       slot of the first null test) and the temporary of the hi of D_002639E0 (v1, retail v0). The branches, the frame
 //       (the path frame is a Mat02 at 0x40, which the tail's weights reuse) and the registers of the pointers are retail's.
 //       ~15 compiles.
+// Night-close2 (2026-11-08): one expression for v, a named Scalar(dt), -0.5f * dt and FromFloat for the last weight leave the same 11 words (FromFloat 31).
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
