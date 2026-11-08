@@ -438,7 +438,6 @@ func_001D3A38	001D3A38	288	handwritten	VU0 macro instruction
 func_001D4348	001D4348	848	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D4698	001D4698	432	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D5678	001D5678	2348	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_001D62E0	001D62E0	760	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D66A8	001D66A8	876	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D6B18	001D6B18	404	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D6DD8	001D6DD8	572	inline	C with inline assembly: VU0 macro instruction in the compiler's frame

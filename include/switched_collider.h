@@ -375,7 +375,8 @@ struct Player : TurningCollider {
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
-    u8 pad26CC[0x26D4 - 0x26CC];
+    f32 f26CC;              // 0x26CC
+    f32 f26D0;              // 0x26D0
     void* f26D4;            // 0x26D4: the object that sent the player to state 9 (func_00178068)
     u8 pad26D8[0x2718 - 0x26D8];
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
