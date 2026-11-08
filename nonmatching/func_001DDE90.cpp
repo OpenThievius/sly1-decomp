@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 2171/2260 (96.1%), checked 2026-11-08
 // NEAR (2026-11-08, worker large-1DDE90): 565 instructions as retail's, frame 0x280 as retail's,
 // everything but one block identical: 27 differing lines, all in the first relaxation loop's
 // weight block (L1DE200 to the position update). The VU0 registers there differ (retail: vel vf4,
