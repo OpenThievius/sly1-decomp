@@ -2499,7 +2499,31 @@ void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
 
 LINKER_REMNANT(func_001ED900);
 
-INCLUDE_ASM(func_001ED908);
+void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
+f32 Arccosine(f32 x);
+
+f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
+{
+    u128 va = Vu0::Length(Vu0::Q(*a));
+    u128 vb = Vu0::Length(Vu0::Q(*b));
+    f32 la = Vu0::ToFloatMoved(va);
+    f32 lb = Vu0::ToFloat(vb);
+    if (la < 0.0001f || lb < 0.0001f) {
+        *axis = g_unitXVector;
+        return 0.0f;
+    }
+    if (axis != 0) {
+        u128 c = Vu0::Cross(Vu0::Q(*a), Vu0::Q(*b));
+        Vu0::Q(*axis) = c;
+        f32 len = Vu0::ToFloat(Vu0::Length(c));
+        if (1e-8f < len) {
+            Vu0::Q(*axis) = Vu0::MulX(c, Vu0::Scalar(1.0f / len));
+        } else {
+            ComputeUnitPerpendicular(a, axis);
+        }
+    }
+    return Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / (la * lb));
+}
 
 INCLUDE_ASM(func_001EDA80);
 

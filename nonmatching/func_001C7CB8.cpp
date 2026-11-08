@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 848/856, checked 2026-11-07
+// SIZE 848/856, checked 2026-11-08
 // NEAR: registers and one branch form: retail keeps the held target in s2 and the player table in s3 across the calls (four saved registers), ours shares s0; the three vector products and the scales match.
 #include "common.h"
 #include "shapes.h"
@@ -174,7 +174,7 @@ void UpdateAgent(Agent* self)
     if (player != 0 && player->anim->f9C != 0) {
         PositionCurve* curve = player->anim->f9C->pos;
         if (curve != 0) {
-            curve->vt->eval(curve, self, 0, 0, &self->v640, player->time, player->speed);
+            curve->vt->eval(curve, self, 0, player->time, player->speed, 0, &self->v640);
             u128 neg = Vu0::FromFloat(-1.0f);
             Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), neg);
             Vu0::Q(push) = neg;

@@ -523,12 +523,14 @@ func_0011F3E8	func_0011F508	match
 func_0011F478	func_0011F598	match	
 func_0011F568	func_0011F688	match	
 func_0011F620	func_0011F740	match	
+func_0011F6B0	func_0011F7D0	match	
 func_0011F798	func_0011F8B8	match	
 func_0011F850	func_0011F970	match	
 func_0011F9F8	func_0011FB18	match	
 func_0011FA88	func_0011FBA8	match	
 func_0011FB98	func_0011FCB8	match	
 func_0011FC20	func_0011FD40	match	
+func_0011FC90	func_0011FDB0	match	
 func_0011FDB8	func_0011FED8	match	
 func_0011FDD8	func_0011FEF8	match	
 func_0011FE40	func_0011FF60	match	
@@ -853,6 +855,7 @@ func_0012F888	func_0012F9B8	match
 func_0012F8C8	func_0012F9F8	match	
 func_0012F9B8	func_0012FAE8	match	
 func_0012FA88	func_0012FBB8	match	
+func_0012FB68	func_0012FC98	match	
 func_0012FCB0	func_0012FDE0	match	
 func_0012FCD0	func_0012FE00	match	
 func_0012FCF0	func_0012FE20	match	
@@ -2018,6 +2021,7 @@ func_00189378	func_001899E0	match
 func_00189438	func_00189AA0	match	
 func_001897F0	func_00189E58	match	
 func_00189AF0	func_0018A158	match	
+func_00189C28	func_0018A290	match	
 func_00189F58	func_0018A5C0	match	
 func_0018A388	func_0018A9F0	match	
 func_0018A3B8	func_0018AA20	match	
@@ -2535,6 +2539,7 @@ func_001A93E8	func_001AA130	match
 func_001A9438	func_001AA180	match	
 func_001A9498	func_001AA1E0	match	
 func_001A94C0	func_001AA208	match	
+func_001A95D0	func_001AA318	match	
 func_001A97C8	func_001AA510	match	
 func_001A9868	func_001AA5B0	match	
 func_001A98F8	func_001AA640	match	
@@ -2544,6 +2549,7 @@ func_001A99B8	func_001AA700	match
 func_001A99F8	func_001AA740	match	
 func_001A9A40	func_001AA788	match	
 func_001A9A98	func_001AA7E0	match	
+func_001A9AE8	func_001AA830	match	
 func_001A9C58	func_001AA9A0	match	
 func_001A9C68	func_001AA9B0	match	
 func_001A9F78	func_001AACC0	match	
@@ -3049,6 +3055,7 @@ func_001C8FD0	func_001C9CC8	match
 func_001C9008	func_001C9D00	match	rodata
 func_001C91C8	func_001C9EC0	match	rodata
 func_001C96B8	func_001CA3B0	match	
+func_001C96D8	func_001CA3D0	match	
 func_001C9990	func_001CA688	match	
 func_001C9A48	func_001CA740	match	
 func_001C9A58	func_001CA750	match	rodata
@@ -3479,6 +3486,7 @@ func_001ED618	func_001EE690	match
 func_001ED650	func_001EE6C8	match	
 func_001ED6B0	func_001EE728	match	
 func_001ED840	func_001EE8B8	match	
+func_001ED908	func_001EE980	match	
 func_001EDDB0	func_001EEE28	match	
 func_001EDE38	func_001EEEB0	match	
 func_001EE290	func_001EF308	match	

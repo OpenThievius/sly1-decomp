@@ -4668,7 +4668,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         Track83* e = &owner->tracks[n->index];
         PlacedObject* o = n->owner;
         if (msg->kind == 35) {
-            e->pos->vt->eval(e->pos, o, 0, &u.v[0], &u.v[1], msg->a0.f, self->speed);
+            e->pos->vt->eval(e->pos, o, 0, msg->a0.f, self->speed, &u.v[0], &u.v[1]);
             o->desc02()->m1D(o, (Vec02*)&u.v[0]);
             o->desc02()->m20(o, (Vec02*)&u.v[1]);
         } else {
@@ -5262,7 +5262,40 @@ tail:
     return hit ^ 1;
 }
 
-INCLUDE_ASM(func_0012FB68);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
+
+void func_0012FB68(IdFilterObject* self, u8* table, s32 which)
+{
+    Vec02 loc;
+    u8* arg;
+    TriggerScriptEvent(self, 2, 0, 0);
+    arg = table + ((1 - which) << 6) + 4;
+    TriggerScriptEvent(self, 0x1D, 1, (void**)&arg);
+    if (self->mode != 0) {
+        if (self->pendingTarget == 0) {
+            if (self->placedTarget != 0) {
+                s32 close;
+                switch (self->mode) {
+                case 1:
+                    *(Quad16*)&loc = *(Quad16*)&self->pos;
+                    break;
+                case 2: {
+                    PlacedObject* node = self->found;
+                    TransformPointBetweenFrames(node->parent, 0, &node->link40, &loc);
+                    break;
+                }
+                }
+                f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(self->placedTarget->v140), Vu0::Q(loc))));
+                close = d <= *(f32*)((u8*)self->placedTarget + 0x3D0) * 2.0f;
+                if (close) {
+                    return;
+                }
+            }
+            self->pendingTarget = *(PlacedObject**)(table + ((1 - which) << 6));
+        }
+    }
+}
 
 void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 {

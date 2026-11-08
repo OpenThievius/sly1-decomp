@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 644/656 (98.2%), checked 2026-11-07
+// BYTES 644/656 (98.2%), checked 2026-11-08
 #include "common.h"
 #include "anim_curve.h"
 #include "placed_object.h"
@@ -61,7 +61,7 @@ void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, p0, out1 ? &x1 : 0, a, b * scale);
+            tg->vt->eval(tg, cam, c, a, b * scale, p0, out1 ? &x1 : 0);
             if (out0) {
                 u128 w = Vu0::FromFloatAt(e->weight);
                 Vu0::Q(k) = w;
