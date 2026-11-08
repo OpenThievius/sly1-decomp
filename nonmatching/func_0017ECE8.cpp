@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 374/812 (46.1%), checked 2026-11-07
+// BYTES 374/812 (46.1%), checked 2026-11-08
+// Night-low1 (2026-11-08): `return -0.1f < acc.z;` in place of the if gives retail's shared
+//       return-0 block after the f690 test (the boolean's li v0,1 / move v0,zero is no return-0
+//       tail for cross-jumping to merge the early returns into), but the loops' delay slots then
+//       fill otherwise and the C grows to 820 bytes (regdiff 'code' 84.7% to 89.7%); kept here
+//       as the if until the count loop's registers (retail row a2, contact a0, row->next in v0
+//       with move a2, v0) come too.
 // NEAR: wave 4 e3. 812 bytes, same size and frame (0x90; the weights' slot at 0x10 below the spilled down vector at 0x20, the sum at 0). Structure is retail's: the guards, the contact
 //       count, the three allocations, the Gram matrix with the copy of the first normal hoisted before the inner loop (vmove), the right-hand sides, the solve, the
 //       weighted sum, the -0.1 test. Differences: the shared return-0 block of the first guard and the f690 test sits at the end in ours and inline after the f690

@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 451/660 (68.3%), checked 2026-11-08
-// NEAR: wave 4 e3. 660 bytes, same size; every instruction is there and the VU0 sequences match; the order of the
+// BYTES 508/660 (77.0%), checked 2026-11-08
+// NEAR (night-low1, 2026-11-08): the body read into a local before v0.z's store (retail loads it
+//       before the subtraction) and the unit-Z vector read after the probe radius's store (retail
+//       loads it after that swc1, where rec->f08's store keeps it) take 65 differing lines to 49.
+//       Still differs: the third call's argument moves (retail t0, t1, f12, f13, then a2), the
+//       weights' slot stores (retail after the first length, the weights in vf6 and vf3, here
+//       stored at once in vf3 and vf5), and the radius sum in f12 (here f0). Tried: v0.z by byte
+//       offset (same), the lengths' order, the weights inline or after the radius (worse).
+// Before: wave 4 e3. 660 bytes, same size; every instruction is there and the VU0 sequences match; the order of the
 //       scheduling differs: the two weight stores and qmtc2s of the unit-Z steps come early (retail: after the first length),
 //       the load of the body before the second call and the delay slot of the second jal (retail fills it with a0, ours a1).
 //       The selected node, the four calls and the probe record's writes are retail's. ~12 compiles (scalar order, float
@@ -84,17 +91,18 @@ void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d)
     Vec02 v70;
     ColliderSpan span;
     func_0012CD78(node->f08, (void*)a, x, y, pl, 1, &v0, 0, 0, 0);
+    ProbeBody* b1 = obj->body;
     v0.z = v0.z - k;
-    func_0012CD78(node->f08, obj->body->f80, x, y, pl, 1, &v10, 0, 0, 0);
+    func_0012CD78(node->f08, b1->f80, x, y, pl, 1, &v10, 0, 0, 0);
     func_0012CD78(node->f08, obj, x, y, pl, 1, &v20, (Vec02*)&m30, 0, 0);
     u128 w = Vu0::Add(Vu0::Q(v20), Vu0::Rotate(m30, Vu0::Q(obj->body->v60)));
     Vu0::Q(v20) = w;
     Vu0::Q(rec->v20) = Vu0::Add(Vu0::Q(v10), Vu0::Sub(Vu0::Q(v0), w));
-    u128 up = Vu0::Q(g_unitZVector);
     u128 s80 = Vu0::ScalarAt(D_00263880);
     u128 s84 = Vu0::ScalarAt(D_00263884);
     ProbeBody* body = obj->body;
     rec->f08 = Vu0::ToFloat(Vu0::Length(Vu0::Q(body->v70))) + Vu0::ToFloat(Vu0::Length(Vu0::Q(body->f84->v100))) + 10.0f;
+    u128 up = Vu0::Q(g_unitZVector);
     Vu0::Q(v70) = Vu0::MulAddX(Vu0::Q(v0), up, s84);
     Vu0::Q(v60) = Vu0::MulAddX(Vu0::Q(v0), up, s80);
     rec->f04 = 0 < CollectBoundsSpans(&rec->v20, &v60, &v70, 1, &span);

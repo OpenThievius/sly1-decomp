@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 439/608 (72.2%), checked 2026-11-07
+// BYTES 474/608 (78.0%), checked 2026-11-08
 #include "common.h"
 #include "collider.h"
 #include "placed_object.h"
 #include "vu0.h"
 struct MeshHit { u8 pad0[0x70]; };
 s32 CollectTreeNodeSpans(void* a, u8* b, u8* c, s32 d, s32 e, MeshHit* f);
-// NEAR (2026-11-07, worker vu0-e6): the code is retail's but the allocator: retail spills the
+// NEAR (night-low1, 2026-11-08): the second loop's two flag tests nested (if (flags & 1) { if
+// (flags & 2) continue; ... }) give retail's andi/beqz in place of xori/andi/bnez (62 lines to
+// 52); what is left is the allocation below. Tried: one test with ||, i-- > 0 loops, a counter
+// per loop, the last loop on n itself (all worse).
+// Before (2026-11-07, worker vu0-e6): the code is retail's but the allocator: retail spills the
 // face count n (sw a2, 0(sp)) and runs the first loop in a2 itself, reloading n for the second
 // and third loop; here the value n - 1 is common to the three loops and is the spilled one, so
 // the counters take t0 and the stack slots swap (62 lines differ, the instructions are the
@@ -51,9 +55,7 @@ s32 func_00186568(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap
     }
     for (i = n - 1; i >= 0; i--) {
         MeshFace* f = list[i].face;
-        if (!(f->flags & 1)) {
-            continue;
-        }
+        if (f->flags & 1) {
         if (f->flags & 2) {
             continue;
         }
@@ -68,6 +70,7 @@ s32 func_00186568(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap
                     *(FaceEdgeLink**)((u8*)&out[filled] + 0x58) = link;
                 }
             }
+        }
         }
     }
     for (i = n - 1; i >= 0; i--) {
