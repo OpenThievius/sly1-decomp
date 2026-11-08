@@ -2873,9 +2873,54 @@ void StartObjectCycler(ObjectCycler* self)
     self->f64C = self->radius3CC + self->radius3CC;
 }
 
-INCLUDE_RODATA(jtbl_0024A190);
+extern f32 D_002621F8[6];
+extern f32 D_00262210[4];
+extern f32 D_00262220[4];
+void EvaluateHermiteVectorSegment(f32 t, f32 dt, f32 scale, Vec02* p0, Vec02* v0, Vec02* p1, void* v1, Vec02* outPos, Vec02* outVel, s32 zero);
+void ClampVectorLength(Vec02* out, Vec02* in, f32 limit);
+void AddColliderForce(Collider* self, Vec02* force);
+void BuildBasisFromXAndZHint(Vec02* x, Vec02* zHint, Mat02* out);
+void ApproachRotationWithRamp(Mat02* current, Mat02* target, const f32* ramp, f32 dt, s32 zero, Vec02* out);
+void SteerColliderTowardPosition(Collider* self, void* a, void* b, const Vec02* zero, const f32* ramp, f32 dt);
+void SteerColliderTowardRotation(Collider* self, void* a, void* b, const Vec02* zero, const f32* ramp, f32 dt);
+void StepCollider(Collider* self, f32 dt);
 
-INCLUDE_ASM(func_0015AF50);
+// k, the ramp's output, is read and written at its own address (*(u128*)&k): through Vu0::Q
+// its address stays in a saved register, where retail forms it again for each call.
+void func_0015AF50(ObjectCycler* self, f32 dt)
+{
+    switch (self->state) {
+    case 0:
+    case 3:
+    case 5: {
+        Vec02 pos;
+        Vec02 vel;
+        Vec02 accel;
+        Vec02 k;
+        Mat02 basis;
+        f32 t = self->stateEnd + dt - g_gameClock[1];
+        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, (u8*)self + 0x600, &pos, &vel, 0);
+        Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
+        *(u128*)&k = Vu0::FromFloat(1.0f / dt);
+        Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);
+        ClampVectorLength(&accel, &accel, 3000.0f);
+        AddColliderForce(self, &accel);
+        Vu0::Q(accel) = Vu0::Sub(Vu0::Q(accel), Vu0::Q(self->gravity));
+        BuildBasisFromXAndZHint(&vel, &accel, &basis);
+        ApproachRotationWithRamp(&self->rot, &basis, D_002621F8, dt, 0, &k);
+        self->desc02()->m21(self, &k);
+        break;
+    }
+    case 1:
+        AddColliderForce(self, &self->gravity);
+        SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_00262210, dt);
+        SteerColliderTowardRotation(self, 0, 0, &D_00248D30, D_00262220, dt);
+        break;
+    case 6:
+        StepCollider(self, dt);
+        break;
+    }
+}
 
 void UpdateObjectCycler(ObjectCycler* self)
 {
