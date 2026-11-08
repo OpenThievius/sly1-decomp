@@ -653,6 +653,20 @@ struct Vu0 {
         return r;
     }
 
+    static Vec DotXY(Vec a, Vec b)
+    {
+        Vec r;
+        r.q = DotXY(a.q, b.q);
+        return r;
+    }
+
+    static Vec Sqrt(Vec a)
+    {
+        Vec r;
+        r.q = Sqrt(a.q);
+        return r;
+    }
+
 
     static Vec Min(Vec a, Vec b)
     {

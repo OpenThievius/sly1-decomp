@@ -341,7 +341,8 @@ struct Player : TurningCollider {
     s32 f22A4;              // 0x22A4: the link state to go back to, -1 for none (func_001CD0C8)
     s32 f22A8;              // 0x22A8: set when the link's heading is turned round (func_001CD0C8)
     void* f22AC;            // 0x22AC
-    u8 pad22B0[0x2360 - 0x22B0];
+    Vec02 v22B0;            // 0x22B0: the link's acceleration (func_001CC818, or SolvePlayerLinkSystem)
+    u8 pad22C0[0x2360 - 0x22C0];
     f32 f2360;              // 0x2360: the three weights func_001CD0C8 gives SetBlendItemWeights, 0xC apart
     u8 pad2364[0x236C - 0x2364];
     f32 f236C;              // 0x236C
