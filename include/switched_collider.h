@@ -396,7 +396,9 @@ struct Player : TurningCollider {
     void* f25C8;            // 0x25C8: the animation whose markers state 8 reads (func_0017D248) and whose marker 0x1BB func_0017F018 reads
     u8 pad25CC[0x25D8 - 0x25CC];
     void* f25D8[5];         // 0x25D8
-    u8 pad25EC[0x2674 - 0x25EC];
+    s32 f25EC;              // 0x25EC: the number of f25F0 entries (func_00177990 adds up to 32)
+    PlacedObject* f25F0[32]; // 0x25F0: the nodes func_00177990 found, which FindNodeForQuery skips
+    Contact03* f2670;       // 0x2670: contacts func_00177990 reads, then gives back to the world's pool
     s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
     OnOffObject* f2678;             // 0x2678: the record func_001D1260 fills
     u8 pad267C[0x2680 - 0x267C];

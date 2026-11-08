@@ -14,10 +14,11 @@ struct NodeQuery {
         void* p00;          // 0x00: func_00198760
     };
     void* hold;             // 0x04: func_00177838 (a PlacedObject), func_00198760
-    s32 f08;                // 0x08
+    f32 weight;             // 0x08: the player's mass times 1000 (func_00177990)
     s32 out;                // 0x0C: func_00177838
     s32 kind;               // 0x10: func_00177838
-    u8 pad14[0x20 - 0x14];
+    f32 key;                // 0x14: the order func_00177990 sorts them in (CompareKeysAscending)
+    u8 pad18[0x20 - 0x18];
     Vec02 pos;              // 0x20: where (func_001C9990: the agent's position)
     Vec02 dir;              // 0x30
 };
