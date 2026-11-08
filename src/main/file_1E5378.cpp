@@ -487,16 +487,9 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
     }
 }
 
-INCLUDE_ASM(func_001E6600);
-
-
-extern f32 g_elapsedTime;
-extern Rgba4 D_002610D8;
-extern Rgba4 D_002610E0;
-
+extern u8 D_00275B50[8];
 void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
-void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
 
 struct ColorLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -509,6 +502,79 @@ struct ColorLerp {
 
 #define GIF_SCREEN_X(x) ((s32)(((x) + 1728.0f) * 16.0f))
 #define GIF_SCREEN_Y(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
+
+// The arc's points: a quad from the edge to each point, coloured from its own colour toward
+// grey by its level, then sparkles scattered at random over each point's span, more the
+// brighter it is.
+void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
+{
+    s32 first, last;
+    GetArcVisibleRange(self, &first, &last);
+    if (first == last) {
+        return;
+    }
+    f32 x0 = self->x + self->edgeFrom;
+    f32 y0 = self->y + 62.7f;
+    f32 xe = self->x + self->edgeTo;
+    BeginGifTag(buf, 0x44, 5, 0x44441);
+    for (s32 i = first; i < last; i++) {
+        T217D_3F0_Pt* p = &self->pts[i];
+        f32 xa = x0 + p->x * 62.7f;
+        f32 xb = x0 + p->nextX * 62.7f;
+        f32 ya = y0 + p->y * 62.7f;
+        f32 yb = y0 + p->nextY * 62.7f;
+        Rgba4 c;
+        {
+            Rgba4 a = *(Rgba4*)&p->colorB;
+            Rgba4 b = *(Rgba4*)D_00275B50;
+            f32 t = p->level;
+            Rgba4 m;
+            m.r = ColorLerp::Of(a.r, b.r, t);
+            m.g = ColorLerp::Of(a.g, b.g, t);
+            m.b = ColorLerp::Of(a.b, b.b, t);
+            m.a = ColorLerp::Of(a.a, b.a, t);
+            c = m;
+        }
+        AddGifRgbaEntry(buf, *(u32*)&c);
+        s32 sx = GIF_SCREEN_X(xe);
+        s32 sya = GIF_SCREEN_Y(ya);
+        AddGifXyzfEntry(buf, sx, sya, 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xa), sya, 0, 0);
+        s32 syb = GIF_SCREEN_Y(yb);
+        AddGifXyzfEntry(buf, sx, syb, 0, 0);
+        AddGifXyzfEntry(buf, GIF_SCREEN_X(xb), syb, 0, 0);
+    }
+    BeginGifTag(buf, 0, 1, 1);
+    AddGifRgbaEntry(buf, 0x80000000);
+    BeginGifTag(buf, 0, 1, 4);
+    for (s32 i = first; i < last; i++) {
+        T217D_3F0_Pt* p = &self->pts[i];
+        s32 n = (s32)(p->level * 3.999f) + 2;
+        if (n != 0) {
+            f32 xa = x0 + p->x * 62.7f;
+            f32 xb = x0 + p->nextX * 62.7f;
+            f32 lo = xb <? (xe < xa ? xe : xa);
+            f32 hi = xb >? (xa < xe ? xe : xa);
+            f32 ya = y0 + p->y * 62.7f;
+            f32 yb = y0 + p->nextY * 62.7f;
+            for (s32 j = 0; j < n; j++) {
+                f32 x = RandomFloatInRange(lo, hi);
+                f32 y = RandomFloatInRange(ya, yb);
+                AddGifXyzfEntry(buf, GIF_SCREEN_X(x), GIF_SCREEN_Y(y), 0, 0);
+            }
+        }
+    }
+}
+
+
+extern f32 g_elapsedTime;
+extern Rgba4 D_002610D8;
+extern Rgba4 D_002610E0;
+
+void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
+void AddGifRgbaEntry(PacketWriter* b, u32 c);
+void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
+
 
 struct FadeClamp {
     static f32 Of(f32 x, f32 lo, f32 hi)
