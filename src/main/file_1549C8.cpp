@@ -3154,7 +3154,55 @@ extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
 INCLUDE_ASM(func_0015BC78);
 
-INCLUDE_ASM(func_0015BD48);
+struct ListedFrameItem {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x34 - 0x1C];
+    BaseObject* item;       // 0x34
+    ListedFrameItem* next;  // 0x38
+};
+typedef void (*ItemPointFn)(BaseObject* self, Vec02* in, s32 a, Vec02* out, s32 b, s32 c, s32 d);
+
+// nearest is read at its own address (*(u128*)&nearest): through Vu0::Q the address stays in
+// a pseudo that CSE keeps in a saved register across the walk, where retail forms it again.
+s32 func_0015BD48(ObjectCycler* self, Quadword128* out)
+{
+    ListFrame frame;
+    Vec02 hit;
+    f32 best = D_0024A218[0];
+    for (ListedFrameItem* n = (ListedFrameItem*)self->world->list1C9C.head; n != 0; n = n->next) {
+        Vec02 from;
+        Vec02 nearest;
+        TransformPointBetweenFrames(0, n->frame, &self->v140, &from);
+        ItemPointFn fn = (ItemPointFn)((void**)n->item->desc)[10];
+        if (fn != 0) {
+            fn(n->item, &from, 0, &nearest, 0, 0, 0);
+        }
+        f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(from), *(u128*)&nearest)));
+        if (d < best) {
+            best = d;
+            TransformPointBetweenFrames(n->frame, 0, &nearest, &hit);
+        }
+    }
+    if (best < D_0024A218[0]) {
+        ColliderSpan span;
+        Vec02 below;
+        s32 count;
+        s32 list;
+        PushBackMemoryMark();
+        GatherCollidersInSphere((s32)self->world, (s32)self, &hit, 0, 0, &count, &list, 500.0f);
+        below = hit;
+        below.z = below.z - 500.0f;
+        s32 r = FindNearestSpanObject(0, &hit, &below, count, list, (s32)&span);
+        PopBackMemoryMark();
+        if (r != 0) {
+            *out = *(Quadword128*)&span;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
 
 s32 func_0015BEF0(ObjectCycler* self)
 {
