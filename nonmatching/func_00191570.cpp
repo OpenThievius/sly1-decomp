@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 340/348 (97.7%), checked 2026-11-07
+// BYTES 340/348 (97.7%), checked 2026-11-08
 #include "common.h"
 #include "point_graph_object.h"
 #include "placed_object.h"
 #include "vu0.h"
+// Still differs (2026-11-08, night-close1): the two lw follow the declarations in reverse and the
+// registers follow the loads (the second load takes v0): a, b gives [1] then [0]; b, a (declared
+// or assigned) gives [0] into v1. The Vec forms move the weights' mfc1 and sub.s.
 // NEAR (2026-11-08, wave 3 retry): Scalar is used. All but four instructions: retail loads
 // nearest[0] into v0 and nearest[1] into v1 before the weights and stores the second weight
 // after the first row's lqc2; here nearest[1] is loaded first and the second weight's store

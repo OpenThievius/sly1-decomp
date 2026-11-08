@@ -340,11 +340,13 @@ struct Vu0 {
         return Sqrt(Dot(v, v));
     }
 
-    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001.
+    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001. The
+    // length's test reads it through ToFloatMoved: retail's mtc1 follows the qmfc2 at once, which
+    // the compiler's own qmfc2 gives and ToFloat's does not (func_00189B18, func_00189C28).
     static u128 NormalizeOr(u128 v, u128 fallback)
     {
         u128 len = Length(v);
-        if (ToFloat(len) < 0.0001f) {
+        if (ToFloatMoved(len) < 0.0001f) {
             return fallback;
         }
         return DivX(v, len);

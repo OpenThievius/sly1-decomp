@@ -601,7 +601,92 @@ s32 AcceptColliderOfOtherRoot(s32 a0, Collider* self)
     return (s32)self->root != a0;
 }
 
-INCLUDE_ASM(func_00196EB0);
+extern float g_gameTime[];
+extern f32 D_0026A710;
+extern f32 D_0026A714;
+extern f32 D_0026A718;
+extern f32 D_0026A71C;
+extern f32 D_0026A820;
+extern f32 D_0026A824;
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+s32 IsObjectOfKind(void* self, s32 kind);
+
+void UpdateSwitchedCollider(GaugeCollider* self);
+s32 FindColliderFloorContact(void* self, s32 a, s32 b);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
+void ClearRootTries(void* self);
+void ConvertPositionToWorld(void* obj, Vec02* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), void* p4, s32* n, Collider*** list);
+Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 AcceptColliderOfOtherRoot(void* a, Collider* self);
+extern const Vec02 D_00248D20;
+extern const Vec02 g_unitXVector;
+
+struct GaugeSpanOwner { u8 pad00[0x278]; u8* f278; };
+
+void func_00196EB0(GaugeCollider* self)
+{
+    Vec02 sum;
+    Vec02 pos;
+    Vec02 lo;
+    Vec02 hi;
+    ColliderSpan span;
+    Vec02 dir;
+    s32 n;
+    Collider** list;
+    u32 i;
+
+    UpdateSwitchedCollider(self);
+    if (FindColliderFloorContact(self, 0, 0) != 0) {
+        self->f61C = g_gameTime[0];
+        self->f628 = D_0026A718;
+        self->f624 = D_0026A71C;
+    } else if (self->f644 != 0) {
+        self->f61C = g_gameTime[0];
+        self->f628 = D_0026A710;
+        self->f624 = D_0026A714;
+    }
+    sum = *(Vec02*)&D_00248D30;
+    s32* np;
+    Collider*** lp;
+    Vec02* pp;
+    pp = &pos;
+    np = &n;
+    lp = &list;
+    for (i = 0; i < 4; i++) {
+        ConvertPositionToWorld(self->f64C[i], pp);
+        hi = pos;
+        lo = pos;
+        hi.z = hi.z + D_0026A820;
+        lo.z = lo.z + D_0026A824;
+        PushBackMemoryMark();
+        GatherCollidersInBox(self->world, 0, &hi, &lo, AcceptColliderOfOtherRoot, self, np, lp);
+        Collider* hit = FindNearestSpanObject(1, &hi, &lo, n, list, &span);
+        if (hit != 0) {
+            *(Quad16*)&dir = span.q[2];
+            if (IsObjectOfKind(hit, 0x1F) != 0 && ((GaugeSpanOwner*)hit)->f278 != 0) {
+                Vec02 pair[2];
+                Vec02 in = dir;
+                BuildPerpendicularPair(&in, pair, &g_unitXVector, &D_00248D20);
+                ComputeOscillatorDisplacement(50.0f, *(void**)(((GaugeSpanOwner*)hit)->f278 + 0xC), &span, pair, 0, pair, 0);
+                Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(D_00248D20)));
+            }
+            if (!(dir.z < 0.7f)) {
+                goto keep;
+            }
+        }
+        dir = self->v630;
+    keep:
+        Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(dir), Vu0::Scalar(0.25f));
+        PopBackMemoryMark();
+    }
+    Vu0::Q(self->v630) = Vu0::DivX(Vu0::Q(sum), Vu0::Length(Vu0::Q(sum)));
+    ClearRootTries(self);
+}
 
 INCLUDE_ASM(func_001971B8);
 

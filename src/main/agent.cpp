@@ -2,6 +2,7 @@
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "object_message.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -1049,7 +1050,75 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
 
 s32 GetAgentRosterState(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)self->f720 + 0x50); }
 
-INCLUDE_ASM(func_001C96D8);
+struct AgentHit {
+    PlacedObject* obj;      // 0x00: what was hit
+    u8 pad04[0x0C - 0x04];
+    s32 flags;              // 0x0C
+    s32 mask;               // 0x10
+    u8 pad14[0x28 - 0x14];
+    f32 height;             // 0x28
+    u8 pad2C[0x30 - 0x2C];
+    Vec02 push;             // 0x30
+};
+
+struct AgentNotice {
+    Agent* self;
+    PlacedObject* obj;
+};
+
+s32 HandleObjectEvent(Agent* self, AgentHit* ev);
+void TurnColliderTowardHeading(Agent* self);
+void ChangeAgentState(Agent* self, s32 state, void* arg);
+extern const Vec02 g_unitXVector;
+
+s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
+{
+    SlotMessage msg;
+    if (self->fBD8 != 0) {
+        return 1;
+    }
+    if (self->fB0C != 0 && (ev->obj->desc->flags & 2) != 0 && IsObjectInPool(self->fB0C, (Collider*)ev->obj) != 0) {
+        return 1;
+    }
+    s32 handled = HandleObjectEvent(self, ev);
+    if (handled == 0 || (ev->flags & 0x20) == 0) {
+        return handled;
+    }
+    void* key = 0;
+    s32 i = self->fAC4;
+    while (--i >= 0) {
+        Pend08* r = &self->fAC8[i];
+        if (r->f00 & ev->mask) {
+            key = r->obj;
+            break;
+        }
+    }
+    if (*(s32*)((u8*)self + 0xBDC) != 0) {
+        if (0.0001f < Vu0::ToFloat(Vu0::Length(Vu0::Q(ev->push)))) {
+            self->fB7C = 0;
+            f32 heading = ArctangentOfRatio(-ev->push.y, -ev->push.x);
+            f32 turn = WrapAngle(heading - self->f638);
+            SetAgentFacingAngles(self, WrapAngle(self->f638 + turn * *(f32*)&self->fBD0), self->fB24);
+            TurnColliderTowardHeading(self);
+        }
+    }
+    ChangeAgentState(self, self->fA68 > 0 ? 16 : 11, key);
+    if (self->fB00 != 0) {
+        msg.kind = 6;
+        Vu0::Q(msg.vb) = Vu0::Q(self->v140);
+        msg.vb.z = ev->height;
+        if (ev->obj != 0 && (ev->obj->desc->flags & 1) != 0) {
+            Vu0::Q(msg.va) = Vu0::DivX(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(ev->obj->v140)), Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(ev->obj->v140))));
+        } else {
+            Vu0::Set(msg.va, Vu0::NormalizeOr(Vu0::Q(ev->push), Vu0::Q(g_unitXVector)));
+        }
+        ((BaseObject*)self->fB00)->desc->m1B((BaseObject*)self->fB00, &msg);
+    }
+    ((AgentNotice*)&msg)->self = self;
+    ((AgentNotice*)&msg)->obj = ev->obj;
+    self->desc->m0E(self, 0x17, &msg);
+    return handled;
+}
 
 // What slot 76 is asked about: a kind and the object concerned.
 struct AgentRequest { s32 kind00; BaseObject* ref04; };
@@ -1108,7 +1177,42 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
 }
 
-INCLUDE_ASM(func_001C9AF8);
+f32 ClampToRange(void* range, f32 x);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
+
+void func_001C9AF8(Agent* self)
+{
+    s32 last = self->f92C - 1;
+    s32 n = self->f930;
+    n = (n < last) ? n : last;
+    Vec02 target;
+    Vu0::Q(target) = Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (n << 4)));
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+    f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    f32 t = ClampToRange((u8*)self + 0xB9C, dist / __builtin_fabsf(F(f32, 0xB94)));
+    f32 time = t * F(f32, 0xB98);
+    Vec02 vel;
+    Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time * -0.5f));
+    self->desc02()->m20(self, &vel);
+    F(f32, 0xBA4) = g_gameTime[0] + time;
+    f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    F(Vec02, 0xBB0) = target;
+    u128 pos = Vu0::MulAddX(Vu0::Q(vel), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time));
+    Vu0::Q(F(Vec02, 0xBC0)) = pos;
+    if (1.0f < speed) {
+        f32 ang = ArctangentOfRatio(d.y, d.x);
+        if (F(f32, 0xB94) < 0.0f) ang += 3.14159265f;
+        SetAgentFacingAngles(self, ang, 0.0f);
+        Vec02 w;
+        u128 s = Vu0::FromFloat(-1.0f);
+        u128 r = Vu0::RotateTransposed(F(Mat02, 0x660), Vu0::MulX(Vu0::Q(vel), s));
+        Vu0::Q(w) = s;
+        Vu0::Q(F(Vec02, 0x640)) = r;
+    } else {
+        F(Vec02, 0x640) = D_00248D30;
+    }
+}
 
 f32 GetAnimationMarkerTime(void* obj, s32 id);
 void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
