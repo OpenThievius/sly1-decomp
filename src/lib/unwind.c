@@ -4,7 +4,7 @@
  * address's record, the reading of its common record and instructions, and the registration of a
  * table, which throw (src/lib/throw.c) relies on to unwind each frame. C, built by the Linux cc1
  * of 2.9-ee-991111 (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
- * code; func_001FF1E0 is not matched yet. */
+ * code. */
 #include "common.h"
 #include "asm_func.h"
 
@@ -177,7 +177,69 @@ void func_001FF0E0(KeyedArray* self, KeyedArray* other)
     }
 }
 
-INCLUDE_ASM(func_001FF1E0);
+/* The order of two records: by key. */
+static inline s32 CompareFrames(KeyedElem* x, KeyedElem* y)
+{
+    return x->key - y->key;
+}
+
+/* The runtime's swap is a statement macro: retail's sift loops need its do-while form (a plain
+ * block of the same three statements changes them). */
+#define SWAP_FRAMES(x, y) do { KeyedElem* tmp = x; x = y; y = tmp; } while (0)
+
+/* A heap sort of the records that came out of order. */
+static inline void SortFrames(KeyedArray* erratic)
+{
+    KeyedElem** a = erratic->data;
+    u32 n = erratic->count;
+    u32 m = n;
+    u32 i;
+
+    while (m > 0) {
+        --m;
+        for (i = m; 2 * i + 1 < n;) {
+            if (2 * i + 2 < n && CompareFrames(a[2 * i + 2], a[2 * i + 1]) > 0
+                && CompareFrames(a[2 * i + 2], a[i]) > 0) {
+                SWAP_FRAMES(a[i], a[2 * i + 2]);
+                i = 2 * i + 2;
+            } else if (CompareFrames(a[2 * i + 1], a[i]) > 0) {
+                SWAP_FRAMES(a[i], a[2 * i + 1]);
+                i = 2 * i + 1;
+            } else
+                break;
+        }
+    }
+    while (n > 1) {
+        --n;
+        SWAP_FRAMES(a[0], a[n]);
+        for (i = 0; 2 * i + 1 < n;) {
+            if (2 * i + 2 < n && CompareFrames(a[2 * i + 2], a[2 * i + 1]) > 0
+                && CompareFrames(a[2 * i + 2], a[i]) > 0) {
+                SWAP_FRAMES(a[i], a[2 * i + 2]);
+                i = 2 * i + 2;
+            } else if (CompareFrames(a[2 * i + 1], a[i]) > 0) {
+                SWAP_FRAMES(a[i], a[2 * i + 1]);
+                i = 2 * i + 1;
+            } else
+                break;
+        }
+    }
+}
+
+/* The end of a table's sort: the records in order split from those out of it, these sorted and
+ * merged back; the second list is freed. */
+FrameDesc** func_001FF1E0(FrameList* list, s32 count)
+{
+    if (list->count != count)
+        AbortProgram();
+    func_001FFE58((KeyedArray*)list, (KeyedArray*)&list->other);
+    if (list->count + list->unused != count)
+        AbortProgram();
+    SortFrames((KeyedArray*)&list->other);
+    func_001FF0E0((KeyedArray*)list, (KeyedArray*)&list->other);
+    LeaveRuntimeLock(list->other);
+    return list->items;
+}
 
 s32 func_001FF448(FrameDesc* p)
 {
