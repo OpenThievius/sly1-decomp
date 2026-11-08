@@ -124,6 +124,18 @@ def isolate(text, func):
                                                          for i, (a, b) in enumerate(aliases)))
             out.append(body)
         elif C_TYPEDEF.match(stripped) and "class" not in stripped:
+            if "__attribute__" in stripped:
+                # The permuter's parser drops attributes, so u128 (mode(TI)) would reach the
+                # compiler as a 32-bit int, and every VU0 helper's "j" operand would be
+                # impossible: its parser gets the plain typedef, and permuter_compile.py puts
+                # the original back.
+                name = re.search(r"(\w+)\s*__attribute__", stripped)
+                if name:
+                    plain = re.sub(r"\s*__attribute__\s*\(\((?:[^()]|\([^()]*\))*\)\)", "", stripped)
+                    out.append("\nPERM_IGNORE(static const char permuter_typedef_%s[] = \"%s\";)\n"
+                               % (name.group(1), stripped.replace('"', '\\"')))
+                    out.append("\n" + plain + "\n")
+                    continue
             out.append(item)
         else:
             out.append("\nPERM_IGNORE(%s)\n" % stripped)

@@ -48,8 +48,16 @@ def main(argv=None):
 ALIAS = re.compile(r'static const char permuter_alias_\d+\[\] = "(\w+)=([^"]+)";')
 
 
+TYPEDEF = re.compile(r'static const char permuter_typedef_(\w+)\[\] = "((?:[^"\\\\]|\\\\.)*)";')
+
+
 def with_aliases(text):
-    """The candidate with permuter_setup.py's call aliases as #defines again (Fpu__Sqrt -> Fpu::Sqrt)."""
+    """The candidate with permuter_setup.py's call aliases as #defines again (Fpu__Sqrt -> Fpu::Sqrt),
+    and each attributed typedef (u128's mode(TI)) as it was written."""
+    for m in list(TYPEDEF.finditer(text)):
+        name, original = m.group(1), m.group(2).replace('\\"', '"')
+        text = re.sub(r"\btypedef\b[^;]*\b%s\s*;" % re.escape(name), lambda _: original, text, count=1)
+    text = TYPEDEF.sub("", text)
     defines = ["#define %s %s" % m.groups() for m in ALIAS.finditer(text)]
     return "\n".join(defines) + "\n" + ALIAS.sub("", text) if defines else text
 
