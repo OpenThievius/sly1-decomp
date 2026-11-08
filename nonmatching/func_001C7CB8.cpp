@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 848/856, checked 2026-11-08
+// SIZE 852/856, checked 2026-11-08
 // NEAR: registers and one branch form: retail keeps the held target in s2 and the player table in s3 across the calls (four saved registers), ours shares s0; the three vector products and the scales match.
 #include "common.h"
 #include "shapes.h"

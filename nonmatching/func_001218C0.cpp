@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 787/904 (87.1%), checked 2026-11-08
+// BYTES 791/904 (87.5%), checked 2026-11-08
 #include "common.h"
 #include "asm_func.h"
 #include "property_descriptor.h"

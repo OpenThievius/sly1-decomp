@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1288/1944 (66.3%), checked 2026-11-08
+// BYTES 1290/1944 (66.4%), checked 2026-11-08
 // NEAR (2026-11-08, night-large3): UpdateObjectGatherer (func_0019B378), 88.9% of the words. The
 // logic, both switches (retail's jump tables) and the list walks follow retail; the frame is
 // 0x10 larger: retail keeps the push vector at 0x20 with both MulXSum weights at 0x30 and the

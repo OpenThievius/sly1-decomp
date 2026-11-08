@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 989/1604 (61.7%), checked 2026-11-08
+// BYTES 991/1604 (61.8%), checked 2026-11-08
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 701/772 (90.8%), checked 2026-11-07
+// BYTES 714/772 (92.5%), checked 2026-11-08
 // NEAR: the same size as retail now, the VU0 registers retail's (MulAddX2 in its own order gives the result a's register, vf2).
 //       Fixed on the way: the parent walk is one while from the part itself (so the mask 0xF000 << 24 is held in s7), the
 //       probe is tested against other->tree.nodes (0x3F8), the end tested for bit 2 is end[1 - side], the cases are written

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 932/1020 (91.4%), checked 2026-11-08
+// BYTES 986/1020 (96.7%), checked 2026-11-08
 // NEAR (2026-11-07, worker night-large2): the frame, the box, the whole loop and the push are
 // retail's; after the loop the registers differ (35 lines): retail's MulXSum of the split motion
 // has its weight -f354 in vf1 and stores both weight slots after the arithmetic (ours stores the

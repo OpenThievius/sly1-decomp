@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 240/260 (92.3%), checked 2026-11-07
+// SIZE 264/260, checked 2026-11-08
 // NEAR: identical but for three details: the vtable load (lw v1,0(s0)) sits before the vmulax in retail and after the vmaddx here; the two weights load into v1 and a0 (the registers of their lui) where ours uses a1 and v1; retail issues the last weight store (sqc2 vf4) in the delay slot of the jalr. WeightAt is FromFloatAt in a 16-byte local, the lw-form of Vu0::Scalar, which include/vu0.h lacks. Tried loading the method or the descriptor first, naming the weights, and a pointer to r.
 #include "common.h"
 #include "placed_object.h"

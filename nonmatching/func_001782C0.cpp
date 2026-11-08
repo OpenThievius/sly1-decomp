@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 718/728 (98.6%), checked 2026-11-08
+// BYTES 720/728 (98.9%), checked 2026-11-08
 // NEAR: wave 4 e3. 728 bytes, same size; 11 words differ: the two weights of the tail (dt and -0.5 dt) take vf4 and vf5
 //       in the other order (retail dt in vf5), the scheduling of their stores (retail leaves dt's second store for the delay
 //       slot of the first null test) and the temporary of the hi of D_002639E0 (v1, retail v0). The branches, the frame
