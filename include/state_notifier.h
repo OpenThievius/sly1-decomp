@@ -36,7 +36,9 @@ struct StateNotifier : PlacedObject {
     u8 pad2E4[0x2E8 - 0x2E4];
     void* f2E8;             // 0x2E8: the object whose message ends it (func_00147EF8)
     void* f2EC;             // 0x2EC
-    u8 pad2F0[0x320 - 0x2F0];
+    Vec02 v2F0;             // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
+    Vec02 v300;             // 0x300: its motion, split along the push (func_00146DB0)
+    u8 pad310[0x320 - 0x310];
     union {
         f32 f320;           // 0x320
         s32 i320;
@@ -44,7 +46,7 @@ struct StateNotifier : PlacedObject {
     u8 pad324[0x334 - 0x324];
     s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
-    s32 f33C;               // 0x33C (unused here)
+    s32 f33C;               // 0x33C: set once it has landed on a slope (func_00146DB0)
     s32 armed;               // 0x340
     f32 f344;               // 0x344
     union {

@@ -571,6 +571,13 @@ struct Vu0 {
             return r;
         }
 
+        static Vec Zero()
+        {
+            Vec r;
+            r.q = Vu0::Zero();
+            return r;
+        }
+
         static Vec FromFloat(f32 f)
         {
             Vec r;
@@ -656,6 +663,13 @@ struct Vu0 {
         return r;
     }
 
+    static Vec MulXSum3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u)
+    {
+        Vec r;
+        r.q = MulXSum3(a.q, s.q, b.q, t.q, c.q, u.q);
+        return r;
+    }
+
     template <class M> static Vec Rotate(const M& m, Vec v)
     {
         Vec r;
@@ -667,6 +681,13 @@ struct Vu0 {
     {
         Vec r;
         r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    template <class M> static Vec RotateUntied(const M& m, Vec v)
+    {
+        Vec r;
+        r.q = RotateUntied(m, v.q);
         return r;
     }
 

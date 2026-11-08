@@ -101,7 +101,8 @@ struct Slot19 {
     Vec02 v40;              // 0x40
     f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
     f32 f54;                // 0x54: an angle f50 advances by the clock's step (func_001DA7E0)
-    u8 pad58[0x60 - 0x58];
+    f32 f58;                // 0x58: the particles owed to the first emitter, spent whole (func_001D8E40)
+    f32 f5C;                // 0x5C: the same for the second
 };
 
 // A marker on class 0x19's path (sixteen at 0x874): an object (kind 0, func_001DB110) or a
@@ -583,7 +584,8 @@ struct GaugeAgent : Agent {
     s32 fC10;               // 0xC10
     u8 padC14[0xE00 - 0xC14];
     s32 fE00;               // 0xE00
-    u8 padE04[0xE0C - 0xE04];
+    s32 fE04;               // 0xE04: its first clip was in range last frame (func_0018AE38)
+    s32 fE08;               // 0xE08: the second's
     void* fE0C;             // 0xE0C
     void* fE10;             // 0xE10
     void* fE14;             // 0xE14
@@ -818,6 +820,19 @@ struct GaugeCollider : SwitchedCollider {
     u8 pad6BC[0x6C0 - 0x6BC];
 };
 
+// What a path follower's wheels hand their particles to (func_001D8E40): an object whose slot
+// at 0x7C takes a spawn record, and a word that, clear, asks for the velocity at the point.
+struct PathEmitter {
+    void** vt;              // 0x00
+    u8 pad04[0x18 - 0x04];
+    s32 f18;                // 0x18
+};
+struct PathEmitters {
+    u8 pad00[0x20];
+    PathEmitter* f20;       // 0x20
+    PathEmitter* f24;       // 0x24
+};
+
 struct PathFollower : SwitchedCollider {
     f32 f610;               // 0x610
     f32 f614;               // 0x614
@@ -876,14 +891,16 @@ struct PathFollower : SwitchedCollider {
     PathMarker f874[16];    // 0x874: f870 of them
     PathMarker* fAF4;       // 0xAF4: the first object marker
     PathMarker* fAF8;       // 0xAF8: the current one
-    u8 padAFC[0xB00 - 0xAFC];
+    PathEmitters* fAFC;     // 0xAFC: the emitters it uses in place of fB18 and fB1C, none for those (func_001D8E40)
     s32 fB00;               // 0xB00
     s32 fB04;               // 0xB04
     s32 fB08;               // 0xB08
     s32 fB0C;               // 0xB0C
     f32 fB10;               // 0xB10: -10.0 at reset (func_001DB290)
     BaseObject* fB14;       // 0xB14
-    u8 padB18[0xB28 - 0xB18];
+    PathEmitter* fB18;      // 0xB18: the wheels' first emitter (func_001D8E40)
+    PathEmitter* fB1C;      // 0xB1C: the second
+    u8 padB20[0xB28 - 0xB20];
     void* fB28;             // 0xB28: func_001DAA18 draws a quad for each of these two
     void* fB2C;             // 0xB2C
     s32 fB30;               // 0xB30
