@@ -64,7 +64,7 @@ D_0024DCA8	0024DCA8	4	.rodata	src/main/tint_blend_collider.cpp
 D_0024DCB0	0024DCB0	1287	.rodata	src/main/commentary_best_time.cpp
 D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
 D_0024E600	0024E600	404	.rodata	src/main/file_1E88D0.cpp
-D_0024E840	0024E840	0	.rodata	src/main/file_1F2758.cpp
+D_0024E840	0024E840	24	.rodata	src/main/file_1F2758.cpp
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
 D_0024EB10	0024EB10	109	.rodata	src/lib/iop_file_client.cpp

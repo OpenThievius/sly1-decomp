@@ -586,7 +586,7 @@ struct GaugeAgent : Agent {
 };
 
 struct GaugeBarAgent : Agent {
-    u8 padC10[0xC14 - 0xC10];
+    s32 fC10;               // 0xC10
     s32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
     s32 fC1C;               // 0xC1C
