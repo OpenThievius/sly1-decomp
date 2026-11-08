@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// NEAR: now the size of retail's (804 bytes), with its loop shape: the bases (D_002748F0 + 8,
+// SIZE 796/804, checked 2026-11-08
+// NEAR: retail's size (804 bytes) when built in src/main/file_137290.cpp (this standalone copy
+// checks 796: the file's other literals are missing), with retail's loop shape: the bases (D_002748F0 + 8,
 // 0x840, 0x50) hoisted as retail has them, the dt weight passed through Vu0::ScalarInGpr (mfc1,
 // the sq to 0x80, shared with `center` declared in the else block), the transfer's blocks read
 // through the inline SprBlock::Of(n) (the offset added before the base, as func_0018F9D8), the

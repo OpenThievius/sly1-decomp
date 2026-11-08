@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 1556/1544, checked 2026-11-08
 // NEAR: MultiplyScriptValues, written as DivideScriptValues (nonmatching/func_00113240.cpp) is:
 // the first switch sets the tag in each case, a number times a vector, matrix, vector B or pair
 // makes that kind (the matrix through ScaleMatrix with Vu0::ScalarInGpr, the vector B through
