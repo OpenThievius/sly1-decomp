@@ -911,7 +911,8 @@ struct PathEmitter {
     s32 f18;                // 0x18
 };
 struct PathEmitters {
-    u8 pad00[0x1C];
+    u8 pad00[0x18];
+    f32 f18;                // 0x18: the grip a path follower using them has in place of its f868 (func_001D7778)
     f32 f1C;                // 0x1C: the most pace a path follower using them may have (func_001D9D78)
     PathEmitter* f20;       // 0x20
     PathEmitter* f24;       // 0x24
