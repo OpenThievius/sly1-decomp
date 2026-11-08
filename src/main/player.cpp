@@ -346,7 +346,136 @@ void LoadPlayer(Player* self)
     g_player = self;
 }
 
-INCLUDE_ASM(func_0016F810);
+void StartTurningCollider(TurningCollider* self);
+void CreateSixEntryBlend(void* self, void* a, void* b);
+void CreatePlayerTwoEntryBlend(Player* self);
+void CreateEightEntryBlend(void* self, void* a, void* b);
+void CreateThreeEntryBlend(void* self, void* a, void* b);
+u8* CreatePoseSource(World* root, void* value, u8* table);
+void InsertAttachment(void* a, void* b);
+void AddMatrixAttachment(void* a, s32 b, void* c);
+s32 FindAnimRecord(s32 key);
+void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void BuildTexturePackets(void* a, RangeRecord* b);
+void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void ResetPlayerOnOffObject(Player* self);
+void ResolvePlayerTableObjects(Player* self);
+void SetTurningColliderGravityScale(void* self, f32 v);
+void SetColliderMass(Collider* self, f32 m);
+void* AllocateZeroedFrontMemory(s32 bytes);
+void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+extern u8 D_0021A9A8[];
+extern u8 D_00219588[];
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void SetPlayerState(Player* self, s32 a, s32 b);
+
+#define PS(T, o) (*(T*)((u8*)self + (o)))
+
+void func_0016F810(Player* self)
+{
+    StartTurningCollider(self);
+    ResolveObjectLinks(self, 27, D_00263558);
+    CreateSixEntryBlend(self, (u8*)self + 0x720, (u8*)self + 0x900);
+    CreatePlayerTwoEntryBlend(self);
+    CreateEightEntryBlend(self, (u8*)self + 0xA20, (u8*)self + 0xB20);
+    CreateEightEntryBlend(self, (u8*)self + 0xB30, (u8*)self + 0xC30);
+    CreateSixEntryBlend(self, (u8*)self + 0xC40, (u8*)self + 0xE20);
+    CreateThreeEntryBlend(self, (u8*)self + 0x2360, (u8*)self + 0x2384);
+    CreateSixEntryBlend(self, (u8*)self + 0xE30, (u8*)self + 0x1010);
+    self->f598 = self;
+    self->f5F0 = PS(void*, 0x110C);
+    u8* a = CreatePoseSource(self->world, self->f24F8, D_0021A9A8);
+    *(s8*)(a + 0x10) = 9;
+    *(s8*)(a + 0x11) = 9;
+    *(s32*)(a + 0x14) = 3;
+    *(s32*)(a + 0x1C) = 2;
+    InsertAttachment(self->f24F8, a);
+    PS(u8*, 0x24FC) = a;
+    AddMatrixAttachment(self->f24F8, 5, &self->f2500);
+    AddMatrixAttachment(self->f618, 5, &self->f2504);
+    AddMatrixAttachment(self->f61C, 5, &self->f2508);
+    AddMatrixAttachment(self->f610, 7, &self->f250C);
+    AddMatrixAttachment(self->f614, 7, &self->f2510);
+    PS(u8*, 0x2518) = CreatePoseSource(self->world, self->f24F8, D_00219588);
+    *(s32*)(PS(u8*, 0x2518) + 0x14) = 1;
+    InsertAttachment(self->f24F8, PS(u8*, 0x2518));
+    PS(void*, 0x1520) = PS(void*, 0x23D0);
+    PS(s32, 0x1524) = FindAnimRecord(0x15A);
+    PS(f32, 0x1530) = 0.5f;
+    PS(Vec02, 0x1560) = *(Vec02*)D_00263710;
+    PS(Vec02, 0x1570) = *(Vec02*)D_00263720;
+    PS(s32, 0x1538) = 2;
+    TransformPointBetweenFrames(0, PS(s32, 0x23D0), (u8*)self->f23D4 + 0x140, (u8*)self + 0x1540);
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(PS(Vec02, 0x1540))));
+    Vu0::Q(PS(Vec02, 0x1540)) = Vu0::MulX(Vu0::Q(PS(Vec02, 0x1540)), Vu0::Scalar((len + self->f2420) / len));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2540, 0, 0, 0, (void**)((u8*)self + 0x2558));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x255C, 0, 0, 0, (void**)((u8*)self + 0x2574));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2578, 0, 0, 0, (void**)((u8*)self + 0x2590));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2594, 0, 0, 0, (void**)((u8*)self + 0x25AC));
+    BaseObject* o = PS(BaseObject*, 0x243C);
+    if (o != 0) {
+        o->desc->m02(o);
+        BuildTexturePackets(PS(void*, 0x243C), self->f284);
+    }
+    self->f2678 = (OnOffObject*)CreateTypedRecord(0x63, self->world, 0, 0x316, -1);
+    ResetPlayerOnOffObject(self);
+    CreateEightEntryBlend(self, (u8*)self + 0x910, (u8*)self + 0xA10);
+    ResolvePlayerTableObjects(self);
+    ((void (*)(Player*, void*, s32))((void**)self->desc)[0xE0 / 4])(self, self->f1390[0], 1);
+    SetPlayerState(self, 0, -1);
+    self->f650 = self->v140.z - 75.0f;
+    SetTurningColliderGravityScale(self, D_00263700);
+    SetColliderMass(self, D_00263704);
+    Collider* c = (Collider*)self->f25D8[0];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[2];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[1];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[3];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+    }
+    c = (Collider*)self->f25D8[4];
+    if (c != 0) {
+        c->flags538 |= (u64)0x8000 << 28;
+        if (((PlacedObject*)self->f25D8[4])->f224 == 0) {
+            ((PlacedObject*)self->f25D8[4])->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
+        }
+        *(s32*)((u8*)((PlacedObject*)self->f25D8[4])->f224 + 0xB0) |= 8;
+        *(s32*)((u8*)((PlacedObject*)self->f25D8[4])->f224 + 0x60) = 0;
+    }
+    if (self->f1390[8] == 0) {
+        self->f1390[8] = self->f1390[2];
+    }
+    self->f2514 = CreatePoseSource(self->world, self, D_00219588);
+    InsertAttachment(self, self->f2514);
+    PS(u8*, 0x251C) = CreatePoseSource(self->world, self->f61C, D_00219588);
+    *(s32*)(PS(u8*, 0x251C) + 0x14) = 5;
+    InsertAttachment(self->f61C, PS(u8*, 0x251C));
+    PS(u8*, 0x2520) = CreatePoseSource(self->world, PS(void*, 0x23D0), D_00219588);
+    *(s32*)(PS(u8*, 0x2520) + 0x14) = 5;
+    InsertAttachment(PS(void*, 0x23D0), PS(u8*, 0x2520));
+    self->flags &= ~(u64)0x0C000000;
+    self->flags &= ~(u64)0x30000000;
+    BuildCombinedBlendAnimation(self, 12, 3, (u8*)self + 0x106C, 0, 0, 0, (void**)((u8*)self + 0x1090));
+    PS(f32, 0x1078) = 1.0f;
+    if (PS(void*, 0x1090) != 0) {
+        SetBlendItemWeights(PS(void*, 0x1090), 12, 3, (u8*)self + 0x106C);
+    }
+    void* q = PS(void*, 0x2490);
+    if (q != 0) {
+        *(s32*)((u8*)q + 0x2F0) = 2;
+    }
+}
+
+#undef PS
 
 INCLUDE_ASM(func_0016FD70);
 
