@@ -305,6 +305,26 @@ function's own compiler) and prints the command that runs the permuter on it. A 
 lead: copy the candidate back and check it with `tools/check.py`. Its C must still follow every
 rule here (plain C++, no barriers).
 
+Unattended, `python3 tools/permute_night.py FUNC ...` runs near misses one after another and keeps
+each zero, spliced back into its near miss and checked, in `build/permute_night/FUNC/`
+(`EXACT_*.cpp` when check.py agrees); `--recheck FUNC` splices and checks again what a run kept.
+Pick its targets with `python3 tools/regdiff.py --all`: those that differ only in `registers` or
+`order` are the permuter's. What the first VU0 night (2026-11-07) showed:
+
+- **Most zeros are tricks.** Of 77 zeros on one near miss, 75 were EXACT, every one by taking a
+  parameter's address (`p = &self`) or reusing one variable for two values. Read each diff; when a
+  zero points at a real change, write that change plainly and check it: func_001D6608 matched as
+  the store common to both branches written once after them, where the permuter's zero wrote it
+  twice.
+- **What the setup must carry through the permuter's C parser:** u128's `mode(TI)` (else every VU0
+  helper's `j` operand is impossible) and g++'s `<?` and `>?` (rewritten as permuter_max and
+  permuter_min calls and back); both are done by permuter_setup.py and permuter_compile.py. A near
+  miss must be one function with its declarations: a whole-file copy, or a member function
+  defined outside its class, stops the setup.
+- **Probe before a long run.** A target whose base.c does not parse fails in seconds with no base
+  score and wastes nothing, but a run of 20-minute slots needs every target to reach a base score
+  first: start each for a few seconds and read `base score =` in its run.log.
+
 The lead keeps the closest attempt per function in `nonmatching/` (PAL's own definitions in
 `nonmatching/eu/`): `python3 tools/nonmatching.py stage 'build/swarm/*/func_*.cpp'` adds every
 attempt within 15% of retail's bytes, and `python3 tools/nonmatching.py check` re-scores them all,
