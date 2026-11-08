@@ -1824,7 +1824,36 @@ void MoveCollider(Collider* self, void* b, f32 x)
     MovePlacedObject(self, x, b);
 }
 
-INCLUDE_ASM(func_001BC0E0);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
+void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
+void FreePooledContactChain(void* pool, Contact03* head);
+
+void func_001BC0E0(void* a0, f32 value, void* a1, void* a2)
+{
+    Collider* self = (Collider*)a0;
+    Vec02* origin = (Vec02*)a1;
+    Vec02* target = (Vec02*)a2;
+    Vec02 vel;
+    Vec02 dir;
+    Contact03* contact;
+    Collider* group[1];
+    ComputeObjectMotionInFrame(self, 0, origin, &vel, 0, 0, 0);
+    Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(*target), Vu0::Q(vel)), Vu0::Q(g_unitZVector)));
+    f32 zero = 0.0f;
+    contact = 0;
+    CreatePooledContact(zero, self, 0, origin, &dir, 0xC, 0, 0, &contact);
+    *(Vec02*)((u8*)&contact->end[1] + 0x30) = *target;
+    contact->f98 = zero;
+    contact->f94 = 1.0f;
+    *(f32*)&contact->fA0 = value;
+    NotifyContactEnds(self->world, 1, &contact);
+    group[0] = (Collider*)self->root;
+    SolveColliderGroupContacts(self->world, 1, group, 1, &contact, zero, 2);
+    FreePooledContactChain(self->world, contact);
+}
+
 
 void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
 {
