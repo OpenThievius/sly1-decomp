@@ -350,6 +350,17 @@ struct Vu0 {
         return DivX(v, len);
     }
 
+    // NormalizeOr with the length's qmfc2 the compiler's (ToFloatMoved): sched2 then puts the
+    // fallback's lq before the mtc1 of the test, where retail has it (func_001C96D8).
+    static u128 NormalizeOrMoved(u128 v, u128 fallback)
+    {
+        u128 len = Length(v);
+        if (ToFloatMoved(len) < 0.0001f) {
+            return fallback;
+        }
+        return DivX(v, len);
+    }
+
     // The cross product a x b, its w zero: vopmula.xyz ACC, a, b; vopmsub.xyz r, b, a;
     // vsub.w r, r, r.
     static u128 Cross(u128 a, u128 b)

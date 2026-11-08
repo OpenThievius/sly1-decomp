@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 936/972 (96.3%), checked 2026-11-07
+// BYTES 936/972 (96.3%), checked 2026-11-08
 // NEAR: all the calls and the control flow are retail's, the frame included (k is one 16-byte local the weight and the axis share); left: the order of the three row loads of the rotation (retail r0, r1, r2; here r2 first), the weight in vf5 (retail keeps it alive over the rows; here it takes the free vf2) and the temps of the call after it. Needs ModeWalker::fBC4, vBE0 and fBFC (include/switched_collider.h).
+// Night-close2 (2026-11-08): RotateUntied, the weight as ScalarAt with k declared later (k's address then stays in s1: 34 words) and the store of k after d leave 13 words.
 #include "common.h"
 #include "switched_collider.h"
 #include "screen_element.h"

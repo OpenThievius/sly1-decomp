@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 408/412 (99.0%), checked 2026-11-07
+// BYTES 408/412 (99.0%), checked 2026-11-08
 // NEAR (2026-11-08, vu0w3-e1): exact but for the two quadword copies of the node query: retail loads *where into $v1 and the effect's qA0 into $v0 (here the reverse, stores in the same order); all 120 orders of the five field assignments (tools/permute.py) leave this 4-byte difference, the best being this one.
+// Night-close2 (2026-11-08): `u128 w = Vu0::Q(*where); Vu0::Q(q.dir) = Vu0::Q(self->qA0); Vu0::Q(q.pos) = w;` gives retail's registers but swaps the two sq (still 4 bytes; tools/permute.py over the five stores finds nothing better); NormalizeOr and the Vec02 temporaries do not apply.
 #include "common.h"
 #include "node_query.h"
 #include "vu0.h"

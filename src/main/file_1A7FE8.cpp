@@ -950,7 +950,70 @@ void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* 
     }
 }
 
-INCLUDE_ASM(func_001A95D0);
+#include "placed_object.h"
+
+// A point that follows an object's frame, or a frame of its own: the spring that eases the follow
+// is a quadratic of the distance (func_001A95D0).
+struct FrameFollower {
+    PlacedObject* frameObject;      // 0x00
+    u8* anchor;                     // 0x04
+    u8 pad08[0x10 - 0x08];
+    Vec02 pos;                      // 0x10
+    s32 mode;                       // 0x20
+    u8 pad24[0x50 - 0x24];
+    f32 poly[3];                    // 0x50
+    u8 pad5C[0x60 - 0x5C];
+    f32 lo;                         // 0x60
+    f32 hi;                         // 0x64
+};
+
+s32 ComputeObjectFrameAtTime(void* object, s32 b, f32 t, Vec02* pos, Mat02* rot, s32 e, s32 f);
+
+void func_001A95D0(FrameFollower* self, Vec02* target, Vec02* out, void* to)
+{
+    Vec02 here;
+    Mat02 rot;
+    Vec02 pos2;
+    Mat02 rot2;
+    void* frame;
+    Vec02* local;
+    if (self->frameObject != 0 || self->anchor == 0) {
+        frame = self->frameObject;
+        local = &self->pos;
+    } else {
+        frame = *(void**)(self->anchor + 0x18);
+        local = (Vec02*)(self->anchor + 0x40);
+    }
+    switch (self->mode) {
+    case 0:
+        TransformPointBetweenFrames(frame, to, local, out);
+        return;
+    case 1:
+    case 2: {
+        TransformPointBetweenFrames(frame, 0, local, &here);
+        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(here), Vu0::Q(*target))));
+        f32* p = self->poly;
+        f32 v = self->poly[0] + len * (p[1] + len * p[2]);
+        f32 lo = self->lo;
+        f32 hi = self->hi;
+        f32 t;
+        if (v < lo) {
+            t = lo;
+        } else if (hi < v) {
+            t = hi;
+        } else {
+            t = v;
+        }
+        ComputeObjectFrameAtTime(frame, 0, t, &here, &rot, 0, 0);
+        Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*local)), Vu0::Q(here));
+        if (to != 0) {
+            ComputeObjectFrameAtTime(to, 0, t, &pos2, &rot2, 0, 0);
+            Vu0::Q(*out) = Vu0::RotateTransposed(rot2, Vu0::Sub(Vu0::Q(*out), Vu0::Q(pos2)));
+        }
+        break;
+    }
+    }
+}
 
 void GetPlacementRecordAngle(u8* self, f32* out, int x)
 {
@@ -1041,7 +1104,45 @@ void UpdateGaugeBarAgentVisibility(void)
     }
 }
 
-INCLUDE_ASM(func_001A9AE8);
+#include "object_event.h"
+#include "object_message.h"
+
+typedef void (*VFn_1A9AE8)(void* self, SlotMessage* msg);
+void DecrementGaugeCount(void* element);
+void ReplaceAnimationPlayer(s32 a, void* b, s32 c, void* d, f32 e, f32 f);
+s32 HandleAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev);
+extern Player* g_player;
+extern const Vec02 g_unitXVector;
+
+s32 func_001A9AE8(GaugeBarAgent* self, ObjectEvent* ev)
+{
+    if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
+        self->fC10 = self->fC10 + 1;
+        DecrementGaugeCount(&g_gaugeBarElement);
+        if (*(void**)((u8*)self + 0xB00) != 0) {
+            SlotMessage msg;
+            msg.kind = 6;
+            msg.vb = ev->pos;
+            Vu0::Set(msg.va, Vu0::NormalizeOrMoved(Vu0::Q(ev->v30), Vu0::Q(g_unitXVector)));
+            void* o = *(void**)((u8*)self + 0xB00);
+            ((VFn_1A9AE8*)(*(void***)o))[0x7C / 4](o, &msg);
+        }
+        s32 which;
+        if ((ev->extraFlags & 2) != 0) {
+            if (g_player == 0 || g_player->f223C == 4 || g_player->f223C == 6)
+                which = self->fC14;
+            else
+                which = self->fC18;
+        } else if ((ev->extraFlags & 4) != 0) {
+            which = self->fC1C;
+        } else {
+            which = self->fC14;
+        }
+        ReplaceAnimationPlayer(which, self, 1, (u8*)self + 0xC20, 0.0f, 1.0f);
+        ev->eventFlags &= ~0x20;
+    }
+    return HandleAgentObjectEvent(self, ev);
+}
 
 void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c)
 {

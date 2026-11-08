@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 702/716 (98.0%), checked 2026-11-07
+// BYTES 702/716 (98.0%), checked 2026-11-08
 // NEAR: the scalar, vector and matrix bodies are retail's (registers included); left: the order of the first loads and of move s1,zero (retail loads args[1].tag and args[0].tag before it, it fills the branch delay slot) and, with it, the order of the prologue saves of ra and s1.
+// Night-close2 (2026-11-08): n = 0 first, tag after, a ternary, the arms swapped and switch on args[0].tag give 5 to 8 words; retail's args[1].tag load comes first with move s1,zero in the delay slot.
 #include "common.h"
 #include "script_value.h"
 #include "shapes.h"

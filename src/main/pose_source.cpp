@@ -855,7 +855,18 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
     }
 }
 
-INCLUDE_ASM(func_0011F6B0);
+void func_0011F6B0(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
+{
+    if (outValues)
+        *(Vec02*)outValues = *base;
+    if (outSlopes)
+        Vu0::Q(*(Vec02*)outSlopes) = Vu0::Zero();
+    for (s32 i = 0; i < 3; i++) {
+        WeightCurve* curve = axis[i];
+        if (curve)
+            curve->vt->eval(curve, other, key, scale, flags, outValues ? outValues + i : 0, outSlopes ? outSlopes + i : 0);
+    }
+}
 
 void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
@@ -973,7 +984,26 @@ void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32
         ((VectorCurveToldFn)other->desc02()->m28)(other, e, f);
 }
 
-INCLUDE_ASM(func_0011FC90);
+void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
+{
+    Vec02 v[2];
+    s32 count;
+    f32* values;
+    s32 result;
+
+    ReadAxisCurves(self->axis, &self->base, arg);
+    PushBackMemoryMark();
+    self->vt->times(self, &count, &values);
+    if (count != 0) {
+        self->vt->eval(self, 0, 0, values[0], 1.0f, &v[0], 0);
+        self->vt->eval(self, 0, 0, values[count - 1], 1.0f, &v[1], 0);
+        result = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(v[0]), Vu0::Q(v[1])))) < 1.0f;
+    } else {
+        result = 1;
+    }
+    *(s32*)((u8*)self + 8) = result;
+    PopBackMemoryMark();
+}
 
 void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
@@ -1201,7 +1231,7 @@ void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
+            tg->vt->eval(tg, cam, a, b * scale, c, p0, p1);
             if (w == 0.0f) {
                 v0 = x0;
             } else {
@@ -1273,7 +1303,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
+            tg->vt->eval(tg, cam, a, b * scale, c, p0, p1);
             sum0 += e->weight * x0;
             sum1 += e->weight * x1;
         }
@@ -1908,7 +1938,7 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
                 tmp[0] = tmp[0] + d * track->speed;
             }
         }
-        e->pos->vt->eval(e->pos, self->owner, 0, a1, a2, tmp[0], track->speed);
+        e->pos->vt->eval(e->pos, self->owner, 0, tmp[0], track->speed, a1, a2);
         return;
     }
     GetOwnerPosition(self, a1, a2);
@@ -1950,7 +1980,7 @@ void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
     Track83* e = &player->anim->tracks[self->index];
     WeightCurve* target = e->weight;
     if (target) {
-        target->vt->eval(target, f4, 0, saved, a2, player->time, player->speed);
+        target->vt->eval(target, f4, player->time, player->speed, 0, saved, a2);
     } else {
         GetOwnerValue(self, saved, a2);
     }
@@ -1977,6 +2007,6 @@ f32 GetTrackIndexedValue(T2195_7C0* self, s32 index)
     WeightCurve** values = row->morph;
     WeightCurve* object = values[index];
     f32 result;
-    object->vt->eval(object, self->owner, 0, &result, 0, track->time, track->speed);
+    object->vt->eval(object, self->owner, track->time, track->speed, 0, &result, 0);
     return result;
 }

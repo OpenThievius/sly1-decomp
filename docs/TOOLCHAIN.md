@@ -327,6 +327,16 @@ What retail shows, and what the compiler does:
   but no function that has it matches yet: in func_00141D88 retail's store and length
   use the copy where NormalizeOr's one vector is used for both.
 
+- **A length compared is ToFloatMoved.** Where retail's `mtc1` of a length (or a squared
+  distance) comes straight after its `qmfc2`, before an unrelated store or load that ours puts
+  between them, the qmfc2 is the compiler's: ToFloatMoved, and NormalizeOrMoved for the
+  normalisation with a fallback (func_001C96D8, func_00189C28, func_001ED908, func_0012FB68,
+  func_001A9AE8, 2026-11-08). In func_00187A88 it gives the order but moves the VU0 registers.
+- **A float's place in a prototype.** The curves' slot 0 takes its floats before the out
+  pointers (PositionCurveEval after the mode, WeightCurveEval right after the owner): their
+  callers set $f12 and $f13 before those argument registers (func_0011FC90, func_0011F6B0,
+  func_001A95D0's time third), and every matched caller keeps its bytes.
+
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
 read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved

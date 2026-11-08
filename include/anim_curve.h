@@ -35,8 +35,9 @@ struct AnimCurve {
 
 // Slot 0 evaluates at `key` (the value and its slope, either may be 0), slot 1 reads the
 // curve from the stream (0 for the blends), slot 2 gives the key times (a count and a new
-// array, which may be 0).
-typedef void (*WeightCurveEval)(WeightCurve* self, PlacedObject* owner, s32 flags, f32* outValue, f32* outSlope, f32 key, f32 scale);
+// array, which may be 0). The floats come right after the owner: retail's callers set $f12
+// and $f13 before $a2 (func_0011F6B0).
+typedef void (*WeightCurveEval)(WeightCurve* self, PlacedObject* owner, f32 key, f32 scale, s32 flags, f32* outValue, f32* outSlope);
 typedef void (*WeightCurveRead)(WeightCurve* self, Stream83* stream);
 typedef void (*WeightCurveTimes)(WeightCurve* self, s32* outCount, f32** outTimes);
 struct WeightCurveVt {
@@ -136,9 +137,10 @@ struct ValueBlendWeightCurve : AngleBlendWeightCurve {
 // ---------------------------------------------------------------------------------------------
 // The position curves: a vector over time. func_00120FB0 makes them, by kind 0..2.
 
-// Slot 0 evaluates (owner, mode, out value, out slope, key, scale), then tells the owner
-// (its slot 44); slot 1 reads the curve; slot 2 gives the key times.
-typedef void (*PositionCurveEval)(PositionCurve* self, PlacedObject* owner, s32 mode, void* outValue, void* outSlope, f32 key, f32 scale);
+// Slot 0 evaluates (owner, mode, key, scale, out value, out slope), then tells the owner
+// (its slot 44); slot 1 reads the curve; slot 2 gives the key times. The floats come before
+// the out pointers: retail's callers set $f12 and $f13 before $a3 (func_0011FC90).
+typedef void (*PositionCurveEval)(PositionCurve* self, PlacedObject* owner, s32 mode, f32 key, f32 scale, void* outValue, void* outSlope);
 typedef void (*PositionCurveRead)(PositionCurve* self, Stream83* stream);
 typedef void (*PositionCurveTimes)(PositionCurve* self, s32* outCount, f32** outTimes);
 struct PositionCurveVt {
