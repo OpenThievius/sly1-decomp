@@ -644,6 +644,13 @@ struct Vu0 {
             return r;
         }
 
+        static Vec ScalarInGpr(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarInGpr(f);
+            return r;
+        }
+
         static Vec ScalarAt(const f32& f)
         {
             Vec r;

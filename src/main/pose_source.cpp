@@ -15,6 +15,7 @@
 #include "attachment.h"
 #include "vu0.h"
 #include "mul_rotation.h"
+#include "game_clock.h"
 
 #include "anim_curve.h"
 
@@ -1762,7 +1763,7 @@ INCLUDE_RODATA(jtbl_00249990);
 
 INCLUDE_ASM(func_001218C0);
 
-void ComputeRotationSpringAcceleration(PlacedObject* self, Mat02* rot, Vec02* spin, Vec02* out, f32 dt)
+void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out)
 {
     Vec02 force = *(Vec02*)D_00248D30;
     if (self->p214 != 0) {
@@ -1794,9 +1795,157 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, Mat02* rot, Vec02* sp
     *out = force;
 }
 
-INCLUDE_RODATA(jtbl_002499C0);
+void OrthonormalizeMatrix(Mat02* m);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 zero, Vec02* rest);
+void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, Vec02* spin, Mat02* out, Vec02* outSpin, s32 d);
+// The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
+// $f14 before the profile and the rate's address.
+extern f32 ApproachValueWithRamp(f32, f32, f32, void*, f32*);
 
-INCLUDE_ASM(func_00121DE0);
+void ApplyPoseSourceRotation(Attachment* self)
+{
+    PlacedObject* owner = self->owner;
+    f32 dt;
+    f32 now;
+    Mat02 A;
+    Vec02 B;
+    f32 value;
+    f32 slope;
+    s32 hasValue;
+    if (owner->f294 != 0) {
+        dt = g_gameClock.step;
+    } else {
+        dt = g_gameClock.dt;
+    }
+    if (owner->f294 != 0) {
+        now = g_gameClock.elapsed;
+    } else {
+        now = g_gameClock.time;
+    }
+    self->vt->getRot(self, 0.0f, &A, &B);
+    if (owner->f224 != 0 && (owner->f224->fB0 & 0x20)) {
+        self->vt->getValue(self, &value, &slope);
+        hasValue = 1;
+    } else {
+        hasValue = 0;
+    }
+    switch (self->mode1) {
+    case 2:
+    case 7:
+        owner->rot = A;
+        owner->v160 = B;
+        if (hasValue) {
+            owner->f224->f90 = value;
+            owner->f224->f94 = slope;
+        }
+        break;
+    case 1: {
+        Vec02 C;
+        Vec02 w;
+        Mat02 m;
+        ComputeRotationSpringAcceleration(owner, dt, &A, &B, &C);
+        Vu0::Q(C) = Vu0::Add(Vu0::Q(C), Vu0::Q(owner->v180));
+        Vu0::Vec s;
+        s.q = Vu0::ScalarInGpr(dt);
+        Vu0::Q(w) = Vu0::MulXSum(Vu0::Vec::Of(owner->v160), s, Vu0::Vec::Of(C), Vu0::Vec::Scalar(dt * (dt * 0.5f))).q;
+        BuildRotationFromVector((f32*)&w, (f32*)&m);
+        MulRotationIntoRotX(owner, m, owner->rot);
+        OrthonormalizeMatrix(&owner->rot);
+        Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Vec::Of(owner->v160), Vu0::Vec::Of(C), Vu0::Vec::ScalarInGpr(dt)).q;
+        if (hasValue) {
+            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, owner->p220, &owner->f224->f94);
+        }
+        break;
+    }
+    case 3:
+    case 6:
+    case 9: {
+        Mat02 m;
+        Vec02 axis;
+        Vec02 rest;
+        Vec02 prof;
+        f32 angle;
+        f32 rate;
+        s32 settle = 0;
+        MultiplyMatrices3x3(&owner->rot, &A, &m);
+        MatrixToAxisAngle(&m, &angle, &axis);
+        f32 r = SplitVectorAlongAxis(&B, &axis, 0, &rest);
+        prof.x = ((f32*)owner->p220)[0] + r;
+        prof.y = ((f32*)owner->p220)[1] + r;
+        prof.z = ((f32*)owner->p220)[2];
+        f32 reach = ApproachValueWithRamp(0.0f, angle, dt, &prof, &rate);
+        if (self->mode1 == 6) {
+            f32 end = ((T2195_7C0*)self)->f18;
+            f32 lim;
+            if (now < end) {
+                lim = angle * dt / (end - now + dt);
+            } else {
+                lim = angle;
+            }
+            if (reach < lim) {
+                reach = lim;
+                rate = reach / dt;
+            }
+        }
+        if (angle <= reach) {
+            owner->rot = A;
+            owner->v160 = B;
+            settle = self->mode1 != 9;
+        } else {
+            BuildAxisAngleMatrix(&axis, reach, &m);
+            MulRotationIntoRotX(owner, m, owner->rot);
+            OrthonormalizeMatrix(&owner->rot);
+            Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Q(rest), Vu0::Q(axis), Vu0::ScalarAt(rate));
+        }
+        if (hasValue) {
+            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, owner->p220, &owner->f224->f94);
+            if (owner->f224->f90 != value) {
+                settle = 0;
+            }
+        }
+        if (settle) {
+            self->mode1 = 7;
+        }
+        break;
+    }
+    case 4: {
+        f32 left = ((T2195_7C0*)self)->f18 - now;
+        if (left <= dt) {
+            s32 still = 0;
+            if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(B))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(B))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(B))) < 0.0001f) {
+                still = 1;
+            }
+            if (still) {
+                owner->rot = A;
+                owner->v160 = *(Vec02*)D_00248D30;
+            } else {
+                Vec02 w;
+                Mat02 m;
+                Vu0::Q(w) = Vu0::MulX(Vu0::Q(B), Vu0::Scalar(now + dt - ((T2195_7C0*)self)->f18));
+                BuildRotationFromVector((f32*)&w, (f32*)&m);
+                MulRotationIntoRotMatFirst(owner, m, A);
+                owner->v160 = B;
+            }
+            if (hasValue) {
+                owner->f224->f90 = value;
+                owner->f224->f94 = 0.0f;
+            }
+        } else {
+            Mat02 m;
+            Vec02 s;
+            func_00130748(left, dt, 1.0f, &owner->rot, &owner->v160, &A, &B, &m, &s, 0);
+            owner->rot = m;
+            owner->v160 = s;
+            if (hasValue) {
+                EvaluateHermiteSegment(left, dt, 1.0f, owner->f224->f90, owner->f224->f94, value, slope, &owner->f224->f90, &owner->f224->f94, 0);
+            }
+        }
+        break;
+    }
+    }
+}
 
 void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 {
