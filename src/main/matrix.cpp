@@ -557,7 +557,35 @@ void func_00189C28(Vec02* x, Vec02* hint, Mat02* out)
     Vu0::Q(out->r[2]) = Vu0::Cross(Vu0::Q(out->r[0]), Vu0::Q(out->r[1]));
 }
 
-INCLUDE_ASM(func_00189D38);
+// The rotation that turns the direction of from into that of to: about their cross product, by
+// the angle whose cosine is their dot (both made unit, or +z when too short). When the two are
+// parallel the axis is x cross from, or y cross from. The axis is written at its own address
+// (*(u128*)&axis): through Vu0::Q or Set its address would stay in a saved register for the last
+// call, where retail forms it again. Its length is a float the compiler keeps in the GPR of its
+// qmfc2, which the divide's Scalar moves back with qmtc2.
+void BuildShortestArcRotation(void* fromp, void* top, void* outp)
+{
+    Vec02 a = *(Vec02*)fromp;
+    Vec02 b = *(Vec02*)top;
+    Vec02 axis;
+    Vu0::Q(a) = Vu0::NormalizeOr(Vu0::Q(a), Vu0::Q(*(Vec02*)g_unitZVector));
+    u128 bn = Vu0::NormalizeOr(Vu0::Q(b), Vu0::Q(*(Vec02*)g_unitZVector));
+    Vu0::Set(b, bn);
+    *(u128*)&axis = Vu0::Cross(Vu0::Q(a), bn);
+    f32 len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+    if (len < 0.0001f) {
+        *(u128*)&axis = Vu0::Cross(Vu0::Q(g_unitXVector), Vu0::Q(a));
+        len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+        if (len < 0.0001f) {
+            *(u128*)&axis = Vu0::Cross(Vu0::Q(*(Vec02*)g_unitYVector), Vu0::Q(a));
+            len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
+        }
+    }
+    u128 cosine = Vu0::Dot(Vu0::Q(a), Vu0::Q(b));
+    *(u128*)&axis = Vu0::DivX(*(u128*)&axis, Vu0::Scalar(len));
+    f32 angle = Arccosine(Vu0::ToFloatMoved(cosine));
+    BuildAxisAngleMatrix(&axis.x, (Mat4*)outp, angle);
+}
 
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
