@@ -494,4 +494,3 @@ func_0020DBF0	0020DBF0	288	handwritten	128-bit MMI instruction
 func_0020DD10	0020DD10	276	handwritten	128-bit MMI instruction
 func_0020DE28	0020DE28	92	handwritten	128-bit MMI instruction
 func_0020DE88	0020DE88	96	handwritten	128-bit MMI instruction
-func_00210F18	00210F18	372	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
