@@ -13,6 +13,7 @@
 //       func_001D60B0 and func_001D61C8 in the same form, since the three guards close the
 //       file's .data in function order (docs/AGENT_WORKFLOW.md, "A function-local static").
 // Tried (order-class pass): the constructor with a member-initialiser list (65 words), stores through a local pointer (21, the same), the pointer FillMemory returns (64).
+// See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);

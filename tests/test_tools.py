@@ -531,6 +531,50 @@ class DeclsTest(unittest.TestCase):
                             "endlabel func_00100000\n")
             self.assertEqual(decls.result_uses(path), {"func_00200000": {"$v0"}})
 
+    def _body(self, *lines):
+        import decls
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "text.s"
+            path.write_text("glabel func_00100000\n" + "".join(("  %s\n" if l.startswith(".L") else "    /* - */  %s\n") % l for l in lines)
+                            + "endlabel func_00100000\n")
+            return decls.function_bodies(path)["func_00100000"]
+
+    def test_a_body_that_returns_a_value(self):
+        import decls
+        # Returns its first argument, set in the delay slot of the return.
+        body = self._body("sw $a1, 0x0($a0)", "jr $ra", " daddu $v0, $a0, $zero")
+        self.assertTrue(decls.returns_value(body))
+        # A constant set on one path and the other: both returned.
+        body = self._body("beqz $a0, .L00100010", " nop", "b .L00100014", " addiu $v0, $zero, 0x1",
+                          ".L00100010:", "daddu $v0, $zero, $zero", ".L00100014:", "jr $ra", " nop")
+        self.assertTrue(decls.returns_value(body))
+        # A float result in $f0.
+        body = self._body("lwc1 $f0, 0x4($a0)", "jr $ra", " nop")
+        self.assertTrue(decls.returns_value(body, "$f0"))
+        self.assertFalse(decls.returns_value(body, "$v0"))
+
+    def test_a_body_that_only_uses_v0_as_scratch(self):
+        import decls
+        # Read after it is written: a temporary.
+        body = self._body("lw $v0, 0x0($a0)", "sw $v0, 0x4($a0)", "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+        # An address built with lui, kept as a pointer for a loop.
+        body = self._body("lui $v0, %hi(D_00200000)", "addiu $v0, $v0, %lo(D_00200000)", "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+        # Overwritten by a call: the callee's result, not a value this body set.
+        body = self._body("addiu $v0, $zero, 0x1", "jal func_00200000", " nop", "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+        # Set on one path only.
+        body = self._body("beqz $a0, .L00100010", " nop", "addiu $v0, $zero, 0x1", ".L00100010:", "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+        # A branch-likely runs its slot only when taken: the fall-through keeps the compare's value.
+        body = self._body("sltiu $v0, $a0, 0x4", "bnel $v0, $zero, .L00100000", " addiu $v0, $zero, 0x60",
+                          "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+        # The VU0 move reads $v0.
+        body = self._body("mfc1 $v0, $f0", "qmtc2.ni $v0, $vf2", "jr $ra", " nop")
+        self.assertFalse(decls.returns_value(body))
+
 
 class RegdiffTest(unittest.TestCase):
     """tools/regdiff.py tells a register-only difference from one in the code."""

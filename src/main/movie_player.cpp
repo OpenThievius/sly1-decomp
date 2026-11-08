@@ -435,7 +435,35 @@ void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
     AddColliderForce(self, &accel);
 }
 
-INCLUDE_ASM(func_0018DEE8);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+s32 func_00141D88(const Vec02* a0, void* a1, void* a2, s32 a3, ColliderSpan* out, f32 radius);
+void LaunchContactListObject(ContactListObject* self);
+extern f32 g_gameTime;
+
+void LaunchTimedContactListObject(ContactListGlider* self)
+{
+    Mat02 rot;
+    Vec02 d;
+    Vec02 e;
+    Vec02 pos;
+    ColliderSpan hit;
+    LaunchContactListObject(self);
+    f32 speed = self->speed6F0;
+    if (0.0f < speed) {
+        self->time6FC = g_gameTime + speed;
+    } else {
+        ComputeObjectFrameAtTime(self->f694, 0, &pos, &rot, 0, 0, D_002699BC);
+        Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->v6A0)), Vu0::Q(pos));
+        Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
+        ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
+        Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
+        func_00141D88(&D_00248D30, &d, &e, 1, &hit, self->rate6F4);
+        f32 x = hit.time[1];
+        f32 m = 0.25f;
+        m = m >? x;
+        self->time6FC = g_gameTime + 1.0f / m;
+    }
+}
 
 struct GliderListFrame {
     void* base;

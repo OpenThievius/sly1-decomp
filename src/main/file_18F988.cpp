@@ -93,7 +93,7 @@ void ActivateSwitchedCollider(void* value);
 // The point-graph query FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
 struct GraphQuery { u8 data[4]; };
 struct GraphQueryOwner { u8 head[0x34]; GraphQuery part; };
-void FindPointGraphPath(GraphQuery* part);
+s32 FindPointGraphPath(GraphQuery* part);
 void SnapPointToPointGraph(GraphQuery* part);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
@@ -212,9 +212,202 @@ void InitBoxCollider(BoxCollider* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-INCLUDE_ASM(func_0018F9D8);
-INCLUDE_RODATA(D_0024B5E0);
-INCLUDE_RODATA(jtbl_0024B5F0);
+// A part of a placed object's model (0x70 bytes, drawParts): its centre, radius, group and the
+// distances its fade works by.
+struct ModelPart {
+    Vec02 at;               // 0x00
+    f32 radius;             // 0x10
+    s32 group;              // 0x14
+    u8 pad18[4];
+    f32 farFade;            // 0x1C: the distance it fades out by (ComputeCameraDistanceFade)
+    f32 nearFade;           // 0x20: and in by, when below farFade (flag60)
+    f32 depth;              // 0x24: its sort depth, FLT_MAX for the eye's distance
+    u8 pad28[0x34 - 0x28];
+    void* f34;              // 0x34: given to func_00126DE8 for the matrix
+    void* f38;              // 0x38: an object whose slot 4 adjusts the request
+    u8 pad3C[0x60 - 0x3C];
+    s32 flag60;             // 0x60: fades in as well
+    u8 pad64[0x68 - 0x64];
+    void* f68;              // 0x68: a matrix the transform is multiplied by
+    u8 pad6C[4];
+};
+
+// A part's state (0x28 bytes, partStates): which views see it and its eased alpha.
+struct ModelPartState {
+    u32 views;              // 0x00: the camera's view bits it is drawn in
+    u8 pad04[0x10 - 0x04];
+    f32 alpha;              // 0x10: eased toward 1.0, or 0.5 while far
+    f32 dist;               // 0x14
+    u8 pad18[0x28 - 0x18];
+};
+
+// The request queued for a part: the part drawer, the depth and group, the transform and the
+// fades, the part's centre, the object and the part.
+struct __attribute__((aligned(16))) PartRequest {
+    void* callback;         // 0x00: DrawModelPart
+    f32 depth;              // 0x04
+    s32 group;              // 0x08: the part's, 0xD or 0xE while it fades
+    u8 pad0C[4];
+    Mat4A m;                // 0x10
+    f32 fade;               // 0x50
+    f32 fade2;              // 0x54
+    u8 pad58[8];
+    Vec02 at;               // 0x60
+    PlacedObject* owner;    // 0x70
+    void* state;            // 0x74: the owner's record at +0x22C
+    ModelPart* part;        // 0x78
+    ModelPartState* partState;  // 0x7C
+};
+
+// One of the two scratchpad transfer buffers (file_1B7968.cpp): the blocks StartToSprChain sent.
+struct SprTransfer {
+    void* tags;             // 0x00
+    s32 base;               // 0x04
+    u32 addrs[8];           // 0x08: each block's scratchpad address
+    s32 sizes[8];           // 0x28
+    s32 count;              // 0x48
+    s32 state;              // 0x4C: 2 while its parts are drawn
+};
+
+extern s32 D_00274990;
+extern SprTransfer D_002748F0[2];
+
+// Block n of the current scratchpad transfer.
+struct SprBlock {
+    static u32 Of(s32 n)
+    {
+        return D_002748F0[D_00274990].addrs[n];
+    }
+};
+
+void DrawModelPart(PartRequest* r);
+void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, Mat4A* out);
+void StartToSprChain(s32 size, ...);
+s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+void MultiplyMatrices(Mat4A* out, Mat4A* b, void* in);
+void func_00126DE8(void* unused0, Camera* cam, void* unused2, Vec02* pos, Mat4A* m);
+void QueueDeferredRequest(PartRequest* r);
+void* FillMemory(void* p, s32 value, s32 size);
+extern void* g_toSprChannel;
+extern f32 g_gameClock[];
+extern const Mat4A D_00248400;
+
+void func_0018F9D8(PlacedObject* self, Camera* cam)
+{
+    PartRequest rec;
+    s32 i = 0;
+    s32 n;
+    u32 views = cam->f21C;
+    FillMemory(&rec, 0, 0x80);
+    n = 0x34;
+    rec.callback = (void*)DrawModelPart;
+    rec.state = self->sub22C;
+    rec.owner = self;
+    BuildMatrixFromRotationAndTranslation(&self->v140, &self->m110, &rec.m);
+    if (self->drawPartCount <= 0x33) {
+        n = self->drawPartCount;
+    }
+    StartToSprChain(n * 0x70, self->drawParts, n * 0x28, self->partStates, 0, 0);
+    while (i < self->drawPartCount) {
+        WaitDmaChannel(g_toSprChannel, 0, 0);
+        s32 next = i + n;
+        D_00274990 = 1 - D_00274990;
+        D_002748F0[D_00274990].state = 2;
+        s32 rest = self->drawPartCount - next;
+        s32 m = 0x34;
+        if (rest <= 0x33) {
+            m = rest;
+        }
+        StartToSprChain(m * 0x70, (u8*)self->drawParts + next * 0x70, m * 0x28, (u8*)self->partStates + next * 0x28, 0, 0);
+        ModelPart* parts = (ModelPart*)SprBlock::Of(0);
+        ModelPartState* states = (ModelPartState*)SprBlock::Of(1);
+        for (s32 j = 0; j < n; j++) {
+            ModelPartState* st = &states[j];
+            if ((st->views & views) != views) {
+                continue;
+            }
+            ModelPart* part = &parts[j];
+            u128 ones = Vu0::Ones();
+            u128 d = Vu0::Sub(Vu0::Q(part->at), Vu0::Q(cam->f40));
+            f32 radius = part->radius;
+            u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0;
+            if (signs != 0) {
+                continue;
+            }
+            if (!ComputeCameraDistanceFade(cam, d, &rec.fade, radius, part->farFade)) {
+                continue;
+            }
+            if (part->flag60 != 0) {
+                if (part->nearFade < part->farFade) {
+                    if (!ComputeCameraDistanceFade(cam, d, &rec.fade2, part->radius, part->nearFade)) {
+                        rec.fade2 = 0.0f;
+                    }
+                } else {
+                    rec.fade2 = 1.0f;
+                }
+            }
+            f32 target = 1.0f;
+            if (g_gameClock[4] < st->dist) {
+                target = 0.5f;
+            }
+            if (target != st->alpha) {
+                ModelPartState* home = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
+                f32 a = ApproachValueWithRamp(st->alpha, target, g_gameClock[2], (Quad16*)D_00269B50, 0);
+                st->alpha = a;
+                home->alpha = a;
+            }
+            rec.fade *= st->alpha;
+            if (rec.fade <= 0.0f) {
+                continue;
+            }
+            rec.part = (ModelPart*)((u8*)self->drawParts + (j + i) * 0x70);
+            rec.partState = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
+            rec.at = part->at;
+            if (part->depth != 3.4028235e+38f) {
+                rec.depth = part->depth;
+            } else {
+                rec.depth = Vu0::ToFloat(Vu0::Dot(d, d));
+            }
+            rec.group = part->group;
+            rec.fade2 *= rec.fade;
+            if (rec.fade < 1.0f) {
+                switch (rec.group) {
+                case 3:
+                case 4:
+                case 7:
+                case 8:
+                    rec.group = 0xD;
+                    break;
+                case 5:
+                case 9:
+                    rec.group = 0xE;
+                    break;
+                }
+            }
+            if (part->f38 != 0) {
+                void (*adjust)(void*, PlacedObject*, PartRequest*) = (*(void (***)(void*, PlacedObject*, PartRequest*))part->f38)[4];
+                if (adjust != 0) {
+                    adjust(part->f38, self, &rec);
+                }
+            }
+            if (part->f68 != 0) {
+                Mat4A t;
+                MultiplyMatrices(&t, &rec.m, part->f68);
+                rec.m = t;
+            }
+            if (part->f34 != 0) {
+                func_00126DE8(self, cam, part->f34, &rec.at, &rec.m);
+            }
+            QueueDeferredRequest(&rec);
+            if (part->f68 != 0 || part->f34 != 0) {
+                rec.m = D_00248400;
+            }
+        }
+        i = next;
+        n = m;
+    }
+}
 
 void InitSeekingAgent(SeekingAgent* self)
 {
@@ -615,7 +808,117 @@ s32 ClassifyAgainstUnitRange(f32 value)
     return 2;
 }
 
-INCLUDE_ASM(func_001909F0);
+// An entry of the tree walk of func_001909F0: a node still to test (0 once a side ends), the
+// node whose triangle the part reached (0 when it left the tree) and where along the segment the
+// part starts. A part that reached a triangle becomes a span.
+struct SegmentWalkEntry {
+    PlaneNode* node;
+    s32 leaf;
+    f32 t;
+};
+
+// The point at t along the segment from a to b.
+struct SegmentPoint {
+    static u128 At(const Vec02& a, const Vec02& b, f32 t)
+    {
+        return Vu0::MulXSum(Vu0::Q(a), Vu0::Scalar(1.0f - t), Vu0::Q(b), Vu0::Scalar(t));
+    }
+};
+
+s32 func_001909F0(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
+{
+    SegmentWalkEntry cur;
+    SegmentWalkEntry stack[32];
+    SegmentWalkEntry* top;
+    ColliderSpan* span;
+    ColliderSpan* last;
+
+    span = spans;
+    last = 0;
+    top = stack;
+    cur.node = root;
+    cur.leaf = 0;
+    cur.t = 0.0f;
+    top->node = 0;
+    top->leaf = 0;
+    top->t = 1.0f;
+    for (;;) {
+        while (cur.node == 0) {
+            if (cur.leaf != 0) {
+                if (last != 0 && cur.t == last->time[1]) {
+                    Vu0::Q(last->q[1]) = SegmentPoint::At(*a, *b, top->t);
+                    last->time[1] = top->t;
+                } else {
+                    if (span - spans >= max) {
+                        return max;
+                    }
+                    last = span++;
+                    last->f48 = 3;
+                    Vu0::Q(last->q[0]) = SegmentPoint::At(*a, *b, cur.t);
+                    Vu0::Q(last->q[1]) = SegmentPoint::At(*a, *b, top->t);
+                    last->time[0] = cur.t;
+                    last->time[1] = top->t;
+                }
+            }
+            if (top <= stack) {
+                return span - spans;
+            }
+            cur = *top;
+            top--;
+        }
+        f32 d0 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*a), Vu0::Q(cur.node->normal))) - cur.node->offset;
+        f32 d1 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*b), Vu0::Q(cur.node->normal))) - cur.node->offset;
+        s32 c0 = ClassifyAgainstUnitRange(d0);
+        s32 c1 = ClassifyAgainstUnitRange(d1);
+        if ((c0 == 1 && c1 != 0) || (c1 == 1 && c0 != 0)) {
+            cur.leaf = (s32)cur.node;
+            cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+        } else if ((c0 == 0 && c1 != 1) || (c1 == 0 && c0 != 1)) {
+            if (GetNeighbourTriangle(cur.node->above) != 0) {
+                cur.leaf = (s32)cur.node;
+                cur.node = 0;
+            } else {
+                cur.node = (PlaneNode*)cur.node->above;
+                cur.leaf = 0;
+            }
+        } else if (c0 == 2 && c1 == 2) {
+            cur.leaf = (s32)cur.node;
+            cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+        } else {
+            f32 cut = d0 / (d0 - d1);
+            f32 e0 = d1 * cur.t + (1.0f - cur.t) * d0;
+            f32 e1 = d1 * top->t + (1.0f - top->t) * d0;
+            if (cur.t < cut && cut < top->t) {
+                top++;
+                top->t = cut;
+                if (e0 <= 0.0f) {
+                    if (GetNeighbourTriangle(cur.node->above) != 0) {
+                        top->leaf = (s32)cur.node;
+                        top->node = 0;
+                    } else {
+                        top->node = (PlaneNode*)cur.node->above;
+                        top->leaf = 0;
+                    }
+                } else {
+                    top->leaf = (s32)cur.node;
+                    top->node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+                }
+            }
+            if (e0 < 0.0f || (e0 == 0.0f && e1 <= 0.0f)) {
+                cur.leaf = (s32)cur.node;
+                cur.node = (PlaneNode*)GetNeighbourFace(cur.node->below);
+            } else {
+                if (GetNeighbourTriangle(cur.node->above) != 0) {
+                    cur.leaf = (s32)cur.node;
+                    cur.node = 0;
+                } else {
+                    cur.node = (PlaneNode*)cur.node->above;
+                    cur.leaf = 0;
+                }
+            }
+        }
+    }
+}
 
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {

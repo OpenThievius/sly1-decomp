@@ -286,6 +286,21 @@ struct Vu0 {
         return Q(t);
     }
 
+    // A weight passed whole in a GPR: the float's bits put in a 128-bit value with mfc1 (the
+    // float as "f", the result "=r"), held in a 16-byte local of the helper's as Scalar's is.
+    // Retail passes the scale of ScaleMatrix (func_00188628) so: mfc1 v0, then the compiler's
+    // por a2, zero, v0 and the sq to the slot (MultiplyScriptValues, DivideScriptValues,
+    // func_00158480). No C form puts a float in a 128-bit GPR value: a union goes through
+    // memory, and a store to its low word masks the rest.
+    static u128 ScalarInGpr(f32 f)
+    {
+        Slot t;
+        u128 r;
+        __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
+        Q(t) = r;
+        return Q(t);
+    }
+
     // a * s.x: vmulx.xyzw.
     static u128 MulX(u128 a, u128 s)
     {
@@ -626,6 +641,13 @@ struct Vu0 {
         {
             Vec r;
             r.q = Vu0::Scalar(f);
+            return r;
+        }
+
+        static Vec ScalarInGpr(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarInGpr(f);
             return r;
         }
 

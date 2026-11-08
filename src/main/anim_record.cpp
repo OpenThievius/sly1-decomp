@@ -1196,12 +1196,12 @@ void LoadTriangleAnimator(TriangleAnimator* self, AnimatorParams* src)
     s32 fl = self->cursor.flags;
     self->u0 = src->f4;
     self->v0 = src->f8;
-    self->du1 = src->fC - src->f4;
-    self->du2 = src->f10 - src->f4;
-    self->dv1 = src->f14 - src->f8;
+    self->uMin = src->fC - src->f4;
+    self->uMax = src->f10 - src->f4;
+    self->vMin = src->f14 - src->f8;
     f32 d = src->f18 - src->f8;
     self->cursor.flags = (fl & -2) | 2;
-    self->dv2 = d;
+    self->vMax = d;
 }
 
-void GetTriangleOutputs(TriangleAnimator* self, void** out) { out[0] = &self->out44; out[1] = &self->out4C; out[2] = &self->out48; }
+void GetTriangleOutputs(TriangleAnimator* self, void** out) { out[0] = &self->count; out[1] = &self->points; out[2] = &self->coords; }

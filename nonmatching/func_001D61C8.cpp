@@ -5,6 +5,7 @@
 //       (FillMemory, then the fields), at retail's labels through config/us/statics.tsv.
 //       Lands only with func_001D5FA8 and func_001D60B0 in the same form (the three guards
 //       close the file's .data in function order).
+// See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);

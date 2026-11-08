@@ -47,7 +47,7 @@ void PlaceAtArrivalPoint(BaseObject* self);
 void BuildAxisAngleMatrix(const void* axis, f32 angle, void* out);
 void SetPlayerState(Player* self, s32 state, s32 sub);
 s32 ChooseNearbyPlayerTarget(Player* self, BaseObject* obj, s32* out);
-void ComputePlayerJumpVelocity(Player* self, Vec02* out);
+s32 ComputePlayerJumpVelocity(Player* self, Vec02* out);
 void func_0017FCC8(Player* self, Vec02* v);
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);

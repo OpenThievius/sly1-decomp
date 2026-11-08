@@ -402,7 +402,7 @@ void ClearCachedVoiceParams(void);
 // A property's getter (PropertyDescriptor::getter with flags 4, or the method at that offset of
 // the object's table): fills `out` with the value of `obj`.
 typedef void (*PropertyGetter)(void* obj, void* out);
-void WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
+void* WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
 // The tags of the two transfers' chains (8 each, read uncached).

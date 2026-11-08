@@ -129,9 +129,10 @@ struct Effect {
         s32 i128;           // 0x128
         Effect* p128;        // 0x128
     };
-    u8 pad12C[0x130 - 0x12C];   // 0x12C
+    s32 i12C;               // 0x12C: kind 18's point the strip starts at (DrawPhasedEffect)
     union {
         const T219C_Params* params; // 0x130: kind 16's block
+        s32 (*points)(void* src, s32 max, void* out); // 0x130: kind 18's points, from +0x134 (DrawPhasedEffect)
         f32 f130;           // 0x130: an angle (TakeDelayedEffectSourcePose)
     };
     union {
