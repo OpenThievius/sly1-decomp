@@ -224,7 +224,7 @@ void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, 
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
 // func_0019B378.
 f32 D_0026A910 = 100.0f;
-s32 D_0026A914 = 0;
+f32 D_0026A914 = 0.0f;
 ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
 ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
 ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
@@ -305,7 +305,56 @@ void StartObjectSet(ObjectSet* self)
     }
 }
 
-INCLUDE_ASM(func_00198BD8);
+void UpdateCollider(void* self);
+void* GetActiveSwitchedCollider();
+
+// The part of the active collider's block at 0x580 that UpdateObjectSet reads.
+struct ActiveReach {
+    s32 on;                 // 0x00
+    u8 pad04[0x14 - 0x04];
+    f32 reach;              // 0x14
+    PlacedObject* target;   // 0x18
+};
+
+// Each frame while the active collider is near: the set moves to a point 100 out from its
+// target, on the ground away from the set.
+void UpdateObjectSet(ObjectSet* self)
+{
+    Vec02 d;
+    UpdateCollider(self);
+    s32 held = self->f59C;
+    self->f59C = 0;
+    SwitchedCollider* a = (SwitchedCollider*)GetActiveSwitchedCollider();
+    if (a == 0) {
+        return;
+    }
+    if (((SlotTest*)self->desc)[76](self) != 1) {
+        return;
+    }
+    ActiveReach* r = (ActiveReach*)&a->f580;
+    if (r->on == 0) {
+        return;
+    }
+    if (r->target == 0) {
+        return;
+    }
+    if (held == 0) {
+        f32 reach = r->reach + self->f550;
+        u128 e = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
+        s32 far = reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(e, e));
+        if (far) {
+            return;
+        }
+    }
+    self->desc->m15(self, 0);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
+    d.z = 0.0f;
+    u128 base = Vu0::Q(r->target->v150);
+    u128 out = Vu0::ScalarAt(D_0026A910);
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(D_0026A914));
+    self->desc02()->m20(self, &d);
+    ((SlotFn*)self->desc)[77](self);
+}
 
 void CollectObjectSet(ObjectSet* self)
 {
