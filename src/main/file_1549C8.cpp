@@ -1564,6 +1564,7 @@ struct SpawnFrame {
     Mat02 rot;              // 0x10
     Vec02 vel;              // 0x40
     Vec02 spin;             // 0x50
+    SpawnFrame() { FillMemory(this, 0, sizeof(*this)); }
 };
 
 // Makes the count points of a spawn record, their directions and times, in the four arrays out
@@ -1599,9 +1600,61 @@ void func_001579B0(void* a, void* b, s32* out)
     }
 }
 
-INCLUDE_RODATA(D_0024A144);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
+void ComputeChainedWorldFrame(void* a, void* frame, void* out);
+void ComputeObjectFrameAtTime(void* self, void* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
-INCLUDE_ASM(func_00157B88);
+void func_00157B88(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
+{
+    SpawnFrame frame;
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Vec02 tmp;
+    Rec50* r = AT(Rec50*, owner, 0x18C);
+    Rec50* sub = AT(Rec50*, r, 0x90);
+    void* saved = sub->target;
+    if (AT(s32, r, 0x94) == -1) {
+        sub->target = AT(void*, r, 0x18);
+    }
+    if (AT(Rec50*, r, 0x90)->target == AT(void*, r, 0x18)) {
+        ComputeChainedWorldFrame(r, &frame.pos, &frame.rot);
+        AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = &frame;
+    }
+    second->flag = 0;
+    func_001579B0((void*)n, AT(Rec50*, r, 0x90), second->out);
+    AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = 0;
+    f32 last = 3.40282347e+38f;
+    for (s32 i = 0; i < n; i++) {
+        if (AT(Rec50*, r, 0x90)->target != 0) {
+            f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
+            if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
+                last = t;
+                ComputeObjectFrameAtTime(AT(Rec50*, r, 0x90)->target, 0, last, &P, &M, &V, &W);
+            }
+            Vec02* p = (Vec02*)(i * 16 + second->out[0]);
+            Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
+            Vu0::Q(*p) = Vu0::Add(Vu0::Q(P), *(u128*)&tmp);
+            s32 kind = AT(s32, AT(Rec50*, r, 0x90), 0x80);
+            if (kind != 3) {
+                Vec02* v = (Vec02*)(i * 16 + second->out[1]);
+                Vu0::Q(*v) = Vu0::Rotate(M, Vu0::Q(*v));
+                if (kind != 2) {
+                    u128 moved = Vu0::Add(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), Vu0::Q(V));
+                    u128 spin = Vu0::Q(W);
+                    Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = Vu0::Add(moved,
+                        Vu0::Cross(spin, Vu0::Q(kind == 1 ? *(Vec02*)(second->out[0] + i * 16) : tmp)));
+                }
+            }
+        }
+        Vu0::Vec neg = Vu0::Vec::FromFloat(-1.0f);
+        u128 r = Vu0::MulX(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), neg.q);
+        *(Vu0::Vec*)&tmp = neg;
+        Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = r;
+    }
+    AT(Rec50*, r, 0x90)->target = saved;
+}
 
 void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
 {
