@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 508/512, checked 2026-11-07
-// NEAR (2026-11-08, vu0w3-e1): structure right (frame, calls, the hit-and-ramp path); differs in the normalisation's branch (retail stores d to dir in the bc1f delay slot and moves the fallback into the VU in the delay slot of the jump over the divide; here the fallback is a struct copy), and in the two weights: retail makes both of the final MulAddX weights vectors of one shared slot at 0x60 (the first from the ramp's result, the second with an lw of the float out straight into qmtc2), which wants a Scalar built on FromFloatAt, and registers them vf4 then vf5.
+// SIZE 508/512, checked 2026-11-08
+// NEAR (2026-11-08, night-lever1): the normalisation's branch, the Set of dir and both weights (ScalarAt)
+// are retail's now (NormalizeOrLength: NormalizeOr that also gives the length). Still differs: the order
+// of the two weights' loads (retail: mfc1 of the ramp result, then lw of out; ours lw first) and the two
+// settle loops (retail keeps v in a1 and compares a1 with the reloaded field, `move a1,v0` before the lw;
+// ours compares v0 and moves in the delay slot). The loops tried: while with the assignment in the
+// condition, both operand orders, a rotated while, for(;;) with a break.
 #include "common.h"
 #include "ramp_profile.h"
 #include "vu0.h"
@@ -19,6 +24,17 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n);
 void SetWalkerColliderSubState(WalkerCollider* self, s32 state);
 void ClearRootTries(void* self);
 
+// Vu0::NormalizeOr that also gives the length it found.
+static inline u128 NormalizeOrLength(u128 v, u128 fallback, f32& length)
+{
+    u128 len = Vu0::Length(v);
+    length = Vu0::ToFloat(len);
+    if (length < 0.0001f) {
+        return fallback;
+    }
+    return Vu0::DivX(v, len);
+}
+
 void UpdateWalkerCollider(WalkerCollider* self)
 {
     UpdateSwitchedCollider(self);
@@ -35,13 +51,8 @@ void UpdateWalkerCollider(WalkerCollider* self)
             u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
             Vu0::Q(diff) = d;
             Vu0::Q(dir) = d;
-            u128 len = Vu0::Length(d);
-            f32 l = Vu0::ToFloat(len);
-            if (!(l < 0.0001f)) {
-                Vu0::Q(dir) = Vu0::DivX(d, len);
-            } else {
-                dir = g_unitXVector;
-            }
+            f32 l;
+            Vu0::Set(dir, NormalizeOrLength(d, Vu0::Q(g_unitXVector), l));
             f32 along = SplitVectorAlongAxis(&vel, &dir, 0, &split);
             f32* lim = (f32*)self->p21C;
             ramp.maxSpeed = lim[0] + along;
@@ -50,7 +61,7 @@ void UpdateWalkerCollider(WalkerCollider* self)
             f32 res = ApproachValueWithRamp(0.0f, l, g_frameDt, &ramp, &out);
             u128 w = Vu0::Scalar(res);
             Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), w);
-            Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::FromFloatAt(out));
+            Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::ScalarAt(out));
         }
         self->desc02()->m1D(self, &pos);
         self->desc02()->m20(self, &vel);
