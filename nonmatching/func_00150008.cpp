@@ -2,6 +2,7 @@
 // BYTES 654/656 (99.7%), checked 2026-11-08
 // NEAR: identical but for the position of one load: retail loads the thrown object (lw v0,0x90(sp)) before the vmul.xyz of the first Length and makes the qmfc2 into v1 with the divisor loaded before it, ours loads it after the vmaddz and the qmfc2 takes v0; the second Length has the same difference. 8 lines in all. The fields f558, f55C, f580 and f584 of PooledObject are floats here (include/pooled_object.h has next at 0x558, a pad at 0x55C and s32 at 0x580 and 0x584); a typed field store is what lets the object pointer in its stack slot stay cached.
 // Still differs (2026-11-08, night-close1): with the lengths through ToFloatMoved (the qmfc2 the compiler's reload) the first is retail's; the second's qmfc2 takes v0 where retail's takes v1 (ToFloat there gives the old order; the length in a u128 local or the division without a local leave v0).
+// Still differs (2026-11-08, night-close5): the second length's qmfc2 (a reload of ToFloatMoved's "r" operand) takes v0, retail v1; reload hands out its registers round-robin between insns (reload1.c), so retail has one reload more or less before it. Vec forms of the lengths, ScalarAt for the weights, one len variable and f558 read first change nothing.
 #include "common.h"
 #include "masked_collider.h"
 #include "pooled_object.h"

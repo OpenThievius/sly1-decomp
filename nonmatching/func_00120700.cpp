@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 932/936 (99.6%), checked 2026-11-08
+// Still differs (2026-11-08, night-close5): the weight's lw into a0 and into the dying s0 is a reload of a MEM operand in retail, here a pseudo local-alloc gives v0; combine never puts a MEM into an "r" asm operand (check_asm_operands) and validate_equiv_mem gives no REG_EQUIV when the address dies there (local-alloc.c), so the form retail compiled is still unknown.
 #include "common.h"
 #include "asm_func.h"
 #include "property_descriptor.h"

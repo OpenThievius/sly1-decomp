@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 148/152 (97.4%), checked 2026-11-07
+// BYTES 148/152 (97.4%), checked 2026-11-08
+// Still differs (2026-11-08, night-close5): `w18 + n` (6 lines), (s64) casts, a while loop, an early return (31) and permute.py --auto leave n in t2.
 #include "common.h"
 // NEAR: only the t1/t2 registers of n and w18 swap (4 lines differ); dead-end tries: s64/u64 temp, += n
 

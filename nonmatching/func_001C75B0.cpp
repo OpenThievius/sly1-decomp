@@ -9,6 +9,7 @@
 // Vu0::Rotate's three pointer reads do not give; rows read as Vec values move all three up.
 // Vec values for the sum and the weight leave it. The quadword product is an inline helper:
 // called directly, the compiler keeps &q in a callee-saved register across the calls.
+// Still differs (2026-11-08, night-close5): row 0 read as a Vec member inside a local Rotate (the alias rule for a varying struct) leaves the same 11 lines.
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"

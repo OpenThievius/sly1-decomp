@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 967/976 (99.1%), checked 2026-11-08
+// Still differs (2026-11-08, night-close5): local-alloc numbers the four by priority: rest's load sits right before the sum after sched1 (life 1, highest priority, vf1), where retail's rest got vf4 (loaded early); permute.py over the four declarations, the operands written inline and the Vec form change nothing.
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"
