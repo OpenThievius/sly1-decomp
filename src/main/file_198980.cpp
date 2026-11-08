@@ -669,7 +669,81 @@ s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
     return 1;
 }
 
-INCLUDE_ASM(func_00199D08);
+struct SpinFrame4 {
+    Vec02 r[4];
+};
+
+struct SpinKeyframe {
+    u8 pad00[0x40];
+    u8 from[0x10];          // 0x40
+    u8 to[0x10];            // 0x50
+};
+
+void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
+void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
+void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
+void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
+void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in);
+void func_00125C90(NumberedItem* self, void* a, SpinFrame4* m);
+
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    const u128* rows = (const u128*)&a;
+    u128 a0 = rows[0];
+    u128 a1 = rows[1];
+    u128 a2 = rows[2];
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    *out = r;
+}
+
+// Turns the item by its spin and builds its transform for the frame, with the keyframe its
+// phase picks in the ring of its objects.
+void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
+{
+    Mat02 axis;
+    Mat02 turned;
+    SpinFrame4 base;
+    Vec02 unused;
+    if (self->flags & ((u64)0x8000 << 17)) {
+        return;
+    }
+    self->f5B8 = self->f5B8 + self->f5B4 * g_gameClock[2];
+    BuildAxisAngleMatrix(&g_unitZVector, self->f5B8, &axis);
+    MulRotation(&turned, *(const Mat02*)((u8*)self + 0x110), axis);
+    if (self->parent != 0) {
+        RotateMatrixUpright(&turned, 0, &turned);
+    }
+    BuildPlacedObjectTransform(self, a2, &base);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &turned, &base);
+    if (self->n5AC > 0) {
+        SpinFrame4 key;
+        SpinFrame4 product;
+        self->f5A4 = self->f5A4 + g_gameClock[2];
+        while (self->f5A8 + self->f5A8 <= self->f5A4) {
+            self->f5A4 = self->f5A4 - (self->f5A8 + self->f5A8);
+        }
+        s32 index = (s32)((f32)self->n5AC * self->f5A4 / self->f5A8);
+        if (index >= self->n5AC) {
+            s32 twice = self->n5AC * 2;
+            s32 m = index + 1;
+            index = twice - m;
+        }
+        SpinKeyframe* k = ((SpinKeyframe**)self->f5B0)[index];
+        BuildMatrixFromRotationAndTranslation(k->from, k->to, &key);
+        MultiplyMatrices(&product, &base, &key);
+        base = product;
+    }
+    func_00125C90(self, a1, &base);
+}
 
 void FlagAllNumberedItems(void)
 {

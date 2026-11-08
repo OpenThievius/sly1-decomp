@@ -2,6 +2,7 @@
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "object_message.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -1178,7 +1179,42 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
 }
 
-INCLUDE_ASM(func_001C9AF8);
+f32 ClampToRange(void* range, f32 x);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
+
+void func_001C9AF8(Agent* self)
+{
+    s32 last = self->f92C - 1;
+    s32 n = self->f930;
+    n = (n < last) ? n : last;
+    Vec02 target;
+    Vu0::Q(target) = Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (n << 4)));
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+    f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    f32 t = ClampToRange((u8*)self + 0xB9C, dist / __builtin_fabsf(F(f32, 0xB94)));
+    f32 time = t * F(f32, 0xB98);
+    Vec02 vel;
+    Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time * -0.5f));
+    self->desc02()->m20(self, &vel);
+    F(f32, 0xBA4) = g_gameTime[0] + time;
+    f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    F(Vec02, 0xBB0) = target;
+    u128 pos = Vu0::MulAddX(Vu0::Q(vel), Vu0::Q(F(Vec02, 0x350)), Vu0::Scalar(time));
+    Vu0::Q(F(Vec02, 0xBC0)) = pos;
+    if (1.0f < speed) {
+        f32 ang = ArctangentOfRatio(d.y, d.x);
+        if (F(f32, 0xB94) < 0.0f) ang += 3.14159265f;
+        SetAgentFacingAngles(self, ang, 0.0f);
+        Vec02 w;
+        u128 s = Vu0::FromFloat(-1.0f);
+        u128 r = Vu0::RotateTransposed(F(Mat02, 0x660), Vu0::MulX(Vu0::Q(vel), s));
+        Vu0::Q(w) = s;
+        Vu0::Q(F(Vec02, 0x640)) = r;
+    } else {
+        F(Vec02, 0x640) = D_00248D30;
+    }
+}
 
 f32 GetAnimationMarkerTime(void* obj, s32 id);
 void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);

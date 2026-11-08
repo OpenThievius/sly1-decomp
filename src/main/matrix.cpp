@@ -522,10 +522,24 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
 }
 
-INCLUDE_ASM(func_00189B18);
-
 extern const Vec02 g_unitXVector;
 void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
+
+void func_00189B18(Vec02* x, Vec02* hint, Mat02* out)
+{
+    Vec02 c;
+    out->r[0] = *x;
+    Vu0::Q(out->r[0]) = Vu0::NormalizeOr(Vu0::Q(out->r[0]), Vu0::Q(g_unitXVector));
+    u128 cr = Vu0::Cross(Vu0::Q(out->r[0]), Vu0::Q(*hint));
+    Vu0::Q(out->r[2]) = cr;
+    Vu0::Q(c) = cr;
+    u128 len = Vu0::Length(cr);
+    Vu0::Q(out->r[2]) = Vu0::DivX(cr, len);
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        ComputeUnitPerpendicular(&out->r[0], &out->r[2]);
+    }
+    Vu0::Q(out->r[1]) = Vu0::Cross(Vu0::Q(out->r[2]), Vu0::Q(out->r[0]));
+}
 
 void func_00189C28(Vec02* x, Vec02* hint, Mat02* out)
 {

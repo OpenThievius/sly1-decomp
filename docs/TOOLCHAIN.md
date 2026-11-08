@@ -240,6 +240,17 @@ What retail shows, and what the compiler does:
   func_001D12F0, and matches func_0016D828. Every user of ToFloat but one matches
   with this form too; func_00187B60 takes other VU0 registers with it, so the two
   stay: ToFloat where retail keeps the value in its VU0 register up to the qmfc2.
+- **A length's test reads it through ToFloatMoved.** Where retail's mtc1 follows the length's
+  qmfc2 at once, or a load (a constant, a divisor, a fallback's address) comes before the qmfc2,
+  the qmfc2 is the compiler's reload of an "r" operand, scheduled after the other insns of the
+  block: ToFloatMoved, not ToFloat (2026-11-08: func_00189B18, func_00189C28 through
+  NormalizeOr, func_001162D0, func_001268B8's second test, func_001A3008, func_001C9AF8). It
+  changes nothing already matched: NormalizeOr reads its length so, and the full build still
+  matches.
+- **A callee's return type reaches the FPRs after the call.** A callee declared to return a
+  float that retail ignores marks $f0 set at the call, so the first float constant after it
+  takes $f1; declared void (as its other callers have it), the constant takes $f0
+  (func_001D66A8, ComputeOscillatorDisplacement).
 - **A u128 across a call is spilled by the compiler.** VU0 registers do not survive
   a call, so a u128 local live across one is stored with sqc2 and reloaded with
   lqc2 (func_00198570's position); a plain copy of a vector to a local instead
