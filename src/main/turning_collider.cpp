@@ -181,9 +181,6 @@ void func_001C4848(s32 a0, PlacedObject* other, PlacedObject* self, Part07* rec)
     }
 }
 
-// The rest of the file's .rodata, after the literal of func_001C4848.
-extern const f32 D_0024D590 = 3.40282347e+38f;
-extern const f32 D_0024D594 = 3.40282347e+38f;
 
 void DrawCollider(void);
 
@@ -274,7 +271,39 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
     self->desc06()->m54(self);
 }
 
-INCLUDE_ASM(func_001C4FF8);
+void CopyColliderMeshesInFrame(void* self);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4* out);
+void TransformByMatrixWithW(Mat4* m, Vec02* in, void* out, f32 w);
+
+void func_001C4FF8(TurningCollider* self)
+{
+    Mat4 world;
+    Vec02 k;
+    s32 lowest = -1;
+    s32 i = 0;
+    CopyColliderMeshesInFrame(self);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &self->m110, &world);
+    f32 lowZ = 3.40282347e+38f;
+    for (; i < self->mesh.vertCount; i++) {
+        Vec02* v = (Vec02*)self->mesh.verts + i;
+        if (i == self->mesh.vertCount - 1) {
+            Vu0::Vec low = Vu0::Vec::Of(((Vec02*)self->mesh.verts)[lowest]);
+            Vu0::Q(k) = Vu0::FromFloat(-self->f6CC);
+            Vu0::Q(*v) = Vu0::MulAddX(low, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::Of(k)).q;
+            self->f6D0 = i;
+            Vec02* dst = (Vec02*)self->meshCopy.verts + i;
+            self->f6D4 = (s32)dst;
+            TransformByMatrixWithW(&world, v, dst, 1.0f);
+        } else if (v->z < lowZ) {
+            lowZ = v->z;
+            lowest = i;
+            self->f6D8 = ((Vec02*)self->meshCopy.verts + i);
+        }
+    }
+}
+
+// The rest of the file's .rodata, after the literal of func_001C4FF8.
+extern const f32 D_0024D594 = 3.40282347e+38f;
 
 void StepCollider(void* self);
 void ApplyTurningColliderDrive(TurningCollider* self);

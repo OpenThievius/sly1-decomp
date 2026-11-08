@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 888/904, checked 2026-11-07
-// NEAR: the frame (0x100), the calls and both VU0 loops are retail's. Differences: the early
+// SIZE 888/904, checked 2026-11-08
+// NEAR (night-size4): the target's 0x690 flag is read from the target (it was read from self), the zero returns that retail sends straight to the epilogue are joined with || (bnez with move v0,zero in the slot), and the flag test is `(x & 1) == 0` (retail's andi, bnezl). Still differs: self in s1 and the table in s2 (retail s2 and s1), the return after func_001CB3D0 (retail bnez to the epilogue, ours beqzl), the switch's compare tree and the ternary for pos (retail movn). Was: the frame (0x100), the calls and both VU0 loops are retail's. Differences: the early
 //       returns (retail jumps straight to the epilogue with the value in each delay slot; ours
 //       shares a block), the corner count: retail keeps the 4 as a register it loads twice (`li v0, 4;
 //       sll a0, v0, 4` and `blez v0`) where ours folds it, the flag test `(x & 1) == 0` (retail
@@ -35,17 +35,14 @@ s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** l
 
 s32 func_001B7280(CompanionAgent* self)
 {
-    if (IsPadSelectFlagHeld(self->world) != 0) return 0;
-    if (F(s32, 0xCCC) != 0) return 0;
+    if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
     if (F(s32, 0xCC8) != 0) return 1;
     PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
     if (target == 0) return 0;
-    if (self->fC14 == 0) return 0;
-    if (self->f724 == 0xB) return 0;
-    if (self->f724 == 0x10) return 0;
+    if (self->fC14 == 0 || self->f724 == 0xB || self->f724 == 0x10) return 0;
     Vec02 a;
     if (IsObjectOfKind(target, 6) != 0) {
-        if (F(s32, 0x690) != 0) {
+        if (*(s32*)((u8*)target + 0x690) != 0) {
             a = *(Vec02*)((u8*)target + 0x6A0);
         } else {
             a = target->v140;
@@ -77,7 +74,7 @@ s32 func_001B7280(CompanionAgent* self)
         if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
     }
     s32 v = GetAgentRosterState(self);
-    if (!(F(s32, 0xCD0) & 1)) {
+    if ((F(s32, 0xCD0) & 1) == 0) {
         if (v != 2) {
             if (func_001CB3D0(self) != 0) return 0;
         }

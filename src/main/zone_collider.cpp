@@ -1189,7 +1189,28 @@ void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
     self->f7B4++;
 }
 
-INCLUDE_ASM(func_0013F1D8);
+// The 0x30-byte entry copied as three quadwords.
+struct __attribute__((aligned(16))) Rotation30 { u8 b[0x30]; };
+
+// n rotations moved by one place: the size is the inline's own product, which retail multiplies
+// again apart from the destination's.
+static inline void MoveRotations(void* dst, void* src, s32 n) { MoveMemory(dst, src, n * 0x30); }
+
+void AddTriggerZoneRotation(TriggerZone* self, void* a1, Entry28* e)
+{
+    s32 n = self->count7E0;
+    s32 idx;
+    if (MatchesObjectId(a1, 0x200)) {
+        idx = 0;
+        if (n > 0) {
+            MoveRotations(&self->entries[n], &self->entries[0], n);
+        }
+    } else {
+        idx = n;
+    }
+    *(Rotation30*)&self->entries[idx] = *(Rotation30*)e;
+    self->count7E0++;
+}
 
 INCLUDE_ASM(func_0013F290);
 

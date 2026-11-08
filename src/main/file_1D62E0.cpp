@@ -793,7 +793,44 @@ s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
     return 1;
 }
 
-INCLUDE_ASM(func_001D6B18);
+void func_001BA5B0(Player* self, void* other, f32 t);
+void func_001EED68(void* obj, Vec02* p, Vec02* out1, Vec02* out2);
+f32 ApproachValueClampingVelocity(void* table, f32* out, f32 a, f32 b, f32 c, f32 d);
+void AddColliderForce(void* a, void* b);
+
+void func_001D6B18(Player* self, Collider* other, f32 t)
+{
+    switch (self->f2228) {
+    case 6:
+    case 0x2B:
+        if (self->v150.z < 0.0f) {
+            func_001BA5B0(self, other, t);
+        }
+        return;
+    case 0x27:
+    case 0x2F: {
+        Vec02 point;
+        Vec02 local;
+        Vec02 q2;
+        Vec02 q3;
+        Vec02 force;
+        Vec02 k;
+        f32 next;
+        if (func_001D6A18(self, other, &point) == 0) {
+            return;
+        }
+        Vu0::Q(local) = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+        func_001EED68(other, &point, &q2, &q3);
+        Vu0::Q(k) = Vu0::FromFloatAt(D_00275170[0]);
+        Vu0::Set(force, Vu0::MulX(Vu0::Sub(Vu0::Add(Vu0::Q(self->v150), Vu0::Q(local)), Vu0::Q(q2)), Vu0::Q(k)));
+        ApproachValueClampingVelocity(D_00275178, &next, self->v140.z + D_0027516C, self->v150.z - q2.z, point.z, t);
+        force.z = (next - self->v150.z) / t - self->gravity.z >? force.z;
+        AddColliderForce(self, &force);
+        return;
+    }
+    }
+    func_001BA5B0(self, other, t);
+}
 
 void SwapInPlayerStandIn(Player* self)
 {
