@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 172/188 (91.5%), checked 2026-11-07
+// BYTES 177/188 (94.1%), checked 2026-11-07
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB2B0.cpp func_eu_001AB2B0 --unit src/main/file_1A7FE8.cpp
-// Still differs: Key-gated sub-object work; layout offset fixed (f51C at 0x51C), all instructions match except self and key are in swapped s-registers (retail self in s2).
+// Still differs: 3 lines: self/key registers now as retail, but the `sh zero,8(self)` of the else branch lands after the jal (in its delay slot) where retail has it before; writing it first swaps the s-registers back.
 // With a key that func_eu_001E3018 accepts, runs the PAL-only calls on the sub-object at +0x8 and on the buffer they fill, then func_001AAB20 and func_0015C900; otherwise clears the s16 at +0x8 and calls func_001AAB20 with 0.0 and 0.0.
 struct Obj_001AAB20_eu;
 void SetScreenElementSize(Obj_001AAB20_eu* self, f32 x, f32 y);
@@ -23,7 +23,7 @@ void func_eu_001AB2B0(Obj_eu_001AB2B0* self, void* key)
         SetScreenElementSize((Obj_001AAB20_eu*)self, self->f40C, self->f410);
         PopFontScale((Font*)self->f4);
     } else {
-        self->f8 = 0;
         SetScreenElementSize((Obj_001AAB20_eu*)self, 0.0f, 0.0f);
+        self->f8 = 0;
     }
 }
