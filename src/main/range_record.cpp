@@ -13,7 +13,7 @@
 #include "asm_func.h"
 
 void InvalidateRangeRecordPacket(RangeRecord* o);
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 extern s32 g_meshQueueCount;
 extern u8 D_0027DC20[];
 void LinkRangeRecord(RangeRecord* self, s32 code);

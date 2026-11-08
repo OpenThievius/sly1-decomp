@@ -77,7 +77,7 @@ typedef void* (*VFn_1A9960)(void* self);
 extern ElementPlaceTable g_elementPlaces;
 s32 IsObjectOfKind(void* node, s32 kind);
 
-void FillMemory(void* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void GetObjectWorldRotation(void* self, void* arg);
 void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);

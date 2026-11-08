@@ -2117,7 +2117,7 @@ struct MeshHit {
 s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshHit* out);
 void HeapSortRecords(void* base, s32 count, s32 size, s32 (*compare)(FloatKeyedItem* a, FloatKeyedItem* b));
 void func_001C61E0(Player* self, s32 n);
-void FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* dst, s32 value, s32 size);
 
 // The player's grabs of the frame. The state picks the object it reaches with (one of the five
 // at 0x25D8) and the kinds of hold it takes (2, 4 or 8). Each class 0x75 object of those kinds
@@ -2804,7 +2804,7 @@ void ComputeTargetArc(Player* self, TargetCandidate* e, f32 f, void* a2, void* a
 s32 CompareDistanceFromPlayer(TargetCandidate* a, TargetCandidate* b);
 void SortElements(TargetCandidate* base, s32 n, s32 size, s32 (*cmp)(TargetCandidate*, TargetCandidate*));
 f32 ScoreTargetCandidate(Player* self, void* e, s32 v, void* a3, TargetHit* a4, f32* a5);
-void FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* dst, s32 value, s32 size);
 
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf)
 {

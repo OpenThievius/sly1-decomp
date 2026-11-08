@@ -143,7 +143,7 @@ void ChoosePlayerLinkedColliderTarget(void);
 void ClearPadPressedBits(void* obj, s32 n);
 void AdvancePlayerLinkedColliderWalker(void* self);
 s32 IsObjectAttached(void);
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 
 void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 {

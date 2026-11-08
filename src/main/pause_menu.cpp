@@ -208,7 +208,7 @@ void ResetPadStepRepeat(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 // The style of the menu's box (D_0026A210, the element's frame): the font that draws it and
 // its colour; the static initialiser builds it.
@@ -299,7 +299,7 @@ struct LerpColor { static void Do(Rgba4* out, Rgba4 a, Rgba4 b, f32 t)
     *out = r;
 } };
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 // The file's .data, in retail's order from 0x269CD8, and the strings of its menus, which open
 // its .rodata. The style (func_00196330, the static initialiser, builds it) and the buffers the

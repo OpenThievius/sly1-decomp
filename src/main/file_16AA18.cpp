@@ -678,7 +678,7 @@ INCLUDE_ASM(func_0016BEA0);
 // initialiser GCC writes for them (func_0016C360); their bytes are zero until then.
 // The rodata from 0x24A7A0 is func_0016AF80's strings ("" to the mission prompt) and
 // func_0016BEA0's "???", all literals.
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 struct BoxStyle {
     void* f0;

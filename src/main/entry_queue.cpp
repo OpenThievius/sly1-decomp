@@ -424,7 +424,7 @@ void UnbindEntryQueue(EntryQueue* self)
 
 // The entry AddQueueEntry hands out once the queue's 0x80 entries are used (0x14 bytes).
 static u8 D_002BE478[0x14];
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {

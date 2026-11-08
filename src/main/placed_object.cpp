@@ -66,7 +66,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void FillMemory(void*, s32, s32);
+extern void* FillMemory(void*, s32, s32);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
@@ -594,7 +594,7 @@ extern const Fn_Table D_00219600[];
 
 
 
-void FillMemory(void** p, s32 v, s32 n);
+void* FillMemory(void** p, s32 v, s32 n);
 void SettlePoseSourceModes(Attachment* n);
 
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };

@@ -38,7 +38,7 @@ void ReleaseSoundLevel(void* p);
 void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void** args);
 s32 ReadBufferedU16(void* a);
 void* AllocateZeroedFrontMemory(s32 size);
-void FillMemory(void* p, int zero, s32 count);
+void* FillMemory(void* p, int zero, s32 count);
 void AddColliderToSweepAxes(void* owner, void* self);
 Contacts03* TakeContactTable(void* owner, void* self);
 void InitContactPairFlags(void* owner, void* self);
@@ -158,7 +158,7 @@ s32 StartSoundVoice(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
 void RemoveFromList(u8* a, void* b);
 void PushFreeSlot(u8* a, void* b);
 extern u8 g_soundBankHandles[];
-void FillMemory(u8* p, s32 a, s32 b);
+void* FillMemory(u8* p, s32 a, s32 b);
 void InitIopCommandChannels(void);
 s32 EnsureSoundBankLoaded(s32 a);
 s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d);
@@ -168,7 +168,7 @@ void func_0011D520(s32 a, s32 b);
 void func_0011D558(s32 a, s32 b, s32 c);
 void func_0011E3A0(s32 a, s32 b);
 void* PopFreeSlot(void* p);
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 void AppendToList(void* list, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
@@ -450,7 +450,7 @@ void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d);
 s32 StepBiasedRandomWalk(void);
 extern PropertyList g_classPropertyLists[];

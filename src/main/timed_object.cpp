@@ -1152,7 +1152,7 @@ void UpdateBlinkObject(BlinkObject* self)
 }
 
 struct TouchQuery;
-void FillMemory(TouchQuery* p, s32 zero, s32 size);
+void* FillMemory(TouchQuery* p, s32 zero, s32 size);
 // The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
 // the object, what touched it, where that is and the direction (the unit z).
 struct TouchQuery {

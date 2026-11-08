@@ -27,7 +27,7 @@ void DestroyOutputBuffer(u8* buf, s32 n);
 
 
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 s32 NewSemaphore(void* self);
 
 
@@ -152,7 +152,7 @@ struct CameraFovSource { u8 pad[0x438]; f32 f438; f32 f43C; };
 
 
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 extern u8 D_00275940[0x18];
 
@@ -258,7 +258,7 @@ void UppercaseString(char* p);
 
 
 
-void FillMemory(FormatSpec* dst, s32 value, s32 size);
+void* FillMemory(FormatSpec* dst, s32 value, s32 size);
 s32 ParseSignedDecimal(s8* s, s32* out);
 extern u8 g_charClassFlags[];
 
@@ -362,7 +362,7 @@ struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 
 // The eight scrambled words that locate a level's data on the disc: the key of the sector
 // range is w[0] ^ w[5] and w[1] ^ w[7]; two blocks are the same level when w[2] ^ w[6] agree.

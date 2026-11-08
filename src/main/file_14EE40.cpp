@@ -322,7 +322,7 @@ void SetStepSequenceState(StepSequence* self, s32 arg);
 extern void* GetLevelEntryByKey(const char*);
 extern void* GetIndexedTargetSlot(void*, u32);
 
-extern void FillMemory(void*, u32, u32);
+extern void* FillMemory(void*, u32, u32);
 
 f32 ClampToRange(void*, f32);
 void SetScatterLevel(ScatterController* object, f32 unused);
@@ -455,7 +455,7 @@ extern u8 g_elementStack[];
 void UpdatePlacedObject(StepSequence* self);
 s32 IsStreamVoiceLocked(void);
 void SetStepSequenceState(StepSequence* self, s32 mode);
-void FillMemory(s32* p, s32 v, s32 n);
+void* FillMemory(s32* p, s32 v, s32 n);
 Ent65* GetActiveSwitchedCollider(void);
 s32 IsTopCameraController(CameraController* p);
 void ChooseStepSequenceState(StepSequence* self);
@@ -578,7 +578,7 @@ struct PartDrawFrame {
 extern f32 D_00261F30[16];
 
 void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
-void FillMemory(PartDrawFrame* p, s32 zero, s32 size);
+void* FillMemory(PartDrawFrame* p, s32 zero, s32 size);
 void MultiplyMatrices(Quad16* out, void* b, void* in);
 void BeginDmaTag(PacketWriter* self);
 void WriteVifBaseOffset(PacketWriter* obj, s32 a, s32 b);

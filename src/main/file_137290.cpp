@@ -502,7 +502,7 @@ s32 ReadBufferedS8(BufferedStream* self)
 
 void RemoveEffect(void* handle);
 void SetEffectPhase(void* handle, s32 mode);
-void FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* block, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(void* self, s32 count, void* out);
 
@@ -1466,7 +1466,7 @@ void InitAlphaStatePackets(void)
 
 void* PopFreeSlot(void* p);
 void PushFreeSlot(void* p, void* q);
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 void AppendToList(void* list, void* item);
 
 OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
