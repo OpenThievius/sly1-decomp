@@ -208,6 +208,7 @@ struct PlacedObject : BaseObject {
             u64 bits24 : 2; // set-up: 1 with a parent, 2 without
             u64 bits26 : 2; // set-up: 0 with a parent, 2 without
             u64 bits28 : 2; // func_00196410
+            u64 bits30 : 2; // a pose follow state (func_00128598): 1 once the object is close and slow
         };
         struct {
             u64 : 42;
