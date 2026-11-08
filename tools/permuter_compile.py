@@ -58,6 +58,10 @@ def with_aliases(text):
         name, original = m.group(1), m.group(2).replace('\\"', '"')
         text = re.sub(r"\btypedef\b[^;]*\b%s\s*;" % re.escape(name), lambda _: original, text, count=1)
     text = TYPEDEF.sub("", text)
+    if "permuter_max" in text or "permuter_min" in text:
+        # permuter_setup.py's stand-ins for g++'s minimum and maximum operators.
+        text = ("#define permuter_max(a, b) ((a) >? (b))\n#define permuter_min(a, b) ((a) <? (b))\n"
+                + text)
     defines = ["#define %s %s" % m.groups() for m in ALIAS.finditer(text)]
     return "\n".join(defines) + "\n" + ALIAS.sub("", text) if defines else text
 
