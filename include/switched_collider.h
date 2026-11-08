@@ -282,7 +282,7 @@ struct Player : TurningCollider {
     s32 f2208;              // 0x2208
     u8 pad220C[0x2220 - 0x220C];
     s32 f2220;              // 0x2220
-    s32 f2224;              // 0x2224
+    f32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
     f32 f222C;              // 0x222C
     ObjectMessage* watched2230; // 0x2230: the message whose object set it lets go of (func_00198EF8)
