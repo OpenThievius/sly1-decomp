@@ -343,6 +343,52 @@ the compiler reads again, the cause is in how each memory reference is written
   (`frame.Clear()`, `FillMemory(this, 0, sizeof(*this))`) the address is
   computed into a0 and again into s0 after the call, as retail's func_001590A0.
 
+## Loops
+
+When retail's loop keeps its constants and multiplies its index each time round (`li 0xD0;
+mult` for an array of 0xD0-byte entries, the constants 0, 1.0 and 2pi loaded inside), yet its
+top is still aligned, the loop optimiser ran and chose to move nothing (2026-11-07,
+func_00140258, func_001F2EF0, func_001F3408):
+
+- **A big loop is left alone.** GCC 2.95's loop.c moves an invariant out of a loop only when
+  `threshold * savings * lifetime >= insns`, where `insns` counts the loop's real insns at the
+  loop pass and `threshold` is `(1 + n_non_fixed_regs)`, doubled when the loop makes no call
+  (scan_loop, move_movables; strength_reduce has the same test with `3 +`). With the files' flags
+  that is 80 for a loop with a call and 160 for one without (measured: a loop with a call moves
+  its constants at 79 insns and not at 81; without `-mvu0-use-vf0-vf15` the limit is 65, the
+  other SN builds give 80 too). A constant used once (lifetime 1) stays in a loop of more than 80
+  insns, and the index's `li 0xD0` with it; then `i * 0xD0` is not a multiple of an invariant, so
+  it is not a giv either and nothing is strength-reduced. A value used farther apart (1.0 in
+  three subtractions, an address used twice) is still moved, as retail moves it. The loop notes
+  stay, so the top is aligned. The pass runs twice (`-frerun-loop-opt`): both counts must be over
+  the limit. cc1plus given `-dL` writes the loop pass's dump next to its input (`unit.ii.loop`):
+  each loop's count and each decision ("not desirable", "moved to", "reduced to").
+- **What the count includes.** The insns of the loop when loop.c sees it, before combine and the
+  register allocator, so things that never reach the output count: flow's `(use (const_int 0))`
+  after a call that ends a basic block (gcse puts them there), copies into argument registers,
+  and copies of 128-bit values. Retail's loops are bigger at this point than the same code
+  written with u128 values: ours had 53 and 78 where retail needed more than 80.
+- **The vectors were values of a struct type.** A vector held in a struct of one u128
+  (`Vu0::Vec`, include/vu0.h) and passed and returned by value through inline functions compiles
+  to the same code, but GCC copies it from pseudo to pseudo at each inline call (four to six
+  movti a call), copies CSE leaves for the allocator: func_001F2EF0's loop goes from 53 to 94
+  insns and keeps its constants and multiplication, func_00140258's from 78 to 86 and is EXACT,
+  func_001F3408's is 194. A Vec temporary in a condition makes the front end compute the
+  condition as a value (its cleanup point) where retail branches: func_00140258's distance test
+  is Vu0::Distance, an inline function that keeps the Vecs inside it.
+- **A loop entered in the middle is not a loop to loop.c.** func_00140258's comparison of its
+  found objects with the old list (`for` with a `break`, whose first test jump.c duplicates
+  ahead of the loop) is "ignored due to multiple entry points": nothing in it is moved or
+  reduced, in retail as here.
+- **Locals whose address is taken later go last.** A float whose address is first taken after
+  its declaration (`f32 sn, cs; ComputeSinCos(x, &sn, &cs);`) is kept as an ADDRESSOF and given
+  its stack slot only when purge_addressof runs, after every temporary of the function: retail's
+  sine and cosine sit above the weight slot (func_001F2EF0 at 0x10, func_001F3408 at 0x70), which
+  an `f32 sc[2]` (placed at its declaration) does not give.
+- **Not yet reproduced.** After ComputeSinCos both oscillator functions move the cosine into its
+  VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
+  reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
+
 ## Getting the compiler
 
 Its Windows build is in the public mirror of Sony's SDK 2.4 tools. Clone it
