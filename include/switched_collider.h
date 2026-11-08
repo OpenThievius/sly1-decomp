@@ -255,6 +255,15 @@ struct TurningCollider : SwitchedCollider {
     const Desc06* desc06() const { return (const Desc06*)desc; }
 };
 
+// An entry of the player's two-entry path blend (+0x103C): its weight, its animation and the
+// speed it plays at (CreatePlayerTwoEntryBlend, ControlPlayerOnPath).
+struct PlayerBlendEntry {
+    f32 weight;             // 0x00
+    void* anim;             // 0x04
+    u8 pad08[4];
+    f32 speed;              // 0x0C
+};
+
 struct Player : TurningCollider {
     u8 pad720[0x900 - 0x720];
     s32 f900;               // 0x900
@@ -262,8 +271,11 @@ struct Player : TurningCollider {
     s32 fA10;               // 0xA10
     s32 fA14;               // 0xA14: -1, 0 or 1: which three of the blend slots take the weights (func_001D4348)
     u8 padA18[0x103C - 0xA18];
-    u8 f103C[0x20];         // 0x103C
-    u8 f105C[4];            // 0x105C
+    union {
+        u8 f103C[0x20];     // 0x103C
+        PlayerBlendEntry blend103C[2];  // 0x103C: the two entries of the path blend (ControlPlayerOnPath)
+    };
+    void* f105C;            // 0x105C: the blend item BuildCombinedBlendAnimation makes of blend103C
     u8 pad1060[0x1064 - 0x1060];
     void* f1064;            // 0x1064
     u8 pad1068[0x1188 - 0x1068];
@@ -354,10 +366,12 @@ struct Player : TurningCollider {
     u8 pad23E8[0x23F0 - 0x23E8];
     f32 f23F0;              // 0x23F0
     f32 f23F4;              // 0x23F4
-    u8 pad23F8[0x2410 - 0x23F8];
+    u8 pad23F8[0x2400 - 0x23F8];
+    Vec02 v2400;            // 0x2400: eased toward zero each frame on the path (ControlPlayerOnPath)
     f32 f2410;              // 0x2410: the length along the path (func_001D1A80)
     f32 f2414;              // 0x2414: the speed along it (func_00172EE0 scales the path's direction by it)
-    u8 pad2418[0x2420 - 0x2418];
+    f32 f2418;              // 0x2418: the eased speed the path's turn checks read (ControlPlayerOnPath)
+    s32 f241C;              // 0x241C: -1, 0 or 1: which way the stick holds the player on the path
     f32 f2420;              // 0x2420
     f32 f2424;              // 0x2424
     u8 pad2428[0x242C - 0x2428];
