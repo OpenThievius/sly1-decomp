@@ -30,6 +30,7 @@
 #include "camera.h"
 #include "path_curve_object.h"
 #include "asm_func.h"
+#include "owner_message.h"
 #include "vu0.h"
 #include "ramp_profile.h"
 
@@ -1233,8 +1234,201 @@ INCLUDE_RODATA(jtbl_0024AA60);
 INCLUDE_RODATA(jtbl_0024AAB0);
 INCLUDE_ASM(func_00173888);
 
-INCLUDE_RODATA(jtbl_0024AB00);
-INCLUDE_ASM(func_00174808);
+void UpdateTurningCollider(Player* self, f32 dt);
+s32 HasAnimationDrivenAttachment(void* ctx);
+void func_00174E20(Player* self);
+void UpdateSixEntryBlendWeights(Player* self, void* blend, s32 n, void* msg);
+f32 WrapModulo(f32 x, f32 y);
+void PlayPhaseCrossingSound(Player* self, void* p, f32 f);
+void UpdateEightEntryBlendWeights(Player* self, void* blend, s32 n);
+void func_0017F018(Player* self);
+void UpdatePlayerTargetPhase(Player* self);
+u128 ApproachPointWithRamp(u128 cur, u128 target, f32 dt, const f32* params, s32 flag);
+s32 func_0017E088(Player* self, void* frame, Vec02* pos, s32 a, s32 b, Vec02* out);
+void UpdatePlayerRequestSubState(Player* self);
+void UpdatePlayerAimTarget(Player* self);
+void ReleaseFarPlayerLinks(Player* self);
+void func_001D66A8(Player* self);
+void ClearRootTries(void* self);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
+void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* out, f32* d, Vec02* out2);
+void InitOwnerMessage(void* out, s32 mode, void* owner);
+void func_00171238(Player* self);
+void func_001790B8(Player* self);
+void RunPlayerQueuedActivations(Player* self);
+extern f32 D_00274B64;
+
+struct PhaseObject_174808 { u8 pad00[0x34]; f32 f34; };
+struct PhaseMessage_174808 { u8 pad00[8]; PhaseObject_174808* f8; u8 pad0C[0x14 - 0xC]; f32 f14; f32 f18; };
+struct PathShape_174808;
+struct PathShapeDesc_174808 { u8 pad00[0x30]; void (*m30)(PathShape_174808* self, Vec02* at, f32 t, s32 a, Vec02* out, s32 b, s32 c, s32 d); };
+struct PathShape_174808 { PathShapeDesc_174808* desc; };
+struct PathTarget_174808 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PathShape_174808* shape; };
+struct LinkTarget_174808 { u8 pad00[0x8C]; f32 radius; };
+struct ContactBody_174808;
+struct ContactBodyDesc_174808 {
+    u8 pad00[0x12C];
+    s32 (*m12C)(ContactBody_174808* self, Contact03* c, OwnerMessage* msg);
+    u8 pad130[0x140 - 0x130];
+    void (*m140)(ContactBody_174808* self, OwnerMessage* msg);
+    u8 pad144[0x160 - 0x144];
+    void (*m160)(ContactBody_174808* self);
+};
+struct ContactBody_174808 {
+    ContactBodyDesc_174808* desc;
+    u8 pad04[0x18 - 0x04];
+    ContactBody_174808* parent;     // 0x18
+    u8 pad1C[0x4E0 - 0x1C];
+    s32 f4E0;                       // 0x4E0
+};
+
+// Which end of the contact the object is: 0 when it is end 0's body, else 1.
+static inline s32 ContactEndOf(Contact03* c, void* obj)
+{
+    return c->end[0].body != obj;
+}
+
+void UpdatePlayer(Player* self, f32 dt)
+{
+    UpdateTurningCollider(self, dt);
+    ApplyPendingPlayerStateRequest(self);
+    if (HasAnimationDrivenAttachment(self) != 0) {
+        func_00174E20(self);
+    }
+    if (self->f26C4 != 0 && self->f2220 != 4 && self->f26D0 < g_gameTime[0] - self->f26CC) {
+        self->f26C4 = 0;
+    }
+    switch (self->f2220) {
+    case 1:
+        UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
+        {
+            f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
+            PlayPhaseCrossingSound(self, &self->f2440[0], phase);
+        }
+        break;
+    case 5:
+        UpdateEightEntryBlendWeights(self, (u8*)self + 0x910, self->fA10);
+        {
+            f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
+            PlayPhaseCrossingSound(self, &self->f2440[1], phase);
+        }
+        break;
+    case 2:
+        func_0017F018(self);
+        break;
+    case 0:
+        UpdatePlayerState0(self);
+        break;
+    case 6:
+        UpdatePlayerTargetPhase(self);
+        break;
+    case 8: {
+        Vec02 local;
+        Vu0::Q(self->v24D0) = ApproachPointWithRamp(Vu0::Q(self->v24D0), Vu0::Q(D_00248D30), dt, D_00263918, 0);
+        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &local);
+        if (func_0017E088(self, self->f24A0, &local, self->f24F0, self->f24F4, &self->v24C0) == 0) {
+            SetPlayerState(self, 2, 2);
+            break;
+        }
+        self->f638 = ArctangentOfRatio(-self->v24C0.y, -self->v24C0.x);
+        break;
+    }
+    case 9: {
+        Vec02 local;
+        if (self->f26D4 != 0) {
+            Vu0::Q(local) = Vu0::Sub(Vu0::Q(((Player*)self->f26D4)->v140), Vu0::Q(g_player->v140));
+        } else {
+            Vu0::Q(local) = Vu0::Sub(Vu0::Q(g_camera->f40), Vu0::Q(g_player->v140));
+        }
+        self->f638 = ArctangentOfRatio(local.y, local.x);
+        break;
+    }
+    case 4:
+        UpdatePlayerRequestSubState(self);
+        break;
+    case 12:
+        self->f638 = *(f32*)&g_camera->ctl460.value;
+        break;
+    case 13:
+        if (self->f2228 == 0x38) {
+            if (D_00263924 < self->rot.r[2].z) {
+                s32 slow = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v160), Vu0::Q(self->v160)))) < D_00263928[0];
+                if (slow) {
+                    SetPlayerState(self, 2, 2);
+                }
+            }
+        } else if (self->f2228 == 0x36) {
+            if (self->f690 != 0) {
+                SetPlayerState(self, 0xD, 0x37);
+            }
+        }
+        break;
+    }
+    UpdatePlayerAimTarget(self);
+    ((ContactBody_174808*)self)->desc->m160((ContactBody_174808*)self);
+    ReleaseFarPlayerLinks(self);
+    func_001D66A8(self);
+    ClearRootTries(self);
+    if (self->f223C == 0) {
+        Vec02 local;
+        Vec02 pts[3];
+        Vec02 dirs[3];
+        Vec02 closest;
+        f32 t;
+        f32 dist;
+        f32 gap;
+        if (self->f2204 != 0) {
+            GetObjectWorldPosition((void*)self->f2204, &local);
+            for (s32 i = 1; i < self->f21CC; i++) {
+                MeasurePointToSegment(&local, &self->v21D0[i - 1], &self->v21D0[i], &t, &dist);
+                if (dist < ((LinkTarget_174808*)self->f2200)->radius + self->f2420) {
+                    SetPlayerState(self, 3, 0x33);
+                    break;
+                }
+            }
+        } else if (self->f2208 != 0) {
+            s32 i;
+            for (i = 0; i < self->f21CC; i++) {
+                TransformPointBetweenFrames(0, (s32)((PathTarget_174808*)self->f2208)->frame, &self->v21D0[i], &pts[i]);
+                PathShape_174808* s = ((PathTarget_174808*)self->f2208)->shape;
+                if (s->desc->m30 != 0) {
+                    s->desc->m30(s, &pts[i], *(f32*)((u8*)self + 0x220C), 0, &dirs[i], 0, 0, 0);
+                }
+            }
+            for (i = 1; i < self->f21CC; i++) {
+                FindClosestPointsOnSegments(&pts[i - 1], &pts[i], &dirs[i - 1], &dirs[i], &local, &gap, &closest);
+                if (gap < self->f2420) {
+                    SetPlayerState(self, 7, 0x17);
+                    break;
+                }
+            }
+        }
+    }
+    if (*(Contact03**)self->f151C != 0) {
+        for (Contact03* c = *(Contact03**)self->f151C; c != 0; c = c->next) {
+            ContactBody_174808* o = (ContactBody_174808*)c->end[1 - ContactEndOf(c, self)].part;
+            while (o != 0 && o->f4E0 == 0) {
+                o = o->parent;
+            }
+            if (o != 0 && (o->f4E0 == 1 || o->f4E0 == 4)) {
+                OwnerMessage msg;
+                InitOwnerMessage(&msg, 0, o);
+                for (; o != 0; o = o->parent) {
+                    if (o->desc->m12C(o, c, &msg) != 0) {
+                        break;
+                    }
+                }
+                ((ContactBody_174808*)self)->desc->m140((ContactBody_174808*)self, &msg);
+            }
+        }
+        FreePooledContactChain(self->world, *(Contact03**)self->f151C);
+        *(Contact03**)self->f151C = 0;
+    }
+    UpdatePlayerSpin(self);
+    func_00171238(self);
+    func_001790B8(self);
+    RunPlayerQueuedActivations(self);
+}
 
 void func_00174E20(Player* self)
 {
