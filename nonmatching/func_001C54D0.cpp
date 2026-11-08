@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 776/756, checked 2026-11-07
-// NEAR: the whole function is written (the ground push, the two ramps, the rotated tangent and MulAddX2); it compiles 20 bytes over retail's and the registers differ throughout (retail keeps the push in f21 on both paths). It also needs MulAddX2 to give the result a's register (retail: the end's v30, here the tangent's); see func_001BBEB8.
+// SIZE 764/756, checked 2026-11-07
+// NEAR: the whole function is written (the ground push, the two ramps, the rotated tangent and MulAddX2, whose result now takes a's register as retail's does); 8 bytes over retail. Now retail's: push = 0 as the first arm of the test, the rotation kept in a register. Still differs: retail's frame is 16 bytes larger (out1 and out2 at 80 and 84, a 16-byte slot at 64 that the tail's weights take, and in the inner block one more 16-byte slot before the weight at 32), the copy of &c->end[e] (move a1, a0) retail keeps for the store, and the VU0 registers of the tail (retail loads m660's rows into vf5, vf3, vf4).
 #include "common.h"
 #include "switched_collider.h"
 #include "game_clock.h"
@@ -23,8 +23,10 @@ f32 ClampToMagnitude(f32 a, f32 b);
 
 void func_001C54D0(TurningCollider* self, Contact03* c, s32 e)
 {
-    f32 push = 0.0f;
-    if (self->f6DC != 0 && self->f6CC != 0.0f) {
+    f32 push;
+    if (self->f6DC == 0 || self->f6CC == 0.0f) {
+        push = 0.0f;
+    } else {
         f32 f90 = c->f90;
         f32 w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->v80), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
         if (f90 < -2.0f) {
@@ -58,10 +60,7 @@ void func_001C54D0(TurningCollider* self, Contact03* c, s32 e)
         }
         push = push + ClampToMagnitude(out1 - push, g_gameClock.dt * (B.f[0] - B.f[1]) / B.f[2]);
     }
-    Vec02 rot;
-    u128 tangent;
-    Vec02 k;
-    Vu0::Q(rot) = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
-    tangent = Vu0::Sub(Vu0::Q(rot), Vu0::MulX(Vu0::Q(c->v80), Vu0::Dot(Vu0::Q(rot), Vu0::Q(c->v80))));
+    u128 rot = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+    u128 tangent = Vu0::Sub(rot, Vu0::MulX(Vu0::Q(c->v80), Vu0::Dot(rot, Vu0::Q(c->v80))));
     Vu0::Q(c->end[e].v30) = Vu0::MulAddX2(Vu0::Q(c->end[e].v30), Vu0::Q(self->m110.r[2]), Vu0::Scalar(-push), tangent, Vu0::ScalarAt(self->f63C));
 }

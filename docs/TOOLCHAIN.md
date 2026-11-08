@@ -252,9 +252,34 @@ What retail shows, and what the compiler does:
   `vmaddx`) weight three or four vectors by Scalars and list the first weight first,
   as MulXSum: retail's result takes its register (func_00130540, func_001D4698).
   MulAddX2 (`vadda` with vf0, `vmaddax`, `vmaddx`) adds two weighted vectors to a,
-  listing the last vector first: retail's result takes its register
-  (func_00198BD8). A weight read from memory is ScalarAt: FromFloatAt into
-  Scalar's slot, the lw retail has (func_00198BD8's two, func_001D4698's speed).
+  its inputs in their own order (a, b, s, c, t). A weight read from memory is
+  ScalarAt: FromFloatAt into Scalar's slot, the lw retail has (func_00198BD8's two,
+  func_001D4698's speed).
+- **MulAddX2's result takes a's register.** Retail gives the sum a's register
+  wherever a is loaded in the block for it (func_001BBEB8, func_0017E3C8,
+  func_001C54D0, func_001CEB18) and c's in func_00198BD8, whose a and b come from
+  earlier blocks: the local allocator ties the result to the first input that is
+  local to the block and dies there, so one order, a first, gives both (the header
+  had c first, for func_00198BD8 alone). Where a's register still differs, the
+  cause was around it, not in the helper: in func_001BBEB8 the next statement's
+  `vel[i]` reload, right after the store, is allocated before the sum (shorter
+  life) and takes vf2; the allocator's widened lifetimes (`fake_birth`) then keep
+  the sum, whose life ends just before, out of vf2, and b takes it instead. Retail's
+  order there is the reload, then the weight's store, then `acc[i]`: the operands
+  of `MulAddX(vel[i], acc[i], Scalar(dt))` named in that order. In func_0017E3C8
+  the arguments written inline are expanded in another order than retail's; a
+  named start point gives its registers. A tie ("+j" or "0") on a instead raises
+  a's priority (its references doubled) above b's and swaps their registers.
+- **A word stored from a reload.** StoreX(dst, a) is `sw` of a vector's low word
+  with the vector as an `"r"` operand: the qmfc2 to the GPR is the compiler's, a
+  reload, whose GPR is chosen after every pseudo has its register. ToBits' result is
+  a pseudo of its own, which the local allocator gives the first free GPR (v0) before
+  the loop's pointers have theirs. Retail's func_001DAA18 (qmfc2 a1 after its loop
+  pointers in v0, v1, a0), func_0013B828 and func_00137FB0 store this way; ToFloat
+  there gives retail's registers through the same reload (its f32 pseudo prefers an
+  FPR), but then mtc1 and swc1. ToBits stays where retail's qmfc2 takes a register
+  the local allocator gives (func_00160EA0's plane distances, the camera's ground
+  lengths, func_001BBEB8's face distances: five matched uses).
 
 - **Through the GPRs, "r" operands.** Where retail handles a vector or floats in
   GPRs (qmfc2 or lq, mfc1, the MMI pextlw/pextuw/pcpyld/pcpyud/prot3w, sq or qmtc2),
@@ -310,7 +335,7 @@ Length, NormalizeOr), the matrix forms (Transform, Transform4, RotateRows and
 RotateUntied, RotateTransposed, MulTransposed, Transpose), the weighted sums (MulXSum,
 MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
 (PlaneSigns, Ones), the cross product, Min and Max, the copy (Copy), and the GPR forms
-(ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits). The assembler takes
+(ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits, StoreX). The assembler takes
 `vsqrt` (the disassembler prints it as a `.word`).
 
 ## Reloads and stores
