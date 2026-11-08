@@ -44,7 +44,7 @@ struct Vt219C {
     void (*m00)(Effect* self, void* pos, f32 scale, s32 flags);          // 0x00: set-up
     void (*m01)(Effect* self, void* other);                              // 0x04
     void (*m02)(Effect* self);                                           // 0x08
-    void (*m03)(Effect* self);                                           // 0x0C
+    void (*m03)(Effect* self, f32 dt);                                   // 0x0C: moves it (func_0019E220)
     void (*m04)(Effect* self, f32 dt);                                   // 0x10: every frame
     void (*m05)(Effect* self, void* other);                              // 0x14
     void (*m06)(Effect* self, s32 flag);                                 // 0x18: end (func_0019F560)

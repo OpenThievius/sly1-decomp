@@ -201,6 +201,20 @@ struct Vu0 {
         return t;
     }
 
+    // A float in all four fields, built in a GPR: pextlw t, t, t (the float twice in the low
+    // doubleword), pextlw r, t, t (four times), where t is the GPR the float came in: the mfc1
+    // that brings it there is the compiler's ("r"), which retail schedules apart, and the
+    // first pextlw turns that copy in place (retail's ten sites all do; the copy dies there).
+    // r may be t (func_0019E220) or another GPR (func_0019F620). The result is "=r": stored
+    // with sq where it goes straight to a vector local, moved to VU0 with qmtc2 where it is
+    // used there. It has no local of its own: retail stores it once, where the C put it.
+    static u128 Splat(f32 f)
+    {
+        u128 r;
+        __asm__("pextlw %1, %1, %1\n\tpextlw %0, %1, %1" : "=r"(r) : "r"(f));
+        return r;
+    }
+
     // The vector (x, y, z) of three floats in FPRs, built in a GPR: mfc1 r, x; mfc1 t, y;
     // pextlw r, t, r (x and y interleaved); mfc1 t, z; pcpyld r, t, r (z after them). Its w
     // is z's sign extension. One sequence: retail never schedules anything inside it, and the
