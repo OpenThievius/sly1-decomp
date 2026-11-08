@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 621/780 (79.6%), checked 2026-11-07
+// BYTES 689/780 (88.3%), checked 2026-11-08
 // BYTES 0/780, checked 2026-11-07
 // NEAR: the calls, the launch block (the ground direction normalised with g_unitXVector as fallback, the ScalarAt speeds, the FromFloats perpendicular) and the frame (0x80, the message reusing the direction's slot) are retail's; retail forms g_unitXVector's address before the length test and takes other GPRs for the loads of the two speeds and of the perpendicular's weight, so a few registers and the order of some loads differ.
 // In the context of its file, src/main/tint_blend_collider.cpp.

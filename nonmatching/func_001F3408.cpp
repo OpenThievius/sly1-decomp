@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 651/736 (88.5%), checked 2026-11-07
+// SIZE 760/736, checked 2026-11-08
 #include "oscillator.h"
 #include "game_clock.h"
 #include "vu0.h"

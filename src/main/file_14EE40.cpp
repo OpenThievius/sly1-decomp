@@ -35,6 +35,9 @@
 #include "deferred_request.h"
 #include "cursor_animator.h"
 #include "texture_table.h"
+#include "owner_message.h"
+#include "switched_collider.h"
+#include "vu0.h"
 
 
 s32 FindPathCurveSegment(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
@@ -694,7 +697,136 @@ void SetPooledObjectState(PooledObject* self, s32 state)
 
 INCLUDE_ASM(func_0014F168);
 
-INCLUDE_ASM(func_0014F270);
+Collider* FindContactingPart(void* self);
+void InitOwnerMessage(OwnerMessage* m, s32 mode, void* owner);
+void LaunchObjectFromPooledObject(void);
+void StartPadRecordPattern(void* rec, s32 n, f32 t);
+s32 CountHeldPooledChildren(void* self);
+void FindNodeForQuery(void* query, s32 a, s32 b);
+void SendPointEventToWorldListener(Vec02* at, f32 x);
+void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void BuildBasisFromX(Vec02* v, Mat02* out);
+void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, PooledObject* b, s32 c, void** out, f32 fa, f32 fb);
+
+// The query FindNodeForQuery takes for an object that touched a held one (func_0014F270).
+struct HeldTouchQuery {
+    PooledObject* self;     // 0x00
+    Collider* other;        // 0x04
+    u8 pad08[0x20 - 0x08];
+    Vec02 pos;              // 0x20
+    Vec02 vel;              // 0x30
+
+    void Clear() { FillMemory(this, 0, (s32)sizeof(*this)); }
+};
+
+// What a group member's slot 0x7C is told when a held object lands (func_0014F270).
+struct HeldLandEvent {
+    s32 kind;               // 0x00: 4
+    u8 pad04[0x20 - 0x04];
+    Vec02 pos;              // 0x20
+};
+
+typedef void (*ObjFn)(void* self);
+typedef void (*ObjPtrFn)(void* self, void* a);
+
+void UpdateHeldPooledObject(PooledObject* self)
+{
+    typedef Vu0::Vec Vec;
+    Collider* c = FindContactingPart(self);
+    if (c != 0) {
+        s32 lands = 1;
+        if (c == (Collider*)g_player && (g_player->f2220 != 6 || g_player->f239C != 2)) {
+            OwnerMessage m;
+            InitOwnerMessage(&m, 0, self);
+            m.fn = LaunchObjectFromPooledObject;
+            ((s32 (*)(void*, void*))((void**)g_player->desc)[0x140 / 4])(g_player, &m);
+        } else if (IsObjectOfKind(c, 0x3A)) {
+            StartSoundEffect(0x34, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            if (g_player != 0 && g_player->heldObject == c) {
+                StartPadRecordPattern(&g_padRecord, 4, 0.25f);
+            }
+            if (!(CountHeldPooledChildren(c) < *(s32*)((u8*)c + 0x564))) {
+                PooledObject* e = FindEarliestPooledChild((PooledObject*)c);
+                if (e != 0) {
+                    SetPooledObjectState(e, 5);
+                }
+            }
+            ((ObjPtrFn)((void**)self->desc)[0x64 / 4])(self, c);
+            ((ObjPtrFn)((void**)self->desc)[0x90 / 4])(self, (void*)&D_00248D30);
+            ((ObjPtrFn)((void**)self->desc)[0x94 / 4])(self, (void*)&D_00248D30);
+            SetColliderAnchors(self, 3, 0, 3, 0);
+            SetPooledObjectState(self, 4);
+            if (self->f574 != 0) {
+                CreateAnimationPlayerWithoutPresetTargets(self->f574, self, 0, &self->watched, 0.0f, 1.0f);
+                if (self->watched != 0) {
+                    SetPooledObjectState(self, 3);
+                }
+            }
+            lands = 0;
+        } else if (IsObjectOfKind(c, 0x46)) {
+            switch (((PooledObject*)c)->state) {
+            case 0:
+            case 1:
+            case 2:
+                break;
+            case 3:
+            case 4:
+            case 5:
+                lands = 0;
+                ((ObjPtrFn)((void**)c->desc)[0x64 / 4])(c, 0);
+                ((ObjFn)((void**)c->desc)[0x1C / 4])(c);
+                break;
+            }
+        } else {
+            HeldTouchQuery q;
+            q.Clear();
+            q.other = c;
+            q.pos = self->v140;
+            q.vel = self->v150;
+            q.self = self;
+            FindNodeForQuery(&q, 0, 0);
+        }
+        if (lands) {
+            StartSoundEffect(0x33, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            void* g = self->member58C;
+            if (g != 0) {
+                HeldLandEvent ev;
+                ev.kind = 4;
+                ev.pos = self->v140;
+                ((ObjPtrFn)((void**)*(void**)g)[0x7C / 4])(g, &ev);
+            } else {
+                SendPointEventToWorldListener(&self->v140, self->f560);
+            }
+            ((ObjPtrFn)((void**)self->desc)[0x64 / 4])(self, 0);
+            ((ObjFn)((void**)self->desc)[0x1C / 4])(self);
+        }
+        return;
+    }
+    if (g_player != 0 && g_player->f2220 == 4) {
+        return;
+    }
+    Vec02 at;
+    Vec02 dir;
+    Mat02 basis;
+    at = self->holder->v140;
+    at.z = at.z + self->holdHeight;
+    f32 t = Vu0::Distance(at, self->v140) / self->holdSpeed;
+    f32 lo = 0.0f;
+    f32 hi = 0.25f;
+    if (t < lo) {
+        t = lo;
+    } else if (hi < t) {
+        t = hi;
+    }
+    ComputeObjectFrameAtTime(self->holder, 0, &at, 0, 0, 0, t);
+    at.z = at.z + self->holdHeight;
+    u128 k = Vu0::ScalarAt(self->holdSpeed);
+    Vu0::Set(dir, Vu0::MulX(Vu0::NormalizeOr(Vu0::Sub(Vec::Of(at), Vec::Of(self->v140)), Vec::Of(D_00248D30)).q, k));
+    ((ObjPtrFn)((void**)self->desc)[0x90 / 4])(self, &dir);
+    BuildBasisFromX(&dir, &basis);
+    ((ObjPtrFn)((void**)self->desc)[0x88 / 4])(self, &basis);
+}
 
 void InitPooledHolder(PooledHolder* self)
 {
@@ -936,7 +1068,70 @@ s32 AcquirePooledObject(PooledHolder* self) {
     return 1;
 }
 
-INCLUDE_ASM(func_00150008);
+#define OBJV ((PooledView*)obj)
+struct PooledView { u8 pad00[0x558]; f32 f558; f32 f55C; u8 pad560[0x580 - 0x560]; f32 f580; f32 f584; };
+void SetPooledObjectState(PooledObject* self, s32 state);
+void BuildBasisFromX(Vec02* dir, Mat02* out);
+void SendPointEventToWorldListener(Vec02* point, f32 radius);
+void TriggerScriptEvent(PooledHolder* host, s32 a, s32 b, void** args);
+void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, Vec02* out);
+
+void func_00150008(PooledHolder* self)
+{
+    Vec02 pos;
+    Vec02 d;
+    Vec02 dir;
+    Vec02 step;
+    Vec02 vel;
+    Mat02 basis;
+    PooledObject* obj;
+    void* args[1];
+    PlacedObject* source;
+    f32 speed;
+    if (self->p6E0 != 0 && ((Held23*)self->p734->f200)->f1C != 0) {
+        if (IsObjectAttached(self->p6E0) == 0 || self->p6E0->state == 3 || self->p6E0->state == 4) {
+            self->p6E0 = 0;
+            return;
+        }
+        speed = 15.0f;
+        source = self->p6E0;
+    } else {
+        source = (PlacedObject*)self->f6DC;
+        speed = *(f32*)((u8*)self + 0x6D4);
+    }
+    obj = (PooledObject*)self->p6C8;
+    self->p6E0 = 0;
+    self->p6C8 = 0;
+    obj->desc->m15(obj, 0);
+    SetColliderAnchors(obj, 0, 0, 0, 0);
+    if (obj->f1FC != 0) {
+        typedef void (*AttachedFn)(void* self, s32 arg);
+        void* att = obj->f1FC;
+        (*(AttachedFn**)att)[2](att, 7);
+    }
+    pos = source->v140;
+    pos.z += speed;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(obj->v140));
+    BuildBasisFromX(&d, &basis);
+    obj->desc02()->m1E(obj, &basis);
+    f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
+    OBJV->f580 = len / OBJV->f558;
+    TransformDirectionBetweenFrames(source->root, 0, &source->root->v150, &dir);
+    Vu0::Q(step) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(OBJV->f580));
+    Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(step));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(obj->v140));
+    f32 len2 = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
+    OBJV->f580 = len2 / OBJV->f558;
+    Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
+    Vu0::Q(vel) = Vu0::MulX(Vu0::Q(d), Vu0::ScalarAt(OBJV->f558));
+    obj->desc02()->m20(obj, &vel);
+    SetPooledObjectState(obj, 2);
+    obj->f57C = (s32)source;
+    OBJV->f584 = speed;
+    SendPointEventToWorldListener(&obj->v140, OBJV->f55C);
+    args[0] = &obj;
+    TriggerScriptEvent(self, 0xD, 1, args);
+}
 
 void SelectEarliestPooledObject(PooledHolder* self)
 {

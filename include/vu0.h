@@ -25,7 +25,9 @@
 //   writes (Dot's 1.0) is a second output.
 // - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
 //   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
-//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat. The word is the
+//   operand itself, which reload loads for the qmtc2: into the register of an address that dies
+//   there (lw s0,0(s0)), or a reload register (docs/TOOLCHAIN.md, "Reloads and stores").
 // - A value retail handles in GPRs (a vector moved there with qmfc2 or lq, floats with mfc1, the
 //   MMI pextlw, pextuw, pcpyld, pcpyud, prot3w, then sq or qmtc2) goes in and out as "r": the
 //   compiler makes the moves and the stores, and the helper holds only the MMI instructions
@@ -109,10 +111,14 @@ struct Vu0 {
 
     // A float in memory into the x of a VU0 register: qmtc2 of its bits, which the compiler
     // loads with lw (FromFloat's operand would be loaded into an FPR and moved with mfc1).
+    // "rV": the memory reference stays the asm's operand until reload ('V' admits memory
+    // before it), and reload, finding it offsettable, loads it into a GPR for "r"; a plain "r"
+    // loads it into a pseudo of its own, which local allocation never gives the dying address's
+    // register.
     static u128 FromFloatAt(const f32& f)
     {
         u128 r;
-        __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(*(const u32*)&f));
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(*(const u32*)&f));
         return r;
     }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 198/324 (61.1%), checked 2026-11-07
+// BYTES 241/324 (74.4%), checked 2026-11-08
 // NEAR: GetAimPoseRotation. The shape is retail's (the gravity scaled by -1 in both arms, the spring term added only with both weights nonzero, the basis built from the owner's velocity and the result). Differs in the registers (retail keeps the attachment in s1 and the owner in s0, ours the reverse), in the address of dir (retail forms `daddu a1,sp` in the prologue and stores through it after the join, ours forms it in each arm) and in where the weight f20 is loaded (retail lw's it into the dead self register after the loads of the vectors; ours with the first weight). The weights are ScalarAt (Vu0::Scalar for a float in memory: FromFloatAt into a slot of its own), which gives retail's one shared slot.
 #include "common.h"
 #include "vu0.h"
