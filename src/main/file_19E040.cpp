@@ -1260,7 +1260,44 @@ INCLUDE_RODATA(D_0024C9B0);
 
 INCLUDE_ASM(func_0019ED58);
 
-INCLUDE_ASM(func_0019F390);
+s32 IsSpinNegligible(void* a);
+s32 IsVelocityNegligible(void* a);
+s32 IsAccelerationNegligible(void* a);
+void TurnMatrixBySpin(void* spin, f32 dt, void* out);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+// The four rows func_0019F390 builds a turn in and TurnMatrixBySpin fills.
+struct EffectFrame {
+    Vec02 r[4];
+};
+
+// An effect's spin and motion over dt: the spin dragged and, when it is not negligible, turned
+// into a rotation the placement (rot50) is multiplied by; then the velocity carried through the
+// spin's frame and the position moved along it.
+void func_0019F390(Effect* self, f32 dt)
+{
+    EffectFrame frame;
+
+    if (IsSpinNegligible(&self->v100) == 0) {
+        f32 len;
+        Mat02 res;
+        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->f110 * dt + 1.0f));
+        len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v100)));
+        if (0.0001f < len) {
+            Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(1.0f / len));
+            BuildAxisAngleMatrix(&frame.r[0], (Mat02*)&frame.r[1], len * dt);
+            MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rot50);
+            *(Mat02*)self->rot50 = res;
+        }
+    }
+    self->q90 = self->q80;
+    if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
+        TurnMatrixBySpin((u8*)self + 0xB0, dt, &frame);
+        u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
+        Vu0::Q(self->qA0) = nv;
+        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), nv, Vu0::Scalar(dt));
+    }
+}
 
 void UpdateEffect(Effect* self)
 {
@@ -2366,7 +2403,56 @@ void TakeDelayedEffectSourcePose(Effect* self)
     self->p134 = 0;
 }
 
-INCLUDE_ASM(func_001A3730);
+// The product a b with MulRotationRowsX's locals, its rows stored to out as quadwords.
+static inline void MulRows(Vec02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    Vu0::Q(out[0]) = Vu0::Q(r.r[0]);
+    Vu0::Q(out[1]) = Vu0::Q(r.r[1]);
+    Vu0::Q(out[2]) = Vu0::Q(r.r[2]);
+}
+
+// An effect homing on its object's frame at the end of its life (once started): its position
+// and velocity steered there through func_00130540 over the time left, and its placement the
+// object's rotation then, turned about f120 by f130 times the share of its life left.
+void func_001A3730(Effect* self, f32 f)
+{
+    Vec02 pos;
+    Vec02 v10;
+    Vec02 v20;
+    Vec02 v30;
+    Mat02 rot;
+    Mat02 turn;
+    f32 t;
+
+    if (!(g_gameClock[1] < self->start)) {
+        self->q90 = self->q80;
+        t = self->start + self->life - g_gameClock[1];
+        t = f >? t;
+        ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, t);
+        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80));
+        u128 w1 = Vu0::Scalar(1.5f / t);
+        u128 w2 = Vu0::Scalar(-0.5f);
+        u128 w3 = Vu0::Scalar(0.25f);
+        u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
+        Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
+        func_00130540(&self->q80, &self->qA0, (const T219C_Params*)&pos, (const f32*)&v10, &v20, &v30, 0, t, f, 1.0f);
+        BuildAxisAngleMatrix((Vec02*)&self->f120, &turn, self->f130 * t / self->life);
+        self->q80 = *(Quad219C*)&v20;
+        self->qA0 = *(Quad219C*)&v30;
+        MulRows(self->rot50, turn, rot);
+    }
+}
 
 void UpdateDelayedEffect(Effect* self)
 {

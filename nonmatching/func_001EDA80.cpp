@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 380/392 (96.9%), checked 2026-11-08
-// NEAR: night-size4: n as a Vu0::Vec (n = NormalizeOr(n, ...) gives retail's vmove into n's register and its size) and ToFloatMoved for the two dots divided (retail's zero and divide order). Still differs in VU0 registers only: retail loads b into vf1 and d into vf2 (ours the reverse; v and w in either order, Vec loads: no change), and the last Dot's product takes vf1 and its 1.0 vf2 (ours the reverse; ToBits, Dot of Vecs, the stores swapped: no change).
+// BYTES 384/392 (98.0%), checked 2026-11-08
+// NEAR: night-size4: n as a Vu0::Vec (n = NormalizeOr(n, ...) gives retail's vmove into n's register and its size) and ToFloatMoved for the two dots divided (retail's zero and divide order). night-sizex2: the differences computed v, w, then u (retail loads b into vf1 and d into vf2). Still differs, 5 words: the last Dot's product takes vf2 and its 1.0 vf1 (retail the reverse); the Dot of Vecs, its operands swapped, StoreX, ToBits or ToFloat, the normal stored first, a new variable for the unit normal and NormalizeOrElse change nothing.
 // In the context of its file, src/main/file_1E88D0.cpp.
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
@@ -12,9 +12,9 @@
 
 void func_001EDA80(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
 {
-    u128 u = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*a));
     u128 v = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     u128 w = Vu0::Sub(Vu0::Q(*d), Vu0::Q(*c));
+    u128 u = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*a));
     Vu0::Vec n;
     n.q = Vu0::Cross(v, w);
     f32 len2 = Vu0::ToFloat(Vu0::Dot(n.q, n.q));

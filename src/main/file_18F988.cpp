@@ -636,7 +636,97 @@ s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 
 s32 GetPointGraphItemIndex(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
 
-INCLUDE_ASM(func_00190EB8);
+s32* AllocateZeroedBackMemory(s32 bytes);
+
+struct SearchLink {
+    GraphPoint* a;
+    GraphPoint* b;
+    f32 length;
+};
+
+struct SearchNode {
+    GraphPoint* point;
+    f32 score;
+    f32 cost;
+    SearchNode* parent;
+    s32 depth;
+    SearchNode* next;
+};
+
+// Whether a point's seen flag was set, setting it.
+static inline s32 Test(s32* slot)
+{
+    if (*slot == 0) {
+        *slot = 1;
+        return 0;
+    }
+    return 1;
+}
+
+static inline s32 WasSearched(PointGraph* graph, s32* seen, GraphPoint* p, GraphPoint* goal)
+{
+    if (p == goal) return 0;
+    return Test(&seen[GetPointGraphItemIndex(graph, (s32)p)]);
+}
+
+// The shortest path through the point graph from one point to another (A*: the open list kept
+// sorted by cost plus straight distance), written back to front into outPath.
+void func_00190EB8(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32 unused, s32* outCount, GraphPoint** outPath)
+{
+    SearchNode start;
+    SearchNode* open;
+    PushBackMemoryMark();
+    s32* seen = AllocateZeroedBackMemory(graph->pointCount << 2);
+    open = 0;
+    SearchNode* cur = &start;
+    outPath[0] = from;
+    start.point = from;
+    start.cost = 0.0f;
+    start.parent = 0;
+    start.depth = 1;
+    u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)from), Vu0::Q(*(Vec02*)goal));
+    start.score = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+    if (from != goal) {
+        do {
+            GraphPoint* here = cur->point;
+            for (s32 i = 0; i < here->linkCount; i++) {
+                SearchLink* link = (SearchLink*)here->links[i];
+                GraphPoint* other = link->a;
+                if (other == here) other = link->b;
+                if (WasSearched(graph, seen, other, goal)) continue;
+                SearchNode* node = (SearchNode*)AllocateBackMemory(sizeof(SearchNode));
+                node->point = other;
+                f32 cost = cur->cost + link->length;
+                node->cost = cost;
+                u128 e = Vu0::Sub(Vu0::Q(*(Vec02*)here), Vu0::Q(*(Vec02*)goal));
+                node->parent = cur;
+                node->score = cost + Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
+                node->depth = cur->depth + 1;
+                SearchNode** pp = &open;
+                SearchNode* c = open;
+                while (c != 0 && !(node->score < c->score)) {
+                    pp = &c->next;
+                    c = c->next;
+                }
+                node->next = c;
+                *pp = node;
+            }
+            cur = open;
+            if (cur == 0) break;
+            open = cur->next;
+        } while (cur->point != goal);
+    }
+    if (cur != 0) {
+        *outCount = cur->depth;
+        while (cur != 0) {
+            outPath[cur->depth - 1] = cur->point;
+            cur = cur->parent;
+        }
+    } else {
+        *outCount = 0;
+    }
+    PopBackMemoryMark();
+}
 
 void SimplifyPointPath(void* a0, s32* a1, s32* a2)
 {
