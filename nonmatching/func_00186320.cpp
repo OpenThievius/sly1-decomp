@@ -226,7 +226,7 @@ s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* o
 
 INCLUDE_ASM(func_00186568);
 
-void MoveMemory(void* dst, void* src, s32 size);
+void* MoveMemory(void* dst, void* src, s32 size);
 
 void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
 {

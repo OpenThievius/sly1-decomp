@@ -465,7 +465,7 @@ struct WarpTextStyle {
 extern f32 D_00276650;
 s32 IsFontLoaded(s32 n);
 Font* GetFontById(s32 n);
-void FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 v, s32 size);
 extern void StartPlacedObject(WarpPage* o);
 s32 IsWarpEntryReachable(WarpPage* o, s32 n);
 void SelectWarpPageEntry(WarpPage* o, s32 n);

@@ -123,7 +123,7 @@ void TurnColliderTowardRotation(Agent* self, Mat02* m, void* rate, f32 dt);
 void SteerColliderTowardPosition(Agent* self, s32 a, s32 b, Vec02* target, s32 c, f32 dt);
 void SteerColliderTowardRotation(Agent* self, Mat02* m, void* a, const Vec02* b, void* c, f32 dt);
 void StepTurningCollider(Agent* self, f32 dt);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
 void func_00130540(Vec02* a, Vec02* b, Vec02* c, Vec02* d, Vec02* outA, Vec02* outB, s32 e, f32 t, f32 u, f32 w);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec02* out, f32 t, f32 u);

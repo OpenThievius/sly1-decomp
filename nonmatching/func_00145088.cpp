@@ -380,7 +380,7 @@ void SetCameraLookAnchor(Camera* self, Quad16* arg);
 
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 
-void MoveMemory(void* dst, void* src, s32 bytes);
+void* MoveMemory(void* dst, void* src, s32 bytes);
 
 void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, s32 arg)
 {

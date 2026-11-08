@@ -7,7 +7,7 @@
 //       Landing it also needs D_002BE490 (0xB0) split at 0x2BE510: the static is 0x80 bytes.
 #include "common.h"
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 
 struct Cfg_18A510 {
     s32 i0; f32 f4; f32 f8; u8 pad1[0x18]; f32 f24; u32 i28; u8 pad2[8]; f32 f34; u8 pad3[0xC]; f32 f44; u32 i48; u8 pad4[4]; f32 f50; f32 f54; u8 pad5[8]; f32 f60; f32 f64; u32 i68; u8 pad6[4]; s32 i70; s32 i74; u8 pad7[8];

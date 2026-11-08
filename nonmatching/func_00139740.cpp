@@ -142,7 +142,7 @@ s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void ResetTextPointToHalf(void* p);
 
 void RefillBufferedStream(BufferedStream* d);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 
 void UnpackBufferedStream(BufferedStream* d);
 
@@ -175,7 +175,7 @@ s32 ReadBufferedS8(BufferedStream* self);
 
 void RemoveEffect(void* handle);
 void SetEffectPhase(void* handle, s32 mode);
-void FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* block, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(void* self, s32 count, void* out);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 787/844 (93.2%), checked 2026-11-07
+// BYTES 791/844 (93.7%), checked 2026-11-08
 // NEAR: wave 4 e3. 844 bytes, same size; instruction order only (regdiff: order, 206 of 211 words equal by opcode): the link pointer of the inner loop and the
 //       copy of the segment pointer take s0 and s1 in the other order (retail: link in s0, which held the first parameter; segment in s1), and the
 //       scheduler orders a few loads/qmtc2 of the opening and of case 0's two quadword copies differently. The kind switch needs a case 2 sharing the
@@ -48,7 +48,7 @@ struct SpanQuery {
 };
 s32 func_0013E430(void* tree, Vec02* centre, SpanRecord** end, f32 r);
 s32 func_00142278(Vec02* p, Vec02* q, u8* a, u8* b, f32 r, s32 max, ColliderSpan* out);
-void FillMemory(void* dst, s32 v, s32 n);
+void* FillMemory(void* dst, s32 v, s32 n);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 

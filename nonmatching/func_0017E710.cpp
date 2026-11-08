@@ -33,7 +33,7 @@ void GatherCollidersInSphere(void* world, void* self, Vec02* center, void* filte
                              Collider*** list, f32 radius);
 s32 IsObjectOfKind(void* object, s32 kind);
 s32 GetObjectWorldPosition(void* object, Vec02* out);
-void FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* dst, s32 value, s32 size);
 PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 // A hit CollectMeshHits gives (0x30 bytes): its point first.
 struct MeshPointHit {

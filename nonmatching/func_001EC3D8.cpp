@@ -45,11 +45,11 @@ typedef void (*PlayerSlotFn)(Player* g, void* arg);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 typedef void (*TempoCallFn)(void);
 s32 FillMemory(Entry90* dst, s32 value, s32 size);
-void FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 v, s32 size);
 
 #include "deferred_request.h"
 #include "camera.h"
-void FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 v, s32 size);
 void DrawAgent(TempoAgent* self, Camera* cam);
 void QueueDeferredRequest(DeferredRequest* r);
 void DrawTempoAgentRing(DeferredRequest* self);

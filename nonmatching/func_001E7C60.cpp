@@ -19,7 +19,7 @@
 
 void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second);
 void UnprojectCameraPoint(void* camera, void* in, void* out);
-void FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 v, s32 n);
 
 s32 AreArcMenusClosed(void);
 extern PadRecord g_padRecord;

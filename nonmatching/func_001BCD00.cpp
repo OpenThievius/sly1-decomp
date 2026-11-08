@@ -58,7 +58,7 @@ typedef void (*SolvePartFn_1BCD00)(Collider* self, void* a, void* b);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
 void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);

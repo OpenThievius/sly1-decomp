@@ -31,7 +31,7 @@ struct ScaledTransform {
     f32 f4c;
 };
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-extern void FillMemory(void*, s32, s32);
+extern void* FillMemory(void*, s32, s32);
 extern f32 ApproachValueWithRamp(void*, s32, f32, f32, f32);
 extern u8 g_unitRange[];
 extern f32 g_fadeRampProfile[4];

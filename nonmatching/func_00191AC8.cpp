@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 416/428, checked 2026-11-07
+// SIZE 416/428, checked 2026-11-08
 // NEAR: the retail scale k is made by mfc1 + a 128-bit store from the GPR (daddu v0,s6; sq v0,0x130(sp)) and read back with lqc2, once per iteration; no plain C form gives it (a union, a cast, FromFloat all give swc1+lq or qmtc2+sqc2): it needs a helper that stores a float's bits as a quadword (func_00118CF0's StoreFloatAsQuadword inline). With FromFloat in its place the rest differs only in registers and the saved registers.
 #include "common.h"
 #include "asm_func.h"
@@ -28,7 +28,7 @@ s32 IsObjectAttached();
 s32 FindSwitchedColliderIndex(SwitchedCollider* value);
 s32 FindSwitchedColliderIndex(void* value);
 void ActivateSwitchedColliderIndex(s32 index);
-void MoveMemory(void* dst, void* src, s32 size);
+void* MoveMemory(void* dst, void* src, s32 size);
 void RegisterCollider(void* self);
 void AddToSwitchedColliderList(void* self);
 void UnregisterCollider(void* self);
@@ -195,7 +195,7 @@ union FloatQuad {
 };
 
 s32 TestOwnerGraphSpan(Obj_191AA8* self, Vec02* pos, Vec02* point, s32 count, ColliderSpan* out);
-void CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, void* src, s32 n);
 void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 
 void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)

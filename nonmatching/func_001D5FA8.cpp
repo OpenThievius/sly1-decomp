@@ -14,7 +14,7 @@
 //       file's .data in function order (docs/AGENT_WORKFLOW.md, "A function-local static").
 #include "common.h"
 
-void FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
 s32 FindAnimRecord(s32 id);
 void DrawAngleSortedRing(void* a, s32 b, void* c, s32 d, s32 e, void* f, void* g);
 extern u8 D_00275070[];
