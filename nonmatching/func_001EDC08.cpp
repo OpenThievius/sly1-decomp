@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 428/424, checked 2026-11-07
+// BYTES 291/424 (68.6%), checked 2026-11-08
+// Night-moved (2026-11-08): ToFloatMoved on the length test gives the size (424); the clamps and VU0 registers are as before (ClampUnit as sequential ifs: 88 words, early returns: same 49).
 // NEAR: the call, the first clamp, MulXSum4 of the four corners with their four Scalars (stored in retail's order), the length and NormalizeOr's fallback copy and the ToBits store are retail's. Still differs: the second clamp keeps its result in the zero's register (f2) where retail gives it f3 and branches with bc1t, and the VU0 registers of the weights and the first point: retail u - 1 vf4, p0 vf5, 1 - v vf6, -u vf7, here vf5, vf4, vf7, vf6. MulXSum4's operands in another order, the clamps as a loop, inline or with v kept in a local: no closer.
 #include "common.h"
 #include "globals.h"
@@ -35,7 +36,7 @@ void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* 
                            Vu0::Q(*q0), Vu0::Scalar(1.0f - st[1]), Vu0::Q(*q1), Vu0::Scalar(st[1]));
     Vu0::Q(*dir) = d;
     u128 len = Vu0::Length(d);
-    if (Vu0::ToFloat(len) < 0.0001f) {
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
         *dir = g_unitXVector;
     } else {
         Vu0::Q(*dir) = Vu0::DivX(d, len);

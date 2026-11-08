@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 595/680 (87.5%), checked 2026-11-07
+// BYTES 605/680 (89.0%), checked 2026-11-08
+// Night-moved (2026-11-08): NormalizeOrMoved loads the unit-Z fallback with lq before the length mtc1 as retail does; left: the callee-saved register assignment (s1/s2, s7/s8, s4) and the dot operands vf1/vf2 order.
 // NEAR (2026-11-08, vu0w3-e1): same size and frame; 7 instructions of 170 differ in order and the rest in registers: retail keeps the frame addresses in s1 (sp+0x20), s2 (sp+0x10), s3, s5 and the link in s7 with &f23E0 in s8 (here s1/s2 and s7/s8 swapped), and loads the unit-Z fallback with lq before the length's mtc1 where here it is in the delay slot of the compare.
 #include "common.h"
 #include "asm_func.h"
@@ -73,7 +74,7 @@ void func_001D2518(Player* self)
     }
     TransformPointBetweenFrames(((PinnedPath*)self->f2208)->f18, 0, &pos, &pos);
     TransformDirectionBetweenFrames(((PinnedPath*)self->f2208)->f18, 0, &dir, &dir);
-    Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(dir), *(const u128*)&g_unitZVector);
+    Vu0::Q(dir) = Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector);
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, &self->f23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(pos));

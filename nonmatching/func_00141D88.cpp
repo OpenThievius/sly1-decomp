@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 363/444 (81.8%), checked 2026-11-07
+// BYTES 403/444 (90.8%), checked 2026-11-08
+// Night-moved (2026-11-08): c, hb and ha read with ToFloatMoved put the head in retail instruction order (sub.s before the second qmfc2, sqc2 after the mul.s); left: only the VU0 registers (retail a=vf4, dots vf3, ones vf5; ours a=vf3, ones vf4, dots vf5). Reordering the three dots or the two subs did not change them.
 // NEAR: Vu0::Copy gives retail's vmove (the copy for the length and the first store, the division by the original; NormalizeOfCopy below is NormalizeOr with the length of the copy), and the loop is retail's. Still differs: the head's scheduling only (retail puts sub.s before the qmfc2 of the second dot and the sqc2 of the stack vector after the mul.s; reordering the three dots changes nothing).
 #include "common.h"
 #include "asm_func.h"
@@ -37,9 +38,9 @@ s32 func_00141D88(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderS
     f32 roots[2];
     Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(pa) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*p));
-    f32 c = Vu0::ToFloat(Vu0::Dot(Vu0::Q(pa), Vu0::Q(pa))) - radius * radius;
-    f32 hb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(pa)));
-    f32 ha = Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
+    f32 c = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(pa), Vu0::Q(pa))) - radius * radius;
+    f32 hb = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ab), Vu0::Q(pa)));
+    f32 ha = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
     f32 twoB = hb + hb;
     f32 disc = twoB * twoB - ha * (c * 4.0f);
     if (disc < 0.0001f) {
