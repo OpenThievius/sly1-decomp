@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 548/544, checked 2026-11-07
-// NEAR: wave 4 e3. 544 bytes; ours 548, frame 112 against retail's 96. The shape is retail's (both vectors normalised with the unit Z as fallback, the cross and its two fallbacks on X and Y,
-//       the cosine, the axis divided by its length, Arccosine, BuildAxisAngleMatrix). It needs a helper the header lacks: retail keeps the length that the last Length left in v0 (qmfc2.ni v0, vf2)
-//       and uses that same GPR twice: mtc1 v0, f1 for the compare and qmtc2.ni v0, vf4 for the DivX (0x189EFC: qmtc2.ni v0,vf4; lqc2 vf1,0x10(sp); lqc2 vf3,0x20(sp); ... vdiv Q,vf0w,vf4x;
-//       vmulq.xyzw vf3,vf3,Q; qmfc2.ni v0,vf2; mtc1 v0,f12; sqc2 vf3,0x20(sp); jal Arccosine; sqc2 vf4,0x30(sp)). Ours goes through an FPR (mtc1, then mfc1 and qmtc2) and a second slot.
-//       The helper: a vector from a GPR holding a float's bits (qmtc2 of an "r" u128/u32 operand, stored to the Scalar slot) beside ToFloatMoved. ~8 compiles.
+// NEAR: night-lever2. ScalarOfGpr below (a GPR holding the length's bits qmtc2'd into the Scalar slot, beside ToFloatMoved) gives retail's qmfc2.ni v0 used for both the mtc1 and the qmtc2.ni v0,vf4; it would be a helper for vu0.h. Still differs: the frame, 112 against retail's 96: ours keeps &axis (addiu s0,sp,32) in a callee-saved register and out in s1, where retail keeps out in s0 and forms addiu a0,sp,32 after Arccosine's call; the scheduling of the head follows (lq of the fallback and the order of the mtc1/c.lt). Computing Arccosine first, or casting the address, changes nothing.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -17,6 +13,14 @@ extern u8 g_unitYVector[];
 extern u8 g_unitZVector[];
 f32 Arccosine(f32 x);
 void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle);
+static inline u128 ScalarOfGpr(u128 g)
+{
+    Vu0::Slot t;
+    u128 r;
+    __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(g));
+    Vu0::Q(t) = r;
+    return Vu0::Q(t);
+}
 void func_00189D38(Vec02* from, Vec02* to, Mat4* out)
 {
     Vec02 a = *from;
@@ -37,6 +41,6 @@ void func_00189D38(Vec02* from, Vec02* to, Mat4* out)
         }
     }
     u128 cosine = Vu0::Dot(Vu0::Q(a), Vu0::Q(b));
-    Vu0::Set(axis, Vu0::DivX(Vu0::Q(axis), Vu0::Scalar(Vu0::ToFloatMoved(len))));
+    Vu0::Set(axis, Vu0::DivX(Vu0::Q(axis), ScalarOfGpr(len)));
     BuildAxisAngleMatrix(&axis.x, out, Arccosine(Vu0::ToFloat(cosine)));
 }

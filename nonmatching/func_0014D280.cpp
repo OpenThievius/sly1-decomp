@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 288/292, checked 2026-11-07
-// NEAR (2026-11-08, vu0w3-e1): the position half and the call are exact; in the tangent half retail subtracts into vf4, copies it with a vmove to vf1 (stored to *tan, the length's operand, and the sqrt's result), and divides vf4 by the length; here one register holds the difference throughout, so the vmove, the registers of the Dot and the sqrt differ. Tried the stored value read back, Length and DivX written out, a ternary.
+// BYTES 276/292 (94.5%), checked 2026-11-07
+// NEAR (night-lever2): Vu0::Copy gives retail's vmove and the file-local NormalizeOfCopy (NormalizeOr with the length of the copy) the rest: everything is retail's except where the first store of the tangent falls (ours before the Dot's vmul, retail's after the Dot, before the sqrt). Splitting Length into Dot, store, Sqrt puts the store right but hoists the fallback's lq above the vmove (an inline ternary or a helper without the fallback argument loads it with lqc2 in the branch instead).
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -90,6 +90,15 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
 
+static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
+{
+    u128 len = Vu0::Length(vc);
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        return fallback;
+    }
+    return Vu0::DivX(v, len);
+}
+
 void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 wrap, Vec02* pos, Vec02* tan)
 {
     f32 lo;
@@ -101,8 +110,9 @@ void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 
     }
     if (tan) {
         u128 d = Vu0::Sub(Vu0::Q(points[i + 1]), Vu0::Q(points[i]));
-        Vu0::Q(*tan) = d;
-        Vu0::Q(*tan) = Vu0::NormalizeOr(d, Vu0::Q(g_unitXVector));
+        u128 dc = Vu0::Copy(d);
+        Vu0::Q(*tan) = dc;
+        Vu0::Q(*tan) = NormalizeOfCopy(d, dc, Vu0::Q(g_unitXVector));
     }
 }
 
