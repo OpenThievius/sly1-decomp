@@ -21,7 +21,7 @@ D_00249E50	00249E50	64	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	184	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	20	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
-D_0024A120	0024A120	400	.rodata	src/main/file_1549C8.cpp
+D_0024A120	0024A120	412	.rodata	src/main/file_1549C8.cpp
 D_0024A2D0	0024A2D0	1136	.rodata	src/main/file_15F678.cpp
 D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
 D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
