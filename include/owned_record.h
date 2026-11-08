@@ -6,13 +6,16 @@
 #ifndef OWNED_RECORD_H
 #define OWNED_RECORD_H
 
-#include "common.h"
+#include "placed_object.h"
 
 struct OwnedRecord {
-    u8 pad0000[0x1088];
+    Vec02 points[2][0x84];  // 0x0000: two banks of points; bank picks the one in use (func_00155868 wraps them)
+    s32 bank;               // 0x1080
+    s32 count;              // 0x1084: the points in use
     void* extraRecord;      // 0x1088: the 0x580-byte record (pool World+0x1B4C), cleared too
     void* owner;            // 0x108C: the object that keeps the record (func_00139C70's first argument)
-    u8 pad1090[0x10C0 - 0x1090];
+    OwnedRecord* next;      // 0x1090: the next in the owner's list (WorldListedObject::members)
+    u8 pad1094[0x10C0 - 0x1094];
 };
 
 typedef char check_OwnedRecord[sizeof(OwnedRecord) == 0x10C0 ? 1 : -1];

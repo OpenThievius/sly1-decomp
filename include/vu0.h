@@ -26,6 +26,11 @@
 // - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
 //   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
 //   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+// - A value retail handles in GPRs (a vector moved there with qmfc2 or lq, floats with mfc1, the
+//   MMI pextlw, pextuw, pcpyld, pcpyud, prot3w, then sq or qmtc2) goes in and out as "r": the
+//   compiler makes the moves and the stores, and the helper holds only the MMI instructions
+//   (ToFloatY, ToFloatZ, Splat, FromFloats, Transpose). A float out of a GPR is "=r", so its
+//   mtc1 is a reload in whatever GPR is free there, as retail's is.
 // - Length and NormalizeOr are C over the helpers, not sequences of their own: NormalizeOr's
 //   test is compiled code, and its fallback is an argument because retail loads it before the
 //   test (lq, then qmtc2 on the fallback's path).
@@ -65,6 +70,16 @@ struct Vu0 {
     {
         u128 r;
         __asm__("vmaxw.xyzw %0, vf0, vf0w" : "=j"(r));
+        return r;
+    }
+
+    // A copy of a in another VU0 register: vmove.xyzw. A plain `u128 b = a;` is a copy only
+    // across basic blocks; within one CSE folds it away, and retail's vmove there (a value
+    // kept whole while a copy of it is used up) is this one.
+    static u128 Copy(u128 a)
+    {
+        u128 r;
+        __asm__("vmove.xyzw %0, %1" : "=j"(r) : "j"(a));
         return r;
     }
 
