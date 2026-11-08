@@ -3331,7 +3331,32 @@ f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hit
     return spans[0].time[1] - spans[0].time[0];
 }
 
-INCLUDE_ASM(func_001EF768);
+struct SwingRecord {
+    u8 pad00[0x0C];
+    Oscillator* osc;        // 0x0C
+};
+
+void UpdateColliderBounds(Collider* self);
+void ComputeOscillatorMaxDisplacement(Oscillator* osc, Vec02* out);
+
+// Grows the box and both radii by the oscillator's largest swing.
+void UpdateAttachedSetBounds(AttachedSet* self)
+{
+    UpdateColliderBounds(self);
+    SwingRecord* r = (SwingRecord*)self->f278;
+    if (r != 0 && r->osc != 0) {
+        Vec02 d;
+        ComputeOscillatorMaxDisplacement(r->osc, &d);
+        u128 v = Vu0::Q(d);
+        f32 len = Vu0::ToFloatMoved(Vu0::SelfLength(v));
+        u128 lo = Vu0::Q(self->boundsMin);
+        u128 hi = Vu0::Q(self->boundsMax);
+        Vu0::Q(self->boundsMax) = Vu0::Add(hi, v);
+        Vu0::Q(self->boundsMin) = Vu0::Sub(lo, v);
+        self->radius3D0 += len;
+        self->radius3D4 += len;
+    }
+}
 
 s32 RequestAttachedSetLaunch(AttachedSet* self)
 {

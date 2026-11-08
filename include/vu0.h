@@ -358,6 +358,23 @@ struct Vu0 {
         return Sqrt(Dot(v, v));
     }
 
+    // Dot of one vector with itself, the vector a single input: vmul.xyz r, v, v. Given as one
+    // operand, v takes another register than Dot(v, v) gives it, and the 1.0 the other way
+    // round: retail's vf3 for v and vf2 for 1.0 in func_001EF768.
+    static u128 SelfDot(u128 v)
+    {
+        u128 r, one;
+        __asm__("vmul.xyz %0, %2, %2\n\tvaddw.x %1, vf0, vf0w\n\tvadday.x ACC, %0, %0y\n\tvmaddz.x %0, %1, %0z"
+                : "=j"(r), "=j"(one) : "j"(v));
+        return r;
+    }
+
+    // The length of v's xyz through SelfDot: v a single input to the dot (func_001EF768).
+    static u128 SelfLength(u128 v)
+    {
+        return Sqrt(SelfDot(v));
+    }
+
     // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001. The
     // length's test reads it through ToFloatMoved: retail's mtc1 follows the qmfc2 at once, which
     // the compiler's own qmfc2 gives and ToFloat's does not (func_00189B18, func_00189C28).
