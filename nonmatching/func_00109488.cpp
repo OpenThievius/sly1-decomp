@@ -18,6 +18,23 @@
 // gives retail's exact instruction count and opcode counts (9,348, no opcode off). But it puts the
 // 553 window 13 insns early and matches only 1,183 exactly.
 //
+// Why 4 is rebuilt or not (2026-11-08, worker big-109488; docs/TOOLCHAIN.md, "Constants in one
+// very long block"; scripts in build/swarm/big-109488/). The function has no call, so no callee's
+// return type is involved. Reload looks for a reloaded constant only in the hard register of the
+// nearest earlier insn that sets one to it (find_equiv_reg), and gives up if that register has
+// changed since. Retail's window-2 pseudo of 4 (set at entry 79, stored at 142-237; ours is pseudo
+// 951, born and used at the same entries) has t8; t8 is reused after 237, so every later 4 is
+// rebuilt. Ours never places 951: local-alloc finds every register taken somewhere in its life by
+// a pseudo of higher priority (t8 by the 18 born at entry 235 for entries 656-750, overlapping 951's
+// last 35 insns; t9 by the 4242 born at entry 169), and global-alloc fails too, so the only hard
+// register ever set to 4 is s5 (pseudo 118, which evicted s5's local pseudos in global-alloc's
+// "poorly used" rule and so keeps it alone), and every 4 is stored from s5. Merging Set10 (one
+// argument for fC, f14 and f18) gives 951 t8 in local-alloc and retail's 24 `li 4` exactly, but
+// moves the windows (9,425 instructions, 1,190 exact). func_00155778 (+7) is the same kind of loss:
+// pseudo 2083 gets no register. Reload's registers are s1, s3 and s6 here (about 270 sets each),
+// t9 and s1 then s4, s8, t8 and s2 in retail: order_regs_for_reload takes, per insn, the
+// registers holding no live pseudo first, so they name where the long pseudos sit.
+//
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
 // Global alloc gives it a callee-saved register (s5 here). In this form and every earlier one, no
