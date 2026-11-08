@@ -474,6 +474,12 @@ class PermuterTest(unittest.TestCase):
         self.assertIn("#define Fpu__Sqrt Fpu::Sqrt", compiled)
         self.assertNotIn("permuter_alias_", compiled)
 
+    def test_nested_scopes_become_one_alias(self):
+        body = "void func_00100030(Vec v)\n{\n    v = Vu0::Vec::Of(v);\n}"
+        plain, aliases = permuter_setup.plain_calls(body, set())
+        self.assertIn("v = Vu0__Vec__Of(v);", plain)
+        self.assertEqual(aliases, [("Vu0__Vec__Of", "Vu0::Vec::Of")])
+
     def test_only_the_function_keeps_its_body(self):
         text = permuter_compile.only_definition(self.UNIT, "func_00100010")
         self.assertIn("void func_00100000(Obj* o)\n;", text)

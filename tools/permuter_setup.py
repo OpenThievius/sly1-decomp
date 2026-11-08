@@ -86,14 +86,14 @@ def items(text):
 
 def plain_calls(body, tags):
     """FUNC's body with the C++ calls in it given plain names, and the macros that turn them back:
-    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)`, a type called like a function `T()` becomes `make_T()`."""
+    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)` (`Vu0::Vec::Of` `Vu0__Vec__Of`), a type called like a function `T()` becomes `make_T()`."""
     aliases = {}
 
     def scoped(m):
-        alias = "%s__%s" % (m.group(1), m.group(2))
-        aliases[alias] = "%s::%s" % (m.group(1), m.group(2))
+        alias = m.group(1).replace("::", "__")
+        aliases[alias] = m.group(1)
         return alias + "("
-    body = re.sub(r"\b([A-Za-z_]\w*)::([A-Za-z_]\w*)\s*\(", scoped, body)
+    body = re.sub(r"\b([A-Za-z_]\w*(?:::[A-Za-z_]\w*)+)\s*\(", scoped, body)
     head, brace, rest = body.partition("{")
 
     def construct(m):
