@@ -11,6 +11,12 @@
 
 struct SwitchedCollider;
 struct TurningCollider;
+// An object the player hit and the clock when (Player::f26D8).
+struct HitStamp {
+    Collider* obj;          // 0x00
+    f32 time;               // 0x04
+};
+
 struct Player;
 struct ObjectMessage;    // object_message.h
 struct BeatPressCollider;
@@ -332,7 +338,8 @@ struct Player : TurningCollider {
     f32 f242C;              // 0x242C
     f32 f2430;              // 0x2430
     f32 f2434;              // 0x2434
-    u8 pad2438[0x2498 - 0x2438];
+    Collider* f2438;        // 0x2438: the object it is aimed at (func_001D66A8)
+    u8 pad243C[0x2498 - 0x243C];
     s32 f2498;              // 0x2498
     u8 pad249C[0x24A0 - 0x249C];
     void* f24A0;            // 0x24A0
@@ -378,7 +385,8 @@ struct Player : TurningCollider {
     f32 f26CC;              // 0x26CC
     f32 f26D0;              // 0x26D0
     void* f26D4;            // 0x26D4: the object that sent the player to state 9 (func_00178068)
-    u8 pad26D8[0x2718 - 0x26D8];
+    HitStamp f26D8[8];      // 0x26D8: the objects func_001D66A8 hit and when
+
     s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
