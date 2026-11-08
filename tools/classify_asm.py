@@ -299,7 +299,27 @@ def derive_only_eu():
     funcs = todo.functions("eu")
     refs = references_of([f[0] for f in funcs], "eu")
     # Every PAL function takes part, so a remnant sees the code before it.
-    return [r for r in classify(funcs, todo.bodies("eu"), refs, key="eu") if r[0] in only]
+    rows = [r for r in classify(funcs, todo.bodies("eu"), refs, key="eu") if r[0] in only]
+    # A function only PAL has whose bytes are one of US's original-assembly functions (the same
+    # libc routine linked twice) is that, whatever the archive's member names could not say.
+    import check
+    us_img, eu_img = check.retail_image("us"), check.retail_image("eu")
+    us_rows = {}
+    for line in TABLE.read_text().splitlines()[1:] if TABLE.exists() else []:
+        name, addr, size, kind, _why = line.split("\t")
+        if kind != "inline":
+            us_rows.setdefault(int(size), []).append((name, int(addr, 16), kind))
+    have = {r[0] for r in rows}
+    # Every function only PAL has, the libraries' too (version_src.only_here lists game code only).
+    unpaired = {l.split("\t")[0] for l in (ROOT / "config" / "eu" / "map.tsv").read_text().splitlines()[1:]
+                if l.split("\t")[3] == "-"} - done
+    for name, addr, size in [(f[0], f[1], f[2]) for f in funcs if f[0] in unpaired and f[0] not in have]:
+        body = eu_img.read_vaddr(addr, size)
+        for us_name, us_addr, kind in us_rows.get(size, []):
+            if us_img.read_vaddr(us_addr, size) == body:
+                rows.append((name, addr, size, kind, "the bytes of US %s (%s)" % (us_name, kind)))
+                break
+    return rows
 
 
 def render(rows):
