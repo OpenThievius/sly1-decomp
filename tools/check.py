@@ -468,6 +468,15 @@ def main(argv=None):
     own = version_src.version_of(args.src)
     if args.unit:
         own = (args.version if args.version != "us" else "eu", Path(args.unit).resolve())
+    # A file that still includes the function's assembly holds retail's bytes under its name:
+    # the C would be scored against itself and read EXACT whatever it is.
+    unit_src = Path(own[1]) if own else Path(args.src)
+    text = unit_src.read_text(errors="replace")
+    for name in args.funcs:
+        if re.search(r"^\s*INCLUDE_ASM\(\s*%s\s*\)" % re.escape(name), text, re.M):
+            print("ERROR: %s still includes %s's assembly (INCLUDE_ASM): replace that line with the C "
+                  "before checking it" % (unit_src.name, name))
+            return 2
     if own and args.version == "us":
         args.version = own[0]       # a version's own definition is checked in that version
     with tempfile.TemporaryDirectory(prefix="sly1-check-") as tmp:
