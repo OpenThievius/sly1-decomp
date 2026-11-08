@@ -689,6 +689,51 @@ func_001F0AE0):
 - **Ruled out for that load** (func_001F0AE0): about 25 statement shapes of the test and the
   selection, byte-offset reads, a local copy, a reference-returning inline accessor (cse
   folds the address back to `self + 732`), and a `long` cast in the comparison.
+- **The table's size is the function's insn count, and it orders the pseudos PRE makes.**
+  alloc_expr_hash_table sizes the expression table `n_insns / 2`, made odd, with `n_insns` the
+  number of insns when gcse starts (the `.addressof` dump: count the `(insn`, `(jump_insn` and
+  `(call_insn` lines; this compiler's table is the public formula's for that count plus 3, so
+  824 gives 413 buckets and 825 gives 415). The table is walked bucket by bucket, so its size
+  sets the order of the reaching registers PRE creates, and reload gives spilled pseudos their
+  stack slots in pseudo order. One insn more or less anywhere in a big function can reorder
+  its spill slots (func_00179A68: a statement that adds one insn put one slot at the end of
+  eight). Each Vu0::Vec value passed to or returned from an inline is a `movti` copy at that
+  point (vu0.h), so the Vec and u128 forms of one expression are the knob: write the form whose
+  count keeps the table retail's. `-dG` prints the size: `Expression hash table (N buckets`.
+
+## sched1
+
+GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
+which pseudos are live together, so it decides registers. How it chooses, read from its
+source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
+
+- **A list scheduler, top-down, by cycle.** Each cycle the ready insns are sorted by
+  `rank_for_schedule` (priority, then `INSN_REG_WEIGHT`, then the class of dependence on the
+  last insn scheduled, then the number of dependents, then insn order) and issued from the best
+  while their function unit is free (the machine description's units: memory, two alus,
+  fmac, fdiv, flop). Insns of different units issue in the same cycle in rank order, and that
+  order is the insn order register allocation sees. An insn's static priority (the `prio`
+  column of the dump's dependence table) is the length of its longest path to the block's end
+  in latency (a load 2, mul.s and add.s 3).
+- **adjust_priority raises an insn that births a pseudo.** When an insn's last dependence is
+  resolved, adjust_priority runs on it. Its REG_DEAD test never fires (the notes are gone by
+  then), so the only case that acts is the "birthing" one: an insn whose single SET is a pseudo
+  that is set once in the whole function (`REG_N_SETS == 1`) and live at the block's end
+  (birthing_insn_p) gets its priority raised to `max_priority`, the higher of the insn just
+  scheduled and the lowest-ranked ready insn. So a load into a variable or parameter set once
+  outranks the arithmetic around it, and an add whose result is assigned again later (a
+  clamp written in place, `v = lo` / `v = hi`) keeps its static priority.
+- **Diagnosing it.** The dump's `Ready list (t = N):` lines list the sorted ready insns, best
+  last; a priority that is not the table's `prio` is adjust_priority's.
+- **ControlModeCollider (func_00179A68).** `f700 = Clamp(f700 + dt * f708, b[0], b[1])`
+  written in place left the add at priority 7 while the load of `b[1]`, born once, went from 2
+  to 8 when the store before it was scheduled. Both were ready in cycle 6; the load went first
+  and was live across the product in $f0, so it got $f3 where retail has $f0. Written as a clamp
+  that returns its result (`if (v < lo) return lo; if (hi < v) return hi; return v;`) the sum
+  is a pseudo set once, the add is raised to 10 when the multiply is scheduled, and it is
+  issued before the load: retail's registers. That form costs one insn more (the copy of v to
+  the result), which moved one spill slot through gcse's table size (GCSE above); one Vec
+  difference stored through `Vu0::Q(...) = ... .q` gives the insn back.
 
 ## Shapes of large functions
 
