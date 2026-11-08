@@ -93,7 +93,47 @@ void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
     }
 }
 
-INCLUDE_ASM(func_001C4618);
+struct FollowProbe {
+    u8 pad00[0x50];
+    s32 f50;
+    u8 pad54[0x60 - 0x54];
+    Vec02 v60;
+    Vec02 v70;
+    f32 f80;
+    u8 pad84[0xD0 - 0x84];
+    f32 fD0;
+};
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+
+void func_001C4618(s32 a0, PlacedObject* self, s32 a2, PlacedObject* obj, FollowProbe* out, f32 radius)
+{
+    Vec02 pos;
+    Vec02 dir;
+    out->f50 = 0;
+    Rec2195_224* rec = obj->f224;
+    if (rec != 0 && (rec->fB0 & 0x20) != 0) {
+        TransformPointBetweenFrames(obj, 0, (u8*)rec + 0x60, &pos);
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->f224->f80)->v140));
+        u128 len = Vu0::Length(Vu0::Q(dir));
+        const Vec02* fallback = &g_unitXVector;
+        if (Vu0::ToFloat(len) < 0.0001f) {
+            dir = *fallback;
+        } else {
+            Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), len);
+        }
+        f32 dist = Vu0::ToFloatMoved(len) - 15.0f;
+        out->f80 = dist;
+        if (dist < 0.0001f) {
+            return;
+        }
+        u128 base = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(g_unitZVector), Vu0::Scalar(-radius));
+        u128 tip = Vu0::MulAddX(base, Vu0::Q(dir), Vu0::Scalar(-dist));
+        Vu0::Q(out->v70) = tip;
+        out->f50 = 1;
+        Vu0::Q(out->v60) = base;
+        out->fD0 = D_0024D588;
+    }
+}
 
 s32 CollectColliderSpansInTree(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
 
