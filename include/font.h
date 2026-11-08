@@ -110,6 +110,8 @@ struct Font {
     u32 mask;               // 0x80: bit in D_002622D8->flags marking the state as sent
     u8 pad84[4];            // 0x84
 
+    // A copy at the scales (sx, sy), through its table's entry 1 (SetupTextPanel).
+    Font* Clone(f32 sx, f32 sy) { return vt->clone((Font*)((u8*)this + vt->adj1), sx, sy); }
     // Whether the font has a glyph for `c`, through its table's entry 2.
     s32 Has(s32 c) { return vt->has((Font*)((u8*)this + vt->adj2), c); }
     // Entries 3 to 7, as func_0015E318 calls them: a character's width, then the begin, flush,
