@@ -27,7 +27,7 @@ struct BitReader_2115C0 {
     u32 bufSize;
 };
 
-s64 PeekBits(BitReader_2115C0* self, s32 n);
+s32 PeekBits(BitReader_2115C0* self, s32 n);
 void AdvanceBits(BitReader_2115C0* self, s32 n);
 
 void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
@@ -43,7 +43,10 @@ void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
     AdvanceBits(self, 0);
 }
 
-INCLUDE_ASM(func_002115F8);
+s32 PeekBits(BitReader_2115C0* self, s32 n)
+{
+    return self->window >> (64 - n);
+}
 
 INCLUDE_ASM(func_00211618);
 

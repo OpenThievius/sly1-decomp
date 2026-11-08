@@ -23,16 +23,29 @@ typedef struct PadSlot {
 
 /* One of the two frames of a slot's buffer, 0x80 bytes. */
 typedef struct PadFrame {
-    u8 head[0x58];
+    u8 head[0x30];
+    u8 f30[8][4];
+    u16 f50[4];
     s32 count;
     u8 pad5C[4];
     s32 size;
-    u8 pad64[3];
+    u8 f64;
+    u8 f65;
+    u8 f66;
     u8 f67;
-    u8 pad68[8];
+    u8 f68;
+    u8 f69;
+    u8 f6A;
+    u8 pad6B[5];
     u8 state;
     u8 mode;
-    u8 pad72[0x0E];
+    u8 f72;
+    u8 pad73[6];
+    u8 f79;
+    u8 f7A;
+    u8 f7B;
+    u8 f7C;
+    u8 pad7D[3];
 } PadFrame;
 
 /* The requests sent to the pad module, each a view of the request buffer. */
@@ -209,9 +222,71 @@ u32 GetPadRequestMode(s32 port, s32 slot)
 }
 
 LINKER_REMNANT(func_002046C8);
-INCLUDE_ASM(func_002046D0);
+s32 func_002046D0(s32 port, s32 slot, s32 index, s32 kind)
+{
+    PadFrame* frame;
+    s32 count;
+
+    if (g_padSlots[port][slot].open == 0)
+        return 0;
+    frame = GetNewerPadFrame(port, slot);
+    if (frame->f72 != 1)
+        return 0;
+    if (frame->f64 < 2)
+        return 0;
+    count = frame->f6A;
+    if (index >= count)
+        return 0;
+    if (index == -1)
+        return count;
+    switch (kind) {
+    case 1:
+        return frame->f30[index][0];
+    case 2:
+        return frame->f30[index][1];
+    case 3:
+        return frame->f30[index][2];
+    case 4:
+        return frame->f30[index][3];
+    }
+    return 0;
+}
 LINKER_REMNANT(func_002047F0);
-INCLUDE_ASM(func_002047F8);
+s32 func_002047F8(s32 port, s32 slot, s32 kind, s32 index)
+{
+    PadFrame* frame;
+
+    if (g_padSlots[port][slot].open == 0)
+        return 0;
+    frame = GetNewerPadFrame(port, slot);
+    if (frame->f72 != 1)
+        return 0;
+    if (frame->mode == 2)
+        return 0;
+    switch (kind) {
+    case 1:
+        if (frame->f65 == 0xF3)
+            return 0;
+        return frame->f65 >> 4;
+    case 2:
+        if (frame->f64 == 1)
+            return 0;
+        return frame->f50[frame->f69];
+    case 3:
+        if (frame->f64 == 1)
+            return 0;
+        return frame->f69;
+    case 4:
+        if (frame->f64 == 1)
+            return 0;
+        if (index == -1)
+            return frame->f68;
+        if (index < frame->f68)
+            return frame->f50[index];
+        return 0;
+    }
+    return 0;
+}
 
 s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3)
 {
@@ -233,7 +308,27 @@ s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3)
     return result;
 }
 
-INCLUDE_ASM(func_002049E8);
+s32 SetPadActuatorBytes(s32 port, s32 slot, u8* src)
+{
+    u32* dma;
+    u8* bytes;
+    s32 i;
+    s32 ok;
+
+    if (GetNewerPadFrame(port, slot)->f72 != 1)
+        return 0;
+    dma = g_padSlots[port][slot].dma;
+    bytes = (u8*)(dma + 3);
+    for (i = 0; i < 6; i++)
+        bytes[i] = src[i];
+    ok = 1;
+    dma[1] = 1;
+    dma[2] = 6;
+    if (SendPadDma(port, slot) != 1)
+        ok = 0;
+    return ok;
+}
+
 
 s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
 {
@@ -255,7 +350,22 @@ s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
     return request->result;
 }
 
-INCLUDE_ASM(func_00204B80);
+s32 func_00204B80(s32 port, s32 slot)
+{
+    PadFrame* frame;
+
+    if (g_padSlots[port][slot].open == 0)
+        return 0;
+    frame = GetNewerPadFrame(port, slot);
+    if (frame->f72 != 1)
+        return 0;
+    if (frame->f64 < 2)
+        return 0;
+    if (frame->f66 < 2)
+        return 0;
+    return frame->f79 + ((u64)frame->f7A << 8) + ((u64)frame->f7B << 16) + ((u64)frame->f7C << 24);
+}
+
 
 s32 SendPadMaskRequest(s32 port, s32 slot, s32 data)
 {

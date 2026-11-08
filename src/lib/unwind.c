@@ -4,8 +4,7 @@
  * address's record, the reading of its common record and instructions, and the registration of a
  * table, which throw (src/lib/throw.c) relies on to unwind each frame. C, built by the Linux cc1
  * of 2.9-ee-991111 (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
- * code; func_001FF1E0, func_001FF658 and func_001FFBE0 are not matched yet (func_001FF658 and
- * func_001FFBE0 are near misses in nonmatching/). */
+ * code; func_001FF1E0 is not matched yet. */
 #include "common.h"
 #include "asm_func.h"
 
@@ -93,6 +92,13 @@ typedef struct KeyedArray {
 
 /* The head of the blocks of frame descriptions. */
 static FrameTable* D_0062A7B8;
+/* The lock of the list, in a runtime built for one thread: its functions do nothing. It sits in the
+ * word after the list (nothing reads it), and its inline functions keep func_001FF658's check of
+ * the walk's result where retail has it. */
+static s32 D_0062A7BC;
+
+static inline s32 LockFrameTables(s32* lock) { return 0; }
+static inline s32 UnlockFrameTables(s32* lock) { return 0; }
 
 s32 CompareStrings(const char* a, const char* b);
 s32 GetStringLength(const char* s);
@@ -107,6 +113,7 @@ u8* ReadUnsignedLeb128(u8* input, u32* output);
 FrameDesc** func_001FF1E0(FrameList* list, s32 count);
 s32 func_001FF448(FrameDesc* p);
 void func_001FF490(FrameDesc* cur, FrameList* list, s32* lo, s32* hi);
+void func_001FFE58(KeyedArray* self, KeyedArray* out);
 
 u8* ReadUnsignedLeb128(u8* input, u32* output)
 {
@@ -257,7 +264,37 @@ void func_001FF518(FrameTable* self)
     self->end = acc.hi;
 }
 
-INCLUDE_ASM(func_001FF658);
+FrameDesc* func_001FF658(void* pc)
+{
+    FrameTable* t;
+    u32 lo, hi, mid;
+    FrameDesc* f;
+
+    LockFrameTables(&D_0062A7BC);
+    for (t = D_0062A7B8; t != 0; t = t->next) {
+        if (t->start == 0)
+            func_001FF518(t);
+        if ((u32)pc >= t->start && (u32)pc < t->end)
+            break;
+    }
+    UnlockFrameTables(&D_0062A7BC);
+    if (t == 0)
+        return 0;
+
+    lo = 0;
+    hi = t->count;
+    while (lo < hi) {
+        mid = (lo + hi) / 2;
+        f = t->sorted[mid];
+        if (pc < f->start)
+            hi = mid;
+        else if ((u32)pc >= (u32)f->start + f->range)
+            lo = mid + 1;
+        else
+            return f;
+    }
+    return 0;
+}
 
 u8* func_001FF740(FrameDesc* f, CommonInfo* info)
 {
@@ -390,7 +427,16 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
     return p;
 }
 
-INCLUDE_ASM(func_001FFBE0);
+void RegisterFrameInfo(void* begin, FrameTable* ob)
+{
+    ob->records = begin;
+    ob->start = ob->end = 0;
+    ob->count = 0;
+    ob->next = D_0062A7B8;
+    D_0062A7B8 = ob;
+    ob->sorted = (FrameDesc**)begin;
+}
+
 
 FrameTable* DeregisterFrameInfo(void* value)
 {
