@@ -1879,7 +1879,22 @@ void InitShortFallingEffect(Effect* self)
     self->qC0 = *(Quad219C*)&g->gravity;
 }
 
-INCLUDE_ASM(func_001A0C98);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
+void ProjectPointToCamera(Camera* cam, void* pos, void* out);
+
+void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
+{
+    InitEffect(self, pos, scale, flags);
+    const T219C_Params* p = self->params;
+    ProjectPointToCamera(g_camera, pos, &self->f120);
+    f32 x = RandomFloatInRange(p->rows[8], p->rows[12]);
+    f32 y = RandomFloatInRange(p->rows[9], p->rows[13]);
+    f32 z = RandomFloatInRange(p->rows[10], p->rows[14]);
+    self->life = D_0026B5F0[0];
+    Vu0::Q(self->qA0) = Vu0::FromFloats(x, y, z);
+    self->q40 = D_00275C50;
+    self->q30 = *(const Quad219C*)&p->rows[20];
+}
 
 void func_00130540(void* a, void* b, const T219C_Params* c, const f32* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
 void func_00144128(Camera* cam, void* point, void* out);
