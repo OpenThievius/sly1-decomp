@@ -7,6 +7,15 @@
 //       packet's last three, the callback argument as void* (worse), the tails rearranged until
 //       retail's branches matched.
 // permute.py --auto (2026-11-08, night-orders): 5 runs of 7/2/4/2/2 lines (5070 orders): best 10 bytes differ, as it stands.
+// Mechanism (2026-11-08, docs/TOOLCHAIN.md, "Sony's compiler separates memory by type"): Sony's
+//       compiler has type-based aliasing at -O2, and the ninth argument's load is moved by
+//       update_equiv_regs to just before its store, a local quantity placed first ($v0). With
+//       `self->id = packet->id;` written first, sched1 issues the id's load before the argument's
+//       store and every register is retail's, but the stores come out argument, id, ..., packet
+//       and callback last (pointer stores, priority 2). With every client field an int (or
+//       -fno-strict-aliasing) only the packet's and the id's store are swapped: sched1 issues the
+//       id's store at t=3 on weight (0 against the packet store's +1) and sched2 keeps that order
+//       on LUID. About 1,000 combinations of field types and store orders: nothing closer.
 #include "common.h"
 
 struct Client_1F7BE8;
