@@ -1330,6 +1330,15 @@ so the load takes $t1 and n $t2; retail has them the other way round. What was m
   its use). Together they reach 39, still T = 19; the loop's shape (`while`, `if` and
   `do`/`while`, `for`, `<= 56`) and locals for the first statements add nothing more, because
   cse1 removes every other copy. Inline helpers for the refill or the update keep n's pseudo.
+- **The copy cse keeps: a local the loop tests, set from the field** (2026-11-09, matched). cse1
+  substitutes a copy's source within its path and deletes the copy only when no use is left; a
+  variable the loop's test reads across the back edge keeps a use outside the path, so `loaded = self->loaded += 8;` at the end of the body (the
+  chained assignment's copy into the local) survives to gcse, and cprop and flow delete it
+  afterwards. With the byte read into a `u8` local (a QImode load and its widening, which combine
+  folds into the `lbu`, +1) and the new count returned (+2), the advance has 40 insns at gcse,
+  T = 21, the extension's bucket comes first and n takes $t1: retail's bytes. The body still reads
+  `self->loaded` for the shift, as retail reloads it each pass; the local only carries the test.
+  Count `(insn/i` lines too when measuring: an inline's insns are marked `insn/i`.
 
 ### Three spilled array addresses and a dot helper's copies (func_00186BA8)
 

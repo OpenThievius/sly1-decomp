@@ -10,7 +10,6 @@
 // padding decides either edge. Written for this project from
 // retail's code.
 #include "common.h"
-#include "asm_func.h"
 
 // The reader: the 64-bit window of bits not yet consumed, the byte the count of consumed bits
 // starts from, the next byte to load, how many bits of the window are loaded, the count of bits
@@ -28,7 +27,7 @@ struct BitReader_2115C0 {
 };
 
 s32 PeekBits(BitReader_2115C0* self, s32 n);
-void AdvanceBits(BitReader_2115C0* self, s32 n);
+u64 AdvanceBits(BitReader_2115C0* self, s32 n);
 
 void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
 {
@@ -48,7 +47,27 @@ s32 PeekBits(BitReader_2115C0* self, s32 n)
     return self->window >> (64 - n);
 }
 
-INCLUDE_ASM(func_00211618);
+// Returns the new count of consumed bits (retail leaves it in $v0; no caller reads it). The
+// loop tests a local copy of the loaded count, and the byte is read into its own local: with
+// the return, these are insns gcse still sees and later passes delete, and they give its
+// expression table the 21 buckets whose order gives n's widening its register before the
+// consumed count's (docs/TOOLCHAIN.md, "Sony's compiler: the same bucket order").
+u64 AdvanceBits(BitReader_2115C0* self, s32 n)
+{
+    self->window <<= n;
+    u32 loaded = self->loaded -= n;
+    while (loaded < 57) {
+        u8* p = (u8*)self->next;
+        u8 c = *p++;
+        self->window |= (u64)c << (56 - self->loaded);
+        self->next = (u32)p;
+        if ((u32)p >= self->bufEnd) {
+            self->next = self->bufStart;
+        }
+        loaded = self->loaded += 8;
+    }
+    return self->consumed += n;
+}
 
 s64 ReadBits(BitReader_2115C0* self, s32 n)
 {
