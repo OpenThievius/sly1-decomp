@@ -521,7 +521,52 @@ s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, vo
     return 1;
 }
 
-INCLUDE_ASM(func_00187D08);
+// Where the segment from b to c first meets the sphere of radius r around a: the quadratic in t
+// of |b + t(c - b) - a|^2 = r^2 (aa = e.e, b2 = 2 e.d, cc = d.d - r^2). The two differences are
+// stored as locals before the products are taken, and the squared length of e before the cross
+// term: local-alloc then ranks d's register ahead of the products' (docs/TOOLCHAIN.md,
+// "Local allocation's ranking"). Its outputs are optional.
+s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* hitOut, Vec02* nOut, f32* dOut, f32 r)
+{
+    Vec02 e;
+    Vec02 d;
+    Vec02 p;
+    Vec02 w;
+    Vec02 n;
+    u128 dv = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    u128 ev = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*b));
+    Vu0::Q(e) = ev;
+    Vu0::Q(d) = dv;
+    f32 dd = Vu0::ToFloatMoved(Vu0::Dot(dv, dv));
+    f32 aa = Vu0::ToFloatViaBits(Vu0::Dot(ev, ev));
+    f32 bb = Vu0::ToFloatViaBits(Vu0::Dot(ev, dv));
+    f32 cc = dd - r * r;
+    f32 b2 = 2.0f * bb;
+    f32 disc = b2 * b2 - aa * (cc * 4.0f);
+    if (disc < 0.0f) {
+        return 0;
+    }
+    f32 t = (-b2 - Fpu::Sqrt(disc)) / (2.0f * aa);
+    if (t < 0.0f || 1.0f < t) {
+        return 0;
+    }
+    Vu0::Q(p) = Vu0::MulXSum(Vu0::Q(*c), Vu0::Scalar(t), Vu0::Q(*b), Vu0::Scalar(1.0f - t));
+    Vu0::Q(w) = Vu0::Sub(Vu0::Q(p), Vu0::Q(*a));
+    Vu0::Q(n) = Vu0::MulX(Vu0::Q(w), Vu0::Scalar(1.0f / r));
+    if (tOut != 0) {
+        *tOut = t;
+    }
+    if (hitOut != 0) {
+        *hitOut = p;
+    }
+    if (nOut != 0) {
+        *nOut = n;
+    }
+    if (dOut != 0) {
+        *dOut = Vu0::ToFloat(Vu0::Dot(Vu0::Q(n), Vu0::Q(*a))) + r;
+    }
+    return 1;
+}
 
 // func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
