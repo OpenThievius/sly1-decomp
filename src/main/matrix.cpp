@@ -646,4 +646,52 @@ void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out)
     *out = MultiplyMatrices((Quad16*)&frame, (Quad16*)&step);
 }
 
-INCLUDE_ASM(func_0018A160);
+// The rotation that turns a into the direction of b, about their cross product made unit (x
+// when the two are parallel), by the angle whose sine and cosine are the cross product's length
+// and the dot over the lengths' product; the identity when either is shorter than 1e-4. The
+// cross product's length is read twice: for the test by ToFloat (an asm qmfc2) and for the sine
+// by ToFloatMoved, whose qmfc2 is the compiler's own copy, a VU0-unit insn sched2 issues after
+// the two lqc2 of the dot, where retail has the loop counter's move.
+void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m)
+{
+    Vec02 axis;
+    f32 la = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*a)));
+    f32 lb = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*b)));
+    if (la < 0.0001f || lb < 0.0001f) {
+        *(Matrix3x4*)m = g_identityMatrix;
+        return;
+    }
+    u128 c = Vu0::Cross(Vu0::Q(*a), Vu0::Q(*b));
+    u128 lc = Vu0::Length(c);
+    const Vec02* fallback = &g_unitXVector;
+    Vu0::Q(axis) = c;
+    if (Vu0::ToFloat(lc) < 0.0001f) {
+        axis = *fallback;
+    } else {
+        Vu0::Q(axis) = Vu0::DivX(c, lc);
+    }
+    f32 prod = la * lb;
+    f32 sinv = Vu0::ToFloatMoved(lc) / prod;
+    f32 cosv = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / prod;
+    f32 (*mm)[4] = (f32 (*)[4])m;
+    f32 t = 1.0f - cosv;
+    s32 i;
+    s32 j;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            mm[i][j] = t * ((f32*)&axis)[i] * ((f32*)&axis)[j];
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        mm[i][i] += cosv;
+    }
+    t = sinv * axis.z;
+    mm[0][1] += t;
+    mm[1][0] -= t;
+    t = sinv * axis.y;
+    mm[0][2] -= t;
+    mm[2][0] += t;
+    t = sinv * axis.x;
+    mm[1][2] += t;
+    mm[2][1] -= t;
+}
