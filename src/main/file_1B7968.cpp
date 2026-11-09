@@ -402,7 +402,10 @@ void ClearCachedVoiceParams(void);
 // A property's getter (PropertyDescriptor::getter with flags 4, or the method at that offset of
 // the object's table): fills `out` with the value of `obj`.
 typedef void (*PropertyGetter)(void* obj, void* out);
-void* WritePropertyValue(ScriptValue* self, void* a, void* b, ScriptValue* c);
+// A property's setter (PropertyDescriptor::putter with flags 0x20, or the method at that offset
+// of the object's table): stores `value` into `obj`.
+typedef void (*PropertySetter)(void* obj, s32 value);
+ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d, ScriptValue* val);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
 // The tags of the two transfers' chains (8 each, read uncached).
@@ -3958,8 +3961,95 @@ ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* 
     return self;
 }
 
-INCLUDE_RODATA(jtbl_0024D510);
-INCLUDE_ASM(func_001C1F20);
+ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d, ScriptValue* val)
+{
+    ScriptValue q;
+    ScriptValue q2;
+    ScriptValue q3;
+    ScriptValue q4;
+    void* dst[1];
+    PropertySetter fn;
+    void* p;
+    InitScriptValue(&q);
+    q.tag = 0x22;
+    if (d->flags & 0x10) {
+        if (d->flags & 0x1000) {
+            dst[0] = (char*)d->target(base, 1) + d->putter;
+        } else {
+            dst[0] = (char*)base + d->putter;
+        }
+        StoreScriptArguments(&q2, 1, val, (const u32*)d, dst);
+        AssignScriptValue(&q, &q2);
+        DestroyScriptValue(&q2, 2);
+    } else {
+        p = (d->flags & 0x1000) ? d->target(base, 1) : base;
+        fn = (d->flags & 0x20) ? (PropertySetter)d->putter
+                               : *(PropertySetter*)(*(char**)base + d->putter);
+        switch (d->type) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17: {
+            s32 v;
+            if (val->tag == 0x14) {
+                v = val->i;
+            } else {
+                InitScriptValue(&q2);
+                ConvertScriptValueToInt(&q3, val);
+                AssignScriptValue(&q2, &q3);
+                DestroyScriptValue(&q3, 2);
+                v = q2.i;
+                DestroyScriptValue(&q2, 2);
+            }
+            fn(p, v);
+            break;
+        }
+        case 1: {
+            f32 f;
+            if (val->tag == 0x15) {
+                f = val->f;
+            } else {
+                InitScriptValue(&q2);
+                ConvertScriptValueToFloat(&q4, val);
+                AssignScriptValue(&q2, &q4);
+                DestroyScriptValue(&q4, 2);
+                f = q2.f;
+                DestroyScriptValue(&q2, 2);
+            }
+            ((void (*)(void*, f32))fn)(p, f);
+            break;
+        }
+        case 0:
+            fn(p, val->i);
+            break;
+        case 2:
+            fn(p, val->i);
+            break;
+        case 4:
+            fn(p, val->i);
+            break;
+        case 9:
+            fn(p, val->i);
+            break;
+        case 10:
+            fn(p, val->i);
+            break;
+        case 11:
+            fn(p, val->i);
+            break;
+        case 13:
+            break;
+        default:
+            if (d->type & 0x1000) {
+                fn(p, val->i);
+            } else if (d->type & 0x2000) {
+                fn(p, val->i);
+            }
+            break;
+        }
+    }
+    CopyConstructScriptValue(out, &q);
+    DestroyScriptValue(&q, 2);
+    return out;
+}
 
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
 {
@@ -3979,8 +4069,8 @@ ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
 ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     if (key < 0x495) {
-        void* v = FindPropertyDescriptor(p, key);
-        WritePropertyValue(self, p, v, value);
+        PropertyDescriptor* d = FindPropertyDescriptor(p, key);
+        WritePropertyValue(self, p, d, value);
     } else {
         UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
     }

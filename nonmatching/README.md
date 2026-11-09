@@ -5,27 +5,17 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 
 | Function | Version | Match | Checked |
 |---|---|---:|---|
-| [func_001841D0](func_001841D0.cpp) | us | 99.7% | 2026-11-08 |
 | [func_0013BF68](func_0013BF68.cpp) | us | 99.6% | 2026-11-08 |
 | [func_0016AB38](eu/func_0016AB38.cpp) | eu | 99.5% | 2026-11-08 |
 | [func_eu_0015DF58](eu/func_eu_0015DF58.cpp) | eu | 99.3% | 2026-11-08 |
 | [func_00149760](func_00149760.cpp) | us | 98.9% | 2026-11-08 |
-| [func_00145E68](func_00145E68.cpp) | us | 98.8% | 2026-11-08 |
-| [func_001E4578](func_001E4578.cpp) | us | 98.3% | 2026-11-08 |
-| [func_0018AD88](func_0018AD88.cpp) | us | 98.3% | 2026-11-08 |
-| [func_00203548](func_00203548.cpp) | us | 98.2% | 2026-11-08 |
-| [func_001CF158](func_001CF158.cpp) | us | 98.2% | 2026-11-08 |
-| [func_0013F290](func_0013F290.cpp) | us | 98.1% | 2026-11-08 |
-| [func_001C1F20](func_001C1F20.cpp) | us | 98.1% | 2026-11-08 |
-| [func_00112698](func_00112698.cpp) | us | 98.0% | 2026-11-08 |
-| [func_00112968](func_00112968.cpp) | us | 98.0% | 2026-11-08 |
+| [func_001CF158](func_001CF158.cpp) | us | 98.4% | 2026-11-08 |
 | [func_001F8290](func_001F8290.cpp) | us | 98.0% | 2026-11-08 |
 | [func_00188B48](func_00188B48.cpp) | us | 98.0% | 2026-11-08 |
 | [func_001EDA80](func_001EDA80.cpp) | us | 98.0% | 2026-11-08 |
 | [func_0018AE38](func_0018AE38.cpp) | us | 97.9% | 2026-11-08 |
 | [func_0012F210](func_0012F210.cpp) | us | 97.9% | 2026-11-08 |
 | [func_001BB290](func_001BB290.cpp) | us | 97.8% | 2026-11-08 |
-| [func_0014D3A8](func_0014D3A8.cpp) | us | 97.8% | 2026-11-08 |
 | [func_001D87C8](func_001D87C8.cpp) | us | 97.8% | 2026-11-08 |
 | [func_001BA5B0](func_001BA5B0.cpp) | us | 97.8% | 2026-11-08 |
 | [func_00191570](func_00191570.cpp) | us | 97.7% | 2026-11-08 |
@@ -76,7 +66,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_0015A198](func_0015A198.cpp) | us | 93.4% | 2026-11-08 |
 | [func_0014D680](func_0014D680.cpp) | us | 93.2% | 2026-11-08 |
 | [func_00142278](func_00142278.cpp) | us | 93.1% | 2026-11-08 |
-| [func_001CC818](func_001CC818.cpp) | us | 93.0% | 2026-11-08 |
+| [func_001CC818](func_001CC818.cpp) | us | 93.1% | 2026-11-08 |
 | [func_001733B8](func_001733B8.cpp) | us | 92.8% | 2026-11-08 |
 | [func_00131198](func_00131198.cpp) | us | 92.6% | 2026-11-08 |
 | [func_0017E3C8](func_0017E3C8.cpp) | us | 92.5% | 2026-11-08 |
@@ -120,13 +110,13 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_00191C78](func_00191C78.cpp) | us | 85.0% | 2026-11-08 |
 | [func_0013BE18](func_0013BE18.cpp) | us | 84.9% | 2026-11-08 |
 | [func_00130540](func_00130540.cpp) | us | 83.9% | 2026-11-08 |
+| [func_00154088](func_00154088.cpp) | us | 83.7% | 2026-11-08 |
 | [func_001C4D60](func_001C4D60.cpp) | us | 83.2% | 2026-11-08 |
 | [func_00184B58](func_00184B58.cpp) | us | 83.0% | 2026-11-08 |
 | [func_001F7390](func_001F7390.cpp) | us | 82.6% | 2026-11-08 |
 | [func_001A1030](func_001A1030.cpp) | us | 81.1% | 2026-11-08 |
 | [func_001E4888](func_001E4888.cpp) | us | 80.8% | 2026-11-08 |
 | [func_001D61C8](func_001D61C8.cpp) | us | 79.7% | 2026-11-08 |
-| [func_00154088](func_00154088.cpp) | us | 79.3% | 2026-11-08 |
 | [func_00186568](func_00186568.cpp) | us | 78.9% | 2026-11-08 |
 | [func_001D5FA8](func_001D5FA8.cpp) | us | 78.5% | 2026-11-08 |
 | [func_00172078](func_00172078.cpp) | us | 77.9% | 2026-11-08 |
@@ -146,7 +136,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_0019B378](func_0019B378.cpp) | us | 66.9% | 2026-11-08 |
 | [func_0015BFC0](func_0015BFC0.cpp) | us | 65.8% | 2026-11-08 |
 | [func_00139740](func_00139740.cpp) | us | 63.8% | 2026-11-08 |
-| [func_0013FAE8](func_0013FAE8.cpp) | us | 60.0% | 2026-11-08 |
+| [func_0013FAE8](func_0013FAE8.cpp) | us | 62.5% | 2026-11-08 |
 | [func_00171238](func_00171238.cpp) | us | 59.8% | 2026-11-08 |
 | [func_001EC7A8](func_001EC7A8.cpp) | us | 57.8% | 2026-11-08 |
 | [func_001C4C20](func_001C4C20.cpp) | us | 56.9% | 2026-11-08 |

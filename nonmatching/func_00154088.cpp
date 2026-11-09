@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 590/744 (79.3%), checked 2026-11-08
+// BYTES 623/744 (83.7%), checked 2026-11-08
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 63); 77 differing lines before, 76 now.
+// ORDER-SWEEP (2026-11-08): bestIndex initialiser moved before RunActiveSetSolver; normal/v loads and twin/it computations swapped; tools/permute.py --auto.
 // NEAR: same instructions as retail but for the registers of the outer loop: retail keeps the contact search's i in a3, the best contact in a4 and the best index in a6, leaving a0-a2 for the inner sum; here the best index takes a0 and the inner loop moves up. Needs ActiveSetItem::twin at 0x48 (include/active_set_solver.h).
 #include "common.h"
 #include "collider.h"
@@ -28,10 +29,10 @@ void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, ContactSample** contact
     Vec02 best;
     Vec02 acc;
     for (;;) {
+        s32 bestIndex = -1;
         RunActiveSetSolver(self, a1, n, (s32)contacts, a4, a5);
         Vu0::Q(best) = zero;
         f32 top = 0.01f;
-        s32 bestIndex = -1;
         ContactSample* bestContact = 0;
         for (s32 i = 0; i < n; i++) {
             ActiveSetItem* item = (ActiveSetItem*)(self->items + i * 0x60);
@@ -56,8 +57,8 @@ void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, ContactSample** contact
                 }
                 other++;
             }
-            u128 normal = Vu0::Q(c->v80);
             u128 v = Vu0::Q(acc);
+            u128 normal = Vu0::Q(c->v80);
             u128 tangent = Vu0::Sub(v, Vu0::MulX(normal, Vu0::Dot(v, normal)));
             u128 len2 = Vu0::Dot(tangent, tangent);
             Vu0::Q(acc) = tangent;
@@ -72,8 +73,8 @@ void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, ContactSample** contact
         if (bestContact == 0) {
             return;
         }
-        ActiveSetItem* twin = (ActiveSetItem*)(self->items + bestIndex * 0x60);
         ActiveSetItem* it = (ActiveSetItem*)(self->items + self->count * 0x60);
+        ActiveSetItem* twin = (ActiveSetItem*)(self->items + bestIndex * 0x60);
         it->twin = twin;
         twin->twin = it;
         f32 mag = -Fpu::Sqrt(top);

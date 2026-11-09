@@ -1752,7 +1752,7 @@ struct MinimumSample {
 
 typedef f32 (*MinimumFn)(void* ctx, f32 x);
 
-void FindLocalMinimum(f32 x, f32 step, f32 lo, f32 hi, MinimumFn fn, void* ctx, f32* outX, f32* outY)
+void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY)
 {
     // The bracket's low end, the midpoint below the middle, the middle, the midpoint above it
     // and the high end.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 3637/3704 (98.2%), checked 2026-11-08
+// BYTES 3645/3704 (98.4%), checked 2026-11-08
 // NEAR (2026-11-08, night-large5): ChoosePlayerTargetByCost (func_001CF158, 3704 bytes): the six
 // candidate loops (objects, paths, class 0x75, target vectors, points, curves), the checksum
 // check, the switch on the best kind and the record update follow retail at the same size; the
@@ -9,11 +9,21 @@
 // as u128 helpers through ToFloatMoved (the Vec copies kept the vector loop at 162 insns at the
 // second loop pass, two over loop.c's 160, so the limit's and D_00274E20's %hi stayed in it);
 // the point loop's scorer named first in the body (`void* fn`), so loop.c hoists its %hi in the
-// first pass and the extremes' %hi parts take s7 and s8 as retail's do. Left, 19 lines: in the
-// vector loop the 50.0 (mov.s $f14) is set before a0 and a1, retail after; in the curve loop
-// retail's s8 holds ScoreTargetCurveAt's %hi, ours D_00274E20's (all three of the function's,
-// D_00274E10's and D_00274E20's %hi are moved in the second pass, the last one found, with the
-// shortest life, gets the register; a named fn local in that loop does not change it).
+// first pass and the extremes' %hi parts take s7 and s8 as retail's do.
+// Found (mech-1CF158): FindLocalMinimum is (fn, ctx, start, step, lo, hi, outX, outY): the
+// argument moves come in prototype order, and retail's vector loop sets a0 and a1 before $f14
+// (the definition and its other callers match with it). Left, 17 lines, all in the curve loop:
+// retail's s8 holds ScoreTargetCurveAt's %hi, ours D_00274E20's. Retail's D_00274E10 and
+// D_00274E20 %hi parts are hoisted and spilled (reload's round robin gives them v1 and a0 after
+// D_00274E44's v0; not hoisted, local-alloc gives both v0), so loop.c moved them before the
+// scorer's: in pass 1, the scorer's in pass 2. Ours: the curve loop has 137 insns in pass 1,
+// the threshold is 68 at D_00274E10 (80 less 3 for each of &at, &ctx, D_00274E44's %hi and
+// 30.0, moved before it), so lifetime 2 needs 136 or fewer for it and 130 or fewer for
+// D_00274E20 (threshold 65); both wait for pass 2 (126 insns), after the scorer, and the last
+// moved has the shortest life and wins global-alloc. Without cur1.z's six insns (131) pass 1
+// moves D_00274E10 but not D_00274E20 (tested, not a form); no plausible form found that
+// shrinks the loop: the counts did not move with statement order, a named shape, step, hi or
+// context pointer, or a loop variable of its own.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
@@ -133,7 +143,7 @@ s32 AddTargetObstructionCost(f32 limit, Chooser* self, void* a1, void* a2, void*
                              Vec02* pe);
 void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
 f32 GetPathCurveSearchStep(TargetShape* shape);
-void FindLocalMinimum(f32 start, f32 step, f32 lo, f32 hi, void* fn, void* ctx, f32* at, f32* min);
+void FindLocalMinimum(void* fn, void* ctx, f32 start, f32 step, f32 lo, f32 hi, f32* at, f32* min);
 f32 ScoreTargetObjectAt(CostContext* self);
 f32 ScoreTargetPathAt(PathArgs* self);
 f32 ScoreTargetPathNearest(NearestContext* self);
@@ -247,8 +257,9 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         f32 start = tPath;
         f32 step = GetPathCurveSearchStep(path->shape);
         f32 lo = path->shape->desc->m6(path->shape, D_00274E04);
-        FindLocalMinimum(start, step, lo, path->shape->desc->m6(path->shape, path->shape->desc->m8(path->shape) - D_00274E04),
-                         (void*)ScoreTargetObjectAt, c, &tPathBest, &cost);
+        FindLocalMinimum((void*)ScoreTargetObjectAt, c, start, step, lo,
+                         path->shape->desc->m6(path->shape, path->shape->desc->m8(path->shape) - D_00274E04),
+                         &tPathBest, &cost);
         if (path != keep) {
             if (cost >= D_00274E20) {
                 continue;
@@ -302,7 +313,7 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         args.self = self;
         args.frame = o->frame;
         args.c = o->v40;
-        FindLocalMinimum(0.5f, 0.25f, 0.25f, 3.0f, (void*)ScoreTargetPathAt, &args, &t, &cost);
+        FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
         func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             if (cost >= D_00274E20) {
@@ -348,8 +359,8 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         near.self = self;
         near.target = o;
         f32 start = tVector;
-        FindLocalMinimum(start, 100.0f, 50.0f, o->shape->desc->m8(o->shape) - 50.0f, (void*)ScoreTargetPathNearest,
-                         n, &tVectorBest, &cost);
+        FindLocalMinimum((void*)ScoreTargetPathNearest, n, start, 100.0f, 50.0f, o->shape->desc->m8(o->shape) - 50.0f,
+                         &tVectorBest, &cost);
         if (o != keep) {
             if (cost >= D_00274E20) {
                 continue;
@@ -364,7 +375,7 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         if (o->shape->desc->m2) {
             o->shape->desc->m2(o->shape, &args.c, tVectorBest, 0);
         }
-        FindLocalMinimum(0.5f, 0.25f, 0.25f, 3.0f, (void*)ScoreTargetPathAt, &args, &t, 0);
+        FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, 0);
         func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             TransformPointBetweenFrames(o->frame, 0, &args.c, &p);
@@ -396,8 +407,7 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         ctx.target = o;
         f32 lo = -3.40282347e+38f;
         f32 hi = 3.40282347e+38f;
-        FindLocalMinimum(ArctangentOfRatio(d.y, d.x) * o->f5C, D_00274E40, lo, hi,
-                         fn, c, &tPoint, &cost);
+        FindLocalMinimum(fn, c, ArctangentOfRatio(d.y, d.x) * o->f5C, D_00274E40, lo, hi, &tPoint, &cost);
         cost = cost * D_00274E10;
         if (o != keep) {
             if (cost >= D_00274E20) {
@@ -438,8 +448,8 @@ s32 func_001CF158(Chooser* self, TargetCand* keep)
         ctx.v = self->v150;
         ctx.target = o;
         f32 start = tCurve;
-        FindLocalMinimum(start, D_00274E44, 30.0f, o->shape->desc->m8(o->shape) - 30.0f, (void*)ScoreTargetCurveAt,
-                         c, &tCurveBest, &cost);
+        FindLocalMinimum((void*)ScoreTargetCurveAt, c, start, D_00274E44, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
+                         &tCurveBest, &cost);
         cost = cost * D_00274E10;
         if (o != keep) {
             if (cost >= D_00274E20) {
