@@ -965,6 +965,29 @@ Found on InitDiscLibrary (Sony's CD/DVD library, cc1 of 2.9-ee-991111) from the 
   before the flag's store gives retail's order: the flag's volatile store and the id's store
   have no dependence, and the scheduler issues the flag's first.
 
+### Dead stores keep their insn order (func_00188B48)
+
+Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
+
+- **A dead store ranks on insn order alone.** A store to a stack object nothing reads again has
+  no dependents in sched1 (its frame address conflicts with nothing later) and no REG_DEAD note
+  (the value's last use is a later store), so every such store has priority 2, weight 0, class 3
+  and no dependents: they issue last, in INSN_LUID order. In sched2 they all gain the same
+  dependents (the later stores through a pointer, which may now alias the frame) and tie again,
+  and sched2's LUIDs are sched1's output order. A dead store that some later frame access
+  depends on (a helper's slot sharing its address) goes earlier on priority.
+- **What that decides: a returned local's copy.** `*(Rows*)out = Vu0::Transpose(m)` writes
+  Transpose's local `t` (three rows), then the inlined `return t` copies it to the call's
+  result temporary by pieces (CSE turns each load into the asm's output), then to out. The
+  rows of `t` all come before the copy's, so the dead tail is t0, t1, t2, r1, r2 (r0 goes
+  early: the Scalar's slot reuses the temporary's first row). InvertRigidTransform's retail
+  tail is t0, t1, r1, t2, r2: its RTL wrote each row to both objects in turn. A scratch copy of
+  the helper that writes the return slot (`Rows TransposeProbe(const M& m) return y`, g++'s
+  named return value) right after each row of its local matches retail exactly, frame slots
+  included. No form of the caller reaches it with the current helper (the copy always follows
+  the last row), and the probe is not a form the original plausibly had, so the function stays
+  a near miss.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
