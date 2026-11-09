@@ -1086,6 +1086,25 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   before the other coefficients. A swap of an FPR op and a load right after a mtc1 is worth
   trying with the other conversion first.
 
+### A compiler copy's latency in sched2 (func_0014D3A8)
+
+- **An asm copy and the compiler's copy schedule differently.** func_0014D3A8's tail stores a
+  copy of the direction, takes the copy's length and divides the original (`vmove vf1, vf4`,
+  the dot, `sqc2 vf1`, the vsqrt). With Vu0::Copy (an asm) sched2 put the store before the
+  dot: both were ready the cycle after the vmove, at equal priority (9, both through the vsqrt,
+  the store by its anti-dependence on vf1), in class 3 (a link out of an asm costs 1), and the
+  store won on dependents (the branch, the vsqrt and the fallback's `lq`, which may alias
+  the store; 3 to 2). Read in the arm instead (a `const Vec02&` fallback) the `lq` dependence
+  goes and the order is retail's, but the load is then an `lqc2` into the result; read through a
+  fixed `u128` it is independent and issues too early for reorg to put it in the delay slot.
+- **What retail had: the compiler's vmove.** As Vu0::Vec values (`Vec dir = Sub(...);
+  *(Vu0::Vec*)outDir = dir; *(Vu0::Vec*)outDir = Vu0::NormalizeOr(dir, Vec::Of(unitX));`) the
+  argument copy is a movti between two live VU0 pseudos, which the allocator keeps as a
+  vmove: a recognised insn on the vu0 unit with a latency of 2. The store's data dependence
+  on it queues the store for two cycles while the dot (an asm, its link cost free) issues at
+  once: retail's order, with no other change. Where retail stores a vmove's copy after an asm
+  that reads it, the copy is the compiler's, not Vu0::Copy.
+
 ### A scalar local's store and a call's argument registers (func_00188270)
 
 Which register a pointer read for two call arguments takes can be decided by whether a store
