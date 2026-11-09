@@ -700,6 +700,35 @@ func_001F0AE0):
   eight). Each Vu0::Vec value passed to or returned from an inline is a `movti` copy at that
   point (vu0.h), so the Vec and u128 forms of one expression are the knob: write the form whose
   count keeps the table retail's. `-dG` prints the size: `Expression hash table (N buckets`.
+- **The bucket is the hash of the expression's registers too, so pseudo numbers move slots**
+  (2026-11-08, func_00162890). hash_expr_1 adds a register's number and a constant's value, so
+  in this build `(plus (reg R) (const_int C))` falls in bucket (13258 + R + C) mod T and
+  `(and (reg R) (const_int C))` in (13266 + R + C) mod T; a frame address is R = 1 (the soft
+  frame pointer). pre_delete walks the buckets in order and gives each redundant expression
+  its reaching register with gen_reg_rtx as it meets it, so the PRE pseudos, and through
+  reload the spill slots of those that spill, come in bucket order. Both T and the pseudo
+  numbers of the loop counters and pointers in those expressions decide it. Sorting the 13
+  slots retail's ReadPlacedObjectModel spills by these formulas, over T and the pseudo
+  numbers, needed T = 483 (ours 481: one insn more) and its morph-loop pointer 53 to 56
+  pseudos later. Unused locals and an extra call proved the model (retail's slot order
+  exactly) before any real source was found; then each candidate form was scored by its
+  insn count and pseudo numbers from the `-dF` and `-dG` dumps before its bytes.
+- **What costs pseudos and not insns.** Pseudos are numbered as the front end expands, and
+  cse deletes the copies that leave no use, so a source form can add pseudos and leave the
+  insn count alone: a count read into its own named local and its byte size written at each
+  use (`s32 nverts = ReadBufferedU16(stream);` and `nverts * 12` twice, +6 each against one
+  reused `size`), a multiplication by an element size where we had a shift (`n * 16` against
+  `n << 4`: +1 each), and an inline's body (each call copies its arguments into new pseudos
+  and every pseudo of the body: `u32& v = *(u32*)p; ... v += d;` costs 4 more per call than
+  `u32 v = *p; ... *p = v + d;`). A value read twice where we had a local for it
+  (`if (strip->extra != 0) { StripExtra* e = strip->extra;`) adds the one insn the table
+  needed: cse leaves the second load, and later passes delete it.
+- **The order of an inline's parameters orders loop.c's invariants.** In that function the
+  three Fix calls in the inner loop hoist `&strip->qwc[n]` and `&starts[n]` out of the loop;
+  global-alloc then takes the one of higher priority first, and their priorities differ only
+  by one insn of life: the one born first lives longer and is placed second. With the size before the start in
+  the helper's parameters (RemapMeshQueueValues's own order), the qwc address is computed
+  first and the two take retail's registers.
 
 ## sched1
 
