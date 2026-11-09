@@ -357,14 +357,94 @@ s32 BeginDiscSCommand(s32 command)
     return 1;
 }
 
-INCLUDE_ASM(func_00203548);
+/* Binds the first client to the IOP's disc service and sends it the mode; mode 5 ends the library
+ * (its semaphores and handler), the others set them up. The callback's busy flag, which the
+ * interrupt's callback reads, and the semaphore ids, which the end callback posts in the
+ * interrupt, are written as volatile, as CreateDiscSemaphores writes them. */
+s32 InitDiscLibrary(s32 mode)
+{
+    s32 r;
+    s32 i;
+    s32 result;
+    s32 status;
+    s32 a;
+    s32 b;
+    u32 recv;
+
+    if (SyncDiscSCommand(1) != 0) {
+        return 0;
+    }
+    InitRemoteCalls(0);
+    D_0062A7D0 = GetCurrentThreadId();
+    *(volatile s32*)&D_00279424 = 1;
+    D_00279440 = -1;
+    D_00279438 = -1;
+    D_00279448 = -1;
+    D_00279444 = -1;
+    D_0027944C = -1;
+    D_0027943C = -1;
+    D_00279434 = 0;
+    D_00279450++;
+    while (1) {
+        r = BindRemoteService(&D_0062A9E8, 0x80000592, 0);
+        if (r < 0) {
+            if (D_00279410 > 0) {
+                PrintBuffered("Libcdvd bind err %d CD_Init %d\n", r, D_00279450);
+            }
+            for (i = 0x100000; i != -1; i--) {
+            }
+            continue;
+        }
+        if (D_0062A9E8.server != 0) {
+            D_0062AA40[0] = mode;
+            D_0027944C = 0;
+            WriteBackDataCacheRange(D_0062AA40, 4);
+            recv = (u32)D_0027A600;
+            if (CallRemoteService(&D_0062A9E8, 0, 0, D_0062AA40, 4, (void*)recv, 0x10, 0, 0) < 0) {
+                *(volatile s32*)&D_00279424 = 0;
+                return 0;
+            }
+            break;
+        }
+        for (i = 0x100000; i != -1; i--) {
+        }
+    }
+    a = *(s32*)((recv + 4) | 0x20000000);
+    b = *(s32*)((recv + 8) | 0x20000000);
+    status = *(s32*)((recv + 12) | 0x20000000);
+    result = 1;
+    if (status != 0xFF) {
+        if (status == 0xFE) {
+            D_00279410 = 1;
+        } else if (a / 256 < 2 || b / 256 < 2) {
+            result = 2;
+        }
+    }
+    *(volatile s32*)&D_00279424 = 0;
+    switch (mode) {
+    case 5:
+        if (D_00279410 > 0) {
+            PrintBuffered("Libcdvd Exit\n");
+        }
+        DeleteDiscSemaphores();
+        *(volatile s32*)&g_discNSemaphore = -1;
+        *(volatile s32*)&g_discSSemaphore = -1;
+        *(volatile s32*)&D_00279420 = -1;
+        break;
+    case 0:
+    case 1:
+    default:
+        CreateDiscSemaphores();
+        InstallDiscCallbackHandler();
+        break;
+    }
+    return result;
+}
+
 INCLUDE_ASM(func_00203828);
 
-/* The messages of func_00203548 and func_00203828, defined here while they are assembly (after
- * the last of them: a definition before an included function would leave the compiler in .rodata
- * for the next one's). */
-const char D_0024F698[] = "Libcdvd bind err %d CD_Init %d\n";
-const char D_0024F6B8[] = "Libcdvd Exit\n";
+/* The messages of func_00203828, defined here while it is assembly (after it: a definition before
+ * an included function would leave the compiler in .rodata for the next one's). */
 const char D_0024F6C8[] = "DiskReady 0\n";
 const char D_0024F6D8[] = "Libcdvd bind err CdDiskReady\n";
 const char D_0024F6F8[] = "DiskReady ended\n";

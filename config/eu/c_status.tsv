@@ -4092,6 +4092,7 @@ func_00203230	func_00204570	match
 func_002032C8	func_00204608	match	rodata
 func_00203368	func_002046A8	match	rodata
 func_002033D8	func_00204718	match	rodata
+func_00203548	func_00204888	match	rodata
 func_00203A20	func_00204D60	match	
 func_00203AE8	func_00204E28	match	
 func_00203B18	func_00204E58	match	rodata
