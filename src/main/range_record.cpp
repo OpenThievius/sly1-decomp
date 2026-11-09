@@ -9,6 +9,8 @@
 #include "shapes.h"
 #include "globals.h"
 #include "range_record.h"
+#include "collider.h"
+#include "game_clock.h"
 #include "cursor_animator.h"
 #include "asm_func.h"
 
@@ -222,7 +224,74 @@ s32 IsRangeRecordBodyCandidate(void* unused, Collider* o)
     return r;
 }
 
-INCLUDE_ASM(func_001B2140);
+struct MeshHit {
+    Vec02 r0;
+    Vec02 r1;
+    Vec02 r2;
+    Vec02 r3;
+    f32 f40;
+    f32 f44;
+    u8 pad48[0x50 - 0x48];
+    void* part;             // 0x50: the part of the body the segment hit
+    u8 pad54[0x70 - 0x54];
+};
+struct RangeDrawPart { u8 pad00[0x2C]; u32 bits; u8 pad30[0x70 - 0x30]; };
+struct RangeSlot {
+    u8 pad00[0x18];
+    f32 stamp;
+    s32 count;
+    RangeRecord* owners[4];
+};
+struct RangePartState { s32 w0; RangeSlot* slots; u8 pad08[0x28 - 8]; };
+struct RangeFacePair { s32 part; s32 slot; };
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+typedef s32 (*RangeBodyFilter)(void*, Collider*);
+void GatherCollidersInSphere(f32 radius, World* world, s32 a, Vec02* centre, RangeBodyFilter filter, s32 b, s32* count, Collider*** list);
+s32 CollectTreeNodeSpans(void* tree, Vec02* from, Vec02* to, s32 a, s32 b, MeshHit* hit);
+
+void func_001B2140(RangeRecord* self)
+{
+    Vec02 a;
+    Vec02 b;
+    s32 count;
+    Collider** list;
+    PushBackMemoryMark();
+    GatherCollidersInSphere(self->f60, g_currentWorld, 0, &self->v50, IsRangeRecordBodyCandidate, 0, &count, &list);
+    if (count != 0) {
+        *(Vu0::Vec*)&a = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f40));
+        *(Vu0::Vec*)&b = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f44));
+    }
+    MeshHit hit;
+    for (s32 i = 0; i < count; i++) {
+        Collider* obj = list[i];
+        if (CollectTreeNodeSpans(obj->tree.nodes, &a, &b, 0, 1, &hit) != 0) {
+            if (hit.part != 0) {
+                s32 face = ((u8*)hit.part - (u8*)obj->meshCopy.faces) >> 5;
+                s32 end = obj->faceStarts[face + 1];
+                for (s32 j = obj->faceStarts[face]; j < end; j++) {
+                    RangeFacePair* pair = (RangeFacePair*)obj->refs + j;
+                    RangeDrawPart* part = (RangeDrawPart*)obj->drawParts + pair->part;
+                    if (RangeRecordMatchesKinds(self, part->bits) != 0) {
+                        RangePartState* state = (RangePartState*)obj->partStates + pair->part;
+                        RangeSlot* slot = state->slots + pair->slot;
+                        if (slot->stamp != g_gameClock.time) {
+                            slot->stamp = g_gameClock.time;
+                            slot->count = 0;
+                        }
+                        if ((u32)slot->count >= 4) {
+                            goto done;
+                        }
+                        slot->owners[slot->count] = self;
+                        slot->count++;
+                    }
+                }
+            }
+        }
+    }
+done:
+    PopBackMemoryMark();
+}
 
 // What the range record's first unpack holds: a matrix, the sizes of the record's colour bytes
 // halved, and the near and far planes of the range with the clip below the near one.
