@@ -1191,6 +1191,36 @@ inline function returning the comparison, and the search as a loop that `break`s
 key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
 the original must have had a used label or a loop end there.
 
+### A loop bound copied into its own register: cse_around_loop and Vec temporaries (func_001C4D60)
+
+Read from cse.c and jump.c of GCC 2.95.3 and the -ds/-dG/-dL dumps (2026-11-09). Retail's plane
+loop loads the face count for the entry test into v0 (`lw v0,908(s0); blez v0`) and copies it
+for the loop's compare after the moved invariants (`lw a0,912(s1); move a3,v0`); ours loaded
+it straight into a3.
+
+- **Where the copy comes from.** jump.c's duplicate_loop_exit_test copies the bottom test
+  (`147 = mem; 148 = j < 147`) before the loop with new pseudos and marks 147
+  REG_LOOP_TEST_P. At the loop's end cse_basic_block calls cse_around_loop, which walks the
+  loop body from its top label and, through cse_set_around_loop, replaces the in-loop load with
+  the register and emits `147 = 182` right after the entry copy's load, before the entry
+  branch. GCSE's copy propagation then folds 147 into 182: one register, no copy.
+- **What stops it.** cse_around_loop invalidates whatever each body insn writes before it
+  reaches the load (and stops at a CALL_INSN or CODE_LABEL). With the point as a `Vu0::Vec`
+  value, the inline helpers' Vec temporaries are still stores to `(mem/s:TI (addressof ...))`
+  at CSE time (purge_addressof runs later), so the load's table entry is gone and the load
+  stays in the loop. GCSE makes it a copy of the entry load, and loop.c moves that copy
+  (`move-insn savings`) into the preheader after the entry test, as retail's is. Written with
+  u128 helpers (Q, Copy) the body has no stores and the copy goes.
+- **Also cse_jumps_altered.** cse_around_loop is skipped entirely once CSE has folded any
+  conditional jump earlier in the function (follow-jumps on), which is another way a loop's
+  bound keeps its own register.
+- **The other difference: jump.c's hoist.** `if (other == 0) changed = 1; else { changed = 0;
+  ... }` is hoisted to `changed = 1; if (other == 0) goto tail; changed = 0;` (the then arm is
+  one set and the else arm's first insn sets the same variable, "An if/else of a constant"
+  below), and reorg turns it into `beqz s0,tail` with `li t2,1` in the slot. Retail's `bnezl
+  s0` (the else arm's first load in the slot) then `b tail; li t2,1` means the else arm's first
+  statement was not the flag's: `changed = 0` written after the arm's pointer locals.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,

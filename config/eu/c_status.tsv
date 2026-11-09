@@ -3186,6 +3186,7 @@ func_001C4848	func_001C5540	match	rodata
 func_001C49C8	func_001C56C0	match	
 func_001C49E8	func_001C56E0	match	
 func_001C4A80	func_001C5778	match	
+func_001C4D60	func_001C5A58	match	
 func_001C4ED0	func_001C5BC8	match	
 func_001C4F00	func_001C5BF8	match	
 func_001C4F08	func_001C5C00	match	
