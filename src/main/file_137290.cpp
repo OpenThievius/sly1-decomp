@@ -940,7 +940,41 @@ void AddColliderToSweepAxes(World* self, void* arg)
     MarkSweepAxesUnsorted(self);
 }
 
-INCLUDE_ASM(func_001388A0);
+void* MoveMemory(void* dst, void* src, s32 bytes);
+
+// Takes the collider's two entries out of each of the three axes: the scan passes the other
+// colliders' entries, remembers the collider's start entry (flag 0) and stops at its end entry,
+// and MoveMemory closes the two gaps. The pass over another collider's entry is its own
+// `continue`: g++ rolls the loop's tests to its end with that label among them, so jump.c does
+// not copy them in front of the loop, the owner is compared once at this loop's depth, and its
+// few references put it after self in global-alloc's order (docs/TOOLCHAIN.md, "Loops").
+void RemoveColliderFromSweepAxes(World* self, void* owner)
+{
+    s32 i;
+    SweepAxisSlot* base;
+    SweepAxisSlot* cur;
+    SweepAxisSlot* start;
+
+    for (i = 0; i < 3; i++) {
+        base = (SweepAxisSlot*)((u8*)self->buf1AD8 + i * 0x1800);
+        cur = base;
+        for (;;) {
+            if (cur->owner != owner) {
+                cur++;
+                continue;
+            }
+            if (cur->flag == 0) {
+                start = cur;
+            } else {
+                break;
+            }
+            cur++;
+        }
+        s32 n = cur - start;
+        MoveMemory(start, start + 1, n * 12 - 12);
+        MoveMemory(cur - 1, cur + 1, (self->count38 * 2 - (cur - base)) * 12 - 12);
+    }
+}
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
