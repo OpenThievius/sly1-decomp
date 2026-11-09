@@ -235,7 +235,6 @@ func_001B9AC8	001B9AC8	20	handwritten	VU0 macro instruction
 func_001B9D08	001B9D08	4	remnant	stripped-function leftover
 func_001B9D10	001B9D10	536	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001B9F28	001B9F28	4	remnant	stripped-function leftover
-func_001BA5B0	001BA5B0	1656	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BBC38	001BBC38	640	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001BC7F8	001BC7F8	44	handwritten	VU0 macro instruction
 func_001BC978	001BC978	900	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
