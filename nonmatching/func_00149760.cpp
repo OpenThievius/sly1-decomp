@@ -1,17 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 4058/4184 (97.0%), checked 2026-11-08
-// NEAR (2026-11-08, large-149760): regdiff "order", 1033 of 1046 aligned; every block is retail's
-// but for registers and scheduling in four places. Still differs: (1) case 1, the 0.0 of the zoom
-// clamp takes $f4 where retail has $f1 (global-alloc); (2) the second switch's cases 0/1: the
-// WrapAngle result's store to +0x08 comes before the tilt clamp's bounds are loaded, so the low
-// bound takes $f0 (retail $f3/$f4, the store in the first branch's delay slot); (3) case 2: the
-// 100.0 scalar's slot store is scheduled before the camera rows are loaded (they may alias it), so
-// MulX's result takes the scalar's register (retail keeps it in $vf6 and stores it before the jal;
-// loading the rows first as RotateRows values fixes the store but loses Rotate's tie to v);
-// (4) case 4's first rotation product: sched1 hoists the my rows' loads above the first row's
-// stores, so mz's third row outranks them in local-alloc ($vf1 where retail has $vf3) and the
-// product's registers follow. Tried: every MulRotation* Into form, RotateUntied, named operands,
-// u128 against Vec forms, clamp shapes (Limit, Clamp, bounds first, ValueRange::Clamp).
+// BYTES 4073/4184 (97.3%), checked 2026-11-08
+// NEAR (2026-11-08, large-149760, mech-149760): regdiff "order", 1035 of 1046 aligned; every block
+// is retail's but for registers and scheduling in three places. Fixed (mech-149760): the second
+// switch's cases 0/1 store the WrapAngle result as a member (self->g08) and read the tilt's upper
+// bound as a scalar (D_00261C00, now an f32 of its own): a struct member at a varying address never
+// aliases a scalar at a fixed one (alias.c fixed_scalar_and_varying_struct_p), so sched1 loads both
+// bounds before the store, as retail does. Still differs: (1) case 1, the 0.0 of the zoom clamp
+// takes $f4 where retail has $f1: global-alloc's pass 0 skips $f1 because r386 (the RangeFraction
+// result, lower priority, conflicting) has $f1 in its full preferences, merged by
+// expand_preferences from zoom (sub.s $f1, zoom, g18) through v; retail must allocate r386 before
+// the 0.0 (priority log2(refs)*refs/live length: 0.0 is 3/10, r386 3/12); (3) case 2: the 100.0
+// scalar's slot store is a MEM with neither in_struct nor scalar set (stored through Vu0::Q), and
+// the camera rows' loads (through Rotate's u128 pointer) neither: they may alias, so the store
+// precedes the loads, gets their priority, and MulX's result takes the scalar's register. Retail
+// keeps the scalar in $vf6 and stores it last. Rows loaded first as values (a tied RotateRows)
+// give $vf6 and the late store but cost an instruction and change the address registers; the
+// alias rule would need the store scalar-flagged (a scalar local's own MEM) and the row loads
+// member accesses; (4) case 4's first rotation product: sched1 hoists the loads of my's rows above
+// the first row's stores, so mz's third row outranks them in local-alloc ($vf1 where retail has
+// $vf3) and the product's registers follow. Tried: every MulRotation* Into form, RotateUntied,
+// named operands, u128 against Vec forms, clamp shapes (Limit, Clamp, bounds first,
+// ValueRange::Clamp, the clamp written out, the fraction named).
 // Build: put it in src/main/file_149398.cpp at its INCLUDE_ASM line (it replaces the three
 // INCLUDE_RODATA lines before it: D_00249EA0 is its {1, 4} array, the jump tables are its).
 #include "common.h"
@@ -35,8 +44,8 @@ extern u8 g_camera[];
 extern f32 g_gameTime[];
 extern f32 D_00261BF4;
 extern f32 D_00261BFC;
-extern f32 D_00261C00[4];
-extern f32 D_00261C20[4];
+extern f32 D_00261C00;
+extern Vec02 D_00261C20;
 extern f32 D_00261C30[4];
 extern f32 D_00261C40[4];
 extern f32 D_00261C50[4];
@@ -291,8 +300,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         self->g14 = ApproachValueWithRamp(self->g14, zero, dt, D_00261C80, 0);
         self->g0C = ClampToMagnitude(self->g0C + yaw * dt, limit * 0.9f);
         self->g14 = ClampToMagnitude(self->g14 + pitch * dt, limit * 0.8f);
-        *(f32*)&self->value = WrapAngle(*(f32*)&self->value + self->g0C * dt);
-        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00[0]);
+        self->g08 = WrapAngle(self->g08 + self->g0C * dt);
+        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->f364) * 2.0f;
         f32 lo = 0.0f;
@@ -353,7 +362,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         blend = 0.0f;
         f32 dy = ClampToRange(coll + 0x658, WrapAngle(yaw - *(f32*)(coll + 0x648)));
         f32 dp = ClampToRange(coll + 0x650, WrapAngle(pitch - *(f32*)(coll + 0x64C)));
-        *(f32*)&self->value = WrapAngle(*(f32*)(coll + 0x648) + dy);
+        self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
         self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
         eye = GetTargetCameraControllerEyePoint(self);
         break;
@@ -363,7 +372,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (obj != 0) {
             Vec02 n;
             Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::Vec::Of(target))).q;
-            *(f32*)&self->value = ArctangentOfRatio(n.y, n.x);
+            self->g08 = ArctangentOfRatio(n.y, n.x);
             Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
         } else {
             eye = GetTargetCameraControllerEyePoint(self);

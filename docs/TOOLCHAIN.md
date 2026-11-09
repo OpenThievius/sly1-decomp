@@ -735,6 +735,55 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   the result), which moved one spill slot through gcse's table size (GCSE above); one Vec
   difference stored through `Vu0::Q(...) = ... .q` gives the insn back.
 
+### Memory dependences in sched1 (func_00149760)
+
+sched1 keeps a load after a store it may alias, and the store then inherits the load's
+priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
+
+- **Which MEMs are flagged.** expand_expr sets MEM_IN_STRUCT_P for a member or an element
+  (COMPONENT_REF, ARRAY_REF) and for `*p` only when p is literally `&aggregate` or the pointed-to
+  type is an aggregate; a declared scalar variable's own MEM (a global `f32`, a scalar local in
+  memory) is MEM_SCALAR_P. A dereferenced cast pointer (`*(f32*)&self->value`, Vu0::Q's
+  `*(u128*)&v`, Rotate's `((const u128*)&m)[i]`) has neither flag. The RTL dumps print the flags
+  as `/s` (in struct) and `/f` (scalar).
+- **The only rule that separates them** without known bases is
+  fixed_scalar_and_varying_struct_p: a MEM_SCALAR_P reference at a fixed address never aliases
+  a MEM_IN_STRUCT_P one at a varying address. A parameter's pointer has base `(address a0)`,
+  which may alias any global (base_alias_check, no `-fargument-noalias`), and a pointer loaded
+  from memory has no known base at all.
+- **func_00149760, second switch, cases 0 and 1.** `*(f32*)&self->value = WrapAngle(...)`
+  (neither flag) made the tilt clamp's bound loads `D_00261BFC` and `D_00261C00[0]` (an array
+  element: in struct) depend on the store: sched1 issued the store first and the low bound took
+  $f0. Retail loads both bounds first and stores in the branch's delay slot. Writing the store as
+  a member (`self->g08 = ...`, a float in CameraController's union) and reading the upper bound
+  as a scalar (`D_00261C00` an `f32` of its own, its 16-byte label padded by the 16-aligned
+  `Vec02` offsets after it) gives retail's registers; either change alone does not.
+- **Not yet applied: case 2's Scalar slot.** Vu0::Scalar's slot store (neither flag) and
+  Rotate's row loads through a u128 pointer (neither) may alias, so the store precedes the loads
+  and gets their priority; retail stores the slot last and keeps the scalar in its register
+  across the multiply. Loading the rows before the scalar in source order gives retail's
+  register and store but not its address registers; by the rule above, the store would have to
+  be a scalar local's own MEM and the row loads member accesses, a change to shared helpers
+  not tried.
+
+### Global allocation's preferences (func_00149760)
+
+- find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
+  of the lower-priority allocnos that conflict with this one (prune_preferences), unless it
+  prefers them itself. A pseudo prefers the hard register of a copy's other side, and the
+  register of the first operand of an arithmetic set whose other side is a hard register or
+  a pseudo local-alloc already placed (set_preference); expand_preferences then pools the
+  preferences of the destination and every allocno that dies in the set, if they do not
+  conflict. `-dg` prints each allocno's conflicts and (pruned) preferences in the `.greg`
+  dump, after the allocation order (`;; N regs to allocate:`), whose ranking is
+  floor_log2(refs) * refs / live length.
+- func_00149760's zoom clamp: the 0.0 bound (r399, 3 refs over 10 insns) ranks above the
+  RangeFraction result (r386, 3 over 12), which conflicts with it and has $f1 among its full
+  preferences, pooled from the zoom (`sub.s $f1, zoom, g18` later) through the clamp's
+  variable. So the bound skips $f0 and $f1 and takes $f4; retail's $f1 needs r386 allocated
+  first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
+  change it.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
