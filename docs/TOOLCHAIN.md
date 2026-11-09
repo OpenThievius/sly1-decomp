@@ -2625,6 +2625,17 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   and from a pointer initialised with the face (`MeshFace* face = &faces[f]`), see "The
   operand order of an address sum".
 
+### An expression split into two statements adds references (func_001F7390)
+
+- Sony's library compiler ranks global-alloc's pseudos the same way: floor_log2(refs) * refs /
+  live length. In func_001F7390 (a double's bits to a rounded integer) the mantissa `m` (14
+  references over 26 insns, 1.615) ranked behind the exponent `e` (10 over 15, 2.0), so the
+  two swapped $a1 and $a2. Retail's `dsrl a1,v0,0xc; or a1,a1,v1` writes the masked mantissa
+  back into m's own register: the original wrote `m = (m << 12) >> 12; m |= (u64)1 << 52;` as
+  two statements, which makes the intermediate m itself (two more references: 16, so
+  floor_log2 rises to 4 and the priority to 2.46). Spot it: a temporary that retail holds in
+  a variable's register, next to a register swap that regalloc.py blames on the ranking.
+
 ### Statements in field order set the call-crossing ranking (func_00144BE8)
 
 - func_00144BE8 blends five spherical differences (heading, pitch, distance, yaw, tilt) by
