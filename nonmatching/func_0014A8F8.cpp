@@ -17,6 +17,12 @@
 // (x/y/z are aggregates, never MEM_SCALAR_P, so fixed_scalar_and_varying_struct_p cannot drop
 // 0xb0's dependence on the v140 load), the class rule (no dependence between frame stores at
 // distinct offsets) and dependent counts (all seven).
+// The named-return-value form (func_001BA5B0's RotateRowsBy with the rows as values,
+// `Mat02 t; Q(t.r[i]) = RotateRows(...); out.r[i] = t.r[i];`, then `basis = RotateRowsBy(...)`)
+// gives 5 lines: the return slot is a temporary at 0x60 below t (0x90), rows 1 and 2 store t
+// first, and the copy to basis still follows both row-2 stores (the same luid tie); written as a
+// chain, through a RotateRowsInto wrapper (*out = RotateRowsBy(...)) the same; initialising
+// basis with it changes the frame (79 lines); with RotateUntied the size differs.
 #include "common.h"
 #include "camera.h"
 #include "camera_controller.h"
