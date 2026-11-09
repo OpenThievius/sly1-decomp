@@ -862,7 +862,7 @@ void StopSoundRecord(void* h, s32 n);
 void RestoreVolumeChannel2(void);
 void SilenceVolumeChannel2(void);
 void ChooseStepSequenceState(Collider* t);
-s32 FadeInPlacedObject(Collider* t, f32 v);
+void FadeInPlacedObject(Collider* t, f32 v);
 void FadeOutPlacedObject(Collider* t, f32 v);
 void SetColliderAnchors(Collider* t, s32 a, s32 b, s32 c, s32 d);
 void PushObjectCameraController(Collider* t);
@@ -2236,7 +2236,22 @@ void EnsureObjectWorldNode(PlacedObject* self)
     }
 }
 
-INCLUDE_ASM(func_00126CB8);
+// Each arm stores the rate itself: with one store after the join, GCSE copies the node pointer
+// into a pseudo for it, and that copy, scheduled between the level's load and its use, gives the
+// level the longer span in local-alloc and the constant takes $f1 first.
+void func_00126CB8(Collider* self, f32 time)
+{
+    if (!IsObjectAttached(self) || self->f298 != 0) {
+        EnsureObjectWorldNode(self);
+        self->desc->m02(self);
+        if (time == 0.0f) {
+            f32 zero = 0.0f;
+            self->f298->rate = zero >? 1.0f - self->f298->level + 0.0001f;
+        } else {
+            self->f298->rate = 1.0f / time;
+        }
+    }
+}
 
 void func_00126D60(Collider* self, f32 time)
 {
