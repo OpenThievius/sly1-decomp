@@ -1981,6 +1981,34 @@ integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near
   once: retail's order, with no other change. Where retail stores a vmove's copy after an asm
   that reads it, the copy is the compiler's, not Vu0::Copy.
 
+### A conversion in each branch, before the epilogue (func_0014DA98)
+
+- **sched2 runs before jump2's cross-jumping.** rest_of_compilation (toplev.c) schedules after
+  reload and the prologue and epilogue (thread_prologue_and_epilogue_insns), then runs the
+  last jump_optimize, the only one with JUMP_CROSS_JUMP, then reorg. Code written once after
+  an if/else's join is scheduled with the epilogue's restores; code written in each branch is
+  scheduled inside the branch, and only then are identical branch tails merged.
+- **An asm mtc1 at the join loses to the restores.** MeasureSplinePathDistance returns a
+  squared distance from either branch. Written `r = Dot(...)` in each branch and one
+  `return ToFloatMoved(r)` after them, the compiler's qmfc2 and the asm mtc1 sat in the
+  join block with `lq ra` and `lq s0`: the asm costs 1 (unit none), so its priority was 4 to
+  the loads' 5 (each 2 to the epilogue's blockage, 3), and the mtc1 came after both. Retail
+  has qmfc2, mtc1, `lq ra`, `lq s0`. ToFloat there is worse (its asm qmfc2 is never put in a
+  branch's delay slot); ToFloat in each branch is merged by cross-jumping before reorg (the
+  two asms come from the same header line, so their ASM_OPERANDS are equal), and the
+  delay slot gets the dot's last instruction from the assembler. A statement-expression macro
+  (an asm on each use's line) avoids the merge but is no plausible form and is not needed.
+- **The form: a return in each branch.** `if (self->b != 0) { ...; return
+  ToFloatMoved(Dot(d, d)); } ... return ToFloatMoved(Dot(e, e));` puts qmfc2 and mtc1 in each
+  branch for sched2, so the join block holds the epilogue alone and the mtc1 stays before the
+  restores; jump2 then merges the first branch's qmfc2 and mtc1 into the second's, and reorg
+  fills the first branch's `b` with the qmfc2 stolen from the new target (it is the
+  compiler's movti, eligible) and retargets the jump to the mtc1: retail's code exactly.
+  Written as `if (b == 0) return ...; else return ...;` the compiler places the else branch
+  first (31 lines differ); the early return for the anchored case keeps retail's block order.
+  Where retail's float conversion comes before the epilogue's restores at a join, look for a
+  return in each branch.
+
 ### A scalar local's store and a call's argument registers (func_00188270)
 
 Which register a pointer read for two call arguments takes can be decided by whether a store
