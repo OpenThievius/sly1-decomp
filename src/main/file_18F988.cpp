@@ -96,6 +96,7 @@ s32 FindPointGraphPath(PointGraph* graph);
 s32 FindPointGraphTriangleWithin(GraphFace* faces, Vec02* p);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
+f32 RandomFloatInRange(f32 lo, f32 hi);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
 s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
@@ -1222,7 +1223,44 @@ void TestOwnerGraphSpan(Obj_191AA8* self)
 
 INCLUDE_ASM(func_00191AC8);
 
-INCLUDE_ASM(func_00191C78);
+// A random point on the graph's triangles: one picked by its area, then a point inside it.
+void func_00191C78(PointGraphObject* self, Vec02* out)
+{
+    Vec02 e1;
+    Vec02 e2;
+    GraphTri* t;
+    f32 total = 0.0f;
+    s32 i;
+    for (i = 0; i < self->graph.triCount; i++) {
+        t = (GraphTri*)(self->graph.tris + i * 12);
+        Vu0::Q(e1) = Vu0::Sub(Vu0::Vec::Of(*t->corner[1]), Vu0::Vec::Of(*t->corner[0])).q;
+        Vu0::Q(e2) = Vu0::Sub(Vu0::Vec::Of(*t->corner[2]), Vu0::Vec::Of(*t->corner[0])).q;
+        total += e1.x * e2.y - e1.y * e2.x;
+    }
+    f32 r = RandomFloatInRange(0.0f, total);
+    for (i = 0; i < self->graph.triCount; i++) {
+        t = (GraphTri*)(self->graph.tris + i * 12);
+        Vu0::Q(e1) = Vu0::Sub(Vu0::Vec::Of(*t->corner[1]), Vu0::Vec::Of(*t->corner[0])).q;
+        Vu0::Q(e2) = Vu0::Sub(Vu0::Vec::Of(*t->corner[2]), Vu0::Vec::Of(*t->corner[0])).q;
+        r -= e1.x * e2.y - e1.y * e2.x;
+        if (r < 0.0f) {
+            break;
+        }
+    }
+    f32 u = RandomFloatInRange(0.0f, 1.0f);
+    f32 v = RandomFloatInRange(0.0f, 1.0f);
+    if (1.0f < u + v) {
+        u = 1.0f - u;
+        v = 1.0f - v;
+    }
+    Vu0::Vec su = Vu0::Vec::Scalar(u);
+    Vu0::Vec a = Vu0::Vec::Of(*t->corner[0]);
+    Vu0::Vec sv = Vu0::Vec::Scalar(v);
+    Vu0::Vec b = Vu0::Vec::Of(*t->corner[1]);
+    Vu0::Vec sw = Vu0::Vec::Scalar(1.0f - u - v);
+    Vu0::Vec c = Vu0::Vec::Of(*t->corner[2]);
+    Vu0::Q(*out) = Vu0::MulXSum3(a, su, b, sv, c, sw).q;
+}
 
 void SetScreenOwner(s32 value)
 {
