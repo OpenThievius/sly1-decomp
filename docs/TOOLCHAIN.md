@@ -1028,6 +1028,28 @@ loop written downwards (2026-11-09, read from the `-dG` and `-dL` dumps):
 - **Spotting it.** A counter loaded with N-1 that counts to zero with bgez, while the loop's
   invariants and hoisted values come before its `li`, is a count-up `for` loop.
 
+### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
+
+`cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
+label has exactly one use and, walking back from the label over notes and unused labels, the
+first thing met is a BARRIER. `if (x->f == a) { ...; return ...; } if (x->f == b) ...` is
+exactly that: every path of the first body returns, so its last jump leaves a barrier before the
+label after it, CSE takes the branch, and the second test reuses the first load's register.
+Retail's func_00183668 instead loads `n->key` once and copies it (`bne v0,t1; move v1,v0`), then
+tests the copy against the other key: that copy is GCSE's (the -dG dump makes a new pseudo for
+the load and copies it to both users), so in retail CSE did not reach the second test from the
+first. The path stops only at (1) a label with more than one use, (2) a used label or a
+NOTE_INSN_LOOP_END between the barrier and the label, or (3) any CODE_LABEL or (before loop.c) a
+NOTE_INSN_LOOP_END in the forward scan before the second load. An empty `do { } while (0)` as
+the last statement of the returning body (case 2) gives retail's copy and every register
+(EXACT); one between the two tests (case 3) gives the registers but aligns a later label
+(`.p2align 3`, one nop). Both are barriers. Ruled out as the original: the second test written
+as an `else if`, the three conditions repeated in each test (jump threading does not merge
+them), the inner range tests as a `switch (key)` with or without `default`, the body as an
+inline function returning the comparison, and the search as a loop that `break`s on the second
+key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
+the original must have had a used label or a loop end there.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
