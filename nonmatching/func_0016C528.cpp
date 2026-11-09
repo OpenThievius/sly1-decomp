@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2156/2260 (95.4%), checked 2026-11-08
+// BYTES 2230/2260 (98.7%), checked 2026-11-09
+// Still differs (2026-11-09, scalar-slot): place (2) is retail's now: Scalar's slot is a cast's copy (MEM_SCALAR_P) and the twist rate goes in by value (Vec::ScalarAtValue: the member load stays MEM_IN_STRUCT_P), so the f94 load passes the swing weight's store (docs/TOOLCHAIN.md, "The weight slot is a cast's copy"). Left: place (1), the swap of vf2 and vf3 after the angular-rate test (local allocation), and with it the order of v's store (sqc2 vf8, 848) against the qmfc2 of the length.
 // NEAR (2026-11-08, worker large-16C528): ApplyLinkConstraint, a two-bone IK solver. Same size
 // (565 instructions), frame 0x4A0 and every stack slot as retail's, saved registers as retail's;
 // 9 lines differ in two places. (1) After the angular-rate test the VU0 registers vf2 and vf3
@@ -251,7 +252,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         *(Vec*)&n = Vu0::Cross(Vec::Of(t), Vec::Of(rest));
         NormalizeVector(n, g_unitXVector);
         *(Vec*)&swingSpin = Vu0::MulX(Vec::Of(n), Vec::Scalar(lr / lt));
-        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAt(self->f224->f94));
+        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAtValue(self->f224->f94));
         *(Vec*)&total = Vu0::Add(Vec::Of(twistSpin), Vec::Of(swingSpin));
         *(Vec*)&rel = Vu0::Sub(Vec::Of(total), Vec::Of(spins[3]));
         *(Vec*)&b->v160 = Vu0::RotateTransposed(rot[2], Vec::Of(spin));

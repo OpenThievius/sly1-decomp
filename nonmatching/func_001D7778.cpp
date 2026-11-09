@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1539/3316 (46.4%), checked 2026-11-08
+// BYTES 1540/3316 (46.4%), checked 2026-11-09
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+3); 561 differing lines before, 554 now.
 // NEAR (2026-11-08, large-1D7778): same size, the frame's locals and every block's code are retail's; three things differ
 //

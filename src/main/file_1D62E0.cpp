@@ -1147,7 +1147,87 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
     return 0.0f < r;
 }
 
-INCLUDE_ASM(func_001D87C8);
+s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+f32 WrapModulo(f32 x, f32 y);
+s32 IsInsideRange(ValueRange* range, f32 x);
+void FindPathCurveNearestTime(PathCurve* self, Vec02* lo, Vec02* hi, Vec02* out, s32 a4, f32* time,
+                              f32* a6, f32 start);
+
+void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
+{
+    PathFollower* list[16];
+    ValueRange spans[16];
+    Vec02 pos;
+    Vec02 tangent;
+    Vec02 dir;
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 out;
+    s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, list);
+    s32 count = 0;
+    s32 k = 0;
+    for (s32 i = 0; i < n; i++) {
+        PathFollower* o = list[i];
+        if (o == self) {
+            continue;
+        }
+        if (o->f830 != self->f830) {
+            continue;
+        }
+        if (IsPathFollowerAhead(self, o)) {
+            continue;
+        }
+        count++;
+        f32 d = WrapModulo(o->f83C - self->f83C, o->f834);
+        f32 r = ((ValueRange*)D_002754C0)->Limit(((QuadraticCurve*)D_002754B0)->Eval(d));
+        if (r <= 0.0f) {
+            continue;
+        }
+        ValueRange* s = &spans[k++];
+        s->lo = o->f840 - r;
+        s->hi = o->f840 + r;
+    }
+    *nearby = count;
+    ValueRange* s = &spans[k++];
+    s->lo = -1e6f;
+    s->hi = -self->f61C;
+    s = &spans[k++];
+    s->lo = self->f61C;
+    s->hi = 1e6f;
+    PathCurve* c = self->f830->curve;
+    c->vt->m06(c, self->f83C + D_002751D0);
+    c = self->f830->curve;
+    if (c->vt->m02) {
+        ((void (*)(PathCurve*, f32, Vec02*, Vec02*))c->vt->m02)(c, self->f83C + D_002751D0, &pos, &tangent);
+    }
+    u128 side = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
+    Vu0::Q(dir) = Vu0::DivX(side, Vu0::Length(side));
+    Vu0::Q(lo) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(D_002754C8.lo));
+    Vu0::Q(hi) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(D_002754C8.hi));
+    FindPathCurveNearestTime(self->f848->curve, &lo, &hi, &out, 0, &self->f84C, 0, self->f84C);
+    f32 ahead = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(out), Vu0::Q(pos)), Vu0::Q(dir)));
+    f32 want = ApproachValueWithRamp(D_002754D0, 0, self->f844, ahead, g_gameClock[2]);
+    f32 best = FindNearestValueOutsideSpans(k, spans, want);
+    if (!IsInsideRange(&D_002754C8, best)) {
+        best = want;
+    } else {
+        if (k > 0) {
+            f32 cur = self->f840;
+            ValueRange* s = spans;
+            s32 j = k;
+            do {
+                if (cur < best && cur < s->lo && s->lo < best) {
+                    best = s->lo;
+                } else if (best < cur && s->hi < cur && best < s->lo) {
+                    best = s->hi;
+                }
+                s++;
+                j--;
+            } while (j != 0);
+        }
+    }
+    self->f844 = best;
+}
 
 f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
 

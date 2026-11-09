@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 354/408 (86.8%), checked 2026-11-08
+// BYTES 372/408 (91.2%), checked 2026-11-09
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 50); 25 differing lines before, 24 now.
 // NEAR (night-low1, 2026-11-08): the direction set through an inline taking the fallback by
 // reference (retail's unit-X address formed before the difference, its lq in the fallback arm,

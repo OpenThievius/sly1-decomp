@@ -302,9 +302,6 @@ void func_001C4FF8(TurningCollider* self)
     }
 }
 
-// The rest of the file's .rodata, after the literal of func_001C4FF8.
-extern const f32 D_0024D594 = 3.40282347e+38f;
-
 void StepCollider(void* self);
 void ApplyTurningColliderDrive(TurningCollider* self);
 
@@ -446,7 +443,112 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
 
 INCLUDE_ASM(func_001C54D0);
 
-INCLUDE_ASM(func_001C57C8);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+void FreePooledContactChain(World* w, Contact03* head);
+
+static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
+{
+    u128 len = Vu0::Length(v.q);
+    Vu0::Vec r;
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        r = fallback;
+    } else {
+        r.q = Vu0::DivX(v.q, len);
+    }
+    return r;
+}
+
+void func_001C57C8(TurningCollider* self)
+{
+    Contact03* freed = 0;
+    Contact03* best = 0;
+    f32 bestHeight = 3.40282347e+38f;
+    self->f690 = 0;
+    ContactRow03* row = self->contacts->head;
+    for (;;) {
+        Contact03* c = row != 0 ? row->head : self->contacts4B4;
+        for (; c != 0; c = c->next) {
+            s32 j = (self != c->end[0].body);
+            if (((s32 (*)(TurningCollider*, Contact03*, s32))self->desc06()->m56)(self, c, j) != 0) {
+                Vec02 arm;
+                Vu0::Q(arm) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->end[1 - j].v10));
+                f32 h = Vu0::ToFloat(Vu0::Dot(Vu0::Q(arm), Vu0::Q(self->m110.r[2])));
+                if (h < bestHeight) {
+                    self->f690 = 1;
+                    bestHeight = h;
+                    self->f694 = g_gameClock.time;
+                    self->v6A0 = c->end[1 - j].v10;
+                    Vu0::Q(self->v6B0) = Vu0::MulX(Vu0::Q(c->v80), Vu0::ScalarAt(D_00274AD0[j]));
+                    self->f6C0 = c->end[1 - j].part;
+                    best = c;
+                }
+            }
+        }
+        if (row == 0) {
+            break;
+        }
+        row = row->next;
+    }
+    if (self->f6DC == 0) {
+        return;
+    }
+    row = self->contacts->head;
+    for (;;) {
+        Contact03** link = row != 0 ? &row->head : &self->contacts4B4;
+        Contact03* c;
+        while ((c = *link) != 0) {
+            s32 j = (self != c->end[0].body);
+            if (c->end[j].part != self) {
+                link = &c->next;
+                continue;
+            }
+            s32 kind = c->kind;
+            if ((kind == 1 && c->fA0 == (s32)self->f6D8) || (kind == 4 && c->fA4 == (s32)self->f6D8)) {
+                if (self->f690 != 0) {
+                    goto drop;
+                }
+            } else {
+                if ((kind == 1 && c->fA0 == self->f6D4) || (kind == 4 && c->fA4 == self->f6D4) ||
+                    (kind == 10 && c->fA0 == self->f6D4)) {
+                    if (c != best) {
+                        goto drop;
+                    }
+                }
+                if (kind == 3 || (j == 1 && (kind == 1 || kind == 4 || kind == 5 || kind == 6))) {
+                    f32 sign = D_00274AD0[j];
+                    if (0.0f < sign * c->v80.z) {
+                        Vec02 n;
+                        Vec02 d;
+                        Vec02 p;
+                        Vu0::Vec sv = Vu0::Vec::Scalar(sign);
+                        *(Vu0::Vec*)&n = Vu0::MulX(Vu0::Vec::Of(c->v80), sv);
+                        n.z = 0.0f;
+                        Vu0::Q(n) = NormalizeOrElse(Vu0::Vec::Of(n), Vu0::Vec::Of(g_unitXVector)).q;
+                        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(c->end[j].v10), Vu0::Vec::Of(c->end[1 - j].v10));
+                        Vu0::Vec dot = Vu0::Dot(Vu0::Vec::Of(d), Vu0::Vec::Of(n));
+                        f32 depth = Vu0::ToFloat(dot);
+                        *(Vu0::Vec*)&p = Vu0::MulAddX(Vu0::Vec::Of(c->end[1 - j].v10), Vu0::Vec::Of(n),
+                                                 Vu0::Vec::Scalar(depth));
+                        CreatePooledContact(depth, self, c->end[1 - j].part, &p, &n, 10, 0, 0, &c->next);
+                    }
+                }
+            }
+        
+            link = &c->next;
+            continue;
+        drop:
+            *link = c->next;
+            c->next = freed;
+            freed = c;
+        }
+        if (row == 0) {
+            break;
+        }
+        *row->link = row->head;
+        row = row->next;
+    }
+    FreePooledContactChain(self->world, freed);
+}
 
 void AddTurningColliderProbeContact(void* a, s32 b, s32 c, s32 d);
 

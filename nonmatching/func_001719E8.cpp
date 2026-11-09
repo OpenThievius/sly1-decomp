@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 508/660 (77.0%), checked 2026-11-08
+// BYTES 516/660 (78.2%), checked 2026-11-09
 // NEAR (night-low1, 2026-11-08): the body read into a local before v0.z's store (retail loads it
 //       before the subtraction) and the unit-Z vector read after the probe radius's store (retail
 //       loads it after that swc1, where rec->f08's store keeps it) take 65 differing lines to 49.
