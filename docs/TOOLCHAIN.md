@@ -1183,6 +1183,33 @@ first, the level, takes `$f1`, as retail has it. A swap of two short-lived tempo
 an if/else whose result is stored after the join points at retail storing in each arm. (The
 sibling func_00126D60, the same shape, has its store after the join: the original wrote both.)
 
+### A call that ends an arm leaves flow's nop, which takes an issue slot (func_0013BF68)
+
+`if (m) { Collect(&n, &list); ... } else { Gather(r, w, 0, &self->v610, ..., &n, &list); }`
+followed by `pos = &self->v610; rot = &self->m620; ...` once after the join gives retail's code;
+the same four assignments written at the end of each arm put the else arm's `move s5, s0` (pos,
+copied from the call's argument address) in the call's delay slot where retail has the last
+argument (`addiu t2, sp, 116`) and the copy after the call. Everything else is the same, registers
+included.
+
+- **The nop.** With the assignments after the join, the else arm ends with the call when gcse
+  builds its flow graph, so find_basic_blocks (flow.c) emits `(use (const_int 0))` after the
+  call ("so that the CALL_INSN itself is not at basic_block_end"). PRE then copies the four
+  addresses into each arm's end (the else arm's `self + 0x610` is its argument's pseudo, so
+  pos becomes a copy of it), after the nop.
+- **The issue slot.** The nop stays in the block through reload and sched2. It has no unit
+  (`none` in the dependence table) but counts against the issue rate (2) like any insn
+  (schedule_block's `can_issue_more--`). Before the call there are 11 insns that the call
+  depends on and pos's copy (priority 1, ready from cycle 2): without the nop the copy takes the
+  one free slot, in cycle 6 beside the last argument, and reorg's backward fill puts the copy
+  in the delay slot. With the nop, the nop (priority 1, earlier insn order) takes that slot, the
+  copy issues with the call in cycle 7 (the call first, priority 4), and reorg fills the slot
+  with the last argument, as retail.
+- **Reading it.** A call whose delay slot holds the last argument move, with a copy that does
+  not depend on the call just after it, where ours puts the copy in the slot: count the insns
+  before the call in sched2's table. One short means retail had flow's nop, so the call ended
+  its block when gcse ran; the statements after it were after a join in the source.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
