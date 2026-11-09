@@ -1163,6 +1163,28 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
   local in memory, which the helpers do not have.
 
+### A weighted sum's operands in insn order (func_00191570)
+
+An inline call evaluates its arguments in two passes (integrate.c, expand_inline_function):
+first each argument in parameter order, where an inline call (Scalar, Vec::Of) emits its code
+and a plain memory reference (`Vu0::Q(*p)`) emits nothing; then each memory reference is copied
+to a register in parameter order. So `MulXSum(Q(*a), Scalar(1 - t), Q(*b), Scalar(t))` stores
+both weights' slot (one stack slot, shared) before it loads either end, and with Vec::Of ends
+it loads a, stores s, loads b, stores t. Every one of those references may alias (slot stores
+with neither flag, loads through pointers read from memory), so sched1 and sched2 keep the insn
+order (2026-11-08):
+
+- **Retail's order s, a, t, b is the source's.** sqc2 s, lqc2 a, sqc2 t, lqc2 b comes only
+  from the operands formed in that order, as locals: `Vec s = Vec::Scalar(1.0f - bestT);
+  Vec pa = Vec::Of(*a); Vec t = Vec::Scalar(bestT); Vec pb = Vec::Of(*b);` then
+  `MulXSum(pa, s, pb, t)` (each weight beside its end; the u128 locals give the same code).
+- **The two pointer loads.** The end pointers' `lw` both anti-depend on the first slot store,
+  so they have one priority, and rank_for_schedule's INSN_REG_WEIGHT picks the load that ends
+  the pointer array's life (the later one in the source) first. Retail's `lw v0, 0(s3);
+  lw v1, 4(s3)` is `b = nearest[1]` read before `a = nearest[0]`, and only with the operands
+  above (a read first leaves the two loads swapped; with the single call, b first swaps their
+  registers).
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
