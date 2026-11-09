@@ -812,6 +812,32 @@ Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c w
   its `sll a1,v0,1; addiu a1,a1,-1` sets the counter itself, where `k = count * 2 - 1` puts the
   doubled count in a temporary that local-alloc ties to the loaded count.
 
+### A copy into a longer-lived variable becomes the canonical register (func_001C57C8)
+
+- After `best = c`, CSE puts the two in one equivalence class and replaces later reads of c in
+  the block with the class's first register. make_regs_eqv makes the copy's destination first
+  when it lives past the block and its last use is later than the source's, as a running
+  "best so far" pointer does (c dies in the loop, best is read in a later loop). Every
+  member read through c after the copy is then a read of best: one more weighted reference
+  each (flow weights references with the loop depth, 3 in a nested loop), which raises the
+  variable's global-alloc priority (floor_log2(refs) * refs / live length).
+- func_001C57C8's first walk saved the contact (`best = c`) before storing the pivot's
+  fields from `c->end[1 - j]` and `c->v80`. Both reads went through best: 13 refs over 382
+  insns, priority 0.102, allocated before freed (0.061) and the second walk's
+  &D_00274AD0 (0.042), so best took $s6 where retail has $s8. Written as the body's last
+  statement, best has only its sets and the later compare (7 refs, 0.037): freed takes $s6,
+  the address and the first walk's high half $s7, best $s8, as retail's. The reads keep c's
+  register in the output, so only the allocation shows the order.
+- So where retail's code reads a member through the loop's pointer after a save into a
+  longer-lived variable and the variable ranks low, the save came after the reads.
+- Still open there: in the level contact, sched1 issues the start's lqc2 before the depth's
+  qmtc2 (both ready at the same cycle with priority 8: the vsub feeds the d store, whose
+  two-cycle store-to-load latency holds the lqc2, and the Dot, qmfc2 and qmtc2 chain alike).
+  rank_for_schedule's INSN_REG_WEIGHT prefers the lqc2 (it kills its address, 0) to the
+  qmtc2 (depth lives on to the call's $f12, 1), and the lqc2 also has more dependents. In
+  that order local-alloc ranks the Scalar first (vf1); retail's vf2 for it needs the qmtc2
+  first (emulated with lalloc.py on the `.lreg`).
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
