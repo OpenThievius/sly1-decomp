@@ -2546,6 +2546,7 @@ func_001A1F40	func_001A2C88	match
 func_001A2070	func_001A2DB8	match	rodata
 func_001A22C8	func_001A3010	match	
 func_001A22E0	func_001A3028	match	
+func_001A2380	func_001A30C8	match	
 func_001A25F0	func_001A3338	match	
 func_001A26B0	func_001A33F8	match	
 func_001A26F8	func_001A3440	match	

@@ -1169,6 +1169,24 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   dump lists each insn's dependents; a link in the RTL whose register no longer matches is a
   stale one.
 
+### A value negated into itself crosses the call (func_001A2380)
+
+- **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the
+  last call only when the pseudo crosses no call (`REG_N_CALLS_CROSSED == 0`): such a pseudo
+  must not be moved over a call. A pseudo that already lives across calls gets no such link.
+- **What that decides.** AttachHitMarkEffect passes `size` to a virtual call and then stores its
+  negation. Written `size = -size; ... e->m30[2] = size;`, the neg sets `size`'s own pseudo,
+  which crosses calls: the neg has no link to the call, is ready with it, and sched2 issues the
+  two in one cycle, so the 5.0 load and the high part of `&g_unitZVector` share the next cycle,
+  one slot before retail's. Written `e->m30[2] = -size;`, the neg sets a fresh pseudo that
+  crosses no call (local-alloc still ties it to `size`'s $f20, which dies there): it gets the
+  anti link to the call, sched2 keeps that stale link (above), and the neg issues in the cycle
+  after the call with the 5.0 load, which pushes every ALU insn of the next call's setup one
+  cycle later: retail's interleaving of the four stores with the lui/addiu pairs, exact.
+- **Reading it.** In the `.sched2` dump an insn that issues in the call's cycle and has no
+  REG_DEP_ANTI to the call, where retail puts it one cycle later, is the sign: look for a
+  reassigned variable that could be an expression instead.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
