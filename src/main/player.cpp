@@ -3497,6 +3497,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 9: {
             ((Attachment*)self->f2514)->mode0 = 4;
             self->desc02()->m2B(self);
+            // The same if/else as case 4's: here anim is set again below, so the else is dead and
+            // flow deletes it, but it keeps jump.c from turning a lone `skip = 1` into a
+            // conditional move, as retail's branch shows (docs/TOOLCHAIN.md, "Conditional moves").
             if (self->f2220 == 2) {
                 skip = 1;
             } else {
