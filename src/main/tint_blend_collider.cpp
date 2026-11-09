@@ -585,7 +585,71 @@ void func_001DF600(TintBlendCollider* self, TintBlendCollider* other)
     SetPlayerState(other, 4, 0x2B);
 }
 
-INCLUDE_ASM(func_001DF700);
+s32 HasSpareCount();
+void ClearRootObjectStateBits(void* owner, void* self, s32 n);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+void ActivateSwitchedCollider(SwitchedCollider* self);
+
+s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
+{
+    if (self->desc05()->m4B(self, req->mode)) {
+        return 0;
+    }
+    if (HasSpareCount()) {
+        self->f728 = 1;
+    }
+    self->f72C = g_gameClock[1];
+    ClearRootObjectStateBits(self->world, self, 7);
+    if (req->mode == 0 && req->reply != 0) {
+        req->reply(req->c, self);
+        {
+        Vec02 dir;
+        Vec02 v;
+        Vec02 w;
+        const Vec02* fb = &g_unitXVector;
+        dir = self->v150;
+        dir.z = 0.0f;
+        u128 len = Vu0::Length(Vu0::Q(dir));
+        if (Vu0::ToFloatMoved(len) < 0.0001f) {
+            dir = *fb;
+        } else {
+            Vu0::Set(dir, Vu0::DivX(Vu0::Q(dir), len));
+        }
+        if (HasSpareCount()) {
+            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_0027589C)));
+        } else {
+            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758A0)));
+        }
+        self->desc02()->m20(self, &v);
+        Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758A4)));
+        v.z = D_002758A8;
+        TransformDirectionBetweenFrames(0, ((PlacedObject*)self->f748)->parent, &v, &v);
+        ((PlacedObject*)self->f748)->desc02()->m20((PlacedObject*)self->f748, &v);
+        Vu0::Set(dir, Vu0::FromFloats(-dir.y, dir.x, 0.0f));
+        Vu0::Set(w, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758AC)));
+        TransformDirectionBetweenFrames(0, ((PlacedObject*)self->f748)->parent, &w, &w);
+        ((PlacedObject*)self->f748)->desc02()->m21((PlacedObject*)self->f748, &w);
+}
+    }
+    OwnerMessage msg;
+    if (HasSpareCount() || g_player == 0) {
+        SetTintBlendColliderState(self, 2);
+    } else {
+        g_player->desc->m02(g_player);
+        g_player->desc02()->m1F(g_player, (PlacedObject*)self->f744);
+        ((BaseObject*)self->f744)->desc->m03((BaseObject*)self->f744);
+        ActivateSwitchedCollider(g_player);
+        SetTintBlendColliderState(self, 3);
+        InitOwnerMessage(&msg, 0, self);
+        msg.reply = (void (*)(s32, void*))ContinueTintBlendColliderRequest;
+        g_player->desc05()->m4C(g_player, &msg);
+        self->f4E0 = 3;
+    }
+    msg.mode = (s32)self;
+    msg.owner = req->owner;
+    self->desc->m0E(self, 0x17, &msg);
+    return 1;
+}
 
 void ExtractContactsByPartMode(void* self, void* sub);
 void CollectTurningColliderContacts(void* self);
