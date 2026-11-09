@@ -1,14 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 385/404 (95.3%), checked 2026-11-08
-// NEAR (2026-11-08, night-sizex1): 6 lines from retail. The rotation is an inline writing out through a matrix local r and vector locals x, y, z (Q(x) = Q(r.r[i]) = ..., then *out = r), declared r first: retail's three copies (basis 0x00, r 0x60, x/y/z 0x90) with k reusing r's slot; target computed before eye's second sum (tools/permute.py). Still differs: the order of two pairs of stores, basis row 0 against z and k against the MulAddX (retail stores both later); Vec stores and a Scalar for k change nothing. Earlier: (2026-11-08, night-size3) the size and frame are retail's now. The rotation's rows are
-// values read as a struct (*(const Vu0::Vec*)&m.r[i]) and the rows rotated are read as a struct
-// too, so the stack stores alias them: retail's single load of the matrix and its reloads of rows
-// 1 and 2 through a2 = self+0x20 after each product. basis is assigned (not initialised) after rv,
-// eye and target are declared, which gives retail's three copies (0x00, 0x60, 0x90) with k reusing
-// 0x60; the clamp sets t in each arm and its 1.0 is a named local loaded before the products.
-// Still differs: retail stores each product to 0x60 before 0x90 (here 0x90 first) and gives the
-// matrix's row 0 vf3 (here vf2), so the products' registers and the store order around the weights
-// follow.
+// BYTES 400/404 (99.0%), checked 2026-11-08
+// NEAR (2026-11-08, w5-14A8F8): 2 lines from retail, the order of two stores. The eye's
+// MulAddX takes Vu0::Vec values (Vec::Of(frame->v140), Vec::Of(basis.r[0]), Vec::Scalar(10)):
+// both Vec::Of and Vec::Scalar are nested inline calls, evaluated in argument order, so the
+// v140 load comes before the Scalar slot's store (k at 0x60) and that store no longer feeds the
+// load: sched1 puts it after the vmaddx, as retail does (the u128 MulAddX with a Scalar or a
+// named k evaluated the slot first). Still differs: retail stores row 0 of basis (0x00) before
+// row 2 of the vector locals (0xb0); here 0xb0 first. Mechanism (sched1 -dS dumps): the five
+// stores after the third product have priority 23 (they all feed the v140 load); 0x10 and 0x20
+// are the deaths of rows 1 and 2 (weight -1) and go first, the rest tie and fall to INSN_LUID,
+// and every form whose copy `*out = r` follows both of row 2's stores gives 0x80, 0xb0, 0x00.
+// tools/permute.py on split statements finds retail's order only with out's row 0 (and
+// optionally row 1) copied between the two row-2 stores (r.r[2] = p2; out->r[0] = r.r[0];
+// z = p2; out->r[1..2] = ...), which is not a form the original plausibly had. The shared
+// mul_rotation.h forms give 3 (MulRotationRowsIndexed) to 100 lines. Ruled out: alias flags
+// (x/y/z are aggregates, never MEM_SCALAR_P, so fixed_scalar_and_varying_struct_p cannot drop
+// 0xb0's dependence on the v140 load), the class rule (no dependence between frame stores at
+// distinct offsets) and dependent counts (all seven).
 #include "common.h"
 #include "camera.h"
 #include "camera_controller.h"
@@ -42,9 +50,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
     Vec02 eye;
     Vec02 target;
     RotateRowsInto(&basis, frame->m110, *(Mat02*)&self->frame20);
-    Vec02 k;
-    Vu0::Q(k) = Vu0::FromFloat(10.0f);
-    Vu0::Q(eye) = Vu0::MulAddX(Vu0::Q(frame->v140), Vu0::Q(basis.r[0]), Vu0::Q(k));
+    Vu0::Q(eye) = Vu0::MulAddX(Vu0::Vec::Of(frame->v140), Vu0::Vec::Of(basis.r[0]), Vu0::Vec::Scalar(10.0f)).q;
     Vu0::Q(rv) = Vu0::Rotate(frame->m110, Vu0::Q(*(Vec02*)((u8*)self + 0x10)));
     Vu0::Q(target) = Vu0::Add(Vu0::Q(frame->v140), Vu0::Q(rv));
     Vu0::Q(eye) = Vu0::Add(Vu0::Q(eye), Vu0::Q(rv));

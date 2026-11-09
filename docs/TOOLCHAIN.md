@@ -1019,6 +1019,27 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
   (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
 
+### A Scalar's slot store after the load it would block (func_0014A8F8)
+
+Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
+
+- **The slot store waits for nothing once it follows the load.** `MulAddX(Vu0::Q(frame->v140),
+  ..., Scalar(10.0f))` (or a named `Vec02 k` stored first) expands the Scalar's slot store
+  before the v140 load: the load, through a pointer loaded from memory, may alias the frame
+  slot, so it depends on the store, which inherits its priority and issues first. Written with
+  Vec values, `MulAddX(Vec::Of(frame->v140), Vec::Of(basis.r[0]), Vec::Scalar(10.0f))`, both
+  arguments are nested inline calls, expanded in argument order: the load comes first, the
+  store only anti-depends on it, and sched1 puts it after the vmaddx, where retail has it.
+- **Ruled out for the rotation's copy order.** The five stores after a three-row product's
+  last row (out's rows 1 and 2, the row-2 stores of the matrix and vector locals, out's row 0)
+  all feed the v140 load (priority 23); out's rows 1 and 2 are their rows' deaths (weight -1)
+  and go first, and the other three tie on class (frame stores at distinct offsets have no
+  dependence) and dependents (seven each) and fall to INSN_LUID. Any form whose `*out = r`
+  follows both row-2 stores gives matrix row 2, vector row 2, out row 0; retail's out row 0
+  before vector row 2 needs out's row 0 copied between the two row-2 stores, which tools/
+  permute.py confirms (EXACT) but no plausible source has. The vector locals are aggregates,
+  never MEM_SCALAR_P, so fixed_scalar_and_varying_struct_p cannot separate them from the load.
+
 ### A run of global stores: the constant's death and the high parts' lives (func_00203548)
 
 Found on InitDiscLibrary (Sony's CD/DVD library, cc1 of 2.9-ee-991111) from the `-dG`, `-dS`,
