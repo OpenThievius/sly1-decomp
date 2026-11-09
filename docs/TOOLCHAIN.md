@@ -1386,6 +1386,38 @@ dumps (2026-11-08, still a near miss):
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A long-lived vector against short products: the conversions and the statement order (func_00187D08)
+
+- IntersectSegmentWithSphere takes three dot products of two differences d and e in its first
+  block. Retail has d in vf2 and each product in vf3 (its 1.0 in vf4): local-alloc gave d
+  (8 references) its register before the products (2 each). A product that reaches its qmfc2
+  with one insn between them in sched1's order has 2 * 4 / 4 = 20000 in the ranking
+  (QTY_CMP_PRI, size 4), d has 3 * 8 * 4 / life; d wins only with a life of 48 or less (a
+  tie goes to the older quantity, d's), so with one insn more between d's vsub and its last
+  use, or a product whose qmfc2 follows it at once (40000), the products take vf2 and d vf3.
+  Retail also stores e before d (sched2 keeps sched1's order for the two tied stores, which
+  then decides which one reorg puts in the branch's delay slot), so d dies at its store,
+  after e's.
+- Each conversion moves this. ToFloat (asm qmfc2, reload's mtc1) adds one insn to sched1's
+  block and has reload's latency of 2; ToFloatViaBits adds two (both asms, latency 1);
+  ToFloatMoved adds one (its asm mtc1, latency 1) but makes the product a GPR pseudo that
+  reload copies out of the asm's output register, so the product's 1.0 takes vf3 where it is
+  local. Retail's schedule needs a latency of 1 after each of the three conversions (the
+  sub.s of `dd - r * r` before the second product's qmfc2, `2 * bb` before the third's) and
+  local products for the second and third: ToFloatMoved for d.d (its product is the only one
+  whose register reload may choose: vf3 is free) and ToFloatViaBits for the other two.
+- That alone lengthens d's life to 52. The statement order fixes it: with the two stores
+  right after the differences and e.e taken before e.d, the cross product is the last use of
+  both d and e in flow's notes, so its INSN_REG_WEIGHT (two sets, one unused, two deaths) is
+  -1, equal to the sub.s's; it wins the tie on INSN_LUID, sched1 issues it before the sub.s,
+  and its life spans the sub.s (20000, not 40000). Of 180 orders of the five statements, with
+  the stores first, after the products or after the discriminant, only the eight with the stores
+  first and e.e before e.d match; the rest are 26 lines off (about 750 variants compiled in
+  all, the conversions swept over every product).
+- build/swarm/w5-187D08/la.py (g4 worktree, not committed) emulates block_alloc for the VU
+  quantities of an `.lreg` dump, asms with several outputs included (all born at 2n, an
+  unused output dying at 2n+1); it reproduced the registers of every variant checked.
+
 ### A parameter passed on fills sched1's second slot (func_0018AD88)
 
 - **What decided it.** UpdateGaugeAgentGoal opens with `switch (self->f724)` against 4. In its
