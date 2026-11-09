@@ -2596,6 +2596,34 @@ match retail except the spill slot of its count pointer (retail 0x24, ours 0x20)
   Allocate(...)` gives retail's `sw v0,0(s7)` after `move s2,v0`; `cursor = Allocate(...);
   *out = cursor;` stores the saved register.
 
+### A switch case that falls into the default; a third unread object (func_0014B6A8)
+
+Measured 2026-11-09 on UpdateNumberedAgentGoal (func_0014B6A8), whose code and registers now
+match retail except the slots of its two distance floats:
+
+- **A fall-through is one store fewer in the weighted refs.** The hit count's switch sets the
+  wall fraction in four places (1.0 for no hit, the exit for two or more, and the entry or exit
+  of a lone span), plus one read, each counted twice in the outer loop: 10 references over 183
+  insns, priority 0.164, above the neighbour loop's `next` and its 0.5, 1.0 and 0.0 (0.145 to
+  0.135), so the fraction took f22. Retail's f26 means a priority under 0.135: the lone span's
+  case falls through to the default's `frac = time[1]` (8 references, 0.131). The final code is
+  the same, because reorg copies the shared load into the default's branch delay slot; retail's
+  two `lwc1 $f26,132(sp)`, one in a delay slot just before the other's address, are that copy.
+  The fraction is used uninitialised when the lone span covers the whole segment, so it is live
+  around the loop and its length cannot change: the store count is the lever.
+- **Operands named in order keep a load behind a Scalar slot.** `a + b * Scalar(3)` written as
+  `Vec from = Of(p); Vec weight = Scalar(3.0f); Vec vel = Of(v);` puts the velocity's load
+  after the weight's slot store in the insn order; it may alias the store (a load through a
+  pointer returned by a call), so sched1 keeps it there and the sum moves next to the call,
+  as retail has it. Written as one MulAddX of three nested calls, both loads come first.
+- **The same small unread object after a collider query's span array.** The two distances are
+  ADDRESSOF scalars that purge_addressof puts after every temporary (0x3C0 and 0x3C4 here);
+  retail's 0x3C4 and 0x3C8 mean one more object of at most 4 bytes, allocated after the
+  `ColliderSpan hits[8]` (0x40 to 0x3C0) while it is live and never read. An empty class with an
+  empty destructor declared right after the array gives EXACT, as in func_001DC4D0 and
+  func_001DC238 above: three functions that query colliders now share it. Not landed, for the
+  same reason (no type the original plausibly declared there is known).
+
 ### A prototype's parameter order and the order of argument moves (func_0013A128)
 
 The EE's ABI gives integer and float arguments their registers independently (a0-a3 and
