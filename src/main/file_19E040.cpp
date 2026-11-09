@@ -2101,8 +2101,6 @@ s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
     return 1;
 }
 
-INCLUDE_ASM(func_001A1F40);
-
 // A point of ComputeProjectedHull: where it is, where it projects (x and y over z), and its
 // angle about the lowest one (0x30 bytes).
 struct HullPoint {
@@ -2111,6 +2109,41 @@ struct HullPoint {
     f32 angle;              // 0x20
     u8 pad24[0x30 - 0x24];
 };
+
+void InitIdentityMatrix(void* self);
+Mat4A MultiplyMatrices(void* m, void* in);
+void BuildBasisFromX(void* x, void* out);
+s32 func_001A2070(void* m, s32 n, HullPoint* pts);
+
+// The frame looking from the camera toward pos: the camera's position moved to the origin, then
+// the basis built from the direction (its rows as the columns), and the product passed to
+// ComputeProjectedHull, returned by value as a temporary.
+s32 func_001A1F40(Vec02* pos, s32 n, HullPoint* pts)
+{
+    Mat4 m0;
+    Mat4 m1;
+    Vec02 v;
+    Mat02 rot;
+    Mat4A t;
+    InitIdentityMatrix(&m0);
+    InitIdentityMatrix(&m1);
+    m0.m[3][0] = -((f32*)g_camera)[16];
+    m0.m[3][1] = -((f32*)g_camera)[17];
+    m0.m[3][2] = -((f32*)g_camera)[18];
+    Vu0::Q(v) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(g_camera->f40));
+    BuildBasisFromX(&v, &rot);
+    m1.m[0][0] = -rot.r[1].x;
+    m1.m[1][0] = -rot.r[1].y;
+    m1.m[2][0] = -rot.r[1].z;
+    m1.m[0][1] = rot.r[2].x;
+    m1.m[1][1] = rot.r[2].y;
+    m1.m[2][1] = rot.r[2].z;
+    m1.m[0][2] = rot.r[0].x;
+    m1.m[1][2] = rot.r[0].y;
+    m1.m[2][2] = rot.r[0].z;
+    t = MultiplyMatrices(&m1, &m0);
+    return func_001A2070(&t, n, pts);
+}
 
 void TransformByMatrixWithW(void* m, Vec02* in, Vec02* out, f32 w);
 void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));

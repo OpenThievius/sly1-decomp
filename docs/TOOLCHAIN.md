@@ -1265,6 +1265,16 @@ Read from haifa-sched.c's sched_analyze and rank_for_schedule and the `-dS -dR
 - Lever: a function whose callers copy its result from a temporary and whose own code begins
   with `move v0,a0` returns a struct; a call that should not set v0 (a later reuse of v0
   depending on an earlier set across the call) is a call to such a function.
+- **The argument moves of such a call (func_001A1F40).** Declared
+  `void MultiplyMatrices(void* out, void* b, void* in)`, ComputeHullSeenFromCamera's call had
+  every instruction of retail's but its three argument moves in a1, a0, a2 order (and, through
+  sched1, `move s3,a2` before `move a0,sp` in the prologue); retail sets a0, a2, a1. With
+  `Mat4A MultiplyMatrices(void* m, void* in)` the result's address is the hidden first
+  argument, expanded apart from the two declared ones, and `t = MultiplyMatrices(&m1, &m0);`
+  into a `Mat4A t` gives retail's order, its copy of the temporary into `t` (four `lq`/`sq`
+  before the next call) and the prologue, all at once. Lever: a three-pointer void declaration
+  of a by-value function shows as argument moves in the wrong order; the copy from a stack
+  temporary to another local is the result's assignment.
 
 ### A matrix returned by value: the stores order local-alloc's ranking (func_001BA5B0)
 
