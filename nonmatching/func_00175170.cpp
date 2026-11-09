@@ -172,13 +172,14 @@ static inline f32 Clamp_175170(f32 v, f32 lo, f32 hi)
 }
 
 // v made unit length in place, or set to fallback when shorter than 0.0001; its length.
-static inline u128 NormalizeInPlace_175170(Vec02& v, const Vec02& fallback)
+static inline Vu0::Vec NormalizeInPlace_175170(Vec02& v, const Vec02& fallback)
 {
-    u128 len = Vu0::Length(Vu0::Q(v));
+    Vu0::Vec q = Vu0::Vec::Of(v);
+    Vu0::Vec len = Vu0::Length(q);
     if (Vu0::ToFloat(len) < 0.0001f) {
         v = fallback;
     } else {
-        Vu0::Q(v) = Vu0::DivX(Vu0::Q(v), len);
+        Vu0::Set(v, Vu0::DivX(q, len).q);
     }
     return len;
 }
@@ -961,6 +962,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->desc02()->m2B(self);
             if (self->f2220 == 2) {
                 skip = 1;
+            } else {
+                anim = PS(void*, 0x1020);
             }
             Vu0::Q(self->v640) = Vu0::Zero();
             Collider* c = AT(Collider*, self->f23B4, 0x60);
@@ -979,7 +982,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->desc02()->m2B(self);
             anim = PS(void*, 0x1030);
             self->f2498 = 0;
-            Vu0::Q(self->v640) = Vu0::Zero();
+            *(Vu0::Vec*)&self->v640 = Vu0::Vec::Zero();
             StartSoundEffect(0x50, 0, 0, 0, 3000.0f, 300.0f, D_00263994, D_00263998, 0.0f, 0, 0);
             break;
         }
@@ -1349,7 +1352,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->desc02()->m20(self, &v);
             v.z = 0.0f;
-            u128 len = NormalizeInPlace_175170(v, D_00248D30);
+            Vu0::Vec len = NormalizeInPlace_175170(v, D_00248D30);
             f32 k = Vu0::ToFloat(len) / self->radius3CC;
             Vec02 spin;
             Vu0::Q(spin) = Vu0::FromFloats(-k * v.y, k * v.x, 0.0f);
