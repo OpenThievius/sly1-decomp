@@ -1191,6 +1191,45 @@ inline function returning the comparison, and the search as a loop that `break`s
 key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
 the original must have had a used label or a loop end there.
 
+### A switch case that repeats the variable's value: three passes delete it (func_0020A190)
+
+Measured 2026-11-09 on the MPEG demultiplexer's stream-id lookup (src/lib/mpeg_demultiplexer.cpp,
+Sony's 2.9-ee-991111; nonmatching/func_0020A190.cpp). `s32 sh = 0;` then a switch on a 64-bit
+mask with cases 0xFFFF000000 (24), 0xFF00000000 (32) and 0xFFFFFFFFFF (`sh = 0`). Retail tests
+`== 0xFFFF000000`, then `> 0xFFFF000000` with a `bnezl` whose annulled slot is `move a1,zero`,
+then `== 0xFF00000000`, and never compares with 0xFFFFFFFFFF; the default path reads the top
+`sh = 0`. Ours has the same tree but branches past the case's `sh = 0`. What deletes it:
+
+- **The tree.** `balance_case_nodes` splits three cases at the middle one, and
+  `emit_case_nodes` emits `GT -> test_label; == B; jump default; test_label: == R`. A greater-than
+  branch goes straight to the right child's label only when `node_is_bounded` holds: its high is
+  the index type's maximum or one below a parent's low, *and* its low is the minimum or one above
+  a parent's high. A lone 0xFFFFFFFFFF never is; a GNU range `0xFFFF000001 ... ~0ULL` is (tested:
+  no third compare).
+- **CSE (follow-jumps).** The `== R` label has one use and a barrier before it, so the first CSE
+  follows `GT` then `== R` from the function's top, knows `sh` is 0, rewrites the case's set as
+  `sh = sh` (`src_related = dest`, cost -1) and `delete_trivially_dead_insns` removes it; the
+  jump pass after CSE then deletes the now useless `== R`. That is our code. With a 64-bit `sh`
+  CSE keeps the set (and the compare), but the shift then needs the `dsll32`/`dsra32` truncation
+  retail lacks. Any case order, a `default` sharing the case (first or last), `default: break`,
+  an inline function returning the shift (by value, by pointer or by reference) all end the same
+  or worse (12 to 43 differences).
+- **reorg.** Even where the set reaches reorg (the range form compiled with
+  `-fno-cse-follow-jumps`, to explore only), `fill_slots_from_thread` calls `redundant_insn`,
+  which scans back from the `bnez` to the top `move a1,zero` in the `beqz` slot (same pattern, no
+  label between, nothing setting a1) and drops the copy: still our code. Retail's `bnezl` with
+  the set means `redundant_insn` failed there: a different pattern (another mode), a label
+  between the top and the `> 0xFFFF000000` test, or an insn setting a1 between them, none of which
+  the visible code shows.
+- **Registers.** Separately, the key's copy takes $t1 where retail has $a3: global-alloc ranks it
+  2 refs over 22 insns (0.091) after `idx * 16` (3 over 17, 0.176). Retail's order needs the key
+  at 4 or more references (or 3 within 17 insns), which suggests retail's RTL used the key in
+  more than one shift, merged after reload by cross-jumping.
+
+Not matched; the plausible plain forms are exhausted. The remaining lead is a source in which
+the key's shift is written on more than one path (the tails merged by jump2), which could also
+change what precedes the greater-than test at reorg.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
