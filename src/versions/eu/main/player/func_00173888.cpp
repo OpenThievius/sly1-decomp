@@ -463,7 +463,7 @@ held:
                 PositionCurve* c = track->pos;
                 if (c != 0) {
                     Vec02 v;
-                    c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+                    c->vt->eval(c, self, src->time, src->speed, 0, 0, &v);
                     Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(v), Vu0::Scalar(-1.0f));
                 }
             }

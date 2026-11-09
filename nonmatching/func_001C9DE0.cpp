@@ -115,7 +115,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 v;
             Vec02 w;
             PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, msg->time, player->speed, 0, &v);
+            c->vt->eval(c, self, msg->time, player->speed, 0, 0, &v);
             u128 s = Vu0::FromFloat(-1.0f);
             Vu0::Q(F(Vec02, 0x640)) = Vu0::MulX(Vu0::Q(v), s);
             Vu0::Q(v) = Vu0::Rotate(F(Mat02, 0x660), Vu0::Q(v));
@@ -152,9 +152,9 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 p1;
             f32 zero = 0.0f;
             PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, from->a0.f, zero, &p0, 0);
+            c->vt->eval(c, self, from->a0.f, zero, 0, &p0, 0);
             c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, to->a0.f, zero, &p1, 0);
+            c->vt->eval(c, self, to->a0.f, zero, 0, &p1, 0);
             F(f32, 0xB94) = p1.x - p0.x;
             F(f32, 0xB98) = (to->a0.f - from->a0.f) / *(f32*)&anim->props6C[0x10];
             break;

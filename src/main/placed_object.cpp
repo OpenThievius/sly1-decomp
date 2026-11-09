@@ -5075,7 +5075,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         Track83* e = &owner->tracks[n->index];
         PlacedObject* o = n->owner;
         if (msg->kind == 35) {
-            e->pos->vt->eval(e->pos, o, 0, msg->a0.f, self->speed, &u.v[0], &u.v[1]);
+            e->pos->vt->eval(e->pos, o, msg->a0.f, self->speed, 0, &u.v[0], &u.v[1]);
             o->desc02()->m1D(o, (Vec02*)&u.v[0]);
             o->desc02()->m20(o, (Vec02*)&u.v[1]);
         } else {
