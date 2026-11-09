@@ -1703,6 +1703,44 @@ paths in expand_expr's PLUS_EXPR (2026-11-08, read from expr.c and optabs.c):
   as a pointer's initialiser fold the member's offset into the index (`sll; addiu 1424; addu
   base`), losing the hoisted base: the form that keeps both is the element store.
 
+### Sony's compiler separates memory by type; a stack argument's load (func_001F8290)
+
+Read from local-alloc.c, haifa-sched.c and the `-dS -dl -dg -fsched-verbose-6` dumps of
+CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
+
+- **2.9-ee-991111 at -O2 has type-based alias analysis on.** Its sched1 lets a store of a
+  pointer member (`self->packet`, `self->callback`) pass an int load through another pointer
+  (`packet->id`), and an int load wait for an earlier int store (`self->callbackArg`); with
+  `-fno-strict-aliasing` the pointer stores depend on the load too. Signed and unsigned ints are
+  one class, each pointer type is its own (a `Packet*` store depends on a `Packet*` store, not
+  on a `void*` one). The game's SN 2.95.3 has no such separation ("Alias classes in the
+  schedule" above), so this applies to Sony's libraries only.
+- **A stack argument used once is loaded where it is used.** The ninth argument (192(sp))
+  gets a pseudo set at the entry with a REG_EQUIV note; update_equiv_regs, at the start of
+  local-alloc (after sched1), cannot put the stack slot into the store that uses it, so it moves
+  the load to just before that store. The pseudo is then a local quantity of two references
+  over one insn, the first that local-alloc places: $v0 here.
+- **The widened lives decide the neighbour's register.** block_alloc first tries each quantity
+  over its life widened by one insn at each end (fake_birth/fake_death). So a quantity takes
+  the register of one placed before it not only when their lives overlap but also when the
+  other is born in the insn right after its death or dies right before its birth.
+- **What it gives func_001F8290.** Retail's id (`self->id = packet->id`) is in $v1 and
+  `mode & 2` in $a0 because the argument's load sits inside (or next to) the id's life in
+  sched1's order. Written with the id first (`self->id = packet->id;` before
+  `self->callbackArg = ...`), sched1 issues the id's load, the argument's store, then the id's
+  store, and every register is retail's; written after the argument's store, the int load must
+  wait for it, the id's life is after the argument's and takes $v0.
+- **What is left: the weight wall.** Retail stores the client's fields in the order argument,
+  packet, id, callback. sched2 breaks the tie between the packet's and the id's store at t=4
+  on INSN_LUID, sched1's order, so sched1 must have issued the packet's store first; but the
+  id's store is ready at t=3 (its load at t=1, two cycles) and weighs 0 (its value dies) where
+  the packet's store weighs +1, and the argument's store has taken t=2. With every field an int
+  (or `-fno-strict-aliasing`) the function is two instructions off for that reason alone; with
+  the header's pointer types the pointer stores fall to the end of the block (priority 2).
+  A sweep of about 1,000 combinations of the client's and packet's field types (int, the pointer
+  type, void*) and store orders found nothing closer. Retail's sched1 order is not reachable in
+  this model; something in the original's block is still unknown.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
