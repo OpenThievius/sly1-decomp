@@ -645,6 +645,29 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   `fixed_scalar_and_varying_struct_p` separates them from the scalar slots:
   sched2 then hoists the reads as retail does, and every case, written in
   source order, matches.
+- **func_001F2840: the order of the insns decides the rotation (2026-11-08).** In the else
+  branch, retail reloads the spilled mesh into v0 for `mesh->f68` and the Transform's 1.0 into
+  v1 (mfc1), ours the other way. Ours reaches the qmtc2's reload first, after the case blocks'
+  VU0 reloads (vf3) left the rotation past the GPRs, so it wraps to v0 and the mesh takes v1.
+  The mesh's load came after the qmtc2 because sched1 kept it behind the Scalar slot's store
+  (`[sp+96]`, neither MEM flag) that it may alias. Reading the pointer before the Transform
+  (`void* skin = mesh->f68;` then `if (skin != 0)`) puts the load first in the insn order, so
+  it no longer depends on the store, takes v0 in the wrap, and the qmtc2 takes v1: retail's
+  registers and its order (the slot store in the branch's delay slot).
+- **What the rotation shows when the final code is the same.** In the same function's vertex
+  loop the three Length cases' qmfc2 reloads are v0, v1, a0 in ours and v1, a0, v0 in retail
+  (a1, holding `&obj->v140` across the loop, is skipped), and every reload after the loop is
+  one step behind too (mesh in a1 for v1, obj in v0 for a1). Before them ours and retail agree
+  (the loop head's mfc1 a0). An offset of exactly one with v0 free means retail allocated one
+  more GPR reload, landing on v0, between the loop head and case 1, and no instruction of the
+  final code shows it: the dispatch (`lw v0, 32(s4)` for the mode) and the case -1 block are
+  the same bytes in both. A candidate is a reload whose value an insn already had, such as a
+  pseudo with a REG_EQUIV memory left without a hard register, whose load reload then makes
+  in its use's reload register (the same `lw v0`). Ruled out: the conversion helper of each
+  case (ToFloat, ToFloatMoved, ToFloatNow, ToFloatViaBits: one helper for all three changes
+  nothing, mixing them is not plausible), the weight stored once after the switch, default
+  apart from case -1, the matrix read as rows, `Vec::Of(p)`, `d` declared outside the loop, and
+  the mode read into a local before the loop (it takes a1 and moves &obj->v140).
 
 ## Loops
 
@@ -1982,6 +2005,14 @@ paths in expand_expr's PLUS_EXPR (2026-11-08, read from expr.c and optabs.c):
 - **A constant base folds into the index.** `self->color[0] + k * 4` and `&self->color[k][0]`
   as a pointer's initialiser fold the member's offset into the index (`sll; addiu 1424; addu
   base`), losing the hoisted base: the form that keeps both is the element store.
+- **An array member indexed is base first (func_001F2840).** `out->f[k]`, where `f` is a
+  `f32[4]` member, is an ARRAY_REF: expand_expr takes it through get_inner_reference, which
+  returns the object (`*out`) and the variable offset `k * 4`, and the address is built as
+  `(plus base offset)`: `addu v0, s1, v0` with `out` first, retail's order. Pointer
+  arithmetic (`out[k]` with `f32* out`) gives the multiplication first. A pointer to an array
+  (`f32 (*out)[4]`, `(*out)[k]`) does not help: the C++ front end's build_array_ref turns an
+  array reached through INDIRECT_REF back into pointer arithmetic, so the array must be a
+  member (or a declared array).
 
 ### Sony's compiler separates memory by type; a stack argument's load (func_001F8290)
 
