@@ -728,6 +728,32 @@ the givs strength_reduce reduced, all before the loop's start; so what the secon
   moved by the second pass: its first-pass count was over `80 * lifetime` (160 without a call)
   and its second-pass count under it.
 
+### The threshold falls as loop.c moves: which invariant wins a saved register (func_001CF158)
+
+Read from loop.c (move_movables) and global.c with `-dL -dG` dumps (2026-11-08,
+ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
+
+- **Each move costs 3.** move_movables lowers `threshold` by 3 after every invariant it moves,
+  in the loop's order, so an invariant late in a big loop faces a smaller limit: the curve loop
+  (137 insns in pass 1, with a call) moves `&at`, `&ctx`, D_00274E44's `%hi` and 30.0 first,
+  and then D_00274E10's `%hi` (lifetime 2) needs `2 * 68 >= insns` and D_00274E20's `2 * 65`.
+  Both stay for pass 2 at 137 insns, and move there (126 insns) after the scorer's `%hi`.
+- **The last one moved wins.** The hoisted `%hi` parts all cross the loop's calls, have three
+  refs each and are live over the whole loop, so global-alloc's priority (refs over live length)
+  differs only by where each sits in the preheader: the one put last (last of the second pass)
+  is the shortest and takes the one saved register left, the others are spilled and reloaded
+  (rematerialized) in the loop. sched1 keeps the preheader's order (all alu, priority 1).
+- **Telling hoisted from never moved.** A `%hi` reloaded in the loop takes reload's round-robin
+  register (v0, v1, a0 in turn across the loop's reloads); one never moved is local-alloc's and
+  takes v0. Retail's curve loop reloads D_00274E10 into v1 and D_00274E20 into a0, so retail
+  hoisted them and they lost to the scorer's `%hi` (s8): they were moved before it, in pass 1,
+  which a loop of 130 insns or fewer would do. Not reproduced: no source form found shrinks the
+  loop (statement order, named locals and the loop variable leave the count at 137).
+- **A function's parameter order shows in its callers' moves.** The same function's vector loop
+  sets `$f14` (the low end, 50.0) after a0 and a1: FindLocalMinimum's prototype is (fn, ctx,
+  start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
+  match as well as the old order (the moves follow it, docs above, func_0013A128).
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
