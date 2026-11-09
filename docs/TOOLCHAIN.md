@@ -915,6 +915,20 @@ so the load takes $t1 and n $t2; retail has them the other way round. What was m
   `do`/`while`, `for`, `<= 56`) and locals for the first statements add nothing more, because
   cse1 removes every other copy. Inline helpers for the refill or the update keep n's pseudo.
 
+### A store after the join copies its pointer into a pseudo (func_00126CB8)
+
+`if (c) rate = a; else rate = b; p->node->rate = rate;` and the same store written in each arm
+give the same final code (cross-jumping merges the two stores after reload, and reorg fills the
+branch's delay slot with the load both arms share), but not the same registers. With one store
+after the join, GCSE's copy propagation leaves each arm's load of `p->node` in its own pseudo and a
+copy into the pseudo the join's store reads (`r133 = r125`). sched1 places that copy in the arm's
+block, here between the float load of `node->level` and its use: the level's span in local-alloc
+grows from 2 insns to 3, the constant's (2) is now shorter, local-alloc places the constant first
+and gives it `$f1`. With a store in each arm there is no copy; the two spans tie and the value born
+first, the level, takes `$f1`, as retail has it. A swap of two short-lived temporaries in one arm of
+an if/else whose result is stored after the join points at retail storing in each arm. (The
+sibling func_00126D60, the same shape, has its store after the join: the original wrote both.)
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
