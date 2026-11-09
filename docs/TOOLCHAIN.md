@@ -1042,6 +1042,50 @@ function.c and haifa-sched.c with `-dS -fsched-verbose-6` dumps):
   object's scope closes before `return`. A frame with an unexplained small slot before the
   address-taken locals is worth reading as such a scoped object.
 
+### A prototype's parameter order and the order of argument moves (func_0013A128)
+
+The EE's ABI gives integer and float arguments their registers independently (a0-a3 and
+$f12-$f19 each in order), so `f(Vec3* in, Vec3* out, f32 s, f32 t)` and `f(Vec3* in, f32 s,
+f32 t, Vec3* out)` take the same registers and the callee's code cannot tell them apart. The
+caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-verbose-6`):
+
+- **The moves come in parameter order.** load_register_parameters emits one move per argument
+  in the prototype's order, and combine leaves each where its move was, so the order of `a0`,
+  `a1`, `$f12` and `$f13` before sched1 is the parameter order.
+- **That order is sched1's last tie-break, and sched2's.** Three such moves (`addiu a0`, `addiu
+  a1`, `mov.s $f13` from a callee-saved zero) have the same priority, weight and dependents;
+  the scheduler issues them by INSN_LUID, and sched2's LUIDs are sched1's output order. In
+  func_0013A128's three RemapQuadraticParameter calls retail sets a0, then $f13, then a1:
+  declared (in, out, s, t) the second call set a1 before $f13; declared (s, t, in, out), $f13
+  before a0. Declared `(Vec3* in, f32 s, f32 t, Vec3* out)` all three match (the third's a0
+  goes first in sched2 because the `still = 0` after the call, allocated to a0, is one
+  dependent more). The definition (file_1E88D0) matches with either order, so it takes the
+  order its caller proves.
+- **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
+  compare their order in the `.combine` dump with the prototype; the order of a function's own
+  parameters is evidence only at its call sites.
+
+### The operand order of an address sum (expr.c, func_0013A128)
+
+`addu a0, v0, t0` (index first) and `addu a0, t0, v0` (base first) come from two different
+paths in expand_expr's PLUS_EXPR (2026-11-08, read from expr.c and optabs.c):
+
+- **A pointer initialised with a sum keeps the source order.** `u8* out = &colors[k * 4];`
+  (C++ folds `&*(p + i)` to `p + i`) is expanded outside an address, so it goes to
+  expand_binop, which swaps commutative operands only when the second is a register and the
+  first is not (or the first is a constant): two registers stay base first.
+- **An address expanded as a memory reference puts the multiplication first.** Inside a MEM
+  the sum is expanded with EXPAND_SUM; the multiplication by the element size comes back as a
+  `(mult k 4)` and the both_summands code ("put a constant term last and put a multiplication
+  first") returns `(plus (mult k 4) base)`, which force_operand turns into `addu index, base`.
+  So the store written as an element (`self->color[k][j] = ...`, or `colors[k * 4 + j]`) gives
+  retail's operand order, and loop.c's strength reduction then makes the pointer that is
+  incremented by one, as retail has it. The reads in the same loop (`(colors + i * 4)[j]`)
+  show the same order for the same reason.
+- **A constant base folds into the index.** `self->color[0] + k * 4` and `&self->color[k][0]`
+  as a pointer's initialiser fold the member's offset into the index (`sll; addiu 1424; addu
+  base`), losing the hoisted base: the form that keeps both is the element store.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
