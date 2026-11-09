@@ -2193,6 +2193,12 @@ reference.
   use, as for a named local; a named scalar local in memory from its declaration needs
   TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
   size with only the call's `addiu a1, sp, 16` early.
+- **A receiver loaded early (func_0015BC78).** Its `Q(k) = FromFloat(-1.0f)` into a Vec02 local
+  held the virtual call's receiver load (`self->receiver678`, a member through a pointer) behind
+  the weight's and the message's stores, so local-alloc tied it to a0. With `Scalar(-1.0f)`
+  passed to MulX the load rises above the vmulx into a2 and the call's delay slot takes
+  `move a0, a2`, as retail. Spot it: retail's receiver in a2 (or another free argument
+  register) copied to a0 in the jalr's delay slot.
 
 ### A method read as a descriptor member passes the weight slots (func_001EB698)
 
