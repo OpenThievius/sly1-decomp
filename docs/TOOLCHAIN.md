@@ -799,6 +799,23 @@ func_001F0AE0):
   by one insn of life: the one born first lives longer and is placed second. With the size before the start in
   the helper's parameters (RemapMeshQueueValues's own order), the qwc address is computed
   first and the two take retail's registers.
+- **Bucket order also picks callee-saved registers, not only spill slots** (2026-11-08,
+  func_001E4578). A call between two loops takes `&lo`, `&hi`, `&count` and `&list`; PRE finds
+  each frame address partially redundant and hoists it, with a reaching register of its own,
+  before the first loop, so each lives across a call and gets a saved register. Those
+  pseudos tie in global-alloc's priority (2 refs over the same life, 0.067 each), and a tie
+  falls to the allocno number, which is the pseudo number: bucket order. With T = 75 (149
+  insns, the u128 form) `&hi` (offset 16) is in bucket 0 and takes s0 before `&count` (176)
+  and `&list` (180); retail has them in s0, s1 and s5 the other way round, which needs a T
+  where (13258 + 1 + 16) mod T is after the other two (71, 73, 83, 85, 91 to 97, 101; not 75,
+  77, 79, 89, 99). Shortening our function by three insns (deleting a statement) gave
+  retail's three registers at once, which proved the model; the source that has it is the
+  project's Vec form throughout (each inline's argument and result a `movti`): 200 insns,
+  T = 101. The intermediate mixes (199 insns, T = 99) and a pointer walk for the second loop
+  (T = 97, retail's Gather registers but a tie lost in that loop) told the forms apart before
+  their bytes. A `Vu0::Set(x, v.q)` store against `*(Vu0::Vec*)&x = v` is one insn, so a
+  function that mixes the two can land on any of several sizes; the uniform Vec form is the
+  plausible one, and it is retail's here.
 
 ## sched1
 
