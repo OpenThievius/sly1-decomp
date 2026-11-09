@@ -308,7 +308,58 @@ void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
     self->f4B8 = 0;
 }
 
-INCLUDE_ASM(func_001CD870);
+void BuildBasisFromXAndZHint(Vec02* x, const Vec02* z, Mat02* out);
+s32 CreatePooledContact(f32 f, void* self, void* other, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+// Adds the contacts of the player with the object node for the axes of flags (bits 1 2 4: always,
+// bits 8 0x10 0x20: when the offset along that axis is under 0.0001), in the frame of axis.
+void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* origin, Vec02* axis, Vec02* offset)
+{
+    Vec02 d;
+    Mat02 m;
+    if (IsObjectAttached(node) == 0) {
+        SetPlayerState(self, 2, 2);
+        return;
+    }
+    s32 each = flags & 2;
+    s32 first = flags & 1;
+    s32 third = flags & 4;
+    BaseObject* n = node;
+    while (n != 0 && (n->desc->flags & 2) == 0) {
+        n = n->parent;
+    }
+    Contact03** last;
+    Contact03** head;
+    if (n != 0) {
+        ContactRow03* row = self->contacts->head;
+        void* want = ((PlacedObject*)n)->root;
+        while (row != 0 && (void*)row->other != want) {
+            row = row->next;
+        }
+        head = (Contact03**)row;
+        last = row->link;
+    } else {
+        last = &self->contacts4B4;
+        head = last;
+    }
+    if (axis != 0) {
+        BuildBasisFromXAndZHint(axis, &g_unitZVector, &m);
+    } else {
+        m = g_identityMatrix;
+    }
+    Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(*origin));
+    Vu0::Q(d) = Vu0::RotateTransposed(m, Vu0::Q(d));
+    if (first != 0 || ((flags & 8) != 0 && d.x < 0.0001f)) {
+        CreatePooledContact(d.x, self, n, offset, &m.r[0], first != 0 ? 11 : 10, 0, 0, head);
+    }
+    if (each != 0 || ((flags & 0x10) != 0 && d.y < 0.0001f)) {
+        CreatePooledContact(d.y, self, n, offset, &m.r[1], each != 0 ? 11 : 10, 0, 0, head);
+    }
+    if (third != 0 || ((flags & 0x20) != 0 && d.z < 0.0001f)) {
+        CreatePooledContact(d.z, self, n, offset, &m.r[2], third != 0 ? 11 : 10, third != 0 ? 0 : *(s32*)((u8*)self + 0x6D4), 0, head);
+    }
+    *last = *head;
+}
 
 struct HeadingVector {
     f32 x;
