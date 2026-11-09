@@ -19,7 +19,7 @@ f32 ClampToMagnitude(f32, f32);
 f32 Arcsine(f32 x);
 f32 ArctangentOfRatio(f32 y, f32 x);
 void InvertRigidTransform(void* a, void* b, Quad16* out);
-Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in);
+Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
 void BuildBasisFromXAndZHint(void* self, void* table, void* value);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
@@ -68,8 +68,10 @@ void InitIdentityMatrix(Mat4* self)
 
 ASM_FUNC(func_00188628);
 
-// out = in times m, row by row: each row of in through m (TransformMatrixByObject's product).
-Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in)
+// in times m, row by row: each row of in through m (TransformMatrixByObject's product). The
+// matrix is returned by value: the caller passes the address of its result in a0 and gets it
+// back in v0, and each row goes to the result (g++'s named return value) as soon as it is made.
+Mat4A MultiplyMatrices(Quad16* m, Quad16* in) return out
 {
     u128 m0 = Vu0::Q(m[0]);
     u128 m1 = Vu0::Q(m[1]);
@@ -77,14 +79,13 @@ Quad16* MultiplyMatrices(Quad16* out, Quad16* m, Quad16* in)
     u128 m3 = Vu0::Q(m[3]);
     Quad16 r[4];
     Vu0::Q(r[0]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[0]));
-    out[0] = r[0];
+    ((Quad16*)&out)[0] = r[0];
     Vu0::Q(r[1]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[1]));
-    out[1] = r[1];
+    ((Quad16*)&out)[1] = r[1];
     Vu0::Q(r[2]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[2]));
-    out[2] = r[2];
+    ((Quad16*)&out)[2] = r[2];
     Vu0::Q(r[3]) = Vu0::Transform4(m0, m1, m2, m3, Vu0::Q(in[3]));
-    out[3] = r[3];
-    return out;
+    ((Quad16*)&out)[3] = r[3];
 }
 
 
@@ -316,14 +317,9 @@ void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out)
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
 {
     Quad16 tmp[4];
-    Quad16 res[4];
 
     InvertRigidTransform(self + 0x30, self, tmp);
-    MultiplyMatrices(res, (Quad16*)arg, tmp);
-    out[0] = res[0];
-    out[1] = res[1];
-    out[2] = res[2];
-    out[3] = res[3];
+    *(Mat4A*)out = MultiplyMatrices((Quad16*)arg, tmp);
 }
 
 void VectorToAngles(Vec3* v, f32* a1, f32* a2)
@@ -600,15 +596,45 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-void BuildScaleAboutFrame(void* point, void* frame, Quad16* scale, void* out);
+void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out);
 
 void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
 {
     Quad16 scale;
     Vu0::Q(scale) = Vu0::Splat(s);
-    BuildScaleAboutFrame(point, 0, &scale, out);
+    BuildScaleAboutFrame((Quad16*)point, 0, (f32*)&scale, (Mat4A*)out);
 }
 
-INCLUDE_ASM(func_0018A040);
+extern u8 D_00248D30[];
+
+// A matrix of zeros.
+static inline void ClearMatrix(Mat4A* m)
+{
+    FillMemory(m, 0, sizeof(*m));
+}
+
+// The transform that scales by scale along the axes of the frame of rotation rot at pos (the
+// origin and identity when they are null): back into the frame, scaled, out again.
+void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out)
+{
+    Mat4A frame;
+    Mat4A inverse;
+    Mat4A scaling;
+    Mat4A step;
+
+    if (pos == 0)
+        pos = (Quad16*)D_00248D30;
+    if (rot == 0)
+        rot = (Quad16*)&g_identityMatrix;
+    BuildMatrixFromRotationAndTranslation(pos, rot, (Quad16*)&frame);
+    InvertRigidTransform(pos, rot, (Quad16*)&inverse);
+    ClearMatrix(&scaling);
+    scaling.m[0][0] = scale[0];
+    scaling.m[1][1] = scale[1];
+    scaling.m[2][2] = scale[2];
+    scaling.m[3][3] = 1.0f;
+    step = MultiplyMatrices((Quad16*)&scaling, (Quad16*)&inverse);
+    *out = MultiplyMatrices((Quad16*)&frame, (Quad16*)&step);
+}
 
 INCLUDE_ASM(func_0018A160);

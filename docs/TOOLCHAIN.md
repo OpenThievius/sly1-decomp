@@ -1014,6 +1014,40 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   the last row), and the probe is not a form the original plausibly had, so the function stays
   a near miss.
 
+### A matrix returned by value: the call sets no v0 (func_0018A040, func_00188668)
+
+Read from haifa-sched.c's sched_analyze and rank_for_schedule and the `-dS -dR
+-fsched-verbose-6` dumps (2026-11-08):
+
+- **What decided the order.** BuildScaleAboutFrame copies a 64-byte product (four `lq`, four
+  `sq`) just before a call. sched1 issues the four loads in insn order (equal priority, weight,
+  class and dependents), so sched2's LUIDs are rows 0, 1, 2, 3. In sched2 the row whose
+  register a later load reuses after the call has one more dependent and goes first: a call's
+  implicit clobbers of call-used registers are added to `reg_last_sets` (the later set depends
+  on both the call and the earlier set), but an explicit SET in the call (`call_value`'s v0)
+  replaces the list. With `Quad16* MultiplyMatrices(Quad16* out, ...)` the call sets v0, so
+  only v1's row (row 2) gains the dependent: 2, 0, 1, 3. Retail's 2, 3, 0, 1 is v0's row
+  gaining one too: the call sets no v0.
+- **What the callee is.** func_00188668 starts with `move v0,a0` and its callers copy its
+  result out of a temporary: a function returning the matrix by value (g++ passes the
+  result's address in a0, returns it in v0, and the call is a `call_internal` with no SET),
+  `step = MultiplyMatrices(&scaling, &inverse); *out = MultiplyMatrices(&frame, &step);`,
+  the two calls sharing one temporary slot. A void declaration matches the caller too, but not
+  the callee's v0.
+- **The callee's rows.** Retail writes each row to its local and then to the result before
+  loading the next row of `in` (the result's address and `in` are both arguments, so they may
+  alias). `return r;` copies only after the last row (the copy is a block move at the return).
+  g++'s named return value, `Mat4A MultiplyMatrices(Quad16* m, Quad16* in) return out`, makes
+  `out` the return slot itself, so each row's store sits where it is written: func_00188668,
+  TransformMatrixByObject (`*(Mat4A*)out = MultiplyMatrices(arg, tmp)`) and func_0018A040
+  all match with it. This is the second function of the matrix file whose retail writes each
+  row to a local and to its result in turn (InvertRigidTransform's Transpose above is the
+  first); taken together they say the original's matrix code returned matrices by value with
+  named return values, a documented g++ 2.x extension.
+- Lever: a function whose callers copy its result from a temporary and whose own code begins
+  with `move v0,a0` returns a struct; a call that should not set v0 (a later reuse of v0
+  depending on an earlier set across the call) is a call to such a function.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
