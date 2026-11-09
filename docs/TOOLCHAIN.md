@@ -1432,6 +1432,42 @@ included.
   before the call in sched2's table. One short means retail had flow's nop, so the call ended
   its block when gcse ran; the statements after it were after a join in the source.
 
+### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, unsolved)
+
+`for (i = 0; i < n; i++) { e = &entries[i]; if (e->used == 0) { inner loop; sum += span; } }`.
+Retail's `addiu v0,a3,1` in the `bnez` delay slot and `move a3,v0` at the latch are PRE's: the
+latch's `i + 1` is deleted (`i = r181`) and r181 is computed before the skipped body. The
+difference is only where r181 is born, and it decides every GPR of the loop (2026-11-09):
+
+- **The insertion points.** With lcm.c's `latein = delayin` (above), PRE inserts the
+  expression at the end of every block on the delayed chain from the loop top whose
+  successors are not all isolated. The skip from the loop top to the latch is a critical edge,
+  so the loop-top block itself gets `r181 = i + 1` before its `bnez` (and the inner loop's
+  preheader a second copy, which cse2 turns into `r181 = r181`).
+- **sched1 hoists it.** In the loop-top block the add depends on nothing but `i`, so it issues
+  in cycle 1 beside the `mult` of `i * 0xD0`. r181 is then live across the `mult`/`addiu`
+  temporaries that local-alloc put in v0, so it conflicts with v0, loses its v0 preference
+  (the latch's `slt` into v0, carried through `i = r181` by expand_preferences) to
+  prune_preferences, and the entry pointer, first in global-alloc's order, takes v0. Every
+  other register follows (21 lines differ).
+- **What retail had.** Retail's r181 is born after the entry pointer's add: with the add held
+  after the load (a diagnostic `asm volatile("")` between the load and the test), or with a
+  transparent block on the skip edge (a diagnostic `else { k = 0; }`, a dead set that flow
+  deletes after gcse), the function is EXACT. In the second, ISOOUT of the loop-top block
+  becomes true (the skip block is "isolated"), so PRE inserts at the end of the skip block and
+  the preheader, never in the loop-top block; reorg then steals the skip block's add into the
+  `bnez` slot and retargets the branch to the latch, which is retail's code.
+- **Ruled out** (all give the same 21 lines or worse): `continue`, `else continue`, a one-case
+  `switch`, `goto next`, a `while` loop, the cast address, no entry pointer, a post-increment
+  index (loop.c then strength-reduces the `mult` away), an inline helper returning a flag or
+  adding the span, a flag variable (not threaded), and the increment written in both arms
+  (12 lines: the else arm's `i++` is in place and the latch's `move` falls into the vadd
+  block).
+- **Spotting it.** A loop index's `i + 1` in a branch delay slot, held in a register whose
+  number the body's temporaries also use: retail's add was born late, so the skip edge of the
+  original had a block of its own when gcse ran. A plain-C form that gives that block without
+  a dead statement is still to be found.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
