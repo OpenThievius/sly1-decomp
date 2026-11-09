@@ -1076,6 +1076,49 @@ loop written downwards (2026-11-09, read from the `-dG` and `-dL` dumps):
 - **Spotting it.** A counter loaded with N-1 that counts to zero with bgez, while the loop's
   invariants and hoisted values come before its `li`, is a count-up `for` loop.
 
+### An exit test jump.c does not copy: a label among the rolled tests (func_001388A0)
+
+expand_end_loop (stmt.c) rolls a loop that begins with an exit test: everything from the top to
+the last jump to the loop's end within 30 insns goes to the bottom, and the loop is entered by a
+jump to it. In the first jump pass (after regscan), jump.c's duplicate_loop_exit_test then
+copies those tests in front of the loop when a LOOP_BEG is followed by that jump, unless the
+copied code holds a CODE_LABEL, a call, a LOOP_BEG or LOOP_CONT note, or more than 20 insns. A
+label counts only while something jumps to it: a label jump threading empties is deleted, and
+the pass runs again until nothing changes, so the copy is made on the next round. A copied test
+adds its references at the outer depth (flow's `REG_N_REFS += loop_depth`), and the first
+block after LOOP_BEG holds what sched1 put before the entry jump, at the loop's depth. The
+final code can be the same either way: cross-jumping after reload merges the copy into the
+bottom test.
+
+RemoveColliderFromSweepAxes scans each axis for a collider's start entry and stops at its end
+entry. Retail's owner (a parameter compared once) ranks after self in global-alloc, and the
+axis counter's `i + 1` before the 0xAAAAAAAB constant: the owner has 4 references (its copy
+from a1, one compare at depth 3) and `i + 1` has 5 (set after the outer loop's LOOP_BEG, at
+depth 3). The forms:
+
+- `for (;;) { while (cur->owner != owner) cur++; if (cur->flag != 0) break; start = cur;
+  cur++; }`: retail's code, but the inner while's test is copied in front of it (8 refs for the
+  owner, 1 + 3 + 4) and `i + 1` sits before the outer loop (4 refs): the owner ranks fourth.
+  90.8%.
+- `if (cur->owner == owner) { if (cur->flag != 0) break; start = cur; } cur++;` and
+  `... { if (cur->flag == 0) start = cur; else break; } cur++;`: rolled, but no label survives
+  in the rolled tests (the second's else label is threaded away), so jump.c copies them and the
+  copy stays before the loop.
+- `if (cur->owner != owner) { cur++; continue; } if (cur->flag != 0) break; start = cur; cur++;`:
+  the label of the skip's else is in the rolled code, so nothing is copied and every register is
+  retail's, but the rolled region ends at the `break`, so `start = cur` is left at the top of
+  the loop (`beqz` back to it) where retail has it after the test (`bnez` out, then `b`).
+- `if (cur->owner != owner) { cur++; continue; } if (cur->flag == 0) start = cur; else break;
+  cur++;`: the region ends at the else's unconditional `break`, so `start = cur` rolls with the
+  tests, the skip's label keeps jump.c from copying them, and only `cur++` stays at the top.
+  EXACT. With SweepAxisSlot pointers, the first count `(cur - start) * 12 - 12` written in one
+  expression is folded to the byte difference; counted into a local first (`s32 n = cur -
+  start;`) it keeps retail's exact division.
+
+The tell: retail enters a loop with a `b` to its tests, a parameter compared once in it ranks
+as if referenced once at the loop's depth, and the near miss's dump shows the test copied in
+front of the loop: a `continue` that skips to the next element leaves a label in the tests.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
