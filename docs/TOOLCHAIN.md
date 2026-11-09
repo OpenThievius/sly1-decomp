@@ -1703,6 +1703,29 @@ integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near
   variable the original reused (two lookups of the same kind, one after the other), or one
   live across blocks.
 
+### A reused parameter takes its argument register's preference (func_00127B20)
+
+- **What differed.** func_00127B20 walks from `self` up to `top`, keeping
+  each object in `chain[]`, then back down. A new local for the walk down (`PlacedObject* o =
+  chain[i]`) was global-alloc's (it lives across the loop body's `if` blocks) and took $v0,
+  the first free register of REG_ALLOC_ORDER: its last use, `q = &o->rot` (insn `r269 =
+  r171 + 0xd0`), is where q is born, so the two do not conflict and q's local $v0 is free
+  over o's whole life. Retail keeps the object in $a0, with q in $v0.
+- **Why $a0.** sched1's order was retail's (the addiu after the row 0 load, from the
+  priorities: the load heads the chain to the row stores that rows 1 and 2 wait for), so no
+  conflict could take $v0 from o. The register is a preference: `self` is copied from $a0 at
+  entry, so its pseudo has `;; N preferences: 4`. Writing `self = chain[i];` (the parameter
+  reused as the cursor of the second walk, as the first walk already moves it) makes the
+  walk down one pseudo with self, which global-alloc gives $a0; its life in the middle loop
+  is dead, so no conflict there. 18 lines became 10.
+- **The rest: an untied rotation.** Retail's first rotation (`o->pos` through M) loads the
+  position into $vf2 and writes $vf4: the result is not tied to v. Vu0::Rotate ties it ("0"),
+  so the load went straight into x's pseudo and both took x's $vf4, which moved M's rows
+  (retail $vf6, $vf5, $vf3). Vu0::RotateUntied for that rotation only (the two later ones are
+  tied in retail: $vf1 in and out, $vf3 in and out) is EXACT.
+- **Rule.** An object held in an argument register across blocks, where a fresh local would
+  take $v0, is the parameter reused (check the parameter's `preferences` line in `.greg`).
+
 ### A reused float variable joins two lives' conflicts and preferences (func_0016E738)
 
 - **Preferences.** set_preference (global.c) gives a global pseudo set by an arithmetic insn

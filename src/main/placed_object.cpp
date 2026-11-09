@@ -2575,9 +2575,94 @@ void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* 
     }
 }
 
-INCLUDE_ASM(func_00127B20);
+void IgnoreStackLocal(Vec02* p);
 
-void func_00127B20(PlacedObject* self, PlacedObject* top, s32 flag, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+{
+    PlacedObject* chain[16];
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Mat02 N;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    s32 i = 0;
+    while (self != top) {
+        chain[i] = self;
+        i++;
+        Rec2195_224* rec = self->f224;
+        if (rec != 0 && (rec->fB0 & 0xC)) {
+            self = (PlacedObject*)rec->p60;
+        } else {
+            self = (PlacedObject*)self->parent;
+        }
+    }
+    P = D_00248D30;
+    M = g_identityMatrix;
+    V = D_00248D30;
+    W = D_00248D30;
+    while (i < n) {
+        n--;
+        if (pos != 0) {
+            pos[n] = P;
+        }
+        if (rot != 0) {
+            rot[n] = M;
+        }
+        if (vel != 0) {
+            vel[n] = V;
+        }
+        if (spin != 0) {
+            spin[n] = W;
+        }
+    }
+    for (i--; i >= 0; i--) {
+        self = chain[i];
+        if (pos != 0 || vel != 0) {
+            Vu0::Q(x) = Vu0::RotateUntied(M, Vu0::Q(self->pos));
+            Vu0::Q(P) = Vu0::Add(Vu0::Q(P), Vu0::Q(x));
+            if (vel != 0) {
+                Vu0::Q(y) = Vu0::Rotate(M, Vu0::Q(self->v150));
+                Vu0::Q(z) = Vu0::Cross(Vu0::Q(W), Vu0::Q(x));
+                Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(y));
+                Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(z));
+            }
+        }
+        if (spin != 0 || vel != 0) {
+            Vu0::Q(x) = Vu0::Rotate(M, Vu0::Q(self->v160));
+            Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Q(x));
+        }
+        const u128* q = (const u128*)&self->rot;
+        u128 a0 = Vu0::Q(M.r[0]);
+        u128 a1 = Vu0::Q(M.r[1]);
+        u128 a2 = Vu0::Q(M.r[2]);
+        Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+        r.r[0] = x;
+        Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+        r.r[1] = y;
+        Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+        N = r;
+        M = r;
+        if (i < n) {
+            if (pos != 0) {
+                pos[i] = P;
+            }
+            if (rot != 0) {
+                rot[i] = M;
+            }
+            if (vel != 0) {
+                vel[i] = V;
+            }
+            if (spin != 0) {
+                spin[i] = W;
+            }
+        }
+        IgnoreStackLocal(&P);
+    }
+}
 
 void func_00127E60(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
