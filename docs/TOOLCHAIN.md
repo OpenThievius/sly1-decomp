@@ -2006,6 +2006,33 @@ from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/cl
   the same kind later in the function (a length, a fraction), and our copy takes $f1 or $f0
   by preference, look for one variable the original reused for both.
 
+### A reused variable is not tied, and a Scalar slot store weighs +1 (func_001B9D10)
+
+Read from local-alloc.c and haifa-sched.c and the `-dS -fsched-verbose-6` dumps of
+TurnColliderTowardRotation (2026-11-09):
+
+- **No tie for a variable set twice.** combine_regs ties an insn's output to any operand that
+  dies there (block_alloc tries every operand of addsf3, which has no `%`) when that operand
+  has a quantity: set once and local to the block. Ours tied `along + step` to the dot's float
+  (both $f0), so the rest that followed took the angle's $f2 by set_preference. Retail's dot is
+  in $f3, the register the speed `ToFloat(Length(v160))` has at the top of the function: one
+  variable, `speed`, reused for the component of the spin along the axis. Set twice, it is a
+  global pseudo, the sum is not tied to it, and step ($f4), the dot ($f3) and rest ($f0) follow.
+- **A Scalar's slot store weighs +1.** find_pre_sched_live counts a SET for every store and
+  takes one off per death; the Scalar's store comes before the asm that uses the weight, so the
+  asm is the weight's death and the slot store weighs +1, against 0 for a store whose value
+  dies there and for an argument move whose source dies. With the call's two argument moves
+  ready from the block's start, sched1 issued them before the slot store and the result's store
+  before it too: the weight lived longer than the product, local-alloc ranked the product
+  first (vf1, the weight vf2; retail the other way). The store wins only when nothing of weight
+  0 is ready in its cycle.
+- **The product in each arm.** Retail's tail after the `error < rate * dt` test is one block
+  in the final code, but it is jump's cross-jumping of two: `Q(torque) = MulX(diff,
+  Scalar(1.0f / dt))` in one arm and `MulX(diff, Scalar(rate / error))` in the other, the call
+  after the join. In each arm the division's latency keeps the vmulx late, so the slot store
+  issues with it after nothing else is left, and after reload the two identical tails are
+  merged (the second arm's division in the branch's delay slot). EXACT.
+
 ### A float parameter passed on fills a load's delay (func_00161B10)
 
 - SelectVertexBatchLights opens with `if (*self->fF8 != 0)`: a pointer load, a byte load

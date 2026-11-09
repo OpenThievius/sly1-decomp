@@ -1198,7 +1198,44 @@ void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 
 LINKER_REMNANT(func_001B9D08);
 
-INCLUDE_ASM(func_001B9D10);
+f32 ClampToMagnitude(f32 value, f32 limit);
+
+void TurnColliderTowardRotation(Collider* self, Mat02* target, f32* gain, f32 dt)
+{
+    Mat02 m;
+    Vec02 axis;
+    Vec02 want;
+    Vec02 torque;
+    Vec02 have;
+    f32 angle;
+    f32 limit = gain[0];
+    f32 rate = (limit - gain[1]) / gain[2];
+    f32 zone = limit * limit / (rate + rate);
+    f32 speed = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v160)));
+    if (limit < speed) {
+        Vu0::Q(torque) = Vu0::MulX(Vu0::Q(self->v160), Vu0::Scalar((limit - speed) * 2.5f / speed));
+        AddColliderTorque(self, &torque);
+    }
+    MultiplyMatrices3x3(&self->rot, target, &m);
+    MatrixToAxisAngle(&m, &angle, &axis);
+    f32 step = ClampToMagnitude(angle / zone * limit, limit);
+    speed = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v160), Vu0::Q(axis)));
+    f32 rest = angle - (speed + step) * (dt * 0.5f);
+    if (rest < zone) {
+        step = ClampToMagnitude(rest / zone * limit, limit);
+    }
+    Vu0::Q(want) = Vu0::MulX(Vu0::Q(axis), Vu0::Scalar(step));
+    Vu0::Q(have) = Vu0::MulAddX(Vu0::Q(self->v160), Vu0::Q(self->v180), Vu0::Scalar(dt));
+    u128 diff = Vu0::Sub(Vu0::Q(want), Vu0::Q(have));
+    Vu0::Q(torque) = diff;
+    f32 error = Vu0::ToFloatMoved(Vu0::Length(diff));
+    if (error < rate * dt) {
+        Vu0::Q(torque) = Vu0::MulX(diff, Vu0::Scalar(1.0f / dt));
+    } else {
+        Vu0::Q(torque) = Vu0::MulX(diff, Vu0::Scalar(rate / error));
+    }
+    AddColliderTorque(self, &torque);
+}
 
 LINKER_REMNANT(func_001B9F28);
 
