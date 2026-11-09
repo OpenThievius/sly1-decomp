@@ -1317,6 +1317,38 @@ for the else arm's dot also puts the division before the mfc1 of 1.0, as retail 
 the distance stored as `*(u32*)dist = ToBits(Sqrt(d))` gives the square root vf1 (StoreX's
 "r" operand put it in vf2).
 
+### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
+
+Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-dS -dR -dl
+-dg -df -fsched-verbose-6` dumps (2026-11-09):
+
+- **What retail shows.** func_0014F168's last block (after NormalizeOr's join) is retail's but
+  for the call's `addiu a1, sp, 16` (the address of the sum `r` passed to the method at 0x90):
+  ours issues it in cycle 3 beside `addiu v0` (it has no dependence and a free ALU slot), retail
+  between the weight's `sqc2 vf3` and r's `sqc2 vf1`, i.e. in cycle 9 of the same schedule.
+  Replaying sched2's cycles (two issues, one memory unit, the slot-swap quirk above) puts it
+  there exactly if the insn becomes ready in cycles 5 to 9: a dependence on one of 316, 171,
+  319, 214, 246 (the weights' loads and qmtc2s, unit Z's load), 269 (`move a0, s0`), 251 (the
+  MulXSum asm), or an anti dependence on 242 or 131. Or if it is in a SCHED_GROUP with r's store
+  261 or the weight's store 181 (adjacent to both in retail).
+- **No plain form gives it one.** In sched2 `(set a1 (plus sp 16))` can only depend on an insn
+  that touches a1 or sets sp (none in the block: reload_cse deletes no-op moves before sched2,
+  reload deletes CLOBBERs and equivalence inits), on a barrier (a volatile asm, a loop or EH
+  note: each would also hold 181, 224 or 269 where retail does not have them), or on a stale
+  sched1 link. In sched1 the insn is combine's merge of Q's address pseudo into `$5 = $1+16`;
+  had it stayed `$5 = P`, P's init is either deleted by reload (no hard reg: reload1.c makes a
+  frame-plus-constant REG_EQUIV a reg_equiv_constant via function_invariant_p) or becomes the
+  addiu itself (P in a1), with no link to any of the insns above either way. flow2's LOG_LINKS
+  (life_analysis after reload) follow the post-reload registers and add nothing. SCHED_GROUP_P
+  is set only for cc0 users and USE insns before a call.
+- **Tried, unchanged (the addiu first):** a pointer to r for the store, the call or both; the
+  `p` of d reused for r; Q's address through an inline returning it (`Put(&r, v)`); the call
+  through an inline wrapper or a local function pointer; r as a Vu0::Vec copy; ScalarAtValue
+  weights; earlier `*(u128*)&r`, Vu0::Set and the descriptor read after the sum or inside the
+  call. ScalarAtCall weights and d read through p move other code (264 and 268 bytes); d and r
+  as a two-element array breaks block 0. What retail had is outside this model: look for a
+  construct that leaves an insn naming a1 (or a group) that the final code does not show.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
