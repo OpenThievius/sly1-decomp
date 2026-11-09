@@ -422,7 +422,12 @@ void InitContactListObjectWithoutGravity(ContactListObject* self)
     self->gravity = D_00248D30;
 }
 
-INCLUDE_ASM(func_0018DDD8);
+void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject* target, Vec02* offset)
+{
+    LaunchContactListObject(self, target, offset);
+    u128 speed = Vu0::ScalarAt(self->speed6F0);
+    Vu0::Q(self->v700) = Vu0::MulX(Vu0::NormalizeOrMoved(Vu0::Q(self->v150), Vu0::Q(g_unitXVector)), speed);
+}
 
 void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
 {
