@@ -1,12 +1,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1015/1084 (93.6%), checked 2026-11-08
-// BYTES 0/0, checked 2026-11-08
+// BYTES 1015/1084 (93.6%), checked 2026-11-09
 // NEAR (2026-11-08, worker night-large1): an effect spawner's splash (its sound by distance, the
 // effect, and a burst through SpawnEffectsAt at 500 and beyond), retail's code up to the burst's
 // two records: there the stores of the tail and the block are scheduled otherwise (the order of
 // the constants' loads and of the block's stores; the block copy takes a1/a2 where retail has
 // a0/a1). tools/permute.py's best orders of the tail's six stores and of five of the block's are
-// kept here (72 bytes off).
+// kept here (69 bytes off).
+// Still differs (2026-11-09, worker w7, from the -dS -fsched-verbose-6 and -dl dumps; all 720
+// orders of the tail's six stores give 69 bytes at best; docs/TOOLCHAIN.md "A burst's two
+// records (func_00156288)"):
+// - the tail's 8.0/12.0 take f0/f1 where retail has f1/f0: local-alloc ties their equal spans by
+//   birth. Storing f20 and f24 first (or naming lo/hi and storing hi first) gives retail's
+//   registers, but then sched2's LUID order of the tail's stores is not retail's.
+// - retail's f10 store goes before the cfg store (cfg in the delay slot): in sched1 the cfg store
+//   weighs 0 (cfg's death) and the f10 store +1 (`one` lives on), so it always goes first; with
+//   cfg kept live past it (an experiment) retail's order comes out. No plain form found.
+// - the block's 5.0 and -1.0 share f0 in retail, so -1.0's load follows 5.0's store in sched1;
+//   here the four constant loads (priority 4) all issue before the stores (priority 2), which
+//   wait for the gravity load (no base: conflicts with the frame stores), so -1.0 takes f3.
+// - the copy loop's dest (sp+64) is born before the world pointer dies (a0 taken): a1/a2/a3 for
+//   retail's a0/a1/a2.
 #include "common.h"
 #include "effect_spawner.h"
 #include "vu0.h"
