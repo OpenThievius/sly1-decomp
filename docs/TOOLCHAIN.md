@@ -1223,6 +1223,38 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   block_alloc (build/swarm/mech-149760/lalloc.py, mech-149760 worktree) on both `.lreg` dumps
   gives both allocations. The final code has retail's two slot stores either way.
 
+### Two or three quantities: the small sort (func_001EDA80)
+
+- block_alloc sorts its quantities with qsort only when the block has four or more. For two
+  or three it exchanges in place (`case 3: if (qty_compare (0, 1) > 0) EXCHANGE (0, 1); if
+  (qty_compare (1, 2) > 0) EXCHANGE (2, 1);` falling into `case 2: if (qty_compare (0, 1) >
+  0) EXCHANGE (0, 1);`), and qty_compare is called on the fixed quantity numbers 0, 1 and 2,
+  not on the entries of qty_order it has just exchanged. With three quantities the first and
+  last steps compare the same pair and undo each other: the order comes out as the creation
+  order unless the third quantity strictly outranks the second, and then it is third,
+  second, first.
+- An asm's outputs are numbered last first (the probes show it: Dot's 1.0, its second
+  output, is quantity 0 and the product quantity 1). Dot's 1.0 is set and never read, so
+  its rank is 0. A Dot whose product goes on to ToBits or ToFloat in a block of its own
+  (the product, the 1.0 and the GPR the qmfc2 writes: three quantities) therefore gives the
+  1.0 the first free VU register and the product the next (vf2 and vf1 swapped against a
+  block with more pseudos, where qsort ranks the product first). Two quantities sort
+  correctly (the product first); so do four or more.
+- StoreX's product is used as "r", so regclass gives it TI_REGS (the GPRs and the VU
+  registers cost the same) and local-alloc puts it in a GPR: the 1.0 takes vf1 and the
+  asm's output reload the next free VU register.
+- func_001EDA80's last block (the normalised normal moved to n, the Dot of n and u, the
+  qmfc2 and sw of the distance, the sqc2 of the normal) has retail's product in vf1 and its
+  1.0 in vf2. That needs the product ranked first in a VU class: two quantities with the
+  product VU_REGS, four or more quantities, or a third that strictly outranks the product.
+  Probes confirm each: ToFloatNow (four quantities) gives retail's vf1 and vf2 but an mtc1
+  and swc1; a qmfc2 to a u128 in a GPR placed after the normal's store (the product living
+  over two insns, rank 2 * 2 / 4, the GPR's 2 * 2 / 2) gives them with the stores swapped.
+  The plain forms do not: StoreX (a GPR product), ToBits, ToFloat or a truncating cast
+  (three quantities, the GPR's rank 1 at best against the product's 2, or a tie when the
+  normal's store comes between), a Vec product or operand, a new variable for the unit
+  normal. What retail's block had that ours lacks is open.
+
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
 - **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a
