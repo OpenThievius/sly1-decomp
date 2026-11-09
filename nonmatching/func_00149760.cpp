@@ -1,17 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 4058/4184 (97.0%), checked 2026-11-08
-// NEAR (2026-11-08, large-149760): regdiff "order", 1033 of 1046 aligned; every block is retail's
-// but for registers and scheduling in four places. Still differs: (1) case 1, the 0.0 of the zoom
-// clamp takes $f4 where retail has $f1 (global-alloc); (2) the second switch's cases 0/1: the
-// WrapAngle result's store to +0x08 comes before the tilt clamp's bounds are loaded, so the low
-// bound takes $f0 (retail $f3/$f4, the store in the first branch's delay slot); (3) case 2: the
-// 100.0 scalar's slot store is scheduled before the camera rows are loaded (they may alias it), so
-// MulX's result takes the scalar's register (retail keeps it in $vf6 and stores it before the jal;
-// loading the rows first as RotateRows values fixes the store but loses Rotate's tie to v);
-// (4) case 4's first rotation product: sched1 hoists the my rows' loads above the first row's
-// stores, so mz's third row outranks them in local-alloc ($vf1 where retail has $vf3) and the
-// product's registers follow. Tried: every MulRotation* Into form, RotateUntied, named operands,
-// u128 against Vec forms, clamp shapes (Limit, Clamp, bounds first, ValueRange::Clamp).
+// BYTES 4139/4184 (98.9%), checked 2026-11-08
+// NEAR (2026-11-08, large-149760, mech-149760): regdiff "order", 1043 of 1046 aligned; every block
+// is retail's but for registers in two places. Fixed (mech-149760): (a) the second switch's cases
+// 0/1 store the WrapAngle result as a member (self->g08) and read the tilt's upper bound as a
+// scalar (D_00261C00, an f32 of its own): a member at a varying address never aliases a scalar at a
+// fixed one (alias.c fixed_scalar_and_varying_struct_p), so sched1 loads both bounds before the
+// store, as retail does; (b) case 2 loads the camera's rows as values before it builds the vector
+// they rotate (Vu0::RotateRowsTied): the rows then precede the Scalar's slot store in the insn
+// order, the store (which they may alias) no longer holds them back, gets a low priority and
+// waits to the end, and the scalar keeps $vf6 as in retail. Still differs: (1) case 1, the 0.0 of
+// the zoom clamp takes $f4 where retail has $f1: global-alloc's pass 0 skips $f1 because r386 (the
+// RangeFraction result, lower priority, conflicting) has $f1 in its full preferences, pooled by
+// expand_preferences from zoom (sub.s $f1, zoom, g18) through v; retail must allocate r386 before
+// the 0.0 (priority log2(refs)*refs/live length: 0.0 is 3/10, r386 3/12); (4) case 4's first
+// rotation product: local-alloc ranks mz's third row (4 refs over 12) above my's first two rows
+// with the product rows tied to them (8 refs over 38): retail's registers follow exactly, by an
+// emulation of block_alloc on our dump (build/swarm/mech-149760/lalloc.py), if those two
+// quantities have one reference more each (9 refs: 3*9/38 > 2*4/12). Tried for (4): b's rows
+// loaded first, Vec-valued rows and results, every MulRotation* form. Tried for (1): clamp shapes
+// (Limit, Clamp, bounds first, ValueRange::Clamp, the clamp written out, the fraction named).
 // Build: put it in src/main/file_149398.cpp at its INCLUDE_ASM line (it replaces the three
 // INCLUDE_RODATA lines before it: D_00249EA0 is its {1, 4} array, the jump tables are its).
 #include "common.h"
@@ -35,8 +42,8 @@ extern u8 g_camera[];
 extern f32 g_gameTime[];
 extern f32 D_00261BF4;
 extern f32 D_00261BFC;
-extern f32 D_00261C00[4];
-extern f32 D_00261C20[4];
+extern f32 D_00261C00;
+extern Vec02 D_00261C20;
 extern f32 D_00261C30[4];
 extern f32 D_00261C40[4];
 extern f32 D_00261C50[4];
@@ -291,8 +298,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         self->g14 = ApproachValueWithRamp(self->g14, zero, dt, D_00261C80, 0);
         self->g0C = ClampToMagnitude(self->g0C + yaw * dt, limit * 0.9f);
         self->g14 = ClampToMagnitude(self->g14 + pitch * dt, limit * 0.8f);
-        *(f32*)&self->value = WrapAngle(*(f32*)&self->value + self->g0C * dt);
-        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00[0]);
+        self->g08 = WrapAngle(self->g08 + self->g0C * dt);
+        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->f364) * 2.0f;
         f32 lo = 0.0f;
@@ -330,7 +337,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 ahead;
             Vec02 world;
             Vec02 push;
-            Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::Rotate(*(Mat02*)cam->f80, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
+            const u128* rows = (const u128*)cam->f80;
+            Vu0::Vec r0, r1, r2;
+            r0.q = rows[0];
+            r1.q = rows[1];
+            r2.q = rows[2];
+            Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::RotateRowsTied(r0, r1, r2, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
             ProjectPointToCamera(*(Camera**)g_camera, &ahead, &screen);
             push.x = pad->f40;
             if (g_saveData->f19EC & 0x400) {
@@ -353,7 +365,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         blend = 0.0f;
         f32 dy = ClampToRange(coll + 0x658, WrapAngle(yaw - *(f32*)(coll + 0x648)));
         f32 dp = ClampToRange(coll + 0x650, WrapAngle(pitch - *(f32*)(coll + 0x64C)));
-        *(f32*)&self->value = WrapAngle(*(f32*)(coll + 0x648) + dy);
+        self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
         self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
         eye = GetTargetCameraControllerEyePoint(self);
         break;
@@ -363,7 +375,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (obj != 0) {
             Vec02 n;
             Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::Vec::Of(target))).q;
-            *(f32*)&self->value = ArctangentOfRatio(n.y, n.x);
+            self->g08 = ArctangentOfRatio(n.y, n.x);
             Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
         } else {
             eye = GetTargetCameraControllerEyePoint(self);

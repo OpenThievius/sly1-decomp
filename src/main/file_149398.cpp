@@ -292,9 +292,11 @@ f32 D_00261BF0 = 0.0f;
 f32 D_00261BF4 = 0.300000012f;
 f32 D_00261BF8 = 7e+01f;
 f32 D_00261BFC = -1.0f;
-f32 D_00261C00[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00261C10[4] = { -150.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00261C20[4] = { -25.0f, 0.0f, 0.0f, 0.0f };
+// The upper bound of the tilt, a float of its own: func_00149760 reads it as a scalar (the alias
+// rule, docs/TOOLCHAIN.md). The 16-aligned offsets after it pad it to 0x261C10.
+f32 D_00261C00 = 1.0f;
+Vec02 D_00261C10 = { -150.0f, 0.0f, 0.0f, 0.0f };
+Vec02 D_00261C20 = { -25.0f, 0.0f, 0.0f, 0.0f };
 f32 D_00261C30[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
 f32 D_00261C40[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
 f32 D_00261C50[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
@@ -347,11 +349,11 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
 {
     Quad16 r;
     Mat02 m;
-    f32* offset;
+    Vec02* offset;
     if (g_player != 0 && g_player->f2228 == 0x22) {
-        offset = D_00261C20;
+        offset = &D_00261C20;
     } else {
-        offset = D_00261C10;
+        offset = &D_00261C10;
     }
     BuildYawPitchMatrix(&m, *(f32*)&self->value, self->f10);
     Quad16 target = GetCameraControllerTargetPoint(self);

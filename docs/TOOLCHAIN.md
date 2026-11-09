@@ -603,6 +603,49 @@ the compiler reads again, the cause is in how each memory reference is written
   (and func_001DF520, whose callee takes the caller's own a1). What the
   original wrote is not known; this reproduces what it compiled to.
 
+### The reload register's round robin (func_001E31F0)
+
+Which GPR reloads a spilled pseudo is not decided at that insn alone
+(reload1.c, read 2026-11-08 for UpdateOnOffCameraController):
+
+- **The spill registers are the function's, in register order.** Each insn
+  that needs reloads picks spill registers from `order_regs_for_reload` (the
+  hard registers no live pseudo holds there); finish_spills then gathers every
+  register spilled anywhere into `spill_regs`, sorted by number (v0, v1, a0,
+  ..., then FPRs and VU0 registers), and gives each insn all of them that no
+  pseudo live there occupies.
+- **allocate_reload_reg rotates.** It starts the search one past
+  `last_spill_reg`, the index of the register the previous reload took, so
+  consecutive reloads walk v0, v1, a0, ... and wrap. A spill register that one
+  insn anywhere in the function needs shifts the choice of every reload after
+  it in the rotation: with a0 in the set, the reload after one in v1 takes a0;
+  without it, it wraps to v0.
+- **func_001E31F0.** The spilled `limit = object->f41C` was reloaded into a0
+  where retail uses v0, and every reload after it was shifted (lw a0/v1,
+  260(sp) for the spilled camera, the qmfc2 temporaries). The cause was 400
+  instructions later: the stick from FromFloats (an asm with an "=&r" output)
+  went to a VU0 register, because its three "j" uses (Length's two operands,
+  DivX's) outweigh the one "=&r" in regclass, so the asm's output needed a GPR
+  reload and a0 became a spill register. Retail keeps the stick in a0 (qmtc2
+  a0 to vf1 and vf3 before each use). Copying the value through a Vu0::Vec
+  local and normalizing the Vec values, `n.q = FromFloats(...); *(Vec*)&stick
+  = n; *(Vec*)&stick = NormalizeOr(Vec::Of(stick), Vec::Of(g_unitXVector))`
+  (file_1793C0.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
+  .lreg dump), global-alloc puts it in a0, and no reload needs a0. The .greg
+  dump's `Spilling for insn N. / Spilling reg R.` lines list every insn's
+  spill registers: one `Spilling reg 4` in a function shows where a0 came
+  from.
+- **Fields against fixed stack slots.** The same function read its camera
+  parameters (the 0x90 bytes at object+0x2F0) through an `f32*` as `block[n]`.
+  Such a MEM is not marked as a structure's (no `/s` in the dumps), so sched2
+  could not move the reads above the stores to the address-taken
+  `placeDist`/`placeHeight` (scalars at fixed frame addresses), and jump2
+  cross-jumped the identical tails of two switch cases. Read as fields of a
+  struct (`block->f58`), the MEMs are `mem/s` and
+  `fixed_scalar_and_varying_struct_p` separates them from the scalar slots:
+  sched2 then hoists the reads as retail does, and every case, written in
+  source order, matches.
+
 ## Loops
 
 When retail's loop keeps its constants and multiplies its index each time round (`li 0xD0;
@@ -700,6 +743,35 @@ func_001F0AE0):
   eight). Each Vu0::Vec value passed to or returned from an inline is a `movti` copy at that
   point (vu0.h), so the Vec and u128 forms of one expression are the knob: write the form whose
   count keeps the table retail's. `-dG` prints the size: `Expression hash table (N buckets`.
+- **The bucket is the hash of the expression's registers too, so pseudo numbers move slots**
+  (2026-11-08, func_00162890). hash_expr_1 adds a register's number and a constant's value, so
+  in this build `(plus (reg R) (const_int C))` falls in bucket (13258 + R + C) mod T and
+  `(and (reg R) (const_int C))` in (13266 + R + C) mod T; a frame address is R = 1 (the soft
+  frame pointer). pre_delete walks the buckets in order and gives each redundant expression
+  its reaching register with gen_reg_rtx as it meets it, so the PRE pseudos, and through
+  reload the spill slots of those that spill, come in bucket order. Both T and the pseudo
+  numbers of the loop counters and pointers in those expressions decide it. Sorting the 13
+  slots retail's ReadPlacedObjectModel spills by these formulas, over T and the pseudo
+  numbers, needed T = 483 (ours 481: one insn more) and its morph-loop pointer 53 to 56
+  pseudos later. Unused locals and an extra call proved the model (retail's slot order
+  exactly) before any real source was found; then each candidate form was scored by its
+  insn count and pseudo numbers from the `-dF` and `-dG` dumps before its bytes.
+- **What costs pseudos and not insns.** Pseudos are numbered as the front end expands, and
+  cse deletes the copies that leave no use, so a source form can add pseudos and leave the
+  insn count alone: a count read into its own named local and its byte size written at each
+  use (`s32 nverts = ReadBufferedU16(stream);` and `nverts * 12` twice, +6 each against one
+  reused `size`), a multiplication by an element size where we had a shift (`n * 16` against
+  `n << 4`: +1 each), and an inline's body (each call copies its arguments into new pseudos
+  and every pseudo of the body: `u32& v = *(u32*)p; ... v += d;` costs 4 more per call than
+  `u32 v = *p; ... *p = v + d;`). A value read twice where we had a local for it
+  (`if (strip->extra != 0) { StripExtra* e = strip->extra;`) adds the one insn the table
+  needed: cse leaves the second load, and later passes delete it.
+- **The order of an inline's parameters orders loop.c's invariants.** In that function the
+  three Fix calls in the inner loop hoist `&strip->qwc[n]` and `&starts[n]` out of the loop;
+  global-alloc then takes the one of higher priority first, and their priorities differ only
+  by one insn of life: the one born first lives longer and is placed second. With the size before the start in
+  the helper's parameters (RemapMeshQueueValues's own order), the qwc address is computed
+  first and the two take retail's registers.
 
 ## sched1
 
@@ -734,6 +806,168 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   issued before the load: retail's registers. That form costs one insn more (the copy of v to
   the result), which moved one spill slot through gcse's table size (GCSE above); one Vec
   difference stored through `Vu0::Q(...) = ... .q` gives the insn back.
+- **Which of two equal subtractions goes first decides a copy preference (func_001E31F0).**
+  `t1 = clock - a; t2 = clock - b;` were ready in the same cycle at the same priority: both are
+  set once and both were raised by adjust_priority by the same clock load, so INSN_REG_WEIGHT
+  decided, and t2's ranks first (the shared clock dies in the later statement). Issued first, it
+  leaves the clock to die in t1's, and global-alloc (`set_preference`: a source that dies in the
+  insn) gives t1 a copy preference for the clock's $f1 ahead of $f12, the register of the
+  division t1 feeds. What retail had was a different cycle, not a different rank: the next
+  statement, `s = 0.0f; if (0.0f < object->f428)`, puts the zero (on the memory and flop units)
+  before the load of f428 in insn order. Read into a local first (`f32 ramp = object->f428; f32
+  s = 0.0f; if (0.0f < ramp)`, the second division reading the field again as retail does), the
+  load issues first and the zero's flop slot delays t2's add by a cycle. t1's subtraction is
+  then ready alone, issues first, and t1 takes $f12. The cost was one insn of t2's life, which
+  put t2 (3 refs over 13 insns, priority 0.231) ahead of `goal` (9 refs over 125, 0.216) in
+  global-alloc's order, so the two swapped $f22 and $f23. Retail's `goal` has one assignment more:
+  `if (!(flags & 2)) goal = angle1; else if (0.0f < d) goal = angle1; else goal = angle2;`
+  instead of `||` gives 10 refs (priority 0.24), and the function matches. global.c's priority is
+  `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
+  identical.
+
+## Conditional moves (jump.c)
+
+What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
+rtlanal.c of GCC 2.95.3 and the `-dj` dumps (2026-11-08, func_00175170):
+
+- **The movsicc conversion runs first.** jump_optimize tries, for every conditional jump that
+  jumps around one insn, a conditional move before the store-flag forms: the insn after the
+  jump must be a single SET of a register (any source without side effects or traps), and the
+  jump's label must follow it (or the next insn must jump to the same place). The old value of
+  x is reg_set_last's (which stops at a label, so after a case label it is x itself): the
+  result is `x = c ? k : x`, an `if_then_else` the R5900 has (movsicc needs `mips_isa >= 4`).
+  The store-flag forms after it need BRANCH_COST of 2 or more unless x's old value is a known
+  constant, and the R5900's BRANCH_COST is 1, so on this target it is the conditional move
+  that acts. It runs in every jump pass before reload (after RTL generation, after CSE, after
+  GCSE, before and after the second CSE).
+- **What it becomes.** Where GCSE's constant propagation then knows x's old value (skip, 0 from
+  the function's start), combine reduces the move to a store flag: `xori; sltiu; sw` in place
+  of retail's `bne; li; sw`.
+- **What keeps retail's branch.** Mode does not: a `bool`, `char` or `short` local is promoted
+  to an SImode pseudo (PROMOTE_MODE), and the move is the same. The if's body has to be more
+  than one set when the jump passes run: in SetPlayerState's sub-state 9 a dead `else anim =
+  ...` (case 4's own else, the case setting anim again afterwards) does it, removed only later
+  by flow as a dead store. No form with one set keeps the branch.
+
+## Alias classes in the schedule
+
+GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
+by alias.c's rules ("Reloads and stores" above for CSE). Three of them decided SetPlayerState's
+order (2026-11-08, func_00175170):
+
+- **A global scalar against a structure's store.** fixed_scalar_and_varying_struct_p: a load of
+  a scalar global (`extern f32 D`, a fixed address, MEM_SCALAR_P, `mem/f` in the dumps) never
+  conflicts with a store that is a structure's (MEM_IN_STRUCT_P, `mem/s`) through a varying
+  address. `Vu0::Q(x) = v` and `Vu0::Set(x, v)` store through a `u128*` cast, neither flag, so
+  the global's load waits for them; a vector stored as a `Vu0::Vec` (`*(Vu0::Vec*)&x = v`, or
+  through an inline returning `Vu0::Vec&`) is a structure's store and the load moves above it,
+  as retail's do: the sound's two floats before the zero velocity's sqc2 (sub-states 10/11),
+  D_00263990 before the dot product that follows the direction's store (state 6/4, where after
+  reload the store's address is a hard register of unknown base). Stored straight through
+  `*(Vu0::Vec*)&local`, CSE forwards the value and the reload goes; through the reference it
+  stays.
+- **A global read as a structure's member is not a scalar.** `D_002639B8.f0` of an 8-byte
+  struct conflicts with the member stores before it; read as `s32 D_002639B8` it does not, and
+  sched2 interleaves retail's shift and lui between the stores (sub-states 37/38). A cast
+  `*(s32*)&D` is neither scalar nor structure and does not help.
+- **Register weight decides between equal stores.** Before reload rank_for_schedule prefers the
+  insn with the lower INSN_REG_WEIGHT (sets minus REG_DEAD notes), so of two stores of one
+  value the one that ends its life goes first: `a = b = x` stores b, then a (the last use);
+  retail's 0x638 before 0x630 is `f638 = f630 = x`. The same rule ordered state 7's two loads
+  through the track pointer: the one that kills the pointer goes first, so the source loads
+  them in the other order (the shape at 0x34, then the turn kind at 0x58).
+- **A last call is everyone's dependent.** In a block that ends with a call, every insn's
+  dependence on the call is also its dependence on the block's end; with an insn after the call
+  the argument moves for registers a later call clobbers count one dependent more, and
+  rank_for_schedule's dependent count sets a3 before a1 (a1 then goes in the call's delay
+  slot). State 6/5's `layers = 1` after SetFlaggedLinkContactMask gives retail's
+  TriggerScriptEvent arguments.
+- **The conversion's own priority.** ToFloat's qmfc2 is an asm statement with a cost of 1 and its
+  mtc1 a second insn, so its chain to a division is one insn longer than a field's lwc1 and
+  sched2 issues it first; ToFloatMoved's mtc1 alone leaves the qmfc2 to the compiler and the load
+  goes first, as in sub-state 55 (`ToFloatMoved(len) / self->radius3CC`).
+- **A spill store follows its set; the set's place is sched1's.** Reload puts a spilled local's
+  store right after the insn that sets it, and sched2 breaks ties by that order, so the prologue's
+  order of a spilled int's store and a float's constant is sched1's order of their sets. sched1
+  issues one memory-unit insn (a float constant) and alu insns two to a cycle by declaration
+  order, so which float constant shares a cycle with which integer follows the order the locals
+  are declared in; the spilled locals' slots follow their declaration order too. SetPlayerState's
+  `sound, start, anim, speed, flag` (start and anim taking the cycle before) gives retail's.
+- **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
+  named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
+
+### Memory dependences in sched1 (func_00149760)
+
+sched1 keeps a load after a store it may alias, and the store then inherits the load's
+priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
+
+- **Which MEMs are flagged.** expand_expr sets MEM_IN_STRUCT_P for a member or an element
+  (COMPONENT_REF, ARRAY_REF) and for `*p` only when p is literally `&aggregate` or the pointed-to
+  type is an aggregate; a declared scalar variable's own MEM (a global `f32`, a scalar local in
+  memory) is MEM_SCALAR_P. A dereferenced cast pointer (`*(f32*)&self->value`, Vu0::Q's
+  `*(u128*)&v`, Rotate's `((const u128*)&m)[i]`) has neither flag. The RTL dumps print the flags
+  as `/s` (in struct) and `/f` (scalar).
+- **The only rule that separates them** without known bases is
+  fixed_scalar_and_varying_struct_p: a MEM_SCALAR_P reference at a fixed address never aliases
+  a MEM_IN_STRUCT_P one at a varying address. A parameter's pointer has base `(address a0)`,
+  which may alias any global (base_alias_check, no `-fargument-noalias`), and a pointer loaded
+  from memory has no known base at all.
+- **func_00149760, second switch, cases 0 and 1.** `*(f32*)&self->value = WrapAngle(...)`
+  (neither flag) made the tilt clamp's bound loads `D_00261BFC` and `D_00261C00[0]` (an array
+  element: in struct) depend on the store: sched1 issued the store first and the low bound took
+  $f0. Retail loads both bounds first and stores in the branch's delay slot. Writing the store as
+  a member (`self->g08 = ...`, a float in CameraController's union) and reading the upper bound
+  as a scalar (`D_00261C00` an `f32` of its own, its 16-byte label padded by the 16-aligned
+  `Vec02` offsets after it) gives retail's registers; either change alone does not.
+- **Insn order instead of flags: case 2's Scalar slot.** Vu0::Scalar's slot store (neither
+  flag) and Rotate's row loads through a u128 pointer (neither) may alias. Rotate loads the rows
+  in its body, after its argument (MulX of a Scalar) has stored the slot, so the loads depend on
+  the store, the store inherits their priority and goes first, and MulX's result takes the
+  scalar's register. Retail stores the slot last. A dependence only runs forward in insn order:
+  with the camera's rows loaded as values first (`const u128* rows = ...; r0.q = rows[0]; ...`)
+  and rotated with the result tied to v (Vu0::RotateRowsTied, Rotate's tie with RotateRows'
+  operands), the store comes after the loads, depends on nothing but the qmtc2, and with its low
+  priority waits to the end of the block: retail's $vf6 and store. RotateRows (untied) gives
+  the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
+  local in memory, which the helpers do not have.
+
+### Global allocation's preferences (func_00149760)
+
+- find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
+  of the lower-priority allocnos that conflict with this one (prune_preferences), unless it
+  prefers them itself. A pseudo prefers the hard register of a copy's other side, and the
+  register of the first operand of an arithmetic set whose other side is a hard register or
+  a pseudo local-alloc already placed (set_preference); expand_preferences then pools the
+  preferences of the destination and every allocno that dies in the set, if they do not
+  conflict. `-dg` prints each allocno's conflicts and (pruned) preferences in the `.greg`
+  dump, after the allocation order (`;; N regs to allocate:`), whose ranking is
+  floor_log2(refs) * refs / live length.
+- func_00149760's zoom clamp: the 0.0 bound (r399, 3 refs over 10 insns) ranks above the
+  RangeFraction result (r386, 3 over 12), which conflicts with it and has $f1 among its full
+  preferences, pooled from the zoom (`sub.s $f1, zoom, g18` later) through the clamp's
+  variable. So the bound skips $f0 and $f1 and takes $f4; retail's $f1 needs r386 allocated
+  first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
+  change it.
+
+### Local allocation's ranking (func_00149760)
+
+- block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
+  gives each local pseudo a quantity born at 2n where it is set and dying at 2n where a
+  REG_DEAD note names it, and ties an asm's output to the first input operand that dies there
+  (the quantity then holds both, with both's references). Quantities are allocated in the
+  order floor_log2(refs) * refs / (death - birth), ties by creation order; each takes the
+  lowest VU register free over its life widened by one insn at each end (the widened range is
+  also what it marks taken), else over its real life. The references are recounted on the
+  RTL just before local-alloc (recompute_reg_usage: every mention in a pattern, a set
+  included), not flow's numbers, which the `.flow` dump shows larger.
+- An emulation of this on the `.lreg` dump (build/swarm/mech-149760/lalloc.py in the
+  mech-149760 worktree, not committed) reproduces every VU register of func_00149760's case 4.
+  Retail's registers for its first rotation product follow from the same insns, in our
+  order, if each product row's quantity has one reference more (9: 3 * 9 / 38 outranks mz's
+  third row's 2 * 4 / 12); no sched1 order of the block's loads, rotations and stores gives
+  them with our counts (100,000 random orders that keep the dependences). Every source form
+  tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
+  rotation, the product returned by value) recounts the same six references.
 
 ## Shapes of large functions
 
