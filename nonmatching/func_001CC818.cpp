@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1781/1916 (93.0%), checked 2026-11-08
+// BYTES 1783/1916 (93.1%), checked 2026-11-08
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
+// ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"
@@ -165,8 +166,8 @@ void func_001CC818(Player* self)
     BuildRotationFromVector(&lin, &m);
     u128 nd = Vu0::Rotate(m, Vu0::Q(dir));
     u128 off = Vu0::MulX(nd, Vu0::Scalar(r));
-    Vu0::Q(ang) = nd;
     Vu0::Q(v) = Vu0::Add(Vu0::Add(Vu0::Q(v2), Vu0::Cross(Vu0::Q(acc), off)), Vu0::MulX(nd, Vu0::ScalarAt(rate)));
+    Vu0::Q(ang) = nd;
     Vu0::Q(p) = Vu0::Add(Vu0::Q(pos), off);
     Vu0::Q(g) = Vu0::Sub(Vu0::DivX(Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v150)), Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock))), Vu0::Q(self->gravity));
     if (self->f22AC != 0) {

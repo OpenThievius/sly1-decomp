@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 341/568 (60.0%), checked 2026-11-08
+// BYTES 355/568 (62.5%), checked 2026-11-08
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 42); 101 differing lines before, 84 now.
+// ORDER-SWEEP (2026-11-08): ga and gb dot-product reads swapped; tools/permute.py --auto.
 // NEAR: about 80% of the instructions equal; the first loop keeps the zone in $s0 and the 0x7C0 cursor in $s1 (retail the other way round) and the call is laid out inline after the second test where retail jumps back to a shared call. The dot products and branches match.
 #include "common.h"
 #include "trigger_zone.h"
@@ -46,10 +47,10 @@ void func_0013FAE8(TriggerZone* self)
     } else {
         where = &p;
         TransformPointBetweenFrames(self, 0, (u8*)self + 0x850, &p);
-        ga = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[0])));
-        gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[1])));
         fb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(p), Vu0::Q(w[1])));
+        gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[1])));
         fa = Vu0::ToFloat(Vu0::Dot(Vu0::Q(p), Vu0::Q(w[0])));
+        ga = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[0])));
     }
     f32 x = fa - ga;
     Vec02* plane;
@@ -65,4 +66,3 @@ void func_0013FAE8(TriggerZone* self)
     Contact03* c = CreatePooledContact(self, 0, where, plane, 10, 0, 0, &self->contacts4B4, x);
     c->f98 = 0.0f;
 }
-
