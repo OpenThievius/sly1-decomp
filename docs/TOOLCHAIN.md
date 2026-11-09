@@ -1198,6 +1198,40 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
   (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
 
+### Three differences of four loads: which statement comes first (func_00142278)
+
+Found from the `-dS -fsched-verbose-6` and `.lreg` dumps (2026-11-09):
+
+- **The load whose pointer dies there goes first.** `ab = b - a; cd = d - c; ca = a - c;`
+  loads four vectors at priority 9. b is never used again, so its load carries b's REG_DEAD
+  note and weighs 0 against the others' +1 (INSN_REG_WEIGHT): sched1 issues it first whatever
+  the statement order. a and c tie on priority, weight and dependents (three each), so the
+  first one in insn order (INSN_LUID) goes second.
+- **The subtraction that becomes ready first goes first.** All three differences are set once
+  and live at the block's end, so adjust_priority raises each to max_priority when its last
+  load is scheduled; the loads' latency then decides which is ready first. With a loaded before
+  c (b, a, then ab ready a cycle before c's load), ab was issued at once and b died early: b
+  took vf1, where retail has vf4. Written `cd = d - c; ab = b - a; ca = a - c;`, c is loaded
+  before a, ca and ab become ready together, and INSN_REG_WEIGHT puts ca first (it kills a and
+  c, -1; ab kills only b, 0): sched1's order b, c, a, ca, ab, d, cd, and local-alloc gives
+  retail's d vf1, a vf2, c vf3, b vf4, which global-alloc follows (cd vf3, ab vf4, ca vf5).
+  Each of the three earlier orders tried (ab/cd/ca, ca/cd/ab, cd/ca/ab) compiled to the same
+  code, so the statement order looked irrelevant until the dumps showed why.
+- **A dot's result that a later ToFloatMoved reads is not a VU0 pseudo.** `nn =
+  ToFloatMoved(Dot(n, n))` makes the dot's result a TI_REGS pseudo (local-alloc puts it in
+  $v0) and reload picks its VU0 register (vf3); ToFloatNow (or ToFloat) keeps it in VU_REGS,
+  local-alloc gives it vf1 and the dot's scratch vf2, retail's. ToFloatNow also keeps the mtc1
+  next to the qmfc2 where retail has it. ToFloatNow's two outputs repeat its input in each SET,
+  so the dot's result counts three references, not two, in local-alloc's priority.
+- **Still open: the side test's block.** An emulation of local-alloc (build/swarm/w7-142278,
+  la3.py and enumg.py in the g11 worktree) over every order of that block's VU0 insns finds
+  one that gives retail's registers with side = ToFloatNow, s and u = ToFloat: the s dot and
+  its conversion before side's conversion and the u dot. sched1 issues side's conversion first
+  (static priority 5 against the s dot's 4: the compare's 3 cycles count, the division's 6 do
+  not, as only the branch follows it), and neither a dot (a PARALLEL) nor an asm conversion is
+  raised by adjust_priority. None of the 64 combinations of ToFloat, ToFloatMoved, ToFloatNow
+  and ToFloatViaBits for side, s and u scores better than the near miss.
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
