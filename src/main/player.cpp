@@ -4442,7 +4442,88 @@ void QueuePlayerSecondActivation(Player* a0, InteractTarget* a1)
 
 ASM_FUNC(func_001782A8);
 
-INCLUDE_ASM(func_001782C0);
+struct TargetArcSource {
+    BaseObject* target;
+    f32 t;
+    u8 pad08[8];
+    Vec02 v10;
+};
+typedef void (*ShapeAtFn)(void* self, f32 t, Vec02* out, s32 x);
+struct ShapeOwner {
+    ShapeAtFn* vtbl;
+};
+struct TargetShaped {
+    u8 pad00[0x34];
+    ShapeOwner* shape;
+};
+s32 IsObjectOfKind(void* obj, s32 kind);
+void PlaceOnPathAt(void* self, void* obj, f32 t, Mat02* out);
+void PlaceOnTargetCurve(void* obj, Vec02* out, f32 t, s32 x);
+void PlaceOnTargetPoint(void* obj, Vec02* out, f32 t, s32 x);
+void TransformPointBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+void TransformPointAtTime(void* obj, s32 a, f32 t, Vec02* in, s32 b, Vec02* out, s32 c);
+// EXACT: gravity read in each expression that weights it, as a value of its own: the -0.5 dt
+// weight then comes before the load in the insn order, and sched1 keeps it there
+// (docs/TOOLCHAIN.md, "sched1").
+void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc)
+{
+    Vec02 p;
+    Vec02 v1;
+    Vec02 a;
+    Vec02 off = *(Vec02*)D_002639C0;
+    BaseObject* parent;
+    if (src->target != 0) {
+        parent = src->target->parent;
+        if (IsObjectOfKind(src->target, 0x76)) {
+            p = *(Vec02*)((u8*)src->target + 0x40);
+            off = *(Vec02*)D_002639D0;
+        } else if (IsObjectOfKind(src->target, 0x70)) {
+            BaseObject* obj = src->target;
+            ShapeOwner* shape = ((TargetShaped*)obj)->shape;
+            if (shape->vtbl[2] != 0) {
+                shape->vtbl[2](shape, src->t, &p, 0);
+            }
+            Mat02 frame;
+            PlaceOnPathAt(self, obj, src->t, &frame);
+            Vu0::Q(off) = Vu0::MulX(Vu0::Q(frame.r[0]), Vu0::ScalarAt(D_002639E0[0]));
+        } else if (IsObjectOfKind(src->target, 0x6F)) {
+            PlaceOnTargetCurve(src->target, &p, src->t, 0);
+            TransformPointBetweenFrames(0, parent, &p, &p);
+        } else if (IsObjectOfKind(src->target, 0x7F)) {
+            PlaceOnTargetPoint(src->target, &p, src->t, 0);
+            TransformPointBetweenFrames(0, parent, &p, &p);
+        } else if (IsObjectOfKind(src->target, 0x6E)) {
+            ShapeOwner* shape = ((TargetShaped*)src->target)->shape;
+            if (shape->vtbl[2] != 0) {
+                shape->vtbl[2](shape, src->t, &p, 0);
+            }
+        } else if (IsObjectOfKind(src->target, 0x7E)) {
+            p = *(Vec02*)((u8*)src->target + 0x40);
+        } else {
+            p = D_00248D30;
+        }
+    } else {
+        parent = 0;
+        p = src->v10;
+    }
+    a = D_00248D30;
+    TransformPointAtTime(parent, 0, dt, &p, 0, &a, 0);
+    u128 end = Vu0::Add(Vu0::Q(p), Vu0::Q(off));
+    u128 v = Vu0::DivX(Vu0::Sub(end, Vu0::Q(self->v140)), Vu0::Scalar(dt));
+    v = Vu0::MulAddX(v, Vu0::Q(self->gravity), Vu0::Scalar(dt * -0.5f));
+    Vu0::Q(p) = end;
+    Vu0::Q(v1) = v;
+    Vu0::Q(a) = Vu0::MulAddX(v, Vu0::Q(self->gravity), Vu0::Scalar(dt));
+    if (vel != 0) {
+        Vu0::Q(*vel) = v;
+    }
+    if (pos != 0) {
+        *pos = p;
+    }
+    if (acc != 0) {
+        *acc = a;
+    }
+}
 
 
 void MoveCollider(void* self, void* b);
