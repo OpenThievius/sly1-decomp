@@ -3796,6 +3796,7 @@ func_001F2688	func_001F36E0	match
 func_001F2738	func_001F3728	match	
 func_001F2758	func_001F3748	match	
 func_001F2798	func_001F3788	match	
+func_001F2840	func_001F3830	match	rodata
 func_001F2EF0	func_001F3EE0	match	
 func_001F31F8	func_001F41E8	match	
 func_001F3250	func_001F4240	match	

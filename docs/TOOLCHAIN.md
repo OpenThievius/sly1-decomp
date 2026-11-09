@@ -668,6 +668,19 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   nothing, mixing them is not plausible), the weight stored once after the switch, default
   apart from case -1, the matrix read as rows, `Vec::Of(p)`, `d` declared outside the loop, and
   the mode read into a local before the loop (it takes a1 and moves &obj->v140).
+- **The hidden reload was a case that cross-jumping deleted (func_001F2840, matched
+  2026-11-09).** Reload allocates every block that exists when it runs, and jump2's
+  cross-jumping (jump.c, after reload) deletes a block whose insns, registers included, equal
+  the tail of another block that jumps to the same place. Retail's switch had case 0 as a
+  block of its own, written before case 1 (`case 0: d = Length(p); goto curve;`), and case 3
+  its own copy (`p.x = 0; d = Length(p); goto curve;`) instead of falling into case 0. Reload
+  gave case 0's qmfc2 v0 (the extra reload), cases 1, 2 and 3 v1, a0 and v0; case 3's tail
+  then equals case 0's block, cross-jumping keeps one copy, and the jump table's case 0 points
+  into case 3 after its `sw zero`. The final code is the same as the fall-through form's, but
+  the rotation is retail's from there on: every difference after the loop head goes. When
+  reload's rotation is one step off with no visible extra reload, look for code the original
+  repeated that jump2 merged. The skin pointer's early read (above) is no longer needed since
+  Vu0::Scalar's slot became MEM_SCALAR_P: `if (mesh->f68 != 0)` read at its use matches too.
 
 ## Loops
 
