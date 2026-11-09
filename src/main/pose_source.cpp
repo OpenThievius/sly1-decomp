@@ -27,6 +27,8 @@
 
 #include "script_value.h"
 
+#include "ramp_profile.h"
+
 void* AllocateBackMemory(s32 size);
 
 void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
@@ -1729,7 +1731,7 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     }
 }
 
-void ComputePositionSpringAcceleration(PlacedObject* self, Vec02* a, Vec02* b, Vec02* out, f32 dt)
+void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out)
 {
     Vec02 force = *(Vec02*)D_00248D30;
     Vec02 d;
@@ -1759,9 +1761,113 @@ void ComputePositionSpringAcceleration(PlacedObject* self, Vec02* a, Vec02* b, V
     *out = force;
 }
 
-INCLUDE_RODATA(jtbl_00249990);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 zero, Vec02* rest);
+// The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
+// $f14 before the profile and the rate's address.
+extern f32 ApproachValueWithRamp(f32, f32, f32, void*, f32*);
+extern const Vec02 g_unitXVector;
 
-INCLUDE_ASM(func_001218C0);
+void ApplyPoseSourcePosition(T2195_7C0* self)
+{
+    PlacedObject* owner = self->owner;
+    f32 dt;
+    f32 now;
+    Vec02 A;
+    Vec02 B;
+    if (owner->f294 != 0) {
+        dt = g_gameClock.step;
+    } else {
+        dt = g_gameClock.dt;
+    }
+    if (owner->f294 != 0) {
+        now = g_gameClock.elapsed;
+    } else {
+        now = g_gameClock.time;
+    }
+    self->vt->getPos(self, 0.0f, &A, &B);
+    switch (self->mode0) {
+    case 2:
+    case 7:
+        owner->pos = A;
+        owner->v150 = B;
+        break;
+    case 1: {
+        Vec02 C;
+        ComputePositionSpringAcceleration(owner, dt, &A, &B, &C);
+        Vu0::Q(C) = Vu0::Add(Vu0::Q(C), Vu0::Q(owner->v170));
+        Vu0::Q(owner->pos) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(owner->pos), Vu0::Vec::Scalar(dt), Vu0::Vec::Of(owner->v150), Vu0::Vec::Scalar(dt * (dt * 0.5f)), Vu0::Vec::Of(C)).q;
+        Vu0::Q(owner->v150) = Vu0::MulAddX(Vu0::Vec::Of(owner->v150), Vu0::Vec::Of(C), Vu0::Vec::Scalar(dt)).q;
+        break;
+    }
+    case 3:
+    case 6:
+    case 9: {
+        Vec02 d;
+        Vec02 dir;
+        Vec02 rest;
+        RampProfile prof;
+        f32 speed;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(A), Vu0::Q(owner->pos));
+        Vu0::Q(dir) = Vu0::Q(d);
+        Vu0::Vec fallback = Vu0::Vec::Of(g_unitXVector);
+        Vu0::Vec len = Vu0::Length(Vu0::Vec::Of(d));
+        f32 dist = Vu0::ToFloat(len.q);
+        Vu0::Vec n;
+        if (dist < 0.0001f) {
+            n = fallback;
+        } else {
+            n = Vu0::DivX(Vu0::Vec::Of(d), len);
+        }
+        Vu0::Q(dir) = n.q;
+        f32 r = SplitVectorAlongAxis(&B, &dir, 0, &rest);
+        prof.maxSpeed = ((RampProfile*)owner->p21C)->maxSpeed + r;
+        prof.endSpeed = ((RampProfile*)owner->p21C)->endSpeed + r;
+        prof.rampTime = ((RampProfile*)owner->p21C)->rampTime;
+        f32 reach = ApproachValueWithRamp(0.0f, dist, dt, &prof, &speed);
+        if (self->mode0 == 6) {
+            f32 end = self->f18;
+            f32 lim;
+            if (now < end) {
+                lim = dist * dt / (end - now + dt);
+            } else {
+                lim = dist;
+            }
+            if (reach < lim) {
+                reach = lim;
+                speed = reach / dt;
+            }
+        }
+        if (dist <= reach) {
+            owner->pos = A;
+            owner->v150 = B;
+            if (self->mode0 != 9) {
+                self->mode0 = 7;
+            }
+        } else {
+            Vu0::Q(owner->pos) = Vu0::MulAddX(Vu0::Vec::Of(owner->pos), Vu0::Vec::Of(dir), Vu0::Vec::Scalar(reach)).q;
+            Vu0::Q(owner->v150) = Vu0::MulAddX(Vu0::Vec::Of(rest), Vu0::Vec::Of(dir), Vu0::Vec::ScalarAt(speed)).q;
+        }
+        break;
+    }
+    case 4: {
+        f32 end = self->f18;
+        f32 left = end - now;
+        if (left < dt) {
+            Vec02 k;
+            Vu0::Q(k) = Vu0::FromFloat(now + dt - end);
+            Vu0::Q(owner->pos) = Vu0::MulAddX(Vu0::Q(A), Vu0::Q(B), Vu0::Q(k));
+            owner->v150 = B;
+        } else {
+            Vec02 p;
+            Vec02 v;
+            EvaluateHermiteVectorSegment((u8*)&owner->pos, (u8*)&owner->v150, (u8*)&A, (u8*)&B, left, dt, 1.0f, (s32)&p, (s32)&v, 0);
+            owner->pos = p;
+            owner->v150 = v;
+        }
+        break;
+    }
+    }
+}
 
 void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out)
 {
@@ -1796,11 +1902,7 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, V
 }
 
 void OrthonormalizeMatrix(Mat02* m);
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 zero, Vec02* rest);
 void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, Vec02* spin, Mat02* out, Vec02* outSpin, s32 d);
-// The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
-// $f14 before the profile and the rate's address.
-extern f32 ApproachValueWithRamp(f32, f32, f32, void*, f32*);
 
 void ApplyPoseSourceRotation(Attachment* self)
 {

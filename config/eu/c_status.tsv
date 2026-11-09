@@ -575,6 +575,7 @@ func_001215A8	func_001216C8	match
 func_001215C0	func_001216E0	match	
 func_00121648	func_00121768	match	
 func_00121760	func_00121880	match	
+func_001218C0	func_001219E0	match	rodata
 func_00121C48	func_00121D68	match	
 func_00121DE0	func_00121F00	match	rodata
 func_00122488	func_001225A8	match	

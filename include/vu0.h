@@ -386,6 +386,21 @@ struct Vu0 {
         return r;
     }
 
+    // MulAddX2 with its parameters as the sum reads, each weight before its vector (a + s b +
+    // t c), as MulAddX3's: an inline call emits its arguments in parameter order, so with the
+    // vectors read as Vec::Of each weight's slot store comes before the next vector's load,
+    // and the loads of a and b need not wait behind the slot stores before them. The asm's
+    // operands keep MulAddX2's order (a, b, s, c, t). ApplyPoseSourcePosition's spring step,
+    // pos + dt v + (dt dt / 2) c, loads pos before dt's slot store and v after it, as retail
+    // (func_001218C0; docs/TOOLCHAIN.md, "A weight listed before its vector").
+    static u128 MulAddX2WeightFirst(u128 a, u128 s, u128 b, u128 t, u128 c)
+    {
+        u128 r;
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddx.xyzw %0, %4, %5x"
+                : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t));
+        return r;
+    }
+
     // a + s.x * b + t.x * c + u.x * d: MulAddX2 with a third weighted vector (vadda.xyzw ACC, a,
     // vf0; two vmaddax.xyzw ACC; vmaddx.xyzw), as MulXSum3 and MulXSum4 extend MulXSum; one use in
     // retail so far, func_001DDE90. Each weight is listed before its vector, as the sum reads
@@ -884,6 +899,13 @@ struct Vu0 {
     {
         Vec r;
         r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    static Vec MulAddX2WeightFirst(Vec a, Vec s, Vec b, Vec t, Vec c)
+    {
+        Vec r;
+        r.q = MulAddX2WeightFirst(a.q, s.q, b.q, t.q, c.q);
         return r;
     }
 

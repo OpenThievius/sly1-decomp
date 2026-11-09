@@ -2164,6 +2164,36 @@ registers of that block (2026-11-08):
   that give the block have the first velocity load before rel's weight, drag's weight before
   the second velocity load and bend's after it; b's load and c's may come anywhere there.
 
+### Weight first, a Vec join and an out float (func_001218C0)
+
+ApplyPoseSourcePosition matched from 35 differing lines with three changes (2026-11-09,
+`-dS -dj -ds -dL` dumps, jump.c of 2.95.3):
+
+- **Weight first for a two-term sum.** Case 1's `pos + dt v + (dt dt / 2) c` with MulAddX2's
+  (a, b, s, c, t) and `Vu0::Q` operands emitted both slot stores before the loads of pos and v
+  (u128 reads, no alias flag), so sched1 kept the loads behind the stores and the float chain of
+  the second weight (priority 18) went first. Vu0::MulAddX2WeightFirst (a, s, b, t, c), the
+  vectors read with Vec::Of, emits pos, dt's slot, v, the second weight's slot, c: the loads that
+  come before a store in insn order need not wait for it, and retail's block follows (pos before
+  dt's store, v after it). The sum's add of c (C + v170) then issues first, as retail's.
+- **An if/else that jump.c leaves alone.** Retail normalises the direction with a branch: the
+  fallback (lq into a GPR before the test) is moved to vf1 by qmtc2 in its arm, the division is
+  the other arm, and vf1 is stored once at the join. A u128 variable set in both arms, or
+  NormalizeOr inline, is hoisted by jump.c (`x = b; if (c) x = a;` or `x = a; if (!c) goto l;`):
+  the switch's table address gives CSE a REG_EQUAL of a label_ref, so cse_main returns nonzero
+  and jump_optimize runs again after cse2, and by then CSE has made the asm set the join pseudo
+  directly (the copy swapped into the preceding insn), so each arm is the one insn the hoists
+  need. A `Vu0::Vec` variable for the join (`Vu0::Vec n; if (..) n = fallback; else n =
+  DivX(..);`) keeps the struct's movti copies in the arms at that pass, and the branch survives.
+  Storing to the local in each arm (the near miss) keeps the branch too, but the fallback's store
+  is then `sq` from the GPR. A matched NormalizeOr caller without a switch (func_0013BBA0) has no
+  jump pass after cse2, which is why the helper keeps its branch there.
+- **An out float allocated last.** ApproachValueWithRamp's last parameter is an `f32*` (camera.cpp
+  declares it so): with a Vec02 record for the rate the record took 96 and the weights' Scalar
+  slot 112, retail's the other way round. An `f32 speed;` whose address is passed is put in the
+  frame by purge_addressof after the other locals and temporaries, at 112. The profile is a
+  RampProfile local (`prof.maxSpeed = ...`).
+
 ### A Scalar slot against a load through a loaded pointer (func_001D87C8)
 
 Read from alias.c, function.c, integrate.c, reorg.c and resource.c and the `-dS`
