@@ -2046,6 +2046,27 @@ reference.
   TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
   size with only the call's `addiu a1, sp, 16` early.
 
+### A method read as a descriptor member passes the weight slots (func_001EB698)
+
+ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, weights
+`-D_00275CD0` and `D_00275CD4`, then the player's slot 0x90 method with the sum) matched on
+2026-11-09 with the scalar slot and one more change (`-dS -dR -fsched-verbose-6` dumps):
+
+- **The slot alone was not enough.** With Vu0::ScalarAt's cast-copy slot in place of the near
+  miss's own Slot local, the order stayed the same: the method load `lw v1, 144(v0)` still
+  waited for both weight stores. The call read the method through
+  `((PlayerSlotFn*)self->desc)[0x90 / 4]`: an array element through a cast pointer, a MEM with
+  no flag, which fixed_scalar_and_varying_struct_p cannot separate from a MEM_SCALAR_P frame
+  store (it needs the varying side MEM_IN_STRUCT_P).
+- **The fix.** `self->desc02()->m20(self, &dir)`, the descriptor's member (Desc02, as the rest of
+  the project calls slot 0x90), is a `mem/s` load; it passes the second weight's store, so
+  sched1 issues the table load first, the method load before that store, and reorg puts the store
+  in the jalr's delay slot, as retail does. The method load still follows the sum's own store
+  (`Q(dir)`, no flag), which retail shows too.
+- **Lesson.** Where a near miss behind the Scalar-slot wall calls a method through a cast array
+  of function pointers, write the call through the descriptor struct's member: both sides of
+  the alias rule need their flag.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
