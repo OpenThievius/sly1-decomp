@@ -1154,6 +1154,7 @@ func_00143148	func_00143448	match
 func_00143180	func_00143480	match	
 func_00143208	func_00143508	match	
 func_001433E0	func_001436E0	match	
+func_00143418	func_00143718	match	
 func_001434C8	func_001437C8	match	
 func_00143560	func_00143860	match	version-specific
 func_00143648	func_00143948	match	version-specific
