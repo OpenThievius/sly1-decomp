@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 772/956 (80.8%), checked 2026-11-07
+// BYTES 784/956 (82.0%), checked 2026-11-08
+// LITERAL-SWEEP: D_0024E5F0 written as 3.40282347e+38f (the compiler's own literal; 67 -> 59 differing instruction lines).
 // NEAR: wave 4 e3. 956 bytes, same size and frame; regdiff 'code' 87.9% (210 of 239 words). The camera's look-around search: the box of the two points and the target, the best-position search
 //       (func_00145950), the free-span test, the sweep of angles by 0.2857 steps scored by (1.25 - span end) * (|angle| + 0.4856), the mix of the best (MulXSum), the push
 //       (func_00145B68) and the final mix by the span's middle. The floats take other FP registers: retail has the angle in f20 and the best score in f21, 1.0 in f22 and its copy for the loop in f27, the
@@ -27,7 +28,6 @@
 
 struct SpanCandidate { u8 pad[0x20]; f32 value; };
 extern f32 g_gameClock[];
-extern const f32 D_0024E5F0;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void ComputePolarOffset(Vec02* out, f32 a, f32 b, f32 c);
@@ -66,7 +66,7 @@ void func_001E4888(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
     if (spanHi < 1.0f) {
         *(s32*)((u8*)self + 0x20) = 4;
         ConvertOffsetToCylindrical(q, p, &m0, &m1, &m2);
-        f32 bestScore = D_0024E5F0;
+        f32 bestScore = 3.40282347e+38f;
         f32 zero = 0.0f;
         f32 next;
         do {
