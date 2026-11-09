@@ -129,7 +129,7 @@ void SetFollowObjects(void* a, s32 b, s32 c);
 void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
 void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
-void SetModeColliderMode(void* self, s32 a1);
+void SetModeColliderMode(ModeCollider* self, s32 mode);
 s32 FindAnimRecord(s32 key);
 
 void StartModeCollider(ModeCollider* self)
@@ -500,7 +500,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
 
 void FinishSwitchedCollider(void* self);
 void HandleSwitchedColliderActivation(void* a, s32 b);
-void SetModeColliderMode(void* self, s32 a1);
+void SetModeColliderMode(ModeCollider* self, s32 mode);
 
 void FinishModeCollider(ModeCollider* self)
 {
@@ -603,7 +603,7 @@ struct SenderValueMessage {
 s32 HasSpareCount(void);
 void ComputeModeColliderAnchors(void* self, void* a, void* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void SetModeColliderMode(void* self, s32 a1);
+void SetModeColliderMode(ModeCollider* self, s32 mode);
 
 extern f32 g_gameTime;
 
@@ -665,8 +665,44 @@ s32 HasModeColliderAcceptedRequest(ModeCollider* self)
     return self->f6D0 != 0;
 }
 
-INCLUDE_RODATA(D_0024AFF4);
-INCLUDE_ASM(func_0017ABE8);
+s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+
+void SetModeColliderMode(ModeCollider* self, s32 mode)
+{
+    s32 old = self->f610;
+    if (mode == old) return;
+    switch (old) {
+    case 3:
+    case 4:
+        self->f6D8 = g_gameClock[1];
+        break;
+    }
+    void* anim = 0;
+    switch (mode) {
+    case 2: {
+        Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+        *(Vec02*)&D_00270650.rateX = D_00248D30;
+        D_00270650.vt->m16(&D_00270650, 2);
+        anim = self->f6C0;
+        break;
+    }
+    case 1:
+        anim = self->f6C4;
+        break;
+    case 3:
+        anim = self->f6C8;
+        self->f6D8 = 3.4028235e+38f;
+        break;
+    case 4:
+        anim = self->f6CC;
+        self->f6D8 = 3.4028235e+38f;
+        SetFollowObjects(self->f6E8, (s32)self, (s32)self);
+        break;
+    }
+    self->f610 = mode;
+    self->f614 = g_gameClock[1];
+    ReplaceAnimationPlayer(anim, self, 1, &self->f618, 0.0f, 1.0f);
+}
 
 void ComputeModeColliderAnchors(void* self, void* a, void* b);
 void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);

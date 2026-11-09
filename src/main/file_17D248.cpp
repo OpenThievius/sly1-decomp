@@ -266,7 +266,78 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
 
 INCLUDE_ASM(func_0017E088);
 
-INCLUDE_ASM(func_0017E3C8);
+extern f32 g_gameTime;
+extern f32 D_00274AD0[];
+s32 func_0017E088(Player* self, Collider* other, Vec02* point, s32 kind, s32 extra, Vec02* out);
+void NotifyContactEnds(void* world, s32 n, Contact03** list);
+s32 func_0013E658(Vec02* p, void* tree);
+Contact03* func_0017E3C8(Player* self, s32* outEnd, Vec02* outPos)
+{
+    Vec02 tmp;
+    Vec02 p;
+    Contact03* c;
+    if (g_gameTime - self->f2224 < 0.15f) {
+        return 0;
+    }
+    Contact03* best = 0;
+    for (ContactRow03* row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            s32 side = (Collider*)self != c->end[0].body;
+            Collider* other = c->end[1 - side].part;
+            Collider* v = other;
+            while (v != 0 && (v->flags538 & (0xF000ULL << 24)) == 0) {
+                v = (Collider*)v->parent;
+            }
+            if (v != 0 && (v->flags538 & (0xF000ULL << 24)) == (0x8000ULL << 22)) {
+                continue;
+            }
+            s32 extra;
+            switch (c->kind) {
+            case 1:
+                if (side == 0) {
+                    continue;
+                }
+                extra = c->fA0;
+                break;
+            case 3:
+                if (side == 0) {
+                    extra = c->fA4;
+                } else {
+                    extra = c->fA0;
+                }
+                break;
+            case 2:
+                if (side == 1) {
+                    continue;
+                }
+                extra = c->fA4;
+                break;
+            default:
+                continue;
+            }
+            if (func_0017E088(self, other, &c->end[1 - side].v10, c->kind, extra, &tmp) == 0) {
+                continue;
+            }
+            if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
+                NotifyContactEnds(self->world, 1, &c);
+            }
+            if (0.0f < D_00274AD0[side] * *(f32*)((u8*)c + 0xB8)) {
+                continue;
+            }
+            Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].v10), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
+                                      Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtCall(D_00264024)).q;
+            if (func_0013E658(&p, other->tree.nodes) != 0) {
+                continue;
+            }
+            if (best == 0 || !(c->end[1 - side].v10.z < best->end[1 - side].v10.z)) {
+                *outEnd = side;
+                *outPos = tmp;
+                best = c;
+            }
+        }
+    }
+    return best;
+}
 
 s32 ChoosePlayerNextState(Player* self)
 {

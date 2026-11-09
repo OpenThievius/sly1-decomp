@@ -998,7 +998,38 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     self->f35C = 1.0f;
 }
 
-INCLUDE_ASM(func_00184B58);
+s32 QueryValueListMask(void* self, f32 radius, void* center, s32* out);
+
+void UpdateConeVolumeBounds(ConeVolume* self)
+{
+    if (self->value == 0) {
+        return;
+    }
+    switch (self->mode) {
+    case 0:
+        self->mask = 0x0FFFFFFF;
+        break;
+    case 1:
+        QueryValueListMask(self->world->f1EC4, self->rangeMax, &self->v140, &self->mask);
+        break;
+    case 2:
+    case 3: {
+        Vec02 apex;
+        Vec02 rim;
+        Vec02 v;
+        Vec02 center;
+        Vu0::Q(apex) = Vu0::FromFloats(0.0f, 0.0f, self->rangeMax * 0.5f);
+        f32 t = Tangent(self->outerAngle * 0.00872664712f);
+        Vu0::Q(rim) = Vu0::FromFloats(t * self->rangeMax, 0.0f, self->rangeMax);
+        Vu0::Q(v) = Vu0::Sub(Vu0::Q(rim), Vu0::Q(apex));
+        f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(v)));
+        Vu0::Q(v) = Vu0::MulX(Vu0::Q(self->axis), Vu0::Scalar(self->rangeMax * 0.5f));
+        Vu0::Q(center) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(v));
+        QueryValueListMask(self->world->f1EC4, r, &center, &self->mask);
+        break;
+    }
+    }
+}
 
 void SetConeVolumeOuterLevels(ConeVolume* self, f32 v)
 {

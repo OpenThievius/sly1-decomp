@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 223/732 (30.5%), checked 2026-11-08
+// BYTES 225/732 (30.7%), checked 2026-11-09
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 31); 165 differing lines before, 161 now.
 #include "common.h"
 #include "asm_func.h"

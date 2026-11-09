@@ -310,8 +310,8 @@ What retail shows, and what the compiler does:
   the sum, whose life ends just before, out of vf2, and b takes it instead. Retail's
   order there is the reload, then the weight's store, then `acc[i]`: the operands
   of `MulAddX(vel[i], acc[i], Scalar(dt))` named in that order. In func_0017E3C8
-  the arguments written inline are expanded in another order than retail's; a
-  named start point gives its registers. A tie ("+j" or "0") on a instead raises
+  the registers came from the second weight's load instead (ScalarAtCall, see "A
+  weight's address hoisted out of the loop"), with every argument inline. A tie ("+j" or "0") on a instead raises
   a's priority (its references doubled) above b's and swaps their registers.
 - **A word stored from a reload.** StoreX(dst, a) is `sw` of a vector's low word
   with the vector as an `"r"` operand: the qmfc2 to the GPR is the compiler's, a
@@ -961,6 +961,40 @@ each read off the diff's registers (2026-11-09):
   store then waits for; `end = Alloc(); recs = end;` stores the call's value and CSE replaces
   the read of `end` with that same value, so the copy to recs is free to move.
 
+### A weight's address hoisted out of the loop: a reference's block notes (func_0017E3C8)
+
+func_0017E3C8 (src/main/file_17D248.cpp) went from 92.5% to EXACT on one change, a float
+weight passed to its helper by value instead of by reference (2026-11-09). Its loop body
+ends `p = from + tmp * -D_00264020 + unitZ * D_00264024` (MulAddX2); retail loads the second
+weight `lui v1; lw v1, %lo(D_00264024)(v1); qmtc2 v1, vf5`, and gives `from` and the result
+vf2 and the first weight vf3. With `Vu0::ScalarAt(D_00264024)` ours swapped vf2 and vf3 and
+built the address in a0, and the a0 carried on to `*outEnd`'s reload after the call.
+
+- **loop.c counts notes in a lifetime.** A movable's lifetime is the luid distance from its
+  set to its last use, and loop.c gives every insn a luid, notes included. ScalarAt takes
+  `const f32&`: the inliner computes the argument, the address (`high` and `lo_sum` into a
+  pseudo), at the call, and the inline bodies' NOTE_INSN_BLOCK_BEG/END notes (ScalarAt's,
+  its Slot's scope, FromFloatAt's) follow before the asm that uses it: `regno 227 (life 9),
+  move-insn savings 1 moved` (80 x 1 x 9 >= the loop's 135 insns). The hoisted `high` lives
+  through the loop and calls, global-alloc spills it, and reload rebuilds it at the asm. Its
+  memory operand then needs two reload registers ("Spilling for insn 528: reg 3, reg 4"),
+  which puts a0 in the function's spill registers; the round robin (see "The reload
+  register's round robin") then gives the asm a0, and `*outEnd`'s reload after the call a0
+  where retail's set {v0, v1} gives v1 (v0 holds the copy of tmp there).
+- **By value the load sits next to its address.** A by-value `f32` argument is loaded at the
+  call, right after its `high` (`life 1, not desirable`, like the first weight's), and the
+  load folds into the asm's `"rV"` memory operand. local-alloc gives the `high` v1, and
+  push_reload loads the operand into that dying register (`lui v1; lw v1,(v1)`): no spill
+  register, and the round robin goes on as retail's. The load in the block also moves
+  sched1's order, so the combined `from` and result quantity outranks the first weight in
+  local-alloc (vf2 to `from` and the result, vf3 to the weight), as retail has it.
+- **The helpers.** include/vu0.h's `FromFloatAtCall`, `ScalarAtCall` and
+  `Vec::ScalarAtCall` take the float by value with FromFloatAt's `"rV"`. Changing ScalarAt
+  itself to by value breaks other matched functions (func_001DDE90's spill slots move), so
+  both forms stay: the reference where retail's address was formed before the helper's body
+  (outside a loop, or hoisted as retail's are), the value where retail's `lui` sits just
+  before the `lw` inside a loop.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
@@ -1241,6 +1275,47 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
 - **Reading it.** In the `.sched2` dump an insn that issues in the call's cycle and has no
   REG_DEP_ANTI to the call, where retail puts it one cycle later, is the sign: look for a
   reassigned variable that could be an expression instead.
+
+### A compiler's qmfc2 of a VU0 product (func_00186230)
+
+MeasurePointToLine (2026-11-09) tests `Dot(e, e) < 0.0001f`. Retail's head is: the product
+in vf1, the dot's 1.0 in vf4, `a` in vf3, `p` loaded into vf2 before the qmfc2, then `qmfc2
+v0,vf1; mtc1 v0,$f2; vsub vf1 = p - a; c.lt.s; sqc2 e; bc1f; (sqc2 w)`. Read from the
+dumps, it needs two things at once:
+
+- **local-alloc: the product a VU0 pseudo.** With ToFloat or ToFloatNow the product is
+  VU_REGS, ranks first (ToFloatNow's two-output asm repeats its input: three refs) and takes
+  vf1 over the dot's insn and the load of p, so p takes vf2, a vf3 and the 1.0 vf4, retail's
+  registers. With ToFloatMoved the product has one `"=j"` def and one `"r"` use: both costs
+  are a VU0-to-GPR move, regclass ties and picks the union TI_REGS, local-alloc gives it v0
+  and the asm's output reload uses vf1 after every VU0 pseudo has its register: p takes vf1,
+  a vf2 and the 1.0 vf3. No sched1 order fixes that (emulated with la.py over the .lreg: the
+  1.0 can only reach vf4 if vf1 to vf3 are all taken around the dot, and without the product
+  only b could hold vf1 there, which needs the load of p before the subtraction of b, ranked
+  4 against the constant's 6 and the subtraction's 7).
+- **sched2: the qmfc2 the compiler's.** At cycle 5 the dot is done and the ready list holds
+  the conversion and the sqc2 of e (priority 2). An asm's qmfc2 (ToFloat, ToFloatNow,
+  ToFloatViaBits) has no function unit, so both issue and the store lands before the
+  subtraction of w, which waits on the conversion's read of vf1 (an anti dependence, and
+  insns made ready in a cycle never issue in it: schedule_block moves the last ready insn
+  into the issued one's slot and counts down past it). The compiler's qmfc2 (a movti
+  reload, unit vu0) takes the vu0 unit the sqc2 also needs: the store waits, the mtc1 and the
+  subtraction issue at cycle 6, the c.lt.s and the store at 7, and reorg puts the sqc2 of w
+  in the branch's delay slot: retail's order. Probed with a ToFloatMoved whose asm also takes
+  the product as a dummy `"j"` operand: the product becomes VU_REGS and the qmfc2 the
+  compiler's, but the subtraction then waits on the mtc1 that names vf1, and the store still
+  comes first.
+
+What retail had is a product in VU_REGS whose only reader takes it as `"r"`: some second
+VU0 reference that leaves no code (a loop's weight, a copy CSE keeps), and none of the
+plain forms found has one. Ruled out: a user variable for the product (CSE folds the copy:
+the variable is canonical only if it lives beyond the block), the same variable reused for
+the arms' squared distances (global, vf4), a truncating cast (sign extension), a union or
+`*(f32*)&` (memory), the product converted again in the else arm (CSE shares the float).
+The near miss keeps ToFloatNow (every register retail's, the sqc2 one slot early); ToFloatNow
+for the else arm's dot also puts the division before the mfc1 of 1.0, as retail has it, and
+the distance stored as `*(u32*)dist = ToBits(Sqrt(d))` gives the square root vf1 (StoreX's
+"r" operand put it in vf2).
 
 ### The rest of rank_for_schedule (func_001782C0)
 
@@ -1925,6 +2000,52 @@ dumps, 2026-11-09, still a near miss):
   store). It is not the effect method's signature: slot 5 of the kind-8 and kind-17 tables is a
   draw method `(self, camera)`, and retail calls no base method here.
 
+### The weight slot is a cast's copy (func_001D87C8, func_001C75B0, func_0017ABE8)
+
+The Scalar-slot wall of the two sections above, and of func_0016C528, func_00181078 and
+func_0017ABE8, has one answer (2026-11-09, read from expr.c, stmt.c, function.c and cp/typeck.c
+of 2.95.3, with `-dS` dumps): retail's weight slot is the copy g++ 2.95 makes of a cast bound by
+reference.
+
+- **The rule needed.** A store at a fixed frame address and a load through a pointer of no
+  known base are separated only by fixed_scalar_and_varying_struct_p: the store MEM_SCALAR_P,
+  the load MEM_IN_STRUCT_P (a structure member). A `volatile u128` slot gives it (func_0017ABE8's
+  probe: retail's order and registers), and so does a u128 local whose address escapes
+  (func_00181078's probe), but purge_addressof allocates that one after every local.
+- **Where an expand-time scalar slot comes from.** expand_expr's ADDR_EXPR copies an operand
+  that expanded to a register into `assign_temp (type, 1, 1, 1)`: a temporary allocated where the
+  expression is expanded (so the weights of one sum share it, as retail's do), flagged
+  MEM_SCALAR_P for a scalar type, stored once and, read back through the address, folded to the
+  register by CSE. The C++ front end builds such an ADDR_EXPR for a cast of a variable: a cast
+  is an lvalue to g++ 2.95 (lvalue_p_1: NOP_EXPR), `&(s128)r` is accepted (pedantic warns), and
+  mark_addressable stops at the NOP_EXPR, so r stays a register and only the cast's value goes to
+  memory. Binding a reference to the cast does the same (build_up_reference), so `Vu0::Q((s128)r)`
+  or a `const s128&` parameter given `(s128)r`. A same-type cast is not an lvalue (non-lvalue
+  error); the cast must change the type, here between the unsigned and signed 128-bit types.
+- **The helpers.** Vu0::Scalar, ScalarAt, FromFloats and ScalarInGpr now return `Q((s128)r)`
+  instead of storing to a 16-byte local of their own (Vu0::Slot, an aggregate, written through
+  Q: no flag). Every function the build linked from C still matches with the change (US and PAL
+  MATCH), and five near misses match with it: func_001D87C8, func_001C75B0 (with
+  Vu0::RotateMembers, whose row loads are Vec members, MEM_IN_STRUCT_P, so rows 1 and 2 pass the
+  weight's store but still wait for v's), func_0017ABE8 (FromFloats' slot against the method
+  table's load), func_00184B58, func_001C57C8 and func_001A00A0 (whose caller-side
+  `Q(k) = FromFloat(-m)` into a Vec02 local was the weight of `Scalar(-m)` passed straight to the
+  MulAddX: its slot follows pos as an expand-time temporary). Retail's sources most plausibly had the same:
+  Sony's headers have both 128-bit types (signed and unsigned), and a helper taking one by
+  reference called with the other cast to it binds such a copy.
+- **A float operand by value.** Vu0::ScalarAt reads its float through a `u32` cast pointer (no
+  flag). func_0016C528's twist rate (`self->f224->f94`) must stay a member load to pass a weight's
+  store: Vu0::ScalarAtValue takes the float as a `const f32` by value, which an inline call passes
+  as the caller's own memory reference, flags included (integrate.c copies an argument to a
+  register only for a parameter that is not read-only), as the asm's "rV" operand. Making it
+  ScalarAt itself changes func_001DDE90.
+- **Still short.** func_00181078's axis shares the weight's slot (0x50) and its address goes to
+  two calls: `const s128& k = (s128)w;` gives retail's frame and block but for the reference's
+  address, set at the binding (and so issued first by sched1) where retail forms &k at its first
+  use, as for a named local; a named scalar local in memory from its declaration needs
+  TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
+  size with only the call's `addiu a1, sp, 16` early.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
@@ -2040,6 +2161,36 @@ dumps, 2026-11-09, still a near miss):
 - Diagnosing it: when tools/regalloc.py reports an `.lreg` live length about twice the
   `.sched` dump's "life shortened/extended" line for that pseudo, the pseudo had a constant
   REG_EQUIV at some point, and every insn of its sched1 life counts twice.
+
+### The leading equal constants double again: a switch's default first (func_0017C428)
+
+- update_equiv_regs doubles REG_LIVE_LENGTH once for every set, in insn order, whose
+  REG_EQUAL constant equals the first one recorded, until a set without a note or with
+  another constant calls no_equiv (which never halves it back). Two leading `x = 1` sets
+  give four times sched1's life, three give eight. A switch's case bodies are in source
+  order, so the order of its cases decides which constant sets come first.
+- func_0017C428 (CheckQueueEntryDone) sets its result in every case (17 sets, 19 refs,
+  sched1 life 68). With `default: done = 1;` last, the first set in insn order is case 4's
+  `done = 1` and the second its `done = 0`: one doubling, 4*19/136 = 0.559, above the entry
+  pointer's 2*5/24 = 0.417, so the result took s2 and the entry s3, retail's the other way
+  round. With the default written first, its `done = 1` and case 4's come first: 272 insns,
+  0.279, and the entry takes s2. The default's body is not where it was written: jump2
+  cross-jumps it into the `done = 1` that ends case 12 and falls into the return (the
+  jump table's entries 10, 11 and the range check then reach the end of the function, as
+  in retail), so the layout gives no sign of it. Explicit `case 10: case 11:` bodies
+  instead make GCC set `done = 1` before the switch.
+- Case 12's shape follows from the same cross-jumping: `if (a) done = 0; else if (b)
+  { call; done = 1; } else done = 1;` keeps `done = 0` in its arm (jump.c's "`if (...)
+  { x = a; goto l; } x = b;` to `x = a; if (...) goto l; x = b;`" no longer applies,
+  because the arm is not followed by a set of done), so jump2 merges it with the float
+  cases' shared `done = 0; goto` tail. That label between the `bc1t` and `done = 0` stops
+  reorg's optimize_skip (which turns "branch over one insn followed by a jump to the same
+  label" into an inverted, annulled branch-likely): retail's `bc1t` takes the return's
+  `move v0` from its target instead. relax_delay_slots then sends the branches whose
+  target `done = 1` is already done in a delay slot past it (redundant_insn).
+- Diagnosing it: two variables whose registers are swapped where the .lreg life of one is
+  2^k times its .sched life; count the leading equal constants in insn order (`grep` the
+  `.lreg` dump for the pseudo's sets) and reorder the cases or arms that set them.
 
 ### Local allocation's ranking (func_00149760)
 
@@ -2776,6 +2927,55 @@ CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
   A sweep of about 1,000 combinations of the client's and packet's field types (int, the pointer
   type, void*) and store orders found nothing closer. Retail's sched1 order is not reachable in
   this model; something in the original's block is still unknown.
+
+### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
+
+- **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
+  by k, the spin by e). Retail's vmulx gives the product a register of its own (vf3, vf2)
+  where `Q(*out) = MulX(sum, Scalar(e))` ties it to the sum (vf1), and in func_00130748 the
+  output pointer takes s5 ahead of the two spin pointers (s6, s7) where ours took s7. Both come
+  from storing the sum and then scaling it in place:
+  `Q(*out) = MulXSum3(...); Q(*out) = MulX(Q(*out), Scalar(e));`. That matched
+  func_00130540 whole and left func_00130748 two instructions off.
+- **Why the product is fresh.** CSE replaces the reload of `*out` with the sum's register, but
+  the first store stays until flow2 (life analysis after reload) deletes it as overwritten
+  with no read between. In local-alloc's view (after sched1, which puts that store after the
+  vmulx) the sum is still live past the vmulx, so it has no REG_DEAD there and combine_regs
+  cannot tie the product to it; the product takes a free register.
+- **Why the pointer moves up.** The dead store still counts: flow's REG_N_REFS (taken before
+  combine and never recounted) gives out four references (its copy, the test, two stores)
+  against three for each pointer read twice. global-alloc's priority,
+  floor_log2(refs) * refs / live length, is then 2 * 4 / 165 against 1 * 3 / 151, so out is
+  placed first and takes the lowest free saved register.
+- **Ruled out first.** An early-clobbered MulX (`"=&j"`) gives the same fresh register, which
+  is how the tie was diagnosed; Vec against u128, a named sum (`r = MulX(r, ...)`, which CSE
+  folds to the same insns) and the order of the sum's operands do not.
+
+### A length returned as a float joins the allocation's preferences (func_00130748)
+
+- **The form.** NormalizeAxis (an axis made unit length, or a fallback when shorter than
+  1e-4) returning the length as a float (`return Vu0::ToFloat(len);` after the join, the
+  caller's `f32 len` assigned at both calls) rather than the u128 the caller converts.
+- **The mechanism.** The caller's len is one variable assigned twice, so a global pseudo.
+  local-alloc then sees only uvv * dur in the call's block with $f12 suggested (the
+  argument's product), and it takes $f12 where the length's local float had won it on a
+  shorter span. set_preference gives uvv the preference $f12 from that insn (the first
+  operand of a set of a hard register), and expand_preferences passes it on to v (1 - u),
+  which dies where uvv is born and does not conflict with it: global-alloc then takes $f12
+  for v instead of $f4, retail's register. The length itself gets $f2 from global-alloc's
+  pass 0, which skips $f0 and $f1 that uvv (lower in priority, conflicting) prefers. With v
+  in $f12 the prologue's `mov.s $f21,$f12` and the uuv/uuu products fall into retail's order
+  (uuu declared before uuv).
+- **What is left.** At the first call's join retail issues `mul.s $f12,$f0,$f21` (uvv * dur)
+  before the length's `qmfc2 v1,$vf2`; sched2 ranks them equal (priority 16: the asm 1 plus
+  reload's mtc1 2 plus the product 13, against the mul.s 3 plus 13) and takes the qmfc2,
+  which has six dependents (reload's mtc1, the product through sched1's stale LOG_LINK, the
+  next length's vaddw.x into vf2, the next qmfc2 into v1, the call, the jump) against the
+  mul.s's four. ToFloatNow (one asm, cost 1) gives retail's order but its GPR is local-alloc's
+  v0, not reload's v1, which shifts reload's round robin in the spin. Ruled out: the product's
+  operand orders, the conversion of the test and of the return in every helper, a temporary
+  for the return, the axis copied inside the helper, a length variable per call (12 lines),
+  and permute.py over every run of simple statements.
 
 ## Stack slots
 

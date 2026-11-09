@@ -1,5 +1,39 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2186/2260 (96.7%), checked 2026-11-08
+// BYTES 2230/2260 (98.7%), checked 2026-11-09
+// Still differs (2026-11-09, scalar-slot): place (2) is retail's now: Scalar's slot is a cast's copy (MEM_SCALAR_P) and the twist rate goes in by value (Vec::ScalarAtValue: the member load stays MEM_IN_STRUCT_P), so the f94 load passes the swing weight's store (docs/TOOLCHAIN.md, "The weight slot is a cast's copy"). Left: place (1), the swap of vf2 and vf3 after the angular-rate test (local allocation), and with it the order of v's store (sqc2 vf8, 848) against the qmfc2 of the length.
+// NEAR (2026-11-08, worker large-16C528): ApplyLinkConstraint, a two-bone IK solver. Same size
+// (565 instructions), frame 0x4A0 and every stack slot as retail's, saved registers as retail's;
+// 9 lines differ in two places. (1) After the angular-rate test the VU0 registers vf2 and vf3
+// are swapped: retail loads swing's second row into vf3 and dv into vf2 (so rest, the cross
+// product's t and the normalisation's length follow), we load them the other way. Local
+// allocation order; tried every order of the rotations, the cross product and the subtraction,
+// the subtraction inline, rest as a Vec value, ToFloat/ToFloatMoved for its length. (2) In the
+// last block retail loads self->f224->f94 (lw, qmtc2 for the twist rate) straight after the swing
+// spin's store, before the swing scalar's slot store and the transposed rotation of b's spin;
+// ours does it after that rotation. Tried every order of the five tail statements
+// (tools/permute.py), a named slot for both scalars, the scalar's store after its product, and a
+// FromFloatAt whose operand is a structure member (MEM_IN_STRUCT_P): no change.
+//
+// What this needed (docs/TOOLCHAIN.md material):
+// - The chain arrays of func_00127B20 are four long and it is passed &x[1]: pos[0] is the end
+//   effector (the 0x60, 0x120 and 0x160 gaps of retail's frame are rot[0], vels[0], spins[0]).
+// - The by-value products of 1DDE90 do not fit here. The swing product goes through a named
+//   Mat02 (`Mat02 R; MulRotationInto(&R, twist, swing); swing = R;`, four stores per row), and
+//   the two products fed to MultiplyByTransposedMatrix3x3 go into named matrices declared
+//   together after it, the one used second first (`Mat02 upper; Mat02 lower;`), so that lower
+//   takes 0x300 and upper 0x2D0, and the call's return temporary reuses the product's freed
+//   frame (0x330). An inline Mat02-returning product puts the return slot before the argument
+//   (calls.c allocates the structure value first) and an assignment adds a temporary.
+// - The product's x, y, z locals come before its matrix local, and are written by address
+//   (`*(u128*)&x = *(u128*)&r.r[0] = ...`): through Vu0::Q the reference pseudo of the first
+//   product's frame (sp+0x2D0) is CSE'd with &upper and held in s1 across the call.
+// - BuildAxisAngleMatrix declared with its float first (retail computes Arccosine(c) - angle
+//   before the addresses); the identity copy through a pointer (`Mat02* m = &b->rot; *m = ...`);
+//   ToFloatMoved for the lengths; `w = bent = Rotate(bend, w)` chained; the final block's
+//   vectors declared together at its top, with one scratch vector v holding the rate as a vector
+//   and then the rotated arm; NormalizeVector(n, g_unitXVector) as an inline taking the
+//   fallback by reference (its address formed before the test).
+// - Rec2195_224's f80 (an s32 in attachment.h) is here the first joint object, read as a pointer.
 // NEAR (2026-11-08, workers large-16C528 and w5-16C528): ApplyLinkConstraint, a two-bone IK
 // solver. Same size (565 instructions), frame 0x4A0 and every stack slot as retail's, saved
 // registers as retail's; what differs is one place in the last block: retail loads
@@ -28,27 +62,7 @@
 // and t take retail's vf2, vf3, vf3 (an emulation of block_alloc on the .lreg dump reproduces
 // every VU register of the block). The lengths then go through ToFloatMoved, the rest's and
 // the normal's, which gives retail's order of the qmfc2 and the v store.
-//
-// What this needed (docs/TOOLCHAIN.md material):
-// - The chain arrays of func_00127B20 are four long and it is passed &x[1]: pos[0] is the end
-//   effector (the 0x60, 0x120 and 0x160 gaps of retail's frame are rot[0], vels[0], spins[0]).
-// - The by-value products of 1DDE90 do not fit here. The swing product goes through a named
-//   Mat02 (`Mat02 R; MulRotationInto(&R, twist, swing); swing = R;`, four stores per row), and
-//   the two products fed to MultiplyByTransposedMatrix3x3 go into named matrices declared
-//   together after it, the one used second first (`Mat02 upper; Mat02 lower;`), so that lower
-//   takes 0x300 and upper 0x2D0, and the call's return temporary reuses the product's freed
-//   frame (0x330). An inline Mat02-returning product puts the return slot before the argument
-//   (calls.c allocates the structure value first) and an assignment adds a temporary.
-// - The product's x, y, z locals come before its matrix local, and are written by address
-//   (`*(u128*)&x = *(u128*)&r.r[0] = ...`): through Vu0::Q the reference pseudo of the first
-//   product's frame (sp+0x2D0) is CSE'd with &upper and held in s1 across the call.
-// - BuildAxisAngleMatrix declared with its float first (retail computes Arccosine(c) - angle
-//   before the addresses); the identity copy through a pointer (`Mat02* m = &b->rot; *m = ...`);
 //   ToFloatMoved for the lengths (the normal's and the rest's too); `w = bent = Rotate(bend, w)` chained; the final block's
-//   vectors declared together at its top, with one scratch vector v holding the rate as a vector
-//   and then the rotated arm; NormalizeVector(n, g_unitXVector) as an inline taking the
-//   fallback by reference (its address formed before the test).
-// - Rec2195_224's f80 (an s32 in attachment.h) is here the first joint object, read as a pointer.
 #include "common.h"
 #include "c52.h"
 #include "vu0.h"
@@ -74,11 +88,11 @@ extern Vec02 g_unitXVector;
 // v made unit length, or fallback when shorter than 0.0001.
 static inline void NormalizeVector(Vec02& v, const Vec02& fallback)
 {
-    u128 len = Vu0::Length(Vu0::Q(v));
-    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+    Vu0::Vec len = Vu0::Length(Vu0::Vec::Of(v));
+    if (Vu0::ToFloat(len) < 0.0001f) {
         v = fallback;
     } else {
-        *(Vu0::Vec*)&v = Vu0::DivX(Vu0::Vec::Of(v), Vu0::Vec::Of(len));
+        *(Vu0::Vec*)&v = Vu0::DivX(Vu0::Vec::Of(v), len);
     }
 }
 
@@ -263,11 +277,11 @@ void ApplyLinkConstraint(PlacedObject* self)
         *(Vec*)&bendSpin = Vu0::RotateUntied(swing, Vec::Of(spin));
         *(Vec*)&sweep = Vu0::Cross(Vec::Of(bendSpin), Vec::Of(v));
         *(Vec*)&rest = Vu0::Sub(Vec::Of(dv), Vec::Of(sweep));
-        f32 lr = Vu0::ToFloatMoved(Vu0::Length(Vec::Of(rest)));
+        f32 lr = Vu0::ToFloat(Vu0::Length(Vec::Of(rest)));
         *(Vec*)&n = Vu0::Cross(Vec::Of(t), Vec::Of(rest));
         NormalizeVector(n, g_unitXVector);
         *(Vec*)&swingSpin = Vu0::MulX(Vec::Of(n), Vec::Scalar(lr / lt));
-        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAt(self->f224->f94));
+        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAtValue(self->f224->f94));
         *(Vec*)&total = Vu0::Add(Vec::Of(twistSpin), Vec::Of(swingSpin));
         *(Vec*)&rel = Vu0::Sub(Vec::Of(total), Vec::Of(spins[3]));
         *(Vec*)&b->v160 = Vu0::RotateTransposed(rot[2], Vec::Of(spin));
