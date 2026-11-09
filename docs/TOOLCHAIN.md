@@ -2832,6 +2832,36 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   a2, zero` tie in sched1 at the same cycle, and retail issues `$f13` first; with `mode` before
   the floats `a2` went first. Every other caller matches with either order.
 
+### A call's result register ends a use's dependences in sched2 (func_00131198)
+
+SetupTextPanel (2026-11-09, `-dS -fsched-verbose-6`, haifa-sched.c's sched_analyze):
+
+- **A call clobbers, it does not set.** sched_analyze makes a CALL_INSN depend on the last
+  uses and sets of every call-used hard register, but it does not clear `reg_last_uses`: a
+  use of v0 stays on the list, and every later call gets one more anti dependence on it,
+  until an insn really sets v0 (a call_value, whose pattern sets it). So in sched2 an insn
+  that reads v0 (`sw v0,608(s1)`, the -1 of `state = -1`) has one dependent per void call
+  up to the next call that returns a value, and rank_for_schedule counts them.
+- **What it decided.** InitGifPacket (func_001611B8) ends `daddu v0,s0,zero`: it returns its
+  object, as a constructor does, and other files already declare it `void*`. Declared
+  `void`, the store had six dependents (the SetTextPanelState, PushBackMemoryMark,
+  InitGifPacket and AllocateBackMemory calls, the `li s1,1`, the block end), tied with
+  `move a1,zero`'s six and beat `move a0,s1`'s five, issued in cycle 2 and freed the memory
+  unit a cycle early: every float constant sched moves up the block (0.171875, 1/24, 640,
+  1728, 16, 0.4545, 1936, each a memory-unit insn) went one call earlier. Declared `void*`,
+  the store has five, loses the LUID tie to `move a0`, issues in cycle 3 (reorg puts it in
+  the call's delay slot) and every constant is retail's.
+- **Rule.** Where a store or move of a call-clobbered register goes a cycle early in sched2
+  for no rank you can see, count its dependents in the `.sched2` table and check whether a
+  callee declared `void` really returns something in v0 (retail's callee setting v0 at its
+  end, a constructor returning `this`).
+- **Two more ties in the same function.** `for (t = step, i = 1; ...)` puts the copy of
+  `step` before the counter's `li` in insn order (they tie on everything else) and gives
+  retail's `mov.s` after the UsePacketBufferMemory call; and InitCurveSpan is
+  `(span, src, f32 x, f32 y, s32 n)`: with `n` before the floats, `li a2,24` won the LUID tie
+  with `mov.s $f12,$f20` at the first call (the prototype rule above). Its definition matches
+  with either order.
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
