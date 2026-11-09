@@ -21,6 +21,9 @@ struct GraphPoint { u8 pad[0x10]; s32 linkCount; GraphLink** links; u8 pad2[8]; 
 // a tagged link (bit 0 set) or none.
 struct GraphFace { u8 pad[0x10]; f32 f10; void* neighbourA; void* neighbourB; u8 pad2[8]; };
 
+// A triangle (12 bytes, PointGraph::tris): its three corners (func_00191C78).
+struct GraphTri { GraphPoint* corner[3]; };
+
 // The graph: the points, the links (12-byte records, two kinds), and the faces.
 struct PointGraph {
     s32 pointCount;         // 0x00

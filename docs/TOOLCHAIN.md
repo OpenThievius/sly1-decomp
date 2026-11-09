@@ -890,6 +890,23 @@ the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` lo
 
 ## CSE
 
+### The same walk twice: Vec values keep the second bound's copy (func_00191C78)
+
+Read from cse.c (cse_around_loop, cse_set_around_loop) and the -ds/-dG/-dL dumps (2026-11-09).
+func_00191C78 walks the graph's triangles twice (the total area, then the pick), each walk
+`for (i = 0; i < self->graph.triCount; i++)`. Retail's second walk loads the count into v0 for
+the entry test and copies it into a2 in the preheader after the moved invariants; ours loaded
+it straight into a2. With the edges written `Vu0::Sub(Vu0::Q(..), Vu0::Q(..))` the body has no
+store CSE cannot see through, so cse_around_loop replaced the bottom test's load with the
+REG_LOOP_TEST_P register and put the copy before the entry branch, where GCSE's copy
+propagation folded it. With the edges as `Vu0::Sub(Vu0::Vec::Of(..), Vu0::Vec::Of(..)).q` the
+helpers' Vec temporaries are stores through ADDRESSOF at CSE time, the load's entry is
+invalidated before the scan reaches it, loop.c moves the load to the preheader and cse2 makes
+it `move a2,v0`: EXACT. (cse_jumps_altered, the other way to skip cse_around_loop, is reset for
+each basic block that is not extended along a jump path, so a jump CSE folds earlier in the
+function does not stop it: tested.) A label in the body also stops the scan (a `continue` to a
+real test gave retail's preheader as an experiment), but nothing in retail's body needs one.
+
 ### A skipped block's struct store forgets memory (func_001B2140)
 
 At -O2 CSE follows a conditional jump that skips a block (`-fcse-skip-blocks`): the path goes
@@ -2021,6 +2038,20 @@ order (2026-11-08, func_00175170):
   `sound, start, anim, speed, flag` (start and anim taking the cycle before) gives retail's.
 - **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
   named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
+
+### Corner pointers read as a record's members (func_00191C78)
+
+Read from alias.c and the -dS dump (2026-11-09). func_00191C78 weights a triangle's three corners
+(`MulXSum3`, each weight a `Vu0::Scalar`). Retail loads each corner pointer (`lw v0,0(s0)`)
+before the previous weight's slot store; ours waited behind it, so sched1's order and with it
+local-alloc's VU registers (a in vf6, the second weight in vf5) differed, 24 words. The corners
+were read as `((GraphPoint**)t)[k]`: a plain scalar load through a pointer of no known base,
+which true_dependence cannot separate from the frame's slot store. Read as members of a
+12-byte record, `struct GraphTri { GraphPoint* corner[3]; }`, the loads are MEM_IN_STRUCT_P
+through a varying address and the slot stores scalars at a fixed one, so
+fixed_scalar_and_varying_struct_p removes the dependence and the loads rise as retail's do. A
+record's members read through a pointer where retail's loads pass a Scalar slot's store is the
+lever; the record (here the graph's triangle) is plausibly the original's own type.
 
 ### A global array's element is not a scalar (func_001CDB70)
 
