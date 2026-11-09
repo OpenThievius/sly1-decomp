@@ -961,6 +961,17 @@ func_001F0AE0):
   function that mixes the two can land on any of several sizes; the uniform Vec form is the
   plausible one, and it is retail's here.
 
+- **A tie of two hoisted frame addresses, read off the hash values** (2026-11-08,
+  func_001BA5B0). PRE hoists seven frame addresses (`&target2`, `&spin`, `&spinAlong`, ...)
+  before the first of four gain loops; `&spin` (sp+48) and `&spinAlong` (sp+176) live over the
+  same 54 insns with 2 refs each, so global-alloc takes the lower pseudo first. The gcse dump
+  prints each expression's hash value: (plus at N) hashes to 13259 + N, so with T = 191 (377
+  insns) &spinAlong is bucket 65 and &spin bucket 128, and &spinAlong takes s4. Retail has
+  &spin in s4, which needs no multiple of T between 13307 and 13435: T = 187, 195, 201, 207, ...
+  not 189, 191, 193. Over these sizes T came out as (insns + 4) / 2 | 1. The dot product of
+  the last block written with Vec operands (`Dot(Vec::Of(a), Vec::Of(b))`, the project's form)
+  is seven insns more: 384, T = 195, retail's two registers and nothing else changed.
+
 ### Sony's compiler: the same bucket order, and what it hashes (func_00211618)
 
 The libraries' compiler (2.9-ee-991111) has the same PRE and the same tie. In the MPEG bit
@@ -1214,6 +1225,35 @@ Read from haifa-sched.c's sched_analyze and rank_for_schedule and the `-dS -dR
 - Lever: a function whose callers copy its result from a temporary and whose own code begins
   with `move v0,a0` returns a struct; a call that should not set v0 (a later reuse of v0
   depending on an earlier set across the call) is a call to such a function.
+
+### A matrix returned by value: the stores order local-alloc's ranking (func_001BA5B0)
+
+Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps (2026-11-08):
+
+- **What differed.** The block that turns the three rows of a matrix by a rotation (an inline
+  returning the matrix, assigned back to it) took $vf3, $vf5, $vf4 for the rotation's rows and
+  $vf2 for the third row where retail has $vf2, $vf6, $vf5 and $vf3. Each row's product is
+  tied by combine_regs to the input that dies in it (the rotation's first row, or the row
+  rotated), so the block has three tied quantities of 6-8 refs and three plain rows of 2-4,
+  and local-alloc places them by floor_log2(refs) * refs / (death - birth), births and deaths
+  being twice the insn's index in the block.
+- **The deaths are the stores.** The rotated rows die at their last store, and those stores
+  are dead copies to the helper's local, the return temporary and the matrix, all with
+  sched1 priority 11 (they precede the next call): they issue by INSN_LUID, the two that kill a
+  register (weight -1) first. With `Mat02 out; ... return out;` the local's rows are stored as
+  they are made and the return copy follows the last row, so sched1's tail is out0, out1, out2,
+  tmp0, tmp1, tmp2 and row 0's product lives to the fifth store; its quantity (6 refs over 24)
+  ranks below the plain row of 4 refs over 14, and the rotation's first row (8 refs) below the
+  third row's (8 refs over a shorter life). Retail's registers need row 0 to die at its copy
+  to the return slot and row 1 three insns before row 2: a tail of out0, tmp0, out1, tmp1, out2,
+  tmp2.
+- **The form.** g++'s named return value, as in the matrix file (func_0018A040 above):
+  `Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out` with a local `t`, each row
+  written to `t` and then to `out` before the next row is made. The frame keeps its three
+  48-byte objects (t, the return slot, the matrix), the tail becomes per row, and the whole
+  function matches. The third function where retail writes a returned matrix's rows to a local
+  and the result in turn, which supports the reading that the original's matrix helpers
+  returned by value with named return values.
 
 ## Conditional moves (jump.c)
 
