@@ -189,6 +189,21 @@ struct Vu0 {
         return r;
     }
 
+    // The x of a VU0 register as a float through its bits: ToBits' qmfc2 into a GPR, then an
+    // mtc1 of its own. The value stays in its VU0 register up to the qmfc2, as with ToFloat
+    // (ToFloatMoved's "r" input makes the vector a GPR pseudo, which renumbers the VU0
+    // registers around it), and the mtc1 is an asm, issued a cycle after the qmfc2 where the
+    // compiler's own (ToFloat's reload of its "=r" float) has a latency of 2: what uses the
+    // float issues a cycle sooner (func_001C5C10: the neg.s of a call's float argument comes
+    // before the last argument move, which reorg then puts in the call's delay slot).
+    static f32 ToFloatViaBits(u128 a)
+    {
+        u32 t = ToBits(a);
+        f32 r;
+        __asm__("mtc1 %1, %0" : "=f"(r) : "r"(t));
+        return r;
+    }
+
     // The x of a VU0 register stored to a word in memory (a float, or its bits): sw of the low word of the vector in
     // a GPR. The vector goes in as "r", so the qmfc2 that brings it there is the compiler's: a
     // reload, whose GPR is taken after every pseudo has its register (func_001DAA18's length
