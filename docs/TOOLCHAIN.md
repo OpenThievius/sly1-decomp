@@ -2381,6 +2381,22 @@ reference.
   `move a0, a2`, as retail. Spot it: retail's receiver in a2 (or another free argument
   register) copied to a0 in the jalr's delay slot.
 
+### A weight named before the normalisation it scales (func_0018DDD8)
+
+LaunchContactListObjectWithoutGravity stores `MulX(NormalizeOrMoved(v150, unit x), speed)`.
+Retail loads the speed (`lw v0, 0x6F0(s0)`) right after the velocity's lqc2, moves it into
+vf4 after the dot's vmaddz and stores the weight's slot (`sqc2 vf4, 0(sp)`) in the branch's
+delay slot. The near miss's own `Vec02 k; Q(k) = FromFloatAt(speed)` (an aggregate written
+through Q: no alias flag) left the load after the square root and the store folded into the
+result's address; `Vu0::ScalarAt(self->speed6F0)` written inside the MulX call is expanded after
+the NormalizeOrMoved (the inline call's nested arguments, right to left), so its lw comes after
+the branch. Named first, `u128 speed = Vu0::ScalarAt(self->speed6F0);` before the statement,
+its lw and qmtc2 get the earliest LUIDs, and the slot is the expand-time MEM_SCALAR_P copy of
+"The weight slot is a cast's copy": byte for byte retail's (2026-11-09). The same body with
+Vu0::Vec::ScalarAt (a Vec value) is 4 bytes longer (a movti copy). The function also takes the
+base method's two parameters and passes them on (a1, a2 untouched before the jal; the base,
+func_0018DA40, stores them), though dropping them leaves the bytes unchanged here.
+
 ### A weight that dies at its multiply gives the product its register (func_001980B0)
 
 StepGaugeColliderAgent rotates `MulX(v640, Scalar(-1.0f))` by the matrix at 0x110. Retail keeps
