@@ -790,6 +790,54 @@ ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
   start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
   match as well as the old order (the moves follow it, docs above, func_0013A128).
 
+### Solved: the weight and the limit named at the top of the loop (func_001CF158)
+
+ChoosePlayerTargetByCost matched on 2026-11-09 (src/main/player_target.cpp). The count was
+never the lever; the lifetime was:
+
+- **A movable's lifetime is in luids, not insns.** `threshold * savings * lifetime` uses the
+  luid distance from the `%hi` set to its last use. `cost * D_00274E10` expands the `%hi`, then
+  the load of cost, then the load of the weight: lifetime 2. At threshold 68 (65 for the
+  limit) a 137-insn loop needs 3. A `const f32& weight = D_00274E10;` at the top of the loop
+  body forms the `%hi` there (g++ folds the reference into the global's own address, so the
+  load stays at the use, and the final code is unchanged), which gives it a lifetime of 85
+  and the limit's 92: both move in pass 1, ahead of `&at`, `&ctx` and D_00274E44's `%hi`. The
+  scorer's `%hi` (lifetime 1 in pass 1, 11 in pass 2 after loop.c folds its `lo_sum` into the
+  a0 move) is then the only `%hi` moved in pass 2, last in the preheader, and takes s8; the
+  weight and the limit are spilled and reloaded into v1 and a0 as retail's.
+- **D_00274E44 had to stay a pass-1 move.** Naming the step (`f32 step = D_00274E44;` after the
+  upper end) makes its `%hi` lifetime 1, so it leaves pass 1 and D_00274E10 moves (threshold
+  71); but D_00274E44 is then never hoisted (a variable load is never loop-invariant in a loop
+  with calls, so no pass-1 substitution lengthens it), local-alloc gives its `%hi` v0, one
+  reload fewer shifts reload's round robin, and the switch after the loops takes other
+  registers. Retail's reload sequence (v0, v1, a0 for the step, the weight and the limit)
+  proves all three were hoisted and spilled.
+- **Where the references go.** Declared just before FindLocalMinimum, or after `c = &ctx`, the
+  limit's `%hi` combines with the weight's move and the code differs (58 lines); at the top of
+  the body, after the loop's own declarations, it is retail's. The point loop, which weighs
+  and tests its cost the same way, takes the same two references with no change to its code
+  (its loop is small enough to move both in pass 1 either way); the four other loops compare
+  with D_00274E20 directly, and a reference there moves their `%hi` parts into saved
+  registers (119 lines), so they had none.
+- **Also EXACT, not landed:** small inline helpers taking the global as `const f32&`
+  (`WeightRef(cost, D_00274E10)`, `ValueRef(D_00274E20)`) do the same through the inline
+  body's block notes (func_0017E3C8's lever above), and a block `{ const f32* w =
+  &D_00274E10; ... }` lengthens the weight's lifetime to 3. A struct type with an `operator
+  f32()` for these globals reaches the curve loop too but loads the limit before cost in the
+  other loops (10 lines).
+- **Rule.** A `%hi` that retail hoists in a big loop while ours waits for pass 2 (a spilled
+  `%hi` reloaded in round-robin registers, against a later hoisted one that took the saved
+  register) points to a name bound to the global earlier in the body: a reference or pointer
+  local, or a `const T&` parameter of an inline function.
+- **PAL fixes the declaration order (2026-11-09).** The results bestPointT, bestCurveT and
+  bestVectorT are each used 3 times over about 730 insns, so global-alloc's integer priority
+  (`floor_log2(refs) * refs / live length * 10000`) is 41 or 40 and ties fall to the pseudo
+  number, that is the declaration order. In US the point's life is 732 insns (priority 40),
+  so only curve before vector showed. PAL's shorter checksum tail (RandomIntInRange instead of
+  the clock and RandomFloatInRange) makes all three 41, and retail's f26, f27, f28 for point,
+  curve and vector prove they were declared in that order; the shared source now declares them
+  so, and US is unchanged.
+
 ### A negative index splits its offset; `&recs[n++]` is retail's record (func_00148938)
 
 Read from `-dr -dL` dumps (2026-11-08, func_00148938's candidate records, 8 bytes each):
