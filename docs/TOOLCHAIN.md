@@ -2538,6 +2538,35 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   variable the original reused (two lookups of the same kind, one after the other), or one
   live across blocks.
 
+### A load read before a call in its arm: one register for two variables, and reorg's slots (func_00185498)
+
+- **What differed.** func_00185498 sets an aim attachment's key from the owner's distance to the
+  target: the far key (`lw s1,72(s0)`), or, after ClearRootTries(owner), the near key. Retail
+  keeps the owner and the key in one register (s1) and fills the `bc1f`'s delay slot with the
+  call arm's `move a0,s1` (reorg's eager fill from the branch target, the branch then aimed past
+  it), and the `jal`'s slot with `lw s1,68(s0)`. Ours (the near key read after the call, the
+  owner's variable reused for the key to share s1) left the `bc1f` slot empty: fill_simple_delay_slots,
+  which runs before the eager fill, takes the `jal`'s slot from the insns before it, so the
+  `move a0,s1` went there and the target thread began with the call.
+- **Mechanism.** With the near key read before the call (`key = self->f44; ClearRootTries(owner);`),
+  sched1 puts the argument copy first (`$4 = owner`, then `key = [self+0x44]`, one cycle,
+  .sched insns 110 then 106), so the owner dies where the key is born: no conflict, and
+  global-alloc gives the key the owner's s1. reorg's backward fill of the `jal` then takes the
+  load (the insn just before the call), which leaves `move a0,s1` at the target for the
+  `bc1f`'s eager fill. A separate key read before the call but in an `o`-reusing form, or a
+  key read after the call, conflicts with the owner (a 64-byte frame or v1).
+- **Rule.** Where retail's call slot holds a load that sets a callee-saved register the
+  argument copy just read, the load was before the call in the source; and an empty
+  conditional-branch slot whose target starts with an argument move that retail stole means
+  the call's own slot was taken by something else first.
+
+- **A store at a join sinks in sched1 (func_00185538, unsolved).** A store with no dependent in
+  its block has priority 1, so sched1 issues it after every load of the block (the memory unit
+  takes the loads first); the stored variable then lives into the next computation. Retail's
+  store first in such a block means a later load there may alias it, or the store was in each
+  arm and cross-jumped after reload (sched2 then keeps it first by the anti-dependence on its
+  hard register).
+
 ### A reused parameter takes its argument register's preference (func_00127B20)
 
 - **What differed.** func_00127B20 walks from `self` up to `top`, keeping
