@@ -854,6 +854,40 @@ func_001F0AE0):
   function that mixes the two can land on any of several sizes; the uniform Vec form is the
   plausible one, and it is retail's here.
 
+### Sony's compiler: the same bucket order, and what it hashes (func_00211618)
+
+The libraries' compiler (2.9-ee-991111) has the same PRE and the same tie. In the MPEG bit
+reader's advance (src/lib/mpeg_bit_reader.cpp, 2026-11-08), the update after the refill loop,
+`self->consumed += n`, joins the loop's exit and the branch around it; PRE copies the load of
+`consumed` and `(s64)n` (a `sign_extend:DI` of n's pseudo) into both arms, and their reaching
+registers tie in global-alloc (4 refs over 24 insns each: sched1 puts the load first in one arm
+and the extension first in the other, so the lives are equal). The tie falls to bucket order:
+with 34 to 35 insns at gcse, T = 17, the load is in bucket 2 and the extension in bucket 15,
+so the load takes $t1 and n $t2; retail has them the other way round. What was measured:
+
+- **T is `max_cuid / 2`, made odd, at least 11** (gcse.c's `alloc_expr_hash_table`; the cuid
+  count is every insn of the `.addressof` dump): 34 and 35 insns give 17, 36 to 39 give 19.
+  For this function the `(n+3)/2|1` of the section above does not hold; read T from `-dG`.
+- **This compiler does not hash a MEM's alias set.** A unit that gave `unsigned long` alias set
+  24 instead of 6 left the load's bucket unchanged. Alias sets here are numbered as types are
+  first used (1 to 5 are taken before the first function: `int` is 5), but they do not move
+  buckets.
+- **The two buckets, measured for T from 11 to 77** (one test function per size): the
+  extension comes first for T = 11, 13, 21, 23, 25, 29, 33, 35, 37, 39, 43, 47, ... and the load
+  for T = 15, 17, 19, 27, 31, 41, 45, 49, ... So retail's function had at least 40 insns at gcse
+  (6 more than the plain form, all gone by the end) or a different pseudo in the extension.
+- **The pseudo in the extension moves its bucket by one per number.** `s32 count = n;` used for
+  the update, declared as the function's third to fifth pseudo (119 to 121), gives retail's
+  bytes exactly; declared first (118) it is bucket 16, still after; copied later, cse
+  substitutes n back. The only way found to put it there was unused locals before it, which the
+  rules forbid, so it is not landed.
+- **What adds insns that vanish:** a `u32` byte widened to `u64` (`dsll32`/`dsrl32` that combine
+  folds into the `lbu`, +2), `self->loaded += 8` re-reading the field after the join (+1, PRE
+  deletes it), returning the new count (`return self->consumed += n;`, +2: the copy to $v0 and
+  its use). Together they reach 39, still T = 19; the loop's shape (`while`, `if` and
+  `do`/`while`, `for`, `<= 56`) and locals for the first statements add nothing more, because
+  cse1 removes every other copy. Inline helpers for the refill or the update keep n's pseudo.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
