@@ -231,7 +231,7 @@ D_0062A540	0062A540	560	.bss	src/lib/file_1FAC00.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	8	.bss	src/lib/unwind.c
-D_0062A7C0	0062A7C0	696	.bss	src/lib/cdvd.c
+D_0062A7C0	0062A7C0	704	.bss	src/lib/cdvd.c
 D_0062AA80	0062AA80	704	.bss	src/lib/pad.c
 D_0062AD40	0062AD40	5632	.bss	src/lib/memory_card_client.cpp
 D_0062C340	0062C340	512	.bss	src/lib/mpeg_ipu_decode.cpp
