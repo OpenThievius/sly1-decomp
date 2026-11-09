@@ -754,6 +754,25 @@ ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
   start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
   match as well as the old order (the moves follow it, docs above, func_0013A128).
 
+### A negative index splits its offset; `&recs[n++]` is retail's record (func_00148938)
+
+Read from `-dr -dL` dumps (2026-11-08, func_00148938's candidate records, 8 bytes each):
+
+- **`q[-1]` is a large offset.** g++ expands `q[-1]` (and `q++` followed by `q[-1].field`) with
+  the index as a product in an unsigned sizetype (inferred: the .rtl dump shows the split at
+  expand), so the address is `q + 0xFFFFFFF8`, which the MIPS
+  address legitimizer splits into `q + -32768` and an offset of 32760 or 32764. loop.c then sees
+  `q - 32768` as a giv (lifetime 46), combines the record's stores into it and eliminates the
+  biv: the pointer starts at `addiu a1,s2,-32768` and every store is biased by 0x8000. Retail
+  never shows such a bias, so a record written through `p[-1]` was not the original.
+- **A record taken by index.** `Candidate* r = &recs[n++];` makes r a giv of the count biv
+  (mult 8, add recs). loop.c reduces it to a register started at recs (`move a1,s2`), kept as a
+  copy for r (`move v1,a1`), and puts the reduced register's `+8` right after the count's
+  increment, so the stores after `n++` read `-4(a1)` and `-8(a1)` while the store across the
+  VU0 asm keeps r (`0(v1)`). Writing `n++` after `r->obj = p` (r taken as `&recs[n]`) leaves the
+  first store on r (`4(v1)`) and moves both increments. A pointer advanced by `q++` with
+  `r = q++` gives neither. Retail's `&recs[n++]` is the plain way to append to an array.
+
 ## CSE
 
 ### A skipped block's struct store forgets memory (func_001B2140)

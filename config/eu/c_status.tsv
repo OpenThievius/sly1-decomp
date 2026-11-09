@@ -1243,6 +1243,7 @@ func_00148770	func_00148A60	match
 func_00148828	func_00148B18	match	
 func_00148888	func_00148B78	match	
 func_00148910	func_00148C00	match	
+func_00148938	func_00148C28	match	rodata
 func_00148AC0	func_00148DB0	match	
 func_00148CE0	func_00148FD0	match	
 func_00148D90	func_00149080	match	
