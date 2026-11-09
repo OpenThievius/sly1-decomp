@@ -1558,7 +1558,9 @@ reference.
   MATCH), and five near misses match with it: func_001D87C8, func_001C75B0 (with
   Vu0::RotateMembers, whose row loads are Vec members, MEM_IN_STRUCT_P, so rows 1 and 2 pass the
   weight's store but still wait for v's), func_0017ABE8 (FromFloats' slot against the method
-  table's load), func_00184B58 and func_001C57C8. Retail's sources most plausibly had the same:
+  table's load), func_00184B58, func_001C57C8 and func_001A00A0 (whose caller-side
+  `Q(k) = FromFloat(-m)` into a Vec02 local was the weight of `Scalar(-m)` passed straight to the
+  MulAddX: its slot follows pos as an expand-time temporary). Retail's sources most plausibly had the same:
   Sony's headers have both 128-bit types (signed and unsigned), and a helper taking one by
   reference called with the other cast to it binds such a copy.
 - **A float operand by value.** Vu0::ScalarAt reads its float through a `u32` cast pointer (no

@@ -1570,7 +1570,25 @@ void InitStreakEffect(Effect* self)
     self->f120 = 0.05f;
 }
 
-INCLUDE_ASM(func_001A00A0);
+void func_001A00A0(Effect* self, void* a1)
+{
+    Vec02 pos;
+    f32 t = g_gameTime - self->start;
+    f32 m = self->f120;
+    if (t < m) {
+        m = t;
+    }
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(self->qA0), Vu0::Scalar(-m));
+    f32 p = t / self->life;
+    f32 x;
+    ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, p);
+    f32 y = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, p);
+    if (x <= 0.0f || y <= 0.0f) {
+        RemoveEffect(self);
+    } else {
+        func_001268B8(self->p20, a1, &pos, &self->q80, y, x);
+    }
+}
 
 void InitScaledEffect(Effect* self, f32 f)
 {
