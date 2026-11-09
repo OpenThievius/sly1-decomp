@@ -2173,6 +2173,24 @@ TurnColliderTowardRotation (2026-11-09):
   moves. A passed-on parameter that sets it for an earlier call takes that away; read the
   callee for every argument register it uses before trusting a shortened prototype.
 
+### A passed-on float argument orders the prologue's saves (func_0019FD08)
+
+- **The symptom.** InitImpactEffect (slot 0 of the kind-4 effect table) differed from retail
+  only in its prologue: retail saves $f20 (`swc1 $f20,32(sp)`) before `move s0,a0`, ours
+  after. Both are in cycle 3 of sched2's schedule (the memory unit and an ALU); which comes
+  first in the output is the ready list's order (rank_for_schedule), that is their priority.
+- **What decided it.** Declared `(Effect* self, f32 limit)` and calling `InitEffect(self)`,
+  the save of $f20 had only `$f20=$f12` behind it, and `move s0,a0` outranked it. InitEffect
+  (hand-written, func_0019EB28) reads $a1, $f12 and $a2: slot 0's signature is `(Effect*
+  self, void* pos, f32 scale, s32 flags)`, as for func_001A0C98. Passing all four on puts a
+  `$f12=$f20` copy before the call (the argument restored from the saved parameter), so the
+  chain swc1 $f20 -> `$f20=$f12` -> `$f12=$f20` -> call is one insn longer and the save now
+  outranks `move s0,a0` (sched2 verbose: ready list at t=3 `67 71 5` before, `73 5 77`
+  after, best last). The extra copy is gone from the final code, as in func_0018AD88.
+- **Rule.** A prologue save order that differs within one cycle is a priority tie in sched2:
+  look for a parameter passed on to a callee (here a float one) that lengthens the chain behind
+  the save.
+
 ### A constant set in an earlier block and used once (func_001549C8)
 
 - **The widening blocks a register after a load's address dies.** local-alloc's first try
