@@ -1021,6 +1021,29 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A 64-bit field's bits as an int: one truncate (func_00210970)
+
+- **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a
+  u64 field. Written as `(s32)(((s64)p->f20 << 27) >> 32) & 0xF` (the shape of retail's
+  `dsll 27; dsra32`), the RTL is a DImode shift and a separate truncate of a shift by 32: two
+  insns before the `and`. Written as the original plausibly had it, `(u32)(p->f20 >> 5) & 0xF`,
+  combine makes one `(truncate:SI (lshiftrt:DI x 5))` insn, which the R5900's truncdi pattern
+  emits as the same two instructions (`dsll 27; dsra32`, the sign-extended low word). The
+  register difference was this one insn of sched1's chain.
+- **How.** With the longer chain, sched1 issued the table address's `addu` in the cycle after the
+  load of the next field to be copied (`s->f5C`, ready as soon as the store before it), so that
+  load's pseudo lived over 3 insns and the table entry's over 2: local-alloc's ranking
+  (2 refs / span) placed the entry first, in $v1, and the field took $a3. One insn shorter, the
+  `addu` issues with the field's load and before it in rank order; both pseudos then span 2
+  insns, the tie goes to creation order (the field's load is first), the field takes $v1 and
+  the entry $a2, the table base's register, free after the `addu`. sched2 then puts the field's
+  load back before the `addu`: retail's code. The table load (u32, int alias set) does not
+  depend on the u64 store before it, nor the field load on the u64 store, which is why only the
+  chain's length moved them.
+- **Rule.** Write a 64-bit field's bits read as an int as the shift and cast the source would
+  have (`(u32)(x >> n)`), not the shift pair the disassembly shows: the pair is the truncate's
+  expansion, and written out it is one insn more before register allocation.
+
 ### A conversion's latency in sched2 (func_00126270)
 
 - **ToFloat's mtc1 is reload's, ToFloatMoved's is the asm's.** With ToFloat the qmfc2 is the
