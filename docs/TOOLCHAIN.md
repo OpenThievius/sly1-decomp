@@ -603,6 +603,49 @@ the compiler reads again, the cause is in how each memory reference is written
   (and func_001DF520, whose callee takes the caller's own a1). What the
   original wrote is not known; this reproduces what it compiled to.
 
+### The reload register's round robin (func_001E31F0)
+
+Which GPR reloads a spilled pseudo is not decided at that insn alone
+(reload1.c, read 2026-11-08 for UpdateOnOffCameraController):
+
+- **The spill registers are the function's, in register order.** Each insn
+  that needs reloads picks spill registers from `order_regs_for_reload` (the
+  hard registers no live pseudo holds there); finish_spills then gathers every
+  register spilled anywhere into `spill_regs`, sorted by number (v0, v1, a0,
+  ..., then FPRs and VU0 registers), and gives each insn all of them that no
+  pseudo live there occupies.
+- **allocate_reload_reg rotates.** It starts the search one past
+  `last_spill_reg`, the index of the register the previous reload took, so
+  consecutive reloads walk v0, v1, a0, ... and wrap. A spill register that one
+  insn anywhere in the function needs shifts the choice of every reload after
+  it in the rotation: with a0 in the set, the reload after one in v1 takes a0;
+  without it, it wraps to v0.
+- **func_001E31F0.** The spilled `limit = object->f41C` was reloaded into a0
+  where retail uses v0, and every reload after it was shifted (lw a0/v1,
+  260(sp) for the spilled camera, the qmfc2 temporaries). The cause was 400
+  instructions later: the stick from FromFloats (an asm with an "=&r" output)
+  went to a VU0 register, because its three "j" uses (Length's two operands,
+  DivX's) outweigh the one "=&r" in regclass, so the asm's output needed a GPR
+  reload and a0 became a spill register. Retail keeps the stick in a0 (qmtc2
+  a0 to vf1 and vf3 before each use). Copying the value through a Vu0::Vec
+  local and normalizing the Vec values, `n.q = FromFloats(...); *(Vec*)&stick
+  = n; *(Vec*)&stick = NormalizeOr(Vec::Of(stick), Vec::Of(g_unitXVector))`
+  (file_1793C0.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
+  .lreg dump), global-alloc puts it in a0, and no reload needs a0. The .greg
+  dump's `Spilling for insn N. / Spilling reg R.` lines list every insn's
+  spill registers: one `Spilling reg 4` in a function shows where a0 came
+  from.
+- **Fields against fixed stack slots.** The same function read its camera
+  parameters (the 0x90 bytes at object+0x2F0) through an `f32*` as `block[n]`.
+  Such a MEM is not marked as a structure's (no `/s` in the dumps), so sched2
+  could not move the reads above the stores to the address-taken
+  `placeDist`/`placeHeight` (scalars at fixed frame addresses), and jump2
+  cross-jumped the identical tails of two switch cases. Read as fields of a
+  struct (`block->f58`), the MEMs are `mem/s` and
+  `fixed_scalar_and_varying_struct_p` separates them from the scalar slots:
+  sched2 then hoists the reads as retail does, and every case, written in
+  source order, matches.
+
 ## Loops
 
 When retail's loop keeps its constants and multiplies its index each time round (`li 0xD0;
@@ -734,6 +777,18 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   issued before the load: retail's registers. That form costs one insn more (the copy of v to
   the result), which moved one spill slot through gcse's table size (GCSE above); one Vec
   difference stored through `Vu0::Q(...) = ... .q` gives the insn back.
+- **Which of two equal subtractions goes first decides a copy preference (func_001E31F0,
+  open).** `t1 = clock - a; t2 = clock - b;` are ready in the same cycle at the same static
+  priority. By INSN_REG_WEIGHT (registers born minus registers dying) t2's ranks first, since
+  the shared clock value dies in the later statement; issued first, it leaves the value to die
+  in t1's, and global-alloc (`set_preference`: a source that dies in the insn) gives t1 a copy
+  preference for the clock's $f1 ahead of $f12, the register of the division t1 feeds. Retail
+  has t1 first and in $f12. The timing around the pair decides it as well: with the zero of the
+  following `if (0.0f < object->f428)` emitted after the load of f428 (s = 0 moved into an else,
+  as retail's issue order has it), t1's subtraction is issued first (adjust_priority raises it
+  when its last dependence resolves) and t1 takes $f12, but the zero then gets a register of its
+  own where retail's `s = 0.0f` doubles as the comparisons' zero. Swapping the statements fixes
+  t1 but issues t2's loads first. No form found has both.
 
 ## Shapes of large functions
 
