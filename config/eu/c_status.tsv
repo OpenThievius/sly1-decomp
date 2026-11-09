@@ -3894,6 +3894,7 @@ func_001F7420	func_001F8420	match	rodata
 func_001F7588	func_001F8588	match	rodata
 func_001F7B50	func_001F8B50	match	
 func_001F7B88	func_001F8B88	match	
+func_001F7BE8	func_001F8BE8	match	
 func_001F7D88	func_001F8D88	match	
 func_001F7DB0	func_001F8DB0	match	
 func_001F7E58	func_001F8E58	match	

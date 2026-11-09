@@ -3794,6 +3794,31 @@ dumps of CallRemoteService with Sony's 2.9-ee-991111 (2026-11-09):
 - **Spot it.** Two stores swapped against retail where the earlier one's value dies in it and the
   later one's lives on: the tie is the weight, and moving statements does not change it.
 
+### A run of stores in two alias classes (func_001F7BE8)
+
+Read from the `-dS -dl -fsched-verbose-6` dumps of InitRemoteCalls (src/lib/remote_call.cpp,
+2.9-ee-991111, 2026-11-09):
+
+- **The `%lo` store is a barrier for its own alias class only.** The record's word at offset 0
+  is stored through `(lo_sum hi sym)` (combine folds the zero offset), the others through the
+  record's base register. After reload sched2 cannot tell the two addresses apart and makes the
+  `%lo` store depend on every store of the same alias set issued before it in sched1, and every
+  later one on it; with Sony's type-based aliasing a store of another type (the pool pointers,
+  `RemoteCallPacket*`) is free of it. The near miss declared every word an int, so all nine
+  stores were chained to the `%lo` one; the file's own record type (the packet pointers as
+  pointers) frees the three pointer stores, and sched2 then puts them out in retail's order.
+- **The int stores' order is sched1's weight, then the source order.** Before reload every
+  store has priority 16 (they all feed the next call); a store whose value dies there weighs 0
+  (the last of the three `0x20` stores in insn order, and the `%lo` store of 1), the zeros and
+  the earlier `0x20` stores weigh +1, and ties fall to INSN_LUID. Retail stores the last pool
+  size before the id counter and the rest after it in field order: the fields in order with
+  the id counter set last (`s->next_id = 1;` after `s->cursor = 0;`) gives exactly that. The
+  id counter written first gives the `%lo` store first and the run of ints behind it, the one
+  difference left by the near miss.
+- **Spot it.** In Sony's code, a store through `%lo(sym)` of a struct whose other stores go
+  through a register: which stores sched2 lets pass it shows their types, and the stores that
+  stay on its far side give the source order around it.
+
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
 - **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
