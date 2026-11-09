@@ -1139,6 +1139,23 @@ func_001F0AE0):
   the last block written with Vec operands (`Dot(Vec::Of(a), Vec::Of(b))`, the project's form)
   is seven insns more: 384, T = 195, retail's two registers and nothing else changed.
 
+- **Two hoisted symbol halves, placed in index order and numbered in bucket order** (2026-11-09,
+  PAL's func_0016AB38). PRE hoists the `lui` of both arguments of the last call,
+  `PushStackElement(g_elementStack, &D_0026FA90)`, to the entry. pre_edge_insert places the
+  copies in expression-index order (the order the expressions first appear: the first
+  argument's first), pre_delete numbers their reaching registers in bucket order, and both
+  live to the call's argument moves, made in argument order, so the two lives tie and the
+  lower pseudo takes s7. A `(high (symbol_ref "NAME"))` hashes to 7933 + h (HIGH 119, SImode
+  6, SYMBOL_REF 61 << 7), h the name's characters folded as `h += (h << 7) + c` in 32 bits:
+  D_00275BC0 comes before D_0026FA90 only for T = 77, 81, 85, 91, 99, 103, 113, 115, ... and
+  ours had T = 95, so D_0026FA90's half took s7. Retail has D_00275BC0's first and in s7; the
+  old near miss read FA90's address into a local first, which put that half first and gave
+  the right registers in the wrong order. Three extra stores proved T = 99 before any real
+  source; the form that lands is the switch with each case's own `v &= 1` (no shared tail),
+  the previous level's index read in the condition, and each TeleportStateWalker's key read
+  into its own local (T = 99). Read the size from `-dG` ("hash table (N buckets", the
+  expression table is the second): the `.addressof` count was up to 5 short of it here.
+
 ### Sony's compiler: the same bucket order, and what it hashes (func_00211618)
 
 The libraries' compiler (2.9-ee-991111) has the same PRE and the same tie. In the MPEG bit
