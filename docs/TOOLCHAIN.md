@@ -1244,6 +1244,31 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   signature does not have. An argument register retail never mentions can still be in the C:
   its copy is a scheduled insn before register allocation.
 
+### A variable set twice is global-alloc's: a return or argument register at its edge (func_0018AE38)
+
+- **What local-alloc cannot give.** local_alloc takes a pseudo only when REG_BASIC_BLOCK >= 0
+  and REG_N_DEATHS == 1 (local-alloc.c, `reg_qty[i] = -2`). Its first try for each quantity
+  (with INSN_SCHEDULING and sched2 on) is the life widened by one insn at each end
+  (`fake_birth`, `fake_death`), to avoid false dependences for sched2. A value loaded from
+  the call's $v0 where $v0 dies (`lw v0,4(v0)`) therefore never gets $v0 from local-alloc:
+  $v0 is live in the insn before. Likewise a value that dies in the insn that sets $a0
+  (`lw a0,4(a0)` for the next call's argument) never gets $a0. It falls back to the real life
+  only when every register is busy over the widened one.
+- **What global-alloc gives.** global-alloc has no widening: a pseudo born where $v0 dies does
+  not conflict with $v0, and it takes the lowest free register in REG_ALLOC_ORDER (v0 first).
+  A user variable assigned twice has two deaths, so it is global-alloc's even in one block.
+- **func_0018AE38.** UpdateGaugeAgentState's case 12 finds two entries (f610, f614) and reads
+  each one's mover and the mover's sequence at 0x10 for FindCyclicRangeIndex. Retail keeps the
+  mover in $v0 and the sequence in $a0 (`lw v0,4(v0); ... lw a0,16(v0); ... lw a1,8(a0); jal;
+  lw a0,4(a0)`); per-call temporaries or locals, local-alloc's, took $v1 and $a3 (and pushed
+  the f7E0 load from $v1 to $a0). One `Mover8B* m` and one `ClipSpan8B* a` assigned for the
+  first object and again for the second is EXACT; the mover variable alone reused fixes the
+  mover and the f7E0 load but not the sequence (10 lines still differ).
+- **Rule.** A value retail holds in $v0 right after a call's `lw v0,N(v0)`, or in an argument
+  register it is read from in the same insn that sets it, is a global-alloc pseudo: look for a
+  variable the original reused (two lookups of the same kind, one after the other), or one
+  live across blocks.
+
 ### A weight's store inside a short life (func_0013F290)
 
 - Three products of one weight, `up * 100`, `pos + side * 100`, `pos + last * 100`, are one
