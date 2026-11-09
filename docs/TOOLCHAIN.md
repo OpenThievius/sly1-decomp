@@ -2505,6 +2505,30 @@ TurnColliderTowardRotation (2026-11-09):
   two floats (same as literals: integrate substitutes constants), and the floats as named
   locals or constructor arguments (they cross the FillMemory call and take saved FPRs:
   over 100 lines).
+- **What retail's order needs (w8, 2026-11-09).** sched1's rank is priority, then
+  INSN_REG_WEIGHT, which counts every REG_DEAD and REG_UNUSED note of the insn (a store whose
+  value dies weighs -1), then LUID. Retail's stores, f04 f18 q30 i4C | f00 f08 f20 f50 f54
+  f70 f78, are the four dead ones and then seven live ones in LUID order, so in sched1's view
+  the 1.0 and -1 pseudos are still live after f54: either a scheduling-region boundary
+  between f54 and f70 (f70 and f78 then die in the second region, dead first, in LUID order),
+  or f70 and f78 waiting on the earlier stores through memory dependences (an output
+  dependence costs 1 on MIPS, so a chain gives every earlier store priority 4, f70 3, f78 2:
+  exactly retail's order). A probe with a do-while(0) after f54 (a loop-note barrier, never
+  landable) gives retail's eleven stores exactly, but the barrier also keeps the copy loop's
+  pointer setup (`move a0,sp`, `addiu a1,sp,128`) below it in sched1 and sched2 (42 lines);
+  in retail sched2 issues them as ALU fillers before the stores, so whatever separated the
+  stores in retail constrained memory insns only, or was gone by sched2.
+- **Ruled out (w8).** Dead overwritten stores to carry the deaths (`f04 = 1.0f; ...
+  f04 = 750.0f;`): flow1 deletes a store to the frame overwritten in its block before sched1,
+  and flow2 never deletes one (flow.c keeps any store whose address mentions the stack
+  pointer), so they either vanish too early or stay in the code. A branch around a body that
+  life analysis empties (`if (k) k++;` on an unused local) is gone by the first jump pass.
+  Static locals (`static B s_b = B(200);`): their guards are g++'s `_$tmp_N` words in .data,
+  like retail's two guard words, but g++ constructs the object in place (no stack temporary
+  and copy loop: about 145 lines). An inline maker returning the object by value copies it
+  twice (147 lines). The memory-dependence form would need f70 and f78 stored through an
+  address alias analysis cannot place in the frame while reload still turns it into
+  `sp+0x70`; no plain form of that was found.
 
 ### A weight's store inside a short life (func_0013F290)
 
