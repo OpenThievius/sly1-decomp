@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 9852/9860, checked 2026-11-08
-// NEAR: python3 tools/check.py nonmatching/func_00175170.cpp func_00175170 (2026-11-08, worker large-175170): SetPlayerState, 2,463 instructions against retail's 2,465; the three switches (leave state, enter state, leave and enter sub-state), their eleven jump tables, every case's calls, the frame, the saved registers and the four spilled locals (0x74 flag, 0x78 layers, 0x7C walker id, 0x80 skip) are retail's; 2,424 of 2,465 instructions align equal.
-// Still differs (2026-11-08): sub-state 9's `if (self->f2220 == 2) skip = 1;` becomes jump.c's store-flag (xori, sltiu, sw) where retail branches (bne, li, sw: two instructions more; a second statement in the if, such as a dead `else anim = 0`, gives retail's code, so retail's if was not a lone set); sub-state 55 loads v back with lqc2 where retail has lq then qmtc2 (one instruction); the rest is order and registers: the prologue's flag spill before speed's 1.0, state 7's path kind in v1 (retail a1), state 6/5's TriggerScriptEvent argument order, state 6/4's load of D_00263990 after the dot, state 13's stores (retail 0x273C, 0x538, 0x3CC), sub-states 10/11 (the sound's two floats loaded before the zero vector), 37/38 (0x630 before 0x638), 55 (v0/v1 and a0/v1 swapped around the normalisation) and the final reload of skip (v0, retail v1).
-// Notes: each case's statements were ordered with build/swarm/large-175170/perm.py (every order compiled and scored); the walker took $fp only once its `walker = 0` came after the other locals' initialisers (global-alloc priority: its live length had been 4 insns longer than the walker id's).
+// NEAR: python3 tools/check.py nonmatching/func_00175170.cpp func_00175170 (2026-11-08, worker mech-175170): SetPlayerState, 2,465 instructions against retail's 2,465, 2,463 align equal; the three switches, their eleven jump tables, every case's calls, the frame, the saved registers and the four spilled locals (0x74 flag, 0x78 layers, 0x7C walker id, 0x80 skip) are retail's.
+// Still differs (2026-11-08): order only. The prologue spills flag (sw v0,116(sp)) before speed's 1.0 is set where retail sets it after (sched2 takes the two by their order out of sched1, where flag's li and speed's float constant share a cycle with start's; no order of the locals' declarations gives retail's); state 13 stores 0x538 and 0x3CC before 0x273C where retail stores 0x273C first (the four stores are ready together with equal priority and register weight, so LUID order decides; no statement order tried gives it).
+// Notes: each case's statements were ordered with build/swarm/large-175170/perm.py (every order compiled and scored); the walker took $fp only once its `walker = 0` came after the other locals' initialisers (global-alloc priority). Mechanisms found 2026-11-08 (docs/TOOLCHAIN.md, "Conditional moves" and "Alias classes in the schedule"): sub-state 9's lone `if (...) skip = 1;` is turned into a conditional move by jump.c (movsicc) unless the if has a second statement, so it keeps case 4's dead `else anim = ...` (flow deletes it later); vectors stored as a Vu0::Vec through AsVec_175170 are a structure's stores, which alias.c lets the scheduler move global scalar loads across (sub-states 10/11, state 6/4); 55's ToFloatMoved; 37/38's `f638 = f630 =` and D_002639B8 read as a scalar global (`extern s32`: player.cpp's definition must become a scalar s32 and a second word when this lands); 6/5's `layers = 1` after the last call; 7's track shape loaded before the turn kind.
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -549,8 +549,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetFlaggedLinkContactMask(self, (void*)self->f2208, 1);
             self->f241C = -1;
             void* track = (void*)self->f2208;
-            s32 turn = AT(s32, track, 0x58);
             TrackShape_175170* s = AT(TrackShape_175170*, track, 0x34);
+            s32 turn = AT(s32, track, 0x58);
             Vec02 a;
             Vec02 b;
             switch (turn) {
@@ -984,7 +984,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->desc02()->m2B(self);
             anim = PS(void*, 0x1030);
             self->f2498 = 0;
-            *(Vu0::Vec*)&self->v640 = Vu0::Vec::Zero();
+            AsVec_175170(self->v640) = Vu0::Vec::Zero();
             StartSoundEffect(0x50, 0, 0, 0, 3000.0f, 300.0f, D_00263994, D_00263998, 0.0f, 0, 0);
             break;
         }
