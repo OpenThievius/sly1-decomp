@@ -1647,6 +1647,45 @@ dumps (2026-11-08, still a near miss):
   moves. A passed-on parameter that sets it for an earlier call takes that away; read the
   callee for every argument register it uses before trusting a shortened prototype.
 
+### A constant set in an earlier block and used once (func_001549C8)
+
+- **The widening blocks a register after a load's address dies.** local-alloc's first try
+  widens each quantity by one insn at each end and marks the widened range taken. In
+  InitSpawnRecord's B block sched1 always issues `li 200` in the cycle of the `lq` of
+  g_unitZVector (the lq on the memory unit, priority 4; the constant the best ALU insn,
+  priority 3), right after it. The address quantity (v0), widened past the lq, overlaps the
+  constant's widened birth, so the constant took a0 and the copy loop's source (global-alloc)
+  took v0: retail has them the other way round. No statement order changes the pairing
+  (about 2000 orders tried).
+- **update_equiv_regs moves the set to the use.** At the start of local_alloc, a pseudo set
+  once to a constant (REG_EQUIV), referenced twice (one set, one use) and not local to one
+  block has its use replaced by the constant, or, when that is not a valid insn (MIPS `sw`
+  takes a register or $0), its set moved to just before the use and made local to that
+  block (REG_LIVE_LENGTH 2, no calls crossed). sched1 has already run, so the moved `li` sits
+  right before the store, away from the lq: its widened life is free of v0 and it takes v0;
+  sched2 then hoists it to just after the lq, which is retail's code. A variable assigned
+  200 before the guards (`s32 ringPoints = 200;`, passed to the constructor) gives every
+  register of the function; GCSE's constant propagation leaves it alone for the same reason
+  (the store cannot take the constant).
+- **Rule.** A constant retail loads into the register a load's address has just freed
+  (`lq v1,0(v0); ...; li v0,200`) is not local-alloc's: look for a value the original held
+  in a variable set in an earlier block (a named default at the top of the function).
+- **What remains (store order).** With the constant's store reading that variable, sched1
+  issues the dead stores (weight 0: the constant's last use) first and the rest in LUID
+  order. Retail's order after the count, f00, f08, f20, f50, f54, f70, f78, has no dead store
+  of 1.0 or -1 in it, which no order of the constructor's statements gives (the near miss
+  is 2 lines, f00 and f20 swapped).
+- **Why no form reaches it.** Each constant is one pseudo (CSE merges repeated literals,
+  chained assignments included: `a = b = x` stores b first and x dies at a), so each of 750,
+  1.0 and -1 has exactly one dead store, and sched1 issues all six dead stores (those three,
+  -1500, q30 and the count) before any live one; sched2 then keeps that order, since every
+  store is ready by the time the memory unit frees. Retail's tail would need the 1.0 and -1
+  pseudos to die outside the stores (a later use), and the function has no later float
+  code. Tried: chained assignments in five groupings (5 to 10 lines), a span setter taking
+  two floats (same as literals: integrate substitutes constants), and the floats as named
+  locals or constructor arguments (they cross the FillMemory call and take saved FPRs:
+  over 100 lines).
+
 ### A weight's store inside a short life (func_0013F290)
 
 - Three products of one weight, `up * 100`, `pos + side * 100`, `pos + last * 100`, are one
