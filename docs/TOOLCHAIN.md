@@ -2225,6 +2225,12 @@ reference.
   not committed) reproduced every VU register of the block before the change was compiled.
 - When two VU registers are swapped across a block, look for a Vec value named from another
   inline's Vec result: the copy merges two short lives into one higher-ranked quantity.
+- The two fixes are independent and both are needed: the scalar-slot merge (`Vec::ScalarAtValue`
+  for the twist rate, "The weight slot is a cast's copy") was made from a copy of the near miss
+  that predated this one and put the Vec `len` back, which brought the swap back. With `u128 len`,
+  ToFloatMoved for the rest's and the normal's lengths and ScalarAtValue together,
+  ApplyLinkConstraint matches (2026-11-09). When merging two workers' fixes of one near miss,
+  diff the code, not only the notes.
 
 ### A long-lived vector against short products: the conversions and the statement order (func_00187D08)
 

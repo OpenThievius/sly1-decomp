@@ -1801,6 +1801,7 @@ func_0016C470	func_0016CAB8	match	rodata
 func_0016C4B8	func_0016CB00	match	
 func_0016C4E8	func_0016CB30	match	
 func_0016C508	func_0016CB50	match	
+func_0016C528	func_0016CB70	match	
 func_0016CE00	func_0016D448	match	
 func_0016CE80	func_0016D4C8	match	
 func_0016CF70	func_0016D5B8	match	
