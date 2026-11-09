@@ -2421,6 +2421,41 @@ ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, 
   of function pointers, write the call through the descriptor struct's member: both sides of
   the alias rule need their flag.
 
+### Weights read where they are used, and a radius that is a call's argument (func_001719E8)
+
+func_001719E8 (the player's per-part probe: three samples of an animation, the record's start,
+radius and segment, then CollectBoundsSpans) went from 47 differing lines to retail's bytes on
+2026-11-09 (`-dS -dR -fsched-verbose-6` dumps, tools/regalloc.py). Three levers, in cascade order:
+
+- **The weights' loads ride on the rec stores.** The near miss read both weights
+  (`Vu0::ScalarAt(D_00263880)`, `D_00263884`, scalar globals) into locals right after storing
+  rec->v20, through ScalarAt's cast pointer (no flag) and with rec->v20 stored through `Q()` (no
+  flag). Each qmtc2 then had a true dependence on the rec->v20 store and an anti dependence on the
+  later rec->f08 store (the long path through the lengths), so the luis' priority was 12
+  against the unit-Z address's 10, and sched1 hoisted the luis and qmtc2s to the top of the block. The
+  hoisted `high(D_00263884)` overlapped the life of `obj->body` (v0), local-alloc gave it a2,
+  and the a2 it then held after the third call gave that call's `move a2,s1` one more dependent,
+  which moved it ahead of t0 and t1 (the first visible difference). With the weights passed
+  straight to the MulAddX calls as `Vu0::Vec::ScalarAtValue(D_...)` (the caller's own
+  MEM_SCALAR_P reference) and rec->v20 stored as a Vec (`*(Vu0::Vec*)&rec->v20 = ...`,
+  MEM_IN_STRUCT_P), the loads come after the rec->f08 store in insn order and depend on neither
+  store (fixed_scalar_and_varying_struct_p), the luis' priority falls to 9, the unit-Z address
+  goes first, and the GPRs and VU registers (weights in vf6 and vf3) are retail's. Writing the two
+  MulAddX statements in v60, v70 order puts the -50 product in vf3, as retail.
+- **ToFloatMoved for the lengths.** ToFloat's separate mtc1 let sched2 put the first weight's
+  slot store between the second qmfc2 and its mtc1; ToFloatMoved (the compiler's own qmfc2)
+  gives retail's `sqc2; qmfc2; mtc1`.
+- **A missing float argument.** Retail adds the radius into $f12 and never names $f12 again:
+  CollectBoundsSpans (func_00141F48) starts `mul.s $f1, $f12, $f12`, so its last parameter is the
+  radius, and the call passes `rec->f08`. The argument's copy to $f12 gives the sum a preference
+  for $f12 in local-alloc (child_group_object.cpp and player_target.cpp already declared it so).
+  With the sum tied to the second operand's register, the lengths are written
+  `Length(f84->v100) + Length(v70)`: the RTL `(plus L2 L1)` is retail's `add.s $f12,$f12,$f0`.
+
+Spot it: a float result that lands in $f12 with no call reading it is an argument the declared
+prototype is missing; weights whose loads sched1 hoists to the top of a block read memory with
+no flag next to stores through a pointer.
+
 ### A rotation product's vector slots are scalar (func_0014A8F8, unsolved)
 
 Read from function.c, stmt.c, expr.c, alias.c and haifa-sched.c of 2.95.3 with `-dS -dR
