@@ -840,6 +840,7 @@ func_0012C840	func_0012C970	match
 func_0012C8F8	func_0012CA28	match	
 func_0012C918	func_0012CA48	match	
 func_0012C9A8	func_0012CAD8	match	
+func_0012C9E8	func_0012CB18	match	rodata
 func_0012CBE8	func_0012CD18	match	
 func_0012CCC0	func_0012CDF0	match	
 func_0012CCE8	func_0012CE18	match	
