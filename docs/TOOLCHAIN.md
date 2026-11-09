@@ -3358,6 +3358,36 @@ CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
   type, void*) and store orders found nothing closer. Retail's sched1 order is not reachable in
   this model; something in the original's block is still unknown.
 
+### sched1's weight puts a dying value's store first (func_001F8290)
+
+Read from haifa-sched.c (find_insn_reg_weight, rank_for_schedule) and the `-dS -fsched-verbose-6`
+dumps of CallRemoteService with Sony's 2.9-ee-991111 (2026-11-09):
+
+- **A store weighs too.** find_insn_reg_weight counts +1 for any SET pattern, a store to memory
+  included, and -1 for each REG_DEAD or REG_UNUSED note. So a store whose value dies there weighs
+  0 and one whose value lives on weighs +1, and before reload rank_for_schedule prefers the lower
+  weight right after priority, before the last-insn class, the dependents and the LUID.
+- **What it costs func_001F8290.** With the client's packet and callback words as ints (u32, as
+  the packet's own self and client words are) all four client stores depend on the packet's int
+  stores and have priority 7; the id's load (priority 9) issues at t=1 and its store is ready at
+  t=3. The argument's store (its value dies: 0) takes t=2, and at t=3 the id's store (0) beats
+  the packet's (+1). sched2 then breaks the packet/id tie on LUID, sched1's order, and retail's
+  argument, packet, id, callback becomes argument, id, packet, callback. With one memory unit no
+  order of these four stores and their types gives retail's: the packet's store can only be
+  issued before the id's in the one cycle before the id's value arrives, and the argument's
+  store (weight 0) takes that cycle.
+- **Proved by experiment.** One more later use of the id (`packet->f38 = id;` after the packet's
+  stores) makes the id's store weigh +1; sched1 then issues argument, packet, id, callback, and
+  the block, its registers included, is exactly retail's. So in the original the id's value
+  outlives its store when sched1 runs (or a barrier, such as a loop note, separates the packet's
+  store from the id's), and nothing of it is left in retail's code: an insn deleted after sched1
+  (a move reload drops, a dead set flow2 deletes) or a form not yet found. Ruled out: the
+  packet's, callback's and argument's words as int, pointer or void* with every store order and
+  the id read in place or into a local (864 compiles), and -O3, -fno-gcse, -fno-strict-aliasing,
+  -fno-sched-interblock, -fno-regmove, -fno-rerun-cse-after-loop.
+- **Spot it.** Two stores swapped against retail where the earlier one's value dies in it and the
+  later one's lives on: the tie is the weight, and moving statements does not change it.
+
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
 - **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity

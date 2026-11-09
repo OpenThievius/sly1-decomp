@@ -1,21 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 482/492 (98.0%), checked 2026-11-08
-// NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: retail loads the
-//       packet's id first and stores the client's fields in the order argument, packet, id,
-//       callback, and tests mode & 2 into $a0; ours stores the callback before loading the id,
-//       and the test lands in $v1. Tried: every order of the client's four stores and of the
-//       packet's last three, the callback argument as void* (worse), the tails rearranged until
-//       retail's branches matched.
-// permute.py --auto (2026-11-08, night-orders): 5 runs of 7/2/4/2/2 lines (5070 orders): best 10 bytes differ, as it stands.
-// Mechanism (2026-11-08, docs/TOOLCHAIN.md, "Sony's compiler separates memory by type"): Sony's
-//       compiler has type-based aliasing at -O2, and the ninth argument's load is moved by
-//       update_equiv_regs to just before its store, a local quantity placed first ($v0). With
-//       `self->id = packet->id;` written first, sched1 issues the id's load before the argument's
-//       store and every register is retail's, but the stores come out argument, id, ..., packet
-//       and callback last (pointer stores, priority 2). With every client field an int (or
-//       -fno-strict-aliasing) only the packet's and the id's store are swapped: sched1 issues the
-//       id's store at t=3 on weight (0 against the packet store's +1) and sched2 keeps that order
-//       on LUID. About 1,000 combinations of field types and store orders: nothing closer.
+// BYTES 488/492 (99.2%), checked 2026-11-09
+// NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: only the packet's
+//       and the id's stores are swapped (retail: argument, packet, id, callback); every register
+//       and every other instruction is retail's. The client's packet and callback words are
+//       u32 here, as the packet's own self and client words are: as pointer types (their own
+//       alias classes) neither store depends on the packet's int stores, so both fall to priority
+//       2 and come out after them. The id is read into a local first, so its load passes the
+//       argument's store (sched2 issues it while the argument's load is in flight).
+// Mechanism (2026-11-09, docs/TOOLCHAIN.md, "sched1's weight puts a dying value's store
+//       first"): sched1 issues the id's load at t=1 (priority 9) and its store is ready at t=3;
+//       there it beats the packet's store on INSN_REG_WEIGHT (0, its value dies, against +1),
+//       and the argument's store (weight 0 too) has taken t=2. sched2 then keeps id before
+//       packet on LUID. Proved by experiment: one more later use of the id
+//       (`packet->f38 = id;` after the packet's stores) makes the id's store weigh +1, and the
+//       client's four stores and all their registers come out exactly as retail's. So in the
+//       original the id's value outlives its store in sched1 (or a barrier separates the
+//       packet's store from the id's), and retail's final code shows no such use: it is an
+//       insn deleted after sched1 (a move reload drops, a set flow2 deletes) or something not
+//       yet identified. Swept: the client's packet, callback and argument words as int, their
+//       pointer type or void*, the id read in place or into a local, all 24 store orders
+//       (864 compiles): nothing under these 8 bytes; -O3, -fno-gcse, -fno-strict-aliasing,
+//       -fno-sched-interblock, -fno-regmove, -fno-rerun-cse-after-loop change nothing or worse.
 #include "common.h"
 
 struct Client_1F7BE8;
@@ -41,14 +46,14 @@ typedef void (*Callback_1F7BE8)(s32 arg);
 
 // What a caller opens: its packet, the packet's id, the semaphore it waits on, the results.
 struct Client_1F7BE8 {
-    Packet_1F7BE8* packet;
+    u32 packet;
     s32 id;
     s32 sema;
     s32 fC;
     s32 f10;
     s32 f14;
     s32 f18;
-    Callback_1F7BE8 callback;
+    u32 callback;
     s32 callback_arg;
     s32 f24;
 };
@@ -124,10 +129,11 @@ s32 CallRemoteService(Client_1F7BE8* self, u32 cmd, u32 mode, void* send, s32 se
 
     packet = TakeRequestPacket(&g_remoteCallState);
     if (packet == 0) return -1;
+    s32 id = packet->id;
     self->callback_arg = callback_arg;
-    self->id = packet->id;
-    self->callback = callback;
-    self->packet = packet;
+    self->packet = (u32)packet;
+    self->id = id;
+    self->callback = (u32)callback;
     packet->cmd = cmd;
     packet->f24 = send_size;
     packet->f28 = (s32)recv;
