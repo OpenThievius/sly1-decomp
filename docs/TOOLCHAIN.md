@@ -825,6 +825,77 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
 
+## Conditional moves (jump.c)
+
+What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
+rtlanal.c of GCC 2.95.3 and the `-dj` dumps (2026-11-08, func_00175170):
+
+- **The movsicc conversion runs first.** jump_optimize tries, for every conditional jump that
+  jumps around one insn, a conditional move before the store-flag forms: the insn after the
+  jump must be a single SET of a register (any source without side effects or traps), and the
+  jump's label must follow it (or the next insn must jump to the same place). The old value of
+  x is reg_set_last's (which stops at a label, so after a case label it is x itself): the
+  result is `x = c ? k : x`, an `if_then_else` the R5900 has (movsicc needs `mips_isa >= 4`).
+  The store-flag forms after it need BRANCH_COST of 2 or more unless x's old value is a known
+  constant, and the R5900's BRANCH_COST is 1, so on this target it is the conditional move
+  that acts. It runs in every jump pass before reload (after RTL generation, after CSE, after
+  GCSE, before and after the second CSE).
+- **What it becomes.** Where GCSE's constant propagation then knows x's old value (skip, 0 from
+  the function's start), combine reduces the move to a store flag: `xori; sltiu; sw` in place
+  of retail's `bne; li; sw`.
+- **What keeps retail's branch.** Mode does not: a `bool`, `char` or `short` local is promoted
+  to an SImode pseudo (PROMOTE_MODE), and the move is the same. The if's body has to be more
+  than one set when the jump passes run: in SetPlayerState's sub-state 9 a dead `else anim =
+  ...` (case 4's own else, the case setting anim again afterwards) does it, removed only later
+  by flow as a dead store. No form with one set keeps the branch.
+
+## Alias classes in the schedule
+
+GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
+by alias.c's rules ("Reloads and stores" above for CSE). Three of them decided SetPlayerState's
+order (2026-11-08, func_00175170):
+
+- **A global scalar against a structure's store.** fixed_scalar_and_varying_struct_p: a load of
+  a scalar global (`extern f32 D`, a fixed address, MEM_SCALAR_P, `mem/f` in the dumps) never
+  conflicts with a store that is a structure's (MEM_IN_STRUCT_P, `mem/s`) through a varying
+  address. `Vu0::Q(x) = v` and `Vu0::Set(x, v)` store through a `u128*` cast, neither flag, so
+  the global's load waits for them; a vector stored as a `Vu0::Vec` (`*(Vu0::Vec*)&x = v`, or
+  through an inline returning `Vu0::Vec&`) is a structure's store and the load moves above it,
+  as retail's do: the sound's two floats before the zero velocity's sqc2 (sub-states 10/11),
+  D_00263990 before the dot product that follows the direction's store (state 6/4, where after
+  reload the store's address is a hard register of unknown base). Stored straight through
+  `*(Vu0::Vec*)&local`, CSE forwards the value and the reload goes; through the reference it
+  stays.
+- **A global read as a structure's member is not a scalar.** `D_002639B8.f0` of an 8-byte
+  struct conflicts with the member stores before it; read as `s32 D_002639B8` it does not, and
+  sched2 interleaves retail's shift and lui between the stores (sub-states 37/38). A cast
+  `*(s32*)&D` is neither scalar nor structure and does not help.
+- **Register weight decides between equal stores.** Before reload rank_for_schedule prefers the
+  insn with the lower INSN_REG_WEIGHT (sets minus REG_DEAD notes), so of two stores of one
+  value the one that ends its life goes first: `a = b = x` stores b, then a (the last use);
+  retail's 0x638 before 0x630 is `f638 = f630 = x`. The same rule ordered state 7's two loads
+  through the track pointer: the one that kills the pointer goes first, so the source loads
+  them in the other order (the shape at 0x34, then the turn kind at 0x58).
+- **A last call is everyone's dependent.** In a block that ends with a call, every insn's
+  dependence on the call is also its dependence on the block's end; with an insn after the call
+  the argument moves for registers a later call clobbers count one dependent more, and
+  rank_for_schedule's dependent count sets a3 before a1 (a1 then goes in the call's delay
+  slot). State 6/5's `layers = 1` after SetFlaggedLinkContactMask gives retail's
+  TriggerScriptEvent arguments.
+- **The conversion's own priority.** ToFloat's qmfc2 is an asm statement with a cost of 1 and its
+  mtc1 a second insn, so its chain to a division is one insn longer than a field's lwc1 and
+  sched2 issues it first; ToFloatMoved's mtc1 alone leaves the qmfc2 to the compiler and the load
+  goes first, as in sub-state 55 (`ToFloatMoved(len) / self->radius3CC`).
+- **A spill store follows its set; the set's place is sched1's.** Reload puts a spilled local's
+  store right after the insn that sets it, and sched2 breaks ties by that order, so the prologue's
+  order of a spilled int's store and a float's constant is sched1's order of their sets. sched1
+  issues one memory-unit insn (a float constant) and alu insns two to a cycle by declaration
+  order, so which float constant shares a cycle with which integer follows the order the locals
+  are declared in; the spilled locals' slots follow their declaration order too. SetPlayerState's
+  `sound, start, anim, speed, flag` (start and anim taking the cycle before) gives retail's.
+- **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
+  named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
