@@ -69,7 +69,7 @@ f32 GetBaseCurveLengthAtTime(void);
 f32 GetBaseCurveTimeAtLength(void);
 s32 FindPathCurveSegmentByTime(PathCurve* self, f32 t, f32* a, f32* b);
 s32 FindPathCurveSegmentByLength(PathCurve* self, f32 t, f32* a1, f32* a2);
-void MeasureSplinePathDistance(void);
+f32 MeasureSplinePathDistance(NearestTimeQuery* self);
 f32 GetPathCurveEndTime(PathCurve* obj);
 f32 GetPathCurveEndLength(PathCurve* obj);
 void func_0014DB70(void);
@@ -273,7 +273,24 @@ s32 FindPathCurveSegmentByLength(PathCurve* self, f32 t, f32* a1, f32* a2)
     return FindPathCurveSegment(t, self->count, self->lengths, self->wrap, a1, a2);
 }
 
-INCLUDE_ASM(func_0014DA98);
+// The squared distance from the curve's sampled point to the query's point a, with the
+// difference constrained by the anchor b first when there is one. Each branch returns its own
+// conversion: sched2 then schedules the mtc1 inside each branch, ahead of the epilogue's
+// restores, and jump2's cross-jumping merges the two tails afterwards (docs/TOOLCHAIN.md).
+f32 MeasureSplinePathDistance(NearestTimeQuery* self)
+{
+    Vec02 p;
+    Vec02 d;
+    if (self->curve->vt->m01)
+        ((CurveSamplePointFn)self->curve->vt->m01)(self->curve, &p, 0);
+    if (self->b != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(p), Vu0::Q(*self->a));
+        ConstrainVectorByAnchor(self->b, &d, &d, 0);
+        return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+    }
+    u128 e = Vu0::Sub(Vu0::Q(p), Vu0::Q(*self->a));
+    return Vu0::ToFloatMoved(Vu0::Dot(e, e));
+}
 
 f32 GetPathCurveEndTime(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->times; return *(f32*)(address - 4); }
 
