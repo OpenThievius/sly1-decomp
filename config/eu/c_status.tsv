@@ -1960,6 +1960,7 @@ func_0017D220	func_0017D880	match
 func_0017D248	func_0017D8A8	match	rodata
 func_0017DCE0	func_0017E340	match	
 func_0017DE88	func_0017E4E8	match	
+func_0017E3C8	func_0017EA28	match	
 func_0017E6D0	func_0017ED30	match	
 func_0017F018	func_0017F678	match	rodata
 func_0017FAC0	func_00180120	match	

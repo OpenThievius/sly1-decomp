@@ -147,6 +147,30 @@ struct Vu0 {
         return Q(t);
     }
 
+    // FromFloatAt of a float passed by value: the caller loads it where it makes the call, the
+    // load just after its address's lui, and the load becomes the asm's memory operand, which
+    // reload loads with lw into the register of the address that dies there (lui v1; lw v1).
+    // FromFloatAt's reference copies the address into a pseudo before the inline body's block
+    // notes, which loop.c counts in the address's life: in a loop it moves the lui out
+    // (80 x savings x life >= the loop's insns), global-alloc spills it, and reload rebuilds it
+    // in a reload register of its own. By value the life is one insn and it stays
+    // (func_0017E3C8; docs/TOOLCHAIN.md, "Loops").
+    static u128 FromFloatAtCall(f32 f)
+    {
+        u128 r;
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(f));
+        return r;
+    }
+
+    // Scalar of FromFloatAtCall: a float passed by value, loaded with lw, held in the
+    // helper's 16-byte local as Scalar's is.
+    static u128 ScalarAtCall(f32 f)
+    {
+        Slot t;
+        Q(t) = FromFloatAtCall(f);
+        return Q(t);
+    }
+
     // The x of a VU0 register as a float: qmfc2 (the compiler moves it on to an FPR).
     static f32 ToFloat(u128 a)
     {
@@ -681,6 +705,13 @@ struct Vu0 {
         {
             Vec r;
             r.q = Vu0::ScalarAt(f);
+            return r;
+        }
+
+        static Vec ScalarAtCall(f32 f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarAtCall(f);
             return r;
         }
 
