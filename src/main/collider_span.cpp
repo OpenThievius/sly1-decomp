@@ -201,7 +201,117 @@ s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
     return dst - spans;
 }
 
-INCLUDE_ASM(func_00142B78);
+struct SpanRecord {
+    struct SpanObject* obj;
+    u8 pad04[8];
+};
+struct SpanLink {
+    s16 vertA;
+    s16 vertB;
+    u8 pad04[2];
+    s16 other;
+    SpanLink* next;
+};
+struct SpanObject {
+    u8 pad00[0x14];
+    SpanLink* links;
+    u8 pad18[4];
+    u16 flags;
+};
+struct SpanOther {
+    u8 pad00[0x1C];
+    u16 flags;
+    u8 pad1E[2];
+};
+struct SpanSet {
+    u8 pad00[8];
+    u8* verts;
+    u8 padC[4];
+    SpanOther* others;
+};
+struct SpanQuery {
+    u8 pad00[4];
+    s32 count;
+    void* tree;
+};
+s32 func_0013E430(void* tree, Vec02* centre, SpanRecord** end, f32 r);
+s32 func_00142278(Vec02* p, Vec02* q, u8* a, u8* b, f32 r, s32 max, ColliderSpan* out);
+void* FillMemory(void* dst, s32 v, s32 n);
+
+s32 func_00142B78(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
+{
+    Vec02 mid;
+    SpanRecord* end;
+    SpanRecord* recs;
+    s32 total;
+    s32 n;
+    s32 i;
+    if (max == 0) {
+        return 0;
+    }
+    PushBackMemoryMark();
+    f32 h = 0.5f;
+    u128 half = Vu0::Scalar(h);
+    Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(*p), half, Vu0::Q(*q), half);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*p), Vu0::Q(*q))));
+    end = (SpanRecord*)AllocateBackMemory(query->count * 12);
+    recs = end;
+    f32 halfLen = len * h;
+    s32 kind = func_0013E430(query->tree, &mid, &end, halfLen + radius);
+    switch (kind) {
+    case 1:
+        total = 0;
+        break;
+    case 0:
+        FillMemory(out, 0, 0x70);
+        total = 1;
+        *(Vec02*)&out->q[0] = *p;
+        *(Vec02*)&out->q[1] = *q;
+        out->time[1] = 1.0f;
+        break;
+    case 2:
+    default:
+        n = end - recs;
+        total = CollectTreeNodeSpans((void*)(end - 1), p, q, 0, max, out);
+        for (i = 0; i < n; i++) {
+            recs[i].obj->flags |= 0x100;
+        }
+        for (i = 0; i < n; i++) {
+            SpanObject* o = recs[i].obj;
+            if ((o->flags & 0x200) == 0) {
+                o->flags |= 0x200;
+                for (SpanLink* l = o->links; l != 0; l = l->next) {
+                    SpanOther* other = &set->others[l->other];
+                    if ((other->flags & 0x100) != 0) {
+                        ColliderSpan* seg = out + total;
+                        s32 got = func_00142278(p, q, set->verts + l->vertA * 16, set->verts + l->vertB * 16, radius, max - total, seg);
+                        if (got > 0) {
+                            ColliderSpan* sp = seg;
+                            ColliderSpan* segEnd = sp + got;
+                            for (; sp < segEnd; sp++) {
+                                f32 a = sp->param[0];
+                                f32 b = sp->param[1];
+                                sp->time[0] = a;
+                                sp->time[1] = b;
+                                if (b < a) {
+                                    sp->time[0] = b;
+                                    sp->time[1] = a;
+                                }
+                            }
+                            total = MergeOverlappingSpans(total + got, out);
+                        }
+                    }
+                }
+            }
+        }
+        for (i = 0; i < n; i++) {
+            recs[i].obj->flags &= 0xFCFF;
+        }
+        break;
+    }
+    PopBackMemoryMark();
+    return total;
+}
 
 LINKER_REMNANT(func_00142EC8);
 

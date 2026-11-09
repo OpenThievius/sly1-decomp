@@ -1322,9 +1322,59 @@ s32 CompareFloatsDescending(const f32* first, const f32* second)
     return result;
 }
 
-INCLUDE_RODATA(D_00249E90);
+// A candidate func_00148938 sorts: its squared distance from the point of view, and the object.
+struct Candidate_00148938 {
+    union {
+        f32 dist;
+        u32 bits;
+    };
+    StateNotifier* obj;
+};
 
-INCLUDE_ASM(func_00148938);
+s32 CountListItems(List01* list);
+void SortElements(void* base, s32 count, s32 size, void* cmp);
+
+s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
+{
+    Vec02 origin;
+    Candidate_00148938* recs;
+    s32 n;
+    if (max == 0) {
+        return 0;
+    }
+    PushBackMemoryMark();
+    SwitchedCollider* viewer = GetActiveSwitchedCollider();
+    Vec02* src;
+    if (viewer != 0) {
+        src = &viewer->v140;
+    } else {
+        src = (Vec02*)(*(u8**)g_camera + 0x40);
+    }
+    origin = *src;
+    n = 0;
+    recs = (Candidate_00148938*)AllocateBackMemory(CountListItems(&self->list1C54) * 8);
+    for (StateNotifier* p = (StateNotifier*)self->list1C54.head; p != 0; p = p->next374) {
+        if (p->f338 != 0 && ((Desc01*)p->desc)->id == kind) {
+            Candidate_00148938* r = &recs[n++];
+            r->obj = p;
+            if (p->state == 2) {
+                r->dist = 3.4028234663852886e+38f;
+            } else {
+                u128 d = Vu0::Sub(Vu0::Q(origin), Vu0::Q(p->v140));
+                r->bits = Vu0::ToBits(Vu0::Dot(d, d));
+            }
+        }
+    }
+    SortElements(recs, n, 8, (void*)CompareFloatsDescending);
+    if (n < max) {
+        max = n;
+    }
+    for (s32 i = 0; i < max; i++) {
+        out[i] = recs[i].obj;
+    }
+    PopBackMemoryMark();
+    return max;
+}
 
 s32 ScatterObjectsAroundCircle(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
 {

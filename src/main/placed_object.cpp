@@ -1723,7 +1723,93 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-INCLUDE_ASM(func_00125138);
+void QueryValueListMask(void* list, f32 x, void* vec, void* out);
+void SetRangeRecordPosition(RangeRecord* r, void* p);
+void SetRangeRecordDirection(RangeRecord* r, void* p);
+
+// The product a b into the object's world matrix (m110), written through the object: b's rows
+// read by index (MulRotationRowsIndexed), each result row stored to its vector local and to the
+// matrix local. The helper's frame is 16 bytes bigger than the other products': g++ saves an
+// inline function as RTL before optimising it and gives each call one stack temporary of that
+// saved frame's size (integrate.c), so a vector local declared after the matrix and never used
+// still takes its 16 bytes above r in each call's frame (retail's 160-byte frame, its unused
+// 0x60..0x70). Here it is the fourth row, w, which a rotation product leaves unset.
+static inline void MulRotationIntoWorld(PlacedObject* o, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const u128* q = (const u128*)&b;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vec02 w;    // the fourth row: never set (see above)
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+    o->m110 = r;
+}
+
+void ComputePlacedObjectWorldFrame(PlacedObject* self)
+{
+    Rec2195_224* rec = self->f224;
+    PlacedObject* par;
+    if (rec != 0 && (rec->fB0 & 0xC) != 0) {
+        par = (rec->fB0 & 4) ? (PlacedObject*)rec->p60 : (PlacedObject*)self->parent;
+        if (par != 0) {
+            Vu0::Q(self->v140) = Vu0::Add(Vu0::Rotate(par->m110, Vu0::Q(self->pos)), Vu0::Q(par->v140));
+        } else {
+            self->v140 = self->pos;
+        }
+        rec = self->f224;
+        par = (rec->fB0 & 8) ? (PlacedObject*)rec->p60 : (PlacedObject*)self->parent;
+        if (par != 0) {
+            MulRotationIntoWorld(self, par->m110, self->rot);
+        } else {
+            self->m110 = self->rot;
+        }
+    } else {
+        PlacedObject* parent = (PlacedObject*)self->parent;
+        if (parent != 0) {
+            Vu0::Q(self->v140) = Vu0::Add(Vu0::Rotate(parent->m110, Vu0::Q(self->pos)), Vu0::Q(parent->v140));
+            MulRotationIntoWorld(self, parent->m110, self->rot);
+        } else {
+            self->v140 = self->pos;
+            self->m110 = self->rot;
+        }
+    }
+    u32 kind = self->bits24;
+    if (kind == 2) {
+        if (self->world->f1EC4 != 0) {
+            QueryValueListMask(self->world->f1EC4, self->f2A8, &self->v140, &self->f88);
+        } else {
+            self->f88 = 0x0FFFFFFF;
+        }
+    }
+    if (self->f284 != 0) {
+        SetRangeRecordPosition(self->f284, &self->v140);
+        if (self->f284->link != 0 && *(u8*)self->f284->link == 3) {
+            Vec02 dir;
+            Vu0::Q(dir) = Vu0::MulX(Vu0::Q(self->m110.r[2]), Vu0::Scalar(-1.0f));
+            SetRangeRecordDirection(self->f284, &dir);
+            StoreRangeRecordVector(self->f284, &self->m110.r[1]);
+        }
+    }
+    for (BaseObject* n = (BaseObject*)self->children.head; n != 0; n = n->next) {
+        if (n->desc->m13 != 0) {
+            n->desc->m13(n);
+        }
+    }
+    Rec2195_224* last = self->f224;
+    if (last != 0 && (last->fB0 & 0x8020) == 0x8020) {
+        ((PlacedObject*)last->f80)->f224->p64 = (BaseObject*)1;
+        ((PlacedObject*)last->p84)->f224->p64 = (BaseObject*)1;
+    }
+}
 
 void BeginPlacedObjectMove(PlacedObject* self)
 {
@@ -2575,9 +2661,94 @@ void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* 
     }
 }
 
-INCLUDE_ASM(func_00127B20);
+void IgnoreStackLocal(Vec02* p);
 
-void func_00127B20(PlacedObject* self, PlacedObject* top, s32 flag, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+{
+    PlacedObject* chain[16];
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Mat02 N;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    s32 i = 0;
+    while (self != top) {
+        chain[i] = self;
+        i++;
+        Rec2195_224* rec = self->f224;
+        if (rec != 0 && (rec->fB0 & 0xC)) {
+            self = (PlacedObject*)rec->p60;
+        } else {
+            self = (PlacedObject*)self->parent;
+        }
+    }
+    P = D_00248D30;
+    M = g_identityMatrix;
+    V = D_00248D30;
+    W = D_00248D30;
+    while (i < n) {
+        n--;
+        if (pos != 0) {
+            pos[n] = P;
+        }
+        if (rot != 0) {
+            rot[n] = M;
+        }
+        if (vel != 0) {
+            vel[n] = V;
+        }
+        if (spin != 0) {
+            spin[n] = W;
+        }
+    }
+    for (i--; i >= 0; i--) {
+        self = chain[i];
+        if (pos != 0 || vel != 0) {
+            Vu0::Q(x) = Vu0::RotateUntied(M, Vu0::Q(self->pos));
+            Vu0::Q(P) = Vu0::Add(Vu0::Q(P), Vu0::Q(x));
+            if (vel != 0) {
+                Vu0::Q(y) = Vu0::Rotate(M, Vu0::Q(self->v150));
+                Vu0::Q(z) = Vu0::Cross(Vu0::Q(W), Vu0::Q(x));
+                Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(y));
+                Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(z));
+            }
+        }
+        if (spin != 0 || vel != 0) {
+            Vu0::Q(x) = Vu0::Rotate(M, Vu0::Q(self->v160));
+            Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Q(x));
+        }
+        const u128* q = (const u128*)&self->rot;
+        u128 a0 = Vu0::Q(M.r[0]);
+        u128 a1 = Vu0::Q(M.r[1]);
+        u128 a2 = Vu0::Q(M.r[2]);
+        Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+        r.r[0] = x;
+        Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+        r.r[1] = y;
+        Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+        N = r;
+        M = r;
+        if (i < n) {
+            if (pos != 0) {
+                pos[i] = P;
+            }
+            if (rot != 0) {
+                rot[i] = M;
+            }
+            if (vel != 0) {
+                vel[i] = V;
+            }
+            if (spin != 0) {
+                spin[i] = W;
+            }
+        }
+        IgnoreStackLocal(&P);
+    }
+}
 
 void func_00127E60(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {

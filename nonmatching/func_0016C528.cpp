@@ -1,17 +1,33 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2156/2260 (95.4%), checked 2026-11-08
-// NEAR (2026-11-08, worker large-16C528): ApplyLinkConstraint, a two-bone IK solver. Same size
-// (565 instructions), frame 0x4A0 and every stack slot as retail's, saved registers as retail's;
-// 9 lines differ in two places. (1) After the angular-rate test the VU0 registers vf2 and vf3
-// are swapped: retail loads swing's second row into vf3 and dv into vf2 (so rest, the cross
-// product's t and the normalisation's length follow), we load them the other way. Local
-// allocation order; tried every order of the rotations, the cross product and the subtraction,
-// the subtraction inline, rest as a Vec value, ToFloat/ToFloatMoved for its length. (2) In the
-// last block retail loads self->f224->f94 (lw, qmtc2 for the twist rate) straight after the swing
-// spin's store, before the swing scalar's slot store and the transposed rotation of b's spin;
-// ours does it after that rotation. Tried every order of the five tail statements
-// (tools/permute.py), a named slot for both scalars, the scalar's store after its product, and a
-// FromFloatAt whose operand is a structure member (MEM_IN_STRUCT_P): no change.
+// BYTES 2186/2260 (96.7%), checked 2026-11-08
+// NEAR (2026-11-08, workers large-16C528 and w5-16C528): ApplyLinkConstraint, a two-bone IK
+// solver. Same size (565 instructions), frame 0x4A0 and every stack slot as retail's, saved
+// registers as retail's; what differs is one place in the last block: retail loads
+// self->f224->f94 (lw, qmtc2 for the twist rate) straight after the swing spin's store, before
+// the swing scalar's slot store, and computes the twist spin and the total before the transposed
+// rotation of b's spin; ours does all of that after the rotation.
+// Why (w5-16C528, -dS -fsched-verbose-6): in sched1 the twist rate's asm (FromFloatAt, its
+// operand a load through self->f224, a pointer loaded from memory) depends on the swing
+// scalar's slot store (Vu0::Scalar's `Q(t) = ...`, neither MEM flag) and on the swing spin's
+// store, so the slot store inherits its priority (12) and goes first; sched2 keeps the order.
+// Retail's order needs the load independent of the slot store but not of the swing spin's
+// (mem/s) store: only fixed_scalar_and_varying_struct_p gives that, with the slot MEM_SCALAR_P
+// and the rate read MEM_IN_STRUCT_P. Diagnosed: with the slot a scalar global (an experiment,
+// not a form) the load and the twist arithmetic move up as in retail. Ruled out: Scalar(f94) by
+// value (lwc1/mfc1: the f32 pseudo prefers an FPR), the rate named as an f32 local before the
+// swing (loaded early, but lwc1/mfc1 too), a const f32& to it (no change), a u128 slot local (also in a template), a
+// Slot copied from a u128, an inline taking the weight as const u128& (all purged back into a
+// register or a /s slot), and before that every order of the five tail statements, a named
+// slot for both scalars, the scalar's store after its product and a member operand for
+// FromFloatAt. The same blocker as func_001D87C8.
+// Fixed (w5-16C528): the swap of vf2 and vf3 after the angular-rate test was local-alloc's
+// ranking: NormalizeVector's `Vu0::Vec len = Vu0::Length(...)` copied the Vec result into len
+// (a movti), which tied the dot and the root into one quantity of 4 references over 8 insns
+// (priority 1.0), placed before the dv/rest quantity (9 over 38: 0.71) so it took vf2. With
+// `u128 len` the root is global-alloc's, the dot alone ranks 0.5 and dv/rest, the swing row
+// and t take retail's vf2, vf3, vf3 (an emulation of block_alloc on the .lreg dump reproduces
+// every VU register of the block). The lengths then go through ToFloatMoved, the rest's and
+// the normal's, which gives retail's order of the qmfc2 and the v store.
 //
 // What this needed (docs/TOOLCHAIN.md material):
 // - The chain arrays of func_00127B20 are four long and it is passed &x[1]: pos[0] is the end
@@ -28,7 +44,7 @@
 //   product's frame (sp+0x2D0) is CSE'd with &upper and held in s1 across the call.
 // - BuildAxisAngleMatrix declared with its float first (retail computes Arccosine(c) - angle
 //   before the addresses); the identity copy through a pointer (`Mat02* m = &b->rot; *m = ...`);
-//   ToFloatMoved for the lengths; `w = bent = Rotate(bend, w)` chained; the final block's
+//   ToFloatMoved for the lengths (the normal's and the rest's too); `w = bent = Rotate(bend, w)` chained; the final block's
 //   vectors declared together at its top, with one scratch vector v holding the rate as a vector
 //   and then the rotated arm; NormalizeVector(n, g_unitXVector) as an inline taking the
 //   fallback by reference (its address formed before the test).
@@ -58,11 +74,11 @@ extern Vec02 g_unitXVector;
 // v made unit length, or fallback when shorter than 0.0001.
 static inline void NormalizeVector(Vec02& v, const Vec02& fallback)
 {
-    Vu0::Vec len = Vu0::Length(Vu0::Vec::Of(v));
-    if (Vu0::ToFloat(len) < 0.0001f) {
+    u128 len = Vu0::Length(Vu0::Q(v));
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
         v = fallback;
     } else {
-        *(Vu0::Vec*)&v = Vu0::DivX(Vu0::Vec::Of(v), len);
+        *(Vu0::Vec*)&v = Vu0::DivX(Vu0::Vec::Of(v), Vu0::Vec::Of(len));
     }
 }
 
@@ -247,7 +263,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         *(Vec*)&bendSpin = Vu0::RotateUntied(swing, Vec::Of(spin));
         *(Vec*)&sweep = Vu0::Cross(Vec::Of(bendSpin), Vec::Of(v));
         *(Vec*)&rest = Vu0::Sub(Vec::Of(dv), Vec::Of(sweep));
-        f32 lr = Vu0::ToFloat(Vu0::Length(Vec::Of(rest)));
+        f32 lr = Vu0::ToFloatMoved(Vu0::Length(Vec::Of(rest)));
         *(Vec*)&n = Vu0::Cross(Vec::Of(t), Vec::Of(rest));
         NormalizeVector(n, g_unitXVector);
         *(Vec*)&swingSpin = Vu0::MulX(Vec::Of(n), Vec::Scalar(lr / lt));
