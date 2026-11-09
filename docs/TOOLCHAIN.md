@@ -995,6 +995,26 @@ built the address in a0, and the a0 carried on to `*outEnd`'s reload after the c
   (outside a loop, or hoisted as retail's are), the value where retail's `lui` sits just
   before the `lw` inside a loop.
 
+### A count-up loop reversed: the counter after PRE's insertions (func_001D4348)
+
+Retail's `li v1,7; addiu v0,a1,224; sw zero,0(v0); addiu v1,v1,-1; bgez v1` with the
+pointer stepping down by 32 is `for (i = 0; i < 8; i++) slots[i].weight = 0.0f;`, not a
+loop written downwards (2026-11-09, read from the `-dG` and `-dL` dumps):
+
+- **loop.c reverses it.** check_dbra_loop finds the counter used only to index stores through
+  a giv that do not overlap, and turns the loop round: the counter counts 7 to 0 against zero
+  (bgez) and the address starts at the last element. Retail's final weighted sum
+  (`move v0,a1; li v1,7; ... addiu v0,v0,32; bgez v1`) is the same loop over the slots,
+  reversed only in its counter.
+- **The new counter's init comes after what PRE hoisted.** PRE put the two asms that the end of the
+  function computes (Zero, and the qmtc2 of Scalar(scale)) at the end of the block before the
+  loop, after the source's `i = ...`. Written `for (i = 7; i >= 0; i--)`, that init keeps the
+  smallest luid of four equal insns (priority 1, weight 1), and sched1 and sched2 issue the
+  `li` first. Reversed, loop.c deletes the source's init and emits its own at the loop start,
+  after the hoisted insns: retail's `mfc1, vsub, qmtc2, li, addiu`.
+- **Spotting it.** A counter loaded with N-1 that counts to zero with bgez, while the loop's
+  invariants and hoisted values come before its `li`, is a count-up `for` loop.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
@@ -1316,6 +1336,33 @@ The near miss keeps ToFloatNow (every register retail's, the sqc2 one slot early
 for the else arm's dot also puts the division before the mfc1 of 1.0, as retail has it, and
 the distance stored as `*(u32*)dist = ToBits(Sqrt(d))` gives the square root vf1 (StoreX's
 "r" operand put it in vf2).
+
+### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
+
+The player's blend weights (2026-11-09) compute three slot weights, each a dot product over
+a length (`scale * Dot(v, v)`), and rescale them by their sum:
+
+- **The rescale's divides go in source order only if the last one is where the sum dies.**
+  `slots[0] = w0 / sum; slots[2] = w2 / sum; slots[4] = w4 / sum;` all have priority 8; the
+  last divide kills both its inputs (INSN_REG_WEIGHT -1, the others 0), so sched1 issues it
+  first and the others in insn order: w4, w0, w2, retail's order. local-alloc's equal spans then
+  give the three quotients f0, f1, f2 in that order, and global-alloc's preferences
+  (set_preference: a pseudo that dies into a local's hard register) put w4 in f0 and the sum in
+  f2, retail's registers. Written in the order w4, w0, w2 the divides came out w2, w4, w0.
+- **One sum, not one accumulated.** `sum = w0 + w2; sum = sum + w4;` is one pseudo with two
+  sets (f2 throughout); retail's `add.s f1 = w0 + w2; add.s f2 = f1 + w4` is `sum = w0 + w2 +
+  w4`, the partial sum a block-local temporary.
+- **A conversion's mtc1 as an asm has a latency of 1.** ToFloat's mtc1 is reload's (cost 2):
+  the mul.s of the length waits a cycle and the next conversion's mtc1 goes first. Retail's
+  `mtc1 v0,f0; qmfc2 a0; mul.s f0` is ToFloatViaBits for the first length.
+- **The same wall as func_00186230.** Retail issues the 1.0 constant's lui/mtc1 between the
+  second length's qmfc2 and the next lqc2, and that order comes only from a compiler qmfc2
+  (ToFloatMoved: unit vu0, which holds the lqc2). With ToFloatMoved every instruction is in
+  retail's order, but the product becomes a TI_REGS pseudo in v0 and its output reload takes a
+  VU0 register after the dot's scratch 1.0 took vf1 (ours vf3 and vf4 for the products, retail
+  vf1). All six conversions as ToFloat give every one of retail's registers (reload's round
+  robin alternates v0 and a0 over the six qmfc2) and lose the order. The near miss keeps the
+  order; what is missing is still a product in VU_REGS whose qmfc2 is the compiler's.
 
 ### The rest of rank_for_schedule (func_001782C0)
 
