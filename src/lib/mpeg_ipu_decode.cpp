@@ -1664,7 +1664,44 @@ void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s6
 // A table of 16 words by a 4-bit code, which func_00210970 reads.
 u32 D_0027B068[16] = { 0x2, 0x0, 0x2, 0x0, 0x2, 0x3, 0x2, 0x3, 0x0, 0x0, 0x0, 0x0, 0x2, 0x4, 0x0, 0x6 };
 
-INCLUDE_ASM(func_00210970);
+struct Blk_210970 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; };
+struct Src_210970 { u8 p0[0x28]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; s32 f4C; s32 f50; s32 f54; s32 f58; s32 f5C; s32 f60; };
+struct Ctx_210970 {
+    u8 p0[0x80]; s32 f80; u8 p84[4]; u64 f88; u8 p90[0x20]; s32 fB0; s32 fB4; s32 fB8; s32 fBC; s32 fC0; s32 fC4; s32 fC8; s32 fCC; s32 fD0;
+    u8 pD4[0x858 - 0xD4]; Blk_210970* f858;
+};
+void func_002107E0(Ctx_210970* c, Src_210970* s, void* a, void* b, void* d);
+s32 func_002104A8(Ctx_210970* c, Src_210970* s);
+void ConvertPictureColours(Ctx_210970* c, Src_210970* s);
+void func_00210548(Ctx_210970* c, Src_210970* s);
+s32 func_002107B8(Ctx_210970* c);
+
+void func_00210970(Ctx_210970* c, Src_210970* s)
+{
+    func_002107E0(c, s, (u8*)c->f858 + 0x10, (u8*)c->f858 + 0x18, (u8*)c->f858 + 0x20);
+    Blk_210970* p = c->f858;
+    u32 idx = (u32)(p->f20 >> 5) & 0xF;
+    c->f80 = p->f10;
+    c->f88 = D_0027B068[idx];
+    c->fCC = s->f5C;
+    c->fD0 = s->f60;
+    c->fB4 = s->f44;
+    c->fB8 = s->f48;
+    c->fBC = s->f4C;
+    c->fC0 = s->f50;
+    c->fC4 = s->f54;
+    c->fC8 = s->f58;
+    if (func_002104A8(c, s)) {
+        if (s->f28 == 1) {
+            if (c->fB0) {
+                ConvertPictureColours(c, s);
+            } else {
+                func_00210548(c, s);
+            }
+            func_002107B8(c);
+        }
+    }
+}
 
 struct Blk_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; s32 f28; u8 p2C[0xC]; u64 f38; };
 struct Src_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0x14]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; u8 p4C[4]; s32 f50; s32 f54; u8 p58[4]; s32 f5C; s32 f60; };

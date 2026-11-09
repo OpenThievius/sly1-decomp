@@ -4239,6 +4239,7 @@ func_002104A8	func_00211968	match	rodata
 func_00210548	func_00211A08	match	
 func_002107B8	func_00211C78	match	
 func_002107E0	func_00211CA0	match	
+func_00210970	func_00211E30	match	
 func_00210A80	func_00211F40	match	
 func_00210C38	func_002120F8	match	
 func_00210D90	func_00212250	match	
