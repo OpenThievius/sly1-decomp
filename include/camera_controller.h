@@ -39,6 +39,8 @@ struct CameraController {
     Camera* owner;             // 0x04: func_00149398 sets it; func_001493A0 asks whether it is the top
     union {
         s32 value;          // 0x08: func_001493B8, func_0014AA90 set it, func_0014AA98 clears it
+        f32 g08;            // 0x08 as a float: a TargetCameraController's yaw (func_00149760
+                            // stores it as a member: the alias rule, docs/TOOLCHAIN.md)
         void* ptr;          // 0x08: D_002173F8's target (func_001E30A0 clears it)
     };
 };

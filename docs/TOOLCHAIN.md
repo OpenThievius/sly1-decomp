@@ -896,6 +896,79 @@ order (2026-11-08, func_00175170):
 - **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
   named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
 
+### Memory dependences in sched1 (func_00149760)
+
+sched1 keeps a load after a store it may alias, and the store then inherits the load's
+priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
+
+- **Which MEMs are flagged.** expand_expr sets MEM_IN_STRUCT_P for a member or an element
+  (COMPONENT_REF, ARRAY_REF) and for `*p` only when p is literally `&aggregate` or the pointed-to
+  type is an aggregate; a declared scalar variable's own MEM (a global `f32`, a scalar local in
+  memory) is MEM_SCALAR_P. A dereferenced cast pointer (`*(f32*)&self->value`, Vu0::Q's
+  `*(u128*)&v`, Rotate's `((const u128*)&m)[i]`) has neither flag. The RTL dumps print the flags
+  as `/s` (in struct) and `/f` (scalar).
+- **The only rule that separates them** without known bases is
+  fixed_scalar_and_varying_struct_p: a MEM_SCALAR_P reference at a fixed address never aliases
+  a MEM_IN_STRUCT_P one at a varying address. A parameter's pointer has base `(address a0)`,
+  which may alias any global (base_alias_check, no `-fargument-noalias`), and a pointer loaded
+  from memory has no known base at all.
+- **func_00149760, second switch, cases 0 and 1.** `*(f32*)&self->value = WrapAngle(...)`
+  (neither flag) made the tilt clamp's bound loads `D_00261BFC` and `D_00261C00[0]` (an array
+  element: in struct) depend on the store: sched1 issued the store first and the low bound took
+  $f0. Retail loads both bounds first and stores in the branch's delay slot. Writing the store as
+  a member (`self->g08 = ...`, a float in CameraController's union) and reading the upper bound
+  as a scalar (`D_00261C00` an `f32` of its own, its 16-byte label padded by the 16-aligned
+  `Vec02` offsets after it) gives retail's registers; either change alone does not.
+- **Insn order instead of flags: case 2's Scalar slot.** Vu0::Scalar's slot store (neither
+  flag) and Rotate's row loads through a u128 pointer (neither) may alias. Rotate loads the rows
+  in its body, after its argument (MulX of a Scalar) has stored the slot, so the loads depend on
+  the store, the store inherits their priority and goes first, and MulX's result takes the
+  scalar's register. Retail stores the slot last. A dependence only runs forward in insn order:
+  with the camera's rows loaded as values first (`const u128* rows = ...; r0.q = rows[0]; ...`)
+  and rotated with the result tied to v (Vu0::RotateRowsTied, Rotate's tie with RotateRows'
+  operands), the store comes after the loads, depends on nothing but the qmtc2, and with its low
+  priority waits to the end of the block: retail's $vf6 and store. RotateRows (untied) gives
+  the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
+  local in memory, which the helpers do not have.
+
+### Global allocation's preferences (func_00149760)
+
+- find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
+  of the lower-priority allocnos that conflict with this one (prune_preferences), unless it
+  prefers them itself. A pseudo prefers the hard register of a copy's other side, and the
+  register of the first operand of an arithmetic set whose other side is a hard register or
+  a pseudo local-alloc already placed (set_preference); expand_preferences then pools the
+  preferences of the destination and every allocno that dies in the set, if they do not
+  conflict. `-dg` prints each allocno's conflicts and (pruned) preferences in the `.greg`
+  dump, after the allocation order (`;; N regs to allocate:`), whose ranking is
+  floor_log2(refs) * refs / live length.
+- func_00149760's zoom clamp: the 0.0 bound (r399, 3 refs over 10 insns) ranks above the
+  RangeFraction result (r386, 3 over 12), which conflicts with it and has $f1 among its full
+  preferences, pooled from the zoom (`sub.s $f1, zoom, g18` later) through the clamp's
+  variable. So the bound skips $f0 and $f1 and takes $f4; retail's $f1 needs r386 allocated
+  first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
+  change it.
+
+### Local allocation's ranking (func_00149760)
+
+- block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
+  gives each local pseudo a quantity born at 2n where it is set and dying at 2n where a
+  REG_DEAD note names it, and ties an asm's output to the first input operand that dies there
+  (the quantity then holds both, with both's references). Quantities are allocated in the
+  order floor_log2(refs) * refs / (death - birth), ties by creation order; each takes the
+  lowest VU register free over its life widened by one insn at each end (the widened range is
+  also what it marks taken), else over its real life. The references are recounted on the
+  RTL just before local-alloc (recompute_reg_usage: every mention in a pattern, a set
+  included), not flow's numbers, which the `.flow` dump shows larger.
+- An emulation of this on the `.lreg` dump (build/swarm/mech-149760/lalloc.py in the
+  mech-149760 worktree, not committed) reproduces every VU register of func_00149760's case 4.
+  Retail's registers for its first rotation product follow from the same insns, in our
+  order, if each product row's quantity has one reference more (9: 3 * 9 / 38 outranks mz's
+  third row's 2 * 4 / 12); no sched1 order of the block's loads, rotations and stores gives
+  them with our counts (100,000 random orders that keep the dependences). Every source form
+  tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
+  rotation, the product returned by value) recounts the same six references.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
