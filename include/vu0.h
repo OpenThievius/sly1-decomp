@@ -16,7 +16,8 @@
 //   there even when nothing reads it back: retail's stores to the stack that nothing loads. A
 //   float made a vector (FromFloat) is always stored so in retail: it goes into a local.
 // - A float weight retail stores in a slot of its own that later weights reuse goes through
-//   Scalar, a helper whose 16-byte local takes the store (not a local of the caller's).
+//   Scalar, whose slot is the copy g++ makes of a cast to s128 bound by reference (not a local
+//   of the caller's): a scalar's memory, which loads of structure members do not wait for.
 // - None is volatile: retail schedules loads, stores and other code across them.
 // - A result may take an input's register ("=j"). The order of the inputs matters: the
 //   allocator gives the result the register of the first input that dies there, so each
@@ -43,9 +44,12 @@
 
 // A 128-bit value: what a VU0 register holds.
 typedef unsigned int u128 __attribute__((mode(TI)));
+// The signed 128-bit value: Scalar's slot is a copy of a u128 cast to it.
+typedef int s128 __attribute__((mode(TI)));
 
 struct Vu0 {
-    // A vector local of a helper's own (Scalar): 16-aligned, so it lives on the stack.
+    // A 16-aligned, 16-byte local of a helper's own: it lives on the stack, and a store to it
+    // through Q has no alias flag (Scalar's slot is a cast's copy instead).
     struct __attribute__((aligned(16))) Slot {
         f32 v[4];
     };
@@ -126,25 +130,45 @@ struct Vu0 {
         return r;
     }
 
-    // A float as a vector of its own: FromFloat into a 16-byte local of the helper, stored to
-    // the stack though nothing reads it back. Retail's weights show it: the two of a MulXSum
-    // (or three, with a MulAddX after it) share one stack slot, as locals of calls that have
-    // ended do, the first stored first, each store after the arithmetic that uses it. The
-    // same float twice (Scalar(dt) in two expressions) is one qmtc2 and two stores.
+    // A float as a vector of its own, stored to the stack though nothing reads it back.
+    // Retail's weights show it: the two of a MulXSum (or three, with a MulAddX after it) share
+    // one stack slot, as temporaries of calls that have ended do, the first stored first, each
+    // store after the arithmetic that uses it. The same float twice (Scalar(dt) in two
+    // expressions) is one qmtc2 and two stores. The slot is the copy g++ 2.95 makes of a cast
+    // bound by reference: a cast of a variable is an lvalue to it (an extension), so Q((s128)r)
+    // takes the address of the cast without making r addressable, and expand_expr copies r's
+    // register into a fresh temporary of the cast's type (assign_temp of a scalar type), which
+    // CSE then reads back from the register. That temporary is a scalar's memory
+    // (MEM_SCALAR_P) at a fixed address, which a structure member's load through a pointer
+    // never waits for (alias.c, fixed_scalar_and_varying_struct_p); a 16-byte local of the
+    // helper's (an aggregate) or a store through a u128 pointer (no flag) holds such loads
+    // behind it, which retail's schedules never do (docs/TOOLCHAIN.md, "The weight slot is a
+    // cast's copy").
     static u128 Scalar(f32 f)
     {
-        Slot t;
-        Q(t) = FromFloat(f);
-        return Q(t);
+        u128 r = FromFloat(f);
+        return Q((s128)r);
     }
 
-    // Scalar of a float in memory: FromFloatAt into the helper's 16-byte local, so the float is
-    // loaded with lw straight into qmtc2's GPR, and stored to the stack as Scalar's is.
+    // Scalar of a float in memory: FromFloatAt, so the float is loaded with lw straight into
+    // qmtc2's GPR, and stored to its slot as Scalar's is.
     static u128 ScalarAt(const f32& f)
     {
-        Slot t;
-        Q(t) = FromFloatAt(f);
-        return Q(t);
+        u128 r = FromFloatAt(f);
+        return Q((s128)r);
+    }
+
+    // ScalarAt with the float passed by value: the operand is the float itself ("rV"), and an
+    // inline call passes a const by-value argument as the caller's own memory reference, its
+    // flags included (integrate.c copies only a writable parameter to a register), so a
+    // structure member's load stays MEM_IN_STRUCT_P and need not wait for the stores before it
+    // (ScalarAt reads the word through a cast pointer: no flag). func_0016C528's twist rate
+    // (self->f224->f94) is loaded before an earlier weight's store, as retail does.
+    static u128 ScalarAtValue(const f32 f)
+    {
+        u128 r;
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(f));
+        return Q((s128)r);
     }
 
     // FromFloatAt of a float passed by value: the caller loads it where it makes the call, the
@@ -299,31 +323,28 @@ struct Vu0 {
     // three floats die together (separate mfc1s are hoisted and change the FPRs the floats
     // take, func_00144AA0). The result is "=r": the compiler stores it with sq where it goes
     // straight to memory (func_00141690, func_00174E20) and moves it to VU0 with qmtc2 where
-    // it is used there (func_00144AA0, func_001BFBF8). It is held in a 16-byte local of the
-    // helper's, stored to the stack though nothing reads it back, as Scalar's.
+    // it is used there (func_00144AA0, func_001BFBF8). It is stored to a slot of its own though
+    // nothing reads it back, as Scalar's: a cast's copy, so a load through a pointer of no known
+    // base (func_0017ABE8's method table) need not wait for the sq.
     static u128 FromFloats(f32 x, f32 y, f32 z)
     {
-        Slot t;
         u128 r, w;
         __asm__("mfc1 %0, %2\n\tmfc1 %1, %3\n\tpextlw %0, %1, %0\n\tmfc1 %1, %4\n\tpcpyld %0, %1, %0"
                 : "=&r"(r), "=&r"(w) : "f"(x), "f"(y), "f"(z));
-        Q(t) = r;
-        return Q(t);
+        return Q((s128)r);
     }
 
     // A weight passed whole in a GPR: the float's bits put in a 128-bit value with mfc1 (the
-    // float as "f", the result "=r"), held in a 16-byte local of the helper's as Scalar's is.
+    // float as "f", the result "=r"), stored to a slot of its own as Scalar's is.
     // Retail passes the scale of ScaleMatrix (func_00188628) so: mfc1 v0, then the compiler's
     // por a2, zero, v0 and the sq to the slot (MultiplyScriptValues, DivideScriptValues,
     // func_00158480). No C form puts a float in a 128-bit GPR value: a union goes through
     // memory, and a store to its low word masks the rest.
     static u128 ScalarInGpr(f32 f)
     {
-        Slot t;
         u128 r;
         __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
-        Q(t) = r;
-        return Q(t);
+        return Q((s128)r);
     }
 
     // The same mfc1 with no slot: the value stays in a register of its own (func_00191AC8
@@ -662,6 +683,14 @@ struct Vu0 {
     // MulRotation) the last row's product takes the register of the first matrix's first row,
     // and func_00125750 gives a rotated position a fresh register, where Rotate's tie to v
     // would keep v's.
+    // Rotate with the rows read as Vec members (m's rows through a Vec pointer): each row load
+    // is a structure member's, MEM_IN_STRUCT_P, which a MEM_SCALAR_P weight slot at a fixed
+    // address never conflicts with (ScalarCopy), while Rotate's u128 reads, with no flag, wait
+    // for every store to the frame. The address is m's own (a pointer parameter's base passes
+    // frame stores; an address pseudo of no known base waits for the other frame stores):
+    // func_001C75B0 loads row 0 before the weight's store and rows 1 and 2 after v's.
+    template <class M> static u128 RotateMembers(const M& m, u128 v);
+
     template <class M> static u128 RotateUntied(const M& m, u128 v)
     {
         const u128* r = (const u128*)&m;
@@ -712,6 +741,13 @@ struct Vu0 {
         {
             Vec r;
             r.q = Vu0::ScalarAtCall(f);
+            return r;
+        }
+
+        static Vec ScalarAtValue(const f32 f)
+        {
+            Vec r;
+            r.q = Vu0::ScalarAtValue(f);
             return r;
         }
 
@@ -986,6 +1022,16 @@ struct Vu0 {
         return r;
     }
 };
+
+// Vu0::RotateMembers, out of the class: its rows are read as Vu0::Vec, complete only here.
+template <class M> inline u128 Vu0::RotateMembers(const M& m, u128 v)
+{
+    const Vec* r = (const Vec*)&m;
+    u128 out;
+    __asm__("vmulax.xyz ACC, %1, %4x\n\tvmadday.xyz ACC, %2, %4y\n\tvmaddz.xyz %0, %3, %4z"
+            : "=j"(out) : "j"(r[0].q), "j"(r[1].q), "j"(r[2].q), "0"(v));
+    return out;
+}
 
 // Vu0::Transpose, out of the class: g++ 2.95 takes a named return value only in a definition
 // at namespace scope (in the class body it is a parse error; on a member template cc1 never

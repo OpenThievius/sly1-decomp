@@ -17,7 +17,7 @@ D_00249E18	00249E18	36	.rodata	src/main/disc_access.cpp
 D_00249E3C	00249E3C	8	.rodata	src/main/flagged_object.cpp
 D_00249E44	00249E44	8	.rodata	src/main/collider_span.cpp
 D_00249E4C	00249E4C	4	.rodata	src/main/camera.cpp
-D_00249E50	00249E50	68	.rodata	src/main/state_notifier.cpp
+D_00249E50	00249E50	64	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	184	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
@@ -29,8 +29,8 @@ D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp
 D_0024A7F0	0024A7F0	88	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	1888	.rodata	src/main/player.cpp
-D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
-D_0024B000	0024B000	36	.rodata	src/main/entry_queue.cpp
+D_0024AFF4	0024AFF4	4	.rodata	src/main/file_1793C0.cpp
+D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	176	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	12	.rodata	src/main/file_180EB0.cpp
 D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
@@ -231,7 +231,7 @@ D_0062A540	0062A540	560	.bss	src/lib/file_1FAC00.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	8	.bss	src/lib/unwind.c
-D_0062A7C0	0062A7C0	704	.bss	src/lib/cdvd.c
+D_0062A7C0	0062A7C0	696	.bss	src/lib/cdvd.c
 D_0062AA80	0062AA80	704	.bss	src/lib/pad.c
 D_0062AD40	0062AD40	5632	.bss	src/lib/memory_card_client.cpp
 D_0062C340	0062C340	512	.bss	src/lib/mpeg_ipu_decode.cpp

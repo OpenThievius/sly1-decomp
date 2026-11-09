@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2522/2532 (99.6%), checked 2026-11-08
+// BYTES 2524/2532 (99.7%), checked 2026-11-09
 // NEAR: every block is retail's, registers included; left: two pairs of instructions in another order: retail fills GatherCollidersInSphere's delay slot with the &list argument (here the pos copy after the call goes there), and stores the scatter loop's FromFloats vector to its local before its slot (here the slot first).
 // Tried (night-close10): Set, a u128 copy, a chained store and Vec forms for the scatter vector
 // (Vec makes the loop big enough that loop.c keeps the index product: 4 bytes longer); pos set
