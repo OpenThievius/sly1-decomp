@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 764/756, checked 2026-11-07
+// SIZE 764/756, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 54); 169 differing lines before, 167 now.
 // NEAR: the whole function is written (the ground push, the two ramps, the rotated tangent and MulAddX2, whose result now takes a's register as retail's does); 8 bytes over retail. Now retail's: push = 0 as the first arm of the test, the rotation kept in a register. Still differs: retail's frame is 16 bytes larger (out1 and out2 at 80 and 84, a 16-byte slot at 64 that the tail's weights take, and in the inner block one more 16-byte slot before the weight at 32), the copy of &c->end[e] (move a1, a0) retail keeps for the store, and the VU0 registers of the tail (retail loads m660's rows into vf5, vf3, vf4).
 #include "common.h"
 #include "switched_collider.h"
@@ -51,7 +52,7 @@ void func_001C54D0(TurningCollider* self, Contact03* c, s32 e)
         B.w = *(ThreeWords*)self->f704;
         A.f[0] = A.f[0] * self->f700;
         B.f[0] = B.f[0] * self->f700;
-        f32 cur = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
+        f32 cur = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
         push = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->v80))) / w;
         ApproachValueWithRamp(cur, 0.0f, g_gameClock.dt, &A, &out1);
         ApproachValueWithRamp(cur, -self->f6CC, g_gameClock.dt, &B, &out2);

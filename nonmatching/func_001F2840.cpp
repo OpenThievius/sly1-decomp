@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1622/1712 (94.7%), checked 2026-11-08
+// BYTES 1638/1712 (95.7%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 3 (source line 177); 39 differing lines before, 34 now.
 // NEAR: retail's blocks: the weight switch shares its curve through a label after case 6 (one block in retail), an out-of-range mode stores the 1.0 still in $f0, the matrices are read as rows from the frame (Vu0::TransformRows), the inner loop's values are Vu0::Vec (big enough that loop.c leaves it as retail's); left: register choices only (the inverse's scalar store, the three lengths' qmfc2 GPRs, the pivot's loads, out[k] formed as k*4 + out where retail adds out first).
 #include "transform_object.h"
 #include "warp_page.h"
@@ -174,7 +175,7 @@ void func_001F2840(Oscillator* self)
                         f32 sn, cs;
                         s32 k;
                         Vu0::Vec qv; qv.q = qc;
-                        f32 a = Vu0::ToFloat(Vu0::Dot(qv, Vu0::Vec::Of(ent->axis))) * (ent->rate * 6.2831855f);
+                        f32 a = Vu0::ToFloatMoved(Vu0::Dot(qv, Vu0::Vec::Of(ent->axis))) * (ent->rate * 6.2831855f);
                         k = ent->index;
                         ComputeSinCos(a, &sn, &cs);
                         out[k++] = cs * *w;

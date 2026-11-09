@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1512/3316 (45.6%), checked 2026-11-08
+// BYTES 1539/3316 (46.4%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+3); 561 differing lines before, 554 now.
 // NEAR (2026-11-08, large-1D7778): same size, the frame's locals and every block's code are retail's; three things differ
 //
 // Still differs (89.9% of instructions with registers, build/swarm notes in the worker's report):
@@ -128,7 +129,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         ComputeObjectMotionInFrame(self, 0, &s->v20, &motion, 0, 0, 0);
         u128 axis = Vu0::Q(s->v30);
         u128 side = Vu0::Sub(Vu0::Q(motion), Vu0::MulX(axis, Vu0::Dot(Vu0::Q(motion), axis)));
-        f32 slip = Vu0::ToFloat(Vu0::Length(side));
+        f32 slip = Vu0::ToFloatMoved(Vu0::Length(side));
         s->f5C += ((ValueRange*)D_002753C0)->Clamp(((QuadraticCurve*)D_002753B0)->Eval(slip)) * dt;
         f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v20), Vu0::Q(b)), Vu0::Q(dir))) / len;
         f32 one = 1.0f;
@@ -140,7 +141,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         } else {
             t = along;
         }
-        f32 push = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v40), Vu0::Q(motion)), Vu0::Q(dir))) * ((QuadraticCurve*)D_002753D0)->Eval(t) * D_002753C8
+        f32 push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v40), Vu0::Q(motion)), Vu0::Q(dir))) * ((QuadraticCurve*)D_002753D0)->Eval(t) * D_002753C8
                  + Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v20), Vu0::Q(b)), Vu0::Q(dir))) * ((QuadraticCurve*)D_002753E0)->Eval(t) * D_002753CC;
         if (push < 0.0f) {
             continue;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 560/568, checked 2026-11-07
+// BYTES 341/568 (60.0%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 42); 101 differing lines before, 84 now.
 // NEAR: about 80% of the instructions equal; the first loop keeps the zone in $s0 and the 0x7C0 cursor in $s1 (retail the other way round) and the call is laid out inline after the second test where retail jumps back to a shared call. The dot products and branches match.
 #include "common.h"
 #include "trigger_zone.h"
@@ -39,7 +40,7 @@ void func_0013FAE8(TriggerZone* self)
     if (self->state == 0) {
         where = &self->v140;
         fa = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[0])));
-        ga = Vu0::ToFloat(Vu0::Dot(Vu0::Q(v[0]), Vu0::Q(w[0])));
+        ga = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(v[0]), Vu0::Q(w[0])));
         gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(v[1]), Vu0::Q(w[1])));
         fb = -fa;
     } else {

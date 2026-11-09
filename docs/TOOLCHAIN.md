@@ -701,6 +701,33 @@ func_00140258, func_001F2EF0, func_001F3408):
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
 
+### Which pass moves an invariant: the preheader's order (func_001971B8)
+
+The preheader holds what loop.c put before the loop's start, in the order it put it there, and
+sched1 keeps that order when the insns tie (all alu, priority 1, one set each: INSN_LUID decides).
+Each pass emits its moved invariants (in their order in the loop) and then the start values of
+the givs strength_reduce reduced, all before the loop's start; so what the second pass
+(`-frerun-loop-opt`) moves comes after the first pass's givs.
+
+- **The gauge collider's best-target search.** Retail's preheader is `addiu s4,sp,432` (the
+  address of a local, moved by pass 1), `move s2,sp` (the reduced `&list[i]`, started by pass
+  1), then `lui s6` (the high part of the angle limit D_0026A82C). Ours moved the `lui` in pass
+  1 too, so it came before `move s2,sp`. The dump (`-dL`) showed two causes: the high part's
+  lifetime was 11 luids, because `D_0026A82C < fabsf(WrapAngle(...))` expands the global's
+  address before the calls; and the loop had 70 insns in pass 1, 60 in pass 2.
+- **Retail's form: lifetime 1, and a loop of 81 to 90 insns in pass 1.** Written
+  `fabsf(WrapAngle(...)) > D_0026A82C` (the same `c.lt.s` with the constant first) the `lui` is
+  expanded right before its load (lifetime 1), so moving it needs `80 * 1 * 1 >= insns`. With
+  the loop's vector statements as Vu0::Vec values (the project's convention, whose movti copies
+  loop.c counts) pass 1 sees 84 insns and leaves the `lui`; strength reduction takes pass 2 down
+  to 75, which moves it, after the giv's start: retail's order. With all three of the loop's
+  vector statements as Vec the counts are 90 and 81 and neither pass moves it (one Vec statement,
+  the angle's difference, stays a u128 expression). With the u128 forms (70 insns) the `lui` and
+  its `lw` stay apart in the order of the first pass.
+- **Reading it.** A preheader `lui` (or any moved constant) placed after a giv's start value was
+  moved by the second pass: its first-pass count was over `80 * lifetime` (160 without a call)
+  and its second-pass count under it.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
@@ -824,6 +851,58 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   instead of `||` gives 10 refs (priority 0.24), and the function matches. global.c's priority is
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
+
+### sched2 keeps sched1's dependences (func_001358D0)
+
+- **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
+  LOG_LINKS (add_dependence skips a link it already has); nothing frees them between sched1 and
+  sched2. So sched2 also sees every dependence sched1 had, on pseudos and hard registers that
+  reload has since changed: a stale link still counts as a dependent in rank_for_schedule.
+- **What that decides: two argument loads of one call.** After reload, rank_for_schedule has no
+  register weight; at equal priority the class of dependence on the last insn, then the number
+  of dependents, then insn order decide. In CollectPanelEntriesOfClass the first
+  `ArctangentOfRatio(d.y, d.x)` loads $f12 and $f13 at the same priority, and the next call's
+  arguments (`d.z`, `ToFloat(Sqrt(DotXY(v, v)))`) set the same two registers again. With
+  ToFloat, combine had put the asm's output straight into $f13 (`(set $f13 (asm_operands
+  "qmfc2"))`, invalid for "=r", so reload added v0 and an mtc1): the qmfc2 kept sched1's output
+  dependence on the $f13 load and the mtc1 got its own, so that load had one dependent more than
+  the $f12 load (7 to 6), issued first, and the $f12 load went to the call's delay slot, the
+  reverse of retail's. With ToFloatMoved (`mtc1` alone, the qmfc2 the compiler's into a pseudo),
+  only the mtc1 depends on the $f13 load, the two loads tie at 6, and sched1's order ($f12
+  first) stands: retail's (PAL's too, with the caption box's fields at PAL's offsets). ToFloatMoved
+  is the helper already used wherever retail's qmfc2 is the compiler's own copy (agent.cpp's
+  distances, the length tests above); nothing else changes. The forward-dependence table of `-dS -fsched-verbose-6`'s `.sched2`
+  dump lists each insn's dependents; a link in the RTL whose register no longer matches is a
+  stale one.
+
+### The rest of rank_for_schedule (func_001782C0)
+
+Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
+
+- **INSN_REG_WEIGHT counts every SET, a store included.** find_pre_sched_live adds one per
+  SET or CLOBBER in the pattern, whatever its destination, and takes one off per REG_DEAD or
+  REG_UNUSED note, in the insn order before scheduling. A store whose value dies there weighs
+  0, a load +1 (0 if it is the last use of its base pointer), an asm that kills two inputs -1.
+  A Scalar's slot store comes before the asm that uses the weight (the helper's body), so the
+  asm, not the store, is the weight's death.
+- **Asms cost one cycle both ways.** insn_cost gives an unrecognised insn (an asm) a cost of 1
+  as a producer, and a link into an asm is LINK_COST_FREE (1), so the "last scheduled insn"
+  class is 3 for every candidate that follows an asm or feeds one. Ties then fall to the number
+  of dependents and last to INSN_LUID, the insn order before scheduling. asms count against
+  the issue rate (2) like any insn.
+- **ComputeTargetArc (func_001782C0).** The tail's weights dt and -0.5 dt share one stack
+  slot with three stores. Local allocation ranks the -0.5 dt weight (3 references) between
+  the end point (5 over 30) and dt (5 over 34) only if its life is exactly 5 insns: retail's
+  vf4, under the end point's vf3 and above dt's vf5. With gravity read once into a local before
+  the division, its load (then self's last use, weight 0) ties with the weight's qmtc2 in one
+  cycle on priority, weight and dependents, and its lower LUID puts it first, outside the
+  weight's life (4 insns: the weight outranks the end point and takes vf3); read before the end
+  point, the load lost on weight (+1), the weight's qmtc2 went before the division on its
+  dependents, and the weight lived 6 (dt took vf4). Read in each expression
+  (`MulAddX(v, Vu0::Q(self->gravity), Scalar(dt * -0.5f))`, the same for the last weight), the
+  load is expanded after the weight's qmtc2, loses the LUID tie and lands inside its life:
+  retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
+  (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
 
 ## Conditional moves (jump.c)
 
@@ -968,6 +1047,123 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   them with our counts (100,000 random orders that keep the dependences). Every source form
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
+
+### A 64-bit field's bits as an int: one truncate (func_00210970)
+
+- **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a
+  u64 field. Written as `(s32)(((s64)p->f20 << 27) >> 32) & 0xF` (the shape of retail's
+  `dsll 27; dsra32`), the RTL is a DImode shift and a separate truncate of a shift by 32: two
+  insns before the `and`. Written as the original plausibly had it, `(u32)(p->f20 >> 5) & 0xF`,
+  combine makes one `(truncate:SI (lshiftrt:DI x 5))` insn, which the R5900's truncdi pattern
+  emits as the same two instructions (`dsll 27; dsra32`, the sign-extended low word). The
+  register difference was this one insn of sched1's chain.
+- **How.** With the longer chain, sched1 issued the table address's `addu` in the cycle after the
+  load of the next field to be copied (`s->f5C`, ready as soon as the store before it), so that
+  load's pseudo lived over 3 insns and the table entry's over 2: local-alloc's ranking
+  (2 refs / span) placed the entry first, in $v1, and the field took $a3. One insn shorter, the
+  `addu` issues with the field's load and before it in rank order; both pseudos then span 2
+  insns, the tie goes to creation order (the field's load is first), the field takes $v1 and
+  the entry $a2, the table base's register, free after the `addu`. sched2 then puts the field's
+  load back before the `addu`: retail's code. The table load (u32, int alias set) does not
+  depend on the u64 store before it, nor the field load on the u64 store, which is why only the
+  chain's length moved them.
+- **Rule.** Write a 64-bit field's bits read as an int as the shift and cast the source would
+  have (`(u32)(x >> n)`), not the shift pair the disassembly shows: the pair is the truncate's
+  expansion, and written out it is one insn more before register allocation.
+
+### A conversion's latency in sched2 (func_00126270)
+
+- **ToFloat's mtc1 is reload's, ToFloatMoved's is the asm's.** With ToFloat the qmfc2 is the
+  asm (unit none, cost 1) and the mtc1 to the FPR is an insn reload makes (`$f12=$3`, on the
+  memory and flop units), whose latency to the next float insn is 2 in the `-dR
+  -fsched-verbose-6` dump. With ToFloatMoved the qmfc2 is the compiler's and the mtc1 is the
+  asm, cost 1. In func_00126270's view test, `fabs(ToFloat(Dot(n, cam->f80)))` left abs.s
+  queued a cycle after the mtc1, so the cubic's first coefficient load (c[3]) took the memory
+  unit first, and c[0]'s load fell into the cycle before the first mul.s. With ToFloatMoved
+  abs.s issues the cycle after the mtc1, ahead of the c[3] load (priority 29 against 28), the
+  multiply is ready a cycle earlier and outranks c[0]'s load: retail's order. The mtc1 also
+  holds the memory unit in its cycle, which is what keeps c[0]'s load (ready then) from going
+  before the other coefficients. A swap of an FPR op and a load right after a mtc1 is worth
+  trying with the other conversion first.
+
+### A scalar local's store and a call's argument registers (func_00188270)
+
+Which register a pointer read for two call arguments takes can be decided by whether a store
+before the call is a scalar's (2026-11-08, BuildObjectPairContacts, read from alias.c,
+function.c and haifa-sched.c with `-dS -fsched-verbose-6` dumps):
+
+- **The tie.** Retail loads the object into a1 and computes the second argument from it last
+  (`lw a1, 0(sp); ... lwc1 $f12, 980(a1); addiu a1, a1, 992` in the jal's slot). local-alloc
+  ties a pseudo to the destination of the insn where it dies, a hard register included
+  (combine_regs), so the object is a1 only if sched1 puts the field load (`$f12`) before the
+  address (`a1 = x + 992`).
+- **The dependence.** The out-parameter's store before the call (`cur = buf`, its address passed
+  as the fourth argument) was a member of a stack struct (`fr.cur`, `mem/s` at a fixed address);
+  the field load `x->f3D4` is `mem/s` at a varying address. Two structure references are never
+  separated (fixed_scalar_and_varying_struct_p needs one MEM_SCALAR_P), so the load waited two
+  cycles for the store, the address was issued first, and the object died in the load: v0. The
+  store cannot win the first cycle instead: both it and the object's load have priority 6 and
+  weight 1, and the load has three dependents to the store's two (rank_for_schedule). A store
+  through `Item** p = &fr.cur` has neither flag and depends the same way.
+- **A scalar local is MEM_SCALAR_P.** `Item* cur;` declared on its own, with `&cur` passed to the
+  call, is a pseudo made ADDRESSOF and given its slot by purge_addressof, which sets the flags
+  with MEM_SET_IN_STRUCT_P (put_reg_into_stack: scalar for a non-aggregate type). The load no
+  longer depends on the store, sched1 issues the field load before the address (priority 4 to
+  3), and the object ties to a1; sched2 then gives retail's order exactly.
+- **What the slots show.** purge_addressof gives scalar slots in insn order of the first
+  address it cannot fold away, after every aggregate local (an aggregate's BLKmode slot is
+  rounded to 16 bytes at its declaration). Retail's frame has the ordered pair at 0 (a struct of
+  two pointers, rounded to 16), one byte at 0x10 that nothing reads, then `cur` at 0x14 and the
+  result at 0x18. The byte is an empty object whose inline constructor and destructor call
+  PushBackMemoryMark and PopBackMemoryMark: its address, the inline constructor's `this`, is
+  met before `&cur` and not folded away (measured, not traced in purge_addressof), so it is put
+  on the stack first, and the result's load comes after PopBackMemoryMark only when the
+  object's scope closes before `return`. A frame with an unexplained small slot before the
+  address-taken locals is worth reading as such a scoped object.
+
+### A prototype's parameter order and the order of argument moves (func_0013A128)
+
+The EE's ABI gives integer and float arguments their registers independently (a0-a3 and
+$f12-$f19 each in order), so `f(Vec3* in, Vec3* out, f32 s, f32 t)` and `f(Vec3* in, f32 s,
+f32 t, Vec3* out)` take the same registers and the callee's code cannot tell them apart. The
+caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-verbose-6`):
+
+- **The moves come in parameter order.** load_register_parameters emits one move per argument
+  in the prototype's order, and combine leaves each where its move was, so the order of `a0`,
+  `a1`, `$f12` and `$f13` before sched1 is the parameter order.
+- **That order is sched1's last tie-break, and sched2's.** Three such moves (`addiu a0`, `addiu
+  a1`, `mov.s $f13` from a callee-saved zero) have the same priority, weight and dependents;
+  the scheduler issues them by INSN_LUID, and sched2's LUIDs are sched1's output order. In
+  func_0013A128's three RemapQuadraticParameter calls retail sets a0, then $f13, then a1:
+  declared (in, out, s, t) the second call set a1 before $f13; declared (s, t, in, out), $f13
+  before a0. Declared `(Vec3* in, f32 s, f32 t, Vec3* out)` all three match (the third's a0
+  goes first in sched2 because the `still = 0` after the call, allocated to a0, is one
+  dependent more). The definition (file_1E88D0) matches with either order, so it takes the
+  order its caller proves.
+- **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
+  compare their order in the `.combine` dump with the prototype; the order of a function's own
+  parameters is evidence only at its call sites.
+
+### The operand order of an address sum (expr.c, func_0013A128)
+
+`addu a0, v0, t0` (index first) and `addu a0, t0, v0` (base first) come from two different
+paths in expand_expr's PLUS_EXPR (2026-11-08, read from expr.c and optabs.c):
+
+- **A pointer initialised with a sum keeps the source order.** `u8* out = &colors[k * 4];`
+  (C++ folds `&*(p + i)` to `p + i`) is expanded outside an address, so it goes to
+  expand_binop, which swaps commutative operands only when the second is a register and the
+  first is not (or the first is a constant): two registers stay base first.
+- **An address expanded as a memory reference puts the multiplication first.** Inside a MEM
+  the sum is expanded with EXPAND_SUM; the multiplication by the element size comes back as a
+  `(mult k 4)` and the both_summands code ("put a constant term last and put a multiplication
+  first") returns `(plus (mult k 4) base)`, which force_operand turns into `addu index, base`.
+  So the store written as an element (`self->color[k][j] = ...`, or `colors[k * 4 + j]`) gives
+  retail's operand order, and loop.c's strength reduction then makes the pointer that is
+  incremented by one, as retail has it. The reads in the same loop (`(colors + i * 4)[j]`)
+  show the same order for the same reason.
+- **A constant base folds into the index.** `self->color[0] + k * 4` and `&self->color[k][0]`
+  as a pointer's initialiser fold the member's offset into the index (`sll; addiu 1424; addu
+  base`), losing the hoisted base: the form that keeps both is the element store.
 
 ## Shapes of large functions
 

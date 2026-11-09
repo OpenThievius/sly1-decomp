@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 520/476, checked 2026-11-07
+// SIZE 520/476, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 68); 112 differing lines before, 110 now.
 // NEAR: the loops and the VU0 part are right; the constants 1 and 2 of the mode test are kept in s6 and s7 over the whole outer loop (frame 144), where retail loads them into a2 and a3 inside it (frame 112).
 #include "common.h"
 #include "id_lookup_object.h"
@@ -65,7 +66,7 @@ void UpdateGroupsNearCamera(World* self)
                 if ((m->f88 & cam->f21C) == cam->f21C) {
                     f32 r = m->f80 + m->f2A8;
                     u128 diff = Vu0::Sub(Vu0::Q(m->v140), Vu0::Q(cam->f40));
-                    f32 d = Vu0::ToFloat(Vu0::Dot(diff, diff));
+                    f32 d = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
                     if (!(r * r < d)) {
                         break;
                     }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1587/1656 (95.8%), checked 2026-11-08
+// BYTES 1619/1656 (97.8%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 148); 34 differing lines before, 28 now.
 // NEAR (2026-11-08, night-large3): the whole function is right but for registers in two places:
 // the six step addresses kept in s1, s4..s7, fp are hoisted before the first gain loop with
 // &spin (sp+0x30) and &spinAlong (sp+0xB0) in s5 and s4, where retail has s4 and s5; and in the
@@ -145,7 +146,7 @@ void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
         self->desc03()->m29(self, &m, 0);
         BuildShortestArcRotation(&g_unitZVector, &normal, &r);
         m = RotateRowsBy(r, m);
-        f32 angle = Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->m110.r[2]), Vu0::Q(m.r[2]))));
+        f32 angle = Arccosine(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->m110.r[2]), Vu0::Q(m.r[2]))));
         Vu0::Set(axis, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(self->m110.r[2]), Vu0::Q(m.r[2])), Vu0::Q(g_unitXVector)));
         Vu0::Q(torque) = Vu0::MulX(Vu0::Q(axis), Vu0::Scalar(angle * (push * 3.0f) * depth));
         AddColliderTorque(self, &torque);

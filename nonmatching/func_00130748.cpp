@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 967/1024 (94.4%), checked 2026-11-08
+// BYTES 979/1024 (95.6%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 55); 31 differing lines before, 28 now.
 // BYTES 0/0, checked 2026-11-07
 // NEAR (2026-11-07, worker night-large1): the rotation's Hermite step (two rotations and their
 // spins, at t of dur, into a rotation and a spin), all its code in retail's order, 31 instructions
@@ -52,7 +53,7 @@ void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 static inline u128 NormalizeAxis(Vec02& v, const Vec02& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
-    if (Vu0::ToFloat(len) < 0.0001f) {
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
         v = fallback;
     } else {
         Vu0::Q(v) = Vu0::DivX(Vu0::Q(v), len);

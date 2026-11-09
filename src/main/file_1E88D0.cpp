@@ -1596,7 +1596,7 @@ s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)
     return 2;
 }
 
-void RemapQuadraticParameter(Vec3* in, Vec3* out, f32 s, f32 t)
+void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out)
 {
     out->z = in->z * s * s;
     out->y = (in->z + in->z) * s * t + in->y * s;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 347/408 (85.0%), checked 2026-11-08
+// BYTES 354/408 (86.8%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 50); 25 differing lines before, 24 now.
 // NEAR (night-low1, 2026-11-08): the direction set through an inline taking the fallback by
 // reference (retail's unit-X address formed before the difference, its lq in the fallback arm,
 // the length's mtc1 at once: ToFloatMoved), the speed's length before the ramp's stores, and the
@@ -47,7 +48,7 @@ void UpdateObjectCreator(ObjectCreator* self)
     if (v == 2) {
         PlacedObject* anchor = (PlacedObject*)self->createsObject;
         SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)*(void**)((u8*)anchor + 0x354))->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
-        f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
+        f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
         RampProfile* p = &ramp;
         p->maxSpeed = 3000.0f;
         p->endSpeed = 0.0f;

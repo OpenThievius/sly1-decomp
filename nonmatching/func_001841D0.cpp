@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1352/1428 (94.7%), checked 2026-11-08
+// BYTES 1424/1428 (99.7%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 88); 25 differing lines before, 4 now.
 // NEAR (2026-11-08): RefreshConeVolumeShape (func_001841D0): retail's size and frame, regdiff order, 95.2% in src/main/base_object.cpp. What got there: the locals declared where they are first used (the colour's Scalar slot freed at 0x40 and taken by each case's own vector, fit after it), the side planes counted upward (loop.c walks them with a pointer and counts down), the far and near planes' vectors stored through self and their distances through references taken before the loop (retail's v1, a1), 1.0 and 0.0 as named locals (f20, f21), the default ramp written [0][0], [1][0], [0][1], [1][1]. Still differs: the schedule around the far plane (retail loads rangeMax before the axis and the 50.0 before the store), and the two spilled addresses of the last FitUnitRampBetweenPair call take each other's slot (retail 0x144 for &rangeMin, 0x140 for &ramp[1][3]): their pseudos come from GCSE's hoisting in the order the expressions first appear. Needs the ConeVolume fields this branch adds (shape, hsv, planes, basis, packetSize, packet).
 // In the context of its file, src/main/base_object.cpp.
 #include "common.h"
@@ -85,7 +86,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
             self->planes[i].w = -Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(self->planes[i])));
         }
         Vu0::Q(self->planes[4]) = Vu0::Q(self->basis.r[0]);
-        far.w = -self->rangeMax - Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(self->planes[4])));
+        far.w = -self->rangeMax - Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(self->planes[4])));
         f32 proj[4][4];
         f32 view[4][4];
         f32 ramp[2][4];

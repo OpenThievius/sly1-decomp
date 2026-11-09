@@ -802,7 +802,7 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 
 s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
 
-void RemapQuadraticParameter(Vec3* in, Vec3* out, f32 s, f32 t);
+void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
 
 void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 

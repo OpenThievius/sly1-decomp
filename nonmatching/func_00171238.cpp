@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1960/1968, checked 2026-11-08
+// BYTES 1177/1968 (59.8%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 148); 424 differing lines before, 255 now.
 // NEAR: the pose of the five parts, the path sample, the turn weights and the push are retail's blocks; left: retail keeps the speed (the dot as a vector) in s0 across the curve's calls where this spills it, forms the direction's address again for each call (here kept in s0), and lays the mode test's else branch out with its own load of the part.
 #include "common.h"
 #include "globals.h"
@@ -145,7 +146,7 @@ void func_00171238(Player* self)
                     u128 speed = Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(vel));
                     Vu0::Q(k) = speed;
                     Vu0::Q(along) = Vu0::MulX(Vu0::Q(vel), Vu0::Q(k));
-                    f32 t = self->f23C4 + Vu0::ToFloatMoved(speed) * D_002637D8;
+                    f32 t = self->f23C4 + Vu0::ToFloat(speed) * D_002637D8;
                     f32 len = c->vt->m08(c);
                     if (c->wrap != 0) {
                         t = WrapModulo(t, len);

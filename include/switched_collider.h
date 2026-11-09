@@ -889,7 +889,8 @@ struct GaugeCollider : SwitchedCollider {
     void* f660;             // 0x660
     void* f664;             // 0x664
     void* f668;             // 0x668: its record at +0x2D0 takes the held object's value (func_001974F8)
-    u8 pad66C[0x674 - 0x66C];
+    u8 pad66C[0x670 - 0x66C];
+    void* f670;             // 0x670: the node func_001971B8 measures from (its world position and +0x40)
     void* f674;             // 0x674: the object being carried (func_001974F8)
     void* f678;             // 0x678
     s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720

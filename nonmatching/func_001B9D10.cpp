@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 493/536 (92.0%), checked 2026-11-08
+// BYTES 501/536 (93.5%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 2 (source line 43); 16 differing lines before, 14 now.
 // NEAR (2026-11-08, night-size2): the same size as retail now: the difference of the torque as a u128 kept for the length and the scale (retail's vf6 across the if, where Q(torque) read it back from the stack). Still differs: float registers (retail keeps the clamped step in f4 and the dot in f3, ours in f3 and f0, so rest is in f0 there and f2 here; the operands of along + step, the dot read inline and ToFloatMoved change nothing) and the last MulX (retail's Scalar in vf1 and the result in vf2, ours the other way) with the order of the call's argument moves.
 #include "common.h"
 #include "collider.h"
@@ -40,7 +41,7 @@ void TurnColliderTowardRotation(Collider* self, Mat02* target, f32* gain, f32 dt
     Vu0::Q(have) = Vu0::MulAddX(Vu0::Q(self->v160), Vu0::Q(self->v180), Vu0::Scalar(dt));
     u128 diff = Vu0::Sub(Vu0::Q(want), Vu0::Q(have));
     Vu0::Q(torque) = diff;
-    f32 error = Vu0::ToFloat(Vu0::Length(diff));
+    f32 error = Vu0::ToFloatMoved(Vu0::Length(diff));
     f32 scale;
     if (error < rate * dt) {
         scale = 1.0f / dt;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1290/1944 (66.4%), checked 2026-11-08
+// BYTES 1300/1944 (66.9%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 4 (source line 142); 207 differing lines before, 204 now.
 // NEAR (2026-11-08, night-large3): UpdateObjectGatherer (func_0019B378), 88.9% of the words. The
 // logic, both switches (retail's jump tables) and the list walks follow retail; the frame is
 // 0x10 larger: retail keeps the push vector at 0x20 with both MulXSum weights at 0x30 and the
@@ -139,7 +140,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         }
         case 2: {
             go = 0;
-            if (self->ring == 0 && self->f554 + 0.7f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f618 * 0.3f) {
+            if (self->ring == 0 && self->f554 + 0.7f < g_gameTime[0] && Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f618 * 0.3f) {
                 go = FindColliderFloorContact(self, 0, floor) != 0;
             }
             if (go) {
