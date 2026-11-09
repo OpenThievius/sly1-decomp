@@ -960,7 +960,61 @@ void MarkSweepAxesUnsorted(World* a0)
     a0->f1AEC = 0;
 }
 
-INCLUDE_ASM(func_001389D0);
+void* MoveMemory(void* dst, void* src, s32 bytes);
+
+// An entry of one of the three sweep axes (0x200 of them each in buf1AD8): a body's start (0)
+// or end (1) on the axis and the bound it reads.
+struct SweepEntry {
+    s32 end;                // 0x00
+    Collider* body;         // 0x04
+    f32* bound;             // 0x08
+};
+
+// The axes' size (0x1800 bytes) is a named local, as AddColliderToSweepAxes names its stride:
+// a pseudo live over the loop that gets no saved register, so reload rematerialises it before
+// the multiply and the product takes its own register (docs/TOOLCHAIN.md, "Loops").
+void SortSweepAxes(World* self)
+{
+    if (self->count38 == 0 || self->f1AEC != 0) {
+        return;
+    }
+    s32 axisSize = 0x1800; // one axis: 0x200 entries
+    s32 axis = 0;
+    u8 bit = 1;
+    for (; axis < 3; axis++) {
+        SweepEntry* list = (SweepEntry*)((u8*)self->buf1AD8 + axis * axisSize);
+        SweepEntry* p = list;
+        f32 top = *p->bound;
+        p++;
+        for (s32 k = self->count38 * 2; --k > 0; p++) {
+            f32 v = *p->bound;
+            if (top <= v) {
+                top = v;
+            } else {
+                SweepEntry* q = p - 1;
+                while (q >= list) {
+                    if (*q->bound <= v) {
+                        break;
+                    }
+                    if (p->end != q->end) {
+                        if (p->end == 0) {
+                            SetContactPairFlags(self, (s32)p->body->contacts, (s32)q->body->contacts, bit, 0);
+                        } else {
+                            SetContactPairFlags(self, (s32)p->body->contacts, (s32)q->body->contacts, 0, bit);
+                        }
+                    }
+                    q--;
+                }
+                q++;
+                SweepEntry tmp = *p;
+                MoveMemory(q + 1, q, (p - q) * sizeof(SweepEntry));
+                *q = tmp;
+            }
+        }
+        bit <<= 1;
+    }
+    self->f1AEC = 1;
+}
 
 void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)
 {

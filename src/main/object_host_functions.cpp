@@ -52,7 +52,7 @@ struct Kinds6 { s32 k[6]; };
 void SetStateTriggerStateFromMessage(void* object, s32 mode);
 s32 AddStateTriggerTableEntry(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void ClearObjectRecordValues(void* p);
-s32 FadeInPlacedObject(void* self, f32 value);
+void FadeInPlacedObject(void* self, f32 value);
 s32 FadeOutPlacedObject(void* self, f32 value);
 void* FindObjectAnimationPlayer(void* self, s32 key);
 void* FindObjectHandle(void* self, s32 key);
@@ -921,7 +921,7 @@ ScriptValue* FadeInScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 u
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &f0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)FadeInPlacedObject(obj, f0);
+    FadeInPlacedObject(obj, f0);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1638/1712 (95.7%), checked 2026-11-08
+// BYTES 1682/1712 (98.2%), checked 2026-11-08
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 3 (source line 177); 39 differing lines before, 34 now.
-// NEAR: retail's blocks: the weight switch shares its curve through a label after case 6 (one block in retail), an out-of-range mode stores the 1.0 still in $f0, the matrices are read as rows from the frame (Vu0::TransformRows), the inner loop's values are Vu0::Vec (big enough that loop.c leaves it as retail's); left: register choices only (the inverse's scalar store, the three lengths' qmfc2 GPRs, the pivot's loads, out[k] formed as k*4 + out where retail adds out first).
+// NEAR: retail's blocks: the weight switch shares its curve through a label after case 6 (one block in retail), an out-of-range mode stores the 1.0 still in $f0, the matrices are read as rows from the frame (Vu0::TransformRows), the inner loop's values are Vu0::Vec (big enough that loop.c leaves it as retail's); the skin pointer is read before the inverse's Transform (its load comes before the Scalar slot store in the insn order, so sched1 and reload order it as retail), the pivot's rotation is untied (RotateUntied), and the outputs are an array member (out->f[k]: expand_expr's ARRAY_REF gives out + k*4 where pointer arithmetic gives k*4 + out). Left: reload's round-robin is one step behind retail's from the vertex loop's switch on: the three lengths' qmfc2 GPRs (ours v0, v1, a0; retail v1, a0, v0), then mesh and obj after the loop (lw a1/v0 where retail has v1/a1) and the pivot's load order that follows; retail allocates one more GPR reload (landing on v0) between the loop head's mfc1 a0 and case 1, which the final code does not show (docs/TOOLCHAIN.md, "Reload's round robin").
 #include "transform_object.h"
 #include "warp_page.h"
 #include "oscillator.h"
@@ -48,7 +48,9 @@ struct OscPart {
 // A block of a mesh's vertices: the range of the vertex data and its stride (u16s).
 struct OscVertexRange { u16 start; u16 end; u8 pad04[0x10 - 0x04]; u16 stride; };
 // The vertex data and, for each oscillator entry's output, a pointer to the four floats a vertex.
-struct OscVertexData { Vec02* verts; u8 pad04[0x24 - 0x04]; f32* outs[1]; };
+// A vertex's output: four floats, the entries' cosine and sine weights at their index.
+struct OscOut { f32 f[4]; };
+struct OscVertexData { Vec02* verts; u8 pad04[0x24 - 0x04]; OscOut* outs[1]; };
 struct OscBlock { u8 pad00[0x1C]; OscVertexRange* range; OscVertexData* data; u8 pad24[0x50 - 0x24]; };
 struct OscMesh { u8 pad00[0x58]; s32 blockCount; OscBlock* blocks; u8 pad60[0x68 - 0x60]; void* f68; };
 // An oscillator entry as func_001F2840 reads it (0xD0 bytes from +0x50).
@@ -101,10 +103,11 @@ void func_001F2840(Oscillator* self)
             }
             Mat4R inv;
             InvertMatrix4x4(&m, &inv);
+            void* skin = mesh->f68;
             dir = Vu0::TransformRows(Vu0::Q(inv.r[0]), Vu0::Q(inv.r[1]), Vu0::Q(inv.r[2]), Vu0::Q(inv.r[3]), dir, 1.0f);
-            if (mesh->f68 != 0) {
+            if (skin != 0) {
                 Mat4R t;
-                MultiplyMatrices(&t, part->m40, mesh->f68);
+                MultiplyMatrices(&t, part->m40, skin);
                 m = t;
             }
         }
@@ -127,7 +130,7 @@ void func_001F2840(Oscillator* self)
                 switch (part->mode) {
                 case -1:
                 default:
-                    *w = 1.0f;
+                    weight = 1.0f;
                     break;
                 case 1:
                     p.z = 0.0f;
@@ -151,9 +154,10 @@ void func_001F2840(Oscillator* self)
                 case 6:
                     d = p.z;
                 curve:
-                    *w = range.Clamp(poly.Eval(d));
+                    weight = range.Clamp(poly.Eval(d));
                     break;
                 }
+                *w = weight;
             }
             Mat4R mat;
             BuildMatrixFromRotationAndTranslation(&obj->v140, &obj->m110, &mat);
@@ -162,12 +166,12 @@ void func_001F2840(Oscillator* self)
                 MultiplyMatrices(&t, &mat, mesh->f68);
                 mat = t;
             }
-            u128 pivot = Vu0::Add(Vu0::Q(obj->v140), Vu0::Rotate(obj->m110, dir));
+            u128 pivot = Vu0::Add(Vu0::Q(obj->v140), Vu0::RotateUntied(obj->m110, dir));
             for (s32 j = 0; j < self->entryCount; j++) {
                 OscEntry* ent = &((OscEntry*)((u8*)self + 0x50))[j];
-                f32* out = data->outs[ent->out];
+                OscOut* out = data->outs[ent->out];
                 w = weights;
-                for (v = verts; v < end; v++, out += 4, w++) {
+                for (v = verts; v < end; v++, out++, w++) {
                     u128 q = Vu0::TransformRows(Vu0::Q(mat.r[0]), Vu0::Q(mat.r[1]), Vu0::Q(mat.r[2]), Vu0::Q(mat.r[3]), Vu0::Q(*v), 1.0f);
                     u128 qc = Vu0::Copy(q);
                     switch (ent->mode) {
@@ -178,18 +182,18 @@ void func_001F2840(Oscillator* self)
                         f32 a = Vu0::ToFloatMoved(Vu0::Dot(qv, Vu0::Vec::Of(ent->axis))) * (ent->rate * 6.2831855f);
                         k = ent->index;
                         ComputeSinCos(a, &sn, &cs);
-                        out[k++] = cs * *w;
-                        out[k] = sn * *w;
+                        out->f[k++] = cs * *w;
+                        out->f[k] = sn * *w;
                         break;
                     }
                     case 1: {
                         Vec02 d;
                         Vu0::Vec qv, pv; qv.q = q; pv.q = pivot;
                         Vu0::Q(d) = Vu0::Sub(qv, pv).q;
-                        out[0] = *w * d.x;
-                        out[1] = *w * d.y;
-                        out[2] = *w * d.z;
-                        out[3] = 1.0f;
+                        out->f[0] = *w * d.x;
+                        out->f[1] = *w * d.y;
+                        out->f[2] = *w * d.z;
+                        out->f[3] = 1.0f;
                         break;
                     }
                     }

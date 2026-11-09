@@ -39,10 +39,10 @@ struct PadRecord {
     u8 f4D;                 // 0x4D
     u8 pad4E[0x50 - 0x4E];
     union {
-        s32 f50;            // 0x50: func_0016E1A0
+        s32 f50;            // 0x50: func_0016E1A0, func_0016E738's latch
         f32 x50;            // 0x50: func_0016E940
     };
-    ValueRange a54[4];         // 0x54: func_0016E1A0 (Pair_16E1A0); func_0016E940 reads a54[0].lo
+    ValueRange a54[4];         // 0x54: func_0016E1A0 (Pair_16E1A0), func_0016E738 (from func_0016E940)
     f32 f74;                // 0x74: func_0016E940
     f32 f78;                // 0x78: func_00132500, func_0016E940
     f32 f7C;                // 0x7C: func_00151300, func_0016E940
@@ -50,10 +50,10 @@ struct PadRecord {
     u8 f81;                 // 0x81
     u8 pad82[0x84 - 0x82];
     union {
-        s32 f84;            // 0x84: func_0016E1A0
+        s32 f84;            // 0x84: func_0016E1A0, func_0016E738's latch
         f32 x84;            // 0x84: func_0016E940
     };
-    ValueRange a88[4];         // 0x88: func_0016E1A0; func_0016E940 reads a88[0].lo
+    ValueRange a88[4];         // 0x88: func_0016E1A0, func_0016E738 (from func_0016E940)
     union {
         s16 fA8;            // 0xA8: func_0016E1A0
         u16 keyA8;          // 0xA8: func_0016E940, func_0016EED0, func_0016F108, func_0016F238

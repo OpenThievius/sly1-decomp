@@ -241,28 +241,14 @@ struct Vu0 {
         u128 r[3];
     };
 
-    // The transpose of a 3x3 matrix (any 16-aligned object whose first three quadwords are
-    // the rows), its rows' w zero, built in GPRs as the 4x4 transpose with a zero fourth row:
-    // the rows loaded with lq (the compiler's), then pextlw/pextuw of rows 0 and 1 and of row
-    // 2 with $zero, then pcpyld/pcpyud of those into the three columns. The two steps are two
-    // sequences, as retail schedules other code between them (func_00188B48's -1.0); the
-    // result is returned in a local of its own, stored to the stack as retail's is.
-    template <class M> static Rows Transpose(const M& m)
-    {
-        const u128* p = (const u128*)&m;
-        u128 r0 = p[0], r1 = p[1], r2 = p[2];
-        u128 lo01, hi01, lo2, hi2;
-        __asm__("pextlw %0, %5, %4\n\tpextuw %1, %5, %4\n\tpextlw %2, $0, %6\n\tpextuw %3, $0, %6"
-                : "=&r"(lo01), "=&r"(hi01), "=&r"(lo2), "=&r"(hi2) : "r"(r0), "r"(r1), "r"(r2));
-        u128 c0, c1, c2;
-        __asm__("pcpyld %0, %4, %3\n\tpcpyud %1, %3, %4\n\tpcpyld %2, %6, %5"
-                : "=&r"(c0), "=&r"(c1), "=&r"(c2) : "r"(lo01), "r"(lo2), "r"(hi01), "r"(hi2));
-        Rows t;
-        t.r[0] = c0;
-        t.r[1] = c1;
-        t.r[2] = c2;
-        return t;
-    }
+    // The transpose of a 3x3 matrix, its rows' w zero, built in GPRs as the 4x4 transpose with
+    // a zero fourth row: the rows loaded with lq (the compiler's), then pextlw/pextuw of rows 0
+    // and 1 and of row 2 with $zero, then pcpyld/pcpyud of those into the three columns. The
+    // two steps are two sequences, as retail schedules other code between them (func_00188B48's
+    // -1.0). The rows are made in a local of its own and the matrix is returned by value,
+    // each row going to the result as soon as it is made (g++'s named return value, as
+    // matrix.cpp's MultiplyMatrices): retail stores each row to the local, then to the result.
+    static Rows Transpose(const Rows& m);
 
     // A float in all four fields, built in a GPR: pextlw t, t, t (the float twice in the low
     // doubleword), pextlw r, t, t (four times), where t is the GPR the float came in: the mfc1
@@ -352,6 +338,22 @@ struct Vu0 {
         u128 r;
         __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddx.xyzw %0, %4, %5x"
                 : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t));
+        return r;
+    }
+
+    // a + s.x * b + t.x * c + u.x * d: MulAddX2 with a third weighted vector (vadda.xyzw ACC, a,
+    // vf0; two vmaddax.xyzw ACC; vmaddx.xyzw), as MulXSum3 and MulXSum4 extend MulXSum; one use in
+    // retail so far, func_001DDE90. Each weight is listed before its vector, as the sum reads
+    // (a + s b + t c + u d): an inline call emits its arguments in parameter order, so a weight's
+    // slot store comes before the next vector's load, which retail's schedule shows
+    // (docs/TOOLCHAIN.md, "A weight listed before its vector"). The asm's operands keep the order
+    // a, b, s, c, t, d, u, which decides which input's register the result takes.
+    static u128 MulAddX3(u128 a, u128 s, u128 b, u128 t, u128 c, u128 u, u128 d)
+    {
+        u128 r;
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddax.xyzw ACC, %4, %5x\n\t"
+                "vmaddx.xyzw %0, %6, %7x"
+                : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t), "j"(d), "j"(u));
         return r;
     }
 
@@ -818,6 +820,13 @@ struct Vu0 {
         return r;
     }
 
+    static Vec MulAddX3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u, Vec d)
+    {
+        Vec r;
+        r.q = MulAddX3(a.q, s.q, b.q, t.q, c.q, u.q, d.q);
+        return r;
+    }
+
     template <class M> static Vec RotateUntied(const M& m, Vec v)
     {
         Vec r;
@@ -946,5 +955,27 @@ struct Vu0 {
         return r;
     }
 };
+
+// Vu0::Transpose, out of the class: g++ 2.95 takes a named return value only in a definition
+// at namespace scope (in the class body it is a parse error; on a member template cc1 never
+// finishes). docs/TOOLCHAIN.md, "A matrix returned by value".
+inline Vu0::Rows Vu0::Transpose(const Rows& m) return y
+{
+    const u128* p = (const u128*)&m;
+    u128 r0 = p[0], r1 = p[1], r2 = p[2];
+    u128 lo01, hi01, lo2, hi2;
+    __asm__("pextlw %0, %5, %4\n\tpextuw %1, %5, %4\n\tpextlw %2, $0, %6\n\tpextuw %3, $0, %6"
+            : "=&r"(lo01), "=&r"(hi01), "=&r"(lo2), "=&r"(hi2) : "r"(r0), "r"(r1), "r"(r2));
+    u128 c0, c1, c2;
+    __asm__("pcpyld %0, %4, %3\n\tpcpyud %1, %3, %4\n\tpcpyld %2, %6, %5"
+            : "=&r"(c0), "=&r"(c1), "=&r"(c2) : "r"(lo01), "r"(lo2), "r"(hi01), "r"(hi2));
+    Rows t;
+    t.r[0] = c0;
+    y.r[0] = t.r[0];
+    t.r[1] = c1;
+    y.r[1] = t.r[1];
+    t.r[2] = c2;
+    y.r[2] = t.r[2];
+}
 
 #endif

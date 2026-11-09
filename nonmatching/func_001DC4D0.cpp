@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 552/576 (95.8%), checked 2026-11-08
-// NEAR: the size of the allocation read before the walk's frame is built (this brings the push of the frame into the call's delay slot, as retail's): still differs: skip and the result cursor in s1/s2 the other way round (retail gives the object to skip s1 and the cursor s2), and the count pointer spilled at sp+0x20 (retail: sp+0x24, so a 4-byte slot at +0x20 is taken in retail). Tried: no goto, the cursor declared before the walk.
+// BYTES 574/576 (99.7%), checked 2026-11-08
+// NEAR (2026-11-08, w5-1DC4D0): every instruction and register is retail's; only the count pointer's spill slot differs (sp+0x20 here, retail sp+0x24). What got here: one `*cursor++ = part` (the filter's two outcomes as continues in a for): two stores counted twice in the inner loop's weighted refs and put the cursor's priority (1.039) above the skipped object's (0.472), so global-alloc gave the cursor s1; with one store the object goes first, as in retail; and `cursor = *out = Allocate...`, which stores the call's value from v0. The slot: reload gives an unallocated pseudo its slot after every declared local, so retail has an object of at most 4 bytes declared after d that nothing reads. An empty class with an empty destructor declared before the parts loop gives EXACT (a class with a destructor is addressable, so it keeps a 1-byte, 16-aligned slot at 0x20 and the spill moves to 0x24), and GatherCollidersInBox (func_001DC238) has the same small object at 0x30 (its frame ends at 0x34, rounded to 0x40); not landed, because no type the original plausibly declared there is known (an invented empty type is a padding local). Tried: an empty object without a destructor, with a constructor only, or with a method that ignores this (no slot); a u8[3] or a destructor object at function scope (a 16-byte slot); docs/TOOLCHAIN.md, "An object with a destructor keeps a slot".
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -59,8 +59,7 @@ void func_001DC4D0(World* world, Collider* skip, f32 radius, Vec02* center, s32 
 {
     s32 size = *(s32*)((u8*)world + 0x34) * 4;
     SphereWalker walk((List01*)((u8*)world + 0x6C));
-    Collider** cursor = (Collider**)AllocateBackMemory(size);
-    *out = cursor;
+    Collider** cursor = *out = (Collider**)AllocateBackMemory(size);
     if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
         goto done;
     }
@@ -88,16 +87,15 @@ void func_001DC4D0(World* world, Collider* skip, f32 radius, Vec02* center, s32 
                     continue;
                 }
             }
-            Collider* part = (Collider*)c->parts.head;
-            while (part != 0) {
+            for (Collider* part = (Collider*)c->parts.head; part != 0; part = (Collider*)part->link2E4.next) {
                 if (filter != 0) {
-                    if (filter(arg, part) != 0) {
-                        *cursor++ = part;
+                    if (filter(arg, part) == 0) {
+                        continue;
                     }
-                } else if ((part->flags538 & 0x80000000000ull) == 0) {
-                    *cursor++ = part;
+                } else if ((part->flags538 & 0x80000000000ull) != 0) {
+                    continue;
                 }
-                part = (Collider*)part->link2E4.next;
+                *cursor++ = part;
             }
         }
     }
