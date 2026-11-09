@@ -7,6 +7,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #include "pad_record.h"
 #include "deferred_request.h"
 #include "list_iter.h"
@@ -1288,7 +1289,122 @@ void SteerPathFollower(PathFollower* self)
     }
 }
 
-INCLUDE_ASM(func_001D8E40);
+// The record a wheel's emitter (PathEmitter's slot at 0x7C) takes: flags, the spawn data and
+// how many to spawn.
+struct WheelEmit {
+    s32 flags;              // 0x00: 0xC0
+    u8 pad04[0x3C - 0x04];
+    void* spawn;            // 0x3C: the WheelSpawn
+    s32 count;              // 0x40
+    u8 pad44[0x50 - 0x44];
+};
+
+// Where and how a wheel's particles start: a point, a basis and a velocity.
+struct WheelSpawn {
+    Vec02 pos;              // 0x00
+    Mat02 basis;            // 0x10
+    Vec02 vel;              // 0x40
+    u8 pad50[0x60 - 0x50];
+};
+
+typedef void (*EmitFn)(PathEmitter* self, WheelEmit* rec);
+void func_00127E60(void* obj, s32 a1, void* a2, void* a3, void* a4, s32 a5);
+void BuildBasisFromX(Vec02* v, Mat02* out);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+
+// The wheels' particles: the lap timer's fade, then for each wheel the emitters of its two
+// spawn counts (the first with a random turn and tilt, the second plain).
+void func_001D8E40(PathFollower* self)
+{
+    if (self->fB14 != 0) {
+        f32 t = (g_gameTime - self->f854) / D_002751D8;
+        *(f32*)((u8*)self->fB14 + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)D_00275240)->Eval(t));
+        BaseObject* o = self->fB14;
+        if (*(f32*)((u8*)o + 0x334) == 0.0f) {
+            ((void (*)(BaseObject*))o->desc->m03)(o);
+        }
+    }
+    f32 one = 1.0f;
+    f32 zero = 0.0f;
+    WheelSpawn spawn;
+    for (u32 i = 0; i < 4; i++) {
+        Slot19* s = &self->f6B0[i];
+        if (one <= s->f58) {
+            if (500.0f < self->f698) {
+                Vec02 off;
+                Vec02 dir;
+                Mat02 m;
+                Mat02 n;
+                f32* range = (g_currentWorld->f1D70 == 3) ? D_00275508 : D_00275500;
+                // The angle is a statement of its own: &m is formed at the call, after it.
+                f32 a = RandomFloatInRange(range[0], range[1]);
+                BuildAxisAngleMatrix(&g_unitYVector, &m, a);
+                // The tilt's range through a pointer, as the turn's: loop.c then moves its
+                // address out of the loop with the %hi of its first word.
+                f32* tilt = D_00275510;
+                f32 b = RandomFloatInRange(tilt[0], tilt[1]);
+                switch ((s32)i) {
+                case 0:
+                    b = b + self->f69C;
+                    break;
+                case 1:
+                    b = self->f69C - b;
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    b = -b;
+                    break;
+                }
+                s32 front = (s32)i < 2;
+                BuildAxisAngleMatrix(&g_unitZVector, &n, b);
+                MulRotation(&m, n, m);
+                TransformPointBetweenFrames(0, self, &s->v20, &spawn.pos);
+                // The offset stored in each arm: the join after them makes CSE read it back
+                // from memory, as retail does; cross-jumping merges the two tails.
+                if (front) {
+                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->f610);
+                } else {
+                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->f614);
+                }
+                Vu0::Q(spawn.pos) = Vu0::Sub(Vu0::Add(Vu0::Q(spawn.pos), Vu0::Q(off)),
+                                             Vu0::Rotate(m, Vu0::Q(off)));
+                TransformDirectionBetweenFrames(0, self, &s->v30, &dir);
+                BuildBasisFromX(&dir, &spawn.basis);
+                Vu0::Q(spawn.vel) = Vu0::FromFloats(-self->f698, zero, zero);
+                Vu0::Q(spawn.vel) = Vu0::RotateUntied(m, Vu0::Q(spawn.vel));
+                WheelEmit rec;
+                rec.flags = 0xC0;
+                rec.count = (s32)s->f58;
+                rec.spawn = &spawn;
+                PathEmitter* e = (self->fAFC != 0) ? self->fAFC->f20 : self->fB18;
+                if (e != 0) {
+                    if (e->f18 == 0) {
+                        func_00127E60(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
+                    }
+                    ((EmitFn)e->vt[0x7C / 4])(e, &rec);
+                }
+            }
+            s->f58 = s->f58 - (f32)(s32)s->f58;
+        }
+        if (one <= s->f5C) {
+            Vec02 dir;
+            WheelEmit rec;
+            FillMemory(&spawn, 0, 0x60);
+            TransformPointBetweenFrames(0, self, &s->v20, &spawn.pos);
+            TransformDirectionBetweenFrames(0, self, &s->v30, &dir);
+            BuildBasisFromX(&dir, &spawn.basis);
+            rec.flags = 0xC0;
+            rec.count = (s32)s->f5C;
+            rec.spawn = &spawn;
+            PathEmitter* e = (self->fAFC != 0) ? self->fAFC->f24 : self->fB1C;
+            if (e != 0) {
+                ((EmitFn)e->vt[0x7C / 4])(e, &rec);
+            }
+            s->f5C = s->f5C - (f32)rec.count;
+        }
+    }
+}
 
 void CountDownPathFollowerLap(PathFollower* self)
 {

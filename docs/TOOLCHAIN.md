@@ -1139,6 +1139,36 @@ front of the loop: a `continue` that skips to the next element leaves a label in
   `s2` here), read it through `Q`. Different statement orders, a pointer local and a
   re-read of `data->f18` keep the CSE'd pseudo and do not help.
 
+### A vector stored in each arm is read back after the join (func_001D8E40)
+
+Retail's wheel-spawn loop stores FromFloats' GPR result with `sq v0` to its offset local and to
+the helper's slot and then reads the offset back with `lqc2`, where ours moved it to VU0 with
+`qmtc2` and stored it with `sqc2` (2026-11-09, read from the `-ds -dt -dl -dL` dumps and
+local-alloc.c's update_equiv_regs):
+
+- **CSE2 forwards a store in its block.** CSE1 does not forward `Q(off) = ..` into the reads
+  (the Vec values' addressof copies between them forget the memory), but CSE2, after
+  purge_addressof, replaces both reads with the asm's output. That pseudo then has two VU0
+  uses besides its two stores and takes a VU0 register (`qmtc2` from the asm's GPR).
+- **A label between store and read stops it.** Written `if (front) Q(off) = FromFloats(0, 0,
+  f610); else Q(off) = FromFloats(0, 0, f614);` instead of a `len` chosen by `?:`, the store
+  is in each arm and the read follows the join, where CSE starts a new table: the reads stay
+  loads, the asm's pseudo is only stored (GPR, `sq`), and jump2's cross-jumping merges the two
+  arms' identical tails after reload, leaving only the loads of f610 and f614 in the arms.
+- **An untied rotate where the result takes row 0's register.** The velocity's `vmaddz` writes
+  vf2 (row 0, last used there) from an input in vf4: RotateUntied. The tied Rotate made combine
+  merge the result into the input's pseudo (".lreg: set 2 times"), which also keeps the input
+  out of update_equiv_regs.
+- **loop.c's count picks the hoisted `%hi`.** With a nested `RandomFloatInRange` argument, `&m`
+  is computed before the call (lifetime 6) and moves into s8; written as a statement of its own,
+  `&m` is formed at the call. The tilt range read through a pointer (`f32* tilt = D_00275510;`,
+  as the turn's `range`) gives its `%hi` and address lifetime 3; the `%hi` takes s8 and the
+  spilled address is rematerialized (`lui v1; addiu v1`) at the call. With Vec values in the
+  offset's sum (Vec::Of) the loop is 231 and 216 insns: those two move only in pass 2, after
+  g_unitYVector's `%hi`, and g_unitZVector's (lifetime 3, threshold minus 9) stays, local-alloc's
+  a0. u128 helpers (Q) there make it 218 and 201: the tilt's two move in pass 1, and pass 2 moves
+  both unit vectors' `%hi`, spilled and rematerialized (`lui v0`) at each use, as retail's are.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
