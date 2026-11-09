@@ -348,10 +348,10 @@ INCLUDE_DATA(D_00261920);
 INCLUDE_DATA(D_00261924);
 f32 D_00261928[9] = { 1.0f, 5.0f, 10.0f, 12.0f, 15.0f, 12.0f, 10.0f, 5.0f, 1.0f };
 f32 D_0026194C = 250.0f;
-INCLUDE_DATA(D_00261950);
+f32 D_00261950[2] = { 1500.0f, 0.0f };
 RampProfile D_00261958 = { 2500.0f, 0.0f, 0.25f, 0.0f };
-INCLUDE_DATA(D_00261970);
-INCLUDE_DATA(D_00261980);
+Vec02 D_00261970 = { -250.0f, -250.0f, -250.0f, 0.0f };
+Vec02 D_00261980 = { 250.0f, 250.0f, 250.0f, 0.0f };
 void* g_camera = 0;
 
 void InitCameraModule(void)
@@ -1260,7 +1260,26 @@ f32 func_00145DE8(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
     return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
 }
 
-INCLUDE_ASM(func_00145E68);
+// The camera's sweep probe: the step's direction from origin to dest, the colliders in a box
+// of 250 around the origin, and the weighed hit, scaled by the step, from the origin into out.
+void func_00145E68(Camera* self, Quad16* origin, Quad16* dest, Vec02* out)
+{
+    Vec02 dir;
+    Vec02 hit;
+    Vec02 lo;
+    Vec02 hi;
+    s32 n;
+    Collider** list;
+    GameClock* clock = &g_gameClock;
+    Vu0::Set(dir, Vu0::DivX(Vu0::Sub(Vu0::Q(*dest), Vu0::Q(*origin)), Vu0::ScalarAt(clock->step)));
+    Vu0::Set(lo, Vu0::Add(Vu0::Q(*origin), Vu0::Q(D_00261970)));
+    Vu0::Set(hi, Vu0::Add(Vu0::Q(*origin), Vu0::Q(D_00261980)));
+    PushBackMemoryMark();
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, HasColliderSecondTree, 0, &n, &list);
+    func_00145B68(self, n, list, (MeshHitWeigh)func_00145DE8, D_0026194C, Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) + D_00261950[0], origin, &dir, &hit);
+    Vu0::Q(*out) = Vu0::MulAddX(Vu0::Q(*origin), Vu0::Q(hit), Vu0::ScalarAt(clock->step));
+    PopBackMemoryMark();
+}
 
 void PushCameraStackValue(Camera* self, s32 value)
 {
