@@ -66,7 +66,8 @@ static u8 D_0062A7D8[0x210];
 static RemoteCallClient D_0062A9E8;
 static RemoteCallClient D_0062AA10;
 static s32 D_0062AA40[4] __attribute__((aligned(64)));
-static RemoteCallClient D_0062AA50;
+/* What WaitDiscReady sends: its one word, in a buffer that runs to the pad library's .bss. */
+static s32 D_0062AA50[12];
 
 s32 ScheduleAlarm(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
 s32 GetCurrentThreadId(void);
@@ -441,13 +442,60 @@ s32 InitDiscLibrary(s32 mode)
     return result;
 }
 
-INCLUDE_ASM(func_00203828);
+/* Waits until the drive is ready: binds the first client's ready service once (the flag set
+ * inside the retry loop, which is written as an endless do-while), sends it the mode and returns
+ * the reply's word, read uncached; 6 (or -1 for mode 8) when the semaphore is taken or a call
+ * fails. */
+s32 WaitDiscReady(s32 mode)
+{
+    s32 i;
+    s32 r;
+    s32 v;
 
-/* The messages of func_00203828, defined here while it is assembly (after it: a definition before
- * an included function would leave the compiler in .rodata for the next one's). */
-const char D_0024F6C8[] = "DiskReady 0\n";
-const char D_0024F6D8[] = "Libcdvd bind err CdDiskReady\n";
-const char D_0024F6F8[] = "DiskReady ended\n";
+    if (D_00279410 > 0) {
+        PrintBuffered("DiskReady 0\n");
+    }
+    CreateDiscSemaphores();
+    if (*(volatile s32*)&g_discSSemaphore != TrySemaphore(*(volatile s32*)&g_discSSemaphore)) {
+        return 6;
+    }
+    if (SyncDiscSCommand(1)) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
+        return mode != 8 ? 6 : -1;
+    }
+    InitRemoteCalls(0);
+    if (D_00279444 < 0) {
+        do {
+            if (BindRemoteService(&D_0062AA10, 0x8000059A, 0) < 0) {
+                if (D_00279410 > 0) {
+                    PrintBuffered("Libcdvd bind err CdDiskReady\n");
+                }
+                for (i = 0x100000; i != -1; i--) {
+                }
+                continue;
+            }
+            if (D_0062AA10.server != 0) {
+                D_00279444 = 0;
+                break;
+            }
+            for (i = 0x100000; i != -1; i--) {
+            }
+        } while (1);
+    }
+    D_0062AA50[0] = mode;
+    WriteBackDataCacheRange(D_0062AA50, 4);
+    r = (s32)D_0027A600;
+    if (CallRemoteService(&D_0062AA10, 0, 0, D_0062AA50, 4, (void*)r, 4, 0, 0) < 0) {
+        PostSemaphore(*(volatile s32*)&g_discSSemaphore);
+        return mode != 8 ? 6 : -1;
+    }
+    if (D_00279410 > 0) {
+        PrintBuffered("DiskReady ended\n");
+    }
+    v = *(s32*)((u32)r | 0x20000000);
+    PostSemaphore(g_discSSemaphore);
+    return v;
+}
 
 u32 func_00203A20(u32 value)
 {

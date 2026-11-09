@@ -796,6 +796,37 @@ Read from `-dr -dL` dumps (2026-11-08, func_00148938's candidate records, 8 byte
   first store on r (`4(v1)`) and moves both increments. A pointer advanced by `q++` with
   `r = q++` gives neither. Retail's `&recs[n++]` is the plain way to append to an array.
 
+### Where a loop's exit store sits: loop depth in global-alloc's ranking (func_00203828)
+
+flow counts each reference to a pseudo with the loop depth of its block (`REG_N_REFS +=
+loop_depth`, depth 1 outside any loop, from the LOOP_BEG and LOOP_END notes at flow time), and
+global-alloc ranks by floor_log2(refs) * refs / live length. So a statement's place relative to
+the loop notes moves a global's high part in the ranking without changing a single instruction.
+WaitDiscReady binds a client once, `if (flag < 0) { retry loop } `, and retail's saved registers
+need the flag's high part first (4 refs over 66 insns, 0.121, above the mode's 0.104) while
+everything in the retry loop is at depth 2 (the client's high part 6 refs over 160, below the
+send buffer's 5 over 132). The forms, with Sony's 2.9-ee-991111:
+
+- `while (flag < 0) { while (1) { ... if (server) break; wait; } flag = 0; }`: the store is in
+  the outer loop (depth 2, the flag first) but the retry loop is at depth 3, so the client's
+  high part (8 refs) rises to the top. Order off.
+- `if (flag < 0) { while (1) { ... if (server) break; wait; } flag = 0; }` (BeginDiscSCommand's
+  form): everything right except the flag, whose store is at depth 1 (3 refs, last).
+- `if (flag < 0) { while (1) { ... if (server) { flag = 0; break; } wait; } }`: expand_end_loop
+  does not rotate the loop (its exit is an unconditional jump after the store), and loop.c's
+  find_and_verify_loops moves the block `flag = 0; goto exit` out of the loop (a block ending in
+  a jump out, behind a conditional jump around it, goes to a barrier at the target's depth): the
+  store is back at depth 1.
+- The same body as `do { ... } while (1);`: expand_end_loop rotates it (the wait first, entered
+  by a jump to the bind, retail's layout), the store and its break end the rotated region and
+  fall into LOOP_END, so there is no jump out for loop.c to move and the store stays at depth 2.
+  EXACT.
+
+The tell: a flag's or pointer's high part ranked as if it had one more reference than its
+loads and stores, with every other value ranked as at the inner loop's depth, is a store inside
+the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` loses it; a
+`do { } while (1)` keeps it.
+
 ## CSE
 
 ### A skipped block's struct store forgets memory (func_001B2140)
