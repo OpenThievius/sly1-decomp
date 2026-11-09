@@ -7,6 +7,13 @@
 // and the length returned as a float (v in $f12 through expand_preferences) are in
 // docs/TOOLCHAIN.md, "A result scaled where it is stored" and "A length returned as a float".
 // ToFloatNow gives the order but its GPR is v0 where retail's reload takes v1.
+// (2026-11-09, worker w8-130748) Retail converted the length with ToFloatMoved at the test and at
+// the return (the compiler's qmfc2, cost 1, then the asm mtc1: the chain at 15 puts the mul.s
+// first; player_path's ToFloat test leaves two other swaps). Two "r" reads tie the length
+// between VU0 and GPRs in regclass (TI_REGS: global-alloc gives it v1, with a qmtc2 back for the
+// division); one more VU0 operand with an output, `__asm__ volatile("#" : "=j"(d) : "j"(len))`
+// after the join, makes it VU_REGS and the function EXACT (a diagnostic only). The plain
+// reference retail had is not found: docs/TOOLCHAIN.md, "A length returned as a float".
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

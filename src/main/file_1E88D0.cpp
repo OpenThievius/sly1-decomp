@@ -133,7 +133,7 @@ void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14,
 s32 HasSpareCount(void);
 void ActivateSwitchedCollider(Player* g);
 void InitOwnerMessage(OwnerMessage* out, s32 mode, BeatPressCollider* self);
-void ContinueBeatPressColliderRequest(void);
+void ContinueBeatPressColliderRequest(PlacedObject* from, Player* self);
 void EndHeldTimeline(TempoAgent* o);
 void SetCachedVoiceParam(s32 a, s32 b);
 void BindEntryQueueToObject(void* a, Player* g);
@@ -1862,7 +1862,18 @@ void HandleBeatPressColliderActivation(BeatPressCollider* self, void* p)
     }
 }
 
-INCLUDE_ASM(func_001EB698);
+void TurnColliderTowardHeading(Player* self);
+void SetPlayerState(Player* self, s32 a, s32 b);
+
+void ContinueBeatPressColliderRequest(PlacedObject* from, Player* self)
+{
+    Vec02 dir;
+    Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-D_00275CD0), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(D_00275CD4));
+    self->desc02()->m20(self, &dir);
+    self->f638 = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
+    TurnColliderTowardHeading(self);
+    SetPlayerState(self, 4, 0x2B);
+}
 
 void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
 {
@@ -1928,7 +1939,7 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
                 TempoAgent* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
-                msg.fn = ContinueBeatPressColliderRequest;
+                msg.fn = (void (*)(void))ContinueBeatPressColliderRequest;
                 ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldTimeline(o);
