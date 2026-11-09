@@ -1007,6 +1007,41 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   before the other coefficients. A swap of an FPR op and a load right after a mtc1 is worth
   trying with the other conversion first.
 
+### A scalar local's store and a call's argument registers (func_00188270)
+
+Which register a pointer read for two call arguments takes can be decided by whether a store
+before the call is a scalar's (2026-11-08, BuildObjectPairContacts, read from alias.c,
+function.c and haifa-sched.c with `-dS -fsched-verbose-6` dumps):
+
+- **The tie.** Retail loads the object into a1 and computes the second argument from it last
+  (`lw a1, 0(sp); ... lwc1 $f12, 980(a1); addiu a1, a1, 992` in the jal's slot). local-alloc
+  ties a pseudo to the destination of the insn where it dies, a hard register included
+  (combine_regs), so the object is a1 only if sched1 puts the field load (`$f12`) before the
+  address (`a1 = x + 992`).
+- **The dependence.** The out-parameter's store before the call (`cur = buf`, its address passed
+  as the fourth argument) was a member of a stack struct (`fr.cur`, `mem/s` at a fixed address);
+  the field load `x->f3D4` is `mem/s` at a varying address. Two structure references are never
+  separated (fixed_scalar_and_varying_struct_p needs one MEM_SCALAR_P), so the load waited two
+  cycles for the store, the address was issued first, and the object died in the load: v0. The
+  store cannot win the first cycle instead: both it and the object's load have priority 6 and
+  weight 1, and the load has three dependents to the store's two (rank_for_schedule). A store
+  through `Item** p = &fr.cur` has neither flag and depends the same way.
+- **A scalar local is MEM_SCALAR_P.** `Item* cur;` declared on its own, with `&cur` passed to the
+  call, is a pseudo made ADDRESSOF and given its slot by purge_addressof, which sets the flags
+  with MEM_SET_IN_STRUCT_P (put_reg_into_stack: scalar for a non-aggregate type). The load no
+  longer depends on the store, sched1 issues the field load before the address (priority 4 to
+  3), and the object ties to a1; sched2 then gives retail's order exactly.
+- **What the slots show.** purge_addressof gives scalar slots in insn order of the first
+  address it cannot fold away, after every aggregate local (an aggregate's BLKmode slot is
+  rounded to 16 bytes at its declaration). Retail's frame has the ordered pair at 0 (a struct of
+  two pointers, rounded to 16), one byte at 0x10 that nothing reads, then `cur` at 0x14 and the
+  result at 0x18. The byte is an empty object whose inline constructor and destructor call
+  PushBackMemoryMark and PopBackMemoryMark: its address, the inline constructor's `this`, is
+  met before `&cur` and not folded away (measured, not traced in purge_addressof), so it is put
+  on the stack first, and the result's load comes after PopBackMemoryMark only when the
+  object's scope closes before `return`. A frame with an unexplained small slot before the
+  address-taken locals is worth reading as such a scoped object.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
