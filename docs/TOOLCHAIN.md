@@ -1757,6 +1757,18 @@ from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/cl
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
 
+### Statements in field order set the call-crossing ranking (func_00144BE8)
+
+- func_00144BE8 blends five spherical differences (heading, pitch, distance, yaw, tilt) by
+  springs whose velocities are five consecutive members (0x2B0..0x2C0). The pitch and distance
+  differences cross WrapAngle's call, so global-alloc ranks them by floor_log2(refs) * refs /
+  live length: with 5 references each, the one that dies first ranks first and takes the lower
+  callee-saved register. Retail's pitch in $f22 and distance in $f23 need pitch's update before
+  distance's, and the five divisions by the common scale in the same order make sched1 issue
+  them as retail does. Both in field order (divisions and updates heading, pitch, distance,
+  yaw, tilt) is EXACT; either alone left 71 to 73 lines different, and a permuted update order
+  had stood at 91.1% before. Plausibly the original's: the source walks the members in order.
+
 ### A load hoisted over a conditional move takes a register from it (func_001C9DE0)
 
 - sched1 may issue a load with a long chain behind it (`anim->f9C`, then `->pos`, `->vt` and
