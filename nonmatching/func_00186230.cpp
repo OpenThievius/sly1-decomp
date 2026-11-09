@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 217/240 (90.4%), checked 2026-11-08
-// NEAR: StoreX stores the result as retail does (night-lever2). (night-size3) The squared length
-// is read with ToFloatMoved: retail's mtc1 follows its qmfc2 and the edge's sqc2 moves after the
-// c.lt.s, as there; the size is retail's. Still differs, VU0 registers only: retail loads p early
-// (vf2, before the qmfc2) and keeps a in vf3 and the dot's 1.0 in vf4, here a in vf2, the 1.0 in
-// vf3 and p in vf1; the final square root in vf1 (here vf2), and the mfc1 of 1.0 comes after the
-// div.s in retail. The three head statements in all six orders and Vec values tried.
+// BYTES 232/240 (96.7%), checked 2026-11-09
+// NEAR: (w7) Every register is retail's; two instructions are swapped. ToFloatNow for both
+// conversions (the squared length's product stays a VU0 pseudo: local-alloc then gives p vf2, a
+// vf3 and the 1.0 vf4, and the division issues before the mfc1 of 1.0) and the distance stored
+// as ToBits (vaddq into vf1). Still differs: retail's sqc2 of e comes after the c.lt.s, ours
+// right after the mtc1. Retail's qmfc2 is the compiler's (sched2's vu0 unit, which blocks the
+// sqc2 for that cycle) while the product is in a VU0 register at local-alloc; a product with
+// one "=j" def and one "r" use ties in regclass (TI_REGS, a GPR), and ToFloatMoved then
+// renumbers a, p and the 1.0. No plain form found that gives VU_REGS with the compiler's qmfc2
+// (docs/TOOLCHAIN.md, "A compiler's qmfc2 of a VU0 product").
 #include "common.h"
 #include "asm_func.h"
 #include "fpu.h"
@@ -132,21 +135,20 @@ void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 {
     Vec02 e;
     Vec02 w;
-    u128 ev = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(ev, ev));
+    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(w) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
-    Vu0::Q(e) = ev;
+    f32 len2 = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
     u128 d;
     if (len2 < 0.0001f) {
         *t = 0.0f;
         d = Vu0::Dot(Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)), Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)));
     } else {
-        *t = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(w))) / len2;
+        *t = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(e), Vu0::Q(w))) / len2;
         u128 q = Vu0::MulXSum(Vu0::Q(*a), Vu0::Scalar(1.0f), Vu0::Q(e), Vu0::Scalar(len2));
         u128 r = Vu0::Sub(Vu0::Q(*p), q);
         d = Vu0::Dot(r, r);
     }
-    Vu0::StoreX(*dist, Vu0::Sqrt(d));
+    *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(d));
 }
 
 INCLUDE_ASM(func_00186320);
