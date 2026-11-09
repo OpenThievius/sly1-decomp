@@ -3644,6 +3644,43 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   without its key: declaring a callee with fewer parameters than it reads hides the argument
   register's copy and swapped s0 and s1.
 
+- **FindFirstFreeSpan (func_001E4888).** Declared `(count, objs, thresh, a2, a3, lo, hi)`,
+  func_001E4888's first and loop calls set `$f12` before a2 and a3; retail sets it after a3
+  (into the call's delay slot in the first). Declared `(count, objs, a2, a3, thresh, lo, hi)`
+  both match, and its definition (camera.cpp) and other callers match with either order.
+
+### A loop variable declared before its loop: CSE2's copies and the preheader's order (func_001E4888)
+
+func_001E4888's angle sweep had every instruction right but its loop constants in a rotated
+set of saved registers (retail: 0.15*pi in $f22, the hoisted zero in $f23, the step in $f26,
+the 1.0 copy in $f27; ours swapped each pair). Read from the `-dt -dL -dS -dl -dg` dumps:
+
+- **What fixes global-alloc's order.** loop.c moves the constants in the order of their first
+  use (zero, 1.25, 0.15*pi, 1.0, step, 0.25, pi); with five references each (loop depth
+  doubles the uses) the zero and 0.15*pi rank by live length, and so does the 1.0 copy against
+  the step (three each). The live length is the place sched1 gives each set in the preheader.
+- **CSE2 turns two of the moved constants into copies.** After loop, CSE2 replaces `zero =
+  0.0` by a copy of a pseudo it knows holds 0 and `one = 1.0` by a copy of the compare's 1.0
+  (a CONST_DOUBLE costs two insns on MIPS, a register none). A copy is an alu insn of priority
+  1 against the constants' 2, so sched1 places both last unless something raises them.
+- **With `angle` declared at the top**, the zero's copy reads `angle`, set in another block:
+  it has no dependence in the preheader, weight 1, and sched1 issues it last (shortest life,
+  so it outranks 0.15*pi). **Declared just before the loop** (`f32 angle = 0.0f;` after
+  `bestScore`), `angle`'s own set is in the preheader (CSE makes it a copy of the 0.0 pseudo
+  the first call's literal left in $f20, which then dies there and ties to it), the hoisted
+  zero copies `angle`, and its true dependence on that set makes adjust_priority's birthing
+  rule raise it as soon as it resolves: it is set early, its life is the longer, and the
+  ranking and the 1.0 copy's place follow. The whole function then matched.
+- **Diagnosing it.** Where a loop's hoisted constants take a rotation of retail's registers,
+  compare the `.loop` dump's movables (insn numbers in the 900s and up, in first-use order)
+  with the `.cse2` dump: a constant CSE2 made a copy is ranked by its source's block. Where
+  retail's copy is early, look for the copied variable's declaration in the preheader.
+- **Stack slots of vectors in a branch.** In the same function the else branch's and the
+  final mix's Scalar temporaries took 64(sp) in retail, the slot of the loop's direction
+  vector, and 112(sp) (the loop's own temporary) in ours: declared at the top of the
+  `if` block (`Vec02 dir, cand, mixed;`), the three slots are freed at its end, and
+  assign_stack_temp_for_type takes the first exact fit of the free list.
+
 ### A named operand of `>?` (expand_expr's target, func_0012C9E8)
 
 `f32 step = limit * 0.1f >? 0.5f;` expands the MAX_EXPR with the variable's pseudo as its

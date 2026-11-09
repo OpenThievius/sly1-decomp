@@ -2183,7 +2183,7 @@ void UnprojectCameraPoint(Camera* cam, Vec02* in, Vec02* out);
 void QueueCameraSnap(Camera* cam);
 s32 HasColliderSecondTree(void* unused, Collider* other);
 void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, void* filter, s32 d, s32* count, Collider*** list);
-s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
+s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi);
 void func_001E4578(CameraController* self)
 {
     Vec02 lo;
@@ -2227,7 +2227,7 @@ void func_001E4578(CameraController* self)
         ProjectPointToCamera(cam, &pts[i], &tmp);
         tmp.z = cam->f1E4;
         UnprojectCameraPoint(cam, &tmp, &tmp);
-        if (FindFirstFreeSpan(count, list, 0.0f, &pts[i], &tmp, 0, &spanEnd) != 0 && 1.0f <= spanEnd) {
+        if (FindFirstFreeSpan(count, list, &pts[i], &tmp, 0.0f, 0, &spanEnd) != 0 && 1.0f <= spanEnd) {
             *(f32*)((u8*)self + 0x60) = g_gameClock[1];
             break;
         }
@@ -2243,8 +2243,68 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
     return a3->value;
 }
 
-INCLUDE_RODATA(D_0024E5F0);
-INCLUDE_ASM(func_001E4888);
+void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r);
+void func_00145B68(void* ctx, s32 count, Collider** objs, void* fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out);
+void func_001E4888(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
+{
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 pos;
+    Vec02 best;
+    s32 count;
+    Collider** list;
+    f32 spanLo;
+    f32 spanHi;
+    f32 m0;
+    f32 m1;
+    f32 m2;
+    Camera* cam = (Camera*)self->owner;
+    Collider* target = (Collider*)cam->stack[0].target;
+    PushBackMemoryMark();
+    Vu0::Q(lo) = Vu0::Min(Vu0::Q(*p), Vu0::Min(Vu0::Q(*q), Vu0::Q(target->v140)));
+    Vu0::Q(hi) = Vu0::Max(Vu0::Q(*p), Vu0::Max(Vu0::Q(*q), Vu0::Q(target->v140)));
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, (void*)HasColliderSecondTree, 0, &count, &list);
+    func_00145950(count, list, &target->v140, &pos, 500.0f);
+    FindFirstFreeSpan(count, list, &pos, q, 0.0f, &spanLo, &spanHi);
+    if (spanHi < 1.0f) {
+        Vec02 dir;
+        Vec02 cand;
+        Vec02 mixed;
+        *(s32*)((u8*)self + 0x20) = 4;
+        ConvertOffsetToCylindrical(q, p, &m0, &m1, &m2);
+        f32 bestScore = 3.40282347e+38f;
+        f32 angle = 0.0f;
+        f32 next;
+        do {
+            ComputePolarOffset(&dir, m0 + angle, m1, m2);
+            Vu0::Q(cand) = Vu0::Add(Vu0::Q(*p), Vu0::Q(dir));
+            FindFirstFreeSpan(count, list, &pos, &cand, 0.0f, &spanLo, &spanHi);
+            f32 score = (1.25f - spanHi) * (__builtin_fabsf(angle) + 0.47123894f);
+            if (score < bestScore) {
+                bestScore = score;
+                Vu0::Q(mixed) = Vu0::MulXSum(Vu0::Q(pos), Vu0::Scalar(1.0f - spanHi), Vu0::Q(cand), Vu0::Scalar(spanHi));
+            }
+            next = -angle;
+            if (angle <= 0.0f) {
+                next = next + 0.28559935f;
+            }
+            angle = next;
+            if (bestScore < (__builtin_fabsf(next) + 0.47123894f) * 0.25f) {
+                break;
+            }
+        } while (next < 3.1415927f);
+        best = mixed;
+    } else {
+        Vu0::Q(best) = Vu0::MulXSum(Vu0::Q(pos), Vu0::Scalar(1.0f - spanHi), Vu0::Q(*q), Vu0::Scalar(spanHi));
+    }
+    func_00145B68(cam, count, list, (void*)GetSpanCandidateValue, ((f32*)cam)[0x1EC / 4], ((f32*)cam)[0x1EC / 4], &best, &best, out);
+    FindFirstFreeSpan(count, list, &best, out, 0.0f, &spanLo, &spanHi);
+    if (spanHi != 1.0f) {
+        f32 w = (spanLo + spanHi) * 0.5f;
+        Vu0::Q(*out) = Vu0::MulXSum(Vu0::Q(best), Vu0::Scalar(1.0f - w), Vu0::Q(*out), Vu0::Scalar(w));
+    }
+    PopBackMemoryMark();
+}
 
 INCLUDE_ASM(func_001E4C48);
 
