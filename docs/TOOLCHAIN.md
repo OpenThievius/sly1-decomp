@@ -777,18 +777,24 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   issued before the load: retail's registers. That form costs one insn more (the copy of v to
   the result), which moved one spill slot through gcse's table size (GCSE above); one Vec
   difference stored through `Vu0::Q(...) = ... .q` gives the insn back.
-- **Which of two equal subtractions goes first decides a copy preference (func_001E31F0,
-  open).** `t1 = clock - a; t2 = clock - b;` are ready in the same cycle at the same static
-  priority. By INSN_REG_WEIGHT (registers born minus registers dying) t2's ranks first, since
-  the shared clock value dies in the later statement; issued first, it leaves the value to die
-  in t1's, and global-alloc (`set_preference`: a source that dies in the insn) gives t1 a copy
-  preference for the clock's $f1 ahead of $f12, the register of the division t1 feeds. Retail
-  has t1 first and in $f12. The timing around the pair decides it as well: with the zero of the
-  following `if (0.0f < object->f428)` emitted after the load of f428 (s = 0 moved into an else,
-  as retail's issue order has it), t1's subtraction is issued first (adjust_priority raises it
-  when its last dependence resolves) and t1 takes $f12, but the zero then gets a register of its
-  own where retail's `s = 0.0f` doubles as the comparisons' zero. Swapping the statements fixes
-  t1 but issues t2's loads first. No form found has both.
+- **Which of two equal subtractions goes first decides a copy preference (func_001E31F0).**
+  `t1 = clock - a; t2 = clock - b;` were ready in the same cycle at the same priority: both are
+  set once and both were raised by adjust_priority by the same clock load, so INSN_REG_WEIGHT
+  decided, and t2's ranks first (the shared clock dies in the later statement). Issued first, it
+  leaves the clock to die in t1's, and global-alloc (`set_preference`: a source that dies in the
+  insn) gives t1 a copy preference for the clock's $f1 ahead of $f12, the register of the
+  division t1 feeds. What retail had was a different cycle, not a different rank: the next
+  statement, `s = 0.0f; if (0.0f < object->f428)`, puts the zero (on the memory and flop units)
+  before the load of f428 in insn order. Read into a local first (`f32 ramp = object->f428; f32
+  s = 0.0f; if (0.0f < ramp)`, the second division reading the field again as retail does), the
+  load issues first and the zero's flop slot delays t2's add by a cycle. t1's subtraction is
+  then ready alone, issues first, and t1 takes $f12. The cost was one insn of t2's life, which
+  put t2 (3 refs over 13 insns, priority 0.231) ahead of `goal` (9 refs over 125, 0.216) in
+  global-alloc's order, so the two swapped $f22 and $f23. Retail's `goal` has one assignment more:
+  `if (!(flags & 2)) goal = angle1; else if (0.0f < d) goal = angle1; else goal = angle2;`
+  instead of `||` gives 10 refs (priority 0.24), and the function matches. global.c's priority is
+  `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
+  identical.
 
 ## Shapes of large functions
 
