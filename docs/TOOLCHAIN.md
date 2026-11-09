@@ -3213,6 +3213,28 @@ CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
   operand orders, the conversion of the test and of the return in every helper, a temporary
   for the return, the axis copied inside the helper, a length variable per call (12 lines),
   and permute.py over every run of simple statements.
+- **Both conversions are the compiler's qmfc2 (2026-11-09, w8).** The tie breaks only on
+  priority: the length's chain must cost 15, which a compiler-made qmfc2 (a movti reload,
+  cost 1) followed by an asm mtc1 (cost 1) gives and ToFloat's asm qmfc2 plus reload's
+  movsf (cost 2, units memory and flop) does not. ToFloatNow and ToFloatViaBits also cost
+  15, but their GPR is local-alloc's, so reload's round robin (retail's v0 at the test, v1
+  at the join, and every later reload) shifts by one. The test needs the same pair: with
+  ToFloat's reload mtc1 the flop unit is busy at its cycle, the uuu product waits a cycle
+  and the lui of the fallback's address (priority 4 to its 3) goes first; ToFloat's test
+  also moves the second length's lqc2 of vf5 before its c.lt.s. So retail converted the
+  length with ToFloatMoved twice (player_path's NormalizeVector, ToFloat test and
+  ToFloatMoved return, fixes the join but leaves those two swaps). Two ToFloatMoved reads
+  make the length a TI_REGS pseudo in regclass (two "r" operands against the Sqrt's "=j"
+  and DivX's "j": a tie, so the union) and global-alloc puts it in v1, with a qmtc2 back
+  for the division. Diagnosed: one more VU0 operand on the length, `__asm__ volatile("#"
+  : "=j"(d) : "j"(len))` after the join (no code), makes it VU_REGS and the function
+  EXACT. Asm statements without outputs are not scanned by regclass (any number of `""
+  : : "j"(len)` leaves TI_REGS). Retail therefore had one more VU0-class reference to each
+  length than any form found, the wall func_00186230 hit too. Ruled out for it: Vec
+  values for the length and its helpers (the inline copies are folded before regclass),
+  the length as a u128 the caller converts (one variable for both calls or one each), a
+  return in each arm (three "r" reads), `u128 len = Dot(v, v); len = Sqrt(len);` (one
+  pseudo for both values, where retail has vf1 then vf2).
 
 ## Stack slots
 
