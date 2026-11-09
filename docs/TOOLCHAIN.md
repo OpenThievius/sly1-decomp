@@ -2865,6 +2865,27 @@ match retail except the spill slot of its count pointer (retail 0x24, ours 0x20)
 - **`a = *p = call()` stores the call's value, not the variable.** `cursor = *out =
   Allocate(...)` gives retail's `sw v0,0(s7)` after `move s2,v0`; `cursor = Allocate(...);
   *out = cursor;` stores the saved register.
+- **What the unread object can be, ruled out (2026-11-09, w8).** Read from function.c
+  (assign_stack_temp_for_type, purge_addressof), stmt.c (expand_decl), integrate.c and
+  toplev.c's pass order, and measured on func_001DC4D0:
+  - Not an inline function's frame: that is one BLKmode temporary, rounded to 16 bytes
+    (assign_stack_temp_for_type), so the spill would land at 0x30.
+  - Not a reload slot whose accesses were inherited away (delete_output_reload): reload's
+    first alter_reg loop gives slots in pseudo order, and only the parameters before the count
+    pointer (pseudos 116 to 121) precede it; retail gives every one of them a register.
+  - Not a scalar whose address was taken and then dropped: purge_addressof runs after jump,
+    CSE and delete_trivially_dead_insns (toplev.c), so a dead copy of an ADDRESSOF is gone
+    before purge decides, and a scalar that does go to the stack keeps its stores.
+  - Not a temporary of the descriptor method calls (`desc03()->m38(a, b)` twice):
+    InitContactPairFlags (func_00138F28) makes the same two calls with no local slot at all.
+  - Not a `const f32&` temporary (`Square(radius + c->radius3D0)`): it changes the code and
+    adds no slot.
+  - What is left is a declaration expand_decl puts in memory with no access: a variable
+    TREE_ADDRESSABLE before its RTL is made, that is of a class with a non-trivial destructor,
+    whose constructor and destructor emit nothing. Its position is free after the vector: an
+    empty class with an empty destructor declared before the parts loop or after `done:`, at
+    the end of the function, both give EXACT; declared before the vector it takes 16 bytes.
+    So the frame shows only that such an object exists, not where or what it is.
 
 ### A switch case that falls into the default; a third unread object (func_0014B6A8)
 
