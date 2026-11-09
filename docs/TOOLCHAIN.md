@@ -2088,6 +2088,21 @@ A second function with func_001D87C8's blocker (2026-11-08, ApplyLinkConstraint,
   Where retail's float conversion comes before the epilogue's restores at a join, look for a
   return in each branch.
 
+- **The compiler's qmfc2 waits for the vu0 unit; the asm's does not (func_0018A160).**
+  BuildRotationBetweenVectors reads the cross product's length twice: for the 1e-4 test and,
+  after the join, for the sine. Read both times with ToFloat (an asm qmfc2, unit none, cost 1)
+  sched2 issued the sine's qmfc2 in the second cycle of the join block, beside the second
+  lqc2 of the dot (priority 13, ready at once), where retail has the loop counter's `move
+  t0,zero` (priority 1); the 1.0 constant then took a memory slot ahead of the divisions.
+  With ToFloatMoved for the sine, the qmfc2 is reload's copy of the length into the asm's "r"
+  input: a movti-class insn on the `vu0` unit, which the two lqc2 (`[memory vu0]`) hold for
+  the first two cycles, so the free alu slot takes `move t0,zero`, the copy follows the dot,
+  and every later insn falls into retail's order. Both reads as ToFloatMoved make the length a
+  GPR pseudo instead (two "r" uses against DivX's one "j"), CSE shares its GPR copy and the
+  branch arms renumber; the test as ToFloat and the sine as ToFloatMoved keep it in vf4 with
+  two separate qmfc2 (v1 in the test, v0 at the join): retail's code. Where retail's qmfc2
+  issues after a block's lqc2 although its value was ready, the conversion is ToFloatMoved.
+
 ### A scalar local's store and a call's argument registers (func_00188270)
 
 Which register a pointer read for two call arguments takes can be decided by whether a store
