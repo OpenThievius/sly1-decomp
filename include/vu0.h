@@ -341,6 +341,22 @@ struct Vu0 {
         return r;
     }
 
+    // a + s.x * b + t.x * c + u.x * d: MulAddX2 with a third weighted vector (vadda.xyzw ACC, a,
+    // vf0; two vmaddax.xyzw ACC; vmaddx.xyzw), as MulXSum3 and MulXSum4 extend MulXSum; one use in
+    // retail so far, func_001DDE90. Each weight is listed before its vector, as the sum reads
+    // (a + s b + t c + u d): an inline call emits its arguments in parameter order, so a weight's
+    // slot store comes before the next vector's load, which retail's schedule shows
+    // (docs/TOOLCHAIN.md, "A weight listed before its vector"). The asm's operands keep the order
+    // a, b, s, c, t, d, u, which decides which input's register the result takes.
+    static u128 MulAddX3(u128 a, u128 s, u128 b, u128 t, u128 c, u128 u, u128 d)
+    {
+        u128 r;
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddax.xyzw ACC, %4, %5x\n\t"
+                "vmaddx.xyzw %0, %6, %7x"
+                : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t), "j"(d), "j"(u));
+        return r;
+    }
+
     // The three-term dot product of a and b, in x: vmul.xyz, then 1.0 into a scratch x
     // (vaddw.x) to sum the terms with vadday.x and vmaddz.x.
     static u128 Dot(u128 a, u128 b)
@@ -801,6 +817,13 @@ struct Vu0 {
     {
         Vec r;
         r.q = MulAddX2(a.q, b.q, s.q, c.q, t.q);
+        return r;
+    }
+
+    static Vec MulAddX3(Vec a, Vec s, Vec b, Vec t, Vec c, Vec u, Vec d)
+    {
+        Vec r;
+        r.q = MulAddX3(a.q, s.q, b.q, t.q, c.q, u.q, d.q);
         return r;
     }
 
