@@ -1261,6 +1261,16 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   order. Retail's order after the count, f00, f08, f20, f50, f54, f70, f78, has no dead store
   of 1.0 or -1 in it, which no order of the constructor's statements gives (the near miss
   is 2 lines, f00 and f20 swapped).
+- **Why no form reaches it.** Each constant is one pseudo (CSE merges repeated literals,
+  chained assignments included: `a = b = x` stores b first and x dies at a), so each of 750,
+  1.0 and -1 has exactly one dead store, and sched1 issues all six dead stores (those three,
+  -1500, q30 and the count) before any live one; sched2 then keeps that order, since every
+  store is ready by the time the memory unit frees. Retail's tail would need the 1.0 and -1
+  pseudos to die outside the stores (a later use), and the function has no later float
+  code. Tried: chained assignments in five groupings (5 to 10 lines), a span setter taking
+  two floats (same as literals: integrate substitutes constants), and the floats as named
+  locals or constructor arguments (they cross the FillMemory call and take saved FPRs:
+  over 100 lines).
 
 ### A weight's store inside a short life (func_0013F290)
 
