@@ -2561,6 +2561,7 @@ func_001A1410	func_001A2158	match
 func_001A1458	func_001A21A0	match	
 func_001A1498	func_001A21E0	match	
 func_001A14A0	func_001A21E8	match	
+func_001A15D8	func_001A2320	match	rodata
 func_001A1DF0	func_001A2B38	match	rodata
 func_001A1F18	func_001A2C60	match	
 func_001A1F40	func_001A2C88	match	

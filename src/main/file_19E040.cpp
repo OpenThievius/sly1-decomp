@@ -2078,9 +2078,161 @@ void AdvanceEffectPhases(Effect* c, f32 dt)
     }
 }
 
-INCLUDE_RODATA(D_0024C9B4);
+// A point of a phased effect's strip, as the effect's source writes them (+0x130): where the
+// piece starts, the point whose x and y head to the next one and whose z is its width, then
+// what DrawPhasedEffect works out for it.
+struct PhasedEffectPoint {
+    Vec02 base;             // 0x00
+    Vec02 at;               // 0x10
+    f32 heading;            // 0x20: the angle to the next point, 0 to 2 pi
+    f32 length;             // 0x24: the distance to the next point in x and y
+    f32 turn;               // 0x28: the turn to the next point's heading, over its width
+    s32 id;                 // 0x2C
+};
 
-INCLUDE_ASM(func_001A15D8);
+// Slot 5 of the kind-18 table: works out each point's heading, length and turn, then draws the
+// strip piece by piece along it, from the point the effect has reached (+0x124). Each piece's
+// operands are formed in the order retail loads and stores them: the first loop's weights and
+// ends as locals, each weight before its end, and both loops' scale after the position
+// (docs/TOOLCHAIN.md, "A weighted sum's operands in insn order").
+void DrawPhasedEffect(Effect* self, Camera* cam)
+{
+    PhasedEffectPoint pts[64];
+    EffectDraw draw;
+    Vec02 v;
+    Mat02 m;
+    Mat02 rot;
+    Vec02 scale;
+    f32 one = 1.0f;
+    f32 x = (g_gameTime - self->start) / self->life;
+    f32 t;
+    if (x < 0.0f) {
+        t = 0.0f;
+    } else if (one < x) {
+        t = one;
+    } else {
+        t = x;
+    }
+    f32 size;
+    switch (self->i120) {
+    case 0:
+        size = D_0026B620[0] + t * (D_0026B620[1] + t * D_0026B620[2]);
+        break;
+    case 1:
+        size = D_0026B630[0];
+        break;
+    case 2:
+        size = D_0026B630[0] + t * (D_0026B630[1] + t * D_0026B630[2]);
+        break;
+    }
+    f32 total = 0.0f;
+    s32 i;
+    s32 cur;
+    PhasedEffectPoint* p;
+    s32 n = self->points(self->p134, 0x3F, pts);
+    pts[n] = pts[0];
+    f32 scaleMin = 3.402823466e+38f;
+    draw.f44 = 1.0f;
+    draw.alpha = 0.0f;
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        Vu0::Q(v) = Vu0::Sub(Vu0::Q(pts[i + 1].at), Vu0::Q(p->at));
+        f32 h = ArctangentOfRatio(v.y, v.x) + 3.14159274f;
+        p->heading = h;
+        f32 w = cam->f1E4 >? p->at.z;
+        f32 a;
+        f32 b;
+        f32 c;
+        ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
+        ClampedQuadratic::Clamp(b, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B660, w), (const ValueRange*)D_0026B670);
+        draw.alpha = a * b >? draw.alpha;
+        f32 s = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
+        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B640, w), (const ValueRange*)D_0026B650);
+        f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(v), Vu0::Q(v))));
+        scaleMin = s * c <? scaleMin;
+        p->length = len;
+        total += len;
+    }
+    pts[n] = pts[0];
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        f32 dh = p[1].heading - p->heading;
+        if (dh <= 0.0f) {
+            dh += 6.28318548f;
+        }
+        f32 turn = dh * D_0026B630[0] / p[1].at.z;
+        p->turn = turn;
+        total += turn;
+    }
+    pts[n] = pts[0];
+    if (self->i128 < 0) {
+        f32 c;
+        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B680, total), (const ValueRange*)D_0026B690);
+        self->i128 = (s32)c;
+        cur = n;
+    } else {
+        for (cur = 0; cur < n; cur++) {
+            if (pts[cur].id == self->i12C) {
+                break;
+            }
+        }
+    }
+    if (!(cur < n)) {
+        self->i12C = pts[0].id;
+        cur = 0;
+    }
+    f32 pos = self->f124 * total / (f32)self->i128;
+    i = 0;
+    while (i < n) {
+        s32 nextI = i + 1;
+        s32 next = cur + 1;
+        p = &pts[cur];
+        f32 step = 0.0f;
+        f32 rest = pos - p->length;
+        if (rest < step) {
+            do {
+                t = (pos + step) / (pos - rest);
+                BuildAxisAngleMatrix(&g_unitXVector, &m, p->heading);
+                f32 k = size * scaleMin;
+                MulRotationRowsX(&rot, cam->rot3A0, m);
+                Vu0::Vec w0 = Vu0::Vec::Scalar(1.0f - t);
+                u128 a = Vu0::Q(p->base);
+                Vu0::Vec w1 = Vu0::Vec::Scalar(t);
+                u128 b = Vu0::Q(p[1].base);
+                Vu0::Q(v) = Vu0::MulXSum3(a, w0.q, b, w1.q, Vu0::Q(rot.r[2]), Vu0::Scalar(k));
+                Vu0::Q(scale) = Vu0::Splat(scaleMin);
+                BuildScaledTransformMatrix(&v.x, (f32 (*)[4])&rot, &scale.x, draw.m);
+                PlacedObject* o = (PlacedObject*)self->p20;
+                o->desc02()->m26(o, cam, &draw);
+                step += total / (f32)self->i128;
+            } while (rest + step < 0.0f);
+        }
+        pos = rest + step;
+        step = 0.0f;
+        rest = pos - p->turn;
+        if (rest < step) {
+            do {
+                t = (pos + step) / (pos - rest);
+                f32 dh = p[1].heading - p->heading;
+                if (dh <= 0.0f) {
+                    dh += 6.28318548f;
+                }
+                BuildAxisAngleMatrix(&g_unitXVector, &m, p->heading + t * dh);
+                f32 k = size * scaleMin;
+                MulRotationRowsX(&rot, cam->rot3A0, m);
+                Vu0::Q(v) = Vu0::MulAddX(Vu0::Vec::Of(p[1].base), Vu0::Vec::Of(rot.r[2]), Vu0::Vec::Scalar(k)).q;
+                Vu0::Q(scale) = Vu0::Splat(scaleMin);
+                BuildScaledTransformMatrix(&v.x, (f32 (*)[4])&rot, &scale.x, draw.m);
+                PlacedObject* o = (PlacedObject*)self->p20;
+                o->desc02()->m26(o, cam, &draw);
+                step += total / (f32)self->i128;
+            } while (rest + step < 0.0f);
+        }
+        cur = next % n;
+        i = nextI;
+        pos = rest + step;
+    }
+}
 
 void SetEffectPhase(Effect* self, s32 mode)
 {
