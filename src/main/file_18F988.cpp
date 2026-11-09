@@ -90,11 +90,12 @@ void PushCameraController(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s
 void RemoveCameraControllers(void* mgr, s32 a1, s32 a2, s32 a3, SwitchedCollider* self, s32 a5);
 void* GetActiveSwitchedCollider(void);
 void ActivateSwitchedCollider(void* value);
-// The point-graph query FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
-struct GraphQuery { u8 data[4]; };
-struct GraphQueryOwner { u8 head[0x34]; GraphQuery part; };
-s32 FindPointGraphPath(GraphQuery* part);
-void SnapPointToPointGraph(GraphQuery* part);
+// The point graph FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
+struct GraphQueryOwner { u8 head[0x34]; PointGraph graph; };
+s32 FindPointGraphPath(PointGraph* graph);
+s32 FindPointGraphTriangleWithin(GraphFace* faces, Vec02* p);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
 s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
@@ -1082,8 +1083,42 @@ void SimplifyPointPath(void* a0, s32* a1, s32* a2)
 
 INCLUDE_ASM(func_00191290);
 
-INCLUDE_ASM(func_00191570);
-INCLUDE_RODATA(D_0024B64C);
+// p, when it is outside every face, moved to the nearest point of the nearest link (each link
+// taken at p's height); otherwise p itself. The weighted sum's operands are formed weight, end,
+// weight, end: sched1 then keeps the first end's load between the two weights' stores
+// (docs/TOOLCHAIN.md, "Memory dependences in sched1").
+void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
+{
+    if (FindPointGraphTriangleWithin(self->faces, p) != 0) {
+        *out = *p;
+        return;
+    }
+    f32 best = 3.4028235e38f;
+    f32 bestT = -1.0f;
+    GraphPoint** nearest = 0;
+    for (s32 i = 0; i < self->nA; i++) {
+        GraphPoint** link = (GraphPoint**)(self->links + i * 12);
+        Vec02 a = *(Vec02*)link[0];
+        Vec02 b = *(Vec02*)link[1];
+        f32 t;
+        f32 d;
+        a.z = p->z;
+        b.z = p->z;
+        MeasurePointToSegment(p, &a, &b, &t, &d);
+        if (d < best) {
+            bestT = t;
+            nearest = link;
+            best = d;
+        }
+    }
+    Vec02* b = (Vec02*)nearest[1];
+    Vec02* a = (Vec02*)nearest[0];
+    Vu0::Vec s = Vu0::Vec::Scalar(1.0f - bestT);
+    Vu0::Vec pa = Vu0::Vec::Of(*a);
+    Vu0::Vec t = Vu0::Vec::Scalar(bestT);
+    Vu0::Vec pb = Vu0::Vec::Of(*b);
+    Vu0::Q(*out) = Vu0::MulXSum(pa, s, pb, t).q;
+}
 
 void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 {
@@ -1172,12 +1207,12 @@ ASM_FUNC(func_001919F8);
 
 void FindOwnerGraphPath(GraphQueryOwner* self)
 {
-    FindPointGraphPath(&self->part);
+    FindPointGraphPath(&self->graph);
 }
 
-void SnapPointToOwnerGraph(GraphQueryOwner* self)
+void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
 {
-    SnapPointToPointGraph(&self->part);
+    SnapPointToPointGraph(&self->graph, p, out);
 }
 
 void TestOwnerGraphSpan(Obj_191AA8* self)
