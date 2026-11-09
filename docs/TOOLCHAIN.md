@@ -2194,6 +2194,25 @@ reference.
   TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
   size with only the call's `addiu a1, sp, 16` early.
 
+### A weight that dies at its multiply gives the product its register (func_001980B0)
+
+StepGaugeColliderAgent rotates `MulX(v640, Scalar(-1.0f))` by the matrix at 0x110. Retail keeps
+the -1 weight (vf6) live past the vmulx and stores its slot after it, so local-alloc ties the
+product to v640's register (vf3, which Rotate's "0" ties on to the rotated result) and dt's
+weight is vf7. With Vu0::Rotate (rows read through a `const u128*`, no alias flag) the `-dS`
+dump shows the weight's slot store (`mem/f:TI`, MEM_SCALAR_P) scheduled before the vmulx: the
+three row loads after it in the insn stream conflict with it, so sched1 must issue the store
+first, and the weight's pseudo then dies at the vmulx (REG_DEAD on both inputs), where
+local-alloc ties the product to it (MulX lists the scale first). Vu0::RotateMembers reads the
+rows as Vec members (`mem/s:TI`, MEM_IN_STRUCT_P), which fixed_scalar_and_varying_struct_p
+separates from the scalar slot: the store, with no dependents, sinks below the vmulx and the
+rows, the weight outlives the multiply, and the product takes v640's register. Passing
+`Vu0::Scalar(-1.0f)` straight to the MulX and the rows as RotateMembers is retail's code, byte
+for byte. The near miss's notes (Scalar inline, Vec values, RotateUntied, RotateRows) had tried
+every half of it but not RotateMembers, which came later. Spot it: a product that takes the
+weight's register where retail's takes the vector's, in a rotation's argument, is a Rotate whose
+rows should be RotateMembers.
+
 ### A method read as a descriptor member passes the weight slots (func_001EB698)
 
 ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, weights
