@@ -1311,6 +1311,7 @@ func_0014CF30	func_0014D1E0	match	version-specific
 func_0014D0A8	func_0014D358	match	
 func_0014D138	func_0014D3E8	match	
 func_0014D1A0	func_0014D450	match	
+func_0014D280	func_0014D530	match	
 func_0014D3A8	func_0014D658	match	rodata
 func_0014D938	func_0014DBE8	match	
 func_0014D9A8	func_0014DC58	match	
