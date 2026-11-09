@@ -758,13 +758,17 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   a member (`self->g08 = ...`, a float in CameraController's union) and reading the upper bound
   as a scalar (`D_00261C00` an `f32` of its own, its 16-byte label padded by the 16-aligned
   `Vec02` offsets after it) gives retail's registers; either change alone does not.
-- **Not yet applied: case 2's Scalar slot.** Vu0::Scalar's slot store (neither flag) and
-  Rotate's row loads through a u128 pointer (neither) may alias, so the store precedes the loads
-  and gets their priority; retail stores the slot last and keeps the scalar in its register
-  across the multiply. Loading the rows before the scalar in source order gives retail's
-  register and store but not its address registers; by the rule above, the store would have to
-  be a scalar local's own MEM and the row loads member accesses, a change to shared helpers
-  not tried.
+- **Insn order instead of flags: case 2's Scalar slot.** Vu0::Scalar's slot store (neither
+  flag) and Rotate's row loads through a u128 pointer (neither) may alias. Rotate loads the rows
+  in its body, after its argument (MulX of a Scalar) has stored the slot, so the loads depend on
+  the store, the store inherits their priority and goes first, and MulX's result takes the
+  scalar's register. Retail stores the slot last. A dependence only runs forward in insn order:
+  with the camera's rows loaded as values first (`const u128* rows = ...; r0.q = rows[0]; ...`)
+  and rotated with the result tied to v (Vu0::RotateRowsTied, Rotate's tie with RotateRows'
+  operands), the store comes after the loads, depends on nothing but the qmtc2, and with its low
+  priority waits to the end of the block: retail's $vf6 and store. RotateRows (untied) gives
+  the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
+  local in memory, which the helpers do not have.
 
 ### Global allocation's preferences (func_00149760)
 

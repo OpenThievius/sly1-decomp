@@ -1,26 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 4073/4184 (97.3%), checked 2026-11-08
-// NEAR (2026-11-08, large-149760, mech-149760): regdiff "order", 1035 of 1046 aligned; every block
-// is retail's but for registers and scheduling in three places. Fixed (mech-149760): the second
-// switch's cases 0/1 store the WrapAngle result as a member (self->g08) and read the tilt's upper
-// bound as a scalar (D_00261C00, now an f32 of its own): a struct member at a varying address never
-// aliases a scalar at a fixed one (alias.c fixed_scalar_and_varying_struct_p), so sched1 loads both
-// bounds before the store, as retail does. Still differs: (1) case 1, the 0.0 of the zoom clamp
-// takes $f4 where retail has $f1: global-alloc's pass 0 skips $f1 because r386 (the RangeFraction
-// result, lower priority, conflicting) has $f1 in its full preferences, merged by
+// BYTES 4139/4184 (98.9%), checked 2026-11-08
+// NEAR (2026-11-08, large-149760, mech-149760): regdiff "order", 1043 of 1046 aligned; every block
+// is retail's but for registers in two places. Fixed (mech-149760): (a) the second switch's cases
+// 0/1 store the WrapAngle result as a member (self->g08) and read the tilt's upper bound as a
+// scalar (D_00261C00, an f32 of its own): a member at a varying address never aliases a scalar at a
+// fixed one (alias.c fixed_scalar_and_varying_struct_p), so sched1 loads both bounds before the
+// store, as retail does; (b) case 2 loads the camera's rows as values before it builds the vector
+// they rotate (Vu0::RotateRowsTied): the rows then precede the Scalar's slot store in the insn
+// order, the store (which they may alias) no longer holds them back, gets a low priority and
+// waits to the end, and the scalar keeps $vf6 as in retail. Still differs: (1) case 1, the 0.0 of
+// the zoom clamp takes $f4 where retail has $f1: global-alloc's pass 0 skips $f1 because r386 (the
+// RangeFraction result, lower priority, conflicting) has $f1 in its full preferences, pooled by
 // expand_preferences from zoom (sub.s $f1, zoom, g18) through v; retail must allocate r386 before
-// the 0.0 (priority log2(refs)*refs/live length: 0.0 is 3/10, r386 3/12); (3) case 2: the 100.0
-// scalar's slot store is a MEM with neither in_struct nor scalar set (stored through Vu0::Q), and
-// the camera rows' loads (through Rotate's u128 pointer) neither: they may alias, so the store
-// precedes the loads, gets their priority, and MulX's result takes the scalar's register. Retail
-// keeps the scalar in $vf6 and stores it last. Rows loaded first as values (a tied RotateRows)
-// give $vf6 and the late store but cost an instruction and change the address registers; the
-// alias rule would need the store scalar-flagged (a scalar local's own MEM) and the row loads
-// member accesses; (4) case 4's first rotation product: sched1 hoists the loads of my's rows above
-// the first row's stores, so mz's third row outranks them in local-alloc ($vf1 where retail has
-// $vf3) and the product's registers follow. Tried: every MulRotation* Into form, RotateUntied,
-// named operands, u128 against Vec forms, clamp shapes (Limit, Clamp, bounds first,
-// ValueRange::Clamp, the clamp written out, the fraction named).
+// the 0.0 (priority log2(refs)*refs/live length: 0.0 is 3/10, r386 3/12); (4) case 4's first
+// rotation product: local-alloc ranks mz's third row (4 refs over 12) above my's first two rows
+// with the product rows tied to them (8 refs over 38): retail's registers follow exactly, by an
+// emulation of block_alloc on our dump (build/swarm/mech-149760/lalloc.py), if those two
+// quantities have one reference more each (9 refs: 3*9/38 > 2*4/12). Tried for (4): b's rows
+// loaded first, Vec-valued rows and results, every MulRotation* form. Tried for (1): clamp shapes
+// (Limit, Clamp, bounds first, ValueRange::Clamp, the clamp written out, the fraction named).
 // Build: put it in src/main/file_149398.cpp at its INCLUDE_ASM line (it replaces the three
 // INCLUDE_RODATA lines before it: D_00249EA0 is its {1, 4} array, the jump tables are its).
 #include "common.h"
@@ -339,7 +337,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 ahead;
             Vec02 world;
             Vec02 push;
-            Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::Rotate(*(Mat02*)cam->f80, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
+            const u128* rows = (const u128*)cam->f80;
+            Vu0::Vec r0, r1, r2;
+            r0.q = rows[0];
+            r1.q = rows[1];
+            r2.q = rows[2];
+            Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::RotateRowsTied(r0, r1, r2, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
             ProjectPointToCamera(*(Camera**)g_camera, &ahead, &screen);
             push.x = pad->f40;
             if (g_saveData->f19EC & 0x400) {

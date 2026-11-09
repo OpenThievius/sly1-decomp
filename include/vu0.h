@@ -910,6 +910,26 @@ struct Vu0 {
     {
         __asm__ volatile("vnop" : : : "memory");
     }
+
+    // RotateRows with its result tied to v ("0") as Rotate's is: the rows are values the caller
+    // loaded before it computed v, and the result takes v's register. Loaded first, the rows
+    // come before a Scalar's slot store in the insn order, so sched1 does not have to keep them
+    // behind it (they may alias it), and the store waits to the end of the block as retail's does
+    // (func_00149760's case 2; docs/TOOLCHAIN.md, "Memory dependences in sched1").
+    static u128 RotateRowsTied(u128 r0, u128 r1, u128 r2, u128 v)
+    {
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %4x\n\tvmadday.xyz ACC, %2, %4y\n\tvmaddz.xyz %0, %3, %4z"
+                : "=j"(out) : "j"(r0), "j"(r1), "j"(r2), "0"(v));
+        return out;
+    }
+
+    static Vec RotateRowsTied(Vec r0, Vec r1, Vec r2, Vec v)
+    {
+        Vec r;
+        r.q = RotateRowsTied(r0.q, r1.q, r2.q, v.q);
+        return r;
+    }
 };
 
 #endif
