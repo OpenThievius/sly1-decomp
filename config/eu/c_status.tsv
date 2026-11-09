@@ -2098,6 +2098,7 @@ func_00185D20	func_00186388	match
 func_001860A8	func_00186710	match	
 func_001861E8	func_00186850	match	
 func_00186450	func_00186AB8	match	
+func_00186568	func_00186BD0	match	
 func_001867C8	func_00186E30	match	
 func_00186A70	func_001870D8	match	
 func_00186BA8	func_00187210	match	rodata

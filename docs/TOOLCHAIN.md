@@ -1432,6 +1432,29 @@ included.
   before the call in sched2's table. One short means retail had flow's nop, so the call ended
   its block when gcse ran; the statements after it were after a join in the source.
 
+### Three loops over one count: `--i >= 0` keeps PRE off `n - 1` (func_00186568)
+
+- **What differed.** Three loops run down the same list of n records. Retail spills n itself
+  (`sw a2,0(sp)` in the prologue) and each loop starts from a reload, `lw v1,0(sp); addiu
+  a2,v1,-1`. Written `for (i = n - 1; i >= 0; i--)` three times, the gcse dump shows PRE taking
+  the third loop's `(plus n -1)` as redundant with the second's ("PRE: redundant insn ...
+  reaching reg is 237", a copy inserted after the second loop's init): the pseudo holding
+  `n - 1` lives across the second loop's call and is the spilled one, n dies early, and the
+  counters and stack slots all move (50 lines differ).
+- **The form.** `for (i = n; --i >= 0; )`: the init is `i = n` and the decrement is a
+  computation of i, which every loop kills, so no expression of n alone is left for PRE to
+  share; n stays live to the last loop and is spilled as retail's. 50 lines to 14.
+- **The rest: one variable reused.** Retail keeps the record's face in t0 in all three loops,
+  where three loop-local pointers took three registers: one `MeshFace* f;` declared with i at
+  the top and assigned in each loop (a user variable set more than once is global-alloc's,
+  docs above: func_0018AE38). And `addu v0,t3,v0` (base first) is a pointer set from the sum,
+  `MeshFace* far = &faces[e->face[1]]; if (!(far->flags & 1))`, not the index inside the
+  memory reference (expr.c puts the index first there; a pointer set from a sum keeps the
+  source order). EXACT.
+- **Reading it.** A loop bound retail reloads from the stack before each of several loops,
+  where ours reloads `n - 1` (or keeps it in a register): the original counted with
+  `--i >= 0` (or another form whose init is not an expression of the bound).
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
