@@ -1903,6 +1903,28 @@ from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/cl
   one) would match with a scalar slot, so retail's Scalar and FromFloats slots were probably
   MEM_SCALAR_P: the original helpers kept a scalar in memory, in some form not found yet.
 
+### A caller's FromFloat slot against an inline parameter's loads (func_001A00A0)
+
+DrawStreakEffect (`k = FromFloat(-m)`, `pos = MulAddX(q80, qA0, k)`, then the clamped quadratic
+of the file's ClampedQuadratic) is a fourth function behind the wall (`-dS -fsched-verbose-6`
+dumps, 2026-11-09, still a near miss):
+
+- **No known base for an inline parameter set from a sum.** ClampedQuadratic::Get passes
+  `(const QuadraticCoeffs*)&self->q40` to Eval, whose `p` becomes a pseudo set to `self + 0x40`.
+  find_base_value of that PLUS replaces `self` by its base, `(address a0)`, and then asks
+  find_base_value of the ADDRESS itself, which falls to the default case: 0. So `p->b` and `p->c`
+  (`mem/s` through the pseudo) may alias k's frame store (`Q(k) = ...`, neither flag), while
+  `p->a`, which CSE folded to `self + 0x40` directly, has the parameter's base and does not.
+- **What it costs.** sched1 issues k's store at t=4, before the loads that depend on it; the
+  quotient then takes $f5 and the upper bound $f4 (retail $f4, $f5), and the store sits before
+  the coefficient loads where retail stores it in the first bc1f's delay slot.
+- **Retail's slot is scalar.** Retail's k is at 16(sp), after pos (an aggregate at 0), and its
+  store has no dependents in retail's order. The experiment of a `volatile u128` local given the
+  FromFloat value (only to get a MEM_SCALAR_P frame store) gives every register and instruction
+  order of retail; only the store stays out of the delay slot (reorg does not move a volatile
+  store). It is not the effect method's signature: slot 5 of the kind-8 and kind-17 tables is a
+  draw method `(self, camera)`, and retail calls no base method here.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
