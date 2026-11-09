@@ -1861,6 +1861,15 @@ label's second word is 0, the padding before the array D_00274DE0 that the MIPS 
 puts on an 8-byte boundary, so the scalar gives the same .data. A two-word label whose second
 word is 0 and never read, followed by an array at an 8-byte boundary, is a scalar.
 
+### A pointer global read as an aggregate's word (func_eu_001AEC90)
+
+The same rule for a pointer: PAL's func_eu_001AEC90 stores two flags through `self` and then
+loads D_eu_0026ABE8 (a pointer whose neighbours at 0x26ABE4 and 0x26ABEC are written through a
+base). Declared `Pal* D_eu_0026ABE8` the load is MEM_SCALAR_P, never conflicts with the
+struct-member stores, and sched1 hoists it above them; read as `D_eu_0026ABE8[0]` it is
+MEM_IN_STRUCT_P, waits behind the stores, and the function matches. func_eu_001AEEA0 reads the
+same word and matches either way, so the unit declares it once, as the array.
+
 ### Memory dependences in sched1 (func_00149760)
 
 sched1 keeps a load after a store it may alias, and the store then inherits the load's
@@ -2340,6 +2349,25 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   the object first (0.400 against 0.387): retail's registers, and jump2 merges the six calls
   into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
   flow weights references with; it is a barrier and not used.
+
+### A named float argument lengthens a long life by one insn (func_eu_001AB2B0)
+
+- global-alloc ranks by REG_LIVE_LENGTH as sched1 recomputes it, so an insn that exists in
+  sched1's blocks and disappears later still counts. `PushFontScale(font, self->scale,
+  self->scale)` is one load into $f12 and a copy to $f13; `f32 scale = self->scale;
+  PushFontScale(font, scale, scale)` is a load into a pseudo and two copies (one becomes a
+  no-op move after allocation and is deleted), one more insn inside every life around it.
+- func_eu_001AB2B0's self (12 refs) and string (4 refs over 7 insns, 2*4/7 = 1.143) are both
+  call-crossing: with the double read self's life is 31 (3*12/31 = 1.161) and self takes $s1;
+  with the named scale it is 32 (1.125), the string goes first and takes $s1, self $s2, as in
+  retail. The near miss had found the registers only with the else branch's store after the
+  call (which lengthened self's life but put the store after the jal).
+- The same named scale is how func_eu_001AB558 reads it (`f32 v = self->f51C;`).
+- Ruled out for func_eu_001AB370 (s and cur swapped, $s1/$s0): s is ranked first by a wide
+  margin (weighted refs 44 against 35 over nearly equal lives), and since s has more
+  references than cur at every loop depth, no loop structure of the same statements flips it;
+  a hard conflict or a local-alloc register would have to keep $s0 from s but not cur, and
+  there is no region where s is live and cur is not except before `cur = buf`.
 
 ### A literal initial value doubles a variable's life in the ranking (func_001BB290)
 
