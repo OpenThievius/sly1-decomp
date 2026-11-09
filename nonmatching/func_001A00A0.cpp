@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 252/276 (91.3%), checked 2026-11-08
-// Tried night-close3, 2 compiles: Clamp loading hi before lo, Clamp assigning v then c: no change or worse.
+// BYTES 249/276 (90.2%), checked 2026-11-09
 #include "common.h"
 #include "effect.h"
 #include "globals.h"
@@ -10,14 +9,19 @@
 extern f32 g_gameTime;
 void RemoveEffect(Effect* self);
 void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
-// NEAR (2026-11-08, night-close9): the clamp written c = v first, then the two tests reading the bounds, gives retail's
-// quotient register (f4); left: retail loads the high bound before the first compare and stores the weight in the
-// first bc1f's delay slot; ours loads the bound after it (also with ValueRange::Limit or Clamp, or the bound named).
-// Earlier (wave 3 retry): Vu0::Scalar(-m) in the MulAddX gives the same code as the k
-// local (the lever is not what blocks it). Left: retail keeps the clamp's high bound (lwc1 f5)
-// loaded before the first compare, the quotient in f4, and stores the weight (sqc2 vf3,16(sp))
-// in the delay slot of the first bc1f; here the quotient is in f5, the bound is loaded in that
-// slot and the store comes before the loads of the quadratic.
+// NEAR (2026-11-09, w7): with the file's ClampedQuadratic (both bounds loaded before the
+// compare) every instruction but four is retail's; what is left is the Scalar-slot wall
+// (docs/TOOLCHAIN.md, "The weight slot of func_00181078"). k's slot store (`Q(k) = ...`, neither
+// alias flag, frame base) and the coefficient loads through Clamp's `p` (`mem/s`, a pseudo
+// `self + 0x40` with no known base: find_base_value loses the ADDRESS of a PLUS) may alias, so
+// sched1 issues the store at t=4, before the loads, and the quotient ends in $f5, hi in $f4.
+// Retail loads the coefficients first and stores k last (reorg puts it in the first bc1f's
+// delay slot), and its slot is at 16(sp), after pos: a MEM_SCALAR_P slot, which
+// fixed_scalar_and_varying_struct_p separates from the loads. Experiment (not a form): k as a
+// `volatile u128` local given FromFloat's value gives every register and the order; only the
+// store stays out of the delay slot (reorg does not move a volatile store). Not a signature
+// issue: slot 5 of the kind-8 and kind-17 tables is a draw method (self, camera), and retail's
+// code calls neither DrawEffect nor any other base method here.
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
 struct QuadraticCoeffs { f32 a, b, c; };
 
@@ -29,11 +33,14 @@ struct ClampedQuadratic {
     }
     static void Clamp(f32& c, f32 v, const ValueRange* r)
     {
-        c = v;
-        if (v < r->lo) {
-            c = r->lo;
-        } else if (r->hi < v) {
-            c = r->hi;
+        f32 lo = r->lo;
+        f32 hi = r->hi;
+        if (v < lo) {
+            c = lo;
+        } else if (hi < v) {
+            c = hi;
+        } else {
+            c = v;
         }
     }
     static void Get(f32& c, const QuadraticCoeffs* p, f32 t)
