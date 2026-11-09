@@ -2417,6 +2417,27 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   2^k times its .sched life; count the leading equal constants in insn order (`grep` the
   `.lreg` dump for the pseudo's sets) and reorder the cases or arms that set them.
 
+### Two hoisted constants one insn apart: a store written after the join (PAL's func_eu_0015DF58)
+
+- loop.c hoists every constant of a long loop (`li` of a compare's operand, of a stored
+  value) into the preheader in the order its first set appears in the loop, and gives each a
+  REG_EQUAL note, so update_equiv_regs doubles both lives. Two such constants with the same
+  references live over the same loop, and the one hoisted first is live one insn longer
+  (two after doubling): at equal references the later one outranks it in global-alloc and
+  takes the lower callee-saved register. Their order in the preheader is fixed by the
+  layout, so it cannot be changed to reverse the ranking; only the references can.
+- PAL's text reader (func_eu_0015DF58, `~`, `&`, `^` markup) hoists `'.'` (3 compares) and
+  1 (3 stores of a flag at +0xA0): 7 references each (the set at depth 1, uses weighted 2),
+  lives 448 and 446, priorities 312 and 313, so 1 took s5 and `'.'` s6, retail's the other way
+  round. In the `&` case the original stored the flag once after the found/not-found if/else
+  instead of in each arm: 1 then has 5 references (2 * 5 / 444 = 0.0225 against 0.0313) and
+  `'.'` takes s5. The output is the same either way: the not-found arm falls into the store
+  and the case's `break`, reorg puts the store in the `b`'s delay slot, and the found arm's
+  jump to it takes a copy into its own delay slot and is redirected past it.
+- Spot it: two loop-wide constants swapped, their `.lreg` lives differing by 2 with equal
+  references; look for a store or a use of the later-ranked constant that every arm of an
+  if/else repeats and that could be written once after it.
+
 ### Local allocation's ranking (func_00149760)
 
 - block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),

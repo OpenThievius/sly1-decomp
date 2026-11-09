@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1076/1084 (99.3%), checked 2026-11-07
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015DF58.cpp func_eu_0015DF58 --unit src/main/file_1549C8.cpp
-// Still differs: Reads next text character after markup codes; only s5/s6 swapped (retail keeps 0x2E in s5 and constant 1 in s6).
-// PAL: reads the next character of a text, first applying the markup codes before it (~colour, &font, ^size).
-// NEAR: only s5/s6 swapped: retail keeps 0x2E in s5 and the constant 1 (stored to fA0) in s6.
+// Reads the next character of a text, first applying the markup codes before it (~colour, &font, ^size).
 
 struct Font_eu_15DF58 { u8 pad0[8]; s32 f8; u8 pad1[0x38]; f32 f44; f32 f48; };
 struct Rgba_eu_15DF58 { u8 r, g, b, a; };
@@ -97,13 +93,12 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
                     Rgba_eu_15DF58 col = t->fontcol;
                     col.a = t->colour.a;
                     t->colour = col;
-                    t->fA0 = 1;
                 } else {
                     t->font = t->base;
                     t->colour = t->deftint;
-                    t->fA0 = 1;
                     done = 1;
                 }
+                t->fA0 = 1;
             } else {
                 done = 1;
             }
