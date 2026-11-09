@@ -904,6 +904,39 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
   (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
 
+### A run of global stores: the constant's death and the high parts' lives (func_00203548)
+
+Found on InitDiscLibrary (Sony's CD/DVD library, cc1 of 2.9-ee-991111) from the `-dG`, `-dS`,
+`-dR`, `-dl` and `-dg` dumps (2026-11-08); it was 723/736 bytes as a near miss.
+
+- **PRE shares a global's high part, and global-alloc decides whether it stays.** The init
+  block's `%hi(D_00279424)` is the reaching value PRE gives the same high part in the loop's
+  error path and after the loop (`PRE: redundant insn ... reaching reg`), so one pseudo lives
+  over the whole function and competes for the nine saved registers. Written plain, it has 5
+  references over 216 insns (floor_log2(5) * 5 / 216 = 0.046) and outranks the receive buffer's
+  high part (3 over 78, 0.038), taking `$fp`: 95 bytes differ. With the flag's three stores
+  volatile (the interrupt's callback reads it, and retail writes it as volatile) it has 4 over
+  218 (0.037), loses, and reload rematerialises a `lui` before each store from its REG_EQUIV:
+  retail's code. Each of the three stores is needed.
+- **A `return` inside a case adds a dependent.** Case 5's own `return result;` puts `move v0,
+  s0` in the case's block; sched2 then ranks the last semaphore id's `lui v0` (an output
+  dependence on the move) above the store before it on dependents, and swaps them. With
+  `break` to the function's one `return result;`, the move is in the next block (reorg still
+  fills the branch's slot with it) and the stores keep retail's order. The switch keeps `case 0:
+  case 1:` beside `default:` for retail's compare tree.
+- **The shared constant's last store goes first.** In a run of `x = -1;` stores the constant's
+  pseudo dies at the last one in source order; that store's INSN_REG_WEIGHT is then -2 (two
+  deaths, no set) against -1 for the others, and sched1 issues it first (retail's `sw` to
+  D_0027943C before the other five). The high parts tie on everything else and go in source
+  (LUID) order, and local-alloc ranks each by 2 refs over its life: a `lui` issued later lives
+  shorter and takes the lower register. Retail's order of the run (D_00279440, 438, 448, 444,
+  44C, 43C, then the volatile D_00279434 = 0 and the increment) is the one of the 24 orders of
+  its last four statements that gives every register; the others leave 5 to 20 lines.
+- **What does not matter.** The thread id's word is stored plain (the interrupt does not read
+  it); written volatile too, the function is the same. `D_0062A7D0 = GetCurrentThreadId();`
+  before the flag's store gives retail's order: the flag's volatile store and the id's store
+  have no dependence, and the scheduler issues the flag's first.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
