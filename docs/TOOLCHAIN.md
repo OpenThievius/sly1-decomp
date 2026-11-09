@@ -1198,6 +1198,37 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
   (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
 
+### A burst's two records (func_00156288)
+
+Read from haifa-sched.c, local-alloc.c and the `-dS -dl -fsched-verbose-6` dumps of the effect
+spawner's splash (2026-11-09, still a near miss). Two frame records are cleared by FillMemory
+and filled member by member, one block holding both calls:
+
+- **Equal spans fall to birth order, so the store order picks the constants' registers.** The
+  tail's 8.0 and 12.0 loads issue in consecutive cycles (priority 15, the memory unit), and
+  their stores two cycles apart with one ALU insn between: equal spans, and local-alloc gives
+  the one born first $f0. Retail's 12.0 has $f0, so its span was shorter: stores of f20 and f24
+  issued back to back. Writing those two stores first gives retail's registers (the earlier
+  stores' LUIDs win the memory cycle as soon as the loads' latency allows), but sched2 then
+  keeps that LUID order for the tail's other stores, which retail's code does not show.
+- **A store weighs +1, less one if its value dies.** The store of a parameter on its last use
+  weighs 0 and goes before a store of a value that lives on (+1) at equal priority, whatever
+  the source order; sched2 has no weights but keeps the order by LUID, and reorg fills the
+  call's delay slot with the last one. Retail's delay slot holds the parameter's store, so in
+  its sched1 the parameter was not dying there; keeping it live in an experiment gives that
+  order. No plain form was found.
+- **Constants and stores at the end of a block.** A float constant's load (movsf, two
+  instructions) has priority 4 and its store 2; stores that anti-depend on a load through a
+  pointer loaded from memory (no base, so it conflicts with every frame store) wait for it, and
+  then every constant still to be loaded is loaded before any of them is stored. Two constants
+  can share a register only if one's store comes before the other's load in sched1's order,
+  which nothing in that block's shape allows: retail's shared $f0 for 5.0 and -1.0 means some
+  other shape (a store with a dependent in the block, or a block boundary).
+- **The copy loop's registers follow the same order.** The struct copy's destination pointer
+  (sp+64) is set on a free ALU slot before the gravity load, so it is live while the world
+  pointer (local-alloc's $a0) is and global-alloc gives it $a1; retail's $a0 means it was set
+  after that load.
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
