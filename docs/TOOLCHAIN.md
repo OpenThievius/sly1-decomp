@@ -1169,6 +1169,47 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   dump lists each insn's dependents; a link in the RTL whose register no longer matches is a
   stale one.
 
+### A compiler's qmfc2 of a VU0 product (func_00186230)
+
+MeasurePointToLine (2026-11-09) tests `Dot(e, e) < 0.0001f`. Retail's head is: the product
+in vf1, the dot's 1.0 in vf4, `a` in vf3, `p` loaded into vf2 before the qmfc2, then `qmfc2
+v0,vf1; mtc1 v0,$f2; vsub vf1 = p - a; c.lt.s; sqc2 e; bc1f; (sqc2 w)`. Read from the
+dumps, it needs two things at once:
+
+- **local-alloc: the product a VU0 pseudo.** With ToFloat or ToFloatNow the product is
+  VU_REGS, ranks first (ToFloatNow's two-output asm repeats its input: three refs) and takes
+  vf1 over the dot's insn and the load of p, so p takes vf2, a vf3 and the 1.0 vf4, retail's
+  registers. With ToFloatMoved the product has one `"=j"` def and one `"r"` use: both costs
+  are a VU0-to-GPR move, regclass ties and picks the union TI_REGS, local-alloc gives it v0
+  and the asm's output reload uses vf1 after every VU0 pseudo has its register: p takes vf1,
+  a vf2 and the 1.0 vf3. No sched1 order fixes that (emulated with la.py over the .lreg: the
+  1.0 can only reach vf4 if vf1 to vf3 are all taken around the dot, and without the product
+  only b could hold vf1 there, which needs the load of p before the subtraction of b, ranked
+  4 against the constant's 6 and the subtraction's 7).
+- **sched2: the qmfc2 the compiler's.** At cycle 5 the dot is done and the ready list holds
+  the conversion and the sqc2 of e (priority 2). An asm's qmfc2 (ToFloat, ToFloatNow,
+  ToFloatViaBits) has no function unit, so both issue and the store lands before the
+  subtraction of w, which waits on the conversion's read of vf1 (an anti dependence, and
+  insns made ready in a cycle never issue in it: schedule_block moves the last ready insn
+  into the issued one's slot and counts down past it). The compiler's qmfc2 (a movti
+  reload, unit vu0) takes the vu0 unit the sqc2 also needs: the store waits, the mtc1 and the
+  subtraction issue at cycle 6, the c.lt.s and the store at 7, and reorg puts the sqc2 of w
+  in the branch's delay slot: retail's order. Probed with a ToFloatMoved whose asm also takes
+  the product as a dummy `"j"` operand: the product becomes VU_REGS and the qmfc2 the
+  compiler's, but the subtraction then waits on the mtc1 that names vf1, and the store still
+  comes first.
+
+What retail had is a product in VU_REGS whose only reader takes it as `"r"`: some second
+VU0 reference that leaves no code (a loop's weight, a copy CSE keeps), and none of the
+plain forms found has one. Ruled out: a user variable for the product (CSE folds the copy:
+the variable is canonical only if it lives beyond the block), the same variable reused for
+the arms' squared distances (global, vf4), a truncating cast (sign extension), a union or
+`*(f32*)&` (memory), the product converted again in the else arm (CSE shares the float).
+The near miss keeps ToFloatNow (every register retail's, the sqc2 one slot early); ToFloatNow
+for the else arm's dot also puts the division before the mfc1 of 1.0, as retail has it, and
+the distance stored as `*(u32*)dist = ToBits(Sqrt(d))` gives the square root vf1 (StoreX's
+"r" operand put it in vf2).
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
