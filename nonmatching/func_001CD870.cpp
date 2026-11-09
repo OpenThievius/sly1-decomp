@@ -29,7 +29,7 @@ float D_00274DC0[3] = {4.0f, 0.0f, 0.100000001f};
 float D_00274DCC = 1.70000005f;
 float D_00274DD0 = 3.0f;
 float D_00274DD4 = 3.5f;
-float D_00274DD8[2] = {-1.70000005f, 0.0f};
+float D_00274DD8 = -1.70000005f;
 float D_00274DE0[3] = {3000.0f, 1000.0f, 0.150000006f};
 float D_00274DF0[3] = {30.0f, 10.0f, 0.150000006f};
 void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);

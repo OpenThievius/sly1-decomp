@@ -1117,6 +1117,17 @@ order (2026-11-08, func_00175170):
 - **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
   named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
 
+### A global array's element is not a scalar (func_001CDB70)
+
+An element of a global array (`D[0]`) is MEM_IN_STRUCT_P like a structure's member, so
+fixed_scalar_and_varying_struct_p does not separate its load from a store through a pointer.
+ComputePlayerLinkPose's `BuildAxisAngleMatrix(&g_unitXVector, D_00274DD8[0], rotB)` had its lwc1
+of the angle after the three `*rotA = r` stores (through a Mat02 parameter), five insns later than
+retail; read as `float D_00274DD8` the load moved above the stores and the function matched. The
+label's second word is 0, the padding before the array D_00274DE0 that the MIPS DATA_ALIGNMENT
+puts on an 8-byte boundary, so the scalar gives the same .data. A two-word label whose second
+word is 0 and never read, followed by an array at an 8-byte boundary, is a scalar.
+
 ### Memory dependences in sched1 (func_00149760)
 
 sched1 keeps a load after a store it may alias, and the store then inherits the load's
