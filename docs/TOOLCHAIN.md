@@ -1610,6 +1610,39 @@ Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-
   as a two-element array breaks block 0. What retail had is outside this model: look for a
   construct that leaves an insn naming a1 (or a group) that the final code does not show.
 
+### A store in each arm leaves the join block to sched2 (func_0013BE18, unsolved)
+
+func_0013BE18 (src/main/child_group_object.cpp) has func_0014F168's tail (2026-11-09): d
+normalized through NormalizeOr into `*p`, then `r = d * w1 + Z * w2` (MulXSum of two ScalarAt
+weights) passed to ConstrainVectorByParentAnchor and the method at 0x90. With Vu0::ScalarAt for
+the weights every register is retail's; what is left is the section above's: `addiu s0,sp,16`
+(&r) and the argument moves issue early in ours, after the reload of d in retail. Here the
+moves that hold back include `addiu a1,s1,1088` and `move t0,zero`, which name nothing any
+earlier insn touches, so no dependence on &r explains it; the issue slots do.
+
+- **The store at the join takes the slots.** In ours NormalizeOr's result is stored once, at
+  the join (`sqc2 vf1,0(v1)`), and that store heads the join block that sched2 schedules with
+  the weights, the sum and the call: a memory and vu0 insn of the highest priority whose unit
+  is busy for three cycles, so the loads behind it queue and the ALU insns (&r, the moves) fill
+  the free issue slots from cycle 3. Written with the store in each arm (`if (len < eps)
+  *p = x; else *p = DivX(d, len);`, probes e1, e4, e5), the join block starts at the weights'
+  lui, the slots are full of priority 12-14 insns, and &r and the moves come out where retail
+  has them: `lqc2 vf1,0(sp); addiu s0,sp,16; vmulax; vmaddx; sqc2 vf3; move a3,s0; sqc2 vf1`
+  (with Vec values for d, e5, the whole tail is retail's but for the two weights' lw order).
+- **Retail stored in each arm.** toplev.c runs jump2's cross-jumping after sched2 (reload,
+  flow2, sched2, then `jump_optimize (insns, JUMP_CROSS_JUMP, ...)`), so two identical stores
+  at the ends of the arms are merged into one at the join after sched2 has scheduled the join
+  block without them. Retail's fallback arm (`b join` with `qmtc2 v0,vf1` in the delay slot,
+  the join `sqc2 vf1,0(v1)`) is what that merge leaves.
+- **Not found: the arms' identical stores.** For the merge both arms must store the same
+  register through the same register: retail's fallback arm copies the GPR-loaded fallback
+  into vf1 and stores vf1 through p (v1). Written plainly, CSE replaces the arm's copy by the
+  fallback itself and p by sp (`sq v0,0(sp)` against `sqc2 vf1,0(sp)`), the stores differ and
+  stay in the arms. A store in each arm of one VU-class variable through a pointer CSE cannot
+  resolve is what is needed; func_0014F168 has the same head and should share the answer.
+  Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
+  retail issues later than ours although nothing it reads or writes is touched before.
+
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
 The player's blend weights (2026-11-09) compute three slot weights, each a dot product over
