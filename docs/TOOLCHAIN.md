@@ -1246,6 +1246,34 @@ order (2026-11-08):
   above (a read first leaves the two loads swapped; with the single call, b first swaps their
   registers).
 
+### A weight listed before its vector (func_001DDE90)
+
+The chain relaxation's velocity update, `vel + rel * b + drag * vel + bend * c`, is one
+file-local helper (vadda, two vmaddax, vmaddx). Its only difference from retail was the VU0
+registers of that block (2026-11-08):
+
+- **The near miss's diagnosis was half right.** sched1 does issue h's qmtc2 (the position
+  update's weight, an asm with no unit and no input in the block) at clock 1, and it still
+  does in the match: h lives across the block either way. What decides the registers is
+  local-alloc's ranking (floor_log2(refs) * refs * 2 / life) of the other quantities. With
+  the helper's parameters (a, b, s, c, t, d, u), the inline's first pass emits the second
+  velocity load before drag's slot store; b's quantity (6 refs, life 30 to 56) ranks 9230,
+  above h's 9000, and takes vf7 before h.
+- **Weight first.** With the parameters (a, s, b, t, c, u, d), the sum as it reads, drag's
+  slot store comes before the second velocity load (slot stores have no alias class, so the
+  load waits for the store), the sum issues one insn later, b's life grows to 58 and its rank
+  falls to 8571, under h's: h takes vf7 and b vf8. The same shift makes vel and rel tie
+  (30000; the tie falls to the quantity number, vel first: vf4, vf5) and puts the second
+  velocity load after drag (vf2, drag vf3), all retail's. The emulation of block_alloc
+  (build/swarm/mech-149760/lalloc.py) on the `.lreg` dumps gives both allocations.
+- **Locals give the same block and the wrong spill slots.** Naming the operands as Vec
+  locals in that order (each weight before the vector it scales) matched the block too, but
+  each Vec local is two movti copies: 638 insns at gcse, T = 321 buckets, and PRE's three
+  spilled pseudos (`first << 6`, `first - 1`, the clock's `%hi`) came out in another bucket
+  order. The inline arguments keep 624 insns and T = 313. Of the orders tried, the ones
+  that give the block have the first velocity load before rel's weight, drag's weight before
+  the second velocity load and bend's after it; b's load and c's may come anywhere there.
+
 ### A Scalar slot against a load through a loaded pointer (func_001D87C8)
 
 Read from alias.c, function.c, integrate.c, reorg.c and resource.c and the `-dS`
