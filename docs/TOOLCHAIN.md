@@ -1895,6 +1895,38 @@ function.c and haifa-sched.c with `-dS -fsched-verbose-6` dumps):
   object's scope closes before `return`. A frame with an unexplained small slot before the
   address-taken locals is worth reading as such a scoped object.
 
+### An object with a destructor keeps a slot; one store counted twice (func_001DC4D0)
+
+Measured 2026-11-08 on GatherCollidersInSphere (func_001DC4D0), whose code and registers now
+match retail except the spill slot of its count pointer (retail 0x24, ours 0x20):
+
+- **Spill slots come after the declared locals.** reload's first alter_reg loop gives each
+  pseudo global-alloc left without a register a slot in pseudo order, after every slot expand
+  made (declared aggregates) and every purge_addressof slot. A spilled parameter one word
+  above the last declared local means retail declared something there that nothing reads.
+- **An object of a class with a destructor keeps a small slot.** A class with a destructor is
+  addressable, so its object is in memory even when it is empty and its destructor emits
+  nothing. Declared inside a block after a 16-byte Vec local it takes a 1-byte slot at the
+  next 16-byte boundary and the spill that follows lands 4 bytes later (0x20 and 0x24 here);
+  declared at function scope before the vector it costs 16 bytes. An empty object with no
+  destructor, with only a constructor (even one that calls a function), or one whose inline
+  method ignores `this` gets no slot at all; a `u8[3]` is rounded to 16. GatherCollidersInBox
+  (func_001DC238) has the same small unread object at 0x30 (its locals end at 0x34, the frame
+  rounds to 0x40), so the two functions share it at the same point, before the parts loop. An
+  empty class with an empty destructor there matches func_001DC4D0 exactly; it is not landed,
+  since no type the original plausibly declared there is known (AGENTS.md: no invented type to
+  size a frame).
+- **Weighted references decide global-alloc's order.** flow counts each reference times its
+  loop depth, so `*cursor++ = part;` written in both arms of the filter test (store, read and
+  write in the innermost loop, twice) gave the cursor priority 1.039 against the skipped
+  object's 0.472, and the cursor took the saved register retail gives the object. Retail
+  has one store: its first `sw` sits in the delay slot of a `b` to the second, which reorg
+  copied from the branch's target. Written once (the filter's outcomes as `continue` in a
+  `for`) the object goes first and both registers are retail's.
+- **`a = *p = call()` stores the call's value, not the variable.** `cursor = *out =
+  Allocate(...)` gives retail's `sw v0,0(s7)` after `move s2,v0`; `cursor = Allocate(...);
+  *out = cursor;` stores the saved register.
+
 ### A prototype's parameter order and the order of argument moves (func_0013A128)
 
 The EE's ABI gives integer and float arguments their registers independently (a0-a3 and
