@@ -193,10 +193,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
 {
     void* walker;
     s32 sound = -1;
-    void* anim = 0;
     f32 start = 0.0f;
-    s32 flag = 1;
+    void* anim = 0;
     f32 speed = 1.0f;
+    s32 flag = 1;
     s32 layers = 0;
     s32 walkerId = -1;
     s32 skip = 0;
