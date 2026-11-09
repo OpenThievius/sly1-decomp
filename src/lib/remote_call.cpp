@@ -91,7 +91,56 @@ s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 s32 SendCommandFromInterrupt(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 void QueueThreadRequest(void* thread);
 
-INCLUDE_ASM(func_001F7BE8);
+void InitCommandChannel(void);
+s32 GetChannelWord(s32 index);
+typedef void (*CommandHandler)(void);
+s32 SetCommandHandler(u32 cmd, CommandHandler handler, void* arg);
+s32 ReadIopRegister(u32 reg);
+u32 WriteIopRegister(u32 reg, u32 value);
+void HandleRemoteCallReply(RemoteCallPacket* reply);
+void AnswerServiceLookup(RemoteCallPacket* src, Pools_1F7BE8* pools);
+void QueueServerRequest(struct Ctx_001F8200* self);
+void AnswerIopCall(RemoteCallPacket* src, Pools_1F7BE8* pools);
+
+void InitRemoteCalls(void)
+{
+    DisableInterrupts();
+    if (g_remoteCallsReady != 0) {
+        EnableInterrupts();
+        return;
+    }
+    g_remoteCallsReady = 1;
+    EnableInterrupts();
+    InitCommandChannel();
+    DisableInterrupts();
+    Pools_1F7BE8* s = &g_remoteCallState;
+    s->packets = (RemoteCallPacket*)((u32)D_00626000 | 0x20000000);
+    s->packet_count = 0x20;
+    s->fC = 0;
+    s->f10 = 0;
+    s->replies = (RemoteCallPacket*)((u32)D_00626800 | 0x20000000);
+    s->reply_count = 0x20;
+    s->f1C = (RemoteCallPacket*)((u32)D_00627000 | 0x20000000);
+    s->f20 = 0x20;
+    s->cursor = 0;
+    // The id counter is set after the pools: Sony's compiler then stores it after the pool
+    // sizes (docs/TOOLCHAIN.md, "A run of stores in two alias classes").
+    s->next_id = 1;
+    SetCommandHandler(0x80000008, (CommandHandler)HandleRemoteCallReply, s);
+    SetCommandHandler(0x80000009, (CommandHandler)AnswerServiceLookup, s);
+    SetCommandHandler(0x8000000A, (CommandHandler)QueueServerRequest, s);
+    SetCommandHandler(0x8000000C, (CommandHandler)AnswerIopCall, s);
+    EnableInterrupts();
+    if (ReadIopRegister(0x80000002) != 0) {
+        return;
+    }
+    RemoteCallPacket* p = (RemoteCallPacket*)D_00626000 + 1;
+    p->head[3] = 1;
+    SendCommand(0x80000002, p, 0x10, 0, 0, 0);
+    while (GetChannelWord(0) == 0) {
+    }
+    WriteIopRegister(0x80000002, 1);
+}
 
 void ShutDownRemoteCalls(void)
 {
