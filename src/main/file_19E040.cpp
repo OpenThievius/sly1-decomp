@@ -4406,7 +4406,44 @@ void StartObjectCreator(ObjectCreator* self)
     SetObjectCreatorState(self, 0);
 }
 
-INCLUDE_ASM(func_001A7800);
+s32 ChooseObjectCreatorState(ObjectCreator* self);
+
+// dir = d made unit length, or fallback when d is shorter than 0.0001.
+static inline void SetDirectionOr(Vec02& dir, u128 d, const Vec02& fallback)
+{
+    Vu0::Q(dir) = d;
+    u128 len = Vu0::Length(d);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        dir = fallback;
+    } else {
+        Vu0::Q(dir) = Vu0::DivX(d, len);
+    }
+}
+
+void UpdateObjectCreator(ObjectCreator* self)
+{
+    Vec02 dir;
+    RampProfile ramp;
+    Vec02 vel;
+    UpdateCollider(self);
+    s32 v;
+    while ((v = ChooseObjectCreatorState(self)) != self->state) {
+        SetObjectCreatorState(self, v);
+    }
+    if (v == 2) {
+        PlacedObject* anchor = (PlacedObject*)self->createsObject;
+        SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)*(void**)((u8*)anchor + 0x354))->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
+        f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
+        ramp.Set(3000.0f, 0.0f, 0.2f);
+        f32 speed = ApproachValueWithRamp(len, 3000.0f, g_frameDt, &ramp, 0);
+        Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(speed));
+        PlacedObject* o = (PlacedObject*)self->created;
+        o->desc02()->m20(o, &vel);
+        Mat02 basis;
+        BuildBasisFromX(&dir, &basis);
+        ((PlacedObject*)self->created)->desc02()->m1E((PlacedObject*)self->created, &basis);
+    }
+}
 
 void SetObjectCreatorState(ObjectCreator* self, s32 idx)
 {

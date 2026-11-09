@@ -3451,6 +3451,36 @@ dumps of OpenPadPort (src/lib/pad.c, 2.9-ee-991111, 2026-11-09):
   words there. Writing the stores in any of the 5,040 orders (tools/permute.py) never reached it
   with the other types: the order was right, the types were not.
 
+### A stack record filled by an inline: only the constant-zero store loses the pointer (func_001A7800)
+
+Read from integrate.c (expand_inline_function, try_constants) and cse.c (find_best_addr), with
+the `-dr -ds` dumps of UpdateObjectCreator (src/main/file_19E040.cpp, 2026-11-09):
+
+- **Retail's mark.** A local profile filled with three constants and passed by address: retail
+  stores the first two fields frame-relative (`swc1 $f1,16(sp)`, `sw zero,20(sp)`) and the third
+  through the register that also holds the call's argument (`addiu a1,sp,16`, `move a0,a1`,
+  `swc1 $f0,8(a1)`). Written `ramp.f = k;` all three are frame-relative and the argument is made
+  at the call (54 bytes differ); written through `RampProfile* p = &ramp;` the second store also
+  goes through the pointer, which keeps it live past the `a1 = 0` argument move and moves it to
+  `$v0` (17 lines differ).
+- **CSE alone never mixes them.** find_best_addr returns at once for a frame-relative address,
+  so a store written on the frame keeps it. A bare pointer address `(mem p)` is replaced by its
+  class's `(plus fp 16)` (equal address cost, and the tie goes to the higher rtx cost), but
+  `(plus p 4)` and `(plus fp 20)` cost the same both ways, so `p->endSpeed` keeps the pointer.
+- **The inliner does.** A pointer parameter whose argument is a frame address
+  (FIXED_BASE_PLUS_P) gets a pseudo with that address as its constant equivalent, and so do the
+  constant float arguments. try_constants then substitutes every equivalent into each copied
+  insn as one change group: all or nothing. The store of `3000.0f` and of `0.2f` cannot take an
+  immediate (no SFmode store of a non-zero constant), so the whole group fails and the address
+  keeps the pointer pseudo too; the store of `0.0f` is a valid `sw zero` with the address
+  `(plus fp 20)`, so both substitutions stay. CSE then turns the first store's bare `(mem p)`
+  into `16(sp)`, which gives retail's three addresses exactly.
+- **The form.** A setter on the record, `void RampProfile::Set(f32 max, f32 end, f32 time)`
+  (include/ramp_profile.h), called as `ramp.Set(3000.0f, 0.0f, 0.2f);`: the original filling
+  its profile with one call. A free inline taking the record by pointer or by reference matches
+  too. Spot it: in a record filled with constants, a zero store frame-relative among stores
+  through the record's address register means an inline call's arguments.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
