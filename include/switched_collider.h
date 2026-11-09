@@ -473,7 +473,7 @@ struct Player : TurningCollider {
     s32 f2730;              // 0x2730
     f32 f2734;              // 0x2734: the time state 4 last took the pad's 0x40 press (ControlPlayer)
     s32 f2738;              // 0x2738: set, ControlPlayer runs the player's callback within D_00263910 of it
-    u8 pad273C[0x2740 - 0x273C];
+    void* f273C;            // 0x273C: the hook (+0x3C8) put aside on entering state 13, given back on leaving it (func_00175170)
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
     s32 f2744;              // 0x2744: mode 2's slow-down held (func_001D2BB8)
     f32 f2748;              // 0x2748: mode 4's speed-up, 1 while held, eased back to 0 (func_001D2BB8)

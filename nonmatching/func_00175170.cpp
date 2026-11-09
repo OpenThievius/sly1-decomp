@@ -427,7 +427,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 13:
             self->flags538 &= ~((u64)1 << 40);
-            self->hook = PS(void*, 0x273C);
+            self->hook = self->f273C;
             if (self->f1390[13] != 0) {
                 func_001C4D60(self, self->f1390[13], 1);
             }
@@ -725,10 +725,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(self->v640) = Vu0::Zero();
             break;
         case 13:
+            self->f273C = self->hook;
+            self->hook = 0;
             self->flags538 |= (u64)1 << 40;
             self->radius3CC = D_00262E30;
-            PS(void*, 0x273C) = self->hook;
-            self->hook = 0;
             if (self->f1390[13] != 0) {
                 func_001C4D60(self, 0, 0);
             }
