@@ -689,7 +689,69 @@ void func_00196EB0(GaugeCollider* self)
     ClearRootTries(self);
 }
 
-INCLUDE_ASM(func_001971B8);
+struct GaugeNodeRec {
+    u8 pad00[0x18];
+    s32 f18;                // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Quad16 q40;             // 0x40
+};
+
+struct GaugeHeld {
+    u8 pad00[0x550];
+    s32 f550;               // 0x550
+    GaugeNodeRec* f554;     // 0x554
+    BaseObject* f558;       // 0x558
+    s32 f55C;               // 0x55C
+};
+
+void ConvertPositionToWorld(void* obj, Vec02* out);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+
+GaugeHeld* func_001971B8(GaugeCollider* self)
+{
+    GaugeHeld* list[0x40];
+    Mat02 rot;
+    Vec02 ahead;
+    Vec02 here;
+    Vec02 start;
+    Vec02 diff;
+    GaugeHeld* best = 0;
+    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->f618);
+    Vu0::Q(ahead) = Vu0::MulAddX(Vu0::Vec::Of(self->pos), Vu0::Vec::Of(self->v150), Vu0::Vec::ScalarAt(D_0026A828)).q;
+    ConvertPositionToWorld(self->f670, &here);
+    Vu0::Q(start) = Vu0::Add(Vu0::Rotate(rot, Vu0::Vec::Of(((GaugeNodeRec*)self->f670)->q40)), Vu0::Vec::Of(ahead)).q;
+    Vu0::Q(diff) = Vu0::Sub(Vu0::Vec::Of(start), Vu0::Vec::Of(here)).q;
+    f32 nearest = D_0026A830;
+    s32 n = GatherObjectsById(self->world, 5, 0x48, 0, 0x40, list);
+    for (s32 i = 0; i < n; i++) {
+        Vec02 framePos;
+        Mat02 frameRot;
+        Vec02 world;
+        Vec02 end;
+        Vec02 d;
+        f32 t;
+        f32 dist;
+        GaugeHeld* o = list[i];
+        if (o->f550 != 0) {
+            continue;
+        }
+        ComputeObjectFrameAtTime((void*)o->f554->f18, 0, &framePos, &frameRot, 0, 0, D_0026A828);
+        ConvertPositionToWorld(o->f554, &world);
+        Vu0::Q(world) = Vu0::Add(Vu0::Vec::Of(world), Vu0::Vec::Of(diff)).q;
+        Vu0::Q(end) = Vu0::Add(Vu0::Rotate(frameRot, Vu0::Vec::Of(o->f554->q40)), Vu0::Vec::Of(framePos)).q;
+        MeasurePointToSegment(&start, &world, &end, &dist, &t);
+        if (t < nearest) {
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(world), Vu0::Q(self->v140));
+            if (__builtin_fabsf(WrapAngle(ArctangentOfRatio(d.y, d.x) - self->f618)) > D_0026A82C) {
+                continue;
+            }
+            nearest = t;
+            best = o;
+        }
+    }
+    return best;
+}
 
 void ApplyGaugeColliderRatioToEffect(GaugeCollider* self)
 {
@@ -725,21 +787,6 @@ void HandleGaugeColliderActivation(GaugeCollider* a, void* b)
 {
     HandleSwitchedColliderActivation(a, b);
 }
-
-struct GaugeNodeRec {
-    u8 pad00[0x18];
-    s32 f18;                // 0x18
-    u8 pad1C[0x40 - 0x1C];
-    Quad16 q40;             // 0x40
-};
-
-struct GaugeHeld {
-    u8 pad00[0x550];
-    s32 f550;               // 0x550
-    GaugeNodeRec* f554;     // 0x554
-    BaseObject* f558;       // 0x558
-    s32 f55C;               // 0x55C
-};
 
 struct GaugeCarrierRec {
     u8 pad00[0x18C];
