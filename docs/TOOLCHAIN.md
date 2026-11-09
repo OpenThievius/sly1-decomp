@@ -1694,6 +1694,35 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.
 
+### A float parameter last moves an asm's quantity (func_001D2518)
+
+Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
+-fsched-verbose-6`, local-alloc.c and haifa-sched.c), each passing `ToFloatMoved(Dot(delta,
+v))`: retail loads delta into vf1 for the first two dots and into vf2 for the third (dir in
+vf1), ours vf1 for all three.
+
+- **local-alloc.** The Dot asm's output is tied to delta, its first dying input, so that
+  quantity has 3 + 2 references and lives from delta's load to the mtc1 that reads the result
+  (Local allocation's ranking above): 2 * 5 / 12 outranks the other input's 1 * 3 / 4, and it
+  takes vf1. One insn more between the asm and the mtc1 (life 14) makes the other input go
+  first and take vf1, retail's third dot.
+- **sched1.** At the cycle after the dot the mtc1 to $f12 (weight 0: it sets one register, the
+  result dies) ties with the a3 move, whose `&dir` pseudo dies there (weight 0 too); the class
+  and the dependents are equal, so INSN_LUID decides, and LUIDs follow the prototype's
+  parameter order (the section above). With `CreatePooledContact(f32 f, a0, ...)` the $f12 move
+  is first and issues first; declared with the float last, `(a0, a1, a2, a3, s32, s32, s32,
+  a7, f32 f)`, as func_0013B9D8's matched call already has it, the a3 move goes first, the mtc1
+  one insn later, and the third dot takes retail's registers. In the first two calls the a3
+  move's pseudo does not die there (weight 1), so the mtc1 wins either way and nothing changes.
+- **reorg steals the else arm's first insn.** Retail sets the list head (`addiu s7,s0,1204`) in
+  the delay slot of the first branch to the else arm, and both branches go to the insn after
+  it. That is the assignment made only in the else arm (`} else { link = &self->contacts4B4;
+  ...`): fill_slots_from_thread copies the target's first insn into the slot (s7 is dead on
+  the fall-through, which sets it before use) and redirects the branch past it. Initialised at
+  its declaration the add is in the entry block, where its anti-dependence on `sq s7` gives the
+  save one dependent more than the others, and sched2 issues it first; and in the else arm the
+  `move s4,s7` then precedes the copies PRE put there instead of following the first.
+
 ### The operand order of an address sum (expr.c, func_0013A128)
 
 `addu a0, v0, t0` (index first) and `addu a0, t0, v0` (base first) come from two different

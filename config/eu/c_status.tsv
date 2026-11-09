@@ -3291,6 +3291,7 @@ func_001D14F0	func_001D21D0	match
 func_001D1630	func_001D2310	match	
 func_001D1A80	func_001D2760	match	
 func_001D1BB0	func_001D2890	match	
+func_001D2518	func_001D31F8	match	
 func_001D27C0	func_001D34A0	match	
 func_001D2830	func_001D3510	match	
 func_001D29C8	func_001D36A8	match	version-specific

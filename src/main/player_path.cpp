@@ -5,6 +5,8 @@
 #include "game_clock.h"
 #include "globals.h"
 #include "vu0.h"
+#include "placed_object.h"
+#include "collider.h"
 
 // The file's .data, in retail's order. D_00274F0C holds two floats (0.3, 10) under one label, which
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
@@ -55,7 +57,7 @@ struct PathHolder;
 struct PathHolderDesc {
     u8 pad00[4];
     void (*m1)(PathHolder* self, Vec02* pos, f32 t, Vec02* tangent);  // 0x04
-    void (*m2)(PathHolder* self, Vec02* out, f32 t, s32 a);           // 0x08
+    void (*m2)(PathHolder* self, Vec02* pos, f32 t, Vec02* dir);      // 0x08
     u8 pad0C[0x20 - 0x0C];
     f32 (*m8)(PathHolder* self);                                      // 0x20: the length
     u8 pad24[0x28 - 0x24];
@@ -72,7 +74,7 @@ struct PathHolder {
 struct PathObject {
     const Desc01* desc;
     u8 pad04[0x14];
-    void* frame;            // 0x18
+    PlacedObject* frame;    // 0x18
     u8 pad1C[0x34 - 0x1C];
     PathHolder* holder;     // 0x34
     u8 pad38[0x40 - 0x38];
@@ -450,7 +452,51 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     SetPlayerState(self, 7, state);
 }
 
-INCLUDE_ASM(func_001D2518);
+void BuildPerpendicularPair(Vec02* dir, Vec02* a, const Vec02* b, const Vec02* c);
+s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7, f32 f);
+
+// The player held on its path: the contact row for the path's frame's root (or the player's own
+// list at +0x4B4 when the frame has no flag 2), the point and direction at the player's length in
+// world space, and three contacts of kind 0xB, along the two directions across the path and along
+// it, each at the offset of the player's point from the path's. The float is the last parameter of
+// CreatePooledContact here, as for func_0013B9D8: the $f12 move then follows the integer argument
+// moves in insn order, which sched1's tie-break needs (docs/TOOLCHAIN.md, "local-alloc").
+void func_001D2518(Player* self)
+{
+    Vec02 pos;
+    Vec02 dir;
+    Vec02 local;
+    Vec02 delta;
+    Vec02 perp[2];
+    PathObject* path = (PathObject*)self->f2208;
+    Contact03** link;
+    ContactRow03* row;
+    if (path->frame != 0 && (path->frame->desc->flags & 2) != 0) {
+        ContactRow03* r = self->contacts->head;
+        Collider* key = (Collider*)path->frame->root;
+        while (r != 0 && r->other != key) {
+            r = r->next;
+        }
+        row = r;
+        link = row->link;
+    } else {
+        link = &self->contacts4B4;
+        row = (ContactRow03*)link;
+    }
+    if (((PathObject*)self->f2208)->holder->desc->m2 != 0) {
+        ((PathObject*)self->f2208)->holder->desc->m2(((PathObject*)self->f2208)->holder, &pos, self->f2410, &dir);
+    }
+    TransformPointBetweenFrames(((PathObject*)self->f2208)->frame, 0, &pos, &pos);
+    TransformDirectionBetweenFrames(((PathObject*)self->f2208)->frame, 0, &dir, &dir);
+    Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
+    BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
+    TransformPointBetweenFrames(self, 0, &self->f23E0, &local);
+    Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(pos));
+    CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
+    CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
+    CreatePooledContact(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
+    *link = (Contact03*)row->head;
+}
 
 void AcquirePadSelectFlag(void* a);
 void ShowCountedScreenElement(void* a);
