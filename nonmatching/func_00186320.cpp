@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 270/300 (90.0%), checked 2026-11-08
-// NEAR: night-size4: StoreX for the distance (retail's qmfc2 and sw) and ToFloatMoved for len2 (the mtc1 before the vsub, the sqc2 in the branch's slot) give retail's size and order. Still differs in registers only: retail keeps a in vf3 and e in vf5 (ours vf2 and vf4), divides r into len2's f1 (ours the dot's f0, which moves the 1.0's and the stores' registers), and the square root into vf1 (ours vf2). A Vec sum and r divided in its own statement: no better.
+// BYTES 292/300 (97.3%), checked 2026-11-09
+// NEAR: (w8) One float variable for the squared length and then the ratio (`r = dot / r`): the division's result is then the length's pseudo, set twice, and global-alloc gives it the length's $f1, so the 1.0 takes $f0 and the 0.0 $f2 as retail has them (a separate ratio variable prefers the dividend's $f0 and, ranked first, takes it). ToFloatNow for the length (every VU0 register retail's) and the distance stored as ToBits (the square root in vf1). Still differs: retail's sqc2 of e comes after the c.lt.s, ours right after the mtc1, the same wall as func_00186230 (docs/TOOLCHAIN.md, "A compiler's qmfc2 of a VU0 product"): retail's qmfc2 is the compiler's (unit vu0) with the product in VU_REGS, which no plain form gives.
 // In the context of its file, src/main/collider_contact.cpp.
 #include "common.h"
 #include "asm_func.h"
@@ -131,14 +131,14 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
     Vec02 e;
     Vec02 d;
     Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
+    f32 r = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
     u128 sum;
-    if (len2 < 0.0001f) {
+    if (r < 0.0001f) {
         *t = 0.0f;
         sum = Vu0::Dot(Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)), Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)));
     } else {
-        f32 r = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d))) / len2;
+        r = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d))) / r;
         if (r < 0.0f) {
             *t = 0.0f;
         } else if (1.0f < r) {
@@ -151,7 +151,7 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
         }
         sum = Vu0::Dot(Vu0::Q(d), Vu0::Q(d));
     }
-    Vu0::StoreX(*dist, Vu0::Sqrt(sum));
+    *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(sum));
 }
 
 extern s32 g_vif0Channel;

@@ -1357,6 +1357,18 @@ for the else arm's dot also puts the division before the mfc1 of 1.0, as retail 
 the distance stored as `*(u32*)dist = ToBits(Sqrt(d))` gives the square root vf1 (StoreX's
 "r" operand put it in vf2).
 
+MeasurePointToSegment (func_00186320, 2026-11-09) has the same head and the same wall: with
+ToFloatNow for the length, ToBits for the distance and the reused float variable above
+("A reused float variable joins two lives' conflicts and preferences") every register is
+retail's and only the sqc2 of e is one slot early (73 of 75 lines). Re-probed there: the
+dummy `"j"` operand on ToFloatMoved gives the registers but makes the subtraction of p wait
+on the asm's mtc1 (an anti dependence on vf1: ready at cycle 7, after the store issued at 6);
+ToFloatMoved through Vec values (`Dot(Vec::Of(e), Vec::Of(e))`) still ties the product to
+TI_REGS (the movti copies are tied away by local-alloc); storing e after the subtraction of p
+in the source changes nothing (the store is ready from the subtraction of b on, whatever its
+insn position). Retail's form needs the mtc1 to read only the GPR, with the product in
+VU_REGS: two references for the product's class, one leaving no code.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
@@ -2430,6 +2442,15 @@ ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, 
 - **Rule.** When a high-priority float in a loop sits in retail's register for a value of
   the same kind later in the function (a length, a fraction), and our copy takes $f1 or $f0
   by preference, look for one variable the original reused for both.
+- **A ratio divided into its own divisor (func_00186320).** MeasurePointToSegment tests the
+  squared length, then divides the dot product by it and clamps the ratio. With a ratio
+  variable of its own (`f32 r = dot / len2`) the ratio is a global pseudo set by a division:
+  set_preference gives it the dividend's $f0 (the conversion, placed by local-alloc), and it
+  ranks first (5 refs over 8 insns against the 1.0's 3 over 8), so it takes $f0 and the 1.0
+  $f1. Retail divides into the length's $f1 and puts the 1.0 in $f0. One variable for the
+  length and then the ratio (`r = ToFloat(Dot(e, d)) / r;`) is that: the pseudo is set twice,
+  holds the length's $f1 from the head, the 1.0 then takes the lowest free $f0 and the 0.0 $f2.
+  Three FPR differences in a cascade of nine lines went with it.
 
 ### A value used after a branch is global-alloc's; one used up before it ties to $f0 (func_001733B8)
 
