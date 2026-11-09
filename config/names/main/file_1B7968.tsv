@@ -182,7 +182,7 @@ func_001C1A28	AppendPropertyToScriptList	reads one value of the list's kind with
 func_001C1AD8	ScriptListContainsValue	builds a script value of the command's kind from val and walks the list comparing with AreScriptValuesEqual, returning 1 on a match
 func_001C1BF8	StoreScriptArguments	for each of n script values, converts and stores it through the destination pointer of the same index according to its kind (int, float, vector, matrix, pair, triple)
 func_001C1E48	BuildScriptListFromPairs	for n key/value pairs appends AppendPropertyToScriptList nodes with the key as kind and ends in one script value chain
-func_001C1F20	WritePropertyValue	INCLUDE_ASM counterpart of ReadPropertyValue: called by UpdateObjectProperty with the object, the descriptor from FindPropertyDescriptor and the new value
+func_001C1F20	WritePropertyValue	counterpart of ReadPropertyValue: stores a script value into a property through its field offset or setter; called by UpdateObjectProperty with the object, the descriptor from FindPropertyDescriptor and the new value
 func_001C21A0	GetObjectProperty	keys below 0x495 go through FindPropertyDescriptor and ReadPropertyValue, other keys are looked up in the object's keyed list at +4 with FindKeyedValue
 func_001C2238	UpdateObjectProperty	keys below 0x495 write through FindPropertyDescriptor and WritePropertyValue, other keys call UpdateKeyedValue on the list at +4
 func_001C22B8	AddObjectProperty	after func_00130110 calls AddKeyedValue with key and value on the list at +4
