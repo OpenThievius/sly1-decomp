@@ -2486,6 +2486,32 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
 
+### A variable reused by a second loop: its conflicts prune a preference (func_001BBC38)
+
+- prune_preferences drops from a pseudo's preferences every hard register it conflicts with.
+  A user variable assigned in two loops (`tri = &tris[f]` in the edges' loop and again in the
+  faces' loop) is one pseudo whose conflicts are the union of both lives: the faces' loop's
+  local-alloc temporaries in $a0 make $a0 a hard conflict, so the edges' `tri = tris + f*12`
+  (whose first operand, the `lw a0,8(s1)` load, is local-alloc's $a0) no longer prefers $a0.
+  The search index `m`, ranked above `tri`, then finds $a0 outside `regs_someone_prefers` and
+  takes it in find_reg's first pass; with a pointer per loop, `tri` keeps the preference, `m`
+  skips $a0 and the whole edge loop's registers rotate (m $a1, bound $a3, count $t0, tri $a0).
+- A value that local-alloc would place, set once and dying in its block (`s32 f =
+  e->faces[j]`, used by `f * 12` and `f * 4`), ties to the shift that ends it (combine_regs:
+  `sll v0,v0,2`) and takes $v0 ahead of the address it is loaded through. Retail's `lh a2` and
+  `sll v0,a2,2` (not tied) mean a global pseudo: the face index declared once and reused as
+  the faces' loop counter (`for (f = 0; f < faceCount; f++)`) is set three times, so
+  local-alloc skips it; global-alloc's first pass then excludes $v0 (the counts pointer, a
+  call's result, prefers it), $v1, $a0 and $a1 (the product, the triangles' base, `k`) and
+  gives $a2.
+- Spotting it: a pointer or an index that holds the same register in two consecutive loops of
+  retail (here $t0 for the triangle in both, $a2 for the face index and its loop counter) is
+  one variable. Retail's base-first address sums (`addu v0,t0,v0` for `tri->i[counts[f]]`,
+  `addu a1,a1,a0` with the faces' base in $a1) came from the triangle as a struct with an
+  array member (`MeshMotion::Tri`, whose `i[3]` gives get_inner_reference's base-first sum)
+  and from a pointer initialised with the face (`MeshFace* face = &faces[f]`), see "The
+  operand order of an address sum".
+
 ### Statements in field order set the call-crossing ranking (func_00144BE8)
 
 - func_00144BE8 blends five spherical differences (heading, pitch, distance, yaw, tilt) by
