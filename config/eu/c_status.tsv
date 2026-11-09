@@ -1193,6 +1193,7 @@ func_00145950	func_00145C50	match	rodata
 func_00145B68	func_00145E68	match	
 func_00145DD8	func_001460D8	match	
 func_00145DE8	func_001460E8	match	
+func_00145E68	func_00146168	match	
 func_00145FB8	func_001462B8	match	
 func_00145FD8	func_001462D8	match	
 func_00145FF8	func_001462F8	match	
