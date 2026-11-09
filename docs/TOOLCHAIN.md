@@ -825,6 +825,35 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
 
+### The rest of rank_for_schedule (func_001782C0)
+
+Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
+
+- **INSN_REG_WEIGHT counts every SET, a store included.** find_pre_sched_live adds one per
+  SET or CLOBBER in the pattern, whatever its destination, and takes one off per REG_DEAD or
+  REG_UNUSED note, in the insn order before scheduling. A store whose value dies there weighs
+  0, a load +1 (0 if it is the last use of its base pointer), an asm that kills two inputs -1.
+  A Scalar's slot store comes before the asm that uses the weight (the helper's body), so the
+  asm, not the store, is the weight's death.
+- **Asms cost one cycle both ways.** insn_cost gives an unrecognised insn (an asm) a cost of 1
+  as a producer, and a link into an asm is LINK_COST_FREE (1), so the "last scheduled insn"
+  class is 3 for every candidate that follows an asm or feeds one. Ties then fall to the number
+  of dependents and last to INSN_LUID, the insn order before scheduling. asms count against
+  the issue rate (2) like any insn.
+- **ComputeTargetArc (func_001782C0).** The tail's weights dt and -0.5 dt share one stack
+  slot with three stores. Local allocation ranks the -0.5 dt weight (3 references) between
+  the end point (5 over 30) and dt (5 over 34) only if its life is exactly 5 insns: retail's
+  vf4, under the end point's vf3 and above dt's vf5. With gravity read once into a local before
+  the division, its load (then self's last use, weight 0) ties with the weight's qmtc2 in one
+  cycle on priority, weight and dependents, and its lower LUID puts it first, outside the
+  weight's life (4 insns: the weight outranks the end point and takes vf3); read before the end
+  point, the load lost on weight (+1), the weight's qmtc2 went before the division on its
+  dependents, and the weight lived 6 (dt took vf4). Read in each expression
+  (`MulAddX(v, Vu0::Q(self->gravity), Scalar(dt * -0.5f))`, the same for the last weight), the
+  load is expanded after the weight's qmtc2, loses the LUID tie and lands inside its life:
+  retail's registers. CSE makes the two reads one load. Written as Vu0::Vec values
+  (`Vec::Of(self->gravity)`) the order is the 4-insn one again.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
