@@ -2172,6 +2172,26 @@ points, a Splat scale and a draw call) matched on 2026-11-09 from 85.4%, with `-
   product named in the min (`scaleMin = s * c <? scaleMin`) rather than `s *= c` (a variable
   set twice, which global-alloc placed in s's register).
 
+### A pointer read before the frame stores (func_001A2D88)
+
+DrawStreakedEffect (normalise the velocity, `tail = place + dir * 100`, draw with the world's
+template slot 11) matched on 2026-11-09 from 68.3%, with two changes read from the `.sched`
+dump:
+
+- **The weight as `Vu0::Scalar(100.0f)`** instead of the near miss's own `Vec02 k` slot: the
+  cast's MEM_SCALAR_P temporary is stored last, in the call's delay slot, as retail's
+  `sqc2 $vf4, 32(sp)` is (the Scalar-slot lever).
+- **The template read first, `BaseObject* tmpl = g_currentWorld->slot1CE8[11];`, before the
+  vector work.** The stores to `dir` and `tail` go through `u128` casts (no alias flag), so
+  true_dependence makes a later load through a pointer register (`[r158+0x1d14]`) depend on
+  every one of them: sched1's table showed the slot load with the three stores as its
+  producers, issued after them, and the world pointer's own load pushed late with it. Read
+  before them in the insn stream, the load only gives the stores anti dependences (they wait
+  for it), and sched1 issues both loads in the square root's shadow, as retail does, with the
+  dead store of the unnormalised velocity sliding after the multiply-add. That also gives
+  local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
+  loads a pointer's field before stack stores that ours issues first.
+
 ### A weight listed before its vector (func_001DDE90)
 
 The chain relaxation's velocity update, `vel + rel * b + drag * vel + bend * c`, is one

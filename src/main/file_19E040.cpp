@@ -91,6 +91,7 @@ void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3
 
 s32 DrawEffectAt(void* self, void* a1, void* a2, void* a3);
 void BuildBasisFromXAndZHint(void* a, void* b, void* c);
+void BuildBasisFromXAndYHint(void* a, void* b, void* c);
 
 struct ColorFade;
 
@@ -2597,7 +2598,27 @@ void PlaceEffectAtSource(Effect* dst, void* a1)
     dst->i124 = src->f1F0;
 }
 
-INCLUDE_ASM(func_001A2D88);
+// The streak from the place along the velocity's direction, 100 long, drawn with the world's
+// template slot 11, or DrawEffectAt in the velocity's frame. The template is read first, before
+// the stores of dir and tail: a load through the world pointer would wait for them (docs/TOOLCHAIN.md,
+// "A pointer read before the frame stores").
+void DrawStreakedEffect(Effect* self, void* a1)
+{
+    if (self->i20 == 0) {
+        BaseObject* tmpl = g_currentWorld->slot1CE8[11];
+        Vec02 dir;
+        Vec02 tail;
+        u128 v = Vu0::Q(self->qA0);
+        Vu0::Q(dir) = v;
+        Vu0::Q(dir) = Vu0::DivX(v, Vu0::Length(v));
+        Vu0::Q(tail) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(dir), Vu0::Scalar(100.0f));
+        func_001268B8(tmpl, a1, &tail, &self->q80, 10.0f, 1.0f);
+    } else {
+        Mat02 rot;
+        BuildBasisFromXAndYHint(&self->qA0, (u8*)a1 + 0x80, &rot);
+        DrawEffectAt(self, a1, &self->q80, &rot);
+    }
+}
 
 s32 FindNodeForQuery(void* p, s32 a, s32 b);
 
