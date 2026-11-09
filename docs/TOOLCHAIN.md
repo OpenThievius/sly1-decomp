@@ -2659,6 +2659,25 @@ TurnColliderTowardRotation (2026-11-09):
 - Same rule as func_0018AD88: an argument register retail never mentions can still be a
   parameter, here a float one, found from the callee's reads ($f12) and the caller's call.
 
+### A time step passed on to a method lengthens two lives equally (func_00143418)
+
+- func_00143418 copies the target's 0x50-byte record (Camera +0x2F0) into `out`, or asks the
+  target's slot 0x124 to fill it and adds the offset behind the target. Written with three
+  parameters, every instruction matched but the camera and `out` swapped $s1 and $s2: in
+  global-alloc's ranking (floor_log2(refs) * refs / live length) the camera scored 2*5/14 =
+  0.714 against `out`'s 2*6/17 = 0.706, so the camera took $s1 first.
+- The lives were already as short as the final code allows (sched1's counts, block by block),
+  and no form of the copy or the branches changes the references. The caller (func_001E2E68)
+  sets $f12 = 0.0f before the call, and the other implementers of slot 0x124
+  (CapturePlayerPose, CaptureColliderPose) take `(self, record, f32 dt)`: the original took the
+  time step as a fourth parameter and passed it on to the slot.
+- The copy of $f12 into its pseudo (block 0) and its move back into $f12 before the virtual
+  call (block 4) are two more insns while both pointers are live: 16 and 19 insns, 0.625
+  against 0.632, so `out` is placed first and takes $s1. global-alloc gives the time step $f12
+  and reload deletes both moves. Adding the same length to two lives favours the one with more
+  references, so a parameter passed on can reorder global-alloc as well as sched1
+  (func_0018AD88, func_00161B10).
+
 ### A passed-on argument register is set twice, so adjust_priority leaves it (func_001A0C98)
 
 - **The symptom.** InitCameraSpaceEffect (slot 0 of the kind-16 effect table) keeps the place
