@@ -1233,6 +1233,36 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   signature does not have. An argument register retail never mentions can still be in the C:
   its copy is a scheduled insn before register allocation.
 
+### A passed-on argument register is set twice, so adjust_priority leaves it (func_001A0C98)
+
+- **The symptom.** InitCameraSpaceEffect (slot 0 of the kind-16 effect table) keeps the place
+  and then the parameter block in one callee-saved register ($s0): the place's last use is the
+  `move a1` for ProjectPointToCamera, the block's load (`lw s0, 0x130(s1)`) is issued before the
+  jal and reorg puts it in the delay slot. Written with the slot-0 signature cut to (self,
+  pos), the load came straight after `move a1` in sched1's order, and local-alloc's widened
+  lifetimes (local-alloc.c, block_alloc: with `-fschedule-insns2` each quantity is first tried
+  over `fake_birth`/`fake_death`, one insn more at each end, to avoid false dependences for
+  sched2) made the place and the block conflict: the place took $s2. Read after the call, the
+  two shared $s0 but the `move a1` filled the slot.
+- **What decided it.** In the cycle after InitEffect's jal, `addiu a2, s1, 0x120` (the out
+  pointer) outranked `move a1, pos` though both had priority 24: $a2 was set once in the whole
+  function and never got a REG_DEAD note at the call, so birthing_insn_p held and
+  adjust_priority raised it to max_priority (27). $a1 is set twice (InitEffect's argument too)
+  and was not raised. The lui and the addiu took cycle 4, `lw a0` and `move a1` cycle 5, and the
+  block's load (the memory unit was busy) cycle 6, adjacent to the place's death.
+- **The fix was the signature.** InitEffect reads $a2 (stored at +0x24) and $f12 (the scale)
+  besides $a1; slot 0's signature is `(Effect* self, void* pos, f32 scale, s32 flags)`
+  (effect.h's Vt219C). Declared with it and passing all four on (`InitEffect(self, pos, scale,
+  flags)`), the first call sets $a2 too: no longer set once, the addiu is not raised, `move a1`
+  wins the tie on register weight (0 against 1) with the lui in cycle 4, the addiu goes with
+  `lw a0` in cycle 5 and the load follows in cycle 6, one insn clear of the place's death. Both
+  take $s0 and sched2 and reorg give retail's code. The copies for the passed-on registers
+  vanish in reload, as in func_0018AD88.
+- **Rule.** An argument register set once in a function (typically the last argument of the
+  one call that has it) is a birthing insn for sched1 and goes first among equal-priority
+  moves. A passed-on parameter that sets it for an earlier call takes that away; read the
+  callee for every argument register it uses before trusting a shortened prototype.
+
 ### A weight's store inside a short life (func_0013F290)
 
 - Three products of one weight, `up * 100`, `pos + side * 100`, `pos + last * 100`, are one
