@@ -1495,7 +1495,17 @@ void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
     EndEffectWithImpact(value, enabled < 1);
 }
 
-INCLUDE_ASM(func_0019FD08);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
+
+void InitImpactEffect(Effect* self, void* pos, f32 limit, s32 flags)
+{
+    InitEffect(self, pos, limit, flags);
+    f32 c = 200.0f;
+    f32 v = c <? limit;
+    self->i20 = (s32)g_currentWorld->slot1CE8[2];
+    self->m30[0] = v;
+    self->m30[1] = v * 0.6f;
+}
 
 void InitGrowingEffect(Effect* self)
 {
