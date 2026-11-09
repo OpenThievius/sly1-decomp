@@ -1530,6 +1530,50 @@ integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near
   local, a pointer parameter to a local, a union and a one-element array (`/s`), and eleven
   integer arguments before the vector (still in registers).
 
+### The weight slot is a cast's copy (func_001D87C8, func_001C75B0, func_0017ABE8)
+
+The Scalar-slot wall of the two sections above, and of func_0016C528, func_00181078 and
+func_0017ABE8, has one answer (2026-11-09, read from expr.c, stmt.c, function.c and cp/typeck.c
+of 2.95.3, with `-dS` dumps): retail's weight slot is the copy g++ 2.95 makes of a cast bound by
+reference.
+
+- **The rule needed.** A store at a fixed frame address and a load through a pointer of no
+  known base are separated only by fixed_scalar_and_varying_struct_p: the store MEM_SCALAR_P,
+  the load MEM_IN_STRUCT_P (a structure member). A `volatile u128` slot gives it (func_0017ABE8's
+  probe: retail's order and registers), and so does a u128 local whose address escapes
+  (func_00181078's probe), but purge_addressof allocates that one after every local.
+- **Where an expand-time scalar slot comes from.** expand_expr's ADDR_EXPR copies an operand
+  that expanded to a register into `assign_temp (type, 1, 1, 1)`: a temporary allocated where the
+  expression is expanded (so the weights of one sum share it, as retail's do), flagged
+  MEM_SCALAR_P for a scalar type, stored once and, read back through the address, folded to the
+  register by CSE. The C++ front end builds such an ADDR_EXPR for a cast of a variable: a cast
+  is an lvalue to g++ 2.95 (lvalue_p_1: NOP_EXPR), `&(s128)r` is accepted (pedantic warns), and
+  mark_addressable stops at the NOP_EXPR, so r stays a register and only the cast's value goes to
+  memory. Binding a reference to the cast does the same (build_up_reference), so `Vu0::Q((s128)r)`
+  or a `const s128&` parameter given `(s128)r`. A same-type cast is not an lvalue (non-lvalue
+  error); the cast must change the type, here between the unsigned and signed 128-bit types.
+- **The helpers.** Vu0::Scalar, ScalarAt, FromFloats and ScalarInGpr now return `Q((s128)r)`
+  instead of storing to a 16-byte local of their own (Vu0::Slot, an aggregate, written through
+  Q: no flag). Every function the build linked from C still matches with the change (US and PAL
+  MATCH), and five near misses match with it: func_001D87C8, func_001C75B0 (with
+  Vu0::RotateMembers, whose row loads are Vec members, MEM_IN_STRUCT_P, so rows 1 and 2 pass the
+  weight's store but still wait for v's), func_0017ABE8 (FromFloats' slot against the method
+  table's load), func_00184B58 and func_001C57C8. Retail's sources most plausibly had the same:
+  Sony's headers have both 128-bit types (signed and unsigned), and a helper taking one by
+  reference called with the other cast to it binds such a copy.
+- **A float operand by value.** Vu0::ScalarAt reads its float through a `u32` cast pointer (no
+  flag). func_0016C528's twist rate (`self->f224->f94`) must stay a member load to pass a weight's
+  store: Vu0::ScalarAtValue takes the float as a `const f32` by value, which an inline call passes
+  as the caller's own memory reference, flags included (integrate.c copies an argument to a
+  register only for a parameter that is not read-only), as the asm's "rV" operand. Making it
+  ScalarAt itself changes func_001DDE90.
+- **Still short.** func_00181078's axis shares the weight's slot (0x50) and its address goes to
+  two calls: `const s128& k = (s128)w;` gives retail's frame and block but for the reference's
+  address, set at the binding (and so issued first by sched1) where retail forms &k at its first
+  use, as for a named local; a named scalar local in memory from its declaration needs
+  TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
+  size with only the call's `addiu a1, sp, 16` early.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
