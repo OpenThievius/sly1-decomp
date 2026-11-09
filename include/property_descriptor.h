@@ -22,7 +22,11 @@ struct PropertyDescriptor {
                             // getter's offset in the object's table, or (flags 4) the getter
     };
     s32 f10;                // 0x10: func_001C15D8 (flags 1) keeps it in a property reference
-    s32 argCount;           // 0x14: how many values the setter takes
+    union {
+        s32 argCount;       // 0x14: how many values the setter takes
+        s32 putter;         // 0x14: when written (func_001C1F20): the field's offset (flags 0x10),
+                            // the setter's offset in the object's table, or (flags 0x20) the setter
+    };
     s32 offset;             // 0x18: of the field (or of the method slot) in the target
     void* (*target)(void* obj, s32 one); // 0x1C: the object holding the field, when set
 };

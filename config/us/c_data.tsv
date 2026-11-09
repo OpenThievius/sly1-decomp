@@ -51,7 +51,7 @@ D_0024CFC0	0024CFC0	420	.rodata	src/main/timed_object.cpp
 D_0024D164	0024D164	8	.rodata	src/main/range_record.cpp
 D_0024D170	0024D170	244	.rodata	src/main/anim_record.cpp
 D_0024D268	0024D268	0	.rodata	src/main/state_walker.cpp
-D_0024D280	0024D280	624	.rodata	src/main/file_1B7968.cpp
+D_0024D280	0024D280	696	.rodata	src/main/file_1B7968.cpp
 D_0024D560	0024D560	40	.rodata	src/main/hit_count_collider.cpp
 D_0024D588	0024D588	16	.rodata	src/main/turning_collider.cpp
 D_0024D5A0	0024D5A0	168	.rodata	src/main/file_1C5F18.cpp

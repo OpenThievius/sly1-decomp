@@ -1056,6 +1056,25 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
 
+### Call sites that cross-jumping merges still rank the allocation (func_001C1F20)
+
+- global-alloc ranks its allocnos by floor_log2(refs) * refs / live length (allocno_compare,
+  ties by pseudo number), with flow's references and sched1's live lengths (update_reg_usage
+  overwrites flow's). Two values used together at every call site rank by where they are born
+  and die: the object and the function pointer of `fn(p, x)` both gain one reference per call,
+  but the pointer is live over the call's argument moves and the call itself, the object only
+  until its move into $a0 (two insns where sched1 puts the $a1 load first). So each extra call
+  site lengthens the pointer's life more than the object's.
+- Cross-jumping runs only after reload (jump2), so identical call sites written in separate
+  cases are separate code for flow, sched1 and global-alloc, and one call in the output.
+  func_001C1F20 (WritePropertyValue) with cases 0, 2, 4, 9, 10 and 11 sharing one call (case
+  labels inside the default's `if`): 6 refs each, object 78 insns, setter 75, the setter ranks
+  first (0.160 against 0.154) and takes $s3, retail's $s4. With one call per case, as its
+  counterpart ReadPropertyValue writes one call per kind: 12 refs each, setter 93, object 90,
+  the object first (0.400 against 0.387): retail's registers, and jump2 merges the six calls
+  into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
+  flow weights references with; it is a barrier and not used.
+
 ### Local allocation's ranking (func_00149760)
 
 - block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
