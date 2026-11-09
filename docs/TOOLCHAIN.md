@@ -1086,6 +1086,16 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   before the other coefficients. A swap of an FPR op and a load right after a mtc1 is worth
   trying with the other conversion first.
 
+- **Retry the statement orders after the swap (func_00145E68).** The camera's sweep probe
+  had been tried in every order of its three vector statements (direction, low corner, high
+  corner) while its length still went through ToFloat; none was closer. With ToFloatMoved its
+  four remaining lines were the two corners' constants and stores swapped, and the low corner
+  written before the high one (the order GatherCollidersInBox takes them) matched: retail's
+  code computes the high corner first, sched1 issuing the later-expanded sum first on a tie
+  (measured; consistent with rank_for_schedule's last key, INSN_LUID). A conversion's latency
+  shifts the whole block's schedule, so orders ruled out before the conversion swap are worth
+  trying again after it.
+
 ### A scalar local's store and a call's argument registers (func_00188270)
 
 Which register a pointer read for two call arguments takes can be decided by whether a store
