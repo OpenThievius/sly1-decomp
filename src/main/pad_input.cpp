@@ -10,6 +10,7 @@
 #include "game_progress.h"
 #include "screen_element.h"
 #include "asm_func.h"
+#include "fpu.h"
 
 // The pad and button-code file: the pad records D_00262C70 and D_00262D38, their connection
 // state machine and input polling, the repeating step readers, and the cheat-code list with its
@@ -336,12 +337,69 @@ void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
     self->f1C = g_gameClock.elapsed;
 }
 
-INCLUDE_ASM(func_0016E738);
+// The stick's response clamp, 0 to 1.
+static inline f32 ClampStick(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) return lo;
+    if (hi < v) return hi;
+    return v;
+}
+
+// len is the stick's projection on each response axis, then its length; frac is the
+// projection's fraction of the axis's widest reach so far, then the response.
+void ReadAnalogStick(PadRecord* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag,
+                     u8* prevX, u8* prevY, s32* latch, ValueRange* range)
+{
+    f32 nx, ny;
+    if (*latch == 0) {
+        s32 moved = 0;
+        if (p->x20 != 0.0f
+            && (x != *prevX || y != *prevY || x < 0x60 || x > 0xA0 || y < 0x60 || y > 0xA0)) {
+            moved = 1;
+        }
+        *latch = moved;
+    }
+    if (*latch != 0) {
+        nx = ((f32)(s32)x + (f32)(s32)x) * 0.003921569f + -1.0f;
+        ny = 1.0f - ((f32)(s32)y + (f32)(s32)y) * 0.003921569f;
+    } else {
+        nx = 0.0f;
+        ny = 0.0f;
+    }
+    f32 sx = nx * nx;
+    f32 sy = ny * ny;
+    f32 best = 0.0f;
+    f32 len;
+    f32 frac;
+    for (u32 i = 0; i < 4; i++) {
+        len = nx * D_00262A30[i * 2] + ny * D_00262A30[i * 2 + 1];
+        if (0.0f <= len) {
+            if (range[i].hi < len) range[i].hi = len;
+            frac = len / range[i].hi;
+        } else {
+            if (len < range[i].lo) range[i].lo = len;
+            frac = len / range[i].lo;
+        }
+        if (best < frac) best = frac;
+    }
+    f32 t = best - 0.35f;
+    t = t + t;
+    frac = ClampStick(t, 0.0f, 1.0f);
+    *outMag = frac;
+    len = Fpu::Sqrt(sx + sy);
+    if (0.0001f < len) {
+        *outX = frac * nx / len;
+        *outY = frac * ny / len;
+    } else {
+        *outX = *outY = 0.0f;
+    }
+    *prevX = x;
+    *prevY = y;
+}
 
 void* FillMemory(u8* p, s32 a, s32 b);
 s32 ReadPadFrame(s32 a, s32 b, u8* c);
 void CopyMemory(u8* dst, u8* src, s32 n);
-void ReadAnalogStick(PadRecord* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
 void AdvanceButtonCodes(PadRecord* p, s32 old);
 
 s32 PollPadInput(PadRecord* self)
@@ -368,8 +426,8 @@ s32 PollPadInput(PadRecord* self)
         self->flags = cur & ~old;
         self->hAC = old & ~cur;
         if (self->f18 >= 2) {
-            ReadAnalogStick(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->x50, &self->a54[0].lo);
-            ReadAnalogStick(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->x84, &self->a88[0].lo);
+            ReadAnalogStick(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->f50, self->a54);
+            ReadAnalogStick(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->f84, self->a88);
         } else {
             self->f74 = self->f78 = self->f7C = self->f40 = self->f44 = self->f48 = 0.0f;
         }

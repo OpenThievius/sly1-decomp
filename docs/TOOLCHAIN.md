@@ -1435,6 +1435,31 @@ dumps (2026-11-08, still a near miss):
   variable the original reused (two lookups of the same kind, one after the other), or one
   live across blocks.
 
+### A reused float variable joins two lives' conflicts and preferences (func_0016E738)
+
+- **Preferences.** set_preference (global.c) gives a global pseudo set by an arithmetic insn
+  the hard register of the first operand when local-alloc already placed it: a dot product
+  `d = a * b + c * e` whose first product local-alloc put in $f1 prefers $f1.
+  expand_preferences then pools that into every allocno set where d dies and that does not
+  conflict with it (`rt = d / hi`), so both take $f1 in their turn. find_reg's pass 0 only
+  removes from `regs_someone_prefers` what lower-priority conflicting allocnos prefer and the
+  allocno does not.
+- **A second life.** A user variable assigned again later in the function is one pseudo with
+  both lives: the second life's hard-register conflicts (a sum dying into an asm's input,
+  locals of another block) and its own preferences join the first's. func_0016E738
+  (ReadAnalogStick) projects the stick on four axes and divides each projection by the axis's
+  widest reach (`d`, the fraction `rt`), then clamps the best fraction and divides by the
+  stick's length (`Fpu::Sqrt`). With a variable per value, d and rt took $f1 by preference
+  and best, the hoisted 0.0 and the two squares followed at $f2, $f4, $f6, $f7 (retail: d $f4,
+  rt $f2, best $f6, 0.0 $f7, squares $f8, $f9). One `len` for the projection and later the
+  length, and one `frac` for the fraction and later the clamped response, is EXACT: len then
+  conflicts with $f1 (the sum of squares dies into the sqrt) and takes the sqrt's $f4; frac
+  conflicts with the clamp's $f0, $f1 and $f4 and takes $f2; the rest follow. Either reuse
+  alone leaves 10 or 15 lines.
+- **Rule.** When a high-priority float in a loop sits in retail's register for a value of
+  the same kind later in the function (a length, a fraction), and our copy takes $f1 or $f0
+  by preference, look for one variable the original reused for both.
+
 ### A float parameter passed on fills a load's delay (func_00161B10)
 
 - SelectVertexBatchLights opens with `if (*self->fF8 != 0)`: a pointer load, a byte load
