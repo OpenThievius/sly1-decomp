@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 4984/4996, checked 2026-11-08
-// NEAR (2026-11-08, large-1E31F0): python3 tools/check.py nonmatching/func_001E31F0.cpp func_001E31F0 -- 1246 instructions against 1249; regdiff "code", 1053/1249 equal ignoring registers. The frame is 0x30 short: retail's locals end at 0xE0 before the nine cylindrical floats (E0..100, given their slots last by purge_addressof, as ours are at B0..D0), three 16-byte slots (0xB0..0xDF) nothing in retail reads or writes; every vector local (0x00..0xA0: blended, sum, goal/frame, dir, two orbits, offset, d/stick/polar, Scalar and FromFloats slots/toCam/pos, axis/Scalar, fwd/prof) already sits at retail's offset.
-// Still differs: (1) the 48-byte gap is CLOSED (2026-11-08, frame-1E31F0): an unused `Mat02 basis;` declared after `Vec02 fwd;` in the else block that reads target->m110 gives frame 0x210 and the floats at E0 (before it: 1178 equal, after: 1183/1249 equal ignoring registers). Declared before fwd it scores worse. (2) Registers: the stick vector from FromFloats stays in a VU0 register (retail keeps it in a0 and reloads it into vf1 and vf3), the cam spill reload uses a0 for v1, t1 takes f1 for f12 in the hold test, w in case 4 takes f5 for f7. (3) Order: the switch cases' pitch loads (block +0x5C) are cross-jumped into the join (retail keeps one per case), case 4's interpolation loads block +0x58 late, the tail's spring for +0x48/+0x4C schedules its second +0x80 load differently.
-// Tried (2026-11-08, regalloc root r134 = limit, reloaded into a0 where retail uses v0 at 1E329C; all other first-diff groups follow from the reload choice): limit read first in the if (1179), limit declared before hold (1176), stick through a u128 local (1183, same), stick as a Vec value (1120). None moved the reload; the root is reload's order_regs_for_reload at the spilled limit.
+// BYTES 4974/4996 (99.6%), checked 2026-11-08
+// NEAR (2026-11-08, mech-1E31F0): python3 tools/check.py nonmatching/func_001E31F0.cpp func_001E31F0 -- 1249 instructions against 1249; regdiff "order", 1248/1249 equal ignoring registers; only the time test of the limit block differs (11 instructions).
+// Still differs: the limit block (11 instructions): retail holds t1 = clock - (f40 + 0.75) in $f12 (the register of the division t1 / f428 it feeds), ours in $f1. sched1 issues t2's subtraction first (INSN_REG_WEIGHT: the clock dies in t2's), the clock then dies in t1's, and global-alloc gives t1 a copy preference for the clock's $f1. Tried: swapping the statements (t1 right, t2's loads first: 1241); a clock local, separate declarations, s = 0 first, a local for f428, the compares reversed (no change); s = 0 in an else (`else if (...) s = 1; else s = 0;`, or `s = cond ? 1 : 0`): the f428 load issues before the zero, t1's subtraction first and t1 in $f12, but the zero gets $f4 of its own and s a mov.s (1247, 7 lines). docs/TOOLCHAIN.md, sched1.
+// Fixed (2026-11-08, mech-1E31F0), 1183 -> 1248 equal: (1) the a0/v0 cascade from limit's reload (lw a0 vs v0, 1052(s2)) was reload's round robin over the function's spill registers: the stick from FromFloats went to a VU0 register (regclass: 3 "j" uses against one "=&r"), so its "=&r" output needed a GPR reload, a0 joined spill_regs, and allocate_reload_reg's rotation from v1 reached a0 at insn 79 where retail, without a0 in the set, wraps to v0. Copying the FromFloats value through a Vu0::Vec and normalizing the Vec values (file_1793C0.cpp's form) ties the costs (TI_REGS), the pseudo takes a0, a0 is never a spill register. (2) The block (0x90 bytes at object+0x2F0) read through a struct of named floats, not an f32*: block[n] gives MEMs without MEM_IN_STRUCT_P, so sched2 cannot move the reads above the stores to the address-taken placeDist/placeHeight; fields (mem/s) against fixed scalar stack slots are independent (alias.c fixed_scalar_and_varying_struct_p), and the switch cases then match in source order and are not cross-jumped. (3) Vu0::Set(pos, ...) for the polar sum, ToFloatMoved for the two later lengths, Limit for the time ramp, the hold product in a local of its own, the springs written f48, f4C, then placeDist, placeHeight.
 // In the context of its file, src/main/file_1E08F8.cpp: its declarations before the function, bodies cut.
 #include "common.h"
 #include "asm_func.h"
@@ -29,6 +29,23 @@
 #include "value_range.h"
 
 extern f32 g_gameClock[];
+// The camera parameters of an on/off object, the 0x90 bytes at 0x2F0 (Block63) that
+// GetOnOffObjectBlock returns: only the floats this function reads are named.
+struct OnOffCameraParams {
+    f32 f00;
+    u8 pad04[0x2C];
+    f32 f30;
+    u8 pad34[0x24];
+    f32 f58;
+    f32 f5C;
+    u8 pad60[0x4];
+    f32 f64;
+    f32 f68;
+    u8 pad6C[0x14];
+    f32 f80;
+    f32 f84;
+    u8 pad88[0x8];
+};
 struct CameraPlacement { Vec02 q[5]; };
 void* GetOnOffObjectBlock(void* self);
 void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye);
@@ -115,7 +132,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         hold = 0;
     }
     func_001E30E8(self, eye);
-    f32* block = (f32*)GetOnOffObjectBlock(object);
+    OnOffCameraParams* block = (OnOffCameraParams*)GetOnOffObjectBlock(object);
     Vec02 blended;
     Vec02 sum;
     BlendOnOffCameraPoint(block, eye, &blended, object);
@@ -125,7 +142,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         SpringCameraVector(g_camera, (Vec02*)((u8*)g_camera + 0x270), (Vec02*)((u8*)g_camera + 0x280), &goal, 8.0f, -6.0f, dt);
     }
     Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(*(Vec02*)((u8*)g_camera + 0x270)));
-    view->f44 = ApproachValueWithRamp(view->f44, (*(s32*)&eye->q[0] & 1) ? 0.0f : block[25], dt, &D_00275A80, 0);
+    view->f44 = ApproachValueWithRamp(view->f44, (*(s32*)&eye->q[0] & 1) ? 0.0f : block->f64, dt, &D_00275A80, 0);
     view->f40 = eye->q[3].z >? view->f40;
     Vec02 frame;
     Vec02 dir;
@@ -195,7 +212,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         } else {
             Vu0::Set(d, Vu0::DivX(v, l).q);
         }
-        f32 x = Vu0::ToFloat(l);
+        f32 x = Vu0::ToFloatMoved(l);
         f32* poly = (f32*)&object->quad450;
         f32 p = poly[0] + x * (poly[1] + x * poly[2]);
         f32 s = ((ValueRange*)&object->pack460)->Clamp(p);
@@ -246,8 +263,10 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
     }
     if (view->f20 == 4) {
         Vec02 stick;
-        Vu0::Set(stick, Vu0::FromFloats(pad->f40, pad->f44, 0.0f));
-        Vu0::Set(stick, Vu0::NormalizeOr(Vu0::Vec::Of(stick).q, Vu0::Q(g_unitXVector)));
+        Vu0::Vec n;
+        n.q = Vu0::FromFloats(pad->f40, pad->f44, 0.0f);
+        *(Vu0::Vec*)&stick = n;
+        *(Vu0::Vec*)&stick = Vu0::NormalizeOr(Vu0::Vec::Of(stick), Vu0::Vec::Of(g_unitXVector));
         Vec02 toCam;
         Vu0::Q(toCam) = Vu0::Sub(Vu0::Q(sum), Vu0::Q(cam->f40));
         toCam.z = 0.0f;
@@ -277,7 +296,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         f32 y = stick.y;
         turn *= ((ValueRange*)D_00275A50)->Clamp(D_00275A40[0] + y * (D_00275A40[1] + y * D_00275A40[2]));
         f32 t = g_gameClock[1] - view->f30;
-        turn *= g_unitRange.Clamp(D_00275A70[0] + t * (D_00275A70[1] + t * D_00275A70[2]));
+        turn *= g_unitRange.Limit(D_00275A70[0] + t * (D_00275A70[1] + t * D_00275A70[2]));
         f32 next = WrapAngle(angle + turn * dt);
         if (!(flags & 3)) {
             angle = next;
@@ -328,7 +347,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         } else {
             speed = 0.0f;
         }
-        speed *= block[26];
+        speed *= block->f68;
         if (limit != 0) {
             f32 t1 = g_gameClock[1] - (view->f40 + 0.75f);
             f32 t2 = g_gameClock[1] - (view->f30 + 10.0f);
@@ -352,10 +371,10 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
             } else {
                 s = 1.0f;
             }
-            s *= object->f424;
-            if (speed * weight < s) {
+            f32 hs = s * object->f424;
+            if (speed * weight < hs) {
                 weight = 1.0f;
-                speed = s;
+                speed = hs;
             }
         }
         RampProfile prof;
@@ -375,8 +394,8 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
                 (WrapAngle(view->f0C - view->f38) * WrapAngle(angle - angle1) <= 0.0f ||
                  __builtin_fabsf(WrapAngle(angle - angle1)) < 0.0001f) &&
                 __builtin_fabsf(WrapAngle(angle - angle1)) < 1.5707964f) {
-                view->f28 = 1;
                 view->f20 = 1;
+                view->f28 = 1;
             } else if ((flags & 2) &&
                        (WrapAngle(view->f0C - view->f3C) * WrapAngle(angle - angle2) <= 0.0f ||
                         __builtin_fabsf(WrapAngle(angle - angle2)) < 0.0001f) &&
@@ -395,23 +414,23 @@ done:
         placeAngle = angle1;
         placeDist = dist1;
         placeHeight = height1;
-        roll = block[22];
-        pitch = block[23];
+        roll = block->f58;
+        pitch = block->f5C;
         break;
     case 2:
         placeAngle = angle2;
         placeDist = dist2;
         placeHeight = height2;
-        roll = -block[22];
-        pitch = block[23];
+        roll = -block->f58;
+        pitch = block->f5C;
         break;
     case 4:
         placeAngle = angle;
         if (!(flags & 3)) {
-            placeDist = __builtin_fabsf(block[0]);
-            placeHeight = block[12];
-            roll = block[22];
-            pitch = block[23];
+            placeDist = __builtin_fabsf(block->f00);
+            placeHeight = block->f30;
+            roll = block->f58;
+            pitch = block->f5C;
         } else {
             f32 w;
             if (!(flags & 2)) {
@@ -436,26 +455,26 @@ done:
                 w = w * w * (3.0f - (w + w));
             }
             f32 iw = 1.0f - w;
-            f32 r = block[22];
+            f32 r = block->f58;
             placeDist = w * dist1 + iw * dist2;
             placeHeight = w * height1 + iw * height2;
             roll = w * r + iw * -r;
-            pitch = block[23];
+            pitch = block->f5C;
         }
         break;
     }
     if (cam->f224 == 0) {
-        view->f48 = (block[33] * D_00261924 * dt + 1.0f) * view->f48 + (placeDist - view->f10) * block[32] * D_00261920 * dt;
+        view->f48 = (block->f84 * D_00261924 * dt + 1.0f) * view->f48 + (placeDist - view->f10) * block->f80 * D_00261920 * dt;
         placeDist = view->f10 + view->f48 * dt;
-        view->f4C = (block[33] * D_00261924 * dt + 1.0f) * view->f4C + (placeHeight - view->f14) * block[32] * D_00261920 * dt;
+        view->f4C = (block->f84 * D_00261924 * dt + 1.0f) * view->f4C + (placeHeight - view->f14) * block->f80 * D_00261920 * dt;
         placeHeight = view->f14 + view->f4C * dt;
     } else {
-        view->f4C = view->f48 = 0.0f;
+        view->f48 = view->f4C = 0.0f;
     }
     Vec02 polar;
     ComputePolarOffset(&polar, placeAngle, placeDist, placeHeight);
     Vec02 pos;
-    Vu0::Q(pos) = Vu0::Add(Vu0::Q(sum), Vu0::Q(polar));
+    Vu0::Set(pos, Vu0::Add(Vu0::Q(sum), Vu0::Q(polar)));
     if (object == 0 || *(s32*)((u8*)object + 0x440) == 0) {
         if (cam->f224 != 0) {
             if (cam->f228 == 0) {
@@ -469,7 +488,7 @@ done:
     view->v50 = pos;
     ComputePolarOffset(&polar, placeAngle, placeDist, placeHeight);
     u128 len = Vu0::Length(Vu0::Q(polar));
-    f32 l = Vu0::ToFloat(len);
+    f32 l = Vu0::ToFloatMoved(len);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(sum), Vu0::MulX(Vu0::Q(polar), Vu0::Scalar((l + cam->f1E4) / l)));
     func_00145718(cam, &sum, &pos, roll, pitch);
     view->f0C = placeAngle;
