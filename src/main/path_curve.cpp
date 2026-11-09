@@ -55,7 +55,7 @@ void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(u32 n);
 void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
 void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, s32 e, s32 f, f32 x);
-void FindLocalMinimum(void* fn, f32 f12, f32 f13, f32 f14, f32 f15, void* ctx, void* out, s32 a3);
+void FindLocalMinimum(void* fn, void* ctx, f32 f12, f32 f13, f32 f14, f32 f15, void* out, s32 a3);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x);
@@ -246,7 +246,7 @@ void FindPathCurveNearestTime(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f
     ctx.b = (Vec02*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    FindLocalMinimum((void*)MeasurePathCurveDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
+    FindLocalMinimum((void*)MeasurePathCurveDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
@@ -543,7 +543,7 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     ctx.b = (Vec02*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    FindLocalMinimum((void*)MeasureSplinePathDistance, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &ctx, &out, 0);
+    FindLocalMinimum((void*)MeasureSplinePathDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
