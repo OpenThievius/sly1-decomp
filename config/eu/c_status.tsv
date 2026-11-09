@@ -2980,6 +2980,7 @@ func_001BB1A0	func_001BBE90	match
 func_001BB1D8	func_001BBEC8	match	
 func_001BB1E0	func_001BBED0	match	
 func_001BB210	func_001BBF00	match	
+func_001BB290	func_001BBF80	match	rodata
 func_001BB378	func_001BC068	match	
 func_001BB3B0	func_001BC0A0	match	
 func_001BB400	func_001BC0F0	match	

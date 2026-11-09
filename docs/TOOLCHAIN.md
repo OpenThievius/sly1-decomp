@@ -1222,6 +1222,31 @@ order (2026-11-08):
   into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
   flow weights references with; it is a barrier and not used.
 
+### A literal initial value doubles a variable's life in the ranking (func_001BB290)
+
+- update_equiv_regs (local-alloc.c) doubles REG_LIVE_LENGTH of a pseudo at each set that
+  carries a REG_EQUAL note of an invariant, even when the pseudo is set more than once: the
+  test lets a second set through as long as its note is a constant, and the first set has
+  no earlier replacement to disagree with. A float initialised from a literal the compiler
+  puts in its constant pool (`f32 best = 3.4028235e38f`, FLT_MAX: lwc1 from `$LC0`) gets the
+  REG_EQUAL note and so a doubled life; the same value read from a named `const` global does
+  not. global-alloc's priority (floor_log2(refs) * refs / life) of the running minimum is
+  then halved. loop.c's hoisted float constants (lui/ori/mtc1) are doubled the same way.
+- func_001BB290 (FindColliderFloorContact) keeps the smallest +0x18 value in a float over
+  two nested loops, with 0.7 and -0.7 hoisted out of the inner one. Retail's order is -0.7,
+  best, 0.7 ($f1, $f2, $f3). With the FLT_MAX `extern const` global, best ranked first (14/42
+  = 0.333 against 10/62 and 10/64). The literal doubles best's life (14/84 = 0.167), still
+  above -0.7 (0.161). The window is narrow: with sched1 lives b (best) and m (-0.7, the
+  constant set second, one insn shorter than 0.7), it needs m < b/1.4 <= m + 1. Writing the
+  inner loop as a `for` with the step `it = next` in its header, the floor test as one `?:`
+  condition and `continue` for each rejection, leaves one copy of the step in the RTL
+  instead of four (reorg copies it back into the delay slots, so the output is the same)
+  and shortens the inner loop by 5 insns: best 37 (74 doubled, 0.189), -0.7 26 (0.192),
+  0.7 27 (0.185), retail's registers. Two separate `if`s in that form are cross-jumped into
+  a shared `bc1f` that retail does not have; the `?:` keeps retail's branch shape.
+- So a running minimum or maximum that starts at FLT_MAX was written with the literal (or a
+  macro of it) where its register points that way; a `const` global is a separate symbol.
+
 ### Local allocation's ranking (func_00149760)
 
 - block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
