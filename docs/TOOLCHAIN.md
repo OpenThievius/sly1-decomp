@@ -1919,6 +1919,35 @@ Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps 
   and the result in turn, which supports the reading that the original's matrix helpers
   returned by value with named return values.
 
+### The rotation's rows read first, and a rotated vector stored before its sum (func_001C6028)
+
+Read from local-alloc.c of GCC 2.95.3 and the `-dl` dump, with lalloc2.py (an emulator of
+local-alloc's VU quantities) (2026-11-09):
+
+- **What differed.** CombineChildPoseRotations turns the three rows of `*outRot` and the
+  vector `*outVec` by one product matrix, then adds a child's offset. Written as three
+  in-place Rotate calls with two Mat02 copies and `Q(*outVec) = Add(Rotate(m, Q(*outVec)),
+  Q(tmpVec))`, every instruction was retail's but six VU registers, the order of the dead
+  stores and the two saved registers of outVec and &tmpRot (87.5%).
+- **The two dead Mat02 copies are the return value.** `*outRot = RotateRowsBy(m, *outRot)`
+  with func_001BA5B0's named-return helper (a local `t`, each row to `t` then to `out`) gives
+  retail's dead-store order (out0 ... then t0, out1, t1, out2, t2 per row), and with it the
+  saved registers (global-alloc's ranking of outVec and &tmpRot follows from the references).
+- **The sum in the offset's register.** Retail's `vadd vf2, vf1, vf2` puts the sum in the
+  second operand's register. combine_regs ties an asm's `=j` output to the first input that
+  dies in it; the rotated vector does not die there when it was stored first:
+  `Q(*outVec) = Rotate(m, Q(*outVec)); Q(*outVec) = Add(Q(*outVec), Q(tmpVec));` (the first
+  store lives until flow2 deletes it, as in func_00130540 below), so the sum ties to tmpVec.
+- **The rotation's rows read once, before the rows they turn.** With Rotate reading `r` where
+  it is, each call's argument (`m.r[i]`) is expanded before the rows, so sched1's tie on LUID
+  issues row 0 of `*outRot` first and its quantity (12 refs over 38) ranks below the
+  rotation's rows; retail needs it between the rotation's second row and first (a life of 30).
+  Reading r's rows into three Vu0::Vec locals at the top of the helper and turning each row
+  with RotateRowsTied moves the loads of r ahead, and local-alloc's ranking becomes retail's
+  (m2, m1, row 0, m0, row 1, row 2: vf3, vf4, vf5, vf6, vf7, vf8). The order was worked out
+  from lalloc2.py's priorities (row 0 needs 12 refs over a life of 30, between 10 refs over
+  24 and over 28) before the compile.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
