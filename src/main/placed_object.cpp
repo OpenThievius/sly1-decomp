@@ -352,7 +352,8 @@ void UpdateRangeRecord(void* p, f32 f);
 void func_00126AC8(PlacedObject* self, f32 f);
 void TriggerScriptEvent(PlacedObject* self, s32 a, s32 b, void** args);
 
-void func_0012C9E8(Animation* a, PlacedObject* b, f32 c, void* d, f32* e, s32 f, s32 g);
+void func_0012C9E8(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
+                   Vec02* outDir);
 void CreateAnimationPlayer(Animation* a, PlacedObject* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
 
 // A value kept within [lo, hi].
@@ -1609,7 +1610,7 @@ void StartAnimationFromContext(PlacedObject* self)
         fr.tmp = ClampRange::Of(ctx->value, 0.0f, 1.0f) * node->length;
         break;
     case 2:
-        func_0012C9E8(node, self, 0.0f, (u8*)self + 0x100, &fr.tmp, 0, 0);
+        func_0012C9E8(node, self, 0.0f, &self->pos, &fr.tmp, 0, 0);
         break;
     default:
         return;
@@ -4773,9 +4774,52 @@ s32 HasAnimationEventKind19(Animation* a0)
     return 0;
 }
 
-INCLUDE_RODATA(D_00249B10);
+void* FindEntryByObjectId(Gr8B* self, void* key);
+void func_0012F210(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
+                   Vec02* outPos, Vec02* outDir);
 
-INCLUDE_ASM(func_0012C9E8);
+// The time on an animation's path for the owner nearest the point: the curve of the owner's track
+// sampled from 0 to the length in steps of a tenth of it (at least 0.5), then refined from the best
+// time with func_0012F210. With no track, the owner's position, time 0 and the default direction.
+void func_0012C9E8(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
+                   Vec02* outDir)
+{
+    Vec02 sampled;
+    f32 limit = self->length;
+    f32 tenth = limit * 0.1f;
+    f32 step = tenth >? 0.5f;
+    Track83* track = (Track83*)FindEntryByObjectId((Gr8B*)self, owner);
+    if (track->pos == 0) {
+        if (outT != 0) {
+            *outT = 0.0f;
+        }
+        if (outPos != 0) {
+            *outPos = owner->pos;
+        }
+        if (outDir != 0) {
+            *outDir = D_00248D30;
+        }
+        return;
+    }
+    track->pos->vt->eval(track->pos, owner, start, 1.0f, 0, &sampled, 0);
+    f32 bestT = start;
+    f32 t = 0.0f;
+    u128 diff = Vu0::Sub(Vu0::Q(sampled), Vu0::Q(*point));
+    f32 best = Vu0::ToFloat(Vu0::Dot(diff, diff));
+    if (t < limit) {
+        do {
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &sampled, 0);
+            u128 d = Vu0::Sub(Vu0::Q(sampled), Vu0::Q(*point));
+            f32 dist = Vu0::ToFloat(Vu0::Dot(d, d));
+            if (dist < best) {
+                best = dist;
+                bestT = t;
+            }
+            t = limit <? t + step;
+        } while (t < limit);
+    }
+    func_0012F210(self->length, 3.40282347e+38f, track, owner, point, bestT, outT, outPos, outDir);
+}
 
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
     s32 i;
@@ -5836,7 +5880,7 @@ void SettleListedPoseSources(AnimationPlayer* self)
 // behind it (or back), unless the point is farther than the radius at t. A step of 0.2 either
 // way brackets it, halving narrows the bracket to 0.05, and a linear step between its ends
 // gives the time. The time, position and direction found are given where asked.
-void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* owner, Vec02* point, f32* outT,
+void func_0012F210(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
                    Vec02* outPos, Vec02* outDir)
 {
     Vec02 pos;

@@ -447,7 +447,32 @@ void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_0014314
     Vu0::Q(self->v280) = Vu0::Zero();
 }
 
-INCLUDE_ASM(func_00143418);
+// The 0x50-byte record of the target in action (Camera +0x2F0): the target's slot 73 fills it.
+struct TargetRecord_00143418 {
+    u8 pad0[0x10];
+    Vec02 v10;              // 0x10
+    u8 pad20[0x40 - 0x20];
+    Vec02 v40;              // 0x40
+};
+
+// Slot 73 (0x124) of the target's method table: CaptureColliderPose and its overrides take the
+// record and the frame's time step.
+typedef void (*VFn_143418)(void* self, TargetRecord_00143418* out, f32 dt);
+
+// dt is the caller's $f12 (func_001E2E68 passes 0.0f), passed on to the target's slot 73 as
+// the other callers of that slot do; the time step's register is never mentioned because it
+// is still in $f12 at the call.
+void func_00143418(Camera* self, void* o, TargetRecord_00143418* out, f32 dt)
+{
+    Vec02 offset;
+    if (o == self->f2E0) {
+        *out = *(TargetRecord_00143418*)((u8*)self + 0x2F0);
+    } else {
+        ((VFn_143418)(*(void***)o)[0x124 / 4])(o, out, dt);
+        ComputeOffsetBehindTarget(self, o, (Target_00143148*)out, &offset);
+        Vu0::Q(out->v40) = Vu0::Add(Vu0::Q(out->v10), Vu0::Q(offset));
+    }
+}
 
 void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 {

@@ -13,7 +13,7 @@ struct Obj_eu_001AEEA0 {
 
 extern s32 D_eu_0027F360;
 extern s32 D_eu_00263EEC;
-extern Pal_eu_001AEEA0* D_eu_0026ABE8;
+extern Pal_eu_001AEEA0* D_eu_0026ABE8[];
 void func_eu_001AED58(void* self);
 void func_eu_001AAFE0(void* self);
 
@@ -25,8 +25,8 @@ void func_eu_001AEEA0(Obj_eu_001AEEA0* self)
     if (1 == D_eu_0027F360) {
         a0 = (D_eu_00263EEC == 3);
         a1 = 0;
-        if (D_eu_0026ABE8 != 0) {
-            if (D_eu_0026ABE8->f0C != 0.0f) {
+        if (D_eu_0026ABE8[0] != 0) {
+            if (D_eu_0026ABE8[0]->f0C != 0.0f) {
                 a1 = 1;
             }
         }

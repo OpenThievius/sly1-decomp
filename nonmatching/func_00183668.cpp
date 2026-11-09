@@ -6,6 +6,12 @@
 // because CSE follows the key-test branch into the tag test. An empty do { } while (0) after the
 // key-match return stops that and matches EXACT, but it is an artificial barrier (AGENTS.md),
 // so it is not kept here. Not linked.
+// Wave 9 (docs/TOOLCHAIN.md, CSE, "A reload after an if whose body returns"): the copy is GCSE's;
+// CSE's follow-jumps reaches the tag test because the label after the returning key-match body
+// has one use and a barrier before it. Retail needs a used label or a NOTE_INSN_LOOP_END there.
+// Ruled out (34 or more words): else-if, the three conditions repeated per test, the range tests
+// as switch (key) with and without default, the body as an inline returning the comparison, and
+// a search loop that breaks on the tag with the unlink after it (67).
 #include "common.h"
 // NEAR (p58b): 34 lines, all register numbering; retail's `move v1,v0` copy of n->key for the tag test needs CSE to stop following the key-test branch. func_00183668_assert.cpp puts a compiled-out ASSERT macro (do {} while (0)) before the tag test: every register then matches, but GCC aligns one label (.p2align 3) and inserts one nop, so the branches after it are 4 bytes off. Only the do {} while (0) after `return 1` (dead code) is EXACT.
 

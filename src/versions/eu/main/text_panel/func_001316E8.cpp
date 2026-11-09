@@ -1,25 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2125/2224 (95.5%), checked 2026-11-07
-// NEAR (only in PAL): python3 tools/check.py build/swarm/palA/func_001316E8.cpp func_001316E8 --version eu --unit src/main/text_panel.cpp
-// Still differs: registers and spill slots only (about 33 lines of ~560): PAL keeps &L (sp+0x240) and
-// &col (sp+0x260) in spill slots 0x2B0/0x2B4 with self in s6, prev/next strings in s7/s8; ours puts &L in s6,
-// self in s7 and spills &sNext.
-// PAL: the object's font and scroll position sit 0x28C later (0x59C, 0x5A0), and each compass
-// letter is first built into a 0xC0-byte string object (func_eu_0015DD18) that is measured
-// (func_eu_0015E438) and drawn (func_eu_0015E7E0).
+// PAL: the object's font and scroll position sit 0x28C later (0x59C, 0x5A0); each compass point is
+// a text id, read into a text reader (0xC0 bytes, func_eu_0015DD18) that is measured
+// (func_eu_0015E438) and drawn (func_eu_0015E7E0); the layout has a fourth word to clear
+// (func_eu_001374E0) and the screen is PAL's 512 lines high.
 struct Obj_eu_1316E8 {
     u8 pad0[0x59C];
     Font* font;
     f32 f5A0;
 };
 
-struct Str_eu_1316E8 {
-    u8 bytes[0xC0];
-};
+struct TextReader_eu_1316E8 { u8 bytes[0xC0]; };
 
-void func_eu_0015DD18(Str_eu_1316E8* out, const char* text, Font* font, s32 zero);
-f32 func_eu_0015E438(Str_eu_1316E8* str);
-void func_eu_0015E7E0(Str_eu_1316E8* str, Layout_137228* layout, s32 zero, PacketWriter* gs);
+void func_eu_0015DD18(TextReader_eu_1316E8* out, s32 id, Font* font, s32 zero);
+f32 func_eu_0015E438(TextReader_eu_1316E8* reader);
+void func_eu_0015E7E0(TextReader_eu_1316E8* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
 void func_eu_001374E0(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_1316E8 {
@@ -34,11 +28,36 @@ struct Gfx_eu_1316E8 {
     }
 };
 
+// The full-screen layout the compass points are drawn in: the screen's size, a colour written into
+// a four-word buffer and passed by the buffer's address, and the other words cleared. Retail forms
+// the layout's address again (addiu a0, sp, 0x240) for each of these six calls, as integration
+// does with an inline function's unchanged pointer parameter, and passes the buffer from a spilled
+// register, as it does with a pointer an inline function returns (docs/TOOLCHAIN.md, "Integration:
+// an inline function's parameters and results (func_001316E8)").
+struct ScreenLayout_eu_1316E8 {
+    static s32* Words(Quad4& q)
+    {
+        return q.w;
+    }
+
+    static void Reset(Layout_137228* l, s32 color)
+    {
+        Quad4 col;
+        l->Pos(0.0f, 0.0f);
+        l->Size(640.0f, 468.610168f);
+        col.w[0] = color;
+        l->Color(Words(col));
+        l->SetF14(0);
+        l->SetF18(0);
+        func_eu_001374E0(l, 0);
+    }
+};
+
 void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
 {
-    Str_eu_1316E8 sCur;
-    Str_eu_1316E8 sPrev;
-    Str_eu_1316E8 sNext;
+    TextReader_eu_1316E8 sCur;
+    TextReader_eu_1316E8 sPrev;
+    TextReader_eu_1316E8 sNext;
     Layout_137228 L;
     s32 i;
     f32 left = 273.0f;
@@ -87,9 +106,9 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     s32 prev = (cur + 7) & 7;
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
-    func_eu_0015DD18(&sCur, D_00261128[cur], self->font, 0);
-    func_eu_0015DD18(&sPrev, D_00261128[prev], self->font, 0);
-    func_eu_0015DD18(&sNext, D_00261128[next], self->font, 0);
+    func_eu_0015DD18(&sCur, ((s32*)D_00261128)[cur], self->font, 0);
+    func_eu_0015DD18(&sPrev, ((s32*)D_00261128)[prev], self->font, 0);
+    func_eu_0015DD18(&sNext, ((s32*)D_00261128)[next], self->font, 0);
     f32 wCur = func_eu_0015E438(&sCur);
     f32 off = frac * w;
     f32 wPrev = func_eu_0015E438(&sPrev);
@@ -101,16 +120,7 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     f32 xPrev = (320.0f - w) - (off - hPrev);
     f32 xNext = (w + 320.0f) - (off - hNext);
 
-    L.Pos(0.0f, 0.0f);
-    L.Size(640.0f, 468.610168f);
-    {
-        Quad4 col;
-        col.w[0] = grey;
-        L.Color(col.w);
-    }
-    L.SetF14(0);
-    L.SetF18(0);
-    func_eu_001374E0(&L, 0);
+    ScreenLayout_eu_1316E8::Reset(&L, grey);
 
     L.h = (f32)self->font->height * self->font->sy;
     L.w = D_00261310;

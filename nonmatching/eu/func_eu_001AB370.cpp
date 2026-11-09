@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 428/480 (89.2%), checked 2026-11-07
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB370.cpp func_eu_001AB370 --unit src/main/file_1A7FE8.cpp
-// Still differs: Re-encodes a string into a local buffer (escape codes for missing glyphs, wraps /digits runs); only the s0/s1 roles (cur vs source pointer) and lui order differ.
+// Still differs: only the s/cur registers (retail cur $s0, s $s1) and the three hoisted high parts' registers. global-alloc places s first (weighted refs 44 over 93 insns, priority 2.37) against cur (35 over 91, 1.92) and gives it $s0 in pass 1; no consistent loop-depth weighting of these statements flips that (s has more references than cur at every depth), and no hard register or local-alloc pseudo can keep $s0 from s alone, so retail's RTL must differ in references or lives that the final code does not show (2026-11-09, w9).
 // Rewrites a string into a local buffer: characters the font lacks become escape codes and "/digits" runs get wrapped, then hands it to func_eu_001AB238.
 struct Vt_eu_1AB370 { u8 pad0[0x10]; s16 off; u8 pad1[2]; s32 (*has)(void* at, s32 ch); };
 struct Font_eu_1AB370 { u8 pad0[0x4C]; Vt_eu_1AB370* vt; };

@@ -1071,7 +1071,35 @@ void StartGaugeColliderAgent(GaugeColliderAgent* self)
     StartAgent(self);
 }
 
-INCLUDE_ASM(func_001980B0);
+void ApplyTurningColliderDrive(void* self);
+void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
+void StepAgent(void* self, f32 dt);
+
+void StepGaugeColliderAgent(GaugeColliderAgent* self, f32 dt)
+{
+    if (self->fC10 != 0 && *(f32*)&self->fBA4 <= g_gameTime[0]) {
+        Vec02 accel;
+        Vec02 moved;
+        ApplyTurningColliderDrive(self);
+        Vu0::Q(moved) = Vu0::RotateMembers(self->m110, Vu0::MulX(Vu0::Q(self->v640), Vu0::Scalar(-1.0f)));
+        Vu0::Q(accel) = Vu0::DivX(Vu0::Sub(Vu0::Q(moved), Vu0::Q(self->v150)), Vu0::Scalar(dt));
+        f32 turn = WrapAngle(self->f638 - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
+        f32 a = __builtin_fabsf(turn);
+        f32 t = g_unitRange.Limit(D_0026A880.x + a * (D_0026A880.y + a * D_0026A880.z));
+        ClampVectorLength(&accel, &accel, D_0026A870.x * t);
+        AddColliderForce(self, &accel);
+        if (self->parent == 0 && (self->flags538 & 0x8000000000000ULL) == 0) {
+            Vec02 local;
+            ConstrainColliderVector(self, &self->v440, &self->gravity, &local, 0);
+            AddColliderForce(self, &local);
+        }
+        for (Attach03* n = self->attached; n != 0; n = n->next) {
+            n->owner->desc03()->m33(n->owner, n, dt);
+        }
+    } else {
+        StepAgent(self, dt);
+    }
+}
 
 s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 {

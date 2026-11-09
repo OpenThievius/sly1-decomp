@@ -16,6 +16,7 @@
 #include "movie_player.h"
 #include "word_copy.h"
 #include "list_iter.h"
+#include "vu0.h"
 
 
 // The objects func_00184D78 orders: by the words at 0x304 and 0x308, then flag bit 38, then
@@ -348,7 +349,31 @@ s32 ResolveAimTarget(T2195_790* a0) {
     return (s32)a0->target;
 }
 
-INCLUDE_ASM(func_00185498);
+void ClearRootTries(PlacedObject* o);
+void SortAttachments(PlacedObject* o);
+
+// The aim attachment's key from the owner's distance to the target: the far key beyond the
+// range at +0x40, else the near key, after clearing the root's tries. The owner is resorted in
+// its list when the key changes.
+void func_00185498(T2195_790* self)
+{
+    PlacedObject* owner = self->owner;
+    PlacedObject* target = (PlacedObject*)ResolveAimTarget(self);
+    if (target != 0) {
+        u128 d = Vu0::Sub(Vu0::Q(owner->v140), Vu0::Q(target->v140));
+        s32 key;
+        if (self->f40 * self->f40 < Vu0::ToFloatMoved(Vu0::Dot(d, d))) {
+            key = self->f48;
+        } else {
+            key = self->f44;
+            ClearRootTries(owner);
+        }
+        if (key != self->key) {
+            self->key = key;
+            SortAttachments(self->owner);
+        }
+    }
+}
 
 INCLUDE_ASM(func_00185538);
 
