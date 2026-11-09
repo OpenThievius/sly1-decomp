@@ -1549,6 +1549,35 @@ integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near
   local, a pointer parameter to a local, a union and a one-element array (`/s`), and eleven
   integer arguments before the vector (still in registers).
 
+### The same slot against a twist rate's load (func_0016C528)
+
+A second function with func_001D87C8's blocker (2026-11-08, ApplyLinkConstraint, `-dS
+-fsched-verbose-6` dumps; still a near miss):
+
+- **What retail shows.** The last block computes `swingSpin = n * Scalar(lr / lt)`, then
+  `twistSpin = dir * ScalarAt(self->f224->f94)`; both weights share the slot at 0x3E0 and retail
+  stores the swing weight there first and the twist weight last, as ours does. But retail loads
+  f94 (`lw v0, 148(v0)`, then qmtc2) straight after the swing spin's store and before the swing
+  weight's slot store, and computes the twist spin and the total before the transposed rotation
+  of b's spin. So in retail's sched1 the rate's load depended on the swing spin's store (a Vec
+  member store, `mem/s`) but not on the slot store.
+- **Why ours does not.** The rate is FromFloatAt's memory operand, read through a pointer loaded
+  from memory (no known base), and the slot store has neither flag: the asm depends on both
+  stores, the slot store inherits its priority (12) and goes first, and the rate waits behind
+  the rotation's row loads; sched2 cannot undo it (the stores are to the frame, the load has no
+  base). Only fixed_scalar_and_varying_struct_p separates the slot store from the load and not
+  the Vec store, which needs the slot MEM_SCALAR_P and the rate read MEM_IN_STRUCT_P. With the
+  swing weight in a scalar global (an experiment, not a form) the load and the twist arithmetic
+  move up as retail has them.
+- **Ruled out here** (on top of func_001D87C8's list): Scalar of the field by value (the f32
+  pseudo prefers an FPR: lwc1, mfc1), the rate read into an `f32` local before the swing line
+  (the load then comes early, as retail's, but into an FPR: regclass gives an SF pseudo set from
+  memory FP_REGS even when its one use is an asm's "r"), a u128 slot local in a plain or a template helper, a Slot
+  copied from a u128 local, a helper taking the weight as `const u128&`: each is purged back
+  into a register, or leaves the Slot's `mem/s` store. Two functions now show retail's weight
+  slots behaving as MEM_SCALAR_P: the original's weight was a scalar 128-bit object in memory,
+  by a construct still to be found.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
@@ -1672,6 +1701,20 @@ integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near
   them with our counts (100,000 random orders that keep the dependences). Every source form
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
+
+### A Vec named from a Vec result adds a reference to the ranking (func_0016C528)
+
+- `Vu0::Vec len = Vu0::Length(Vu0::Vec::Of(v));` copies Vec::Length's result into `len` (a movti
+  from the inline's return value), and the copy ties the dot's and the root's pseudos into one
+  quantity with both's references. In ApplyLinkConstraint's NormalizeVector that quantity had 4
+  references over 8 insns (priority 1.0) and was placed before the dv/rest quantity (9 over 38:
+  0.71), so it took vf2 and dv, a rotation row and t took the registers the other way round.
+  With `u128 len = Vu0::Length(Vu0::Q(v));` the root (used again in the divide's block) is
+  global-alloc's, the dot alone ranks 0.5 after dv/rest, and the block takes retail's registers.
+  An emulation of block_alloc on the `.lreg` dump (build/swarm/w5-16C528/la.py in that worktree,
+  not committed) reproduced every VU register of the block before the change was compiled.
+- When two VU registers are swapped across a block, look for a Vec value named from another
+  inline's Vec result: the copy merges two short lives into one higher-ranked quantity.
 
 ### A parameter passed on fills sched1's second slot (func_0018AD88)
 
