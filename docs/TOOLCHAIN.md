@@ -969,6 +969,21 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A conversion's latency in sched2 (func_00126270)
+
+- **ToFloat's mtc1 is reload's, ToFloatMoved's is the asm's.** With ToFloat the qmfc2 is the
+  asm (unit none, cost 1) and the mtc1 to the FPR is an insn reload makes (`$f12=$3`, on the
+  memory and flop units), whose latency to the next float insn is 2 in the `-dR
+  -fsched-verbose-6` dump. With ToFloatMoved the qmfc2 is the compiler's and the mtc1 is the
+  asm, cost 1. In func_00126270's view test, `fabs(ToFloat(Dot(n, cam->f80)))` left abs.s
+  queued a cycle after the mtc1, so the cubic's first coefficient load (c[3]) took the memory
+  unit first, and c[0]'s load fell into the cycle before the first mul.s. With ToFloatMoved
+  abs.s issues the cycle after the mtc1, ahead of the c[3] load (priority 29 against 28), the
+  multiply is ready a cycle earlier and outranks c[0]'s load: retail's order. The mtc1 also
+  holds the memory unit in its cycle, which is what keeps c[0]'s load (ready then) from going
+  before the other coefficients. A swap of an FPR op and a load right after a mtc1 is worth
+  trying with the other conversion first.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
