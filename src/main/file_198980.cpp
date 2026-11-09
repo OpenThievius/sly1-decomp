@@ -597,7 +597,49 @@ void StartNumberedItem(NumberedItem* self)
     }
 }
 
-INCLUDE_ASM(func_00199698);
+struct ActiveColliderTarget {
+    s32 f0;
+    u8 pad4[0x18 - 0x4];
+    PlacedObject* f18;
+};
+s32 MaskWorldBitsBySave(void);
+void ComputeObjectMotionInFrame(void* obj, s32 a, void* pos, Vec02* out, s32 b, s32 c, s32 d);
+
+// The reach test reads the target's position at the use (*(const u128*)&...), not through Q's
+// reference: the reference's address is a pseudo that CSE then reuses for the &target->v140
+// passed after the test, where retail forms it afresh (docs/TOOLCHAIN.md, "CSE").
+void UpdateNumberedItem(NumberedItem* self)
+{
+    Vec02 first;
+    Vec02 second;
+    UpdateObjectSet(self);
+    if ((MaskWorldBitsBySave() & 0x20000) == 0) {
+        return;
+    }
+    if (((SlotTest*)self->desc)[76](self) != 1) {
+        return;
+    }
+    ActiveColliderTarget* data = (ActiveColliderTarget*)GetActiveSwitchedColliderData();
+    if (data->f0 == 0) {
+        return;
+    }
+    PlacedObject* target = data->f18;
+    if (target == 0) {
+        return;
+    }
+    u128 gap = Vu0::Sub(*(const u128*)&target->v140, Vu0::Q(self->v140));
+    if (D_0026A968 * D_0026A968 < Vu0::ToFloatMoved(Vu0::Dot(gap, gap))) {
+        return;
+    }
+    ComputeObjectMotionInFrame(target, 0, &target->v140, &first, 0, 0, 0);
+    ComputeObjectMotionInFrame(self, 0, &self->v140, &second, 0, 0, 0);
+    u128 rel = Vu0::Sub(Vu0::Q(second), Vu0::Q(first));
+    u128 away = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(data->f18->v140));
+    u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(D_00248D30));
+    if (Vu0::ToFloat(Vu0::Dot(rel, dir)) > -50.0f) {
+        ((SlotFn*)self->desc)[77](self);
+    }
+}
 
 void SetNumberedItemFlag(NumberedItem* self)
 {
