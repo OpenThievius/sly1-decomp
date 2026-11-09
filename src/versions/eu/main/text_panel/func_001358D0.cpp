@@ -1,67 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1356/1360 (99.7%), checked 2026-11-08
-// NEAR: all but the first ArctangentOfRatio's arguments are retail's, registers and frame
-// included: retail loads d.y into $f12 before the jal and d.x into $f13 in its delay slot, ours
-// the other way round (two words). The same call matches elsewhere (agent.cpp's func_001C7A60,
-// camera.cpp's ConvertOffsetToSpherical); here no form moved it: the coordinates as locals in
-// either order, d declared in the loop, Set or a frame store for d, an inline helper for the two
-// angles. What placed the rest: i set before GatherObjectsById, entries[i] with e->obj passed on
-// (an unreversed first loop), the view test's flags XORed into a word of their own, the second
-// angle in a variable of its own (rise, pitch), and T217D_440's markers at 0x358 (two hoisted
-// bases, the object's and the effect's). PAL's T217D_440 is laid out differently (+0x28C).
-#include "common.h"
-#include "screen_element.h"
-#include "placed_object.h"
-#include "vu0.h"
-
-struct CameraHeading {
-    u8 pad0[0x40];
-    s32 f40[4];             // 0x40: the eye
-    f32 planes[3][4];       // 0x50: the view planes' normals, as columns (camera.h)
-    u8 pad80[0x1C4 - 0x80];
-    f32 f1C4;               // 0x1C4
-    u8 pad1C8[0x1E0 - 0x1C8];
-    f32 f1E0;               // 0x1E0
-    u8 pad1E4[0x468 - 0x1E4];
-    f32 heading;            // 0x468
-    u8 pad46C[0x470 - 0x46C];
-    f32 pitch;              // 0x470
-    u8 pad474[0x478 - 0x474];
-    f32 f478;
+// PAL: the caption box's fields are later (state at 0x570, blockA at 0x5BC, countA at 0x5DC,
+// count at 0x5E0, the markers at 0x5E4); the code is US's.
+struct PanelMarkers_1358D0_eu {
+    u8 pad0[0x570];
+    s32 state;                  // 0x570
+    u8 pad574[0x5BC - 0x574];
+    s32 blockA[4];              // 0x5BC
+    u8 pad5CC[0x5DC - 0x5CC];
+    s32 countA;                 // 0x5DC
+    s32 count;                  // 0x5E0
+    T217D_440_Marker markers[31]; // 0x5E4
 };
 
-extern CameraHeading* g_camera;
-extern u8 g_currentWorld[];
-extern f32 g_gameClock[];
-struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
-struct SortEntry {
-    void* obj;
-    f32 key;
-};
-s32 IsObjectAttached(void* obj);
-void GetNumberedItemFlag(void* obj, s32* out);
-void SetEffectPhase(void* handle, s32 mode);
-void* FillMemory(void* block, s32 value, s32 size);
-f32 WrapAngle(f32 a);
-s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b);
-s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b);
-
-struct PanelEntry {
-    void* obj;              // 0x00
-    f32 key;                // 0x04
-    f32 radius;             // 0x08
-    u8 pad0C[4];
-    PanelEntryPosition v;   // 0x10
-};
-
-s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
-void HeapSortRecords(void* base, s32 count, s32 size, s32 (*cmp)(SortEntry* a, SortEntry* b));
-f32 ArctangentOfRatio(f32 y, f32 x);
-void CopyMemory(void* dst, void* src, u32 size);
-void* CreateEffect(s32 kind, s32 owner);
-extern f32 D_00261274;
-
-void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, s32 a5, f32 range)
+void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2, void* a3, s32 limit, s32 a5, f32 range)
 {
     PanelEntry entries[0x80];
     void* objs[0x80];
@@ -98,7 +49,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         if (want && !visible) {
             f32 yaw = ArctangentOfRatio(d.y, d.x);
             u128 v = Vu0::Q(d);
-            f32 rise = ArctangentOfRatio(d.z, Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(v, v))));
+            f32 rise = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(v, v))));
             yaw = WrapAngle(yaw - g_camera->heading);
             f32 pitch = WrapAngle(rise - g_camera->pitch);
             if (g_camera->f1C4 * (g_camera->f1E0 * 0.45f) < yaw) {

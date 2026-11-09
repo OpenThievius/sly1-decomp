@@ -825,6 +825,29 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
 
+### sched2 keeps sched1's dependences (func_001358D0)
+
+- **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
+  LOG_LINKS (add_dependence skips a link it already has); nothing frees them between sched1 and
+  sched2. So sched2 also sees every dependence sched1 had, on pseudos and hard registers that
+  reload has since changed: a stale link still counts as a dependent in rank_for_schedule.
+- **What that decides: two argument loads of one call.** After reload, rank_for_schedule has no
+  register weight; at equal priority the class of dependence on the last insn, then the number
+  of dependents, then insn order decide. In CollectPanelEntriesOfClass the first
+  `ArctangentOfRatio(d.y, d.x)` loads $f12 and $f13 at the same priority, and the next call's
+  arguments (`d.z`, `ToFloat(Sqrt(DotXY(v, v)))`) set the same two registers again. With
+  ToFloat, combine had put the asm's output straight into $f13 (`(set $f13 (asm_operands
+  "qmfc2"))`, invalid for "=r", so reload added v0 and an mtc1): the qmfc2 kept sched1's output
+  dependence on the $f13 load and the mtc1 got its own, so that load had one dependent more than
+  the $f12 load (7 to 6), issued first, and the $f12 load went to the call's delay slot, the
+  reverse of retail's. With ToFloatMoved (`mtc1` alone, the qmfc2 the compiler's into a pseudo),
+  only the mtc1 depends on the $f13 load, the two loads tie at 6, and sched1's order ($f12
+  first) stands: retail's (PAL's too, with the caption box's fields at PAL's offsets). ToFloatMoved
+  is the helper already used wherever retail's qmfc2 is the compiler's own copy (agent.cpp's
+  distances, the length tests above); nothing else changes. The forward-dependence table of `-dS -fsched-verbose-6`'s `.sched2`
+  dump lists each insn's dependents; a link in the RTL whose register no longer matches is a
+  stale one.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
