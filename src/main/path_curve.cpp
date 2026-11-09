@@ -151,8 +151,67 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
 
 INCLUDE_ASM(func_0014D280);
 
-INCLUDE_RODATA(D_00249FBC);
-INCLUDE_ASM(func_0014D3A8);
+void ConstrainVectorByAnchor(void* self, void* a, void* b, s32 c);
+extern const Vec02 g_unitXVector;
+
+// The nearest point of a polyline to pos. The direction is stored, then stored again made unit
+// length: as Vu0::Vec values, NormalizeOr's argument is a copy the compiler makes (its own
+// vmove, a vu0 insn of latency 2), so sched2 issues the length's dot before the first store, as
+// retail does (docs/TOOLCHAIN.md, "A compiler copy's latency in sched2").
+void func_0014D3A8(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
+{
+    s32 best = -1;
+    f32 frac = -1.0f;
+    f32 bestDist = 3.4028234663852886e+38f;
+    s32 count = n - 1;
+    for (s32 i = 0; i < count; i++) {
+        Vec02 d, pt, e;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(pts[i]));
+        Vu0::Q(e) = Vu0::Sub(Vu0::Q(pts[i + 1]), Vu0::Q(pts[i]));
+        if (anchor != 0) {
+            ConstrainVectorByAnchor(anchor, &d, &d, 0);
+            ConstrainVectorByAnchor(anchor, &e, &e, 0);
+        }
+        Vu0::Vec ev = Vu0::Vec::Of(e);
+        Vu0::Vec len = Vu0::Length(ev);
+        f32 lenF = Vu0::ToFloatMoved(len);
+        Vu0::Vec unit;
+        unit.q = Vu0::DivX(ev.q, len.q);
+        {
+            Vec02 e0;
+            Vu0::Q(e0) = ev.q;
+        }
+        f32 t = Vu0::ToFloat(Vu0::Dot(unit, Vu0::Vec::Of(d)));
+        Vu0::Q(e) = unit.q;
+        f32 c = t;
+        if (t < 0.0f) {
+            c = 0.0f;
+        } else if (lenF < t) {
+            c = lenF;
+        }
+        Vu0::Q(pt) = Vu0::MulAddX(Vu0::Q(d), Vu0::Q(e), Vu0::Scalar(-c));
+        f32 dist = Vu0::ToFloat(Vu0::Dot(Vu0::Q(pt), Vu0::Q(pt)));
+        if (dist < bestDist) {
+            frac = c / lenF;
+            bestDist = dist;
+            best = i;
+        }
+    }
+    if (outIdx != 0) {
+        *outIdx = best;
+    }
+    if (outT != 0) {
+        *outT = frac;
+    }
+    if (outPoint != 0) {
+        Vu0::Q(*outPoint) = Vu0::MulXSum(Vu0::Q(pts[best]), Vu0::Scalar(1.0f - frac), Vu0::Q(pts[best + 1]), Vu0::Scalar(frac));
+    }
+    if (outDir != 0) {
+        Vu0::Vec dir = Vu0::Sub(Vu0::Vec::Of(pts[best + 1]), Vu0::Vec::Of(pts[best]));
+        *(Vu0::Vec*)outDir = dir;
+        *(Vu0::Vec*)outDir = Vu0::NormalizeOr(dir, Vu0::Vec::Of(g_unitXVector));
+    }
+}
 
 INCLUDE_ASM(func_0014D680);
 
@@ -408,7 +467,6 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
 
 // The Hermite evaluation (func_00130540) with its three floats first: retail sets $f12 and
 // $f13 among the pointer arguments, which the floats' place in the list decides.
-extern const Vec02 g_unitXVector;
 void EvaluateHermiteVectorSegment(f32 u, f32 v, f32 w, void* p0, void* t0, void* p1, void* t1, void* a4, void* a5, s32 a6);
 
 void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
@@ -503,8 +561,6 @@ void FillSplinePathLengths(SplinePathCurve* self)
         self->lengths[i + 1] = self->lengths[i] + r;
     }
 }
-
-void ConstrainVectorByAnchor(void* self, void* a, void* b, s32 c);
 
 void FindSplinePathNearestPoint(SplinePathCurve* self, Vec02* pos, void* anchor, s32 a3, s32 a4, f32* a5, f32* a6)
 {
