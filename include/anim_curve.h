@@ -137,10 +137,12 @@ struct ValueBlendWeightCurve : AngleBlendWeightCurve {
 // ---------------------------------------------------------------------------------------------
 // The position curves: a vector over time. func_00120FB0 makes them, by kind 0..2.
 
-// Slot 0 evaluates (owner, mode, key, scale, out value, out slope), then tells the owner
-// (its slot 44); slot 1 reads the curve; slot 2 gives the key times. The floats come before
-// the out pointers: retail's callers set $f12 and $f13 before $a3 (func_0011FC90).
-typedef void (*PositionCurveEval)(PositionCurve* self, PlacedObject* owner, s32 mode, f32 key, f32 scale, void* outValue, void* outSlope);
+// Slot 0 evaluates (owner, key, scale, mode, out value, out slope), then tells the owner
+// (its slot 44); slot 1 reads the curve; slot 2 gives the key times. The order is the weight
+// curves' (WeightCurveEval): retail's callers set $f12 and $f13 before $a3 (func_0011FC90),
+// and $f12 or $f13 before the mode's $a2 where nothing else orders them (func_0012F210,
+// func_001C9DE0; docs/TOOLCHAIN.md, "A prototype's parameter order").
+typedef void (*PositionCurveEval)(PositionCurve* self, PlacedObject* owner, f32 key, f32 scale, s32 mode, void* outValue, void* outSlope);
 typedef void (*PositionCurveRead)(PositionCurve* self, Stream83* stream);
 typedef void (*PositionCurveTimes)(PositionCurve* self, s32* outCount, f32** outTimes);
 struct PositionCurveVt {

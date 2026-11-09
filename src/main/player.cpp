@@ -817,7 +817,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 break;
             }
             PositionCurve* c = track->pos;
-            c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+            c->vt->eval(c, self, src->time, src->speed, 0, 0, &v);
             Vu0::Q(v) = Vu0::Rotate(self->m660, Vu0::Q(v));
             self->desc02()->m20(self, &v);
             if (src == (void*)self->watched2230) {
@@ -2227,7 +2227,7 @@ held:
                 PositionCurve* c = track->pos;
                 if (c != 0) {
                     Vec02 v;
-                    c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+                    c->vt->eval(c, self, src->time, src->speed, 0, 0, &v);
                     Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(v), Vu0::Scalar(-1.0f));
                 }
             }

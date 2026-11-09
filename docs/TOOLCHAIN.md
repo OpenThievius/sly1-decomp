@@ -1281,6 +1281,27 @@ order (2026-11-08):
 - So a running minimum or maximum that starts at FLT_MAX was written with the literal (or a
   macro of it) where its register points that way; a `const` global is a separate symbol.
 
+### A constant's REG_EQUIV doubles a life for global-alloc (func_0012F210)
+
+- update_equiv_regs (local-alloc.c, run before local-alloc and global-alloc) walks the sets
+  in insn order. A pseudo set more than once still passes when the set's REG_EQUAL note is a
+  constant and no other constant was recorded for it yet: the note becomes REG_EQUIV and the
+  pseudo's REG_LIVE_LENGTH is doubled. A later set to a different constant (no_equiv) drops
+  the equivalence but never halves the life back. So a variable set to 0.2 in one arm and to
+  -0.2 in the other ranks in global-alloc with twice sched1's live length: the `.sched` dump's
+  "life shortened from 58 to 57" is the `.lreg` dump's "across 114 insns".
+- The doubling magnifies one insn of sched1's order into two. func_0012F210's bracketing step
+  (5 refs, sched1 life 57, 114 doubled: 0.0877) ranked just ahead of the upper end's dot (7
+  refs over 161: 0.0870), so the two took $f25 and $f26 the other way round from retail. The
+  step's set is a li.s (the memory unit, cost 2) after the arm's two vector stores, which
+  rank first for their deaths (INSN_REG_WEIGHT -1), so it always issues third; one alu insn
+  more in the arm, issued after it, gives it 58, 116, 0.0862. Retail's `behind = 0` was in
+  the arm, mirroring the other arm's `behind = 1` (written once before the `if`, sched1 put
+  it into the block before; dbr fills the branch's delay slot with it either way).
+- Diagnosing it: when tools/regalloc.py reports an `.lreg` live length about twice the
+  `.sched` dump's "life shortened/extended" line for that pseudo, the pseudo had a constant
+  REG_EQUIV at some point, and every insn of its sched1 life counts twice.
+
 ### Local allocation's ranking (func_00149760)
 
 - block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
@@ -1557,6 +1578,12 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   goes first in sched2 because the `still = 0` after the call, allocated to a0, is one
   dependent more). The definition (file_1E88D0) matches with either order, so it takes the
   order its caller proves.
+- **A function-pointer type is a prototype too (func_0012F210).** The position curves'
+  evaluate slot was declared (owner, mode, key, scale, ...): func_0012F210's first two calls
+  set a2 before $f12, retail $f12 first, and func_001C9DE0's set a2 before $f13. Declared
+  (owner, key, scale, mode, ...), the weight curves' own order, both come out as retail's and
+  every other caller still matches. A call site that passed a non-zero int where a float now
+  is compiles silently (the int converts): rebuild in full after such a change.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.

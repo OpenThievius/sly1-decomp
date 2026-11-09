@@ -997,8 +997,8 @@ void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
     PushBackMemoryMark();
     self->vt->times(self, &count, &values);
     if (count != 0) {
-        self->vt->eval(self, 0, 0, values[0], 1.0f, &v[0], 0);
-        self->vt->eval(self, 0, 0, values[count - 1], 1.0f, &v[1], 0);
+        self->vt->eval(self, 0, values[0], 1.0f, 0, &v[0], 0);
+        self->vt->eval(self, 0, values[count - 1], 1.0f, 0, &v[1], 0);
         result = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(v[0]), Vu0::Q(v[1])))) < 1.0f;
     } else {
         result = 1;
@@ -1222,7 +1222,7 @@ void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0,
                     a -= e->sub->length;
                 b = b / seq->pairs[idx].b;
             }
-            tg->vt->eval(tg, cam, c, a, b * scale, p0, out1 ? &x1 : 0);
+            tg->vt->eval(tg, cam, a, b * scale, c, p0, out1 ? &x1 : 0);
             if (out0) {
                 u128 w = Vu0::FromFloatAt(e->weight);
                 Vu0::Q(k) = w;
@@ -2272,7 +2272,7 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
                 tmp[0] = tmp[0] + d * track->speed;
             }
         }
-        e->pos->vt->eval(e->pos, self->owner, 0, tmp[0], track->speed, a1, a2);
+        e->pos->vt->eval(e->pos, self->owner, tmp[0], track->speed, 0, a1, a2);
         return;
     }
     GetOwnerPosition(self, a1, a2);
