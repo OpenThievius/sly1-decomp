@@ -3642,6 +3642,7 @@ func_001EC0B8	func_001ED130	match
 func_001EC0D8	func_001ED150	match	rodata
 func_001EC188	func_001ED200	match	
 func_001EC380	func_001ED3F8	match	
+func_001EC3D8	func_001ED450	match	
 func_001EC478	func_001ED4F0	match	
 func_001EC528	func_001ED5A0	match	version-specific
 func_001EC570	func_001ED5E8	match	rodata

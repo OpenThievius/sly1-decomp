@@ -1599,6 +1599,18 @@ dumps (2026-11-08, still a near miss):
   ToFloatMoved of the u32 widens it to TImode first. Swept over the eleven near misses whose
   notes mention mtc1 or neg.s, it closed no other.
 
+- **A call's argument move against the last stores (func_001EC3D8).** DrawTempoAgent fills a
+  stack request (group, a float, the object, the callback) and passes `&r` (`move a0,sp`).
+  With ToFloat, sched2 had the swc1 queued two cycles behind reload's mtc1, so the free alu
+  slot took `move a0,sp` a cycle ahead of it, in every store order. With ToFloatMoved the
+  mtc1 is the asm (cost 1): the swc1 and the move are ready in the same cycle, tied on
+  priority (3), class and dependents (the call only), and INSN_LUID, sched1's output order,
+  decides. sched1 issues the move in the first cycle where the memory unit is taken and the
+  alu free; with the float stored before the object (`r.group; r.f04; r.arg; r.callback`)
+  the swc1 wins that cycle over the object's store on INSN_LUID, the move follows it, and
+  sched2 then keeps swc1 before the move: retail's code. The order is the struct's own
+  field order after the group, an ordinary way to fill a record.
+
 ### A compiler copy's latency in sched2 (func_0014D3A8)
 
 - **An asm copy and the compiler's copy schedule differently.** func_0014D3A8's tail stores a
