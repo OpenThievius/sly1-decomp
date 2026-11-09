@@ -952,7 +952,7 @@ void AddMarkRootList(void* dst, void* value);
 struct SampledCurve;
 struct CurvePoint { u8 pad0[16]; };
 
-void EvaluateHermiteVectorSegment(f32 f12, SampledCurve* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 void ReleaseCountedObject(CountedObject* object)
 {
@@ -6415,7 +6415,37 @@ void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f3
     }
 }
 
-INCLUDE_ASM(func_00130540);
+// The cubic Hermite segment from p0 (tangent m0) to p1 (tangent m1) over dur, at time t: the
+// point into pos, the velocity (scaled by k) into vel and the acceleration (by k squared)
+// into acc, each when given.
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc)
+{
+    Vec02 d;
+    f32 u = t / dur;
+    f32 w = 1.0f - u;
+    if (pos != 0) {
+        f32 uw = u * w;
+        f32 uu = u * u;
+        f32 ww = w * w;
+        f32 uww = uw * w;
+        f32 uuw = uu * w;
+        f32 www = ww * w;
+        Vu0::Q(*pos) = Vu0::MulXSum4(Vu0::Q(*p0), Vu0::Scalar(www + uww * 3.0f), Vu0::Q(*m0), Vu0::Scalar(uww * dur),
+                                     Vu0::Q(*m1), Vu0::Scalar(-uuw * dur), Vu0::Q(*p1), Vu0::Scalar(uu * u + uuw * 3.0f));
+    }
+    if (vel != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p1), Vu0::Q(*p0));
+        Vu0::Q(*vel) = Vu0::MulXSum3(Vu0::Q(d), Vu0::Scalar(u * (6.0f - u * 6.0f) / dur), Vu0::Q(*m0), Vu0::Scalar(1.0f - u * (4.0f - u * 3.0f)),
+                               Vu0::Q(*m1), Vu0::Scalar(u * (u * 3.0f + -2.0f)));
+        Vu0::Q(*vel) = Vu0::MulX(Vu0::Q(*vel), Vu0::Scalar(k));
+    }
+    if (acc != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p1), Vu0::Q(*p0));
+        Vu0::Q(*acc) = Vu0::MulXSum3(Vu0::Q(d), Vu0::Scalar((6.0f - u * 12.0f) / dur), Vu0::Q(*m0), Vu0::Scalar(u * 6.0f - 4.0f),
+                               Vu0::Q(*m1), Vu0::Scalar(u * 6.0f - 2.0f));
+        Vu0::Q(*acc) = Vu0::MulX(Vu0::Q(*acc), Vu0::Scalar(k * k / dur));
+    }
+}
 
 INCLUDE_ASM(func_00130748);
 
@@ -6425,7 +6455,7 @@ void SampleCurvePoints(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 co
     f32 cur = start;
     s32 i;
     for (i = 0; i < count; i++) {
-        EvaluateHermiteVectorSegment(k, self, a1, a2, a3, cur, 1.0f, (s32)(out + i), 0, 0);
+        EvaluateHermiteVectorSegment(k, (const Vec02*)self, (const Vec02*)a1, (const Vec02*)a2, (const Vec02*)a3, cur, 1.0f, (Vec02*)(out + i), 0, 0);
         cur += step;
     }
 }
