@@ -149,10 +149,24 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
     return i;
 }
 
-INCLUDE_ASM(func_0014D280);
-
 void ConstrainVectorByAnchor(void* self, void* a, void* b, s32 c);
 extern const Vec02 g_unitXVector;
+
+void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 wrap, Vec02* pos, Vec02* tan)
+{
+    f32 lo;
+    f32 hi;
+    s32 i = FindPathCurveSegment(t, count, times, wrap, &lo, &hi);
+    f32 u = lo / hi;
+    if (pos) {
+        Vu0::Q(*pos) = Vu0::MulXSum(Vu0::Q(points[i]), Vu0::Scalar(1.0f - u), Vu0::Q(points[i + 1]), Vu0::Scalar(u));
+    }
+    if (tan) {
+        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(points[i + 1]), Vu0::Vec::Of(points[i]));
+        *(Vu0::Vec*)tan = d;
+        *(Vu0::Vec*)tan = Vu0::NormalizeOr(d, Vu0::Vec::Of(g_unitXVector));
+    }
+}
 
 // The nearest point of a polyline to pos. The direction is stored, then stored again made unit
 // length: as Vu0::Vec values, NormalizeOr's argument is a copy the compiler makes (its own

@@ -2054,6 +2054,11 @@ A second function with func_001D87C8's blocker (2026-11-08, ApplyLinkConstraint,
   on it queues the store for two cycles while the dot (an asm, its link cost free) issues at
   once: retail's order, with no other change. Where retail stores a vmove's copy after an asm
   that reads it, the copy is the compiler's, not Vu0::Copy.
+- **The same tail in func_0014D280.** InterpolatePathCurvePoint's tangent is the same
+  three statements (`Vec d = Sub(Vec::Of(points[i + 1]), Vec::Of(points[i])); *(Vu0::Vec*)tan
+  = d; *(Vu0::Vec*)tan = NormalizeOr(d, Vec::Of(g_unitXVector));`) and matched on the first
+  compile; the near miss with Vu0::Copy and a file-local NormalizeOfCopy had stopped at 94.5%
+  with exactly the store-before-dot order above.
 
 ### A conversion in each branch, before the epilogue (func_0014DA98)
 
