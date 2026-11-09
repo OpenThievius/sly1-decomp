@@ -47,7 +47,7 @@ void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(u32 n);
 void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
 void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, s32 e, s32 f, f32 x);
-void FindLocalMinimum(void* fn, f32 f12, f32 f13, f32 f14, f32 f15, void* ctx, void* out, s32 a3);
+void FindLocalMinimum(void* fn, void* ctx, f32 f12, f32 f13, f32 f14, f32 f15, void* out, s32 a3);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x);

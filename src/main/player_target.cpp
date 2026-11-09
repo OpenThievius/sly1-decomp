@@ -344,7 +344,7 @@ struct PathScoreFrame {
     f32 out;
 };
 
-void FindLocalMinimum(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
+void FindLocalMinimum(void* fn, void* b, f32 f12, f32 f13, f32 f14, f32 f15, s32 c, void* out);
 
 f32 ScoreTargetPathNearest(PathScoreContext* self)
 {
@@ -359,7 +359,7 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
     l.b[1] = n->f18;
     l.c = l.a;
     
-    FindLocalMinimum(0.5f, q, q, 3.0f, (void*)ScoreTargetPathAt, l.b, 0, &l.out);
+    FindLocalMinimum((void*)ScoreTargetPathAt, l.b, 0.5f, q, q, 3.0f, 0, &l.out);
     return l.out;
 }
 
