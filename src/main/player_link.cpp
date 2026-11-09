@@ -28,7 +28,7 @@ float D_00274DC0[3] = {4.0f, 0.0f, 0.100000001f};
 float D_00274DCC = 1.70000005f;
 float D_00274DD0 = 3.0f;
 float D_00274DD4 = 3.5f;
-float D_00274DD8[2] = {-1.70000005f, 0.0f};
+float D_00274DD8 = -1.70000005f;
 float D_00274DE0[3] = {3000.0f, 1000.0f, 0.150000006f};
 float D_00274DF0[3] = {30.0f, 10.0f, 0.150000006f};
 
@@ -326,7 +326,49 @@ void GetLinkedObjectHeading(u8* a0, f32* a1)
     *a1 = ArctangentOfRatio(v.y, v.x);
 }
 
-INCLUDE_ASM(func_001CDB70);
+struct LinkSource {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+    u8 pad50[0xB0 - 0x50];
+    f32 reach;              // 0xB0
+};
+
+struct LinkRecord {
+    u8 pad00[0x80];
+    PlacedObject* object;   // 0x80
+};
+
+void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 gap;
+    Mat02 arc;
+    Mat02 axis;
+    Vec02 k;
+    LinkSource* source = (LinkSource*)self->f2204;
+    PlacedObject* held = ((LinkRecord*)((PlacedObject*)self->f61C)->f224)->object;
+    TransformPointBetweenFrames(source->frame, self, &source->point, &a);
+    TransformPointBetweenFrames(0, self, &held->v140, &b);
+    Vu0::Q(gap) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
+    BuildShortestArcRotation(&g_unitXVector, &gap, &arc);
+    u128 here = Vu0::Q(a);
+    u128 reach = Vu0::FromFloatAt(((LinkSource*)self->f2204)->reach);
+    Vu0::Q(k) = reach;
+    Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(D_00248D30)), reach);
+    BuildAxisAngleMatrix(&g_unitXVector, D_00274DD4, &axis);
+    MulRotation(rotA, arc, axis);
+    BuildAxisAngleMatrix(&g_unitXVector, D_00274DD8, rotB);
+    u128 turned = Vu0::Rotate(*rotB, Vu0::Q(((PlacedObject*)self->f23D4)->pos));
+    u128 sum = Vu0::Add(Vu0::Q((*(PlacedObject**)((u8*)self + 0x23D0))->pos), turned);
+    u128 moved = Vu0::Rotate(*rotA, sum);
+    PlacedObject* base = (PlacedObject*)self->f61C;
+    u128 total = Vu0::Add(Vu0::Q(base->pos), moved);
+    Vu0::Q(k) = total;
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(base->pos), Vu0::Sub(Vu0::Q(a), total));
+}
 
 typedef u64 Quad128 __attribute__((mode(TI)));
 Quad128 ApproachPointWithRamp(Quad128 cur, Quad128 target, const f32* params, s32 flag, f32 dt);

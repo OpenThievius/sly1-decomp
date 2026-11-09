@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1618/1660 (97.5%), checked 2026-11-08
+// BYTES 1624/1660 (97.8%), checked 2026-11-08
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
@@ -15,7 +15,8 @@
 // which also moves the 0x1AC markers' registers (retail s2, s4, s0 and v1 for the alternative;
 // here s3, s4, s2 and a1). Declaring the animation first, at function level, or reading the
 // player through msg->source or self->f7E0 does not swap them. Also retail sets $f13 before
-// a2 in 0x1AC's first curve call. Levers that gave the rest: the -1.0 weight as a u128 stored to
+// a2 in 0x1AC's first curve call (fixed
+// 2026-11-08 by the evaluate slot's prototype, floats before the mode: func_0012F210). Levers that gave the rest: the -1.0 weight as a u128 stored to
 // its slot after the rotation (as func_001C9AF8), the colliders' ternaries with the sender's
 // first, the item keeper's test as if/else with state = 2 in the else.
 // Found (night-close10): global.c's priority picks the order; ours allocates the animation
@@ -115,7 +116,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 v;
             Vec02 w;
             PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, msg->time, player->speed, 0, &v);
+            c->vt->eval(c, self, msg->time, player->speed, 0, 0, &v);
             u128 s = Vu0::FromFloat(-1.0f);
             Vu0::Q(F(Vec02, 0x640)) = Vu0::MulX(Vu0::Q(v), s);
             Vu0::Q(v) = Vu0::Rotate(F(Mat02, 0x660), Vu0::Q(v));
@@ -152,9 +153,9 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 p1;
             f32 zero = 0.0f;
             PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, from->a0.f, zero, &p0, 0);
+            c->vt->eval(c, self, from->a0.f, zero, 0, &p0, 0);
             c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, to->a0.f, zero, &p1, 0);
+            c->vt->eval(c, self, to->a0.f, zero, 0, &p1, 0);
             F(f32, 0xB94) = p1.x - p0.x;
             F(f32, 0xB98) = (to->a0.f - from->a0.f) / *(f32*)&anim->props6C[0x10];
             break;

@@ -2141,7 +2141,25 @@ void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
     func_00125C90(self, s, out);
 }
 
-INCLUDE_ASM(func_001EC3D8);
+#include "deferred_request.h"
+void DrawAgent(TempoAgent* self, Camera* cam);
+void QueueDeferredRequest(DeferredRequest* r);
+void DrawTempoAgentRing(DeferredRequest* self);
+
+void DrawTempoAgent(TempoAgent* self, Camera* cam)
+{
+    DrawAgent(self, cam);
+    if (self->f724 == 16) {
+        DeferredRequest r;
+        FillMemory(&r, 0, 0x80);
+        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)), Vu0::Q(cam->f80)));
+        r.group = 0xD;
+        r.f04 = d;
+        r.arg = self;
+        r.callback = (void*)DrawTempoAgentRing;
+        QueueDeferredRequest(&r);
+    }
+}
 
 void LeaveTempoAgentState(TempoAgent* self, void* arg)
 {
