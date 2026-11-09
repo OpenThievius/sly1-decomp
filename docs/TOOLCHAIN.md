@@ -2151,12 +2151,21 @@ ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, 
   gives that order; the curve read inside the call, `anim->f9C->pos->vt->eval(anim->f9C->pos,
   ...)` (a virtual call on the curve, as the original's C++ would read it), leaves the load
   after the move: no conflict, $v1, and retail's delay slots.
-- Still open in the same function: global-alloc's ranking puts the animation (13 refs over 84
-  insns, 0.464) before the player it is read from (4 over 34, 0.235), and find_reg's pass 0
-  gives it $s0; retail's registers need the player (or the marker `to`, 6 over 39) first. No
-  plain source changes these counts: cse folds every way of naming the player into one
-  pseudo, and copies of the animation fold away (nonmatching/func_001C9DE0.cpp lists what is
-  ruled out).
+- The rest of the same function, matched 2026-11-09: global-alloc's ranking puts the animation
+  (13 refs over 84 insns, 0.464) before the player it is read from (4 over 34, 0.235), and
+  pass 0 of find_reg gives it $s0, the first saved register already in use. No naming of the
+  player or the animation changes those counts (cse folds them), but nothing needs to: the
+  animation also loses $s0 if $s0 is a *hard* conflict when it is placed. The chosen end marker
+  as a variable of its own, `AnimEvent* end = alt != 0 ? alt : to;` (jump.c still makes the
+  `movn`), is live only in the block of the two curve calls, crosses them, and so is
+  local-alloc's: it takes $s0 there, before global-alloc runs. The animation, live in that
+  block, then has $s0 in its hard-register conflicts and takes $s3; the player (not live there)
+  takes the free $s0; `to`, now 3 refs over 10 insns, ends in the copy `end = to`, ties to $s0
+  by its copy preference, and reload deletes the copy as `move s0,s0`.
+- The lever in general: where retail keeps a long-lived pseudo out of a saved register that
+  global-alloc's order would give it, look for a block-local variable crossing a call in that
+  pseudo's life (a value picked between two others, a result named once): local-alloc places
+  it first, in $s0 upward, and global-alloc's pseudos live across it must avoid that register.
 
 ### Call sites that cross-jumping merges still rank the allocation (func_001C1F20)
 

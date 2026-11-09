@@ -3242,6 +3242,7 @@ func_001C9A58	func_001CA750	match	rodata
 func_001C9AF8	func_001CA7F0	match	
 func_001C9CF8	func_001CA9F0	match	
 func_001C9D50	func_001CAA48	match	rodata
+func_001C9DE0	func_001CAAD8	match	rodata
 func_001CA460	func_001CB158	match	
 func_001CA468	func_001CB160	match	
 func_001CA5E0	func_001CB2D8	match	
