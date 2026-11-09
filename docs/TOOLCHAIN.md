@@ -956,6 +956,38 @@ rtlanal.c of GCC 2.95.3 and the `-dj` dumps (2026-11-08, func_00175170):
   ...` (case 4's own else, the case setting anim again afterwards) does it, removed only later
   by flow as a dead store. No form with one set keeps the branch.
 
+### An if/else of a constant: when jump.c hoists `x = 0` (func_00112698, func_00112968)
+
+Read from jump.c, local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-da` dumps
+(2026-11-08). AddScriptValues and SubtractScriptValues set the list's first node to 0 or to
+`args[1].node`; retail has `lw v0; lw v1; beqz v0 [move s1,zero]; lw s1,12(s0)`, `sq ra`
+before `sq s1` in the prologue, and the arguments in s0 and the node in s1.
+
+- **jump.c's two hoists.** `if (c) x = a; else x = b;` becomes `x = b; if (c) x = a;` when b
+  is a constant or cannot trap, and `if (c) { x = a; goto l; } x = b;` becomes `x = a; if
+  (!c) goto l; x = b;` when a can (both in jump_optimize, every jump pass, before and after
+  reload). Both need the arm that stays to be one insn directly after the conditional jump
+  and the other arm's first insn to set x: with `n = args[1].node` either order of the arms is
+  hoisted in the first jump pass, so `n = 0` sits in the first block, before the branch.
+- **What that costs in sched2.** The first block runs from the prologue through the call to
+  the constructor to the branch. `move s1,zero` there depends on the save of s1, so it issues
+  with the call, and the save of s1 (three dependents against ra's two) goes before ra's.
+  Retail's `move s1,zero` is not in that block: the hoist happened only in the jump pass after
+  sched2, which puts it directly before the branch, and reorg moves it into the delay slot.
+- **What blocks the hoist before reload.** An arm of two insns: `ScriptValue* m = &args[1];
+  n = m->node;` expands to `m = args + 8; n = m[4]`, whose first insn does not set n; combine
+  later makes it one load, and the jump pass after sched2 hoists `n = 0`.
+- **Which arm comes first decides the registers.** update_equiv_regs (local-alloc.c) takes
+  the sets of a pseudo in insn order: a set carrying a REG_EQUAL of a constant (CSE gives
+  `n = 0` one) makes it REG_EQUIV and doubles REG_LIVE_LENGTH, unless an earlier set without
+  one has already ruled the pseudo out. With `if (args[1].tag == 0) n = 0; else ...` the zero
+  comes first and n's life doubles (123 to about 250 insns), global-alloc's priority puts the
+  arguments' pointer first, and it takes s0 as retail's; with the arms the other way round n
+  takes s0. The script machine's other built-ins test `args[1].tag == 0` first too.
+- **The tag in the case.** With the if/else left as two blocks, CSE no longer follows a path
+  from the first read of `args[0].tag` into the switch's cases: the case reads the local
+  (`tag == 0x14`), or it reloads the tag.
+
 ## Alias classes in the schedule
 
 GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
