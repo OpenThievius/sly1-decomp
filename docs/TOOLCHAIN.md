@@ -3227,6 +3227,14 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
 - **Normalising in place.** An inline that normalises a vector in place,
   taking the fallback by reference, loads the fallback's address before the
   difference, as retail does.
+- **A fallback's address in the block before the test.** Where retail forms a
+  fallback vector's address (`lui; addiu`) among the length's VU0 code and
+  only its `lq` in the short arm, the source named the address first: `const
+  Vec02* fb = &g_unitXVector;` before the length, then `dir = *fb;` in the
+  arm. The pointer is a pseudo set where it is written, so its two insns stay
+  in the earlier block and sched1 puts the `lui` first; `dir =
+  g_unitXVector;` expands the address inside the arm (func_001DF700, as
+  func_0016D490 does with its `fb`).
 - **A vector's three floats in a loop.** Two pointers indexed by i (`cur[i]`,
   `vel[i]`) give retail's induction variables; separately incremented
   pointers do not.
