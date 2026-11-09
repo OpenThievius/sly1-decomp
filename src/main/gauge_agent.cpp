@@ -51,7 +51,7 @@ f32 D_00264A38 = 20.0f;
 extern f32 g_gameTime;
 
 void InitAgent(void*);
-void LoadAgent(void*);
+void LoadAgent(Agent* self, void* reader);
 void ResolveObjectLinks(void* self, s32 n, void* table);
 void StartAgent(void* self);
 void SetWorldActiveFollower(void* sub, void* self);
@@ -88,9 +88,9 @@ void InitGaugeAgent(GaugeAgent* self)
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
-void LoadGaugeAgent(GaugeAgent* self)
+void LoadGaugeAgent(GaugeAgent* self, void* reader)
 {
-    LoadAgent(self);
+    LoadAgent(self, reader);
     ResolveObjectLinks(self, 2, D_00264910);
 }
 
