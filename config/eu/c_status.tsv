@@ -903,6 +903,7 @@ func_00130F48	func_00131078	match
 func_00131000	func_00131130	match	
 func_001310F0	func_00131220	match	version-specific
 func_00131140	func_00131270	match	version-specific
+func_00131198	func_001312C8	match	version-specific
 func_001316E8	func_00131820	differs	
 func_00132500	func_00132698	match	version-specific
 func_00133B58	func_00133CF0	match	version-specific

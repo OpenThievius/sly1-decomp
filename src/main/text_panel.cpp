@@ -362,7 +362,7 @@ CurveSpan D_002612B0;
 CurveSpan D_002612E0;
 f32 D_00261310;
 
-void InitCurveSpan(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y);
+void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n);
 f32 EvalCurveSpan(const CurveSpan* s, s32 x);
 void InitTextPanel(T217D_440* self, s32 a1);
 void ClearTextPanel(T217D_440* self);
@@ -390,7 +390,7 @@ void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
 void ChooseTextPanelState(T217D_440* self);
 s32 EndTextPanelState(Owner_136FA8* self);
 
-void InitCurveSpan(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y)
+void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n)
 {
     f32 fn = (f32)n;
     f32 inv = 1.0f / fn;
@@ -451,7 +451,86 @@ void ClearTextPanel(T217D_440* self)
     self->f314 = 0.4f;
 }
 
-INCLUDE_ASM(func_00131198);
+void SetupScreenElementText(T217D_440* self);
+s32 IsFontLoaded(s32 id);
+Font* GetFontById(s32 id);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+// Returns its writer (retail sets v0 from it), as a constructor does.
+void* InitGifPacket(PacketWriter* gs);
+void UsePacketBufferMemory(PacketWriter* gs, s32 n, void* mem);
+void DetachPacketBufferCopy(PacketWriter* gs, void* a, s32 b, void* c, s32 d);
+f32 MeasureFontString(Font* font, const char* text);
+
+// Sets a text panel up: its two fonts, the widest compass point, and the GS packet of the two
+// curved bands drawn behind it.
+void SetupTextPanel(T217D_440* self)
+{
+    SetupScreenElementText(self);
+    ClearTextPanel(self);
+    f32 sy = 0.8f;
+    Font* small = self->font->Clone(0.7f, sy);
+    self->smallFont = small;
+    small->f30 = 1;
+    small->f38 = 0x3F001;
+    self->font = self->font->Clone(0.75f, sy);
+    if (IsFontLoaded(2) != 0) {
+        self->frame = (Font**)&D_00261148;
+        *self->frame = GetFontById(2);
+    }
+    D_00261310 = MeasureFontString(self->smallFont, D_00261128[0]);
+    for (u32 i = 1; i < 8; i++) {
+        D_00261310 = MeasureFontString(self->smallFont, D_00261128[i]) >? D_00261310;
+    }
+    self->state = -1;
+    self->child = 0;
+    SetTextPanelState(self, 0);
+    PushBackMemoryMark();
+    f32 step = 1.0f / 24.0f;
+    PacketWriter gs;
+    InitGifPacket(&gs);
+    UsePacketBufferMemory(&gs, 0x800, AllocateBackMemory(0x8000));
+    BeginGifTag(&gs, 0, 3, 0x1EE);
+    AddGifRegisterWrite(&gs, 0x47, 0x70000);
+    AddGifRegisterWrite(&gs, 0x42, 0x44);
+    PanelColor c = D_002610D0;
+    c.a = 0x60;
+    AddGifRgbaEntry(&gs, *(u32*)&c);
+    BeginGifTag(&gs, 0x44, 1, 4);
+    InitCurveSpan(&D_00261280, (const SpanHead*)D_002610A0, 0.171875f, 40.0f, 0x18);
+    InitCurveSpan(&D_002612B0, (const SpanHead*)D_002610B0, 0.171875f, -60.0f, 0x18);
+    InitCurveSpan(&D_002612E0, (const SpanHead*)D_002610C0, 0.2857143f, 8.0f, 0x18);
+    s32 i;
+    f32 t;
+    AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
+    AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7B45, 0x0FFFFFF0, 0);
+    for (t = step, i = 1; i < 24; i++) {
+        f32 u = t * 640.0f;
+        f32 y = EvalCurveSpan(&D_00261280, i);
+        t += step;
+        s32 x = (s32)((u + 1728.0f) * 16.0f);
+        AddGifXyzfEntry(&gs, x, 0x7900, 0x0FFFFFF0, 0);
+        AddGifXyzfEntry(&gs, x, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    }
+    AddGifXyzfEntry(&gs, 0x9400, 0x7900, 0x0FFFFFF0, 0);
+    AddGifXyzfEntry(&gs, 0x9400, 0x7B45, 0x0FFFFFF0, 0);
+    AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x8700, 0x0FFFFFF0, 0);
+    AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x80FA, 0x0FFFFFF0, 0);
+    t = 1.0f / 24.0f;
+    for (i = 1; i < 24; i++) {
+        f32 u = t * 640.0f;
+        f32 y = EvalCurveSpan(&D_002612B0, i);
+        t += step;
+        s32 x = (s32)((u + 1728.0f) * 16.0f);
+        AddGifXyzfEntry(&gs, x, 0x8700, 0x0FFFFFF0, 0);
+        AddGifXyzfEntry(&gs, x, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    }
+    AddGifXyzfEntry(&gs, 0x9400, 0x8700, 0x0FFFFFF0, 0);
+    AddGifXyzfEntry(&gs, 0x9400, 0x80FA, 0x0FFFFFF0, 0);
+    DetachPacketBufferCopy(&gs, &self->bands, 0, &self->bandsSize, 0x15);
+    PopBackMemoryMark();
+}
 
 
 
