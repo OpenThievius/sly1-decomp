@@ -3639,6 +3639,38 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     them one base), and the constants set before the FillMemory call (CSE
     and the scheduler give the same code). func_001F7BE8 is a libkernel
     function built by 2.9-ee-991111 and was not taken further.
+  - **What retail's sched1 order must have been (func_0018A510, 2026-11-09,
+    `-dS -dl -fsched-verbose-6`, alias.c read).** In sched2 the two stores
+    through a `%lo` address (the field at offset 0, `sw v1,%lo(cfg)(s2)`,
+    and the guard) are barriers for every store through s0, so retail's
+    sched1 put out the stores as A = {f4, f24, f44, f34}, then i0, then
+    B = {f8, i28, i48, i68}, then the guard, then C = {f50, f60, f64, f54}
+    (each group's inner order free). func_001D5FA8 has the same shape
+    without an i0: its guard also splits off {f50, f60, f54}, the last
+    stores of the constructor. Here, before reload, the constructor's
+    `this` is one pseudo set once from `(lo_sum hi cfg)`, and CSE gives that
+    set a REG_EQUAL of the symbol, so init_alias_analysis knows its value:
+    i0's `(lo_sum hi cfg)` (combine folds offset 0) and every `this+N` are
+    told apart, and nothing orders the stores. Probes (not plain C) that
+    take the pointer's value away show what each property does:
+    - pointer with no base at all (an empty asm on it): i0 and the guard
+      both conflict with every store, so A comes out right (all four
+      constants loaded first, 1.0 into 5.0's f2 after f4's store, retail's
+      f0-f3), but the guard is last;
+    - pointer with cfg as base but no known value (`this + off`, off from
+      an asm): i0 alone conflicts, A and the late loads come out as retail
+      has them (100 and 50 swap f0/f1), and after i0 the stores sort by
+      INSN_REG_WEIGHT, so the guard (two deaths) goes second, not after B;
+    - every field volatile, in retail's group order: one chain, the guard
+      last, and the first loads interleaved with the first stores.
+    So retail needs the stores before the guard chained (or otherwise
+    given priority) and the C stores free, with i0 a barrier after A; no
+    form tried gives that, and the plain forms all give `this` a known
+    value. Also ruled out: one variable reused for 5.0/1.0, 100/75 and
+    50/-100 (retail's register pairs; the anti-dependences pull 5.0's
+    store first and push 0.5 late), and a zeroing base class with
+    sub-records whose constructors set the colours (an empty base shifts
+    the fields).
 
 ## Constants in one very long block
 
