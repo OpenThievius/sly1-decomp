@@ -9,6 +9,12 @@
 // helper's slot after loading the element's table into a3; here the base takes a2, the vector
 // v1, and the slot is stored first. Writing the aim before the rates gives retail's base (the
 // aim's address, the rates at -0x10); through a pointer to the element the base is the element.
+// Mechanism (2026-11-09, worker w6-17ABE8; docs/TOOLCHAIN.md, "The Scalar slot against a
+// method-table load"): every difference is sched1's. The method load (lw 64 through the loaded
+// table, no known base) depends on FromFloats' slot store (neither MEM flag), so the store has
+// the table load's priority (7) and wins the tie on INSN_REG_WEIGHT and insn order. With the slot
+// a MEM_SCALAR_P store (a volatile u128 local, as an experiment only) the order and all
+// registers are retail's; only the delay slot differs. No plain form of a scalar slot is known.
 
 extern f32 g_gameClock[];
 extern const Vec02 D_00248D30;

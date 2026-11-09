@@ -1670,6 +1670,44 @@ A second function with func_001D87C8's blocker (2026-11-08, ApplyLinkConstraint,
   slots behaving as MEM_SCALAR_P: the original's weight was a scalar 128-bit object in memory,
   by a construct still to be found.
 
+### The Scalar slot against a method-table load (func_0017ABE8)
+
+SetModeColliderMode's mode 2 (`aim = FromFloats(0, 0, 2000); rates = D_00248D30;
+D_00270650.vt->m16(&D_00270650, 2)`) is the same wall, and all of its 20 differing words come
+from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/class.c with `-dS
+-fsched-verbose-6` dumps, 2026-11-09, still a near miss):
+
+- **What retail shows.** Retail stores the rates, the aim, loads the object's table (`lw a3,
+  -624(v1)`), then stores FromFloats' slot (`sq a2, 0(sp)`) and loads the method (`lw v0,
+  64(a3)`). In sched2 the table load depends on the slot store (a frame slot after reload against
+  a hard register of no known base), so retail's sched1 issued the table load first.
+- **Why ours cannot.** In sched1 the table load (insn 134) has no dependence on the slot store
+  (its base is CSE's `&aim`, a symbol, against the frame), but the method load (138, through the
+  loaded table, no base) does. The slot store therefore inherits the method load's priority:
+  both it and the table load are at 7 (cost 2 + 5). The tie goes to INSN_REG_WEIGHT, where the
+  table load is +1 (it sets a register, and `&aim` dies at the `this` argument after it) and the
+  store 0; even at equal weights the store comes first in insn order. Nothing about luids or
+  weights can reverse it: any order of statements leaves the store's priority equal to the
+  load's, because both reach the call through insn 138.
+- **The experiment.** The slot written as a `volatile u128` local of the helper (only to get a
+  MEM_SCALAR_P frame store: fixed_scalar_and_varying_struct_p then separates it from the method
+  load, mem/s through a varying pointer) gives retail's instruction order and every register of
+  the function; only the delay slot differs (reorg does not move the `li a1, 2` past a volatile
+  store). So the whole difference is that dependence.
+- **Ruled out besides the forms of func_001C75B0.** The method load cannot be RTX_UNCHANGING_P:
+  expand_expr sets that for an INDIRECT_REF only with TREE_READONLY and TREE_STATIC, and g++
+  2.95's virtual calls (class.c, build_vtbl_ref) index the vptr through a plain indirect
+  reference, so a real C++ virtual call is no different from the method table struct. Alias sets
+  do not apply (`-fstrict-aliasing` is off). A u128 or a one-u128 struct is passed in a GPR (no
+  invisible reference, so integrate.c's scalar stack copy of an argument is not reached). A
+  scalar u128 local whose address only Vu0::Q takes is folded back into a register by
+  purge_addressof (`t = r; return Q(t);` and `Q(t) = r; return t;` both lose the slot store).
+  A reload spill is ruled out too: its store would follow the asm, and sched2 keeps the table
+  load behind it.
+- **What this says about the helpers.** Three near misses (func_001D87C8, func_001C75B0 and this
+  one) would match with a scalar slot, so retail's Scalar and FromFloats slots were probably
+  MEM_SCALAR_P: the original helpers kept a scalar in memory, in some form not found yet.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
