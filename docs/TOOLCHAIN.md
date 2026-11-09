@@ -861,6 +861,30 @@ Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c w
   that order local-alloc ranks the Scalar first (vf1); retail's vf2 for it needs the qmtc2
   first (emulated with lalloc.py on the `.lreg`).
 
+### A loop bound from the copy, a call's result stored first (func_00142B78)
+
+Three statement shapes closed func_00142B78 (src/main/collider_span.cpp) from 93.7% to EXACT,
+each read off the diff's registers (2026-11-09):
+
+- **The bound computed from the loop's copy.** Retail's `move t1,s1; mult a1,v0,s2; addu
+  v1,a1,t1` builds the end pointer from the loop variable's register (t1), not from the
+  segment pointer that lived across the call (s1). Written `ColliderSpan* sp = seg;
+  ColliderSpan* segEnd = sp + got; for (; sp < segEnd; sp++)`, the segment pointer dies at the
+  copy; written `for (sp = seg; sp < seg + got; sp++)` it lives to the bound, which raised its
+  global-alloc priority above the inner loop's link pointer: the two swapped s0 and s1 (and
+  every reference to them in the inner loop differed). An index loop (`seg[j]`, j < got) is
+  not it: loop.c turns it into a counted loop with no top compare.
+- **A pointer initialised with a sum keeps the source order** (see "The operand order of an
+  address sum"): retail's `addu a0,a0,v0` (base first, into the base's register) is
+  `SpanOther* other = &set->others[l->other]; if (other->flags & 0x100)`; the member read
+  straight off the element (`set->others[l->other].flags`) puts the index first.
+- **A call's result stored to an address-taken local, then copied.** Retail stores the
+  allocation into the record end whose address the next call takes (`sw v0,32(sp)`) and copies
+  it into the callee-saved base after the next load (`lw a0,8(s0); move s7,v0`). `recs =
+  Alloc(); end = recs;` stores the base's register (`move s7,v0; ...; sw s7`), which the
+  store then waits for; `end = Alloc(); recs = end;` stores the call's value and CSE replaces
+  the read of `end` with that same value, so the copy to recs is free to move.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
