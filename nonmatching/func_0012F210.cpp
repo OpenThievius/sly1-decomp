@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1155/1180 (97.9%), checked 2026-11-08
+// BYTES 1167/1180 (98.9%), checked 2026-11-08
 // NEAR (src/main/placed_object.cpp, where it is INCLUDE_ASM; 2026-11-08, night-untouched): the
 // code is retail's but for two things, 17 lines. (1) The eval calls at t (the first and the
 // bracketing loop's) set a2 before f12, retail f12 first; the third and fourth match. (2) The

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1618/1660 (97.5%), checked 2026-11-08
+// BYTES 1635/1660 (98.5%), checked 2026-11-08
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
@@ -10,20 +10,31 @@
 #include "animation.h"
 #include "attachment.h"
 #include "anim_curve.h"
-// NEAR (2026-11-08, night-large4): every case is retail's code but for two registers in kind
-// 0x13: retail gives the player (msg->source) s0 and its animation s3, here the other way round,
-// which also moves the 0x1AC markers' registers (retail s2, s4, s0 and v1 for the alternative;
-// here s3, s4, s2 and a1). Declaring the animation first, at function level, or reading the
-// player through msg->source or self->f7E0 does not swap them. Also retail sets $f13 before
-// a2 in 0x1AC's first curve call. Levers that gave the rest: the -1.0 weight as a u128 stored to
-// its slot after the rotation (as func_001C9AF8), the colliders' ternaries with the sender's
-// first, the item keeper's test as if/else with state = 2 in the else.
-// Found (night-close10): global.c's priority picks the order; ours allocates the animation
-// (13 refs over 84 insns) before the player (4 refs over 34 insns), retail the player first,
-// so retail's player had more references or the animation a longer life in its RTL. Loading the
-// animation after the test (or no animation variable) moves the load out of the bne's delay
-// slot (8 bytes longer); f32 zero set earlier, the curve's time in a local, a literal 0.0f, the
-// test written self->f7E0 != player or through msg->source again change nothing.
+// NEAR (2026-11-08, night-large4, w4-1C9DE0): every instruction is retail's but for the
+// registers of kind 0x13's player and animation and what follows from them: retail gives the
+// player (msg->source) s0 and its animation s3, here the other way round, which moves the
+// 0x1AC markers' registers (from and to: retail s2 and s0, here s3 and s2).
+// Mechanism: global.c's allocno_compare orders by floor_log2(refs) * refs / live length, the
+// lengths sched1's update_reg_usage leaves. The animation (13 refs over 84 insns, 0.464) goes
+// before the player (4 over 34, 0.235) and the 0x1AC `to` (6 over 39, 0.308), and pass 0 of
+// find_reg gives it s0, the first saved register already in use (local-alloc put `kind` there).
+// Retail's order needs the player or `to` before the animation: the player with 8 refs or a
+// life of at most 17 insns, `to` with 8 refs, or the animation with at most 7 refs or a life of
+// 166 insns. Pinning the animation to s3 (a diagnostic only) gives retail's registers here.
+// Ruled out: s0 in regs_someone_prefers (no pseudo relates to s0 but `kind`, in block 0); the
+// player through msg->source again, read after the test, declared after the animation, or as
+// self->f7E0 (cse folds them all into one pseudo: same counts); an if around the inner switch;
+// a copy of the animation in 0x1AC, or 0x1AC as an inline helper (cse/cprop fold the copy, the
+// helper changes code); the 0x138 test through player->anim (code changes).
+// Levers that gave the rest: the -1.0 weight as a u128 stored to its slot after the rotation
+// (as func_001C9AF8), the colliders' ternaries with the sender's first, the item keeper's test
+// as if/else with state = 2 in the else; the curve's eval with its floats after the owner
+// (include/anim_curve.h: the first call in 0x1AC then sets $f13 before $a2, a LUID tie in
+// sched1); and the curve read inside each eval call in 0x1AC instead of a local `c`, which
+// keeps sched1 from loading anim->f9C before the alternative marker's conditional move: the
+// load's pseudo then no longer conflicts with the alternative, whose regs_someone_prefers lost
+// $v1, so the alternative is in $v1 as retail's and sched2 fills the fourth call's slot with
+// li a1 (the a1 output dependence gone).
 #define F(T, o) (*(T*)((u8*)self + (o)))
 extern f32 g_gameClock[];
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -115,7 +126,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 v;
             Vec02 w;
             PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, msg->time, player->speed, 0, &v);
+            c->vt->eval(c, self, msg->time, player->speed, 0, 0, &v);
             u128 s = Vu0::FromFloat(-1.0f);
             Vu0::Q(F(Vec02, 0x640)) = Vu0::MulX(Vu0::Q(v), s);
             Vu0::Q(v) = Vu0::Rotate(F(Mat02, 0x660), Vu0::Q(v));
@@ -151,10 +162,8 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 p0;
             Vec02 p1;
             f32 zero = 0.0f;
-            PositionCurve* c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, from->a0.f, zero, &p0, 0);
-            c = anim->f9C->pos;
-            c->vt->eval(c, self, 0, to->a0.f, zero, &p1, 0);
+            anim->f9C->pos->vt->eval(anim->f9C->pos, self, from->a0.f, zero, 0, &p0, 0);
+            anim->f9C->pos->vt->eval(anim->f9C->pos, self, to->a0.f, zero, 0, &p1, 0);
             F(f32, 0xB94) = p1.x - p0.x;
             F(f32, 0xB98) = (to->a0.f - from->a0.f) / *(f32*)&anim->props6C[0x10];
             break;
