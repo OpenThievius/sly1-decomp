@@ -2006,6 +2006,26 @@ from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/cl
   the same kind later in the function (a length, a fraction), and our copy takes $f1 or $f0
   by preference, look for one variable the original reused for both.
 
+### A value used after a branch is global-alloc's; one used up before it ties to $f0 (func_001733B8)
+
+- **A call's result in $f0.** local-alloc's combine_regs ties a block-local pseudo to the
+  hard register an insn's first input dies in, so `len = call() - 30` keeps the call's $f0
+  only if len dies in the block. func_001733B8 (the push object's edge force) read `len`
+  again in the `else if (len - reach < at)` arm: len was a global pseudo, local-alloc gave
+  the block's short temporaries (`len - 30`, the span) $f0, $f1, $f2 first, and those hard
+  registers entered len's conflicts, so global-alloc put it in $f4 and the whole tail's
+  floats shifted (retail: len $f0, the player's +0x23A4 $f4). Naming the arm's bound before
+  the branch, `f32 highEdge = len - reach;`, ends len in the block: len ties to $f0, the bound
+  (live into the arm) takes $f0 after it in global-alloc, and reorg fills the branch's delay
+  slot with it unannulled (retail's `bc1f` + `sub.s $f0,$f0,$f2` rather than `bc1fl`).
+- **One clamp variable for two arms.** The two arms clamp a fraction and square it
+  (`-w * w * 150`, `w * w * 150`). With `w` declared in each arm, the second arm's w took
+  the fraction's $f0 by preference (no conflict: its 150.0 is loaded after `w * w`), which
+  removes a `mov.s` and reshapes the clamp's branches. One `f32 w;` before the if, assigned in
+  both arms, is one pseudo carrying the first arm's conflicts ($f0 for `-w`, $f1 for 150.0),
+  so it takes $f2 in both, as retail. Same rule as func_0016E738 above: a value of the same
+  kind in the same register in two arms is one variable.
+
 ### A float parameter passed on fills a load's delay (func_00161B10)
 
 - SelectVertexBatchLights opens with `if (*self->fF8 != 0)`: a pointer load, a byte load
