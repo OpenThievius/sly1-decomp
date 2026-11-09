@@ -1332,7 +1332,139 @@ void AddTriggerZoneRotation(TriggerZone* self, void* a1, Entry28* e)
     self->count7E0++;
 }
 
-INCLUDE_ASM(func_0013F290);
+void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q);
+
+struct ScopedListFrame {
+    void* list;
+    void* cursor;
+    s32 next_off;
+    ScopedListFrame* prev;
+    ScopedListFrame(List01* l)
+    {
+        list = l;
+        cursor = l;
+        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        next_off = l->offset;
+        g_activeListFrames = (ListFrame*)this;
+        prev = p;
+    }
+    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+};
+
+void StartPlacedObject(TriggerZone* self);
+void StartZoneRecord(Zone28* self);
+void SetTriggerZoneMode(TriggerZone* self, s32 v);
+s32 IsObjectOfKind(void* node, s32 kind);
+void TransformPointBetweenFrames(void* to, void* from, void* in, void* out);
+void TransformRotationBetweenFrames(void* to, void* from, void* in, void* out);
+void TransformDirectionBetweenFrames(void* to, void* from, void* in, void* out);
+void AddTriggerZoneRotation(TriggerZone* self, void* a1, Mat02* m);
+void ConstrainColliderVector(void* self, Vec02* limit, Vec02* in, Vec02* out, s32 a);
+void CopyMemory(void* dst, void* src, s32 n);
+extern const Vec02 g_unitXVector;
+extern const Vec02 g_unitYVector;
+extern const Vec02 g_unitZVector;
+
+static inline Vec02* RowOf(Mat02* m, s32 i)
+{
+    return &m->r[i];
+}
+
+void func_0013F290(TriggerZone* self)
+{
+    ScopedListFrame frame(&self->children);
+    Vec02 v;
+    StartPlacedObject(self);
+    StartZoneRecord(&self->zone);
+    SetTriggerZoneMode(self, 0);
+    s32 state = self->state;
+    void* head = *(void**)frame.cursor;
+    frame.cursor = (void*)((s32)head + frame.next_off);
+    PlacedObject* node = (PlacedObject*)head;
+    if (node != 0) {
+        do {
+            if (state == 0 && IsObjectOfKind(node, 0x7E)) {
+                TransformPointBetweenFrames(self, self->parent, (u8*)node + 0x40, &v);
+                AddTriggerZoneQuad(self, node, (Quad28*)&v);
+            } else if (state == 1 && IsObjectOfKind(node, 0x73) && !IsObjectOfKind(node, 0x75)) {
+                Mat02 m;
+                TransformRotationBetweenFrames(self, self->parent, (u8*)node + 0x50, &m);
+                AddTriggerZoneRotation(self, node, &m);
+                node->desc->m03(node);
+            }
+            if (IsObjectOfKind(node, 0x76)) {
+                self->id880 = (s32)node;
+            }
+            void* next = *(void**)frame.cursor;
+            frame.cursor = (void*)((s32)next + frame.next_off);
+            node = (PlacedObject*)next;
+        } while (node != 0);
+    }
+    switch (state) {
+    case 0: {
+        s32 i;
+        for (i = 0; i < self->f7B4; i++) {
+            Vu0::Q(v) = Vu0::Sub(Vu0::Q(self->quads[i]), Vu0::Q(self->pos));
+            ConstrainColliderVector(self, &self->v440, &v, &v, 0);
+            Vu0::Q(self->quads[i]) = Vu0::Add(Vu0::Q(self->pos), Vu0::Q(v));
+        }
+        u128 d = Vu0::Sub(Vu0::Q(self->quads[self->f7B4 - 1]), Vu0::Q(self->quads[0]));
+        Vu0::Q(self->v860) = d;
+        Vu0::Q(self->v860) = Vu0::DivX(d, Vu0::Length(d));
+        Vu0::Q(self->v870) = Vu0::MulX(Vu0::Q(self->v860), Vu0::Scalar(-1.0f));
+        break;
+    }
+    case 1: {
+        Mat02 rows;
+        Vec02 a;
+        Vec02 b;
+        Vec02 dir;
+        s32 k = self->count7E0 - 1;
+        TransformDirectionBetweenFrames(self->parent, self, &self->v460, &dir);
+        Vec02* side;
+        Vec02* last;
+        const Vec02* up;
+        if (0.9f < dir.x) {
+            rows.r[0] = ((Mat02*)self->entries)->r[2];
+            side = &((Mat02*)self->entries)->r[1];
+            up = &g_unitYVector;
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 1);
+            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[2];
+        } else if (0.9f < dir.y) {
+            rows.r[0] = ((Mat02*)self->entries)->r[0];
+            side = &((Mat02*)self->entries)->r[2];
+            up = &g_unitZVector;
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 2);
+            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[0];
+        } else {
+            rows.r[0] = ((Mat02*)self->entries)->r[1];
+            side = &((Mat02*)self->entries)->r[0];
+            up = &g_unitXVector;
+            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 0);
+            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[1];
+        }
+        if (self->parent != 0) {
+            rows.r[2] = self->pos;
+        } else {
+            rows.r[2] = self->v140;
+        }
+        CopyMemory(&self->v860, &rows, 0x20);
+        Vu0::Q(self->v850) = Vu0::MulX(Vu0::Q(*up), Vu0::Scalar(100.0f));
+        Vu0::Q(a) = Vu0::MulAddX(Vu0::Q(rows.r[2]), Vu0::Q(*side), Vu0::Scalar(100.0f));
+        Vu0::Q(b) = Vu0::MulAddX(Vu0::Q(rows.r[2]), Vu0::Q(*last), Vu0::Scalar(100.0f));
+
+        Vu0::Q(v) = Vu0::Sub(Vu0::Q(b), Vu0::Q(a));
+        if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v870), Vu0::Q(v)))) {
+            Vu0::Q(self->v870) = Vu0::MulX(Vu0::Q(self->v870), Vu0::Scalar(-1.0f));
+        } else {
+            Vu0::Q(self->v860) = Vu0::MulX(Vu0::Q(self->v860), Vu0::Scalar(-1.0f));
+        }
+        break;
+    }
+    case 2:
+        break;
+    }
+}
 
 void CopyCollider(Collider* self);
 
