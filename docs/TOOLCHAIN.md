@@ -1747,6 +1747,33 @@ Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps 
   and the result in turn, which supports the reading that the original's matrix helpers
   returned by value with named return values.
 
+### A store after the call makes the jump every insn's dependent (func_0017B8C0)
+
+Found from the `-dS -dR -fsched-verbose-6` dumps (2026-11-09). SetCountdownState's state-1
+block sets eight fields of g_gaugeBarElement, then calls SetWorldActiveFollower. Two separate
+things decided its order:
+
+- **sched1: the stores by weight, then source order.** All eight stores are ready in the same
+  cycle with one priority, so sched1 takes first those that kill a register (the -1.0, the 16,
+  the 1.0, the 4's last store, the base pointer's last store: weight -1, -2 for both) in source
+  order, then the rest in source order; sched2 keeps that order (LUID). Retail's
+  27C, 270, 268, 278, 260, 26C, 264, 274 is the source order 260, 26C, 264, 270, 268, 278, 274,
+  27C: `bar->f26C = bar->f260 = 4; bar->f270 = bar->f264 = 4;` (a chained assignment stores the
+  inner field first) and changedAt (-1.0) last, the only order of the eight that a
+  weights-then-LUID sort turns into retail's.
+- **sched2: what follows the call.** With `self->mode = state;` in each case, the state-1 block
+  ends `jal; sw s1,0x550(s0); b`: the block's jump then depends on every insn, so each mtc1 of a
+  constant has three dependents (its store, the call through the call-used $f register, the
+  jump) and the address's `lui` two (the addiu, the jump). On one priority, sched2 issues the
+  1.0's mtc1 before the `lui`, whatever sched1 left. Written once after the switch, the block
+  ends `jal; b`: the call collects those dependences instead, both have two, and the LUID tie
+  keeps sched1's `lui` first, as retail. The store then sits in the join, where its `lui` of
+  the clock would go first; the clock read as `g_gameClock[1]` (MEM_IN_STRUCT_P, see
+  func_001CDB70) waits for the pointer store `self->mode = state`, so the store leads the join,
+  and reorg's delay slots (`b tail; sw s1` stolen from the join) give retail's per-case look.
+  Spot it: a constant's mtc1 placed before an address `lui` that retail issues first, in a block
+  that ends with a call and a store after it.
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
