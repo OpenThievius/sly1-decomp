@@ -1,193 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 9836/9860 (99.8%), checked 2026-11-08
-// NEAR: python3 tools/check.py nonmatching/func_00175170.cpp func_00175170 (2026-11-08, worker mech-175170): SetPlayerState, 2,465 instructions against retail's 2,465, 2,463 align equal; the three switches, their eleven jump tables, every case's calls, the frame, the saved registers and the four spilled locals (0x74 flag, 0x78 layers, 0x7C walker id, 0x80 skip) are retail's.
-// Still differs (2026-11-08): order only. The prologue spills flag (sw v0,116(sp)) before speed's 1.0 is set where retail sets it after (sched2 takes the two by their order out of sched1, where flag's li and speed's float constant share a cycle with start's; no order of the locals' declarations gives retail's); state 13 stores 0x538 and 0x3CC before 0x273C where retail stores 0x273C first (the four stores are ready together with equal priority and register weight, so LUID order decides; no statement order tried gives it).
-// Notes: each case's statements were ordered with build/swarm/large-175170/perm.py (every order compiled and scored); the walker took $fp only once its `walker = 0` came after the other locals' initialisers (global-alloc priority). Mechanisms found 2026-11-08 (docs/TOOLCHAIN.md, "Conditional moves" and "Alias classes in the schedule"): sub-state 9's lone `if (...) skip = 1;` is turned into a conditional move by jump.c (movsicc) unless the if has a second statement, so it keeps case 4's dead `else anim = ...` (flow deletes it later); vectors stored as a Vu0::Vec through AsVec_175170 are a structure's stores, which alias.c lets the scheduler move global scalar loads across (sub-states 10/11, state 6/4); 55's ToFloatMoved; 37/38's `f638 = f630 =` and D_002639B8 read as a scalar global (`extern s32`: player.cpp's definition must become a scalar s32 and a second word when this lands); 6/5's `layers = 1` after the last call; 7's track shape loaded before the turn kind.
-#include "common.h"
-#include "globals.h"
-#include "switched_collider.h"
-#include "base_object.h"
-#include "placed_object.h"
-#include "collider.h"
-#include "screen_element.h"
-#include "camera.h"
-#include "animation.h"
-#include "vu0.h"
-
-extern f32 g_gameTime[];
-extern Player* g_player;
-extern f32 D_00262E14;
-extern f32 D_00262E18;
-extern f32 D_00262E1C;
-extern f32 D_00262E20;
-extern f32 D_00262E24;
-extern f32 D_00262E2C;
-extern f32 D_00262E30;
-extern f32 D_00263970[4];
-extern f32 D_00263980[4];
-extern f32 D_00263990;
-extern f32 D_00263994;
-extern f32 D_00263998;
-extern f32 D_0026399C;
-extern f32 D_002639A0[4];
-extern f32 D_002639B0[2];
-struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
-extern s32 D_002639B8;
-extern f32 g_unitRange[];
-
-void func_001C61E0(void* self, s32 arg);
-void func_001C4D60(Player* self, void* a1, s32 zero);
-void SetPlayerPartLayers(Player* self, s32 flags);
-s32 FindStateEntryIndex(void* p, s32 n);
-f32 ArctangentOfRatio(f32 a, f32 b);
-s32 IsObjectAttached(void* p);
-void ResetPlayerOnOffObject(Player* self);
-void ReleaseFarPlayerLinks(Player* self);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
-f32 GetAnimationMarkerTime(Animation* anim, s32 key);
-void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
-
-#include "fpu.h"
-#include "attachment.h"
-#include "on_off_object.h"
-
-void CreateAnimationPlayer(void* anim, void* owner, s32 count, void* args, s32 flag, void* out, f32 start, f32 speed);
-void StopAnimationPlayer(void* p);
-s32 IsObjectOfKind(void* node, s32 kind);
-void InitContactPairFlags(void* world, void* obj);
-void PushCameraController(void* camera, s32 kind, void* sounds, void* owner, s32 a4);
-void RemoveCameraControllers(void* camera, s32 mask, s32 kind, void* sounds, void* owner, s32 a5);
-void RequestCameraSnap(Camera* camera, s32 mode);
-void StartCameraSounds(void* sounds);
-void SendEmptyMessage(void* x);
-s32 MaskWorldBitsBySave(void);
-void SetPooledObjectPlayerHold(void* obj, s32 hold);
-void SelectPlayerStateAnimation(Player* self);
-void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void func_0017FC48(Player* self, Vec02* out);
-void func_0017FCC8(Player* self, Vec02* out);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void ActivateSwitchedCollider(void* obj);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void DestroyStateWalker(void* h);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-void AddColliderAttachment(Collider* o, Attach03* node);
-void RemoveColliderAttachment(Collider* o, Attach03* node);
-void SetColliderTreeContactsDropped(void* self, s32 dropped);
-void* PushSoundLevel(s32 level);
-void ReleaseSoundLevel(void* p);
-void StartSoundEffect(s32 sound, void* a1, void* obj, void* pos, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
-void ResetTrailRing(void* sub);
-void SetTurningColliderLinkFlag(void* self, s32 a1);
-void TurnColliderTowardHeading(Player* self);
-void TurnPlayerToClass75AheadMask8(Player* self);
-void TurnPlayerToClass75AheadMask4(Player* self);
-void PlacePlayerOnLinkedObject(Player* self);
-void SetFlaggedLinkContactMask(Player* self, void* obj, s32 on);
-void GetLinkedObjectHeading(Player* self, f32* out);
-void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB);
-s32 HasNoActiveObject89(Player* self);
-void TakeCountedColliderTouch(void* obj, Player* a, s32 b);
-Attach03* TakeAttachRecord(void* world);
-void ReleaseAttachRecords(void* owner, Attach03* list);
-void PopActiveSequenceElement(void* x);
-void SetOnOffObjectForcedState(void* p, s32 n);
-void PushStackElement(void* a, void* b);
-void PopStackElement(void* p);
-f32 WrapAngle(f32 a);
-void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
-void* FillMemory(void* dst, s32 value, s32 size);
-
-extern s32 D_00270454;
-extern f32 D_00274F00;
-extern f32 D_00274F04;
-extern f32 D_00274F08;
-extern f32 D_00274F14;
-extern u8 g_elementStack[];
-
-// The shape a track object (+0x2208, +0x23BC) holds at +0x34: slot 1 the position and direction
-// at a length, slot 2 the position.
-struct TrackShape_175170;
-struct TrackShapeDesc_175170 {
-    void* m0;
-    void (*m1)(TrackShape_175170* self, f32 t, Vec02* pos, Vec02* dir);    // 0x04
-    void (*m2)(TrackShape_175170* self, f32 t, Vec02* pos, s32 a);         // 0x08
+// PAL: the caption box's child sits at 0x5B0 (not 0x324).
+struct CaptionBox_175170_eu {
+    u8 pad000[0x5B0];
+    void* child;            // 0x5B0
 };
-struct TrackShape_175170 {
-    TrackShapeDesc_175170* desc;
-    u8 pad04[4];
-    s32 looped;             // 0x08
-    s32 count;              // 0x0C
-    f32* start;             // 0x10
-    f32* lengths;           // 0x14
-};
-
-// An animation argument CreateAnimationPlayer takes: the held object as argument 0x61.
-struct AnimArg_175170 {
-    s32 id;
-    void* value;
-};
-
-// The animation player of the player's state, or its state walker, stopped.
-static inline void StopPlayerAnimation(Player* self)
-{
-    if (self->watched2230 != 0) {
-        StopAnimationPlayer(self->watched2230);
-        self->watched2230 = 0;
-    } else if (self->f2234 != 0) {
-        DestroyStateWalker(self->f2234);
-        self->f2234 = 0;
-    }
-}
-
-template <class T> static inline Vu0::Vec& AsVec_175170(T& v) { return *(Vu0::Vec*)&v; }
-
-// v made unit length, or fallback when shorter than 0.0001, the fallback in the first arm
-// (as player_path.cpp's).
-static inline Vu0::Vec NormalizeOrElse_175170(Vu0::Vec v, Vu0::Vec fallback)
-{
-    u128 len = Vu0::Length(v.q);
-    Vu0::Vec r;
-    if (Vu0::ToFloatMoved(len) < 0.0001f) {
-        r = fallback;
-    } else {
-        r.q = Vu0::DivX(v.q, len);
-    }
-    return r;
-}
-
-// v held between lo and hi.
-static inline f32 Clamp_175170(f32 v, f32 lo, f32 hi)
-{
-    f32 r;
-    if (v < lo) {
-        r = lo;
-    } else if (hi < v) {
-        r = hi;
-    } else {
-        r = v;
-    }
-    return r;
-}
-
-// v made unit length in place, or set to fallback when shorter than 0.0001; its length.
-static inline Vu0::Vec NormalizeInPlace_175170(Vec02& v, const Vec02& fallback)
-{
-    Vu0::Vec q = Vu0::Vec::Of(v);
-    Vu0::Vec len = Vu0::Length(q);
-    if (Vu0::ToFloat(len) < 0.0001f) {
-        v = fallback;
-    } else {
-        Vu0::Set(v, Vu0::DivX(q, len).q);
-    }
-    return len;
-}
-
-#define PS(T, o) (*(T*)((u8*)self + (o)))
-#define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
 void SetPlayerState(Player* self, s32 state, s32 sub)
 {
@@ -211,7 +27,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 2: {
             self->penalizedTargetId = 0;
             if (state != 3 && state != 7) {
-                StartSoundEffect(0x49, 0, self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x49, 0, (s32)self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
             }
             self->f224C = -1;
             if (self->f223C == 0 && state != 7 && state != 3) {
@@ -321,7 +137,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4E, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x4E, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 SetPooledObjectPlayerHold(self->heldObject, 0);
                 break;
             case 5:
@@ -629,7 +445,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4D, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x4D, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 loud = 1;
                 SetPooledObjectPlayerHold(self->heldObject, 1);
                 break;
@@ -890,7 +706,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f2274 = now;
             self->f226C = D_00262E14 * Fpu::Sqrt(self->f700);
             self->f690 = 0;
-            StartSoundEffect(0x4F, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x4F, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             ComputePlayerJumpVelocity(self, &v);
             switch (self->f224C) {
             case 1:
@@ -1029,7 +845,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1020);
             }
             Vu0::Q(self->v640) = Vu0::Zero();
-            if (self->f2B70 != 0 && IsObjectOfKind(self->f2B70, 0x70)) {
+            if (self->f2B70 != 0 && IsObjectOfKind((BaseObject*)self->f2B70, 0x70)) {
                 self->f638 = ArctangentOfRatio(self->v150.y, self->v150.x);
                 TurnColliderTowardHeading(self);
             }
@@ -1245,7 +1061,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetVolumeChannelFactor(5, 1, dim);
             StartCameraSounds((u8*)g_camera + 0x460);
             RequestCameraSnap(g_camera, 0);
-            g_typedTextCaptionBox.child = self->f2BD0;
+            ((CaptionBox_175170_eu*)&g_typedTextCaptionBox)->child = self->f2BD0;
             self->f2BD0 = 0;
             PushStackElement(g_elementStack, &g_typedTextCaptionBox);
             break;
@@ -1268,7 +1084,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 } else {
                     f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(vel, vel)));
                     f32 k = D_002639A0[0] + len * (D_002639A0[1] + len * D_002639A0[2]);
-                    f32* range = g_unitRange;
+                    f32* range = (f32*)&g_unitRange;
                     f32 lo = range[0];
                     f32 hi = range[1];
                     f32 r;
@@ -1410,6 +1226,3 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
     }
 }
-
-#undef AT
-#undef PS

@@ -796,6 +796,15 @@ order (2026-11-08, func_00175170):
   mtc1 a second insn, so its chain to a division is one insn longer than a field's lwc1 and
   sched2 issues it first; ToFloatMoved's mtc1 alone leaves the qmfc2 to the compiler and the load
   goes first, as in sub-state 55 (`ToFloatMoved(len) / self->radius3CC`).
+- **A spill store follows its set; the set's place is sched1's.** Reload puts a spilled local's
+  store right after the insn that sets it, and sched2 breaks ties by that order, so the prologue's
+  order of a spilled int's store and a float's constant is sched1's order of their sets. sched1
+  issues one memory-unit insn (a float constant) and alu insns two to a cycle by declaration
+  order, so which float constant shares a cycle with which integer follows the order the locals
+  are declared in; the spilled locals' slots follow their declaration order too. SetPlayerState's
+  `sound, start, anim, speed, flag` (start and anim taking the cycle before) gives retail's.
+- **A structure's member store, named.** State 13's `f273C = hook` as a Player member (the field
+  named where the struct had padding) rather than a byte-offset store let sched1 issue it first.
 
 ## Shapes of large functions
 
