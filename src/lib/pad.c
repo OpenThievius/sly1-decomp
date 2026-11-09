@@ -11,11 +11,12 @@
 #include "asm_func.h"
 #include "system.h"
 
-/* A port's slot: the buffer of its two frames, its DMA words, whether it is open. */
+/* A port's slot: the buffer of its two frames, its DMA words and the IOP's address they are
+ * sent to (f08, from the open request's reply), whether it is open. */
 typedef struct PadSlot {
     u8* buffer;
     u32* dma;
-    s32 f08;
+    u32* f08;
     s32 f0C;
     s32 open;
     s32 f14;
@@ -55,8 +56,8 @@ typedef struct PadRequest {
     s32 port;
     s32 slot;
     s32 result;
-    s32 arg10;
-    s32 arg14;
+    u8* arg10;
+    u32* arg14;
 } PadRequest;
 
 typedef struct PadActRequest {
@@ -164,11 +165,49 @@ s32 func_00204228(s32 mode)
     return ((PadRequest*)g_padRequest)->result;
 }
 
-INCLUDE_ASM(func_002042C8);
+s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
+{
+    PadRequest* request;
+    PadFrame* frame;
+    u32* dma;
+    s32 i;
 
-/* The messages of func_002042C8, defined here while it is assembly. */
-const char D_0024F7D0[] = "libpad: buffer addr is not 64 byte align. %08x\n";
-const char D_0024F800[] = "libpad: pad port is already open [%d][%d]\n";
+    if ((u32)buffer & 0x3F) {
+        if (D_0027AE84 != 0)
+            PrintFormatted("libpad: buffer addr is not 64 byte align. %08x\n", buffer);
+        return 0;
+    }
+    if (g_padSlots[port][slot].open == 1) {
+        if (D_0027AE84 != 0)
+            PrintFormatted("libpad: pad port is already open [%d][%d]\n", port, slot);
+        return 0;
+    }
+    frame = (PadFrame*)buffer;
+    for (i = 0; i < 2; i++) {
+        frame->count = 0;
+        frame->state = 5;
+        frame->mode = 2;
+        frame->f67 = 0;
+        FillMemory(frame, 0xFF, 0x20);
+        frame->size = 0;
+        frame++;
+    }
+    request = (PadRequest*)g_padRequest;
+    request->command = 1;
+    request->port = port;
+    request->slot = slot;
+    request->arg10 = buffer;
+    if (CallRemoteService(g_padClients, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+        return 0;
+    dma = D_0062ABC0[port][slot];
+    g_padSlots[port][slot].open = 1;
+    g_padSlots[port][slot].f08 = request->arg14;
+    g_padSlots[port][slot].buffer = buffer;
+    g_padSlots[port][slot].dma = dma;
+    dma[0] = 0;
+    g_padSlots[port][slot].f0C = 0;
+    return request->result;
+}
 
 PadFrame* GetNewerPadFrame(s32 port, s32 slot)
 {

@@ -2527,6 +2527,35 @@ and in the else arm is one pseudo across all three lives, which global-alloc giv
 the else arm's row pointer, took v1 in local-alloc first). Retail's v1 in the first arm and
 a0 in the else arm are two variables: the else arm declares its own `parent`.
 
+### A pointer field's type picks its store's partner (func_002042C8)
+
+Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
+dumps of OpenPadPort (src/lib/pad.c, 2.9-ee-991111, 2026-11-09):
+
+- **A store's priority is its type's next store.** In a run of stores into one struct through
+  separate address computations, a store's only dependents in sched1 are the later stores of
+  its own alias class (an output dependence, cost 1): different symbols (the slots, the DMA
+  words, the request buffer) never conflict there, and other types never do at -O2. So a
+  pointer field's store has priority 2 when no later store has its type and 1 + the next one's
+  otherwise, and that priority reaches back to the load of its value (the reply's word) and the
+  address it is stored through, which decides sched1's order and so local-alloc's registers.
+- **sched2 sees the same chains, with longer ones after reload.** After reload the bases are
+  hard registers and every int store and load of the block conflicts, so the int stores form
+  one chain to the return value's load (priority 4 for the last one), while a pointer store
+  still only chains to the next store of its type. The slot's last stores (the DMA id `= 0`
+  and the IOP address from the reply) tie at sched2 when the address is a `u8*` like the
+  buffer's (1 + the buffer store's 3); its store then goes first on insn order, two instructions off
+  retail. With an `s32`, every int store and the reply's load chain together and the load is
+  issued two cycles early (nine instructions differ); with `void*` the address's store is a leaf, its load
+  and address lose priority in sched1 and the registers change (20 bytes differ in the best order).
+- **Retail's: the type of the DMA words' pointer.** With the address field and the reply's
+  word typed `u32*`, the pointer type of the DMA words that the slot also holds, the address's
+  store chains to the DMA pointer's store (a leaf: priority 3, so sched1's order and registers
+  are the `u8*` ones) and in sched2 it ranks below the DMA id's (4): retail's code. It is the
+  natural type too: SendPadDma adds the frame's offset to that address and sends the slot's DMA
+  words there. Writing the stores in any of the 5,040 orders (tools/permute.py) never reached it
+  with the other types: the order was right, the types were not.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
