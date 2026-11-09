@@ -1085,8 +1085,8 @@ INCLUDE_ASM(func_00191290);
 
 // p, when it is outside every face, moved to the nearest point of the nearest link (each link
 // taken at p's height); otherwise p itself. The weighted sum's operands are formed weight, end,
-// weight, end: sched1 then keeps the first end's load between the two weights' stores
-// (docs/TOOLCHAIN.md, "Memory dependences in sched1").
+// weight, end, the order retail's stores and loads keep (docs/TOOLCHAIN.md, "A weighted sum's
+// operands in insn order").
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
 {
     if (FindPointGraphTriangleWithin(self->faces, p) != 0) {
