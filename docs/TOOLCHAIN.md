@@ -2486,6 +2486,55 @@ CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
   type, void*) and store orders found nothing closer. Retail's sched1 order is not reachable in
   this model; something in the original's block is still unknown.
 
+### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
+
+- **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
+  by k, the spin by e). Retail's vmulx gives the product a register of its own (vf3, vf2)
+  where `Q(*out) = MulX(sum, Scalar(e))` ties it to the sum (vf1), and in func_00130748 the
+  output pointer takes s5 ahead of the two spin pointers (s6, s7) where ours took s7. Both come
+  from storing the sum and then scaling it in place:
+  `Q(*out) = MulXSum3(...); Q(*out) = MulX(Q(*out), Scalar(e));`. That matched
+  func_00130540 whole and left func_00130748 two instructions off.
+- **Why the product is fresh.** CSE replaces the reload of `*out` with the sum's register, but
+  the first store stays until flow2 (life analysis after reload) deletes it as overwritten
+  with no read between. In local-alloc's view (after sched1, which puts that store after the
+  vmulx) the sum is still live past the vmulx, so it has no REG_DEAD there and combine_regs
+  cannot tie the product to it; the product takes a free register.
+- **Why the pointer moves up.** The dead store still counts: flow's REG_N_REFS (taken before
+  combine and never recounted) gives out four references (its copy, the test, two stores)
+  against three for each pointer read twice. global-alloc's priority,
+  floor_log2(refs) * refs / live length, is then 2 * 4 / 165 against 1 * 3 / 151, so out is
+  placed first and takes the lowest free saved register.
+- **Ruled out first.** An early-clobbered MulX (`"=&j"`) gives the same fresh register, which
+  is how the tie was diagnosed; Vec against u128, a named sum (`r = MulX(r, ...)`, which CSE
+  folds to the same insns) and the order of the sum's operands do not.
+
+### A length returned as a float joins the allocation's preferences (func_00130748)
+
+- **The form.** NormalizeAxis (an axis made unit length, or a fallback when shorter than
+  1e-4) returning the length as a float (`return Vu0::ToFloat(len);` after the join, the
+  caller's `f32 len` assigned at both calls) rather than the u128 the caller converts.
+- **The mechanism.** The caller's len is one variable assigned twice, so a global pseudo.
+  local-alloc then sees only uvv * dur in the call's block with $f12 suggested (the
+  argument's product), and it takes $f12 where the length's local float had won it on a
+  shorter span. set_preference gives uvv the preference $f12 from that insn (the first
+  operand of a set of a hard register), and expand_preferences passes it on to v (1 - u),
+  which dies where uvv is born and does not conflict with it: global-alloc then takes $f12
+  for v instead of $f4, retail's register. The length itself gets $f2 from global-alloc's
+  pass 0, which skips $f0 and $f1 that uvv (lower in priority, conflicting) prefers. With v
+  in $f12 the prologue's `mov.s $f21,$f12` and the uuv/uuu products fall into retail's order
+  (uuu declared before uuv).
+- **What is left.** At the first call's join retail issues `mul.s $f12,$f0,$f21` (uvv * dur)
+  before the length's `qmfc2 v1,$vf2`; sched2 ranks them equal (priority 16: the asm 1 plus
+  reload's mtc1 2 plus the product 13, against the mul.s 3 plus 13) and takes the qmfc2,
+  which has six dependents (reload's mtc1, the product through sched1's stale LOG_LINK, the
+  next length's vaddw.x into vf2, the next qmfc2 into v1, the call, the jump) against the
+  mul.s's four. ToFloatNow (one asm, cost 1) gives retail's order but its GPR is local-alloc's
+  v0, not reload's v1, which shifts reload's round robin in the spin. Ruled out: the product's
+  operand orders, the conversion of the test and of the return in every helper, a temporary
+  for the return, the axis copied inside the helper, a length variable per call (12 lines),
+  and permute.py over every run of simple statements.
+
 ## Stack slots
 
 ### An inline function's frame is one temporary of its saved size (func_00125138)
