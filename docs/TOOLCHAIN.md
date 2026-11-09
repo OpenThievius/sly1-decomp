@@ -1076,6 +1076,30 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A parameter passed on fills sched1's second slot (func_0018AD88)
+
+- **What decided it.** UpdateGaugeAgentGoal opens with `switch (self->f724)` against 4. In its
+  first block sched1 (issue rate 2, two ALU units) has three candidates at t=1: self's copy from
+  $a0 (priority 4), the constant 4 (priority 2) and, at t=2, the load of f724 (it needs the
+  copy). With only self as a parameter, the constant fills the second ALU slot of t=1 and comes
+  before the load: the constant's quantity spans 2 insns, the state's 1, local-alloc's ranking
+  (2 refs / span) places the state first in $v0 and 4 takes $v1. Retail has them the other way
+  round. No form of the switch (a cast, a state local, the default first, an if/else, the
+  operands swapped) changes the block: they all expand to the same three insns.
+- **The fix was the signature.** The method's slot passes a second argument, and the base
+  method it falls back on (UpdateAgentGoal, agent.cpp) reads it in $a1: the original was
+  `UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)` with `UpdateAgentGoal(self, flag)` in the
+  default case. The flag's copy from $a1 is then one more candidate at t=1, with the constant's
+  priority (2: it is live into the default block, so the jump depends on it) and the earlier
+  insn of the two (expanded with the parameters), so it wins the tie and takes the second slot;
+  the constant drops to t=2 behind the load (priority 3 against 2), the
+  constant spans 1 insn and the state 2: 4 is placed first in $v0 and the state takes $v1.
+  The copy itself disappears: global-alloc gives the flag $a1, and reload deletes the move.
+- **Rule.** A method that falls back on its base method passes the base method's arguments on;
+  check the base's code for a read of $a1 (or later argument registers) the near miss's
+  signature does not have. An argument register retail never mentions can still be in the C:
+  its copy is a scheduled insn before register allocation.
+
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
 - **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a

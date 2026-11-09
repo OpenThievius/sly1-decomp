@@ -361,7 +361,38 @@ void ShowGaugeAgentBar(GaugeAgent* self)
         g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-INCLUDE_ASM(func_0018AD88);
+extern void* g_player;
+void func_001C8418(void* self, void* p);
+void GetObjectWorldPosition(void* obj, Vec02* out);
+void UpdateAgentGoal(void* self, s32 flag);
+
+void UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)
+{
+    switch (self->f724) {
+    case 4:
+        if (self->fE14 != 0) {
+            Vec02 pos;
+            GetObjectWorldPosition(self->fE14, &pos);
+            func_001C8418(self, &pos);
+        } else {
+            s32 key;
+            GetStateWalkerCurrentKey(self->fE10, &key);
+            switch (key) {
+            case 0x438:
+            case 0x439:
+                func_001C8418(self, (u8*)self + 0x140);
+                break;
+            default:
+                func_001C8418(self, (u8*)g_player + 0x140);
+                break;
+            }
+        }
+        break;
+    default:
+        UpdateAgentGoal(self, flag);
+        break;
+    }
+}
 
 INCLUDE_ASM(func_0018AE38);
 
