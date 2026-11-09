@@ -1496,7 +1496,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
 u128 ApproachPointWithRamp(u128 a, u128 b, f32 dt, f32* ramp, s32 zero);
 void func_001733B8(Player* self, u8* out);
 void GetObjectWorldPosition(s32 obj, Vec02* out);
-extern f32 g_unitRange[];
+#include "value_range.h"
 typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
 
 // The pose a collider's slot captures each frame (CaptureSwitchedColliderPose fills pos).
@@ -1633,7 +1633,7 @@ void func_00172EE0(Player* self, ColliderPose* pose, f32 dt)
     case 0: {
         f32 a = __builtin_fabsf(self->v160.z);
         f32 k = D_002638D0[0] + a * (D_002638D0[1] + a * D_002638D0[2]);
-        f32* range = g_unitRange;
+        f32* range = (f32*)&g_unitRange;
         f32 lo = range[0];
         f32 hi = range[1];
         f32 r;
@@ -1716,11 +1716,539 @@ s32 func_00173750(Player* self, Vec02* offset)
     return 0;
 }
 
-INCLUDE_RODATA(jtbl_0024A9F0);
-INCLUDE_RODATA(jtbl_0024AA10);
-INCLUDE_RODATA(jtbl_0024AA60);
-INCLUDE_RODATA(jtbl_0024AAB0);
-INCLUDE_ASM(func_00173888);
+#include "pad_record.h"
+#include "step_sequence.h"
+#include "identity_key.h"
+
+s32 HasAnimationDrivenAttachment(void* ctx);
+void ReleaseAnimationDrivenAttachments(void* ctx);
+void* FillMemory(void* dst, s32 value, s32 size);
+s32 IsObjectOfKind(BaseObject* n, s32 kind);
+s32 IsTopCameraController(u8* p);
+s32 HasSpareCount(void);
+s32 MaskWorldBitsBySave(void);
+void SetPlayerBlendWeights(f32 angle, f32 t, Player* self, void* records, s32 n);
+extern s32 g_currentMode;
+extern s32 g_padRouting;
+extern s32 g_padSelectFlags;
+s32 IsEntryQueueRunning(EntryQueue* q);
+void DrivePlayerFromEntryQueue(EntryQueue* q, PadRecord* pad);
+void UnbindEntryQueue(EntryQueue* q);
+void StartObjectFade(void* key, s32 id, s32 on);
+void ClearPadPressedBits(PadRecord* pad, s32 mask);
+BaseObject* FindFirstObjectById(World* world, s32 kind, s32 id, s32 ctx);
+void func_001C49E8(Player* self, PadRecord* pad);
+f32 WrapAngle(f32 a);
+void UpdateModeSelection(Player* self, PadRecord* pad);
+void SkipRemainingSteps(StepSequence* self);
+void SetStepSequenceState(StepSequence* self, s32 state);
+s32 ChooseNearbyPlayerTarget(Player* self, s32 a, s32* out);
+void StartSoundEffect(s32 sound, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+s32 ChoosePlayerTargetByCost(Player* self, void* target);
+s32 ChoosePlayerNextState(Player* self);
+void PopStackElement(void* q);
+void HandlePlayerAimButton(Player* self, PadRecord* pad);
+// player_request.cpp defines it with four parameters; retail's call here also loads the word at
+// 0xA10 into $a2 (first, as the argument order below gives).
+void SetPlayerVelocityFromHeading(Player* self, void* basis, s32 n, f32 heading, f32 speed);
+void ControlPlayerOnLinkedObject(Player* self, PadRecord* pad);
+void ControlPlayerOnPath(Player* self, PadRecord* pad);
+void func_0017D5D8(Player* self, PadRecord* pad);
+void ControlPlayerOnTarget(Player* self, PadRecord* pad);
+void func_00177990(Player* self);
+extern s32 D_00261D38;
+extern s32 D_00275F84;
+extern StepSequence* D_0026F800;
+extern u8 g_elementStack[];
+
+// Slot 73 of class 0x07: the player's control for a frame. Without control (an activation queued, the
+// entry queue running) the pad is a cleared record. It works out a jump (the pad's 0x40 bit near a
+// floor), a fall and a step skip, then changes state until the state it chooses is the one it is in,
+// and runs the state's own control. A 0x40 press without a jump stamps 0x2284, except in state 4
+// (the goto, past the stamp). In the
+// default case the offset is stored through a cast, so its address is not a register CSE hands on to
+// the call, which retail computes after the time test.
+void ControlPlayer(Player* self, PadRecord* pad)
+{
+    if (HasAnimationDrivenAttachment(self)) {
+        if (!(0.0f < pad->f48) && (pad->flags & 0xF0) == 0) {
+            return;
+        }
+        ReleaseAnimationDrivenAttachments(self);
+    }
+    PadRecord blank;
+    if (D_00261D38 > 0 || self->walkerActivation != 0 || self->firstActivation != 0 || self->secondActivation != 0) {
+        switch (self->f2220) {
+        case 12:
+            if (self->f2BD0 == 0) {
+                SetPlayerState(g_player, 12, 0x23);
+            }
+            break;
+        case 8:
+            if (g_gameTime[0] - self->f2224 > 0.2f) {
+                self->f224C = 4;
+                SetPlayerState(g_player, 2, 0);
+            }
+            break;
+        case 2:
+            switch (self->f2228) {
+            case 4:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+                SetPlayerState(self, 2, 2);
+                break;
+            }
+            break;
+        }
+        FillMemory(&blank, 0, sizeof(blank));
+        pad = &blank;
+    }
+    if (self->f2220 != 4) {
+    if (self->entryQueue != 0 && IsEntryQueueRunning(self->entryQueue)) {
+        EntryQueue* q = self->entryQueue;
+        if ((g_padRecord.flags & 0x800) && D_00275F84 == 0) {
+            s32 start = q->f40;
+            if (start >= 0) {
+                for (s32 i = start; i < q->f34; i++) {
+                    QueueEntry* e = &((QueueEntry*)q->buffer)[i];
+                    if (e->kind == 1) {
+                        BaseObject* o = FindFirstObjectById(q->world, 0x104, e->id, q->f4C);
+                        if (o != 0 && IsObjectOfKind(o, 0x74)) {
+                            StartObjectFade(&D_00275B04, o->id, 1);
+                            ClearPadPressedBits(&g_padRecord, 0x800);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        FillMemory(&blank, 0, sizeof(blank));
+        pad = &blank;
+        DrivePlayerFromEntryQueue(self->entryQueue, &blank);
+    } else {
+        if (self->entryQueue != 0) {
+            UnbindEntryQueue(self->entryQueue);
+        }
+        func_001C49E8(self, pad);
+    }
+    } else {
+        func_001C49E8(self, pad);
+    }
+    s32 skipStep = 0;
+    s32 noFloor = 0;
+    s32 moving;
+    s32 falling = 0;
+    s32 jump = 0;
+    WrapAngle(self->f630 - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x));
+    if (pad->flags & 0x40) {
+        switch (self->f2220) {
+        case 6:
+            if (self->f239C == 2 || self->f239C == 5 || self->f239C == 4) {
+                jump = 1;
+            }
+            break;
+        case 2:
+            switch (self->f2228) {
+            case 7:
+            case 8:
+                break;
+            default:
+                if (self->f2498 != 0) {
+                    Vec02 off;
+                    Vu0::Q(off) = Vu0::MulXSum3(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->f6CC),
+                                                Vu0::Q(self->v150), Vu0::Scalar(0.1f),
+                                                Vu0::Q(self->gravity), Vu0::Scalar(0.5f * 0.1f * 0.1f));
+                    falling = HasFloorAtPlayerOffset(self, &off) == 0;
+                }
+                break;
+            }
+            break;
+        case 4:
+            goto held;
+        case 5:
+        default: {
+            Vec02 off;
+            *(u128*)&off = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->f6CC - 60.0f));
+            if (g_gameTime[0] - self->f694 < 0.1f || HasFloorAtPlayerOffset(self, &off)) {
+                jump = 1;
+            }
+            break;
+        }
+        case 3:
+        case 7:
+        case 8:
+            jump = 1;
+            break;
+        }
+        if (!jump) {
+            self->f2284 = g_gameTime[0];
+        }
+    } else if (g_gameTime[0] - self->f2284 < 0.1f && g_gameTime[0] - self->f694 < 0.1f) {
+        jump = 1;
+    }
+held:
+    switch (self->f2220) {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+    case 14:
+    case 15:
+    case 16:
+        if (g_gameTime[0] - self->f694 > 0.1f) {
+            Vec02 off;
+            if (self->f2220 == 6 && self->f239C == 3) {
+                Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->f6CC - 200.0f));
+            } else {
+                Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->f6CC - 60.0f));
+            }
+            noFloor = !HasFloorAtPlayerOffset(self, &off);
+        }
+        break;
+    default:
+        noFloor = 0;
+        break;
+    }
+    moving = 0.0f < self->f634;
+    s32 aim = pad->keyA8 & 0x20;
+    s32 modeKey = 0;
+    if (pad->flags & 0x10) {
+        modeKey = g_currentMode == 0;
+    }
+    UpdateModeSelection(self, pad);
+    if (!IsTopCameraController((u8*)&g_camera->ctl454)) {
+        PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
+        StepSequence* seq = (StepSequence*)g_typedTextCaptionBox.child;
+        if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
+            if (self->f2220 == 12) {
+                self->f2BD0 = 0;
+                skipStep = 1;
+            }
+            SkipRemainingSteps((StepSequence*)g_typedTextCaptionBox.child);
+            ClearPadPressedBits(rec, 0xC);
+        } else if (self->f2BD4 != 0 || (pad->flags & 0xC)) {
+            if (self->f2220 == 12) {
+                if (g_typedTextCaptionBox.child == 0) {
+                    self->f2BD0 = 0;
+                    skipStep = 1;
+                }
+            } else if (g_typedTextCaptionBox.child == 0) {
+                if ((pad->flags & 4) && D_0026F800 != 0 && (self->f2BD4 == 0 || D_0026F800->mode2D0 == 1)) {
+                    SetStepSequenceState(D_0026F800, 1);
+                } else if (self->f2BD4 == 0) {
+                    self->f2BD0 = 0;
+                    skipStep = 1;
+                }
+            }
+        }
+    }
+    for (;;) {
+        s32 state = self->f2220;
+        s32 sub = self->f2228;
+        s32 target;
+        switch (state) {
+        case 4:
+            if (HasSpareCount()) {
+                if (pad->flags & 0x40) {
+                    ClearPadPressedBits(pad, 0x40);
+                    self->f2734 = g_gameTime[0];
+                }
+            }
+            if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < D_00263910[0]) {
+                RunPlayerCallback(self);
+                state = self->f2220;
+                sub = self->f2228;
+            }
+            break;
+        case 0:
+            if ((self->f223C == 8 || self->f223C == 9) && self->f2248 == 0) {
+                break;
+            }
+            if (jump) {
+                state = 2;
+                sub = 0;
+                break;
+            }
+            if (noFloor) {
+                state = 2;
+                sub = 2;
+                break;
+            }
+            if (modeKey && (MaskWorldBitsBySave() & 2)) {
+                state = 10;
+                sub = 0x1F;
+                break;
+            }
+            if (aim) {
+                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                if (target != -1) {
+                    state = 6;
+                    sub = target;
+                    break;
+                }
+                if (pad->flags & 0x20) {
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                }
+            }
+            if (skipStep) {
+                state = 12;
+                sub = 0x21;
+                break;
+            }
+            if (moving) {
+                state = 1;
+                sub = -1;
+            }
+            break;
+        case 1:
+            if (jump) {
+                state = 2;
+                sub = 0;
+                self->f224C = state;
+                break;
+            }
+            if (noFloor) {
+                state = 2;
+                sub = 2;
+                break;
+            }
+            if (modeKey && (MaskWorldBitsBySave() & 2)) {
+                state = 10;
+                sub = 0x1F;
+                break;
+            }
+            if (aim) {
+                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                if (target != -1) {
+                    state = 6;
+                    sub = target;
+                    break;
+                }
+                if (pad->flags & 0x20) {
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                }
+            }
+            if (skipStep) {
+                state = 12;
+                sub = 0x21;
+                break;
+            }
+            if (!moving) {
+                state = 0;
+                sub = -1;
+            }
+            break;
+        case 5:
+            if (jump) {
+                state = 2;
+                sub = 0;
+                break;
+            }
+            if (noFloor) {
+                state = 2;
+                sub = 2;
+                break;
+            }
+            if (aim) {
+                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                if (target != -1) {
+                    state = 6;
+                    sub = target;
+                    break;
+                }
+                if (pad->flags & 0x20) {
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                }
+            }
+            if (skipStep) {
+                state = 12;
+                sub = 0x21;
+                break;
+            }
+            state = 0;
+            sub = -1;
+            break;
+        case 2: {
+            s32 ready = !(sub == 10 || sub == 11 || sub == 13 || sub == 12 || sub == 14 || sub == 15 || sub == 8)
+                && (sub != 5 || g_gameTime[0] - self->f222C > 0.05f);
+            if (ready) {
+                if (pad->flags & 0x20) {
+                    ClearPadPressedBits(pad, 0x20);
+                    func_001C61E0(self, -1);
+                    sub = ChoosePlayerTargetByCost(self, 0);
+                    break;
+                }
+                if ((sub != 6 || self->f226C != 0.0f) && (pad->flags & 0x80)) {
+                    func_001C61E0(self, -1);
+                    sub = 7;
+                    ClearPadPressedBits(pad, 0x80);
+                    break;
+                }
+            }
+            if (ready && modeKey && (MaskWorldBitsBySave() & 0x10)) {
+                func_001C61E0(self, -1);
+                sub = 8;
+                break;
+            }
+            if (jump) {
+                sub = 0;
+                if (MaskWorldBitsBySave() & 0x1000) {
+                    break;
+                }
+                if (!(pad->keyA8 & 0x10)) {
+                    self->f2744 = 0;
+                }
+                break;
+            }
+            if (falling) {
+                sub = 3;
+            }
+            break;
+        }
+        case 3:
+        case 7:
+            if (jump) {
+                state = 2;
+                sub = 0;
+                self->f224C = 1;
+            }
+            break;
+        case 6:
+            if (self->f239C == 2) {
+                if (jump) {
+                    state = 2;
+                    sub = 5;
+                }
+                break;
+            }
+            if (jump) {
+                state = 2;
+                sub = 0;
+                break;
+            }
+            if (self->f239C == 4 || self->f239C == 5) {
+                break;
+            }
+            if (modeKey && (MaskWorldBitsBySave() & 2)) {
+                state = 10;
+                sub = 0x1F;
+                break;
+            }
+            if (noFloor) {
+                state = 2;
+                sub = 2;
+                break;
+            }
+            if (pad->keyA8 & 0x20) {
+                break;
+            }
+            if (g_padSelectFlags & 1) {
+                break;
+            }
+            state = ChoosePlayerNextState(self);
+            sub = -1;
+            break;
+        case 8:
+            if (jump) {
+                state = 2;
+                sub = 0;
+                self->f224C = 4;
+            }
+            break;
+        case 12:
+            if (skipStep) {
+                if (self->f2228 == 0x22) {
+                    sub = 0x23;
+                    PopStackElement(g_elementStack);
+                    break;
+                }
+            } else if (self->f2228 == 0x22) {
+                T217D_440* box = &g_typedTextCaptionBox;
+                if (box->state == 0 || (box->state == 2 && box->child != 0 && ((StepSequence*)box->child)->state2D4 == 4)) {
+                    sub = 0x23;
+                    break;
+                }
+            }
+            if (self->f2228 == 0x21 && self->f25CC == 0 && g_gameTime[0] - self->f222C >= 0.5f) {
+                sub = 0x22;
+                break;
+            }
+            if (self->f2228 == 0x23 && self->f25D0 == 0 && g_gameTime[0] - self->f222C >= 0.25f) {
+                state = 0;
+                sub = -1;
+            }
+            break;
+        case 13:
+            if (!(pad->keyA8 & 0x10) && g_gameTime[0] - self->f2224 > D_00262E3C) {
+                sub = 0x38;
+                break;
+            }
+            self->f638 = self->f630;
+            break;
+        case 14:
+        case 15:
+        case 16:
+            if (noFloor) {
+                state = 2;
+                sub = 2;
+            }
+            break;
+        }
+        if (state == self->f2220 && sub == self->f2228) {
+            break;
+        }
+        SetPlayerState(self, state, sub);
+        skipStep = 0;
+        jump = 0;
+        falling = 0;
+    }
+    HandlePlayerAimButton(self, pad);
+    switch (self->f2220) {
+    case 5:
+        SetPlayerVelocityFromHeading(self, (u8*)self + 0x910, self->fA10, self->f630, self->f634);
+        break;
+    case 1:
+        SetPlayerBlendWeights(self->f630, self->f634, self, (u8*)self + 0x720, self->f900);
+        break;
+    case 4:
+    case 10: {
+        self->v640 = D_00248D30;
+        PlayerNoticePlayer* src = (PlayerNoticePlayer*)self->watched2230;
+        if (src != 0) {
+            Track83* track = src->anim->f9C;
+            if (track != 0) {
+                PositionCurve* c = track->pos;
+                if (c != 0) {
+                    Vec02 v;
+                    c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+                    Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(v), Vu0::Scalar(-1.0f));
+                }
+            }
+        }
+        break;
+    }
+    case 3:
+        ControlPlayerOnLinkedObject(self, pad);
+        break;
+    case 7:
+        ControlPlayerOnPath(self, pad);
+        break;
+    case 2:
+        func_0017D5D8(self, pad);
+        break;
+    case 6:
+        ControlPlayerOnTarget(self, pad);
+        break;
+    case 0:
+    case 16:
+        break;
+    }
+    func_00177990(self);
+}
 
 void UpdateTurningCollider(Player* self, f32 dt);
 s32 HasAnimationDrivenAttachment(void* ctx);
@@ -2766,7 +3294,6 @@ s32 AreMenusAndFadeClear(void* self);
 
 
 extern f32 g_gameClock[];
-extern f32 g_unitRange[];
 extern Rgba4 D_002623E0;
 
 f32 Cosine(f32 x);

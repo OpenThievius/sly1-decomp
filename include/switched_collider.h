@@ -291,7 +291,7 @@ struct Player : TurningCollider {
     void* f1090;            // 0x1090: the blend those weights go to
     f32 f1094;              // 0x1094: eased toward the side the path turns to (func_00171238)
     f32 f1098;              // 0x1098: its rate
-    u8 pad109C[0x1188 - 0x109C];
+    void* f109C[59];        // 0x109C: the animation of each sub-state (+0x2228), by its number (SetPlayerState)
     void* f1188;            // 0x1188
     s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
@@ -434,7 +434,9 @@ struct Player : TurningCollider {
     void* f25B4;            // 0x25B4: that of aim state 9
     u8 pad25B8[0x25C8 - 0x25B8];
     void* f25C8;            // 0x25C8: the animation whose markers state 8 reads (func_0017D248) and whose marker 0x1BB func_0017F018 reads
-    u8 pad25CC[0x25D8 - 0x25CC];
+    s32 f25CC;              // 0x25CC: ControlPlayer (func_00173888) holds state 12's step 0x21 while it is set
+    s32 f25D0;              // 0x25D0: the same for step 0x23
+    u8 pad25D4[0x25D8 - 0x25D4];
     void* f25D8[5];         // 0x25D8
     s32 f25EC;              // 0x25EC: the number of f25F0 entries (func_00177990 adds up to 32); cleared by aim states 3 to 7 (func_001C61E0)
     PlacedObject* f25F0[32]; // 0x25F0: the nodes func_00177990 found, which FindNodeForQuery skips
@@ -469,7 +471,9 @@ struct Player : TurningCollider {
     f32 f2728;              // 0x2728: 1.0 at set-up
     u8 pad272C[0x2730 - 0x272C];
     s32 f2730;              // 0x2730
-    u8 pad2734[0x2740 - 0x2734];
+    f32 f2734;              // 0x2734: the time state 4 last took the pad's 0x40 press (ControlPlayer)
+    s32 f2738;              // 0x2738: set, ControlPlayer runs the player's callback within D_00263910 of it
+    u8 pad273C[0x2740 - 0x273C];
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
     s32 f2744;              // 0x2744: mode 2's slow-down held (func_001D2BB8)
     f32 f2748;              // 0x2748: mode 4's speed-up, 1 while held, eased back to 0 (func_001D2BB8)
@@ -500,7 +504,7 @@ struct Player : TurningCollider {
     Vec02 v2BB0;            // 0x2BB0
     Vec02 v2BC0;            // 0x2BC0
     void* f2BD0;            // 0x2BD0
-    u8 pad2BD4[0x2BD8 - 0x2BD4];
+    s32 f2BD4;              // 0x2BD4: ControlPlayer's step-sequence skip reads it with the pad's 0xC bits
     s32 f2BD8;              // 0x2BD8
     s32 penalizedTargetId;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to the candidate with this id
     void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations

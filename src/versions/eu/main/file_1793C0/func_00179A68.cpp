@@ -1,121 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 3173/3176 (99.9%), checked 2026-11-08
-// NEAR (2026-11-08, worker large-179A68): every instruction but three: the f700 clamp's upper
-// bound is loaded into $f3 where retail has $f0. Here the scheduler's first pass puts the load of
-// D_00263C90[1] before the add whose product (dt * f708) holds $f0, so global-alloc cannot give it
-// $f0 (tools/regalloc.py); in retail the load comes after the add. Reading the bound inside the
-// else arm (an explicit if/else-if, or a ClampToRange(v, const f32*) inline) gives $f0 but moves the
-// bound's address (addiu v0,s5,%lo) from the block's start into the branch's delay slot (2 insns
-// off). Also tried (2026-11-08, large-179A68b), none better: a const f32* b = D_00263C90 read as
-// b[0]/b[1] (address moves, 2+ insns off); a named sum with lo/hi locals loaded before the ifs
-// (same 3 diffs); the unclamped sum stored before the test, the bound read in the arm (hi gets $f0
-// but stores and branch layout change, ~9 insns off); f700 statement before f6FC (worse).
-// Found on the way (all in this attempt): ApproachValueWithRamp takes its floats first
-// (value, target, dt, profile, speed out); ApproachRotationWithRamp takes dt fourth; one loop index
-// at function scope (its final value 2 is the constant of the second mode test, li s2,2); the mode
-// range as a switch (case 2, 3, 4) where && folds into a range test; the 3 address spill slots'
-// order follows the insn count at GCSE time (the address pseudos are numbered in hash-bucket order):
-// Vec rows in the product inline and the Vec axis copy give retail's order.
-#include "common.h"
-#include "switched_collider.h"
-#include "globals.h"
-#include "placed_object.h"
-#include "screen_element.h"
-#include "vu0.h"
-#include "pad_record.h"
-#include "game_progress.h"
-#include "attachment.h"
-#include "mul_rotation.h"
-
-extern T217D_BF0 D_00270650;
-extern f32 g_gameTime;
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-
-static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
-{
-    if (v < lo) {
-        return lo;
-    }
-    if (hi < v) {
-        return hi;
-    }
-    return v;
-}
-
-// The record ModeCollider::f618 points at in mode 3: a value tested against zero and an object
-// whose 0x34 is the mode's length.
-struct ModeColliderLength {
-    u8 pad00[0x34];
-    f32 length;             // 0x34
-};
-struct ModeColliderSource {
-    u8 pad00[0x08];
-    ModeColliderLength* f08; // 0x08
-    u8 pad0C[0x18 - 0x0C];
-    f32 f18;                // 0x18: 0.0 ends the mode at once
-};
-
-// The three floats of a ramp profile ApproachValueWithRamp reads, copied whole.
-struct RampProfile3 {
-    f32 maxSpeed;
-    f32 endSpeed;
-    f32 rampTime;
-};
-
-extern f32 D_00263C50[];
-extern f32 D_00263C58[];
-extern f32 D_00263C68[];
-extern f32 D_00263C78[];
-extern f32 D_00263C80[];
-extern f32 D_00263C90[];
-extern f32 D_00263CA0[];
-extern f32 D_00263CB0[];
-extern f32 D_00263CC0[];
-extern f32 D_00263CD0[];
-extern f32 D_00263CE0[];
-extern f32 D_00263CF0[];
-extern f32 D_00263D00[];
-extern f32 D_00263D08[];
-extern f32 D_00263D18[];
-
-s32 HasSpareCount(void);
-void ClearPadPressedBits(PadRecord* pad, s32 bits);
-void GetStateWalkerCurrentKey(void* walker, s32* out);
-void SetStateWalkerTarget(void* walker, s32 key);
-f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, void* profile, f32* speed);
-void ProjectPointToCamera(Camera* camera, Vec02* pos, f32* out);
-void BuildBasisFromXAndZHint(Vec02* x, const Vec02* z, Mat02* out);
-void TransformRotationBetweenFrames(void* from, void* to, Mat02* in, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void ApproachRotationWithRamp(Mat02* rot, Mat02* target, void* profile, f32 dt, Mat02* out, s32 flags);
-void HandleStepSequenceSkipButtons(ModeCollider* self, PadRecord* pad);
-void ClearRootTries(void* self);
-
-// v limited to lo..hi, in place.
-static inline f32 ClampInPlace(f32 v, f32 lo, f32 hi)
-{
-    if (v < lo) {
-        v = lo;
-    } else if (hi < v) {
-        v = hi;
-    }
-    return v;
-}
-
-// The product a b of two rotations into out: a's rows loaded once, b's rows each rotated by
-// them, each result row stored to its vector local and then to out's row.
-static inline void RotationProductInto(Mat02* out, const Mat02& a, const Mat02& b)
-{
-    Vu0::Vec a0 = Vu0::Vec::Of(a.r[0]);
-    Vu0::Vec a1 = Vu0::Vec::Of(a.r[1]);
-    Vu0::Vec a2 = Vu0::Vec::Of(a.r[2]);
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[0]));
-    Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[1]));
-    Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[2]));
-}
+// PAL: the D_00270650 aim at 0x580 (US 0x270; PAL's ScreenElement is 0x310 bytes longer).
 
 void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
 {
@@ -189,7 +73,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
                                       D_00263CB0[0] + w * (D_00263CB0[1] + w * D_00263CB0[2]));
         TransformPointBetweenFrames(self->f660, 0, &pos, &pos);
         TransformPointBetweenFrames(0, self->f660, &pos, (u8*)self->f650 + 0xF0);
-        ProjectPointToCamera(g_camera, &pos, D_00270650.aim);
+        ProjectPointToCamera(g_camera, &pos, (f32*)((u8*)&D_00270650 + 0x580));
         for (i = 0; i < 2; i++) {
             Vec02 dir;
             *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f674[i]->v140));
@@ -209,20 +93,14 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
             f32 s = D_00263CC0[0] + k * (D_00263CC0[1] + k * D_00263CC0[2]);
             tx = (loX + hiX) * 0.5f;
             ty = hiY;
-            f32 lo = g_unitRange.lo;
-            f32 hi = g_unitRange.hi;
-            if (s < lo) {
-                s = lo;
-            } else if (hi < s) {
-                s = hi;
-            }
+            s = ClampBetween(s, g_unitRange.lo, g_unitRange.hi);
             prof.maxSpeed *= s;
             prof.endSpeed *= s;
         }
         self->f704 = ApproachValueWithRamp(self->f704, tx, dt, &prof, 0);
         self->f708 = ApproachValueWithRamp(self->f708, ty, dt, &prof, 0);
-        self->f6FC = ClampInPlace(self->f6FC + dt * self->f704, D_00263C90[0], D_00263C90[1]);
-        self->f700 = ClampInPlace(self->f700 + dt * self->f708, D_00263C90[0], D_00263C90[1]);
+        self->f6FC = ClampBetween(self->f6FC + dt * self->f704, D_00263C90[0], D_00263C90[1]);
+        self->f700 = ClampBetween(self->f700 + dt * self->f708, D_00263C90[0], D_00263C90[1]);
 
         Mat02 pitch;
         Mat02 yaw;
@@ -242,7 +120,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
         *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->f660)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
         f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
-        f32 angle = ClampInPlace(D_00263CF0[0] + speed * (D_00263CF0[1] + speed * D_00263CF0[2]), D_00263D00[0], D_00263D00[1]);
+        f32 angle = ClampBetween(D_00263CF0[0] + speed * (D_00263CF0[1] + speed * D_00263CF0[2]), D_00263D00[0], D_00263D00[1]);
         Vu0::Vec n;
         n.q = Vu0::FromFloats(-self->v150.y, self->v150.x, 0.0f);
         *(Vu0::Vec*)&axis = n;
@@ -255,7 +133,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
         RotationProductInto(&m2, m1, yaw);
         RotationProductInto(&m3, m2, pitch);
         self->m620 = m3;
-        *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140));
+        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140)).q;
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &aim);
         TransformRotationBetweenFrames(0, self->f67C->f224->p60, &aim, &aim);
         break;
