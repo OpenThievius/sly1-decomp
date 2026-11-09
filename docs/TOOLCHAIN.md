@@ -701,6 +701,33 @@ func_00140258, func_001F2EF0, func_001F3408):
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
 
+### Which pass moves an invariant: the preheader's order (func_001971B8)
+
+The preheader holds what loop.c put before the loop's start, in the order it put it there, and
+sched1 keeps that order when the insns tie (all alu, priority 1, one set each: INSN_LUID decides).
+Each pass emits its moved invariants (in their order in the loop) and then the start values of
+the givs strength_reduce reduced, all before the loop's start; so what the second pass
+(`-frerun-loop-opt`) moves comes after the first pass's givs.
+
+- **The gauge collider's best-target search.** Retail's preheader is `addiu s4,sp,432` (the
+  address of a local, moved by pass 1), `move s2,sp` (the reduced `&list[i]`, started by pass
+  1), then `lui s6` (the high part of the angle limit D_0026A82C). Ours moved the `lui` in pass
+  1 too, so it came before `move s2,sp`. The dump (`-dL`) showed two causes: the high part's
+  lifetime was 11 luids, because `D_0026A82C < fabsf(WrapAngle(...))` expands the global's
+  address before the calls; and the loop had 70 insns in pass 1, 60 in pass 2.
+- **Retail's form: lifetime 1, and a loop of 81 to 90 insns in pass 1.** Written
+  `fabsf(WrapAngle(...)) > D_0026A82C` (the same `c.lt.s` with the constant first) the `lui` is
+  expanded right before its load (lifetime 1), so moving it needs `80 * 1 * 1 >= insns`. With
+  the loop's vector statements as Vu0::Vec values (the project's convention, whose movti copies
+  loop.c counts) pass 1 sees 84 insns and leaves the `lui`; strength reduction takes pass 2 down
+  to 75, which moves it, after the giv's start: retail's order. With all three of the loop's
+  vector statements as Vec the counts are 90 and 81 and neither pass moves it (one Vec statement,
+  the angle's difference, stays a u128 expression). With the u128 forms (70 insns) the `lui` and
+  its `lw` stay apart in the order of the first pass.
+- **Reading it.** A preheader `lui` (or any moved constant) placed after a giv's start value was
+  moved by the second pass: its first-pass count was over `80 * lifetime` (160 without a call)
+  and its second-pass count under it.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
