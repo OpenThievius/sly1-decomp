@@ -1420,6 +1420,27 @@ dumps (2026-11-08, still a near miss):
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
 
+### A load hoisted over a conditional move takes a register from it (func_001C9DE0)
+
+- sched1 may issue a load with a long chain behind it (`anim->f9C`, then `->pos`, `->vt` and
+  the call) before a conditional move that jump.c made (`if (alt) to = alt;`, a `movn`). The
+  load's pseudo is then born while the move's source is still live, so the two conflict; the
+  load's pseudo, local-alloc's and ranked below the source, pools $v1 and $a0 from the curve
+  it feeds (expand_preferences), and those enter the source's `regs_someone_prefers`. Pass 0
+  of find_reg skips them and the source takes $a1, where retail has $v1; sched2 then sees an
+  output dependence between `li a1, 432` and the source's copy, one dependent more, and fills
+  the call's delay slot with another move.
+- In func_001C9DE0's marker 0x1AC, `PositionCurve* c = anim->f9C->pos; c->vt->eval(c, ...)`
+  gives that order; the curve read inside the call, `anim->f9C->pos->vt->eval(anim->f9C->pos,
+  ...)` (a virtual call on the curve, as the original's C++ would read it), leaves the load
+  after the move: no conflict, $v1, and retail's delay slots.
+- Still open in the same function: global-alloc's ranking puts the animation (13 refs over 84
+  insns, 0.464) before the player it is read from (4 over 34, 0.235), and find_reg's pass 0
+  gives it $s0; retail's registers need the player (or the marker `to`, 6 over 39) first. No
+  plain source changes these counts: cse folds every way of naming the player into one
+  pseudo, and copies of the animation fold away (nonmatching/func_001C9DE0.cpp lists what is
+  ruled out).
+
 ### Call sites that cross-jumping merges still rank the allocation (func_001C1F20)
 
 - global-alloc ranks its allocnos by floor_log2(refs) * refs / live length (allocno_compare,
@@ -1837,6 +1858,12 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.
+
+- **The position curves' slot 0 (func_001C9DE0).** PositionCurveEval is declared `(owner, f32
+  key, f32 scale, s32 mode, out value, out slope)`, the weight curves' order: in func_001C9DE0's
+  marker 0x1AC the first call's `$f13` (from a zero in a saved register, ready late) and `move
+  a2, zero` tie in sched1 at the same cycle, and retail issues `$f13` first; with `mode` before
+  the floats `a2` went first. Every other caller matches with either order.
 
 ### The operand order of an address sum (expr.c, func_0013A128)
 
