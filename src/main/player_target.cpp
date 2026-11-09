@@ -573,9 +573,9 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
     f32 bestCost;
     f32 bestT;
     f32 bestPathT;
+    f32 bestPointT;
     f32 bestCurveT;
     f32 bestVectorT;
-    f32 bestPointT;
     TargetCand* o;
 
     if (keep != 0) {

@@ -816,6 +816,14 @@ never the lever; the lifetime was:
   `%hi` reloaded in round-robin registers, against a later hoisted one that took the saved
   register) points to a name bound to the global earlier in the body: a reference or pointer
   local, or a `const T&` parameter of an inline function.
+- **PAL fixes the declaration order (2026-11-09).** The results bestPointT, bestCurveT and
+  bestVectorT are each used 3 times over about 730 insns, so global-alloc's integer priority
+  (`floor_log2(refs) * refs / live length * 10000`) is 41 or 40 and ties fall to the pseudo
+  number, that is the declaration order. In US the point's life is 732 insns (priority 40),
+  so only curve before vector showed. PAL's shorter checksum tail (RandomIntInRange instead of
+  the clock and RandomFloatInRange) makes all three 41, and retail's f26, f27, f28 for point,
+  curve and vector prove they were declared in that order; the shared source now declares them
+  so, and US is unchanged.
 
 ### A negative index splits its offset; `&recs[n++]` is retail's record (func_00148938)
 
