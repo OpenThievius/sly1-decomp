@@ -3422,6 +3422,30 @@ and in the else arm is one pseudo across all three lives, which global-alloc giv
 the else arm's row pointer, took v1 in local-alloc first). Retail's v1 in the first arm and
 a0 in the else arm are two variables: the else arm declares its own `parent`.
 
+### A local's size is the frame (func_00203FD0)
+
+Sony's 2.9-ee-991111, like SN's 2.95.3, adds nothing to the locals' area: mips.c's
+compute_frame_size takes get_frame_size(), the sum of the locals' slots, and rounds it to 16.
+The three other callers of StartIopDma have exactly their records' bytes below their saves
+(0x10 for one record in func_0018E7C0 and func_001F9AD8, 0x20 for command_channel's
+`recs[2]`). SendPadDma (src/lib/pad.c) has 0x100, with its one record at 0: its local was
+256 bytes. Ruled out, with dumps of the frame (2026-11-09):
+
+- **A variable's alignment does nothing.** expand_decl allocates a BLKmode local from its
+  size and then resets DECL_ALIGN to BIGGEST_ALIGNMENT, so `PadDmaTransfer t
+  __attribute__((aligned(64)))` keeps a 0x60 frame.
+- **A type's alignment changes its size.** `aligned(64)` on the record's typedef makes it 64
+  bytes (a 0x90 frame); `aligned(256)` gives retail's 0x150 frame and the function matches,
+  but nothing in retail asks for a 256-byte-aligned DMA record (the library's own DMA words
+  and request buffer are 64-aligned in .bss).
+- **No temporary or inline frame.** The function has no struct value, call returning a
+  struct or inline call that could leave a 0xF0-byte temporary.
+
+What matches, and is landed: a table of sixteen records (`PadDmaTransfer transfers[16]`),
+of which the first is filled and `StartIopDma(transfers, 1)` sends one, as a sender written
+for a record table of fixed capacity would. The failure message is a string literal in both
+places (one .rodata copy, at D_0024F738, where the near miss's named global was).
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
