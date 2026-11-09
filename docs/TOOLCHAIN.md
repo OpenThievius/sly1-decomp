@@ -3586,6 +3586,34 @@ one register each (95.5%).
   matched) has the same setter sequence (Pos(0, 0), Size(640, 492.8), the grey colour from a
   spill slot, the two words cleared) and is likely the same helper.
 
+- **Confirmed in US func_00134B48** (2026-11-09, near miss, 99.1%). The same five setters in
+  an inline helper (`ScreenLayout::Reset(Layout_137228* l)`, the colour a constant in the helper:
+  as a parameter, loop.c hoisted it into s4) give retail's `addiu a0, sp, 0x1B0` at each call and
+  the buffer from a spill slot. The rule finds a second inline in the same function: retail
+  forms `&layout` again for the font's `drawBox` call but passes `&style` from a spill slot, so
+  that call sat in an inline taking the layout (the file family's `StyleDrawer::Draw(Font** h,
+  Layout* out, void* tbl)`, `if (*h) (*h)->vt->drawBox(...)`). With both, `&layout`'s pseudo has
+  one use left (DrawFontString), loses s4 to the clock's address and spills, and the frame grows
+  by retail's 16 bytes (a fifth spill slot). Then gcse's bucket order (T = 187 against 189, one
+  Vec value) and loop.c's pass order (below) gave retail's registers.
+- **Which pass moved an invariant decides global-alloc's tie of two hoisted addresses.** In that
+  function the clock's address (`g_gameClock`, read twice) and the coefficient table's (read
+  three times) both live from the preheader over the loop; retail's preheader has the table's
+  `%lo` first and gives the clock s4. loop.c moved the clock's `%lo` in its first pass (savings
+  2, life 10) and found the table's not desirable there (savings 1, life 3: move_movables
+  lowers its threshold by 3 for every insn it moves, so threshold * savings * life fell short
+  of the loop's 282 insns), moving it only in the second pass; the clock's address then lived
+  longer and won the tie. The table read through a pointer named before the projection call
+  (`const f32* k = D_002611A0;`, life 30) moves in the first pass ahead of the clock's: retail's
+  order and registers.
+- **What is left there: sched1's order of the preheader.** sched1 puts a `%lo` that ends its
+  `%hi` (register weight 0) before a frame address (weight 1), and the float constants (memory
+  unit, priority 2) one per cycle beside them; retail's spill stores between the constants
+  need `&pos` beside the first constant, so retail's preheader had one invariant `%hi`/`%lo`
+  pair fewer than ours (three: the table's, the clock's, g_unitRange's). The likely one is
+  g_unitRange's `%lo` (Limit's `this`), which loop.c's second pass moves with a life of 4 (the
+  inline's two block notes count); no clamp form tried keeps it in the loop with retail's code.
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
