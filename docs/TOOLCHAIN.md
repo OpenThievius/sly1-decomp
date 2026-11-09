@@ -2553,6 +2553,28 @@ TurnColliderTowardRotation (2026-11-09):
   (three quantities, the GPR's rank 1 at best against the product's 2, or a tie when the
   normal's store comes between), a Vec product or operand, a new variable for the unit
   normal. What retail's block had that ours lacks is open.
+- Probes of 2026-11-09 confirm the sort is the whole difference and narrow what is left:
+  - With the last Dot's asm listing its 1.0 first (`"=j"(one), "=j"(r)`), so that the product
+    is quantity 0, ToBits gives EXACT. Changing Dot so for every user does not: this
+    function's earlier Dots move, and a function of path_curve.cpp changes size. Retail's Dot
+    is the project's; the last block is what differs.
+  - A Dot and qmfc2 in one sequence (`DotBits`) matches here only with the 1.0 listed before
+    the product, and the matched ToBits(Dot) users (func_00148938, CopyMeshTransformed) only
+    with the product first (func_001BBEB8 with neither): not one recurring sequence.
+  - The three-quantity arithmetic: the ranks are floor_log2(refs) * refs * size / life, with
+    TImode two words and SImode one, births and deaths at 2 * insn. ToBits' GPR (2 refs,
+    size 1) outranks the product (2 refs, size 2) only if the product lives more than twice
+    as long: two insns between the Dot and the qmfc2. The only candidate, the normal's sqc2,
+    cannot come before the sw: both stores go through parameters, which may alias each other
+    (no -fargument-noalias), so sched1 and sched2 keep their source order, and retail's sw
+    comes first.
+  - ToFloat's float prefers FP_REGS (an mtc1 and swc1, 396 bytes). Copies of the normalised
+    vector fold in CSE: `n.q = NormalizeOr(..).q`, a Vec m then `n = m`, a named fallback, the
+    u128 NormalizeOr, Vu0::Copy (its vmove writes n). None adds a quantity to the block.
+  - Still to find: a block-local quantity born before the Dot (by the sort, a TImode copy of
+    the unit normal dying at the vmove would rank first, leave vf1 to the reload of StoreX's
+    product and push the 1.0 to vf2 through local-alloc's widened lifetimes), or a product
+    whose preferred class is VU_REGS (two quantities, the qmfc2 a reload).
 
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
