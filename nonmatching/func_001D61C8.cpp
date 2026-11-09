@@ -6,6 +6,8 @@
 //       Lands only with func_001D5FA8 and func_001D60B0 in the same form (the three guards
 //       close the file's .data in function order).
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
+// Probe 2026-11-09 (not plain C; explicit guard written between i68 and f50, record base hidden): guard place, 25.0 late into f0
+//       and the first loads come out as retail (18 words differ); the group before the guard stays a weight sort (i68 first).
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);

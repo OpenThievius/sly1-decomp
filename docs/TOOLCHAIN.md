@@ -4682,6 +4682,29 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     store first and push 0.5 late), and a zeroing base class with
     sub-records whose constructors set the colours (an empty base shifts
     the fields).
+  - **The guard's place and the late constant, reproduced; the order inside
+    the groups is not a weight sort (func_001D61C8, 2026-11-09).** g++
+    2.95's expand_static_init (cp/decl.c) always emits `guard = 1` after
+    the whole constructor, so in the RTL the guard store is the last store.
+    A probe (not plain C: an explicit guard, the record through a pointer
+    hidden by an empty asm, `guard = 1` written between i68 and f50) gives
+    retail's guard position, 25.0 loaded after i48 into -100.0's f0, and
+    retail's first four loads (18 words differ, against 21). What is left
+    is the order inside the groups: sched1 sorts the free stores of a
+    group by INSN_REG_WEIGHT, and sched2 keeps that order. Retail's group
+    before the guard is f44, f4, f40, f8, i28, f34, i48, i68, which no
+    source order gives as a weight sort: -1 (`lui; ori` into one pseudo,
+    stored by i48 and i68) dies at whichever of the two comes last, giving
+    it weight -1, so it sorts ahead of f8, i28 and f34 (weight 0). So in
+    retail's sched1 the stores of that group were not all ready at once
+    with equal priority: they had dependences (or sat in separate blocks)
+    that this compiler only gives with volatile. Two further mechanisms
+    checked and ruled out as the source of the late loads: local-alloc's
+    update_equiv_regs moves a constant's set next to its single use only
+    for a pseudo live across blocks (`REG_BASIC_BLOCK < 0`), and a pseudo
+    set twice from `(lo_sum hi cfg)` loses its base (alias.c, record_set),
+    which makes the guard conflict with the stores but needs a variable
+    the original would not have reassigned.
 
 ## Constants in one very long block
 
