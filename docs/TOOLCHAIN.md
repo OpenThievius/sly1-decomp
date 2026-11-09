@@ -1336,6 +1336,32 @@ and filled member by member, one block holding both calls:
   pointer (local-alloc's $a0) is and global-alloc gives it $a1; retail's $a0 means it was set
   after that load.
 
+### Emulating sched1 to read local-alloc's registers backwards (func_001CC818)
+
+Worked out on the link swing's last block (2026-11-09):
+
+- **Two emulators reproduce the compiler exactly.** A list scheduler over the `-dS
+  -fsched-verbose-6` dependence table (the table's `prio`, `cost` and units; LOG_LINKS kinds from
+  the RTL; a link into an asm or an anti/output link costing 1, any other the producer's cost;
+  issue rate 2 with one memory insn a cycle; the birthing raise for pseudos set once and live at
+  the block's end; rank_for_schedule's keys) gave sched1's order of the block, and the
+  local-alloc emulator (g11's lalloc2.py, corrected to tie an asm's output only to a pseudo that
+  is local to the block: a value used in a later block belongs to global-alloc and never joins
+  a dying input's quantity) gave every VU register of ours. Searching orders and single-insn
+  priorities with both says which change to sched1's input retail's registers need, before any
+  variant is compiled (build/swarm/w7-1CC818/sim.py, la3.py in the g10 worktree).
+- **What it showed here.** Retail's registers need two things: the load of `self->v150` issued
+  before v2's (its priority 8 where the vsub, division, subtraction and store after it give 6,
+  or the nd * rate product's lowered from 7 to 5), and the Scalar(r) qmtc2 out of the second
+  issue slot after the call (another insn ranked above it there). No single priority or move
+  does it, and no reordering of the statements (permute.py), Vec values, RotateUntied, Scalar(r)
+  named first or a local for the f22AC pointer changes sched1's priorities: priorities come
+  from the dependence graph, which only a different expression tree or helper split would change.
+- **The address CSE keeps for `&local`.** `Vu0::Q(g) = x` inlines Q's reference parameter into a
+  pseudo holding g's address; CSE then gives the call's later `&g` that pseudo, computed before
+  the branch (`addiu a3, sp, 192` hoisted out of the call block). `*(u128*)&g = x` addresses the
+  frame directly, as Set's note in vu0.h says, and the call forms the address again: retail's.
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
