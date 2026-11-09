@@ -2046,6 +2046,53 @@ reference.
   TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
   size with only the call's `addiu a1, sp, 16` early.
 
+### A rotation product's vector slots are scalar (func_0014A8F8, unsolved)
+
+Read from function.c, stmt.c, expr.c, alias.c and haifa-sched.c of 2.95.3 with `-dS -dR
+-fsched-verbose-6` dumps (2026-11-09). The product of two rotations that mul_rotation.h writes
+(each row stored to a matrix local r and to a vector local x, y or z, then `*out = r`) leaves
+func_0014A8F8 two stores apart: after the third product retail stores 0x10, 0x20 (out's rows 1
+and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z before out's row 0.
+
+- **Why ours differs.** The five stores have priority 23; out's rows 1 and 2 hold the deaths of
+  the row values (weight -1) and go first, and the rest tie on dependents (seven each: every
+  later load through a pointer, `cam->f364` included, and the call), so INSN_LUID decides, and
+  z's store precedes `*out = r` in every form whose copy follows the rows.
+- **What retail's z is.** A MEM_SCALAR_P store at a fixed frame address does not conflict with
+  a structure member's load through a pointer (fixed_scalar_and_varying_struct_p, in
+  true_dependence and write_dependence_p alike), so it loses `cam->f364` (`mem/s:SF`) as a
+  dependent and goes last: with x, y and z as Vu0::Scalar's cast copies (`Q(r.r[i]) =
+  Q((s128)x)`), sched1 gives retail's exact order 0x80, 0x00, z, and the stores of rows 0 and 1
+  stay where retail has them (r's store first: its priority is higher, since the next row's
+  load waits for it and not for the scalar). Retail's slots are also where a scalar's slot goes:
+  0x90, 0xa0, 0xb0 are the top of the locals, above the inlined body's frame (r at 0x60), which
+  is where purge_addressof's put_reg_into_stack allocates a scalar whose ADDRESSOF escapes.
+- **Why no plain form gives them.** The three slots are distinct and each is stored before the
+  next row's load (a store made after that load anti-depends on it), so each must be made in its
+  own row's statement and outlive it. A cast copy's slot
+  (`assign_temp (type, 1, 1, 1)` in expand_expr's ADDR_EXPR, addr_taken) is freed when its
+  statement ends: g++ wraps each statement and each declaration's initialiser in
+  expand_start_target_temps (push_temp_slots plus expand_start_bindings, two levels) and
+  expand_assignment pushes a third, while preserve_temp_slots (expand_expr_stmt's, expand_decl_init's)
+  promotes an addr_taken slot one level at a time. Tried, all with one shared slot at 0x90 and a
+  frame 32 bytes short: the cast as Q's argument, as `*(const u128*)&(s128)x`, as an inline call's
+  `const s128&` argument statement (`SetRow(r.r[0], (s128)x)`), bound to a local reference or
+  pointer (`const s128& x = (s128)v;`, `const s128* x = &(s128)v;`), in the inline's body or
+  written in the caller, and as each row's own inline call returning `Q((s128)r)` (its frame is a
+  temporary of the statement). A `const u128&` bound to the product's rvalue is a register, and a
+  u128 local whose address only reaches Q or a `u128&` parameter is purged back into a register.
+  Three casts in one statement do get three slots (0x90, 0xa0, 0xb0), but made after the rows they
+  anti-depend on the row loads and are stored last. An escaping address does give the frame: a
+  probe whose x, y and z are written by an asm `sqc2` with an `"=m"` output (not a permitted
+  helper: the compiler emits sqc2) has retail's frame and first two groups, with z stored first
+  in the third group because an asm has no function unit. Sweeping the declaration order (r
+  before or after x, y, z) and the four ways to write each row's two stores (chained either way,
+  or a statement and a struct copy either way) gives 2 to 5 lines, never fewer.
+- **What would close it.** A plain construct that leaves a 16-byte scalar's address escaping
+  after CSE (so put_reg_into_stack gives it a scalar slot at the top of the frame) without code of
+  its own; the same construct would likely explain the varying store orders of mul_rotation.h's
+  other sites, which are one inline helper in the original.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences

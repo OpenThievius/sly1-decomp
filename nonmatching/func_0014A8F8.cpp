@@ -23,6 +23,15 @@
 // first, and the copy to basis still follows both row-2 stores (the same luid tie); written as a
 // chain, through a RotateRowsInto wrapper (*out = RotateRowsBy(...)) the same; initialising
 // basis with it changes the frame (79 lines); with RotateUntied the size differs.
+// (2026-11-09, w8-14A8F8) Retail's x, y, z are scalar slots (MEM_SCALAR_P): a scalar store at a
+// fixed address does not wait for or hold back cam->f364's member load, so z has one dependent
+// fewer and goes last. With x, y, z as cast copies (`Vu0::Q(r.r[i]) = Vu0::Q((s128)x)`, x a u128)
+// the third group is retail's (0x80, 0x00, z), but the copies share one slot (0x90; frame 32
+// bytes short): a cast copy's slot is freed when its statement ends, and every way tried to make
+// it outlive the statement failed. A probe with an asm sqc2 into escaped u128 locals (not a
+// permitted helper) gives retail's frame. Ruled out in detail, with the sweep of declaration
+// orders and row-store forms (2 to 5 lines): docs/TOOLCHAIN.md, "A rotation product's vector
+// slots are scalar".
 #include "common.h"
 #include "camera.h"
 #include "camera_controller.h"
