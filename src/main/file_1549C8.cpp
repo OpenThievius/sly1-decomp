@@ -3250,7 +3250,23 @@ void func_0015B7B8(ObjectCycler* self, s32 state)
 
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
-INCLUDE_ASM(func_0015BC78);
+void ConvertPositionToWorld(BaseObject* self, Quad16* out);
+
+void func_0015BC78(ObjectCycler* self)
+{
+    GroupForwardMessage loc;
+    if (self->receiver678 && self->f680 <= g_gameClock[1]) {
+        loc.f0 = 6;
+        if (self->source67C)
+            ConvertPositionToWorld(self->source67C, &loc.f20);
+        else
+            loc.f20 = *(Quad16*)&self->v140;
+        Vu0::Q(loc.f10) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
+        ((f32*)&loc.f10)[2] = 0.0f;
+        self->receiver678->desc->m1B(self->receiver678, &loc);
+        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+    }
+}
 
 struct ListedFrameItem {
     u8 pad00[0x18];

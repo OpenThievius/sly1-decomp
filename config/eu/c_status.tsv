@@ -1555,6 +1555,7 @@ func_0015B128	func_0015B3E0	match	rodata
 func_0015B4D0	func_0015B788	match	
 func_0015B720	func_0015B9D8	match	
 func_0015B7B8	func_0015BA70	match	rodata
+func_0015BC78	func_0015BF30	match	
 func_0015BD48	func_0015C000	match	
 func_0015BEF0	func_0015C1A8	match	
 func_0015C058	func_0015C310	match	
