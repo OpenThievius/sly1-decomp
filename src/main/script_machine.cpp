@@ -338,10 +338,162 @@ INCLUDE_DATA(D_00259958);
 INCLUDE_DATA(D_00259DE8);
 MarkStacks g_markStacks;
 
-INCLUDE_ASM(func_00112698);
-
-INCLUDE_ASM(func_00112968);
-
+ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue t;
+    InitScriptValue(&t);
+    s32 tag = args[0].tag;
+    R11B008Node* n;
+    if (args[1].tag == 0) {
+        n = 0;
+    } else {
+        ScriptValue* m = &args[1];
+        n = m->node;
+    }
+    switch (tag) {
+    case 0x14:
+    case 0x15: {
+        s32 isInt;
+        f32 sum;
+        if (tag == 0x14) {
+            sum = (f32)args[0].i;
+            isInt = 1;
+        } else {
+            sum = args[0].f;
+            isInt = 0;
+        }
+        for (; n != 0; n = n->next) {
+            if (n->tag == 0x14) {
+                sum = sum + (f32)n->i;
+            } else {
+                isInt = 0;
+                sum = sum + n->f;
+            }
+        }
+        if (isInt != 0) {
+            SetScriptValueInt(&t, (s32)sum);
+        } else {
+            SetScriptValueFloat(&t, sum);
+        }
+        break;
+    }
+    case 0x16: {
+        Vec02* v = (Vec02*)AcquireVectorAPayload();
+        *v = *(Vec02*)args[0].v;
+        for (; n != 0; n = n->next) {
+            Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), Vu0::Q(*(Vec02*)n->v));
+        }
+        SetScriptValueVectorA(&t, (f32*)v);
+        break;
+    }
+    case 0x17: {
+        Mat4A* m = (Mat4A*)AcquireMatrixPayload();
+        *m = *(Mat4A*)args[0].v;
+        for (; n != 0; n = n->next) {
+            f32* src = n->v;
+            ((f32*)m)[0] = ((f32*)m)[0] + src[0];
+            ((f32*)m)[1] = ((f32*)m)[1] + src[1];
+            ((f32*)m)[2] = ((f32*)m)[2] + src[2];
+            ((f32*)m)[3] = ((f32*)m)[3] + src[3];
+            ((f32*)m)[4] = ((f32*)m)[4] + src[4];
+            ((f32*)m)[5] = ((f32*)m)[5] + src[5];
+            ((f32*)m)[6] = ((f32*)m)[6] + src[6];
+            ((f32*)m)[7] = ((f32*)m)[7] + src[7];
+            ((f32*)m)[8] = ((f32*)m)[8] + src[8];
+            ((f32*)m)[9] = ((f32*)m)[9] + src[9];
+            ((f32*)m)[10] = ((f32*)m)[10] + src[10];
+            ((f32*)m)[11] = ((f32*)m)[11] + src[11];
+            ((f32*)m)[12] = ((f32*)m)[12] + src[12];
+            ((f32*)m)[13] = ((f32*)m)[13] + src[13];
+            ((f32*)m)[14] = ((f32*)m)[14] + src[14];
+            ((f32*)m)[15] = ((f32*)m)[15] + src[15];
+        }
+        SetScriptValueMatrix(&t, (f32*)m);
+        break;
+    }
+    }
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
+    return ret;
+}
+ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue t;
+    InitScriptValue(&t);
+    s32 tag = args[0].tag;
+    R11B008Node* n;
+    if (args[1].tag == 0) {
+        n = 0;
+    } else {
+        ScriptValue* m = &args[1];
+        n = m->node;
+    }
+    switch (tag) {
+    case 0x14:
+    case 0x15: {
+        s32 isInt;
+        f32 sum;
+        if (tag == 0x14) {
+            sum = (f32)args[0].i;
+            isInt = 1;
+        } else {
+            sum = args[0].f;
+            isInt = 0;
+        }
+        for (; n != 0; n = n->next) {
+            if (n->tag == 0x14) {
+                sum = sum - (f32)n->i;
+            } else {
+                isInt = 0;
+                sum = sum - n->f;
+            }
+        }
+        if (isInt != 0) {
+            SetScriptValueInt(&t, (s32)sum);
+        } else {
+            SetScriptValueFloat(&t, sum);
+        }
+        break;
+    }
+    case 0x16: {
+        Vec02* v = (Vec02*)AcquireVectorAPayload();
+        *v = *(Vec02*)args[0].v;
+        for (; n != 0; n = n->next) {
+            Vu0::Q(*v) = Vu0::Sub(Vu0::Q(*v), Vu0::Q(*(Vec02*)n->v));
+        }
+        SetScriptValueVectorA(&t, (f32*)v);
+        break;
+    }
+    case 0x17: {
+        Mat4A* m = (Mat4A*)AcquireMatrixPayload();
+        *m = *(Mat4A*)args[0].v;
+        for (; n != 0; n = n->next) {
+            f32* src = n->v;
+            ((f32*)m)[0] = ((f32*)m)[0] - src[0];
+            ((f32*)m)[1] = ((f32*)m)[1] - src[1];
+            ((f32*)m)[2] = ((f32*)m)[2] - src[2];
+            ((f32*)m)[3] = ((f32*)m)[3] - src[3];
+            ((f32*)m)[4] = ((f32*)m)[4] - src[4];
+            ((f32*)m)[5] = ((f32*)m)[5] - src[5];
+            ((f32*)m)[6] = ((f32*)m)[6] - src[6];
+            ((f32*)m)[7] = ((f32*)m)[7] - src[7];
+            ((f32*)m)[8] = ((f32*)m)[8] - src[8];
+            ((f32*)m)[9] = ((f32*)m)[9] - src[9];
+            ((f32*)m)[10] = ((f32*)m)[10] - src[10];
+            ((f32*)m)[11] = ((f32*)m)[11] - src[11];
+            ((f32*)m)[12] = ((f32*)m)[12] - src[12];
+            ((f32*)m)[13] = ((f32*)m)[13] - src[13];
+            ((f32*)m)[14] = ((f32*)m)[14] - src[14];
+            ((f32*)m)[15] = ((f32*)m)[15] - src[15];
+        }
+        SetScriptValueMatrix(&t, (f32*)m);
+        break;
+    }
+    }
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
+    return ret;
+}
 INCLUDE_RODATA(jtbl_00248FE0);
 INCLUDE_RODATA(jtbl_00249000);
 INCLUDE_RODATA(jtbl_00249020);
