@@ -139,29 +139,6 @@ void BuildRotationBetweenVectors(Vec02* from, Vec02* to, Mat02* out);
 void OrthonormalizeMatrix(Mat02* m);
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
 
-// a + s.x * b + t.x * c + u.x * d: MulAddX2 with a third weighted vector (vadda.xyzw ACC, a,
-// vf0; two vmaddax.xyzw ACC; vmaddx.xyzw), its one use in retail. Each weight is listed before
-// its vector, as the sum reads (vel + rel * b + drag * vel + bend * c): an inline call emits its
-// arguments in parameter order, so drag's slot store comes before the second load of the
-// velocity, which delays the sum by one insn and gives retail's VU0 registers
-// (docs/TOOLCHAIN.md, "A weight listed before its vector"). The asm's operands keep the order
-// a, b, s, c, t, d, u, which decides which input's register the result takes.
-static inline u128 MulAddX3(u128 a, u128 s, u128 b, u128 t, u128 c, u128 u, u128 d)
-{
-    u128 r;
-    __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddax.xyzw ACC, %2, %3x\n\tvmaddax.xyzw ACC, %4, %5x\n\t"
-            "vmaddx.xyzw %0, %6, %7x"
-            : "=j"(r) : "j"(a), "j"(b), "j"(s), "j"(c), "j"(t), "j"(d), "j"(u));
-    return r;
-}
-
-static inline Vu0::Vec MulAddX3(Vu0::Vec a, Vu0::Vec s, Vu0::Vec b, Vu0::Vec t, Vu0::Vec c, Vu0::Vec u, Vu0::Vec d)
-{
-    Vu0::Vec r;
-    r.q = MulAddX3(a.q, s.q, b.q, t.q, c.q, u.q, d.q);
-    return r;
-}
-
 // The clock's step, read through the clock's address.
 static inline const f32& ClockStep(const f32* clock) { return clock[2]; }
 // The product a b of two rotations, returned (g++'s named return value, so that the rows are
@@ -278,7 +255,7 @@ void func_001DDE90(RedirectObject* self)
             drag = one <? drag;
             f32 bend = self->bendStiffness * angle * h;
             *(Vec*)&c = Vu0::Cross(Vec::Of(axis), Vec::Of(a));
-            *(Vec*)&step->vel = MulAddX3(Vec::Of(step->vel), Vec::Scalar(rel), Vec::Of(b), Vec::Scalar(drag),
+            *(Vec*)&step->vel = Vu0::MulAddX3(Vec::Of(step->vel), Vec::Scalar(rel), Vec::Of(b), Vec::Scalar(drag),
                                              Vec::Of(step->vel), Vec::Scalar(bend), Vec::Of(c));
             *(Vec*)&step->pos = Vu0::MulAddX(Vec::Of(step->pos), Vec::Of(step->vel), Vec::Scalar(h));
             d = a;
