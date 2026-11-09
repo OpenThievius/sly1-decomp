@@ -42,7 +42,6 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_eu_001AB370](eu/func_eu_001AB370.cpp) | eu | 89.2% | 2026-11-09 |
 | [func_0017B8C0](func_0017B8C0.cpp) | us | 89.2% | 2026-11-09 |
 | [func_00199698](func_00199698.cpp) | us | 89.1% | 2026-11-09 |
-| [func_001BBC38](func_001BBC38.cpp) | us | 89.1% | 2026-11-09 |
 | [func_0015BC78](func_0015BC78.cpp) | us | 88.9% | 2026-11-09 |
 | [func_00183668](func_00183668.cpp) | us | 88.8% | 2026-11-09 |
 | [func_001BC978](func_001BC978.cpp) | us | 88.7% | 2026-11-09 |

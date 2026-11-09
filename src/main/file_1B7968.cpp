@@ -1947,8 +1947,6 @@ s32 RequestColliderLaunch(Collider* self)
 
 s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
 
-INCLUDE_ASM(func_001BBC38);
-
 struct MeshMotion {
     Vec02* velocity;
     Vec02* accel;
@@ -1961,6 +1959,72 @@ struct MeshFace {
     u8 pad14[0xA];
     u16 ref;
 };
+
+// An edge of a collision mesh (Mesh03::edges, 0x10 bytes): its two vertices and the two
+// faces it joins.
+struct MeshEdge {
+    s16 verts[2];           // 0x00
+    s16 faces[2];           // 0x04
+    u8 pad08[0x10 - 0x08];
+};
+
+void* AllocateZeroedBackMemory(s32 size);
+
+// Builds the collider's hook: two zeroed vectors per vertex, and the three vertex indices of
+// each face gathered from the edges that bound it, then wound to face along the face's
+// normal.
+void func_001BBC38(Collider* self)
+{
+    Vec02 e1;
+    Vec02 e2;
+    Vec02 n;
+    if (self->hook != 0) {
+        return;
+    }
+    PushBackMemoryMark();
+    MeshMotion* h = (MeshMotion*)AllocateFrontMemory(0xC);
+    self->hook = h;
+    h->velocity = (Vec02*)AllocateZeroedFrontMemory(self->meshCopy.vertCount * 16);
+    h->accel = (Vec02*)AllocateZeroedFrontMemory(self->meshCopy.vertCount * 16);
+    h->tris = (MeshMotion::Tri*)AllocateZeroedFrontMemory(self->meshCopy.faceCount * 12);
+    s32* counts = (s32*)AllocateZeroedBackMemory(self->meshCopy.faceCount * 4);
+    MeshMotion::Tri* tri;
+    s32 f;
+    for (s32 i = 0; i < self->meshCopy.edgeCount; i++) {
+        MeshEdge* e = &((MeshEdge*)self->meshCopy.edges)[i];
+        for (s32 j = 0; j < 2; j++) {
+            f = e->faces[j];
+            tri = &h->tris[f];
+            for (s32 k = 0; k < 2; k++) {
+                s32 v = e->verts[k];
+                s32 m;
+                for (m = 0; m < counts[f]; m++) {
+                    if (v == tri->i[m]) {
+                        break;
+                    }
+                }
+                if (m >= counts[f] && m < 3) {
+                    tri->i[counts[f]] = v;
+                    counts[f]++;
+                }
+            }
+        }
+    }
+    Vec02* verts = (Vec02*)self->mesh.verts;
+    for (f = 0; f < self->meshCopy.faceCount; f++) {
+        tri = &h->tris[f];
+        MeshFace* face = &((MeshFace*)self->mesh.faces)[f];
+        Vu0::Q(e1) = Vu0::Sub(Vu0::Q(verts[tri->i[1]]), Vu0::Q(verts[tri->i[0]]));
+        Vu0::Q(e2) = Vu0::Sub(Vu0::Q(verts[tri->i[2]]), Vu0::Q(verts[tri->i[0]]));
+        Vu0::Q(n) = Vu0::Cross(Vu0::Q(e1), Vu0::Q(e2));
+        if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(n), Vu0::Q(face->normal))) < 0.0f) {
+            s32 b = tri->i[1];
+            tri->i[1] = tri->i[2];
+            tri->i[2] = b;
+        }
+    }
+    PopBackMemoryMark();
+}
 
 void func_001BBEB8(Collider* self, f32 dt)
 {
