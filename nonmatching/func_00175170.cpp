@@ -32,7 +32,7 @@ extern f32 D_0026399C;
 extern f32 D_002639A0[4];
 extern f32 D_002639B0[2];
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
-extern Obj_2639B8 D_002639B8;
+extern s32 D_002639B8;
 extern f32 g_unitRange[];
 
 void func_001C61E0(void* self, s32 arg);
@@ -142,6 +142,8 @@ static inline void StopPlayerAnimation(Player* self)
         self->f2234 = 0;
     }
 }
+
+template <class T> static inline Vu0::Vec& AsVec_175170(T& v) { return *(Vu0::Vec*)&v; }
 
 // v made unit length, or fallback when shorter than 0.0001, the fallback in the first arm
 // (as player_path.cpp's).
@@ -652,7 +654,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 }
                 TransformDirectionBetweenFrames(AT(void*, track, 0x18), 0, &tan, &dir);
                 dir.z = 0.0f;
-                Vu0::Q(dir) = NormalizeOrElse_175170(Vu0::Vec::Of(dir), Vu0::Vec::Of(g_unitXVector)).q;
+                AsVec_175170(dir) = NormalizeOrElse_175170(Vu0::Vec::Of(dir), Vu0::Vec::Of(g_unitXVector));
                 s32 back = 1;
                 if (!(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(dir), Vu0::Q(self->m110.r[0]))) < D_00263990)) {
                     back = 0;
@@ -1315,9 +1317,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 37:
         case 38:
             flag = 0;
-            self->f630 = self->f638 = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
+            self->f638 = self->f630 = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
             anim = self->f109C[sub];
-            if (D_002639B8.f0 != 0) {
+            if (D_002639B8 != 0) {
                 speed = 0.0f;
             }
             break;
@@ -1353,7 +1355,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->desc02()->m20(self, &v);
             v.z = 0.0f;
             Vu0::Vec len = NormalizeInPlace_175170(v, D_00248D30);
-            f32 k = Vu0::ToFloat(len) / self->radius3CC;
+            f32 k = Vu0::ToFloatMoved(len) / self->radius3CC;
             Vec02 spin;
             Vu0::Q(spin) = Vu0::FromFloats(-k * v.y, k * v.x, 0.0f);
             self->desc02()->m21(self, &spin);
