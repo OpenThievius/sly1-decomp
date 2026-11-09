@@ -1224,6 +1224,43 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
   local in memory, which the helpers do not have.
 
+### The weight slot of func_00181078 (ruled out in plain C++)
+
+Read from alias.c, function.c, stmt.c and expr.c and the `-dS -fsched-verbose-6` dumps
+(2026-11-08). func_00181078 computes `d = (Rotate(m, v) - v) * D` with the weight in a 16-byte
+slot that the axis of MatrixToAxisAngle reuses (80(sp)); the near miss differs only around it.
+
+- **What sched1 must do.** Retail's weight takes vf5 and the product takes the difference's
+  register, so in sched1's order the weight's slot store comes after the vmulx: local-alloc then
+  ranks row 1 before the weight (the weight lives longer) and the product does not tie to it.
+  After the call before them, the memory unit issues row 0, row 1, row 2, v (priority 30) and
+  then one of the loads of `self->fBC0`, `fBCC`, `fBD0` (26, 26, 25) or the slot store per
+  cycle; the vmulx issues two cycles after row 2. The store (weight 0 or -1) beats an equal
+  load (+1), so it must rank below all three: priority 24 or less. Its priority is 26 because
+  the loads of the `parent` fields passed to TransformDirectionBetweenFrames (`lw a0, 24(v1)`,
+  `lw a1, 24(v0)`, 24) depend on it: a pointer loaded from memory has no known base, so
+  base_alias_check cannot separate it from the frame.
+- **Insn order cannot do it.** With the loads before the store in the insn order, the store
+  anti-depends on them, in sched1 and (its LOG_LINKS kept) in sched2, where retail stores before
+  `lw a0`. Only fixed_scalar_and_varying_struct_p separates them: the loads as members
+  (`((PlacedObject*)p)->parent`, `mem/s`) and the store MEM_SCALAR_P at a fixed address. With
+  `u128 k` (a scalar local whose address is passed, so purged to a scalar slot) the whole block
+  is retail's, and only the frame differs: purge_addressof puts k after the aggregates (144),
+  where retail has it at 80, between d and m2.
+- **No plain form gives a scalar-flagged slot in expansion order.** MEM_SCALAR_P comes from
+  MEM_SET_IN_STRUCT_P (x, 0): expand_decl for a non-aggregate on the stack (never a TImode
+  local: it is a pseudo unless TREE_ADDRESSABLE at its declaration, and g++ 2.95 expands each
+  declaration before its address is taken, so `&k` gives an ADDRESSOF), put_reg_into_stack (at
+  purge time, after the aggregates), assign_temp for a non-aggregate with memory_required: an
+  asm input that allows only memory given a register (the asm then reads the slot, so the store
+  must precede it: tried, the store stays first) and ADDR_EXPR of a value in a register (g++
+  marks a reference temporary addressable, and purge_addressof folds it back into a register:
+  no store at all). A 16-byte argument is passed in a register here, not by invisible
+  reference (no copy in integrate.c or calls.c). Vu0::Slot is an aggregate and `Q(t) = x` has
+  neither flag. So retail's slot behaves as a scalar-flagged 16-byte temporary that nothing
+  reads, a construct the project's helpers do not have; func_00149760's case 2 met the same
+  limit and got around it by insn order, which this function's later loads forbid.
+
 ### A weighted sum's operands in insn order (func_00191570)
 
 An inline call evaluates its arguments in two passes (integrate.c, expand_inline_function):
