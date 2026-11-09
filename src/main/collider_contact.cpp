@@ -234,7 +234,8 @@ struct MeshEdge {
         s16 v[2];           // 0x00
     };
     s16 face[2];            // 0x04: the faces on either side (func_00186BA8)
-    u8 pad08[0x10 - 8];
+    MeshEdge* next;         // 0x08: the next edge of a face's list (func_00186568)
+    u8 pad0C[0x10 - 0xC];
 };
 
 // A face of a collision mesh (Mesh03::faces, 0x20 bytes): its plane, then flags (8 marks a face
@@ -242,8 +243,9 @@ struct MeshEdge {
 struct MeshFace {
     Vec02 normal;           // 0x00
     f32 dist;               // 0x10
-    u8 pad14[0x1C - 0x14];
-    u16 flags;              // 0x1C
+    MeshEdge* edges;        // 0x14: the edges that bound it, linked by next (func_00186568)
+    u8 pad18[0x1C - 0x18];
+    u16 flags;              // 0x1C: 1 the face may be hit, 2 its edges are collected (func_00186568)
     u8 pad1E[2];
 };
 
@@ -296,7 +298,61 @@ s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* o
     return total;
 }
 
-INCLUDE_ASM(func_00186568);
+// A face a sweep may hit, in the list func_00186568 is given (12 bytes each).
+struct FaceRef {
+    MeshFace* face;         // 0x00
+    u8 pad04[0x0C - 4];
+};
+
+// Collects the hits of the collider's tree on the edges of the listed faces: marks each listed
+// face whose bounding sphere (the mesh's point and radius word for the face, grown by the
+// collider's radius) reaches the collider's centre, then for each marked face not done yet runs
+// CollectTreeNodeSpans on each edge whose far face is marked too, recording the edge in the
+// hits it adds, and clears both marks at the end. Returns the number of hits.
+s32 func_00186568(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap, MeshHit* out)
+{
+    s32 i;
+    MeshFace* f;
+    s32 total = 0;
+    s32 filled = 0;
+    u8* verts = (u8*)other->meshCopy.verts;
+    MeshFace* faces = (MeshFace*)other->meshCopy.faces;
+    for (i = n; --i >= 0; ) {
+        f = list[i].face;
+        s32 k = f - faces;
+        f32 reach = self->radius3CC + ((f32*)other->meshCopy.words)[k];
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((Vec02*)other->meshCopy.points)[k]));
+        if (!(reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
+            f->flags |= 1;
+        }
+    }
+    for (i = n; --i >= 0; ) {
+        f = list[i].face;
+        if (f->flags & 1) {
+            if (f->flags & 2) {
+                continue;
+            }
+            f->flags |= 2;
+            for (MeshEdge* e = f->edges; e != 0; e = e->next) {
+                MeshFace* far = &faces[e->face[1]];
+                if (!(far->flags & 1)) {
+                    continue;
+                }
+                total += CollectTreeNodeSpans(self->tree.nodes, verts + e->x * 16, verts + e->y * 16, 0, cap - total, &out[total]);
+                if (filled < total) {
+                    for (; filled < total; filled++) {
+                        out[filled].edge = e;
+                    }
+                }
+            }
+        }
+    }
+    for (i = n; --i >= 0; ) {
+        f = list[i].face;
+        f->flags &= 0xFFFC;
+    }
+    return total;
+}
 
 void* MoveMemory(void* dst, void* src, s32 size);
 
@@ -433,7 +489,6 @@ done:
     return n;
 }
 
-s32 func_00186568(Collider* a, Collider* b, void* c, void* d, s32 cap, MeshHit* out);
 void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* t, f32* depth, Vec02* normal);
 
 // The dot product of two vectors as a float, the vectors passed as values (each a movti copy
@@ -470,7 +525,7 @@ void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx,
     MeshHit* e;
 
     counts[0] = CollectEdgeContacts((s32)other, self, ctx, 0x80, hits[0]);
-    counts[1] = func_00186568(self, other, a2, a3, 0x80, hits[1]);
+    counts[1] = func_00186568(self, other, (s32)a2, (FaceRef*)a3, 0x80, hits[1]);
     if (counts[0] == 0 && counts[1] == 0) {
         return;
     }

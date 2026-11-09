@@ -332,10 +332,20 @@ void FinishHitCountCollider(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-INCLUDE_ASM(func_001C3EB0);
+void func_001C3EB0(s32 c, void* receiver)
+{
+    PlacedObject* from = (PlacedObject*)c;
+    PlacedObject* to = (PlacedObject*)receiver;
+    Vec02 d;
+    Vec02 v;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(from->v140));
+    d.z = 0.0f;
+    u128 s = Vu0::ScalarAt(D_00274AB4);
+    Vu0::Set(v, Vu0::MulX(Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), s));
+    to->desc02()->m20(to, &v);
+}
 
 void InitOwnerMessage(void* self, s32 a, s32 b);
-void func_001C3EB0(s32 c, void* receiver);
 
 void SendHitCountColliderRequest(HitCountCollider* self, s32 value)
 {

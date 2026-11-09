@@ -235,7 +235,57 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
 
 INCLUDE_ASM(func_001C4C20);
 
-INCLUDE_ASM(func_001C4D60);
+// A face of a collision mesh as func_001C4D60 reads it: its plane, the normal and the distance.
+struct MeshFace {
+    Vec02 normal;           // 0x00
+    f32 d;                  // 0x10
+    u8 pad14[0x20 - 0x14];
+};
+
+void ClearRootObjectStateBits(World* a, void* self, s32 n);
+void func_001BBEB8(TurningCollider* self, f32 t);
+
+// The point is a Vu0::Vec value: its temporaries are stores in the plane loop when CSE runs,
+// so cse_around_loop keeps the loop's own read of the face count, which GCSE and loop.c turn
+// into retail's `move a3,v0`. `changed = 0` after the pointers keeps jump.c from hoisting
+// `changed = 1` above the test of `other` (docs/TOOLCHAIN.md).
+void func_001C4D60(TurningCollider* self, Collider* other, s32 all)
+{
+    if (other == self->f6DC) {
+        return;
+    }
+    s32 changed;
+    if (other == 0) {
+        changed = 1;
+    } else {
+        Vec02* vel = *(Vec02**)self->hook;
+        Vec02* out = (Vec02*)self->mesh.verts;
+        Vec02* in = (Vec02*)other->mesh.verts;
+        changed = 0;
+        for (s32 i = 0; i < other->mesh.vertCount; i++) {
+            Vu0::Vec p = Vu0::Add(Vu0::Vec::Of(other->pos), Vu0::Rotate(other->rot, Vu0::Vec::Of(in[i])));
+            if (all == 0) {
+                for (s32 j = 0; j < other->mesh.faceCount; j++) {
+                    MeshFace* f = &((MeshFace*)self->mesh.faces)[j];
+                    if (Vu0::ToFloat(Vu0::Dot(p, Vu0::Vec::Of(f->normal))) - f->d > 1.0f) {
+                        goto next;
+                    }
+                }
+            }
+            changed = 1;
+            Vu0::Q(out[i]) = p.q;
+            vel[i] = D_00248D30;
+        next:;
+        }
+    }
+    if (changed) {
+        ClearRootObjectStateBits(self->world, self, 7);
+        if (self->hook != 0) {
+            func_001BBEB8(self, 0.0f);
+        }
+    }
+    self->f6DC = other;
+}
 
 
 void UpdateSwitchedCollider(void* self);

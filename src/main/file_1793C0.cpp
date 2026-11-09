@@ -16,6 +16,7 @@
 #include "game_progress.h"
 #include "attachment.h"
 #include "mul_rotation.h"
+#include "memory_card.h"
 
 // Classes 0x1B, 0x4A and 0x4B (the countdown). Its .rodata is func_0017ABE8's FLT_MAX literal
 // at 0x24AFF4; its .data runs from 0x263AC0 to 0x263E34, in retail's order.
@@ -879,7 +880,7 @@ extern f32 g_gameTime;
 
 void UpdateCollider(void* self);
 void StopAnimationPlayer(void* p);
-void SetCountdownState(void* self, s32 state);
+void SetCountdownState(CountdownCollider* self, s32 state);
 void FadeOutAndQueueMovie(s32 n);
 
 void UpdateCountdown(CountdownCollider* self)
@@ -968,4 +969,33 @@ s32 HandleCountdownObjectEvent(CountdownCollider* self, ObjectEvent* msg)
     return HandleObjectEvent(self, msg);
 }
 
-INCLUDE_ASM(func_0017B8C0);
+void MarkLevelDone(s32 n);
+void StartMemoryCardSave(MemoryCard* card);
+
+void SetCountdownState(CountdownCollider* self, s32 state)
+{
+    if (state == self->mode) {
+        return;
+    }
+    D_00263E2C = -1;
+    switch (state) {
+    case 1:
+        {
+            T217D_2E0* bar = &g_gaugeBarElement;
+            bar->f26C = bar->f260 = 4;
+            bar->f270 = bar->f264 = 4;
+            bar->f268 = 0x10;
+            bar->fillTarget = 1.0f;
+            bar->fill = 0.0f;
+            bar->changedAt = -1.0f;
+        }
+        SetWorldActiveFollower(self->world, self);
+        break;
+    case 2:
+        MarkLevelDone(5);
+        StartMemoryCardSave(&g_memoryCard);
+        break;
+    }
+    self->mode = state;
+    self->startTime = g_gameClock[1];
+}
