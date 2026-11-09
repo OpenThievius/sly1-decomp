@@ -1935,6 +1935,7 @@ func_0017B998	func_0017BFF8	match
 func_0017B9D0	func_0017C030	match	
 func_0017BB78	func_0017C1D8	match	
 func_0017BC20	func_0017C280	match	
+func_0017C428	func_0017CA88	match	rodata
 func_0017C660	func_0017CCC0	match	
 func_0017C718	func_0017CD78	match	
 func_0017CDA8	func_0017D408	match	

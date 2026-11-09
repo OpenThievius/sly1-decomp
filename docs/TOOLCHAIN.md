@@ -2041,6 +2041,36 @@ dumps, 2026-11-09, still a near miss):
   `.sched` dump's "life shortened/extended" line for that pseudo, the pseudo had a constant
   REG_EQUIV at some point, and every insn of its sched1 life counts twice.
 
+### The leading equal constants double again: a switch's default first (func_0017C428)
+
+- update_equiv_regs doubles REG_LIVE_LENGTH once for every set, in insn order, whose
+  REG_EQUAL constant equals the first one recorded, until a set without a note or with
+  another constant calls no_equiv (which never halves it back). Two leading `x = 1` sets
+  give four times sched1's life, three give eight. A switch's case bodies are in source
+  order, so the order of its cases decides which constant sets come first.
+- func_0017C428 (CheckQueueEntryDone) sets its result in every case (17 sets, 19 refs,
+  sched1 life 68). With `default: done = 1;` last, the first set in insn order is case 4's
+  `done = 1` and the second its `done = 0`: one doubling, 4*19/136 = 0.559, above the entry
+  pointer's 2*5/24 = 0.417, so the result took s2 and the entry s3, retail's the other way
+  round. With the default written first, its `done = 1` and case 4's come first: 272 insns,
+  0.279, and the entry takes s2. The default's body is not where it was written: jump2
+  cross-jumps it into the `done = 1` that ends case 12 and falls into the return (the
+  jump table's entries 10, 11 and the range check then reach the end of the function, as
+  in retail), so the layout gives no sign of it. Explicit `case 10: case 11:` bodies
+  instead make GCC set `done = 1` before the switch.
+- Case 12's shape follows from the same cross-jumping: `if (a) done = 0; else if (b)
+  { call; done = 1; } else done = 1;` keeps `done = 0` in its arm (jump.c's "`if (...)
+  { x = a; goto l; } x = b;` to `x = a; if (...) goto l; x = b;`" no longer applies,
+  because the arm is not followed by a set of done), so jump2 merges it with the float
+  cases' shared `done = 0; goto` tail. That label between the `bc1t` and `done = 0` stops
+  reorg's optimize_skip (which turns "branch over one insn followed by a jump to the same
+  label" into an inverted, annulled branch-likely): retail's `bc1t` takes the return's
+  `move v0` from its target instead. relax_delay_slots then sends the branches whose
+  target `done = 1` is already done in a delay slot past it (redundant_insn).
+- Diagnosing it: two variables whose registers are swapped where the .lreg life of one is
+  2^k times its .sched life; count the leading equal constants in insn order (`grep` the
+  `.lreg` dump for the pseudo's sets) and reorder the cases or arms that set them.
+
 ### Local allocation's ranking (func_00149760)
 
 - block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),

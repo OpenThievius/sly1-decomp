@@ -172,11 +172,80 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 INCLUDE_RODATA(jtbl_0024B000);
 INCLUDE_ASM(func_0017BCD0);
 
-INCLUDE_RODATA(jtbl_0024B030);
-INCLUDE_ASM(func_0017C428);
+extern f32 D_0026185C;
+void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
+void StopAnimationPlayer(void* p);
+void SetPlayerState(Player* self, s32 a, s32 b);
+
+s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
+{
+    s32 done;
+    Player* pl = (Player*)self->f3C;
+    void* obj = FindFirstObjectById(pl->world, 0x104, e->id, self->f4C);
+    switch (e->kind) {
+    default:
+        done = 1;
+        break;
+    case 4:
+        done = e->valueF < D_0026185C - self->f44;
+        break;
+    case 5:
+        done = pl->f2220 != 2;
+        break;
+    case 6: {
+        if (obj == 0) {
+            done = 1;
+            break;
+        }
+        Vec02 pos;
+        GetNodeAnchorAndHeading(self, (BaseObject*)obj, &pos, 0);
+        Vu0::Vec gap = Vu0::Sub(Vu0::Vec::Of(pl->v140), Vu0::Vec::Of(pos));
+        done = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(gap, gap))) < D_00263E38;
+        break;
+    }
+    case 7:
+        done = __builtin_fabsf(pl->f2410 - self->f64) < D_00263E3C;
+        break;
+    case 9: {
+        void* p = self->f50;
+        done = p == 0 || ((f32*)p)[6] == 0.0f;
+        if (done && p != 0) {
+            StopAnimationPlayer(p);
+            self->f50 = 0;
+        }
+        break;
+    }
+    case 8:
+        switch (e->value) {
+        case 2:
+            done = pl->f223C == -1;
+            break;
+        case 4:
+            done = pl->f2220 != 2;
+            break;
+        case 8:
+            done = pl->f2220 != 10;
+            break;
+        default:
+            done = 1;
+            break;
+        }
+        break;
+    case 12:
+        if (pl->f2220 == 2 && (u32)(pl->f2228 - 12) < 2) {
+            done = 0;
+        } else if (pl->f2220 == 6 && (u32)pl->f239C < 2) {
+            SetPlayerState(pl, 0, -1);
+            done = 1;
+        } else {
+            done = 1;
+        }
+        break;
+    }
+    return done;
+}
 
 void StartNextQueueEntry(EntryQueue* self);
-s32 CheckQueueEntryDone(EntryQueue* self, void* item);
 
 void AdvanceEntryQueue(EntryQueue* self)
 {
@@ -188,13 +257,11 @@ void AdvanceEntryQueue(EntryQueue* self)
             break;
         StartNextQueueEntry(self);
     }
-    if (self->f48 && CheckQueueEntryDone(self, self->f48))
+    if (self->f48 && CheckQueueEntryDone(self, (QueueEntry*)self->f48))
         self->f48 = 0;
 }
 
-void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
 s32 ChoosePlayerTargetByCost(Player* self, void* target);
-void SetPlayerState(Player* self, s32 a, s32 b);
 f32 WrapAngle(f32 a);
 void ProjectPointToCamera(Camera* self, Vec02* in, Vec02* out);
 extern f32 g_gameTime;
@@ -393,7 +460,6 @@ void BindEntryQueueToObject(void* a0, void* a1)
 }
 
 
-void StopAnimationPlayer(void* p);
 void SetGameClockScale(f32 x);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 void ClearPadSelectFlags(s32 n);

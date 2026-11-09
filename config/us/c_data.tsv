@@ -30,7 +30,7 @@ D_0024A7F0	0024A7F0	88	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	1888	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
-D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
+D_0024B000	0024B000	36	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	176	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	12	.rodata	src/main/file_180EB0.cpp
 D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
