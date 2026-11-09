@@ -2068,7 +2068,15 @@ void InitTempoAgent(TempoAgent* self)
     D_00275DBC = 0;
 }
 
-INCLUDE_ASM(func_001EBF40);
+s32 ResolveAgentClip(void* self, s32 id);
+void LoadAgent(Agent* self, void* reader);
+void LoadTempoAgent(TempoAgent* self, void* reader)
+{
+    LoadAgent(self, reader);
+    for (s32 i = 0; i < 4; i++) {
+        self->fC10[i] = ResolveAgentClip(self, D_00275CF8[i]);
+    }
+}
 
 void StartTempoAgent(TempoAgent* self)
 {

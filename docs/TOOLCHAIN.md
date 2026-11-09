@@ -2659,6 +2659,24 @@ TurnColliderTowardRotation (2026-11-09):
 - Same rule as func_0018AD88: an argument register retail never mentions can still be a
   parameter, here a float one, found from the callee's reads ($f12) and the caller's call.
 
+### A Load method's reader, passed on, ranks self below the counter (func_001EBF40)
+
+- LoadTempoAgent (slot 10 of class 0x13) calls LoadAgent and resolves four clip ids into
+  fC10 in a loop that loop.c reverses (`li s2,3` ... `bgez s2`). Written as `(TempoAgent*
+  self)` it was retail's code with self and the counter in s2 and s3 swapped. global-alloc
+  ranked 133 (the out pointer, 14/12), 135 (the id pointer, 14/18), self (5 refs: 2*5/15 =
+  0.667) and the counter (7 refs; its `i = 3` carries a REG_EQUAL constant, so
+  update_equiv_regs doubles its life 14 to 28: 2*7/28 = 0.5) in that order.
+- Load methods take a reader as their second parameter: LoadAgent passes its $a1 on to
+  LoadCollider untouched, and LoadCollider reads it. With `(TempoAgent* self, void* reader)`
+  passed on to `LoadAgent(self, reader)`, the copy of $a1 into its pseudo and back is one
+  more candidate before the call: sched1 now issues the counter's `i = 3` after the call
+  (its life 11, doubled 22, crossing one call instead of two) and self spans 16. The counter
+  (2*7/22 = 0.636) ranks above self (2*5/16 = 0.625) and takes s2: EXACT. The reader's
+  copies vanish in reload, as in
+  func_0018AD88 and func_00161B10: check what the callee reads before trusting a
+  signature that drops a parameter.
+
 ### A passed-on argument register is set twice, so adjust_priority leaves it (func_001A0C98)
 
 - **The symptom.** InitCameraSpaceEffect (slot 0 of the kind-16 effect table) keeps the place
