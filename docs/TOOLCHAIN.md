@@ -1246,6 +1246,43 @@ order (2026-11-08):
   above (a read first leaves the two loads swapped; with the single call, b first swaps their
   registers).
 
+### A Scalar slot against a load through a loaded pointer (func_001D87C8)
+
+Read from alias.c, function.c, integrate.c, reorg.c and resource.c and the `-dS`
+dumps (2026-11-08, still a near miss):
+
+- **What retail shows.** In AdvancePathFollowerAlongPath the two weights of `lo = pos + dir *
+  range.lo; hi = pos + dir * range.hi;` share the slot at 0x120, and the call after them takes
+  `self->f848->curve`. Retail loads f848 between the sums, stores the lo weight after the three
+  result stores, then loads `->curve` (`lw a0, 52(v0)`) and stores the hi weight last, in the
+  call's delay slot. Reorg fills a call's slot backward only past insns that touch no memory and
+  never forward with a store (the call sets memory, resource.c), so in sched2's input the hi
+  store came after the curve load and the lo store before it. After reload a frame slot is
+  `sp + n`, which varies (rtx_varies_p) and conflicts with a load through a hard register of no
+  known base, so sched2 keeps the order sched1 gave them: sched1 put the curve load between the
+  two slot stores.
+- **Why ours does not.** sched1 can do that only if the curve load does not depend on the hi
+  store. The load's address is a pointer loaded from memory, of no known base, so
+  base_alias_check cannot separate it from a frame address, and the slot store (`Q(t) = ...`, a
+  `u128*` store) has neither MEM flag: the load depends on both slot stores, which inherit its
+  priority and go first; the f848 load (same priority, weight +1) then loses its memory cycle to
+  the result stores. Without the slot stores (FromFloatAt alone, as an experiment) f848 is
+  loaded in retail's cycle. The only rule that would separate them is
+  fixed_scalar_and_varying_struct_p, with the slot MEM_SCALAR_P.
+- **No scalar temporary stays in memory.** A u128 temporary bound to a `const u128&` (an inline
+  parameter, a local reference, a template helper), a by-value parameter whose address is taken,
+  or a local read through a pointer is a VAR_DECL that put_var_into_stack gives an ADDRESSOF
+  (`mem/f`, scalar), and purge_addressof folds every one back into a register: the slot
+  disappears (the frame is 16 bytes smaller). A scalar stays in a stack slot only if it is
+  TREE_ADDRESSABLE when expand_decl runs, its ADDRESSOF escapes, or expand_expr takes the
+  address of a value in a register (`assign_temp (type, 1, 1, 1)`, scalar for a scalar type);
+  none of these comes from a plain helper, and an aggregate's slot (Slot, a Vec temporary) is
+  MEM_IN_STRUCT_P, which still conflicts with a member load through a varying pointer.
+- **The spills of that function are gcse's buckets.** Its `&lo`, `&hi`, `&out` are PRE's
+  reaching registers, spilled in pseudo order: (13259 + C) mod T for C = 240, 256, 272 must not
+  wrap, which T = 123 (the Vec form) and 125 (a for loop) do and T = 103 (the uniform u128 form,
+  no movti copies) does not: retail's slots 0x134, 0x138, 0x13C.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
