@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1027/1120 (91.7%), checked 2026-11-08
-// Tried night-close8: the 3.0 weight named before the sum, onA/onB/d declared before it: no closer (40 and 42 differing words).
-// NEAR (2026-11-08, worker night-large2): the state switch, the frame test, the sixteen
-// headings, the wall, target and neighbour terms and the turn are retail's; 40 lines differ.
-// The wall fraction takes f22 where retail's is f26 (allocated after the inner loop's 0.5,
-// 1.0 and 0.0, which here take f24..f26 for retail's f23..f25, and the next heading f23 for
-// f22); in the target and neighbour terms retail stores the 3.0 weight's slot first and puts
-// the sum just before the call (its store in the delay slot), ours sums first; and retail's
-// two distances sit at 0x3C4 and 0x3C8, ours at 0x3C0 and 0x3C4 (a 4-byte local before them in
-// retail). Found on the way: each clamp's top as a named float (the compare and the result
-// one register), the main body as the switch's 12/13 case, the hit count as a switch with
-// default first, SetSinCosPair with its float first (its own code is unchanged). Tried: frac
-// declared at four other places, Set for the summed point.
+// BYTES 1116/1120 (99.6%), checked 2026-11-09
+// NEAR (2026-11-09, w7-14B6A8): every instruction and register is retail's; only the two
+// distances' slots differ (sp+0x3C0 and 0x3C4 here, retail 0x3C4 and 0x3C8). What got here:
+// (1) the target and neighbour terms name their operands in source order (`Vec from`, `Vec
+// weight`, `Vec vel`, then MulAddX): the integrator emits the velocity's load after the 3.0
+// weight's slot store, which it may alias, so sched1 keeps it there and the sum lands by the
+// call as in retail (func_00191570's lever). (2) The hit switch's one-span case falls through
+// to the default's `frac = time[1]`: one store less in the loop (weighted refs 8, not 10) puts
+// frac's global-alloc priority (0.131) below the neighbour loop's 0.0 (0.135), so next, 0.5,
+// 1.0 and 0.0 take f22..f25 first and frac f26, as in retail; reorg copies the shared load into
+// the default's branch delay slot, which is the second `lwc1 $f26,132(sp)` retail shows. The
+// slots: the distances are ADDRESSOF scalars put on the stack by purge_addressof after every
+// temporary, so retail has one small object (at most 4 bytes, at 0x3C0) after the hit array that
+// nothing reads. An empty class with an empty destructor declared after `hits` gives EXACT
+// (build/swarm/w7-14B6A8/f.cpp), the pattern of GatherCollidersInSphere (func_001DC4D0) and
+// GatherCollidersInBox (func_001DC238), also around collider queries; not landed, because no
+// type the original plausibly declared there is known (AGENTS.md: no invented type).
 // In the context of its file, src/main/file_149398.cpp (with SetSinCosPair(f32, SinCosPair*)).
 #include "common.h"
 #include "vu0.h"
@@ -53,16 +57,19 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     ColliderSpan hits[8];
                     s32 r = func_001909F0(*(void**)(self->f928 + 0x54), &self->v140, &probe, 8, hits);
                     switch (r) {
-                    default:
-                        frac = hits[0].time[1];
-                        break;
                     case 0:
                         frac = 1.0f;
                         break;
                     case 1:
-                        if (hits[0].time[0] != 0.0f || hits[0].time[1] != 1.0f) {
-                            frac = (hits[0].time[0] != 0.0f) ? hits[0].time[0] : hits[0].time[1];
+                        if (hits[0].time[0] == 0.0f && hits[0].time[1] == 1.0f) {
+                            break;
                         }
+                        if (hits[0].time[0] != 0.0f) {
+                            frac = hits[0].time[0];
+                            break;
+                        }
+                    default:
+                        frac = hits[0].time[1];
                         break;
                     }
                     f32 v = (0.75f - frac) * 1.3333334f;
@@ -81,7 +88,10 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 NumberedAgent* tgt = ((TargetOfFn)((void**)self->desc)[0x198 / 4])(self);
                 if (tgt != 0) {
                     Vec02 other;
-                    Vu0::Q(other) = Vu0::MulAddX(Vec::Of(tgt->v140), Vec::Of(tgt->v150), Vec::Scalar(3.0f)).q;
+                    Vec from = Vec::Of(tgt->v140);
+                    Vec weight = Vec::Scalar(3.0f);
+                    Vec vel = Vec::Of(tgt->v150);
+                    Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
                     Vec02 onA;
                     Vec02 onB;
                     f32 d;
@@ -102,7 +112,10 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                         continue;
                     }
                     Vec02 other;
-                    Vu0::Q(other) = Vu0::MulAddX(Vec::Of(o->v140), Vec::Of(o->v150), Vec::Scalar(3.0f)).q;
+                    Vec from = Vec::Of(o->v140);
+                    Vec weight = Vec::Scalar(3.0f);
+                    Vec vel = Vec::Of(o->v150);
+                    Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
                     Vec02 onA;
                     Vec02 onB;
                     f32 d;
