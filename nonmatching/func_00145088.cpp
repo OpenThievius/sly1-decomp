@@ -205,7 +205,7 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 void RequestCameraSnap(Camera* self, f32* src);
 void QueueCameraSnap(Camera* self);
 void RequestPlainCameraSnap(void* p);
-s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
+s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi);
 s32 HasColliderSecondTree(void* unused, Collider* other);
 void PushCameraStackValue(Camera* self, s32 value);
 s32 PopCameraStackValue(Camera* self);

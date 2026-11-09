@@ -321,7 +321,7 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 void RequestCameraSnap(Camera* self, f32* src);
 void QueueCameraSnap(Camera* self);
 void RequestPlainCameraSnap(void* p);
-s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
+s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi);
 s32 HasColliderSecondTree(void* unused, Collider* other);
 void PushCameraStackValue(Camera* self, s32 value);
 s32 PopCameraStackValue(Camera* self);
@@ -1254,7 +1254,7 @@ void func_00145610(Camera* self, Vec02* p, f32 x, f32 y)
 }
 
 INCLUDE_ASM(func_00145718);
-s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
+s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];
     s32 total = 0;
@@ -1300,7 +1300,7 @@ void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
         for (s32 j = 0; (f32)j < n; j++) {
             ComputeDirectionFromAngles(&dir, (f32)j * 3.14159274f / n, pitch, r);
             Vu0::Q(cand) = Vu0::Add(Vu0::Q(*origin), Vu0::Q(dir));
-            if (FindFirstFreeSpan(count, objs, step + step, origin, &cand, &lo, &hi) != 0) {
+            if (FindFirstFreeSpan(count, objs, origin, &cand, step + step, &lo, &hi) != 0) {
                 if (0.0f < lo) {
                     lo = lo + step;
                 }
