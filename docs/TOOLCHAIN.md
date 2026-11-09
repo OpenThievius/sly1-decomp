@@ -793,6 +793,17 @@ func_001F0AE0):
   `u32 v = *p; ... *p = v + d;`). A value read twice where we had a local for it
   (`if (strip->extra != 0) { StripExtra* e = strip->extra;`) adds the one insn the table
   needed: cse leaves the second load, and later passes delete it.
+- **Two spill slots swapped, read off the formula before any compile** (2026-11-08,
+  func_001841D0). RefreshConeVolumeShape's last FitUnitRampBetweenPair call spills two
+  addresses PRE hoists above an earlier call: `&self->rangeMin`, (plus (reg 116) 816), and
+  `&ramp[1][3]`, (plus (reg 1) 300). Ours had 319 insns at gcse, T = 161, buckets 22 and 35,
+  so rangeMin's pseudo came first and took the lower slot (0x140); retail has it at 0x144.
+  The formula, (13258 + R + C) mod T, puts the frame address first for T in 145..157 and
+  167..171 (and 183..187), so retail had 5 or more insns fewer or 10 to 21 more. Each
+  expression written with Vu0::Vec values instead of u128 adds 6 or 7 movti copies and leaves
+  the code alone; the six plane distances in Vec form (the loop's four, far, near: +20, T =
+  171) give retail's slots, as do the three MulX scalings (+18, T = 169); converting all seven
+  (T = 181) or four (T = 173) does not, as predicted. The six distances as Vec values landed.
 - **The order of an inline's parameters orders loop.c's invariants.** In that function the
   three Fix calls in the inner loop hoist `&strip->qwc[n]` and `&starts[n]` out of the loop;
   global-alloc then takes the one of higher priority first, and their priorities differ only
