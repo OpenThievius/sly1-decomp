@@ -410,7 +410,7 @@ struct AngledPoint { u8 pad00[0x20]; f32 angle; };
 
 extern s32 D_0026B6C0[4];
 
-void AttachHitMarkEffect(Effect* self, s32 v, void* other, void* a2, void* a3, s32 zero);
+void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out);
 
 s32 IsObjectOfKind(void* self, s32 kind);
 
@@ -429,7 +429,6 @@ void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 
 s32 IsObjectOfKind(void* node, s32 kind);
 
-void AttachHitMarkEffect(Effect* self, s32 v, void* other, void* a2, void* a3, void* out);
 
 
 
@@ -1495,7 +1494,17 @@ void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
     EndEffectWithImpact(value, enabled < 1);
 }
 
-INCLUDE_ASM(func_0019FD08);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
+
+void InitImpactEffect(Effect* self, void* pos, f32 limit, s32 flags)
+{
+    InitEffect(self, pos, limit, flags);
+    f32 c = 200.0f;
+    f32 v = c <? limit;
+    self->i20 = (s32)g_currentWorld->slot1CE8[2];
+    self->m30[0] = v;
+    self->m30[1] = v * 0.6f;
+}
 
 void InitGrowingEffect(Effect* self)
 {
@@ -2216,7 +2225,64 @@ void func_001A22E0(Effect* self, void* a1)
     DrawEffectAt(self, a1, &self->q80, &rot);
 }
 
-INCLUDE_ASM(func_001A2380);
+void BuildEulerRotationMatrix(Vec02* angles, Mat02* out);
+void BuildShortestArcRotation(Vec02* from, Vec02* to, Mat02* out);
+
+void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out)
+{
+    Effect* e = 0;
+    if (target != 0) {
+        e = CreateEffect(0x14, 0);
+        if (e != 0) {
+            Vec02 local;
+            Mat02 basis;
+            Vec02 angles;
+            Mat02 turn;
+            TransformPointBetweenFrames(0, other, point, &local);
+            f32 zero = 0.0f;
+            f32 t = (g_gameTime - self->start) / self->life;
+            f32* m = self->m30;
+            f32 size = self->m30[0] + t * (m[1] + t * m[2]);
+            size *= RandomFloatInRange(0.8f, 1.4f);
+            e->vt->m00(e, &local, size, 0);
+            e->i20 = target;
+            e->life = 5.0f;
+            e->m30[2] = -size;
+            e->p120 = other;
+            basis.r[2] = *normal;
+            BuildPerpendicularPair(normal, basis.r, &g_unitXVector, &g_unitZVector);
+            angles.y = zero;
+            angles.x = zero;
+            angles.z = RandomFloatInRange(zero, 6.2831855f);
+            BuildEulerRotationMatrix(&angles, &turn);
+            {
+                Mat02 r;
+                Vec02 x;
+                Vec02 y;
+                Vec02 z;
+                Vu0::Q(x) = Vu0::RotateUntied(basis, Vu0::Q(turn.r[0]));
+                r.r[0] = x;
+                Vu0::Q(y) = Vu0::RotateUntied(basis, Vu0::Q(turn.r[1]));
+                r.r[1] = y;
+                Vu0::Q(z) = Vu0::RotateUntied(basis, Vu0::Q(turn.r[2]));
+                r.r[2] = z;
+                e->rot50[0] = r.r[0];
+                e->rot50[1] = r.r[1];
+                e->rot50[2] = r.r[2];
+            }
+            if (__builtin_fabsf(normal->z) < 0.7f) {
+                Vec02 up = *normal;
+                Mat02 arc;
+                up.z = zero;
+                BuildShortestArcRotation(&up, normal, &arc);
+                Vu0::Q(e->qA0) = Vu0::Rotate(arc, Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-50.0f)));
+            }
+        }
+    }
+    if (out != 0) {
+        *out = e;
+    }
+}
 
 s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
@@ -2227,7 +2293,7 @@ s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
         }
     }
     if (IsObjectOfKind(other, 0x1F) == 0) {
-        AttachHitMarkEffect(self, self->i120, other, a2, a3, 0);
+        AttachHitMarkEffect(self, self->i120, other, (Vec02*)a2, (Vec02*)a3, 0);
     }
     RemoveEffect(self);
     return 1;
@@ -2280,7 +2346,7 @@ s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
     if (IsObjectOfKind(other->root, 6) != 0) {
         return 0;
     }
-    AttachHitMarkEffect(self, self->i20, other, a2, a3, out);
+    AttachHitMarkEffect(self, self->i20, other, (Vec02*)a2, (Vec02*)a3, (Effect**)out);
     p = *(void**)out;
     if (p != 0) {
         TransformRotationBetweenFrames(0, other, (u8*)p + 0x50, (u8*)p + 0x50);

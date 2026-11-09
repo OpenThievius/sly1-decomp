@@ -1,24 +1,30 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1783/1916 (93.1%), checked 2026-11-08
+// BYTES 1888/1916 (98.5%), checked 2026-11-09
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
+// TAIL (2026-11-09): `*(u128*)&g =` for the result and the tail in the order v, g, p, ang; 40 differing lines before, 16 now.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"
 #include "switched_collider.h"
 #include "attachment.h"
 #include "value_range.h"
-// NEAR (2026-11-08, night-large7): 81 instructions differ, the size and frame retail's. Found:
-// the clock read through inline accessors taking its address (ClockDt, ClockTime) gives retail's
-// form, the address formed from a high part kept in s6 (addiu s0, s6, %lo) and the fields read
-// at their offsets, where a plain read folds the offset into the address and takes a register
-// more; the first direction normalised in place by an inline function (NormalizeInPlace) loads
-// the fallback's address before the difference, as retail; the direction read at each use;
-// ValueRange::Limit for the clamp. Still differs: scheduling around the first split (the &dir
-// argument and the length's mtc1 come earlier in retail), the length's division before the
-// second square root, the dt Scalar's load after w2's, the curve's address before its first
-// product, and at the end retail loads dt's bits into the clock pointer's own register as it dies
-// (lw s0, 8(s0); qmtc2 s0) and schedules the final block otherwise.
+// NEAR (2026-11-09, w7): 16 instructions differ, all in the last block (after the call that
+// builds the rotation); everything before it is retail's. Found: the result stored with
+// `*(u128*)&g = ...` (vu0.h, Set's note) leaves no address pseudo for CSE to reuse in the call's
+// &g, so a3 is formed again in the call block (addiu a3, sp, 192), as retail; the tail in the
+// order v, g, p, ang gives retail's store order (p before ang). Still differs: VU registers in the
+// last block (m.r[1] vf2 for vf3, Scalar(r) vf7 for vf6, off vf6 for vf7, acc vf3 for vf2, v150
+// vf2 for vf3, gravity vf3 for vf2) and p's vadd after g's vsub. That is local-alloc on sched1's
+// order: an emulation of sched1 (list scheduling, the dump's priorities) and of local-alloc on
+// the .lreg dump reproduces ours exactly, and retail's registers need two changes to sched1's
+// order: the load of self->v150 issued before v2's (priority 8 where ours is 6, or nd*rate's
+// multiply at 5 for 7), and Scalar(r)'s qmtc2 out of the second issue slot after the call
+// (ScalarAt(dt)'s qmtc2 there instead, or Scalar(r) at priority 4). No single priority change
+// does it. Ruled out: Vec values for the tail, RotateUntied, Scalar(r) named before the
+// rotation, a copy of r, every order of the six tail statements (permute.py), f22AC read into
+// a local (once, or a variable assigned at both ifs: that one is no longer born once, so not
+// raised, and the first block breaks).
 
 extern f32 D_00274D40;
 extern f32 D_00274D44;
@@ -167,9 +173,9 @@ void func_001CC818(Player* self)
     u128 nd = Vu0::Rotate(m, Vu0::Q(dir));
     u128 off = Vu0::MulX(nd, Vu0::Scalar(r));
     Vu0::Q(v) = Vu0::Add(Vu0::Add(Vu0::Q(v2), Vu0::Cross(Vu0::Q(acc), off)), Vu0::MulX(nd, Vu0::ScalarAt(rate)));
-    Vu0::Q(ang) = nd;
+    *(u128*)&g = Vu0::Sub(Vu0::DivX(Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v150)), Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock))), Vu0::Q(self->gravity));
     Vu0::Q(p) = Vu0::Add(Vu0::Q(pos), off);
-    Vu0::Q(g) = Vu0::Sub(Vu0::DivX(Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v150)), Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock))), Vu0::Q(self->gravity));
+    Vu0::Q(ang) = nd;
     if (self->f22AC != 0) {
         SolvePlayerLinkSystem(self, ((LinkSystem*)self->f22AC)->object, &pos, &g, &self->v22B0);
     } else {
