@@ -5645,7 +5645,114 @@ void SettleListedPoseSources(AnimationPlayer* self)
     }
 }
 
-INCLUDE_ASM(func_0012F210);
+// The time on a track's position curve, from t on, at which the point is level with the curve:
+// where the point's offset from the curve's position turns from ahead of its direction to
+// behind it (or back), unless the point is farther than the radius at t. A step of 0.2 either
+// way brackets it, halving narrows the bracket to 0.05, and a linear step between its ends
+// gives the time. The time, position and direction found are given where asked.
+void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* owner, Vec02* point, f32* outT,
+                   Vec02* outPos, Vec02* outDir)
+{
+    Vec02 pos;
+    Vec02 dir;
+    Vec02 d;
+    Vec02 loPos;
+    Vec02 hiPos;
+    Vec02 loDir;
+    Vec02 hiDir;
+    f32 loT;
+    f32 hiT;
+    f32 loDot;
+    f32 step;
+    f32 hiDot;
+    f32 dot;
+    s32 behind;
+    s32 far;
+
+    track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
+    far = radius * radius < Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+    if (!far) {
+        dot = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(dir)));
+        if (__builtin_fabsf(dot) < 0.0001f) {
+            goto done;
+        }
+        if (0.0f < dot) {
+            loDot = dot;
+            Vu0::Q(loPos) = Vu0::Q(pos);
+            Vu0::Q(loDir) = Vu0::Q(dir);
+            step = 0.2f;
+            loT = t;
+            behind = 0;
+        } else {
+            Vu0::Q(hiPos) = Vu0::Q(pos);
+            hiDot = dot;
+            Vu0::Q(hiDir) = Vu0::Q(dir);
+            hiT = t;
+            step = -0.2f;
+            behind = 1;
+        }
+        t = ClampRange::Of(t + step, 0.0f, end);
+        for (;;) {
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
+            dot = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(dir)));
+            if (behind != 0) {
+                if (0.0f < dot || t == 0.0f) {
+                    Vu0::Q(loPos) = Vu0::Q(pos);
+                    loT = t;
+                    Vu0::Q(loDir) = Vu0::Q(dir);
+                    loDot = dot;
+                    break;
+                }
+            } else if (dot < 0.0f || end - 0.0001f < t) {
+                hiT = t;
+                hiDot = dot;
+                Vu0::Q(hiPos) = Vu0::Q(pos);
+                Vu0::Q(hiDir) = Vu0::Q(dir);
+                break;
+            }
+            t = ClampRange::Of(t + step, 0.0f, end);
+        }
+        while (0.05f < hiT - loT) {
+            t = (hiT + loT) * 0.5f;
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
+            dot = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(dir)));
+            if (0.0f < dot) {
+                loT = t;
+                loDot = dot;
+                Vu0::Q(loPos) = Vu0::Q(pos);
+                Vu0::Q(loDir) = Vu0::Q(dir);
+            } else {
+                Vu0::Q(hiPos) = Vu0::Q(pos);
+                hiT = t;
+                Vu0::Q(hiDir) = Vu0::Q(dir);
+                hiDot = dot;
+            }
+        }
+        f32 span = hiDot - loDot;
+        if (0.0001f < __builtin_fabsf(span)) {
+            f32 u = ClampRange::Of(hiDot / span, 0.0f, 1.0f);
+            t = loT * u + (1.0f - u) * hiT;
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
+        } else {
+            t = loT;
+            pos = loPos;
+            dir = loDir;
+        }
+    }
+done:
+    if (outT != 0) {
+        *outT = t;
+    }
+    if (outPos != 0) {
+        *outPos = pos;
+    }
+    if (outDir != 0) {
+        *outDir = dir;
+    }
+}
 
 void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x)
 {
