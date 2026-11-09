@@ -455,7 +455,7 @@ Length, NormalizeOr), the matrix forms (Transform, Transform4, RotateRows and
 RotateUntied, RotateTransposed, MulTransposed, Transpose), the weighted sums (MulXSum,
 MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
 (PlaneSigns, Ones), the cross product, Min and Max, the copy (Copy), and the GPR forms
-(ToFloatMoved, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits, StoreX). The assembler takes
+(ToFloatMoved, ToFloatViaBits, ToFloatY, ToFloatZ, FromFloats, Splat, ToBits, StoreX). The assembler takes
 `vsqrt` (the disassembler prints it as a `.word`).
 
 ### A microprogram's interface (vcallms)
@@ -1411,6 +1411,27 @@ order (2026-11-08):
   (measured; consistent with rank_for_schedule's last key, INSN_LUID). A conversion's latency
   shifts the whole block's schedule, so orders ruled out before the conversion swap are worth
   trying again after it.
+
+- **Both asms: the value in its VU0 register and the mtc1's latency of 1 (func_001C5C10).**
+  The kind-1 contact negates a dot product for the call's $f12 (`d = -d`). Retail sets $f12
+  with neg.s before the jal and fills the delay slot with the last argument move (`move t2,
+  a2`); ours put neg.s in the slot. reorg's fill_simple_delay_slots takes the first eligible
+  insn scanning back from the call (a call's argument registers are not "needed" with
+  include_delayed_effects 0, so neg.s qualifies), so the difference is sched2's order. With
+  ToFloat the block's chain is fixed: the -1.0 constant (lui/mtc1, 2), its mfc1 (2), the
+  qmtc2, vmulx (also waiting on the lqc2's 3), the dot, the qmfc2, reload's mtc1 (latency
+  2), then neg.s at cycle 10; the seventeen other insns of the block fill the two issue
+  slots of cycles 1 to 9 but one, so the last argument move takes cycle 9 alone, before
+  neg.s. ToFloatMoved gives retail's order (its mtc1 is an asm of cost 1, so neg.s issues at
+  cycle 9 and outranks the move, priority 5 to 3), but its "r" input makes the dot's result a
+  GPR pseudo (TI_REGS: one "=j" def, one "r" use, a tie the class order breaks), so local-alloc
+  no longer has it in vf2 while the -1.0 vector is live, and the VU0 registers renumber
+  (k vf2 for vf3, the difference vf3 for vf2). Retail had both: the dot's result in a VU0
+  register up to an asm qmfc2 into a GPR, and an asm mtc1 of its own. Vu0::ToFloatViaBits is
+  that pair (ToBits, then `mtc1` of the u32): the bits through a plain pun
+  (`*(f32*)&bits`) give the compiler's mtc1 again (latency 2, the old order), and
+  ToFloatMoved of the u32 widens it to TImode first. Swept over the eleven near misses whose
+  notes mention mtc1 or neg.s, it closed no other.
 
 ### A compiler copy's latency in sched2 (func_0014D3A8)
 

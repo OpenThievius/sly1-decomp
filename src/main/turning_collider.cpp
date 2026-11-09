@@ -455,7 +455,36 @@ void CollideTurningColliderWithObject(TurningCollider* a0, s32 a1, s32 unused2, 
     AddTurningColliderProbeContact(a0, a1, a4, a5);
 }
 
-INCLUDE_ASM(func_001C5C10);
+s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+void AddTurningColliderProbeContact(void* a, s32 b, s32 c, s32 d)
+{
+    TurningCollider* self = (TurningCollider*)a;
+    if (self->f6DC != 0) {
+        ColliderSpan span;
+        void* obj = (void*)b;
+        if (CollectColliderSpansInTree(obj, (void*)c, &self->v140, (void*)self->f6D4, 1, &span) > 0 && span.time[0] > 0.0f) {
+            Vec02 diff;
+            Vu0::Q(diff) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(span.q[0]));
+            switch (span.f48) {
+            case 0: {
+                f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
+                CreatePooledContact(d0, self, obj, (void*)self->f6D4, &span.q[2], 1, self->f6D4, (s32)span.face50, (void*)d);
+                break;
+            }
+            case 1: {
+                Vec02 k;
+                Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+                Vu0::Q(span.q[2]) = Vu0::MulX(Vu0::Q(span.q[2]), Vu0::Q(k));
+                f32 d1 = Vu0::ToFloatViaBits(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
+                d1 = -d1;
+                CreatePooledContact(d1, obj, self, (void*)self->f6D4, &span.q[2], 4, 0, self->f6D4, (void*)d);
+                break;
+            }
+            }
+        }
+    }
+}
 
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
