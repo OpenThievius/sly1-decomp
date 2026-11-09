@@ -15,6 +15,7 @@
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(void* a, void* b, void* out);
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, f32 t, s32 e, s32 f);
 void GetObjectWorldPosition(void* p, Vec02* out);
@@ -76,7 +77,56 @@ void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
     }
 }
 
-INCLUDE_ASM(func_001C6028);
+// The rows of m, each turned by r, returned by value (g++'s named return value): r's rows are
+// read once, and each row goes to the result as soon as it is made.
+static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
+{
+    Mat02 t;
+    Vu0::Vec r0 = Vu0::Vec::Of(r.r[0]);
+    Vu0::Vec r1 = Vu0::Vec::Of(r.r[1]);
+    Vu0::Vec r2 = Vu0::Vec::Of(r.r[2]);
+    Vu0::Q(t.r[0]) = Vu0::RotateRowsTied(r0, r1, r2, Vu0::Vec::Of(m.r[0])).q;
+    out.r[0] = t.r[0];
+    Vu0::Q(t.r[1]) = Vu0::RotateRowsTied(r0, r1, r2, Vu0::Vec::Of(m.r[1])).q;
+    out.r[1] = t.r[1];
+    Vu0::Q(t.r[2]) = Vu0::RotateRowsTied(r0, r1, r2, Vu0::Vec::Of(m.r[2])).q;
+    out.r[2] = t.r[2];
+}
+
+void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outVec, f32 t)
+{
+    ListFrame frame;
+    Mat02 saved;
+    Mat02 tmpRot;
+    Mat02 m;
+    Vec02 tmpVec;
+    PlacedObject* owner = self->owner;
+    *outRot = owner->m1A0;
+    *outVec = D_00248D30;
+    owner->desc02()->m29(owner, outRot, 0);
+    saved = *outRot;
+    Attachment* c = self;
+    s32 n = ((ChildPoseSource*)c)->count;
+    if (n > 0) {
+        c = c->link.next;
+        while (c != 0) {
+            if ((u8)(c->mode1 + 1) >= 2) {
+                if (c->vt != &D_00219560) {
+                    c->vt->getRot(c, t, &tmpRot, &tmpVec);
+                    MultiplyMatrices3x3(&saved, &tmpRot, &m);
+                    *outRot = RotateRowsBy(m, *outRot);
+                    Vu0::Q(*outVec) = Vu0::Rotate(m, Vu0::Q(*outVec));
+                    Vu0::Q(*outVec) = Vu0::Add(Vu0::Q(*outVec), Vu0::Q(tmpVec));
+                }
+                n--;
+            }
+            if (n <= 0) {
+                break;
+            }
+            c = c->link.next;
+        }
+    }
+}
 
 // An item of an animation player's list (func_001C61E0): two byte states and a time.
 struct AimPlayerItem {
