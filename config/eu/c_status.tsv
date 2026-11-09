@@ -1136,6 +1136,7 @@ func_00141D00	func_00142000	match
 func_00142170	func_00142470	match	
 func_00142998	func_00142C98	match	
 func_001429F8	func_00142CF8	match	
+func_00142B78	func_00142E78	match	
 func_00142ED0	func_001431D0	match	
 func_00142F10	func_00143210	match	version-specific
 func_00143030	func_00143330	match	
