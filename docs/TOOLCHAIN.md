@@ -310,8 +310,8 @@ What retail shows, and what the compiler does:
   the sum, whose life ends just before, out of vf2, and b takes it instead. Retail's
   order there is the reload, then the weight's store, then `acc[i]`: the operands
   of `MulAddX(vel[i], acc[i], Scalar(dt))` named in that order. In func_0017E3C8
-  the arguments written inline are expanded in another order than retail's; a
-  named start point gives its registers. A tie ("+j" or "0") on a instead raises
+  the registers came from the second weight's load instead (ScalarAtCall, see "A
+  weight's address hoisted out of the loop"), with every argument inline. A tie ("+j" or "0") on a instead raises
   a's priority (its references doubled) above b's and swaps their registers.
 - **A word stored from a reload.** StoreX(dst, a) is `sw` of a vector's low word
   with the vector as an `"r"` operand: the qmfc2 to the GPR is the compiler's, a
@@ -934,6 +934,40 @@ each read off the diff's registers (2026-11-09):
   Alloc(); end = recs;` stores the base's register (`move s7,v0; ...; sw s7`), which the
   store then waits for; `end = Alloc(); recs = end;` stores the call's value and CSE replaces
   the read of `end` with that same value, so the copy to recs is free to move.
+
+### A weight's address hoisted out of the loop: a reference's block notes (func_0017E3C8)
+
+func_0017E3C8 (src/main/file_17D248.cpp) went from 92.5% to EXACT on one change, a float
+weight passed to its helper by value instead of by reference (2026-11-09). Its loop body
+ends `p = from + tmp * -D_00264020 + unitZ * D_00264024` (MulAddX2); retail loads the second
+weight `lui v1; lw v1, %lo(D_00264024)(v1); qmtc2 v1, vf5`, and gives `from` and the result
+vf2 and the first weight vf3. With `Vu0::ScalarAt(D_00264024)` ours swapped vf2 and vf3 and
+built the address in a0, and the a0 carried on to `*outEnd`'s reload after the call.
+
+- **loop.c counts notes in a lifetime.** A movable's lifetime is the luid distance from its
+  set to its last use, and loop.c gives every insn a luid, notes included. ScalarAt takes
+  `const f32&`: the inliner computes the argument, the address (`high` and `lo_sum` into a
+  pseudo), at the call, and the inline bodies' NOTE_INSN_BLOCK_BEG/END notes (ScalarAt's,
+  its Slot's scope, FromFloatAt's) follow before the asm that uses it: `regno 227 (life 9),
+  move-insn savings 1 moved` (80 x 1 x 9 >= the loop's 135 insns). The hoisted `high` lives
+  through the loop and calls, global-alloc spills it, and reload rebuilds it at the asm. Its
+  memory operand then needs two reload registers ("Spilling for insn 528: reg 3, reg 4"),
+  which puts a0 in the function's spill registers; the round robin (see "The reload
+  register's round robin") then gives the asm a0, and `*outEnd`'s reload after the call a0
+  where retail's set {v0, v1} gives v1 (v0 holds the copy of tmp there).
+- **By value the load sits next to its address.** A by-value `f32` argument is loaded at the
+  call, right after its `high` (`life 1, not desirable`, like the first weight's), and the
+  load folds into the asm's `"rV"` memory operand. local-alloc gives the `high` v1, and
+  push_reload loads the operand into that dying register (`lui v1; lw v1,(v1)`): no spill
+  register, and the round robin goes on as retail's. The load in the block also moves
+  sched1's order, so the combined `from` and result quantity outranks the first weight in
+  local-alloc (vf2 to `from` and the result, vf3 to the weight), as retail has it.
+- **The helpers.** include/vu0.h's `FromFloatAtCall`, `ScalarAtCall` and
+  `Vec::ScalarAtCall` take the float by value with FromFloatAt's `"rV"`. Changing ScalarAt
+  itself to by value breaks other matched functions (func_001DDE90's spill slots move), so
+  both forms stay: the reference where retail's address was formed before the helper's body
+  (outside a loop, or hoisted as retail's are), the value where retail's `lui` sits just
+  before the `lw` inside a loop.
 
 ## GCSE
 
