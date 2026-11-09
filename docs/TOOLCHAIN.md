@@ -1874,6 +1874,14 @@ Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026
   before vector row 2 needs out's row 0 copied between the two row-2 stores, which tools/
   permute.py confirms (EXACT) but no plausible source has. The vector locals are aggregates,
   never MEM_SCALAR_P, so fixed_scalar_and_varying_struct_p cannot separate them from the load.
+- **The same with a named scale (func_001C3EB0, 2026-11-09).** `u128 s = Vu0::ScalarAt(k);`
+  written before `Q(d) = Sub(Q(to->v140), Q(from->v140)); d.z = 0.0f;` expands the slot store
+  first; the two loads, through argument registers with no pointer flag, may alias the frame
+  slot and wait for it, so the store and its qmtc2 inherit their priority and the loads come
+  out in the wrong order and registers (73% as a near miss). Named after `d.z = 0.0f`, right
+  before the MulX that uses it, the slot store follows the loads and the z store and issues
+  where retail has it (after `sw zero,8(sp)`): EXACT. Where a weight slot's store sits late in
+  retail, name the weight just before its use.
 
 ### A run of global stores: the constant's death and the high parts' lives (func_00203548)
 
