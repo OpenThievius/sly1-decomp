@@ -1283,6 +1283,45 @@ dumps (2026-11-08, still a near miss):
   wrap, which T = 123 (the Vec form) and 125 (a for loop) do and T = 103 (the uniform u128 form,
   no movti copies) does not: retail's slots 0x134, 0x138, 0x13C.
 
+### A base register's pointer flag, and the Scalar slot again (func_001C75B0)
+
+Read from alias.c (find_base_value, find_base_term, init_alias_analysis), function.c,
+integrate.c, stmt.c and haifa-sched.c with `-dS` dumps (2026-11-08, still a near miss):
+
+- **A register's base counts only with the pointer flag.** init_alias_analysis gives an
+  argument register the base `(address:VOID a0)`; a pseudo set from `self + 0x660` first gets
+  `(reg self)` (pass 1 reads the old array, still empty) and the last loop folds that into
+  self's base. find_base_term of `(plus R 16)` returns that base only when R has
+  REGNO_POINTER_FLAG (the `-dl` dump's "pointer"); otherwise it takes it only if it is a
+  symbol or a Pmode ADDRESS (the stack), and an argument's is VOIDmode: the address has no
+  known base and conflicts with every frame store. `self` is a pointer parameter, so a load
+  at `self + 0x660` never conflicts with a frame slot (stack against argument,
+  base_alias_check), while the inlined Rotate's address pseudo (`r = &m`, user variable,
+  no pointer flag) gives rows 1 and 2 no base: they wait for every frame store. A row read
+  through an address register CSE makes (`m.r[1]` of a reference) is flagged and passes the
+  frame stores: that is why rows read as Vec values moved up.
+- **What retail needs.** In StepAgent's first branch retail loads row 0 before the vdiv
+  and stores dt's Scalar slot after it. After reload every `sp + n` slot conflicts with the
+  loads through s0 and s2, so in sched2's input row 0 came before the slot store: sched1 issued
+  row 0 first. Ours cannot: rows 1 and 2 depend on the slot store, which inherits their
+  priority (11 against row 0's 9) and wins the memory cycle. Without the slot store (FromFloat,
+  an experiment) the first branch is retail's instruction order exactly. Rows 1 and 2 must still
+  wait for v's store (retail loads them after it), and both stores are frame slots, so no base
+  rule separates the slot from v: only fixed_scalar_and_varying_struct_p does, with the slot
+  MEM_SCALAR_P and the rows MEM_IN_STRUCT_P (adjust_priority's birthing rule does not apply:
+  row 0's register dies in the block).
+- **No plausible form makes the slot scalar.** A frame MEM is MEM_SCALAR_P only from a scalar
+  decl in memory at expand_decl (TREE_ADDRESSABLE or volatile before its declaration is
+  expanded, which g++ 2.95, expanding as it parses, never sees), assign_temp of a scalar with
+  memory required (expand_expr taking the address of a register value), an inline parameter
+  living in memory (passed on the stack or by invisible reference), or put_reg_into_stack
+  (an ADDRESSOF that escapes). Retail's slot is at 0x20, among the expand-time temporaries,
+  which rules out the escape (purge_addressof allocates after every local). Tried and folded
+  back into registers or made MEM_IN_STRUCT_P: a `const u128&` parameter bound to an inline
+  call's result or to `Vec::FromFloat(dt).q`, a named return value (`return t`), a `const u128`
+  local, a pointer parameter to a local, a union and a one-element array (`/s`), and eleven
+  integer arguments before the vector (still in registers).
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences

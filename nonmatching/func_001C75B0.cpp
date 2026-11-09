@@ -10,6 +10,12 @@
 // Vec values for the sum and the weight leave it. The quadword product is an inline helper:
 // called directly, the compiler keeps &q in a callee-saved register across the calls.
 // Still differs (2026-11-08, night-close5): row 0 read as a Vec member inside a local Rotate (the alias rule for a varying struct) leaves the same 11 lines.
+// Still differs (2026-11-08, w5-1C75B0, docs/TOOLCHAIN.md "A base register's pointer flag"): row 0 is
+// at self + 0x660 (a pointer parameter's base, which no frame store aliases) and rows 1 and 2 go
+// through Rotate's unflagged address pseudo (no base: they wait for both frame stores), so dt's
+// slot store inherits their priority and sched1 issues it before row 0; without the slot the
+// branch is retail's order exactly. Only a MEM_SCALAR_P slot (with rows MEM_IN_STRUCT_P) would
+// separate it from the rows while v's store still holds them; no plausible C++ gives one.
 #include "common.h"
 #include "shapes.h"
 #include "vu0.h"
