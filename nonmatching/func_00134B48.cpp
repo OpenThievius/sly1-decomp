@@ -20,7 +20,12 @@
 // g_unitRange's: its %lo (Limit's this, life 4 in loop.c's second pass, threshold about 85
 // against 234 insns) is moved; with a life of 2 it would not be. No form of the clamp tried
 // keeps it in the loop with retail's code (Clamp, a range pointer outside or at the top of the
-// body change the code).
+// body change the code). Measured (2026-11-09, w10): loop.c's threshold here is 79, so any
+// inline `this` (life >= 3: the contour's two notes) is moved. A clamp reading `hi` only in
+// its else arm stays in the loop (maybe_never) and gives retail's preheader order exactly, but
+// then g_unitRange's %hi pseudo (5 refs over 466) outranks the clock's address (5 over 486)
+// and takes s4. Retail fits only a hoisted `this` whose %hi was set in an earlier block (its
+// %lo then not raised by adjust_priority); no form found (docs/TOOLCHAIN.md, func_001316E8).
 // What landed here (2026-11-09): the five setters in an inline helper (ScreenLayout::Reset,
 // as PAL's func_001316E8: the layout's address formed at each call, the colour buffer's from a
 // spill slot), the font's box through the file family's StyleDrawer::Draw (retail forms &layout

@@ -3613,6 +3613,38 @@ one register each (95.5%).
   pair fewer than ours (three: the table's, the clock's, g_unitRange's). The likely one is
   g_unitRange's `%lo` (Limit's `this`), which loop.c's second pass moves with a life of 4 (the
   inline's two block notes count); no clamp form tried keeps it in the loop with retail's code.
+- **loop.c's threshold for a loop with a call is 79** (1 + n_non_fixed_regs; measured
+  2026-11-09 on synthetic loops of N calls: a life-1, savings-1 invariant moves at 79 real
+  insns and not at 80). In func_00134B48's second pass (234 insns) a move-insn moves when
+  its life is 3 or more. Limit's `this` copy is set before expand_inline_function's contour
+  (`pushlevel`/`expand_start_bindings` come after the arguments), so the two BLOCK_BEG notes
+  sit between it and its uses; CSE folds the `lo` read into `lo_sum(%hi)`, leaving the `hi`
+  read as the last use: life 4. Loading `hi` first gives life 3 (237 >= 234, still moved)
+  and puts `lo` in $f5 where retail has $f4. An inline's `this` that is read only inside its
+  body can never have a life under 3.
+- **Keeping the address in the loop gives retail's preheader, and loses s4.** A clamp that
+  reads `hi` only in its else arm (`if (v < lo) r = lo; else if (hi < v) r = hi; else r =
+  v;`, as an inline member) uses the address in another basic block after the loop's first
+  branch, which scan_loop refuses to move at all (maybe_never). Its preheader then has
+  retail's sched2 order (the spill stores between the constants exactly as retail), the
+  result in $f13 copied to $f23, `lo` in $f4. But gcse's PRE pseudo for g_unitRange's `%hi`
+  (moved in loop.c's first pass, priority 1 in sched1, so after `&pos` by LUID) has 5 refs
+  over 466 (doubled) against the clock address's 5 over 486 (its `%lo` is raised to cycle 2
+  by the birthing rule), outranks it in global-alloc and takes s4; retail leaves it
+  unallocated (the `lui a2, 0x27` rematerialized in the body). With equal references the
+  `%hi` set later in the preheader always outranks the clock, so retail's preheader had
+  either no g_unitRange `%hi` at all or one that lost on references.
+- **What fits every constraint and is not found.** Retail's body code is that of a
+  hoisted, unallocated `this` (REG_EQUIV constant: reload rematerializes `&g_unitRange` for
+  the `+4` read, reload_cse turns its `lui a3` into `move a3, a2`) whose `lo` read was folded
+  by CSE. A hoisted `%lo` is raised to the front only because its `%hi` is set in the same
+  block (adjust_priority runs when a dependence resolves); with the `%hi` set in an earlier
+  block, the `%lo` would be ready from the start at priority 1 and follow `&pos` by LUID, and
+  the `%hi`'s longer life would lose s4. No form tried puts g_unitRange's `%hi` before the
+  loop while CSE still folds the `lo` read (a reference declared before the loop or at the
+  top of the body breaks the fold: `lwc1 $f4, 0(a2)`; a `const` pointer is substituted as
+  a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
+  references, are not cross-jumped into retail's single call).
 
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
