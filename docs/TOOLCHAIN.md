@@ -1316,6 +1316,23 @@ order (2026-11-08):
   variable the original reused (two lookups of the same kind, one after the other), or one
   live across blocks.
 
+### A float parameter passed on fills a load's delay (func_00161B10)
+
+- SelectVertexBatchLights opens with `if (*self->fF8 != 0)`: a pointer load, a byte load
+  through it, a branch. With `(self, a1)` as its parameters, sched1 issues the copies from $a0
+  and $a1 together at t=0 and the two loads back to back: both quantities span 1 insn, equal
+  priority, and local-alloc places the pointer first ($v0, the byte $v1). Retail has the
+  byte in $v0.
+- The callee (CollectLightsForSphere) stores $f12 as the sphere's radius, and this function
+  never sets $f12: the original took the radius as a third parameter and passed it on
+  (trail_ribbon.cpp's caller already declares `(VertexBatch*, u8*, f32)`). The copy of $f12
+  into its pseudo is one more candidate after the copies of $a0 and $a1, and sched1 puts it
+  between the two loads (`.lreg`: lw, the SF copy, lbu). The pointer then spans 2 insns,
+  priority 2/2 against the byte's 2/1: the byte is placed first in $v0. global-alloc gives the
+  radius $f12 and reload deletes the copy, so retail shows no trace of it.
+- Same rule as func_0018AD88: an argument register retail never mentions can still be a
+  parameter, here a float one, found from the callee's reads ($f12) and the caller's call.
+
 ### A weight's store inside a short life (func_0013F290)
 
 - Three products of one weight, `up * 100`, `pos + side * 100`, `pos + last * 100`, are one
