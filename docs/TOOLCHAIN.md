@@ -754,6 +754,37 @@ ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
   start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
   match as well as the old order (the moves follow it, docs above, func_0013A128).
 
+### A constant the loop does not own: an untied product (func_001389D0)
+
+Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c with `-dL -dl
+-dg -dr` dumps (2026-11-08, SortSweepAxes, src/main/file_137290.cpp):
+
+- **Retail's sign.** `li v0,0x1800; mult a0,a1,v0`: the constant and the product in different
+  registers. In ours the constant's pseudo died in the multiply and block_alloc tied the product
+  to it (combine_regs ties operand 0 of a two-operand insn to the first input that dies there,
+  if that input is a local pseudo), so both took one register (`mult v1,a1,v1`), and every
+  register of the block after it moved (the base, the count and the counter).
+- **No tie when the constant is not local.** A pseudo live in more than one block has
+  `reg_qty` -1, and combine_regs refuses it. With the multiplier a pseudo live over the whole
+  loop that gets no hard register (all nine saved registers already taken, like the constant
+  loop.c hoists in func_001CF158), reload rematerialises its REG_EQUIV constant into a reload
+  register just before the multiply, and the product is a quantity of its own: retail's
+  `li v0; mult a0` and, after it, retail's base in v1, count in v0 and counter in a1.
+- **Why loop.c did not hoist ours.** The outer loop had 85 insns at the loop pass, over the
+  80 of a lifetime-1 constant in a loop with calls. Six of them and four of gcse's copies are
+  the inner `while` loop's exit test that jump.c duplicates ahead of the loop
+  (duplicate_loop_exit_test, after regscan) and that cross-jumping removes again after reload:
+  the final code shows nothing of it, retail's shape included. Blocking the duplication (a test
+  only) drops the count to 78 and the constant moves, with retail's registers; no plain source
+  shape of the inner loop avoids it (`while`, `for` with or without the decrement, `for (;;)`
+  with breaks, the break folded into the condition: stmt.c's expand_end_loop rotates them all
+  the same way, and jump.c's first pass deletes the label between the two tests).
+- **Retail's form: a named size.** `s32 axisSize = 0x1800;` before the loop, multiplied by the
+  axis (`buf1AD8 + axis * axisSize`), as the same file's AddColliderToSweepAxes keeps its
+  stride in a named local. The middle loop counts down with `for (k = count * 2; --k > 0; p++)`:
+  its `sll a1,v0,1; addiu a1,a1,-1` sets the counter itself, where `k = count * 2 - 1` puts the
+  doubled count in a temporary that local-alloc ties to the loaded count.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
