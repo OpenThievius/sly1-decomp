@@ -3232,6 +3232,26 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   a2, zero` tie in sched1 at the same cycle, and retail issues `$f13` first; with `mode` before
   the floats `a2` went first. Every other caller matches with either order.
 
+- **func_0012F210's own order (func_0012C9E8).** Its one caller sets `$f12`, `$f13`, a0, a1,
+  a2, then `$f14`, then a3 to a5: the time `t` is declared after the point, `(end, radius,
+  track, owner, point, t, outT, outPos, outDir)`. With `t` third, `$f14` went first (only
+  that differed once the step was named, below). The order also shifts global-alloc's ranking:
+  with `t` sixth and the step still set twice, step and best time swapped $f23 and $f24. The
+  definition matches with either order. Before both, the near miss called FindEntryByObjectId
+  without its key: declaring a callee with fewer parameters than it reads hides the argument
+  register's copy and swapped s0 and s1.
+
+### A named operand of `>?` (expand_expr's target, func_0012C9E8)
+
+`f32 step = limit * 0.1f >? 0.5f;` expands the MAX_EXPR with the variable's pseudo as its
+target, and expand_expr passes that target on as the subtarget of operand 0: the product is
+computed straight into `step`, which is then set twice (`mul.s $f24,...; max.s $f24,$f24,$f1`)
+and ranks lower in global-alloc (two sets, six references). Retail's `mul.s $f0,$f21,$f0;
+max.s $f24,$f0,$f1` is a product in its own block-local pseudo that local-alloc places in $f0,
+so the original named it: `f32 tenth = limit * 0.1f; f32 step = tenth >? 0.5f;`. Swapping the
+operands (`0.5f >? limit * 0.1f`) does not help (fold puts the constant second). Spot it in the
+`.lreg` dump: the variable `set 2 times` where retail's code shows one set.
+
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
 
 SetupTextPanel (2026-11-09, `-dS -fsched-verbose-6`, haifa-sched.c's sched_analyze):
