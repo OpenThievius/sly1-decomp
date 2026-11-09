@@ -6,6 +6,16 @@
 // on each exit path and have the same global priority (4 refs over 24 insns); global-alloc breaks the
 // tie to the lower pseudo, w18's. s64/u64 locals for n or w18 at the end, w18 read at the top, a s64
 // parameter, `+ (u32)n` keep the order or change the code.
+// Mechanism (2026-11-08, w4-211618, -dG dumps; docs/TOOLCHAIN.md "GCSE", "Sony's compiler"):
+// the two values are PRE's reaching registers for the w18 load and (s64)n, copied into both
+// arms of the join; their global-alloc tie falls to the pseudo number, which is GCSE's bucket
+// order. With 34-35 insns at gcse the table has T = 17 buckets: the load is in bucket 2, the
+// extension in 15. Retail needs the extension first: T = 21, 23, 25 (40 to 51 insns) or n held
+// in a pseudo numbered 119-121 (`s32 count = n;` as the third pseudo gives EXACT, but only
+// behind unused locals). The plain form `self->window <<= n; self->loaded -= n; while
+// (self->loaded < 57) { ... } self->consumed += n;` has the same registers (6 lines, retail's
+// operand order); a u32 byte (+2), `loaded += 8` (+1) and returning the count (+2) reach 39
+// insns, still T = 19. Not found: a plausible form with 40+ insns at gcse.
 // NEAR: only the t1/t2 registers of n and w18 swap (4 lines differ); dead-end tries: s64/u64 temp, += n
 
 struct Str_211618 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
