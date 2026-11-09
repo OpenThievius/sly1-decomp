@@ -13,6 +13,15 @@ struct RampProfile {
     f32 endSpeed;           // 0x04: the speed at the target
     f32 rampTime;           // 0x08: the seconds it takes to slow from maxSpeed to endSpeed
     f32 maxAccel;           // 0x0C: 0 for none (func_001EA620)
+
+    // The first three fields, as a caller fills a profile of its own on the stack
+    // (func_001A7800).
+    void Set(f32 max, f32 end, f32 time)
+    {
+        maxSpeed = max;
+        endSpeed = end;
+        rampTime = time;
+    }
 };
 
 #endif
