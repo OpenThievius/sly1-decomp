@@ -475,7 +475,7 @@ INCLUDE_DATA(D_00275A58);
 INCLUDE_DATA(D_00275A70);
 INCLUDE_DATA(D_00275A80);
 INCLUDE_DATA(D_00275A90);
-INCLUDE_DATA(D_00275AA0);
+Vec02 D_00275AA0[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
 
 s32 ParseSignedDecimal(s8* s, s32* out)
 {
@@ -2171,7 +2171,72 @@ done:
 }
 
 
-INCLUDE_ASM(func_001E4578);
+extern s32 g_padSelectFlags;
+extern f32 D_00275970;
+extern f32 D_00275974;
+extern f32 g_gameClock[];
+extern f32 D_0026185C;
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void ProjectPointToCamera(Camera* cam, Vec02* in, Vec02* out);
+void UnprojectCameraPoint(Camera* cam, Vec02* in, Vec02* out);
+void QueueCameraSnap(Camera* cam);
+s32 HasColliderSecondTree(void* unused, Collider* other);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, void* filter, s32 d, s32* count, Collider*** list);
+s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
+void func_001E4578(CameraController* self)
+{
+    Vec02 lo;
+    Vec02 hi;
+    Vec02 tmp;
+    Vec02 pts[5];
+    Mat02 basis;
+    s32 count;
+    Collider** list;
+    f32 spanEnd;
+    s32 i;
+    Camera* cam = (Camera*)self->owner;
+    Collider* target = (Collider*)cam->stack[0].target;
+    if (g_padSelectFlags & 2) {
+        *(f32*)((u8*)self + 0x60) = D_0026185C;
+        return;
+    }
+    if (self->ptr != 0 && *(s32*)((u8*)self->ptr + 0x440) != 0) {
+        return;
+    }
+    if (D_00275978 != 0) {
+        return;
+    }
+    if (g_gameClock[1] - *(f32*)((u8*)self + 0x60) < D_00275970) {
+        return;
+    }
+    lo = hi = *(Vec02*)cam->f40;
+    *(Vu0::Vec*)&basis.r[2] = Vu0::Vec::Of(g_unitZVector);
+    Vu0::Vec side = Vu0::NormalizeOr(Vu0::Cross(Vu0::Vec::Of(g_unitZVector), Vu0::Sub(Vu0::Vec::Of(target->v140), Vu0::Vec::Of(cam->f40))), Vu0::Vec::Of(g_unitXVector));
+    *(Vu0::Vec*)&basis.r[1] = side;
+    *(Vu0::Vec*)&basis.r[0] = Vu0::Cross(Vu0::Vec::Of(basis.r[2]), side);
+    for (i = 0; (u32)i < 5; i++) {
+        Vu0::Vec p = Vu0::Add(Vu0::Vec::Of(target->v140), Vu0::Rotate(basis, Vu0::Vec::Of(D_00275AA0[i])));
+        *(Vu0::Vec*)&lo = Vu0::Min(Vu0::Vec::Of(lo), p);
+        *(Vu0::Vec*)&hi = Vu0::Max(Vu0::Vec::Of(lo), p);
+        *(Vu0::Vec*)&pts[i] = p;
+    }
+    PushBackMemoryMark();
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, (void*)HasColliderSecondTree, 0, &count, &list);
+    for (i = 0; (u32)i < 5; i++) {
+        ProjectPointToCamera(cam, &pts[i], &tmp);
+        tmp.z = cam->f1E4;
+        UnprojectCameraPoint(cam, &tmp, &tmp);
+        if (FindFirstFreeSpan(count, list, 0.0f, &pts[i], &tmp, 0, &spanEnd) != 0 && 1.0f <= spanEnd) {
+            *(f32*)((u8*)self + 0x60) = g_gameClock[1];
+            break;
+        }
+    }
+    PopBackMemoryMark();
+    if (D_00275974 < g_gameClock[1] - *(f32*)((u8*)self + 0x60)) {
+        QueueCameraSnap(cam);
+    }
+}
 
 f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
