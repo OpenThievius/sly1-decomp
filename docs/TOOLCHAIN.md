@@ -3461,6 +3461,46 @@ SetupTextPanel (2026-11-09, `-dS -fsched-verbose-6`, haifa-sched.c's sched_analy
   with `mov.s $f12,$f20` at the first call (the prototype rule above). Its definition matches
   with either order.
 
+### Integration: an inline function's parameters and results (func_001316E8)
+
+PAL's DrawCompassStrip (2026-11-09, `-dr -ds -dF -dG`, integrate.c, cse.c, gcse.c, local-alloc.c
+and reload1.c of GCC 2.95.3). Retail forms the layout's address again (`addiu a0, sp, 0x240`)
+for each of the six setter calls, passes the colour buffer's address from a spill slot (`lw
+a1, 0x2B4(sp)`) and the layout's address to the three draw calls from another (`lw a1,
+0x2B0(sp)`). Written as plain calls (`L.Pos(...)`, ... `L.Color(col.w)`), the layout's address
+was one pseudo for all nine calls and took s6, which moved self and the readers' addresses
+one register each (95.5%).
+
+- **A call's argument is a pseudo; an inline's is substituted.** expand_call computes `&L`
+  into a pseudo at each call; CSE makes them one, and gcse's PRE replaces its computation with
+  a copy of the address it hoists before the loop: a long-lived pseudo with no equivalence.
+  An inline function's parameter that its body never sets is TREE_READONLY (save_for_inline
+  clears it only for a modified one), so expand_inline_function takes the argument as it is:
+  a frame address `(plus vsv N)` gets a constant equivalence (process_reg_param,
+  FIXED_BASE_PLUS_P) and try_constants writes it into each insn of the copied body. The
+  calls inside then set a0 from `(plus fp N)` directly; no pseudo holds the address, and CSE
+  keeps the constant (the integration's own copy of it is a user variable). The same holds for
+  the inline's own locals: virtual_stack_vars maps to a pseudo with the frame block's address
+  as its equivalence, so `&local` is substituted too.
+- **What escapes substitution.** A parameter the inline modifies (copied through a register
+  first), and a value an inline function returns: the result goes to a fresh pseudo set from
+  the address, which a following call takes as an ordinary argument. That pseudo is in gcse's
+  table, PRE hoists it, and global-alloc leaves it in a spill slot: retail's `lw a1, 0x2B4(sp)`.
+- **The form.** The six setter calls in an inline helper taking the layout and the colour
+  (`Reset(Layout_137228* l, s32 color)`), the colour written into the helper's own Quad4 and
+  passed as `l->Color(Words(col))`, `Words` an inline returning `q.w`: EXACT. The helper's
+  frame (the Quad4 at 0x260) is the block temporary the later SpanHead reuses, as retail's.
+  `l->Color(col.w)` in the helper gives `addiu a1, sp, 0x260`; the buffer as the caller's local
+  passed in (`Reset(&L, col.w)`, also with `&col.w[0]`, `(s32*)&col` or a `void*` parameter) is
+  substituted the same way; the colour as a parameter whose address the helper takes (`s32
+  color`, `const s32&`) goes through ADDRESSOF and purge_addressof places it after every other
+  local (0x2B0), and the buffer built in the caller stores the colour before Pos.
+- **Rule.** Where retail forms a frame address again at each call (`addiu aN, sp, K`) but
+  keeps the same address in a register or spill slot for other calls, the calls that form it
+  were inside an inline function whose parameter or local it is. func_00134B48 (US, not yet
+  matched) has the same setter sequence (Pos(0, 0), Size(640, 492.8), the grey colour from a
+  spill slot, the two words cleared) and is likely the same helper.
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
