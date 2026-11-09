@@ -435,7 +435,7 @@ void UpdateAgent(Agent* self)
     if (player != 0 && player->anim->f9C != 0) {
         PositionCurve* curve = player->anim->f9C->pos;
         if (curve != 0) {
-            curve->vt->eval(curve, self, 0, player->time, player->speed, 0, &self->v640);
+            curve->vt->eval(curve, self, player->time, player->speed, 0, 0, &self->v640);
             u128 neg = Vu0::FromFloat(-1.0f);
             Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), neg);
             Vu0::Q(push) = neg;

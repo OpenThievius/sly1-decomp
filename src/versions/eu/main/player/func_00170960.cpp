@@ -84,7 +84,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 break;
             }
             PositionCurve* c = track->pos;
-            c->vt->eval(c, self, 0, src->time, src->speed, 0, &v);
+            c->vt->eval(c, self, src->time, src->speed, 0, 0, &v);
             Vu0::Q(v) = Vu0::Rotate(self->m660, Vu0::Q(v));
             self->desc02()->m20(self, &v);
             if (src == (void*)self->watched2230) {

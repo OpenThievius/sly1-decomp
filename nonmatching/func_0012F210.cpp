@@ -57,7 +57,7 @@ void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* own
     s32 behind;
     s32 far;
 
-    track->pos->vt->eval(track->pos, owner, 0, t, 1.0f, &pos, &dir);
+    track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
     far = radius * radius < Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
     if (!far) {
@@ -82,7 +82,7 @@ void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* own
         }
         t = ClampRange::Of(t + step, 0.0f, end);
         for (;;) {
-            track->pos->vt->eval(track->pos, owner, 0, t, 1.0f, &pos, &dir);
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
             dot = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(dir)));
             if (behind != 0) {
@@ -104,7 +104,7 @@ void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* own
         }
         while (0.05f < hiT - loT) {
             t = (hiT + loT) * 0.5f;
-            track->pos->vt->eval(track->pos, owner, 0, t, 1.0f, &pos, &dir);
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(*point), Vu0::Q(pos));
             dot = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(dir)));
             if (0.0f < dot) {
@@ -123,7 +123,7 @@ void func_0012F210(f32 end, f32 radius, f32 t, Track83* track, PlacedObject* own
         if (0.0001f < __builtin_fabsf(span)) {
             f32 u = ClampRange::Of(hiDot / span, 0.0f, 1.0f);
             t = loT * u + (1.0f - u) * hiT;
-            track->pos->vt->eval(track->pos, owner, 0, t, 1.0f, &pos, &dir);
+            track->pos->vt->eval(track->pos, owner, t, 1.0f, 0, &pos, &dir);
         } else {
             t = loT;
             pos = loPos;
