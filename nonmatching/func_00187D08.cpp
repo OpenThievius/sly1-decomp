@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 356/384 (92.7%), checked 2026-11-08
+// BYTES 363/384 (94.5%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 2 (source line 424); 8 differing lines before, 6 now.
 // NEAR: scheduling only (IntersectSegmentWithSphere): every instruction is right, including sqrt.s through Fpu::Sqrt, the weights as Scalars and the three outputs; retail issues the sub.s of the constant term before the qmfc2 of the second dot product and loads the 0.0 constant (mtc1 zero,f4) after the two mtc1 of the discriminant's terms, with the store of the edge vector before the mtc1 of the third; ours moves those. Tried the terms in separate statements, the stores of the two locals before the test, and three forms of the discriminant test.
 // Tried (2026-11-08, night-close9): ToFloatMoved or ToFloatNow for the dot products (any of them), cc before bb, the dots as Vu0::Vec values: the sub.s and the 0.0 stay where they are or get worse.
 // In the context of its file, src/main/collider_contact.cpp.
@@ -421,7 +422,7 @@ s32 func_00187D08(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* hitOut, Vec02*
     Vec02 n;
     u128 dv = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     u128 ev = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*b));
-    f32 dd = Vu0::ToFloat(Vu0::Dot(dv, dv));
+    f32 dd = Vu0::ToFloatMoved(Vu0::Dot(dv, dv));
     f32 bb = Vu0::ToFloat(Vu0::Dot(ev, dv));
     f32 cc = dd - r * r;
     f32 aa = Vu0::ToFloat(Vu0::Dot(ev, ev));

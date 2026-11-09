@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1695/1916 (88.5%), checked 2026-11-08
+// BYTES 1781/1916 (93.0%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"
@@ -58,7 +59,7 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
     } else {
         Vu0::Q(*v) = Vu0::DivX(Vu0::Q(*v), len);
     }
-    return Vu0::ToFloat(len);
+    return Vu0::ToFloatMoved(len);
 }
 
 void func_001CC818(Player* self)
@@ -83,7 +84,7 @@ void func_001CC818(Player* self)
     f32 speed = SplitVectorAlongAxis(&rel, &dir, &along, &across);
     Vu0::Vec a1 = Vu0::NormalizeOr(Vu0::Cross(Vu0::Vec::Of(dir), Vu0::Vec::Of(across)), Vu0::Vec::Of(g_unitXVector));
     Vu0::Set(n1, a1.q);
-    Vu0::Set(w1, Vu0::MulX(a1, Vu0::Vec::Scalar(Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(across))) / dist)).q);
+    Vu0::Set(w1, Vu0::MulX(a1, Vu0::Vec::Scalar(Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(across))) / dist)).q);
     Vu0::Vec gv = Vu0::Vec::Of(self->gravity);
     Vu0::Vec gp = Vu0::Sub(gv, Vu0::MulX(Vu0::Vec::Of(dir), Vu0::Dot(gv, Vu0::Vec::Of(dir))));
     Vec02 g;
@@ -115,7 +116,7 @@ void func_001CC818(Player* self)
             if (self->f22A8 != 0) {
                 push = -push;
             }
-            f32 l = Vu0::ToFloat(Vu0::Length(Vu0::Q(across)));
+            f32 l = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(across)));
             f32 gz = -self->gravity.z;
             f32 t = (gz * delta.z + l * (l * 0.5f)) / gz;
             push *= g_unitRange.Limit(D_00274D60[0] + t * (D_00274D60[1] + t * D_00274D60[2]));

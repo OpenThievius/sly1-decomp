@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 1408/1416, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 2 (source line 111); 199 differing lines before, 197 now.
 // NEAR (2026-11-08): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
 // where the segment between the two objects at Rec2195_224::p64 and p60 crosses the animator's
 // triangle strip, the strip's coordinates there, offset, clamped and eased into the cursor.
@@ -108,7 +109,7 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
         Vu0::Q(n) = Vu0::DivX(c, Vu0::Length(c)).q;
         f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(tri[0])));
         f32 da = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(a))) - d0;
-        f32 db = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
+        f32 db = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
         if (da >= 0.0f && db >= 0.0f) {
             continue;
         }

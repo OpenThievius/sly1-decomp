@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 474/608 (78.0%), checked 2026-11-08
+// BYTES 480/608 (78.9%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 52); 52 differing lines before, 50 now.
 #include "common.h"
 #include "collider.h"
 #include "placed_object.h"
@@ -49,7 +50,7 @@ s32 func_00186568(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap
         s32 k = f - faces;
         f32 reach = self->radius3CC + ((f32*)*(void**)((u8*)other + 0x3C4))[k];
         u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((Vec02*)*(void**)((u8*)other + 0x3C0))[k]));
-        if (!(reach * reach <= Vu0::ToFloat(Vu0::Dot(d, d)))) {
+        if (!(reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
             f->flags |= 1;
         }
     }

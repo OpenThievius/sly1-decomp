@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 661/724 (91.3%), checked 2026-11-08
+// BYTES 708/724 (97.8%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 39); 19 differing lines before, 5 now.
 // NEAR: every register, the frame (0x110) and the branches are retail's; only the two dead stores of the segment vector differ in place, as in func_0014D680: the copy at 0x30 comes before the vdiv where retail's follows the vmulq, and the unit vector at 0x20 before the compare where retail's is in the bc1f delay slot. Found: the copy's block scope makes the Scalar of the point blend share its slot (0x30); the loop on an index (pts[i]) gives retail's s0 pointer / s1 index; the literal 3.4028234663852886e+38f is retail's bound (the checker's rodata message is only the instruction offset); the tail is NormalizeCopy (length of the vmove copy, DivX of the original). Written with Vu0::Vec for the segment (Vec::Of, Length, DivX on .q) the copy's store is dropped altogether.
 // Tried (2026-11-08, night-close9): the copy and the unit vector's stores moved after the dot in the C: the scheduler puts them back.
 // In the context of its file, src/main/path_curve.cpp.
@@ -36,7 +37,7 @@ void func_0014D3A8(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint,
         }
         Vu0::Vec ev = Vu0::Vec::Of(e);
         Vu0::Vec len = Vu0::Length(ev);
-        f32 lenF = Vu0::ToFloat(len);
+        f32 lenF = Vu0::ToFloatMoved(len);
         Vu0::Vec unit;
         unit.q = Vu0::DivX(ev.q, len.q);
         {

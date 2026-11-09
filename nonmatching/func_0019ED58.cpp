@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 1580/1588, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 4 (source line 111); 233 differing lines before, 217 now.
 #include "common.h"
 #include "vu0.h"
 #include "collider.h"
@@ -108,7 +109,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     Vu0::Vec c2 = Vu0::Cross(p, dir);
     f32 k = 2.5f / (radius * radius);
     Vu0::Vec w2 = Vu0::MulAddX(dir, Vu0::Cross(c2, p), Vu0::Vec::Scalar(k));
-    f32 j2 = Vu0::ToFloat(Vu0::Dot(rel, nv)) * (-1.0f - bounce) / Vu0::ToFloat(Vu0::Dot(w2, nv));
+    f32 j2 = Vu0::ToFloat(Vu0::Dot(rel, nv)) * (-1.0f - bounce) / Vu0::ToFloatMoved(Vu0::Dot(w2, nv));
     Vu0::Vec imp2 = Vu0::MulAddX(rel, w2, Vu0::Vec::Scalar(j2));
     Vu0::Vec tang2 = Vu0::Sub(imp2, Vu0::MulX(nv, Vu0::Dot(imp2, nv)));
     Vec02 t1;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 584/744 (78.5%), checked 2026-11-07
+// BYTES 590/744 (79.3%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 63); 77 differing lines before, 76 now.
 // NEAR: same instructions as retail but for the registers of the outer loop: retail keeps the contact search's i in a3, the best contact in a4 and the best index in a6, leaving a0-a2 for the inner sum; here the best index takes a0 and the inner loop moves up. Needs ActiveSetItem::twin at 0x48 (include/active_set_solver.h).
 #include "common.h"
 #include "collider.h"
@@ -60,7 +61,7 @@ void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, ContactSample** contact
             u128 tangent = Vu0::Sub(v, Vu0::MulX(normal, Vu0::Dot(v, normal)));
             u128 len2 = Vu0::Dot(tangent, tangent);
             Vu0::Q(acc) = tangent;
-            f32 len = Vu0::ToFloatMoved(len2);
+            f32 len = Vu0::ToFloat(len2);
             if (top < len) {
                 Vu0::Q(best) = tangent;
                 top = len;

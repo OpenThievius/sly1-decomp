@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 832/852, checked 2026-11-07
+// SIZE 832/852, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 93); 139 differing lines before, 136 now.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -90,7 +91,7 @@ void func_00128598(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0
     if (out1 == 0) {
         d.z = 0.0f;
     }
-    f32 len1 = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+    f32 len1 = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
     f32 len2 = Vu0::ToFloat(Vu0::Length(Vu0::Q(vel)));
     s32 f = ((s32)((s64)self->flags << 2 >> 32)) & 3;
     if (f == 0) {

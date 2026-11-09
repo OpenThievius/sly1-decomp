@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 214/732 (29.2%), checked 2026-11-07
+// BYTES 223/732 (30.5%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 31); 165 differing lines before, 161 now.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -28,7 +29,7 @@ void func_001CEB18(f32 t, Player* self, BaseObject* obj, Vec02* point, f32* out1
     TransformPointAtTime(obj, 0, &p, 0, 0, 0, t);
     Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
     f32 r = D_00274E08;
-    if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(d))) < r * r) {
+    if (Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d))) < r * r) {
         if (out1 != 0) {
             *out1 = Fpu::Sqrt(r * r) - r;
         }

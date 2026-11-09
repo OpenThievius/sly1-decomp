@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 309/332 (93.1%), checked 2026-11-08
+// BYTES 328/332 (98.8%), checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 0 (source line 53); 9 differing lines before, 4 now.
 // Wave 4 (night-lever1, 4 compiles): with D_00261950/70/80 defined in camera.cpp and Vu0::ScalarAt it differs only in the order of the prologue saves, the head (retail: origin vf1, high-corner constant vf2, dest vf3, low constant vf4; ours: origin vf2, constant vf1) and the last weight's register (retail lw s0, ours v0). Statement orders hi/dir/lo, lo/hi/dir and the origin in a shared local: no better.
 // NEAR: The camera's sweep probe. The frame (0xB0), the vectors and the calls are retail's; differs in the order of the prologue saves and in two register choices: retail keeps &g_gameClock in s0 across the call and reloads the step into s0 for the last weight (`lw s0,0x14(s0)`), ours loads it into v0; and retail computes the high corner before the low one with the offset constants in v1/v0 (ours has them swapped). Needs D_00261950 (a float pair), D_00261970 and D_00261980 (Vec02 constants) defined in C, as below, instead of INCLUDE_DATA.
 #include "common.h"
@@ -50,7 +51,7 @@ void func_00145E68(Camera* self, Quad16* origin, Quad16* dest, Vec02* out)
     Vu0::Set(lo, Vu0::Add(Vu0::Q(*origin), Vu0::Q(D_00261970)));
     PushBackMemoryMark();
     GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, HasColliderSecondTree, 0, &n, &list);
-    func_00145B68(self, n, list, func_00145DE8, origin, &dir, &hit, D_0026194C, Vu0::ToFloat(Vu0::Length(Vu0::Q(dir))) + D_00261950[0]);
+    func_00145B68(self, n, list, func_00145DE8, origin, &dir, &hit, D_0026194C, Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) + D_00261950[0]);
     Vu0::Q(*out) = Vu0::MulAddX(Vu0::Q(*origin), Vu0::Q(hit), ScalarAt(clock->step));
     PopBackMemoryMark();
 }

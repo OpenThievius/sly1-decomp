@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 920/908, checked 2026-11-08
+// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 47); 169 differing lines before, 167 now.
 // NEAR: the frame (0x1A0, with the ColliderSpan at 0x50 and the count and list at 0xD0), the calls,
 //       the min.s (the `<?` operator), the loop's materialised test and every VU0 sequence are
 //       retail's. Still differs: retail keeps the high half of the clock's address in $fp from
@@ -44,7 +45,7 @@ void func_001C8590(Agent* self)
         F(s32, 0x92C) = 2;
         u128 pos = Vu0::Q(self->v140);
         u128 goal = Vu0::Q(self->vA50);
-        f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
+        f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
         Vu0::Q(F(Vec02, 0x940)) = pos;
         f32 maxLen = __builtin_fabsf(F(f32, 0xB94));
         Vec02 a;
