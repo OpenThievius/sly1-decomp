@@ -1072,8 +1072,8 @@ Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
   the helper that writes the return slot (`Rows TransposeProbe(const M& m) return y`, g++'s
   named return value) right after each row of its local matches retail exactly, frame slots
   included. No form of the caller reaches it with the current helper (the copy always follows
-  the last row), and the probe is not a form the original plausibly had, so the function stays
-  a near miss.
+  the last row). Matched since with Vu0::Transpose itself written that way (below, "A matrix
+  returned by value").
 
 ### A matrix returned by value: the call sets no v0 (func_0018A040, func_00188668)
 
@@ -1105,6 +1105,18 @@ Read from haifa-sched.c's sched_analyze and rank_for_schedule and the `-dS -dR
   row to a local and to its result in turn (InvertRigidTransform's Transpose above is the
   first); taken together they say the original's matrix code returned matrices by value with
   named return values, a documented g++ 2.x extension.
+- **InvertRigidTransform's transpose (func_00188B48).** Retail has no separate transpose
+  function: the MMI transpose (pextlw/pextuw, then pcpyld/pcpyud) occurs once in all of `.text`,
+  inlined there. Written as MultiplyMatrices is, a local made row by row and each row copied to
+  the named return value (`inline Vu0::Rows Vu0::Transpose(const Rows& m) return y`), the dead
+  stores fall in retail's order (local, result, row by row) and the function matches. Two
+  limits of g++ 2.95 decide where it is written: a named return value in a class body is a
+  parse error, and on a member template the compiler never finishes (cc1 still running after
+  120 seconds), so Vu0::Transpose is declared in the class, takes `const Rows&` and is defined
+  inline at namespace scope after it. A wrapper in matrix.cpp around the shared asm does not
+  work: helpers whose several outputs are reference parameters give each output a stack slot
+  (frame 112, not 96), and one-instruction helpers are scheduled apart; the two sequences must
+  sit in the function that writes the rows. InvertRigidTransform is Transpose's only caller.
 - Lever: a function whose callers copy its result from a temporary and whose own code begins
   with `move v0,a0` returns a struct; a call that should not set v0 (a later reuse of v0
   depending on an earlier set across the call) is a call to such a function.

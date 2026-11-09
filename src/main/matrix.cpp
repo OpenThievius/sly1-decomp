@@ -205,7 +205,16 @@ void BuildMatrixFromRotationAndTranslation(Quad16* a, Quad16* b, Quad16* dst)
     *(f32*)&dst[3].w[3] = 1.0f;
 }
 
-INCLUDE_ASM(func_00188B48);
+void InvertRigidTransform(void* a, void* b, Quad16* out)
+{
+    *(Vu0::Rows*)out = Vu0::Transpose(*(Vu0::Rows*)b);
+    Vu0::Q(out[3]) = Vu0::RotateTransposed(*(Vu0::Rows*)b, Vu0::Q(*(Quad16*)a));
+    Vu0::Q(out[3]) = Vu0::MulX(Vu0::Q(out[3]), Vu0::Scalar(-1.0f));
+    out[0].w[3] = 0;
+    out[1].w[3] = 0;
+    out[2].w[3] = 0;
+    *(f32*)&out[3].w[3] = 1.0f;
+}
 
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
 {
