@@ -2311,6 +2311,62 @@ order (2026-11-08):
   above (a read first leaves the two loads swapped; with the single call, b first swaps their
   registers).
 
+### Operands in insn order against sched2's stack addresses (func_001A15D8)
+
+DrawPhasedEffect (two inner loops, each a MulRotationRowsX, a weighted sum of the strip's
+points, a Splat scale and a draw call) matched on 2026-11-09 from 85.4%, with `-dS -dR -dL
+-fsched-verbose-6` dumps. Four changes, each found from a dump:
+
+- **sched2 cannot separate a frame store from a member load.** After reload rtx_varies_p calls
+  an `sp`-based address varying (only the frame, hard frame and argument pointers are fixed), so
+  fixed_scalar_and_varying_struct_p no longer applies and every stack store conflicts with a
+  load through a pointer register. sched2 then keeps whatever order sched1 gave a weight's slot
+  store and the point load: a slot store that sched1 issued first (it was the only ready insn
+  while the load waited for the rotation's nine row stores) stays before the load, where retail
+  stores it last, in the call's delay slot. So the order must already hold in the insn stream:
+  retail's loads come before the slot stores they precede in its schedule.
+- **Loop 2: `MulAddX(Vec::Of(p[1].base), Vec::Of(rot.r[2]), Vec::Scalar(k))`.** The Vec forms
+  are inline calls, evaluated in parameter order in integrate.c's first pass, so the point is
+  loaded before k's slot is stored. With `Q(p[1].base)` the load is copied in the second pass,
+  after the slot store.
+- **Loop 1: the operands as locals, each weight before its end** (`Vec w0 = Vec::Scalar(1 - t);
+  u128 a = Q(p->base); Vec w1 = Vec::Scalar(t); u128 b = Q(p[1].base);`), retail's
+  sqc2 w0, lqc2 a, sqc2 w1, lqc2 b, as in func_00191570. The weights as Vec locals add the
+  movti copies that bring the loop to 77 insns at the first loop pass. move_movables' threshold
+  starts at 79 in a loop with a call (the `-dL` dumps bound it: loop 2's pos - rest, life 1,
+  moves at 79 insns) and drops by 3 per register moved. At 77 insns pos - rest moves (79 >= 77),
+  and the axis's `%hi` (life 1), next in the list, does not (76 < 77): it moves in the rerun,
+  after cam->rot3A0's and draw's addresses, which gives retail's preheader order (`addiu s2;
+  addiu s1; lui s7`), as loop 2's (79 insns) already did. With u128 weights the loop is 68 insns
+  and the `%hi` moves in the first pass, first; with every operand a Vec it is 91 and the 1.0 is
+  not hoisted at all.
+- **Both loops: the scale after the position.** `Q(scale) = Splat(scaleMin)` written before the
+  sum stores scale (no alias flag) before the point loads, which must then wait for it; written
+  after the sum, the store follows the loads, as retail's `sq v0, 0xCC0(sp)` does.
+- **The first loop: `p->heading = h;` before `w = cam->f1E4 >? p->at.z`**, and the scale
+  product named in the min (`scaleMin = s * c <? scaleMin`) rather than `s *= c` (a variable
+  set twice, which global-alloc placed in s's register).
+
+### A pointer read before the frame stores (func_001A2D88)
+
+DrawStreakedEffect (normalise the velocity, `tail = place + dir * 100`, draw with the world's
+template slot 11) matched on 2026-11-09 from 68.3%, with two changes read from the `.sched`
+dump:
+
+- **The weight as `Vu0::Scalar(100.0f)`** instead of the near miss's own `Vec02 k` slot: the
+  cast's MEM_SCALAR_P temporary is stored last, in the call's delay slot, as retail's
+  `sqc2 $vf4, 32(sp)` is (the Scalar-slot lever).
+- **The template read first, `BaseObject* tmpl = g_currentWorld->slot1CE8[11];`, before the
+  vector work.** The stores to `dir` and `tail` go through `u128` casts (no alias flag), so
+  true_dependence makes a later load through a pointer register (`[r158+0x1d14]`) depend on
+  every one of them: sched1's table showed the slot load with the three stores as its
+  producers, issued after them, and the world pointer's own load pushed late with it. Read
+  before them in the insn stream, the load only gives the stores anti dependences (they wait
+  for it), and sched1 issues both loads in the square root's shadow, as retail does, with the
+  dead store of the unnormalised velocity sliding after the multiply-add. That also gives
+  local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
+  loads a pointer's field before stack stores that ours issues first.
+
 ### A weight listed before its vector (func_001DDE90)
 
 The chain relaxation's velocity update, `vel + rel * b + drag * vel + bend * c`, is one

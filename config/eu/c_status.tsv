@@ -2566,6 +2566,7 @@ func_001A1410	func_001A2158	match
 func_001A1458	func_001A21A0	match	
 func_001A1498	func_001A21E0	match	
 func_001A14A0	func_001A21E8	match	
+func_001A15D8	func_001A2320	match	rodata
 func_001A1DF0	func_001A2B38	match	rodata
 func_001A1F18	func_001A2C60	match	
 func_001A1F40	func_001A2C88	match	
@@ -2581,6 +2582,7 @@ func_001A2A68	func_001A37B0	match
 func_001A2B18	func_001A3860	match	
 func_001A2B48	func_001A3890	match	
 func_001A2D30	func_001A3A78	match	
+func_001A2D88	func_001A3AD0	match	
 func_001A2E68	func_001A3BB0	match	
 func_001A3008	func_001A3D50	match	
 func_001A3128	func_001A3E70	match	
