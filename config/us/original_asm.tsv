@@ -69,7 +69,6 @@ func_0013BF68	0013BF68	2532	inline	C with inline assembly: VU0 macro instruction
 func_0013CCF0	0013CCF0	4	remnant	stripped-function leftover
 func_0013E650	0013E650	4	remnant	stripped-function leftover
 func_0013E658	0013E658	108	handwritten	VU0 macro instruction
-func_0013F290	0013F290	1072	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0013F8A0	0013F8A0	156	handwritten	VU0 macro instruction
 func_0013FAE8	0013FAE8	568	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00140D88	00140D88	4	remnant	stripped-function leftover

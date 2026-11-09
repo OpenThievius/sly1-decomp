@@ -1048,6 +1048,22 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A weight's store inside a short life (func_0013F290)
+
+- Three products of one weight, `up * 100`, `pos + side * 100`, `pos + last * 100`, are one
+  qmtc2 (CSE folds the Scalars' identical asm) but each Scalar keeps its own store to the
+  helper's slot. With the weight named once (`u128 s = Scalar(100.0f)` for the first two),
+  sched1 has nothing to issue between the up vector's load, its vmulx and the store to v850:
+  the chain's quantity lives 4 (2 * 4 refs * 2 / 4 = 4) and outranks the side chain
+  (load, vmaddx, the difference: 9 refs over 18, 3), so the up chain takes vf1 and the side
+  chain vf2, retail's swapped. Written `Scalar(100.0f)` in each expression, the second slot
+  store is ready after the up vector's load (the load reads memory the first store wrote,
+  the second store waits for it) and sched1 issues it between the load and the store to v850:
+  the up chain lives 6 (2.67), the side chain is allocated first and takes vf1, and the up
+  chain, overlapping it by the widened insn, takes vf2, as retail's. The emulation of
+  block_alloc (build/swarm/mech-149760/lalloc.py, mech-149760 worktree) on both `.lreg` dumps
+  gives both allocations. The final code has retail's two slot stores either way.
+
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
 - **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a
