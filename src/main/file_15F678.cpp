@@ -1891,7 +1891,36 @@ void SetVertexBatchTransform(u8* self, void* a1, void* a2)
     InvertRigidTransform(a1, a2, self + 0x40);
 }
 
-INCLUDE_ASM(func_00161B10);
+// The lights a batch is lit by: CollectLightsForSphere (main_loop.cpp) takes the world, the
+// sphere's centre in a1 and its radius in $f12, which this function passes on untouched (the
+// caller, trail_ribbon.cpp's builder, sets both), then a mask, a maximum and the three outputs.
+s32 CollectLightsForSphere(void* world, void* center, f32 radius, s32 mask, s32 max,
+                           s32* first, s32* count, s32* mode);
+struct LightedVertexBatch {
+    u8 pad0[0x94];
+    s32 f94;
+    u8 pad98[4];
+    s32 f9C;
+    u8 padA0[0xB0 - 0xA0];
+    s32 fB0;
+    s32 fB4;
+    s32 fB8;
+    u8 padBC[0xF8 - 0xBC];
+    u8* fF8;
+};
+
+void SelectVertexBatchLights(LightedVertexBatch* self, void* center, f32 radius)
+{
+    if (*self->fF8 != 0) {
+        self->fB4 = 0;
+        self->f94 = -1;
+        self->fB0 = 0;
+    } else {
+        self->f9C = CollectLightsForSphere(g_currentWorld, center, radius, 1, 0x10, &self->fB0,
+                                           &self->fB4, &self->fB8);
+        self->f94 = 4;
+    }
+}
 
 void ResetVertexBatch(u8* self)
 {
