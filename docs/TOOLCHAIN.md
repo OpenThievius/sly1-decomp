@@ -2945,6 +2945,35 @@ TurnColliderTowardRotation (2026-11-09):
   compile; the near miss with Vu0::Copy and a file-local NormalizeOfCopy had stopped at 94.5%
   with exactly the store-before-dot order above.
 
+### Three dots before a test: which conversion keeps the dot in VU0 (func_00141D88)
+
+Read from haifa-sched.c and the `-dS -dl -dg -fsched-verbose-6` dumps, with the local-alloc
+emulation of build/swarm/w5-1D2518/lalloc2.py (g11 worktree) (2026-11-09, still a near miss):
+
+- **The loop's copy is the compiler's.** The segment-sphere test's loop stores a copy of the
+  direction, takes the copy's length and divides the original, as func_0014D3A8's tail does,
+  and Vu0::Copy put the store before the dot the same way: in sched2 the store and the dot tie
+  on priority, and the store wins rank_for_schedule's class test (the vmove is the last insn
+  scheduled; its link to the dot, an asm, is LINK_COST_FREE, cost 0, class 1, to the store cost
+  1, class 3). `Vec d = Sub(...); *(Vu0::Vec*)&out->q[j + 2] = d; ... = NormalizeOr(d,
+  Vec::Of(g_unitXVector));` gives the compiler's vmove and retail's loop at once. A fallback
+  read as a const object (an RTX_UNCHANGING_P load) also frees the store but is hoisted out
+  of the loop by loop.c, where retail loads it in each iteration.
+- **A dot read through ToFloatMoved is not a VU0 pseudo.** Its "r" input makes the dot's
+  result a TI_REGS pseudo (local-alloc gives it $v0) and reload picks its VU0 register, after
+  local-alloc has placed the 1.0 scratches: the near miss's a=vf3, scratch vf4/vf3 against
+  retail's a=vf4 and every scratch vf5. With ToFloat, ToFloatNow or ToFloatViaBits the results
+  are VU0 pseudos: all three as ToFloat give retail's a=vf4, results vf3, vf4, vf3 and
+  scratches vf5 (but not its order); all three as ToFloatViaBits give dot3's scratch vf4.
+- **What retail's registers need of sched1.** With all three ToFloatViaBits, sched2 gives
+  retail's head order provided dot3's scratch is vf5 (it then no longer anti-depends on dot2's
+  qmfc2, which loses the tie with the 4.0 load on dependents). The emulation over orders of
+  sched1's block gives vf5 only with dot3 issued before dot2's qmfc2 (dot2's result alive over
+  dot3). sched1 cannot: dot2's conversion has priority 15 (qmfc2, mtc1, add, mul, sub, c.lt)
+  and dot3 at most 13, and a dot (a PARALLEL of the result and the scratch) is never raised by
+  adjust_priority's birthing rule. Statement order changes nothing (24 orders x 64 conversion
+  mixes compiled). Open: what in the original made dot3 or its conversion outrank dot2's.
+
 ### A conversion in each branch, before the epilogue (func_0014DA98)
 
 - **sched2 runs before jump2's cross-jumping.** rest_of_compilation (toplev.c) schedules after
