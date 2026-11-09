@@ -636,8 +636,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             case 5:
                 TriggerScriptEvent(self->f23B8, 2, 0, 0);
                 ((BaseObject*)self->f23B8)->desc->m17((BaseObject*)self->f23B8, self);
-                layers = 1;
                 SetFlaggedLinkContactMask(self, self->f23B8, 1);
+                layers = 1;
                 break;
             case 4: {
                 void* track = self->f23BC;
