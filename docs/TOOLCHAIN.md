@@ -1106,6 +1106,35 @@ so the load takes $t1 and n $t2; retail has them the other way round. What was m
   `do`/`while`, `for`, `<= 56`) and locals for the first statements add nothing more, because
   cse1 removes every other copy. Inline helpers for the refill or the update keep n's pseudo.
 
+### Three spilled array addresses and a dot helper's copies (func_00186BA8)
+
+The contacts between two colliders' edge hits (2026-11-09) spill three frame addresses PRE
+hoists out of the GroupEdgesByKey loop, `&groupCounts` (sp+28688), `&keys` (sp+28704) and
+`&groups` (sp+29216); retail's slots hold them in the order groupCounts, groups, keys. By
+(13259 + C) mod T that order needs T = 103, 105, 129, 131, 171 to 175, 257, 261 or 263 (none
+from 201 to 255), and the near miss had 463 insns (T = 233), the path loop's operands named
+479 (T = 241). Three extra calls at the end (511 insns, T = 257) gave retail's slots before
+any source did. What landed is the uniform Vec form of every dot product: a file-local
+`DotFloat(Vu0::Vec a, Vu0::Vec b)` (and its ToFloatMoved twin for the last contact, whose
+conversion retail schedules as the compiler's own) costs 4 insns a call over
+`ToFloat(Dot(Vec::Of(x), Vec::Of(y)))` (two movti parameter copies), and the edge test's
+differences named as Vec locals 2 each: 511 insns, T = 257, and the build matches. A float dot
+of two vectors is the ordinary helper of such code; the per-call cost is the knob. Measured
+deltas on the way, each with the same final code: a Vec param for the point only (+2 a call),
+a named Vec operand (+2), `*(Vu0::Vec*)&x = v` against `Vu0::Set(x, v.q)` (+2), a pointer
+local read twice instead (+0 to +1).
+
+- **The path loop's blends** (`pts[k] = seg[2k] * (1 - t) + seg[2k+1] * t`) are func_00191570's
+  shape: retail stores the 1 - t weight, loads the first end, stores t, loads the second, so
+  the operands are named in that order (`Vec s0 = Scalar(1 - params[0]); Vec a0 = Of(*seg[0]);
+  Vec t0 = Scalar(params[0]); Vec b0 = Of(*seg[1]);`). Written as MulXSum's arguments, the
+  first pair's weights were computed before the second pair's loads and every VU register of
+  the block differed.
+- **The lowest float was the compiler's literal.** With `extern const f32 D = -FLT_MAX` defined
+  in the file, g++ folds the read into a literal of its own and emits a second word, which
+  moved the next data by 4 in the full build (check.py's literal check passes it). Written as
+  the literal `-3.40282347e+38f`, the constant is retail's word at 0x24B258.
+
 ### A store after the join copies its pointer into a pseudo (func_00126CB8)
 
 `if (c) rate = a; else rate = b; p->node->rate = rate;` and the same store written in each arm

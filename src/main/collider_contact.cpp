@@ -233,7 +233,18 @@ struct MeshEdge {
         };
         s16 v[2];           // 0x00
     };
-    u8 pad04[0x10 - 4];
+    s16 face[2];            // 0x04: the faces on either side (func_00186BA8)
+    u8 pad08[0x10 - 8];
+};
+
+// A face of a collision mesh (Mesh03::faces, 0x20 bytes): its plane, then flags (8 marks a face
+// func_00186BA8 has tried).
+struct MeshFace {
+    Vec02 normal;           // 0x00
+    f32 dist;               // 0x10
+    u8 pad14[0x1C - 0x14];
+    u16 flags;              // 0x1C
+    u8 pad1E[2];
 };
 
 // A 0x70-byte hit func_0013DFD8 fills (CollectEdgeContacts, func_00187C28) and GroupEdgesByKey
@@ -249,8 +260,12 @@ struct MeshHit {
     union {
         s32 i50;            // 0x50
         void* p50;          // 0x50: the part hit (AddSweptPartMeshContact)
+        MeshFace* face50;   // 0x50: the faces either side of the hit (func_00186BA8)
     };
-    s32 i54;                // 0x54
+    union {
+        s32 i54;            // 0x54
+        MeshFace* face54;
+    };
     MeshEdge* edge;         // 0x58
     s32 slot5C;             // 0x5C: which end of the edge is the key (0 or 1)
     MeshHit* next;          // 0x60
@@ -418,9 +433,180 @@ done:
     return n;
 }
 
-// The lowest float, read by func_00186BA8.
-extern const f32 D_0024B258 = -3.40282347e+38f;
-INCLUDE_ASM(func_00186BA8);
+s32 func_00186568(Collider* a, Collider* b, void* c, void* d, s32 cap, MeshHit* out);
+void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* t, f32* depth, Vec02* normal);
+
+// The dot product of two vectors as a float, the vectors passed as values (each a movti copy
+// into the parameter, which the GCSE table's size counts: docs/TOOLCHAIN.md, "GCSE"). The
+// Moved form leaves the qmfc2 to the compiler (Vu0::ToFloatMoved), as retail's last
+// edge-against-face contact has it.
+static inline f32 DotFloat(Vu0::Vec a, Vu0::Vec b)
+{
+    return Vu0::ToFloat(Vu0::Dot(a, b));
+}
+
+static inline f32 DotFloatMoved(Vu0::Vec a, Vu0::Vec b)
+{
+    return Vu0::ToFloatMoved(Vu0::Dot(a, b));
+}
+
+void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list)
+{
+    s32 counts[2];
+    MeshHit hits[2][0x80];
+    s32 groupCounts[2];
+    s32 keys[2][64];
+    MeshHit* groups[2][64];
+    MeshHit* heads[2];
+    Collider* objs[2];
+    MeshHit* path[32];
+    f32 params[2];
+    Vec02 normal;
+    Vec02 pts[2];
+    Vec02* seg[4];
+    f32 depth;
+    s32 i;
+    s32 j;
+    MeshHit* e;
+
+    counts[0] = CollectEdgeContacts((s32)other, self, ctx, 0x80, hits[0]);
+    counts[1] = func_00186568(self, other, a2, a3, 0x80, hits[1]);
+    if (counts[0] == 0 && counts[1] == 0) {
+        return;
+    }
+    for (i = 0; i < 2; i++) {
+        GroupEdgesByKey(counts[i], hits[i], &groupCounts[i], keys[i], groups[i], &heads[i]);
+    }
+    objs[0] = self;
+    objs[1] = other;
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < groupCounts[i]; j++) {
+            MeshHit* g = groups[i][j];
+            s32 key = keys[i][j];
+            Vec02* verts = (Vec02*)objs[0]->meshCopy.verts;
+            Vec02* kp = &verts[key];
+            f32 best = -3.40282347e+38f;
+            MeshFace* bestFace = 0;
+            f32 bestDot;
+            MeshHit* h;
+            MeshHit* c;
+            for (c = g; c != 0; c = c->next) {
+                MeshFace* f = c->face54;
+                if (f->flags & 8) {
+                    continue;
+                }
+                f->flags |= 8;
+                f32 d = DotFloat(Vu0::Vec::Of(*kp), Vu0::Vec::Of(f->normal));
+                f32 m = d;
+                for (h = g; h != 0; h = h->next) {
+                    if (h->face54 == f) {
+                        continue;
+                    }
+                    f32 d2 = DotFloat(Vu0::Vec::Of(verts[h->edge->v[1 - h->slot5C]]), Vu0::Vec::Of(f->normal));
+                    if (d2 < m) {
+                        m = d2;
+                    }
+                }
+                m -= f->dist;
+                if (best < m) {
+                    bestFace = f;
+                    best = m;
+                    bestDot = d;
+                }
+            }
+            for (c = g; c != 0; c = c->next) {
+                c->face54->flags &= ~8;
+            }
+            CreatePooledContact(bestDot - bestFace->dist, objs[0], objs[1], kp, bestFace, 1,
+                                (s32)&((Vec02*)objs[0]->meshCopy.verts)[key], (s32)bestFace, list);
+            for (h = g; h != 0; h = h->next) {
+                if (h->face54 == bestFace) {
+                    continue;
+                }
+                f32 d = DotFloat(Vu0::Vec::Of(h->r1), Vu0::Vec::Of(bestFace->normal));
+                if (d < bestDot) {
+                    CreatePooledContact(d - bestFace->dist, objs[0], objs[1], &h->r1, bestFace, 2, (s32)h->edge,
+                                        (s32)bestFace, list);
+                }
+            }
+        }
+        Collider* t = objs[0];
+        objs[0] = objs[1];
+        objs[1] = t;
+    }
+    for (e = heads[0]; e != 0; e = e->next) {
+        if (e->face50 == 0) {
+            continue;
+        }
+        if (e->face54 == 0) {
+            continue;
+        }
+        MeshFace* faces = (MeshFace*)other->meshCopy.faces;
+        s32 n = FindGraphPath((PathVertex*)faces, e->face50 - faces, e->face54 - faces, (PathEdge*)heads[1],
+                              (PathEdge**)path);
+        if (n > 0) {
+            for (s32 k = 0; k < n; k++) {
+                MeshHit* h = path[k];
+                Vec02* va = (Vec02*)self->meshCopy.verts;
+                Vec02* vb = (Vec02*)other->meshCopy.verts;
+                seg[0] = &va[e->edge->v[0]];
+                seg[1] = &va[e->edge->v[1]];
+                seg[2] = &vb[h->edge->v[0]];
+                seg[3] = &vb[h->edge->v[1]];
+                FindSegmentClosestParams(seg[0], seg[1], seg[2], seg[3], params, &depth, &normal);
+                // Each weight beside its end, in the order retail stores and loads them (s, a,
+                // t, b: docs/TOOLCHAIN.md, "A weighted sum's operands in insn order").
+                Vu0::Vec s0 = Vu0::Vec::Scalar(1.0f - params[0]);
+                Vu0::Vec a0 = Vu0::Vec::Of(*seg[0]);
+                Vu0::Vec t0 = Vu0::Vec::Scalar(params[0]);
+                Vu0::Vec b0 = Vu0::Vec::Of(*seg[1]);
+                *(Vu0::Vec*)&pts[0] = Vu0::MulXSum(a0, s0, b0, t0);
+                Vu0::Vec s1 = Vu0::Vec::Scalar(1.0f - params[1]);
+                Vu0::Vec a1 = Vu0::Vec::Of(*seg[2]);
+                Vu0::Vec t1 = Vu0::Vec::Scalar(params[1]);
+                Vu0::Vec b1 = Vu0::Vec::Of(*seg[3]);
+                *(Vu0::Vec*)&pts[1] = Vu0::MulXSum(a1, s1, b1, t1);
+                CreatePooledContact(-depth, self, other, pts, &normal, 3, (s32)e->edge, (s32)h->edge, list);
+            }
+        } else {
+            MeshEdge* edge = e->edge;
+            for (s32 k = 0; k < counts[1]; k++) {
+                MeshHit* h = &hits[1][k];
+                MeshFace* faces = (MeshFace*)self->meshCopy.faces;
+                if (h->face50 == &faces[edge->face[0]] || h->face50 == &faces[edge->face[1]] ||
+                    h->face54 == &faces[edge->face[0]] || h->face54 == &faces[edge->face[1]]) {
+                    goto next;
+                }
+            }
+            Vu0::Vec pos = Vu0::Vec::Of(self->v140);
+            Vu0::Vec v0 = Vu0::Sub(pos, Vu0::Vec::Of(e->r0));
+            Vu0::Vec v1 = Vu0::Sub(pos, Vu0::Vec::Of(e->r1));
+            f32 d0 = DotFloat(v0, Vu0::Vec::Of(e->r2));
+            f32 d1 = DotFloat(v1, Vu0::Vec::Of(e->r3));
+            MeshFace* face;
+            s32 end = e->slot5C;
+            if (d1 < d0) {
+                face = e->face50;
+                end = 1 - end;
+            } else {
+                face = e->face54;
+            }
+            Vec02* p = &((Vec02*)self->meshCopy.verts)[edge->v[end]];
+            PooledContact* c;
+            for (c = *list; c != 0; c = c->next) {
+                if (c->kind == 1 && c->fA0 == (s32)p && c->fA4 == (s32)face) {
+                    break;
+                }
+            }
+            if (c != 0) {
+                continue;
+            }
+            CreatePooledContact(DotFloatMoved(Vu0::Vec::Of(*p), Vu0::Vec::Of(face->normal)) - face->dist, self, other,
+                                p, face, 1, (s32)p, (s32)face, list);
+        }
+    next:;
+    }
+}
 
 INCLUDE_ASM(func_00187260);
 
