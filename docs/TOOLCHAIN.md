@@ -788,6 +788,26 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
 
+### Local allocation's ranking (func_00149760)
+
+- block_alloc (local-alloc.c) numbers the block's insns after sched1 (notes not counted),
+  gives each local pseudo a quantity born at 2n where it is set and dying at 2n where a
+  REG_DEAD note names it, and ties an asm's output to the first input operand that dies there
+  (the quantity then holds both, with both's references). Quantities are allocated in the
+  order floor_log2(refs) * refs / (death - birth), ties by creation order; each takes the
+  lowest VU register free over its life widened by one insn at each end (the widened range is
+  also what it marks taken), else over its real life. The references are recounted on the
+  RTL just before local-alloc (recompute_reg_usage: every mention in a pattern, a set
+  included), not flow's numbers, which the `.flow` dump shows larger.
+- An emulation of this on the `.lreg` dump (build/swarm/mech-149760/lalloc.py in the
+  mech-149760 worktree, not committed) reproduces every VU register of func_00149760's case 4.
+  Retail's registers for its first rotation product follow from the same insns, in our
+  order, if each product row's quantity has one reference more (9: 3 * 9 / 38 outranks mz's
+  third row's 2 * 4 / 12); no sched1 order of the block's loads, rotations and stores gives
+  them with our counts (100,000 random orders that keep the dependences). Every source form
+  tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
+  rotation, the product returned by value) recounts the same six references.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
