@@ -34,7 +34,6 @@ func_00123DC0	00123DC0	64	handwritten	VU0 macro instruction
 func_00123E00	00123E00	68	handwritten	VU0 macro instruction
 func_00123E48	00123E48	64	handwritten	VU0 macro instruction
 func_00123E88	00123E88	68	handwritten	VU0 macro instruction
-func_00125138	00125138	764	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00125C90	00125C90	1324	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00127468	00127468	12	remnant	stripped-function leftover
 func_00127678	00127678	68	handwritten	VU0 macro instruction

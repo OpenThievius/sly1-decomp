@@ -2207,6 +2207,47 @@ CallRemoteService (src/lib/remote_call.cpp, 2.9-ee-991111, 2026-11-08):
   type, void*) and store orders found nothing closer. Retail's sched1 order is not reachable in
   this model; something in the original's block is still unknown.
 
+## Stack slots
+
+### An inline function's frame is one temporary of its saved size (func_00125138)
+
+How the frame's locals get their offsets (function.c, stmt.c, integrate.c of GCC 2.95.3):
+
+- **Locals are temporaries.** expand_decl gives a BLKmode or address-taken local
+  `assign_temp (type, 1, 1, 1)`: a temp slot kept until its block ends, then free for
+  reuse. assign_stack_temp_for_type reuses a free slot only of the same machine mode, with
+  room enough; a bigger BLKmode slot is split. Strict aliasing is off in SN's 2.95.3 (an
+  inline's frame slot, alias set 0, is reused by the next call's), so the alias set never
+  blocks reuse. The frame grows upward from 0 in allocation order (MIPS does not define
+  FRAME_GROWS_DOWNWARD).
+- **Vec02 is BLKmode, Vu0::Vec is TImode.** Vec02's `aligned(16)` comes after layout chose
+  BLKmode for four floats at 4-byte alignment; Vu0::Vec has a u128 member. A Vec02 declared
+  after a block can therefore take part of an earlier BLKmode slot (an inline's frame); a
+  Vu0::Vec whose address is taken never can, and gets a new 16-byte slot at the frame's end.
+- **An inline call's frame is one BLKmode temporary of DECL_FRAME_SIZE.** rest_of_compilation
+  saves an inline function's RTL straight after RTL generation, with its frame size then
+  (save_for_inline_nocopy, DECL_FRAME_SIZE). At each call copy_rtx_and_substitute gives the
+  first reference to virtual_stack_vars `assign_stack_temp (BLKmode, size, 1)`: all of the
+  inline's locals move together, at their own offsets, and every call in a later block reuses
+  the slot. So the frame shows the inline's own locals, used or not: an unused local
+  declared in the inline still takes its bytes in every call's copy of the frame.
+- **No unused 16-byte slot from the caller.** An unused BLKmode local in a block after the
+  inline's block splits the free slot (no new bytes); one at the function's top is allocated
+  first, at 0, and moves everything up; a scalar that purge_addressof puts on the stack comes
+  last but has accesses.
+
+func_00125138 (ComputePlacedObjectWorldFrame): retail's locals are 112 bytes, the product's
+x, y, z at 0, 0x10, 0x20 and its matrix at 0x30..0x60, then 16 bytes nothing touches; the
+direction (a Vec02 at 0) and Scalar's slot (0x10) of the later block reuse the product's slot.
+The other rotation products' frames are 96 bytes. A Vec02 declared after the matrix in this
+product's inline (its fourth row, never set) gives a 112-byte saved frame and the function
+matches. The 0x60 slot is the inline's own, not the caller's.
+
+The same function's parent pointer: one variable assigned in both arms of the first if/else
+and in the else arm is one pseudo across all three lives, which global-alloc gives a0 (r206,
+the else arm's row pointer, took v1 in local-alloc first). Retail's v1 in the first arm and
+a0 in the else arm are two variables: the else arm declares its own `parent`.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
