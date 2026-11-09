@@ -754,6 +754,33 @@ ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
   start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
   match as well as the old order (the moves follow it, docs above, func_0013A128).
 
+## CSE
+
+### A skipped block's struct store forgets memory (func_001B2140)
+
+At -O2 CSE follows a conditional jump that skips a block (`-fcse-skip-blocks`): the path goes
+from before an `if` straight to the label after it, and what the skipped body stores is
+forgotten by `invalidate_skipped_block`. Its `invalidate_skipped_set` forgets one location for a
+plain scalar store with a fixed address, but *all* memory for a store that is
+`MEM_IN_STRUCT_P`, BLKmode or through a varying address. So a local whose address escaped (an
+out-parameter, a stack slot after purge_addressof) and that is read before the `if` and again
+after it is read twice when the `if`'s body stores a struct, once when it stores only through
+`u128*` casts or scalars. The second load starts the block after the join label, so it comes
+after every store of the body in the schedule, and the register the first load held is free in
+the body.
+
+func_001B2140 tests the count of colliders a call wrote (`lw v0, 160(sp); beqz`), computes a
+segment's two ends only `if (count != 0)`, then runs `for (i = 0; i < count; i++)`, whose copied
+entry test retail reads again (`lw v0, 160(sp); blez`) after the segment's stores, and whose
+weights it loads with `lw v0`. Written with `Vu0::Q(a) = ...` (a u128 store, no struct) inside
+an `if` holding the loop, or around the two stores only, CSE kept the count in v0 across the
+segment and the weights took v1 (97.0%). The ends written as Vu0::Vec values
+(`*(Vu0::Vec*)&a = Vu0::MulAddX(...)`, a struct store) in an `if` of their own before the loop
+give retail's reload and registers. The join label survives sched1 (the -dS dump still branches
+to it); the branch reaches the function's end in a later pass. With the loop inside the `if`, no block is
+skipped and Vec stores change nothing; with the `if` around the stores and u128 stores, the
+skip path keeps the count. Both are needed.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,

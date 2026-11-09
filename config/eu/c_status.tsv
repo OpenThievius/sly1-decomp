@@ -2829,6 +2829,7 @@ func_001B2010	func_001B2D00	match
 func_001B2068	func_001B2D58	match	
 func_001B2090	func_001B2D80	match	
 func_001B2118	func_001B2E08	match	
+func_001B2140	func_001B2E30	match	
 func_001B2358	func_001B3048	match	rodata
 func_001B2640	func_001B3330	match	
 func_001B2790	func_001B3480	match	
