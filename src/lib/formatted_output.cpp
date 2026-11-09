@@ -61,7 +61,40 @@ void WriteConsoleChar(s32 c)
 
 PutChar_1F7588 g_outputHook = WriteConsoleChar;  // where formatted output sends each character
 
-INCLUDE_ASM(func_001F7390);
+s32 func_001F7390(double a)
+{
+    union {
+        double d;
+        u64 u;
+    } v;
+    u64 m;
+    s64 e;
+
+    v.d = a;
+    m = v.u;
+    e = (m << 1) >> 53;
+    e -= 0x433;
+    if (e < -0x35) {
+        return 0;
+    }
+    if (e >= 13) {
+        return 9999;
+    }
+    m = (m << 12) >> 12;
+    m |= (u64)1 << 52;
+    if (e < 0) {
+        e = -e;
+        m >>= e - 2;
+        if ((m & 3) == 3) {
+            m = (m >> 2) + 1;
+        } else {
+            m >>= 2;
+        }
+    } else {
+        m <<= e;
+    }
+    return m;
+}
 
 s32 func_001FD308(double a, double b);
 double func_001FCD78(double a, double b);
