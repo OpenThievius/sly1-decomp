@@ -1191,6 +1191,33 @@ inline function returning the comparison, and the search as a loop that `break`s
 key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
 the original must have had a used label or a loop end there.
 
+### A default set in the else arm, not in the walk's test: reorg's stolen slot (func_001CD870)
+
+AddPlayerObjectContacts walks a node's parents (`while (n != 0 && !(flags & 2)) n = n->parent;`)
+and then takes a contact row's lists, or the player's own list when no parent has the flag.
+Retail's loop top is `beqz s0,else; addiu s5,s1,1204` with the back edge (`beqzl`) aiming at
+it, the else block is a lone `move s2,s5`, and the branch after the loop carries that move in
+its slot (2026-11-09, read from reorg.c, loop.c and the `-da` dumps):
+
+- **Not loop.c's.** The near miss set the default inside the loop's test (`while ((last =
+  &self->list, n != 0) && ...)`) to put the `addiu` there, but loop.c moves it out (the loop
+  dump's `Insn 69: regno 127 (life 250), global savings 1 moved`): a set of an invariant used
+  outside the loop is moved whenever threshold * savings * lifetime reaches the loop's insn
+  count, and a variable living to the function's end always does. Set before the loop, it is
+  the same. Either way `last` is born before the walk, and its longer life puts it after the
+  axis pointer in global-alloc's order (0.073 against 0.077): the three saved registers
+  rotate (s7, s5, s6 for retail's s5, s6, s7), and the label gets an alignment nop.
+- **reorg's.** Written in the else arm (`else { last = &self->list; head = last; }`), the
+  `addiu` is the first insn of a block both of the walk's exits branch to. The loop-top
+  branch's fall-through never reads s5 before setting it, so fill_slots_from_thread copies the
+  `addiu` from the else thread into its slot and aims the branch past it; for the branch after
+  the loop, redundant_insn finds the same `addiu` in the loop top's slot with s5 unchanged
+  since, skips it, and steals the `move` instead. The else arm's life is a few insns, and the
+  registers fall into retail's order. EXACT.
+- **Spot it**: a delay slot holding a value's only set, executed on a path where the source
+  sets it later anyway, is reorg's copy from the branch target: write the set in the target's
+  arm.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
