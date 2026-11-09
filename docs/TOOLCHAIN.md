@@ -2893,6 +2893,22 @@ match retail except the slots of its two distance floats:
   empty destructor declared right after the array gives EXACT, as in func_001DC4D0 and
   func_001DC238 above: three functions that query colliders now share it. Not landed, for the
   same reason (no type the original plausibly declared there is known).
+- **What the unread object can be (2026-11-09, after the scalar-slot change).** The Scalar
+  cast copy does not reach it: it is a TImode temporary that reuses the TImode slots at 0x30
+  and 0x40 (the 3000 and 3.0 weights) and is stored every time, while the object at 0x3C0 is
+  never stored or read; one more Scalar slot would move the distances by 16, not 4. The
+  object is not a BLKmode temporary either: assign_stack_temp_for_type rounds a new BLKmode
+  slot to BIGGEST_ALIGNMENT (16 bytes) and aborts on less, so an aggregate, an inline call's
+  saved frame or a padding array costs 16. It needs a slot of a scalar mode (1 to 4 bytes),
+  made in memory with no reference left: a decl of a TREE_ADDRESSABLE type (a class with a
+  destructor; a constructor alone keeps it in a register), or a char, short or bool whose
+  address is taken, which put_var_into_stack cannot turn into an ADDRESSOF (its promoted mode
+  is SImode, `decl_mode == promoted_mode` fails) and so gives a stack slot at once, at the
+  point the address is taken. An unpromoted scalar whose address goes only to a dead copy gets
+  none: cse1's delete_trivially_dead_insns removes the copy before purge_addressof sees it. In
+  this function nothing of the second kind takes an address after `hits`, so the original
+  plausibly had an object with an empty (or compiled-out) destructor in the span block or
+  after it; which class that was is still unknown.
 
 ### A prototype's parameter order and the order of argument moves (func_0013A128)
 

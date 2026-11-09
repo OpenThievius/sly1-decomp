@@ -16,6 +16,11 @@
 // (build/swarm/w7-14B6A8/f.cpp), the pattern of GatherCollidersInSphere (func_001DC4D0) and
 // GatherCollidersInBox (func_001DC238), also around collider queries; not landed, because no
 // type the original plausibly declared there is known (AGENTS.md: no invented type).
+// Re-scored 2026-11-09 (w8-14B6A8) after the scalar-slot change: unchanged. The Scalar cast
+// copies are TImode temporaries reusing 0x30/0x40 and stored each time; the object at 0x3C0 is
+// a scalar-mode slot (1-4 bytes; a BLKmode one is rounded to 16) with no reference: an object
+// of a class with a destructor (a constructor alone gives no slot), or a promoted char, short
+// or bool whose address is taken (docs/TOOLCHAIN.md, "What the unread object can be").
 // In the context of its file, src/main/file_149398.cpp (with SetSinCosPair(f32, SinCosPair*)).
 #include "common.h"
 #include "vu0.h"
