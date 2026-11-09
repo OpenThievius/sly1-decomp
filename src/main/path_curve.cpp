@@ -227,7 +227,83 @@ void func_0014D3A8(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint,
     }
 }
 
-INCLUDE_ASM(func_0014D680);
+// The point at the fraction along the polyline nearest pos, walking from segment idx backwards or
+// forwards (wrapping when wrap is set), and the segment's unit direction. As in func_0014D3A8, the
+// vectors are Vu0::Vec values: the loop is then big enough at the loop pass that loop.c hoists
+// only &d (its life is long enough) and leaves n - 2 and 0.0f in the loop, and the address is
+// set before the loop's NOTE_INSN_LOOP_BEG, so sched2 interleaves it with the saves
+// (docs/TOOLCHAIN.md, "Loops").
+void func_0014D680(Vec02* pos, void* anchor, s32 n, Vec02* pts, s32 idx, s32 wrap, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
+{
+    s32 back = 0;
+    s32 fwd = 0;
+    f32 frac;
+    Vec02 e;
+    for (;;) {
+        Vec02 d, e0;
+        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(*pos), Vu0::Vec::Of(pts[idx]));
+        *(Vu0::Vec*)&e = Vu0::Sub(Vu0::Vec::Of(pts[idx + 1]), Vu0::Vec::Of(pts[idx]));
+        if (anchor != 0) {
+            ConstrainVectorByAnchor(anchor, &d, &d, 0);
+            ConstrainVectorByAnchor(anchor, &e, &e, 0);
+        }
+        Vu0::Vec ev = Vu0::Vec::Of(e);
+        Vu0::Vec len = Vu0::Length(ev);
+        f32 lenF = Vu0::ToFloatMoved(len);
+        Vu0::Vec unit;
+        unit.q = Vu0::DivX(ev.q, len.q);
+        f32 t = Vu0::ToFloat(Vu0::Dot(unit, Vu0::Vec::Of(d)));
+        *(Vu0::Vec*)&e0 = ev;
+        *(Vu0::Vec*)&e = unit;
+        if (t < 0.0f) {
+            if (fwd != 0) {
+                frac = 0.0f;
+                break;
+            }
+            if (idx > 0) {
+                idx--;
+            } else if (wrap != 0) {
+                idx = n - 2;
+            } else {
+                frac = 0.0f;
+                break;
+            }
+            back = 1;
+            continue;
+        }
+        if (!(lenF < t)) {
+            frac = t / lenF;
+            break;
+        }
+        if (back != 0) {
+            frac = 1.0f;
+            break;
+        }
+        if (idx < n - 2) {
+            idx++;
+        } else if (wrap != 0) {
+            idx = 0;
+        } else {
+            frac = 1.0f;
+            break;
+        }
+        fwd = 1;
+    }
+    if (outIdx != 0) {
+        *outIdx = idx;
+    }
+    if (outT != 0) {
+        *outT = frac;
+    }
+    if (outPoint != 0) {
+        Vu0::Q(*outPoint) = Vu0::MulXSum(Vu0::Q(pts[idx]), Vu0::Scalar(1.0f - frac), Vu0::Q(pts[idx + 1]), Vu0::Scalar(frac));
+    }
+    if (outDir != 0) {
+        Vu0::Vec dir = Vu0::Sub(Vu0::Vec::Of(pts[idx + 1]), Vu0::Vec::Of(pts[idx]));
+        *(Vu0::Vec*)outDir = dir;
+        *(Vu0::Vec*)outDir = Vu0::NormalizeOr(dir, Vu0::Vec::Of(g_unitXVector));
+    }
+}
 
 void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
 {

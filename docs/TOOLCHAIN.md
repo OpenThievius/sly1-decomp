@@ -911,6 +911,32 @@ Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c w
   that order local-alloc ranks the Scalar first (vf1); retail's vf2 for it needs the qmtc2
   first (emulated with lalloc.py on the `.lreg`).
 
+### A hoisted address after NOTE_INSN_LOOP_BEG is a scheduling barrier (func_0014D680)
+
+func_0014D680 (src/main/path_curve.cpp) differed only in its prologue: retail's `addiu
+s2,sp,16` (the address of the loop's local d, passed to two calls) sits among the
+callee-saved saves; ours came after all of them, in the entry jump's delay slot (2026-11-09).
+
+- **The barrier.** A `for (;;)` loop whose top is an exit test is rotated by
+  expand_end_loop (stmt.c): the entry `goto` is emitted after NOTE_INSN_LOOP_BEG. With
+  `Vu0::Q(d) = ...` at the loop top, `&d` is a pseudo set unconditionally there, so PRE
+  hoists it to the end of the block before the loop, after the note and before the jump.
+  haifa-sched turns a LOOP_BEG note into a REG_SAVE_NOTE on the next insn and makes that
+  insn depend on every earlier insn (`schedule_barrier_found`): the addiu waits for every
+  save. The insertion also makes loop.c call the loop phony (its first insn after the note
+  is neither the entry jump nor a label), so nothing else is moved.
+- **Retail's form: loop.c moves it instead.** Written with Vu0::Vec values (`*(Vu0::Vec*)&d =
+  Vu0::Sub(Vu0::Vec::Of(*pos), ...)`, `Vu0::Vec ev = Vu0::Vec::Of(e)`, as func_0014D3A8 is),
+  the address is formed only at the calls, PRE leaves it, and loop.c moves it before the
+  note, where sched2 is free to interleave it with the saves. The Vec copies make the loop 91
+  real insns at the loop pass (56 written with u128 and frame-addressed stores): `&d` (life 3,
+  80*3 >= 91) moves, `n - 2` and `0.0f` (life 1, 80 < 91) are "not desirable" and stay, as in
+  retail. With u128 values and frame-addressed stores loop.c moves all three (a 240-byte
+  frame, n - 2 spilled).
+- **Diagnosis.** A prologue insn that ours puts last (or in the entry jump's delay slot) and
+  that the sched2 dump shows depending on every earlier insn is this barrier: look for the
+  LOOP_BEG note right before it in the `.sched2` dump and for "is phony" in the `.loop` dump.
+
 ### A loop bound from the copy, a call's result stored first (func_00142B78)
 
 Three statement shapes closed func_00142B78 (src/main/collider_span.cpp) from 93.7% to EXACT,
