@@ -1544,10 +1544,39 @@ void SendColliderNotification(Collider* self, s32 kind, void* arg)
     }
 }
 
-// The literal func_001BB290 loads.
-extern const f32 D_0024D2A0 = 3.4028235e38f;
-
-INCLUDE_ASM(func_001BB290);
+void* FindColliderFloorContact(void* self, s32 key, s32* out)
+{
+    u8* n = *(u8**)(*(u8**)((u8*)self + 0x480));
+    u8* bestIt = 0;
+    s32 bestSel = 0;
+    f32 bestF = 3.4028235e38f;
+    while (n) {
+        u8* nxt = *(u8**)(n + 4);
+        for (u8* it = *(u8**)n; it; it = *(u8**)(it + 0xD0)) {
+            s32 sel = *(u32*)it != (u32)self;
+            if (key != 0) {
+                if (*(s32*)(it + (sel << 6) + 4) != key) {
+                    continue;
+                }
+            }
+            f32 f0 = *(f32*)(it + 0x88);
+            if (!(sel == 0 ? 0.7f < f0 : f0 < -0.7f)) {
+                continue;
+            }
+            f0 = *(f32*)(it + (sel << 6) + 0x18);
+            if (f0 < bestF) {
+                bestF = f0;
+                bestSel = sel;
+                bestIt = it;
+            }
+        }
+        n = nxt;
+    }
+    if (out != 0) {
+        *out = bestSel;
+    }
+    return bestIt;
+}
 
 void SetColliderGravityDisabled(Collider* self, s32 flag)
 {
