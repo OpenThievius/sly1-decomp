@@ -1119,6 +1119,26 @@ The tell: retail enters a loop with a `b` to its tests, a parameter compared onc
 as if referenced once at the loop's depth, and the near miss's dump shows the test copied in
 front of the loop: a `continue` that skips to the next element leaves a label in the tests.
 
+### A reference's address reused across a test: read the vector at its use (func_00199698)
+
+- **What retail shows.** `UpdateNumberedItem` tests the squared distance between `target->v140`
+  and `self->v140`, and after the test passes `&target->v140` and `&self->v140` to calls.
+  Retail forms `self + 320` before the test (`addiu s2,s0,320`, kept for the second call), but
+  `target + 320` only after it (`addiu a2,a0,320` beside the call's other argument moves). Ours
+  formed both before the test, which also moved the `mul.s` and the `vsub` out of the
+  `c.lt.s` nop and the branch's fall-through (89.1%).
+- **Mechanism.** `Vu0::Q(x)` (like `Vec::Of`, `Set`) takes `x` by reference: after inlining,
+  the parameter is a pseudo set to `(plus target 320)` in the test's block. CSE, following the
+  branch into the next block, finds the call's `&target->v140` equal to that pseudo and reuses
+  it, so the address is computed once, before the test, and sched1 orders the block around it.
+  A read written `*(const u128*)&target->v140` at the use is a plain `mem` with the sum inside
+  it: no register holds the sum, so the call's address is expanded afresh where it is used.
+- **The form.** The read side of the rule `Set`'s comment in include/vu0.h gives for stores
+  (`*(u128*)&v = x` at the use): where retail forms an address afresh for a call after the
+  vector was read, read it with the cast at the use; where retail keeps the address (self's
+  `s2` here), read it through `Q`. Different statement orders, a pointer local and a
+  re-read of `data->f18` keep the CSE'd pseudo and do not help.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
