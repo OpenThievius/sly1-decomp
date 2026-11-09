@@ -60,7 +60,6 @@ func_00137CB8	00137CB8	4	remnant	stripped-function leftover
 func_00137DF0	00137DF0	4	remnant	stripped-function leftover
 func_00138510	00138510	4	remnant	stripped-function leftover
 func_001399F0	001399F0	4	remnant	stripped-function leftover
-func_0013A128	0013A128	632	inline	C with inline assembly: 128-bit MMI instruction in the compiler's frame
 func_0013A498	0013A498	384	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0013A618	0013A618	804	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0013A940	0013A940	964	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
