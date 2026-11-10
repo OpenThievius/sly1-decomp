@@ -588,3 +588,38 @@ Retail allocates nothing for it (a fresh `lui` at each use) and holds the first 
 in s0 and the new loop's in s1, with the five member addresses in s4-fp: the new loop had a counter
 of its own. `for (s32 k = 0; k < 14; k++)` instead of `for (i = 0; ...)` was EXACT. Spot it: a
 counter in a different saved register in one loop than in the loops before it.
+
+### A count-up loop with no vtop, and a giv loop.c never finds (func_0013AD80, near miss)
+
+The draw of the frames list in func_0013AD80 (for each mesh, `for i < count` over 0x50-byte
+frames, ten calls in the body) counts up in retail (`addiu s4,1; lw v1,count; slt; bnez`,
+`addiu s2,s2,0x50` for the frame) where a `for` with a pointer walk (`f++`) is reversed. From
+the `-dL -dl -dg` dumps (2026-11-10):
+
+- **The count is a spilled pseudo, not memory.** frames, count, the Ones vector and sent sit at
+  0xB8, 0xBC, 0xC0 and 0xD0 after every expand-time local (the second loop's p and q are at
+  0xB0/0xB4): reload's slots, given in regno order, so `sent` is declared where it is set (after
+  the first walk) and the Ones vector's pseudo, from the first loop's body, comes before it.
+  count is re-read each pass because it is spilled; at the loop pass it is an invariant register.
+- **check_dbra_loop with a register bound.** A counter used only for counting is reversible
+  even with calls (`no_use_except_counting`). With a non-constant bound the first form (a
+  constant comparison) does not apply and the NE form needs `loop_info->vtop`: a loop with no
+  NOTE_INSN_LOOP_VTOP is not reversed ("Can reverse loop" in the dump, then nothing). jump.c's
+  duplicate_loop_exit_test gives every `for` and `while` a vtop here, so the counter has to be
+  used in a giv (loop.c then cannot reverse it with calls) or the loop has to be a do/while.
+- **The doubling of a counter's life.** In a do/while behind `if (count > 0)`, `i = 0` keeps
+  its REG_EQUAL note and update_equiv_regs doubles i's life (88 to 178 insns): i then ranks
+  below the bank pointer and the two saved registers swap. Behind `if (i < count)` combine
+  folds `i = 0` into the guard's compare, as it does with jump.c's copied test of a `for`, and i
+  keeps its life (s4, as retail).
+- **Retail's shape is a reduced giv.** Retail sets i = 0 before the guard and the frame pointer
+  after it, and PRE does not hoist `&fade` (sp+112, also the first loop's rotation): exactly
+  what `for (i...) { ViewedFrame* f = &frames[i]; ... }` gives when strength reduction finds f
+  (the reduced giv's start value is emitted by loop.c in the preheader, after GCSE; a source
+  `f = frames` inside the guard instead gives PRE a block to insert &fade in). Measured by
+  removing calls: the giv is found once the `li 80` before the `mult` moves, which at life 1
+  and savings 1 needs at most 79 insns in pass 2 (76 moves it, 80 does not); this loop has 84
+  (95 in pass 1). Not found yet: what gives retail's 80 a longer life or a second matching
+  movable. Ruled out: `frames + i`, `&frames[i]` in the call, a byte-offset cast, the fade read
+  as `frames[i].fade` (one mult after CSE), four WriteVifFlush calls (one after the switch is
+  retail's tree and 7 insns fewer).
