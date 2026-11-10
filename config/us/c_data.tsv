@@ -133,7 +133,7 @@ D_00261390	00261390	96	.data	src/main/zone_collider.cpp
 D_002613F0	002613F0	32	.data	src/main/disc_access.cpp
 D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
-D_00261880	00261880	180	.data	src/main/camera.cpp
+D_00261880	00261880	188	.data	src/main/camera.cpp
 D_002619A0	002619A0	568	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	212	.data	src/main/file_149398.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp

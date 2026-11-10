@@ -1568,6 +1568,15 @@ no class, every float load waits for it, and the registers are retail's (copy in
 `move a0,s0` in the delay slot), but retail loads `$f13` before the store and ours after it.
 Neither form gives both; a Vec member store (`((Vu0::Vec*)&p)->q`) behaves as the assignment.
 
+Solved (2026-11-10, EXACT): the three globals are not alike. `g_frameDt` is the game clock's
+`dt` member, and read as `g_gameClock.dt` (include/game_clock.h) its load is MEM_IN_STRUCT_P
+with a fixed address, so it conflicts with the Vec02 assignment's in-struct store at a varying
+address, while `D_00261924` and `D_00261920` stay scalars that pass it. With the store keeping
+the class (`*(Vec02*)self->f40 = *a2;`), only the scalar loads may cross it, and retail's
+order and registers follow: sched2 lifts `$f13` above the `sq`, `$f14` waits behind it. A
+float read through a struct global and one read as a plain scalar differ exactly here; check
+whether a global is a member of a known struct before blaming the store's alias class.
+
 ### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
 
 From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10):
