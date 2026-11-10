@@ -93,7 +93,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
 s32 NextRandom(void);
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void InitConeAgent(void* self);
 void StartAgent(void* self);
 void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
@@ -802,7 +802,7 @@ f32 RandomGaussian(f32 mean, f32 deviation, f32 limit);
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
 
