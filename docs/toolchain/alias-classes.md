@@ -1714,6 +1714,33 @@ TurnColliderTowardRotation (2026-11-09):
   twice (147 lines). The memory-dependence form would need f70 and f78 stored through an
   address alias analysis cannot place in the frame while reload still turns it into
   `sp+0x70`; no plain form of that was found.
+- **What else is ruled out (w15, 2026-11-10).** sched1 ranks stores by priority, then
+  INSN_REG_WEIGHT (a store's SET counts +1 and each REG_DEAD -1, so a dying store weighs 0, a
+  live one 1), then LUID; the stores issue on the one memory unit only after the four constant
+  loads, when every store is ready, so the order is the rank alone. Written in member order
+  (f00 f04 f08 f18 f20 q30 i4C f50 f54 f70 f78), retail's eleven stores are exactly what sched1
+  gives if f70 and f78 are not yet ready, or the 1.0 and -1 pseudos live past them.
+  - Memory dependences cannot do it with a frame address: base_alias_check separates
+    different stack bases, and memrefs_conflict_p separates two constant offsets from one
+    base, so only an address alias analysis cannot canonicalise conflicts, a pseudo with no
+    REG_EQUAL note (reg_known_value comes only from REG_EQUAL or REG_EQUIV). A probe,
+    `f32* p = &f54; p[7] = 1.0f; p[9] = -1.0f;`, gives retail's eleven-store order exactly,
+    but the pointer stays in a0 (`swc1 $f1,28(a0)`): reload substitutes a pseudo's
+    equivalent (plus fp N) only from a REG_EQUIV note, which update_equiv_regs makes only from
+    a REG_EQUAL note, which would also have let alias analysis place the store. With one use
+    combine folds the pointer into the address before sched1 (`f32* p = &f70; p[0]..p[2]`: 7
+    lines, as the literals).
+  - The ADDRESSOF lever (func_0015F320, docs/toolchain/gcse.md) does not reach the constants:
+    the floats passed by `const f32&` to a setter become one temporary each, but cse2 merges
+    the equal constants again (7 lines); the count by `const s32&` lets integrate substitute
+    200 at the store (15 lines).
+  - A block boundary that sched1 sees and sched2 does not: flow2's find_basic_blocks merges
+    a block ending in a jump that has become trivial, so a condition folded after the last
+    jump pass before sched1 (by combine) would split the stores in sched1 only and let sched2
+    hoist the copy loop's pointer setup, as retail's is. The conditions tried fold too early
+    (`ringPoints >= 0`, `!(ringPoints & 0x100)`: gcse's cprop folds the jump, 7 lines) or
+    not at all (`ringPoints < 256`, `(u32)ringPoints < 256`: combine keeps the `slti`, 85
+    lines), and none is a plausible test in this constructor.
 
 ### A weight's store inside a short life (func_0013F290)
 
