@@ -461,3 +461,36 @@ D_00262474's `%hi` (t8); the UNPACK command words 0x6C0BC000 and 0x6C01C01A are 
 - **Spotting it.** A `bgez`/`bltz` where retail keeps `and` with a register holding
   0x80000000 (or any constant that needs a `lui`): read `-dL` for "phony", and look for a PRE'd
   expression right after the loop note.
+
+### Two passes in the preheader, and a loop 15 insns too big (func_001D9488, near miss)
+
+Read from `-dL` dumps (2026-11-10, AdvancePathFollowerEntry, nonmatching/func_001D9488.cpp).
+Retail's preheader, after the entry test, is `li s8,1; addiu s2,s0,0x874; li s7,-1; li s6,0x42F;
+li s5,0x430; lui s4,%hi(D_00261EF0)`, with `move s3,zero` in the `blez` delay slot.
+
+- **The marker is taken by index.** `addiu s2` after the entry test is a reduced giv's start
+  value (loop.c puts it in the preheader), not a walked pointer's (`e = self->f874; ... e++`
+  sets it before the test, in the first block). `PathMarker* e = &self->f874[i];` at the top of
+  the body is retail's: `li 40; mult` reduced to s2, and the prologue's save order then matches
+  too.
+- **1 in pass 1, the rest in pass 2.** The giv's start sits between 1 and -1, so pass 1 moved
+  the `li 40` (life 1) and the kind test's 1 (life 1), reduced the giv, and stopped at -1; pass 2
+  moved -1, 0x42F, 0x430 (life 1 each) and the `%hi` (life 2 once pass 1 folds its `lo_sum`
+  into the argument move). With threshold T falling 3 per move that needs T >= N1, T-3 >= N1,
+  T-6 < N1 in pass 1 and T-6 >= N2 in pass 2.
+- **Measured.** The file's threshold is 79 (a loop of 80 does not move a life-1 constant, 79
+  does). Ours counts N1 = 91, N2 = 87, so nothing moves in pass 1. The same source is EXACT
+  with `-mvu0-use-vf0-vf30` or `-vf31` (T = 94, 95: each freed VU0 register adds one), and
+  `-dL` then shows retail's exact split. So the source is retail's in everything but the loop's
+  size at the loop pass: at T = 79 retail's pass 1 must count 74 to 76 insns, 15 fewer than ours.
+- **Not a flag.** vf30/vf31 for every game file changes 115 functions in 22 files, among them
+  the loop-tuned matches of this chapter (func_00140258, func_001971B8, func_00192DD0,
+  func_001CF158, func_00154370) and two in this file (func_001D66A8, func_001D9AC8); the
+  threshold 79 stands.
+- **Where 15 insns could go: not found.** Accounted for in pass 1: the giv's four insns, five
+  moved constants, four call-result copies that combine removes, the `&key` copy, flow's
+  `(use (const_int 0))`, two single-use pseudos pass 1 substitutes, a jump: ours' 91 is the
+  final code's 74 plus exactly these. Statement forms change one insn at most (an if/else for
+  the key's switch: 90; `self->f874 + i` and byte-offset index forms: 91). Lifetimes can't do it:
+  a compare's constant is forced into its register right before the jump (life 1), and a named
+  constant at the loop's top moves in pass 1, before the giv's start, against retail's order.
