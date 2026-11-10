@@ -1568,6 +1568,26 @@ no class, every float load waits for it, and the registers are retail's (copy in
 `move a0,s0` in the delay slot), but retail loads `$f13` before the store and ours after it.
 Neither form gives both; a Vec member store (`((Vu0::Vec*)&p)->q`) behaves as the assignment.
 
+### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
+
+From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10):
+
+- **Each inline method call on a global makes its own address.** `g_unitRange.Clamp(x)` in
+  three places gives three `(high sym)` and `(lo_sum (high) sym)` pairs. The lo end is read as
+  `(mem (lo_sum H sym))` (CSE folds `this`), the hi end as `(mem (plus this 4))`, so `this`
+  (the lo_sum) stays a register.
+- **GCSE runs one pass (MAX_PASSES 1).** PRE makes the later highs copies of the first (retail's
+  `daddu s1, v1` after the lean clamp's `lui`), but the lo_sums still have different operands
+  in the same pass's hash table, so none of them is redundant: every clamp recomputes `addiu
+  v0, sN, %lo`.
+- **Retail's `addiu s5, s1, %lo(g_unitRange)` before the first BuildAxisAngleMatrix, used as
+  `lwc1 4(s5)` in the speed clamp only, is CSE.** A clamp's join label (two uses) ends a CSE
+  path, but the block after it runs through the calls to the speed test, and the test's then-arm
+  falls through: an address computed there is the speed arm's `this`. The lean clamp (before
+  the join) and the w clamp (after the speed arms' join) compute their own, as retail does.
+  So the original took the range's address after the lean clamp and used it for the speed
+  clamp; written before the lean clamp or used by the w clamp it lands in the wrong place.
+
 ### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
@@ -2416,6 +2436,27 @@ as retail does.
   initializer temporary is at 0x100. The colour slot in a block, freed as a 16-byte slot that
   the buffer does not fit, and the buffer declared at function level after the block give that
   layout; the buffer in a block of its own is freed and the temporary moves into it.
+
+### Argument moves held back to a call's own block: what is and is not a barrier (func_001DEBE8, unsolved)
+
+From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-dS -dR
+-fsched-verbose-6` dumps (2026-11-10):
+
+- **Retail:** the third BuildAxisAngleMatrix's `lui v0, %hi(K); addiu a1, sp, 0x80; lwc1 $f12;
+  move a0, s4` come after every store of the matrix block before it. Ours issues the lui and
+  the two argument moves in idle alu slots among the block's loads (they depend only on the
+  previous call), in sched1 and again in sched2, and the lui then takes v1 (v0 holds
+  `self + 0x660` there).
+- **Only a barrier gives retail's order.** An insn depends on everything before it and
+  everything after depends on it when it is a volatile asm, an ASM_INPUT (an asm without
+  operands, even non-volatile), an UNSPEC_VOLATILE, or the first insn after a
+  NOTE_INSN_LOOP_BEG/END, EH-region or setjmp note. An empty `__asm__ volatile("")` before the
+  call (diagnostic only) gives retail's four insns and their registers. A `do { } while (0)` (or
+  `for (;;) break;`) there does too, but its loop notes also add an aligned label's `nop` in a
+  later clamp (1704 bytes): retail has no loop there.
+- Not yet found: which plain C++ the original had there. A REG_EQUIV pseudo used once in another
+  block is moved before its use by update_equiv_regs (after sched1), which would explain the
+  lui but not the two argument moves.
 
 ### sched2 keeps sched1's dependences (func_001358D0)
 
@@ -6202,6 +6243,24 @@ The same function's parent pointer: one variable assigned in both arms of the fi
 and in the else arm is one pseudo across all three lives, which global-alloc gives a0 (r206,
 the else arm's row pointer, took v1 in local-alloc first). Retail's v1 in the first arm and
 a0 in the else arm are two variables: the else arm declares its own `parent`.
+
+### A by-value inline passed to a call: the call's return slot comes first (func_001DEBE8)
+
+From calls.c and integrate.c of GCC 2.95.3 and the frames of func_001DEBE8 (2026-11-10):
+
+- **expand_call allocates the return temporary before it expands the arguments.** For
+  `rot = MultiplyByTransposedMatrix3x3(a, RotatedRows(m, a))`, the out-of-line call's
+  hidden return slot (a 48-byte BLKmode temporary) is taken first; the inline argument's
+  frame (its local `t` and its named return value `out`, one BLKmode temporary of its saved
+  size) is taken while the argument is expanded, after it. Retail's frame shows exactly that:
+  the result at 0xE0, the inline's rows at 0x110 and 0x140, the call passed 0x110.
+- **Declared locals come in the other order.** `Mat02 p, q; RotateRowsBy(&q, ...); p = q;
+  Mat02 r = Multiply(..., p);` puts p and q (declared at the top) before the call's slot, so
+  the result lands after them (0x140) and the out-parameter product at 0xE0: same size, wrong
+  offsets. Spot it: a call's return slot below an argument's rows means the argument was an
+  expression (an inline returning by value), not a local.
+- The call's slot is freed at the end of the statement, so a later Vec02 (the velocity at
+  0xE0) and its Scalar slots (0xF0) reuse it.
 
 ### A local's size is the frame (func_00203FD0)
 

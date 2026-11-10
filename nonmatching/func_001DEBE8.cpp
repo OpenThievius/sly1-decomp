@@ -1,13 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1688/1700, checked 2026-11-08
-// NEAR (2026-11-08, night-large3): ControlTintBlendCollider. Logic, calls, clamps (Clamp in
-// place for three of the quadratics, Limit for the lean) and the branch shapes follow retail;
-// what differs is the frame (0x1F0 against 0x200) and where the matrix temporaries live: retail
-// has the second product's rows at 0x110 and 0x140 and MultiplyByTransposedMatrix3x3's result
-// at 0xE0 (later the velocity and its two Scalars), ours puts the out-parameter product at 0xE0
-// and the result in a block local; retail also keeps a fifth saved register (s5, the unit range's
-// address) and the self/pad pair in s0/s2. Tried: the product as an inline returning Mat02 (three
-// copies where retail has two), a named result (a temporary after the locals).
+// BYTES 1506/1700 (88.6%), checked 2026-11-10
+// NEAR (2026-11-10, w13-1DEBE8): ControlTintBlendCollider. Size and frame now match (0x200, s5
+// saved). The frame came from two things. (1) The second product is a by-value inline
+// (RotatedRows, g++'s named return value) passed straight to MultiplyByTransposedMatrix3x3:
+// expand_call allocates the call's return temporary (0xE0, later reused by the velocity and
+// its Scalar slots) before it expands the argument, whose inline frame (t at 0x110, out at
+// 0x140) comes next, as in retail; the declared p/q locals put them the other way round.
+// (2) Retail's fifth saved register s5 is &g_unitRange for the speed clamp: CSE carries an
+// address computed after the lean clamp's join (the block of the three BuildAxisAngleMatrix
+// calls, with the speed test's then-arm falling through) into the speed arm, so `unit` is
+// taken there; written in the lean or the w clamp it is wrong (lean and w compute their own
+// in retail). The rows of frame->m110 read through a u128 pointer give retail's
+// `addiu v0,v0,0x110; move a1,v0; lqc2 0x10(v0)`; the first product stored to self->m660
+// first puts the 660 rows before m's.
+// Still differs: (a) global-alloc order: pad (11 refs over 331 insns, 0.100) ranks below &cur
+// (3 over 29, 0.103), so pad takes s3 for retail's s2 and the s1/s3 highs follow; (b) the third
+// BuildAxisAngleMatrix's lui/a1/a0 are scheduled before the first product's stores (sched1 and
+// sched2 issue them in idle alu slots); retail has them after the rot stores, as if a schedule
+// barrier stood there: an empty volatile asm there gives retail's order (diagnostic only),
+// and loop notes (do {} while (0)) do too but add an aligned-label nop, so retail has no loop;
+// the 660 row order (retail 0x670, 0x680, 0x660) and the w Scalar slot (retail vf6, stored after
+// frame->m110's rows) also differ.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -72,6 +85,19 @@ static inline void RotateRowsBy(Mat02* out, const Mat02& r, const Mat02& m)
     Vu0::Q(out->r[2]) = Vu0::RotateUntied(r, Vu0::Q(m.r[2]));
 }
 
+// The rows of m, each turned by r, returned by value (g++'s named return value).
+static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
+{
+    const u128* q = (const u128*)&m;
+    Mat02 t;
+    Vu0::Q(t.r[0]) = Vu0::RotateUntied(r, q[0]);
+    out.r[0] = t.r[0];
+    Vu0::Q(t.r[1]) = Vu0::RotateUntied(r, q[1]);
+    out.r[1] = t.r[1];
+    Vu0::Q(t.r[2]) = Vu0::RotateUntied(r, q[2]);
+    out.r[2] = t.r[2];
+}
+
 void ControlTintBlendCollider(TintBlendCollider* self, PadRecord* pad)
 {
     Vec02 offset;
@@ -80,8 +106,6 @@ void ControlTintBlendCollider(TintBlendCollider* self, PadRecord* pad)
     Mat02 turn;
     Mat02 m;
     Mat02 rot;
-    Mat02 p;
-    Mat02 q;
     s32 cur;
     s32 tgt;
     f32 stick;
@@ -121,26 +145,22 @@ void ControlTintBlendCollider(TintBlendCollider* self, PadRecord* pad)
     ComputePolarOffset(&axis, stick, 1.0f, 0.0f);
     Vu0::Q(axis) = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(axis));
     f32 lean = g_unitRange.Limit(Quadratic(D_00275800, pad->f48));
+    ValueRange* unit = &g_unitRange;
     BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
     BuildAxisAngleMatrix(&g_unitZVector, &turn, self->f638);
-    RotateRowsBy(&m, tilt, turn);
-    self->m660 = m;
+    RotateRowsBy(&self->m660, tilt, turn);
+    m = self->m660;
     Vu0::Q(self->v640) = Vu0::RotateTransposed(self->m660, Vu0::Q(offset));
     rot = m;
     BuildAxisAngleMatrix(&axis, &m, D_00275830[0] * lean);
     PlacedObject* frame = ((TintPart_1DEBE8*)self->f748)->frame;
-    RotateRowsBy(&q, m, frame->m110);
-    p = q;
-    {
-        Mat02 r = MultiplyByTransposedMatrix3x3(frame->m110, p);
-        rot = r;
-    }
+    rot = MultiplyByTransposedMatrix3x3(frame->m110, RotatedRows(m, frame->m110));
     ((TintBody_1DEBE8*)self->f74C)->m40 = rot;
     ((TintBody_1DEBE8*)self->f754)->m40 = rot;
     f32 speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150)));
     f32 k;
     if (0.0f < speed) {
-        k = D_00275860 * g_unitRange.Clamp(Quadratic(D_00275840, speed)) / speed;
+        k = D_00275860 * unit->Clamp(Quadratic(D_00275840, speed)) / speed;
     } else {
         k = 0.0f;
     }
