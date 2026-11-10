@@ -3874,6 +3874,15 @@ match retail except the spill slot of its count pointer (retail 0x24, ours 0x20)
     the end of the function, both give EXACT; declared before the vector it takes 16 bytes.
     So the frame shows only that such an object exists, not where or what it is.
 
+- **Approved as ScopeMarker (2026-11-10).** The maintainer approved one shared type for this
+  object, `ScopeMarker` (include/scope_marker.h): an empty class whose destructor emits no
+  code. Its limit: it is declared only where a retail frame shows an unread slot of 1 to 4 bytes
+  of this kind after the aggregate locals, and it is the only such type, never a padding array,
+  a byte array or an invented type of one function. GatherCollidersInSphere declares it with
+  the loop body's vector (`Vec02 d; ScopeMarker scope;`), GatherCollidersInBox with its two
+  bound vectors, in the same form as the sphere query (the walk as a class with a constructor
+  and destructor, the filter's outcomes as `continue`, `lo` before `hi`); both match.
+
 ### A switch case that falls into the default; a third unread object (func_0014B6A8)
 
 Measured 2026-11-09 on UpdateNumberedAgentGoal (func_0014B6A8), whose code and registers now
@@ -3917,6 +3926,16 @@ match retail except the slots of its two distance floats:
   this function nothing of the second kind takes an address after `hits`, so the original
   plausibly had an object with an empty (or compiled-out) destructor in the span block or
   after it; which class that was is still unknown.
+
+- **Landed with ScopeMarker (2026-11-10).** Approved by the maintainer as above
+  (func_001DC4D0): UpdateNumberedAgentGoal declares `ScopeMarker scope;` right after `hits`
+  and matches; SetSinCosPair's prototype is `(f32 value, SinCosPair* self)`, since its caller's
+  argument moves follow the parameter order. GatherObjectsByMode (func_0015A198) has the same
+  slot at 0x10 below its address-taken count, min and id and matches with the object among its
+  function-scope locals, its two mark walks sharing one `p`, and `flags & 0x200` tested at the
+  end (a local `all` set before the loop took the spill slot before `&min`'s; the tested
+  expression gets the slot after it, as in retail, by a mechanism not yet read). The limit is the
+  one above: only where a retail frame shows this unread 1 to 4 byte slot.
 
 ### A prototype's parameter order and the order of argument moves (func_0013A128)
 
