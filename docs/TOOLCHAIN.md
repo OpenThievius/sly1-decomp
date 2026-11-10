@@ -5179,6 +5179,38 @@ count), with the other callers' frames showing nothing else is padded. A byte ar
 array of an unrelated type, an invented wrapper type or an alignment attribute is still not
 allowed.
 
+### Best fit places a later block's locals: a 16-byte frame difference far above (func_00125C90)
+
+assign_stack_temp_for_type takes the smallest free slot of the mode that is big enough, splits
+off the rest of a BLKmode slot, and otherwise makes a new slot at the frame's end; freed
+neighbours are combined at each block's end (combine_temp_slots, always at -O2). So the
+offsets of a block's locals depend on how far earlier, finished blocks pushed the frame's end,
+not only on their own sizes and order: with earlier blocks reaching 0x120, a block declaring
+an 80-byte ScaledTransform, a 64-byte Mat4A and an 80-byte one gets 0x50, 0xA0 and a new
+0x120 (0xE0..0x120 is too small), where retail had 0x50, 0xA0, 0xE0. Retail's frame reached
+0x130: the earlier block's rotation product is the 112-byte inline frame of the entry above
+(MulRotationIntoWorld's unset fourth row, in the same file). Read a shifted block's offsets
+as "which earlier allocation was bigger", and simulate the free list before adding locals.
+
+### A by-value result's slot is a movable; an address passed once is not (func_00125C90)
+
+loop.c (scan_loop) deletes a movable set once and used once in a loop with a call: it
+substitutes the source into the use (reg_single_usage), so a local's `&world` passed to one
+call stays `addiu a0,sp,N` in the loop. A call returning a struct by value into a temporary
+(`*(Mat4A*)&ct = MultiplyMatrices(a, b)`, matrix.cpp's by-value product) uses the temporary's
+address twice, as the hidden first argument and for the copy, so loop.c moves it to the
+preheader and it takes a saved register (retail's s7). Retail's child loop nests the products,
+`MultiplyMatrices(MultiplyMatrices(*xf, inv), local)`, with const Mat4A& parameters; the
+two arms' calls share one jal only when their temporaries share an offset (cross-jumping
+needs the copies into ct that follow them to be identical).
+
+Still open there: retail moves d, a spilled u128 that PlaneSigns read through a reload into
+vf6, to the first call with `qmfc2 a1,$vf6`; ours reloads it (`lq a1`). The argument move
+`(set a1 d)` takes movti's memory alternative, whose source class is NO_REGS, so find_reloads
+makes no optional reload and inheritance never sees vf6: retail must have had a second pseudo
+in vf6 for the asm and the first call. d as Vu0::Vec, as a Vec02, through Vu0::Q, and an inline
+helper taking d for PlaneSigns and the call do not give it.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
