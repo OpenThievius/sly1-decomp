@@ -89,7 +89,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
 s32 NextRandom(void);
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void InitConeAgent(void* self);
 void StartAgent(void* self);
 void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
@@ -1507,7 +1507,7 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
         c = c - u;
         d = half;
     }
-    SolveQuadratic(roots, (k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d);
+    SolveQuadratic((k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d, roots);
     r = roots[0] - c;
     if (0.0f < r) {
         res = (k->maxSpeed - k->endSpeed) * r * r / (k->rampTime + k->rampTime) + k->endSpeed * r;
@@ -1679,7 +1679,7 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
     return __builtin_fabsf(a - b) / scale < tolerance;
 }
 
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots)
 {
     f32 disc = b * b - a * (4.0f * c);
     if (disc < 0.0f) {

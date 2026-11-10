@@ -2229,6 +2229,12 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   (owner, key, scale, mode, ...), the weight curves' own order, both come out as retail's and
   every other caller still matches. A call site that passed a non-zero int where a float now
   is compiles silently (the int converts): rebuild in full after such a change.
+- **SolveQuadratic is `(f32 a, f32 b, f32 c, f32* roots)` (func_00130C58).** Declared with
+  the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
+  where retail copies t into $f12 first; with the roots last every case's moves are retail's.
+  Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
+  func_001EA4B8) match with either order; func_00156718 (file_1549C8) already declared the roots
+  last, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.

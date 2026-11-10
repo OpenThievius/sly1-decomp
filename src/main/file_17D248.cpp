@@ -650,12 +650,12 @@ void func_0017F018(Player* p)
     }
 }
 
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out)
 {
     f32 roots[2];
-    s32 count = SolveQuadratic(roots, self->gravity.z * 0.5f, b->z - d->z, a->z - c->z);
+    s32 count = SolveQuadratic(self->gravity.z * 0.5f, b->z - d->z, a->z - c->z, roots);
     switch (count) {
     case 0:
         return 0;
