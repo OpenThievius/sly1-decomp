@@ -536,8 +536,9 @@ struct Agent : TurningCollider {
     f32 f86C;               // 0x86C
     Slot08 f870[17];        // 0x870: ids -1 at set-up (slot 0)
     void* f8F8;             // 0x8F8
-    u8 pad8FC[0x910 - 0x8FC];
-    f32 f910;               // 0x910
+    u8 pad8FC[0x900 - 0x8FC];
+    Vec02 v900;             // 0x900: a place an item keeper gives its member (func_001CC120)
+    f32 f910;               // 0x910: its heading there
     f32 f914;               // 0x914
     f32 f918;               // 0x918
     f32 f91C;               // 0x91C

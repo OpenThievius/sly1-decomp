@@ -1136,6 +1136,33 @@ The tell: retail enters a loop with a `b` to its tests, a parameter compared onc
 as if referenced once at the loop's depth, and the near miss's dump shows the test copied in
 front of the loop: a `continue` that skips to the next element leaves a label in the tests.
 
+### The opposite: a minimum of two members in the exit test, through an inline (func_001CC120)
+
+The other way round from func_001388A0: retail copied the exit test, ours did not. The loop is
+`while (i < min(self->owned.count, self->listed.count))`. Retail enters with the test and its
+loop.c invariants (`&rot`, `self + 92`, `self + 228`) sit after the `blez`; ours entered by a
+jump to the bottom test, the invariants went before it, and every register of the outer loop
+differed (37.4%).
+
+- **Mechanism.** COND_EXPR's expansion of `a < b ? a : b` with both arms members leaves
+  `t = listed; if (owned < listed) t = mem[self + 88]`: the arm is a memory load, `may_trap_p`,
+  so jump.c's conditional move (jump.c, "x = a; if (...) x = b;") refuses it. Its label survives
+  the first jump pass, and duplicate_loop_exit_test refuses any test with a CODE_LABEL. `a <? b`
+  (MIN_EXPR) does no better: its `target = op1` is still the member's MEM.
+- **Lever.** An inline `MinOfCounts(s32 a, s32 b) { return a < b ? a : b; }` (as player.cpp has):
+  the parameters are pseudos, so the arm is a register move, jump.c turns it into `movz` in its
+  first round, the label is deleted, and the next round copies the test in front of the loop
+  (the copy is the `movn` form, the bottom the `movz` one: retail's two shapes are the tell).
+- **Then loop.c's order.** With the loop rotated, retail moves `sp + 16` before `self + 92`
+  (the order of their spill stores). The outer loop needs more than 80 insns at the first loop
+  pass so that the life-1 invariants (`self + 92`, a `%hi`) wait for the second pass, while
+  PRE's long-lived copies (`self + 228`, `&rot`) move in the first. `Vu0::Distance` (Vec values)
+  for the inner loop's distance brings the outer loop from 72 to 80 insns, which does it;
+  the u128 `ToFloatMoved(Length(Sub(..)))` does not.
+- Two other differences: the second loop written `for (; i < n; i++) { m = found[i]; ... }`
+  (loop.c's reduced giv: `addu s2,v0,s3`, index first) rather than a walking pointer, and
+  `radius` declared before `step` (retail loads 1/(2pi) before 2pi).
+
 ### A reference's address reused across a test: read the vector at its use (func_00199698)
 
 - **What retail shows.** `UpdateNumberedItem` tests the squared distance between `target->v140`

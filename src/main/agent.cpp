@@ -2671,9 +2671,72 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
     self->stateSince = g_gameClock[1];
 }
 
-INCLUDE_RODATA(D_0024DA94);
+void GetObjectWorldPosition(void* obj, void* out);
+void GetObjectWorldRotation(void* obj, void* out);
+void ComputePolarOffset(void* out, f32 angle, f32 dist, f32 z);
 
-INCLUDE_ASM(func_001CC120);
+static inline s32 MinOfCounts(s32 a, s32 b)
+{
+    return a < b ? a : b;
+}
+
+// Places the owned members: each of the first ones on the listed object nearest the target
+// (taken once, in a zeroed back-memory array), with its heading; the rest at random around the
+// target, on a ring whose radius grows with their count.
+void func_001CC120(ItemKeeper* self)
+{
+    Vec02 offset;
+    Mat02 rot;
+    Vec02 pos;
+    s32 i = 0;
+    PushBackMemoryMark();
+    s32* used = (s32*)AllocateZeroedBackMemory(self->listed.count << 2);
+    while (i < MinOfCounts(self->owned.count, self->listed.count)) {
+        Agent* member = self->owned.found[i];
+        s32 best = -1;
+        f32 bestDist = 3.4028235e+38f;
+        for (s32 j = 0; j < self->listed.count; j++) {
+            if (used[j] == 0) {
+                GetObjectWorldPosition(self->listed.found[j], &pos);
+                f32 d = Vu0::Distance(self->targetPos, pos);
+                if (d < bestDist) {
+                    bestDist = d;
+                    best = j;
+                }
+            }
+        }
+        used[best] = 1;
+        Agent* m = self->listed.found[best];
+        i++;
+        GetObjectWorldPosition(m, &member->v900);
+        GetObjectWorldRotation(m, &rot);
+        member->f910 = ArctangentOfRatio(rot.r[0].y, rot.r[0].x);
+    }
+    PopBackMemoryMark();
+    if (i != self->owned.count) {
+        f32 cnt = (f32)self->owned.count;
+        f32 radius = cnt * D_00274D20[0] * 0.15915494f;
+        f32 step = 6.2831855f / cnt;
+        PlacedObject* target = (PlacedObject*)GetItemKeeperTarget(self);
+        f32 ang0;
+        if (target != 0) {
+            ang0 = ArctangentOfRatio(target->v150.y, target->v150.x);
+        } else {
+            ang0 = 0.0f;
+        }
+        for (; i < self->owned.count; i++) {
+            Agent* m = self->owned.found[i];
+            f32 r = RandomFloatInRange(D_00274D28[0], D_00274D28[1]);
+            f32 ang = WrapAngle(ang0 + r * step);
+            f32 r2 = RandomFloatInRange(D_00274D30.c[0], D_00274D30.c[1]);
+            ComputePolarOffset(&offset, ang, r2 * radius, 0.0f);
+            u128 q = Vu0::Add(Vu0::Q(self->targetPos), Vu0::Q(offset));
+            m->f910 = ang;
+            Vu0::Q(m->v900) = q;
+            ang0 = WrapAngle(ang0 + step);
+        }
+    }
+}
 
 ASM_FUNC(func_001CC3F8);
 
