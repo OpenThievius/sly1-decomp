@@ -4165,6 +4165,43 @@ TurnColliderTowardRotation (2026-11-09):
     the unit normal dying at the vmove would rank first, leave vf1 to the reload of StoreX's
     product and push the 1.0 to vf2 through local-alloc's widened lifetimes), or a product
     whose preferred class is VU_REGS (two quantities, the qmfc2 a reload).
+- **Two quantities from a variable set twice (func_0017ECE8, 2026-11-10).** Where retail has
+  two blocks of the same shape (here the Gram loop's and the right-hand sides' `Dot` and
+  `qmfc2; sw`), one `u32 bits;` declared at the top and assigned in both
+  (`bits = Vu0::ToBits(Vu0::Dot(na, nb).q); *(u32*)p++ = bits;`) has REG_N_SETS 2, so
+  local-alloc leaves it to global-alloc (`reg_qty = -2`) and the inline's own result folds
+  into it: the Dot's block has two quantities, the product and the 1.0, which sort product
+  first (retail's vf1 and vf2). The GPR is then global-alloc's lowest free, v0, as retail's.
+  A Vec for the product shared the same way does the opposite (the product leaves the block
+  and the 1.0, alone, takes vf1). Worth trying in func_001EDA80 where a second Dot of the
+  same shape exists.
+
+### Loops over one list: one variable for every loop (func_0017ECE8)
+
+- Retail's four walks of the contact rows (a count, the Gram matrix, the right-hand sides,
+  the weighted sum) keep the row in a2 and the contact in a0 in every one, with the
+  count loop's `move a2,v0` from row->next: one `ContactRow03* row; Contact03* c;` declared at
+  the top and reused by each loop (one pseudo each, which global-alloc places once over all
+  the loops), as camera.cpp's sibling func_00145B68 reuses `i` and `j`. A variable per loop
+  gave other caller-saved registers in each (t0, a1, v1). The Gram loop's inner pair (the
+  second row and contact) stays its own.
+- The first normal of the Gram loop is copied (vmove vf3, vf4) after the inner loop's entry
+  test: loop.c hoisted it out of the inner loop body. Written with Vu0::Vec values
+  (`Vu0::Dot(na, nb)` taking na by value), the copy is the parameter's movti, which loop.c
+  moves to the inner loop's preheader; a u128 `ac = na` before the inner loop puts it before
+  the entry test instead, and plain u128 operands give no copy at all.
+- Still open there: retail's reload of the spilled `down` vector for `acc = down` (after
+  SolveActiveSetSystem) is in v1. order_regs_for_reload (reload1.c) skips a hard register that
+  holds a pseudo live before or after the insn, so retail had a value in v0 across the copy:
+  the sum loop's `self->contacts` load, scheduled first by sched1. Ours ties both at priority 5
+  (the copy's unflagged TImode frame store is a true dependence of the `row->head` load
+  through the loaded pointer) and INSN_REG_WEIGHT puts the copy first (-1, down dying,
+  against the load's +1). Confirmed by a probe: acc as a u128 whose address the z read
+  takes makes the copy's store MEM_SCALAR_P at a fixed address, which
+  fixed_scalar_and_varying_struct_p keeps apart from the mem/s load; sched1 then issues the
+  load first and reload takes v1, as retail. But purge_addressof allocates such a variable's
+  slot after the expand-time weight slot (retail has the sum at 0, the slot at 0x10), so the
+  form that has both is still to find.
 
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
