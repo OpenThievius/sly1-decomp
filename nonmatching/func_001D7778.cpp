@@ -10,7 +10,11 @@
 // retail's means spin's copy was born first (spin, D0, E0). loop.c moves in loop order (the
 // copy of PRE's &0x70 is at the first call, after the push's curves), and sched1 keeps that
 // order (equal raised priorities, LUID decides). What made retail's copy of &spin come before
-// the curves is open: not spin declared at the top (frame changes), not a named curve.
+// the curves is open. Ruled out (2026-11-10, 6 compiles, still 10 lines): spin declared at the
+// top (frame changes); the curves as named references before the push, or as pointers passed
+// to an inline (both substituted as constants: unchanged); the curve pointers named at the loop
+// body's top (635 lines); the loop's eight vectors as members of one struct (80 lines). The
+// curves cannot be read after the first call that takes &spin: the push is tested before it.
 //
 // What matched (2026-11-10, docs/toolchain gcse.md, alias-classes.md, sched1.md):
 // - `s` declared once at the top and assigned by both loops: set twice, it has no base value,
