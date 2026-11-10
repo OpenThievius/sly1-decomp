@@ -2110,6 +2110,39 @@ rotated:
   later loop's preheader, is PRE's insertion after a computation that should not have been in
   the table.
 
+### A `%hi` copied into a second register: the store's block began with a label when cse ran (func_00140968, unsolved)
+
+RefreshDiscStatus (`if (g_discStatus != status) g_discStatus = status; return g_discStatus ==
+0x14;`), read from cse.c (cse_end_of_basic_block, cse_main), gcse.c (pre_insert,
+pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (2026-11-10):
+
+- **Retail's sign.** `lui v1` before `move a0,v0`, `beq v0,a0` with `move a1,v1` in its delay
+  slot, the store through a1 and the return's load through v1; the equal path skips the reload
+  (reorg finds the target's `lw v0` redundant with the compare's and retargets past it). Ours
+  has one address register: `bnel` with the store in the likely slot, 4 bytes short.
+- **Why ours has one.** cse's blocks end only at a CODE_LABEL (cse_end_of_basic_block), so the
+  then-arm of a plain `if` is in the compare's block and its `%hi` becomes the compare's
+  pseudo before gcse runs: the expression has one occurrence, and PRE does nothing.
+- **What gives retail's code.** When the arm begins with a label at cse time, its `%hi` stays a
+  pseudo of its own. lcm.c then finds the `%hi` anticipated at the end of the compare's block
+  and, lazy, inserts a new computation there (insert_insn_end_bb) rather than reuse the
+  compare's; the arm's and the join's become copies of it, cse2 turns the insertion into a copy
+  of the compare's pseudo, which lives on to the join, so the copy keeps a register of its own
+  (a1) and sched1 raises the `lui` (it now has a dependent) above `move a0,v0`. Diagnostics
+  that show it: `if (g_discStatus != status || status == 0x7fffffff)` (a real second test) gives
+  retail's first seven instructions; `while (g_discStatus != status) g_discStatus = status;`
+  (cse folds the loop's second test, after its top label made the store a block of its own)
+  gives the whole shape, with status and the address in v1/a0 swapped and an extra `nop`.
+- **Ruled out** (all the same 60 bytes): the comparison's operands swapped, an empty then-arm
+  with an `else`, a pointer local, a reference- or pointer-returning inline accessor, an inline
+  setter (`SetIfChanged(&g_discStatus, s)`), inline predicates (`bool`, `if/return`), a flag
+  (`s32 changed`, `bool changed`), a named old value, an unused named label, a returned copy
+  in each arm, and an early return: jump.c's first pass removes every jump into the arm that
+  plain forms make before cse sees it.
+- **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
+  the copy and later loads through the original: the store's block was entered by a jump that
+  cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
