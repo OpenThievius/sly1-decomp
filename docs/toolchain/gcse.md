@@ -759,3 +759,21 @@ pseudo for both (2026-11-10, w15):
   T. For retail's order T = 323 (or 339) with params as pseudo 121; `*(Vu0::Vec*)&x = F(...)`
   stores (two more insns each than `Vu0::Q(x) = F(...).q`), Vec locals for the weighted sums'
   operands and a named row weight bring the table from 305 to 323 with the final code unchanged.
+
+### cprop's two passes and an inline's argument copy across a branch (func_0019ED58)
+
+expand_inline_function copies each argument into its parameter's pseudo as the argument is
+evaluated, so in `MulAddX(nv, NormalizeOr(t, x), mu)` the copy `P = nv` sits in the block before
+NormalizeOr's branch and the asm that reads P in the block after it. cse1 cannot fold P there;
+gcse's cprop (cprop_insn, which only rewrites a SET and only from a copy available at the start
+of the block) replaces P by nv in pass 1 and nv by the inline result it was copied from in pass
+2, one step of the chain per pass. The use is left one copy behind every other use of the
+normal: a separate pseudo, set at the top of the function and crossing every call, which
+global-alloc spills (HandleEffectContact's 80(sp), stored at entry). A user variable copy made
+after a join (`Vu0::Vec d1 = nv;` after an if/else) does the same for the uses through it in later
+blocks. Retail's 80(sp) copy is read only by the final impulse sum (`MulXSum(d1, s, dir, s2)`):
+naming the first impulse's direction `d1` puts it there; the size became retail's. Count the
+copies between the variable and a use, and the block boundaries between them, to predict which
+uses end on which pseudo (`-dG`: "COPY-PROP: Replacing reg N in insn M with reg K", pass by pass).
+Unsolved there: retail's second direction keeps its parameter copy as a register copy of the
+normal (vmove vf6,vf8 before the branch), which neither form above gives.
