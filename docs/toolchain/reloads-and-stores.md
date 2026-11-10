@@ -140,3 +140,7 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   reload's rotation is one step off with no visible extra reload, look for code the original
   repeated that jump2 merged. The skin pointer's early read (above) is no longer needed since
   Vu0::Scalar's slot became MEM_SCALAR_P: `if (mesh->f68 != 0)` read at its use matches too.
+
+- **func_00187260.** One `madd` in a loop preheader (a strength-reduced address, loops.md, "A
+  pointer set in an inner loop too is no giv of the outer loop") made a1 a spill register and
+  shifted every qmfc2 temporary of the function's first loop, 1,400 bytes before it.

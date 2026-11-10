@@ -967,3 +967,27 @@ pseudo that the later `GetVectorAngles(&d, ...)` reused (a0 set before the range
 sets it in the branch's delay slot), fixed by storing through `*(u128*)&d` as vu0.h's Set note
 says; and BuildYawPitchMatrix's parameter order (alias-classes.md, "A prototype's parameter
 order").
+
+### sched2: a variable set after the first call keeps its save late in the prologue (func_00187260)
+
+Retail's prologue saves s6 and s2 after the others (`sq s3; move s4,a0; swc1 $f21; move s3,t1;
+sq s6; mov.s $f21,$f12; sq s2; move s6,zero; sq ra; move s2,zero`), ours in register order.
+In sched2 every insn of the first block is a predecessor of the block's last insn; the
+parameter copies and anything else before the call (here `PushBackMemoryMark()`) are also
+predecessors of the call, so they have priority 3 and the saves they wait for (anti
+dependences) 4. `n = 0; nv = 0;` written in the declarations are such copies; retail's two
+zero moves have priority 2, so they come after the call in the source (`PushBackMemoryMark();
+nv = 0; n = 0;`): they set call-saved registers, sched2 lifts them above the call, and their
+saves fall to priority 3, where the rank's dependents count (two: the move and the call) puts
+them before ra's save (one). The order of the two moves follows their order in the source.
+
+### A length turned into a depth in place (func_00187260)
+
+Retail's edge hit takes the square root into $f2, divides 1.0 by it, and only then subtracts
+the radius into the same register (`sqrt.s $f2,$f1; ... div.s $f0,$f0,$f2; ... sub.s
+$f2,$f2,$f21`). With `f32 len = Fpu::Sqrt(dsq); f32 depth = len - radius;` sched1 issued the
+subtraction before the division and the depth took a register of its own ($f3), with a `mov.s`
+of the root. Reusing the variable, `f32 depth = Fpu::Sqrt(dsq); ... (the normal, scaled by
+1.0f / depth) ...; depth -= radius;`, gives retail's code: the variable is set twice (two
+lives of one pseudo, no birthing raise in adjust_priority) and the subtraction stays where it
+is written, writing the register it reads.
