@@ -156,11 +156,13 @@ struct Vu0 {
     }
 
     // Scalar of a float in memory: FromFloatAt, so the float is loaded with lw straight into
-    // qmtc2's GPR, and stored to its slot as Scalar's is.
+    // qmtc2's GPR, and stored to its slot as Scalar's is, the slot's address taken without a
+    // reference return (a Q return leaves it in a pseudo that a later local given the freed
+    // slot is read through, func_001D36F0).
     static u128 ScalarAt(const f32& f)
     {
         u128 r = FromFloatAt(f);
-        return Q((s128)r);
+        return *(u128*)&(s128)r;
     }
 
     // ScalarAt with the float passed by value: the operand is the float itself ("rV"), and an
