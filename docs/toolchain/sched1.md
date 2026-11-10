@@ -151,6 +151,33 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   `-fno-strict-aliasing`, `-O3`, `-fno-gcse` (146), the Linux 2.9-ee-991111-01 build (102).
 - **Spot it.** Two branches into one block whose delay slots hold the same insn and whose
   target is the block's second insn: the copied insn was alone in sched2's first cycle.
+- **Why no barrier fits exactly** (second pass, 2026-11-10, from haifa-sched.c's
+  get_block_head_tail, sched_analyze_insn, schedule_insn, mips.h's ADJUST_COST and reorg.c's
+  fill_slots_from_thread). Retail's cycles are ours with the v0 chain (the address, its spill
+  store `sw v0,68(sp)` and the next addresses) and the two picture stores one cycle later,
+  while the other chain (`li s0,384`, the mults, `addiu s1`, `move a0,s1`) keeps its cycles:
+  in retail's cycle 1 the memory unit and the second issue slot are both unused although the
+  stores and `li s0,384` are ready. A loop note is a barrier only after the block's first
+  insn (get_block_head_tail skips leading notes; an empty loop at the top of the body has no
+  effect, 123 lines), and the barrier insn is the one after the note, which then depends on
+  every earlier insn: no insn order makes the address both first and the barrier. A note
+  after the address makes the next insn the barrier and serialises cycles 2 and 3 (the
+  previous attempt's 35 lines). Anti and output dependences cost 0 on MIPS (ADJUST_COST), but
+  a dependent made ready by an issue is not issued in the same cycle (it is swapped behind the
+  loop index), so a second copy of the address cannot share cycle 1.
+- **No invisible insn either.** An insn that takes the slot and vanishes later would also fit:
+  jump2 deletes no-op moves only after sched2, but none reaches sched2 (reload_cse_regs
+  deletes them first; no `(set (reg N) (reg N))` in 650 sched2 dumps of this project); flow's
+  `(use (const_int 0))` follows a call that ends a block, never a block's head; reorg deletes
+  a thread insn redundant with one before the branch (redundant_insn), and only `lw v1,0(a1)`
+  is redundant at both branches, but a dead re-read of the width never reaches sched2. The
+  other grouping of retail's order (address and height store in cycle 1, every later pair
+  alu first) needs the v0 chain below `li s0,384` and the mults, the reverse of ours (64 to
+  62), and the width store below 63 while the height store stays at 65.
+- **Also ruled out:** `-funroll-loops` with the plane calls as loops (151, 166: not unrolled
+  completely), the plane array through a local pointer (102 after the test, 42 at the top: the
+  pointer is kept in s5), the size test as an inline (134), the body as an inline (not
+  inlined: over the integration threshold).
 
 ### A value negated into itself crosses the call (func_001A2380)
 
