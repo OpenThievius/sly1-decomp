@@ -15,6 +15,13 @@
 // register: `*p = self->lines` through `p = &lines` keeps it, while `lines = self->lines` then
 // `p = &lines`, or `&(lines = ...)`, lets CSE fold p to the frame (608 bytes). Declaring p earlier
 // (before the first reader call) fixes shown and text but leaves p in s3.
+// Round 3: inlines that copy the record and return its address do not give retail's p either.
+// `{ *d = *s; return d; }`, the same with references (`d = s; return &d;`), and one taking the
+// object fold p to the frame (608 bytes): the copy's destination is the substituted frame
+// constant, so p carries it too. `{ T* out = d; *out = *s; return out; }` keeps the register,
+// but out is set before the copy, so this is X1 again (four references). Retail's p is set from
+// the block move's own address register (`move s5,a2`) and never becomes a frame equivalent,
+// which no form tried reproduces.
 // PAL: the panel's fields sit later (state 0x570, frame 0x520, colour 0x580, glyph 0x584, bands
 // 0x5A4); its text is 16-bit (a reader of 0xC0 bytes, func_eu_0015DCB8, and PAL's copy and append,
 // func_eu_001E3050, func_eu_001E3178); the line breaks are a record of their own (0x408, laid out by
