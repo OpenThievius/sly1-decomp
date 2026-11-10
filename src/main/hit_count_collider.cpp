@@ -245,7 +245,7 @@ void func_001C39A0(HitCountCollider* self, void* ev)
 
 
 void StepCollider(Collider* self, f32 t);
-void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 void TurnColliderTowardRotation(Collider* self, f32 scale, Mat02* rot, f32* data);
 void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
 void AddColliderForce(void* a, void* b);
@@ -256,7 +256,7 @@ void func_001C3B40(HitCountCollider* self, f32 dt)
     Vec02 accel;
     Vec02 t;
     StepCollider(self, dt);
-    BuildYawPitchMatrix(&rot, self->f644, 0.0f);
+    BuildYawPitchMatrix(self->f644, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, D_00274AA8);
     Vu0::Q(accel) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x650)), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
