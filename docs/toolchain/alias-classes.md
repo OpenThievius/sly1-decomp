@@ -3122,3 +3122,24 @@ the force's store between them (`Vu0::Q(force) =`, a u128 store with no alias cl
 fixed_scalar_and_varying_struct_p does not help) invalidates the load in cse's table. Declared
 in each loop, `s` is set once, its base is the `self` argument, a frame store cannot alias it,
 and the load is shared. The same declaration once at the top is the lever of func_00139740.
+
+### A transposed rotation's rows through a u128 pointer wait for the weight slots (func_001DEBE8)
+
+From the `-dS -fsched-verbose-6` dumps of ControlTintBlendCollider (2026-11-10):
+
+- **What retail shows.** After `vel = MulXSum(v150, Scalar(k), axis, Scalar(w))` retail loads
+  `frame->m110`'s three rows (`lqc2 vf3, 0x110(v0)`, then 0x20 and 0x10 through `v0 + 0x110`)
+  and `self->f74C` before it stores w's slot (`sqc2 vf6, 0xF0(sp)`), so the slot holds w in vf6
+  over the loads. Ours stores the slot first and gives w vf3.
+- **Why.** Vu0::RotateTransposed reads its rows through `(const u128*)&m`: loads with no alias
+  class, which conflict with every frame store, the MEM_SCALAR_P weight slots included. In
+  sched1 the three row loads depend on both slot stores and on vel's, so the slot stores (leaves,
+  priority 9 and 10) go first. Rows read as structure members (MEM_IN_STRUCT_P, varying address)
+  never wait for a scalar slot at a fixed address (fixed_scalar_and_varying_struct_p), and the
+  slot store falls behind them as retail's does.
+- **Checked only as a diagnostic:** RotateTransposed's asm with its rows taken as
+  `((const Vu0::Vec*)&m)[i].q` (as Vu0::RotateMembers reads Rotate's) gives retail's whole tail,
+  13 more instructions right. It is a helper variant (RotateTransposed reading members), so it
+  waits for the lead's decision; a pointer variable for the row base (`PlacedObject* part`) does
+  not help, since a pointer loaded from memory has no base term in alias.c either way.
+
