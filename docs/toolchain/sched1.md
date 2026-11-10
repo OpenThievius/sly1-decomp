@@ -538,6 +538,40 @@ Worked out on the link swing's last block (2026-11-09):
   the branch (`addiu a3, sp, 192` hoisted out of the call block). `*(u128*)&g = x` addresses the
   frame directly, as Set's note in vu0.h says, and the call forms the address again: retail's.
 
+### The link swing's last block: what the two rankings need (func_001CC818, unsolved)
+
+Second pass on the same block (w15, 2026-11-10), with the emulators above corrected to count
+only the block's own pseudos (`used N times across M insns in block 36` in the .lreg dump):
+
+- **The two rankings retail needs.** Local-alloc gives the six wrong registers through two
+  comparisons. Scalar(r)'s quantity (3 refs: qmtc2, vmulx, slot store; a life of 32) must
+  rank above off's (3 refs: vmulx, cross, p's vadd; 26), and the v150-to-quotient chain
+  (6 refs over 14) below acc's (4 over 10), which one more insn inside the chain's life does.
+- **Why the first one is hard.** Scalar(r)'s qmtc2 has priority 10 and only memory loads
+  rank above it, so sched1 issues it in the first cycle after the call whatever else ties: the
+  graph fixes its birth. Its death is the slot store, priority 4 behind the loads. Only a
+  higher-priority store (a load that truly depends on it) or p's vadd moved to the block's end
+  fixes the order.
+- **What the emulators accept.** No single added or removed dependence, no swap of two
+  LUIDs, no single priority, and no one or two insns added to the block give retail's
+  fourteen registers. Pairs of added dependences do. One is the v150 load waiting for the
+  Scalar(r) slot store, which fixes the first ranking, together with p's store before the
+  f22AC load (or before ang's store). The other is the f22AC load ready only mid-block, after
+  the v150 load, which ends the birthing raise in the first cycle after the call, together
+  with the rate slot store ranked above a later store. Each is two changes, and no plain form
+  gives either: the loads through `self` have the parameter's base, so they never wait for a
+  frame store.
+- **A second Scalar(r) gives the first ranking.** Writing p as `Add(pos, MulX(nd, Scalar(r)))`
+  (CSE merges the qmtc2 and the vmulx with off's) gives Scalar(r) 4 refs, and the registers up
+  to the cross product become retail's: m.r[1] vf3, Scalar(r) vf6, off vf7, acc vf2. It costs a
+  second slot store, which retail does not have (54 lines).
+- **Ruled out by compiling (16 lines unless noted).** v2 as a u128 (a spill slot at the top
+  of the frame, 58). The quotient over Vec values. off and Scalar(r) as Vec values.
+  ScalarAtValue and ScalarAtCall for r, rate and dt. ScalarAt(r) (r goes to memory, 182). p
+  computed in place from off, and v built in two statements (the dead stores stay: flow1 keeps
+  them, 52 and 57). Rotate's result stored to ang first. RotateMembers. RotateRowsTied (23).
+  g computed from a named sum before v's store (23).
+
 ### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
 
 ComputeGridBlendWeights writes out[i*8 + j*4 + k] = zk * yj * xi for three x weights, two y
