@@ -2512,6 +2512,11 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   before the call (`u128 x = ..; SetRows(..)`) store the slots after every load (26 lines). b's
   rows by index (`q[i]`) or as Vec members both match; Q(b.r[i]) differs. func_001721B0's
   product takes the same helper (98 lines to 5); func_00149760's do not (frame grows).
+- **func_00172078's second product** (near miss on another branch) takes the same one-call form
+  with the matrix local passed in and its rows read as Vec members (`SetRows(*out, x = Q(a.r[0])
+  = RotateRows(.., q[0].q), ..)` after `Mat02 a;` in the caller): three slots at 0xa0 to 0xc0,
+  5 lines to 2. It and func_001721B0 keep one tie: retail stores z's slot before r's row 2 at the
+  block's end, ours after, whichever way each argument's chain is written.
 
 ### Three row copies made by one call (func_00122B30)
 
