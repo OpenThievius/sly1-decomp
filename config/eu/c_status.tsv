@@ -3344,6 +3344,7 @@ func_001CBE70	func_001CCB68	match
 func_001CBEE8	func_001CCBE0	match	
 func_001CC120	func_001CCE18	match	rodata
 func_001CC410	func_001CD108	match	
+func_001CC490	func_001CD188	match	
 func_001CCF98	func_001CDC90	match	
 func_001CD088	func_001CDD80	match	
 func_001CD0C8	func_001CDDC0	match	
