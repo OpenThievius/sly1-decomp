@@ -254,7 +254,56 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     return r;
 }
 
-INCLUDE_ASM(func_001CE590);
+void ComputeObjectMotionInFrame(BaseObject* from, BaseObject* to, Vec02* pt, Vec02* a, Vec02* b, Vec02* c, Vec02* d);
+s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
+void EvaluateHermiteVectorSegment(f32 t, f32 u, f32 v, void* a, void* b, void* c, void* d, void* e, void* f, void* g);
+
+static inline f32 MinF(f32 a, f32 b) { return b <? a; }
+void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel)
+{
+    Vec02 vel;
+    Vec02 reach;
+    Vec02 seg1;
+    Vec02 seg2;
+    Vec02 weight;
+    f32 t;
+    ComputeObjectMotionInFrame(obj, 0, start, &vel, 0, 0, 0);
+    if (SolveArrivalTimeAtHeight(self, (Vec02*)self->f6D4, point, start, &vel, &t) == 0) {
+        f32 dz = point->z - vel.z;
+        f32 g = self->gravity.z;
+        f32 fall = -dz / g;
+        f32 tt = fall >? 0.0f;
+        f32 h = ((Vec02*)self->f6D4)->z - start->z + (g * (tt * 0.5f) * tt + dz * tt);
+        if (outTime != 0) {
+            *outTime = tt;
+        }
+        if (outCost != 0) {
+            *outCost = 1010000.0f - h;
+        }
+        return;
+    }
+    Vu0::Set(weight, Vu0::FromFloat(MinF(t, 0.15f)));
+    Vu0::Set(reach, Vu0::MulAddX(Vu0::Q(*start), Vu0::Q(vel), Vu0::Q(weight)));
+    if (extra != 0) {
+        *(Vu0::Vec*)&vel = Vu0::Add(Vu0::Vec::Of(vel), Vu0::Vec::Of(*extra));
+    }
+    if (outTime != 0) {
+        *outTime = t;
+    }
+    if (outCost != 0) {
+        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (void*)self->f6D4, point, &reach, &vel, 0, 0, &seg1);
+        f32 a = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg1), Vu0::Q(seg1))));
+        EvaluateHermiteVectorSegment(t, t, 1.0f, (void*)self->f6D4, point, &reach, &vel, 0, 0, &seg2);
+        f32 b = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg2), Vu0::Q(seg2))));
+        *outCost = ((a + b) * (t * 0.5f)) <? 1000000.0f;
+    }
+    if (outPoint != 0) {
+        *outPoint = reach;
+    }
+    if (outVel != 0) {
+        *outVel = vel;
+    }
+}
 
 INCLUDE_ASM(func_001CE800);
 

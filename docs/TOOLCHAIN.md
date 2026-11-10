@@ -5198,6 +5198,35 @@ so the original named it: `f32 tenth = limit * 0.1f; f32 step = tenth >? 0.5f;`.
 operands (`0.5f >? limit * 0.1f`) does not help (fold puts the constant second). Spot it in the
 `.lreg` dump: the variable `set 2 times` where retail's code shows one set.
 
+### A named quotient before `>?` reorders a whole block's FPRs (func_001CE590)
+
+ScorePlayerTargetPlacement's no-solution branch computes `tt = (-dz / g) >? 0.0f` and a
+height from it. Written that way the division sets `tt` itself (the MAX_EXPR's target, as in
+func_0012C9E8), and `tt`, read again in another block (`*outTime = tt`), is a global pseudo:
+the negation `-dz` is then a lone block-local quantity of two references, which local-alloc
+ranks below the chain tied to `g` (`g * (tt * 0.5f) * tt` ties each product to `g`, nine
+references). The chain took $f0 and pushed every other value one register up (ours
+vel.z $f1, g $f0, tt $f4; retail vel.z $f0, g $f1, tt $f0). Named, `f32 fall = -dz / g;
+f32 tt = fall >? 0.0f;`, the quotient is a block-local pseudo that the negation ties to
+(`-dz` dies in the division): one quantity of four references over a short life, ranked
+first, in $f0; `g`'s chain follows in $f1, and global-alloc gives `tt` the free $f0. All
+fifteen of the block's float values then match, and reorg's branch over the block becomes
+retail's plain `bnez` with the solution path's `lwc1 $f1, t` in its slot (with `tt` in $f4,
+ours was `bnezl`).
+
+How it was found: build/swarm/w13-1CE590/sfenum.py (worktree g8, gitignored) emulates
+local-alloc's ties (combine_regs: the first operand that is a local register, tied if it dies
+there), QTY_CMP_PRI ranking and the fake one-insn-wider lifetimes for one block's SF pseudos
+from an `.lreg` dump. It reproduced ours exactly; sampling sched1 orders found few that gave
+retail's registers, while raising the negation's quantity by two references gave all of them
+at once: a tie the source was missing, i.e. a pseudo of its own for the quotient.
+
+The same function's `if (extra != 0) vel = vel + *extra;` must be a struct store
+(`*(Vu0::Vec*)&vel = Vu0::Add(Vu0::Vec::Of(vel), Vu0::Vec::Of(*extra));`): CSE's skip-blocks
+path then forgets memory over the skipped body (func_001B2140), and `*outTime = t` reads `t`
+again from its slot (`lwc1 $f0, 80(sp)`), retail's four bytes; through `u128` casts CSE kept
+the `t` of the min in $f1.
+
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
 
 SetupTextPanel (2026-11-09, `-dS -fsched-verbose-6`, haifa-sched.c's sched_analyze):

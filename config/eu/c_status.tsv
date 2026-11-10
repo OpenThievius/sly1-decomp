@@ -3355,6 +3355,7 @@ func_001CDB70	func_001CE868	match
 func_001CDD98	func_001CEA90	match	
 func_001CDF78	func_001CEC70	match	
 func_001CDFB8	func_001CECB0	match	rodata
+func_001CE590	func_001CF288	match	
 func_001CE9E8	func_001CF6E0	match	
 func_001CEA58	func_001CF750	match	
 func_001CEAB8	func_001CF7B0	match	
