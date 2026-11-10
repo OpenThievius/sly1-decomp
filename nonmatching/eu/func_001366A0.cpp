@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1824/2428 (75.1%), checked 2026-11-10
+// BYTES 2341/2428 (96.4%), checked 2026-11-10
 // BYTES 0/0, checked 2026-11-10
 // NEAR (PAL's own definition): python3 tools/check.py nonmatching/eu/func_001366A0.cpp func_001366A0 --version eu --unit src/main/text_panel.cpp
-// Still differs (2026-11-10, w13): the size and every block but the line search match. The cut
-// loop over the copied lines record (`for (i = 1; i < lines.count; i++) if (at < start[i]) { cut;
-// break; }`) rolls its body into the exit test (stmt.c expand_end_loop), jump.c copies that test
-// before the loop (retail's peeled i = 1 with the height unmultiplied), and the copy's jump back
-// to the increment enters the loop from outside: loop.c says "ignored due to multiple entry
-// points" and leaves the index unreduced (`sll; addu sp`), where retail walks a pointer from
-// s5 + 24 (`addiu a0,s5,24`, `addiu a0,a0,8`), s5 being the record copy's address kept from the
-// block move (`move s5,a2`). An explicit walk (`for (s32* start = &lines.lines[1].start; ...;
-// i++, start += 2)`, build/swarm/w13-1366A0/T5.cpp) gives retail's loop exactly but from the
-// frame (`addiu a0,sp,0x538`, 608 bytes): the base must be a pointer CSE cannot fold to the frame.
-// `goto` instead of break keeps the loop valid but hoists the count (598 bytes). Also: the
-// clock's %hi in s7 where retail has s8 (ours hoists the packet writer's %hi into s8 over the
-// text block, as the US near miss did before StyleDrawer).
+// Still differs (2026-11-10, w13 round 2): only five saved registers. The record copy's address p
+// is in s0 where retail has s5, and so shown, text, typed and total each sit one register off
+// (retail s0, s1, s3, s4). In the .lreg dump p has 4 refs over 62 insns, which ranks it first in
+// global-alloc. Retail's p has 3 refs: it is set from the block move's destination register
+// (`addiu a2,sp,0x520 ... move s5,a2`), where ours sets a2 from p (`move a2,s0`), so it ranks
+// below total. The loop is solved: the cut written as an explicit walk (`for (s32* start =
+// &p->lines[1].start; ...; i++, start += 2)`) is retail's loop insn for insn, with the count
+// reloaded on each pass. With `break`, the rolled exit test's copy enters the loop from outside
+// and loop.c ignores the loop (docs/TOOLCHAIN.md). `goto` (func_0015FD78's fix) keeps the loop
+// valid, but it hoists the count and loses the peeled first pass (598 bytes). The base must be a
+// register: `*p = self->lines` through `p = &lines` keeps it, while `lines = self->lines` then
+// `p = &lines`, or `&(lines = ...)`, lets CSE fold p to the frame (608 bytes). Declaring p earlier
+// (before the first reader call) fixes shown and text but leaves p in s3.
 // PAL: the panel's fields sit later (state 0x570, frame 0x520, colour 0x580, glyph 0x584, bands
 // 0x5A4); its text is 16-bit (a reader of 0xC0 bytes, func_eu_0015DCB8, and PAL's copy and append,
 // func_eu_001E3050, func_eu_001E3178); the line breaks are a record of their own (0x408, laid out by
@@ -180,7 +180,9 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         s32 total = CountTextChars(&all);
         s32 shown = (s32)((g_gameClock[1] - self->textSince) * self->charsPerSecond);
         u16 text[0x200];
-        TextLines_eu_1367B8 lines = self->lines;
+        TextLines_eu_1367B8 lines;
+        TextLines_eu_1367B8* p = &lines;
+        *p = self->lines;
         if (!(shown < total)) {
             shown = total;
         }
@@ -191,8 +193,9 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         func_eu_0015E3E0(&typed, shown);
         if (height < self->textHeight) {
             s32 at = func_eu_0015DE58(&typed);
-            for (s32 i = 1; i < lines.count; i++) {
-                if (at < lines.lines[i].start) {
+            s32 i = 1;
+            for (s32* start = &p->lines[1].start; i < lines.count; i++, start += 2) {
+                if (at < *start) {
                     lines.count = i;
                     lines.height = (f32)i * ((f32)self->font->height * self->font->sy);
                     break;

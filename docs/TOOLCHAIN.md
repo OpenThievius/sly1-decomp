@@ -1373,7 +1373,12 @@ is reduced (`addiu a0,s5,24`, `addiu a0,a0,8`) with the count reloaded each pass
 loop was valid or the walk was written: an explicit pointer (`for (s32* start =
 &lines.lines[1].start; ...; i++, start += 2)`) gives retail's loop insn for insn, but CSE folds
 its base to the frame (`addiu a0,sp,0x538`) where retail keeps the record copy's block-move
-address (`move s5,a2`); `goto` past the loop keeps it valid but hoists the count. Open.
+address (`move s5,a2`); `goto` past the loop keeps it valid but hoists the count. Copying the
+record through a pointer, `TextLines* p = &lines; *p = self->lines;`, keeps the base a register
+(`lw 24(s0)`, `addiu a0,s0,24`): the whole function is then retail's code but for five saved
+registers, because p has one reference more than retail's (ours sets the block move's address
+from p, retail sets p from it) and global-alloc ranks it first. Writing the copy first and taking
+`&lines` after lets CSE fold p to the frame. Still open.
 
 ### A search loop that leaves by `goto`: breaks roll the body into the exit test (func_0015FD78)
 
