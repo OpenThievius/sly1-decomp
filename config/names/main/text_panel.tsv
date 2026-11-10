@@ -27,7 +27,7 @@ func_001365A0	SetTextPanelSubject	stores the object at 0x2FC: ClearTextPanel pas
 func_001365A8	SetTextPanelValuePercent	stores its argument divided by 100 clamped to 0..1 in the value at +0x300
 func_001365F0	GetTextPanelSlideInTime	slot 11 of the panel table: 0 in states 1, 2 and 5, otherwise the base slide-in time
 func_00136648	GetTextPanelSlideOutTime	the twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise GetScreenElementSlideOutTime
-func_001366A0	DrawTextPanel	original assembly; slot 9 of D_0021A440, the draw slot (DrawScreenElementText, DrawPauseMenu): reads and counts the panel's text, pushes its font scale and draws through func_00132500
+func_001366A0	DrawTextPanel	slot 9 of D_0021A440, the draw slot (DrawScreenElementText, DrawPauseMenu): draws the frames by state (func_00132500 and the others), the box in the style's colour, the text typed so far with a blinking cursor scrolled to the line being typed (DrawAlignedText), and the pulsing button glyph (DrawFontString)
 func_00136EC8	GetTextPanelCenter	returns the panel's stick position plus (320, 180.4)
 func_00136EF8	ChooseTextPanelState	slot 6 of the panel table: with a child, sets state 2, 3 or 4 by the child's mode at +0x2D0 and calls func_00150790 with 3; without one sets state 1
 func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanelState: with a child it sets the child's step sequence to state 4, without one it puts the panel back in state 0 (SetTextPanelState)
