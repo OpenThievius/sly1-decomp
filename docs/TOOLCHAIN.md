@@ -2059,6 +2059,45 @@ frame); four changes matched it:
   the vmulx and the weight dies at the vmulx, which takes its register as retail's does
   (`vmulx vf3, vf1, vf3x`). `place.scaleX = place.scaleY = 1.0f;` stores scaleX first.
 
+### A frame address CSE keeps in a pseudo across a call: an inline's arguments (func_00112C38, func_00113240)
+
+MultiplyScriptValues and DivideScriptValues scale a matrix with ScaleMatrix (func_00188628) into a
+stack matrix, then copy it with CopyBytes: retail forms the matrix's address afresh for each call
+(`addiu a0, sp, 0x60; jal ScaleMatrix` ... `addiu a0, sp, 0x20; addiu a1, sp, 0x60; jal CopyBytes`),
+where every direct form kept it in a saved register (s0, 16 bytes too long with the cross-jumped
+tails). The mechanism, from the .rtl and .cse dumps:
+
+- **A call's arguments are pseudos; CSE keeps the first.** expand_call computes each register
+  argument (and a struct return's hidden address, force_reg) into a pseudo, then moves it to
+  a0-a3. A second `&r` after the call is the same (plus fp 0x60), and CSE's cheapest equivalent is
+  the first pseudo (cost 1 against the PLUS), so one pseudo lives across the call: a saved
+  register. An out pointer, a value return, a reference, an operator= or the returned
+  temporary's address all go through such a pseudo.
+- **An inlined call's arguments go straight into the hard registers.** In an inline function's
+  saved body the call's argument moves are `(set a0 (plus fp K))`; integrated, they stay so, and
+  a0 is invalidated by the call, so the later address is formed again. Retail's shape is a matrix
+  class whose copy constructor calls CopyBytes and an inline function that scales into its own
+  matrix and returns it: `M r; ScaleMatrix(&r, m, s); return r;`, the return copy-constructing the
+  caller's `M c = ScaledMatrix(m, s)` (the helper over the asm routine that a matrix class would
+  have; func_001C75B0 and ComputeColliderInverseInertia copy their scaled 3x3 matrices with
+  CopyBytes the same way).
+- **A pseudo for the freed slot's address does the same.** Where the weight's slot (ScalarInGpr's
+  temporary) was freed and the inline's matrix took the same offset (0x50 in the matrix case),
+  the pseudo that read the slot back was again CSE's equivalent of (plus fp 0x50). It came from
+  Vu0::Q: integrate.c copies a parameter that is not read-only through a register
+  (process_reg_param), and Q's reference parameter is one, so `*(const u128*)&v` loads through a
+  pseudo holding the slot's address. Bound to a local reference instead (`const s128& slot =
+  (s128)r; return *(const u128*)&slot;`), the address is a set-once frame address that
+  integrate.c substitutes into the load, and no pseudo holds it: ScalarInGpr and the new
+  ScalarInGprAt end so (include/vu0.h). Every other ScalarInGpr caller is unchanged (full build).
+- **A callee's v0.** CopyBytes declared `void*` sets v0 at the call (unused), and the lq/sq copy
+  after it then starts in v1 where retail's starts in v0; declared void, as the file does, v0 is
+  free. Likewise StoreFloatAsQuadword (func_00118CF0, defined in the same file) returns its out
+  pointer: declared so, sched1 orders `mov.s $f12` before `move s6, v0` as retail.
+- **A float in memory into a 128-bit GPR.** Retail loads the float operand's word with lw straight
+  into the GPR it passes (`lw v0, 4(s2); por a2, zero, v0; sq v0, 0x50(sp)`); ScalarInGpr's
+  operand would be lwc1 then mfc1. Vu0::ScalarInGprAt is that lw, as FromFloatAt is to FromFloat.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
