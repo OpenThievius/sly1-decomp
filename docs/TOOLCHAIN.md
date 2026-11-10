@@ -240,6 +240,10 @@ explains it; search the section's title or the function. Walls that stay open ar
   register-relative stores (func_001A7800 "A stack record filled by an inline").
 - **An inline layout helper's frame-address parameters** give a fresh `addiu` at each call and the buffer from a
   spill slot (PAL func_001316E8 "Integration: an inline function's parameters and results"; func_00134B48).
+- **A non-immediate constant argument** (a colour literal) makes try_constants keep the inline frame's base
+  pseudo, which CSE then keeps in a saved register; pass a variable (func_001366A0 "One layout helper for three
+  layouts"). A pointer argument to an inline (`StyleDrawer::Draw(.., &g_gsPacketWriter)`) has its %hi live
+  across the code before the call, which changes reload's spill registers (same section).
 - **An inline's whole frame** is one BLKmode temporary per call; locals declared in an inner block free their
   slots at its end (func_00125138, func_001E4888); a Scalar's copy reuses an inner block's slot of its mode
   (func_00158480 "A block's local slot taken by a Scalar's copy").
@@ -1439,6 +1443,27 @@ differed (37.4%).
 - Two other differences: the second loop written `for (; i < n; i++) { m = found[i]; ... }`
   (loop.c's reduced giv: `addu s2,v0,s3`, index first) rather than a walking pointer, and
   `radius` declared before `step` (retail loads 1/(2pi) before 2pi).
+
+### A break with a body: the copied exit test enters the loop from outside (PAL func_001366A0, unsolved)
+
+PAL's DrawTextPanel cuts a copied lines record at the line being typed:
+`for (i = 1; i < lines.count; i++) if (at < lines.lines[i].start) { lines.count = i; lines.height
+= i * h; break; }`. stmt.c rolls the `if` with its body into the exit test, jump.c copies the
+test before NOTE_INSN_LOOP_BEG (retail's peeled `i = 1`, its height stored unmultiplied), and the
+copy's path that goes on looping is a conditional jump to the increment's label inside the loop:
+mark_loop_jump (loop.c) invalidates any loop entered by a jump from outside, the .loop dump says
+"ignored due to multiple entry points", and the index stays `sll; addu`. The US twin's search
+(an empty break body) is valid because its copy falls through into the loop. Retail's PAL loop
+is reduced (`addiu a0,s5,24`, `addiu a0,a0,8`) with the count reloaded each pass, so either its
+loop was valid or the walk was written: an explicit pointer (`for (s32* start =
+&lines.lines[1].start; ...; i++, start += 2)`) gives retail's loop insn for insn, but CSE folds
+its base to the frame (`addiu a0,sp,0x538`) where retail keeps the record copy's block-move
+address (`move s5,a2`); `goto` past the loop keeps it valid but hoists the count. Copying the
+record through a pointer, `TextLines* p = &lines; *p = self->lines;`, keeps the base a register
+(`lw 24(s0)`, `addiu a0,s0,24`): the whole function is then retail's code but for five saved
+registers, because p has one reference more than retail's (ours sets the block move's address
+from p, retail sets p from it) and global-alloc ranks it first. Writing the copy first and taking
+`&lines` after lets CSE fold p to the frame. Still open.
 
 ### A search loop that leaves by `goto`: breaks roll the body into the exit test (func_0015FD78)
 
@@ -6629,6 +6654,55 @@ the `-dr -ds` dumps of UpdateObjectCreator (src/main/file_19E040.cpp, 2026-11-09
   its profile with one call. A free inline taking the record by pointer or by reference matches
   too. Spot it: in a record filled with constants, a zero store frame-relative among stores
   through the record's address register means an inline call's arguments.
+
+### One layout helper for three layouts, and what each difference was (func_001366A0)
+
+DrawTextPanel (src/main/text_panel.cpp, matched 2026-11-10) was a near miss 72 bytes too long,
+with its registers off in every block. Each difference had its own cause, found from the bytes
+and the `-dr -ds -dG -dl -dg` dumps:
+
+- **The size: an inline layout helper.** Retail rebuilds the layout's address (`addiu a0,sp,N`)
+  before each of the five setter calls and passes the colour buffer from a fresh `addiu a1`.
+  Written out at each layout, our `&box` stayed in a saved register (18 insns more over three
+  layouts). One inline helper, `PanelLayout::Set(l, x, y, w, h, color)` (Pos, Size, the colour
+  through a four-word buffer, the two words cleared; as PAL func_001316E8's ScreenLayout::Reset),
+  substitutes the unchanged pointer parameter at each use ("Integration: an inline function's
+  parameters and results"). The glyph's layout, whose two words are then set to 1 through the
+  pointer retail keeps in v0 (`addiu v0,sp,80; sw v1,24(v0)`), takes the helper's result:
+  `Layout_137228* l = PanelLayout::Set(&at, ...)`.
+- **A constant colour defeats the substitution.** The glyph's call passed `0xFF808080` as a
+  literal; the colour store `col.w[0] = color` cannot take that immediate, so try_constants's
+  group fails for the insn and the inline frame's base pseudo stays its address; CSE then makes
+  that pseudo the buffer's canonical register and it lives in s1 across the calls (retail's s1
+  is the font). A variable (`s32 glyphColor = 0xFF808080;`, as the box's `grey`) keeps every
+  substitution: the same mechanism as func_001A7800's record, from the other side.
+- **The %hi of a pointer passed to an inline is live across the block before it.** The style's
+  box (`drawBox` through the style's first word) written in place left the `lwl/lwr` copies of
+  the colours (movstrsi with four scratches) choosing their scratches from {v0 .. a2}: retail
+  uses a3 for several copies and a1/a0 for the style's, so a3 is one of retail's spill registers.
+  The file's StyleDrawer::Draw (the inline other files use, `Draw(Font** h, out, tbl)`), called
+  as `StyleDrawer::Draw(self->frame, &box, &g_gsPacketWriter)`, gives retail's `lui v0` before
+  the frame word's reload and `addiu a3,v0,%lo` at the call, and with it every scratch register
+  of the copies (reload's round robin, "The reload register's round robin"); 40 lines at once.
+- **A two-character string from an aggregate initializer.** `char glyph[2] = { c, 0 };` builds a
+  temporary and block-copies it (`sb; sb; lb; lb; sb; sb`), retail's code. A struct returned by
+  an inline function (`PanelGlyph::Of(c)`) is BLKmode returned in registers by this compiler and
+  packs the bytes through `and/or/dsll`; a constructor builds in place with no copy.
+- **A search loop with `break`.** `for (row = 0; row < n; row++) if (shown < breaks[row]) break;`
+  gives retail's copy of the count after the entry test (`move a0,v1`); the same test written as
+  one `while (row < n && !(shown < breaks[row]))` keeps one register ("A search loop that leaves
+  by `goto`").
+- **The order of two divisions.** `start` declared before `end` loads `breaks[row]` first and
+  computes `end - start` before `elapsed - start`, retail's order; the reverse order swaps both.
+- **A flag set in both arms.** `s32 cursor; if (shown < total) cursor = 1; else cursor = .. & 1;`
+  gives retail's v0 for both sets; `cursor = 1;` then a reassignment in an `if` gives v1.
+- **A named zero for `>?`.** `f32 noScroll = 0.0f; noScroll >? (y - height)` loads the zero into
+  the result's register (`mtc1 zero,$f13; max.s $f13,$f13,$f0`, retail); with the literal, the
+  difference takes the result's register.
+- **Constants the near miss had wrong.** The glyph's x in state 4 is 532.0 (`lui at,0x4405`), not
+  533, and the cursor's string (D_00249D58) is `"&.~ffffff|"` with six f's: read both from the
+  bytes (the `.word`s of a string are little-endian). The glyph's byte is a `char` (`lb` for the
+  test), T217D_440::f2F8 in include/screen_element.h.
 
 ### Reading a frame's slots back to the declarations (func_0019B378)
 

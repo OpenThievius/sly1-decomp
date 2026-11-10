@@ -289,7 +289,7 @@ struct T217D_440 : ScreenElement {
     u8 pad2B0[0x2F0 - 0x2B0];
     f32 charsPerSecond;         // 0x2F0: 15.0 (func_001310F0), the typing speed (func_00136530)
     u32 highlight;              // 0x2F4: 0x80FFFFFF (func_001310F0)
-    u8 f2F8;                // 0x2F8
+    char f2F8;              // 0x2F8: the button glyph drawn beside the text (0 none)
     u8 pad2F9[0x2FC - 0x2F9];
     s32 f2FC;                   // 0x2FC: set by func_001365A0
     f32 value;                  // 0x300: 0 to 1 (func_001365A8: a percent / 100)
