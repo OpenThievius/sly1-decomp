@@ -122,6 +122,13 @@ explains it; search the section's title or the function. Walls that stay open ar
   virtual slot is one more pseudo before the call; reload deletes its moves, but sched1 and global-alloc count
   it. Look at the callers' argument registers and the sibling methods' signatures (func_001EBF40 "A Load
   method's reader", func_00143418 "A time step passed on", func_0018AD88, func_00161B10, func_001719E8).
+- **An extra parameter is the same mistake the other way** (func_001F5268). A near miss passed a seventh
+  argument to CollectTreeNodeSpans, the base pointer its two vertex addresses are built from, because retail
+  holds that pointer in $t2. The copy `$t2 = verts` kills `verts`, so its INSN_REG_WEIGHT is 0 and sched1 picks
+  it before the two `verts + index` sums; `verts` then dies at the second sum, ties to $a1 there, and a move
+  to $t2 is left over (4 bytes). Without the argument, local-alloc simply finds $t2 free for `verts`. The other
+  callers (collider_contact.cpp, camera.cpp) pass six arguments: a register retail sets is not an argument
+  until the callers agree.
 - **A prototype's parameter order** sets the order of argument moves, since ints and floats use separate
   registers; the callee's code cannot show it, the callers do (func_0013A128, func_0012C9E8, func_001E4888,
   func_00131198).
