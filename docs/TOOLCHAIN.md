@@ -1975,6 +1975,38 @@ before `sq s1` in the prologue, and the arguments in s0 and the node in s1.
   from the first read of `args[0].tag` into the switch's cases: the case reads the local
   (`tag == 0x14`), or it reloads the tag.
 
+### A preset of the fallback after cse2: a jump table reruns jump.c (func_00156718)
+
+Read from jump.c, cse.c and toplev.c of GCC 2.95.3 and the `-dL -dt -dl` dumps (2026-11-10).
+The spawn shape's point normalises three vectors with Vu0::NormalizeOr; retail loads each
+fallback into a GPR before the test (`lq a0,0(a0)`) and moves it in the fallback's arm
+(`b join; qmtc2 a0,$vf1`), the divide's result in the length's register. Ours loaded the
+fallback straight into the result (`lqc2 $vf2`), with `bc1tl` and the store in its delay slot.
+
+- **cse2 makes the divide's arm start with the set of the result.** Its "(set REG0 REG1)"
+  special case turns `r = DivX(..); x = r;` into `x = DivX(..); r = x;` (x lives past the
+  join, so it is the quantity's canonical register), in every function.
+- **jump.c runs after cse2 only when cse2 says so**: toplev.c reruns jump_optimize if
+  cse_main returns nonzero, which it does when a jump was altered or a LABEL_REF went into its
+  table. A switch compiled as a jump table always records one: the table address's REG_EQUAL
+  `(label_ref)`. That pass then applies the hoist above, `if (c) { x = fallback; goto l; } x =
+  DivX(..);` to `x = fallback; if (!c) goto l; x = DivX(..);`, and combine folds the
+  fallback's load into it. Without a jump table (every earlier user of NormalizeOr) the pass
+  does not run and the arms stay: rewriting this function's outer switch as an if chain alone
+  gives retail's arms.
+- **What keeps the arms with a jump table.** The normalisation written over Vu0::Vec values,
+  `Vec NormalizedOr(Vec v, Vec fallback)` with `Vec r; r.q = DivX(v.q, len); return r;` (or
+  Vec internals over u128 arguments): the copies of the vector values put a copy first in the
+  divide's arm, so the hoist does not apply, and they are gone before allocation. The all-Vec
+  form (Vec Length, Vec DivX) keeps the arms too but adds a `vmove` and a GPR load.
+- **A value reused as its own normalisation** (`d = NormalizeOr(d, fb)`, as func_00172EE0
+  writes it) also blocks the hoist (the divide's arm reads x), but the result then takes d's
+  register, not the length's.
+- **The last normalisation's slots.** Its result and the position copy at 0x80 and 0x90 of the
+  frame, above every case's locals, are u128 values crossing the jitter's call that reload
+  spills (the slots go at the frame's end), not Vec02 locals (which reuse the cases' freed
+  slots at 0x0 and 0x10).
+
 ## Alias classes in the schedule
 
 GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
