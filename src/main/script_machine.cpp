@@ -2956,7 +2956,123 @@ ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, Sc
     return ret;
 }
 
-INCLUDE_ASM(func_00118988);
+// A sample's 16-aligned quadword and 0x30-byte rotation, as func_0012CD78 fills them in the
+// untyped back-memory buffers SampleScriptAnimation allocates.
+struct __attribute__((aligned(16))) ScriptSampleQuad {
+    f32 f[4];
+};
+struct __attribute__((aligned(16))) ScriptSampleRotation {
+    f32 f[12];
+};
+
+void* AllocateBackMemory(s32 size);
+void func_0012CD78(void* anim, f32 a, f32 b, void* from, void* to, s32 n, void* positions, void* rotations,
+                   void* q4, void* q8);
+void CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
+
+ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue q;
+    ScriptValue t;
+    s32 n;
+    s32 mask;
+    void* from;
+    void* to;
+    InitScriptValue(&q);
+    u8* positions = 0;
+    u8* rotations = 0;
+    u8* q4 = 0;
+    u8* q8 = 0;
+    void* anim = args[0].p;
+    ConvertScriptValueToFloat(&t, args + 1);
+    f32 a = t.f;
+    DestroyScriptValue(&t, 2);
+    ConvertScriptValueToFloat(&t, args + 2);
+    f32 b = t.f;
+    DestroyScriptValue(&t, 2);
+    from = args[3].p;
+    to = args[4].p;
+    n = args[5].i;
+    mask = args[6].i;
+    PushBackMemoryMark();
+    if (mask & 1) {
+        positions = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
+    }
+    if (mask & 2) {
+        rotations = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleRotation));
+    }
+    if (mask & 4) {
+        q4 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
+    }
+    if (mask & 8) {
+        q8 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
+    }
+    func_0012CD78(anim, a, b, from, to, n, positions, rotations, q4, q8);
+    R11B008Node* head = 0;
+    R11B008Node* tail = 0;
+    for (s32 bit = 1; bit < 9; bit <<= 1) {
+        if (!(mask & bit)) {
+            continue;
+        }
+        R11B008Node* node = NewScriptValueNode();
+        if (tail != 0) {
+            tail->next = node;
+        } else {
+            head = node;
+        }
+        tail = node;
+        SetScriptValueTag(node, 0);
+        R11B008Node* last = 0;
+        for (s32 i = 0; i < n; i++) {
+            // The sample's byte offsets into the back-memory buffers, computed before the switch:
+            // loop.c then finds every index of i in its first pass and counts the loop down.
+            s32 quad = i * sizeof(ScriptSampleQuad);
+            s32 rot = i * sizeof(ScriptSampleRotation);
+            node = NewScriptValueNode();
+            switch (bit) {
+            case 1: {
+                ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
+                *p = *(ScriptSampleQuad*)(positions + quad);
+                SetScriptValueVectorA(node, (f32*)p);
+                break;
+            }
+            case 2: {
+                f32* m = AcquireMatrixPayload();
+                CopyRotationMatrix(m, (ScriptSampleRotation*)(rotations + rot));
+                SetScriptValueMatrix(node, m);
+                break;
+            }
+            case 4: {
+                ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
+                *p = *(ScriptSampleQuad*)(q4 + quad);
+                SetScriptValueVectorA(node, (f32*)p);
+                break;
+            }
+            case 8: {
+                ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
+                *p = *(ScriptSampleQuad*)(q8 + quad);
+                SetScriptValueVectorA(node, (f32*)p);
+                break;
+            }
+            }
+            if (last != 0) {
+                last->next = node;
+            } else {
+                SetScriptValueChain(tail, node);
+            }
+            last = node;
+        }
+    }
+    PopBackMemoryMark();
+    if (head != 0) {
+        SetScriptValueChain(&q, head);
+    } else {
+        SetScriptValueTag(&q, 0);
+    }
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
+    return ret;
+}
 
 Quad_118D20* func_00118CF0(Quad_118D20* out, f32 f)
 {

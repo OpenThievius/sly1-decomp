@@ -219,6 +219,35 @@ the givs strength_reduce reduced, all before the loop's start; so what the secon
   In retail's order (positions, rotations, q4, q8 in the cases) the registers come out right;
   what keeps the 48 movable in pass 1 there is still to find.
 
+### Solved: the samples' byte offsets formed before the switch (func_00118988)
+
+SampleScriptAnimation matched on 2026-11-10 (src/main/script_machine.cpp), read from `-dL`
+dumps:
+
+- **The threshold is 79 here, and the 48 is sixth.** Varying the loop's size with the 48 left
+  after the compare tree: 64 insns moves it, 65 does not, so `79 - 15 = 64` is its limit behind
+  the tree's five moves (li 2, the `bit < 3` slt, li 1, li 4, li 8). The `li 48` always sits
+  right before its `mult` (expand_binop forces the constant after both operands, and
+  `-fforce-mem` loads a memory operand before it), so its lifetime is 1, and it can move in
+  pass 1 only from ahead of the tree or with a loop of 64 insns.
+- **Which giv is reduced last.** strength_reduce prepends each giv it finds, so it reduces them
+  in reverse order of the loop and the last one's start value sits nearest the loop: the
+  shortest life, global-alloc's first choice (s4). Retail's increments and start values (q8,
+  q4, rotations, positions) say positions' giv came first: its address in case 1 is a memory
+  giv, so the rotations' surviving giv (the add of the base) has to be found after case 1.
+- **Both at once: the multiply ahead, the add in case 2.** Computing the offsets at the top of
+  the body, `s32 quad = i * sizeof(ScriptSampleQuad); s32 rot = i * sizeof(ScriptSampleRotation);`,
+  and adding them to the buffers in the cases (`rotations + rot`), puts the `li 48` first in
+  the movables (moved at 79) and the add giv in case 2: pass 1 reduces every giv, pass 2
+  reverses the counter, and the registers are retail's. The buffers are AllocateBackMemory's
+  untyped memory, so they are `u8*` and the cases cast at the read. Ruled out: a pointer local
+  `r = &rotations[i]` ahead of the switch (the add is then found first: rotations takes s4),
+  pointers for all four (each case's memory giv is reduced separately, the same swap), an
+  inline taking the index by `const s32&` (ADDRESSOF loads: 74 insns), `u32` counters and
+  switch copies (no change), and pointer walks with a count (`if (n > 0) do { } while (--k)`:
+  registers right, but the walks' starts are the source's, ahead of loop.c's moved slt, so
+  sched2 places its spill store last).
+
 ### The threshold falls as loop.c moves: which invariant wins a saved register (func_001CF158)
 
 Read from loop.c (move_movables) and global.c with `-dL -dG` dumps (2026-11-08,
