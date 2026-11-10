@@ -28,6 +28,7 @@
 #include "render_frame.h"
 #include "text_reader.h"
 #include "layout_137228.h"
+#include "scope_marker.h"
 #include "vu0.h"
 
 
@@ -2645,7 +2646,87 @@ void CollectObjectByMode(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObj
     }
 }
 
-INCLUDE_ASM(func_0015A198);
+// A member link of a group object's list at +0x2D0: the member and the next link.
+struct GroupMemberLink {
+    PlacedObject* obj;      // 0x00
+    u8 pad04[4];
+    GroupMemberLink* next;  // 0x08
+};
+
+// An object of a hashed id list (GetHashedSlot): its id, the next with the same hash, and for a
+// group (its class flag 0x100) the list of its members.
+struct HashedObject {
+    const Desc01* desc;     // 0x00
+    u8 pad04[4];
+    s32 id;                 // 0x08
+    HashedObject* nextHashed; // 0x0C
+    u8 pad10[0x30 - 0x10];
+    Alias01* alias;         // 0x30
+    u8 pad34[0x2D0 - 0x34];
+    GroupMemberLink* members; // 0x2D0
+};
+
+s32 GatherObjectsByMode(void* host, s32 flags, s32 id, void* rootp, s32 max, void* foundp)
+{
+    s32 count;
+    s32 min;
+    PlacedObject* mark;
+    PlacedObject* p;
+    ScopeMarker scope;
+    GetHashedSlot((u8*)host, id);
+    if (id == -1) {
+        return 0;
+    }
+    s32 kind = flags & 0xFF;
+    switch (kind) {
+    case 1:
+    case 3:
+    case 4: {
+        mark = (PlacedObject*)rootp;
+        if (mark != 0 && !(mark->desc->flags & 1)) {
+            mark = (PlacedObject*)mark->parent;
+        }
+        p = mark;
+        s32 n = 0;
+        while (p != 0) {
+            n++;
+            p->mark = n;
+            p = (PlacedObject*)p->parent;
+        }
+        min = 0x7FFFFFFF;
+        if (rootp == 0) {
+            if (kind == 3) {
+                return 0;
+            }
+            kind = 5;
+        }
+        break;
+    }
+    default:
+        mark = 0;
+        break;
+    }
+    count = 0;
+    for (HashedObject* obj = *(HashedObject**)GetHashedSlot((u8*)host, id); obj != 0; obj = obj->nextHashed) {
+        if (obj->id != id) {
+            continue;
+        }
+        if (obj->desc->flags & 0x100) {
+            for (GroupMemberLink* l = obj->members; l != 0; l = l->next) {
+                CollectObjectByMode(l->obj, kind, flags & 0x100, 1, (PlacedObject*)rootp, max, &count, (PlacedObject**)foundp, &min);
+            }
+        } else if (obj->alias == 0 || obj->alias->id != obj->id) {
+            CollectObjectByMode((PlacedObject*)obj, kind, flags & 0x100, 0, (PlacedObject*)rootp, max, &count, (PlacedObject**)foundp, &min);
+        }
+    }
+    for (p = mark; p != 0; p = (PlacedObject*)p->parent) {
+        p->mark = 0;
+    }
+    if (!(flags & 0x200) && max < count) {
+        count = max;
+    }
+    return count;
+}
 
 MemberTargetObject* FindFirstObjectById(void* self,s32 flags,s32 kind,void* arg)
 {
