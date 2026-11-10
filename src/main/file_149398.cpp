@@ -482,7 +482,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
     Vec02 rv;
     Vec02 eye;
     Vec02 target;
-    MulRotationIndexedSetRows(&basis, frame->m110, *(Mat02*)&self->frame20);
+    MulRotationCopied(&basis, frame->m110, *(Mat02*)&self->frame20);
     Vu0::Q(eye) = Vu0::MulAddX(Vu0::Vec::Of(frame->v140), Vu0::Vec::Of(basis.r[0]), Vu0::Vec::Scalar(10.0f)).q;
     Vu0::Q(rv) = Vu0::Rotate(frame->m110, Vu0::Q(*(Vec02*)((u8*)self + 0x10)));
     Vu0::Q(target) = Vu0::Add(Vu0::Q(frame->v140), Vu0::Q(rv));
