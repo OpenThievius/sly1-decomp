@@ -1706,6 +1706,38 @@ Not matched; the plausible plain forms are exhausted. The remaining lead is a so
 the key's shift is written on more than one path (the tails merged by jump2), which could also
 change what precedes the greater-than test at reorg.
 
+### An end pointer, a switch and a reread argument: a kind loop's size (func_00185F48)
+
+Matched 2026-11-10. The function walks each contact's two ends and carries each end's point into
+the world, with a part's frame or, for some kinds, from the part's centre along the normal.
+The near miss (indexing `c->end[e]` in every statement, nested ifs for kinds 4 to 6) was 376
+bytes against 348. Three source properties gave retail's code:
+
+- **A pointer to the end, `ContactEnd03* end = &c->end[e];`.** Under `if (e == 0)` CSE records
+  e = 0 (record_jump_equiv) and folds `&c->end[e].v20` to c + 32, so our end-0 calls used fixed
+  addresses from c. CSE does not refold the value of a register already set from e, so through
+  `end` the end-0 arm keeps `end + 32` and `end + 16`, and loop.c gives each call site its own
+  pair of reduced registers (retail's s4/s5, initialised as copies of s2/s3). With this the
+  constants 7 and 9 also stayed in their arm (loaded with `li v1` before each compare) instead
+  of being hoisted into s7/s8.
+- **A switch for end 0: `case 4: case 5: case 6:` and a default.** The compare tree tests the
+  case range's high bound then its low bound (`slti 7; beqz default; slti 4; beqzl case`), the
+  two signed compares retail has; `kind >= 4 && kind < 7` or a range test is merged into one
+  `sltiu` and the two nested ifs give two call sites, three induction pairs and 392 bytes.
+- **The default reads `end->part` again.** Retail's `lw a0,4(s0)` sits between the kind < 4
+  test and the call, and the kind >= 7 branch jumps past it: the default's first insn is the
+  reload, and reorg retargets the branch whose path already holds the value in a0 past the
+  redundant load (inferred from the code; not checked in the reorg dump). With `part` passed
+  the load is gone (344 bytes), and its reference also gives the end pointer s0 and the contact
+  s1, as retail has them.
+
+The last difference was the MulAddX's operand order: retail loads the centre (`lqc2 $vf3`)
+before the weight's slot store and the normal after it. An inline call's plain memory operands
+are copied after its nested inline calls, so `Vu0::Q(part->v140)` came after the Scalar; naming
+the centre as a local just before the statement (`u128 centre = Vu0::Q(part->v140);`) loads it
+first and gives retail's VU registers. The Vu0::Vec form (Vec::Of, Vec::Scalar) loads both
+vectors before the slot and does not match.
+
 ### Loop variables declared once at the top: shared counters and an indexed record (func_00139740)
 
 Matched 2026-11-10 from the -dG dumps. ComputeBlendedDuration has four loops over two counts
