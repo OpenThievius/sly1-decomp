@@ -4,7 +4,9 @@
 //       v0,v1 and a later mflo a0, the two-operand form, its result allocated to LO); ours
 //       writes it with the three-operand mult straight into a0, one instruction less. Tried:
 //       the product first, last, of the stored copies, of locals set by chained assignments,
-//       the operands swapped, through s64.
+//       the operands swapped, through s64. Mechanism: docs/TOOLCHAIN.md "A stored product's
+//       two-operand mult" (combine re-recognises the bare SET only through a surviving,
+//       non-adjacent register copy; see nonmatching/eu/func_eu_001ACC68.cpp).
 #include "common.h"
 #include "screen_element.h"
 #include "font.h"
