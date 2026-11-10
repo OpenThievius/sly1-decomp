@@ -522,3 +522,15 @@ had no `block` variable: each loop takes the slots' address itself, inside its b
 
 The tell: a reg-reg copy in a loop's preheader that feeds only the inner loop's reduced pointer
 is a PRE copy of an address the original wrote inside the inner loop's body.
+
+### A loop's own counter frees a saved register for a hoisted %hi (PAL func_eu_001DDC68)
+
+PAL's copy of LoadWorld adds a 14-entry loop to US's two counted loops. Reusing US's `i` for it
+makes the counter one user variable set six times over all three loops: one pseudo, one saved
+register (s3), with the third loop's pointer reusing another. Global-alloc then has a saved register
+left for the `%hi` of g_activeListFrames that PRE hoisted to the entry block (4 refs across 314
+insns, the lowest-ranked of the candidates that still get one), so ours keeps it in fp as US does.
+Retail allocates nothing for it (a fresh `lui` at each use) and holds the first two loops' counter
+in s0 and the new loop's in s1, with the five member addresses in s4-fp: the new loop had a counter
+of its own. `for (s32 k = 0; k < 14; k++)` instead of `for (i = 0; ...)` was EXACT. Spot it: a
+counter in a different saved register in one loop than in the loops before it.
