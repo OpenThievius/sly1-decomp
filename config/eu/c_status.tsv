@@ -2006,6 +2006,7 @@ func_00180F20	func_00181580	match
 func_00180F68	func_001815C8	match	
 func_00180F98	func_001815F8	match	version-specific, rodata
 func_00181448	func_00181AA8	match	
+func_00181658	func_00181CB8	match	
 func_00181780	func_00181DE0	match	version-specific
 func_00181818	func_00181E78	match	
 func_00181A58	func_001820B8	match	
