@@ -121,6 +121,30 @@ makes no optional reload and inheritance never sees vf6: retail must have had a 
 in vf6 for the asm and the first call. d as Vu0::Vec, as a Vec02, through Vu0::Q, and an inline
 helper taking d for PlaneSigns and the call do not give it.
 
+Read further from reload1.c, reload.c and the `-dF -dG -dt -dl -dg` dumps (2026-11-10, w15):
+
+- **movti's alternatives.** The 2.95.3 cc1plus's constraint strings for movti_internal are
+  `=d,j,j,d,d,d,R,m,j,j,R,m,d,d,d,d,d` and `d,j,d,j,R,m,d,d,R,m,j,j,J,K,L,M,i`: a GPR from a
+  spilled pseudo wins on alternative 5 (`d` from `m`, no reload), so nothing inherits vf6. A
+  copy into a GPR from a VU0 reload register (func_001841D0's `qmfc2 a0,$vf2; sq a0`) happens
+  only where the move needs the value in a register (memory to memory): reload_override_in.
+- **reload_cse does not do it either.** reload_cse_simplify_set swaps a load for a register
+  that holds the same value only when REGISTER_MOVE_COST from that register's class is 2; ours
+  keeps `lq a1` with vf6 known equal to the slot, so VU0 to GPR costs more.
+  reload_cse_simplify_operands sorts the alternatives by the fewest substitutions (2.95's
+  comparison), so it never substitutes in a move.
+- **A frame variable instead of the spill slot.** d forced into the frame at purge_addressof
+  time lands at 0x1C0, after fade (0x1B0), retail's offsets; but cse2 then forwards the
+  stored value to the asm and the call (vsub straight into vf6, `qmfc2 a1,$vf6`, no reload),
+  where retail reloads the slot. cse1 does not forward through `(mem (addressof))`; cse2 does
+  once the variable is in the frame or a register again. A Vec02 d (expand-time slot 0x60)
+  is forwarded by cse1; a Vu0::Vec d keeps its movti copies through gcse and cse2 folds them;
+  a `const u128&` to d, local or an inline helper's parameter, is purged to the same pseudo.
+- **What retail implies.** A pseudo in vf6 that the asm reads and the first call's move copies
+  (`qmfc2` is then the move itself), set from the slot where reload would put the asm's input
+  reload, or a frame store cse2 could not see when it reached the asm. Neither comes from a
+  plain form tried so far.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
