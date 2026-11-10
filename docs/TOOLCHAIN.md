@@ -866,6 +866,26 @@ func_00140258, func_001F2EF0, func_001F3408):
   VU0 register before the sine's `mfc1`, which then takes v0; ours does the sine's `mfc1` (a
   reload) first, into v1 (nonmatching/func_001F2EF0.cpp, func_001F3408.cpp).
 
+### A `for` over a call's count, and a zero named in the body (func_00149190)
+
+Measured with `-dL` dumps (2026-11-10, the armed notifier's push loop, src/main/state_notifier.cpp):
+
+- **The pretest on the call's result.** Retail's `blez v0` tests GatherObjectsById's result
+  before `move s2,v0`. A `do { } while (p++, --n != 0)` under `if (n > 0)` tests n's own
+  pseudo (`move s2,v0; blez s2`); `for (s32 i = 0; i < n; i++)` with `found[i]` tests the
+  value and lets loop.c's second pass reduce `found[i]` to a pointer and count the copy of n
+  down (retail's `addiu s2,s2,-1; bnez s2`).
+- **The zero.** Retail's `mtc1 zero,$f20` sits after the pretest, so it was moved out of the
+  loop: `f32 zero = 0.0f;` at the top of the body (life 150 in pass 1, moved first). Before the
+  `for` it is set before the call; a literal `0.0f >? push.z` stays in the loop (life 1).
+- **The loop's size.** The body's vectors as Vu0::Vec values make pass 1 109 insns and pass 2
+  97, so 250000.0f and 99 (life 1) stay in the loop as retail's; with u128 values (87 and 76)
+  pass 2 moved both into saved registers, and the weight's ScalarAt (a reference, life 7) moved
+  D_00261BE0's `%hi`. The weight is `Vec k = Vec::ScalarAtValue(D_00261BE0);` named before the
+  product: its slot is stored before `lqc2` of the velocity and the product takes its register.
+- **Slot order.** The message is declared in the listener's `if`, as the file's other senders
+  do: the weight's temporary then gets the slot before it (112, the message 128).
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
@@ -2652,6 +2672,25 @@ fallback straight into the result (`lqc2 $vf2`), with `bc1tl` and the store in i
   frame, above every case's locals, are u128 values crossing the jitter's call that reload
   spills (the slots go at the frame's end), not Vec02 locals (which reuse the cases' freed
   slots at 0x0 and 0x10).
+
+### A clamp's constant in a register: `slt v1,v1(98),v0; movz` (func_00149190)
+
+Read from mips.c of GCC 2.95.3 (gen_conditional_move, gen_int_relational) and measured
+(2026-11-10). Retail clamps a counter with `li v1,98; li a0,99; addiu v0,v0,1; slt
+v1,v1,v0; movz a0,v0,v1`: the constant compared sits in a register, not in an `slti`.
+
+- **Where the register comes from.** gen_int_relational (a branch or a store flag) takes a
+  constant within 16 bits as `slti`, adding 1 for GT and LE. gen_conditional_move (movsicc,
+  what jump.c's conversion of `if (c) x = y;` expands to) does not: for GT and LE it forces
+  the constant into a register and swaps the operands (`slt t, K, c`), with `movn` for GT and
+  `movz` for LE. So `li K; slt t,K,c; movz` is a jump.c conditional move on `c <= K`.
+- **Which source gives LE.** `s32 v = 99; if (c < 99) v = c;` reaches the move as `c <= 98`:
+  retail's code, EXACT. `(c > 98) ? 99 : c` is folded into a MIN_EXPR (`slti 100; movn`),
+  `if (c >= 99) c = 99;` and `s32 v = c; if (c >= 99) v = 99;` give `slti 99; movz` (GE),
+  and an if/else storing in each arm keeps a branch (`beqzl`).
+- **Rule.** A conditional move whose `slt` has the constant in a register as its first
+  operand is a variable set to the clamp's value first and then to the value under a `<`
+  test.
 
 ## Alias classes in the schedule
 

@@ -1269,6 +1269,7 @@ func_00148EF8	func_001491E8	match
 func_00148F80	func_00149270	match	version-specific
 func_00148FF0	func_001492E0	match	
 func_00149168	func_00149458	match	
+func_00149190	func_00149480	match	
 func_00149398	func_00149688	match	
 func_001493A0	func_00149690	match	
 func_001493B8	func_001496A8	match	
