@@ -27,6 +27,7 @@
 struct R11B008Node;
 struct R11AFC8;
 struct BufferedStream;
+struct Vec02;
 
 // Tags: the setters, func_0011B0F8 (the comparison), func_0011B258 (the deep copy),
 // func_0011B418 / func_0011B4A8 (the payload's release and reference), func_0011BA28 (the reader).
@@ -51,6 +52,12 @@ struct ScriptValue {
         R11B008Node* node;      // 0x04: 0x1E (func_0011B6C0, func_0011B258)
         R11AFC8* rec;           // 0x04: 0x1F (func_0011B700, func_0011B258)
     };
+
+    // The 16-byte vector a tag 0x16 or 0x18 value points to (func_00117FE0). Inlined on an
+    // element past the first of an array, its `this` is a sum the inliner copies into a fresh
+    // pseudo with no pointer flag, so a read through it is reloaded after a store
+    // (docs/TOOLCHAIN.md, "An inline method's this").
+    Vec02* Vector() const { return (Vec02*)v; }
 };
 
 typedef char check_ScriptValue[sizeof(ScriptValue) == 8 ? 1 : -1];
