@@ -340,6 +340,27 @@ integrate.c (the inline frame's `assign_stack_temp (BLKmode, size, 1)`), with th
   the dot. Row 0 has to beat v at the first cycle (rows 1 and 2 wait for the addiu of the
   matrix's address); Vec or u128 forms, RotateMembers, RotateRowsTied over the rows, v named
   first, and ScalarAtValue or ScalarAtCall for the f63C weight do not give it.
+- **The rows read before v: rows as Vec values through a pointer (2026-11-10, w15).** Rotate's
+  `u128 v` is a register parameter, and integrate.c's process_reg_param copies any memory
+  argument into a pseudo at the call, `const` or not, so v640's load always gets a lower LUID
+  than the rows the asm reads (it was the LUID that let it beat row 0 in the first cycle; row 2
+  wins the second on INSN_REG_WEIGHT, being the last use of the matrix's address). Written as
+  `const Vu0::Vec* m = (const Vu0::Vec*)&self->m660;` and
+  `RotateRowsTied(m[0], m[1], m[2], Vec::Of(self->v640))`, the rows are loaded first, keep
+  retail's `addiu v0, s1, 0x660` (a reference local or `Vec::Of(m.r[k])` lets CSE fold every row
+  into `s1` offsets), and as Vec values they no longer wait for the weight-slot stores (two
+  dependents each, not four): sched1 takes row 0, row 2, row 1, v and local-alloc gives
+  retail's vf5, vf3, vf4 and vf2 (97.6%).
+- **Still open: the f63C weight's qmtc2 is ready at the block's start.** It is one insn (FromFloatAt's
+  memory operand, ScalarAtValue and ScalarAtCall alike, since combine folds the load back in),
+  the block's last use of `self` (weight 0, as the -push weight's qmtc2, which kills the negated
+  float), and has three dependents (its slot store, the sum, and an anti dependence on the
+  end->v30 store, as parameters may alias) against the -push qmtc2's two, so it takes the free
+  slot in the fourth cycle. The emulator wants it after the dot and before the end->v30 load.
+  Passing m110.r[2] as a plain `*(const u128*)&` argument (evaluated after the weights' inline
+  calls) lets the -push qmtc2 go first, but then `self` dies at m110's load, which wins the
+  sixth cycle on weight; the f63C weight takes vf4 and its reload takes s1 (17 lines). Naming
+  the weights as Vec locals changes the frame (224 bytes).
 
 ### Which induction variable loop.c keeps: combine_givs' totals (func_001575D8)
 
