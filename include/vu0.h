@@ -170,12 +170,15 @@ struct Vu0 {
     // flags included (integrate.c copies only a writable parameter to a register), so a
     // structure member's load stays MEM_IN_STRUCT_P and need not wait for the stores before it
     // (ScalarAt reads the word through a cast pointer: no flag). func_0016C528's twist rate
-    // (self->f224->f94) is loaded before an earlier weight's store, as retail does.
+    // (self->f224->f94) is loaded before an earlier weight's store, as retail does. The slot's
+    // address is taken here, not through Q, as Scalar's and ScalarAt's are: Q's reference left
+    // it in a pseudo that CSE handed to a later local given the same freed slot (a colour
+    // passed by address), which loop.c then moved out of the loop (func_001D5678).
     static u128 ScalarAtValue(const f32 f)
     {
         u128 r;
         __asm__("qmtc2 %1, %0" : "=j"(r) : "rV"(f));
-        return Q((s128)r);
+        return *(u128*)&(s128)r;
     }
 
     // FromFloatAt of a float passed by value: the caller loads it where it makes the call, the
