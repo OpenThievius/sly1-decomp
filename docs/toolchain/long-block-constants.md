@@ -72,6 +72,41 @@ reload.c and reload1.c read):
   `.greg` dispositions come after reload's spills and retry_global_alloc,
   so they cannot show which registers had been evicted by 4's turn: that
   needs an emulation of global-alloc's allocno order.
+- **The eviction order, replayed** (2026-11-10, w18; tools/globalalloc.py,
+  which reproduces the dumps of 4,501 functions exactly). Before the 4's
+  turn (step 579 of 2,068), s8 was opened in pass 1 by a 6-insn %hi (step
+  35), s7, s4 and s2 were taken in pass 0 by other 6-insn %hi pseudos
+  (steps 48, 29, 363: pass 0 reuses any register already in use, so a
+  short pseudo free there takes it and the register stops being local-only),
+  and t9, t8 and s6 were evicted (steps 446, 518, 576, by two 10-insn %hi
+  pseudos and 0x80000000). So the scan for the 4 passes s8, t9, t8, s7, s6
+  and takes s5 (0.00477 < 0.00545); s4 is not evictable and s3 (0.00449)
+  is never reached. Then 66 evicts s3 and 9 evicts s1.
+- **Retail's choice comes from local-alloc's order of four long constants.**
+  Retail holds 2194 (from entry 257) in s7, func_00155778 in s4, an 18 in
+  s5, 146 in s6, then 1 in s6 and 1025 in s7; ours has 2194 (pseudo 1701)
+  in s4, func_00155778 (2072) in s5, the 18 (3199) in s7. local-alloc
+  places quantities by floor_log2(refs) * refs / life: ours 1701 157, 2072
+  155, 146 (1841) 150, 3199 144, so 1701 takes s4 first and pushes 2072 to
+  s5. With 1701's priority below 144 (`globalalloc.py --pri 1701=140`) the
+  local replay gives retail's placements, and the global replay then gives
+  every retail register this function shows: the 4 in s3 (s5 is denser
+  without func_00155778, s4 not local-only), 256 kept in s5,
+  func_00155778 kept in s4 (built once), 66 in s1, 0x80000000 in s8. 1701
+  needs 16 refs instead of 18, or a life at least 210 insns longer (4,578 to
+  5,000 in local-alloc's half-insn units).
+  Retail's `li s7,2194` is at instruction 698, ours `li s4,2194` at 1043:
+  retail's is hoisted 345 instructions further, enough.
+- **The lives are sched1's.** The constant sets are inline-parameter
+  pseudos set just before their stores, and sched1 hoists them by hundreds
+  of entries (1701: set at entry 292 before sched1, at entry 128 after;
+  1 (6194): 1129 to 364). A constant load is ready from the block's start
+  and is issued when it is the best ready insn in a free slot, so how far
+  each one runs ahead depends on how many other constant loads are pending,
+  that is on the CSE windows' pseudos. The source lever is whatever makes
+  retail's 2194 load run about 210 or more insns further ahead; no form found so
+  far moves it without moving the window landmarks. A model of sched1's
+  list scheduling for this block would be the next tool.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at

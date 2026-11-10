@@ -79,6 +79,21 @@
 // first register below 118's density at that point (func_00155778's pseudo out of s5, or s5
 // denser), with the CSE window landmarks held. No variant was compiled this round.
 //
+// The allocators replayed (2026-11-10, worker w18-109488; tools/globalalloc.py, which reproduces
+// both allocators' dumps of this file exactly; docs/toolchain/long-block-constants.md, "The
+// eviction order, replayed"). Before the first 4's turn (step 579), s8, s7, s4 and s2 were taken by
+// 6-insn %hi pseudos (pass 0 reuses registers in use) and t9, t8 and s6 evicted, so the scan takes
+// s5. Retail's registers all follow from local-alloc's order of four long constants: ours ranks
+// 2194 (pseudo 1701, 157) above func_00155778 (2072, 155), 146 (1841, 150) and an 18 (3199, 144),
+// so 2194 takes s4 and func_00155778 s5. `globalalloc.py --dumps DIR func_00109488 --pri 1701=140`
+// gives retail's local placements (2194 s7, func_00155778 s4, 18 s5, 1 s6, 1025 s7) and then
+// retail's global ones: 4 in s3, 256 kept in s5, func_00155778 kept, 66 in s1, 0x80000000 in s8.
+// 1701 needs 16 refs instead of 18, or a life 210 insns longer; retail's `li s7,2194` is 345
+// instructions earlier than ours. These lives are sched1's: it hoists each constant load hundreds of
+// entries above its first store (1701 from entry 292 to 128), as far as the pending constant loads
+// let it, so the lever is sched1's pool of pending loads (the CSE windows' pseudos), not the 2194
+// statements. No variant was compiled; the next tool is a model of sched1's list scheduling here.
+//
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
 // Global alloc gives it a callee-saved register (s5 here). In this form and every earlier one, no
