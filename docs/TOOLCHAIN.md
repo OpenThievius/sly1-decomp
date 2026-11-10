@@ -2260,6 +2260,31 @@ Worked out on the link swing's last block (2026-11-09):
   the branch (`addiu a3, sp, 192` hoisted out of the call block). `*(u128*)&g = x` addresses the
   frame directly, as Set's note in vu0.h says, and the call forms the address again: retail's.
 
+### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
+
+ComputeGridBlendWeights writes out[i*8 + j*4 + k] = zk * yj * xi for three x weights, two y
+weights and four z weights (2026-11-10, still a near miss):
+
+- **The statement order decides the x weights' registers.** CSE makes the eight zk * yj
+  products once each; sched1 puts all eight first (priority 8 against 5 for the second
+  products and 2 for the stores), ordered by INSN_REG_WEIGHT (an insn that is a pseudo's
+  last use in LUID order goes first) and then LUID. The 24 statements written z weight by z
+  weight (for each k: xa, xb, x, each with ny then y) give retail's x, xa and xb in $f15 to
+  $f17, the entry copy of x and y left in $f13; written in out-index order (x weight
+  outermost) x keeps $f12 and y is copied. Of all 1728 regular orders (nest order and each
+  index's direction) this one is the closest; naming the eight products first changes nothing
+  (the weights and LUIDs of the product insns are the same).
+- **What is left is one local-alloc tie.** local-alloc ranks a quantity by floor_log2(refs) *
+  refs / life; z2*y (tied with its last product, 6 refs over 56 half-insns, 2142) loses to
+  z2*y*x (2 refs over 8, 2500), which takes $f0, so z2*y gets $f1 and the globals that prefer
+  $f0 (z1, from `3.0f - z`) and $f10 (ny, from z1*ny) follow differently from retail (z1 $f10,
+  ny $f2). An emulator of local-alloc on the .lreg block (build/swarm/w11-19CC10/la_sf.py and
+  la2.py in the g5 worktree: births and deaths at twice the insn number, a product tied to a
+  dying local input, the one-insn widened range tried first) reproduces every register of
+  ours, and shows that out[23]'s store one insn later in sched1 gives retail's z2*y and z2*y*x;
+  but the store is issued on the memory unit the cycle its product is ready, and no statement
+  order, named product, extra weight variable or re-association tried moves it.
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
