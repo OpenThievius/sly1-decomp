@@ -18,10 +18,11 @@
 #include "vertex_batch.h"
 #include "shapes.h"
 #include "word_copy.h"
+#include "camera.h"
 
 
 void RegroupQueuedObjects(void* self);
-void UpdateGroupsNearCamera(void* self);
+void UpdateGroupsNearCamera(World* self);
 
 
 void RemoveValueFromArray(void* list, void* base, void* item);
@@ -1092,12 +1093,74 @@ void SetColliderFrozen(Collider* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_0015FD78);
+extern u8* g_camera;
+void AppendToList(void* list, void* node);
+void RemoveFromList(void* list, void* node);
+
+// Marks each group active (bit 37 of its members' flags) when a member's mode bits force it or the
+// camera sees a member within its radius, and moves the members into or out of the world's lists.
+void UpdateGroupsNearCamera(World* self)
+{
+    for (PlacedObject* g = (PlacedObject*)self->list54.head; g != 0; g = (PlacedObject*)g->link48.next) {
+        if (g->f54 != g) {
+            continue;
+        }
+        PlacedObject* m = (PlacedObject*)g->list60.head;
+        PlacedObject* first = m;
+        s32 active;
+        for (; m != 0; m = (PlacedObject*)m->link58.next) {
+            Camera* cam = (Camera*)g_camera;
+            s32 mode = (s32)(m->flags >> 40) & 3;
+            if (mode == 1) {
+                goto done;
+            }
+            if (mode == 2) {
+                m = 0;
+                goto done;
+            }
+            if ((m->f88 & cam->f21C) == cam->f21C) {
+                f32 r = m->f80 + m->f2A8;
+                u128 diff = Vu0::Sub(Vu0::Q(m->v140), Vu0::Q(cam->f40));
+                f32 d = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
+                if (!(r * r < d)) {
+                    goto done;
+                }
+            }
+        }
+    done:
+        active = m != 0;
+        m = first;
+        if (m == 0) {
+            continue;
+        }
+        u64 bit = (u64)active << 37;
+        u64 mask = ~((u64)1 << 37);
+        while (m != 0) {
+            if (active != ((s32)(m->flags >> 37) & 1)) {
+                if (active != 0) {
+                    VisitObjectTree((VisitNode*)m, 0);
+                    AppendToList(&self->list60, m);
+                    if (m->desc->flags & 2) {
+                        AppendToList(&self->list6C, m);
+                    }
+                } else {
+                    VisitObjectTree((VisitNode*)m, (void*)1);
+                    RemoveFromList(&self->list60, m);
+                    if (m->desc->flags & 2) {
+                        RemoveFromList(&self->list6C, m);
+                    }
+                }
+                m->flags = (m->flags & mask) | bit;
+            }
+            m = (PlacedObject*)m->link58.next;
+        }
+    }
+}
 
 void UpdateWorldObjectLists(void* self)
 {
     RegroupQueuedObjects(self);
-    UpdateGroupsNearCamera(self);
+    UpdateGroupsNearCamera((World*)self);
 }
 
 void ResolveLookupIds(IdLookupObject* self)
@@ -1855,7 +1918,6 @@ void AddGifImageTag(PacketWriter* self, s32 count)
 }
 
 struct CameraBlock16 { u8 b[16]; };
-extern u8* g_camera;
 
 u8* InitVertexBatch(u8* self)
 {

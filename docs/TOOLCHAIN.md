@@ -1292,6 +1292,24 @@ differed (37.4%).
   (loop.c's reduced giv: `addu s2,v0,s3`, index first) rather than a walking pointer, and
   `radius` declared before `step` (retail loads 1/(2pi) before 2pi).
 
+### A search loop that leaves by `goto`: breaks roll the body into the exit test (func_0015FD78)
+
+expand_end_loop's scan takes the *last* jump to the loop's end label within 30 insns of the first,
+and a `break` is such a jump, conditional or not. A search loop whose body begins with early
+exits (`if (mode == 1) break; if (mode == 2) { m = 0; break; }`) therefore has its whole head,
+the mode tests included, rolled to the bottom with the `m != 0` test; duplicate_loop_exit_test
+then copies all of it in front of the loop, and the copy enters the loop by a conditional jump
+to the label after the tests. loop.c reports "Loop at N ignored due to multiple entry points",
+moves nothing out of the inner loop, and the outer loop takes its constants (`li 1`, `li 2`)
+into saved registers for its whole body (ours: frame 160 with s6 to s8, 44 bytes longer).
+Retail's code has only the `m != 0` test rolled (`bnezl s0` at the bottom, the mode tests at the
+loop's head, the constants in a2 and a3 in the inner preheader): its exits did not jump to the
+loop's end label. A `goto done;` to a label after the loop (the same place) gives exactly that,
+and so would any exit that is not the loop's own `break` (an inline function's `return` also
+avoids the roll, but its own pseudos for the pointer and the result do not match here). Spot it:
+"ignored due to multiple entry points" in the .loop dump, or retail's inner loop with its
+early exits at the head and only the continuation test at the bottom.
+
 ### A reference's address reused across a test: read the vector at its use (func_00199698)
 
 - **What retail shows.** `UpdateNumberedItem` tests the squared distance between `target->v140`
