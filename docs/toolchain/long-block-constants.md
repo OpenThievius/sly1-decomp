@@ -121,6 +121,22 @@ reload.c and reload1.c read):
   likely spread over several lives than in that one load. Source variants
   should now be screened by compiling (6 s) and running `sched1.py --alloc`
   and `globalalloc.py --local` on the dumps, against the registers above.
+- **A guided search** (2026-11-10, w18; build/swarm/w18-109488/search/drive.py
+  with the big-109488 worker's renderer: per-call merges of equal arguments,
+  single fields set after the call, Set10's three-way merge, Set8m undone;
+  about 1,300 compiles, each screened on the CSE landmarks, then exact
+  instructions plus retail's 256 long register holds, five of them key:
+  4 in s3, 256 in s5, 66 in s1, 2194 in s7, func_00155778 in s4). Nothing
+  keeps 8 landmarks and gets a key hold. Merging Set10 on any one call that
+  stores 2194 (entries 134 to 336) gives three: 4 in s3, 256 kept in s5,
+  66 in s1, as the replays predicted for a 2194 pseudo set earlier; but the
+  2194 is still not in s7, func_00155778 is rebuilt (lui +19, addiu +18),
+  the 553 landmark moves (7 of 8) and exact falls from 2,990 to about 1,600.
+  600 compiles searching around that merge with three key holds required
+  never restored the landmark (best: 9,380 instructions, 1,620 exact). The
+  best overall, 7 single-field splits and a merge (3,050 exact, 9,340
+  instructions), keeps no key hold and is per-call noise, so the near miss
+  is unchanged.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at

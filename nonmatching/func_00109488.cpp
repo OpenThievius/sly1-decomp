@@ -96,7 +96,13 @@
 // instructions before ours, is sched2's hoist into a freed register, not evidence of sched1's order,
 // and the per-entry ALU counts of both final codes agree, so the needed change is likely spread over
 // several lives. Screen variants by compiling (6 s) and running sched1.py --alloc and
-// globalalloc.py --local on the dumps. No variant was compiled.
+// globalalloc.py --local on the dumps.
+// Guided search (2026-11-10, build/swarm/w18-109488/search/, about 1,300 compiles screened on the
+// landmarks, exact instructions and retail's long register holds): merging Set10 (fC = f14 = f18)
+// on any one 2194 entry from 134 to 336 gives the 4 in s3, 256 in s5 and 66 in s1 as retail, but
+// not 2194 in s7 or func_00155778 in s4, moves the 553 landmark and halves exact (about 1,600);
+// nothing near it restored the landmark. The best form that keeps the landmarks (3,050 exact,
+// 9,340 instructions) is 8 coincidental per-call edits with no key register, so this file stays.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
