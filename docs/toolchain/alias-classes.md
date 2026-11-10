@@ -3110,3 +3110,15 @@ The triangle animator's cursor update went from 22 differing words to 14 (2026-1
   sched1 issues at cycle 8 (a free alu slot) before the test's asm at 12; the GPR takes v0
   and the fallback (global) v1. Naming the fallback after the Length, or not naming it,
   does not move the lo_sum past the test (unnamed, the address goes into the arm).
+
+### A pointer assigned in two loops loses its base: cse1 reloads through it (func_001D7778)
+
+StepPathFollower reads `s->v20` three times in its first loop (the slot's contact point); retail
+loads it again for the torque arm after the push's load, where cse1 reused the push's register
+in ours. The slot pointer `s` was declared once at the top, C style, and assigned by both loops
+(`s = &self->f6B0[i];`). init_alias_analysis gives a pseudo set more than once no
+REG_BASE_VALUE, so base_alias_check can no longer tell `(plus s 32)` from a frame address, and
+the force's store between them (`Vu0::Q(force) =`, a u128 store with no alias class, so
+fixed_scalar_and_varying_struct_p does not help) invalidates the load in cse's table. Declared
+in each loop, `s` is set once, its base is the `self` argument, a frame store cannot alias it,
+and the load is shared. The same declaration once at the top is the lever of func_00139740.

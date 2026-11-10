@@ -1032,3 +1032,15 @@ of the root. Reusing the variable, `f32 depth = Fpu::Sqrt(dsq); ... (the normal,
 1.0f / depth) ...; depth -= radius;`, gives retail's code: the variable is set twice (two
 lives of one pseudo, no birthing raise in adjust_priority) and the subtraction stays where it
 is written, writing the register it reads.
+
+### A product written into a dying operand's variable keeps sched2's order (func_001D7778)
+
+In StepPathFollower's first loop `force = dir * Scalar(push * mass)` and `accel = force /
+Scalar(mass)`. FromFloat's asm reading `mass` is ready one cycle after the load (an asm
+consumer's link is cost-free in insn_cost) while the multiply waits two, so sched1 puts the asm
+first; `mass` then dies at the multiply and local-alloc gives the product mass's `$f0`, and
+after reload the mfc1 of mass must precede `mul.s $f0` (anti-dependence). Retail's `mul.s
+$f1,$f1,$f0` is the product in push's register: `push *= mass;` makes the product push's own
+pseudo (global, `$f1`), and sched2 is free to issue the multiply first. In the same block the
+torque's cross product before the accel's division (`vdiv` first in retail) is the source order
+force, torque, accel: their asms tie on priority and LUID decides.
