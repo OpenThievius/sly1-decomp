@@ -1331,6 +1331,7 @@ func_0014C6E0	func_0014C990	match
 func_0014C788	func_0014CA38	match	
 func_0014C820	func_0014CAD0	match	
 func_0014C838	func_0014CAE8	match	
+func_0014C858	func_0014CB08	match	
 func_0014CBA8	func_0014CE58	match	rodata
 func_0014CD70	func_0014D020	match	
 func_0014CDC8	func_0014D078	match	

@@ -160,3 +160,32 @@ Read from the `-dS -dl -dg -fsched-verbose-6` dumps (2026-11-10, w15):
   compiler's latency and moves), the member read inside the expression (o->mass) nor
   ToFloatViaBits gives it.
 
+
+### A second spill register from a rematerialised constant (func_0014C858)
+
+GaugeManager's agent placement (src/main/file_149398.cpp), read from `-dL -dS -dl -dg` dumps
+(2026-11-10):
+
+- **The sign: four reloads in v1 where ours has v0.** Retail's posp output reload, the first
+  Length's qmfc2, the pick's `li v1,20` and the clock address after RandomFloatInRange are v1;
+  every other reload is v0 in both. The .greg dump of ours spills only reg 2 (`Spilling reg 2`
+  on every line): with one spill register every reload is v0, so retail had a second one, and
+  the rotation ("The reload register's round robin") alternates v0/v1 through the function.
+- **Where v1 came from.** `li v1,20; mult v0,s4,v1`: the constant and the product apart, the
+  untied product of "A constant the loop does not own" (cse.md, func_001389D0). In ours the
+  `li 20` is a block-local pseudo that dies in the multiply and local-alloc ties the product to
+  it. loop.c would not hoist it: life 1 (expand_binop forces the constant right before the
+  mult) in an outer loop of 158 insns (144 in pass 2), so 80 < insns. A named stride
+  (`s32 slotSize = sizeof(GaugeSlot);` before the loop, `(u8*)self->slots + best * slotSize`,
+  as DrawTrailRibbon keeps `u32 size = sizeof(TrailPoint)`) is a pseudo live over the loop with
+  no free saved register; reload rematerialises its REG_EQUIV 20 before the multiply, and the
+  product, a local pseudo in v0, is live after the insn, so the reload spills v1. From then on
+  the rotation is retail's everywhere after the prologue.
+- **The prologue's order.** With two spill registers, retail's posp v1, wait v0, rotp v0 is the
+  reload order wait, posp, rotp (v0, v1, v0; its stores at 104, 96, 100 keep that order). The
+  spill slots follow pseudo numbers (posp, rotp, wait at 96, 100, 104), so the declarations
+  keep that order. Set at the top, posp outranks wait in sched1: GCSE's copy of `&pos` for the
+  search loop's call (`r239 = r117`) gives it a dependent in block 0 (priority 2), and LUIDs
+  break the rest. Assigning `posp = &pos; rotp = &rot[0];` inside the loop, before their calls,
+  removes the copy, and loop.c hoists both to the preheader, after the wait pointer's address
+  set at its declaration: the order wait, posp, rotp, and the match.

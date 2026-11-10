@@ -1203,7 +1203,100 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
 
 INCLUDE_RODATA(D_00249FB4);
 
-INCLUDE_ASM(func_0014C858);
+s32 ProjectPointToCamera(void* cam, void* point, f32* out);
+extern const f32 D_00249FB4;
+
+// Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the
+// second, from the first's place) among the slots on screen, then any. The slot's size is a named
+// stride (as DrawTrailRibbon's): its constant then lives across the loop without a register and is
+// rematerialised before the multiply, as retail's `li v1,20` shows; the position and rotation
+// pointers are set where they are used, so loop.c hoists them after the wait pointer's address.
+void func_0014C858(GaugeManager* self)
+{
+    Vec02 anchor;
+    Vec02 pos;
+    f32 screen[2];
+    Vec02 rot[3];
+    Vec02* posp;
+    s32 made = 0;
+    Vec02* rotp;
+    f32* wait = &self->f43C;
+    s32 pass;
+    s32 best;
+    s32 i;
+    f32 bestDist;
+    GaugeSlot* slot;
+    void* player;
+    s32 slotSize = sizeof(GaugeSlot);
+
+    do {
+        if (self->f458 >= 2) {
+            self->f45C = D_00249FB4;
+            return;
+        }
+        ChooseObjectPoolItem((ObjectPool*)self->f420);
+        if (((ObjectPool*)self->f420)->f48 == 0) {
+            return;
+        }
+        player = GetActiveSwitchedCollider();
+        best = -1;
+        bestDist = 0.0f;
+        pass = 0;
+        do {
+            for (i = 0; i < self->slotCount; i++) {
+                GaugeSlot* cand = &self->slots[i];
+                if (cand->taken != 0 || cand->key != 0) {
+                    continue;
+                }
+                GetObjectWorldPosition(cand->f4, (f32*)&pos);
+                if (pass == 0) {
+                    ProjectPointToCamera(*(void**)g_camera, (u8*)cand->obj + 0x140, screen);
+                    if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
+                        continue;
+                    }
+                }
+                f32 dist = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)player)->v140), Vu0::Q(pos))));
+                if (made == 1) {
+                    dist = dist + Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(anchor), Vu0::Q(pos))));
+                }
+                if (bestDist < dist) {
+                    bestDist = dist;
+                    best = i;
+                }
+            }
+            if (best >= 0) {
+                break;
+            }
+            pass++;
+        } while (pass < 2);
+        if (best < 0) {
+            return;
+        }
+        ObjectPool* h = (ObjectPool*)self->f420;
+        ContactAgent* agent = (ContactAgent*)h->f48;
+        slot = (GaugeSlot*)((u8*)self->slots + best * slotSize);
+        func_001A8C90(h, 0);
+        posp = &pos;
+        rotp = &rot[0];
+        GetObjectWorldPosition(slot->f4, (f32*)posp);
+        GetObjectWorldRotation(slot->f4, (f32*)rotp);
+        agent->desc02()->m1D(agent, posp);
+        agent->desc02()->m1E(agent, (Mat02*)rotp);
+        agent->desc02()->m20(agent, (Vec02*)D_00248D30);
+        agent->desc02()->m21(agent, (Vec02*)D_00248D30);
+        if (made == 0) {
+            anchor = pos;
+        }
+        CreateAnimationPlayerWithoutPresetTargets(slot->f8, slot->obj, 0, &slot->key, 0.0f, 1.0f);
+        made++;
+        AddAnimationPlayerRecordCallback(slot->key, self);
+        self->f458 = self->f458 + 1;
+        self->f45C = g_gameClock[1] + RandomFloatInRange(self->f43C, wait[1]);
+        agent->fC20 = slot;
+        slot->taken = 1;
+        agent->fC24 = *(f32*)(self->buf430 + 0x14);
+    } while (made < 2);
+}
 
 void ActivateRandomGaugeSlot(GaugeManager* self)
 {
