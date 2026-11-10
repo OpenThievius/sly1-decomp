@@ -43,6 +43,38 @@ to it); the branch reaches the function's end in a later pass. With the loop ins
 skipped and Vec stores change nothing; with the `if` around the stores and u128 stores, the
 skip path keeps the count. Both are needed.
 
+### A dead compare left by reorg: equal arms, and the join forgets memory (func_0017FB78)
+
+Read from jump.c (delete_jump, delete_computation), reload1.c (reload_cse_regs), reorg.c and
+local-alloc.c (block_alloc's widened lifetimes) with `-ds -dG -dl -dg -dR -dJ` dumps and the
+`-dp` assembly (2026-11-10, ComputePlayerJumpVelocity, src/main/file_17D248.cpp). Retail's tail
+is `lq; li v1,3; sq; swc1 $f0,8(a1); lw v0,0x2220(a2); lwc1 $f1,0x158(a2); lwc1 $f0,8(a1);
+max.s`: a dead constant, a dead load, and out->z read back right after it was stored.
+
+- **The dead pair is a compare whose branch reorg deleted.** The source is `out->z = z; if
+  (self->f2220 == 3) out->z = z; else out->z = z;` (the arms equal). reload_cse_regs deletes
+  the then-arm's store (the fall-through keeps its record that 8(a1) holds $f0; the else arm
+  starts at a label and is kept); jump2 inverts the branch over the else store; reorg finds
+  that store redundant with the one before the test, deletes it and then the branch to the
+  next insn, and never deletes what set the branch's operands. The sched2 dump still has the
+  store and the branch; the `-dp` assembly does not.
+- **Other forms lose the pair.** An `if` without an else (`if (s == 3) out->z = z;`) has its
+  store deleted by reload_cse and its branch by jump2's delete_jump, whose delete_computation
+  deletes the load and the constant too. A mode test (`f224C`) held in a local dies earlier.
+- **The join forgets memory.** At the if/else's join label (two uses) CSE starts with no
+  memory, so out->z is loaded again for the max. With the max inside each arm instead, CSE
+  forwards the stored z in both arms (the fall-through arm is in the same extended block, the
+  else arm is followed by `-fcse-follow-jumps`) and z stays in $f1 (204 bytes, not 200).
+- **Registers by widened lifetimes.** block_alloc first tries each quantity's life widened by
+  one insn at each end (INSN_SCHEDULING). With only the copy before the test and the z store in
+  the arms, sched1 issues `li 3` beside the `lq` and the TImode copy's widened life covers the
+  `lw`'s: f2220 takes v1, the constant a0. With `*out = v150; out->z = z;` before the test, the
+  `lw` waits for the swc1, the copy's widened life ends before it, and f2220 takes v0, the
+  constant v1, as retail. With the copy in each arm, the test block holds only the lw and the
+  li, and the li (shorter span) is placed first, in v0.
+- Plausibility: the test is retail's own (the dead `li 3`, `lw 0x2220`); the arms must be
+  equal after reload, so the original's two arms stored the same z, the shape the source keeps.
+
 ### A constant the loop does not own: an untied product (func_001389D0)
 
 Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c with `-dL -dl

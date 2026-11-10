@@ -672,8 +672,38 @@ s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* 
     return 1;
 }
 
-INCLUDE_RODATA(jtbl_0024B150);
-INCLUDE_ASM(func_0017FB78);
+static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
+
+// The state test with two equal arms is retail's: its dead `li v1,3` and `lw v0,0x2220` are
+// what reorg leaves of a compare with 3 once the arms' repeated stores are deleted, and its
+// join is why out->z is read again from memory for the max (docs/TOOLCHAIN.md, CSE).
+void func_0017FB78(Player* self, Vec02* out)
+{
+    f32 z;
+    switch (self->f224C) {
+    case 1:
+        z = D_00263E80 * Fpu::Sqrt(self->f700);
+        break;
+    case 4:
+        z = D_00263E8C * Fpu::Sqrt(self->f700);
+        break;
+    case 3:
+        z = D_00263E88 * Fpu::Sqrt(self->f700);
+        break;
+    case 0:
+    case 2:
+        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84)) + (self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84))) * self->gravity.z));
+        break;
+    }
+    *out = self->v150;
+    out->z = z;
+    if (self->f2220 == 3) {
+        out->z = z;
+    } else {
+        out->z = z;
+    }
+    out->z = out->z >? self->v150.z;
+}
 
 static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
 {

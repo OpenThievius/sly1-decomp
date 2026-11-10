@@ -2007,6 +2007,7 @@ func_0017E3C8	func_0017EA28	match
 func_0017E6D0	func_0017ED30	match	
 func_0017F018	func_0017F678	match	rodata
 func_0017FAC0	func_00180120	match	
+func_0017FB78	func_001801D8	match	rodata
 func_0017FC48	func_001802A8	match	
 func_0017FCC8	func_00180328	match	
 func_0017FD48	func_001803A8	match	
