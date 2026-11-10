@@ -3948,6 +3948,8 @@ func_001F89F8	func_001F9A80	match
 func_001F8A28	func_001F9AB0	match	
 func_001F8BF8	func_001F9D08	match	
 func_001F8C38	func_001F9FC8	match	
+func_001F8DB8	func_001FA148	match	
+func_001F9028	func_001FA3B8	match	
 func_001F92E8	func_001FA678	match	
 func_001F9690	func_001FAA20	match	
 func_001F9790	func_001FAB20	match	
