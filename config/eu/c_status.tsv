@@ -1300,6 +1300,7 @@ func_0014B5C0	func_0014B870	match
 func_0014B608	func_0014B8B8	match	
 func_0014B640	func_0014B8F0	match	
 func_0014B678	func_0014B928	match	
+func_0014B6A8	func_0014B958	match	rodata
 func_0014BB08	func_0014BDB8	match	
 func_0014BCE8	func_0014BF98	match	
 func_0014BD38	func_0014BFE8	match	
