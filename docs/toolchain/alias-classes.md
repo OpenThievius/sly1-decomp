@@ -1230,6 +1230,36 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   2^k times its .sched life; count the leading equal constants in insn order (`grep` the
   `.lreg` dump for the pseudo's sets) and reorder the cases or arms that set them.
 
+### A constant nobody keeps: `li v0, 4` at each use is an unallocated REG_EQUIV (func_001B7280)
+
+- Retail's `li v0, 4; sll a0, v0, 4` (an allocation's size), `li v0, 4; blez v0` (a loop's
+  first test) and `li s1, 4` (its counter), with no set of the count anywhere, are one
+  variable set to 4 in two switch arms that global-alloc left without a register: reload
+  substitutes its REG_EQUIV constant at each use and deletes the arms' sets. It is no constant
+  to CSE or loop.c (the default path does not set it, so GCSE's cprop finds no set available
+  at the uses), and global-alloc found all nine saved registers taken over its life.
+- Whether it gets one is a race with the variable set beside it (the table the arms choose):
+  each equal constant set doubles the count's live length (two arms: four times, 2*5/520),
+  the table's first set doubles its own once before the second, another symbol, ends the
+  equivalence (3/254). Ranked first, the count takes s1 and the table ties to the loop's
+  pointer (no `move s3, s1`); with a third equal set (2*5/1040) the table goes first, the
+  count finds nothing, and the code is retail's down to the counter.
+- Every way of adding the third set tried has a cost: `default: n = 4` or an initializer
+  before the switch sets it on every path (cprop then folds it and loop.c knows the trip
+  count, `li s4, 3; bgez`); `case 3: n = 4` adds a compare node to the switch's tree. Not
+  solved; the near miss keeps case 3.
+
+### An index plus a pointer argument has no base (func_001C3C98)
+
+- find_base_value's PLUS case replaces each register operand by its base value first: the
+  pointer argument's becomes an `(address (reg a1))` of VOIDmode, which none of its rules
+  takes as the base (they look for a SYMBOL_REF, a CONST, a CONST_INT on the other side, or a
+  REG still marked as a pointer), and the index is no pointer: the sum has no base, in sched1
+  as in sched2. A load from `&c->end[end]` (the record of a contact's end) therefore always
+  waits for a frame store before it, the Scalar slot's included; only its alias flags
+  (MEM_IN_STRUCT_P against the slot's MEM_SCALAR_P) can free it, and then sched2 frees it
+  too. Where retail's load sits after the slot store, its address's span in sched1 runs
+  past the store as ours does.
 ### Two hoisted constants one insn apart: a store written after the join (PAL's func_eu_0015DF58)
 
 - loop.c hoists every constant of a long loop (`li` of a compare's operand, of a stored
