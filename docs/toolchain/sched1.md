@@ -829,3 +829,26 @@ for the stores:
   loads second (the two-pass argument rule), which gives our vf4/vf3 for the 1.0 and the
   second vertex and the 1.0's store after the sum. The named order also gave the kind's
   reloads retail's v1 (and with it the `beqzl` of the kind switch's delay slot).
+
+### A reader passed on and a void return: the counter's own register (PAL func_eu_001DDA10)
+
+A PAL-only loader stored a count read from a stream, allocated a word per entry and read each
+entry through a callee, `for (i = 0; i < count; i++) read(a0, &table[i]);`. Our attempt (53.8%)
+called the reader as `ReadBufferedU16()` and returned the table; retail has one more saved
+register (s5), the counter in s2 from the prologue, and no load of the table after the loop.
+Both were signature errors, not scheduling ones:
+
+- **The reader takes the stream.** Retail's first `jal` has no argument move because `$a0` is
+  still the incoming parameter: ReadBufferedU16 is `s32 (void* self)` (its other callers pass
+  it). With the argument, the parameter's copy to `$a0` sits before the call, and sched1 then
+  puts combine's `i = 0` (which combine sinks to the rotated loop test, merging the test into
+  `blez count`) before the count's load instead of after it. The counter is born while the
+  count's `%hi` pseudo is still live, conflicts with it, and global-alloc gives it a register of
+  its own (s2) rather than reusing the dead `%hi`'s s0; sched2 then hoists `move s2,zero` into
+  the prologue.
+- **It returns nothing.** The `v0` retail has at the return is the table's reload that reorg
+  copied into the loop's delay slot; `return table;` adds a load at the exit and a blez target
+  before it. The caller (func_eu_001DDC68) never reads `v0`.
+
+Check a callee's first argument register even where retail never sets it: an unchanged `$a0`
+passed on is invisible in the caller's code but shifts sched1 (as in func_0018AD88).
