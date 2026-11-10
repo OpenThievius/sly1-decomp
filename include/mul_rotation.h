@@ -238,4 +238,24 @@ static inline void MulRotationSetRows(Mat02* out, const Mat02& a, const Mat02& b
     *out = r;
 }
 
+// The product a b with a's rows as values and b's read by index (MulRotationRowsIndexed), out
+// set by SetRows from the three result rows, each row computed in SetRows's own argument: stored
+// to the matrix local and to a row variable, `x = Q(r.r[0]) = ...`. Each argument is then a u128
+// variable converted to s128, so g++ copies it into a scalar slot (MEM_SCALAR_P) as soon as that
+// argument is evaluated: the three slots are distinct, each stored before the next row is read,
+// and alive together for the call. The last one has no dependents and is stored last
+// (UpdateFrameCameraController, func_0014A8F8; docs/TOOLCHAIN.md, "Three row copies made by one
+// call").
+static inline void MulRotationIndexedSetRows(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    const u128* q = (const u128*)&b;
+    u128 x, y, z;
+    SetRows(*out, x = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]),
+            y = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]),
+            z = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]));
+}
+
 #endif

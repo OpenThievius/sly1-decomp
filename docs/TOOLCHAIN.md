@@ -2451,7 +2451,7 @@ ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, 
   of function pointers, write the call through the descriptor struct's member: both sides of
   the alias rule need their flag.
 
-### A rotation product's vector slots are scalar (func_0014A8F8, unsolved)
+### A rotation product's vector slots are scalar (func_0014A8F8)
 
 Read from function.c, stmt.c, expr.c, alias.c and haifa-sched.c of 2.95.3 with `-dS -dR
 -fsched-verbose-6` dumps (2026-11-09). The product of two rotations that mul_rotation.h writes
@@ -2497,6 +2497,21 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   after CSE (so put_reg_into_stack gives it a scalar slot at the top of the frame) without code of
   its own; the same construct would likely explain the varying store orders of mul_rotation.h's
   other sites, which are one inline helper in the original.
+- **Solved (2026-11-10, w11-14A8F8).** The construct is one call with the rows computed in its
+  arguments: mul_rotation.h's MulRotationIndexedSetRows, `SetRows(*out, x = Q(r.r[0]) =
+  RotateRows(a0, a1, a2, q[0]), y = ..., z = ...)`, with x, y, z u128 variables. Each argument is
+  an lvalue of a u128 variable (a register) bound to a `const s128&` parameter, so expand_expr's
+  ADDR_EXPR copies it into an assign_temp slot (MEM_SCALAR_P) at that argument's expansion: right
+  after its row's product and r's store, before the next row's load. All three temporaries
+  belong to the one call statement, so their slots are distinct (0x90, 0xa0, 0xb0) and survive
+  to its end. The first two have the next row's load (a u128 read, no alias class) as a
+  dependent and are stored at once; z has none and goes last. SetRows then writes out's rows
+  from the registers. Variants: the products as rvalues (`SetRows(r, RotateRows(..), ..)`) get
+  no slots (the TARGET_EXPR's pseudo is purged back), an assignment to memory (`Q(r.r[0]) = ..`
+  alone) binds the reference to r's row itself (no slots, frame 160), and separate statements
+  before the call (`u128 x = ..; SetRows(..)`) store the slots after every load (26 lines). b's
+  rows by index (`q[i]`) or as Vec members both match; Q(b.r[i]) differs. func_001721B0's
+  product takes the same helper (98 lines to 5); func_00149760's do not (frame grows).
 
 ### Three row copies made by one call (func_00122B30)
 
@@ -2525,7 +2540,8 @@ dumps, alias.c and function.c of 2.95.3). It has a rotation product, `*rot = sel
   as rvalues (with either type), a u128 row read as `(Vec02&)x`, and a cast copy per statement.
   This is the construct func_0014A8F8's notes above ask for, and there the stores of those
   slots must come last too ("Three casts in one statement ... are stored last"). It may close
-  that near miss and explain mul_rotation.h's other forms. Not tried there.
+  that near miss and explain mul_rotation.h's other forms. There the rows must be computed in
+  the call's own arguments (the section above, "Solved").
 
 ### Global allocation's preferences (func_00149760)
 
