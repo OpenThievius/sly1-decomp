@@ -103,7 +103,6 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_001ABE70](func_001ABE70.cpp) | us | size differs | 2026-11-10 |
 | [func_001B55C0](func_001B55C0.cpp) | us | size differs | 2026-11-10 |
 | [func_001B7280](func_001B7280.cpp) | us | size differs | 2026-11-10 |
-| [func_001B8B90](func_001B8B90.cpp) | us | size differs | 2026-11-10 |
 | [func_001C54D0](func_001C54D0.cpp) | us | size differs | 2026-11-10 |
 | [func_001C8590](func_001C8590.cpp) | us | size differs | 2026-11-10 |
 | [func_001C8920](func_001C8920.cpp) | us | size differs | 2026-11-10 |

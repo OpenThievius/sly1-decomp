@@ -3007,6 +3007,7 @@ func_001B89B8	func_001B96A8	match
 func_001B8A08	func_001B96F8	match	
 func_001B8A48	func_001B9738	match	
 func_001B8B30	func_001B9820	match	
+func_001B8B90	func_001B9880	match	rodata
 func_001B9058	func_001B9D48	match	
 func_001B91A8	func_001B9E98	match	
 func_001B9338	func_001BA028	match	
