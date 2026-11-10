@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 220/276 (79.7%), checked 2026-11-08
+// BYTES 220/276 (79.7%), checked 2026-11-10
 // NEAR: order: as func_001D5FA8; it passes a 12-byte stack struct as the pointer argument;
 //       the record and its guard are a function-local static with an inline constructor
 //       (FillMemory, then the fields), at retail's labels through config/us/statics.tsv.
@@ -8,6 +8,7 @@
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
 // Probe 2026-11-09 (not plain C; explicit guard written between i68 and f50, record base hidden): guard place, 25.0 late into f0
 //       and the first loads come out as retail (18 words differ); the group before the guard stays a weight sort (i68 first).
+// 2026-11-10: retail's late constants need the early stores to have priority 4 (two dependent links); no plain form gives a store any dependent (sub-records, inline setters, static in an inline accessor ruled out; TOOLCHAIN.md, "What retail's order needs").
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);

@@ -40,6 +40,7 @@
 #include "fpu.h"
 #include "attachment.h"
 #include "on_off_object.h"
+#include "mul_rotation.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -1210,9 +1211,104 @@ void ReleasePlayerToState2(Player* self)
     }
 }
 
-INCLUDE_ASM(func_00172078);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 
-INCLUDE_ASM(func_001721B0);
+void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t)
+{
+    Vec02 axis;
+    Mat02 m;
+    if (self->f2228 == 8) {
+        axis = g_unitZVector;
+    } else {
+        axis = g_unitXVector;
+    }
+    BuildAxisAngleMatrix(&axis, &m, self->f2434 - g_frameDt[0] * self->f2430 * t);
+    Mat02 a;
+    Mat02 c;
+    MulRotationThenCopy(&c, self->rot, m);
+    MulRotationCopiedVia(out, a, c, ((PlacedObject*)self->f61C)->rot);
+}
+
+extern void* D_0026FA68;
+extern f32 D_00263894;
+extern f32 D_00263898;
+extern f32 D_00263888[3];
+s32 HasNoActiveObject89(void);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
+void BuildPlacedObjectTransform(void* a, void* b, void* out);
+void OrientPlayerSpinPart(void* self, void* out, f32 t);
+void AddTrailPoint(void* record, Vec02* pos, Mat02* m, s32 flag, f32 a, f32 dt);
+void func_00125C90(void* self, void* a, void* b);
+void BlendPlayerPose(Player* self, void* a, void* b)
+{
+    u8 out[0x50] __attribute__((aligned(16)));
+    Vec02 pos;
+    Mat02 turned;
+    Mat02 m90;
+    if (self->flags & (0x8000ULL << 17)) {
+        return;
+    }
+    f32 target;
+    if (self->f2220 == 6 && self->f239C == 3 && HasNoActiveObject89() != 0) {
+        f32 since = g_gameClock[1] - self->f2224;
+        f32 k;
+        if (0.5f <= since) {
+            k = 1.0f;
+        } else {
+            k = g_gameClock[2] / (0.5f - since);
+        }
+        f32 ramp = *(f32*)((u8*)self + 0x2724);
+        target = D_00263898;
+        *(f32*)((u8*)self + 0x2724) = k * D_00263894 + (1.0f - k) * ramp;
+    } else {
+        f32 one = 1.0f;
+        *(f32*)((u8*)self + 0x2724) = ApproachValueWithRamp(*(f32*)((u8*)self + 0x2724), one, g_gameClock[2], (Quad16*)D_00263888, 0);
+        target = one;
+    }
+    f32 spin = ApproachValueWithRamp(*(f32*)((u8*)self + 0x2728), target, g_gameClock[2], (Quad16*)D_00263888, 0);
+    *(f32*)((u8*)self + 0x2728) = spin;
+    if (*(f32*)((u8*)self + 0x2724) < 1.0f || spin < 1.0f) {
+        BuildPlacedObjectTransform(self, b, out);
+        b = out;
+        *(f32*)(out + 0x44) = *(f32*)((u8*)self + 0x2728);
+        *(f32*)(out + 0x40) = *(f32*)(out + 0x40) * *(f32*)((u8*)self + 0x2724);
+    }
+    *(f32*)((u8*)self + 0x2A8) = 500.0f;
+    if (self->f2434 != 0.0f || self->f2430 != 0.0f) {
+        OrientPlayerSpinPart(self, &m90, 0.0f);
+        u8* obj = *(u8**)((u8*)self + 0x23D0);
+        Mat02* b3 = (Mat02*)(obj + 0xD0);
+        u128 r0 = Vu0::Q(m90.r[0]);
+        u128 r1 = Vu0::Q(m90.r[1]);
+        u128 r2 = Vu0::Q(m90.r[2]);
+        Vu0::Q(pos) = Vu0::RotateRows(r0, r1, r2, Vu0::Q(*(Vec02*)(obj + 0x100)));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(((Collider*)self->f61C)->v140), Vu0::Q(pos));
+        MulRotationCopied(&turned, m90, *b3);
+        AddTrailPoint((u8*)self + 0x1520, &pos, &turned, 0, self->f2430, g_gameClock[2]);
+        ((Collider*)self->f61C)->flags |= (0x8000ULL << 17);
+    } else {
+        s32 flag;
+        switch (self->f2220) {
+        case 3:
+        case 4:
+        case 7:
+            flag = 1;
+            break;
+        default:
+            flag = 0;
+            break;
+        }
+        AddTrailPoint((u8*)self + 0x1520, 0, 0, flag, 0.0f, g_gameClock[2]);
+    }
+    if (self->f2220 == 12 && self->f2228 == 0x22) {
+        return;
+    }
+    if (D_0026FA68 != 0 && (u32)(*(s32*)((u8*)D_0026FA68 + 0x2D0) - 2) < 2) {
+        return;
+    }
+    func_00125C90(self, a, b);
+    ((Collider*)self->f61C)->flags &= ~(0x8000ULL << 17);
+}
 
 void RecomputeTurningColliderFrame(Player* self);
 void func_001C4618(Player* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);

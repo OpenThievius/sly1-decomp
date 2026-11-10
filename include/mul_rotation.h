@@ -210,4 +210,87 @@ template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat
     o->rot = r;
 }
 
+// A matrix's three rows set from quadword values passed as the signed quadword type. The
+// product's rows are u128, so each argument is converted and g++ binds a temporary of s128 to
+// the reference: a scalar's slot in the frame (MEM_SCALAR_P), stored though nothing reads it
+// back, the three alive together for the call and so at three addresses above the locals.
+// Loads of structure members through a pointer never wait for such stores
+// (fixed_scalar_and_varying_struct_p), so they sink below later code as retail's do
+// (docs/TOOLCHAIN.md, "Three row copies made by one call").
+static inline void SetRows(Mat02& m, const s128& x, const s128& y, const s128& z)
+{
+    Vu0::Q(m.r[0]) = x;
+    Vu0::Q(m.r[1]) = y;
+    Vu0::Q(m.r[2]) = z;
+}
+
+// The product a b with a's rows loaded once as values and the three result rows put in the
+// matrix local by SetRows, then copied to out (GetIdentityPoseRotation, func_00122B30).
+static inline void MulRotationSetRows(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    u128 y = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    u128 z = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    SetRows(r, x, y, z);
+    *out = r;
+}
+
+// A matrix's three rows set from quadwords that are already in memory, bound where they are:
+// the arguments are u128 lvalues, so no copy is made for the call.
+static inline void SetRowsFrom(Mat02& m, const u128& x, const u128& y, const u128& z)
+{
+    Vu0::Q(m.r[0]) = x;
+    Vu0::Q(m.r[1]) = y;
+    Vu0::Q(m.r[2]) = z;
+}
+
+// The product a b into out with the matrix local r the caller's: a's rows loaded once as values,
+// b's read as Vec members, and each result row, in SetRowsFrom's own argument, copied through a
+// cast (Vu0::Scalar's copy, a scalar's slot) and then stored to r's row, which is what the call
+// reads. The three slots are temporaries of the one call statement, so they are distinct and
+// alive together; each is stored before its row of r, as retail's last row shows (the slot's
+// store and r's tie at the block's end, and the earlier insn goes first). b's rows as structure
+// members never wait for the slots' stores (fixed_scalar_and_varying_struct_p), only for r's
+// (func_00172078, OrientPlayerSpinPart's second product; docs/TOOLCHAIN.md, "A rotation
+// product's last two stores").
+static inline void MulRotationCopiedVia(Mat02* out, Mat02& r, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    const Vu0::Vec* q = (const Vu0::Vec*)&b;
+    u128 x, y, z;
+    SetRowsFrom(*out, Vu0::Q(r.r[0]) = Vu0::Q((s128)(x = Vu0::RotateRows(a0, a1, a2, q[0].q))),
+                Vu0::Q(r.r[1]) = Vu0::Q((s128)(y = Vu0::RotateRows(a0, a1, a2, q[1].q))),
+                Vu0::Q(r.r[2]) = Vu0::Q((s128)(z = Vu0::RotateRows(a0, a1, a2, q[2].q))));
+}
+
+// MulRotationCopiedVia with the matrix local its own (UpdateFrameCameraController,
+// func_0014A8F8; func_001721B0's spin part).
+static inline void MulRotationCopied(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    const Vu0::Vec* q = (const Vu0::Vec*)&b;
+    u128 x, y, z;
+    SetRowsFrom(*out, Vu0::Q(r.r[0]) = Vu0::Q((s128)(x = Vu0::RotateRows(a0, a1, a2, q[0].q))),
+                Vu0::Q(r.r[1]) = Vu0::Q((s128)(y = Vu0::RotateRows(a0, a1, a2, q[1].q))),
+                Vu0::Q(r.r[2]) = Vu0::Q((s128)(z = Vu0::RotateRows(a0, a1, a2, q[2].q))));
+}
+
+// The product a b with the three rows computed first and then set into out by SetRowsFrom
+// through their casts' copies, three slots of the one call (func_00172078's first product).
+static inline void MulRotationThenCopy(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    u128 y = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    u128 z = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    SetRowsFrom(*out, Vu0::Q((s128)x), Vu0::Q((s128)y), Vu0::Q((s128)z));
+}
+
 #endif

@@ -3,6 +3,9 @@
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
+// 2026-11-10: retail's registers need sched1 to store -0.5 (f20) before it loads -1.0 (f74), both $f0;
+//       independent frame stores never allow it, and one variable reused for both (26 lines differ)
+//       becomes global and cannot take $f0 (local-alloc emulator; TOOLCHAIN.md, func_001930B8).
 #include "common.h"
 #include "shapes.h"
 

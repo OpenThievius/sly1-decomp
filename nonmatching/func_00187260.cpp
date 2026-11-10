@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 890/1888 (47.1%), checked 2026-11-08
-// NEAR (2026-11-08, night-large5): CollectMeshHits (func_00187260, 1888 bytes): frame, saved
-// registers, the spilled count (written as `for (i = count; --i >= 0;)`, so count - 1 is not one
-// shared pseudo), the near-face test, the face, edge and vertex passes and the clean-up follow
-// retail. Left: in the face pass retail reloads pt from its stack slot after the stores into the
-// hit (ours keeps it in a VU register, one instruction short, which shifts the rest); the
-// MulAddX results take the Scalar's register in retail (ours the normal's); the prologue's moves
-// are scheduled in another order.
+// BYTES 1653/1888 (87.6%), checked 2026-11-10
+// NEAR (2026-11-10, w10-187260): CollectMeshHits (func_00187260, 1888 bytes). Matched now: the
+// near-face test (the mesh point read inside each memory reference, index first), the three
+// MulAddX ties (MulAddX lists its weight before b, include/vu0.h), the hits written through one
+// reused `o` (set three times, so alias.c knows no base for it and its stores kill the frame
+// locals: retail's reload of pt and nrm), func_0013E430's radius before its cursor, the edge
+// hit's arms (vertex first, vi set before rel) and the vertex pass's own counter and index
+// local, the clean-up through `face`. Still differs: the prologue's order; the GPRs reload
+// picks for the qmfc2/mfc1 moves (a1/a3/v0 for retail's a3/a0/a3) and the count's reload
+// before the face pass (v1 for v0), which keeps reorg from threading its entry test past the
+// edge pass (retail's `bltz s1,0x187880; move t5,s2`); the spans call's argument order; in the
+// edge pass PRE keeps rel from the distance test for the normal (a vmove; retail reloads it
+// from its slot, cause not found: no store on the path) and len is copied; the vertex pass's
+// hit pointer is strength-reduced whole where retail reduces n * 48 alone (`addu a1,s8,t3`).
 #include "common.h"
 #include "fpu.h"
 #include "vu0.h"
@@ -67,7 +73,7 @@ struct SpanHit {
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark();
-s32 func_0013E430(void* tree, Vec02* center, FaceCandidate** cursor, f32 radius);
+s32 func_0013E430(void* tree, Vec02* center, f32 radius, FaceCandidate** cursor);
 s32 CollectTreeNodeSpans(void* a, Vec02* b, Vec02* c, s32 d, s32 e, SpanHit* f);
 
 // The squared distance between two points.
@@ -87,6 +93,7 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
     s32 firstEdge;
     s32 lastEdge;
     MeshFace* face;
+    MeshHitEntry* o;
 
     PushBackMemoryMark();
     if (cap <= 0) {
@@ -95,7 +102,7 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
     if (cursor == 0) {
         FaceCandidate* buf = (FaceCandidate*)AllocateBackMemory(count * sizeof(FaceCandidate));
         cursor = buf;
-        if (func_0013E430(list, center, &cursor, radius) != 2) {
+        if (func_0013E430(list, center, radius, &cursor) != 2) {
             goto done;
         }
         list = buf;
@@ -106,16 +113,15 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
         face = list[i].face;
         s32 k = face - (MeshFace*)mesh->faces;
         f32* w = (f32*)mesh->words;
-        Vec02* c = &((Vec02*)mesh->points)[k];
         f32 r = radius + w[k];
-        f32 dsq = DistanceSquared(*center, *c);
+        f32 dsq = DistanceSquared(*center, ((Vec02*)mesh->points)[k]);
         if (r * r <= dsq) {
             continue;
         }
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal))) - face->dist;
         Vu0::Vec s = Vu0::Vec::Scalar(-d);
         Vu0::Vec p = Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal), s);
-        f32 e = Vu0::ToFloat(Vu0::Length(Vu0::Sub(p, Vu0::Vec::Of(*c)))) - w[k];
+        f32 e = Vu0::ToFloat(Vu0::Length(Vu0::Sub(p, Vu0::Vec::Of(((Vec02*)mesh->points)[k])))) - w[k];
         e = e >? 0.0f;
         if (radius * radius < e * e + d * d) {
             continue;
@@ -135,8 +141,8 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
         Vec02 bottom;
         SpanHit spans[16];
         Vec02 pt;
-        Vu0::Set(top, Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal), Vu0::Vec::Scalar(radius)).q);
-        Vu0::Set(bottom, Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal), Vu0::Vec::Scalar(-radius)).q);
+        Vu0::Set(top, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(radius)));
+        Vu0::Set(bottom, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(-radius)));
         s32 m = CollectTreeNodeSpans(cursor, &top, &bottom, 0, 0x10, spans);
         s32 k;
         for (k = 0; k < m; k++) {
@@ -154,9 +160,9 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
         if (k >= m) {
             continue;
         }
-        Vu0::Set(pt, Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal), Vu0::Vec::Scalar(-radius)).q);
+        Vu0::Set(pt, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(-radius)));
         if (n < cap) {
-            MeshHitEntry* o = &out[n++];
+            o = &out[n++];
             o->point = pt;
             o->normal = face->normal;
             o->depth = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(pt), Vu0::Vec::Of(face->normal))) - face->dist;
@@ -202,8 +208,8 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
             if (t < 0.0001f) {
                 vi = ed->v[0];
             } else if (0.9999f < t) {
-                Vu0::Set(rel, Vu0::Sub(Vu0::Vec::Of(*center), Vu0::Vec::Of(*b)).q);
                 vi = ed->v[1];
+                Vu0::Set(rel, Vu0::Sub(Vu0::Vec::Of(*center), Vu0::Vec::Of(*b)).q);
             } else {
                 vi = -1;
                 Vu0::Set(p, Vu0::MulAddX(Vu0::Vec::Of(*a), Vu0::Vec::Of(dir), Vu0::Vec::Scalar(t)).q);
@@ -226,46 +232,47 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
                 f32 depth = len - radius;
                 Vu0::Set(nrm, Vu0::MulX(Vu0::Vec::Of(rel), Vu0::Vec::Scalar(1.0f / len)).q);
                 Vu0::Set(p, Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(nrm), Vu0::Vec::Scalar(-radius)).q);
-                if (vi < 0) {
-                    if (n < cap) {
-                        MeshHitEntry* o = &out[n++];
-                        o->point = p;
-                        o->normal = nrm;
-                        o->depth = depth;
-                        o->kind = 5;
-                        o->part = ed;
-                        if (n >= cap) {
-                            goto clear;
-                        }
+                if (vi >= 0) {
+                    if ((u32)nv < 64) {
+                        VertexHit* v = &verts[nv++];
+                        v->index = vi;
+                        v->point = p;
+                        v->normal = nrm;
+                        v->depth = depth;
                     }
-                } else if ((u32)nv < 64) {
-                    VertexHit* v = &verts[nv++];
-                    v->index = vi;
-                    v->point = p;
-                    v->normal = nrm;
-                    v->depth = depth;
+                } else if (n < cap) {
+                    o = &out[n++];
+                    o->point = p;
+                    o->normal = nrm;
+                    o->depth = depth;
+                    o->kind = 5;
+                    o->part = ed;
+                    if (n >= cap) {
+                        goto clear;
+                    }
                 }
             }
         next:;
         }
     }
     lastEdge = n;
-    for (i = nv - 1; i >= 0; i--) {
-        VertexHit* v = &verts[i];
+    for (s32 j = nv - 1; j >= 0; j--) {
+        VertexHit* v = &verts[j];
+        s32 vi = v->index;
         s32 q;
         for (q = firstEdge; q < lastEdge; q++) {
             FaceEdge* ed = (FaceEdge*)out[q].part;
-            if (ed->v[0] == v->index || ed->v[1] == v->index) {
+            if (ed->v[0] == vi || ed->v[1] == vi) {
                 goto nextv;
             }
         }
         if (n < cap) {
-            MeshHitEntry* o = &out[n++];
+            o = &out[n++];
             o->point = v->point;
             o->normal = v->normal;
             o->depth = v->depth;
             o->kind = 4;
-            o->part = &((Vec02*)mesh->verts)[v->index];
+            o->part = &((Vec02*)mesh->verts)[vi];
             if (n >= cap) {
                 goto clear;
             }
@@ -274,7 +281,8 @@ s32 func_00187260(Vec02* center, s32 count, FaceCandidate* list, FaceCandidate* 
     }
 clear:
     for (i = count; --i >= 0;) {
-        list[i].face->flags &= ~0xF0;
+        face = list[i].face;
+        face->flags &= ~0xF0;
     }
 done:
     PopBackMemoryMark();

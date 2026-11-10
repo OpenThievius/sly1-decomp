@@ -21,7 +21,7 @@ D_00249E50	00249E50	68	.rodata	src/main/state_notifier.cpp
 D_00249EA0	00249EA0	200	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
-D_0024A120	0024A120	412	.rodata	src/main/file_1549C8.cpp
+D_0024A120	0024A120	432	.rodata	src/main/file_1549C8.cpp
 D_0024A2D0	0024A2D0	1152	.rodata	src/main/file_15F678.cpp
 D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
 D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
@@ -30,7 +30,7 @@ D_0024A7F0	0024A7F0	88	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	1888	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	4	.rodata	src/main/file_1793C0.cpp
-D_0024B000	0024B000	36	.rodata	src/main/entry_queue.cpp
+D_0024B000	0024B000	84	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	176	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	12	.rodata	src/main/file_180EB0.cpp
 D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
@@ -43,7 +43,7 @@ D_0024B438	0024B438	416	.rodata	src/main/movie_player.cpp
 D_0024B5E0	0024B5E0	116	.rodata	src/main/file_18F988.cpp
 D_0024B660	0024B660	4608	.rodata	src/main/pause_menu.cpp
 D_0024C860	0024C860	12	.rodata	src/main/file_1963D8.cpp
-D_0024C870	0024C870	32	.rodata	src/main/file_198980.cpp
+D_0024C870	0024C870	96	.rodata	src/main/file_198980.cpp
 D_0024C930	0024C930	652	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
 D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
@@ -55,7 +55,7 @@ D_0024D280	0024D280	696	.rodata	src/main/file_1B7968.cpp
 D_0024D560	0024D560	40	.rodata	src/main/hit_count_collider.cpp
 D_0024D588	0024D588	16	.rodata	src/main/turning_collider.cpp
 D_0024D5A0	0024D5A0	168	.rodata	src/main/file_1C5F18.cpp
-D_0024D650	0024D650	1044	.rodata	src/main/agent.cpp
+D_0024D650	0024D650	1048	.rodata	src/main/agent.cpp
 D_0024DAA0	0024DAA0	124	.rodata	src/main/player_target.cpp
 D_0024DB20	0024DB20	168	.rodata	src/main/player_mode.cpp
 D_0024DBD0	0024DBD0	184	.rodata	src/main/player_request.cpp

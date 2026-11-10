@@ -143,11 +143,16 @@ struct Vu0 {
     // never waits for (alias.c, fixed_scalar_and_varying_struct_p); a 16-byte local of the
     // helper's (an aggregate) or a store through a u128 pointer (no flag) holds such loads
     // behind it, which retail's schedules never do (docs/TOOLCHAIN.md, "The weight slot is a
-    // cast's copy").
+    // cast's copy"). The address is taken here, not through Q: Q returns a reference, which
+    // leaves the slot's address in a pseudo of its own that CSE then keeps as the canonical
+    // register for that frame address, and a later local given the freed slot (a block's Vec02
+    // passed by address) is read through that pseudo across the calls in between, one saved
+    // register more than retail (func_0017BCD0; docs/TOOLCHAIN.md, "A weight slot's address
+    // must not outlive the statement").
     static u128 Scalar(f32 f)
     {
         u128 r = FromFloat(f);
-        return Q((s128)r);
+        return *(u128*)&(s128)r;
     }
 
     // Scalar of a float in memory: FromFloatAt, so the float is loaded with lw straight into
@@ -364,11 +369,15 @@ struct Vu0 {
         return r;
     }
 
-    // a + b * s.x: vadda.xyzw ACC, a, vf0; vmaddx.xyzw.
+    // a + b * s.x: vadda.xyzw ACC, a, vf0; vmaddx.xyzw. The inputs are listed a, s, b: the
+    // local allocator ties the result to the first input that dies there, and retail gives it
+    // the weight's register where a lives on and b is loaded for the sum (func_00187260's three,
+    // docs/TOOLCHAIN.md, "MulAddX lists its weight before b"). Every matched function builds
+    // the same with either order.
     static u128 MulAddX(u128 a, u128 b, u128 s)
     {
         u128 r;
-        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddx.xyzw %0, %2, %3x" : "=j"(r) : "j"(a), "j"(b), "j"(s));
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddx.xyzw %0, %3, %2x" : "=j"(r) : "j"(a), "j"(s), "j"(b));
         return r;
     }
 

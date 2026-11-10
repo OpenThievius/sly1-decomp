@@ -1402,9 +1402,244 @@ void SendPointEventToWorldListener(Quad16* a0, f32 f)
     }
 }
 
-INCLUDE_RODATA(jtbl_0024A130);
+struct SpawnCurve;
+typedef void (*CurveEvalFn)(SpawnCurve* self, f32 t, Vec02* pos, Vec02* dir);
+struct SpawnCurveClass { u8 pad0[8]; CurveEvalFn eval; };
+struct SpawnCurve {
+    SpawnCurveClass* desc;  // 0x00
+    u8 pad04[8];
+    s32 count;              // 0x0C
+    u8 pad10[4];
+    f32* lengths;           // 0x14
+};
 
-INCLUDE_ASM(func_00156718);
+// A piece of a ring of segments between two objects: the radii at its ends and its length.
+struct SpawnSegment {
+    u8 pad00[8];
+    f32 f08;                // 0x08
+    f32 f0C;                // 0x0C
+    f32 r0;                 // 0x10
+    f32 r1;                 // 0x14
+    PlacedObject* from;     // 0x18
+    PlacedObject* to;       // 0x1C
+    f32 f20;                // 0x20
+    f32 len;                // 0x24
+};
+
+struct SpawnTriangle {
+    s32 v[3];               // 0x00
+    f32 area;               // 0x0C
+};
+
+struct SpawnMesh {
+    u8 pad00[4];
+    Vec02* verts;           // 0x04
+    s32 count;              // 0x08
+    SpawnTriangle* tris;    // 0x0C
+    Vec02* normals;         // 0x10
+    f32 area;               // 0x14
+};
+
+// A range a random float is drawn from.
+struct SpawnRange {
+    f32 lo;
+    f32 hi;
+};
+
+struct SpawnShape {
+    s32 kind;               // 0x00
+    u8 pad04[0xC];
+    union {
+        Vec02 point;        // 0x10
+        struct {
+            f32 lo[4];      // 0x10
+            f32 hi[4];      // 0x20
+        } box;
+        SpawnCurve* curve;  // 0x10
+        struct {
+            s32 count;      // 0x10
+            SpawnSegment* segs; // 0x14
+            f32 len;        // 0x18
+        } ring;
+        SpawnMesh mesh;     // 0x10
+    };
+    u8 pad30[0x40 - 0x30];
+    s32 mode;               // 0x40
+    u8 pad44[0x50 - 0x44];
+    Vec02 dir;              // 0x50
+    SpawnRange jitter;      // 0x60
+    u8 pad68[4];
+    void* anchor;           // 0x6C
+};
+
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
+void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
+void TransformDirectionBetweenFrames(void* from, void* to, void* dir, Vec02* out);
+
+static inline f32 RandomInRange(const SpawnRange& r)
+{
+    return RandomFloatInRange(r.lo, r.hi);
+}
+
+// v made unit length, or fallback when v is shorter than 0.0001: Vu0::NormalizeOr over vector
+// values, the fallback returned as it is. In a function with a jump table, jump.c runs again
+// after cse2 and turns the u128 form's arms into a preset of the fallback (docs/TOOLCHAIN.md,
+// "A preset of the fallback after cse2"); the copies of the vector values keep the arms.
+static inline Vu0::Vec NormalizedOr(Vu0::Vec v, Vu0::Vec fallback)
+{
+    u128 len = Vu0::Length(v.q);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        return fallback;
+    }
+    Vu0::Vec r;
+    r.q = Vu0::DivX(v.q, len);
+    return r;
+}
+
+// The point of a spawn shape for the index-th of count spawns, and its direction: a point, a
+// random point in a box, along a curve, on a ring of segments or on a mesh, the direction by the
+// shape's mode, then made unit length and the point moved along it by a random jitter.
+void func_00156718(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Vec02* axis)
+{
+    switch (shape->kind) {
+    case 0:
+        *pos = shape->point;
+        break;
+    case 1:
+        pos->x = RandomFloatInRange(shape->box.lo[0], shape->box.hi[0]);
+        pos->y = RandomFloatInRange(shape->box.lo[1], shape->box.hi[1]);
+        pos->z = RandomFloatInRange(shape->box.lo[2], shape->box.hi[2]);
+        break;
+    case 2: {
+        SpawnCurve* curve = shape->curve;
+        f32 step = curve->lengths[curve->count - 1] / (f32)count;
+        f32 lo = (f32)index * step;
+        f32 t = RandomFloatInRange(lo, lo + step);
+        switch (shape->mode) {
+        default:
+            if (curve->desc->eval) {
+                curve->desc->eval(curve, t, pos, 0);
+            }
+            break;
+        case 2:
+            if (curve->desc->eval) {
+                curve->desc->eval(curve, t, pos, axis);
+            }
+            goto normalize;
+        case 3: {
+            Vec02 tangent;
+            if (curve->desc->eval) {
+                curve->desc->eval(curve, t, pos, &tangent);
+            }
+            Vu0::Set(*axis, Vu0::Cross(Vu0::Vec::Of(tangent), Vu0::Vec::Of(shape->dir)).q);
+            goto normalize;
+        }
+        }
+        break;
+    }
+    case 3: {
+        f32 step = shape->ring.len / (f32)count;
+        f32 d = RandomFloatInRange((f32)index * step, (f32)(index + 1) * step);
+        SpawnSegment* seg;
+        Vec02 offset;
+        Mat02 frame;
+        Vec02 at;
+        Vec02 side;
+        f32 roots[2];
+        s32 i;
+        for (i = 0; i < shape->ring.count; i++) {
+            seg = &shape->ring.segs[i];
+            d -= seg->len;
+            if (d < 0.0f) {
+                break;
+            }
+        }
+        Vu0::Set(frame.r[2], NormalizedOr(Vu0::Sub(Vu0::Vec::Of(seg->to->v140), Vu0::Vec::Of(seg->from->v140)),
+                                              Vu0::Vec::Of(g_unitXVector)).q);
+        BuildPerpendicularPair(&frame.r[2], &frame.r[0], &g_unitXVector, &g_unitZVector);
+        d += seg->len;
+        if (seg->f0C != seg->f08) {
+            SolveQuadratic((seg->f0C - seg->f08) * 0.5f / seg->f20, seg->f08, -d, roots);
+        } else {
+            roots[0] = d / seg->f08;
+        }
+        f32 u = roots[0] / seg->f20;
+        ComputePolarOffset(&offset, RandomFloatInRange(-3.14159265f, 3.14159265f), (1.0f - u) * seg->r0 + u * seg->r1,
+                           roots[0]);
+        Vu0::Set(at, Vu0::Add(Vu0::Vec::Of(seg->from->v140), Vu0::Rotate(frame, Vu0::Vec::Of(offset))).q);
+        TransformPointBetweenFrames(0, shape->anchor, &at, pos);
+        switch (shape->mode) {
+        case 2:
+            TransformDirectionBetweenFrames(0, shape->anchor, &frame.r[2], axis);
+            goto normalize;
+        case 3: {
+            Vu0::Set(side, NormalizedOr(Vu0::Cross(Vu0::Vec::Of(frame.r[2]), Vu0::Vec::Of(shape->dir)),
+                                            Vu0::Vec::Of(g_unitXVector)).q);
+            TransformDirectionBetweenFrames(0, shape->anchor, &side, axis);
+            goto normalize;
+        }
+        }
+        break;
+    }
+    case 4: {
+        SpawnMesh* mesh = &shape->mesh;
+        f32 a = RandomFloatInRange(0.0f, 1.0f) * mesh->area;
+        SpawnTriangle* tri;
+        Vec02 p[3];
+        s32 i;
+        for (i = 0; i < mesh->count; i++) {
+            tri = &mesh->tris[i];
+            a -= tri->area;
+            if (a <= 0.0f) {
+                break;
+            }
+        }
+        p[0] = mesh->verts[tri->v[0]];
+        p[1] = mesh->verts[tri->v[1]];
+        p[2] = mesh->verts[tri->v[2]];
+        f32 s = RandomFloatInRange(0.0f, 1.0f);
+        f32 t = RandomFloatInRange(0.0f, 1.0f - s);
+        f32 w = 1.0f - s - t;
+        Vu0::Set(*pos, Vu0::MulXSum3(Vu0::Vec::Of(p[0]), Vu0::Vec::Scalar(s), Vu0::Vec::Of(p[1]),
+                                     Vu0::Vec::Scalar(t), Vu0::Vec::Of(p[2]), Vu0::Vec::Scalar(w)).q);
+        if (shape->mode == 5) {
+            Vec02 n[3];
+            Vu0::Set(n[0], Vu0::Vec::Of(mesh->normals[tri->v[0]]).q);
+            Vu0::Set(n[1], Vu0::Vec::Of(mesh->normals[tri->v[1]]).q);
+            Vu0::Set(n[2], Vu0::Vec::Of(mesh->normals[tri->v[2]]).q);
+            Vu0::Set(*axis, Vu0::MulXSum3(Vu0::Vec::Of(n[0]), Vu0::Vec::Scalar(s), Vu0::Vec::Of(n[1]),
+                                          Vu0::Vec::Scalar(t), Vu0::Vec::Of(n[2]), Vu0::Vec::Scalar(w)).q);
+            goto normalize;
+        }
+        break;
+    }
+    }
+    switch (shape->mode) {
+    case 0:
+        *axis = shape->dir;
+        break;
+    case 1:
+        Vu0::Set(*axis, Vu0::Sub(Vu0::Vec::Of(*pos), Vu0::Vec::Of(shape->dir)).q);
+        break;
+    case 4:
+        if (shape->anchor != 0) {
+            Vu0::Set(*axis, Vu0::RotateTransposed(*(Mat02*)((u8*)shape->anchor + 0x110),
+                                                  Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir))).q);
+        } else {
+            Vu0::Set(*axis, Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir)).q);
+        }
+        break;
+    default:
+        *axis = g_unitXVector;
+        break;
+    }
+normalize:
+    Vu0::Vec n = NormalizedOr(Vu0::Vec::Of(*axis), Vu0::Vec::Of(g_unitXVector));
+    Vu0::Set(*axis, n.q);
+    Vu0::Vec at = Vu0::Vec::Of(*pos);
+    Vu0::Set(*pos, Vu0::Add(at, Vu0::MulX(n, Vu0::Vec::Scalar(RandomInRange(shape->jitter)))).q);
+}
 
 struct AnchoredSpawn {
     u8 pad00[0x6C];
@@ -1556,8 +1791,6 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
 
 INCLUDE_ASM(func_001575D8);
 
-void func_00156718(void* shape, s32 index, s32 count, Vec02* pos, Vec02* axis);
-
 // The frame of the object a spawn record follows (at 0x78): its position, the rotation, and the
 // velocity and spin it moves with.
 struct SpawnFrame {
@@ -1582,7 +1815,7 @@ void func_001579B0(void* a, void* b, s32* out)
     out[3] = (s32)AllocateBackMemory(n * 4);
     InitSpawnRing(*(s32*)(rec + 0xEC), (SpawnSpan*)(rec + 0xE4), n, &ring);
     for (s32 i = 0; i < n; i++) {
-        func_00156718(rec + 0x10, i, n, (Vec02*)out[0] + i, &axis);
+        func_00156718((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);
         func_00157248((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
                       (Vec02*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
         SpawnFrame* o = *(SpawnFrame**)(rec + 0x78);
@@ -3421,7 +3654,34 @@ s32 func_0015BEF0(ObjectCycler* self)
     return next;
 }
 
-INCLUDE_ASM(func_0015BFC0);
+void* GetActiveSwitchedCollider(void);
+
+// The squared length of d. ToFloatMoved: the qmfc2 is the compiler's and the mtc1 the helper's
+// (one cycle each, where the compiler's mtc1 costs two), so in sched2 the difference's load has
+// f684's priority, not one more, and f684's load and square come before it, as in retail.
+static inline f32 LengthSquared(u128 d)
+{
+    return Vu0::ToFloatMoved(Vu0::Dot(d, d));
+}
+
+// Whether the active collider's point (its position plus half its velocity) is within f684 of
+// the cycler. The position is named first: its load is expanded before the weight's slot store
+// and passes it in both schedules, while the velocity, read inside the sum after the Scalar,
+// waits for the store, as retail's lqc2 order shows.
+s32 func_0015BFC0(ObjectCycler* self)
+{
+    Vec02 point;
+    PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
+    if (active != 0) {
+        Vu0::Vec pos = Vu0::Vec::Of(active->v140);
+        Vu0::Q(point) = Vu0::MulAddX(pos.q, Vu0::Q(active->v150), Vu0::Scalar(0.5f));
+        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->f684 * self->f684;
+        if (inside) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {

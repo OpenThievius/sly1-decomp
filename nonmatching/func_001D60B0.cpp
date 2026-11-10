@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 195/280 (69.6%), checked 2026-11-08
+// BYTES 195/280 (69.6%), checked 2026-11-10
 // NEAR: order: as func_001D5FA8 (the stores keep the constructor's order in retail and are
 //       scheduled out of order here);
 //       the record and its guard are a function-local static with an inline constructor
@@ -7,6 +7,7 @@
 //       Lands only with func_001D5FA8 and func_001D61C8 in the same form (the three guards
 //       close the file's .data in function order).
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
+// 2026-11-10: retail's late constants need the early stores to have priority 4 (two dependent links); no plain form gives a store any dependent (sub-records, inline setters, static in an inline accessor ruled out; TOOLCHAIN.md, "What retail's order needs").
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);

@@ -1,16 +1,29 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 374/812 (46.1%), checked 2026-11-08
-// Night-low1 (2026-11-08): `return -0.1f < acc.z;` in place of the if gives retail's shared
-//       return-0 block after the f690 test (the boolean's li v0,1 / move v0,zero is no return-0
-//       tail for cross-jumping to merge the early returns into), but the loops' delay slots then
-//       fill otherwise and the C grows to 820 bytes (regdiff 'code' 84.7% to 89.7%); kept here
-//       as the if until the count loop's registers (retail row a2, contact a0, row->next in v0
-//       with move a2, v0) come too.
-// NEAR: wave 4 e3. 812 bytes, same size and frame (0x90; the weights' slot at 0x10 below the spilled down vector at 0x20, the sum at 0). Structure is retail's: the guards, the contact
-//       count, the three allocations, the Gram matrix with the copy of the first normal hoisted before the inner loop (vmove), the right-hand sides, the solve, the
-//       weighted sum, the -0.1 test. Differences: the shared return-0 block of the first guard and the f690 test sits at the end in ours and inline after the f690
-//       test in retail; the row and contact pointers of the loops are in other caller-saved registers (retail a2 and a0, ours t0, a1, v1) and the gram pointer in a2
-//       (retail a3). ~12 compiles.
+// BYTES 810/812 (99.8%), checked 2026-11-10
+// NEAR: w11 (2026-11-10). 812 bytes, same code and frame; registers differ in one place only:
+//       the copy of the spilled down vector into the sum after SolveActiveSetSystem (`lq v0,32(sp);
+//       sq v0,0(sp)`, retail v1). That reload register comes from order_regs_for_reload, which
+//       skips a hard register holding a live pseudo: retail's v1 means a value in v0 was live
+//       across the copy, which is the self->contacts load (v0) of the sum loop's head scheduled
+//       before the copy by sched1. Ours has the copy first: both are ready in the cycle after the
+//       call with priority 5 (the copy's frame store is a true dependence of the row->head load,
+//       an unflagged TImode frame store against a mem/s through a loaded pointer), and the tie
+//       falls to INSN_REG_WEIGHT (the copy -1 for down's death, the load +1). Ruled out: acc as a
+//       Vu0::Vec (coalesced with down, frame changes), down as a Vec02 in memory (slots swap),
+//       acc declared at the copy (slot order), the copy after `p = sol`, the sum loop's
+//       self->contacts in a named pointer (CSE folds it; the load still depends on the copy).
+//       Confirmed: acc as a u128 whose address the z read takes (`((f32*)&acc)[2]`) makes the
+//       copy's store MEM_SCALAR_P at a fixed address, which fixed_scalar_and_varying_struct_p
+//       keeps apart from the mem/s load, and gives retail's `lq v1`; but purge_addressof then
+//       allocates acc after the weight slot (acc 0x10, slot 0) and the frame grows to 0xA0.
+// w11 levers that closed the rest (from 46.1%): one row and one contact variable for every
+//       loop (retail's a2 and a0 in all four: one pseudo each, as camera.cpp's sibling
+//       func_00145B68 reuses i and j); the normals as Vu0::Vec values (the Gram loop's vf4 and
+//       the vmove that loop.c hoists out of the inner loop: the Vec parameter copy of na); down
+//       a Vu0::Vec; `return -0.1f < acc.z;` (retail's return-0 block after the f690 test); and
+//       one u32 for the dots' bits in both loops: set twice, it is no local-alloc quantity, so
+//       the Dot's block has two (product first: vf1, the 1.0 vf2) instead of three (the small
+//       sort's creation order: the 1.0 first).
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
@@ -29,6 +42,9 @@ void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
 s32 func_0017ECE8(Player* self)
 {
     Vec02 acc;
+    ContactRow03* row;
+    Contact03* c;
+    u32 bits;
     s32 n = 0;
     f32 now = D_0026185C;
     if (now - self->f222C < 1.0f) {
@@ -43,8 +59,8 @@ s32 func_0017ECE8(Player* self)
     }
     Contacts03* ct = self->contacts;
     if (ct != 0) {
-        for (ContactRow03* row = ct->head; row != 0; row = row->next) {
-            for (Contact03* c = row->head; c != 0; c = c->next) {
+        for (row = ct->head; row != 0; row = row->next) {
+            for (c = row->head; c != 0; c = c->next) {
                 n++;
             }
         }
@@ -53,54 +69,52 @@ s32 func_0017ECE8(Player* self)
         return 0;
     }
     PushBackMemoryMark();
-    u128 down = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-1.0f));
+    Vu0::Vec down = Vu0::MulX(Vu0::Vec::Of(g_unitZVector), Vu0::Vec::Scalar(-1.0f));
     f32* gram = (f32*)AllocateBackMemory(n * n * 4);
     f32* rhs = (f32*)AllocateBackMemory(n * 4);
     f32* sol = (f32*)AllocateBackMemory(n * 4);
     f32* p = gram;
-    for (ContactRow03* ra = self->contacts->head; ra != 0; ra = ra->next) {
-        for (Contact03* a = ra->head; a != 0; a = a->next) {
-            u128 na = Vu0::Q(a->v80);
-            if (a->end[0].body != (Collider*)self) {
-                na = Vu0::MulX(na, Vu0::Scalar(-1.0f));
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
             for (ContactRow03* rb = self->contacts->head; rb != 0; rb = rb->next) {
-                u128 ac = na;
                 for (Contact03* b = rb->head; b != 0; b = b->next) {
-                    u128 nb = Vu0::Q(b->v80);
+                    Vu0::Vec nb = Vu0::Vec::Of(b->v80);
                     if (b->end[0].body != (Collider*)self) {
-                        nb = Vu0::MulX(nb, Vu0::Scalar(-1.0f));
+                        nb = Vu0::MulX(nb, Vu0::Vec::Scalar(-1.0f));
                     }
-                    *(u32*)p++ = Vu0::ToBits(Vu0::Dot(ac, nb));
+                    bits = Vu0::ToBits(Vu0::Dot(na, nb).q);
+                    *(u32*)p++ = bits;
                 }
             }
         }
     }
     p = rhs;
-    for (ContactRow03* ra = self->contacts->head; ra != 0; ra = ra->next) {
-        for (Contact03* a = ra->head; a != 0; a = a->next) {
-            u128 na = Vu0::Q(a->v80);
-            if (a->end[0].body != (Collider*)self) {
-                na = Vu0::MulX(na, Vu0::Scalar(-1.0f));
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
-            *(u32*)p++ = Vu0::ToBits(Vu0::Dot(na, down));
+            bits = Vu0::ToBits(Vu0::Dot(na, down).q);
+            *(u32*)p++ = bits;
         }
     }
     SolveActiveSetSystem(n, (u8*)gram, rhs, sol);
-    Vu0::Q(acc) = down;
+    Vu0::Q(acc) = down.q;
     p = sol;
-    for (ContactRow03* ra = self->contacts->head; ra != 0; ra = ra->next) {
-        for (Contact03* a = ra->head; a != 0; a = a->next) {
-            u128 na = Vu0::Q(a->v80);
-            if (a->end[0].body != (Collider*)self) {
-                na = Vu0::MulX(na, Vu0::Scalar(-1.0f));
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
-            Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(acc), na, Vu0::Scalar(*p++));
+            Vu0::Q(acc) = Vu0::MulAddX(Vu0::Vec::Of(acc), na, Vu0::Vec::Scalar(*p++)).q;
         }
     }
     PopBackMemoryMark();
-    if (-0.1f < acc.z) {
-        return 1;
-    }
-    return 0;
+    return -0.1f < acc.z;
 }
