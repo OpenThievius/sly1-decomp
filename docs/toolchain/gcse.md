@@ -541,3 +541,41 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
 - **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
+
+### Eight spilled frame addresses: the table size from their slot order (func_001CC490)
+
+SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) with `-dF -dG -dL
+-dl -dg` dumps (2026-11-10). What each difference came from:
+
+- **The size.** Each weight of the two sums read with `ScalarAt` (its "rV" memory operand) was
+  its own qmtc2; with `ScalarAtValue` the second use of each weight is CSE's copy, one qmtc2 and
+  two slot stores, as retail. And retail's row address (`li s0,96; mtlo; madd`) is loop.c's giv
+  left alone: in the second loop pass the constant 96 moves (80 x 1 x 1 >= the loop's insns)
+  when the inner loop has 80 insns or fewer, and the multiply is then reduced. Naming the mass
+  weight (`Vu0::Vec mass = ...ScalarAtValue(...)`) and the arm's operands keeps it at 81 or more.
+
+- **The table size, solved from the slots.** PRE's reaching registers for the addresses of eight
+  locals (cross, scaled, rows, vel, m, factor, rhs, sol) are all spilled; reload gives them stack
+  slots in pseudo order, which is PRE's bucket order. With `(plus (reg 1) N)` hashing to
+  13258 + 1 + N, the only odd T from 31 to 400 that orders the offsets as retail's slots do
+  (cross, m, scaled, rows, factor, `j << 5`, vel, rhs, sol) is 153: 304 to 307 insns at gcse.
+  Ours had 271 (T = 135). Each named `Vu0::Vec` operand is about two insns there (its movti
+  copies), so retail's operands were named: weight then vector for each term of the two
+  MulXSum3 sums (which also gives retail's chain of slot stores and row loads, the lever of
+  func_001DDE90), the two velocities, the dot product's two rows and the arm's two points.
+- **Order of the PRE insertions.** The entry block's address insns follow each address's first
+  use as a value, and reload's round robin (v0, v1, a2, t3) follows that order: retail's
+  `&scaled, &rows[i][j].a, &cross` (the calls' arguments) means the stores into cross and scaled
+  were `Vu0::Set`, addressed from the frame; `Vu0::Q(cross) =` forms `&cross` as a value
+  first.
+- **The row's base.** `m[j][k]` folds the array's offset into the memory reference, so loop.c
+  forms `sp+384` afresh in the preheader; `f32* row = m[j]; row[k]` keeps the address an
+  expression PRE replaces with its reaching register (retail's `lw t4,544(sp)`). The element is
+  stored with `Vu0::StoreX` (its qmfc2 is a reload, t3, after the loop's registers).
+- **The constant 1 of `i == 1`** in retail is a reload (`li a2,1` between the rotation's v1 and
+  t3), so it was a function-wide pseudo with no register, not a block-local one (local-alloc's
+  v0): a named local set once, `s32 flipped = 1;`. loop.c cannot move the literal: its life and
+  savings are 1 and the loop has 99 insns (the `li s0,96` beside it stays for the same reason).
+- **`addu v0,v1,a2` (base first) for `target[j]`.** g++ turns a subscript of a pointer, or of
+  `*p`, into pointer arithmetic, whose address inside a memory reference has the index first; an
+  array member (`target->v[j]`) stays an ARRAY_REF, base first, as a local array's.

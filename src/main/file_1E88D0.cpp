@@ -354,6 +354,10 @@ s32 FillMemory(Entry90* dst, s32 value, s32 size);
 void EnterAgentState(TempoAgent* self, s32 a, s32 b);
 void MarkLevelDone(s32 n);
 void StartMemoryCardSave(void* p);
+s32 TestFlagTableBit(void* table, s32 index);
+void SetFlagTableBit(void* table, s32 index);
+void RaiseScatterLevelForObject(void* controller, void* node);
+extern u8 g_scatterController[];
 f32 ArctangentOfRatio(f32 a, f32 b);
 void CopyMemory(TempoPlayerEntry* dst, TempoPlayerEntry* src, s32 bytes);
 void RunTimelineEntry(Timeline* self, Entry90* e);
@@ -747,9 +751,106 @@ void StartKeyedConeAgent(KeyedConeAgent* self)
 
 ASM_FUNC(func_001E89F0);
 
-INCLUDE_RODATA(jtbl_0024E610);
-INCLUDE_RODATA(jtbl_0024E650);
-INCLUDE_ASM(func_001E8A50);
+void func_001E8A50(KeyedConeAgent* self, s32 a, s32 b)
+{
+    s32 key;
+    s32 slot;
+
+    switch (self->f724) {
+    case 1:
+        if (self->fC54 != 0) {
+            SetStateWalkerTarget(self->fC54, self->fC58);
+            void* near = ((TargetObjectFn*)self->desc)[102](self);
+            if (near != 0) {
+                key = FindNearestAgentKey(self, (u8*)near + 0x140);
+            } else {
+                key = 0;
+            }
+            for (u32 i = 0; i < 6; i++) {
+                PlacedObject* root = self->fC64[i];
+                s32 pick;
+                switch (self->fC58) {
+                case 0x2D7:
+                case 0x2D8:
+                case 0x2DA:
+                    pick = 0x2DE;
+                    break;
+                case 0x2D9:
+                case 0x2DB:
+                case 0x2DC:
+                case 0x2DD:
+                    pick = 0x2DF;
+                    if ((s32)root == key) {
+                        pick = 0x2DE;
+                    }
+                    break;
+                }
+                void* h = FindObjectHandle((s32)root, -1);
+                if (h != 0) {
+                    SetStateWalkerTarget(h, pick);
+                }
+            }
+        }
+        if (self->fC58 != 0x2DA) {
+            u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(self->v190));
+            if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d))) < 300.0f) {
+                self->fC5C = 8;
+            } else {
+                self->fC5C = 5;
+            }
+        } else {
+            self->fC5C = 5;
+        }
+        self->fC7C = 0;
+        break;
+    case 16:
+        switch (self->fC58) {
+        case 0x2D8:
+            self->fC58 = 0x2D9;
+            slot = 0;
+            break;
+        case 0x2D9:
+            self->fC58 = 0x2DA;
+            slot = 1;
+            break;
+        case 0x2DA:
+            self->fC58 = 0x2DB;
+            slot = 2;
+            break;
+        case 0x2DB:
+            self->fC58 = 0x2DC;
+            slot = 3;
+            break;
+        }
+        if (TestFlagTableBit(g_flagTable, (s32)self->fC80[slot]) == 0) {
+            RaiseScatterLevelForObject(g_scatterController, 0);
+        }
+        SetFlagTableBit(g_flagTable, (s32)self->fC80[slot]);
+        self->fC90 = 3 - slot;
+        DecrementGaugeCount(&g_gaugeBarElement);
+        break;
+    case 11:
+        if (self->fC54 != 0) {
+            SetStateWalkerTarget(self->fC54, 0x2DD);
+        }
+        for (u32 i = 0; i < 6; i++) {
+            void* h = FindObjectHandle((s32)self->fC64[i], -1);
+            if (h != 0) {
+                SetStateWalkerTarget(h, 0x2DE);
+            }
+        }
+        self->fC90 = 0;
+        DecrementGaugeCount(&g_gaugeBarElement);
+        MarkLevelDone(1);
+        StartMemoryCardSave(&g_memoryCard);
+        break;
+    case 10:
+    case 14:
+        self->fC5C = 0;
+        break;
+    }
+    EnterAgentState((TempoAgent*)self, a, b);
+}
 
 s32 ChooseKeyedConeAgentState(KeyedConeAgent* self)
 {

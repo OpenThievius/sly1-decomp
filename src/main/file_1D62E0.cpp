@@ -869,7 +869,52 @@ s32 TestStandInMayContact(StandIn* self, s32 value)
     return TestCollidersMayContact(self, value);
 }
 
-INCLUDE_ASM(func_001D6DD8);
+Quadword ScaleQuadword(Quadword a, Quadword b);
+void StepCollider(StandIn* self, f32 t);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void SteerColliderTowardRotation(StandIn* self, Mat02* rot, Vec02* a, Vec02* b, Vec02* c, f32 t);
+void SteerColliderTowardPosition(StandIn* self, s32 a, s32 b, Vec02* pos, Vec02* c, f32 t);
+extern Quad16 D_00275C40;
+
+// k times the vector at p, into dst (the quadword helpers' product).
+static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
+{
+    Quadword t;
+    StoreFloatAsQuadword(&t, k);
+    Quadword tv = t;
+    Quadword u;
+    CopyQuadword(&u, p);
+    StoreQuadword(dst, ScaleQuadword(tv, u));
+}
+
+void func_001D6DD8(StandIn* self, f32 t)
+{
+    Mat02 upright;
+    Vec02 push;
+    Vec02 spin;
+    Vec02 q50;
+    Vec02 q60;
+    StepCollider(self, t);
+    f32 since = g_gameClock[1] - self->f690;
+    f32 age = g_unitRange.Limit(D_002751C0[0] + since * (D_002751C0[1] + since * D_002751C0[2]));
+    RotateMatrixUpright(&self->rot, 0, &upright);
+    StoreScaledQuadword(&q50, age, (u8*)D_00275190);
+    StoreScaledQuadword(&q60, age, (u8*)D_002751A0);
+    if (self->f694 != 0) {
+        Vu0::Q(spin) = Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::ScalarAt(D_00275188));
+    } else {
+        spin = D_00248D30;
+        q50 = *(Vec02*)&D_00275C40;
+    }
+    SteerColliderTowardRotation(self, &upright, &q50, &spin, &q60, t);
+    if (self->f694 != 0) {
+        Vu0::Q(push) = Vu0::MulX(Vu0::Q(self->rot.r[0]), Vu0::ScalarAt(D_0027518C));
+    } else {
+        push = D_00248D30;
+    }
+    StoreScaledQuadword(&q60, age, (u8*)D_002751B0);
+    SteerColliderTowardPosition(self, 0, 0, &push, &q60, t);
+}
 
 void StopStandIn(StandIn* self)
 {
@@ -1516,7 +1561,44 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
                          ((ValueRange*)D_002755D0)->Clamp(((QuadraticCurve*)D_002755C0)->Eval(slide)));
 }
 
-INCLUDE_ASM(func_001D9AC8);
+void ChangeAgentState(void* node, s32 kind, s32 flag);
+
+void func_001D9AC8(PathFollower* self)
+{
+    Vec02 pos;
+    Vec02 spin;
+    if (self->contacts == 0) {
+        return;
+    }
+    for (Contact03* c = self->contacts; c != 0; c = c->next) {
+        s32 side = c->end[0].body == (Collider*)self;
+        Collider* other = c->end[side].body;
+        s32 i;
+        for (i = 0; i < self->pushedCount; i++) {
+            if (other == self->pushed[i]) {
+                break;
+            }
+        }
+        if (i < self->pushedCount) {
+            continue;
+        }
+        TransformDirectionBetweenFrames(self, 0, (Vec02*)D_00275600, &pos);
+        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(self->v150), Vu0::ScalarAtCall(D_00275610));
+        Vu0::Set(spin, Vu0::MulX(Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(pos)), Vu0::ScalarAtCall(D_00275614)));
+        other->desc02()->m20(other, &pos);
+        other->desc02()->m21(other, &spin);
+        if ((u32)self->pushedCount < 8) {
+            self->pushed[self->pushedCount++] = other;
+        }
+        if (IsObjectOfKind(other, 0x19)) {
+            ((PathFollower*)other)->f86C = g_gameClock[1];
+        } else if (IsObjectOfKind(other, 8)) {
+            ChangeAgentState(other, 0x10, 0);
+        }
+    }
+    FreePooledContactChain(self->world, self->contacts);
+    self->contacts = 0;
+}
 
 void UpdatePathFollower(PathFollower* self, f32 t)
 {
@@ -1699,7 +1781,79 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
 
 void ReleasePathFollowerContacts(PathFollower* self) { self->f6A0++; }
 
-INCLUDE_ASM(func_001DA320);
+s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
+void ComputeObjectMotionInFrame(void* obj, void* a, void* b, void* c, s32 d, s32 e, s32 f);
+void StartChildGroupDelay(void* obj, f32 t);
+s32 IsObjectAccepted(void* obj, void* by);
+void SetColliderTurnAnchorPreset(void* obj, s32 n);
+void SetColliderMoveAnchorPreset(void* obj, s32 n);
+void AddMeshContacts(Collider* a, f32 f, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
+void func_00186BA8(void* a, Collider* b, void* c, void* d, void* e, void* f);
+
+// Whether a lies below b along axis (their dot products with it).
+static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis)
+{
+    return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(a), Vu0::Q(axis))) < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(b), Vu0::Q(axis)));
+}
+
+void func_001DA320(PathFollower* self, Collider* other, void* a2, void* a3, void* a4)
+{
+    if ((other->flags538 & ((u64)0x8000 << 40)) != 0 || (((u32*)other->desc)[2] & 0x10) != 0) {
+        for (u32 i = 0; i < 4; i++) {
+            Slot19* slot = &self->f6B0[i];
+            s32 first = (s32)i < 2;
+            Vec02 p;
+            Vec02 q;
+            Vec02 k;
+            ColliderSpan hit;
+            p = *(Vec02*)((u8*)slot->obj8 + 0x40);
+            p.z = p.z - (first ? self->f610 : self->f614);
+            TransformPointBetweenFrames(self, 0, &p, &p);
+            q = slot->obj->v190;
+            q.z = q.z - (first ? self->f610 : self->f614);
+            TransformPointBetweenFrames(self, 0, &q, &q);
+            u128* pp = &Vu0::Q(p);
+            u128 base = *pp;
+            f32 r = first ? self->f610 : self->f614;
+            u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(q));
+            Vu0::Q(k) = Vu0::FromFloat(r);
+            *pp = Vu0::MulAddX(base, Vu0::DivX(d, Vu0::Sqrt(Vu0::Dot(d, d))), Vu0::Q(k));
+            if (CollectColliderSpansInTree(other, a4, &p, &q, 1, &hit) > 0 && hit.time[0] > 0.0f) {
+                if (slot->f0C != self->f6A0 + 1 || IsLowerAlong(slot->v20, *(Vec02*)&hit.q[0], self->rot.r[2])) {
+                    slot->f0C = self->f6A0 + 1;
+                    slot->v20 = *(Vec02*)&hit.q[0];
+                    slot->v30 = *(Vec02*)&hit.q[2];
+                    ComputeObjectMotionInFrame(other, 0, &slot->v20, &slot->v40, 0, 0, 0);
+                }
+                if (other->id != 1) {
+                    if ((other->desc->flags & 0x20) != 0) {
+                        if (*(s32*)((u8*)other + 0x550) == 0) {
+                            StartChildGroupDelay(other, 0.0f);
+                        }
+                    } else if (IsObjectOfKind(other, 0x25) != 0 && *(s32*)((u8*)other + 0x678) == 0 && IsObjectAccepted(other, self) != 0) {
+                        if (*(s32*)((u8*)other + 0x6C4) != -1) {
+                            SetColliderTurnAnchorPreset(other, *(s32*)((u8*)other + 0x6C4));
+                        }
+                        if (*(s32*)((u8*)other + 0x6C8) != -1) {
+                            SetColliderMoveAnchorPreset(other, *(s32*)((u8*)other + 0x6C8));
+                        }
+                        f32 m = other->mass;
+                        *(s32*)((u8*)other + 0x678) = 1;
+                        *(void**)((u8*)other + 0x6CC) = self;
+                        other->mass = m * *(f32*)((u8*)other + 0x6C0);
+                    }
+                }
+            }
+        }
+    } else if (self->fB4C != 0 && IsObjectAttached((Collider*)self->fB4C) != 0) {
+        if ((other->flags538 & ((u64)0x8000 << 25)) != 0) {
+            Collider* c = (Collider*)self->fB4C;
+            AddMeshContacts(other, other->radius3CC, (u8*)other + 0x140, c, c->tree.count, (s32)c->tree.nodes, 0, (u8*)self + 0xB74);
+        } else if (a3 != 0) {
+            func_00186BA8((Collider*)self->fB4C, other, a2, a3, a4, (u8*)self + 0xB74);
+        }
+    }
+}
 
 ASM_FUNC(func_001DA6E0);
 

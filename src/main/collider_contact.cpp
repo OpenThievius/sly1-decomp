@@ -164,7 +164,42 @@ s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s
     return (s32)c;
 }
 
-INCLUDE_ASM(func_00185F48);
+// Carries each contact's end points into the world: an end on a part takes the part's frame
+// (TransformPointBetweenFrames), except for the kinds whose end lies on the part's sphere, where
+// the point is the part's centre moved by its radius against the contact's normal (kinds 4 to 6
+// at end 0, kinds 7 and 9 at end 1).
+void func_00185F48(void* unused, s32 n, Contact03** list)
+{
+    for (s32 i = 0; i < n; i++) {
+        Contact03* c = list[i];
+        for (s32 e = 0; e < 2; e++) {
+            ContactEnd03* end = &c->end[e];
+            Collider* part = end->part;
+            if (part == 0) {
+                continue;
+            }
+            if (e == 0) {
+                switch (c->kind) {
+                case 4:
+                case 5:
+                case 6: {
+                    u128 centre = Vu0::Q(part->v140);
+                    Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->v80), Vu0::Scalar(-part->radius3CC));
+                    break;
+                }
+                default:
+                    TransformPointBetweenFrames(end->part, 0, &end->v20, &end->v10);
+                    break;
+                }
+            } else if (c->kind == 7 || c->kind == 9) {
+                u128 centre = Vu0::Q(part->v140);
+                Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->v80), Vu0::Scalar(-part->radius3CC));
+            } else {
+                TransformPointBetweenFrames(part, 0, &end->v20, &end->v10);
+            }
+        }
+    }
+}
 
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
@@ -671,7 +706,7 @@ struct MeshHitEntry { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
 s32 CollectMeshHits(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, MeshHitEntry* a6);
 s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
-void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
+void AddMeshContacts(void* a0, f32 radius, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
     MeshHitEntry ents[64];
     s32 n = CollectMeshHits(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);

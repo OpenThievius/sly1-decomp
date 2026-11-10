@@ -7,6 +7,16 @@
 //       and both constants last, and the flag at 0(sp). About 30 compiles (a for loop whose
 //       increment the continues share, the flags tested through a temporary, the select as a
 //       ternary).
+// GCSE (2026-11-10, -dG dump): ours is 12 bytes short because PRE treats p->flags538 as one
+//       expression from the f load at the top of the body (insns 130 and 349 redundant, a copy
+//       added at the end of bb 1, loads inserted after each swept call), so the sweep's tests and
+//       the |= reuse it. Retail reloads p->flags538 at the sweep test, before the |= and at the
+//       second sweep's bit-40 test, yet reuses other->flags538 (g, loaded before the bit-47/56
+//       test) at the first sweep's bit-40 test: to GCSE, memory was set between the f load and the
+//       g load in the original (mem_set_in_block: a store or a call in the bit-43, bit-40 or
+//       tree-nodes blocks), or the sweep reads p's word through another expression. Diagnostic
+//       only: -fno-gcse gives retail's loads everywhere but that one reuse (816 bytes, the 4-byte
+//       slot at 0(sp) retail leaves free for the sweep flag's 4(sp) still missing).
 #include "common.h"
 #include "collider.h"
 #include "placed_object.h"

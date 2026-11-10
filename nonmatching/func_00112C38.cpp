@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1560/1544, checked 2026-11-09
+// SIZE 1560/1544, checked 2026-11-10
+// EXACT FORM, NOT LANDED (2026-11-10, maintainer's rule): wave 11 matched this function byte for byte (branch w11-112C38, commit 4ddf80ff) with DivideScriptValues' ScaledMatrix/ScriptMatrixPayload forms (landed) plus one more helper, Vu0::ScalarInGprAt (an asm `lw` of a float in memory straight into a u128 GPR, the memory twin of ScalarInGpr), used only for the matrix-times-float arm. AGENTS.md allows an asm helper only for a sequence that recurs across retail's functions; it has one site, so it was not landed. A second retail use of that lw-into-128-bit-GPR pattern would justify it.
 // NEAR: MultiplyScriptValues, written as DivideScriptValues (nonmatching/func_00113240.cpp) is:
 // the first switch sets the tag in each case, a number times a vector, matrix, vector B or pair
 // makes that kind (the matrix through ScaleMatrix with Vu0::ScalarInGpr, the vector B through

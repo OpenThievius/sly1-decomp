@@ -494,16 +494,196 @@ ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
     DestroyScriptValue(&t, 2);
     return ret;
 }
+
+// The payloads of the vector and matrix tags (func_001159B8 reads them too): a 16-byte vector
+// (tags 0x16, 0x18) and the four rows of the 0x40-byte block (tag 0x17), 16-aligned (a row is
+// copied with lq/sq). A matrix is copy-constructed with CopyBytes (the scaled matrix
+// ScaledMatrix returns: CopyBytes(&c, &r, 0x40) in MultiplyScriptValues and
+// DivideScriptValues); it is assigned member by member (lq/sq).
+struct __attribute__((aligned(16))) ScriptVectorRow {
+    f32 v[4];               // 0x00
+};
+// Declared void here: retail's calls leave v0 free for the copy that follows (a value the call
+// set would end in v0, and the next lq would take v1).
+void CopyBytes(void* dst, void* src, s32 n);
+struct ScriptMatrixPayload {
+    ScriptVectorRow row[4];      // 0x00
+    ScriptMatrixPayload() {}
+    ScriptMatrixPayload(const ScriptMatrixPayload& o) { CopyBytes(this, (void*)&o, sizeof(*this)); }
+};
+// The two floats of tag 0x19, copied as one 8-byte value.
+struct ScriptFloatPair {
+    f32 v[2];
+};
+Quad_118D20 ScaleQuadword(Quad_118D20 s, Quad_118D20 v);
+void ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
+// A matrix scaled by a weight in a GPR (Vu0::ScalarInGpr), returned by value: ScaleMatrix into
+// the inline's own matrix, which the return copies into the caller's with CopyBytes. Inlined, the
+// call's arguments go straight into a0-a2, so retail forms the matrix's address afresh for
+// ScaleMatrix and again for CopyBytes (addiu a0, sp, 0x60; addiu a1, sp, 0x60).
+static inline ScriptMatrixPayload ScaledMatrix(const ScriptMatrixPayload* m, u128 s)
+{
+    ScriptMatrixPayload r;
+    ScaleMatrix(&r, m, s);
+    return r;
+}
+Quad_118D20* StoreFloatAsQuadword(Quad_118D20* out, f32 f);
+void TransformByMatrixWithW(const ScriptMatrixPayload* m, const void* v, void* out, f32 w);
+ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
+void FreeMatrixPayload(void* p);
+
 INCLUDE_RODATA(jtbl_00248FE0);
 INCLUDE_RODATA(jtbl_00249000);
 INCLUDE_RODATA(jtbl_00249020);
 INCLUDE_RODATA(jtbl_00249040);
 INCLUDE_ASM(func_00112C38);
 
-INCLUDE_RODATA(jtbl_00249060);
-INCLUDE_RODATA(jtbl_00249080);
-INCLUDE_RODATA(jtbl_002490A0);
-INCLUDE_ASM(func_00113240);
+ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue q;
+    InitScriptValue(&q);
+    f32 n = 0.0f;
+    s32 tag = args[0].tag;
+    ScriptVectorRow* va = 0;
+    ScriptVectorRow* vb = 0;
+    s32 isInt = 0;
+    ScriptFloatPair* pair = 0;
+    ScriptMatrixPayload* m = 0;
+    switch (tag) {
+    case 0x15:
+        n = args[0].f;
+        isInt = 0;
+        break;
+    case 0x14:
+        tag = 0x15;
+        n = (f32)args[0].i;
+        isInt = 1;
+        break;
+    case 0x16:
+        va = (ScriptVectorRow*)AcquireVectorAPayload();
+        *va = *(ScriptVectorRow*)args[0].v;
+        break;
+    case 0x17:
+        m = (ScriptMatrixPayload*)AcquireMatrixPayload();
+        *m = *(ScriptMatrixPayload*)args[0].v;
+        break;
+    case 0x18:
+        vb = (ScriptVectorRow*)AcquireVectorBPayload();
+        *vb = *(ScriptVectorRow*)args[0].v;
+        break;
+    case 0x19:
+        pair = (ScriptFloatPair*)AcquirePairPayload();
+        *pair = *(ScriptFloatPair*)args[0].v;
+        break;
+    }
+    R11B008Node* x = 0;
+    if (args[1].tag != 0) {
+        x = args[1].node;
+    }
+    for (; x != 0; x = x->next) {
+        switch (tag) {
+        case 0x15:
+            switch (x->tag) {
+            case 0x15:
+                isInt = 0;
+                n /= x->f;
+                break;
+            case 0x14:
+                n /= (f32)x->i;
+                break;
+            }
+            break;
+        case 0x16:
+            switch (x->tag) {
+            case 0x14: {
+                Vu0::Q(*va) = Vu0::MulX(Vu0::Q(*va), Vu0::Scalar(1.0f / (f32)x->i));
+                break;
+            }
+            case 0x15: {
+                Vu0::Q(*va) = Vu0::MulX(Vu0::Q(*va), Vu0::Scalar(1.0f / x->f));
+                break;
+            }
+            }
+            break;
+        case 0x17:
+            switch (x->tag) {
+            case 0x14: {
+                ScriptMatrixPayload c = ScaledMatrix(m, Vu0::ScalarInGpr(1.0f / (f32)x->i));
+                *m = c;
+                break;
+            }
+            case 0x15: {
+                ScriptMatrixPayload c = ScaledMatrix(m, Vu0::ScalarInGpr(1.0f / x->f));
+                *m = c;
+                break;
+            }
+            }
+            break;
+        case 0x18:
+            switch (x->tag) {
+            case 0x14: {
+                Quad_118D20 t;
+                StoreFloatAsQuadword(&t, 1.0f / (f32)x->i);
+                Quad_118D20 tv = t;
+                Quad_118D10 u;
+                CopyQuadword(&u, vb);
+                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                break;
+            }
+            case 0x15: {
+                Quad_118D20 t;
+                StoreFloatAsQuadword(&t, 1.0f / x->f);
+                Quad_118D20 tv = t;
+                Quad_118D10 u;
+                CopyQuadword(&u, vb);
+                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                break;
+            }
+            }
+            break;
+        case 0x19:
+            switch (x->tag) {
+            case 0x14: {
+                f32 r = 1.0f / (f32)x->i;
+                pair->v[0] *= r;
+                pair->v[1] *= r;
+                break;
+            }
+            case 0x15: {
+                f32 r = 1.0f / x->f;
+                pair->v[0] *= r;
+                pair->v[1] *= r;
+                break;
+            }
+            }
+            break;
+        }
+    }
+    switch (tag) {
+    case 0x15:
+        if (isInt) {
+            SetScriptValueInt(&q, (s32)n);
+        } else {
+            SetScriptValueFloat(&q, n);
+        }
+        break;
+    case 0x16:
+        SetScriptValueVectorA(&q, (f32*)va);
+        break;
+    case 0x17:
+        SetScriptValueMatrix(&q, (f32*)m);
+        break;
+    case 0x18:
+        SetScriptValueVectorB(&q, (f32*)vb);
+        break;
+    case 0x19:
+        SetScriptValuePair(&q, (f32*)pair);
+        break;
+    }
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
+    return ret;
+}
 
 ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -1499,15 +1679,6 @@ ScriptValue* MakeScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* arg
     DestroyScriptValue(&t, 2);
     return ret;
 }
-
-// The payloads func_001159B8 reads: a 16-byte vector (tags 0x16, 0x18) and the four rows of the
-// 0x40-byte block (tag 0x17), 16-aligned (a row is copied with lq/sq).
-struct __attribute__((aligned(16))) ScriptVectorRow {
-    f32 v[4];               // 0x00
-};
-struct ScriptMatrixPayload {
-    ScriptVectorRow row[4];      // 0x00
-};
 
 ScriptValue* GetScriptVectorElement(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

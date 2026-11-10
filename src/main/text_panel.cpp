@@ -1410,8 +1410,209 @@ f32 GetTextPanelSlideOutTime(T217D_440* s) {
     }
 }
 
-INCLUDE_RODATA(D_00249D58);
-INCLUDE_ASM(func_001366A0);
+extern PacketWriter g_gsPacketWriter;
+s32 AreMenusClosed(void);
+void DrawCompassStrip(T217D_440* self, PacketWriter* gs);
+void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs);
+void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
+void SeekTextReader(void* reader, s32 n);
+void AppendString(char* dst, const char* src);
+void DrawAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
+
+// A byte from a toward b by t, as the panel fades its alpha (the difference taken as an integer).
+struct ByteLerp {
+    static u8 Of(u8 a, u8 b, f32 t)
+    {
+        if (a == b) {
+            return b;
+        }
+        if (a < b) {
+            return a + (s32)(t * ((f32)(b - a) + 0.999f));
+        }
+        return b + (s32)((1.0f - t) * (0.999f - (f32)(b - a)));
+    }
+};
+
+struct StyleDrawer {
+    static void Draw(Font** h, Layout_137228* out, void* tbl)
+    {
+        if (*h != 0) {
+            const FontVt* vt = (*h)->vt;
+            vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
+        }
+    }
+};
+
+// A layout placed and sized, in a colour, its other words cleared.
+struct PanelLayout {
+    static s32* Words(Quad4& q)
+    {
+        return q.w;
+    }
+
+    static Layout_137228* Set(Layout_137228* l, f32 x, f32 y, f32 w, f32 h, s32 color)
+    {
+        Quad4 col;
+        l->Pos(x, y);
+        l->Size(w, h);
+        col.w[0] = color;
+        l->Color(Words(col));
+        l->SetF14(0);
+        l->SetF18(0);
+        return l;
+    }
+};
+
+// Draws the panel: its frames by state, then its box, the text typed so far (a cursor blinking
+// at its end) scrolled to the line being typed, and the pulsing button glyph.
+void DrawTextPanel(T217D_440* self)
+{
+    if (AreMenusClosed() == 0) {
+        return;
+    }
+    switch (self->state) {
+    case 1:
+    case 2:
+        DrawTextPanelCenterFrame(self, &g_gsPacketWriter);
+        AddDmaRefTag(&g_gsPacketWriter, self->bands, self->bandsSize);
+        DrawCompassStrip(self, &g_gsPacketWriter);
+        DrawTextPanelControlLabels(self, &g_gsPacketWriter);
+        DrawTextPanelBorders(self, &g_gsPacketWriter);
+        DrawTextPanelBlocks(self, &g_gsPacketWriter);
+        break;
+    case 4:
+        break;
+    case 5:
+        DrawTextPanelCenterFrame(self, &g_gsPacketWriter);
+        break;
+    }
+    f32 scale = 1.0f;
+    if (self->state == 4) {
+        scale = 0.8f;
+    }
+    if (self->state == 3 && self->text[0] == 0) {
+        return;
+    }
+    PushFontScale(self->font, scale, scale);
+    Rgba4 color = *(Rgba4*)&self->highlight;
+    Rgba4 frameColor;
+    if (self->frame != 0) {
+        frameColor = *(Rgba4*)&((PanelStyle*)self->frame)->f18;
+    } else {
+        *(u32*)&frameColor = 0;
+    }
+    f32 offY = 0.0f;
+    f32 offX = offY;
+    f32 line = (f32)self->font->height * self->font->sy;
+    f32 width = 280.0f;
+    f32 height = line * 3.0f;
+    switch (self->state) {
+    case 3:
+        offY = -8.0f;
+        break;
+    case 4:
+        height = line + line;
+        width = 380.0f;
+        offX = -50.0f;
+        offY = 40.0f;
+        break;
+    }
+    s32 grey = 0xFF808080;
+    Layout_137228 box;
+    PanelLayout::Set(&box, offX + 180.0f, offY + 386.800018f, width, height, grey);
+    f32 fade = 1.0f;
+    if (D_002708E0.target != 0) {
+        fade = D_002708E0.blend <? fade;
+    }
+    if (D_00271558.target != 0) {
+        fade = D_00271558.blend <? fade;
+    }
+    if (fade < 1.0f) {
+        u8 a = ByteLerp::Of(0, color.a, fade);
+        Rgba4 t = color;
+        t.a = a;
+        color = t;
+        a = ByteLerp::Of(0, frameColor.a, fade);
+        Rgba4 u = frameColor;
+        u.a = a;
+        frameColor = u;
+    }
+    if (self->state == 3 && self->frame != 0) {
+        PanelStyle* style = (PanelStyle*)self->frame;
+        Rgba4 saved = *(Rgba4*)&style->f18;
+        *(Rgba4*)&style->f18 = frameColor;
+        StyleDrawer::Draw(self->frame, &box, &g_gsPacketWriter);
+        *(Rgba4*)&((PanelStyle*)self->frame)->f18 = saved;
+    }
+    if (self->text[0] != 0) {
+        TextScratch all;
+        InitTextReader(&all, self->text, self->font);
+        s32 total = CountTextChars(&all);
+        s32 shown = (s32)((g_gameClock[1] - self->textSince) * self->charsPerSecond);
+        if (!(shown < total)) {
+            shown = total;
+        }
+        s32 row;
+        for (row = 0; row < self->lineCount; row++) {
+            if (shown < self->lineBreaks[row]) {
+                break;
+            }
+        }
+        f32 scroll;
+        if (row > 0 && row < self->lineCount) {
+            f32 start = (f32)self->lineBreaks[row - 1] / self->charsPerSecond;
+            f32 end = (f32)self->lineBreaks[row] / self->charsPerSecond;
+            scroll = ((g_gameClock[1] - self->textSince) - start) / (end - start);
+        } else {
+            scroll = 0.0f;
+        }
+        char text[0x200];
+        CopyString(text, self->text);
+        row++;
+        TextScratch typed;
+        InitTextReader(&typed, text, self->font);
+        SeekTextReader(&typed, shown);
+        s32 cursor;
+        if (shown < total) {
+            cursor = 1;
+        } else {
+            cursor = (s32)(g_gameClock[1] * 4.0f) & 1;
+        }
+        if (cursor != 0) {
+            AppendString(text, "&.~ffffff|");
+        }
+        f32 y = ((f32)row + scroll) * ((f32)self->font->height * self->font->sy);
+        Layout_137228 lines;
+        f32 noScroll = 0.0f;
+        PanelLayout::Set(&lines, offX + 180.0f, (offY + 386.800018f) - (noScroll >? (y - height)), width, y,
+                         *(s32*)&color);
+        DrawAlignedText(&typed, &lines, &box, &g_gsPacketWriter);
+    }
+    PopFontScale(self->font);
+    if (self->f2F8 != 0) {
+        char glyph[2] = { self->f2F8, 0 };
+        f32 s = Cosine(WrapAngle(g_gameTime * 10.0f)) * 0.5f + 0.5f;
+        f32 size = (1.0f - s) * 0.3f + s * 0.4f;
+        Font* font = GetFontById(1);
+        f32 x;
+        f32 y;
+        if (self->state == 4) {
+            x = 532.0f;
+            y = 472.800018f;
+        } else {
+            x = offX + 482.0f;
+            y = offY + 472.800018f;
+        }
+        PushFontScale(font, size, size);
+        s32 glyphColor = 0xFF808080;
+        Layout_137228 at;
+        Layout_137228* l = PanelLayout::Set(&at, x, y, 0.0f, 0.0f, glyphColor);
+        l->f14 = 1;
+        l->f18 = (void*)1;
+        DrawFontString(font, glyph, l, 0, &g_gsPacketWriter);
+        PopFontScale(font);
+    }
+}
 
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
 {

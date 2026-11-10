@@ -240,6 +240,8 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **GCSE's table has (n+3)/2|1 buckets** from the insn count; PRE's pseudos follow bucket order, which sets
   spill slots and callee-saved registers. Read T from the -dG dump's second "hash table (N buckets" line and
   tune the count with Vec/u128 forms or extra statements (func_001841D0, PAL func_0016AB38, func_00211618).
+- **A loop test reading a point through `Q`** leaves a pseudo for its address that CSE reuses for the body's
+  `&c` and PRE hoists into a saved register; `Vu0::Vec::Of` in the test avoids it (func_001C8590).
 - **A store in each arm** avoids a pointer copy and keeps a value read after the join; cross-jumping merges the
   stores after reload (func_00126CB8, func_001D8E40).
 - **A set written in the target's arm** lets reorg copy it into the delay slot (func_001CD870). jump.c hoists
@@ -259,6 +261,10 @@ explains it; search the section's title or the function. Walls that stay open ar
   register-relative stores (func_001A7800 "A stack record filled by an inline").
 - **An inline layout helper's frame-address parameters** give a fresh `addiu` at each call and the buffer from a
   spill slot (PAL func_001316E8 "Integration: an inline function's parameters and results"; func_00134B48).
+- **A non-immediate constant argument** (a colour literal) makes try_constants keep the inline frame's base
+  pseudo, which CSE then keeps in a saved register; pass a variable (func_001366A0 "One layout helper for three
+  layouts"). A pointer argument to an inline (`StyleDrawer::Draw(.., &g_gsPacketWriter)`) has its %hi live
+  across the code before the call, which changes reload's spill registers (same section).
 - **An inline's whole frame** is one BLKmode temporary per call; locals declared in an inner block free their
   slots at its end (func_00125138, func_001E4888); a Scalar's copy reuses an inner block's slot of its mode
   (func_00158480 "A block's local slot taken by a Scalar's copy").
