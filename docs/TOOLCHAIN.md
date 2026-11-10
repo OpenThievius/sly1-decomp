@@ -615,6 +615,35 @@ retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u12
 (MoveToVf takes it, ToFloatMoved reads it). Neither function matches yet (nonmatching/): the
 bodies are retail's apart from register allocation.
 
+### func_00185150's vi block was one non-volatile asm (2026-11-10)
+
+Two of func_00185150's last differences come from the volatility of its four one-instruction
+helpers (ctc2.i $vi3, ctc2.ni $vi4, cfc2.ni $vi2, vnop), and both point to one asm statement with
+an output, which GCC does not make volatile (stmt.c makes an asm volatile only when it is declared
+so or has no outputs):
+
+- **sched1's dependents.** A volatile asm is a full barrier (haifa-sched.c, ASM_OPERANDS with
+  MEM_VOLATILE_P), so the three field loads retail has before ctc2.i must be read before it. With
+  separate asms the count's load has three forward dependents (its own ctc2.ni through flow's
+  LOG_LINK, the ctc2.i barrier, the block's jump) against two for fE's and kind's, and
+  rank_for_schedule, after equal priority and weight, prefers more dependents: count comes first
+  in every source order (tools/permute.py tried all six). Only an asm that consumes fE and count
+  together ties them, and INSN_LUID then gives retail's fE, count, kind.
+- **reorg's redundant insn.** resource_conflicts_p counts any insn with `volatil` set as a
+  conflict, so redundant_insn never looks back across a volatile asm. The join's `t7 = i + 1`
+  (PRE's copy at the switch's end) is then not redundant with the identical insn in the earlier
+  bnez's delay slot: the default arm's `b` takes a copy, and fill_eager_delay_slots lets the case-0
+  `beqz` steal it (steal_delay_list_from_fallthrough). Retail's two empty slots need no volatile
+  insn between that bnez and the b.
+
+With `__asm__("ctc2.i %1,$vi3; ctc2.ni %2,$vi4; cfc2.ni %0,$vi2; vnop" : "=r"(mask) : "r"(fE),
+"r"(count))` and a plain `switch (grp->kind)` (the kind's load is then free to move up), both match
+(build/swarm/w11-185150/h4.cpp, scratch only). What is left is a global-alloc tie: three fewer loop
+insns than the separate asms move the light table's address (3 refs over a 134-insn life, doubled by
+its REG_EQUAL constant) ahead of the out-count pointer (2 refs over 90). A four-instruction asm used
+by one function is not a project helper (AGENTS.md), so the near miss keeps the separate helpers
+until that is decided.
+
 ## The MMI and system helpers
 
 The 37 `inline` functions whose special instructions are MMI or system ones, not VU0
