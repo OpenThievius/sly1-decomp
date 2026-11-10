@@ -79,7 +79,7 @@ void SetCameraFarDistance(void* self);
 
 void PlaceCameraLookingAt(void* self, void* a, void* b);
 void SetCameraControllerValue(CameraController* p, s32 zero);
-void PushCameraController(void* self, s32 a1, void* a2, s32 a3, s32 a4);
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, s32 arg);
 
 
 
@@ -1128,7 +1128,54 @@ store:
 
 LINKER_REMNANT(func_00145080);
 
-INCLUDE_ASM(func_00145088);
+void* MoveMemory(void* dst, void* src, s32 bytes);
+
+// Moves the entries from the given one on up by one, to open a slot for a new entry.
+// Its parameter copies give retail its (i * 16 + self) base shared by both pointers
+// (as RemoveFromSmallList's helper in file_1E88D0.cpp).
+struct MoveEntriesUp {
+    static void Of(CameraControllerEntry* dst, CameraControllerEntry* src, s32 n)
+    {
+        MoveMemory(dst, src, n);
+    }
+};
+
+// Inserts a controller into the stack, which is kept in descending key order, after the
+// entries whose key is at least its own. It calls the new controller's slot 2; when the
+// new one becomes the first, the displaced one's slot 1 and then its own slot 0.
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, s32 arg)
+{
+    s32 i;
+    for (i = 0; i < self->stackCount; i++) {
+        if ((self->stack + i)->key < key) {
+            break;
+        }
+    }
+    MoveEntriesUp::Of(&self->stack[i + 1], &self->stack[i], (self->stackCount - i) * sizeof(CameraControllerEntry));
+    self->stack[i].key = key;
+    self->stack[i].ctl = ctl;
+    self->stack[i].target = target;
+    self->stack[i].arg = arg;
+    self->stackCount++;
+    CameraControllerFn fn = ctl->vt->m02;
+    if (fn != 0) {
+        fn(ctl, arg);
+    }
+    if (i == 0) {
+        if (self->stackCount >= 2) {
+            CameraController* o = self->stack[1].ctl;
+            CameraControllerFn fn1 = o->vt->m01;
+            if (fn1 != 0) {
+                fn1(o, self->stack[1].arg);
+            }
+        }
+        self->f364 = g_gameTime;
+        CameraControllerFn fn0 = ctl->vt->m00;
+        if (fn0 != 0) {
+            fn0(ctl, arg);
+        }
+    }
+}
 
 void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3)
 {

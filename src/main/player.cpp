@@ -511,10 +511,214 @@ void func_0016F810(Player* self)
 
 #undef PS
 
-INCLUDE_ASM(func_0016FD70);
+// x + t (y + t z) of a curve's three coefficients.
+static inline f32 EvalCurve3(const f32* c, f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 
-INCLUDE_RODATA(jtbl_0024A870);
-INCLUDE_ASM(func_001701B0);
+extern f32 g_gameClock[];
+
+f32 ComputeAngleBetweenVectors(const Vec02* a, const Vec02* b, Vec02* axis);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
+f32 ApproachValueClampingVelocity(f32 x, f32 v, f32 target, f32 dt, void* params, f32* outv);
+void AddColliderTorque(void* self, Vec02* torque);
+void AddColliderForce(void* self, void* force);
+
+// a blended toward b by t.
+static inline f32 BlendRamp(f32 t, f32 a, f32 b)
+{
+    return (1.0f - t) * a + t * b;
+}
+
+// m turned so that its z axis lies along to: the angle between them, the axis in axis, the
+// turn about it in turn, and m's rows each rotated by the turn into out (the rows kept in
+// vector locals and a matrix local, MulRotationRowsIndexed's form with each row stored by
+// Vu0::Set). m's rows are read through one pointer to them, a variable of the inline set
+// before the first call: an inline's own pointer variable has no pointer flag, so its rows 1
+// and 2 have no alias base and wait for the stores of the row before, as retail's do; a pointer
+// of the caller, or the address of m written at each read, is flagged (or folds into the
+// object's offset) and its loads move to the top (docs/TOOLCHAIN.md, "A rotation product's
+// rows read after the stores"). Q's reference return would leave an address pseudo for each
+// row local that GCSE reuses for a later local at the same frame offset (a saved register).
+static inline f32 TiltRotation(Mat02* out, Mat02* turn, const Mat02& m, const Vec02& to, Vec02* axis)
+{
+    const u128* q = (const u128*)&m;
+    f32 angle = ComputeAngleBetweenVectors((const Vec02*)&q[2], &to, axis);
+    BuildAxisAngleMatrix(axis, turn, angle);
+    const u128* p = (const u128*)turn;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vu0::Set(x, Vu0::RotateRows(a0, a1, a2, q[0]));
+    r.r[0] = x;
+    Vu0::Set(y, Vu0::RotateRows(a0, a1, a2, q[1]));
+    r.r[1] = y;
+    u128 w = Vu0::RotateRows(a0, a1, a2, q[2]);
+    Vu0::Set(r.r[2], w);
+    Vu0::Set(z, w);
+    *out = r;
+    return angle;
+}
+
+// The player's upright torque: the ramp profile blended by the ground speed and scaled by 0x634
+// (D_00263740 alone off the ground), the tilt and the heading to the goal matrix 0x660, the
+// two speeds ApproachValueClampingVelocity gives, the torque that reaches them in one step,
+// and the pull to the pivot. The two speeds are scalars whose addresses are passed, so they
+// live in the frame's last slots (put there after every local); an array of two would be a
+// local below the product's locals.
+void func_0016FD70(Player* self)
+{
+    Vec02 axis;
+    Vec02 axis2;
+    Vec02 along;
+    Vec02 rest;
+    Vec02 spin;
+    Vec02 torque;
+    Mat02 turn;
+    Mat02 rot;
+    RampProfile ramp;
+    f32 tiltSpeed;
+    f32 headingSpeed;
+
+    if (self->f2220 == 1) {
+        f32 v = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
+        f32 t = g_unitRange.Limit(EvalCurve3(D_00263760, v));
+        ramp.maxSpeed = BlendRamp(t, D_00263740.maxSpeed, D_00263750.maxSpeed);
+        ramp.endSpeed = BlendRamp(t, D_00263740.endSpeed, D_00263750.endSpeed);
+        ramp.rampTime = BlendRamp(t, D_00263740.rampTime, D_00263750.rampTime);
+        ramp.maxAccel = BlendRamp(t, D_00263740.maxAccel, D_00263750.maxAccel);
+        f32 k = self->f634;
+        t = g_unitRange.Limit(EvalCurve3(D_00263770, k));
+        ramp.maxSpeed *= t;
+        ramp.endSpeed *= t;
+    } else {
+        ramp = D_00263740;
+    }
+    Mat02* goal = &self->m660;
+    f32 tilt = TiltRotation(&rot, &turn, self->rot, goal->r[2], &axis);
+    f32 heading = ComputeAngleBetweenVectors(&rot.r[0], &goal->r[0], &axis2);
+    u128 up = Vu0::Q(goal->r[2]);
+    if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(axis2), up)) < 0.0f) {
+        heading = -heading;
+    }
+    Vu0::Q(axis2) = up;
+    f32 w = SplitVectorAlongAxis(&self->v160, &axis, &along, &rest);
+    f32 w2 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(rest), Vu0::Q(axis2)));
+    ApproachValueClampingVelocity(0.0f, w, tilt, g_gameClock[2], &D_00263730, &tiltSpeed);
+    ApproachValueClampingVelocity(0.0f, w2, heading, g_gameClock[2], &ramp, &headingSpeed);
+    f32 dt = g_gameClock[2];
+    Vu0::Q(spin) = Vu0::MulXSum(Vu0::Q(axis), Vu0::ScalarAt(tiltSpeed), Vu0::Q(axis2), Vu0::ScalarAt(headingSpeed));
+    Vu0::Q(torque) = Vu0::MulXSum(Vu0::Q(spin), Vu0::Scalar(1.0f / dt), Vu0::Q(self->v160), Vu0::Scalar(-1.0f / dt));
+    AddColliderTorque(self, &torque);
+    {
+        Vec02* pivot;
+        if (self->f690 != 0) {
+            pivot = &self->v6A0;
+        } else {
+            pivot = (Vec02*)self->f6D4;
+        }
+        Vec02 arm;
+        Vec02 v;
+        Vec02 u;
+        Vu0::Q(arm) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*pivot));
+        Vu0::Q(v) = Vu0::Cross(Vu0::Q(self->v180), Vu0::Q(arm));
+        AddColliderForce(self, &v);
+        Vu0::Q(u) = Vu0::Cross(Vu0::Q(self->v160), Vu0::Q(arm));
+        Vu0::Q(v) = Vu0::Cross(Vu0::Q(self->v160), Vu0::Q(u));
+        AddColliderForce(self, &v);
+    }
+}
+
+void StepCollider(void* self, f32 t);
+void func_0016FD70(Player* self);
+void func_0017D248(Player* self);
+void TurnPlayerTowardLinkedObject(Player* self);
+void StepPlayerOnPath(Player* self);
+void StepPlayerRequestState(Player* self);
+void StepPlayerAlongTarget(Player* self);
+void ComputePolarOffset(Vec02* out, f32 angle, f32 dist, f32 z);
+void StoreFloatAsQuadword(void* out, f32 f);
+void* CopyQuadword(void* out, void* in);
+s128 ScaleQuadword(s128 a, s128 b);
+void* StoreQuadword(void* dst, s128 v);
+void SteerColliderTowardRotation(Player* self, s32 a, s32 b, Vec02* offset, Vec02* dir, f32 t);
+void SteerColliderTowardPosition(Player* self, s32 a, s32 b, const Vec02* pos, void* params, f32 t);
+void TurnColliderTowardRotation(Player* self, f32 t, void* rot, void* data);
+
+// Stores v as the direction at dir and steers the player toward the offset along it. Both
+// addresses are the inline's parameters, so each call forms its frame address again where
+// retail does (addiu in each call's delay slot); written at the call sites, CSE keeps the one
+// address in a saved register (docs/TOOLCHAIN.md, "A frame address passed by an inline call
+// is not GCSE's").
+static inline void SteerAlongDirection(Player* self, Vec02* off, Vec02* dir, s128 v, f32 t)
+{
+    StoreQuadword(dir, v);
+    SteerColliderTowardRotation(self, 0, 0, off, dir, t);
+}
+
+void func_001701B0(Player* self, f32 t)
+{
+    Mat02 m;
+    s128 qa;
+    s128 a;
+    s128 b;
+    StepCollider(self, t);
+    switch (self->f2220) {
+    case 2:
+        func_0017D248(self);
+        break;
+    case 3:
+        TurnPlayerTowardLinkedObject(self);
+        break;
+    case 7:
+        StepPlayerOnPath(self);
+        break;
+    case 4:
+        StepPlayerRequestState(self);
+        break;
+    case 6:
+        StepPlayerAlongTarget(self);
+        break;
+    case 13:
+        switch (self->f2228) {
+        case 0x38:
+            BuildAxisAngleMatrix(&g_unitZVector, &m, self->f638);
+            TurnColliderTowardRotation(self, g_frameDt[0], &m, D_00263780);
+            break;
+        case 0x36:
+        case 0x37: {
+            ComputePolarOffset(&m.r[0], self->f638 + 1.5707964f, self->f634 * D_00262E28 / self->radius3CC, 0.0f);
+            u8* table = (u8*)D_00263790;
+            StoreFloatAsQuadword(&a, self->f634);
+            qa = a;
+            CopyQuadword(&b, table);
+            s128 prod = ScaleQuadword(qa, b);
+            SteerAlongDirection(self, &m.r[0], &m.r[1], prod, t);
+            break;
+        }
+        }
+        break;
+    case 9:
+        if (g_gameClock[1] - self->f2224 > 0.25f) {
+            Vu0::Q(m.r[1]) = Vu0::FromFloat(-1.0f);
+            Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(m.r[1]));
+            AddColliderForce(self, &m.r[0]);
+            SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_002637A0, t);
+            TurnColliderTowardRotation(self, g_gameClock[2], (u8*)self + 0x660, (u8*)self + 0x6E0);
+        } else {
+            func_0016FD70(self);
+        }
+        break;
+    default:
+        func_0016FD70(self);
+        break;
+    case 11:
+        break;
+    }
+}
 
 
 void ComputePlayerSlideRates(Player* self, Contact03* out)
@@ -1027,9 +1231,6 @@ s32 func_00171180(Player* self)
 struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec02 offset; u8 pad30[0x40 - 0x30]; Mat02 rotation; };
 // The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
 struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 f40; };
-
-// x + t (y + t z) of a curve's three coefficients.
-static inline f32 EvalCurve3(const f32* c, f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 
 void BuildEulerRotationMatrix(void* angles, void* out);
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);

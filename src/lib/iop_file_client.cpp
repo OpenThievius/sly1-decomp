@@ -333,9 +333,174 @@ s32 CloseFile(s32 a0)
     return Min_1F8C38::Of(out, 0);
 }
 
-INCLUDE_ASM(func_001F8DB8);
+// The request func_001F8DB8 sends.
+struct Read_1F8DB8 {
+    s32 sema;
+    s32 result;
+    s32 result_size;
+    s32 id;
+    void* buf;
+    s32 size;
+    s32 f18;
+    s32 index;
+};
 
-INCLUDE_ASM(func_001F9028);
+s32 ReadFile(s32 fd, void* buf, s32 size)
+{
+    Read_1F8DB8* g = (Read_1F8DB8*)D_00627880;
+    Handle_1F84D8* p;
+    s32 mode;
+    s32 h;
+    s32 v;
+    s32 i;
+    SemaphoreParams ctor;
+    s32 out;
+
+    p = (Handle_1F84D8*)FindFileHandle(fd);
+    if (Lock_1F8C38::Ready(2) == 0) {
+        UnlockFileRequests();
+        return -1;
+    }
+    if (p == 0 || p->used == 0) {
+        UnlockFileRequests();
+        return -9;
+    }
+    mode = p->used;
+    g->id = p->id;
+    g->index = ((s32)p - (s32)D_00628940) >> 4;
+    g->buf = buf;
+    g->size = size;
+    ctor.maxCount = 1;
+    ctor.initCount = 0;
+    ctor.option = 0;
+    h = NewSemaphore(&ctor);
+    g->sema = h;
+    g->result = (s32)&out;
+    g->result_size = 4;
+    if (mode & 0x8000) {
+        AwaitSemaphore(D_002771C4);
+        for (i = 0; i < 32; i++) {
+            if (g_semaphoreSlots[i] == -1) {
+                g_semaphoreSlots[i] = g->sema;
+                g->sema = -g->sema;
+                break;
+            }
+        }
+        PostSemaphore(D_002771C4);
+    }
+    if (!(mode & 0x20000000)) {
+        WriteBackDataCacheRange(buf, size);
+    }
+    WriteBackDataCacheRange(D_00628500, 0xA4);
+    WriteBackDataCacheRange(g, 0x20);
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 2, 0, D_00627880, 0x20, D_006284C0, 4, 0, 0) < 0) {
+        FreeSemaphore(h);
+        UnlockFileRequests();
+        return -0xB;
+    }
+    v = *(s32*)((u32)D_006284C0 | 0x20000000);
+    UnlockFileRequests();
+    if (v == 0) {
+        FreeSemaphore(h);
+        return -0xB;
+    }
+    if (mode & 0x8000) {
+        FreeSemaphore(h);
+        return 0;
+    }
+    AwaitSemaphore(h);
+    FreeSemaphore(h);
+    return out;
+}
+
+// The request func_001F9028 sends: the bytes before the buffer's first 16-byte boundary go with it.
+struct Write_1F9028 {
+    s32 sema;
+    s32 result;
+    s32 result_size;
+    s32 id;
+    void* buf;
+    s32 size;
+    s32 head;
+    u8 bytes[16];
+    s32 index;
+};
+
+s32 WriteFile(s32 fd, void* buf, s32 size)
+{
+    Write_1F9028* g = (Write_1F9028*)D_00627880;
+    Handle_1F84D8* p;
+    s32 mode;
+    s32 h;
+    s32 v;
+    s32 i;
+    SemaphoreParams ctor;
+    s32 out;
+    s32 head;
+
+    p = (Handle_1F84D8*)FindFileHandle(fd);
+    if (Lock_1F8C38::Ready(3) == 0) {
+        UnlockFileRequests();
+        return -1;
+    }
+    if (p == 0 || p->used == 0) {
+        UnlockFileRequests();
+        return -9;
+    }
+    mode = p->used;
+    g->id = p->id;
+    g->index = ((s32)p - (s32)D_00628940) >> 4;
+    g->size = size;
+    g->buf = buf;
+    ctor.maxCount = 1;
+    ctor.initCount = 0;
+    ctor.option = 0;
+    h = NewSemaphore(&ctor);
+    g->sema = h;
+    g->result = (s32)&out;
+    g->result_size = 4;
+    if (mode & 0x8000) {
+        AwaitSemaphore(D_002771C4);
+        for (i = 0; i < 32; i++) {
+            if (g_semaphoreSlots[i] == -1) {
+                g_semaphoreSlots[i] = g->sema;
+                g->sema = -g->sema;
+                break;
+            }
+        }
+        PostSemaphore(D_002771C4);
+    }
+    if (((u32)buf & 0xF) == 0)
+        head = 0;
+    else
+        head = (((u32)buf >> 4) << 4) + 16 - (u32)buf;
+    if (size < head)
+        head = size;
+    if (!(mode & 0x20000000))
+        WriteBackDataCacheRange(buf, size);
+    buf = UNCACHED_1F84D8(buf);
+    g->head = head;
+    for (s32 j = 0; j < head; j++)
+        g->bytes[j] = ((u8*)buf)[j];
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 3, 0, D_00627880, 0x30, D_006284C0, 4, 0, 0) < 0) {
+        FreeSemaphore(h);
+        UnlockFileRequests();
+        return -0xB;
+    }
+    v = *(s32*)((u32)D_006284C0 | 0x20000000);
+    UnlockFileRequests();
+    if (v == 0) {
+        FreeSemaphore(h);
+        return -0xB;
+    }
+    if (mode & 0x8000) {
+        FreeSemaphore(h);
+        return 0;
+    }
+    AwaitSemaphore(h);
+    FreeSemaphore(h);
+    return out;
+}
 
 s32 ControlFile(s32 a0, s32 mode, u32* out)
 {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 876/872, checked 2026-11-08
-// NEAR (2026-11-08, night-gamec): anim is in s3 in retail (s2 here) and the spill reloads take other registers; the frame and stack slots are retail's
+// BYTES 866/872 (99.3%), checked 2026-11-10
+// NEAR (2026-11-10, w12-117FE0): size right; only positions and rotations swap s4 and s5 in the inner loop. Fixed: the arguments read in order (args[3]..args[6]: mask last, so sched1 keeps args alive to n and to takes s2, anim s3); one node variable for the list and its items (the item reassigns it, so gcse cannot propagate tail = node and the chain call reads tail, last gets s8); func_0012CD78 declared with the pointer first (ABI-identical; its a0 move then precedes f12). The inner loop is reversed (retail s3 counts down) only if loop.c finds every giv of i in pass 1: the li 48 for &rotations[i] must be moved, and it is "not desirable" after the five switch-tree constants (threshold 69..77 less 3 per move, 67 insns). Hoisting `r = &rotations[i]` above the switch moves it first but makes rotations the last-reduced giv, so it is allocated first (s4). Untried: a form that keeps &rotations[i] in case 2 and still moves the 48 in pass 1 (docs/TOOLCHAIN.md, loop.c).
 // In the context of its file, src/main/script_machine.cpp: its declarations before the function, bodies cut.
 #include "common.h"
 #include "vu0.h"
@@ -634,7 +634,7 @@ struct __attribute__((aligned(16))) ScriptSampleRotation {
 };
 
 void* AllocateBackMemory(s32 size);
-void func_0012CD78(f32 a, f32 b, void* anim, void* from, void* to, s32 n, ScriptSampleQuad* positions,
+void func_0012CD78(void* anim, f32 a, f32 b, void* from, void* to, s32 n, ScriptSampleQuad* positions,
                    ScriptSampleRotation* rotations, ScriptSampleQuad* q4, ScriptSampleQuad* q8);
 void CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
 
@@ -658,10 +658,10 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     ConvertScriptValueToFloat(&t, args + 2);
     f32 b = t.f;
     DestroyScriptValue(&t, 2);
-    mask = args[6].i;
     from = args[3].p;
     to = args[4].p;
     n = args[5].i;
+    mask = args[6].i;
     PushBackMemoryMark();
     if (mask & 1) {
         positions = (ScriptSampleQuad*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
@@ -675,56 +675,57 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     if (mask & 8) {
         q8 = (ScriptSampleQuad*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
     }
-    func_0012CD78(a, b, anim, from, to, n, positions, rotations, q4, q8);
+    func_0012CD78(anim, a, b, from, to, n, positions, rotations, q4, q8);
     R11B008Node* head = 0;
     R11B008Node* tail = 0;
     for (s32 bit = 1; bit < 9; bit <<= 1) {
         if (!(mask & bit)) {
             continue;
         }
-        R11B008Node* list = NewScriptValueNode();
+        R11B008Node* node = NewScriptValueNode();
         if (tail != 0) {
-            tail->next = list;
+            tail->next = node;
         } else {
-            head = list;
+            head = node;
         }
-        tail = list;
-        SetScriptValueTag(list, 0);
+        tail = node;
+        SetScriptValueTag(node, 0);
         R11B008Node* last = 0;
         for (s32 i = 0; i < n; i++) {
-            R11B008Node* v = NewScriptValueNode();
+            ScriptSampleRotation* r = &rotations[i];
+            node = NewScriptValueNode();
             switch (bit) {
             case 1: {
                 ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
                 *p = positions[i];
-                SetScriptValueVectorA(v, (f32*)p);
+                SetScriptValueVectorA(node, (f32*)p);
                 break;
             }
             case 2: {
                 f32* m = AcquireMatrixPayload();
-                CopyRotationMatrix(m, &rotations[i]);
-                SetScriptValueMatrix(v, m);
+                CopyRotationMatrix(m, r);
+                SetScriptValueMatrix(node, m);
                 break;
             }
             case 4: {
                 ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
                 *p = q4[i];
-                SetScriptValueVectorA(v, (f32*)p);
+                SetScriptValueVectorA(node, (f32*)p);
                 break;
             }
             case 8: {
                 ScriptSampleQuad* p = (ScriptSampleQuad*)AcquireVectorAPayload();
                 *p = q8[i];
-                SetScriptValueVectorA(v, (f32*)p);
+                SetScriptValueVectorA(node, (f32*)p);
                 break;
             }
             }
             if (last != 0) {
-                last->next = v;
+                last->next = node;
             } else {
-                SetScriptValueChain(list, v);
+                SetScriptValueChain(tail, node);
             }
-            last = v;
+            last = node;
         }
     }
     PopBackMemoryMark();

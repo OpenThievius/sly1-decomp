@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 244/248, checked 2026-11-07
-// NEAR: right instructions; differs in the order the arguments of the first call are set up (which hi() lands in which register, and where the copy of *a2 sits). Tried arguments through locals in three orders, the pointer last, the floats first, decomp-permuter --auto of tools/permute.py.
+// BYTES 229/248 (92.3%), checked 2026-11-10
+// NEAR (2026-11-10, w12-145088): 248 bytes, retail's size, and retail's registers: the position copied as Vu0::Q(self->pos) = Vu0::Q(*a2) (a u128 load into v0, which frees a0 for D_00261920's %hi and leaves retail's move a0,s0 in the call's delay slot). Still differs: the order of the three float argument loads (retail: $f13 before the sq, then $f12, $f14; ours: all three after the sq, $f13, $f14, $f12). The u128 store has no alias class, so every global float load waits for it; a store with a class (the Vec02 assignment, a Vec member) lets all three pass it and local-alloc then gives the copy a2 and the %hi t0, as before. Locals for the floats before or after the copy, Vec::Of, and a Vec member store were tried. Before: right instructions; differs in the order the arguments of the first call are set up (which hi() lands in which register, and where the copy of *a2 sits). Tried arguments through locals in three orders, the pointer last, the floats first, decomp-permuter --auto of tools/permute.py.
 #include "common.h"
 #include "shapes.h"
 #include "camera.h"
@@ -57,7 +57,7 @@ void func_00145718(Orbit_00145718* self, Vec02* a1, Vec02* a2, f32 turnYaw, f32 
     f32 pitch;
     f32 dist;
 
-    self->pos = *a2;
+    Vu0::Q(self->pos) = Vu0::Q(*a2);
     SpringCameraVector(self, &self->v230, &self->v240, &D_00248D30, D_00261920, D_00261924, g_frameDt);
     Vu0::Q(tmp) = Vu0::Add(Vu0::Q(*a1), Vu0::Q(self->v230));
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
