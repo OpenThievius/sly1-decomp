@@ -1848,6 +1848,29 @@ TurnColliderTowardRotation (2026-11-09):
   load first and reload takes v1, as retail. But purge_addressof allocates such a variable's
   slot after the expand-time weight slot (retail has the sum at 0, the slot at 0x10), so the
   form that has both is still to find.
+- What else was read for the same copy (2026-11-10, alias.c, expr.c, stmt.c, function.c and
+  haifa-sched.c), each ruled out:
+  - *A base for the loaded pointer.* find_base_value gives a register loaded from memory no
+    base (only arguments in the copying block do), and canon_rtx has no known value for it
+    (reg_known_value comes from REG_EQUAL or REG_EQUIV notes), so base_alias_check cannot
+    separate `row->head` from the frame store; only the flags can.
+  - *A scalar store from a cast.* expand_expr's INDIRECT_REF sets MEM_IN_STRUCT_P for an
+    aggregate type, or the address of an aggregate, and never MEM_SCALAR_P, so no form of
+    `Q(acc) = ..` (Vu0::Set, the template Q, a struct copy) gives the store a scalar flag.
+    MEM_SCALAR_P comes only from a non-aggregate decl's own memory (expand_decl puts it on the
+    stack only when TREE_ADDRESSABLE is already set, which g++ 2.95, expanding as it parses,
+    never knows at the declaration; later the address gives an ADDRESSOF, purged after the
+    weight slots exist), from put_reg_into_stack at purge time, and from temporaries. A
+    promoted-mode variable would go to the stack at once, but TImode is not promoted.
+  - *sched1's other levers.* The load's destination is a temporary that dies at `->head` and
+    the row is set more than once, so birthing_insn_p does not raise it. The copy is a store:
+    its weight is at best 0 (down live after it), never above the load's +1. The two loads
+    cannot hold the copy between them by an anti dependence: `self->contacts` has self's
+    argument base, which never conflicts with a frame address.
+  - Probes: acc as a plain u128 (ToFloatZ for the test) leaves the sum in vf3 for the loop,
+    with a caller save around PopBackMemoryMark (58 lines); with `((f32*)&acc)[2]` the frame
+    is 160 and s5 is used (200 lines); down as a Vec02 in memory (`acc = down`) moves the
+    count loop's registers and the slots (128 lines).
 
 - Probes of 2026-11-10 (after func_0017ECE8's variable set twice): taking the qmfc2's result
   out of local-alloc does give retail's VU order here. With `len2` reused for the distance

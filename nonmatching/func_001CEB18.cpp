@@ -15,6 +15,9 @@
 // a chain of 8 (ToFloatMoved or ToFloatViaBits give it), which needs the product in VU_REGS
 // with a compiler qmfc2 into a reload register: the wall of func_00186230 and func_001D4348
 // (docs/TOOLCHAIN.md, "A compiler's qmfc2 of a VU0 product").
+// w15 (2026-11-10): re-scored, unchanged. sched2's class tie is 3 for both (move v1,v0 is
+// the last insn, as in retail); the qmfc2's third dependent is a stale sched1 link. The
+// radius read before the subtraction, or r * r named first: no change (docs/toolchain/sched1.md).
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
