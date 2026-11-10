@@ -228,7 +228,107 @@ void StartModeWalkerObject(ModeWalker* self)
     base->icon = FindAnimRecord(0x36A);
 }
 
-INCLUDE_ASM(func_00181078);
+// A pad record's stick and buttons (PadRecord's 0x40, 0x44, 0xA8 and 0xAA: pad_record.h's ranges
+// clash with this file's view of g_unitRange).
+struct PadStick {
+    u8 pad00[0x40];
+    f32 x;                  // 0x40
+    f32 y;                  // 0x44
+    u8 pad48[0xA8 - 0x48];
+    u16 held;               // 0xA8: func_00181078 tests 0x80
+    u16 pressed;            // 0xAA: func_00181078 tests and clears 0x40
+};
+
+extern T217D_BF0 D_00270650;
+extern u8 D_00262D38[];
+extern u8 D_002708C0[];
+void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
+void GetStateWalkerCurrentKey(void* h, s32* out);
+void GetStateWalkerTargetKey(void* h, s32* out);
+void ClearPadPressedBits(PadStick* pad, s32 mask);
+void UnprojectCameraPoint(void* camera, void* a, Vec02* out);
+void BuildBasisFromXAndZHint(void* a, void* b, void* c);
+void TransformRotationBetweenFrames(void* from, void* to, Mat02* in, Mat02* out);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, void* out);
+void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void ClearRootTries(void* self);
+void func_00181ED0(T217D_BF0* self, PadStick* pad);
+typedef void (*FrameFn)(void* self, Mat02* m);
+
+// The rotation's weight is a Scalar passed straight to MulX (its expand-time slot, a scalar's
+// memory, stored after the product as retail's is), and m2 and the axis are declared after
+// that statement: the slot is freed there and the axis takes it (retail's 0x50, between d and m2).
+void func_00181078(ModeWalker* self, PadStick* pad, f32 dt)
+{
+    s32 cur;
+    s32 target;
+    Mat02 m;
+    Vec02 pos;
+    Vec02 d;
+    f32 angle;
+    ControlPathFollower(self, pad, dt);
+    GetStateWalkerCurrentKey(self->fBBC, &cur);
+    GetStateWalkerTargetKey(self->fBBC, &target);
+    switch (self->fBB0) {
+    case 1:
+        if ((pad->held & 0x80) != 0) {
+            SetStateWalkerTarget(self->fBBC, 0x360);
+        } else {
+            SetStateWalkerTarget(self->fBBC, 0x35F);
+        }
+        break;
+    case 2:
+        if (cur == 0x35F) {
+            self->desc05()->m50(self);
+        } else {
+            if ((pad->pressed & 0x40) != 0) {
+                ClearPadPressedBits(pad, 0x40);
+                self->fBFC = g_gameTime;
+            }
+            if (self->fC00 != 0 && g_gameTime - self->fBFC < D_00264128) {
+                self->desc05()->m50(self);
+                TeleportStateWalker(self->fBBC, 0x35F);
+                GetStateWalkerCurrentKey(self->fBBC, &cur);
+                GetStateWalkerTargetKey(self->fBBC, &target);
+            }
+        }
+        break;
+    }
+    if ((u32)(cur - 0x35F) < 2) {
+        if (target == -1 || target == 0x35F || target == 0x360) {
+            if (self->fBB0 == 2) {
+                pad = (PadStick*)D_00262D38;
+            }
+            func_00181ED0(&D_00270650, pad);
+            Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
+            u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
+            Vu0::Q(m.r[1]) = n;
+            Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
+            TransformRotationBetweenFrames(0, ((PlacedObject*)self->fBC4)->parent, &m, &m);
+            ApproachRotationWithRamp(dt, (u8*)self->fBC4 + 0xD0, &m, D_00264130, &m, 0);
+            (*(FrameFn**)self->fBC4)[34](self->fBC4, &m);
+            UnprojectCameraPoint(g_camera, D_002708C0, &pos);
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->fBC0)->v140));
+            BuildBasisFromXAndZHint(&d, (void*)&g_unitZVector, &m);
+            TransformRotationBetweenFrames(0, ((PlacedObject*)self->fBC0)->parent, &m, &m);
+            (*(FrameFn**)self->fBC0)[34](self->fBC0, &m);
+            u128 v = Vu0::Q(self->vBE0);
+            u128 rot = Vu0::RotateUntied(m, v);
+            Vu0::Q(d) = Vu0::MulX(Vu0::Sub(rot, v), Vu0::ScalarAt(D_0026413C));
+            Mat02 m2;
+            Vec02 k;
+            TransformDirectionBetweenFrames(((PlacedObject*)self->fBC0)->parent, ((PlacedObject*)self->fBCC)->parent, &d, (u8*)self->fBD0 + 0x20);
+            MultiplyMatrices3x3((Mat02*)((u8*)self->fBC0 + 0x1A0), &m, &m2);
+            TransformRotationBetweenFrames(((PlacedObject*)self->fBC0)->parent, ((PlacedObject*)self->fBCC)->parent, &m2, &m2);
+            MatrixToAxisAngle(&m2, &angle, &k);
+            BuildAxisAngleMatrix(&k, (Mat02*)((u8*)self->fBD0 + 0x40), D_0026413C * angle);
+            ClearRootTries(self);
+        }
+    }
+}
 
 void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 {
@@ -508,13 +608,6 @@ void GetObjectWorldPosition(void* obj, Vec02* out);
 void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
 
-// A pad record's stick (PadRecord's 0x40 and 0x44: pad_record.h's ranges clash with this file's
-// view of g_unitRange).
-struct PadStick {
-    u8 pad00[0x40];
-    f32 x;                  // 0x40
-    f32 y;                  // 0x44
-};
 
 void func_00181ED0(T217D_BF0* self, PadStick* pad)
 {

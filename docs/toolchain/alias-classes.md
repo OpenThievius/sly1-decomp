@@ -126,7 +126,7 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   the result row 0's register instead. Making the slot store scalar-flagged would need a scalar
   local in memory, which the helpers do not have.
 
-### The weight slot of func_00181078 (ruled out in plain C++)
+### The weight slot of func_00181078 (as one local, ruled out; matched as two)
 
 Read from alias.c, function.c, stmt.c and expr.c and the `-dS -fsched-verbose-6` dumps
 (2026-11-08). func_00181078 computes `d = (Rotate(m, v) - v) * D` with the weight in a 16-byte
@@ -531,12 +531,17 @@ reference.
   as the caller's own memory reference, flags included (integrate.c copies an argument to a
   register only for a parameter that is not read-only), as the asm's "rV" operand. Making it
   ScalarAt itself changes func_001DDE90.
-- **Still short.** func_00181078's axis shares the weight's slot (0x50) and its address goes to
-  two calls: `const s128& k = (s128)w;` gives retail's frame and block but for the reference's
-  address, set at the binding (and so issued first by sched1) where retail forms &k at its first
-  use, as for a named local; a named scalar local in memory from its declaration needs
-  TREE_ADDRESSABLE before expand_decl, which g++ 2.95 never gives. func_0014F168 is now retail's
-  size with only the call's `addiu a1, sp, 16` early.
+- **The axis is not the weight (func_00181078, matched 2026-11-10).** func_00181078's axis
+  shares the weight's slot (0x50) because it is declared after the weight's statement: the
+  weight is `Vu0::ScalarAt(D)` passed straight to MulX (the cast's expand-time temporary, freed
+  at the statement's end by free_temp_slots), and `Mat02 m2; Vec02 k;` declared just after it
+  are given slots by expand_decl's assign_temp there, the 16-byte axis taking the freed one
+  (between d and m2) and the 48-byte matrix a new one. Earlier attempts made one local the
+  weight and the axis (`Set(k, w)`, or `const s128& k = (s128)w;`), which no plain form orders as
+  retail does. The rows are RotateUntied's. Spot it: a 16-byte frame slot stored by a Scalar and
+  later passed by address as an out-parameter is two objects, the second declared after the
+  first's statement. func_0014F168 is now retail's size with only the call's `addiu a1, sp, 16`
+  early.
 - **A receiver loaded early (func_0015BC78).** Its `Q(k) = FromFloat(-1.0f)` into a Vec02 local
   held the virtual call's receiver load (`self->receiver678`, a member through a pointer) behind
   the weight's and the message's stores, so local-alloc tied it to a0. With `Scalar(-1.0f)`
