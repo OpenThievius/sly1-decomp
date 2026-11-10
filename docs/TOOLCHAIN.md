@@ -915,6 +915,23 @@ the count in s8) is retail's only when loop.c reduces nothing in it:
   group's count, buffer and list read in that order (count first, list last) for sched1's order
   of the three loads.
 
+The two functions before it in the file (2026-11-10):
+
+- **func_00153780 (matched).** Three source forms, each read from retail: the item's axes
+  stored through the array pointer walked in the `for` header (`for (s32 i = 0; i < a3; i++,
+  axes++)`, `Q(*axes) = ...`: retail's `addiu a0,s7,16` spilled at the top and `lw s7` at the
+  bottom is PRE's copy of `axes + 1`, as for a counter, where `axes[i]` gives an indexed
+  store); the zero written at each use (`Q(out[j]) = Vu0::Zero();`), which loop.c moves to the
+  preheader after the entry test as retail (a `zero` local before the loop is scheduled into the
+  prologue); and the early-out first (`if (body == 0 || body->f4BC < 0) zero; else if (end 0)
+  ...; else if (end 1) ...; else zero;`), whose two zero stores reload into the same register
+  and cross-jump into one tail. The first loop reads `contact->end[i].body` by index, not
+  through a walked `end` pointer, for retail's s4/s5. With the axes walk, a1 keeps s7 and the
+  contact is spilled, as retail.
+- **func_001536C8 (near miss).** The dot over Vec values gives retail's size (the count reloaded
+  for the row's index, cse_around_loop as in func_001C4D60); only local-alloc's order of the
+  owner pointer and the count chain differs (a0/v1 swapped).
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
