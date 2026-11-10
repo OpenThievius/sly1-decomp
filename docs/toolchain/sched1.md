@@ -829,3 +829,17 @@ for the stores:
   loads second (the two-pass argument rule), which gives our vf4/vf3 for the 1.0 and the
   second vertex and the 1.0's store after the sum. The named order also gave the kind's
   reloads retail's v1 (and with it the `beqzl` of the kind switch's delay slot).
+
+### A product's operand order sets the next constant's register (func_0017E710)
+
+- **What differed.** Before FindNodeForQuery the second loop of func_0017E710 has
+  `q.weight = self->mass * D_00264034; q.kind = 0x20;`. Ours put the 0x20 in v0 after the
+  weight slot's `qmtc2 v0` and sched2 placed the `sw` of the slot in the call's delay slot;
+  retail sets `li v1,32` while v0 still holds the weight slot's word and stores the weight
+  before the call. The first loop, with the same statements, is retail's in both forms.
+- **The form.** `q.weight = self->mass; q.weight *= D_00264034;` (or the constant named first,
+  `f32 k = D_00264034; q.weight = self->mass * k;`) gives the constant's load an earlier LUID
+  than the member's: the multiply keeps `mul.s $f0,$f0,$f1` with the mass in $f0, and the
+  0x20 takes v1. `D_00264034 * self->mass` gives the same order with the registers swapped.
+  Found by trial (three forms); the dumps were not traced, so the pass that decides it is a
+  guess: the load order changes sched1's ties and with it the order local-alloc sees.

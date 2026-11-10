@@ -8,6 +8,8 @@
 #include "common.h"
 #include "placed_object.h"
 
+void* FillMemory(void* dst, s32 value, s32 size);
+
 struct NodeQuery {
     union {
         s32 f00;            // 0x00: func_00177838
@@ -21,6 +23,11 @@ struct NodeQuery {
     u8 pad18[0x20 - 0x18];
     Vec02 pos;              // 0x20: where (func_001C9990: the agent's position)
     Vec02 dir;              // 0x30
+
+    // Zeroes the whole query. Through `this`, the frame address goes straight into the call's
+    // argument register, so GCSE does not take it for an expression shared with the address
+    // FindNodeForQuery is given later (func_0017E710).
+    void Clear() { FillMemory(this, 0, (s32)sizeof(*this)); }
 };
 
 
