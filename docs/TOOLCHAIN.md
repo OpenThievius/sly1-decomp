@@ -5529,6 +5529,46 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   longer chain). The ternary's spellings and a named `magh * w - 1` (which moves the multiplies)
   do not change it.
 
+### Reading a library function's source off its code: types, sums and spill slots (func_0020CAF8)
+
+Measured 2026-11-10 on the MPEG macroblock prediction (src/lib/mpeg_macroblock.cpp, 2.9-ee-991111;
+nonmatching/func_0020CAF8.cpp). The near miss had the wrong frame (0xA0 against 0xB0) and 49% of
+retail's code; these readings gave the frame, the spill slots in retail's order (but one), the
+branch layout and 68% of the code:
+
+- **A constant kept with the index means a pointer.** Retail adds `(yo << 4) + 0x300` first and
+  then the base (`addiu t2,t1,768; addu t2,s2,t2`). With an integer base fold re-associates
+  `base + ((yo << 4) + 0x300)` to `(base + 0x300) + (yo << 4)`; with a `u8*` base the integer sum
+  is converted before the pointer addition and stays one operand. So the work buffer, the
+  destination and the parts' rows are pointers.
+- **Which loads are reused shows the types (type-based aliasing).** Retail loads the frame's data
+  word once for both source rows and its width again at the end, re-reads the count for the
+  final `count++`, and keeps the chroma rows' stores before the source rows' store. That is: the
+  frame's data an int (as func_0020C1A0's frame record has it), the parts' rows and the source
+  rows the same pointer type (their stores chain), the count an int read again after the int
+  stores.
+- **A four-term sum's operand order reads back through the balance table** ("Sony's compiler
+  balances a chain of | and +"): retail's `(A + y) + (dstY + srcField)` is the source
+  `A + srcField + dstY + y`.
+- **A test whose `then` is the split.** Retail branches from both row tests into one shared
+  `rows = height; rest = 0;` tail after both arms (bnezl into it): written `if (... >= 16) split;
+  else whole;` cross-jumping merges the two `else` tails; written the other way round the first
+  test jumps into the second arm.
+- **Spill slots in declaration order.** reload gives the pseudos global-alloc leaves without a
+  register their slots in pseudo order, and pseudos are numbered as the front end meets them:
+  retail's slots (dstField, x, the destination, the routine index, the luma block, `&count`'s
+  base, `average << 2`) put the count's address after the luma block, which needs the locals
+  declared at the top C-style with the count read after them (`s32 n; ... n = ...count;`); an
+  initialised `s32 n = ...` first numbers the address before them.
+- **A value computed once before a branch was named.** `height >> 1` and `dstY >> 1` are computed
+  once before the chroma part's `if (half)` in retail (each arm uses them); written in each arm
+  they are computed in each arm (PRE does not hoist what is only anticipated). Likewise the
+  half-pixel flags `dx & 1`, `cdx & 1`, computed before the row tests.
+- **What is left.** The routine index keeps a register (s5) where retail spills it at 12(sp):
+  local-alloc gives `yo << 4` t2 in the block after the luma row tests (retail t1), and its
+  preference pulls ys and yo into t2 (retail a2), the first difference in global-alloc's order;
+  the registers cascade from there.
+
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
 - **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
