@@ -1046,7 +1046,7 @@ DrawGridSelector, src/main/file_16AA18.cpp):
 - **Spot it.** Two loads of one float constant in a block, one into an argument register:
   the argument came through an inline's parameter (or was otherwise never a pseudo).
 
-### A stored product's two-operand mult: what combine needs (PAL func_eu_001ACC68, unsolved)
+### A stored product's two-operand mult: what combine needs (US func_001ABE70, PAL func_eu_001ACC68)
 
 Retail's `mult $zero,v0,v1` with a later `mflo a0` (the two-operand form, the product in LO)
 against our three-operand `mult a0,v0,v1`, where the product (two member loads, each also
@@ -1085,15 +1085,29 @@ combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -d
   product assigned to n directly, `n = cols * rows;`, which expand_mult writes straight into n)
   the i3_subst_into_i2 path keeps the PARALLEL. A live early reference (the switch's value in n)
   is global-alloc's and moves the switch's registers.
-- **Why it is not landed.** Each half is a form no plain source needs: a variable referenced
+- **Why the test form was not landed.** Each half is a form no plain source needs: a variable referenced
   before the switch only to be overwritten, and a second variable that only carries the product
   to it. No single-variable form gives a temporary product: a pseudo target (`n = a * b`,
   `n *= b`, a chained assignment) takes the mult directly (expand_binop uses the target; a
   same-mode NOP_EXPR passes it on); an inline's return copy is adjacent (expand_return computes
   into a fresh pseudo and copies it at once); an inline's parameter copy is block-local and CSE
   deletes it. The original must have had both a long-lived int variable and a temporary
-  (two locals, or an inline whose local is returned after other statements); until a plausible
-  shape of that turns up, both stay near misses with this form in their notes.
+  (two locals, or an inline whose local is returned after other statements): the next item is
+  that shape.
+- **The natural form (2026-11-10, both matched and linked).** Both conditions come from two
+  plain habits. The early reference is an int variable with a real first job: the font id,
+  `s32 n = 4; ... self->font = GetFontById(n);` (CSE folds the constant into the argument, flow
+  deletes the set, so nothing reaches the allocator, as with the dead `n = 0`). The product's
+  temporary is an inline setter's own local, returned after its other statements:
+  `s32 cells = g->f260 * g->f264; g->f26C = g->f260; g->f270 = g->f264; return cells;`.
+  `n = StartGaugeCount(self);` makes the inline's return target n itself (expand_inline_function
+  maps the result to a register target of its mode), so the return is the copy `n = cells`, two
+  stores after the mult; `self->f268 = n;` after the letter stores. Ruled out on the way: the
+  inline stored straight into the member (`self->f268 = StartGaugeCount(self);`, a fresh return
+  pseudo, mult3) and declared at its use (`s32 n = StartGaugeCount(self);`, no early reference,
+  mult3); the switch's value as n's first job (the tail matches, but n is global-alloc's and the
+  head swaps v0/a0/v1). The prologue holds only two ints, the font id and the switch's value, so
+  the font id is the one early job that leaves the registers alone.
 - The other nine `mult $zero` sites in US are products by a constant or with an operand that
   dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
   to an argument register: a three-insn combine whose split leaves the bare SET.

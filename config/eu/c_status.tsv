@@ -2816,6 +2816,7 @@ func_001ABE20	func_001ACC18	match	version-specific
 func_001ABE40	func_001ACC38	match	
 func_001ABE50	func_001ACC48	match	
 func_001ABE60	func_001ACC58	match	
+func_001ABE70	-	absent	
 func_001AC060	-	absent	
 func_001AC0E8	-	absent	
 func_001AC5C0	-	absent	
@@ -4485,6 +4486,7 @@ func_eu_001AB2B0	func_001AB2B0	match	only in PAL
 func_eu_001AB370	func_001AB370	match	only in PAL
 func_eu_001AB550	func_001AB550	match	only in PAL
 func_eu_001AB558	func_001AB558	match	only in PAL
+func_eu_001ACC68	func_001ACC68	match	only in PAL, rodata
 func_eu_001ACE58	func_001ACE58	match	only in PAL
 func_eu_001ACEE0	func_001ACEE0	match	only in PAL
 func_eu_001AD3C0	func_001AD3C0	match	only in PAL
