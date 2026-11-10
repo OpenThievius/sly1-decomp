@@ -36,6 +36,7 @@
 #include "path_curve_object.h"
 #include "state_notifier.h"
 #include "fpu.h"
+#include "scope_marker.h"
 
 extern f32 g_gameClock[];
 
@@ -2418,9 +2419,128 @@ void PushCloneBatch(World* self, void* src, s32 n)
 
 s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
 
-INCLUDE_ASM(func_001DC238);
+// A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
+struct ColliderListWalker {
+    List01* list;
+    s32* cur;
+    s32 step;
+    ColliderListWalker* prev;
+    ColliderListWalker(List01* l)
+    {
+        list = l;
+        cur = (s32*)&l->head;
+        step = l->offset;
+        prev = (ColliderListWalker*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
+    }
+    ~ColliderListWalker() { g_activeListFrames = (ListFrame*)prev; }
+    s32 Next()
+    {
+        s32 n = *cur;
+        cur = (s32*)(n + step);
+        return n;
+    }
+};
+void* AllocateBackMemory(s32 size);
 
-INCLUDE_ASM(func_001DC4D0);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
+{
+    s32 size = *(s32*)((u8*)world + 0x34) * 4;
+    ColliderListWalker walk((List01*)((u8*)world + 0x6C));
+    Collider** cursor = *out = (Collider**)AllocateBackMemory(size);
+    if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
+        goto done;
+    }
+    {
+        Vec02 lo;
+        Vec02 hi;
+        ScopeMarker scope;
+        Vu0::Q(lo) = Vu0::Min(Vu0::Q(*a), Vu0::Q(*b));
+        Vu0::Q(hi) = Vu0::Max(Vu0::Q(*a), Vu0::Q(*b));
+        Collider* c;
+        while ((c = (Collider*)walk.Next()) != 0) {
+            if (c == skip) {
+                continue;
+            }
+            if (c->boundsMin.x > hi.x || c->boundsMax.x < lo.x || c->boundsMin.y > hi.y || c->boundsMax.y < lo.y ||
+                c->boundsMin.z > hi.z || c->boundsMax.z < lo.z) {
+                continue;
+            }
+            if (c->root03()->flags538 & 0x40000000000ull) {
+                continue;
+            }
+            if (skip != 0) {
+                if (skip->desc03()->m38(skip, c) != 0) {
+                    continue;
+                }
+                if (c->desc03()->m38(c, skip) != 0) {
+                    continue;
+                }
+            }
+            for (Collider* part = (Collider*)c->parts.head; part != 0; part = (Collider*)part->link2E4.next) {
+                if (filter != 0) {
+                    if (filter(arg, part) == 0) {
+                        continue;
+                    }
+                } else if ((part->flags538 & 0x80000000000ull) != 0) {
+                    continue;
+                }
+                *cursor++ = part;
+            }
+        }
+    }
+done:
+    *count = cursor - *out;
+}
+
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
+{
+    s32 size = *(s32*)((u8*)world + 0x34) * 4;
+    ColliderListWalker walk((List01*)((u8*)world + 0x6C));
+    Collider** cursor = *out = (Collider**)AllocateBackMemory(size);
+    if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
+        goto done;
+    }
+    {
+        Collider* c;
+        while ((c = (Collider*)walk.Next()) != 0) {
+            if (c == skip) {
+                continue;
+            }
+            Vec02 d;
+            ScopeMarker scope;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*center), Vu0::Q(c->v140));
+            f32 dist = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+            f32 reach = radius + c->radius3D0;
+            if (reach * reach < dist) {
+                continue;
+            }
+            if (c->root03()->flags538 & 0x40000000000ull) {
+                continue;
+            }
+            if (skip != 0) {
+                if (skip->desc03()->m38(skip, c) != 0) {
+                    continue;
+                }
+                if (c->desc03()->m38(c, skip) != 0) {
+                    continue;
+                }
+            }
+            for (Collider* part = (Collider*)c->parts.head; part != 0; part = (Collider*)part->link2E4.next) {
+                if (filter != 0) {
+                    if (filter(arg, part) == 0) {
+                        continue;
+                    }
+                } else if ((part->flags538 & 0x80000000000ull) != 0) {
+                    continue;
+                }
+                *cursor++ = part;
+            }
+        }
+    }
+done:
+    *count = cursor - *out;
+}
 
 void UnlinkContactTable(Contacts03* a0, Contacts03** a1) {
     Contacts03* next;
