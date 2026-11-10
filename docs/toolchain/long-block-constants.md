@@ -95,18 +95,32 @@ reload.c and reload1.c read):
   func_00155778 kept in s4 (built once), 66 in s1, 0x80000000 in s8. 1701
   needs 16 refs instead of 18, or a life at least 210 insns longer (4,578 to
   5,000 in local-alloc's half-insn units).
-  Retail's `li s7,2194` is at instruction 698, ours `li s4,2194` at 1043:
-  retail's is hoisted 345 instructions further, enough.
-- **The lives are sched1's.** The constant sets are inline-parameter
-  pseudos set just before their stores, and sched1 hoists them by hundreds
-  of entries (1701: set at entry 292 before sched1, at entry 128 after;
-  1 (6194): 1129 to 364). A constant load is ready from the block's start
-  and is issued when it is the best ready insn in a free slot, so how far
-  each one runs ahead depends on how many other constant loads are pending,
-  that is on the CSE windows' pseudos. The source lever is whatever makes
-  retail's 2194 load run about 210 or more insns further ahead; no form found so
-  far moves it without moving the window landmarks. A model of sched1's
-  list scheduling for this block would be the next tool.
+- **The lives are sched1's, and retail's final code does not show them.**
+  The constant sets are inline-parameter pseudos set just before their
+  stores, and sched1 hoists them by hundreds of entries (1701: set at entry
+  292 before sched1, at entry 128 after; 1 (6194): 1129 to 364). The block
+  is memory-bound (one store a cycle, 3,870 of 6,739 cycles issue only a
+  store), so the ALU slot takes the ready constant loads in priority order,
+  and a load's priority is one more than its first store's place on the
+  store chain: it issues once every ALU insn feeding an earlier store has
+  issued (798 before the 2194 load here, no cycle without an ALU issue).
+  Retail's `li s7,2194` 345 instructions before ours is sched2's doing,
+  not sched1's: in both, the load sits right after the last store of the
+  register's previous value (anti-dependence), and the ALU counts per
+  entry of the two final codes agree within 5 up to entry 1000.
+- **Replayed with tools/sched1.py** (which reproduces this block's 8,808
+  insns cycle for cycle) and `--alloc`, which runs both allocators on the
+  replayed order: raising the 2194 load's priority from 1,978 to about
+  2,150 (`--prio 8206=2150`) issues it 139 cycles earlier and gives every
+  retail register checked (2194 in s7, func_00155778 kept in s4, the 4 in s3,
+  256 kept in s5, 66 in s1, 0x80000000 in s8); 2,050-2,100 give the 4 in s3
+  but lose the 2194. Moving the 18 (3199), the 146 (1841) or
+  func_00155778's load alone does not. A priority 170 higher means a first
+  store about 35 entries earlier, which retail's code does not show (entries
+  134-248 store 2194 from t6 on both sides), so the difference is more
+  likely spread over several lives than in that one load. Source variants
+  should now be screened by compiling (6 s) and running `sched1.py --alloc`
+  and `globalalloc.py --local` on the dumps, against the registers above.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at
