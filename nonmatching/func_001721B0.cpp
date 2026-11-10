@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 888/892, checked 2026-11-08
+// BYTES 885/892 (99.2%), checked 2026-11-10
 // NEAR (night-low1, 2026-11-08): two of the three open points fixed, one instruction short now
 //       (888 of 892 bytes): the spin part's rows read as m90.r[i] (no pointer to m90, so &m90 is
 //       formed afresh for the call, addiu a1, sp, 144, and the rows load from the frame, as
@@ -15,6 +15,14 @@
 //       The scalar part is retail's to the byte. Open: (1) retail keeps the constant 0.0 for the two compares in f12 (shared with the else arm's 0.0 argument; a shared local
 //       made it worse: 132 lines); (2) retail does not keep &m90 in a callee-saved register (ours does: s0) and loads the base rows of the product through t1 = obj + 0xD0 for
 //       rows 1 and 2 only; ours folds every row into v1 offsets. ~14 compiles.
+// (2026-11-10, w11-14A8F8) The product is mul_rotation.h's MulRotationIndexedSetRows (each row
+//       computed in SetRows's argument, `x = Q(r.r[0]) = ...`): its three scalar row slots are
+//       retail's frame (0xF0 to 0x110 above r at 0xC0), and b's rows read by index give retail's
+//       t1 = obj + 0xD0 for rows 1 and 2 (98 lines to 5). Still differs: the 0.0 of the two
+//       compares (f2 here, f12 in retail, open point (1)), and the last two stores before
+//       AddTrailPoint's jal: retail stores z's slot (0x110) and puts r's row 2 (0xE0) in the
+//       delay slot; ours the other way. Unchanged by the order of each argument's chain
+//       (`Q(r.r[i]) = x = ...`) or a comma form (`(x = ..., Q(r.r[i]) = x, x)`).
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -101,7 +109,7 @@ void func_001721B0(Player* self, void* a, void* b)
         u128 r2 = Vu0::Q(m90.r[2]);
         Vu0::Q(pos) = Vu0::RotateRows(r0, r1, r2, Vu0::Q(*(Vec02*)(obj + 0x100)));
         Vu0::Q(pos) = Vu0::Add(Vu0::Q(((Collider*)self->f61C)->v140), Vu0::Q(pos));
-        MulRotationRows(&turned, m90, *b3);
+        MulRotationIndexedSetRows(&turned, m90, *b3);
         AddTrailPoint((u8*)self + 0x1520, &pos, &turned, 0, self->f2430, g_gameClock[2]);
         ((Collider*)self->f61C)->flags |= (0x8000ULL << 17);
     } else {
