@@ -1568,6 +1568,28 @@ included.
   where ours reloads `n - 1` (or keeps it in a register): the original counted with
   `--i >= 0` (or another form whose init is not an expression of the bound).
 
+### Pointer copies for an inner loop: CSE2 makes them canonical for PRE's increments (func_001C4C20)
+
+- **What differed.** An outer loop over three vertex arrays (`src++, cur++, dst++` at its end)
+  holds an inner loop over a vertex's three floats. Written with walking pointer copies
+  (`f32* c = (f32*)cur; ... c++`), the near miss stood at 56.9%: retail's `addiu s6,a0,16`
+  (cur's next value, which PRE hoists from the outer loop's end into the block before the inner
+  loop) became `addiu s8,s0,16`, read from the copy c. The gcse and loop dumps still show
+  `(plus (reg cur) 16)`; the sched dump shows `(plus (reg c) 16)`: CSE after loop
+  (-frerun-cse-after-loop) put c, the copy made just before and live longer, first in the
+  equivalence class (make_regs_eqv), so the hoisted increments depend on the copies. That
+  raised the copies' sched1 priority (2 against 1), moved every hoisted increment and the
+  counter's `i - 1` later in the block, shortened the `i - 1` pseudo's life and ranked it above
+  the rotation's address in global-alloc: retail spills the counter's slot and keeps the address
+  in s8; ours spilled the address.
+- **The form.** The inner loop indexes the floats, `(&cur->x)[k]`, `(&world.x)[k]`,
+  `(&dst->x)[k]` with `for (k = 0; k < 3; k++)`: loop.c reduces the indexes to walking pointers
+  and reverses k (retail's `li s3,2 ... bgez s3`), its pointer inits coming after PRE's copies,
+  so no copy precedes the increments when CSE2 runs. 11 lines left; the outer count written
+  `for (i = n; --i >= 0; )` (above) instead of `i = n - 1; i >= 0; i--` gave the rest. EXACT.
+- **Reading it.** Retail's hoisted pointer increments reading the outer pointers while the inner
+  loop walks registers of its own: the inner loop was written with an index, not with copies.
+
 ### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, unsolved)
 
 `for (i = 0; i < n; i++) { e = &entries[i]; if (e->used == 0) { inner loop; sum += span; } }`.
