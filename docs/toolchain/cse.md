@@ -595,6 +595,42 @@ no class, every float load waits for it, and the registers are retail's (copy in
 `move a0,s0` in the delay slot), but retail loads `$f13` before the store and ours after it.
 Neither form gives both; a Vec member store (`((Vu0::Vec*)&p)->q`) behaves as the assignment.
 
+Solved (2026-11-10, EXACT): the three globals are not alike. `g_frameDt` is the game clock's
+`dt` member, and read as `g_gameClock.dt` (include/game_clock.h) its load is MEM_IN_STRUCT_P
+with a fixed address, so it conflicts with the Vec02 assignment's in-struct store at a varying
+address, while `D_00261924` and `D_00261920` stay scalars that pass it. With the store keeping
+the class (`*(Vec02*)self->f40 = *a2;`), only the scalar loads may cross it, and retail's
+order and registers follow: sched2 lifts `$f13` above the `sq`, `$f14` waits behind it. A
+float read through a struct global and one read as a plain scalar differ exactly here; check
+whether a global is a member of a known struct before blaming the store's alias class.
+
+### A projection's arms and the product's frame (func_00144540, near miss)
+
+From the `.flow`, `.sched` and `.lreg` dumps and alias.c, flow.c and function.c of GCC 2.95.3
+(2026-11-10); the near miss now has retail's size, frame and saved registers:
+
+- **A pointer used after an if/else that both arms compute is GCSE's.** Retail keeps the
+  camera's matrix address in s0 for the arm's loads and copies it to s5 (`move s5,s0`) in each
+  arm for the call after the join. A `view` variable assigned in both arms is one pseudo that
+  CSE makes canonical (it outlives the block, cse.c make_regs_eqv), so the arm's loads go
+  through it and one saved register is lost; written as the expression at the later call,
+  PRE finds it computed in both arms and inserts exactly those copies.
+- **flow1 deletes a dead frame store only with no possibly-aliasing read in between.**
+  flow.c's mem_set_list tracks stores through the frame pointer (before reload it is not sp)
+  and drops a store overwritten later in the block; a read whose base alias.c does not know
+  (a `lo_sum` address in a pseudo) clears the entry. Retail's frame has a weight slot where an
+  inline product's last result row (`r.r[2]`) was: the row's store is gone. That happens only
+  when nothing reads unknown memory between the row's store and the slot's store, so the
+  statement that loads two globals (corner) comes before the product, not between it and the
+  weight.
+- **A register without REGNO_POINTER_FLAG whose base is an argument has no base term in an
+  address sum.** find_base_term's PLUS case returns an operand's base only if the register is
+  a known pointer or the base is a symbol or a Pmode (stack) ADDRESS; an argument's base is a
+  VOIDmode ADDRESS, so `(plus (reg ref) 16)` through an inline reference parameter (self+0x80)
+  waits for a frame store, while `(plus (reg self) 128)` (a pointer parameter) passes it. In
+  func_00144540 that keeps the product's rows behind corner's store, where retail loads them
+  first; a `Mat02*` local and Vec-member reads did not change it. Unsolved.
+
 ### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
 
 From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10):
@@ -636,6 +672,36 @@ them), the inner range tests as a `switch (key)` with or without `default`, the 
 inline function returning the comparison, and the search as a loop that `break`s on the second
 key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
 the original must have had a used label or a loop end there.
+
+Measured again 2026-11-10 (cse.c's cse_end_of_basic_block and cse_basic_block, gcse.c's cprop,
+`-ds -dG` dumps):
+
+- **Follow-jumps is the whole difference.** The near miss built with `-fno-cse-follow-jumps`
+  (both CSE passes, to explore only) has retail's registers: self in t0, the key in t1, the tag
+  in t5.
+- **A jump that the first CSE folds does not stop it.** A second use of the tag label that CSE
+  can decide (`if (n->key == key && n->owner == self)` inside the owner test) gives the label
+  two uses when the path is chosen, but cse_basic_block, once the folded jump drops the label's
+  count back to its own, continues past the label (the `to_usage` test) and the tag test still
+  reads the first load's register: the near miss's code, no PRE copy.
+- **A jump that only GCSE removes does.** A local set to 1 before the walk and tested with the
+  key (`if (flag && n->key == key)`, or `n->key == key && flag`) is EXACT: the first CSE cannot
+  see the constant (the walk's body starts at the loop label), so the tag label has two uses all
+  through CSE, PRE copies the key load (`move v1,v0` in the bne's slot), the second CPROP pass
+  replaces the flag with `(const_int 1)` and the jump pass after GCSE deletes the test; cse2
+  then leaves the copy alone. So retail's source had a second use of that label, or a loop
+  note, that ends the first CSE's path and is gone after GCSE: a test GCSE's constant
+  propagation decides, a `do { } while (0)`, or something not yet seen. A constant flag that is
+  never anything else is not plausible original code and is not kept (nonmatching/).
+- **Also ruled out (34 words or more):** the walk with `continue` for other objects' calls and
+  `prev = n` in the for's increment, a `do { } while` with `goto next` (as RemoveQueuedCalls is
+  written), the owner test repeated around each key test (65), and one test of both keys
+  (`n->key == key || n->key == tag`) with the key's body inside (62, the tag test then comes
+  first).
+- **The comparison's block before the loop is loop.c's.** The `return n->data->f4 == *q` block
+  sits between the switch's cases and the loop in both builds: find_and_verify_loops moves a
+  block entered by a conditional jump and ending in a jump out of the loop to the last barrier
+  before it.
 
 ### A default set in the else arm, not in the walk's test: reorg's stolen slot (func_001CD870)
 
@@ -801,6 +867,26 @@ here (`-fstrict-aliasing` is off), so only a memory set in a block between the t
 keep p's word unavailable while other's stays available. `-fno-gcse`, as a diagnostic only,
 gives retail's reloads everywhere but that reuse (816 bytes against 812). Retail's sweep flag
 is spilled at 4(sp) with 0(sp) unused, a sign of another frame object in the original.
+
+What a second look ruled out (w15, 2026-11-10, gcse.c and lcm.c of GCC 2.95.3):
+
+- **The reuse is a variable.** `u64 g = other->flags538;` read before the bit-47/56 test (not
+  inside it) and tested at the first sweep's bit-40 test gives retail's `ld a1` in that test's
+  delay slot and the reuse (152 lines differ, from 176). Every other read is a reload in retail.
+- **No memory set explains the rest.** 2.95's PRE is lazy code motion over ANTLOC and TRANSP
+  alone (lcm.c pre_lcm; no availability from the end of a block): it deletes an occurrence
+  whose block's first computation is anticipated and redundant, and inserts at a block's end
+  where that reaches a deleted one. A store or call between the top load and the sweep only
+  moves the source: the sweep's own load then feeds the second sweep and the tail (an asm
+  memory clobber, as a diagnostic, gives 812 bytes with those reads shared again). Retail needs
+  the reads of p->flags538 after the top, and other's at the second sweep and the tail, to be
+  separate expressions or not anticipated at all.
+- **The same expression every time.** expr_equiv_p compares the address register, the mode and
+  the alias set. A copy of p (CSE's canon_reg keeps the loop variable; gcse's cprop replaces the
+  copy in later blocks, MEM addresses included), an inline accessor, an inline helper for both
+  sweeps (852 bytes for its return value), u64 bitfield reads and -fstrict-aliasing (alias sets
+  do work in this cc1plus with it, all u64 reads share one) leave the PRE unchanged; volatile
+  reads give 836 bytes.
 
 ### Loop variables declared once at the top: shared counters and an indexed record (func_00139740)
 

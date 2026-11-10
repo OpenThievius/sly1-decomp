@@ -89,7 +89,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
 s32 NextRandom(void);
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void InitConeAgent(void* self);
 void StartAgent(void* self);
 void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
@@ -281,7 +281,7 @@ void UnregisterSwitchedCollider(void);
 void EndTimeline(void* p);
 void ComputeSinCos(f32 angle, f32* a, f32* b);
 typedef u64 Bits128 __attribute__((mode(TI)));
-s32 QueryValueTreeMask(void* self, void* node, Bits128 q, s32* out);
+s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void func_00125C90(void* obj, void* s, void* out);
@@ -1507,7 +1507,7 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
         c = c - u;
         d = half;
     }
-    SolveQuadratic(roots, (k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d);
+    SolveQuadratic((k->maxSpeed - k->endSpeed) / (k->rampTime + k->rampTime), k->endSpeed, -d, roots);
     r = roots[0] - c;
     if (0.0f < r) {
         res = (k->maxSpeed - k->endSpeed) * r * r / (k->rampTime + k->rampTime) + k->endSpeed * r;
@@ -1679,7 +1679,7 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
     return __builtin_fabsf(a - b) / scale < tolerance;
 }
 
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c)
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots)
 {
     f32 disc = b * b - a * (4.0f * c);
     if (disc < 0.0f) {
@@ -3283,15 +3283,54 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
     return acc | bits;
 }
 
-INCLUDE_ASM(func_001EEA40);
+// One plane of the value tree (QueryValueTreeMask): a child is a node's address, or a leaf mask
+// with bit 31 set.
+struct PlaneNode {
+    Vec02 normal;           // 0x00
+    f32 dist;               // 0x10
+    s32 front;              // 0x14: the child on the plane's near side
+    s32 back;               // 0x18
+};
 
-s32 QueryValueListMask(ValueListObject* self, Bits128* vec, s32* out)
+// The mask of the leaves within radius of point under node: the walk follows the near side,
+// descends into the far side too where the sphere straddles the plane, and ORs each leaf's mask
+// (ExpandMaskThroughTable) into *out.
+s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out)
+{
+    if (node < 0) {
+        *out = ExpandMaskThroughTable(self, node);
+    } else {
+        f32 near = -radius;
+        s32 next;
+        do {
+            PlaneNode* n = (PlaneNode*)node;
+            f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(point), Vu0::Q(n->normal))) - n->dist;
+            if (d < near) {
+                next = n->front;
+            } else if (radius < d) {
+                next = n->back;
+            } else {
+                next = n->back;
+                if ((u32)next & 0x80000000) {
+                    *out |= ExpandMaskThroughTable(self, next);
+                } else {
+                    QueryValueTreeMask(self, next, point, radius, out);
+                }
+                next = n->front;
+            }
+            node = next;
+        } while (!((u32)next & 0x80000000));
+        *out |= ExpandMaskThroughTable(self, next);
+    }
+}
+
+s32 QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out)
 {
     s32 r;
     if (self != 0 && self->data38 != 0) {
         Bits128 q = *vec;
         *out = 0;
-        r = QueryValueTreeMask(self, self->data38, q, out);
+        r = QueryValueTreeMask(self, (s32)self->data38, q, radius, out);
 
     } else {
         r = 0x0FFFFFFF;

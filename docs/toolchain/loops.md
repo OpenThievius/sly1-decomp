@@ -343,7 +343,7 @@ loads and stores, with every other value ranked as at the inner loop's depth, is
 the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` loses it; a
 `do { } while (1)` keeps it.
 
-### An int parameter used as a pointer: no base for the alias test (func_0019C9C8, near miss)
+### An int parameter used as a pointer: no base for the alias test (func_0019C9C8)
 
 func_0019C9C8 took its cell as `s32 b` (the caller's word from func_0019D0E0) and read
 `((s32*)b)[i]` after storing three Vec02 locals. With an int parameter the cell's address has no
@@ -365,3 +365,160 @@ per-iteration `f32* out = block` (GCSE's cprop propagates the copy into the inne
 dies); `out = (f32*)self->slots` (PRE turns it into a copy in pass 1, cprop pass 2 propagates it,
 and PRE's reaching register is inserted in loop 1 and hoisted to the top by loop.c); a biv
 `out += 8` (it is the inner pointer itself); the same loop in an inline helper; `*record++`.
+
+### A switch's case constants in a loop with calls: savings and life 1 (func_00130C58)
+
+Read from loop.c (scan_loop, combine_movables, move_movables), stmt.c (emit_case_nodes) and
+mips.c (gen_conditional_branch) with `-dL` dumps (2026-11-10, nonmatching/func_00130C58.cpp,
+the curve-window search: four quadratics per curve chosen by `switch (j)` over `j < 4`):
+
+- **What retail shows.** The inner loop's compare tree is `beq j,1; slti j,2; beqz j; beq j,2;
+  beq j,3`. Retail keeps 2 in s6 and 3 in s8 (both hoisted before the outer loop, between the
+  float constants: 4.0, 2, 6.0, 3, -2.0, -6.0) and loads the 1 in the loop (`li v0,1`). Ours
+  keeps the 3 in the loop: s8 is not saved, the frame is 16 bytes smaller and the case-2 branch
+  keeps `li v0,3` in its slot.
+- **Why ours stays.** Each EQ compare against a non-zero constant forces the constant into its
+  own pseudo right before the jump (gen_conditional_branch), so the set has life 1 and savings 1
+  (savings is n_times_set). combine_movables adds the life and savings of other sets of the same
+  constant: the 2 matches `found == 2` (life 2, savings 2) and moves at threshold 79; the 3,
+  considered next at 76, needs `76 * 1 * 1 >= 104` (the inner loop's count in pass 1; 90 in
+  pass 2 at 79) and stays. The 1 stays for the same reason. Luids count non-line notes, but
+  nothing sits between a tree constant and its jump.
+- **Retail moved the 3 in pass 1, probably the 1 too.** Built with `-fmove-all-movables` (to
+  explore only) the 1, the 2 and the 3 all move in pass 1, global-alloc gives 2 and 3 s6 and s8,
+  the 1 gets no saved register and reload rematerialises `li v0,1` in the loop: retail's code
+  and preheader order exactly, apart from one block (below). So retail's 1 and 3 each had
+  `savings * life >= 2` with the loop near 104 insns, or the loop was at most 73 insns in pass
+  1 (or 76 in pass 2). With four calls in the loop (each case sets a0 and calls; cross-jumping
+  merges cases 2 and 3 only after sched2) no form found is that small: one call after the
+  switch gives 88 and 74 insns, and pass 2 then moves the 1 and the 3, but its code is not
+  retail's.
+- **Ruled out:** the case order (sorted anyway, the tree is fixed by balance_case_nodes), `j <=
+  3` (gen_int_relational turns LE into `lt 4` with no register), the counter's type (u32, s16,
+  u16, s8, u8), the switch inside an inline function, `j == 3 ? -t : t` in case 3 (cse1 folds
+  it on the case's path, so no second 3 reaches loop.c), `case 2: case 3:` with a shared body
+  (grouped into a range: a different tree). A second set of the constant that cse1 cannot fold
+  and a later pass removes is what is missing; not found.
+- **The one other block.** Even with every constant moved, the block after the outer loop
+  differs: PRE hoists FLT_MAX's `%hi` (the search's start value) to the end of the entry block
+  (LCM puts an expression anticipated through the loop at its earliest point), update_equiv_regs
+  moves it back before its use, and local-alloc gives it v0 (2 refs over 2 insns outranks the
+  window count's subtraction, over 3), so `lui v0` leads and the subtraction takes v1; retail
+  subtracts into v0 and loads `lui v1` right before the `lwc1`. The order of `found = w -
+  windows`, `best` and `k = -1` and a named global for FLT_MAX change nothing.
+
+### An inline's constant parameter is a variable with a life: the strip loop's UNPACK words (func_00166690)
+
+Matched 2026-11-10 (DrawModelPart, src/main/file_15F678.cpp; the form found by worker
+w14-1536C8, the mechanism read from w15-166690's `-dL` dump). The part drawer's strip loop is
+333 insns in pass 1 and 304 in pass 2 and makes no call (threshold 160, less 3 a move). Retail's
+preheader holds `&D_002623E0` (s8), the constant 1 (t9, both `q.hi = 1` and `count == 1`) and
+D_00262474's `%hi` (t8); the UNPACK command words 0x6C0BC000 and 0x6C01C01A are built in the loop.
+
+- **Why ours hoisted the command words.** Passed as a parameter (`Unpack(w, 0x6C0BC000, src,
+  size)` calling `Word(w, cmd)`), the constant goes through integrate.c's parameter copy: the
+  argument is copied into a REG_USERVAR pseudo at the inline's entry with a constant
+  equivalence, which try_constants cannot put into the store (a MIPS store needs a register), so
+  the pseudo stays and lives from the inline's entry to the store: `.loop` shows `reg/v` with
+  life 5 and 6, moved at `160 * 5 >= 333`. Hoisted, they live over the whole loop and
+  global-alloc gives them t9 and t8; `&D_002623E0` and 1 are then spilled and rematerialised at
+  each use (24 bytes more, every register after them shifted).
+- **Retail's form.** `UnpackV4(w, src, num, addr)` stores `(num << 16) | addr | 0x6C00C000`
+  itself: the literal is formed at the store (life 1, "not desirable"), as `(n << 16) |
+  0x6000C000` already was for the skin's words. The S-32 size is written `n << 2`, and UnpackAt
+  takes its source first (`(w, src, size, cmd, addr)`), so the source's address is expanded
+  before the command in the bone loops' preheaders, in retail's order.
+- **The jump tables.** The function's two switches emit jtbl_0024A750 and jtbl_0024A780, so
+  their INCLUDE_RODATA lines go (left in, .rodata is 0x50 bytes too large).
+- **The tell.** A command word or other constant hoisted into a saved register in a big loop
+  where retail loads it at its store: look in `.loop` for a `reg/v` constant with a life above 1;
+  it is an inline's parameter, and retail formed the word inside the helper.
+
+### A PRE'd invariant ahead of the entry jump makes the loop phony (func_001EEA40)
+
+- **What differed.** A plane-tree walk (`for (;;) { ... if (d < -radius) ...; if (next &
+  0x80000000) { ...; break; } node = next; }`) tested bit 31 with `bgez` and had no `s3`; retail
+  hoists `lui s3,0x8000` before the loop and tests `and v0,a1,s3; beqz v0` at each use, with a
+  frame 16 bytes larger for the saved s3.
+- **Why.** GCSE runs before loop.c. PRE hoisted `-radius` (loop-invariant, used in the body) to
+  just after NOTE_INSN_LOOP_BEG, in front of the loop's entry jump to its rolled exit test.
+  scan_loop then finds an insn, not a label or the entry jump, as the first thing in the loop
+  and prints "Loop from N to M is phony" (`-dL`): nothing moves. The mask's set stays in the
+  loop, combine folds `(ne (and x 0x80000000) 0)` into a sign test, and the constant disappears.
+  Once loop.c moves the set to the preheader, the mask is a register set once outside the loop
+  and used twice inside: combine cannot merge it (it does not die at the use), so the `and`
+  stays.
+- **The form.** `f32 near = -radius;` named before the loop puts the negation ahead of
+  NOTE_INSN_LOOP_BEG. That gives the `and`, but `for (;;)` with `break` still leaves an entry
+  jump whose delay slot reorg fills with the negation (the `li` of 0x80000000 has length 2 and
+  cannot go there), so the preheader read `lui; neg.s` where retail has `neg.s; lui`. A
+  `do { ... node = next; } while (!(next & 0x80000000));` followed by the leaf's expansion has
+  no entry jump: retail's order, EXACT. The middle test reads `else if (radius < d) next =
+  n->back; else { next = n->back; ... }` (retail branches out to the bottom test on `radius <
+  d`), and the recursive call's argument moves (`mov.s $f12` before `move a3`) need the radius
+  before `out` in the prototype, as the caller QueryValueListMask's own `(self, radius, vec,
+  out)` has it.
+- **Spotting it.** A `bgez`/`bltz` where retail keeps `and` with a register holding
+  0x80000000 (or any constant that needs a `lui`): read `-dL` for "phony", and look for a PRE'd
+  expression right after the loop note.
+
+### Two passes in the preheader, and a loop 15 insns too big (func_001D9488, near miss)
+
+Read from `-dL` dumps (2026-11-10, AdvancePathFollowerEntry, nonmatching/func_001D9488.cpp).
+Retail's preheader, after the entry test, is `li s8,1; addiu s2,s0,0x874; li s7,-1; li s6,0x42F;
+li s5,0x430; lui s4,%hi(D_00261EF0)`, with `move s3,zero` in the `blez` delay slot.
+
+- **The marker is taken by index.** `addiu s2` after the entry test is a reduced giv's start
+  value (loop.c puts it in the preheader), not a walked pointer's (`e = self->f874; ... e++`
+  sets it before the test, in the first block). `PathMarker* e = &self->f874[i];` at the top of
+  the body is retail's: `li 40; mult` reduced to s2, and the prologue's save order then matches
+  too.
+- **1 in pass 1, the rest in pass 2.** The giv's start sits between 1 and -1, so pass 1 moved
+  the `li 40` (life 1) and the kind test's 1 (life 1), reduced the giv, and stopped at -1; pass 2
+  moved -1, 0x42F, 0x430 (life 1 each) and the `%hi` (life 2 once pass 1 folds its `lo_sum`
+  into the argument move). With threshold T falling 3 per move that needs T >= N1, T-3 >= N1,
+  T-6 < N1 in pass 1 and T-6 >= N2 in pass 2.
+- **Measured.** The file's threshold is 79 (a loop of 80 does not move a life-1 constant, 79
+  does). Ours counts N1 = 91, N2 = 87, so nothing moves in pass 1. The same source is EXACT
+  with `-mvu0-use-vf0-vf30` or `-vf31` (T = 94, 95: each freed VU0 register adds one), and
+  `-dL` then shows retail's exact split. So the source is retail's in everything but the loop's
+  size at the loop pass: at T = 79 retail's pass 1 must count 74 to 76 insns, 15 fewer than ours.
+- **Not a flag.** vf30/vf31 for every game file changes 115 functions in 22 files, among them
+  the loop-tuned matches of this chapter (func_00140258, func_001971B8, func_00192DD0,
+  func_001CF158, func_00154370) and two in this file (func_001D66A8, func_001D9AC8); the
+  threshold 79 stands.
+- **Where 15 insns could go: not found.** Accounted for in pass 1: the giv's four insns, five
+  moved constants, four call-result copies that combine removes, the `&key` copy, flow's
+  `(use (const_int 0))`, two single-use pseudos pass 1 substitutes, a jump: ours' 91 is the
+  final code's 74 plus exactly these. Statement forms change one insn at most (an if/else for
+  the key's switch: 90; `self->f874 + i` and byte-offset index forms: 91). Lifetimes can't do it:
+  a compare's constant is forced into its register right before the jump (life 1), and a named
+  constant at the loop's top moves in pass 1, before the giv's start, against retail's order.
+
+Solved (2026-11-10, w15): the copy is a PRE copy kept by being used in its own block. Retail
+had no `block` variable: each loop takes the slots' address itself, inside its body
+(`f32* out = (f32*)self->slots; out[k * 8] += ...;`, the zero loop the same, the call passing
+`self->slots`). Read from the `-dG` and `.loop` dumps:
+
+- **PRE inserts the address once and copies it at each use.** `self + 0xE4` is never locally
+  anticipatable in the entry block (the parameter's copy from a0 sets `self` before it), and 2.95's
+  lcm only counts ANTLOC occurrences as computations, so a computation at the top is not
+  available to the later ones: PRE inserts the expression into a new pseudo (here in loop 1's
+  body, which loop.c hoists to the entry: retail's `addiu t4,t3,228`) and turns every occurrence
+  into a copy of it.
+- **cprop removes a copy only into other blocks.** Its copy propagation is global only: a copy
+  used in its own block survives. In the inner loop's body, `out = R; mem(out + k*32)` keeps the
+  copy; loop.c's inner pass moves it to the inner preheader (the outer body) and reduces the giv
+  from it (`move v0,a2`), and the outer pass moves it again to the outer preheader, after the
+  constant 100 (`move a2,t4`). The same copy declared in the outer body (`out = ...` once per
+  corner) is used only in the inner loop's block, so cprop pass 2 propagates it and it dies.
+- **No separate `block` pseudo.** With `f32* block = (f32*)self->slots;` at the top, the entry
+  computation is a second pseudo beside PRE's (two registers, `move t8,t4` at the entry);
+  declared just before the zero loop it is a PRE copy in another block that cprop removes (also
+  EXACT). Writing the address in each loop, as the near miss's callers' `self->slots` already
+  did, is the form landed.
+- `((f32*)self->slots)[k * 8]` and `*(f32*)&self->slots[k]` fold the 0xE4 into the memory
+  offset (`lwc1 228(v0)`): the address has to be a named pointer.
+
+The tell: a reg-reg copy in a loop's preheader that feeds only the inner loop's reduced pointer
+is a PRE copy of an address the original wrote inside the inner loop's body.

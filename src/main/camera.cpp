@@ -344,8 +344,8 @@ INCLUDE_DATA(D_002618E0);
 INCLUDE_DATA(D_002618F0);
 INCLUDE_DATA(D_00261900);
 INCLUDE_DATA(D_00261910);
-INCLUDE_DATA(D_00261920);
-INCLUDE_DATA(D_00261924);
+f32 D_00261920 = 15.0f;
+f32 D_00261924 = -8.0f;
 f32 D_00261928[9] = { 1.0f, 5.0f, 10.0f, 12.0f, 15.0f, 12.0f, 10.0f, 5.0f, 1.0f };
 f32 D_0026194C = 250.0f;
 f32 D_00261950[2] = { 1500.0f, 0.0f };
@@ -1300,7 +1300,27 @@ void func_00145610(Camera* self, Vec02* p, f32 x, f32 y)
     Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
 }
 
-INCLUDE_ASM(func_00145718);
+f32 Arctangent(f32 x);
+
+// The orbit step: the camera moves to the focus a2, the spring at v230/v240 eases toward rest,
+// and the heading and pitch of a1 plus the spring's offset, seen from a2, turn by the
+// arctangents of the screen turn scaled by f1F0 and f1F4; the frame is rebuilt from them.
+void func_00145718(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw, f32 turnPitch)
+{
+    Vec02 tmp;
+    f32 yaw;
+    f32 pitch;
+    f32 dist;
+
+    *(Vec02*)self->f40 = *a2;
+    SpringCameraVector(self, &self->v230, &self->v240, (Vec02*)&D_00248D30, D_00261920, D_00261924, g_gameClock.dt);
+    Vu0::Q(tmp) = Vu0::Add(Vu0::Q(*a1), Vu0::Q(self->v230));
+    ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
+    yaw = yaw + Arctangent(turnYaw * self->f1F0);
+    pitch = pitch - Arctangent(turnPitch * self->f1F4);
+    BuildYawPitchMatrix((Mat02*)self->f80, yaw, pitch);
+    UpdateCameraMatrices(self);
+}
 s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];

@@ -1241,6 +1241,31 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A pointer that dies before the next quantity is born: the widening does not reach it (func_001536C8, open)
+
+- AddActiveSetItem's loop body (owner load, index load, the count chain `lw; sll; addu` for
+  the row's slot, the Dot and its qmfc2) has retail's instructions and order; only the owner
+  pointer and the count chain swap a0 and v1. From the `.lreg` dump, sched1's order puts the
+  owner load at insn 1, the axes load at 2, the index load (where the owner dies) at 3 and the
+  count load at 4. QTY_CMP_PRI: the owner 2 * 4 / (6 - 2) = 2.0, the count chain (three
+  pseudos tied by combine_regs, 12 references) 3 * 12 / (26 - 8) = 2.0, a tie that the
+  owner's lower quantity number wins, so it takes v1 and the chain a0.
+- Placing the chain first would not help: the owner's widened range is [fake_birth,
+  fake_death) = [0, 8) and the chain is born at 8, so find_free_reg sees no conflict and the
+  owner takes v1 again. Retail's a0 needs the count load before the index load in
+  local-alloc's order (owner [2, 8), 1.33; chain born at 6, 1.8, placed first in v1, and the
+  owner then conflicts with v0 and v1). sched2 would restore retail's final order from that.
+- sched1 cannot produce that order from this dependence graph: the index load (priority 9,
+  ahead of the Dot) is ready at t = 3 and always outranks the count load (6, only the store
+  after it); loads never depend on loads, and adjust_priority's birthing raise does not apply
+  to an insn ready from the start. Ruled out by probes (each the same six differences): the
+  count, the index, the owner or the slot's address named (before or after the Dot; the count
+  named before the Dot lets cse_around_loop reuse the loop test's load instead), the Dot
+  operands named or as `Vec02` entries, `u128` for the product, a `const s32&` index,
+  `&items[i]`, the row read at each use, a named axes pointer, ToBits named before the store.
+  What retail's block had that changes the graph (an insn sched1 sees and reload deletes, or a
+  dependence of the index load) is open.
+
 ### MulAddX lists its weight before b (func_00187260)
 
 Read from local-alloc.c (block_alloc, combine_regs) and the `.lreg`/`.greg` dumps of
@@ -2204,6 +2229,12 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   (owner, key, scale, mode, ...), the weight curves' own order, both come out as retail's and
   every other caller still matches. A call site that passed a non-zero int where a float now
   is compiles silently (the int converts): rebuild in full after such a change.
+- **SolveQuadratic is `(f32 a, f32 b, f32 c, f32* roots)` (func_00130C58).** Declared with
+  the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
+  where retail copies t into $f12 first; with the roots last every case's moves are retail's.
+  Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
+  func_001EA4B8) match with either order; func_00156718 (file_1549C8) already declared the roots
+  last, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.

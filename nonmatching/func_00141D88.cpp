@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 420/444 (94.6%), checked 2026-11-09
+// BYTES 420/444 (94.6%), checked 2026-11-10
 // Tried w8 (2026-11-09): the loop matches as retail with the compiler's vmove (Vec d stored, then NormalizeOr(d, ...): docs/TOOLCHAIN.md, "A compiler copy's latency in sched2"); the head's dots are VU0 pseudos in retail (a dot read through ToFloatMoved is a TI_REGS pseudo and reload picks its VU0 register: the old vf3/vf4/vf5 mix). All three as ToFloat give retail's VU0 registers but not its order; all three as ToFloatViaBits give retail's order once dot3 is placed before dot2's qmfc2 in sched1 (the local-alloc emulation then gives retail's vf5 for dot3's 1.0), which no priority allows (dot2's conversion 15 against dot3's 13 at -dS).
+// Tried w15 (2026-11-10): the head is a sched1 priority wall (docs/toolchain/sched1.md, "The quadratic's head"): dot3's path is 13 at most, below dot2's conversion (14-15), c's subtraction (16) and the 4.0 load (15), and twoB's add is raised to 14 by adjust_priority (set once, live at the block's end), so dot3 never issues before or directly after dot2's qmfc2, which retail's vf5 for dot3's 1.0 needs. Lengthening dot3's path (probe: `+ 0.0f`) gives every VU0 register of retail. Ruled out: the 64 conversion mixes, Vec-valued dots (448 forms), a copied twoB, an inline root solver.
 // NEAR: the loop is retail's. Still differs: the head only: dot2's qmfc2 issues before the 4.0 and the sub.s (retail after), and dot3 (ToFloatMoved here, the closest of 216 conversion mixes) takes vf4/vf3 where retail has vf3/vf5.
 #include "common.h"
 #include "asm_func.h"

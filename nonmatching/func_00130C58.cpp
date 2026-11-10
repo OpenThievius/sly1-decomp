@@ -1,18 +1,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 744/748, checked 2026-11-08
+// SIZE 736/748, checked 2026-11-10
 // NEAR (src/main/placed_object.cpp, where it is INCLUDE_ASM with INCLUDE_RODATA(D_00249C90)):
-// all but one register: retail keeps the switch's constant 3 in s8 (loop.c moved it out of
-// the inner loop, so s8 is saved too: 16 bytes more), ours loads it in the loop (li v0,3 in
-// the case-2 branch's slot, where retail has a beql with the lwc1). The loop dump (-dL) gives
-// the inner loop 104 insns: the 1 and the 3 each have life 1 and are "not desirable", the 2
-// (also found's test) is moved; retail moved the 3 but not the 1. Matched on the way: the final
-// search as a goto loop (retail's has its test at the top and no strength reduction: loop.c
-// never sees it), the window count in found's register, the va slots read as words.
-// Tried for the 3: the case order, j <= 3.
+// retail keeps the switch's constant 3 in s8 (loop.c moved it before the outer loop, so s8 is
+// saved too: 16 bytes more); ours loads it in the loop (li v0,3 in the case-2 branch's slot).
+// Each tree constant is its own pseudo with life 1 and savings 1; the 2 matches found == 2
+// (savings 2) and moves, the 3 needs 76 >= 104 insns (pass 1; 79 >= 90 in pass 2) and stays.
+// Built with -fmove-all-movables (to explore only) the 1, 2 and 3 move in pass 1 and the code is
+// retail's (the 1 rematerialised as li v0,1) except the block after the outer loop: PRE hoists
+// FLT_MAX's %hi to the entry, local-alloc gives it v0 and the window count's subu v1 (retail:
+// subu v0, lui v1 just before the lwc1). So retail's 1 and 3 each had a second set of the same
+// constant (or a loop of at most 73 insns): not found (docs/TOOLCHAIN.md, "A switch's case
+// constants in a loop with calls"). SolveQuadratic's real prototype has the roots last: with
+// them first, cases 0 and 2 set a0 before $f12. Matched on the way: the final search as a goto
+// loop (retail's has its test at the top and no strength reduction: loop.c never sees it), the
+// window count in found's register, the va slots read as words.
+// Tried for the 3: the case order, j <= 3, the counter's type, the switch in an inline, j == 3
+// in case 3 (cse1 folds it), case 2: case 3: shared (a range), one call after the switch.
 #include "common.h"
 
 f32 func_001FD578(u64 v);
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 // The earliest time from 0 on outside every window the given curves spend beyond their limits:
 // for each (coefficients, scale) pair, the roots of four quadratics in the coefficients, kept
@@ -32,16 +39,16 @@ void func_00130C58(s32 n, ...)
         for (j = 0; j < 4; j++) {
             switch (j) {
             case 0:
-                found = SolveQuadratic(w, t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f);
+                found = SolveQuadratic(t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f, w);
                 break;
             case 1:
-                found = SolveQuadratic(w, -t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f);
+                found = SolveQuadratic(-t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f, w);
                 break;
             case 2:
-                found = SolveQuadratic(w, t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f);
+                found = SolveQuadratic(t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f, w);
                 break;
             case 3:
-                found = SolveQuadratic(w, -t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f);
+                found = SolveQuadratic(-t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f, w);
                 break;
             }
             if (found == 2) {

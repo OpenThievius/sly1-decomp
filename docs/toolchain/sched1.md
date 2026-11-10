@@ -315,6 +315,44 @@ earlier insn touches, so no dependence on &r explains it; the issue slots do.
   Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
   retail issues later than ours although nothing it reads or writes is touched before.
 
+### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18, unsolved)
+
+Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2026-11-10):
+
+- **jump2 does merge them.** A probe that stores `*p` in each arm with `p` hidden from CSE
+  (an empty asm on `p`, a probe only) gets both arms' `sqc2 vf1,0(v1)` merged by jump2's
+  cross-jumping (find_cross_jump with minimum 1 for a simple jump: the .jump2 dump puts a new
+  label before arm B's store) and reorg then fills arm A's `b` slot from before the jump:
+  retail's layout. So a store in each arm, merged after sched2, is a consistent explanation of
+  retail's head.
+- **CSE rules out `p = &d` in the same block.** `&d` (d at frame offset 0) is a register copy of
+  the frame pointer ($1 before elimination), and make_regs_eqv always makes a fixed hard
+  register the canonical register of its class, so canon_reg rewrites `(mem p)` to `(mem fp)`
+  in every insn of the extended basic block that holds p's set. Arm A (the then-arm) falls
+  through from the test and is always in that block; arm B is reached by a jump to a label used
+  once, which -fcse-follow-jumps follows. Written plainly the arms store through sp (`0(sp)`),
+  and retail's `move v1,sp` with `0(v1)` in both arms cannot come from `p = &d` set before the
+  test in the same block. With the store after the join (the near misses' form) p survives
+  because the join label starts a new CSE block. func_0014F168 has no label before the test at
+  all; in func_0013BE18, p set before the first `if` survives but crosses the call into s2.
+- **Arm A's VU copy has the same problem.** `n = x; *p = n;` stores x (the fallback, a GPR
+  pseudo: `sq v0`) unless n is the canonical register; make_regs_eqv prefers the new register
+  only if it lives past the CSE block (or was set before it) and longer than the old one. A
+  reused variable n first set in func_0013BE18's first else arm (the Sub result, probe g1)
+  still gives `sq v0,0(sp)`: CSE's path from block 0 follows the first if's arms, so the block
+  starts at the function's start.
+- **Isolating the store is not enough in func_0014F168.** With the probe's merged stores the tail
+  loses retail's `move v1,sp` life into the join block: local-alloc then gives the first
+  weight's %hi a0 (retail v1) and `addiu a1` comes one slot late (after `sqc2 vf1`). In
+  func_0013BE18 the same probe gives the e1/e4 tail above, but for the weights' lw order.
+- **Stale scheduling state, checked.** haifa-sched.c 2.95 never clears flow's LOG_LINKS or
+  SCHED_GROUP_P before sched2 (the "clear out stale" lines came later), so a group or link made
+  before reload survives; the sched2 dump marks a SCHED_GROUP_P insn with '+'. On MIPS only a
+  USE before a call sets SCHED_GROUP_P, and no insn of these blocks has it. jump2's
+  delete_noop_moves (after sched2) also deletes a move whose value find_equiv_reg finds
+  already in its register, so sched2 can see an insn that the final code lacks: a candidate for
+  the missing dependence of `addiu a1`, not found.
+
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
 The player's blend weights (2026-11-09) compute three slot weights, each a dot product over
@@ -829,3 +867,75 @@ for the stores:
   loads second (the two-pass argument rule), which gives our vf4/vf3 for the 1.0 and the
   second vertex and the 1.0's store after the sum. The named order also gave the kind's
   reloads retail's v1 (and with it the `beqzl` of the kind switch's delay slot).
+
+### A reader passed on and a void return: the counter's own register (PAL func_eu_001DDA10)
+
+A PAL-only loader stored a count read from a stream, allocated a word per entry and read each
+entry through a callee, `for (i = 0; i < count; i++) read(a0, &table[i]);`. Our attempt (53.8%)
+called the reader as `ReadBufferedU16()` and returned the table; retail has one more saved
+register (s5), the counter in s2 from the prologue, and no load of the table after the loop.
+Both were signature errors, not scheduling ones:
+
+- **The reader takes the stream.** Retail's first `jal` has no argument move because `$a0` is
+  still the incoming parameter: ReadBufferedU16 is `s32 (void* self)` (its other callers pass
+  it). With the argument, the parameter's copy to `$a0` sits before the call, and sched1 then
+  puts combine's `i = 0` (which combine sinks to the rotated loop test, merging the test into
+  `blez count`) before the count's load instead of after it. The counter is born while the
+  count's `%hi` pseudo is still live, conflicts with it, and global-alloc gives it a register of
+  its own (s2) rather than reusing the dead `%hi`'s s0; sched2 then hoists `move s2,zero` into
+  the prologue.
+- **It returns nothing.** The `v0` retail has at the return is the table's reload that reorg
+  copied into the loop's delay slot; `return table;` adds a load at the exit and a blez target
+  before it. The caller (func_eu_001DDC68) never reads `v0`.
+
+Check a callee's first argument register even where retail never sets it: an unchanged `$a0`
+passed on is invisible in the caller's code but shifts sched1 (as in func_0018AD88).
+
+### A product's operand order sets the next constant's register (func_0017E710)
+
+- **What differed.** Before FindNodeForQuery the second loop of func_0017E710 has
+  `q.weight = self->mass * D_00264034; q.kind = 0x20;`. Ours put the 0x20 in v0 after the
+  weight slot's `qmtc2 v0` and sched2 placed the `sw` of the slot in the call's delay slot;
+  retail sets `li v1,32` while v0 still holds the weight slot's word and stores the weight
+  before the call. The first loop, with the same statements, is retail's in both forms.
+- **The form.** `q.weight = self->mass; q.weight *= D_00264034;` (or the constant named first,
+  `f32 k = D_00264034; q.weight = self->mass * k;`) gives the constant's load an earlier LUID
+  than the member's: the multiply keeps `mul.s $f0,$f0,$f1` with the mass in $f0, and the
+  0x20 takes v1. `D_00264034 * self->mass` gives the same order with the registers swapped.
+  Found by trial (three forms); the dumps were not traced, so the pass that decides it is a
+  guess: the load order changes sched1's ties and with it the order local-alloc sees.
+
+### The quadratic's head: a priority wall between dot2's conversion and dot3 (func_00141D88, unsolved)
+
+Read from the `-dS -fsched-verbose-6`, `.combine` and `.lreg` dumps (2026-11-10, w15), for
+func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Dot(ab,pa)`,
+`ha = Dot(ab,ab)`, `disc = (hb+hb)^2 - ha*(c*4)`):
+
+- **What each pass needs.** Local-alloc (emulated with lalloc2.py over the `.lreg`) gives
+  dot3's 1.0 retail's vf5 only when dot2's result (vf4) is still live at dot3: dot3 issued
+  in sched1 before dot2's qmfc2, or directly after it. Retail's `qmfc2 v1` for dot2 needs
+  dot1's ToBits GPR to die (its mtc1) directly before dot2's qmfc2, as the near miss has.
+  sched2 then gives retail's order only with dot3 in vf3/vf5: with dot3 in vf4 it is
+  anti-dependent on dot2's qmfc2 (3 dependents), which then wins the priority-15 tie with
+  the 4.0 load (`lui at,0x4080`) by LUID; in vf3/vf5 the qmfc2 has 2 dependents, the load
+  goes first and the sequence m1, 4.0, sub.s c, qmfc2 v1, mtc1 v1, dot3 is retail's.
+- **Why sched1 cannot.** dot3's longest path is dot, qmfc2, mtc1, `ha*(4c)`: priority 13 at
+  most (ToFloatViaBits; 12 with ToFloat, ToFloatNow or ToFloatMoved). dot2's qmfc2 is 15
+  (ViaBits) or 14 (Now, ToFloat), dot1's mtc1 17, `c - r*r` 16, the 4.0 load 15, and all
+  are ready from cycle 6 while dot3 is ready from cycle 5: dot3 can never issue before or
+  right after dot2's conversion. When dot3 finally ties, twoB's add has been raised by
+  adjust_priority to 14 (it sets a pseudo set once and live at the block's end: the
+  roots' `-twoB`) and goes first. INSN_REG_WEIGHT is 0 for both (dot3 kills ab and has
+  one REG_UNUSED), so the earlier note that the dot weighs 1 was wrong; the raise decides.
+- **Probe.** `ha = ToFloatViaBits(...) + 0.0f` (dot3's path +3) puts dot3 before dot2's
+  qmfc2 and gives every VU0 register of retail: the lever is dot3's priority, by at least
+  one cycle, with nothing visible in the code (a copy kept until allocation and deleted by
+  reload would do it).
+- **Ruled out (w15).** All 64 ToFloat/ToFloatNow/ToFloatViaBits/ToFloatMoved mixes for the
+  three dots (the near miss's ViaBits/ViaBits/Moved stays best at 9 lines; all ToFloat and
+  all ToFloatNow give every VU0 register of retail but 17-18 lines of order and GPRs);
+  each dot written over Vec values (`Dot(Vec::Of(x), Vec::Of(y)).q`, the movti copies are
+  gone before sched1: the 448 forms score as their u128 twins); `twoB = hb; twoB += twoB`
+  (combine merges the copy, twoB is set once again); an inline root solver taking
+  `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
+  test).

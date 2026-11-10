@@ -178,7 +178,10 @@ void RemoveFromList(void* table, void* self);
 extern f32 g_gameClock[];
 void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
-void func_0019C9C8(void* a, s32 b, void* c);
+// A cell of the grid func_0019D0E0 finds a point in: the indices of its four corners in the
+// point table at 0xA8 and the record table at 0xC4.
+struct Cell8B { s32 corner[4]; };
+void func_0019C9C8(C8B* self, Cell8B* cell, Quad16* point);
 void UnregisterCollider(Collider* self);
 struct LoadStream;
 s32 ReadBufferedS16(LoadStream* in);
@@ -1925,7 +1928,47 @@ void StartC8BObject(C8B* self)
     self->f50 = 1;
 }
 
-INCLUDE_ASM(func_0019C9C8);
+// Weights of the four corners of a cell for the point, from the planes of its faces (the sides'
+// cross products), then blends the corners' 24 floats by those weights into self's slots and
+// gives them to the renderer.
+void func_0019C9C8(C8B* self, Cell8B* cell, Quad16* point)
+{
+    s32 tri[3];
+    Vec02 side1;
+    Vec02 side2;
+    Vec02 normal;
+    f32 weight[4];
+    s32 i;
+    s32 j;
+    s32 k;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            tri[j] = cell->corner[(i + j + 1) % 4];
+        }
+        Vec02* points = *(Vec02**)((u8*)self + 0xA8);
+        Vu0::Q(side1) = Vu0::Sub(Vu0::Q(points[tri[1]]), Vu0::Q(points[tri[0]]));
+        Vu0::Q(side2) = Vu0::Sub(Vu0::Q(points[tri[2]]), Vu0::Q(points[tri[0]]));
+        Vu0::Q(normal) = Vu0::Cross(Vu0::Q(side1), Vu0::Q(side2));
+        Vu0::Q(normal) = Vu0::DivX(Vu0::Q(normal), Vu0::Length(Vu0::Q(normal)));
+        f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*point), Vu0::Q(normal)));
+        f32 corner0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(points[tri[0]]), Vu0::Q(normal)));
+        f32 cornerI = Vu0::ToFloat(Vu0::Dot(Vu0::Q(points[cell->corner[i]]), Vu0::Q(normal)));
+        weight[i] = (along - corner0) / (cornerI - corner0);
+    }
+    for (k = 23; k >= 0; k--) {
+        f32* out = (f32*)self->slots;
+        out[k * 8] = 0.0f;
+    }
+    for (i = 0; i < 4; i++) {
+        f32 w = weight[i];
+        f32* record = (f32*)self->fC4[cell->corner[i]].pos;
+        for (k = 0; k < 24; k++) {
+            f32* out = (f32*)self->slots;
+            out[k * 8] += record[k] * w;
+        }
+    }
+    SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
+}
 
 INCLUDE_ASM(func_0019CC10);
 
@@ -2089,11 +2132,11 @@ void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
     }
 }
 
-void TrackAimTargetObject(Player* self, void* x, void* y)
+void TrackAimTargetObject(Player* self, C8B* x, void* y)
 {
     Quad16 q0;
     Quad16 q1;
-    s32 w20;
+    Cell8B* w20;
     s32 w24;
     if (y != 0) {
         f32 d = self->f2424 - g_gameClock[1];
@@ -2106,13 +2149,13 @@ void TrackAimTargetObject(Player* self, void* x, void* y)
     }
 }
 
-void TrackAimTargetPoint(void* self, void* dst, PathCurveObject* src, f32* k)
+void TrackAimTargetPoint(void* self, C8B* dst, PathCurveObject* src, f32* k)
 {
     Quad16 q0;
     Quad16 q1;
     Quad16 q2;
     Quad16 q3;
-    s32 w40;
+    Cell8B* w40;
     s32 w44;
     TransformPointBetweenFrames(0, (s32)src->parent, (u8*)self + 0x140, &q0);
     PathCurve* o = src->curve;

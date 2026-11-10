@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 516/492, checked 2026-11-08
-// NEAR (2026-11-08, night-gamec): retail forms &params.q30 and &params.q50 afresh for each call; this keeps them in two more s registers (a 0x160 frame for 0x140)
+// BYTES 392/492 (79.7%), checked 2026-11-10
+// NEAR (2026-11-10, w15): the frame and saved registers are retail's with the two scales through the inline
+//       StoreScaledQuadword (docs/toolchain/gcse.md, func_001EC190); what still differs is the init block's
+//       constant stores, the open wall of the static parameter records (docs/toolchain/large-functions.md,
+//       "What retail's order needs"; func_001D5FA8 and its siblings)
 // In the context of its file, src/main/file_1E88D0.cpp: its declarations before the function, bodies cut.
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
@@ -91,7 +94,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
 s32 NextRandom(void);
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void InitConeAgent(void* self);
 void StartAgent(void* self);
 void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
@@ -800,7 +803,7 @@ f32 RandomGaussian(f32 mean, f32 deviation, f32 limit);
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 
-s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
 
@@ -920,6 +923,17 @@ void* StoreQuadword(void* dst, Quadword128 v);
 void* FindAnimRecord(s32 key);
 void DrawAngleSortedRing(void* pos, s32 n, f32* table, s32 a, void* b, TempoRingParams* params, void* request);
 
+// k times the quadword at p, into dst (the quadword helpers' product).
+static inline void StoreScaledQuadword(void* dst, f32 k, void* p)
+{
+    Quadword128 t;
+    StoreFloatAsQuadword(&t, k);
+    Quadword128 tv = t;
+    Quadword128 u;
+    CopyQuadword(&u, p);
+    StoreQuadword(dst, ScaleQuadword(tv, u));
+}
+
 // The deferred request DrawTempoAgent queues: the agent at 0x60.
 struct TempoRingRequest {
     u8 pad00[0x60];
@@ -951,18 +965,8 @@ void DrawTempoAgentRing(TempoRingRequest* request)
         params.f70 = 0;
         params.f74 = FindAnimRecord(0x15D);
         f32 level = agent->f298->level;
-        Quadword128 t;
-        StoreFloatAsQuadword(&t, level * level);
-        Quadword128 tv = t;
-        Quadword128 u;
-        CopyQuadword(&u, &params.q30);
-        StoreQuadword(&params.q30, ScaleQuadword(tv, u));
-        Quadword128 t2;
-        StoreFloatAsQuadword(&t2, agent->f298->level);
-        Quadword128 tv2 = t2;
-        Quadword128 u2;
-        CopyQuadword(&u2, &params.q50);
-        StoreQuadword(&params.q50, ScaleQuadword(tv2, u2));
+        StoreScaledQuadword(&params.q30, level * level, &params.q30);
+        StoreScaledQuadword(&params.q50, agent->f298->level, &params.q50);
         DrawAngleSortedRing(&agent->v140, 7, D_00275070, agent->fC98, agent->fC9C, &params, request);
     }
 }

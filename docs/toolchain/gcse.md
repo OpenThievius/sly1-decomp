@@ -579,3 +579,118 @@ SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) wit
 - **`addu v0,v1,a2` (base first) for `target[j]`.** g++ turns a subscript of a pointer, or of
   `*p`, into pointer arithmetic, whose address inside a memory reference has the index first; an
   array member (`target->v[j]`) stays an ARRAY_REF, base first, as a local array's.
+
+### A splat split between a GPR and a VU0 copy: what gcse's copy propagation does (func_00155868, unsolved)
+
+Read from cse.c (make_regs_eqv, the copy swap at the end of cse_insn, cse_end_of_basic_block),
+gcse.c (hash_scan_set, cprop_insn), reload.c (find_equiv_reg) and reload1.c (reload_cse_regs_1)
+of GCC 2.95.3 and the -ds/-dG/-dl dumps (2026-11-10). func_00155868 splats the margin
+(`Q(size) = Splat(m)`) and then, by arm, either `lo = t - size, hi = t + size` or `hi = size,
+lo = size * -1`. Retail keeps the splat in a GPR (`pextlw v0,v1,v1`: an output register apart
+from the input, so a real GPR pseudo), copies it to vf2 for the size store and the then-arm's
+vsub/vadd, stores `hi` from the GPR in the else arm (`sq v0,32(sp)`) and copies it again to vf3
+for the MulX (`qmtc2 v0,vf3`, which reorg takes from the else arm into the `beqz` slot). Ours
+has one VU0 pseudo (`VU_REGS or none`): the asm's output is reloaded through v0 into vf2 and
+everything reads vf2. One instruction short.
+
+- **cse1 makes the split; gcse's cprop undoes it.** With the splat named (`u128 s = Splat(m)`)
+  the inline's return copy `s = r` survives cse1 in two orientations by path: on the jump path
+  (head and else, whose cuid range covers the whole if/else) the copy's destination does not
+  live outside the range, so the asm's register stays canonical and the else arm's uses become
+  it; on the fall-through path (head and then) the destination lives past the range, becomes
+  canonical, and cse_insn's swap moves the asm's output into it (the copy follows the asm
+  directly). After cse1: `asm -> s; r = s; size = s; then: s; else: r`. gcse's copy
+  propagation then finds `r = s` available at the else arm's entry and rewrites both uses
+  ("COPY-PROP: Replacing reg 121 in insn 191/232 with reg 119"): one pseudo. With a statement
+  between the asm and the copy (a diagnostic, not a form) there is no swap and cse1 leaves the
+  other orientation, `asm -> s; h = s; then: h; else: s`, which is retail's; cprop then rewrites
+  the then arm's uses instead. cprop replaces a copy's destination wherever the copy is
+  available at a block's entry and its source is not set earlier in that block, in any insn whose
+  pattern is a SET (asm operands included); only PRE's copies, made after cprop in the single
+  pass, escape it, and cse2's paths then canonicalise them back the same way.
+- **The class of the GPR value.** A test unit shows regclass's balance for a Splat result:
+  `=r` output, one store and one `j` use give VU0 (`qmtc2` after the asm, `sqc2`); two stores
+  and one `j` use give a GPR (`pextlw v0,v1,v1; sq v0; qmtc2 v0,vf3` before the MulX: retail's
+  else arm). So retail's GPR pseudo had at most one VU0 use against two stores at regclass
+  time, and the then arm's two uses were on another (VU0) pseudo.
+- **Reload would supply the rest.** find_equiv_reg stops only at a CODE_LABEL, so a reload in
+  the fall-through arm finds a register copied in the head (`vf2`); reload_cse_regs forgets at
+  labels, not jumps; reload_cse_simplify_set turns a load of a slot a register was just stored
+  to into a register move. A form whose then arm reads `size` from memory up to reload, with
+  the copy to vf2 in the head, would give retail's head; no plain form tried keeps the loads
+  past cse2.
+- **Ruled out** (all one VU0 pseudo, 572 bytes): the splat as a named `u128` read by either
+  or both arms, as a `Vu0::Vec` with Vec helpers in the arms, `Vec::Of(size)` reads, `hi = size`
+  after the MulX, `Q(hi) = Q(size)` and MulX of `Q(hi)`, a second Splat in the else arm (cse1's
+  jump path merges the identical asm), `s` reassigned in the else arm or after the join.
+- **The loop is retail's.** `Vec02* pts = r->points[r->bank];` before the loop and `Vec02* p =
+  &pts[i];` in its body: loop.c reduces the address to a pointer giv initialised in the
+  preheader after the entry test (`addu v1,a0,s1` in the `blez` slot, `move s0,v1`), where a
+  pointer stepped by the `for` (`p++`) is the variable itself. With it the loop and the tail
+  equal retail's instruction for instruction; only the head's missing instruction is left (it
+  also moves the loop label's alignment `nop`).
+
+### The same lever for a parameter block's two quadwords (func_001EC190)
+
+- The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);
+  CopyQuadword(&u, &params.q30); StoreQuadword(&params.q30, ScaleQuadword(t, u));`, twice)
+  kept `&params.q30` and `&params.q50` in two saved registers (a 0x160 frame for retail's
+  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
+  and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
+  substitutes each address at its use and retail's frame and saved registers follow; the
+  remaining difference is the block's constructor stores ("What retail's order needs",
+  large-functions.md).
+
+### PRE hoists an exit block's expressions above a loop; a variable whose address is taken keeps them (func_0015F320)
+
+- **What PRE does after a loop.** In this release's lcm.c, `latein` is `delayin` for every
+  block but the last, and `delayin` stops at a loop's header (its back edge starts as not
+  delayed and stays so). An expression the block after a loop computes from a register set
+  before the loop (`frame & 0x1FF`, `frame >> 24`) is anticipatable through the loop and
+  delayed only up to the block before it, so that block is "latest": PRE computes the
+  expression there (`PRE/HOIST: end of bb 6`), deletes the computation after the loop, and the
+  value lives in a saved register across the loop. A computation earlier in the function does
+  not help: this LCM never uses availability, only anticipation from the last kill. Constants
+  are not expressions, so `frame & 0xF000000` (its `lui` set in the same block) stays.
+- **Retail's sign.** After the loop retail recomputes a FRAME word from the register the value
+  was loaded into (`andi v0,s3,0x1ff; lui a2,0xf00; and a2,s3,a2; or`) and no masked value
+  crosses the loop. Ours kept `frame & 0x1FF` and `frame >> 24` in s3 and s4 (one more saved
+  register, a different frame and loop registers), or `fbp | psm` in s3 when they were locals.
+- **What keeps them after the loop.** A variable whose address is taken is an ADDRESSOF
+  until purge_addressof, which runs after cse1 and turns each read into a fresh copy
+  `(set (reg 174) (reg/v 172))` in the reading block. cse never sees those copies and gcse's
+  cprop only propagates copies set in other blocks, so the expression's operand is set in its
+  own block: not anticipatable at the block's start, never hoisted. combine then folds the copy
+  away and the `andi` reads the variable's register. func_0015F320 passes its FRAME word by
+  `const u64&` to a small inline that keeps the base and format bits; `*(u64*)&frame` at one
+  read does the same.
+- **fold merges two masks of one operand.** `(f & 0x1FF) | (f & 0xF000000)` is
+  `f & 0xF0001FF` from the front end on (distribute_bit_expr), `lui; ori; and` in the output.
+  Retail's two `and`s and `or` come from `(f & 0x1FF) | (((f >> 24) & 0xF) << 24)`, which
+  combine turns into the second `and` after fold has run.
+- **Spotting it.** The gcse dump's `PRE/HOIST: end of bb N` for an expression whose only
+  occurrence is after a loop, and retail computing the same thing after the loop from a
+  saved register.
+
+### A clear and a query of one frame record: `q.Clear()` keeps PRE off `&q` (func_0017E710)
+
+Read from gcse.c (compute_hash_table, pre_insert) and lcm.c (pre_lcm) of GCC 2.95.3, with an
+emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11-10):
+
+- **What differed.** Each of the player's two query loops clears a NodeQuery on the stack
+  (`FillMemory(&q, 0, 0x40)`), fills it, normalises a direction (two arms) and calls
+  FindNodeForQuery(&q, 0, 0). Ours kept `sp+32` in s0 from before the arms to the call (8 bytes
+  more over both loops); retail forms `addiu a0,sp,32` at each call.
+- **Why.** A frame address is never killed: on a call gcse marks every call-used hard register
+  set except the frame pointer (`regno != FRAME_POINTER_REGNUM`), so `(plus fp 32)` is
+  transparent through FillMemory's call and the query's `&q` is fully anticipated and redundant
+  with the clear's. lcm.c's compute_latein sets LATEIN to DELAYIN in every block but the last
+  (its successor test is skipped), so the "optimal" point is the entry of the clear's block and
+  pre_insert puts the copy at that block's end, before the arms' test. Both loops share the
+  expression and so one reaching register; loop 2's copy crosses RandomIntInRange's call in one
+  arm, and the pseudo takes a saved register.
+- **The form.** The clear as an inline method of the record, `void Clear() { FillMemory(this,
+  0, sizeof(*this)); }` (node_query.h, as file_14EE40.cpp's HeldTouchQuery has one): `this` is
+  substituted as a constant and set straight into `$a0`, which gcse never records, so the
+  query's `&q` is the only occurrence. A free inline function does the same only if its pointer
+  parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.

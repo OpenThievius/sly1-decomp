@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 456/492, checked 2026-11-08
-// NEAR (2026-11-08, night-gamec): the loop is 86-88 insns at the loop pass, over loop.c's 80, so 1, -1, 0x42F and 0x430 stay inside where retail moves them out (tools: -dL)
+// SIZE 456/492, checked 2026-11-10
+// NEAR (2026-11-10, w15): EXACT with this source under -mvu0-use-vf0-vf30 or -vf31 (loop.c's threshold 94-95 instead of 79); under the file's flags the loop is 91 insns in pass 1 where retail's moves need 74-76 (docs/toolchain/loops.md, func_001D9488)
 // In the context of its file, src/main/file_1D62E0.cpp: its declarations before the function, bodies cut.
 // From 0x1D62E0 to 0x1DDCE0: classes 0x07 and 0x3F, the output buffer, class 0x19, the world
 // (class 0x6C) and its script functions. Its .data runs from 0x275140 to the zeroed globals
@@ -614,10 +614,10 @@ s32 TestPointAgainstObjectShape(void* item, void* point);
 void ResetScatterLevels(void* scatter);
 void RecordPathFollowerProgress(PathFollower* self);
 
-void AdvancePathFollowerEntry(PathFollower* self)
+void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 {
-    PathMarker* e = self->f874;
-    for (s32 i = 0; i < self->f870; i++, e++) {
+    for (s32 i = 0; i < self->f870; i++) {
+        PathMarker* e = &self->f874[i];
         s32 r = TestPointAgainstObjectShape(e->item, (u8*)self + 0x100);
         if (r == *(s32*)((u8*)e + 8)) {
             continue;
