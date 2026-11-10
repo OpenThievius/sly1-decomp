@@ -27,6 +27,7 @@
 #include "vu0.h"
 #include "mul_rotation.h"
 #include "attached_set.h"
+#include "active_set_solver.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -880,8 +881,136 @@ f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ap), Vu0::Q(ab))) / Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
 }
 
-INCLUDE_RODATA(jtbl_0024D280);
-INCLUDE_ASM(func_001B8B90);
+void TransformDirectionBetweenFrames(void* a, void* b, void* c, void* d);
+void CopyMemory(void* dst, void* src, s32 count);
+
+// What Collider::hook points at for a mesh that blends per-vertex vectors (func_001B8B90): a
+// vector for each vertex, and the three vertex indices of each face.
+struct VertexBlend03 {
+    Vec02* vectors;         // 0x00: one per vertex of the mesh copy, none to skip
+    u8 pad04[0x08 - 0x04];
+    s32 (*faceVerts)[3];    // 0x08: one triple per face
+};
+
+void func_001B8B90(Collider* self, Contact03* c, s32 which)
+{
+    typedef Vu0::Vec Vec;
+    if (self->hook == 0) {
+        return;
+    }
+    s32 idx[3];
+    f32 w[3];
+    Vec02 sum;
+    ContactEnd03* end = &c->end[which];
+    s32 kind = 0;
+    if (which == 0) {
+        switch (c->kind) {
+        case 1:
+            kind = 1;
+            idx[0] = (Vec02*)c->fA0 - (Vec02*)self->meshCopy.verts;
+            break;
+        case 2:
+        case 3:
+            kind = 2;
+            idx[0] = ((s16*)c->fA0)[0];
+            idx[1] = ((s16*)c->fA0)[1];
+            break;
+        }
+    } else {
+        switch (c->kind) {
+        case 4:
+            kind = 1;
+            idx[0] = (Vec02*)c->fA4 - (Vec02*)self->meshCopy.verts;
+            break;
+        case 3:
+        case 5:
+            kind = 2;
+            idx[0] = ((s16*)c->fA4)[0];
+            idx[1] = ((s16*)c->fA4)[1];
+            break;
+        case 1:
+        case 2:
+        case 6:
+        case 8:
+            kind = 3;
+            CopyMemory(idx, ((VertexBlend03*)self->hook)->faceVerts[(c->fA4 - (s32)self->meshCopy.faces) >> 5], 12);
+            break;
+        }
+    }
+    switch (kind) {
+    case 0:
+        return;
+    case 1:
+        w[0] = 1.0f;
+        break;
+    case 2: {
+        Vec02* verts = (Vec02*)self->meshCopy.verts;
+        f32 t = ComputeSegmentParameter(&verts[idx[0]], &verts[idx[1]], &end->v10);
+        f32 lo = 0.0f;
+        f32 hi = 1.0f;
+        f32 r;
+        if (t < lo) {
+            r = lo;
+        } else if (hi < t) {
+            r = hi;
+        } else {
+            r = t;
+        }
+        w[1] = r;
+        w[0] = 1.0f - r;
+        break;
+    }
+    case 3: {
+        Vec02* verts = (Vec02*)self->meshCopy.verts;
+        for (s32 i = 0; i < 2; i++) {
+            f32 t = ComputeSegmentParameter(&verts[idx[i]], &verts[idx[i + 1]], &verts[idx[(i + 2) % 3]]);
+            Vec s = Vec::Scalar(t);
+            Vec a = Vec::Of(verts[idx[i]]);
+            Vec u = Vec::Scalar(-t);
+            Vec b = Vec::Of(verts[idx[i + 1]]);
+            Vec v = Vec::Scalar(1.0f);
+            Vec c = Vec::Of(verts[idx[(i + 2) % 3]]);
+            Vu0::Q(sum) = Vu0::MulXSum3(a, s, b, u, c, v).q;
+            w[i] = ComputeSegmentParameter(&verts[idx[i]], &sum, &end->v10);
+        }
+        f32 a = w[0];
+        f32 lo = 0.0f;
+        f32 hi = 1.0f;
+        f32 r;
+        if (a < lo) {
+            r = lo;
+        } else if (hi < a) {
+            r = hi;
+        } else {
+            r = a;
+        }
+        w[0] = r;
+        f32 b = w[1];
+        f32 lo2 = 0.0f;
+        f32 hi2 = 1.0f - r;
+        f32 q;
+        if (b < lo2) {
+            q = lo2;
+        } else if (hi2 < b) {
+            q = hi2;
+        } else {
+            q = b;
+        }
+        w[1] = q;
+        w[2] = 1.0f - w[0] - w[1];
+        break;
+    }
+    }
+    if (((VertexBlend03*)self->hook)->vectors == 0) {
+        return;
+    }
+    Vu0::Q(sum) = Vec::Zero().q;
+    for (s32 j = 0; j < kind; j++) {
+        Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(((VertexBlend03*)self->hook)->vectors[idx[j]]), Vu0::ScalarAt(w[j]));
+    }
+    TransformDirectionBetweenFrames(self, 0, &sum, &sum);
+    Vu0::Q(end->v30) = Vu0::Add(Vec::Of(end->v30), Vec::Of(sum)).q;
+}
 
 ASM_FUNC(func_001B8FE0);
 
@@ -2324,7 +2453,206 @@ void func_001BC828(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit,
 
 INCLUDE_ASM(func_001BC978);
 
-INCLUDE_ASM(func_001BCD00);
+// A Contact03 with the fields the group solve reads and writes.
+struct SolveContact_1BCD00 {
+    ContactEnd03 end[2];            // 0x00
+    Vec02 normal;                   // 0x80
+    f32 depth;                      // 0x90
+    u8 pad94[0x98 - 0x94];
+    f32 bounce;                     // 0x98
+    s32 kind;                       // 0x9C
+    f32 limit;                      // 0xA0
+    u8 padA4[0xB0 - 0xA4];
+    Vec02 relVel;                   // 0xB0
+    f32 push;                       // 0xC0
+    f32 impulse;                    // 0xC4
+    f32 speed;                      // 0xC8
+    s32 index;                      // 0xCC
+};
+struct SolveHandler_1BCD00;
+struct SolveHandlerDesc_1BCD00 { u8 pad00[0x108]; void (*m108)(SolveHandler_1BCD00* self, s32 kind, ActiveSetItem* it, s32 end, f32 dt); };
+struct SolveHandler_1BCD00 { SolveHandlerDesc_1BCD00* desc; };
+
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void* AllocateBackMemory(s32 size);
+void* FillMemory(void* p, s32 zero, s32 size);
+void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
+void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
+void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
+void func_00154370(f32 a, f32 b, ActiveSetSolver* loc, s32 n, s32* counts, void** lists);
+void ResetActiveSetSolver(ActiveSetSolver* self);
+void func_00185F48(World* world, s32 n, SolveContact_1BCD00** list);
+void func_00154088(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
+f32 RandomFloatInRange(f32 a, f32 b);
+
+void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 n, Contact03** list, f32 dt, s32 flags)
+{
+    SolveContact_1BCD00** contacts = (SolveContact_1BCD00**)list;
+    ActiveSetSolver loc;
+    s32 i;
+    if (flags & 1) {
+        if (n == 0) {
+            return;
+        }
+    } else {
+        if (flags & 4) {
+            for (i = 0; i < n; i++) {
+                SolveContact_1BCD00* c = contacts[i];
+                if (c->kind == 11) {
+                    if (0.1f < __builtin_fabsf(c->depth)) {
+                        break;
+                    }
+                } else if (c->depth < -2.0f) {
+                    break;
+                }
+            }
+            if (!(i < n)) {
+                flags &= ~4;
+            }
+        }
+        if (flags & 2) {
+            i = 0;
+            if (i < n) {
+                do {
+                    SolveContact_1BCD00* c = contacts[i];
+                    if (c->kind == 11) {
+                        if (5.0f < __builtin_fabsf(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->relVel), Vu0::Q(c->normal))))) {
+                            break;
+                        }
+                    } else if (Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->relVel), Vu0::Q(c->normal))) < -5.0f) {
+                        break;
+                    }
+                    i++;
+                } while (i < n);
+            }
+            if (!(i < n)) {
+                flags &= ~2;
+            }
+        }
+        if (flags == 0) {
+            return;
+        }
+    }
+    PushBackMemoryMark();
+    void** lists = (void**)AllocateBackMemory(nParts * 4);
+    s32* counts = (s32*)AllocateBackMemory(nParts * 4);
+    FillMemory(counts, 0, nParts * 4);
+    for (s32 k = 0; k < nParts; k++) {
+        Collider* part = parts[k];
+        part->f4BC = k;
+        lists[k] = AllocateBackMemory(0xC0);
+        part->desc03()->m35(part, &counts[k], (Collider**)lists[k]);
+    }
+    for (i = 0; i < n; i++) {
+        contacts[i]->index = i;
+    }
+    InitActiveSetSolver(&loc, n);
+    for (i = 0; i < n; i++) {
+        SolveContact_1BCD00* c = contacts[i];
+        ActiveSetItem* it = (ActiveSetItem*)(loc.items + i * 0x60);
+        it->owner = c;
+        *(Vec02*)it->axis = c->normal;
+        switch (c->kind) {
+        case 11:
+            it->kind = 2;
+            break;
+        case 12:
+            it->kind = 0;
+            it->bounded = 1;
+            it->limit = c->limit;
+            break;
+        default:
+            it->kind = 0;
+            break;
+        }
+        AddActiveSetItem(&loc, it);
+    }
+    if (flags & 4) {
+        for (s32 j = 0; j < n; j++) {
+            ActiveSetItem* it = (ActiveSetItem*)(loc.items + j * 0x60);
+            SolveContact_1BCD00* c = contacts[j];
+            if (it->kind == 2) {
+                it->val = c->depth;
+            } else {
+                it->val = c->depth + 1.0f;
+            }
+            for (s32 e = 0; e < 2; e++) {
+                SolveHandler_1BCD00* h = (SolveHandler_1BCD00*)FindHandlerForSlot(c->end[e].part, 0x108);
+                if (h != 0 && h->desc->m108 != 0) {
+                    h->desc->m108(h, 0xC, it, e, dt);
+                }
+            }
+        }
+        RunActiveSetSolver(&loc, 4, n, contacts, counts, lists);
+        func_00154370(100.0f, 1.0f, &loc, nParts, counts, lists);
+        for (s32 j = 0; j < nParts; j++) {
+            parts[j]->desc03()->m2F(parts[j], 0);
+        }
+        if (flags == 4) {
+            goto done;
+        }
+        ResetActiveSetSolver(&loc);
+    }
+    if (flags & 1) {
+        func_00185F48(world, n, contacts);
+        NotifyContactEnds(world, n, list);
+        for (s32 j = 0; j < n; j++) {
+            ActiveSetItem* it = (ActiveSetItem*)(loc.items + j * 0x60);
+            SolveContact_1BCD00* c = contacts[j];
+            Vu0::StoreX(it->val, Vu0::Dot(Vu0::Q(c->relVel), Vu0::Q(c->normal)));
+            for (s32 e = 0; e < 2; e++) {
+                SolveHandler_1BCD00* h = (SolveHandler_1BCD00*)FindHandlerForSlot(c->end[e].part, 0x108);
+                if (h != 0 && h->desc->m108 != 0) {
+                    h->desc->m108(h, 9, it, e, dt);
+                }
+            }
+        }
+    } else {
+        for (s32 j = flags & 1; j < n; j++) {
+            SolveContact_1BCD00* c = contacts[j];
+            ActiveSetItem* it = (ActiveSetItem*)(loc.items + j * 0x60);
+            Vu0::StoreX(c->speed, Vu0::Dot(Vu0::Q(c->relVel), Vu0::Q(c->normal)));
+            f32 r = RandomFloatInRange(0.9f, 1.1f);
+            it->val = c->speed * (c->bounce * r + 1.0f);
+            for (s32 e = 0; e < 2; e++) {
+                SolveHandler_1BCD00* h = (SolveHandler_1BCD00*)FindHandlerForSlot(c->end[e].part, 0x108);
+                if (h != 0 && h->desc->m108 != 0) {
+                    h->desc->m108(h, 10, it, e, dt);
+                }
+            }
+        }
+    }
+    func_00154088(dt, &loc, flags & ~4, n, contacts, counts, lists);
+    if (flags & 1) {
+        func_00154370(5000.0f, 50.0f, &loc, nParts, counts, lists);
+    } else {
+        func_00154370(5000.0f, 50.0f, &loc, nParts, counts, lists);
+    }
+done:
+    for (i = 0; i < nParts; i++) {
+        Collider* part = parts[i];
+        part->f4BC = -1;
+        if (flags & 1) {
+            part->desc03()->m31(part, 0);
+        } else if (flags & 2) {
+            part->desc03()->m30(part, 0);
+        }
+        for (s32 j = 0; j < counts[i]; j++) {
+            ((Collider**)lists[i])[j]->index = -1;
+        }
+    }
+    if (flags & 1) {
+        for (i = 0; i < n; i++) {
+            contacts[i]->push = ((ActiveSetItem*)(loc.items + i * 0x60))->x;
+        }
+    } else if (flags & 2) {
+        for (i = 0; i < n; i++) {
+            contacts[i]->impulse = ((ActiveSetItem*)(loc.items + i * 0x60))->x;
+        }
+    }
+    PopBackMemoryMark();
+}
 
 s32 CollectGroupItems(s32 count, Collider** roots, s32 cap, Contact03** out)
 {

@@ -2883,6 +2883,66 @@ things decided its order:
   Spot it: a constant's mtc1 placed before an address `lui` that retail issues first, in a block
   that ends with a call and a store after it.
 
+### A flag test written at each use: GCSE's pseudo stays behind the calls (func_001BCD00)
+
+Matched 2026-11-10 from the -dS dumps and haifa-sched.c. SolveColliderGroupContacts allocates
+two arrays from back memory and clears one (three calls in one block, sched1's block 24) and
+tests `flags & 1` and `flags & 4` many times further down. Written as named variables
+(`s32 rest = flags & 1;` between the two allocations), both `and`s are initially ready at the
+block's start (calls do not end blocks here, and a pseudo that crosses calls has no anti
+dependence on the call before it). With priority 2 each they tie with the parts loop's `k = 0`,
+which combine re-emits at the entry test's place (the 3-insn merge of `k = 0`, `slt`, `beqz`
+into `blez nParts`), so the LUID tie picks the `and` for the free slot beside `$a0 = size`
+in cycle 2 and ours computes `rest` before the first call and the mask before the second.
+Retail computes each one call later. Written as `flags & 1` and `flags & 4` at every use, the
+expressions are GCSE's: its pseudos appear where retail has them and the schedule is retail's,
+spills and all (rest at 96(sp), the mask at 100(sp)). Spot it: a flag mask's `andi` and its
+spill store one call later than a named variable puts them.
+
+Three other differences closed the near miss, each shrinking the size gap first:
+
+- **Each slot's real argument count.** Slots 51 to 53 (0xCC, 0xD0, 0xD4) take
+  `(self, moved)`: retail sets only $a1. A cast array of three-argument pointers added a
+  `move a2, zero` per call. Called through Desc02/Desc03's members, they are retail's.
+- **A store from an asm stays out of the call's delay slot.** Retail's bounce loop has
+  `sw a0, 200(s0); jal RandomFloatInRange; nop`: `Vu0::StoreX` (the store is the helper's
+  asm, which reorg never puts in a delay slot) where `*(u32*)&c->speed = ToBits(..)` let reorg
+  fill the slot with the plain `sw`.
+- **A guarded do-while threads its exit test.** `i = 0; if (i < n) do { .. } while (i < n);`
+  lets CSE record `i < n` false on the guard's path, so jump threading sends the guard's `blez`
+  straight past the after-loop test to `flags &= ~2` (retail's `bnez; nop` with the `li` at a
+  label of its own). `if (0 < n)` tests a different expression and is not threaded; `for` and
+  `while` with a `break` keep the test at the top (not rotated).
+- Per-loop counters (`for (s32 j = 0; ..)`) in the depth, rest, bounce and part loops, and the
+  shared `i` for the scans and write-backs, give retail's counters (a3 for counters that cross
+  no call, s0 for the shared one); `for (s32 j = flags & 1; j < n; j++)` in the else arm of
+  `if (flags & 1)` gives retail's entry test `slt rest, n` with `j` set to 0.
+
+### A member read again in the loop, and slots that loads wait for (func_001B8B90)
+
+Matched 2026-11-10. The near miss was 8 bytes short, with no rodata at fault: retail's blend
+loop has `move a2, v1` before it (and the loop label's 8-byte alignment then adds a `nop`).
+That copy is loop.c's: the loop body read `self->hook` again (`((VertexBlend03*)self->hook)
+->vectors[idx[j]]`), loop.c moved that load to the preheader as a pseudo of its own, and cse2
+turned the preheader's load into a copy of the register the `vectors == 0` test had loaded.
+A local `h` read in the loop is one pseudo and no copy. Spot it: a `move` of a just-tested
+pointer into the register a loop reads it through.
+
+The rest was the order of weight-slot stores and vector loads. In both loops retail stores
+each weight's slot before the vector load that follows it in the source, and the loads wait
+for the stores:
+
+- **The blend loop** is retail's only in u128 form, `Q(sum) = MulAddX(Q(sum), Q(vec), ScalarAt(w[j]))`:
+  every Vec form (Vec::ScalarAt, a named weight, a named vector) leaves the slot store late or
+  adds copies. The u128 form also put the spilled `&w` and `&end->v10` at retail's 0x4C and
+  0x48.
+- **The face loop's sum** names its six operands in retail's order, each weight before its
+  vector (`Vec s = Vec::Scalar(t); Vec a = Vec::Of(v0); Vec u = Vec::Scalar(-t); ...`), then
+  `MulXSum3(a, s, b, u, c, v)`. Passed inline, the Scalars are expanded first and the vertex
+  loads second (the two-pass argument rule), which gives our vf4/vf3 for the 1.0 and the
+  second vertex and the 1.0's store after the sum. The named order also gave the kind's
+  reloads retail's v1 (and with it the `beqzl` of the kind switch's delay slot).
+
 ## Conditional moves (jump.c)
 
 What turns a lone `if (c) x = k;` into branch-free code, read from jump.c, optabs.c and
