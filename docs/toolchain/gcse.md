@@ -579,3 +579,14 @@ SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) wit
 - **`addu v0,v1,a2` (base first) for `target[j]`.** g++ turns a subscript of a pointer, or of
   `*p`, into pointer arithmetic, whose address inside a memory reference has the index first; an
   array member (`target->v[j]`) stays an ARRAY_REF, base first, as a local array's.
+
+### The same lever for a parameter block's two quadwords (func_001EC190)
+
+- The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);
+  CopyQuadword(&u, &params.q30); StoreQuadword(&params.q30, ScaleQuadword(t, u));`, twice)
+  kept `&params.q30` and `&params.q50` in two saved registers (a 0x160 frame for retail's
+  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
+  and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
+  substitutes each address at its use and retail's frame and saved registers follow; the
+  remaining difference is the block's constructor stores ("What retail's order needs",
+  large-functions.md).
