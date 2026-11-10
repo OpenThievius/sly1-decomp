@@ -59,6 +59,19 @@ reload.c and reload1.c read):
   distance in per-value build counts (the sum over values of
   |ours - retail| builds) was 107 at best, against 89-90 for the near miss
   that keeps 4 in s5. Freeing one constant's register re-permutes the rest.
+- **One eviction costs both big values** (2026-11-10, from the near miss's
+  `.lreg`). local-alloc puts 256 (entries 3-76) and func_00155778 (18 refs
+  over 5,134 insns) in s5, 0.00477 refs per insn of life in all. The first
+  4 (10 refs over 1,836 insns, 0.00545) gets no free register, and
+  find_reg's "utilized poorly" scan, from the last register down, takes
+  the first register whose local pseudos have fewer refs per insn than it:
+  s5. Both are unassigned, so 4 is held to the end (retail builds it 24
+  times, ours once) and func_00155778 is rebuilt at each store (8 builds,
+  retail 1). Those two values are the whole of the near miss's 10-insn
+  deficit; the rest cancel. Retail keeps 256 in s5 and evicts s3. The
+  `.greg` dispositions come after reload's spills and retry_global_alloc,
+  so they cannot show which registers had been evicted by 4's turn: that
+  needs an emulation of global-alloc's allocno order.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at

@@ -58,6 +58,27 @@
 // exact fell to 2,527, so the gain is noise. The next attempt needs moves that change several
 // long-lived constants together; no single-constant objective found a descent.
 //
+// Where the 10 instructions are (2026-11-10, worker w17-109488; build/swarm/w17-109488/: cum.py,
+// ratio.py; re-scored 37,352 against 37,392, unchanged). They are not in one region. Aligned on the
+// entry steps (`addiu v0,v0,32`), ours runs -5 to +6 instructions against retail through the
+// first 700 entries and drifts to -10 by entry 825 and -12 at the end: scheduling noise over a
+// register-allocation difference, not a constant rebuilt after a moved CSE flush or one entry's
+// statements (the function has no branch). By value: 4 is built once against retail's 24 (-23),
+// func_00155778 (lui 0x15, addiu 22392) 8 times against 1 (+14), 9 is -4, and the rest are +-1 or
+// 2 and cancel. One global-alloc decision explains the two big ones. local-alloc puts both 256
+// (pseudo 136, entries 3-76) and func_00155778 (pseudo 2072, 18 refs over 5,134 insns) in s5, whose
+// local pseudos then have 38 refs over 7,974 insns (0.00477 per insn). The first 4 (pseudo 118,
+// 10 refs over 1,836 insns, 0.00545) finds no free register, and find_reg's "utilized poorly" scan
+// (global.c, from the last register down, the first whose local refs per insn are below the
+// allocno's) takes s5 and unassigns both, so 4 is never rebuilt and func_00155778 is rebuilt at
+// each store. Retail keeps 256 in s5 (its `li s5,256` is at insn 28) and evicts s3 for the first
+// 4. Which higher registers were still local at 118's turn is not in the dumps: t9, t8, s6 and s3
+// each end with one pseudo, but the dispositions are after reload's spills and
+// retry_global_alloc, so the order of evictions needs an emulation of global's allocno order
+// (priority floor_log2(refs) * refs / length). A form that matches must keep s5 from being the
+// first register below 118's density at that point (func_00155778's pseudo out of s5, or s5
+// denser), with the CSE window landmarks held. No variant was compiled this round.
+//
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
 // Global alloc gives it a callee-saved register (s5 here). In this form and every earlier one, no
