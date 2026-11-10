@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 2324/2348, checked 2026-11-08
+// SIZE 2292/2348, checked 2026-11-10
 // NEAR (2026-11-08): DrawAngleSortedRing (func_001D5678), first attempt: the points around the
 // anchors projected into camera space, the lowest first, their angles about it and the sort,
 // the hull (a Graham scan against the z axis), the bounds' centre, the points where the hull
@@ -15,6 +15,10 @@
 // the angle loop's and the insert loop's pointers; the previous point kept in s4 (retail loads
 // it with lq after the sort); the hull's next index; spill slots and the draw loop's row
 // pointer, kept in a register where retail spills it.
+// 2026-11-10 (w13): Vu0::ScalarAt's slot address no longer comes through a reference return
+// (func_001D36F0); this attempt went from 2324 to 2292 bytes with it, the entry's parameter
+// homes moving in global-alloc (a1 spilled, t1 in s8). Not the cause of func_001D36F0's
+// difference (that was a loop-body constant and the slot address): its gaps are its own.
 // In the context of its file, src/main/player_request.cpp (FLT_MAX is retail's D_0024DC88).
 #include "common.h"
 #include "shapes.h"

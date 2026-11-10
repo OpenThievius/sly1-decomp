@@ -38,7 +38,109 @@ s32 D_00275130 = 0;
 s32 D_00275134 = 0;
 s32 D_00275138 = 0;
 
-INCLUDE_ASM(func_001D36F0);
+// The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
+struct BlendSlotObject;
+struct BlendSlot {
+    f32 weight;             // 0x00
+    BlendSlotObject* object; // 0x04
+    u8 pad08[0x10 - 0x08];
+    Vec02 v10;              // 0x10: where the object's mover puts it
+};
+
+typedef void (*SlotMoveFn)(Mover8B* m, void* body, f32 x, f32 y, s32 z, Vec02* out, Vec02* out2);
+struct SlotMover { SlotMoveFn* vtbl; };
+struct SlotMoverHolder { u8 pad00[4]; SlotMover* mover; };
+struct BlendSlotObject {
+    u8 pad00[0x34];
+    f32 f34;                // 0x34
+    u8 pad38[0x9C - 0x38];
+    SlotMoverHolder* holder; // 0x9C
+};
+
+Entry8B* FindEntryByObjectId(void* object, void* body);
+void BuildCombinedBlendAnimation(TurningCollider* self, s32 stride, s32 count, BlendSlot* slots, s32 a, s32 b, s32 c, Gr8B** gr);
+
+struct PlayerBlendItem {
+    f32 weight;             // 0x00
+    BlendSlotObject* object; // 0x04
+    u8 pad08[0x10 - 0x08];
+    Vec02 v10;              // 0x10
+    Vec02 v20;              // 0x20
+    f32 f30;                // 0x30
+    u8 pad34[0x40 - 0x34];
+    f32 f40;                // 0x40
+    u8 pad44[0x50 - 0x44];
+};
+struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
+
+void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals);
+void SetBlendItemWeights(Gr8B* obj, s32 a1, s32 a2, void* a3);
+
+void func_001D36F0(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
+{
+    Vec02 a0;
+    Vec02 a10;
+    Gr8B* blend;
+    s32 i;
+
+    if (items[0].object == 0) {
+        *out = 0;
+        return;
+    }
+    items[0].weight = 1.0f;
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x30, 2, D_00274FA0);
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x40, 2, D_00274FA8);
+    for (i = 0; i < 6; i++) {
+        PlayerBlendItem* it = &items[i];
+        BlendSlotObject* o = it->object;
+        if (o != 0) {
+            f32 one = 1.0f;
+            SlotMover* m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, 0.0f, one, 0, &a0, 0);
+            m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, o->f34, one, 0, &a10, 0);
+            *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->f34));
+            Vec02 a20;
+            m = (SlotMover*)FindEntryByObjectId(it->object, self->f610)->mover;
+            (*m->vtbl)((Mover8B*)m, self->f610, it->f30, one, 0, &a20, 0);
+            Vec02 a30;
+            m = (SlotMover*)FindEntryByObjectId(it->object, self->f614)->mover;
+            (*m->vtbl)((Mover8B*)m, self->f614, it->f40, one, 0, &a30, 0);
+            Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
+            *(Vu0::Vec*)&it->v20 = Vu0::MulXSum(Vu0::Vec::Of(a20), h, Vu0::Vec::Of(a30), h);
+        }
+    }
+    BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (BlendSlot*)items, 2, (s32)D_00274FB8, (s32)D_00274FB0, &blend);
+    for (s32 j = 0; j < blend->f38; j++) {
+        Entry8B* e = (Entry8B*)(blend->f3C + j * 0x1C);
+        s32 k = e->key;
+        if (k >= 0x37) {
+            if (k < 0x3A) {
+                continue;
+            }
+            if (k < 0x3D) {
+                if (e->mover != 0) {
+                    ((PlayerBlendCurve*)e->mover)->f10 = blend->pC0 + 1;
+                }
+                if (e->sub != 0) {
+                    ((PlayerBlendCurve*)e->sub)->f10 = blend->pC0 + 1;
+                }
+                continue;
+            }
+        }
+        if (e->mover != 0) {
+            ((PlayerBlendCurve*)e->mover)->f10 = 0;
+        }
+        if (e->sub != 0) {
+            ((PlayerBlendCurve*)e->sub)->f10 = 0;
+        }
+    }
+    SetBlendItemWeights(blend, 0x50, 6, items);
+    if (out != 0) {
+        *out = blend;
+    }
+}
+
 struct WeightedRow { f32 w; u8 pad0[0xC]; Vec02 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
 
 void func_001D39E0(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
@@ -239,28 +341,6 @@ void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, 
     SetBlendItemWeights(a2, 0x50, 6, a1);
     SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
 }
-
-// The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
-struct BlendSlotObject;
-struct BlendSlot {
-    f32 weight;             // 0x00
-    BlendSlotObject* object; // 0x04
-    u8 pad08[0x10 - 0x08];
-    Vec02 v10;              // 0x10: where the object's mover puts it
-};
-
-typedef void (*SlotMoveFn)(Mover8B* m, void* body, f32 x, f32 y, s32 z, Vec02* out, Vec02* out2);
-struct SlotMover { SlotMoveFn* vtbl; };
-struct SlotMoverHolder { u8 pad00[4]; SlotMover* mover; };
-struct BlendSlotObject {
-    u8 pad00[0x34];
-    f32 f34;                // 0x34
-    u8 pad38[0x9C - 0x38];
-    SlotMoverHolder* holder; // 0x9C
-};
-
-Entry8B* FindEntryByObjectId(void* object, void* body);
-void BuildCombinedBlendAnimation(TurningCollider* self, s32 stride, s32 count, BlendSlot* slots, s32 a, s32 b, s32 c, Gr8B** gr);
 
 void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
 {
