@@ -92,3 +92,32 @@ Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and glo
   life (or one fewer before hi) that is gone by the final code. Written `y1` before `y0`,
   sched1 puts y1's subtraction last and local-alloc's registers are retail's but global-alloc's
   are not; the other way round, the reverse.
+
+### A loop's counter as the outer loop's variable, and a counter of its own for an earlier loop (func_001D5678, near miss)
+
+DrawAngleSortedRing fills the gaps between its points with an inner loop inside a loop that
+counts i down and keeps `s32 down = i - 1;` for its next step. Its inner counter as a `k` of its
+own was a pseudo that global-alloc ranked after the inner loop's entry pointer (k: 14 refs, a
+life of 29 insns, 1.448; the pointer 1.826 over 23), so the pointer took s0 and k s1, where retail
+has them the other way round. Retail's s0 is the function's i: the inner loop counts with i
+itself, which is why the outer loop saves `down` at all. Reusing i was not enough on its own:
+with every loop after the anchors on i, its life was 390 insns and its priority 1.277, below the
+gap pointer's, which then took s0 from i and moved four other values. The angles loop right
+after the anchors counts with a `for (s32 j = 1; ...)` of its own, as the anchor loops do; i's
+life then starts at the hull, it is placed first and takes s0, and the gap loop's registers and
+its branch target (retail's `blez` into the `move s0,s6` that k's delay slot clobbers) follow.
+
+What was left there is a register global-alloc's dumps do not explain: the first sort's `n - 1`,
+GCSE's temporary inserted at the end of the swap's block (after the loop's entry test, retail's
+order), placed 64th of 80 with s2 and s3 both used before and free over its life, and with no
+saved register in any allocno's hard-register preferences (preferences come only from hard
+registers and local-alloc's pseudos, and local-alloc put none in a saved register), so find_reg's
+first pass takes s2 where retail has s3. A user variable shared with the later `last = n - 1`
+gives s3 but moves the set ahead of the entry test in LUID order, and sched1 then issues it two
+slots early; the same variable assigned after the loop is PRE'd into a fresh temporary whose
+copy dies before global-alloc (s2).
+
+In the same function, Length's float taken with ToFloatMoved instead of ToFloat matched the row
+loop: the asm qmfc2 put the dot's asm chain one above the `uv[1]` store in sched2's priorities
+(38 against 37), so the store came after the dot; with the compiler's own qmfc2 the store issues
+first and UnprojectCameraPoint's argument moves follow the camera's load, as retail's.
