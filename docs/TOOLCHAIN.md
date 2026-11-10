@@ -1604,6 +1604,43 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   original had a block of its own when gcse ran. A plain-C form that gives that block without
   a dead statement is still to be found.
 
+### MoveMemory's frame arguments: an inline's parameters set the argument registers directly (func_001B55C0)
+
+Read from gcse.c (hash_scan_set, compute_transp, pre_insert), lcm.c (pre_lcm), calls.c
+(precompute_register_parameters) and integrate.c, with the `-dF -dG -dL` dumps of the triangle
+animator's strip walk (2026-11-10). Retail shifts two three-entry windows on the stack each time
+round the strip loop, `MoveMemory(sp+32, sp+48, 32)` and `MoveMemory(sp+80, sp+88, 16)`, and an
+inner loop reads `uv[next[j]].x` and `.y` (bases sp+80 and sp+84, which loop.c moves into the
+inner loop's preheader). Written as plain calls, ours was 8 bytes short and its saved registers
+rotated:
+
+- **Calls never kill a frame address.** compute_hash_table records the call-clobbered registers
+  as set by a call but leaves out FRAME_POINTER_REGNUM (MIPS's `$1` before elimination), so
+  `(plus fp 80)` is transparent everywhere. A plain call's argument goes through a pseudo
+  (calls.c copies any argument whose rtx_cost exceeds 2 to a register, and expand_expr's
+  ADDR_EXPR has already forced the address into one), so the shift's `&uv[0]` is an
+  anticipatable occurrence of the same expression the inner loop computes.
+- **PRE then takes the inner loop's copy.** With `(plus fp 80)` ANTLOC in the shift's block,
+  that block is LATEIN, the inner loop's occurrence is redundant, and pre_insert puts a fresh
+  computation at the end of the shift's block (before the flags test's branch, whose delay slot
+  it then fills): one word more than retail, and retail's `bnezl` with the latch's load is
+  lost. The 8 bytes are that word and the inner loop label's alignment nop. The same goes for
+  `&uv[1]` and `&tri[1]`: their PRE pseudos live across the whole loop and compete for the
+  saved registers, so `&uv[1]` took retail's `&tri[2]` register.
+- **Retail's arguments were not in the table.** hash_scan_set records only sets of pseudos; a
+  set of `$a0` itself is never an expression. integrate.c gives a pointer parameter whose
+  argument is a frame address a constant equivalent and substitutes it into every copied insn,
+  so an inline function that passes its parameters on to the call (`template <class T> void
+  DropFirst(T* w) { MoveMemory(w, w + 1, 2 * sizeof(T)); }`) leaves `(set (reg a0) (plus fp
+  80))` and `(set (reg a1) (plus fp 88))`: no PRE, the inner loop's address moved by loop.c,
+  retail's size and its saved registers (199 differing lines to 22).
+- **Spotting it.** A call's frame-address arguments formed afresh at the call every time round a
+  loop (`addiu a0,sp,K` in the loop, nothing kept in a saved register) while the same addresses
+  passed to another function in the same loop are kept in saved registers: the first call went
+  through an inline. An extra address computation before a branch, where retail forms it in a
+  later loop's preheader, is PRE's insertion after a computation that should not have been in
+  the table.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
