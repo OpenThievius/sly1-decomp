@@ -305,7 +305,67 @@ void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec
     }
 }
 
-INCLUDE_ASM(func_001CE800);
+typedef void (*PathShapeFn)(void* self, void* out, s32 x);
+
+struct PathShape {
+    PathShapeFn* vtbl;
+};
+
+struct PathTarget {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1C[0x34 - 0x1C];
+    PathShape* f34;
+};
+
+typedef f32 (*ShapeScalarFn)(void* self, f32 t);
+typedef f32 (*ShapeLimitFn)(void* self);
+void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, void* out);
+void ComputePolarOffset(Vec02* out, f32 a, f32 b, f32 c);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+
+// A value clamped to [lo, hi]; returned from an inline, the three outcomes are one value.
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* outB, f32 t)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 c;
+    Vec02 d;
+    Vec02 e;
+    Vec02 f;
+    f32 lo;
+    f32 hi;
+    PathShape* shape = node->f34;
+    if (shape->vtbl[1] != 0) {
+        shape->vtbl[1](shape, &a, (s32)&b);
+    }
+    TransformPointBetweenFrames((void*)node->f18, 0, &a, &c);
+    TransformDirectionBetweenFrames((void*)node->f18, 0, &b, &d);
+    ComputePolarOffset(&e, self->f630, Vu0::ToFloat(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xE90)))) * self->f634, 0.0f);
+    f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d)));
+    PathShape* s2 = node->f34;
+    f32 value = ((ShapeScalarFn)s2->vtbl[5])(s2, t);
+    f.y = -*(f32*)((u8*)self + 0xE40);
+    f.x = -*(f32*)((u8*)self + 0xE90);
+    f.z = D_00274E1C;
+    ApproachValueWithRamp(value, D_00274E04, g_gameClock.dt, (RampProfile*)&f, &lo);
+    PathShape* s3 = node->f34;
+    ApproachValueWithRamp(value, ((ShapeLimitFn)s3->vtbl[8])(s3) - D_00274E04, g_gameClock.dt, (RampProfile*)&f, &hi);
+    *outA = c;
+    f32 clamped = ClampBetween(along, lo, hi);
+    Vu0::Q(*outB) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(clamped));
+}
 
 // What a target cost search passes to its scorer: the player, the target, and the record at
 // +0x10 the scorer hands on.
@@ -360,19 +420,6 @@ f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
     func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
     return out;
 }
-
-typedef void (*PathShapeFn)(void* self, void* out, s32 x);
-
-struct PathShape {
-    PathShapeFn* vtbl;
-};
-
-struct PathTarget {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1C[0x34 - 0x1C];
-    PathShape* f34;
-};
 
 struct PathScoreContext {
     s32 f0;
@@ -999,17 +1046,6 @@ struct PhasePlayer {
     f32 time;               // 0x14
     f32 speed;              // 0x18
 };
-
-static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
-{
-    if (v < lo) {
-        return lo;
-    }
-    if (hi < v) {
-        return hi;
-    }
-    return v;
-}
 
 void FindTargetCurveLengthNearCollider(void* curve, f32* length, Vec02* pos, f32* heading);
 void PlaceTargetPointNearCollider(void* point, Vec02* pos, f32* heading);

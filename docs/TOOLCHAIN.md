@@ -5227,6 +5227,23 @@ path then forgets memory over the skipped body (func_001B2140), and `*outTime = 
 again from its slot (`lwc1 $f0, 80(sp)`), retail's four bytes; through `u128` casts CSE kept
 the `t` of the min in $f1.
 
+### A float parameter last: the entry copies' order and a0 (func_001CE800)
+
+PlaceOnTargetObject's first statement loads `node->f34` and tests a method of it, then calls
+the method with the shape in a0. Declared `(f32 t, Player* self, ...)`, the entry copies are
+emitted in parameter order, $f12's first; in sched1 they all have priority 2 and the tie falls
+to INSN_LUID, so `t`'s copy took the cycle's second slot and the shape's load issued before
+self's copy out of a0. The shape was then born while a0 was live, a conflict, and global-alloc
+gave it v1 (`lw v1,52(s3)` and a `move a0,v1` before the call: four bytes). Its two matched
+callers already declared it `(Chooser*, TargetCand*, Vec02*, Vec02*, f32 t)`, and one sets $f12
+before the integer arguments, as calls.c's reversed evaluation does for a last parameter. With
+`t` last, self's copy comes first and the shape takes a0. ApproachValueWithRamp likewise takes
+its three floats first (`(f32, f32, f32, RampProfile*, f32*)`, as the file's other callers
+declare it), which gives retail's argument order around its call. The ramp record is filled
+`y` before `x`, as the same file's other ramp fill does (func_001CFFD0's `i.y = ...; i.x = ...`),
+and the clamp of the dot is file_1793C0.cpp's ClampBetween, which returns each outcome into one
+value (retail's merge in $f0).
+
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
 
 SetupTextPanel (2026-11-09, `-dS -fsched-verbose-6`, haifa-sched.c's sched_analyze):
