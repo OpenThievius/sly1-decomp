@@ -1089,3 +1089,33 @@ $f1,$f1,$f0` is the product in push's register: `push *= mass;` makes the produc
 pseudo (global, `$f1`), and sched2 is free to issue the multiply first. In the same block the
 torque's cross product before the accel's division (`vdiv` first in retail) is the source order
 force, torque, accel: their asms tie on priority and LUID decides.
+
+### The zero trap of func_00202140: what sched2 needs (unsolved)
+
+Measured 2026-11-10 with 2.9-ee-991111's `-dS -dR -fsched-verbose-6` dumps of the near miss
+(src/lib/graph.c's DISPLAY register; build/swarm/w15-202140/tp.sh prints the sched2 table of
+the block holding the first trap):
+
+- **A TRAP_IF only orders memory.** haifa's sched_analyze_2 calls `flush_pending_lists (insn,
+  1)` for it: it waits for earlier stores, and every later memory reference waits for it. In
+  the interlaced arm the only later reference is the field load (`lh a2,4(a2)`, cost 2, read
+  only by the beqz), so the trap's priority is 1 + 3 = 4.
+- **sched2 keeps sched1's links.** Block 7's sched2 RTL lists the same producer twice
+  (`(insn_list 157 (insn_list 157 ...`) and keeps pseudo-era links such as the multiplies'
+  to the div after reload added the `mflo`: a link sched1 made still counts in sched2.
+- **What retail's order needs.** At t=3 the trap and dy's `dsll a3,v1,12` are both ready;
+  the shift has priority 5 through its anti dependence on the dx term's `daddiu v1` (which
+  has 4: `andi a1,v1` and the dw term's `dsll32 v1` write and read v1 after it). With
+  retail's registers the shift's 5 is fixed, so retail's trap had 5 and won on the tie (luid,
+  dependents): an edge from the trap to the `daddiu` (priority 4), or from the field load to
+  the magh or dw shift (priority 2), or the dw term's `dsll32` absent from the block at sched2
+  (the `daddiu` then has 3 and the shift 4, tied with the trap). The last fits a `dsll32`
+  computed at the start of each field arm, which reorg moves into the beqz's delay slot from
+  the fall-through and redirects the branch past the target's copy; but fold saves every
+  term that is not a plain variable before the test (its COND_EXPR rule's COMPOUND_EXPR), so
+  no spelling of the macro tried puts the shift in the arms.
+- **Ruled out** (all leave the six instructions or worse): the field read into a local (in
+  the arm or for the function), its casts, the arms as `== 0`, `2 * h`, `h + h`, the dw term
+  as a product or through a (u32) or (s64) cast, the dy mask after the shift, a sixth MAGV
+  term (a constant or a local 0, all 720 orders), the interlace arms swapped, a dh local, the
+  word built in a u64 local.
