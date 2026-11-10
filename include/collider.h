@@ -58,7 +58,8 @@ struct ContactEnd03 {
     Collider* part;              // 0x04
     u8 pad08[0x10 - 0x08];
     Vec02 v10;              // 0x10: handed on with v80 by func_001F5008
-    u8 pad20[0x30 - 0x20];
+    Vec02 v20;              // 0x20: the point in the part's frame, which func_00185F48 carries
+                            // into v10 (CreatePooledContact sets it from v10)
     Vec02 v30;              // 0x30: the player adds to it (func_00170820)
 };
 
