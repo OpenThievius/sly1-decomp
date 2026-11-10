@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 119/136 (87.5%), checked 2026-11-08
+// BYTES 121/136 (89.0%), checked 2026-11-10
 // NEAR: in its file, src/lib/mpeg_demultiplexer.cpp (Sony's 2.9-ee-991111). The unused entry
-//       gives retail's 16-byte frame and the key's copy at the top; the three cases give its
-//       compare tree. Left: the full mask's `sh = 0` is deleted (CSE knows sh is 0 there), where
-//       retail keeps it and puts it in a bnezl's slot; the key is in $t1 (retail $a3), the
-//       entry offset in $a3 ($a2), the first mask in $a2 ($a0). Tried: no initial sh and a
-//       default, the full mask sharing the default, the entry copied into the local, idx as s32;
-//       2026-11-09 (docs/TOOLCHAIN.md, "A switch case that repeats the variable's value"): every
-//       case order and default placement, sh of every integer type (64-bit keeps the set but adds
-//       a truncation), an inline returning the shift (value, pointer, reference), a GNU range for
-//       the full mask (no third compare, but CSE still deletes the set), the result computed per
-//       case, an early return. Mechanism: CSE follows `> mask` then `== full` from the top `sh = 0`
-//       and deletes the case's set, then the compare; reorg's redundant_insn would drop it too.
-//       Retail's bnezl keeps it, so its RTL had a different pattern, a label or an a1 set before
-//       that test; the key's $a3 suggests the shift appeared on several paths (4+ key refs).
+//       gives retail's 16-byte frame and the key's copy at the top. The code is now retail's
+//       instruction for instruction; only the registers differ (regdiff: registers). The full
+//       mask's case written first makes its compare the right leaf after the root's `>` test,
+//       directly followed by its body: jump.c turns `if (mask != full) goto end; sh = 0;` into
+//       a conditional move `sh = mask != full ? sh : 0`, which CSE folds to `(c ? 0 : 0)` but does
+//       not delete as a no-op, so the set survives into the bnezl's slot and the third compare
+//       disappears (docs/toolchain/cse.md). Left: the mask constant takes $a2 where retail has
+//       $a0, and the chain follows (entry offset $a3 for $a2, key $t0 for $a3, %hi $t1 for $t0).
+//       Mechanism: global-alloc's pass 0 skips $a0 for the mask because the key and sh, lower in
+//       its order and conflicting with it, prefer $a0 (the key dies in the dsllv whose result
+//       local-alloc put in $a0: set_preference); with $a0 to the mask, the rest falls out as
+//       retail's. Tried: sh as u32/u8, a named mask, a pointer to the entry, the shift as its
+//       own local, `r |=` after loading the entry, the operands of the or swapped, early returns,
+//       r set in an else, the key copied into a local.
 //       Written for this project from retail's code.
 #include "common.h"
 
@@ -27,14 +28,14 @@ u64 GetStreamId(u32 idx, u64 key)
     if (idx < 10) {
         Pair_20A538 e;
         switch (g_streamIds[idx].b) {
+        case 0xFFFFFFFFFFULL:
+            sh = 0;
+            break;
         case 0xFFFF000000ULL:
             sh = 24;
             break;
         case 0xFF00000000ULL:
             sh = 32;
-            break;
-        case 0xFFFFFFFFFFULL:
-            sh = 0;
             break;
         }
         r = g_streamIds[idx].a | (key << sh);
