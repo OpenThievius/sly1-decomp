@@ -3715,6 +3715,22 @@ after a store through a pointer derived from a parameter, where ours keeps it in
   the object first (0.400 against 0.387): retail's registers, and jump2 merges the six calls
   into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
   flow weights references with; it is a barrier and not used.
+- The same holds for any repeated statement, not only calls, and it is how a whole set of
+  registers swaps where the code is the same (PAL func_eu_001AB370, an escape-code string
+  rewriter). With one escape call shared by the two font arms (`code = D[3]` or `D[4]`, then
+  one `FormatToString(cur, fmt, code, *s)`) and one `*cur++ = c` for both of the slash test's
+  failures (`c == '/' && digit(s[1])`), the three hoisted format %hi's are ranked by life
+  alone (3 refs each, lives doubled by their REG_EQUAL notes: 174, 170, 168) and the string
+  pointer s (44 refs, 93 insns, 2.37) outranks the buffer pointer cur (35, 91, 1.92). With a
+  `FormatToString` call in each font arm, the first format's %hi has 4 refs (8/174, first:
+  retail's $s5) and cur gains 6 refs (41 against 46); with `*cur++ = c` in both the inner
+  `else` and the outer one (`if (c == '/') { if (digit(s[1])) ... else *cur++ = c; } else
+  *cur++ = c;`), cur gains 3 more and outranks s: every register of retail. jump2 merges both
+  pairs into retail's one copy (the escape tail is reached by `b` with `D[3]`'s load in its
+  delay slot; the two failures branch to one `sb` by likely branches).
+- Spot it: a value's priority short by about a sixth with nothing in the code to add
+  references, and a branch to a shared tail (`b L; <delay>`) or two branches to one store.
+  Write the tail in each arm before trying loop structures.
 
 ### A merged arm keeps its place: B0, the arm, the join (func_001EC7A8, unsolved)
 
@@ -3748,11 +3764,11 @@ after a store through a pointer derived from a parameter, where ours keeps it in
   retail. The near miss had found the registers only with the else branch's store after the
   call (which lengthened self's life but put the store after the jal).
 - The same named scale is how func_eu_001AB558 reads it (`f32 v = self->f51C;`).
-- Ruled out for func_eu_001AB370 (s and cur swapped, $s1/$s0): s is ranked first by a wide
-  margin (weighted refs 44 against 35 over nearly equal lives), and since s has more
-  references than cur at every loop depth, no loop structure of the same statements flips it;
-  a hard conflict or a local-alloc register would have to keep $s0 from s but not cur, and
-  there is no region where s is live and cur is not except before `cur = buf`.
+- func_eu_001AB370 (s and cur swapped, $s1/$s0) was not a life of one insn: s ranked first
+  (weighted refs 44 against 35 over nearly equal lives), and no loop structure of the same
+  statements flips that. The statements were not the same: retail wrote repeated arms that
+  cross-jumping merged after reload (see "Call sites that cross-jumping merges still rank the
+  allocation").
 
 ### A literal initial value doubles a variable's life in the ranking (func_001BB290)
 
