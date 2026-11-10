@@ -50,7 +50,100 @@ void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2)
     }
 }
 
-INCLUDE_ASM(func_001CC490);
+// A row of the link's system: the response of the two objects to a unit impulse along one axis,
+// in direction (a) and in rotation (b).
+struct LinkRow {
+    Vec02 a;
+    Vec02 b;
+};
+
+// The right-hand side of the link's system, read as components by index.
+struct __attribute__((aligned(16))) LinkVector {
+    f32 v[4];
+};
+
+void ConstrainVectorByParentAnchor(void* self, void* anchor, Vec02* in, Vec02* out, s32 mode);
+void ApplyColliderInverseInertia(void* self, Vec02* in, Vec02* out);
+void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec02* out);
+void FactorSymmetricMatrix(s32 n, f32* a, f32* l);
+void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
+void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+
+void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out)
+{
+    PlacedObject* objs[2];
+    Vec02 pts[2];
+    Vec02 axis;
+    Vec02 cross;
+    Vec02 scaled;
+    Vec02 torque;
+    LinkRow rows[2][3];
+    Vec02 vel[2];
+    Vec02 diff[3];
+    f32 m[3][3];
+    f32 factor[3][3];
+    f32 rhs[3];
+    f32 sol[3];
+    s32 i;
+    s32 j;
+    s32 flipped = 1;    // the object whose impulse is turned the other way
+
+    objs[0] = a;
+    objs[1] = b;
+    pts[0] = a->v140;
+    pts[1] = *point;
+    for (j = 0; j < 3; j++) {
+        for (i = 0; i < 2; i++) {
+            PlacedObject* o = objs[i];
+            axis = g_identityMatrix.r[j];
+            if (i == flipped) {
+                Vu0::Q(axis) = Vu0::MulX(Vu0::Vec::Of(axis), Vu0::Vec::Scalar(-1.0f)).q;
+            }
+            Vu0::Vec p = Vu0::Vec::Of(pts[i]);
+            Vu0::Vec c = Vu0::Vec::Of(o->v140);
+            Vu0::Vec arm = Vu0::Sub(p, c);
+            Vu0::Set(cross, Vu0::Cross(arm, Vu0::Vec::Of(axis)).q);
+            Vu0::Vec mass = Vu0::Vec::ScalarAtValue(*(f32*)((u8*)o + 0x368));
+            Vu0::Set(scaled, Vu0::DivX(Vu0::Vec::Of(axis), mass).q);
+            ConstrainVectorByParentAnchor(o, (u8*)o + 0x440, &scaled, &rows[i][j].a, 0);
+            ApplyColliderInverseInertia(o, &cross, &torque);
+            ConstrainVectorByParentAnchor(o, (u8*)o + 0x460, &torque, &rows[i][j].b, 0);
+            ComputeColliderPointVelocity(o, point, &rows[i][j], &vel[i]);
+        }
+        Vu0::Vec v0 = Vu0::Vec::Of(vel[0]);
+        Vu0::Vec v1 = Vu0::Vec::Of(vel[1]);
+        Vu0::Q(diff[j]) = Vu0::Sub(v0, v1).q;
+    }
+    for (j = 0; j < 3; j++) {
+        f32* row = m[j];
+        for (s32 k = 0; k < 3; k++) {
+            Vu0::Vec e = Vu0::Vec::Of(g_identityMatrix.r[k]);
+            Vu0::Vec d = Vu0::Vec::Of(diff[j]);
+            Vu0::StoreX(row[k], Vu0::Dot(e, d).q);
+        }
+        rhs[j] = target->v[j];
+    }
+    FactorSymmetricMatrix(3, &m[0][0], &factor[0][0]);
+    SolveFactoredSystem(3, &factor[0][0], rhs, sol);
+    for (i = 0; i < 2; i++) {
+        Vu0::Vec s0 = Vu0::Vec::ScalarAtValue(sol[0]);
+        Vu0::Vec a0 = Vu0::Vec::Of(rows[i][0].a);
+        Vu0::Vec s1 = Vu0::Vec::ScalarAtValue(sol[1]);
+        Vu0::Vec a1 = Vu0::Vec::Of(rows[i][1].a);
+        Vu0::Vec s2 = Vu0::Vec::ScalarAtValue(sol[2]);
+        Vu0::Vec a2 = Vu0::Vec::Of(rows[i][2].a);
+        Vu0::Q(out[i].a) = Vu0::MulXSum3(a0, s0, a1, s1, a2, s2).q;
+        Vu0::Vec t0 = Vu0::Vec::ScalarAtValue(sol[0]);
+        Vu0::Vec b0 = Vu0::Vec::Of(rows[i][0].b);
+        Vu0::Vec t1 = Vu0::Vec::ScalarAtValue(sol[1]);
+        Vu0::Vec b1 = Vu0::Vec::Of(rows[i][1].b);
+        Vu0::Vec t2 = Vu0::Vec::ScalarAtValue(sol[2]);
+        Vu0::Vec b2 = Vu0::Vec::Of(rows[i][2].b);
+        Vu0::Q(out[i].b) = Vu0::MulXSum3(b0, t0, b1, t1, b2, t2).q;
+        TransformDirectionBetweenFrames(0, *(void**)((u8*)objs[i] + 0x18), &out[i].a, &out[i].a);
+        TransformDirectionBetweenFrames(0, *(void**)((u8*)objs[i] + 0x18), &out[i].b, &out[i].b);
+    }
+}
 
 INCLUDE_ASM(func_001CC818);
 
