@@ -532,6 +532,10 @@ void TransformByMatrixWithW(const ScriptMatrixPayload* m, const void* v, void* o
 ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
 void FreeMatrixPayload(void* p);
 
+INCLUDE_RODATA(jtbl_00248FE0);
+INCLUDE_RODATA(jtbl_00249000);
+INCLUDE_RODATA(jtbl_00249020);
+INCLUDE_RODATA(jtbl_00249040);
 INCLUDE_ASM(func_00112C38);
 
 ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
