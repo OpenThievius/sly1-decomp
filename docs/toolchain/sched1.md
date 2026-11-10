@@ -1329,3 +1329,7 @@ assignments after `= {}` clears (worse store order), the initialisers (retail's 
 order, kept), named extern const bounds (folded to the same literals), the list-head pointer as
 an OffsetList* (the load no longer waits for the stores: not retail), the bounds' assignments
 after the frame push, and declaration orders (the frame slots follow declaration order).
+
+  three parameters one saved register; half and the luma part swap t4 and t5. (Resolved
+  through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
+  takes no new saved register" (func_0020CAF8).)

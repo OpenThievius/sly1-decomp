@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 718/1052 (68.3%), checked 2026-11-10
-// NEAR: in its file, src/lib/mpeg_macroblock.cpp (Sony's 2.9-ee-991111). Retail's size, frame
-//       (0xB0) and all seven spill slots (dstField, x, the destination, the routine index, the
-//       luma block, `&count`'s base, `average << 2`); tools/regdiff.py "order" 85.9%. Two luma
-//       variables are reused for the chroma part, C style (docs/toolchain/sched1.md, "A variable
-//       reused for a second half", func_0020CAF8): xs (set twice, so sched1 no longer raises
-//       its add; the dx half then takes t2 and x is reloaded, retail's `lw a3,4(sp)`), and fy
-//       (more references, so the routine index loses its register and is spilled at 12(sp)).
-//       Left: global-alloc's order. fy (6 refs over 109 insns) is placed 16th and takes s0 where
-//       retail has t9, which pushes dstY, srcField and dy one saved register up (s1, s2, t9
-//       against s0, s1, s2); half and the luma part swap t4 and t5 (a preference for t4 from
-//       the luma block's product, r203); `yo << 4` takes t2 in local-alloc (retail t1) and pulls
-//       ys and yo into t2. Tried: every subset of reusing xs, ys, xo, yo, fx, fy for the chroma
-//       part (64; xs+fy best, fx too gives 81%), the chroma base as its own variable (no change),
-//       the src0/src1 statement orders, and permute.py --auto (this order).
+// BYTES 1040/1052 (98.9%), checked 2026-11-10
+// NEAR: in its file, src/lib/mpeg_macroblock.cpp (Sony's 2.9-ee-991111). Every instruction and
+//       register but one value's: tools/regdiff.py "registers" 100% (263/263). xs, fx and fy are
+//       reused for the chroma part (C style); the chroma block's base is its own variable (cbase),
+//       which drops base's global-alloc priority (4 refs over 92 insns, from 7 over 112) below
+//       srcField's, so fy takes t9 in pass 0 and dstY, srcField, base get s0, s1, s2 as retail;
+//       fx reused gives fx and cdx s3 (docs/toolchain/global-alloc.md, func_0020CAF8). The chroma
+//       statements in retail's order (cyb and cyo first, the offset stored before the
+//       destination) and chroma[n] stored after src1[n].
+//       Left: ys and yo take t1 where retail has a2 (8 instructions). yo dies in `yo << 4`,
+//       whose register local-alloc makes t1 (as in retail); set_preference gives yo, and
+//       through expand_preferences ys, a preference for t1, and global-alloc honours it. Retail's
+//       a2 means t1 was excluded (a lower-priority conflicting allocno preferring t1, pass 0's
+//       regs_someone_prefers) or yo did not die there. Tried: ys reused as yo, src1 before src0,
+//       ch named before the luma part, permute.py --auto over this order.
 //       Written for this project from retail's code.
 #include "common.h"
 
@@ -76,8 +76,9 @@ void PredictMacroblock(Dec_20CAF8* self, Frame_20CAF8* src, s32 srcField, s32 ds
     s32 lumaSel, lumaBlock, chromaSel;
     s32 cxb, cys, cyb, cxo, cyo;
     u8* base;
+    u8* cbase;
     s32 cdx, cdy, ch, cY;
-    s32 fx, fy, cfx;
+    s32 fx, fy;
 
     dst = self->dst;
     n = self->preds[self->current].count;
@@ -132,14 +133,14 @@ void PredictMacroblock(Dec_20CAF8* self, Frame_20CAF8* src, s32 srcField, s32 ds
         cys = ((cdy >> 1) << 1) + srcField + cY + (y >> 1);
     else
         cys = (cdy >> 1) + srcField + cY + (y >> 1);
-    cxb = xs >> 3;
-    cxo = xs - (cxb << 3);
     cyb = cys >> 3;
     cyo = cys - (cyb << 3);
-    chroma->dst = dst + (((dstField + cY) << 4) + 0x200);
-    chroma->offset = cxo;
-    cfx = cdx & 1;
+    fx = cdx & 1;
+    cxb = xs >> 3;
+    cxo = xs - (cxb << 3);
     fy = cdy & 1;
+    chroma->offset = cxo;
+    chroma->dst = dst + (((dstField + cY) << 4) + 0x200);
     if (fy) {
         if (cyo + (ch << half) >= 8) {
             sub = (8 >> half) - (cyo >> half) - 1;
@@ -159,14 +160,14 @@ void PredictMacroblock(Dec_20CAF8* self, Frame_20CAF8* src, s32 srcField, s32 ds
             chroma->rest = 0;
         }
     }
-    base += ((cxb - xb) * 2 + (cyb - yb)) * 0x180;
-    chroma->src0 = base + ((cyo << 3) + 0x100);
-    chroma->src1 = base + ((cyo << 3) + 0x400);
+    cbase = base + ((cxb - xb) * 2 + (cyb - yb)) * 0x180;
+    chroma->src0 = cbase + ((cyo << 3) + 0x100);
+    chroma->src1 = cbase + ((cyo << 3) + 0x400);
     chroma->stride = 8 << half;
     self->preds[self->current].luma[n] = D_0027B000[lumaSel];
-    chromaSel = (average << 2) | (cfx << 1) | fy;
+    chromaSel = (average << 2) | (fx << 1) | fy;
     self->preds[self->current].src0[n] = (u8*)(src->data + lumaBlock * 0x180);
-    self->preds[self->current].chroma[n] = D_0027B020[chromaSel];
     self->preds[self->current].src1[n] = (u8*)(src->data + (lumaBlock + src->width) * 0x180);
+    self->preds[self->current].chroma[n] = D_0027B020[chromaSel];
     self->preds[self->current].count++;
 }
