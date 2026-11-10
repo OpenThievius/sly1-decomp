@@ -1,0 +1,196 @@
+<!-- Part of docs/TOOLCHAIN.md, split by chapter. -->
+# Still to qualify
+
+1. **SN build.** A function that compiles differently under the three SN
+   builds would settle which one retail used.
+2. **Per-file flags.** `-O2 -G0 -fno-exceptions -fno-rtti` is every file's default so
+   far (config/cflags.tsv); a file that needs other options gets its own row,
+   never a function.
+3. **The libraries.** Sony's libraries and the compiler's runtime were linked
+   from prebuilt archives and need other compilers or options. Their code is
+   decompiled from retail like the rest: never from SDK source, headers or
+   samples. Measured on 2026-10-29: the double-precision float support at
+   0x1FB618–0x1FD6E0 makes tail calls and saves registers in 8 bytes, and
+   five of its functions (`func_001FBDF8`, `func_001FCD20`, `func_001FCD78`,
+   `func_001FD308`, `func_001FD548`) are EXACT with Sony's `2.9-ee-991111`,
+   none with the SN builds.
+
+   **The whole library is Sony's 2.9-ee-991111** (measured on 2026-11-01).
+   Every one of the 340 library functions that saves a register saves it
+   with `sd`, none with `sq`; 52 of the 619 library functions end in a tail
+   jump to a function, against 2 of the 4,151 in game code; and 49 of the 51
+   library functions matched with 2.95.3 are EXACT with 2.9-ee-991111 as
+   well (the other two sit among `sd`-saving functions and were rewritten).
+   config/cflags.tsv names 2.9-ee-991111 in the third column of every
+   `src/lib` file's row, and tools/compile.py runs that release's
+   `cc1plus.exe`. This is how OpenRAC builds its SDK objects (rac1-decomp,
+   `docs/reference/TOOLCHAIN.md`: Sony's 2.9-ee for the `ee29` objects).
+   Unlike OpenRAC, which builds libgcc from GCC's own sources, nothing here
+   comes from GCC's sources: the runtime's functions (the double-precision
+   float support among them) are decompiled from retail like the rest
+   (LEGAL.md).
+
+   **The C++ runtime (once src/lib/001FC000.cpp, now its whole files) was built with exceptions on**
+   (measured on 2026-11-02), 2.9-ee-991111's default. Its throw and
+   exception-specification functions (func_001FEC10, func_001FEE48, and
+   func_001FEDC8, which splat joins to func_001FEC10) match only so, and so
+   does func_001FD920: with exceptions on the compiler makes no tail calls,
+   and a call to a function that never returns keeps retail's frame and
+   `jal`. All 53 functions matched in that file stay EXACT without
+   `-fno-exceptions`, which config/cflags.tsv no longer gives it. The object
+   then carries frame (unwind) tables in `.data` (1,668 bytes) that no code
+   refers to; retail's are in the disassembly's `.data`, and
+   tools/c_layout.py takes them out of the object (drop_frame_tables). The
+   throw functions name the runtime's helpers the compiler calls
+   (`__eh_alloc`, `__cp_push_exception`, `__throw`, `__start_cp_handler`,
+   `__uncatch_exception`, `__cp_pop_exception`, `terminate__Fv`) and their
+   classes' vtables and destructors in config/us/libcalls.tsv; the file
+   starts with `#pragma interface`, so the compiler refers to those vtables
+   by name rather than writing its own. All four match.
+
+   **The math library is another build** (measured on 2026-11-01). Its range,
+   0x204F68-0x208F90 (26 functions unmatched), puts two `nop`s before every
+   `div.s` that uses a value computed just before, and sets up its frame
+   before the body. None of the toolchain's compilers (2.95.3, 2.96-ee-001003-1,
+   2.95.2, 2.9-ee-991111) with any of its assemblers (`ee/bin/as.exe`,
+   `bin/ee-as.exe`, `ee/bin/ps2eeas.exe`) gives that, whatever the scheduling
+   flags. Sony's own build `2.9-ee-991111-01` does: its compiler writes
+   `nop; nop; div.s` itself. It comes in the archive OpenRAC uses for its
+   DTL-S13010 assembler (decompme/compilers `ee-gcc2.9-991111-01-dtls13010.tar.gz`,
+   SHA-256 `3ab52a7ea962100f2a7df3e04d3e7a758aad669eb365251682e769b755d9d586`;
+   kept in the toolchain folder, never committed), as 32-bit Linux programs
+   with their own loader: on macOS they run in a Linux container. Built with
+   it, a near miss of func_00206298 (written for 2.9-ee-991111) comes out at
+   1,064 bytes against retail's 1,072, with 89% of its instructions in line,
+   against 1,016 bytes with 2.9-ee-991111; `-O2` is the right level
+   (`-O1` or no scheduling is far worse).
+
+   **The math library builds with it** (2026-11-02), as OpenRAC's
+   rac1-decomp builds the objects Sony built with 2.9-ee-991111-01 (its
+   `Makefile.sn` and `config/core_text.objects`). The library is
+   0x204F68–0x2093F0 (PAL 0x2062A8–0x20A8B8): from the first function that
+   pads `div.s` to the last one only the library calls, func_002093C0;
+   func_002093F0 after it is called from game code. config/us/layout.tsv
+   gives it its own folder, `src/libm/`, and config/cflags.tsv names
+   `2.9-ee-991111-01` for its files. tools/compile.py runs that release's
+   Linux `cc1plus` through its own loader (`lib/ld-2.3.6.so`), from
+   `ee-gcc-2.9-991111-01/` or `ee-gcc-2.9-dtls13010/` in the toolchain
+   directory or from `SLY1_LINUX_TOOLCHAIN`; the preprocessor and the
+   assembler stay the Windows 2.9-ee-991111 ones. On x86 Linux the program
+   runs as it is; elsewhere it runs in an `i386/busybox:1.36` container
+   (`docker run --platform linux/386`, OrbStack or Docker Desktop on macOS),
+   or under `SLY1_LINUX_RUNNER`. Without the Linux build, tools/build.py
+   leaves `src/libm/` out and takes the library from the disassembly: the
+   image still matches, with fewer functions from C, and it says so.
+   `tools/check.py` falls back to the Windows 2.9-ee-991111 for these files,
+   as rac1-decomp does, which cannot match a `div.s` function.
+   `python3 tools/toolchain.py` reports which is found. The three math functions matched before this
+   (func_00205318, func_00205578, func_00208FE8) are EXACT with both builds,
+   in US and PAL. The first pass with it (2026-11-02) matched six more,
+   func_002082F8 (2,380 bytes) among them.
+
+   **Its bit-access macros** (2026-11-02). Two forms recur in its near
+   misses:
+   - a `nop` after a `b` or `jr` and its delay slot, putting the next label
+     on an 8-byte boundary (0x204FB4, 0x2062EC, 0x20730C, 0x208DC4 and
+     others), where this compiler aligns jump targets to 4;
+   - a float argument's bits copied out (`mfc1`, `move`) and the frame set
+     up before any constant is loaded, where ours loads the constants first.
+   No flag or tool gives them (`-O1`, `-O3`, `-G2`, `-fno-schedule-insns`,
+   `-fno-schedule-insns2`, `-fno-delayed-branch`, `-mips3`, `-mcpu=r4000` and
+   `r5000`, C with the Linux `cc1`, the Linux `ee/bin/as.bin`), and
+   `-malign-jumps=3` pads every jump target, not some. The compiler aligns
+   the first label after the start of a loop to 8 (`-malign-loops=3`, its
+   default), and a `do { } while (0)` is a loop to it: reading the float's
+   bits inside one gives both forms. func_00204F68, func_00205210 and
+   func_00209210 are EXACT that way and with nothing else. Retail's library
+   was written with such macros, so include/float_bits.h defines a pair,
+   `FLOAT_TO_BITS` and `BITS_TO_FLOAT` (our names), which src/libm uses for
+   a float's bits, and the same for a double's words (`DOUBLE_TO_WORDS`,
+   `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`, `SET_DOUBLE_HIGH`), which func_00209010
+   needs; AGENTS.md allows `do { } while (0)` there and nowhere else. With
+   them all 33 functions of the library match.
+
+   **Its files** (2026-11-06). The library is 35 objects, proved whole in
+   config/us/files.tsv as src/libm/file_*.c: one function each, and two
+   with no code, only a constant in .rodata (the double infinity at
+   0x24FF70 and the error mode at 0x24FF78). They are C, built by the
+   Linux `cc1` with `-O2 -G0`. Each file's .rodata is its own in one
+   piece, 0x24F890-0x24FFA0 in the order of the code: the file's
+   `static const` floats and tables in definition order, then the
+   literals its code needs (a checked function's name, a folded
+   `0.0 / 0.0` or `-two25 / zero`). GCC folds a `static const` into the code
+   as an immediate and still writes it out, unused or not, which is why
+   retail has a 1.0 after the cosine's code and a 1.0 and 1e-30 after the
+   square root's. Double arithmetic in plain C (`(double)x`, `-inf`,
+   `y *= 0.5`, `x < 0.0`) gives the software routine calls retail makes.
+   The word-for-word comparison with the toolchain's `libm.a` confirmed
+   each object's range and that every one was compiled from C; nothing
+   else was taken from it.
+
+Record every result here: the function, the compiler, the flags, and whether
+it matched.
+
+Additional US checks on 2026-10-29: 80 small functions across
+`src/main/00104000.cpp`, `0011C000.cpp`, `00128000.cpp`, `00134000.cpp`, and
+`00140000.cpp` matched with SN GCC 2.95.3 and `-O2 -G0 -fno-exceptions`.
+The full US build, linked with GNU binutils using `-march=r5900 -mabi=eabi`,
+printed `MATCH: build/us/SCUS_971.98 sha1
+57dc305db57932ad3f1122966cdb695d2e62a47a with 1785 functions from C`.
+
+Twenty-two near misses from this wave are retained under `nonmatching/` with
+the remaining differences recorded in each file. PAL version check reported
+27 absent, 42 differs, 7 error, 1709 match; 79 of the 80 functions in this
+wave match at their PAL counterparts, while `func_001365A0` differs there.
+Progress reported US 1785/4766 functions (13.38%) and PAL 1709/4791 (12.62%).
+Unit tests printed `OK` (11 tests), and
+`python3 tests/check_repository.py` printed `ok: 0 problem(s)`.
+
+**The square root (2026-11-03).** Nine game functions hold a bare `sqrt.s`. `__builtin_sqrtf`
+adds a NaN check and a call to `sqrtf` that retail never has. `-ffast-math` gives a bare
+`sqrt.s`, but its result lands in its input's register and the compiler schedules code around
+it, where retail never does either: retail's `sqrt.s` behaves as an inline-assembly helper,
+fixed in place, with an early-clobbered result. include/fpu.h is that helper, `Fpu::Sqrt`, the
+one inline assembly AGENTS.md allows; with it, under the files' own flags, the functions match
+(func_001EDDB0 first). OpenRAC's RAC3 keeps a `sqrt.s` helper for the same reason.
+
+**The toolchain's runtime is C (2026-11-06).** Retail's 64-bit divide and remainder helpers
+(func_001FAE38, func_001FB790, func_001FBE00, func_001FC3D0) are word for word the members of
+the toolchain's `libgcc.a` (2.95.x and 2.9-ee-991111 alike), whose debug sections name a `.c`
+source; the C++ runtime's throw and rethrow (func_001FE6A8, func_001FE4C8) need
+`__builtin_unwind_init` and `__builtin_eh_return`, which `cc1.exe` has and `cc1plus.exe` lacks.
+So that code is C: tools/compile.py builds a `.c` file with the release's `cc1` and the
+driver's C predefines. Like the math library, the runtime was built by Sony's Linux build,
+2.9-ee-991111-01: with the Windows `cc1.exe` of the same release the remainders and the unsigned
+quotient keep their code but lose the unused stack slots retail's frames have (48 bytes for
+func_001FC3D0, where cc1.exe gives 16), and with the Linux `cc1` all four divisions match. Each
+division is its own file, as each is its own object in retail with its own copy of the table of
+significant bits (src/lib/divide.c, remainder.c, divide_unsigned.c, remainder_unsigned.c, on
+include/divide.h). src/lib/throw.c matches with `-O2 -G0 -fexceptions`; without `-fexceptions`
+the stub of func_001FE4C8 moves and cc1 fails on func_001FE6A8. Without the Linux build these
+files stay assembly in the build, as the math library's do. The
+divide helpers multiply with one `multu`, read from lo and hi, which no C product gives (GCC
+multiplies twice or splits a 64-bit product): include/mul_wide.h is that helper, the second
+inline assembly AGENTS.md allows. As with libc and libm, nothing is taken from the archive but
+the kind of its source; the C is written from retail's code.
+
+**The runtime's files (2026-11-06).** From 0x1FAE38 to 0x1FFFD0 the runtime is proved file by file
+(config/us/files.tsv), every file C built by the Linux cc1: the four division files, three
+conversions (src/lib/double_to_u64.c, s64_to_double.c, s64_to_float.c), abstract_call.c, the double
+and single software floating point (soft_float.c, soft_float_single.c), the exception runtime
+(throw.c, with its frame tables in .data from -fexceptions), the 64-bit product (multiply.c) and
+the unwinder (unwind.c, no frame tables, so no -fexceptions). Each boundary is where one object's
+code and data end: its own tables and literals in .rodata, its frame tables in .data, its statics
+in .bss; most are also one member of the toolchain's `libgcc.a`, equal word for word with
+relocations masked (only that equality is used). Padding is no evidence here: the runtime's
+functions are all 8-byte aligned, inside an object as between objects. The C++ runtime's
+objects are proved too, each C++ built by the Linux cc1plus with exceptions on: allocate.cpp
+(0x1FD8A8), exception.cpp (0x1FE8F0), new_handler.cpp (0x1FFFD0), type_info.cpp (0x200080) and
+type_info_kinds.cpp (0x200750). Their classes take the names their type-name strings spell
+(docs/NAMING.md); `#pragma implementation` writes the inline members, vtables and
+type-information functions of include/exception.h, new.h and typeinfo.h where retail has them,
+config/us/generated.tsv gives those functions retail's names, the common type-information
+objects take their addresses from config/us/libcalls.tsv, and two of the files place their
+`.gcc_except_table` (config/us/files.tsv's `except` column). cc1plus of 2.9-ee-991111 refuses
+`#pragma implementation` after the preprocessor's line marker for the source, so tools/compile.py
+names the unit itself in those markers.
