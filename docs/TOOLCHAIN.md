@@ -4134,6 +4134,37 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     store first and push 0.5 late), and a zeroing base class with
     sub-records whose constructors set the colours (an empty base shifts
     the fields).
+  - **func_001930B8, the static initialiser (2026-11-10, `-dS -dl -dg`,
+    local-alloc.c read).** Its two records go to a stack temporary that a
+    `movstrsi` loop copies to the global, so every store is frame-relative
+    and sched2 is free to reorder them; only the registers carry sched1's
+    order. Retail has -0.5 (f20) and -1.0 (f74) both in $f0, and 1000,
+    1200, -1750, 0.5, 2.0, 1.0 in $f5, $f2, $f1, $f3, $f4, $f6. Read
+    backwards through local-alloc (QTY_CMP_PRI, ties by qty number, the
+    fake birth and death one insn wider when sched2 runs), that needs
+    -0.5's store before -1.0's load in sched1's output, and -1750's life
+    shorter than 1200's, 1200's than 0.5's and 2.0's, and 1000's the
+    longest of the single-use constants. In sched1 every constant load
+    (priority 4) outranks every store (2), so with independent stores no
+    source order can give it. A 40-line emulator of the allocation
+    (build/swarm/w10-1930B8/emu.py, rsearch.py in the g7 worktree)
+    confirms both directions: sampled schedules with -0.5 stored first and
+    -1.0 loaded after it reproduce retail's eight registers, and none
+    where all loads lead.
+    - **One variable for -0.5 and -1.0 cannot be it.** Reusing it gives
+      the anti-dependence that makes sched1 store -0.5 first and load
+      -1.0 late (retail's instruction order but for f8, 26 lines differ
+      against 33), but the variable then has two deaths, so global-alloc
+      places it after local-alloc has given $f0 to a constant live across
+      it ($f6 here). The emulator with the variable global finds no
+      schedule at all that gives retail's registers.
+    - **Written as the file's real static initialiser** (inline functions
+      returning each record by value, `static Blk05 D_00604700 = MakeA();`,
+      checked against the generated `__static_initialization_and_destruction_0`)
+      the code is the near miss's exactly: the first record exact, the same
+      34 lines in the second. An aggregate initialiser instead stores the
+      fields straight into the globals (no temporary, no copy loop): not
+      retail's form.
 
 ## Constants in one very long block
 
