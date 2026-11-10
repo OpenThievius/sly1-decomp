@@ -933,6 +933,35 @@ Measured with `-dL` dumps (2026-11-10, the armed notifier's push loop, src/main/
 - **Slot order.** The message is declared in the listener's `if`, as the file's other senders
   do: the weight's temporary then gets the slot before it (112, the message 128).
 
+### jump.c's copy of a loop test has a life of 2: three constants, two moved (func_00192DD0)
+
+Measured with `-dL` dumps (2026-11-10, the switched collider's segment walk,
+src/main/file_18F988.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
+0.0001 (the length test) in f24 and f23, in that order in the preheader, and loads 5.0 in the
+else arm before the divide.
+
+- **The order says two passes.** The three constants are in the loop in the order 0.0001, 5.0,
+  1.0, each a one-insn load. With life 1 each, one pass moves them first to last while
+  `80 - 3k >= insns`, so moving 0.0001 and 1.0 but not 5.0 needs 1.0 to have a longer life, and
+  1.0 ahead of 0.0001 in the preheader needs 1.0 moved in pass 1 and 0.0001 in pass 2 (see the
+  next section).
+- **The walk as a `for`.** `for (f32 t = step; t < 1.0f; t += step)` (with `step` set in both
+  arms of the length test) makes jump.c copy the exit test ahead of the loop; the copied 1.0 is a
+  fresh pseudo whose load sits two luids from its compare (life 2), where the near miss's
+  `if (t < 1.0f) do { } while (t < 1.0f);` gives life 1. So it moves at `80 * 2 >= insns`.
+- **The size: 82 in pass 1, 79 in pass 2.** With Length and MulXSum on Vu0::Vec values
+  (Distance, and the interpolated point stored as a Vec) and the endpoint's copy into the message
+  written `*(Vu0::Vec*)&msg.vb = Vu0::Vec::Of(b)`, pass 1 counts 82 insns: 0.0001 (80) and 5.0
+  stay, 1.0 (160) moves; pass 2 counts 79: 0.0001 moves, the threshold falls to 77 and 5.0
+  stays. The same with a plain `msg.vb = b` is 78 and 74 (5.0 moves in pass 2); the final store
+  to the collider also as a Vec makes 86 and 83 (0.0001 never moves).
+- **The prologue's save order** followed from `target = 0` being set before the `if (sink)`:
+  its `move s4,zero` in the first block ties `sq s4` to it in sched2. Declared inside the `if`
+  (reorg still fills the branch's delay slot with it) the saves come in retail's order.
+- **The node scan.** Retail starts its walk pointer at `self + 0x59C` (`addiu s0,s3,1436`); a
+  cast array indexed at each use gives `move s0,s3` and offset 1436 in each load. The giv's add
+  value must be a register: the array named once, `void** nodes = (void**)((u8*)self + 0x59C);`.
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and

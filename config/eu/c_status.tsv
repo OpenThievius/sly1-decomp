@@ -2374,6 +2374,7 @@ func_00192A38	func_001935C0	match	version-specific
 func_00192A70	func_001935F8	match	
 func_00192B58	func_001936E0	match	
 func_00192C58	func_001937E0	match	
+func_00192DD0	func_00193958	match	
 func_001930B0	func_00193C38	match	
 func_001931F0	func_00193D78	match	
 func_00193210	func_00193D98	match	

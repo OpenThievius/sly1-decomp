@@ -15,6 +15,7 @@
 #include "pad_record.h"
 #include "effect.h"
 #include "vu0.h"
+#include "object_message.h"
 void InitCollider(void* self);
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void InitAgent(void* self);
@@ -1790,7 +1791,84 @@ void FinishSwitchedCollider(SwitchedCollider* self)
     }
 }
 
-INCLUDE_ASM(func_00192DD0);
+// A trail node of a switched collider's list at 0x5AC: when it was laid and the segment it spans.
+struct TrailNode {
+    u8 pad00[0x18];
+    f32 time;               // 0x18
+    u8 pad1C[0x80 - 0x1C];
+    Vec02 v80;              // 0x80
+    Vec02 v90;              // 0x90
+};
+
+// Sends the sink a message for each point along the segments to the attached node (or along
+// the trail), one every 5 units. The segment loop's size decides what loop.c moves out: with
+// the vectors as Vu0::Vec values and the walk a `for` from step to 1.0, pass 1 sees 82 insns and
+// moves only the guard's 1.0 (jump.c's copy, life 2), pass 2 sees 79 and moves 0.0001; 5.0
+// stays, as retail's (docs/TOOLCHAIN.md, "Loops").
+void func_00192DD0(SwitchedCollider* self)
+{
+    Vec02 from[9];
+    Vec02 to[9];
+    SlotMessage msg;
+    Vec02 a;
+    Vec02 b;
+    BaseObject* sink = *(BaseObject**)((u8*)self->world + 0x1D5C);
+    s32 count;
+    if (sink != 0) {
+        PlacedObject* target = 0;
+        void** nodes = (void**)((u8*)self + 0x59C);
+        for (u32 k = 0; k < 4; k++) {
+            if (nodes[k] != 0 && IsObjectAttached(nodes[k]) != 0) {
+                target = (PlacedObject*)nodes[k];
+                break;
+            }
+        }
+        if (target != 0) {
+            count = 1;
+            s32 still = 0;
+            if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f) {
+                still = 1;
+            }
+            if (still) {
+                from[0] = target->v140;
+            } else {
+                from[0] = (*(Vec02*)((u8*)self + 0x5E0));
+            }
+            to[0] = target->v140;
+        } else {
+            count = 0;
+            for (s32 k = 0; k < self->f5D0; k++) {
+                TrailNode* n = (TrailNode*)self->f5AC[k];
+                if (n != 0 && g_gameClock[1] >= n->time) {
+                    from[count] = n->v90;
+                    to[count] = n->v80;
+                    count++;
+                }
+            }
+        }
+        msg.kind = 4;
+        for (s32 i = 0; i < count; i++) {
+            a = from[i];
+            b = to[i];
+            f32 len = Vu0::Distance(a, b);
+            f32 step;
+            if (len < 0.0001f) {
+                step = 1.0f;
+            } else {
+                step = 5.0f / len;
+            }
+            for (f32 t = step; t < 1.0f; t += step) {
+                *(Vu0::Vec*)&msg.vb = Vu0::MulXSum(Vu0::Vec::Of(a), Vu0::Vec::Scalar(1.0f - t), Vu0::Vec::Of(b), Vu0::Vec::Scalar(t));
+                sink->desc->m1B(sink, &msg);
+            }
+            *(Vu0::Vec*)&msg.vb = Vu0::Vec::Of(b);
+            sink->desc->m1B(sink, &msg);
+            (*(Vec02*)((u8*)self + 0x5E0)) = b;
+        }
+    }
+}
 
 void* GetSwitchedColliderTarget(SwitchedCollider* p)
 {
