@@ -4545,6 +4545,24 @@ emulation of build/swarm/w5-1D2518/lalloc2.py (g11 worktree) (2026-11-09, still 
   and dot3 at most 13, and a dot (a PARALLEL of the result and the scratch) is never raised by
   adjust_priority's birthing rule. Statement order changes nothing (24 orders x 64 conversion
   mixes compiled). Open: what in the original made dot3 or its conversion outrank dot2's.
+- **What retail's sched2 order needs of the conversions (func_00141F48, 2026-11-10).** The
+  sibling's head is the same code. sched2 issues the 4.0 load (priority 15) before dot2's
+  conversion only when that conversion ranks below it: one ToFloatNow asm for hb (priority 14;
+  its qmfc2 and mtc1 are adjacent in retail too, `qmfc2 v1; mtc1 v1,$f1`), and the first dot's
+  mtc1 is an asm (ToFloatViaBits: unit none, so it shares cycle 6 with the 4.0's memory slot).
+  ToFloat for hb (compiler mtc1, 16) or for the first dot (compiler mtc1 on the memory unit)
+  puts the qmfc2 or dot3 there instead.
+- **Why sched1 then puts dot3 late: the doubling's register weight.** With c ToFloatViaBits, hb
+  ToFloatNow and ha ToFloatViaBits, the local-alloc emulation gives retail's VU0 registers only
+  with dot3 right after hb's conversion and an insn between dot3 and its qmfc2 (a dot followed at
+  once by its qmfc2 has a two-slot life and outranks pa in local-alloc). At t=8 twoB's add and
+  dot3 tie at priority 13; INSN_REG_WEIGHT is 0 for the add (hb dies in it) and 1 for the dot
+  (two SETs, the scratch REG_UNUSED), so the add goes first. Doubling hb in place (`hb += hb;`,
+  no death, weight 1) lets LUID put dot3 first and gives every VU0 register of retail, but hb
+  and twoB are then one pseudo, and retail's `add.s $f5,$f1,$f1` has two registers (17 lines).
+  Still open: a plausible form where hb lives on past the add or the add is not ready at t=8.
+  SelfDot for the squared dots, named dots in any order, the 4ac product's other groupings and
+  an inline quadratic solver were compiled against all 64 conversion mixes: none is closer.
 
 ### A pointer set after a call, and a call in each arm (func_0013FAE8)
 
