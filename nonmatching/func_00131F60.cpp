@@ -1,16 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 670/1436 (46.7%), checked 2026-11-08
-// NEAR (2026-11-08, night-sizex2): the same size as retail now (was 1448). The gauge loop's
-// constants: retail keeps 1, 9, 60, 320 and the screen mapping's 1728, 16, 0.4545 and 1936 in
-// f23..f31 and loads 1/9, 1/15, 55, 0.5 and 372.8 inside the loop. The loop pass (-dL) showed
-// why ours moved 55 and 372.8 out: each was one pseudo used twice (life 5 and 4), which loop.c
-// moves at 90 insns; one float temporary assigned 55 and then 372.8 is set twice in the loop,
-// so neither is a movable and both stay, as retail's. The colour as a pointer chosen by an if
-// (D_002610D8, else D_002610E0) and copied gives retail's bc1t over the second address. Still
-// differs: retail also keeps the high halves of both colours' addresses in s4 and s3 (loop.c
-// moved them; here only &D_002610D8 is kept, whole, in a saved register), so its frame is 16
-// bytes larger and the saved registers and FPRs of the rest are numbered
-// differently; the ternary, an if/else of pointers and a struct copy in each arm were tried.
+// BYTES 1374/1436 (95.7%), checked 2026-11-10
+// NEAR (2026-11-10, w11): the frame, the saved registers and the whole state-1 half are
+// retail's; what differs is three FPR numbers in the gauge loop. Retail keeps 16.0 in f23 and
+// y1 in f24 (ours the other way round: global-alloc ranks y1, 4 refs over 33 insns, before
+// 16.0, 13 over 174), and loads 1/15 and 372.8 into f2, the second late in the block; ours
+// holds both in f7 (the scratch `d` below is one pseudo set twice, which global-alloc places,
+// and sched1 issues the 372.8 load right after hi). What found the rest (docs/TOOLCHAIN.md,
+// "The colour of a band"): the colours as named constant pointers at the top of the loop body
+// (g++ folds their uses, so each arm keeps its own %lo with a REG_EQUAL note and jump.c does
+// not hoist an arm before reload, while the dead declarations make both %hi's anticipated, so
+// PRE hoists them: retail's s4 and s3, its bc1t with D8 in the delay slot), the camera's zoom
+// read before them (PRE places the three %hi's in first-appearance order: camera, D8, E0, so
+// they take s5, s4, s3), the screen-x conversion named before the screen-y one (loop.c moves
+// 1728 and 16 first), the five layout setters in ScreenLayout::Reset with the colour copied
+// into its own local (`s32 c = color; l->Color(&c)`: the store after Size, the colour in s0
+// across Pos and Size, `addiu a0, sp, 32` at each call), `char buf[16]` before the layout
+// (sp+16, layout at sp+32), the layout's first two words stored through a pointer (`lay`, the
+// v1 that PRE copies into s6 for the draw calls), the move colour before PushFontScale, and
+// "Move"'s alignment stored through a reference made there (retail's `sw a0, 20(s6)`).
+// Unproven forms: the scratch floats `d` (1/15 then 372.8) and `k` (55 then 0.5), which keep
+// those constants in the loop as retail does (as literals loop.c moves 55 and 372.8, life 5
+// and 4 against 90 insns), and the `move` reference.
 #include "common.h"
 #include "screen_element.h"
 #include "packet_writer.h"
@@ -57,6 +67,18 @@ s32 FormatToString(void* dst, const char* fmt, ...);
 Font* GetFontById(s32 id);
 extern s32 D_00261090[4];
 
+struct ScreenLayout {
+    static void Reset(Layout_137228* l, s32 color)
+    {
+        l->Pos(0.0f, 0.0f);
+        l->Size(640.0f, 492.800018f);
+        s32 c = color;
+        l->Color(&c);
+        l->SetF14(0);
+        l->SetF18(0);
+    }
+};
+
 // The panel's control labels: eight bands of the zoom gauge (lit up to the camera's zoom), and in
 // state 1 the two button glyphs (larger while held) with "Move" and "Zoom" beside them.
 void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
@@ -70,22 +92,30 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     f32 center = 320.0f;
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
+        f32 zoom = g_camera->f478;
+        const PanelColor* const lit = &D_002610D8;
+        const PanelColor* const dim = &D_002610E0;
         f32 lo = (f32)i * (1.0f / 9.0f);
-        f32 hi = lo + 1.0f / 15.0f;
+        f32 d = 1.0f / 15.0f;
+        f32 hi = lo + d;
         f32 k = 55.0f;
         f32 x0 = (one - lo) * k - inset;
         f32 x1 = ((one - hi) * k + one) - inset;
-        k = 372.800018f;
-        f32 y0 = k - lo * height;
-        f32 y1 = k - hi * height;
-        const PanelColor* src = &D_002610D8;
-        if (!((lo + hi) * 0.5f <= g_camera->f478)) {
-            src = &D_002610E0;
+        d = 372.800018f;
+        f32 y0 = d - lo * height;
+        f32 y1 = d - hi * height;
+        k = 0.5f;
+        const PanelColor* src;
+        if ((lo + hi) * k <= zoom) {
+            src = lit;
+        } else {
+            src = dim;
         }
         PanelColor c = *src;
         AddGifRgbaEntry(gs, *(u32*)&c);
+        s32 sx0 = CenterFrameMath::ScreenX(center - x0);
         s32 sy0 = CenterFrameMath::ScreenY(y0);
-        AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(center - x0), sy0, 0, 0);
+        AddGifXyzfNoDrawEntry(gs, sx0, sy0, 0, 0);
         AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(x0 + center), sy0, 0, 0);
         s32 sy1 = CenterFrameMath::ScreenY(y1);
         AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(center - x1), sy1, 0, 0);
@@ -94,24 +124,17 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     if (self->state != 1) {
         return;
     }
+    char buf[16];
     Layout_137228 L;
     f32 row = 390.800018f;
-    L.Pos(0.0f, 0.0f);
-    L.Size(640.0f, 492.800018f);
-    {
-        Quad4 col;
-        col.w[0] = 0xFF808080;
-        L.Color(col.w);
-    }
-    L.SetF14(0);
-    L.SetF18(0);
+    ScreenLayout::Reset(&L, 0xFF808080);
     PadRecord* pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     Font* glyphs = GetFontById(1);
     Font* text = GetFontById(0);
-    char buf[16];
     FormatToString(buf, "%c", 0x28);
-    L.f18 = (void*)1;
-    L.f14 = 1;
+    Layout_137228* lay = &L;
+    lay->f14 = 1;
+    lay->f18 = (void*)1;
     L.w = 0.0f;
     L.h = 0.0f;
     f32 s = 0.4f;
@@ -133,9 +156,10 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     L.y = row;
     DrawFontString(glyphs, buf, &L, 0, gs);
     PopFontScale(glyphs);
-    PushFontScale(text, 0.6f, 0.6f);
     *(PanelColor*)&L.color = PanelColor(0x32, 0x84, 0xB0, 0x80);
-    L.f14 = 2;
+    PushFontScale(text, 0.6f, 0.6f);
+    Layout_137228& move = L;
+    move.f14 = 2;
     L.x = (f32)(320 - D_00261090[0]);
     L.y = row;
     DrawFontString(text, "Move", &L, 0, gs);
