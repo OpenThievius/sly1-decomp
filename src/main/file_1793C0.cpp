@@ -755,7 +755,86 @@ void StartGaugeModeObject(GaugeModeObject* self)
     PlayGaugeModeObjectLoop(self, 1);
 }
 
-INCLUDE_ASM(func_0017AF38);
+void func_001B93F8(GaugeModeObject* self);
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
+f32 ComputeAngleBetweenVectors(const Vec02* a, const Vec02* b, Vec02* out);
+void StopAnimationPlayer(void* p);
+
+static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
+
+// Mode 0 stores its weights unscaled and then scales them by 1 - D_00263AC0 in place: the
+// stores before the scaling stay until flow2, so the remainder's product takes k's register.
+void func_0017AF38(GaugeModeObject* self)
+{
+    Vec02 v0;
+    Vec02 local;
+    Vec02 vel;
+    Vec02 local2;
+    Vec02 pos;
+    Mat02 rot;
+
+    func_001B93F8(self);
+    if (self->mode >= 0) {
+    if (self->mode < 2) {
+        ComputeObjectMotionInFrame(self, 0, &self->v140, &v0, 0, 0, 0);
+        Vu0::Q(local) = Vu0::RotateTransposed(self->m110, Vu0::Q(v0));
+        ComputeObjectFrameAtTime(self, 0, &pos, &rot, &vel, 0, D_00263DF4);
+        Vu0::Q(local2) = Vu0::RotateTransposed(rot, Vu0::Q(vel));
+        if (self->mode == 0) {
+            f32 c = ClampBetween(local2.x / D_00263DF8, -1.0f, 1.0f);
+            f32 a = MaxF(0.0f, c);
+            f32 b = MaxF(0.0f, -c);
+            self->wA[0].w = a;
+            self->wA[1].w = 1.0f - a - b;
+            self->wA[2].w = b;
+            self->wA[3].w = D_00263AC0;
+            f32 k = 1.0f - D_00263AC0;
+            self->wA[0].w *= k;
+            self->wA[2].w *= k;
+            self->wA[1].w *= k;
+            SetBlendItemWeights(self->mode0Handle, 12, 4, self->wA);
+        } else {
+            f32 a = ClampBetween(local2.x / D_00263DFC, 0.0f, 1.0f);
+            f32 b = ClampBetween(local2.y / D_00263E00, -1.0f, 1.0f);
+            f32 s = 1.0f / MaxF(1.0f, __builtin_fabsf(a) + __builtin_fabsf(b));
+            s = s * (1.0f - D_00263AC0);
+            b *= s;
+            a *= s;
+            self->wB[1].w = a;
+            self->wB[2].w = ClampBetween(b, 0.0f, 1.0f);
+            self->wB[3].w = ClampBetween(-b, 0.0f, 1.0f);
+            self->wB[0].w = 1.0f - a - __builtin_fabsf(b);
+            SetBlendItemWeights(self->mode1Handle, 12, 4, self->wB);
+        }
+    }
+    }
+    PlacedObject* p = (PlacedObject*)GetActiveSwitchedCollider();
+    if (p != 0) {
+        TransformPointBetweenFrames(0, self, &p->v140, &v0);
+        f32 t = ComputeAngleBetweenVectors(&g_unitXVector, &v0, &local);
+        t = MinF(1.0f, t);
+        f32 y = -t * local.y;
+        f32 z = t * local.z;
+        f32 zp = z >? 0.0f;
+        f32 yp = y >? 0.0f;
+        f32 zn = -z >? 0.0f;
+        f32 yn = -y >? 0.0f;
+        self->wC[3].w = zp;
+        self->wC[1].w = yp;
+        self->wC[4].w = zn;
+        self->wC[2].w = yn;
+        self->wC[0].w = 1.0f - yp - yn - zp - zn;
+        SetBlendItemWeights(self->loopHandle, 12, 5, self->wC);
+    }
+    void* target = *(void**)self->targetPlayer;
+    if (target != 0) {
+        if (*(f32*)((u8*)target + 0x18) == 0.0f) {
+            StopAnimationPlayer(target);
+            *(void**)self->targetPlayer = 0;
+        }
+    }
+}
 
 extern s32 D_00270458;
 extern s32 D_00270B54;

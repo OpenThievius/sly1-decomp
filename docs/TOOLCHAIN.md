@@ -2909,6 +2909,32 @@ Read from haifa-sched.c's sched_analyze and rank_for_schedule and the `-dS -dR
   of a by-value function shows as argument moves in the wrong order; the copy from a stack
   temporary to another local is the result's assignment.
 
+### Weights stored, then scaled in place: local-alloc's tie and sched1's tie (func_0017AF38)
+
+Retail's `mul.s $f1,$f2,$f1` writes a product into its second operand's register although the first
+operand (`$f2`) dies there too. local-alloc's block_alloc tries the operands in order (mulsf3 has no
+`%`), and combine_regs ties the output only to an operand with a REG_DEAD note at that insn, counted
+on sched1's order. When the original stored the factor unscaled first and then scaled the member in
+place (`w[1].w = 1 - a - b; ... w[1].w *= k;`), CSE replaces the reload with the register, the store
+stays until flow2, and sched1 puts it after the product: the factor's last use is the dead store, the
+tie to it fails and the product ties to `k`. Writing `k * rest` instead gives the tie but the operands
+in the other order.
+
+The same form decides a store against an argument move in one cycle. rank_for_schedule compares
+INSN_REG_WEIGHT before anything else, and find_insn_reg_weight counts every SET, a store's included,
+less its REG_DEAD notes: a store whose value dies there weighs 0 and goes before `li a1,12` (weight
+1), and sched2 keeps sched1's order on the remaining tie (LUID). Retail's `li a1` first means the
+weight store was not the value's last use. All three weights stored unscaled (`w[0] = a; w[1] = 1 -
+a - b; w[2] = b; w[3] = D;`) and then scaled (`w[0] *= k; w[2] *= k; w[1] *= k;`, in that order)
+give retail's code exactly; none of the 720 orders of the scaled-product form did.
+
+In the same function, a clamp written as an inline returning its result (the file's
+`ClampBetween`) lets the clamp's result tie to the variable, and the scaled inputs reused in place
+(`b *= s; a *= s;`, as retail's `mul.s $f3,$f3,$f0`) instead of new variables give retail's mode-1
+registers and its size (a fresh `b0 * s` left the first clamp's store in the second clamp's delay
+slot, one `b` longer). `t = 1.0f <? t` puts `t` first; an inline `MinF(1.0f, t)` gives retail's
+constant-first `min.s`.
+
 ### A matrix returned by value: the stores order local-alloc's ranking (func_001BA5B0)
 
 Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps (2026-11-08):
