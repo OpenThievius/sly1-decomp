@@ -130,7 +130,6 @@ func_0017E088	0017E088	828	inline	C with inline assembly: VU0 macro instruction 
 func_0017E710	0017E710	1496	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_0017ECE8	0017ECE8	812	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00181078	00181078	972	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
-func_00181658	00181658	292	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00183050	00183050	4	remnant	stripped-function leftover
 func_00185150	00185150	516	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00185538	00185538	540	inline	C with inline assembly: VU0 macro instruction in the compiler's frame

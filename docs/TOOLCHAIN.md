@@ -2750,6 +2750,30 @@ reference.
   `move a0, a2`, as retail. Spot it: retail's receiver in a2 (or another free argument
   register) copied to a0 in the jalr's delay slot.
 
+### Rows bound by reference as s128 (func_00181658)
+
+RecomputeModeWalker rotates a basis's three rows by a product matrix, and retail stores each
+result three times: to the basis (0x50), to a matrix local (0x80) and to three more 16-byte
+slots at the frame's end (0xB0, 0xC0, 0xD0). The last store of the third group fills the first
+virtual call's delay slot and the group interleaves with the call's loads (`self->fC08`, its
+method table, the method), where every attempt with plain locals (Mat02 or Vec02 copies, the
+mul_rotation.h forms) scheduled all nine stores before `lw a0, 0xC08(s2)` and left a nop: 296
+bytes against 292.
+
+- **The mechanism.** In sched2 (after reload the base of s2 is no longer known) a load through
+  a register waits for every frame store that is not MEM_SCALAR_P at a fixed address
+  (fixed_scalar_and_varying_struct_p). The first two groups are a struct's memory, so the loads
+  wait for them; the third must be scalar. A `volatile u128` probe for it was EXACT.
+- **The plain form.** A helper taking the rows as `const s128&` called with u128 values: each
+  argument's conversion is a copy g++ makes into a temporary of the scalar type (the cast's copy
+  of "The weight slot is a cast's copy"), and the three of one call get three slots, allocated
+  after the block's locals. The helper writes the matrix local, which is then assigned to the
+  basis: `Mat02 rot; SetMatrixRows(rot, x, y, z); m2 = rot;`. Three `const s128& a = (s128)x;`
+  statements share one slot (each statement frees its temporaries), and the rotations written
+  as the call's arguments change the order.
+- **Spot it:** a group of dead 16-byte stores at the frame's end that sched2 lets pass loads
+  through pointers, one slot per row: rows passed by reference across the two 128-bit types.
+
 ### A weight named before the normalisation it scales (func_0018DDD8)
 
 LaunchContactListObjectWithoutGravity stores `MulX(NormalizeOrMoved(v150, unit x), speed)`.

@@ -20,6 +20,7 @@
 #include "asm_func.h"
 #include "transform_object.h"
 #include "ramp_profile.h"
+#include "path_curve.h"
 
 void CopyObjectData(void* self);
 
@@ -266,7 +267,49 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
 }
 
-INCLUDE_ASM(func_00181658);
+void RecomputePathFollowerFrame(PathFollower* self);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void BuildBasisFromXAndZHint(void* a, void* b, void* c);
+typedef void (*PathSampleFn)(PathCurve* self, f32 t, Vec02* pos, Vec02* dir);
+
+// A matrix set from three rows passed by reference as the signed 128-bit type: the unsigned rows
+// the caller passes are each copied to a temporary of their own, a scalar's memory, which retail's
+// frame keeps after the matrix locals (docs/TOOLCHAIN.md, "Rows bound by reference as s128").
+static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s128& c)
+{
+    Vu0::Q(m.r[0]) = (u128)a;
+    Vu0::Q(m.r[1]) = (u128)b;
+    Vu0::Q(m.r[2]) = (u128)c;
+}
+
+void RecomputeModeWalker(ModeWalker* self)
+{
+    RecomputePathFollowerFrame(self);
+    if (self->f830 != 0 && self->fC08 != 0) {
+        Vec02 pos;
+        Vec02 dir;
+        Mat02 m1;
+        Mat02 m2;
+        PathCurve* curve = self->f830->curve;
+        PathSampleFn fn = (PathSampleFn)curve->vt->m01;
+        if (fn) {
+            fn(curve, self->f838, &pos, &dir);
+        }
+        MultiplyMatrices3x3(&self->m1A0, &self->fC08->m1A0, &m1);
+        BuildBasisFromXAndZHint(&dir, (void*)&g_unitZVector, &m2);
+        u128 r0 = Vu0::Q(m1.r[0]);
+        u128 r1 = Vu0::Q(m1.r[1]);
+        u128 r2 = Vu0::Q(m1.r[2]);
+        u128 x = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[0]));
+        u128 y = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[1]));
+        u128 z = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[2]));
+        Mat02 rot;
+        SetMatrixRows(rot, x, y, z);
+        m2 = rot;
+        self->fC08->desc02()->m1D(self->fC08, &pos);
+        self->fC08->desc02()->m1E(self->fC08, &m2);
+    }
+}
 
 void HandlePathFollowerActivation(void* self, s32 active);
 
