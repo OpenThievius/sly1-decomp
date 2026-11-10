@@ -1287,3 +1287,30 @@ differences, all of the order inside the first block (the 0.001 constant before 
 `sub.s` before the `mul.s` by 0.001), went with `Vu0::ToFloatMoved` for the length instead of
 `ToFloat` (the conversion lever above). The clamps stayed the file's own inline; ValueRange's
 Limit gives the same code here.
+
+### A variable reused for a second half: no birthing raise, more references (func_0020CAF8)
+
+Measured 2026-11-10 on the MPEG macroblock prediction (src/lib/mpeg_macroblock.cpp,
+2.9-ee-991111; nonmatching/func_0020CAF8.cpp), which computes a luma and a chroma part with the
+same arithmetic. The near miss was three words short with separate chroma variables; retail's
+registers show some of the luma variables holding the chroma values (the column sum in t0 both
+times, the vertical flag in t9 both times).
+
+- **Reusing the column sum (`xs = (cdx >> 1) + (x >> 1);`) makes it a pseudo set twice.**
+  adjust_priority's birthing rule then no longer raises the luma add `xs = (dx >> 1) + x` in
+  block 0, so sched1 issues it after the count's address add instead of right after the shift.
+  The shift's life now spans that add's v1, local-alloc gives the shift t2 (x's incoming
+  register, already copied), and reload cannot inherit x from t2 for the add: retail's
+  `sw t2,4(sp); lw a3,4(sp)`, one of the three missing words.
+- **Reusing the flag (`fy = cdy & 1;`) gives it six references** (two sets, two tests, two
+  selector terms). Its global-alloc priority rises from 0.057 to 0.110, it is placed before the
+  long-lived saved-register values, and the routine index (2 refs over 81 insns) no longer finds
+  a free register: it is spilled at 12(sp) as in retail, which also moves the later slots to
+  retail's offsets. Reusing the other flag, the row sum, the offsets or the base as well
+  lengthens lives and spills more (64 subsets tried; xs and fy are the best, at retail's size).
+- **Spot it.** Two parallel halves of a function where a luma value and its chroma
+  counterpart share a register in retail although both lives are long: try one variable for
+  both, assigned again for the second half. A missing reload of a parameter just after its
+  spill store points at a birthing raise that should not have happened (a variable set twice).
+- **Still differs** (85.9% "order"): fy is placed 16th and takes s0 (retail t9), which shifts
+  three parameters one saved register; half and the luma part swap t4 and t5.
