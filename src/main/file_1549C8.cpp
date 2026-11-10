@@ -2046,7 +2046,50 @@ void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 
 ASM_FUNC(func_001583E8);
 
-INCLUDE_ASM(func_00158480);
+// The spin record TurnMatrixBySpin reads (MoveEffect's at +0x100).
+struct SpinRecord_158480 {
+    f32 scale;          // 0x00
+    u8 pad4[0xC];
+    f32 tx, ty, tz;     // 0x10
+    u8 pad1C[4];
+    f32 rate;           // 0x20
+    u8 pad24[0xC];
+    Quad16 axis;        // 0x30
+    s32 mode;           // 0x40
+    void* frame;        // 0x44
+};
+extern const Mat4A D_00248400;
+void BuildAxisAngleMatrix(void* axis, Mat4A* out, f32 angle);
+void ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
+void AddMatrices(f32* a, f32* b, f32* out);
+
+void TurnMatrixBySpin(SpinRecord_158480* spin, f32* out, f32 dt)
+{
+    Mat4A place = D_00248400;
+    Mat4A turn;
+    place.m[2][2] = place.m[1][1] = place.m[0][0] = spin->scale;
+    place.m[3][0] = spin->tx;
+    place.m[3][1] = spin->ty;
+    place.m[3][2] = spin->tz;
+    turn = D_00248400;
+    if (spin->rate != 0.0f) {
+        Quad16 axis;
+        if (spin->mode == 1 && spin->frame != 0) {
+            TransformDirectionBetweenFrames(spin->frame, 0, &spin->axis, (Vec02*)&axis);
+        } else {
+            axis = spin->axis;
+        }
+        BuildAxisAngleMatrix(&axis, &turn, spin->rate * dt);
+    }
+    Mat4A term;
+    Mat4A scaled;
+    Mat4A product;
+    Mat4A* result = &scaled;
+    MultiplyMatrices((Quad16*)&product, &turn, (Quad16*)&place);
+    ScaleMatrix(result, &product, Vu0::ScalarInGpr(dt));
+    term = scaled;
+    AddMatrices((f32*)&turn, (f32*)&term, out);
+}
 
 void StartMemberObject(MemberObject* self)
 {
