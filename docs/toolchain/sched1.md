@@ -1270,3 +1270,20 @@ near miss's sched2 order of the block exactly) (2026-11-10, w15):
   "r" operand. Not reached: the Vec forms of the dot (their copies are gone before regclass), the
   dot named before or after the square root, the division written apart, and all 64 mixes of
   the four conversions for w, k and kk (Moved for all three stays best, at 8 lines).
+
+### A curve's value named before the clamp that scales it (func_001A3250)
+
+DrawFacingEffect scales its object by `Eval(q30, t) * near`, where `near` is a quadratic of the
+camera distance clamped to a range (the file's `ClampedQuadratic::Clamp`). Written with the
+distance `k` first, then `t`, the clamp, and `Eval(q30, t)` inside the Splat after it, the code
+was 8 bytes short: the q30 quadratic was computed after the clamp's join, so the clamp's result
+could share its input's register in the first two clamps, and `t`'s loads and its `div.s` were
+scheduled after the distance's. Retail computes `t` first (g_gameTime's `lui` is hoisted above
+the Length), evaluates the q30 quadratic in the block that ends in the clamp's first compare
+(its last `add.s` fills the `bc1f` delay slot) and keeps the clamp's result in its own register
+(`mov.s $f0,$f5` / `mov.s $f0,$f4; mov.s $f0,$f6`). `f32 t = ...; f32 k = ...; f32 s =
+Eval(q30, t);` then the clamp and `Splat(s * near)` give retail's blocks and sizes; the last 22
+differences, all of the order inside the first block (the 0.001 constant before the `qmfc2`,
+`sub.s` before the `mul.s` by 0.001), went with `Vu0::ToFloatMoved` for the length instead of
+`ToFloat` (the conversion lever above). The clamps stayed the file's own inline; ValueRange's
+Limit gives the same code here.
