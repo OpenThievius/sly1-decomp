@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 896/904, checked 2026-11-08
+// SIZE 896/904, checked 2026-11-10
 // NEAR (2026-11-08, night-sizex2): 896 bytes for retail's 904 (was 888). The corner count set in
 // each arm of the table's switch (n = 4 at a join is no constant to CSE, so the allocation and
 // the loop take it from a register as retail does) and a third `case 3: break;` for the

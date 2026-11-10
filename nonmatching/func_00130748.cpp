@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1016/1024 (99.2%), checked 2026-11-09
+// BYTES 1016/1024 (99.2%), checked 2026-11-10
 // NEAR (2026-11-09, worker w7-130748): two instructions in retail's other order, every register
 // retail's. At the first call's join retail issues uvv * dur (mul.s $f12) before the length's
 // qmfc2; sched2 ranks them equal (priority 16) and takes the qmfc2, which has six dependents to

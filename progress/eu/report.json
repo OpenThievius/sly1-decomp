@@ -1,20 +1,20 @@
 {
  "measures": {
-  "fuzzy_match_percent": 91.6837262403682,
+  "fuzzy_match_percent": 92.13395582882686,
   "total_code": "1117652",
-  "matched_code": "1022364",
-  "matched_code_percent": 91.47426927165164,
+  "matched_code": "1027396",
+  "matched_code_percent": 91.9244988601103,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4831,
-  "matched_functions": 4763,
-  "matched_functions_percent": 98.59242392879321,
+  "matched_functions": 4765,
+  "matched_functions_percent": 98.63382322500517,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 167,
+  "total_units": 168,
   "complete_units": 0
  },
  "units": [
@@ -14061,16 +14061,16 @@
   {
    "name": "game/file_149398",
    "measures": {
-    "fuzzy_match_percent": 67.5019374838543,
-    "total_code": "15484",
-    "matched_code": "10452",
-    "matched_code_percent": 67.5019374838543,
+    "fuzzy_match_percent": 100.0,
+    "total_code": "8852",
+    "matched_code": "8852",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 58,
-    "matched_functions": 56,
-    "matched_functions_percent": 96.55172413793103,
+    "total_functions": 36,
+    "matched_functions": 36,
+    "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -14202,7 +14202,7 @@
     {
      "name": "func_00149A50",
      "size": "4184",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "968",
      "metadata": {
       "virtual_address": "1350224",
@@ -14438,12 +14438,42 @@
       "virtual_address": "1358120",
       "demangled_name": "SetSinCosPair"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_149398.cpp"
+   }
+  },
+  {
+   "name": "game/file_14B6A8",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "6632",
+    "matched_code": "6632",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 22,
+    "matched_functions": 22,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0014B958",
      "size": "1120",
      "fuzzy_match_percent": 100.0,
-     "address": "8912",
+     "address": "0",
      "metadata": {
       "virtual_address": "1358168",
       "demangled_name": "UpdateNumberedAgentGoal"
@@ -14453,7 +14483,7 @@
      "name": "func_0014BDB8",
      "size": "480",
      "fuzzy_match_percent": 100.0,
-     "address": "10032",
+     "address": "1120",
      "metadata": {
       "virtual_address": "1359288",
       "demangled_name": "IsNumberedAgentFree"
@@ -14463,7 +14493,7 @@
      "name": "func_0014BF98",
      "size": "80",
      "fuzzy_match_percent": 100.0,
-     "address": "10512",
+     "address": "1600",
      "metadata": {
       "virtual_address": "1359768",
       "demangled_name": "HandleNumberedAgentObjectEvent"
@@ -14473,7 +14503,7 @@
      "name": "func_0014BFE8",
      "size": "144",
      "fuzzy_match_percent": 100.0,
-     "address": "10592",
+     "address": "1680",
      "metadata": {
       "virtual_address": "1359848",
       "demangled_name": "EnterNumberedAgentState"
@@ -14483,7 +14513,7 @@
      "name": "func_0014C078",
      "size": "224",
      "fuzzy_match_percent": 100.0,
-     "address": "10736",
+     "address": "1824",
      "metadata": {
       "virtual_address": "1359992",
       "demangled_name": "ChooseAgentStateByContact"
@@ -14493,7 +14523,7 @@
      "name": "func_0014C158",
      "size": "76",
      "fuzzy_match_percent": 100.0,
-     "address": "10960",
+     "address": "2048",
      "metadata": {
       "virtual_address": "1360216",
       "demangled_name": "IsContactAgentFree"
@@ -14503,7 +14533,7 @@
      "name": "func_0014C1A8",
      "size": "144",
      "fuzzy_match_percent": 100.0,
-     "address": "11040",
+     "address": "2128",
      "metadata": {
       "virtual_address": "1360296",
       "demangled_name": "HandleContactAgentObjectEvent"
@@ -14513,7 +14543,7 @@
      "name": "func_0014C238",
      "size": "140",
      "fuzzy_match_percent": 100.0,
-     "address": "11184",
+     "address": "2272",
      "metadata": {
       "virtual_address": "1360440",
       "demangled_name": "EnterContactAgentState"
@@ -14523,7 +14553,7 @@
      "name": "func_0014C2C8",
      "size": "288",
      "fuzzy_match_percent": 100.0,
-     "address": "11328",
+     "address": "2416",
      "metadata": {
       "virtual_address": "1360584",
       "demangled_name": "InitGaugeManager"
@@ -14533,7 +14563,7 @@
      "name": "func_0014C3E8",
      "size": "436",
      "fuzzy_match_percent": 100.0,
-     "address": "11616",
+     "address": "2704",
      "metadata": {
       "virtual_address": "1360872",
       "demangled_name": "BlendParamSets"
@@ -14543,7 +14573,7 @@
      "name": "func_0014C5A0",
      "size": "760",
      "fuzzy_match_percent": 100.0,
-     "address": "12056",
+     "address": "3144",
      "metadata": {
       "virtual_address": "1361312",
       "demangled_name": "ComputeGaugeOutputs"
@@ -14553,7 +14583,7 @@
      "name": "func_0014C898",
      "size": "128",
      "fuzzy_match_percent": 100.0,
-     "address": "12816",
+     "address": "3904",
      "metadata": {
       "virtual_address": "1362072",
       "demangled_name": "ApplyGaugeRatioToEffect"
@@ -14563,7 +14593,7 @@
      "name": "func_0014C918",
      "size": "116",
      "fuzzy_match_percent": 100.0,
-     "address": "12944",
+     "address": "4032",
      "metadata": {
       "virtual_address": "1362200",
       "demangled_name": "FinishGaugeOnTimeout"
@@ -14573,7 +14603,7 @@
      "name": "func_0014C990",
      "size": "168",
      "fuzzy_match_percent": 100.0,
-     "address": "13064",
+     "address": "4152",
      "metadata": {
       "virtual_address": "1362320",
       "demangled_name": "UpdateGaugeManager"
@@ -14583,7 +14613,7 @@
      "name": "func_0014CA38",
      "size": "148",
      "fuzzy_match_percent": 100.0,
-     "address": "13232",
+     "address": "4320",
      "metadata": {
       "virtual_address": "1362488",
       "demangled_name": "ShowGaugeManagerDisplays"
@@ -14593,7 +14623,7 @@
      "name": "func_0014CAD0",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "13384",
+     "address": "4472",
      "metadata": {
       "virtual_address": "1362640",
       "demangled_name": "GetGaugeParams"
@@ -14603,7 +14633,7 @@
      "name": "func_0014CAE8",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "13408",
+     "address": "4496",
      "metadata": {
       "virtual_address": "1362664",
       "demangled_name": "AppendGaugeSlot"
@@ -14612,8 +14642,8 @@
     {
      "name": "func_0014CB08",
      "size": "848",
-     "fuzzy_match_percent": 0.0,
-     "address": "13440",
+     "fuzzy_match_percent": 100.0,
+     "address": "4528",
      "metadata": {
       "virtual_address": "1362696",
       "demangled_name": "RunGaugeTimedEvent"
@@ -14623,7 +14653,7 @@
      "name": "func_0014CE58",
      "size": "452",
      "fuzzy_match_percent": 100.0,
-     "address": "14288",
+     "address": "5376",
      "metadata": {
       "virtual_address": "1363544",
       "demangled_name": "ActivateRandomGaugeSlot"
@@ -14633,7 +14663,7 @@
      "name": "func_0014D020",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "14744",
+     "address": "5832",
      "metadata": {
       "virtual_address": "1364000",
       "demangled_name": "CountDownGaugeContacts"
@@ -14643,7 +14673,7 @@
      "name": "func_0014D078",
      "size": "360",
      "fuzzy_match_percent": 100.0,
-     "address": "14832",
+     "address": "5920",
      "metadata": {
       "virtual_address": "1364088",
       "demangled_name": "AddToGaugeAmount"
@@ -14653,7 +14683,7 @@
      "name": "func_0014D1E0",
      "size": "376",
      "fuzzy_match_percent": 100.0,
-     "address": "15192",
+     "address": "6280",
      "metadata": {
       "virtual_address": "1364448",
       "demangled_name": "HandleGaugeManagerNotification"
@@ -14665,7 +14695,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_149398.cpp"
+    "source_path": "src/main/file_14B6A8.cpp"
    }
   },
   {
@@ -52670,21 +52700,21 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 91.05727004152028,
+    "fuzzy_match_percent": 91.559505748962,
     "total_code": "1001920",
-    "matched_code": "909980",
-    "matched_code_percent": 90.8236186521878,
+    "matched_code": "915012",
+    "matched_code_percent": 91.32585435962952,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 4196,
-    "matched_functions": 4135,
-    "matched_functions_percent": 98.54623450905625,
+    "matched_functions": 4137,
+    "matched_functions_percent": 98.59389895138227,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 74,
+    "total_units": 75,
     "complete_units": 0
    }
   },

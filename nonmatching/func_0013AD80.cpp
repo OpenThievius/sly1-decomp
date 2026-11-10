@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1728/1708, checked 2026-11-08
+// SIZE 1728/1708, checked 2026-11-10
 // NEAR: the view walk, the VIF packet and the merged tails are retail's shape; left: retail spills frames/count/sent (count re-read each pass of the frame loop, which counts up, where loop.c here reverses it), the count == 0 return is cross-jumped into the end in retail (ours loads the pop's address high half into v1, retail a0), and the first walk's vector loads are scheduled a little apart.
 #include "common.h"
 #include "asm_func.h"

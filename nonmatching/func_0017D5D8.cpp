@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1800/1796, checked 2026-11-08
+// SIZE 1800/1796, checked 2026-11-10
 // NEAR (2026-11-08, night-large3): func_0017D5D8, the player's steer and leap search (80.8% of
 // the words). The steer block, both switches and both searches follow retail; what is left is
 // the frame (0x160 against 0x180): retail's point-object loop has its vectors 0x10 higher (pos at
