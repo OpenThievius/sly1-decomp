@@ -1456,6 +1456,46 @@ avoids the roll, but its own pseudos for the pointer and the result do not match
 "ignored due to multiple entry points" in the .loop dump, or retail's inner loop with its
 early exits at the head and only the continuation test at the bottom.
 
+### The 30-insn window of the roll, and a record taken by index (func_0019A6A8)
+
+ControlC17Collider checks three dials in a loop: each marker's walker must have no target key
+(-1) and its current key must equal one digit of the code (`c - 0x390 == code / 100 % 10`,
+`code *= 10` per dial); all three matching completes the lock, any mismatch goes on to the step
+queue. Retail lays the loop out as: entry jump into the body; the increment and `i < 3` test at
+the top; the completion falling out of that test; the body last, its match branching back to
+the increment and its mismatch falling into the queue code. -1 and 100 are in s5 and s4 (moved
+by loop.c), the marker pointer is set in the entry jump's delay slot, after them.
+
+- **The roll needs the whole head within 30 insns.** expand_end_loop (stmt.c) counts INSNs and
+  JUMP_INSNs (not CALL_INSNs) from the loop's start label and stops looking for jumps to the
+  loop's end label once one is found and the count passes 30. With the body's two exits as
+  `break` and the exit test in the header, the region is test (3) + target key (7: the
+  address-of, the two argument moves, the load, the -1, the conditional jump and the break's
+  jump) + current key (15: `code / 100 % 10` is two divmodsi4 with a constant and a trap each)
+  = 25, so all of it rolls and only the increment stays at the top: retail's shape. The
+  completion after the loop is then `if (i >= 3 && ...)`: CSE and jump threading fold the test
+  on both paths (the exit test's, where i >= 3, and the breaks', which come from the body after
+  `i < 3`), so retail shows no compare of i after the loop.
+- **What does not.** The completion inside the loop (`if (i >= 3) { ...; break; }` at the top)
+  is 33 insns to the second break, so the roll stops at the first and the body's tail stays at
+  the top (ours entered the dials at the current key). Removing one division (29) rolls it,
+  removing one insn (32) does not: the limit is exact. The completion in the increment part
+  (body first, then `i++; code *= 10; if (i >= 3) {...}`) gives retail's layout, but the body
+  then begins the loop with `&t`, which PRE hoists after NOTE_INSN_LOOP_BEG: loop.c calls the
+  loop phony and moves nothing (-1 and 100 stay in the loop, &t takes a saved register).
+- **A record by index.** A walking `m++` pointer is set where its statement is, before loop.c's
+  moved constants; retail's comes after them, which is where loop.c puts a reduced giv's
+  initialisation. `C17Marker* m = &markers[i];` at the top of the body (4 insns more, still 29
+  in the window) gives that, where `markers[i].walker` at each call (twice the multiply) breaks
+  the window.
+- **The key.** `s32 key = target; if (key == -1) key = cur;` makes key's pseudo the target
+  load's (s0, copied to a1 for the later compares); `key = target == -1 ? cur : target` (or the
+  if/else) keeps the load in its own pseudo (a1, copied to s0), as retail. EXACT.
+
+The tell: a loop whose increment and test sit at its top, entered by a jump into a body that
+falls out into the following code, is a fully rolled top-test loop: count the head's insns
+against the 30 in the `.rtl` dump.
+
 ### A reference's address reused across a test: read the vector at its use (func_00199698)
 
 - **What retail shows.** `UpdateNumberedItem` tests the squared distance between `target->v140`
