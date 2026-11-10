@@ -1235,3 +1235,43 @@ and reorg.c with `-dj -dJ -dd` dumps (2026-11-10):
   counted both (one shared read left the position two references short of the table pointer,
   and their saved registers swapped).
 
+
+### A short return value is a promoted copy, and its definition's IOR order (func_001E4C48, func_00137D10)
+
+ReadMeshTables (func_001E4C48) compares each link index with -1 in $v0 but multiplies a copy of
+it (`move v1,v0` in the branch's delay slot), with the point count and -1 in s6 and s7. It is
+EXACT only when its file declares ReadBufferedS16 (func_00137D10) as returning `s16`: MIPS
+defines PROMOTE_FUNCTION_RETURN, so expand_call copies $v0 into a fresh promoted pseudo and the
+variable is set from that by a second move; the compare reads the older pseudo, the multiply the
+variable (one variable per read, `s32 a = ...; s32 b = ...;`). With an `s32` declaration no caller
+form gives the copy: `s16 a = f()` and `s32 a = (s16)f()` add an `sll`/`sra` pair per read
+(392 and 384 bytes for retail's 376); the forms in the earlier note (an assignment in the test, a
+ternary, an inline taking the index or returning the link) read one pseudo.
+
+Every other caller is indifferent (2026-11-10): the 22 functions of src/main that call it
+(ReadSequenceSteps, LoadGroupMembers, ReadPlacedObjectModel, LoadPointGraph, LoadObjectGroup,
+LoadC8BObject, LoadCollider, LoadWorld, LoadArrivalPoint, LoadObjectSubGroup, LoadAnimation,
+LoadFollowRecord, ReadAnimationEvents, func_001289C0, the seven readers of pose_source.cpp and
+LoadStateGraph) print EXACT with every declaration of their file changed to `s16`, as with `s32`.
+So `s16` is the likely real type, and only the definition holds it back.
+
+The definition matches only as `s32` (`return lo | ((s16)(hi << 8));`). Retail sign-extends the
+shifted byte alone (`lbu; sll 24; sra 16`) and ORs it with the low byte as `or v0,a2,v0` (low
+byte first), with no extension after the OR. As `s16`, two things go wrong:
+
+- Returned directly, the IOR is narrowed to HImode by convert_to_integer (the `(s16)` on the
+  shifted byte is then a no-op), so the extension comes after the OR: `sll 8; or; sll 16; sra 16`
+  (`lo | (s16)(hi << 8)`, `(s16)(hi << 8) | lo`, `lo | (s32)(s16)(hi << 8)`).
+- Kept in SImode through a variable (`s32 h = (s16)(hi << 8); return lo | h;`, `s32 v = ...;
+  return v;`, an `s16` local for the shifted byte or for the value, `s32 lo`, `p[0]` read in the
+  expression, `(s8)hi << 8`, either source order), the code is retail's but for the OR: combine
+  removes the return's redundant extension (sign-bit copies), and in the combination that follows
+  the extension's removal it substitutes the shifted byte's `sra` into the new IOR, swaps the
+  operands to put the non-object operand first (subst's canonical order) and splits it back, so the
+  shifted byte comes first: `or v0,v0,a2`. Under `s32` the same substitution fails (a two-insn
+  combination is never split) and the order stays.
+- `s32 hi = (s8)p[1]; ... lo | (hi << 8)` keeps the order but loads with `lb` and shifts by 8.
+
+Twenty-two definition forms were tried. Until a form of the definition gives the low byte first as
+`s16`, func_001E4C48 stays in nonmatching/: its EXACT form is the one above with the `s16`
+declaration (branch w13-1E4C48, commits 41a198d1 and 34c7e29b).
