@@ -1443,7 +1443,72 @@ void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, 
     }
 }
 
-INCLUDE_ASM(func_00139740);
+void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, s32 pairs, void* out)
+{
+    BlendTimeScale* keys = (BlendTimeScale*)pairs;
+    f32* duration = (f32*)out;
+    f32 total = 0.0f;
+    s32 j;
+    s32 k;
+    BlendEntry* item;
+
+    if (nKeys == 0) {
+        if (duration == 0) {
+            return;
+        }
+        for (j = 0; j < count; j++) {
+            item = (BlendEntry*)((u8*)items + j * stride);
+            if (item->weight != 0.0f) {
+                total += item->sub->length * item->weight;
+            }
+        }
+        *duration = total;
+        return;
+    }
+    for (k = 0; k < nKeys; k++) {
+        keys[k].b = 0.0f;
+        for (j = 0; j < count; j++) {
+            item = (BlendEntry*)((u8*)items + j * stride);
+            if (item->sub != 0) {
+                keys[k].b += ((BlendTimeScale*)((u8*)item + offset))[k].b * item->weight;
+            }
+        }
+        total += keys[k].b;
+    }
+    f32 sum;
+    f32 ref;
+    s32 first = 1;
+    for (j = 0; j < count; j++) {
+        item = (BlendEntry*)((u8*)items + j * stride);
+        if (item->weight != 0.0f) {
+            BlendTimeScale* key = (BlendTimeScale*)((u8*)item + offset);
+            if (first) {
+                first = 0;
+                sum = key->a / item->sub->length;
+                ref = sum;
+            } else {
+                f32 d = key->a / item->sub->length - ref;
+                if (d <= -0.5f) {
+                    d += 1.0f;
+                } else if (0.5f < d) {
+                    d -= 1.0f;
+                }
+                sum += d * item->weight;
+            }
+        }
+    }
+    keys[0].a = WrapModulo(sum, 1.0f) * total;
+    for (k = 1; k < nKeys; k++) {
+        f32 s = keys[k - 1].a + keys[k - 1].b;
+        keys[k].a = s;
+        if (total <= s) {
+            keys[k].a = s - total;
+        }
+    }
+    if (duration != 0) {
+        *duration = total;
+    }
+}
 
 s32 FindCyclicRangeIndex(s32 count, BlendTimeScale* p, f32 x, f32 period, f32* out)
 {

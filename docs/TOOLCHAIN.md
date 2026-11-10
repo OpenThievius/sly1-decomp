@@ -1433,6 +1433,32 @@ Not matched; the plausible plain forms are exhausted. The remaining lead is a so
 the key's shift is written on more than one path (the tails merged by jump2), which could also
 change what precedes the greater-than test at reorg.
 
+### Loop variables declared once at the top: shared counters and an indexed record (func_00139740)
+
+Matched 2026-11-10 from the -dG dumps. ComputeBlendedDuration has four loops over two counts
+(three over the items, two over the keys). Retail shows three signs of C-style declarations,
+`s32 j; s32 k; BlendEntry* item;` at the top, each reused by every loop:
+
+- **A count-down counter in its own register.** loop.c reverses each `for (j = 0; j < count;
+  j++)` whose j is only counted (check_dbra_opportunities). The reversed biv is j's own pseudo,
+  set to the count before the loop. With one j per loop, the copy ties to the count's register
+  where the count dies (ours counted down in a1). With one j for every loop, the pseudo is live
+  where the count is live too, so it conflicts with a1, and retail's `move t2,a1` comes before
+  each of the three loops. A shared k is the same: the last loop's k is in t0, like the key
+  loop's.
+- **The record taken by index, not advanced by pointer.** With `item = (BlendEntry*)((u8*)items
+  + j * stride)` at the top of the body, PRE leaves the weight's second load after the
+  if/else's join (retail's `lwc1 $f0,0(a2)` before the multiply). With the pointer advanced at
+  the end of the body (`item = item + stride`), PRE finds the join's load redundant and keeps
+  the value in a copy (`mov.s $f2,$f0` in the test's delay slot). In the dump, only the pointer
+  form gives a "PRE: redundant insn" for the load. loop.c then reduces the index to the same
+  pointer registers, so the rest of the loop does not change.
+- **A user variable live past the loop keeps loop.c's copy.** When one `item` serves every
+  loop, the key loop's giv `item` is still live after that loop, since the next loop reads it.
+  loop.c then keeps `item = reduced` at the top of the body and advances the reduced register
+  early. That gives retail's `move t0,v0` with `addu v0,t0,a0` in the branch's delay slot. With
+  a local `item` per loop, the giv is replaced and the pointer advances at the end.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
