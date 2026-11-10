@@ -364,11 +364,15 @@ struct Vu0 {
         return r;
     }
 
-    // a + b * s.x: vadda.xyzw ACC, a, vf0; vmaddx.xyzw.
+    // a + b * s.x: vadda.xyzw ACC, a, vf0; vmaddx.xyzw. The inputs are listed a, s, b: the
+    // local allocator ties the result to the first input that dies there, and retail gives it
+    // the weight's register where a lives on and b is loaded for the sum (func_00187260's three,
+    // docs/TOOLCHAIN.md, "MulAddX lists its weight before b"). Every matched function builds
+    // the same with either order.
     static u128 MulAddX(u128 a, u128 b, u128 s)
     {
         u128 r;
-        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddx.xyzw %0, %2, %3x" : "=j"(r) : "j"(a), "j"(b), "j"(s));
+        __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddx.xyzw %0, %3, %2x" : "=j"(r) : "j"(a), "j"(s), "j"(b));
         return r;
     }
 

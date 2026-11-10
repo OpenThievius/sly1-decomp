@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 336/1880 (17.9%), checked 2026-11-08
+// BYTES 337/1880 (17.9%), checked 2026-11-10
 #include "common.h"
 #include "switched_collider.h"
 #include "entry_queue.h"

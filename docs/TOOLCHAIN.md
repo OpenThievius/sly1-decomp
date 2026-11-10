@@ -2491,6 +2491,20 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   its own; the same construct would likely explain the varying store orders of mul_rotation.h's
   other sites, which are one inline helper in the original.
 
+### A pointer set three times has no base: its stores kill the frame (func_00187260)
+
+alias.c's init_alias_analysis gives a pseudo a base (find_base_value) only when it is set
+once: record_set wipes it to unknown on a second set. A pointer from an incoming argument
+(`&out[n++]`, out in $t2) has the argument's base, which base_alias_check separates from every
+frame address, so CSE keeps a frame local's stored value in its register across stores through
+it. Retail's CollectMeshHits reloads its point (`lqc2 $vf2,5920(sp)`) after the hit's normal is
+stored, and copies the edge hit's normal from its slot (`lq v0,4128(sp)`) after the point's
+store: those stores may alias the frame. One `MeshHitEntry* o;` declared with the function's
+other locals and assigned at each of the three places a hit is appended has three sets, no
+base, and gives both reloads (the hits' other stores unchanged). The sibling func_00186568
+reuses one face pointer for its three loops the same way. Spot it: a frame local reloaded
+after a store through a pointer derived from a parameter, where ours keeps it in a register.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
@@ -2705,6 +2719,27 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   them with our counts (100,000 random orders that keep the dependences). Every source form
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
+
+### MulAddX lists its weight before b (func_00187260)
+
+Read from local-alloc.c (block_alloc, combine_regs) and the `.lreg`/`.greg` dumps of
+CollectMeshHits (2026-11-10):
+
+- **What differed.** Three MulAddX sums whose a (the centre) lives on or comes from an earlier
+  block and whose b (a face's normal) is loaded for the sum: retail gives the result the
+  weight's register (`qmtc2 a0,$vf1; ...; vmaddx.xyzw $vf1, $vf2, $vf1x`), where ours took
+  b's, and the weight and the centre then moved up a register (the centre in vf4 for vf3).
+- **The mechanism.** block_alloc tries the asm's input operands in order and ties the output
+  to the first that is local to the block and dies there (combine_regs). With the inputs
+  listed a, b, s, b wins whenever a does not die; listed a, s, b, the weight wins, which is
+  every one of retail's sums here. Where a dies in the block (the second of two sums from one
+  centre load) a still wins, as before. A sum whose result is a global pseudo (used in the next
+  block) is never tied (reg_qty of the output is -1) and takes global-alloc's register.
+- **The change.** Vu0::MulAddX now lists its inputs a, s, b (the text the same, `%3` and
+  `%2` swapped). A clean build with the new order prints MATCH with all 4341 functions from C;
+  of the near misses only CollectMeshHits (47.1% to 48.4% alone) and func_0017BCD0 (one byte)
+  move, both closer. The order a, b, s had never been tested against a sum where a lives on.
+- **Spot it:** a MulAddX whose result takes b's register where retail's takes the weight's.
 
 ### A Vec named from a Vec result adds a reference to the ranking (func_0016C528)
 
