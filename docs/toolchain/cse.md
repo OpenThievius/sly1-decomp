@@ -150,6 +150,33 @@ each read off the diff's registers (2026-11-09):
   store then waits for; `end = Alloc(); recs = end;` stores the call's value and CSE replaces
   the read of `end` with that same value, so the copy to recs is free to move.
 
+### One pointer variable for every loop: non-replaceable givs (func_001D5678, near miss)
+
+Found 2026-11-10 from the `-dL` dump. Retail's loops over `entries[i]` show a reduced pointer
+copied at the loop top and stepped from the copy (`addu v0,v0,sp; move s1,v0` before the label,
+`move s1,v0` / `addiu v0,s1,-32` inside), not one register stepped in place. That is loop.c's
+reduction of a giv that is not *replaceable* (strength_reduce inserts `giv = reduced` where the
+giv was computed): record_giv marks a giv replaceable only when its insn is the register's first
+set (REGNO_FIRST_UID) and its last use is inside the loop. A fresh pseudo for `&entries[i]` (an
+expression, or a block-local pointer) is replaceable and is substituted away; a pointer variable
+declared once at function scope and assigned in every loop (`RingEntry* e;` ... `e =
+&entries[i];`) is not, in every loop, and gives retail's copies.
+
+- A non-replaceable giv that is a user variable pays `copy_cost` in the benefit test as well as
+  `add_cost` per biv increment; with a benefit of 6 that is negative, so the giv is left alone and
+  recomputed each iteration (`sll v0,s5,5; addu s1,sp,v0`), while the memory references through
+  it after the biv's increment are reduced to a register of their own from `sp-32`
+  (`e = &entries[n]; Call(e); n++; e->z = ...`).
+- The threshold of that test is `(has_call ? 1 : 2) * (1 + n_non_fixed_regs)`, so a positive
+  benefit is almost always worth it: a giv retail leaves unreduced has a benefit of zero or less.
+- The variable's value after a loop is live: retail read the first point of the next loop through
+  it (`addu a1,s2,s1`, s1 the pointer's last value), which only `e[n]` reproduced.
+
+Also from this function: a member read as the weight of a long-lived pointer's last loop
+(`Vec::ScalarAtValue(params->rows[r].lift)` against `Vec::ScalarAt`) changes the pointer's life
+in insns, and with it global-alloc's ranking of the parameters (`floor_log2(refs) * refs / life`):
+params at 4*17/438 = 0.155 against nOffsets at 2*5/68 = 0.147 took s8 from it.
+
 ### A weight's address hoisted out of the loop: a reference's block notes (func_0017E3C8)
 
 func_0017E3C8 (src/main/file_17D248.cpp) went from 92.5% to EXACT on one change, a float
