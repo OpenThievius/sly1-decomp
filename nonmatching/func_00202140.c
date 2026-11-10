@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 440/624 (70.5%), checked 2026-11-08
-/* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): the size is
- * retail's with the display macro's terms in the order dy, magh, dh, dw, dx (the best of all
- * 120 orders, each with the field test either way round; 2026-11-08, night-untouched), and the
- * start matches up to the video mode test: the interlace value is read as a u16 before the
- * store to pmode (retail's lh for the smode2 test and lhu for the later (s16) compare: the store
- * may alias, so CSE keeps both loads), and dx's offset is added in 64 bits (daddiu: the product
- * cast to u64 first). Left, in each display computation: retail computes dy's term into its own
- * register before the division and ORs it in last, and its interlaced arms test the field last
- * (beqz, the 2h - 1 arm falling through) and share the tail after it across the two modes;
- * here dy's term is ORed in first and the field test is bnez. Tried: explicit OR trees of the
- * shape retail's code shows ((magh | dw) | (dx | dh)) | dy, the field test as (h or 2h) - 1. */
+// BYTES 604/624 (96.8%), checked 2026-11-10
+/* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): six
+ * instructions off, two pairs in the interlaced arms. Found 2026-11-10 (docs/TOOLCHAIN.md,
+ * "Sony's compiler balances a chain of | and +"): the libraries' compiler re-associates a chain
+ * of ORs into a balanced tree as fold builds it, and fold distributes the ORs over the field's
+ * ternary (each term but dh saved before the test, the ORs copied into both arms, which
+ * cross-jumping merges across the two modes). Of the 120 orders of the macro's terms only
+ * magh, dh, dx, dy, dw gives retail's tree ((magh | dw) | (dx | dh)) | dy, in both the
+ * interlaced and the plain arms. magh is declared in each arm: one variable assigned in four
+ * arms is a global pseudo that the quotient cannot tie to (`mflo v1; move v0,v1` before).
+ * Still differs: in each interlaced arm retail issues the division's zero trap (beqzl/break)
+ * before dy's `dsll a3,v1,12`; ours after. sched2 gives the shift priority 5 (its anti
+ * dependence on the dx term's daddiu into v1) and the trap 4 (the field load after it), and
+ * the registers are retail's, so retail's sched2 saw a dependence ours lacks (a stale sched1
+ * link to the trap, or the field load's chain one longer). Ruled out: the ternary as
+ * `p->field ?`, `(... ? h * 2 : h) - 1`, `(h << 1) - 1`, `h * (... ? 2 : 1) - 1`, and
+ * magh * w - 1 as a named (or const) local, which moves the multiplies. */
 #include "common.h"
 
 typedef struct GsParam {
@@ -36,14 +41,13 @@ extern const char D_0024F510[];
 
 /* The display register of a mode: position, magnification, size. */
 #define GS_DISPLAY(dx, dy, magh, dw, dh) \
-    (((u64)(dy) << 12) | ((u64)(magh) << 23) | ((u64)(dh) << 44) | ((u64)(dw) << 32) | (u64)(dx))
+    (((u64)(magh) << 23) | ((u64)(dh) << 44) | (u64)(dx) | ((u64)(dy) << 12) | ((u64)(dw) << 32))
 
 
 void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
 {
     GsParam* p = GetGsParams();
     u16 interlace;
-    s32 magh;
 
     interlace = p->interlace;
     env->pmode = 0x66;
@@ -58,21 +62,21 @@ void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16
     env->dispfb = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
     if (p->mode == 2) {
         if ((s16)interlace == 1) {
-            magh = (w + 0x9FF) / w;
+            s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x27C) & 0xFFF, (dy + 0x32) & 0xFFF, magh - 1,
-                                      magh * w - 1, p->field == 0 ? h - 1 : h * 2 - 1);
+                                      magh * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);
         } else {
-            magh = (w + 0x9FF) / w;
+            s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x27C) & 0xFFF, (dy + 0x19) & 0xFFF, magh - 1,
                                       magh * w - 1, h - 1);
         }
     } else if (p->mode == 3) {
         if ((s16)interlace == 1) {
-            magh = (w + 0x9FF) / w;
+            s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x290) & 0xFFF, (dy + 0x48) & 0xFFF, magh - 1,
-                                      magh * w - 1, p->field == 0 ? h - 1 : h * 2 - 1);
+                                      magh * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);
         } else {
-            magh = (w + 0x9FF) / w;
+            s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x290) & 0xFFF, (dy + 0x24) & 0xFFF, magh - 1,
                                       magh * w - 1, h - 1);
         }
