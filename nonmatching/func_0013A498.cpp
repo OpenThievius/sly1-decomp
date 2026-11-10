@@ -15,6 +15,15 @@
 // filled delay slot, leaving the prologue order and kept (a2 for a0) with the test back to slt
 // (kept=0 then precedes the vcallms barrier). Register variables are pins (AGENTS.md): a user
 // decision, so this stays a near miss with the project's helpers.
+// w15 (2026-11-10): no source order of the existing helpers can match. Retail's qmtc2 is the first
+// insn after `addiu sp`, ahead of the saves, and reload's entry spills of ra and mode (`sw t3,4(sp)`,
+// `sw t2,0(sp)`) follow lqc2s; a volatile asm (any asm without outputs) keeps every earlier insn
+// before it (haifa-sched.c), and the parameter copies are always earlier. The VU0 registers are
+// already retail's; the GPRs and order differ only through the barriers. The register-variable
+// scratch (w13 x.cpp) is NOT exact either: 43 lines differ (prologue order, slt entry test, kept in
+// a2 for a0). Retail's kept is set before the vcallms yet its test is the folded blez, which no
+// volatile vcallms between allows (combine's can_combine_p): an open point under any interface
+// (docs/toolchain/vu0-helpers.md).
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"

@@ -413,3 +413,26 @@ func_0013A498 shows the same thing for the loads and stores around its vcallms, 
   again, and after it kept's life is short enough for a saved register (retail: a0, caller-saved).
   Register variables are register pins, which AGENTS.md forbids, so the near miss keeps the
   helpers until the user decides.
+- **No order of the helpers reaches retail (2026-11-10, w15).** The vector registers are already
+  retail's ($vf21..$vf31 are named by the helpers; the near miss's VU0 numbers all match), so the
+  usual levers (Vec values against u128, local-alloc's quantity order, fresh variables) have
+  nothing to act on: what differs is the GPRs and the order, both from the barriers. Two of
+  retail's insns prove that no source order of volatile helpers gives it. Its `qmtc2 a1,$vf27`
+  is the first insn after the frame's `addiu sp`, ahead of every register save, and its
+  `sw t3,4(sp)` and `sw t2,0(sp)` (reload's spills of ra and mode, emitted at the parameter
+  copies, which expand puts before the first statement) come after lqc2s. A volatile asm depends
+  on every earlier insn and every later insn on it (haifa-sched.c, ASM_OPERANDS with
+  MEM_VOLATILE_P: all registers' uses and sets, and flush_pending_lists), and an asm with no
+  outputs is volatile whatever it is declared (stmt.c), so the parameter copies and the saves
+  stay above the first helper in any source. Every fixed-register helper in include/vu0.h has
+  no output or is volatile, and the "j" helpers only reach $vf1..$vf15: only a new non-volatile
+  form (an asm with an output, or the compiler's own moves into a register variable) can match.
+- **The register variables do not match either.** Re-scored in the w15 worktree,
+  build/swarm/w13-13A498/x.cpp (and x1..x5) differ in 43 lines, not EXACT: the prologue order
+  (retail's qmtc2 before the saves; ours after `lui`, `swc1 $f21`), the entry test (`slt a2,t1`
+  and `beqz`, kept's `= 0` before the vcallms) and kept in a2 where retail has a0. So the
+  entry test is a second open point under any interface: retail sets kept (`move a0,zero`)
+  before the vcallms, which is volatile in every form (no outputs), and still has the folded
+  `blez`, which combine gives only with no volatile insn between kept's set and the test
+  (can_combine_p). Tried with the helpers: kept's `= 0` at the top gives the slt back (392
+  bytes, 96 differing lines); `if (count > 0)` around a do-while makes loop.c count up (100).
