@@ -1679,6 +1679,47 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   dump lists each insn's dependents; a link in the RTL whose register no longer matches is a
   stale one.
 
+### A block whose first cycle holds one insn: reorg's two copies (func_0020BB18, unsolved)
+
+Read from haifa-sched.c (schedule_block, rank_for_schedule, sched_analyze_insn), reorg.c
+(fill_eager_delay_slots, fill_slots_from_thread, own_thread_p) and the `-dS -dR -fsched-verbose-6`
+dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-10):
+
+- **What retail shows.** After `if (w == pic->width && h == pic->height) return;` retail has
+  `bne s7,v1,L` and `beq s6,v0,RET` with the same `addiu v0,s8,1320` (the last plane's address,
+  a spilled pseudo) in both delay slots, and L is the height store. Ours has `bnel` with the
+  height store and `beq` with the epilogue's `ld ra`, and from there the body one insn off.
+- **Read backwards through reorg.** The bne's target label is also reached by the beq's
+  fallthrough, so own_thread_p is false and fill_slots_from_thread can take only the thread's
+  first insn (`(! lose || own_thread)` stops the scan at the first skipped insn). Retail's copy
+  in the bne slot means the address was the body's first insn after sched2; the copy retargets
+  the bne past it, the old label loses its last use, the beq's fallthrough becomes its own thread
+  and the beq takes the insn itself. With the height store first (ours), the likely bne (an `NE`
+  test) takes the store into an annulled slot instead.
+- **Read backwards through sched2.** Retail's body is exactly ours with that address issued
+  alone in cycle 1 and every later insn one cycle later (each of our cycles' pairs then reads
+  reversed against retail's). In ours the address and the height store tie at priority 65 in
+  cycle 1 and the store wins on dependents (9 to 6: the spill-slot stores conflict with it), so
+  they share the cycle. No order of the stores, the size, the tests or the planes' arguments
+  changes that: a pair in one cycle is always sorted by rank, and for the address to be first
+  and still alone the two picture stores must depend on it.
+- **What reproduces it.** A scheduling barrier at the address: an insn that carries a loop note
+  (sched_analyze_insn's schedule_barrier_found) depends on every earlier insn and every later one
+  on it. `for (p8 = &st->planes[8].addr; 0; ) { }` at the top of the body gives retail's two
+  delay slots and the whole test exactly (680 bytes, 35 lines left, all in the body: the extra
+  notes are a second barrier, and the early-created pseudo takes the first spill slot, 48(sp),
+  where retail's last plane has 68(sp), the slot of the last pseudo). That form is not plausible
+  original code; it shows only what retail's sched2 saw: the last plane's address set alone at
+  the head of the block, its pseudo created after the other five spilled addresses.
+- **Ruled out** (all 102 lines, the near miss's score): the body inside `if (w != pic->width ||
+  h != pic->height)`, the operands swapped, the picture's fields unsigned, w and h computed in
+  the other order or as `* 16`, rows stored in both arms and read back, the size before the
+  test, the stores after the size, an inline helper for the body (Sony's compiler calls it, not
+  inlined), `do { } while (0)` around the body (128) or before it (123),
+  `-fno-strict-aliasing`, `-O3`, `-fno-gcse` (146), the Linux 2.9-ee-991111-01 build (102).
+- **Spot it.** Two branches into one block whose delay slots hold the same insn and whose
+  target is the block's second insn: the copied insn was alone in sched2's first cycle.
+
 ### A value negated into itself crosses the call (func_001A2380)
 
 - **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the
