@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1580/1588, checked 2026-11-08
+// SIZE 1584/1588, checked 2026-11-10
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 4 (source line 111); 233 differing lines before, 217 now.
 #include "common.h"
 #include "vu0.h"
