@@ -1950,6 +1950,7 @@ func_0017ABE8	func_0017B248	match	version-specific, rodata
 func_0017AD50	func_0017B3B0	match	
 func_0017ADD0	func_0017B430	match	
 func_0017AE00	func_0017B460	match	
+func_0017AF38	func_0017B598	match	
 func_0017B308	func_0017B968	match	
 func_0017B3A8	func_0017BA08	match	
 func_0017B410	func_0017BA70	match	version-specific
