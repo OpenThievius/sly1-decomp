@@ -694,3 +694,21 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
   substituted as a constant and set straight into `$a0`, which gcse never records, so the
   query's `&q` is the only occurrence. A free inline function does the same only if its pointer
   parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.
+
+### An asm's bucket comes from its header line: a value spilled among frame addresses (func_001D7778)
+
+StepPathFollower's eight PRE registers that reload spills are the addresses of seven locals
+(`(plus (reg 1) N)`, raw hash 13259 + N) and the `ScalarInGpr(dt)` value shared by two
+statements after the first loop. Retail's slots put the dt value last; ours put it between
+0xC0's and 0xD0's, which added 16 bytes of frame and moved every later slot. The asm's raw hash
+is gcse.c's sum over ASM_OPERANDS ("ssiEEsi"): its code and mode (38 + 0), the template, the
+output constraint and the file name as character sums, the output index, the input's `REG << 7`
++ regno (dt is pseudo 117), the input constraint's `ASM_INPUT:SF` (37 + 14 + 'f'), and the
+**source line of the asm in include/vu0.h** (361): 9614. With T = 349 (697 insns at gcse) it
+falls in bucket 191, before 0xD0's 205. The odd T from 301 to 403 that order all eight as
+retail's slots do are 301, 323, 333, 357, 359, 387, 389, 391, 401, 403. Writing the two
+statements that take `ScalarInGpr(dt)` over Vu0::Vec values (`Vu0::MulAddX(Vu0::Vec::Of(..),
+Vu0::Vec::Of(..), Vu0::Vec::ScalarInGpr(dt)).q`, the same for the delta's DivX) adds their movti
+copies: 718 insns, T = 359, and the slots are retail's. The line number makes such a bucket an
+accident of our header's layout: solve the table size for the order retail shows, as above,
+rather than moving the helper.

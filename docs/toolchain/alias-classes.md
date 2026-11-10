@@ -2942,3 +2942,15 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
   reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
   before regclass (the copy survives cse1 and gcse).
+
+### A pointer assigned in two loops loses its base: cse1 reloads through it (func_001D7778)
+
+StepPathFollower reads `s->v20` three times in its first loop (the slot's contact point); retail
+loads it again for the torque arm after the push's load, where cse1 reused the push's register
+in ours. The slot pointer `s` was declared once at the top, C style, and assigned by both loops
+(`s = &self->f6B0[i];`). init_alias_analysis gives a pseudo set more than once no
+REG_BASE_VALUE, so base_alias_check can no longer tell `(plus s 32)` from a frame address, and
+the force's store between them (`Vu0::Q(force) =`, a u128 store with no alias class, so
+fixed_scalar_and_varying_struct_p does not help) invalidates the load in cse's table. Declared
+in each loop, `s` is set once, its base is the `self` argument, a frame store cannot alias it,
+and the load is shared. The same declaration once at the top is the lever of func_00139740.

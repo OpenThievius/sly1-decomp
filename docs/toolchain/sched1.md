@@ -939,3 +939,15 @@ func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Do
   (combine merges the copy, twoB is set once again); an inline root solver taking
   `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
   test).
+
+### A product written into a dying operand's variable keeps sched2's order (func_001D7778)
+
+In StepPathFollower's first loop `force = dir * Scalar(push * mass)` and `accel = force /
+Scalar(mass)`. FromFloat's asm reading `mass` is ready one cycle after the load (an asm
+consumer's link is cost-free in insn_cost) while the multiply waits two, so sched1 puts the asm
+first; `mass` then dies at the multiply and local-alloc gives the product mass's `$f0`, and
+after reload the mfc1 of mass must precede `mul.s $f0` (anti-dependence). Retail's `mul.s
+$f1,$f1,$f0` is the product in push's register: `push *= mass;` makes the product push's own
+pseudo (global, `$f1`), and sched2 is free to issue the multiply first. In the same block the
+torque's cross product before the accel's division (`vdiv` first in retail) is the source order
+force, torque, accel: their asms tie on priority and LUID decides.
