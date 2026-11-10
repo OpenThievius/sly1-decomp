@@ -208,6 +208,8 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **GCSE's table has (n+3)/2|1 buckets** from the insn count; PRE's pseudos follow bucket order, which sets
   spill slots and callee-saved registers. Read T from the -dG dump's second "hash table (N buckets" line and
   tune the count with Vec/u128 forms or extra statements (func_001841D0, PAL func_0016AB38, func_00211618).
+- **A loop test reading a point through `Q`** leaves a pseudo for its address that CSE reuses for the body's
+  `&c` and PRE hoists into a saved register; `Vu0::Vec::Of` in the test avoids it (func_001C8590).
 - **A store in each arm** avoids a pointer copy and keeps a value read after the join; cross-jumping merges the
   stores after reload (func_00126CB8, func_001D8E40).
 - **A set written in the target's arm** lets reorg copy it into the delay slot (func_001CD870). jump.c hoists
@@ -1392,6 +1394,33 @@ early exits at the head and only the continuation test at the bottom.
   vector was read, read it with the cast at the use; where retail keeps the address (self's
   `s2` here), read it through `Q`. Different statement orders, a pointer local and a
   re-read of `data->f18` keep the CSE'd pseudo and do not help.
+
+### A loop test's reference pseudo, hoisted by PRE, takes a saved register (func_001C8590)
+
+Read from the -dj/-dF/-dG/-dl dumps (2026-11-10). `BuildAgentPath` walks a point toward the
+goal while it is still within reach of the agent (`while (IsNearPoint(c, self->v140, reach))`,
+the test at the bottom, the body calling `SnapPointToOwnerGraph(f928, &c, &c)`). Ours was 12
+bytes long: an `addiu s1,sp,32` before the loop, a `nop` after the entry `b`, and the clock's
+`lui` twice (retail keeps it in `s8` from before the first branch).
+
+- **The chain.** The test's `Vu0::Q(c)` is an inline taking `c` by reference: its parameter
+  is a pseudo set to `&c` in the test. CSE follows the entry jump into the test and the
+  branch back into the body, so the call's `&c` arguments become that pseudo; PRE then
+  hoists it, loop-invariant, into the preheader. Live across the loop's call, it takes a
+  saved register, and the clock's high part (PRE's pseudo from the entry block to the end,
+  the lowest priority of all) gets none: reload rematerialises the `lui` at both reads.
+- **Not loop.c.** The loop is "phony" in the .loop dump; nothing there moved it.
+- **The form.** Pass the points to the test as `Vu0::Vec` values (`Vu0::Vec::Of(c)`) with the
+  helper over Vec: CSE's table then has no register holding `&c` at the body, the body
+  expands `&c` itself (retail's `addiu a1,sp,32`, reorg's delay-slot copy, and `move a2,a1`),
+  and the clock's pseudo takes `s8`. Vec values are the project's convention.
+- **Two smaller lessons.** GCSE numbers expressions in the order it first meets them, and
+  PRE's insertions in the preheader follow that index: `Vu0::Q(d1) = MulAddX(..)` expands
+  `&d1` before the operands, `Vu0::Set(d1, MulAddX(..))` the operands (the global's high part)
+  first, as retail's `lui s6,0x25` before `addiu s2,sp,48` shows. And two floats tied in
+  global-alloc's ranking (11 refs each, lives of 66 and 67 insns; a `min` counts each operand
+  twice) swapped with the order of the first statements: `pos`, its store to the path,
+  `maxLen`, then `goal` and the length.
 
 ### A vector stored in each arm is read back after the join (func_001D8E40)
 

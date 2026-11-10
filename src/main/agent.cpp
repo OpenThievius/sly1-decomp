@@ -860,7 +860,86 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
     return 1;
 }
 
-INCLUDE_ASM(func_001C8590);
+s32 FindOwnerGraphPath(s32 graph, Vec02* a, Vec02* b, s32 max, Vec02* out);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), Agent* self, s32* n, Collider*** list);
+s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+
+// Whether two points are within reach of each other in the ground plane (x and y).
+static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
+{
+    return Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(a, b), Vu0::Sub(a, b)))) < reach;
+}
+
+// The game clock's time (its second word), read through the clock's address.
+static inline f32 ClockTime(const f32* clock) { return clock[1]; }
+
+void func_001C8590(Agent* self)
+{
+    if (F(s32, 0xA60) != 0) {
+        if (!(D_00274C98[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
+    }
+    if (F(s32, 0xB90) != 0) {
+        F(s32, 0x92C) = 2;
+        u128 pos = Vu0::Q(self->v140);
+        Vu0::Q(F(Vec02, 0x940)) = pos;
+        f32 maxLen = __builtin_fabsf(F(f32, 0xB94));
+        u128 goal = Vu0::Q(self->vA50);
+        f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
+        Vec02 a;
+        if (maxLen < len) {
+            f32 t = maxLen / len;
+            Vu0::Q(a) = Vu0::MulXSum(goal, Vu0::Scalar(t), pos, Vu0::Scalar(1.0f - t));
+        } else {
+            Vu0::Q(a) = goal;
+        }
+        Vec02 b;
+        if (self->f928 != 0) {
+            SnapPointToOwnerGraph(self->f928, &a, &b);
+        } else {
+            b = a;
+        }
+        f32 reach = (maxLen <? len) * 0.5f;
+        Vec02 c = b;
+        while (IsNearPoint(Vu0::Vec::Of(c), Vu0::Vec::Of(self->v140), reach)) {
+            f32 next = maxLen + 100.0f;
+            maxLen = next <? len;
+            f32 t = maxLen / len;
+            Vu0::Q(c) = Vu0::MulXSum(Vu0::Q(self->vA50), Vu0::Scalar(t), Vu0::Q(self->v140), Vu0::Scalar(1.0f - t));
+            SnapPointToOwnerGraph(self->f928, &c, &c);
+        }
+        PushBackMemoryMark();
+        Vec02 d1;
+        Vec02 d4;
+        ColliderSpan span;
+        s32 count;
+        Collider** list;
+        Vu0::Set(d1, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(-500.0f)));
+        Vu0::Set(d4, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(500.0f)));
+        GatherCollidersInBox(self->world, (s32)self, &d1, &d4, IsAgentPathBlocker, self, &count, &list);
+        if (FindNearestSpanObject(1, &d4, &d1, count, list, &span) != 0) {
+            f32 h = -((f32*)F(void*, 0x388))[(F(s32, 0x6D0) << 2) + 2] - 1.0f;
+            if (F(s32, 0xC04) != 0) h += F(f32, 0x6CC);
+            Vu0::Q(c) = Vu0::MulAddX(Vu0::Q(span.q[0]), Vu0::Q(D_00248D20), Vu0::Scalar(h));
+        }
+        PopBackMemoryMark();
+        F(Vec02, 0x950) = c;
+    } else {
+        F(s32, 0x92C) = 0;
+        if (self->f928 != 0) {
+            F(s32, 0x92C) = FindOwnerGraphPath(self->f928, &self->v140, &self->vA50, 0x10, (Vec02*)((u8*)self + 0x940));
+        }
+        if (F(s32, 0x92C) == 0) {
+            F(s32, 0x92C) = 2;
+            F(Vec02, 0x940) = self->v140;
+            F(Vec02, 0x950) = self->vA50;
+        }
+    }
+    F(s32, 0x930) = 0;
+    F(s32, 0xA60) = 1;
+    F(f32, 0xA64) = ClockTime(g_gameClock);
+}
 
 INCLUDE_RODATA(jtbl_0024D6B0);
 
