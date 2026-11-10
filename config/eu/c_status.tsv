@@ -596,6 +596,7 @@ func_001229E0	func_00122B00	match
 func_00122A00	func_00122B20	match	
 func_00122A18	func_00122B38	match	
 func_00122A80	func_00122BA0	match	
+func_00122B30	func_00122C50	match	
 func_00122C48	func_00122D68	match	
 func_00122CB0	func_00122DD0	match	
 func_00122D90	func_00122EB0	match	

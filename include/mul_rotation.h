@@ -210,4 +210,32 @@ template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat
     o->rot = r;
 }
 
+// A matrix's three rows set from quadword values passed as the signed quadword type. The
+// product's rows are u128, so each argument is converted and g++ binds a temporary of s128 to
+// the reference: a scalar's slot in the frame (MEM_SCALAR_P), stored though nothing reads it
+// back, the three alive together for the call and so at three addresses above the locals.
+// Loads of structure members through a pointer never wait for such stores
+// (fixed_scalar_and_varying_struct_p), so they sink below later code as retail's do
+// (docs/TOOLCHAIN.md, "Three row copies made by one call").
+static inline void SetRows(Mat02& m, const s128& x, const s128& y, const s128& z)
+{
+    Vu0::Q(m.r[0]) = x;
+    Vu0::Q(m.r[1]) = y;
+    Vu0::Q(m.r[2]) = z;
+}
+
+// The product a b with a's rows loaded once as values and the three result rows put in the
+// matrix local by SetRows, then copied to out (GetIdentityPoseRotation, func_00122B30).
+static inline void MulRotationSetRows(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    u128 y = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    u128 z = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    SetRows(r, x, y, z);
+    *out = r;
+}
+
 #endif

@@ -2263,7 +2263,22 @@ void func_00122A80(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
     Vu0::Q(*vec) = Vu0::Add(Vu0::Q(*vec), Vu0::Q(self->vec));
 }
 
-INCLUDE_ASM(func_00122B30);
+void GetIdentityPoseRotation(T2195_588* self, f32 t, Mat02* rot, Vec02* vec)
+{
+    Attachment* p = self;
+    while ((p = p->link.next) != 0) {
+        s8 f = p->mode1;
+        if (f == 0) { p = 0; break; }
+        if (f != -1) break;
+    }
+    if (p != 0) {
+        p->vt->getRot(p, t, rot, vec);
+    } else {
+        GetOwnerRotation(self, rot, vec);
+    }
+    MulRotationSetRows(rot, self->rot, *rot);
+    Vu0::Q(*vec) = Vu0::Add(Vu0::RotateMembers(self->rot, Vu0::Q(*vec)), Vu0::Q(self->v70));
+}
 
 void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
 {

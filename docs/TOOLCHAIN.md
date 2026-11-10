@@ -2498,6 +2498,35 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   its own; the same construct would likely explain the varying store orders of mul_rotation.h's
   other sites, which are one inline helper in the original.
 
+### Three row copies made by one call (func_00122B30)
+
+GetIdentityPoseRotation matched from 69.3% (2026-11-09, `-dS -dl -dR -fsched-verbose-6`
+dumps, alias.c and function.c of 2.95.3). It has a rotation product, `*rot = self->rot *
+*rot`, then the spin turned by self->rot.
+
+- **What retail shows.** The frame holds two 48-byte groups. One (0x00 to 0x20) is stored with
+  the result's rows, before the spin's loads. The other (0x30 to 0x50) is stored after them: row
+  0 between the spin's add and its store, rows 1 and 2 after the epilogue's restores. The spin's
+  rows 1 and 2 are loaded through `v0 = s1 + 64`, a pseudo of no known base, so their loads
+  wait for every frame store that may alias them.
+- **The mechanism.** The late group is scalar memory. A MEM_SCALAR_P store at a fixed address
+  never conflicts with a MEM_IN_STRUCT_P load through a varying address
+  (fixed_scalar_and_varying_struct_p). Its rows have no dependents, so sched1 sinks them and
+  local-alloc keeps their registers (vf7, vf8, vf5) live past the spin. The spin's rows must be
+  struct loads, so the spin is Vu0::RotateMembers. With Vu0::Rotate's u128 reads (no flag) the
+  late stores stay ahead (37 lines). The three slots are distinct and sit above the matrix
+  local, so all three are alive at once.
+- **The form.** mul_rotation.h's `SetRows(Mat02& m, const s128& x, const s128& y, const s128& z)`,
+  called once with the three product rows as u128 variables. Each argument is converted from
+  u128 to s128, so g++ binds a temporary of the parameter's scalar type to each reference. That
+  gives three assign_temp slots (MEM_SCALAR_P), all alive for the one call statement. Then
+  `*out = r`. Each of these alone gives 32 lines and one shared slot or none: `const u128&`
+  parameters (the variables bound directly, purged back into registers), the products passed
+  as rvalues (with either type), a u128 row read as `(Vec02&)x`, and a cast copy per statement.
+  This is the construct func_0014A8F8's notes above ask for, and there the stores of those
+  slots must come last too ("Three casts in one statement ... are stored last"). It may close
+  that near miss and explain mul_rotation.h's other forms. Not tried there.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
