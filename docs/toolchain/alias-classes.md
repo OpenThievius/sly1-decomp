@@ -2447,6 +2447,40 @@ one register each (95.5%).
   a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
   references, are not cross-jumped into retail's single call).
 
+### Three of file_1D62E0's near misses closed by known levers (func_001D6DD8, func_001D9AC8, func_001DA320)
+
+Wave 14 (2026-11-10). None needed a new mechanism; each was a lever above applied where the
+near miss's notes had stopped.
+
+- **func_001D6DD8 (StepStandIn): the quadword product as an inline.** Written with the four
+  helper calls (StoreFloatAsQuadword, CopyQuadword, ScaleQuadword, StoreQuadword) at the call
+  site, `&q50` and `&q60` were call arguments, so CSE and PRE made each one pseudo that lived
+  across the helpers in s2 and s4 (20 bytes longer). Retail forms both again with `addiu` at
+  each use: they are the parameter of an inline, substituted as a constant (integration, above).
+  agent.cpp's `StoreScaledQuadword(dst, k, p)` is that inline; with it the size was retail's.
+  Then: the clamp is ValueRange::Limit (its own result variable: `mov.s $f20` in each arm), the
+  two weights are `Vu0::ScalarAt(D_x)` (retail's `lw` into a GPR for the qmtc2), the steer calls
+  take `&q60` directly (one pseudo, set into a4 and copied to s3 as retail does; a `Vec02* c`
+  variable set s3 first), and StepCollider takes the step `t` it reads in $f12.
+- **func_001D9AC8 (ProcessPathFollowerContacts): `Vu0::ScalarAtCall` in a loop.** The two
+  weights were `Slot k; Q(k) = FromFloat(D_x)` (lwc1 and mfc1, 12 bytes longer). ScalarAt's
+  reference hoisted both `lui`s out of the loop into saved registers (s6, s7); the by-value
+  ScalarAtCall keeps `lui; lw` at the use, and the two slot stores land as retail's.
+- **func_001DA320: a reread generation counter, a store order and a flag from an inline.**
+  `s32 cur = self->f6A0;` kept an extra pseudo that took s1 ahead of self in global-alloc;
+  writing `self->f6A0 + 1` at both uses, and the slot's `f0C` stored first (before the two
+  vectors, `v20` then `v30`), lets CSE reuse the one load (retail's `move a0,v0`) and gives
+  self s1. Retail's replace test sets a flag (`li v0,1` ... `bc1fl; move v0,zero; beqz v0`)
+  only on the path that compares, with the first test branching straight to the stores: an
+  inline function's result (`IsLowerAlong(a, b, axis)`) inside `if (x != n || ...)`; the same
+  comparison written in the `if`, or a `replace` variable, branches on the FPU flag or tests
+  the flag on both paths. The mesh object `self->fB4C` is read at each use (retail reloads it).
+  The last instruction, `lwc1 $f12, 0x3CC(a0)` where ours read `(s0)`, is AddMeshContacts'
+  parameter order: declared `(Collider* a, f32 radius, ...)` the move to a0 comes before the
+  float's load, and CSE takes the base from a0. Every other caller (agent.cpp, file_1F2758.cpp,
+  player.cpp) and the definition (collider_contact.cpp, which never reads the float) match with
+  that order, so all now declare it.
+
 ### The colour of a band: const pointers that only lend their `%hi` (func_00131F60)
 
 DrawTextPanelControlLabels (US, 2026-11-10, `-dj -dG -dL -dS -dg`, jump.c, gcse.c, loop.c of
