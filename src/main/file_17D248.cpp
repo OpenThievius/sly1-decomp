@@ -8,6 +8,9 @@
 #include "asm_func.h"
 #include "fpu.h"
 #include "vu0.h"
+#include "node_query.h"
+#include "list_iter.h"
+#include "transform_object.h"
 
 // From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
@@ -264,11 +267,86 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     return hits >= 2;
 }
 
-INCLUDE_ASM(func_0017E088);
+struct EdgeNode : MeshEdge {
+    EdgeNode* next8;
+    EdgeNode* nextC;
+};
+struct EdgeGroup {
+    u8 pad00[8];
+    f32 f8;
+    u8 padC[8];
+    EdgeNode* list14;
+    EdgeNode* list18;
+};
+s32 CollectEntriesForKey(Mesh03* mesh, Tree03* tree, s32 index, s32 max, MeshEdge** out);
+s32 CollectTreeNodeSpans(TreeNode03* nodes, Vec02* a, Vec02* b, s32 c, s32 d, ColliderSpan* out);
+s32 func_0017E088(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out)
+{
+    u8 buf[0x100] __attribute__((aligned(16)));
+    Vec02 gap;
+    switch (kind) {
+    case 1: {
+        Mesh03* mesh = &part->meshCopy;
+        u128 acc = Vu0::Q(D_00248D30);
+        s32 found = 0;
+        s32 n = CollectEntriesForKey(mesh, &part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (MeshEdge**)buf);
+        for (s32 i = 0; i < n; i++) {
+            if (func_0017DCE0(self, part, ((MeshEdge**)buf)[i], &gap) != 0) {
+                found = 1;
+                acc = Vu0::Add(acc, Vu0::Q(gap));
+            }
+        }
+        if (found == 0) {
+            return 0;
+        }
+        Vu0::Q(*out) = Vu0::NormalizeOr(acc, Vu0::Q(g_unitXVector));
+        break;
+    }
+    case 3:
+        if (func_0017DCE0(self, part, (MeshEdge*)arg, out) == 0) {
+            return 0;
+        }
+        break;
+    case 2: {
+        EdgeGroup* g = (EdgeGroup*)arg;
+        if (g->f8 < 0.7f) {
+            return 0;
+        }
+        u128 sum = Vu0::Q(D_00248D30);
+        s32 found = 0;
+        Vec02* verts;
+        for (EdgeNode* e = g->list14; e != 0; e = e->next8) {
+            if (func_0017DCE0(self, part, e, (Vec02*)buf) != 0) {
+                verts = (Vec02*)part->meshCopy.verts;
+                if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
+                    found = 1;
+                    sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
+                }
+            }
+        }
+        for (EdgeNode* e = g->list18; e != 0; e = e->nextC) {
+            if (func_0017DCE0(self, part, e, (Vec02*)buf) != 0) {
+                verts = (Vec02*)part->meshCopy.verts;
+                if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
+                    found = 1;
+                    sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
+                }
+            }
+        }
+        if (found == 0) {
+            return 0;
+        }
+        Vu0::Q(*out) = Vu0::NormalizeOr(sum, Vu0::Q(g_unitXVector));
+        break;
+    }
+    default:
+        break;
+    }
+    return TestProbeSegmentsAgainstColliders(self, point, (Quad16*)out);
+}
 
 extern f32 g_gameTime;
 extern f32 D_00274AD0[];
-s32 func_0017E088(Player* self, Collider* other, Vec02* point, s32 kind, s32 extra, Vec02* out);
 void NotifyContactEnds(void* world, s32 n, Contact03** list);
 s32 func_0013E658(Vec02* p, void* tree);
 Contact03* func_0017E3C8(Player* self, s32* outEnd, Vec02* outPos)
@@ -315,7 +393,7 @@ Contact03* func_0017E3C8(Player* self, s32* outEnd, Vec02* outPos)
             default:
                 continue;
             }
-            if (func_0017E088(self, other, &c->end[1 - side].v10, c->kind, extra, &tmp) == 0) {
+            if (func_0017E088(self, other, &c->end[1 - side].v10, c->kind, (void*)extra, &tmp) == 0) {
                 continue;
             }
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
@@ -352,7 +430,173 @@ s32 ChoosePlayerNextState(Player* self)
     return r;
 }
 
-INCLUDE_ASM(func_0017E710);
+s32 IsObjectAttached(void* p);
+void RecordCameraTimestamp(Camera* camera);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInSphere(void* world, void* self, Vec02* center, void* filter, void* ctx, s32* count,
+                             Collider*** list, f32 radius);
+s32 IsObjectOfKind(void* object, s32 kind);
+s32 GetObjectWorldPosition(void* object, Vec02* out);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+// A hit CollectMeshHits gives (0x30 bytes): its point first.
+struct MeshPointHit {
+    Vec02 point;
+    u8 pad10[0x30 - 0x10];
+};
+s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshPointHit* out);
+s32 IsInsideRange(f32* range, f32 value);
+s32 RandomIntInRange(s32 lo, s32 hi);
+extern List01 g_class75List;
+
+// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
+// (list_iter.h) and each step reads the next item through the link (as file_1549C8.cpp's).
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = ((List01*)it->list)->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+
+template <class T> struct NextInList {
+    static T* Of(ListFrame* it)
+    {
+        T* obj = *(T**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+// v made unit length, or fallback when v is shorter than 0.0001, over vector values (as
+// file_1549C8.cpp's): this function's search loop leaves cse2 a jump to change, so jump.c runs
+// again after it and would turn the u128 NormalizeOr's arms into a preset of the fallback
+// (docs/toolchain/conditional-moves.md); the copies of the vector values keep the arms.
+static inline Vu0::Vec NormalizedOr(Vu0::Vec v, Vu0::Vec fallback)
+{
+    u128 len = Vu0::Length(v.q);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        return fallback;
+    }
+    Vu0::Vec r;
+    r.q = Vu0::DivX(v.q, len);
+    return r;
+}
+
+// The player's reach of the frame with the object at 0x25E4: the class 0x75 objects near its
+// point at 0x6A0 (within 300, 500 under a class 0x58 parent, and within 150 up or down) and the
+// colliders gathered around it (the attached ones whose mesh reaches the point within that height,
+// or that are near enough themselves) become queries of kind 0x20 aimed from the point.
+void func_0017E710(Player* self)
+{
+    f32 band[2];
+    ListFrame fr;
+    s32 count;
+    Collider** list;
+    Class75Object* n;
+    s32 i;
+
+    if (!IsObjectAttached(self->f25D8[3])) {
+        return;
+    }
+    RecordCameraTimestamp(g_camera);
+    PushBackMemoryMark();
+    GatherCollidersInSphere(self->world, self, &self->v140, 0, 0, &count, &list, D_00264028);
+    for (i = 0; i < count; i++) {
+        list[i]->flags538 |= (u64)0x8000 << 47;
+    }
+    band[0] = self->v6A0.z + D_00264038[0];
+    band[1] = self->v6A0.z + D_00264038[1];
+    BeginListWalk::Of(&fr, &g_class75List);
+    n = NextInList<Class75Object>::Of(&fr);
+    while (n != 0) {
+        NodeQuery q;
+        Vec02 pos;
+        f32 range = D_00264028;
+        PlacedObject* p;
+        s32 far;
+        for (p = (PlacedObject*)n->parent; p != 0; p = (PlacedObject*)p->parent) {
+            if ((p->desc->flags & 2) && (((Collider*)p)->flags538 & ((u64)0x8000 << 47))) {
+                goto next;
+            }
+            if (IsObjectOfKind(p, 0x58)) {
+                range = D_0026402C;
+            }
+        }
+        GetObjectWorldPosition(n, &pos);
+        far = range < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v6A0)),
+                                                         Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v6A0))))) - n->scale;
+        if (far) {
+            goto next;
+        }
+        if (pos.z + n->scale < band[0] || band[1] < pos.z - n->scale) {
+            goto next;
+        }
+        q.Clear();
+        q.p00 = self;
+        q.hold = n;
+        {
+            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->v6A0));
+            Vu0::Q(q.pos) = Vu0::Q(pos);
+            Vu0::Set(q.dir, Vu0::MulX(NormalizedOr(d, Vu0::Vec::Of(D_00248D00)), Vu0::Vec::ScalarAtCall(D_00264030)).q);
+            q.weight = self->mass * D_00264034;
+            q.kind = 0x20;
+        }
+        FindNodeForQuery(&q, 0, 0);
+    next:
+        n = NextInList<Class75Object>::Of(&fr);
+    }
+    for (i = 0; i < count; i++) {
+        Collider* o = list[i];
+        NodeQuery q;
+        if (!IsObjectAttached(o)) {
+            continue;
+        }
+        if (o->flags538 & ((u64)0x8000 << 25)) {
+            s32 out = D_00264028 < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(self->v6A0))))
+                || o->v140.z + o->radius3CC < band[0] || band[1] < o->v140.z - o->radius3CC;
+            if (out) {
+                continue;
+            }
+        } else if (o->tree.nodes != 0) {
+            MeshPointHit hits[32];
+            s32 hitCount = CollectMeshHits(D_00264028, &self->v6A0, o->tree.count2, o->tree.nodes, 0, &o->meshCopy, 32, hits);
+            s32 j;
+            for (j = 0; j < hitCount; j++) {
+                if (IsInsideRange(band, hits[j].point.z)) {
+                    break;
+                }
+            }
+            if (j >= hitCount) {
+                continue;
+            }
+        }
+        q.Clear();
+        q.p00 = self;
+        q.hold = o;
+        if (o->meshCopy.vertCount > 0) {
+            q.pos = ((Vec02*)o->meshCopy.verts)[RandomIntInRange(0, o->meshCopy.vertCount - 1)];
+        } else {
+            q.pos = o->v140;
+        }
+        {
+            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(o->v140), Vu0::Vec::Of(self->v6A0));
+            Vu0::Set(q.dir, Vu0::MulX(NormalizedOr(d, Vu0::Vec::Of(D_00248D00)), Vu0::Vec::ScalarAtCall(D_00264030)).q);
+            q.weight = self->mass;
+            q.weight *= D_00264034;
+            q.kind = 0x20;
+        }
+        FindNodeForQuery(&q, 0, 0);
+    }
+    for (i = 0; i < count; i++) {
+        list[i]->flags538 &= ~((u64)0x8000 << 47);
+    }
+    PopBackMemoryMark();
+    g_activeListFrames = fr.prev;
+}
 
 INCLUDE_ASM(func_0017ECE8);
 

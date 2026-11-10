@@ -378,3 +378,18 @@ combine statistics" line says why:
 - **A 32-byte record taken by index.** `ParticleExtra* x = &chunk->extra[k]; x->a = ..; x->b =
   ..;` gives retail's `addu a0, a0, v0` (base first); `chunk->extra[k].a = ..` repeated costs
   8 bytes, and the byte-offset form puts the index first.
+
+### A running sum crossing calls is a spilled u128, loaded at each use (func_0017E088)
+
+- **Retail's sign.** An edge-group case adds vectors in two call loops and normalises the sum:
+  `sq v0,272(sp)` (the zero vector copied through a GPR), `lqc2 vf2` then `lqc2 vf3` from
+  272(sp) in the two loops, and in the normalisation `lqc2 vf4,272(sp)` for the length and
+  `lqc2 vf2,272(sp)` again in the divide's arm (bc1f's delay slot).
+- **Why.** As a Vec02 local read and written through Q, the sum is memory that CSE reads once at
+  the normalisation (one register for both uses). As a `u128` variable it is a pseudo living
+  across every call of both loops, which no VU register survives: global-alloc leaves it
+  unallocated, reload gives it a slot after the locals and loads it at each use into the spill
+  register of the moment, separately in the length's block and the divide's arm.
+- **Rule.** A vector accumulated across calls whose loads land in changing registers, with a
+  second load of the same slot inside NormalizeOr's divide, was a u128 variable, as the same
+  function's other case keeps its own (`u128 acc`).

@@ -671,3 +671,26 @@ everything reads vf2. One instruction short.
 - **Spotting it.** The gcse dump's `PRE/HOIST: end of bb N` for an expression whose only
   occurrence is after a loop, and retail computing the same thing after the loop from a
   saved register.
+
+### A clear and a query of one frame record: `q.Clear()` keeps PRE off `&q` (func_0017E710)
+
+Read from gcse.c (compute_hash_table, pre_insert) and lcm.c (pre_lcm) of GCC 2.95.3, with an
+emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11-10):
+
+- **What differed.** Each of the player's two query loops clears a NodeQuery on the stack
+  (`FillMemory(&q, 0, 0x40)`), fills it, normalises a direction (two arms) and calls
+  FindNodeForQuery(&q, 0, 0). Ours kept `sp+32` in s0 from before the arms to the call (8 bytes
+  more over both loops); retail forms `addiu a0,sp,32` at each call.
+- **Why.** A frame address is never killed: on a call gcse marks every call-used hard register
+  set except the frame pointer (`regno != FRAME_POINTER_REGNUM`), so `(plus fp 32)` is
+  transparent through FillMemory's call and the query's `&q` is fully anticipated and redundant
+  with the clear's. lcm.c's compute_latein sets LATEIN to DELAYIN in every block but the last
+  (its successor test is skipped), so the "optimal" point is the entry of the clear's block and
+  pre_insert puts the copy at that block's end, before the arms' test. Both loops share the
+  expression and so one reaching register; loop 2's copy crosses RandomIntInRange's call in one
+  arm, and the pseudo takes a saved register.
+- **The form.** The clear as an inline method of the record, `void Clear() { FillMemory(this,
+  0, sizeof(*this)); }` (node_query.h, as file_14EE40.cpp's HeldTouchQuery has one): `this` is
+  substituted as a constant and set straight into `$a0`, which gcse never records, so the
+  query's `&q` is the only occurrence. A free inline function does the same only if its pointer
+  parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.
