@@ -315,6 +315,44 @@ earlier insn touches, so no dependence on &r explains it; the issue slots do.
   Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
   retail issues later than ours although nothing it reads or writes is touched before.
 
+### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18, unsolved)
+
+Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2026-11-10):
+
+- **jump2 does merge them.** A probe that stores `*p` in each arm with `p` hidden from CSE
+  (an empty asm on `p`, a probe only) gets both arms' `sqc2 vf1,0(v1)` merged by jump2's
+  cross-jumping (find_cross_jump with minimum 1 for a simple jump: the .jump2 dump puts a new
+  label before arm B's store) and reorg then fills arm A's `b` slot from before the jump:
+  retail's layout. So a store in each arm, merged after sched2, is a consistent explanation of
+  retail's head.
+- **CSE rules out `p = &d` in the same block.** `&d` (d at frame offset 0) is a register copy of
+  the frame pointer ($1 before elimination), and make_regs_eqv always makes a fixed hard
+  register the canonical register of its class, so canon_reg rewrites `(mem p)` to `(mem fp)`
+  in every insn of the extended basic block that holds p's set. Arm A (the then-arm) falls
+  through from the test and is always in that block; arm B is reached by a jump to a label used
+  once, which -fcse-follow-jumps follows. Written plainly the arms store through sp (`0(sp)`),
+  and retail's `move v1,sp` with `0(v1)` in both arms cannot come from `p = &d` set before the
+  test in the same block. With the store after the join (the near misses' form) p survives
+  because the join label starts a new CSE block. func_0014F168 has no label before the test at
+  all; in func_0013BE18, p set before the first `if` survives but crosses the call into s2.
+- **Arm A's VU copy has the same problem.** `n = x; *p = n;` stores x (the fallback, a GPR
+  pseudo: `sq v0`) unless n is the canonical register; make_regs_eqv prefers the new register
+  only if it lives past the CSE block (or was set before it) and longer than the old one. A
+  reused variable n first set in func_0013BE18's first else arm (the Sub result, probe g1)
+  still gives `sq v0,0(sp)`: CSE's path from block 0 follows the first if's arms, so the block
+  starts at the function's start.
+- **Isolating the store is not enough in func_0014F168.** With the probe's merged stores the tail
+  loses retail's `move v1,sp` life into the join block: local-alloc then gives the first
+  weight's %hi a0 (retail v1) and `addiu a1` comes one slot late (after `sqc2 vf1`). In
+  func_0013BE18 the same probe gives the e1/e4 tail above, but for the weights' lw order.
+- **Stale scheduling state, checked.** haifa-sched.c 2.95 never clears flow's LOG_LINKS or
+  SCHED_GROUP_P before sched2 (the "clear out stale" lines came later), so a group or link made
+  before reload survives; the sched2 dump marks a SCHED_GROUP_P insn with '+'. On MIPS only a
+  USE before a call sets SCHED_GROUP_P, and no insn of these blocks has it. jump2's
+  delete_noop_moves (after sched2) also deletes a move whose value find_equiv_reg finds
+  already in its register, so sched2 can see an insn that the final code lacks: a candidate for
+  the missing dependence of `addiu a1`, not found.
+
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
 The player's blend weights (2026-11-09) compute three slot weights, each a dot product over
