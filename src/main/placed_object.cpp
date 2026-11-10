@@ -2940,7 +2940,83 @@ void func_00128330(BaseObject* from, BaseObject* to, void* pt, void* d, void* e,
     }
 }
 
-INCLUDE_ASM(func_00128598);
+void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
+
+void func_00128598(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2)
+{
+    Vec02 d;
+    Vec02 g;
+    Vec02 tgt;
+    Vec02 pos;
+    Vec02 vel;
+    Vec02 w;
+    Mat02 R;
+    if (p1 == 0) {
+        p1 = D_00260EE0;
+    }
+    if (p3 == 0) {
+        p3 = D_00260EF0;
+    }
+    Attachment* pa = self->f1EC;
+    Attachment* ra = self->f1F0;
+    if (pa != 0) {
+        pa->vt->getPos(pa, 0.0f, &pos, &vel);
+    } else {
+        pos = self->pos;
+        vel = D_00248D30;
+    }
+    if (ra != 0) {
+        ra->vt->getRot(ra, 0.0f, &R, &w);
+    } else {
+        R = self->rot;
+        w = D_00248D30;
+    }
+    Vu0::Set(d, Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)));
+    if (out1 == 0) {
+        d.z = 0.0f;
+    }
+    f32 len1 = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
+    f32 len2 = Vu0::ToFloat(Vu0::Length(Vu0::Q(vel)));
+    switch (self->bits30) {
+    case 0:
+        if (len1 < 25.0f) {
+            if (len2 < 10.0f) {
+                self->bits30 = 1;
+            }
+        }
+        break;
+    case 1:
+        if (50.0f < len1 || 10.0f < len2) {
+            self->bits30 = 0;
+        }
+        break;
+    }
+    switch (self->bits30) {
+    case 0: {
+        if (0.0001f < len1) {
+            f32 v = ClampRange::Of(p1[0] + len1 * (p1[1] + len1 * p1[2]), p3[0], p3[1]);
+            Vu0::Q(g) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(v / len1));
+        } else {
+            Vu0::Q(g) = Vu0::Zero();
+        }
+        Vu0::Q(tgt) = Vu0::Add(Vu0::Q(g), Vu0::Q(vel));
+        ConvertOffsetToSpherical(&tgt, 0, out0, out1, out2);
+        break;
+    }
+    case 1:
+        if (ra != 0) {
+            ConvertOffsetToSpherical((Vec02*)&R, 0, out0, out1, 0);
+            *out2 = 0.0f;
+        } else {
+            *out0 = b;
+            if (out1 != 0) {
+                *out1 = 0.0f;
+            }
+            *out2 = 0.0f;
+        }
+        break;
+    }
+}
 
 s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
 {
