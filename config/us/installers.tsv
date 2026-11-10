@@ -245,6 +245,7 @@ address	label	kind	install	pass	return	addr	load	data
 002213D0	D_002213D0	descriptor	-	-	-	-	-	D_00247448
 002214A0	D_002214A0	descriptor	-	-	-	-	-	D_00247448
 00221520	D_00221520	descriptor	-	-	-	-	-	D_00247448
+00249D80	D_00249D80	vtable	-	-	-	-	-	-
 00249D98	D_00249D98	vtable	func_0013CC00:+0x0($sp)	-	-	-	-	-
 0024A0E0	D_0024A0E0	vtable	func_00152888:+0x18($s0) func_001EE318:+0x18($s0)	-	-	-	-	-
 0024A220	D_0024A220	vtable	func_0015C930:+0x4C($s0) func_0015DB28:+0x5C($s0) func_001B2DF8:+0x4C($v1)	-	-	-	-	-

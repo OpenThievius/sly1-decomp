@@ -245,6 +245,7 @@ address	section	label	kind	entries	functions	slots
 002213D0	rodata	D_002213D0	descriptor	52	43	(clsA)
 002214A0	rodata	D_002214A0	descriptor	32	19	(clsA)
 00221520	rodata	D_00221520	descriptor	32	18	(clsA)
+00249D80	rodata	D_00249D80	vtable	3	1	- func_0013CCE8 -
 00249D98	rodata	D_00249D98	vtable	3	1	- func_0013CC80 -
 0024A0E0	rodata	D_0024A0E0	vtable	4	1	- func_00152E18 - -
 0024A220	rodata	D_0024A220	vtable	11	9	- func_0015C930 func_0015CA38 func_0015CA60 func_0015CB88 func_0015CC80 func_0015CD18 func_0015C3C0 func_0015CF70 func_0015D4E0 -
