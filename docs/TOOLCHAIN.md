@@ -1650,6 +1650,39 @@ DrawGridSelector, src/main/file_16AA18.cpp):
 - **Spot it.** Two loads of one float constant in a block, one into an argument register:
   the argument came through an inline's parameter (or was otherwise never a pseudo).
 
+### A stored product's two-operand mult: what combine needs (PAL func_eu_001ACC68, unsolved)
+
+Retail's `mult $zero,v0,v1` with a later `mflo a0` (the two-operand form, the product in LO)
+against our three-operand `mult a0,v0,v1`, where the product (two member loads, each also
+stored elsewhere) is only stored (US func_001ABE70, PAL func_eu_001ACC68). Read from
+combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -dr -dl` dumps:
+
+- The mulsi3 expander always emits mulsi3_mult3_r5900, a PARALLEL with three clobber pseudos,
+  which regclass gives GR for the product ("GR_REGS or none" in the `.lreg`): three-operand.
+  Only an insn that combine *re-recognises from the bare SET* (the mult's SET without its
+  clobbers) matches mulsi3_internal first ("=l" only, `mult\t%1,%2`), and reload's output
+  copy is the mflo that sched2 delays. combine builds that bare SET when the mult (i2) is
+  substituted into a later insn (i3) by the normal path. It keeps the PARALLEL, clobbers and
+  all, in the i3_subst_into_i2 path, taken when i3 is a register copy of the product that is
+  the very next real insn and in which the product dies (`next_real_insn (i2) == i3`).
+- A store can never be i3 (`(set (mem) (mult ..))` matches nothing, and the split needs an
+  i1 that dies, which two loads used again by the cols/rows stores are not). So the product
+  needs a register copy that survives CSE, not right after the mult. CSE keeps a copy only
+  when its destination is the class's canonical register: make_regs_eqv makes it first only
+  if it lives outside CSE's block (first use before the block, last use after it) and longer
+  than the source. The tail after a switch's join is one CSE block, so an inline getter's
+  return copy, a local or a chained assignment all have their copies replaced and deleted.
+- Shown: a variable first set before the switch, assigned the product from a local after the
+  cols2/rows2 stores (`s32 m = cols * rows; ...stores...; n = m; self->cells = n;`), gives
+  retail's whole tail (mult, mflo a0, the store order). The same with the copy right after the
+  mult (an inline getter into the reused variable) keeps mult3. Neither is plausible source,
+  and the reused variable moves the switch's registers. Ruled out as well: `s64` locals and casts
+  (`(s32)((s64)a * b)` folds back to SImode; an `s64` local keeps a truncdisi2 of
+  `(truncate (sign_extend p))` that SN's combine does not reduce; u64 forms widen and shift).
+- The other nine `mult $zero` sites in US are products by a constant or with an operand that
+  dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
+  to an argument register: a three-insn combine whose split leaves the bare SET.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
