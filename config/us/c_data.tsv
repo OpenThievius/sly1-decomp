@@ -22,7 +22,7 @@ D_00249EA0	00249EA0	200	.rodata	src/main/file_149398.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
 D_0024A120	0024A120	432	.rodata	src/main/file_1549C8.cpp
-D_0024A2D0	0024A2D0	1152	.rodata	src/main/file_15F678.cpp
+D_0024A2D0	0024A2D0	1220	.rodata	src/main/file_15F678.cpp
 D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
 D_0024A7A0	0024A7A0	60	.rodata	src/main/file_16AA18.cpp
 D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp

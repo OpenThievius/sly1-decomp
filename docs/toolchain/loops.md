@@ -365,3 +365,30 @@ per-iteration `f32* out = block` (GCSE's cprop propagates the copy into the inne
 dies); `out = (f32*)self->slots` (PRE turns it into a copy in pass 1, cprop pass 2 propagates it,
 and PRE's reaching register is inserted in loop 1 and hoisted to the top by loop.c); a biv
 `out += 8` (it is the inner pointer itself); the same loop in an inline helper; `*record++`.
+
+### An inline's constant parameter is a variable with a life: the strip loop's UNPACK words (func_00166690)
+
+Matched 2026-11-10 (DrawModelPart, src/main/file_15F678.cpp; the form found by worker
+w14-1536C8, the mechanism read from w15-166690's `-dL` dump). The part drawer's strip loop is
+333 insns in pass 1 and 304 in pass 2 and makes no call (threshold 160, less 3 a move). Retail's
+preheader holds `&D_002623E0` (s8), the constant 1 (t9, both `q.hi = 1` and `count == 1`) and
+D_00262474's `%hi` (t8); the UNPACK command words 0x6C0BC000 and 0x6C01C01A are built in the loop.
+
+- **Why ours hoisted the command words.** Passed as a parameter (`Unpack(w, 0x6C0BC000, src,
+  size)` calling `Word(w, cmd)`), the constant goes through integrate.c's parameter copy: the
+  argument is copied into a REG_USERVAR pseudo at the inline's entry with a constant
+  equivalence, which try_constants cannot put into the store (a MIPS store needs a register), so
+  the pseudo stays and lives from the inline's entry to the store: `.loop` shows `reg/v` with
+  life 5 and 6, moved at `160 * 5 >= 333`. Hoisted, they live over the whole loop and
+  global-alloc gives them t9 and t8; `&D_002623E0` and 1 are then spilled and rematerialised at
+  each use (24 bytes more, every register after them shifted).
+- **Retail's form.** `UnpackV4(w, src, num, addr)` stores `(num << 16) | addr | 0x6C00C000`
+  itself: the literal is formed at the store (life 1, "not desirable"), as `(n << 16) |
+  0x6000C000` already was for the skin's words. The S-32 size is written `n << 2`, and UnpackAt
+  takes its source first (`(w, src, size, cmd, addr)`), so the source's address is expanded
+  before the command in the bone loops' preheaders, in retail's order.
+- **The jump tables.** The function's two switches emit jtbl_0024A750 and jtbl_0024A780, so
+  their INCLUDE_RODATA lines go (left in, .rodata is 0x50 bytes too large).
+- **The tell.** A command word or other constant hoisted into a saved register in a big loop
+  where retail loads it at its store: look in `.loop` for a `reg/v` constant with a life above 1;
+  it is an inline's parameter, and retail formed the word inside the helper.
