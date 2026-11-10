@@ -802,6 +802,26 @@ keep p's word unavailable while other's stays available. `-fno-gcse`, as a diagn
 gives retail's reloads everywhere but that reuse (816 bytes against 812). Retail's sweep flag
 is spilled at 4(sp) with 0(sp) unused, a sign of another frame object in the original.
 
+What a second look ruled out (w15, 2026-11-10, gcse.c and lcm.c of GCC 2.95.3):
+
+- **The reuse is a variable.** `u64 g = other->flags538;` read before the bit-47/56 test (not
+  inside it) and tested at the first sweep's bit-40 test gives retail's `ld a1` in that test's
+  delay slot and the reuse (152 lines differ, from 176). Every other read is a reload in retail.
+- **No memory set explains the rest.** 2.95's PRE is lazy code motion over ANTLOC and TRANSP
+  alone (lcm.c pre_lcm; no availability from the end of a block): it deletes an occurrence
+  whose block's first computation is anticipated and redundant, and inserts at a block's end
+  where that reaches a deleted one. A store or call between the top load and the sweep only
+  moves the source: the sweep's own load then feeds the second sweep and the tail (an asm
+  memory clobber, as a diagnostic, gives 812 bytes with those reads shared again). Retail needs
+  the reads of p->flags538 after the top, and other's at the second sweep and the tail, to be
+  separate expressions or not anticipated at all.
+- **The same expression every time.** expr_equiv_p compares the address register, the mode and
+  the alias set. A copy of p (CSE's canon_reg keeps the loop variable; gcse's cprop replaces the
+  copy in later blocks, MEM addresses included), an inline accessor, an inline helper for both
+  sweeps (852 bytes for its return value), u64 bitfield reads and -fstrict-aliasing (alias sets
+  do work in this cc1plus with it, all u64 reads share one) leave the PRE unchanged; volatile
+  reads give 836 bytes.
+
 ### Loop variables declared once at the top: shared counters and an indexed record (func_00139740)
 
 Matched 2026-11-10 from the -dG dumps. ComputeBlendedDuration has four loops over two counts

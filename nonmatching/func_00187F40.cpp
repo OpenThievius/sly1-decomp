@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 800/812, checked 2026-11-07
+// SIZE 804/812, checked 2026-11-10
 // NEAR: the control flow, the conditional moves (movz for the mesh contact's last two arguments),
 //       the delay slots and both VU0 sequences are retail's; the registers are not. Retail keeps
 //       the object in $s7, the two argument pointers in $s6 and $s5, the bit-53 constant in $s4 and
@@ -7,26 +7,36 @@
 //       and both constants last, and the flag at 0(sp). About 30 compiles (a for loop whose
 //       increment the continues share, the flags tested through a temporary, the select as a
 //       ternary).
-// GCSE (2026-11-10, -dG dump): ours is 12 bytes short because PRE treats p->flags538 as one
-//       expression from the f load at the top of the body (insns 130 and 349 redundant, a copy
-//       added at the end of bb 1, loads inserted after each swept call), so the sweep's tests and
-//       the |= reuse it. Retail reloads p->flags538 at the sweep test, before the |= and at the
-//       second sweep's bit-40 test, yet reuses other->flags538 (g, loaded before the bit-47/56
-//       test) at the first sweep's bit-40 test: to GCSE, memory was set between the f load and the
-//       g load in the original (mem_set_in_block: a store or a call in the bit-43, bit-40 or
-//       tree-nodes blocks), or the sweep reads p's word through another expression. Diagnostic
-//       only: -fno-gcse gives retail's loads everywhere but that one reuse (816 bytes, the 4-byte
-//       slot at 0(sp) retail leaves free for the sweep flag's 4(sp) still missing).
+// GCSE (2026-11-10, -dG dump): PRE treats p->flags538 as one expression from the f load at the
+//       top of the body, so the sweep's tests reuse it; retail reloads p->flags538 at every read
+//       after the top, and other->flags538 at the second sweep and the final tail. `-fno-gcse`, as
+//       a diagnostic only, gives retail's loads everywhere but one reuse.
+// w15 (2026-11-10): AddMeshContacts declared pointer-first, as the file defines it (no change).
+//       `u64 g = other->flags538;` read before the bit-47/56 test, not inside it, and tested at
+//       the first sweep's bit-40 test: retail's `ld a1` in that test's delay slot and its reuse at
+//       the sweep (176 differing lines to 152; with -fno-gcse the size is retail's 812). What is
+//       left is PRE's sharing: "PRE: redundant insn" for p->flags538 at the first sweep's bit-44
+//       test and the second sweep's bit-40 test (inserted at the top and after the first sweep's
+//       calls), and for other->flags538 at the final tail (inserted after the second sweep's
+//       calls). 2.95's PRE is lazy code motion over ANTLOC and TRANSP only (lcm.c), so no memory
+//       set reproduces retail: a set between f and g makes the sweep's own load the new source
+//       (diagnostic asm clobber: 812 bytes, the later reads shared again). Copies of p (CSE's
+//       canon_reg, gcse's cprop), an inline accessor, an inline sweep helper (852 bytes, its
+//       return value), bitfield reads and -fstrict-aliasing all give the same expression;
+//       volatile reads give 836. Retail's ranking also puts the bit-53 constant above the a3/t0
+//       copies (global-alloc priority, which needs about twice the weighted references ours has);
+//       a named `u64 mark` makes it worse.
 #include "common.h"
 #include "collider.h"
 #include "placed_object.h"
 #include "vu0.h"
 
+struct PooledContact;
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2);
 s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
-void AddSphereSphereContact(void* a0, void* a1, void* a2);
-void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, f32 radius);
-void func_00186BA8(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
+void AddSphereSphereContact(Collider* self, Collider* other, void* a2);
+void AddMeshContacts(void* a0, f32 radius, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6);
+void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list);
 
 void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
 {
@@ -38,8 +48,8 @@ void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a
         if (!(f & (1ULL << 40)) && p->tree.nodes == 0) {
             continue;
         }
+        u64 g = other->flags538;
         if (f & ((1ULL << 47) | (1ULL << 56))) {
-            u64 g = other->flags538;
             if (g & ((1ULL << 47) | (1ULL << 56))) {
                 if (f & (1ULL << 56)) {
                     continue;
@@ -54,7 +64,7 @@ void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a
                 u128 d = Vu0::Sub(Vu0::Q(p->v370), Vu0::Q(p->v140));
                 if (1.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
                     s32 hit;
-                    if (other->flags538 & (1ULL << 40)) {
+                    if (g & (1ULL << 40)) {
                         hit = AddSweptPartSphereContact(p, other, a6);
                     } else {
                         hit = AddSweptPartMeshContact(p, other, a3, a4, a5, a6);
@@ -85,13 +95,13 @@ void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a
             if (p->flags538 & (1ULL << 40)) {
                 AddSphereSphereContact(p, other, a6);
             } else {
-                AddMeshContacts(other, &other->v140, p, (void*)p->tree.count2, (void*)p->tree.nodes, 0, a6, other->radius3CC);
+                AddMeshContacts(other, other->radius3CC, &other->v140, p, (void*)p->tree.count2, (void*)p->tree.nodes, 0, a6);
             }
         } else if (p->flags538 & (1ULL << 40)) {
             s32 v = p != self || p->radius3CC != p->radius3D4;
-            AddMeshContacts(p, &p->v140, other, a3, v ? a5 : a4, v ? (void*)0 : a5, a6, p->radius3CC);
+            AddMeshContacts(p, p->radius3CC, &p->v140, other, a3, v ? a5 : a4, v ? (void*)0 : a5, a6);
         } else {
-            func_00186BA8(p, other, a3, a4, a5, a6);
+            func_00186BA8(p, other, a3, a4, (u8*)a5, (PooledContact**)a6);
         }
     }
 }
