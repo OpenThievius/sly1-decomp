@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 204/260 (78.5%), checked 2026-11-08
+// BYTES 204/260 (78.5%), checked 2026-11-10
 // NEAR: order: frame, calls, constants and addresses are retail's; the constants get other
 //       registers and the stores another order. Retail keeps the stores in the constructor's
 //       order and loads 75.0 only after -100.0's last store (into its f0), as if the stores
@@ -14,6 +14,7 @@
 //       file's .data in function order (docs/AGENT_WORKFLOW.md, "A function-local static").
 // Tried (order-class pass): the constructor with a member-initialiser list (65 words), stores through a local pointer (21, the same), the pointer FillMemory returns (64).
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
+// 2026-11-10: retail's late constants need the early stores to have priority 4 (two dependent links); no plain form gives a store any dependent (sub-records, inline setters, static in an inline accessor ruled out; TOOLCHAIN.md, "What retail's order needs").
 #include "common.h"
 
 void* FillMemory(void* p, s32 zero, s32 size);
