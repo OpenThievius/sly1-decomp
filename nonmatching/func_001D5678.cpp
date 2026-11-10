@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2272/2348 (96.8%), checked 2026-11-10
+// BYTES 2346/2348 (99.9%), checked 2026-11-10
 // NEAR (2026-11-10, w15): DrawAngleSortedRing (func_001D5678): the points around the anchors
 // projected into camera space, the lowest first, their angles about it and the sort, the hull (a
 // Graham scan against the z axis), the bounds' centre, the points where the hull crosses the
@@ -33,11 +33,31 @@
 //   buckets, where the four PRE'd addresses come out in retail's spill-slot order (sp+32, sp+8288,
 //   params+112, sp+14512: bucket = (13258 + regno + offset) mod T; 323 is the nearest T above 305
 //   that orders them so).
-// Still differs: n - 1 for the first sort in s2 where retail has s3 (both free when global-alloc
-// places it); the gap loop's k and its entry pointer swap s0 and s1 (global-alloc ranks the
-// pointer first, 1.826 against k's 1.448: k's life is 29 insns, the pointer's 23); in the row
-// loop, sched1 issues uv[1]'s store after Length's asm where retail issues it before, and the
-// argument moves for UnprojectCameraPoint earlier than retail.
+// w17 (2272 to 2346 bytes; 587 of 587 instructions agree by register, two registers differ):
+// - The gap loop counts with i, the outer loop's own variable (C style: the outer loop keeps
+//   `down` because the inner loop reuses i). k was a pseudo of its own that global-alloc ranked
+//   after the entry pointer (1.448 against 1.826), so the pointer took s0; i is s0 already.
+// - The angles loop after the anchors has its own `s32 j` (as the anchor loops do): with i
+//   from there on, i's life is 390 insns and its priority (1.277) falls below the gap pointer's,
+//   which takes s0 from it; with j, i's life starts at the hull and it is placed first.
+// - Length's float through ToFloatMoved: the compiler's own qmfc2 instead of the asm's lowers
+//   the asm chain's priority in sched2 (38 against the uv[1] store's 37 with ToFloat), so the
+//   store issues before the dot's asm, and the argument moves for UnprojectCameraPoint fall
+//   after the camera's load, as retail's.
+// Still differs: n - 1 for the first sort is s2 where retail has s3. It is GCSE's temporary
+// (inserted at the end of the swap's block, after the loop's entry test and params+112, which
+// is retail's order); global-alloc places it 64th of 80, both s2 and s3 already used and free
+// over its life, and no lower-priority conflicting allocno has a hard-register preference (no
+// local-alloc pseudo sits in a saved register), so the first free in the allocation order, s2,
+// wins. A user variable for the count (`s32 last = n - 1;` before the loop, reused by the later
+// `last = n - 1`) gives s3, but its set then has an earlier LUID than the entry test and sched1
+// issues it two slots early; the same variable assigned after the loop is PRE'd into a new
+// temporary whose copy dies (s2 again). `entries + 1`, a `Vec02* row = rows + r` (spill slots
+// move) and a function-scope j (109 lines) were tried. Also tried (w17, second round): `n--;`
+// before the sort and `n++;` after (8 bytes longer), `RingEntry* first = &entries[1];` passed
+// (no change), `s32 count = n - 1;` before the angles loop (s2, and issued early), and the sorts
+// through an inline `SortEntries(base, count)` (GCSE's table changes size and the four PRE'd
+// addresses take other spill slots: 557 lines).
 // In the context of its file, src/main/player_request.cpp (FLT_MAX is retail's D_0024DC88).
 #include "common.h"
 #include "shapes.h"
@@ -143,9 +163,9 @@ void func_001D5678(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingA
         *low = entries[0];
         entries[0] = t;
     }
-    for (i = 1; i < n; i++) {
+    for (s32 j = 1; j < n; j++) {
         Vec02 d;
-        e = &entries[i];
+        e = &entries[j];
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(entries[0].pos));
         e->angle = ArctangentOfRatio(d.y, d.x);
     }
@@ -213,9 +233,9 @@ void func_001D5678(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingA
             prevAngle = entries[i].angle;
             s32 steps = (s32)(__builtin_fabsf(WrapAngle(a - prevAngle)) / D_0027506C);
             if (steps > 0) {
-                for (s32 k = 0; k < steps;) {
-                    k++;
-                    f32 t = (f32)k / (f32)(steps + 1);
+                for (i = 0; i < steps;) {
+                    i++;
+                    f32 t = (f32)i / (f32)(steps + 1);
                     Vec02 d;
                     e = &entries[n++];
                     *(Vu0::Vec*)&e->pos = Vu0::MulXSum(to, Vu0::Vec::Scalar(1.0f - t), from, Vu0::Vec::Scalar(t));
@@ -269,7 +289,7 @@ void func_001D5678(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingA
             }
             for (r = s; r <= s + 1; r++) {
                 uv[1] = params->rows[r].v;
-                f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(d)));
+                f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(d)));
                 Vu0::Vec w = Vu0::Vec::Scalar(((rows + r)->x + len * ((rows + r)->y + len * (rows + r)->z)) / len);
                 *(Vu0::Vec*)&pt = Vu0::MulAddX2(Vu0::Vec::Of(center), Vu0::Vec::Of(d), w, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtValue(params->rows[r].lift));
                 UnprojectCameraPoint(g_camera, &pt, &pt);
