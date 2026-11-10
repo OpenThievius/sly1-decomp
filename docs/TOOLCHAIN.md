@@ -1905,6 +1905,28 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   original had a block of its own when gcse ran. A plain-C form that gives that block without
   a dead statement is still to be found.
 
+### A copy in each arm is propagated into the join (func_00114BB0, matched 2026-11-10)
+
+- **What differed.** AppendScriptLists links each list it appends after the last node and
+  walks to the new end: `while (last->next) last = last->next;`. Written with `last = c;` in
+  both arms of `if (head == 0)`, gcse's copy propagation (the -dG dump: "1 copy props") finds
+  the copy `(set last c)` available at the join on both paths and rewrites the walk's first
+  test (jump.c's copy of the exit test) to read `c->next`. Retail tests `last->next` (`lw
+  v0,8(s2)`), and the PRE'd `n->next` load and the exit's `move` land differently (8 bytes
+  short).
+- **The form.** One `last = c;` after the if/else (each arm keeps only what differs: the new
+  head's chain, or the store into the old end). The join's block then sets `last` itself and
+  the copy is not "available" from the predecessors, so the walk reads `last`; reorg still
+  copies the join's first load into the head arm's `b` delay slot.
+- **Also needed:** the function gives its value back as a class (RetValue, as func_00118198
+  and func_00119218): its `args->tag == 0` return keeps its own copy, destruction and return
+  only so; with explicit calls jump2 cross-jumps that return into the last one. With the class
+  alone the code was 8 bytes short and n took s1 instead of args' s0; the single copy after the
+  join gave both (retail's registers follow from the walk's lives).
+- **Spotting it.** A walk or test after a join that reads, in ours, the variable each arm
+  copied from, and in retail the variable the arms copied to: write the copy once after the
+  join.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
