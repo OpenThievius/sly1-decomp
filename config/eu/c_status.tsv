@@ -3673,6 +3673,7 @@ func_001E8878	func_001E98A0	match
 func_001E88B0	func_001E98D8	match	
 func_001E88D0	func_001E98F8	match	
 func_001E8948	func_001E9970	match	
+func_001E8A50	func_001E9A78	match	rodata
 func_001E8D58	func_001E9D80	match	rodata
 func_001E8DB0	func_001E9DD8	match	
 func_001E8DD0	func_001E9DF8	match	

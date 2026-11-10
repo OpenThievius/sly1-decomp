@@ -1826,6 +1826,36 @@ combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -d
   dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
   to an argument register: a three-insn combine whose split leaves the bare SET.
 
+### A case that seems to store the compare's register: reorg's redundant constant (func_001E8A50)
+
+The keyed cone agent's state hook (src/main/file_1E88D0.cpp) was 8 bytes long. Read from cse.c
+and reorg.c with `-dj -dJ -dd` dumps (2026-11-10):
+
+- **The size was a wrong constant.** In its inner switch, retail's case 0x2DA is `b S; li s3,2`,
+  where S is the `sw v0,3160(s1)` shared with cases 0x2D9 and 0x2DB, and v0 seemed to hold the
+  tree's 730 (`li v0,730; beq v1,v0`). The near miss wrote `self->fC58 = 0x2DA;`, and CSE, which
+  follows the tree's jump into the case (the label has one use and a barrier before it),
+  merged the index (reg 168, which lives on to the next compare) with the constant's register:
+  make_regs_eqv keeps the longer-lived index as the class's canonical register, so the store
+  took v1 and cross-jumping could not merge it (one store more). The real value is 0x2DB: the
+  beq's delay slot holds the next compare's `li v0,731`, and reorg (fill_slots_from_thread),
+  finding the case's own `li v0,731` redundant with it, deletes it. **Spot it**: a case's store of a
+  register that its compare does not leave holding the expected value; read the delay slot.
+- **`.p2align 3` before loop labels.** SN's compiler aligns each loop top to 8 bytes, so a nop
+  appears or goes away in front of a loop when the code before it changes size. Fix the size
+  first; such nops then follow.
+- **Two loops, two counters.** Both loops counted with one `u32 i` declared at the top, so both
+  got s2; retail's first loop counts in s0 and the second in s2. A `for (u32 i = 0; ...)` in
+  each case gives each loop its own pseudo, and global-alloc places them as retail does.
+- **A constant hoisted by jump.c moves in sched1.** `v = ... ? 8 : 5; self->fC5C = v;` lets jump.c
+  hoist `v = 8` in front of the float test, where sched1 places it first in the block (low priority, ready
+  from the start); retail's `bc1t X; li v0,8` needs it next to the branch. A store in each arm
+  (`self->fC5C = 8;` / `= 5;`, merged by cross-jumping after reload) gives that, and the
+  annulled `beql ...; li v0,5` of the test above it.
+- **key = 0 in the else arm.** `key = 0; if (near) key = Find(..);` lets sched1 put the zero before
+  the first call; written as `if (near) key = Find(..); else key = 0;`, reorg moves the zero into
+  the branch's slot, as retail has it.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
