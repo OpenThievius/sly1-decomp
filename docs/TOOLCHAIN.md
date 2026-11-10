@@ -197,6 +197,10 @@ explains it; search the section's title or the function. Walls that stay open ar
   "VU_REGS or none" in the .lreg dump (set once or twice, with ToFloatMoved too) and is spilled.
 - **A frame address passed to an inline function is no GCSE expression,** so PRE does not keep it in a
   saved register across a guarded call (func_00171238, "A frame address passed by an inline call").
+- **A ToBits store just before a load costs the load its register**: local-alloc's widened lifetimes keep
+  the next value out of the qmfc2's GPR; `Vu0::StoreX` makes the qmfc2 a reload. Two loops over the same
+  three corners sharing one counter variable give their reversed counters one register (func_00191290
+  "A frame address PRE copies, StoreX's reload and one counter for two loops").
 
 ### Loops (loop.c, jump.c)
 - **loop.c moves an invariant when 80 x savings x lifetime >= insns** (the threshold is 79 for a loop with a
@@ -2276,6 +2280,41 @@ rotated:
   through an inline. An extra address computation before a branch, where retail forms it in a
   later loop's preheader, is PRE's insertion after a computation that should not have been in
   the table.
+
+### A frame address PRE copies, StoreX's reload and one counter for two loops (func_00191290)
+
+Three independent causes, each fixed at its own pass; the function matched once all three were.
+
+- **PRE's copy of a frame address.** Retail keeps `&node1` in s0 for the first loop and passes
+  `t3`, a copy made right after the block that set s0, to the search call after both loops. That
+  is gcse.c's PRE: `&node1` computed again at the call (`SearchPointGraph(graph, &node1, ...)`)
+  is redundant with the earlier `n1 = &node1`, so PRE gives the expression a reaching register
+  and copies into it after the first computation. Passing `n1` itself has no copy (one insn
+  short, and the loop labels' alignment nops move with it).
+- **The minimum by an inline.** `n = maxOut < count ? maxOut : count` written in place, or as
+  an if, gives `movn` into count's register or a `slt` that reads n's register: CSE makes the
+  longer-lived n the copy's canonical register. Retail's `move s0,s7; slt v0,s7,v1; movz
+  s0,v1,v0` is `static inline s32 MinOfCounts(s32 a, s32 b) { return a < b ? a : b; }` called
+  as `MinOfCounts(maxOut, count)` (the helper player.cpp and agent.cpp already have).
+- **StoreX instead of ToBits for a float member.** With `*(u32*)&l->length =
+  Vu0::ToBits(...)` the qmfc2's GPR is a local-alloc quantity that dies at the store, right
+  before the reload of `node1.links` from its frame slot. local-alloc first tries each quantity
+  over its life widened by one insn at each end (`fake_birth`/`fake_death`, INSN_SCHEDULING),
+  so the load that follows cannot take the qmfc2's v0 and takes v1, which pushes the index and
+  the exit test one register up and the loop's pointer from a1 to a3. `Vu0::StoreX(l->length,
+  ...)` makes the qmfc2 a reload (no quantity): the load takes v0 and every register falls into
+  retail's place. Spot it: a value born just after a ToBits store in a register one above the
+  one retail gives it.
+- **One counter for both walks of a triangle's corners.** The links to the goal's corners and the
+  loop that lowers their counts again both run `k` from 0 to 3; loop.c reverses each into a down
+  counter in the biv's own pseudo. Declared once (`s32 k;` before the first of the two), the one
+  pseudo conflicts with both loops' values and global-alloc gives it t0 in each, retail's
+  registers; a counter per loop ranks below the corner pointer (42 insns of life against
+  its 23) and takes t1 and a1. Sharing the first loop's or the copy loop's counter as
+  well is worse: retail's registers show which loops share a variable.
+- Taking the records by index (`PathLink* l = &links1[i]; PathNode* c = tri0[i];`, loop.c
+  reducing both) instead of walking pointers kept the order and the size; the near miss's
+  pointer walks reused one `l` and one `tp` for both loops, which ties their registers.
 
 ## sched1
 

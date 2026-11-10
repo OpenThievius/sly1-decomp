@@ -92,7 +92,7 @@ void* GetActiveSwitchedCollider(void);
 void ActivateSwitchedCollider(void* value);
 // The point graph FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
 struct GraphQueryOwner { u8 head[0x34]; PointGraph graph; };
-s32 FindPointGraphPath(PointGraph* graph);
+s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out);
 s32 FindPointGraphTriangleWithin(GraphFace* faces, Vec02* p);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
@@ -1082,7 +1082,105 @@ void SimplifyPointPath(void* a0, s32* a1, s32* a2)
     PopBackMemoryMark();
 }
 
-INCLUDE_ASM(func_00191290);
+// The temporary start and goal points FindPointGraphPath links into the graph: a GraphPoint's
+// layout, with its position.
+struct PathNode;
+
+struct PathLink {
+    PathNode* a;
+    PathNode* b;
+    f32 length;
+};
+
+struct PathNode {
+    Vec02 pos;
+    s32 count;
+    PathLink** links;
+    u8 pad18[8];
+};
+
+static inline s32 MinOfCounts(s32 a, s32 b)
+{
+    return a < b ? a : b;
+}
+
+// A path from start to goal over the point graph, at most maxOut points written to out; its
+// count is returned. Each end is placed in its triangle (snapped onto the graph when outside
+// it); a shared triangle is the straight path. Otherwise the start becomes a temporary point
+// linked to its triangle's corners, the goal one its triangle's corners link to (their counts
+// raised for the search and lowered after), and the search's path is simplified.
+s32 func_00191290(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
+{
+    Vec02 a;
+    Vec02 b;
+    PathNode* faces = (PathNode*)graph->faces;
+    PathNode** tri0 = (PathNode**)func_00190810((PlaneNode*)faces, start);
+    if (tri0 != 0) {
+        a = *start;
+    } else {
+        SnapPointToPointGraph(graph, start, &a);
+        tri0 = (PathNode**)func_001908C0((PlaneNode*)faces, &a);
+    }
+    PathNode** tri1 = (PathNode**)func_00190810((PlaneNode*)faces, goal);
+    if (tri1 != 0) {
+        b = *goal;
+    } else {
+        SnapPointToPointGraph(graph, goal, &b);
+        tri1 = (PathNode**)func_001908C0((PlaneNode*)faces, &b);
+    }
+    if (tri0 == tri1) {
+        out[0] = a;
+        out[1] = b;
+        return 2;
+    }
+    PushBackMemoryMark();
+    PathNode** path = (PathNode**)AllocateBackMemory(0x200);
+    PathNode node1;
+    PathLink links1[3];
+    PathNode node2;
+    PathLink links2[3];
+    s32 count;
+    PathNode* n1 = &node1;
+    node1.pos = a;
+    node1.count = 3;
+    node1.links = (PathLink**)AllocateBackMemory(12);
+    for (s32 i = 0; i < 3; i++) {
+        PathLink* l = &links1[i];
+        l->a = n1;
+        PathNode* c = tri0[i];
+        l->b = c;
+        u128 d = Vu0::Sub(Vu0::Q(n1->pos), Vu0::Q(c->pos));
+        Vu0::StoreX(l->length, Vu0::Sqrt(Vu0::DotXY(d, d)));
+        node1.links[i] = l;
+    }
+    node2.pos = b;
+    node2.count = 0;
+    node2.links = 0;
+    // One counter for both walks of the goal's corners (retail's t0 in each).
+    s32 k;
+    for (k = 0; k < 3; k++) {
+        PathLink* l = &links2[k];
+        PathNode* corner = tri1[k];
+        l->a = corner;
+        l->b = &node2;
+        u128 d = Vu0::Sub(Vu0::Q(corner->pos), Vu0::Q(node2.pos));
+        Vu0::StoreX(l->length, Vu0::Sqrt(Vu0::DotXY(d, d)));
+        corner->links[corner->count++] = l;
+    }
+    SearchPointGraph(graph, (GraphPoint*)&node1, (GraphPoint*)&node2, 0x80, &count, (GraphPoint**)path);
+    if (count >= 3) {
+        SimplifyPointPath(graph->faces, &count, (s32*)path);
+    }
+    s32 n = MinOfCounts(maxOut, count);
+    for (s32 i = 0; i < n; i++) {
+        out[i] = path[i]->pos;
+    }
+    for (k = 0; k < 3; k++) {
+        tri1[k]->count--;
+    }
+    PopBackMemoryMark();
+    return n;
+}
 
 // p, when it is outside every face, moved to the nearest point of the nearest link (each link
 // taken at p's height); otherwise p itself. The weighted sum's operands are formed weight, end,
@@ -1206,9 +1304,9 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 
 ASM_FUNC(func_001919F8);
 
-void FindOwnerGraphPath(GraphQueryOwner* self)
+s32 FindOwnerGraphPath(GraphQueryOwner* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
 {
-    FindPointGraphPath(&self->graph);
+    return FindPointGraphPath(&self->graph, start, goal, maxOut, out);
 }
 
 void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
