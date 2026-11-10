@@ -87,6 +87,15 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
 - Not yet found: which plain C++ the original had there. A REG_EQUIV pseudo used once in another
   block is moved before its use by update_equiv_regs (after sched1), which would explain the
   lui but not the two argument moves.
+- **No loop notes in retail there (2026-11-10, w15).** final.c's shorten_branches gives the
+  first CODE_LABEL after every NOTE_INSN_LOOP_BEG the loop alignment (8 bytes here), however far
+  away it is, which is the `nop` the `do { } while (0)` adds. Retail's labels from 0x1DEEF8 on
+  are at 0x1DF10C, 0x1DF11C, 0x1DF134, ... (4 mod 8), so no LOOP_BEG note follows 0x1DEEE4; one
+  before it would have to enclose the whole tilt/turn block, and loop depth 2 there changes
+  local-alloc's VU0 registers (vf10/vf11 for retail's vf6/vf7, tried: `do {` at the lean join,
+  and from the stick heading on, which gives pad retail's s2 through the doubled refs but loses
+  the block's registers). The only plain-C++ barrier is ruled out, so the argument moves must be
+  held back by a dependence of their own, not a barrier.
 
 ### sched2 keeps sched1's dependences (func_001358D0)
 
