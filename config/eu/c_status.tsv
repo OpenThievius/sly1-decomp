@@ -1879,6 +1879,8 @@ func_0016F588	func_0016FBD8	match
 func_0016F608	func_0016FC58	match	rodata
 func_0016F7B0	func_0016FE00	match	
 func_0016F810	func_0016FE60	match	
+func_0016FD70	func_001703C0	match	
+func_001701B0	func_00170800	match	rodata
 func_00170410	func_00170A60	match	
 func_00170528	func_00170B78	match	
 func_001705C8	func_00170C18	match	

@@ -2163,6 +2163,54 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
 - **Spotting it.** A frame address in a saved register (`addiu sN, sp, n` in a branch's delay
   slot before a guarded call) where retail forms it at each call: try the calls through an
   inline function taking the pointer.
+- **Both uses in one block need the inline (func_001701B0, StepPlayer).** `StoreQuadword(&m.r[1],
+  v)` followed by `SteerColliderTowardRotation(self, 0, 0, &m.r[0], &m.r[1], t)` kept `sp + 16`
+  in s0 across the store's call; retail forms it in each call's delay slot. With only the steer
+  call through an inline the address is still shared (cse1 replaces the hard register's
+  constant source with the store's pseudo in the same block); with both calls in one inline
+  taking `dir` (`SteerAlongDirection(self, &m.r[0], &m.r[1], v, t)`) neither use makes a
+  pseudo: EXACT. The same function's prologue order (`mov.s $f20, $f12` before `sq ra`) came
+  from a missing argument: StepCollider reads $f12 (`mov.s $f20, $f12` in its first insns), so
+  the call is `StepCollider(self, t)`, as its other callers declare it.
+
+### A rotation product's rows read after the stores (func_0016FD70)
+
+func_0016FD70 (the player's upright torque) was 24 bytes short with every register after the
+product renumbered. Four separate causes, found from `-dl -dS -dF -dG` dumps (2026-11-10):
+
+- **The rows of b must have no alias base.** Retail loads row 0 of the player's matrix at
+  `0xD0(s2)` and rows 1 and 2 at `0x10(s1)`, `0x20(s1)` (s1 = s2 + 0xD0), each after the two
+  stores of the row before. find_base_term of `(plus R 16)` gives R's base only when R has
+  REGNO_POINTER_FLAG; without it (and with an argument's VOIDmode base) the address has no base
+  and base_alias_check lets it conflict with the frame stores. A pointer variable of the
+  function (`Mat02* cur`), a reference variable, a pointer parameter's copy (integrate.c marks
+  it) and a pointer an inline returns into a variable are all flagged, and their loads move to
+  the top; MulRotationRowsIndexed's own `q = (const u128*)&b` comes out unflagged in the
+  caller's RTL (`.lreg`: `user var`, no `pointer`) and its loads wait. But that q is set after
+  the two calls that build the turn, where retail sets s1 in the first call's delay slot (it
+  lives across both). Only a pointer variable of an inline, set at the inline's top before
+  those calls, has both properties: `TiltRotation(&rot, &turn, self->rot, goal->r[2], &axis)`,
+  an inline that reads m's rows through q from its first line (the angle from row 2, then the
+  product), matched.
+- **Q's reference return leaves an address pseudo per row local.** `Vu0::Q(x) = ...` inlines a
+  function returning `u128&`; its result is a pseudo set to `(plus fp n)`, dead after cse but
+  still in gcse's table, and GCSE then replaces a later `&v` of a block-scope local reusing the
+  same frame offset by a copy of it: `sp + 224` (or 208, 240) in a saved register across the
+  pivot's calls. Writing each row with `Vu0::Set` (which returns nothing) leaves no pseudo.
+- **Two speeds whose addresses are passed are two scalars, not an array.** Retail's speeds
+  are at 0x130 and 0x134, above the product's inline frame (0xD0 to 0x130), and the Scalar
+  slots and the pivot's locals reuse 0xD0 after it. An `f32 speeds[2]` is an assign_temp local
+  at its declaration (below the product, or reusing its freed BLKmode slot when declared after
+  it); two `f32` locals whose addresses are taken go through ADDRESSOF and get their slots from
+  purge_addressof, after every local: retail's offsets.
+- **The clamp's result in its own register.** Retail clamps into $f2 and copies to $f11 after
+  the join (`mov.s $f11, $f2`), for both clamps. A clamp whose returns set the result (or whose
+  argument variable is reassigned) is expanded straight into the target variable. ValueRange's
+  `Limit` (a local result `r` set in each arm, then `return r`) gives the copy when the target
+  is a variable that lives past the block: the blend weight reused for the speed scale (`t =
+  g_unitRange.Limit(EvalCurve3(D_00263770, k))`), which makes cse keep t as the class's head.
+  The last five instructions then fell to `ToFloatMoved` for the ground speed (the other
+  conversion first, as the brief's sched2 lever says).
 
 ### A named frame address is an expression; an argument register's is not (func_0016BEA0)
 
