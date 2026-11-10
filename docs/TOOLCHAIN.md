@@ -1625,6 +1625,37 @@ StartNextQueueEntry (2026-11-10):
   needs for retail's vector registers. CreateAnimationPlayerWithoutPresetTargets declared void
   (as five other files do) lets local-alloc give the next load v0.
 
+### A float constant declared in the loop body: loop.c's hoist, cse2's copy (func_001D36F0)
+
+Read from gcse.c (cprop_insn, one_cprop_pass) and the `.gcse`, `.loop` dumps of
+func_001D36F0 (2026-11-10, src/main/player_request.cpp):
+
+- **Retail's sign.** `items[0].weight = 1.0f` is stored from `$f0` (`lui at,0x3f80; mtc1`)
+  and `mov.s $f20,$f0` follows; the loop's four mover calls pass `mov.s $f13,$f20`, with
+  `$f20` saved in the frame. Ours (`f32 one = 1.0f;` at function scope, stored and passed)
+  rebuilt `lui/mtc1 $f13` at each call: 4 bytes less code, 16 less frame.
+- **Why.** A function-scope `one` is one pseudo set once to a CONST_DOUBLE, available on the
+  loop's entry and back edges, so GCSE's constant propagation replaces it in every argument
+  move inside the loop (`CONST-PROP: Replacing reg 120 in insn 133 ...` in the `.gcse` dump):
+  nothing is left for global-alloc to give a saved FPR.
+- **Retail's form.** The local declared in the loop body (`f32 one = 1.0f;` at the top of the
+  `if (o != 0)` block) and the store written with the literal: the body's set is not
+  available at the loop's head (it is set again on the back edge), so cprop leaves it; loop.c
+  hoists the invariant set to the preheader, and cse2 finds the store's pseudo still holding
+  1.0 in that block, so the hoist becomes a copy of it: retail's `mov.s $f20,$f0`.
+- **Spot it.** A constant loaded once before a loop and copied (`mov.s`) into a saved register
+  the loop's calls read: the constant was a local of the loop body. Compare func_0016BEA0
+  above, where an inline's parameter keeps the copy from forming.
+- **Also in this function.** Vu0::ScalarAt returned `Q((s128)r)`, a reference, which left the
+  weight slot's address in a pseudo, as Vu0::Scalar's did (func_0017BCD0 above): the division's
+  slot (32(sp)) is reused by the block-scope `Vec02 a20` declared after it, and CSE then read
+  `&a20` through that pseudo, which loop.c hoisted into a saved register (s6) for the whole loop.
+  ScalarAt now ends `return *(u128*)&(s128)r;`, the same slot and store; every matched function
+  builds the same (full US and PAL builds MATCH). The two Vec02 results read last (a20, a30)
+  are declared in the body before their calls, where the slot order shows them (the division's
+  slot shared with a20, the 0.5's slot after a30, `&blend` last); the second loop has its own
+  counter (`for (s32 j = 0; ...)`), as retail's caller-saved a2 shows.
+
 ### A constant passed through an inline is no pseudo for cse2 to copy (func_0016BEA0)
 
 Read from calls.c, integrate.c and cse.c with `-dt -dL -dS -dl` dumps (2026-11-10,
