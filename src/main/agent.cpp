@@ -860,11 +860,147 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
     return 1;
 }
 
-INCLUDE_ASM(func_001C8590);
+s32 FindOwnerGraphPath(s32 graph, Vec02* a, Vec02* b, s32 max, Vec02* out);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), Agent* self, s32* n, Collider*** list);
+s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
 
-INCLUDE_RODATA(jtbl_0024D6B0);
+// Whether two points are within reach of each other in the ground plane (x and y).
+static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
+{
+    return Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(a, b), Vu0::Sub(a, b)))) < reach;
+}
 
-INCLUDE_ASM(func_001C8920);
+// The game clock's time (its second word), read through the clock's address.
+static inline f32 ClockTime(const f32* clock) { return clock[1]; }
+
+void func_001C8590(Agent* self)
+{
+    if (F(s32, 0xA60) != 0) {
+        if (!(D_00274C98[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
+    }
+    if (F(s32, 0xB90) != 0) {
+        F(s32, 0x92C) = 2;
+        u128 pos = Vu0::Q(self->v140);
+        Vu0::Q(F(Vec02, 0x940)) = pos;
+        f32 maxLen = __builtin_fabsf(F(f32, 0xB94));
+        u128 goal = Vu0::Q(self->vA50);
+        f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
+        Vec02 a;
+        if (maxLen < len) {
+            f32 t = maxLen / len;
+            Vu0::Q(a) = Vu0::MulXSum(goal, Vu0::Scalar(t), pos, Vu0::Scalar(1.0f - t));
+        } else {
+            Vu0::Q(a) = goal;
+        }
+        Vec02 b;
+        if (self->f928 != 0) {
+            SnapPointToOwnerGraph(self->f928, &a, &b);
+        } else {
+            b = a;
+        }
+        f32 reach = (maxLen <? len) * 0.5f;
+        Vec02 c = b;
+        while (IsNearPoint(Vu0::Vec::Of(c), Vu0::Vec::Of(self->v140), reach)) {
+            f32 next = maxLen + 100.0f;
+            maxLen = next <? len;
+            f32 t = maxLen / len;
+            Vu0::Q(c) = Vu0::MulXSum(Vu0::Q(self->vA50), Vu0::Scalar(t), Vu0::Q(self->v140), Vu0::Scalar(1.0f - t));
+            SnapPointToOwnerGraph(self->f928, &c, &c);
+        }
+        PushBackMemoryMark();
+        Vec02 d1;
+        Vec02 d4;
+        ColliderSpan span;
+        s32 count;
+        Collider** list;
+        Vu0::Set(d1, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(-500.0f)));
+        Vu0::Set(d4, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(500.0f)));
+        GatherCollidersInBox(self->world, (s32)self, &d1, &d4, IsAgentPathBlocker, self, &count, &list);
+        if (FindNearestSpanObject(1, &d4, &d1, count, list, &span) != 0) {
+            f32 h = -((f32*)F(void*, 0x388))[(F(s32, 0x6D0) << 2) + 2] - 1.0f;
+            if (F(s32, 0xC04) != 0) h += F(f32, 0x6CC);
+            Vu0::Q(c) = Vu0::MulAddX(Vu0::Q(span.q[0]), Vu0::Q(D_00248D20), Vu0::Scalar(h));
+        }
+        PopBackMemoryMark();
+        F(Vec02, 0x950) = c;
+    } else {
+        F(s32, 0x92C) = 0;
+        if (self->f928 != 0) {
+            F(s32, 0x92C) = FindOwnerGraphPath(self->f928, &self->v140, &self->vA50, 0x10, (Vec02*)((u8*)self + 0x940));
+        }
+        if (F(s32, 0x92C) == 0) {
+            F(s32, 0x92C) = 2;
+            F(Vec02, 0x940) = self->v140;
+            F(Vec02, 0x950) = self->vA50;
+        }
+    }
+    F(s32, 0x930) = 0;
+    F(s32, 0xA60) = 1;
+    F(f32, 0xA64) = ClockTime(g_gameClock);
+}
+
+static inline f32 ClampTo(f32 v, const f32* r)
+{
+    f32 l = r[0];
+    f32 h = r[1];
+    f32 out;
+    if (v < l)
+        out = l;
+    else if (h < v)
+        out = h;
+    else
+        out = v;
+    return out;
+}
+
+void func_001C8920(Agent* self)
+{
+    ((void (*)(Agent*))self->desc08()->m5F)(self);
+    for (;;) {
+        if (!(self->f930 < self->f92C)) break;
+        s32 i = self->f930;
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (i << 4))));
+        s32 far = D_00274C94 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        if (far) break;
+        self->f930 = i + 1;
+    }
+    Vec02 dir;
+    if (self->f930 < self->f92C) {
+        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (self->f930 << 4))), Vu0::Q(self->v140)));
+    } else {
+        s32 m = self->f92C;
+        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x930 + (m << 4))), Vu0::Q(*(Vec02*)((u8*)self + 0x920 + (m << 4)))));
+    }
+    f32 yaw;
+    if (1.0f < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(dir), Vu0::Q(dir))))) {
+        yaw = ArctangentOfRatio(dir.y, dir.x);
+    } else {
+        yaw = self->f638;
+    }
+    f32 pitch;
+    if (F(s32, 0xB1C) == 0) {
+        pitch = 0.0f;
+    } else {
+        u128 e = Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(self->v140));
+        f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(e, e)));
+        f32 dz = self->vA50.z - self->v140.z;
+        switch (self->f724) {
+        case 5: case 6: case 7: case 10: case 12: case 13: case 14: case 15:
+            dz += F(f32, 0xB20);
+            break;
+        }
+        f32 g1 = D_00274CA0.c[0] + dist * (D_00274CA0.c[1] + dist * D_00274CA0.c[2]);
+        g1 = ClampTo(g1, D_00274CB0.c);
+        f32 adz = __builtin_fabsf(dz);
+        f32 g2 = D_00274CC0.c[0] + adz * (D_00274CC0.c[1] + adz * D_00274CC0.c[2]);
+        g2 = ClampTo(g2, D_00274CD0);
+        pitch = g1 * g2 * D_00274CD8[0];
+        if (dz < 0.0f) pitch = -pitch;
+    }
+    SetAgentFacingAngles(self, yaw, pitch);
+}
 
 void ConvertOffsetToSpherical(void* a, void* b, f32* x, f32* y, s32 flag);
 void SetAgentFacingAngles(void* self, f32 x, f32 y);
