@@ -2742,6 +2742,41 @@ dumps of CallRemoteService with Sony's 2.9-ee-991111 (2026-11-09):
 - **Spot it.** Two stores swapped against retail where the earlier one's value dies in it and the
   later one's lives on: the tie is the weight, and moving statements does not change it.
 
+### What retail's order needs, and a lever that proves it (func_001F8290)
+
+Read from the `-dS -fsched-verbose-6` dumps of CallRemoteService (Sony's 2.9-ee-991111,
+2026-11-10), with the client's packet and callback words as ints:
+
+- **sched2 picks the argument's store by its dependents, not by sched1's order.** After reload
+  the argument is loaded into $v0 (`lw v0,192(sp)`) and $v0 is loaded again by `lw v0,36(s1)`
+  (the server word), so the argument's store has one dependent more than the other three (the
+  anti dependence on $v0) and wins the cycle it shares with the packet's and the callback's
+  stores. So of sched1's order only the relative order of the packet's, the id's and the
+  callback's stores reaches retail (sched2 breaks their tie on LUID): sched1 must issue the
+  packet's store before the id's. The argument's store may go anywhere.
+- **Two ways to that, neither found in plain code.** At sched1's t=2 the argument's store (its
+  value dies: weight 0) beats the packet's (+1), and at t=3 the id's (0) beats it. Either the
+  argument's value outlives its store and the packet's store is written first (both +1, the
+  tie falls to LUID; a second use of the argument moves it to a saved register, so this cannot
+  be tested by adding one), or the packet's store has priority 8: a dependence from it to the
+  callback's or the id's store. Two stores through one base at different offsets never
+  conflict (memrefs_conflict_p), whatever their alias sets, so no choice of types gives that
+  edge.
+- **Volatile gives the edge and matches, but it is not the original.** Written through
+  volatile lvalues (a test cast, not a declaration), the argument's, packet's and either the
+  id's or the callback's stores, with the callback word an int, make the function exactly
+  retail's (also with the callback a function pointer when the packet's request words are
+  volatile too): two volatile references always conflict (true_dependence), so the stores keep
+  their source order. Declared volatile in the client's type it breaks HandleRemoteCallReply
+  (func_001F7EA8): a volatile reference never fills a delay slot, and retail has the callback's
+  argument in the `jalr` slot and the packet's load in the `jal` slot; the packet's `f34` and
+  `f30` stores in delay slots rule out a volatile packet the same way. So retail's ordering edge
+  is real but comes from something else.
+- **Ruled out as well (2026-11-10).** The client's first four words as a nested header struct
+  (stored through the member or through a pointer to it): unchanged, 2 instructions off. A
+  `do { } while (0)` around the id's store (loop notes are a scheduling barrier): adds code.
+  The id read after the argument's store: the id takes $v0.
+
 ### A run of stores in two alias classes (func_001F7BE8)
 
 Read from the `-dS -dl -fsched-verbose-6` dumps of InitRemoteCalls (src/lib/remote_call.cpp,
