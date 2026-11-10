@@ -1084,6 +1084,7 @@ func_0013F6F8	func_0013F9F8	match
 func_0013F718	func_0013FA18	match	
 func_0013F940	func_0013FC40	match	
 func_0013FA10	func_0013FD10	match	
+func_0013FAE8	func_0013FDE8	match	
 func_0013FD20	func_00140020	match	rodata
 func_00140028	func_00140328	match	
 func_001400A8	func_001403A8	match	
