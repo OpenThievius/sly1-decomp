@@ -4140,6 +4140,31 @@ one register each (95.5%).
   a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
   references, are not cross-jumped into retail's single call).
 
+### An inline method's member read is not the caller's: a tested value stays local (func_001A8C90)
+
+The object pool's release (2026-11-10, `-dl -dg -dG`). Retail tests the random spin's upper
+bound and then passes both ends to RandomFloatInRange: `lwc1 $f1, 0xD4(s2)`, `c.lt.s $f0, $f1`,
+then in the arm `lwc1 $f12, 0xD0(s2)` first and `mov.s $f13, $f1` in the call's delay slot.
+Written `if (0 < self->spinHi) RandomFloatInRange(self->spinLo, self->spinHi)` (or with a local
+for the bound), CSE makes the call's read the test's pseudo; that pseudo lives into the arm, so
+global-alloc takes it, and its copy to $f13 is a preference: `lwc1 $f13` for the test, the
+copy gone, the tail one instruction short.
+
+- **The read through an inline's `this` is a different address until after GCSE.** With the
+  pair a ValueRange and the call its inline method (`self->spinRange.Random()`, include/value_range.h),
+  the body reads `hi` as `(mem (plus this' 4))`, `this'` the integrated copy of the parameter:
+  the .gcse dump still has it, so neither CSE nor GCSE replaces the load with the test's value.
+  The test's pseudo then dies at the compare: local-alloc gives it the lowest free FPR ($f1,
+  $f0 holding the zero), and after reload, reload_cse_regs sees $f1 holds the word and turns
+  the arm's load into `mov.s $f13, $f1`. A variable set twice (`m = self->spinHi; ... m =
+  Random(lo, m)`) gives the same schedule but crosses the calls ($f22).
+- In the same function: a `switch` whose `case 0: case 1: default:` block retail lays out before
+  case 2 is written in that order (the cases in retail's block order); `if (frame != 0 ||
+  self->target == 0) at = &self->at; else { ... }` gives retail's fall-through and the target's
+  pointer in the address's register; and the length's second conversion after the
+  normalisation is ToFloatMoved with the test's ToFloat (the other way round, CSE merges the two
+  GPR copies; both ToFloat, the asm qmfc2 is scheduled before the coefficients' address).
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
