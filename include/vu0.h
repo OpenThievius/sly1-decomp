@@ -143,11 +143,16 @@ struct Vu0 {
     // never waits for (alias.c, fixed_scalar_and_varying_struct_p); a 16-byte local of the
     // helper's (an aggregate) or a store through a u128 pointer (no flag) holds such loads
     // behind it, which retail's schedules never do (docs/TOOLCHAIN.md, "The weight slot is a
-    // cast's copy").
+    // cast's copy"). The address is taken here, not through Q: Q returns a reference, which
+    // leaves the slot's address in a pseudo of its own that CSE then keeps as the canonical
+    // register for that frame address, and a later local given the freed slot (a block's Vec02
+    // passed by address) is read through that pseudo across the calls in between, one saved
+    // register more than retail (func_0017BCD0; docs/TOOLCHAIN.md, "A weight slot's address
+    // must not outlive the statement").
     static u128 Scalar(f32 f)
     {
         u128 r = FromFloat(f);
-        return Q((s128)r);
+        return *(u128*)&(s128)r;
     }
 
     // Scalar of a float in memory: FromFloatAt, so the float is loaded with lw straight into

@@ -1508,6 +1508,42 @@ Matched 2026-11-10 from the -dG dumps. ComputeBlendedDuration has four loops ove
   early. That gives retail's `move t0,v0` with `addu v0,t0,a0` in the branch's delay slot. With
   a local `item` per loop, the giv is replaced and the pointer advances at the end.
 
+### A weight slot's address must not outlive the statement (func_0017BCD0)
+
+Read from cse.c (cse_end_of_basic_block, cse_basic_block) and the `.cse`/`.greg` dumps of
+StartNextQueueEntry (2026-11-10):
+
+- **What differed.** Kind 5 builds a goal (`goal += drift * rise`, a MulAddX whose weight slot
+  is 64(sp)), skips a lift for kind 0x76 (`if (IsObjectOfKind(obj, 0x76)) goal.z += D;`), calls
+  SolveArrivalTimeAtHeight and, in its body, passes a block-scope `Vec02 v` (the freed slot,
+  64(sp) again) to slot 32. Retail forms `addiu a1,sp,64` at the call; ours kept the address in
+  a saved register from the first weight on, one saved register more (s8), 0x10 more frame and
+  every register after it shifted (17.9%).
+- **The mechanism.** Vu0::Scalar returned `Q((s128)r)`: Q returns a reference, so the inlined
+  return value is the slot's address in a pseudo of its own (`(set (reg 270) (plus fp 64))`),
+  dead once CSE folds the load back to the frame address. CSE keeps that pseudo in the class of
+  `(plus fp 64)` for the rest of the extended block: with `-fcse-skip-blocks` the path skips
+  the kind test's body (`invalidate_skipped_block` forgets only what the body sets) and falls
+  into SolveArrivalTimeAtHeight's body, where `&v` is the same frame address and CSE replaces it
+  with the oldest register of the class. The pseudo then lives across four calls. Breaking the
+  path at the kind test's label (a second use of it) gives retail's frame, confirming it, but
+  also splits `&goal` and `&drift` into PRE copies retail does not have: retail's path does go
+  through, so the weight's address simply never was a register.
+- **The change.** Vu0::Scalar takes the cast's address itself, `return *(u128*)&(s128)r;`:
+  the same cast-lvalue temporary (MEM_SCALAR_P, the same slot and store) with no reference
+  return, so no address pseudo is left for CSE. All matched functions build the same (full
+  build MATCH).
+- **Spot it:** a saved register holding `sp+N` (`addiu sN,sp,N` with no other use) where N is a
+  weight slot that a later block-scope vector reuses, and retail forms the address at the call.
+- Also in this function: `&vel`, `&goal`, `&drift` written plainly at each call (no pointer
+  locals): CSE and PRE make retail's address registers, PRE inserting `&vel` into the arms that
+  lack it (`addiu s5,sp,16` in delay slots). `s32 sub = e->value != 0 ? 0 : 2;` shares the 2 with
+  the state argument and a store (`li a1,2; move s7,a1`), where `sub = 2; if (..) sub = 0;` does
+  not. The drift update written with Vu0::Vec values (`MulAddX(Vec::Of(goal), Vec::Of(drift),
+  Vec::Scalar(rise))`) puts the goal's load first in the luid order, which sched1's tie-break
+  needs for retail's vector registers. CreateAnimationPlayerWithoutPresetTargets declared void
+  (as five other files do) lets local-alloc give the next load v0.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
