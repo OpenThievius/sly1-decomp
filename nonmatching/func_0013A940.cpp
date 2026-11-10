@@ -1,107 +1,116 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 944/964, checked 2026-11-10
-// NEAR (first translation, the control flow and every call are retail's; the code is not yet): the
-//       frame is 0x150 against retail's 0x140, retail clears both bounds with 128-bit stores before
-//       setting their x, y, z, the per-chunk base addresses and the pointer walks come out
-//       differently, and the list frame is filled in another order. About 10 compiles.
+// SIZE 952/964, checked 2026-11-10
+// NEAR: built in src/main/file_137290.cpp it is 952 bytes of retail's 964, with retail's frame
+//       (0x140), block layout and calls. Since the first translation: the mode tests are a switch
+//       (retail's beq 1 / beql 2 / b compare tree, the mode-1 case placed after it), the bounds
+//       are constant initialisers ({K, K, K, 0}: two sq clears, then z, x, y) and the frame push
+//       is func_0013A618's (WordListFrame, the head read straight from self->members).
+//       Left: (1) loop.c combines the inner loop's address givs differently. Retail keeps
+//       &cur->pos[j], &cur->vel[j], &nxt->pos[out], &nxt->vel[out] (the call arguments) as their
+//       own reduced registers (fp, s6, s7, s5) and bases every memory reference on the rec
+//       arrays' givs (s1 = cur + 0x580, s0 = nxt + 0x580, negative offsets); ours lets the
+//       multi-use &cur[j] DEST_REG giv absorb the memory givs (tie at total benefit 116, broken
+//       by giv order), so one callee-saved register is left over and the bivs (removed, j, out)
+//       land in it instead of retail's a7/t0/t1 saved around both calls (caller-save sq/lq):
+//       the 12-byte gap is that. (2) The mode-2 case: retail reads node->extraRecord twice (in
+//       the beql slot and again after the call, keeping only j * 32 in s2), which writing the
+//       extra record as an array of 32-byte pairs {Vec02, Vec02} indexed from node->extraRecord
+//       at each use gives (tried: right code there, but the freed register then holds j and the
+//       caller-saves go, 912 bytes). (3) The prologue has func_0013A618's sched1 tie: both
+//       literal %hi's issue in the first cycle, so the second takes v1 (retail reuses v0).
+//       About 12 compiles this round.
+// In the context of its file, src/main/file_137290.cpp.
 #include "common.h"
 #include "list_iter.h"
+#include "owned_record.h"
+#include "world_listed_object.h"
 #include "placed_object.h"
 #include "vu0.h"
 
 extern f32 g_gameClock[];
-extern const f32 D_00249D6C;
-extern const f32 D_00249D70;
-struct ParticleArrays03 { Vec02 pos[0x2C]; Vec02 vel[0x2C]; Vec02 rec[0x2C]; };
 
-struct ParticleChunk03 {
-    ParticleArrays03 blk[2];    // 0x000, 0x840
-    s32 flip;                   // 0x1080
-    s32 count;                  // 0x1084
-    Vec02* extra;               // 0x1088: 32-byte entries
-    s32 f108C;
-    ParticleChunk03* next;      // 0x1090
-};
-
-void func_0013A618(void* set, f32 dt);
+void DetachOwnedRecord(OwnedRecord* o);
+void func_0013A618(WorldListedObject* self, f32 dt);
+s32 EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
 f32 WrapAngle(f32 a);
-void EvaluateHermiteVectorSegment(void* a, void* b, void* c, void* d, f32 f12, f32 f13, f32 f14, void* a4, void* a5, s32 a6);
-void DetachOwnedRecord(void* a);
-#define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
-void func_0013A940(void* set, f32 dt)
+void func_0013A940(WorldListedObject* self, f32 dt)
 {
-    Vec02 lo;
-    Vec02 hi;
-    Vec02 center;
-    ListFrame frame;
-    if (AT(s32, set, 0x320) == 0) {
-        func_0013A618(set, dt);
+    if (self->mode == 0) {
+        func_0013A618(self, dt);
         return;
     }
-    lo.x = lo.y = lo.z = D_00249D6C;
-    lo.w = 0.0f;
-    hi.x = hi.y = hi.z = D_00249D70;
-    hi.w = 0.0f;
-    frame.list = (u8*)set + 0x624;
-    frame.link = (u8*)frame.list;
-    frame.offset = AT(s32, frame.list, 8);
-    frame.prev = g_activeListFrames;
-    g_activeListFrames = &frame;
-    ParticleChunk03* chunk = AT(ParticleChunk03*, set, 0x624);
-    frame.link = (u8*)chunk + frame.offset;
-    while (chunk != 0) {
-        s32 flip = (chunk->flip + 1) & 1;
-        ParticleArrays03* cur = &chunk->blk[chunk->flip];
-        ParticleArrays03* nxt = &chunk->blk[flip];
-        s32 cnt = chunk->count;
-        s32 removed = 0;
+    Vec02 lo = {3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Vec02 hi = {-3.4028235e+38f, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    WordListFrame fr;
+    s32 e = (s32)&self->members.head;
+    fr.list = e;
+    fr.link = e;
+    s32 old = *(s32*)&g_activeListFrames;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.offset = link;
+    *(s32*)&g_activeListFrames = (s32)&fr;
+    s32 head = *(s32*)fr.link;
+    fr.link = head + fr.offset;
+    OwnedRecord* node = (OwnedRecord*)head;
+    while (node != 0) {
+        Vec02* cur = node->points[node->bank];
         s32 out = 0;
-        for (s32 j = 0; j < cnt; j++) {
-            f32 end = cur->vel[j].w;
+        s32 removed = 0;
+        s32 nb = (node->bank + 1) & 1;
+        Vec02* nxt = node->points[nb];
+        for (s32 j = 0; j < node->count; j++) {
+            f32 end = cur[0x2C + j].w;
             if (end <= g_gameClock[1]) {
                 removed++;
                 continue;
             }
-            if (AT(s32, set, 0x320) == 1) {
-                nxt->vel[out] = cur->vel[j];
-                Vu0::Q(nxt->pos[out]) = Vu0::MulAddX(Vu0::Q(cur->pos[j]), Vu0::Q(cur->vel[j]), Vu0::Scalar(dt));
-            } else if (AT(s32, set, 0x320) == 2) {
-                Vec02* ex = chunk->extra;
-                EvaluateHermiteVectorSegment(&cur->pos[j], &cur->vel[j], &ex[j * 2], &ex[j * 2 + 1], end - g_gameClock[1], (end - g_gameClock[1]) <? dt, 1.0f, &nxt->pos[out], &nxt->vel[out], 0);
+            switch (self->mode) {
+            case 1: {
+                u128 v = Vu0::Q(cur[0x2C + j]);
+                Vu0::Q(nxt[0x2C + out]) = v;
+                Vu0::Q(nxt[out]) = Vu0::MulAddX(Vu0::Q(cur[j]), v, Vu0::Scalar(dt));
+                break;
+            }
+            case 2: {
+                Vec02* ex = (Vec02*)node->extraRecord;
+                f32 left = end - g_gameClock[1];
+                EvaluateHermiteVectorSegment(&cur[j], &cur[0x2C + j], &ex[j * 2], &ex[j * 2 + 1], left, left <? dt, 1.0f, &nxt[out], &nxt[0x2C + out], 0);
                 if (out != j) {
                     ex[out * 2] = ex[j * 2];
                     ex[out * 2 + 1] = ex[j * 2 + 1];
                 }
+                break;
             }
-            nxt->pos[out].w = cur->pos[j].w;
-            nxt->vel[out].w = cur->vel[j].w;
-            nxt->rec[out] = cur->rec[j];
-            if (AT(s32, set, 0x618) == 2) {
-                nxt->rec[out].w = WrapAngle(cur->rec[j].w + cur->rec[j].z * dt);
             }
-            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(nxt->pos[out]));
-            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(nxt->pos[out]));
+            nxt[out].w = cur[j].w;
+            nxt[0x2C + out].w = cur[0x2C + j].w;
+            nxt[0x58 + out] = cur[0x58 + j];
+            if (self->f618 == 2) {
+                nxt[0x58 + out].w = WrapAngle(cur[0x58 + j].w + cur[0x58 + j].z * dt);
+            }
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(nxt[out]));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(nxt[out]));
             out++;
         }
-        chunk->count = cnt - removed;
-        AT(s32, set, 0x620) = AT(s32, set, 0x620) - removed;
-        if (chunk->count <= 0) {
-            DetachOwnedRecord(chunk);
+        node->count -= removed;
+        self->f620 -= removed;
+        if (node->count <= 0) {
+            DetachOwnedRecord(node);
         } else {
-            chunk->flip = flip;
+            node->bank = nb;
         }
-        chunk = *(ParticleChunk03**)frame.link;
-        frame.link = (u8*)chunk + frame.offset;
+        node = *(OwnedRecord**)fr.link;
+        fr.link = (s32)node + fr.offset;
     }
-    if (AT(s32, set, 0x620) <= 0) {
-        (*(void (**)(void*))(AT(u8*, set, 0) + 0x1C))(set);
+    if (self->f620 <= 0) {
+        self->desc->m03(self);
     } else {
+        Vec02 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
-        (*(void (**)(void*, Vec02*))(AT(u8*, set, 0) + 0x84))(set, &center);
-        f32 r = Vu0::ToFloat(Vu0::Sqrt(Vu0::Dot(Vu0::Sub(Vu0::Q(center), Vu0::Q(lo)), Vu0::Sub(Vu0::Q(center), Vu0::Q(lo)))));
-        AT(f32, set, 0x2A4) = r;
-        AT(f32, set, 0x2A8) = r;
+        self->desc02()->m1D(self, &center);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, hi);
     }
-    g_activeListFrames = frame.prev;
+    *(s32*)&g_activeListFrames = fr.prev;
 }
