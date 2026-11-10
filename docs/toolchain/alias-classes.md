@@ -1241,6 +1241,31 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   tried (b's rows first, Vec rows and results, struct copies of the rows, rows read per
   rotation, the product returned by value) recounts the same six references.
 
+### A pointer that dies before the next quantity is born: the widening does not reach it (func_001536C8, open)
+
+- AddActiveSetItem's loop body (owner load, index load, the count chain `lw; sll; addu` for
+  the row's slot, the Dot and its qmfc2) has retail's instructions and order; only the owner
+  pointer and the count chain swap a0 and v1. From the `.lreg` dump, sched1's order puts the
+  owner load at insn 1, the axes load at 2, the index load (where the owner dies) at 3 and the
+  count load at 4. QTY_CMP_PRI: the owner 2 * 4 / (6 - 2) = 2.0, the count chain (three
+  pseudos tied by combine_regs, 12 references) 3 * 12 / (26 - 8) = 2.0, a tie that the
+  owner's lower quantity number wins, so it takes v1 and the chain a0.
+- Placing the chain first would not help: the owner's widened range is [fake_birth,
+  fake_death) = [0, 8) and the chain is born at 8, so find_free_reg sees no conflict and the
+  owner takes v1 again. Retail's a0 needs the count load before the index load in
+  local-alloc's order (owner [2, 8), 1.33; chain born at 6, 1.8, placed first in v1, and the
+  owner then conflicts with v0 and v1). sched2 would restore retail's final order from that.
+- sched1 cannot produce that order from this dependence graph: the index load (priority 9,
+  ahead of the Dot) is ready at t = 3 and always outranks the count load (6, only the store
+  after it); loads never depend on loads, and adjust_priority's birthing raise does not apply
+  to an insn ready from the start. Ruled out by probes (each the same six differences): the
+  count, the index, the owner or the slot's address named (before or after the Dot; the count
+  named before the Dot lets cse_around_loop reuse the loop test's load instead), the Dot
+  operands named or as `Vec02` entries, `u128` for the product, a `const s32&` index,
+  `&items[i]`, the row read at each use, a named axes pointer, ToBits named before the store.
+  What retail's block had that changes the graph (an insn sched1 sees and reload deletes, or a
+  dependence of the index load) is open.
+
 ### MulAddX lists its weight before b (func_00187260)
 
 Read from local-alloc.c (block_alloc, combine_regs) and the `.lreg`/`.greg` dumps of
