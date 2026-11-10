@@ -4850,6 +4850,47 @@ one register each (95.5%).
   a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
   references, are not cross-jumped into retail's single call).
 
+### The colour of a band: const pointers that only lend their `%hi` (func_00131F60)
+
+DrawTextPanelControlLabels (US, 2026-11-10, `-dj -dG -dL -dS -dg`, jump.c, gcse.c, loop.c of
+GCC 2.95.3; near miss at 95.7%). Retail's gauge loop picks a colour per band with `bc1t join`,
+`addiu v0, s4, %lo(D_002610D8)` in the delay slot, `addiu v0, s3, %lo(D_002610E0)` on the
+fall-through, and keeps both `%hi`'s (and g_camera's, s5) from the prologue on.
+
+- **Where each candidate failed.** An if/else of `&D_002610D8` / `&D_002610E0` keeps both
+  arms (each a `%hi` and a `%lo` with a REG_EQUAL note, which jump.c's `x = b; if (c) x = a`
+  hoist refuses), but loop.c leaves the `%hi`'s in the arms: each has life 1, savings 1, and
+  the loop is 90 insns against a threshold below 80 (1/9 and 1/15 sit before them and stay
+  too). PRE cannot hoist them: an expression in one arm only is not anticipated at the loop
+  header. References or pointers to the colours at the top of the body make the `%hi`'s
+  anticipated (PRE hoists them), but the arms become plain copies, which jump.c's first pass
+  hoists before the branch, and sched1 then issues that copy first (the ALU is free at cycle
+  2): retail's delay slot never appears.
+- **The form.** `const PanelColor* const lit = &D_002610D8;` (and `dim`) at the top of the loop
+  body. g++ substitutes a const pointer's constant initialiser at each use, so the arms are
+  the direct addresses (two insns each, REG_EQUAL notes: no hoist before reload), while the
+  declarations still emit their own `%hi`/`%lo` at the top. Those make each `%hi` anticipated:
+  PRE hoists them and the arms' `%hi`'s become copies; the dead `%lo`'s go. After sched2 the
+  arms are one `addiu` each, and reorg takes the target arm's `addiu` into the delay slot.
+- **Which saved register.** pre_edge_insert places the hoisted `%hi`'s in expression-index
+  order (first appearance) and global-alloc ranks the last placed highest (shortest life):
+  retail's camera s5, D8 s4, E0 s3 needs the camera's read first, `f32 zoom = g_camera->f478;`
+  before the two pointers.
+- **The state-1 half** (all of it retail's now): the five setters in `ScreenLayout::Reset(l,
+  color)` with the colour copied into a local of the helper (`s32 c = color; l->Color(&c);`:
+  ADDRESSOF places it after the other locals and stores it after Size, the colour in s0
+  across Pos and Size; with the helper's own Quad4 the buffer's address is the inline frame's
+  pseudo, hoisted into a saved register, and with `&color` the store moves before Pos); `char
+  buf[16]` declared before the layout (sp+16, layout sp+32, buffer sp+64); the first two
+  words stored through `Layout_137228* lay = &L;` (PRE copies lay into the pseudo the draw
+  calls use, retail's `addiu v1, sp, 32; move s6, v1`), the later stores as `L.`, and the
+  move colour stored before PushFontScale.
+- **Still open.** 55 and 372.8 stay in the loop only as a variable assigned twice (as literals
+  CSE makes each one pseudo of life 4-5 that loop.c moves); retail has them in f6 and f2 by
+  local-alloc, which a twice-set variable never is. "Move"'s `sw a0, 20(s6)` needs its store's
+  address formed as a pointer there (a reference made at that point does it; no plainer form
+  found).
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
