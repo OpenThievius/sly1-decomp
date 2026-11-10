@@ -629,3 +629,14 @@ everything reads vf2. One instruction short.
   pointer stepped by the `for` (`p++`) is the variable itself. With it the loop and the tail
   equal retail's instruction for instruction; only the head's missing instruction is left (it
   also moves the loop label's alignment `nop`).
+
+### The same lever for a parameter block's two quadwords (func_001EC190)
+
+- The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);
+  CopyQuadword(&u, &params.q30); StoreQuadword(&params.q30, ScaleQuadword(t, u));`, twice)
+  kept `&params.q30` and `&params.q50` in two saved registers (a 0x160 frame for retail's
+  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
+  and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
+  substitutes each address at its use and retail's frame and saved registers follow; the
+  remaining difference is the block's constructor stores ("What retail's order needs",
+  large-functions.md).

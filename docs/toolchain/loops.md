@@ -433,3 +433,31 @@ D_00262474's `%hi` (t8); the UNPACK command words 0x6C0BC000 and 0x6C01C01A are 
 - **The tell.** A command word or other constant hoisted into a saved register in a big loop
   where retail loads it at its store: look in `.loop` for a `reg/v` constant with a life above 1;
   it is an inline's parameter, and retail formed the word inside the helper.
+
+### A PRE'd invariant ahead of the entry jump makes the loop phony (func_001EEA40)
+
+- **What differed.** A plane-tree walk (`for (;;) { ... if (d < -radius) ...; if (next &
+  0x80000000) { ...; break; } node = next; }`) tested bit 31 with `bgez` and had no `s3`; retail
+  hoists `lui s3,0x8000` before the loop and tests `and v0,a1,s3; beqz v0` at each use, with a
+  frame 16 bytes larger for the saved s3.
+- **Why.** GCSE runs before loop.c. PRE hoisted `-radius` (loop-invariant, used in the body) to
+  just after NOTE_INSN_LOOP_BEG, in front of the loop's entry jump to its rolled exit test.
+  scan_loop then finds an insn, not a label or the entry jump, as the first thing in the loop
+  and prints "Loop from N to M is phony" (`-dL`): nothing moves. The mask's set stays in the
+  loop, combine folds `(ne (and x 0x80000000) 0)` into a sign test, and the constant disappears.
+  Once loop.c moves the set to the preheader, the mask is a register set once outside the loop
+  and used twice inside: combine cannot merge it (it does not die at the use), so the `and`
+  stays.
+- **The form.** `f32 near = -radius;` named before the loop puts the negation ahead of
+  NOTE_INSN_LOOP_BEG. That gives the `and`, but `for (;;)` with `break` still leaves an entry
+  jump whose delay slot reorg fills with the negation (the `li` of 0x80000000 has length 2 and
+  cannot go there), so the preheader read `lui; neg.s` where retail has `neg.s; lui`. A
+  `do { ... node = next; } while (!(next & 0x80000000));` followed by the leaf's expansion has
+  no entry jump: retail's order, EXACT. The middle test reads `else if (radius < d) next =
+  n->back; else { next = n->back; ... }` (retail branches out to the bottom test on `radius <
+  d`), and the recursive call's argument moves (`mov.s $f12` before `move a3`) need the radius
+  before `out` in the prototype, as the caller QueryValueListMask's own `(self, radius, vec,
+  out)` has it.
+- **Spotting it.** A `bgez`/`bltz` where retail keeps `and` with a register holding
+  0x80000000 (or any constant that needs a `lui`): read `-dL` for "phony", and look for a PRE'd
+  expression right after the loop note.
