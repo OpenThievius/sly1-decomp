@@ -3345,6 +3345,30 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   signature does not have. An argument register retail never mentions can still be in the C:
   its copy is a scheduled insn before register allocation.
 
+### A parameter passed to the first call decides which %hi crosses it (func_0019DC98)
+
+- **What differed.** SubmitDeferredRequests opens with a call (UploadLightVolumes), then reads
+  D_0026AC10. Retail hoists that read's `lui s0,%hi(D_0026AC10)` above the `jal` and copies it
+  to s4 for the final store; the near miss hoisted D_002622A8's %hi instead. The %hi of
+  D_0026AC10 (insn 15) is ready at t=1 beside the call: both have priority 10 (both reach the
+  load, which depends on the call), both weight 1 (the call's clobber of $ra counts as a set),
+  and the call has twenty dependents against three, so the call is scheduled first and the
+  %hi's pseudo lives in its block only: local-alloc gives it $v0.
+- **The fix was the signature.** The caller (main_loop.cpp) passes the world and the camera,
+  and UploadLightVolumes takes the world: `SubmitDeferredRequests(World* world, void* camera)`
+  with `UploadLightVolumes(world)`. The parameter's copy from $a0 (priority 12) and the
+  argument move (11) come first, the call waits for them, and the %hi is scheduled at t=1:
+  its pseudo now crosses the call, global-alloc gives it s0 (the first callee-saved register
+  free there), and reload deletes both moves, so retail shows no trace of the argument.
+- **Then the store order.** With the %hi in place, sched1's tie on weight (a store that kills
+  two pseudos, `D_00262474 = 0x214`, goes before one that kills one) left the %hi of
+  D_00604784 the longest life, so local-alloc gave it $t1 where retail has $a2. Clearing the
+  four words at D_00604780 in address order and D_00262474 last gives retail's a2, a3, t0, t1
+  (found with tools/permute.py over the five statements).
+- **Rule.** As for func_0018AD88: an argument register retail never mentions can still be a
+  parameter. Check the callers' argument registers (here $a0 and $a1 from main_loop) and
+  whether the first callee takes $a0.
+
 ### A variable set twice is global-alloc's: a return or argument register at its edge (func_0018AE38)
 
 - **What local-alloc cannot give.** local_alloc takes a pseudo only when REG_BASIC_BLOCK >= 0
