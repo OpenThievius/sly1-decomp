@@ -10,8 +10,12 @@
 //       an unflagged TImode frame store against a mem/s through a loaded pointer), and the tie
 //       falls to INSN_REG_WEIGHT (the copy -1 for down's death, the load +1). Ruled out: acc as a
 //       Vu0::Vec (coalesced with down, frame changes), down as a Vec02 in memory (slots swap),
-//       acc declared at the copy (slot order), acc as an addressed u128 (frame 0xA0), the copy
-//       after `p = sol`.
+//       acc declared at the copy (slot order), the copy after `p = sol`, the sum loop's
+//       self->contacts in a named pointer (CSE folds it; the load still depends on the copy).
+//       Confirmed: acc as a u128 whose address the z read takes (`((f32*)&acc)[2]`) makes the
+//       copy's store MEM_SCALAR_P at a fixed address, which fixed_scalar_and_varying_struct_p
+//       keeps apart from the mem/s load, and gives retail's `lq v1`; but purge_addressof then
+//       allocates acc after the weight slot (acc 0x10, slot 0) and the frame grows to 0xA0.
 // w11 levers that closed the rest (from 46.1%): one row and one contact variable for every
 //       loop (retail's a2 and a0 in all four: one pseudo each, as camera.cpp's sibling
 //       func_00145B68 reuses i and j); the normals as Vu0::Vec values (the Gram loop's vf4 and

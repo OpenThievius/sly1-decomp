@@ -3639,7 +3639,12 @@ TurnColliderTowardRotation (2026-11-09):
   the sum loop's `self->contacts` load, scheduled first by sched1. Ours ties both at priority 5
   (the copy's unflagged TImode frame store is a true dependence of the `row->head` load
   through the loaded pointer) and INSN_REG_WEIGHT puts the copy first (-1, down dying,
-  against the load's +1).
+  against the load's +1). Confirmed by a probe: acc as a u128 whose address the z read
+  takes makes the copy's store MEM_SCALAR_P at a fixed address, which
+  fixed_scalar_and_varying_struct_p keeps apart from the mem/s load; sched1 then issues the
+  load first and reload takes v1, as retail. But purge_addressof allocates such a variable's
+  slot after the expand-time weight slot (retail has the sum at 0, the slot at 0x10), so the
+  form that has both is still to find.
 
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
