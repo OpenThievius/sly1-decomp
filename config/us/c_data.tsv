@@ -3,7 +3,7 @@ D_00217380	00217380	41504	.rodata	src/main/class_descriptors.cpp
 D_002215A0	002215A0	145824	.rodata	src/main/property_registry.cpp
 D_00244F40	00244F40	15904	.rodata	src/main/global_tables.cpp
 D_00248D80	00248D80	608	.rodata	src/main/object_host_functions.cpp
-D_00248FE0	00248FE0	532	.rodata	src/main/script_machine.cpp
+D_00248FE0	00248FE0	756	.rodata	src/main/script_machine.cpp
 D_002492F0	002492F0	308	.rodata	src/main/value.cpp
 D_00249428	00249428	1096	.rodata	src/main/iop_commands.cpp
 D_00249870	00249870	372	.rodata	src/main/pose_source.cpp
