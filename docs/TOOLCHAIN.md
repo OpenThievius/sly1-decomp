@@ -1707,6 +1707,28 @@ it straight into a3.
   s0` (the else arm's first load in the slot) then `b tail; li t2,1` means the else arm's first
   statement was not the flag's: `changed = 0` written after the arm's pointer locals.
 
+### A 2-bit field's type in its read, and a switch's dispatch (func_00128598)
+
+Measured 2026-11-10 on a follow step of src/main/placed_object.cpp. Two causes, both in the
+source's shape, not in a pass's tie:
+
+- **The field's type.** Retail reads a 2-bit field at bits 30-31 of the doubleword at 0x2C8 as
+  `ld; dsll 2; dsra32; andi 3` and stores it as the doubleword's `ld; and; or; sd`. A `u64 : 2`
+  field reads as `dsrl 30` instead; a `u32 : 2` field in the same union (as bits24, read with
+  `dsll 8; dsra32; andi 3` by func_00125138) gives retail's extraction, a 32-bit field taken out
+  of a 64-bit word, and the same doubleword stores. The written-out read `(s32)((s64)flags << 2
+  >> 32) & 3` gives the same instructions but is an expression of its own: sched1 raised its `ld`
+  above both Lengths and the qmfc2 results lost v0 to it. The field's read keeps the `ld` where
+  the switch is. Where retail shows `dsll k; dsra32; andi m` on a doubleword field, declare it an
+  int field.
+- **The dispatch.** Retail tests `beqz v; li v0,1; beq v,v0; b end` and then the cases' bodies:
+  a `switch` with cases 0 and 1 and no default. An `if (f == 0) ... else if (f == 1)` chain gives
+  `bnezl` into the second test instead, one block shorter.
+- **A value set in both arms, then read.** `if (c) g = a; else g = 0; t = g + v;` with `g` a
+  stack Vec02: retail stores `g` once at the join (cross-jumping merged the arms' stores after
+  reload) and reloads it for the add. A `u128 push` set in the arms and stored once (`Q(g) =
+  push`) lets CSE forward the register and drops the reload: assign the memory in each arm.
+
 ### A switch case that repeats the variable's value: three passes delete it (func_0020A190)
 
 Measured 2026-11-09 on the MPEG demultiplexer's stream-id lookup (src/lib/mpeg_demultiplexer.cpp,

@@ -209,7 +209,9 @@ struct PlacedObject : BaseObject {
                             // ld, then dsll 8, dsra32 and andi 3, the 32-bit extraction)
             u64 bits26 : 2; // set-up: 0 with a parent, 2 without
             u64 bits28 : 2; // func_00196410
-            u64 bits30 : 2; // a pose follow state (func_00128598): 1 once the object is close and slow
+            u32 bits30 : 2; // a pose follow state (func_00128598): 1 once the object is close and slow
+                            // (an int field as bits24: read as ld, dsll 2, dsra32, andi 3; stored as
+                            // the doubleword's ld, and, or, sd)
         };
         struct {
             u64 : 42;
