@@ -962,6 +962,26 @@ else arm before the divide.
   cast array indexed at each use gives `move s0,s3` and offset 1436 in each load. The giv's add
   value must be a register: the array named once, `void** nodes = (void**)((u8*)self + 0x59C);`.
 
+### A call's frame-address arguments that GCSE does not hoist (func_00191AC8, unsolved)
+
+Read from the `-dF` dumps (2026-11-10, nonmatching/func_00191AC8.cpp). In a loop, a call's argument
+`&local` is expanded into a pseudo (`(set (reg) (plus sp N))`) that PRE hoists to the function's entry
+like any frame address, and global-alloc then gives it a saved register. Retail's `addiu a0,sp,192`
+and `addiu a1,sp,256` at the CopyBytes call inside the loop (with `&p` and `&span` hoisted into
+s5/s4) mean those two never were pseudos:
+
+- **An inline's address parameters are substituted.** Called through an inline whose parameters are
+  the two pointers, integrate.c substitutes the constant frame addresses into the argument moves
+  themselves (`(set (reg a0) (plus sp 192))`), which PRE does not touch (its destination is a hard
+  register).
+- **But a reference in the same block undoes it.** Rows stored as `Vu0::Q(s.r[i]) = ...` pass s.r[0]
+  to Q by reference, which copies its address into a pseudo; CSE then uses that pseudo for the later
+  `&s` argument, and PRE hoists it. Stored as `*(Vu0::Vec*)&s.r[i] = ...` the address stays a
+  constant in the memory reference.
+- **Not a struct assignment.** `rot = s` of two Mat02 is moved by pieces (lq/sq), of two Mat3U by
+  ldl/sdl pieces, and an inline returning a Mat02 by value copies it by pieces too: none calls
+  CopyBytes (memcpy), so retail's call was written.
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
