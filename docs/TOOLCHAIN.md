@@ -1080,6 +1080,47 @@ loads and stores, with every other value ranked as at the inner loop's depth, is
 the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` loses it; a
 `do { } while (1)` keeps it.
 
+### A switch's case constants in a loop with calls: savings and life 1 (func_00130C58)
+
+Read from loop.c (scan_loop, combine_movables, move_movables), stmt.c (emit_case_nodes) and
+mips.c (gen_conditional_branch) with `-dL` dumps (2026-11-10, nonmatching/func_00130C58.cpp,
+the curve-window search: four quadratics per curve chosen by `switch (j)` over `j < 4`):
+
+- **What retail shows.** The inner loop's compare tree is `beq j,1; slti j,2; beqz j; beq j,2;
+  beq j,3`. Retail keeps 2 in s6 and 3 in s8 (both hoisted before the outer loop, between the
+  float constants: 4.0, 2, 6.0, 3, -2.0, -6.0) and loads the 1 in the loop (`li v0,1`). Ours
+  keeps the 3 in the loop: s8 is not saved, the frame is 16 bytes smaller and the case-2 branch
+  keeps `li v0,3` in its slot.
+- **Why ours stays.** Each EQ compare against a non-zero constant forces the constant into its
+  own pseudo right before the jump (gen_conditional_branch), so the set has life 1 and savings 1
+  (savings is n_times_set). combine_movables adds the life and savings of other sets of the same
+  constant: the 2 matches `found == 2` (life 2, savings 2) and moves at threshold 79; the 3,
+  considered next at 76, needs `76 * 1 * 1 >= 104` (the inner loop's count in pass 1; 90 in
+  pass 2 at 79) and stays. The 1 stays for the same reason. Luids count non-line notes, but
+  nothing sits between a tree constant and its jump.
+- **Retail moved the 3 in pass 1, probably the 1 too.** Built with `-fmove-all-movables` (to
+  explore only) the 1, the 2 and the 3 all move in pass 1, global-alloc gives 2 and 3 s6 and s8,
+  the 1 gets no saved register and reload rematerialises `li v0,1` in the loop: retail's code
+  and preheader order exactly, apart from one block (below). So retail's 1 and 3 each had
+  `savings * life >= 2` with the loop near 104 insns, or the loop was at most 73 insns in pass
+  1 (or 76 in pass 2). With four calls in the loop (each case sets a0 and calls; cross-jumping
+  merges cases 2 and 3 only after sched2) no form found is that small: one call after the
+  switch gives 88 and 74 insns, and pass 2 then moves the 1 and the 3, but its code is not
+  retail's.
+- **Ruled out:** the case order (sorted anyway, the tree is fixed by balance_case_nodes), `j <=
+  3` (gen_int_relational turns LE into `lt 4` with no register), the counter's type (u32, s16,
+  u16, s8, u8), the switch inside an inline function, `j == 3 ? -t : t` in case 3 (cse1 folds
+  it on the case's path, so no second 3 reaches loop.c), `case 2: case 3:` with a shared body
+  (grouped into a range: a different tree). A second set of the constant that cse1 cannot fold
+  and a later pass removes is what is missing; not found.
+- **The one other block.** Even with every constant moved, the block after the outer loop
+  differs: PRE hoists FLT_MAX's `%hi` (the search's start value) to the end of the entry block
+  (LCM puts an expression anticipated through the loop at its earliest point), update_equiv_regs
+  moves it back before its use, and local-alloc gives it v0 (2 refs over 2 insns outranks the
+  window count's subtraction, over 3), so `lui v0` leads and the subtraction takes v1; retail
+  subtracts into v0 and loads `lui v1` right before the `lwc1`. The order of `found = w -
+  windows`, `best` and `k = -1` and a named global for FLT_MAX change nothing.
+
 ## CSE
 
 ### The same walk twice: Vec values keep the second bound's copy (func_00191C78)
@@ -5153,6 +5194,12 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   (owner, key, scale, mode, ...), the weight curves' own order, both come out as retail's and
   every other caller still matches. A call site that passed a non-zero int where a float now
   is compiles silently (the int converts): rebuild in full after such a change.
+- **SolveQuadratic is `(f32 a, f32 b, f32 c, f32* roots)` (func_00130C58).** Declared with
+  the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
+  where retail copies t into $f12 first; with the roots last every case's moves are retail's.
+  Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
+  func_001EA4B8) match with either order; func_00156718 (file_1549C8) already declared the roots
+  last, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
   parameters is evidence only at its call sites.
