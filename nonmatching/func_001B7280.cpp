@@ -1,17 +1,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 896/904, checked 2026-11-10
-// NEAR (2026-11-08, night-sizex2): 896 bytes for retail's 904 (was 888). The corner count set in
-// each arm of the table's switch (n = 4 at a join is no constant to CSE, so the allocation and
-// the loop take it from a register as retail does) and a third `case 3: break;` for the
-// switch's tree (retail's compares are bltz, slti 2, then 2) gave 8 bytes and about half the
-// differing words. Still differs: self in s3 and the table in s2 here (retail s2 and s1, with
-// the table copied to s3 and the count put in s1 before the loop: `move s3, s1; li s1, 4`, and
-// the count loaded again as `li v0, 4` for the allocation's size and the loop's first test),
-// the return after func_001CB3D0 (retail bnez to the epilogue, ours beqzl) and the compare
-// tree's order (default, the bltz, first in retail).
-// Before (night-size4): the target's 0x690 flag is read from the target, the zero returns that
-// retail sends straight to the epilogue are joined with || (bnez with move v0,zero in the slot),
-// and the flag test is `(x & 1) == 0` (retail's andi, bnezl).
+// BYTES 591/904 (65.4%), checked 2026-11-10
+// NEAR (2026-11-10, worker w16-1B7280): retail's size now (was 896), 591 of 904 bytes. The
+// count is a constant retail never keeps in a register: `li v0, 4; sll a0, v0, 4` for the
+// allocation, `li v0, 4; blez v0` for the loop's first test and `li s1, 4` for its counter are
+// reload putting back the REG_EQUIV constant of a pseudo global-alloc left without a register
+// (all nine saved registers are taken over its life), and the arms' `n = 4` sets are the
+// equivalence's init insns reload deletes. update_equiv_regs doubles n's live length once per
+// equal constant set (2 sets: 130 x 4 = 520, priority 2*5/520 = 0.0192); the table's first set
+// doubles it once and the second, another constant, ends the equivalence (127 x 2 = 254,
+// 3/254 = 0.0118). n ranks first and takes s1, the table s3 and the loop's table pointer with
+// it (no `move s3, s1`). A third equal set gives 0.0096: the table is placed first and takes s1,
+// n finds no register, and the allocation, the test and the counter come out as retail's.
+// `case 3: n = 4;` below is that third set; retail's compare tree has no node for 3 (bltz,
+// slti 2, then 2, which cases {0-1} and {2} alone give: see b7 in the worker's folder), so the
+// real third set is elsewhere. Ruled out: `default: n = 4` or `s32 n = 4;` anywhere before the
+// switch (every path then sets n = 4, GCSE's cprop sees the set available at the uses, loop.c
+// knows the trip count: `li s4, 3; bgez`), `case 3: n = 4` (the extra compare). Still differs:
+// the tree; self in s3 here (retail s2: the case 3 insns lengthen its life past the loop
+// pointer's priority, 0.679 against 0.700); i and the loop's `i < 4` swapped (s2/s1); and the
+// return, which retail branches on (`bnez s2` to `li v0, 1`, else `move v0, zero`) where every
+// form tried (`return i < 4`, `if (i < 4) return 1; return 0;`, `i == 4`, `i != 4`, a ?:) is a
+// store-flag here; `if (i == 4) return 0; return 1;` is 4 bytes longer.
+// Before (night-sizex2): the corner count set in each arm of the table's switch (n = 4 at a
+// join is no constant to CSE) and the flag tests: the target's 0x690 flag is read from the
+// target, the zero returns that retail sends straight to the epilogue are joined with ||
+// (bnez with move v0,zero in the slot), and the flag test is `(x & 1) == 0` (retail's andi,
+// bnezl).
 #include "common.h"
 #include "switched_collider.h"
 #include "collider.h"
@@ -99,6 +113,7 @@ s32 func_001B7280(CompanionAgent* self)
         n = 4;
         break;
     case 3:
+        n = 4;
         break;
     }
     Vec02* pos = F(PlacedObject*, 0x734) != 0 ? &F(PlacedObject*, 0x734)->v140 : &self->v140;

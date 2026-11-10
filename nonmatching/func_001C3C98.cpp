@@ -29,6 +29,20 @@
 // after the division instead of before the length's lwc1. Retail's address needs a fourth
 // reference or a span of at most 5, or p->anim a span of at least 7.
 //
+// Re-scored 2026-11-10 (w16): the same 114 of 144. The span is not where it goes wrong: the
+// position's load waits for the slot store in sched1 too, not only in sched2 (alias.c's
+// find_base_value gives (plus index c) no base, the index being no pointer and c's base an
+// argument ADDRESS that no rule of the PLUS case takes, so base_alias_check conflicts), and
+// the forms that free it (a mem/s position) hoist it into the division's shadow in sched2,
+// where retail's waits. sched1's order of the closest form (pos as a cast, vel as
+// *(Vec*)&, store through Q in one statement) is retail's final order, insn for insn, so its
+// spans are retail's: the address (3 refs over 9) loses to p->anim (2 over 4) on refs alone.
+// Retail's address quantity has a fourth reference, or a second pseudo tied to it: a register
+// copy of the address that stays (the store's base, `move v1, v0` being that copy rather than
+// reload_cse's) gives 2*4/9 = 0.889 and retail's registers everywhere, but CSE folds every
+// plain copy tried (a pointer or reference local to the end or to v30, Set, the sibling
+// ResolveScaledOffsetContact's `Vec02* v = &c->end[end].v30`: one register, 36 differ), and
+// re-reading self->f67C for p changes nothing.
 // Tried (all with the c->end[end] signature, 2026-11-10): every combination of Q, a u128 cast
 // and *(Vec*)& for the position load, the velocity load and the store, with the store in the
 // same statement or after a named value (54 variants); the same with a Normalize helper
