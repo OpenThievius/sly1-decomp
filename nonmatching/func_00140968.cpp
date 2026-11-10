@@ -10,6 +10,9 @@
 //       `while (g_discStatus != status) g_discStatus = status;` reproduce the copy (the loop the
 //       whole shape, registers v1/a0 swapped and a nop); no plausible single-test form found
 //       (about 30 forms ruled out, listed there).
+// Wave 16 (2026-11-10): about 25 more forms ruled out (docs/toolchain/gcse.md, "Also ruled out"):
+//       condition spellings, goto, switch, ?:/&&/|| statements, do-while(0), the return's forms;
+//       every loop form gives the copy but adds an aligned loop label's nop (68 bytes).
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"

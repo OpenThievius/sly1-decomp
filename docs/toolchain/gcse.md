@@ -549,6 +549,20 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   (`s32 changed`, `bool changed`), a named old value, an unused named label, a returned copy
   in each arm, and an early return: jump.c's first pass removes every jump into the arm that
   plain forms make before cse sees it.
+- **Also ruled out (2026-11-10, wave 16)**, all 60 bytes with the same `bnel` unless noted:
+  `if (status != g_discStatus)` (any operand order) written as `g_discStatus - status`,
+  `g_discStatus ^ status`, `status - g_discStatus != 0`, `(g_discStatus == status) == 0`, a
+  `?: 1 : 0` condition; `goto done` over the store; a `switch` on the comparison or on the
+  difference (empty `case 0`, store under `default`); a conditional-expression statement
+  (`c ? (void)(g = s) : (void)0`), `c && (g = s)` and `!c || (g = s)`; the store in
+  `do { } while (0)`; `g = c ? s : g`; the assignment inside the test (`(status = Get()) != g`);
+  the return as `if (g == 0x14) return 1; return 0;`, its inverse, a `ready` flag and `?: 1 : 0`;
+  and a duplicate second test (`|| status != g`, `&& status != g`: fold removes it before RTL).
+  `status < g || status > g` is 84 bytes. A back edge by `goto` (`again: if (c) { g = s; goto
+  again; }`) is not folded by cse and stays a loop (60 bytes, other code). Every loop form
+  (`while`, `for (; c; g = s);`, `for (;;) { if (!c) break; g = s; }`, `if (c) do g = s; while
+  (c);`) gives retail's copy but 68 bytes: the extra `nop` is the aligned loop label, which
+  retail does not have, so retail's function was not a loop at final.
 - **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
