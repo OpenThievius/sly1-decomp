@@ -2502,7 +2502,87 @@ void SetRandomEffectSpin(Effect* self)
     BuildBasisFromX(&axis, self->rot50);
 }
 
-INCLUDE_ASM(func_001A2830);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
+
+// A quadratic in z (poly[0] + poly[1] z + poly[2] z^2), clamped to range[0]..range[1]; the same
+// inline as file_17D248.cpp's.
+static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
+{
+    f32 v = poly[0] + z * (poly[1] + z * poly[2]);
+    f32 lo = range[0];
+    f32 hi = range[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    return v;
+}
+
+// Turns an effect by angle about the second row of rot (its placement): the turn built into the
+// caller's matrix, then the velocity and the placement's rows rotated by it, rot's rows read by
+// index through the parameter and the result stored through the effect. The parameter is a
+// pseudo of the inline's own, without the pointer flag a declared pointer gets, set before the
+// call; its row loads may alias the frame's stores, so each waits for the row before
+// (docs/TOOLCHAIN.md, "An inline's pointer parameter and frame stores").
+static inline void TurnEffectAboutRow(Effect* o, const Mat02& rot, Mat02* turn, f32 angle)
+{
+    BuildAxisAngleMatrix(&rot.r[1], turn, angle);
+    const u128* p = (const u128*)turn;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vu0::Q(o->qA0) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(o->qA0));
+    const u128* q = (const u128*)&rot;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+    *(Mat02*)o->rot50 = r;
+}
+
+// v made unit length in place, or set to fallback when shorter than 0.0001; returns the length.
+static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
+{
+    Vu0::Vec t = Vu0::Vec::Of(*v);
+    Vu0::Vec l = Vu0::Length(t);
+    if (Vu0::ToFloat(l) < 0.0001f) {
+        *v = fallback;
+    } else {
+        Vu0::Q(*v) = Vu0::DivX(t, l).q;
+    }
+    return Vu0::ToFloatMoved(l);
+}
+
+// A tumbling effect's motion over dt: the placement turned about its own second row at a rate
+// from the velocity along its first (D_0026B6D0, clamped to D_0026B6E0), the velocity's part
+// along the motion scaled by D_0026B6E8 towards the speed D_0026B6EC and the rest by the drag at
+// +0xB0, which is cleared for MoveEffect and put back after. One float scratch holds the spin
+// and then the speed: one pseudo with two deaths, which global-alloc places above the block's
+// locals in both places ($f4).
+void MoveTumblingEffect(Effect* self, f32 dt)
+{
+    f32 t = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->qA0), Vu0::Q(self->rot50[0])));
+    f32 w = EvalClampedQuadratic(D_0026B6D0, D_0026B6E0, t);
+    Mat02 turn;
+    TurnEffectAboutRow(self, *(Mat02*)self->rot50, &turn, w * dt);
+    f32 drag = self->fB0;
+    self->iB0 = 0;
+    Vec02 along;
+    Vec02 across;
+    SplitVectorAlongAxis((Vec02*)&self->qA0, self->rot50, &along, &across);
+    t = NormalizeInPlace(&along, g_unitXVector);
+    Vu0::Q(self->qA0) =
+        Vu0::MulXSum(Vu0::Vec::Of(along), Vu0::Vec::Scalar(D_0026B6EC + (D_0026B6E8 * dt + 1.0f) * (t - D_0026B6EC)),
+                     Vu0::Vec::Of(across), Vu0::Vec::Scalar(drag * dt + 1.0f)).q;
+    MoveEffect(self, dt);
+    self->fB0 = drag;
+}
 
 
 s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
@@ -2898,7 +2978,6 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 z, Vec02* out);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
 void UpdateSwitchedCollider(void* self);
 s32 ChooseWalkerColliderState(WalkerCollider* self);
