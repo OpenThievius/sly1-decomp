@@ -1,6 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1728/1708, checked 2026-11-10
-// NEAR: the view walk, the VIF packet and the merged tails are retail's shape; left: retail spills frames/count/sent (count re-read each pass of the frame loop, which counts up, where loop.c here reverses it), the count == 0 return is cross-jumped into the end in retail (ours loads the pop's address high half into v1, retail a0), and the first walk's vector loads are scheduled a little apart.
+// BYTES 1663/1708 (97.4%), checked 2026-11-10
+// NEAR: retail's size; the view walk, the VIF packet, the spill slots (frames, count, the Ones vector,
+// then sent: `sent` declared where it is set) and the merged tails are retail's. The frame loop counts up
+// because it has no NOTE_INSN_LOOP_VTOP (check_dbra_loop reverses a loop with a non-constant bound only
+// through its NE path, which needs vtop): a do/while behind an `if (i < count)` guard, the guard naming i
+// so that combine folds `i = 0` into it and update_equiv_regs does not double i's life (i then outranks
+// bank, s4/s5 as retail); one WriteVifFlush after the switch. Left: f = frames is loaded before the hdr
+// call (retail: after the guard), and the switch's const 2 / %hi reloads take other registers. Retail's
+// shape (i = 0 before the guard, f set after it, no PRE of &fade) is exactly a `for` loop with f =
+// &frames[i] strength-reduced by loop.c (a loop.c-reduced giv's init is emitted after GCSE), but the i*80
+// constant is not moved at this loop size (life 1, savings 1, threshold 76-79 against 84 insns in the
+// second pass), so the giv is never found; with f declared inside the guard instead, PRE hoists &fade into
+// the new preheader block.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"
@@ -88,7 +99,6 @@ void func_0013AD80(void* self)
     ViewedFrame one;
     ViewedFrame* frames;
     s32 count;
-    s32 sent;
     PushBackMemoryMark();
     WorldListedObject* obj = (WorldListedObject*)req->owner;
     if (obj->source != 0 && IsListEmpty(((EffectSpawner*)obj->source)->list314) == 0) {
@@ -134,7 +144,7 @@ void func_0013AD80(void* self)
         *(Mat4x4Copy*)one.m = *(const Mat4x4Copy*)D_00248400;
         one.fade = req->radius;
     }
-    sent = 0;
+    s32 sent = 0;
     BeginDmaTag(&g_vifPacketWriter);
     ViewListWalk walk(&obj->members);
     ListedMesh* mesh;
@@ -171,7 +181,8 @@ void func_0013AD80(void* self)
         hdr[2] = mesh->count;
         CopyWordsToWriter(&g_vifPacketWriter, 9, 1, hdr, 0);
         ViewedFrame* f = frames;
-        for (s32 i = 0; i < count; i++) {
+        s32 i = 0;
+        if (i < count) do {
             Vec02 fade;
             CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, f, 7);
             fade.x = f->fade;
@@ -185,22 +196,17 @@ void func_0013AD80(void* self)
             switch (obj->f618) {
             case 0:
                 WriteVifMscal(&g_vifPacketWriter, D_00000000);
-                WriteVifFlush(&g_vifPacketWriter);
                 break;
             case 1:
                 WriteVifMscal(&g_vifPacketWriter, D_00000398);
-                WriteVifFlush(&g_vifPacketWriter);
                 break;
             case 2:
                 WriteVifMscal(&g_vifPacketWriter, D_00000880);
-                WriteVifFlush(&g_vifPacketWriter);
-                break;
-            default:
-                WriteVifFlush(&g_vifPacketWriter);
                 break;
             }
+            WriteVifFlush(&g_vifPacketWriter);
             f++;
-        }
+        } while (++i < count);
     }
     CloseDmaTag(&g_vifPacketWriter);
     PopBackMemoryMark();
