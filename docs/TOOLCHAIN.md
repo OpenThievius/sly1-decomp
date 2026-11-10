@@ -2091,6 +2091,33 @@ in the source changes nothing (the store is ready from the subtraction of b on, 
 insn position). Retail's form needs the mtc1 to read only the GPR, with the product in
 VU_REGS: two references for the product's class, one leaving no code.
 
+### A block-scoped struct local frees its slot for a later Scalar (func_00154088)
+
+Matched 2026-11-10 from the -dS dumps. LimitContactTangents (func_00154088) sums each contact's
+vector over the active items into a Vec02 `acc` on the stack, then, after the search loop,
+scales the best tangent by `Vu0::Scalar(1.0f / mag)`. Three separate differences, in cascade
+order:
+
+- **A counted inner loop, not a pointer walk.** Retail's `addiu a0,-1; bnez a0` with a `blez`
+  entry test is loop.c's reversal (check_dbra_loop) of `for (k = 0; k < self->count; k++)`
+  with the record taken by index (`items + k * 0x60`); the count is read before the items
+  pointer, which is reloaded rather than copied. A walk `for (k = count; k > 0; k--)
+  other++` gives `bgtz` and CSE's copy of the outer loop's items register, and moves the
+  outer loop's registers (37 of 77 differing lines went with this alone).
+- **A value set after a call, declared after it.** `s32 bestIndex = -1;` written before the
+  solver call crosses it and takes s0; after it, t2 as retail.
+- **The weight's slot is acc's, because acc is declared in the loop body.** stmt.c's
+  expand_decl gives a block's memory variable a kept temporary slot (assign_temp with keep),
+  freed when the block ends; the tail's Scalar temporary then reuses it (both TImode), at
+  16(sp) as retail. Declared at the top of the function, acc keeps 16(sp) and the Scalar takes
+  the next slot, 32(sp). The tail also needed the Scalar directly (the scalar-slot lever): with
+  `Q(acc) = FromFloat(1.0f / mag)` and `MulX(best, Q(acc))`, the store to acc has no alias
+  class, so sched1 keeps the load of `it->twin` behind it, and MulX's result ties to the
+  dying scale instead of `best` (retail's `vmulx vf1, vf1, vf2x`).
+
+The handler at slot 0x108 takes `(self, flags, item, end, dt)`: retail's `mov.s $f12` fills the
+call's delay slot after the a1-a3 moves, as in func_001BCD00; with dt second it goes first.
+
 ### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
 
 Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-dS -dR -dl

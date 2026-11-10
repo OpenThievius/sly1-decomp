@@ -94,7 +94,9 @@ struct Contact03 {
     s32 kind;               // 0x9C: 8 and 9 are dropped when a part stops colliding (func_001B94F0)
     s32 fA0;                // 0xA0: compared with TurningCollider::f6D4 at end 0 (kinds 1, 10; func_001C5248)
     s32 fA4;                // 0xA4: the same at end 1 (kind 4)
-    u8 padA8[0xC4 - 0xA8];
+    u8 padA8[0xB0 - 0xA8];
+    Vec02 vB0;              // 0xB0: the ends' relative velocity (func_001860A8); func_00154088 limits it
+    u8 padC0[0xC4 - 0xC0];
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
     u8 padC8[0xD0 - 0xC8];
     Contact03* next;        // 0xD0
