@@ -1,21 +1,21 @@
 {
  "measures": {
-  "fuzzy_match_percent": 89.07038834951456,
+  "fuzzy_match_percent": 89.07254584681769,
   "total_code": "1112400",
-  "matched_code": "954016",
-  "matched_code_percent": 85.76195613088817,
+  "matched_code": "954292",
+  "matched_code_percent": 85.78676734987414,
   "total_data": "431059",
   "matched_data": "403267",
   "matched_data_percent": 93.5526227268193,
   "total_functions": 4807,
-  "matched_functions": 4667,
-  "matched_functions_percent": 97.08758061160808,
-  "complete_code": "954016",
-  "complete_code_percent": 85.76195613088817,
+  "matched_functions": 4668,
+  "matched_functions_percent": 97.10838360723945,
+  "complete_code": "954292",
+  "complete_code_percent": 85.78676734987414,
   "complete_data": "403267",
   "complete_data_percent": 93.5526227268193,
   "total_units": 169,
-  "complete_units": 112
+  "complete_units": 113
  },
  "units": [
   {
@@ -49095,28 +49095,28 @@
   {
    "name": "lib/pad",
    "measures": {
-    "fuzzy_match_percent": 99.38837920489297,
+    "fuzzy_match_percent": 100.0,
     "total_code": "3924",
-    "matched_code": "3648",
-    "matched_code_percent": 92.96636085626912,
+    "matched_code": "3924",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 26,
-    "matched_functions": 25,
-    "matched_functions_percent": 96.15384615384616,
-    "complete_code": "3648",
-    "complete_code_percent": 92.96636085626912,
+    "matched_functions": 26,
+    "matched_functions_percent": 100.0,
+    "complete_code": "3924",
+    "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 1,
-    "complete_units": 0
+    "complete_units": 1
    },
    "functions": [
     {
      "name": "func_00203FD0",
      "size": "276",
-     "fuzzy_match_percent": 91.30434782608695,
+     "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
       "virtual_address": "2113488",
@@ -49364,7 +49364,7 @@
     }
    ],
    "metadata": {
-    "complete": false,
+    "complete": true,
     "progress_categories": [
      "lib"
     ],
@@ -52612,22 +52612,22 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 97.16004330213717,
+    "fuzzy_match_percent": 97.1809959491549,
     "total_code": "114544",
-    "matched_code": "109660",
-    "matched_code_percent": 95.73613633188992,
+    "matched_code": "109936",
+    "matched_code_percent": 95.97709177259394,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 631,
-    "matched_functions": 622,
-    "matched_functions_percent": 98.57369255150554,
-    "complete_code": "109660",
-    "complete_code_percent": 95.73613633188992,
+    "matched_functions": 623,
+    "matched_functions_percent": 98.73217115689381,
+    "complete_code": "109936",
+    "complete_code_percent": 95.97709177259394,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 91,
-    "complete_units": 83
+    "complete_units": 84
    }
   },
   {
