@@ -3004,6 +3004,25 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
   flow weights references with; it is a barrier and not used.
 
+### A merged arm keeps its place: B0, the arm, the join (func_001EC7A8, unsolved)
+
+- jump2's cross-jumping runs after sched2 (the .sched2 dump still has the branch and both
+  arms), so where two identical arms merge, the final order is B0's schedule, the surviving
+  arm's insns, then the join block's schedule, each scheduled apart. A dead compare constant
+  (`li v0,1`) that sched2 placed among B0's prologue moves marks B0's end: whatever the arm
+  held sits right after it.
+- Arms that survive the passes before reload must be stores or loads: register and float
+  copies in both arms are removed by jump.c's first pass or CSE (the branch is gone before
+  flow), an arm reading `a[dir]` is folded by CSE in the `dir == 1` arm (record_jump_equiv;
+  `dir != 1` is folded the same way in the other arm), and an arm ending in a call does not
+  merge: the fall-through arm's call gets flow's `(use (const_int 0))`, the other ends in its
+  jump.
+- func_001EC7A8: `if (dir == 1)` straight after the read of dir, `self->fC40 = dir;` in each
+  arm, gives every one of retail's registers (local-alloc and global-alloc see retail's
+  blocks), but retail has no insn between the lw of dir and the join's first: its arm emitted
+  nothing. A search over the arm's position and contents (3960 compiles) found none closer
+  than 14 lines. What survives the early jump passes and emits nothing is still open.
+
 ### A named float argument lengthens a long life by one insn (func_eu_001AB2B0)
 
 - global-alloc ranks by REG_LIVE_LENGTH as sched1 recomputes it, so an insn that exists in
