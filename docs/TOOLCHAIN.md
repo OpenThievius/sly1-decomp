@@ -1577,6 +1577,33 @@ order and registers follow: sched2 lifts `$f13` above the `sq`, `$f14` waits beh
 float read through a struct global and one read as a plain scalar differ exactly here; check
 whether a global is a member of a known struct before blaming the store's alias class.
 
+### A projection's arms and the product's frame (func_00144540, near miss)
+
+From the `.flow`, `.sched` and `.lreg` dumps and alias.c, flow.c and function.c of GCC 2.95.3
+(2026-11-10); the near miss now has retail's size, frame and saved registers:
+
+- **A pointer used after an if/else that both arms compute is GCSE's.** Retail keeps the
+  camera's matrix address in s0 for the arm's loads and copies it to s5 (`move s5,s0`) in each
+  arm for the call after the join. A `view` variable assigned in both arms is one pseudo that
+  CSE makes canonical (it outlives the block, cse.c make_regs_eqv), so the arm's loads go
+  through it and one saved register is lost; written as the expression at the later call,
+  PRE finds it computed in both arms and inserts exactly those copies.
+- **flow1 deletes a dead frame store only with no possibly-aliasing read in between.**
+  flow.c's mem_set_list tracks stores through the frame pointer (before reload it is not sp)
+  and drops a store overwritten later in the block; a read whose base alias.c does not know
+  (a `lo_sum` address in a pseudo) clears the entry. Retail's frame has a weight slot where an
+  inline product's last result row (`r.r[2]`) was: the row's store is gone. That happens only
+  when nothing reads unknown memory between the row's store and the slot's store, so the
+  statement that loads two globals (corner) comes before the product, not between it and the
+  weight.
+- **A register without REGNO_POINTER_FLAG whose base is an argument has no base term in an
+  address sum.** find_base_term's PLUS case returns an operand's base only if the register is
+  a known pointer or the base is a symbol or a Pmode (stack) ADDRESS; an argument's base is a
+  VOIDmode ADDRESS, so `(plus (reg ref) 16)` through an inline reference parameter (self+0x80)
+  waits for a frame store, while `(plus (reg self) 128)` (a pointer parameter) passes it. In
+  func_00144540 that keeps the product's rows behind corner's store, where retail loads them
+  first; a `Mat02*` local and Vec-member reads did not change it. Unsolved.
+
 ### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
 
 From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10):
