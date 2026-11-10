@@ -1075,6 +1075,25 @@ combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -d
   and the reused variable moves the switch's registers. Ruled out as well: `s64` locals and casts
   (`(s32)((s64)a * b)` folds back to SImode; an `s64` local keeps a truncdisi2 of
   `(truncate (sign_extend p))` that SN's combine does not reduce; u64 forms widen and shift).
+- **Both conditions, and nothing else (2026-11-10, both functions EXACT in a test form).** The
+  "outside CSE's block" test reads REGNO_FIRST_UID, which reg_scan records before cse1, so a
+  *dead* early reference is enough: `s32 n = 0;` at the top (flow deletes it before allocation,
+  so the switch's registers stay retail's), `s32 m = cols * rows;` before the two float stores,
+  `n = m; self->cells = n;` at the end gives retail's bytes in US func_001ABE70 and PAL
+  func_eu_001ACC68 (check.py EXACT). Take away either half and it is mult3 again: without the
+  early reference (`s32 n = m;`) CSE deletes the copy; with the copy right after the mult (or the
+  product assigned to n directly, `n = cols * rows;`, which expand_mult writes straight into n)
+  the i3_subst_into_i2 path keeps the PARALLEL. A live early reference (the switch's value in n)
+  is global-alloc's and moves the switch's registers.
+- **Why it is not landed.** Each half is a form no plain source needs: a variable referenced
+  before the switch only to be overwritten, and a second variable that only carries the product
+  to it. No single-variable form gives a temporary product: a pseudo target (`n = a * b`,
+  `n *= b`, a chained assignment) takes the mult directly (expand_binop uses the target; a
+  same-mode NOP_EXPR passes it on); an inline's return copy is adjacent (expand_return computes
+  into a fresh pseudo and copies it at once); an inline's parameter copy is block-local and CSE
+  deletes it. The original must have had both a long-lived int variable and a temporary
+  (two locals, or an inline whose local is returned after other statements); until a plausible
+  shape of that turns up, both stay near misses with this form in their notes.
 - The other nine `mult $zero` sites in US are products by a constant or with an operand that
   dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
   to an argument register: a three-insn combine whose split leaves the bare SET.
