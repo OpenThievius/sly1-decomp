@@ -2720,6 +2720,23 @@ v1,v1,v0; movz a0,v0,v1`: the constant compared sits in a register, not in an `s
   operand is a variable set to the clamp's value first and then to the value under a `<`
   test.
 
+### A flag set from a && chain: a boolean, not `if (..) flag = 1` (func_001BC978)
+
+Read from the `-dr`, `-dj` and `-dl` dumps (2026-11-10):
+
+- **What differed.** A zero test `s32 still = 0; if (fabs(x) < k && fabs(y) < k && fabs(z) <
+  k) still = 1;` whose lanes are read through `Vu0::Vec::Of(o->offset)` put the flag in v0 and
+  the offset's GPR copy in v1, where retail has v1 and v0.
+- **Why.** With the Vec copies in its operands the `&&` is expanded as a value: a temporary
+  (r191) set to 0 and to 1, then jump.c turns `if (r191) still = 1;` into a conditional move,
+  which combine reduces to `still = r191`. `still` lives one block and local-alloc gives it
+  v0; the copy makes r191 prefer v0, and global-alloc's find_reg skips registers another
+  allocno prefers on its first pass, so the offset (ranked first) takes v1. With u128 lanes
+  (`Vu0::Q`, func_001B7D00) the same source keeps the branch form and has retail's registers.
+- **Rule.** Where the flag and the vector swap registers in such a test, write the test as the
+  flag's value: `s32 still = a && b && c;` (or the three tests nested, the same code). Matched
+  the flag in func_001BC978 (near miss, one GPR left).
+
 ## Alias classes in the schedule
 
 GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
@@ -2800,6 +2817,17 @@ base). Declared `Pal* D_eu_0026ABE8` the load is MEM_SCALAR_P, never conflicts w
 struct-member stores, and sched1 hoists it above them; read as `D_eu_0026ABE8[0]` it is
 MEM_IN_STRUCT_P, waits behind the stores, and the function matches. func_eu_001AEEA0 reads the
 same word and matches either way, so the unit declares it once, as the array.
+
+### A rotation product through a pointer local (func_001B7D00)
+
+- ApplyColliderPendingMove multiplies its rotation into its own matrix with
+  MulRotationRowsIndexed (b's rows read by index after each row's stores). Written
+  `Mat02* frame = &self->rot; MulRotationRowsIndexed(&m, rot, *frame); *frame = m;`, the three
+  rows of b were loaded before any product row was stored; written `MulRotationRowsIndexed(&m,
+  rot, self->rot); self->rot = m;` the second and third rows wait for the stores of the row
+  before, as retail's do: EXACT. Not traced in the dumps; it fits the rule above that a base
+  register with REGNO_POINTER_FLAG (here the pointer-typed variable `frame`) passes frame
+  stores, where the address formed from `self` inside the helper does not.
 
 ### Memory dependences in sched1 (func_00149760)
 
