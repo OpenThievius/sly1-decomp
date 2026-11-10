@@ -1063,3 +1063,16 @@ and reorg.c with `-dj -dJ -dd` dumps (2026-11-10):
 - **key = 0 in the else arm.** `key = 0; if (near) key = Find(..);` lets sched1 put the zero before
   the first call; written as `if (near) key = Find(..); else key = 0;`, reorg moves the zero into
   the branch's slot, as retail has it.
+
+### A break test written right after the head rolls with it (PAL func_eu_0015E4A8)
+
+- PAL's line layout begins its loop body with the newline handling: the read, the width, the
+  newline test and the handling's `if (e >= end) break;` are the rolled exit test at the
+  bottom, the handling itself the loop's new top, and both line breaks jump back to the
+  test. That is expand_end_loop's roll with the last exit jump within 30 insns of the read's:
+  written as `if (c == '\n') { newline: if (e >= end) break; ...; continue; }` first in the
+  body, with each break ending `pos = Pos(self); goto newline;`. Each break keeps its own
+  position read: cross-jumping merges the two after reload, but global-alloc has already
+  counted both (one shared read left the position two references short of the table pointer,
+  and their saved registers swapped).
+
