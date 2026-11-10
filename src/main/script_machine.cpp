@@ -2536,7 +2536,33 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
     return ret;
 }
 
-INCLUDE_ASM(func_00117FE0);
+// The box between its two vector arguments, component by component. Both are read through
+// ScriptValue::Vector(): the second's `this` is the inliner's fresh pseudo, so its pointer is
+// read again after the store of lo, as retail does (docs/TOOLCHAIN.md, "An inline method's
+// this").
+void GatherCollidersInBox(void* self, s32 p1, Vec02* lo, Vec02* hi, s32 p4, s32 p5, s32* o1, u8** o2);
+
+ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue q;
+    Vec02 lo;
+    Vec02 hi;
+    ScriptValue t;
+    s32 n;
+    u8* list;
+    InitScriptValue(&q);
+    Vu0::Set(lo, Vu0::Min(Vu0::Q(*args[0].Vector()), Vu0::Q(*args[1].Vector())));
+    Vu0::Set(hi, Vu0::Max(Vu0::Q(*args[0].Vector()), Vu0::Q(*args[1].Vector())));
+    PushBackMemoryMark();
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, 0, 0, &n, &list);
+    MakeScriptRefList(&t, n, list);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    PopBackMemoryMark();
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
+    return ret;
+}
 
 ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

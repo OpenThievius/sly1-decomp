@@ -913,6 +913,29 @@ the givs strength_reduce reduced, all before the loop's start; so what the secon
   moved by the second pass: its first-pass count was over `80 * lifetime` (160 without a call)
   and its second-pass count under it.
 
+### A count-up loop over arrays reversed only when pass 1 finds every giv (func_00118988, near miss)
+
+- **Retail.** SampleScriptAnimation's inner loop `for (i = 0; i < n; i++)` indexes four arrays
+  by i and calls functions. Retail counts it down (`move s3,v0` after the entry test,
+  `addiu s3,s3,-1; bnez s3`), with the four array pointers in s4..s7 initialised after the
+  entry test, in the preheader.
+- **check_dbra_loop.** In a loop with calls it reverses a counter only when it is used for
+  nothing but counting: `bl->giv_count == 0`. Loop.c runs twice (-frerun-loop-opt): givs pass 1
+  reduces are gone when pass 2 looks at i. `&rotations[i]` multiplies by 48 through a register
+  loaded in the loop (`li 48; mult`); pass 1 finds that giv only if it first moves the `li`.
+  It is "not desirable" there: the threshold `(has_call ? 1 : 2) * (1 + n_non_fixed_regs)`
+  (between 69 and 77 here, measured) falls by 3 for each register moved, and the switch's
+  compare tree, at the top of the body, gives five constants that move first (67 insns against
+  at most 62). Pass 2 moves it, reduces the giv, and i then has a giv: not reversed.
+- **Pointer walks** (`pp++` for each array) reverse the counter, but their inits are the
+  source's, before the entry test, where retail's are after it (loop.c's own inits).
+- **Hoisting `r = &rotations[i]` above the switch** moves the 48 first and the loop reverses,
+  everything else retail's but one swap: rotations' reduced register is reduced last (givs are
+  reduced in reverse insn order, and the last one's init sits nearest the loop, the shortest
+  life and so global-alloc's first choice), so it takes s4 where retail has positions there.
+  In retail's order (positions, rotations, q4, q8 in the cases) the registers come out right;
+  what keeps the 48 movable in pass 1 there is still to find.
+
 ### The threshold falls as loop.c moves: which invariant wins a saved register (func_001CF158)
 
 Read from loop.c (move_movables) and global.c with `-dL -dG` dumps (2026-11-08,
@@ -3580,6 +3603,38 @@ other way.
 Spot it: two stores that tie at a block's end in retail's order opposite to their expand order
 mean the later statement of the pair was expanded first; a constant whose register is an
 argument register no call seems to read is an argument the declaration is missing.
+
+### An inline method's this: a fresh pseudo with no pointer flag (func_00117FE0, matched 2026-11-10)
+
+- **What differed.** FindScriptObjectsInBox computes `lo = min(a, b)` and `hi = max(a, b)` of
+  its first two vector arguments. Retail reads `args[1].v` twice, once after the store of lo
+  (`addiu v1,s0,8; lw a0,4(s0); lw v0,4(v1); ...; sqc2 $vf1,16(sp); lw v0,4(v1)`), but
+  `args[0].v` once. Every plain form (locals, `ScriptValue* pb = &args[1]`, `args[1].v`
+  written twice, Vec or u128 locals, Q or Set) keeps one load of each: CSE1 and CSE2 merge the
+  two `lw`, because a store addressed from the frame never conflicts with a load whose base is
+  an argument (alias.c's base_alias_check: "a stack reference can not alias a parameter").
+- **When the base is unknown.** find_base_term of `(plus R c)` uses R's base value only if R
+  has REGNO_POINTER_FLAG; otherwise it looks at both operands and returns a base only for a
+  symbol or a non-argument ADDRESS. An argument's base is a VOIDmode ADDRESS, so through an
+  unflagged register the load has no base, base_alias_check says "may alias", the frame store
+  kills it in CSE and sched1 keeps it after the store (the scheduler re-runs alias analysis).
+  A pointer variable set twice (`v = args; ...; v = &args[1];`) keeps both loads through CSE,
+  but flow deletes the dead first set before sched1, which then hoists the second load above
+  the store and postreload merges it: not enough.
+- **Who makes such a register.** integrate.c's process_reg_param copies an inline argument that
+  is not a register into a fresh pseudo with copy_to_mode_reg, which sets no pointer flag (the
+  flag is set only when the argument already is a register, at expand_inline_function's
+  mark_reg_pointer). A member function's `this` is read-only, so for `args[1].Method()` the
+  argument `args + 8` is such a copy; for `args[0].Method()` it is `args` itself, flagged.
+- **The form.** An inline accessor on ScriptValue, `Vec02* Vector() const { return (Vec02*)v; }`
+  (include/script_value.h), called as `*args[0].Vector()` and `*args[1].Vector()` in both
+  statements. The first argument's pointer is loaded once (known base), the second's twice,
+  through one `this` register: retail's code, the prologue's order included. The original's
+  value class plausibly had such an accessor; the asymmetry comes from the inliner, not from
+  the source.
+- **Spotting it.** A field of `args[k]` (k > 0), or of any `&array[k]` or `p + k` passed as
+  `this`, reloaded after an unrelated frame store while the same field of the first element is
+  not: read it through an inline member function.
 
 ### A pointer set three times has no base: its stores kill the frame (func_00187260)
 
