@@ -363,18 +363,6 @@ struct Vu0 {
         return *(const u128*)&slot;
     }
 
-    // ScalarInGpr of a float in memory: its word loaded with lw straight into the 128-bit GPR
-    // value (ScalarInGpr's operand would be loaded into an FPR and moved with mfc1), stored to
-    // its slot as ScalarInGpr's is. MultiplyScriptValues scales a matrix by a float operand so
-    // (lw v0, 4(s2); por a2, zero, v0; sq v0, 0x50(sp)).
-    static u128 ScalarInGprAt(const f32& f)
-    {
-        u128 r;
-        __asm__("lw %0, %1" : "=r"(r) : "m"(f));
-        const s128& slot = (s128)r;
-        return *(const u128*)&slot;
-    }
-
     // The same mfc1 with no slot: the value stays in a register of its own (func_00191AC8
     // holds it in a saved GPR across its loop and copies it to the stack per use).
     static u128 ScalarInGprReg(f32 f)
