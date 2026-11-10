@@ -1549,5 +1549,53 @@ void InitArmedStateNotifier(ArmedStateNotifier* self)
     self->armed = 0;
 }
 
-INCLUDE_ASM(func_00149190);
+extern f32 D_00261BE4;
+s32 GatherObjectsById(void* world, s32 a, s32 b, s32 c, s32 d, PlacedObject** out);
+
+// Pushes the objects of kind 0x19 near the notifier (within 500, their meshes hit from 200 above
+// it) away by 0.75 of their velocity, the push never downward, counting the hits of the active
+// switched collider up to 99, and tells the listener.
+void func_00149190(ArmedStateNotifier* self)
+{
+    typedef Vu0::Vec Vec;
+    Vec02 probe;
+    PlacedObject* found[6];
+    u8 hit[0x30];
+    Vec02 push;
+    s32 n;
+
+    UpdateStateNotifier(self);
+    Vu0::Q(probe) = Vu0::Add(Vec::Of(self->v140), Vec::Of(D_00261BD0)).q;
+    n = GatherObjectsById(self->world, 5, 0x19, 0, 6, found);
+    for (s32 i = 0; i < n; i++) {
+        f32 zero = 0.0f;
+        PlacedObject* o = found[i];
+        Vec d = Vu0::Sub(Vec::Of(o->v140), Vec::Of(probe));
+        if (250000.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+            continue;
+        }
+        if (CollectMeshHits(100.0f, &probe, *(void**)((u8*)o + 0x3F4), *(void**)((u8*)o + 0x3F8), 0,
+                            (u8*)o + 0x3A4, 1, hit) <= 0) {
+            continue;
+        }
+        if ((void*)o == (void*)GetActiveSwitchedCollider()) {
+            s32 c = *(s32*)((u8*)o + 0x858) + 1;
+            s32 v = 99;
+            if (c < 99) v = c;
+            *(s32*)((u8*)o + 0x858) = v;
+        }
+        Vec k = Vec::ScalarAtValue(D_00261BE0);
+        Vu0::Q(push) = Vu0::MulX(Vec::Of(o->v150), k).q;
+        push.z = zero >? push.z;
+        self->desc02()->m20(self, &push);
+        if (self->listener != 0) {
+            ListenerMessage msg;
+            msg.state = 1;
+            msg.sender = self;
+            self->listener->vtbl[31](self->listener, &msg);
+        }
+        StartSoundEffect(0x2C, 0, 0, (s32)&self->v140, 7500.0f, 2500.0f, 2.0f, D_00261BE4, 0.0f, 0, 0);
+        self->desc02()->m2F(self, 2);
+    }
+}
 
