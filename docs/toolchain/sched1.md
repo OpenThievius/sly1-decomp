@@ -512,6 +512,51 @@ and filled member by member, one block holding both calls:
   pointer (local-alloc's $a0) is and global-alloc gives it $a1; retail's $a0 means it was set
   after that load.
 
+### A burst's two records, emulated (func_00156288, 2026-11-10)
+
+An emulator of sched1 for the block (build/swarm/w15-156288/sim.py in the g10 worktree, with
+lasf.py for local-alloc's SFmode quantities and hyp.py for trying changes) reproduces the
+`-dS -fsched-verbose-6` order of all 50 insns exactly. What it needed, read from haifa-sched.c:
+
+- **Weights come from the notes before sched1.** find_pre_sched_live counts +1 for every SET
+  pattern (a store too) and -1 for each REG_DEAD and REG_UNUSED, then removes the REG_DEAD
+  notes; read them from the `.combine` dump, not the `.sched` one (recomputed after). A copy
+  that GCSE placed after the last use of its source carries that source's death.
+- **An insn made ready in a cycle waits for the next one** (the issue loop walks the ready
+  array sorted at the cycle's start), and adjust_priority's max_priority is the larger of the
+  issued insn's priority and that of ready[0], the lowest-ranked insn still ready.
+
+What it showed, with `-1.0`, `5.0`, `1.047` and `0.39` the block's four constants:
+
+- **Retail's FP registers are impossible with the constants loaded in this block.** Retail
+  shares $f0 between 5.0 and -1.0, so -1.0's load came after 5.0's store. Every constant
+  load has priority 4 and every store after the gravity load 2 (they wait for it: the world
+  pointer is loaded from memory, no base), so sched1 loads every constant still pending before
+  it stores any; no statement order, weight or single extra dependence changes that (searched
+  with the emulator). A pseudo set once to -1.0 in an earlier block and used once is moved to
+  its store by update_equiv_regs after sched1 ("A constant set in an earlier block and used
+  once", alias-classes.md): an `f32 m1 = -1.0f;` at the function's top gives retail's 5.0
+  $f0, 1.047 $f1, 0.39 $f2 and -1.0 $f0 (the stores' order then differs: 32 lines).
+- **The tail's registers and its delay slot are one weight.** Retail's tail (8.0 $f1, 12.0
+  $f0, the 1.0 store before the call and the cfg store in its delay slot) is the LUID order
+  of its six stores when all weigh 0; ours weighs the 1.0 store +1 (the value lives on into
+  the block record). With the tail's 1.0 a variable that dies at its store (`f32 rate = 1.0f;`
+  at the top, an experiment) the tail is retail's exactly, but CSE then merges the function's
+  earlier 1.0 literals into that variable (262 lines). Retail stores both records' 1.0 from
+  one $f20 loaded once, so how its tail's 1.0 died there is still open.
+- **The copy's destination.** Retail's a0/a1/a2 for the copy loop need `sp+64` born after the
+  world pointer dies; ALU slots are never short in this block, so the address issues as soon
+  as the call is done. Writing `blk.up` before `blk.gravity` gives retail's three registers
+  (the world pointer is then loaded after up's store) but breaks the FP registers.
+- **Ruled out.** An inline builder returning the record by value (two copies; with
+  initialization one copy and retail's frame, the inline's frame at sp+192 reused by the
+  position, but integrate.c's try_constants keeps the frame register for the non-immediate
+  constants' stores and the world pointer is loaded before FillMemory); a constructor
+  temporary assigned to the record (the same two differences); an inline holding the whole
+  burst (`&blk` substituted as a constant: two insns short); the gravity through a `const
+  Vec02&` (CSE folds the address back); one float variable reused for 5.0 and -1.0 (they
+  share a register, but its first set rises to priority 7 and loads too early).
+
 ### Emulating sched1 to read local-alloc's registers backwards (func_001CC818)
 
 Worked out on the link swing's last block (2026-11-09):
