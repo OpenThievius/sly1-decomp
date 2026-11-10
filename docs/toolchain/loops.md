@@ -343,7 +343,7 @@ loads and stores, with every other value ranked as at the inner loop's depth, is
 the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` loses it; a
 `do { } while (1)` keeps it.
 
-### An int parameter used as a pointer: no base for the alias test (func_0019C9C8, near miss)
+### An int parameter used as a pointer: no base for the alias test (func_0019C9C8)
 
 func_0019C9C8 took its cell as `s32 b` (the caller's word from func_0019D0E0) and read
 `((s32*)b)[i]` after storing three Vec02 locals. With an int parameter the cell's address has no
@@ -494,3 +494,31 @@ li s5,0x430; lui s4,%hi(D_00261EF0)`, with `move s3,zero` in the `blez` delay sl
   the key's switch: 90; `self->f874 + i` and byte-offset index forms: 91). Lifetimes can't do it:
   a compare's constant is forced into its register right before the jump (life 1), and a named
   constant at the loop's top moves in pass 1, before the giv's start, against retail's order.
+
+Solved (2026-11-10, w15): the copy is a PRE copy kept by being used in its own block. Retail
+had no `block` variable: each loop takes the slots' address itself, inside its body
+(`f32* out = (f32*)self->slots; out[k * 8] += ...;`, the zero loop the same, the call passing
+`self->slots`). Read from the `-dG` and `.loop` dumps:
+
+- **PRE inserts the address once and copies it at each use.** `self + 0xE4` is never locally
+  anticipatable in the entry block (the parameter's copy from a0 sets `self` before it), and 2.95's
+  lcm only counts ANTLOC occurrences as computations, so a computation at the top is not
+  available to the later ones: PRE inserts the expression into a new pseudo (here in loop 1's
+  body, which loop.c hoists to the entry: retail's `addiu t4,t3,228`) and turns every occurrence
+  into a copy of it.
+- **cprop removes a copy only into other blocks.** Its copy propagation is global only: a copy
+  used in its own block survives. In the inner loop's body, `out = R; mem(out + k*32)` keeps the
+  copy; loop.c's inner pass moves it to the inner preheader (the outer body) and reduces the giv
+  from it (`move v0,a2`), and the outer pass moves it again to the outer preheader, after the
+  constant 100 (`move a2,t4`). The same copy declared in the outer body (`out = ...` once per
+  corner) is used only in the inner loop's block, so cprop pass 2 propagates it and it dies.
+- **No separate `block` pseudo.** With `f32* block = (f32*)self->slots;` at the top, the entry
+  computation is a second pseudo beside PRE's (two registers, `move t8,t4` at the entry);
+  declared just before the zero loop it is a PRE copy in another block that cprop removes (also
+  EXACT). Writing the address in each loop, as the near miss's callers' `self->slots` already
+  did, is the form landed.
+- `((f32*)self->slots)[k * 8]` and `*(f32*)&self->slots[k]` fold the 0xE4 into the memory
+  offset (`lwc1 228(v0)`): the address has to be a named pointer.
+
+The tell: a reg-reg copy in a loop's preheader that feeds only the inner loop's reduced pointer
+is a PRE copy of an address the original wrote inside the inner loop's body.
