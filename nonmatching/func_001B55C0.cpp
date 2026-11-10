@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1408/1416, checked 2026-11-08
-// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 2 (source line 111); 199 differing lines before, 197 now.
-// NEAR (2026-11-08): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
+// BYTES 1367/1416 (96.5%), checked 2026-11-10
+// NEAR (2026-11-10, w11): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
 // where the segment between the two objects at Rec2195_224::p64 and p60 crosses the animator's
 // triangle strip, the strip's coordinates there, offset, clamped and eased into the cursor.
-// Retail's frame, control flow and VU0 sequences; 352 of retail's 354 instructions. What got
-// there: the -1.0 weight of the second edge as a braced vector local (Scalar's constant, set
-// nine notes before its qmtc2, is hoisted out of the strip loop by loop.c into a saved GPR;
-// FromFloat's literal is not, and the local gives retail's store at 0xC0); the cursor's address
-// as a named local read for u and v (otherwise PRE's copies of &uv[1] and &tri[2] win the
-// saved registers and the cursor is spilled, 16 more bytes of frame); 1 - u and 1 - v named
-// before the clamps. Still differs: GCSE's PRE keeps &uv[1] (sp+0x58) in a saved register
-// across the loop where retail keeps &tri[2] (sp+0x40) and re-forms &uv[1], and hoists &uv[0]
-// (sp+0x50) of the inner loop into the flags block (retail forms it in the inner loop's
-// preheader): retail's form of the uv copies is still unknown; the saved registers are
-// permuted (cursor s5 not s7, ramp s6 not s5) and the cursor's u and v are read through it
-// where retail reads them through self; the point's flags test reuses s0; the inner loop's
-// counter and next pointer have each other's registers; the 0.0 and the second dot's qmfc2
-// are scheduled later; the clamp's FPRs differ.
+// Retail's size and 332 of its 354 words. What got the size: the window shifts as an inline
+// (DropFirst), whose frame-address parameters integrate.c substitutes into the argument moves,
+// so the MoveMemory arguments are hard-register sets that GCSE never hashes: PRE then neither
+// hoists &uv[0] into the flags block (the extra word and the loop label's alignment nop) nor
+// keeps &uv[1] in a saved register (docs/TOOLCHAIN.md, "MoveMemory's frame arguments"). Then:
+// the flags read through `StripPoint* pt = &self->points[i]` (a pointer set from a sum keeps
+// points first, so the sum ties to the loaded points, not to i*16); one `j` for the edge loop
+// and the inner loop (its refs put it before the next pointer's giv: a3 and t0 as retail);
+// ApproachValueWithRamp declared floats first as most files do (the f13 move before a0); all
+// three dots through ToFloat; the cursor's u and v read through self. Still differs: the cursor
+// and &tri[2]'s PRE pseudo tie in global-alloc (both 84 after truncation; ours takes &tri[2]
+// first: s7/s8 swapped; the cursor needs a life of 235 insns, it has 240); sched2 puts the b
+// load before the 0.0 and the a-dot's qmfc2 before the b-dot (retail the other way); the first
+// clamp's FPRs (lo f13, hi f2, 1 - v f3 in retail).
 // In the context of its file, src/main/state_walker.cpp (the ramp {1, 0.1, 0.1} is retail's
 // D_0024D268, whose INCLUDE_RODATA line goes with the function).
 #include "common.h"
@@ -40,9 +39,15 @@ extern s32 D_00274578[4];
 
 void* MoveMemory(void* dst, void* src, s32 size);
 void TransformPointBetweenFrames(void* from, void* to, void* point, void* out);
-f32 ApproachValueWithRamp(Vec3* ramp, f32* rate, f32 value, f32 target, f32 dt);
+f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, Vec3* ramp, f32* rate);
 void SetCursorCoords(AnimCursor* cursor, f32 u, f32 v);
 void DrawModelPart();
+// Drops the first entry of a three-entry window: the other two move down.
+template <class T> static inline void DropFirst(T* window)
+{
+    MoveMemory(window, window + 1, 2 * sizeof(T));
+}
+
 
 static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 {
@@ -86,16 +91,18 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
             order = D_00274548;
             next = D_00274558;
         }
-        MoveMemory(tri, tri + 1, 0x20);
-        MoveMemory(&uv[0], &uv[1], 0x10);
+        DropFirst(tri);
+        DropFirst(uv);
         CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[i]);
         CopyVec2(&uv[2], (Point2*)&self->coords[i]);
-        if (self->points[i].flags & 0x8000) {
+        StripPoint* pt = &self->points[i];
+        if (pt->flags & 0x8000) {
             continue;
         }
         Vec02 n;
         Vec02 p;
-        for (s32 j = 0; j < 3; j++) {
+        s32 j;
+        for (j = 0; j < 3; j++) {
             Vu0::Q(edge[j]) = Vu0::Sub(Vu0::Vec::Of(tri[order[(j + 1) % 3]]), Vu0::Vec::Of(tri[order[j]])).q;
         }
         Vu0::Vec e0 = Vu0::Vec::Of(edge[0]);
@@ -109,7 +116,7 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
         Vu0::Q(n) = Vu0::DivX(c, Vu0::Length(c)).q;
         f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(tri[0])));
         f32 da = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(a))) - d0;
-        f32 db = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
+        f32 db = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
         if (da >= 0.0f && db >= 0.0f) {
             continue;
         }
@@ -120,7 +127,6 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
         Vu0::Q(p) = Vu0::Add(Vu0::MulX(Vu0::Vec::Of(a), Vu0::Vec::Scalar(1.0f - t)), Vu0::MulX(Vu0::Vec::Of(b), Vu0::Vec::Scalar(t))).q;
         f32 su = 0.0f;
         f32 sv = 0.0f;
-        s32 j;
         for (j = 0; j < 3; j++) {
             Vec02 m;
             Vu0::Vec e = Vu0::Cross(Vu0::Vec::Of(edge[j]), Vu0::Vec::Of(n));
@@ -145,7 +151,7 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
     f32 iv = 1.0f - v;
     u = ClampBetween(iu - self->u0, self->uMin, self->uMax);
     v = ClampBetween(iv - self->v0, self->vMin, self->vMax);
-    ApproachValueWithRamp(&ramp, 0, cursor->u, u, g_gameClock.dt);
-    ApproachValueWithRamp(&ramp, 0, cursor->v, v, g_gameClock.dt);
+    ApproachValueWithRamp(self->cursor.u, u, g_gameClock.dt, &ramp, 0);
+    ApproachValueWithRamp(self->cursor.v, v, g_gameClock.dt, &ramp, 0);
     SetCursorCoords(cursor, u, v);
 }
