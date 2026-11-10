@@ -2,13 +2,21 @@
 // BYTES 332/680 (48.8%), checked 2026-11-08
 // NEAR: in its file, src/lib/mpeg_decoder.cpp (Sony's 2.9-ee-991111). The structure, the
 //       calls and the tail call match; the rows kept in a local give retail's use of the value
-//       for the height and its reload of the width. Left: the defaults' stores are scheduled in
-//       another order (this order, from tools/permute.py, is the closest), and after the size
-//       test ours stores the height first where retail computes the last plane's address first,
-//       so its beq slot gets that addiu where ours takes ld ra from the epilogue; from there the
-//       spills of the plane addresses are one instruction apart. Tried: the stores and the size
-//       in every order, the planes' addresses in locals, the size as w * h * 0x180 (other
-//       multiply order), (w * 0x180) * h. Written for this project from retail's code.
+//       for the height and its reload of the width, and the defaults' stores are now retail's.
+//       Left (re-scored 2026-11-10): retail's sched2 issues the last plane's address
+//       (`addiu v0,s8,1320`, a spilled pseudo) alone in the body's first cycle; ours pairs it
+//       with the height store, which wins the tie on dependents and comes first. reorg then
+//       puts the store in an annulled bnel slot, where retail copies the address into both the
+//       bne and the beq slots, and the body runs one insn off from there (docs/TOOLCHAIN.md,
+//       "A block whose first cycle holds one insn"). Only a scheduling barrier at that address
+//       reproduces it: a loop note before it (`for (p8 = &st->planes[8].addr; 0; ) { }` at the
+//       top of the body, not plausible) gives the test and both delay slots exactly. Tried: the
+//       stores and the size in every order, the planes' addresses in locals, the size as
+//       w * h * 0x180 (other multiply order), (w * 0x180) * h, the body inside the inverted
+//       test, unsigned fields, w and h in the other order, rows stored in both arms, the size
+//       before the test, an inline helper (not inlined), do-while(0) around or before the body,
+//       -fno-strict-aliasing, -O3, -fno-gcse, the Linux -01 build. Written for this project
+//       from retail's code.
 // permute.py --auto (2026-11-08, night-orders): 4 runs of 6/4/7/7 lines (10824 orders): best 180 bytes differ (348 as it stands), none EXACT.
 #include "common.h"
 
