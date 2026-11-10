@@ -3042,6 +3042,8 @@ ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, 
   of function pointers, write the call through the descriptor struct's member: both sides of
   the alias rule need their flag.
 
+### A rotation product's vector slots are scalar (func_0014A8F8)
+
 ### Weights read where they are used, and a radius that is a call's argument (func_001719E8)
 
 func_001719E8 (the player's per-part probe: three samples of an animation, the record's start,
@@ -3152,6 +3154,29 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   after CSE (so put_reg_into_stack gives it a scalar slot at the top of the frame) without code of
   its own; the same construct would likely explain the varying store orders of mul_rotation.h's
   other sites, which are one inline helper in the original.
+- **Solved (2026-11-10, w11-14A8F8).** The construct is one call with the rows computed in its
+  arguments: mul_rotation.h's MulRotationIndexedSetRows, `SetRows(*out, x = Q(r.r[0]) =
+  RotateRows(a0, a1, a2, q[0]), y = ..., z = ...)`, with x, y, z u128 variables. Each argument is
+  an lvalue of a u128 variable (a register) bound to a `const s128&` parameter, so expand_expr's
+  ADDR_EXPR copies it into an assign_temp slot (MEM_SCALAR_P) at that argument's expansion: right
+  after its row's product and r's store, before the next row's load. All three temporaries
+  belong to the one call statement, so their slots are distinct (0x90, 0xa0, 0xb0) and survive
+  to its end. The first two have the next row's load (a u128 read, no alias class) as a
+  dependent and are stored at once; z has none and goes last. SetRows then writes out's rows
+  from the registers. Variants: the products as rvalues (`SetRows(r, RotateRows(..), ..)`) get
+  no slots (the TARGET_EXPR's pseudo is purged back), an assignment to memory (`Q(r.r[0]) = ..`
+  alone) binds the reference to r's row itself (no slots, frame 160), and separate statements
+  before the call (`u128 x = ..; SetRows(..)`) store the slots after every load (26 lines). b's
+  rows by index (`q[i]`) or as Vec members both match; Q(b.r[i]) differs. func_001721B0's
+  product takes the same helper (98 lines to 5); func_00149760's do not (frame grows).
+- **func_00172078's second product** (near miss on another branch) takes the same one-call form
+  with the matrix local passed in and its rows read as Vec members (`SetRows(*out, x = Q(a.r[0])
+  = RotateRows(.., q[0].q), ..)` after `Mat02 a;` in the caller): three slots at 0xa0 to 0xc0,
+  5 lines to 2. It and func_001721B0 keep one tie: retail stores z's slot before r's row 2 at the
+  block's end, ours after, whichever way each argument's chain is written.
+- **Closed (2026-11-10, w11-1721B0).** The slot is copied first and r's row stored from it,
+  `Q(r.r[i]) = Q((s128)(x = ...))` with SetRowsFrom's `const u128&` parameters (MulRotationCopied):
+  all three functions match ("A rotation product's last two stores").
 
 ### Three row copies made by one call (func_00122B30)
 
@@ -3180,7 +3205,95 @@ dumps, alias.c and function.c of 2.95.3). It has a rotation product, `*rot = sel
   as rvalues (with either type), a u128 row read as `(Vec02&)x`, and a cast copy per statement.
   This is the construct func_0014A8F8's notes above ask for, and there the stores of those
   slots must come last too ("Three casts in one statement ... are stored last"). It may close
-  that near miss and explain mul_rotation.h's other forms. Not tried there.
+  that near miss and explain mul_rotation.h's other forms. There the rows must be computed in
+  the call's own arguments (the section above, "Solved").
+
+### A rotation product's row slots are cast copies (func_00172078, near miss)
+
+func_00172078 (two rotation products, `c = rot m`, then `a = c f61C->rot`, `*out = a`) went from
+32 differing lines to 5 on 2026-11-10 (`-dS -dR -fsched-verbose-6` dumps, a local-alloc emulator
+on the `.lreg` dump). Read with alias.c (true_dependence, base_alias_check, find_base_term),
+function.c (assign_stack_temp_for_type, purge_addressof_1), stmt.c (expand_decl), expr.c
+(INDIRECT_REF, ADDR_EXPR) and integrate.c of 2.95.3.
+
+- **The registers are local-alloc's priority, decided by one insn.** The second product's row 0
+  of f61C's matrix and its result are one quantity (6 references); with a life of 20 its
+  priority (1.2) beat the first product's `a0 + z` and `m1 + y` quantities (1.15, 1.09), so it
+  took vf4 and pushed theirs to vf5/vf6 (retail: vf4, vf5, vf6 the other way). Any sched1 order
+  that issues that row load one insn earlier (life 22) gives retail's allocation, by the
+  emulator and by the compiler.
+- **Why the load waited.** It went after every frame store of the first product: its address
+  (`f61C + 0xD0`, a pointer loaded from memory) has no base, so base_alias_check cannot separate
+  it from the stack, and neither MEM carried a flag (`*(u128*)&` stores and loads). Retail's
+  sched2 issues it before the first product's y and z slot stores but after the stores to the
+  matrix local, and loads rows 1 and 2 after the previous row's store to `a` but before its slot
+  store: the slot stores are MEM_SCALAR_P at fixed addresses and the row loads MEM_IN_STRUCT_P
+  (fixed_scalar_and_varying_struct_p), while `a`'s and `c`'s rows (no flag) conflict.
+- **The plain form.** f61C's rows read as Vec members (`((const Vu0::Vec*)&b)[i].q`: `/s`)
+  and each row value stored through a cast's copy (`Vu0::Q((s128)x)`, as Vu0::Scalar). With both,
+  registers, frame and every store but the second product's slots are retail's.
+- **What is left: three slots in per-row statements.** Retail's slots are distinct (0xA0, 0xB0,
+  0xC0 in both products, the inline frame's). Three casts that are arguments of one inline
+  call (`SetRows(out, Q((s128)x), Q((s128)y), Q((s128)z))`) get three: they are expanded in the
+  caller's statement before the call's body. That suits the first product (its loads are frame
+  slots at fixed offsets, which never conflict). The second product needs out's row stored
+  before the next row is loaded (its rows wait for `a`'s stores in retail), so its stores are
+  per row, and a cast's temporary (`assign_temp (type, 1, 1, 1)`, keep 1) is freed when its
+  statement ends: every row's slot is 0xA0. With SetRows there too, the rows load before any
+  store (37 to 42 lines). Ruled out for the second product: per-row stores then one call with the
+  three casts (38: the slot stores move after the last product), the casts bound to references
+  or a pointer (shared slot), a row helper returning `Q((s128)r)` per statement or in one comma
+  expression (an inline's frame block is free again when the call returns: shared), a `const`
+  reference bound to the product's rvalue (a register, no slot), volatile slots (56). What would
+  close it: a plain construct that keeps three 16-byte scalar slots alive across three
+  statements, which none of temporaries, reference bindings and inline frames gives in g++ 2.95.
+- **Matched (2026-11-10).** Three slots alive across three statements are not needed: one call
+  with the rows computed in its arguments gives them, each slot copied before r's row is stored
+  from it ("A rotation product's last two stores", below).
+
+### A rotation product's last two stores (func_001721B0, func_00172078)
+
+Both near misses matched on 2026-11-10 (`-dS -dR -fsched-verbose-6 -dc` dumps, haifa-sched.c's
+rank_for_schedule and find_insn_reg_weight, reorg.c's fill_simple_delay_slots, of 2.95.3). Each
+was one tie from retail: after the product's out rows, retail stores z's slot and then the
+matrix local's row 2 (into the delay slot of `jal`, or of `jr` after the epilogue); ours the
+other way.
+
+- **reorg is not it.** fill_simple_delay_slots scans back from the call and takes the first
+  insn that fits; its resource model has one bit for memory, so if the store just before the
+  call could not go, the one before it could not either. Retail's sched2 therefore ended with
+  z's slot, then r's row 2.
+- **sched1 decides by LUID.** The five stores have equal priority (9 in func_001721B0, 2 at the
+  end of func_00172078's block) and equal dependents (the call and the jump, or none). The out
+  rows carry the deaths of the row values (INSN_REG_WEIGHT -1, -2 where the out pointer dies too:
+  func_00172078's out rows 0, 2, 1 order is this) and go first; the slot and r's row 2 have
+  weight 0, so INSN_LUID, the expand order, breaks the tie. With MulRotationIndexedSetRows's
+  `x = Q(r.r[i]) = product` arguments, the slot is the argument's conversion to s128, made after
+  the whole argument, so r's store always precedes it, whichever way the chain is written. For
+  retail's order the slot must be made first, and the row value must still die at the out row
+  (func_00172078's out row 2, with weight -2, shows it), so r's row is stored between the slot
+  and the call's body, from the slot.
+- **The form.** `SetRowsFrom(*out, Q(r.r[i]) = Q((s128)(x = product)), ...)` with
+  `const u128&` parameters (mul_rotation.h's MulRotationCopied, and MulRotationCopiedVia with
+  the matrix local the caller's): the cast of the variable copies it into the scalar slot when
+  its address is taken, r's row is stored from the slot (CSE reads it back from the register),
+  and the parameter binds to r's row itself (a u128 lvalue: no second copy). The three slots
+  stay one call's temporaries (distinct, 0xF0 to 0x110 or 0xA0 to 0xC0). Every row then has the
+  slot's store first in LUID, so the earlier rows need b's rows read as Vec members
+  (MEM_IN_STRUCT_P): the next row's load then waits for r's store but not for the slot's
+  (fixed_scalar_and_varying_struct_p), r's store has the extra dependent and goes first, and the
+  slot's store fills the load's latency, as retail's rows 0 and 1 show. With b's rows by index
+  (u128, no flag) the earlier rows' two stores swap (7 lines). UpdateFrameCameraController
+  (func_0014A8F8) matches with the same helper, so MulRotationIndexedSetRows is gone: one
+  form for the three products.
+- **func_001721B0's 0.0 in $f12 was a missing argument.** OrientPlayerSpinPart (func_00172078)
+  reads a float t in $f12 (its angle is `f2434 - dt * f2430 * t`), and player.cpp already
+  declared it so; the call passes 0.0f, which CSE shares with the two compares' 0.0 and which
+  takes $f12 by the argument copy's preference. The near miss declared two parameters.
+
+Spot it: two stores that tie at a block's end in retail's order opposite to their expand order
+mean the later statement of the pair was expanded first; a constant whose register is an
+argument register no call seems to read is an argument the declaration is missing.
 
 ### Global allocation's preferences (func_00149760)
 
