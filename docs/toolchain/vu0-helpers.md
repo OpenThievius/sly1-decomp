@@ -389,3 +389,27 @@ insns than the separate asms move the light table's address (3 refs over a 134-i
 its REG_EQUAL constant) ahead of the out-count pointer (2 refs over 90). A four-instruction asm used
 by one function is not a project helper (AGENTS.md), so the near miss keeps the separate helpers
 until that is decided.
+
+### func_0013A498's loads and stores were not asms (2026-11-10)
+
+func_0013A498 shows the same thing for the loads and stores around its vcallms, more strongly:
+
+- **The entry test.** jump.c copies the loop's `i < count` before the loop, and CSE replaces i by
+  `kept`, the canonical register of the constant 0 (cse.c make_regs_eqv: the pseudo that lives
+  longest beyond the block heads the class, whichever is set first). combine folds the
+  `slt kept,count` with kept's `= 0` into retail's `blez count` only when no volatile insn lies
+  between them (can_combine_p), so `kept = 0` written just before the loop, after the last helper,
+  gives retail's size (384 bytes); written above the helpers, the slt and its beqz stay (392).
+- **The barriers.** LoadVf and MoveToVf have no outputs, which stmt.c always makes volatile, and a
+  volatile asm is a full barrier in sched1 and sched2. Retail moves across its lqc2s and sqc2s:
+  `sw t2,0(sp)` (the mode parameter's spill, emitted at its copy at the top) comes after the four
+  matrix lqc2s, `move v0,a0` (the return) before the sqc2 of $vf26, and the else arm computes both
+  addresses before both sqc2s. Only vcallms and the cfc2.i wait are barriers in retail.
+- **Scratch evidence.** File-scope register variables for $vf21..$vf31 (`register u128 vf25
+  asm("vf25");`, SN's spelling, no `$`) with plain assignments (`vf25 = *(u128*)rb;`,
+  `*(u128*)ra = vf26;`) give retail's loop body exactly: j in s8, the iterators, the else arm's
+  order and the branch's filled delay slot (build/swarm/w13-13A498/x.cpp). Left are the
+  prologue's order and kept's register: with kept's `= 0` before the vcallms the test is `slt`
+  again, and after it kept's life is short enough for a saved register (retail: a0, caller-saved).
+  Register variables are register pins, which AGENTS.md forbids, so the near miss keeps the
+  helpers until the user decides.

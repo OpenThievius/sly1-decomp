@@ -1,10 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 392/384, checked 2026-11-08
-// NEAR: the loop body, the helper calls (qmtc2, lqc2 x9, vcallms 0x10 twice, cfc2.i, sqc2 x4) and the stack layout are retail's; the scale is a u128 parameter (retail passes the float in a GPR with a 128-bit por) read with ToFloatMoved. Left: register allocation. Retail keeps the kept count in a0 (saved around WrapAngle's call) and the position/extra pointers in s7/s6, the index in s8; ours puts the kept count in a callee-saved register and one pointer in a caller-saved one, and the prologue order differs (retail's qmtc2 first, j = -1 before the saves).
-// Still differs (2026-11-08, vcallms worker): declaring j and kept before the loads, after them, or one each way moves the allocation but never gives retail's (kept in a2 also folds the loop test into slt).
-// Why (2026-11-08, tools/regalloc.py): the s0/s1 swap is r184 (i's offset, 12 refs over 38 insns,
-// priority 0.947) placed before r141 (j's, 6 over 13, 0.923); r141 goes first with a life of 12 or
-// 7 refs. Reading items[j] for the wrap instead of items[i] (all three ways) adds 6 differences.
+// BYTES 203/384 (52.9%), checked 2026-11-10
+// NEAR: retail's size since 2026-11-10: `kept = 0` written just before the loop, after the last
+// asm, so combine folds jump.c's copied entry test (slt kept,count / beqz, kept being CSE's
+// canonical zero) into retail's blez; written earlier, a volatile asm lies between and combine
+// refuses (can_combine_p). The loop body, the helper calls and the stack layout are retail's.
+// Why the rest differs (2026-11-10, w13): retail's lqc2/sqc2/qmtc2 are not scheduling barriers.
+// Its `sw t2,0(sp)` (mode's spill, emitted at the parameter copy) sits after the four matrix
+// lqc2s, its `move v0,a0` before the sqc2 of $vf26, and the else arm computes both addresses
+// before both sqc2s; LoadVf/MoveToVf have no outputs, so stmt.c makes them volatile, and a
+// volatile asm is a full barrier in sched1 and sched2 (haifa-sched.c). Retail's loads and stores
+// were the compiler's own moves (vcallms and cfc2.i stay barriers: nothing crosses them). Scratch
+// only (build/swarm/w13-13A498/x.cpp): file-scope `register u128 vf25 asm("vf25")` variables
+// for $vf21..$vf31 with plain assignments give retail's loop body, j in s8, the iterators, the
+// filled delay slot, leaving the prologue order and kept (a2 for a0) with the test back to slt
+// (kept=0 then precedes the vcallms barrier). Register variables are pins (AGENTS.md): a user
+// decision, so this stays a near miss with the project's helpers.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"
@@ -16,7 +26,6 @@ s32 func_0013A498(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02*
 {
     Vu0::MoveToVf<27>(scaleBits);
     s32 j = -1;
-    s32 kept = 0;
     f32 now = g_gameTime;
     Vu0::LoadVf<25>(rb);
     Vu0::LoadVf<28>(m + 12);
@@ -27,6 +36,7 @@ s32 func_0013A498(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02*
     Vu0::LoadVf<24>(extra);
     Vu0::LoadVf<23>(pos);
     Vu0::CallMs<0x10>();
+    s32 kept = 0;
     for (s32 i = 0; i < count; i++) {
         if (extra[i].w <= now) {
             kept++;
