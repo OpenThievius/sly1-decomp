@@ -215,7 +215,8 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **An inline layout helper's frame-address parameters** give a fresh `addiu` at each call and the buffer from a
   spill slot (PAL func_001316E8 "Integration: an inline function's parameters and results"; func_00134B48).
 - **An inline's whole frame** is one BLKmode temporary per call; locals declared in an inner block free their
-  slots at its end (func_00125138, func_001E4888).
+  slots at its end (func_00125138, func_001E4888); a Scalar's copy reuses an inner block's slot of its mode
+  (func_00158480 "A block's local slot taken by a Scalar's copy").
 
 ### Library code (Sony's 2.9-ee-991111)
 - **Stores of different types do not conflict;** use the file's real pointer types (func_001F7BE8).
@@ -5480,6 +5481,34 @@ retail's layout once its rules are applied:
   `lqc2` comes before the Scalar's slot store (the two-pass argument rule, func_00191570). A
   method called through desc02() rather than a cast table, and an `if (any != 0)` written in
   retail's block order, finished it.
+
+### A block's local slot taken by a Scalar's copy; a frame address named before a call (func_00158480)
+
+func_00158480 (TurnMatrixBySpin) went from 86.6% to a match with three changes, each read from
+retail's frame offsets and registers:
+
+- **The weight's slot is the axis's.** Retail passes ScaleMatrix's scale as `mfc1 v0; por a2,
+  zero, v0` with `sq v0, 128(sp)` in the call's delay slot, and 128 is the axis that
+  TransformDirectionBetweenFrames fills in the `if`. Vu0::ScalarInGpr gives the mfc1 and the
+  cast's copy (its `(s128)` temporary); declared at the function's top, the axis keeps its slot
+  and the copy takes a new one (a 448-byte frame). Declared inside the `if`, its assign_temp slot
+  is freed at the block's end and the copy reuses it (same mode, same size): retail's 432 bytes.
+  A conversion written in C (`(u128)*(s32*)&f` into the axis) extends the int and costs three
+  moves.
+- **Locals declared where they are first needed.** With the axis in the `if`, the frame is in
+  allocation order (it grows upward): the two matrices at the top, the axis, then the three
+  declared after the `if`. Retail's 144, 208, 272 for the copy, the scaled matrix and the
+  product mean they are declared in that order after the block (C++ declarations mid-block).
+- **`&b` at each use, no pointer variable.** A `Mat4A* p = &b;` at the top makes CSE use p in the
+  branch (`move a1, s2`); writing `&turn` at each use gives retail's fresh `addiu v0, sp, 64` in
+  the branch and its copy to s2 in the call's delay slot.
+- **A frame address in a saved register before a call.** Retail sets `addiu s1, sp, 208` (the
+  scaled matrix) before MultiplyMatrices and passes s1 to ScaleMatrix after it. Written as
+  `ScaleMatrix(&scaled, ...)`, the address is computed straight into a0 after the call: sched1
+  does not move a pseudo's set above a call unless the pseudo already crosses one. Retail's
+  register means the source named the address before the call: `Mat4A* result = &scaled;`
+  above the MultiplyMatrices line, then `ScaleMatrix(result, ...)`. Placed after the call, the
+  same pointer is propagated away (one use) and changes nothing.
 
 ## Shapes of large functions
 
