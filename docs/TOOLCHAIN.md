@@ -2369,6 +2369,56 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
 
+### A splat split between a GPR and a VU0 copy: what gcse's copy propagation does (func_00155868, unsolved)
+
+Read from cse.c (make_regs_eqv, the copy swap at the end of cse_insn, cse_end_of_basic_block),
+gcse.c (hash_scan_set, cprop_insn), reload.c (find_equiv_reg) and reload1.c (reload_cse_regs_1)
+of GCC 2.95.3 and the -ds/-dG/-dl dumps (2026-11-10). func_00155868 splats the margin
+(`Q(size) = Splat(m)`) and then, by arm, either `lo = t - size, hi = t + size` or `hi = size,
+lo = size * -1`. Retail keeps the splat in a GPR (`pextlw v0,v1,v1`: an output register apart
+from the input, so a real GPR pseudo), copies it to vf2 for the size store and the then-arm's
+vsub/vadd, stores `hi` from the GPR in the else arm (`sq v0,32(sp)`) and copies it again to vf3
+for the MulX (`qmtc2 v0,vf3`, which reorg takes from the else arm into the `beqz` slot). Ours
+has one VU0 pseudo (`VU_REGS or none`): the asm's output is reloaded through v0 into vf2 and
+everything reads vf2. One instruction short.
+
+- **cse1 makes the split; gcse's cprop undoes it.** With the splat named (`u128 s = Splat(m)`)
+  the inline's return copy `s = r` survives cse1 in two orientations by path: on the jump path
+  (head and else, whose cuid range covers the whole if/else) the copy's destination does not
+  live outside the range, so the asm's register stays canonical and the else arm's uses become
+  it; on the fall-through path (head and then) the destination lives past the range, becomes
+  canonical, and cse_insn's swap moves the asm's output into it (the copy follows the asm
+  directly). After cse1: `asm -> s; r = s; size = s; then: s; else: r`. gcse's copy
+  propagation then finds `r = s` available at the else arm's entry and rewrites both uses
+  ("COPY-PROP: Replacing reg 121 in insn 191/232 with reg 119"): one pseudo. With a statement
+  between the asm and the copy (a diagnostic, not a form) there is no swap and cse1 leaves the
+  other orientation, `asm -> s; h = s; then: h; else: s`, which is retail's; cprop then rewrites
+  the then arm's uses instead. cprop replaces a copy's destination wherever the copy is
+  available at a block's entry and its source is not set earlier in that block, in any insn whose
+  pattern is a SET (asm operands included); only PRE's copies, made after cprop in the single
+  pass, escape it, and cse2's paths then canonicalise them back the same way.
+- **The class of the GPR value.** A test unit shows regclass's balance for a Splat result:
+  `=r` output, one store and one `j` use give VU0 (`qmtc2` after the asm, `sqc2`); two stores
+  and one `j` use give a GPR (`pextlw v0,v1,v1; sq v0; qmtc2 v0,vf3` before the MulX: retail's
+  else arm). So retail's GPR pseudo had at most one VU0 use against two stores at regclass
+  time, and the then arm's two uses were on another (VU0) pseudo.
+- **Reload would supply the rest.** find_equiv_reg stops only at a CODE_LABEL, so a reload in
+  the fall-through arm finds a register copied in the head (`vf2`); reload_cse_regs forgets at
+  labels, not jumps; reload_cse_simplify_set turns a load of a slot a register was just stored
+  to into a register move. A form whose then arm reads `size` from memory up to reload, with
+  the copy to vf2 in the head, would give retail's head; no plain form tried keeps the loads
+  past cse2.
+- **Ruled out** (all one VU0 pseudo, 572 bytes): the splat as a named `u128` read by either
+  or both arms, as a `Vu0::Vec` with Vec helpers in the arms, `Vec::Of(size)` reads, `hi = size`
+  after the MulX, `Q(hi) = Q(size)` and MulX of `Q(hi)`, a second Splat in the else arm (cse1's
+  jump path merges the identical asm), `s` reassigned in the else arm or after the join.
+- **The loop is retail's.** `Vec02* pts = r->points[r->bank];` before the loop and `Vec02* p =
+  &pts[i];` in its body: loop.c reduces the address to a pointer giv initialised in the
+  preheader after the entry test (`addu v1,a0,s1` in the `blez` slot, `move s0,v1`), where a
+  pointer stepped by the `for` (`p++`) is the variable itself. With it the loop and the tail
+  equal retail's instruction for instruction; only the head's missing instruction is left (it
+  also moves the loop label's alignment `nop`).
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides

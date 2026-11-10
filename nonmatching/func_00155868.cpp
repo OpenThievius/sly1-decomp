@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 572/580, checked 2026-11-07
+// SIZE 572/580, checked 2026-11-10
 // BYTES 0/580, checked 2026-11-07
-// NEAR: the wrap loop over the owned records' points is retail's instruction for instruction; in the head retail keeps the first Splat's GPR value (v0) live into the no-target arm, storing hi with sq from it and copying it to VU0 again (qmtc2 vf3) for the MulX, where here hi and the MulX take the VU0 copy made for size's store; the GPRs of the head differ with it. Tried the splat as a u128, a struct copy, a second Splat, the arms swapped, Set.
+// NEAR: the loop and the tail are retail's instruction for instruction (the points taken by index from pts, so loop.c's reduced pointer is copied in the preheader: addu v1; move s0,v1). One instruction short in the head: retail keeps the splat in a GPR pseudo (pextlw v0,v1,v1), copies it to vf2 for the size store and the then arm, and in the else arm stores hi from v0 and copies it again to vf3 for the MulX; here one VU0 pseudo serves all. cse1 does make that split for a named splat, and gcse's copy propagation folds it (docs/TOOLCHAIN.md, "A splat split between a GPR and a VU0 copy"). Tried the splat as a u128 or Vu0::Vec read by either arm, Vec::Of reads, a second Splat, hi = size after the MulX, MulX of hi, s reassigned, the arms swapped, Set.
 // In the context of its file, src/main/file_1549C8.cpp.
 #include "common.h"
 #include "effect_spawner.h"
@@ -37,8 +37,9 @@ void func_00155868(EffectSpawner* self)
         return;
     }
     for (OwnedRecord* r = (OwnedRecord*)w->members.head; r != 0; r = r->next) {
-        Vec02* p = r->points[r->bank];
-        for (s32 i = 0; i < r->count; i++, p++) {
+        Vec02* pts = r->points[r->bank];
+        for (s32 i = 0; i < r->count; i++) {
+            Vec02* p = &pts[i];
             Vec02 delta;
             ListFrame frame;
             if (p->x < lo.x || hi.x < p->x) {
