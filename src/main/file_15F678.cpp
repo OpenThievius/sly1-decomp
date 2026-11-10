@@ -3394,7 +3394,134 @@ void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src)
     CollectNonNullRefs(self);
 }
 
-INCLUDE_ASM(func_00165AE8);
+// What CopyAttachmentPart copies: a part's 0x50-byte entries (the mesh, a record of pointers
+// into its three buffers, the buffers' sizes and the buffers) and the 0x28-byte record built
+// for the part.
+struct PartPointers {
+    void* f00;              // 0x00
+    void* a[4];             // 0x04
+    void* b[4];             // 0x14
+    void* c[4];             // 0x24
+};
+struct PartEntry {
+    u8 pad00[0x18];
+    StripMesh* mesh;        // 0x18
+    u8 pad1C[0x20 - 0x1C];
+    PartPointers* pointers; // 0x20
+    u8 pad24[0x38 - 0x24];
+    s32 sizes[3];           // 0x38: quadwords
+    void* buffers[3];       // 0x44
+    u8 pad50[0x50 - 0x50];
+};
+struct CopiedPart {
+    u8 pad00[0x38];
+    CursorAnimator* animator;   // 0x38
+    u8 pad3C[0x54 - 0x3C];
+    void* f54;              // 0x54
+    s32 count;              // 0x58
+    PartEntry* entries;     // 0x5C
+};
+struct PartRecord {
+    u8 pad00[0x04];
+    u8* packets;            // 0x04: 0x30 bytes an entry
+};
+extern FrameTarget D_0027DC20[];
+s32 GetAnimatorSize(s32 type);
+
+// Moves a pointer that points into the block at `from` (`size` bytes) to the same place in the
+// block at `to`.
+static inline void MovePointerInto(void** p, u8* from, s32 size, u8* to)
+{
+    if (p != 0 && !((u8*)*p < from) && (u8*)*p < from + size) {
+        *p = (u8*)*p + (to - from);
+    }
+}
+
+// Retail reads part->animator again after the count's store, so the count is its own statement;
+// the detached list is walked through a variable of its own (`lw v0; move s0,v0`: the load can't
+// pass the store of 0 into the loop's variable); and the strip search reads e->mesh at each use:
+// PRE then loads it once in the loop's entry, after NOTE_INSN_LOOP_BEG, and loop.c calls the loop
+// phony and moves nothing out of it (retail reloads the count, the strips and the frame each time).
+void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
+{
+    CopiedPart* part = (CopiedPart*)partp;
+    PartRecord* rec = (PartRecord*)recp;
+    rec->packets = (u8*)CopyToFrontMemory(part->count * 0x30, rec->packets);
+    if (part->animator != 0) {
+        owner->f50++;
+    }
+    s32 animated = part->animator != 0 && (part->animator->cursor.flags & 4) != 0;
+    s32 linked = part->f54 != 0;
+    s32 first;
+    if (animated || linked) {
+        first = g_meshQueueCount;
+        part->entries = (PartEntry*)CopyToFrontMemory(part->count * 0x50, part->entries);
+        if (part->animator != 0) {
+            part->animator = (CursorAnimator*)CopyToFrontMemory(GetAnimatorSize(part->animator->type), part->animator);
+            AnimCursor* cursor = &part->animator->cursor;
+            FrameLink* links = cursor->links;
+            cursor->links = 0;
+            for (FrameLink* link = links; link != 0; link = link->next) {
+                FrameTarget* t = link->dst;
+                if (link->src != 0) {
+                    QueueMeshStrip((StripMesh*)cursor->record, link->src, t->dstAddr, t->count, t->flag, cursor);
+                } else {
+                    QueueNodeLink(t->dstAddr, t->count, cursor);
+                }
+            }
+        }
+    }
+    for (s32 i = 0; i < part->count; i++) {
+        PartEntry* e = &part->entries[i];
+        u8* packets = rec->packets + i * 0x30;
+        if (animated || linked) {
+            for (s32 j = 0; j < 3; j++) {
+                u8* old = (u8*)e->buffers[j];
+                if (old != 0) {
+                    s32 size = e->sizes[j] << 4;
+                    u8* end = old + size;
+                    e->buffers[j] = CopyToFrontMemory(size, old);
+                    for (s32 k = 0; k < first; k++) {
+                        FrameTarget* t = &D_0027DC20[k];
+                        if (!((u8*)t->dstAddr < old) && (u8*)t->dstAddr < end) {
+                            s32 again = 0;
+                            for (s32 m = first; m < g_meshQueueCount; m++) {
+                                FrameTarget* q = &D_0027DC20[m];
+                                if (q->dstAddr == t->dstAddr) {
+                                    again = 1;
+                                    break;
+                                }
+                            }
+                            if (again == 0) {
+                                FrameSource* strip = 0;
+                                for (s32 n = 0; n < e->mesh->nstrips; n++) {
+                                    FrameSource* s = &e->mesh->strips[n];
+                                    u32 limit = (u32)s->base + ((*(s32*)((u8*)e->mesh + 0x20) * s->stride) << 4);
+                                    if (!((u32)t->value < (u32)s->base) && (u32)t->value < limit) {
+                                        strip = s;
+                                        break;
+                                    }
+                                }
+                                QueueMeshStrip(e->mesh, strip, t->dstAddr, t->count, t->flag, 0);
+                            }
+                        }
+                    }
+                    RemapMeshQueueValues(first, size, (u32)old, (u32)e->buffers[j]);
+                    if (linked) {
+                        e->pointers = (PartPointers*)CopyToFrontMemory(0x34, e->pointers);
+                        MovePointerInto(&e->pointers->f00, old, e->sizes[j] << 4, (u8*)e->buffers[j]);
+                        for (s32 k = 0; k < 4; k++) {
+                            MovePointerInto(&e->pointers->a[k], old, e->sizes[j] << 4, (u8*)e->buffers[j]);
+                            MovePointerInto(&e->pointers->b[k], old, e->sizes[j] << 4, (u8*)e->buffers[j]);
+                            MovePointerInto(&e->pointers->c[k], old, e->sizes[j] << 4, (u8*)e->buffers[j]);
+                        }
+                    }
+                }
+            }
+        }
+        BuildPartVifPackets((PartPacketContext*)part, (PartPacketSource*)e, (PartPackets*)packets);
+    }
+}
 
 void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 {

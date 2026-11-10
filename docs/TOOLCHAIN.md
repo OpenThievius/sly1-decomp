@@ -1373,6 +1373,43 @@ avoids the roll, but its own pseudos for the pointer and the result do not match
 "ignored due to multiple entry points" in the .loop dump, or retail's inner loop with its
 early exits at the head and only the continuation test at the bottom.
 
+### A search loop that loop.c leaves alone: a member read at each use (func_00165AE8)
+
+Retail's strip search in CopyAttachmentPart (src/main/file_15F678.cpp) is a rolled `break`
+loop (`b` into the test, the increment above it) that reloads the mesh's count, its strips and
+its frame on every pass: loop.c moved nothing. Ours, with `StripMesh* mesh = e->mesh;` before
+the loop, had the count hoisted (`Insn 485 ... moved`), and jump2 then copied the test in
+front of the loop (`blez`), 8 bytes longer (2026-11-10).
+
+- **Mechanism.** Written `e->mesh->nstrips`, `e->mesh->strips[n]` at each use, the load of
+  `e->mesh` is partially redundant around the back edge, and PRE inserts it at the end of the
+  loop's entry block: after NOTE_INSN_LOOP_BEG, before the entry jump (retail's `lw t1,24(s2)`
+  in the `b`'s delay slot). scan_loop then finds an insn, not the entry jump or a label, as the
+  first thing in the loop and reports "Loop from N to M is phony": nothing moves, as in
+  retail. It is the barrier of func_0014D680 used the other way.
+- **Two more forms in the same function.** The comparison against the strip's end was named
+  first (`u32 limit = base + ((frame * stride) << 4);` then the two tests): retail computes the
+  end before the first branch. `D_0027DC20[m].dstAddr` in a search over the queue expands as
+  `(D + 8) + m*16` and hoists `&D[0].dstAddr` into a saved register; `FrameTarget* q =
+  &D_0027DC20[m]; q->dstAddr` gives retail's `(m*16 + D) + 8` (expr.c's address order).
+- **Spot it.** A loop in retail that reloads invariant members every pass while ours keeps one
+  in a register: read the pointer at each use instead of through a local, and look for "is
+  phony" in the .loop dump.
+
+### The value read before a store, kept in its own variable (func_00165AE8)
+
+- Retail's `lw v0,20(s1); move s0,v0` before `sw zero,20(s1)` (take a list, clear the head,
+  walk it): `FrameLink* links = cursor->links; cursor->links = 0; for (FrameLink* link = links;
+  ...)`. combine cannot merge the load into the copy across the store to the same memory, and
+  the block-local `links` (v0) and the loop's `link` (s0) stay apart. One variable for both
+  loads straight into s0.
+- A count before a test of the same pointer: `if (p->a) owner->n++; s32 x = p->a && ...;`
+  puts the `&&`'s clear after a label, so sched1 cannot raise it above the count's store
+  (retail's `sw zero,4(sp)` in the second `beqz`'s delay slot). Written inside the `if`
+  (`{ owner->n++; x = p->a && ...; } else x = 0;`), the clear has no dependences and issues
+  in the first cycle, before the count. The separate form still gives retail's first `beql`
+  straight to the join (which pass threads it past the second test was not checked).
+
 ### A reference's address reused across a test: read the vector at its use (func_00199698)
 
 - **What retail shows.** `UpdateNumberedItem` tests the squared distance between `target->v140`
