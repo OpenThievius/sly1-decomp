@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 940/944, checked 2026-11-07
+// SIZE 940/944, checked 2026-11-10
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001DDC68.cpp func_eu_001DDC68 --unit src/main/file_1D62E0.cpp
 // Still differs: frame now 224 as retail (ListFrame-sized unused local before the iterator; global stores through pointers so the lui bases are hoisted; the word copied through an unaligned read of a packed pad struct). Left: 948 vs 944 bytes, loop counter i in s4 (retail s0), the walk's setup order (retail loads the stride before and the head after the D_eu_00284A94 store, and keeps w's copy as swl/swr from the a3 register), and the epilogue lui order.
+// PAL's copy of US LoadWorld (func_001DCEA0, src/main/file_1D62E0.cpp), unpaired: it adds the call to func_eu_001DDA10 after SkipBufferedBlocks and a 14-entry ReadOptionalBufferedBlock loop over D_eu_0027EEA0, and keeps g_activeListFrames' %hi out of fp (US hoists it); LoadWorld's own C with those two additions scores 133 differing lines, worse than this attempt (2026-11-10).
 // Level object setup: spawns the fixed object pools, initialises the managers, runs the update/draw passes over the object list once and ends the frame.
 struct Vt_eu_1DDC68 { u8 pad0[0x1C]; void (*f1C)(void* self); u8 pad1[0x4C - 0x20]; void (*f4C)(void* self); void (*f50)(void* self); };
 struct Node_eu_1DDC68 { Vt_eu_1DDC68* vt; u8 pad0[0x18]; Node_eu_1DDC68* next; };
