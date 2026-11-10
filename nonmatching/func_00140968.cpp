@@ -2,6 +2,14 @@
 // SIZE 60/64, checked 2026-11-08
 // NEAR (2026-11-08, night-gamec): retail's beq with the store's address copied (move a1,v1 in its delay slot) where this has bnel and one address register; the reload after the store is the same
 // In the context of its file, src/main/disc_access.cpp: its declarations before the function, bodies cut.
+// Mechanism (2026-11-10, docs/TOOLCHAIN.md, GCSE, "A %hi copied into a second register"):
+//       retail's move a1,v1 is PRE's late insertion of the %hi at the end of the compare's block,
+//       which cse2 turns into a copy; it happens only when the store's arm begins with a label at
+//       cse time (a jump into the arm that cse folds away), so its %hi is still its own pseudo.
+//       A plain if puts the arm in the compare's cse block. `|| <real second test>` and
+//       `while (g_discStatus != status) g_discStatus = status;` reproduce the copy (the loop the
+//       whole shape, registers v1/a0 swapped and a nop); no plausible single-test form found
+//       (about 30 forms ruled out, listed there).
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"
