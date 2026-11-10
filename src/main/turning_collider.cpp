@@ -9,6 +9,7 @@
 #include "attachment.h"
 #include "pad_record.h"
 #include "game_clock.h"
+#include "ramp_profile.h"
 #include "vu0.h"
 
 
@@ -233,7 +234,33 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     PlaySoundWithWanderingPitch();
 }
 
-INCLUDE_ASM(func_001C4C20);
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+
+// Each vertex's velocity toward the other mesh's vertex in the world: the vertex moved by
+// the ramp over this frame, as a speed. The count runs down (`--i >= 0`) and the floats are
+// read by index, which loop.c reduces to the walking pointers of retail's inner loop; written
+// as pointer copies (`f32* c = (f32*)cur`), CSE after loop makes the copies canonical and the
+// increments PRE hoisted read them (docs/TOOLCHAIN.md).
+void func_001C4C20(TurningCollider* self)
+{
+    Collider* other = (Collider*)self->f6DC;
+    if (other != 0) {
+        Vec02* src = (Vec02*)other->mesh.verts;
+        Vec02* cur = (Vec02*)self->mesh.verts;
+        Vec02* dst = *(Vec02**)self->hook;
+        for (s32 i = other->mesh.vertCount; --i >= 0; ) {
+            Vec02 world;
+            Vu0::Q(world) = Vu0::Add(Vu0::Q(other->pos), Vu0::Rotate(other->rot, Vu0::Q(*src)));
+            for (s32 k = 0; k < 3; k++) {
+                f32 t = ApproachValueWithRamp((&cur->x)[k], (&world.x)[k], g_gameClock.dt, (RampProfile*)D_00274B68, 0);
+                (&dst->x)[k] = (t - (&cur->x)[k]) / g_gameClock.dt;
+            }
+            src++;
+            cur++;
+            dst++;
+        }
+    }
+}
 
 // A face of a collision mesh as func_001C4D60 reads it: its plane, the normal and the distance.
 struct MeshFace {
@@ -289,7 +316,6 @@ void func_001C4D60(TurningCollider* self, Collider* other, s32 all)
 
 
 void UpdateSwitchedCollider(void* self);
-void func_001C4C20(void* self);
 
 void UpdateTurningCollider(TurningCollider* self)
 {
