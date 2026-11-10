@@ -694,3 +694,26 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
   substituted as a constant and set straight into `$a0`, which gcse never records, so the
   query's `&q` is the only occurrence. A free inline function does the same only if its pointer
   parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.
+
+### A stack array read through `(rows + r)->`: the frame constant stays out of PRE's reach (func_001D5678, near miss)
+
+DrawAngleSortedRing copies three rows of its parameter block into a stack array, scales them, and
+reads them again in the draw loop. Retail forms `sp + 14512` once at the entry (spilled, read by the
+copy loop) and again in the draw's i-loop preheader (spilled to a slot of its own); ours had one
+pseudo for both (2026-11-10, w15):
+
+- **The expression.** `rows[r].x`, `&rows[r]` and `Vec02* row = rows + r;` all expand the address
+  of the element first, `(plus (plus fp 14512) (ashift r 4))` forced into a register, which
+  computes `fp + 14512` as an insn of its own: expression `(plus fp 14512)`, which PRE then finds
+  redundant with the copy loop's and replaces by its entry pseudo.
+- **Pointer arithmetic inside the memory reference.** `(rows + r)->x` is a PLUS_EXPR expanded with
+  EXPAND_SUM as the address of a MEM: expand_expr puts the sum's constant outside
+  (`((ashift r 4) + fp) + 14512`), and memory_address leaves 14512 as the offset, so GCSE has no
+  `fp + 14512` there. loop.c's giv for the rows then has the add value `fp + 14512`, which it
+  forms in the row loop's preheader and moves out of the i loop in its next pass: retail's
+  `addiu v0,sp,14512; sw v0,14644(sp)` and two more instructions than ours had.
+- **Bucket order.** The four addresses PRE hoists to the entry (sp+32, sp+8288, params+112,
+  sp+14512) spill in pseudo order, which is the table's bucket order, (13258 + regno + offset) mod
+  T. For retail's order T = 323 (or 339) with params as pseudo 121; `*(Vu0::Vec*)&x = F(...)`
+  stores (two more insns each than `Vu0::Q(x) = F(...).q`), Vec locals for the weighted sums'
+  operands and a named row weight bring the table from 305 to 323 with the final code unchanged.
