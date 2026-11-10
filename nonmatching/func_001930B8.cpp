@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 241/312 (77.2%), checked 2026-11-08
+// BYTES 241/312 (77.2%), checked 2026-11-10
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).
 // 2026-11-10: retail's registers need sched1 to store -0.5 (f20) before it loads -1.0 (f74), both $f0;
 //       independent frame stores never allow it, and one variable reused for both (26 lines differ)
 //       becomes global and cannot take $f0 (local-alloc emulator; TOOLCHAIN.md, func_001930B8).
+// 2026-11-10 (wave 15): `D = (Cfg_1930B8){ ... };` (a compound literal, no FillMemory written) is the
+//       plausible form: the global's address before the compiler's memset, the first record exact,
+//       the second the same differences (34 lines). Retail's $f0 needs -0.5/-1.0 as ONE local quantity
+//       (REG_N_DEATHS 1), which no plain form gives (docs/toolchain/large-functions.md, func_001930B8).
 #include "common.h"
 #include "shapes.h"
 

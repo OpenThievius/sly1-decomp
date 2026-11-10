@@ -16,6 +16,11 @@
 //       copy's store MEM_SCALAR_P at a fixed address, which fixed_scalar_and_varying_struct_p
 //       keeps apart from the mem/s load, and gives retail's `lq v1`; but purge_addressof then
 //       allocates acc after the weight slot (acc 0x10, slot 0) and the frame grows to 0xA0.
+// w15 (2026-11-10): re-scored, unchanged. Read in GCC's source, no other route to the order:
+//       the loaded pointer has no alias base, INDIRECT_REF never makes the cast store scalar,
+//       an addressable scalar's slot comes at purge time, the load is no birthing insn, the
+//       store's weight is at most 0, and self->contacts never conflicts with the frame. acc as
+//       a plain u128, or down as a Vec02, cascade (docs/toolchain/alias-classes.md).
 // w11 levers that closed the rest (from 46.1%): one row and one contact variable for every
 //       loop (retail's a2 and a0 in all four: one pseudo each, as camera.cpp's sibling
 //       func_00145B68 reuses i and j); the normals as Vu0::Vec values (the Gram loop's vf4 and

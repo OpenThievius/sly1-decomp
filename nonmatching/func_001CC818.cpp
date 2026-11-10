@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1888/1916 (98.5%), checked 2026-11-09
+// BYTES 1888/1916 (98.5%), checked 2026-11-10
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
 // TAIL (2026-11-09): `*(u128*)&g =` for the result and the tail in the order v, g, p, ang; 40 differing lines before, 16 now.
@@ -25,6 +25,16 @@
 // rotation, a copy of r, every order of the six tail statements (permute.py), f22AC read into
 // a local (once, or a variable assigned at both ifs: that one is no longer born once, so not
 // raised, and the first block breaks).
+// W15 (2026-11-10): still 16 lines. Retail's registers need two local-alloc comparisons
+// reversed: Scalar(r) (3 refs over 32) above off (3 over 26), and the v150 chain (6 over 14)
+// below acc (4 over 10). sched1 has to issue Scalar(r)'s qmtc2 in the first cycle after the
+// call (priority 10; only loads rank above it), so the first comparison needs its slot store
+// earlier or p's vadd last. The emulators find no single dependence, LUID swap, priority or
+// added insn that gives both. Pairs of added dependences do (the v150 load waiting for the
+// Scalar(r) slot store plus p's store before the f22AC load), but no plain form gives them.
+// Writing p as Add(pos, MulX(nd, Scalar(r))) gives Scalar(r) 4 refs and retail's registers up
+// to the cross product, at the cost of a second slot store (54 lines).
+// docs/toolchain/sched1.md, "The link swing's last block".
 
 extern f32 D_00274D40;
 extern f32 D_00274D44;

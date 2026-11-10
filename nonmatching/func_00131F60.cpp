@@ -1,26 +1,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1374/1436 (95.7%), checked 2026-11-10
-// NEAR (2026-11-10, w11): the frame, the saved registers and the whole state-1 half are
-// retail's; what differs is three FPR numbers in the gauge loop. Retail keeps 16.0 in f23 and
-// y1 in f24 (ours the other way round: global-alloc ranks y1, 4 refs over 33 insns, before
-// 16.0, 13 over 174), and loads 1/15 and 372.8 into f2, the second late in the block; ours
-// holds both in f7 (the scratch `d` below is one pseudo set twice, which global-alloc places,
-// and sched1 issues the 372.8 load right after hi). What found the rest (docs/TOOLCHAIN.md,
-// "The colour of a band"): the colours as named constant pointers at the top of the loop body
-// (g++ folds their uses, so each arm keeps its own %lo with a REG_EQUAL note and jump.c does
-// not hoist an arm before reload, while the dead declarations make both %hi's anticipated, so
-// PRE hoists them: retail's s4 and s3, its bc1t with D8 in the delay slot), the camera's zoom
-// read before them (PRE places the three %hi's in first-appearance order: camera, D8, E0, so
-// they take s5, s4, s3), the screen-x conversion named before the screen-y one (loop.c moves
-// 1728 and 16 first), the five layout setters in ScreenLayout::Reset with the colour copied
-// into its own local (`s32 c = color; l->Color(&c)`: the store after Size, the colour in s0
-// across Pos and Size, `addiu a0, sp, 32` at each call), `char buf[16]` before the layout
-// (sp+16, layout at sp+32), the layout's first two words stored through a pointer (`lay`, the
-// v1 that PRE copies into s6 for the draw calls), the move colour before PushFontScale, and
-// "Move"'s alignment stored through a reference made there (retail's `sw a0, 20(s6)`).
-// Unproven forms: the scratch floats `d` (1/15 then 372.8) and `k` (55 then 0.5), which keep
-// those constants in the loop as retail does (as literals loop.c moves 55 and 372.8, life 5
-// and 4 against 90 insns), and the `move` reference.
+// BYTES 1420/1436 (98.9%), checked 2026-11-10
+// NEAR (2026-11-10, w15): instruction order, frame, saved registers and the state-1 half are
+// retail's; what differs is one swap of $f2 and $f3 in the gauge loop's first block: retail's
+// `hi` is $f3 and the scratch `d` (1/15, then (1 - lo) * 55, then 372.8) with the (1 - lo)
+// temporary is $f2; ours the other way round. What w15 found: `d` holds the product too (so `d =
+// 372.8` has an anti dependence on `x0 = d - inset` and sched1 issues it after x0, as retail's
+// sched2 order shows, and global-alloc gives d $f2), and x1 is computed before x0 (sched1 then
+// matches retail's order and the 16.0/y1 ranking of w11's notes is retail's). What is left is
+// local-alloc's ranking (docs/toolchain/long-block-constants.md, "A scratch float in a loop"):
+// hi's quantity (hi tied to hi * height: 12 refs, born at insn 9 of the block, dying at y1's sub,
+// insn 22) is 36/26 against the (1 - lo) temporary's 8/6, so hi takes $f2 first. With y1's sub at
+// insn 23 or later the temporary wins (written `y1` before `y0`, sched1 puts y1's sub last:
+// $f2/$f3 become retail's), but y1 then lives 35 insns or less and global-alloc puts it before
+// 16.0 (8/35 against 39/174, 16.0's life doubled by its REG_EQUIV), the other swap. Both hold
+// only with one more insn in y1's life than ours has (or one fewer before hi in block 1):
+// retail's loop has an insn ours lacks that reload or flow2 deletes. Not found.
+// Earlier (w11): the colours as named constant pointers at the top of the loop body (g++ folds
+// their uses, so each arm keeps its own %lo with a REG_EQUAL note and jump.c does not hoist an
+// arm before reload, while the dead declarations make both %hi's anticipated, so PRE hoists
+// them: retail's s4 and s3, its bc1t with D8 in the delay slot), the camera's zoom read before
+// them (PRE places the three %hi's in first-appearance order), the screen-x conversion named
+// before the screen-y one (loop.c moves 1728 and 16 first), the five layout setters in
+// ScreenLayout::Reset with the colour copied into its own local, `char buf[16]` before the
+// layout, the layout's first two words stored through a pointer (`lay`), the move colour
+// before PushFontScale, and "Move"'s alignment stored through a reference made there. The
+// scratch floats `d` and `k` (55 then 0.5) keep those constants in the loop as retail does
+// (set more than once, loop.c does not move them).
 #include "common.h"
 #include "screen_element.h"
 #include "packet_writer.h"
@@ -99,8 +104,9 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
         f32 d = 1.0f / 15.0f;
         f32 hi = lo + d;
         f32 k = 55.0f;
-        f32 x0 = (one - lo) * k - inset;
         f32 x1 = ((one - hi) * k + one) - inset;
+        d = (one - lo) * k;
+        f32 x0 = d - inset;
         d = 372.800018f;
         f32 y0 = d - lo * height;
         f32 y1 = d - hi * height;

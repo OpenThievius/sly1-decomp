@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 488/492, checked 2026-11-08
+// SIZE 488/492, checked 2026-11-10
 // NEAR: everything but the product: retail computes f268 = f260 * f264 into LO (mult $zero,
 //       v0,v1 and a later mflo a0, the two-operand form, its result allocated to LO); ours
-//       writes it with the three-operand mult straight into a0, one instruction less. Tried:
-//       the product first, last, of the stored copies, of locals set by chained assignments,
-//       the operands swapped, through s64. Mechanism: docs/TOOLCHAIN.md "A stored product's
-//       two-operand mult" (combine re-recognises the bare SET only through a surviving,
-//       non-adjacent register copy; see nonmatching/eu/func_eu_001ACC68.cpp).
+//       writes it with the three-operand mult straight into a0, one instruction less.
+// Mechanism (docs/toolchain/cse.md "A stored product's two-operand mult"): combine re-recognises
+// the bare SET (mulsi3_internal) only through a register copy of the product that survives CSE
+// and is not the next insn after the mult. CSE keeps the copy only when its destination is
+// referenced outside the tail's CSE block (REGNO_FIRST_UID, from reg_scan before cse1, so a dead
+// reference counts). Test form, EXACT under check.py (2026-11-10), not landed as implausible:
+// `s32 n = 0;` first in the function, `s32 m = self->f26C * self->f270;` before the letterX and
+// letterY stores, then `n = m; self->f268 = n;`. Without either half it is mult3 again; a live
+// early reference (n holding the switch's value) moves the switch's registers. No single-variable
+// form gives a temporary product (expand writes a product straight into a variable target; an
+// inline's return copy is adjacent; an inline's parameter copy is deleted by CSE). Also tried:
+// the product first, last, of the stored copies, chained assignments, swapped operands, s64.
 #include "common.h"
 #include "screen_element.h"
 #include "font.h"

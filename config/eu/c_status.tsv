@@ -332,6 +332,7 @@ func_00118720	func_00118720	match
 func_001187E8	func_001187E8	match	
 func_00118850	func_00118850	match	
 func_001188F0	func_001188F0	match	
+func_00118988	func_00118988	match	
 func_00118CF0	func_00118CF0	match	
 func_00118D10	func_00118D10	match	
 func_00118D20	func_00118D20	match	
@@ -2031,6 +2032,7 @@ func_00180EE8	func_00181548	match
 func_00180F20	func_00181580	match	
 func_00180F68	func_001815C8	match	
 func_00180F98	func_001815F8	match	version-specific, rodata
+func_00181078	func_001816D8	match	
 func_00181448	func_00181AA8	match	
 func_00181658	func_00181CB8	match	
 func_00181780	func_00181DE0	match	version-specific
@@ -2128,6 +2130,7 @@ func_00185358	func_001859B8	match
 func_001853F0	func_00185A50	match	
 func_00185468	func_00185AC8	match	
 func_00185498	func_00185AF8	match	
+func_00185538	func_00185B98	match	
 func_00185758	func_00185DB8	match	
 func_001858F8	func_00185F58	match	rodata
 func_00185A58	func_001860B8	match	
@@ -2144,6 +2147,7 @@ func_00186568	func_00186BD0	match
 func_001867C8	func_00186E30	match	
 func_00186A70	func_001870D8	match	
 func_00186BA8	func_00187210	match	rodata
+func_00187260	func_001878C8	match	
 func_001879C0	func_00188028	match	
 func_00187A88	func_001880F0	match	
 func_00187B60	func_001881C8	match	
@@ -3893,6 +3897,7 @@ func_001F2758	func_001F3748	match
 func_001F2798	func_001F3788	match	
 func_001F2840	func_001F3830	match	rodata
 func_001F2EF0	func_001F3EE0	match	
+func_001F3140	func_001F4130	match	
 func_001F31F8	func_001F41E8	match	
 func_001F3250	func_001F4240	match	
 func_001F3328	func_001F4318	match	
@@ -4449,6 +4454,7 @@ func_eu_0015DF18	func_0015DF18	match	only in PAL
 func_eu_0015DF58	func_0015DF58	match	only in PAL
 func_eu_0015E3E0	func_0015E3E0	match	only in PAL
 func_eu_0015E438	func_0015E438	match	only in PAL
+func_eu_0015E4A8	func_0015E4A8	match	only in PAL
 func_eu_0015E7E0	func_0015E7E0	match	only in PAL
 func_eu_00160538	func_00160538	match	only in PAL
 func_eu_00160568	func_00160568	match	only in PAL
@@ -4513,6 +4519,7 @@ func_eu_001AEEA0	func_001AEEA0	match	only in PAL
 func_eu_001AEF48	func_001AEF48	match	only in PAL
 func_eu_001DDA10	func_001DDA10	match	only in PAL
 func_eu_001DDAB0	func_001DDAB0	match	only in PAL
+func_eu_001DDC68	func_001DDC68	match	only in PAL
 func_eu_001DE018	func_001DE018	match	only in PAL
 func_eu_001E3018	func_001E3018	match	only in PAL
 func_eu_001E3050	func_001E3050	match	only in PAL

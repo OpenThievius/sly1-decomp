@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1367/1416 (96.5%), checked 2026-11-10
+// BYTES 1376/1416 (97.2%), checked 2026-11-10
 // NEAR (2026-11-10, w11): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
 // where the segment between the two objects at Rec2195_224::p64 and p60 crosses the animator's
 // triangle strip, the strip's coordinates there, offset, clamped and eased into the cursor.
-// Retail's size and 332 of its 354 words. What got the size: the window shifts as an inline
+// Retail's size and 340 of its 354 words. What got the size: the window shifts as an inline
 // (DropFirst), whose frame-address parameters integrate.c substitutes into the argument moves,
 // so the MoveMemory arguments are hard-register sets that GCSE never hashes: PRE then neither
 // hoists &uv[0] into the flags block (the extra word and the loop label's alignment nop) nor
@@ -12,11 +12,30 @@
 // points first, so the sum ties to the loaded points, not to i*16); one `j` for the edge loop
 // and the inner loop (its refs put it before the next pointer's giv: a3 and t0 as retail);
 // ApproachValueWithRamp declared floats first as most files do (the f13 move before a0); all
-// three dots through ToFloat; the cursor's u and v read through self. Still differs: the cursor
-// and &tri[2]'s PRE pseudo tie in global-alloc (both 84 after truncation; ours takes &tri[2]
-// first: s7/s8 swapped; the cursor needs a life of 235 insns, it has 240); sched2 puts the b
-// load before the 0.0 and the a-dot's qmfc2 before the b-dot (retail the other way); the first
-// clamp's FPRs (lo f13, hi f2, 1 - v f3 in retail).
+// three dots through ToFloat; the cursor's u and v read through self; the clamps' results
+// in variables of their own (cu, cv: w15, below). Still differs (w15, 2026-11-10), two things:
+// - the cursor and &tri[2]'s PRE pseudo (s7/s8 swapped). global-alloc ranks 2 refs over 240
+//   insns against 3 refs over 354 (177 doubled by update_equiv_regs for its REG_EQUIV): the
+//   cursor goes first only if 4 x 177 > 3 x its life, so at most 235 insns (236 ties on the
+//   allocno number). Its set is sched1's filler at t3 of the entry block (ready from t1,
+//   priority 2, lowest LUID among the other fillers, the PRE'd highs of $LC0 and the clock),
+//   so it is born before the first call whatever the source order (declared after the loop,
+//   PRE hoists it and sched1 puts it there again); retail's life needs the set after that call
+//   (5 insns later) or 13 more RTL insns in the loop. Vec values for n, p, m and the edges add
+//   none (their copies are gone before flow); two `end` variables, `&self->cursor` at the call
+//   and cursor->record change nothing or too much (cursor->u: 3 refs, above &uv[2]).
+// - sched2 in the dots' block: retail puts the 0.0's mtc1 before b's lqc2 (ours has b's load
+//   at priority 7 against 6) and the b-dot before the a-dot's qmfc2 (ours: the a-dot's chain,
+//   priority 10, against 6). The first needs b's chain one shorter, the second the a-dot's
+//   qmfc2 not ready at t11 (a link to the d0 qmfc2 that ours lacks); ToFloatMoved for the
+//   b-dot fixes the first and renumbers its registers. Every mix of ToFloat, ToFloatMoved,
+//   ToFloatNow and ToFloatViaBits for the three dots, their order, a named Vec for n and a
+//   named 0.0 change nothing or more. Vec::Scalar(-1.0f) for `neg` grows the frame by 16.
+// The clamps (w15): `u = ClampBetween(..)` stored the first result in u's own pseudo, live
+// while lo is loaded, so lo conflicts with u and expand_preferences gives it none of u's
+// preferences ($f12, $f13 from the calls' arguments): lo took $f2, hi $f3, and 1 - v kept its
+// own $f13. In a fresh variable the result is born after u dies, lo and hi pool its $f13
+// preference, lo (first in the order) takes it, hi takes $f2 and 1 - v $f3, as retail.
 // In the context of its file, src/main/state_walker.cpp (the ramp {1, 0.1, 0.1} is retail's
 // D_0024D268, whose INCLUDE_RODATA line goes with the function).
 #include "common.h"
@@ -149,9 +168,9 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
     Vec3 ramp = { 1.0f, 0.1f, 0.1f };
     f32 iu = 1.0f - u;
     f32 iv = 1.0f - v;
-    u = ClampBetween(iu - self->u0, self->uMin, self->uMax);
-    v = ClampBetween(iv - self->v0, self->vMin, self->vMax);
-    ApproachValueWithRamp(self->cursor.u, u, g_gameClock.dt, &ramp, 0);
-    ApproachValueWithRamp(self->cursor.v, v, g_gameClock.dt, &ramp, 0);
-    SetCursorCoords(cursor, u, v);
+    f32 cu = ClampBetween(iu - self->u0, self->uMin, self->uMax);
+    f32 cv = ClampBetween(iv - self->v0, self->vMin, self->vMax);
+    ApproachValueWithRamp(self->cursor.u, cu, g_gameClock.dt, &ramp, 0);
+    ApproachValueWithRamp(self->cursor.v, cv, g_gameClock.dt, &ramp, 0);
+    SetCursorCoords(cursor, cu, cv);
 }

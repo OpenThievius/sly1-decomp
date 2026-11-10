@@ -13,14 +13,23 @@
 // in retail). The rows of frame->m110 read through a u128 pointer give retail's
 // `addiu v0,v0,0x110; move a1,v0; lqc2 0x10(v0)`; the first product stored to self->m660
 // first puts the 660 rows before m's.
-// Still differs: (a) global-alloc order: pad (11 refs over 331 insns, 0.100) ranks below &cur
-// (3 over 29, 0.103), so pad takes s3 for retail's s2 and the s1/s3 highs follow; (b) the third
-// BuildAxisAngleMatrix's lui/a1/a0 are scheduled before the first product's stores (sched1 and
-// sched2 issue them in idle alu slots); retail has them after the rot stores, as if a schedule
-// barrier stood there: an empty volatile asm there gives retail's order (diagnostic only),
-// and loop notes (do {} while (0)) do too but add an aligned-label nop, so retail has no loop;
-// the 660 row order (retail 0x670, 0x680, 0x660) and the w Scalar slot (retail vf6, stored after
-// frame->m110's rows) also differ.
+// Still differs (re-scored 2026-11-10, w15-1DEBE8; the signature is now slot 0x134's,
+// Desc05::m49 (self, dt, pad), dt unread, no code change):
+// (a) global-alloc order: pad (11 refs over 331 insns, 0.100) ranks below &cur (3 over 29,
+// 0.103), so pad takes s3 for retail's s2; then r509 (%hi g_unitRange, 5/290, 0.034) ranks
+// below r506 (%hi g_unitZVector, 2/54, 0.037) and the s1/s3 pair swaps. One more pad ref
+// gives retail's s2 (diagnostic: the stick heading call written in both arms of the camera
+// if/else), but cross-jumping cannot merge those copies (the fall-through arm's call ends its
+// block with flow's (use (const_int 0)), so find_cross_jump stops at once): 1720 bytes.
+// (b) the third BuildAxisAngleMatrix's lui/a1/a0 issue in idle alu slots before the first
+// product's stores; retail has them after the rot stores. A loop note would do it, but
+// final.c aligns the first label after any NOTE_INSN_LOOP_BEG and retail's labels after
+// 0x1DEEE4 are 4 mod 8: no loop there (docs/toolchain/sched1.md). Also the 660 row stores
+// (retail 0x670, 0x680, 0x660) and call 2's a0/a1 order (sched2, likely from (a)'s registers).
+// (c) w's slot: RotateTransposed reads frame->m110's rows through a u128 pointer, which waits
+// for the MEM_SCALAR_P slot stores; with the rows read as Vec members (a RotateTransposed
+// variant like RotateMembers, tried only as a diagnostic, not a helper of the project yet)
+// the whole velocity tail is retail's (docs/toolchain/alias-classes.md).
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -98,7 +107,7 @@ static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
     out.r[2] = t.r[2];
 }
 
-void ControlTintBlendCollider(TintBlendCollider* self, PadRecord* pad)
+void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
 {
     Vec02 offset;
     Vec02 axis;

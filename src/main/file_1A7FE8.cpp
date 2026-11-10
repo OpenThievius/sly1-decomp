@@ -972,7 +972,7 @@ void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, Vec02* spin, s32 b, s32 c);
 void GetPlacementRecordAngle(void* self, f32* out, void* x);
 void func_001A9868(void* self, f32* out, void* x);
-void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 f32 WrapAngle(f32 a);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 void ForwardBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
@@ -1066,7 +1066,7 @@ s32 func_001A8C90(PoolView_1A8C90* self, s32 aim)
                 } else {
                     speed = obj->speed;
                 }
-                BuildYawPitchMatrix(&m, yaw, pitch);
+                BuildYawPitchMatrix(yaw, pitch, &m);
                 Vu0::Q(scale) = Vu0::FromFloat(speed);
                 Vu0::Q(self->velocity) = Vu0::MulX(Vu0::Q(m.r[0]), Vu0::Q(scale));
             } else {

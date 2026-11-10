@@ -355,7 +355,7 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
-void func_001892A0(Mat02* out, f32 yaw, f32 pitch)
+void func_001892A0(f32 yaw, f32 pitch, Mat02* out)
 {
     Mat02 a;
     Mat02 b;

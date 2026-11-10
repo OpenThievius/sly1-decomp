@@ -317,3 +317,45 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
       34 lines in the second. An aggregate initialiser instead stores the
       fields straight into the globals (no temporary, no copy loop): not
       retail's form.
+    - **A compound literal is the plausible form of the records (wave 15,
+      2026-11-10).** `D_00604700 = (Cfg_1930B8){ ..., D_00248D30 };` and
+      the same for D_00269C10, with no FillMemory call written:
+      expand_assignment expands the global's address first (so it is in
+      s0 before the call, which the near miss gets only by declaring the
+      pointer before the memset), store_constructor clears the temporary
+      with the compiler's own memset call (FillMemory is memset) and
+      stores the non-zero fields in field order, and the struct copy is
+      the `movstrsi` loop. The first record is exact and the second has
+      the near miss's differences (34 lines against 33: 1200 and -1750
+      swap $f0/$f2). Retail's loads after the first two (1000, 1200,
+      -1750, 0.5, 2.0, -1.0) are in field order too, which fits an
+      initialiser.
+    - **What the registers need, read again.** Retail's locals avoid $f0
+      altogether (-1750 has the shortest life and still takes $f1), so
+      $f0 went to a quantity that local-alloc ranked first: -0.5 and
+      -1.0 as one local quantity (four references, so
+      `floor_log2(4) * 4` against 2 for the single-use constants). With
+      the reused variable and the fields in offset order (26 lines), the
+      emulator (build/swarm/w15-1930B8/emu2.py in the g6 worktree, the
+      variable as one quantity) gives that quantity $f0 and 1.0 $f6, as
+      retail; the other five still come out f1-f5 in load order where
+      retail has -1750, 1200, 0.5, 2.0, 1000, so their stores also run
+      in a different order. A pseudo with two values is a local quantity
+      only if `REG_N_DEATHS` is 1 (local-alloc.c), and a variable stored
+      twice dies twice. The only code in 2.95.3 that takes a death away
+      from a pseudo with several values is regmove's
+      `optimize_reg_copy_2` (`d = s` where s dies, d modified, `s = d`
+      where d dies: d is renamed s and both lose a death), and combine's
+      note bookkeeping; CSE removes such copies before regmove sees them
+      in every plain form tried. Not found: the source of the anti-link
+      from -0.5's store to -1.0's load with -0.5 and -1.0 in separate
+      pseudos.
+    - **Ruled out in wave 15:** a 16-byte vector field whose type is
+      BLKmode (a struct of a 12-byte struct and a float, or of an array):
+      a 16-aligned 16-byte copy is TImode pieces (`lq`/`sq`), never a
+      BLKmode move whose unknown size would conflict with the frame
+      stores; `-c.f70` for -1.0 (CSE does not fold the negation: a
+      `neg.s` stays); `c.f20 + c.f20` or `k *= 2.0f` (folded to the
+      constant, same code as the literal); loop notes around the first
+      stores (a `do { } while (0)` probe: a barrier in sched2 as well,
+      which retail's `lq` before -0.5's store rules out).

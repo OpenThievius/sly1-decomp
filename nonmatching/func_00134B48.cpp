@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1712/1756 (97.5%), checked 2026-11-09
+// BYTES 1712/1756 (97.5%), checked 2026-11-10
 #include "common.h"
 #include "layout_137228.h"
 #include "screen_element.h"
@@ -26,6 +26,19 @@
 // then g_unitRange's %hi pseudo (5 refs over 466) outranks the clock's address (5 over 486)
 // and takes s4. Retail fits only a hoisted `this` whose %hi was set in an earlier block (its
 // %lo then not raised by adjust_priority); no form found (docs/TOOLCHAIN.md, func_001316E8).
+// Ruled out (2026-11-10, w15): ApproachValueWithRamp's definition in file_1E88D0.cpp takes
+// its pointers first (k, out, x, y, z); declared so, the a0/a1 moves come before retail's
+// `mov.s $f13,$f23` and both calls' argument setup differs (26 instructions): the float-first
+// declaration here gives retail's order.
+// Wave 15 (2026-11-10, re-scored 97.5%): sched2 issues the constants and the spill stores in
+// sched1's LUID order, and exactly two in-block %hi/%lo pairs can rank before &pos. Our
+// third is Limit's `this`: loop.c's second pass re-emits it as a fresh %hi + %lo, and cse2
+// swaps the fresh %hi for PRE's pseudo set earlier in the same block. With g_unitRange read
+// before the loops (experiment), the body's %hi is moved in the second pass too: any hoisted
+// `this` brings its pair. Ruled out: a range pointer before the loop or at the top (no %lo
+// fold), the table as &D_00261190[4] (own high(sym+16) expression), an early-return clamp
+// (retail's preheader, s4 lost, 4 bytes longer), two f58 calls in an if/else (not merged).
+// docs/toolchain/sched1.md, "Spill stores between float constants".
 // What landed here (2026-11-09): the five setters in an inline helper (ScreenLayout::Reset,
 // as PAL's func_001316E8: the layout's address formed at each call, the colour buffer's from a
 // spill slot), the font's box through the file family's StyleDrawer::Draw (retail forms &layout

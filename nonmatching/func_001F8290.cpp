@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 488/492 (99.2%), checked 2026-11-09
+// BYTES 488/492 (99.2%), checked 2026-11-10
 // NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: only the packet's
 //       and the id's stores are swapped (retail: argument, packet, id, callback); every register
 //       and every other instruction is retail's. The client's packet and callback words are
@@ -21,6 +21,15 @@
 //       pointer type or void*, the id read in place or into a local, all 24 store orders
 //       (864 compiles): nothing under these 8 bytes; -O3, -fno-gcse, -fno-strict-aliasing,
 //       -fno-sched-interblock, -fno-regmove, -fno-rerun-cse-after-loop change nothing or worse.
+// 2026-11-10 (docs/toolchain/alias-classes.md, "What retail's order needs, and a lever that
+//       proves it"): sched2 picks the argument's store first by its dependents ($v0 is loaded
+//       again for the server word), so sched1 only has to issue packet before id before
+//       callback. Written through volatile lvalues (argument, packet and id or callback, with
+//       the callback an int word) the function is EXACT: an ordering edge between the client's
+//       stores is all that is missing. Not landable: a volatile client breaks
+//       HandleRemoteCallReply, whose delay slots hold the callback's argument and the packet,
+//       which a volatile reference never fills. A nested header struct for the first four
+//       words, and a loop note around the id's store, do not help.
 #include "common.h"
 
 struct Client_1F7BE8;

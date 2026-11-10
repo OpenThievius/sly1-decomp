@@ -65,3 +65,30 @@ local-alloc places, which follows the number and lives of the pseudos at
 each point, that is the source's argument and statement shapes, and through
 the CSE windows the instruction counts before each window edge.
 func_00109488 has no call, so no callee's return type is involved.
+
+### A scratch float in a loop: local-alloc's tie against global-alloc's ranking (func_00131F60)
+
+Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and global.c read.
+
+- **A scratch set to a constant, then to a product, then to another constant.** The gauge loop
+  keeps 1/15 and 372.8 in the loop because one float is set to both (set more than once,
+  loop.c does not move it). Retail's sched2 order puts the 372.8 load after `x0 = d - inset`,
+  where ours issued it right after `hi = lo + d`: the scratch also holds `(1 - lo) * 55`
+  (`d = (one - lo) * k; x0 = d - inset; ... d = 372.8f;`), so the constant's set has an anti
+  dependence on x0's subtraction and sched1 keeps it there; global-alloc then gives the scratch
+  one register for all three lives ($f2).
+- **local-alloc's ties count in its ranking.** combine_regs ties `hi * height` to `hi` (hi dies
+  there), adding its references (qty_n_refs, 8 + 4) and moving the quantity's death to the
+  product's last use. QTY_CMP_PRI is floor_log2(refs) * refs / (death - birth), with birth and
+  death at twice the insn's index in the block (labels count, notes do not): hi's quantity is
+  3 * 12 / 2(n_y1 - n_hi) and a two-insn temporary's 2 * 4 / 2 * 3. With hi at insn 9 the
+  temporary goes first only when y1's subtraction is at insn 23 or later.
+- **global-alloc's ranking of the same insn.** y1 lives across three calls; its live length is
+  the insns after its subtraction, so each insn later in block 1 shortens it by one. 16.0 is a
+  preheader constant with a REG_EQUIV note, whose live length update_equiv_regs doubles (87
+  insns counted as 174). 16.0 goes first (retail's $f23) only while 8 / life(y1) is below
+  39 / 174, that is while y1's subtraction is at insn 22 or earlier. The two rankings want
+  y1's subtraction on either side of one insn: retail's loop must have one more insn in y1's
+  life (or one fewer before hi) that is gone by the final code. Written `y1` before `y0`,
+  sched1 puts y1's subtraction last and local-alloc's registers are retail's but global-alloc's
+  are not; the other way round, the reverse.

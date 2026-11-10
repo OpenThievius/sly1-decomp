@@ -290,7 +290,7 @@ explains it; search the section's title or the function. Walls that stay open ar
 ### Still open
 func_00186230, func_00186320, func_00130748 and func_001D4348 (a compiler-made `qmfc2` that an asm one does not
 reproduce); the static-record constructor wall (func_0018A510, func_001D61C8, func_001D5FA8, func_001D60B0);
-func_0013BE18 and func_0014F168 (a store in each arm merged only after sched2); func_001F3140, func_0020A190,
+func_0013BE18 and func_0014F168 (a store in each arm merged only after sched2); func_0020A190,
 func_00183668 (a pass-ordering effect no plain form gives); func_0014B6A8, func_001DC4D0, func_001DC238 and
 func_0015A198 (an unread small object that only an empty destructor reproduces).
 

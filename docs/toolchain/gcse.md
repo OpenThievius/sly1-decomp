@@ -285,7 +285,7 @@ included.
 - **Reading it.** Retail's hoisted pointer increments reading the outer pointers while the inner
   loop walks registers of its own: the inner loop was written with an index, not with copies.
 
-### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, unsolved)
+### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, matched 2026-11-10)
 
 `for (i = 0; i < n; i++) { e = &entries[i]; if (e->used == 0) { inner loop; sum += span; } }`.
 Retail's `addiu v0,a3,1` in the `bnez` delay slot and `move a3,v0` at the latch are PRE's: the
@@ -318,8 +318,19 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   block).
 - **Spotting it.** A loop index's `i + 1` in a branch delay slot, held in a register whose
   number the body's temporaries also use: retail's add was born late, so the skip edge of the
-  original had a block of its own when gcse ran. A plain-C form that gives that block without
-  a dead statement is still to be found.
+  original had a block of its own when gcse ran.
+- **The form: a switch with a second, empty case.** `switch (e->kind) { case 0: { ... break; }
+  case 1: break; }` (the file's EvaluateOscillator switches on the same kind, a sine 0 and a
+  noise blend 1; the noise blend has no fixed amplitude to add). The two cases' compares share
+  their targets, so by gcse only `beq kind,0,Lcase0; j Lend; barrier; Lcase0:` is left: the
+  unconditional jump is a block of its own on the skip path, the skip edge is no longer
+  critical, and PRE inserts `r178 = i + 1` at the end of that jump block and of the inner
+  loop's preheader (the -dG dump: "end of bb 2", "end of bb 3"), never in the loop-top block.
+  jump.c later inverts the pair into one `bnez` to the latch, and reorg fills its delay slot
+  with the add. EXACT. A one-case switch (or an `if`) gives jump1 the plain `bne` at once,
+  hence the 21 lines.
+- **Spotting it:** a test whose skip edge PRE treats as having a block (the add born after the
+  test's operands) was a `switch` whose other case did nothing.
 
 ### A copy in each arm is propagated into the join (func_00114BB0, matched 2026-11-10)
 
@@ -694,3 +705,57 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
   substituted as a constant and set straight into `$a0`, which gcse never records, so the
   query's `&q` is the only occurrence. A free inline function does the same only if its pointer
   parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.
+
+### A weight's slot store before a load keeps PRE off that load (func_00187260)
+
+CollectMeshHits loads `rel` (a Vec02 on the frame) for the squared distance and again, after a
+search loop, for the normal `MulX(Vec::Of(rel), Vec::Scalar(1.0f / len))`. PRE deleted the
+second load (`PRE: redundant insn 1977 (expression 122) ... reaching reg is 802`) and kept the
+value in a VU0 register across the loop (a `vmove` in a delay slot); retail loads it again
+(`lqc2 $vf2,4112(sp)`). An occurrence is deleted only when it comes before any kill in its
+block (ANTLOC), and in this release any store kills every memory expression. Vec::Scalar stores
+its weight to a frame slot; as MulX's second argument, after `Vec::Of(rel)`, the store comes
+after the load. Naming the weight first (`Vu0::Vec s = Vu0::Vec::Scalar(1.0f / len);` and then
+`MulX(Vec::Of(rel), s)`) puts the slot store ahead of the load in the block, and the load
+stays.
+
+### An asm's bucket comes from its header line: a value spilled among frame addresses (func_001D7778)
+
+StepPathFollower's eight PRE registers that reload spills are the addresses of seven locals
+(`(plus (reg 1) N)`, raw hash 13259 + N) and the `ScalarInGpr(dt)` value shared by two
+statements after the first loop. Retail's slots put the dt value last; ours put it between
+0xC0's and 0xD0's, which added 16 bytes of frame and moved every later slot. The asm's raw hash
+is gcse.c's sum over ASM_OPERANDS ("ssiEEsi"): its code and mode (38 + 0), the template, the
+output constraint and the file name as character sums, the output index, the input's `REG << 7`
++ regno (dt is pseudo 117), the input constraint's `ASM_INPUT:SF` (37 + 14 + 'f'), and the
+**source line of the asm in include/vu0.h** (361): 9614. With T = 349 (697 insns at gcse) it
+falls in bucket 191, before 0xD0's 205. The odd T from 301 to 403 that order all eight as
+retail's slots do are 301, 323, 333, 357, 359, 387, 389, 391, 401, 403. Writing the two
+statements that take `ScalarInGpr(dt)` over Vu0::Vec values (`Vu0::MulAddX(Vu0::Vec::Of(..),
+Vu0::Vec::Of(..), Vu0::Vec::ScalarInGpr(dt)).q`, the same for the delta's DivX) adds their movti
+copies: 718 insns, T = 359, and the slots are retail's. The line number makes such a bucket an
+accident of our header's layout: solve the table size for the order retail shows, as above,
+rather than moving the helper.
+
+### A stack array read through `(rows + r)->`: the frame constant stays out of PRE's reach (func_001D5678, near miss)
+
+DrawAngleSortedRing copies three rows of its parameter block into a stack array, scales them, and
+reads them again in the draw loop. Retail forms `sp + 14512` once at the entry (spilled, read by the
+copy loop) and again in the draw's i-loop preheader (spilled to a slot of its own); ours had one
+pseudo for both (2026-11-10, w15):
+
+- **The expression.** `rows[r].x`, `&rows[r]` and `Vec02* row = rows + r;` all expand the address
+  of the element first, `(plus (plus fp 14512) (ashift r 4))` forced into a register, which
+  computes `fp + 14512` as an insn of its own: expression `(plus fp 14512)`, which PRE then finds
+  redundant with the copy loop's and replaces by its entry pseudo.
+- **Pointer arithmetic inside the memory reference.** `(rows + r)->x` is a PLUS_EXPR expanded with
+  EXPAND_SUM as the address of a MEM: expand_expr puts the sum's constant outside
+  (`((ashift r 4) + fp) + 14512`), and memory_address leaves 14512 as the offset, so GCSE has no
+  `fp + 14512` there. loop.c's giv for the rows then has the add value `fp + 14512`, which it
+  forms in the row loop's preheader and moves out of the i loop in its next pass: retail's
+  `addiu v0,sp,14512; sw v0,14644(sp)` and two more instructions than ours had.
+- **Bucket order.** The four addresses PRE hoists to the entry (sp+32, sp+8288, params+112,
+  sp+14512) spill in pseudo order, which is the table's bucket order, (13258 + regno + offset) mod
+  T. For retail's order T = 323 (or 339) with params as pseudo 121; `*(Vu0::Vec*)&x = F(...)`
+  stores (two more insns each than `Vu0::Q(x) = F(...).q`), Vec locals for the weighted sums'
+  operands and a named row weight bring the table from 305 to 323 with the final code unchanged.

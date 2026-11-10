@@ -71,7 +71,7 @@ void SetCameraControllerOwner(CameraController* self, Camera* owner);
 
 void VectorToAngles(void* a, void* b, void* c);
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
-void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 void SetCameraLookAnchor(void* eng, void* tmp);
 void SetCameraNearDistance(void* eng, f32 x);
 extern void* g_deadlineNotifier;
@@ -357,7 +357,7 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
     } else {
         offset = &D_00261C10;
     }
-    BuildYawPitchMatrix(&m, *(f32*)&self->value, self->f10);
+    BuildYawPitchMatrix(*(f32*)&self->value, self->f10, &m);
     Quad16 target = GetCameraControllerTargetPoint(self);
     Vu0::Q(r) = Vu0::Add(Vu0::Q(target), Vu0::Rotate(m, Vu0::Q(*(Quad16*)offset)));
     return r;

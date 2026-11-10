@@ -219,6 +219,35 @@ the givs strength_reduce reduced, all before the loop's start; so what the secon
   In retail's order (positions, rotations, q4, q8 in the cases) the registers come out right;
   what keeps the 48 movable in pass 1 there is still to find.
 
+### Solved: the samples' byte offsets formed before the switch (func_00118988)
+
+SampleScriptAnimation matched on 2026-11-10 (src/main/script_machine.cpp), read from `-dL`
+dumps:
+
+- **The threshold is 79 here, and the 48 is sixth.** Varying the loop's size with the 48 left
+  after the compare tree: 64 insns moves it, 65 does not, so `79 - 15 = 64` is its limit behind
+  the tree's five moves (li 2, the `bit < 3` slt, li 1, li 4, li 8). The `li 48` always sits
+  right before its `mult` (expand_binop forces the constant after both operands, and
+  `-fforce-mem` loads a memory operand before it), so its lifetime is 1, and it can move in
+  pass 1 only from ahead of the tree or with a loop of 64 insns.
+- **Which giv is reduced last.** strength_reduce prepends each giv it finds, so it reduces them
+  in reverse order of the loop and the last one's start value sits nearest the loop: the
+  shortest life, global-alloc's first choice (s4). Retail's increments and start values (q8,
+  q4, rotations, positions) say positions' giv came first: its address in case 1 is a memory
+  giv, so the rotations' surviving giv (the add of the base) has to be found after case 1.
+- **Both at once: the multiply ahead, the add in case 2.** Computing the offsets at the top of
+  the body, `s32 quad = i * sizeof(ScriptSampleQuad); s32 rot = i * sizeof(ScriptSampleRotation);`,
+  and adding them to the buffers in the cases (`rotations + rot`), puts the `li 48` first in
+  the movables (moved at 79) and the add giv in case 2: pass 1 reduces every giv, pass 2
+  reverses the counter, and the registers are retail's. The buffers are AllocateBackMemory's
+  untyped memory, so they are `u8*` and the cases cast at the read. Ruled out: a pointer local
+  `r = &rotations[i]` ahead of the switch (the add is then found first: rotations takes s4),
+  pointers for all four (each case's memory giv is reduced separately, the same swap), an
+  inline taking the index by `const s32&` (ADDRESSOF loads: 74 insns), `u32` counters and
+  switch copies (no change), and pointer walks with a count (`if (n > 0) do { } while (--k)`:
+  registers right, but the walks' starts are the source's, ahead of loop.c's moved slt, so
+  sched2 places its spill store last).
+
 ### The threshold falls as loop.c moves: which invariant wins a saved register (func_001CF158)
 
 Read from loop.c (move_movables) and global.c with `-dL -dG` dumps (2026-11-08,
@@ -522,3 +551,40 @@ had no `block` variable: each loop takes the slots' address itself, inside its b
 
 The tell: a reg-reg copy in a loop's preheader that feeds only the inner loop's reduced pointer
 is a PRE copy of an address the original wrote inside the inner loop's body.
+
+### A pointer set in an inner loop too is no giv of the outer loop (func_00187260)
+
+CollectMeshHits's vertex pass searches the edge hits (`out[q]`, an inner loop) and then writes
+a hit through `o = &out[n++]`. Ours reduced the whole address `out + n * 48` into one register
+(`addiu a3,a3,48`, stores at -48(a3)); retail reduces `n * 48` alone (`mult t3,s2,v1` in the
+preheader, `addiu t3,t3,48` per hit) and adds the base in the loop (`addu a1,s8,t3`). The .loop
+dump of ours: `Insn 2396: giv reg 130 src reg 124 ... mult 48 add (reg/v:SI 122)`, combined with
+every store's DEST_ADDR giv and reduced.
+
+- **strength_reduce takes a DEST_REG giv only where the register is set once in the loop**
+  (`VARRAY_INT (n_times_set, REGNO (dest_reg)) == 1`, or consecutive sets that make one giv).
+  n_times_set counts every set between the outer loop's start and end, the inner loops'
+  included. When the inner search reads its records through the same pointer (`o = &out[q];
+  ed = (MeshEdge*)o->part;`), o is set twice in the outer loop and is no giv there; `n * 48`
+  (its own pseudo) stays a giv and is reduced alone, and the stores, addresses off a non-giv,
+  stay as they are. In the inner loop o is set once, but there the record's `part` address
+  (`q * 48 + 40` plus out) was already the reduced giv, and the code does not change.
+- **The reload side.** Ours's whole-address giv was set in the preheader by a `madd`
+  (`*mul_acc_si_r5900`, four scratch clobbers), whose reload made a1 a spill register
+  (`Spilling for insn 2712. Spilling reg 5.` in .greg). That one spill register, 1,400 bytes
+  later, shifted the round robin ("The reload register's round robin", reloads-and-stores.md)
+  of every qmfc2/mfc1 temporary at the top of the function: a0, a1, a3, v0 where retail has
+  a0, a3, a0, a3. The register set of the whole function is the tell: count the `Spilling reg`
+  lines of .greg and look for the one that retail's rotation skips.
+
+### A loop's own counter frees a saved register for a hoisted %hi (PAL func_eu_001DDC68)
+
+PAL's copy of LoadWorld adds a 14-entry loop to US's two counted loops. Reusing US's `i` for it
+makes the counter one user variable set six times over all three loops: one pseudo, one saved
+register (s3), with the third loop's pointer reusing another. Global-alloc then has a saved register
+left for the `%hi` of g_activeListFrames that PRE hoisted to the entry block (4 refs across 314
+insns, the lowest-ranked of the candidates that still get one), so ours keeps it in fp as US does.
+Retail allocates nothing for it (a fresh `lui` at each use) and holds the first two loops' counter
+in s0 and the new loop's in s1, with the five member addresses in s4-fp: the new loop had a counter
+of its own. `for (s32 k = 0; k < 14; k++)` instead of `for (i = 0; ...)` was EXACT. Spot it: a
+counter in a different saved register in one loop than in the loops before it.

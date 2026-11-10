@@ -15,7 +15,16 @@
  * the registers are retail's, so retail's sched2 saw a dependence ours lacks (a stale sched1
  * link to the trap, or the field load's chain one longer). Ruled out: the ternary as
  * `p->field ?`, `(... ? h * 2 : h) - 1`, `(h << 1) - 1`, `h * (... ? 2 : 1) - 1`, and
- * magh * w - 1 as a named (or const) local, which moves the multiplies. */
+ * magh * w - 1 as a named (or const) local, which moves the multiplies. Measured 2026-11-10
+ * (docs/toolchain/sched1.md, "The zero trap of func_00202140"): sched2 keeps sched1's links
+ * (block 7 shows them twice), and retail's order needs the trap at priority 5, the shift's: an
+ * edge trap -> the dx term's daddiu, the field load -> the magh or dw shift, or the dw
+ * term's dsll32 absent from the block (computed in each field arm, moved into the beqz delay
+ * slot by reorg). Also ruled out: the field read into a local (in the arm, or one for the
+ * function), its casts ((s16), (u16), (s32), (char)), `== 0` arms swapped, `2 * h`,
+ * `h + h`, the dw term as a product or a (u32)/(s64) cast, the dy mask after the shift, a
+ * sixth MAGV term (a constant or a local 0: 720 orders), the interlace arms swapped, a dh
+ * local, a u64 local for the word. */
 #include "common.h"
 
 typedef struct GsParam {

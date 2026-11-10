@@ -458,14 +458,14 @@ void UpdateTintBlendCollider(TintBlendCollider* self)
 
 extern f32 g_frameDt;
 void func_00128598(f32 a, f32 b, void* self, s32 c, s32 d, f32* e, f32* f, f32* g);
-void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 {
     f32 heading, pitch, speed;
     func_00128598(g_frameDt, self->f638, self, 0, 0, &heading, &pitch, &speed);
     self->f638 = heading;
-    BuildYawPitchMatrix(&self->m660, heading, pitch);
+    BuildYawPitchMatrix(heading, pitch, &self->m660);
     Vu0::Q(self->v640) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
 }
 

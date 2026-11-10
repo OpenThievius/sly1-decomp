@@ -121,6 +121,30 @@ makes no optional reload and inheritance never sees vf6: retail must have had a 
 in vf6 for the asm and the first call. d as Vu0::Vec, as a Vec02, through Vu0::Q, and an inline
 helper taking d for PlaneSigns and the call do not give it.
 
+Read further from reload1.c, reload.c and the `-dF -dG -dt -dl -dg` dumps (2026-11-10, w15):
+
+- **movti's alternatives.** The 2.95.3 cc1plus's constraint strings for movti_internal are
+  `=d,j,j,d,d,d,R,m,j,j,R,m,d,d,d,d,d` and `d,j,d,j,R,m,d,d,R,m,j,j,J,K,L,M,i`: a GPR from a
+  spilled pseudo wins on alternative 5 (`d` from `m`, no reload), so nothing inherits vf6. A
+  copy into a GPR from a VU0 reload register (func_001841D0's `qmfc2 a0,$vf2; sq a0`) happens
+  only where the move needs the value in a register (memory to memory): reload_override_in.
+- **reload_cse does not do it either.** reload_cse_simplify_set swaps a load for a register
+  that holds the same value only when REGISTER_MOVE_COST from that register's class is 2; ours
+  keeps `lq a1` with vf6 known equal to the slot, so VU0 to GPR costs more.
+  reload_cse_simplify_operands sorts the alternatives by the fewest substitutions (2.95's
+  comparison), so it never substitutes in a move.
+- **A frame variable instead of the spill slot.** d forced into the frame at purge_addressof
+  time lands at 0x1C0, after fade (0x1B0), retail's offsets; but cse2 then forwards the
+  stored value to the asm and the call (vsub straight into vf6, `qmfc2 a1,$vf6`, no reload),
+  where retail reloads the slot. cse1 does not forward through `(mem (addressof))`; cse2 does
+  once the variable is in the frame or a register again. A Vec02 d (expand-time slot 0x60)
+  is forwarded by cse1; a Vu0::Vec d keeps its movti copies through gcse and cse2 folds them;
+  a `const u128&` to d, local or an inline helper's parameter, is purged to the same pseudo.
+- **What retail implies.** A pseudo in vf6 that the asm reads and the first call's move copies
+  (`qmfc2` is then the move itself), set from the slot where reload would put the asm's input
+  reload, or a frame store cse2 could not see when it reached the asm. Neither comes from a
+  plain form tried so far.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
@@ -340,6 +364,27 @@ integrate.c (the inline frame's `assign_stack_temp (BLKmode, size, 1)`), with th
   the dot. Row 0 has to beat v at the first cycle (rows 1 and 2 wait for the addiu of the
   matrix's address); Vec or u128 forms, RotateMembers, RotateRowsTied over the rows, v named
   first, and ScalarAtValue or ScalarAtCall for the f63C weight do not give it.
+- **The rows read before v: rows as Vec values through a pointer (2026-11-10, w15).** Rotate's
+  `u128 v` is a register parameter, and integrate.c's process_reg_param copies any memory
+  argument into a pseudo at the call, `const` or not, so v640's load always gets a lower LUID
+  than the rows the asm reads (it was the LUID that let it beat row 0 in the first cycle; row 2
+  wins the second on INSN_REG_WEIGHT, being the last use of the matrix's address). Written as
+  `const Vu0::Vec* m = (const Vu0::Vec*)&self->m660;` and
+  `RotateRowsTied(m[0], m[1], m[2], Vec::Of(self->v640))`, the rows are loaded first, keep
+  retail's `addiu v0, s1, 0x660` (a reference local or `Vec::Of(m.r[k])` lets CSE fold every row
+  into `s1` offsets), and as Vec values they no longer wait for the weight-slot stores (two
+  dependents each, not four): sched1 takes row 0, row 2, row 1, v and local-alloc gives
+  retail's vf5, vf3, vf4 and vf2 (97.6%).
+- **Still open: the f63C weight's qmtc2 is ready at the block's start.** It is one insn (FromFloatAt's
+  memory operand, ScalarAtValue and ScalarAtCall alike, since combine folds the load back in),
+  the block's last use of `self` (weight 0, as the -push weight's qmtc2, which kills the negated
+  float), and has three dependents (its slot store, the sum, and an anti dependence on the
+  end->v30 store, as parameters may alias) against the -push qmtc2's two, so it takes the free
+  slot in the fourth cycle. The emulator wants it after the dot and before the end->v30 load.
+  Passing m110.r[2] as a plain `*(const u128*)&` argument (evaluated after the weights' inline
+  calls) lets the -push qmtc2 go first, but then `self` dies at m110's load, which wins the
+  sixth cycle on weight; the f63C weight takes vf4 and its reload takes s1 (17 lines). Naming
+  the weights as Vec locals changes the frame (224 bytes).
 
 ### Which induction variable loop.c keeps: combine_givs' totals (func_001575D8)
 

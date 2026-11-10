@@ -15,6 +15,12 @@
 //       weight (z0): 68 and 82. Declaration orders, ny's position: no change or worse.
 //       Re-associations in this order: x*(z*y) 63, (y*z)*x 55 (its operands then differ).
 // Tried (order-class pass 2): the products re-associated four ways (z*(ny*xa), xa*ny*z, ny*xa*z, z*xa*ny): 94 to 98 words, worse than 70.
+// Tried (2026-11-10, w15): not the blend family of func_0019C9C8 (no loop, no pointer load,
+//       no SetBlendItemWeights call: only the 32 products and 24 stores through out), so its
+//       typed-pointer and PRE levers have nothing to act on. A copy of y (`ya = y`) and the 24
+//       products named before all 24 stores: identical code (51 lines). Without sched1
+//       (-fno-schedule-insns, to explore): 94 lines, so retail's 18 live FPRs are sched1's
+//       interleaving and the wall stays local-alloc's ranking on sched1's order.
 #include "common.h"
 
 void ComputeGridBlendWeights(void* self, f32* out, f32 x, f32 y, f32 z)

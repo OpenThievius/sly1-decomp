@@ -515,7 +515,7 @@ f32 ArctangentOfRatio(f32 a, f32 b);
 
 f32 ApproachAngleWithRamp(u8* p, s32 a, f32 b, f32 c, f32 d);
 
-void BuildYawPitchMatrix(f32* out, f32 unused, f32 value);
+void BuildYawPitchMatrix(f32 unused, f32 value, f32* out);
 
 extern f32 D_0026B6A0[4];
 
@@ -2973,7 +2973,7 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src)
     f.ramp = *(RampParams*)D_0024C9C0;
     f32 r = ArctangentOfRatio(((PlacedObject*)self->f64C)->m110.r[0].y, ((PlacedObject*)self->f64C)->m110.r[0].x);
     r = ApproachAngleWithRamp((u8*)&f.ramp, 0, r, self->f620, g_frameDt);
-    BuildYawPitchMatrix((f32*)&f.rot, r, 0.0f);
+    BuildYawPitchMatrix(r, 0.0f, (f32*)&f.rot);
     TransformRotationBetweenFrames(0, self, &f.rot, &f.rot);
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
@@ -3216,7 +3216,7 @@ void StepWalkerCollider(WalkerCollider* self)
 {
     f32 buf[12];
     StepCollider(self);
-    BuildYawPitchMatrix(buf, self->f618, 0.0f);
+    BuildYawPitchMatrix(self->f618, 0.0f, buf);
     TurnColliderTowardRotation(self, buf, D_0026B7D8, g_frameDt);
 }
 

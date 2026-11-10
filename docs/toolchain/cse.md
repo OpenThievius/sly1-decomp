@@ -821,6 +821,46 @@ Not matched; the plausible plain forms are exhausted. The remaining lead is a so
 the key's shift is written on more than one path (the tails merged by jump2), which could also
 change what precedes the greater-than test at reorg.
 
+### The same switch with the full mask's case first: a conditional move CSE cannot drop (func_0020A190)
+
+Measured 2026-11-10, following the section above (nonmatching/func_0020A190.cpp). Written with
+the full mask's case *first* (`case 0xFFFFFFFFFF: sh = 0; break;` before the 24 and 32 cases),
+the function is retail's code instruction for instruction (regdiff: registers, 34/34):
+
+- **jump.c.** The case bodies follow the dispatch code, so the first body comes straight after
+  the right leaf's `== 0xFFFFFFFFFF -> L_full; jump end`. jump1 inverts that into
+  `!= 0xFFFFFFFFFF -> end; L_full: sh = 0; jump end` and, a lone `if (c) x = k;`
+  (docs/toolchain/conditional-moves.md), turns it into `sh = mask != full ? sh : 0`. With the
+  case last (the earlier order), the body is not next to its test and stays a branch.
+- **CSE.** Following the jumps from the top, CSE substitutes the known `sh = 0` into the move and
+  gets `(if_then_else c (const_int 0) (const_int 0))`, which this version does not simplify:
+  the source is no register and no constant, so neither the no-op rule nor
+  `delete_trivially_dead_insns` removes it, and the compare stays live through cse2 and flow.
+- **combine** simplifies the move with equal arms to `sh = 0` (with `use`s of the condition's
+  operands), after the last CSE. The `!= 0xFFFFFFFFFF` compare is then dead and goes, the
+  greater-than branch reaches `sh = 0` directly, and reorg puts the set in a `bnezl`'s annulled
+  slot: retail's shape, with no third compare.
+
+So a set CSE "should" delete as redundant survives when jump1 has already made it a conditional
+move: a case body written right after the dispatch (the first case) or an `if` with a lone
+constant assignment. Spot it in the .cse dump as `(if_then_else ... (const_int 0) (const_int 0))`
+(`nop+2`).
+
+What still differs is the registers, one chain: the mask constant takes $a2 where retail has $a0,
+then the entry offset, the key and the table's `%hi` each take the next register. In this
+compiler the pseudos local-alloc placed are allocnos too (the .greg dump lists their conflicts),
+so `expand_preferences` merges the dsllv's result (local, $a0) with the key and `sh`, which die in
+it: both prefer $a0 and $a1. Both rank below the mask (2 refs over 26 insns and 5 over 44,
+against 3 over 10) and conflict with it, so `prune_preferences` puts $a0 in the mask's
+`regs_someone_prefers`, and pass 0 of `find_reg` takes the first other call-used register, $a2.
+With $a0 to the mask, the rest falls out as retail's. Not found: what keeps $a0 out of that set in
+retail (the key not dying in the shift, tested, gives the mask $a0 but moves sh; a source shape
+that ranks the key and sh above the mask, or gives the mask its own $a0 preference). Tried
+without effect: sh as u32 or u8, a named mask, a pointer to the entry, the shift as its own local,
+`r |=` after loading the entry, the or's operands swapped, early returns, r set in an else, the key
+copied to a local, sh declared in the block, a third parameter, every placement of the frame's
+unused entry, a `default`, a copy of the shift in each case.
+
 ### An end pointer, a switch and a reread argument: a kind loop's size (func_00185F48)
 
 Matched 2026-11-10. The function walks each contact's two ends and carries each end's point into
@@ -1035,6 +1075,25 @@ combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -d
   and the reused variable moves the switch's registers. Ruled out as well: `s64` locals and casts
   (`(s32)((s64)a * b)` folds back to SImode; an `s64` local keeps a truncdisi2 of
   `(truncate (sign_extend p))` that SN's combine does not reduce; u64 forms widen and shift).
+- **Both conditions, and nothing else (2026-11-10, both functions EXACT in a test form).** The
+  "outside CSE's block" test reads REGNO_FIRST_UID, which reg_scan records before cse1, so a
+  *dead* early reference is enough: `s32 n = 0;` at the top (flow deletes it before allocation,
+  so the switch's registers stay retail's), `s32 m = cols * rows;` before the two float stores,
+  `n = m; self->cells = n;` at the end gives retail's bytes in US func_001ABE70 and PAL
+  func_eu_001ACC68 (check.py EXACT). Take away either half and it is mult3 again: without the
+  early reference (`s32 n = m;`) CSE deletes the copy; with the copy right after the mult (or the
+  product assigned to n directly, `n = cols * rows;`, which expand_mult writes straight into n)
+  the i3_subst_into_i2 path keeps the PARALLEL. A live early reference (the switch's value in n)
+  is global-alloc's and moves the switch's registers.
+- **Why it is not landed.** Each half is a form no plain source needs: a variable referenced
+  before the switch only to be overwritten, and a second variable that only carries the product
+  to it. No single-variable form gives a temporary product: a pseudo target (`n = a * b`,
+  `n *= b`, a chained assignment) takes the mult directly (expand_binop uses the target; a
+  same-mode NOP_EXPR passes it on); an inline's return copy is adjacent (expand_return computes
+  into a fresh pseudo and copies it at once); an inline's parameter copy is block-local and CSE
+  deletes it. The original must have had both a long-lived int variable and a temporary
+  (two locals, or an inline whose local is returned after other statements); until a plausible
+  shape of that turns up, both stay near misses with this form in their notes.
 - The other nine `mult $zero` sites in US are products by a constant or with an operand that
   dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
   to an argument register: a three-insn combine whose split leaves the bare SET.
@@ -1149,3 +1208,16 @@ and reorg.c with `-dj -dJ -dd` dumps (2026-11-10):
 - **key = 0 in the else arm.** `key = 0; if (near) key = Find(..);` lets sched1 put the zero before
   the first call; written as `if (near) key = Find(..); else key = 0;`, reorg moves the zero into
   the branch's slot, as retail has it.
+
+### A break test written right after the head rolls with it (PAL func_eu_0015E4A8)
+
+- PAL's line layout begins its loop body with the newline handling: the read, the width, the
+  newline test and the handling's `if (e >= end) break;` are the rolled exit test at the
+  bottom, the handling itself the loop's new top, and both line breaks jump back to the
+  test. That is expand_end_loop's roll with the last exit jump within 30 insns of the read's:
+  written as `if (c == '\n') { newline: if (e >= end) break; ...; continue; }` first in the
+  body, with each break ending `pos = Pos(self); goto newline;`. Each break keeps its own
+  position read: cross-jumping merges the two after reload, but global-alloc has already
+  counted both (one shared read left the position two references short of the table pointer,
+  and their saved registers swapped).
+

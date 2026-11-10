@@ -140,3 +140,23 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   reload's rotation is one step off with no visible extra reload, look for code the original
   repeated that jump2 merged. The skin pointer's early read (above) is no longer needed since
   Vu0::Scalar's slot became MEM_SCALAR_P: `if (mesh->f68 != 0)` read at its use matches too.
+
+- **func_00187260.** One `madd` in a loop preheader (a strength-reduced address, loops.md, "A
+  pointer set in an inner loop too is no giv of the outer loop") made a1 a spill register and
+  shifted every qmfc2 temporary of the function's first loop, 1,400 bytes before it.
+
+### Which dot reaches a GPR through local-alloc (func_001BC978)
+
+Read from the `-dS -dl -dg -fsched-verbose-6` dumps (2026-11-10, w15):
+
+- **A TI_REGS pseudo takes a GPR unless it has a suggestion.** A Dot whose result only feeds
+  ToFloatMoved (asm "=j" out, "r" in) costs the same in GPRs and VU0 registers, so regclass
+  gives it TI_REGS (`TI_REGS or none` in .lreg). local-alloc tries the suggested registers
+  first: d's dot (r368), whose input rn dies in the asm, takes rn's vf1, and its qmfc2 is then
+  the mtc1 asm's input reload (v0, reload's turn). offsetSq's dot (r393) has none (the offset
+  lives on to ro's Rotate), and the register order gives it v0 itself; retail's v1 is what
+  reload's round robin (above) would give a second qmfc2 reload after d's v0, i.e. offsetSq's
+  dot in a VU0 register. Neither the conversion helper (ToFloat gives v1 but its mtc1 has the
+  compiler's latency and moves), the member read inside the expression (o->mass) nor
+  ToFloatViaBits gives it.
+
