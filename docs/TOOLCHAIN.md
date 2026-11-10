@@ -6446,6 +6446,56 @@ retail's frame offsets and registers:
   above the MultiplyMatrices line, then `ScaleMatrix(result, ...)`. Placed after the call, the
   same pointer is propagated away (one use) and changes nothing.
 
+### Ramp copies live through a tail: a goto over function-scope locals (func_001C54D0, near miss)
+
+func_001C54D0 (a turning collider's contact push) had a frame 16 bytes short of retail's 208,
+every frame offset after the ground push wrong, and 8 bytes too many. Read from function.c
+(assign_stack_temp_for_type, combine_temp_slots, free_temp_slots), stmt.c (expand_decl) and
+integrate.c (the inline frame's `assign_stack_temp (BLKmode, size, 1)`), with the -dr dumps
+(2026-11-10, w13):
+
+- **Retail's offsets, as allocations.** The ground push stores its difference at 0 and its
+  Scalar weight at 32 (16 untouched bytes between); the push block stores two differences at 0
+  and 16 and the ramp profiles at 32 and 48; the tail stores both weights at 64; the two
+  out-parameters are at 80 and 84 (purge_addressof, after every expand-time slot). Every one of
+  these is BLKmode (Vec02 and an inline's frame are BLKmode, the profile union too), so a
+  later BLKmode request of 16 bytes takes any free slot: the tail's weight at 64 means 0..64 is
+  still in use at the tail, and the profile at 32 reusing the ground push's freed weight slot
+  means it was allocated after that block ended.
+- **So the profiles are function-scope and declared after the ground push.** Declared in the
+  else arm of `if (zero) push = 0; else { ... }` they are freed (and combined) at the arm's end
+  and the tail's weight takes 0 (ours: 192 bytes). A function-scope declaration after the inner
+  `if`, with the zero-push path jumping over it (`push = 0.0f; goto apply;`, legal since the
+  locals have no initializers), gives retail's 208 bytes and every offset. The 16 untouched
+  bytes of the ground push are the second difference vector, declared at the top with the
+  first, which the ground push reuses for its own difference (C-style scratch locals).
+- **Two copies of one address: an argument read first.** Retail's `addu a0,s3,s2; move a1,a0`
+  (loads through a0, the store through a1) is the address expanded inside each memory reference
+  (multiplication first) with the vector read into a named `u128 v = Q(c->end[e].v10);` at the
+  block's top; `ContactEnd03* end = &c->end[e]` gives `addu a0,s2,s3` and one register. The read
+  first also puts the load before the weight's computation, which gives the block's VU0
+  registers.
+- **A store of a vector's x from a GPR of reload's choosing.** The separation stored as bits:
+  Vu0::StoreX (the compiler's qmfc2, a reload into a0 after the block's pseudos) where ToBits'
+  own pseudo takes v0.
+- **sched2's tie between profile loads and dot loads.** With the dots written before the
+  profile copies (after them, the copies' BLKmode move kills CSE's knowledge of the
+  differences and they are reloaded: 8 bytes), each dot's load ranks by its chain to the first
+  call: an asm mtc1 (ToFloatMoved) costs 1, the compiler's (ToFloat's reload) 2, and the
+  push's division waits for the call (anti dependence on $f0). Both conversions as
+  ToFloatMoved give the dot loads priority 18 against the profile loads' 19, and the profile
+  loads go first as retail's do; with either ToFloat one dot load ties at 19 and wins on its
+  dependents count (six against five).
+- **Still open: the tail's sched1 order.** Ours loads v640 first (its Vec::Of argument is
+  expanded before Rotate's rows, so its LUID is lower), then rows 2 and 1 (their address
+  pseudo has no known base, so they conflict with the weight-slot stores and have four
+  dependents against row 0's two), then row 0, and puts the f63C weight's qmtc2 early as
+  filler. The lalloc2 emulator gives retail's VU0 registers for row 0 first, then row 2, then
+  row 1 (v anywhere before row 1), with the -push weight's qmtc2 early and the f63C one after
+  the dot. Row 0 has to beat v at the first cycle (rows 1 and 2 wait for the addiu of the
+  matrix's address); Vec or u128 forms, RotateMembers, RotateRowsTied over the rows, v named
+  first, and ScalarAtValue or ScalarAtCall for the f63C weight do not give it.
+
 ### Which induction variable loop.c keeps: combine_givs' totals (func_001575D8)
 
 func_001575D8 adds particles to chunks of six parallel arrays (this frame's position, velocity
