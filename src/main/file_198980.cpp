@@ -4,7 +4,7 @@
 // classes built on them (0x2D, 0x2E), classes 0x5C and 0x5D, class 0x17, class 0x71, the object
 // gatherer (class 0x41), class 0x7C and class 0x8B with the VU0 helpers only it and
 // func_0019D2A8/func_0019D338 call. Its .rodata (0x24C870 to 0x24C930) is the jump tables of
-// func_0019A6A8, func_0019B378 and func_0019C1C0 (assembly for now) and the FLT_MAX literal of
+// func_0019A6A8 (assembly for now), func_0019B378 and func_0019C1C0 and the FLT_MAX literal of
 // func_0019AF00; its .data (0x26A910 to 0x26ABF0) is the globals below, all initialised. Named
 // after its first address until what it was is known.
 #include "common.h"
@@ -131,7 +131,7 @@ extern s32 D_00275C34;
 void StartObjectSet(ObjectSet* self);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 RandomIntInRange(s32 a, s32 b);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
 Effect* CreateEffect(s32 kind, EffectOwner* sys);
 void SetNumberedItemFlag(NumberedItem* self);
@@ -1287,9 +1287,187 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
     }
 }
 
-INCLUDE_RODATA(jtbl_0024C8D0);
-INCLUDE_RODATA(jtbl_0024C8F0);
-INCLUDE_ASM(func_0019B378);
+// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
+// (list_iter.h) and each step reads the next item through the link.
+struct BeginListWalk {
+    static void Of(ListFrame* it, List01* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = g_activeListFrames;
+        g_activeListFrames = it;
+    }
+};
+
+template <class T> struct NextInList {
+    static T* Of(ListFrame* it)
+    {
+        T* obj = *(T**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct GatherCandidate {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 pos;              // 0x40
+};
+
+void UpdateCollider(Collider* self, f32 dt);
+void* FindColliderFloorContact(void* self, s32 key, s32* out);
+s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
+void ClearRootTries(void* self);
+
+// Each update: the state's sound, push and speed.
+void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
+{
+    Vec02 dir;
+    Vec02 target;
+    SwitchedCollider* act = (SwitchedCollider*)GetActiveSwitchedCollider();
+    UpdateCollider(self, dt);
+    s32 state = self->state;
+    if (act != 0) {
+        u128 pos = Vu0::Q(act->v140);
+        Vu0::Q(target) = Vu0::MulAddX(pos, Vu0::Q(act->v150), Vu0::Scalar(0.5f));
+    }
+    if (state < 3) {
+        if (state >= 0 && self->f55C < g_gameClock[1]) {
+            StartSoundEffect(0x3B, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            self->f55C = RandomGaussian(g_gameClock[1] + 3.0f, 1.0f, 2.5f);
+        }
+    }
+    if (act != 0 && (u32)state < 2 && Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140)))) < 90000.0f) {
+        ListFrame frame;
+        BeginListWalk::Of(&frame, &self->world->list1C60);
+        ObjectGatherer* n;
+        while ((n = NextInList<ObjectGatherer>::Of(&frame)) != 0) {
+            if (self != n) {
+                s32 near = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)))) < self->f624 * self->f624;
+                if (near) {
+                    func_0019C1C0(n, 2);
+                }
+            }
+        }
+        state = 2;
+        g_activeListFrames = frame.prev;
+    } else {
+        s32 side;
+        s32 go;
+        switch (state) {
+        case 0:
+            if (self->f558 < g_gameTime[0]) {
+                state = 1;
+            }
+            break;
+        case 1: {
+            go = 0;
+            if (self->ring == 0 && self->f554 + 0.5f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f614 * 0.1f) {
+                go = FindColliderFloorContact(self, 0, &side) != 0;
+            }
+            if (go) {
+                Vec02 push;
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f614 * 0.7f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                self->desc02()->m20(self, &push);
+                break;
+            }
+            if (self->f558 < g_gameTime[0]) {
+                state = 0;
+                break;
+            }
+            if (Vu0::ToFloatMoved(Vu0::DotXY(Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140)))) < 400.0f) {
+                state = 0;
+            }
+            break;
+        }
+        case 2: {
+            go = 0;
+            if (self->ring == 0 && self->f554 + 0.7f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f618 * 0.3f) {
+                go = FindColliderFloorContact(self, 0, &side) != 0;
+            }
+            if (go) {
+                Vec02 push;
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f618 * 0.5f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                self->desc02()->m20(self, &push);
+                break;
+            }
+            if (self->f558 < g_gameTime[0]) {
+                state = 1;
+                break;
+            }
+            if (self->f660 != 0 && TestPointAgainstObjectShape(self->f660, &self->v140) != 0) {
+                state = 4;
+            }
+            break;
+        }
+        case 3:
+            break;
+        case 4:
+            if (self->f558 < g_gameClock[1] && act != 0 && 360000.0f < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140)), Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140))))) {
+                ListFrame frame;
+                s32 any = 0;
+                BeginListWalk::Of(&frame, &self->world->list1C60);
+                while (NextInList<ObjectGatherer>::Of(&frame) != 0) {
+                    if (Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140)), Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140)))) < 90000.0f) {
+                        any = 1;
+                        break;
+                    }
+                }
+                if (any != 0) {
+                    self->f558 = g_gameClock[1] + RandomFloatInRange(0.2f, 3.0f);
+                } else {
+                    state = 1;
+                }
+                g_activeListFrames = frame.prev;
+            } else {
+                self->desc02()->m20(self, (Vec02*)&D_00248D30);
+                self->desc02()->m21(self, (Vec02*)&D_00248D30);
+            }
+            break;
+        }
+    }
+    func_0019C1C0(self, state);
+    switch (state) {
+    case 1:
+    case 2: {
+        f32 speed;
+        if (state == 1) {
+            Vu0::Q(self->v630) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
+            speed = self->f614;
+        } else {
+            speed = self->f618;
+            Vec02 at;
+            TransformPointBetweenFrames(((GatherCandidate*)self->f660)->frame, 0, &((GatherCandidate*)self->f660)->pos, (Quad4*)&at);
+            u128 d = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v140));
+            f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d)));
+            if (dist < 500.0f) {
+                speed = self->f618 <? (D_0026ABC0[0] + dist * (D_0026ABC0[1] + dist * D_0026ABC0[2]));
+            }
+            Vu0::Q(self->v630) = d;
+        }
+        dir = self->v630;
+        Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
+        f32 c = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->m110.r[0]), Vu0::Q(dir)));
+        f32 lo = 0.0f;
+        f32 hi = 1.0f;
+        if (c < lo) {
+            c = lo;
+        } else if (hi < c) {
+            c = hi;
+        }
+        self->f61C = c * speed;
+        ClearRootTries(self);
+        return;
+    }
+    case 0:
+    case 3:
+    case 4:
+        self->f61C = 0.0f;
+        return;
+    }
+}
 
 ASM_FUNC(func_0019BB10);
 
@@ -1361,35 +1539,6 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 
 void* GetActiveSwitchedCollider();
 void MeasurePointToSegment(void* p, Vec02* a, Vec02* b, f32* t, f32* dist);
-
-// A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
-// (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
-
-template <class T> struct NextInList {
-    static T* Of(ListFrame* it)
-    {
-        T* obj = *(T**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-struct GatherCandidate {
-    u8 pad00[0x18];
-    void* frame;            // 0x18
-    u8 pad1C[0x40 - 0x1C];
-    Vec02 pos;              // 0x40
-};
 
 // Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
 // the segment to it, and keeps it in f660.

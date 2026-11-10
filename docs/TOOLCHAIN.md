@@ -4773,6 +4773,40 @@ the `-dr -ds` dumps of UpdateObjectCreator (src/main/file_19E040.cpp, 2026-11-09
   too. Spot it: in a record filled with constants, a zero store frame-relative among stores
   through the record's address register means an inline call's arguments.
 
+### Reading a frame's slots back to the declarations (func_0019B378)
+
+UpdateObjectGatherer's near miss had a frame 0x10 too large, its locals in other slots, and
+nine versions of the scopes had not moved them. assign_stack_temp_for_type (function.c) explains
+retail's layout once its rules are applied:
+
+- **Free slots are reused newest first, and adjacent free ones combine.** The search walks
+  temp_slots from the head (the newest slot) and stops at the first free slot of the same mode,
+  size and alignment; free_temp_slots and pop_temp_slots call combine_temp_slots, which merges
+  adjacent free BLKmode slots, and a larger slot is split from its bottom. So a 16-byte local
+  placed when 0x20 to 0x50 is free lands at 0x20, and one placed while 0x20 is still in use
+  lands in the newest free slot, not the lowest.
+- **A slot created last was created last.** On the R5900 the frame does not grow downward, so
+  offsets follow creation order. Retail's side index at 0x40, above the weights' slot at 0x30
+  that is used after it, cannot be a local placed at its declaration. It is an `s32` whose
+  address is passed (FindColliderFloorContact's third argument, `s32* out`: func_001BB290
+  stores the contact's side there), and purge_addressof gives it its slot after every
+  temporary. The near miss's `u8 floor[0x10]` record took 0x30 at its declaration instead.
+  Check a callee's real out-parameter type before giving a local a size.
+- **A slot reused after a block means the block ended.** Retail's list frame of state 4 at
+  0x20, the push vector's slot, shows the push vector is not live there: it is declared in each
+  case's `if`, not in the switch's enclosing block.
+- **The tail written twice.** Each case's push written in full (state 1 with `f614 * 0.7f`,
+  state 2 with `f618 * 0.5f`) instead of a `goto` into state 2's code: jump2's cross-jumping
+  merges the two tails after reload from the first insn after the lift constant, which leaves
+  the `lui` of g_unitZVector in each case's own block. Retail's branch into the middle of the
+  other case's block (`b .L0019B76C`, past its speed and lift) is that merge.
+- **What was left.** A clamp of a cosine to 0..1 with both bounds named (`f32 lo = 0.0f;
+  f32 hi = 1.0f;`): retail loads 1.0 before the first test and branches on both. And the
+  position named before the weighted sum that reads it (`u128 pos = Q(act->v140);`), so its
+  `lqc2` comes before the Scalar's slot store (the two-pass argument rule, func_00191570). A
+  method called through desc02() rather than a cast table, and an `if (any != 0)` written in
+  retail's block order, finished it.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
