@@ -579,3 +579,34 @@ SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) wit
 - **`addu v0,v1,a2` (base first) for `target[j]`.** g++ turns a subscript of a pointer, or of
   `*p`, into pointer arithmetic, whose address inside a memory reference has the index first; an
   array member (`target->v[j]`) stays an ARRAY_REF, base first, as a local array's.
+
+### PRE hoists an exit block's expressions above a loop; a variable whose address is taken keeps them (func_0015F320)
+
+- **What PRE does after a loop.** In this release's lcm.c, `latein` is `delayin` for every
+  block but the last, and `delayin` stops at a loop's header (its back edge starts as not
+  delayed and stays so). An expression the block after a loop computes from a register set
+  before the loop (`frame & 0x1FF`, `frame >> 24`) is anticipatable through the loop and
+  delayed only up to the block before it, so that block is "latest": PRE computes the
+  expression there (`PRE/HOIST: end of bb 6`), deletes the computation after the loop, and the
+  value lives in a saved register across the loop. A computation earlier in the function does
+  not help: this LCM never uses availability, only anticipation from the last kill. Constants
+  are not expressions, so `frame & 0xF000000` (its `lui` set in the same block) stays.
+- **Retail's sign.** After the loop retail recomputes a FRAME word from the register the value
+  was loaded into (`andi v0,s3,0x1ff; lui a2,0xf00; and a2,s3,a2; or`) and no masked value
+  crosses the loop. Ours kept `frame & 0x1FF` and `frame >> 24` in s3 and s4 (one more saved
+  register, a different frame and loop registers), or `fbp | psm` in s3 when they were locals.
+- **What keeps them after the loop.** A variable whose address is taken is an ADDRESSOF
+  until purge_addressof, which runs after cse1 and turns each read into a fresh copy
+  `(set (reg 174) (reg/v 172))` in the reading block. cse never sees those copies and gcse's
+  cprop only propagates copies set in other blocks, so the expression's operand is set in its
+  own block: not anticipatable at the block's start, never hoisted. combine then folds the copy
+  away and the `andi` reads the variable's register. func_0015F320 passes its FRAME word by
+  `const u64&` to a small inline that keeps the base and format bits; `*(u64*)&frame` at one
+  read does the same.
+- **fold merges two masks of one operand.** `(f & 0x1FF) | (f & 0xF000000)` is
+  `f & 0xF0001FF` from the front end on (distribute_bit_expr), `lui; ori; and` in the output.
+  Retail's two `and`s and `or` come from `(f & 0x1FF) | (((f >> 24) & 0xF) << 24)`, which
+  combine turns into the second `and` after fold has run.
+- **Spotting it.** The gcse dump's `PRE/HOIST: end of bb N` for an expression whose only
+  occurrence is after a loop, and retail computing the same thing after the loop from a
+  saved register.

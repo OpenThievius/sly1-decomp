@@ -1638,6 +1638,7 @@ func_0015EE80	func_0015F348	match
 func_0015EF88	func_0015F450	match	
 func_0015EFE8	func_0015F4B0	match	
 func_0015F210	func_0015F6D8	match	
+func_0015F320	func_0015F7E8	match	version-specific
 func_0015F618	func_0015FAE0	match	
 func_0015F658	func_0015FB20	match	
 func_0015F678	func_0015FB40	match	
