@@ -285,7 +285,7 @@ included.
 - **Reading it.** Retail's hoisted pointer increments reading the outer pointers while the inner
   loop walks registers of its own: the inner loop was written with an index, not with copies.
 
-### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, unsolved)
+### Where PRE puts a loop's `i + 1`: the skip edge's block (func_001F3140, matched 2026-11-10)
 
 `for (i = 0; i < n; i++) { e = &entries[i]; if (e->used == 0) { inner loop; sum += span; } }`.
 Retail's `addiu v0,a3,1` in the `bnez` delay slot and `move a3,v0` at the latch are PRE's: the
@@ -318,8 +318,19 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   block).
 - **Spotting it.** A loop index's `i + 1` in a branch delay slot, held in a register whose
   number the body's temporaries also use: retail's add was born late, so the skip edge of the
-  original had a block of its own when gcse ran. A plain-C form that gives that block without
-  a dead statement is still to be found.
+  original had a block of its own when gcse ran.
+- **The form: a switch with a second, empty case.** `switch (e->kind) { case 0: { ... break; }
+  case 1: break; }` (the file's EvaluateOscillator switches on the same kind, a sine 0 and a
+  noise blend 1; the noise blend has no fixed amplitude to add). The two cases' compares share
+  their targets, so by gcse only `beq kind,0,Lcase0; j Lend; barrier; Lcase0:` is left: the
+  unconditional jump is a block of its own on the skip path, the skip edge is no longer
+  critical, and PRE inserts `r178 = i + 1` at the end of that jump block and of the inner
+  loop's preheader (the -dG dump: "end of bb 2", "end of bb 3"), never in the loop-top block.
+  jump.c later inverts the pair into one `bnez` to the latch, and reorg fills its delay slot
+  with the add. EXACT. A one-case switch (or an `if`) gives jump1 the plain `bne` at once,
+  hence the 21 lines.
+- **Spotting it:** a test whose skip edge PRE treats as having a block (the add born after the
+  test's operands) was a `switch` whose other case did nothing.
 
 ### A copy in each arm is propagated into the join (func_00114BB0, matched 2026-11-10)
 

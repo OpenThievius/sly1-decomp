@@ -205,7 +205,6 @@ func_001EEBB0	001EEBB0	172	handwritten	VU0 macro instruction
 func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
 func_001F0218	001F0218	4	remnant	stripped-function leftover
 func_001F2728	001F2728	12	remnant	stripped-function leftover
-func_001F3140	001F3140	184	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001F59C4	001F59C4	148	handwritten	assembled from a .S source (the toolchain's libc.a)
 func_001F5A58	001F5A58	176	handwritten	assembled from a .S source (the toolchain's libc.a)
 func_001F5B08	001F5B08	260	handwritten	assembled from a .S source (the toolchain's libc.a)
