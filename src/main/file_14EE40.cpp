@@ -2797,7 +2797,104 @@ void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s
     }
 }
 
-INCLUDE_ASM(func_00154370);
+void* AllocateZeroedBackMemory(u32 size);
+void ComputeColliderPointVelocity(Collider* body, Vec02* point, void* motion, Vec02* out);
+void ConstrainColliderVector(Collider* body, Vec02* limits, Vec02* in, Vec02* out, s32 mode);
+
+// A part's share of the solved impulses: a linear and an angular one.
+struct PartImpulse {
+    Vec02 lin;              // 0x00
+    Vec02 ang;              // 0x10
+};
+
+// acc += v, with v cut to length `limit` when it is longer (limitSq is limit squared).
+static inline void AddLimited(Vec02* acc, Vec02* v, f32 limitSq, f32 limit)
+{
+    f32 lengthSq = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(*v), Vu0::Vec::Of(*v)));
+    if (limitSq < lengthSq) {
+        Vu0::Vec a = Vu0::Vec::Of(*acc);
+        Vu0::Vec s = Vu0::Vec::Scalar(limit / Fpu::Sqrt(lengthSq));
+        Vu0::Q(*acc) = Vu0::MulAddX(a, Vu0::Vec::Of(*v), s).q;
+    } else {
+        Vu0::Q(*acc) = Vu0::Add(Vu0::Vec::Of(*acc), Vu0::Vec::Of(*v)).q;
+    }
+}
+
+// The solver's impulses handed out: each solved item adds its rows, weighted by its x, to the
+// parts of the bodies at its contact's two ends (n groups of parts, counts[j] in group j); each
+// part then takes its own impulse, relative to its parent's motion at its position and in the
+// parent's frame when it has one, constrained and cut to maxLin and maxAng.
+void func_00154370(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng)
+{
+    PartImpulse** bufs;
+    f32 maxLinSq;
+    f32 maxAngSq;
+    s32 j;
+
+    PushBackMemoryMark();
+    bufs = (PartImpulse**)AllocateBackMemory(n * 4);
+    for (j = 0; j < n; j++) {
+        bufs[j] = (PartImpulse*)AllocateZeroedBackMemory(counts[j] << 5);
+    }
+    maxLinSq = maxLin * maxLin;
+    maxAngSq = maxAng * maxAng;
+    for (s32 i = 0; i < self->count; i++) {
+        ActiveSetItem* it = (ActiveSetItem*)(self->items + i * 0x60);
+        s32 k;
+        if (it->x == 0.0f) {
+            continue;
+        }
+        for (k = 0; k < 2; k++) {
+            Collider* body = ((Contact03*)it->owner)->end[k].body;
+            s32 m;
+            if (body == 0) {
+                continue;
+            }
+            s32 g = body->f4BC;
+            if (g < 0) {
+                continue;
+            }
+            Vec02* row = (Vec02*)it->rows[k];
+            PartImpulse* buf = bufs[g];
+            for (m = 0; m < counts[g]; m++) {
+                u128 lin = Vu0::Q(buf[m].lin);
+                Vu0::Q(buf[m].lin) = Vu0::MulAddX(lin, Vu0::Q(row[2 * m]), Vu0::ScalarAt(it->x));
+                u128 ang = Vu0::Q(buf[m].ang);
+                Vu0::Q(buf[m].ang) = Vu0::MulAddX(ang, Vu0::Q(row[2 * m + 1]), Vu0::ScalarAt(it->x));
+            }
+        }
+    }
+    for (j = 0; j < n; j++) {
+        s32 count = counts[j];
+        PartImpulse* buf = bufs[j];
+        Collider** list = lists[j];
+        for (s32 i = 0; i < count; i++) {
+            Collider* body = list[i];
+            PartImpulse* own = &buf[body->index];
+            Collider* parent = (Collider*)body->parent;
+            if (parent != 0) {
+                PartImpulse* up = &buf[parent->index];
+                Vec02 lin;
+                Vec02 ang;
+                Vec02 linLocal;
+                Vec02 angLocal;
+                ComputeColliderPointVelocity(parent, &body->v140, up, &lin);
+                Vu0::Q(lin) = Vu0::Sub(Vu0::Vec::Of(own->lin), Vu0::Vec::Of(lin)).q;
+                Vu0::Q(ang) = Vu0::Sub(Vu0::Vec::Of(own->ang), Vu0::Vec::Of(up->ang)).q;
+                Vu0::Q(linLocal) = Vu0::RotateTransposed(parent->m110, Vu0::Vec::Of(lin)).q;
+                Vu0::Q(angLocal) = Vu0::RotateTransposed(parent->m110, Vu0::Vec::Of(ang)).q;
+                ConstrainColliderVector(body, &body->v440, &linLocal, &linLocal, 0);
+                ConstrainColliderVector(body, &body->v460, &angLocal, &angLocal, 0);
+                AddLimited(&body->v490, &linLocal, maxLinSq, maxLin);
+                AddLimited(&body->spin4A0, &angLocal, maxAngSq, maxAng);
+            } else {
+                AddLimited(&body->v490, &own->lin, maxLinSq, maxLin);
+                AddLimited(&body->spin4A0, &own->ang, maxAngSq, maxAng);
+            }
+        }
+    }
+    PopBackMemoryMark();
+}
 
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out)
 {

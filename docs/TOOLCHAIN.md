@@ -886,6 +886,35 @@ Measured with `-dL` dumps (2026-11-10, the armed notifier's push loop, src/main/
 - **Slot order.** The message is declared in the listener's `if`, as the file's other senders
   do: the weight's temporary then gets the slot before it (112, the message 128).
 
+### An index loop.c leaves alone: a giv's benefit against a big loop (func_00154370)
+
+Matched 2026-11-10 from the `-dL -dl -dg` dumps. The impulse distribution's last loop (each
+group's parts, `list[i]` with `list` from its spill slot at 96(sp), `i` counted up in s4 against
+the count in s8) is retail's only when loop.c reduces nothing in it:
+
+- **The test.** strength_reduce leaves a giv when `lifetime * threshold * benefit < insns`
+  (loop.c, the "not worth while" line of the `.loop` dump), with threshold 81 for a loop with a
+  call and the benefit less the add it would cost (4 per biv increment). `list[i]`'s address is a
+  DEST_ADDR giv of lifetime 1 and benefit 7 - 4 = 3: it stays only in a loop of more than 243
+  insns at the loop pass, in both passes. Once it stays, the biv is used in it, so the loop is not
+  reversed either (retail's `addiu s4,1; slt; bnez`, not a countdown).
+- **The size.** Written with u128 helpers the loop is 122 insns (`list[i]` becomes a walking
+  pointer and `i` a countdown); with the parent arm's vectors as Vu0::Vec values 237; with
+  AddLimited (the inline that adds a vector cut to a limit) over Vec values as well, 245 and 243+
+  in pass 2. Every part of the inline as Vec is needed: any of its three statements left as u128
+  stays under 243.
+- **The weight named before the vector.** In the Vec form, `MulAddX(a, Vec::Of(*v),
+  Vec::Scalar(..))` expands the nested Of first (inline arguments, two passes), so the load of
+  `*v` precedes the weight's slot store and CSE reuses the dot's load; retail reloads `*v` after
+  the slot store where `v` points into a part's buffer (no known base) and keeps it (vmove) where
+  it is a stack local. `Vec s = Vec::Scalar(..);` named before the MulAddX gives both.
+- **One counter for the two loops over the groups.** The first loop (`bufs[j] =
+  AllocateZeroedBackMemory(counts[j] << 5)`) and the outer last loop share `s32 j`, declared at
+  the top: j's pseudo then crosses the first loop's calls, so global-alloc gives it a saved
+  register (s0, free once the first loop's countdown is dead) instead of v1, as retail. Then the
+  group's count, buffer and list read in that order (count first, list last) for sched1's order
+  of the three loads.
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
