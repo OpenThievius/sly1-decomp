@@ -1842,6 +1842,37 @@ a length (`scale * Dot(v, v)`), and rescale them by their sum:
   robin alternates v0 and a0 over the six qmfc2) and lose the order. The near miss keeps the
   order; what is missing is still a product in VU_REGS whose qmfc2 is the compiler's.
 
+### The same wall in a reach test, and what led up to it (func_001CEB18)
+
+The player's reach test against a point carried to time t (2026-11-10) went from 30.7% to
+97.8% (four lines) by reading the code again, not by variants:
+
+- **Retail's operand, not the notes'.** The inside arm's `c1 0x20004` is sqrt.s with ft = $f2,
+  the squared distance: `*out1 = Sqrt(dist2) - r`, where the near miss had `Sqrt(r * r)`.
+- **Two early outcomes, each with its own tail and return.** Retail places the solve block
+  last, falling into the epilogue, and shares one `swc1 $f0,0(s1)` between the two out1
+  values: the source returns from both early cases, each repeating `out2 = pos0; out3 = v +
+  t g`, and cross-jumping merges the tails after reload. Written as an if/else whose join
+  holds the tail, the solve block comes first. With the tails in their arms the first block's
+  `Scalar(t)` (one qmtc2) also serves both tails' weights: the frame grows to 208 with retail's
+  spill at 0x60, and the tails keep their own slot stores. A named `u128 tv = Scalar(t)`
+  instead copies the slot through a GPR.
+- **The callee's parameter order.** TransformPointAtTime's `$f12` copy ranked last among the
+  argument moves (INSN_LUID) and sched2 then issued `move a3,zero` before the sum; declared
+  `(self, top, t, pos, rot, vel, spin)`, as player.cpp's matched caller has it, the float's copy
+  ties ahead of a3's and the head is retail's. func_001259D8 stays EXACT defined that way.
+- **The normalisation as an inline with the fallback by reference** (player_path.cpp's
+  NormalizeVector): the fallback's address is formed before the length test, as retail has it.
+- **What is left is func_00186230's wall.** After the call, retail issues the radius's lwc1
+  before the vsub and the `r * r` before the distance's qmfc2. With ToFloat every register is
+  retail's (product vf2, 1.0 vf3, the qmfc2 into reload's a0), but reload's mtc1 costs 2, so
+  the subtraction's chain (1 + 1 + 1 + 2 + 4) ties the radius's (2 + 3 + 4) at 9 and wins on
+  dependents (3 against 2), and the same tie puts the qmfc2 before the mul.s. A chain of 8
+  (ToFloatMoved, ToFloatViaBits) gives retail's order in the dumps, but ToFloatViaBits' bits are
+  a local pseudo in v0 (an anti dependence on the lwc1's base that pulls the load before the
+  second lqc2), and ToFloatMoved makes the product TI_REGS in v0 with the 1.0 in vf2. Retail's
+  a0 is a reload register: the compiler's qmfc2 of a product in VU_REGS, as in func_00186230.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
