@@ -829,3 +829,38 @@ for the stores:
   loads second (the two-pass argument rule), which gives our vf4/vf3 for the 1.0 and the
   second vertex and the 1.0's store after the sum. The named order also gave the kind's
   reloads retail's v1 (and with it the `beqzl` of the kind switch's delay slot).
+
+### The quadratic's head: a priority wall between dot2's conversion and dot3 (func_00141D88, unsolved)
+
+Read from the `-dS -fsched-verbose-6`, `.combine` and `.lreg` dumps (2026-11-10, w15), for
+func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Dot(ab,pa)`,
+`ha = Dot(ab,ab)`, `disc = (hb+hb)^2 - ha*(c*4)`):
+
+- **What each pass needs.** Local-alloc (emulated with lalloc2.py over the `.lreg`) gives
+  dot3's 1.0 retail's vf5 only when dot2's result (vf4) is still live at dot3: dot3 issued
+  in sched1 before dot2's qmfc2, or directly after it. Retail's `qmfc2 v1` for dot2 needs
+  dot1's ToBits GPR to die (its mtc1) directly before dot2's qmfc2, as the near miss has.
+  sched2 then gives retail's order only with dot3 in vf3/vf5: with dot3 in vf4 it is
+  anti-dependent on dot2's qmfc2 (3 dependents), which then wins the priority-15 tie with
+  the 4.0 load (`lui at,0x4080`) by LUID; in vf3/vf5 the qmfc2 has 2 dependents, the load
+  goes first and the sequence m1, 4.0, sub.s c, qmfc2 v1, mtc1 v1, dot3 is retail's.
+- **Why sched1 cannot.** dot3's longest path is dot, qmfc2, mtc1, `ha*(4c)`: priority 13 at
+  most (ToFloatViaBits; 12 with ToFloat, ToFloatNow or ToFloatMoved). dot2's qmfc2 is 15
+  (ViaBits) or 14 (Now, ToFloat), dot1's mtc1 17, `c - r*r` 16, the 4.0 load 15, and all
+  are ready from cycle 6 while dot3 is ready from cycle 5: dot3 can never issue before or
+  right after dot2's conversion. When dot3 finally ties, twoB's add has been raised by
+  adjust_priority to 14 (it sets a pseudo set once and live at the block's end: the
+  roots' `-twoB`) and goes first. INSN_REG_WEIGHT is 0 for both (dot3 kills ab and has
+  one REG_UNUSED), so the earlier note that the dot weighs 1 was wrong; the raise decides.
+- **Probe.** `ha = ToFloatViaBits(...) + 0.0f` (dot3's path +3) puts dot3 before dot2's
+  qmfc2 and gives every VU0 register of retail: the lever is dot3's priority, by at least
+  one cycle, with nothing visible in the code (a copy kept until allocation and deleted by
+  reload would do it).
+- **Ruled out (w15).** All 64 ToFloat/ToFloatNow/ToFloatViaBits/ToFloatMoved mixes for the
+  three dots (the near miss's ViaBits/ViaBits/Moved stays best at 9 lines; all ToFloat and
+  all ToFloatNow give every VU0 register of retail but 17-18 lines of order and GPRs);
+  each dot written over Vec values (`Dot(Vec::Of(x), Vec::Of(y)).q`, the movti copies are
+  gone before sched1: the 448 forms score as their u128 twins); `twoB = hb; twoB += twoB`
+  (combine merges the copy, twoB is set once again); an inline root solver taking
+  `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
+  test).
