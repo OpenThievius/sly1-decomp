@@ -293,4 +293,20 @@ static inline void MulRotationThenCopy(Mat02* out, const Mat02& a, const Mat02& 
     SetRowsFrom(*out, Vu0::Q((s128)x), Vu0::Q((s128)y), Vu0::Q((s128)z));
 }
 
+// MulRotationThenCopy through the caller's matrix local r: each row's cast copy stored to r's
+// row in SetRowsFrom's own argument, so a slot's store and r's row alternate in the expand
+// order, and out is set from r's rows (UpdateTargetCameraController's second product, the
+// camera's matrix set through a local: retail stores r's row 0 between the first and second
+// slots).
+static inline void MulRotationThenCopyVia(Mat02* out, Mat02& r, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0], a1 = p[1], a2 = p[2];
+    u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    u128 y = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    u128 z = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    SetRowsFrom(*out, Vu0::Q(r.r[0]) = Vu0::Q((s128)x), Vu0::Q(r.r[1]) = Vu0::Q((s128)y),
+                Vu0::Q(r.r[2]) = Vu0::Q((s128)z));
+}
+
 #endif

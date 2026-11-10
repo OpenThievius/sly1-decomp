@@ -438,3 +438,59 @@ combine statistics" line says why:
 - **Rule.** A vector accumulated across calls whose loads land in changing registers, with a
   second load of the same slot inside NormalizeOr's divide, was a u128 variable, as the same
   function's other case keeps its own (`u128 acc`).
+
+### A product written out in the caller: its matrix in the freed vector slots (func_0012CD78)
+
+func_0012CD78 (the chain walk that samples positions, rotations, velocities and spins, in
+placed_object.cpp) ends each step with the product of two rotations, as MulRotation does: each
+row rotated, stored to a vector and then to a matrix. Retail's frame has the matrix at 0x130
+and the three row vectors at 0x160, 0x170, 0x180, and the rotated vectors of the blocks before
+it (0x130, 0x140, 0x150; the spin's at 0x130 again) in the matrix's bytes. With MulRotation
+the frame is 0x30 bigger: the inline's frame is one 96-byte BLKmode temporary, and the freed
+Vec02 slots of the earlier blocks combine to only 48 bytes, so it takes a new slot at 0x160
+(no slot is extended, assign_stack_temp_for_type only reuses, splits or allocates). Retail's
+offsets are the caller's own locals, each a temporary of its own in declaration order: the
+matrix (48 bytes) fits the combined freed slots exactly, and the three vectors, declared after
+it, are new slots above. Writing the product out in a block of the loop body
+(`{ Mat02 r; Vec02 x, y, z; ... N = r; }`) matches. Spot it: an inline's locals split across
+reused and new slots means they were not an inline's.
+
+Two more differences of the same function, before the frame: the parameter `o` reused for
+`o = chain[k]` in the second loop, and `k` reused as its counter (`for (k--; k >= 0; k--)`),
+put both in saved registers from the first loop on (retail's s0 and s2, as func_00125750's
+`self = chain[n]`); and `if (e) { a = e->mover; b = e->sub; } else { a = 0; b = 0; }` gives
+retail's branch, where preset zeros give a delay-slot load in the other order. The prototype
+is `(self, t, scale, o, top, n, pos, rot, vel, spin)`: the function itself matches with its
+floats first, second or last, but SampleScriptAnimation's argument moves (func_00118988) match
+only with the floats after self; the other three callers match with either.
+
+### Two untouched 16-byte slots: which GCC objects can leave one (func_0017D5D8, near miss)
+
+func_0017D5D8 (the player's steer and leap search) matches with two Vec02 locals nothing
+touches, which the maintainer held. Read from function.c, stmt.c, cp/decl.c and cp/semantics.c
+of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is sp+16 here):
+
+- **Every statement's temporaries die with it.** g++ wraps each expression statement
+  (cplus_expand_expr_stmt), each declaration's initializer (cp_finish_decl) and each return in
+  expand_start_target_temps/expand_end_target_temps: two temp levels pushed and popped, and
+  pop_temp_slots frees every slot of the level, kept or not. An inline's frame
+  (`assign_stack_temp (BLKmode, size, 1)`, its by-value parameters and its locals), Scalar's
+  copy and a call's return slot are therefore free again at the statement's end, and the next
+  declaration of the same mode and size takes them: `u128 w = Scalar(...); Vec02 end;` puts end
+  in w's slot (measured, a 0x160 frame). If and for conditions get their own binding level and
+  are freed at its end. preserve_temp_slots (expand_assignment, calls.c) only moves a slot to the
+  outer of the two statement levels.
+- **What outlives a statement.** A declared local (expand_decl, keep 1 at its block's level),
+  and a memory variable declared in a for-init, which cp_finish_decl preserves into the
+  enclosing block (is_for_scope). A slot of another machine mode (a TImode temporary) is never
+  taken by a BLKmode Vec02 either, but it is written where it is created.
+- **So an untouched slot is a declared object.** Every slot that is created and then never
+  stored to or read, while later locals are placed above it, is a local declared at that point
+  that the surviving code never writes. In func_0017D5D8, retail's 0x50 is created after
+  bestLand and stays allocated through both list walks (the second walk's position reuses the
+  first walk's freed slots from 0x60): the walks' ListFrame, declared after the best values,
+  which AGENTS.md's list-walk rule allows (SelectEarliestPooledObject walks g_partList with one
+  too). Retail's 0xA0 is created in the point-object walk after the relative velocity (0x90)
+  and is still allocated when the segment end (0xB0) and the weight's Scalar frame (0xC0) are:
+  only a local declared there gives that, and no walk frame belongs inside a loop's body. The
+  near miss keeps the ListFrame and leaves that slot open (97.1%, the frame 0x170).

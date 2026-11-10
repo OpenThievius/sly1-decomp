@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 292/300 (97.3%), checked 2026-11-09
+// BYTES 292/300 (97.3%), checked 2026-11-10
 // NEAR: (w8) One float variable for the squared length and then the ratio (`r = dot / r`): the division's result is then the length's pseudo, set twice, and global-alloc gives it the length's $f1, so the 1.0 takes $f0 and the 0.0 $f2 as retail has them (a separate ratio variable prefers the dividend's $f0 and, ranked first, takes it). ToFloatNow for the length (every VU0 register retail's) and the distance stored as ToBits (the square root in vf1). Still differs: retail's sqc2 of e comes after the c.lt.s, ours right after the mtc1, the same wall as func_00186230 (docs/TOOLCHAIN.md, "A compiler's qmfc2 of a VU0 product"): retail's qmfc2 is the compiler's (unit vu0) with the product in VU_REGS, which no plain form gives.
 // In the context of its file, src/main/collider_contact.cpp.
 #include "common.h"

@@ -1270,3 +1270,47 @@ near miss's sched2 order of the block exactly) (2026-11-10, w15):
   "r" operand. Not reached: the Vec forms of the dot (their copies are gone before regclass), the
   dot named before or after the square root, the division written apart, and all 64 mixes of
   the four conversions for w, k and kk (Moved for all three stays best, at 8 lines).
+
+### A curve's value named before the clamp that scales it (func_001A3250)
+
+DrawFacingEffect scales its object by `Eval(q30, t) * near`, where `near` is a quadratic of the
+camera distance clamped to a range (the file's `ClampedQuadratic::Clamp`). Written with the
+distance `k` first, then `t`, the clamp, and `Eval(q30, t)` inside the Splat after it, the code
+was 8 bytes short: the q30 quadratic was computed after the clamp's join, so the clamp's result
+could share its input's register in the first two clamps, and `t`'s loads and its `div.s` were
+scheduled after the distance's. Retail computes `t` first (g_gameTime's `lui` is hoisted above
+the Length), evaluates the q30 quadratic in the block that ends in the clamp's first compare
+(its last `add.s` fills the `bc1f` delay slot) and keeps the clamp's result in its own register
+(`mov.s $f0,$f5` / `mov.s $f0,$f4; mov.s $f0,$f6`). `f32 t = ...; f32 k = ...; f32 s =
+Eval(q30, t);` then the clamp and `Splat(s * near)` give retail's blocks and sizes; the last 22
+differences, all of the order inside the first block (the 0.001 constant before the `qmfc2`,
+`sub.s` before the `mul.s` by 0.001), went with `Vu0::ToFloatMoved` for the length instead of
+`ToFloat` (the conversion lever above). The clamps stayed the file's own inline; ValueRange's
+Limit gives the same code here.
+
+### A variable reused for a second half: no birthing raise, more references (func_0020CAF8)
+
+Measured 2026-11-10 on the MPEG macroblock prediction (src/lib/mpeg_macroblock.cpp,
+2.9-ee-991111; nonmatching/func_0020CAF8.cpp), which computes a luma and a chroma part with the
+same arithmetic. The near miss was three words short with separate chroma variables; retail's
+registers show some of the luma variables holding the chroma values (the column sum in t0 both
+times, the vertical flag in t9 both times).
+
+- **Reusing the column sum (`xs = (cdx >> 1) + (x >> 1);`) makes it a pseudo set twice.**
+  adjust_priority's birthing rule then no longer raises the luma add `xs = (dx >> 1) + x` in
+  block 0, so sched1 issues it after the count's address add instead of right after the shift.
+  The shift's life now spans that add's v1, local-alloc gives the shift t2 (x's incoming
+  register, already copied), and reload cannot inherit x from t2 for the add: retail's
+  `sw t2,4(sp); lw a3,4(sp)`, one of the three missing words.
+- **Reusing the flag (`fy = cdy & 1;`) gives it six references** (two sets, two tests, two
+  selector terms). Its global-alloc priority rises from 0.057 to 0.110, it is placed before the
+  long-lived saved-register values, and the routine index (2 refs over 81 insns) no longer finds
+  a free register: it is spilled at 12(sp) as in retail, which also moves the later slots to
+  retail's offsets. Reusing the other flag, the row sum, the offsets or the base as well
+  lengthens lives and spills more (64 subsets tried; xs and fy are the best, at retail's size).
+- **Spot it.** Two parallel halves of a function where a luma value and its chroma
+  counterpart share a register in retail although both lives are long: try one variable for
+  both, assigned again for the second half. A missing reload of a parameter just after its
+  spill store points at a birthing raise that should not have happened (a variable set twice).
+- **Still differs** (85.9% "order"): fy is placed 16th and takes s0 (retail t9), which shifts
+  three parameters one saved register; half and the luma part swap t4 and t5.

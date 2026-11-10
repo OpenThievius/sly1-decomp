@@ -2778,7 +2778,47 @@ void InitFacingEffect(Effect* self)
     self->q30 = *(Quad219C*)D_0026B720;
 }
 
-INCLUDE_ASM(func_001A3250);
+// Draws a facing effect: an object turned to the camera, scaled and faded by the distance and
+// by the effect's age.
+void DrawFacingEffect(Effect* self, Camera* cam)
+{
+    Vec02 pos;
+    Vec02 dir;
+    Vec02 scale;
+    Mat02 axis;
+    Mat02 basis;
+    Mat02 rot;
+    EffectDraw draw;
+    PlacedObject* o = (PlacedObject*)self->p20;
+    if (o != 0) {
+        TransformPointBetweenFrames(self->p120, 0, &self->q80, &pos);
+        u128 r = Vu0::ScalarAt(o->f2A8);
+        u128 ones = Vu0::Ones();
+        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(cam->f40));
+        if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, r) ^ 0xF0) != 0) {
+            RemoveEffect(self);
+            return;
+        }
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(g_camera->f40), Vu0::Q(pos));
+        BuildBasisFromXAndZHint(&dir, (void*)&g_unitZVector, &basis);
+        f32 t = (g_gameTime - self->start) / self->life;
+        f32 k = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) * 0.001f;
+        f32 s = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
+        f32 near;
+        ClampedQuadratic::Clamp(near, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B740, k), (const ValueRange*)D_0026B750);
+        Vu0::Q(scale) = Vu0::Splat(s * near);
+        f32 a;
+        ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
+        f32 fade;
+        ClampedQuadratic::Clamp(fade, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B760, k), (const ValueRange*)D_0026B770);
+        draw.alpha = a * fade;
+        draw.f44 = 1.0f;
+        BuildAxisAngleMatrix(&g_unitXVector, &axis, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B730, t));
+        MulRotationRowsX(&rot, basis, axis);
+        BuildScaledTransformMatrix(&pos.x, (f32(*)[4])&rot, &scale.x, draw.m);
+        ((PlacedObject*)self->p20)->desc02()->m26((PlacedObject*)self->p20, cam, &draw);
+    }
+}
 
 void InitDelayedEffect(Effect* self, f32 x)
 {

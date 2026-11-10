@@ -549,6 +549,20 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   (`s32 changed`, `bool changed`), a named old value, an unused named label, a returned copy
   in each arm, and an early return: jump.c's first pass removes every jump into the arm that
   plain forms make before cse sees it.
+- **Also ruled out (2026-11-10, wave 16)**, all 60 bytes with the same `bnel` unless noted:
+  `if (status != g_discStatus)` (any operand order) written as `g_discStatus - status`,
+  `g_discStatus ^ status`, `status - g_discStatus != 0`, `(g_discStatus == status) == 0`, a
+  `?: 1 : 0` condition; `goto done` over the store; a `switch` on the comparison or on the
+  difference (empty `case 0`, store under `default`); a conditional-expression statement
+  (`c ? (void)(g = s) : (void)0`), `c && (g = s)` and `!c || (g = s)`; the store in
+  `do { } while (0)`; `g = c ? s : g`; the assignment inside the test (`(status = Get()) != g`);
+  the return as `if (g == 0x14) return 1; return 0;`, its inverse, a `ready` flag and `?: 1 : 0`;
+  and a duplicate second test (`|| status != g`, `&& status != g`: fold removes it before RTL).
+  `status < g || status > g` is 84 bytes. A back edge by `goto` (`again: if (c) { g = s; goto
+  again; }`) is not folded by cse and stays a loop (60 bytes, other code). Every loop form
+  (`while`, `for (; c; g = s);`, `for (;;) { if (!c) break; g = s; }`, `if (c) do g = s; while
+  (c);`) gives retail's copy but 68 bytes: the extra `nop` is the aligned loop label, which
+  retail does not have, so retail's function was not a loop at final.
 - **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
@@ -759,3 +773,21 @@ pseudo for both (2026-11-10, w15):
   T. For retail's order T = 323 (or 339) with params as pseudo 121; `*(Vu0::Vec*)&x = F(...)`
   stores (two more insns each than `Vu0::Q(x) = F(...).q`), Vec locals for the weighted sums'
   operands and a named row weight bring the table from 305 to 323 with the final code unchanged.
+
+### cprop's two passes and an inline's argument copy across a branch (func_0019ED58)
+
+expand_inline_function copies each argument into its parameter's pseudo as the argument is
+evaluated, so in `MulAddX(nv, NormalizeOr(t, x), mu)` the copy `P = nv` sits in the block before
+NormalizeOr's branch and the asm that reads P in the block after it. cse1 cannot fold P there;
+gcse's cprop (cprop_insn, which only rewrites a SET and only from a copy available at the start
+of the block) replaces P by nv in pass 1 and nv by the inline result it was copied from in pass
+2, one step of the chain per pass. The use is left one copy behind every other use of the
+normal: a separate pseudo, set at the top of the function and crossing every call, which
+global-alloc spills (HandleEffectContact's 80(sp), stored at entry). A user variable copy made
+after a join (`Vu0::Vec d1 = nv;` after an if/else) does the same for the uses through it in later
+blocks. Retail's 80(sp) copy is read only by the final impulse sum (`MulXSum(d1, s, dir, s2)`):
+naming the first impulse's direction `d1` puts it there; the size became retail's. Count the
+copies between the variable and a use, and the block boundaries between them, to predict which
+uses end on which pseudo (`-dG`: "COPY-PROP: Replacing reg N in insn M with reg K", pass by pass).
+Unsolved there: retail's second direction keeps its parameter copy as a register copy of the
+normal (vmove vf6,vf8 before the branch), which neither form above gives.

@@ -7,6 +7,7 @@
 #include "vu0.h"
 #include "placed_object.h"
 #include "collider.h"
+#include "c8b.h"
 
 // The file's .data, in retail's order. D_00274F0C holds two floats (0.3, 10) under one label, which
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
@@ -28,7 +29,6 @@ struct TwoEntryBlendEntry {
 };
 
 void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
-void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
 
 void CreatePlayerTwoEntryBlend(Player* self)
 {
@@ -36,14 +36,14 @@ void CreatePlayerTwoEntryBlend(Player* self)
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
-        func_0012CD78(0.0f, 1.0f, e->p4, self->f614, self, 1, 0, 0, out, 0);
+        func_0012CD78((Gr8B*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
         e->fC = out[2];
         e++;
         i--;
     } while (i >= 0);
     BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
-    func_0012CD78(0.0f, 1.0f, self->f1064, self->f618, self, 1, &self->f23E0, 0, 0, 0);
-    func_0012CD78(0.0f, 1.0f, self->f1064, self->f614, self, 1, &self->f23F0, 0, 0, 0);
+    func_0012CD78((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
+    func_0012CD78((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
     self->f23E4 = 0.0f;

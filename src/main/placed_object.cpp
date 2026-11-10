@@ -4942,7 +4942,128 @@ void* FindEntryByObjectId(Gr8B* self, void* key)
     return 0;
 }
 
-INCLUDE_ASM(func_0012CD78);
+// A source of an object's pose (Entry8B's mover and sub): its first method gives the pose at a
+// time and scale, a vector and a second value (func_0012CD78).
+typedef void (*PoseAtFn8B)(void* src, PlacedObject* o, f32 t, f32 scale, s32 z, void* a, Vec02* b);
+
+void func_0012CD78(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+                   Vec02* vel, Vec02* spin)
+{
+    typedef Vu0::Vec Vec;
+    PlacedObject* chain[16];
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Vec02 p;
+    Vec02 v;
+    Vec02 w;
+    Mat02 R;
+    Mat02 N;
+    f32 s = scale * (self->f7C * self->f98);
+    s32 k = 0;
+    while (o != top) {
+        if (o->f224 == 0 || (o->f224->fB0 & 0xC) == 0) {
+            chain[k++] = o;
+        }
+        o = (PlacedObject*)o->parent;
+    }
+    P = D_00248D30;
+    M = g_identityMatrix;
+    V = D_00248D30;
+    W = D_00248D30;
+    while (k < n) {
+        n--;
+        if (pos != 0) {
+            pos[n] = P;
+        }
+        if (rot != 0) {
+            rot[n] = M;
+        }
+        if (vel != 0) {
+            vel[n] = V;
+        }
+        if (spin != 0) {
+            spin[n] = W;
+        }
+    }
+    for (k--; k >= 0; k--) {
+        o = chain[k];
+        Entry8B* e = (Entry8B*)FindEntryByObjectId(self, o);
+        void* a;
+        void* b;
+        if (e != 0) {
+            a = e->mover;
+            b = e->sub;
+        } else {
+            a = 0;
+            b = 0;
+        }
+        if (pos != 0 || vel != 0) {
+            if (a != 0) {
+                (*(PoseAtFn8B*)*(void**)a)(a, o, t, s, 0, &p, &v);
+            } else {
+                p = o->pos;
+                v = o->v150;
+            }
+        }
+        if (b != 0) {
+            (*(PoseAtFn8B*)*(void**)b)(b, o, t, s, 0, &R, &w);
+        } else {
+            R = o->rot;
+            w = o->v160;
+        }
+        if (pos != 0 || vel != 0) {
+            Vec02 d;
+            Vu0::Q(d) = Vu0::RotateUntied(M, Vec::Of(p)).q;
+            Vu0::Q(P) = Vu0::Add(Vec::Of(P), Vec::Of(d)).q;
+            if (vel != 0) {
+                Vec02 f;
+                Vec02 g;
+                Vu0::Q(f) = Vu0::Rotate(M, Vec::Of(v)).q;
+                Vu0::Q(V) = Vu0::Add(Vec::Of(V), Vec::Of(f)).q;
+                Vu0::Q(g) = Vu0::Cross(Vec::Of(W), Vec::Of(d)).q;
+                Vu0::Q(V) = Vu0::Add(Vec::Of(V), Vec::Of(g)).q;
+            }
+        }
+        if (spin != 0 || vel != 0) {
+            Vec02 d;
+            Vu0::Q(d) = Vu0::Rotate(M, Vec::Of(w)).q;
+            Vu0::Q(W) = Vu0::Add(Vec::Of(W), Vec::Of(d)).q;
+        }
+        // The product of the rotations, written out here rather than through MulRotation: its
+        // matrix takes the freed slots of the rotated vectors above and its rows come after
+        // them, which an inline's frame (one temporary for all its locals) does not give.
+        {
+            Mat02 r;
+            Vec02 x;
+            Vec02 y;
+            Vec02 z;
+            Vu0::Q(x) = Vu0::RotateUntied(M, Vu0::Q(R.r[0]));
+            r.r[0] = x;
+            Vu0::Q(y) = Vu0::RotateUntied(M, Vu0::Q(R.r[1]));
+            r.r[1] = y;
+            Vu0::Q(z) = Vu0::RotateUntied(M, Vu0::Q(R.r[2]));
+            r.r[2] = z;
+            N = r;
+        }
+        M = N;
+        if (k < n) {
+            if (pos != 0) {
+                pos[k] = P;
+            }
+            if (rot != 0) {
+                rot[k] = M;
+            }
+            if (vel != 0) {
+                vel[k] = V;
+            }
+            if (spin != 0) {
+                spin[k] = W;
+            }
+        }
+    }
+}
 
 void GatherAnimationEventObjects(Animation* self, void* ctx, s32* outCount, s32** outArr)
 {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 368/376, checked 2026-11-08
+// SIZE 368/376, checked 2026-11-10
 // NEAR (2026-11-08, night-gamec): registers: retail keeps the point count in s6 and -1 in s7 (swapped here) and copies each link index to v1 before its multiply
 // In the context of its file, src/main/file_1E08F8.cpp: its declarations before the function, bodies cut.
 #include "common.h"

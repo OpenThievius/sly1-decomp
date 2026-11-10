@@ -39,6 +39,7 @@
 #include "anim_curve.h"
 #include "fpu.h"
 #include "attachment.h"
+#include "c8b.h"
 #include "on_off_object.h"
 #include "mul_rotation.h"
 #include "value_range.h"
@@ -1425,7 +1426,6 @@ struct ProbeNode { u8 pad00[8]; Animation* f08; };
 struct ProbeNodeBase { u8 pad00[0x100]; Vec02 v100; };
 struct ProbeBody { u8 pad00[0x60]; Vec02 v60; Vec02 v70; void* f80; ProbeNodeBase* f84; };
 struct ProbeHolder { u8 pad00[0x224]; ProbeBody* body; };
-void func_0012CD78(f32 x, f32 y, void* node, void* a, void* self, s32 one, Vec02* out, Vec02* out2, s32 z0, s32 z1);
 s32 CollectBoundsSpans(Vec02* out, Vec02* lo, Vec02* hi, s32 one, ColliderSpan* span, f32 radius);
 
 void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d)
@@ -1466,11 +1466,11 @@ void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d)
     Vec02 v60;
     Vec02 v70;
     ColliderSpan span;
-    func_0012CD78(x, y, node->f08, (void*)a, pl, 1, &v0, 0, 0, 0);
+    func_0012CD78((Gr8B*)node->f08, x, y, (PlacedObject*)a, (PlacedObject*)pl, 1, &v0, 0, 0, 0);
     ProbeBody* b1 = obj->body;
     v0.z = v0.z - k;
-    func_0012CD78(x, y, node->f08, b1->f80, pl, 1, &v10, 0, 0, 0);
-    func_0012CD78(x, y, node->f08, obj, pl, 1, &v20, (Vec02*)&m30, 0, 0);
+    func_0012CD78((Gr8B*)node->f08, x, y, (PlacedObject*)b1->f80, (PlacedObject*)pl, 1, &v10, 0, 0, 0);
+    func_0012CD78((Gr8B*)node->f08, x, y, (PlacedObject*)obj, (PlacedObject*)pl, 1, &v20, &m30, 0, 0);
     *(Vu0::Vec*)&v20 = Vu0::Add(Vu0::Vec::Of(v20), Vu0::Rotate(m30, Vu0::Vec::Of(obj->body->v60)));
     *(Vu0::Vec*)&rec->v20 = Vu0::Add(Vu0::Vec::Of(v10), Vu0::Sub(Vu0::Vec::Of(v0), Vu0::Vec::Of(v20)));
     ProbeBody* body = obj->body;

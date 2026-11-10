@@ -24,6 +24,9 @@
 // a2 for a0). Retail's kept is set before the vcallms yet its test is the folded blez, which no
 // volatile vcallms between allows (combine's can_combine_p): an open point under any interface
 // (docs/toolchain/vu0-helpers.md).
+// w16 (2026-11-10): no new helper fits the rules: only this function (PAL func_0013A798) touches
+// $vf16..$vf31 or vcallms 0x10, the loads have no natural output (so any asm is volatile), and a
+// non-volatile sqc2 with a memory output gets 66 differing lines (from 73), prologue unchanged.
 #include "common.h"
 #include "vu0.h"
 #include "placed_object.h"

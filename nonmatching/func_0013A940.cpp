@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 944/964, checked 2026-11-07
+// SIZE 944/964, checked 2026-11-10
 // NEAR (first translation, the control flow and every call are retail's; the code is not yet): the
 //       frame is 0x150 against retail's 0x140, retail clears both bounds with 128-bit stores before
 //       setting their x, y, z, the per-chunk base addresses and the pointer walks come out

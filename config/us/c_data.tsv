@@ -18,7 +18,8 @@ D_00249E3C	00249E3C	8	.rodata	src/main/flagged_object.cpp
 D_00249E44	00249E44	8	.rodata	src/main/collider_span.cpp
 D_00249E4C	00249E4C	4	.rodata	src/main/camera.cpp
 D_00249E50	00249E50	68	.rodata	src/main/state_notifier.cpp
-D_00249EA0	00249EA0	200	.rodata	src/main/file_149398.cpp
+D_00249EA0	00249EA0	68	.rodata	src/main/file_149398.cpp
+D_00249EF0	00249EF0	200	.rodata	src/main/file_14B6A8.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	308	.rodata	src/main/file_14EE40.cpp
 D_0024A120	0024A120	432	.rodata	src/main/file_1549C8.cpp
@@ -31,7 +32,7 @@ D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	1936	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	4	.rodata	src/main/file_1793C0.cpp
 D_0024B000	0024B000	84	.rodata	src/main/entry_queue.cpp
-D_0024B060	0024B060	196	.rodata	src/main/file_17D248.cpp
+D_0024B060	0024B060	260	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	12	.rodata	src/main/file_180EB0.cpp
 D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
 D_0024B1E8	0024B1E8	109	.rodata	src/main/main_loop.cpp
@@ -46,7 +47,7 @@ D_0024C860	0024C860	12	.rodata	src/main/file_1963D8.cpp
 D_0024C870	0024C870	180	.rodata	src/main/file_198980.cpp
 D_0024C930	0024C930	652	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
-D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
+D_0024CBD0	0024CBD0	1003	.rodata	src/main/screen_element.cpp
 D_0024CFC0	0024CFC0	420	.rodata	src/main/timed_object.cpp
 D_0024D164	0024D164	8	.rodata	src/main/range_record.cpp
 D_0024D170	0024D170	244	.rodata	src/main/anim_record.cpp
@@ -135,7 +136,8 @@ D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
 D_00261880	00261880	188	.data	src/main/camera.cpp
 D_002619A0	002619A0	568	.data	src/main/state_notifier.cpp
-D_00261BF0	00261BF0	212	.data	src/main/file_149398.cpp
+D_00261BF0	00261BF0	160	.data	src/main/file_149398.cpp
+D_00261C90	00261C90	52	.data	src/main/file_14B6A8.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp
 D_00261F70	00261F70	508	.data	src/main/file_1549C8.cpp
 D_002623C0	002623C0	184	.data	src/main/file_15F678.cpp
@@ -216,7 +218,8 @@ D_0027B0B0	0027B0B0	128	.data	src/lib/ipu_reset.cpp
 D_0027B130	0027B130	84	.data.D_0027B130	src/lib/001F8000.cpp
 D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
-D_0027C008	0027C008	8	.bss	src/main/file_149398.cpp
+D_0027C008	0027C008	4	.bss	src/main/file_149398.cpp
+D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
 D_002BE460	002BE460	24	.bss	src/main/file_167D68.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
 D_00604700	00604700	128	.bss	src/main/file_18F988.cpp

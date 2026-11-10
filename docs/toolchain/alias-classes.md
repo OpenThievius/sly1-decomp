@@ -882,6 +882,19 @@ Spot it: two stores that tie at a block's end in retail's order opposite to thei
 mean the later statement of the pair was expanded first; a constant whose register is an
 argument register no call seems to read is an argument the declaration is missing.
 
+- **func_00149760 (UpdateTargetCameraController, matched 2026-11-10).** Its case 4 builds the
+  camera's matrix as `(mz my) mx`. Both products take the rows computed first and set through
+  three cast copies (MulRotationThenCopy): with both, local-alloc's VU registers of the first
+  product are retail's (31 differing lines to 6; MulRotationRowsInto stored each row to a
+  Vec02 local and the matrix instead). The second product leaves one tie:
+  retail stores the matrix local's row 0 between the first and second slots. Its rows 1 and 2
+  have the struct copy's loads as dependents and go early; row 0's store ties with the slots
+  on LUID, so it was expanded right after the first slot: the slot copy stored to the local's
+  row in SetRowsFrom's own argument, and the camera's matrix set from the local's rows
+  (mul_rotation.h's MulRotationThenCopyVia, `(Mat02*)cam->f80` and the caller's `rot`). The
+  forms with the products computed in the arguments (MulRotationCopied, CopiedVia) or b's rows
+  as Vec members or by index differ by 70 to 146 lines.
+
 ### An inline method's this: a fresh pseudo with no pointer flag (func_00117FE0, matched 2026-11-10)
 
 - **What differed.** FindScriptObjectsInBox computes `lo = min(a, b)` and `hi = max(a, b)` of
@@ -976,6 +989,18 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   variable. So the bound skips $f0 and $f1 and takes $f4; retail's $f1 needs r386 allocated
   first. The clamp written out, the fraction named and LimitFloat (another control flow) do not
   change it.
+- **Matched (2026-11-10, w11-149760): the clamp returns its bound.** With `if (v < lo) return
+  lo; if (hi < v) return hi; return v;` the inline's return value is the caller's variable
+  (zoom), so each arm copies the bound straight into it and the bound dies there. That copy
+  is an expand_preferences pair (the two do not conflict), so the bound pools zoom's full
+  preferences ($f1 from the gap's `sub.s`, $f14 from the argument) and prefers $f1 itself:
+  find_reg's first pass skips `regs_someone_prefers` only where the allocno does not prefer
+  the register too, so it takes $f1, retail's. ClampFloat's `v = lo` in place copied the bound
+  into the clamp's own v, which is live with it at the compare (a conflict, no pooling). The
+  same return form matches every other clamp of the function (the sound's pitch and volume,
+  the tilt, the blend that was written out), so it is the one clamp the function had.
+- Spot it: a bound that skips the register its value is copied into, where retail's takes
+  it, was copied straight into the destination: try a clamp that returns its bound.
 
 ### A variable reused by a second loop: its conflicts prune a preference (func_001BBC38)
 
@@ -1230,6 +1255,36 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   2^k times its .sched life; count the leading equal constants in insn order (`grep` the
   `.lreg` dump for the pseudo's sets) and reorder the cases or arms that set them.
 
+### A constant nobody keeps: `li v0, 4` at each use is an unallocated REG_EQUIV (func_001B7280)
+
+- Retail's `li v0, 4; sll a0, v0, 4` (an allocation's size), `li v0, 4; blez v0` (a loop's
+  first test) and `li s1, 4` (its counter), with no set of the count anywhere, are one
+  variable set to 4 in two switch arms that global-alloc left without a register: reload
+  substitutes its REG_EQUIV constant at each use and deletes the arms' sets. It is no constant
+  to CSE or loop.c (the default path does not set it, so GCSE's cprop finds no set available
+  at the uses), and global-alloc found all nine saved registers taken over its life.
+- Whether it gets one is a race with the variable set beside it (the table the arms choose):
+  each equal constant set doubles the count's live length (two arms: four times, 2*5/520),
+  the table's first set doubles its own once before the second, another symbol, ends the
+  equivalence (3/254). Ranked first, the count takes s1 and the table ties to the loop's
+  pointer (no `move s3, s1`); with a third equal set (2*5/1040) the table goes first, the
+  count finds nothing, and the code is retail's down to the counter.
+- Every way of adding the third set tried has a cost: `default: n = 4` or an initializer
+  before the switch sets it on every path (cprop then folds it and loop.c knows the trip
+  count, `li s4, 3; bgez`); `case 3: n = 4` adds a compare node to the switch's tree. Not
+  solved; the near miss keeps case 3.
+
+### An index plus a pointer argument has no base (func_001C3C98)
+
+- find_base_value's PLUS case replaces each register operand by its base value first: the
+  pointer argument's becomes an `(address (reg a1))` of VOIDmode, which none of its rules
+  takes as the base (they look for a SYMBOL_REF, a CONST, a CONST_INT on the other side, or a
+  REG still marked as a pointer), and the index is no pointer: the sum has no base, in sched1
+  as in sched2. A load from `&c->end[end]` (the record of a contact's end) therefore always
+  waits for a frame store before it, the Scalar slot's included; only its alias flags
+  (MEM_IN_STRUCT_P against the slot's MEM_SCALAR_P) can free it, and then sched2 frees it
+  too. Where retail's load sits after the slot store, its address's span in sched1 runs
+  past the store as ours does.
 ### Two hoisted constants one insn apart: a store written after the join (PAL's func_eu_0015DF58)
 
 - loop.c hoists every constant of a long loop (`li` of a compare's operand, of a stored

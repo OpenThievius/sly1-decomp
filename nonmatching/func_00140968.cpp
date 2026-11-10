@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 60/64, checked 2026-11-08
+// SIZE 60/64, checked 2026-11-10
 // NEAR (2026-11-08, night-gamec): retail's beq with the store's address copied (move a1,v1 in its delay slot) where this has bnel and one address register; the reload after the store is the same
 // In the context of its file, src/main/disc_access.cpp: its declarations before the function, bodies cut.
 // Mechanism (2026-11-10, docs/TOOLCHAIN.md, GCSE, "A %hi copied into a second register"):
@@ -10,6 +10,9 @@
 //       `while (g_discStatus != status) g_discStatus = status;` reproduce the copy (the loop the
 //       whole shape, registers v1/a0 swapped and a nop); no plausible single-test form found
 //       (about 30 forms ruled out, listed there).
+// Wave 16 (2026-11-10): about 25 more forms ruled out (docs/toolchain/gcse.md, "Also ruled out"):
+//       condition spellings, goto, switch, ?:/&&/|| statements, do-while(0), the return's forms;
+//       every loop form gives the copy but adds an aligned loop label's nop (68 bytes).
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"

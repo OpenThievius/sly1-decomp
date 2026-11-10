@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 412/428, checked 2026-11-10
-// NEAR (2026-11-10, w13-192DD0): the frame (512) and the saved set now match retail (code 80.4% by regdiff, was 64.5%; four insns short: retail reloads k more often): the copy goes through an inline (CopyMatrix) so integrate.c substitutes &rot and &s as constants straight into a0/a1 (GCSE no longer hoists them into s6/s7; retail rematerialises them as addiu a0,sp,192 at the call), the rows are stored as Vu0::Vec values (a Q(s.r[i]) reference makes &s a pseudo CSE reuses for the argument), and Q(k) = w is stored before BuildAxisAngleMatrix (the call keeps CSE from forwarding w into the products, so they read k at 304 as retail). Saved registers still differ in order (ours &p s6, &span s5, w s4, dir s3, &D[i] s2; retail s5, s4, s6, s2, s3); retail reads k twice for the rows (vf2, then vf4 for rows 1 and 2), copies k2 = k through a GPR from 304, reloads k into vf4 after TestOwnerGraphSpan inside the loop and stores it to 192 (rot's slot, a freed temporary) before the vdiv: k looks like a spilled pseudo whose REG_EQUIV memory is 304, not a memory local. Tried: a Vu0::Vec k = Vec::ScalarInGpr(scale) per iteration (loop.c then moves the copy chain out and k gets a spill slot at 320: frame 528), rot/k2/s declared in the loop body (no change), `rot = s` (move_by_pieces, no memcpy; a Mat3U copy is ldl/sdl pieces), an inline returning Mat02 by value (no memcpy). The pos copy as a Vec value (spilled to 320 across CopyBytes, as retail) and the final DivX on Vec values took it to 94 lines but 77.6%.
+// NEAR (2026-11-10, w16-191AC8): 81.3% by regdiff (was 80.4%), 412 bytes against 428: the four missing insns are exactly retail's mfc1 s6, the in-loop move v0,s6 and s8's save and restore (see (1)); everything else in the loop now matches. The scale is a Vu0::Vec value k (not a Vec02 in memory): global-alloc leaves it unallocated (10 refs, 3 calls crossed: 4*3 >= 10, so no caller save) and reload gives it the spill slot at 304, so the rows load it as retail does (vf2 for row 0, vf4 inherited for rows 1 and 2), the copy to k2 goes through a GPR (lq v0,304; sq v0,240) and the pos copy as a Vec value is spilled to 320 across CopyBytes, all as retail. Still differs: (1) loop.c moves k's set out of the loop (the mfc1 output is k itself after CSE; an invariant set once), where retail keeps the mfc1 in a saved GPR (s6, one saved register more: frame 512 against our 496) and per iteration copies it (move v0,s6; sq v0,304): retail's in-loop set is not invariant to loop.c (a partial set, or a second set in the loop); (2) retail loads k into vf4 right after TestOwnerGraphSpan (beqz's delay slot, before the branch: not reorg's, vf4 is live into the exit) and after the loop stores it to 192 (a temporary in rot's slot) and divides by vf4; ours reloads it at the vdiv. No source tried makes a value set after the call that lives to the exit: a separate `kz = k` after the call (loop.c moves it with k), a fresh Vec::ScalarInGpr(scale) for the divide (not CSE'd across the loop: mfc1 again), Vec::ScalarInGpr(scale) per iteration (the slot at 304 stays in the loop but k is hoisted to 320: frame 528), a FloatQuad union {f32; u128} set from scale (in memory, not a register: swc1 then lq), `= { scale }` (the same), a cast to the union (does not compile), Q((s128)k.q) for the divisor (no temporary), u128 k (identical to the Vec).
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -188,12 +188,6 @@ struct PlaneNode {
     s32 above;              
 };
 
-typedef u64 Quad128 __attribute__((mode(TI)));
-union FloatQuad {
-    f32 f;
-    Quad128 q;
-};
-
 s32 TestOwnerGraphSpan(Obj_191AA8* self, Vec02* pos, Vec02* point, s32 count, ColliderSpan* out);
 void* CopyBytes(void* dst, void* src, s32 n);
 void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
@@ -210,21 +204,19 @@ void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
     Mat02 rot;
     Vec02 k2;
     Mat02 s;
-    Vec02 k;
-    Vec02 pcopy;
+    Vu0::Vec k;
     f32 best = -1.0f;
     u32 i = 0;
-    u128 w = Vu0::ScalarInGprReg(scale);
     do {
-        Vu0::Q(k) = w;
+        k.q = Vu0::ScalarInGprReg(scale);
         BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
-        *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), Vu0::Vec::Of(k));
-        *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), Vu0::Vec::Of(k));
-        *(Vu0::Vec*)&s.r[2] = Vu0::MulX(Vu0::Vec::Of(m.r[2]), Vu0::Vec::Of(k));
-        Vu0::Q(k2) = Vu0::Q(k);
-        pcopy = *pos;
+        *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), k);
+        *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), k);
+        *(Vu0::Vec*)&s.r[2] = Vu0::MulX(Vu0::Vec::Of(m.r[2]), k);
+        *(Vu0::Vec*)&k2 = k;
+        Vu0::Vec pc = Vu0::Vec::Of(*pos);
         CopyMatrix(&rot, &s);
-        Vu0::Q(p) = Vu0::Add(Vu0::Q(pcopy), Vu0::Rotate(rot, Vu0::Q(*dir)));
+        *(Vu0::Vec*)&p = Vu0::Add(pc, Vu0::Rotate(rot, Vu0::Vec::Of(*dir)));
         if (TestOwnerGraphSpan(self, pos, &p, 1, &span) != 0 && best < span.time[1]) {
             best = span.time[1];
             Vu0::Q(hit) = Vu0::Q(span.q[1]);
@@ -232,5 +224,5 @@ void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
         }
         i++;
     } while (i < 11);
-    Vu0::Q(*dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(hit), Vu0::Q(*pos)), Vu0::Q(k));
+    *(Vu0::Vec*)dir = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(hit), Vu0::Vec::Of(*pos)), k);
 }

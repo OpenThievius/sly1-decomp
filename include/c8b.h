@@ -56,6 +56,15 @@ struct Gr8B {
     In8B* pC0;              // 0xC0
 };
 
+// Samples the chain of objects from o up to top (not included) at time t and scale: the n
+// positions, rotations, velocities and spins, each output optional (placed_object.cpp). The
+// floats come after self: SampleScriptAnimation's argument moves need that order.
+struct PlacedObject;
+struct Vec02;
+struct Mat02;
+void func_0012CD78(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+                   Vec02* vel, Vec02* spin);
+
 struct Slot8B {
     u8 pad0[4];
     Node8B* n4;             // 0x04: the object named by the id

@@ -228,7 +228,6 @@ void BuildCombinedBlendAnimation(void* self, s32 a, s32 b, void* c, s32 d, void*
 void SetBlendEntryRecordFlag(void* g, void* n);
 void ComputeGridBlendWeights(C8B* self, f32* out, f32 a, f32 b, f32 c);
 void SetBlendItemWeights(void* g, s32 a, s32 b, void* c);
-void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
 
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
@@ -1913,7 +1912,8 @@ void StartC8BObject(C8B* self)
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
     SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-    func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q70, 0, 0, 0);
+    func_0012CD78(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
+                  (Vec02*)&self->q70, 0, 0, 0);
     self->f60 = self->f3E4->pC0->p8->f8;
     if (self->f80 != 0) {
         ComputeGridBlendWeights(self, buf, self->f84, self->f88, self->f8C);
@@ -1921,7 +1921,8 @@ void StartC8BObject(C8B* self)
         src = buf;
         for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
         SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-        func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q90, 0, 0, 0);
+        func_0012CD78(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
+                      (Vec02*)&self->q90, 0, 0, 0);
     } else {
         self->q90 = self->q70;
     }

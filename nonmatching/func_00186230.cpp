@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 232/240 (96.7%), checked 2026-11-09
+// BYTES 232/240 (96.7%), checked 2026-11-10
 // NEAR: (w7) Every register is retail's; two instructions are swapped. ToFloatNow for both
 // conversions (the squared length's product stays a VU0 pseudo: local-alloc then gives p vf2, a
 // vf3 and the 1.0 vf4, and the division issues before the mfc1 of 1.0) and the distance stored
