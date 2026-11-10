@@ -648,6 +648,32 @@ everything reads vf2. One instruction short.
   or both arms, as a `Vu0::Vec` with Vec helpers in the arms, `Vec::Of(size)` reads, `hi = size`
   after the MulX, `Q(hi) = Q(size)` and MulX of `Q(hi)`, a second Splat in the else arm (cse1's
   jump path merges the identical asm), `s` reassigned in the else arm or after the join.
+- **Without cprop the split survives, but on the wrong side (2026-11-10, second look).** As a
+  diagnostic (never a form: one flag set per file), the named form (`u128 half = Splat(m);
+  Q(size) = half;`, the else arm `Q(hi) = half; MulX(half, ..)`) built with `-fno-gcse` keeps
+  cse1's two pseudos: vf2 for the head's store and the then arm, vf3 for the else arm
+  (`vmove vf3,vf2` in the `beqz` slot, `sqc2 vf3,32(sp)`, `vmulx vf2,vf3`). So cprop is the
+  only pass that merges them. Even so the else pseudo is `VU_REGS or none` (.lreg): with one
+  store (hi), one `j` use (the MulX) and the copy from a VU0 pseudo, regclass prefers VU0.
+  For retail's GPR (`sq v0,32(sp)`, `qmtc2 v0,vf3`) the else pseudo must be the asm's own
+  output and also carry the size store (two stores and one `j` use, as the class test above
+  found): RTL `asm -> S; H = S; size = S; then: H, H; else: S, S`. reload_cse then has
+  `vf2 = v0` from the copy and can store `size` from either; retail's `sqc2 vf2,0(sp)` after
+  `qmtc2 v0,vf2` fits.
+- **Why no plain form gets there.** cprop_insn propagates a copy into any insn whose pattern
+  is a SET (asm operands, stores) when the copy is available at the block's entry, unless the
+  copy's source is set earlier in that block; find_avail_set takes any copy in the head that
+  neither side overwrites later in the head. A then arm that reads `H` therefore always gets
+  `S`, whichever orientation cse1 leaves. The ways out in gcse.c are a use inside a PARALLEL
+  (an asm with two outputs or a clobber: the then arm's vsub and vadd are single-output
+  helpers, and retail reloads `target` between them, so they were two statements), a then arm
+  that sets `S` before reading `H` (it would also have to compute through `S`, which retail's
+  vf1 results rule out), a copy with a second predecessor into the then arm, or a copy PRE
+  makes after cprop (PRE has nothing redundant to eliminate here: the arms have no splat of
+  their own). Also ruled out tonight: the margin named as a float before the test (`f32 m =
+  self->margin;`), and the splat kept in one `u128` variable reused for the doubled splat after
+  the join (the user variable's two lives make one pseudo, and both splats go to VU0, 8
+  instructions worse).
 - **The loop is retail's.** `Vec02* pts = r->points[r->bank];` before the loop and `Vec02* p =
   &pts[i];` in its body: loop.c reduces the address to a pointer giv initialised in the
   preheader after the entry test (`addu v1,a0,s1` in the `blez` slot, `move s0,v1`), where a
