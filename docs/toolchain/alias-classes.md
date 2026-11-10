@@ -2911,3 +2911,23 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
   reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
   before regclass (the copy survives cse1 and gcse).
+- **Where the length's copy goes, and the copy retail's counts imply (2026-11-10, w15).**
+  With ToFloatMoved for the test and StoreX for the distance (`-ds -dG -dL -dt -df` dumps):
+  cse1 keeps the inline's copy `len = r` (r the Sqrt's output; len lives outside the block
+  and longer, so make_regs_eqv makes it canonical and the test's mtc1 reads len); gcse's
+  copy propagation then replaces len in the arm (DivX) and at the join (StoreX) by r, cse2
+  folds the test's use into r, and flow deletes the dead copy. Regclass sees one pseudo with
+  Sqrt's "=j" and DivX's "j" against two "r": the tie. By the counts, retail's code is what
+  a surviving copy at the join gives: `a = len` with `a` read only by StoreX makes the
+  length 2 "j" against 1 "r" (VU_REGS, the test's qmfc2 a reload in v1 while the fallback
+  holds v0), and `a` GR_REGS, so the copy is the compiler's qmfc2 (unit vu0) into
+  local-alloc's v0 with StoreX's asm sw after it. No plain copy survives: make_regs_eqv
+  makes a new register canonical only when it lives outside the CSE block and longer, so a
+  block-local destination is always folded (`u128 l2 = len; Vu0::StoreX(*dist, l2);`
+  folds in cse1; integrate.c passes a user variable to StoreX's parameter without a copy).
+- ToFloatNow with StoreX differs from retail only in the test's GPR and the fallback's
+  addiu: ToFloatNow's GPR is an unused output (REG_UNUSED, one ref, rank 0, allocated
+  last), and the fallback's `%hi` pseudo, which holds v0, has died at the lo_sum, which
+  sched1 issues at cycle 8 (a free alu slot) before the test's asm at 12; the GPR takes v0
+  and the fallback (global) v1. Naming the fallback after the Length, or not naming it,
+  does not move the lo_sum past the test (unnamed, the address goes into the arm).
