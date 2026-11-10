@@ -330,13 +330,15 @@ struct Vu0 {
     // straight to memory (func_00141690, func_00174E20) and moves it to VU0 with qmtc2 where
     // it is used there (func_00144AA0, func_001BFBF8). It is stored to a slot of its own though
     // nothing reads it back, as Scalar's: a cast's copy, so a load through a pointer of no known
-    // base (func_0017ABE8's method table) need not wait for the sq.
+    // base (func_0017ABE8's method table) need not wait for the sq. The cast's address is taken
+    // here, as Scalar's is, not through Q: Q's reference return leaves the slot's address in a
+    // pseudo CSE keeps for later locals given the same slot (func_001E7C60's pos and request).
     static u128 FromFloats(f32 x, f32 y, f32 z)
     {
         u128 r, w;
         __asm__("mfc1 %0, %2\n\tmfc1 %1, %3\n\tpextlw %0, %1, %0\n\tmfc1 %1, %4\n\tpcpyld %0, %1, %0"
                 : "=&r"(r), "=&r"(w) : "f"(x), "f"(y), "f"(z));
-        return Q((s128)r);
+        return *(u128*)&(s128)r;
     }
 
     // A weight passed whole in a GPR: the float's bits put in a 128-bit value with mfc1 (the
