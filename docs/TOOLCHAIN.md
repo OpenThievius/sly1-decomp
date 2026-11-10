@@ -2192,6 +2192,34 @@ dump:
   local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
   loads a pointer's field before stack stores that ours issues first.
 
+### A member store that kills two registers goes first (func_001A1030, near miss)
+
+UpdateSpringEffect (two clamped quadratics, a spring towards them, `vel += acc * dt;
+pos += vel * dt` with vel.y zeroed for the position) went from 81.1% to 86.1% on
+2026-11-10, from the `-df -dS` dumps:
+
+- **The tail: INSN_REG_WEIGHT counts every death.** With `Q(vel) = MulAddX(...);
+  Q(self->qA0) = Q(vel);` the member store is the last use of both the new velocity and
+  `self` (flow's REG_DEAD notes on it: weight -2, or -1 once the pointer dies later), while
+  the dead stores of pa, pb, d1 and d2 kill nothing (weight 0). sched1 then issues the member
+  store before them, and sched2 cannot undo it (after reload a store through `a2` conflicts
+  with every `sp` store). Retail stores qA0 last: written `Q(self->qA0) = MulAddX(...);
+  Q(vel) = Q(self->qA0);` (CSE reads the member back from the register), the velocity dies
+  at the frame store instead, the member store ties with the dead stores at weight 0 and
+  falls to INSN_LUID, after them. Spot it: retail's member store comes after dead frame
+  stores of values computed earlier.
+- **Two stores of one constant: the dying one first.** `b.x = 20; b.y = 20;` puts the
+  constant's REG_DEAD on b.y's store, which sched1 then prefers by weight: retail's b.y
+  store before the branch and b.x in its delay slot.
+- **Ruled out for the head.** Retail's sched1 must issue b's clear after the life load
+  (sched2 keeps a frame store after a load through `a2` in stream order) and the 20.0 after
+  the divide (it shares `$f0` with the difference). Ours issues the clear at clock 3 (its
+  priority 3 beats the dt copy's 2, the only other ALU insn) and the 20.0 at clock 5 (three
+  dependents, the two stores and the jump, beat 125's and -25's two). None of the 280 orders
+  of the seven a/b/t statements, the clamp as an inline, if/else, ?:, a reference output or
+  named bounds, `g_gameClock[1]`, or `Vec02 a = {125, -25}` initialisers changes either; the
+  difference lies in the RTL's shape, not in the order.
+
 ### A weight listed before its vector (func_001DDE90)
 
 The chain relaxation's velocity update, `vel + rel * b + drag * vel + bend * c`, is one
