@@ -237,6 +237,9 @@ explains it; search the section's title or the function. Walls that stay open ar
   for the maintainer's decision; its section is on branch w9-203FD0).
 - **`volatile` only for words an interrupt or another thread shares,** as retail reloads them (func_00203548).
 - The GCSE bucket order is the same as SN's (func_00211618 "Sony's compiler: the same bucket order").
+- **A flag tested twice and recomputed at the second test** came from a variable copied from a loaded temporary:
+  GCSE's copy propagation splits the two tests into two expressions (func_001F8DB8, func_001F9028).
+- **A local reused by two loops is one register;** retail's loops in different registers had their own variables.
 
 ### Process
 - Find the mechanism first: the pass in the dumps (-dS, -dl, -dg, -dL, -dG, -fsched-verbose-6) and in GCC
@@ -5665,6 +5668,45 @@ branch layout and 68% of the code:
   local-alloc gives `yo << 4` t2 in the block after the luma row tests (retail t1), and its
   preference pulls ys and yo into t2 (retail a2), the first difference in global-alloc's order;
   the registers cascade from there.
+
+### A copy keeps two tests of one flag apart (func_001F8DB8, func_001F9028)
+
+Read from the `-dr -ds -dG` dumps of ReadFile and WriteFile (src/lib/iop_file_client.cpp,
+2.9-ee-991111, 2026-11-10), with gcse.c's hash_scan_set, cprop and pre_delete:
+
+- **What retail shows.** Both functions test the handle's mode `& 0x8000` before registering the
+  semaphore and again after the reply, and retail computes `andi v0,s3,0x8000` at each test. Written
+  with one variable (`if (p == 0 || (mode = p->used) == 0)`), PRE finds the second `and` fully
+  redundant, keeps the first's result in a pseudo across every call, and that pseudo takes the
+  callee-saved register retail gives to a hoisted `%hi` (0x20000000 or D_006284C0's high half): one
+  instruction longer, and every later register moves.
+- **The mechanism.** Written as `if (p == 0 || p->used == 0) { ... } mode = p->used;`, the null test
+  loads the field into a temporary, and cse1 (following the jump) turns the second load into a copy
+  `mode = temp`. GCSE's copy propagation then replaces `mode` by the temporary in the uses in later
+  blocks (the 0x20000000 test and the last test) but not in the first test, which sits in the copy's
+  own block (cprop is global only). The two tests are now `(and mode 0x8000)` and
+  `(and temp 0x8000)`: different expressions, nothing redundant, and global-alloc ties the copy's
+  two pseudos into one register (s3), so the only trace is the recomputed `andi`.
+- **Ruled out.** A copy written by hand (`s32 m = mode;`) or an inline function's parameter: cse1
+  canonicalises them back to `mode` along its jump-following path. `(s16)mode < 0` gives sll/bgez,
+  `(mode >> 15) & 1` keeps the shift, and `(u16)mode & 0x8000` folds back to the same expression.
+- **The rest followed once the size was right.** The reply's address written in place
+  (`D_006284C0` as the argument and `(u32)D_006284C0 | 0x20000000`, as ControlFile has it) leaves
+  three `%hi` that PRE hoists into the first test's arms (D_006284C0, D_00628500, D_00628B40, all
+  anticipated after the join and blocked by the registration loop); global-alloc gives the callee-saved
+  register to D_006284C0's, as retail. WriteFile also needed: the zero arm first
+  (`if ((buf & 0xF) == 0) head = 0; else ...`) for retail's block order; the head as
+  `((buf >> 4) << 4) + 16 - buf`, which Sony's reassociation turns into retail's `A - (buf - 16)`
+  (written `A - (buf - 16)` it becomes `(A + 16) - buf`); the uncached address stored back into
+  `buf` (retail's `or s1,s1,s3`); and the copy loop's own index variable (retail's two loops count in
+  different registers, a2 and a1).
+- **Spot it.** A test of a flag in a callee-saved register that retail recomputes from the variable
+  each time: look for the variable assigned after its first test as a load (`if (!p || !p->field)`
+  then `x = p->field;`).
+- **A check.py caveat.** check.py printed `lui v0,0x62` against retail's `0x63` for these functions
+  while the full build matched: it pairs a `%hi` of a file's static (a `.bss` section symbol) with the
+  next `%lo` of the section in address order, and a hoisted `%hi` whose `%lo` is far away takes
+  another static's. A `.bss` `%hi` off by one in check.py alone is worth a full build.
 
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
