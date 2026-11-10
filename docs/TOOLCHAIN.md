@@ -1738,6 +1738,21 @@ the centre as a local just before the statement (`u128 centre = Vu0::Q(part->v14
 first and gives retail's VU registers. The Vu0::Vec form (Vec::Of, Vec::Scalar) loads both
 vectors before the slot and does not match.
 
+### A flags word PRE shares that retail reloads (func_00187F40, unsolved)
+
+Read from the -dG dump (2026-11-10). The contact dispatcher reads `p->flags538` into a local at
+the top of its loop body and tests its bits, then reads `p->flags538` again in the sweep tests
+and for the `|=` after a swept call. PRE (gcse.c) finds those reads redundant with the first
+load ("PRE: redundant insn 130 (expression 1)", a copy of the load's register at the end of bb 1
+and loads inserted after each call), so ours keeps the word in a register and is 12 bytes
+short. Retail reloads it at each of those reads, but reuses `other->flags538`, loaded before
+the bit-47/56 test, at the first sweep's bit-40 test. GCSE does not hash a MEM's alias set
+here (`-fstrict-aliasing` is off), so only a memory set in a block between the two loads
+(mem_set_in_block: a store or a call) or another address expression for the later reads would
+keep p's word unavailable while other's stays available. `-fno-gcse`, as a diagnostic only,
+gives retail's reloads everywhere but that reuse (816 bytes against 812). Retail's sweep flag
+is spilled at 4(sp) with 0(sp) unused, a sign of another frame object in the original.
+
 ### Loop variables declared once at the top: shared counters and an indexed record (func_00139740)
 
 Matched 2026-11-10 from the -dG dumps. ComputeBlendedDuration has four loops over two counts
