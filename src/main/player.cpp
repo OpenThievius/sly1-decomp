@@ -41,6 +41,7 @@
 #include "attachment.h"
 #include "on_off_object.h"
 #include "mul_rotation.h"
+#include "value_range.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -1021,7 +1022,197 @@ s32 func_00171180(Player* self)
     return 1;
 }
 
-INCLUDE_ASM(func_00171238);
+// A part of the player's model as func_00171238 poses it: its state (0x10) and the state asked
+// for (0x11), its offset and its rotation (BuildEulerRotationMatrix).
+struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec02 offset; u8 pad30[0x40 - 0x30]; Mat02 rotation; };
+// The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
+struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 f40; };
+
+// x + t (y + t z) of a curve's three coefficients.
+static inline f32 EvalCurve3(const f32* c, f32 t) { return c[0] + t * (c[1] + t * c[2]); }
+
+void BuildEulerRotationMatrix(void* angles, void* out);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void ConvertPositionToWorld(void* rec, Vec02* out);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
+f32 WrapModulo(f32 x, f32 m);
+f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
+f32 ApproachValueClampingVelocity(f32 x, f32 v, f32 target, f32 dt, void* params, f32* outv);
+void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
+void TransformPointAtTime(void* obj, s32 a, f32 t, Vec02* in, s32 b, Vec02* out, s32 c);
+
+// The smaller of two floats (min.s; through an inline function the result takes b's register).
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
+
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+// The direction of a path curve at t (its slot 2, when it has one) turned from the curve's frame
+// into the world. The address of the result is the inline's argument, formed at each call.
+static inline void SampleCurveDirection(PathCurve* c, PlacedObject* frame, f32 t, Vec02* dir)
+{
+    if (c->vt->m02 != 0)
+        ((void (*)(PathCurve*, f32, s32, Vec02*))c->vt->m02)(c, t, 0, dir);
+    TransformDirectionBetweenFrames(frame, 0, dir, dir);
+}
+
+void func_00171238(Player* self)
+{
+    s32 mode;
+    if (self->f2220 == 6 && self->f239C == 4 && self->f2228 == 0x10 && (u32)(self->f223C - 4) < 2) {
+        void* angles;
+        mode = 2;
+        if (((PathRecord*)self->f23BC)->f40 != 0) {
+            Vu0::Q(((PosedPart*)self->f2518)->offset) = Vu0::Q(*(Vec02*)D_00263820);
+            angles = D_00263830;
+        } else {
+            Vec02 d;
+            Mat02 m;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PosedPart*)self->f250C)->offset), Vu0::Q(((PosedPart*)self->f2510)->offset));
+            f32 angle = D_00263850 * ArctangentOfRatio(d.z, D_00263854);
+            BuildAxisAngleMatrix(&g_unitYVector, &m, angle);
+            Vu0::Q(((PosedPart*)self->f2518)->offset) = Vu0::Add(Vu0::Q(*(Vec02*)D_00263840), Vu0::Rotate(m, Vu0::Sub(Vu0::Q(*(Vec02*)D_00263800), Vu0::Q(*(Vec02*)D_00263840))));
+            angles = D_00263810;
+        }
+        BuildEulerRotationMatrix(angles, &((PosedPart*)self->f2518)->rotation);
+    } else {
+        mode = -1;
+    }
+    PosedPart* part = (PosedPart*)self->f2518;
+    if (part->state != mode) {
+        part->next = mode;
+        s32 n = ((PosedPart*)self->f2518)->next;
+        part->state = n;
+        ((const Desc02*)self->f24F8->desc)->m2B(self->f24F8);
+    }
+    Vec02 rest;
+    Vec02 pos;
+    Vec02 vel;
+    Vec02 along;
+    Vec02 side;
+    Vec02 k;
+    Vec02 push;
+    Vu0::Q(rest) = Vu0::Q(D_00248D30);
+    PlacedObject* frame = 0;
+    Vec02* at = 0;
+    PosedPart* lead = (PosedPart*)self->f2500;
+    if (lead == 0 || lead->state == -1)
+        return;
+    switch (self->f2220) {
+    case 0:
+        if (self->f690 != 0) {
+            frame = (PlacedObject*)self->f6C0;
+            at = &self->v6A0;
+        }
+        break;
+    case 6:
+        if (self->f2228 == 0x10) {
+            switch (self->f239C) {
+            case 5: {
+                PathRecord* rec = (PathRecord*)self->f23B8;
+                frame = rec->frame;
+                ConvertPositionToWorld(rec, &pos);
+                at = &pos;
+                break;
+            }
+            case 4: {
+                PathRecord* rec = (PathRecord*)self->f23BC;
+                PathCurve* c = rec->curve;
+                frame = rec->frame;
+                if (c->vt->m01 != 0)
+                    ((void (*)(PathCurve*, f32, Vec02*, Vec02*))c->vt->m01)(c, self->f23C0, &pos, &vel);
+                TransformPointBetweenFrames(frame, 0, &pos, &pos);
+                at = &pos;
+                if (((PathRecord*)self->f23BC)->f40 != 0) {
+                    Vu0::Q(vel) = Vu0::DivX(Vu0::Q(vel), Vu0::Length(Vu0::Q(vel)));
+                    f32 speed = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(vel)));
+                    Vu0::Q(k) = Vu0::FromFloat(speed);
+                    Vu0::Q(along) = Vu0::MulX(Vu0::Q(vel), Vu0::Q(k));
+                    f32 t = self->f23C4 + speed * D_002637D8;
+                    f32 len = c->vt->m08(c);
+                    if (c->wrap != 0) {
+                        t = WrapModulo(t, len);
+                    } else {
+                        f32 lo = *c->lengths;
+                        if (t < lo)
+                            t = lo;
+                        else if (len < t)
+                            t = len;
+                    }
+                    SampleCurveDirection(c, frame, t, &vel);
+                    *(u128*)&k = Vu0::FromFloat(speed);
+                    Vu0::Q(side) = Vu0::MulX(Vu0::DivX(Vu0::Q(vel), Vu0::Length(Vu0::Q(vel))), *(const u128*)&k);
+                    Vu0::Q(rest) = Vu0::Sub(Vu0::Q(side), Vu0::Q(along));
+                    if (self->f1090 != 0) {
+                        u128 n = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(vel));
+                        Vu0::Q(k) = Vu0::DivX(n, Vu0::Length(n));
+                        f32 turn = ClampBetween(SplitVectorAlongAxis(&rest, &k, 0, &rest) / D_002637DC, -1.0f, 1.0f);
+                        if (self->f23C8 != 0)
+                            turn = -turn;
+                        f32 r = ApproachValueClampingVelocity(self->f1094, self->f1098, turn * (2.0f - __builtin_fabsf(turn)), g_frameDt[0], D_00263858, &self->f1098);
+                        self->f1094 = r;
+                        f32 a = r >? 0.0f;
+                        f32 b = -r >? 0.0f;
+                        self->f106C = a;
+                        self->f1084 = b;
+                        self->f1078 = 1.0f - a - b;
+                        SetBlendItemWeights(self->f1090, 0xC, 3, &self->f106C);
+                    }
+                    goto motion;
+                }
+                break;
+            }
+            }
+        }
+        break;
+    }
+    if (frame == 0)
+        return;
+motion:
+    ComputeObjectMotionInFrame(frame, 0, at, &vel, 0, 0, 0);
+    TransformPointBetweenFrames(0, (s32)frame, at, &along);
+    Vu0::Q(side) = Vu0::Zero();
+    TransformPointAtTime(frame, 0, D_002637D8, &along, 0, &side, 0);
+    Vu0::Q(k) = Vu0::DivX(Vu0::Sub(Vu0::Add(Vu0::Q(rest), Vu0::Q(side)), Vu0::Q(vel)), Vu0::ScalarAt(D_002637D8));
+    f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(k), Vu0::Q(k))));
+    if (0.0001f < dist) {
+        f32 g = EvalCurve3(D_002637F0, MinF(1.0f, dist / D_002637DC));
+        f32 lo = g_unitRange.lo;
+        f32 hi = g_unitRange.hi;
+        if (g < lo)
+            g = lo;
+        else if (hi < g)
+            g = hi;
+        Vu0::Q(k) = Vu0::RotateTransposed(self->m660, Vu0::Q(k));
+        Vu0::Q(push) = Vu0::FromFloats(k.x * D_002637E0 * g / dist, k.y * D_002637E0 * g / dist, D_002637E4 * g);
+    } else {
+        Vu0::Q(push) = Vu0::Q(D_00248D30);
+    }
+    Vu0::Q(((PosedPart*)self->f2500)->offset) = Vu0::Q(push);
+    f32 e1 = EvalCurve3(D_00263870, ((PosedPart*)self->f250C)->offset.z);
+    f32 e2 = EvalCurve3(D_00263870, ((PosedPart*)self->f2510)->offset.z);
+    f32 z;
+    if (push.z < e1)
+        z = e2 <? push.z;
+    else
+        z = e2 <? e1;
+    ((PosedPart*)self->f2500)->offset.z = z;
+    if (self->f223C == -1) {
+        u128 s = Vu0::MulX(Vu0::Q(push), Vu0::ScalarAt(D_002637E8[0]));
+        Vu0::Q(((PosedPart*)self->f2504)->offset) = s;
+        Vu0::Q(((PosedPart*)self->f2508)->offset) = s;
+    } else {
+        ((PosedPart*)self->f2508)->offset = ((PosedPart*)self->f2504)->offset = D_00248D30;
+    }
+}
 
 // The record of a probe the player keeps for each of its two parts (+0x1190, +0x1290):
 // func_001719E8 fills it (the animation it was measured for, whether the segment hit, the probe
@@ -1847,20 +2038,6 @@ struct PushHolderDesc {
 struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHolder* holder; u8 pad38[0x50 - 0x38]; u32 flags; };
 struct PushRecord { u8 pad00[0x30]; f32 f30; s32 f34; };
 f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
-
-// The smaller of two floats (min.s; through an inline function the result takes b's register).
-static inline f32 MinF(f32 a, f32 b) { return a <? b; }
-
-static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
-{
-    if (v < lo) {
-        return lo;
-    }
-    if (hi < v) {
-        return hi;
-    }
-    return v;
-}
 
 void func_001733B8(Player* self, PushRecord* out)
 {

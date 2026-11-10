@@ -183,6 +183,13 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **A Vec named from a Vec result** adds a movti copy and a reference (func_0016C528).
 - **Reload's round robin is one step off with no visible extra reload:** the original repeated code that
   cross-jumping merged after reload; write the repeated tail instead of a fall-through (func_001F2840).
+- **A dot product kept in a saved GPR across calls is a float, not a vector** (func_00171238): retail's
+  `qmfc2 s0, vfN` after a Dot, then `mtc1 s0` for an FPR use and `qmtc2 s0` for each weight, is
+  `f32 x = ToFloat(Dot(..))` used as `FromFloat(x)`: ToFloat's "=r" output and FromFloat's "r" inputs
+  outnumber the one FPR use, so regclass prefers GR_REGS. A u128 Dot result across calls is
+  "VU_REGS or none" in the .lreg dump (set once or twice, with ToFloatMoved too) and is spilled.
+- **A frame address passed to an inline function is no GCSE expression,** so PRE does not keep it in a
+  saved register across a guarded call (func_00171238, "A frame address passed by an inline call").
 
 ### Loops (loop.c, jump.c)
 - **loop.c moves an invariant when 80 x savings x lifetime >= insns** (the threshold is 79 for a loop with a
@@ -208,6 +215,12 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **A return in each branch** lets the tails merge before the epilogue (func_0014DA98).
 - **Assignments written once after an if/else** keep PRE from copying them into the arms (func_0013BF68,
   PAL func_eu_0015DF58).
+- **A `b` over one load whose copy is in the delay slot** (`b join; lw a0, N(s2)` then `lw a0, N(s2)` at the
+  else label) is an else arm whose own set reorg took into the first test's slot: `if (..) { mode = 2; .. }
+  else { mode = -1; }`, not `mode = -1;` before the if (func_00171238).
+- **A chained struct assignment re-reads its middle operand** in C++ (`b->v = a->v = zero;` is an lvalue):
+  the left pointer is loaded first (expand_assignment expands the target before the value), then `a`'s
+  pointer again for the copy, which retail's early `lw a1` then `lw v1` show (func_00171238).
 
 ### Inlining
 - **An inline setter's constants** are substituted per insn, giving retail's mix of frame-relative and
@@ -215,7 +228,8 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **An inline layout helper's frame-address parameters** give a fresh `addiu` at each call and the buffer from a
   spill slot (PAL func_001316E8 "Integration: an inline function's parameters and results"; func_00134B48).
 - **An inline's whole frame** is one BLKmode temporary per call; locals declared in an inner block free their
-  slots at its end (func_00125138, func_001E4888).
+  slots at its end (func_00125138, func_001E4888); a Scalar's copy reuses an inner block's slot of its mode
+  (func_00158480 "A block's local slot taken by a Scalar's copy").
 
 ### Library code (Sony's 2.9-ee-991111)
 - **Stores of different types do not conflict;** use the file's real pointer types (func_001F7BE8).
@@ -600,6 +614,35 @@ other and with the loads and stores around them. The C around them sets and read
 retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u128 parameter
 (MoveToVf takes it, ToFloatMoved reads it). Neither function matches yet (nonmatching/): the
 bodies are retail's apart from register allocation.
+
+### func_00185150's vi block was one non-volatile asm (2026-11-10)
+
+Two of func_00185150's last differences come from the volatility of its four one-instruction
+helpers (ctc2.i $vi3, ctc2.ni $vi4, cfc2.ni $vi2, vnop), and both point to one asm statement with
+an output, which GCC does not make volatile (stmt.c makes an asm volatile only when it is declared
+so or has no outputs):
+
+- **sched1's dependents.** A volatile asm is a full barrier (haifa-sched.c, ASM_OPERANDS with
+  MEM_VOLATILE_P), so the three field loads retail has before ctc2.i must be read before it. With
+  separate asms the count's load has three forward dependents (its own ctc2.ni through flow's
+  LOG_LINK, the ctc2.i barrier, the block's jump) against two for fE's and kind's, and
+  rank_for_schedule, after equal priority and weight, prefers more dependents: count comes first
+  in every source order (tools/permute.py tried all six). Only an asm that consumes fE and count
+  together ties them, and INSN_LUID then gives retail's fE, count, kind.
+- **reorg's redundant insn.** resource_conflicts_p counts any insn with `volatil` set as a
+  conflict, so redundant_insn never looks back across a volatile asm. The join's `t7 = i + 1`
+  (PRE's copy at the switch's end) is then not redundant with the identical insn in the earlier
+  bnez's delay slot: the default arm's `b` takes a copy, and fill_eager_delay_slots lets the case-0
+  `beqz` steal it (steal_delay_list_from_fallthrough). Retail's two empty slots need no volatile
+  insn between that bnez and the b.
+
+With `__asm__("ctc2.i %1,$vi3; ctc2.ni %2,$vi4; cfc2.ni %0,$vi2; vnop" : "=r"(mask) : "r"(fE),
+"r"(count))` and a plain `switch (grp->kind)` (the kind's load is then free to move up), both match
+(build/swarm/w11-185150/h4.cpp, scratch only). What is left is a global-alloc tie: three fewer loop
+insns than the separate asms move the light table's address (3 refs over a 134-insn life, doubled by
+its REG_EQUAL constant) ahead of the out-count pointer (2 refs over 90). A four-instruction asm used
+by one function is not a project helper (AGENTS.md), so the near miss keeps the separate helpers
+until that is decided.
 
 ## The MMI and system helpers
 
@@ -1582,6 +1625,64 @@ StartNextQueueEntry (2026-11-10):
   needs for retail's vector registers. CreateAnimationPlayerWithoutPresetTargets declared void
   (as five other files do) lets local-alloc give the next load v0.
 
+### A constant passed through an inline is no pseudo for cse2 to copy (func_0016BEA0)
+
+Read from calls.c, integrate.c and cse.c with `-dt -dL -dS -dl` dumps (2026-11-10,
+DrawGridSelector, src/main/file_16AA18.cpp):
+
+- **Retail's sign.** `lui/ori/mtc1 $f12` for the push's 1.3 after GetFontById, a second
+  `lui/ori/mtc1 $f27` for the loop's 1.3, and `mov.s $f13,$f12` in the call's delay slot. Ours
+  (`PushFontScale(f, 1.3f, 1.3f)` and `k * 1.3f` in the loop) loaded 1.3 once, before the
+  title's DrawFontString, into a saved register, and copied it for the call and the loop.
+- **Why.** A call's constant argument costs more than 2, so precompute_register_parameters
+  copies it into a pseudo before the hard register (calls.c, preserve_subexpressions_p is
+  always true at -O2). loop.c hoists the loop's 1.3 to the end of the block that holds the
+  push, and cse2 (after loop) finds that pseudo still holding 1.3 there: the hoist becomes a
+  copy of it, the pseudo crosses the calls, and sched1 (a call-crossing pseudo has no anti
+  dependence on the last call) moves its set above DrawFontString. The 0.5 and `&out` copies
+  retail does show (`mov.s $f25,$f20`, `move s8,s0`) are this same mechanism on user variables.
+- **Retail's form: an inline with one scale.** `inline void PushUniformFontScale(Font* f, f32 s)
+  { PushFontScale(f, s, s); }` called with 1.3f: integrate.c substitutes an unmodified
+  parameter's constant into the saved body, whose call already reads a register, so the body
+  sets `$f12` and `$f13` from the constant directly, no pseudo holds it after the call (the call
+  clobbers the hard registers), and the hoisted 1.3 keeps its own load. The `$f12` load stays
+  after GetFontById (a call-used hard register depends on the last call).
+- **Spot it.** Two loads of one float constant in a block, one into an argument register:
+  the argument came through an inline's parameter (or was otherwise never a pseudo).
+
+### A stored product's two-operand mult: what combine needs (PAL func_eu_001ACC68, unsolved)
+
+Retail's `mult $zero,v0,v1` with a later `mflo a0` (the two-operand form, the product in LO)
+against our three-operand `mult a0,v0,v1`, where the product (two member loads, each also
+stored elsewhere) is only stored (US func_001ABE70, PAL func_eu_001ACC68). Read from
+combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -dr -dl` dumps:
+
+- The mulsi3 expander always emits mulsi3_mult3_r5900, a PARALLEL with three clobber pseudos,
+  which regclass gives GR for the product ("GR_REGS or none" in the `.lreg`): three-operand.
+  Only an insn that combine *re-recognises from the bare SET* (the mult's SET without its
+  clobbers) matches mulsi3_internal first ("=l" only, `mult\t%1,%2`), and reload's output
+  copy is the mflo that sched2 delays. combine builds that bare SET when the mult (i2) is
+  substituted into a later insn (i3) by the normal path. It keeps the PARALLEL, clobbers and
+  all, in the i3_subst_into_i2 path, taken when i3 is a register copy of the product that is
+  the very next real insn and in which the product dies (`next_real_insn (i2) == i3`).
+- A store can never be i3 (`(set (mem) (mult ..))` matches nothing, and the split needs an
+  i1 that dies, which two loads used again by the cols/rows stores are not). So the product
+  needs a register copy that survives CSE, not right after the mult. CSE keeps a copy only
+  when its destination is the class's canonical register: make_regs_eqv makes it first only
+  if it lives outside CSE's block (first use before the block, last use after it) and longer
+  than the source. The tail after a switch's join is one CSE block, so an inline getter's
+  return copy, a local or a chained assignment all have their copies replaced and deleted.
+- Shown: a variable first set before the switch, assigned the product from a local after the
+  cols2/rows2 stores (`s32 m = cols * rows; ...stores...; n = m; self->cells = n;`), gives
+  retail's whole tail (mult, mflo a0, the store order). The same with the copy right after the
+  mult (an inline getter into the reused variable) keeps mult3. Neither is plausible source,
+  and the reused variable moves the switch's registers. Ruled out as well: `s64` locals and casts
+  (`(s32)((s64)a * b)` folds back to SImode; an `s64` local keeps a truncdisi2 of
+  `(truncate (sign_extend p))` that SN's combine does not reduce; u64 forms widen and shift).
+- The other nine `mult $zero` sites in US are products by a constant or with an operand that
+  dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
+  to an argument register: a three-insn combine whose split leaves the bare SET.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
@@ -1904,6 +2005,111 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   original had a block of its own when gcse ran. A plain-C form that gives that block without
   a dead statement is still to be found.
 
+### A copy in each arm is propagated into the join (func_00114BB0, matched 2026-11-10)
+
+- **What differed.** AppendScriptLists links each list it appends after the last node and
+  walks to the new end: `while (last->next) last = last->next;`. Written with `last = c;` in
+  both arms of `if (head == 0)`, gcse's copy propagation (the -dG dump: "1 copy props") finds
+  the copy `(set last c)` available at the join on both paths and rewrites the walk's first
+  test (jump.c's copy of the exit test) to read `c->next`. Retail tests `last->next` (`lw
+  v0,8(s2)`), and the PRE'd `n->next` load and the exit's `move` land differently (8 bytes
+  short).
+- **The form.** One `last = c;` after the if/else (each arm keeps only what differs: the new
+  head's chain, or the store into the old end). The join's block then sets `last` itself and
+  the copy is not "available" from the predecessors, so the walk reads `last`; reorg still
+  copies the join's first load into the head arm's `b` delay slot.
+- **Also needed:** the function gives its value back as a class (RetValue, as func_00118198
+  and func_00119218): its `args->tag == 0` return keeps its own copy, destruction and return
+  only so; with explicit calls jump2 cross-jumps that return into the last one. With the class
+  alone the code was 8 bytes short and n took s1 instead of args' s0; the single copy after the
+  join gave both (retail's registers follow from the walk's lives).
+- **Spotting it.** A walk or test after a join that reads, in ours, the variable each arm
+  copied from, and in retail the variable the arms copied to: write the copy once after the
+  join.
+
+### A frame address passed by an inline call is not GCSE's (func_00171238)
+
+- **What differed.** After a guarded curve sample (`if (c->vt->m02) m02(c, t, 0, &vel);`)
+  and `TransformDirectionBetweenFrames(frame, 0, &vel, &vel)`, ours kept `sp + 32` in a saved
+  register across the sample's call; retail forms it again in the call's delay slot and at the
+  join (`addiu a2, sp, 0x20` twice). The saved register pushed a value retail keeps in s0
+  into a spill slot: 16 more bytes of frame and every register after it renumbered.
+- **Why.** An argument written in the call expands to `(set (reg P) (plus fp 32))` and then
+  a move into the argument register: P's set is in gcse's expression table. The expression
+  is anticipated at the end of the test block (both successors compute it before any call),
+  so PRE inserts it there (`-dG`: "PRE/HOIST: end of bb 30 ... expression 66") and after
+  the arm's call, and cse2 then folds the arm's own computation into the hoisted pseudo,
+  which now lives across the call. Passed to an inline function instead, the address is the
+  inline's unmodified parameter: integrate.c substitutes it as a constant at each use, so
+  each argument move is `(set (reg a2) (plus fp 32))` straight into the hard register,
+  which gcse never records (hash_scan_set takes only sets of pseudos). No expression, no
+  PRE.
+- **The form.** The sample and its transform as one inline helper (`SampleCurveDirection(c,
+  frame, t, &vel)`): the direction of a path curve at t in the world, a step the original
+  plausibly had as a function of its own. The same function's first sample (`m01` with
+  `&pos`) is PRE'd in retail (its address in s0), so that one stays written out.
+- **Spotting it.** A frame address in a saved register (`addiu sN, sp, n` in a branch's delay
+  slot before a guarded call) where retail forms it at each call: try the calls through an
+  inline function taking the pointer.
+
+### A named frame address is an expression; an argument register's is not (func_0016BEA0)
+
+Read from gcse.c (hash_scan_set) and global.c with `-dG -dl -dg` dumps (2026-11-10,
+DrawGridSelector):
+
+- **Retail's sign.** `addiu a1,sp,48` before `addiu a0,sp,16` for SetTextLayoutColor, and in
+  the loop and the tail `addiu a1,sp,48` / `addiu t2,sp,48` (rematerialized) while `&out`'s
+  loop copy has s8. Ours set a0 first, and PRE's reaching register for `sp+48` (inserted at the
+  end of the block before the loop) took the last saved register from `&out`'s copy.
+- **Why.** gcse records only sets of pseudos. Through the inline methods (`out.Color(&slot.v)`)
+  the frame address is substituted as a constant and set straight into `$a1`: no expression.
+  PRE then inserts its own computation late (lazy code motion), so the reaching register lives
+  from there to the tail: 5 refs over 72 insns beat `&out`'s copy (4 over 236) in
+  global-alloc. Named
+  (`s32* color = &slot.v; out.Color(color);`) the address is a pseudo set in the first block,
+  the loop's and the tail's `sp+48` are redundant with it, the reaching register lives over the
+  whole function and is spilled (its REG_EQUIV address is rematerialized at each use), and the
+  set's extra dependent (PRE's copy) ranks it, and so `$a1`, before `$a0` in sched1.
+- **Spot it.** An argument's frame address set before an earlier argument's, and the same
+  offset rematerialized later in the function: the original named that address.
+
+### MoveMemory's frame arguments: an inline's parameters set the argument registers directly (func_001B55C0)
+
+Read from gcse.c (hash_scan_set, compute_transp, pre_insert), lcm.c (pre_lcm), calls.c
+(precompute_register_parameters) and integrate.c, with the `-dF -dG -dL` dumps of the triangle
+animator's strip walk (2026-11-10). Retail shifts two three-entry windows on the stack each time
+round the strip loop, `MoveMemory(sp+32, sp+48, 32)` and `MoveMemory(sp+80, sp+88, 16)`, and an
+inner loop reads `uv[next[j]].x` and `.y` (bases sp+80 and sp+84, which loop.c moves into the
+inner loop's preheader). Written as plain calls, ours was 8 bytes short and its saved registers
+rotated:
+
+- **Calls never kill a frame address.** compute_hash_table records the call-clobbered registers
+  as set by a call but leaves out FRAME_POINTER_REGNUM (MIPS's `$1` before elimination), so
+  `(plus fp 80)` is transparent everywhere. A plain call's argument goes through a pseudo
+  (calls.c copies any argument whose rtx_cost exceeds 2 to a register, and expand_expr's
+  ADDR_EXPR has already forced the address into one), so the shift's `&uv[0]` is an
+  anticipatable occurrence of the same expression the inner loop computes.
+- **PRE then takes the inner loop's copy.** With `(plus fp 80)` ANTLOC in the shift's block,
+  that block is LATEIN, the inner loop's occurrence is redundant, and pre_insert puts a fresh
+  computation at the end of the shift's block (before the flags test's branch, whose delay slot
+  it then fills): one word more than retail, and retail's `bnezl` with the latch's load is
+  lost. The 8 bytes are that word and the inner loop label's alignment nop. The same goes for
+  `&uv[1]` and `&tri[1]`: their PRE pseudos live across the whole loop and compete for the
+  saved registers, so `&uv[1]` took retail's `&tri[2]` register.
+- **Retail's arguments were not in the table.** hash_scan_set records only sets of pseudos; a
+  set of `$a0` itself is never an expression. integrate.c gives a pointer parameter whose
+  argument is a frame address a constant equivalent and substitutes it into every copied insn,
+  so an inline function that passes its parameters on to the call (`template <class T> void
+  DropFirst(T* w) { MoveMemory(w, w + 1, 2 * sizeof(T)); }`) leaves `(set (reg a0) (plus fp
+  80))` and `(set (reg a1) (plus fp 88))`: no PRE, the inner loop's address moved by loop.c,
+  retail's size and its saved registers (199 differing lines to 22).
+- **Spotting it.** A call's frame-address arguments formed afresh at the call every time round a
+  loop (`addiu a0,sp,K` in the loop, nothing kept in a saved register) while the same addresses
+  passed to another function in the same loop are kept in saved registers: the first call went
+  through an inline. An extra address computation before a branch, where retail forms it in a
+  later loop's preheader, is PRE's insertion after a computation that should not have been in
+  the table.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
@@ -1955,6 +2161,22 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   instead of `||` gives 10 refs (priority 0.24), and the function matches. global.c's priority is
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
+
+### Two loads tied at one priority: name the term retail loads first (func_0016BEA0)
+
+DrawGridSelector's first cell's y (`self->y + fontH * fontSy + gap + cellH * half`) and x:
+retail loads the cell font's height and scale before the title font's and both before
+`self->y` and `self->x`. The title font's loads wait two cycles for `self->font`, and among
+the ready loads of equal priority INSN_LUID decides, so the cell's height named first (`f32
+cellW = f->Width('_'); f32 cellH = (f32)f->height * f->sy;`, then y0, then x0) gives retail's
+order and registers; the step (`dy`) still reads the font again after the second Width call,
+as retail does.
+
+- **PAL's frame (func_0016C4C8).** PAL draws the title through a 0xC0-byte text buffer at 0x40
+  while the colour slot, the cell string and the line's colour share 0x30 and the string's
+  initializer temporary is at 0x100. The colour slot in a block, freed as a 16-byte slot that
+  the buffer does not fit, and the buffer declared at function level after the block give that
+  layout; the buffer in a block of its own is freed and the temporary moves into it.
 
 ### sched2 keeps sched1's dependences (func_001358D0)
 
@@ -2090,6 +2312,33 @@ TI_REGS (the movti copies are tied away by local-alloc); storing e after the sub
 in the source changes nothing (the store is ready from the subtraction of b on, whatever its
 insn position). Retail's form needs the mtc1 to read only the GPR, with the product in
 VU_REGS: two references for the product's class, one leaving no code.
+
+### A block-scoped struct local frees its slot for a later Scalar (func_00154088)
+
+Matched 2026-11-10 from the -dS dumps. LimitContactTangents (func_00154088) sums each contact's
+vector over the active items into a Vec02 `acc` on the stack, then, after the search loop,
+scales the best tangent by `Vu0::Scalar(1.0f / mag)`. Three separate differences, in cascade
+order:
+
+- **A counted inner loop, not a pointer walk.** Retail's `addiu a0,-1; bnez a0` with a `blez`
+  entry test is loop.c's reversal (check_dbra_loop) of `for (k = 0; k < self->count; k++)`
+  with the record taken by index (`items + k * 0x60`); the count is read before the items
+  pointer, which is reloaded rather than copied. A walk `for (k = count; k > 0; k--)
+  other++` gives `bgtz` and CSE's copy of the outer loop's items register, and moves the
+  outer loop's registers (37 of 77 differing lines went with this alone).
+- **A value set after a call, declared after it.** `s32 bestIndex = -1;` written before the
+  solver call crosses it and takes s0; after it, t2 as retail.
+- **The weight's slot is acc's, because acc is declared in the loop body.** stmt.c's
+  expand_decl gives a block's memory variable a kept temporary slot (assign_temp with keep),
+  freed when the block ends; the tail's Scalar temporary then reuses it (both TImode), at
+  16(sp) as retail. Declared at the top of the function, acc keeps 16(sp) and the Scalar takes
+  the next slot, 32(sp). The tail also needed the Scalar directly (the scalar-slot lever): with
+  `Q(acc) = FromFloat(1.0f / mag)` and `MulX(best, Q(acc))`, the store to acc has no alias
+  class, so sched1 keeps the load of `it->twin` behind it, and MulX's result ties to the
+  dying scale instead of `best` (retail's `vmulx vf1, vf1, vf2x`).
+
+The handler at slot 0x108 takes `(self, flags, item, end, dt)`: retail's `mov.s $f12` fills the
+call's delay slot after the a1-a3 moves, as in func_001BCD00; with dt second it goes first.
 
 ### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
 
@@ -2692,6 +2941,23 @@ v1,v1,v0; movz a0,v0,v1`: the constant compared sits in a register, not in an `s
   operand is a variable set to the clamp's value first and then to the value under a `<`
   test.
 
+### A flag set from a && chain: a boolean, not `if (..) flag = 1` (func_001BC978)
+
+Read from the `-dr`, `-dj` and `-dl` dumps (2026-11-10):
+
+- **What differed.** A zero test `s32 still = 0; if (fabs(x) < k && fabs(y) < k && fabs(z) <
+  k) still = 1;` whose lanes are read through `Vu0::Vec::Of(o->offset)` put the flag in v0 and
+  the offset's GPR copy in v1, where retail has v1 and v0.
+- **Why.** With the Vec copies in its operands the `&&` is expanded as a value: a temporary
+  (r191) set to 0 and to 1, then jump.c turns `if (r191) still = 1;` into a conditional move,
+  which combine reduces to `still = r191`. `still` lives one block and local-alloc gives it
+  v0; the copy makes r191 prefer v0, and global-alloc's find_reg skips registers another
+  allocno prefers on its first pass, so the offset (ranked first) takes v1. With u128 lanes
+  (`Vu0::Q`, func_001B7D00) the same source keeps the branch form and has retail's registers.
+- **Rule.** Where the flag and the vector swap registers in such a test, write the test as the
+  flag's value: `s32 still = a && b && c;` (or the three tests nested, the same code). Matched
+  the flag in func_001BC978 (near miss, one GPR left).
+
 ## Alias classes in the schedule
 
 GCC 2.95 without `-fstrict-aliasing` separates a load from a store in sched1 and sched2 only
@@ -2772,6 +3038,17 @@ base). Declared `Pal* D_eu_0026ABE8` the load is MEM_SCALAR_P, never conflicts w
 struct-member stores, and sched1 hoists it above them; read as `D_eu_0026ABE8[0]` it is
 MEM_IN_STRUCT_P, waits behind the stores, and the function matches. func_eu_001AEEA0 reads the
 same word and matches either way, so the unit declares it once, as the array.
+
+### A rotation product through a pointer local (func_001B7D00)
+
+- ApplyColliderPendingMove multiplies its rotation into its own matrix with
+  MulRotationRowsIndexed (b's rows read by index after each row's stores). Written
+  `Mat02* frame = &self->rot; MulRotationRowsIndexed(&m, rot, *frame); *frame = m;`, the three
+  rows of b were loaded before any product row was stored; written `MulRotationRowsIndexed(&m,
+  rot, self->rot); self->rot = m;` the second and third rows wait for the stores of the row
+  before, as retail's do: EXACT. Not traced in the dumps; it fits the rule above that a base
+  register with REGNO_POINTER_FLAG (here the pointer-typed variable `frame`) passes frame
+  stores, where the address formed from `self` inside the helper does not.
 
 ### Memory dependences in sched1 (func_00149760)
 
@@ -3573,6 +3850,37 @@ base, and gives both reloads (the hits' other stores unchanged). The sibling fun
 reuses one face pointer for its three loops the same way. Spot it: a frame local reloaded
 after a store through a pointer derived from a parameter, where ours keeps it in a register.
 
+### An inline's pointer parameter and frame stores (func_001A2830)
+
+MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read from the
+`.sched` and `.lreg` dumps:
+
+- **find_base_term needs the pointer flag.** For an address `(plus P 16)`, alias.c's
+  find_base_term takes P's base only when P has REGNO_POINTER_FLAG; otherwise it looks up both
+  operands and keeps a base only if it is a symbol or a Pmode ADDRESS (the stack). An argument's
+  base is a VOIDmode ADDRESS, so `(plus P 16)` with P an unflagged copy of `self + 0x50` has no
+  base, base_alias_check answers "may alias", and the load depends on every earlier frame store
+  through a `u128` cast. A declared pointer local (`Vec02* b = self->rot50;`) is flagged
+  (expand_decl), so its loads never wait for the frame; an inline function's pointer or
+  reference parameter is a pseudo of the inline's own without the flag. Retail's rows 1 and 2 of
+  the placement, loaded at `0x10(s0)` and `0x20(s0)` each after the stores of the row before, with
+  s0 set before the call that builds the turn, are a reference parameter of an inline that makes
+  that call (`TurnEffectAboutRow(self, *(Mat02*)self->rot50, &turn, angle)`); row 0's load,
+  `(mem P)`, is folded by CSE to `0x50(s1)` (self, flagged) and so issues early. The rows are
+  stored through the effect (`*(Mat02*)o->rot50 = r`), so the stores use s1 and the turn's rows,
+  loaded once, are not reloaded. Spot it: loads through a register that crosses a call and is
+  never folded into the object's offset, each after the frame stores before it.
+- **An in-place normalisation as an inline over a pointer**, `*v = fallback` in one arm and
+  `Q(*v) = DivX(t, l)` in the other with `t` a `Vu0::Vec` copy of `*v`: retail's
+  `lq v0,48(sp); qmtc2 v0,$vf3` (the copy through a GPR), the fallback's address before the
+  branch and its `lq; sq` in the arm, and a store in each arm, with the length's two conversions
+  (ToFloat for the test, ToFloatMoved for the returned length after the join).
+- **One float scratch for two values** (`t = ToFloat(Dot(..))`, later `t = NormalizeInPlace(..)`):
+  two sets and two deaths, so local-alloc leaves it to global-alloc, which places it above every
+  local of both blocks ($f4 in both, where ours had $f0 and $f3), and a product no longer ties to
+  it (retail's `mul.s $f0,$f4,$f0`). Spot it: the same high FPR for two unrelated values that
+  each live in one block, with the block's other temporaries packed below it.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
@@ -3688,6 +3996,22 @@ after a store through a pointer derived from a parameter, where ours keeps it in
   the object first (0.400 against 0.387): retail's registers, and jump2 merges the six calls
   into retail's one. An empty `do { } while (0)` matched too, by raising the loop depth that
   flow weights references with; it is a barrier and not used.
+- The same holds for any repeated statement, not only calls, and it is how a whole set of
+  registers swaps where the code is the same (PAL func_eu_001AB370, an escape-code string
+  rewriter). With one escape call shared by the two font arms (`code = D[3]` or `D[4]`, then
+  one `FormatToString(cur, fmt, code, *s)`) and one `*cur++ = c` for both of the slash test's
+  failures (`c == '/' && digit(s[1])`), the three hoisted format %hi's are ranked by life
+  alone (3 refs each, lives doubled by their REG_EQUAL notes: 174, 170, 168) and the string
+  pointer s (44 refs, 93 insns, 2.37) outranks the buffer pointer cur (35, 91, 1.92). With a
+  `FormatToString` call in each font arm, the first format's %hi has 4 refs (8/174, first:
+  retail's $s5) and cur gains 6 refs (41 against 46); with `*cur++ = c` in both the inner
+  `else` and the outer one (`if (c == '/') { if (digit(s[1])) ... else *cur++ = c; } else
+  *cur++ = c;`), cur gains 3 more and outranks s: every register of retail. jump2 merges both
+  pairs into retail's one copy (the escape tail is reached by `b` with `D[3]`'s load in its
+  delay slot; the two failures branch to one `sb` by likely branches).
+- Spot it: a value's priority short by about a sixth with nothing in the code to add
+  references, and a branch to a shared tail (`b L; <delay>`) or two branches to one store.
+  Write the tail in each arm before trying loop structures.
 
 ### A merged arm keeps its place: B0, the arm, the join (func_001EC7A8, unsolved)
 
@@ -3721,11 +4045,11 @@ after a store through a pointer derived from a parameter, where ours keeps it in
   retail. The near miss had found the registers only with the else branch's store after the
   call (which lengthened self's life but put the store after the jal).
 - The same named scale is how func_eu_001AB558 reads it (`f32 v = self->f51C;`).
-- Ruled out for func_eu_001AB370 (s and cur swapped, $s1/$s0): s is ranked first by a wide
-  margin (weighted refs 44 against 35 over nearly equal lives), and since s has more
-  references than cur at every loop depth, no loop structure of the same statements flips it;
-  a hard conflict or a local-alloc register would have to keep $s0 from s but not cur, and
-  there is no region where s is live and cur is not except before `cur = buf`.
+- func_eu_001AB370 (s and cur swapped, $s1/$s0) was not a life of one insn: s ranked first
+  (weighted refs 44 against 35 over nearly equal lives), and no loop structure of the same
+  statements flips that. The statements were not the same: retail wrote repeated arms that
+  cross-jumping merged after reload (see "Call sites that cross-jumping merges still rank the
+  allocation").
 
 ### A literal initial value doubles a variable's life in the ranking (func_001BB290)
 
@@ -4545,6 +4869,24 @@ emulation of build/swarm/w5-1D2518/lalloc2.py (g11 worktree) (2026-11-09, still 
   and dot3 at most 13, and a dot (a PARALLEL of the result and the scratch) is never raised by
   adjust_priority's birthing rule. Statement order changes nothing (24 orders x 64 conversion
   mixes compiled). Open: what in the original made dot3 or its conversion outrank dot2's.
+- **What retail's sched2 order needs of the conversions (func_00141F48, 2026-11-10).** The
+  sibling's head is the same code. sched2 issues the 4.0 load (priority 15) before dot2's
+  conversion only when that conversion ranks below it: one ToFloatNow asm for hb (priority 14;
+  its qmfc2 and mtc1 are adjacent in retail too, `qmfc2 v1; mtc1 v1,$f1`), and the first dot's
+  mtc1 is an asm (ToFloatViaBits: unit none, so it shares cycle 6 with the 4.0's memory slot).
+  ToFloat for hb (compiler mtc1, 16) or for the first dot (compiler mtc1 on the memory unit)
+  puts the qmfc2 or dot3 there instead.
+- **Why sched1 then puts dot3 late: the doubling's register weight.** With c ToFloatViaBits, hb
+  ToFloatNow and ha ToFloatViaBits, the local-alloc emulation gives retail's VU0 registers only
+  with dot3 right after hb's conversion and an insn between dot3 and its qmfc2 (a dot followed at
+  once by its qmfc2 has a two-slot life and outranks pa in local-alloc). At t=8 twoB's add and
+  dot3 tie at priority 13; INSN_REG_WEIGHT is 0 for the add (hb dies in it) and 1 for the dot
+  (two SETs, the scratch REG_UNUSED), so the add goes first. Doubling hb in place (`hb += hb;`,
+  no death, weight 1) lets LUID put dot3 first and gives every VU0 register of retail, but hb
+  and twoB are then one pseudo, and retail's `add.s $f5,$f1,$f1` has two registers (17 lines).
+  Still open: a plausible form where hb lives on past the add or the add is not ready at t=8.
+  SelfDot for the squared dots, named dots in any order, the 4ac product's other groupings and
+  an inline quadratic solver were compiled against all 64 conversion mixes: none is closer.
 
 ### A pointer set after a call, and a call in each arm (func_0013FAE8)
 
@@ -5027,6 +5369,31 @@ fall-through, and keeps both `%hi`'s (and g_camera's, s5) from the prologue on.
   address formed as a pointer there (a reference made at that point does it; no plainer form
   found).
 
+### An inline method's member read is not the caller's: a tested value stays local (func_001A8C90)
+
+The object pool's release (2026-11-10, `-dl -dg -dG`). Retail tests the random spin's upper
+bound and then passes both ends to RandomFloatInRange: `lwc1 $f1, 0xD4(s2)`, `c.lt.s $f0, $f1`,
+then in the arm `lwc1 $f12, 0xD0(s2)` first and `mov.s $f13, $f1` in the call's delay slot.
+Written `if (0 < self->spinHi) RandomFloatInRange(self->spinLo, self->spinHi)` (or with a local
+for the bound), CSE makes the call's read the test's pseudo; that pseudo lives into the arm, so
+global-alloc takes it, and its copy to $f13 is a preference: `lwc1 $f13` for the test, the
+copy gone, the tail one instruction short.
+
+- **The read through an inline's `this` is a different address until after GCSE.** With the
+  pair a ValueRange and the call its inline method (`self->spinRange.Random()`, include/value_range.h),
+  the body reads `hi` as `(mem (plus this' 4))`, `this'` the integrated copy of the parameter:
+  the .gcse dump still has it, so neither CSE nor GCSE replaces the load with the test's value.
+  The test's pseudo then dies at the compare: local-alloc gives it the lowest free FPR ($f1,
+  $f0 holding the zero), and after reload, reload_cse_regs sees $f1 holds the word and turns
+  the arm's load into `mov.s $f13, $f1`. A variable set twice (`m = self->spinHi; ... m =
+  Random(lo, m)`) gives the same schedule but crosses the calls ($f22).
+- In the same function: a `switch` whose `case 0: case 1: default:` block retail lays out before
+  case 2 is written in that order (the cases in retail's block order); `if (frame != 0 ||
+  self->target == 0) at = &self->at; else { ... }` gives retail's fall-through and the target's
+  pointer in the address's register; and the length's second conversion after the
+  normalisation is ToFloatMoved with the test's ToFloat (the other way round, CSE merges the two
+  GPR copies; both ToFloat, the asm qmfc2 is scheduled before the coefficients' address).
+
 ### A float parameter last moves an asm's quantity (func_001D2518)
 
 Read on func_001D2518's three CreatePooledContact calls (2026-11-08, `-dS -dl
@@ -5213,6 +5580,46 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   longer chain). The ternary's spellings and a named `magh * w - 1` (which moves the multiplies)
   do not change it.
 
+### Reading a library function's source off its code: types, sums and spill slots (func_0020CAF8)
+
+Measured 2026-11-10 on the MPEG macroblock prediction (src/lib/mpeg_macroblock.cpp, 2.9-ee-991111;
+nonmatching/func_0020CAF8.cpp). The near miss had the wrong frame (0xA0 against 0xB0) and 49% of
+retail's code; these readings gave the frame, the spill slots in retail's order (but one), the
+branch layout and 68% of the code:
+
+- **A constant kept with the index means a pointer.** Retail adds `(yo << 4) + 0x300` first and
+  then the base (`addiu t2,t1,768; addu t2,s2,t2`). With an integer base fold re-associates
+  `base + ((yo << 4) + 0x300)` to `(base + 0x300) + (yo << 4)`; with a `u8*` base the integer sum
+  is converted before the pointer addition and stays one operand. So the work buffer, the
+  destination and the parts' rows are pointers.
+- **Which loads are reused shows the types (type-based aliasing).** Retail loads the frame's data
+  word once for both source rows and its width again at the end, re-reads the count for the
+  final `count++`, and keeps the chroma rows' stores before the source rows' store. That is: the
+  frame's data an int (as func_0020C1A0's frame record has it), the parts' rows and the source
+  rows the same pointer type (their stores chain), the count an int read again after the int
+  stores.
+- **A four-term sum's operand order reads back through the balance table** ("Sony's compiler
+  balances a chain of | and +"): retail's `(A + y) + (dstY + srcField)` is the source
+  `A + srcField + dstY + y`.
+- **A test whose `then` is the split.** Retail branches from both row tests into one shared
+  `rows = height; rest = 0;` tail after both arms (bnezl into it): written `if (... >= 16) split;
+  else whole;` cross-jumping merges the two `else` tails; written the other way round the first
+  test jumps into the second arm.
+- **Spill slots in declaration order.** reload gives the pseudos global-alloc leaves without a
+  register their slots in pseudo order, and pseudos are numbered as the front end meets them:
+  retail's slots (dstField, x, the destination, the routine index, the luma block, `&count`'s
+  base, `average << 2`) put the count's address after the luma block, which needs the locals
+  declared at the top C-style with the count read after them (`s32 n; ... n = ...count;`); an
+  initialised `s32 n = ...` first numbers the address before them.
+- **A value computed once before a branch was named.** `height >> 1` and `dstY >> 1` are computed
+  once before the chroma part's `if (half)` in retail (each arm uses them); written in each arm
+  they are computed in each arm (PRE does not hoist what is only anticipated). Likewise the
+  half-pixel flags `dx & 1`, `cdx & 1`, computed before the row tests.
+- **What is left.** The routine index keeps a register (s5) where retail spills it at 12(sp):
+  local-alloc gives `yo << 4` t2 in the block after the luma row tests (retail t1), and its
+  preference pulls ys and yo into t2 (retail a2), the first difference in global-alloc's order;
+  the registers cascade from there.
+
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
 - **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
@@ -5283,6 +5690,35 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   the length as a u128 the caller converts (one variable for both calls or one each), a
   return in each arm (three "r" reads), `u128 len = Dot(v, v); len = Sqrt(len);` (one
   pseudo for both values, where retail has vf1 then vf2).
+
+### An asm store issues beside an epilogue restore (func_001EDC08)
+
+FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, `-dS -dl
+-dg -dR -fsched-verbose-6` dumps):
+
+- **Vec operands named in pairs fix two register cascades at once.** MulXSum4 over u128
+  operands gave the weights and the first point the wrong VU0 registers, and in the same
+  block local-alloc ranked `1 - v` (2 refs over 3 insns, 0.667) above the shared 1.0 (3 refs
+  over 5, 0.6), so the 1.0 took f3, the second clamp's result (global) lost f3 and took the
+  zero's f2 by preference, and the clamp's `c = 0` copy vanished (bc1tl where retail has bc1t
+  with the copy in its slot). With the operands as Vu0::Vec values named weight before point
+  (`Vec w0 = Vec::Scalar(s - 1); Vec a0 = Vec::Of(*p0); ...`, a Vec MulXSum4) sched1's order
+  changes, the 1.0 ranks first (f2) and every FPR and VU0 register is retail's: one cause for
+  what looked like a clamp written differently from the first.
+- **A pointer local set before a test keeps its address in the test's block.** Retail's
+  `lui/addiu v0` of the fallback vector come before the branch and its `lq` in the arm:
+  `const Vec02* fallback = &g_unitXVector;` before the test (a TImode load cannot take a
+  `%lo` address, so CSE leaves the pseudo). Haifa schedules one block per region here (no
+  loops: find_rgns makes single-block regions), so no interblock motion does it.
+- **An asm's sw has no function unit.** The epilogue's restores after `sw v0,0(s6)` are
+  `lq s5, lq s6` in retail, the only such order in the executable: with a plain store (unit
+  memory) at cycle 2, `lq s6` (anti-dependent, cost 1) is ready at cycle 3 and wins the tie on
+  LUID. StoreX's asm sw issues at cycle 2 beside `lq s5`, so s6 comes a cycle later, as
+  retail. StoreX with the test's ToFloatMoved gives the length two "r" operands against
+  Sqrt's and DivX's "j": regclass's tie (TI_REGS, the wall above). ToFloatNow or ToFloat for
+  the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
+  reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
+  before regclass (the copy survives cse1 and gcse).
 
 ## Stack slots
 
@@ -5480,6 +5916,72 @@ retail's layout once its rules are applied:
   `lqc2` comes before the Scalar's slot store (the two-pass argument rule, func_00191570). A
   method called through desc02() rather than a cast table, and an `if (any != 0)` written in
   retail's block order, finished it.
+
+### A block's local slot taken by a Scalar's copy; a frame address named before a call (func_00158480)
+
+func_00158480 (TurnMatrixBySpin) went from 86.6% to a match with three changes, each read from
+retail's frame offsets and registers:
+
+- **The weight's slot is the axis's.** Retail passes ScaleMatrix's scale as `mfc1 v0; por a2,
+  zero, v0` with `sq v0, 128(sp)` in the call's delay slot, and 128 is the axis that
+  TransformDirectionBetweenFrames fills in the `if`. Vu0::ScalarInGpr gives the mfc1 and the
+  cast's copy (its `(s128)` temporary); declared at the function's top, the axis keeps its slot
+  and the copy takes a new one (a 448-byte frame). Declared inside the `if`, its assign_temp slot
+  is freed at the block's end and the copy reuses it (same mode, same size): retail's 432 bytes.
+  A conversion written in C (`(u128)*(s32*)&f` into the axis) extends the int and costs three
+  moves.
+- **Locals declared where they are first needed.** With the axis in the `if`, the frame is in
+  allocation order (it grows upward): the two matrices at the top, the axis, then the three
+  declared after the `if`. Retail's 144, 208, 272 for the copy, the scaled matrix and the
+  product mean they are declared in that order after the block (C++ declarations mid-block).
+- **`&b` at each use, no pointer variable.** A `Mat4A* p = &b;` at the top makes CSE use p in the
+  branch (`move a1, s2`); writing `&turn` at each use gives retail's fresh `addiu v0, sp, 64` in
+  the branch and its copy to s2 in the call's delay slot.
+- **A frame address in a saved register before a call.** Retail sets `addiu s1, sp, 208` (the
+  scaled matrix) before MultiplyMatrices and passes s1 to ScaleMatrix after it. Written as
+  `ScaleMatrix(&scaled, ...)`, the address is computed straight into a0 after the call: sched1
+  does not move a pseudo's set above a call unless the pseudo already crosses one. Retail's
+  register means the source named the address before the call: `Mat4A* result = &scaled;`
+  above the MultiplyMatrices line, then `ScaleMatrix(result, ...)`. Placed after the call, the
+  same pointer is propagated away (one use) and changes nothing.
+
+### Which induction variable loop.c keeps: combine_givs' totals (func_001575D8)
+
+func_001575D8 adds particles to chunks of six parallel arrays (this frame's position, velocity
+and record, and a copy of each for the frame before). Retail walks the record array in one
+register (`s0`, the positions and velocities at -0x580 and -0x2C0 from it, and `s0` itself is
+FillMemory's argument) and the copy in another (`s2`, from `addiu a2, s1, 0x840` before the
+loop). Ours folded everything into one register based on the positions. The -dL dump's "Sorted
+combine statistics" line says why:
+
+- **combine_givs keeps the giv with the largest total.** Each giv's total is its own benefit
+  (+1 for a zero addend, `no_const_addval`) plus, for every other giv it can absorb, that giv's
+  benefit + 3. A DEST_ADDR giv (a memory reference) can be absorbed by any giv whose difference
+  is a valid address; a DEST_REG giv (a pseudo) only by an identical one. Written as
+  `chunk->pos[k]` everywhere, CSE makes one `k*16 + chunk` pseudo for the top of the body and,
+  after the ifs' join, a second one for the copy; each absorbs the other (identical) and so
+  totals 9 more than the record pointer `rec` (182 against 173): the position register wins and
+  `rec` stays a register of its own (an extra spilled giv, 12 bytes).
+- **One pointer per array.** `Quad16* p = &chunk->cur.pos[k]; Quad16* v = ...; Quad16* rec =
+  ...;` at the top of the body, used for every access including the copy, leaves no CSE pseudo
+  after the join; `rec` (benefit 10 against p's 7+1) then wins and absorbs every memory
+  reference; p and v die.
+- **A copy through a pointer of its own.** `ParticleState* last = &chunk->prev;` before the inner
+  loop makes `last + k*16` a giv whose addend is a register, not `chunk + constant`, so it
+  cannot be combined with the record's: loop.c moves `chunk + 0x840` out and reduces a second
+  register, retail's s2. Written as `chunk->prev.pos[k]`, get_inner_reference folds 0x840 into
+  the constant offset and the copy joins the first register.
+- **`while (a && b)`, not `if (a && b) do { } while (a && b)`.** The `while` is expanded with
+  its test at the top and jump.c copies the whole exit test to the bottom (retail: both tests
+  at the bottom, no jump into the loop); the do-while left a `b` into the second test (4 bytes).
+- **The increments' order is the bivs' order.** `i++; k++;` (the counter of the inputs first)
+  puts i's givs' initialisations first in the preheader, so `i * 16` reuses the `lw v1` of the
+  entry test as retail's does; `k++; i++;` reloads i.
+- **`x & 0xFFFFFFFE` is `lui; ori`.** An unsigned constant above 0x7FFFFFFF is not a SMALL_INT
+  here; `~1` gives `li -2`.
+- **A 32-byte record taken by index.** `ParticleExtra* x = &chunk->extra[k]; x->a = ..; x->b =
+  ..;` gives retail's `addu a0, a0, v0` (base first); `chunk->extra[k].a = ..` repeated costs
+  8 bytes, and the byte-offset form puts the index first.
 
 ## Shapes of large functions
 

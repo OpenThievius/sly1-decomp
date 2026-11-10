@@ -138,7 +138,7 @@ void CopyMemory(void* dst, void* src, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-struct EffectOwnerSlot { u8 pad[4]; s32* f4; s32 f8; };
+struct EffectOwnerSlot { s32* f0; s32* f4; s32 f8; };
 EffectOwner* AcquireEffectOwner(u8* ctx, s32 flag);
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 Effect* CreateEffect(s32 a, EffectOwner* b);
@@ -1789,7 +1789,107 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
     }
 }
 
-INCLUDE_ASM(func_001575D8);
+struct WorldListedObject;
+struct OwnedRecord;
+WorldListedObject* ResetFirstListedObject(World* self);
+OwnedRecord* AcquireOwnedRecord(WorldListedObject* o);
+s32 RandomIntInRange(s32 a, s32 b);
+
+// A chunk of particles an effect owner keeps (its 0x624 word, the next at 0x1090): this frame's
+// positions, velocities and records and a copy of them for the frame before, 0x2C of each.
+struct ParticleState {
+    Quad16 pos[0x2C];       // 0x000: w is the size
+    Quad16 vel[0x2C];       // 0x2C0: w is the spin
+    Quad16 rec[0x2C];       // 0x580
+};
+struct ParticleExtra {
+    Quad16 a;
+    Quad16 b;
+};
+struct ParticleChunk {
+    ParticleState cur;      // 0x000
+    ParticleState prev;     // 0x840
+    s32 f1080;
+    u32 count;              // 0x1084
+    ParticleExtra* extra;   // 0x1088
+    s32 f108C;
+    ParticleChunk* next;    // 0x1090
+};
+
+// Adds n particles to the owner the slot holds (or a fresh one), chunk after chunk; each gets its
+// position and velocity, random frame numbers and spin, and the copy for the frame before.
+// Each array is written through its own pointer, the copy through the chunk's previous state:
+// loop.c then reduces the record's address and the copy's as two registers (docs/TOOLCHAIN.md).
+void func_001575D8(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
+{
+    EffectOwner* set = 0;
+    s32 i;
+    ParticleChunk* chunk;
+    if (h) {
+        if (h->f0) set = (EffectOwner*)*h->f0;
+    }
+    if (!set) {
+        World* world = g_currentWorld;
+        if (AT(s32, world, 0x1B48) == 0) return;
+        if (AT(s32, self, 0x130) == 2) {
+            if (AT(s32, world, 0x1B54) == 0) return;
+        }
+        set = (EffectOwner*)ResetFirstListedObject(world);
+        if (!set) return;
+        if (h) {
+            if (h->f0) *h->f0 = (s32)set;
+        }
+        func_0013A128(set, self);
+        if (h) {
+            if (h->f8) {
+                typedef void (*F)(EffectOwner*, s32);
+                (*(F*)(AT(u8*, set, 0) + 0x6C))(set, h->f8);
+            }
+        }
+        if (!set) return;
+    }
+    chunk = AT(ParticleChunk*, set, 0x624);
+    i = 0;
+    while (i < n && (chunk != 0 || (chunk = (ParticleChunk*)AcquireOwnedRecord((WorldListedObject*)set)) != 0)) {
+        u32 k = chunk->count;
+        ParticleState* last = &chunk->prev;
+        while (k < 0x2C && i < n) {
+            Quad16* p = &chunk->cur.pos[k];
+            Quad16* v = &chunk->cur.vel[k];
+            Quad16* rec = &chunk->cur.rec[k];
+            *p = pos[i];
+            AT(f32, p, 0xC) = size[i];
+            *v = vel[i];
+            AT(f32, v, 0xC) = spin[i];
+            FillMemory(rec, 0, 0x10);
+            s32 r = RandomIntInRange(0, AT(s32, set, 0x590) - 1);
+            AT(s32, rec, 0) = r;
+            if (AT(s32, set, 0x614) != 0) AT(s32, rec, 0) = r & 0xFFFFFFFE;
+            if (AT(s32, self, 0x178) != 0) AT(s32, rec, 4) = RandomIntInRange(0, AT(s32, set, 0x384) - 1);
+            if (AT(s32, set, 0x618) == 2) {
+                f32 f = RandomInRange(AT(SpawnRange, self, 0x19C));
+                AT(f32, rec, 8) = f;
+                if (AT(s32, self, 0x198) == 0) {
+                    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(AT(Quad16, g_camera, 0x90)), Vu0::Q(*v)))) AT(f32, rec, 8) = -f;
+                }
+                if (AT(s32, self, 0x1A4) != 0) AT(f32, rec, 0xC) = RandomFloatInRange(-3.14159274f, 3.14159274f);
+            }
+            if (AT(s32, set, 0x320) == 2) {
+                ParticleExtra* x = &chunk->extra[k];
+                x->a = e[i];
+                x->b = g[i];
+            }
+            last->pos[k] = *p;
+            last->vel[k] = *v;
+            last->rec[k] = *rec;
+            chunk->count = chunk->count + 1;
+            AT(s32, set, 0x620) = AT(s32, set, 0x620) + 1;
+            i++;
+            k++;
+        }
+        chunk = chunk->next;
+    }
+}
 
 // The frame of the object a spawn record follows (at 0x78): its position, the rotation, and the
 // velocity and spin it moves with.
@@ -2046,7 +2146,50 @@ void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 
 ASM_FUNC(func_001583E8);
 
-INCLUDE_ASM(func_00158480);
+// The spin record TurnMatrixBySpin reads (MoveEffect's at +0x100).
+struct SpinRecord_158480 {
+    f32 scale;          // 0x00
+    u8 pad4[0xC];
+    f32 tx, ty, tz;     // 0x10
+    u8 pad1C[4];
+    f32 rate;           // 0x20
+    u8 pad24[0xC];
+    Quad16 axis;        // 0x30
+    s32 mode;           // 0x40
+    void* frame;        // 0x44
+};
+extern const Mat4A D_00248400;
+void BuildAxisAngleMatrix(void* axis, Mat4A* out, f32 angle);
+void ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
+void AddMatrices(f32* a, f32* b, f32* out);
+
+void TurnMatrixBySpin(SpinRecord_158480* spin, f32* out, f32 dt)
+{
+    Mat4A place = D_00248400;
+    Mat4A turn;
+    place.m[2][2] = place.m[1][1] = place.m[0][0] = spin->scale;
+    place.m[3][0] = spin->tx;
+    place.m[3][1] = spin->ty;
+    place.m[3][2] = spin->tz;
+    turn = D_00248400;
+    if (spin->rate != 0.0f) {
+        Quad16 axis;
+        if (spin->mode == 1 && spin->frame != 0) {
+            TransformDirectionBetweenFrames(spin->frame, 0, &spin->axis, (Vec02*)&axis);
+        } else {
+            axis = spin->axis;
+        }
+        BuildAxisAngleMatrix(&axis, &turn, spin->rate * dt);
+    }
+    Mat4A term;
+    Mat4A scaled;
+    Mat4A product;
+    Mat4A* result = &scaled;
+    MultiplyMatrices((Quad16*)&product, &turn, (Quad16*)&place);
+    ScaleMatrix(result, &product, Vu0::ScalarInGpr(dt));
+    term = scaled;
+    AddMatrices((f32*)&turn, (f32*)&term, out);
+}
 
 void StartMemberObject(MemberObject* self)
 {

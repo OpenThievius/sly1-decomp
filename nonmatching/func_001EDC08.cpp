@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 291/424 (68.6%), checked 2026-11-08
-// Night-moved (2026-11-08): ToFloatMoved on the length test gives the size (424); the clamps and VU0 registers are as before (ClampUnit as sequential ifs: 88 words, early returns: same 49).
-// NEAR: the call, the first clamp, MulXSum4 of the four corners with their four Scalars (stored in retail's order), the length and NormalizeOr's fallback copy and the ToBits store are retail's. Still differs: the second clamp keeps its result in the zero's register (f2) where retail gives it f3 and branches with bc1t, and the VU0 registers of the weights and the first point: retail u - 1 vf4, p0 vf5, 1 - v vf6, -u vf7, here vf5, vf4, vf7, vf6. MulXSum4's operands in another order, the clamps as a loop, inline or with v kept in a local: no closer.
+// BYTES 420/424 (99.1%), checked 2026-11-10
+// Night-moved (2026-11-08): ToFloatMoved on the length test gives the size (424).
+// NEAR: w12 (2026-11-10): from 49 differing lines to 2. The operands as Vu0::Vec values named in pairs, each weight before its point (w0, p0, w1, p1, ...; MulXSum4 over Vecs), give retail's VU0 registers and, through block 8's local-alloc (the 1.0 now outranks 1 - v), retail's f3 for the second clamp and its bc1t; the fallback's address named before the test (`const Vec02* fallback`) gives retail's lui/addiu in the test block with the lq in the arm. Still differs: the epilogue restores s6 then s5, retail s5 then s6 (unique in retail). sched2 ranks the two lq equal; retail's s6 waits because the sw before it is an asm (StoreX, no function unit: it issues with lq s5 in one cycle, and s6, anti-dependent on it, a cycle later), which ToFloatNow or ToFloat with StoreX confirm. StoreX with ToFloatMoved's test gives the length two "r" operands against two "j": regclass ties and picks TI_REGS (a GPR, qmtc2 back for DivX), the wall of func_00186230 and player_path (docs/TOOLCHAIN.md); ToFloatNow + StoreX: the test's GPR is local-alloc's v0 where retail's is reload's v1 (the address then takes v1); ToFloat + StoreX: reload's mtc1 latency 2 lets a slot store in. Vec copies of the length are folded by cse2 before regclass.
 #include "common.h"
 #include "globals.h"
 #include "vu0.h"
@@ -32,12 +32,20 @@ void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* 
     FindSegmentClosestParams(p0, p1, q0, q1, st, dist, dir);
     st[0] = ClampUnit(st[0]);
     st[1] = ClampUnit(st[1]);
-    u128 d = Vu0::MulXSum4(Vu0::Q(*p0), Vu0::Scalar(st[0] - 1.0f), Vu0::Q(*p1), Vu0::Scalar(-st[0]),
-                           Vu0::Q(*q0), Vu0::Scalar(1.0f - st[1]), Vu0::Q(*q1), Vu0::Scalar(st[1]));
+    Vu0::Vec w0 = Vu0::Vec::Scalar(st[0] - 1.0f);
+    Vu0::Vec a0 = Vu0::Vec::Of(*p0);
+    Vu0::Vec w1 = Vu0::Vec::Scalar(-st[0]);
+    Vu0::Vec a1 = Vu0::Vec::Of(*p1);
+    Vu0::Vec w2 = Vu0::Vec::Scalar(1.0f - st[1]);
+    Vu0::Vec a2 = Vu0::Vec::Of(*q0);
+    Vu0::Vec w3 = Vu0::Vec::Scalar(st[1]);
+    Vu0::Vec a3 = Vu0::Vec::Of(*q1);
+    u128 d = Vu0::MulXSum4(a0, w0, a1, w1, a2, w2, a3, w3).q;
     Vu0::Q(*dir) = d;
+    const Vec02* fallback = &g_unitXVector;
     u128 len = Vu0::Length(d);
     if (Vu0::ToFloatMoved(len) < 0.0001f) {
-        *dir = g_unitXVector;
+        *dir = *fallback;
     } else {
         Vu0::Q(*dir) = Vu0::DivX(d, len);
     }

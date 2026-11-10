@@ -38,6 +38,7 @@
 #include "owner_message.h"
 #include "switched_collider.h"
 #include "vu0.h"
+#include "fpu.h"
 
 
 s32 FindPathCurveSegment(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
@@ -2718,7 +2719,83 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
     }
 }
 
-INCLUDE_ASM(func_00154088);
+typedef void (*HandlerFn)(void* handler, s32 flags, ActiveSetItem* item, s32 end, f32 dt);
+Collider* FindHandlerForSlot(Collider* node, s32 offset);
+void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item);
+
+void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt)
+{
+    u128 zero = Vu0::Zero();
+    Vec02 best;
+    for (;;) {
+        RunActiveSetSolver(self, a1, n, (s32)contacts, a4, a5);
+        s32 bestIndex = -1;
+        Vu0::Q(best) = zero;
+        f32 top = 0.01f;
+        Contact03* bestContact = 0;
+        for (s32 i = 0; i < n; i++) {
+            ActiveSetItem* item = (ActiveSetItem*)(self->items + i * 0x60);
+            if (item->twin != 0) {
+                continue;
+            }
+            if (item->x < 0.0001f) {
+                continue;
+            }
+            if (item->kind == 2) {
+                continue;
+            }
+            Contact03* c = contacts[i];
+            if (c->f94 < 0.0001f) {
+                continue;
+            }
+            Vec02 acc;
+            Vu0::Q(acc) = Vu0::Q(c->vB0);
+            for (s32 k = 0; k < self->count; k++) {
+                ActiveSetItem* other = (ActiveSetItem*)(self->items + k * 0x60);
+                if (other->x != 0.0f) {
+                    Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(acc), Vu0::Q(((Vec02*)other->axes)[i]), Vu0::Scalar(other->x));
+                }
+            }
+            u128 v = Vu0::Q(acc);
+            u128 normal = Vu0::Q(c->v80);
+            u128 tangent = Vu0::Sub(v, Vu0::MulX(normal, Vu0::Dot(v, normal)));
+            u128 len2 = Vu0::Dot(tangent, tangent);
+            Vu0::Q(acc) = tangent;
+            f32 len = Vu0::ToFloat(len2);
+            if (top < len) {
+                Vu0::Q(best) = tangent;
+                top = len;
+                bestIndex = i;
+                bestContact = c;
+            }
+        }
+        if (bestContact == 0) {
+            return;
+        }
+        ActiveSetItem* it = (ActiveSetItem*)(self->items + self->count * 0x60);
+        ActiveSetItem* twin = (ActiveSetItem*)(self->items + bestIndex * 0x60);
+        it->twin = twin;
+        twin->twin = it;
+        f32 mag = -Fpu::Sqrt(top);
+        it->owner = bestContact;
+        ContactEnd03* end = bestContact->end;
+        it->val = mag;
+        Vu0::Q(it->axis) = Vu0::MulX(Vu0::Q(best), Vu0::Scalar(1.0f / mag));
+        it->kind = 1;
+        it->bounded = 1;
+        it->limit = it->twin->x * bestContact->f94;
+        for (s32 j = 0; j < 2; j++) {
+            Collider* h = FindHandlerForSlot(end[j].part, 0x108);
+            if (h != 0) {
+                HandlerFn fn = *(HandlerFn*)(*(u8**)h + 0x108);
+                if (fn != 0) {
+                    fn(h, a1 | 0x10, it, j, dt);
+                }
+            }
+        }
+        AddActiveSetItem(self, it);
+    }
+}
 
 INCLUDE_ASM(func_00154370);
 

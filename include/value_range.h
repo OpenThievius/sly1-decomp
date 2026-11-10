@@ -11,6 +11,8 @@
 
 #include "common.h"
 
+f32 RandomFloatInRange(f32 lo, f32 hi);
+
 struct ValueRange {
     f32 lo;                 // 0x00
     f32 hi;                 // 0x04
@@ -41,6 +43,12 @@ struct ValueRange {
             r = v;
         return r;
     }
+
+    // A random value in the range (func_001EAAE0). Inlined, it reads hi through its own
+    // this pointer, an address CSE and GCSE do not see as the caller's: a test of hi just before
+    // keeps its value to its block (local-alloc's lowest free register), and reload's cse makes
+    // the call's load a copy of it (func_001A8C90's spin: lwc1 $f1, then mov.s $f13,$f1).
+    f32 Random() const { return RandomFloatInRange(lo, hi); }
 };
 
 typedef char check_ValueRange[sizeof(ValueRange) == 8 ? 1 : -1];

@@ -1109,7 +1109,55 @@ ScriptValue* ReturnScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args
     return ret;
 }
 
-INCLUDE_ASM(func_00114BB0);
+// KEPT (build/swarm/v2/NOTES.md): func_00114BB0, func_00118198 and func_00119218 give their
+// value back as a class (the result's place is GCC's hidden first argument), and their early
+// return keeps its own copy and destruction only so: written with the plain value and explicit
+// calls, GCC cross-jumps that return into the last one. Their callers (for func_00114BB0, the
+// table D_00259958) call them through the plain declarations above (ScriptValue* first).
+struct RetValue : ScriptValue {
+    RetValue() { InitScriptValue(this); }
+    RetValue(const RetValue& o) { CopyConstructScriptValue(this, &o); }
+    ~RetValue() { DestroyScriptValue(this, 2); }
+};
+
+RetValue AppendScriptLists(s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    RetValue q;
+    if (args->tag == 0) {
+        return *(RetValue*)args;
+    }
+    R11B008Node* n = args->node;
+    R11B008Node* head = 0;
+    R11B008Node* last;
+    while (n != 0) {
+        if (n->tag == 0x1E) {
+            R11B008Node* c;
+            if (n->next != 0) {
+                c = NewScriptValueNode();
+                CopyScriptValueChain(n->node, c, 0);
+            } else {
+                c = n->node;
+            }
+            if (head == 0) {
+                head = NewScriptValueNode();
+                SetScriptValueChain(head, c);
+            } else {
+                last->next = c;
+            }
+            last = c;
+            while (last->next != 0) {
+                last = last->next;
+            }
+        }
+        n = n->next;
+    }
+    if (head != 0) {
+        SetScriptValueChain(&q, head->node);
+    } else {
+        q.tag = 0;
+    }
+    return q;
+}
 
 ScriptValue* MapScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -2509,17 +2557,6 @@ ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue*
     DestroyScriptValue(&q, 2);
     return ret;
 }
-
-// KEPT (build/swarm/v2/NOTES.md): func_00118198 and func_00119218 give their value back as a
-// class (the result's place is GCC's hidden first argument), and their early return inside a
-// loop keeps its own copy and destruction only so: written with the plain value and explicit
-// calls, GCC cross-jumps that return into the last one. Their callers call them through the
-// plain declarations above (ScriptValue* first).
-struct RetValue : ScriptValue {
-    RetValue() { InitScriptValue(this); }
-    RetValue(const RetValue& o) { CopyConstructScriptValue(this, &o); }
-    ~RetValue() { DestroyScriptValue(this, 2); }
-};
 
 RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
 {

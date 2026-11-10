@@ -657,7 +657,56 @@ void SetColliderPartListed(Collider* self, s32 flag)
     sub->desc03()->m32(sub);
 }
 
-INCLUDE_ASM(func_001B7D00);
+void SettlePoseSourceModes(Attachment* a);
+void BuildRotationFromVector(Vec02* v, Mat02* m);
+
+void ApplyColliderPendingMove(Collider* self, s32 quiet)
+{
+    Mat02 rot;
+    Mat02 m;
+    s32 moved = quiet;
+    s32 still = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->v490))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->v490))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still) {
+        Vu0::Q(self->pos) = Vu0::Add(Vu0::Q(self->pos), Vu0::Q(self->v490));
+        if (self->f1EC != 0) {
+            SettlePoseSourceModes(self->f1EC);
+        }
+        Vu0::Q(self->v490) = Vu0::Zero();
+        moved = 1;
+    }
+    still = 0;
+    if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->spin4A0))) < 0.0001f
+        && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->spin4A0))) < 0.0001f) {
+        still = 1;
+    }
+    if (!still) {
+        BuildRotationFromVector(&self->spin4A0, &rot);
+        MulRotationRowsIndexed(&m, rot, self->rot);
+        self->rot = m;
+        if (self->f1F0 != 0) {
+            SettlePoseSourceModes(self->f1F0);
+        }
+        Vu0::Q(self->spin4A0) = Vu0::Zero();
+        moved = 1;
+    }
+    ListFrame it;
+    ListWalk::Begin(&it, &self->children);
+    for (PlacedObject* c = (PlacedObject*)ListWalk::Next(&it); c != 0; c = (PlacedObject*)ListWalk::Next(&it)) {
+        if (c->desc->flags & 2) {
+            c->desc02()->m2F(c, moved);
+        }
+    }
+    if (moved && !quiet && self->desc->m12 != 0) {
+        self->desc->m12(self);
+    }
+    ListWalk::End(&it);
+}
 
 void SettlePoseSourceModes(Attachment* a);
 void ApplyColliderPendingImpulse(Collider* self, s32 moved)
