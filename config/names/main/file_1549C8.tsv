@@ -75,7 +75,7 @@ func_00159D00	UpdateColorFade	blends the fade record's start, hold and end colou
 func_00159ED0	StartColorFade	if the fade record is not running, sets its running flag, stores the clock as its start time and links it into the list at D_00275710 + 0x1CD8
 func_00159F20	GetHashedSlot	returns base plus 0x84 plus 12 times ((n * 0x95675) and 0x1FF)
 func_00159F48	CollectObjectByMode	switch on a collection mode (parent chain, level bits, alias ids) that appends self to a bounded array and counts it when it passes and is attached
-func_0015A198	GatherObjectsByMode	unmatched yet: collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
+func_0015A198	GatherObjectsByMode	collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
 func_0015A418	FindFirstObjectById	runs func_0015A198 with flags or 0x200, one result wanted, and returns that object
 func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and some thirty others call it)
 func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object

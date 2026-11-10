@@ -1538,6 +1538,7 @@ func_00159D00	func_00159FB8	match
 func_00159ED0	func_0015A188	match	
 func_00159F20	func_0015A1D8	match	
 func_00159F48	func_0015A200	match	rodata
+func_0015A198	func_0015A450	match	
 func_0015A418	func_0015A6D0	match	
 func_0015A448	func_0015A700	match	
 func_0015A480	func_0015A738	match	
