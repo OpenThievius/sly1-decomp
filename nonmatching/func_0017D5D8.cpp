@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1800/1796, checked 2026-11-08
-// NEAR (2026-11-08, night-large3): func_0017D5D8, the player's steer and leap search (80.8% of
-// the words). The steer block, both switches and both searches follow retail; what is left is
-// the frame (0x160 against 0x180): retail's point-object loop has its vectors 0x10 higher (pos at
-// 0x60, the MulAddX end at 0xB0, an unexplained slot at 0xA0) and the floats t, cost, a, b after
-// them at 0xD0..0xE4, and the -1 vector of the steer is a Scalar retail keeps in the vf6 register
-// MulX's result does not take. Tried: Vec forms of MulAddX, a function-scope position.
+// BYTES 1744/1796 (97.1%), checked 2026-11-10
+// NEAR (2026-11-10, w16): func_0017D5D8, the player's steer and leap search. Every instruction
+// is retail's but the frame (0x170 against 0x180). Slot by slot (stack-slots.md, "Two untouched
+// 16-byte slots"): retail's 0x50, allocated after bestLand and kept through both walks, is the
+// walks' ListFrame (AGENTS.md's list-walk rule; SelectEarliestPooledObject walks g_partList with
+// one too), declared here. What is left is retail's 0xA0 in the point-object loop, created after
+// the relative velocity and still allocated when the segment end is: in GCC 2.95.3 only a local
+// declared there, never written, does that. Ruled out: an inline's frame or argument copy, a
+// Scalar's frame, a call's return slot, a TImode temporary (each is freed at the end of its
+// statement, or would be stored to), a for-init declaration (preserved, but allocated before the
+// body). With an unused Vec02 between dv and end the function is EXACT (branch w13-17D5D8).
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
@@ -16,6 +20,7 @@
 #include "fpu.h"
 #include "vu0.h"
 #include "switched_collider.h"
+#include "list_iter.h"
 
 extern f32 D_00263EB0[4];
 void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
@@ -74,16 +79,14 @@ static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
 static inline f32 GroundDistanceSquared(const Vec02& a, const Vec02& b)
 {
     Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b));
-    return Vu0::ToFloatMoved(Vu0::DotXY(d.q, d.q));
+    return Vu0::ToFloat(Vu0::DotXY(d.q, d.q));
 }
+
+static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
 void func_0017D5D8(Player* p)
 {
     Vec02 aim;
-    Vec02 bestAim;
-    Vec02 land;
-    Vec02 bestLand;
-    Vec02 pos;
     switch (p->f2228) {
     case 4:
     case 6:
@@ -97,16 +100,16 @@ void func_0017D5D8(Player* p)
         break;
     default:
         ComputePolarOffset(&aim, p->f630, p->f634 * p->f226C, 0.0f);
-        Vu0::Q(bestAim) = Vu0::FromFloat(-1.0f);
-        Vu0::Q(p->v640) = Vu0::MulX(Vu0::RotateTransposed(p->m660, Vu0::Q(aim)), Vu0::Q(bestAim));
+        Vu0::Q(p->v640) = Vu0::MulX(Vu0::RotateTransposed(p->m660, Vu0::Q(aim)), Vu0::Scalar(-1.0f));
         if ((p->f2228 != 0 || p->f2270 == 3) && p->f2268 == 0) {
-            bestAim = p->v150;
-            bestAim.z = 0.0f;
-            f32 speed = Vu0::ToFloat(NormalizeVectorOr(bestAim, g_unitXVector));
-            f32 d = SplitVectorAlongAxis(&aim, &bestAim, 0, &land);
+            Vec02 dir;
+            Vec02 side;
+            dir = p->v150;
+            dir.z = 0.0f;
+            f32 speed = Vu0::ToFloat(NormalizeVectorOr(dir, g_unitXVector));
+            f32 d = SplitVectorAlongAxis(&aim, &dir, 0, &side);
             if (d < speed && speed * -0.25f < d) {
-                Vu0::Q(bestLand) = Vu0::FromFloat(speed);
-                Vu0::Q(aim) = Vu0::MulAddX(Vu0::Q(land), Vu0::Q(bestAim), Vu0::Q(bestLand));
+                Vu0::Q(aim) = Vu0::MulAddX(Vu0::Q(side), Vu0::Q(dir), Vu0::Scalar(speed));
             }
         }
         p->v2290 = aim;
@@ -121,18 +124,17 @@ void func_0017D5D8(Player* p)
     case 2:
     case 5:
     default: {
+        Vec02 bestAim;
+        Vec02 land;
+        Vec02 bestLand;
+        ListFrame frame;
         LeapPart_17D5D8* best = 0;
         LeapPoint_17D5D8* bestPoint = 0;
         f32 bestCost = 1500.0f;
         f32 bestT;
+        f32 t;
+        f32 cost;
         for (LeapPart_17D5D8* q = (LeapPart_17D5D8*)g_partList.head; q != 0; q = q->next) {
-            Vec02 rel;
-            Vec02 dv;
-            Vec02 end;
-            f32 t;
-            f32 cost;
-            f32 a;
-            f32 b;
             if (360000.0f < GroundDistanceSquared(q->v140, p->v140)) {
                 continue;
             }
@@ -143,11 +145,15 @@ void func_0017D5D8(Player* p)
             if (bestCost < cost) {
                 continue;
             }
+            Vec02 rel;
+            Vec02 dv;
+            Vec02 end;
+            f32 a;
+            f32 b;
             Vu0::Q(rel) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(q->pos));
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(q->v150));
-            Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(0.25f <? t));
-            end.z = 0.0f;
-            rel.z = 0.0f;
+            Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
+            rel.z = end.z = 0.0f;
             MeasurePointToSegment(&D_00248D30, &rel, &end, &a, &b);
             if ((100.0f < b || a == 0.0f) && (25.0f < b || 0.0f < p->v150.z)) {
                 continue;
@@ -160,12 +166,11 @@ void func_0017D5D8(Player* p)
             bestCost = cost;
         }
         for (LeapPoint_17D5D8* q = (LeapPoint_17D5D8*)g_pointObjects.head; q != 0; q = q->next) {
+            Vec02 pos;
             Vec02 vel;
             Vec02 rel;
             Vec02 dv;
             Vec02 end;
-            f32 t;
-            f32 cost;
             f32 a;
             f32 b;
             ConvertPositionToWorld(q, &pos);
@@ -179,11 +184,10 @@ void func_0017D5D8(Player* p)
             ComputeObjectMotionInFrame(q->parent, 0, &pos, &vel, 0, 0, 0);
             Vu0::Q(rel) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(pos));
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(vel));
-            Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(0.25f <? t));
-            end.z = 0.0f;
-            rel.z = 0.0f;
+            Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
+            rel.z = end.z = 0.0f;
             MeasurePointToSegment(&D_00248D30, &rel, &end, &a, &b);
-            if ((q->radius < b || a == 0.0f) && (q->radius * 0.25f < b || 0.0f < p->v150.z)) {
+            if ((b > q->radius || a == 0.0f) && (q->radius * 0.25f < b || 0.0f < p->v150.z)) {
                 continue;
             }
             bestPoint = q;
