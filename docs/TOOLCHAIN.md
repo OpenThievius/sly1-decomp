@@ -183,6 +183,13 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **A Vec named from a Vec result** adds a movti copy and a reference (func_0016C528).
 - **Reload's round robin is one step off with no visible extra reload:** the original repeated code that
   cross-jumping merged after reload; write the repeated tail instead of a fall-through (func_001F2840).
+- **A dot product kept in a saved GPR across calls is a float, not a vector** (func_00171238): retail's
+  `qmfc2 s0, vfN` after a Dot, then `mtc1 s0` for an FPR use and `qmtc2 s0` for each weight, is
+  `f32 x = ToFloat(Dot(..))` used as `FromFloat(x)`: ToFloat's "=r" output and FromFloat's "r" inputs
+  outnumber the one FPR use, so regclass prefers GR_REGS. A u128 Dot result across calls is
+  "VU_REGS or none" in the .lreg dump (set once or twice, with ToFloatMoved too) and is spilled.
+- **A frame address passed to an inline function is no GCSE expression,** so PRE does not keep it in a
+  saved register across a guarded call (func_00171238, "A frame address passed by an inline call").
 
 ### Loops (loop.c, jump.c)
 - **loop.c moves an invariant when 80 x savings x lifetime >= insns** (the threshold is 79 for a loop with a
@@ -208,6 +215,12 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **A return in each branch** lets the tails merge before the epilogue (func_0014DA98).
 - **Assignments written once after an if/else** keep PRE from copying them into the arms (func_0013BF68,
   PAL func_eu_0015DF58).
+- **A `b` over one load whose copy is in the delay slot** (`b join; lw a0, N(s2)` then `lw a0, N(s2)` at the
+  else label) is an else arm whose own set reorg took into the first test's slot: `if (..) { mode = 2; .. }
+  else { mode = -1; }`, not `mode = -1;` before the if (func_00171238).
+- **A chained struct assignment re-reads its middle operand** in C++ (`b->v = a->v = zero;` is an lvalue):
+  the left pointer is loaded first (expand_assignment expands the target before the value), then `a`'s
+  pointer again for the copy, which retail's early `lw a1` then `lw v1` show (func_00171238).
 
 ### Inlining
 - **An inline setter's constants** are substituted per insn, giving retail's mix of frame-relative and
@@ -1926,6 +1939,31 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
 - **Spotting it.** A walk or test after a join that reads, in ours, the variable each arm
   copied from, and in retail the variable the arms copied to: write the copy once after the
   join.
+
+### A frame address passed by an inline call is not GCSE's (func_00171238)
+
+- **What differed.** After a guarded curve sample (`if (c->vt->m02) m02(c, t, 0, &vel);`)
+  and `TransformDirectionBetweenFrames(frame, 0, &vel, &vel)`, ours kept `sp + 32` in a saved
+  register across the sample's call; retail forms it again in the call's delay slot and at the
+  join (`addiu a2, sp, 0x20` twice). The saved register pushed a value retail keeps in s0
+  into a spill slot: 16 more bytes of frame and every register after it renumbered.
+- **Why.** An argument written in the call expands to `(set (reg P) (plus fp 32))` and then
+  a move into the argument register: P's set is in gcse's expression table. The expression
+  is anticipated at the end of the test block (both successors compute it before any call),
+  so PRE inserts it there (`-dG`: "PRE/HOIST: end of bb 30 ... expression 66") and after
+  the arm's call, and cse2 then folds the arm's own computation into the hoisted pseudo,
+  which now lives across the call. Passed to an inline function instead, the address is the
+  inline's unmodified parameter: integrate.c substitutes it as a constant at each use, so
+  each argument move is `(set (reg a2) (plus fp 32))` straight into the hard register,
+  which gcse never records (hash_scan_set takes only sets of pseudos). No expression, no
+  PRE.
+- **The form.** The sample and its transform as one inline helper (`SampleCurveDirection(c,
+  frame, t, &vel)`): the direction of a path curve at t in the world, a step the original
+  plausibly had as a function of its own. The same function's first sample (`m01` with
+  `&pos`) is PRE'd in retail (its address in s0), so that one stays written out.
+- **Spotting it.** A frame address in a saved register (`addiu sN, sp, n` in a branch's delay
+  slot before a guarded call) where retail forms it at each call: try the calls through an
+  inline function taking the pointer.
 
 ## sched1
 
