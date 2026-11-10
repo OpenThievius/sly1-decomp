@@ -375,7 +375,58 @@ void func_00185498(T2195_790* self)
     }
 }
 
-INCLUDE_ASM(func_00185538);
+// One axis of an aim (T2195_790 has the yaw's at +0x50 and the pitch's at +0x70): a quadratic
+// (a, b, c) applied to the angle toward the target and the range the result is clamped to.
+// GetAimRotation gives both axes the same code, one inline per axis.
+struct AimAxis {
+    f32 a;                  // 0x00
+    f32 b;                  // 0x04
+    f32 c;                  // 0x08
+    u8 pad0C[0x10 - 0x0C]; // 0x0C
+    ValueRange limits;      // 0x10
+    u8 pad18[0x20 - 0x18]; // 0x18
+
+    f32 Apply(f32 x) { return limits.Limit(a + x * (b + x * c)); }
+};
+
+typedef char check_AimAxis[sizeof(AimAxis) == 0x20 ? 1 : -1];
+
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void GetVectorAngles(Vec02* v, f32* yaw, f32* pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
+
+// The aim's rotation: the owner's own while the aim is held, its +0x1A0 matrix when the target
+// is beyond the range at +0x40, else a yaw and pitch toward the target, each through its axis's
+// quadratic and clamp (AimAxis). d's stores are written to its address (`*(u128*)&d`): through
+// Q(d) the inline's address of d stays in a pseudo the later &d reuses (a0 set before the range
+// test instead of in the branch's delay slot).
+void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
+{
+    Vec02 pos;
+    Vec02 d;
+    Mat02 m;
+    f32 angles[2];
+    PlacedObject* owner = self->owner;
+    *vec = D_00248D30;
+    if (self->hold != 0) {
+        *rot = owner->rot;
+        return;
+    }
+    ComputeObjectFrameAtTime((void*)ResolveAimTarget(self), 0, &pos, &m, 0, 0, dt);
+    Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(m, Vu0::Q(self->point)), Vu0::Q(pos));
+    TransformPointBetweenFrames(0, self->owner->parent, &pos, &pos);
+    *(u128*)&d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->owner->pos));
+    s32 outside = self->f40 < Vu0::ToFloat(Vu0::Length(*(u128*)&d));
+    if (outside) {
+        *rot = owner->m1A0;
+        return;
+    }
+    GetVectorAngles(&d, &angles[0], &angles[1]);
+    angles[0] = ((AimAxis*)&self->v50)->Apply(angles[0]);
+    angles[1] = ((AimAxis*)&self->v70)->Apply(angles[1]);
+    BuildYawPitchMatrix(angles[0], angles[1], rot);
+}
 
 void RunMainLoop(s32 a, s32 b)
 {

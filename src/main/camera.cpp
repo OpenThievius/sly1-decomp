@@ -993,7 +993,7 @@ void SetCameraLookAnchor(Camera* self, Quad16* arg)
 void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
 void VectorToAngles(Vec3* v, f32* yaw, f32* pitch);
 void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
-void BuildYawPitchMatrix(Mat02* out, f32 yaw, f32 pitch);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 void func_00144BE8(Camera* self, s32 flags, void* c, s32 d, s32 e, f32 gain, f32 damp, f32 unused,
                    f32 yawOffset, f32 pitchOffset, f32 dt)
@@ -1090,7 +1090,7 @@ void func_00144BE8(Camera* self, s32 flags, void* c, s32 d, s32 e, f32 gain, f32
     }
     ComputeDirectionFromAngles(&dir, h, p, r);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(*focus), Vu0::Q(dir));
-    BuildYawPitchMatrix(&m, y, t);
+    BuildYawPitchMatrix(y, t, &m);
     *(Vec02*)self->f40 = pos;
     *(Vec02*)self->f80 = m.r[0];
     *(Vec02*)self->f90 = m.r[1];
@@ -1318,7 +1318,7 @@ void func_00145718(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw, f32 turnPitc
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
     yaw = yaw + Arctangent(turnYaw * self->f1F0);
     pitch = pitch - Arctangent(turnPitch * self->f1F4);
-    BuildYawPitchMatrix((Mat02*)self->f80, yaw, pitch);
+    BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->f80);
     UpdateCameraMatrices(self);
 }
 s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi)

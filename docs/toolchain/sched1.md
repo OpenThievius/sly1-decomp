@@ -939,3 +939,31 @@ func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Do
   (combine merges the copy, twoB is set once again); an inline root solver taking
   `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
   test).
+
+### Two axes through one inline method: the clamp's store first in its block (func_00185538)
+
+GetAimRotation (main_loop.cpp) runs the yaw and the pitch toward its target each through a
+quadratic `a + x*(b + x*c)` and a clamp to a range, from two 0x20-byte records at +0x50 and
++0x70 of the aim (curve at +0, ValueRange at +0x10). Retail clamps the yaw in one register (sum,
+result and the store all `$f3`), stores it first in the block that starts the pitch, and
+clamps the pitch with a separate result (`$f13` in, `$f3` out). Written by hand, the yaw's
+store had priority 2 in sched1 (no dependent: the pitch's loads go through `self` plus a
+constant, whose base alias.c knows, and the frame store cannot conflict with them), so it sank
+to cycle 6 and kept the yaw live into the pitch (global-alloc then gave it `$f4`, with lo and hi
+in `$f5` and `$f0`). Every hand form of the yaw clamp tried (in place, in the array, with a
+reused variable, through a pointer) left it there or worse.
+
+Written as one inline method of the record, `f32 AimAxis::Apply(f32 x) { return
+limits.Limit(a + x*(b + x*c)); }`, called once per axis, both clamps are retail's: the inline's
+`this` is a pseudo alias.c gives no base, so the pitch's loads through it may alias the yaw's
+frame store, which becomes their dependent's head (priority 20) and is issued first; the yaw's
+sum, result and store then share `$f3` while the pitch, with the same code, keeps its sum in
+`$f13` (the argument register it is copied to). The same inline giving the two axes different
+code is the sign: where two retail sequences differ only in their registers and in whether a
+result copy survives, try one shared inline before writing each by hand.
+
+The rest of the function was two smaller things: `Vu0::Q(d) = ...` left the inline's `&d` in a
+pseudo that the later `GetVectorAngles(&d, ...)` reused (a0 set before the range test, retail
+sets it in the branch's delay slot), fixed by storing through `*(u128*)&d` as vu0.h's Set note
+says; and BuildYawPitchMatrix's parameter order (alias-classes.md, "A prototype's parameter
+order").
