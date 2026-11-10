@@ -77,6 +77,14 @@ sits among: the file of the closest function before it that both versions have. 
 definition to replace, it is added at the end of that file's unit. `c_status.tsv` has a row for
 it under that name, noted `only in PAL`.
 
+A function only PAL has can still be a US function's counterpart that the pairing missed, because
+PAL's own changes (fields moved for its wide text, an extra call) changed its bytes too much:
+before matching one from scratch, look for a matched US function of nearly its size and shape in
+the same file and start from its C. PAL func_eu_001AD800 (780 bytes) is US DrawSlidingGlyphElement
+(func_001ACAA8, 760 bytes) with the fields 0x310 further on and func_eu_001374E0 called on the
+frame's layout; a reconstruction written from scratch with its own clamp had stayed 145 lines off,
+the US C with those two changes was EXACT at the first compile.
+
 Two gaps of the tools, found on 2026-11-08. `version_src.py todo` lists game code only, so the
 library functions only PAL has are found from `config/eu/map.tsv`. And a function whose closest
 shared function lies in a `.c` file (PAL's four routines after libm's copy_sign.c, 0x20A730 to
