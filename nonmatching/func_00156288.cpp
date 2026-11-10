@@ -20,6 +20,13 @@
 //   wait for the gravity load (no base: conflicts with the frame stores), so -1.0 takes f3.
 // - the copy loop's dest (sp+64) is born before the world pointer dies (a0 taken): a1/a2/a3 for
 //   retail's a0/a1/a2.
+// w15 (2026-11-10, emulated: docs/toolchain/sched1.md "A burst's two records, emulated"): with the
+// four constants loaded in the block, retail's shared $f0 for 5.0 and -1.0 is impossible (every
+// constant load outranks every store behind the gravity load); a -1.0 set in an earlier block and
+// used once (update_equiv_regs moves it to the store) gives retail's FP registers (`f32 m1 = -1.0f;`
+// at the top: 32 lines, store order off). The tail is retail's when its 1.0 store carries a death
+// (a dying 1.0 variable: retail's single $f20 for both records leaves that open). The copy's a0 needs
+// sp+64 born after the world pointer dies (blk.up before blk.gravity gives it, breaking the FP regs).
 #include "common.h"
 #include "effect_spawner.h"
 #include "vu0.h"
