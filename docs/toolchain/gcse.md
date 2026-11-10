@@ -816,3 +816,10 @@ and any copy still read stays as a register copy that global-alloc must place.
   use that ends one copy short of where retail's register shows it wants one copy less in the
   source (a member set instead of a Vec helper's return), and one that retail keeps as a copy
   wants one more (a variable assigned before the call that reads it).
+- The last missing instruction there is a local-alloc tie, not a copy: c2 (3 refs, one call)
+  dies at the second MulXSum, combine_regs ties the sum's result into c2's quantity and adds its
+  refs, so CALLER_SAVE_PROFITABLE (4 * calls < refs) passes and c2 is caller-saved in vf6.
+  Retail ties that result to the weight s and reloads c2 from its slot, so its c2 was a global
+  pseudo. In the .lreg dump, a call-crossing local that gets a register with too few refs is
+  usually the target of such a tie: look for an asm whose REG_DEAD input has the output's
+  register.

@@ -16,11 +16,20 @@
 // second direction as `dir = nv; dir = MulAddX(dir, NormalizeOr(..), mu)`, like d1 = nv for the
 // first: the copy of the normal now survives cprop (retail's vmove vf6,vf8 before the branch),
 // and with it the order after ComputeObjectMotionInFrame (Cross(spin, p) before Cross(c1, p),
-// retail's registers vf3/vf2/vf4/vf1) is retail's. Still differs: c2 = Cross(p, dir) is kept in
+// retail's registers vf3/vf2/vf4/vf1) is retail's. The spin's update is written before the
+// velocity's: both sums tie in sched1 (priority 10, the same register weight), and the later
+// statement's goes first, so this gives retail's order of the two sums (365/397). Still differs: c2 = Cross(p, dir) is kept in
 // vf6 across MeasurePointToSegment (stored at 128(sp)), where retail spills it (sqc2 vf1,112(sp)
 // at once and lqc2 vf1,112(sp) before Cross(c2, p): the missing instruction) and keeps dir in
 // vf5 at 128(sp); c2 is local to its block with 3 refs and 1 call, so local-alloc's caller-save
-// test should refuse it, yet it gets vf6: find why (a tie in combine_regs adding refs?). Then the
+// test should refuse it, yet it gets vf6. The reason, from the .lreg dump: c2 dies at the
+// spin's MulXSum and combine_regs ties that sum's result to c2's quantity, adding its refs, so
+// 4*calls < refs holds and c2 is caller-saved. Retail ties that result to s (vf1) and reloads c2
+// from 112(sp): there c2 has no quantity to tie into, i.e. it is a global pseudo (used in another
+// block, or set twice), which global-alloc spills with 3 refs. Not found: c2 without a local
+// (Cross(p, dir) at both uses), declared at the block's top (with c1 or alone), returned by an
+// inline with the impulse (ImpulseAlongArm), s and s2 as `.q = Scalar(..)`, or the sums named
+// before the stores: all keep c2 in vf6. Then the
 // globals: p vf11 / rel vf10 / tang1 vf9 against retail's vf10 / vf9 / vf7 (one register lower,
 // likely from c2's and k's locals), and the ShortenEffectLife store order at the end. The FLT_MAX
 // literal is the function's own (INCLUDE_RODATA(D_0024C9B0) goes with it). At retail's size,
@@ -146,8 +155,8 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     f32 one = 1.0f;
     Vu0::Vec s = Vu0::Vec::Scalar((one - along) * j1);
     Vu0::Vec s2 = Vu0::Vec::Scalar(along * j2);
-    Vu0::Q(self->qA0) = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, s, dir, s2)).q;
     Vu0::Q(self->v100) = Vu0::MulAddX(Vu0::Vec::Of(self->v100), Vu0::MulXSum(c1, s, c2, s2), Vu0::Vec::Scalar(k)).q;
+    Vu0::Q(self->qA0) = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, s, dir, s2)).q;
     if (((f32*)&self->qA0)[2] < D_0026B54C) {
         ((f32*)&self->qA0)[2] = D_0026B54C;
         ShortenEffectLife(self, D_0026B550[0]);
