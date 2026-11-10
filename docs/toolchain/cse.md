@@ -637,6 +637,36 @@ inline function returning the comparison, and the search as a loop that `break`s
 key with the unlink after it. Every natural body that returns on all paths ends in a barrier;
 the original must have had a used label or a loop end there.
 
+Measured again 2026-11-10 (cse.c's cse_end_of_basic_block and cse_basic_block, gcse.c's cprop,
+`-ds -dG` dumps):
+
+- **Follow-jumps is the whole difference.** The near miss built with `-fno-cse-follow-jumps`
+  (both CSE passes, to explore only) has retail's registers: self in t0, the key in t1, the tag
+  in t5.
+- **A jump that the first CSE folds does not stop it.** A second use of the tag label that CSE
+  can decide (`if (n->key == key && n->owner == self)` inside the owner test) gives the label
+  two uses when the path is chosen, but cse_basic_block, once the folded jump drops the label's
+  count back to its own, continues past the label (the `to_usage` test) and the tag test still
+  reads the first load's register: the near miss's code, no PRE copy.
+- **A jump that only GCSE removes does.** A local set to 1 before the walk and tested with the
+  key (`if (flag && n->key == key)`, or `n->key == key && flag`) is EXACT: the first CSE cannot
+  see the constant (the walk's body starts at the loop label), so the tag label has two uses all
+  through CSE, PRE copies the key load (`move v1,v0` in the bne's slot), the second CPROP pass
+  replaces the flag with `(const_int 1)` and the jump pass after GCSE deletes the test; cse2
+  then leaves the copy alone. So retail's source had a second use of that label, or a loop
+  note, that ends the first CSE's path and is gone after GCSE: a test GCSE's constant
+  propagation decides, a `do { } while (0)`, or something not yet seen. A constant flag that is
+  never anything else is not plausible original code and is not kept (nonmatching/).
+- **Also ruled out (34 words or more):** the walk with `continue` for other objects' calls and
+  `prev = n` in the for's increment, a `do { } while` with `goto next` (as RemoveQueuedCalls is
+  written), the owner test repeated around each key test (65), and one test of both keys
+  (`n->key == key || n->key == tag`) with the key's body inside (62, the tag test then comes
+  first).
+- **The comparison's block before the loop is loop.c's.** The `return n->data->f4 == *q` block
+  sits between the switch's cases and the loop in both builds: find_and_verify_loops moves a
+  block entered by a conditional jump and ending in a jump out of the loop to the last barrier
+  before it.
+
 ### A default set in the else arm, not in the walk's test: reorg's stolen slot (func_001CD870)
 
 AddPlayerObjectContacts walks a node's parents (`while (n != 0 && !(flags & 2)) n = n->parent;`)
