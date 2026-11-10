@@ -3743,6 +3743,30 @@ emulation of build/swarm/w5-1D2518/lalloc2.py (g11 worktree) (2026-11-09, still 
   adjust_priority's birthing rule. Statement order changes nothing (24 orders x 64 conversion
   mixes compiled). Open: what in the original made dot3 or its conversion outrank dot2's.
 
+### A pointer set after a call, and a call in each arm (func_0013FAE8)
+
+ReleaseTriggerZoneContacts (2026-11-10, matched from a 62.5% near miss that had been blamed on
+the first loop's registers and the tail's layout):
+
+- **A variable assigned before a call crosses it.** `where = &p;` written before the
+  TransformPointBetweenFrames that fills p made `where` a call-crossing pseudo (global-alloc, a
+  callee-saved register); written after the call it dies before the next one and takes $a2,
+  the argument it is passed in, as retail's `addiu a2,s1,0x140` / `move a2,s0` in the arms show.
+  The callee-saved pseudo it no longer needs also changed global-alloc's order for the whole
+  function: the first loop's zone and 0x7C0 cursor swapped to retail's $s1 and $s0, a
+  difference that had looked like the loop's own.
+- **Retail's first arm jumping to the call means a call in each arm.** One call after
+  `if (...) plane = &w[0]; else { ...; plane = &w[1]; }` leaves the then arm one insn, which
+  jump.c threads (`bc1t` to the call with the argument in the delay slot). A
+  `CreatePooledContact(...)` and its store in each arm gives retail's `bc1f` to the second
+  test and `b` to the shared call: jump2's cross-jumping merges the identical tails after
+  reload.
+- **Floats set by ToFloat in both arms and read after the join stay in GPRs.** The asm's "=r"
+  output makes ga and gb GPR pseudos; reload's mtc1 at the join is retail's `mtc1 v0,$f1`.
+  Only one conversion is the compiler's: the first dot of the first arm through ToFloatMoved,
+  whose compiler qmfc2 sched2 issues after the second dot (the asm qmfc2 went before it). The
+  near miss's earlier swap had put ToFloatMoved on the second dot.
+
 ### A conversion in each branch, before the epilogue (func_0014DA98)
 
 - **sched2 runs before jump2's cross-jumping.** rest_of_compilation (toplev.c) schedules after
