@@ -72,6 +72,71 @@ reload.c and reload1.c read):
   `.greg` dispositions come after reload's spills and retry_global_alloc,
   so they cannot show which registers had been evicted by 4's turn: that
   needs an emulation of global-alloc's allocno order.
+- **The eviction order, replayed** (2026-11-10, w18; tools/globalalloc.py,
+  which reproduces the dumps of 4,501 functions exactly). Before the 4's
+  turn (step 579 of 2,068), s8 was opened in pass 1 by a 6-insn %hi (step
+  35), s7, s4 and s2 were taken in pass 0 by other 6-insn %hi pseudos
+  (steps 48, 29, 363: pass 0 reuses any register already in use, so a
+  short pseudo free there takes it and the register stops being local-only),
+  and t9, t8 and s6 were evicted (steps 446, 518, 576, by two 10-insn %hi
+  pseudos and 0x80000000). So the scan for the 4 passes s8, t9, t8, s7, s6
+  and takes s5 (0.00477 < 0.00545); s4 is not evictable and s3 (0.00449)
+  is never reached. Then 66 evicts s3 and 9 evicts s1.
+- **Retail's choice comes from local-alloc's order of four long constants.**
+  Retail holds 2194 (from entry 257) in s7, func_00155778 in s4, an 18 in
+  s5, 146 in s6, then 1 in s6 and 1025 in s7; ours has 2194 (pseudo 1701)
+  in s4, func_00155778 (2072) in s5, the 18 (3199) in s7. local-alloc
+  places quantities by floor_log2(refs) * refs / life: ours 1701 157, 2072
+  155, 146 (1841) 150, 3199 144, so 1701 takes s4 first and pushes 2072 to
+  s5. With 1701's priority below 144 (`globalalloc.py --pri 1701=140`) the
+  local replay gives retail's placements, and the global replay then gives
+  every retail register this function shows: the 4 in s3 (s5 is denser
+  without func_00155778, s4 not local-only), 256 kept in s5,
+  func_00155778 kept in s4 (built once), 66 in s1, 0x80000000 in s8. 1701
+  needs 16 refs instead of 18, or a life at least 210 insns longer (4,578 to
+  5,000 in local-alloc's half-insn units).
+- **The lives are sched1's, and retail's final code does not show them.**
+  The constant sets are inline-parameter pseudos set just before their
+  stores, and sched1 hoists them by hundreds of entries (1701: set at entry
+  292 before sched1, at entry 128 after; 1 (6194): 1129 to 364). The block
+  is memory-bound (one store a cycle, 3,870 of 6,739 cycles issue only a
+  store), so the ALU slot takes the ready constant loads in priority order,
+  and a load's priority is one more than its first store's place on the
+  store chain: it issues once every ALU insn feeding an earlier store has
+  issued (798 before the 2194 load here, no cycle without an ALU issue).
+  Retail's `li s7,2194` 345 instructions before ours is sched2's doing,
+  not sched1's: in both, the load sits right after the last store of the
+  register's previous value (anti-dependence), and the ALU counts per
+  entry of the two final codes agree within 5 up to entry 1000.
+- **Replayed with tools/sched1.py** (which reproduces this block's 8,808
+  insns cycle for cycle) and `--alloc`, which runs both allocators on the
+  replayed order: raising the 2194 load's priority from 1,978 to about
+  2,150 (`--prio 8206=2150`) issues it 139 cycles earlier and gives every
+  retail register checked (2194 in s7, func_00155778 kept in s4, the 4 in s3,
+  256 kept in s5, 66 in s1, 0x80000000 in s8); 2,050-2,100 give the 4 in s3
+  but lose the 2194. Moving the 18 (3199), the 146 (1841) or
+  func_00155778's load alone does not. A priority 170 higher means a first
+  store about 35 entries earlier, which retail's code does not show (entries
+  134-248 store 2194 from t6 on both sides), so the difference is more
+  likely spread over several lives than in that one load. Source variants
+  should now be screened by compiling (6 s) and running `sched1.py --alloc`
+  and `globalalloc.py --local` on the dumps, against the registers above.
+- **A guided search** (2026-11-10, w18; build/swarm/w18-109488/search/drive.py
+  with the big-109488 worker's renderer: per-call merges of equal arguments,
+  single fields set after the call, Set10's three-way merge, Set8m undone;
+  about 1,300 compiles, each screened on the CSE landmarks, then exact
+  instructions plus retail's 256 long register holds, five of them key:
+  4 in s3, 256 in s5, 66 in s1, 2194 in s7, func_00155778 in s4). Nothing
+  keeps 8 landmarks and gets a key hold. Merging Set10 on any one call that
+  stores 2194 (entries 134 to 336) gives three: 4 in s3, 256 kept in s5,
+  66 in s1, as the replays predicted for a 2194 pseudo set earlier; but the
+  2194 is still not in s7, func_00155778 is rebuilt (lui +19, addiu +18),
+  the 553 landmark moves (7 of 8) and exact falls from 2,990 to about 1,600.
+  600 compiles searching around that merge with three key holds required
+  never restored the landmark (best: 9,380 instructions, 1,620 exact). The
+  best overall, 7 single-field splits and a merge (3,050 exact, 9,340
+  instructions), keeps no key hold and is per-call noise, so the near miss
+  is unchanged.
 
 What decides the bytes is therefore which handful of long-lived constants
 local-alloc places, which follows the number and lives of the pseudos at

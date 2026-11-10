@@ -79,6 +79,31 @@
 // first register below 118's density at that point (func_00155778's pseudo out of s5, or s5
 // denser), with the CSE window landmarks held. No variant was compiled this round.
 //
+// The allocators replayed (2026-11-10, worker w18-109488; tools/globalalloc.py, which reproduces
+// both allocators' dumps of this file exactly; docs/toolchain/long-block-constants.md, "The
+// eviction order, replayed"). Before the first 4's turn (step 579), s8, s7, s4 and s2 were taken by
+// 6-insn %hi pseudos (pass 0 reuses registers in use) and t9, t8 and s6 evicted, so the scan takes
+// s5. Retail's registers all follow from local-alloc's order of four long constants: ours ranks
+// 2194 (pseudo 1701, 157) above func_00155778 (2072, 155), 146 (1841, 150) and an 18 (3199, 144),
+// so 2194 takes s4 and func_00155778 s5. `globalalloc.py --dumps DIR func_00109488 --pri 1701=140`
+// gives retail's local placements (2194 s7, func_00155778 s4, 18 s5, 1 s6, 1025 s7) and then
+// retail's global ones: 4 in s3, 256 kept in s5, func_00155778 kept, 66 in s1, 0x80000000 in s8.
+// 1701 needs 16 refs instead of 18, or a life 210 insns longer. These lives are sched1's: it hoists
+// each constant load hundreds of entries above its first store (1701 from entry 292 to 128).
+// tools/sched1.py replays this block cycle for cycle; `sched1.py --dumps DIR func_00109488 --prio
+// 8206=2150 --alloc 118 ...` (the 2194 load issued 139 cycles earlier) gives every retail register
+// checked, and moving the 18, the 146 or func_00155778 alone does not. Retail's `li s7,2194`, 345
+// instructions before ours, is sched2's hoist into a freed register, not evidence of sched1's order,
+// and the per-entry ALU counts of both final codes agree, so the needed change is likely spread over
+// several lives. Screen variants by compiling (6 s) and running sched1.py --alloc and
+// globalalloc.py --local on the dumps.
+// Guided search (2026-11-10, build/swarm/w18-109488/search/, about 1,300 compiles screened on the
+// landmarks, exact instructions and retail's long register holds): merging Set10 (fC = f14 = f18)
+// on any one 2194 entry from 134 to 336 gives the 4 in s3, 256 in s5 and 66 in s1 as retail, but
+// not 2194 in s7 or func_00155778 in s4, moves the 553 landmark and halves exact (about 1,600);
+// nothing near it restored the landmark. The best form that keeps the landmarks (3,050 exact,
+// 9,340 instructions) is 8 coincidental per-call edits with no key register, so this file stays.
+//
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
 // Global alloc gives it a callee-saved register (s5 here). In this form and every earlier one, no
