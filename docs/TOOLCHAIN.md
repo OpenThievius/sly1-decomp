@@ -4203,6 +4203,23 @@ TurnColliderTowardRotation (2026-11-09):
   slot after the expand-time weight slot (retail has the sum at 0, the slot at 0x10), so the
   form that has both is still to find.
 
+- Probes of 2026-11-10 (after func_0017ECE8's variable set twice): taking the qmfc2's result
+  out of local-alloc does give retail's VU order here. With `len2` reused for the distance
+  (`len2 = Vu0::ToFloat(Vu0::Dot(n.q, u)); *dist = len2;`), len2 is set twice, global-alloc
+  takes it and the inline's result folds into it, the last block has two quantities and the
+  product gets vf1 and the 1.0 vf2, as retail's. But an f32 set twice is "pref FP_REGS, else
+  GR_REGS" in the .lreg dump whatever its other uses, so the distance goes through an FPR
+  (mtc1, swc1: 396 bytes). Every f32 the function has fails the same way: len2 (its compare
+  and divides), a `dot` shared with the else arm's sign test, and the zero arm's `z` (only
+  stored, but its 0.0f set gives FP_REGS too; retail's zero arm is an FPR anyway, mtc1 zero
+  and two swc1, so z was never a GPR). A u32 set twice would give GR_REGS, but the function
+  has no second bits value to share it with: the only one would be the squared length's
+  (`u32 bits = ToBits(..); f32 len2 = ToFloatMoved(bits)`), whose u32 to u128 widening costs
+  a dsll32, dsrl32 and por (404 bytes), and which is no plausible source. A u128 product
+  shared between Dots (`p = Dot(n.q, n.q); .. p = Dot(n.q, u); StoreX(*dist, p)`) moves the
+  product out of the block instead and swaps vf1 and vf2 in both Dots. Still open: a GR_REGS
+  pseudo the original set twice, or a quantity born in the last block before the Dot.
+
 ### A 64-bit field's bits as an int: one truncate (func_00210970)
 
 - **What decided it.** func_00210970 (Sony's 2.9-ee-991111) indexes a table by bits 5 to 8 of a
