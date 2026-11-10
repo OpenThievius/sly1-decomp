@@ -3198,3 +3198,16 @@ From the `-dS -fsched-verbose-6` dumps of ControlTintBlendCollider (2026-11-10):
   waits for the lead's decision; a pointer variable for the row base (`PlacedObject* part`) does
   not help, since a pointer loaded from memory has no base term in alias.c either way.
 
+
+### A global record copied as u128 waits for a frame store; a struct copy does not (func_0019ED58)
+
+HandleEffectContact starts its nearest-vertex search from `D_00248D30` right after storing the
+rotated normal to a Vec02 local (`Vu0::Q(v) = RotateTransposed(..)`). Written `Vec02 best =
+D_00248D30;`, the copy is a structure move whose load carries MEM_IN_STRUCT_P and a symbol base,
+so sched2 lifts its `lq` above the frame store, first in the block. Written `Vec02 best;
+Vu0::Q(best) = Vu0::Q(D_00248D30);`, the load has no alias class and its address is a register,
+so it waits for the `sqc2` to 0(sp): retail's `lq` comes after the argument addresses
+(`addiu s3..s5`), and the FLT_MAX load before it falls into place. In the same function's other
+branch, storing the new velocity before the acceleration computed from it (`Q(qA0) = vel.q;
+Q(qC0) = DivX(Sub(target, vel), ..)`) keeps the qA0 store behind the Scalar slot store (both
+without a class, so they are ordered), and reorg puts it in the call's delay slot as retail does.

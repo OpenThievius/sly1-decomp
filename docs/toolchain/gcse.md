@@ -817,3 +817,35 @@ copies between the variable and a use, and the block boundaries between them, to
 uses end on which pseudo (`-dG`: "COPY-PROP: Replacing reg N in insn M with reg K", pass by pass).
 Unsolved there: retail's second direction keeps its parameter copy as a register copy of the
 normal (vmove vf6,vf8 before the branch), which neither form above gives.
+
+### Copy chains one hop too long: a Vec temporary's copy, and a variable that starts as the normal (func_0019ED58, wave 17)
+
+The same function, the next two hops. Each pass of cprop moves every use one copy up its chain
+(the pass's table holds each copy as it was when the pass began, and the copies themselves are
+rewritten in the same pass), so after two passes a use reaches the pseudo two or three copies up,
+and any copy still read stays as a register copy that global-alloc must place.
+
+- `Vu0::Vec mu = Vu0::Vec::Scalar(-f);` is three copies from the qmtc2 (Scalar's u128, Vec's
+  member through its return, the variable): the MulAddX that reads mu after NormalizeOr's join
+  ends on the middle copy, which lives across the branch beside the qmtc2's register (whose slot
+  store sched2 sinks), and comes out as `vmove vf6,vf5`. `Vu0::Vec mu; mu.q = Vu0::Scalar(-f);`
+  is one copy shorter: the use reaches the qmtc2's pseudo and the vmove is gone, as in retail
+  (`vmaddx vf5,vf1,vf5x`).
+- `Vu0::Vec dir = nv; dir = Vu0::MulAddX(dir, Vu0::NormalizeOr(t, x), mu);` (the direction set
+  twice, as `d1 = nv` names the first impulse's) leaves the argument copy of the normal as
+  retail's `vmove vf6,vf8` before the branch, where `MulAddX(nv, ...)` read the spilled copy at
+  80(sp) and `Vu0::Vec n = nv;` gives the same as `dir = nv`. With that copy in place sched2's
+  order after the next call (Cross(spin, p) before Cross(c1, p), the loads in retail's
+  registers) became retail's too: the earlier difference there was this copy's register, not
+  the schedule's priorities.
+- In `-dG`, follow each use's "COPY-PROP: Replacing reg N in insn M" line through both passes; a
+  use that ends one copy short of where retail's register shows it wants one copy less in the
+  source (a member set instead of a Vec helper's return), and one that retail keeps as a copy
+  wants one more (a variable assigned before the call that reads it).
+- The last missing instruction there is a local-alloc tie, not a copy: c2 (3 refs, one call)
+  dies at the second MulXSum, combine_regs ties the sum's result into c2's quantity and adds its
+  refs, so CALLER_SAVE_PROFITABLE (4 * calls < refs) passes and c2 is caller-saved in vf6.
+  Retail ties that result to the weight s and reloads c2 from its slot, so its c2 was a global
+  pseudo. In the .lreg dump, a call-crossing local that gets a register with too few refs is
+  usually the target of such a tie: look for an asm whose REG_DEAD input has the output's
+  register.
