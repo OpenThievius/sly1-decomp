@@ -2466,6 +2466,7 @@ func_0019B1E0	func_0019BF28	match
 func_0019B218	func_0019BF60	match	
 func_0019B250	func_0019BF98	match	
 func_0019B298	func_0019BFE0	match	
+func_0019B378	func_0019C0C0	match	rodata
 func_0019BC40	func_0019C988	match	
 func_0019BE08	func_0019CB50	match	
 func_0019BE80	func_0019CBC8	match	
