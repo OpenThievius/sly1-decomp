@@ -1119,3 +1119,41 @@ the block holding the first trap):
   as a product or through a (u32) or (s64) cast, the dy mask after the shift, a sixth MAGV
   term (a constant or a local 0, all 720 orders), the interlace arms swapped, a dh local, the
   word built in a u64 local.
+
+### Two equal clears that retail issues apart: a rank sched1 cannot give (func_001A1030, unsolved)
+
+UpdateSpringEffect's first block (two quadratics' coefficients cleared and set on the
+stack, `t = (g_gameTime - start) / life`, the clamp's first test) is the only part still
+off (2026-11-10, `-dS -fsched-verbose-6` dumps, haifa-sched.c and alias.c read):
+
+- **What retail's sched1 order must be.** After reload every `sp` store conflicts with
+  every load through `a2` in sched2: `sp` is set twice (prologue and epilogue), so
+  init_alias_analysis gives it no base and base_alias_check answers "may alias". Retail's
+  final order therefore fixes sched1's: a's clear (`sq 80`) before the `start` load, b's
+  clear (`sq 96`) after the `life` load. local-alloc fixes the rest: the 20.0 shares `$f0`
+  with the difference, so its set comes after the divide.
+- **Why no statement order gives it.** The issue rate is 2 and the loads use the one
+  memory unit, so the start load is at clock 3, the life load at 4, and the second slot of
+  clock 2 and of clock 3 goes to the best non-memory insn ready: a's clear, b's clear (each
+  priority 3, INSN_REG_WEIGHT 1: a store is a SET; three dependents) and dt's copy from
+  `$f12` (priority 2, weight 0: `$f12` dies). Retail needs a's clear at clock 2 and dt's
+  copy at clock 3, b's clear at 4 behind the life load. The two clears have the same rank
+  but for INSN_LUID, so anything that beats b's clear at clock 3 beats a's at clock 2 too
+  (a dt copy of priority 3 wins both on weight). And the 20.0 (priority 4, three
+  dependents: two stores and the jump) beats 125 and -25 (two each) at clock 5, so it is
+  set before the divide. The b member stores' output dependences on the clear give it
+  priority 3 whatever the order (mips_adjust_cost makes an output link cost 1; a store's
+  own priority is 2), and frame stores never wait for loads through a parameter or a
+  global in sched1 (a stack base never aliases), so nothing delays it.
+- **What would.** b's clear and the 20.0 both ranked lower: the 20.0 read by one store only,
+  or b's clear with priority 2 (it would then lose to dt's copy on weight), or an insn ready
+  at clock 3 only (a dependence on a's clear) raised by adjust_priority's birthing rule. A
+  reused float variable (`k = g_gameTime - start; t = k / life; k = 20.0f;`) puts the 20.0
+  after the divide by its anti-dependence and gives retail's issue order for it, but it is
+  not plausible source and leaves the registers off (18 lines).
+- **Ruled out (w15).** `b.y = 20; b.x = b.y`, `b.x = b.y = 20`, `b.y = b.x = 20`,
+  `Vec02 b = a` (CSE folds the copy to the constant store), b's initialisation after the
+  clamp (the stores move to the join block), an inline setter for b or a, an inline
+  `(g_gameTime - e->start) / e->life`, the quadratic as an inline over `const Vec02&`, the
+  clamp's parameters by const reference, dt's weight through a `const f32&` inline, and the
+  whole update as an inline taking `(self, a, b, dt)` (the frame moves).
