@@ -24,6 +24,7 @@
 #include "object_gatherer.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "fpu.h"
 #include "hit_target.h"
 #include "value_range.h"
 #include "common.h"
@@ -577,7 +578,31 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
     }
 }
 
-INCLUDE_ASM(func_001F3140);
+// The kind-0 (sine) entries' amplitudes, per axis: a noise blend (kind 1) adds no fixed bound.
+void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out)
+{
+    Vec02 sum;
+    Vec02 span;
+    sum = D_00248D30;
+    for (s32 i = 0; i < self->entryCount; i++) {
+        OscillatorSweepEntry* e = (OscillatorSweepEntry*)((u8*)self + 0x50) + i;
+        switch (e->kind) {
+        case 0: {
+            f32* d = &span.x;
+            f32* a = &e->v20.x;
+            f32* b = &e->v40.x;
+            for (s32 k = 0; k < 3; k++) {
+                d[k] = Fpu::Sqrt(a[k] * a[k] + b[k] * b[k]);
+            }
+            Vu0::Q(sum) = Vu0::Add(Vu0::Q(sum), Vu0::Q(span));
+            break;
+        }
+        case 1:
+            break;
+        }
+    }
+    *out = sum;
+}
 
 f32 HashToUnitFloat(s32 a0)
 {
