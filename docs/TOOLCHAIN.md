@@ -4126,6 +4126,49 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     set twice from `(lo_sum hi cfg)` loses its base (alias.c, record_set),
     which makes the guard conflict with the stores but needs a variable
     the original would not have reassigned.
+  - **What retail's order needs, in sched1's priorities (static-record
+    research, 2026-11-10, all four static records, func_001EC190 and
+    func_001930B8; `-dS -fsched-verbose-6`, haifa-sched.c and mips.h
+    read).** A float constant's set is a memory-unit insn of cost 2; a
+    store with no dependent has priority 2, so its constant has 4. An
+    output or anti link costs 1 (mips.h's ADJUST_COST zeroes it and
+    insn_cost raises it to 1). In every case retail loads a constant only
+    after some earlier stores (1.0, 75 and -100 after f4, f24 and f44 in
+    func_0018A510; 75 after i48 in func_001D5FA8; -1.0 after -0.5's store
+    in func_001930B8, whose constants reuse $f0 as local-alloc can only
+    give them that way): a ready constant of priority 4 waits behind a
+    store only if the store has priority 4 or more, which needs a chain of
+    two links after it (store, then something of priority 3, then
+    something of 2). Ties at equal priority go to the smaller
+    INSN_REG_WEIGHT, which counts every SET (stores too) as +1 and each
+    REG_DEAD or REG_UNUSED note as -1, then to the earlier insn. Stores
+    through one pointer whose value alias.c knows have no dependents at
+    all, so every plain form tried gives all constants first.
+  - **The guard needs more than a conflict.** A probe (not plain C) with
+    func_0018A510's A and B stores through a copy of `this` hidden by an
+    empty asm (no base) and C through `this` gives retail's three groups
+    A, i0, B and retail's late loads (A has priority 5 through i0, B 3
+    through C). The guard then still lands after f54, not before C: the
+    last C store in RTL order is where `this` and 1.0 die (weight 1 - 2),
+    which ties the guard's (its 1 and its `%hi` die) and wins on the
+    earlier insn. So retail's guard ahead of C also needs the last C store
+    to kill one register fewer, or C not yet ready when the guard is.
+  - **Ruled out tonight (all give the base's fully independent stores).**
+    The record as sub-records (`Entry e1, e2, e3` members, fields
+    through `e1.f4`); C's two pairs set by an inline `Pair::Set(x, y)` on
+    members; the static inside an inline accessor
+    (`inline Cfg* GetCfg() { static Cfg cfg; return &cfg; }`, its guard
+    and record unchanged); a reference bound to the static. In each, an
+    inline call's `this` is substituted as `(plus this N)` (integrate.c
+    copies a non-readonly parameter into a pseudo, CSE folds it back), so
+    one pseudo with a known value addresses every store. In a block with
+    no call or branch the only plain sources of a store's dependents are
+    a memory conflict (a base or value alias.c cannot see) and a register
+    reused after the store (a reassigned variable, or a PRE copy such as
+    the `(set r149 r149)` of `%hi(cfg)` GCSE leaves in the init block,
+    which gives i0 one anti link of cost 1, too short). func_001930B8 has
+    the same requirement on frame stores, so the missing form is common
+    to the file-scope initialiser and the function-local statics.
 
 ## Constants in one very long block
 
