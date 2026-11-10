@@ -438,3 +438,28 @@ combine statistics" line says why:
 - **Rule.** A vector accumulated across calls whose loads land in changing registers, with a
   second load of the same slot inside NormalizeOr's divide, was a u128 variable, as the same
   function's other case keeps its own (`u128 acc`).
+
+### A product written out in the caller: its matrix in the freed vector slots (func_0012CD78)
+
+func_0012CD78 (the chain walk that samples positions, rotations, velocities and spins, in
+placed_object.cpp) ends each step with the product of two rotations, as MulRotation does: each
+row rotated, stored to a vector and then to a matrix. Retail's frame has the matrix at 0x130
+and the three row vectors at 0x160, 0x170, 0x180, and the rotated vectors of the blocks before
+it (0x130, 0x140, 0x150; the spin's at 0x130 again) in the matrix's bytes. With MulRotation
+the frame is 0x30 bigger: the inline's frame is one 96-byte BLKmode temporary, and the freed
+Vec02 slots of the earlier blocks combine to only 48 bytes, so it takes a new slot at 0x160
+(no slot is extended, assign_stack_temp_for_type only reuses, splits or allocates). Retail's
+offsets are the caller's own locals, each a temporary of its own in declaration order: the
+matrix (48 bytes) fits the combined freed slots exactly, and the three vectors, declared after
+it, are new slots above. Writing the product out in a block of the loop body
+(`{ Mat02 r; Vec02 x, y, z; ... N = r; }`) matches. Spot it: an inline's locals split across
+reused and new slots means they were not an inline's.
+
+Two more differences of the same function, before the frame: the parameter `o` reused for
+`o = chain[k]` in the second loop, and `k` reused as its counter (`for (k--; k >= 0; k--)`),
+put both in saved registers from the first loop on (retail's s0 and s2, as func_00125750's
+`self = chain[n]`); and `if (e) { a = e->mover; b = e->sub; } else { a = 0; b = 0; }` gives
+retail's branch, where preset zeros give a delay-slot load in the other order. The prototype
+is `(self, t, scale, o, top, n, pos, rot, vel, spin)`: the function itself matches with its
+floats first, second or last, but SampleScriptAnimation's argument moves (func_00118988) match
+only with the floats after self; the other three callers match with either.

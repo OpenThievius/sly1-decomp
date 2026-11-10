@@ -852,6 +852,7 @@ func_0012C9E8	func_0012CB18	match	rodata
 func_0012CBE8	func_0012CD18	match	
 func_0012CCC0	func_0012CDF0	match	
 func_0012CCE8	func_0012CE18	match	
+func_0012CD78	func_0012CEA8	match	
 func_0012D1B0	func_0012D2E0	match	
 func_0012D2A8	func_0012D3D8	match	
 func_0012D398	func_0012D4C8	match	
