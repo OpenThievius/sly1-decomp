@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 764/756, checked 2026-11-08
-// CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call 1 (source line 54); 169 differing lines before, 167 now.
-// NEAR: the whole function is written (the ground push, the two ramps, the rotated tangent and MulAddX2, whose result now takes a's register as retail's does); 8 bytes over retail. Now retail's: push = 0 as the first arm of the test, the rotation kept in a register. Still differs: retail's frame is 16 bytes larger (out1 and out2 at 80 and 84, a 16-byte slot at 64 that the tail's weights take, and in the inner block one more 16-byte slot before the weight at 32), the copy of &c->end[e] (move a1, a0) retail keeps for the store, and the VU0 registers of the tail (retail loads m660's rows into vf5, vf3, vf4).
+// BYTES 717/756 (94.8%), checked 2026-11-10
+// NEAR: same size, frame and code as retail up to the tail; 20 lines differ, all in the tail's VU0 registers and its two weights (2026-11-10, w13). The frame (208 bytes: the ground push's weight at 32, the tail's weights at 64, out1 and out2 at 80 and 84) needs the vectors d0 and d1 declared at the top (the ground push reuses d0, d1 is the 16 bytes before its weight) and the ramp copies declared at function scope after the ground push, live through the tail (assign_temp slots are freed only at their block's end): the zero-push path jumps over them with a goto. The ground push reads end[e].v10 into a named u128 first and stores it at the address recomputed in place (retail's move a1, a0), the separation through Vu0::StoreX (a0), and both ramp inputs convert with ToFloatMoved, which leaves the dots below the profile loads in sched2 (priority 18 against 19). Still differs: sched1 loads v640 before m660's rows and the rows last to first, and puts the f63C weight's qmtc2 before the rotation, so local-alloc gives the rows vf2, vf4, vf5 and v vf3 where retail has vf5, vf3, vf4 and vf2, and the weights vf6 and vf5 swapped; the lalloc2 emulator gives retail's registers for the order r0, r2, v, r1 with the -push qmtc2 early and the f63C one after the dot (docs/TOOLCHAIN.md, "Ramp copies live through a tail: a goto over function-scope locals").
 #include "common.h"
 #include "switched_collider.h"
 #include "game_clock.h"
@@ -24,44 +23,48 @@ f32 ClampToMagnitude(f32 a, f32 b);
 
 void func_001C54D0(TurningCollider* self, Contact03* c, s32 e)
 {
+    Vec02 d0;
+    Vec02 d1;
     f32 push;
+    f32 w;
+    f32 cur;
     if (self->f6DC == 0 || self->f6CC == 0.0f) {
         push = 0.0f;
-    } else {
-        f32 f90 = c->f90;
-        f32 w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->v80), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
-        if (f90 < -2.0f) {
-            ContactEnd03* end = &c->end[e];
-            f32 t = (f90 + 1.0f) / w;
-            f32 ground = ((Vec02*)self->mesh.verts)[self->f6D0].z + 10.0f;
-            f32 m = ground >? t;
-            Vec02 d;
-            Vu0::Q(end->v10) = Vu0::MulAddX(Vu0::Q(end->v10), Vu0::Q(self->m110.r[2]), Vu0::Scalar(-m));
-            Vu0::Q(d) = Vu0::Sub(Vu0::Q(c->end[0].v10), Vu0::Q(c->end[1].v10));
-            *(u32*)&c->f90 = Vu0::ToBits(Vu0::Dot(Vu0::Q(d), Vu0::Q(c->v80)));
-        }
-        Vec02 d0;
-        Vec02 d1;
-        RampCopy A;
-        RampCopy B;
-        f32 out1;
-        f32 out2;
-        Vu0::Q(d0) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(c->end[e].v10));
-        Vu0::Q(d1) = Vu0::Sub(Vu0::Q(c->end[0].v30), Vu0::Q(c->end[1].v30));
-        A.w = *(ThreeWords*)self->f710;
-        B.w = *(ThreeWords*)self->f704;
-        A.f[0] = A.f[0] * self->f700;
-        B.f[0] = B.f[0] * self->f700;
-        f32 cur = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
-        push = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->v80))) / w;
-        ApproachValueWithRamp(cur, 0.0f, g_gameClock.dt, &A, &out1);
-        ApproachValueWithRamp(cur, -self->f6CC, g_gameClock.dt, &B, &out2);
-        if (push < out2) {
-            push = out2;
-        }
-        push = push + ClampToMagnitude(out1 - push, g_gameClock.dt * (B.f[0] - B.f[1]) / B.f[2]);
+        goto apply;
     }
-    u128 rot = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
-    u128 tangent = Vu0::Sub(rot, Vu0::MulX(Vu0::Q(c->v80), Vu0::Dot(rot, Vu0::Q(c->v80))));
-    Vu0::Q(c->end[e].v30) = Vu0::MulAddX2(Vu0::Q(c->end[e].v30), Vu0::Q(self->m110.r[2]), Vu0::Scalar(-push), tangent, Vu0::ScalarAt(self->f63C));
+    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->v80), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
+    if (c->f90 < -2.0f) {
+        f32 f90 = c->f90;
+        u128 v = Vu0::Q(c->end[e].v10);
+        f32 t = (f90 + 1.0f) / w;
+        f32 ground = ((Vec02*)self->mesh.verts)[self->f6D0].z + 10.0f;
+        f32 m = ground >? t;
+        Vu0::Q(c->end[e].v10) = Vu0::MulAddX(v, Vu0::Q(self->m110.r[2]), Vu0::Scalar(-m));
+        Vu0::Q(d0) = Vu0::Sub(Vu0::Q(c->end[0].v10), Vu0::Q(c->end[1].v10));
+        Vu0::StoreX(c->f90, Vu0::Dot(Vu0::Q(d0), Vu0::Q(c->v80)));
+    }
+    RampCopy A;
+    RampCopy B;
+    f32 out1;
+    f32 out2;
+    Vu0::Q(d0) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(c->end[e].v10));
+    Vu0::Q(d1) = Vu0::Sub(Vu0::Q(c->end[0].v30), Vu0::Q(c->end[1].v30));
+    cur = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
+    push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->v80))) / w;
+    A.w = *(ThreeWords*)self->f710;
+    B.w = *(ThreeWords*)self->f704;
+    A.f[0] = A.f[0] * self->f700;
+    B.f[0] = B.f[0] * self->f700;
+    ApproachValueWithRamp(cur, 0.0f, g_gameClock.dt, &A, &out1);
+    ApproachValueWithRamp(cur, -self->f6CC, g_gameClock.dt, &B, &out2);
+    if (push < out2) {
+        push = out2;
+    }
+    push = push + ClampToMagnitude(out1 - push, g_gameClock.dt * (B.f[0] - B.f[1]) / B.f[2]);
+apply:
+    ContactEnd03* end = &c->end[e];
+    Vu0::Vec rot = Vu0::Rotate(self->m660, Vu0::Vec::Of(self->v640));
+    Vu0::Vec n = Vu0::Vec::Of(c->v80);
+    Vu0::Vec tangent = Vu0::Sub(rot, Vu0::MulX(n, Vu0::Dot(rot, n)));
+    *(Vu0::Vec*)&end->v30 = Vu0::MulAddX2(Vu0::Vec::Of(end->v30), Vu0::Vec::Of(self->m110.r[2]), Vu0::Vec::Scalar(-push), tangent, Vu0::Vec::ScalarAt(self->f63C));
 }
