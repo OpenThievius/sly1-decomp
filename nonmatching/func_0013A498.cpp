@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 392/384, checked 2026-11-08
+// BYTES 203/384 (52.9%), checked 2026-11-10
 // NEAR: retail's size since 2026-11-10: `kept = 0` written just before the loop, after the last
 // asm, so combine folds jump.c's copied entry test (slt kept,count / beqz, kept being CSE's
 // canonical zero) into retail's blez; written earlier, a volatile asm lies between and combine
