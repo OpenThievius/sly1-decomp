@@ -638,3 +638,37 @@ the `-dL -dl -dg` dumps (2026-11-10):
   movable. Ruled out: `frames + i`, `&frames[i]` in the call, a byte-offset cast, the fade read
   as `frames[i].fade` (one mult after CSE), four WriteVifFlush calls (one after the switch is
   retail's tree and 7 insns fewer).
+
+### Life-1 invariants that reload rematerialises: a `lui` in a loop with every saved register taken (func_0013A618, near miss)
+
+Read from loop.c (move_movables) with `-dL` dumps (2026-11-10, nonmatching/func_0013A618.cpp, the
+scratchpad transfer loop of a WorldListedObject's owned records). Retail's loop starts with `lui
+a3,%hi(g_toSprChannel)` (copied by reorg into the bnez slot and before the label) and forms
+`lui a3; addiu a3,%lo(D_002748F0)` again inside the loop; ours forms the first in v0. All nine
+saved registers (s0-s8) hold values here, so an invariant loop.c moves gets no register and
+reload rematerialises it from its REG_EQUIV at each use, in a reload register (a3 in both
+places). That is what retail shows for the `%hi` of g_toSprChannel: loop.c moved it. Ours stays
+in the loop because its life is 1 (the `%hi` and the `lw` that uses it are adjacent: the call's
+argument is expanded into the move to a0): `80 * 1 * 1 < 95` insns in pass 1 (87 in pass 2).
+Written `void* const& ch = g_toSprChannel;` at the loop top (a reference makes the address its own
+insn, life 2, so `160 >= 95`), the `lui a3` comes out exactly as retail's, which confirms the
+mechanism; but the preheader then loses retail's `move v1,v0` (the move happens in pass 1 and
+changes the preheader's order), and the form is not plausible code. Retail's 1 of `1 -
+D_00274990` (`li v0,1` with the result in the loaded register's v1, where ours ties the result to
+the constant's pseudo) is probably the same: a moved, rematerialised constant. As func_00130C58
+above: what gives retail's life-1 invariants their move is not found.
+
+### Memory givs absorbed by a multi-use address giv (func_0013A940, near miss)
+
+Read from loop.c (combine_givs, combine_givs_p) with `-dL` (2026-11-10). Retail's particle loop
+keeps the four call-argument addresses (&cur->pos[j], &cur->vel[j], &nxt->pos[out],
+&nxt->vel[out]) as reduced registers of their own and bases every memory reference on the rec
+arrays' givs (cur + 0x580 + 16j, nxt + 0x580 + 16out, with negative offsets). combine_givs sorts
+by total benefit (own benefit, +1 for a zero addend, + each combinable giv's benefit + 3) and
+breaks ties by the giv list's order (newest first); a DEST_REG giv used once may not absorb
+others. Ours computes &cur[j] once into a pseudo that several statements share (CSE), a
+DEST_REG giv with several uses: it ties at 116 with another and absorbs every memory giv, so the
+loop has one reduced register fewer, the bivs (removed, j, out) take the saved register left over
+instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), and the function
+is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
+change it.

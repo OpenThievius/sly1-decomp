@@ -134,3 +134,15 @@ In the same function, Length's float taken with ToFloatMoved instead of ToFloat 
 loop: the asm qmfc2 put the dot's asm chain one above the `uv[1]` store in sched2's priorities
 (38 against 37), so the store came after the dot; with the compiler's own qmfc2 the store issues
 first and UnprojectCameraPoint's argument moves follow the camera's load, as retail's.
+
+### One pointer variable for three transfers: copy preferences in global-alloc (func_0013A618)
+
+func_0013A618 sends a record's bank to the scratchpad before its loop and the next record's in
+the loop (StartToSprChain(size, p, size, p + 0x2C, size, p + 0x58)), and sends the worked bank
+back (StartFromSprChain(p, p + 0x2C, p + 0x58)). Retail computes each bank pointer into a1, also
+the last one, which it then copies to a0 (`addu a1,v0,s1; move a0,a1; addiu a1,a0,704`): one
+instruction more than a block-local pointer gives (local-alloc ties it to a0, which it dies
+into). One `Vec02* p` declared with the first transfer and assigned again for the other two (C
+style) is a global pseudo set three times: global-alloc places it with its copy preferences, two
+copies into a1 against one into a0, so a1. That gave retail's size and took the function from
+113 differing lines to 30 (built in its file).
