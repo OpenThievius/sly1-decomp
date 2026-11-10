@@ -2970,6 +2970,35 @@ Spot it: a float result that lands in $f12 with no call reading it is an argumen
 prototype is missing; weights whose loads sched1 hoists to the top of a block read memory with
 no flag next to stores through a pointer.
 
+### A slot store after reload, and which load passes it (func_0015BFC0)
+
+func_0015BFC0 (whether an active collider's position plus half its velocity is within f684 of
+the cycler) matched on 2026-11-10 from 65.8%, with `-dS -dR -dc -fsched-verbose-6` dumps:
+
+- **sched2 sees every frame store as varying.** After reload a slot's address is `$sp + n`, and
+  rtx_varies_p counts only the frame, hard frame and argument pointers as fixed, not the stack
+  pointer; so fixed_scalar_and_varying_struct_p no longer separates a MEM_SCALAR_P slot from a
+  `mem/s` member load, and every load after the slot store in sched1's output waits for it in
+  sched2. A member load that sched1 lets pass the slot is held behind it again unless it was
+  already before the store in the insn order.
+- **So the expansion order decides.** Retail loads the position (`lqc2 vf3, 320(v0)`) before
+  the weight's `sqc2` and the velocity after. An inline call's argument that is itself an inline
+  call is expanded first and a plain memory reference second (the two-pass rule): with both
+  operands read in the MulAddX (`Q(a->v140)`, `Q(a->v150)`), both loads follow Scalar's store;
+  with both as Vec::Of, both precede it. `Vu0::Vec pos = Vu0::Vec::Of(active->v140);` as its own
+  statement before the sum puts the position's load first and leaves the velocity, read inside
+  the sum, behind the store.
+- **The registers came with it.** Before, sched1's tie between the two loads (same priority and
+  dependents) went to the one with the lower INSN_REG_WEIGHT: the later load in the insn order
+  carries `active`'s REG_DEAD note, so the velocity went first and took vf3. With the position
+  loaded first, local-alloc gives retail's vf3 (position, then the sum) and vf2 (velocity, then
+  the Dot's 1.0).
+- **Then the conversion.** f684's load and square still came after the difference's load: in
+  sched2 the difference's `lqc2` had priority 10 against the f684 load's 9, through the
+  compiler's mtc1 (cost 2). Vu0::ToFloatMoved (the compiler's qmfc2, cost 1, then the helper's
+  mtc1, 1) brings it to 9 and f684 goes first, as in retail (ToFloatViaBits also matches;
+  ToFloatNow does not).
+
 ### A rotation product's vector slots are scalar (func_0014A8F8, unsolved)
 
 Read from function.c, stmt.c, expr.c, alias.c and haifa-sched.c of 2.95.3 with `-dS -dR

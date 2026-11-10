@@ -3421,7 +3421,34 @@ s32 func_0015BEF0(ObjectCycler* self)
     return next;
 }
 
-INCLUDE_ASM(func_0015BFC0);
+void* GetActiveSwitchedCollider(void);
+
+// The squared length of d. ToFloatMoved: the qmfc2 is the compiler's and the mtc1 the helper's
+// (one cycle each, where the compiler's mtc1 costs two), so in sched2 the difference's load has
+// f684's priority, not one more, and f684's load and square come before it, as in retail.
+static inline f32 LengthSquared(u128 d)
+{
+    return Vu0::ToFloatMoved(Vu0::Dot(d, d));
+}
+
+// Whether the active collider's point (its position plus half its velocity) is within f684 of
+// the cycler. The position is named first: its load is expanded before the weight's slot store
+// and passes it in both schedules, while the velocity, read inside the sum after the Scalar,
+// waits for the store, as retail's lqc2 order shows.
+s32 func_0015BFC0(ObjectCycler* self)
+{
+    Vec02 point;
+    PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
+    if (active != 0) {
+        Vu0::Vec pos = Vu0::Vec::Of(active->v140);
+        Vu0::Q(point) = Vu0::MulAddX(pos.q, Vu0::Q(active->v150), Vu0::Scalar(0.5f));
+        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->f684 * self->f684;
+        if (inside) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
