@@ -2911,3 +2911,29 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
   reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
   before regclass (the copy survives cse1 and gcse).
+
+### A clamp's result in the variable it reads loses the arguments' preference (func_001B55C0)
+
+The triangle animator's cursor update went from 22 differing words to 14 (2026-11-10, w15,
+`-dl -dg` dumps):
+
+- **expand_preferences pools preferences only between allocnos that do not conflict.** A
+  copy `(set A B)` with B dying there gives each the other's preferences unless they conflict.
+  `u = ClampBetween(iu - self->u0, self->uMin, self->uMax)` returns lo, hi or v into u's own
+  pseudo, which still holds the loop's sum while sched1 loads lo (`lwc1 $f13,52(s1)` before
+  `sub.s $f0,1,u`): lo conflicts with u and gets none of u's preferences ($f12 and $f13, from
+  the calls that pass u). lo, first in global-alloc's order, took the lowest free FPR ($f2),
+  hi $f3, and `1 - v` its own $f13 preference. Written `f32 cu = ClampBetween(...)` the result
+  is a fresh pseudo born after the loop's u dies: lo and hi pool its $f13, lo takes it
+  (pass 0 does not skip a register it prefers itself), hi takes $f2, and `1 - v`, whose $f13
+  is gone, $f3, as retail. Spot it: a value copied into a variable in one arm takes its
+  register from the variable's later uses only when it does not overlap the variable's
+  previous value.
+- **A frame address's PRE pseudo is ranked at twice its life.** update_equiv_regs doubles
+  the live length of every pseudo with a REG_EQUIV note (`(plus fp 64)`, &tri[2] hoisted out
+  of the loop), so 3 refs over 177 insns rank as 3/354 against a pointer local's 2 refs over
+  240 (2/240): the local goes first only if 4 x 177 > 3 x 240. The local's set
+  (`cursor = &self->cursor`) is sched1's filler (priority 2, ready from the block's start,
+  lowest LUID among the fillers), so it is born before the block's first call wherever it is
+  written; declared at the end, PRE hoists `self + 16` to the loop's preheader and sched1
+  puts it at the same place. What gives retail's order is still open: noted in the near miss.
