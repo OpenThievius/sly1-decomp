@@ -1,152 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 4139/4184 (98.9%), checked 2026-11-08
-// NEAR (2026-11-08, large-149760, mech-149760): regdiff "order", 1043 of 1046 aligned; every block
-// is retail's but for registers in two places. Fixed (mech-149760): (a) the second switch's cases
-// 0/1 store the WrapAngle result as a member (self->g08) and read the tilt's upper bound as a
-// scalar (D_00261C00, an f32 of its own): a member at a varying address never aliases a scalar at a
-// fixed one (alias.c fixed_scalar_and_varying_struct_p), so sched1 loads both bounds before the
-// store, as retail does; (b) case 2 loads the camera's rows as values before it builds the vector
-// they rotate (Vu0::RotateRowsTied): the rows then precede the Scalar's slot store in the insn
-// order, the store (which they may alias) no longer holds them back, gets a low priority and
-// waits to the end, and the scalar keeps $vf6 as in retail. Still differs: (1) case 1, the 0.0 of
-// the zoom clamp takes $f4 where retail has $f1: global-alloc's pass 0 skips $f1 because r386 (the
-// RangeFraction result, lower priority, conflicting) has $f1 in its full preferences, pooled by
-// expand_preferences from zoom (sub.s $f1, zoom, g18) through v; retail must allocate r386 before
-// the 0.0 (priority log2(refs)*refs/live length: 0.0 is 3/10, r386 3/12); (4) case 4's first
-// rotation product: local-alloc ranks mz's third row (4 refs over 12) above my's first two rows
-// with the product rows tied to them (8 refs over 38): retail's registers follow exactly, by an
-// emulation of block_alloc on our dump (build/swarm/mech-149760/lalloc.py), if those two
-// quantities have one reference more each (9 refs: 3*9/38 > 2*4/12). Tried for (4): b's rows
-// loaded first, Vec-valued rows and results, every MulRotation* form. Tried for (1): clamp shapes
-// (Limit, Clamp, bounds first, ValueRange::Clamp, the clamp written out, the fraction named).
-// Build: put it in src/main/file_149398.cpp at its INCLUDE_ASM line (it replaces the three
-// INCLUDE_RODATA lines before it: D_00249EA0 is its {1, 4} array, the jump tables are its).
-#include "common.h"
-#include "vu0.h"
-#include "shapes.h"
-#include "switched_collider.h"
-#include "camera.h"
-#include "game_progress.h"
-#include "screen_element.h"
-#include "pad_record.h"
-#include "ramp_profile.h"
-#include "mul_rotation.h"
-
-struct CameraSound {
-    u8 pad000[0x18];
-    s32 voice;
+// PAL: the two arcs' fields are 0x310 later (their screen element is longer), fade at 0x570, the
+// target at 0x580 and the special object at 0x588 (US 0x260, 0x270, 0x278).
+struct Arc_149760_eu {
+    u8 pad000[0x570];
+    s32 fade;
+    u8 pad574[0x580 - 0x574];
+    void* target;
+    void* current;
+    void* special;
 };
-
-extern Player* g_player;
-extern u8 g_camera[];
-extern f32 g_gameTime[];
-extern f32 D_00261BF4;
-extern f32 D_00261BFC;
-extern f32 D_00261C00;
-extern Vec02 D_00261C20;
-extern f32 D_00261C30[4];
-extern f32 D_00261C40[4];
-extern f32 D_00261C50[4];
-extern f32 D_00261C60[4];
-extern f32 D_00261C70[4];
-extern f32 D_00261C80[3];
-extern f32 D_00261C8C;
-Quad16 GetCameraControllerTargetPoint(TargetCameraController* self);
-Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self);
-s32 PeekStackValue(TargetCameraController* s);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-void SnapCameraZoom(void* self, f32 x);
-void PauseIopVoice(s32 a);
-void ConvertPositionToWorld(void* n, void* out);
-void* GetActiveSwitchedCollider(void);
-void VectorToAngles(void* a, void* b, void* c);
-
-// The fraction of the way v lies from r[0] to r[1], 0 when the two are equal.
-static inline f32 RangeFraction(const f32* r, f32 v)
-{
-    if (r[0] == r[1]) {
-        return 0.0f;
-    }
-    return (v - r[0]) / (r[1] - r[0]);
-}
-
-// The point a fraction t of the way from r[0] to r[1].
-static inline f32 RangeLerp(const f32* r, f32 t)
-{
-    return (1.0f - t) * r[0] + t * r[1];
-}
-
-static inline f32 ClampFloat(f32 v, f32 lo, f32 hi)
-{
-    if (v < lo) {
-        v = lo;
-    } else if (hi < v) {
-        v = hi;
-    }
-    return v;
-}
-
-static inline f32 LimitFloat(f32 v, f32 lo, f32 hi)
-{
-    f32 r;
-    if (v < lo) {
-        r = lo;
-    } else if (hi < v) {
-        r = hi;
-    } else {
-        r = v;
-    }
-    return r;
-}
-
-// v made unit length.
-static inline Vu0::Vec Normalized(Vu0::Vec v)
-{
-    return Vu0::DivX(v, Vu0::Length(v));
-}
-
-// Vu0::Vec::Scalar with its slot written straight through the frame: Scalar's reference keeps the
-// slot's address in a register that CSE later reuses for a local at the same place (the &off
-// passed to ComputeDirectionFromAngles), where retail forms that address afresh.
-static inline Vu0::Vec ScalarHere(f32 f)
-{
-    Vu0::Slot t;
-    *(u128*)&t = Vu0::FromFloat(f);
-    Vu0::Vec r;
-    r.q = *(u128*)&t;
-    return r;
-}
-
-static inline f32 Blend(f32 t, f32 a, f32 b)
-{
-    return (1.0f - t) * a + t * b;
-}
-
-extern const Vec02 g_unitXVector;
-extern const Vec02 g_unitYVector;
-extern const Vec02 g_unitZVector;
-extern void* D_002704F4;
-extern f32 D_002704F8;
-extern s32 D_00270518;
-f32 Arctangent(f32 x);
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
-f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, void* profile, f32* speed);
-f32 ApproachValueClampingVelocity(f32 value, f32 speed, f32 target, f32 dt, void* profile, f32* out);
-void ResumeIopVoice(s32 voice);
-void SetSoundRecordPitch(void* record, f32 x);
-void SetSoundRecordVolume(void* record, f32 x);
-f32 ClampToMagnitude(f32 a, f32 b);
-f32 WrapAngle(f32 a);
-f32 ClampToRange(void* range, f32 v);
-void BuildBasisFromX(Vec02* v, Mat02* out);
-void ProjectPointToCamera(Camera* cam, void* point, void* out);
-void UnprojectCameraPoint(Camera* cam, void* point, void* out);
-f32 ArctangentOfRatio(f32 y, f32 x);
-void ConvertOffsetToSpherical(void* a, void* b, f32* heading, f32* pitch, f32* length);
-void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void UpdateCameraMatrices(Camera* self);
-void func_00144BE8(Camera* cam, s32 mode, void* eye, void* target, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
 
 void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRecord* pad, f32 dt)
 {
@@ -230,14 +92,13 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             }
             self->g18 = ApproachValueClampingVelocity(self->g18, self->g1C, zoom, dt, profile, &self->g1C);
         } else {
-            f32 zero = 0.0f;
-            self->g1C = ApproachValueWithRamp(self->g1C, zero, dt, D_00261C60, 0);
-            self->g18 = LimitFloat(self->g18 + self->g1C * dt, zero, 1.0f);
+            self->g1C = ApproachValueWithRamp(self->g1C, 0.0f, dt, D_00261C60, 0);
+            self->g18 = ClampFloat(self->g18 + self->g1C * dt, 0.0f, 1.0f);
         }
         break;
     }
     case 3: {
-        f32 v = LimitFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, D_00261C70, 0), 0.0f, 1.0f);
+        f32 v = ClampFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, D_00261C70, 0), 0.0f, 1.0f);
         f32 prev = self->g18;
         self->g18 = v;
         self->g1C = (v - prev) / dt;
@@ -302,15 +163,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->f364) * 2.0f;
-        f32 lo = 0.0f;
-        f32 hi = 1.0f;
-        if (since < lo) {
-            blend = lo;
-        } else if (hi < since) {
-            blend = hi;
-        } else {
-            blend = since;
-        }
+        blend = ClampFloat(since, 0.0f, 1.0f);
         if (g_player != 0 && g_player->f2228 == 0x22) {
             flag = 0;
             rise = 0.0f;
@@ -387,11 +240,11 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         break;
     }
     case 4: {
-        T217D_3F0* s;
-        if (D_002708E0.fade == 1) {
-            s = &D_002708E0;
+        Arc_149760_eu* s;
+        if (((Arc_149760_eu*)&D_002708E0)->fade == 1) {
+            s = (Arc_149760_eu*)&D_002708E0;
         } else {
-            s = (D_00271558.fade == 1) ? &D_00271558 : 0;
+            s = (((Arc_149760_eu*)&D_00271558)->fade == 1) ? (Arc_149760_eu*)&D_00271558 : 0;
         }
         u8* obj = (u8*)D_002704F4;
         if (obj == 0 && s != 0) {
@@ -433,9 +286,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         BuildAxisAngleMatrix(&g_unitXVector, &mx, *(f32*)((u8*)s->target + 0x328));
         Mat02 rot;
         Mat02 m;
-        MulRotationRowsInto(&m, mz, my);
-        MulRotationRowsInto(&rot, m, mx);
-        *(Mat02*)cam->f80 = rot;
+        MulRotationThenCopy(&m, mz, my);
+        MulRotationThenCopyVia((Mat02*)cam->f80, rot, m, mx);
         UpdateCameraMatrices(cam);
         *(Quad16*)cam->f2D0 = pos;
         return;
@@ -444,4 +296,3 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     func_00144BE8(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
                   Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
 }
-

@@ -1,10 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The file from 0x149398 to 0x14D0A8 (its .rodata from 0x249EA0, its .data from 0x261BF0, its
+// The file from 0x149398 to 0x14B6A8 (its .rodata from 0x249EA0, its .data from 0x261BF0, its
 // .bss from 0x27C008): the camera's controllers (0x149398 to 0x14ABD0, the method tables
 // D_00217398 to D_002173E0), a screen element's methods and the helpers after them (0x14ABD0 to
-// 0x14B550), classes 0x10 to 0x12 and class 0x68, the gauge manager (0x14B550 to 0x14D0A8).
-// One file between two exact edges: it could be several. Classes 0x11, 0x12 and 0x68 share it,
-// since all three read the static D_0027C00C. Its name is ours, after its first address.
+// 0x14B550), class 0x10's methods, class 0x11's first two and SetSinCosPair (0x14B550 to 0x14B6A8).
+// Where it ends, retail proves only to a range. Its .rodata (func_00149760's constants and two
+// jump tables, 0x249EA0 to 0x249EE4) is followed by 12 bytes of zeros and func_0014B6A8's
+// FLT_MAX on 16 at 0x249EF0, the next file's .rodata (file_14B6A8.cpp), so a file ends between
+// func_00149760 and func_0014B6A8. But any function start from 0x14A7B8 to 0x14B6A8 links to the
+// same bytes: the functions between them read no .rodata or .data of either file, their code is
+// on 8 as every file's is, and the one .bss they use, D_0027C008 (func_0014B608, func_0014B640),
+// can be a file's whole .bss (a file of words aligns its .bss to 4), so it may lie in this file
+// or the next. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and 0x14B6A8 all
+// printed MATCH (docs/AGENT_WORKFLOW.md, "Finding and proving a file"). The cut is at 0x14B6A8,
+// where the next file's data provably begins; the functions from 0x14A7B8 to 0x14B6A8 could
+// belong to either file or to a third. Its name is ours, after its first address.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -26,57 +35,20 @@
 #include "vu0.h"
 #include "scope_marker.h"
 #include "mul_rotation.h"
+#include "pad_record.h"
+#include "ramp_profile.h"
 
-s32 IsObjectOfKind(void* node, s32 kind);
 extern Player* g_player;
 extern s32 D_00275BEC;
 extern f32 g_timeScale;
 
-
-
-
-void EnterAgentState(NumberedAgent* self);
-
-
-void SetAnimationPlayerSpeed(void* handle, f32 scale);
-// An agent of the world's list at +0x1CCC (linked at +0xC10), seen as its table of slots:
-// slot 0x50 takes an owner message (func_0014BDC8, func_0014BEF8).
-typedef void (*AgentMessageFn)(void* self, void* arg);
-
-struct ListedAgentView {
-    AgentMessageFn* vtbl;
-    u8 pad0[0xC10 - 4];
-    ListedAgentView* next;
-};
-
-// The 32-byte block func_0014BDC8 builds its owner message in (InitOwnerMessage fills the
-// first 16 bytes; the frame has room for 32).
-struct Scratch_0014BDC8 {
-    s32 words[8];
-};
-
-s32 ChooseAgentState(ContactAgent* self);
-
-
-s32 IsContactBetweenParts(void* a, void* b);
-void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
-void ChangeAgentState(void* node, s32 kind, s32 flag);
-s32 IsPadSelectFlagHeld(void* p);
-
-
-s32 HandleAgentObjectEvent(ContactAgent* self, ListedAgentView** slot);
-void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
 void SetCameraControllerOwner(CameraController* self, Camera* owner);
-
 
 void VectorToAngles(void* a, void* b, void* c);
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 void SetCameraLookAnchor(void* eng, void* tmp);
 void SetCameraNearDistance(void* eng, f32 x);
-extern void* g_deadlineNotifier;
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
 void RegisterAgent(void* self);
 void AppendToList(void* table, void* self);
 
@@ -90,9 +62,6 @@ void CopyAgent(void*, void*);
 void InitAgent(void*);
 void StartAgent(void*);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-
 
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 void GetTargetCameraControllerEyePoint(void* out, void* self);
@@ -102,11 +71,6 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 void SnapCameraZoom(void* self, f32 x);
 void SetCameraNearDistance(void* self, f32 x);
 
-
-void EnterAgentState(void* self);
-void CountDownGaugeContacts(void* mgr, void* self);
-void SetAnimationPlayerSpeed(void* sub, f32 x);
-f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void PauseIopVoice(s32 a);
@@ -125,170 +89,28 @@ struct CameraSoundOwner {
     s32 f4C;
 };
 
-s32 HandleAgentObjectEvent(NumberedAgent* self);
 extern u8 g_camera[];
 void ConvertPositionToWorld(void* n, void* out);
 extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
-extern u8 D_00248D30[];
-f32 RandomFloatInRange(f32 a, f32 b);
 extern u8 g_identityMatrix[];
-extern u8 D_00248D30[];
-f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern T217D_Vt D_00218330;
 void RemoveFromList(void* a, void* b);
-s32 IsObjectOfKind(void* a, s32 b);
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 idx, void* table);
 
-
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(void* dev, s32 value);
-void ApplyGaugeRatioToEffect(GaugeManager* self);
-extern f32 g_gameClock[];
-void UpdatePlacedObject(void* self);
-void RunGaugeTimedEvent(void* self);
-void ActivateRandomGaugeSlot(void* self);
 void* GetActiveSwitchedCollider(void);
-// The active collider seen as its table of slots: slot 81 (func_0014C6E0, func_0014CDC8).
-typedef void (*ColliderSlotFn)(void* self);
 
-struct ColliderSlots { ColliderSlotFn* vtbl; };
-
-void* AreMenusAndFadeClear(void* zero);
 extern f32 g_gameTime[];
-f32 RandomFloatInRange(f32 a, f32 b);
 
-
-void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
-s32 IsObjectOfKind(void* obj, s32 kind);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void GetStateWalkerTargetKey(void* h, s32* out);
-void SetStateWalkerTarget(void* h, s32 code);
 void AppendToList(void*,void*);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerTargetKey(void* dev, s32* out);
 
-
-void ResolveObjectLinks(void* self, s32 n, void* table);
-BaseObject* FindFirstObjectByIdMode1(void* a, s32 kind, void* arg);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-
-
-
-extern f32 g_unitRange[];
-void StartPlacedObject(GaugeManager* self);
-void ResolveObjectLinks(GaugeManager* self, s32 n, void* table);
-void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
-void GetStateWalkerCurrentKey(void* a, void* b);
-void AddStateWalkerListener(void* a, void* b);
-void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
 
-
-void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg);
-typedef s32 (*ColliderQueryFn)(void* self);
-
-struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
-
-f32 RandomFloatInRange(f32 a, f32 b);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
 void* GetActiveSwitchedCollider(void);
-void SetStateWalkerTarget(void* dev, s32 value);
-s32 GatherObjectsById(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
-void ChangeAgentState(s32 value, s32 a1, s32 a2);
-void StopTimer(void* obj);
-void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
-void RaiseScatterLevels(void* self, f32 amount);
-extern u8 D_00248D30[];
-extern u8 D_00248D30[];
-void GetStateWalkerCurrentKey(void* p, s32* out);
-void GetStateWalkerTargetKey(void* p, s32* out);
-
-extern u8 D_00248D30[];
-void ChooseObjectPoolItem(ObjectPool* p);
-s32 RandomIntInRange(s32 a, s32 b);
-s32 func_001A8C90(ObjectPool* h, s32 v);
-s32 GetObjectWorldPosition(void* p, f32* out);
-s32 GetObjectWorldRotation(void* p, f32* out);
-s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
-void AddAnimationPlayerRecordCallback(void* a, GaugeManager* self);
-f32 RandomFloatInRange(f32 a, f32 b);
-
-
-void InitPlacedObject(GaugeManager* self);
-typedef void (*TimerDoneFn)(void* self);
-void HandlePlacedObjectNotification(GaugeManager* self, s32 kind, void* key);
-void GetStateWalkerCurrentKey(void* key, s32* out);
-void SetWorldActiveFollower(void* sub, GaugeManager* self);
-void StartTimer(T217D_510* self, f32 v);
-void SetTimerLimit(T217D_510* self, f32 v, TimerDoneFn cb);
-void StartTimerCounting(T217D_510* self);
-void FinishGaugeOnTimeout(void* self);
-
-// The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
-struct Quadratic {
-    f32 a;
-    f32 b;
-    f32 c;
-};
-
-// The helpers func_0014C2F0 maps the gauge fraction with: a quadratic, a clamp, a blend.
-struct GaugeCurve {
-    static f32 Eval(Quadratic* q, f32 t) { return q->a + t * (q->b + t * q->c); }
-    static f32 Limit(f32 g, f32 lo, f32 hi)
-    {
-        if (g < lo) return lo;
-        if (hi < g) return hi;
-        return g;
-    }
-    static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
-};
-
-// GaugeManager::o5E0, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
-// limits and the quadratics that pick between them.
-struct BlendedGaugeParams {
-    f32 f00;
-    f32 f04;
-    u8 pad08[8];
-    Quadratic q10;
-    u8 pad1C[4];
-    f32 f20;
-    f32 f24;
-    f32 f28;
-    f32 f2C;
-    Quadratic q30;
-    u8 pad3C[4];
-    f32 f40;
-    f32 f44;
-    f32 f48;
-    f32 f4C;
-    f32 f50;
-    u8 pad54[0xC];
-    Quadratic q60;
-    u8 pad6C[4];
-    f32 f70;
-    f32 f74;
-    u8 pad78[8];
-    Quadratic q80;
-    u8 pad8C[4];
-    f32 f90;
-    f32 f94;
-    u8 pad98[8];
-    Quadratic qA0;
-};
-
-extern f32 g_unitRange[];
-extern f32 g_gameClock[];
 
 // The file's statics (.bss from 0x27C008).
 static s32 D_0027C008;  // a running count, reset by func_0014B608
-static GaugeManager* D_0027C00C;  // the gauge manager, set by its set-up (func_0014C018)
 
 f32 D_00261BF0 = 0.0f;
 f32 D_00261BF4 = 0.300000012f;
@@ -306,10 +128,6 @@ f32 D_00261C60[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00261C70[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
 f32 D_00261C80[3] = { 5.0f, 0.0f, 0.5f };
 f32 D_00261C8C = 24.0f;
-s32 D_00261C90 = 4;
-f32 D_00261C94 = 900.0f;
-f32 D_00261C98 = 1200.0f;
-ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner)
 {
@@ -433,11 +251,394 @@ void ActivateTargetCameraController(TargetCameraController* self)
     SetCameraNearDistance(eng, 49.0f);
 }
 
-INCLUDE_RODATA(D_00249EA0);
-INCLUDE_RODATA(jtbl_00249EB0);
-INCLUDE_RODATA(jtbl_00249ED0);
+// v limited to [lo, hi].
+static inline f32 ClampFloat(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+extern Player* g_player;
+extern u8 g_camera[];
+extern f32 g_gameTime[];
+extern f32 D_00261BF4;
+extern f32 D_00261BFC;
+extern f32 D_00261C00;
+extern Vec02 D_00261C20;
+extern f32 D_00261C30[4];
+extern f32 D_00261C40[4];
+extern f32 D_00261C50[4];
+extern f32 D_00261C60[4];
+extern f32 D_00261C70[4];
+extern f32 D_00261C80[3];
+extern f32 D_00261C8C;
+Quad16 GetCameraControllerTargetPoint(TargetCameraController* self);
+Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self);
+s32 PeekStackValue(TargetCameraController* s);
+s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
+void SnapCameraZoom(void* self, f32 x);
+void PauseIopVoice(s32 a);
+void ConvertPositionToWorld(void* n, void* out);
+void* GetActiveSwitchedCollider(void);
+void VectorToAngles(void* a, void* b, void* c);
 
-INCLUDE_ASM(func_00149760);
+// The fraction of the way v lies from r[0] to r[1], 0 when the two are equal.
+static inline f32 RangeFraction(const f32* r, f32 v)
+{
+    if (r[0] == r[1]) {
+        return 0.0f;
+    }
+    return (v - r[0]) / (r[1] - r[0]);
+}
+
+// The point a fraction t of the way from r[0] to r[1].
+static inline f32 RangeLerp(const f32* r, f32 t)
+{
+    return (1.0f - t) * r[0] + t * r[1];
+}
+
+
+
+// v made unit length.
+static inline Vu0::Vec Normalized(Vu0::Vec v)
+{
+    return Vu0::DivX(v, Vu0::Length(v));
+}
+
+// Vu0::Vec::Scalar with its slot written straight through the frame: Scalar's reference keeps the
+// slot's address in a register that CSE later reuses for a local at the same place (the &off
+// passed to ComputeDirectionFromAngles), where retail forms that address afresh.
+static inline Vu0::Vec ScalarHere(f32 f)
+{
+    Vu0::Slot t;
+    *(u128*)&t = Vu0::FromFloat(f);
+    Vu0::Vec r;
+    r.q = *(u128*)&t;
+    return r;
+}
+
+static inline f32 Blend(f32 t, f32 a, f32 b)
+{
+    return (1.0f - t) * a + t * b;
+}
+
+extern const Vec02 g_unitXVector;
+extern const Vec02 g_unitYVector;
+extern const Vec02 g_unitZVector;
+extern void* D_002704F4;
+extern f32 D_002704F8;
+extern s32 D_00270518;
+f32 Arctangent(f32 x);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, void* profile, f32* speed);
+f32 ApproachValueClampingVelocity(f32 value, f32 speed, f32 target, f32 dt, void* profile, f32* out);
+void ResumeIopVoice(s32 voice);
+void SetSoundRecordPitch(void* record, f32 x);
+void SetSoundRecordVolume(void* record, f32 x);
+f32 ClampToMagnitude(f32 a, f32 b);
+f32 WrapAngle(f32 a);
+f32 ClampToRange(void* range, f32 v);
+void BuildBasisFromX(Vec02* v, Mat02* out);
+void ProjectPointToCamera(Camera* cam, void* point, void* out);
+void UnprojectCameraPoint(Camera* cam, void* point, void* out);
+f32 ArctangentOfRatio(f32 y, f32 x);
+void ConvertOffsetToSpherical(void* a, void* b, f32* heading, f32* pitch, f32* length);
+void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void UpdateCameraMatrices(Camera* self);
+void func_00144BE8(Camera* cam, s32 mode, void* eye, void* target, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+
+void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRecord* pad, f32 dt)
+{
+    Quad16 target = GetCameraControllerTargetPoint(self);
+    Quad16 eye;
+    Camera* cam = self->owner;
+    f32 ease = D_00261BF4;
+    s32 mode;
+    s32 flag;
+    f32 blend;
+    f32 far;
+    f32 rise;
+
+    if (dt == 0.0f) {
+        return;
+    }
+    mode = PeekStackValue(self);
+    switch (mode) {
+    case 0: {
+        f32 t = self->g18;
+        f32 speed = (D_00261C30[0] + t * (D_00261C30[1] + t * D_00261C30[2])) * pad->f78 * __builtin_fabsf(pad->f78);
+        self->g1C = speed;
+        self->g18 = ClampFloat(t + speed * dt, 0.0f, 1.0f);
+        break;
+    }
+    case 1:
+    case 2: {
+        u8* obj = self->obj50;
+        s32 near = 0;
+        f32 zoom;
+        if (obj != 0) {
+            Vec02 pos;
+            Vec02 span;
+            Vec02 mid;
+            Vec02 d;
+            Vec02 e;
+            f32 size = (0.0f < self->f58) ? self->f58 : *(f32*)(obj + 0x2A8);
+            f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->f40), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
+            f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
+            fov = self->f24 >? fov;
+            ComputeObjectFrameAtTime(obj, 0, &pos, 0, 0, 0, 0.1f);
+            Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec02*)(obj + 0x140))).q;
+            Camera* gc = *(Camera**)g_camera;
+            Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
+            f32 reach = size + Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(span))) * 0.5f;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->f40)).q;
+            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->f80, Vu0::Vec::Of(d)).q;
+            e.x = -d.y;
+            e.y = d.z;
+            e.z = d.x;
+            f32 fit;
+            if (0.0001f < e.z) {
+                f32 a = 2.0f * Arctangent((__builtin_fabsf(e.x) + reach) / (e.z * gc->f1E0));
+                f32 b = 2.0f * Arctangent((__builtin_fabsf(e.y) + reach) / e.z);
+                fit = self->f28 <? (b >? a);
+            } else {
+                fit = self->f28;
+            }
+            zoom = ClampFloat(1.0f - RangeFraction(&self->f24, fov >? fit), 0.0f, 1.0f);
+            if (fov < fit && zoom < self->g18) {
+                near = 1;
+            }
+        } else {
+            zoom = 0.0f;
+        }
+        if ((D_00270518 != 1 && (near || (zoom < self->g18 && (self->g1C < 0.0f || 0.025f < self->g18 - zoom))))
+            || (self->g18 < zoom && (0.0f < self->g1C || 0.035f < zoom - self->g18))) {
+            void* profile;
+            RampProfile scaled;
+            if (!near) {
+                f32 gap = __builtin_fabsf(zoom - self->g18);
+                f32 w[2] = { 1.0f, 4.0f };
+                f32 s = (1.0f - gap) * w[0] + gap * w[1];
+                scaled = *(RampProfile*)D_00261C40;
+                scaled.maxAccel *= s;
+                scaled.maxSpeed *= s;
+                scaled.endSpeed *= s;
+                profile = &scaled;
+            } else {
+                profile = D_00261C50;
+            }
+            self->g18 = ApproachValueClampingVelocity(self->g18, self->g1C, zoom, dt, profile, &self->g1C);
+        } else {
+            self->g1C = ApproachValueWithRamp(self->g1C, 0.0f, dt, D_00261C60, 0);
+            self->g18 = ClampFloat(self->g18 + self->g1C * dt, 0.0f, 1.0f);
+        }
+        break;
+    }
+    case 3: {
+        f32 v = ClampFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, D_00261C70, 0), 0.0f, 1.0f);
+        f32 prev = self->g18;
+        self->g18 = v;
+        self->g1C = (v - prev) / dt;
+        break;
+    }
+    case 4:
+        break;
+    }
+
+    CameraSound* sound = (CameraSound*)self->p48;
+    if (sound != 0) {
+        if (self->g1C != 0.0f) {
+            if (self->f44 != 0) {
+                ResumeIopVoice(sound->voice);
+                self->f44 = 0;
+            }
+            SetSoundRecordPitch(self->p48, ClampFloat(__builtin_fabsf(self->g1C), -1.0f, 1.0f));
+            SetSoundRecordVolume(self->p48, ClampFloat(__builtin_fabsf(self->g1C) * 0.5f + 0.5f, 0.0f, 1.0f));
+        } else if (self->f44 == 0) {
+            PauseIopVoice(sound->voice);
+            self->f44 = 1;
+        }
+    }
+
+    f32 zoom = RangeLerp(&self->f24, 1.0f - self->g18);
+    if (AreFloatsNearlyEqual(cam->f1C4, zoom, 0.0001f) == 0) {
+        SnapCameraZoom(cam, zoom);
+    }
+
+    switch (mode) {
+    case 0:
+    case 1: {
+        f32 x = ClampToMagnitude(pad->f40 + pad->f74, 1.0f);
+        f32 y = ClampToMagnitude(pad->f44, 1.0f);
+        if (g_player != 0 && g_player == GetActiveSwitchedCollider() && g_player->f2228 != 0x22) {
+            y = 0.0f;
+            x = 0.0f;
+        }
+        f32 z = (*(Camera**)g_camera)->f1C4;
+        f32 limit = z * 1.3f;
+        f32 scale = (1.0f - z) * 0.5f + z;
+        if (mode == 0) {
+            scale = 1.0f;
+        }
+        f32 yaw = -x * x * x * (scale * 10.0f);
+        if (yaw * self->g0C <= 0.0f) {
+            self->g0C = 0.0f;
+        }
+        f32 pitch = y * y * y * (scale * 10.0f);
+        if ((mode == 0 && (g_saveData->f19EC & 0x200) == 0) || (mode == 1 && (g_saveData->f19EC & 0x400) == 0)) {
+            pitch = -pitch;
+        }
+        f32 zero = 0.0f;
+        if (pitch * self->g14 <= zero) {
+            self->g14 = zero;
+        }
+        self->g0C = ApproachValueWithRamp(self->g0C, zero, dt, D_00261C80, 0);
+        self->g14 = ApproachValueWithRamp(self->g14, zero, dt, D_00261C80, 0);
+        self->g0C = ClampToMagnitude(self->g0C + yaw * dt, limit * 0.9f);
+        self->g14 = ClampToMagnitude(self->g14 + pitch * dt, limit * 0.8f);
+        self->g08 = WrapAngle(self->g08 + self->g0C * dt);
+        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00);
+        eye = GetTargetCameraControllerEyePoint(self);
+        f32 since = (g_gameTime[0] - cam->f364) * 2.0f;
+        blend = ClampFloat(since, 0.0f, 1.0f);
+        if (g_player != 0 && g_player->f2228 == 0x22) {
+            flag = 0;
+            rise = 0.0f;
+            far = 0.0f;
+        } else {
+            rise = -50.0f;
+            far = 400.0f;
+            flag = 1;
+        }
+        break;
+    }
+    case 2: {
+        ease = 0.0f;
+        Quad16 pt;
+        pt = GetCameraControllerTargetPoint(self);
+        u8* coll = (u8*)GetActiveSwitchedCollider();
+        Mat02 basis;
+        Vec02 dir;
+        if (*(s32*)(coll + 0x634) != 0) {
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(self->obj50 + 0x140)), Vu0::Vec::Of(pt)).q;
+        } else {
+            Vec02 screen;
+            Vec02 moved;
+            Vec02 ahead;
+            Vec02 world;
+            Vec02 push;
+            const u128* rows = (const u128*)cam->f80;
+            Vu0::Vec r0, r1, r2;
+            r0.q = rows[0];
+            r1.q = rows[1];
+            r2.q = rows[2];
+            Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::RotateRowsTied(r0, r1, r2, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
+            ProjectPointToCamera(*(Camera**)g_camera, &ahead, &screen);
+            push.x = pad->f40;
+            if (g_saveData->f19EC & 0x400) {
+                push.y = pad->f44;
+            } else {
+                push.y = -pad->f44;
+            }
+            push.z = 0.0f;
+            Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(D_00261C8C * dt)).q;
+            UnprojectCameraPoint(*(Camera**)g_camera, &moved, &world);
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(world), Vu0::Vec::Of(pt)).q;
+        }
+        BuildBasisFromX(&dir, &basis);
+        f32 yaw;
+        f32 pitch;
+        VectorToAngles(&basis, &yaw, &pitch);
+        flag = 1;
+        far = 20.0f;
+        rise = -7.0f;
+        blend = 0.0f;
+        f32 dy = ClampToRange(coll + 0x658, WrapAngle(yaw - *(f32*)(coll + 0x648)));
+        f32 dp = ClampToRange(coll + 0x650, WrapAngle(pitch - *(f32*)(coll + 0x64C)));
+        self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
+        self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
+        eye = GetTargetCameraControllerEyePoint(self);
+        break;
+    }
+    case 3: {
+        u8* obj = (u8*)D_002704F4;
+        if (obj != 0) {
+            Vec02 n;
+            Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::Vec::Of(target))).q;
+            self->g08 = ArctangentOfRatio(n.y, n.x);
+            Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
+        } else {
+            eye = GetTargetCameraControllerEyePoint(self);
+        }
+        blend = 0.5f;
+        rise = -7.0f;
+        far = 20.0f;
+        flag = 1;
+        break;
+    }
+    case 4: {
+        T217D_3F0* s;
+        if (D_002708E0.fade == 1) {
+            s = &D_002708E0;
+        } else {
+            s = (D_00271558.fade == 1) ? &D_00271558 : 0;
+        }
+        u8* obj = (u8*)D_002704F4;
+        if (obj == 0 && s != 0) {
+            obj = (u8*)s->special;
+        }
+        if (s == 0 || s->target == 0 || obj == 0) {
+            return;
+        }
+        Quad16 pos = *(Quad16*)(obj + 0x140);
+        f32 sy = *(f32*)((u8*)s->target + 0x324) * 2.0f - 1.0f;
+        f32 sx = *(f32*)((u8*)s->target + 0x320) * 2.0f - 1.0f;
+        f32 reach = *(f32*)((u8*)s->target + 0x2D8) * 0.22222222f;
+        Vec02 dir;
+        if (self->f5C != 0) {
+            ConvertPositionToWorld(self->f5C, &target);
+            Vu0::Q(dir) = Normalized(Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(pos))).q;
+        } else {
+            Vu0::Vec fwd = Vu0::Vec::Of(*(Vec02*)(obj + 0x110));
+            Vu0::Vec k = Vu0::Vec::Scalar(sx);
+            Vu0::Q(dir) = Normalized(Vu0::MulAddX(fwd, Vu0::Vec::Of(*(Vec02*)(obj + 0x120)), k)).q;
+        }
+        u8* tg = (u8*)s->target;
+        Vu0::Q(target) = Vu0::Add(Vu0::Add(Vu0::Vec::Of(pos), Vu0::MulX(Vu0::Vec::Of(dir), ScalarHere(reach * 2.0f))), Vu0::Vec::Of(*(Vec02*)(tg + 0x310))).q;
+        f32 heading;
+        f32 tilt;
+        f32 length;
+        ConvertOffsetToSpherical(&target, &pos, &heading, &tilt, &length);
+        f32 z = cam->f1C4;
+        f32 a = heading + 3.1415927f + sx * z * cam->f1E0 * 0.5f;
+        f32 b = -tilt - sy * z * 0.5f;
+        Vec02 off;
+        ComputeDirectionFromAngles(&off, heading, tilt, length);
+        Vu0::Q(cam->f40) = Vu0::Add(Vu0::Vec::Of(pos), Vu0::Vec::Of(off)).q;
+        Mat02 mz;
+        Mat02 my;
+        Mat02 mx;
+        BuildAxisAngleMatrix(&g_unitZVector, &mz, a);
+        BuildAxisAngleMatrix(&g_unitYVector, &my, -b);
+        BuildAxisAngleMatrix(&g_unitXVector, &mx, *(f32*)((u8*)s->target + 0x328));
+        Mat02 rot;
+        Mat02 m;
+        MulRotationThenCopy(&m, mz, my);
+        MulRotationThenCopyVia((Mat02*)cam->f80, rot, m, mx);
+        UpdateCameraMatrices(cam);
+        *(Quad16*)cam->f2D0 = pos;
+        return;
+    }
+    }
+    func_00144BE8(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
+                  Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
+}
+
 
 void DeactivateTargetCameraController(TargetCameraController* self)
 {
@@ -784,643 +985,3 @@ void SetSinCosPair(f32 value, SinCosPair* self)
     ComputeSinCos(&self->b, self, value);
     self->value = 0;
 }
-
-extern s32 g_frameCount;
-s32 func_001909F0(void* tree, Vec02* from, Vec02* to, s32 max, ColliderSpan* out);
-void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* onA, f32* dist, Vec02* onB);
-void func_001C8418(Agent* self, Vec02* goal);
-void UpdateAgentGoal(Agent* self);
-f32 WrapAngle(f32 a);
-typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
-
-void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
-{
-    typedef Vu0::Vec Vec;
-    switch (self->f724) {
-    case 12:
-    case 13:
-        if (g_frameCount % D_00261C90 == self->fC2C % D_00261C90) {
-            f32 step = 0.3926991f;
-            f32 best = 3.40282347e+38f;
-            f32 angle = self->f638;
-            f32 frac;
-            Vec02 bestPos;
-            Vec02 probe;
-            SinCosPair dir;
-            for (s32 i = 0; i < 16; i++) {
-                SetSinCosPair(angle, &dir);
-                f32 score = 0.0f;
-                Vu0::Set(probe, Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(*(Vec02*)&dir), Vec::Scalar(3000.0f)).q);
-                if (self->f928 != 0) {
-                    ColliderSpan hits[8];
-                    ScopeMarker scope;
-                    s32 r = func_001909F0(*(void**)(self->f928 + 0x54), &self->v140, &probe, 8, hits);
-                    switch (r) {
-                    case 0:
-                        frac = 1.0f;
-                        break;
-                    case 1:
-                        if (hits[0].time[0] == 0.0f && hits[0].time[1] == 1.0f) {
-                            break;
-                        }
-                        if (hits[0].time[0] != 0.0f) {
-                            frac = hits[0].time[0];
-                            break;
-                        }
-                    default:
-                        frac = hits[0].time[1];
-                        break;
-                    }
-                    f32 v = (0.75f - frac) * 1.3333334f;
-                    f32 lo = 0.0f;
-                    f32 hi = 1.0f;
-                    f32 c;
-                    if (v < lo) {
-                        c = 0.0f;
-                    } else if (hi < v) {
-                        c = hi;
-                    } else {
-                        c = v;
-                    }
-                    score = score + c * 4.0f;
-                }
-                NumberedAgent* tgt = ((TargetOfFn)((void**)self->desc)[0x198 / 4])(self);
-                if (tgt != 0) {
-                    Vec02 other;
-                    Vec from = Vec::Of(tgt->v140);
-                    Vec weight = Vec::Scalar(3.0f);
-                    Vec vel = Vec::Of(tgt->v150);
-                    Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
-                    Vec02 onA;
-                    Vec02 onB;
-                    f32 d;
-                    FindClosestPointsOnSegments(&self->v140, &probe, &tgt->v140, &other, &onA, &d, &onB);
-                    f32 q = d / ((tgt->radius3D0 + self->radius3D0) * 5.0f);
-                    f32 hi = 1.0f;
-                    if (q < 0.0f) {
-                        q = 0.0f;
-                    } else if (hi < q) {
-                        q = hi;
-                    }
-                    score = score + (1.0f - q) * 3.0f;
-                }
-                f32 next = angle + step;
-                for (NumberedAgent* o = (NumberedAgent*)self->world->list1CCC.head; o != 0;
-                     o = *(NumberedAgent**)&o->fC10) {
-                    if (o == self) {
-                        continue;
-                    }
-                    Vec02 other;
-                    Vec from = Vec::Of(o->v140);
-                    Vec weight = Vec::Scalar(3.0f);
-                    Vec vel = Vec::Of(o->v150);
-                    Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
-                    Vec02 onA;
-                    Vec02 onB;
-                    f32 d;
-                    FindClosestPointsOnSegments(&self->v140, &probe, &o->v140, &other, &onA, &d, &onB);
-                    f32 q = d / ((o->radius3D0 + self->radius3D0) + (o->radius3D0 + self->radius3D0));
-                    f32 hi = 1.0f;
-                    if (q < 0.0f) {
-                        q = 0.0f;
-                    } else if (hi < q) {
-                        q = hi;
-                    }
-                    score = score + (1.0f - q) * 0.5f;
-                }
-                f32 turn = WrapAngle(angle - self->f638) * 0.31830987f;
-                score = score + (__builtin_fabsf(turn) + __builtin_fabsf(turn));
-                if (score < best) {
-                    best = score;
-                    bestPos = probe;
-                }
-                angle = WrapAngle(next);
-            }
-            func_001C8418(self, &bestPos);
-        }
-        break;
-    case 4:
-        if (flag != 0) {
-            func_001C8418(self, &self->v140);
-        }
-        break;
-    default:
-        UpdateAgentGoal(self);
-        break;
-    }
-}
-
-extern const Vec02 g_unitXVector;
-
-s32 IsNumberedAgentFree(NumberedAgent* self)
-{
-    if (IsPadSelectFlagHeld(self->world) != 0) {
-        return 0;
-    }
-    switch (self->f724) {
-    case 4:
-    case 0xB:
-    case 0x10:
-        return 0;
-    }
-    PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
-    if (target == 0) {
-        return 0;
-    }
-    u128 gap = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
-    u128 gap2 = gap;
-    f32 dist = Vu0::ToFloat(Vu0::Length(gap));
-    if (self->fC20 != 0) {
-        if (D_00261C98 < dist) {
-            self->fC20 = 0;
-        }
-        return self->fC20;
-    }
-    if (dist < D_00261C94) {
-        u128 facing = Vu0::NormalizeOr(Vu0::Q(target->v150), Vu0::Q(g_unitXVector));
-        u128 facing2 = facing;
-        u128 toward = Vu0::NormalizeOr(gap2, Vu0::Q(g_unitXVector));
-        if (0.3f < Vu0::ToFloat(Vu0::Dot(facing2, toward))) {
-            self->fC20 = 1;
-        }
-    }
-    return self->fC20;
-}
-
-s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
-{
-    if (self->f724 == 0x10) {
-        return 1;
-    }
-    if (self->f724 == 0xB) {
-        return 1;
-    }
-    if (HandleAgentObjectEvent(self) == 0) {
-        return 0;
-    }
-    self->fC20 = 0;
-    return 1;
-}
-
-void EnterNumberedAgentState(NumberedAgent* self)
-{
-    EnterAgentState(self);
-    switch (self->f724) {
-    case 0xB:
-        AddToGaugeAmount(D_0027C00C, self);
-        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
-        break;
-    case 0xC:
-        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
-        SetAnimationPlayerSpeed(self->f7E0, D_0027C00C->speed448);
-        break;
-    }
-}
-
-s32 ChooseAgentStateByContact(ContactAgent* self)
-{
-    s32 result = ChooseAgentState(self);
-    if (result == 0xB) return result;
-    ListedAgentView* n = (ListedAgentView*)GetActiveSwitchedCollider();
-    if (n != 0 && IsContactBetweenParts(self, n) != 0) {
-        Scratch_0014BDC8 buf;
-        InitOwnerMessage(&buf, 0, self);
-        result = 0xB;
-        n->vtbl[0x50](n, &buf);
-    }
-    for (ListedAgentView* x = (ListedAgentView*)self->world->list1CCC.head; x != 0; x = x->next) {
-        if ((void*)x != (void*)self && IsObjectOfKind(x, 0x12) != 0 && IsContactBetweenParts(self, x) != 0) {
-            ChangeAgentState(x, 0xB, 0);
-        }
-    }
-    return result;
-}
-
-s32 IsContactAgentFree(ContactAgent* self)
-{
-    if (IsPadSelectFlagHeld(self->world) != 0) return 0;
-    if (self->f724 == 0xB || self->f724 == 0x10) return 0;
-    return 1;
-}
-
-s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
-{
-    if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
-    if (HandleAgentObjectEvent(self, slot) == 0) return 0;
-    ListedAgentView* found = (ListedAgentView*)GetActiveSwitchedCollider();
-    ListedAgentView* n = *slot;
-    if (n == found) {
-        OwnerMessage buf;
-        InitOwnerMessage(&buf, 0, self);
-        n->vtbl[0x50](n, &buf);
-    }
-    return 1;
-}
-
-void EnterContactAgentState(ContactAgent* self)
-{
-    EnterAgentState(self);
-    switch (self->f724) {
-    case 0xB:
-        CountDownGaugeContacts((void*)D_0027C00C, self);
-        if (((GaugeSlot*)self->fC20) != 0) {
-            ((GaugeSlot*)self->fC20)->taken = 0;
-            self->fC20 = 0;
-        }
-        break;
-    case 0xC:
-        if (((GaugeSlot*)self->fC20) != 0) {
-            ((GaugeSlot*)self->fC20)->taken = 0;
-            self->fC20 = 0;
-        }
-        SetAnimationPlayerSpeed(self->f7E0, self->fC24);
-        break;
-    }
-}
-
-extern const GaugeParams g_defaultGaugeParams = {
-    { 0x41000000, 0x40C00000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A, 0x3F19999A, 0x3F4CCCCD, 0x3FA66666, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A },
-    { 3.5f, 5.0f }, { 2.0f, 2.5f },
-    { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }
-};
-
-void InitGaugeManager(GaugeManager* self)
-{
-    InitPlacedObject(self);
-    self->maxAmount = 50;
-    self->f2D8 = 90.0f;
-    GaugeParams params = g_defaultGaugeParams;
-    self->params0 = params;
-    self->params1 = params;
-    self->params1.p44.Set(12.0f, 12.0f);
-    self->params1.p4C.Set(12.0f, 12.0f);
-    self->timer.Init();
-    self->f45C = 3.4028235e+38f;
-    self->f450 = 2;
-    self->f464 = 0;
-    D_0027C00C = self;
-}
-
-void BlendParamSets(GaugeManager* self)
-{
-    s32 i = 0;
-    StartPlacedObject(self);
-    ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
-    self->device = CreateStateWalker(self->f428, 0, 0x3FB, 0);
-    GetStateWalkerCurrentKey(self->device, self->buf430);
-    AddStateWalkerListener(self->device, self);
-    for (; i < self->slotCount; i++) {
-        GaugeSlot* s = &self->slots[i];
-        BaseObject* n = (BaseObject*)FindFirstObjectByIdMode4(self->world, s->obj, self);
-        s->obj = n;
-        s->f8 = FindFirstObjectByIdMode1(n->world, 0x3F7, n);
-        s->f4 = FindFirstObjectByIdMode1(n->world, 0x3F6, n);
-    }
-    f32* p = self->poly;
-    f32 g = g_currentEntry->dt;
-    f32 v = self->poly[0] + g * (p[1] + g * p[2]);
-    f32 lo = g_unitRange[0];
-    f32 hi = g_unitRange[1];
-    f32 t;
-    if (v < lo) {
-        t = lo;
-    } else if (hi < v) {
-        t = hi;
-    } else {
-        t = v;
-    }
-    f32 u = 1.0f - t;
-    f32* pa = (f32*)&self->params0;
-    f32* pb = (f32*)&self->params1;
-    f32* po = self->o5E0;
-    for (u32 k = 0; k < 44; k++) {
-        *po++ = u * *pa++ + t * *pb++;
-    }
-    self->f44C = (s32)self->o5E0[0];
-    ComputeGaugeOutputs(self);
-}
-
-void ComputeGaugeOutputs(GaugeManager* o)
-{
-    f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
-    BlendedGaugeParams* p = (BlendedGaugeParams*)o->o5E0;
-    f32 s;
-
-    s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q30, t), g_unitRange[0], g_unitRange[1]);
-    *(f32*)(o->buf430 + 4) = GaugeCurve::Lerp(s, p->f20, p->f28);
-    *(f32*)(o->buf430 + 8) = GaugeCurve::Lerp(s, p->f24, p->f2C);
-
-    s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q60, t), g_unitRange[0], g_unitRange[1]);
-    *(f32*)(o->buf430 + 0xC) = GaugeCurve::Lerp(s, p->f44, p->f4C);
-    *(f32*)(o->buf430 + 0x10) = GaugeCurve::Lerp(s, p->f48, p->f50);
-
-    *(f32*)(o->buf430 + 0x14) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange[0], g_unitRange[1]), p->f70, p->f74);
-
-    *(f32*)(o->buf430 + 0x18) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange[0], g_unitRange[1]), p->f90, p->f94);
-
-    o->f44C = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange[0], g_unitRange[1]), p->f00, p->f04);
-
-    if (p->f40 < t && o->f464 == 0) {
-        o->f464 = 1;
-        o->f45C = g_gameClock[1];
-    }
-}
-
-void ApplyGaugeRatioToEffect(GaugeManager* self)
-{
-    f32 one = 1.0f;
-    f32 ratio = (f32)self->amount / (f32)self->maxAmount;
-    f32 c;
-    if (ratio < 0.0f) {
-        c = 0.0f;
-    } else if (one < ratio) {
-        c = 1.0f;
-    } else {
-        c = ratio;
-    }
-    RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
-}
-
-void FinishGaugeOnTimeout(void* unused, s32 mode)
-{
-    if (mode == 1) {
-        s32 t[2];
-        GetStateWalkerTargetKey(D_0027C00C->device, &t[0]);
-        GetStateWalkerCurrentKey(D_0027C00C->device, &t[1]);
-        if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            SetStateWalkerTarget(D_0027C00C->device, 0x3FF);
-            ApplyGaugeRatioToEffect(D_0027C00C);
-        }
-    }
-}
-
-void UpdateGaugeManager(GaugeManager* self)
-{
-    s32 tag;
-    UpdatePlacedObject(self);
-    GetStateWalkerCurrentKey(self->device, &tag);
-    if (tag == 0x3FD) {
-        if (self->f45C < g_gameClock[1]) {
-            RunGaugeTimedEvent(self);
-        }
-        if (self->f460 < g_gameClock[1]) {
-            ActivateRandomGaugeSlot(self);
-        }
-        void* p = GetActiveSwitchedCollider();
-        ColliderSlots* o = (ColliderSlots*)p;
-        o->vtbl[81](p);
-    }
-}
-
-void ShowGaugeManagerDisplays(GaugeManager* self)
-{
-    s32 tag;
-    GetStateWalkerCurrentKey(self->device, &tag);
-    void* p = 0;
-    if (tag == 0x3FD) {
-        p = AreMenusAndFadeClear(p);
-    }
-    if (p) {
-        g_gaugeAmountCaption.vt->m14(&g_gaugeAmountCaption);
-        g_timerElement.vt->m14(&g_timerElement);
-    } else {
-        g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
-        g_timerElement.vt->m15(&g_timerElement);
-    }
-}
-
-void* GetGaugeParams(GaugeManager* self)
-{
-    return (u8*)self + (self->setIndex * 0xB0 + 0x480);
-}
-
-void AppendGaugeSlot(GaugeManager* self, s32 value)
-{
-    s32 i = self->slotCount;
-    self->slotCount = i + 1;
-    self->slots[i].obj = (void*)value;
-}
-
-INCLUDE_RODATA(D_00249FB4);
-
-s32 ProjectPointToCamera(void* cam, void* point, f32* out);
-extern const f32 D_00249FB4;
-
-// Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the
-// second, from the first's place) among the slots on screen, then any. The slot's size is a named
-// stride (as DrawTrailRibbon's): its constant then lives across the loop without a register and is
-// rematerialised before the multiply, as retail's `li v1,20` shows; the position and rotation
-// pointers are set where they are used, so loop.c hoists them after the wait pointer's address.
-void func_0014C858(GaugeManager* self)
-{
-    Vec02 anchor;
-    Vec02 pos;
-    f32 screen[2];
-    Vec02 rot[3];
-    Vec02* posp;
-    s32 made = 0;
-    Vec02* rotp;
-    f32* wait = &self->f43C;
-    s32 pass;
-    s32 best;
-    s32 i;
-    f32 bestDist;
-    GaugeSlot* slot;
-    void* player;
-    s32 slotSize = sizeof(GaugeSlot);
-
-    do {
-        if (self->f458 >= 2) {
-            self->f45C = D_00249FB4;
-            return;
-        }
-        ChooseObjectPoolItem((ObjectPool*)self->f420);
-        if (((ObjectPool*)self->f420)->f48 == 0) {
-            return;
-        }
-        player = GetActiveSwitchedCollider();
-        best = -1;
-        bestDist = 0.0f;
-        pass = 0;
-        do {
-            for (i = 0; i < self->slotCount; i++) {
-                GaugeSlot* cand = &self->slots[i];
-                if (cand->taken != 0 || cand->key != 0) {
-                    continue;
-                }
-                GetObjectWorldPosition(cand->f4, (f32*)&pos);
-                if (pass == 0) {
-                    ProjectPointToCamera(*(void**)g_camera, (u8*)cand->obj + 0x140, screen);
-                    if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
-                        continue;
-                    }
-                }
-                f32 dist = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)player)->v140), Vu0::Q(pos))));
-                if (made == 1) {
-                    dist = dist + Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(anchor), Vu0::Q(pos))));
-                }
-                if (bestDist < dist) {
-                    bestDist = dist;
-                    best = i;
-                }
-            }
-            if (best >= 0) {
-                break;
-            }
-            pass++;
-        } while (pass < 2);
-        if (best < 0) {
-            return;
-        }
-        ObjectPool* h = (ObjectPool*)self->f420;
-        ContactAgent* agent = (ContactAgent*)h->f48;
-        slot = (GaugeSlot*)((u8*)self->slots + best * slotSize);
-        func_001A8C90(h, 0);
-        posp = &pos;
-        rotp = &rot[0];
-        GetObjectWorldPosition(slot->f4, (f32*)posp);
-        GetObjectWorldRotation(slot->f4, (f32*)rotp);
-        agent->desc02()->m1D(agent, posp);
-        agent->desc02()->m1E(agent, (Mat02*)rotp);
-        agent->desc02()->m20(agent, (Vec02*)D_00248D30);
-        agent->desc02()->m21(agent, (Vec02*)D_00248D30);
-        if (made == 0) {
-            anchor = pos;
-        }
-        CreateAnimationPlayerWithoutPresetTargets(slot->f8, slot->obj, 0, &slot->key, 0.0f, 1.0f);
-        made++;
-        AddAnimationPlayerRecordCallback(slot->key, self);
-        self->f458 = self->f458 + 1;
-        self->f45C = g_gameClock[1] + RandomFloatInRange(self->f43C, wait[1]);
-        agent->fC20 = slot;
-        slot->taken = 1;
-        agent->fC24 = *(f32*)(self->buf430 + 0x14);
-    } while (made < 2);
-}
-
-void ActivateRandomGaugeSlot(GaugeManager* self)
-{
-    GaugeSlot* list[16];
-    f32 v0[4];
-    f32 v1[12];
-    if (self->f454 >= self->f44C) {
-        self->f460 = 3.4028235e+38f;
-        return;
-    }
-    ChooseObjectPoolItem((ObjectPool*)self->f424);
-    if (!((ObjectPool*)self->f424)->f48) return;
-    s32 n = 0;
-    for (s32 i = 0; i < self->slotCount; i++) {
-        GaugeSlot* s = &self->slots[i];
-        if (!s->taken && !s->key) list[n++] = s;
-    }
-    if (n <= 0) return;
-    s32 idx = RandomIntInRange(0, n - 1);
-    ObjectPool* h = (ObjectPool*)self->f424;
-    NumberedAgent* c = (NumberedAgent*)h->f48;
-    GaugeSlot* s = list[idx];
-    (void)func_001A8C90(h, 0);
-    GetObjectWorldPosition(s->f4, v0);
-    GetObjectWorldRotation(s->f4, v1);
-    c->desc02()->m1D(c, (Vec02*)v0);
-    c->desc02()->m1E(c, (Mat02*)v1);
-    c->desc02()->m20(c, (Vec02*)D_00248D30);
-    c->desc02()->m21(c, (Vec02*)D_00248D30);
-    CreateAnimationPlayerWithoutPresetTargets(s->f8, s->obj, 0, &s->key, 0.0f, 1.0f);
-    AddAnimationPlayerRecordCallback(s->key, self);
-    self->f454 = self->f454 + 1;
-    f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
-    self->f460 = (*(f32*)&g_gameTime) + r;
-    c->fC28 = s;
-    s->taken = 1;
-}
-
-void CountDownGaugeContacts(GaugeManager* self)
-{
-    if (self->f458 == self->f450) {
-        self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
-    }
-    self->f458 = self->f458 - 1;
-}
-
-void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
-{
-    s32 hi = self->maxAmount;
-    s32 v = self->amount + arg->fC24;
-    if (v < 0) {
-        v = 0;
-    } else {
-        if (hi < v) {
-            v = hi;
-        }
-    }
-    self->amount = v;
-    if (!(v < self->maxAmount)) {
-        s32 arr[32];
-        s32 t1;
-        s32 t2;
-        GetStateWalkerCurrentKey(self->device, &t1);
-        GetStateWalkerTargetKey(self->device, &t2);
-        void* p = GetActiveSwitchedCollider();
-        ColliderQuerySlots* o = (ColliderQuerySlots*)p;
-        s32 r = o->vtbl[81](p);
-        if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
-            SetStateWalkerTarget(self->device, 0x3FE);
-            s32 n = GatherObjectsById(self->world, 5, 0x12, 0, 0x20, arr);
-            if (n > 0) {
-                s32 cnt = n;
-                s32* q = arr;
-                do {
-                    ChangeAgentState(*q, 0xB, 0);
-                    q++;
-                } while (--cnt != 0);
-            }
-        }
-        StopTimer(&g_timerElement);
-    }
-    ComputeGaugeOutputs(self);
-    if (self->f454 == self->f44C) {
-        self->f460 = g_gameTime[0] + RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
-    }
-    self->f454 = self->f454 - 1;
-}
-
-void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
-{
-    HandlePlacedObjectNotification(self, kind, key);
-    switch (kind) {
-    case 6: {
-        s32 i;
-        for (i = 0; i < self->slotCount; i++) {
-            if (self->slots[i].key == key) {
-                break;
-            }
-        }
-        if (i < self->slotCount) {
-            self->slots[i].key = 0;
-        }
-        break;
-    }
-    case 0x14:
-        if (key == self->device) {
-            s32 out;
-            GetStateWalkerCurrentKey(key, &out);
-            if (out == 0x3FD) {
-                g_gaugeAmountCaption.target = &self->amount;
-                g_gaugeAmountCaption.limit = &self->maxAmount;
-                SetWorldActiveFollower(self->world, self);
-                StartTimer(&g_timerElement, self->f2D8);
-                SetTimerLimit(&g_timerElement, 0.0f, FinishGaugeOnTimeout);
-                StartTimerCounting(&g_timerElement);
-            }
-            if (self->tag430 == 0x3FD) {
-                g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
-                g_timerElement.vt->m15(&g_timerElement);
-                SetWorldActiveFollower(self->world, 0);
-            }
-            self->tag430 = out;
-        }
-        break;
-    }
-}
-

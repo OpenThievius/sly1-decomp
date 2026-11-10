@@ -35,25 +35,3 @@ func_0014B5C0	CopyWorldListedAgent	slot 9 of class 0x10: keeps the Pack10 record
 func_0014B608	InitNumberedAgent	slot 0 of class 0x11: runs InitAgent, sets 0xC24 to 1 and resets the running count D_0027C008 that StartNumberedAgent draws from
 func_0014B640	StartNumberedAgent	a method of class 0x11 (overriding StartAgent): runs StartAgent and stores the running count D_0027C008, post-incremented, in 0xC2C
 func_0014B678	SetSinCosPair	writes the sine and cosine of its angle into the record's first two floats (ComputeSinCos) and clears the word after them; func_0014B6A8 of class 0x11 calls it
-func_0014B6A8	UpdateNumberedAgentGoal	slot 0x188 of class 0x11, the goal slot UpdateAgentGoal fills for class 0x08: steers the numbered agent's heading (WrapAngle, func_001C8418) from its position and its record at +0xC10, then runs UpdateAgentGoal
-func_0014BB08	IsNumberedAgentFree	slot 0x16C of class 0x11, the slot IsContactAgentFree and IsGaugeAgentFree fill: tests func_001DDA80 for the world and the agent's state at +0x724 (0xB, 0x10) and its record at +0xC20
-func_0014BCE8	HandleNumberedAgentObjectEvent	a method of class 0x11 (overriding HandleAgentObjectEvent): returns 1 in state 0x10 or 0xB, else runs the base HandleAgentObjectEvent and clears 0xC20 when it accepts
-func_0014BD38	EnterNumberedAgentState	a method of class 0x11 (overriding EnterAgentState): runs EnterAgentState, then on state 0xB adds to the gauge manager (AddToGaugeAmount) and on 0xB and 0xC clears the pending record at 0xC28
-func_0014BDC8	ChooseAgentStateByContact	a method of class 0x12 (overriding ChooseAgentState): runs ChooseAgentState, and when the controlled object touches it sends that object a message and returns state 0xB, and sends 0xB to each touching agent of kind 0x12 in the world list 0x1CCC
-func_0014BEA8	IsContactAgentFree	slot 0x16C of class 0x12: 0 when func_001DDA80 holds for the world or the agent's state (+0x724) is 0xB or 0x10, else 1
-func_0014BEF8	HandleContactAgentObjectEvent	a method of class 0x12 (overriding HandleAgentObjectEvent): returns 1 in state 0x10 or 0xB, else runs the base handler and when the slot's object is the active switched collider sends it an owner message
-func_0014BF88	EnterContactAgentState	a method of class 0x12 (overriding EnterAgentState): runs EnterAgentState, clears the pending record at 0xC20 on states 0xB and 0xC and sets the animation player speed on 0xC
-func_0014C018	InitGaugeManager	Slot 0 of class 0x68: sets the maximum amount to 50, copies the two parameter sets and the timer defaults and stores itself in D_0027C00C.
-func_0014C138	BlendParamSets	Slot 16 of class 0x68: fills o5E0 with the mix of params0 and params1 weighted by a clamped polynomial of the clock.
-func_0014C2F0	ComputeGaugeOutputs	clamps amount/maxAmount to 0..1 and from it fills the seven outputs at 0x434.. and 0x44C by evaluating each parameter polynomial and lerping between two parameter values
-func_0014C5E8	ApplyGaugeRatioToEffect	clamps amount/maxAmount to 0..1 and passes 1 - ratio * 0.8 to func_00151E20 on D_00261EF0
-func_0014C668	FinishGaugeOnTimeout	the callback HandleGaugeManagerNotification gives g_timerElement with SetTimerLimit: on mode 1, unless either tag of the gauge manager's device (func_001B6568, func_001B6598) is 0x3FE, moves the device to state 0x3FF and applies the gauge ratio (ApplyGaugeRatioToEffect)
-func_0014C6E0	UpdateGaugeManager	slot 17 of class 0x68: runs UpdatePlacedObject, and while the device is in state 0x3FD runs func_0014C858 and ActivateRandomGaugeSlot when their timers 0x45C and 0x460 have passed
-func_0014C788	ShowGaugeManagerDisplays	slot 0xC8 of class 0x68: while the device is in state 0x3FD and AreMenusAndFadeClear holds, calls slot 14 of g_gaugeAmountCaption and g_timerElement, else their slot 15
-func_0014C820	GetGaugeParams	Returns the address of the parameter set at 0x480 + setIndex * 0xB0 of a class 0x68 object.
-func_0014C838	AppendGaugeSlot	Stores an object at slots[slotCount] of a class 0x68 object and increments the count.
-func_0014C858	RunGaugeTimedEvent	original assembly: UpdateGaugeManager runs it when the timer at +0x45C has passed
-func_0014CBA8	ActivateRandomGaugeSlot	picks at random one of the slots with no flag and no pc, sets up its object with the device vtable calls and func_0012C7B0, sets flag 1 and schedules the next time at 0x460
-func_0014CD70	CountDownGaugeContacts	when the gauge manager's count +0x458 equals +0x450, sets the timer +0x45C to the game time plus a random time between +0x43C and +0x440; then lowers the count (EnterContactAgentState calls it)
-func_0014CDC8	AddToGaugeAmount	Adds the argument's field to amount, clamps it to 0..maxAmount and acts when it reaches the maximum.
-func_0014CF30	HandleGaugeManagerNotification	slot 13 of class 0x68: kind 6 clears the key of the slot that holds the object; kind 0x14 from the device on state 0x3FD installs the gauge displays D_0026D348 and D_0026E760

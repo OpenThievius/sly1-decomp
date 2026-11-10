@@ -254,6 +254,17 @@ Measured on this compiler; add to this list when you learn something.
   - A global with no initialiser goes to the end of the file's `.data`; one in the middle of
     retail's carries `= { 0 }`. A global built by a constructor stays at its definition.
   - The linker pads before a file's `.data` or `.rodata` to that file's own alignment, up to 16.
+    One file's literals and jump tables leave no gap of their own (a float literal is aligned
+    to 4), so a 4-byte literal on 16 after a gap of zeros starts the next file's `.rodata`:
+    func_0014B6A8's FLT_MAX at 0x249EF0, 12 bytes after func_00149760's last jump table, ends
+    file_149398.cpp between the two (one file built whole came out 12 bytes short).
+  - A cut the data bounds only to a range is a choice, said so in both files' heads. The
+    functions from 0x14A7B8 to 0x14B6A8 read no `.rodata` or `.data` of either side, code is
+    on 8 in every file, and a file that holds only words aligns its `.bss` to 4 (`objdump -h`
+    of file_149398.o: `.bss 2**2`), so the two statics D_0027C008 and D_0027C00C can be two
+    files' `.bss`. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and
+    0x14B6A8 all printed `MATCH`. The cut is at 0x14B6A8 (file_14B6A8.cpp), where the second
+    file's data provably begins; the functions before it could belong to either file or a third.
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
   - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (file_15F678), one word)
