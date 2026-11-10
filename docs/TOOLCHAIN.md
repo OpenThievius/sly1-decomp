@@ -5284,6 +5284,35 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   return in each arm (three "r" reads), `u128 len = Dot(v, v); len = Sqrt(len);` (one
   pseudo for both values, where retail has vf1 then vf2).
 
+### An asm store issues beside an epilogue restore (func_001EDC08)
+
+FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, `-dS -dl
+-dg -dR -fsched-verbose-6` dumps):
+
+- **Vec operands named in pairs fix two register cascades at once.** MulXSum4 over u128
+  operands gave the weights and the first point the wrong VU0 registers, and in the same
+  block local-alloc ranked `1 - v` (2 refs over 3 insns, 0.667) above the shared 1.0 (3 refs
+  over 5, 0.6), so the 1.0 took f3, the second clamp's result (global) lost f3 and took the
+  zero's f2 by preference, and the clamp's `c = 0` copy vanished (bc1tl where retail has bc1t
+  with the copy in its slot). With the operands as Vu0::Vec values named weight before point
+  (`Vec w0 = Vec::Scalar(s - 1); Vec a0 = Vec::Of(*p0); ...`, a Vec MulXSum4) sched1's order
+  changes, the 1.0 ranks first (f2) and every FPR and VU0 register is retail's: one cause for
+  what looked like a clamp written differently from the first.
+- **A pointer local set before a test keeps its address in the test's block.** Retail's
+  `lui/addiu v0` of the fallback vector come before the branch and its `lq` in the arm:
+  `const Vec02* fallback = &g_unitXVector;` before the test (a TImode load cannot take a
+  `%lo` address, so CSE leaves the pseudo). Haifa schedules one block per region here (no
+  loops: find_rgns makes single-block regions), so no interblock motion does it.
+- **An asm's sw has no function unit.** The epilogue's restores after `sw v0,0(s6)` are
+  `lq s5, lq s6` in retail, the only such order in the executable: with a plain store (unit
+  memory) at cycle 2, `lq s6` (anti-dependent, cost 1) is ready at cycle 3 and wins the tie on
+  LUID. StoreX's asm sw issues at cycle 2 beside `lq s5`, so s6 comes a cycle later, as
+  retail. StoreX with the test's ToFloatMoved gives the length two "r" operands against
+  Sqrt's and DivX's "j": regclass's tie (TI_REGS, the wall above). ToFloatNow or ToFloat for
+  the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
+  reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
+  before regclass (the copy survives cse1 and gcse).
+
 ## Stack slots
 
 ### An inline function's frame is one temporary of its saved size (func_00125138)
