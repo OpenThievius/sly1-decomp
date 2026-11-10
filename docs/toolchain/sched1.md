@@ -372,6 +372,13 @@ The player's reach test against a point carried to time t (2026-11-10) went from
   a local pseudo in v0 (an anti dependence on the lwc1's base that pulls the load before the
   second lqc2), and ToFloatMoved makes the product TI_REGS in v0 with the 1.0 in vf2. Retail's
   a0 is a reload register: the compiler's qmfc2 of a product in VU_REGS, as in func_00186230.
+- Read again in sched2's `-fsched-verbose-6` dump (2026-11-10): at the radius's tie the last
+  scheduled insn is `move v1,v0` (the %hi kept for the second read of the radius), so both
+  candidates are class 3; had the lqc2 of p been last, the vsub would be its data dependent
+  (class 1) and lose, but retail issues `move v1,v0` after that lqc2 too. The qmfc2's third
+  dependent, the c.lt.s, is a stale LOG_LINK from sched1 (before reload the asm's output was
+  the comparison's operand; reload's mtc1 now stands between them). The radius read before
+  the subtraction, or `f32 rr = r * r;` named before the distance, changes nothing (4 lines).
 
 ### The rest of rank_for_schedule (func_001782C0)
 
