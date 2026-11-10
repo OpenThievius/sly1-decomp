@@ -576,3 +576,15 @@ every store's DEST_ADDR giv and reduced.
   of every qmfc2/mfc1 temporary at the top of the function: a0, a1, a3, v0 where retail has
   a0, a3, a0, a3. The register set of the whole function is the tell: count the `Spilling reg`
   lines of .greg and look for the one that retail's rotation skips.
+
+### A loop's own counter frees a saved register for a hoisted %hi (PAL func_eu_001DDC68)
+
+PAL's copy of LoadWorld adds a 14-entry loop to US's two counted loops. Reusing US's `i` for it
+makes the counter one user variable set six times over all three loops: one pseudo, one saved
+register (s3), with the third loop's pointer reusing another. Global-alloc then has a saved register
+left for the `%hi` of g_activeListFrames that PRE hoisted to the entry block (4 refs across 314
+insns, the lowest-ranked of the candidates that still get one), so ours keeps it in fp as US does.
+Retail allocates nothing for it (a fresh `lui` at each use) and holds the first two loops' counter
+in s0 and the new loop's in s1, with the five member addresses in s4-fp: the new loop had a counter
+of its own. `for (s32 k = 0; k < 14; k++)` instead of `for (i = 0; ...)` was EXACT. Spot it: a
+counter in a different saved register in one loop than in the loops before it.
