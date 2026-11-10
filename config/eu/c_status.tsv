@@ -3274,6 +3274,7 @@ func_001C8418	func_001C9110	match
 func_001C84C0	func_001C91B8	match	
 func_001C84E8	func_001C91E0	match	
 func_001C8590	func_001C9288	match	
+func_001C8920	func_001C9618	match	rodata
 func_001C8BC0	func_001C98B8	match	
 func_001C8C08	func_001C9900	match	rodata
 func_001C8D40	func_001C9A38	match	

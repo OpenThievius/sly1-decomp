@@ -1452,6 +1452,13 @@ local-alloc.c's update_equiv_regs):
   a0. u128 helpers (Q) there make it 218 and 201: the tilt's two move in pass 1, and pass 2 moves
   both unit vectors' `%hi`, spilled and rematerialized (`lui v0`) at each use, as retail's are.
 
+- **Again in func_001C8920 (2026-11-10).** Retail stores the facing direction and loads it
+  straight back (`sqc2 vf1,0(sp); lqc2 vf1,0(sp)`) for its length, after a join where both
+  arms' `vsub` and store were merged by cross-jumping. One `Set(dir, Sub(a, b))` after the
+  join, with `a` and `b` chosen in the arms, is forwarded by CSE (no reload, 4 bytes short);
+  `Set(dir, Sub(..))` written in each arm leaves the join's read to memory. The remaining
+  `lwc1` order in the pitch arm was the conversion: ToFloatMoved for the distance.
+
 ### One address, two adds: which forms CSE merges (func_001C3C98, unsolved)
 
 Observed in the `.rtl`, `.cse` and `.lreg` dumps of func_001C3C98 (three accesses to
