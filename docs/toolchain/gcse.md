@@ -694,3 +694,16 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
   substituted as a constant and set straight into `$a0`, which gcse never records, so the
   query's `&q` is the only occurrence. A free inline function does the same only if its pointer
   parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.
+
+### A weight's slot store before a load keeps PRE off that load (func_00187260)
+
+CollectMeshHits loads `rel` (a Vec02 on the frame) for the squared distance and again, after a
+search loop, for the normal `MulX(Vec::Of(rel), Vec::Scalar(1.0f / len))`. PRE deleted the
+second load (`PRE: redundant insn 1977 (expression 122) ... reaching reg is 802`) and kept the
+value in a VU0 register across the loop (a `vmove` in a delay slot); retail loads it again
+(`lqc2 $vf2,4112(sp)`). An occurrence is deleted only when it comes before any kill in its
+block (ANTLOC), and in this release any store kills every memory expression. Vec::Scalar stores
+its weight to a frame slot; as MulX's second argument, after `Vec::Of(rel)`, the store comes
+after the load. Naming the weight first (`Vu0::Vec s = Vu0::Vec::Scalar(1.0f / len);` and then
+`MulX(Vec::Of(rel), s)`) puts the slot store ahead of the load in the block, and the load
+stays.

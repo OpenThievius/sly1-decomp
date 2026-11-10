@@ -522,3 +522,28 @@ had no `block` variable: each loop takes the slots' address itself, inside its b
 
 The tell: a reg-reg copy in a loop's preheader that feeds only the inner loop's reduced pointer
 is a PRE copy of an address the original wrote inside the inner loop's body.
+
+### A pointer set in an inner loop too is no giv of the outer loop (func_00187260)
+
+CollectMeshHits's vertex pass searches the edge hits (`out[q]`, an inner loop) and then writes
+a hit through `o = &out[n++]`. Ours reduced the whole address `out + n * 48` into one register
+(`addiu a3,a3,48`, stores at -48(a3)); retail reduces `n * 48` alone (`mult t3,s2,v1` in the
+preheader, `addiu t3,t3,48` per hit) and adds the base in the loop (`addu a1,s8,t3`). The .loop
+dump of ours: `Insn 2396: giv reg 130 src reg 124 ... mult 48 add (reg/v:SI 122)`, combined with
+every store's DEST_ADDR giv and reduced.
+
+- **strength_reduce takes a DEST_REG giv only where the register is set once in the loop**
+  (`VARRAY_INT (n_times_set, REGNO (dest_reg)) == 1`, or consecutive sets that make one giv).
+  n_times_set counts every set between the outer loop's start and end, the inner loops'
+  included. When the inner search reads its records through the same pointer (`o = &out[q];
+  ed = (MeshEdge*)o->part;`), o is set twice in the outer loop and is no giv there; `n * 48`
+  (its own pseudo) stays a giv and is reduced alone, and the stores, addresses off a non-giv,
+  stay as they are. In the inner loop o is set once, but there the record's `part` address
+  (`q * 48 + 40` plus out) was already the reduced giv, and the code does not change.
+- **The reload side.** Ours's whole-address giv was set in the preheader by a `madd`
+  (`*mul_acc_si_r5900`, four scratch clobbers), whose reload made a1 a spill register
+  (`Spilling for insn 2712. Spilling reg 5.` in .greg). That one spill register, 1,400 bytes
+  later, shifted the round robin ("The reload register's round robin", reloads-and-stores.md)
+  of every qmfc2/mfc1 temporary at the top of the function: a0, a1, a3, v0 where retail has
+  a0, a3, a0, a3. The register set of the whole function is the tell: count the `Spilling reg`
+  lines of .greg and look for the one that retail's rotation skips.
